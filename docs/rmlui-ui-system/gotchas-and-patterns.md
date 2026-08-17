@@ -509,3 +509,209 @@ thumb, anything that isn't a freely-draggable panel): `MakeDraggable`'s `onMove`
 right place to clamp/snap the axis you care about, but remember to also reset the axis you *don't*
 care about — it will otherwise silently drift with the cursor, since `MakeDraggable` has no way to
 know your handle is axis-constrained.
+
+### Getting `SysMenuWin`/`OptionWin`'s panel body to render at all took five attempts — tiling still isn't one of them
+
+**Symptom**: `SysMenuWin`/`OptionWin`'s legacy-theme panel background (`op1_stone.jpg`, meant to
+fill the middle band between the top/bottom caps) went through five real, distinct failure modes
+across several rounds of "fixed, verify" with a real screenshot each time — worth reading in full
+because each one independently produces the *identical* symptom (nothing renders, nothing logs),
+so ruling one out proves nothing about the others.
+
+1. **`tiled-vertical` never repeats.** First attempt used `decorator: tiled-vertical(top, center,
+   bottom);` on a single `#panel` element. Confirmed by reading `DecoratorTiled.cpp`'s
+   `RegisterTileProperty` and `DecoratorTiledVertical`/`Horizontal`/`Box`'s instancer constructors:
+   none of them pass `register_fit_modes = true`, so none of their tiles ever get a `-fit` property
+   registered at all — every tile, including the center, is permanently `FILL` (stretch), with no
+   RCSS-level way to ask for `REPEAT`. Rendered as one heavily stretched, blurry copy — visually
+   close enough to flat that it read as "some areas not have the background texture."
+2. **Wrong shorthand argument position.** Switched to the plain `image()` decorator (the one
+   decorator that *does* register real fit-mode support, via
+   `RegisterTileProperty("image", true)`), but wrote `decorator: image(sprite-name repeat);`. The
+   shorthand's real argument order is `src, orientation, fit, align-x, align-y` — a bare
+   space-separated second token binds to **orientation**, not **fit**; `"repeat"` isn't a valid
+   orientation keyword, the declaration fails to parse, and the *entire* decorator drops. Rendered
+   as fully transparent — strictly worse than attempt 1.
+3. **`repeat` + a named sprite is rejected outright.** Fixed the argument order to
+   `image(sprite-name, none, repeat)`, comma-separated — still fully transparent. `DecoratorTiled.cpp`'s
+   `GetTileProperties` explicitly checks `if (sprite && fit_mode is REPEAT-family) { LT_WARNING;
+   return false; }` — the whole decorator instantiation fails whenever the source resolves through
+   `GetSprite()` (a named `@spritesheet` entry) rather than `GetTexture()` (a raw path), and
+   `op1_stone.jpg` had been declared as a sprite purely for stylistic consistency with every other
+   tile in the file (it never actually needed the padding-workaround a spritesheet exists for —
+   already power-of-two).
+4. **An unrelated sizing bug, found only after 1–3 were genuinely fixed.** Switched the center tile
+   to a raw quoted path (`image("../../../op1_stone.jpg", none, repeat)`) — still transparent, but
+   this time `MuError.log` had *zero* `[RmlUi]`-tagged lines, meaning nothing was failing to parse
+   or instantiate anymore. The next suspect: `.panel-middle` had no explicit `height`, relying on
+   both `top` and `bottom` being set on a `position: absolute` element to derive height from the
+   gap between them (legitimate CSS 2.1 behavior in principle, never actually confirmed to compute
+   correctly in this specific RmlUi 6.2 integration). Fixed by giving `#panel_middle` a real `id`
+   and pushing `top`/`height` explicitly from C++, the same proven technique `#panel` itself
+   already uses — **still transparent after this fix too**, ruling out sizing as *the* remaining
+   blocker (though it's a correctness improvement worth keeping regardless).
+5. **The raw quoted path likely never lost its quotes.** With parsing and sizing both now
+   independently ruled out, the last live theory: `PropertyParserString::ParseValue`
+   (`PropertyParserString.cpp`) does **zero quote-stripping** — it stores the raw token verbatim.
+   `font-family: "Liberation Sans"` works elsewhere in this codebase, but that's a top-level
+   property parsed through a different code path than a value embedded inside a shorthand function
+   call like `image(...)`. A quoted literal used as a shorthand argument may retain its literal
+   quote characters as part of the resolved "path" — which then fails to resolve to any real file,
+   and this engine's texture loader fails **100% silently** on a bad path (already documented in
+   [Theming & Modding](theming-and-modding.md#bringing-your-own-images-to-a-theme)) — consistent
+   with everything observed (no art, no warning anywhere). Not proven with a live debugger, but
+   consistent with every fact gathered, and further chasing it stopped being worth the cost — see
+   the fix below.
+
+**Actual fix shipped**: none of the above, deliberately. After four straight misses on the same
+visible symptom, the tiling ambition itself was set aside in favor of the one decorator form
+already *proven* to render correctly everywhere else in this exact document — a **named sprite**
+with **plain `FILL`** (`decorator: image(legacy-panel-center);`, no fit-mode argument at all),
+identical in form to `.panel-cap-bottom`/`.btn`/`.checkbox-box`, all of which render correctly.
+This stretches the 128×128 source across the middle band instead of tiling it — a real, disclosed
+visual downgrade from the original goal, not a hidden one — but ships something that actually
+renders instead of a fifth unverified theory. True tiling is a deliberate, isolated follow-up
+experiment for later, not something to keep blocking on.
+
+**Practical rule for the next tiled-background attempt**: prefer the decorator form with the most
+existing proof of working in this codebase over the theoretically-more-correct one, especially
+after two or more silent-failure rounds on the same rule — every one of the five failure modes
+above produces the *identical* symptom (nothing renders, and 4 of 5 produce zero log output too),
+so a screenshot alone cannot distinguish between them; each fix has to be argued from source and
+then independently re-verified, and "still broken" after a source-grounded fix is real information
+(it rules that theory out), not proof the theory was worthless reasoning.
+
+### Sixth issue, a genuinely different category: the center tile was never modeled as spanning the whole panel
+
+**Symptom**: after fix 5 above (fallback to plain `FILL` + named sprite) actually got the stone
+texture rendering, a real screenshot showed it *only* in the gap between the top/bottom caps —
+"the mid section (horizontal) has texture, the top and bottom part are still transparent." The
+scrollwork linework on the caps rendered correctly (as it had in every earlier screenshot too), but
+the space around/behind that linework showed through to whatever's behind the document, exactly as
+if the caps' own art has genuine alpha transparency around the ornate line pattern (not a solid
+background) — which turned out to be exactly the case.
+
+**Root cause**: not a decorator bug at all this time — a structural modeling error, caught only by
+going back to the *actual* legacy `CWinEx` source (`UI/Widgets/WinEx.h`/`.cpp`) instead of
+continuing to iterate on the RmlUi side. `WE_BG_CENTER = 0` and `CWinEx::Render()`'s loop
+(`for (i = 0; i < WE_BG_MAX; ++i) m_psprBg[i].Render();`) draws the center tile **first**, before
+top/bottom/left/right — and `SetPosition()`/`SetLine()` size and position it to span **nearly the
+entire panel** (inset by `WE_CENTER_SPR_POS` = 3px on every side), not confined to the gap between
+the caps. The cap images are drawn *on top of* that already-drawn center tile, and since the caps'
+own art has transparent space around the scrollwork linework, the center shows through underneath
+them by design — this is how the ornate-border-over-solid-texture look is actually achieved in the
+original widget. The RmlUi reconstruction had modeled this as three independent, non-overlapping
+stacked bands (`.panel-cap-top` 0–64px, `.panel-middle` the literal gap, `.panel-cap-bottom` the
+last 43px) — internally consistent and exactly what fixes 1–5 above were spent getting to render
+correctly, but built on a structural assumption about the composite that was never actually checked
+against the widget it was meant to reproduce.
+
+**Fix**: reordered `#panel_middle` to be the *first* child in the RML (before both cap elements, so
+it paints first), and gave it the same 3px inset `CWinEx` uses via plain RCSS —
+`left: 3px; top: 3px; right: 3px; bottom: 3px;`, no explicit `width`/`height` at all. This first
+shipped with the inset pushed from C++ instead (`SysMenuWin`/`OptionWin`'s `SetPosition()`,
+mirroring fix 4's earlier "don't trust opposing-edge auto-sizing" caution) — reverted once that
+caution was actually checked against `Layout/LayoutDetails.cpp`'s `BuildBoxWidth`/`BuildBoxHeight`
+and confirmed to be unfounded: `position: absolute` elements with `left`+`right` (or `top`+`bottom`)
+set and no explicit size *do* correctly derive their box dimensions from the containing block minus
+those insets — standard CSS 2.1 behavior, genuinely implemented, not an untested corner case. Kept
+in C++ initially "to be safe," it was actually the wrong default: this project's stated goal is
+that a theme (including a modder's) needs zero C++ changes and zero recompilation, and a
+hardcoded-in-C++ inset value meant a future theme wanting a different one couldn't express that
+without an engine change. Moved back to RCSS once the caution was disproven, matching every other
+per-element position rule in this codebase. The caps' own rules didn't need to change beyond that —
+only `panel_middle`'s DOM order and inset expression did.
+
+**Practical rule for the next multi-piece legacy-widget reproduction**: when translating a
+composite legacy `CWin`/`CWinEx`-family widget into RmlUi elements, check the *original* render
+loop's draw order and each piece's real geometry before modeling the RmlUi structure — don't infer
+the composite's shape from what the *visible* gaps between labeled pieces suggest. A background
+piece that's drawn first and spans the full area, with foreground pieces with their own
+transparency layered over it, looks structurally different from independent non-overlapping bands
+even though a static screenshot of the *original* widget can look identical to either model until
+one of them is actually missing.
+
+## Window lifecycle
+
+### `CWin::Release()` has no idea `m_pRmlDoc` exists — a hybrid window can outlive its own scene
+
+**Symptom**: after building `CLoginMainWin` (Batch 2), transitioning from the login scene to
+character-select left its Menu/Credit icon buttons visibly overlapping `CharSelMainWin`'s own
+button bar on the *next* scene — described from a real screenshot as "the Create button... overlaid
+with an older painting of the menu button."
+
+**Root cause**: `CUIMng::RemoveWinList()` — called at the top of every `Create*Scene()` function,
+i.e. on every scene transition — walks every window still in `m_WinList` and calls `Release()` on
+it unconditionally. `CWin::Release()`/the virtual `PreRelease()` hook it calls predate RmlUi
+entirely and know nothing about `m_pRmlDoc`; they release legacy `CButton`s and `CSprite`s but
+never touch the RmlUi document. Since a migrated window's document is deliberately created **once**
+and reused across repeated `Create()` calls (see `Create()`'s own `if (!m_pRmlDoc && ...)` guard,
+the same pattern `CLoginWin` established), `Release()` leaves it exactly as visible as it was the
+moment `Release()` ran — and because RmlUi always renders **last** in the frame (see
+[Architecture §3](architecture.md#3-frame-lifecycle--the-render-order-contract)), that stale
+document paints on top of whatever the *next* scene's windows draw, indefinitely, until something
+else happens to call `Show()`/`Hide()` on it again.
+
+This reproduced 100% of the time for `CLoginMainWin` specifically because it's unconditionally
+visible for the entire login flow, so it's *guaranteed* to still be shown at the exact moment
+`CreateCharacterScene()`'s `RemoveWinList()` runs. `CSysMenuWin`/`COptionWin` have the identical
+gap but only manifest it if the player happens to have the menu open at the exact instant a scene
+transition fires — a much rarer window, not a safer design. `CLoginWin` (the Phase 1 pilot) turned
+out to have the same latent gap too, currently masked only by the fact that both of its real
+show→hide paths (`RequestLogin()`, `CancelLogin()`) happen to call `CUIMng::HideWin(this)` before
+any scene transition can occur — an incidental property of those two call sites, not something
+`CLoginWin`'s own lifecycle actually guaranteed.
+
+**Fix**: every hybrid `CWin` + RmlUi window's `PreRelease()` override now unconditionally calls
+`if (m_pRmlDoc) m_pRmlDoc->Hide();` — `Hide()`, not unload/destroy, consistent with the
+create-once-reuse-forever document lifecycle already established. Applied to `CLoginWin`,
+`CLoginMainWin`, `CSysMenuWin`, `COptionWin` — every current hybrid window. `RememberPasswordPrompt`
+is unaffected (never a `CWin`, never touched by `CUIMng::RemoveWinList()` at all).
+
+**Practical rule for the next hybrid `CWin` + RmlUi window**: `PreRelease()` isn't optional
+boilerplate to skip when a window has no legacy sprites to clean up — if it owns an `m_pRmlDoc`,
+`PreRelease()` must hide it, full stop, regardless of whether some other call site *currently*
+happens to hide it first. A window whose only "proof" of correct hide behavior is "nothing has
+hit the gap yet" is exactly the shape of bug this entry describes.
+
+## Scene-conditional visibility
+
+### `.hidden` vs `.disabled`: a dimmed button can still visually collide with its neighbor
+
+**Symptom**: in the modern theme, `CSysMenuWin`'s dialog on the login screen showed the Select
+Server button rendering at 50% opacity directly behind the Option button — not just visually
+adjacent, but overlapping enough that Option's text was legible through Select Server's own.
+
+**Root cause**: real layout math, not a rendering bug. `CSysMenuWin::SetPosition()` stacks its four
+buttons at fixed offsets that assume the panel is tall enough to fit all four with real spacing —
+true when the panel is opened from the character-select scene (`SetLine(10)`), but the *login*
+scene's panel is shorter (`SetLine(6)`, since it has one less real reason to be tall), which puts
+Select Server at `top≈67px` and Option at `top≈69px` — almost exactly on top of each other. This
+overlap already existed before this migration; it was invisible only because the legacy `CButton`
+Select Server used while disabled rendered fully opaque-grey, visually reading as "one solid
+button," not two stacked ones. `.btn.disabled { opacity: 0.5; }` (added generically, for any future
+disabled button, not specifically vetted against this one collision) made the underlying overlap
+show through for the first time.
+
+**Fix**: added a `.hidden { display: none; }` utility class to both themes' `base.rcss`, and
+switched Select Server to use it (instead of `.disabled`) specifically in the login scene, where
+the button doesn't apply at all (you can't switch servers before logging into one) rather than
+merely being temporarily unavailable. `display: none` removes the element from layout entirely —
+no overlap possible, because there's nothing there to overlap with. Renamed the underlying model
+field end-to-end to match its real meaning: `selectServerDisabled`/`select_server_disabled` (bool
+field, model binding key) → `selectServerHidden`/`select_server_hidden`; `sys_menu.rml`'s
+`data-class-disabled="select_server_disabled"` → `data-class-hidden="select_server_hidden"` on the
+`btn_select_server` element. `.btn.disabled` itself was untouched and remains available for any
+future button that genuinely wants dim-but-clickable-elsewhere semantics.
+
+**Practical rule for the next scene-conditional button**: `.disabled` and `.hidden` are not
+interchangeable "make this button go away" options — `.disabled` keeps the element in layout
+(taking up space, able to visually collide with a neighbor if the layout was never actually
+spaced for the button being both present *and* dimmed) and communicates "temporarily unavailable,
+might become clickable later in this same view." `.hidden` removes it from layout entirely and
+communicates "does not apply to this view/scene at all." Reach for `.hidden` (and a model field
+name that says *hidden*, not *disabled*) whenever the reason a button shouldn't be clickable is
+"this scene doesn't have this feature," not "this feature is temporarily off." Getting this
+distinction right up front also avoids the trap this bug fell into: a generic `.disabled` style
+change (adding opacity) silently exposing a pre-existing layout assumption that was never actually
+true for every panel height the button could appear at.

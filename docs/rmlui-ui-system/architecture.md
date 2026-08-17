@@ -15,22 +15,27 @@ graph TD
         NewUI["UI/NewUI — CNewUIObj/CNewUIManager<br>(~90 in-game windows, main HUD)"]
     end
     RmlUi["RmlUi overlay<br>(Rml::Context, one per Rml runtime)"]
+    PureRml["Pure-RmlUi window, no CWin at all<br>(RememberPasswordPrompt)"]
 
-    CWin -.->|"pilot: hybrid overlay"| RmlUi
+    CWin -.->|"hybrid overlay (4 windows):<br>CLoginWin, CLoginMainWin,<br>CSysMenuWin, COptionWin"| RmlUi
+    PureRml --> RmlUi
     CUIControl -.->|"not yet migrated"| CUIControl
     NewUI -.->|"not yet migrated"| NewUI
 ```
 
-No window has been fully retired yet — the login screen is a **hybrid**: `CWin` still owns the
-window's position/size/z-order bookkeeping (and its `CursorInWin` hit-testing), but draws nothing
-visual at all (`CWin::Create()` is always called with `nTexID=-2`). RmlUi renders 100% of the
-visible panel — background, input-box frames, checkboxes, buttons, labels — in every theme; a
-"legacy-look" theme reproduces the original art by pointing its own RCSS decorators at the same
-image files the old `CWin`/`CSprite` objects used to draw (see
+No window has been fully retired yet. Two structural shapes exist for a migrated window so far, not
+one: the **hybrid** shape, where `CWin` still owns the window's position/size/z-order bookkeeping
+(and its `CursorInWin` hit-testing) but draws nothing visual at all (`CWin::Create()` is always
+called with `nTexID=-2`) — `CLoginWin` (the Phase 1 pilot), plus `CLoginMainWin`/`CSysMenuWin`/
+`COptionWin` (Batch 2) — and the **pure-RmlUi** shape, with no `CWin`/`CUIMng` involvement
+whatsoever (`RememberPasswordPrompt`, see [§6a](#6a-a-pure-rmlui-window-with-no-cwin-at-all)).
+Either way, RmlUi renders 100% of the visible panel — background, input-box frames, checkboxes,
+buttons, labels — in every theme; a "legacy-look" theme reproduces the original art by pointing its
+own RCSS decorators at the same image files the old `CWin`/`CSprite` objects used to draw (see
 [Theming & Modding](theming-and-modding.md)), it just isn't `CWin` doing the drawing anymore.
-Retiring a window means removing its remaining legacy dependency (position/hit-testing), not
+Retiring a hybrid window means removing its remaining legacy dependency (position/hit-testing), not
 swapping frameworks atomically — see the migration plan's Retirement criteria for the full
-checklist.
+checklist; a pure-RmlUi window like `RememberPasswordPrompt` has no such dependency left to remove.
 
 ## 2. Render interface: why a custom one, and what it doesn't do
 
@@ -103,7 +108,7 @@ two separate real bugs (see [Gotchas](gotchas-and-patterns.md)):
 ```mermaid
 sequenceDiagram
     participant Scene as RenderCurrentScene()<br>(3D world + legacy 2D)
-    participant UIMng as CUIMng::Render()<br>(CWin draws nothing;<br>CUITextInputBox text stays for later)
+    participant UIMng as CUIMng::Render()<br>(CWin draws nothing,<br>CUITextInputBox text stays for later)
     participant Rml as RmlUiRuntime::Render()<br>(the whole panel: bg, frames, controls)
     participant Post as Post-RmlUi draws<br>(cursor, RenderTextOnTop)
 
@@ -227,7 +232,31 @@ backdrop in RmlUi (`#backdrop`, see [Theming & Modding](theming-and-modding.md#b
 and switching their own `CWin::Create()` call to `-2`. Their `CWinEx m_winBack` member stays alive
 purely for its quantized-height geometry math (`SetLine()`/`GetWidth()`/`GetHeight()`) — never
 rendered, the same "legacy object survives only as bookkeeping" shape `CLoginWin`'s own
-`CButton`s already established.
+`CButton`s already established. Unlike `CLoginWin`'s own checkboxes/buttons (deliberately flat,
+even in the legacy theme — see §2's note and `login.rcss`'s header comment), both windows'
+legacy-theme panel chrome and buttons reproduce the *real* sprite art
+(`op1_stone.jpg`/`op1_back1-2.tga`/`op2_back1.tga`/`op1_b_all.tga`) as three stacked elements
+(a fixed top-cap image, a `repeat`-tiled middle band, a fixed bottom-cap image) — **not** RmlUi's
+`tiled-vertical` decorator, which an earlier version of this used and turned out wrong: confirmed
+by reading `DecoratorTiled(Vertical).cpp`, `tiled-vertical` never registers RmlUi's fit-mode
+sub-property for any of its tiles, so every tile (including the center) is hardcoded to `FILL`
+(stretch), never `REPEAT` — the center tile rendered as one blurry stretched copy instead of a
+tiled pattern, reading as "no texture" in a real run. See
+[Theming & Modding §Shared cross-window RCSS](theming-and-modding.md#shared-cross-window-rcss-basercss)
+for the corrected mechanism and what it does/doesn't reproduce (the two 5px left/right edge trim
+strips are the one still-omitted piece).
+
+**`COptionWin` is migrated but currently unreachable dead code — a disclosed, open product
+decision, not silently fixed or worked around.** No live path in this codebase shows it
+(grep-confirmed): `CSysMenuWin`'s Option button opens a separate, already-modern window,
+`SEASON3B::CNewUIOptionWindow`, via `g_pNewUISystem->Show(SEASON3B::INTERFACE_OPTION)`. Both
+windows read/write the same underlying state through the `g_pOption` macro
+(`CNewUISystem::GetInstance()->GetUI_NewOptionWindow()`), so `COptionWin` is a second, dead,
+alternate *view* over state the live window owns — its checkboxes/sliders genuinely work (see §7's
+`MakeDraggable` discussion below), it's just never shown. This migration deliberately did **not**
+rewire `CSysMenuWin`'s Option button to point at it. Retiring one of the two implementations (or
+resurrecting this one as the real Options screen) is a real product decision, left open on
+purpose — see the [Roadmap](roadmap.md#open-decisions-need-a-human-call)'s Open Decisions.
 
 `CLoginMainWin` is the one variant on this pattern worth calling out: it has no dynamic state or
 I18N text at all (two pure image buttons), so it skips `RmlModelBinder`/`SyncRmlModel()` entirely

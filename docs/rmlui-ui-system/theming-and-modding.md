@@ -81,13 +81,20 @@ its own, is a drop-a-folder operation.
 `login.rcss` (both themes) proved out a set of generic, non-positional rules —
 `.btn`/`.btn:hover`, `.checkbox-row`/`.checkbox-box`/`.checkbox-box.checked`/`.checkbox-label` —
 that every subsequently-migrated window also needs. Rather than re-deriving them per window,
-Batch 2 introduced `themes/<name>/base.rcss`, holding exactly those shared rules plus two new
+Batch 2 introduced `themes/<name>/base.rcss`, holding exactly those shared rules plus three new
 ones: `body { pointer-events: none; }` (the mandatory click-passthrough reset every full-window
 document needs, see
-[Gotchas](gotchas-and-patterns.md#pointer-events-swallows-every-click-on-screen)) and `#backdrop`
+[Gotchas](gotchas-and-patterns.md#pointer-events-swallows-every-click-on-screen)), `#backdrop`
 (a full-screen semi-transparent dim overlay, for any window that previously relied on `CWin`'s own
 default-`nTexID=-1` dim sprite — `CSysMenuWin`/`COptionWin` both do; `CLoginWin`/`CLoginMainWin`
-never did, they use `nTexID=-2`).
+never did, they use `nTexID=-2`), and `.hidden { display: none; }` — for a button that doesn't
+apply to the *current scene at all* (as opposed to `.btn.disabled`, which keeps the element in
+layout, dimmed, for something that's merely temporarily unclickable). Use `.hidden` when the
+reason isn't "not yet," it's "not in this view" — see
+[Gotchas](gotchas-and-patterns.md#hidden-vs-disabled-a-dimmed-button-can-still-visually-collide-with-its-neighbor)
+for the real bug this distinction fixed (`CSysMenuWin`'s Select Server button, hidden via a bound
+model field rather than a hardcoded RCSS rule, so it's still shown normally once the same panel is
+opened from a scene where it does apply).
 
 A new migrated window's `<head>` links `base.rcss` first, then its own positional `.rcss`:
 
@@ -99,6 +106,18 @@ A new migrated window's `<head>` links `base.rcss` first, then its own positiona
 `.btn` in `base.rcss` is sized for the 108×30 `BITMAP_TEXT_BTN` shape (`CSysMenuWin`'s 4 buttons,
 `COptionWin`'s Close button) — a window with a different button size (like `CLoginMainWin`'s 54×30
 icon buttons) defines its own class instead of overriding `.btn`'s dimensions.
+
+**Unlike `login.rcss`'s own checkboxes/buttons (deliberately flat, even in the `legacy` theme — a
+documented scope cut for the Phase 1 pilot), `base.rcss`'s `legacy`-theme `.btn`/`.checkbox-box`
+reproduce the real sprite art** (`op1_b_all.tga`'s 3-frame idle/hover/active strip,
+`op2_ch.tga`'s 2-frame checked/unchecked pair — both already loaded unconditionally at startup by
+`ZzzOpenData.cpp`'s `OpenBasicData()`, confirmed not scene-gated). The distinguishing factor
+wasn't caution about the mechanism — it's that `base.rcss` is genuinely shared across windows
+using the *identical* asset (`CSysMenuWin` and `COptionWin`'s buttons are the same
+`BITMAP_TEXT_BTN` texture), so reproducing it once here pays for itself immediately, whereas
+`login.rcss`'s buttons/checkboxes have no other consumer. `themes/modern/base.rcss` stays fully
+flat/programmatic — real sprite reproduction is a `legacy`-theme-only concern; modern is where a
+theme author's own customized/experimental look belongs.
 
 **`login.rcss`/`login.rml` themselves deliberately don't link `base.rcss`** and still define their
 own copies of these rules — they're the only files in the whole migration verified against a real

@@ -46,6 +46,12 @@ draggable control, and a window that was never `CWin`-based to begin with.
    migrating the next window — several of these are non-obvious traps that cost real debugging
    time once and don't need to cost it again.
 
+4. **[Roadmap](roadmap.md)**
+   *What's done, what's next, and the decisions still open.* Covers Phases 2-5 (message-box
+   engine, HUD, 3D-in-UI bridge, inventory), retirement criteria, and — critically — that the
+   adapter/facade pattern every later phase depends on has never actually been proven in real
+   code. Read this before starting any window beyond the login scene.
+
 ---
 
 ## Architectural Highlights
