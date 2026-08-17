@@ -5,21 +5,8 @@
 #include "Render/Shaders/PassthroughShader.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Core/Globals/_TextureIndex.h"
+#include "Core/Utilities/StringUtils.h"
 #include <algorithm>
-
-namespace
-{
-    std::wstring Utf8ToWide(const std::string& s)
-    {
-        if (s.empty()) return std::wstring();
-        const int len = static_cast<int>(s.size());
-        const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), len, nullptr, 0);
-        if (n <= 0) return std::wstring();
-        std::wstring out(static_cast<size_t>(n), L'\0');
-        MultiByteToWideChar(CP_UTF8, 0, s.c_str(), len, out.data(), n);
-        return out;
-    }
-}
 
 Rml::CompiledGeometryHandle RmlUiRenderInterface::CompileGeometry(Rml::Span<const Rml::Vertex> vertices, Rml::Span<const int> indices)
 {
@@ -158,7 +145,7 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     // (and this engine's Linux port's) forward-slash tolerance extends to this legacy loader too.
     std::string normalized = source;
     std::replace(normalized.begin(), normalized.end(), '/', '\\');
-    const std::wstring wpath = Utf8ToWide(normalized); // Rml::String is std::string (RmlUi/Config/Config.h)
+    const std::wstring wpath = StringUtils::NarrowToWide(normalized); // Rml::String is std::string (RmlUi/Config/Config.h)
     const GLuint bitmapIndex = Bitmaps.LoadImage(wpath, GL_LINEAR, GL_CLAMP_TO_EDGE);
     if (bitmapIndex == BITMAP_UNKNOWN) return 0;
 

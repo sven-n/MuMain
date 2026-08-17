@@ -2,22 +2,12 @@
 #include "RmlUiSystemInterface.h"
 
 #include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/StringUtils.h"
 #include <SDL3/SDL.h>
 #include <chrono>
 
 namespace
 {
-    std::wstring Utf8ToWide(const std::string& s)
-    {
-        if (s.empty()) return std::wstring();
-        const int len = static_cast<int>(s.size());
-        const int n = MultiByteToWideChar(CP_UTF8, 0, s.c_str(), len, nullptr, 0);
-        if (n <= 0) return std::wstring();
-        std::wstring out(static_cast<size_t>(n), L'\0');
-        MultiByteToWideChar(CP_UTF8, 0, s.c_str(), len, out.data(), n);
-        return out;
-    }
-
     // Real wall-clock time, independent of game pause/tick state -- matches this codebase's own
     // established pattern for render-frequency timing (std::chrono::steady_clock, see the
     // FPS_ANIMATION_FACTOR gotchas in docs/GPU Skinning/gotchas-and-patterns.md) rather than
@@ -43,7 +33,7 @@ bool RmlUiSystemInterface::LogMessage(Rml::Log::Type type, const Rml::String& me
         case Rml::Log::LT_DEBUG:   tag = L"[RmlUi][Debug]";   break;
         default: break;
     }
-    g_ErrorReport.Write(L"%s %s\r\n", tag, Utf8ToWide(message).c_str());
+    g_ErrorReport.Write(L"%s %s\r\n", tag, StringUtils::NarrowToWide(message).c_str());
     return true; // continue execution -- never break into the debugger from here
 }
 
