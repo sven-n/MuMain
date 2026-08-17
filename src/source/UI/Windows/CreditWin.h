@@ -73,7 +73,6 @@ public:
 	void Create();
 	void SetPosition();
 	void Show(bool bShow);
-	bool CursorInWin(int nArea);
 
 protected:
 	void PreRelease();

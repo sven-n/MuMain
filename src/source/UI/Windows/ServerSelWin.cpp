@@ -39,6 +39,7 @@ CServerSelWin::~CServerSelWin()
 void CServerSelWin::Create()
 {
     CWin::Create(0, 0, -2);
+    SetMovable(false);
 
     m_iSelectServerBtnIndex = -1;
 
@@ -383,20 +384,6 @@ void CServerSelWin::ShowServerBtns()
     }
 
     m_winDescription.Show(CWin::m_bShow);
-}
-
-bool CServerSelWin::CursorInWin(int nArea)
-{
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
 }
 
 void CServerSelWin::UpdateWhileActive(double dDeltaTick)

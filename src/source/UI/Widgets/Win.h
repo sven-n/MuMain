@@ -37,6 +37,11 @@ protected:
 
     CPList		m_BtnList;
 
+    // Whether WA_MOVE hit-testing (the window's title-bar drag area) can ever report true.
+    // Most CWin-derived dialogs are fixed in place and previously each re-implemented an
+    // identical CursorInWin() override just to force WA_MOVE to false -- see SetMovable().
+    bool		m_bMovable = true;
+
 public:
     CWin();
     virtual ~CWin();
@@ -57,6 +62,10 @@ public:
     virtual void Active(bool bActive) { m_bActive = bActive; }
     bool IsActive() { return m_bActive; }
     void SetDocking(bool bDocking) { m_bDocking = bDocking; }
+    // Subclasses that should never be draggable call this instead of overriding
+    // CursorInWin() to hardcode WA_MOVE -> false (a pattern that was previously
+    // duplicated verbatim across seven CWin subclasses).
+    void SetMovable(bool bMovable) { m_bMovable = bMovable; }
     int GetState() { return m_nState; }
     void Update(double dDeltaTick);
     virtual void Render();

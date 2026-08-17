@@ -92,6 +92,8 @@ bool CWin::CursorInWin(int nArea)
         break;
 
     case WA_MOVE:
+        if (!m_bMovable)
+            break;
         ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx,
             m_ptPos.y + 26);
         if (::PtInRect(&rc, rInput.GetCursorPos()))
