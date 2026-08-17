@@ -1,0 +1,68 @@
+/* "Modern" theme for the Options window -- flat programmatic panel/sliders, matching login.rcss's
+   modern theme's translucent-dark-panel-with-border look. Layout offsets are identical to the
+   legacy theme's (see that file's comment for why they're fixed px, not pushed from C++). */
+
+#panel {
+	position: absolute;
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+	background-color: rgba(18, 20, 28, 235);
+	border: 1px rgba(255, 255, 255, 30);
+	border-radius: 10px;
+}
+
+.option-title {
+	position: absolute;
+	left: 0px;
+	top: 10px;
+	width: 100%;
+	text-align: center;
+}
+
+#checkbox_auto_attack   { left: 52px; top: 52px; }
+#checkbox_whisper_alarm { left: 52px; top: 93px; }
+#checkbox_slide_help    { left: 52px; top: 134px; }
+
+.slider {
+	position: absolute;
+	width: 98px;
+	height: 13px;
+}
+#slider_volume { left: 52px; top: 198px; }
+#slider_render { left: 52px; top: 259px; }
+
+.slider-label {
+	position: absolute;
+	left: 0px;
+	top: -18px;
+	white-space: nowrap;
+}
+.slider-value {
+	position: absolute;
+	left: 85px;
+	top: -18px;
+	white-space: nowrap;
+}
+.slider-track {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 98px;
+	height: 13px;
+	background-color: rgba(255, 255, 255, 20);
+	border: 1px rgba(255, 255, 255, 60);
+	border-radius: 3px;
+}
+.slider-thumb {
+	position: absolute;
+	top: 0px;
+	width: 13px;
+	height: 13px;
+	background-color: #c0a050;
+	border: 1px #c0a050;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+#btn_close { left: 52px; top: 301px; }

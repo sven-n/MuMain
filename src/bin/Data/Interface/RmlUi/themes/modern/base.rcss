@@ -1,0 +1,81 @@
+/* Shared, cross-window RCSS -- generic (non-positional) rules reused by more than one migrated
+   window, extracted from themes/modern/login.rcss's originals (which stay self-contained and
+   unretrofitted -- see the RmlUi migration plan's "Batch 2" section). Every new migrated
+   window's <head> links this file first, then its own per-window positional .rcss. Colors here
+   match login.rcss's existing modern-theme palette so windows sharing a theme look consistent. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* See themes/legacy/base.rcss's identical #backdrop comment for the CWin::Create() nTexID=-1
+   parity rationale. */
+#backdrop {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 128);
+	pointer-events: auto;
+}
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-box {
+	display: inline-block;
+	width: 16px;
+	height: 16px;
+	border: 1px rgba(255, 255, 255, 60);
+	border-radius: 3px;
+	background-color: rgba(255, 255, 255, 20);
+}
+.checkbox-box.checked {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+}
+.checkbox-label {
+	position: absolute;
+	left: 21px;
+	top: 1px;
+	white-space: nowrap;
+}
+
+/* Sized for the 108x30 BITMAP_TEXT_BTN shape shared by SysMenuWin's 4 buttons and OptionWin's
+   Close button -- login's own 54x30 image buttons stay defined in login.rcss's own .btn rule,
+   unaffected since login.rml/.rcss don't link this file. */
+.btn {
+	position: absolute;
+	width: 108px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+	border-radius: 4px;
+	pointer-events: auto;
+}
+.btn:hover {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+}
+.btn.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+}
+
+/* See themes/legacy/base.rcss's identical comment -- SysMenuWin's Select Server button uses this
+   in the login scene instead of .disabled, since a dimmed-but-still-drawn button visibly
+   collided with Option there. */
+.hidden {
+	display: none;
+}

@@ -1,0 +1,44 @@
+<rml>
+<head>
+	<title>Options</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="option.rcss"/>
+</head>
+<body>
+	<div id="backdrop"></div>
+	<div id="panel" data-model="option">
+		<div id="panel_middle" class="panel-middle"></div>
+		<div class="panel-cap-top"></div>
+		<div class="panel-cap-bottom"></div>
+		<span class="option-title">{{title_label}}</span>
+
+		<div id="checkbox_auto_attack" class="checkbox-row" data-event-click="option_toggle_auto_attack">
+			<div class="checkbox-box" data-class-checked="auto_attack_checked"></div>
+			<span class="checkbox-label">{{auto_attack_label}}</span>
+		</div>
+		<div id="checkbox_whisper_alarm" class="checkbox-row" data-event-click="option_toggle_whisper_alarm">
+			<div class="checkbox-box" data-class-checked="whisper_alarm_checked"></div>
+			<span class="checkbox-label">{{whisper_alarm_label}}</span>
+		</div>
+		<div id="checkbox_slide_help" class="checkbox-row" data-event-click="option_toggle_slide_help">
+			<div class="checkbox-box" data-class-checked="slide_help_checked"></div>
+			<span class="checkbox-label">{{slide_help_label}}</span>
+		</div>
+
+		<div id="slider_volume" class="slider">
+			<span class="slider-label">{{volume_label}}</span>
+			<span class="slider-value">{{volume_value_text}}</span>
+			<div class="slider-track"></div>
+			<div id="volume_thumb" class="slider-thumb" data-style-left="volume_thumb_left + 'px'"></div>
+		</div>
+		<div id="slider_render" class="slider">
+			<span class="slider-label">{{render_label}}</span>
+			<span class="slider-value">{{render_value_text}}</span>
+			<div class="slider-track"></div>
+			<div id="render_thumb" class="slider-thumb" data-style-left="render_thumb_left + 'px'"></div>
+		</div>
+
+		<div id="btn_close" class="btn" data-event-click="option_close_click">{{close_label}}</div>
+	</div>
+</body>
+</rml>

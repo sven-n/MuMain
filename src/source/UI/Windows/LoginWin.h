@@ -46,7 +46,6 @@ public:
     void Create();
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow);
-    bool CursorInWin(int nArea);
 
     void ConnectConnectionServer();
 
@@ -112,6 +111,7 @@ private:
     void SyncRmlModel();
 
 protected:
+    void PreRelease();
     void UpdateWhileActive(double dDeltaTick);
     void UpdateWhileShow(double dDeltaTick);
     void RenderControls();

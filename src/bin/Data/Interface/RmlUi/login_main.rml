@@ -1,0 +1,15 @@
+<rml>
+<head>
+	<title>Login Main Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="login_main.rcss"/>
+</head>
+<body>
+	<div id="panel">
+		<div id="btn_menu" class="btn-icon btn-icon-menu"></div>
+		<div id="btn_credit" class="btn-icon btn-icon-credit">
+			<div class="btn-credit-deco"></div>
+		</div>
+	</div>
+</body>
+</rml>

@@ -1,0 +1,69 @@
+/* RmlUi overlay for the login-scene menu/credit button bar (CLoginMainWin). CWin draws nothing
+   for this window (CWin::Create() uses nTexID=-2, same sentinel as login.rcss's panel). Only the
+   IDLE frame of each button's 3-frame art is reproduced (no RmlUi decorator swap for hover/press
+   frames in this pass) -- same simplification precedent login.rcss's own checkboxes/buttons
+   already established (flat/static art standing in for the legacy frame-based sprite system,
+   documented there as "out of scope for proving the pipeline"). Source art per
+   Engine/Object/ZzzOpenData.cpp's OpenLoginSceneData(): server_menu_b_all.tga /
+   server_credit_b_all.tga (each a 54x30-per-frame, 3-frame vertical strip -- CButton::Create lays
+   frames out at Y = nHeight * frameIndex, so the idle frame is the sheet's top 54x30 rect) and
+   deco.tga (189x103, single frame). Same @spritesheet-with-explicit-rect technique login.rcss
+   uses, for the same reason (this engine's .OZT loader pads textures to the next power-of-two
+   size; a plain decorator:image() would sample the whole padded texture, not just the real art). */
+
+@spritesheet login-main-menu-sheet
+{
+	src: "../../../server_menu_b_all.tga";
+	login-main-menu-icon: 0px 0px 54px 30px;
+}
+@spritesheet login-main-credit-sheet
+{
+	src: "../../../server_credit_b_all.tga";
+	login-main-credit-icon: 0px 0px 54px 30px;
+}
+@spritesheet login-main-deco-sheet
+{
+	src: "../../../deco.tga";
+	login-main-deco-image: 0px 0px 189px 103px;
+}
+
+#panel {
+	position: absolute;
+	/* Width/height are pushed from C++ (CLoginMainWin::SetPosition/Create) -- the bar spans
+	   (screen width - 60px) and is exactly one button tall, both screen-size-dependent, unlike
+	   login's fixed 329x245 panel. */
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.btn-icon-menu {
+	left: 0px;
+	top: 0px;
+	decorator: image(login-main-menu-icon);
+}
+/* left is pushed from C++ (screen-width dependent right-alignment, matching the legacy
+   CButton::SetPosition math in CLoginMainWin::SetPosition). */
+.btn-icon-credit {
+	top: 0px;
+	decorator: image(login-main-credit-icon);
+}
+
+/* Stands in for CSprite m_sprDeco -- decorative only, must not intercept clicks meant for the
+   credit button beneath/around it. Original CSprite::Create's trailing (105, 59) args are this
+   engine's sprite anchor-point offset (the pixel within the 189x103 art that lines up with
+   SetPosition()'s coords); reproduced here as a fixed offset from the credit button's own
+   top-left, since deco is a child of #btn_credit and inherits its positioning context. */
+.btn-credit-deco {
+	position: absolute;
+	left: -105px;
+	top: -59px;
+	width: 189px;
+	height: 103px;
+	pointer-events: none;
+	decorator: image(login-main-deco-image);
+}

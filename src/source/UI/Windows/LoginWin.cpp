@@ -32,28 +32,13 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
 #define LIW_OK			0
 #define LIW_CANCEL		1
-
-namespace
-{
-    // Mirrors the Narrow() idiom already used elsewhere in this codebase (e.g.
-    // Core/Platform/WinIni.cpp) -- Rml::String is UTF-8 std::string (RmlUi/Config/Config.h).
-    std::string WideToUtf8(const wchar_t* s)
-    {
-        if (!s) return std::string();
-        const int len = static_cast<int>(wcslen(s));
-        const int n = WideCharToMultiByte(CP_UTF8, 0, s, len, nullptr, 0, nullptr, nullptr);
-        if (n <= 0) return std::string();
-        std::string out(static_cast<size_t>(n), '\0');
-        WideCharToMultiByte(CP_UTF8, 0, s, len, out.data(), n, nullptr, nullptr);
-        return out;
-    }
-}
 
 
 
@@ -99,6 +84,7 @@ void CLoginWin::Create()
     // ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves m_psprBg null, and CWin::Render()'s existing
     // `if (m_psprBg)` guard then draws nothing.
     CWin::Create(329, 245, -2);
+    SetMovable(false);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -205,6 +191,21 @@ void CLoginWin::Create()
     }
 }
 
+void CLoginWin::PreRelease()
+{
+    // CUIMng::RemoveWinList() (run on every scene transition) calls Release() on every window
+    // in its list unconditionally -- CWin's own Release()/PreRelease() has no knowledge of
+    // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
+    // window is ever Released() while still shown. In today's real login/cancel flow that
+    // never happens (RequestLogin()/CancelLogin() both call CUIMng::HideWin(this) first), but
+    // that's an incidental property of those two call sites, not something this class's own
+    // lifecycle actually guarantees -- explicit here rather than relying on it staying true.
+    // Hide(), not unload -- the document/model are meant to be created once and reused (see
+    // Create()'s own guard comment above).
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+}
+
 void CLoginWin::SetPosition(int x, int y)
 {
 	CWin::SetPosition(x, y);
@@ -262,26 +263,14 @@ void CLoginWin::Show(bool bShow)
     }
 }
 
-bool CLoginWin::CursorInWin(int nArea)
-{
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
-}
-
 void CLoginWin::UpdateWhileActive(double)
 {
 	// While the "Remember Password" confirmation dialog is open, let it own the
 	// input so Enter/Esc/clicks don't also drive the login screen behind it. The
-	// dialog's outcome is applied on the next frame, once it has closed.
-	if (!g_MessageBox->IsEmpty())
+	// dialog's outcome is applied on the next frame, once it has closed. Scoped to this
+	// dialog's own Pending state (not the old shared g_MessageBox->IsEmpty() stack-wide check --
+	// this dialog no longer registers with that engine, see RememberPasswordPrompt.cpp).
+	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
 		return;
 
 	if (m_aBtn[LIW_OK].IsClick() || m_bRmlOkClicked || CInput::Instance().IsKeyDown(VK_RETURN))
@@ -356,6 +345,10 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
 {
     m_pUsernameInputBox->DoAction();
     m_pPasswordInputBox->DoAction();
+
+    // Polls the "Remember Password" dialog's own Enter/Esc while it's open -- ticked from here
+    // (not UpdateWhileActive) for the same reason ApplyRememberPasswordChoice() is, right below.
+    UI::Login::Tick();
 
     ApplyRememberPasswordChoice();
     RevokeSavedCredentialsIfEdited();
@@ -448,7 +441,7 @@ void CLoginWin::SyncRmlModel()
     wchar_t szServerName[MAX_TEXT_LENGTH] = {};
     const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    const std::string serverNameUtf8 = WideToUtf8(szServerName);
+    const std::string serverNameUtf8 = StringUtils::WideToNarrow(szServerName);
     if (m_RmlBinder.GetModel().serverName != serverNameUtf8)
     {
         m_RmlBinder.GetModel().serverName = serverNameUtf8;
@@ -460,7 +453,7 @@ void CLoginWin::SyncRmlModel()
     // comparison; only actually dirties the model on an active locale change, which is rare.
     auto syncLabel = [this](Rml::String LoginRmlModel::* field, const char* boundName, const wchar_t* text)
     {
-        const std::string utf8 = WideToUtf8(text);
+        const std::string utf8 = StringUtils::WideToNarrow(text);
         if (m_RmlBinder.GetModel().*field != utf8)
         {
             m_RmlBinder.GetModel().*field = utf8;

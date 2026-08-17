@@ -1,0 +1,100 @@
+/* RmlUi overlay for the (currently unreachable -- see OptionWin.h's class comment) Options
+   window. Panel chrome and control positions mirror the exact legacy layout math
+   (OptionWin.cpp's Create()/SetPosition()) as fixed px offsets -- unlike CSysMenuWin, this
+   window's layout is never scene-conditional (m_winBack.SetLine(30) is the only value ever
+   used), so nothing here needs to be pushed from C++ beyond #panel's own left/top/width/height.
+   Panel background is three stacked elements (.panel-cap-top/.panel-middle/.panel-cap-bottom,
+   structural rules in base.rcss, same shape SysMenuWin uses) rather than a single tiled-vertical()
+   decorator -- see base.rcss's header comment for why (tiled-vertical hardcodes FILL/stretch for
+   every tile, never REPEAT). Only this window's own top-cap height/image differ from SysMenuWin's
+   (op2_back1.tga vs op1_back1.tga); center/bottom are the shared sprites base.rcss declares.
+   Checkboxes/buttons reproduce the real legacy art via base.rcss, shared with SysMenuWin. Sliders
+   reproduce the real track/thumb art too (op2_volume1.tga/op2_volume3.tga) -- the one piece NOT
+   reproduced is the gauge fill (op2_volume2.jpg), which would need a third, dynamically-widthed
+   element tracking the thumb position; deferred as a minor cosmetic gap, not required for the
+   slider to read correctly (the thumb position alone already conveys the value). */
+
+@spritesheet option-top-sheet
+{
+	src: "../../../op2_back1.tga";
+	/* op2_back1.tga is 213x65 -- not power-of-two, needs the named-rect workaround (see
+	   base.rcss's identical note). OptionWin's own top cap; center/bottom are the same shared
+	   sprites SysMenuWin uses, declared once in base.rcss. */
+	option-top: 0px 0px 213px 65px;
+}
+
+@spritesheet option-slider-sheet
+{
+	src: "../../../op2_volume1.tga";
+	option-slider-track: 0px 0px 98px 13px;
+}
+@spritesheet option-slider-thumb-sheet
+{
+	src: "../../../op2_volume3.tga";
+	option-slider-thumb: 0px 0px 13px 13px;
+}
+
+#panel {
+	position: absolute;
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+}
+
+.panel-cap-top {
+	height: 65px;
+	decorator: image(option-top);
+}
+/* .panel-middle's inset is pure RCSS, declared once in base.rcss -- nothing window-specific to
+   override here. */
+
+.option-title {
+	position: absolute;
+	left: 0px;
+	top: 10px;
+	width: 100%;
+	text-align: center;
+}
+
+#checkbox_auto_attack   { left: 52px; top: 52px; }
+#checkbox_whisper_alarm { left: 52px; top: 93px; }
+#checkbox_slide_help    { left: 52px; top: 134px; }
+
+.slider {
+	position: absolute;
+	width: 98px;
+	height: 13px;
+}
+#slider_volume { left: 52px; top: 198px; }
+#slider_render { left: 52px; top: 259px; }
+
+.slider-label {
+	position: absolute;
+	left: 0px;
+	top: -18px;
+	white-space: nowrap;
+}
+.slider-value {
+	position: absolute;
+	left: 85px;
+	top: -18px;
+	white-space: nowrap;
+}
+.slider-track {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 98px;
+	height: 13px;
+	decorator: image(option-slider-track);
+}
+.slider-thumb {
+	position: absolute;
+	top: 0px;
+	width: 13px;
+	height: 13px;
+	decorator: image(option-slider-thumb);
+	cursor: pointer;
+}
+
+#btn_close { left: 52px; top: 301px; }

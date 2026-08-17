@@ -1,0 +1,32 @@
+/* RmlUi overlay for the login/character-scene system menu (UI/Windows/SysMenuWin.cpp). Panel
+   chrome reproduces the real CWinEx art via three stacked elements (.panel-cap-top/.panel-middle/
+   .panel-cap-bottom, structural rules in base.rcss) -- see base.rcss's header comment for why this
+   replaced an earlier single tiled-vertical() attempt (that decorator hardcodes FILL/stretch, not
+   REPEAT, for every tile including the center). Only this window's own top-cap height/image
+   differ from OptionWin's; center/bottom are the shared sprites base.rcss already declares.
+   Buttons rely entirely on base.rcss's shared .btn (this window's 4 buttons are the exact
+   BITMAP_TEXT_BTN/108x30 shape base.rcss's .btn is sized for, and the same real art now) -- no
+   per-button classes here since their positions are pushed from C++ (SysMenuWin::SetPosition),
+   scene-conditional via m_winBack's own quantized-line-count height. */
+
+@spritesheet sys-menu-top-sheet
+{
+	src: "../../../op1_back1.tga";
+	/* op1_back1.tga is 213x64 -- not power-of-two, needs the named-rect workaround (see
+	   base.rcss's identical note). */
+	sys-menu-top: 0px 0px 213px 64px;
+}
+
+#panel {
+	position: absolute;
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+}
+
+.panel-cap-top {
+	height: 64px;
+	decorator: image(sys-menu-top);
+}
+/* .panel-middle's inset is pure RCSS, declared once in base.rcss -- nothing window-specific to
+   override here. */

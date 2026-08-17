@@ -1,0 +1,38 @@
+/* "Modern" theme for the login-scene menu/credit button bar -- flat programmatic icon buttons,
+   no reproduction of the legacy frame-based sprite art (same approach as login.rcss's modern
+   theme). Text-free by design (the legacy buttons are pure image buttons with no I18N label), so
+   each gets a simple glyph-like mark via border/background only -- no font glyph needed. */
+
+#panel {
+	position: absolute;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+	border-radius: 4px;
+}
+.btn-icon:hover {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+}
+.btn-icon-menu {
+	left: 0px;
+	top: 0px;
+}
+/* left is pushed from C++ (screen-width dependent right-alignment). */
+.btn-icon-credit {
+	top: 0px;
+}
+
+/* No legacy deco art in this theme -- the modern theme is intentionally flat, matching
+   login.rcss's modern .input-frame precedent of standing in with a plain shape rather than
+   reproducing decorative sprite art pixel-for-pixel. */
+.btn-credit-deco {
+	display: none;
+}

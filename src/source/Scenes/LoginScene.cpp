@@ -480,16 +480,11 @@ bool NewRenderLogInScene(HDC hDC)
         g_pOption->Render();
     }
 
-    // Drive the NewUI message box here too (same reason as the option window):
-    // the login scene skips the full NewUI update, so a confirmation dialog such
-    // as the "Remember Password" prompt would otherwise never update or draw.
-    if (!g_MessageBox->IsEmpty())
-    {
-        g_MessageBox->UpdateMouseEvent();
-        g_MessageBox->UpdateKeyEvent();
-        g_MessageBox->Update();
-        g_MessageBox->Render();
-    }
+    // The "Remember Password" prompt (the one dialog that used to need a manual g_MessageBox
+    // pump here, since the login scene skips the full NewUI update) is now its own RmlUi
+    // document -- see UI/Windows/RememberPasswordPrompt.cpp. It's already driven by
+    // RmlUiRuntime::Instance().Update()/Render(), called unconditionally every frame regardless
+    // of scene, so no equivalent manual pump is needed for it here.
 
     EndBitmap();
 
