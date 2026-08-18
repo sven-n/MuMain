@@ -12,6 +12,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 namespace RHI {
 
@@ -45,6 +46,20 @@ struct Caps {
     int  maxUniformBlockSize  = 16384;  // GL_MAX_UNIFORM_BLOCK_SIZE
 };
 const Caps& GetCaps();
+
+// ---- Driver identification ----
+// The strings the driver reports about itself, captured once alongside the capability probe.
+// Diagnostic only -- nothing branches on them -- but they are what makes a performance number
+// attributable to a machine, so the benchmark exports and any bug report can name the GL
+// implementation that produced it instead of "it was slow on my laptop". Lives here rather than
+// at the call site because glGetString is a GL entry point, and those belong behind the RHI.
+struct DriverInfo {
+    std::string vendor;
+    std::string renderer;
+    std::string version;
+    std::string shadingLanguageVersion;
+};
+const DriverInfo& GetDriverInfo();
 
 // ---- Device/frame (implemented in RHI_GL) ----
 bool Init(void* nativeWindowHandle, int width, int height);

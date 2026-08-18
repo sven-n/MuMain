@@ -34,12 +34,6 @@ namespace
         return out;
     }
 
-    std::string FromGLString(GLenum name)
-    {
-        const GLubyte* value = glGetString(name);
-        return value ? std::string((const char*)value) : std::string();
-    }
-
     std::string UtcTimestamp()
     {
         const std::time_t now = std::time(nullptr);
@@ -108,10 +102,14 @@ namespace
 
     void CaptureGraphics(EnvironmentInfo& info)
     {
-        info.glVendor = FromGLString(GL_VENDOR);
-        info.glRenderer = FromGLString(GL_RENDERER);
-        info.glVersion = FromGLString(GL_VERSION);
-        info.glslVersion = FromGLString(GL_SHADING_LANGUAGE_VERSION);
+        // Through the RHI rather than glGetString directly: GL entry points belong behind the
+        // render layer (DXP-10), and the driver strings are captured next to the capability
+        // probe that reads the same GL_VERSION anyway.
+        const RHI::DriverInfo& driver = RHI::GetDriverInfo();
+        info.glVendor = driver.vendor;
+        info.glRenderer = driver.renderer;
+        info.glVersion = driver.version;
+        info.glslVersion = driver.shadingLanguageVersion;
 
         const RHI::Caps& caps = RHI::GetCaps();
         info.contextMajor = caps.glMajor;
