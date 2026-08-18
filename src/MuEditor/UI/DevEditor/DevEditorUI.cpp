@@ -14,6 +14,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "Scenes/SceneCore.h"
 
 // External C functions
 extern "C" CameraManager& CameraManager_Instance();
@@ -119,7 +120,6 @@ void CDevEditorUI::Render(bool* p_open)
 
 void CDevEditorUI::RenderScenesTab()
 {
-    extern EGameScene SceneFlag;
     auto& camMgr = CameraManager_Instance();
     int cameraMode = GetCurrentCameraMode();
 
@@ -676,7 +676,6 @@ extern "C"
     // an independent override state in the DevEditor UI.
     bool DevEditor_IsCameraOverrideEnabled(const char* cameraName)
     {
-        extern EGameScene SceneFlag;
         if (SceneFlag != MAIN_SCENE || !cameraName) return false;
         if (strcmp(cameraName, "Default") == 0) return g_DevEditorUI.GetDefaultOverride().enabled;
         if (strcmp(cameraName, "Orbital") == 0) return g_DevEditorUI.GetOrbitalOverride().enabled;
@@ -685,7 +684,6 @@ extern "C"
 
     void DevEditor_ApplyCameraOverride(const char* cameraName, CameraConfig* cfg)
     {
-        extern EGameScene SceneFlag;
         if (SceneFlag != MAIN_SCENE || !cfg || !cameraName) return;
         if (strcmp(cameraName, "Default") == 0) g_DevEditorUI.ApplyDefaultOverrideToConfig(*cfg);
         else if (strcmp(cameraName, "Orbital") == 0) g_DevEditorUI.ApplyOrbitalOverrideToConfig(*cfg);
@@ -693,7 +691,6 @@ extern "C"
 
     bool DevEditor_IsCameraFogOverrideEnabled(const char* cameraName)
     {
-        extern EGameScene SceneFlag;
         if (SceneFlag != MAIN_SCENE || !cameraName) return false;
         if (strcmp(cameraName, "Default") == 0)
         {
@@ -748,7 +745,6 @@ extern "C"
     // Return identity/zero when override disabled or not in MAIN_SCENE.
     void DevEditor_GetDefaultCameraOffset(float* outX, float* outY, float* outZ)
     {
-        extern EGameScene SceneFlag;
         const auto& ov = g_DevEditorUI.GetDefaultOverride();
         const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
         if (outX) *outX = active ? ov.offsetX : 0.0f;
@@ -762,7 +758,6 @@ extern "C"
     bool DevEditor_GetOrbitalHullTrapezoid(float* outFarDist, float* outFarWidth,
                                            float* outNearDist, float* outNearWidth)
     {
-        extern EGameScene SceneFlag;
         const auto& ov = g_DevEditorUI.GetOrbitalOverride();
         const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
         if (!active) return false;
@@ -775,7 +770,6 @@ extern "C"
 
     void DevEditor_GetDefaultTrapezoidMultipliers(float* outNearMul, float* outFarMul)
     {
-        extern EGameScene SceneFlag;
         const auto& ov = g_DevEditorUI.GetDefaultOverride();
         const bool active = (SceneFlag == MAIN_SCENE) && ov.enabled;
         if (outNearMul) *outNearMul = active ? ov.widthNearMul : 1.0f;

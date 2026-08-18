@@ -782,7 +782,10 @@ void GetSystemInfo(ER_SystemInfo* si)
 #include <cstdio>
 #include <cstring>
 #include <string>
-#include "Core/Utilities/PlatformInfo.h"   // Core::Platform::GetOSDistroName
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#endif
+#include "Core/Utilities/PlatformInfo.h"
 
 // IME is a Windows input service; there is nothing to report elsewhere.
 void CErrorReport::WriteImeInfo(HWND /*hWnd*/)
@@ -802,6 +805,17 @@ void GetSystemInfo(ER_SystemInfo* si)
 
     // CPU: the first "model name" entry of /proc/cpuinfo.
     mu_swprintf(si->m_lpszCPU, L"Unknown");
+#ifdef __APPLE__
+    char brand[MAX_LENGTH_CPUNAME] = {};
+    size_t brandLen = sizeof(brand);
+    if (sysctlbyname("machdep.cpu.brand_string", brand, &brandLen, nullptr, 0) != 0 || brand[0] == '\0')
+    {
+        brandLen = sizeof(brand);
+        sysctlbyname("hw.model", brand, &brandLen, nullptr, 0);
+    }
+    if (brand[0] != '\0')
+        MultiByteToWideChar(CP_UTF8, 0, brand, -1, si->m_lpszCPU, MAX_LENGTH_CPUNAME);
+#else
     if (FILE* f = std::fopen("/proc/cpuinfo", "r"))
     {
         char line[256];
@@ -823,6 +837,7 @@ void GetSystemInfo(ER_SystemInfo* si)
         }
         std::fclose(f);
     }
+#endif
 
     // Memory: physical RAM in bytes, clamped like the DWORD->int path on Windows.
     const long long pages    = ::sysconf(_SC_PHYS_PAGES);

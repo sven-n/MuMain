@@ -31,6 +31,18 @@ Linux/WSL with MinGW-w64.
 | Rider | [windows/rider.md](windows/rider.md) |
 | VS Code | [windows/vscode.md](windows/vscode.md) |
 
+### macOS (native)
+
+A native macOS build produces a real, playable client: the engine plus the
+`osx-arm64` or `osx-x64` network library, rendered through SDL/OpenGL.
+
+| Setup | Guide |
+|-------|-------|
+| Terminal / command line | [macos/console.md](macos/console.md) |
+| CLion | [macos/clion.md](macos/clion.md) |
+| Rider | [macos/rider.md](macos/rider.md) |
+| VS Code | [macos/vscode.md](macos/vscode.md) |
+
 ### Planned
 
 `android/` and `iOS/` are placeholders for future ports; the engine is not yet
@@ -43,10 +55,13 @@ buildable for them. See the per-platform notes when that work lands.
 | Linux | x64 | on / off | `MUnique.Client.Library.so` (linux-x64 AOT) | Full client |
 | Windows | x64 | on / off | `MUnique.Client.Library.dll` (win-x64 AOT) | Full client |
 | Windows | x86 | on / off | `MUnique.Client.Library.dll` (win-x86 AOT) | Full client |
+| macOS | arm64 | on / off | `MUnique.Client.Library.dylib` (osx-arm64 AOT) | Full client |
+| macOS | x64 | on / off | `MUnique.Client.Library.dylib` (osx-x64 AOT) | Full client |
 | Linux | x86 | - | none | Not supported (see below) |
 
-CI builds every supported row: see [windows-build.yml](../../.github/workflows/windows-build.yml)
-and [linux-build.yml](../../.github/workflows/linux-build.yml).
+CI builds every supported row: see [windows-build.yml](../../.github/workflows/windows-build.yml),
+[linux-build.yml](../../.github/workflows/linux-build.yml), and
+[macos-build.yml](../../.github/workflows/macos-build.yml).
 
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
@@ -76,6 +91,7 @@ The build produces it automatically and copies it next to `Main`:
 
 - Linux target -> `MUnique.Client.Library.so`
 - Windows target -> `MUnique.Client.Library.dll`
+- macOS target -> `MUnique.Client.Library.dylib`
 
 Native AOT cannot cross-compile across OS boundaries: a Linux-hosted SDK cannot
 produce a Windows `.dll`, and vice versa. So a MinGW-on-Linux build (and CI)
@@ -90,7 +106,7 @@ library next to the executable, so the build output directory is runnable:
 ```
 <build-dir>/src/
   Main (or Main.exe)
-  MUnique.Client.Library.so (or .dll)
+  MUnique.Client.Library.so (or .dll / .dylib)
   Data/ ...                          <-- copied assets
   config.ini                         <-- seeded from config.ini.template
 ```
@@ -110,8 +126,8 @@ special characters (e.g. umlauts break the AOT compiler `ilc`). Override with
 
 The build picks the SDK that can target the current OS:
 
-- **Linux target:** prefers native `dotnet` (only it can AOT-compile the
-  `linux-x64` `.so`), falling back to `dotnet.exe`.
+- **Linux / macOS target:** prefers native `dotnet` (only it can AOT-compile
+  the `linux-x64` `.so` or `osx-*` `.dylib`), falling back to `dotnet.exe`.
 - **Windows target (incl. WSL/MinGW):** prefers `dotnet.exe`, falling back to
   native `dotnet`.
 
@@ -122,6 +138,6 @@ client still compiles and links.
 
 Unit tests live under `tests/` and use [doctest](https://github.com/doctest/doctest).
 Enable with `-DBUILD_TESTING=ON`, then `ctest --test-dir <build-dir>
---output-on-failure`. On a native Linux build they run directly; for
+--output-on-failure`. On a native Linux or macOS build they run directly; for
 MinGW/Windows binaries on a Linux host, CTest runs them through `wine`. See
 [the test reference](reference-tests.md) for adding a module.

@@ -16,6 +16,7 @@ _deps
 /build/
 build-mingw/
 build-linux/
+build-macos/
 /cmake-build-debug/
 /cmake-build-release/
 /CMakeFiles/

@@ -25,9 +25,9 @@
 #include <utility>
 #include <vector>
 
-#include <unistd.h>                    // readlink (executable path)
-#include "Core/Platform/WinNls.h"      // WideCharToMultiByte / CP_UTF8
-#include "Core/Platform/BundledFonts.h" // curated font list shared with Windows
+#include "Core/Platform/PathResolve.h"
+#include "Core/Platform/WinNls.h"
+#include "Core/Platform/BundledFonts.h"
 
 namespace
 {
@@ -128,15 +128,7 @@ namespace
     // same way Dotnet/Connection.h locates the client library. Empty on failure.
     const std::string& ExeDir()
     {
-        static const std::string dir = []() -> std::string {
-            char buf[4096];
-            const ssize_t n = ::readlink("/proc/self/exe", buf, sizeof(buf) - 1);
-            if (n <= 0) return {};
-            buf[n] = '\0';
-            const std::string path(buf);
-            const auto slash = path.find_last_of('/');
-            return slash == std::string::npos ? std::string() : path.substr(0, slash + 1);
-        }();
+        static const std::string dir = MuGetExecutableDir();
         return dir;
     }
 
@@ -180,6 +172,14 @@ namespace
             candidates.push_back(std::move(bundled));
         if (std::string fc = FontconfigMatch(family, bold); !fc.empty())
             candidates.push_back(std::move(fc));
+#ifdef __APPLE__
+        const char* fallbacks[] = {
+            "/System/Library/Fonts/Supplemental/Arial Unicode.ttf",
+            "/System/Library/Fonts/Supplemental/Arial.ttf",
+            "/System/Library/Fonts/Helvetica.ttc",
+            "/Library/Fonts/Arial Unicode.ttf",
+        };
+#else
         const char* fallbacks[] = {
             bold ? "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
                  : "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
@@ -192,6 +192,7 @@ namespace
             bold ? "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf"
                  : "/usr/share/fonts/truetype/freefont/FreeSans.ttf",
         };
+#endif
         for (const char* f : fallbacks)
             candidates.emplace_back(f);
 
