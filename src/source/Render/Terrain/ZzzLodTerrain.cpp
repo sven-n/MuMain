@@ -3076,8 +3076,7 @@ void CacheActiveFrustum()
 bool TestFrustrum2D(float x, float y, float Range)
 {
     extern EGameScene SceneFlag;
-    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE
-        || SceneFlag == LOG_IN_SCENE)
+    if (SceneFlag == SERVER_LIST_SCENE || SceneFlag == WEBZEN_SCENE || SceneFlag == LOADING_SCENE)
         return true;
 
     // Fast path: unrolled 4-edge test for Legacy/Default cameras
@@ -3111,10 +3110,6 @@ bool TestFrustrum2D(float x, float y, float Range)
 
 bool TestFrustrum(vec3_t Position, float Range)
 {
-    extern EGameScene SceneFlag;
-    if (SceneFlag == LOG_IN_SCENE)
-        return true;
-
     for (int i = 0; i < 5; i++)
     {
         if (DotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)

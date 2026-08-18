@@ -401,11 +401,9 @@ bool NewRenderLogInScene(HDC hDC)
 
     BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
 
-    // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
-    // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and
-    // we reset iteration bounds to cover the full terrain so stale bounds from other scenes
-    // don't restrict the render loop.
-    ResetFrustrumBoundsFullTerrain();
+    vec3_t cameraPos;
+    VectorCopy(g_Camera.Position, cameraPos);
+    CreateFrustrum((float)Width / (float)REFERENCE_WIDTH, 430.f / (float)REFERENCE_HEIGHT, cameraPos);
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
