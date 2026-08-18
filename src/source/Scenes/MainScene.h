@@ -14,6 +14,7 @@ bool RenderMainScene();
 // via $effects on/off (muConsoleDebug.cpp) -- not gated behind _EDITOR since the report came from a
 // Release NoEditor build.
 void SetDisableEffects(bool disabled);
+bool IsEffectsDisabledDebug();
 
 // DXP-23 diagnostic, finer-grained bisection: `$effects off` (above) confirmed effect rendering is
 // the dominant GPU cost during a multi-caster fight, but not WHICH effect system inside it -- these

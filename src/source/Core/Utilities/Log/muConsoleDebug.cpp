@@ -19,6 +19,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
+#include "Core/Utilities/Benchmark/BenchConsoleCommand.h"
 #include "UI/NewUI/NewUISystem.h"
 
 #ifdef _EDITOR
@@ -85,6 +86,11 @@ void CmuConsoleDebug::UpdateMainScene()
 
 bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
 {
+    // Handled in its own translation unit -- the benchmark's command vocabulary is large enough
+    // that growing it inside this chain would bury everything else in here.
+    if (Core::Benchmark::Console::HandleCommand(strCommand))
+        return true;
+
     if (strCommand.compare(L"$fpscounter on") == 0)
     {
         SetShowFpsCounter(true);
