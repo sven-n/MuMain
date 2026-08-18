@@ -31,6 +31,7 @@ namespace {
 
     // ---- GLP-08: capability probe ----
     Caps g_Caps;
+    DriverInfo g_DriverInfo;
 
     #ifndef APIENTRY
     #define APIENTRY
@@ -73,11 +74,28 @@ namespace {
         return versionOrExtPresent && fnsResolved;
     }
 
+    // glGetString returns null on a lost or not-yet-current context; an empty field says
+    // "the driver did not tell us" rather than crashing a diagnostic path.
+    std::string GLString(GLenum name)
+    {
+        const GLubyte* value = glGetString(name);
+        return value ? std::string((const char*)value) : std::string();
+    }
+
+    void ProbeDriverInfo()
+    {
+        g_DriverInfo.vendor = GLString(GL_VENDOR);
+        g_DriverInfo.renderer = GLString(GL_RENDERER);
+        g_DriverInfo.version = GLString(GL_VERSION);
+        g_DriverInfo.shadingLanguageVersion = GLString(GL_SHADING_LANGUAGE_VERSION);
+    }
+
     void ProbeCaps()
     {
         g_Caps = Caps{};
+        ProbeDriverInfo();
 
-        const char* versionStr = (const char*)glGetString(GL_VERSION);
+        const char* versionStr = g_DriverInfo.version.empty() ? nullptr : g_DriverInfo.version.c_str();
         int major = 0, minor = 0;
         if (versionStr) sscanf(versionStr, "%d.%d", &major, &minor);
         g_Caps.glMajor = major;
@@ -137,6 +155,11 @@ namespace {
 const Caps& GetCaps()
 {
     return g_Caps;
+}
+
+const DriverInfo& GetDriverInfo()
+{
+    return g_DriverInfo;
 }
 
 bool Init(void* /*nativeWindowHandle*/, int width, int height)

@@ -8,6 +8,7 @@
 
 namespace RHI_GL_Impl {
     const RHI::Caps& GetCaps();
+    const RHI::DriverInfo& GetDriverInfo();
 
     bool Init(void* nativeWindowHandle, int width, int height);
     void Shutdown();
@@ -54,6 +55,11 @@ namespace RHI {
 const Caps& GetCaps()
 {
     return RHI_GL_Impl::GetCaps();
+}
+
+const DriverInfo& GetDriverInfo()
+{
+    return RHI_GL_Impl::GetDriverInfo();
 }
 
 bool Init(void* nativeWindowHandle, int width, int height)
