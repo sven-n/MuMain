@@ -21,7 +21,10 @@
 #include <cstring>
 #include <sys/types.h>
 #include <unistd.h>
-#include "Core/Platform/WinCompat.h"  // BOOL, BYTE, DWORD, PVOID, LPCWSTR, LPWSTR
+#ifdef __APPLE__
+#include <sys/sysctl.h>
+#endif
+#include "Core/Platform/WinCompat.h"
 
 typedef struct _CRYPTOAPI_BLOB {
     DWORD cbData;
@@ -45,6 +48,12 @@ namespace mu_dpapi_detail
         mix(kSalt, sizeof(kSalt));
         const uid_t uid = ::getuid();
         mix(&uid, sizeof(uid));
+#ifdef __APPLE__
+        char uuid[128] = {};
+        size_t uuidLen = sizeof(uuid);
+        if (sysctlbyname("kern.uuid", uuid, &uuidLen, nullptr, 0) == 0 && uuid[0] != '\0')
+            mix(uuid, uuidLen);
+#else
         if (FILE* f = std::fopen("/etc/machine-id", "rb"))
         {
             char buf[64];
@@ -52,6 +61,7 @@ namespace mu_dpapi_detail
             std::fclose(f);
             if (n > 0) mix(buf, n);
         }
+#endif
         return h ? h : 0x9E3779B97F4A7C15ull;
     }
 

@@ -17,6 +17,11 @@ mu_ensure_submodule("ThirdParty/SDL_mixer"
   INDICATOR "CMakeLists.txt"
   URL "https://github.com/libsdl-org/SDL_mixer.git")
 
+if (APPLE)
+  enable_language(C)
+  enable_language(OBJC)
+endif()
+
 # SDL3 — static link, no tests, no install
 set(SDL_SHARED OFF CACHE BOOL "" FORCE)
 set(SDL_STATIC ON CACHE BOOL "" FORCE)
@@ -171,6 +176,9 @@ endif()
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
+if (APPLE)
+  target_compile_options(MuClient PUBLIC -Wno-c++11-narrowing)
+endif()
 
 # The in-game shop downloader uses libcurl off Windows (issue #462); on Windows
 # it uses the OS WinINet/urlmon stack and needs no extra dependency here.
@@ -195,8 +203,7 @@ add_library(MuClient::MuClient ALIAS MuClient_whole)
 # executable shell's sources live under source/App/ (see issue #346). The entry
 # point is selected per platform (issue #441): each OS keeps its bootstrap under
 # source/App/Platform/<OS>/, so adding a platform is a new entry file plus a
-# branch here, not a CMake rewrite. Only the Windows entry point exists today;
-# the Linux/macOS sources are added when that work starts.
+# branch here, not a CMake rewrite.
 #
 # Unsupported platforms fail loudly rather than silently selecting the Linux
 # entry: the mobile targets need a different entry model and a renderer port
@@ -211,7 +218,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
     "Store restricted. When that work starts, add source/App/Platform/iOS/ "
     "and replace this branch.")
 elseif (APPLE)
-  set(MU_APP_ENTRY "source/App/Platform/macOS/main.mm")
+  # macOS entry (main.cpp) plus the shared bootstrap/game-loop from Winmain.cpp,
+  # which compiles off Windows (issue #462). main() calls into it.
+  set(MU_APP_ENTRY
+    "source/App/Platform/macOS/main.cpp"
+    "source/App/Platform/Windows/Winmain.cpp")
 elseif (ANDROID)
   message(FATAL_ERROR "Android is not a supported build target yet: it needs "
     "an OpenGL ES renderer port, and its entry point is android_main via "
@@ -229,15 +240,21 @@ else()
     "and a branch above.")
 endif()
 
-add_executable(Main
-  "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
-)
+set(MU_APP_ENTRY_ABS)
+foreach(_mu_entry IN LISTS MU_APP_ENTRY)
+  list(APPEND MU_APP_ENTRY_ABS "${CMAKE_CURRENT_SOURCE_DIR}/${_mu_entry}")
+endforeach()
+add_executable(Main ${MU_APP_ENTRY_ABS})
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
-  target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+  if (APPLE)
+    target_link_options(Main PRIVATE "-Wl,-map,${MU_MAIN_MAP_FILE}")
+  else()
+    target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+  endif()
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -303,18 +320,19 @@ add_custom_command(TARGET Main POST_BUILD
 # Skeleton Linux-native linkage. This intentionally depends only on
 # ubiquitous system libraries so we can focus on getting the project to
 # compile; more platform-specific adjustments will follow as we iterate.
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  # The engine uses fixed-function desktop OpenGL via GLEW; link the system GL
-  # and GLEW so the gl*/glew* symbols resolve in the Linux executable.
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR APPLE)
   find_package(OpenGL REQUIRED)
   find_library(GLEW_LIBRARY NAMES GLEW glew32 REQUIRED)
   find_library(TURBOJPEG_LIBRARY NAMES turbojpeg REQUIRED)
+  set(MU_GL_LIBS OpenGL::GL)
+  if (TARGET OpenGL::GLU)
+    list(APPEND MU_GL_LIBS OpenGL::GLU)
+  endif()
   target_link_libraries(MuClient PUBLIC
     pthread
     dl
     m
-    OpenGL::GL
-    OpenGL::GLU
+    ${MU_GL_LIBS}
     ${GLEW_LIBRARY}
     ${TURBOJPEG_LIBRARY}
   )
@@ -323,11 +341,10 @@ endif()
 # --- .NET / NuGet infrastructure (shared by wire-sizes codegen and ClientLibrary)
 # Lifted up here so the wire-sizes block below can resolve the OpenMU packet
 # XML from the same NuGet cache the ClientLibrary uses.
-# A Linux target needs the native Linux dotnet to Native-AOT-compile the
-# linux-x64 .so (a Windows dotnet.exe cannot cross-OS AOT). Everything else
-# (Windows/MinGW targets, including from WSL) prefers dotnet.exe so the win-*
-# AOT build works. Pick accordingly.
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+# A non-Windows target needs the native host SDK to Native-AOT-compile the
+# platform shared library (a Windows dotnet.exe cannot cross-OS AOT). Windows
+# targets (including from WSL) prefer dotnet.exe so the win-* AOT build works.
+if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
   find_program(DOTNET_EXECUTABLE dotnet)
   if (NOT DOTNET_EXECUTABLE)
     find_program(DOTNET_EXECUTABLE dotnet.exe)
@@ -540,10 +557,12 @@ if (DOTNET_EXECUTABLE)
   message(STATUS "Found .NET SDK: ${DOTNET_EXECUTABLE}")
 
   # 1. Define the output path. Native AOT emits a platform-native shared
-  # library: .dll on Windows, .so on Linux (the runtime client dlopen's it by
-  # this name).
+  # library: .dll on Windows, .so on Linux, .dylib on macOS (the runtime
+  # client dlopen's / LoadLibrary's it by this name).
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(DOTNET_LIB_NAME "MUnique.Client.Library.so")
+  elseif (APPLE)
+    set(DOTNET_LIB_NAME "MUnique.Client.Library.dylib")
   else()
     set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
   endif()
@@ -590,6 +609,16 @@ if (DOTNET_EXECUTABLE)
     # skip it (ci=true) and use the checked-in output.
     set(DOTNET_EXTRA_ARGS "-p:ci=true")
     message(STATUS ".NET Client Library will build for linux-x64")
+  elseif (APPLE)
+    if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64|aarch64")
+      set(DOTNET_RID "osx-arm64")
+      set(DOTNET_PLATFORM "ARM64")
+    else()
+      set(DOTNET_RID "osx-x64")
+      set(DOTNET_PLATFORM "x64")
+    endif()
+    set(DOTNET_EXTRA_ARGS "-p:ci=true")
+    message(STATUS ".NET Client Library will build for ${DOTNET_RID}")
   elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(DOTNET_RID "win-x64")
     set(DOTNET_PLATFORM "x64")
