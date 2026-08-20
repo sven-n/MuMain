@@ -62,6 +62,7 @@ src/graphify-out/
 # Local agent/tool state
 .claude/
 .paw/
+.worktrees/
 
 # Interrupted editor/temp files
 .!*
