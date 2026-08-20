@@ -7,18 +7,7 @@
 #include <cassert>
 #include "Render/Textures/ZzzOpenglUtil.h"
 
-#define CHECK_FINITE_MATRIX(mat, boneIdx, label) \
-    do { \
-        for (int r = 0; r < 3; ++r) { \
-            for (int c = 0; c < 4; ++c) { \
-                float val = (mat)[r][c]; \
-                if (std::isnan(val) || std::isinf(val) || std::abs(val) > 1e6f) { \
-                    assert(false && "Vertex explosion: Invalid float in BoneMatrix!"); \
-                } \
-            } \
-        } \
-    } while(0)
-#include "Engine/Object/ZzzInfomation.h" 
+#include "Engine/Object/ZzzInfomation.h"
 #include "ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -229,9 +218,6 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
         {
             R_ConcatTransforms(BoneMatrix[b->Parent], Matrix, BoneMatrix[i]);
         }
-#ifdef _DEBUG
-        CHECK_FINITE_MATRIX(BoneMatrix[i], i, "BoneMatrix");
-#endif
     }
 }
 
