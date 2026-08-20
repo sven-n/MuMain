@@ -140,8 +140,8 @@ CHANGED_CPP=$(git diff --name-only --diff-filter=ACMR rollback/pre-upstream-merg
 CHANGED_IMPL=$(printf '%s\n' "$CHANGED_CPP" | rg '\.cpp$' || true)
 
 if [ -n "$CHANGED_CPP" ]; then
-  printf '%s\n' "$CHANGED_CPP" | xargs clang-format --dry-run --Werror
-  printf '%s\n' "$CHANGED_CPP" | xargs cppcheck --error-exitcode=1 \
+  git clang-format --diff rollback/pre-upstream-merge-2026-08-20 -- $CHANGED_CPP
+  printf '%s\n' "$CHANGED_CPP" | xargs cppcheck \
     --enable=warning,performance,portability --std=c++20 --language=c++ \
     --suppress=missingInclude --suppress=unmatchedSuppression \
     --suppress=unusedFunction --suppress='*:*/ThirdParty/*' \
@@ -159,6 +159,8 @@ WIN32_NEW=$(python3 scripts/check-win32-guards.py 2>&1 | rg '^VIOLATION' \
   | rg -v '^VIOLATION  (UI/Windows/CBTMessageBox\.(h|cpp)|Core/Input/Input\.cpp):' || true)
 test -z "$WIN32_NEW" || { printf '%s\n' "$WIN32_NEW"; false; }
 ```
+
+`git clang-format` must report no formatting patch. Compare cppcheck and clang-tidy IDs/messages with the same paths at `rollback/pre-upstream-merge-2026-08-20`; every current-only finding must be fixed. New files have no baseline and therefore must be clean. Whole-file legacy findings remain out of scope unless the incoming hunk caused them.
 
 - [x] **Step 6: Create the preservation ledger**
 
