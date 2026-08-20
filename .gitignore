@@ -57,6 +57,7 @@ build-linux/
 # Local build outputs
 /out/
 /build_validation/
+/build-test-upstream-sync/
 src/graphify-out/
 
 # Local agent/tool state
