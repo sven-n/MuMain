@@ -6,7 +6,7 @@
 
 **Architecture:** Start from the pinned downstream `main`, work in an isolated Git worktree, then merge eleven chronological upstream mainline checkpoints. Resolve each conflict by keeping downstream structure and porting the upstream behavioral delta. Track every upstream non-merge commit in a preservation ledger; publish only after ancestry, build, test, and quality gates pass.
 
-**Tech Stack:** Git merge/rerere/worktrees, CMake presets, C++20, Catch2/CTest, `ctl` quality gates, Markdown audit ledger.
+**Tech Stack:** Git merge/rerere/worktrees, CMake presets, C++20, Catch2/CTest, worktree-local quality gates, Markdown audit ledger.
 
 ---
 
@@ -17,7 +17,7 @@
 - Read: `docs/superpowers/specs/2026-08-20-preservation-first-upstream-sync-design.md`
 - Modify: none
 
-- [ ] **Step 1: Confirm the planning branch is clean**
+- [x] **Step 1: Confirm the planning branch is clean**
 
 Run:
 
@@ -29,7 +29,7 @@ git rev-parse origin/main
 
 Expected: clean worktree; local and remote-tracking `main` both resolve to `db2d3c7a94b6be43240ac37f6809104ddd078ea2`.
 
-- [ ] **Step 2: Refresh remote-tracking references**
+- [x] **Step 2: Refresh remote-tracking references**
 
 Run:
 
@@ -40,7 +40,7 @@ git fetch --prune origin
 
 Expected: both fetches exit 0. The integration scope remains pinned to `c0d74c4ed5edfad527b71899337f72d39bfc49f3` even if `fork/main` advances.
 
-- [ ] **Step 3: Verify pinned objects and ancestry**
+- [x] **Step 3: Verify pinned objects and ancestry**
 
 Run:
 
@@ -52,7 +52,7 @@ git merge-base db2d3c7a94b6be43240ac37f6809104ddd078ea2 c0d74c4ed5edfad527b71899
 
 Expected merge base: `685936c10a8ee50982d0e1ca8d9430bf88186dd1`.
 
-- [ ] **Step 4: Create the rollback branch**
+- [x] **Step 4: Create the rollback branch**
 
 Run:
 
@@ -69,7 +69,7 @@ Expected: branch created. If it already exists, verify it resolves to the pinned
 - Create branch: `integration/upstream-2026-08-20`
 - Create: `docs/porting/upstream-sync-2026-08-20-ledger.md`
 
-- [ ] **Step 1: Verify worktree isolation path is ignored**
+- [x] **Step 1: Verify worktree isolation path is ignored**
 
 Run:
 
@@ -79,7 +79,7 @@ git check-ignore -q .worktrees
 
 Expected: exit 0. If it fails, stop; do not create a project-local worktree until `.worktrees/` is ignored.
 
-- [ ] **Step 2: Create the integration worktree from pinned downstream main**
+- [x] **Step 2: Create the integration worktree from pinned downstream main**
 
 Run:
 
@@ -89,7 +89,7 @@ git worktree add .worktrees/integration-upstream-2026-08-20 -b integration/upstr
 
 Expected: worktree created on `integration/upstream-2026-08-20`.
 
-- [ ] **Step 3: Carry the approved design and plan into integration**
+- [x] **Step 3: Carry the approved design and plan into integration**
 
 Run from the new worktree:
 
@@ -99,7 +99,7 @@ git cherry-pick main..feature/preservation-first-upstream-sync-design
 
 Expected: design and implementation-plan commits applied in chronological order.
 
-- [ ] **Step 4: Verify reusable conflict resolution**
+- [x] **Step 4: Verify reusable conflict resolution**
 
 Run:
 
@@ -112,7 +112,7 @@ git config --get rerere.autoupdate
 
 Expected: both values print `true`.
 
-- [ ] **Step 5: Run the pre-merge baseline**
+- [x] **Step 5: Run the pre-merge baseline**
 
 Run:
 
@@ -122,12 +122,45 @@ cmake --build --preset macos-arm64-debug
 cmake -S . -B build-test-upstream-sync -DBUILD_TESTING=ON -DCMAKE_BUILD_TYPE=Debug
 cmake --build build-test-upstream-sync -j8
 ctest --test-dir build-test-upstream-sync --output-on-failure
-/Users/joseybv/workspace/mu/MuMain-workspace/ctl check
+python3 scripts/check-win32-guards.py
+make format-check
+make lint
+make tidy-gate
 ```
 
-Expected: every command exits 0. If any command fails, record the exact baseline failure and stop before merging upstream.
+Observed: both builds passed and CTest passed 85/85. The Win32 guard check has three pre-existing violations (`UI/Windows/CBTMessageBox.h`, `UI/Windows/CBTMessageBox.cpp`, and `Core/Input/Input.cpp`); whole-tree format and cppcheck gates have pre-existing debt; tidy was not run after those failures. The workspace-root `ctl` command is intentionally excluded because it validates the primary checkout, not this worktree.
 
-- [ ] **Step 6: Create the preservation ledger**
+For every code checkpoint, builds and tests must remain green. Run quality tools directly from this worktree against changed C/C++ paths only. The Win32 guard output may contain only the three baseline paths above. No new changed-path clang-format, cppcheck, or clang-tidy finding is accepted.
+
+Run the changed-path gates with:
+
+```bash
+CHANGED_CPP=$(git diff --name-only --diff-filter=ACMR rollback/pre-upstream-merge-2026-08-20 -- src/source \
+  | rg '\.(cpp|h|hpp)$' | rg -v '/(ThirdParty|Dotnet)/' || true)
+CHANGED_IMPL=$(printf '%s\n' "$CHANGED_CPP" | rg '\.cpp$' || true)
+
+if [ -n "$CHANGED_CPP" ]; then
+  printf '%s\n' "$CHANGED_CPP" | xargs clang-format --dry-run --Werror
+  printf '%s\n' "$CHANGED_CPP" | xargs cppcheck --error-exitcode=1 \
+    --enable=warning,performance,portability --std=c++20 --language=c++ \
+    --suppress=missingInclude --suppress=unmatchedSuppression \
+    --suppress=unusedFunction --suppress='*:*/ThirdParty/*' \
+    --suppress=useInitializationList --suppress=passedByValue \
+    --suppress=postfixOperator --suppress=returnByReference --inline-suppr
+fi
+
+if [ -n "$CHANGED_IMPL" ]; then
+  printf '%s\n' "$CHANGED_IMPL" | xargs clang-tidy -p out/build/macos-arm64 \
+    --checks='-*,bugprone-sizeof-expression,bugprone-suspicious-memset-usage,bugprone-misplaced-pointer-arithmetic-in-alloc,-clang-diagnostic-*' \
+    --extra-arg=-Wno-everything
+fi
+
+WIN32_NEW=$(python3 scripts/check-win32-guards.py 2>&1 | rg '^VIOLATION' \
+  | rg -v '^VIOLATION  (UI/Windows/CBTMessageBox\.(h|cpp)|Core/Input/Input\.cpp):' || true)
+test -z "$WIN32_NEW" || { printf '%s\n' "$WIN32_NEW"; false; }
+```
+
+- [x] **Step 6: Create the preservation ledger**
 
 Create `docs/porting/upstream-sync-2026-08-20-ledger.md` with one row for each commit returned by:
 
@@ -291,7 +324,7 @@ cmake --preset macos-arm64
 cmake --build --preset macos-arm64-debug
 cmake --build build-test-upstream-sync -j8
 ctest --test-dir build-test-upstream-sync --output-on-failure
-/Users/joseybv/workspace/mu/MuMain-workspace/ctl check
+# Run the Task 2 worktree-local changed-path quality gates.
 ```
 
 Expected: no conflicts or markers; every gate exits 0.
@@ -453,7 +486,7 @@ cmake --preset macos-arm64
 cmake --build --preset macos-arm64-debug
 cmake --build build-test-upstream-sync -j8
 ctest --test-dir build-test-upstream-sync --output-on-failure
-/Users/joseybv/workspace/mu/MuMain-workspace/ctl check
+# Run the Task 2 worktree-local changed-path quality gates.
 ```
 
 Replace all PR #560 ledger `pending` values, stage them, then run `git commit --no-edit`.
@@ -505,7 +538,7 @@ git diff --check
 cmake --build --preset macos-arm64-debug
 cmake --build build-test-upstream-sync -j8
 ctest --test-dir build-test-upstream-sync --output-on-failure
-/Users/joseybv/workspace/mu/MuMain-workspace/ctl check
+# Run the Task 2 worktree-local changed-path quality gates.
 ```
 
 Resolve all 16 ledger rows; commit with `git commit --no-edit`.
@@ -584,7 +617,7 @@ cmake --preset macos-arm64
 cmake --build --preset macos-arm64-debug
 cmake --build build-test-upstream-sync -j8
 ctest --test-dir build-test-upstream-sync --output-on-failure
-/Users/joseybv/workspace/mu/MuMain-workspace/ctl check
+# Run the Task 2 worktree-local changed-path quality gates.
 git status --short --branch
 ```
 
