@@ -1922,8 +1922,18 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     InitVSync();
     if (IsVSyncAvailable())
     {
-        EnableVSync();
-        SetTargetFps(-1); // unlimited
+        if (EnableVSync())
+        {
+            SetTargetFps(-1); // VSync paces frames, no separate cap needed.
+        }
+        else
+        {
+            SetTargetFps(GetFPSLimit());
+        }
+    }
+    else
+    {
+        SetTargetFps(GetFPSLimit());
     }
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,

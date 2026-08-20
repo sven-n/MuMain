@@ -224,6 +224,10 @@ public:
     // No-op in the OpenGL backend. Called from MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}
+    [[nodiscard]] virtual bool SetVSyncEnabled(bool /*enabled*/)
+    {
+        return false;
+    }
     [[nodiscard]] virtual bool RequestFramePixels()
     {
         return false;

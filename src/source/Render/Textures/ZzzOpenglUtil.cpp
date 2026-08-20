@@ -690,8 +690,7 @@ BOOL IsGLExtensionSupported(const wchar_t* extension)
 
 void InitVSync()
 {
-    // SDL controls the swap interval on the current GL context on every platform;
-    // EnableVSync/DisableVSync just toggle it. No WGL extension probing needed.
+    // SDL GPU swapchains always support VSync. The renderer applies present-mode changes.
     _isVSyncAvailable = true;
 }
 
@@ -705,14 +704,28 @@ bool IsVSyncEnabled()
     return _isVSyncEnabled;
 }
 
-void EnableVSync()
+bool EnableVSync()
 {
-    _isVSyncEnabled = true;
+    if (mu::GetRenderer().SetVSyncEnabled(true))
+    {
+        _isVSyncEnabled = true;
+        return true;
+    }
+
+    _isVSyncEnabled = false;
+    return false;
 }
 
-void DisableVSync()
+bool DisableVSync()
 {
-    _isVSyncEnabled = false;
+    if (mu::GetRenderer().SetVSyncEnabled(false))
+    {
+        _isVSyncEnabled = false;
+        return true;
+    }
+
+    _isVSyncEnabled = true;
+    return false;
 }
 
 // GetFPSLimit() lives in the platform layer (Winmain.cpp): it queries the

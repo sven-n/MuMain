@@ -48,6 +48,18 @@ add_test(
 )
 
 add_test(
+    NAME sdl_gpu_vsync_frame_pacing
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_HEADER=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRenderer.h
+        -DRENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
+        -DRENDER_UTIL_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Textures/ZzzOpenglUtil.cpp
+        -DWINMAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+        -DCONSOLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Log/muConsoleDebug.cpp
+        -DSRC_CMAKE=${CMAKE_SOURCE_DIR}/src/CMakeLists.txt
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_vsync_frame_pacing.cmake
+)
+
+add_test(
     NAME global_bitmap_empty_shutdown_guard
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp

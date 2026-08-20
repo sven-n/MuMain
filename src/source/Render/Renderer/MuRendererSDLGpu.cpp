@@ -2210,6 +2210,24 @@ public:
         return s_frameActive;
     }
 
+    [[nodiscard]] bool SetVSyncEnabled(bool enabled) override
+    {
+        if (!s_device || !s_window)
+        {
+            return false;
+        }
+
+        const SDL_GPUPresentMode presentMode = enabled ? SDL_GPU_PRESENTMODE_VSYNC : SDL_GPU_PRESENTMODE_IMMEDIATE;
+        if (!SDL_SetGPUSwapchainParameters(s_device, s_window, SDL_GPU_SWAPCHAINCOMPOSITION_SDR, presentMode))
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- failed to set {} present mode: {}",
+                                         enabled ? "VSync" : "immediate", SDL_GetError());
+            return false;
+        }
+
+        return true;
+    }
+
     // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
     // Allows GlobalBitmap.cpp to obtain the SDL_GPUDevice* via mu::GetRenderer().GetDevice()
     // without a direct dependency on MuRendererSDLGpu.cpp internals.

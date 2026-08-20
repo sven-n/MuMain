@@ -101,8 +101,8 @@ void RestoreCameraPerspective();
 void InitVSync();
 bool IsVSyncAvailable();
 bool IsVSyncEnabled();
-void EnableVSync();
-void DisableVSync();
+bool EnableVSync();
+bool DisableVSync();
 int GetFPSLimit();
 
 void UpdateMousePositionn();
