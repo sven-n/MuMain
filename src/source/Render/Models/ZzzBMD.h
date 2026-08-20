@@ -1,7 +1,18 @@
 #ifndef __ZZZBMD_H__
 #define __ZZZBMD_H__
 
+#include <vector>
+#include <cstdint>
 #include "Render/Sprites/TextureScript.h"
+
+extern const float (*g_pActiveBoneTransform)[3][4];
+// Bumped by every SetActiveBoneTransform() call — lets BoneUBO detect "the pointer is
+// the same address as last upload, but the content underneath it has changed" (e.g. a
+// stack-local BoneTransform array reused at the same call depth for a different linked
+// item, or the shared global BoneTransform[] array reused across different objects).
+// Pointer identity alone is NOT safe to cache on in this codebase — see the call sites.
+extern unsigned int g_BoneTransformVersion;
+void SetActiveBoneTransform(const float (*ptr)[3][4]);
 
 #define MAX_BONES    200
 #define MAX_MESH     50
@@ -208,9 +219,39 @@ public:
 
     bool				m_bCompletedAlloc;
 
-    BMD() : NumBones(0), NumActions(0), NumMeshs(0),
-        Meshs(NULL), Bones(NULL), Actions(NULL), Textures(NULL), IndexTexture(NULL)
+    float (*m_pCurrentBoneTransform)[3][4]; // Active bone matrix palette stored during Transform()
+    bool m_LastTranslate;       // Set by Transform(): true=Translate mode (BodyOrigin/BodyScale shift world pos),
+                                // false=non-Translate mode (bone matrices already encode world position)
+    vec3_t m_LastLightPosition; // Set by Transform() when LightEnable: the per-body light direction
+                                // vector (HighLight/BattleCastle/default variants), consumed by
+                                // RenderMesh()'s GPU-skinned draw to compute per-vertex lighting
+                                // in-shader instead of replaying IntensityTransform on the CPU (DXP-20).
+
+    // DXP-20 increment 4: lazy CPU-skin materialization. TransformCheap() stashes the skin
+    // request and bumps m_SkinStamp instead of eagerly filling VertexTransform/NormalTransform/
+    // IntensityTransform; EnsureCpuVertices()/EnsureCpuNormals() run the deferred work on first
+    // read per mesh per Transform() call. See DXP-20-inc4-plan.md.
+    // mutable: several consumers (e.g. AddMeshShadowTriangles()) are const methods that only read
+    // game state but still need to trigger materialization -- this is cache state, not object
+    // identity, same rationale as any other lazy-init pattern behind a const accessor.
+    mutable uint32_t m_SkinStamp;           // matches g_SkinStampCounter iff this BMD owns the scratch arrays right now
+    mutable bool m_CpuVertsReady[MAX_MESH]; // per-mesh: VertexTransform[mesh] materialized under m_SkinStamp
+    mutable bool m_CpuNormalsReady[MAX_MESH]; // per-mesh: NormalTransform/IntensityTransform[mesh] materialized under
+                                              // m_SkinStamp
+    float m_LastSkinScale;                    // Transform()'s `_Scale` arg, stashed for deferred materialization
+    float m_LastBoneScale; // global BoneScale AT TransformCheap() time (callers mutate the global right after)
+
+    BMD()
+        : NumBones(0), NumActions(0), NumMeshs(0), Meshs(NULL), Bones(NULL), Actions(NULL), Textures(NULL),
+          IndexTexture(NULL), m_pCurrentBoneTransform(nullptr), m_LastTranslate(false), m_SkinStamp(0),
+          m_LastSkinScale(0.f), m_LastBoneScale(1.f)
     {
+        m_LastLightPosition[0] = m_LastLightPosition[1] = m_LastLightPosition[2] = 0.f;
+        for (int _i = 0; _i < MAX_MESH; _i++)
+        {
+            m_CpuVertsReady[_i] = false;
+            m_CpuNormalsReady[_i] = false;
+        }
         LightEnable = false;
         ContrastEnable = false;
         HideSkin = false;
@@ -229,9 +270,42 @@ public:
     void CreateBoundingBox();
 
     bool PlayAnimation(float* AnimationFrame, float* PriorAnimationFrame, unsigned short* PriorAction, float Speed, vec3_t Origin, vec3_t Angle);
-    void Animation(float(*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame, unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false, bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1);
+    // BoneMatrixCapacity: element count of the caller's BoneTransform buffer. The DXP-24 stale-slot
+    // fill writes identity into [NumBones, BoneMatrixCapacity) so UBO-uploaded full-size palettes
+    // never carry a previous model's matrices; callers passing a buffer smaller than MAX_BONES
+    // (e.g. the internal new vec34_t[NumBones] scratch arrays) MUST pass their real capacity.
+    void Animation(float (*BoneTransform)[3][4], float AnimationFrame, float PriorAnimationFrame,
+                   unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent = false,
+                   bool Translate = true, const float (*ExtParentMatrix)[4] = nullptr, short CurrentAction = -1,
+                   int BoneMatrixCapacity = MAX_BONES);
     void InterpolationTrans(float(*Mat1)[4], float(*TransMat2)[4], float _Scale);
     void Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate = false, float _Scale = 0.0f);
+    // DXP-20 increment 2: the state-stash + OBB-from-args portion of Transform(), without the
+    // expensive per-mesh vertex/normal loop. Only equivalent to Transform() when EditFlag != 2 and
+    // not a _DEBUG build -- those need the vertex-loop-derived OBB Transform() itself still computes.
+    void TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB,
+                        bool Translate = false, float _Scale = 0.0f);
+    // DXP-20 increment 2: skins ONE vertex from BoneMatrix, replicating Transform()'s per-vertex
+    // math exactly (position only -- no normals, lighting, or bounding box). `_Scale`/`Translate`
+    // must match what the caller would have passed to Transform(); BoneScale/BodyScale/BodyOrigin
+    // are read as the same ambient globals/members Transform() itself reads.
+    void SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool Translate, float _Scale,
+                    vec3_t out) const;
+    // Batch form: skins every vertex of `mesh` into the corresponding slice of the global
+    // VertexTransform[mesh] array -- the same side effect Transform()'s loop has for that one mesh,
+    // without touching any other mesh or computing normals/lighting.
+    void SkinVertices(int mesh, float (*BoneMatrix)[3][4], bool Translate, float _Scale) const;
+    // DXP-20 increment 4: materializes VertexTransform[mesh] (mesh == -1: all meshes) from the
+    // skin request stashed by the most recent TransformCheap()/Transform() call, if not already
+    // materialized under the current stamp. Idempotent -- safe to call from every consumer site.
+    void EnsureCpuVertices(int mesh = -1) const;
+    // Same as EnsureCpuVertices, but for NormalTransform/IntensityTransform[mesh] (needs LightEnable
+    // + m_LastLightPosition, both stashed by TransformCheap()).
+    void EnsureCpuNormals(int mesh = -1) const;
+    // For consumers (cloth sim write-back) that populate VertexTransform[mesh] themselves, outside
+    // the normal skin path -- marks it "ready" under the current stamp so a later EnsureCpuVertices
+    // doesn't re-skin and clobber the externally-written data.
+    void MarkCpuVerticesExternallyWritten(int mesh) const;
     void TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBoneNumber, vec3_t vRelativePosition = NULL);
     void TransformByBoneMatrix(vec3_t vResultPosition, float(*BoneMatrix)[4], vec3_t vWorldPosition = NULL, vec3_t vRelativePosition = NULL);
     void TransformPosition(float(*Matrix)[4], vec3_t Position, vec3_t WorldPosition, bool Translate = false);
@@ -268,7 +342,7 @@ public:
     void Chrome(float*, int, vec3_t);
 
     //render
-    void RenderBone(float(*BoneTransform)[3][4]);
+    void RenderBone(float (*BoneTransform)[3][4]);
     void RenderObjectBoundingBox();
     void BeginRender(float);
     void EndRender();
@@ -280,7 +354,9 @@ public:
     int AddToCoinHeap(int coinIndex, int target_vertex_index);
     void EndRenderCoinHeap(int coinCount);
 
-    void RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int Texture = -1);
+    void RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha = 1.f,
+                               int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f,
+                               float BlendMeshTexCoordV = 0.f, int Texture = -1);
     void RenderBody(int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderBodyAlternative(int iRndExtFlag, int iParam, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int HiddenMesh = -1, int Texture = -1);
     void RenderMeshTranslate(int i, int RenderFlag, float Alpha = 1.f, int BlendMesh = -1, float BlendMeshLight = 1.f, float BlendMeshTexCoordU = 0.f, float BlendMeshTexCoordV = 0.f, int Texture = -1);
@@ -304,6 +380,8 @@ public:
     //#endif //USE_SHADOWVOLUME
 private:
     BMD(const BMD& b);
+
+    void ClaimSkinStamp() const;
 
     void AddClothesShadowTriangles(void* pClothes, int clothesCount, float sx, float sy,
         std::uint32_t color) const;

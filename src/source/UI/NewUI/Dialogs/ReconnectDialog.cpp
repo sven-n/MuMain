@@ -2,7 +2,8 @@
 #include "ReconnectDialog.h"
 
 #include "Network/Reconnect/ReconnectManager.h"
-#include "Render/Textures/ZzzOpenglUtil.h"   // RenderColor, BeginBitmap/EndBitmap, Mouse*
+#include "Render/Textures/ZzzOpenglUtil.h" // RenderColor, BeginBitmap/EndBitmap, Mouse*
+#include <vector>
 #include "Render/Sprites/GlobalBitmap.h"     // Bitmaps (texture-loaded check)
 #include "UI/Legacy/UIControls.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
 #include "UI/NewUI/NewUICommon.h"            // SEASON3B::RenderImage

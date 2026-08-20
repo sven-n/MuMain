@@ -1,4 +1,4 @@
-﻿// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
+// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -96,6 +96,18 @@ namespace SEASON3B
         mu_swprintf(szText, I18N::Game::XDCoins, GetRegistCount());
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
+
+    // DXP-07d increment 5, stage 1+2 (implemented together, on trust — see task doc/2026-08-01 note:
+    // this panel, like increment 4, is unreachable via normal play until the server implements the
+    // corresponding NPC/event, so no runtime soak was possible before this swap). Own copies of the
+    // compare/log helpers. Identical shape to increment 4 (CNewUIGoldBowmanLena::Render3D): EndBitmap()
+    // at entry, restore mirror runs BEFORE BeginBitmap() at the end (own pre-panel snapshot needed).
+    // The only per-item call is RenderItem3D() (line 138 below) — same shared path increments 0-4
+    // already proved carries no GL model transform; SetItemRotation() (lines 137/139) is a plain
+    // bool-field setter (m_ItemAngle), not a GL call, consumed later inside RenderObjectScreen's
+    // angle table — verified by reading NewUIRegistrationLuckyCoin.h.
+    static float s_PreLuckyCoinProj[16];
+    static float s_PreLuckyCoinView[16];
 
     void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
     {

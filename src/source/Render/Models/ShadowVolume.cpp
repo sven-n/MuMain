@@ -118,7 +118,8 @@ void CShadowVolume::Clear(void)
     m_pEdges = NULL;
 }
 
-BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga)
+BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o,
+                                     bool SkipTga)
 {
     if (o->Alpha < 0.01f)
     {
@@ -141,7 +142,8 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
 
         if (Bitmaps[b->IndexTexture[i]].Components == 4)
         {
-            if (SkipTga) continue;
+            if (SkipTga)
+                continue;
         }
         iNumTriangles += std::max<int>(0, b->Meshs[i].NumTriangles);
     }
@@ -159,7 +161,8 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
         if (Bitmaps[b->IndexTexture[i]].Components == 4)
         {
             Tga = true;
-            if (SkipTga) continue;
+            if (SkipTga)
+                continue;
         }
         DeterminateSilhouette(i, ppVertexTransformed, b->Meshs[i].NumTriangles, b->Meshs[i].Triangles, Tga);
     }
@@ -169,7 +172,9 @@ BOOL CShadowVolume::GetReadyToCreate(vec3_t ppVertexTransformed[MAX_MESH][MAX_VE
 
 void CShadowVolume::Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga)
 {
-    m_vLight[0] = -1.f; m_vLight[1] = 0.03f; m_vLight[2] = -1.f;
+    m_vLight[0] = -1.f;
+    m_vLight[1] = 0.03f;
+    m_vLight[2] = -1.f;
     VectorNormalize(m_vLight);
 
     if (!GetReadyToCreate(ppVertexTransformed, b, o, SkipTga))
@@ -253,9 +258,9 @@ void CShadowVolume::DeterminateSilhouette(short nMesh, vec3_t ppVertexTransforme
         if (pTriangle->Front)
         {
             short* pnVertexIndex = pTriangle->VertexIndex;
-            //AddEdge( pnVertexIndex[0], pnVertexIndex[1], nMesh);
-            //AddEdge( pnVertexIndex[1], pnVertexIndex[2], nMesh);
-            //AddEdge( pnVertexIndex[2], pnVertexIndex[0], nMesh);
+            // AddEdge( pnVertexIndex[0], pnVertexIndex[1], nMesh);
+            // AddEdge( pnVertexIndex[1], pnVertexIndex[2], nMesh);
+            // AddEdge( pnVertexIndex[2], pnVertexIndex[0], nMesh);
             AddEdgeFast(pnVertexIndex[0], pnVertexIndex[1], nMesh, iTriangle, 0, pTriangles);
             AddEdgeFast(pnVertexIndex[1], pnVertexIndex[2], nMesh, iTriangle, 1, pTriangles);
             AddEdgeFast(pnVertexIndex[2], pnVertexIndex[0], nMesh, iTriangle, 2, pTriangles);

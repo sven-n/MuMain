@@ -57,7 +57,7 @@ void CSWaterTerrain::Update(void)
     calcBaseWave();
 }
 
-void    CSWaterTerrain::Render(void)
+void CSWaterTerrain::Render(void)
 {
     if (!gMapManager.InHellas(m_iMapIndex)) return;
 

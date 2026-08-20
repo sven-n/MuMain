@@ -109,6 +109,18 @@ float SEASON3B::CNewUI3DCamera::GetLayerDepth()
     return m_fZOrder;
 }
 
+// DXP-07d increment 2's shadow-compare diagnostic (proj/view vs. CPU closed form) validated this
+// camera's projection formula across multiple soaks; DXP-08a deleted the diagnostic and the FFP
+// matrix-stack calls it was validating once GlobalUBO was confirmed the only consumer
+// — see Render()'s own comments below. Pre-implementation read of every
+// INewUI3DRenderObj::Render3D() implementer registered with this camera (12 call sites across
+// NewUIMyInventory, NewUIInventoryCtrl, NewUIEmpireGuardianNPC, NewUINPCQuest,
+// NewUIDoppelGangerWindow, NewUICustomMessageBox, NewUICommonMessageBox, and 4 GameShop MsgBoxIGS*
+// dialogs) found none touch the GL matrix stack — they all just call RenderItem3D(), which carries no
+// GL model transform. (NewUIGoldBowmanLena/NewUIRegistrationLuckyCoin's own Render3D() methods are
+// NOT reached through this camera — they call EndBitmap()/gluPerspective2 directly themselves,
+// independent of CNewUI3DCamera.)
+
 bool SEASON3B::CNewUI3DCamera::Render()
 {
     if (m_list3DObjs.empty())

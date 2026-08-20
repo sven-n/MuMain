@@ -294,14 +294,17 @@ static void ApplySelectedCharacterLighting()
  */
 static void RenderCharacterScene3D()
 {
+    // DXP-16 increment 1: terrain has a real D3D11 path now -- call unconditionally.
+    // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it.
+    // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();
+    RenderMount();
 
     if (!CUIMng::Instance().IsCursorOnUI())
         Input::Selection::SelectObjects();
 
-    RenderMount();
     RenderBlurs();
     RenderJoints();
     RenderEffects();

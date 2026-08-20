@@ -2766,6 +2766,15 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
 
         float TextureUWidth = (Width + 0.01f) / b->Width;
         float TextureVHeight = (Height + 0.01f) / b->Height;
+        // DXP-16 fix: the glyph atlas is mostly-transparent (background pixels are alpha=0,
+        // only the glyph strokes themselves are opaque) and RELIES on alpha blending to show
+        // through to whatever is underneath (panel art, other text). RenderBitmap itself never
+        // sets a blend mode -- it draws with whatever's currently active. Setting it here,
+        // immediately before this specific draw, survives whatever earlier UI code (buttons,
+        // checkboxes, etc.) left the blend state as -- a default set once at the top of
+        // BeginBitmap() didn't survive that gauntlet (confirmed: had zero effect on the
+        // reported flicker), so pin it right at the point of use instead.
+        EnableAlphaTest();
         RenderBitmap(BITMAP_FONT, (float)sx, (float)sy, (float)Width, (float)Height,
             TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
     }

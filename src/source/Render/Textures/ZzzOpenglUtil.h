@@ -53,6 +53,8 @@ void DisableTexture(bool AlphaTest = false);
 void DisableAlphaBlend();
 void EnableLightMap();
 void EnableAlphaTest(bool DepthMake = true);
+// Sets glAlphaFunc(GL_GREATER, ref) and mirrors it to the shader-side alpha-test ref (DXP-01).
+void SetAlphaFuncRef(float ref);
 void EnableAlphaBlend();
 void EnableAlphaBlendMinus();
 void EnableAlphaBlend2();
@@ -61,6 +63,27 @@ void EnableAlphaBlend4();
 void BindTexture(int tex);
 void BindTextureStream(int tex);
 void EndTextureStream();
+
+// DXP-10 dumb single-call state wrappers. Unlike the Enable/DisableAlphaBlend family above,
+// these do NOT cache state or bundle other toggles -- each is the exact single GL call a
+// call site outside Render/ used to make directly, same guard, nothing added or removed.
+// NOT interchangeable with the smart bundled wrappers of the same GL enum (e.g. DisableTexture()
+// also touches alpha-test/depth-mask state; DisableTexture2D() below does not).
+void EnableTexture2D();
+void DisableTexture2D();
+void EnableAlphaTestRaw();
+void DisableAlphaTestRaw();
+void EnableFog();
+void DisableFog();
+void EnableBlend();
+void DisableBlend();
+void SetBlendFuncAlpha();
+void SetDepthFuncLEqual();
+void ClearColorBuffer();
+void ClearDepthBuffer();
+void ClearColorAndDepthBuffers();
+void SetClearColor(float r, float g, float b, float a = 1.0f);
+void FlushGL();
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void EndOpengl();
 

@@ -68,6 +68,7 @@ namespace
 constexpr int k_MaxQuads = 4096;
 // Initial vertex capacity. CPU staging grows so stress frames keep late UI draws.
 constexpr Uint32 k_InitialVertexBufferSize = 64u * 1024u * 1024u;
+constexpr Uint32 k_InitialBoneBufferSize = 64u * 1024u;
 // Number of blend pipelines: 8 blend modes + 1 disabled.
 constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
@@ -83,6 +84,20 @@ struct VertexUniforms
     float fogPad[2]; // 16-byte alignment padding
 };
 static_assert(sizeof(VertexUniforms) == 80, "VertexUniforms must be 80 bytes");
+
+struct SkinningVertexUniforms
+{
+    glm::mat4 mvp;
+    float bodyOriginAndScale[4]{};
+    float skinningScales[4]{};
+    std::uint32_t palette[4]{};
+    float lightDirection[4]{};
+    float fogParameters[4]{};
+    std::uint32_t textureCoordinates[4]{};
+    float chromeParameters[4]{};
+    float textureCoordinateParameters[4]{};
+};
+static_assert(sizeof(SkinningVertexUniforms) == 192, "SkinningVertexUniforms must be 192 bytes");
 
 } // anonymous namespace
 
@@ -471,6 +486,10 @@ static SDL_GPUGraphicsPipeline* s_pipelines3D[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DNoCull[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelines3DDepthReadOnly[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinned[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedNoCull[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthOff[k_PipelineCount] = {};
+static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthReadOnly[k_PipelineCount] = {};
 
 // Story 4.3.2 (AC-7): Single pre-frame vertex upload.
 // Draws accumulate in growable CPU memory before one GPU upload.
@@ -479,6 +498,16 @@ static SDL_GPUBuffer* s_vtxGpuBuf = nullptr;
 static Uint32 s_vtxCapacity = 0u;
 static Uint32 s_vtxOffset = 0u;
 static std::vector<Uint8> s_vtxScratch;
+
+// Per-frame packed float4 bone rows. Three rows represent one affine 3x4 bone transform.
+static SDL_GPUTransferBuffer* s_boneTransferBuf = nullptr;
+static SDL_GPUBuffer* s_boneGpuBuf = nullptr;
+static Uint32 s_boneCapacity = 0u;
+static std::vector<float> s_boneRowScratch;
+static const float* s_lastBonePalette = nullptr;
+static std::size_t s_lastBonePaletteSize = 0u;
+static std::uint32_t s_lastBonePaletteVersion = 0u;
+static Uint32 s_lastBonePaletteRowOffset = 0u;
 
 // Static quad index buffer (pre-generated [0,1,2, 0,2,3] pattern × k_MaxQuads).
 static SDL_GPUBuffer* s_quadIdxBuf = nullptr;
@@ -499,8 +528,9 @@ static SDL_GPUSampler* s_defaultSampler = nullptr;
 enum class RenderCmdType : uint8_t
 {
     SetViewport,
-    SetScissor,         // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
-    DrawTriangles,      // non-indexed 3D (Vertex3D)
+    SetScissor,    // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
+    DrawTriangles, // non-indexed 3D (Vertex3D)
+    DrawSkinnedTriangles,
     DrawIndexedQuads2D, // indexed 2D with static quad index buffer (Vertex2D)
     DrawIndexedStrip,   // indexed 3D with per-frame strip indices (Vertex3D)
     DrawTriangles2D,    // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
@@ -517,6 +547,7 @@ struct RenderCmd
     Uint32 idxCount;       // for DrawIndexed*
     Uint32 stripIdxOffset; // byte offset into strip index scratch buffer
     VertexUniforms vu;
+    SkinningVertexUniforms skinningVu{};
     FogUniform fogUniform;
     SDL_GPUViewport viewport; // for SetViewport only
     SDL_Rect scissor;         // for SetScissor only
@@ -578,6 +609,7 @@ static SDL_GPUShader* s_fragShaderTex = nullptr;    // basic_textured.frag
 static SDL_GPUShader* s_vertShader2DCol = nullptr;  // basic_colored.vert
 static SDL_GPUShader* s_fragShaderCol = nullptr;    // basic_colored.frag
 static SDL_GPUShader* s_vertShaderShadow = nullptr; // shadow_volume.vert
+static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 
 // Story 7.9.7 (AC-3): Depth buffer texture for correct 3D depth testing.
 // Created in Init() at swapchain dimensions, recreated on window resize.
@@ -1260,6 +1292,7 @@ public:
 
         DestroyQuadIndexBuffer();
         DestroyVertexBuffers();
+        DestroyBoneBuffers();
         DestroyPipelines();
         ReleaseShaders();
 
@@ -1310,6 +1343,11 @@ public:
         s_vtxOffset = 0u;
         s_renderCmds.clear();
         s_stripIdxScratch.clear();
+        s_boneRowScratch.clear();
+        s_lastBonePalette = nullptr;
+        s_lastBonePaletteSize = 0u;
+        s_lastBonePaletteVersion = 0u;
+        s_lastBonePaletteRowOffset = 0u;
         s_texturesInvalidated = false; // Reset per-frame texture invalidation flag
         s_dbgDrawCallsThisFrame = 0u;
         s_dbgVtxBytesThisFrame = 0u;
@@ -1409,6 +1447,27 @@ public:
             }
         }
 
+        Uint32 boneDataSize = 0u;
+        bool boneDataReady = s_boneRowScratch.empty();
+        if (!s_boneRowScratch.empty())
+        {
+            const std::size_t boneBytes = s_boneRowScratch.size() * sizeof(float);
+            if (boneBytes <= std::numeric_limits<Uint32>::max())
+            {
+                boneDataSize = static_cast<Uint32>(boneBytes);
+                if (EnsureBoneBufferCapacity(boneDataSize))
+                {
+                    void* mapped = SDL_MapGPUTransferBuffer(s_device, s_boneTransferBuf, false);
+                    if (mapped)
+                    {
+                        std::memcpy(mapped, s_boneRowScratch.data(), boneDataSize);
+                        SDL_UnmapGPUTransferBuffer(s_device, s_boneTransferBuf);
+                        boneDataReady = true;
+                    }
+                }
+            }
+        }
+
         bool stripIdxReady = false;
         if (!s_stripIdxScratch.empty())
         {
@@ -1463,7 +1522,7 @@ public:
             }
         }
 
-        if (s_vtxOffset > 0u || stripIdxReady || !preparedTexUploads.empty())
+        if (s_vtxOffset > 0u || boneDataSize > 0u || stripIdxReady || !preparedTexUploads.empty())
         {
             SDL_GPUCopyPass* copyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
             if (copyPass)
@@ -1481,6 +1540,20 @@ public:
                     vtxDst.size = s_vtxOffset;
 
                     SDL_UploadToGPUBuffer(copyPass, &vtxSrc, &vtxDst, false);
+                }
+
+                if (boneDataSize > 0u && boneDataReady)
+                {
+                    SDL_GPUTransferBufferLocation boneSrc{};
+                    boneSrc.transfer_buffer = s_boneTransferBuf;
+                    boneSrc.offset = 0;
+
+                    SDL_GPUBufferRegion boneDst{};
+                    boneDst.buffer = s_boneGpuBuf;
+                    boneDst.offset = 0;
+                    boneDst.size = boneDataSize;
+
+                    SDL_UploadToGPUBuffer(copyPass, &boneSrc, &boneDst, false);
                 }
 
                 // Copy accumulated strip index data (all strips for this frame).
@@ -1634,6 +1707,34 @@ public:
                         vtxBind.buffer = s_vtxGpuBuf;
                         vtxBind.offset = cmd.vtxOffset;
                         SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                        SDL_GPUTextureSamplerBinding sampBind{};
+                        sampBind.texture = cmd.texture;
+                        sampBind.sampler = cmd.sampler;
+                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                        SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                        break;
+                    }
+
+                    case RenderCmdType::DrawSkinnedTriangles:
+                    {
+                        if (!boneDataReady || !s_boneGpuBuf || !cmd.texture || !cmd.sampler)
+                        {
+                            break;
+                        }
+                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.skinningVu, sizeof(SkinningVertexUniforms));
+
+                        SDL_GPUBufferBinding vtxBind{};
+                        vtxBind.buffer = s_vtxGpuBuf;
+                        vtxBind.offset = cmd.vtxOffset;
+                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                        SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
+                        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
 
                         SDL_GPUTextureSamplerBinding sampBind{};
                         sampBind.texture = cmd.texture;
@@ -2536,6 +2637,87 @@ public:
         s_dbgVtxBytesThisFrame += byteSize;
     }
 
+    [[nodiscard]] bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t textureId,
+                                              const SkinningParameters& parameters) override
+    {
+        if (vertices.empty() || vertices.size() % 3 != 0 || !s_frameActive || !m_colorWriteEnabled ||
+            m_stencilTestEnabled || parameters.boneMatrices.empty() || parameters.boneMatrices.size() % 12 != 0)
+        {
+            return false;
+        }
+
+        const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
+        auto* texture = static_cast<SDL_GPUTexture*>(LookupTextureForDraw(resolvedTexId));
+        if (!texture)
+        {
+            return false;
+        }
+
+        const int pipelineIdx = GetActivePipelineIndex();
+        SDL_GPUGraphicsPipeline* pipeline =
+            m_depthTestEnabled
+                ? (m_depthMaskEnabled
+                       ? (m_cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
+                       : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
+                : s_pipelinesSkinnedDepthOff[pipelineIdx];
+        if (!pipeline)
+        {
+            return false;
+        }
+
+        const Uint32 paletteRowOffset = RecordBonePalette(parameters);
+        if (paletteRowOffset == ~0u)
+        {
+            return false;
+        }
+
+        const Uint32 byteSize = static_cast<Uint32>(vertices.size() * sizeof(SkinnedVertex3D));
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        if (vtxOffset == ~0u)
+        {
+            return false;
+        }
+
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawSkinnedTriangles;
+        cmd.pipeline = pipeline;
+        cmd.texture = texture;
+        void* sampler = LookupSampler(resolvedTexId);
+        cmd.sampler = sampler ? static_cast<SDL_GPUSampler*>(sampler) : s_defaultSampler;
+        cmd.vtxOffset = vtxOffset;
+        cmd.vtxCount = static_cast<Uint32>(vertices.size());
+        cmd.skinningVu.mvp = m_mvpMatrix;
+        cmd.skinningVu.bodyOriginAndScale[0] = parameters.bodyOrigin[0];
+        cmd.skinningVu.bodyOriginAndScale[1] = parameters.bodyOrigin[1];
+        cmd.skinningVu.bodyOriginAndScale[2] = parameters.bodyOrigin[2];
+        cmd.skinningVu.bodyOriginAndScale[3] = parameters.bodyScale;
+        cmd.skinningVu.skinningScales[0] = parameters.boneScale;
+        cmd.skinningVu.skinningScales[1] = parameters.restPoseScale;
+        cmd.skinningVu.palette[0] = paletteRowOffset;
+        cmd.skinningVu.palette[1] = static_cast<std::uint32_t>(parameters.boneMatrices.size() / 12);
+        cmd.skinningVu.palette[2] = parameters.translate ? 1u : 0u;
+        cmd.skinningVu.palette[3] = parameters.lightEnabled ? 1u : 0u;
+        cmd.skinningVu.lightDirection[0] = parameters.lightDirection[0];
+        cmd.skinningVu.lightDirection[1] = parameters.lightDirection[1];
+        cmd.skinningVu.lightDirection[2] = parameters.lightDirection[2];
+        cmd.skinningVu.fogParameters[0] = m_fogUniform.fogStart;
+        cmd.skinningVu.fogParameters[1] = m_fogUniform.fogEnd;
+        cmd.skinningVu.textureCoordinates[0] = static_cast<std::uint32_t>(parameters.textureCoordinates);
+        cmd.skinningVu.chromeParameters[0] = parameters.chromeWave;
+        cmd.skinningVu.chromeParameters[1] = parameters.chromeWave2;
+        cmd.skinningVu.chromeParameters[2] = parameters.chromeLight[0];
+        cmd.skinningVu.chromeParameters[3] = parameters.chromeLight[1];
+        cmd.skinningVu.textureCoordinateParameters[0] = parameters.textureCoordinateOffset[0];
+        cmd.skinningVu.textureCoordinateParameters[1] = parameters.textureCoordinateOffset[1];
+        cmd.skinningVu.textureCoordinateParameters[2] = parameters.chromeTimeTerm;
+        cmd.fogUniform = m_fogUniform;
+        s_renderCmds.push_back(cmd);
+
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += byteSize;
+        return true;
+    }
+
     // -----------------------------------------------------------------------
     // RenderQuadStrip: Render a quad strip as triangle list.
     // Converts vertex pairs (0,1), (2,3), ... into triangles.
@@ -2939,6 +3121,34 @@ private:
         return alignedOffset;
     }
 
+    [[nodiscard]] static Uint32 RecordBonePalette(const SkinningParameters& parameters)
+    {
+        const auto bones = parameters.boneMatrices;
+        if (bones.empty() || bones.size() % 12 != 0)
+        {
+            return ~0u;
+        }
+        if (bones.data() == s_lastBonePalette && bones.size() == s_lastBonePaletteSize &&
+            parameters.paletteVersion == s_lastBonePaletteVersion)
+        {
+            return s_lastBonePaletteRowOffset;
+        }
+
+        const std::size_t rowOffset = s_boneRowScratch.size() / 4;
+        if (rowOffset > std::numeric_limits<Uint32>::max() ||
+            bones.size() > std::numeric_limits<Uint32>::max() / sizeof(float) - s_boneRowScratch.size())
+        {
+            return ~0u;
+        }
+
+        s_boneRowScratch.insert(s_boneRowScratch.end(), bones.begin(), bones.end());
+        s_lastBonePalette = bones.data();
+        s_lastBonePaletteSize = bones.size();
+        s_lastBonePaletteVersion = parameters.paletteVersion;
+        s_lastBonePaletteRowOffset = static_cast<Uint32>(rowOffset);
+        return s_lastBonePaletteRowOffset;
+    }
+
     // -----------------------------------------------------------------------
     // Static resource creation/destruction helpers.
     // -----------------------------------------------------------------------
@@ -3043,6 +3253,10 @@ private:
         s_vertShaderShadow =
             createShader("shadow_volume", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/false);
 
+        // Rest-pose BMD geometry: one vertex storage buffer for packed bone rows, one uniform buffer.
+        s_vertShaderSkinned =
+            createShader("skinned_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 1, /*fatal=*/false);
+
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
         return true;
     }
@@ -3078,6 +3292,11 @@ private:
             SDL_ReleaseGPUShader(s_device, s_vertShaderShadow);
             s_vertShaderShadow = nullptr;
         }
+        if (s_vertShaderSkinned)
+        {
+            SDL_ReleaseGPUShader(s_device, s_vertShaderSkinned);
+            s_vertShaderSkinned = nullptr;
+        }
     }
 
     // -----------------------------------------------------------------------
@@ -3089,9 +3308,17 @@ private:
     // also serves 3D (re-uses position+uv+color bindings; normal discarded by shader).
     // Fragment shader: s_fragShaderTex (textured path with fog support).
     // -----------------------------------------------------------------------
+    enum class VertexLayout
+    {
+        TwoDimensional,
+        ThreeDimensional,
+        Skinned,
+    };
+
     [[nodiscard]] static SDL_GPUGraphicsPipeline* BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
                                                                      bool depthTestEnabled, bool depthWriteEnabled,
-                                                                     bool bUse3DLayout, bool cullFaceEnabled = false)
+                                                                     VertexLayout vertexLayout,
+                                                                     bool cullFaceEnabled = false)
     {
         // Get swapchain texture format for pipeline target.
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
@@ -3100,14 +3327,14 @@ private:
         colorTargetDesc.format = swapchainFmt;
         colorTargetDesc.blend_state = blendState;
 
-        SDL_GPUVertexAttribute vertexAttribs[4]; // 2D uses 3, 3D uses 4
+        SDL_GPUVertexAttribute vertexAttribs[6];
         Uint32 numAttribs = 0;
         SDL_GPUVertexBufferDescription vtxBufDesc{};
         vtxBufDesc.slot = 0;
         vtxBufDesc.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX;
         vtxBufDesc.instance_step_rate = 0;
 
-        if (!bUse3DLayout)
+        if (vertexLayout == VertexLayout::TwoDimensional)
         {
             // Vertex2D: float2 pos (TEXCOORD0), float2 uv (TEXCOORD1), ubyte4_norm color (TEXCOORD2)
             vertexAttribs[0] = {};
@@ -3131,7 +3358,7 @@ private:
             vtxBufDesc.pitch = sizeof(Vertex2D);
             numAttribs = 3;
         }
-        else
+        else if (vertexLayout == VertexLayout::ThreeDimensional)
         {
             // Vertex3D mapped to the 2D shader's input locations:
             //   location 0 (TEXCOORD0 → pos):   float3 pos  — shader reads float2 (x,y), z dropped
@@ -3159,6 +3386,47 @@ private:
             vtxBufDesc.pitch = sizeof(Vertex3D);
             numAttribs = 3;
         }
+        else
+        {
+            vertexAttribs[0] = {};
+            vertexAttribs[0].location = 0;
+            vertexAttribs[0].buffer_slot = 0;
+            vertexAttribs[0].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+            vertexAttribs[0].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, x));
+
+            vertexAttribs[1] = {};
+            vertexAttribs[1].location = 1;
+            vertexAttribs[1].buffer_slot = 0;
+            vertexAttribs[1].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT3;
+            vertexAttribs[1].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, nx));
+
+            vertexAttribs[2] = {};
+            vertexAttribs[2].location = 2;
+            vertexAttribs[2].buffer_slot = 0;
+            vertexAttribs[2].format = SDL_GPU_VERTEXELEMENTFORMAT_FLOAT2;
+            vertexAttribs[2].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, u));
+
+            vertexAttribs[3] = {};
+            vertexAttribs[3].location = 3;
+            vertexAttribs[3].buffer_slot = 0;
+            vertexAttribs[3].format = SDL_GPU_VERTEXELEMENTFORMAT_UBYTE4_NORM;
+            vertexAttribs[3].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, color));
+
+            vertexAttribs[4] = {};
+            vertexAttribs[4].location = 4;
+            vertexAttribs[4].buffer_slot = 0;
+            vertexAttribs[4].format = SDL_GPU_VERTEXELEMENTFORMAT_INT;
+            vertexAttribs[4].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, positionBoneIndex));
+
+            vertexAttribs[5] = {};
+            vertexAttribs[5].location = 5;
+            vertexAttribs[5].buffer_slot = 0;
+            vertexAttribs[5].format = SDL_GPU_VERTEXELEMENTFORMAT_INT;
+            vertexAttribs[5].offset = static_cast<Uint32>(offsetof(SkinnedVertex3D, normalBoneIndex));
+
+            vtxBufDesc.pitch = sizeof(SkinnedVertex3D);
+            numAttribs = 6;
+        }
 
         SDL_GPUVertexInputState vtxInputState{};
         vtxInputState.vertex_buffer_descriptions = &vtxBufDesc;
@@ -3179,7 +3447,8 @@ private:
         //   ran these passes with GL_LEQUAL effectively by calling SetDepthFunc(GL_LEQUAL)
         //   before them, which the SDL3 backend doesn't propagate. Using LESS_OR_EQUAL on
         //   read-only variants recovers the intended behavior uniformly.
-        const bool strictLayering = bUse3DLayout && depthWriteEnabled;
+        const bool usesWorldDepth = vertexLayout != VertexLayout::TwoDimensional;
+        const bool strictLayering = usesWorldDepth && depthWriteEnabled;
         depthState.compare_op = strictLayering ? SDL_GPU_COMPAREOP_LESS : SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
 
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
@@ -3194,11 +3463,11 @@ private:
         // Disable for transparent/glow passes (depth write OFF) and all 2D.
         SDL_GPURasterizerState rasterState{};
         rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
-        rasterState.cull_mode = (bUse3DLayout && cullFaceEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+        rasterState.cull_mode = (usesWorldDepth && cullFaceEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.vertex_shader = s_vertShader2D;
+        pipelineInfo.vertex_shader = vertexLayout == VertexLayout::Skinned ? s_vertShaderSkinned : s_vertShader2D;
         pipelineInfo.fragment_shader = s_fragShaderTex;
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
@@ -3211,7 +3480,7 @@ private:
         if (!pipeline)
         {
             mu::log::Get("render")->error("SDL_gpu -- pipeline creation failed ({} layout): {}",
-                                          bUse3DLayout ? "3D" : "2D", SDL_GetError());
+                                          vertexLayout == VertexLayout::TwoDimensional ? "2D" : "3D", SDL_GetError());
         }
         return pipeline;
     }
@@ -3278,14 +3547,14 @@ private:
             blendState.enable_blend = table[i].enableBlend;
 
             // 2D depth ON (test+write).
-            s_pipelines2D[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/false);
+            s_pipelines2D[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::TwoDimensional);
             if (!s_pipelines2D[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 2D pipeline[{}] creation failed: {}", i, SDL_GetError());
             }
 
             // 2D depth OFF.
-            s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, false, /*bUse3DLayout=*/false);
+            s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, false, VertexLayout::TwoDimensional);
             if (!s_pipelines2DDepthOff[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 2D depth-off pipeline[{}] creation failed: {}", i,
@@ -3293,14 +3562,13 @@ private:
             }
 
             // 3D depth ON (test+write) — opaque geometry.
-            s_pipelines3D[i] =
-                BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true, /*cullFaceEnabled=*/true);
+            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::ThreeDimensional, true);
             if (!s_pipelines3D[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 3D pipeline[{}] creation failed: {}", i, SDL_GetError());
             }
 
-            s_pipelines3DNoCull[i] = BuildBlendPipeline(blendState, true, true, /*bUse3DLayout=*/true);
+            s_pipelines3DNoCull[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::ThreeDimensional);
             if (!s_pipelines3DNoCull[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 3D no-cull pipeline[{}] creation failed: {}", i,
@@ -3308,7 +3576,7 @@ private:
             }
 
             // 3D depth OFF.
-            s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, false, /*bUse3DLayout=*/true);
+            s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, false, VertexLayout::ThreeDimensional);
             if (!s_pipelines3DDepthOff[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 3D depth-off pipeline[{}] creation failed: {}", i,
@@ -3318,11 +3586,19 @@ private:
             // Story 7.9.7: 3D depth read-only (test ON, write OFF) — for transparent/additive particles.
             // Particles need depth test (to go behind walls) but must NOT write to depth buffer
             // (which would occlude geometry behind them, causing solid rectangle artifacts).
-            s_pipelines3DDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, /*bUse3DLayout=*/true);
+            s_pipelines3DDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, VertexLayout::ThreeDimensional);
             if (!s_pipelines3DDepthReadOnly[i])
             {
                 mu::log::Get("render")->error("SDL_gpu -- 3D depth-readonly pipeline[{}] creation failed: {}", i,
                                               SDL_GetError());
+            }
+
+            if (s_vertShaderSkinned)
+            {
+                s_pipelinesSkinned[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::Skinned, true);
+                s_pipelinesSkinnedNoCull[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::Skinned);
+                s_pipelinesSkinnedDepthOff[i] = BuildBlendPipeline(blendState, false, false, VertexLayout::Skinned);
+                s_pipelinesSkinnedDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, VertexLayout::Skinned);
             }
         }
 
@@ -3362,6 +3638,26 @@ private:
             {
                 SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelines3DDepthReadOnly[i]);
                 s_pipelines3DDepthReadOnly[i] = nullptr;
+            }
+            if (s_pipelinesSkinned[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinned[i]);
+                s_pipelinesSkinned[i] = nullptr;
+            }
+            if (s_pipelinesSkinnedNoCull[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedNoCull[i]);
+                s_pipelinesSkinnedNoCull[i] = nullptr;
+            }
+            if (s_pipelinesSkinnedDepthOff[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthOff[i]);
+                s_pipelinesSkinnedDepthOff[i] = nullptr;
+            }
+            if (s_pipelinesSkinnedDepthReadOnly[i])
+            {
+                SDL_ReleaseGPUGraphicsPipeline(s_device, s_pipelinesSkinnedDepthReadOnly[i]);
+                s_pipelinesSkinnedDepthReadOnly[i] = nullptr;
             }
         }
     }
@@ -3508,6 +3804,57 @@ private:
         return true;
     }
 
+    [[nodiscard]] static bool EnsureBoneBufferCapacity(Uint32 requiredSize)
+    {
+        if (s_boneCapacity >= requiredSize)
+        {
+            return true;
+        }
+
+        Uint32 newCapacity = s_boneCapacity > 0u ? s_boneCapacity : k_InitialBoneBufferSize;
+        while (newCapacity < requiredSize)
+        {
+            if (newCapacity > std::numeric_limits<Uint32>::max() / 2u)
+            {
+                newCapacity = requiredSize;
+                break;
+            }
+            newCapacity *= 2u;
+        }
+
+        SDL_GPUTransferBufferCreateInfo transferInfo{};
+        transferInfo.usage = SDL_GPU_TRANSFERBUFFERUSAGE_UPLOAD;
+        transferInfo.size = newCapacity;
+        SDL_GPUTransferBuffer* transferBuffer = SDL_CreateGPUTransferBuffer(s_device, &transferInfo);
+        if (!transferBuffer)
+        {
+            return false;
+        }
+
+        SDL_GPUBufferCreateInfo bufferInfo{};
+        bufferInfo.usage = SDL_GPU_BUFFERUSAGE_GRAPHICS_STORAGE_READ;
+        bufferInfo.size = newCapacity;
+        SDL_GPUBuffer* gpuBuffer = SDL_CreateGPUBuffer(s_device, &bufferInfo);
+        if (!gpuBuffer)
+        {
+            SDL_ReleaseGPUTransferBuffer(s_device, transferBuffer);
+            return false;
+        }
+
+        if (s_boneGpuBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_boneGpuBuf);
+        }
+        if (s_boneTransferBuf)
+        {
+            SDL_ReleaseGPUTransferBuffer(s_device, s_boneTransferBuf);
+        }
+        s_boneGpuBuf = gpuBuffer;
+        s_boneTransferBuf = transferBuffer;
+        s_boneCapacity = newCapacity;
+        return true;
+    }
+
     static void DestroyVertexBuffers()
     {
         if (s_vtxGpuBuf)
@@ -3533,6 +3880,22 @@ private:
             s_stripIdxTransfer = nullptr;
         }
         s_stripIdxCapacity = 0u;
+    }
+
+    static void DestroyBoneBuffers()
+    {
+        if (s_boneGpuBuf)
+        {
+            SDL_ReleaseGPUBuffer(s_device, s_boneGpuBuf);
+            s_boneGpuBuf = nullptr;
+        }
+        if (s_boneTransferBuf)
+        {
+            SDL_ReleaseGPUTransferBuffer(s_device, s_boneTransferBuf);
+            s_boneTransferBuf = nullptr;
+        }
+        s_boneCapacity = 0u;
+        s_boneRowScratch.clear();
     }
 
     [[nodiscard]] static bool CreateQuadIndexBuffer()

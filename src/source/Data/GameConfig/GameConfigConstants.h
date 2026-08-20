@@ -9,6 +9,7 @@ namespace CfgSections
     inline constexpr wchar_t CfgSectionLogin[]      = L"LOGIN";
     inline constexpr wchar_t CfgSectionConnectionSettings[] = L"CONNECTION SETTINGS";
     inline constexpr wchar_t CfgSectionCamera[] = L"Camera";
+    inline constexpr wchar_t CfgSectionRender[] = L"Render";
 }
 
 namespace CfgKeys
@@ -39,6 +40,10 @@ namespace CfgKeys
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
+
+    // Render
+    // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
+    inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
 }
 
 namespace CfgDefaults
@@ -68,4 +73,9 @@ namespace CfgDefaults
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
     // the user picks a font. Any value is passed through as the GDI face name.
     inline constexpr wchar_t CfgDefaultFont[] = L"";
+
+    // DXP-08 Stage G: flipped to default-on after DXP-08a/DXP-09 prerequisites were fixed and
+    // soak-confirmed clean under CoreProfile=1 (2026-08-01). Set CoreProfile=0 in config.ini to
+    // opt back into the compatibility-profile rollback path.
+    inline constexpr bool CfgDefaultCoreProfile = true;
 }

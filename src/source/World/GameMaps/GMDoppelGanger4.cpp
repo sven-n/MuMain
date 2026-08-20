@@ -11,6 +11,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "World/MapInfra/MapManager.h"
 
 

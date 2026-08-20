@@ -6,6 +6,7 @@
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"	// self
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/Legacy/UIControls.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 using namespace SEASON3B;
 

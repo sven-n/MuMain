@@ -1,4 +1,4 @@
-﻿// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
+// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -305,6 +305,16 @@ void CNewUIInGameShop::SetRateScale(int _ItemType)
         m_fRate_Scale = _fRate_Value;
     }
 }
+
+// DXP-07d increment 3's shadow-compare diagnostic validated RenderDisplayItems()'s proj/view closed
+// form and post-pop restore across multiple soaks; DXP-08a deleted the diagnostic and the FFP
+// matrix-stack calls it was validating (see RenderDisplayItems()'s own comments below). Its per-item
+// loop only calls RenderItem3D(), which carries no GL model transform. The restore mirror runs
+// BEFORE BeginBitmap() is called again (unlike CNewUI3DCamera::Render(), where it runs after) — a
+// genuine save/restore of whatever context was active at entry, not a BeginBitmap()-delegated
+// restore, hence its own pre-panel snapshot below.
+static float s_PreShopProj[16];
+static float s_PreShopView[16];
 
 void CNewUIInGameShop::RenderDisplayItems()
 {

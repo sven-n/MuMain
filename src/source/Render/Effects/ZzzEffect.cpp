@@ -21,6 +21,7 @@
 #include "Character/CharacterManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "Scenes/MainScene.h"
 
 PARTICLE  Particles[MAX_PARTICLES];
 #ifdef DEVIAS_XMAS_EVENT
@@ -8705,6 +8706,10 @@ void RenderEffects(bool bRenderBlendMesh)
         }
         else
         {
+            if (IsSkillEffectModelsDisabledDebug()) // DXP-23 diagnostic
+            {
+                continue;
+            }
             o = g_SkillEffects.GetEffect(i - MAX_EFFECTS);
         }
 

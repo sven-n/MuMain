@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "UI/Legacy/UIWindows.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Effects/ZzzEffect.h"

@@ -13,6 +13,7 @@
 #include <mach-o/dyld.h>
 #endif
 #include <clocale>
+#include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
 #include "UI/Legacy/UIManager.h"
@@ -125,6 +126,7 @@ int g_iScreenSaverOldValue = 60 * 15;
 
 BOOL g_bUseWindowMode = TRUE;
 BOOL g_bUseFullscreenMode = FALSE;
+bool g_bDisableAnimationTaskPool = true;
 
 #include "Audio/AudioPlayer.h"
 
@@ -1730,6 +1732,23 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     // Load game settings from INI file first
     GameConfig::GetInstance().Load();
+
+    // Check if animation task pool should be enabled (disabled by default)
+    {
+        wchar_t configPath[MAX_PATH];
+        GetModuleFileNameW(nullptr, configPath, MAX_PATH);
+        wchar_t* lastSlash = wcsrchr(configPath, L'\\');
+        if (!lastSlash)
+            lastSlash = wcsrchr(configPath, L'/');
+        if (lastSlash)
+            *(lastSlash + 1) = L'\0';
+        wcscat(configPath, L"config.ini");
+        int enableTaskPool = GetPrivateProfileIntW(L"UI", L"EnableAnimationTaskPool", 0, configPath);
+        if (enableTaskPool != 0 || wcsstr(GetCommandLineW(), L"--enable-taskpool"))
+        {
+            g_bDisableAnimationTaskPool = false;
+        }
+    }
 
     // Check for command line server override
     WORD wPortNumber;

@@ -17,6 +17,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Scenes/MainScene.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f };
 vec3_t g_vParticleWindVelo = { 0.0f, 0.0f, 0.0f };
@@ -8896,6 +8897,10 @@ void MoveParticles()
 void RenderParticles(BYTE byRenderOneMore)
 {
     if (!g_pOption->GetRenderAllEffects())
+    {
+        return;
+    }
+    if (IsParticlesDisabledDebug()) // DXP-23 diagnostic
     {
         return;
     }

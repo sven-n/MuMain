@@ -10,6 +10,12 @@ mu_add_test(
         SDL3::SDL3
 )
 
+mu_add_test(
+    NAME gpu_skinning_contract_tests
+    SOURCES
+        test_gpu_skinning_contract.cpp
+)
+
 add_test(
     NAME sdl_gpu_cull_face_pipeline
     COMMAND ${CMAKE_COMMAND}
@@ -29,6 +35,16 @@ add_test(
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_vertex_overflow_guard.cmake
+)
+
+add_test(
+    NAME sdl_gpu_bone_skinning_path
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDERER_HEADER=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRenderer.h
+        -DRENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
+        -DBMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp
+        -DSHADER_SOURCE=${CMAKE_SOURCE_DIR}/src/shaders/skinned_textured.vert.hlsl
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_gpu_skinning_path.cmake
 )
 
 add_test(

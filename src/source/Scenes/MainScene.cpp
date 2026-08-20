@@ -283,9 +283,15 @@ static void UpdateGameEntities()
     MoveMounts();
     ThePetProcess().UpdatePets();
     MovePoints();
-    MoveEffects();
+    {
+        FRAME_PROFILE(MoveEffects);
+        MoveEffects();
+    }
     MoveJoints();
-    MoveParticles();
+    {
+        FRAME_PROFILE(MoveParticles);
+        MoveParticles();
+    }
     MovePointers();
 
     g_Direction.CheckDirection();
@@ -386,6 +392,83 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
+// DXP-23 diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
+static bool g_bDisableEffectsDebug = false;
+
+void SetDisableEffects(bool disabled)
+{
+    g_bDisableEffectsDebug = disabled;
+}
+
+// DXP-23 diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
+static bool g_bDisableSpritesDebug = false;
+static bool g_bDisableParticlesDebug = false;
+static bool g_bDisableSkillEffectModelsDebug = false;
+static bool g_bDisableBoidsDebug = false;
+
+void SetDisableSprites(bool disabled)
+{
+    g_bDisableSpritesDebug = disabled;
+}
+void SetDisableParticles(bool disabled)
+{
+    g_bDisableParticlesDebug = disabled;
+}
+void SetDisableSkillEffectModels(bool disabled)
+{
+    g_bDisableSkillEffectModelsDebug = disabled;
+}
+void SetDisableBoids(bool disabled)
+{
+    g_bDisableBoidsDebug = disabled;
+}
+bool IsSpritesDisabledDebug()
+{
+    return g_bDisableSpritesDebug;
+}
+bool IsParticlesDisabledDebug()
+{
+    return g_bDisableParticlesDebug;
+}
+bool IsSkillEffectModelsDisabledDebug()
+{
+    return g_bDisableSkillEffectModelsDebug;
+}
+bool IsBoidsDisabledDebug()
+{
+    return g_bDisableBoidsDebug;
+}
+
+static bool g_bDisableWingShadowDebug = false;
+void SetDisableWingShadow(bool disabled)
+{
+    g_bDisableWingShadowDebug = disabled;
+}
+bool IsWingShadowDisabledDebug()
+{
+    return g_bDisableWingShadowDebug;
+}
+
+static bool g_bDisableJointsDebug = false;
+void SetDisableJoints(bool disabled)
+{
+    g_bDisableJointsDebug = disabled;
+}
+bool IsJointsDisabledDebug()
+{
+    return g_bDisableJointsDebug;
+}
+
+static bool g_bDisableWingExtraLayersDebug = false;
+void SetDisableWingExtraLayers(bool disabled)
+{
+    g_bDisableWingExtraLayersDebug = disabled;
+}
+bool IsWingExtraLayersDisabledDebug()
+{
+    return g_bDisableWingExtraLayersDebug;
+}
+
 /**
  * @brief Renders all 3D game entities (terrain, objects, characters, effects).
  *
@@ -399,13 +482,13 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     // DevEditor render toggle checks
     bool renderTerrain = DevEditor_ShouldRenderTerrain();
     bool renderStatic = DevEditor_ShouldRenderStaticObjects();
-    bool renderEffects = DevEditor_ShouldRenderEffects();
+    bool renderEffects = DevEditor_ShouldRenderEffects() && !g_bDisableEffectsDebug;
     bool renderDroppedItems = DevEditor_ShouldRenderDroppedItems();
     bool renderWeatherEffects = DevEditor_ShouldRenderWeatherEffects();
 #else
     bool renderTerrain = true;
     bool renderStatic = true;
-    bool renderEffects = true;
+    bool renderEffects = !g_bDisableEffectsDebug;
     bool renderDroppedItems = true;
     bool renderWeatherEffects = true;
 #endif
@@ -634,8 +717,10 @@ bool RenderMainScene()
     }
 #endif
 
-    RenderMainSceneUI();
-
+    {
+        FRAME_PROFILE(UI);
+        RenderMainSceneUI();
+    }
 
     EndOpengl();
 

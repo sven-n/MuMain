@@ -82,6 +82,51 @@ struct Vertex3D
     std::uint32_t color; // packed ABGR
 };
 
+// Rest-pose model vertex for GPU bone skinning.
+struct SkinnedVertex3D
+{
+    float x, y, z;
+    float nx, ny, nz;
+    float u, v;
+    std::uint32_t color;
+    std::int32_t positionBoneIndex;
+    std::int32_t normalBoneIndex;
+};
+
+enum class SkinningTextureCoordinates : std::uint32_t
+{
+    Mesh,
+    Chrome,
+    Chrome2,
+    Chrome3,
+    Chrome4,
+    Chrome5,
+    Chrome6,
+    Chrome7,
+    Oil,
+    Metal,
+};
+
+// Bone matrices are contiguous row-major 3x4 affine transforms: 12 floats per bone.
+struct SkinningParameters
+{
+    std::span<const float> boneMatrices;
+    std::uint32_t paletteVersion = 0;
+    float bodyOrigin[3]{};
+    float bodyScale = 1.0f;
+    float boneScale = 1.0f;
+    float restPoseScale = 0.0f;
+    float lightDirection[3]{};
+    float textureCoordinateOffset[2]{};
+    float chromeWave = 0.0f;
+    float chromeWave2 = 0.0f;
+    float chromeLight[2]{};
+    float chromeTimeTerm = 0.0f;
+    SkinningTextureCoordinates textureCoordinates = SkinningTextureCoordinates::Mesh;
+    bool translate = false;
+    bool lightEnabled = false;
+};
+
 // ---------------------------------------------------------------------------
 // IMuRenderer: Pure abstract rendering interface.
 // Game code obtains the active backend via GetRenderer() (see below).
@@ -96,6 +141,17 @@ public:
 
     // Render world-space triangles (vertex count must be divisible by 3).
     virtual void RenderTriangles(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
+
+    // Render rest-pose triangles using a GPU bone palette. Returns false when the backend
+    // cannot accept the draw so the caller can use its CPU-skinned fallback.
+    [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices,
+                                                      std::uint32_t textureId, const SkinningParameters& parameters)
+    {
+        (void)vertices;
+        (void)textureId;
+        (void)parameters;
+        return false;
+    }
 
     // Render a quad strip from world-space vertices (requires >= 4 vertices, even count ideal).
     virtual void RenderQuadStrip(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;

@@ -288,11 +288,13 @@ bool Calc_RenderObject(OBJECT* o, bool Translate, int Select, int ExtraMon)
 
     if (o->EnableBoneMatrix)
     {
-        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
+        b->Animation(o->BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                     o->HeadAngle, false, !Translate);
     }
     else
     {
-        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle, false, !Translate);
+        b->Animation(BoneTransform, o->AnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle,
+                     false, !Translate);
     }
 
     BoneScale = 1.f;
@@ -6942,10 +6944,12 @@ void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderTy
         b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         float Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.3f;
         Vector(0.1f + Luminosity, 0.1f + Luminosity, 0.1f + Luminosity, b->BodyLight);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
         Luminosity = absf(sinf(WorldTime * 0.001f)) * 0.8f;
         Vector(0.0f + Luminosity, 0.0f + Luminosity, 0.0f + Luminosity, b->BodyLight);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_3RDWING_LAYER);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_3RDWING_LAYER);
     }
     else if (Type == MODEL_CAPE_OF_EMPEROR)
     {
@@ -10231,13 +10235,13 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
         }
         else if (g_pOption->GetRenderLevel())
         {
-            if (Level < 8 && g_pOption->GetRenderLevel() >= 1)  //  +7
+            if (Level < 8 && g_pOption->GetRenderLevel() >= 1) //  +7
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
                 RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT, 1.f);
             }
-            else if (Level < 9 && g_pOption->GetRenderLevel() >= 1)  //  +8
+            else if (Level < 9 && g_pOption->GetRenderLevel() >= 1) //  +8
             {
                 Vector(Light[0] * 0.8f, Light[1] * 0.8f, Light[2] * 0.8f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
@@ -10247,55 +10251,74 @@ void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha, int 
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
             }
             else if (Level < 11 && g_pOption->GetRenderLevel() >= 2) //  +10
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
             }
             else if (Level < 12 && g_pOption->GetRenderLevel() >= 3) //  +11
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                                           RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 13 && g_pOption->GetRenderLevel() >= 3) //  +12
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                                           RENDER_CHROME2 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 14 && g_pOption->GetRenderLevel() >= 4) //  +13
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                                           RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 15 && g_pOption->GetRenderLevel() >= 4) //  +14
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                                           RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else if (Level < 16 && g_pOption->GetRenderLevel() >= 4) //  +15
             {
                 Vector(Light[0] * 0.9f, Light[1] * 0.9f, Light[2] * 0.9f, b->BodyLight);
                 RenderPartObjectBody(b, o, Type, Alpha, RenderType);
-                RenderPartObjectBodyColor2(b, o, Type, 1.f, RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
-                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor2(b, o, Type, 1.f,
+                                           RENDER_CHROME4 | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha, RENDER_METAL | RENDER_BRIGHT | (RenderType & RENDER_EXTRA),
+                                          1.f);
+                RenderPartObjectBodyColor(b, o, Type, Alpha,
+                                          RENDER_CHROME | RENDER_BRIGHT | (RenderType & RENDER_EXTRA), 1.f);
             }
             else
             {

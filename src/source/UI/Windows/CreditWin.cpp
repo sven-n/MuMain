@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "UI/Windows/CreditWin.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "Engine/Object/ZzzInfomation.h"

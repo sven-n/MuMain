@@ -996,6 +996,8 @@ BOOL CPhysicsClothMesh::Create(OBJECT* o, int iMesh, int iBone, DWORD dwType, in
 
     float(*BoneMatrix)[3][4] = m_oOwner->BoneTransform;
 
+    b->EnsureCpuVertices(m_iMesh); // DXP-20 inc4: creation-time full-mesh read, not a per-frame consumer
+
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {
         Vertex_t* v = &pMesh->Vertices[iVertex];
@@ -1139,6 +1141,12 @@ void CPhysicsClothMesh::SetFixedVertices(float Matrix[3][4])
 
     BMD* b = &Models[m_iBMDType];
     Mesh_t* pMesh = &b->Meshs[m_iMesh];
+
+    // DXP-20 inc4: the only per-frame skinned-data read on the cloth path -- touches just the
+    // pinned vertices, but Ensure materializes the whole mesh (cape BMDs are small standalone
+    // models; a per-vertex SkinVertex() refinement isn't worth the complexity here).
+    b->EnsureCpuVertices(m_iMesh);
+
     for (int iVertex = 0; iVertex < m_iNumVertices; ++iVertex)
     {
         Vertex_t* v = &pMesh->Vertices[iVertex];
@@ -1195,6 +1203,12 @@ void CPhysicsClothMesh::Render(vec3_t* pvColor, int iLevel)
         m_pVertices[iVertex].GetPosition(&vPos);
         VectorCopy(vPos, VertexTransform[m_iMesh][iVertex]);
     }
+
+    // DXP-20 inc4: the cape draw reads pure sim output, never skinned data -- mark the mesh ready
+    // so a later EnsureCpuVertices() (e.g. from the draw path) doesn't re-skin and clobber this
+    // write-back. SetFixedVertices() already runs materialize->sim->write-back in that order each
+    // frame, so this is normally a no-op; it makes the invariant explicit instead of incidental.
+    Models[m_iBMDType].MarkCpuVerticesExternallyWritten(m_iMesh);
 }
 
 float CPhysicsManager::s_fWind = 0.0f;

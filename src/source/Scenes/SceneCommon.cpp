@@ -201,6 +201,12 @@ void SetEffectVolumeLevel(int level)
 // Rendering Functions
 ///////////////////////////////////////////////////////////////////////////////
 
+// DXP-07d increment 1's shadow-compare diagnostic validated RenderInfomation3D()'s proj/view closed
+// form and post-pop GlobalUBO restore across multiple soaks; DXP-08a deleted the diagnostic and the
+// FFP matrix-stack calls it was validating (see RenderInfomation3D()'s own comments below).
+static float s_PreInfo3DProj[16];
+static float s_PreInfo3DView[16];
+
 void RenderInfomation3D()
 {
     bool Success = false;

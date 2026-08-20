@@ -40,7 +40,6 @@ GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
 bool _isVSyncAvailable = false;
 bool _isVSyncEnabled = false;
 
-
 unsigned int WindowWidth = 1024;
 unsigned int WindowHeight = 768;
 int          MouseX = WindowWidth / 2;
@@ -175,6 +174,72 @@ void BindTextureStream(int tex)
 void EndTextureStream()
 {
     TextureStream = false;
+}
+
+void SetAlphaFuncRef(float ref)
+{
+    glAlphaFunc(GL_GREATER, ref);
+}
+
+void EnableTexture2D()
+{
+    glEnable(GL_TEXTURE_2D);
+}
+void DisableTexture2D()
+{
+    glDisable(GL_TEXTURE_2D);
+}
+void EnableAlphaTestRaw()
+{
+    glEnable(GL_ALPHA_TEST);
+}
+void DisableAlphaTestRaw()
+{
+    glDisable(GL_ALPHA_TEST);
+}
+void EnableFog()
+{
+    glEnable(GL_FOG);
+}
+void DisableFog()
+{
+    glDisable(GL_FOG);
+}
+void EnableBlend()
+{
+    glEnable(GL_BLEND);
+}
+void DisableBlend()
+{
+    glDisable(GL_BLEND);
+}
+void SetBlendFuncAlpha()
+{
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+void SetDepthFuncLEqual()
+{
+    glDepthFunc(GL_LEQUAL);
+}
+void ClearColorBuffer()
+{
+    glClear(GL_COLOR_BUFFER_BIT);
+}
+void ClearDepthBuffer()
+{
+    glClear(GL_DEPTH_BUFFER_BIT);
+}
+void ClearColorAndDepthBuffers()
+{
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+void SetClearColor(float r, float g, float b, float a)
+{
+    glClearColor(r, g, b, a);
+}
+void FlushGL()
+{
+    glFlush();
 }
 
 void EnableDepthTest()
@@ -1137,8 +1202,8 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
     y = ConvertY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
-    //x -= Width *0.5f;
-    //y -= Height*0.5f;
+    // x -= Width *0.5f;
+    // y -= Height*0.5f;
     BindTexture(Texture);
 
     vec3_t p[4], p2[4];

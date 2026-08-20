@@ -16,7 +16,7 @@
 
 CGlobalBitmap Bitmaps;
 
-bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality)
+bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality, bool bottomUp)
 {
     const auto fileCloser = [](FILE* fp)
     {

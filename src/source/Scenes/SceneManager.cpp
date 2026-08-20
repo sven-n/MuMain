@@ -509,12 +509,10 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     };
     RenderRect(gx, glBottom, gw, gh, mu::PackABGR(0.f, 0.f, 0.f, 0.5f));
 
-    // Target line at 16.67ms (60fps)
     float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
     float lineY = glBottom + target60 * gh;
     RenderRect(gx, lineY, gw, 1.f, mu::PackABGR(0.3f, 0.8f, 0.3f, 0.5f));
 
-    // Frame bars
     float barW = gw / FRAME_HISTORY_SIZE;
     int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
 
@@ -624,12 +622,12 @@ static void RenderDebugInfo()
     // Per-pass frame timing (ms) — accumulated by FRAME_PROFILE scopes around the
     // major render passes in MainScene. Reset just below so next frame starts fresh.
     using FP = FrameProfiler::Pass;
-    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f",
-             FrameProfiler::AccumulatorMs(FP::Terrain),
-             FrameProfiler::AccumulatorMs(FP::Objects),
-             FrameProfiler::AccumulatorMs(FP::Characters),
-             FrameProfiler::AccumulatorMs(FP::Items),
-             FrameProfiler::AccumulatorMs(FP::Effects));
+    mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f  Oth:%5.2f",
+                FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
+                FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
+                FrameProfiler::AccumulatorMs(FP::Effects),
+                FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost
+                                                          // only now (Present split out below, DXP-23)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     FrameProfiler::ResetFrame();

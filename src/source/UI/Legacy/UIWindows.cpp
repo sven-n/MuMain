@@ -1,4 +1,4 @@
-﻿///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -20,6 +20,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
 
 
@@ -1738,6 +1739,60 @@ void CUIChatWindow::Lock(BOOL bFlag)
 extern int gix, giy;
 extern void MoveCharacter(CHARACTER* c, OBJECT* o);
 extern void MoveCharacterVisual(CHARACTER* c, OBJECT* o);
+
+// DXP-07d increment 6's shadow-compare diagnostic validated RenderPhotoCharacter()'s full camera
+// transform (proj + the glRotatef/glRotatef/glTranslatef/glTranslatef sequence that builds this
+// panel's hand-rolled "photo camera") against a CPU closed form across multiple soaks — the matrix
+// formulas (MakeRotationX/Z, MakeTranslation, Mat4Multiply) are copied verbatim from DXP-07b's
+// already-validated versions, not re-derived, since a sign/order error here reproduces exactly the
+// "mirrored/upside-down character" failure mode this panel is flagged for. DXP-08a deleted the
+// diagnostic and the real glMatrixMode/glPushMatrix/glLoadIdentity/glRotatef/glTranslatef/glPopMatrix
+// calls it was validating (see RenderPhotoCharacter()'s own comments below) — this is the one panel
+// of the "6 UI item-preview panels" population with a real (non-identity) camera, and the one
+// without a BeginBitmap()-delegated or EndBitmap()-preceded restore, hence its own pre-panel
+// snapshot below instead of a fresh GL read.
+static float s_PrePhotoProj[16];
+static float s_PrePhotoView[16];
+
+// Column-major float[16], matching glGetFloatv layout. out = a * b (GL right-multiply composition,
+// applying b first, then a) — same formulas as ZzzOpenglUtil.cpp's DXP-07b helpers, copied verbatim.
+static void PhotoMat4Multiply(float* out, const float* a, const float* b)
+{
+    float result[16];
+    for (int col = 0; col < 4; ++col)
+    {
+        for (int row = 0; row < 4; ++row)
+        {
+            double sum = 0.0;
+            for (int k = 0; k < 4; ++k)
+                sum += (double)a[k * 4 + row] * (double)b[col * 4 + k];
+            result[col * 4 + row] = (float)sum;
+        }
+    }
+    memcpy(out, result, sizeof(result));
+}
+
+static void PhotoMakeRotationX(float degrees, float* out)
+{
+    float rad = degrees * Q_PI / 180.0f;
+    float c = cosf(rad), s = sinf(rad);
+    float m[16] = {1.f, 0.f, 0.f, 0.f, 0.f, c, s, 0.f, 0.f, -s, c, 0.f, 0.f, 0.f, 0.f, 1.f};
+    memcpy(out, m, sizeof(m));
+}
+
+static void PhotoMakeRotationZ(float degrees, float* out)
+{
+    float rad = degrees * Q_PI / 180.0f;
+    float c = cosf(rad), s = sinf(rad);
+    float m[16] = {c, s, 0.f, 0.f, -s, c, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
+    memcpy(out, m, sizeof(m));
+}
+
+static void PhotoMakeTranslation(float x, float y, float z, float* out)
+{
+    float m[16] = {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, x, y, z, 1.f};
+    memcpy(out, m, sizeof(m));
+}
 
 void CUIPhotoViewer::RenderPhotoCharacter()
 {

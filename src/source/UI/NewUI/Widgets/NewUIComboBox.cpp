@@ -8,6 +8,8 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 
+#include "Render/Textures/ZzzOpenglUtil.h"
+
 // From ZzzOpenglUtil.cpp -- viewport scaling helpers.
 float ConvertX(float x);
 float ConvertY(float y);

@@ -2029,11 +2029,19 @@ bool SEASON3B::CNewUISkillList::Render()
         }
     }
 
+    // Do NOT reset m_bRenderSkillInfo here. UpdateMouseEvent() runs once per fixed 50Hz tick and is
+    // the sole authority on hover state (it re-derives true/false fresh every tick), but Render()
+    // runs at full render rate (~120fps+, decoupled from the tick since the fixed-timestep refactor
+    // -- see SceneManager.cpp's UpdateSceneState()). Clearing the flag here was a one-shot
+    // consume-and-reset that only rendered the tooltip on the first render frame after each tick,
+    // then skipped it for the remaining ~1-2 render frames until the next tick fired -- a rapid
+    // strobe, reported as the tooltip "rapidly blinking" while hovering. Safe to just read it every
+    // frame instead: CNewUI3DCamera::Render() already drains m_deque2DEffects fully every single
+    // call (NewUI3DRenderMng.cpp), so re-queuing every render frame while still hovering does not
+    // accumulate or leak.
     if (m_bRenderSkillInfo == true && m_pNewUI3DRenderMng)
     {
         m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
-
-        m_bRenderSkillInfo = false;
     }
 
     return true;

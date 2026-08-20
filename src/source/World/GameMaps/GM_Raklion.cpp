@@ -1055,6 +1055,10 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
     if (o->Type >= 6 && o->Type <= 12)
     {
+        // DXP-20 inc4: flat IntensityTransform override -- must materialize before overwriting, or
+        // a later lazy EnsureCpuNormals() (e.g. from RenderMesh()'s CPU fallback) would clobber this
+        // flat value with freshly computed per-vertex lighting.
+        b->EnsureCpuNormals(-1);
         for (int i = 0; i < b->NumMeshs; i++)
         {
             Mesh_t* m = &b->Meshs[i];

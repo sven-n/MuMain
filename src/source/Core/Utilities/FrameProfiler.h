@@ -14,26 +14,34 @@
 namespace FrameProfiler
 {
     // Stable, indexed pass list. Add a slot to extend; keep Count_ last.
-    enum class Pass : int
-    {
-        Terrain,
-        Objects,
-        Characters,
-        Items,
-        Effects,
-        Other,
-        Count_
-    };
+enum class Pass : int
+{
+    Terrain,
+    Objects,
+    Characters,
+    Items,
+    Effects,
+    Other,
+    CharWait,      // subset of Characters — time spent blocked in WaitCharactersAnimation()
+    MoveEffects,   // MoveEffects() in UpdateGameEntities() — Move/update phase, not render
+    MoveParticles, // MoveParticles() in UpdateGameEntities() — Move/update phase, not render
+    Skinning,      // BMD::Transform() self-time (DXP-20 baseline) — subset of Objects/Characters/Items
+    UI,            // DXP-23: RenderMainSceneUI() self-time — was previously unmeasured (fell outside every
+        // FRAME_PROFILE scope), interface panels/party window/NewUI system/cursor
+    Present, // DXP-23: PlatformSwapBuffers() self-time, split out of Other so a large reading
+             // unambiguously means "CPU stalling on the GPU command queue", not HUD render cost
+    Count_
+};
 
-    inline constexpr const char* kPassNames[(int)Pass::Count_] = {
-        "Terrain", "Objects", "Chars", "Items", "Effects", "Other"
-    };
+inline constexpr const char* kPassNames[(int)Pass::Count_] = {"Terrain",  "Objects",  "Chars",    "Items",
+                                                              "Effects",  "Other",    "CharWait", "MoveFx",
+                                                              "MovePart", "Skinning", "UI",       "Present"};
 
-    inline float& AccumulatorMs(Pass p)
-    {
-        static float s_ms[(int)Pass::Count_] = {};
-        return s_ms[(int)p];
-    }
+inline float& AccumulatorMs(Pass p)
+{
+    static float s_ms[(int)Pass::Count_] = {};
+    return s_ms[(int)p];
+}
 
     inline void ResetFrame()
     {

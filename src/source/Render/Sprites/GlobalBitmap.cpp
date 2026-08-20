@@ -601,7 +601,7 @@ void CGlobalBitmap::UnloadImage(GLuint uiBitmapIndex, bool bForce)
                 }
             }
 
-            const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->Width * pBitmap->Height * pBitmap->Components);
+            const auto memoryUsed = static_cast<std::uint32_t>(pBitmap->BufferStorage.size());
             m_dwUsedTextureMemory -= memoryUsed;
 
             m_mapBitmap.erase(mi);
