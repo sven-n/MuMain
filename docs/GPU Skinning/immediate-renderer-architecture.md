@@ -24,8 +24,8 @@ wrappers build vertices and call these methods. New code should call
 
 ## Primitive conversion
 
-SDL GPU draws triangles and lines. Compatibility code expands unsupported legacy
-topologies before replay:
+SDL GPU draws triangles and lines. Compatibility code expands unsupported
+legacy topologies before replay:
 
 - quad: `[v0, v1, v2]`, `[v0, v2, v3]`;
 - quad strip segment: `[v0, v1, v2]`, `[v1, v3, v2]`;
@@ -51,14 +51,20 @@ queued texture updates, then replays commands in order.
 
 ## Data paths
 
-- `Vertex2D` contains screen position, UV, and packed ABGR color.
-- `Vertex3D` contains position, normal, UV, and packed ABGR color.
-- `SkinnedVertex3D` adds separate position and normal bone indices.
+- `Vertex2D` contains screen position, UV, and packed ABGR color: 20 bytes.
+- `Vertex3D` contains position, normal, UV, and packed ABGR color: 36 bytes.
+- `SkinnedVertex3D` adds separate position and normal bone indices: 44 bytes.
 - Quad indices and strip indices use dedicated per-frame storage.
 - Bone palettes use a separate growable storage buffer.
 
 This replaces upstream GL ring-buffer orphaning with explicit SDL GPU transfer
 and device buffers.
+
+The upstream audit corrected its dynamic type from `VertexStream` to
+`IRVertex`, with a 36-byte float-color layout, and placed program bind caching
+in `IR::Begin()` rather than `IR::End()`. Downstream has no `IRVertex` or
+program-ID cache to correct: draw methods select an SDL GPU pipeline, store it
+in `RenderCmd`, and replay binds that pipeline through SDL GPU.
 
 ## State ownership
 

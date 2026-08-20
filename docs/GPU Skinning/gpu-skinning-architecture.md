@@ -2,10 +2,10 @@
 
 The active implementation spans:
 
-- `Render/Models/ZzzBMD.cpp` and `ZzzBMD.h`
-- `Render/Renderer/MuRenderer.h`
-- `Render/Renderer/MuRendererSDLGpu.cpp`
-- `src/shaders/skinned_textured.vert.hlsl`
+- `Render/Models/ZzzBMD.cpp` and `ZzzBMD.h`;
+- `Render/Renderer/MuRenderer.h`;
+- `Render/Renderer/MuRendererSDLGpu.cpp`;
+- `src/shaders/skinned_textured.vert.hlsl`.
 
 It ports upstream GPU-skinning behavior into SDL GPU without restoring the
 upstream `BoneUBO`, RHI, or OpenGL shader classes.
@@ -47,13 +47,22 @@ uses the established CPU-skinned path.
 
 The renderer appends these rows to per-frame bone scratch storage. The command
 stores the starting row and bone count. `EndFrame()` uploads the combined data
-to one SDL GPU storage buffer and binds it for skinned draws.
+to one SDL GPU storage buffer and binds it at vertex storage slot 0.
+
+Upstream's corrected `BoneUBO` slot-2 documentation does not transfer directly:
+the downstream HLSL declares `StructuredBuffer<float4> boneRows` at
+`register(t0, space0)`, matching the SDL GPU vertex-storage slot-0 binding.
+There is no downstream slot-1/slot-2 inconsistency.
 
 ## Palette deduplication
 
+`SetActiveBoneTransform()` unconditionally stores the pointer and increments
+`g_BoneTransformVersion` on every call. This preserves the upstream audit
+correction: pointer equality alone is not treated as unchanged content.
+
 Consecutive meshes often share one animated skeleton. `RecordBonePalette()`
-reuses the previous offset only when both the matrix pointer and
-`paletteVersion` match.
+reuses the previous offset only when the matrix pointer, palette size, and
+`paletteVersion` all match.
 
 The version is required because stack-local palettes can reuse an address after
 their contents change. Pointer-only reuse would animate a mesh with stale bones.
@@ -87,10 +96,25 @@ Each command snapshots:
 - palette offset and count;
 - texture-coordinate mode and animated chrome parameters.
 
-`SkinningTextureCoordinates` preserves the legacy formulas for mesh UVs,
-Chrome through Chrome7, Oil, and Metal. Chrome-compatible meshes therefore stay
-on the GPU path instead of silently falling back solely because their UVs are
-generated.
+Downstream does not use the upstream render-mode enum corrected in #546. It
+passes a direct `SkinningTextureCoordinates` value to the shader:
+
+| Shader mode | Downstream value |
+|---:|---|
+| 0 | Mesh UV |
+| 1 | Chrome |
+| 2 | Chrome2 |
+| 3 | Chrome3 |
+| 4 | Chrome4 |
+| 5 | Chrome5 |
+| 6 | Chrome6 |
+| 7 | Chrome7 |
+| 8 | Oil |
+| 9 | Metal |
+
+The shader has a distinct formula for every row. Eligible chrome, oil, and
+metal draws therefore stay on the GPU path instead of collapsing aliases into a
+single variant. Unsupported state still falls back to CPU materialization.
 
 ## Pipeline selection
 

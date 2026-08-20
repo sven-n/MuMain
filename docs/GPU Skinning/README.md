@@ -48,6 +48,20 @@ and HLSL shaders compiled for the active SDL GPU backend.
 | SDL GPU backend | [`MuRendererSDLGpu.cpp`](../../src/source/Render/Renderer/MuRendererSDLGpu.cpp) |
 | BMD submission and CPU fallback | [`ZzzBMD.cpp`](../../src/source/Render/Models/ZzzBMD.cpp), [`ZzzBMD.h`](../../src/source/Render/Models/ZzzBMD.h) |
 | Skinning shader | [`skinned_textured.vert.hlsl`](../../src/shaders/skinned_textured.vert.hlsl) |
-| Compatibility wrappers | [`ZzzOpenglUtil.cpp`](../../src/source/Render/Textures/ZzzOpenglUtil.cpp), `Render/Renderer/GLCompatShim.cpp` |
+| Compatibility wrappers | [`ZzzOpenglUtil.cpp`](../../src/source/Render/Textures/ZzzOpenglUtil.cpp), [`GLCompatShim.cpp`](../../src/source/Render/Renderer/GLCompatShim.cpp) |
 | Guard | [`check_gl_wrapper_monopoly.py`](../../tools/check_gl_wrapper_monopoly.py) |
 | Regression coverage | [`tests/render`](../../tests/render) |
+
+## Runtime configuration
+
+- SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is not
+  read; it cannot request either an OpenGL Core or Compatibility context.
+- `[UI] EnableAnimationTaskPool=1` enables parallel animation processing when
+  at least 20 active characters are visible. Default `0` keeps sequential
+  processing.
+- `--enable-taskpool` enables the same task-pool path regardless of the INI
+  value; the 20-character threshold remains.
+- `[UI] Locale` defaults to `en` and is updated by the Options language picker.
+- `[Camera] Zoom` defaults to `1735` and stores the Orbital-camera distance.
+- `--editor` starts the editor enabled on `*_mueditor` builds; **F12** toggles
+  it.

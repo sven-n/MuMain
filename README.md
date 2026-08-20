@@ -1,4 +1,4 @@
-﻿# MU Online Client Sources
+# MU Online Client Sources
 
 [![MinGW Build](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml/badge.svg?branch=main)](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sven-n/MuMain)
@@ -263,8 +263,32 @@ The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.1
 will work as well. By default, it connects to localhost and port `44406`.
 The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
+#### Client configuration (`config.ini`)
+
+The client reads options from `config.ini` in the executable directory:
+
+| Section | Key | Default Value | Description |
+| :--- | :--- | :--- | :--- |
+| **`[UI]`** | `EnableAnimationTaskPool` | `0` | Set to `1` to process character animation through `AnimationTaskPool` when at least 20 active characters are visible. `0` keeps sequential updates. |
+| **`[UI]`** | `Locale` | `"en"` | Active generated UI locale. The Options window persists runtime language changes here. |
+| **`[Camera]`** | `Zoom` | `1735` | Persisted Orbital-camera distance. |
+
+Rendering always uses the SDL GPU backend. The legacy `[Render] CoreProfile`
+key is not read; values `0` and `1` have no effect and do not select an OpenGL
+context.
+
+#### Command-line flags and options
+
+- **Connection string**: `main.exe connect /u<IP> /p<PORT>`.
+- **`--enable-taskpool`**: Enables `AnimationTaskPool` regardless of
+  `config.ini`; the 20-character threshold still applies.
+- **`--editor`**: Starts the ImGui editor enabled on `*_mueditor` builds;
+  **F12** toggles it.
+
 ## Documentation
 
+- [GPU skinning and SDL GPU rendering](docs/GPU%20Skinning/README.md) - the
+  downstream mapping for upstream Core Profile, GPU skinning, and DXP work.
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
   frustum culling, `$details` overlay, and the gameplay behaviour changes
   from the 3D camera rework.

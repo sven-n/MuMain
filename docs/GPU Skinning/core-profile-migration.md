@@ -16,11 +16,11 @@ downstream architecture.
 | `ImmediateRenderer` / `RHI` | `IMuRenderer` contract plus the deferred command queue in `MuRendererSDLGpu.cpp` |
 | GLSL Core Profile shaders | HLSL sources compiled to SPIR-V and MSL; DXIL remains the repository's current stub strategy |
 | GL texture objects | Renderer texture registry, SDL GPU textures, samplers, and queued updates |
-| Synchronous readback | Request/consume frame-pixel API backed by an asynchronous SDL GPU transfer |
+| Synchronous color readback | Request/consume frame-pixel API backed by an asynchronous SDL GPU transfer |
 
-The historical names `BeginBitmap`, `BeginOpengl`, and
-`ZzzOpenglUtil` remain for call-site compatibility. They do not require a
-normal runtime OpenGL context.
+The historical names `BeginBitmap`, `BeginOpengl`, and `ZzzOpenglUtil` remain
+for call-site compatibility. They do not require a normal runtime OpenGL
+context.
 
 ## Matrices and passes
 
@@ -58,18 +58,38 @@ This preserves legacy ordering while avoiding per-call GPU uploads.
 
 ## Textures and readback
 
-- `GlobalBitmap.cpp` owns game texture creation through the renderer's SDL GPU
-  device.
+- `Render/Sprites/GlobalBitmap.cpp` owns game texture creation through the
+  renderer's SDL GPU device.
 - Dynamic changes use queued texture updates; draw submission resolves game
   bitmap IDs through the renderer registry.
 - Screenshots and diagnostic captures call `RequestFramePixels()` and later
-  `ConsumeFramePixels()`. Ordinary frames do not allocate readback resources.
+  `ConsumeFramePixels()`. Ordinary frames do not allocate color-readback
+  resources.
 
 ## Enforcement
 
-`tools/check_gl_wrapper_monopoly.py` runs as a build dependency. It permits
-raw GL compatibility implementation only inside the render layer and rejects
-new raw graphics calls in gameplay, UI, scene, and world code.
+`tools/check_gl_wrapper_monopoly.py` runs as a build dependency. It permits raw
+GL compatibility implementation only inside the render layer and rejects new
+raw graphics calls in gameplay, UI, scene, and world code.
 
 Use the renderer-neutral contract for new code. Extend a compatibility wrapper
 only when an existing legacy call family must remain source-compatible.
+
+## Configuration compatibility
+
+Upstream exposed `[Render] CoreProfile` as an OpenGL context selector. MuMain
+always initializes SDL GPU, so that legacy key is not read and both `0` and `1`
+leave renderer selection unchanged. GL-shaped wrapper names remain source
+compatibility only; they do not restore a Compatibility Profile path.
+
+## Audit status
+
+- DXP-07d's item-preview camera validation survives in the downstream
+  `SceneCommon`, `NewUI3DRenderMng`, event-panel, game-shop, and legacy UI call
+  sites. Those paths use CPU projection/view math before renderer submission.
+- DXP-17 is partially mapped. CPU projection, zero-to-one viewport depth, and
+  per-command fog are active. The SDL GPU renderer does not override the legacy
+  single-pixel `ReadPixels()` depth query, so `CameraProjection::TestDepthBuffer`
+  retains its far-depth fallback. No gamma-correction audit is claimed.
+- DXP-21 compute acceleration remains deferred. Cloth simulation and rendering
+  stay on the CPU and remain isolated from rigid BMD GPU skinning.
