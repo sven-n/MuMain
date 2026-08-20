@@ -49,6 +49,10 @@ Draw methods do not immediately issue SDL GPU commands. They:
 During `EndFrame()`, the renderer uploads the accumulated buffers, applies
 queued texture updates, then replays commands in order.
 
+The command queue never sorts by texture. This is deliberate: blended terrain
+overlays and effects rely on submission order. Only adjacent commands with
+identical captured state and contiguous vertex storage can merge.
+
 ## Data paths
 
 - `Vertex2D` contains screen position, UV, and packed ABGR color: 20 bytes.
@@ -59,6 +63,10 @@ queued texture updates, then replays commands in order.
 
 This replaces upstream GL ring-buffer orphaning with explicit SDL GPU transfer
 and device buffers.
+
+CPU scratch storage grows with the frame's submitted data. Vertex and bone GPU
+buffers double until they can hold the pending upload, then the renderer copies
+the frame once before replay. There is no fixed upstream IR ring-wrap ceiling.
 
 The upstream audit corrected its dynamic type from `VertexStream` to
 `IRVertex`, with a 36-byte float-color layout, and placed program bind caching
@@ -76,6 +84,14 @@ This avoids two common deferred-rendering bugs:
 
 - reading mutable renderer state after a later draw changed it;
 - retaining a caller-owned span after the caller's storage expired.
+
+## Statistics
+
+`$glstats on` enables generic pass counters and backend `RendererStats`. The
+overlay shows recorded and submitted draws, adjacent merges, command and vertex
+volume, texture operations, CPU replay/submit time, and the active SDL GPU
+driver. `FrameProfiler` contains no raw GPU query API and reports no per-pass GPU
+milliseconds.
 
 ## Upstream milestone mapping
 

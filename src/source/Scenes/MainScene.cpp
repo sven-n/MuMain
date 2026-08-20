@@ -544,7 +544,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     if (renderStatic)
         { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
 
-    RenderJoints(byWaterMap);
+    { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
 
     if (renderEffects)
     {
@@ -560,8 +560,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         RenderLeaves();
     }
 
-    RenderSprites();
-    RenderParticles();
+    { FRAME_PROFILE(Sprites); RenderSprites(); }
+    { FRAME_PROFILE(Particles); RenderParticles(); }
 
     if (IsWaterTerrain() == false)
     {
@@ -579,17 +579,16 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         EndOpengl();
         BeginOpengl(0, 0, width, height);
         RenderWaterTerrain();
-        RenderJoints(byWaterMap);
-        RenderEffects(true);
-        RenderBlurs();
+        { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
+        { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
         CheckSprites();
         BeginSprite();
 
         if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
             RenderLeaves();
 
-        RenderSprites(byWaterMap);
-        RenderParticles(byWaterMap);
+        { FRAME_PROFILE(Sprites); RenderSprites(byWaterMap); }
+        { FRAME_PROFILE(Particles); RenderParticles(byWaterMap); }
         RenderPoints(byWaterMap);
 
         EndSprite();

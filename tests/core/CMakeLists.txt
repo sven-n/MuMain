@@ -61,3 +61,15 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+
+mu_add_test(
+    NAME test_frame_profiler
+    SOURCES
+        test_frame_profiler.cpp
+)
+
+mu_add_test(
+    NAME test_cpu_usage_math
+    SOURCES
+        test_cpu_usage_math.cpp
+)

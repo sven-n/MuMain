@@ -3,13 +3,11 @@
 // Story 4.4.1 — Flow Code: VS1-RENDER-TEXTURE-MIGRATE (GetDevice accessor added)
 //
 // IMuRenderer defines the stable rendering API surface that game code calls.
-// MuRendererGL (in MuRenderer.cpp) implements it using OpenGL immediate mode.
-// A future MuRendererSDLGPU will replace only MuRenderer.cpp (story 4.3.1).
+// MuRendererSDLGpu.cpp implements it using the active SDL GPU backend.
 //
 // DESIGN CONTRACT:
 //   - No OpenGL types (GLenum, GLuint, GLint, etc.) in this header.
 //   - All parameters expressed in project-defined enums and plain C++ types.
-//   - stdafx.h OpenGL stubs allow MuRenderer.cpp to compile on macOS/Linux.
 //   - No #ifdef _WIN32 in game logic — cross-platform via stubs.
 #pragma once
 
@@ -127,6 +125,21 @@ struct SkinningParameters
     bool lightEnabled = false;
 };
 
+struct RendererStats
+{
+    std::uint32_t requestedDrawCalls = 0;
+    std::uint32_t submittedDrawCalls = 0;
+    std::uint32_t mergedDrawCalls = 0;
+    std::uint32_t commandCount = 0;
+    std::uint32_t vertexBytes = 0;
+    std::uint32_t textureUploads = 0;
+    std::uint32_t textureCreates = 0;
+    std::uint32_t textureReleases = 0;
+    double frameMilliseconds = 0.0;
+    double replayMilliseconds = 0.0;
+    double submitMilliseconds = 0.0;
+};
+
 // ---------------------------------------------------------------------------
 // IMuRenderer: Pure abstract rendering interface.
 // Game code obtains the active backend via GetRenderer() (see below).
@@ -211,19 +224,21 @@ public:
     // Vertex count should be even (pairs); odd count logs a warning, last vertex ignored.
     virtual void RenderLines(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Story 7-9-2 (AC-6): Query whether a frame is currently active.
-    // OpenGL backend: always false (immediate mode, no frame lifecycle).
-    // SDL_gpu backend: true when s_renderPass != nullptr.
-    // Used by RenderTitleSceneUI() to self-manage BeginFrame/EndFrame.
+    // Query whether the renderer is between BeginFrame() and EndFrame().
+    // Used by RenderTitleSceneUI() to self-manage frame submission.
     [[nodiscard]] virtual bool IsFrameActive() const
     {
         return false;
     }
 
-    // Per-frame lifecycle: acquire command buffer / render pass (SDL_gpu backend).
-    // No-op in the OpenGL backend. Called from MuMain.cpp game loop.
+    // Per-frame lifecycle. Called from the MuMain.cpp game loop.
     virtual void BeginFrame() {}
     virtual void EndFrame() {}
+    virtual void SetStatsEnabled(bool /*enabled*/) {}
+    [[nodiscard]] virtual RendererStats GetFrameStats() const
+    {
+        return {};
+    }
     [[nodiscard]] virtual bool SetVSyncEnabled(bool /*enabled*/)
     {
         return false;

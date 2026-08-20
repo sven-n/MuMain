@@ -59,8 +59,8 @@ public:
         if (systemTimeElapsed == 0 || m_numProcessors == 0)
             return 0.0;
 
-        // Calculate CPU usage as a percentage
-        return std::max<double>(0.0, processTimeElapsed / (static_cast<double>(systemTimeElapsed) * m_numProcessors));
+        return Core::Utilities::CalculateCpuUsageFromFileTime(processTimeElapsed, systemTimeElapsed,
+                                                               m_numProcessors);
     }
 
 private:

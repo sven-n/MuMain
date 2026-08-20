@@ -37,10 +37,10 @@ call sites.
 | DXP-20-inc5 | Chrome-mode correctness | `SkinningTextureCoordinates` preserves the distinct chrome, oil, and metal formulas. |
 | DXP-21 | Cloth compute separation | Compute acceleration remains deferred; CPU cloth stays isolated from rigid BMD GPU skinning. |
 | DXP-22 | Safe resource/state ownership | SDL GPU resources have renderer ownership and are released with dependent pipeline state. |
-| DXP-23 | Render diagnostics | Existing frame and draw counters remain available through downstream profiler seams. |
+| DXP-23 | Render diagnostics | `$glstats` exposes per-pass CPU timing plus SDL GPU draw, merge, buffer, texture, replay, submit, and driver statistics. |
 | DXP-24 | Safe shadow bone behavior | Shadow-volume and other incompatible paths retain CPU-skinned geometry. |
 | DXP-25 | Logic/render UI decoupling | Downstream UI state ownership and defaults remain unchanged. |
-| DXP-26 | Efficient dynamic streaming | Growable per-frame scratch buffers and deferred uploads replace GL orphan-on-wrap. |
+| DXP-26 | Efficient dynamic streaming | Growable per-frame scratch buffers, device buffers, and deferred uploads replace GL orphan-on-wrap. |
 | DXP-27 | Animation cadence control | Existing animation task synchronization and frame-timing controls remain authoritative. |
 
 ## Corrected status notes

@@ -122,3 +122,6 @@ double GetTargetFps();
 void SetShowDebugInfo(bool enabled);
 void SetShowFpsCounter(bool enabled);
 void ResetFrameStats();
+
+// SDL GPU frame counters and per-pass CPU timings. Console-toggled via `$glstats on/off`.
+void SetShowGLStats(bool enabled);

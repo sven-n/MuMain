@@ -56,6 +56,11 @@ wrapper.
 
 This preserves legacy ordering while avoiding per-call GPU uploads.
 
+The renderer does not copy upstream terrain texture-pair sorting. Downstream
+base and blended overlay layers are separate commands with different depth
+behavior, so global reordering can change output. Adjacent compatible commands
+still merge without changing order.
+
 ## Textures and readback
 
 - `Render/Sprites/GlobalBitmap.cpp` owns game texture creation through the
@@ -81,6 +86,10 @@ Upstream exposed `[Render] CoreProfile` as an OpenGL context selector. MuMain
 always initializes SDL GPU, so that legacy key is not read and both `0` and `1`
 leave renderer selection unchanged. GL-shaped wrapper names remain source
 compatibility only; they do not restore a Compatibility Profile path.
+
+The upstream `[Render] MaxGLVersion` rollback is likewise absent. SDL creates a
+supported platform GPU backend directly and exposes the selected driver in logs,
+error reports, and `$glstats`.
 
 ## Audit status
 

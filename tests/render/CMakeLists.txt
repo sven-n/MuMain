@@ -67,6 +67,21 @@ add_test(
 )
 
 add_test(
+    NAME sdl_gpu_frame_stats
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_sdl_gpu_frame_stats.cmake
+)
+
+add_test(
+    NAME glp29_sprite_path
+    COMMAND ${CMAKE_COMMAND}
+        -DRENDER_UTIL_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Textures/ZzzOpenglUtil.cpp
+        -DRENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_glp29_sprite_path.cmake
+)
+
+add_test(
     NAME global_bitmap_empty_shutdown_guard
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp

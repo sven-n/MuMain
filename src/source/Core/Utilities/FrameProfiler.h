@@ -1,19 +1,14 @@
 #pragma once
 
-// Tiny per-frame timing utility used by the $details overlay to break a frame
-// down into a fixed list of named passes. Header-only and lock-free; intended
-// for ad-hoc bottleneck hunting on a single thread (the render thread).
-//
-// Usage:
-//   { FRAME_PROFILE(Terrain); RenderTerrain(false); }
-// Then `FrameProfiler::AccumulatorMs(Pass::Terrain)` returns the elapsed ms.
-// Call `FrameProfiler::ResetFrame()` once per frame after reading the values.
+// Per-frame CPU timing and renderer counters for the $details and $glstats overlays.
+// Single render thread only. Reset after every frame's overlays have read the values.
 
+#include <array>
 #include <chrono>
+#include <cstdint>
 
 namespace FrameProfiler
 {
-    // Stable, indexed pass list. Add a slot to extend; keep Count_ last.
 enum class Pass : int
 {
     Terrain,
@@ -22,53 +17,170 @@ enum class Pass : int
     Items,
     Effects,
     Other,
-    CharWait,      // subset of Characters — time spent blocked in WaitCharactersAnimation()
-    MoveEffects,   // MoveEffects() in UpdateGameEntities() — Move/update phase, not render
-    MoveParticles, // MoveParticles() in UpdateGameEntities() — Move/update phase, not render
-    Skinning,      // BMD::Transform() self-time (DXP-20 baseline) — subset of Objects/Characters/Items
-    UI,            // DXP-23: RenderMainSceneUI() self-time — was previously unmeasured (fell outside every
-        // FRAME_PROFILE scope), interface panels/party window/NewUI system/cursor
-    Present, // DXP-23: PlatformSwapBuffers() self-time, split out of Other so a large reading
-             // unambiguously means "CPU stalling on the GPU command queue", not HUD render cost
+    CharWait,
+    MoveEffects,
+    MoveParticles,
+    Skinning,
+    UI,
+    Present,
+    Sprites,
+    Particles,
+    Joints,
+    Overlay,
     Count_
 };
 
-inline constexpr const char* kPassNames[(int)Pass::Count_] = {"Terrain",  "Objects",  "Chars",    "Items",
-                                                              "Effects",  "Other",    "CharWait", "MoveFx",
-                                                              "MovePart", "Skinning", "UI",       "Present"};
+inline constexpr const char* kPassNames[static_cast<int>(Pass::Count_)] = {
+    "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
+    "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay",
+};
 
-inline float& AccumulatorMs(Pass p)
+enum class Counter : int
 {
-    static float s_ms[(int)Pass::Count_] = {};
-    return s_ms[(int)p];
+    DrawCalls,
+    MergedDraws,
+    VertexBytes,
+    TextureUploads,
+    Count_
+};
+
+inline bool g_CountersEnabled = false;
+
+inline float& AccumulatorMs(Pass pass)
+{
+    static float milliseconds[static_cast<int>(Pass::Count_)]{};
+    return milliseconds[static_cast<int>(pass)];
 }
 
-    inline void ResetFrame()
+inline std::uint32_t& CounterValue(Pass pass, Counter counter)
+{
+    static std::uint32_t values[static_cast<int>(Pass::Count_)][static_cast<int>(Counter::Count_)]{};
+    return values[static_cast<int>(pass)][static_cast<int>(counter)];
+}
+
+inline std::uint32_t& CounterValue(Counter counter)
+{
+    static std::uint32_t totals[static_cast<int>(Counter::Count_)]{};
+    return totals[static_cast<int>(counter)];
+}
+
+inline void ResetFrame()
+{
+    for (int index = 0; index < static_cast<int>(Pass::Count_); ++index)
     {
-        for (int i = 0; i < (int)Pass::Count_; i++)
-            AccumulatorMs((Pass)i) = 0.f;
+        AccumulatorMs(static_cast<Pass>(index)) = 0.0f;
+    }
+}
+
+inline void ResetCounters()
+{
+    for (int pass = 0; pass < static_cast<int>(Pass::Count_); ++pass)
+    {
+        for (int counter = 0; counter < static_cast<int>(Counter::Count_); ++counter)
+        {
+            CounterValue(static_cast<Pass>(pass), static_cast<Counter>(counter)) = 0;
+        }
     }
 
-    // RAII timer. Constructor stamps the start, destructor accumulates elapsed
-    // ms into the named pass. Multiple Scopes for the same Pass within a frame
-    // accumulate (so calling RenderObjects twice per frame sums correctly).
-    class Scope
+    for (int counter = 0; counter < static_cast<int>(Counter::Count_); ++counter)
     {
-    public:
-        explicit Scope(Pass p)
-            : m_pass(p), m_t0(std::chrono::steady_clock::now()) {}
-
-        ~Scope()
-        {
-            const auto t1 = std::chrono::steady_clock::now();
-            const auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(t1 - m_t0).count();
-            AccumulatorMs(m_pass) += (float)ns / 1.0e6f;
-        }
-
-    private:
-        Pass m_pass;
-        std::chrono::steady_clock::time_point m_t0;
-    };
+        CounterValue(static_cast<Counter>(counter)) = 0;
+    }
 }
 
-#define FRAME_PROFILE(passName) FrameProfiler::Scope _frameProf_##__LINE__(FrameProfiler::Pass::passName)
+namespace detail
+{
+inline constexpr std::size_t kMaxPassDepth = 8;
+
+struct PassState
+{
+    std::array<Pass, kMaxPassDepth> stack{};
+    std::size_t depth = 0;
+    std::size_t overflow = 0;
+    Pass current = Pass::Other;
+};
+
+inline PassState& State()
+{
+    static PassState state;
+    return state;
+}
+}
+
+inline Pass CurrentPass()
+{
+    return detail::State().current;
+}
+
+inline void PushPass(Pass pass)
+{
+    detail::PassState& state = detail::State();
+    if (state.depth == state.stack.size())
+    {
+        // ponytail: eight nested scopes; raise kMaxPassDepth if profiling gains deeper nesting.
+        ++state.overflow;
+        return;
+    }
+
+    state.stack[state.depth++] = state.current;
+    state.current = pass;
+}
+
+inline void PopPass()
+{
+    detail::PassState& state = detail::State();
+    if (state.overflow > 0)
+    {
+        --state.overflow;
+        return;
+    }
+    if (state.depth == 0)
+    {
+        state.current = Pass::Other;
+        return;
+    }
+
+    state.current = state.stack[--state.depth];
+}
+
+inline void Count(Counter counter, std::uint32_t amount = 1)
+{
+    if (!g_CountersEnabled)
+    {
+        return;
+    }
+
+    CounterValue(CurrentPass(), counter) += amount;
+    CounterValue(counter) += amount;
+}
+
+class Scope
+{
+public:
+    explicit Scope(Pass pass)
+        : m_pass(pass), m_startedAt(std::chrono::steady_clock::now())
+    {
+        PushPass(pass);
+    }
+
+    ~Scope()
+    {
+        const auto elapsed = std::chrono::steady_clock::now() - m_startedAt;
+        const auto nanoseconds = std::chrono::duration_cast<std::chrono::nanoseconds>(elapsed).count();
+        AccumulatorMs(m_pass) += static_cast<float>(nanoseconds) / 1.0e6f;
+        PopPass();
+    }
+
+    Scope(const Scope&) = delete;
+    Scope& operator=(const Scope&) = delete;
+
+private:
+    Pass m_pass;
+    std::chrono::steady_clock::time_point m_startedAt;
+};
+}
+
+#define FRAME_PROFILE_CAT_(left, right) left##right
+#define FRAME_PROFILE_CAT(left, right) FRAME_PROFILE_CAT_(left, right)
+#define FRAME_PROFILE(passName)                                                                                         \
+    FrameProfiler::Scope FRAME_PROFILE_CAT(_frameProfilerScope_, __LINE__)(FrameProfiler::Pass::passName)

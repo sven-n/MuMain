@@ -18,8 +18,14 @@ What I have done so far:
       * V-Sync: `$vsync on` / `$vsync off`
       * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
       * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
-  * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
-    a better frame rate when many players and objects are visible.
+      * Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics: `$glstats on` / `$glstats off`
+  * 🔥 Rendering uses deferred SDL GPU commands, indexed quads and strips,
+    growable per-frame buffers, and safe adjacent draw merging.
+  * 🔥 The upstream Core Profile performance series is mapped to SDL GPU (see
+    [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)): packed
+    3x4 bone palettes, renderer statistics, pass attribution, buffer growth,
+    and heap-free sprite geometry generation are retained without restoring the
+    retired OpenGL RHI or its hardware-specific measurements.
   * 🔥 Added inventory and vault extensions.
   * 🔥 The master skill tree system was upgraded to Season 6
   * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.

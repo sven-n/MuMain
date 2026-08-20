@@ -103,6 +103,12 @@ void SetShowFpsCounter(bool enabled)
     if (enabled) g_bShowDebugInfo = false;
 }
 
+void SetShowGLStats(bool enabled)
+{
+    FrameProfiler::g_CountersEnabled = enabled;
+    mu::GetRenderer().SetStatsEnabled(enabled);
+}
+
 //=============================================================================
 // Frame Statistics Tracker
 //=============================================================================
@@ -630,10 +636,116 @@ static void RenderDebugInfo()
                                                           // only now (Present split out below, DXP-23)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    FrameProfiler::ResetFrame();
+    // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
+    // FRAME_PROFILE scope) -- this frame's own value, RenderCurrentScene() already ran above.
+    // Present = PlatformSwapBuffers() self-time, split out of Other so a large reading
+    // unambiguously points at GPU-stall wait rather than HUD render cost -- 1-frame-lagged like
+    // Oth above, since the swap itself only happens after this function returns.
+    mu_swprintf(szLine, L"UI:%6.2f  Present:%6.2f",
+             FrameProfiler::AccumulatorMs(FP::UI),
+             FrameProfiler::AccumulatorMs(FP::Present));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // Move/update-phase cost of particle & effect simulation (UpdateGameEntities(), not the
+    // render-side Effects pass above) — added to gauge whether MoveEffects()/MoveParticles()
+    // are worth parallelizing on a worker thread pool (see feature-ffp-shader-port task memory).
+    mu_swprintf(szLine, L"MoveSim ms  MoveFx:%5.2f  MovePart:%5.2f",
+             FrameProfiler::AccumulatorMs(FP::MoveEffects),
+             FrameProfiler::AccumulatorMs(FP::MoveParticles));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // DXP-20 baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
+    // summed across every body transformed this frame (subset of the Objects/Chars/Items passes
+    // above, not additive with them). Judge the whole GPU-skinning task against this number.
+    mu_swprintf(szLine, L"Skinning ms  Transform:%5.2f", FrameProfiler::AccumulatorMs(FP::Skinning));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — splits the Characters
+    // pass above into "waiting on the animation thread pool" vs "everything else" (actual
+    // per-character RenderMesh calls), and shows whether this tick's animation ran on the
+    // worker thread pool or sequentially on the main thread (PARALLEL_ANIMATION_THRESHOLD = 20
+    // active characters, ZzzCharacter.cpp). Remove once the FPS investigation is resolved.
+    {
+        extern size_t g_LastActiveCharacterCount;
+        extern bool   g_LastAnimationWasParallel;
+        float charWaitMs = FrameProfiler::AccumulatorMs(FP::CharWait);
+        float charRenderMs = FrameProfiler::AccumulatorMs(FP::Characters) - charWaitMs;
+        mu_swprintf(szLine, L"CharDbg  Active:%3d  Parallel:%d  Wait:%5.2f  Render:%5.2f",
+            (int)g_LastActiveCharacterCount, (int)g_LastAnimationWasParallel, charWaitMs, charRenderMs);
+        g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    }
 
     // Frame time graph below text
     RenderFrameGraph(DEBUG_TEXT_X, (float)y + DEBUG_GRAPH_Y_OFFSET, DEBUG_GRAPH_WIDTH, DEBUG_GRAPH_HEIGHT);
+
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+
+    // MainScene resets profiling after every overlay has read this frame.
+}
+
+/**
+ * @brief Renders the $glstats overlay: per-pass CPU and SDL GPU submission statistics.
+ * Independent of $details -- reads the same FrameProfiler accumulators but is gated by its own
+ * flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
+ */
+static void RenderGLStats()
+{
+    if (!FrameProfiler::g_CountersEnabled)
+    {
+        return;
+    }
+
+    BeginBitmap();
+
+    wchar_t szLine[160];
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 100);
+    g_pRenderText->SetTextColor(255, 255, 255, 200);
+
+    const float x = DEBUG_TEXT_X + 260.0f;
+    int y = DEBUG_TEXT_Y_START;
+
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    static constexpr Pass kRows[] = {
+        Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
+        Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
+    };
+
+    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  VtxKB");
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    for (Pass pass : kRows)
+    {
+        const double vertexKilobytes =
+            static_cast<double>(FrameProfiler::CounterValue(pass, Counter::VertexBytes)) / 1024.0;
+        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
+                    FrameProfiler::AccumulatorMs(pass), FrameProfiler::CounterValue(pass, Counter::DrawCalls),
+                    FrameProfiler::CounterValue(pass, Counter::MergedDraws), vertexKilobytes);
+        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+        y += DEBUG_TEXT_LINE_HEIGHT;
+    }
+
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    mu_swprintf(szLine, L"SDL GPU: %hs", mu::GetRenderer().GetGPUDriverName());
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
+                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.commandCount, stats.vertexBytes / 1024);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"CPU frame:%5.2f replay:%5.2f submit:%5.2f ms", stats.frameMilliseconds,
+                stats.replayMilliseconds, stats.submitMilliseconds);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Textures upload:%u create:%u release:%u", stats.textureUploads, stats.textureCreates,
+                stats.textureReleases);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
@@ -1068,16 +1180,24 @@ void MainScene(HDC hDC)
         if (s_frameTimingEnabled && ++s_frameTimingLogCounter % 60 == 0)
         {
             using FP = FrameProfiler::Pass;
-            std::fprintf(stderr, "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms effects=%.2fms render_objects=%.2fms\n",
+            std::fprintf(stderr,
+                         "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
+                         "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms\n",
                          FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
                          FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
-                         FrameProfiler::AccumulatorMs(FP::Effects), FrameProfiler::AccumulatorMs(FP::Other));
-            if (!g_bShowDebugInfo)
-                FrameProfiler::ResetFrame();
+                         FrameProfiler::AccumulatorMs(FP::Effects), FrameProfiler::AccumulatorMs(FP::Other),
+                         FrameProfiler::AccumulatorMs(FP::Sprites), FrameProfiler::AccumulatorMs(FP::Particles),
+                         FrameProfiler::AccumulatorMs(FP::Joints));
         }
-        RenderDebugInfo();
-        RenderFpsCounter();
-        UI::Reconnect::RenderDialog();
+        {
+            FRAME_PROFILE(Overlay);
+            RenderDebugInfo();
+            RenderGLStats();
+            RenderFpsCounter();
+            UI::Reconnect::RenderDialog();
+        }
+        FrameProfiler::ResetFrame();
+        FrameProfiler::ResetCounters();
 
         if (Success)
         {

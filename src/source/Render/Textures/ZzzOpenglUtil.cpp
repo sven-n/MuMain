@@ -882,20 +882,17 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     }
     else
     {
-        vec3_t p2[4];
-        Vector(-Width, -Height, z, p2[0]);
-        Vector(Width, -Height, z, p2[1]);
-        Vector(Width, Height, z, p2[2]);
-        Vector(-Width, Height, z, p2[3]);
-        vec3_t Angle;
-        Vector(0.f, 0.f, Rotation, Angle);
-        float Matrix[3][4];
-        AngleMatrix(Angle, Matrix);
+        // GLP-29: Z-only AngleMatrix/VectorRotate reduces exactly to this 2D rotation.
+        const float rad = Rotation * (Q_PI * 2 / 360);
+        const float sy  = sinf(rad);
+        const float cy  = cosf(rad);
+        const float dx[4] = { -Width,   Width,  Width, -Width  };
+        const float dy[4] = { -Height, -Height, Height, Height };
         for (int i = 0; i < 4; i++)
         {
-            VectorRotate(p2[i], Matrix, p[i]);
-            p[i][0] += x;
-            p[i][1] += y;
+            p[i][0] = x + dx[i] * cy - dy[i] * sy;
+            p[i][1] = y + dx[i] * sy + dy[i] * cy;
+            p[i][2] = z;
         }
     }
 

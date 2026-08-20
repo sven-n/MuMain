@@ -33,10 +33,12 @@
 
 #include "MuRenderer.h"
 #include "SdlGpuPixelFormat.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
@@ -462,15 +464,23 @@ static Uint32 s_dbgTextureUploadsThisFrame = 0u;
 static Uint32 s_dbgTextureCreatesThisFrame = 0u;
 static Uint32 s_dbgTextureReleasesThisFrame = 0u;
 static Uint32 s_dbgRenderCmdsReplayedThisFrame = 0u;
+static Uint32 s_dbgGpuDrawCallsThisFrame = 0u;
 static Uint32 s_dbgMergedDrawsThisFrame = 0u;
 static Uint32 s_dbgWhiteTextureDrawsThisFrame = 0u;
 static Uint32 s_dbgRealTextureDrawsThisFrame = 0u;
 static bool s_dbgNullPipelineWarned = false;
 static bool s_frameTimingInitialized = false;
 static bool s_frameTimingEnabled = false;
+static bool s_statsEnabled = false;
+static mu::RendererStats s_lastFrameStats;
 static std::chrono::steady_clock::time_point s_frameBeginTime;
 static std::chrono::steady_clock::time_point s_renderReplayBeginTime;
 static std::chrono::steady_clock::time_point s_submitTime;
+
+[[nodiscard]] static bool IsFrameTimingEnabled()
+{
+    return s_frameTimingEnabled || s_statsEnabled;
+}
 
 // Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
 // Story 7.9.7: Added DepthReadOnly variants (depth test ON, depth write OFF) for particles.
@@ -1321,7 +1331,7 @@ public:
             s_frameTimingEnabled = std::getenv("MU_RENDER_TIMING") != nullptr;
             s_frameTimingInitialized = true;
         }
-        if (s_frameTimingEnabled)
+        if (IsFrameTimingEnabled())
         {
             s_frameBeginTime = std::chrono::steady_clock::now();
         }
@@ -1356,6 +1366,7 @@ public:
         s_dbgTextureCreatesThisFrame = 0u;
         s_dbgTextureReleasesThisFrame = 0u;
         s_dbgRenderCmdsReplayedThisFrame = 0u;
+        s_dbgGpuDrawCallsThisFrame = 0u;
         s_dbgMergedDrawsThisFrame = 0u;
         s_dbgWhiteTextureDrawsThisFrame = 0u;
         s_dbgRealTextureDrawsThisFrame = 0u;
@@ -1633,7 +1644,7 @@ public:
                                                   : reconnectCaptureTexture ? reconnectCaptureTexture
                                                                             : s_swapchainTexture;
         bool renderPassCompleted = false;
-        if (s_frameTimingEnabled)
+        if (IsFrameTimingEnabled())
         {
             s_renderReplayBeginTime = std::chrono::steady_clock::now();
         }
@@ -1715,6 +1726,7 @@ public:
 
                         SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
                         SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                        ++s_dbgGpuDrawCallsThisFrame;
                         break;
                     }
 
@@ -1743,6 +1755,7 @@ public:
 
                         SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
                         SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                        ++s_dbgGpuDrawCallsThisFrame;
                         break;
                     }
 
@@ -1776,6 +1789,7 @@ public:
 
                         SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
                         SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                        ++s_dbgGpuDrawCallsThisFrame;
                         break;
                     }
 
@@ -1809,6 +1823,7 @@ public:
 
                         SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
                         SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                        ++s_dbgGpuDrawCallsThisFrame;
                         break;
                     }
 
@@ -1835,6 +1850,7 @@ public:
 
                         SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
                         SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                        ++s_dbgGpuDrawCallsThisFrame;
                         break;
                     }
                     } // switch
@@ -1888,12 +1904,30 @@ public:
             s_cmdBuf = nullptr;
         }
 
-        if (s_frameTimingEnabled)
+        if (IsFrameTimingEnabled())
         {
             s_submitTime = std::chrono::steady_clock::now();
         }
 
         s_swapchainTexture = nullptr;
+
+        const auto frameCompletedAt = std::chrono::steady_clock::now();
+        s_lastFrameStats.requestedDrawCalls = s_dbgDrawCallsThisFrame;
+        s_lastFrameStats.submittedDrawCalls = s_dbgGpuDrawCallsThisFrame;
+        s_lastFrameStats.mergedDrawCalls = s_dbgMergedDrawsThisFrame;
+        s_lastFrameStats.commandCount = static_cast<std::uint32_t>(s_renderCmds.size());
+        s_lastFrameStats.vertexBytes = s_dbgVtxBytesThisFrame;
+        s_lastFrameStats.textureUploads = s_dbgTextureUploadsThisFrame;
+        s_lastFrameStats.textureCreates = s_dbgTextureCreatesThisFrame;
+        s_lastFrameStats.textureReleases = s_dbgTextureReleasesThisFrame;
+        if (IsFrameTimingEnabled())
+        {
+            const auto milliseconds = [](auto begin, auto end)
+            { return std::chrono::duration<double, std::milli>(end - begin).count(); };
+            s_lastFrameStats.frameMilliseconds = milliseconds(s_frameBeginTime, frameCompletedAt);
+            s_lastFrameStats.replayMilliseconds = milliseconds(s_renderReplayBeginTime, s_submitTime);
+            s_lastFrameStats.submitMilliseconds = milliseconds(s_submitTime, frameCompletedAt);
+        }
 
         const bool emitTimingDiagnostics = s_frameTimingEnabled && s_dbgFrameCount % 60 == 0;
         if (emitTimingDiagnostics)
@@ -1908,11 +1942,9 @@ public:
                 s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated, m_texture2DEnabled,
                 m_boundTextureId);
 
-            const auto ms = [](auto begin, auto end)
-            { return std::chrono::duration<double, std::milli>(end - begin).count(); };
-            const auto now = std::chrono::steady_clock::now();
-            logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms", ms(s_frameBeginTime, now),
-                          ms(s_renderReplayBeginTime, s_submitTime), ms(s_submitTime, now));
+            logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
+                          s_lastFrameStats.frameMilliseconds, s_lastFrameStats.replayMilliseconds,
+                          s_lastFrameStats.submitMilliseconds);
         }
         if (s_dbgFrameCount == 10 && s_dbgDrawCallsThisFrame == 0)
         {
@@ -2210,6 +2242,16 @@ public:
         return s_frameActive;
     }
 
+    void SetStatsEnabled(bool enabled) override
+    {
+        s_statsEnabled = enabled;
+    }
+
+    [[nodiscard]] RendererStats GetFrameStats() const override
+    {
+        return s_lastFrameStats;
+    }
+
     [[nodiscard]] bool SetVSyncEnabled(bool enabled) override
     {
         if (!s_device || !s_window)
@@ -2316,6 +2358,8 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
     // -----------------------------------------------------------------------
@@ -2348,6 +2392,7 @@ public:
         cmd.bytesPerRow = width * 4; // RGBA8
         s_textureUpdates.push_back(std::move(cmd));
         ++s_dbgTextureUploadsThisFrame;
+        FrameProfiler::Count(FrameProfiler::Counter::TextureUploads);
     }
 
     void EnsureTexture(std::uint32_t textureId, std::uint32_t width, std::uint32_t height) override
@@ -2571,6 +2616,8 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
     // -----------------------------------------------------------------------
@@ -2645,14 +2692,17 @@ public:
         if (MergeAdjacentTriangleCommand(cmd))
         {
             ++s_dbgMergedDrawsThisFrame;
+            FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
         }
         else
         {
             s_renderCmds.push_back(cmd);
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
         }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
     [[nodiscard]] bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices, std::uint32_t textureId,
@@ -2733,6 +2783,8 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
         return true;
     }
 
@@ -2829,6 +2881,8 @@ public:
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
     // -----------------------------------------------------------------------

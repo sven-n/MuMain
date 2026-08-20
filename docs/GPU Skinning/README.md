@@ -23,6 +23,8 @@ and HLSL shaders compiled for the active SDL GPU backend.
    the deferred SDL GPU command path replacing upstream `IR::`.
 5. [Gotchas and invariants](gotchas-and-patterns.md) records safety,
    compatibility, and performance constraints.
+6. [GLP milestone mapping](glperf/README.md) maps the upstream OpenGL
+   performance series to the active SDL GPU renderer and its `$glstats` output.
 
 ## Architecture highlights
 

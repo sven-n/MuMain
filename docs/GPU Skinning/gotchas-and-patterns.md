@@ -49,6 +49,21 @@
 - `BeginFrame()` and `EndFrame()` bound all queued data. Submission outside an
   active frame is rejected.
 
+## Batching and profiling
+
+- Do not reorder blended terrain by texture pair. Base and overlay layers are
+  separate downstream draws, and overlays may render with depth testing off.
+  Only adjacent compatible commands may merge.
+- A merge key must include pipeline, texture, sampler, MVP, fog, and contiguous
+  vertex storage. Omitting captured state can replay earlier geometry with a
+  later draw's settings.
+- `FrameProfiler` is renderer-neutral. Do not add raw GL or SDL GPU query calls
+  to it; backend statistics belong in `RendererStats`.
+- `$glstats` reports CPU pass and SDL GPU submission timings. It does not claim
+  per-pass GPU time.
+- Reset profiler values after every overlay has consumed them, including frames
+  where neither overlay is visible.
+
 ## Textures and resources
 
 - Game bitmap IDs are not SDL GPU handles. Resolve them through the renderer's

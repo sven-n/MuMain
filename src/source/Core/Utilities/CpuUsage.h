@@ -1,6 +1,24 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
+
+namespace Core::Utilities
+{
+[[nodiscard]] constexpr double CalculateCpuUsageFromFileTime(std::uint64_t processTicks100ns,
+                                                             std::int64_t wallMicroseconds,
+                                                             unsigned int processorCount)
+{
+    if (wallMicroseconds <= 0 || processorCount == 0)
+    {
+        return 0.0;
+    }
+
+    constexpr double kFileTimeTicksPerMicrosecond = 10.0;
+    const double processMicroseconds = static_cast<double>(processTicks100ns) / kFileTimeTicksPerMicrosecond;
+    return processMicroseconds / (static_cast<double>(wallMicroseconds) * processorCount);
+}
+}
 
 class CpuUsage
 {
