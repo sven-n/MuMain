@@ -170,7 +170,7 @@ git log --reverse --no-merges --format='%H%x09%s' 685936c10a8ee50982d0e1ca8d9430
 
 Columns: upstream commit, intent, upstream paths, downstream targets, resolution, verification, checkpoint. Initial resolution and verification cells use `pending`; replace every `pending` before final acceptance.
 
-- [ ] **Step 7: Commit the ledger baseline**
+- [x] **Step 7: Commit the ledger baseline**
 
 Run:
 
