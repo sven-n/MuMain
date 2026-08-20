@@ -60,6 +60,13 @@ add_test(
 )
 
 add_test(
+    NAME terrain_texture_uv_scale
+    COMMAND ${CMAKE_COMMAND}
+        -DTERRAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Terrain/ZzzLodTerrain.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_terrain_texture_uv_scale.cmake
+)
+
+add_test(
     NAME global_bitmap_empty_shutdown_guard
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Render/Sprites/GlobalBitmap.cpp
