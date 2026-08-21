@@ -48,6 +48,13 @@ add_test(
 )
 
 add_test(
+    NAME camera_projection_updates_renderer_matrix
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Camera/CameraProjection.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_camera_projection_path.cmake
+)
+
+add_test(
     NAME sdl_gpu_vsync_frame_pacing
     COMMAND ${CMAKE_COMMAND}
         -DRENDERER_HEADER=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRenderer.h

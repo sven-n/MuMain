@@ -19,8 +19,7 @@ static int s_ViewportHeight = 0;
 void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
                                           float zNear, float zFar)
 {
-    // GL perspective is fed to GlobalUBO from a CPU closed form by BeginOpengl() (DXP-07b) --
-    // this function only maintains the CPU screen-center/perspective-factor cache below.
+    gluPerspective(fov, aspect, zNear, zFar);
 
     // Use actual viewport dimensions (set by SetViewport) for screen center and
     // perspective. This accounts for the game viewport being narrower/shorter than
