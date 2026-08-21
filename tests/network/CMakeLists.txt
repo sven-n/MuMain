@@ -27,3 +27,11 @@ add_test(
         -DCONNECTION=${CMAKE_SOURCE_DIR}/src/source/Dotnet/Connection.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_packet_binding_resolution.cmake
 )
+
+add_test(
+    NAME stale_connection_packets_are_discarded
+    COMMAND ${CMAKE_COMMAND}
+        -DHEADER_FILE=${CMAKE_SOURCE_DIR}/src/source/Network/Server/WSclient.h
+        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Network/Server/WSclient.cpp
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_stale_connection_packets.cmake
+)

@@ -14967,6 +14967,11 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
 
 void ProcessPacketCallback(const PacketInfo* Packet)
 {
+    if (SocketClient == nullptr || Packet->ConnectionHandle != SocketClient->GetHandle())
+    {
+        return;
+    }
+
     try
     {
         SuppressOptionalPresentation = Packet->SuppressOptionalPresentation;
@@ -14982,6 +14987,7 @@ static void HandleIncomingPacket(int32_t Handle, const BYTE* ReceiveBuffer, int3
     auto Packet = std::make_unique<PacketInfo>();
     Packet->ReceiveBuffer = std::make_unique<BYTE[]>(Size);
     std::copy(ReceiveBuffer, ReceiveBuffer + Size, Packet->ReceiveBuffer.get());
+    Packet->ConnectionHandle = Handle;
     Packet->Size = Size;
 
     // Hand the packet to the main thread for processing. The main loop drains
