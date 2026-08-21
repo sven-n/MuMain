@@ -95,40 +95,115 @@ public:
     void ChangeCastleMoney(LPPMSG_ANS_MONEYDRAWOUT pInfo);
     void BuyNewNPC(int iNpcNumber, int iNpcIndex);
 
-    int GetCurrGate() { return m_iCurrGate; }
-    void SetCurrGate(int iCurrGate) { m_iCurrGate = iCurrGate; }
-    int GetCurrStatue() { return m_iCurrStatue; }
-    void SetCurrStatue(int iCurrStatue) { m_iCurrStatue = iCurrStatue; }
+    int GetCurrGate()
+    {
+        return m_iCurrGate;
+    }
+    void SetCurrGate(int iCurrGate)
+    {
+        m_iCurrGate = iCurrGate;
+    }
+    int GetCurrStatue()
+    {
+        return m_iCurrStatue;
+    }
+    void SetCurrStatue(int iCurrStatue)
+    {
+        m_iCurrStatue = iCurrStatue;
+    }
 
-    PMSG_NPCDBLIST& GetGateInfo(int iIndex) { return m_GateInfo[iIndex]; }
-    PMSG_NPCDBLIST& GetStatueInfo(int iIndex) { return m_StatueInfo[iIndex]; }
-    PMSG_NPCDBLIST& GetCurrGateInfo() { return m_GateInfo[m_iCurrGate]; }
-    PMSG_NPCDBLIST& GetCurrStatueInfo() { return m_StatueInfo[m_iCurrStatue]; }
+    PMSG_NPCDBLIST& GetGateInfo(int iIndex)
+    {
+        return m_GateInfo[iIndex];
+    }
+    PMSG_NPCDBLIST& GetStatueInfo(int iIndex)
+    {
+        return m_StatueInfo[iIndex];
+    }
+    PMSG_NPCDBLIST& GetCurrGateInfo()
+    {
+        return m_GateInfo[m_iCurrGate];
+    }
+    PMSG_NPCDBLIST& GetCurrStatueInfo()
+    {
+        return m_StatueInfo[m_iCurrStatue];
+    }
 
-    BOOL IsGateRepairable() { return (GetCurrGateInfo().iNpcHp < GetCurrGateInfo().iNpcMaxHp); }
-    BOOL IsGateHPUpgradable() { return (GetHPLevel(&GetCurrGateInfo()) < GATE_MAX_HP_LEVEL); }
-    BOOL IsGateDefeseUpgradable() { return (GetDefenseLevel(&GetCurrGateInfo()) < GATE_MAX_DEFENSE_LEVEL); }
+    BOOL IsGateRepairable()
+    {
+        return (GetCurrGateInfo().iNpcHp < GetCurrGateInfo().iNpcMaxHp);
+    }
+    BOOL IsGateHPUpgradable()
+    {
+        return (GetHPLevel(&GetCurrGateInfo()) < GATE_MAX_HP_LEVEL);
+    }
+    BOOL IsGateDefeseUpgradable()
+    {
+        return (GetDefenseLevel(&GetCurrGateInfo()) < GATE_MAX_DEFENSE_LEVEL);
+    }
 
-    BOOL IsStatueRepairable() { return (GetCurrStatueInfo().iNpcHp < GetCurrStatueInfo().iNpcMaxHp); }
-    BOOL IsStatueHPUpgradable() { return (GetHPLevel(&GetCurrStatueInfo()) < STATUE_MAX_HP_LEVEL); }
-    BOOL IsStatueDefeseUpgradable() { return (GetDefenseLevel(&GetCurrStatueInfo()) < STATUE_MAX_DEFENSE_LEVEL); }
-    BOOL IsStatueRecoverUpgradable() { return (GetRecoverLevel(&GetCurrStatueInfo()) < STATUE_MAX_RECOVER_LEVEL); }
+    BOOL IsStatueRepairable()
+    {
+        return (GetCurrStatueInfo().iNpcHp < GetCurrStatueInfo().iNpcMaxHp);
+    }
+    BOOL IsStatueHPUpgradable()
+    {
+        return (GetHPLevel(&GetCurrStatueInfo()) < STATUE_MAX_HP_LEVEL);
+    }
+    BOOL IsStatueDefeseUpgradable()
+    {
+        return (GetDefenseLevel(&GetCurrStatueInfo()) < STATUE_MAX_DEFENSE_LEVEL);
+    }
+    BOOL IsStatueRecoverUpgradable()
+    {
+        return (GetRecoverLevel(&GetCurrStatueInfo()) < STATUE_MAX_RECOVER_LEVEL);
+    }
 
-    int GetChaosTaxRate() { return m_iChaosTaxRate; }
+    int GetChaosTaxRate()
+    {
+        return m_iChaosTaxRate;
+    }
     void PlusChaosTaxRate(int iValue);
-    int GetNormalTaxRate() { return m_iNormalTaxRate; }
+    int GetNormalTaxRate()
+    {
+        return m_iNormalTaxRate;
+    }
     void PlusNormalTaxRate(int iValue);
-    int GetRealTaxRateChaos() { return m_iRealTaxRateChaos; }
-    int GetRealTaxRateStore() { return m_iRealTaxRateStore; }
-    __int64 GetCastleMoney() { return m_i64CastleMoney; }
+    int GetRealTaxRateChaos()
+    {
+        return m_iRealTaxRateChaos;
+    }
+    int GetRealTaxRateStore()
+    {
+        return m_iRealTaxRateStore;
+    }
+    __int64 GetCastleMoney()
+    {
+        return m_i64CastleMoney;
+    }
     void RollbackTaxRates();
 
-    int GetMaxHPLevel() { return STATUE_MAX_HP_LEVEL; }
-    int GetMaxDefenseLevel() { return STATUE_MAX_DEFENSE_LEVEL; }
-    int GetMaxRecoverLevel() { return STATUE_MAX_RECOVER_LEVEL; }
+    int GetMaxHPLevel()
+    {
+        return STATUE_MAX_HP_LEVEL;
+    }
+    int GetMaxDefenseLevel()
+    {
+        return STATUE_MAX_DEFENSE_LEVEL;
+    }
+    int GetMaxRecoverLevel()
+    {
+        return STATUE_MAX_RECOVER_LEVEL;
+    }
 
-    BOOL IsGate(LPPMSG_NPCDBLIST pInfo) { return (pInfo->iNpcNumber == GATENPC_NUMBER); }
-    BOOL IsStatue(LPPMSG_NPCDBLIST pInfo) { return (pInfo->iNpcNumber == STATUENPC_NUMBER); }
+    BOOL IsGate(LPPMSG_NPCDBLIST pInfo)
+    {
+        return (pInfo->iNpcNumber == GATENPC_NUMBER);
+    }
+    BOOL IsStatue(LPPMSG_NPCDBLIST pInfo)
+    {
+        return (pInfo->iNpcNumber == STATUENPC_NUMBER);
+    }
 
 protected:
     int m_iCurrGate;

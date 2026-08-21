@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "Core/Time/FrameTimerScheduler.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -12,8 +13,6 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/AI/GOBoid.h"
 #include "UIManager.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
 #include "Character/CSParts.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "World/MapInfra/MapManager.h"
@@ -28,7 +27,6 @@
 extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
 extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);
@@ -808,49 +806,29 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
 }
 void SetLineColor(int iType, float fAlphaRate = 1.0f)
 {
-    GLubyte ubWindowAlpha = 255 * fAlphaRate;
-
+    const BYTE windowAlpha = static_cast<BYTE>(255.f * fAlphaRate);
     switch (iType)
     {
-    case 0:
-        glColor4ub(146, 134, 121, ubWindowAlpha);	break;
-    case 1:
-        glColor4ub(37, 37, 37, ubWindowAlpha);		break;
-    case 2:
-        glColor4ub(106, 97, 88, ubWindowAlpha);		break;
-    case 3:
-        glColor4ub(0, 0, 0, 179 * fAlphaRate);		break;
-    case 4:
-        glColor4ub(173, 167, 150, ubWindowAlpha);	break;
-    case 5:
-        glColor4ub(53, 49, 48, ubWindowAlpha);		break;
-    case 6:
-        glColor4ub(26, 22, 21, ubWindowAlpha);		break;
-    case 7:
-        glColor4ub(0, 0, 0, 255 * fAlphaRate);		break;
-    case 8:
-        glColor4ub(153, 156, 166, ubWindowAlpha);	break;
-    case 9:
-        glColor4ub(136, 138, 147, ubWindowAlpha);	break;
-    case 10:
-        glColor4ub(83, 85, 93, ubWindowAlpha);		break;
-    case 11:
-        glColor4ub(102, 104, 112, ubWindowAlpha);	break;
-    case 12:
-        glColor4ub(0, 0, 8, ubWindowAlpha);			break;
-    case 13:
-        glColor4ub(0, 0, 0, ubWindowAlpha);			break;
-    case 14:
-        glColor4ub(185, 185, 185, ubWindowAlpha);	break;
-    case 15:
-        glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-    case 16:
-        glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-    case 17:
-        glColor4ub(209, 188, 134, ubWindowAlpha);	break;
-    case 18:
-        glColor4ub(205, 209, 133, ubWindowAlpha);	break;
-    default:	break;
+    case 0: SetRenderColor(146, 134, 121, windowAlpha); break;
+    case 1: SetRenderColor(37, 37, 37, windowAlpha); break;
+    case 2: SetRenderColor(106, 97, 88, windowAlpha); break;
+    case 3: SetRenderColor(0, 0, 0, static_cast<BYTE>(179.f * fAlphaRate)); break;
+    case 4: SetRenderColor(173, 167, 150, windowAlpha); break;
+    case 5: SetRenderColor(53, 49, 48, windowAlpha); break;
+    case 6: SetRenderColor(26, 22, 21, windowAlpha); break;
+    case 7: SetRenderColor(0, 0, 0, static_cast<BYTE>(255.f * fAlphaRate)); break;
+    case 8: SetRenderColor(153, 156, 166, windowAlpha); break;
+    case 9: SetRenderColor(136, 138, 147, windowAlpha); break;
+    case 10: SetRenderColor(83, 85, 93, windowAlpha); break;
+    case 11: SetRenderColor(102, 104, 112, windowAlpha); break;
+    case 12: SetRenderColor(0, 0, 8, windowAlpha); break;
+    case 13: SetRenderColor(0, 0, 0, windowAlpha); break;
+    case 14: SetRenderColor(185, 185, 185, windowAlpha); break;
+    case 15: SetRenderColor(194, 194, 194, windowAlpha); break;
+    case 16: SetRenderColor(194, 194, 194, windowAlpha); break;
+    case 17: SetRenderColor(209, 188, 134, windowAlpha); break;
+    case 18: SetRenderColor(205, 209, 133, windowAlpha); break;
+    default: break;
     }
 }
 
@@ -911,6 +889,18 @@ void CUIBaseWindow::SetTitle(const wchar_t* pszTitle)
     m_strTitle = std::wstring(pszTitle);
 }
 
+void CUIBaseWindow::SetReturnText(const wchar_t* text)
+{
+    m_returnText = text ? text : L"";
+}
+
+std::wstring CUIBaseWindow::TakeReturnText()
+{
+    std::wstring text;
+    text.swap(m_returnText);
+    return text;
+}
+
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 {
     SetLineColor(0);
@@ -951,17 +941,7 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 
 void CUIBaseWindow::SetControlButtonColor(int iSelect)
 {
-    if (m_iControlButtonClick == iSelect && CheckMouseIn(m_iPos_x + m_iWidth - 38, m_iPos_y + 8, 38, 9) == TRUE)
-    {
-        if (MouseLButtonPush == true)
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
-        else
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-    else
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 1.0f);
-    }
+    (void)iSelect;
 }
 
 void CUIBaseWindow::Render()
@@ -997,8 +977,6 @@ void CUIBaseWindow::Render()
     {
         bBackWindow = TRUE;
     }
-    if (bBackWindow == TRUE)
-        glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
     if (CheckOption(UIWINDOWSTYLE_FRAME))
     {
         if (CheckOption(UIWINDOWSTYLE_TITLEBAR))
@@ -1061,7 +1039,6 @@ void CUIBaseWindow::Render()
         }
         SetControlButtonColor(3);
         RenderBitmap(BITMAP_INTERFACE_EX + 10, (float)m_iPos_x + m_iWidth - 16, (float)m_iPos_y + 8, (float)9, (float)9, 0.f, 9.f / 32.f, 9.f / 32.f, 9.f / 32.f);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetFont(g_hFont);
     }
     if (CheckOption(UIWINDOWSTYLE_RESIZEABLE))
@@ -1071,7 +1048,6 @@ void CUIBaseWindow::Render()
     }
     if (g_pWindowMgr->GetTopWindowUIID() != GetUIID() || !g_pUIManager->IsOpen(INTERFACE_FRIEND))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
     }
 
@@ -1397,7 +1373,7 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
 {
     m_dwRoomNumber = dwRoomNumber;
 
-    _connection = new Connection(pszIP, 55980, true, &HandlePacketS);
+    _connection = new Connection(MU_C16(pszIP), 55980, true, &HandlePacketS);
 
     if (!_connection->IsConnected())
     {
@@ -1419,6 +1395,7 @@ void CUIChatWindow::DisconnectToChatServer()
             _connection->Close();
         }
 
+        delete _connection;
         _connection = nullptr;
     }
 }
@@ -1666,7 +1643,7 @@ BOOL CUIChatWindow::HandleMessage()
                 else
                 {
                     SocketClient->ToGameServer()->SendChatRoomInvitationRequest(
-                        m_InvitePalListBox.GetSelectedText()->m_szID,
+                        MU_C16(m_InvitePalListBox.GetSelectedText()->m_szID),
                         m_dwRoomNumber,
                         GetUIID());
                 }
@@ -1799,12 +1776,7 @@ static void PhotoMakeRotationX(float degrees, float* out)
 {
     float rad = degrees * Q_PI / 180.0f;
     float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, c,   s,   0.f,
-        0.f, -s,  c,   0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
+    float m[16] = {1.f, 0.f, 0.f, 0.f, 0.f, c, s, 0.f, 0.f, -s, c, 0.f, 0.f, 0.f, 0.f, 1.f};
     memcpy(out, m, sizeof(m));
 }
 
@@ -1812,23 +1784,13 @@ static void PhotoMakeRotationZ(float degrees, float* out)
 {
     float rad = degrees * Q_PI / 180.0f;
     float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        c,   s,   0.f, 0.f,
-        -s,  c,   0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
+    float m[16] = {c, s, 0.f, 0.f, -s, c, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
     memcpy(out, m, sizeof(m));
 }
 
 static void PhotoMakeTranslation(float x, float y, float z, float* out)
 {
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        x,   y,   z,   1.f
-    };
+    float m[16] = {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, x, y, z, 1.f};
     memcpy(out, m, sizeof(m));
 }
 
@@ -1846,67 +1808,32 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     MoveMount(&m_PhotoHelper, TRUE);
     gMapManager.WorldActive = WorldBackup;
 
-    // Snapshot the CPU source of truth before this panel overwrites GlobalUBO — this panel has no
-    // EndBitmap()/BeginBitmap() bracket of its own (unlike every other DXP-07d panel), so its
-    // restore below needs this snapshot instead of either of those idioms.
-    memcpy(s_PrePhotoProj, GlobalUBO::Instance().GetProj(), sizeof(s_PrePhotoProj));
-    memcpy(s_PrePhotoView, GlobalUBO::Instance().GetView(), sizeof(s_PrePhotoView));
-
-    SaveCameraPerspective();
-    glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y,
+        m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
     gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
-
-    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity(x2) bracket and
-    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read are deleted — g_Camera.Matrix is
-    // identity here (matching the original glLoadIdentity()-before-rotate capture; the real photo
-    // camera below feeds GlobalUBO directly, not g_Camera.Matrix, same as every other panel).
-    static const float s_IdentityCameraMatrix[3][4] = {
-        {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-    };
-    memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
-    // DXP-08a: the real glRotatef/glRotatef/glTranslatef/glTranslatef sequence that used to build
-    // this panel's "photo camera" is deleted — DXP-07d increment 6 already proved the CPU closed
-    // form below matches bit-for-bit across multiple soaks, and GlobalUBO (fed from that closed
-    // form just below) is the only consumer (same finding used for every other
-    // panel and for BeginOpengl/BeginBitmap in Category 3).
-    // CPU closed form for the same camera — proj = gluPerspective(1.f deg, aspect, 2000, 20000)
-    // closed form (this panel's own literal near/far, unlike RENDER_ITEMVIEW_NEAR/FAR
-    // elsewhere); view = Rx(-90) * Rz(-90) * T(-10000,0,-75) * T(-o->Position...) composed in
-    // GL's right-multiply order (translate applied first, closest to the vertex — matches the
-    // glRotatef/glRotatef/glTranslatef/glTranslatef call order above exactly).
-    {
-        float aspect = (m_iWidth * g_fScreenRate_x) / (141.f * g_fScreenRate_y);
-        float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
-        float f = 1.0f / tanf(fovRad);
-        float zNear = 2000.f, zFar = 20000.f;
-        float cpuProj[16];
-        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
+    mu::GetRenderer().Rotate(-90.0f, 1.f, 0.f, 0.f);
+    mu::GetRenderer().Rotate(-90.0f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().Translate(-10000.0f, 0.0f, -75.f);
 
-        float rx[16]; PhotoMakeRotationX(-90.0f, rx);
-        float rz[16]; PhotoMakeRotationZ(-90.0f, rz);
-        float t1[16]; PhotoMakeTranslation(-10000.0f, 0.0f, -75.f, t1);
-        float t2[16];
-        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
-            PhotoMakeTranslation(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f, t2);
-        else
-            PhotoMakeTranslation(-o->Position[0], -o->Position[1], -o->Position[2], t2);
-
-        float m1[16]; PhotoMat4Multiply(m1, rx, rz);
-        float m2[16]; PhotoMat4Multiply(m2, m1, t1);
-        float cpuView[16]; PhotoMat4Multiply(cpuView, m2, t2);
-
-        GlobalUBO::Instance().SetProj(cpuProj);
-        GlobalUBO::Instance().SetView(cpuView);
-    }
+    if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
+        mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f);
+    else
+        mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2]);
 
     Vector(0.0f, 0.0f, m_fCurrentAngle, o->Angle);
 
-    DisableAlphaTestRaw();
-    EnableTexture2D();
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(true);
     EnableDepthTest();
     EnableCullFace();
     EnableDepthMask();
@@ -1916,10 +1843,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    SetDepthFuncLEqual();
-    SetAlphaFuncRef(0.25f);
-    DisableFog();
-    ClearDepthBuffer();
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
+    mu::GetRenderer().SetFogEnabled(false);
+    mu::GetRenderer().ClearDepthBuffer();
     o->Scale = 0.7f * m_fCurrentZoom;
     m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
     Vector(1, 1, 1, o->Light);
@@ -1940,12 +1867,11 @@ void CUIPhotoViewer::RenderPhotoCharacter()
         m_PhotoHelper.Position[2] -= 25;
     RenderCharacter(c, o);
 
-    // DXP-08a: the matching glMatrixMode/glPopMatrix pops are deleted — GlobalUBO is restored
-    // directly from the pre-panel snapshot taken at entry instead of a fresh GL read.
-    glViewport2(0, 0, WindowWidth, WindowHeight);
-    RestoreCameraPerspective();
-    GlobalUBO::Instance().SetProj(s_PrePhotoProj);
-    GlobalUBO::Instance().SetView(s_PrePhotoView);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
@@ -2564,7 +2490,6 @@ void CUIPhotoViewer::Render()
 {
     if (m_bIsWebzenMail == TRUE)
     {
-        glColor4f(0.f, 0.f, 0.f, 1.0f);
         RenderColor(m_iPos_x, m_iPos_y, 119.f, 141.f);
         EndRenderColor();
         RenderBitmap(BITMAP_INTERFACE_EX + 22, m_iPos_x + 20, m_iPos_y + 38, 80.f, 62.f, 0.f, 0.f, 256.f / 256.f, 195.f / 256.f);
@@ -2602,7 +2527,6 @@ void CUIPhotoViewer::Render()
 
     if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
         if (m_bHelpEnable == FALSE)
         {
@@ -2610,9 +2534,7 @@ void CUIPhotoViewer::Render()
         }
         else
         {
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 2, m_iPos_y + m_iHeight - 16, 15.0f, 15.0f, 0.f, 0.f, 15.f / 16.f, 15.f / 16.f);
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextNum = 0;
             mu_swprintf(TextList[TextNum], I18N::Game::WheelButtonZoomInOut); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
@@ -2942,7 +2864,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
                 int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
                 BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;
                 BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;
-                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), szMailto, szTitle, Data1, Data2, len, szText);
+                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), MU_C16(szMailto), MU_C16(szTitle), Data1, Data2, len, MU_C16(szText));
             }
             break;
         case 2:
@@ -3605,7 +3527,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
                     if (g_pWindowMgr->GetChatReject() == FALSE && g_pFriendMenu->IsRequestWindow(pszName) == FALSE)
                     {
                         g_pFriendMenu->AddRequestWindow(pszName);
-                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(pszName);
+                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(MU_C16(pszName));
                     }
                 }
                 else if (dwDuplicationCheck == -1);
@@ -3642,18 +3564,20 @@ BOOL CUIFriendListTabWindow::HandleMessage()
     }
     break;
     case UI_MESSAGE_TXTRETURN:
-        if (m_WorkMessage.m_iParam2 != 0)
         {
-            wchar_t* pText = (wchar_t*)m_WorkMessage.m_iParam2;
-            SocketClient->ToGameServer()->SendFriendAddRequest(pText);
-            delete[] pText;
+            std::wstring text = TakeReturnText();
+            if (text.empty())
+            {
+                break;
+            }
+            SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(text.c_str()));
         }
         break;
     case UI_MESSAGE_YNRETURN:
         if (m_WorkMessage.m_iParam2 == 1)
         {
             if (GetCurrentSelectedFriend() == NULL) break;
-            SocketClient->ToGameServer()->SendFriendDelete(GetCurrentSelectedFriend());
+            SocketClient->ToGameServer()->SendFriendDelete(MU_C16(GetCurrentSelectedFriend()));
         }
         break;
     default:
@@ -5101,12 +5025,22 @@ void CUITextInputWindow::RenderSub()
 
 void CUITextInputWindow::ReturnText()
 {
-    wchar_t* pszReturnText = new wchar_t[MAX_TEXT_LENGTH + 1];
-    m_TextInputBox.GetText(pszReturnText);
+    wchar_t returnText[MAX_TEXT_LENGTH + 1] = { 0 };
+    m_TextInputBox.GetText(returnText, MAX_TEXT_LENGTH + 1);
     m_TextInputBox.SetText(NULL);
-    if (pszReturnText[0] == '\0') return;
+    if (returnText[0] == L'\0')
+    {
+        return;
+    }
 
-    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), reinterpret_cast<LONG_PTR>(pszReturnText));
+    CUIBaseWindow* returnWindow = g_pWindowMgr->GetWindow(m_dwReturnWindowUIID);
+    if (returnWindow == NULL)
+    {
+        return;
+    }
+
+    returnWindow->SetReturnText(returnText);
+    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), 0);
     g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 }
 
@@ -5237,7 +5171,7 @@ BOOL CUIQuestionWindow::HandleMessage()
         case 1:
             if (m_dwReturnWindowUIID == -1)
             {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, m_szSaveID);
+                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, MU_C16(m_szSaveID));
             }
             else if (m_dwReturnWindowUIID != 0)
             {
@@ -5249,7 +5183,7 @@ BOOL CUIQuestionWindow::HandleMessage()
             if (m_iDialogType != 0) break;
             if (m_dwReturnWindowUIID == -1)
             {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, m_szSaveID);
+                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, MU_C16(m_szSaveID));
             }
             else if (m_dwReturnWindowUIID != 0)
             {
@@ -5630,9 +5564,7 @@ void CUIFriendMenu::RenderWindowList()
         auto* pWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(*m_WindowListIter);
         if (pWindow != NULL && pWindow->GetUserCount() > 2)
         {
-            glColor3f(255, 0, 0);
             RenderBitmap(BITMAP_INTERFACE_EX + 15, (float)m_iPos_x + m_iWidth - 7, (float)m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 5, (float)4, (float)6, 0.f, 0.f, 4.f / 8.f, 6.f / 8.f);
-            glColor3f(255, 255, 255);
         }
     }
 }

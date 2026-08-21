@@ -89,10 +89,10 @@ private:
     wchar_t m_szTitle[MAX_TEXT_LENGTH];
     wchar_t m_szText[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 
-    int	m_iMsgBoxWidth;
+    int m_iMsgBoxWidth;
     int m_iMsgBoxHeight;
     int m_iMiddleCount;
-    int	m_iNumTextLine;
+    int m_iNumTextLine;
 
 public:
 };

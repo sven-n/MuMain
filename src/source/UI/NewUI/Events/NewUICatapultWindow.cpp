@@ -262,7 +262,6 @@ bool SEASON3B::CNewUICatapultWindow::Update()
 bool SEASON3B::CNewUICatapultWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderOutlineUpper(m_Pos.x + 0, m_Pos.y + 120, 162, 100);
     RenderOutlineLower(m_Pos.x + 0, m_Pos.y + 120, 162, 100);
@@ -313,7 +312,7 @@ void SEASON3B::CNewUICatapultWindow::RenderButtons()
 
 void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
 
     RenderImage(IMAGE_CATAPULT_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
@@ -323,7 +322,7 @@ void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos
 
 void SEASON3B::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
     float fBoxHeight = fHeight;
 

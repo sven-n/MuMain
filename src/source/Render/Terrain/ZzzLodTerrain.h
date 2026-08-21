@@ -77,16 +77,6 @@ void ResetFrustrumBoundsFullTerrain();  // Set bounds to cover entire terrain (f
 
 void CreateLodBuffer();
 
-void CreateTerrainVBO();
-void DestroyTerrainVBO();
-void UploadTerrainLightVBO();
-extern GLuint g_VBO_TerrainPosition;
-extern GLuint g_EBO_Terrain;
-extern GLuint g_VAO_Terrain;
-extern GLuint g_VBO_TerrainLight[2];
-extern GLuint g_VBO_TerrainAlpha;
-extern int g_TerrainLightBufIdx;
-
 float RequestTerrainHeight(float xf, float yf);
 
 // Debug visualization

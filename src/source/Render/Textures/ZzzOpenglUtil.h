@@ -40,7 +40,7 @@ extern bool         GrabEnable;
 
 //  etc
 bool CheckID_HistoryDay(wchar_t* Name, WORD day);
-void glViewport2(int x, int y, int Width, int Height);
+void SetRenderViewport(int x, int y, int Width, int Height);
 void BeginSprite();
 void EndSprite();
 void EnableDepthTest();
@@ -61,6 +61,7 @@ void EnableAlphaBlend2();
 void EnableAlphaBlend3();
 void EnableAlphaBlend4();
 void BindTexture(int tex);
+void BindTextureStream(int tex);
 void EndTextureStream();
 
 // DXP-10 dumb single-call state wrappers. Unlike the Enable/DisableAlphaBlend family above,
@@ -104,49 +105,34 @@ bool EnableVSync();
 bool DisableVSync();
 int GetFPSLimit();
 
-// Present the current GL frame via SDL (replaces the Win32 ::SwapBuffers, #442).
-void PlatformSwapBuffers();
-
 void UpdateMousePositionn();
 inline void TEXCOORD(float* c, float u, float v)
 {
     c[0] = u;
     c[1] = v;
 }
-// GLP-19: the cached render state IR must key a batch on. These all live as file-scope globals in
-// ZzzOpenglUtil.cpp; exposing a snapshot accessor keeps them encapsulated there rather than
-// scattering `extern` declarations, and matches the DXP-10 state-wrapper monopoly convention.
-// Read by ImmediateRenderer to decide whether two consecutive Begin/End pairs can be merged into
-// one draw -- so it must cover every piece of state that changes what a quad looks like.
-struct GLRenderStateSnapshot
-{
-    int   alphaBlendType;
-    bool  alphaTestEnable;
-    float alphaRef;
-    bool  depthTestEnable;
-    bool  depthMaskEnable;
-    bool  cullFaceEnable;
-    bool  textureEnable;
-    bool  fogEnable;
-    int   cachTexture;
-};
-GLRenderStateSnapshot GetRenderStateSnapshot();
-
+void RenderBox(float Matrix[3][4]);
 void RenderPlane3D(float Width, float Height, float Matrix[3][4]);
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Angle = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha = 1.f);
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha = 1.f, float Scale = 15.f);
-float RenderNumber2D(float x, float y, int Num, float Width, float Height);
+float RenderNumber2D(float x, float y, int Num, float Width, float Height,
+    unsigned int color = 0xFFFFFFFFu);
+void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha);
 void RenderColor(float x, float y, float Width, float Height, float Alpha = 0.f, int Flag = 0);
 void EndRenderColor();
+void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor);
+void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor);
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, bool Scale = true, bool StartScale = true, float Alpha = 0.f);
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xffffffff);
-void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
+void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Angle, float u = 0.f,
+    float v = 0.f, float uWidth = 1.f, float vHeight = 1.f, unsigned int color = 0xFFFFFFFFu);
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate);
 void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num = -1);
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height);
-void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight);
+void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
+    float vHeight, unsigned int color = 0xFFFFFFFFu);
 void BeginBitmap();
 void EndBitmap();
 float absf(float a);

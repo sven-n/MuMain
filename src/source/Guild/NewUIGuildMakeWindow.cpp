@@ -116,9 +116,7 @@ namespace
         switch (fill)
         {
         case 1:
-            glColor4ub(146, 144, 141, 200);
-            RenderColor(x, y, sx, sy);
-            EndRenderColor();
+            RenderColorQuadARGB(x, y, sx, sy, 0xC892908Du);
             break;
         };
 
@@ -420,7 +418,7 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
                 Mark[i / 2] += GuildMark[MARK_EDIT].Mark[i];
         }
 
-        SocketClient->ToGameServer()->SendGuildCreateRequest(GuildMark[MARK_EDIT].GuildName, Mark, sizeof Mark);
+        SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark, sizeof Mark);
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
         return true;
     }
@@ -557,7 +555,6 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 bool CNewUIGuildMakeWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

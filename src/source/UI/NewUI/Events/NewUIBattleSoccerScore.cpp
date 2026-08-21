@@ -77,8 +77,6 @@ bool SEASON3B::CNewUIBattleSoccerScore::Render()
 {
     ::EnableAlphaTest();
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
     RenderContents();
 
@@ -89,8 +87,7 @@ bool SEASON3B::CNewUIBattleSoccerScore::Render()
 
 void SEASON3B::CNewUIBattleSoccerScore::RenderBackImage()
 {
-    RenderImage(IMAGE_BSS_BACK,
-        m_Pos.x, m_Pos.y, float(BSS_WIDTH), float(BSS_HEIGHT));
+    RenderImage(IMAGE_BSS_BACK, m_Pos.x, m_Pos.y, float(BSS_WIDTH), float(BSS_HEIGHT));
 }
 
 void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
@@ -110,10 +107,10 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
             g_pRenderText->SetTextColor(0, 150, 255, 255);
 
         mu_swprintf(szTemp, L"%d", GuildWarScore[0]);
-        g_pRenderText->RenderText(nX, nY, szTemp);				// ����
+        g_pRenderText->RenderText(nX, nY, szTemp); // ����
         ::CreateGuildMark(Hero->GuildMarkIndex);
-        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY), 8, 8);// ��� ��ũ
-        g_pRenderText->RenderText(nX + 33, nY, GuildMark[Hero->GuildMarkIndex].GuildName);// ����
+        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY), 8, 8);                     // ��� ��ũ
+        g_pRenderText->RenderText(nX + 33, nY, GuildMark[Hero->GuildMarkIndex].GuildName); // ����
 
         if (HeroSoccerTeam == 0)
             g_pRenderText->SetTextColor(0, 150, 255, 255);
@@ -121,10 +118,10 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
             g_pRenderText->SetTextColor(255, 60, 0, 255);
 
         mu_swprintf(szTemp, L"%d", GuildWarScore[1]);
-        g_pRenderText->RenderText(nX, nY + 22, szTemp);			// ����
+        g_pRenderText->RenderText(nX, nY + 22, szTemp); // ����
         ::CreateGuildMark(FindGuildMark(GuildWarName));
-        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY + 22), 8, 8);// ��� ��ũ
-        g_pRenderText->RenderText(nX + 33, nY + 22, GuildWarName);	// ����
+        ::RenderBitmap(BITMAP_GUILD, float(nX + 21), float(nY + 22), 8, 8); // ��� ��ũ
+        g_pRenderText->RenderText(nX + 33, nY + 22, GuildWarName);          // ����
     }
     else if (SoccerObserver)
     {

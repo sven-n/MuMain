@@ -9,6 +9,7 @@
     {
       "name": "windows-base",
       "hidden": true,
+      "description": "Base configuration for Windows builds (MSVC)",
       "generator": "Ninja Multi-Config",
       "binaryDir": "${sourceDir}/out/build/${presetName}",
       "cacheVariables": {
@@ -75,6 +76,58 @@
       "cacheVariables": {
         "ENABLE_EDITOR": "ON"
       }
+    },
+    {
+      "name": "linux-base",
+      "hidden": true,
+      "description": "Base configuration for native Linux builds",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "BUILD_TESTING": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Linux"
+      }
+    },
+    {
+      "name": "linux-x64",
+      "displayName": "Linux x86_64",
+      "description": "Native Linux x64 build — full build target, must compile and pass tests",
+      "inherits": "linux-base",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/linux-x64.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "OFF"
+      }
+    },
+    {
+      "name": "macos-base",
+      "hidden": true,
+      "description": "Base configuration for native macOS builds",
+      "generator": "Ninja Multi-Config",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "BUILD_TESTING": "ON"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
+      "name": "macos-arm64",
+      "displayName": "macOS arm64",
+      "description": "Native macOS Apple Silicon build — full build target, must compile and pass tests",
+      "inherits": "macos-base",
+      "toolchainFile": "${sourceDir}/cmake/toolchains/macos-arm64.cmake",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "OFF"
+      }
     }
   ],
   "buildPresets": [
@@ -124,6 +177,30 @@
       "name": "windows-x64-mueditor-release",
       "displayName": "x64 MuEditor Release",
       "configurePreset": "windows-x64-mueditor",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x64-debug",
+      "displayName": "Linux x64 Debug",
+      "configurePreset": "linux-x64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-x64-release",
+      "displayName": "Linux x64 Release",
+      "configurePreset": "linux-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "macos-arm64-debug",
+      "displayName": "macOS arm64 Debug",
+      "configurePreset": "macos-arm64",
+      "configuration": "Debug"
+    },
+    {
+      "name": "macos-arm64-release",
+      "displayName": "macOS arm64 Release",
+      "configurePreset": "macos-arm64",
       "configuration": "Release"
     }
   ]

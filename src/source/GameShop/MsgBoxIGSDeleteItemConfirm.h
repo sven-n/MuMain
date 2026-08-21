@@ -66,6 +66,7 @@ public:
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+
 private:
     void SetAddCallbackFunc();
     void SetButtonInfo();
@@ -74,17 +75,18 @@ private:
     void RenderButtons();
     void LoadImages();
     void UnloadImages();
+
 private:
     CNewUIMessageBoxButton m_BtnDelete;
     CNewUIMessageBoxButton m_BtnCancel;
-    int		m_iMiddleCount;
-    int		m_iStorageSeq;
-    int		m_iStorageItemSeq;
+    int m_iMiddleCount;
+    int m_iStorageSeq;
+    int m_iStorageItemSeq;
 
     wchar_t m_szItemType;
     wchar_t m_szDescription[UIMAX_TEXT_LINE][MAX_TEXT_LENGTH];
 
-    int			m_iDesciptionLine;
+    int m_iDesciptionLine;
 };
 
 class CMsgBoxIGSDeleteItemConfirmLayout : public TMsgBoxLayout<CMsgBoxIGSDeleteItemConfirm>

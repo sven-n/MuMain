@@ -9,7 +9,7 @@
 #include "Camera/CameraMove.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -26,6 +26,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "UI/Legacy/UIControls.h"
 #include "SceneCommon.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
@@ -34,7 +35,6 @@
 extern int DeleteGuildIndex;
 extern EGameScene SceneFlag;
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern float g_fMULogoAlpha;
 extern wchar_t m_Username[MAX_USERNAME_SIZE + 1];
 extern CHARACTER* Hero;
@@ -118,7 +118,7 @@ void DeleteCharacter()
     }
 
     CurrentProtocolState = REQUEST_DELETE_CHARACTER;
-    SocketClient->ToGameServer()->SendDeleteCharacter(CharactersClient[characterToDelete].ID, InputText[0]);
+    SocketClient->ToGameServer()->SendDeleteCharacter(MU_C16(CharactersClient[characterToDelete].ID), MU_C16(InputText[0]));
 
     PlayBuffer(SOUND_MENU01);
 
@@ -385,11 +385,9 @@ bool NewRenderLogInScene(HDC hDC)
 
     int Width, Height;
 
-    glColor3f(1.f, 1.f, 1.f);
-
     Height = REFERENCE_HEIGHT;
     Width = GetScreenWidth();
-    SetClearColor(0.f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
 
     // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
 #ifdef _EDITOR
@@ -409,18 +407,29 @@ bool NewRenderLogInScene(HDC hDC)
 
     if (!CUIMng::Instance().m_CreditWin.IsShow())
     {
-        RenderTerrain(false);
-        RenderObjects();
-        RenderCharactersClient();
-        RenderMount();
-
-        RenderJoints();
-        RenderEffects();
-        CheckSprites();
-        RenderLeaves();
-        RenderBoids();
-        RenderObjects_AfterCharacter();
-        ThePetProcess().RenderPets();
+        { FRAME_PROFILE(Terrain); RenderTerrain(false); }
+        { FRAME_PROFILE(Characters); RenderCharactersClient(); }
+        { FRAME_PROFILE(Objects); RenderMount(); }
+        {
+            FRAME_PROFILE(Objects);
+            {
+                FRAME_PROFILE(Other);
+                RenderObjects();
+            }
+        }
+        { FRAME_PROFILE(Effects); RenderJoints(); }
+        { FRAME_PROFILE(Effects); RenderEffects(); }
+        { FRAME_PROFILE(Effects); CheckSprites(); }
+        { FRAME_PROFILE(Effects); RenderLeaves(); }
+        { FRAME_PROFILE(Effects); RenderBoids(); }
+        {
+            FRAME_PROFILE(Objects);
+            {
+                FRAME_PROFILE(Other);
+                RenderObjects_AfterCharacter();
+            }
+        }
+        { FRAME_PROFILE(Characters); ThePetProcess().RenderPets(); }
     }
 
     BeginSprite();
@@ -435,11 +444,15 @@ bool NewRenderLogInScene(HDC hDC)
         if (g_fMULogoAlpha > 10.0f) g_fMULogoAlpha = 10.0f;
 
         EnableAlphaBlend();
-        glColor4f(g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f, g_fMULogoAlpha - 0.3f);
-        RenderBitmap(BITMAP_LOG_IN + 17, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f);
+        const BYTE glowLevel = static_cast<BYTE>(std::clamp(g_fMULogoAlpha - 0.3f, 0.f, 1.f) * 255.f);
+        RenderColorBitmap(BITMAP_LOG_IN + 17, 320.0f - 128.0f * 0.8f, 25.0f,
+            256.0f * 0.8f, 128.0f * 0.8f, 0.f, 0.f, 1.f, 1.f,
+            RGBA(glowLevel, glowLevel, glowLevel, glowLevel));
         EnableAlphaTest();
-        glColor4f(g_fMULogoAlpha, g_fMULogoAlpha, g_fMULogoAlpha, g_fMULogoAlpha);
-        RenderBitmap(BITMAP_LOG_IN + 16, 320.0f - 128.0f * 0.8f, 25.0f, 256.0f * 0.8f, 128.0f * 0.8f);
+        const BYTE logoLevel = static_cast<BYTE>(std::clamp(g_fMULogoAlpha, 0.f, 1.f) * 255.f);
+        RenderColorBitmap(BITMAP_LOG_IN + 16, 320.0f - 128.0f * 0.8f, 25.0f,
+            256.0f * 0.8f, 128.0f * 0.8f, 0.f, 0.f, 1.f, 1.f,
+            RGBA(logoLevel, logoLevel, logoLevel, logoLevel));
     }
 
     SIZE Size;
@@ -448,7 +461,6 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetFont(g_hFont);
 
     InputTextWidth = 256;
-    glColor3f(0.8f, 0.7f, 0.6f);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 

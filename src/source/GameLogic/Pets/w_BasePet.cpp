@@ -17,12 +17,8 @@ PetObjectPtr PetObject::Make()
     return ptr;
 }
 
-PetObject::PetObject() :
-    m_moveType(eAction_Stand),
-    m_oldMoveType(eAction_End),
-    m_targetKey(-1),
-    m_pOwner(NULL),
-    m_itemType(-1)
+PetObject::PetObject()
+    : m_moveType(eAction_Stand), m_oldMoveType(eAction_End), m_targetKey(-1), m_pOwner(NULL), m_itemType(-1)
 {
 }
 
@@ -38,14 +34,16 @@ void PetObject::Init()
 
 void PetObject::SetScale(float scale)
 {
-    if (NULL == m_obj) return;
+    if (NULL == m_obj)
+        return;
 
     m_obj->Scale = scale;
 }
 
 void PetObject::SetBlendMesh(int blendMesh)
 {
-    if (NULL == m_obj) return;
+    if (NULL == m_obj)
+        return;
 
     m_obj->BlendMesh = blendMesh;
 }
@@ -53,7 +51,8 @@ void PetObject::SetBlendMesh(int blendMesh)
 bool PetObject::Create(int itemType, int modelType, vec3_t Position, CHARACTER* Owner, int SubType, int LinkBone)
 {
     assert(Owner);
-    if (m_obj->Live) return FALSE;
+    if (m_obj->Live)
+        return FALSE;
 
     m_timer = new CTimer();
 
@@ -118,14 +117,15 @@ void PetObject::Release()
 
     if (m_timer)
     {
-      delete m_timer;
-      m_timer = nullptr;
+        delete m_timer;
+        m_timer = nullptr;
     }
 }
 
 void PetObject::Update(bool bForceRender)
 {
-    if (!m_obj->Live || NULL == m_obj->Owner || NULL == m_obj) return;
+    if (!m_obj->Live || NULL == m_obj->Owner || NULL == m_obj)
+        return;
 
     if (SceneFlag == MAIN_SCENE)
     {
@@ -149,7 +149,9 @@ void PetObject::Render(bool bForceRender)
 {
     if (m_obj->Live)
     {
-        m_obj->Visible = (bForceRender == FALSE ? TestFrustrum2D(m_obj->Position[0] * 0.01f, m_obj->Position[1] * 0.01f, -20.f) : TRUE);
+        m_obj->Visible =
+            (bForceRender == FALSE ? TestFrustrum2D(m_obj->Position[0] * 0.01f, m_obj->Position[1] * 0.01f, -20.f)
+                                   : TRUE);
 
         if (m_obj->Visible)
         {
@@ -178,7 +180,8 @@ bool PetObject::IsSameObject(OBJECT* Owner, int itemType)
 
 void PetObject::SetActions(ActionType type, Weak_Ptr(PetAction) action, float speed)
 {
-    if (action.expired() == TRUE) return;
+    if (action.expired() == TRUE)
+        return;
 
     m_actionMap.insert(std::make_pair(type, action));
     m_speedMap.insert(std::make_pair(type, speed));
@@ -197,7 +200,8 @@ bool PetObject::UpdateMove(double tick, bool bForceRender)
         m_oldMoveType = m_moveType;
 
         auto iter2 = m_speedMap.find(m_moveType);
-        if (iter2 == m_speedMap.end()) return FALSE;
+        if (iter2 == m_speedMap.end())
+            return FALSE;
 
         m_obj->Velocity = (*iter2).second;
     }
@@ -209,7 +213,7 @@ bool PetObject::UpdateMove(double tick, bool bForceRender)
         return FALSE;
     }
 
-    //std::tr1::weak_ptr<PetAction> petAction = (*iter).second;
+    // std::tr1::weak_ptr<PetAction> petAction = (*iter).second;
 
     Weak_Ptr(PetAction) petAction = (*iter).second;
 
@@ -224,7 +228,8 @@ bool PetObject::UpdateMove(double tick, bool bForceRender)
 bool PetObject::UpdateModel(double tick, bool bForceRender)
 {
     auto iter = m_actionMap.find(m_moveType);
-    if (iter == m_actionMap.end()) return FALSE;
+    if (iter == m_actionMap.end())
+        return FALSE;
 
     Weak_Ptr(PetAction) petAction = (*iter).second;
 
@@ -235,7 +240,8 @@ bool PetObject::UpdateModel(double tick, bool bForceRender)
 
     BMD* b = &Models[m_obj->Type];
     b->CurrentAction = m_obj->CurrentAction;
-    b->PlayAnimation(&m_obj->AnimationFrame, &m_obj->PriorAnimationFrame, &m_obj->PriorAction, m_obj->Velocity, m_obj->Position, m_obj->Angle);
+    b->PlayAnimation(&m_obj->AnimationFrame, &m_obj->PriorAnimationFrame, &m_obj->PriorAction, m_obj->Velocity,
+                     m_obj->Position, m_obj->Angle);
 
     return TRUE;
 }
@@ -243,7 +249,8 @@ bool PetObject::UpdateModel(double tick, bool bForceRender)
 bool PetObject::UpdateSound(double tick, bool bForceRender)
 {
     auto iter = m_actionMap.find(m_moveType);
-    if (iter == m_actionMap.end()) return FALSE;
+    if (iter == m_actionMap.end())
+        return FALSE;
 
     Weak_Ptr(PetAction) petAction = (*iter).second;
 
@@ -258,7 +265,8 @@ bool PetObject::UpdateSound(double tick, bool bForceRender)
 bool PetObject::CreateEffect(double tick, bool bForceRender)
 {
     auto iter = m_actionMap.find(m_moveType);
-    if (iter == m_actionMap.end()) return FALSE;
+    if (iter == m_actionMap.end())
+        return FALSE;
 
     Weak_Ptr(PetAction) petAction = (*iter).second;
 

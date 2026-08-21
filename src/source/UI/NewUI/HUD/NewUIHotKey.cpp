@@ -13,6 +13,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 
 #include "Render/Effects/ZzzEffect.h"
+#include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMng.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
@@ -394,6 +395,11 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 
 bool SEASON3B::CNewUIHotKey::CanUpdateKeyEvent()
 {
+    if (CUITextInputBox::IsAnyInputBoxFocused())
+    {
+        return false;
+    }
+
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
         || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)

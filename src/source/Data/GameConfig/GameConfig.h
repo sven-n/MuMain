@@ -71,10 +71,16 @@ public:
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
-    const std::vector<std::wstring>& GetChatCommandFavourites() const { return m_chatCommandFavourites; }
+    const std::vector<std::wstring>& GetChatCommandFavourites() const
+    {
+        return m_chatCommandFavourites;
+    }
     void SetChatCommandFavourites(const std::vector<std::wstring>& favourites);
 
-    const std::vector<std::wstring>& GetChatCommandTemplates() const { return m_chatCommandTemplates; }
+    const std::vector<std::wstring>& GetChatCommandTemplates() const
+    {
+        return m_chatCommandTemplates;
+    }
     void SetChatCommandTemplates(const std::vector<std::wstring>& templates);
 
     // Camera

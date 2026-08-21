@@ -30,8 +30,6 @@
 #include "Camera/CameraUtility.h"
 #include "Scenes/SceneManager.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern int g_iChatInputType;
 extern BOOL g_bUseChatListBox;
 extern DWORD g_dwMouseUseUIID;
@@ -114,7 +112,6 @@ void MoveCharacter(CHARACTER* c, OBJECT* o);
 float g_Luminosity;
 
 extern int g_iNoMouseTime;
-extern GLvoid KillGLWindow(GLvoid);
 
 void WaitForNextActivity(bool usePreciseSleep)
 {

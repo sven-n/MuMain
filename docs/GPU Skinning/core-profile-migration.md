@@ -1,139 +1,104 @@
-# Core Profile & Pipeline Migration Guide
+# Core Profile Migration Mapped to SDL GPU
 
-This document details the modernization of the client rendering engine from fixed-function pipeline (FFP) legacy patterns to OpenGL 3.3 Core Profile compliance, Uniform Buffer Object matrix management, Immediate Renderer (`IR::`) primitive decomposition, and strict graphics wrapper isolation.
+Upstream retired fixed-function OpenGL by moving to OpenGL Core Profile, UBOs,
+an `IR::` immediate renderer, and an RHI. MuMain reaches the same product goal
+through SDL GPU. This document maps the incoming concepts to the active
+downstream architecture.
 
----
+## Fixed-function replacement
 
-## 1. Core Profile Migration Strategy
+| Legacy or upstream concept | Downstream equivalent |
+|---|---|
+| `glBegin` / `glEnd` geometry | `IMuRenderer::RenderQuad2D`, `RenderTriangles`, `RenderQuadStrip`, and `RenderLines` |
+| Driver matrix stacks | CPU camera/projection math plus renderer-owned MVP state |
+| `GlobalUBO`, `SceneUBO` | Per-command vertex/fog uniform structs pushed through SDL GPU |
+| `BoneUBO` | Growable per-frame SDL GPU storage buffer containing packed 3x4 rows |
+| `ImmediateRenderer` / `RHI` | `IMuRenderer` contract plus the deferred command queue in `MuRendererSDLGpu.cpp` |
+| GLSL Core Profile shaders | HLSL sources compiled to SPIR-V and MSL; DXIL remains the repository's current stub strategy |
+| GL texture objects | Renderer texture registry, SDL GPU textures, samplers, and queued updates |
+| Synchronous color readback | Request/consume frame-pixel API backed by an asynchronous SDL GPU transfer |
 
-The migration from legacy OpenGL compatibility profile to **OpenGL 3.3 Core Profile** (executed in `DXP-08`) enforced the complete elimination of fixed-function state machine features:
+The historical names `BeginBitmap`, `BeginOpengl`, and `ZzzOpenglUtil` remain
+for call-site compatibility. They do not require a normal runtime OpenGL
+context.
 
-> [!NOTE]
-> **3.3 is now the floor, not the target.** [`GLP-08`](glperf/README.md#glp-08--gl-context-version-chain--capability-probe)
-> replaced the fixed request for exactly GL 3.3 core with a descending `{4,5} → {4,3} → {3,3}`
-> attempt chain plus an `RHI::Caps` capability probe, so later work can branch on real hardware
-> capability instead of assuming a version. `config.ini [Render] MaxGLVersion` forces a ceiling as
-> a rollback path. Shaders are still authored to `#version 330 core`.
+## Matrices and passes
 
-```mermaid
-graph LR
-    subgraph Legacy["Legacy Fixed-Function Pattern"]
-        L1["glBegin(GL_QUADS) ... glEnd()"]
-        L2["glMatrixMode(GL_PROJECTION)"]
-        L3["glPushMatrix() / glPopMatrix()"]
-        L4["glAlphaFunc(GL_GREATER, ref)"]
-        L5["glEnable(GL_LIGHTING)"]
-        L6["glGetFloatv(GL_MODELVIEW_MATRIX)"]
-    end
-    subgraph Modern["Modern Core Profile Pattern"]
-        M1["ImmediateRenderer (IR::) / VBOs"]
-        M2["CPU Matrix Math -> GlobalUBO (Slot 0)"]
-        M3["GlobalUBO::PushModel / PopModel"]
-        M4["Shader u_AlphaRef + Fragment Discard"]
-        M5["GLSL Shaders (BMDMeshShader)"]
-        M6["CPU View Matrix Cache"]
-    end
-    L1 --> M1
-    L2 --> M2
-    L3 --> M3
-    L4 --> M4
-    L5 --> M5
-    L6 --> M6
-```
+- `CameraProjection.cpp` and the camera state build projection and view data on
+  the CPU. Picking therefore does not depend on driver matrix readback.
+- `IMuRenderer::BeginScene()` establishes the 3D viewport and projection.
+- `Begin2DPass()` marks screen-space rendering. The SDL GPU backend selects
+  depth behavior through pipelines rather than mutating a global GL state.
+- Every deferred draw stores the MVP and fog values it needs. Later state
+  changes cannot retroactively alter an already recorded command.
 
----
+## Primitive conversion
 
-## 2. Matrix Stack & FFP Bridge Retirement
+SDL GPU pipelines consume triangles or lines. Compatibility helpers convert
+legacy shapes before submission:
 
-In legacy client code, camera, world, and projection matrices were maintained on driver-side fixed-function matrix stacks (`GL_MODELVIEW` and `GL_PROJECTION`). Modern shaders read view and projection matrices directly from `GlobalUBO` (Slot 0).
+- A quad becomes triangles `[v0, v1, v2]` and `[v0, v2, v3]`.
+- A quad strip becomes repeated pairs `[v0, v1, v2]`, `[v1, v3, v2]`.
+- Triangle and line callers submit already expanded vertices.
 
-### CPU-Side Orthographic & Perspective Matrix Builders
+There is no downstream `IR::Begin()` state machine. Callers construct a
+bounded span and submit it through `IMuRenderer` or an existing rendering
+wrapper.
 
-- **`BeginBitmap()` (2D UI Ortho)**: Replaced `glOrtho()` with CPU-side orthographic projection matrix calculation uploaded directly to `GlobalUBO`.
-- **`BeginOpengl()` (3D World View/Proj)**: Replaced `gluLookAt()` and `glFrustum()` with CPU-side view and perspective matrix math (`BuildPerspectiveProjection`).
-- **`UpdateMousePosition()` (3D Ray Picking)**: Decoupled mouse-click ground picking from `glGetFloatv` driver readbacks by reading cached CPU camera matrices.
+## Deferred frame flow
 
-### Unified Projection Matrix Construction
+1. `BeginFrame()` acquires SDL GPU frame resources.
+2. Draw calls append vertex bytes to growable CPU scratch storage and record a
+   `RenderCmd` containing pipeline, texture, sampler, offsets, and uniforms.
+3. Compatible adjacent triangle commands may merge.
+4. `EndFrame()` uploads vertex, index, bone, and texture-update data.
+5. Commands replay in order into the active render pass.
 
-> [!NOTE]
-> All 3D cameras (world view, 3D UI item preview panels, photo viewers) construct perspective matrices via `BuildPerspectiveProjection()` (`Render/Core/RenderConfig.cpp`), ensuring consistent clip-space depth calculations across all rendering passes.
+This preserves legacy ordering while avoiding per-call GPU uploads.
 
----
+The renderer does not copy upstream terrain texture-pair sorting. Downstream
+base and blended overlay layers are separate commands with different depth
+behavior, so global reordering can change output. Adjacent compatible commands
+still merge without changing order.
 
-## 3. Immediate Renderer (`IR::`) & Primitive Decomposition
+## Textures and readback
 
-For UI controls, health bars, 2D sprites, particles, and dynamic lines, the engine provides the `ImmediateRenderer` (`IR::`) subsystem ([`Render/Core/ImmediateRenderer.cpp`](../../src/source/Render/Core/ImmediateRenderer.cpp)).
+- `Render/Sprites/GlobalBitmap.cpp` owns game texture creation through the
+  renderer's SDL GPU device.
+- Dynamic changes use queued texture updates; draw submission resolves game
+  bitmap IDs through the renderer registry.
+- Screenshots and diagnostic captures call `RequestFramePixels()` and later
+  `ConsumeFramePixels()`. Ordinary frames do not allocate color-readback
+  resources.
 
-### Primitive Topology Decomposition
+## Enforcement
 
-Hardware shader pipelines do not natively support legacy quad (`GL_QUADS`) or triangle fan (`GL_TRIANGLE_FAN`) primitives. `IR::` decomposes these primitives CPU-side into **non-indexed** triangle lists (`GL_TRIANGLES`) before issuing draw calls. Decomposition happens inline in `IR::Vertex3f()` as vertices arrive, not in `IR::End()`:
+`tools/check_gl_wrapper_monopoly.py` runs as a build dependency. It permits raw
+GL compatibility implementation only inside the render layer and rejects new
+raw graphics calls in gameplay, UI, scene, and world code.
 
-#### 1. Quads Decomposition (`GL_QUADS`)
-For every 4 vertices submitted (`v0, v1, v2, v3`), the fourth vertex emits two triangles:
-$$\text{Triangle 1}: [v_0, v_1, v_2], \quad \text{Triangle 2}: [v_0, v_2, v_3]$$
+Use the renderer-neutral contract for new code. Extend a compatibility wrapper
+only when an existing legacy call family must remain source-compatible.
 
-#### 2. Triangle Fan Decomposition (`GL_TRIANGLE_FAN`)
-For $N$ vertices submitted ($v_0, v_1, \dots, v_{N-1}$), each vertex from the third onward emits one triangle against the fan anchor $v_0$, giving $N-2$ total:
-$$\text{Triangle } i: [v_0, v_{i}, v_{i+1}] \quad \text{for } 1 \le i \le N-2$$
+## Configuration compatibility
 
-```mermaid
-graph TD
-    subgraph Quad["Quad Decomposition (2 Triangles)"]
-        v0["v0"] --- v1["v1"]
-        v1 --- v2["v2"]
-        v2 --- v3["v3"]
-        v3 --- v0
-        v0 -. Split Diagonal .-> v2
-    end
-    subgraph Fan["Fan Decomposition (N-2 Triangles)"]
-        f0["v0 (Anchor)"] --- f1["v1"]
-        f0 --- f2["v2"]
-        f0 --- f3["v3"]
-        f0 --- f4["v4"]
-        f1 --- f2
-        f2 --- f3
-        f3 --- f4
-    end
-```
+Upstream exposed `[Render] CoreProfile` as an OpenGL context selector. MuMain
+always initializes SDL GPU, so that legacy key is not read and both `0` and `1`
+leave renderer selection unchanged. GL-shaped wrapper names remain source
+compatibility only; they do not restore a Compatibility Profile path.
 
-### Streaming VBO Ring-Buffer Architecture
+The upstream `[Render] MaxGLVersion` rollback is likewise absent. SDL creates a
+supported platform GPU backend directly and exposes the selected driver in logs,
+error reports, and `$glstats`.
 
-`ImmediateRenderer` streams dynamic vertex data through a pre-allocated dynamic vertex buffer using ring-buffer upload semantics (`DXP-26`):
+## Audit status
 
-1. **Sequential Append**: New draw calls append vertices sequentially into the buffer using `RHI::AppendBuffer`.
-2. **Orphan-on-Wrap**: When the ring-buffer reaches capacity, it re-allocates or orphans the buffer, starting fresh at offset 0 without stalling the GPU pipeline. [`GLP-25`](glperf/README.md#glp-25--ir-streaming-ring-growth-policy) added a growth policy on top: a ring that merely wraps repeatedly (rather than failing a single oversized append) now doubles its capacity, because the original code could only grow on the latter and so wrapped ~23 times per effect-dense frame forever.
-3. **Persistent Program Binding**: `IR::Begin()` binds the `PassthroughShader` through `BindState`'s dirty-check cache. If the same program is already bound from a prior draw, the `glUseProgram` call is skipped.
-4. **Deferred Submission** ([`GLP-19`](glperf/README.md#glp-19--batch-ir-draws-across-beginend-pairs)): `IR::End()` issues no GL call at all — it marks the accumulated run pending and snapshots the render state it was built under. The next `IR::Begin()` extends that run if nothing affecting the pixels changed; otherwise it flushes first. Every state writer that would invalidate a pending batch calls `IR::Flush()` from inside its own dirty check, *before* mutating. See [immediate-renderer-architecture.md §4.4](immediate-renderer-architecture.md#44-cross-beginend-batching-glp-19).
-
----
-
-## 4. Graphics Wrapper Monopoly & Enforcement
-
-To prevent technical debt and ensure cross-platform driver compatibility, the client enforces a strict **State-Wrapper Monopoly** (`DXP-10`):
-
-> **Invariant**: No raw graphics API calls (e.g., `glDrawArrays`, `glBindTexture`, `glUseProgram`) are permitted outside the `Render/` directory tree.
-
-### Automated Build-Time Verification Guard
-
-The build system executes [`CLIENT/Tools/check_gl_wrapper_monopoly.py`](../../Tools/check_gl_wrapper_monopoly.py) as an automatic custom target before compiling `MuClient`.
-
-```mermaid
-flowchart TD
-    A["check_gl_wrapper_monopoly.py Guard"] --> B{"Scan Source Files Outside Render/"}
-    B -- "No Raw Graphics Calls" --> C["Pass: Build Proceeds Cleanly"]
-    B -- "Raw Graphics Call Detected" --> D["Fail: Compilation Halts with Error & Line"]
-```
-
-If developer code outside `Render/` attempts to invoke raw driver functions, the Python guard halts the build with a descriptive error pointing to the violating file and line number.
-
----
-
-## 5. RHI Texture Management & Memory Operations
-
-All texture operations are encapsulated behind the RHI layer:
-
-- **Creation & Upload**: [`GlobalBitmap.cpp`](../../src/source/Render/Sprites/GlobalBitmap.cpp) creates textures via `RHI::CreateTexture`. The format is RGBA8 (hardcoded — no named RHI format constant exists; `DXGI_FORMAT_R8G8B8A8_UNORM`-style named constants are D3D11-side only; the GL backend hardwires `GL_RGBA8`). No automatic mipmap generation occurs — textures are single-level unless explicitly updated.
-- **Dynamic Streaming**: UI fonts, dynamic minimaps, and reconnect dialogs update sub-regions of textures using `RHI::UpdateTexture`.
-- **Pixel Readback**: Two separate readback functions exist behind the RHI:
-  - `RHI::ReadColorFramebuffer` — used by screenshot export and the reconnect-dialog background blur. Returns top-down row order regardless of backend.
-  - `RHI::ReadDepthPixel` — called by `CameraProjection::TestDepthBuffer`, which is **dead code**. Its only caller is `RenderSun()` (`Render/Terrain/ZzzLodTerrain.cpp`), which has zero call sites anywhere in the tree and whose own sprite draw is commented out. A single-pixel `glReadPixels` is a full CPU-blocks-until-GPU-drains sync and would be a serious stall if it ran — it does not. Re-verified 2026-08-12 while hunting a frame-time spike; see [glperf §Corrections](glperf/README.md#corrections-to-the-source-analysis). Note: `RHI::ReadPixels` does **not** exist as a function.
+- DXP-07d's item-preview camera validation survives in the downstream
+  `SceneCommon`, `NewUI3DRenderMng`, event-panel, game-shop, and legacy UI call
+  sites. Those paths use CPU projection/view math before renderer submission.
+- DXP-17 is partially mapped. CPU projection, zero-to-one viewport depth, and
+  per-command fog are active. The SDL GPU renderer does not override the legacy
+  single-pixel `ReadPixels()` depth query, so `CameraProjection::TestDepthBuffer`
+  retains its far-depth fallback. No gamma-correction audit is claimed.
+- DXP-21 compute acceleration remains deferred. Cloth simulation and rendering
+  stay on the CPU and remain isolated from rigid BMD GPU skinning.

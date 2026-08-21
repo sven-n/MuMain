@@ -246,7 +246,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Update()
 bool SEASON3B::CNewUIItemEnduranceInfo::Render()
 {
     EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -340,34 +339,10 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
     // HPUI_FRAME
-    if (bWarning == false)
-    {
-        glColor4f(0.f, 0.f, 0.f, 0.7f);
-    }
-    else
-    {
-        glColor4f(0.2f, 0.f, 0.f, 0.7f);
-    }
-
-    RenderColor(iX + 2, iY + 2, PETHP_FRAME_WIDTH - 4, PETHP_FRAME_HEIGHT - 10);
+    const unsigned int backgroundColor = bWarning ? 0xB3330000u : 0xB3000000u;
+    RenderColorQuadARGB(iX + 2, iY + 2, PETHP_FRAME_WIDTH - 4, PETHP_FRAME_HEIGHT - 10, backgroundColor);
     EndRenderColor();
 
-#ifdef PJH_FIX_SPRIT
-    if (wcscmp(pszName, I18N::Game::DarkRaven) == 0)
-    {
-        int iCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
-        PET_INFO PetInfo;
-        giPetManager::GetPetInfo(PetInfo, 421 - PET_TYPE_DARK_SPIRIT);
-        int RequireCharisma = (185 + (PetInfo.m_wLevel * 15));
-        if (RequireCharisma > iCharisma)
-            glColor4f(1.f, 0.5f, 0.5f, 1.f);
-        else
-            glColor4f(1.f, 1.f, 1.f, 1.f);
-    }
-    else
-#endif //#ifdef PJH_FIX_SPRIT
-
-        glColor4f(1.f, 1.f, 1.f, 1.f);
     RenderImage(IMAGE_PETHP_FRAME, iX, iY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT);
 
     // HPUI_Bar
@@ -570,8 +545,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
     if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
         return false;
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-
     auto ItemDurPos = POINT(m_ItemDurUIStartPos);
     int icntItemDurIcon = 0;
     int iTempImageIndex;
@@ -638,7 +611,6 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
         }
 
         EnableAlphaTest();
-        glColor4f(1.f, 1.f, 1.f, 1.f);
 
         if (i != EQUIPMENT_RING_LEFT || bRenderRingWarning != true)
         {
@@ -650,35 +622,27 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
             bRenderRingWarning = true;
         }
 
+        unsigned int warningColor = 0x80FFFF00u;
         if (pItem->Durability == 0)
-        {
-            glColor4f(1.f, 0.0f, 0.f, 0.5f);
-        }
+            warningColor = 0x80FF0000u;
         else if (pItem->Durability <= iMaxDurability * 0.2f)
-        {
-            glColor4f(1.f, 0.2f, 0.0f, 0.5f);
-        }
+            warningColor = 0x80FF3300u;
         else if (pItem->Durability <= iMaxDurability * 0.3f)
-        {
-            glColor4f(1.0f, 0.5f, 0.f, 0.5f);
-        }
-        else if (pItem->Durability <= iMaxDurability * 0.5f)
-        {
-            glColor4f(1.f, 1.f, 0.f, 0.5f);
-        }
+            warningColor = 0x80FF8000u;
 
         if (i == EQUIPMENT_RING_RIGHT)
         {
-            RenderColor(ItemDurPos.x, ItemDurPos.y, ITEM_DUR_WIDTH / 2, ITEM_DUR_HEIGHT);
+            RenderColorQuadARGB(ItemDurPos.x, ItemDurPos.y, ITEM_DUR_WIDTH / 2, ITEM_DUR_HEIGHT, warningColor);
         }
         else if (i == EQUIPMENT_RING_LEFT)
         {
-            RenderColor(ItemDurPos.x + (ITEM_DUR_WIDTH / 2), ItemDurPos.y, ITEM_DUR_WIDTH / 2, ITEM_DUR_HEIGHT);
+            RenderColorQuadARGB(ItemDurPos.x + (ITEM_DUR_WIDTH / 2), ItemDurPos.y, ITEM_DUR_WIDTH / 2,
+                ITEM_DUR_HEIGHT, warningColor);
             bRenderRingWarning = false;
         }
         else
         {
-            RenderColor(ItemDurPos.x, ItemDurPos.y, ITEM_DUR_WIDTH, ITEM_DUR_HEIGHT);
+            RenderColorQuadARGB(ItemDurPos.x, ItemDurPos.y, ITEM_DUR_WIDTH, ITEM_DUR_HEIGHT, warningColor);
         }
 
         EndRenderColor();

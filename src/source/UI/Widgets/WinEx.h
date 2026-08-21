@@ -9,23 +9,23 @@
 
 #include "UI/Widgets/Win.h"
 
-#define	WINEX_BGSIDE_HEIGHT		8
+#define WINEX_BGSIDE_HEIGHT 8
 
-#define	WE_BG_CENTER	0
-#define WE_BG_TOP		1
-#define	WE_BG_BOTTOM	2
-#define	WE_BG_LEFT		3
-#define	WE_BG_RIGHT		4
-#define	WE_BG_MAX		5
+#define WE_BG_CENTER 0
+#define WE_BG_TOP 1
+#define WE_BG_BOTTOM 2
+#define WE_BG_LEFT 3
+#define WE_BG_RIGHT 4
+#define WE_BG_MAX 5
 
 class CWinEx : public CWin
 {
 protected:
-    int			m_nBgSideMax;
-    int			m_nBgSideMin;
-    int			m_nBgSideNow;
+    int m_nBgSideMax;
+    int m_nBgSideMin;
+    int m_nBgSideNow;
 
-    int			m_nBasisY;
+    int m_nBasisY;
 
 public:
     CWinEx();

@@ -6,8 +6,8 @@
 #include "UI/Widgets/Win.h"
 #include "UI/Widgets/Button.h"
 
-#define	MW_MSG_LINE_MAX		2
-#define	MW_MSG_ROW_MAX		52
+#define MW_MSG_LINE_MAX 2
+#define MW_MSG_ROW_MAX 52
 
 class CMsgWin : public CWin
 {
@@ -21,15 +21,15 @@ protected:
         MWT_STR_INPUT,
     };
 
-    CSprite			m_sprBack;
-    CSprite			m_sprInput;
-    CButton			m_aBtn[2];
-    wchar_t			m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
-    int				m_nMsgLine;
-    int				m_nMsgCode;
-    MSG_WIN_TYPE	m_eType;
-    short			m_nGameExit;
-    double			m_dDeltaTickSum;
+    CSprite m_sprBack;
+    CSprite m_sprInput;
+    CButton m_aBtn[2];
+    wchar_t m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
+    int m_nMsgLine;
+    int m_nMsgCode;
+    MSG_WIN_TYPE m_eType;
+    short m_nGameExit;
+    double m_dDeltaTickSum;
 
 public:
     CMsgWin();

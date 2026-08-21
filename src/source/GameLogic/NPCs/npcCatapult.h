@@ -12,4 +12,4 @@
 #ifndef __NPC_CATAPULT_H__
 #define __NPC_CATAPULT_H__
 
-#endif// __NPC_CATAPULT_H__
+#endif // __NPC_CATAPULT_H__

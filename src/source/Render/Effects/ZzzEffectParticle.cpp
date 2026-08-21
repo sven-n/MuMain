@@ -16,7 +16,7 @@
 #include "Network/Server/WSclient.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Scenes/MainScene.h"
 
 vec3_t g_vParticleWind = { 0.0f, 0.0f, 0.0f };
@@ -9031,16 +9031,10 @@ void RenderParticles(BYTE byRenderOneMore)
             case BITMAP_ADV_SMOKE + 1:
                 if (o->SubType == 2)
                 {
-                    // DXP-08a: GL_TEXTURE_ENV_MODE=GL_ADD is FFP-only state the shader path never
-                    // read, so this additive glow was silently lost once the VBO/shader path became
-                    // permanent — ported to PassthroughShader's u_TexCombineAdd uniform (real FFP
-                    // call kept for the legacy compatibility-profile path).
-                    if (!g_CoreProfile) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
-                    PassthroughShader::Instance().SetTexCombineAdd(true);
+                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD);
                     EnableAlphaBlend3();
                     RenderSprite(o->TexType, o->Position, Width, Height, o->Light, o->Rotation);
-                    if (!g_CoreProfile) glTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-                    PassthroughShader::Instance().SetTexCombineAdd(false);
+                    mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
                 }
                 else
                 {

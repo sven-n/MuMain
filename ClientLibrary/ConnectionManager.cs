@@ -5,8 +5,9 @@
 namespace MUnique.Client.Library;
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.IO;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -26,7 +27,7 @@ public unsafe partial class ConnectionManager
     /// <summary>
     /// The currently active connections, with their handle as key.
     /// </summary>
-    private static readonly Dictionary<int, ConnectionWrapper> Connections = new();
+    private static readonly ConcurrentDictionary<int, ConnectionWrapper> Connections = new();
 
     /// <summary>
     /// The currently used maximum handle number.
@@ -60,6 +61,7 @@ public unsafe partial class ConnectionManager
         catch (Exception ex)
         {
             Debug.WriteLine($"Error establishing connection: {ex}");
+            WriteNetworkDiagnostic($"Connection failed: {ex}");
             return -1;
         }
     }
@@ -137,11 +139,15 @@ public unsafe partial class ConnectionManager
 
         var handle = Interlocked.Increment(ref _maxHandle);
         var wrapper = new ConnectionWrapper(handle, connection, onPacketReceived, onDisconnected);
-        Connections.Add(handle, wrapper);
+        if (!Connections.TryAdd(handle, wrapper))
+        {
+            wrapper.Dispose();
+            throw new InvalidOperationException($"Connection handle {handle} already exists.");
+        }
 
         connection.Disconnected += () =>
         {
-            Connections.Remove(handle);
+            Connections.TryRemove(handle, out _);
             return ValueTask.CompletedTask;
         };
 
@@ -221,5 +227,12 @@ public unsafe partial class ConnectionManager
         {
             Debug.WriteLine($"Failed to set socket option {option}: {ex}");
         }
+    }
+
+    private static void WriteNetworkDiagnostic(string message)
+    {
+        var logLine = $"{DateTimeOffset.Now:O} [NET] {message}{Environment.NewLine}";
+        File.AppendAllText(Path.Combine(Path.GetTempPath(), "MuNetwork.log"), logLine);
+        Console.Error.Write(logLine);
     }
 }

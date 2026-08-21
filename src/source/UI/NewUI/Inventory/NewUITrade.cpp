@@ -185,8 +185,6 @@ bool CNewUITrade::Render()
 {
     ::EnableAlphaTest();
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-
     RenderBackImage();
     RenderText();
 
@@ -330,10 +328,9 @@ void CNewUITrade::RenderWarningArrow()
                 + (pYourItemObj->y * INVENTORY_SQUARE_WIDTH)
                 + sinf(WorldTime * 0.015f);
 
-            ::glColor3f(0.f, 1.f, 1.f);
-            ::RenderBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5, 24.f, 24.f,
-                0.f, 0.4f);
-            ::glColor3f(1.f, 1.f, 1.f);
+            const DWORD warningArrowColor = RGBA(0, 255, 255, 255);
+            ::RenderColorBitmap(IMAGE_TRADE_WARNING_ARROW, fX, fY + 5, 24.f, 24.f,
+                0.f, 0.4f, 1.f, 1.f, warningArrowColor);
 
             g_pRenderText->SetFont(g_hFontBold);
             g_pRenderText->SetTextColor(255, 255, 255, 255);

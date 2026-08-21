@@ -2,9 +2,9 @@
 #include "UI/NewUI/Inventory/NewUIItemMng.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
-extern OBJECT       Mounts[];
-extern OBJECT       Boids[];
-extern OBJECT       Fishs[];
+extern OBJECT Mounts[];
+extern OBJECT Boids[];
+extern OBJECT Fishs[];
 
 extern float EarthQuake;
 extern bool EnableShadow;
@@ -21,7 +21,8 @@ void RenderObject(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMo
 void RenderObjects();
 void NextGradeObjectRender(CHARACTER* c);
 void RenderObject_AfterImage(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
-void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0, float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
+void RenderCharacter_AfterImage(CHARACTER* pCha, PART_t* pPart, bool Translate = false, int Select = 0,
+                                float AniInterval1 = 1.4f, float AniInterval2 = 0.7f);
 void RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void Draw_RenderObject_AfterCharacter(OBJECT* o, bool Translate = false, int Select = 0, int ExtraMon = 0);
 void RenderObjects_AfterCharacter();
@@ -48,8 +49,8 @@ void CreateOperate(OBJECT* Owner);
 ///////////////////////////////////////////////////////////////////////////////
 
 extern ITEM_t Items[MAX_ITEMS];
-extern ITEM   PickItem;
-extern ITEM   TargetItem;
+extern ITEM PickItem;
+extern ITEM TargetItem;
 
 void ItemObjectAttribute(OBJECT* o);
 void CreateItemDrop(ITEM_t* ip, ItemCreationParams params, vec3_t position, bool isFreshDrop);
@@ -57,12 +58,17 @@ void CreateMoneyDrop(ITEM_t* ip, int amount, vec3_t position, bool isFreshDrop);
 void PartObjectColor(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 void PartObjectColor2(int Type, float Alpha, float Bright, vec3_t Light, bool ExtraMon = false);
 
-void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture = -1, int iMonsterIndex = -1);
-void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture = -1);
+void RenderPartObjectBodyColor(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright, int Texture = -1,
+                               int iMonsterIndex = -1);
+void RenderPartObjectBodyColor2(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType, float Bright,
+                                int Texture = -1);
 void RenderPartObjectBody(BMD* b, OBJECT* o, int Type, float Alpha, int RenderType);
 
-void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0, int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
-void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false, bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
+void RenderPartObjectEffect(OBJECT* o, int Type, vec3_t Light, float Alpha = 0.f, int Level = 0, int ExcellentFlags = 0,
+                            int ancientDiscriminator = 0, int Select = 0, int RenderType = RENDER_TEXTURE);
+void RenderPartObject(OBJECT* o, int Type, void* p, vec3_t Light, float Alpha = 0.f, int Level = 0,
+                      int ExcellentFlags = 0, int ancientDiscriminator = 0, bool GlobalTransform = false,
+                      bool HideSkin = false, bool Translate = false, int Select = 0, int RenderType = RENDER_TEXTURE);
 
 void RenderPartObjectEdge(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale);
 void RenderPartObjectEdge2(BMD* b, OBJECT* o, int Flag, bool Translate, float Scale, OBB_t* OBB);

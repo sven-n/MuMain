@@ -95,7 +95,6 @@ namespace UI::Notices
 
         g_pRenderText->SetFont(g_hFontBold);
 
-        glColor3f(1.f, 1.f, 1.f);
         for (int i = 0; i < MAX_NOTICE; i++)
         {
             Notice* n = &s_notices[i];

@@ -11,11 +11,11 @@
 #include "stdafx.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "ListManager.h"
-#ifdef _WIN32
-#include <process.h>
-#endif
-
+#include <condition_variable>
+#include <filesystem>
 #include <iterator>
+#include <mutex>
+#include <thread>
 
 CListManager::CListManager() // OK
 {
@@ -72,18 +72,15 @@ void			CListManager::SetListManagerInfo(DownloaderType type,
     this->m_ListManagerInfo.m_Version = Version;
     this->m_ListManagerInfo.m_dwDownloadMaxTime = dwDownloadMaxTime;
 
-    if (GetFileAttributes(LocalPath) == INVALID_FILE_ATTRIBUTES)
-        CreateDirectory(LocalPath, 0);
+    std::error_code error;
+    std::filesystem::create_directories(std::filesystem::path(LocalPath), error);
 
-    if (this->m_ListManagerInfo.m_strLocalPath.substr(this->m_ListManagerInfo.m_strLocalPath.size(), 1) != L"\\")
-    {
-        this->m_ListManagerInfo.m_strLocalPath += L"\\";
-    }
+    const wchar_t separator = std::filesystem::path::preferred_separator;
+    if (!this->m_ListManagerInfo.m_strLocalPath.empty() && this->m_ListManagerInfo.m_strLocalPath.back() != separator)
+        this->m_ListManagerInfo.m_strLocalPath += separator;
 
-    if (this->m_ListManagerInfo.m_strRemotePath.substr(this->m_ListManagerInfo.m_strRemotePath.size(), 1) != L"/")
-    {
+    if (!this->m_ListManagerInfo.m_strRemotePath.empty() && this->m_ListManagerInfo.m_strRemotePath.back() != L'/')
         this->m_ListManagerInfo.m_strRemotePath += L"/";
-    }
 }
 
 WZResult		CListManager::LoadScriptList(bool bDonwLoad) // OK
@@ -149,7 +146,7 @@ std::wstring		CListManager::GetScriptPath() // OK
 
     std::wstring path = this->m_ListManagerInfo.m_strLocalPath;
     path += buff;
-    path += L"\\";
+    path += std::filesystem::path::preferred_separator;
 
     return path;
 }
@@ -168,50 +165,39 @@ void			CListManager::DeleteScriptFiles() // OK
 
 WZResult		CListManager::FileDownLoad() // OK
 {
-#ifndef _WIN32
-    // The watchdog thread guards a WinInet download that is excluded off
-    // Windows (issue #462); DownLoadFiles fails immediately there, so run it
-    // inline.
-    this->m_Result = this->FileDownLoadImpl();
-#else
     if (this->m_ListManagerInfo.m_dwDownloadMaxTime > 0)
     {
-        unsigned int ThreadID = 0;
+        std::mutex mutex;
+        std::condition_variable completed;
+        bool done = false;
+        std::thread worker([&] {
+            this->m_Result = this->FileDownLoadImpl();
+            {
+                std::lock_guard lock(mutex);
+                done = true;
+            }
+            completed.notify_one();
+        });
 
-        auto hHandle = (HANDLE)_beginthreadex(0, 0, CListManager::RunFileDownLoadThread, this, 0, &ThreadID);
-
-        if (hHandle == INVALID_HANDLE_VALUE)
-        {
-            this->m_Result.BuildResult(8, GetLastError(), L"Fail : _beginthreadex");
-        }
-        else if (WaitForSingleObject(hHandle, this->m_ListManagerInfo.m_dwDownloadMaxTime) == WAIT_TIMEOUT)
+        std::unique_lock lock(mutex);
+        if (!completed.wait_for(lock, std::chrono::milliseconds(this->m_ListManagerInfo.m_dwDownloadMaxTime), [&] { return done; }))
         {
             if (this->m_pFTPDownLoader != NULL)
                 this->m_pFTPDownLoader->Break();
-
-            WaitForSingleObject(hHandle, INFINITE);
-
-            if (m_pFTPDownLoader != NULL)
-                if (m_pFTPDownLoader->GetFileDownloader() != NULL)
-                    m_pFTPDownLoader->GetFileDownloader()->Break();
-
-            SAFE_DELETE(m_pFTPDownLoader);
-
-            CloseHandle(hHandle);
-
+            lock.unlock();
+            worker.join();
             this->m_Result.BuildResult(1, 0, L"Time Out!");
         }
         else
         {
-            CloseHandle(hHandle);
+            lock.unlock();
+            worker.join();
         }
     }
     else
     {
         this->m_Result = this->FileDownLoadImpl();
     }
-#endif // _WIN32
-
     return this->m_Result;
 }
 
@@ -221,12 +207,6 @@ WZResult		CListManager::FileDownLoadImpl() // OK
     {
         m_pFTPDownLoader->Break();
 
-#ifdef _WIN32
-        if (m_pFTPDownLoader->GetFileDownloader() != NULL)
-        {
-            m_pFTPDownLoader->GetFileDownloader()->Break();
-        }
-#endif
     }
 
     SAFE_DELETE(m_pFTPDownLoader); // FIX THIS

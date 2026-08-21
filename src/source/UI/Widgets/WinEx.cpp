@@ -9,11 +9,10 @@
 #include "UI/Widgets/Button.h"
 #include "Core/Utilities/UsefulDef.h"
 
-#define	WE_CENTER_SPR_POS		3
+#define WE_CENTER_SPR_POS 3
 
-CWinEx::CWinEx()
-{
-}
+// cppcheck-suppress uninitMemberVar
+CWinEx::CWinEx() {}
 
 CWinEx::~CWinEx()
 {
@@ -39,9 +38,8 @@ void CWinEx::Create(SImgInfo* aImgInfo, int nBgSideMin, int nBgSideMax)
     CWin::m_bDocking = CWin::m_bActive = CWin::m_bShow = false;
     CWin::m_nState = WS_NORMAL;
     CWin::m_Size.cx = CWin::m_psprBg[WE_BG_TOP].GetWidth();
-    CWin::m_Size.cy = CWin::m_psprBg[WE_BG_TOP].GetHeight()
-        + CWin::m_psprBg[WE_BG_BOTTOM].GetHeight()
-        + CWin::m_psprBg[WE_BG_LEFT].GetHeight();
+    CWin::m_Size.cy = CWin::m_psprBg[WE_BG_TOP].GetHeight() + CWin::m_psprBg[WE_BG_BOTTOM].GetHeight() +
+                      CWin::m_psprBg[WE_BG_LEFT].GetHeight();
 
     m_nBgSideNow = m_nBgSideMin = nBgSideMin;
     m_nBgSideMax = nBgSideMax;
@@ -64,20 +62,16 @@ void CWinEx::SetPosition(int nXCoord, int nYCoord)
 {
     CWin::m_psprBg[WE_BG_TOP].SetPosition(nXCoord, nYCoord);
 
-    CWin::m_psprBg[WE_BG_CENTER].SetPosition(nXCoord + WE_CENTER_SPR_POS,
-        nYCoord + WE_CENTER_SPR_POS);
+    CWin::m_psprBg[WE_BG_CENTER].SetPosition(nXCoord + WE_CENTER_SPR_POS, nYCoord + WE_CENTER_SPR_POS);
 
-    CWin::m_psprBg[WE_BG_LEFT].SetPosition(nXCoord,
-        nYCoord + CWin::m_psprBg[WE_BG_TOP].GetHeight());
+    CWin::m_psprBg[WE_BG_LEFT].SetPosition(nXCoord, nYCoord + CWin::m_psprBg[WE_BG_TOP].GetHeight());
 
-    CWin::m_psprBg[WE_BG_RIGHT].SetPosition(
-        nXCoord + CWin::m_psprBg[WE_BG_TOP].GetWidth()
-        - CWin::m_psprBg[WE_BG_RIGHT].GetWidth(),
-        CWin::m_psprBg[WE_BG_LEFT].GetYPos());
+    CWin::m_psprBg[WE_BG_RIGHT].SetPosition(nXCoord + CWin::m_psprBg[WE_BG_TOP].GetWidth() -
+                                                CWin::m_psprBg[WE_BG_RIGHT].GetWidth(),
+                                            CWin::m_psprBg[WE_BG_LEFT].GetYPos());
 
-    CWin::m_psprBg[WE_BG_BOTTOM].SetPosition(nXCoord,
-        CWin::m_psprBg[WE_BG_LEFT].GetYPos()
-        + CWin::m_psprBg[WE_BG_LEFT].GetHeight());
+    CWin::m_psprBg[WE_BG_BOTTOM].SetPosition(nXCoord, CWin::m_psprBg[WE_BG_LEFT].GetYPos() +
+                                                          CWin::m_psprBg[WE_BG_LEFT].GetHeight());
 
     m_ptPos.x = nXCoord;
     m_ptPos.y = nYCoord;
@@ -93,30 +87,25 @@ int CWinEx::SetLine(int nLine)
     int nOldLine = m_nBgSideNow;
     m_nBgSideNow = nLine;
 
-    int nBgSideHeight
-        = CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideNow;
+    int nBgSideHeight = CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideNow;
 
     CWin::m_psprBg[WE_BG_LEFT].SetSize(0, nBgSideHeight, Y);
     CWin::m_psprBg[WE_BG_RIGHT].SetSize(0, nBgSideHeight, Y);
 
-    CWin::m_psprBg[WE_BG_BOTTOM].SetPosition(0,
-        CWin::m_psprBg[WE_BG_LEFT].GetYPos()
-        + CWin::m_psprBg[WE_BG_LEFT].GetHeight(), Y);
+    CWin::m_psprBg[WE_BG_BOTTOM].SetPosition(
+        0, CWin::m_psprBg[WE_BG_LEFT].GetYPos() + CWin::m_psprBg[WE_BG_LEFT].GetHeight(), Y);
 
-    CWin::m_Size.cy = CWin::m_psprBg[WE_BG_TOP].GetHeight()
-        + CWin::m_psprBg[WE_BG_BOTTOM].GetHeight() + nBgSideHeight;
+    CWin::m_Size.cy = CWin::m_psprBg[WE_BG_TOP].GetHeight() + CWin::m_psprBg[WE_BG_BOTTOM].GetHeight() + nBgSideHeight;
 
-    CWin::m_psprBg[WE_BG_CENTER].SetSize(0,
-        CWin::m_Size.cy - WE_CENTER_SPR_POS * 2, Y);
+    CWin::m_psprBg[WE_BG_CENTER].SetSize(0, CWin::m_Size.cy - WE_CENTER_SPR_POS * 2, Y);
 
     return nOldLine;
 }
 
 void CWinEx::SetSize(int nHeight)
 {
-    int nLine = (nHeight - CWin::m_psprBg[WE_BG_TOP].GetHeight()
-        - CWin::m_psprBg[WE_BG_BOTTOM].GetHeight())
-        / CWin::m_psprBg[WE_BG_LEFT].GetTexHeight();
+    int nLine = (nHeight - CWin::m_psprBg[WE_BG_TOP].GetHeight() - CWin::m_psprBg[WE_BG_BOTTOM].GetHeight()) /
+                CWin::m_psprBg[WE_BG_LEFT].GetTexHeight();
 
     SetLine(nLine);
 }
@@ -127,21 +116,19 @@ bool CWinEx::CursorInWin(int nArea)
         return false;
 
     CInput& rInput = CInput::Instance();
-    RECT rc = { 0, 0, 0, 0 };
+    RECT rc = {0, 0, 0, 0};
 
     switch (nArea)
     {
     case WA_EXTEND_DN:
-        ::SetRect(&rc, CWin::m_ptPos.x, CWin::m_ptPos.y + CWin::m_Size.cy - 5,
-            CWin::m_ptPos.x + CWin::m_Size.cx,
-            CWin::m_ptPos.y + CWin::m_Size.cy);
+        ::SetRect(&rc, CWin::m_ptPos.x, CWin::m_ptPos.y + CWin::m_Size.cy - 5, CWin::m_ptPos.x + CWin::m_Size.cx,
+                  CWin::m_ptPos.y + CWin::m_Size.cy);
         if (::PtInRect(&rc, rInput.GetCursorPos()))
             return true;
         break;
 
     case WA_EXTEND_UP:
-        ::SetRect(&rc, CWin::m_ptPos.x, CWin::m_ptPos.y,
-            CWin::m_ptPos.x + CWin::m_Size.cx, CWin::m_ptPos.y + 4);
+        ::SetRect(&rc, CWin::m_ptPos.x, CWin::m_ptPos.y, CWin::m_ptPos.x + CWin::m_Size.cx, CWin::m_ptPos.y + 4);
         if (::PtInRect(&rc, rInput.GetCursorPos()))
             return true;
         break;
@@ -168,15 +155,14 @@ void CWinEx::CheckAdditionalState()
     {
         if (CursorInWin(WA_EXTEND_UP))
         {
-            m_nBasisY = CWin::m_ptPos.y
-                + CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideNow;
+            m_nBasisY = CWin::m_ptPos.y + CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideNow;
             CWin::m_nState = WS_EXTEND_UP;
         }
 
         if (CursorInWin(WA_EXTEND_DN))
         {
-            m_nBasisY = CWin::m_ptPos.y + CWin::m_psprBg[WE_BG_TOP].GetHeight()
-                + CWin::m_psprBg[WE_BG_BOTTOM].GetHeight();
+            m_nBasisY =
+                CWin::m_ptPos.y + CWin::m_psprBg[WE_BG_TOP].GetHeight() + CWin::m_psprBg[WE_BG_BOTTOM].GetHeight();
             CWin::m_nState = WS_EXTEND_DN;
         }
     }
@@ -186,26 +172,21 @@ void CWinEx::CheckAdditionalState()
     {
     case WS_EXTEND_UP:
         nBgSideHeight = m_nBasisY - rInput.GetCursorY();
-        if (nBgSideHeight
-            < CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideMin)
+        if (nBgSideHeight < CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideMin)
             SetLine(m_nBgSideMin);
         else
-            SetLine(nBgSideHeight / CWin::m_psprBg[WE_BG_LEFT].GetTexHeight()
-                + 1);
+            SetLine(nBgSideHeight / CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() + 1);
 
-        SetPosition(CWin::m_ptPos.x, m_nBasisY
-            - CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideNow);
+        SetPosition(CWin::m_ptPos.x, m_nBasisY - CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideNow);
 
         break;
 
     case WS_EXTEND_DN:
         nBgSideHeight = rInput.GetCursorY() - m_nBasisY;
-        if (nBgSideHeight
-            < CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideMin)
+        if (nBgSideHeight < CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() * m_nBgSideMin)
             SetLine(m_nBgSideMin);
         else
-            SetLine(nBgSideHeight / CWin::m_psprBg[WE_BG_LEFT].GetTexHeight()
-                + 1);
+            SetLine(nBgSideHeight / CWin::m_psprBg[WE_BG_LEFT].GetTexHeight() + 1);
 
         break;
     }

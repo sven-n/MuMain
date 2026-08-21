@@ -17,13 +17,9 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CObserver::CObserver()
-{
-}
+CObserver::CObserver() {}
 
-CObserver::~CObserver()
-{
-}
+CObserver::~CObserver() {}
 
 //*****************************************************************************
 // CSubject
@@ -33,13 +29,9 @@ CObserver::~CObserver()
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CSubject::CSubject()
-{
-}
+CSubject::CSubject() {}
 
-CSubject::~CSubject()
-{
-}
+CSubject::~CSubject() {}
 
 //*****************************************************************************
 // 함수 이름 : Attach()

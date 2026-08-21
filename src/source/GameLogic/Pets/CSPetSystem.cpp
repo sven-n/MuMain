@@ -38,19 +38,14 @@ bool IsValidCharacterIndex(int index)
 
 extern bool g_PetEnableDuel;
 
-extern  double   WorldTime;
-extern	wchar_t    TextList[50][100];
-extern	int     TextListColor[50];
-extern	int     TextBold[50];
+extern double WorldTime;
+extern wchar_t TextList[50][100];
+extern int TextListColor[50];
+extern int TextBold[50];
 
 CSPetSystem::CSPetSystem()
-    : m_PetOwner(nullptr)
-    , m_PetTarget(nullptr)
-    , m_PetCharacter()
-    , m_PetType(PET_TYPE_NONE)
-    , m_pPetInfo(nullptr)
-    , m_byCommand(PET_CMD_DEFAULT)
-    , m_BoneTransforms()
+    : m_PetOwner(nullptr), m_PetTarget(nullptr), m_PetCharacter(), m_PetType(PET_TYPE_NONE), m_pPetInfo(nullptr),
+      m_byCommand(PET_CMD_DEFAULT), m_BoneTransforms()
 {
     m_PetCharacter.Object.BoneTransform = nullptr;
 }
@@ -201,7 +196,7 @@ void CSPetSystem::CreatePetPointer(int Type, unsigned char PositionX, unsigned c
 bool CSPetSystem::PlayAnimation(OBJECT* o)
 {
     BMD* b = &Models[o->Type];
-    float   playSpeed = 0.1f;
+    float playSpeed = 0.1f;
 
     switch (m_PetType)
     {
@@ -211,7 +206,8 @@ bool CSPetSystem::PlayAnimation(OBJECT* o)
     }
 
     b->CurrentAction = o->CurrentAction;
-    return b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, playSpeed, o->Position, o->Angle);
+    return b->PlayAnimation(&o->AnimationFrame, &o->PriorAnimationFrame, &o->PriorAction, playSpeed, o->Position,
+                            o->Angle);
 }
 
 void CSPetSystem::SetAI(int AI)
@@ -285,9 +281,7 @@ void CSPetSystem::SetAttack(int Key, int attackType)
     }
 }
 
-void CSPetSystem::MoveInventory(void)
-{
-}
+void CSPetSystem::MoveInventory(void) {}
 
 CSPetDarkSpirit::CSPetDarkSpirit(CHARACTER* c)
 {
@@ -305,7 +299,7 @@ CSPetDarkSpirit::~CSPetDarkSpirit(void) = default;
 
 void CSPetDarkSpirit::MovePet(void)
 {
-    bool    Play;
+    bool Play;
     CHARACTER* c = &m_PetCharacter;
     OBJECT* o = &c->Object;
     OBJECT* Owner = &m_PetOwner->Object;
@@ -329,8 +323,8 @@ void CSPetDarkSpirit::MovePet(void)
     {
         CHARACTER* tc = &CharactersClient[c->TargetCharacter];
 
-        if ((g_isCharacterBuff((&tc->Object), eBuff_Cloaking) || g_isCharacterBuff(Owner, eBuff_Cloaking))
-            && (o->AI == PET_ATTACK || o->AI == PET_ESCAPE || o->AI == PET_ATTACK_MAGIC))
+        if ((g_isCharacterBuff((&tc->Object), eBuff_Cloaking) || g_isCharacterBuff(Owner, eBuff_Cloaking)) &&
+            (o->AI == PET_ATTACK || o->AI == PET_ESCAPE || o->AI == PET_ATTACK_MAGIC))
         {
             auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
 
@@ -348,7 +342,8 @@ void CSPetDarkSpirit::MovePet(void)
             }
         }
     }
-    else if ((g_isCharacterBuff(Owner, eBuff_Cloaking)) && (o->AI == PET_ATTACK || o->AI == PET_ESCAPE || o->AI == PET_ATTACK_MAGIC))
+    else if ((g_isCharacterBuff(Owner, eBuff_Cloaking)) &&
+             (o->AI == PET_ATTACK || o->AI == PET_ESCAPE || o->AI == PET_ATTACK_MAGIC))
     {
         auto* pPet = (CSPetSystem*)m_PetOwner->m_pPet;
 
@@ -392,18 +387,30 @@ void CSPetDarkSpirit::MovePet(void)
     {
         switch (o->AI)
         {
-        case PET_FLY:           SetAction(o, 0); break;
-        case PET_FLYING:        SetAction(o, 1); break;
-        case PET_STAND:         SetAction(o, 2); break;
-        case PET_STAND_START:   SetAction(o, 1); break;
+        case PET_FLY:
+            SetAction(o, 0);
+            break;
+        case PET_FLYING:
+            SetAction(o, 1);
+            break;
+        case PET_STAND:
+            SetAction(o, 2);
+            break;
+        case PET_STAND_START:
+            SetAction(o, 1);
+            break;
         case PET_ATTACK:
-        case PET_ESCAPE:        SetAction(o, 3); break;
-        default:               SetAction(o, 0); break;
+        case PET_ESCAPE:
+            SetAction(o, 3);
+            break;
+        default:
+            SetAction(o, 0);
+            break;
         }
     }
 
-    vec3_t  Range, TargetPosition;
-    float   FlyRange = 150.f;
+    vec3_t Range, TargetPosition;
+    float FlyRange = 150.f;
 
     if (o->m_bActionStart == true)
     {
@@ -461,13 +468,15 @@ void CSPetDarkSpirit::MovePet(void)
         {
             speedRandom = 10;
             o->Angle[0] -= 2.f;
-            if (o->Angle[0] < -15.f) o->Angle[0] = -15.f;
+            if (o->Angle[0] < -15.f)
+                o->Angle[0] = -15.f;
         }
         else if (o->Position[2] > Height + 100)
         {
             speedRandom = 20;
             o->Angle[0] += 2.f;
-            if (o->Angle[0] > 15.f) o->Angle[0] = 15.f;
+            if (o->Angle[0] > 15.f)
+                o->Angle[0] = 15.f;
         }
 
         float Speed = 0;
@@ -516,7 +525,7 @@ void CSPetDarkSpirit::MovePet(void)
         {
             TargetPosition[2] += 50.f * FPS_ANIMATION_FACTOR;
             float Distance = MoveHumming(o->Position, o->Angle, TargetPosition, o->Velocity);
-            if (Distance < 20 || o->LifeTime>20)
+            if (Distance < 20 || o->LifeTime > 20)
             {
                 SetAI(PET_ESCAPE);
                 o->Angle[0] = -45.f;
@@ -527,7 +536,7 @@ void CSPetDarkSpirit::MovePet(void)
             }
             o->Velocity += o->Gravity * FPS_ANIMATION_FACTOR;
             o->Gravity += 0.2f * FPS_ANIMATION_FACTOR;
-            o->LifeTime+= FPS_ANIMATION_FACTOR;
+            o->LifeTime += FPS_ANIMATION_FACTOR;
         }
         else if (o->AI == PET_ESCAPE)
         {
@@ -597,7 +606,7 @@ void CSPetDarkSpirit::MovePet(void)
     VectorCopy(m_PetOwner->Object.Position, TargetPosition);
     VectorSubtract(TargetPosition, o->Position, Range);
     float Distance = Range[0] * Range[0] + Range[1] * Range[1];
-    if (o->Position[2] < (TargetPosition[2] - 200.f) || Distance>409600.f)
+    if (o->Position[2] < (TargetPosition[2] - 200.f) || Distance > 409600.f)
     {
         o->LifeTime += FPS_ANIMATION_FACTOR;
     }
@@ -609,16 +618,14 @@ void CSPetDarkSpirit::MovePet(void)
     }
 }
 
-void CSPetDarkSpirit::CalcPetInformation(const PET_INFO& Petinfo)
-{
-}
+void CSPetDarkSpirit::CalcPetInformation(const PET_INFO& Petinfo) {}
 
-void    CSPetDarkSpirit::RenderPetInventory(void)
+void CSPetDarkSpirit::RenderPetInventory(void)
 {
     RenderCmdType();
 }
 
-void    CSPetDarkSpirit::RenderPet(int PetState)
+void CSPetDarkSpirit::RenderPet(int PetState)
 {
     CHARACTER* c = &m_PetCharacter;
     OBJECT* o = &c->Object;
@@ -653,12 +660,12 @@ void    CSPetDarkSpirit::RenderPet(int PetState)
     }
 }
 
-void    CSPetDarkSpirit::Eff_LevelUp(void)
+void CSPetDarkSpirit::Eff_LevelUp(void)
 {
     OBJECT* o = &m_PetCharacter.Object;
 
-    vec3_t Angle = { 0.f, 0.f, 0.f };
-    vec3_t Position = { o->Position[0], o->Position[1], o->Position[2] };
+    vec3_t Angle = {0.f, 0.f, 0.f};
+    vec3_t Position = {o->Position[0], o->Position[1], o->Position[2]};
 
     for (int i = 0; i < 5; ++i)
     {
@@ -666,11 +673,11 @@ void    CSPetDarkSpirit::Eff_LevelUp(void)
     }
 }
 
-void    CSPetDarkSpirit::Eff_LevelDown(void)
+void CSPetDarkSpirit::Eff_LevelDown(void)
 {
     OBJECT* o = &m_PetCharacter.Object;
 
-    vec3_t Position = { o->Position[0], o->Position[1], o->Position[2] };
+    vec3_t Position = {o->Position[0], o->Position[1], o->Position[2]};
 
     for (int i = 0; i < 15; ++i)
     {
@@ -678,10 +685,10 @@ void    CSPetDarkSpirit::Eff_LevelDown(void)
     }
 }
 
-void    CSPetDarkSpirit::RenderCmdType(void)
+void CSPetDarkSpirit::RenderCmdType(void)
 {
-    float   x, y, Width, Height;
-    float   PartyWidth = 0.f;
+    float x, y, Width, Height;
+    float PartyWidth = 0.f;
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
@@ -691,13 +698,17 @@ void    CSPetDarkSpirit::RenderCmdType(void)
     {
         PartyWidth = 50.f;
     }
-    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+    if ((Hero->Helper.Type >= MODEL_GUARDIAN_ANGEL && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM) ||
+        Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
         PartyWidth += 60.f;
     }
 
     int Dur = 255;
-    Width = 50; Height = 2; x = GetScreenWidth() - Width - PartyWidth - 15; y = 4;
+    Width = 50;
+    Height = 2;
+    x = GetScreenWidth() - Width - PartyWidth - 15;
+    y = 4;
     int Life = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Durability * (int)Width / Dur;
 
     EnableAlphaTest();
@@ -706,12 +717,16 @@ void    CSPetDarkSpirit::RenderCmdType(void)
 
     RenderBar(x, y + 12, Width, Height, (float)Life);
 
-    glColor3f(1.f, 1.f, 1.f);
+    Width = 20.f;
+    Height = 28.f;
+    x = GetScreenWidth() - Width - PartyWidth - 65.f;
+    y = 5.f;
+    RenderBitmap(BITMAP_SKILL_INTERFACE + 2, (float)x, (float)y, (float)Width - 4, (float)Height - 8,
+                 (((m_byCommand) % 8) * 32 + 6.f) / 256.f, (((m_byCommand) / 8) * Height + 3.f) / 256.f, Width / 256.f,
+                 (Height - 1.f) / 256.f);
 
-    Width = 20.f; Height = 28.f; x = GetScreenWidth() - Width - PartyWidth - 65.f; y = 5.f;
-    RenderBitmap(BITMAP_SKILL_INTERFACE + 2, (float)x, (float)y, (float)Width - 4, (float)Height - 8, (((m_byCommand) % 8) * 32 + 6.f) / 256.f, (((m_byCommand) / 8) * Height + 3.f) / 256.f, Width / 256.f, (Height - 1.f) / 256.f);
-
-    Width -= 8.f; Height -= 8.f;
+    Width -= 8.f;
+    Height -= 8.f;
 
     if (MouseX >= x && MouseX <= x + Width && MouseY >= y && MouseY <= y + Height)
     {
@@ -731,7 +746,8 @@ void CSPetDarkSpirit::AttackEffect(CHARACTER* c, OBJECT* o)
         {
             for (int i = 0; i < 10; i++)
             {
-                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL, (Random::RangeFloat(0, 39) + 20.f));
+                CreateJoint(BITMAP_LIGHT, o->Position, o->Position, o->Angle, 1, NULL,
+                            (Random::RangeFloat(0, 39) + 20.f));
             }
 
             if (c->CheckAttackTime(1))

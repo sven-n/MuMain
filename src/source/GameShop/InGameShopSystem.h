@@ -11,12 +11,12 @@
 #include "GameShop/ShopListManager/ShopListManager.h"
 #include "GameShop/ShopListManager/BannerListManager.h"
 
-#define INGAMESHOP_ERROR_ZERO_SIZE		(-1)
-#define INGAMESHOP_ERROR_INVALID_INDEX	(-2)
+#define INGAMESHOP_ERROR_ZERO_SIZE (-1)
+#define INGAMESHOP_ERROR_INVALID_INDEX (-2)
 
-typedef std::list<CShopPackage>			type_listPackage;
-typedef std::map<int, int>				type_mapZoneSeq;
-typedef std::list<std::wstring>	type_listName;
+typedef std::list<CShopPackage> type_listPackage;
+typedef std::map<int, int> type_mapZoneSeq;
+typedef std::list<std::wstring> type_listName;
 
 class CInGameShopSystem
 {
@@ -61,6 +61,7 @@ public:
 
 protected:
     CInGameShopSystem();
+
 public:
     ~CInGameShopSystem();
 
@@ -100,13 +101,13 @@ public:
     void SetTotalCash(double dTotalCash);
     void SetTotalPoint(double dTotalPoint);
     void SetTotalMileage(double dTotalMileage);
-    void SetCashCreditCard(double dCashCreditCard);		// Global Credit Cash
-    void SetCashPrepaid(double dCashPrepaid);			// Global Prepaid Cash
+    void SetCashCreditCard(double dCashCreditCard); // Global Credit Cash
+    void SetCashPrepaid(double dCashPrepaid);       // Global Prepaid Cash
     double GetTotalCash();
     double GetTotalPoint();
     double GetTotalMileage();
-    double GetCashCreditCard();							// Global Credit Cash
-    double GetCashPrepaid();							// Global Prepaid Cash
+    double GetCashCreditCard(); // Global Credit Cash
+    double GetCashPrepaid();    // Global Prepaid Cash
 
     CShopPackage* GetDisplayPackage(int iIndex);
 
@@ -115,7 +116,8 @@ public:
 
     bool GetPackageInfo(int iPackageSeq, int iPackageAttrType, OUT int& iValue, OUT wchar_t* pszText);
 
-    bool GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSeq, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName);
+    bool GetProductInfoFromPriceSeq(int iProductSeq, int iPriceSeq, int iAttrType, OUT int& iValue,
+                                    OUT wchar_t* pszUnitName);
     bool GetProductInfoFromProductSeq(int iProductSeq, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName);
 
     void SetNormalPackage();
@@ -159,37 +161,37 @@ protected:
     bool GetProductInfo(CShopProduct* pProduct, int iAttrType, OUT int& iValue, OUT wchar_t* pszUnitName);
 
 protected:
-    CShopListManager		m_ShopManager;
-    CBannerListManager		m_BannerManager;
+    CShopListManager m_ShopManager;
+    CBannerListManager m_BannerManager;
 
-    CListVersionInfo		m_ScriptVerInfo;
-    CListVersionInfo		m_BannerVerInfo;
+    CListVersionInfo m_ScriptVerInfo;
+    CListVersionInfo m_BannerVerInfo;
 
 #ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-    CListVersionInfo		m_CurrentScriptVerInfo;
-    CListVersionInfo		m_CurrentBannerVerInfo;
+    CListVersionInfo m_CurrentScriptVerInfo;
+    CListVersionInfo m_CurrentBannerVerInfo;
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
-    wchar_t					m_szScriptIPAddress[20];
-    wchar_t					m_szBannerIPAddress[20];
-    wchar_t					m_szScriptRemotePath[MAX_TEXT_LENGTH];
-    wchar_t					m_szScriptLocalPath[MAX_TEXT_LENGTH];
-    wchar_t					m_szBannerRemotePath[MAX_TEXT_LENGTH];
-    wchar_t					m_szBannerLocalPath[MAX_TEXT_LENGTH];
+    wchar_t m_szScriptIPAddress[20];
+    wchar_t m_szBannerIPAddress[20];
+    wchar_t m_szScriptRemotePath[MAX_TEXT_LENGTH];
+    wchar_t m_szScriptLocalPath[MAX_TEXT_LENGTH];
+    wchar_t m_szBannerRemotePath[MAX_TEXT_LENGTH];
+    wchar_t m_szBannerLocalPath[MAX_TEXT_LENGTH];
 
-    CShopCategory			m_SelectedZone;
-    CShopCategory			m_SelectedCategory;
-    CBannerInfo				m_BannerInfo;
+    CShopCategory m_SelectedZone;
+    CShopCategory m_SelectedCategory;
+    CBannerInfo m_BannerInfo;
 
-    int						m_iSelectedPage;
+    int m_iSelectedPage;
 
-    type_mapZoneSeq			m_mapZoneSeqIndex;
-    type_listPackage		m_listDisplayPackage;
-    type_listPackage		m_listNormalPackage;
-    type_listPackage		m_listEventPackage;
+    type_mapZoneSeq m_mapZoneSeqIndex;
+    type_listPackage m_listDisplayPackage;
+    type_listPackage m_listNormalPackage;
+    type_listPackage m_listEventPackage;
     type_listPackage* m_plistSelectPackage;
-    type_listName			m_listZoneName;
-    type_listName			m_listCategoryName;
+    type_listName m_listZoneName;
+    type_listName m_listCategoryName;
 
     CShopCategoryList* m_pCategoryList;
     CShopPackageList* m_pPackageList;
@@ -197,28 +199,28 @@ protected:
 
     CBannerInfoList* m_pBannerList;
 
-    double					m_dTotalCash;
-    double					m_dTotalPoint;
-    double					m_dTotalMileage;
-    double					m_dCashCreditCard;
-    double					m_dCashPrepaid;
+    double m_dTotalCash;
+    double m_dTotalPoint;
+    double m_dTotalMileage;
+    double m_dCashCreditCard;
+    double m_dCashPrepaid;
 
-    bool					m_bIsRequestEventPackage;
+    bool m_bIsRequestEventPackage;
 
-    bool					m_bIsRequestShopOpenning;
+    bool m_bIsRequestShopOpenning;
 
-    bool					m_bSelectEventCategory;
-    bool					m_bAbleRequestEventPackage;
-    int						m_iCntSelectEventZone;
+    bool m_bSelectEventCategory;
+    bool m_bAbleRequestEventPackage;
+    int m_iCntSelectEventZone;
 
-    int						m_iEventPackageCnt;
-    int						m_iTotalEventPackage;
-    int						m_iCurrentEventPackage;
+    int m_iEventPackageCnt;
+    int m_iTotalEventPackage;
+    int m_iCurrentEventPackage;
 
-    bool					m_bIsShopOpenLock;
-    bool					m_bIsBanner;
-    bool					m_bFirstScriptDownloaded;
-    bool					m_bFirstBannerDownloaded;
+    bool m_bIsShopOpenLock;
+    bool m_bIsBanner;
+    bool m_bFirstScriptDownloaded;
+    bool m_bFirstBannerDownloaded;
 };
 
 #define g_InGameShopSystem CInGameShopSystem::GetInstance()

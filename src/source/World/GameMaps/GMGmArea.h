@@ -5,7 +5,7 @@
 
 namespace M40GMArea
 {
-    bool IsGmArea();
+bool IsGmArea();
 }
 
 #endif /* _GMGMAREA_H_ */

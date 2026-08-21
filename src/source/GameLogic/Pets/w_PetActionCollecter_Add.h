@@ -23,12 +23,12 @@ public:
     virtual bool Effect(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
     virtual bool Sound(OBJECT* obj, CHARACTER* Owner, int targetKey, double tick, bool bForceRender);
 
-    //test
+    // test
     void FindZen(OBJECT* obj);
     bool CompTimeControl(const DWORD& dwCompTime, DWORD& dwTime);
 
 public:
-    typedef std::list< RootingItem > ItemList;
+    typedef std::list<RootingItem> ItemList;
     enum ActionState
     {
         eAction_Stand = 0,
@@ -42,9 +42,9 @@ public:
 protected:
     PetActionCollecterAdd();
 
-    //test
+    // test
 
-    //ItemList m_ItemList;
+    // ItemList m_ItemList;
     RootingItem m_RootItem;
     bool m_isRooting;
 
@@ -56,14 +56,15 @@ protected:
     double m_fRadWidthStand;
     double m_fRadWidthGet;
 
-    //test
+    // test
 };
-#endif //PJH_ADD_PANDA_PET
+#endif // PJH_ADD_PANDA_PET
 
 SmartPointer(PetActionCollecterSkeleton);
 class PetActionCollecterSkeleton : public PetActionCollecterAdd
 {
 public:
+    // cppcheck-suppress duplInheritedMember
     static PetActionCollecterSkeletonPtr Make();
     virtual ~PetActionCollecterSkeleton();
     virtual bool Release(OBJECT* obj, CHARACTER* Owner);

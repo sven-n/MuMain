@@ -105,7 +105,8 @@ int TurnAngle(int iTheta, int iHeading, int maxTURN)
         return NormalizeAngleInt(iTheta);
     }
 
-    const float updated = StepTowardsAngle(static_cast<float>(iTheta), static_cast<float>(iHeading), static_cast<float>(maxTURN));
+    const float updated =
+        StepTowardsAngle(static_cast<float>(iTheta), static_cast<float>(iHeading), static_cast<float>(maxTURN));
     return NormalizeAngleInt(static_cast<int>(std::lround(updated)));
 }
 
@@ -175,12 +176,14 @@ void Alpha(OBJECT* o)
         if (o->AlphaTarget > o->Alpha)
         {
             o->Alpha += 0.05f;
-            if (o->Alpha > 1.f) o->Alpha = 1.f;
+            if (o->Alpha > 1.f)
+                o->Alpha = 1.f;
         }
         else if (o->AlphaTarget < o->Alpha)
         {
             o->Alpha -= 0.05f;
-            if (o->Alpha < 0.f) o->Alpha = 0.f;
+            if (o->Alpha < 0.f)
+                o->Alpha = 0.f;
         }
     }
     else
@@ -231,7 +234,8 @@ void MoveBoid(OBJECT* o, int i, OBJECT* Boids, int MAX)
         TargetX = o->Position[0] + TargetX / NumBirds;
         TargetY = o->Position[1] + TargetY / NumBirds;
 
-        o->Angle[2] = (float)TurnAngle((int)o->Angle[2], CalcAngle(o->Position[0], o->Position[1], TargetX, TargetY), (int)o->Gravity);
+        o->Angle[2] = (float)TurnAngle((int)o->Angle[2], CalcAngle(o->Position[0], o->Position[1], TargetX, TargetY),
+                                       (int)o->Gravity);
     }
 }
 
@@ -239,7 +243,8 @@ void PushObject(vec3_t PushPosition, vec3_t Position, float Power, vec3_t Angle)
 {
     Vector(0.f, 0.f, 0.f, Angle);
     Angle[2] = CreateAngle2D(PushPosition, Position) + 180.f;
-    if (Angle[2] >= 360.f) Angle[2] -= 360.f;
+    if (Angle[2] >= 360.f)
+        Angle[2] -= 360.f;
 
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
@@ -300,14 +305,15 @@ void SetAction_Fenrir_Damage(CHARACTER* c, OBJECT* o)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type == MODEL_ARROWS)
             SetAction(o, PLAYER_FENRIR_DAMAGE_ONE_LEFT);
-        else	// 맨손
+        else // 맨손
             SetAction(o, PLAYER_FENRIR_DAMAGE);
     }
 }
 
 void SetAction_Fenrir_Run(CHARACTER* c, OBJECT* o)
 {
-    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
+    if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS &&
+        c->Weapon[1].Type != MODEL_BOLT)
     {
         if (gCharacterManager.GetBaseClass(c->Class) == CLASS_ELF)
             SetAction(o, PLAYER_FENRIR_RUN_TWO_SWORD_ELF);
@@ -372,7 +378,8 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
     }
     else
     {
-        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS && c->Weapon[1].Type != MODEL_BOLT)
+        if (c->Weapon[0].Type != -1 && c->Weapon[1].Type != -1 && c->Weapon[0].Type != MODEL_ARROWS &&
+            c->Weapon[1].Type != MODEL_BOLT)
             SetAction(o, PLAYER_FENRIR_WALK_TWO_SWORD);
         else if (c->Weapon[0].Type != -1 && c->Weapon[1].Type == -1)
             SetAction(o, PLAYER_FENRIR_WALK_ONE_RIGHT);
@@ -389,14 +396,9 @@ void SetAction_Fenrir_Walk(CHARACTER* c, OBJECT* o)
 
 bool IsAliceRideAction_UniDino(unsigned short byAction)
 {
-    if (
-        byAction == PLAYER_SKILL_CHAIN_LIGHTNING_UNI
-        || byAction == PLAYER_SKILL_CHAIN_LIGHTNING_DINO
-        || byAction == PLAYER_SKILL_LIGHTNING_ORB_UNI
-        || byAction == PLAYER_SKILL_LIGHTNING_ORB_DINO
-        || byAction == PLAYER_SKILL_DRAIN_LIFE_UNI
-        || byAction == PLAYER_SKILL_DRAIN_LIFE_DINO
-        )
+    if (byAction == PLAYER_SKILL_CHAIN_LIGHTNING_UNI || byAction == PLAYER_SKILL_CHAIN_LIGHTNING_DINO ||
+        byAction == PLAYER_SKILL_LIGHTNING_ORB_UNI || byAction == PLAYER_SKILL_LIGHTNING_ORB_DINO ||
+        byAction == PLAYER_SKILL_DRAIN_LIFE_UNI || byAction == PLAYER_SKILL_DRAIN_LIFE_DINO)
     {
         return true;
     }
@@ -406,11 +408,8 @@ bool IsAliceRideAction_UniDino(unsigned short byAction)
 
 bool IsAliceRideAction_Fenrir(unsigned short byAction)
 {
-    if (
-        byAction == PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR
-        || byAction == PLAYER_SKILL_LIGHTNING_ORB_FENRIR
-        || byAction == PLAYER_SKILL_DRAIN_LIFE_FENRIR
-        )
+    if (byAction == PLAYER_SKILL_CHAIN_LIGHTNING_FENRIR || byAction == PLAYER_SKILL_LIGHTNING_ORB_FENRIR ||
+        byAction == PLAYER_SKILL_DRAIN_LIFE_FENRIR)
     {
         return true;
     }
@@ -421,7 +420,8 @@ bool IsAliceRideAction_Fenrir(unsigned short byAction)
 void SetAction(OBJECT* o, int Action, bool bBlending)
 {
     BMD* b = &Models[o->Type];
-    if (Action >= b->NumActions) return;
+    if (Action >= b->NumActions)
+        return;
     if (o->CurrentAction != Action)
     {
         o->PriorAction = o->CurrentAction;
@@ -441,7 +441,8 @@ bool TestDistance(CHARACTER* c, vec3_t TargetPosition, float Range)
     VectorSubtract(c->Object.Position, TargetPosition, Range2);
     float Distance = Range2[0] * Range2[0] + Range2[1] * Range2[1];
     float ZoneRange = Range;
-    if (Distance <= ZoneRange * ZoneRange) return true;
+    if (Distance <= ZoneRange * ZoneRange)
+        return true;
     return false;
 }
 
@@ -489,26 +490,27 @@ void MoveHead(CHARACTER* c)
                 o->HeadTargetAngle[0] = Random::RangeFloat(-64, 63);
                 o->HeadTargetAngle[1] = Random::RangeFloat(-16, 31);
                 for (int i = 0; i < 2; i++)
-                    if (o->HeadTargetAngle[i] < 0) o->HeadTargetAngle[i] += 360.f;
+                    if (o->HeadTargetAngle[i] < 0)
+                        o->HeadTargetAngle[i] += 360.f;
             }
         }
+        else if (o->CurrentAction == MONSTER01_WALK && c->TargetCharacter != -1)
+        {
+            LookAtTarget(o, &CharactersClient[c->TargetCharacter]);
+        }
         else
-            if (o->CurrentAction == MONSTER01_WALK && c->TargetCharacter != -1)
-            {
-                LookAtTarget(o, &CharactersClient[c->TargetCharacter]);
-            }
-            else
-            {
-                o->HeadTargetAngle[0] = 0.f;
-                o->HeadTargetAngle[1] = 0.f;
-            }
+        {
+            o->HeadTargetAngle[0] = 0.f;
+            o->HeadTargetAngle[1] = 0.f;
+        }
     }
 }
 
 void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint, bool Hit)
 {
     return;
-    if (tc == NULL) return;
+    if (tc == NULL)
+        return;
 
     OBJECT* to = &tc->Object;
 
@@ -531,7 +533,7 @@ void Damage(vec3_t soPosition, CHARACTER* tc, float AttackRange, int AttackPoint
         CreateParticle(BITMAP_SPARK + 1, Position, to->Angle, Light);
     }
 
-    //point
+    // point
     VectorCopy(to->Position, Position);
     Position[2] += 130.f + to->CollisionRange * 0.5f;
     vec3_t Color;
@@ -644,7 +646,8 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
     if (M34CryWolf1st::Get_State_Only_Elf() == true && M34CryWolf1st::IsCyrWolf1st() == true)
     {
-        if ((CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 && CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5))
+        if ((CharactersClient[TargetNpc].Object.Type >= MODEL_CRYWOLF_ALTAR1 &&
+             CharactersClient[TargetNpc].Object.Type <= MODEL_CRYWOLF_ALTAR5))
         {
             Value = true;
         }
@@ -655,7 +658,9 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
     bool PathFound = path->FindPath(sx, sy, tx, ty, true, Wall, Value, fDistance);
     if (!PathFound)
     {
-        if (((TerrainWall[TERRAIN_INDEX_REPEAT(sx, sy)] & TW_SAFEZONE) == TW_SAFEZONE || (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_SAFEZONE) == TW_SAFEZONE) && (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_CHARACTER) != TW_CHARACTER)
+        if (((TerrainWall[TERRAIN_INDEX_REPEAT(sx, sy)] & TW_SAFEZONE) == TW_SAFEZONE ||
+             (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_SAFEZONE) == TW_SAFEZONE) &&
+            (TerrainWall[TERRAIN_INDEX_REPEAT(tx, ty)] & TW_CHARACTER) != TW_CHARACTER)
         {
             Wall = TW_NOMOVE;
         }
@@ -690,7 +695,7 @@ bool PathFinding2(int sx, int sy, int tx, int ty, PATH_t* a, float fDistance, in
 
 CTimer* g_WorldTime = new CTimer();
 
-double   FPS;
+double FPS;
 
 /**
  * \brief A factor which should applied to all values which get an added offset, frame-by-frame.
@@ -699,9 +704,9 @@ double   FPS;
  * frame rate of 50 fps, this factor is 0.5f, so it moves just 5 positions in this frame.
  * Therefore, the speed of the game is maintained even when the FPS change dynamically.
  */
-float   FPS_ANIMATION_FACTOR;
-double   FPS_AVG;
-double   WorldTime = 0.0;
+float FPS_ANIMATION_FACTOR;
+double FPS_AVG;
+double WorldTime = 0.0;
 
 bool rand_fps_check(int reference_frames)
 {

@@ -24,67 +24,67 @@ using GameLogic::Commands::ChatCommandTemplate;
 
 namespace
 {
-    // A favourite is marked with a leading character instead of an icon, so
-    // that it works with every font the client is started with.
-    constexpr const wchar_t* FavouriteMarker = L"* ";
-    // What tells the player that a command wants something filled in. The names
-    // of the parameters don't fit next to the command at this width.
-    constexpr const wchar_t* ParameterMarker = L" ...";
+// A favourite is marked with a leading character instead of an icon, so
+// that it works with every font the client is started with.
+constexpr const wchar_t* FavouriteMarker = L"* ";
+// What tells the player that a command wants something filled in. The names
+// of the parameters don't fit next to the command at this width.
+constexpr const wchar_t* ParameterMarker = L" ...";
 
-    struct TextColor
-    {
-        BYTE Red;
-        BYTE Green;
-        BYTE Blue;
-    };
+struct TextColor
+{
+    BYTE Red;
+    BYTE Green;
+    BYTE Blue;
+};
 
-    constexpr TextColor TitleColor = { 255, 220, 120 };
-    constexpr TextColor NormalColor = { 220, 220, 220 };
-    constexpr TextColor FavouriteColor = { 255, 220, 120 };
-    constexpr TextColor DescriptionColor = { 200, 220, 255 };
-    constexpr TextColor MissingValueColor = { 255, 150, 150 };
-    constexpr TextColor ActionColor = { 150, 210, 255 };
+constexpr TextColor TitleColor = {255, 220, 120};
+constexpr TextColor NormalColor = {220, 220, 220};
+constexpr TextColor FavouriteColor = {255, 220, 120};
+constexpr TextColor DescriptionColor = {200, 220, 255};
+constexpr TextColor MissingValueColor = {255, 150, 150};
+constexpr TextColor ActionColor = {150, 210, 255};
 
-    void UseTextColor(const TextColor& color)
-    {
-        g_pRenderText->SetTextColor(color.Red, color.Green, color.Blue, 255);
-        g_pRenderText->SetBgColor(0);
-    }
-
-    // Renders one line of the window. An empty text has to be skipped: the text
-    // renderer measures a placeholder for it and would leave a stray glyph
-    // behind whenever a box width is given.
-    void RenderLine(int x, int y, const wchar_t* text, int boxWidth, int boxHeight = 0, int sort = RT3_SORT_LEFT)
-    {
-        if (text == nullptr || text[0] == L'\0')
-        {
-            return;
-        }
-
-        g_pRenderText->RenderText(x, y, text, boxWidth, boxHeight, sort);
-    }
-
-    // The text renderer works in real pixels while the window is laid out in
-    // reference units, which is what the screen rate converts between.
-    int MeasureInReferenceUnits(const wchar_t* text, size_t length)
-    {
-        SIZE size = { 0, 0 };
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), text, static_cast<int>(length), &size);
-        return (g_fScreenRate_x > 0.f) ? static_cast<int>(size.cx / g_fScreenRate_x) : size.cx;
-    }
-
-    void RenderValueBackground(int x, int y, int width, int height)
-    {
-        glColor4ub(0, 0, 0, 160);
-        RenderColor(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
-        EndRenderColor();
-        glColor4f(1.f, 1.f, 1.f, 1.f);
-    }
+void UseTextColor(const TextColor& color)
+{
+    g_pRenderText->SetTextColor(color.Red, color.Green, color.Blue, 255);
+    g_pRenderText->SetBgColor(0);
 }
+
+// Renders one line of the window. An empty text has to be skipped: the text
+// renderer measures a placeholder for it and would leave a stray glyph
+// behind whenever a box width is given.
+void RenderLine(int x, int y, const wchar_t* text, int boxWidth, int boxHeight = 0, int sort = RT3_SORT_LEFT)
+{
+    if (text == nullptr || text[0] == L'\0')
+    {
+        return;
+    }
+
+    g_pRenderText->RenderText(x, y, text, boxWidth, boxHeight, sort);
+}
+
+// The text renderer works in real pixels while the window is laid out in
+// reference units, which is what the screen rate converts between.
+int MeasureInReferenceUnits(const wchar_t* text, size_t length)
+{
+    SIZE size = {0, 0};
+    GetTextExtentPoint32(g_pRenderText->GetFontDC(), text, static_cast<int>(length), &size);
+    return (g_fScreenRate_x > 0.f) ? static_cast<int>(size.cx / g_fScreenRate_x) : size.cx;
+}
+
+void RenderValueBackground(int x, int y, int width, int height)
+{
+    glColor4ub(0, 0, 0, 160);
+    RenderColor(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height));
+    EndRenderColor();
+    glColor4f(1.f, 1.f, 1.f, 1.f);
+}
+} // namespace
 
 SEASON3B::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
 {
-    m_pNewUIMng = NULL;
+    m_pNewUIMng = nullptr;
     m_Pos.x = 0;
     m_Pos.y = 0;
     m_page = PAGE_COMMANDS;
@@ -100,8 +100,10 @@ SEASON3B::CNewUIChatCommandWindow::~CNewUIChatCommandWindow()
 
 bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
-    if (NULL == pNewUIMng)
+    if (pNewUIMng == nullptr)
+    {
         return false;
+    }
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_COMMAND_LIST, this);
@@ -130,7 +132,7 @@ void SEASON3B::CNewUIChatCommandWindow::Release()
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
-        m_pNewUIMng = NULL;
+        m_pNewUIMng = nullptr;
     }
 }
 
@@ -141,13 +143,14 @@ void SEASON3B::CNewUIChatCommandWindow::SetPos(int x, int y)
 
     m_BtnExit.ChangeButtonInfo(m_Pos.x + EXIT_BUTTON_X, m_Pos.y + EXIT_BUTTON_Y, EXIT_BUTTON_WIDTH, EXIT_BUTTON_HEIGHT);
     m_BtnLeft.ChangeButtonInfo(m_Pos.x + CONTENT_LEFT, m_Pos.y + BUTTON_ROW_Y, BUTTON_WIDTH, BUTTON_HEIGHT);
-    m_BtnRight.ChangeButtonInfo(m_Pos.x + WINDOW_WIDTH - CONTENT_LEFT - BUTTON_WIDTH, m_Pos.y + BUTTON_ROW_Y, BUTTON_WIDTH, BUTTON_HEIGHT);
+    m_BtnRight.ChangeButtonInfo(m_Pos.x + WINDOW_WIDTH - CONTENT_LEFT - BUTTON_WIDTH, m_Pos.y + BUTTON_ROW_Y,
+                                BUTTON_WIDTH, BUTTON_HEIGHT);
 }
 
 void SEASON3B::CNewUIChatCommandWindow::InitButtons()
 {
     wchar_t closeText[256] = {};
-    mu_swprintf(closeText, I18N::Game::CloseS, L"J");
+    mu_swprintf_s(closeText, I18N::Game::CloseS, L"J");
 
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CHATCOMMAND_BTN_EXIT);
     m_BtnExit.ChangeToolTipText(closeText, true);
@@ -193,23 +196,21 @@ void SEASON3B::CNewUIChatCommandWindow::RebuildCommandOrder()
 
     // The favourites move to the top, the rest keeps the order of the server.
     std::stable_partition(m_commandOrder.begin(), m_commandOrder.end(), [&commands](int index)
-        {
-            return GameLogic::Commands::Favourites::Contains(commands[index].Command);
-        });
+                          { return GameLogic::Commands::Favourites::Contains(commands[index].Command); });
 }
 
 const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetCommandAt(int row) const
 {
     if (row < 0 || static_cast<size_t>(row) >= m_commandOrder.size())
     {
-        return NULL;
+        return nullptr;
     }
 
     const auto& commands = Catalog().GetCommands();
     const auto index = m_commandOrder[row];
     if (index < 0 || static_cast<size_t>(index) >= commands.size())
     {
-        return NULL;
+        return nullptr;
     }
 
     return &commands[index];
@@ -251,7 +252,7 @@ void SEASON3B::CNewUIChatCommandWindow::PickCommand(int row)
     m_parameterValues.clear();
 
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return;
     }
@@ -273,7 +274,7 @@ void SEASON3B::CNewUIChatCommandWindow::PickCommand(int row)
 bool SEASON3B::CNewUIChatCommandWindow::AreRequiredValuesSet() const
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return false;
     }
@@ -294,7 +295,7 @@ void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
     CommitEditedValue();
 
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return;
     }
@@ -343,7 +344,7 @@ void SEASON3B::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
     CommitEditedValue();
 
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return;
     }
@@ -359,7 +360,7 @@ void SEASON3B::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
 void SEASON3B::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return;
     }
@@ -373,7 +374,7 @@ void SEASON3B::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
     for (size_t row = 0; row < m_commandOrder.size(); ++row)
     {
         const auto* candidate = GetCommandAt(static_cast<int>(row));
-        if (candidate != NULL && candidate->Command == selected)
+        if (candidate != nullptr && candidate->Command == selected)
         {
             m_selectedRow = static_cast<int>(row);
             break;
@@ -409,7 +410,7 @@ bool SEASON3B::CNewUIChatCommandWindow::IsPickedFromList(const ChatCommandParame
 void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterIndex)
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL || parameterIndex >= command->Parameters.size())
+    if (command == nullptr || parameterIndex >= command->Parameters.size())
     {
         return;
     }
@@ -442,7 +443,7 @@ void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIn
     CommitEditedValue();
 
     const auto* command = GetSelectedCommand();
-    if (command == NULL || parameterIndex >= command->Parameters.size() || m_pValueInput == nullptr)
+    if (command == nullptr || parameterIndex >= command->Parameters.size() || m_pValueInput == nullptr)
     {
         return;
     }
@@ -454,8 +455,8 @@ void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIn
     // A number field which accepts letters only leads to a command the server
     // rejects, so let the field enforce what the parameter takes.
     m_pValueInput->SetOption(command->Parameters[parameterIndex].Type == ChatCommandParameterType::Number
-        ? UIOPTION_NUMBERONLY
-        : UIOPTION_NULL);
+                                 ? UIOPTION_NUMBERONLY
+                                 : UIOPTION_NULL);
     m_pValueInput->SetText(m_parameterValues[parameterIndex].c_str());
     m_pValueInput->SetState(UISTATE_NORMAL);
     m_pValueInput->GiveFocus();
@@ -467,13 +468,13 @@ void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIn
 
 void SEASON3B::CNewUIChatCommandWindow::CommitEditedValue()
 {
-    if (m_editedParameter < 0 || m_pValueInput == nullptr
-        || static_cast<size_t>(m_editedParameter) >= m_parameterValues.size())
+    if (m_editedParameter < 0 || m_pValueInput == nullptr ||
+        static_cast<size_t>(m_editedParameter) >= m_parameterValues.size())
     {
         return;
     }
 
-    wchar_t text[MAX_TEXT_LENGTH] = { 0 };
+    wchar_t text[MAX_TEXT_LENGTH] = {0};
     m_pValueInput->GetText(text, MAX_TEXT_LENGTH);
     m_parameterValues[m_editedParameter] = text;
 }
@@ -484,11 +485,11 @@ void SEASON3B::CNewUIChatCommandWindow::StopEditing()
     m_editedParameter = -1;
     if (m_pValueInput != nullptr)
     {
-        m_pValueInput->SetText(NULL);
+        m_pValueInput->SetText(nullptr);
         m_pValueInput->SetState(UISTATE_HIDE);
     }
 
-    SetRelatedWnd(NULL);
+    SetRelatedWnd(g_hWnd);
 }
 
 int SEASON3B::CNewUIChatCommandWindow::GetScrollableRowCount() const
@@ -506,7 +507,7 @@ void SEASON3B::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
     m_descriptionLines.clear();
 
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return;
     }
@@ -518,7 +519,7 @@ void SEASON3B::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
 int SEASON3B::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() const
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return 0;
     }
@@ -539,7 +540,7 @@ int SEASON3B::CNewUIChatCommandWindow::GetParameterTop() const
 int SEASON3B::CNewUIChatCommandWindow::GetActionTop() const
 {
     const auto* command = GetSelectedCommand();
-    const auto parameterCount = (command == NULL) ? 0 : static_cast<int>(command->Parameters.size());
+    const auto parameterCount = (command == nullptr) ? 0 : static_cast<int>(command->Parameters.size());
     return GetParameterTop() + parameterCount * PARAMETER_HEIGHT + ROW_HEIGHT;
 }
 
@@ -581,9 +582,9 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
         return false;
     }
 
-    const bool handled = (m_page == PAGE_COMMANDS) ? UpdateCommandPageMouseEvent()
-        : (m_page == PAGE_PARAMETERS) ? UpdateParameterPageMouseEvent()
-        : UpdateTemplatePageMouseEvent();
+    const bool handled = (m_page == PAGE_COMMANDS)     ? UpdateCommandPageMouseEvent()
+                         : (m_page == PAGE_PARAMETERS) ? UpdateParameterPageMouseEvent()
+                                                       : UpdateTemplatePageMouseEvent();
     if (handled)
     {
         return false;
@@ -610,13 +611,13 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
         const auto index = m_scrollOffset + row;
-        if (GetCommandAt(index) == NULL)
+        if (GetCommandAt(index) == nullptr)
         {
             break;
         }
 
-        if (CheckMouseIn(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP + row * ROW_HEIGHT, CONTENT_WIDTH, ROW_HEIGHT)
-            && IsRelease(VK_LBUTTON))
+        if (CheckMouseIn(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP + row * ROW_HEIGHT, CONTENT_WIDTH, ROW_HEIGHT) &&
+            IsRelease(VK_LBUTTON))
         {
             PlayBuffer(SOUND_CLICK01);
             PickCommand(index);
@@ -630,7 +631,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
 bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return false;
     }
@@ -664,7 +665,8 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
         return true;
     }
 
-    if (CheckMouseIn(m_Pos.x + CONTENT_LEFT, actionTop + ROW_HEIGHT, CONTENT_WIDTH, ROW_HEIGHT) && IsRelease(VK_LBUTTON))
+    if (CheckMouseIn(m_Pos.x + CONTENT_LEFT, actionTop + ROW_HEIGHT, CONTENT_WIDTH, ROW_HEIGHT) &&
+        IsRelease(VK_LBUTTON))
     {
         SaveSelectedAsTemplate();
         return true;
@@ -825,11 +827,13 @@ void SEASON3B::CNewUIChatCommandWindow::RenderBaseWindow()
     // past their end. They are a plain vertical border, so stretching them
     // doesn't show.
     RenderImageStretch(IMAGE_CHATCOMMAND_LEFT, x, y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight,
-        0.f, 0.f, float(FRAME_SIDE_WIDTH), float(FRAME_SIDE_TEXTURE_HEIGHT));
-    RenderImageStretch(IMAGE_CHATCOMMAND_RIGHT, x + float(WINDOW_WIDTH - FRAME_SIDE_WIDTH), y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight,
-        0.f, 0.f, float(FRAME_SIDE_WIDTH), float(FRAME_SIDE_TEXTURE_HEIGHT));
+                       0.f, 0.f, float(FRAME_SIDE_WIDTH), float(FRAME_SIDE_TEXTURE_HEIGHT));
+    RenderImageStretch(IMAGE_CHATCOMMAND_RIGHT, x + float(WINDOW_WIDTH - FRAME_SIDE_WIDTH), y + float(FRAME_TOP_HEIGHT),
+                       float(FRAME_SIDE_WIDTH), middleHeight, 0.f, 0.f, float(FRAME_SIDE_WIDTH),
+                       float(FRAME_SIDE_TEXTURE_HEIGHT));
 
-    RenderImage(IMAGE_CHATCOMMAND_BOTTOM, x, y + float(WINDOW_HEIGHT - FRAME_BOTTOM_HEIGHT), float(WINDOW_WIDTH), float(FRAME_BOTTOM_HEIGHT));
+    RenderImage(IMAGE_CHATCOMMAND_BOTTOM, x, y + float(WINDOW_HEIGHT - FRAME_BOTTOM_HEIGHT), float(WINDOW_WIDTH),
+                float(FRAME_BOTTOM_HEIGHT));
 }
 
 void SEASON3B::CNewUIChatCommandWindow::RenderTitle()
@@ -839,7 +843,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderTitle()
     {
         title = I18N::Game::ChatCommandsTemplates;
     }
-    else if (m_page == PAGE_PARAMETERS && GetSelectedCommand() != NULL)
+    else if (m_page == PAGE_PARAMETERS && GetSelectedCommand() != nullptr)
     {
         title = GetSelectedCommand()->Command.c_str();
     }
@@ -855,14 +859,15 @@ void SEASON3B::CNewUIChatCommandWindow::RenderCommandPage()
     if (m_commandOrder.empty())
     {
         UseTextColor(NormalColor);
-        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP, I18N::Game::ChatCommandsNotSupported, CONTENT_WIDTH, VISIBLE_ROWS * ROW_HEIGHT);
+        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP, I18N::Game::ChatCommandsNotSupported, CONTENT_WIDTH,
+                   VISIBLE_ROWS * ROW_HEIGHT);
         return;
     }
 
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
         const auto* command = GetCommandAt(m_scrollOffset + row);
-        if (command == NULL)
+        if (command == nullptr)
         {
             break;
         }
@@ -886,7 +891,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderCommandPage()
 void SEASON3B::CNewUIChatCommandWindow::RenderParameterPage()
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL)
+    if (command == nullptr)
     {
         return;
     }
@@ -895,7 +900,8 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameterPage()
     const auto descriptionLines = GetVisibleDescriptionLineCount();
     for (int line = 0; line < descriptionLines; ++line)
     {
-        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP + line * ROW_HEIGHT, m_descriptionLines[line].c_str(), CONTENT_WIDTH);
+        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP + line * ROW_HEIGHT, m_descriptionLines[line].c_str(),
+                   CONTENT_WIDTH);
     }
 
     for (size_t i = 0; i < command->Parameters.size(); ++i)
@@ -912,14 +918,15 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameterPage()
     const bool isFavourite = GameLogic::Commands::Favourites::Contains(command->Command);
     UseTextColor(ActionColor);
     RenderLine(m_Pos.x + CONTENT_LEFT, actionTop,
-        isFavourite ? I18N::Game::ChatCommandsRemoveFavourite : I18N::Game::ChatCommandsAddFavourite, CONTENT_WIDTH);
+               isFavourite ? I18N::Game::ChatCommandsRemoveFavourite : I18N::Game::ChatCommandsAddFavourite,
+               CONTENT_WIDTH);
     RenderLine(m_Pos.x + CONTENT_LEFT, actionTop + ROW_HEIGHT, I18N::Game::ChatCommandsSaveTemplate, CONTENT_WIDTH);
 }
 
 void SEASON3B::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, int y)
 {
     const auto* command = GetSelectedCommand();
-    if (command == NULL || parameterIndex >= command->Parameters.size())
+    if (command == nullptr || parameterIndex >= command->Parameters.size())
     {
         return;
     }
@@ -958,7 +965,8 @@ void SEASON3B::CNewUIChatCommandWindow::RenderTemplatePage()
     if (m_templates.empty())
     {
         UseTextColor(NormalColor);
-        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP, I18N::Game::ChatCommandsNoTemplates, CONTENT_WIDTH, VISIBLE_ROWS * ROW_HEIGHT);
+        RenderLine(m_Pos.x + CONTENT_LEFT, m_Pos.y + CONTENT_TOP, I18N::Game::ChatCommandsNoTemplates, CONTENT_WIDTH,
+                   VISIBLE_ROWS * ROW_HEIGHT);
         return;
     }
 
@@ -983,13 +991,13 @@ void SEASON3B::CNewUIChatCommandWindow::LoadImages()
     // The ids are shared with the other windows, but every window loads what it
     // draws - relying on another one having done it means an empty frame when
     // that window wasn't opened yet.
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CHATCOMMAND_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CHATCOMMAND_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CHATCOMMAND_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CHATCOMMAND_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CHATCOMMAND_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CHATCOMMAND_BTN_EXIT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_CHATCOMMAND_BTN, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_msgbox_back.jpg", IMAGE_CHATCOMMAND_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_item_back01.tga", IMAGE_CHATCOMMAND_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_item_back02-L.tga", IMAGE_CHATCOMMAND_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_item_back02-R.tga", IMAGE_CHATCOMMAND_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_item_back03.tga", IMAGE_CHATCOMMAND_BOTTOM, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_exit_00.tga", IMAGE_CHATCOMMAND_BTN_EXIT, GL_LINEAR);
+    LoadBitmap(L"Interface/newui_btn_empty_small.tga", IMAGE_CHATCOMMAND_BTN, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIChatCommandWindow::UnloadImages()

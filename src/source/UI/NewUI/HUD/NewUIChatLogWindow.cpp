@@ -70,9 +70,9 @@ bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
         float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
         EnableAlphaTest();
-        glColor4f(0.0f, 0.0f, 0.0f, GetBackAlpha());
-        RenderColor(fRenderPosX, fRenderPosY, (float)m_WndSize.cx, (float)m_WndSize.cy);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        const unsigned int backgroundAlpha = static_cast<unsigned int>(std::clamp(GetBackAlpha(), 0.f, 1.f) * 255.f);
+        RenderColorQuadARGB(fRenderPosX, fRenderPosY, (float)m_WndSize.cx, (float)m_WndSize.cy,
+            backgroundAlpha << 24);
         DisableAlphaBlend();
     }
     return true;
@@ -166,7 +166,10 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
 
         if (bRenderMessage && !pMsgText->GetText().empty())
         {
-            POINT ptRenderPos = { (long)fRenderPosX + (long)WND_LEFT_RIGHT_EDGE, (long)fRenderPosY + (long)FONT_LEADING + ((long)SCROLL_MIDDLE_PART_HEIGHT * (long)s) };
+            POINT ptRenderPos = {
+                static_cast<LONG>(fRenderPosX + WND_LEFT_RIGHT_EDGE),
+                static_cast<LONG>(fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * s))
+            };
             if (!pMsgText->GetID().empty())
             {
                 if (m_bPointedMessage == true && m_iPointedMessageIndex == i)
@@ -197,18 +200,12 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
         float const fRenderPosY = m_WndPos.y - m_WndSize.cy;
 
         EnableAlphaTest();
-        if (m_EventState == EVENT_RESIZING_BTN_DOWN)
-        {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        }
-        else
-        {
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY - (float)RESIZING_BTN_HEIGHT, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT);
+        const DWORD resizeButtonColor = m_EventState == EVENT_RESIZING_BTN_DOWN
+            ? RGBA(179, 179, 179, 255)
+            : RGBA(255, 255, 255, 255);
+        RenderImage(IMAGE_DRAG_BTN, fRenderPosX, fRenderPosY - (float)RESIZING_BTN_HEIGHT,
+            RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT, 0.f, 0.f, resizeButtonColor);
         DisableAlphaBlend();
-
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
         RenderImage(IMAGE_SCROLL_TOP, fRenderPosX + m_WndSize.cx - SCROLL_BAR_WIDTH - WND_LEFT_RIGHT_EDGE, fRenderPosY + WND_TOP_BOTTOM_EDGE, SCROLL_BAR_WIDTH, WND_TOP_BOTTOM_EDGE);
 
@@ -222,15 +219,11 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
             m_WndPos.y - WND_TOP_BOTTOM_EDGE - SCROLL_TOP_BOTTOM_PART_HEIGHT, SCROLL_BAR_WIDTH, SCROLL_TOP_BOTTOM_PART_HEIGHT);
 
         EnableAlphaTest();
-        if (m_EventState == EVENT_SCROLL_BTN_DOWN)
-        {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        }
-        else
-        {
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        }
-        RenderImage(IMAGE_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT);
+        const DWORD scrollButtonColor = m_EventState == EVENT_SCROLL_BTN_DOWN
+            ? RGBA(179, 179, 179, 255)
+            : RGBA(255, 255, 255, 255);
+        RenderImage(IMAGE_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH,
+            SCROLL_BTN_HEIGHT, 0.f, 0.f, scrollButtonColor);
         DisableAlphaBlend();
     }
 

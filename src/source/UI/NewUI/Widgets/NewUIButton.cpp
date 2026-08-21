@@ -70,19 +70,17 @@ bool CNewUIBaseButton::RadioProcess()
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
     if (isMousein)
     {
+        if (m_EventState == BUTTON_STATE_UP)
+        {
+            m_EventState = BUTTON_STATE_OVER;
+        }
+
         if (SEASON3B::IsPress(VK_LBUTTON))
         {
             if (m_EventState == BUTTON_STATE_OVER)
             {
                 m_EventState = BUTTON_STATE_DOWN;
                 return true;
-            }
-        }
-        else
-        {
-            if (m_EventState == BUTTON_STATE_UP)
-            {
-                m_EventState = BUTTON_STATE_OVER;
             }
         }
     }
@@ -119,7 +117,7 @@ bool CNewUIBaseButton::Process()
     {
         m_EventState = BUTTON_STATE_OVER;
     }
-    else if (SEASON3B::IsRepeat(VK_LBUTTON) && isMousein)
+    else if ((SEASON3B::IsRepeat(VK_LBUTTON) || SEASON3B::IsPress(VK_LBUTTON)) && isMousein)
     {
         m_EventState = BUTTON_STATE_DOWN;
     }
@@ -1289,7 +1287,6 @@ bool SEASON3B::CNewUICheckBox::GetBoxState()
 void SEASON3B::CNewUICheckBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderImage(s_ImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.0, (State) ? 0.0 : m_Size.y);
 

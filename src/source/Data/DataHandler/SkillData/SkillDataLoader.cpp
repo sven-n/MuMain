@@ -21,11 +21,11 @@ extern HWND g_hWnd;
 bool SkillDataLoader::Load(wchar_t* fileName)
 {
     FILE* fp = _wfopen(fileName, L"rb");
-    if (fp == NULL)
+    if (fp == nullptr)
     {
         wchar_t errorMsg[256];
         mu_swprintf(errorMsg, L"Skill file not found: %ls", fileName);
-        DataFileIO::ShowErrorAndExit(errorMsg);
+        DataFileIO::ReportError(errorMsg);
         return false;
     }
 
@@ -35,9 +35,7 @@ bool SkillDataLoader::Load(wchar_t* fileName)
     fseek(fp, 0, SEEK_SET);
 
     const int LegacySize = sizeof(SKILL_ATTRIBUTE_FILE_LEGACY);
-    const int NewSize = sizeof(SKILL_ATTRIBUTE_FILE);
     const long expectedLegacySize = LegacySize * MAX_SKILLS + sizeof(DWORD);
-    const long expectedNewSize = NewSize * MAX_SKILLS + sizeof(DWORD);
 
     bool isLegacyFormat = (fileSize == expectedLegacySize);
     bool success = false;
@@ -102,7 +100,7 @@ bool SkillDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
         std::wstring errorMsg = L"Failed to read skill file (";
         errorMsg += formatName;
         errorMsg += L").";
-        DataFileIO::ShowErrorAndExit(errorMsg.c_str());
+        DataFileIO::ReportError(errorMsg.c_str());
         return false;
     }
 
@@ -112,7 +110,7 @@ bool SkillDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
         std::wstring errorMsg = L"Skill file corrupted (";
         errorMsg += formatName;
         errorMsg += L").";
-        DataFileIO::ShowErrorAndExit(errorMsg.c_str());
+        DataFileIO::ReportError(errorMsg.c_str());
         return false;
     }
 

@@ -8,9 +8,7 @@
 #include "Core/Input/Input.h"
 
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Renderer/MuRenderer.h"
 
 #include "Core/Platform/CrtDbg.h"
 
@@ -200,13 +198,13 @@ BOOL CSprite::PtInSprite(long lXPos, long lYPos)
     if (!m_bShow)
         return FALSE;
 
-    POINT pt = { lXPos, lYPos };
+    POINT pt = { static_cast<LONG>(lXPos), static_cast<LONG>(lYPos) };
 
     RECT rc = {
-        long(m_aScrCoord[LT].fX * m_fScaleX),
-        long((m_fScrHeight - m_aScrCoord[LT].fY) * m_fScaleY),
-        long(m_aScrCoord[RB].fX * m_fScaleX),
-        long((m_fScrHeight - m_aScrCoord[RB].fY) * m_fScaleY)
+        static_cast<LONG>(m_aScrCoord[LT].fX * m_fScaleX),
+        static_cast<LONG>((m_fScrHeight - m_aScrCoord[LT].fY) * m_fScaleY),
+        static_cast<LONG>(m_aScrCoord[RB].fX * m_fScaleX),
+        static_cast<LONG>((m_fScrHeight - m_aScrCoord[RB].fY) * m_fScaleY)
     };
 
     return ::PtInRect(&rc, pt);
@@ -289,30 +287,40 @@ void CSprite::Render()
     if (!m_bShow)
         return;
 
-    if (-1 < m_nTexID)
+    const std::uint32_t color = (static_cast<std::uint32_t>(m_byAlpha) << 24) |
+                                (static_cast<std::uint32_t>(m_byBlue) << 16) |
+                                (static_cast<std::uint32_t>(m_byGreen) << 8) |
+                                static_cast<std::uint32_t>(m_byRed);
+    mu::Vertex2D vertices[POS_MAX];
+    for (int i = LT; i < POS_MAX; ++i)
     {
-        BindTexture(m_nTexID);
-        PassthroughShader::Instance().SetUseTexture(true);
-        IR::Begin(GL_TRIANGLE_FAN);
-        IR::Color4ub(m_byRed, m_byGreen, m_byBlue, m_byAlpha);
-        for (int i = LT; i < POS_MAX; ++i)
+        vertices[i] = {
+            m_aScrCoord[i].fX * m_fScaleX,
+            m_aScrCoord[i].fY * m_fScaleY,
+            m_nTexID >= 0 ? m_aTexCoord[i].fTU : 0.f,
+            m_nTexID >= 0 ? m_aTexCoord[i].fTV : 0.f,
+            color,
+        };
+    }
+
+    if (m_nTexID >= 0)
+    {
+        if (!TextureEnable)
         {
-            IR::TexCoord2f(m_aTexCoord[i].fTU, m_aTexCoord[i].fTV);
-            IR::Vertex2f(m_aScrCoord[i].fX * m_fScaleX,
-                m_aScrCoord[i].fY * m_fScaleY);
+            TextureEnable = true;
+            mu::GetRenderer().SetTexture2D(true);
         }
-        IR::End();
+        BindTexture(m_nTexID);
     }
     else
     {
-        PassthroughShader::Instance().SetUseTexture(false);
-        IR::Begin(GL_TRIANGLE_FAN);
-        IR::Color4ub(m_byRed, m_byGreen, m_byBlue, m_byAlpha);
-        for (int i = LT; i < POS_MAX; ++i)
+        if (TextureEnable)
         {
-            IR::Vertex2f(m_aScrCoord[i].fX * m_fScaleX,
-                m_aScrCoord[i].fY * m_fScaleY);
+            TextureEnable = false;
+            mu::GetRenderer().SetTexture2D(false);
         }
-        IR::End();
     }
+
+    const std::uint32_t texture = m_nTexID >= 0 ? static_cast<std::uint32_t>(m_nTexID) : 0u;
+    mu::GetRenderer().RenderQuad2D(vertices, texture);
 }

@@ -25,9 +25,18 @@ public:
     WZResult LoadPackage(const wchar_t* szFilePath);
     WZResult LoadProduct(const wchar_t* szFilePath);
 
-    CShopCategoryList* GetCategoryListPtr() { return m_CategoryListPtr; };	// 카테고리 목록 가져온다.
-    CShopPackageList* GetPackageListPtr() { return m_PackageListPtr; };		// 패키지 목록 가져온다.
-    CShopProductList* GetProductListPtr() { return m_ProductListPtr; };		// 상품(속성) 목록 가져온다.
+    CShopCategoryList* GetCategoryListPtr()
+    {
+        return m_CategoryListPtr;
+    }; // 카테고리 목록 가져온다.
+    CShopPackageList* GetPackageListPtr()
+    {
+        return m_PackageListPtr;
+    }; // 패키지 목록 가져온다.
+    CShopProductList* GetProductListPtr()
+    {
+        return m_ProductListPtr;
+    }; // 상품(속성) 목록 가져온다.
 
     void SetCategoryListPtr(CShopCategoryList* CategoryListPtr);
     void SetPackageListPtr(CShopPackageList* PackagePtr);

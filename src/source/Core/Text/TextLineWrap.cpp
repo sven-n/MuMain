@@ -105,7 +105,7 @@ void TrimTrailingSpaces(std::wstring& line)
         line.pop_back();
     }
 }
-}
+} // namespace
 
 std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth)
 {

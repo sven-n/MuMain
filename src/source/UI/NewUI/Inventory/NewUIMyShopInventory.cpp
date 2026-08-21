@@ -438,7 +438,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                     else
                     {
                         wcscpy(g_szPersonalShopTitle, shopTitle);
-                        SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
 
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -552,7 +552,6 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 bool SEASON3B::CNewUIMyShopInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

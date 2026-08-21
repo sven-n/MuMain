@@ -14,9 +14,7 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUIFriendWindow::CNewUIFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL)
-{
-}
+SEASON3B::CNewUIFriendWindow::CNewUIFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL) {}
 
 SEASON3B::CNewUIFriendWindow::~CNewUIFriendWindow()
 {
@@ -67,8 +65,8 @@ bool SEASON3B::CNewUIFriendWindow::Render()
     if (m_pFriendWindowMgr)
     {
         m_pFriendWindowMgr->Render();
-        //GetFriendMenu()->Render();
-        //GetFriendMenu()->RenderFriendButton();
+        // GetFriendMenu()->Render();
+        // GetFriendMenu()->RenderFriendButton();
     }
     return true;
 }
@@ -91,7 +89,8 @@ bool SEASON3B::CNewUIFriendWindow::UpdateMouseEvent()
                 pMainWnd->SetPosition(pMainWnd->GetPosition_x(), 259);
             }
 
-            if (CheckMouseIn(pMainWnd->GetPosition_x(), pMainWnd->GetPosition_y(), pMainWnd->GetWidth(), pMainWnd->GetHeight()) == true)
+            if (CheckMouseIn(pMainWnd->GetPosition_x(), pMainWnd->GetPosition_y(), pMainWnd->GetWidth(),
+                             pMainWnd->GetHeight()) == true)
             {
                 return false;
             }

@@ -4,9 +4,7 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/BindState.h"
-#include "Render/RHI/RHI.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -23,6 +21,7 @@
 #include "Scenes/SceneCore.h"
 
 #include "Core/Utilities/Debouncer.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -56,7 +55,6 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
 extern CUIGuildListBox* g_pGuildListBox;
 
@@ -233,38 +231,17 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 
     for (int i = 0; i < TextNum; i++)
     {
-        g_pRenderText->SetTextColor(0xffffffff);
-
         switch (TextListColor[i])
         {
-        case TEXT_COLOR_WHITE:
-        case TEXT_COLOR_DARKRED:
-        case TEXT_COLOR_DARKBLUE:
-        case TEXT_COLOR_DARKYELLOW:
-            glColor3f(1.f, 1.f, 1.f);
-            break;
-        case TEXT_COLOR_BLUE:
-            glColor3f(0.5f, 0.7f, 1.f);
-            break;
-        case TEXT_COLOR_GRAY:
-            glColor3f(0.4f, 0.4f, 0.4f);
-            break;
-        case TEXT_COLOR_GREEN_BLUE:
-            glColor3f(1.f, 1.f, 1.f);
-            break;
-        case TEXT_COLOR_RED:
-            glColor3f(1.f, 0.2f, 0.1f);
-            break;
-        case TEXT_COLOR_YELLOW:
-            glColor3f(1.f, 0.8f, 0.1f);
-            break;
-        case TEXT_COLOR_GREEN:
-            glColor3f(0.1f, 1.f, 0.5f);
-            break;
-        case TEXT_COLOR_PURPLE:
-            glColor3f(1.f, 0.1f, 1.f);
-            break;
+        case TEXT_COLOR_BLUE: g_pRenderText->SetTextColor(128, 179, 255, 255); break;
+        case TEXT_COLOR_GRAY: g_pRenderText->SetTextColor(102, 102, 102, 255); break;
+        case TEXT_COLOR_RED: g_pRenderText->SetTextColor(255, 51, 26, 255); break;
+        case TEXT_COLOR_YELLOW: g_pRenderText->SetTextColor(255, 204, 26, 255); break;
+        case TEXT_COLOR_GREEN: g_pRenderText->SetTextColor(26, 255, 128, 255); break;
+        case TEXT_COLOR_PURPLE: g_pRenderText->SetTextColor(255, 26, 255, 255); break;
+        default: g_pRenderText->SetTextColor(255, 255, 255, 255); break;
         }
+
         if (TEXT_COLOR_DARKRED == TextListColor[i])
         {
             g_pRenderText->SetBgColor(160, 0, 0, 255);
@@ -370,15 +347,13 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
     if (bUseBG == TRUE && TextNum > 0)
     {
-        glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1);
-        RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1);
-        RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1);
-        RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1);
+        RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1, 1.0f, 1);
 
-        glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-        RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight);
-        EnableTexture2D();
+        RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight, 0.8f, 1);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -400,45 +375,18 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         }
         else
         {
-            g_pRenderText->SetTextColor(0xffffffff);
             switch (TextListColor[i])
             {
-            case TEXT_COLOR_WHITE:
-            case TEXT_COLOR_DARKRED:
-            case TEXT_COLOR_DARKBLUE:
-            case TEXT_COLOR_DARKYELLOW:
-                glColor3f(1.f, 1.f, 1.f);
-                break;
-            case TEXT_COLOR_BLUE:
-                glColor3f(0.5f, 0.7f, 1.f);
-                break;
-            case TEXT_COLOR_GRAY:
-                glColor3f(0.4f, 0.4f, 0.4f);
-                break;
-            case TEXT_COLOR_GREEN_BLUE:
-                glColor3f(1.f, 1.f, 1.f);
-                break;
-            case TEXT_COLOR_RED:
-                glColor3f(1.f, 0.2f, 0.1f);
-                break;
-            case TEXT_COLOR_YELLOW:
-                glColor3f(1.f, 0.8f, 0.1f);
-                break;
-            case TEXT_COLOR_GREEN:
-                glColor3f(0.1f, 1.f, 0.5f);
-                break;
-            case TEXT_COLOR_PURPLE:
-                glColor3f(1.f, 0.1f, 1.f);
-                break;
-            case TEXT_COLOR_REDPURPLE:
-                glColor3f(0.8f, 0.5f, 0.8f);
-                break;
-            case TEXT_COLOR_VIOLET:
-                glColor3f(0.7f, 0.4f, 1.0f);
-                break;
-            case TEXT_COLOR_ORANGE:
-                glColor3f(0.9f, 0.42f, 0.04f);
-                break;
+            case TEXT_COLOR_BLUE: g_pRenderText->SetTextColor(128, 179, 255, 255); break;
+            case TEXT_COLOR_GRAY: g_pRenderText->SetTextColor(102, 102, 102, 255); break;
+            case TEXT_COLOR_RED: g_pRenderText->SetTextColor(255, 51, 26, 255); break;
+            case TEXT_COLOR_YELLOW: g_pRenderText->SetTextColor(255, 204, 26, 255); break;
+            case TEXT_COLOR_GREEN: g_pRenderText->SetTextColor(26, 255, 128, 255); break;
+            case TEXT_COLOR_PURPLE: g_pRenderText->SetTextColor(255, 26, 255, 255); break;
+            case TEXT_COLOR_REDPURPLE: g_pRenderText->SetTextColor(204, 128, 204, 255); break;
+            case TEXT_COLOR_VIOLET: g_pRenderText->SetTextColor(179, 102, 255, 255); break;
+            case TEXT_COLOR_ORANGE: g_pRenderText->SetTextColor(230, 107, 10, 255); break;
+            default: g_pRenderText->SetTextColor(255, 255, 255, 255); break;
             }
             if (TEXT_COLOR_DARKRED == TextListColor[i])
             {
@@ -468,7 +416,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         fsy += fHeight * 1.1f;
     }
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
 }
 
@@ -6049,7 +5996,6 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
 
 void SetTextColor(float r, float g, float b)
 {
-    glColor3f(r, g, b);
     g_pRenderText->SetTextColor(r * 255, g * 255, b * 255, 255);
 }
 
@@ -6432,8 +6378,7 @@ void DeleteGroundItemLabelTexture(GLuint textureId)
 {
     if (textureId != 0)
     {
-        // DXP-12: RHI::DestroyTexture invalidates BindState's texture cache internally.
-        RHI::DestroyTexture(RHI::TextureHandle{ textureId });
+        mu::GetRenderer().ReleaseTexture(textureId);
     }
 }
 
@@ -6941,14 +6886,8 @@ bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, G
         }
     }
 
-    // DXP-12: textureBuffer is already RGBA8 (DWORD-packed pixelColor, alpha from font AA) --
-    // no format conversion needed here, unlike GlobalBitmap.cpp's JPEG path.
-    RHI::TextureDesc desc;
-    desc.width = textureWidth;
-    desc.height = textureHeight;
-    desc.filter = RHI::TexFilter::Nearest;
-    desc.wrap = RHI::TexWrap::Clamp;
-    GLuint textureId = RHI::CreateTexture(desc, textureBuffer.data()).id;
+    const std::uint32_t textureId = mu::GetRenderer().CreateTexture(
+        static_cast<std::uint32_t>(textureWidth), static_cast<std::uint32_t>(textureHeight), textureBuffer.data());
     if (textureId == 0)
     {
         return false;
@@ -6977,13 +6916,12 @@ void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& ca
     if (cacheEntry.BgColor != 0)
     {
         EnableAlphaTest();
-        glColor4ub(GetRed(cacheEntry.BgColor), GetGreen(cacheEntry.BgColor), GetBlue(cacheEntry.BgColor), GetAlpha(cacheEntry.BgColor));
-        RenderColor(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
-            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x, static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y);
+        RenderColorQuadARGB(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
+            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x,
+            static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y, cacheEntry.BgColor);
         EndRenderColor();
     }
 
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     float textureUWidth = (cacheEntry.TextWidth + 0.01f) / static_cast<float>(cacheEntry.TextureWidth);
     float textureVHeight = (cacheEntry.TextHeight + 0.01f) / static_cast<float>(cacheEntry.TextureHeight);
     RenderBitmap(-static_cast<int>(cacheEntry.TextureId), renderX, renderY, static_cast<float>(cacheEntry.TextWidth),
@@ -7071,7 +7009,13 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        RenderGroundItemLabelCached(o, ip);
+        if (!RenderGroundItemLabelCached(o, ip))
+        {
+            GroundItemLabelDescriptor descriptor;
+            BuildGroundItemLabelDescriptor(o, ip, descriptor);
+            ApplyGroundItemLabelDescriptor(descriptor);
+            g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15, descriptor.Name, 0, 0, RT3_WRITE_CENTER);
+        }
     }
 
     g_pRenderText->SetTextColor(255, 230, 200, 255);
@@ -10653,39 +10597,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 
 void InventoryColor(ITEM* p)
 {
-    switch (p->Color)
-    {
-    case 0:
-        glColor3f(1.f, 1.f, 1.f);
-        break;
-    case 1:
-        glColor3f(0.8f, 0.8f, 0.8f);
-        break;
-    case 2:
-        glColor3f(0.6f, 0.7f, 1.f);
-        break;
-    case 3:
-        glColor3f(1.f, 0.2f, 0.1f);
-        break;
-    case 4:
-        glColor3f(0.5f, 1.f, 0.6f);
-        break;
-    case 5:
-        glColor4f(0.8f, 0.7f, 0.f, 1.f);
-        break;
-    case 6:
-        glColor4f(0.8f, 0.5f, 0.f, 1.f);
-        break;
-    case 7:
-        glColor4f(0.8f, 0.3f, 0.3f, 1.f);
-        break;
-    case 8:
-        glColor4f(1.0f, 0.f, 0.f, 1.f);
-        break;
-    case 99:
-        glColor3f(1.f, 0.2f, 0.1f);
-        break;
-    }
+    (void)p;
 }
 
 void RenderEqiupmentBox()
@@ -10986,7 +10898,7 @@ void MovePersonalShop()
             {
                 if (g_bEnablePersonalShop)
                 {
-                    SocketClient->ToGameServer()->SendPlayerShopOpen(g_szPersonalShopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
                     g_pUIManager->Close(INTERFACE_INVENTORY);
                 }
                 else
@@ -11037,7 +10949,7 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, MU_C16(g_PersonalShopSeller.ID));
         }
     }
 
@@ -11195,6 +11107,11 @@ void CreateGuildMark(int nMarkIndex, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")->error("[CreateGuildMark] BITMAP_GUILD not loaded (BitmapIndex={})", b->BitmapIndex);
+        return;
+    }
     int alpha = 128;
     if (blend)
     {
@@ -11235,9 +11152,9 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         }
     }
 
-    // DXP-12: repaints an already-created, fixed-size texture in place -- RHI::UpdateTexture's
-    // full-rect form is the sub-image equivalent of the old full glTexImage2D re-specify.
-    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
+    mu::GetRenderer().QueueTextureUpdate(b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(Width),
+                                         static_cast<std::uint32_t>(Height));
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void CreateCastleMark(int Type, BYTE* buffer, bool blend)
@@ -11316,70 +11233,37 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             offset += 4;
         }
     }
-    // DXP-12: same in-place repaint pattern as CreateGuildMark, see its comment.
-    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
+    mu::GetRenderer().QueueTextureUpdate(
+        b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
 {
     RenderBitmap(BITMAP_INVENTORY + 18, x - 1, y - 1, (float)SizeX + 2, (float)SizeY + 2, 0.f, 0.f, SizeX / 32.f, SizeY / 30.f);
 
-    BITMAP_t* b = &Bitmaps[BITMAP_GUILD];
-
-    int Width, Height;
-
-    Width = (int)b->Width;
-    Height = (int)b->Height;
-    BYTE* Buffer = b->Buffer;
-    unsigned int Color = MarkColor[Index];
-
     if (Index == 0)
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                *((unsigned int*)(Buffer)) = 255 << 24;
-                Buffer += 4;
-            }
-        }
-        Color = (255 << 24) + (128 << 16) + (128 << 8) + (128);
-        Buffer = b->Buffer;
-        for (int i = 0; i < 8; i++)
-        {
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 + 4;
-        }
-        Buffer = b->Buffer + 7 * 4;
-        for (int i = 0; i < 8; i++)
-        {
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 - 4;
-        }
+        const unsigned int black = (255u << 24);
+        const unsigned int gray = (255u << 24) | (128u << 16) | (128u << 8) | 128u;
+        const float fx = x;
+        const float fy = y;
+        const float fw = (float)SizeX;
+        const float fh = (float)SizeY;
+        RenderColorQuadARGB(fx, fy, fw, fh, black);
+        RenderColorLineARGB(fx, fy, fx + fw, fy + fh, 2.0f, gray);
+        RenderColorLineARGB(fx + fw, fy, fx, fy + fh, 2.0f, gray);
     }
     else
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                *((unsigned int*)(Buffer)) = Color;
-                Buffer += 4;
-            }
-        }
+        RenderColorQuadARGB(x, y, (float)SizeX, (float)SizeY, MarkColor[Index]);
     }
-
-    // DXP-12: same in-place repaint pattern as CreateGuildMark, see its comment.
-    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
-    RenderBitmap(BITMAP_GUILD, x, y, (float)SizeX, (float)SizeY);
 }
 
 void RenderGuildList(int StartX, int StartY)
 {
     GuildListStartX = StartX;
     GuildListStartY = StartY;
-
-    glColor3f(1.f, 1.f, 1.f);
 
     DisableAlphaBlend();
     float x, y, Width, Height;
@@ -11433,7 +11317,6 @@ void RenderServerDivision()
 
     float Width, Height, x, y;
 
-    glColor3f(1.f, 1.f, 1.f);
     EnableAlphaTest();
 
     InventoryStartX = REFERENCE_WIDTH - 190;
@@ -11474,14 +11357,9 @@ void RenderServerDivision()
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::Cancel, 0, 0, RT3_WRITE_CENTER);
 
     Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 320;//(Width/2.f); y = 231;
-    if (g_bServerDivisionAccept)
-        glColor3f(1.f, 1.f, 1.f);
-    else
-        glColor3f(0.5f, 0.5f, 0.5f);
     RenderBitmap(BITMAP_INTERFACE + 10, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, 213.f / 256.f);
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::OK, 0, 0, RT3_WRITE_CENTER);
 
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 BYTE CaculateFreeTicketLevel(int iType)

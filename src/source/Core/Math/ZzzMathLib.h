@@ -2,6 +2,7 @@
 #define __MATHLIB__
 
 #include <math.h>
+#include "Core/Globals/_types.h"
 
 #ifdef __cplusplus
 extern "C" {

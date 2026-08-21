@@ -17,8 +17,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -6090,7 +6089,7 @@ void MoveCharacterVisual(CHARACTER* c, OBJECT* o)
             if (g_isCharacterBuff(o, eBuff_CrywolfNPCHide))
                 break;
             if (o->CurrentAction == 0 && o->AnimationFrame >= 5.f && o->AnimationFrame <= 10.f)
-                PlayBuffer(SOUND_NPC_BLACK_SMITH);
+                PlayBuffer(SOUND_NPC_BLACK_SMITH, o);
             o->BlendMesh = 4;
             o->BlendMeshLight = Luminosity;
             Vector(Luminosity * 1.f, Luminosity * 0.4f, Luminosity * 0.f, Light);
@@ -6504,7 +6503,7 @@ void MoveCharactersClient()
 // TEMP diagnostic (2026-07-31, Devil Square FPS investigation) — active-character count and
 // which animation path was taken this tick, read by the debug HUD (SceneManager.cpp).
 size_t g_LastActiveCharacterCount = 0;
-bool   g_LastAnimationWasParallel = false;
+bool g_LastAnimationWasParallel = false;
 
 void UpdateCharactersAnimationParallel(std::span<CHARACTER> characters)
 {
@@ -6569,10 +6568,8 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
 {
     EnableAlphaTest();
     EnableCullFace();
-    glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_GUILD);
-    GlobalUBO::Instance().PushModel();
-    GlobalUBO::Instance().SetModel(o->Position, 1.0f);
+    mu::GetRenderer().PushMatrix();
 
     float Matrix[3][4];
     vec3_t Angle;
@@ -6600,9 +6597,10 @@ void RenderGuild(OBJECT* o, int Type, vec3_t vPos)
     }
 
     R_ConcatTransforms(o->BoneTransform[26], Matrix, ParentMatrix);
+    mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
     RenderPlane3D(5.f, 7.f, ParentMatrix);
 
-    GlobalUBO::Instance().PopModel();
+    mu::GetRenderer().PopMatrix();
     DisableCullFace();
 }
 
@@ -8403,8 +8401,8 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
         break;
     }
 
-    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE && !g_Direction.m_CKanturu.IsMayaScene()
-        && !IsWingShadowDisabledDebug()) // DXP-23 diagnostic
+    if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
+        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug()) // DXP-23 diagnostic
     {
         switch (Type)        // 날개인지 검사
         {

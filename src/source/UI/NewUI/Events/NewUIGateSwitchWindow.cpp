@@ -112,7 +112,6 @@ bool CNewUIGateSwitchWindow::Update()
 bool CNewUIGateSwitchWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -232,7 +231,7 @@ bool CNewUIGateSwitchWindow::BtnProcess()
 
 void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
 
     RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
@@ -242,7 +241,7 @@ void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, floa
 
 void CNewUIGateSwitchWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
     float fBoxHeight = fHeight;
 

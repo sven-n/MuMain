@@ -3,6 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #ifdef _WIN32
 #include <ddraw.h>
 #include <dinput.h>
@@ -11,7 +12,15 @@
 #include <imagehlp.h>
 #endif
 #include "ErrorReport.h"
-#include "Render/RHI/RHI.h"  // GLP-08: RHI::GetCaps() for WriteOpenGLInfo()'s boot log
+#include "Core/Platform/Audio/AudioDeviceNames.h"
+#include "Render/Renderer/MuRenderer.h"
+
+#include <filesystem>
+#include <fstream>
+#include <string>
+#include <vector>
+
+CErrorReport g_ErrorReport;
 
 // Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
 // up to 3 bytes per BMP character (and 4 bytes per surrogate pair), so a 1024-wchar
@@ -23,10 +32,31 @@ constexpr int MAX_HEX_LINE_BYTES = 512;
 
 void DeleteSocket();
 
+namespace
+{
+std::string WideToUtf8(const wchar_t* value)
+{
+    if (value == nullptr)
+    {
+        return {};
+    }
+
+    const int size = WideCharToMultiByte(CP_UTF8, 0, value, -1, nullptr, 0, nullptr, nullptr);
+    if (size <= 1)
+    {
+        return {};
+    }
+
+    std::string result(static_cast<size_t>(size), '\0');
+    WideCharToMultiByte(CP_UTF8, 0, value, -1, result.data(), size, nullptr, nullptr);
+    result.pop_back();
+    return result;
+}
+}
+
 CErrorReport::CErrorReport()
 {
     Clear();
-    Create(L"MuError.log");
 }
 
 CErrorReport::~CErrorReport()
@@ -36,115 +66,77 @@ CErrorReport::~CErrorReport()
 
 void CErrorReport::Clear(void)
 {
-    m_hFile = INVALID_HANDLE_VALUE;
-    m_lpszFileName[0] = '\0';
+    m_filePath.clear();
     m_iKey = 0;
 }
 
 void CErrorReport::Create(const wchar_t* lpszFileName)
 {
-    wcscpy(m_lpszFileName, lpszFileName);
+    if (m_fileStream.is_open())
+    {
+        m_fileStream.close();
+    }
 
-    //DeleteFile( m_lpszFileName);
     m_iKey = 0;
-    m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+    m_filePath = std::filesystem::path(WideToUtf8(lpszFileName));
 
     CutHead();
-    SetFilePointer(m_hFile, 0, NULL, FILE_END);
+    m_fileStream.open(m_filePath, std::ios::out | std::ios::app | std::ios::binary);
 }
 
 void CErrorReport::Destroy(void)
 {
-    CloseHandle(m_hFile);
+    if (m_fileStream.is_open())
+    {
+        m_fileStream.flush();
+        m_fileStream.close();
+    }
     Clear();
 }
 
 void CErrorReport::CutHead(void)
 {
-    // Log file is UTF-8. The "###### Log Begin ######" marker is pure ASCII, and UTF-8
-    // preserves ASCII bytes verbatim (no multi-byte sequence starts with a byte < 0x80),
-    // so byte-level strchr/strncmp on '#' reliably locates the marker even if other lines
-    // contain multi-byte sequences.
-    DWORD dwNumber;
-    char lpszBuffer[128 * 1024];
-    ReadFile(m_hFile, lpszBuffer, sizeof(lpszBuffer) - 1, &dwNumber, NULL);
-    //m_iKey = Xor_ConvertBuffer( lpszBuffer, dwNumber);
-    lpszBuffer[dwNumber] = '\0';
-    char* lpCut = CheckHeadToCut(lpszBuffer, dwNumber);
-    if (dwNumber >= 32 * 1024 - 1)
+    std::ifstream input(m_filePath, std::ios::in | std::ios::binary);
+    if (!input.is_open())
     {
-        lpCut = &lpszBuffer[32 * 1024 - 1];
-    }
-    if (lpCut != lpszBuffer)
-    {
-        CloseHandle(m_hFile);
-        DeleteFile(m_lpszFileName);
-        m_hFile = CreateFile(m_lpszFileName, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_READ, NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-        DWORD dwSize = dwNumber - static_cast<DWORD>(lpCut - lpszBuffer);
-        m_iKey = 0;
-        WriteFile(m_hFile, lpCut, dwSize, &dwNumber, NULL);
-    }
-}
-
-char* CErrorReport::CheckHeadToCut(char* lpszBuffer, DWORD dwNumber)
-{
-    const char* lpszBegin = "###### Log Begin ######";
-    int iLengthOfBegin = static_cast<int>(strlen(lpszBegin));
-
-    char* lpFoundList[128];
-    int iFoundCount = 0;
-
-    for (char* lpFind = lpszBuffer; lpFind && *lpFind; )
-    {
-        lpFind = strchr(lpFind, '#');
-        if (lpFind)
-        {
-            if (0 == strncmp(lpFind, lpszBegin, iLengthOfBegin))
-            {
-                lpFoundList[iFoundCount++] = lpFind;
-                lpFind += iLengthOfBegin;
-            }
-            else
-            {
-                lpFind++;
-            }
-        }
+        return;
     }
 
-    if (iFoundCount >= 5)
+    const std::string content((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
+    constexpr std::string_view marker = "###### Log Begin ######";
+    std::vector<size_t> positions;
+    for (size_t position = content.find(marker); position != std::string::npos;
+         position = content.find(marker, position + marker.size()))
     {
-        return (lpFoundList[iFoundCount - 4]);
+        positions.push_back(position);
     }
-    return (lpszBuffer);
-}
 
-BOOL CErrorReport::WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped)
-{
-    //m_iKey = Xor_ConvertBuffer( lpBuffer, nNumberOfBytesToWrite, m_iKey);
-    return (::WriteFile(hFile, lpBuffer, nNumberOfBytesToWrite, lpNumberOfBytesWritten, lpOverlapped));
+    size_t keepFrom = 0;
+    if (positions.size() >= 5)
+    {
+        keepFrom = positions[positions.size() - 4];
+    }
+    else if (content.size() >= 32 * 1024 - 1)
+    {
+        keepFrom = content.size() / 2;
+    }
+
+    if (keepFrom == 0)
+    {
+        return;
+    }
+
+    std::ofstream output(m_filePath, std::ios::out | std::ios::trunc | std::ios::binary);
+    output.write(content.data() + keepFrom, static_cast<std::streamsize>(content.size() - keepFrom));
 }
 
 void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
 {
-    if (m_hFile == INVALID_HANDLE_VALUE) return;
-
-    // Convert UTF-16 wide string to UTF-8 before writing. UTF-8 is portable across
-    // locales (unlike CP_ACP, where the file's bytes depend on the writer's system
-    // codepage -- Shift-JIS on JP Windows, Windows-1252 on EN, etc. -- making logs
-    // collected from different machines ambiguous without knowing each user's locale).
-    char narrowBuf[MAX_LOG_LINE_BYTES];
-    int len = WideCharToMultiByte(CP_UTF8, 0, lpszToWrite, -1, narrowBuf, sizeof(narrowBuf), nullptr, nullptr);
-    // len includes the null terminator. 0 = conversion failed (e.g. ERROR_INSUFFICIENT_BUFFER);
-    // 1 = empty string (only null terminator). Either way, nothing to write.
-    if (len <= 1) return;
-
-    DWORD dwNumber;
-    WriteFile(m_hFile, narrowBuf, len - 1, &dwNumber, NULL);
-    if (dwNumber == 0)
-    {
-        CloseHandle(m_hFile);
-        Create(m_lpszFileName);
-    }
+    std::string line = WideToUtf8(lpszToWrite);
+    while (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
+        line.pop_back();
+    if (!line.empty())
+        MU_LOG_ERROR(mu::log::Get("core"), "{}", line);
 }
 
 void CErrorReport::Write(const wchar_t* lpszFormat, ...)
@@ -160,7 +152,6 @@ void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 
 void CErrorReport::HexWrite(void* pBuffer, int iSize)
 {
-    DWORD dwWritten = 0;
     wchar_t szLine[256] = { 0, };
     char narrowLine[MAX_HEX_LINE_BYTES];
     int offset = 0;
@@ -172,7 +163,11 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
             if (i % 16 == 15) {	//. new line
                 offset += mu_swprintf(szLine + offset, L"\r\n");
                 len = WideCharToMultiByte(CP_UTF8, 0, szLine, -1, narrowLine, sizeof(narrowLine), nullptr, nullptr);
-                if (len > 1) WriteFile(m_hFile, narrowLine, len - 1, &dwWritten, NULL);
+                if (len > 1 && m_fileStream.is_open())
+                {
+                    m_fileStream.write(narrowLine, len - 1);
+                    m_fileStream.flush();
+                }
                 offset = 0;
                 offset += mu_swprintf(szLine + offset, L"           : ");
             }
@@ -183,7 +178,11 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
     }
     offset += mu_swprintf(szLine + offset, L"\r\n");
     len = WideCharToMultiByte(CP_UTF8, 0, szLine, -1, narrowLine, sizeof(narrowLine), nullptr, nullptr);
-    if (len > 1) WriteFile(m_hFile, narrowLine, len - 1, &dwWritten, NULL);
+    if (len > 1 && m_fileStream.is_open())
+    {
+        m_fileStream.write(narrowLine, len - 1);
+        m_fileStream.flush();
+    }
 }
 
 void CErrorReport::AddSeparator(void)
@@ -212,40 +211,16 @@ void CErrorReport::WriteSystemInfo(ER_SystemInfo* si)
     Write(L"<System information>\r\n");
     Write(L"OS \t\t\t: %ls\r\n", si->m_lpszOS);
     Write(L"CPU \t\t\t: %ls\r\n", si->m_lpszCPU);
-    Write(L"RAM \t\t\t: %dMB\r\n", 1 + (si->m_iMemorySize / 1024 / 1024));
+    Write(L"RAM \t\t\t: %lldMB\r\n", static_cast<long long>(1 + (si->m_iMemorySize / 1024 / 1024)));
     AddSeparator();
-    Write(L"Direct-X \t\t: %ls\r\n", si->m_lpszDxVersion);
+    Write(L"GPU Backend \t\t: %ls\r\n", si->m_lpszGpuBackend);
 }
 
 void CErrorReport::WriteOpenGLInfo(void)
 {
-    Write(L"<OpenGL information>\r\n");
-    // GLP-08: was (wchar_t*)glGetString(...) -- glGetString returns a narrow (ASCII) const
-    // GLubyte*, and reinterpreting those bytes as UTF-16 code units produced garbled output.
-    // %hs is this file's own established narrow-string convention (see WriteFontInfo() above).
-    Write(L"Vendor\t\t: %hs\r\n", (const char*)glGetString(GL_VENDOR));
-    Write(L"Render\t\t: %hs\r\n", (const char*)glGetString(GL_RENDERER));
-    Write(L"OpenGL version\t: %hs\r\n", (const char*)glGetString(GL_VERSION));
-    GLint iResult[2];
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, iResult);
-    Write(L"Max Texture size\t: %d x %d\r\n", iResult[0], iResult[0]);
-    glGetIntegerv(GL_MAX_VIEWPORT_DIMS, iResult);
-    Write(L"Max Viewport size\t: %d x %d\r\n", iResult[0], iResult[1]);
-
-    // GLP-08: resolved context version + capability probe -- this is the deliverable a remote
-    // user's log needs to be actionable, and what GLP-09/15/22 will branch on.
-    GLint maxVertexUniformBlocks = 0;
-    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
-    Write(L"Max Vertex Uniform Blocks\t: %d\r\n", maxVertexUniformBlocks);
-
-    const RHI::Caps& caps = RHI::GetCaps();
-    Write(L"GL context\t: %d.%d\r\n", caps.glMajor, caps.glMinor);
-    Write(L"Caps.bufferStorage\t: %d\r\n", caps.bufferStorage ? 1 : 0);
-    Write(L"Caps.vertexAttribBinding\t: %d\r\n", caps.vertexAttribBinding ? 1 : 0);
-    Write(L"Caps.programBinary\t: %d\r\n", caps.programBinary ? 1 : 0);
-    Write(L"Caps.timerQuery\t: %d\r\n", caps.timerQuery ? 1 : 0);
-    Write(L"Caps.uboOffsetAlignment\t: %d\r\n", caps.uboOffsetAlignment);
-    Write(L"Caps.maxUniformBlockSize\t: %d\r\n", caps.maxUniformBlockSize);
+    Write(L"<Renderer information>\r\n");
+    Write(L"API\t\t: SDL_gpu\r\n");
+    Write(L"Driver\t\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
 }
 
 void CErrorReport::WriteFontInfo(void)
@@ -286,23 +261,10 @@ void CErrorReport::WriteFontInfo(void)
 // (Winmain), so guard the whole section off on non-Windows (issue #462).
 #ifdef _WIN32
 
-void CErrorReport::WriteImeInfo(HWND hWnd)
+void CErrorReport::WriteImeInfo(SDL_Window* /*window*/)
 {
-    wchar_t lpszTemp[256];
-    Write(L"<IME information>\r\n");
-
-    HIMC hImc = ImmGetContext(hWnd);
-    if (hImc)
-    {
-        HKL hKl = GetKeyboardLayout(0);
-        ImmGetDescription(hKl, lpszTemp, 256);
-        Write(L"IME Name\t\t: %ls\r\n", lpszTemp);
-        ImmGetIMEFileName(hKl, lpszTemp, 256);
-        Write(L"IME File Name\t\t: %ls\r\n", lpszTemp);
-        ImmReleaseContext(hWnd, hImc);
-    }
-    GetKeyboardLayoutName(lpszTemp);
-    Write(L"Keyboard type\t\t: %ls\r\n", lpszTemp);
+    Write(L"<Text input information>\r\n");
+    Write(L"Backend\t\t: SDL3\r\n");
 }
 
 typedef struct tagER_SOUNDDEVICE {
@@ -340,34 +302,14 @@ BOOL GetFileVersion(wchar_t* lpszFileName, WORD* pwVersion);
 
 void CErrorReport::WriteSoundCardInfo(void)
 {
-    ER_SOUNDDEVICEENUMINFO sdi;
-    DirectSoundEnumerate((LPDSENUMCALLBACK)DSoundEnumCallback, &sdi);
-
-    if (sdi.nDeivceCount > 0)
+    Write(L"<Sound device information>\r\n");
+    const auto names = mu::GetAudioDeviceNames();
+    if (names.empty())
     {
-        Write(L"<Sound card information>\r\n");
-    }
-    else
-    {
-        Write(L"No sound card found.\r\n");
+        Write(L"No playback device found.\r\n");
         return;
     }
-
-    for (unsigned int i = 0; i < sdi.nDeivceCount; ++i)
-    {
-        Write(L"Sound Card \t\t: %ls\r\n", sdi.infoSoundDevice[i].szDeviceName);
-
-        wchar_t lpszBuffer[MAX_PATH];
-        GetSystemDirectory(lpszBuffer, MAX_PATH);
-        wcscat(lpszBuffer, L"\\drivers\\");
-        wcscat(lpszBuffer, sdi.infoSoundDevice[i].szDriverName);
-        WORD wVersion[4];
-        GetFileVersion(lpszBuffer, wVersion);
-
-        Write(L"Sound Card Driver\t: %ls (%d.%d.%d.%d)\r\n", sdi.infoSoundDevice[i].szDriverName, wVersion[0], wVersion[1], wVersion[2], wVersion[3]);
-    }
-
-    AddSeparator();
+    for (const auto& name : names) Write(L"Description \t\t: %hs\r\n", name.c_str());
 }
 
 void GetOSVersion(ER_SystemInfo* si)
@@ -753,7 +695,7 @@ DWORD GetDXVersion()
     return dwDXVersion;
 }
 
-void GetSystemInfo(ER_SystemInfo* si)
+void MuGetSystemInfo(ER_SystemInfo* si)
 {
     ZeroMemory(si, sizeof(ER_SystemInfo));
 
@@ -770,8 +712,8 @@ void GetSystemInfo(ER_SystemInfo* si)
     GetOSVersion(si);
 
     // DX
-    DWORD dwDX = GetDXVersion();
-    mu_swprintf(si->m_lpszDxVersion, L"Direct-X %d.%d", dwDX >> 8, dwDX & 0xFF);
+    MultiByteToWideChar(CP_UTF8, 0, mu::GetRenderer().GetGPUDriverName(), -1,
+        si->m_lpszGpuBackend, MAX_GPU_BACKEND_LEN);
 }
 
 #else  // ---- non-Windows ----------------------------------------------------
@@ -785,18 +727,26 @@ void GetSystemInfo(ER_SystemInfo* si)
 #include "Core/Utilities/PlatformInfo.h"   // Core::Platform::GetOSDistroName
 
 // IME is a Windows input service; there is nothing to report elsewhere.
-void CErrorReport::WriteImeInfo(HWND /*hWnd*/)
+void CErrorReport::WriteImeInfo(SDL_Window* /*window*/)
 {
+    Write(L"<Text input information>\r\n");
+    Write(L"Backend\t\t: SDL3\r\n");
 }
 
 // Audio runs through SDL; the DirectSound device enumeration has no equivalent.
 void CErrorReport::WriteSoundCardInfo(void)
 {
     Write(L"<Sound device information>\r\n");
-    Write(L"Description \t\t: SDL audio\r\n");
+    const auto names = mu::GetAudioDeviceNames();
+    if (names.empty())
+    {
+        Write(L"No playback device found.\r\n");
+        return;
+    }
+    for (const auto& name : names) Write(L"Description \t\t: %hs\r\n", name.c_str());
 }
 
-void GetSystemInfo(ER_SystemInfo* si)
+void MuGetSystemInfo(ER_SystemInfo* si)
 {
     ZeroMemory(si, sizeof(ER_SystemInfo));
 
@@ -829,8 +779,7 @@ void GetSystemInfo(ER_SystemInfo* si)
     const long long pageSize = ::sysconf(_SC_PAGE_SIZE);
     if (pages > 0 && pageSize > 0)
     {
-        const long long bytes = pages * pageSize;
-        si->m_iMemorySize = (bytes > INT_MAX) ? INT_MAX : static_cast<int>(bytes);
+        si->m_iMemorySize = pages * pageSize;
     }
 
     // OS: distro (if any) plus the full kernel name and release, e.g.
@@ -857,7 +806,7 @@ void GetSystemInfo(ER_SystemInfo* si)
         mu_swprintf(si->m_lpszOS, L"Unknown");
     }
 
-    // No DirectX off Windows; rendering is OpenGL.
-    mu_swprintf(si->m_lpszDxVersion, L"none (OpenGL)");
+    MultiByteToWideChar(CP_UTF8, 0, mu::GetRenderer().GetGPUDriverName(), -1,
+        si->m_lpszGpuBackend, MAX_GPU_BACKEND_LEN);
 }
 #endif // _WIN32 (Win32 crash-report system info)

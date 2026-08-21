@@ -8,7 +8,7 @@
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -44,7 +44,6 @@ extern CHARACTER CharacterView;
 extern int SelectedCharacter;
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern BOOL g_bIMEBlock;
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
@@ -153,6 +152,8 @@ void NewMoveCharacterScene()
         return;
     }
 
+    MouseOnWindow = false;
+
     if (!InitCharacterScene)
     {
         InitCharacterScene = true;
@@ -244,11 +245,10 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 
     MoveMainCamera();
 
-    glColor3f(1.f, 1.f, 1.f);
     outHeight = REFERENCE_HEIGHT;
     outWidth = GetScreenWidth();
 
-    SetClearColor(0.f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
     BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
 
     // Build global frustum arrays for TestFrustrum/TestFrustrum2D

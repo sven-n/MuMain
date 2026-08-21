@@ -1,16 +1,22 @@
 #pragma once
 
+#include <filesystem>
+#include <fstream>
+#include <cstdint>
+
 #define MAX_LENGTH_CPUNAME	( 128)
 #define MAX_LENGTH_OSINFO	( 128)
-#define MAX_DXVERSION		( 128)
+#define MAX_GPU_BACKEND_LEN	( 128)
+
+struct SDL_Window;
 
 typedef struct
 {
     wchar_t m_lpszCPU[MAX_LENGTH_CPUNAME];
     wchar_t m_lpszOS[MAX_LENGTH_OSINFO];
-    int m_iMemorySize;
+    std::int64_t m_iMemorySize;
 
-    wchar_t m_lpszDxVersion[MAX_DXVERSION];
+    wchar_t m_lpszGpuBackend[MAX_GPU_BACKEND_LEN];
 } ER_SystemInfo;
 
 class CErrorReport
@@ -22,18 +28,14 @@ public:
     void Clear(void);
 
 protected:
-    HANDLE m_hFile;
-    wchar_t m_lpszFileName[MAX_PATH];
+    std::ofstream m_fileStream;
+    std::filesystem::path m_filePath;
     int m_iKey;
 public:
     void Create(const wchar_t* lpszFileName);
     void Destroy(void);
 protected:
     void CutHead(void);
-    char* CheckHeadToCut(char* lpszBuffer, DWORD dwNumber);
-
-protected:
-    BOOL WriteFile(HANDLE hFile, void* lpBuffer, DWORD nNumberOfBytesToWrite, LPDWORD lpNumberOfBytesWritten, LPOVERLAPPED lpOverlapped);
 public:
     void WriteDebugInfoStr(wchar_t* lpszToWrite);
     void Write(const wchar_t* lpszFormat, ...);
@@ -46,11 +48,10 @@ public:
     void WriteSystemInfo(ER_SystemInfo* si);
     void WriteOpenGLInfo(void);
     void WriteFontInfo(void);
-    void WriteImeInfo(HWND hWnd);
+    void WriteImeInfo(SDL_Window* window);
     void WriteSoundCardInfo(void);
 };
 
 extern CErrorReport g_ErrorReport;
 
-void GetSystemInfo(ER_SystemInfo* si);
-
+void MuGetSystemInfo(ER_SystemInfo* si);

@@ -91,7 +91,9 @@
 //c runtime
 #include <stdio.h>
 #include <stdlib.h>
+#if !defined(__APPLE__)
 #include <malloc.h>
+#endif
 #include <memory.h>
 #include <assert.h>
 #include <time.h>
@@ -139,6 +141,8 @@
   // overrun smaller buffers, and glibc's _FORTIFY_SOURCE aborts on the
   // mismatch even before anything is written. Only a plain pointer (size
   // unknowable) keeps the 1024 assumption.
+#ifndef MU_SWPRINTF_DEFINED
+#define MU_SWPRINTF_DEFINED
   template<typename Buf, typename... Args>
   inline int mu_swprintf(Buf&& buffer, const wchar_t* format, Args... args) {
       using Array = std::remove_reference_t<Buf>;
@@ -158,14 +162,12 @@
       return std::swprintf(buffer, N, format, args...);
   }
 #endif
+#endif
 
 //opengl
 #include <gl/glew.h>
 #include <gl/GL.h>
-
-// DXP-08a Category 1: intercepts glColor3f/3fv/3ub/4f/4ub project-wide so every call site
-// keeps working under both GL profiles without a per-site rewrite -- see GLColorIntercept.h.
-#include "Render/Core/GLColorIntercept.h"
+#include "Render/Renderer/GLCompatShim.h"
 
 //patch
 //winmain
@@ -177,6 +179,8 @@
 #include "Core/Globals/_enum.h"
 #include "Core/Globals/_types.h"
 #include "Core/Globals/_struct.h"
+#include "Dotnet/PacketFunctions_CommonEnums.h"
+#include "Dotnet/PacketFunctions_ClientToServer_Enums.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "Core/Globals/_TextureIndex.h"
 #include "UI/Legacy/UIDefaultBase.h"

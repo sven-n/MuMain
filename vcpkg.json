@@ -1,0 +1,15 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "mumain",
+  "version-string": "0.0.0",
+  "description": "MuMain client — Windows MSVC native dependencies. Linux/macOS use system package managers (apt, brew).",
+  "dependencies": [
+    {
+      "name": "curl",
+      "features": ["ssl"]
+    },
+    "openssl",
+    "glslang",
+    "spirv-cross"
+  ]
+}

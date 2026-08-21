@@ -8,9 +8,7 @@
 
 #include "GameLogic/Items/MixMgr.h"
 #include "Camera/CameraProjection.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Core/Utilities/Log/ErrorReport.h"
+#include "Render/Renderer/MuRenderer.h"
 
 namespace
 {
@@ -185,7 +183,6 @@ bool CNewUIGoldBowmanLena::Update()
 bool CNewUIGoldBowmanLena::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 
@@ -270,42 +267,15 @@ void CNewUIGoldBowmanLena::Render3D()
 {
     EndBitmap();
 
-    // Snapshot the CPU source of truth right after EndBitmap() restores it (DXP-07a), before this
-    // panel overwrites GlobalUBO — used to check the post-pop restore below for symmetry.
-    memcpy(s_PreGBLProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreGBLProj));
-    memcpy(s_PreGBLView, GlobalUBO::Instance().GetView(), sizeof(s_PreGBLView));
-
-    SaveCameraPerspective();
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
-    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic are
-    // deleted — DXP-07d already proved this closed form matches bit-for-bit, and GlobalUBO is
-    // the only consumer. This panel's projection is a plain gluPerspective(1.f
-    // deg, aspect, RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR) closed form, and its view is
-    // identity.
-    {
-        float aspect = (float)WindowWidth / (float)WindowHeight;
-        float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
-        float f = 1.0f / tanf(fovRad);
-        float zNear = RENDER_ITEMVIEW_NEAR;
-        float zFar  = RENDER_ITEMVIEW_FAR;
-        float cpuProj[16];
-        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
-        float cpuView[16] = {
-            1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
-        };
-
-        GlobalUBO::Instance().SetProj(cpuProj);
-        GlobalUBO::Instance().SetView(cpuView);
-
-        // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used to
-        // produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
-        static const float s_IdentityCameraMatrix[3][4] = {
-            {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-        };
-        memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-    }
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
@@ -320,10 +290,10 @@ void CNewUIGoldBowmanLena::Render3D()
 
     UpdateMousePositionn();
 
-    // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry shadow-compare
-    // are deleted — GlobalUBO is restored directly from the pre-panel snapshot taken at entry.
-    RestoreCameraPerspective();
-    GlobalUBO::Instance().SetProj(s_PreGBLProj);
-    GlobalUBO::Instance().SetView(s_PreGBLView);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
+
     BeginBitmap();
 }

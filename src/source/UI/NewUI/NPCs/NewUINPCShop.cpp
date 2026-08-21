@@ -209,7 +209,6 @@ bool SEASON3B::CNewUINPCShop::Update()
 bool SEASON3B::CNewUINPCShop::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButton();

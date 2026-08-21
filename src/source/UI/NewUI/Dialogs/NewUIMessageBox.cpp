@@ -6,7 +6,6 @@
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"	// self
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/Legacy/UIControls.h"
-#include "Render/Core/RenderConfig.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 using namespace SEASON3B;
@@ -126,14 +125,19 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
     float fPosX = 0.0f, fPosY = 0.0f;
     if (_bRender)
     {
-        EnableAlphaTestRaw();
-        glColor4f(m_vColor[0], m_vColor[1], m_vColor[2], m_fOpacityAlpha);
-        RenderColor(fPosX, fPosY, fWidth, fHeight - 50.0f);
+        EnableAlphaTest();
+        const auto toByte = [](float value)
+        {
+            return static_cast<unsigned int>(std::clamp(value, 0.f, 1.f) * 255.f);
+        };
+        const unsigned int color = (toByte(m_fOpacityAlpha) << 24)
+            | (toByte(m_vColor[0]) << 16)
+            | (toByte(m_vColor[1]) << 8)
+            | toByte(m_vColor[2]);
+        RenderColorQuadARGB(fPosX, fPosY, fWidth, fHeight - 50.0f, color);
 
-        EnableTexture2D();
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-        DisableBlend();
-        EnableAlphaTestRaw();
+        DisableAlphaBlend();
+        EnableAlphaTest();
     }
 }
 
@@ -180,6 +184,11 @@ bool SEASON3B::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
 
 void SEASON3B::CNewUIMessageBoxMng::Release()
 {
+    if (m_pNewUIMng == nullptr && m_pMsgBoxFactory == nullptr)
+    {
+        return;
+    }
+
     UnloadImages();
 
     PopAllEvents();

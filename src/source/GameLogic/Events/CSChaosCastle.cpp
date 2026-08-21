@@ -26,10 +26,10 @@
 
 extern int g_iChatInputType;
 extern int g_iCustomMessageBoxButton[NUM_BUTTON_CMB][NUM_PAR_BUTTON_CMB];
-extern  int g_iActionObjectType;
-extern  int g_iActionWorld;
-extern  int g_iActionTime;
-extern  float g_fActionObjectVelocity;
+extern int g_iActionObjectType;
+extern int g_iActionWorld;
+extern int g_iActionTime;
+extern float g_fActionObjectVelocity;
 
 namespace
 {
@@ -105,13 +105,12 @@ const CastleAreaSet* SelectLimitArea(CastleLevel level)
 
 bool IsWithinLimitArea(const CastleAreaSet& areas, int xi, int yi)
 {
-    return std::any_of(areas.begin(), areas.end(), [xi, yi](const CastleArea& area) {
-        return xi >= area[0] && xi <= area[2] && yi >= area[1] && yi <= area[3];
-    });
+    return std::any_of(areas.begin(), areas.end(), [xi, yi](const CastleArea& area)
+                       { return xi >= area[0] && xi <= area[2] && yi >= area[1] && yi <= area[3]; });
 }
 } // namespace
 
-void    ClearChaosCastleHelper(CHARACTER* c)
+void ClearChaosCastleHelper(CHARACTER* c)
 {
     c->Wing.Type = -1;
     c->Wing.Level = 0;
@@ -128,9 +127,10 @@ void    ClearChaosCastleHelper(CHARACTER* c)
 #endif
 }
 
-void    ChangeChaosCastleUnit(CHARACTER* c)
+void ChangeChaosCastleUnit(CHARACTER* c)
 {
-    if (gMapManager.InChaosCastle() == false) return;
+    if (gMapManager.InChaosCastle() == false)
+        return;
 
     ClearChaosCastleHelper(c);
 
@@ -168,7 +168,8 @@ void    ChangeChaosCastleUnit(CHARACTER* c)
 
 bool MoveChaosCastleObjectSetting(int& objCount, int object)
 {
-    if (gMapManager.InChaosCastle() == false) return false;
+    if (gMapManager.InChaosCastle() == false)
+        return false;
 
     if (rand_fps_check(10) && object)
     {
@@ -225,23 +226,24 @@ bool MoveChaosCastleObject(OBJECT* o, int& object, int& visibleObject)
 
 bool MoveChaosCastleAllObject(OBJECT* o)
 {
-    if (gMapManager.InChaosCastle() == false) return false;
+    if (gMapManager.InChaosCastle() == false)
+        return false;
 
     vec3_t Position;
 
     switch (o->Type)
     {
-    case    24:
-    case    25:
-    case    26:
-    case    27:
-    case    28:
-    case    29:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
         if (g_currentCastleLevel == CastleLevel::Seven)
         {
             if (g_iActionTime >= kActionTriggerTime)
             {
-                vec3_t Light = { 1.f, 1.f, 1.f };
+                vec3_t Light = {1.f, 1.f, 1.f};
 
                 Position[0] = o->Position[0] + Random::RangeFloat(-150, 149);
                 Position[1] = o->Position[1];
@@ -265,17 +267,17 @@ bool MoveChaosCastleAllObject(OBJECT* o)
         }
         break;
 
-    case    30:
-    case    31:
-    case    32:
-    case    33:
-    case    34:
-    case    35:
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
         if (g_currentCastleLevel == CastleLevel::Four)
         {
             if (g_iActionTime >= kActionTriggerTime)
             {
-                vec3_t Light = { 1.f, 1.f, 1.f };
+                vec3_t Light = {1.f, 1.f, 1.f};
 
                 Position[0] = o->Position[0] + Random::RangeFloat(-150, 149);
                 Position[1] = o->Position[1];
@@ -299,22 +301,22 @@ bool MoveChaosCastleAllObject(OBJECT* o)
         }
         break;
 
-    case    0:
-    case    1:
-    case    2:
-    case    3:
-    case    4:
-    case    5:
-    case    13:
-    case    14:
-    case    15:
-    case    16:
-    case    17:
+    case 0:
+    case 1:
+    case 2:
+    case 3:
+    case 4:
+    case 5:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
         if (g_currentCastleLevel == CastleLevel::One)
         {
             if (g_iActionTime >= kActionTriggerTime)
             {
-                vec3_t Light = { 1.f, 1.f, 1.f };
+                vec3_t Light = {1.f, 1.f, 1.f};
 
                 Position[0] = o->Position[0] + Random::RangeFloat(-150, 149);
                 Position[1] = o->Position[1];
@@ -344,26 +346,27 @@ bool MoveChaosCastleAllObject(OBJECT* o)
 
 bool CreateChaosCastleObject(OBJECT* o)
 {
-    if (gMapManager.InChaosCastle() == false) return false;
+    if (gMapManager.InChaosCastle() == false)
+        return false;
 
     switch (o->Type)
     {
-    case    18:
-    case    19:
-    case    20:
-    case    21:
-    case    24:
-    case    25:
-    case    26:
-    case    27:
-    case    28:
-    case    29:
-    case    30:
-    case    31:
-    case    32:
-    case    33:
-    case    34:
-    case    35:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
         o->HiddenMesh = -2;
         VectorCopy(o->Position, o->StartPosition);
         break;
@@ -374,16 +377,17 @@ bool CreateChaosCastleObject(OBJECT* o)
 
 bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
 {
-    if (gMapManager.InChaosCastle() == false) return false;
+    if (gMapManager.InChaosCastle() == false)
+        return false;
 
     vec3_t p, Position;
 
     switch (o->Type)
     {
-    case    6:
+    case 6:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.05f, 0.05f, 0.1f, Light);
             for (int i = 0; i < 10; ++i)
             {
@@ -393,10 +397,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    7:
+    case 7:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.05f, 0.05f, 0.1f, Light);
             for (int i = 0; i < 10; ++i)
             {
@@ -406,10 +410,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    8:
+    case 8:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.05f, 0.05f, 0.1f, Light);
             for (int i = 0; i < 10; ++i)
             {
@@ -419,10 +423,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    9:
+    case 9:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.05f, 0.05f, 0.1f, Light);
             for (int i = 0; i < 5; ++i)
             {
@@ -432,10 +436,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    10:
+    case 10:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.05f, 0.05f, 0.1f, Light);
             for (int i = 0; i < 5; ++i)
             {
@@ -445,10 +449,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    11:
+    case 11:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.05f, 0.05f, 0.1f, Light);
             for (int i = 0; i < 5; ++i)
             {
@@ -458,10 +462,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    12:
+    case 12:
         if (o->HiddenMesh != -2)
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(0.3f, 0.3f, 0.3f, Light);
             for (int i = 0; i < 7; ++i)
             {
@@ -471,10 +475,10 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         o->HiddenMesh = -2;
         break;
 
-    case    18:
-    case    19:
-    case    20:
-    case    21:
+    case 18:
+    case 19:
+    case 20:
+    case 21:
         if (g_currentCastleLevel == CastleLevel::Seven || g_currentCastleLevel == CastleLevel::Eight)
         {
             o->HiddenMesh = -1;
@@ -485,12 +489,12 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         }
         break;
 
-    case    24:
-    case    25:
-    case    26:
-    case    27:
-    case    28:
-    case    29:
+    case 24:
+    case 25:
+    case 26:
+    case 27:
+    case 28:
+    case 29:
         if (g_currentCastleLevel == CastleLevel::Four || g_currentCastleLevel == CastleLevel::Five)
         {
             o->HiddenMesh = -1;
@@ -501,12 +505,12 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         }
         break;
 
-    case    30:
-    case    31:
-    case    32:
-    case    33:
-    case    34:
-    case    35:
+    case 30:
+    case 31:
+    case 32:
+    case 33:
+    case 34:
+    case 35:
         if (g_currentCastleLevel == CastleLevel::One || g_currentCastleLevel == CastleLevel::Two)
         {
             o->HiddenMesh = -1;
@@ -517,17 +521,18 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
         }
         break;
 
-    case    0:
-    case    1:
-    case    2:
-    case    3:
+    case 0:
+    case 1:
+    case 2:
+    case 3:
         if (o->PKKey && o->HiddenMesh != -2)
         {
             Vector(0.f, 0.f, 0.f, p);
             b->TransformPosition(BoneTransform[1], p, Position);
             if ((int)o->LifeTime == 10)
             {
-                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL, 60.f + Random::RangeFloat(0, 9));
+                CreateJoint(BITMAP_JOINT_THUNDER + 1, Position, Position, o->Angle, 2, NULL,
+                            60.f + Random::RangeFloat(0, 9));
 
                 int randValue = Random::RangeInt(0, 1);
                 PlayBuffer(static_cast<ESound>(SOUND_CHAOS_THUNDER01 + randValue));
@@ -543,14 +548,15 @@ bool RenderChaosCastleVisual(OBJECT* o, BMD* b)
                 o->LifeTime -= FPS_ANIMATION_FACTOR;
             }
         }
-    case    4:
-    case    5:
-    case    13:
-    case    14:
-    case    15:
-    case    16:
-    case    17:
-        if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Two) && g_currentCastleLevel != CastleLevel::Invalid)
+    case 4:
+    case 5:
+    case 13:
+    case 14:
+    case 15:
+    case 16:
+    case 17:
+        if (LevelValue(g_currentCastleLevel) >= LevelValue(CastleLevel::Two) &&
+            g_currentCastleLevel != CastleLevel::Invalid)
         {
             o->HiddenMesh = -2;
         }
@@ -575,8 +581,8 @@ void RenderTerrainVisual(int xi, int yi)
 
     if (IsWithinLimitArea(*areaSet, xi, yi))
     {
-        vec3_t Light = { 1.f, 1.f, 1.f };
-        vec3_t Angle = { 0.f, 0.f, 0.f };
+        vec3_t Light = {1.f, 1.f, 1.f};
+        vec3_t Angle = {0.f, 0.f, 0.f};
         vec3_t Position;
 
         Position[0] = (xi * TERRAIN_SCALE) + Random::RangeFloat(-15, 14);

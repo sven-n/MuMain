@@ -116,7 +116,6 @@ int SelectCharacter(BYTE Kind)
     Vector(0.8f, 0.8f, 0.8f, Light);
     int iSelected = -1;
     float fNearestDist = 1000000000000.0f;
-
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -266,6 +265,16 @@ int SelectOperate()
 void SelectObjects()
 {
     BYTE CKind_1, CKind_2;
+
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        SelectedCharacter = SelectCharacter(KIND_PLAYER);
+        SelectedItem = -1;
+        SelectedNpc = -1;
+        SelectedOperate = -1;
+        Attacking = -1;
+        return;
+    }
 
     if (g_pOption->IsAutoAttack() && gMapManager.WorldActive != WD_6STADIUM && gMapManager.InChaosCastle() == false)
     {

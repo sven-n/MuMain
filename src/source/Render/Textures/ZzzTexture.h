@@ -7,7 +7,7 @@
 bool OpenJpegBuffer(wchar_t* filename, float* BufferFloat);
 // DXP-12: bottomUp defaults true to match every pre-existing caller's row order
 // (raw glReadPixels/legacy buffers are bottom-up); pass false for a buffer that's
-// already top-down (e.g. RHI::ReadColorFramebuffer's contract).
+// already top-down, such as SDL GPU frame readback.
 bool WriteJpeg(wchar_t* filename, int Width, int Height, unsigned char* Buffer, int quality, bool bottomUp = true);
 void SaveImage(int HeaderSize, wchar_t* Ext, wchar_t* filename, BYTE* PakBuffer, int Size);
 

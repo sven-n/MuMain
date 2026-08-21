@@ -16,10 +16,9 @@
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "Core/Utilities/Random.h"
@@ -546,7 +545,6 @@ void RenderLeaves()
         EnableAlphaTest();
     }
 
-    glColor3f(1.f, 1.f, 1.f);
 #ifdef DEVIAS_XMAS_EVENT
     int iMaxLeaves;
     if (World == WD_2DEVIAS)
@@ -571,9 +569,8 @@ void RenderLeaves()
             }
             else
             {
-                GlobalUBO::Instance().PushModel();
-                GlobalUBO::Instance().SetModel(o->Position, 1.0f);
-
+                mu::GetRenderer().PushMatrix();
+                mu::GetRenderer().Translate(o->Position[0], o->Position[1], o->Position[2]);
                 float Matrix[3][4];
                 AngleMatrix(o->Angle, Matrix);
 
@@ -598,8 +595,7 @@ void RenderLeaves()
                         RenderPlane3D(3.f, 3.f, Matrix);
                     }
                 }
-
-                GlobalUBO::Instance().PopModel();
+                mu::GetRenderer().PopMatrix();
             }
         }
     }

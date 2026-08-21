@@ -8,6 +8,7 @@
 
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "SceneCore.h"
@@ -87,16 +88,15 @@ void LoadingScene(HDC hDC)
         rUIMng.m_pLoadingScene->Create();
     }
 
-    FogEnable = true;
+    FogEnable = false;
     ::BeginOpengl();
-    ::ClearColorAndDepthBuffers();
+    mu::GetRenderer().ClearScreen();
     ::BeginBitmap();
 
     rUIMng.m_pLoadingScene->Render();
 
     ::EndBitmap();
     ::EndOpengl();
-    ::FlushGL();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
     g_MuEditorCore.Render();
@@ -111,7 +111,6 @@ void LoadingScene(HDC hDC)
     }
 #endif
     UI::Reconnect::RenderDialog();
-    PlatformSwapBuffers();
 
     SAFE_DELETE(rUIMng.m_pLoadingScene);
 

@@ -16,9 +16,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Camera/CameraProjection.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Core/Utilities/Log/ErrorReport.h"
+#include "Render/Renderer/MuRenderer.h"
 
 using namespace SEASON3B;
 
@@ -86,7 +84,6 @@ void CNewUIInGameShop::SetPos(int x, int y)
 bool CNewUIInGameShop::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderButtons();
     RenderTexts();
@@ -323,47 +320,19 @@ void CNewUIInGameShop::RenderDisplayItems()
 {
     EndBitmap();
 
-    // Snapshot the CPU source of truth right after EndBitmap() restores it (DXP-07a), before this
-    // panel overwrites GlobalUBO — used to check the post-pop restore below for symmetry.
-    memcpy(s_PreShopProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreShopProj));
-    memcpy(s_PreShopView, GlobalUBO::Instance().GetView(), sizeof(s_PreShopView));
-
-    SaveCameraPerspective();
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
     gluPerspective2(2.0f, (float)(WindowWidth) / (float)(WindowHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
-    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic are
-    // deleted — DXP-07d already proved this closed form matches bit-for-bit, and GlobalUBO is the
-    // only consumer (same finding used for CNewUI3DCamera::Render()). This
-    // panel's projection is a plain gluPerspective(2.0f deg, aspect, RENDER_ITEMVIEW_NEAR,
-    // RENDER_ITEMVIEW_FAR) closed form (note: Fov=2.0f here, not the 1.f used elsewhere), and its
-    // view is identity.
-    {
-        float aspect = (float)WindowWidth / (float)WindowHeight;
-        float fovRad = 2.0f * 0.5f * Q_PI / 180.0f;
-        float f = 1.0f / tanf(fovRad);
-        float zNear = RENDER_ITEMVIEW_NEAR;
-        float zFar  = RENDER_ITEMVIEW_FAR;
-        float cpuProj[16];
-        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
-        float cpuView[16] = {
-            1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
-        };
-
-        GlobalUBO::Instance().SetProj(cpuProj);
-        GlobalUBO::Instance().SetView(cpuView);
-
-        // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used to
-        // produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
-        static const float s_IdentityCameraMatrix[3][4] = {
-            {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-        };
-        memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-    }
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
-    ClearDepthBuffer();
+    mu::GetRenderer().ClearDepthBuffer();
 
     for (int i = 0; i < g_InGameShopSystem->GetSizePackageAsDisplayPackage(); i++)
     {
@@ -374,11 +343,11 @@ void CNewUIInGameShop::RenderDisplayItems()
 
     UpdateMousePositionn();
 
-    // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry shadow-compare
-    // are deleted — GlobalUBO is restored directly from the pre-panel snapshot taken at entry.
-    RestoreCameraPerspective();
-    GlobalUBO::Instance().SetProj(s_PreShopProj);
-    GlobalUBO::Instance().SetView(s_PreShopView);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
+
     BeginBitmap();
 }
 

@@ -2108,12 +2108,14 @@ void M34CryWolf1st::RenderBaseSmoke(void)
 {
     EnableAlphaTest();
 
-    glColor3f(0.4f, 0.4f, 0.45f);
+    const DWORD smokeColor = RGBA(102, 102, 115, 255);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0005f;
-    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
+    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+        (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f, smokeColor);
     EnableAlphaBlend();
     float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+        (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f, smokeColor);
 }
 
 bool M34CryWolf1st::Get_State()
@@ -2616,7 +2618,6 @@ bool M34CryWolf1st::Render_Mvp_Interface()
     }
 
     g_pCryWolfInterface->Render(538, 392, 104, 37, 0.f, 0.f, 104.f / 128.f, 36.f / 64.f, 12);
-    glColor3f(1.f, 0.6f, 0.3f);
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 148, 21, 255);
     g_pRenderText->SetBgColor(0);
@@ -2679,15 +2680,14 @@ bool M34CryWolf1st::Render_Mvp_Interface()
             BackUpMin = nPastMinute;
             nPastTick = 0;
         }
-        if (View_Bal == false)
-            glColor3f(1.f, 1.0f, 1.0f);
-        else
-            glColor3f(1.f, 0.3f, 0.3f);
-        RenderNumber2D(510 + 60, 384 + 18, nPastMinute, 14, 14);
+        const DWORD timerColor = View_Bal
+            ? RGBA(255, 77, 77, 255)
+            : RGBA(255, 255, 255, 255);
+        RenderNumber2D(510 + 60, 384 + 18, nPastMinute, 14, 14, timerColor);
         if (nPastTick == 0)
-            RenderNumber2D(520 + 87, 384 + 18, nPastTick, 14, 14);
+            RenderNumber2D(520 + 87, 384 + 18, nPastTick, 14, 14, timerColor);
         else
-            RenderNumber2D(520 + 87, 384 + 18, 60 - nPastTick, 14, 14);
+            RenderNumber2D(520 + 87, 384 + 18, 60 - nPastTick, 14, 14, timerColor);
     }
 
     float Hp = ((88.f / 100.f) * (float)m_StatueHP);

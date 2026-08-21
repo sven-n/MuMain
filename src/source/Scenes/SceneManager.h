@@ -12,12 +12,11 @@ class FrameTimingState {
 private:
     double targetFps = -1.0;      // -1 = uncapped, >0 = specific FPS limit
     double msPerFrame = 0.0;      // 0 = no frame limiting (uncapped)
-
-public:
     double lastRenderTickCount = 0.0;
     double currentTickCount = 0.0;
     double lastWaterChange = 0.0;
 
+public:
     /**
      * Set target frames per second for frame rate limiting
      * @param fps Target FPS. Use -1 or any negative value for uncapped (unlimited) framerate.
@@ -97,6 +96,11 @@ public:
     double GetCurrentFrameTime() const {
         return currentTickCount - lastRenderTickCount;
     }
+
+    double GetLastRenderTickCount() const { return lastRenderTickCount; }
+    double GetCurrentTickCount() const { return currentTickCount; }
+    double GetLastWaterChange() const { return lastWaterChange; }
+    void SetLastWaterChange(double time) { lastWaterChange = time; }
 };
 
 // Global frame timing state
@@ -119,7 +123,5 @@ void SetShowDebugInfo(bool enabled);
 void SetShowFpsCounter(bool enabled);
 void ResetFrameStats();
 
-// GLP-01: GL call/draw/buffer counters + GPU pass timers overlay, console-toggled via
-// `$glstats on/off` (muConsoleDebug.cpp). Independent of $details/$fpscounter -- can be
-// shown alongside either.
+// SDL GPU frame counters and per-pass CPU timings. Console-toggled via `$glstats on/off`.
 void SetShowGLStats(bool enabled);

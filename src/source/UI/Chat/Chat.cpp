@@ -181,7 +181,6 @@ void RenderBoolean(int x, int y, CHAT* c)
     }
 
     EnableAlphaTest();
-    glColor3f(1.f, 1.f, 1.f);
 
     if (FontHeight > 32) FontHeight = 32;
 

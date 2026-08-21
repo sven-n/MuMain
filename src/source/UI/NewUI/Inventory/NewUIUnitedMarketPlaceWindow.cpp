@@ -153,7 +153,6 @@ bool CNewUIUnitedMarketPlaceWindow::IsVisible() const
 bool CNewUIUnitedMarketPlaceWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

@@ -16,12 +16,15 @@
 #ifdef _WIN32
 
 #include <windows.h>
+#define MU_C16(s) reinterpret_cast<const char16_t*>(s)
 
 #else  // ---- non-Windows: minimal Win32 type shims -------------------------
 
 #include <cstdint>
 #include <cstddef>
 #include <cstring>       // memset for ZeroMemory
+#include <algorithm>
+#include <string>
 #include <type_traits>   // underlying_type for DEFINE_ENUM_FLAG_OPERATORS
 
 // Fixed-width scalar aliases. Widths match the Windows definitions (DWORD/LONG
@@ -45,6 +48,97 @@ typedef unsigned char UCHAR;
 typedef wchar_t   WCHAR;  // 32-bit here vs 16-bit on Windows; width handled at the .NET interop boundary (#462).
 typedef void      VOID;
 typedef DWORD     COLORREF;
+
+inline std::u16string mu_wchar_to_char16(const wchar_t* text)
+{
+    std::u16string result;
+    if (text == nullptr)
+    {
+        return result;
+    }
+
+    constexpr size_t kMaxInputCodepoints = 4096;
+    size_t codepoints = 0;
+    for (const wchar_t* p = text; *p && codepoints < kMaxInputCodepoints; ++p, ++codepoints)
+    {
+        const char32_t ch = static_cast<char32_t>(*p);
+        if (ch <= 0xFFFF)
+        {
+            result.push_back(static_cast<char16_t>(ch));
+        }
+        else if (ch <= 0x10FFFF)
+        {
+            const char32_t v = ch - 0x10000;
+            result.push_back(static_cast<char16_t>(0xD800 + (v >> 10)));
+            result.push_back(static_cast<char16_t>(0xDC00 + (v & 0x3FF)));
+        }
+    }
+    return result;
+}
+
+#define MU_C16(s) mu_wchar_to_char16(s).c_str()
+
+inline void mu_wchar_to_utf8(const wchar_t* text, std::string& result)
+{
+    result.clear();
+    if (text == nullptr)
+    {
+        return;
+    }
+
+    for (const wchar_t* p = text; *p; ++p)
+    {
+        const char32_t ch = static_cast<char32_t>(*p);
+        if (ch < 0x80)
+        {
+            result.push_back(static_cast<char>(ch));
+        }
+        else if (ch < 0x800)
+        {
+            result.push_back(static_cast<char>(0xC0 | (ch >> 6)));
+            result.push_back(static_cast<char>(0x80 | (ch & 0x3F)));
+        }
+        else if (ch < 0x10000)
+        {
+            result.push_back(static_cast<char>(0xE0 | (ch >> 12)));
+            result.push_back(static_cast<char>(0x80 | ((ch >> 6) & 0x3F)));
+            result.push_back(static_cast<char>(0x80 | (ch & 0x3F)));
+        }
+        else if (ch <= 0x10FFFF)
+        {
+            result.push_back(static_cast<char>(0xF0 | (ch >> 18)));
+            result.push_back(static_cast<char>(0x80 | ((ch >> 12) & 0x3F)));
+            result.push_back(static_cast<char>(0x80 | ((ch >> 6) & 0x3F)));
+            result.push_back(static_cast<char>(0x80 | (ch & 0x3F)));
+        }
+    }
+}
+
+inline std::string mu_wchar_to_utf8(const wchar_t* text)
+{
+    std::string result;
+    mu_wchar_to_utf8(text, result);
+    return result;
+}
+
+inline std::string mu_narrow_path(const wchar_t* path)
+{
+    std::string result = mu_wchar_to_utf8(path);
+    std::replace(result.begin(), result.end(), '\\', '/');
+    return result;
+}
+
+inline std::string mu_narrow_path(const std::wstring& path)
+{
+    return mu_narrow_path(path.c_str());
+}
+
+inline std::string mu_narrow_path(const char* path)
+{
+    std::string result = path == nullptr ? "" : path;
+    std::replace(result.begin(), result.end(), '\\', '/');
+    return result;
+}
 
 // MSVC fixed-width keyword aliases (gcc/clang lack these). Defined as macros,
 // not typedefs, so the common `unsigned __int64` form stays valid.

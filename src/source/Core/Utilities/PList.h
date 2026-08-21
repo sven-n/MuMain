@@ -30,8 +30,14 @@ public:
     BOOL AddTail(CPList* pNewList);
     void RemoveAll();
 
-    NODE* GetHeadPosition() const { return m_pNodeHead; }
-    NODE* GetTailPosition() const { return m_pNodeTail; }
+    NODE* GetHeadPosition() const
+    {
+        return m_pNodeHead;
+    }
+    NODE* GetTailPosition() const
+    {
+        return m_pNodeTail;
+    }
     void* GetNext(NODE*& rPosition) const;
     void* GetPrev(NODE*& rPosition) const;
 
@@ -47,13 +53,19 @@ public:
     NODE* Find(void* searchValue, NODE* startAfter = NULL) const;
     NODE* FindIndex(int nIndex) const;
 
-    int GetCount() const { return m_nCount; }
-    BOOL IsEmpty() const { return 0 == m_nCount; }
+    int GetCount() const
+    {
+        return m_nCount;
+    }
+    BOOL IsEmpty() const
+    {
+        return 0 == m_nCount;
+    }
 
 protected:
     NODE* m_pNodeHead;
     NODE* m_pNodeTail;
-    int		m_nCount;
+    int m_nCount;
 
     NODE* NewNode(NODE* pPrev, NODE* pNext);
     void FreeNode(NODE* pNode);

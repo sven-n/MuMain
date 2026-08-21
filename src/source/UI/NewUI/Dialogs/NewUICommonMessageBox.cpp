@@ -171,21 +171,15 @@ void SEASON3B::CNewUIMessageBoxButton::Update()
 
 void SEASON3B::CNewUIMessageBoxButton::Render()
 {
-    if (m_bEnable == false)
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 0.9f);
-    }
-    else
-    {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+    const DWORD buttonColor = m_bEnable
+        ? RGBA(255, 255, 255, 255)
+        : RGBA(204, 204, 204, 230);
     BITMAP_t* pImage = &Bitmaps[m_dwTexType];
-    RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
+    RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height,
         (0.5f / (float)pImage->Width), ((static_cast<float>(m_EventState) * m_fButtonHeight + 0.5f) / (float)pImage->Height),
         (m_fButtonWidth - 0.5f) / (float)pImage->Width - (0.5f / (float)pImage->Width),
-        (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height));
+        (m_fButtonHeight - 0.5f) / (float)pImage->Height - (0.5f / (float)pImage->Height), buttonColor);
 #else //KJH_ADD_INGAMESHOP_UI_SYSTEM
     float fv = 0.f;
     float fBtnOrigWidth = 0.f;
@@ -224,22 +218,24 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
         fv = 0.f;
     }
 
-    if (m_bEnable == false)
-    {
-        glColor4f(0.6f, 0.6f, 0.6f, 0.6f);
-    }
+    const DWORD buttonColor = m_bEnable
+        ? RGBA(255, 255, 255, 255)
+        : RGBA(153, 153, 153, 153);
 
     if (m_dwSizeType == MSGBOX_BTN_SIZE_OK || m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_SMALL)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 64.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 64.f, fBtnOrigHeight / 128.f, buttonColor);
     }
     else if (m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 128.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 128.f, fBtnOrigHeight / 128.f, buttonColor);
     }
     else if (m_dwSizeType == MSGBOX_BTN_SIZE_EMPTY_BIG)
     {
-        RenderBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv, fBtnOrigWidth / 256.f, fBtnOrigHeight / 128.f);
+        RenderColorBitmap(m_dwTexType, m_x, m_y, m_width, m_height, 0.f, fv,
+            fBtnOrigWidth / 256.f, fBtnOrigHeight / 128.f, buttonColor);
     }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
@@ -591,7 +587,6 @@ bool SEASON3B::CNewUICommonMessageBox::Update()
 bool SEASON3B::CNewUICommonMessageBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -1044,7 +1039,6 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
 bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderTexts();
     RenderButtons();
@@ -1396,7 +1390,12 @@ bool SEASON3B::CTradeAlertMsgBoxLayout::SetLayout()
     if (false == pMsgBox->Create(MSGBOX_COMMON_TYPE_OKCANCEL))
         return false;
 
-    DWORD adwColor[4] = { RGBA(255, 178, 0, 255), RGBA(255, 178, 0, 255), RGBA(255, 178, 0, 255), RGBA(255, 32, 32, 255) };
+    DWORD adwColor[4] = {
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 178, 0, 255)),
+        static_cast<DWORD>(RGBA(255, 32, 32, 255))
+    };
 
     for (int i = 0; i < 4; ++i)
         pMsgBox->AddMsg(I18N::Game::Lookup(371 + i), adwColor[i], MSGBOX_FONT_BOLD);
@@ -1552,7 +1551,7 @@ CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewU
     wchar_t shopTitle[MAX_SHOPTITLE]{};
     g_pMyShopInventory->GetTitle(shopTitle);
     wcscpy(g_szPersonalShopTitle, shopTitle);
-    SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
+    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
 
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -2924,7 +2923,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
         int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
         if (sourceIndex >= 0)
         {
-            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, pCha->ID, sourceIndex);
+            SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, MU_C16(pCha->ID), sourceIndex);
         }
     }
 
@@ -3086,7 +3085,7 @@ bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 
 CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, GuildList[DeleteIndex].Name, 0x03);
+    SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(GuildList[DeleteIndex].Name), 0x03);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3451,7 +3450,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CN
 
 CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(DeleteID);
+    SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(DeleteID));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

@@ -2,8 +2,7 @@
 #include "CameraProjection.h"
 #include "CameraState.h"
 #include "CameraConfig.h"
-#include "Render/RHI/RHI.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 
 // External window dimensions
 extern unsigned int WindowWidth;
@@ -20,8 +19,7 @@ static int s_ViewportHeight = 0;
 void CameraProjection::SetupPerspective(CameraState& state, float fov, float aspect,
                                           float zNear, float zFar)
 {
-    // GL perspective is fed to GlobalUBO from a CPU closed form by BeginOpengl() (DXP-07b) --
-    // this function only maintains the CPU screen-center/perspective-factor cache below.
+    gluPerspective(fov, aspect, zNear, zFar);
 
     // Use actual viewport dimensions (set by SetViewport) for screen center and
     // perspective. This accounts for the game viewport being narrower/shorter than
@@ -45,10 +43,8 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
     s_ViewportWidth = width;
     s_ViewportHeight = height;
 
-    // GL's viewport origin is bottom-left, so glViewport needs y flipped to
-    // WindowHeight-(y+height).
-    const int flippedY = WindowHeight - (y + height);
-    glViewport(x, flippedY, width, height);
+    mu::GetRenderer().SetViewport(x, y, width, height);
+    mu::GetRenderer().SetScissor(x, y, width, height);
 }
 
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
@@ -115,9 +111,9 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
         return false;
     }
 
-    // Read depth buffer
-    GLfloat depth;
-    RHI::ReadDepthPixel(x, y, &depth);
+    // Backends without depth readback leave the far-depth fallback unchanged.
+    GLfloat depth = 1.f;
+    mu::GetRenderer().ReadPixels(x, y, 1, 1, &depth);
 
     // Expected window-space depth from a standard gluPerspective projection:
     //   z_window = (f / (f - n)) * (1 + n / z_eye)        with z_eye < 0
@@ -135,7 +131,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
 void CameraProjection::GetOpenGLMatrix(float outMatrix[3][4])
 {
     float openglMatrix[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, openglMatrix);
+    mu::GetRenderer().GetMatrix(GL_MODELVIEW_MATRIX, openglMatrix);
 
     // Convert from OpenGL 4×4 to our 3×4 format
     for (int i = 0; i < 3; i++)

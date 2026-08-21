@@ -1,9 +1,14 @@
 #pragma once
+#include "Core/Globals/_define.h"
+#include "Core/Globals/_enum.h"
 #include "Core/Utilities/Singleton.h"
 
 #include <array>
 #include <cstdint>
 #include <map>
+
+struct tagITEM;
+typedef struct tagITEM ITEM;
 
 constexpr std::uint8_t MAX_SET_OPTION = 64; // Maximum number of possible ancient sets
 constexpr std::uint8_t MASTERY_OPTION = 24; // A mastery option increases a specific skill
@@ -173,4 +178,3 @@ public:
 };
 
 #define g_csItemOption CSItemOption::GetSingleton ()
-

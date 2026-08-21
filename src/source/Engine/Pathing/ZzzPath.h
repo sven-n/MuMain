@@ -5,6 +5,7 @@ extern bool g_bShowPath;
 
 #include <math.h>
 #include "Core/Utilities/BaseCls.h"
+#include "Core/Utilities/Log/ErrorReport.h"
 
 
 class PATH

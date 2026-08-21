@@ -1,68 +1,69 @@
-# GPU Skinning & Modern Graphics Subsystem Documentation
+# GPU Skinning and SDL GPU Rendering
 
-Welcome to the documentation for the MU Online Client **GPU Skinning & Modern Graphics Subsystem**.
+This directory documents the GPU-skinning and modern-rendering capabilities
+ported from the upstream OpenGL Core Profile work into MuMain's SDL GPU
+architecture.
 
-This documentation details the architecture, design decisions, milestone catalog, and technical invariants behind the migration of the client rendering engine from the legacy fixed-function pipeline (FFP) to modern GPU skeletal skinning, Uniform Buffer Objects (UBOs), Core Profile shaders, and the Render Hardware Interface (RHI) abstraction layer.
+The upstream concepts remain useful, but their original `Render/Core`,
+`Render/RHI`, `Render/Shaders`, `BoneUBO`, and `ImmediateRenderer`
+implementations are not part of this project. Their behavior is represented by
+`IMuRenderer`, `MuRendererSDLGpu.cpp`, the legacy compatibility wrappers,
+and HLSL shaders compiled for the active SDL GPU backend.
 
----
+## Documents
 
-## Document Index
+1. [DXP milestone mapping](dxp-milestones.md) maps upstream milestone names to
+   their downstream SDL GPU equivalents.
+2. [GPU skinning architecture](gpu-skinning-architecture.md) describes
+   rest-pose vertices, packed 3x4 bone palettes, shader inputs, palette
+   deduplication, and CPU fallbacks.
+3. [Core Profile migration mapping](core-profile-migration.md) explains how
+   fixed-function and Core Profile concepts map to the renderer-neutral API.
+4. [Immediate renderer mapping](immediate-renderer-architecture.md) documents
+   the deferred SDL GPU command path replacing upstream `IR::`.
+5. [Gotchas and invariants](gotchas-and-patterns.md) records safety,
+   compatibility, and performance constraints.
+6. [GLP milestone mapping](glperf/README.md) maps the upstream OpenGL
+   performance series to the active SDL GPU renderer and its `$glstats` output.
 
-1. **[DXP Milestone Catalog](dxp-milestones.md)**  
-   *The complete reference catalog for all `DXP-xx` milestone tags referenced in source code inline comments.* Contains background, scope, and resolution details for DXP-01 through DXP-27.
+## Architecture highlights
 
-2. **[GPU Skinning Architecture](gpu-skinning-architecture.md)**  
-   *Deep technical specification of GPU-based skeletal animation.* Details matrix palette management, UBO layouts (`GlobalUBO`, `BoneUBO`), vertex shader transformation equations, item specular / chrome GPU shaders, and skeleton invariants (`MAX_BONES=200`).
+- BMD meshes can submit rest-pose vertices plus separate position and normal
+  bone indices through `IMuRenderer::RenderSkinnedTriangles()`.
+- Bone matrices use packed row-major 3x4 affine rows: 12 floats per bone.
+- The SDL GPU backend records deferred draw commands, uploads per-frame vertex
+  and bone data once, then replays commands with dedicated skinned pipelines.
+- Palette pointer and version checks avoid duplicate palette copies while
+  preventing stale reuse when a memory address is recycled.
+- Mesh, chrome, oil, and metal texture-coordinate modes are generated in the
+  skinned vertex shader.
+- CPU skinning remains the fallback for unsupported draws. Cloth, shadow-volume,
+  shadow-map, and vertex-wave paths retain their required CPU behavior.
+- Legacy GL-shaped helpers remain compatibility APIs only. The build guard
+  rejects raw graphics calls outside the rendering layer.
 
-3. **[Core Profile & Pipeline Migration](core-profile-migration.md)**  
-   *Guide to modern shader pipeline migration and legacy FFP retirement.* Covers the removal of the fixed-function matrix stack, `ImmediateRenderer` (`IR::`) topology decomposition, RHI state encapsulation, and automated build-time wrapper enforcement.
+## Source map
 
-4. **[ImmediateRenderer (IR::) Architecture](immediate-renderer-architecture.md)**  
-   *Detailed technical specification of the ImmediateRenderer subsystem.* Covers Quad and Triangle Fan primitive decomposition math, interleaved dynamic vertex stream layouts, streaming ring-buffer orphan-on-wrap mechanics, RHI integration, and complete IR milestone task history.
+| Concern | Files |
+|---|---|
+| Renderer contract | [`MuRenderer.h`](../../src/source/Render/Renderer/MuRenderer.h) |
+| SDL GPU backend | [`MuRendererSDLGpu.cpp`](../../src/source/Render/Renderer/MuRendererSDLGpu.cpp) |
+| BMD submission and CPU fallback | [`ZzzBMD.cpp`](../../src/source/Render/Models/ZzzBMD.cpp), [`ZzzBMD.h`](../../src/source/Render/Models/ZzzBMD.h) |
+| Skinning shader | [`skinned_textured.vert.hlsl`](../../src/shaders/skinned_textured.vert.hlsl) |
+| Compatibility wrappers | [`ZzzOpenglUtil.cpp`](../../src/source/Render/Textures/ZzzOpenglUtil.cpp), [`GLCompatShim.cpp`](../../src/source/Render/Renderer/GLCompatShim.cpp) |
+| Guard | [`check_gl_wrapper_monopoly.py`](../../tools/check_gl_wrapper_monopoly.py) |
+| Regression coverage | [`tests/render`](../../tests/render) |
 
-5. **[Gotchas & Invariants Catalog](gotchas-and-patterns.md)**  
-   *Comprehensive catalog of known gotchas, threading synchronization rules, cache invalidation pitfalls, and performance invariants.*
+## Runtime configuration
 
-6. **[GLP Milestone Catalog](glperf/README.md)**  
-   *Reference catalog for the `GLP-xx` Core Profile FPS regression fix series.* Covers milestones with a landed implementation (build-verified at minimum, some still pending target-hardware confirmation) — not-yet-started and paused-investigation tickets are tracked separately, not here.
-
----
-
-## Architectural Highlights
-
-- **Zero-CPU Skeletal Skinning**: Character, monster, equipment, weapon, wing, and mount meshes perform skeletal bone transformation directly in the vertex shader, freeing significant CPU resources. The authoritative shader source is the embedded `g_szBMDMeshVert` string in [`Render/Shaders/BMDMeshShader.cpp`](../../src/source/Render/Shaders/BMDMeshShader.cpp) — **not** `Render/Shaders/glsl/bmd_mesh.vert`, which is a stale, non-runtime-loaded snapshot (see the caution in [GPU Skinning Architecture](gpu-skinning-architecture.md)).
-- **Render Hardware Interface (RHI)**: Modernized graphics abstraction layer (`RHI.h`) decoupling low-level driver state, shaders, textures, and vertex buffers from client application code.
-- **Core Profile Conformance**: Retirement of legacy immediate mode (`glBegin`/`glEnd`), `glPushMatrix`/`glPopMatrix`, and FFP matrix stack operations in favor of UBO-driven GLSL 3.3 Core Profile pipelines.
-- **Interleaved Streaming VBOs**: High-efficiency dynamic vertex buffer streaming (`[Pos | UV | Color]` interleaving) eliminating runtime heap allocations during draw passes.
-- **Decoupled Animation & Render Cadence**: Thread-safe parallel character animation calculation (`AnimationTaskPool`) decoupled from rendering FPS.
-
----
-
-## Primary Subsystems & Source Map
-
-| Subsystem | Key Files | Description |
-|---|---|---|
-| **RHI Core** | [`Render/RHI/RHI.h`](../../src/source/Render/RHI/RHI.h) | Abstract rendering hardware interface definitions. |
-| **Model & Mesh Shader** | [`Render/Shaders/BMDMeshShader.cpp`](../../src/source/Render/Shaders/BMDMeshShader.cpp)<br>[`Render/Models/ZzzBMD.cpp`](../../src/source/Render/Models/ZzzBMD.cpp) | BMD mesh skinning shader, static/dynamic VBO management, matrix caching. |
-| **Uniform Buffers** | [`Render/Core/GlobalUBO.h`](../../src/source/Render/Core/GlobalUBO.h)<br>[`Render/Core/BoneUBO.h`](../../src/source/Render/Core/BoneUBO.h) | Uniform Buffer Objects for Camera/Model matrices (`Slot 0`), SceneData (`Slot 1`), Skeletal Bones (`Slot 2`, `vec4[600]` — 3 affine rows per bone since `GLP-11`) and per-draw `BMDFlags` (`Slot 6`). |
-| **Immediate Renderer** | [`Render/Core/ImmediateRenderer.cpp`](../../src/source/Render/Core/ImmediateRenderer.cpp) | Dynamic quad/fan topology decomposition and 2D/3D immediate-mode submission. |
-| **Item Specular Shader** | [`Render/Shaders/ItemSpecularShader.cpp`](../../src/source/Render/Shaders/ItemSpecularShader.cpp) | Modern single-pass GPU shader for +7 through +15 equipment shine & chrome effects. |
-
----
-
-## Graphics & Performance Configuration Switches
-
-The graphics and performance engine exposes runtime switches via `config.ini` and command-line flags:
-
-### 1. `config.ini` Switches
-- **`[Render] CoreProfile`** (Default: `1`):
-  - `1`: Enforces **OpenGL 3.3 Core Profile** (`SDL_GL_CONTEXT_PROFILE_CORE`). All rendering runs via UBOs, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).
-  - `0`: Requests **OpenGL Compatibility Profile** (`SDL_GL_CONTEXT_PROFILE_COMPATIBILITY`). Re-enables legacy FFP driver state toggles (e.g. `glAlphaTest`, `glEnable(GL_TEXTURE_2D)`) for legacy driver hook compatibility; all primary rendering remains shader and UBO driven.
-- **`[Render] MaxGLVersion`** (`GLP-08`): caps the GL context version the client will request. Without it the client walks a descending `{4,5} → {4,3} → {3,3}` chain and takes the highest that succeeds; set this to force a lower ceiling as a rollback path if a driver misbehaves on the newer context.
-- **`[UI] EnableAnimationTaskPool`** (Default: `0`):
-  - `1`: Enables the multi-threaded character animation task pool (`AnimationTaskPool`) when $\ge 20$ active characters are present.
-  - `0`: Runs character skeletal animation updates sequentially on the main thread.
-
-### 2. Command Line Flags
-- **`--enable-taskpool`**: Forces `AnimationTaskPool` on at launch regardless of `config.ini`.
-- **`--editor`**: Enables the in-game ImGui editor overlay (**F12**) on `*_mueditor` builds.
+- SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is not
+  read; it cannot request either an OpenGL Core or Compatibility context.
+- `[UI] EnableAnimationTaskPool=1` enables parallel animation processing when
+  at least 20 active characters are visible. Default `0` keeps sequential
+  processing.
+- `--enable-taskpool` enables the same task-pool path regardless of the INI
+  value; the 20-character threshold remains.
+- `[UI] Locale` defaults to `en` and is updated by the Options language picker.
+- `[Camera] Zoom` defaults to `1735` and stores the Orbital-camera distance.
+- `--editor` starts the editor enabled on `*_mueditor` builds; **F12** toggles
+  it.
