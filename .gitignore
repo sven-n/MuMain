@@ -3,7 +3,6 @@
 .nuget/
 
 graphify-out
-.superpowers
 
 
 src/source/Global Debug/
@@ -64,7 +63,12 @@ src/graphify-out/
 # Local agent/tool state
 .claude/
 .paw/
+.remember/
+.superpowers/
 .worktrees/
+
+# Test caches
+.pytest_cache/
 
 # Interrupted editor/temp files
 .!*
