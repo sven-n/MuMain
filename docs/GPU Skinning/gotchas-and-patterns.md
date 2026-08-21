@@ -88,3 +88,14 @@
 - Render-frequency code must not advance fixed-step simulation once per rendered
   frame. Existing timing controls preserve animation and cloth cadence when FPS
   changes.
+
+## Batch-break attribution
+
+- `$glstats` reports SDL GPU triangle batch draws, vertices per batch, and break
+  causes for texture, blend, depth, pipeline, uniform, matrix, intervening draw,
+  or other barriers.
+- Attribute breaks where deferred SDL GPU commands fail to merge. State-wrapper
+  calls only update logical renderer state; adding flush hooks there would restore
+  the retired OpenGL ownership model and double-count attempted changes.
+- Do not count the first triangle command of a frame as a break. A break requires
+  an existing triangle batch candidate that the next submission cannot join.

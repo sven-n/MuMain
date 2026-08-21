@@ -561,28 +561,88 @@ struct RenderCmd
     FogUniform fogUniform;
     SDL_GPUViewport viewport; // for SetViewport only
     SDL_Rect scissor;         // for SetScissor only
+    BlendMode blendMode{};
+    bool blendEnabled{};
+    bool depthTestEnabled{};
+    bool depthMaskEnabled{};
+    bool cullFaceEnabled{};
 };
 
 static std::vector<RenderCmd> s_renderCmds;
+static constexpr std::size_t kNoTriangleCommand = std::numeric_limits<std::size_t>::max();
+static std::size_t s_lastTriangleCommand = kNoTriangleCommand;
+
+[[nodiscard]] static bool IsDrawCommand(RenderCmdType type)
+{
+    return type != RenderCmdType::SetViewport && type != RenderCmdType::SetScissor;
+}
+
+[[nodiscard]] static FrameProfiler::Counter ClassifyBatchBreak(const RenderCmd& command)
+{
+    using Counter = FrameProfiler::Counter;
+
+    const RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
+    if (previous.texture != command.texture || previous.sampler != command.sampler)
+    {
+        return Counter::BatchBreakTexture;
+    }
+    if (previous.blendEnabled != command.blendEnabled || previous.blendMode != command.blendMode)
+    {
+        return Counter::BatchBreakBlend;
+    }
+    if (previous.depthTestEnabled != command.depthTestEnabled ||
+        previous.depthMaskEnabled != command.depthMaskEnabled || previous.cullFaceEnabled != command.cullFaceEnabled)
+    {
+        return Counter::BatchBreakDepth;
+    }
+    if (previous.pipeline != command.pipeline)
+    {
+        return Counter::BatchBreakProgram;
+    }
+    if (std::memcmp(&previous.vu.mvp, &command.vu.mvp, sizeof(command.vu.mvp)) != 0)
+    {
+        return Counter::BatchBreakMatrix;
+    }
+    if (previous.vu.fogStart != command.vu.fogStart || previous.vu.fogEnd != command.vu.fogEnd ||
+        std::memcmp(&previous.fogUniform, &command.fogUniform, sizeof(FogUniform)) != 0)
+    {
+        return Counter::BatchBreakUniform;
+    }
+
+    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
+    if (previousEnd != command.vtxOffset)
+    {
+        return Counter::BatchBreakDraw;
+    }
+    for (std::size_t index = s_lastTriangleCommand + 1; index < s_renderCmds.size(); ++index)
+    {
+        if (IsDrawCommand(s_renderCmds[index].type))
+        {
+            return Counter::BatchBreakDraw;
+        }
+    }
+    if (s_lastTriangleCommand + 1 != s_renderCmds.size())
+    {
+        return Counter::BatchBreakOther;
+    }
+    return Counter::Count_;
+}
 
 [[nodiscard]] static bool MergeAdjacentTriangleCommand(const RenderCmd& command)
 {
-    if (s_renderCmds.empty())
+    if (s_lastTriangleCommand == kNoTriangleCommand)
     {
         return false;
     }
 
-    RenderCmd& previous = s_renderCmds.back();
-    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
-    if (previous.type != RenderCmdType::DrawTriangles || command.type != RenderCmdType::DrawTriangles ||
-        previous.pipeline != command.pipeline || previous.texture != command.texture ||
-        previous.sampler != command.sampler || previousEnd != command.vtxOffset ||
-        std::memcmp(&previous.vu, &command.vu, sizeof(VertexUniforms)) != 0 ||
-        std::memcmp(&previous.fogUniform, &command.fogUniform, sizeof(FogUniform)) != 0)
+    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command);
+    if (breakCause != FrameProfiler::Counter::Count_)
     {
+        FrameProfiler::Count(breakCause);
         return false;
     }
 
+    RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
     previous.vtxCount += command.vtxCount;
     return true;
 }
@@ -1352,6 +1412,7 @@ public:
         // so keep s_textureUpdates until EndFrame has submitted them.
         s_vtxOffset = 0u;
         s_renderCmds.clear();
+        s_lastTriangleCommand = kNoTriangleCommand;
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -2689,6 +2750,12 @@ public:
         cmd.vu.fogStart = m_fogUniform.fogStart;
         cmd.vu.fogEnd = m_fogUniform.fogEnd;
         cmd.fogUniform = m_fogUniform;
+        cmd.blendMode = m_activeBlendMode;
+        cmd.blendEnabled = m_blendEnabled;
+        cmd.depthTestEnabled = m_depthTestEnabled;
+        cmd.depthMaskEnabled = m_depthMaskEnabled;
+        cmd.cullFaceEnabled = m_cullFaceEnabled;
+        FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         if (MergeAdjacentTriangleCommand(cmd))
         {
             ++s_dbgMergedDrawsThisFrame;
@@ -2697,7 +2764,9 @@ public:
         else
         {
             s_renderCmds.push_back(cmd);
+            s_lastTriangleCommand = s_renderCmds.size() - 1;
             FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
         }
 
         ++s_dbgDrawCallsThisFrame;

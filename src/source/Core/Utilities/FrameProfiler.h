@@ -41,6 +41,16 @@ enum class Counter : int
     MergedDraws,
     VertexBytes,
     TextureUploads,
+    BatchDraws,
+    BatchVertices,
+    BatchBreakTexture,
+    BatchBreakBlend,
+    BatchBreakDepth,
+    BatchBreakProgram,
+    BatchBreakUniform,
+    BatchBreakMatrix,
+    BatchBreakDraw,
+    BatchBreakOther,
     Count_
 };
 

@@ -746,6 +746,44 @@ static void RenderGLStats()
     mu_swprintf(szLine, L"Textures upload:%u create:%u release:%u", stats.textureUploads, stats.textureCreates,
                 stats.textureReleases);
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    const auto batchDraws = FrameProfiler::CounterValue(Counter::BatchDraws);
+    const auto batchVertices = FrameProfiler::CounterValue(Counter::BatchVertices);
+    const float verticesPerBatch =
+        batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.0f;
+    mu_swprintf(szLine, L"Batch Draw:%u Vtx:%u Vtx/Draw:%.1f", batchDraws, batchVertices, verticesPerBatch);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(
+        szLine, L"Break Tex:%u Blend:%u Depth:%u Prog:%u Uni:%u Mtx:%u Draw:%u Other:%u",
+        FrameProfiler::CounterValue(Counter::BatchBreakTexture), FrameProfiler::CounterValue(Counter::BatchBreakBlend),
+        FrameProfiler::CounterValue(Counter::BatchBreakDepth), FrameProfiler::CounterValue(Counter::BatchBreakProgram),
+        FrameProfiler::CounterValue(Counter::BatchBreakUniform), FrameProfiler::CounterValue(Counter::BatchBreakMatrix),
+        FrameProfiler::CounterValue(Counter::BatchBreakDraw), FrameProfiler::CounterValue(Counter::BatchBreakOther));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    static constexpr Pass kBatchRows[] = {Pass::Sprites, Pass::Particles, Pass::Joints, Pass::UI};
+    for (Pass pass : kBatchRows)
+    {
+        const auto passDraws = FrameProfiler::CounterValue(pass, Counter::BatchDraws);
+        if (passDraws == 0)
+        {
+            continue;
+        }
+
+        const auto passVertices = FrameProfiler::CounterValue(pass, Counter::BatchVertices);
+        mu_swprintf(szLine, L"  %-9hs Draw:%5u Vtx/Draw:%5.1f Tex:%u Blend:%u Draw:%u",
+                    FrameProfiler::kPassNames[static_cast<int>(pass)], passDraws,
+                    static_cast<float>(passVertices) / static_cast<float>(passDraws),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakTexture),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakBlend),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakDraw));
+        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+        y += DEBUG_TEXT_LINE_HEIGHT;
+    }
 
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();

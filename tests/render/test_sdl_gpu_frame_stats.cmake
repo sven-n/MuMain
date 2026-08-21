@@ -30,6 +30,48 @@ if(overlay_pos EQUAL -1)
     message(FATAL_ERROR "Stats overlay does not read renderer frame stats")
 endif()
 
+foreach(counter
+        "BatchDraws"
+        "BatchVertices"
+        "BatchBreakTexture"
+        "BatchBreakBlend"
+        "BatchBreakDepth"
+        "BatchBreakProgram"
+        "BatchBreakUniform"
+        "BatchBreakMatrix"
+        "BatchBreakDraw"
+        "BatchBreakOther")
+    string(FIND "${profiler}" "${counter}" counter_pos)
+    if(counter_pos EQUAL -1)
+        message(FATAL_ERROR "Missing SDL GPU batch attribution counter: ${counter}")
+    endif()
+endforeach()
+
+foreach(contract
+        "ClassifyBatchBreak"
+        "Counter::BatchDraws"
+        "Counter::BatchVertices"
+        "Counter::BatchBreakTexture"
+        "Counter::BatchBreakBlend"
+        "Counter::BatchBreakDepth"
+        "Counter::BatchBreakProgram"
+        "Counter::BatchBreakUniform"
+        "Counter::BatchBreakMatrix"
+        "Counter::BatchBreakDraw"
+        "Counter::BatchBreakOther")
+    string(FIND "${renderer}" "${contract}" attribution_pos)
+    if(attribution_pos EQUAL -1)
+        message(FATAL_ERROR "Missing SDL GPU batch-break attribution: ${contract}")
+    endif()
+endforeach()
+
+foreach(label "Batch Draw:" "Break Tex:")
+    string(FIND "${scenes}" "${label}" label_pos)
+    if(label_pos EQUAL -1)
+        message(FATAL_ERROR "Stats overlay is missing ${label}")
+    endif()
+endforeach()
+
 string(FIND "${profiler}" "SDL_GL_GetProcAddress" raw_gl_pos)
 if(NOT raw_gl_pos EQUAL -1)
     message(FATAL_ERROR "Generic FrameProfiler still owns raw OpenGL queries")
