@@ -1156,7 +1156,7 @@ public:
     /// <param name="skillId">The skill id.</param>
     /// <param name="playerId">The player id.</param>
     /// <remarks>
-    /// Is sent by the client when: A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardy Enhance'.
+    /// Is sent by the client when: A player cancels a specific magic effect of a skill, usually 'Infinity Arrow' and 'Wizardry Enhance'.
     /// Causes reaction on server side: The effect is cancelled and an update is sent to the player and all surrounding players.
     /// </remarks>
     void SendMagicEffectCancelRequest(uint16_t skillId, uint16_t playerId);
@@ -2071,4 +2071,13 @@ public:
     /// Causes reaction on server side: The server will remove the player as spectator.
     /// </remarks>
     void SendDuelChannelQuitRequest();
+
+    /// <summary>
+    /// Sends a ChatCommandListRequest to this connection.
+    /// </summary>
+    /// <remarks>
+    /// Is sent by the client when: A client which supports a user interface for chat commands requests the list of commands which are available to the player. It's usually sent after the character entered the game world.
+    /// Causes reaction on server side: The server sends an AvailableChatCommand message for each available chat command.
+    /// </remarks>
+    void SendChatCommandListRequest();
 };

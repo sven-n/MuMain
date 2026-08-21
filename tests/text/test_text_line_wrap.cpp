@@ -201,3 +201,54 @@ TEST_CASE("forward progress: char wider than the line lands on its own row")
     CHECK(out[1][0] == L'好');
     CHECK(out[2][0] == L'世');
 }
+
+// WrapTextToWidth measures with a callback, so the tests can define the width
+// of a character instead of depending on a font. One unit per character keeps
+// the expectations readable.
+static MeasureTextWidth OneUnitPerCharacter()
+{
+    return [](const wchar_t*, size_t length) { return static_cast<int>(length); };
+}
+
+TEST_CASE("wrap to width: guards return no lines")
+{
+    CHECK(WrapTextToWidth(L"", 10, OneUnitPerCharacter()).empty());
+    CHECK(WrapTextToWidth(L"text", 0, OneUnitPerCharacter()).empty());
+    CHECK(WrapTextToWidth(L"text", 10, nullptr).empty());
+}
+
+TEST_CASE("wrap to width: text which fits stays on one line")
+{
+    const auto lines = WrapTextToWidth(L"Handles the command", 32, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 1);
+    CHECK(lines[0] == L"Handles the command");
+}
+
+TEST_CASE("wrap to width: breaks at spaces and drops them")
+{
+    const auto lines = WrapTextToWidth(L"Handles the chat command", 12, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0] == L"Handles the");
+    CHECK(lines[1] == L"chat command");
+}
+
+TEST_CASE("wrap to width: a word wider than the line is broken inside")
+{
+    const auto lines = WrapTextToWidth(L"setmasterleveluppoints", 8, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 3);
+    CHECK(lines[0] == L"setmaste");
+    CHECK(lines[1] == L"rlevelup");
+    CHECK(lines[2] == L"points");
+}
+
+TEST_CASE("wrap to width: an own line break starts a new line")
+{
+    const auto lines = WrapTextToWidth(L"first\nsecond", 32, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 2);
+    CHECK(lines[0] == L"first");
+    CHECK(lines[1] == L"second");
+}

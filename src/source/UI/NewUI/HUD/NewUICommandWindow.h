@@ -9,7 +9,7 @@
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
 #include "UI/NewUI/Widgets/NewUIButton.h"
 
-#define MAX_COMMAND_BTN		( 11 )
+#define MAX_COMMAND_BTN (12)
 
 #define COMMAND_BTN_INTERVAL_SIZE	(1)
 
@@ -34,7 +34,9 @@ namespace SEASON3B
         enum eCOMMAND_WINDOW_SIZE
         {
             COMMAND_WINDOW_WIDTH = 190,
-            COMMAND_WINDOW_HEIGHT = 429,
+            COMMAND_WINDOW_HEIGHT = 459,
+            // How tall newui_item_back02-L/R actually are.
+            COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT = 320,
         };
 
     private:

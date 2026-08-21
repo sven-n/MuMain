@@ -972,3 +972,8 @@ void PacketFunctions_ClientToServer::SendDuelChannelQuitRequest()
 {
     dotnet_SendDuelChannelQuitRequest(this->GetHandle());
 }
+
+void PacketFunctions_ClientToServer::SendChatCommandListRequest()
+{
+    dotnet_SendChatCommandListRequest(this->GetHandle());
+}

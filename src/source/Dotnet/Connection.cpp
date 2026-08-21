@@ -279,6 +279,7 @@ void ResolvePacketBindings()
     ReResolve(dotnet_SendDuelStopRequest, "SendDuelStopRequest");
     ReResolve(dotnet_SendDuelChannelJoinRequest, "SendDuelChannelJoinRequest");
     ReResolve(dotnet_SendDuelChannelQuitRequest, "SendDuelChannelQuitRequest");
+    ReResolve(dotnet_SendChatCommandListRequest, "SendChatCommandListRequest");
 
     mu::log::Get("dotnet")->info("NET: ResolvePacketBindings done (SendServerListRequest={})",
                                 dotnet_SendServerListRequest ? "resolved" : "NULL");

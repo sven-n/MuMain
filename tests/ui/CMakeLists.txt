@@ -10,3 +10,10 @@ mu_add_test(
         test_text_search.cpp
         ${CMAKE_SOURCE_DIR}/src/source/UI/Legacy/TextSearch.cpp
 )
+
+add_test(
+    NAME chat_command_window_focus_contract
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_chat_command_window_focus.cmake
+)
