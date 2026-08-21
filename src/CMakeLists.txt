@@ -463,7 +463,8 @@ target_include_directories(MuClient PUBLIC
   # after the bootstrap files moved out of source/ (issue #346).
   "${CMAKE_CURRENT_SOURCE_DIR}/source/App"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/include"
-  "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/miniaudio"
+  "${miniaudio_SOURCE_DIR}"
+  "${miniaudio_SOURCE_DIR}/extras"
   "${CMAKE_CURRENT_SOURCE_DIR}/dependencies/netcore/includes"
   "${CMAKE_BINARY_DIR}/generated"
   # stb_truetype backs the portable GDI text rasterizer (issue #462).

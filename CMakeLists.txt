@@ -99,6 +99,14 @@ FetchContent_Declare(spdlog
 )
 FetchContent_MakeAvailable(spdlog)
 
+FetchContent_Declare(miniaudio
+    URL https://github.com/mackron/miniaudio/archive/9634bedb5b5a2ca38c1ee7108a9358a4e233f14d.tar.gz
+    URL_HASH SHA256=1a3a79b80fc6f0b0cc155e28b954a598e0ddfa2db64e2afa8466be88c476fa55
+    DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    SOURCE_SUBDIR _fetchcontent_only
+)
+FetchContent_MakeAvailable(miniaudio)
+
 set(SDLTTF_SAMPLES OFF CACHE BOOL "" FORCE)
 set(SDLTTF_VENDORED ON CACHE BOOL "" FORCE)
 FetchContent_Declare(SDL3_ttf
