@@ -34,6 +34,7 @@ int main(int /*argc*/, char* /*argv*/[])
     setenv("LIBGL_LOGSHADERERROR", "1", 1);
     setenv("LIBGL_DBGSHADERCONV", "1", 1);
 
+
     // The engine's font discovery probes desktop Linux paths; point it at the
     // Android system font so UI text renders.
     setenv("MU_FONT", "/system/fonts/Roboto-Regular.ttf", 0);

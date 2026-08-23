@@ -9,6 +9,10 @@
 #include <numeric>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
+#ifdef __ANDROID__
+#include <android/log.h>
+#include <chrono>
+#endif
 #include "Core/Utilities/PlatformInfo.h"
 #include "Render/Core/ImmediateRenderer.h"
 #include "Render/Shaders/PassthroughShader.h"
@@ -1209,6 +1213,49 @@ void MainScene(HDC hDC)
             // for why this can't live inside either overlay function. AdvanceGpuTimers() must run
             // after this frame's Terrain/Objects/Characters/Items/Effects/UI passes have all
             // issued their GpuTimerBegin/End calls, which RenderCurrentScene() above guarantees.
+#ifdef __ANDROID__
+            // AH-1118 batching pass: dump the frame's GL statistics to logcat
+            // every ~5s, before the reset below wipes them.
+            {
+                FrameProfiler::g_CountersEnabled = true;
+                using clock = std::chrono::steady_clock;
+                static clock::time_point s_lastDump{};
+                const clock::time_point nowT = clock::now();
+                if (nowT - s_lastDump >= std::chrono::seconds(5))
+                {
+                    s_lastDump = nowT;
+                    using FrameProfiler::Counter;
+                    using FrameProfiler::CounterValue;
+                    using FrameProfiler::Pass;
+                    __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                        "tot gl=%u draw=%u bufUp=%u orphan=%u prog=%u tex=%u uni=%u",
+                        CounterValue(Counter::GLCalls), CounterValue(Counter::DrawCalls),
+                        CounterValue(Counter::BufferUpdates), CounterValue(Counter::BufferOrphans),
+                        CounterValue(Counter::ProgramBinds), CounterValue(Counter::TextureBinds),
+                        CounterValue(Counter::UniformWrites));
+                    for (int p = 0; p < static_cast<int>(Pass::Count_); ++p)
+                    {
+                        const uint32_t gl = CounterValue(static_cast<Pass>(p), Counter::GLCalls);
+                        if (gl >= 200)
+                        {
+                            __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                                "pass %s gl=%u draw=%u tex=%u buf=%u",
+                                FrameProfiler::kPassNames[p], gl,
+                                CounterValue(static_cast<Pass>(p), Counter::DrawCalls),
+                                CounterValue(static_cast<Pass>(p), Counter::TextureBinds),
+                                CounterValue(static_cast<Pass>(p), Counter::BufferUpdates));
+                        }
+                    }
+                    __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                        "IR draws=%u verts=%u brk tex=%u blend=%u depth=%u prog=%u uni=%u mtx=%u draw=%u oth=%u",
+                        CounterValue(Counter::IRDraws), CounterValue(Counter::IRVertices),
+                        CounterValue(Counter::IRBreakTexture), CounterValue(Counter::IRBreakBlend),
+                        CounterValue(Counter::IRBreakDepth), CounterValue(Counter::IRBreakProgram),
+                        CounterValue(Counter::IRBreakUniform), CounterValue(Counter::IRBreakMatrix),
+                        CounterValue(Counter::IRBreakDraw), CounterValue(Counter::IRBreakOther));
+                }
+            }
+#endif
             FrameProfiler::ResetFrame();
             FrameProfiler::ResetCounters();
             FrameProfiler::AdvanceGpuTimers();

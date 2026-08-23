@@ -244,6 +244,7 @@ static void MaybeCaptureFrame()
 // through, so branching here (rather than at each call site) covers all of them uniformly.
 #ifdef __ANDROID__
 #include <android/log.h>
+#include "Core/Utilities/FrameProfiler.h"
 #endif
 
 void PlatformSwapBuffers()
