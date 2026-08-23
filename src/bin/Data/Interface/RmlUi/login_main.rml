@@ -5,10 +5,15 @@
 	<link type="text/rcss" href="login_main.rcss"/>
 </head>
 <body>
+	<!-- .btn-icon-label only matters for the modern theme (legacy hides it -- its real icon art
+	     already gives these buttons a visual identity, see themes/legacy/login_main.rcss). -->
 	<div id="panel">
-		<div id="btn_menu" class="btn-icon btn-icon-menu"></div>
+		<div id="btn_menu" class="btn-icon btn-icon-menu">
+			<span class="btn-icon-label">M</span>
+		</div>
 		<div id="btn_credit" class="btn-icon btn-icon-credit">
 			<div class="btn-credit-deco"></div>
+			<span class="btn-icon-label">C</span>
 		</div>
 	</div>
 </body>

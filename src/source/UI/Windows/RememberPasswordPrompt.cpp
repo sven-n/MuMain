@@ -115,7 +115,11 @@ void OpenRememberPasswordPrompt()
     if (g_pDoc)
     {
         SyncLabels();
-        g_pDoc->Show();
+        // Modal (not the ModalFlag::None default): without it, the login document underneath
+        // stays fully clickable, and RmlUi's focus-follows-click default can bring it back in
+        // front of this dialog. Context::GetElementAtPoint (Context.cpp) confirms modal
+        // hit-testing skips every element whose owner document isn't the focused/modal one.
+        g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
 }
 

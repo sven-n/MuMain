@@ -181,6 +181,26 @@ compositing is actually implemented in `RmlUiRenderInterface`. `background-color
 `border-radius` are all pure geometry and render correctly — they're what should carry a themed
 panel's look instead.
 
+### `transform` parses fine and silently never renders
+
+**Symptom**: `transform: rotate(45deg)` on a border corner (the classic CSS checkmark trick)
+rendered as a static, un-rotated corner. Zero `[RmlUi]` warnings in `MuError.log` — the
+declaration parses and is accepted without complaint.
+
+**Root cause**: same category of gap as `box-shadow` blur above — `SetTransform` is one of the
+"optional advanced-rendering functions" `RmlUiRenderInterface` leaves at the base class's no-op
+default (its own header comment names it explicitly). Unlike `box-shadow`, there's no
+blur-radius-zero threshold that makes it "work by accident" — `transform` is unconditionally
+inert here. The property still parses and is stored correctly
+(`StyleSheetSpecification.cpp`/`PropertyParserTransform.cpp`); nothing downstream ever applies it.
+
+**Fix**: don't use `transform` (rotate/skew/translate/scale) in any theme until
+`RmlUiRenderInterface::SetTransform` is implemented. For an angled shape, use real bitmap art
+(`decorator: image(...)`) or an axis-aligned approximation from plain positioned rectangles (e.g.
+a blocky pixel-art checkmark from several small `background-color` squares). Check
+`RmlUiRenderInterface.h`'s header comment for "left at their base-class no-op defaults" before
+reaching for an unfamiliar CSS property — it lists every such gap up front.
+
 ### `FileBacked` textures rendered using the wrong GL texture object
 
 **Symptom**: the `legacy` theme's `#panel`/`.input-frame` `decorator: image(...)` backgrounds

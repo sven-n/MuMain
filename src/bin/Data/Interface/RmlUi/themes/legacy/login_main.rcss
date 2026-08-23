@@ -67,3 +67,9 @@
 	pointer-events: none;
 	decorator: image(login-main-deco-image);
 }
+
+/* Only the modern theme needs a text glyph -- these buttons' real icon art above already gives
+   them a visual identity (see themes/modern/login_main.rcss's own .btn-icon-label rule). */
+.btn-icon-label {
+	display: none;
+}

@@ -31,6 +31,16 @@
 	login-input-frame-image: 0px 0px 156px 23px;
 }
 
+/* Real checkbox tick art (BITMAP_CHECK_BTN, ZzzOpenData.cpp:5443) -- same source/frames as
+   base.rcss's legacy-checkbox-sheet, declared locally since login.rcss doesn't link base.rcss
+   (see this file's header comment). Frame 0 = unchecked, frame 1 = checked. */
+@spritesheet login-checkbox-sheet
+{
+	src: "../../../op2_ch.tga";
+	login-checkbox-unchecked: 0px  0px 16px 16px;
+	login-checkbox-checked:   0px 16px 16px 16px;
+}
+
 body {
 	width: 100%;
 	height: 100%;
@@ -103,11 +113,17 @@ body {
 	display: inline-block;
 	width: 16px;
 	height: 16px;
-	border: 1px #808080;
-	background-color: #202020;
+	/* Same named-sprite note as #panel above -- see @spritesheet login-checkbox-sheet. */
+	decorator: image(login-checkbox-unchecked);
 }
 .checkbox-box.checked {
-	background-color: #c0a050;
+	decorator: image(login-checkbox-checked);
+}
+
+/* The real tick is baked into login-checkbox-checked's art above -- .checkbox-tick only matters
+   for the modern theme (see themes/modern/login.rcss). */
+.checkbox-tick {
+	display: none;
 }
 
 .checkbox-label {
@@ -115,6 +131,28 @@ body {
 	left: 21px;
 	top: 1px;
 	white-space: nowrap;
+}
+
+/* Real OK/Cancel button art (ZzzOpenData.cpp:5431-5432: message_ok_b_all.tga/
+   loding_cancel_b_all.tga, BITMAP_BUTTON+0/+1) -- label text is baked in (original CButton::Create
+   calls never used SetText()), so login.rml's {{ok_label}}/{{cancel_label}} text node (shared with
+   the modern theme, which needs it) is made transparent here instead.
+   3 frames, same convention as base.rcss's legacy-btn-sheet: frame 0 = idle, frame 1 = hover,
+   frame 2 = pressed (CButton::Create(54, 30, BITMAP_BUTTON+i, 3, 2, 1)'s nDownFrame=2/
+   nActiveFrame=1, per Button.cpp's Update()). */
+@spritesheet login-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	login-ok-idle:   0px  0px 54px 30px;
+	login-ok-hover:  0px 30px 54px 30px;
+	login-ok-active: 0px 60px 54px 30px;
+}
+@spritesheet login-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	login-cancel-idle:   0px  0px 54px 30px;
+	login-cancel-hover:  0px 30px 54px 30px;
+	login-cancel-active: 0px 60px 54px 30px;
 }
 
 .btn {
@@ -125,16 +163,30 @@ body {
 	vertical-align: middle;
 	line-height: 30px;
 	cursor: pointer;
-	background-color: #402c1a;
-	border: 1px #806040;
+	color: transparent;
 	/* Opt back in to hit-testing -- see body's pointer-events comment above. */
 	pointer-events: auto;
 }
-.btn:hover {
-	background-color: #5a4026;
+.btn-ok {
+	left: 150px; top: 200px;
+	decorator: image(login-ok-idle);
 }
-.btn-ok     { left: 150px; top: 200px; }
-.btn-cancel { left: 211px; top: 200px; }
+.btn-ok:hover {
+	decorator: image(login-ok-hover);
+}
+.btn-ok:active {
+	decorator: image(login-ok-active);
+}
+.btn-cancel {
+	left: 211px; top: 200px;
+	decorator: image(login-cancel-idle);
+}
+.btn-cancel:hover {
+	decorator: image(login-cancel-hover);
+}
+.btn-cancel:active {
+	decorator: image(login-cancel-active);
+}
 
 /* Below the fixed-size panel, matching the legacy "no room inside it" comment. */
 .trust-warning {

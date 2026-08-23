@@ -71,6 +71,11 @@ void COptionWin::Create()
     {
         m_aBtn[i].Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
         CWin::RegisterButton(&m_aBtn[i]);
+
+        // Same double-toggle risk as CLoginWin's checkboxes (see LoginWin.cpp's SetEnable
+        // comment) -- these 3 are checkbox-style (HasCheckVisuals()) CButtons too, so their own
+        // input polling would fight RmlToggleAutoAttack/WhisperAlarm/SlideHelp's SetCheck() flip.
+        m_aBtn[i].SetEnable(false);
     }
 
     DWORD adwBtnClr[4] = { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };

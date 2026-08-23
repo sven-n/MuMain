@@ -76,6 +76,7 @@ body {
 
 .checkbox-box {
 	display: inline-block;
+	position: relative;
 	width: 16px;
 	height: 16px;
 	border: 1px rgba(255, 255, 255, 60);
@@ -85,6 +86,32 @@ body {
 .checkbox-box.checked {
 	background-color: #c0a050;
 	border: 1px #c0a050;
+}
+
+/* Real tick glyph, not just the color swap above. This engine's RmlUiRenderInterface does not
+   implement SetTransform (CSS `transform` parses but never renders -- see
+   gotchas-and-patterns.md's "transform parses fine and silently never renders" entry), so no
+   rotation is available for a true diagonal stroke. Built instead from 5 small 2x2px axis-aligned
+   "pixels" (.tick-px) stair-stepping into a blocky checkmark approximation. */
+.tick-px {
+	position: absolute;
+	width: 2px;
+	height: 2px;
+	background-color: #12141c;
+}
+.tick-px-1 { left: 3px;  top: 7px; }
+.tick-px-2 { left: 5px;  top: 9px; }
+.tick-px-3 { left: 7px;  top: 7px; }
+.tick-px-4 { left: 9px;  top: 5px; }
+.tick-px-5 { left: 11px; top: 3px; }
+
+.checkbox-tick {
+	display: none;
+	position: absolute;
+	left: 0; top: 0; width: 16px; height: 16px;
+}
+.checkbox-box.checked .checkbox-tick {
+	display: block;
 }
 
 .checkbox-label {

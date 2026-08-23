@@ -1,10 +1,15 @@
-/* "Modern" theme for the login-scene menu/credit button bar -- flat programmatic icon buttons,
-   no reproduction of the legacy frame-based sprite art (same approach as login.rcss's modern
-   theme). Text-free by design (the legacy buttons are pure image buttons with no I18N label), so
-   each gets a simple glyph-like mark via border/background only -- no font glyph needed. */
+/* "Modern" theme for the login-scene menu/credit button bar -- flat programmatic icon buttons, no
+   legacy sprite art (same approach as login.rcss's modern theme). No reserved I18N string exists
+   for these icon-only buttons, so each gets a plain single-letter monogram (.btn-icon-label,
+   "M"/"C") instead -- plain ASCII, not a Unicode symbol, since glyph coverage in the loaded font
+   isn't guaranteed (see login.rcss's checkmark comment). */
 
 #panel {
 	position: absolute;
+	/* Needed for .btn-icon-label's text -- matches login.rcss's #panel rather than relying on
+	   RmlUiRuntime's regular-weight fallback face to also resolve bold correctly. */
+	font-family: "Liberation Sans";
+	font-size: 14px;
 }
 
 .btn-icon {
@@ -16,10 +21,16 @@
 	background-color: rgba(255, 255, 255, 15);
 	border: 1px rgba(255, 255, 255, 50);
 	border-radius: 4px;
+	text-align: center;
+	line-height: 30px;
 }
 .btn-icon:hover {
 	background-color: #c0a050;
 	border: 1px #c0a050;
+}
+.btn-icon-label {
+	color: white;
+	font-weight: bold;
 }
 .btn-icon-menu {
 	left: 0px;

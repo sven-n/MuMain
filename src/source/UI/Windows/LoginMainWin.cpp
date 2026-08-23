@@ -66,10 +66,11 @@ void CLoginMainWin::Create()
     );
     SetMovable(false);
 
+    // Legacy CButtons stay registered for redundant click detection only -- RenderControls() is
+    // no longer overridden, so CWin::RenderButtons() never runs for them; RmlUi renders 100% of
+    // this bar's visuals in every theme (see the class header comment).
     for (int i = 0; i < LMW_BTN_MAX; ++i)
         CWin::RegisterButton(&m_aBtn[i]);
-
-    m_sprDeco.Create(189, 103, BITMAP_LOG_IN + 6, 0, nullptr, 105, 59);
 
     // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
     // CLoginWin::Create() is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change),
@@ -89,8 +90,6 @@ void CLoginMainWin::Create()
 
 void CLoginMainWin::PreRelease()
 {
-    m_sprDeco.Release();
-
     // CUIMng::RemoveWinList() (run on every scene transition) calls Release() on every window
     // in its list unconditionally -- CWin's own Release()/PreRelease() has no knowledge of
     // m_pRmlDoc, so without this it silently keeps rendering (still Shown, still in the
@@ -112,11 +111,6 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     m_aBtn[LMW_BTN_CREDIT].SetPosition(
         nXCoord + CWin::GetWidth() - m_aBtn[LMW_BTN_CREDIT].GetWidth(),
         nYCoord
-    );
-
-    m_sprDeco.SetPosition(
-        m_aBtn[LMW_BTN_CREDIT].GetXPos(),
-        m_aBtn[LMW_BTN_CREDIT].GetYPos()
     );
 
     // RmlUi panel: positioned at the same real window-pixel origin CWin's own bookkeeping uses
@@ -143,8 +137,6 @@ void CLoginMainWin::Show(bool bShow)
 
     for (int i = 0; i < LMW_BTN_MAX; ++i)
         m_aBtn[i].Show(bShow);
-
-    m_sprDeco.Show(bShow);
 
     if (m_pRmlDoc)
     {
@@ -173,10 +165,4 @@ void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
         ::StopMp3(MUSIC_MAIN_THEME);
         ::PlayMp3(MUSIC_MUTHEME);
     }
-}
-
-void CLoginMainWin::RenderControls()
-{
-    m_sprDeco.Render();
-    CWin::RenderButtons();
 }

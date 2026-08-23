@@ -23,6 +23,10 @@ about what's ahead, not how the finished parts function.
   panel).
 - **Theming framework.** Pluggable, data-driven, modder-pluggable theme folders; two real themes
   (`legacy`, `modern`) covering all five migrated windows.
+- **Login-scene bugfix round.** Real bugs found post-Batch-2: a legacy-`CButton` double-toggle
+  fighting the RmlUi checkbox click handler, a non-modal confirmation dialog, missing hover/sprite
+  art, and a real engine limitation (`RmlUiRenderInterface::SetTransform` unimplemented — see
+  `gotchas-and-patterns.md`). All fixed.
 
 ## Not started: the rest of the `CUIMng`-tier screens
 

@@ -26,7 +26,6 @@ class CLoginMainWin : public CWin
 {
 protected:
     CButton	m_aBtn[LMW_BTN_MAX];
-    CSprite	m_sprDeco;
 
 public:
     CLoginMainWin();
@@ -45,7 +44,6 @@ public:
 protected:
     void PreRelease();
     void UpdateWhileActive(double dDeltaTick);
-    void RenderControls();
 
 private:
     bool m_bRmlMenuClicked = false;

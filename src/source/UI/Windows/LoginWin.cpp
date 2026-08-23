@@ -98,6 +98,17 @@ void CLoginWin::Create()
     m_aBtnSavePassword.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
     CWin::RegisterButton(&m_aBtnSavePassword);
 
+    // CButton::Update() auto-toggles m_bCheck on its own input polling whenever HasCheckVisuals()
+    // is true (both are 2-frame check-style art) -- independent of and in addition to
+    // RmlToggleRememberMe()/RmlToggleSavePassword()'s own SetCheck() flip below, since legacy
+    // input polling isn't gated by which UI tier's Context claimed the click. Left enabled, one
+    // click produces two flips (net no change). SetEnable(false) makes these pure state
+    // containers (SetCheck/IsCheck still work for every other call site); only the RmlUi handler
+    // drives them now. Plain action buttons (OK/Cancel) don't need this -- HasCheckVisuals() is
+    // false there, so redundant firing is harmless.
+    m_aBtnRememberMe.SetEnable(false);
+    m_aBtnSavePassword.SetEnable(false);
+
     SAFE_DELETE(m_pUsernameInputBox);
 
     m_pUsernameInputBox = new CUITextInputBox;
@@ -326,10 +337,10 @@ void CLoginWin::UpdateRememberCheckboxes()
 		return;
 	}
 
-	// Enabling requires confirmation. Revert the tick immediately; it is
-	// re-applied only if the dialog is accepted, so a cancel (however the dialog
-	// closes) always leaves the box unchecked.
-	m_aBtnSavePassword.SetCheck(false);
+	// Enabling requires confirmation, but the box stays ticked from the click that got us here --
+	// ApplyRememberPasswordChoice() already sets SetCheck(bAccepted) once the dialog resolves
+	// either way, so a Cancel still correctly unticks it. This just gives the click itself real
+	// visual feedback, matching Remember Me's own click.
 
 	// Storing the password implies remembering the account.
 	if (!m_RememberMe)
