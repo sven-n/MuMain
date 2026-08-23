@@ -56,7 +56,14 @@ inline void* get_munique_client_library_handle()
                     return h;
             }
         }
+#ifdef __ANDROID__
+        // AH-1118 spike: on Android the library ships in the APK's jniLibs,
+        // which requires the lib*.so naming; the system linker finds it in the
+        // app's native library directory by plain name.
+        return dlopen("libMUniqueClient.so", RTLD_LAZY);
+#else
         return dlopen("MUnique.Client.Library.so", RTLD_LAZY);
+#endif
     }();
     return handle;
 }

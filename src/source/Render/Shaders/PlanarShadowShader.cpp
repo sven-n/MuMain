@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Render/Shaders/EsShaderShim.h"
 #include "Render/Shaders/PlanarShadowShader.h"
 #include "Render/Core/BindState.h"
 #include "Render/Core/RenderConfig.h"

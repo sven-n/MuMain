@@ -103,6 +103,16 @@ void CameraProjection::TransformPosition(const CameraState& state, const vec3_t 
 
 bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t position)
 {
+#ifdef __ANDROID__
+    // AH-1118: this single 1-pixel depth readback (sun lens-flare visibility)
+    // drains the whole GPU pipeline once per frame -- measured at 1-3 FPS on
+    // both Adreno and the emulator -- and GL_DEPTH_COMPONENT reads are not
+    // legal in OpenGL ES to begin with. Report "occluded" (no flare) until an
+    // async occlusion query replaces this.
+    (void)state;
+    (void)position;
+    return false;
+#else
     vec3_t worldPosition;
     int x, y;
     TransformPosition(state, position, worldPosition, &x, &y);
@@ -130,6 +140,7 @@ bool CameraProjection::TestDepthBuffer(const CameraState& state, const vec3_t po
     const float expected = (f / (f - n)) * (1.0f + n / z_eye);
 
     return (depth >= expected);
+#endif
 }
 
 void CameraProjection::GetOpenGLMatrix(float outMatrix[3][4])

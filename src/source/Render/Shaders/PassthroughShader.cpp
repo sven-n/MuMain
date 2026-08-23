@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Render/Shaders/EsShaderShim.h"
 #include "PassthroughShader.h"
 #include "Render/Core/RenderConfig.h"
 #include "Render/Core/BindState.h"
@@ -59,7 +60,7 @@ static bool LoadGLShaderFunctions()
     if (loaded) return true;
 
     fn_glCreateShader       = (PFNGLCREATESHADERPROC)SDL_GL_GetProcAddress("glCreateShader");
-    fn_glShaderSource        = (PFNGLSHADERSOURCEPROC)SDL_GL_GetProcAddress("glShaderSource");
+    fn_glShaderSource        = (PFNGLSHADERSOURCEPROC)MU_GLSHADERSOURCE_PROC;
     fn_glCompileShader       = (PFNGLCOMPILESHADERPROC)SDL_GL_GetProcAddress("glCompileShader");
     fn_glGetShaderiv         = (PFNGLGETSHADERIVPROC)SDL_GL_GetProcAddress("glGetShaderiv");
     fn_glGetShaderInfoLog    = (PFNGLGETSHADERINFOLOGPROC)SDL_GL_GetProcAddress("glGetShaderInfoLog");
