@@ -9,6 +9,10 @@
 *.csproj text
 *.sln text
 
+# Shell scripts must keep LF endings unconditionally -- a CRLF-corrupted
+# shebang line (e.g. "#!/usr/bin/env bash\r") fails to execute on Linux.
+*.sh text eol=lf
+
 # Binary game assets: never apply text detection or EOL normalization.
 # Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`
 # misdetects them as text; on a Windows clone (core.autocrlf=true) their lone
