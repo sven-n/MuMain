@@ -588,7 +588,7 @@ if (DOTNET_EXECUTABLE)
   else()
     set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
   endif()
-  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/dotnet_stage/$<CONFIG>/${DOTNET_LIB_NAME}")
+  set(DOTNET_DLL_PATH "${CMAKE_CURRENT_BINARY_DIR}/${DOTNET_LIB_NAME}")
   set(DOTNET_PROJ "${CMAKE_CURRENT_SOURCE_DIR}/../ClientLibrary/MUnique.Client.Library.csproj")
 
   # Create temp directories for Native AOT build.
@@ -662,11 +662,10 @@ if (DOTNET_EXECUTABLE)
     add_custom_command(
             OUTPUT "${DOTNET_DLL_PATH}"
             COMMAND ${CMAKE_COMMAND} -E echo "--- C# Changes Detected: Rebuilding Client Library ---"
-            COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/$<CONFIG>"
             COMMAND ${CMAKE_COMMAND} -E env
                     ${DOTNET_PUBLISH_ENV}
-                    "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} ${DOTNET_EXTRA_ARGS} -o "${DOTNET_TEMP_OUTPUT_NATIVE}/$<CONFIG>" --nologo
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/$<CONFIG>/${DOTNET_LIB_NAME}" "${DOTNET_DLL_PATH}"
+                    "${DOTNET_EXECUTABLE}" publish "${DOTNET_PROJ_NATIVE}" -c $<CONFIG> -r ${DOTNET_RID} -p:PlatformTarget=${DOTNET_PLATFORM} ${DOTNET_EXTRA_ARGS} -o "${DOTNET_TEMP_OUTPUT_NATIVE}" --nologo
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different "${DOTNET_TEMP_OUTPUT}/${DOTNET_LIB_NAME}" "${DOTNET_DLL_PATH}"
             DEPENDS "${DOTNET_PROJ}" ${DOTNET_SOURCES}
             COMMENT "Checking for .NET Client Library updates..."
             VERBATIM
