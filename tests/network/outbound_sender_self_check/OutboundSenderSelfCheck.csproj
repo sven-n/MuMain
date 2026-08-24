@@ -6,6 +6,6 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="../../../ClientLibrary/OutboundPacketSender.cs" Link="OutboundPacketSender.cs" />
+    <Compile Include="../../../ClientLibrary/OutboundFlushLoop.cs" Link="OutboundFlushLoop.cs" />
   </ItemGroup>
 </Project>

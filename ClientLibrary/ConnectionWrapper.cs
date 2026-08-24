@@ -20,7 +20,7 @@ public sealed class ConnectionWrapper : IDisposable
 {
     private readonly int _handle;
     private readonly Connection _connection;
-    private readonly OutboundPacketSender _outboundSender;
+    private readonly OutboundFlushLoop _outboundFlushLoop;
     private readonly bool _networkDiagnosticsEnabled = Environment.GetEnvironmentVariable("MU_NETWORK_DIAGNOSTICS") == "1";
 
     /// <summary>
@@ -59,7 +59,7 @@ public sealed class ConnectionWrapper : IDisposable
         this._connection = connection;
         this._onPacketReceived = onPacketReceived;
         this._onDisconnected = onDisconnected;
-        this._outboundSender = new OutboundPacketSender(this.SendPacketAsync, this.OnSendFailed);
+        this._outboundFlushLoop = new OutboundFlushLoop(this.FlushOutputAsync, this.OnSendFailed);
 
         connection.PacketReceived += this.OnPacketReceivedAsync;
         connection.Disconnected += this.OnDisconnectedAsync;
@@ -82,14 +82,7 @@ public sealed class ConnectionWrapper : IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        if (this._isDisposed)
-        {
-            return;
-        }
-
-        this._isDisposed = true;
-        this._outboundSender.Complete();
-        this._connection.Dispose();
+        this.BeginShutdown(false);
     }
 
     /// <summary>
@@ -97,28 +90,7 @@ public sealed class ConnectionWrapper : IDisposable
     /// </summary>
     public void DisconnectAndDispose()
     {
-        if (Interlocked.Exchange(ref this._isDisconnecting, 1) != 0)
-        {
-            return;
-        }
-
-        _ = Task.Run(async () =>
-        {
-            try
-            {
-                await this._outboundSender.CompleteAsync().ConfigureAwait(false);
-                await this._connection.DisconnectAsync().ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-            finally
-            {
-                this._isDisposed = true;
-                this._connection.Dispose();
-            }
-        });
+        this.BeginShutdown(true);
     }
 
     /// <summary>
@@ -133,7 +105,15 @@ public sealed class ConnectionWrapper : IDisposable
             return;
         }
 
-        this.Enqueue(bytes.ToArray());
+        using var outputLock = this._connection.OutputLock.Lock();
+        if (this._isDisposed || Volatile.Read(ref this._isDisconnecting) != 0)
+        {
+            return;
+        }
+
+        bytes.CopyTo(this._connection.Output.GetSpan(bytes.Length));
+        this._connection.Output.Advance(bytes.Length);
+        this._outboundFlushLoop.RequestFlush();
     }
 
     /// <summary>
@@ -148,47 +128,29 @@ public sealed class ConnectionWrapper : IDisposable
             return;
         }
 
-        // Diagnostic: null checks for properties that could cause SIGSEGV in Native AOT.
-        if (this._connection.OutputLock is null)
+        using var outputLock = this._connection.OutputLock.Lock();
+        if (this._isDisposed || Volatile.Read(ref this._isDisconnecting) != 0)
         {
-            Console.Error.WriteLine($"[NET] CreateAndSend: OutputLock is null, handle={this._handle}");
             return;
         }
 
-        if (this._connection.Output is null)
-        {
-            Console.Error.WriteLine($"[NET] CreateAndSend: Output (PipeWriter) is null, handle={this._handle}");
-            return;
-        }
-
-        var packetWriter = new PacketPipeWriter();
-        var length = packetFactory(packetWriter);
-        packetWriter.Advance(length);
-        this.Enqueue(packetWriter.ToArray(length));
+        var length = packetFactory(this._connection.Output);
+        this._connection.Output.Advance(length);
+        this._outboundFlushLoop.RequestFlush();
     }
 
-    private void Enqueue(byte[] packet)
-    {
-        if (!this._outboundSender.TryEnqueue(packet))
-        {
-            this.OnSendFailed(new InvalidOperationException($"Outbound packet queue is full, handle={this._handle}"));
-        }
-    }
-
-    private async ValueTask SendPacketAsync(ReadOnlyMemory<byte> packet)
+    private async ValueTask FlushOutputAsync()
     {
         var lockStarted = Stopwatch.GetTimestamp();
         using var outputLock = await this._connection.OutputLock.LockAsync().ConfigureAwait(false);
         var lockElapsed = Stopwatch.GetElapsedTime(lockStarted);
-        packet.Span.CopyTo(this._connection.Output.GetSpan(packet.Length));
-        this._connection.Output.Advance(packet.Length);
         var flushStarted = Stopwatch.GetTimestamp();
         await this._connection.Output.FlushAsync().ConfigureAwait(false);
         var flushElapsed = Stopwatch.GetElapsedTime(flushStarted);
-        this.WriteOutboundDiagnostic(packet.Length, lockElapsed, flushElapsed);
+        this.WriteOutboundDiagnostic(lockElapsed, flushElapsed);
     }
 
-    private void WriteOutboundDiagnostic(int packetLength, TimeSpan lockElapsed, TimeSpan flushElapsed)
+    private void WriteOutboundDiagnostic(TimeSpan lockElapsed, TimeSpan flushElapsed)
     {
         if (!this._networkDiagnosticsEnabled)
         {
@@ -206,13 +168,49 @@ public sealed class ConnectionWrapper : IDisposable
         }
 
         Volatile.Write(ref this._lastOutboundDiagnosticTimestamp, now);
-        Console.Error.WriteLine($"[OutboundQueue] handle={this._handle} depth={this._outboundSender.PendingCount} high={this._outboundSender.HighWaterMark} bytes={packetLength} lock={lockElapsed.TotalMilliseconds:F1}ms flush={flushElapsed.TotalMilliseconds:F1}ms");
+        Console.Error.WriteLine($"[OutboundFlush] handle={this._handle} lock={lockElapsed.TotalMilliseconds:F1}ms flush={flushElapsed.TotalMilliseconds:F1}ms");
     }
 
     private void OnSendFailed(Exception exception)
     {
         Console.Error.WriteLine($"[NET] Send failed, handle={this._handle}: {exception}");
         this.DisconnectAndDispose();
+    }
+
+    private void BeginShutdown(bool disconnect)
+    {
+        if (Interlocked.Exchange(ref this._isDisconnecting, 1) != 0)
+        {
+            return;
+        }
+
+        this._isDisposed = true;
+        _ = Task.Run(() => this.ShutdownAsync(disconnect));
+    }
+
+    private async Task ShutdownAsync(bool disconnect)
+    {
+        try
+        {
+            using (await this._connection.OutputLock.LockAsync().ConfigureAwait(false))
+            {
+                this._outboundFlushLoop.Stop();
+            }
+
+            await this._outboundFlushLoop.CompleteAsync().ConfigureAwait(false);
+            if (disconnect)
+            {
+                await this._connection.DisconnectAsync().ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+        finally
+        {
+            this._connection.Dispose();
+        }
     }
 
     private async Task RunReceiveLoopAsync()

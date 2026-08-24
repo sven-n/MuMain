@@ -1,34 +1,77 @@
-using System.Collections.Concurrent;
 using MUnique.Client.Library;
 
-var releaseFirstSend = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-var sent = new ConcurrentQueue<byte>();
+var timeout = TimeSpan.FromSeconds(5);
+await VerifyCoalescingAndDrainAsync(timeout).ConfigureAwait(false);
+await VerifyFailureReportingAsync(timeout).ConfigureAwait(false);
 
-await using var sender = new OutboundPacketSender(async packet =>
+static async Task VerifyCoalescingAndDrainAsync(TimeSpan timeout)
 {
-    if (sent.IsEmpty)
+    var firstFlushStarted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+    var releaseFirstFlush = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+    var flushCount = 0;
+    Exception? failure = null;
+    var flushLoop = new OutboundFlushLoop(async () =>
     {
-        await releaseFirstSend.Task.ConfigureAwait(false);
+        if (Interlocked.Increment(ref flushCount) == 1)
+        {
+            firstFlushStarted.TrySetResult();
+            await releaseFirstFlush.Task.ConfigureAwait(false);
+        }
+    }, exception => failure = exception);
+
+    try
+    {
+        flushLoop.RequestFlush();
+        await firstFlushStarted.Task.WaitAsync(timeout).ConfigureAwait(false);
+
+        flushLoop.RequestFlush();
+        flushLoop.RequestFlush();
+        var completion = flushLoop.CompleteAsync().AsTask();
+
+        if (completion.IsCompleted)
+        {
+            throw new InvalidOperationException("Flush loop completed before the active flush finished.");
+        }
+
+        releaseFirstFlush.TrySetResult();
+        await completion.WaitAsync(timeout).ConfigureAwait(false);
+
+        if (flushCount != 2)
+        {
+            throw new InvalidOperationException($"Flush requests were not coalesced: {flushCount} flushes.");
+        }
+
+        if (failure is not null)
+        {
+            throw new InvalidOperationException("Successful flushes reported a failure.", failure);
+        }
     }
-
-    sent.Enqueue(packet.Span[0]);
-});
-
-if (!sender.TryEnqueue([1]) || !sender.TryEnqueue([2]))
-{
-    throw new InvalidOperationException("Sender rejected packets below capacity.");
+    finally
+    {
+        releaseFirstFlush.TrySetResult();
+        await flushLoop.CompleteAsync().AsTask().WaitAsync(timeout).ConfigureAwait(false);
+    }
 }
 
-await Task.Delay(50).ConfigureAwait(false);
-if (!sent.IsEmpty)
+static async Task VerifyFailureReportingAsync(TimeSpan timeout)
 {
-    throw new InvalidOperationException("Blocked sink completed before release.");
-}
+    var expectedFailure = new IOException("flush failed");
+    var reportedFailure = new TaskCompletionSource<Exception>(TaskCreationOptions.RunContinuationsAsynchronously);
+    var flushLoop = new OutboundFlushLoop(
+        () => ValueTask.FromException(expectedFailure),
+        exception => reportedFailure.TrySetResult(exception));
 
-releaseFirstSend.SetResult();
-await sender.CompleteAsync().ConfigureAwait(false);
-
-if (!sent.SequenceEqual(new byte[] { 1, 2 }))
-{
-    throw new InvalidOperationException($"FIFO order lost: {string.Join(',', sent)}");
+    try
+    {
+        flushLoop.RequestFlush();
+        var actualFailure = await reportedFailure.Task.WaitAsync(timeout).ConfigureAwait(false);
+        if (!ReferenceEquals(actualFailure, expectedFailure))
+        {
+            throw new InvalidOperationException("Flush failure callback received the wrong exception.");
+        }
+    }
+    finally
+    {
+        await flushLoop.CompleteAsync().AsTask().WaitAsync(timeout).ConfigureAwait(false);
+    }
 }

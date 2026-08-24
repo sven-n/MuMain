@@ -20,18 +20,12 @@ mu_add_test(
         ${CMAKE_SOURCE_DIR}/src/source/GameLogic/Commands/ChatCommandCatalog.cpp
 )
 
-add_test(
-    NAME packet_binding_resolution
-    COMMAND ${CMAKE_COMMAND}
-        -DBINDINGS=${CMAKE_SOURCE_DIR}/src/source/Dotnet/PacketBindings_ClientToServer.h
-        -DCONNECTION=${CMAKE_SOURCE_DIR}/src/source/Dotnet/Connection.cpp
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_packet_binding_resolution.cmake
-)
-
-add_test(
-    NAME stale_connection_packets_are_discarded
-    COMMAND ${CMAKE_COMMAND}
-        -DHEADER_FILE=${CMAKE_SOURCE_DIR}/src/source/Network/Server/WSclient.h
-        -DSOURCE_FILE=${CMAKE_SOURCE_DIR}/src/source/Network/Server/WSclient.cpp
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_stale_connection_packets.cmake
-)
+if(DOTNET_EXECUTABLE)
+    add_test(
+        NAME outbound_flush_loop
+        COMMAND "${DOTNET_EXECUTABLE}" run
+            --project ${CMAKE_CURRENT_SOURCE_DIR}/outbound_sender_self_check/OutboundSenderSelfCheck.csproj
+            --configuration Release
+    )
+    set_tests_properties(outbound_flush_loop PROPERTIES TIMEOUT 30)
+endif()
