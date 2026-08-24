@@ -12,6 +12,7 @@
 #ifdef __ANDROID__
 #include <android/log.h>
 #include <chrono>
+#include <unordered_map>
 #endif
 #include "Core/Utilities/PlatformInfo.h"
 #include "Render/Core/ImmediateRenderer.h"
@@ -1317,6 +1318,37 @@ void MainScene(HDC hDC)
                             g_muTextCacheHits, g_muTextCacheMisses);
                         g_muTextCacheHits = 0;
                         g_muTextCacheMisses = 0;
+                    }
+                    {
+                        // Top texture-bind churners since the last dump. Bitmap index
+                        // -> bind count; negative indices are raw GL texture ids
+                        // (the string cache draws with those).
+                        extern std::unordered_map<int, unsigned int> g_muBindHisto;
+                        std::vector<std::pair<int, unsigned int>> top(g_muBindHisto.begin(), g_muBindHisto.end());
+                        std::sort(top.begin(), top.end(),
+                                  [](const auto& a, const auto& b) { return a.second > b.second; });
+                        char histLine[256];
+                        int off = 0;
+                        unsigned int negatives = 0;
+                        for (const auto& kv : top) if (kv.first < 0) negatives += kv.second;
+                        for (size_t t = 0; t < top.size() && t < 8 && off < 200; ++t)
+                        {
+                            if (top[t].first < 0) continue;
+                            off += snprintf(histLine + off, sizeof(histLine) - off, "%d:%u ",
+                                            top[t].first, top[t].second);
+                        }
+                        __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                            "bindhisto raw=%u %s", negatives, histLine);
+                        // Dynamic-range slots carry their source filename -- log it so the
+                        // histogram is actionable without an enum lookup.
+                        for (size_t t = 0; t < top.size() && t < 6; ++t)
+                        {
+                            if (top[t].first < (int)BITMAP_NONAMED_TEXTURES_BEGIN) continue;
+                            __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                                "bindname %d:%u %ls", top[t].first, top[t].second,
+                                Bitmaps[top[t].first].FileName);
+                        }
+                        g_muBindHisto.clear();
                     }
                     if (g_muSplitFrames > 0)
                     {

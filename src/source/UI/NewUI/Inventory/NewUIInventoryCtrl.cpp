@@ -1023,15 +1023,26 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
     RenderImage(IMAGE_ITEM_TABLE_BOTTOM_LEFT, m_Pos.x - WND_LEFT_EDGE, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 14, 14);
     RenderImage(IMAGE_ITEM_TABLE_BOTTOM_RIGHT, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 14, 14);
 
-    for (x = m_Pos.x - WND_LEFT_EDGE + 14; x < m_Pos.x + m_Size.cx - WND_RIGHT_EDGE; x++)
+    // AH-1118: one stretched quad per edge instead of a 1px-strip loop. The
+    // strip textures are 1px wide/tall, so stretching samples the identical
+    // texel column/row -- but the loop alternated two textures per iteration,
+    // breaking the batch on every pixel (~270 texture binds per frame for one
+    // open window, measured on Adreno 730).
     {
-        RenderImage(IMAGE_ITEM_TABLE_TOP_PIXEL, x, m_Pos.y - WND_TOP_EDGE, 1, 14);
-        RenderImage(IMAGE_ITEM_TABLE_BOTTOM_PIXEL, x, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, 1, 14);
-    }
-    for (y = m_Pos.y - WND_TOP_EDGE + 14; y < m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE; y++)
-    {
-        RenderImage(IMAGE_ITEM_TABLE_LEFT_PIXEL, m_Pos.x - WND_LEFT_EDGE, y, 14, 1);
-        RenderImage(IMAGE_ITEM_TABLE_RIGHT_PIXEL, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, y, 14, 1);
+        const float xStart = m_Pos.x - WND_LEFT_EDGE + 14;
+        const float xSpan = (m_Pos.x + m_Size.cx - WND_RIGHT_EDGE) - xStart;
+        if (xSpan > 0)
+        {
+            RenderImage(IMAGE_ITEM_TABLE_TOP_PIXEL, xStart, m_Pos.y - WND_TOP_EDGE, xSpan, 14);
+            RenderImage(IMAGE_ITEM_TABLE_BOTTOM_PIXEL, xStart, m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE, xSpan, 14);
+        }
+        const float yStart = m_Pos.y - WND_TOP_EDGE + 14;
+        const float ySpan = (m_Pos.y + m_Size.cy - WND_BOTTOM_EDGE) - yStart;
+        if (ySpan > 0)
+        {
+            RenderImage(IMAGE_ITEM_TABLE_LEFT_PIXEL, m_Pos.x - WND_LEFT_EDGE, yStart, 14, ySpan);
+            RenderImage(IMAGE_ITEM_TABLE_RIGHT_PIXEL, m_Pos.x + m_Size.cx - WND_RIGHT_EDGE, yStart, 14, ySpan);
+        }
     }
 
     if (ms_pPickedItem)

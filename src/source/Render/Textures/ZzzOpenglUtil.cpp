@@ -3,6 +3,9 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
+#ifdef __ANDROID__
+#include <unordered_map>
+#endif
 #include "ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -183,6 +186,12 @@ GLRenderStateSnapshot GetRenderStateSnapshot()
     };
 }
 
+#ifdef __ANDROID__
+// AH-1118 diagnostics: which bitmap indices churn the texture binding (each
+// change breaks the IR batch). Read+cleared by the SceneManager 5s stats dump.
+std::unordered_map<int, unsigned int> g_muBindHisto;
+#endif
+
 void BindTexture(int tex)
 {
     if (CachTexture != tex)
@@ -195,6 +204,9 @@ void BindTexture(int tex)
         const uint32_t textureID = (tex >= 0) ? static_cast<uint32_t>(Bitmaps[tex].TextureNumber)
                                                : static_cast<uint32_t>(-1 * tex);
         BindTexture2D(0, textureID);
+#ifdef __ANDROID__
+        ++g_muBindHisto[tex];
+#endif
     }
 }
 
