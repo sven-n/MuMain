@@ -18,3 +18,11 @@ add_test(
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_ac_std3_no_raw_imm.cmake
 )
+
+mu_add_test(
+    NAME sdl_window_flags_tests
+    SOURCES
+        test_sdl_window_flags.cpp
+    LINK_LIBS
+        SDL3::SDL3
+)

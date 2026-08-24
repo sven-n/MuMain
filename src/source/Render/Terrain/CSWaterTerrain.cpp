@@ -438,8 +438,5 @@ void CSWaterTerrain::RenderWaterBitmapTile(float xf, float yf, float lodf, int l
             c[i][0], c[i][1], color,
         };
     }
-    const mu::Vertex3D triangles[6] = {
-        vertices[0], vertices[1], vertices[2], vertices[0], vertices[2], vertices[3],
-    };
-    mu::GetRenderer().RenderTriangles(triangles, 0u);
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }

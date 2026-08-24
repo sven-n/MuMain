@@ -798,13 +798,11 @@ void RenderBox(float Matrix[3][4])
     const auto MakeVtx = [](const vec3_t& pos, float u, float v, std::uint32_t color) -> mu::Vertex3D
     { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, u, v, color}; };
     std::vector<mu::Vertex3D> verts;
-    verts.reserve(36);
+    verts.reserve(24);
     const auto EmitQuad = [&](const vec3_t& a, const vec3_t& b, const vec3_t& c, const vec3_t& d, std::uint32_t color)
     {
         verts.push_back(MakeVtx(a, 1.f, 1.f, color));
         verts.push_back(MakeVtx(b, 1.f, 0.f, color));
-        verts.push_back(MakeVtx(c, 0.f, 0.f, color));
-        verts.push_back(MakeVtx(a, 1.f, 1.f, color));
         verts.push_back(MakeVtx(c, 0.f, 0.f, color));
         verts.push_back(MakeVtx(d, 0.f, 1.f, color));
     };
@@ -814,7 +812,7 @@ void RenderBox(float Matrix[3][4])
     EmitQuad(TransformVertices[0], TransformVertices[1], TransformVertices[5], TransformVertices[4], mu::PackABGR(.6f, .6f, .6f, 1.f));
     EmitQuad(TransformVertices[7], TransformVertices[5], TransformVertices[1], TransformVertices[3], mu::PackABGR(.4f, .4f, .4f, 1.f));
     EmitQuad(TransformVertices[0], TransformVertices[4], TransformVertices[6], TransformVertices[2], mu::PackABGR(.4f, .4f, .4f, 1.f));
-    mu::GetRenderer().RenderTriangles(verts, 0u);
+    mu::GetRenderer().RenderQuad3D(verts, 0u);
 }
 
 void RenderPlane3D(float Width, float Height, float Matrix[3][4])
@@ -831,15 +829,13 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    const mu::Vertex3D verts[6] = {
+    const mu::Vertex3D verts[4] = {
         {TransformVertices[0][0], TransformVertices[0][1], TransformVertices[0][2], 0.f, 0.f, 1.f, 0.f, 1.f, 0xFFFFFFFFu},
         {TransformVertices[1][0], TransformVertices[1][1], TransformVertices[1][2], 0.f, 0.f, 1.f, 1.f, 1.f, 0xFFFFFFFFu},
         {TransformVertices[2][0], TransformVertices[2][1], TransformVertices[2][2], 0.f, 0.f, 1.f, 1.f, 0.f, 0xFFFFFFFFu},
-        {TransformVertices[0][0], TransformVertices[0][1], TransformVertices[0][2], 0.f, 0.f, 1.f, 0.f, 1.f, 0xFFFFFFFFu},
-        {TransformVertices[2][0], TransformVertices[2][1], TransformVertices[2][2], 0.f, 0.f, 1.f, 1.f, 0.f, 0xFFFFFFFFu},
         {TransformVertices[3][0], TransformVertices[3][1], TransformVertices[3][2], 0.f, 0.f, 1.f, 0.f, 0.f, 0xFFFFFFFFu},
     };
-    mu::GetRenderer().RenderTriangles(verts, 0u);
+    mu::GetRenderer().RenderQuad3D(verts, 0u);
 }
 
 void BeginSprite()
@@ -919,15 +915,13 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
         }
     }
 
-    const mu::Vertex3D vertices[6] = {
+    const mu::Vertex3D vertices[4] = {
         {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, c[0][0], c[0][1], color},
         {p[1][0], p[1][1], p[1][2], 0.f, 0.f, 0.f, c[1][0], c[1][1], color},
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
-        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, c[0][0], c[0][1], color},
-        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, c[3][0], c[3][1], color},
     };
-    mu::GetRenderer().RenderTriangles(vertices, static_cast<std::uint32_t>(Texture));
+    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha)
@@ -953,15 +947,13 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     Vector(x + Width, y + Height, z, p[2]);
     Vector(x - Width, y + Height, z, p[3]);
 
-    const mu::Vertex3D vertices[6] = {
+    const mu::Vertex3D vertices[4] = {
         {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, UV[0][0], UV[0][1], mu::PackABGR(Light[0][0], Light[0][1], Light[0][2], Alpha)},
         {p[1][0], p[1][1], p[1][2], 0.f, 0.f, 0.f, UV[1][0], UV[1][1], mu::PackABGR(Light[1][0], Light[1][1], Light[1][2], Alpha)},
         {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
-        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, UV[0][0], UV[0][1], mu::PackABGR(Light[0][0], Light[0][1], Light[0][2], Alpha)},
-        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
         {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, UV[3][0], UV[3][1], mu::PackABGR(Light[3][0], Light[3][1], Light[3][2], Alpha)},
     };
-    mu::GetRenderer().RenderTriangles(vertices, static_cast<std::uint32_t>(Texture));
+    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)

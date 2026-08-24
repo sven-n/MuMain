@@ -9,6 +9,7 @@ class NoopRenderer final : public IMuRenderer
 public:
     void RenderQuad2D(std::span<const Vertex2D>, std::uint32_t) override {}
     void RenderTriangles(std::span<const Vertex3D>, std::uint32_t) override {}
+    void RenderQuad3D(std::span<const Vertex3D>, std::uint32_t) override {}
     void RenderQuadStrip(std::span<const Vertex3D>, std::uint32_t) override {}
     void SetBlendMode(BlendMode) override {}
     void DisableBlend() override {}

@@ -20,6 +20,7 @@ class MinimalRenderer final : public mu::IMuRenderer
 public:
     void RenderQuad2D(std::span<const mu::Vertex2D>, std::uint32_t) override {}
     void RenderTriangles(std::span<const mu::Vertex3D>, std::uint32_t) override {}
+    void RenderQuad3D(std::span<const mu::Vertex3D>, std::uint32_t) override {}
     void RenderQuadStrip(std::span<const mu::Vertex3D>, std::uint32_t) override {}
     void SetBlendMode(mu::BlendMode) override {}
     void DisableBlend() override {}

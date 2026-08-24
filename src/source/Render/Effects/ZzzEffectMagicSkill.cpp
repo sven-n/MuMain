@@ -73,10 +73,7 @@ void RenderCircle(int Type, vec3_t ObjectPosition, float ScaleBottom, float Scal
             quadVerts[i] = {Position[i][0], Position[i][1],      Position[i][2], 0.f, 0.f, 1.f,
                             UV[i][0],       UV[i][1] + TextureV, color};
         }
-        mu::Vertex3D triVerts[6] = {
-            quadVerts[0], quadVerts[1], quadVerts[2], quadVerts[0], quadVerts[2], quadVerts[3],
-        };
-        mu::GetRenderer().RenderTriangles(triVerts, 0);
+        mu::GetRenderer().RenderQuad3D(quadVerts, 0);
     }
 }
 

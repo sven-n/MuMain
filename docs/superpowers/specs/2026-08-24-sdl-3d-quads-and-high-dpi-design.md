@@ -27,6 +27,8 @@ Add `IMuRenderer::RenderQuad3D()` for independent world-space quads.
 - Vertex count must be divisible by four.
 - Each quad uses indices `(0,1,2), (0,2,3)`.
 - The SDL backend reuses the existing static quad index buffer.
+- Adjacent same-state world-space quad calls merge up to the static index
+  buffer's `k_MaxQuads` capacity, preserving existing hot-loop batching.
 - Rendering uses the existing 3D pipeline selection, current MVP, fog,
   texture resolution, blending, depth, and culling state.
 - Invalid vertex counts are rejected before upload.
@@ -99,7 +101,8 @@ executable metadata remain available through CMake substitutions.
 Use red-green-refactor for each behavior:
 
 1. Renderer contract and topology: verify `RenderQuad3D()` exists, is classified
-   as 3D, rejects malformed counts, and uses the static quad index pattern.
+   as 3D, rejects malformed counts, uses the static quad index pattern, and
+   merges adjacent draws without exceeding static index capacity.
 2. Aura lifecycle: verify Attack, Defense, and HelpNpc each keep the joint alive;
    no relevant buff expires it.
 3. SDL flags: verify high-pixel-density is always present and fullscreen and

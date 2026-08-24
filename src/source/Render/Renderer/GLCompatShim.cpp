@@ -109,9 +109,9 @@ void SubmitTriangles(const std::vector<ImmediateVertex>& vertices)
     mu::GetRenderer().RenderTriangles(s_renderVertices, s_texture2D ? s_boundTexture : 0u);
 }
 
-void SubmitQuadsAsTriangles()
+void SubmitQuads()
 {
-    s_renderVertices.resize((s_vertices.size() / 4) * 6);
+    s_renderVertices.resize((s_vertices.size() / 4) * 4);
     std::size_t output = 0;
     for (std::size_t i = 0; i + 3 < s_vertices.size(); i += 4)
     {
@@ -119,11 +119,9 @@ void SubmitQuadsAsTriangles()
         s_renderVertices[output++] = {quad[0].x, quad[0].y, quad[0].z, 0.f, 0.f, 1.f, quad[0].u, quad[0].v, quad[0].color};
         s_renderVertices[output++] = {quad[1].x, quad[1].y, quad[1].z, 0.f, 0.f, 1.f, quad[1].u, quad[1].v, quad[1].color};
         s_renderVertices[output++] = {quad[2].x, quad[2].y, quad[2].z, 0.f, 0.f, 1.f, quad[2].u, quad[2].v, quad[2].color};
-        s_renderVertices[output++] = {quad[0].x, quad[0].y, quad[0].z, 0.f, 0.f, 1.f, quad[0].u, quad[0].v, quad[0].color};
-        s_renderVertices[output++] = {quad[2].x, quad[2].y, quad[2].z, 0.f, 0.f, 1.f, quad[2].u, quad[2].v, quad[2].color};
         s_renderVertices[output++] = {quad[3].x, quad[3].y, quad[3].z, 0.f, 0.f, 1.f, quad[3].u, quad[3].v, quad[3].color};
     }
-    mu::GetRenderer().RenderTriangles(s_renderVertices, s_texture2D ? s_boundTexture : 0u);
+    mu::GetRenderer().RenderQuad3D(s_renderVertices, s_texture2D ? s_boundTexture : 0u);
 }
 
 void SubmitTriangleFan()
@@ -205,7 +203,7 @@ void mu_glEnd()
     switch (s_mode)
     {
     case kGLQuads:
-        SubmitQuadsAsTriangles();
+        SubmitQuads();
         break;
     case kGLTriangles:
         SubmitTriangles(s_vertices);

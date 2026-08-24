@@ -238,6 +238,7 @@ if (APPLE)
     MACOSX_BUNDLE_BUNDLE_NAME "MU Online"
     MACOSX_BUNDLE_GUI_IDENTIFIER "org.openmu.mumain"
     MACOSX_BUNDLE_ICON_FILE "MuMain.icns"
+    MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/source/App/Platform/macOS/Info.plist.in"
   )
 else()
   add_executable(Main

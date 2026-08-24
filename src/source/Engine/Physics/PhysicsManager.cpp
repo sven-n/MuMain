@@ -842,9 +842,10 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, u
         return {(*pvPos)[0], (*pvPos)[1], (*pvPos)[2], 0.f, 0.f, 1.f, u, v, vertexColor};
     };
 
-    int numQuads = (m_iNumHor - 1) * (m_iNumVer - 1);
-    std::vector<mu::Vertex3D> triVerts;
-    triVerts.reserve(numQuads * 6);
+    const int numQuads = (m_iNumHor - 1) * (m_iNumVer - 1);
+    static thread_local std::vector<mu::Vertex3D> quadVerts;
+    quadVerts.clear();
+    quadVerts.reserve(numQuads * 4);
 
     if (bFront)
     {
@@ -856,12 +857,10 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, u
                 mu::Vertex3D v1 = makeVert(i + 1, j);
                 mu::Vertex3D v2 = makeVert(i + 1, j + 1);
                 mu::Vertex3D v3 = makeVert(i, j + 1);
-                triVerts.push_back(v0);
-                triVerts.push_back(v1);
-                triVerts.push_back(v2);
-                triVerts.push_back(v0);
-                triVerts.push_back(v2);
-                triVerts.push_back(v3);
+                quadVerts.push_back(v0);
+                quadVerts.push_back(v1);
+                quadVerts.push_back(v2);
+                quadVerts.push_back(v3);
             }
         }
     }
@@ -875,17 +874,15 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, u
                 mu::Vertex3D v1 = makeVert(i, j + 1);
                 mu::Vertex3D v2 = makeVert(i + 1, j + 1);
                 mu::Vertex3D v3 = makeVert(i + 1, j);
-                triVerts.push_back(v0);
-                triVerts.push_back(v1);
-                triVerts.push_back(v2);
-                triVerts.push_back(v0);
-                triVerts.push_back(v2);
-                triVerts.push_back(v3);
+                quadVerts.push_back(v0);
+                quadVerts.push_back(v1);
+                quadVerts.push_back(v2);
+                quadVerts.push_back(v3);
             }
         }
     }
 
-    mu::GetRenderer().RenderTriangles(triVerts, 0);
+    mu::GetRenderer().RenderQuad3D(quadVerts, 0);
 }
 
 void CPhysicsCloth::RenderCollisions(void)

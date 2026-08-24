@@ -9,3 +9,15 @@ mu_add_test(
     LINK_LIBS
         SDL3::SDL3
 )
+
+mu_add_test(
+    NAME quad_topology_tests
+    SOURCES
+        test_quad_topology.cpp
+)
+
+mu_add_test(
+    NAME aura_joint_lifecycle_tests
+    SOURCES
+        test_aura_joint_lifecycle.cpp
+)

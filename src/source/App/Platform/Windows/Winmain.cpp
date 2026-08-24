@@ -39,6 +39,7 @@
 
 #include "Core/Platform/Imm.h"
 #include "Core/Platform/ServerPort.h"
+#include "Core/Platform/sdl3/SDLWindowFlags.h"
 #include "Core/Platform/BundledFonts.h"
 #include "Engine/Pathing/ZzzPath.h"
 #include "App/Platform/Windows/Local.h"
@@ -1824,9 +1825,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     SetWorkingDirectoryToBasePath();
 #endif
 
-    SDL_WindowFlags windowFlags = 0;
-    if (g_bUseWindowMode != TRUE)
-        windowFlags |= SDL_WINDOW_FULLSCREEN;
+    const SDL_WindowFlags windowFlags = Core::Platform::BuildSDLWindowFlags(g_bUseWindowMode != TRUE, false);
 
     g_sdlWindow =
         SDL_CreateWindow("MU Online", static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), windowFlags);

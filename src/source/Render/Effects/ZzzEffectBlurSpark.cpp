@@ -110,10 +110,10 @@ void RenderBlurSegment(const BlurType& blur, int segment, float firstLight, floa
                                        0.f, 0.f, 1.f, secondU, 0.f, secondColor};
     const mu::Vertex3D secondTop = {blur.P1[segment + 1][0], blur.P1[segment + 1][1], blur.P1[segment + 1][2],
                                     0.f, 0.f, 1.f, secondU, 1.f, secondColor};
-    const mu::Vertex3D triangles[6] = {
-        firstTop, firstBottom, secondBottom, firstTop, secondBottom, secondTop,
+    const mu::Vertex3D vertices[4] = {
+        firstTop, firstBottom, secondBottom, secondTop,
     };
-    mu::GetRenderer().RenderTriangles(triangles, 0u);
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
 void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float texCoord[4][2],
@@ -135,10 +135,7 @@ void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float
             mu::PackABGR(light[0] * vertex.light, light[1] * vertex.light, light[2] * vertex.light, 1.f),
         };
     }
-    const mu::Vertex3D triangles[6] = {
-        vertices[0], vertices[1], vertices[2], vertices[0], vertices[2], vertices[3],
-    };
-    mu::GetRenderer().RenderTriangles(triangles, 0u);
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
 } // namespace

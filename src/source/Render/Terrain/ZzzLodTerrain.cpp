@@ -1302,8 +1302,8 @@ void RenderFace(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
-    const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
-    mu::GetRenderer().RenderTriangles(tris, 0u);
+    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
 void RenderFace_After(int Texture, int mx, int my)
@@ -1326,8 +1326,8 @@ void RenderFace_After(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
-    const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
-    mu::GetRenderer().RenderTriangles(tris, 0u);
+    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
 void RenderFaceAlpha(int Texture, int mx, int my)
@@ -1344,8 +1344,8 @@ void RenderFaceAlpha(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], PrimaryTerrainLight[TerrainIndex2], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
-    mu::GetRenderer().RenderTriangles(tris, 0u);
+    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
     EnableDepthTest();
 }
 
@@ -1361,8 +1361,8 @@ void RenderFaceBlend(int Texture, int mx, int my)
     const mu::Vertex3D v1 = MakeVert(TerrainVertex[1], TerrainTextureCoord[1], TerrainMappingAlpha[TerrainIndex2]);
     const mu::Vertex3D v2 = MakeVert(TerrainVertex[2], TerrainTextureCoord[2], TerrainMappingAlpha[TerrainIndex3]);
     const mu::Vertex3D v3 = MakeVert(TerrainVertex[3], TerrainTextureCoord[3], TerrainMappingAlpha[TerrainIndex4]);
-    const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
-    mu::GetRenderer().RenderTriangles(tris, 0u);
+    const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
 
 void FaceTexture(int Texture, float xf, float yf, bool Water, bool Scale)
@@ -1545,8 +1545,8 @@ void RenderTerrainFace(float xf, float yf, int xi, int yi, float lodf)
                     MakeVert(TerrainVertex[2], TerrainTextureCoord[2], PrimaryTerrainLight[TerrainIndex3]);
                 const mu::Vertex3D v3 =
                     MakeVert(TerrainVertex[3], TerrainTextureCoord[3], PrimaryTerrainLight[TerrainIndex4]);
-                const mu::Vertex3D tris[6] = {v0, v1, v2, v0, v2, v3};
-                mu::GetRenderer().RenderTriangles(tris, 0u);
+                const mu::Vertex3D vertices[4] = {v0, v1, v2, v3};
+                mu::GetRenderer().RenderQuad3D(vertices, 0u);
 
                 if (gMapManager.IsPKField() || IsDoppelGanger2())
                     DisableAlphaBlend();
@@ -1631,10 +1631,7 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
                     vertices[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
                                    0.f, 0.f, 1.f, 0.f, 0.f, color};
                 }
-                const mu::Vertex3D triangles[6] = {
-                    vertices[0], vertices[1], vertices[2], vertices[0], vertices[2], vertices[3],
-                };
-                mu::GetRenderer().RenderTriangles(triangles, 0u);
+                mu::GetRenderer().RenderQuad3D(vertices, 0u);
                 DisableAlphaBlend();
             }
         }
@@ -1701,10 +1698,7 @@ bool RenderTerrainTile(float xf, float yf, int xi, int yi, float lodf, int lodi,
                 vertices[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
                                0.f, 0.f, 1.f, 0.f, 0.f, debugColor};
             }
-            const mu::Vertex3D triangles[6] = {
-                vertices[0], vertices[1], vertices[2], vertices[0], vertices[2], vertices[3],
-            };
-            mu::GetRenderer().RenderTriangles(triangles, 0u);
+            mu::GetRenderer().RenderQuad3D(vertices, 0u);
 
             DisableAlphaBlend();
         }
@@ -1778,8 +1772,7 @@ void RenderTerrainBitmapTile(int Texture, float xf, float yf, float lodf, int lo
         verts[i] = {TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2],
                     0.f, 0.f, 1.f, c[i][0], c[i][1], color};
     }
-    const mu::Vertex3D tris[6] = {verts[0], verts[1], verts[2], verts[0], verts[2], verts[3]};
-    mu::GetRenderer().RenderTriangles(tris, static_cast<std::uint32_t>(Texture));
+    mu::GetRenderer().RenderQuad3D(verts, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderTerrainBitmap(int Texture, int mxi, int myi, float Rotation)

@@ -533,7 +533,7 @@ void CCameraMove::RenderWayPoint()
 
     static thread_local std::vector<mu::Vertex3D> vertices;
     vertices.clear();
-    vertices.reserve(m_listWayPoint.size() * 6);
+    vertices.reserve(m_listWayPoint.size() * 4);
     constexpr std::uint32_t waypointColor = 0xCC0000FFu;
     for (const auto& waypoint : m_listWayPoint)
     {
@@ -546,9 +546,9 @@ void CCameraMove::RenderWayPoint()
         const mu::Vertex3D v1 = {maxX, minY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
         const mu::Vertex3D v2 = {maxX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
         const mu::Vertex3D v3 = {minX, maxY, z, 0.f, 0.f, 1.f, 0.f, 0.f, waypointColor};
-        vertices.insert(vertices.end(), {v0, v1, v2, v0, v2, v3});
+        vertices.insert(vertices.end(), {v0, v1, v2, v3});
     }
-    mu::GetRenderer().RenderTriangles(vertices, 0u);
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 
     vertices.clear();
     if (m_listWayPoint.size() >= 2)

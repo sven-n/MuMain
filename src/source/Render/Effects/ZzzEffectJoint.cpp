@@ -15,6 +15,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Effects/AuraJointLifecycle.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -4424,7 +4425,10 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->SubType == 4 || o->SubType == 9)
             {
-                if (g_isCharacterBuff(o->Target, eBuff_Defense) || g_isCharacterBuff(o->Target, eBuff_HelpNpc))
+                const bool hasAttack = g_isCharacterBuff(o->Target, eBuff_Attack);
+                const bool hasDefense = g_isCharacterBuff(o->Target, eBuff_Defense);
+                const bool hasHelpNpc = g_isCharacterBuff(o->Target, eBuff_HelpNpc);
+                if (Render::Effects::ShouldKeepAuraJointAlive(hasAttack, hasDefense, hasHelpNpc))
                 {
                     o->LifeTime = 100;
                 }
@@ -7125,7 +7129,7 @@ void RenderJoints(BYTE bRenderOneMore)
                         {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
                         {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
                     };
-                    mu::GetRenderer().RenderQuadStrip(forceVerts, static_cast<std::uint32_t>(o->TexType));
+                    mu::GetRenderer().RenderQuad3D(forceVerts, static_cast<std::uint32_t>(o->TexType));
                 }
                 else
                 {
@@ -7276,7 +7280,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
                             {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
                         };
-                        mu::GetRenderer().RenderQuadStrip(guildFace1, static_cast<std::uint32_t>(o->TexType));
+                        mu::GetRenderer().RenderQuad3D(guildFace1, static_cast<std::uint32_t>(o->TexType));
 
                         const mu::Vertex3D guildFace2[4] = {
                             {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
@@ -7286,7 +7290,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
                             {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
                         };
-                        mu::GetRenderer().RenderQuadStrip(guildFace2, static_cast<std::uint32_t>(o->TexType));
+                        mu::GetRenderer().RenderQuad3D(guildFace2, static_cast<std::uint32_t>(o->TexType));
 
                         mu::GetRenderer().PopMatrix();
                         continue;
@@ -7316,7 +7320,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
                             {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
                         };
-                        mu::GetRenderer().RenderQuadStrip(faceOneVerts, static_cast<std::uint32_t>(o->TexType));
+                        mu::GetRenderer().RenderQuad3D(faceOneVerts, static_cast<std::uint32_t>(o->TexType));
                     }
 
                     if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
@@ -7332,7 +7336,7 @@ void RenderJoints(BYTE bRenderOneMore)
                             {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
                             {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
                         };
-                        mu::GetRenderer().RenderQuadStrip(faceTwoVerts, static_cast<std::uint32_t>(o->TexType));
+                        mu::GetRenderer().RenderQuad3D(faceTwoVerts, static_cast<std::uint32_t>(o->TexType));
                     }
                 }
             }

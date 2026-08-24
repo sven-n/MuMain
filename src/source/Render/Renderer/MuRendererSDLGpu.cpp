@@ -32,6 +32,7 @@
 #endif
 
 #include "MuRenderer.h"
+#include "QuadTopology.h"
 #include "SdlGpuPixelFormat.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
@@ -190,40 +191,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
         return SDL_GPU_SHADERFORMAT_MSL;
     }
     return SDL_GPU_SHADERFORMAT_SPIRV;
-}
-
-// ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-8): GetPipelineSetFor
-// Returns which pipeline set should be used for a given draw mode.
-// RenderQuad2D → Pipelines2D; RenderTriangles/RenderQuadStrip → Pipelines3D
-// Exposed for test linkage (test_shaderprograms.cpp).
-// ---------------------------------------------------------------------------
-enum class PipelineSet
-{
-    Pipelines2D,
-    Pipelines3D
-};
-
-enum class DrawMode
-{
-    Quad2D,
-    Triangles,
-    QuadStrip
-};
-
-PipelineSet GetPipelineSetFor(DrawMode mode)
-{
-    switch (mode)
-    {
-    case DrawMode::Quad2D:
-        return PipelineSet::Pipelines2D;
-    case DrawMode::Triangles:
-    case DrawMode::QuadStrip:
-        return PipelineSet::Pipelines3D;
-    default:
-        mu::log::Get("render")->warn("GetPipelineSetFor -- unknown DrawMode {}", static_cast<int>(mode));
-        return PipelineSet::Pipelines3D;
-    }
 }
 
 // ---------------------------------------------------------------------------
@@ -541,7 +508,7 @@ enum class RenderCmdType : uint8_t
     SetScissor,    // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
     DrawTriangles, // non-indexed 3D (Vertex3D)
     DrawSkinnedTriangles,
-    DrawIndexedQuads2D, // indexed 2D with static quad index buffer (Vertex2D)
+    DrawIndexedQuads, // indexed 2D or 3D with static quad index buffer
     DrawIndexedStrip,   // indexed 3D with per-frame strip indices (Vertex3D)
     DrawTriangles2D,    // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
 };
@@ -571,17 +538,21 @@ struct RenderCmd
 static std::vector<RenderCmd> s_renderCmds;
 static constexpr std::size_t kNoTriangleCommand = std::numeric_limits<std::size_t>::max();
 static std::size_t s_lastTriangleCommand = kNoTriangleCommand;
+static constexpr std::size_t kNoQuadCommand = std::numeric_limits<std::size_t>::max();
+static std::size_t s_lastQuadCommand = kNoQuadCommand;
 
 [[nodiscard]] static bool IsDrawCommand(RenderCmdType type)
 {
     return type != RenderCmdType::SetViewport && type != RenderCmdType::SetScissor;
 }
 
-[[nodiscard]] static FrameProfiler::Counter ClassifyBatchBreak(const RenderCmd& command)
+[[nodiscard]] static FrameProfiler::Counter ClassifyBatchBreak(const RenderCmd& command,
+                                                               std::size_t previousCommand,
+                                                               bool geometryCanMerge)
 {
     using Counter = FrameProfiler::Counter;
 
-    const RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
+    const RenderCmd& previous = s_renderCmds[previousCommand];
     if (previous.texture != command.texture || previous.sampler != command.sampler)
     {
         return Counter::BatchBreakTexture;
@@ -609,19 +580,18 @@ static std::size_t s_lastTriangleCommand = kNoTriangleCommand;
         return Counter::BatchBreakUniform;
     }
 
-    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
-    if (previousEnd != command.vtxOffset)
+    if (!geometryCanMerge)
     {
         return Counter::BatchBreakDraw;
     }
-    for (std::size_t index = s_lastTriangleCommand + 1; index < s_renderCmds.size(); ++index)
+    for (std::size_t index = previousCommand + 1; index < s_renderCmds.size(); ++index)
     {
         if (IsDrawCommand(s_renderCmds[index].type))
         {
             return Counter::BatchBreakDraw;
         }
     }
-    if (s_lastTriangleCommand + 1 != s_renderCmds.size())
+    if (previousCommand + 1 != s_renderCmds.size())
     {
         return Counter::BatchBreakOther;
     }
@@ -635,15 +605,39 @@ static std::size_t s_lastTriangleCommand = kNoTriangleCommand;
         return false;
     }
 
-    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command);
+    const RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
+    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
+    const FrameProfiler::Counter breakCause =
+        ClassifyBatchBreak(command, s_lastTriangleCommand, previousEnd == command.vtxOffset);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
         FrameProfiler::Count(breakCause);
         return false;
     }
 
-    RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
-    previous.vtxCount += command.vtxCount;
+    s_renderCmds[s_lastTriangleCommand].vtxCount += command.vtxCount;
+    return true;
+}
+
+[[nodiscard]] static bool MergeAdjacentQuadCommand(const RenderCmd& command)
+{
+    if (s_lastQuadCommand == kNoQuadCommand)
+    {
+        return false;
+    }
+
+    const RenderCmd& previous = s_renderCmds[s_lastQuadCommand];
+    const bool geometryCanMerge = Render::Topology::CanMergeQuadDraws(
+        previous.vtxOffset, previous.idxCount, command.vtxOffset, command.idxCount, sizeof(Vertex3D), k_MaxQuads);
+    const FrameProfiler::Counter breakCause =
+        ClassifyBatchBreak(command, s_lastQuadCommand, geometryCanMerge);
+    if (breakCause != FrameProfiler::Counter::Count_)
+    {
+        FrameProfiler::Count(breakCause);
+        return false;
+    }
+
+    s_renderCmds[s_lastQuadCommand].idxCount += command.idxCount;
     return true;
 }
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
@@ -1413,6 +1407,7 @@ public:
         s_vtxOffset = 0u;
         s_renderCmds.clear();
         s_lastTriangleCommand = kNoTriangleCommand;
+        s_lastQuadCommand = kNoQuadCommand;
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -1820,7 +1815,7 @@ public:
                         break;
                     }
 
-                    case RenderCmdType::DrawIndexedQuads2D:
+                    case RenderCmdType::DrawIndexedQuads:
                     {
                         // Guard against dangling sampler/texture — scene transitions may
                         // unload assets mid-frame before EndFrame replays deferred commands.
@@ -2262,8 +2257,7 @@ public:
             perpY *= scale;
             perpZ *= scale;
 
-            // Two triangles forming a thin quad: (A+p, A-p, B-p) and (A+p, B-p, B+p)
-            Vertex3D verts[6];
+            Vertex3D verts[4];
             verts[0] = a;
             verts[0].x += perpX;
             verts[0].y += perpY;
@@ -2276,21 +2270,12 @@ public:
             verts[2].x -= perpX;
             verts[2].y -= perpY;
             verts[2].z -= perpZ;
-
-            verts[3] = a;
+            verts[3] = b;
             verts[3].x += perpX;
             verts[3].y += perpY;
             verts[3].z += perpZ;
-            verts[4] = b;
-            verts[4].x -= perpX;
-            verts[4].y -= perpY;
-            verts[4].z -= perpZ;
-            verts[5] = b;
-            verts[5].x += perpX;
-            verts[5].y += perpY;
-            verts[5].z += perpZ;
 
-            RenderTriangles(std::span<const Vertex3D>(verts, 6), textureId);
+            RenderQuad3D(verts, textureId);
         }
     }
 
@@ -2602,7 +2587,7 @@ public:
             return;
         }
 
-        if (vertices.size() % 4 != 0)
+        if (!Render::Topology::IsValidQuadVertexCount(vertices.size()))
         {
             mu::log::Get("render")->warn("SDL_gpu::RenderQuad2D -- vertex count {} not divisible by 4",
                                          vertices.size());
@@ -2632,7 +2617,7 @@ public:
         // geometry regardless of depth buffer state. The 3D pass fills the depth buffer
         // with near values (characters close to camera) that would occlude 2D UI.
         const int pipelineIdx = GetActivePipelineIndex();
-        SDL_GPUGraphicsPipeline* pipeline = s_pipelines2DDepthOff[pipelineIdx];
+        SDL_GPUGraphicsPipeline* pipeline = GetActiveQuadPipeline(Render::Topology::QuadSpace::Screen);
         if (!pipeline)
         {
             if (!s_dbgNullPipelineWarned)
@@ -2658,7 +2643,7 @@ public:
 
         // Record deferred draw command — replayed in EndFrame after vertex data is on the GPU.
         RenderCmd cmd{};
-        cmd.type = RenderCmdType::DrawIndexedQuads2D;
+        cmd.type = RenderCmdType::DrawIndexedQuads;
         cmd.pipeline = pipeline;
         cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
         cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
@@ -2717,12 +2702,7 @@ public:
 
         // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
-        SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled
-                ? (m_depthMaskEnabled
-                       ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx])
-                       : s_pipelines3DDepthReadOnly[pipelineIdx])
-                : s_pipelines3DDepthOff[pipelineIdx];
+        SDL_GPUGraphicsPipeline* pipeline = GetActive3DPipeline();
         if (!pipeline)
         {
             if (!s_dbgNullPipelineWarned)
@@ -2763,6 +2743,100 @@ public:
         {
             s_renderCmds.push_back(cmd);
             s_lastTriangleCommand = s_renderCmds.size() - 1;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
+
+        ++s_dbgDrawCallsThisFrame;
+        s_dbgVtxBytesThisFrame += byteSize;
+        FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
+    }
+
+    // -----------------------------------------------------------------------
+    // RenderQuad3D: Render independent world-space quads in perimeter order.
+    // -----------------------------------------------------------------------
+    void RenderQuad3D(std::span<const Vertex3D> vertices, std::uint32_t textureId) override
+    {
+        if (vertices.empty() || !s_frameActive || !m_colorWriteEnabled || m_stencilTestEnabled)
+        {
+            return;
+        }
+
+        if (!Render::Topology::IsValidQuadVertexCount(vertices.size()))
+        {
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuad3D -- vertex count {} not divisible by 4",
+                                         vertices.size());
+            return;
+        }
+
+        const std::uint32_t resolvedTexId = ResolveTextureId(textureId);
+        void* pTex = LookupTextureForDraw(resolvedTexId);
+        if (!pTex)
+        {
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuad3D -- unknown textureId {}, skipping", textureId);
+            return;
+        }
+        if (resolvedTexId == 0u)
+            ++s_dbgWhiteTextureDrawsThisFrame;
+        else
+            ++s_dbgRealTextureDrawsThisFrame;
+
+        const Uint32 numQuads = static_cast<Uint32>(vertices.size() / 4);
+        if (numQuads > static_cast<Uint32>(k_MaxQuads))
+        {
+            mu::log::Get("render")->warn("SDL_gpu::RenderQuad3D -- numQuads {} exceeds k_MaxQuads {}; clamping draw",
+                                         numQuads, k_MaxQuads);
+        }
+        const Uint32 drawQuads =
+            (numQuads <= static_cast<Uint32>(k_MaxQuads)) ? numQuads : static_cast<Uint32>(k_MaxQuads);
+        const Uint32 byteSize = drawQuads * 4u * static_cast<Uint32>(sizeof(Vertex3D));
+        const Uint32 vtxOffset = UploadVertices(vertices.data(), byteSize);
+        if (vtxOffset == ~0u)
+        {
+            return;
+        }
+
+        const int pipelineIdx = GetActivePipelineIndex();
+        SDL_GPUGraphicsPipeline* pipeline = GetActiveQuadPipeline(Render::Topology::QuadSpace::World);
+        if (!pipeline)
+        {
+            if (!s_dbgNullPipelineWarned)
+            {
+                SDL_Log("[RENDER diag] WARNING: RenderQuad3D pipeline is null (idx=%d depth=%d)", pipelineIdx,
+                        m_depthTestEnabled ? 1 : 0);
+                s_dbgNullPipelineWarned = true;
+            }
+            return;
+        }
+
+        void* pSampler = LookupSampler(resolvedTexId);
+
+        RenderCmd cmd{};
+        cmd.type = RenderCmdType::DrawIndexedQuads;
+        cmd.pipeline = pipeline;
+        cmd.texture = static_cast<SDL_GPUTexture*>(pTex);
+        cmd.sampler = pSampler ? static_cast<SDL_GPUSampler*>(pSampler) : s_defaultSampler;
+        cmd.vtxOffset = vtxOffset;
+        cmd.idxCount = drawQuads * 6u;
+        cmd.vu.mvp = m_mvpMatrix;
+        cmd.vu.fogStart = m_fogUniform.fogStart;
+        cmd.vu.fogEnd = m_fogUniform.fogEnd;
+        cmd.fogUniform = m_fogUniform;
+        cmd.blendMode = m_activeBlendMode;
+        cmd.blendEnabled = m_blendEnabled;
+        cmd.depthTestEnabled = m_depthTestEnabled;
+        cmd.depthMaskEnabled = m_depthMaskEnabled;
+        cmd.cullFaceEnabled = m_cullFaceEnabled;
+        FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
+        if (MergeAdjacentQuadCommand(cmd))
+        {
+            ++s_dbgMergedDrawsThisFrame;
+            FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
+        }
+        else
+        {
+            s_renderCmds.push_back(cmd);
+            s_lastQuadCommand = s_renderCmds.size() - 1;
             FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
             FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
         }
@@ -2896,13 +2970,7 @@ public:
         const Uint32 numIndices = numQuads * 6;
 
         // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
-        const int pipelineIdx = GetActivePipelineIndex();
-        SDL_GPUGraphicsPipeline* pipeline =
-            m_depthTestEnabled
-                ? (m_depthMaskEnabled
-                       ? (m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx])
-                       : s_pipelines3DDepthReadOnly[pipelineIdx])
-                : s_pipelines3DDepthOff[pipelineIdx];
+        SDL_GPUGraphicsPipeline* pipeline = GetActive3DPipeline();
         if (!pipeline)
         {
             return;
@@ -3226,6 +3294,29 @@ private:
             return k_PipelineDisabled;
         }
         return static_cast<int>(m_activeBlendMode);
+    }
+
+    [[nodiscard]] SDL_GPUGraphicsPipeline* GetActive3DPipeline() const
+    {
+        const int pipelineIdx = GetActivePipelineIndex();
+        if (!m_depthTestEnabled)
+        {
+            return s_pipelines3DDepthOff[pipelineIdx];
+        }
+        if (!m_depthMaskEnabled)
+        {
+            return s_pipelines3DDepthReadOnly[pipelineIdx];
+        }
+        return m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx];
+    }
+
+    [[nodiscard]] SDL_GPUGraphicsPipeline* GetActiveQuadPipeline(Render::Topology::QuadSpace space) const
+    {
+        if (Render::Topology::Uses3DPipeline(space))
+        {
+            return GetActive3DPipeline();
+        }
+        return s_pipelines2DDepthOff[GetActivePipelineIndex()];
     }
 
     // -----------------------------------------------------------------------
@@ -4039,21 +4130,8 @@ private:
 
     [[nodiscard]] static bool CreateQuadIndexBuffer()
     {
-        // Pre-generate indices for up to k_MaxQuads quads.
-        // Pattern per quad i: [4i+0, 4i+1, 4i+2, 4i+0, 4i+2, 4i+3]
-        // Winding: TL(0), BL(1), BR(2), TR(3) — CCW in screen-space Y-down.
-        std::vector<Uint16> indices;
-        indices.reserve(static_cast<size_t>(k_MaxQuads) * 6);
-
-        for (int i = 0; i < k_MaxQuads; ++i)
-        {
-            indices.push_back(static_cast<Uint16>(i * 4 + 0));
-            indices.push_back(static_cast<Uint16>(i * 4 + 1));
-            indices.push_back(static_cast<Uint16>(i * 4 + 2));
-            indices.push_back(static_cast<Uint16>(i * 4 + 0));
-            indices.push_back(static_cast<Uint16>(i * 4 + 2));
-            indices.push_back(static_cast<Uint16>(i * 4 + 3));
-        }
+        std::vector<Uint16> indices(static_cast<std::size_t>(k_MaxQuads) * 6);
+        Render::Topology::FillQuadIndices(indices);
 
         const Uint32 idxByteSize = static_cast<Uint32>(indices.size() * sizeof(Uint16));
 

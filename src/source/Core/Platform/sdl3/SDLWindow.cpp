@@ -1,5 +1,6 @@
 
 #include "SDLWindow.h"
+#include "SDLWindowFlags.h"
 #include "../IPlatformWindow.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include <SDL3/SDL.h>
@@ -19,11 +20,8 @@ bool SDLWindow::Create(const char* title, int width, int height, uint32_t flags)
         return false;
     }
 
-    SDL_WindowFlags sdlFlags = SDL_WINDOW_RESIZABLE;
-    if (flags & MU_WINDOW_FULLSCREEN)
-    {
-        sdlFlags |= SDL_WINDOW_FULLSCREEN;
-    }
+    const SDL_WindowFlags sdlFlags =
+        Core::Platform::BuildSDLWindowFlags((flags & MU_WINDOW_FULLSCREEN) != 0, true);
 
     m_pWindow = SDL_CreateWindow(title, width, height, sdlFlags);
     if (m_pWindow == nullptr)

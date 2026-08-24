@@ -184,6 +184,9 @@ Render::Topology::FillQuadIndices(indices);
 Mirror `RenderTriangles()` state resolution, but reject malformed quad counts,
 use the 3D pipeline, record `DrawIndexedQuads`, set the current MVP and fog, and
 draw `min(vertices.size() / 4, k_MaxQuads) * 6` indices from `s_quadIdxBuf`.
+Merge adjacent same-state, contiguous world-space quad commands while their
+combined index count remains within `k_MaxQuads`; start a new command at the
+capacity boundary.
 
 Rename `RenderCmdType::DrawIndexedQuads2D` to `DrawIndexedQuads`; both
 `RenderQuad2D()` and `RenderQuad3D()` record it. Add `DrawMode::Quad3D` to the
