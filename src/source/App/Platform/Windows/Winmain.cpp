@@ -1451,10 +1451,10 @@ struct FontSizes
 
 FontSizes CalculateFontSizes()
 {
-    FontHeight = static_cast<int>(
+    const int uiFontHeight = static_cast<int>(
         std::ceil(BASE_FONT_HEIGHT + (WindowHeight - REFERENCE_HEIGHT) * FONT_HEIGHT_GROWTH_PER_PIXEL));
     int fixFontHeight = (WindowHeight <= SMALL_WINDOW_HEIGHT_THRESHOLD) ? FIX_FONT_HEIGHT_SMALL : FIX_FONT_HEIGHT_LARGE;
-    return {FontHeight - 1, fixFontHeight - 1};
+    return {uiFontHeight - 1, fixFontHeight - 1};
 }
 
 #ifdef _WIN32
@@ -1521,7 +1521,7 @@ void CreateNewFonts(FontSizes sizes)
 
 void ReinitializeTextRenderer()
 {
-    // Recreates the font buffer bitmap with new g_fScreenRate values
+    // Recreates SDL_ttf font resources with the new screen rates.
     g_pRenderText->Release();
     g_pRenderText->Create(g_hDC);
     g_pRenderText->SetFont(g_hFont);

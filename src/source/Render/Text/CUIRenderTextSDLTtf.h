@@ -17,8 +17,6 @@ public:
     bool Create(HDC hDC) override;
     void Release() override;
 
-    HDC GetFontDC() const override;
-    BYTE* GetFontBuffer() const override;
     DWORD GetTextColor() const override;
     DWORD GetBgColor() const override;
 

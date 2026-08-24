@@ -27,7 +27,6 @@ using namespace SEASON3B;
 
 namespace
 {
-constexpr int GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME = 32;
 
 // Draws a segmented monster HP bar, horizontally centered on centerX with its
 // top edge at topY. `steps` is the segment count (HP granularity); `scale`
@@ -236,8 +235,6 @@ void SEASON3B::CNewUINameWindow::RenderName()
 
     if (m_bShowItemName || SEASON3B::IsRepeat(VK_MENU))
     {
-        SetGroundItemLabelBuildBudget(GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME);
-
 #ifdef _EDITOR
         bool renderLabels = DevEditor_ShouldRenderItemLabels();
 #else

@@ -142,8 +142,6 @@ int   TargetType;
 int TargetX;
 int TargetY;
 float TargetAngle;
-int   FontHeight;
-
 OBJECT* TradeNpc = NULL;
 
 bool  DontMove = false;
@@ -332,16 +330,15 @@ extern int  AlphaBlendType;
 
 void RenderTipText(int sx, int sy, const wchar_t* Text)
 {
-    SIZE TextSize = { 0, 0 };
     g_pRenderText->SetFont(g_hFont);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &TextSize);
+    const SIZE TextSize = g_pRenderText->MeasureText(Text, lstrlen(Text));
 
     int BackupAlphaBlendType = AlphaBlendType;
     EnableAlphaTest();
     constexpr unsigned int borderColor = 0xFF000000u;
     constexpr unsigned int backgroundColor = 0xCC000000u;
-    const float textWidth = static_cast<float>(TextSize.cx) / g_fScreenRate_x;
-    const float textHeight = static_cast<float>(TextSize.cy) / g_fScreenRate_y;
+    const float textWidth = static_cast<float>(TextSize.cx);
+    const float textHeight = static_cast<float>(TextSize.cy);
     RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) - 3, textWidth + 4, 1.f, borderColor);
     RenderColorQuadARGB(static_cast<float>(sx) - 2, static_cast<float>(sy) - 3, 1.f, textHeight + 4, borderColor);
     RenderColorQuadARGB(static_cast<float>(sx) + textWidth + 1, static_cast<float>(sy) - 3, 1.f, textHeight + 4, borderColor);

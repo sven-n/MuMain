@@ -655,9 +655,9 @@ static std::vector<Uint16> s_stripIdxScratch;
 
 // ---------------------------------------------------------------------------
 // Deferred texture updates.
-// Queued during the frame when CPU-side BITMAP_t.Buffer changes (e.g., GDI
-// text rendering to BITMAP_FONT). Processed in EndFrame's copy pass before
-// the render pass, so draw commands see the updated texture data.
+// Queued during the frame when CPU-side BITMAP_t.Buffer changes. Processed in
+// EndFrame's copy pass before the render pass, so draw commands see the updated
+// texture data.
 // ---------------------------------------------------------------------------
 struct TextureUpdateCmd
 {
@@ -1645,7 +1645,7 @@ public:
                     SDL_UploadToGPUBuffer(copyPass, &idxSrc, &idxDst, false);
                 }
 
-                // Upload queued texture updates (GDI text bitmap → GPU texture).
+                // Upload queued dynamic texture updates.
                 for (const auto& pu : preparedTexUploads)
                 {
                     SDL_GPUTextureTransferInfo texSrc{};
@@ -2425,8 +2425,6 @@ public:
 
     // -----------------------------------------------------------------------
     // QueueTextureUpdate: Queue a CPU→GPU texture upload for the next EndFrame copy pass.
-    // Used by CUIRenderTextOriginal::UploadText and CUITextInputBox::Render to update
-    // the BITMAP_FONT GPU texture after GDI text rasterization modifies the CPU buffer.
     // -----------------------------------------------------------------------
     void QueueTextureUpdate(std::uint32_t textureId, const void* pixels, std::uint32_t width,
                             std::uint32_t height) override

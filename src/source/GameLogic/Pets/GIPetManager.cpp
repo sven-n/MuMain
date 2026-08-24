@@ -366,9 +366,9 @@ static std::uint8_t g_tabBar = 0;
             case PET_CMD_TARGET: mu_swprintf(TextList[TextNum], I18N::Game::AttackTheMonsterSelectedByTheCharacter); TextNum++; SkipNum++; break;
             }
 
-            SIZE TextSize = { 0, 0 };
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-            int Height = (int)(((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) / g_fScreenRate_y);
+            g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+            const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
+            int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
             sy -= Height;
 
             RenderTipTextList(sx, sy, TextNum, 0);
@@ -758,9 +758,9 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_BLUE, false, false, I18N::Game::IncreaseDPossibleAttackDistance, 2);
         }
 
-        SIZE TextSize = { 0, 0 };
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-        int Height = static_cast<int>(((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) / g_fScreenRate_y);
+        g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+        const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
+        int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
         if (sy - Height >= 0)
         {
             sy -= Height;

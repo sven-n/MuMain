@@ -45,12 +45,10 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
     m_iWidth = iWidth;
     m_iHeight = iHeight;
 
-    SIZE Fontsize;
     g_pRenderText->SetFont(g_hFont);
 
     std::wstring strTemp = L"A";
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &Fontsize);
+    const SIZE Fontsize = g_pRenderText->MeasureText(strTemp.c_str(), static_cast<int>(strTemp.size()));
 
     m_iTextHeight = Fontsize.cy;
     m_iTextLineHeight = m_iTextHeight + iLINE_INTERVAL;

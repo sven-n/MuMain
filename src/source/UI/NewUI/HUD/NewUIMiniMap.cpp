@@ -324,13 +324,10 @@ bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx, int my)
         {
             if (mx > m_Btn_Loc[i][0] && mx < (m_Btn_Loc[i][0] + m_Btn_Loc[i][2]) && my > m_Btn_Loc[i][1] && my < (m_Btn_Loc[i][1] + m_Btn_Loc[i][3]))
             {
-                SIZE Fontsize;
                 m_TooltipText = (std::wstring)m_Mini_Map_Data[i].Name;
                 g_pRenderText->SetFont(g_hFont);
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-
-                Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
-                Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
+                const SIZE Fontsize = g_pRenderText->MeasureText(
+                    m_TooltipText.c_str(), static_cast<int>(m_TooltipText.size()));
 
                 int x = m_Btn_Loc[i][0] + ((m_Btn_Loc[i][2] / 2) - (Fontsize.cx / 2));
                 int y = m_Btn_Loc[i][1] + m_Btn_Loc[i][3] + 2;

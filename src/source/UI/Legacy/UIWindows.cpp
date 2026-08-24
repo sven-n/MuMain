@@ -2540,9 +2540,8 @@ void CUIPhotoViewer::Render()
             mu_swprintf(TextList[TextNum], I18N::Game::WheelButtonZoomInOut); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::LeftClickRotation); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::RightClickDefault); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            SIZE TextSize;
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
-            TextSize.cy /= g_fScreenRate_y;
+            g_pRenderText->SetFont(g_hFont);
+            const SIZE TextSize = g_pRenderText->MeasureText(L"Z", 1);
             RenderTipTextList(m_iPos_x + m_iWidth / 2, m_iPos_y + m_iHeight - TextNum * (TextSize.cy + 2), TextNum, 0, RT3_SORT_LEFT);
         }
     }
@@ -2550,10 +2549,8 @@ void CUIPhotoViewer::Render()
 
 void CUILetterWriteWindow::InitControls()
 {
-    SIZE size;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
-
-    size.cx = (size.cx / g_fScreenRate_x) + 0.5f;
+    g_pRenderText->SetFont(g_hFont);
+    const SIZE size = g_pRenderText->MeasureText(I18N::Game::Receiver, wcslen(I18N::Game::Receiver));
 
     m_MailtoInputBox.Init(g_hWnd, 238, 14, 50);
     m_MailtoInputBox.SetParentUIID(m_dwUIID);
@@ -2711,12 +2708,11 @@ void CUILetterWriteWindow::RenderSub()
     RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth(), 1.0f);
     EndRenderColor();
 
-    SIZE size;
-
+    g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
+    const SIZE size = g_pRenderText->MeasureText(I18N::Game::Receiver, wcslen(I18N::Game::Receiver));
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx, 0, RT3_SORT_RIGHT);
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title, size.cx, 0, RT3_SORT_RIGHT);
 
     m_MailtoInputBox.Render();
     m_TitleInputBox.Render();
@@ -4752,6 +4748,7 @@ void CUIFriendWindow::RenderSub()
 
     SIZE TextSize;
     int TextLen;
+    g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
 
     if (m_FriendListWnd.GetTitle() != NULL)
@@ -4767,9 +4764,9 @@ void CUIFriendWindow::RenderSub()
 
         TextLen = lstrlen(m_FriendListWnd.GetTitle());
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_FriendListWnd.GetTitle(), TextLen, &TextSize);
-        g_pRenderText->RenderText(RPos_x(0) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-            RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_FriendListWnd.GetTitle());
+        TextSize = g_pRenderText->MeasureText(m_FriendListWnd.GetTitle(), TextLen);
+        g_pRenderText->RenderText(RPos_x(0) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_FriendListWnd.GetTitle());
     }
     if (m_LetterBoxWnd.GetTitle() != NULL)
     {
@@ -4783,8 +4780,9 @@ void CUIFriendWindow::RenderSub()
         }
         TextLen = lstrlen(m_LetterBoxWnd.GetTitle());
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_LetterBoxWnd.GetTitle(), TextLen, &TextSize);
-        g_pRenderText->RenderText(RPos_x(54) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
+        TextSize = g_pRenderText->MeasureText(m_LetterBoxWnd.GetTitle(), TextLen);
+        g_pRenderText->RenderText(RPos_x(54) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
     }
     if (m_ChatRoomListWnd.GetTitle() != NULL)
     {
@@ -4798,16 +4796,18 @@ void CUIFriendWindow::RenderSub()
         }
         TextLen = lstrlen(m_ChatRoomListWnd.GetTitle());
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_ChatRoomListWnd.GetTitle(), TextLen, &TextSize);
-        g_pRenderText->RenderText(RPos_x(107) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
+        TextSize = g_pRenderText->MeasureText(m_ChatRoomListWnd.GetTitle(), TextLen);
+        g_pRenderText->RenderText(RPos_x(107) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
     }
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat), &TextSize);
-    g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, I18N::Game::RefuseChat);
+    TextSize = g_pRenderText->MeasureText(I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat));
+    g_pRenderText->RenderText(RPos_x(0) + RWidth() - static_cast<float>(TextSize.cx) - 2,
+        RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, I18N::Game::RefuseChat);
 
-    float fCheckBoxPos_x = RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2 - 14;
-    float fCheckBoxPos_y = RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2;
+    float fCheckBoxPos_x = RPos_x(0) + RWidth() - static_cast<float>(TextSize.cx) - 2 - 14;
+    float fCheckBoxPos_y = RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2;
 
     RenderCheckBox(fCheckBoxPos_x - 1, fCheckBoxPos_y - 1, g_pWindowMgr->GetChatReject());
 }
@@ -4928,9 +4928,9 @@ void CUIFriendWindow::DoMouseActionSub()
     else
     {
         m_iTabMouseOverIndex = m_iTabIndex;
-        SIZE TextSize;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat), &TextSize);
+        g_pRenderText->SetFont(g_hFont);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat));
 
         if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
             RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
@@ -5448,10 +5448,8 @@ void CUIFriendMenu::RenderSub()
 {
     if (m_fLineHeight == 0)
     {
-        SIZE TextSize;
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"0", 1, &TextSize);
-
-        m_fLineHeight = TextSize.cy / g_fScreenRate_y;
+        g_pRenderText->SetFont(g_hFont);
+        m_fLineHeight = g_pRenderText->MeasureText(L"0", 1).cy;
     }
     m_fMenuAlpha += m_fMenuAlphaAdd;
     if (m_fMenuAlpha < 0.0f)

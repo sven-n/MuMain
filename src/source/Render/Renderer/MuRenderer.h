@@ -310,8 +310,7 @@ public:
     }
 
     // Queue a CPU→GPU texture update for the current frame's copy pass.
-    // Used by GDI text rendering (CUIRenderTextOriginal, CUITextInputBox) to upload
-    // modified BITMAP_t.Buffer to the GPU texture after WriteText modifies the CPU buffer.
+    // Used when dynamic BITMAP_t buffers, such as guild marks, change.
     // The implementation copies pixels before QueueTextureUpdate returns.
     virtual void QueueTextureUpdate(std::uint32_t textureId, const void* pixels, std::uint32_t width,
                                     std::uint32_t height)

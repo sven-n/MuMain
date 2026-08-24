@@ -69,13 +69,13 @@ DWORD CUIPopup::SetPopup(const wchar_t* pszText, int nLineCount, int nBufferSize
     Init();
     m_Align = Align;
     m_sizePopup.cy = 0;
-    SIZE sizeText;
+    g_pRenderText->SetFont(g_hFont);
     for (int i = 0; i < nLineCount; ++i)
     {
         if (pszText[i * nBufferSize])
         {
             wcscpy(m_szPopupText[i], &pszText[i * nBufferSize]);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &sizeText);
+            const SIZE sizeText = g_pRenderText->MeasureText(m_szPopupText[i], wcslen(m_szPopupText[i]));
             m_sizePopup.cy += sizeText.cy + 2;
         }
     }
@@ -489,10 +489,7 @@ void CUIPopup::Render()
         float fPosY = pt.y + 20;
         for (int i = 0; i < m_nPopupTextCount; ++i)
         {
-            SIZE size;
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_szPopupText[i], wcslen(m_szPopupText[i]), &size);
-
-            size.cx /= g_fScreenRate_x;
+            const SIZE size = g_pRenderText->MeasureText(m_szPopupText[i], wcslen(m_szPopupText[i]));
             g_pRenderText->RenderText(320 - (size.cx / 2), fPosY, m_szPopupText[i], 0, 0, RT3_SORT_LEFT);
             fPosY += 15;
         }

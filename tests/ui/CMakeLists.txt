@@ -40,6 +40,13 @@ add_test(
 )
 
 add_test(
+    NAME sdl_text_measurement_migration_contract
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_sdl_text_measurement_migration.cmake
+)
+
+add_test(
     NAME divide_string_delimiter_contract
     COMMAND ${CMAKE_COMMAND}
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}

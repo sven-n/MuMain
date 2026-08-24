@@ -356,21 +356,15 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
 void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor)
 {
     ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];
-    SIZE TextSize = { 0, 0 };
-
     int iLevel = pItem->Level;
     int iMaxDurability = CalcMaxDurability(pItem, pItemAtt, iLevel);
 
     wchar_t szText[256] = {};
     mu_swprintf(szText, L"%ls (%d/%d)", pItemAtt->Name, pItem->Durability, iMaxDurability);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), szText, 1, &TextSize);
-
     g_pRenderText->SetBgColor(0, 0, 0, 128);
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(dwTextColor);
-    int iTextlen = wcslen(szText);
-
-    int iTooltipWidth = (/*TextSize.cx*/7 * iTextlen) / g_fScreenRate_x;
+    const int iTooltipWidth = g_pRenderText->MeasureText(szText, static_cast<int>(wcslen(szText))).cx;
 
     if (iX + (iTooltipWidth / 2) > GetScreenWidth())
     {

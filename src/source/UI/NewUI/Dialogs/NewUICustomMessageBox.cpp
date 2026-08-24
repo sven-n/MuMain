@@ -17,6 +17,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "Core/Text/TextLineWrap.h"
 
 extern int DeleteIndex;
 extern int AppointStatus;
@@ -28,6 +29,29 @@ char AppointType;
 #define BATTLEMASTER	32
 
 using namespace SEASON3B;
+
+namespace
+{
+template <typename AppendLine>
+int AppendWrappedMessageLines(const std::wstring& text, BYTE fontType, int maxWidth, AppendLine appendLine)
+{
+    g_pRenderText->SetFont(fontType == MSGBOX_FONT_BOLD ? g_hFontBold : g_hFont);
+    auto lines = WrapTextToWidth(text, maxWidth, [](const wchar_t* line, size_t length)
+    {
+        return g_pRenderText->MeasureText(line, static_cast<int>(length)).cx;
+    });
+    if (lines.empty())
+    {
+        lines.emplace_back();
+    }
+
+    for (const auto& line : lines)
+    {
+        appendLine(line);
+    }
+    return static_cast<int>(lines.size());
+}
+} // namespace
 
 SEASON3B::CNewUITextInputMsgBox::CNewUITextInputMsgBox()
 {
@@ -209,78 +233,15 @@ void SEASON3B::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
 
 int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    
-
-    SIZE TextSize;
-    size_t TextExtentWidth;
-    int iLine = 0;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-    TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-    {
-        auto* pMsg = new MSGBOX_TEXTDATA;
-        pMsg->strMsg = strMsg;
-        pMsg->dwColor = dwColor;
-        pMsg->byFontType = byFontType;
-        m_MsgTextList.push_back(pMsg);
-
-        iLine = 1;
-        return iLine;
-    }
-
-    type_string strCutText, strRemainText;
-    strRemainText = strMsg;
-
-    bool bLoop = true;
-    while (bLoop)
-    {
-        int prev_offset = 0;
-        for (int cur_offset = 0; cur_offset < (int)strRemainText.size(); )
+    return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
+        [&](const std::wstring& line)
         {
-            prev_offset = cur_offset;
-            size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str() + cur_offset));
-            cur_offset += offset;
-
-            type_string strTemp(strRemainText, 0, cur_offset/* size */);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-            TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-            if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
-            {
-                strCutText = type_string(strRemainText, 0, prev_offset/* size */);
-                strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
-
-                auto* pMsg = new MSGBOX_TEXTDATA;
-                pMsg->strMsg = strCutText;
-                pMsg->dwColor = dwColor;
-                pMsg->byFontType = byFontType;
-                m_MsgTextList.push_back(pMsg);
-                iLine++;
-
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-                TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-                if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-                {
-                    auto* pMsg = new MSGBOX_TEXTDATA;
-                    pMsg->strMsg = strRemainText;
-                    pMsg->dwColor = dwColor;
-                    pMsg->byFontType = byFontType;
-                    m_MsgTextList.push_back(pMsg);
-                    iLine++;
-
-                    bLoop = false;
-                    break;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return iLine;
+            auto* message = new MSGBOX_TEXTDATA;
+            message->strMsg = line;
+            message->dwColor = dwColor;
+            message->byFontType = byFontType;
+            m_MsgTextList.push_back(message);
+        });
 }
 
 DWORD SEASON3B::CNewUITextInputMsgBox::GetMsgBoxType()
@@ -376,12 +337,10 @@ void SEASON3B::CNewUITextInputMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -830,12 +789,10 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -1132,12 +1089,10 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + 60 + ((GetSize().cx - 60) / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -1373,12 +1328,10 @@ void SEASON3B::CGemIntegrationMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -1609,12 +1562,10 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -2167,12 +2118,10 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -3131,78 +3080,15 @@ void SEASON3B::CDialogMsgBox::SetAddCallbackFunc()
 
 int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    
-
-    SIZE TextSize;
-    size_t TextExtentWidth;
-    int iLine = 0;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-    TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-    {
-        auto* pMsg = new MSGBOX_TEXTDATA;
-        pMsg->strMsg = strMsg;
-        pMsg->dwColor = dwColor;
-        pMsg->byFontType = byFontType;
-        m_MsgDataList.push_back(pMsg);
-
-        iLine = 1;
-        return iLine;
-    }
-
-    type_string strCutText, strRemainText;
-    strRemainText = strMsg;
-
-    bool bLoop = true;
-    while (bLoop)
-    {
-        int prev_offset = 0;
-        for (int cur_offset = 0; cur_offset < (int)strRemainText.size(); )
+    return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
+        [&](const std::wstring& line)
         {
-            prev_offset = cur_offset;
-            size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str() + cur_offset));
-            cur_offset += offset;
-
-            type_string strTemp(strRemainText, 0, cur_offset/* size */);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-            TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-            if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
-            {
-                strCutText = type_string(strRemainText, 0, prev_offset/* size */);
-                strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
-
-                auto* pMsg = new MSGBOX_TEXTDATA;
-                pMsg->strMsg = strCutText;
-                pMsg->dwColor = dwColor;
-                pMsg->byFontType = byFontType;
-                m_MsgDataList.push_back(pMsg);
-                iLine++;
-
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-                TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-                if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-                {
-                    auto* pMsg = new MSGBOX_TEXTDATA;
-                    pMsg->strMsg = strRemainText;
-                    pMsg->dwColor = dwColor;
-                    pMsg->byFontType = byFontType;
-                    m_MsgDataList.push_back(pMsg);
-                    iLine++;
-
-                    bLoop = false;
-                    break;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return iLine;
+            auto* message = new MSGBOX_TEXTDATA;
+            message->strMsg = line;
+            message->dwColor = dwColor;
+            message->byFontType = byFontType;
+            m_MsgDataList.push_back(message);
+        });
 }
 
 void SEASON3B::CDialogMsgBox::SetButtonInfo()
@@ -3273,12 +3159,10 @@ void SEASON3B::CDialogMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -3365,81 +3249,15 @@ void SEASON3B::CProgressMsgBox::SetElapseTime(DWORD dwElapseTime)
 
 int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    
-
-    SIZE TextSize;
-    size_t TextExtentWidth;
-    int iLine = 0;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-    TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-    {
-        auto* pMsg = new MSGBOX_TEXTDATA;
-        pMsg->strMsg = strMsg;
-        pMsg->dwColor = dwColor;
-        pMsg->byFontType = byFontType;
-        m_MsgDataList.push_back(pMsg);
-
-        iLine = 1;
-        return iLine;
-    }
-
-    type_string strCutText, strRemainText;
-    strRemainText = strMsg;
-
-    bool bLoop = true;
-    while (bLoop)
-    {
-        int prev_offset = 0;
-
-        for (int cur_offset = 0; cur_offset < (int)strRemainText.size(); )
+    return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
+        [&](const std::wstring& line)
         {
-            prev_offset = cur_offset;
-            size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str() + cur_offset));
-            cur_offset += offset;
-
-            type_string strTemp(strRemainText, 0, cur_offset/* size */);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-            TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-            if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
-            {
-                strCutText = type_string(strRemainText, 0, prev_offset/* size */);
-                strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
-
-                auto* pMsg = new MSGBOX_TEXTDATA;
-                pMsg->strMsg = strCutText;
-                pMsg->dwColor = dwColor;
-                pMsg->byFontType = byFontType;
-                m_MsgDataList.push_back(pMsg);
-                iLine++;
-
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-                TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-                if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-                {
-                    auto* pMsg = new MSGBOX_TEXTDATA;
-                    pMsg->strMsg = strRemainText;
-                    pMsg->dwColor = dwColor;
-                    pMsg->byFontType = byFontType;
-                    m_MsgDataList.push_back(pMsg);
-                    iLine++;
-
-                    bLoop = false;
-                    break;
-                }
-
-                break;
-            }
-        }
-
-        int i = 0;
-    }
-
-    return iLine;
+            auto* message = new MSGBOX_TEXTDATA;
+            message->strMsg = line;
+            message->dwColor = dwColor;
+            message->byFontType = byFontType;
+            m_MsgDataList.push_back(message);
+        });
 }
 
 bool SEASON3B::CProgressMsgBox::Update()
@@ -3515,12 +3333,10 @@ void SEASON3B::CProgressMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -3616,79 +3432,15 @@ void SEASON3B::CCursedTempleProgressMsgBox::AddMsg(const type_string& strMsg, DW
 
 int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
-    
-
-    SIZE TextSize;
-    size_t TextExtentWidth;
-    int iLine = 0;
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strMsg.c_str(), strMsg.size(), &TextSize);
-    TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-    if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-    {
-        auto* pMsg = new MSGBOX_TEXTDATA;
-        pMsg->strMsg = strMsg;
-        pMsg->dwColor = dwColor;
-        pMsg->byFontType = byFontType;
-        m_MsgDataList.push_back(pMsg);
-
-        iLine = 1;
-        return iLine;
-    }
-
-    type_string strCutText, strRemainText;
-    strRemainText = strMsg;
-
-    bool bLoop = true;
-    while (bLoop)
-    {
-        int prev_offset = 0;
-        for (int cur_offset = 0; cur_offset < (int)strRemainText.size(); )
+    return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
+        [&](const std::wstring& line)
         {
-            prev_offset = cur_offset;
-            size_t offset = _mbclen((const unsigned char*)(strRemainText.c_str() + cur_offset));
-            cur_offset += offset;
-
-            type_string strTemp(strRemainText, 0, cur_offset/* size */);
-
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTemp.c_str(), strTemp.size(), &TextSize);
-            TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-            if (TextExtentWidth > MSGBOX_TEXT_MAXWIDTH && cur_offset != 0)
-            {
-                strCutText = type_string(strRemainText, 0, prev_offset/* size */);
-                strRemainText = type_string(strRemainText, prev_offset, strRemainText.size() - prev_offset/* size */);
-
-                auto* pMsg = new MSGBOX_TEXTDATA;
-                pMsg->strMsg = strCutText;
-                pMsg->dwColor = dwColor;
-                pMsg->byFontType = byFontType;
-                m_MsgDataList.push_back(pMsg);
-                iLine++;
-
-                GetTextExtentPoint32(g_pRenderText->GetFontDC(), strRemainText.c_str(), strRemainText.size(), &TextSize);
-                TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-
-                if (TextExtentWidth <= MSGBOX_TEXT_MAXWIDTH)
-                {
-                    auto* pMsg = new MSGBOX_TEXTDATA;
-                    pMsg->strMsg = strRemainText;
-                    pMsg->dwColor = dwColor;
-                    pMsg->byFontType = byFontType;
-                    m_MsgDataList.push_back(pMsg);
-                    iLine++;
-
-                    bLoop = false;
-                    break;
-                }
-
-                break;
-            }
-        }
-    }
-
-    return iLine;
+            auto* message = new MSGBOX_TEXTDATA;
+            message->strMsg = line;
+            message->dwColor = dwColor;
+            message->byFontType = byFontType;
+            m_MsgDataList.push_back(message);
+        });
 }
 
 bool SEASON3B::CCursedTempleProgressMsgBox::Update()
@@ -3800,12 +3552,10 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
@@ -7333,12 +7083,10 @@ void SEASON3B::CGuild_ToPerson_Position::RenderTexts()
             break;
         }
 
-        SIZE TextSize;
-        size_t TextExtentWidth, TextExtentHeight;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (*vi)->strMsg.c_str(), (*vi)->strMsg.size(), &TextSize);
-        TextExtentWidth = (size_t)(TextSize.cx / g_fScreenRate_x);
-        TextExtentHeight = (size_t)(TextSize.cy / g_fScreenRate_y);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
+        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
+        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
 
         x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
         g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());

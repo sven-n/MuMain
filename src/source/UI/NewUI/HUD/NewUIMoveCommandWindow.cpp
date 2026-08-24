@@ -151,12 +151,10 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
     m_MapNameUISize.x += 10;
 
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
-    constexpr int FALLBACK_FONT_HEIGHT = 16;
     constexpr int DEFAULT_ROW_HEIGHT = 14;
-    const int effectiveFontHeight = (FontHeight > 0) ? FontHeight : FALLBACK_FONT_HEIGHT;
-    m_iRealFontHeight = (g_fScreenRate_y > 0.0f)
-        ? static_cast<int>(effectiveFontHeight / g_fScreenRate_y) + 2
-        : DEFAULT_ROW_HEIGHT;
+    g_pRenderText->SetFont(g_hFont);
+    const int measuredFontHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
+    m_iRealFontHeight = measuredFontHeight > 0 ? measuredFontHeight + 2 : DEFAULT_ROW_HEIGHT;
 
     m_MapNameUISize.y = 60 + (m_iRealFontHeight * MOVECOMMAND_MAX_RENDER_TEXTLINE);
 

@@ -205,11 +205,11 @@ void CButton::Render()
     g_pRenderText->SetBgColor(0);
     g_pRenderText->SetFont(g_hFixFont);
 
-    SIZE size{};
     const int textLength = static_cast<int>(m_text.length());
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_text.c_str(), textLength, &size);
+    const SIZE size = g_pRenderText->MeasureText(m_text.c_str(), textLength);
 
-    const float textRelativeYPos = (static_cast<float>(CSprite::GetHeight()) - size.cy) * 0.5f;
+    const float textHeight = static_cast<float>(size.cy) * g_fScreenRate_y;
+    const float textRelativeYPos = (static_cast<float>(CSprite::GetHeight()) - textHeight) * 0.5f;
     g_pRenderText->RenderText(
         static_cast<int>(CSprite::GetXPos() / g_fScreenRate_x),
         static_cast<int>((static_cast<float>(CSprite::GetYPos()) + textRelativeYPos) / g_fScreenRate_y +

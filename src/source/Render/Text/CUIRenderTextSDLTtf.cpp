@@ -135,14 +135,6 @@ void CUIRenderTextSDLTtf::Release()
     m_activeFont = nullptr;
 }
 
-HDC CUIRenderTextSDLTtf::GetFontDC() const
-{
-    return nullptr;
-}
-BYTE* CUIRenderTextSDLTtf::GetFontBuffer() const
-{
-    return nullptr;
-}
 DWORD CUIRenderTextSDLTtf::GetTextColor() const
 {
     return m_textColor;

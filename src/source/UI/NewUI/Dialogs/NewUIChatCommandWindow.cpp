@@ -64,13 +64,9 @@ void RenderLine(int x, int y, const wchar_t* text, int boxWidth, int boxHeight =
     g_pRenderText->RenderText(x, y, text, boxWidth, boxHeight, sort);
 }
 
-// The text renderer works in real pixels while the window is laid out in
-// reference units, which is what the screen rate converts between.
 int MeasureInReferenceUnits(const wchar_t* text, size_t length)
 {
-    SIZE size = {0, 0};
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), text, static_cast<int>(length), &size);
-    return (g_fScreenRate_x > 0.f) ? static_cast<int>(size.cx / g_fScreenRate_x) : size.cx;
+    return g_pRenderText->MeasureText(text, static_cast<int>(length)).cx;
 }
 
 void RenderValueBackground(int x, int y, int width, int height)

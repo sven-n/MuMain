@@ -14,9 +14,8 @@
 
 bool ReduceStringByPixel(LPTSTR lpszDst, int nDstSize, LPCTSTR lpszSrc, int nPixel)
 {
-    SIZE size;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), lpszSrc, lstrlen(lpszSrc), &size);
-    int nSrcWidth = int(size.cx / g_fScreenRate_x);
+    const SIZE size = g_pRenderText->MeasureText(lpszSrc, lstrlen(lpszSrc));
+    const int nSrcWidth = size.cx;
 
     if (nSrcWidth <= nPixel)
     {

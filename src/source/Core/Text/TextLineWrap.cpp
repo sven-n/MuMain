@@ -114,6 +114,11 @@ std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth
     {
         return lines;
     }
+    if (text.find_first_not_of(L' ') == std::wstring::npos)
+    {
+        lines.push_back(text);
+        return lines;
+    }
 
     std::wstring line;
     // Where the current line may be broken, which is behind the last space it

@@ -465,18 +465,18 @@ bool NewRenderLogInScene(HDC hDC)
     g_pRenderText->SetBgColor(0, 0, 0, 128);
 
     wcscpy_s(Text, 100, I18N::Game::CCopyright2001Webzen);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(335 - Size.cx * REFERENCE_WIDTH / WindowWidth, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
+    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
+    g_pRenderText->RenderText(335 - Size.cx, REFERENCE_HEIGHT - Size.cy - 1, Text);
 
     wcscpy_s(Text, 100, I18N::Game::AllRightsReserved);
 
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
+    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
+    g_pRenderText->RenderText(335, REFERENCE_HEIGHT - Size.cy - 1, Text);
 
     swprintf_s(Text, 100, I18N::Game::VerS, m_ExeVersion);
 
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), Text, lstrlen(Text), &Size);
-    g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy * REFERENCE_WIDTH / WindowWidth - 1, Text);
+    Size = g_pRenderText->MeasureText(Text, lstrlen(Text));
+    g_pRenderText->RenderText(0, REFERENCE_HEIGHT - Size.cy - 1, Text);
 
     RenderInfomation();
 

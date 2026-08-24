@@ -66,6 +66,7 @@ typedef struct
     int       x, y;
     int       Width;
     int       Height;
+    int       LineHeight;
     vec3_t    Position;
 } CHAT;
 
@@ -75,25 +76,24 @@ CHAT Chat[MAX_CHAT];
 
 void SetBooleanPosition(CHAT* c)
 {
-    BOOL bResult[5];
-    SIZE Size[5];
-    memset(&Size[0], 0, sizeof(SIZE) * 5);
+    SIZE Size[5]{};
 
     if (g_isCharacterBuff((&c->Owner->Object), eBuff_GMEffect) || (c->Owner->CtlCode == CTLCODE_20OPERATOR) || (c->Owner->CtlCode == CTLCODE_08OPERATOR))
     {
         g_pRenderText->SetFont(g_hFontBold);
-        bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
-        g_pRenderText->SetFont(g_hFont);
+        Size[0] = g_pRenderText->MeasureText(c->ID, lstrlen(c->ID));
     }
     else
     {
-        bResult[0] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->ID, lstrlen(c->ID), &Size[0]);
+        g_pRenderText->SetFont(g_hFont);
+        Size[0] = g_pRenderText->MeasureText(c->ID, lstrlen(c->ID));
     }
 
-    bResult[1] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[0], lstrlen(c->Text[0]), &Size[1]);
-    bResult[2] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Text[1], lstrlen(c->Text[1]), &Size[2]);
-    bResult[3] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Union, lstrlen(c->Union), &Size[3]);
-    bResult[4] = GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->Guild, lstrlen(c->Guild), &Size[4]);
+    g_pRenderText->SetFont(g_hFont);
+    Size[1] = g_pRenderText->MeasureText(c->Text[0], lstrlen(c->Text[0]));
+    Size[2] = g_pRenderText->MeasureText(c->Text[1], lstrlen(c->Text[1]));
+    Size[3] = g_pRenderText->MeasureText(c->Union, lstrlen(c->Union));
+    Size[4] = g_pRenderText->MeasureText(c->Guild, lstrlen(c->Guild));
 
     Size[0].cx += 3;
 
@@ -104,23 +104,29 @@ void SetBooleanPosition(CHAT* c)
         c->Width = std::max<int>(std::max<int>(Size[0].cx, Size[1].cx), std::max<int>(Size[3].cx, Size[4].cx));
     else
         c->Width = std::max<int>(std::max<int>(Size[0].cx, Size[3].cx), Size[4].cx);
-    c->Height = FontHeight * (bResult[0] + bResult[1] + bResult[2] + bResult[3] + bResult[4]);
+    const int lineCount = (c->ID[0] != L'\0') + (c->LifeTime[0] > 0) + (c->LifeTime[1] > 0)
+        + (c->Union[0] != L'\0') + (c->Guild[0] != L'\0');
+    c->LineHeight = 1;
+    for (const SIZE& size : Size)
+    {
+        c->LineHeight = std::max<int>(c->LineHeight, size.cy);
+    }
 
     if (lstrlen(c->szShopTitle) > 0)
     {
-        SIZE sizeT[2];
         g_pRenderText->SetFont(g_hFontBold);
+        const SIZE shopTitleSize = g_pRenderText->MeasureText(c->szShopTitle, lstrlen(c->szShopTitle));
+        const SIZE storeSize = g_pRenderText->MeasureText(I18N::Game::Store, wcslen(I18N::Game::Store));
 
-        if (GetTextExtentPoint32(g_pRenderText->GetFontDC(), c->szShopTitle, lstrlen(c->szShopTitle), &sizeT[0]) && GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store, wcslen(I18N::Game::Store), &sizeT[1]))
+        if (shopTitleSize.cx > 0 && storeSize.cx > 0)
         {
-            if (c->Width < sizeT[0].cx + sizeT[1].cx)
-                c->Width = sizeT[0].cx + sizeT[1].cx;
-            c->Height += std::max<int>(sizeT[0].cy, sizeT[1].cy);
+            if (c->Width < shopTitleSize.cx + storeSize.cx)
+                c->Width = shopTitleSize.cx + storeSize.cx;
+            c->LineHeight = std::max<int>(c->LineHeight, std::max<int>(shopTitleSize.cy, storeSize.cy));
         }
         g_pRenderText->SetFont(g_hFont);
     }
-    c->Width /= g_fScreenRate_x;
-    c->Height /= g_fScreenRate_y;
+    c->Height = c->LineHeight * (lineCount + (c->szShopTitle[0] != L'\0'));
 }
 
 void SetPlayerColor(BYTE PK)
@@ -182,11 +188,9 @@ void RenderBoolean(int x, int y, CHAT* c)
 
     EnableAlphaTest();
 
-    if (FontHeight > 32) FontHeight = 32;
-
     POINT RenderPos = { x, y };
     SIZE RenderBoxSize = { c->Width, c->Height };
-    int iLineHeight = FontHeight / g_fScreenRate_y;
+    const int iLineHeight = c->LineHeight;
 
     if (IsShopInViewport(c->Owner))
     {
@@ -272,8 +276,8 @@ void RenderBoolean(int x, int y, CHAT* c)
         SetPlayerColor(c->Color);
     }
 
-    if (c->x <= MouseX && MouseX < (int)(c->x + c->Width * REFERENCE_WIDTH / WindowWidth) &&
-        c->y <= MouseY && MouseY < (int)(c->y + c->Height * REFERENCE_HEIGHT / WindowHeight) &&
+    if (c->x <= MouseX && MouseX < c->x + c->Width &&
+        c->y <= MouseY && MouseY < c->y + c->Height &&
         InputEnable && Hero->SafeZone && wcscmp(c->ID, Hero->ID) != 0 &&
         (DWORD)WorldTime % 24 < 12)
     {

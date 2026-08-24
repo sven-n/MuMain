@@ -438,6 +438,7 @@ BOOL CUIButton::DoMouseAction()
 void CUIButton::Render()
 {
     EnableAlphaTest();
+    g_pRenderText->SetFont(g_hFont);
 
     if (GetState() == UISTATE_DISABLE)
     {
@@ -445,12 +446,12 @@ void CUIButton::Render()
 
         if (m_pszCaption != nullptr)
         {
-            SIZE TextSize;
             const int TextLen = lstrlen(m_pszCaption);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
+            const SIZE TextSize = g_pRenderText->MeasureText(m_pszCaption, TextLen);
             g_pRenderText->SetTextColor(230, 220, 200, 255);
             g_pRenderText->SetBgColor(0);
-            g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
+            g_pRenderText->RenderText(m_iPos_x + (m_iWidth - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+                m_iPos_y + 1 + (m_iHeight - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_pszCaption);
         }
         return;
     }
@@ -462,20 +463,21 @@ void CUIButton::Render()
 
     if (m_pszCaption != nullptr)
     {
-        SIZE TextSize;
         const int TextLen = lstrlen(m_pszCaption);
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_pszCaption, TextLen, &TextSize);
+        const SIZE TextSize = g_pRenderText->MeasureText(m_pszCaption, TextLen);
         g_pRenderText->SetTextColor(230, 220, 200, 255);
         g_pRenderText->SetBgColor(0, 0, 0, 0);
 
         if (m_bMouseState == TRUE)
         {
-            g_pRenderText->RenderText(m_iPos_x + 1 + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 2 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
+            g_pRenderText->RenderText(m_iPos_x + 1 + (m_iWidth - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+                m_iPos_y + 2 + (m_iHeight - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_pszCaption);
         }
         else
         {
-            g_pRenderText->RenderText(m_iPos_x + (m_iWidth - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, m_iPos_y + 1 + (m_iHeight - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_pszCaption);
+            g_pRenderText->RenderText(m_iPos_x + (m_iWidth - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+                m_iPos_y + 1 + (m_iHeight - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_pszCaption);
         }
     }
     DisableAlphaBlend();
@@ -1448,11 +1450,11 @@ void CUISimpleChatListBox::AddTextToRenderList(const wchar_t* pszID, const wchar
 
     if (wcslen(pszID) + wcslen(pszText) >= 20)
     {
-        SIZE nameSize;
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszID, lstrlen(pszID), &nameSize);
+        g_pRenderText->SetFont(g_hFont);
+        const SIZE nameSize = g_pRenderText->MeasureText(pszID, lstrlen(pszID));
 
         wchar_t Text1[10][MAX_TEXT_LENGTH + 1] = { {0},{0},{0},{0},{0} };
-        int iLine = CutText3(pszText, Text1[0], m_iWidth - 30, 10, MAX_TEXT_LENGTH + 1, (nameSize.cx + 5) / g_fScreenRate_x);
+        int iLine = CutText3(pszText, Text1[0], m_iWidth - 30, 10, MAX_TEXT_LENGTH + 1, nameSize.cx + 5);
 
         if (Text1[0][0] != '\0')
         {
@@ -1581,11 +1583,11 @@ CUIChatPalListBox::CUIChatPalListBox()
     m_bUseSelectLine = TRUE;
 
     m_iColumnWidth[0] = m_iColumnWidth[1] = m_iColumnWidth[2] = m_iColumnWidth[3] = 0;
-    SIZE TextSize;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"ZZZZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZZZZ"), &TextSize);
-    SetColumnWidth(0, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Server, wcslen(I18N::Game::Server), &TextSize);
-    SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
+    g_pRenderText->SetFont(g_hFont);
+    SIZE TextSize = g_pRenderText->MeasureText(L"ZZZZZZZZZZZZZ", lstrlen(L"ZZZZZZZZZZZZZ"));
+    SetColumnWidth(0, TextSize.cx + 8);
+    TextSize = g_pRenderText->MeasureText(I18N::Game::Server, wcslen(I18N::Game::Server));
+    SetColumnWidth(1, TextSize.cx + 8);
 
     m_bForceEditList = FALSE;
 }
@@ -2003,15 +2005,15 @@ CUILetterListBox::CUILetterListBox()
     m_bUseSelectLine = TRUE;
 
     m_iColumnWidth[0] = m_iColumnWidth[1] = m_iColumnWidth[2] = m_iColumnWidth[3] = 0;
-    SIZE TextSize;
+    g_pRenderText->SetFont(g_hFont);
 
     SetColumnWidth(0, 15 + 10);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Sender, wcslen(I18N::Game::Sender), &TextSize);
-    SetColumnWidth(1, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::DateRcvd, wcslen(I18N::Game::DateRcvd), &TextSize);
-    SetColumnWidth(2, TextSize.cx / g_fScreenRate_x + 8);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Title1030, wcslen(I18N::Game::Title1030), &TextSize);
-    SetColumnWidth(3, TextSize.cx / g_fScreenRate_x + 8);
+    SIZE TextSize = g_pRenderText->MeasureText(I18N::Game::Sender, wcslen(I18N::Game::Sender));
+    SetColumnWidth(1, TextSize.cx + 8);
+    TextSize = g_pRenderText->MeasureText(I18N::Game::DateRcvd, wcslen(I18N::Game::DateRcvd));
+    SetColumnWidth(2, TextSize.cx + 8);
+    TextSize = g_pRenderText->MeasureText(I18N::Game::Title1030, wcslen(I18N::Game::Title1030));
+    SetColumnWidth(3, TextSize.cx + 8);
 
     m_bForceEditList = FALSE;
 }
@@ -2538,18 +2540,6 @@ void CUIRenderText::Release()
     m_pRenderText.reset();
 }
 
-HDC CUIRenderText::GetFontDC() const
-{
-    if (m_pRenderText)
-        return m_pRenderText->GetFontDC();
-    return nullptr;
-}
-BYTE* CUIRenderText::GetFontBuffer() const
-{
-    if (m_pRenderText)
-        return m_pRenderText->GetFontBuffer();
-    return nullptr;
-}
 DWORD CUIRenderText::GetTextColor() const
 {
     if (m_pRenderText)
@@ -2602,311 +2592,6 @@ void CUIRenderText::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, i
         m_pRenderText->RenderText(iPos_x, iPos_y, pszText, iBoxWidth, iBoxHeight, iSort, lpTextSize);
     }
 }
-CUIRenderTextOriginal::CUIRenderTextOriginal()
-{
-    m_hFontDC = nullptr;
-    m_hBitmap = nullptr;
-    m_pFontBuffer = nullptr;
-    m_dwTextColor = m_dwBackColor = 0;
-}
-CUIRenderTextOriginal::~CUIRenderTextOriginal() { Release(); }
-
-SIZE CUIRenderTextOriginal::MeasureText(const wchar_t* pszText, int iLength) const
-{
-    SIZE size = {0, 0};
-    if (pszText != nullptr && iLength > 0 && GetTextExtentPoint32(m_hFontDC, pszText, iLength, &size))
-    {
-        size.cx = static_cast<LONG>(static_cast<float>(size.cx) / g_fScreenRate_x);
-        size.cy = static_cast<LONG>(static_cast<float>(size.cy) / g_fScreenRate_y);
-    }
-    return size;
-}
-
-bool CUIRenderTextOriginal::Create(HDC hDC)
-{
-    BITMAPINFO* DIB_INFO;
-    DIB_INFO = (BITMAPINFO*)new BYTE[sizeof(BITMAPINFOHEADER) + sizeof(PALETTEENTRY) * 256];
-    memset(DIB_INFO, 0x00, sizeof(BITMAPINFOHEADER));
-    DIB_INFO->bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-    DIB_INFO->bmiHeader.biWidth = REFERENCE_WIDTH * g_fScreenRate_x;		//. 640
-    DIB_INFO->bmiHeader.biHeight = -(REFERENCE_HEIGHT * g_fScreenRate_y);		//. 480
-    DIB_INFO->bmiHeader.biPlanes = 1;
-    DIB_INFO->bmiHeader.biBitCount = 24;
-    DIB_INFO->bmiHeader.biCompression = BI_RGB;
-
-    m_hBitmap = CreateDIBSection(hDC, DIB_INFO, DIB_RGB_COLORS, (void**)&m_pFontBuffer, nullptr, 0);
-    m_hFontDC = CreateCompatibleDC(hDC);
-    SelectObject(m_hFontDC, m_hBitmap);
-    SelectObject(m_hFontDC, g_hFont);
-    m_dwBackColor = 0;				//. Default Background Color;
-    m_dwTextColor = 0xFFFFFFFF;		//. Default Text Color
-
-    delete[] DIB_INFO;
-
-    if (nullptr == m_hFontDC || nullptr == m_hBitmap)
-    {
-        Release();
-        return false;
-    }
-    return true;
-}
-void CUIRenderTextOriginal::Release()
-{
-    if (m_hFontDC != nullptr)
-    {
-        DeleteDC(m_hFontDC);
-        m_hFontDC = nullptr;
-        m_pFontBuffer = nullptr;
-    }
-    if (m_hBitmap != nullptr)
-    {
-        DeleteObject(m_hBitmap);
-        m_hBitmap = nullptr;
-    }
-}
-
-HDC CUIRenderTextOriginal::GetFontDC() const { return m_hFontDC; }
-BYTE* CUIRenderTextOriginal::GetFontBuffer() const { return m_pFontBuffer; }
-
-DWORD CUIRenderTextOriginal::GetTextColor() const { return m_dwTextColor; }
-DWORD CUIRenderTextOriginal::GetBgColor() const { return m_dwBackColor; }
-
-void CUIRenderTextOriginal::SetTextColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha)
-{
-    m_dwTextColor = (byRed)+(byGreen << 8) + (byBlue << 16) + (byAlpha << 24);
-}
-void CUIRenderTextOriginal::SetTextColor(DWORD dwColor) { m_dwTextColor = dwColor; }
-void CUIRenderTextOriginal::SetBgColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha)
-{
-    m_dwBackColor = (byRed)+(byGreen << 8) + (byBlue << 16) + (byAlpha << 24);
-}
-void CUIRenderTextOriginal::SetBgColor(DWORD dwColor) { m_dwBackColor = dwColor; }
-
-void CUIRenderTextOriginal::SetFont(HFONT hFont) { SelectObject(m_hFontDC, hFont); }
-
-/// \brief Reads the Picture created by GDI and copies it to the texture bitmap.
-void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
-{
-    const int LIMIT_WIDTH = 256, LIMIT_HEIGHT = 32;
-
-    SIZE FontDCSize = { (int)(REFERENCE_WIDTH * g_fScreenRate_x), (int)(REFERENCE_HEIGHT * g_fScreenRate_y) };
-    int iPitch = ((FontDCSize.cx * 24 + 31) & ~31) >> 3;
-
-    BITMAP_t* pBitmapFont = &Bitmaps[BITMAP_FONT];
-    for (int y = 0; y < iHeight; ++y)
-    {
-        int SrcIndex = y * iPitch + iOffset;
-        int DstIndex = y * LIMIT_WIDTH * 4;
-        for (int x = 0; x < iWidth; ++x)
-        {
-            if ((SrcIndex > iPitch * FontDCSize.cy) || (DstIndex > LIMIT_WIDTH * 4 * LIMIT_HEIGHT))
-            {
-#ifdef _DEBUG
-                MU_DEBUG_BREAK();
-#endif // _DEBUG
-                return;
-            }
-            if (*(m_pFontBuffer + SrcIndex) == 255)	// we hit a white pixel, so here is Text
-            {
-                *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = m_dwTextColor;
-            }
-            else if (*(m_pFontBuffer + SrcIndex) != 0) // we hit a semi transparent pixel, so anti aliasing hit here
-            {
-                // The alpha channel is the highest 8 bits.
-                DWORD alpha = *(m_pFontBuffer + SrcIndex);
-                alpha += *(m_pFontBuffer + SrcIndex + 1);
-                alpha += *(m_pFontBuffer + SrcIndex + 2);
-                alpha /= 3;
-                alpha <<= 24;
-                alpha |= 0x00FFFFFF;
-                *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = m_dwTextColor & alpha;
-            }
-            else // it's a black pixel, so there is no text
-            {
-                *reinterpret_cast<unsigned int*>(pBitmapFont->Buffer + DstIndex) = 0; // Transparent
-            }
-
-            SrcIndex += 3; // RBG
-            DstIndex += 4; // RGBA
-        }
-    }
-}
-
-/// \brief Binds the previously created texture bitmap to the opengl texture.
-void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
-{
-    BITMAP_t* b = &Bitmaps[BITMAP_FONT];
-    float TextureU = 0.f, TextureV = 0.f;
-    if (sx < 0)
-    {
-        TextureU = (-sx + 0.01f) / b->Width;
-        Width += sx;
-        sx = 0.f;
-    }
-    else if (sx + Width > (int)WindowWidth)
-    {
-        Width = WindowWidth - sx;
-    }
-    if (sy < 0)
-    {
-        TextureV = (-sy + 0.01f) / b->Height;
-        Height += sy;
-        sy = 0.f;
-    }
-    else if (sy + Height > (int)WindowHeight)
-    {
-        Height = WindowHeight - sy;
-    }
-    if (Width > 0 && Height > 0 && sx + Width > 0 && sy + Height > 0)
-    {
-        mu::GetRenderer().QueueTextureUpdate(
-            static_cast<std::uint32_t>(b->BitmapIndex), b->Buffer,
-            static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
-        mu::GetRenderer().BindTexture(static_cast<int>(b->BitmapIndex));
-
-        float TextureUWidth = (Width + 0.01f) / b->Width;
-        float TextureVHeight = (Height + 0.01f) / b->Height;
-        // DXP-16 fix: the glyph atlas is mostly-transparent (background pixels are alpha=0,
-        // only the glyph strokes themselves are opaque) and RELIES on alpha blending to show
-        // through to whatever is underneath (panel art, other text). RenderBitmap itself never
-        // sets a blend mode -- it draws with whatever's currently active. Setting it here,
-        // immediately before this specific draw, survives whatever earlier UI code (buttons,
-        // checkboxes, etc.) left the blend state as -- a default set once at the top of
-        // BeginBitmap() didn't survive that gauntlet (confirmed: had zero effect on the
-        // reported flicker), so pin it right at the point of use instead.
-        EnableAlphaTest();
-        RenderBitmap(BITMAP_FONT, (float)sx, (float)sy, (float)Width, (float)Height,
-            TextureU, TextureV, TextureUWidth, TextureVHeight, false, false);
-    }
-}
-
-/// \brief Renders the text with GDI to the location of m_hFontDC/m_pFontBuffer as black/white picture. Text is white.
-void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText,
-                                       int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */,
-                                       int iSort /* = RT3_SORT_LEFT */, OUT SIZE* lpTextSize /* = NULL */)
-{
-    if (pszText == nullptr || (pszText[0] == '\0' && iBoxWidth == 0)) return;
-    if (wcslen(pszText) <= 0 && iBoxWidth == 0) return;
-
-    SIZE RealTextSize;
-
-    if (pszText[0] == '\0')
-        GetTextExtentPoint32(m_hFontDC, L"0", 1, &RealTextSize);
-    else
-        GetTextExtentPoint32(m_hFontDC, pszText, lstrlen(pszText), &RealTextSize);
-
-    MU_POINTF RealBoxPos = { (float)iPos_x * g_fScreenRate_x, (float)iPos_y * g_fScreenRate_y };
-    SIZEF RealBoxSize = { (float)iBoxWidth * g_fScreenRate_x, (float)iBoxHeight * g_fScreenRate_y };
-    SIZE RealRenderingSize = { RealTextSize.cx, RealTextSize.cy };
-
-    if (RealBoxSize.cx == 0)
-        RealBoxSize.cx = RealTextSize.cx;
-    if (RealBoxSize.cy == 0)
-        RealBoxSize.cy = RealTextSize.cy;
-
-    int iTab = 0;
-    int iClipMove = 0;
-
-    if (iSort == RT3_SORT_LEFT_CLIP)
-    {
-        if (RealRenderingSize.cx > RealBoxSize.cx)
-        {
-            iClipMove = RealRenderingSize.cx - RealBoxSize.cx;
-            RealRenderingSize.cx = RealBoxSize.cx;
-        }
-    }
-    else if (iSort == RT3_SORT_LEFT)
-    {
-        if (RealRenderingSize.cx > RealBoxSize.cx)
-            RealRenderingSize.cx = RealBoxSize.cx;
-    }
-    else if (iSort == RT3_SORT_CENTER)
-    {
-        if (RealRenderingSize.cx > RealBoxSize.cx)
-        {
-            iClipMove = (RealRenderingSize.cx - RealBoxSize.cx) / 2;
-            RealRenderingSize.cx = RealBoxSize.cx;
-        }
-        else
-        {
-            iTab = (RealBoxSize.cx - RealRenderingSize.cx) / 2;
-        }
-    }
-    else if (iSort == RT3_SORT_RIGHT)
-    {
-        if (RealRenderingSize.cx > RealBoxSize.cx)
-        {
-            iClipMove = RealRenderingSize.cx - RealBoxSize.cx;
-            RealRenderingSize.cx = RealBoxSize.cx;
-        }
-        else
-        {
-            iTab = RealBoxSize.cx - RealRenderingSize.cx;
-        }
-    }
-    else if (iSort == RT3_WRITE_RIGHT_TO_LEFT)
-    {
-        if (RealRenderingSize.cx > RealBoxSize.cx)
-        {
-            iClipMove = RealRenderingSize.cx - RealBoxSize.cx;
-            RealRenderingSize.cx = RealBoxSize.cx;
-        }
-        else
-        {
-            iTab = RealBoxSize.cx - RealRenderingSize.cx;
-        }
-        RealBoxPos.x -= RealBoxSize.cx;
-    }
-    else if (iSort == RT3_WRITE_CENTER)
-    {
-        if (RealRenderingSize.cx > RealBoxSize.cx)
-        {
-            iClipMove = (RealRenderingSize.cx - RealBoxSize.cx) / 2;
-            RealRenderingSize.cx = RealBoxSize.cx;
-        }
-        else
-        {
-            iTab = (RealBoxSize.cx - RealRenderingSize.cx) / 2;
-        }
-        RealBoxPos.x -= (RealBoxSize.cx / 2);
-    }
-
-    const int LIMIT_WIDTH = 256;
-
-    if (m_dwBackColor != 0)
-    {
-        EnableAlphaTest();
-        RenderColorQuadARGB(RealBoxPos.x / g_fScreenRate_x, RealBoxPos.y / g_fScreenRate_y,
-            RealBoxSize.cx / g_fScreenRate_x, RealBoxSize.cy / g_fScreenRate_y, m_dwBackColor);
-        EndRenderColor();
-    }
-
-    if (pszText[0] != 0x0a)
-    {
-        ::SetBkColor(m_hFontDC, RGB(0, 0, 0));
-        ::SetTextColor(m_hFontDC, RGB(255, 255, 255));
-        TextOut(m_hFontDC, 0, 0, pszText, lstrlen(pszText));
-    }
-
-    int iRealRenderWidth = RealRenderingSize.cx;
-    int iNumberOfSections = (RealRenderingSize.cx / LIMIT_WIDTH) + ((iRealRenderWidth % LIMIT_WIDTH >= 0) ? 1 : 0);
-    for (int i = 0; i < iNumberOfSections; i++)
-    {
-        SIZE RealSectionLine = { static_cast<LONG>(LIMIT_WIDTH), static_cast<LONG>(RealRenderingSize.cy) };
-        if (i == iNumberOfSections - 1)
-            RealSectionLine.cx = iRealRenderWidth % LIMIT_WIDTH;
-
-        WriteText(LIMIT_WIDTH * i * 3 + iClipMove, RealSectionLine.cx, RealSectionLine.cy);
-        UploadText(RealBoxPos.x + LIMIT_WIDTH * i + iTab, RealBoxPos.y, RealSectionLine.cx, RealSectionLine.cy);
-    }
-
-    if (lpTextSize)
-    {
-        lpTextSize->cx = RealRenderingSize.cx / g_fScreenRate_x;
-        lpTextSize->cy = RealRenderingSize.cy / g_fScreenRate_y;
-    }
-}
-
 DWORD g_dwBKConv = IME_CMODE_ALPHANUMERIC;
 DWORD g_dwBKSent = IME_SMODE_NONE;
 BOOL g_bForceIMEConv = FALSE;
@@ -3226,7 +2911,7 @@ void CUITextInputBox::SetFont(HFONT hFont)
 BOOL CUITextInputBox::DoPortableMouse()
 {
     g_pRenderText->SetFont(CurrentFont());
-    const int iLineHeight = LineHeightPx();
+    const int iLineHeight = LineHeight();
 
     // Thumb drag in progress: track the mouse until the button is released.
     if (m_bUseMultiLine && GetState() == UISTATE_SCROLL)
@@ -3551,11 +3236,10 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
     }
 }
 
-int CUITextInputBox::LineHeightPx() const
+int CUITextInputBox::LineHeight() const
 {
-    SIZE qSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Q", 1, &qSize);
-    int iLineHeight = (g_fScreenRate_y > 0.f) ? static_cast<int>(qSize.cy / g_fScreenRate_y) : qSize.cy;
+    g_pRenderText->SetFont(CurrentFont());
+    int iLineHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
     if (iLineHeight <= 0) iLineHeight = 1;
     return iLineHeight;
 }
@@ -3680,7 +3364,7 @@ void CUITextInputBox::RenderPortable()
         iCaret = compEnd;
     }
 
-    int iLineHeight = LineHeightPx();
+    int iLineHeight = LineHeight();
     if (!m_bUseMultiLine && iLineHeight > m_iHeight) iLineHeight = m_iHeight;
 
     // Background fill (shared by both layouts).
@@ -4209,9 +3893,7 @@ void CUISlideHelp::Render(BOOL bForceFadeOut)
 
     if (m_iFontHeight == 0)
     {
-        SIZE TextSize = { 0, 0 };
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
-        m_iFontHeight = TextSize.cy /= g_fScreenRate_y;
+        m_iFontHeight = g_pRenderText->MeasureText(L"Z", 1).cy;
 
         if (GetPosition_y() >= m_iFontHeight)
         {
@@ -4244,7 +3926,6 @@ void CUISlideHelp::SlideMove()
     if (m_iCutSize == 0)
     {
         m_iCutSize = CheckCutSize(m_pszSlideText, 4);
-        m_iCutSize /= g_fScreenRate_x;
     }
 
     if (m_fMovePosition < m_iCutSize * -1)
@@ -4252,7 +3933,6 @@ void CUISlideHelp::SlideMove()
         memset(m_pszSlideText, 0, SLIDE_TEXT_LENGTH);
         m_fMovePosition = (float)REFERENCE_WIDTH;
         m_iCutSize = CheckCutSize(m_pszSlideText, 4);
-        m_iCutSize /= g_fScreenRate_x;
     }
 }
 
@@ -4311,9 +3991,7 @@ int CUISlideHelp::CheckCutSize(const wchar_t* pszSource, int iNeedValue)
     }
     m_iCutLength = iTextSize;
 
-    SIZE TextSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), pszSource, m_iCutLength, &TextSize);
-    return TextSize.cx;
+    return g_pRenderText->MeasureText(pszSource, m_iCutLength).cx;
 }
 
 void CUISlideHelp::SetScrollSpeed(float fSpeed)

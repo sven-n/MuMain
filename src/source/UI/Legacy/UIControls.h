@@ -901,9 +901,6 @@ public:
     virtual bool Create(HDC hDC) = 0;
     virtual void Release() = 0;
 
-    virtual HDC GetFontDC() const = 0;
-    virtual BYTE* GetFontBuffer() const = 0;
-
     virtual DWORD GetTextColor() const = 0;
     virtual DWORD GetBgColor() const = 0;
 
@@ -921,42 +918,6 @@ public:
 
 typedef std::multimap<int, RENDER_TEXT_DATA, std::less<int>> RTMap;
 
-class CUIRenderTextOriginal : public IUIRenderText
-{
-    HDC m_hFontDC;
-    HBITMAP m_hBitmap;
-    BYTE* m_pFontBuffer;
-    DWORD m_dwTextColor, m_dwBackColor;
-
-public:
-    CUIRenderTextOriginal();
-    virtual ~CUIRenderTextOriginal();
-
-    bool Create(HDC hDC);
-    void Release();
-
-    HDC GetFontDC() const;
-    BYTE* GetFontBuffer() const;
-
-    DWORD GetTextColor() const;
-    DWORD GetBgColor() const;
-
-    void SetTextColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha);
-    void SetTextColor(DWORD dwColor);
-    void SetBgColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BYTE byAlpha);
-    void SetBgColor(DWORD dwColor);
-
-    void SetFont(HFONT hFont);
-    SIZE MeasureText(const wchar_t* pszText, int iLength) const;
-
-    void RenderText(int iPos_x, int iPos_y, const wchar_t* pszText, int iBoxWidth = 0, int iBoxHeight = 0,
-                    int iSort = RT3_SORT_LEFT, OUT SIZE* lpTextSize = NULL);
-
-protected:
-    void WriteText(int iOffset, int iWidth, int iHeight);
-    void UploadText(int sx, int sy, int Width, int Height);
-};
-
 class CUIRenderText
 {
     CUIRenderText();
@@ -971,8 +932,6 @@ public:
     bool Create(HDC hDC);
     void Release();
 
-    HDC GetFontDC() const;
-    BYTE* GetFontBuffer() const;
     DWORD GetTextColor() const;
     DWORD GetBgColor() const;
 
@@ -1165,7 +1124,7 @@ protected:
     int CaretToLine(const std::vector<PortableLine>& lines, int iCaret) const;
     // Buffer index on a line whose rendered x (reference px) is nearest targetX.
     int IndexAtLineX(const std::wstring& display, const PortableLine& line, int targetX) const;
-    int LineHeightPx() const;
+    int LineHeight() const;
     int VisibleLineCount(int iLineHeight) const;
     void MoveCaret(int iNewCaret, bool bExtendSelection);
     void InsertChar(wchar_t ch);

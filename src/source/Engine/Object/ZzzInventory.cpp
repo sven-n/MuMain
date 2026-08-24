@@ -46,7 +46,6 @@
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -216,7 +215,7 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
             g_pRenderText->SetFont(g_hFont);
         }
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &Size[i]);
+        Size[i] = g_pRenderText->MeasureText(TextList[i], lstrlen(TextList[i]));
 
         if (TextWidth < Size[i].cx)
         {
@@ -226,7 +225,7 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 
     if (Tab == 0)
     {
-        sx -= (TextWidth + Tab) * REFERENCE_WIDTH / WindowWidth / 2;
+        sx -= (TextWidth + Tab) / 2;
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -282,7 +281,6 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort, int iRenderPoint, BOOL bUseBG)
 {
     SIZE TextSize = { 0, 0 };
-    int TextLine = 0; int EmptyLine = 0;
     float fWidth = 0; float fHeight = 0;
     for (int i = 0; i < TextNum; ++i)
     {
@@ -301,33 +299,26 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
             g_pRenderText->SetFont(g_hFont);
         }
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
+        TextSize = g_pRenderText->MeasureText(TextList[i], lstrlen(TextList[i]));
 
         if (fWidth < TextSize.cx)
             fWidth = TextSize.cx;
 
-        if (TextList[i][0] == '\n')
-        {
-            ++EmptyLine;
-        }
-        else
-        {
-            ++TextLine;
-        }
+        const bool halfLine = TextList[i][0] == '\n';
+        const bool spacer = halfLine || (TextList[i][0] == L' ' && TextList[i][1] == L'\0');
+        const SIZE lineSize = spacer ? g_pRenderText->MeasureText(L"Q", 1) : TextSize;
+        fHeight += static_cast<float>(lineSize.cy) * (halfLine ? 0.55f : 1.1f);
     }
 
-    fHeight = TextSize.cy * TextLine + TextSize.cy / 2.0f * EmptyLine;
-    fHeight /= g_fScreenRate_y / 1.1f;
     EnableAlphaTest();
-    fWidth /= g_fScreenRate_x;
     if (Tab > 0)
-        fWidth = Tab / g_fScreenRate_x * 2;
+        fWidth = Tab * 2;
     fWidth += 4;
     int iPos_x = sx - fWidth / 2;
     if (iPos_x < 0) iPos_x = 0;
-    if (iPos_x + fWidth > (int)WindowWidth / g_fScreenRate_x)
+    if (iPos_x + fWidth > REFERENCE_WIDTH)
     {
-        iPos_x = ((int)WindowWidth) / g_fScreenRate_x - fWidth - 1;
+        iPos_x = REFERENCE_WIDTH - fWidth - 1;
     }
 
     float fsx = iPos_x + 1;
@@ -370,8 +361,8 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         float fHeight = 0;
         if (TextList[i][0] == 0x0a || (TextList[i][0] == ' ' && TextList[i][1] == 0x00))
         {
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
-            fHeight = (float)TextSize.cy / g_fScreenRate_y / (TextList[i][0] == 0x0a ? 2.0f : 1.0f);
+            TextSize = g_pRenderText->MeasureText(L"Q", 1);
+            fHeight = static_cast<float>(TextSize.cy) / (TextList[i][0] == 0x0a ? 2.0f : 1.0f);
         }
         else
         {
@@ -780,13 +771,13 @@ void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, 
 
     if (pGapText == NULL)
     {
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]), &TextSize);
+        TextSize = g_pRenderText->MeasureText(TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]));
     }
     else
     {
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), pGapText, wcslen(pGapText), &TextSize);
+        TextSize = g_pRenderText->MeasureText(pGapText, wcslen(pGapText));
     }
-    TabSpace += int(TextSize.cx / g_fScreenRate_x);
+    TabSpace += TextSize.cx;
     if (iType == 6)
     {
         TabSpace += 5;
@@ -5566,7 +5557,6 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextNum = g_SocketItemMgr.AttachToolTipForSocketItem(ip, TextNum);
 
         SIZE TextSize = { 0, 0 };
-        float fRateY = g_fScreenRate_y;
         int	Height = 0;
         int	EmptyLine = 0;
         int TextLine = 0;
@@ -5577,12 +5567,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             else if (TextList[i][0] == '\n')	++EmptyLine;
             else							++TextLine;
         }
-        fRateY = fRateY / 1.1f;
         g_pRenderText->SetFont(g_hFont);
+        TextSize = g_pRenderText->MeasureText(L"Q", 1);
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-
-        Height = (TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) / fRateY;
+        Height = static_cast<int>((TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) * 1.1f);
 
         int iScreenHeight = 420;
 
@@ -5892,11 +5880,9 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-    SIZE TextSize = { 0, 0 };
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-
-    int Height = ((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) * REFERENCE_HEIGHT / WindowHeight;
+    g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+    const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
+    int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
     if (sy - Height >= 0)
         sy -= Height;
     else
@@ -6230,11 +6216,6 @@ std::unordered_set<int> orangeTextItems = {
 
 namespace
 {
-constexpr size_t GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES = 1500;
-constexpr DWORD GROUND_ITEM_LABEL_CACHE_MAX_IDLE_MS = 10 * 1000;
-
-int g_groundItemLabelBuildBudgetRemaining = 0;
-
 struct GroundItemLabelDescriptor
 {
     wchar_t Name[80]{};
@@ -6242,50 +6223,6 @@ struct GroundItemLabelDescriptor
     DWORD TextColor = 0xFFFFFFFF;
     DWORD BgColor = 0xFF000000;
 };
-
-struct GroundItemLabelCacheKey
-{
-    int Type = -1;
-    int Level = 0;
-    BYTE ExcellentFlags = 0;
-    BYTE AncientDiscriminator = 0;
-    BYTE FeatureFlags = 0;
-
-    bool operator==(const GroundItemLabelCacheKey& other) const
-    {
-        return this->Type == other.Type
-            && this->Level == other.Level
-            && this->ExcellentFlags == other.ExcellentFlags
-            && this->AncientDiscriminator == other.AncientDiscriminator
-            && this->FeatureFlags == other.FeatureFlags;
-    }
-};
-
-struct GroundItemLabelCacheKeyHasher
-{
-    size_t operator()(const GroundItemLabelCacheKey& key) const
-    {
-        size_t seed = std::hash<int>{}(key.Type);
-        seed ^= std::hash<int>{}(key.Level) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.ExcellentFlags)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.AncientDiscriminator)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.FeatureFlags)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-
-struct GroundItemLabelCacheEntry
-{
-    GLuint TextureId = 0;
-    int TextWidth = 0;
-    int TextHeight = 0;
-    int TextureWidth = 0;
-    int TextureHeight = 0;
-    DWORD BgColor = 0;
-    DWORD LastUsedTick = 0;
-};
-
-std::unordered_map<GroundItemLabelCacheKey, GroundItemLabelCacheEntry, GroundItemLabelCacheKeyHasher> g_groundItemLabelCache;
 
 DWORD MakeRgba(BYTE red, BYTE green, BYTE blue, BYTE alpha = 255)
 {
@@ -6338,91 +6275,6 @@ void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* form
     }
 
     _snwprintf_s(buffer + currentLength, BufferSize - currentLength, _TRUNCATE, format, args...);
-}
-
-GroundItemLabelCacheKey BuildGroundItemLabelCacheKey(OBJECT* o, ITEM* ip)
-{
-    GroundItemLabelCacheKey key;
-    key.Type = o->Type;
-    key.Level = ip->Level;
-    key.ExcellentFlags = static_cast<BYTE>(ip->ExcellentFlags);
-    key.AncientDiscriminator = static_cast<BYTE>(ip->AncientDiscriminator);
-    key.FeatureFlags = 0;
-    if (ip->HasSkill)
-    {
-        key.FeatureFlags |= 1;
-    }
-    if (ip->HasLuck)
-    {
-        key.FeatureFlags |= 2;
-    }
-    if (ip->OptionLevel > 0)
-    {
-        key.FeatureFlags |= 4;
-    }
-    return key;
-}
-
-int GetNextPowerOfTwo(int value)
-{
-    int result = 1;
-    while (result < value)
-    {
-        result <<= 1;
-    }
-
-    return result;
-}
-
-void DeleteGroundItemLabelTexture(GLuint textureId)
-{
-    if (textureId != 0)
-    {
-        mu::GetRenderer().ReleaseTexture(textureId);
-    }
-}
-
-void PruneGroundItemLabelCache(DWORD currentTick)
-{
-    for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end();)
-    {
-        if (currentTick - cacheEntryIterator->second.LastUsedTick > GROUND_ITEM_LABEL_CACHE_MAX_IDLE_MS)
-        {
-            DeleteGroundItemLabelTexture(cacheEntryIterator->second.TextureId);
-            cacheEntryIterator = g_groundItemLabelCache.erase(cacheEntryIterator);
-        }
-        else
-        {
-            ++cacheEntryIterator;
-        }
-    }
-
-    if (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES)
-    {
-        const size_t entryCountToEvict = g_groundItemLabelCache.size() - GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES;
-        std::vector<decltype(g_groundItemLabelCache.begin())> cacheEntryIterators;
-        cacheEntryIterators.reserve(g_groundItemLabelCache.size());
-
-        for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end(); ++cacheEntryIterator)
-        {
-            cacheEntryIterators.push_back(cacheEntryIterator);
-        }
-
-        std::nth_element(
-            cacheEntryIterators.begin(),
-            cacheEntryIterators.begin() + entryCountToEvict,
-            cacheEntryIterators.end(),
-            [](const auto& left, const auto& right)
-            {
-                return left->second.LastUsedTick < right->second.LastUsedTick;
-            });
-
-        for (size_t i = 0; i < entryCountToEvict; ++i)
-        {
-            DeleteGroundItemLabelTexture(cacheEntryIterators[i]->second.TextureId);
-            g_groundItemLabelCache.erase(cacheEntryIterators[i]);
-        }
-    }
 }
 
 void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
@@ -6820,180 +6672,6 @@ void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
     g_pRenderText->SetBgColor(descriptor.BgColor);
 }
 
-bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, GroundItemLabelCacheEntry& cacheEntry)
-{
-    HDC fontDc = g_pRenderText->GetFontDC();
-    BYTE* fontBuffer = g_pRenderText->GetFontBuffer();
-    if (fontDc == nullptr || fontBuffer == nullptr || descriptor.Name[0] == L'\0')
-    {
-        return false;
-    }
-
-    g_pRenderText->SetFont(descriptor.Font);
-
-    SIZE textSize{};
-    GetTextExtentPoint32(fontDc, descriptor.Name, lstrlen(descriptor.Name), &textSize);
-    if (textSize.cx <= 0 || textSize.cy <= 0)
-    {
-        return false;
-    }
-
-    RECT clearRect = {0, 0, textSize.cx, textSize.cy};
-    FillRect(fontDc, &clearRect, reinterpret_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
-
-    ::SetBkColor(fontDc, RGB(0, 0, 0));
-    ::SetTextColor(fontDc, RGB(255, 255, 255));
-    TextOut(fontDc, 0, 0, descriptor.Name, lstrlen(descriptor.Name));
-
-    SIZE fontDcSize = { static_cast<int>(640 * g_fScreenRate_x), static_cast<int>(480 * g_fScreenRate_y) };
-    int sourcePitch = ((fontDcSize.cx * 24 + 31) & ~31) >> 3;
-    int sourceBufferLength = sourcePitch * fontDcSize.cy;
-
-    int textureWidth = GetNextPowerOfTwo(textSize.cx);
-    int textureHeight = GetNextPowerOfTwo(textSize.cy);
-
-    std::vector<DWORD> textureBuffer(static_cast<size_t>(textureWidth) * textureHeight, 0);
-    for (int y = 0; y < textSize.cy; ++y)
-    {
-        int sourceIndex = y * sourcePitch;
-        int destinationIndex = y * textureWidth;
-        for (int x = 0; x < textSize.cx; ++x)
-        {
-            if (sourceIndex + 2 >= sourceBufferLength)
-            {
-                return false;
-            }
-
-            DWORD pixelColor = 0;
-            if (*(fontBuffer + sourceIndex) == 255)
-            {
-                pixelColor = descriptor.TextColor;
-            }
-            else if (*(fontBuffer + sourceIndex) != 0)
-            {
-                DWORD alpha = *(fontBuffer + sourceIndex);
-                alpha += *(fontBuffer + sourceIndex + 1);
-                alpha += *(fontBuffer + sourceIndex + 2);
-                alpha /= 3;
-                alpha <<= 24;
-                alpha |= 0x00FFFFFF;
-                pixelColor = descriptor.TextColor & alpha;
-            }
-
-            textureBuffer[destinationIndex] = pixelColor;
-            sourceIndex += 3;
-            destinationIndex += 1;
-        }
-    }
-
-    const std::uint32_t textureId = mu::GetRenderer().CreateTexture(
-        static_cast<std::uint32_t>(textureWidth), static_cast<std::uint32_t>(textureHeight), textureBuffer.data());
-    if (textureId == 0)
-    {
-        return false;
-    }
-
-    cacheEntry.TextureId = textureId;
-    cacheEntry.TextWidth = textSize.cx;
-    cacheEntry.TextHeight = textSize.cy;
-    cacheEntry.TextureWidth = textureWidth;
-    cacheEntry.TextureHeight = textureHeight;
-    cacheEntry.BgColor = descriptor.BgColor;
-    return true;
-}
-
-void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& cacheEntry)
-{
-    if (cacheEntry.TextureId == 0)
-    {
-        return;
-    }
-
-    // Match RenderText center behavior: subtract integer half-width to avoid half-pixel blur on odd widths.
-    float renderX = static_cast<float>(o->ScreenX) * g_fScreenRate_x - static_cast<float>(cacheEntry.TextWidth / 2);
-    float renderY = static_cast<float>(o->ScreenY - 15) * g_fScreenRate_y;
-
-    if (cacheEntry.BgColor != 0)
-    {
-        EnableAlphaTest();
-        RenderColorQuadARGB(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
-            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x,
-            static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y, cacheEntry.BgColor);
-        EndRenderColor();
-    }
-
-    float textureUWidth = (cacheEntry.TextWidth + 0.01f) / static_cast<float>(cacheEntry.TextureWidth);
-    float textureVHeight = (cacheEntry.TextHeight + 0.01f) / static_cast<float>(cacheEntry.TextureHeight);
-    RenderBitmap(-static_cast<int>(cacheEntry.TextureId), renderX, renderY, static_cast<float>(cacheEntry.TextWidth),
-        static_cast<float>(cacheEntry.TextHeight), 0.f, 0.f, textureUWidth, textureVHeight, false, false);
-}
-
-bool RenderGroundItemLabelCached(OBJECT* o, ITEM* ip)
-{
-    GroundItemLabelCacheKey cacheKey = BuildGroundItemLabelCacheKey(o, ip);
-    DWORD currentTick = timeGetTime();
-
-    auto cacheIterator = g_groundItemLabelCache.find(cacheKey);
-    if (cacheIterator != g_groundItemLabelCache.end())
-    {
-        cacheIterator->second.LastUsedTick = currentTick;
-        RenderGroundItemLabelTexture(o, cacheIterator->second);
-        return true;
-    }
-
-    if (g_groundItemLabelBuildBudgetRemaining <= 0)
-    {
-        return false;
-    }
-
-    --g_groundItemLabelBuildBudgetRemaining;
-
-    GroundItemLabelDescriptor descriptor;
-    BuildGroundItemLabelDescriptor(o, ip, descriptor);
-
-    GroundItemLabelCacheEntry cacheEntry;
-    if (!CreateGroundItemLabelTexture(descriptor, cacheEntry))
-    {
-        return false;
-    }
-
-    cacheEntry.LastUsedTick = currentTick;
-
-    auto insertResult = g_groundItemLabelCache.emplace(cacheKey, cacheEntry);
-    if (!insertResult.second)
-    {
-        DeleteGroundItemLabelTexture(cacheEntry.TextureId);
-    }
-
-    PruneGroundItemLabelCache(currentTick);
-
-    auto insertedIterator = g_groundItemLabelCache.find(cacheKey);
-    if (insertedIterator != g_groundItemLabelCache.end())
-    {
-        RenderGroundItemLabelTexture(o, insertedIterator->second);
-        return true;
-    }
-
-    return false;
-}
-}
-
-void SetGroundItemLabelBuildBudget(int buildBudget)
-{
-    g_groundItemLabelBuildBudgetRemaining = buildBudget > 0 ? buildBudget : 0;
-
-    constexpr DWORD pruneIntervalMs = 250;
-    static DWORD lastPruneTick = 0;
-    DWORD currentTick = timeGetTime();
-
-    if (!g_groundItemLabelCache.empty()
-        && (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES
-            || lastPruneTick == 0
-            || currentTick - lastPruneTick >= pruneIntervalMs))
-    {
-        PruneGroundItemLabelCache(currentTick);
-        lastPruneTick = currentTick;
-    }
 }
 
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
@@ -7009,13 +6687,10 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        if (!RenderGroundItemLabelCached(o, ip))
-        {
-            GroundItemLabelDescriptor descriptor;
-            BuildGroundItemLabelDescriptor(o, ip, descriptor);
-            ApplyGroundItemLabelDescriptor(descriptor);
-            g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15, descriptor.Name, 0, 0, RT3_WRITE_CENTER);
-        }
+        GroundItemLabelDescriptor descriptor;
+        BuildGroundItemLabelDescriptor(o, ip, descriptor);
+        ApplyGroundItemLabelDescriptor(descriptor);
+        g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15, descriptor.Name, 0, 0, RT3_WRITE_CENTER);
     }
 
     g_pRenderText->SetTextColor(255, 230, 200, 255);

@@ -756,13 +756,8 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
 
     mu_swprintf(strTooltip, L"%ls", I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
 
-    SIZE fontsize;
     g_pRenderText->SetFont(g_hFont);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
-
-    const auto multiplier = ((float)WindowHeight / REFERENCE_HEIGHT);
-    fontsize.cx = fontsize.cx / multiplier;
-    fontsize.cy = fontsize.cy / multiplier;
+    const SIZE fontsize = g_pRenderText->MeasureText(strTooltip, wcslen(strTooltip));
 
     int x = m_WndPos.x
         + (m_iTooltipType * BUTTON_WIDTH)

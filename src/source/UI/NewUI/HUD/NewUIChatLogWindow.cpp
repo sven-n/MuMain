@@ -318,7 +318,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
     if (strText.size() >= 20)
     {
         type_string	strText1, strText2;
-        SeparateText(strID, strText, strText1, strText2);
+        SeparateText(strID, strText, MsgType, strText1, strText2);
         if (!strText1.empty())
         {
             const auto pMsgText = new CMessageText;
@@ -891,23 +891,20 @@ float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
     return 8.0f;
 }
 
-void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText, OUT type_string& strText1, OUT type_string& strText2)
+void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
+                                                 MESSAGE_TYPE MsgType, OUT type_string& strText1,
+                                                 OUT type_string& strText2)
 {
-    
-
-    SIZE TextSize;
-    
-    float max_first_line_size = CLIENT_WIDTH * g_fScreenRate_x;
+    g_pRenderText->SetFont(MsgType == TYPE_GM_MESSAGE ? g_hFontBold : g_hFont);
+    int max_first_line_size = CLIENT_WIDTH;
     if (!strID.empty())
     {
         const type_string strIDPart = strID + L" : ";
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), strIDPart.c_str(), strIDPart.length(), &TextSize);
-        max_first_line_size -= (TextSize.cx);
+        max_first_line_size -= g_pRenderText->MeasureText(
+            strIDPart.c_str(), static_cast<int>(strIDPart.length())).cx;
     }
 
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strText.c_str(), strText.length(), &TextSize);
-    auto required_size = TextSize.cx;
+    int required_size = g_pRenderText->MeasureText(strText.c_str(), static_cast<int>(strText.length())).cx;
 
     if (required_size <= max_first_line_size)
     {
@@ -922,9 +919,13 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     while ((required_size > max_first_line_size) && (iLocToken > -1))
     {
         iLocToken = (bSpaceExist) ? strText.find_last_of(L" ", iLocToken - 1) : iLocToken - 1;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), (strText.substr(0, iLocToken)).c_str(), iLocToken, &TextSize);
-        required_size = TextSize.cx;
+        if (iLocToken <= 0)
+        {
+            strText1.clear();
+            strText2 = strText;
+            return;
+        }
+        required_size = g_pRenderText->MeasureText(strText.c_str(), iLocToken).cx;
     }
 
     strText1 = strText.substr(0, iLocToken);
@@ -1112,14 +1113,13 @@ bool SEASON3B::CNewUISystemLogWindow::RenderMessages()
         fRenderPosY += FONT_LEADING;
     }
 
-    const auto rowHeight = static_cast<int>(FontHeight * 1.2 / g_fScreenRate_y);
+    g_pRenderText->SetFont(g_hFont);
+    const int rowHeight = std::max(1, static_cast<int>(g_pRenderText->MeasureText(L"Q", 1).cy * 1.2f));
 
     EnableAlphaTest();
     for (int i = iRenderStartLine; i <= GetCurrentRenderEndLine(); i++)
     {
         if (i < 0 && i >= static_cast<int>(m_vecAllMsgs.size())) break;
-
-        g_pRenderText->SetFont(g_hFont);
 
         auto const message = m_vecAllMsgs[i];
         const auto backgroundAlpha = static_cast<BYTE>(255.f * m_fBackAlpha);
