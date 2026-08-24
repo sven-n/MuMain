@@ -2,7 +2,7 @@
 // Story:     3.4.2 - Server Connection Configuration
 // AC:        AC-4, AC-5, AC-STD-2, AC-STD-11
 //
-// Catch2 unit tests for GameConfig validation helpers.
+// doctest unit tests for GameConfig validation helpers.
 // Tests validate boundary and edge-case behaviour required by AC-4 and AC-5.
 // These tests do NOT require config.ini at test time — they call the free
 // functions ValidateServerPort() and ValidateServerIP() directly.
@@ -183,11 +183,3 @@ TEST_CASE("AC-5: ValidateServerIP rejects empty and whitespace-only values [netw
         REQUIRE(result == L"localhost");
     }
 }
-
-// =============================================================================
-// AC-STD-11: Flow Code Traceability (verified separately by CMake script)
-// =============================================================================
-// Flow code VS1-NET-CONFIG-SERVER must appear:
-//   - In GameConfig.cpp header comment (first 1000 chars)
-//   - In this test file header (above) — verified by CMake script
-//   - Run: cmake -P tests/build/test_ac_std11_flow_code_3_4_2.cmake

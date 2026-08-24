@@ -15,14 +15,12 @@
 
 #include "Core/Platform/GroundTruthCapture.h"
 
-#define SECTION SUBCASE
-
 // ---------------------------------------------------------------------------
 // AC-STD-2 (AC-5): SSIM on identical buffers — expects score >= 0.99 (PASS)
 // ---------------------------------------------------------------------------
 TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99 [core][ground_truth][ac-5]")
 {
-    SECTION("8x8 identical solid-gray buffers produce SSIM = 1.0")
+    SUBCASE("8x8 identical solid-gray buffers produce SSIM = 1.0")
     {
         constexpr int width = 8;
         constexpr int height = 8;
@@ -32,13 +30,12 @@ TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99 [core][ground_t
         std::vector<unsigned char> imgA(size, 128u);
         std::vector<unsigned char> imgB(size, 128u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score >= 0.99);
     }
 
-    SECTION("16x16 identical gradient buffers produce SSIM = 1.0")
+    SUBCASE("16x16 identical gradient buffers produce SSIM = 1.0")
     {
         constexpr int width = 16;
         constexpr int height = 16;
@@ -52,13 +49,12 @@ TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99 [core][ground_t
         }
         std::vector<unsigned char> imgB = imgA; // exact copy
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score >= 0.99);
     }
 
-    SECTION("SSIM score for identical images is capped at 1.0")
+    SUBCASE("SSIM score for identical images is capped at 1.0")
     {
         constexpr int width = 8;
         constexpr int height = 8;
@@ -68,8 +64,7 @@ TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99 [core][ground_t
         std::vector<unsigned char> imgA(size, 200u);
         std::vector<unsigned char> imgB(size, 200u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score <= 1.0);
         REQUIRE(score >= 0.99);
@@ -81,7 +76,7 @@ TEST_CASE("AC-5: SSIM on identical buffers returns score >= 0.99 [core][ground_t
 // ---------------------------------------------------------------------------
 TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99 [core][ground_truth][ac-5]")
 {
-    SECTION("8x8 inverted buffers produce SSIM well below 0.99")
+    SUBCASE("8x8 inverted buffers produce SSIM well below 0.99")
     {
         constexpr int width = 8;
         constexpr int height = 8;
@@ -92,13 +87,12 @@ TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99 [core][ground_t
         std::vector<unsigned char> imgA(size, 255u);
         std::vector<unsigned char> imgB(size, 0u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score < 0.99);
     }
 
-    SECTION("8x8 checkerboard vs solid buffer produces SSIM < 0.99")
+    SUBCASE("8x8 checkerboard vs solid buffer produces SSIM < 0.99")
     {
         constexpr int width = 8;
         constexpr int height = 8;
@@ -121,13 +115,12 @@ TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99 [core][ground_t
             }
         }
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score < 0.99);
     }
 
-    SECTION("16x16 random-noise vs solid buffer produces SSIM < 0.99")
+    SUBCASE("16x16 random-noise vs solid buffer produces SSIM < 0.99")
     {
         constexpr int width = 16;
         constexpr int height = 16;
@@ -145,8 +138,7 @@ TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99 [core][ground_t
             imgA[i] = static_cast<unsigned char>(seed & 0xFFu);
         }
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score < 0.99);
     }
@@ -157,7 +149,7 @@ TEST_CASE("AC-5: SSIM on dissimilar buffers returns score < 0.99 [core][ground_t
 // ---------------------------------------------------------------------------
 TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0] [core][ground_truth][ac-5]")
 {
-    SECTION("All-zero buffers produce a valid bounded score")
+    SUBCASE("All-zero buffers produce a valid bounded score")
     {
         constexpr int width = 8;
         constexpr int height = 8;
@@ -167,8 +159,7 @@ TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0] [core][ground_truth][ac-5]"
         std::vector<unsigned char> imgA(size, 0u);
         std::vector<unsigned char> imgB(size, 0u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         // Both images identical (all-zero) → should be 1.0 or close
         // The C1/C2 stabilisers prevent division-by-zero for flat images
@@ -176,7 +167,7 @@ TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0] [core][ground_truth][ac-5]"
         REQUIRE(score <= 1.0);
     }
 
-    SECTION("Single-channel (luminance) buffers are supported")
+    SUBCASE("Single-channel (luminance) buffers are supported")
     {
         constexpr int width = 8;
         constexpr int height = 8;
@@ -186,33 +177,12 @@ TEST_CASE("AC-5: SSIM score is bounded in [0.0, 1.0] [core][ground_truth][ac-5]"
         std::vector<unsigned char> imgA(size, 100u);
         std::vector<unsigned char> imgB(size, 100u);
 
-        double score = mu::GroundTruthCapture::ComputeSSIM(
-            imgA.data(), imgB.data(), width, height, channels);
+        double score = mu::GroundTruthCapture::ComputeSSIM(imgA.data(), imgB.data(), width, height, channels);
 
         REQUIRE(score >= 0.99);
         REQUIRE(score <= 1.0);
     }
 }
-
-// ---------------------------------------------------------------------------
-// LOW-2: CompareTo() deferred stub — verify contract: returns < 0 ("not yet implemented")
-// This locks in the temporary contract so story 4.2.x cannot accidentally change it
-// without a test failure signalling the contract shift.
-// Guard matches GroundTruthCapture.cpp — CompareTo is only compiled under the flag.
-// ---------------------------------------------------------------------------
-#ifdef ENABLE_GROUND_TRUTH_CAPTURE
-TEST_CASE("AC-6 (deferred): CompareTo returns negative for deferred stub [core][ground_truth][ac-6][deferred]")
-{
-    SECTION("CompareTo returns < 0 indicating not-yet-implemented")
-    {
-        // The implementation always returns -1.0 (deferred to story 4.2.x).
-        // Callers must treat negative values as "not yet implemented", distinct from
-        // a valid SSIM score (which is always in [0.0, 1.0]).
-        double result = mu::GroundTruthCapture::CompareTo("nonexistent_scene", 8, 8);
-        REQUIRE(result < 0.0);
-    }
-}
-#endif // ENABLE_GROUND_TRUTH_CAPTURE
 
 // ---------------------------------------------------------------------------
 // AC-VAL-2: SSIM correctly identifies identical vs known-different
@@ -230,10 +200,10 @@ TEST_CASE("AC-VAL-2: SSIM correctly distinguishes identical from different image
     std::vector<unsigned char> identical_b(size, 150u); // same as a
     std::vector<unsigned char> different(size, 10u);    // very different from a
 
-    double same_score = mu::GroundTruthCapture::ComputeSSIM(
-        identical_a.data(), identical_b.data(), width, height, channels);
-    double diff_score = mu::GroundTruthCapture::ComputeSSIM(
-        identical_a.data(), different.data(), width, height, channels);
+    double same_score =
+        mu::GroundTruthCapture::ComputeSSIM(identical_a.data(), identical_b.data(), width, height, channels);
+    double diff_score =
+        mu::GroundTruthCapture::ComputeSSIM(identical_a.data(), different.data(), width, height, channels);
 
     // Identical → pass threshold
     REQUIRE(same_score >= 0.99);

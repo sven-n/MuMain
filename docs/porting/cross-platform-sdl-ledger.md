@@ -4,6 +4,10 @@ Source branch: `cross-platform-sdl-migration`
 Target branch: `replay/cross-platform-sdl-migration`  
 Shared base: `d98b7bf26228cabd1fbb711ae43f0dd02ad77c4a`
 
+Historical rows may reference source-contract or unregistered test files removed
+during PR #572 review. They preserve prior evidence; only tests registered by the
+current `tests/**/CMakeLists.txt` files are active.
+
 ## Status Values
 
 - `ported`: The source commit's behavior is present in the current restructured files.

@@ -1,5 +1,9 @@
 # Upstream Sync Preservation Ledger — 2026-08-20
 
+Historical rows may reference source-contract or unregistered test files removed
+during PR #572 review. They preserve prior evidence; only tests registered by the
+current `tests/**/CMakeLists.txt` files are active.
+
 ## Scope
 
 - Downstream base: `db2d3c7a94b6be43240ac37f6809104ddd078ea2`

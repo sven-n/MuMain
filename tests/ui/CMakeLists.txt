@@ -12,43 +12,8 @@ mu_add_test(
 )
 
 add_test(
-    NAME chat_command_window_focus_contract
+    NAME no_legacy_text_measurement
     COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_chat_command_window_focus.cmake
-)
-
-add_test(
-    NAME inventory_and_system_backdrops_contract
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_and_system_backdrops.cmake
-)
-
-add_test(
-    NAME exit_game_shutdown_contract
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_exit_game_shutdown.cmake
-)
-
-add_test(
-    NAME text_wrap_measurement_contract
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_text_wrap_measurement.cmake
-)
-
-add_test(
-    NAME sdl_text_measurement_migration_contract
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_sdl_text_measurement_migration.cmake
-)
-
-add_test(
-    NAME divide_string_delimiter_contract
-    COMMAND ${CMAKE_COMMAND}
-        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
-        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_divide_string_delimiter.cmake
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}/src/source
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_no_legacy_text_measurement.cmake
 )
