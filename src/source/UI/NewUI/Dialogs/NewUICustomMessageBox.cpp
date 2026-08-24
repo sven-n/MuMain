@@ -2394,6 +2394,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
         MUHelper::g_MuHelper.TriggerStop();
         LogOut = true;
         SocketClient->ToGameServer()->SendLogOut(LogOutType::CloseGame);
+        PostMessage(g_hWnd, WM_CLOSE, 0, 0);
         g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
     }
 

@@ -24,3 +24,10 @@ add_test(
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_and_system_backdrops.cmake
 )
+
+add_test(
+    NAME exit_game_shutdown_contract
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_exit_game_shutdown.cmake
+)
