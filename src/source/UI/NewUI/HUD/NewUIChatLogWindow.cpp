@@ -1122,14 +1122,14 @@ bool SEASON3B::CNewUISystemLogWindow::RenderMessages()
         g_pRenderText->SetFont(g_hFont);
 
         auto const message = m_vecAllMsgs[i];
+        const auto backgroundAlpha = static_cast<BYTE>(255.f * m_fBackAlpha);
+        g_pRenderText->SetBgColor(0, 0, 0, backgroundAlpha);
         if (message->GetType() == TYPE_SYSTEM_MESSAGE)
         {
-            g_pRenderText->SetBgColor(0, 0, 0, 100);
             g_pRenderText->SetTextColor(100, 150, 255, 255);
         }
         else
         {
-            g_pRenderText->SetBgColor(0, 0, 0, 100);
             g_pRenderText->SetTextColor(255, 30, 0, 255);
         }
 

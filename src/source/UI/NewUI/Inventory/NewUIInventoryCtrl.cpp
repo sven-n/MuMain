@@ -15,6 +15,17 @@
 #include "GameLogic/Items/MixMgr.h"
 using namespace SEASON3B;
 
+namespace
+{
+constexpr float PickedItemOverlayAlpha = 0.4f;
+
+void SetInventorySquareColor(const vec3_t& color)
+{
+    SetRenderColor(static_cast<BYTE>(color[0] * 255.f), static_cast<BYTE>(color[1] * 255.f),
+                   static_cast<BYTE>(color[2] * 255.f), static_cast<BYTE>(PickedItemOverlayAlpha * 255.f));
+}
+}
+
 SEASON3B::CNewUIPickedItem::CNewUIPickedItem()
 {
     m_pNewItemMng = nullptr;
@@ -1001,8 +1012,6 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                 {
                     this->ClearSlotKey(slotKey);
                     this->RequestInventoryRefresh();
-                    RenderColor(m_Pos.x + (x * INVENTORY_SQUARE_WIDTH), m_Pos.y + (y * INVENTORY_SQUARE_HEIGHT),
-                                INVENTORY_SQUARE_WIDTH, INVENTORY_SQUARE_HEIGHT);
                 }
 
                 EndRenderColor();
@@ -1102,6 +1111,8 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                 if (bWarning)
                 {
                     EnableAlphaTest();
+                    SetSquareColorWarning(1.f, 0.2f, 0.2f);
+                    SetInventorySquareColor(m_afColorStateWarning);
                     RenderColor(iDestPosX, iDestPosY, iDestWidth, iDestHeight);
                     EndRenderColor();
                 }
@@ -1190,6 +1201,12 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
                                     {
                                         SetSquareColorWarning(1.f, 0.2f, 0.2f);
                                     }
+
+                                    SetInventorySquareColor(m_afColorStateWarning);
+                                }
+                                else
+                                {
+                                    SetInventorySquareColor(m_afColorStateNormal);
                                 }
                                 RenderColor(m_Pos.x + (iSquarePosX * INVENTORY_SQUARE_WIDTH),
                                             m_Pos.y + (iSquarePosY * INVENTORY_SQUARE_HEIGHT), INVENTORY_SQUARE_WIDTH,

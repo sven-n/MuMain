@@ -17,3 +17,10 @@ add_test(
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_chat_command_window_focus.cmake
 )
+
+add_test(
+    NAME inventory_and_system_backdrops_contract
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_and_system_backdrops.cmake
+)
