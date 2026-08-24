@@ -38,3 +38,10 @@ add_test(
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_text_wrap_measurement.cmake
 )
+
+add_test(
+    NAME divide_string_delimiter_contract
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_divide_string_delimiter.cmake
+)
