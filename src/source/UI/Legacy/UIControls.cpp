@@ -53,19 +53,19 @@ int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelW
 
     auto tempString = std::wstring(pszSrcText);
     int iCharIndex = 0, iLineIndex = 0;
-    const int iScreenRatePixelWidth = iTargetPixelWidth * g_fScreenRate_x - 5;
+    constexpr int TextWrapPadding = 5;
+    const int iTargetWidth = iTargetPixelWidth - TextWrapPadding;
 
     const int totalCharacters = tempString.length();
     int processedSourceCharacters = 0;
-    SIZE iSize;
     while (!tempString.empty() && iLineIndex < iMaxOutLine)
     {
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), tempString.c_str(), tempString.length(), &iSize);
+        SIZE iSize = g_pRenderText->MeasureText(tempString.c_str(), static_cast<int>(tempString.length()));
 
         if (iLineIndex == 0)
             iSize.cx += iFirstLineTab;
 
-        const auto isTooWideInPixels = iSize.cx >= iScreenRatePixelWidth;
+        const auto isTooWideInPixels = iSize.cx >= iTargetWidth;
         const auto isTooLongInCharacters = (int)tempString.length() >= iOutStrLength - 1;
         if (isTooWideInPixels || isTooLongInCharacters)
         {

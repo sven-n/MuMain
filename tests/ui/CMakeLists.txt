@@ -31,3 +31,10 @@ add_test(
         -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_exit_game_shutdown.cmake
 )
+
+add_test(
+    NAME text_wrap_measurement_contract
+    COMMAND ${CMAKE_COMMAND}
+        -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/test_text_wrap_measurement.cmake
+)
