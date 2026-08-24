@@ -7,6 +7,7 @@
 
 #include <cstdlib>
 #include <unistd.h>
+#include <sys/system_properties.h>
 
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
@@ -26,6 +27,17 @@ extern "C" __attribute__((constructor(101))) void mu_android_early_chdir(void)
 
 int main(int /*argc*/, char* /*argv*/[])
 {
+    // Inside an emulator, GL calls cross a per-call transport whose round trips
+    // dominate; the mapped streaming writes trade one call for two there, so
+    // keep the plain SubData path. Real devices keep the stall-free mapping.
+    {
+        char qemu[PROP_VALUE_MAX] = {0};
+        __system_property_get("ro.kernel.qemu", qemu);
+        if (qemu[0] == '1')
+        {
+            setenv("MU_STREAM_MAP", "0", 1);
+        }
+    }
     // gl4es: back the desktop-GL API with an ES2 context it finds itself.
     setenv("LIBGL_ES", "2", 1);
     setenv("LIBGL_GL", "21", 1);
@@ -39,6 +51,7 @@ int main(int /*argc*/, char* /*argv*/[])
     // Android system font so UI text renders.
     setenv("MU_FONT", "/system/fonts/Roboto-Regular.ttf", 0);
 
+
     // The engine loads Data/ and config.ini relative to the working directory;
     // point it at the app's internal storage, where the data was pushed.
     const char* internal = SDL_GetAndroidInternalStoragePath();
@@ -46,6 +59,12 @@ int main(int /*argc*/, char* /*argv*/[])
     {
         chdir(internal);
     }
+
+    // Without the trap, Android's back gesture minimizes the game mid-session;
+    // trapped, it arrives as SDL_SCANCODE_AC_BACK for the engine to handle.
+    // (SDL_SetHint, not setenv: SDLActivity queries this through the hint
+    // table, which the environment does not reach here.)
+    SDL_SetHint(SDL_HINT_ANDROID_TRAP_BACK_BUTTON, "1");
 
     return WinMain(nullptr, nullptr, nullptr, SW_SHOW);
 }

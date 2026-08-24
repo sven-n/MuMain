@@ -276,6 +276,21 @@ void PlatformSwapBuffers()
         // swap path in the tree funnels through here (SceneManager, LoadingScene, UIMng), which
         // makes this the one place that cannot be missed.
         IR::Flush();
+#ifdef __ANDROID__
+        // AH-1118: alarm on pathological presents -- measures the SwapWindow
+        // block that the off-CPU profile could not attribute.
+        {
+            const Uint64 t0 = SDL_GetTicksNS();
+            SDL_GL_SwapWindow(g_sdlWindow);
+            const Uint64 dtMs = (SDL_GetTicksNS() - t0) / 1000000ull;
+            if (dtMs >= 100)
+            {
+                __android_log_print(ANDROID_LOG_WARN, "MuMainPace",
+                    "SwapWindow blocked %llu ms", (unsigned long long)dtMs);
+            }
+            return;
+        }
+#endif
 #ifndef _WIN32
         MaybeCaptureFrame();
 #endif
@@ -1251,6 +1266,13 @@ MSG MainLoop()
                 else
                     SDL_StopTextInput(g_sdlWindow);
                 s_textInputActive = wantTextInput;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, "MuMainInput",
+                    "text input %s (focused=%p, started=%d, kbdShown=%d)",
+                    wantTextInput ? "START" : "STOP", (void*)focusedField,
+                    (int)SDL_TextInputActive(g_sdlWindow),
+                    (int)SDL_ScreenKeyboardShown(g_sdlWindow));
+#endif
             }
 
             // Anchor the IME candidate window at the caret (reference px -> window
@@ -1972,6 +1994,21 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
 
     InitVSync();
+#ifdef __ANDROID__
+    // AH-1118 pacing experiment: the on-device profile shows the frame loop
+    // SLEEPING at ~0.7 FPS (CpuUsage/sleep_for dominate an otherwise idle CPU),
+    // so the pacing path is suspect. Force uncapped + vsync off and log every
+    // input to the decision so the real numbers are on record.
+    {
+        const bool vsAvail = IsVSyncAvailable();
+        const int fpsLimit = GetFPSLimit();
+        DisableVSync();
+        SetTargetFps(-1);
+        __android_log_print(ANDROID_LOG_INFO, "MuMainPace",
+            "vsyncAvailable=%d fpsLimit=%d forced=uncapped targetFps=%.2f",
+            vsAvail ? 1 : 0, fpsLimit, GetTargetFps());
+    }
+#else
     if (IsVSyncAvailable())
     {
         if (EnableVSync())
@@ -1983,6 +2020,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     {
         SetTargetFps(GetFPSLimit());
     }
+#endif
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.

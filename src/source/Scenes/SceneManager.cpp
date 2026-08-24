@@ -663,6 +663,11 @@ static void RenderGLStats()
 {
     if (!FrameProfiler::g_CountersEnabled)
         return;
+#ifdef __ANDROID__
+    // Counters stay on for the periodic logcat dump, but the on-screen HUD's
+    // per-line text rendering is too expensive on mobile GL to pay every frame.
+    return;
+#endif
 
     BeginBitmap();
 
@@ -1227,6 +1232,22 @@ void MainScene(HDC hDC)
                     using FrameProfiler::Counter;
                     using FrameProfiler::CounterValue;
                     using FrameProfiler::Pass;
+                    // Per-pass CPU milliseconds for the frame in flight -- the
+                    // decisive "where do 900 ms go" breakdown.
+                    {
+                        char msLine[256];
+                        int off = 0;
+                        for (int p = 0; p < static_cast<int>(Pass::Count_) && off < 200; ++p)
+                        {
+                            const float ms = FrameProfiler::AccumulatorMs(static_cast<Pass>(p));
+                            if (ms >= 1.0f)
+                            {
+                                off += snprintf(msLine + off, sizeof(msLine) - off, "%s=%.0f ",
+                                                FrameProfiler::kPassNames[p], ms);
+                            }
+                        }
+                        __android_log_print(ANDROID_LOG_INFO, "MuMainGL", "ms %s", msLine);
+                    }
                     __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
                         "tot gl=%u draw=%u bufUp=%u orphan=%u prog=%u tex=%u uni=%u",
                         CounterValue(Counter::GLCalls), CounterValue(Counter::DrawCalls),

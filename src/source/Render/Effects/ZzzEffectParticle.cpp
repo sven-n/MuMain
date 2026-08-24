@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+#include <algorithm>
 #include "Render/Models/BoneManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -8905,8 +8906,26 @@ void RenderParticles(BYTE byRenderOneMore)
         return;
     }
 
-    for (int i = 0; i < MAX_PARTICLES; i++)
+    // AH-1118: draw particles grouped by texture (stable within a texture, so
+    // per-type animation stays deterministic). The natural array order
+    // interleaves TexTypes, and every texture change breaks an IR batch --
+    // measured at ~700 breaks per login-scene frame, each one a streaming
+    // buffer append whose driver-side cost dominates the frame on mobile GPUs.
+    static int s_renderOrder[MAX_PARTICLES];
+    int liveCount = 0;
+    for (int idx = 0; idx < MAX_PARTICLES; idx++)
     {
+        if (Particles[idx].Live)
+        {
+            s_renderOrder[liveCount++] = idx;
+        }
+    }
+    std::stable_sort(s_renderOrder, s_renderOrder + liveCount,
+        [](int a, int b) { return Particles[a].TexType < Particles[b].TexType; });
+
+    for (int k = 0; k < liveCount; k++)
+    {
+        const int i = s_renderOrder[k];
         PARTICLE* o = &Particles[i];
         if (o->Live)
         {

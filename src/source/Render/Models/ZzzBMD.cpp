@@ -2369,6 +2369,9 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
     {
         CPlanarShadowShader::Instance().Draw(reinterpret_cast<const float*>(vertices), target_vertex_index + 1);
     }
+#ifndef __ANDROID__
+    // Client-array submission does not exist in the ES context; with the shadow
+    // shader unavailable, dropping the shadow beats dereferencing a NULL entry.
     else
     {
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -2377,6 +2380,7 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
         FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
+#endif
 }
 
 void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
@@ -2457,6 +2461,8 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
     {
         CPlanarShadowShader::Instance().Draw(reinterpret_cast<const float*>(vertices), target_vertex_index + 1);
     }
+#ifndef __ANDROID__
+    // See AddClothesShadowTriangles(): no client arrays in the ES context.
     else
     {
         glEnableClientState(GL_VERTEX_ARRAY);
@@ -2465,6 +2471,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
         glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     }
+#endif
 }
 
 void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
