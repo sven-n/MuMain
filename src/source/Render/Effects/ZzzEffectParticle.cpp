@@ -8920,8 +8920,26 @@ void RenderParticles(BYTE byRenderOneMore)
             s_renderOrder[liveCount++] = idx;
         }
     }
+    // Sort key includes SubType: the switch below picks the blend mode from
+    // (TexType, SubType), so grouping by both lets one blend state serve a
+    // whole run instead of flushing the batch on nearly every particle.
     std::stable_sort(s_renderOrder, s_renderOrder + liveCount,
-        [](int a, int b) { return Particles[a].TexType < Particles[b].TexType; });
+        [](int a, int b)
+        {
+            if (Particles[a].TexType != Particles[b].TexType)
+                return Particles[a].TexType < Particles[b].TexType;
+            if (Particles[a].Type != Particles[b].Type)
+                return Particles[a].Type < Particles[b].Type;
+            return Particles[a].SubType < Particles[b].SubType;
+        });
+
+    // The default blend below used to run per particle, resetting state that the
+    // per-type case then overrode -- an X->Y toggle on every particle that broke
+    // the IR batch even in sorted order. Apply it once per (TexType, SubType) run;
+    // within a run the case's own blend call is cached and free.
+    int lastRunTexType = -0x7FFFFFFF;
+    int lastRunSubType = -0x7FFFFFFF;
+    int lastRunParticleType = -0x7FFFFFFF;
 
     for (int k = 0; k < liveCount; k++)
     {
@@ -8941,7 +8959,17 @@ void RenderParticles(BYTE byRenderOneMore)
             BITMAP_t* pBitmap = Bitmaps.GetTexture(o->TexType);
             float Width = pBitmap->Width * o->Scale;
             float Height = pBitmap->Height * o->Scale;
-            if (pBitmap->Components == 3)
+            const bool newBlendRun = (o->TexType != lastRunTexType || o->SubType != lastRunSubType ||
+                                      o->Type != lastRunParticleType);
+            lastRunTexType = o->TexType;
+            lastRunSubType = o->SubType;
+            lastRunParticleType = o->Type;
+            if (!newBlendRun)
+            {
+                // Same (TexType, SubType) run: blend state from the previous
+                // particle's case still stands -- skip the default reset.
+            }
+            else if (pBitmap->Components == 3)
             {
                 EnableAlphaBlend();
             }

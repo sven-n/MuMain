@@ -1181,8 +1181,39 @@ static void ManageMainSceneAudio()
  *
  * @param hDC Device context for rendering
  */
+#ifdef __ANDROID__
+// AH-1118: wall-clock split of the frame -- time inside MainScene vs the gap
+// between MainScene calls (game update, input pump, swap, everything else).
+// Accumulated per frame, averaged into the 5s MuMainGL dump.
+static double g_muInsideMsAccum = 0.0;
+static double g_muOutsideMsAccum = 0.0;
+static int    g_muSplitFrames = 0;
+static std::chrono::steady_clock::time_point g_muLastExit{};
+#endif
+
 void MainScene(HDC hDC)
 {
+#ifdef __ANDROID__
+    struct MuSplitScope
+    {
+        std::chrono::steady_clock::time_point entry;
+        MuSplitScope()
+        {
+            entry = std::chrono::steady_clock::now();
+            if (g_muLastExit.time_since_epoch().count() != 0)
+            {
+                g_muOutsideMsAccum += std::chrono::duration<double, std::milli>(entry - g_muLastExit).count();
+            }
+        }
+        ~MuSplitScope()
+        {
+            const auto exitT = std::chrono::steady_clock::now();
+            g_muInsideMsAccum += std::chrono::duration<double, std::milli>(exitT - entry).count();
+            g_muLastExit = exitT;
+            ++g_muSplitFrames;
+        }
+    } muSplitScope;
+#endif
     if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
     {
         UpdateLoginAndCharacterScenes();
@@ -1195,14 +1226,27 @@ void MainScene(HDC hDC)
         return;
     }
 
+#ifdef __ANDROID__
+    // AH-1118: bisect the inside-MainScene time -- update phase vs render phase.
+    static double s_muUpdateMs = 0.0, s_muRenderMs = 0.0;
+    const auto muT0 = std::chrono::steady_clock::now();
+#endif
     UpdateCoreSystems();
     SetWorldClearColor();
+#ifdef __ANDROID__
+    const auto muT1 = std::chrono::steady_clock::now();
+    s_muUpdateMs += std::chrono::duration<double, std::milli>(muT1 - muT0).count();
+#endif
 
     bool Success = false;
 
     try
     {
         Success = RenderCurrentScene(hDC);
+#ifdef __ANDROID__
+        s_muRenderMs += std::chrono::duration<double, std::milli>(
+            std::chrono::steady_clock::now() - muT1).count();
+#endif
         {
             // GLP-24: tagged Overlay, not Other. These three render text as roughly one IR quad per
             // glyph, so with $glstats on they were adding hundreds of draw calls to the very bucket
@@ -1247,6 +1291,47 @@ void MainScene(HDC hDC)
                             }
                         }
                         __android_log_print(ANDROID_LOG_INFO, "MuMainGL", "ms %s", msLine);
+                    }
+                    {
+                        char gpuLine[256];
+                        int off = 0;
+                        for (int gi = 0; gi < FrameProfiler::kGpuTimedPassCount && off < 200; ++gi)
+                        {
+                            const Pass p = FrameProfiler::kGpuTimedPasses[gi];
+                            const float ms = FrameProfiler::GpuMs(p);
+                            if (ms >= 1.0f)
+                            {
+                                off += snprintf(gpuLine + off, sizeof(gpuLine) - off, "%s=%.0f ",
+                                                FrameProfiler::kPassNames[(int)p], ms);
+                            }
+                        }
+                        if (off > 0)
+                        {
+                            __android_log_print(ANDROID_LOG_INFO, "MuMainGL", "gpu %s", gpuLine);
+                        }
+                    }
+                    {
+                        extern unsigned int g_muTextCacheHits, g_muTextCacheMisses;
+                        __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                            "textcache hits=%u misses=%u (since last dump)",
+                            g_muTextCacheHits, g_muTextCacheMisses);
+                        g_muTextCacheHits = 0;
+                        g_muTextCacheMisses = 0;
+                    }
+                    if (g_muSplitFrames > 0)
+                    {
+                        __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+                            "split inside=%.0fms (update=%.0f render=%.0f) outside=%.0fms (avg over %d frames)",
+                            g_muInsideMsAccum / g_muSplitFrames,
+                            s_muUpdateMs / g_muSplitFrames,
+                            s_muRenderMs / g_muSplitFrames,
+                            g_muOutsideMsAccum / g_muSplitFrames,
+                            g_muSplitFrames);
+                        g_muInsideMsAccum = 0.0;
+                        g_muOutsideMsAccum = 0.0;
+                        s_muUpdateMs = 0.0;
+                        s_muRenderMs = 0.0;
+                        g_muSplitFrames = 0;
                     }
                     __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
                         "tot gl=%u draw=%u bufUp=%u orphan=%u prog=%u tex=%u uni=%u",
