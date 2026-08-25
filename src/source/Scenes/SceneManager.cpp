@@ -429,7 +429,7 @@ static void SetWorldClearColor()
     if (world == WD_0LORENCIA)
         rgb8(10, 20, 14);                              // Dark green
     else if (world == WD_2DEVIAS)
-        SetClearAndFogColor(0.75f, 0.85f, 1.0f);       // Light snowy blue
+        rgb8(0, 0, 10);                                // Dark navy abyss
     else if (world == WD_10HEAVEN)
         rgb8(3, 25, 44);                               // Blue
     else if (world == WD_73NEW_LOGIN_SCENE || world == WD_74NEW_CHARACTER_SCENE)
