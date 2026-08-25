@@ -9,11 +9,6 @@ set(CMAKE_CXX_COMPILER i686-w64-mingw32-g++)
 set(CMAKE_RC_COMPILER i686-w64-mingw32-windres)
 
 set(CMAKE_FIND_ROOT_PATH /usr/i686-w64-mingw32)
-set(MINGW_ADDITIONAL_TARGET_ROOT "" CACHE PATH "Additional MinGW target root")
-# ponytail: one extra target root is current ceiling; use full vcpkg chainloading only if more target package behavior is needed.
-if(MINGW_ADDITIONAL_TARGET_ROOT)
-    list(APPEND CMAKE_FIND_ROOT_PATH "${MINGW_ADDITIONAL_TARGET_ROOT}")
-endif()
 
 # Prefer static GCC runtimes to avoid shipping libgcc_s_dw2-1.dll / libstdc++-6.dll
 set(CMAKE_EXE_LINKER_FLAGS_INIT "${CMAKE_EXE_LINKER_FLAGS_INIT} -static-libgcc -static-libstdc++")

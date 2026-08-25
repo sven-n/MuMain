@@ -11,6 +11,11 @@ CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
 MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
 RELEASE_CONFIG = ROOT / ".releaserc.json"
 RENDERER_SOURCE = ROOT / "src/source/Render/Renderer/MuRendererSDLGpu.cpp"
+SHADER_BLOB_VALIDATOR = ROOT / "cmake/ValidateShaderBlobs.cmake"
+MINGW_TOOLCHAINS = (
+    ROOT / "cmake/toolchains/mingw-w64-i686.cmake",
+    ROOT / "cmake/toolchains/mingw-w64-x86_64.cmake",
+)
 
 EXPECTED_SHADERS = {
     "basic_colored.frag.dxil",
@@ -149,10 +154,16 @@ def manifest(block, assignment):
 ci = CI_WORKFLOW.read_text(encoding="utf-8")
 mingw = MINGW_WORKFLOW.read_text(encoding="utf-8")
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
+shader_blob_validator = SHADER_BLOB_VALIDATOR.read_text(encoding="utf-8")
 native_job = job(ci, "build-windows")
 linux_job = job(ci, "build-linux")
 release_job = job(ci, "release")
 mingw_job = job(mingw, "build-mingw")
+
+check(
+    shader_blob_validator.startswith("cmake_minimum_required(VERSION 3.25)\n"),
+    "Shader blob validation must declare CMake 3.25 policies in script mode",
+)
 
 linux_rows = re.findall(
     r"(?ms)^          - editor: (\S+)\n(.*?)(?=^          - editor: |^\s{4}steps:)",
@@ -392,6 +403,14 @@ check(
     [row for row, value in actual_native_shader_compilation.items() if value == "ON"]
     == [("x64", "Release", "OFF")],
     "Native matrix must contain exactly one shader-compilation ON tuple",
+)
+
+native_environment_assertion = step(
+    native_job, "build-windows", "Assert MSVC developer environment"
+)
+check(
+    native_environment_assertion.rstrip().endswith("exit 0"),
+    "Native MSVC identity probes must not leak their expected nonzero exit codes",
 )
 
 native_configure = step(native_job, "build-windows", "Configure CMake")
@@ -828,6 +847,27 @@ check(
     "-DCMAKE_BUILD_TYPE=Release" in mingw_configure,
     "MinGW exact asset-stamp exclusion requires the Release configuration",
 )
+for required in (
+    '-DCMAKE_TOOLCHAIN_FILE="${VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"',
+    '-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-${{ matrix.arch }}.cmake"',
+    '-DVCPKG_TARGET_TRIPLET="${{ matrix.vcpkg_triplet }}"',
+    '-DVCPKG_INSTALLED_DIR="${VCPKG_CLASSIC_INSTALL_ROOT}"',
+    "-DVCPKG_MANIFEST_MODE=OFF",
+):
+    check(
+        mingw_configure.count(required) == 1,
+        f"MinGW configure must use vcpkg chainloading exactly once: {required}",
+    )
+check(
+    "MINGW_ADDITIONAL_TARGET_ROOT" not in mingw_configure,
+    "MinGW configure must not replace vcpkg package integration with a find root",
+)
+for toolchain_path in MINGW_TOOLCHAINS:
+    check(
+        "MINGW_ADDITIONAL_TARGET_ROOT"
+        not in toolchain_path.read_text(encoding="utf-8"),
+        f"MinGW toolchain must not retain the obsolete extra find root: {toolchain_path.name}",
+    )
 for required in (
     'source_directory="build-mingw/src"',
     'runtime_directory="${RUNNER_TEMP}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}"',

@@ -2818,3 +2818,53 @@ PowerShell, native MSVC, MinGW/Wine, Linux editor-ON/OFF, downloaded-artifact,
 and interactive D3D12/Vulkan validation remain pending explicit push/Actions
 authorization and Windows-host execution. They do not establish that the
 Windows build or renderer works.
+
+### CI follow-up after `5c373cc9`
+
+The first pushed repair commit produced three failed workflow runs on
+2026-08-25:
+
+- CI run `32879280969`;
+- Linux Build run `32879280987`;
+- Windows Build (MinGW) run `32879280984`.
+
+Quality Gates and the macOS native job passed. Four Linux jobs failed while
+running `ValidateShaderBlobs.cmake` under CMake 3.31 because the standalone
+script did not declare its CMake 3.25 policy baseline. `CMP0057` therefore used
+OLD behavior and rejected `IN_LIST` at line 77. The script now starts with
+`cmake_minimum_required(VERSION 3.25)`, matching the project and the other
+standalone shader validators.
+
+All eight native Windows rows activated the correct MSVC architecture and
+resolved `cl.exe` plus `link.exe` under the Visual Studio 18 toolchain. Their
+identity assertions emitted no exception. The expected nonzero status from the
+help probes remained in `$LASTEXITCODE`, so the GitHub PowerShell wrapper failed
+the otherwise successful step. The assertion step now exits zero only after all
+identity and architecture checks pass; thrown assertion failures still stop the
+step first.
+
+All four MinGW rows installed OpenSSL, curl, and the transitive zlib package.
+Configuration found zlib 1.3.2 headers but not `ZLIB_LIBRARY` when curl's config
+called stock `FindZLIB`. The workflow had added the classic installation as a
+generic find root instead of activating vcpkg's package wrappers. MinGW now uses
+the existing vcpkg toolchain with the existing MinGW toolchain chainloaded,
+classic manifest installation disabled, and the exact matrix triplet plus
+installation root selected. The obsolete extra find-root option was removed
+from both MinGW toolchain files.
+
+The workflow contract was extended before production edits. Its RED output
+named the missing CMake policy declaration, leaked MSVC probe status, five
+missing vcpkg-chainload arguments, and obsolete manual find roots. After the
+edits:
+
+```text
+Windows workflow contract: OK
+CMake 4.4.2 shader validation: 18/18 blobs
+CMake 3.31.10 container shader validation: 18/18 blobs
+workflow YAML parse: exit 0
+workflow contract py_compile: exit 0
+```
+
+Native PowerShell execution, both MinGW architectures, and all hosted workflow
+matrices still require a new Actions run. These local checks do not establish
+that the Windows build works.

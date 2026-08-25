@@ -198,6 +198,7 @@ jobs:
           if ($linkerIdentity -notmatch 'Microsoft \(R\) Incremental Linker') {
             throw "link.exe is not the Microsoft linker."
           }
+          exit 0
 
       - name: Cache FetchContent dependencies
         uses: actions/cache@v4

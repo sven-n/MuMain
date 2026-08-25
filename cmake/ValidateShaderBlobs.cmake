@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 if(NOT DEFINED MU_SHADER_BLOB_DIR OR MU_SHADER_BLOB_DIR STREQUAL "")
     message(FATAL_ERROR "MU_SHADER_BLOB_DIR is required")
 endif()
