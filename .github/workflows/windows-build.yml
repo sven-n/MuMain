@@ -474,6 +474,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-windows-mingw-${{ matrix.arch }}-release-editor-${{ matrix.editor }}
-          path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/
+          path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/Main.exe
           if-no-files-found: error
-          include-hidden-files: true
