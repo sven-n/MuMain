@@ -79,7 +79,22 @@ namespace {
 
         const char* versionStr = (const char*)glGetString(GL_VERSION);
         int major = 0, minor = 0;
-        if (versionStr) sscanf(versionStr, "%d.%d", &major, &minor);
+        bool isES = false;
+        if (versionStr)
+        {
+            // OpenGL ES reports "OpenGL ES M.m ..."; a plain "%d.%d" scan of that
+            // string parses the word "OpenGL" and yields 0.0, silently failing every
+            // version-gated capability below (observed as "GL context 0.0" in the
+            // error report on Android).
+            if (sscanf(versionStr, "OpenGL ES %d.%d", &major, &minor) == 2)
+            {
+                isES = true;
+            }
+            else
+            {
+                sscanf(versionStr, "%d.%d", &major, &minor);
+            }
+        }
         g_Caps.glMajor = major;
         g_Caps.glMinor = minor;
 
@@ -87,16 +102,21 @@ namespace {
         GLint numExtensions = 0;
         glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
 
+        // ES exposes several of these features under EXT names or as core at
+        // different version thresholds than desktop GL; probe accordingly.
         g_Caps.bufferStorage = ProbeOneCap(L"bufferStorage",
-            AtLeastGLVersion(major, minor, 4, 4) || HasGLExtension("GL_ARB_buffer_storage", fn_glGetStringi, numExtensions),
-            "glBufferStorage");
+            isES ? HasGLExtension("GL_EXT_buffer_storage", fn_glGetStringi, numExtensions)
+                 : (AtLeastGLVersion(major, minor, 4, 4) || HasGLExtension("GL_ARB_buffer_storage", fn_glGetStringi, numExtensions)),
+            isES ? "glBufferStorageEXT" : "glBufferStorage");
 
         g_Caps.vertexAttribBinding = ProbeOneCap(L"vertexAttribBinding",
-            AtLeastGLVersion(major, minor, 4, 3) || HasGLExtension("GL_ARB_vertex_attrib_binding", fn_glGetStringi, numExtensions),
+            isES ? AtLeastGLVersion(major, minor, 3, 1)
+                 : (AtLeastGLVersion(major, minor, 4, 3) || HasGLExtension("GL_ARB_vertex_attrib_binding", fn_glGetStringi, numExtensions)),
             "glBindVertexBuffer", "glVertexAttribFormat");
 
         g_Caps.programBinary = ProbeOneCap(L"programBinary",
-            AtLeastGLVersion(major, minor, 4, 1) || HasGLExtension("GL_ARB_get_program_binary", fn_glGetStringi, numExtensions),
+            isES ? AtLeastGLVersion(major, minor, 3, 0)
+                 : (AtLeastGLVersion(major, minor, 4, 1) || HasGLExtension("GL_ARB_get_program_binary", fn_glGetStringi, numExtensions)),
             "glGetProgramBinary", "glProgramBinary");
 
         g_Caps.timerQuery = ProbeOneCap(L"timerQuery",
@@ -287,6 +307,46 @@ namespace {
         g_BufferCapacity[id] = (GLsizeiptr)sizeBytes;
         return BufferHandle{ id };
     }
+
+    // Write into a possibly in-flight streaming buffer without the implicit
+    // synchronization glBufferSubData can incur (a hard stall on tiled/mobile
+    // GPUs) -- the same UNSYNCHRONIZED | INVALIDATE_RANGE contract the GLP-09
+    // UBO ring's fallback rung already uses. Ring discipline guarantees the
+    // written range is not one an in-flight draw reads. Returns false where
+    // mapping is unavailable or fails, so callers can fall back to SubData.
+    bool MappedRangeWrite(GLenum target, GLintptr offset, GLsizeiptr size, const void* data)
+    {
+        // MU_STREAM_MAP=0 opts out (the Android entry point sets it inside
+        // emulators, whose per-GL-call transport cost makes map+unmap more
+        // expensive than the single SubData it replaces; on real mobile GPUs
+        // the stall avoidance is what matters).
+        static const bool s_enabled = []() {
+            const char* v = std::getenv("MU_STREAM_MAP");
+            return v == nullptr || v[0] != '0';
+        }();
+        if (!s_enabled)
+        {
+            return false;
+        }
+        typedef void*     (APIENTRY* PFNMAPRANGELOCAL)(GLenum, GLintptr, GLsizeiptr, GLbitfield);
+        typedef GLboolean (APIENTRY* PFNUNMAPLOCAL)(GLenum);
+        static PFNMAPRANGELOCAL s_map =
+            (PFNMAPRANGELOCAL)SDL_GL_GetProcAddress("glMapBufferRange");
+        static PFNUNMAPLOCAL s_unmap =
+            (PFNUNMAPLOCAL)SDL_GL_GetProcAddress("glUnmapBuffer");
+        if (s_map == nullptr || s_unmap == nullptr)
+        {
+            return false;
+        }
+        void* dst = s_map(target, offset, size,
+            GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT | GL_MAP_UNSYNCHRONIZED_BIT);
+        if (dst == nullptr)
+        {
+            return false;
+        }
+        memcpy(dst, data, (size_t)size);
+        return s_unmap(target) == GL_TRUE;
+    }
 }
 
 BufferHandle CreateVertexBuffer(const void* initialData, size_t sizeBytes, BufferUsage usage)
@@ -315,7 +375,10 @@ void UpdateBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
         FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
         FrameProfiler::TagBufferOrphan();
     }
-    fn_glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
+    if (!MappedRangeWrite(GL_ARRAY_BUFFER, 0, (GLsizeiptr)sizeBytes, data))
+    {
+        fn_glBufferSubData(GL_ARRAY_BUFFER, 0, (GLsizeiptr)sizeBytes, data);
+    }
     FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -374,7 +437,10 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
         writeOffset = 0;
     }
 
-    fn_glBufferSubData(GL_ARRAY_BUFFER, writeOffset, neededSize, data);
+    if (!MappedRangeWrite(GL_ARRAY_BUFFER, writeOffset, neededSize, data))
+    {
+        fn_glBufferSubData(GL_ARRAY_BUFFER, writeOffset, neededSize, data);
+    }
     FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -447,6 +513,11 @@ namespace {
         static bool loaded = false;
         if (loaded) return true;
         fn_glBufferStorage = (PFNGLBUFFERSTORAGEPROC)SDL_GL_GetProcAddress("glBufferStorage");
+        if (fn_glBufferStorage == nullptr)
+        {
+            // OpenGL ES ships this as GL_EXT_buffer_storage; same signature.
+            fn_glBufferStorage = (PFNGLBUFFERSTORAGEPROC)SDL_GL_GetProcAddress("glBufferStorageEXT");
+        }
         loaded = (fn_glBufferStorage != nullptr);
         return loaded;
     }
