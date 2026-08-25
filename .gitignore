@@ -16,6 +16,8 @@ _deps
 /build/
 build-mingw/
 build-linux/
+/build-android/
+/build-x64/
 /cmake-build-debug/
 /cmake-build-release/
 /CMakeFiles/

@@ -1,0 +1,88 @@
+plugins {
+    id "com.android.application"
+}
+
+def defaultNativeDir = new File(rootProject.projectDir, "../out/android/native")
+def nativeLibDir = providers.gradleProperty("muNativeLibDir")
+        .map { file(it) }
+        .getOrElse(defaultNativeDir)
+
+android {
+    namespace "com.alin.mumain"
+    compileSdk 36
+
+    defaultConfig {
+        applicationId "com.alin.mumain"
+        minSdk 28
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        ndk {
+            abiFilters "arm64-v8a", "x86_64"
+        }
+    }
+
+    buildTypes {
+        debug {
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.debug
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    sourceSets {
+        main {
+            java.srcDir "src/main/java"
+            java.srcDir "../../src/ThirdParty/SDL/android-project/app/src/main/java"
+            jniLibs.srcDir nativeLibDir
+        }
+    }
+
+    packagingOptions {
+        jniLibs {
+            useLegacyPackaging true
+        }
+    }
+}
+
+tasks.register("verifyNativeLibraries") {
+    doLast {
+        def supportedAbis = ["arm64-v8a", "x86_64"]
+        def requiredLibraries = [
+                "libmain.so",
+                "libGL.so",
+                "libcurl.so",
+                "libturbojpeg.so",
+                "libMUniqueClient.so"
+        ]
+        def foundAbi = false
+
+        supportedAbis.each { abi ->
+            def abiDir = new File(nativeLibDir, abi)
+            if (abiDir.isDirectory()) {
+                foundAbi = true
+                requiredLibraries.each { library ->
+                    if (!new File(abiDir, library).isFile()) {
+                        throw new GradleException("Missing ${abi}/${library} in ${nativeLibDir}")
+                    }
+                }
+            }
+        }
+
+        if (!foundAbi) {
+            throw new GradleException("No Android native libraries found in ${nativeLibDir}")
+        }
+    }
+}
+
+tasks.named("preBuild").configure {
+    dependsOn tasks.named("verifyNativeLibraries")
+}

@@ -78,6 +78,23 @@ endif()
 # Editor mode option (for admin builds)
 option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 
+# Renderer selection is explicit even while OpenGL is the only completed
+# backend. AH-1308 replaces the guarded SDL_GPU branch with the first Vulkan
+# implementation; keeping the choice in CMake now prevents platform bootstrap
+# code from silently deciding which renderer is active.
+set(MU_RENDER_BACKEND "OpenGL" CACHE STRING "Renderer backend (OpenGL or SDL_GPU)")
+set_property(CACHE MU_RENDER_BACKEND PROPERTY STRINGS OpenGL SDL_GPU)
+if(NOT MU_RENDER_BACKEND STREQUAL "OpenGL" AND
+   NOT MU_RENDER_BACKEND STREQUAL "SDL_GPU")
+  message(FATAL_ERROR "Unknown MU_RENDER_BACKEND='${MU_RENDER_BACKEND}'. "
+    "Choose OpenGL or SDL_GPU.")
+endif()
+if(MU_RENDER_BACKEND STREQUAL "SDL_GPU")
+  message(FATAL_ERROR "MU_RENDER_BACKEND=SDL_GPU is reserved for the Vulkan "
+    "backend landing in AH-1308; use OpenGL for the reproducible baseline.")
+endif()
+message(STATUS "MuMain renderer backend: ${MU_RENDER_BACKEND}")
+
 # ---------------------------------------------------------------------------
 # Engine/game code -> static library (libMuClient); MuMain -> thin executable.
 #
@@ -171,6 +188,7 @@ endif()
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
+target_compile_definitions(MuClient PUBLIC MU_RENDER_BACKEND_OPENGL=1)
 
 # The in-game shop downloader uses libcurl off Windows (issue #462); on Windows
 # it uses the OS WinINet/urlmon stack and needs no extra dependency here.
@@ -326,6 +344,36 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     OpenGL::GL
     OpenGL::GLU
     ${GLEW_LIBRARY}
+    ${TURBOJPEG_LIBRARY}
+  )
+endif()
+
+if(ANDROID)
+  # Android baseline dependencies are built by tools/android/build-native.sh.
+  # Keep their locations as cache inputs instead of smuggling absolute paths
+  # through CMAKE_CXX_FLAGS/CMAKE_*_LINKER_FLAGS as the original spike did.
+  set(MU_ANDROID_GL4ES_ROOT "" CACHE PATH
+      "gl4es source root containing include/ for the Android OpenGL baseline")
+  set(MU_ANDROID_GL4ES_LIBRARY "" CACHE FILEPATH
+      "Android libGL.so produced by gl4es (SONAME must be libGL.so)")
+
+  if(NOT MU_ANDROID_GL4ES_ROOT OR
+     NOT EXISTS "${MU_ANDROID_GL4ES_ROOT}/include/GL/gl.h")
+    message(FATAL_ERROR "Set MU_ANDROID_GL4ES_ROOT to the gl4es source root. "
+      "tools/android/build-native.sh configures this automatically.")
+  endif()
+  if(NOT MU_ANDROID_GL4ES_LIBRARY OR
+     NOT EXISTS "${MU_ANDROID_GL4ES_LIBRARY}")
+    message(FATAL_ERROR "Set MU_ANDROID_GL4ES_LIBRARY to the staged libGL.so. "
+      "tools/android/build-native.sh configures this automatically.")
+  endif()
+
+  find_library(TURBOJPEG_LIBRARY NAMES turbojpeg REQUIRED)
+  target_include_directories(MuClient PUBLIC "${MU_ANDROID_GL4ES_ROOT}/include")
+  target_compile_definitions(MuClient PUBLIC GLEW_NO_GLU)
+  target_compile_options(MuClient PUBLIC -Wno-c++11-narrowing)
+  target_link_libraries(MuClient PUBLIC
+    ${MU_ANDROID_GL4ES_LIBRARY}
     ${TURBOJPEG_LIBRARY}
   )
 endif()

@@ -1743,6 +1743,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Fullscreen is requested via an SDL window flag below; SDL handles the
     // display-mode change and restores it on teardown.
     g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
+    g_ErrorReport.Write(L"> Renderer backend = %hs.\r\n", RHI::GetConfiguredBackendName());
 
     g_hInst = hInstance;
 
