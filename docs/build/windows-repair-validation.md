@@ -2940,3 +2940,52 @@ Git diff and rejects only changed hunks. Full-file cppcheck also exposed three
 signed left-shift color packings in the touched personal-shop source; those now
 use the existing unsigned `RGBA()` packer with byte-identical channel values.
 The current file passes the workflow's cppcheck command.
+
+### CI follow-up after `a630774b`
+
+The next pushed Windows repair commit produced failures in
+[CI run 32899019191](https://github.com/yesid-bocanegra/MuMain/actions/runs/32899019191)
+and
+[MinGW run 32899019156](https://github.com/yesid-bocanegra/MuMain/actions/runs/32899019156)
+on 2026-08-25. Linux and macOS passed. All eight native Windows rows built
+successfully. Seven rows then failed the three shader-reflection tests; the
+strict x64 Release editor-OFF row passed CTest and failed runtime-import
+validation. All four MinGW rows failed compilation.
+
+The native workflow passed shader executables under `C:/vcpkg/installed`, but
+manifest mode installed packages under each build directory because
+`VCPKG_INSTALLED_DIR` was unset. Shader-compilation-OFF rows retained the
+nonexistent paths and registered reflection tests against them. Native CMake
+now explicitly selects `C:/vcpkg/installed`, matching the existing cache and
+tool arguments.
+
+The remaining native artifact failure was `Main.exe: USP10.dll`. Uniscribe is
+a Windows OS component. The reviewed OS-DLL allowlist now contains
+`usp10.dll`; validation still requires the DLL to exist in the
+architecture-correct Windows system directory.
+
+MinGW exposed source files relying on indirect integer declarations.
+`ChatCommandCatalog.h`, `ChatCommandCatalog.cpp`, and `MultiLanguage.h` now
+include `<cstdint>` directly.
+
+The workflow contract was changed before production files. Its RED output
+named the missing vcpkg root, three missing `<cstdint>` includes, and missing
+`USP10.dll` allowlist entry. After the edits:
+
+```text
+Windows workflow contract: OK
+workflow contract py_compile: exit 0
+workflow YAML parse: exit 0
+git diff --check: exit 0
+editor-OFF chat command catalog: 4/4 passed
+editor-ON chat command catalog: 4/4 passed
+editor-OFF tests/all build: exit 0
+editor-ON tests/all build: exit 0
+editor-OFF CTest: 106/106 passed
+editor-ON CTest: 105/105 passed
+```
+
+Both full local macOS builds stopped in the pre-existing NativeAOT link step
+with `ld: library 'brotlienc' not found`. The affected C++ target compiled and
+linked independently in both editor configurations. Hosted MSVC and MinGW
+matrices remain the execution gate; no Windows-working claim is made.

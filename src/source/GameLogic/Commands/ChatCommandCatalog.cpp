@@ -2,6 +2,8 @@
 
 #include "Data/Translation/MultiLanguage.h"
 
+#include <cstdint>
+
 namespace GameLogic::Commands
 {
 namespace

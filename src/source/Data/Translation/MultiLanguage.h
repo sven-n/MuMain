@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 class CMultiLanguage
 {
 private:

@@ -535,8 +535,14 @@ Final-audit remediation tasks discovered before authorized Actions execution:
 - [x] **6.4.10 — Publish the complete native runtime.** Release downloads the
   native x64 Release editor-OFF artifact, archives the entire directory with
   hidden files, then publishes exactly that archive with native metadata.
+- [x] **6.4.11 — Repair the latest hosted Windows regressions.** Native manifest
+  installs now use the same `C:/vcpkg/installed` root as the cached shader-tool
+  paths, `USP10.dll` is reviewed as a target-system DLL, and the MinGW-rejected
+  `int32_t` declarations include `<cstdint>` directly. The workflow contract
+  reproduced all five missing requirements before the edits and passes after
+  them. Hosted Windows execution remains pending the next authorized push.
 
-These ten local remediation items are complete. Task 6.4 remains open pending
+These eleven local remediation items are complete. Task 6.4 remains open pending
 complete-diff final reviews, authorized GitHub Actions, Windows artifact
 inspection, and interactive D3D12/Vulkan validation. No Windows-working claim
 is made.

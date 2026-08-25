@@ -247,6 +247,7 @@ jobs:
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
           -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-${{ matrix.architecture }}.cmake
           -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+          -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
           -DMU_ENABLE_SHADER_COMPILATION=${{ matrix.shader_compilation }}
           -DGLSLANG_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/glslang/glslangValidator.exe
@@ -439,6 +440,7 @@ jobs:
             "uiautomationcore.dll"
             "urlmon.dll"
             "user32.dll"
+            "usp10.dll"
             "uuid.dll"
             "version.dll"
             "vfw32.dll"

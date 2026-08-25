@@ -2,6 +2,7 @@
 
 #include "Core/Platform/WinCompat.h"
 
+#include <cstdint>
 #include <string>
 #include <vector>
 

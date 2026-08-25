@@ -18,6 +18,13 @@ PERSONAL_SHOP_SOURCE = (
 SHADER_BLOB_VALIDATOR = ROOT / "cmake/ValidateShaderBlobs.cmake"
 SRC_CMAKE = ROOT / "src/CMakeLists.txt"
 NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
+CHAT_COMMAND_CATALOG_HEADER = (
+    ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.h"
+)
+CHAT_COMMAND_CATALOG_SOURCE = (
+    ROOT / "src/source/GameLogic/Commands/ChatCommandCatalog.cpp"
+)
+MULTI_LANGUAGE_HEADER = ROOT / "src/source/Data/Translation/MultiLanguage.h"
 SCRIPT_MODE_TESTS = (
     ROOT / "tests/core/test_msvc_runtime_dll_staging.cmake",
     ROOT / "tests/editor/test_leak.cmake",
@@ -97,6 +104,7 @@ EXPECTED_WINDOWS_OS_DLLS = {
     "uiautomationcore.dll",
     "urlmon.dll",
     "user32.dll",
+    "usp10.dll",
     "uuid.dll",
     "version.dll",
     "vfw32.dll",
@@ -170,6 +178,9 @@ vcpkg_manifest = json.loads(VCPKG_MANIFEST.read_text(encoding="utf-8"))
 shader_blob_validator = SHADER_BLOB_VALIDATOR.read_text(encoding="utf-8")
 src_cmake = SRC_CMAKE.read_text(encoding="utf-8")
 network_test_cmake = NETWORK_TEST_CMAKE.read_text(encoding="utf-8")
+chat_command_catalog_header = CHAT_COMMAND_CATALOG_HEADER.read_text(encoding="utf-8")
+chat_command_catalog_source = CHAT_COMMAND_CATALOG_SOURCE.read_text(encoding="utf-8")
+multi_language_header = MULTI_LANGUAGE_HEADER.read_text(encoding="utf-8")
 personal_shop_source = PERSONAL_SHOP_SOURCE.read_text(encoding="utf-8")
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
@@ -517,6 +528,7 @@ native_configure_arguments = folded_run_arguments(
     native_configure, "build-windows", "Configure CMake"
 )
 for required in (
+    "-DVCPKG_INSTALLED_DIR=C:/vcpkg/installed",
     "-DMU_ENABLE_SHADER_COMPILATION=${{ matrix.shader_compilation }}",
     "-DGLSLANG_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/glslang/glslangValidator.exe",
     "-DSPIRV_CROSS_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/spirv-cross/spirv-cross.exe",
@@ -528,6 +540,16 @@ for required in (
         f"Native strict shader configure argument must appear exactly once: {required}; found {count}",
     )
 check("DXC_EXE" not in mingw, "MinGW must not require the native MSVC DXC tool")
+
+for source_path, source in (
+    (CHAT_COMMAND_CATALOG_HEADER, chat_command_catalog_header),
+    (CHAT_COMMAND_CATALOG_SOURCE, chat_command_catalog_source),
+    (MULTI_LANGUAGE_HEADER, multi_language_header),
+):
+    check(
+        "#include <cstdint>" in source,
+        f"Windows integer declarations must include <cstdint> directly: {source_path}",
+    )
 
 check(
     re.search(
