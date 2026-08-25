@@ -1,7 +1,7 @@
 // GPU bone skinning for BMD rest-pose geometry.
 StructuredBuffer<float4> boneRows : register(t0, space0);
 
-cbuffer Skinning : register(b1)
+cbuffer Skinning : register(b0, space1)
 {
     float4x4 mvp;
     float4 bodyOriginAndScale;

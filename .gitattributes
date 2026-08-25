@@ -8,6 +8,9 @@
 *.cs text
 *.csproj text
 *.sln text
+*.spv binary
+*.dxil binary
+src/shaders/compiled/*.msl text eol=lf whitespace=-blank-at-eof
 
 # Binary game assets: never apply text detection or EOL normalization.
 # Some encrypted .bmd / .oz* files contain no NUL bytes, so `text=auto`

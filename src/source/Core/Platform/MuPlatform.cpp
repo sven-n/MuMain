@@ -53,7 +53,7 @@ void MuPlatform::Shutdown()
     s_bInitialized = false;
 }
 
-bool MuPlatform::CreateWindow(const char* title, int width, int height, uint32_t flags)
+bool MuPlatform::CreatePlatformWindow(const char* title, int width, int height, uint32_t flags)
 {
     if (!s_bInitialized)
     {

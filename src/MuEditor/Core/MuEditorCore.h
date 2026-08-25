@@ -5,18 +5,21 @@
 #include "stdafx.h"
 
 struct SDL_Window;
+struct SDL_GPUCommandBuffer;
+struct SDL_GPURenderPass;
 
 class CMuEditorCore
 {
 public:
     static CMuEditorCore& GetInstance();
 
-    // window/glContext are the SDL window and GL context for the ImGui SDL3
-    // backend (issue #442).
-    void Initialize(SDL_Window* window, void* glContext);
+    // window is the SDL window used by the ImGui SDL3 backend (issue #442).
+    void Initialize(SDL_Window* window);
     void Shutdown();
     void Update();
     void Render();
+    void PrepareDrawData(SDL_GPUCommandBuffer* commandBuffer);
+    void RenderDrawData(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass);
 
     bool IsEnabled() const { return m_bEditorMode; }
     void SetEnabled(bool enabled) { m_bEditorMode = enabled; }
@@ -36,6 +39,7 @@ private:
     bool m_bEditorMode;
     bool m_bInitialized;
     bool m_bFrameStarted;
+    bool m_bDrawDataReady;
     bool m_bShowItemEditor;
     bool m_bShowSkillEditor;
     bool m_bShowDevEditor;

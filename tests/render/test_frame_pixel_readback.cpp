@@ -1,5 +1,10 @@
 #include <array>
+#include <chrono>
 #include <cstdint>
+#include <filesystem>
+#include <fstream>
+#include <iterator>
+#include <string>
 #include <utility>
 #include <vector>
 
@@ -7,6 +12,7 @@
 #include <SDL3/SDL_gpu.h>
 
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
+#include "App/Platform/DiagnosticFrameCaptureWriter.h"
 #include "Render/Renderer/FramePixelReadback.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/SdlGpuPixelFormat.h"
@@ -14,6 +20,19 @@
 
 namespace
 {
+
+std::filesystem::path TemporaryCapturePath(const char* testName)
+{
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    return std::filesystem::temp_directory_path() /
+           (std::string("mu_frame_capture_") + testName + "_" + std::to_string(timestamp) + ".ppm");
+}
+
+std::vector<std::uint8_t> ReadBytes(const std::filesystem::path& path)
+{
+    std::ifstream file(path, std::ios::binary);
+    return {std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>()};
+}
 
 class MinimalRenderer final : public mu::IMuRenderer
 {
@@ -70,6 +89,54 @@ TEST_CASE("diagnostic capture requests exactly once [diagnostic capture]")
 
     CHECK_FALSE(schedule.BeforeFrame());
     CHECK_FALSE(schedule.AfterFrame());
+}
+
+TEST_CASE("diagnostic capture writes exact binary PPM bytes [diagnostic capture]")
+{
+    const auto path = TemporaryCapturePath("exact_bytes");
+    const mu::FramePixels pixels{1, 1, {0x00, 0x80, 0xFF}};
+    const std::vector<std::uint8_t> expected{
+        'P', '6', '\n', '1', ' ', '1', '\n', '2', '5', '5', '\n', 0x00, 0x80, 0xFF,
+    };
+
+    REQUIRE(mu::WriteDiagnosticFrameCapturePpm(path.string().c_str(), pixels));
+    CHECK(ReadBytes(path) == expected);
+
+    std::filesystem::remove(path);
+}
+
+TEST_CASE("diagnostic capture writer rejects zero dimensions [diagnostic capture]")
+{
+    const auto path = TemporaryCapturePath("zero_dimensions");
+
+    CHECK_FALSE(mu::WriteDiagnosticFrameCapturePpm(path.string().c_str(), {0, 1, {}}));
+    CHECK_FALSE(mu::WriteDiagnosticFrameCapturePpm(path.string().c_str(), {1, 0, {}}));
+    CHECK_FALSE(std::filesystem::exists(path));
+
+    std::filesystem::remove(path);
+}
+
+TEST_CASE("diagnostic capture writer rejects RGB byte-count mismatch [diagnostic capture]")
+{
+    const auto path = TemporaryCapturePath("byte_count");
+
+    CHECK_FALSE(mu::WriteDiagnosticFrameCapturePpm(path.string().c_str(), {1, 1, {1, 2}}));
+    CHECK_FALSE(mu::WriteDiagnosticFrameCapturePpm(path.string().c_str(), {1, 1, {1, 2, 3, 4}}));
+    CHECK_FALSE(std::filesystem::exists(path));
+
+    std::filesystem::remove(path);
+}
+
+TEST_CASE("diagnostic capture writer rejects an empty path [diagnostic capture]")
+{
+    CHECK_FALSE(mu::WriteDiagnosticFrameCapturePpm(nullptr, {1, 1, {1, 2, 3}}));
+    CHECK_FALSE(mu::WriteDiagnosticFrameCapturePpm("", {1, 1, {1, 2, 3}}));
+}
+
+TEST_CASE("diagnostic capture writer rejects an existing directory path [diagnostic capture]")
+{
+    CHECK_FALSE(
+        mu::WriteDiagnosticFrameCapturePpm(std::filesystem::temp_directory_path().string().c_str(), {1, 1, {1, 2, 3}}));
 }
 
 TEST_CASE("screenshot metadata remains pending until cleared [screenshot capture]")

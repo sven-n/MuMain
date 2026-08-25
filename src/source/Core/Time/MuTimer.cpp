@@ -1,7 +1,7 @@
 #include "stdafx.h"
 
 #include "MuTimer.h"
-#include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 #include <algorithm>
 
@@ -88,9 +88,9 @@ void MuTimer::LogStats()
     const double averageFrameMs = m_frameCount > 0 ? elapsedSeconds * 1000.0 / static_cast<double>(m_frameCount) : 0.0;
     const double minimumFrameMs = m_minFrameMs == std::numeric_limits<double>::max() ? 0.0 : m_minFrameMs;
 
-    g_ErrorReport.Write(
-        L"PERF: MuTimer -- elapsed=%.0fs frames=%llu avg=%.1fms min=%.1fms max=%.1fms hitches=%llu fps=%.1f\r\n",
-        elapsedSeconds, static_cast<unsigned long long>(m_frameCount), averageFrameMs, minimumFrameMs, m_maxFrameMs,
-        static_cast<unsigned long long>(m_hitchCount), GetFPS());
+    MU_LOG_ERROR(mu::log::Get("core"),
+                 "PERF: MuTimer -- elapsed={:.0f}s frames={} avg={:.1f}ms min={:.1f}ms max={:.1f}ms hitches={} "
+                 "fps={:.1f}",
+                 elapsedSeconds, m_frameCount, averageFrameMs, minimumFrameMs, m_maxFrameMs, m_hitchCount, GetFPS());
 }
-}
+} // namespace mu

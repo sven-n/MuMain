@@ -126,7 +126,7 @@ if(ENABLE_EDITOR)
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_tables.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/imgui_widgets.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_sdl3.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_opengl2.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/imgui/backends/imgui_impl_sdlgpu3.cpp"
   )
 
   target_include_directories(imgui PUBLIC
@@ -137,19 +137,6 @@ if(ENABLE_EDITOR)
   # The SDL3 ImGui backend (imgui_impl_sdl3.cpp) needs the SDL3 headers; link the
   # target so its include dirs propagate (issue #442).
   target_link_libraries(imgui PUBLIC SDL3::SDL3)
-
-  # The Win32 + OpenGL2 backends call straight into opengl32 (glOrtho,
-  # glShadeModel, ...) and dwmapi. Declaring them as PUBLIC dependencies of
-  # imgui lets CMake place these libraries *after* libimgui.a on the final
-  # link line, which MinGW's order-sensitive linker requires. Restrict to
-  # Windows non-MSVC (MinGW): these are Windows-only libraries, and MSVC links
-  # them elsewhere and ignores order anyway.
-  if (WIN32 AND NOT MSVC)
-    target_link_libraries(imgui PUBLIC opengl32 dwmapi)
-  elseif (UNIX AND NOT APPLE)
-    find_package(OpenGL REQUIRED)
-    target_link_libraries(imgui PUBLIC OpenGL::GL)
-  endif()
 
   # <-- Force C++20 for ImGui here
   target_compile_features(imgui PUBLIC cxx_std_20)
@@ -294,9 +281,10 @@ set(ASSETS_STAMP "${CMAKE_CURRENT_BINARY_DIR}/.assets_copied_$<CONFIG>.stamp")
 add_custom_command(
   OUTPUT "${ASSETS_STAMP}"
   COMMAND ${CMAKE_COMMAND} -E echo "=== Copying assets from ${ASSETS_DIR} to $<TARGET_FILE_DIR:Main>"
-  COMMAND ${CMAKE_COMMAND} -E copy_directory
-          "${ASSETS_DIR}"
-          "$<TARGET_FILE_DIR:Main>"
+  COMMAND "${CMAKE_COMMAND}"
+          "-DMU_ASSET_SOURCE=${ASSETS_DIR}"
+          "-DMU_ASSET_OUTPUT=$<TARGET_FILE_DIR:Main>"
+          "-P" "${REPO_ROOT}/cmake/CopyRuntimeAssets.cmake"
   COMMAND ${CMAKE_COMMAND} -E touch "${ASSETS_STAMP}"
   DEPENDS ${ASSET_FILES}
   COMMENT "Copying game assets (sources changed)"
@@ -477,7 +465,7 @@ set_source_files_properties(
   "${CMAKE_CURRENT_SOURCE_DIR}/source/Core/Platform/Audio/MiniAudioImpl.cpp"
   PROPERTIES
     SKIP_PRECOMPILE_HEADERS ON
-    COMPILE_OPTIONS "-Wno-error=tautological-compare"
+    COMPILE_OPTIONS "$<$<COMPILE_LANG_AND_ID:CXX,AppleClang,Clang,GNU>:-Wno-error=tautological-compare>"
 )
 
 # Basic compile definitions, roughly mirroring the original MSVC project
@@ -533,29 +521,18 @@ if (MSVC)
     urlmon
     turbojpeg-static
   )
+endif()
 
-  # Locate required DLLs in bin directory
-  set(DLL_SEARCH_PATH "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-  set(REQUIRED_DLL_NAMES glew32)
-  set(REQUIRED_DLLS)
-
-  foreach(DLL_NAME IN LISTS REQUIRED_DLL_NAMES)
-    find_file(${DLL_NAME}_DLL
-      NAMES "${DLL_NAME}.dll"
-      PATHS "${DLL_SEARCH_PATH}"
-      NO_DEFAULT_PATH
-      REQUIRED
-    )
-    list(APPEND REQUIRED_DLLS "${${DLL_NAME}_DLL}")
-  endforeach()
-
-  # Copy required DLLs to build directory for MSVC builds
+if (MSVC)
+  # ponytail: native CI uses dynamic vcpkg triplets; guard an empty runtime
+  # DLL list if static triplets are added.
   add_custom_command(TARGET Main POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E echo "=== DEBUG: Copying DLLs to: $<TARGET_FILE_DIR:Main>"
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-      ${REQUIRED_DLLS}
-      $<TARGET_FILE_DIR:Main>
-    COMMENT "Copying required DLLs to build directory"
+    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+      $<TARGET_RUNTIME_DLLS:Main>
+      "$<TARGET_FILE_DIR:Main>"
+    COMMAND_EXPAND_LISTS
+    COMMENT "Staging linked-target runtime DLLs"
+    VERBATIM
   )
 endif()
 
@@ -633,12 +610,12 @@ if (DOTNET_EXECUTABLE)
   elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(DOTNET_RID "win-x64")
     set(DOTNET_PLATFORM "x64")
-    set(DOTNET_EXTRA_ARGS "-p:IlcUseEnvironmentalTools=true")
+    set(DOTNET_EXTRA_ARGS "")
     message(STATUS ".NET Client Library will build for win-x64 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   else()
     set(DOTNET_RID "win-x86")
     set(DOTNET_PLATFORM "x86")
-    set(DOTNET_EXTRA_ARGS "-p:IlcUseEnvironmentalTools=true")
+    set(DOTNET_EXTRA_ARGS "")
     message(STATUS ".NET Client Library will build for win-x86 (CMAKE_SIZEOF_VOID_P=${CMAKE_SIZEOF_VOID_P})")
   endif()
 
@@ -861,9 +838,8 @@ if(APPLE)
   )
 endif()
 
-# Link ImGui for all platforms when editor is enabled. imgui carries its own
-# opengl32/dwmapi link dependencies (see its definition above), so the engine
-# only needs to link the imgui target itself.
+# Link ImGui for all platforms when editor is enabled. Untouched compatibility
+# code retains its existing OpenGL system-library links above.
 if(ENABLE_EDITOR)
   target_link_libraries(MuClient PUBLIC imgui)
 endif()

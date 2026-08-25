@@ -32,6 +32,7 @@ jobs:
     env:
       WINEDEBUG: -all
       WINEPREFIX: ${{ github.workspace }}/.wineprefix
+      VCPKG_CLASSIC_INSTALL_ROOT: ${{ github.workspace }}/_deps/vcpkg-installed
 
     steps:
       - name: Checkout repository
@@ -92,40 +93,110 @@ jobs:
           fi
           test -f "${prefix}/lib/libturbojpeg.a"
 
-      - name: Cache OpenSSL (MinGW ${{ matrix.arch }})
+      - name: Resolve vcpkg revision
+        id: vcpkg_revision
+        run: |
+          revision=$(git -C "${VCPKG_INSTALLATION_ROOT}" rev-parse HEAD) || {
+            echo "VCPKG_INSTALLATION_ROOT is not a git checkout: ${VCPKG_INSTALLATION_ROOT}" >&2
+            exit 1
+          }
+          if [ -z "${revision}" ]; then
+            echo "vcpkg revision is empty" >&2
+            exit 1
+          fi
+          echo "revision=${revision}" >> "${GITHUB_OUTPUT}"
+
+      - name: Cache MinGW dependencies (${{ matrix.arch }})
         uses: actions/cache@v4
         with:
           path: _deps/vcpkg-installed
-          key: openssl-mingw-${{ matrix.arch }}-${{ hashFiles('vcpkg.json') }}
+          key: vcpkg-${{ matrix.vcpkg_triplet }}-${{ steps.vcpkg_revision.outputs.revision }}-openssl+curl[ssl]-${{ hashFiles('vcpkg.json') }}
 
-      - name: Install OpenSSL (MinGW ${{ matrix.arch }} static)
+      - name: Install OpenSSL and curl (MinGW ${{ matrix.arch }} static)
         run: |
-          "${VCPKG_INSTALLATION_ROOT}/vcpkg" install "openssl:${{ matrix.vcpkg_triplet }}" \
+          "${VCPKG_INSTALLATION_ROOT}/vcpkg" install \
+            "openssl:${{ matrix.vcpkg_triplet }}" \
+            "curl[ssl]:${{ matrix.vcpkg_triplet }}" \
             --classic \
-            --x-install-root="${GITHUB_WORKSPACE}/_deps/vcpkg-installed"
-
-      - name: Locate OpenSSL (MinGW ${{ matrix.arch }})
-        id: openssl
-        run: |
-          crypto=$(find "${GITHUB_WORKSPACE}/_deps/vcpkg-installed" -path '*/lib/libcrypto.a' -print -quit)
-          header=$(find "${GITHUB_WORKSPACE}/_deps/vcpkg-installed" -path '*/include/openssl/crypto.h' -print -quit)
-          test -n "$crypto"
-          test -n "$header"
-          echo "crypto=$crypto" >> "$GITHUB_OUTPUT"
-          echo "include=$(dirname "$(dirname "$header")")" >> "$GITHUB_OUTPUT"
+            --x-install-root="${VCPKG_CLASSIC_INSTALL_ROOT}"
 
       - name: Configure CMake
         run: |
+          triplet_prefix="${VCPKG_CLASSIC_INSTALL_ROOT}/${{ matrix.vcpkg_triplet }}"
           cmake -S . -B build-mingw \
             -G Ninja \
             -DCMAKE_TOOLCHAIN_FILE="${GITHUB_WORKSPACE}/cmake/toolchains/mingw-w64-${{ matrix.arch }}.cmake" \
             -DCMAKE_BUILD_TYPE=Release \
             -DBUILD_TESTING=ON \
             -DENABLE_EDITOR=${{ matrix.editor }} \
-            -DOPENSSL_INCLUDE_DIR="${{ steps.openssl.outputs.include }}" \
-            -DOPENSSL_CRYPTO_LIBRARY="${{ steps.openssl.outputs.crypto }}" \
+            -DMINGW_ADDITIONAL_TARGET_ROOT="${triplet_prefix}" \
             -DOPENSSL_USE_STATIC_LIBS=TRUE \
             -DMU_TURBOJPEG_STATIC_LIB="${GITHUB_WORKSPACE}/_deps/mingw-${{ matrix.arch }}/lib/libturbojpeg.a"
+
+      - name: Validate MinGW dependency roots
+        run: |
+          triplet_prefix="${VCPKG_CLASSIC_INSTALL_ROOT}/${{ matrix.vcpkg_triplet }}"
+          cache="build-mingw/CMakeCache.txt"
+          test -f "${cache}"
+
+          validate_target_paths() {
+            local cache_name=$1
+            local cache_value=$2
+            local cache_path
+            local -a cache_paths
+            local populated=false
+
+            IFS=';' read -r -a cache_paths <<< "${cache_value}"
+            for cache_path in "${cache_paths[@]}"; do
+              case "${cache_path}" in
+                ""|*-NOTFOUND) continue ;;
+              esac
+
+              populated=true
+              case "${cache_path}" in
+                "${triplet_prefix}"/*) ;;
+                *)
+                  echo "${cache_name} resolved outside ${triplet_prefix}: ${cache_path}" >&2
+                  exit 1
+                  ;;
+              esac
+            done
+
+            "${populated}"
+          }
+
+          openssl_library_found=false
+          curl_dir_found=false
+          while IFS= read -r cache_line || [ -n "${cache_line}" ]; do
+            cache_key=${cache_line%%=*}
+            cache_value=${cache_line#*=}
+            cache_name=${cache_key%%:*}
+            case "${cache_name}" in
+              *-ADVANCED) continue ;;
+            esac
+
+            case "${cache_name}" in
+              OPENSSL_*LIBRARY*)
+                if validate_target_paths "${cache_name}" "${cache_value}"; then
+                  openssl_library_found=true
+                fi
+                ;;
+              CURL_DIR)
+                if validate_target_paths "${cache_name}" "${cache_value}"; then
+                  curl_dir_found=true
+                fi
+                ;;
+            esac
+          done < "${cache}"
+
+          "${openssl_library_found}" || {
+            echo "No populated OpenSSL library found in ${cache}" >&2
+            exit 1
+          }
+          "${curl_dir_found}" || {
+            echo "No populated CURL_DIR found in ${cache}" >&2
+            exit 1
+          }
 
       - name: Build
         run: cmake --build build-mingw -j"$(nproc)"
@@ -133,10 +204,274 @@ jobs:
       - name: Run tests
         run: ctest --test-dir build-mingw --output-on-failure
 
+      - name: Stage runnable directory
+        run: |
+          source_directory="build-mingw/src"
+          runtime_directory="${RUNNER_TEMP}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}"
+          test -f "${source_directory}/Main.exe"
+          if [ -e "${runtime_directory}" ]; then
+            echo "Refusing to reuse stale runtime directory: ${runtime_directory}" >&2
+            exit 1
+          fi
+          mkdir -p "${runtime_directory}"
+
+          # ponytail: current CMake/Ninja metadata only; add an install target when packaging grows.
+          tar -C "${source_directory}" \
+            --anchored \
+            --exclude='./CMakeFiles' \
+            --exclude='./ThirdParty' \
+            --exclude='./CTestTestfile.cmake' \
+            --exclude='./cmake_install.cmake' \
+            --exclude='./libMuClient.a' \
+            --exclude='./libimgui.a' \
+            --exclude='./Main.map' \
+            --exclude='./.assets_copied_Release.stamp' \
+            -cf - . | tar -C "${runtime_directory}" -xf -
+          test -f "${runtime_directory}/Main.exe"
+
+          runtime_has_root_import() {
+            local import_name=${1,,}
+            local runtime_file
+            local runtime_name
+            while IFS= read -r -d '' runtime_file; do
+              runtime_name=${runtime_file##*/}
+              if [ "${runtime_name,,}" = "${import_name}" ]; then
+                return 0
+              fi
+            done < <(find "${runtime_directory}" -maxdepth 1 -type f -print0)
+            return 1
+          }
+
+          stage_compiler_runtime_closure() {
+            local binary
+            local compiler_path
+            local copied
+            local dependencies
+            local import_name
+            local iteration
+            local -a runtime_binaries
+
+            for iteration in {1..8}; do
+              copied=false
+              mapfile -d '' -t runtime_binaries < <(
+                find "${runtime_directory}" -type f \
+                  \( -iname '*.exe' -o -iname '*.dll' \) \
+                  -print0 | LC_ALL=C sort -z
+              )
+              for binary in "${runtime_binaries[@]}"; do
+                if ! dependencies=$("${{ matrix.triple }}-objdump" -p "${binary}"); then
+                  echo "objdump -p failed for ${binary}" >&2
+                  exit 1
+                fi
+                while IFS= read -r import_name; do
+                  if [ -z "${import_name}" ]; then
+                    continue
+                  fi
+                  if [[ "${import_name}" == /* ||
+                        "${import_name}" =~ ^[[:alpha:]]: ||
+                        "${import_name}" == *"/"* ||
+                        "${import_name}" == *"\\"* ||
+                        "$(basename -- "${import_name}")" != "${import_name}" ]]; then
+                    continue
+                  fi
+                  if runtime_has_root_import "${import_name}"; then
+                    continue
+                  fi
+                  case "${import_name,,}" in
+                    libgcc_s_*.dll|libstdc++-6.dll|libwinpthread-1.dll)
+                      ;;
+                    *)
+                      continue
+                      ;;
+                  esac
+                  if ! compiler_path=$("${{ matrix.triple }}-g++" "-print-file-name=${import_name}"); then
+                    echo "Compiler runtime lookup failed: ${import_name}" >&2
+                    exit 1
+                  fi
+                  if [ "${compiler_path}" = "${import_name}" ] || [ ! -f "${compiler_path}" ]; then
+                    continue
+                  fi
+                  cp -- "${compiler_path}" "${runtime_directory}/${import_name}"
+                  copied=true
+                done < <(
+                  sed -n 's/^[[:space:]]*DLL Name:[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' \
+                    <<< "${dependencies}"
+                )
+              done
+              if ! "${copied}"; then
+                return 0
+              fi
+            done
+            echo "Compiler runtime closure exceeded 8 iterations" >&2
+            exit 1
+          }
+
+          stage_compiler_runtime_closure
+
+      - name: Validate runnable directory
+        run: |
+          runtime_directory="${RUNNER_TEMP}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}"
+          required_files=(
+            "${runtime_directory}/Main.exe"
+            "${runtime_directory}/config.ini"
+            "${runtime_directory}/Data/Dec2.dat"
+            "${runtime_directory}/fonts/DejaVuSans.ttf"
+          )
+          required_directories=(
+            "${runtime_directory}/Data"
+            "${runtime_directory}/shaders"
+          )
+
+          for path in "${required_files[@]}"; do
+            if [ ! -f "${path}" ]; then
+              echo "Missing required runtime file: ${path}" >&2
+              exit 1
+            fi
+          done
+          for path in "${required_directories[@]}"; do
+            if [ ! -d "${path}" ]; then
+              echo "Missing required runtime directory: ${path}" >&2
+              exit 1
+            fi
+          done
+          if [ -e "${runtime_directory}/MUnique.Client.Library.dll" ]; then
+            echo "Unexpected NativeAOT DLL in MinGW runtime directory" >&2
+            exit 1
+          fi
+
+          case "${{ matrix.arch }}" in
+            x86_64)
+              expected_file_format="pei-x86-64"
+              expected_architecture_line="architecture: i386:x86-64, flags"
+              ;;
+            i686)
+              expected_file_format="pei-i386"
+              expected_architecture_line="architecture: i386, flags"
+              ;;
+            *)
+              echo "Unsupported MinGW architecture: ${{ matrix.arch }}" >&2
+              exit 1
+              ;;
+          esac
+
+          is_windows_system_dll() {
+            case "${1,,}" in
+              advapi32.dll|avrt.dll|bcrypt.dll|cfgmgr32.dll|combase.dll|comctl32.dll|comdlg32.dll|crypt32.dll|d3d12.dll|dbghelp.dll|dinput8.dll|dnsapi.dll|dwmapi.dll|dxcore.dll|dxgi.dll|dxguid.dll|gdi32.dll|glu32.dll|hid.dll|imagehlp.dll|imm32.dll|iphlpapi.dll|kernel32.dll|mf.dll|mfplat.dll|mfreadwrite.dll|mfsensorgroup.dll|msvcrt.dll|normaliz.dll|ntdll.dll|ole32.dll|oleaut32.dll|opengl32.dll|powrprof.dll|propsys.dll|rpcrt4.dll|sechost.dll|secur32.dll|setupapi.dll|shell32.dll|shcore.dll|shlwapi.dll|ucrtbase.dll|uiautomationcore.dll|urlmon.dll|user32.dll|uuid.dll|version.dll|vfw32.dll|wininet.dll|winmm.dll|wintrust.dll|wldap32.dll|ws2_32.dll|wtsapi32.dll)
+                return 0
+                ;;
+              *)
+                return 1
+                ;;
+            esac
+          }
+
+          runtime_has_root_import() {
+            local import_name=${1,,}
+            local runtime_file
+            local runtime_name
+            while IFS= read -r -d '' runtime_file; do
+              runtime_name=${runtime_file##*/}
+              if [ "${runtime_name,,}" = "${import_name}" ]; then
+                return 0
+              fi
+            done < <(find "${runtime_directory}" -maxdepth 1 -type f -print0)
+            return 1
+          }
+
+          mapfile -d '' -t runtime_binaries < <(
+            find "${runtime_directory}" -type f \
+              \( -iname '*.exe' -o -iname '*.dll' \) \
+              -print0 | LC_ALL=C sort -z
+          )
+          if [ ${#runtime_binaries[@]} -eq 0 ]; then
+            echo "Runtime directory contains no PE files: ${runtime_directory}" >&2
+            exit 1
+          fi
+
+          remaining_imports=()
+          for binary in "${runtime_binaries[@]}"; do
+            if ! headers=$("${{ matrix.triple }}-objdump" -f "${binary}"); then
+              echo "objdump -f failed for ${binary}" >&2
+              exit 1
+            fi
+            grep -Eq "[[:space:]]file format ${expected_file_format}$" <<< "${headers}"
+            grep -Fq "${expected_architecture_line}" <<< "${headers}"
+
+            if ! dependencies=$("${{ matrix.triple }}-objdump" -p "${binary}"); then
+              echo "objdump -p failed for ${binary}" >&2
+              exit 1
+            fi
+            while IFS= read -r import_name; do
+              if [ -z "${import_name}" ]; then
+                continue
+              fi
+              if [[ "${import_name}" == /* ||
+                    "${import_name}" =~ ^[[:alpha:]]: ||
+                    "${import_name}" == *"/"* ||
+                    "${import_name}" == *"\\"* ||
+                    "$(basename -- "${import_name}")" != "${import_name}" ]]; then
+                remaining_imports+=("${binary}: invalid import name: ${import_name}")
+                continue
+              fi
+              if runtime_has_root_import "${import_name}"; then
+                continue
+              fi
+              case "${import_name,,}" in
+                api-ms-win-*|ext-ms-win-*)
+                  continue
+                  ;;
+              esac
+              if is_windows_system_dll "${import_name}"; then
+                continue
+              fi
+              remaining_imports+=("${binary}: missing runtime import: ${import_name}")
+            done < <(
+              sed -n 's/^[[:space:]]*DLL Name:[[:space:]]*\([^[:space:]]*\)[[:space:]]*$/\1/p' \
+                <<< "${dependencies}"
+            )
+          done
+          if [ ${#remaining_imports[@]} -ne 0 ]; then
+            printf '%s\n' "${remaining_imports[@]}" | LC_ALL=C sort -u >&2
+            exit 1
+          fi
+
+          expected_shaders=(
+            "basic_colored.frag.dxil"
+            "basic_colored.frag.msl"
+            "basic_colored.frag.spv"
+            "basic_colored.vert.dxil"
+            "basic_colored.vert.msl"
+            "basic_colored.vert.spv"
+            "basic_textured.frag.dxil"
+            "basic_textured.frag.msl"
+            "basic_textured.frag.spv"
+            "basic_textured.vert.dxil"
+            "basic_textured.vert.msl"
+            "basic_textured.vert.spv"
+            "shadow_volume.vert.dxil"
+            "shadow_volume.vert.msl"
+            "shadow_volume.vert.spv"
+            "skinned_textured.vert.dxil"
+            "skinned_textured.vert.msl"
+            "skinned_textured.vert.spv"
+          )
+          shader_directory="${runtime_directory}/shaders"
+          mapfile -t actual_shaders < <(
+            find "${shader_directory}" -type f -printf '%P\n' | LC_ALL=C sort
+          )
+          if ! diff -u \
+            <(printf '%s\n' "${expected_shaders[@]}") \
+            <(printf '%s\n' "${actual_shaders[@]}"); then
+            echo "Runtime shader manifest differs from the exact 18-file manifest" >&2
+            exit 1
+          fi
+
+          echo "Validated MinGW ${{ matrix.arch }} runtime directory: ${runtime_directory}"
+
       - name: Upload client binary
         uses: actions/upload-artifact@v4
         with:
-          name: mu-client-windows-${{ matrix.arch }}-editor-${{ matrix.editor }}
-          path: |
-            build-mingw/src/Main.exe
+          name: mu-client-windows-mingw-${{ matrix.arch }}-release-editor-${{ matrix.editor }}
+          path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/
           if-no-files-found: error
+          include-hidden-files: true

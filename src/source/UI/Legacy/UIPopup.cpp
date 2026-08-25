@@ -506,7 +506,7 @@ void CUIPopup::Render()
                     .pos = {320 - m_nInputSize / 2 + 5, static_cast<int>(fPosY) - 2},
                     .size = {m_nInputSize, 14},
                     .textLimit = m_nInputTextLength,
-                    .options = m_InputOptions,
+                    .options = static_cast<DWORD>(m_InputOptions),
                 });
                 g_pSingleTextInputBox->GiveFocus();
                 g_pSingleTextInputBox->DoAction();

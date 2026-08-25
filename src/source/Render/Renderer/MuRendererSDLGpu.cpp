@@ -36,6 +36,9 @@
 #include "SdlGpuPixelFormat.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#ifdef _EDITOR
+#include "Core/MuEditorCore.h"
+#endif
 
 #include <algorithm>
 #include <array>
@@ -505,12 +508,15 @@ static SDL_GPUSampler* s_defaultSampler = nullptr;
 enum class RenderCmdType : uint8_t
 {
     SetViewport,
-    SetScissor,    // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
+    SetScissor, // pixel-level rect clip — Vulkan/Metal/D3D12 viewport alone doesn't clip
+#ifdef _EDITOR
+    EditorOverlay,
+#endif
     DrawTriangles, // non-indexed 3D (Vertex3D)
     DrawSkinnedTriangles,
     DrawIndexedQuads, // indexed 2D or 3D with static quad index buffer
-    DrawIndexedStrip,   // indexed 3D with per-frame strip indices (Vertex3D)
-    DrawTriangles2D,    // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
+    DrawIndexedStrip, // indexed 3D with per-frame strip indices (Vertex3D)
+    DrawTriangles2D,  // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
 };
 
 struct RenderCmd
@@ -543,11 +549,27 @@ static std::size_t s_lastQuadCommand = kNoQuadCommand;
 
 [[nodiscard]] static bool IsDrawCommand(RenderCmdType type)
 {
+#ifdef _EDITOR
+    if (type == RenderCmdType::EditorOverlay)
+    {
+        return true;
+    }
+#endif
     return type != RenderCmdType::SetViewport && type != RenderCmdType::SetScissor;
 }
 
-[[nodiscard]] static FrameProfiler::Counter ClassifyBatchBreak(const RenderCmd& command,
-                                                               std::size_t previousCommand,
+[[nodiscard]] static bool IsUnsafeInvalidatedDrawCommand(RenderCmdType type)
+{
+#ifdef _EDITOR
+    if (type == RenderCmdType::EditorOverlay)
+    {
+        return false;
+    }
+#endif
+    return IsDrawCommand(type);
+}
+
+[[nodiscard]] static FrameProfiler::Counter ClassifyBatchBreak(const RenderCmd& command, std::size_t previousCommand,
                                                                bool geometryCanMerge)
 {
     using Counter = FrameProfiler::Counter;
@@ -629,8 +651,7 @@ static std::size_t s_lastQuadCommand = kNoQuadCommand;
     const RenderCmd& previous = s_renderCmds[s_lastQuadCommand];
     const bool geometryCanMerge = Render::Topology::CanMergeQuadDraws(
         previous.vtxOffset, previous.idxCount, command.vtxOffset, command.idxCount, sizeof(Vertex3D), k_MaxQuads);
-    const FrameProfiler::Counter breakCause =
-        ClassifyBatchBreak(command, s_lastQuadCommand, geometryCanMerge);
+    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, s_lastQuadCommand, geometryCanMerge);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
         FrameProfiler::Count(breakCause);
@@ -643,6 +664,31 @@ static std::size_t s_lastQuadCommand = kNoQuadCommand;
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
 // during the collection phase (render pass is only opened in EndFrame now).
 static bool s_frameActive = false;
+#ifdef _EDITOR
+void QueueEditorRenderCommand()
+{
+    if (!s_frameActive)
+    {
+        return;
+    }
+
+    RenderCmd command{};
+    command.type = RenderCmdType::EditorOverlay;
+    s_renderCmds.push_back(command);
+}
+
+static void PreparePendingEditorDrawData(SDL_GPUCommandBuffer* commandBuffer)
+{
+    const bool editorRenderPending = std::any_of(s_renderCmds.begin(), s_renderCmds.end(), [](const RenderCmd& command)
+                                                 { return command.type == RenderCmdType::EditorOverlay; });
+    if (!editorRenderPending)
+    {
+        return;
+    }
+
+    g_MuEditorCore.PrepareDrawData(commandBuffer);
+}
+#endif
 // CPU-side scratch buffer for quad strip indices accumulated during the frame.
 // Copied to GPU in one shot in EndFrame before the render pass.
 static std::vector<Uint16> s_stripIdxScratch;
@@ -668,11 +714,11 @@ static std::vector<TextureUpdateCmd> s_textureUpdates;
 static SDL_GPUTexture* s_whiteTexture = nullptr;
 
 // Shader handles for basic_textured (2D path) and basic_colored — released after pipeline creation.
-static SDL_GPUShader* s_vertShader2D = nullptr;     // basic_textured.vert
-static SDL_GPUShader* s_fragShaderTex = nullptr;    // basic_textured.frag
-static SDL_GPUShader* s_vertShader2DCol = nullptr;  // basic_colored.vert
-static SDL_GPUShader* s_fragShaderCol = nullptr;    // basic_colored.frag
-static SDL_GPUShader* s_vertShaderShadow = nullptr; // shadow_volume.vert
+static SDL_GPUShader* s_vertShader2D = nullptr;      // basic_textured.vert
+static SDL_GPUShader* s_fragShaderTex = nullptr;     // basic_textured.frag
+static SDL_GPUShader* s_vertShader2DCol = nullptr;   // basic_colored.vert
+static SDL_GPUShader* s_fragShaderCol = nullptr;     // basic_colored.frag
+static SDL_GPUShader* s_vertShaderShadow = nullptr;  // shadow_volume.vert
 static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 
 // Story 7.9.7 (AC-3): Depth buffer texture for correct 3D depth testing.
@@ -1083,10 +1129,12 @@ public:
             return false;
         }
 
-        // Create blend mode pipelines (9 per set × 4 sets = 36 total).
+        // Build nine blend variants for five required core sets, plus the unused
+        // 2D depth-on set and any skinned sets whose optional shader loaded.
         if (!CreatePipelines())
         {
             mu::log::Get("render")->error("SDL_gpu -- pipeline creation failed during Init");
+            DestroyPipelines();
             ReleaseShaders();
             SDL_ReleaseWindowFromGPUDevice(s_device, s_window);
             SDL_DestroyGPUDevice(s_device);
@@ -1704,6 +1752,9 @@ public:
         {
             s_renderReplayBeginTime = std::chrono::steady_clock::now();
         }
+#ifdef _EDITOR
+        PreparePendingEditorDrawData(s_cmdBuf);
+#endif
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
@@ -1732,185 +1783,198 @@ public:
             // recently requested scissor and re-apply it before every draw command.
             // When no scissor has been set yet we default to the full swapchain
             // (same as SDL_GPU's implicit initial state).
+            SDL_GPUViewport s_currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH),
+                                              0.0f, 1.0f};
             SDL_Rect s_currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
 
-            // Replay all recorded draw commands in submission order.
-            // Skip replay if textures were unloaded mid-frame — deferred commands
-            // may hold dangling GPU pointers. The frame renders as a blank clear.
-            if (!s_texturesInvalidated)
-                for (const auto& cmd : s_renderCmds)
+            // Replay state and editor commands after texture invalidation, but skip
+            // game draws because their deferred texture pointers may be dangling.
+            for (const auto& cmd : s_renderCmds)
+            {
+                if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
                 {
-                    ++s_dbgRenderCmdsReplayedThisFrame;
-                    switch (cmd.type)
+                    continue;
+                }
+                ++s_dbgRenderCmdsReplayedThisFrame;
+
+                switch (cmd.type)
+                {
+                case RenderCmdType::SetViewport:
+                {
+                    s_currentViewport = cmd.viewport;
+                    SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
+                    break;
+                }
+
+                case RenderCmdType::SetScissor:
+                {
+                    s_currentScissor = cmd.scissor;
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    break;
+                }
+
+#ifdef _EDITOR
+                case RenderCmdType::EditorOverlay:
+                {
+                    g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
+                    SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    break;
+                }
+#endif
+
+                case RenderCmdType::DrawTriangles:
+                {
+                    if (!cmd.texture || !cmd.sampler)
                     {
-                    case RenderCmdType::SetViewport:
+                        break;
+                    }
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    // Sticky scissor: re-apply after pipeline bind (see note above).
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                    ++s_dbgGpuDrawCallsThisFrame;
+                    break;
+                }
+
+                case RenderCmdType::DrawSkinnedTriangles:
+                {
+                    if (!boneDataReady || !s_boneGpuBuf || !cmd.texture || !cmd.sampler)
                     {
-                        // const_cast: SDL_SetGPUViewport takes a non-const pointer but
-                        // does not modify the viewport struct.
-                        auto vp = cmd.viewport;
-                        SDL_SetGPUViewport(s_renderPass, &vp);
+                        break;
+                    }
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.skinningVu, sizeof(SkinningVertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
+                    SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                    ++s_dbgGpuDrawCallsThisFrame;
+                    break;
+                }
+
+                case RenderCmdType::DrawIndexedQuads:
+                {
+                    // Guard against dangling sampler/texture — scene transitions may
+                    // unload assets mid-frame before EndFrame replays deferred commands.
+                    if (!cmd.texture || !cmd.sampler)
+                    {
                         break;
                     }
 
-                    case RenderCmdType::SetScissor:
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUBufferBinding idxBind{};
+                    idxBind.buffer = s_quadIdxBuf;
+                    idxBind.offset = 0;
+                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                    ++s_dbgGpuDrawCallsThisFrame;
+                    break;
+                }
+
+                case RenderCmdType::DrawIndexedStrip:
+                {
+                    // Guard against dangling sampler/texture — scene transitions may
+                    // unload assets mid-frame before EndFrame replays deferred commands.
+                    if (!cmd.texture || !cmd.sampler)
                     {
-                        s_currentScissor = cmd.scissor;
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                         break;
                     }
 
-                    case RenderCmdType::DrawTriangles:
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
+
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+
+                    SDL_GPUBufferBinding idxBind{};
+                    idxBind.buffer = s_stripIdxBuf;
+                    idxBind.offset = cmd.stripIdxOffset;
+                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
+
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
+
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
+                    ++s_dbgGpuDrawCallsThisFrame;
+                    break;
+                }
+
+                case RenderCmdType::DrawTriangles2D:
+                {
+                    if (!cmd.texture || !cmd.sampler)
                     {
-                        if (!cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
-                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                        // Sticky scissor: re-apply after pipeline bind (see note above).
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                        SDL_GPUBufferBinding vtxBind{};
-                        vtxBind.buffer = s_vtxGpuBuf;
-                        vtxBind.offset = cmd.vtxOffset;
-                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                        SDL_GPUTextureSamplerBinding sampBind{};
-                        sampBind.texture = cmd.texture;
-                        sampBind.sampler = cmd.sampler;
-                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                        SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                        ++s_dbgGpuDrawCallsThisFrame;
                         break;
                     }
+                    // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
+                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
+                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
 
-                    case RenderCmdType::DrawSkinnedTriangles:
-                    {
-                        if (!boneDataReady || !s_boneGpuBuf || !cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
-                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.skinningVu, sizeof(SkinningVertexUniforms));
+                    SDL_GPUBufferBinding vtxBind{};
+                    vtxBind.buffer = s_vtxGpuBuf;
+                    vtxBind.offset = cmd.vtxOffset;
+                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
 
-                        SDL_GPUBufferBinding vtxBind{};
-                        vtxBind.buffer = s_vtxGpuBuf;
-                        vtxBind.offset = cmd.vtxOffset;
-                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
+                    SDL_GPUTextureSamplerBinding sampBind{};
+                    sampBind.texture = cmd.texture;
+                    sampBind.sampler = cmd.sampler;
+                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
 
-                        SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
-                        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
-
-                        SDL_GPUTextureSamplerBinding sampBind{};
-                        sampBind.texture = cmd.texture;
-                        sampBind.sampler = cmd.sampler;
-                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                        SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                        ++s_dbgGpuDrawCallsThisFrame;
-                        break;
-                    }
-
-                    case RenderCmdType::DrawIndexedQuads:
-                    {
-                        // Guard against dangling sampler/texture — scene transitions may
-                        // unload assets mid-frame before EndFrame replays deferred commands.
-                        if (!cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
-
-                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                        SDL_GPUBufferBinding vtxBind{};
-                        vtxBind.buffer = s_vtxGpuBuf;
-                        vtxBind.offset = cmd.vtxOffset;
-                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                        SDL_GPUBufferBinding idxBind{};
-                        idxBind.buffer = s_quadIdxBuf;
-                        idxBind.offset = 0;
-                        SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                        SDL_GPUTextureSamplerBinding sampBind{};
-                        sampBind.texture = cmd.texture;
-                        sampBind.sampler = cmd.sampler;
-                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                        SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                        ++s_dbgGpuDrawCallsThisFrame;
-                        break;
-                    }
-
-                    case RenderCmdType::DrawIndexedStrip:
-                    {
-                        // Guard against dangling sampler/texture — scene transitions may
-                        // unload assets mid-frame before EndFrame replays deferred commands.
-                        if (!cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
-
-                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                        SDL_GPUBufferBinding vtxBind{};
-                        vtxBind.buffer = s_vtxGpuBuf;
-                        vtxBind.offset = cmd.vtxOffset;
-                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                        SDL_GPUBufferBinding idxBind{};
-                        idxBind.buffer = s_stripIdxBuf;
-                        idxBind.offset = cmd.stripIdxOffset;
-                        SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                        SDL_GPUTextureSamplerBinding sampBind{};
-                        sampBind.texture = cmd.texture;
-                        sampBind.sampler = cmd.sampler;
-                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                        SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                        ++s_dbgGpuDrawCallsThisFrame;
-                        break;
-                    }
-
-                    case RenderCmdType::DrawTriangles2D:
-                    {
-                        if (!cmd.texture || !cmd.sampler)
-                        {
-                            break;
-                        }
-                        // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
-                        SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                        SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                        SDL_GPUBufferBinding vtxBind{};
-                        vtxBind.buffer = s_vtxGpuBuf;
-                        vtxBind.offset = cmd.vtxOffset;
-                        SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                        SDL_GPUTextureSamplerBinding sampBind{};
-                        sampBind.texture = cmd.texture;
-                        sampBind.sampler = cmd.sampler;
-                        SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                        SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                        SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                        ++s_dbgGpuDrawCallsThisFrame;
-                        break;
-                    }
-                    } // switch
-                } // for
+                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
+                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
+                    ++s_dbgGpuDrawCallsThisFrame;
+                    break;
+                }
+                } // switch
+            } // for
 
             SDL_EndGPURenderPass(s_renderPass);
             s_renderPass = nullptr;
@@ -3385,7 +3449,7 @@ private:
 
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-2, AC-5): LoadShaders
-    // Loads all 5 HLSL shader blobs from MU_SHADER_DIR and creates
+    // Loads all 6 HLSL shader blobs from MU_SHADER_DIR and creates
     // SDL_GPUShader handles for pipeline creation.
     // driverName: SDL_GetGPUDeviceDriver(s_device) result.
     // Returns false if the primary shader (basic_textured.vert) cannot be loaded
@@ -3446,7 +3510,7 @@ private:
 
         // basic_textured.vert — fatal: required for all 2D textured draws.
         // Inputs: pos(TEXCOORD0), uv(TEXCOORD1), color(TEXCOORD2)
-        // Uniform buffers: b1 (ScreenSize)
+        // Uniform buffers: b0, space1 (Transform)
         s_vertShader2D = createShader("basic_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 0, 1, /*fatal=*/true);
         if (!s_vertShader2D)
         {
@@ -3466,8 +3530,8 @@ private:
         }
 
         // basic_colored.vert — non-fatal (colored path degrades gracefully).
-        // Inputs: pos(TEXCOORD0), color(TEXCOORD2)  [uv removed per LOW-1 fix]
-        // Uniform buffers: b1 (ScreenSize)
+        // Inputs: pos(TEXCOORD0), color(TEXCOORD1)
+        // Uniform buffers: b0, space1 (ScreenSize)
         // NOTE (HIGH-4): Shader handles below are loaded as pipeline hooks for
         //   future IMuRenderer::RenderColoredGeometry() and RenderShadowVolume()
         //   methods. No dedicated pipeline sets exist yet — these shaders are not
@@ -3492,7 +3556,7 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2: ReleaseShaders — release all 5 shader handles.
+    // Story 4.3.2: ReleaseShaders — release all 6 shader handles.
     // Called after CreatePipelines() and during Shutdown() as a safety net.
     // -----------------------------------------------------------------------
     static void ReleaseShaders()
@@ -3531,12 +3595,8 @@ private:
 
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-8): BuildBlendPipeline
-    // bUse3DLayout=false → Vertex2D layout (pitch=20, float2 pos/uv + ubyte4 color).
-    // bUse3DLayout=true  → Vertex3D layout (pitch=40, float3 pos + float3 normal
-    //                       + float2 uv + ubyte4 color).
-    // Vertex shader chosen per layout: s_vertShader2D for 2D, s_vertShader2D
-    // also serves 3D (re-uses position+uv+color bindings; normal discarded by shader).
-    // Fragment shader: s_fragShaderTex (textured path with fog support).
+    // Creates one textured blend/depth/cull variant and captures SDL's immediate
+    // error before another pipeline build can overwrite it.
     // -----------------------------------------------------------------------
     enum class VertexLayout
     {
@@ -3545,11 +3605,29 @@ private:
         Skinned,
     };
 
-    [[nodiscard]] static SDL_GPUGraphicsPipeline* BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
-                                                                     bool depthTestEnabled, bool depthWriteEnabled,
-                                                                     VertexLayout vertexLayout,
-                                                                     bool cullFaceEnabled = false)
+    struct PipelineBuildDescription
     {
+        const char* setName;
+        const char* blendModeName;
+        int blendIndex;
+        bool depthTestEnabled;
+        bool depthWriteEnabled;
+        VertexLayout vertexLayout;
+        bool cullFaceEnabled;
+    };
+
+    struct PipelineBuildResult
+    {
+        SDL_GPUGraphicsPipeline* pipeline;
+        PipelineBuildDescription description;
+        std::string error;
+    };
+
+    [[nodiscard]] static PipelineBuildResult BuildBlendPipeline(SDL_GPUColorTargetBlendState blendState,
+                                                                const PipelineBuildDescription& description)
+    {
+        PipelineBuildResult result{nullptr, description, {}};
+
         // Get swapchain texture format for pipeline target.
         const SDL_GPUTextureFormat swapchainFmt = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
 
@@ -3564,7 +3642,7 @@ private:
         vtxBufDesc.input_rate = SDL_GPU_VERTEXINPUTRATE_VERTEX;
         vtxBufDesc.instance_step_rate = 0;
 
-        if (vertexLayout == VertexLayout::TwoDimensional)
+        if (description.vertexLayout == VertexLayout::TwoDimensional)
         {
             // Vertex2D: float2 pos (TEXCOORD0), float2 uv (TEXCOORD1), ubyte4_norm color (TEXCOORD2)
             vertexAttribs[0] = {};
@@ -3588,7 +3666,7 @@ private:
             vtxBufDesc.pitch = sizeof(Vertex2D);
             numAttribs = 3;
         }
-        else if (vertexLayout == VertexLayout::ThreeDimensional)
+        else if (description.vertexLayout == VertexLayout::ThreeDimensional)
         {
             // Vertex3D mapped to the 2D shader's input locations:
             //   location 0 (TEXCOORD0 → pos):   float3 pos  — shader reads float2 (x,y), z dropped
@@ -3665,8 +3743,8 @@ private:
         vtxInputState.num_vertex_attributes = numAttribs;
 
         SDL_GPUDepthStencilState depthState{};
-        depthState.enable_depth_test = depthTestEnabled;
-        depthState.enable_depth_write = depthWriteEnabled;
+        depthState.enable_depth_test = description.depthTestEnabled;
+        depthState.enable_depth_write = description.depthWriteEnabled;
         depthState.enable_stencil_test = false;
         // Depth compare selection:
         //   LESS for opaque 3D (depth write ON): strict layering, normal opaque z-sort.
@@ -3677,8 +3755,8 @@ private:
         //   ran these passes with GL_LEQUAL effectively by calling SetDepthFunc(GL_LEQUAL)
         //   before them, which the SDL3 backend doesn't propagate. Using LESS_OR_EQUAL on
         //   read-only variants recovers the intended behavior uniformly.
-        const bool usesWorldDepth = vertexLayout != VertexLayout::TwoDimensional;
-        const bool strictLayering = usesWorldDepth && depthWriteEnabled;
+        const bool usesWorldDepth = description.vertexLayout != VertexLayout::TwoDimensional;
+        const bool strictLayering = usesWorldDepth && description.depthWriteEnabled;
         depthState.compare_op = strictLayering ? SDL_GPU_COMPAREOP_LESS : SDL_GPU_COMPAREOP_LESS_OR_EQUAL;
 
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
@@ -3693,11 +3771,13 @@ private:
         // Disable for transparent/glow passes (depth write OFF) and all 2D.
         SDL_GPURasterizerState rasterState{};
         rasterState.fill_mode = SDL_GPU_FILLMODE_FILL;
-        rasterState.cull_mode = (usesWorldDepth && cullFaceEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
+        rasterState.cull_mode =
+            (usesWorldDepth && description.cullFaceEnabled) ? SDL_GPU_CULLMODE_BACK : SDL_GPU_CULLMODE_NONE;
         rasterState.front_face = SDL_GPU_FRONTFACE_COUNTER_CLOCKWISE;
 
         SDL_GPUGraphicsPipelineCreateInfo pipelineInfo{};
-        pipelineInfo.vertex_shader = vertexLayout == VertexLayout::Skinned ? s_vertShaderSkinned : s_vertShader2D;
+        pipelineInfo.vertex_shader =
+            description.vertexLayout == VertexLayout::Skinned ? s_vertShaderSkinned : s_vertShader2D;
         pipelineInfo.fragment_shader = s_fragShaderTex;
         pipelineInfo.vertex_input_state = vtxInputState;
         pipelineInfo.primitive_type = SDL_GPU_PRIMITIVETYPE_TRIANGLELIST;
@@ -3706,24 +3786,52 @@ private:
         pipelineInfo.target_info = targetInfo;
         pipelineInfo.props = 0;
 
-        SDL_GPUGraphicsPipeline* pipeline = SDL_CreateGPUGraphicsPipeline(s_device, &pipelineInfo);
-        if (!pipeline)
+        result.pipeline = SDL_CreateGPUGraphicsPipeline(s_device, &pipelineInfo);
+        if (!result.pipeline)
         {
-            mu::log::Get("render")->error("SDL_gpu -- pipeline creation failed ({} layout): {}",
-                                          vertexLayout == VertexLayout::TwoDimensional ? "2D" : "3D", SDL_GetError());
+            result.error = SDL_GetError();
+            if (result.error.empty())
+            {
+                result.error = "SDL reported no pipeline error";
+            }
         }
-        return pipeline;
+        return result;
+    }
+
+    static void LogPipelineFailure(const char* driverName, const PipelineBuildResult& result, bool required)
+    {
+        const PipelineBuildDescription& description = result.description;
+        const char* layoutName = description.vertexLayout == VertexLayout::TwoDimensional     ? "2D"
+                                 : description.vertexLayout == VertexLayout::ThreeDimensional ? "3D"
+                                                                                              : "skinned";
+        const char* vertexShaderName =
+            description.vertexLayout == VertexLayout::Skinned ? "skinned_textured.vert" : "basic_textured.vert";
+        constexpr const char* fragmentShaderName = "basic_textured.frag";
+        const char* cullMode =
+            description.vertexLayout != VertexLayout::TwoDimensional && description.cullFaceEnabled ? "back" : "none";
+        if (required)
+        {
+            mu::log::Get("render")->error(
+                "SDL_gpu -- required pipeline failed: driver={} set={} layout={} vertex_shader={} fragment_shader={} "
+                "blend={} index={} depth_test={} depth_write={} cull={} error={}",
+                driverName, description.setName, layoutName, vertexShaderName, fragmentShaderName,
+                description.blendModeName, description.blendIndex, description.depthTestEnabled,
+                description.depthWriteEnabled, cullMode, result.error);
+            return;
+        }
+
+        mu::log::Get("render")->warn(
+            "SDL_gpu -- optional pipeline failed: driver={} set={} layout={} vertex_shader={} fragment_shader={} "
+            "blend={} index={} depth_test={} depth_write={} cull={} error={}",
+            driverName, description.setName, layoutName, vertexShaderName, fragmentShaderName,
+            description.blendModeName, description.blendIndex, description.depthTestEnabled,
+            description.depthWriteEnabled, cullMode, result.error);
     }
 
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-8): CreatePipelines
-    // Creates 5 pipeline sets × 9 blend modes = 45 pipelines total.
-    //   s_pipelines2D[9]         — Vertex2D layout, depth ON
-    //   s_pipelines2DDepthOff[9] — Vertex2D layout, depth OFF
-    //   s_pipelines3D[9]         — Vertex3D layout, depth ON
-    //   s_pipelines3DDepthOff[9] — Vertex3D layout, depth OFF
-    //   s_pipelines3DDepthReadOnly[9] — Vertex3D layout, depth test ON, depth write OFF
-    // Pipeline creation failures are non-fatal (draw calls skip if pipeline is null).
+    // Builds every blend variant. The five non-skinned sets selected by current
+    // draw callers are required; unused 2D depth-on and skinned sets are optional.
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
     {
@@ -3739,6 +3847,7 @@ private:
 
         struct BlendEntry
         {
+            const char* name;
             SDL_GPUBlendFactor src;
             SDL_GPUBlendFactor dst;
             bool enableBlend;
@@ -3746,23 +3855,59 @@ private:
 
         const BlendEntry table[k_PipelineCount] = {
             // Alpha
-            {SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true},
+            {"alpha", SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true},
             // Additive
-            {SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE, true},
+            {"additive", SDL_GPU_BLENDFACTOR_SRC_ALPHA, SDL_GPU_BLENDFACTOR_ONE, true},
             // Subtract
-            {SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, true},
+            {"subtract", SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, true},
             // InverseColor
-            {SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR, SDL_GPU_BLENDFACTOR_ZERO, true},
+            {"inverse-color", SDL_GPU_BLENDFACTOR_ONE_MINUS_DST_COLOR, SDL_GPU_BLENDFACTOR_ZERO, true},
             // Mixed
-            {SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true},
+            {"mixed", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_ALPHA, true},
             // LightMap
-            {SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_SRC_COLOR, true},
+            {"light-map", SDL_GPU_BLENDFACTOR_ZERO, SDL_GPU_BLENDFACTOR_SRC_COLOR, true},
             // Glow
-            {SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE, true},
+            {"glow", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ONE, true},
             // Luminance
-            {SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_GPU_BLENDFACTOR_ONE, true},
+            {"luminance", SDL_GPU_BLENDFACTOR_ONE_MINUS_SRC_COLOR, SDL_GPU_BLENDFACTOR_ONE, true},
             // Disabled (index 8, no blend)
-            {SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ZERO, false},
+            {"disabled", SDL_GPU_BLENDFACTOR_ONE, SDL_GPU_BLENDFACTOR_ZERO, false},
+        };
+
+        const char* deviceDriver = SDL_GetGPUDeviceDriver(s_device);
+        const char* driverName = deviceDriver ? deviceDriver : "unknown";
+        int requiredFailureCount = 0;
+        std::string firstRequiredError;
+
+        const auto buildRequiredPipeline = [&](SDL_GPUGraphicsPipeline*& destination,
+                                               SDL_GPUColorTargetBlendState blendState,
+                                               const PipelineBuildDescription& description)
+        {
+            const PipelineBuildResult result = BuildBlendPipeline(blendState, description);
+            destination = result.pipeline;
+            if (destination)
+            {
+                return;
+            }
+
+            ++requiredFailureCount;
+            if (firstRequiredError.empty())
+            {
+                firstRequiredError = result.error;
+            }
+            LogPipelineFailure(driverName, result, true);
+        };
+
+        const auto buildOptionalPipeline = [&](SDL_GPUGraphicsPipeline*& destination,
+                                               SDL_GPUColorTargetBlendState blendState,
+                                               const PipelineBuildDescription& description)
+        {
+            const PipelineBuildResult result = BuildBlendPipeline(blendState, description);
+            destination = result.pipeline;
+            if (!destination)
+            {
+                LogPipelineFailure(driverName, result, false);
+            }
         };
 
         for (int i = 0; i < k_PipelineCount; ++i)
@@ -3776,63 +3921,45 @@ private:
             blendState.alpha_blend_op = SDL_GPU_BLENDOP_ADD;
             blendState.enable_blend = table[i].enableBlend;
 
-            // 2D depth ON (test+write).
-            s_pipelines2D[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::TwoDimensional);
-            if (!s_pipelines2D[i])
-            {
-                mu::log::Get("render")->error("SDL_gpu -- 2D pipeline[{}] creation failed: {}", i, SDL_GetError());
-            }
-
-            // 2D depth OFF.
-            s_pipelines2DDepthOff[i] = BuildBlendPipeline(blendState, false, false, VertexLayout::TwoDimensional);
-            if (!s_pipelines2DDepthOff[i])
-            {
-                mu::log::Get("render")->error("SDL_gpu -- 2D depth-off pipeline[{}] creation failed: {}", i,
-                                              SDL_GetError());
-            }
-
-            // 3D depth ON (test+write) — opaque geometry.
-            s_pipelines3D[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::ThreeDimensional, true);
-            if (!s_pipelines3D[i])
-            {
-                mu::log::Get("render")->error("SDL_gpu -- 3D pipeline[{}] creation failed: {}", i, SDL_GetError());
-            }
-
-            s_pipelines3DNoCull[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::ThreeDimensional);
-            if (!s_pipelines3DNoCull[i])
-            {
-                mu::log::Get("render")->error("SDL_gpu -- 3D no-cull pipeline[{}] creation failed: {}", i,
-                                              SDL_GetError());
-            }
-
-            // 3D depth OFF.
-            s_pipelines3DDepthOff[i] = BuildBlendPipeline(blendState, false, false, VertexLayout::ThreeDimensional);
-            if (!s_pipelines3DDepthOff[i])
-            {
-                mu::log::Get("render")->error("SDL_gpu -- 3D depth-off pipeline[{}] creation failed: {}", i,
-                                              SDL_GetError());
-            }
-
-            // Story 7.9.7: 3D depth read-only (test ON, write OFF) — for transparent/additive particles.
-            // Particles need depth test (to go behind walls) but must NOT write to depth buffer
-            // (which would occlude geometry behind them, causing solid rectangle artifacts).
-            s_pipelines3DDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, VertexLayout::ThreeDimensional);
-            if (!s_pipelines3DDepthReadOnly[i])
-            {
-                mu::log::Get("render")->error("SDL_gpu -- 3D depth-readonly pipeline[{}] creation failed: {}", i,
-                                              SDL_GetError());
-            }
+            buildOptionalPipeline(s_pipelines2D[i], blendState,
+                                  {"2d-depth-on", table[i].name, i, true, true, VertexLayout::TwoDimensional, false});
+            buildRequiredPipeline(
+                s_pipelines2DDepthOff[i], blendState,
+                {"2d-depth-off", table[i].name, i, false, false, VertexLayout::TwoDimensional, false});
+            buildRequiredPipeline(s_pipelines3D[i], blendState,
+                                  {"3d-culled", table[i].name, i, true, true, VertexLayout::ThreeDimensional, true});
+            buildRequiredPipeline(s_pipelines3DNoCull[i], blendState,
+                                  {"3d-no-cull", table[i].name, i, true, true, VertexLayout::ThreeDimensional, false});
+            buildRequiredPipeline(
+                s_pipelines3DDepthOff[i], blendState,
+                {"3d-depth-off", table[i].name, i, false, false, VertexLayout::ThreeDimensional, false});
+            buildRequiredPipeline(
+                s_pipelines3DDepthReadOnly[i], blendState,
+                {"3d-depth-read-only", table[i].name, i, true, false, VertexLayout::ThreeDimensional, false});
 
             if (s_vertShaderSkinned)
             {
-                s_pipelinesSkinned[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::Skinned, true);
-                s_pipelinesSkinnedNoCull[i] = BuildBlendPipeline(blendState, true, true, VertexLayout::Skinned);
-                s_pipelinesSkinnedDepthOff[i] = BuildBlendPipeline(blendState, false, false, VertexLayout::Skinned);
-                s_pipelinesSkinnedDepthReadOnly[i] = BuildBlendPipeline(blendState, true, false, VertexLayout::Skinned);
+                buildOptionalPipeline(s_pipelinesSkinned[i], blendState,
+                                      {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
+                buildOptionalPipeline(s_pipelinesSkinnedNoCull[i], blendState,
+                                      {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
+                buildOptionalPipeline(
+                    s_pipelinesSkinnedDepthOff[i], blendState,
+                    {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
+                buildOptionalPipeline(
+                    s_pipelinesSkinnedDepthReadOnly[i], blendState,
+                    {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
             }
         }
 
-        return true; // Pipeline creation failures are non-fatal.
+        if (requiredFailureCount != 0)
+        {
+            mu::log::Get("render")->error("SDL_gpu -- {} required pipelines failed for driver {}; first error: {}",
+                                          requiredFailureCount, driverName, firstRequiredError);
+            return false;
+        }
+
+        return true;
     }
 
     static void DestroyPipelines()

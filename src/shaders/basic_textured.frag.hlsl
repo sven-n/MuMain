@@ -1,9 +1,9 @@
 // basic_textured.frag.hlsl — Fragment shader with texture, alpha discard, and linear fog.
 // Story 4.3.2: Shader Programs [VS1-RENDER-SHADERS]
 // FogUniforms cbuffer mirrors FogUniform struct (std140): see MuRendererSDLGpu.cpp.
-Texture2D tex : register(t0);
-SamplerState s : register(s0);
-cbuffer FogUniforms : register(b0)
+Texture2D tex : register(t0, space2);
+SamplerState s : register(s0, space2);
+cbuffer FogUniforms : register(b0, space3)
 {
     uint fogEnabled;
     uint alphaDiscardEnabled;

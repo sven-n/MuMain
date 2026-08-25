@@ -12,14 +12,14 @@ public:
     Impl()
     {
         SYSTEM_INFO sysInfo;
-    MuGetSystemInfo(&sysInfo);
+        ::GetSystemInfo(&sysInfo);
         m_numProcessors = sysInfo.dwNumberOfProcessors;
         m_lastCheckTime = std::chrono::steady_clock::now();
         m_lastProcessTime = 0;
         m_lastSystemTime = 0;
     }
 
-    double GetUsage() 
+    double GetUsage()
     {
         // Get the current process times
         FILETIME creationTime, exitTime, kernelTime, userTime;
@@ -59,8 +59,7 @@ public:
         if (systemTimeElapsed == 0 || m_numProcessors == 0)
             return 0.0;
 
-        return Core::Utilities::CalculateCpuUsageFromFileTime(processTimeElapsed, systemTimeElapsed,
-                                                               m_numProcessors);
+        return Core::Utilities::CalculateCpuUsageFromFileTime(processTimeElapsed, systemTimeElapsed, m_numProcessors);
     }
 
 private:
@@ -75,11 +74,11 @@ private:
     }
 };
 
-#else  // ---- non-Windows ----------------------------------------------------
+#else // ---- non-Windows ----------------------------------------------------
 
-#include <algorithm>       // std::max
-#include <sys/resource.h>  // getrusage
-#include <thread>          // hardware_concurrency
+#include <algorithm>      // std::max
+#include <sys/resource.h> // getrusage
+#include <thread>         // hardware_concurrency
 
 // POSIX implementation: process CPU time (user + system) from getrusage against
 // wall-clock time, scaled by the processor count -- the same ratio the Windows
@@ -88,9 +87,9 @@ class CpuUsage::Impl
 {
 public:
     Impl()
-        : m_numProcessors(std::max(1u, std::thread::hardware_concurrency()))
-        , m_lastCheckTime(std::chrono::steady_clock::now())
-        , m_lastProcessTime(~0ULL)  // sentinel: "no baseline yet" (0 is a valid CPU time)
+        : m_numProcessors(std::max(1u, std::thread::hardware_concurrency())),
+          m_lastCheckTime(std::chrono::steady_clock::now()),
+          m_lastProcessTime(~0ULL) // sentinel: "no baseline yet" (0 is a valid CPU time)
     {
     }
 
@@ -100,11 +99,11 @@ public:
         if (getrusage(RUSAGE_SELF, &ru) != 0)
             return 0.0;
 
-        const unsigned long long currentProcessTime =
-            (static_cast<unsigned long long>(ru.ru_utime.tv_sec) +
-             static_cast<unsigned long long>(ru.ru_stime.tv_sec)) * 1000000ULL +
-            static_cast<unsigned long long>(ru.ru_utime.tv_usec) +
-            static_cast<unsigned long long>(ru.ru_stime.tv_usec);
+        const unsigned long long currentProcessTime = (static_cast<unsigned long long>(ru.ru_utime.tv_sec) +
+                                                       static_cast<unsigned long long>(ru.ru_stime.tv_sec)) *
+                                                          1000000ULL +
+                                                      static_cast<unsigned long long>(ru.ru_utime.tv_usec) +
+                                                      static_cast<unsigned long long>(ru.ru_stime.tv_usec);
 
         const auto now = std::chrono::steady_clock::now();
         const long long elapsedWallTime =
@@ -125,8 +124,7 @@ public:
         if (elapsedWallTime <= 0 || m_numProcessors == 0)
             return 0.0;
 
-        return std::max<double>(0.0, processTimeElapsed /
-                                     (static_cast<double>(elapsedWallTime) * m_numProcessors));
+        return std::max<double>(0.0, processTimeElapsed / (static_cast<double>(elapsedWallTime) * m_numProcessors));
     }
 
 private:

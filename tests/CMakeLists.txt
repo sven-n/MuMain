@@ -50,6 +50,14 @@ function(mu_add_test)
     doctest_discover_tests(${MAT_NAME})
 endfunction()
 
+find_package(Python3 COMPONENTS Interpreter REQUIRED)
+add_test(
+    NAME windows_workflow_contract
+    COMMAND "${Python3_EXECUTABLE}"
+            "${CMAKE_CURRENT_SOURCE_DIR}/test_windows_workflow_contract.py"
+            "${CMAKE_SOURCE_DIR}"
+)
+
 add_subdirectory(text)
 
 add_subdirectory(ui)

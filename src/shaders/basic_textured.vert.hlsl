@@ -5,7 +5,7 @@
 //   2D pipeline sends float2 pos — GPU fills z=0 automatically.
 //   3D pipeline sends float3 pos — full world-space position.
 // MVP matrix + fog params pushed per-draw: ortho for 2D, perspective*view for 3D.
-cbuffer Transform : register(b1) { float4x4 mvp; float fogStart; float fogEnd; float2 fogPad; };
+cbuffer Transform : register(b0, space1) { float4x4 mvp; float fogStart; float fogEnd; float2 fogPad; };
 struct VSInput { float3 pos : TEXCOORD0; float2 uv : TEXCOORD1; float4 color : TEXCOORD2; };
 struct VSOutput
 {

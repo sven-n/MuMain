@@ -13,7 +13,7 @@ public:
     [[nodiscard]] static bool Initialize();
     static void Shutdown();
 
-    [[nodiscard]] static bool CreateWindow(const char* title, int width, int height, uint32_t flags);
+    [[nodiscard]] static bool CreatePlatformWindow(const char* title, int width, int height, uint32_t flags);
     [[nodiscard]] static IPlatformWindow* GetWindow();
     [[nodiscard]] static bool PollEvents();
 

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
+#include "App/Platform/DiagnosticFrameCaptureWriter.h"
 
 #define WIN32_LEAN_AND_MEAN
 #define WIN32_EXTRA_LEAN
@@ -106,7 +107,6 @@ HGLRC g_hRC = nullptr;
 // into g_hWnd so the remaining Win32 code (IME, DirectSound, cursor, the legacy
 // EDIT-control text boxes) keeps working until those are migrated.
 static SDL_Window* g_sdlWindow = nullptr;
-static SDL_GLContext g_sdlGLContext = nullptr;
 HFONT g_hFont = nullptr;
 HFONT g_hFontBold = nullptr;
 HFONT g_hFontBig = nullptr;
@@ -175,7 +175,6 @@ static void ShutdownRendererWindow()
     }
 
     mu::ShutdownSDLGpuRenderer();
-    g_sdlGLContext = nullptr;
     g_hRC = nullptr;
 
     if (g_sdlWindow)
@@ -186,52 +185,10 @@ static void ShutdownRendererWindow()
     }
 }
 
-#ifndef _WIN32
 // Debug-only framebuffer capture: when MU_CAPTURE_FRAME=<N> is set, dump the
-// Nth presented frame to MU_CAPTURE_PATH (default /tmp/mu-frame.ppm) as a PPM.
+// Nth presented frame to MU_CAPTURE_PATH (default mu-frame.ppm) as a PPM.
 // Used to verify rendering on headless/WSLg setups where X screenshot tools
 // cannot read the window (issue #462). No effect unless the env var is set.
-static bool WriteCapturePpm(const char* path, const mu::FramePixels& pixels)
-{
-    constexpr std::size_t RgbBytesPerPixel = 3;
-
-    if (pixels.width == 0 || pixels.height == 0)
-    {
-        return false;
-    }
-
-    const std::size_t pixelWidth = pixels.width;
-    const std::size_t pixelHeight = pixels.height;
-    const std::size_t maximumByteCount = pixels.rgb.max_size();
-    if (pixelWidth > maximumByteCount / RgbBytesPerPixel)
-    {
-        return false;
-    }
-
-    const std::size_t rgbRowBytes = pixelWidth * RgbBytesPerPixel;
-    if (pixelHeight > maximumByteCount / rgbRowBytes)
-    {
-        return false;
-    }
-
-    const std::size_t expectedBytes = rgbRowBytes * pixelHeight;
-    if (pixels.rgb.size() != expectedBytes)
-    {
-        return false;
-    }
-
-    FILE* fp = std::fopen(path, "wb");
-    if (!fp)
-    {
-        return false;
-    }
-
-    const bool wroteHeader = std::fprintf(fp, "P6\n%u %u\n255\n", pixels.width, pixels.height) > 0;
-    const bool wrotePixels = std::fwrite(pixels.rgb.data(), 1, expectedBytes, fp) == expectedBytes;
-    const bool closed = std::fclose(fp) == 0;
-    return wroteHeader && wrotePixels && closed;
-}
-
 struct DiagnosticFrameCapture
 {
     std::uint64_t targetFrame = 0;
@@ -275,27 +232,28 @@ static void ConsumeDiagnosticFrameCapture()
     capture.schedule.Finish();
     if (!mu::GetRenderer().ConsumeFramePixels(pixels))
     {
-        std::fprintf(stderr, "[capture] frame %llu readback failed\n",
-                     static_cast<unsigned long long>(capture.targetFrame));
+        g_ErrorReport.Write(L"[capture] frame %llu readback failed\r\n",
+                            static_cast<unsigned long long>(capture.targetFrame));
         return;
     }
 
+    constexpr const char* DefaultCapturePath = "mu-frame.ppm";
     const char* path = std::getenv("MU_CAPTURE_PATH");
-    if (!path)
+    if (path == nullptr)
     {
-        path = "/tmp/mu-frame.ppm";
+        path = DefaultCapturePath;
     }
-    if (!WriteCapturePpm(path, pixels))
+    if (!mu::WriteDiagnosticFrameCapturePpm(path, pixels))
     {
-        std::fprintf(stderr, "[capture] failed to write frame %llu to %s\n",
-                     static_cast<unsigned long long>(capture.targetFrame), path);
+        const char* loggedPath = path[0] == '\0' ? "<empty>" : path;
+        g_ErrorReport.Write(L"[capture] failed to write frame %llu to %hs\r\n",
+                            static_cast<unsigned long long>(capture.targetFrame), loggedPath);
         return;
     }
 
-    std::fprintf(stderr, "[capture] wrote frame %llu (%ux%u) to %s\n",
-                 static_cast<unsigned long long>(capture.targetFrame), pixels.width, pixels.height, path);
+    g_ErrorReport.Write(L"[capture] wrote frame %llu (%ux%u) to %hs\r\n",
+                        static_cast<unsigned long long>(capture.targetFrame), pixels.width, pixels.height, path);
 }
-#endif
 
 // Monitor refresh rate (Hz) for the display the window is on, via SDL instead
 // of the Win32 GetDeviceCaps(VREFRESH) (issue #442). Falls back to 60.
@@ -1407,15 +1365,11 @@ MSG MainLoop()
                 g_MuEditorCore.Update();
 #endif
 
-#ifndef _WIN32
                 RequestDiagnosticFrameCapture();
-#endif
                 mu::GetRenderer().BeginFrame();
                 RenderScene(g_hDC);
                 mu::GetRenderer().EndFrame();
-#ifndef _WIN32
                 ConsumeDiagnosticFrameCapture();
-#endif
             }
         }
         else
@@ -1903,8 +1857,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
 #ifdef _EDITOR
-    // Initialize MU Editor (ImGui SDL3 backend needs the SDL window + GL context).
-    g_MuEditorCore.Initialize(g_sdlWindow, g_sdlGLContext);
+    // Initialize MU Editor with the live SDL GPU window.
+    g_MuEditorCore.Initialize(g_sdlWindow);
 
     // Check for --editor command line flag
     if (szCmdLine && wcsstr(GetCommandLineW(), L"--editor"))
@@ -1993,9 +1947,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     GateAttribute = new GATE_ATTRIBUTE[MAX_GATES]{};
     SkillAttribute = new SKILL_ATTRIBUTE[MAX_SKILLS]{};
     ItemAttRibuteMemoryDump = new ITEM_ATTRIBUTE[MAX_ITEM + 1024]{};
-    ItemAttribute = ((ITEM_ATTRIBUTE*)ItemAttRibuteMemoryDump) + rand() % 1024;
+    ItemAttribute = ItemAttRibuteMemoryDump + rand() % 1024;
     CharacterMemoryDump = new CHARACTER[MAX_CHARACTERS_CLIENT + 1 + 128]{};
-    CharactersClient = ((CHARACTER*)CharacterMemoryDump) + rand() % 128;
+    CharactersClient = CharacterMemoryDump + rand() % 128;
     CharacterMachine = new CHARACTER_MACHINE;
 
     memset(GateAttribute, 0, sizeof(GATE_ATTRIBUTE) * (MAX_GATES));
@@ -2018,7 +1972,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_pUIMapName = new CUIMapName; // rozy
 
     g_BuffSystem = BuffStateSystem::Make();
-	AnimationTaskPool::Instance().Initialize();
+    AnimationTaskPool::Instance().Initialize();
 
     g_MapProcess = MapProcess::Make();
 

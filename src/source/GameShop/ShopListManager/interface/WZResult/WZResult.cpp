@@ -30,7 +30,7 @@ bool WZResult::IsSuccess() // OK
     return !this->m_dwErrorCode && !this->m_dwWindowErrorCode;
 }
 
-DWORD  WZResult::GetErrorCode() // OK
+uint32_t WZResult::GetErrorCode() // OK
 {
     return this->m_dwErrorCode;
 }
@@ -40,7 +40,7 @@ wchar_t* WZResult::GetErrorMessage() // OK
     return this->m_szErrorMessage;
 }
 
-DWORD  WZResult::GetWindowErrorCode() // OK
+uint32_t WZResult::GetWindowErrorCode() // OK
 {
     return this->m_dwWindowErrorCode;
 }
@@ -53,7 +53,7 @@ WZResult& WZResult::operator=(const WZResult& a2) // OK
     return *this;
 }
 
-void WZResult::SetResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...) // OK
+void WZResult::SetResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const wchar_t* szFormat, ...) // OK
 {
     va_list va;
 
@@ -79,7 +79,7 @@ WZResult WZResult::BuildSuccessResult() // OK
     return result;
 }
 
-WZResult WZResult::BuildResult(DWORD dwErrorCode, DWORD dwWindowErrorCode, const TCHAR* szFormat, ...) // OK
+WZResult WZResult::BuildResult(uint32_t dwErrorCode, uint32_t dwWindowErrorCode, const wchar_t* szFormat, ...) // OK
 {
     WZResult result;
     wchar_t Buffer[MAX_ERROR_MESSAGE];

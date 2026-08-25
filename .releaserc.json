@@ -33,7 +33,11 @@
     }],
     ["@semantic-release/github", {
       "assets": [
-        { "path": "artifacts/Main.exe", "name": "MuMain-mingw-i686.exe", "label": "MuMain (MinGW i686)" }
+        {
+          "path": "MuMain-windows-native-x64-release-editor-off.tar.gz",
+          "name": "MuMain-windows-native-x64-release-editor-off.tar.gz",
+          "label": "MuMain (Windows native x64 Release, editor OFF)"
+        }
       ]
     }],
     ["@semantic-release/git", {
