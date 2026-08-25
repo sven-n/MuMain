@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 if(NOT DEFINED MU_RENDERER_SOURCE)
     message(FATAL_ERROR "MU_RENDERER_SOURCE must be set")
 endif()

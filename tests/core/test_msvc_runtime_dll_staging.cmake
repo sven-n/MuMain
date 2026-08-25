@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 if(NOT DEFINED MU_CMAKE_SOURCE)
     message(FATAL_ERROR "MU_CMAKE_SOURCE is required")
 endif()

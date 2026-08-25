@@ -213,7 +213,7 @@ DWORD CPersonalShopTitleImp::GetShopTextColor(CHARACTER* pPlayer)
         case PVP_MURDERER1:
             return RGBA(230, 110, 0, 255);
         default:
-            return IsShopTitleHighlight(pPlayer) ? (255 << 24) + (255 << 16) + (230 << 8) + (230) : (255 << 24) + (0 << 16) + (230 << 8) + (230);
+            return IsShopTitleHighlight(pPlayer) ? RGBA(230, 230, 255, 255) : RGBA(230, 230, 0, 255);
         }
     }
 }
@@ -234,7 +234,7 @@ DWORD CPersonalShopTitleImp::GetShopText2Color(CHARACTER* pPlayer)
         case PVP_MURDERER1:
             return RGBA(230, 110, 0, 255);
         default:
-            return IsShopTitleHighlight(pPlayer) ? (255 << 24) + (41 << 16) + (57 << 8) + (108) : (255 << 24) + (0 << 16) + (150 << 8) + (250);
+            return IsShopTitleHighlight(pPlayer) ? RGBA(108, 57, 41, 255) : RGBA(250, 150, 0, 255);
         }
     }
 }
@@ -255,7 +255,7 @@ DWORD CPersonalShopTitleImp::GetShopBGColor(CHARACTER* pPlayer)
         case PVP_MURDERER1:
             return IsShopTitleHighlight(pPlayer) ? RGBA(182, 122, 82, 128) : RGBA(108, 57, 41, 128);
         default:
-            return IsShopTitleHighlight(pPlayer) ? (128 << 24) + (0 << 16) + (150 << 8) + (250) : (128 << 24) + (41 << 16) + (57 << 8) + (108);
+            return IsShopTitleHighlight(pPlayer) ? RGBA(250, 150, 0, 128) : RGBA(108, 57, 41, 128);
         }
     }
 }
@@ -555,7 +555,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
     POINT RenderPos = { static_cast<LONG>(m_pos.x / g_fScreenRate_x), static_cast<LONG>(m_pos.y / g_fScreenRate_y) };
     SIZE RenderBoxSize = { static_cast<LONG>(m_size.cx / g_fScreenRate_x), static_cast<LONG>(m_size.cy / g_fScreenRate_y) };
     SIZE RenderIconSize = { static_cast<LONG>(m_icon.cx / g_fScreenRate_x), static_cast<LONG>(m_icon.cy / g_fScreenRate_y) };
-    const int iLineHeight = std::max(1, RenderIconSize.cy);
+    const int iLineHeight = std::max<int>(1, RenderIconSize.cy);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(iIconBkColor);

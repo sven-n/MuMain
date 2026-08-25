@@ -44,12 +44,14 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "push" ] && [ "${{ github.ref }}" = "refs/heads/main" ]; then
             # On main push, diff against the previous commit
-            CHANGED=$(git diff --name-only --diff-filter=d HEAD~1...HEAD -- 'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
-              | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+            DIFF_BASE=HEAD~1
           else
-            CHANGED=$(git diff --name-only --diff-filter=d origin/main...HEAD -- 'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
-              | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+            DIFF_BASE=origin/main
           fi
+          CHANGED=$(git diff --name-only --diff-filter=d "${DIFF_BASE}...HEAD" -- \
+            'src/source/*.cpp' 'src/source/*.h' 'src/source/*.hpp' \
+            | grep -v ThirdParty/ | grep -v 'src/source/Dotnet/' || true)
+          echo "diff_base=$DIFF_BASE" >> "$GITHUB_OUTPUT"
           if [ -z "$CHANGED" ]; then
             echo "count=0" >> "$GITHUB_OUTPUT"
             echo "No C++ files changed"
@@ -64,7 +66,29 @@ jobs:
         if: steps.changed.outputs.count != '0'
         run: |
           echo "Checking ${{ steps.changed.outputs.count }} files..."
-          cat /tmp/changed-cpp-files.txt | xargs clang-format --dry-run --Werror
+          base="${{ steps.changed.outputs.diff_base }}"
+          while IFS= read -r file; do
+            format_args=()
+            while read -r start count; do
+              if [ -z "$start" ]; then
+                continue
+              fi
+              if [ -z "$count" ]; then
+                count=1
+              fi
+              if [ "$count" -eq 0 ]; then
+                continue
+              fi
+              end=$((start + count - 1))
+              format_args+=(--lines="${start}:${end}")
+            done < <(
+              git diff --unified=0 --no-color "${base}...HEAD" -- "$file" \
+                | sed -nE 's/^@@ -[0-9]+(,[0-9]+)? \+([0-9]+)(,([0-9]+))? @@.*/\2 \4/p'
+            )
+            if [ "${#format_args[@]}" -ne 0 ]; then
+              clang-format --dry-run --Werror "${format_args[@]}" "$file"
+            fi
+          done < /tmp/changed-cpp-files.txt
 
       - name: Static analysis
         if: steps.changed.outputs.count != '0'
@@ -175,7 +199,7 @@ jobs:
       - name: Activate Visual Studio developer environment
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
-          arch: ${{ matrix.architecture }}
+          arch: ${{ matrix.architecture == 'x86' && 'amd64_x86' || 'x64' }}
 
       - name: Assert MSVC developer environment
         shell: pwsh

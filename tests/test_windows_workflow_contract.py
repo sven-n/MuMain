@@ -10,8 +10,18 @@ ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().pare
 CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
 MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
 RELEASE_CONFIG = ROOT / ".releaserc.json"
+VCPKG_MANIFEST = ROOT / "vcpkg.json"
 RENDERER_SOURCE = ROOT / "src/source/Render/Renderer/MuRendererSDLGpu.cpp"
+PERSONAL_SHOP_SOURCE = (
+    ROOT / "src/source/GameLogic/Items/PersonalShopTitleImp.cpp"
+)
 SHADER_BLOB_VALIDATOR = ROOT / "cmake/ValidateShaderBlobs.cmake"
+SCRIPT_MODE_TESTS = (
+    ROOT / "tests/core/test_msvc_runtime_dll_staging.cmake",
+    ROOT / "tests/editor/test_leak.cmake",
+    ROOT / "tests/render/test_imgui_sdlgpu_backend.cmake",
+    ROOT / "tests/render/test_pipeline_fail_fast.cmake",
+)
 MINGW_TOOLCHAINS = (
     ROOT / "cmake/toolchains/mingw-w64-i686.cmake",
     ROOT / "cmake/toolchains/mingw-w64-x86_64.cmake",
@@ -154,7 +164,10 @@ def manifest(block, assignment):
 ci = CI_WORKFLOW.read_text(encoding="utf-8")
 mingw = MINGW_WORKFLOW.read_text(encoding="utf-8")
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
+vcpkg_manifest = json.loads(VCPKG_MANIFEST.read_text(encoding="utf-8"))
 shader_blob_validator = SHADER_BLOB_VALIDATOR.read_text(encoding="utf-8")
+personal_shop_source = PERSONAL_SHOP_SOURCE.read_text(encoding="utf-8")
+quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
 linux_job = job(ci, "build-linux")
 release_job = job(ci, "release")
@@ -163,6 +176,70 @@ mingw_job = job(mingw, "build-mingw")
 check(
     shader_blob_validator.startswith("cmake_minimum_required(VERSION 3.25)\n"),
     "Shader blob validation must declare CMake 3.25 policies in script mode",
+)
+for script_path in SCRIPT_MODE_TESTS:
+    check(
+        script_path.read_text(encoding="utf-8").startswith(
+            "cmake_minimum_required(VERSION 3.25)\n"
+        ),
+        f"Script-mode test must declare CMake 3.25 policies: {script_path.name}",
+    )
+check(
+    "std::max<int>(1, RenderIconSize.cy)" in personal_shop_source,
+    "Personal-shop line height must resolve the Windows LONG/int std::max type",
+)
+for color_expression in (
+    "RGBA(230, 230, 255, 255) : RGBA(230, 230, 0, 255)",
+    "RGBA(108, 57, 41, 255) : RGBA(250, 150, 0, 255)",
+    "RGBA(250, 150, 0, 128) : RGBA(108, 57, 41, 128)",
+):
+    check(
+        color_expression in personal_shop_source,
+        "Personal-shop colors must use the unsigned RGBA packer",
+    )
+check(
+    "(255 << 24)" not in personal_shop_source
+    and "(128 << 24)" not in personal_shop_source,
+    "Personal-shop colors must not use signed left-shift packing",
+)
+
+quality_detection = step(quality_job, "quality", "Detect changed C++ files")
+check(
+    "diff_base=$DIFF_BASE" in quality_detection,
+    "Quality detection must expose the comparison base",
+)
+quality_formatting = step(quality_job, "quality", "Check formatting")
+for required in (
+    "git diff --unified=0 --no-color",
+    'format_args+=(--lines="${start}:${end}")',
+    'clang-format --dry-run --Werror "${format_args[@]}" "$file"',
+):
+    check(
+        required in quality_formatting,
+        f"Formatting gate must inspect changed lines only: {required}",
+    )
+check(
+    "xargs clang-format --dry-run --Werror" not in quality_formatting,
+    "Formatting gate must not reject untouched legacy lines",
+)
+
+vcpkg_dependency_names = {
+    dependency if isinstance(dependency, str) else dependency.get("name")
+    for dependency in vcpkg_manifest.get("dependencies", [])
+}
+check(
+    "directx-dxc" in vcpkg_dependency_names,
+    "Windows dependency manifest must install the required DXC shader compiler",
+)
+directx_dxc_dependencies = [
+    dependency
+    for dependency in vcpkg_manifest.get("dependencies", [])
+    if isinstance(dependency, dict) and dependency.get("name") == "directx-dxc"
+]
+check(
+    len(directx_dxc_dependencies) == 1
+    and directx_dxc_dependencies[0].get("platform") == "windows & x64",
+    "DXC must install only for the x64 Windows shader-compilation rows",
 )
 
 linux_rows = re.findall(
@@ -412,6 +489,14 @@ check(
     native_environment_assertion.rstrip().endswith("exit 0"),
     "Native MSVC identity probes must not leak their expected nonzero exit codes",
 )
+native_environment_activation = step(
+    native_job, "build-windows", "Activate Visual Studio developer environment"
+)
+check(
+    "arch: ${{ matrix.architecture == 'x86' && 'amd64_x86' || 'x64' }}"
+    in native_environment_activation,
+    "Native x86 rows must use the x64-hosted x86 compiler so host .NET tools remain x64",
+)
 
 native_configure = step(native_job, "build-windows", "Configure CMake")
 native_configure_arguments = folded_run_arguments(
@@ -429,7 +514,7 @@ for required in (
     )
 check(
     "DXC_EXE" not in ci + mingw,
-    "Windows workflows must leave DXC discovery to the active Windows SDK",
+    "Windows workflows must use vcpkg tool discovery for DXC",
 )
 
 native_crt_stage = step(
@@ -863,10 +948,16 @@ check(
     "MinGW configure must not replace vcpkg package integration with a find root",
 )
 for toolchain_path in MINGW_TOOLCHAINS:
+    toolchain = toolchain_path.read_text(encoding="utf-8")
     check(
-        "MINGW_ADDITIONAL_TARGET_ROOT"
-        not in toolchain_path.read_text(encoding="utf-8"),
+        "MINGW_ADDITIONAL_TARGET_ROOT" not in toolchain,
         f"MinGW toolchain must not retain the obsolete extra find root: {toolchain_path.name}",
+    )
+    check(
+        "set(CMAKE_FIND_ROOT_PATH " not in toolchain
+        and "list(APPEND CMAKE_FIND_ROOT_PATH /usr/" in toolchain
+        and "list(REMOVE_DUPLICATES CMAKE_FIND_ROOT_PATH)" in toolchain,
+        f"MinGW toolchain must preserve vcpkg roots across repeated chainloads: {toolchain_path.name}",
     )
 for required in (
     'source_directory="build-mingw/src"',

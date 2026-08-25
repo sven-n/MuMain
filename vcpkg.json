@@ -8,6 +8,10 @@
       "name": "curl",
       "features": ["ssl"]
     },
+    {
+      "name": "directx-dxc",
+      "platform": "windows & x64"
+    },
     "openssl",
     "glslang",
     "spirv-cross"

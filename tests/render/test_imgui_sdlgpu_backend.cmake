@@ -1,3 +1,5 @@
+cmake_minimum_required(VERSION 3.25)
+
 if(NOT DEFINED MU_SOURCE_DIR)
     message(FATAL_ERROR "MU_SOURCE_DIR is required")
 endif()

@@ -2868,3 +2868,75 @@ workflow contract py_compile: exit 0
 Native PowerShell execution, both MinGW architectures, and all hosted workflow
 matrices still require a new Actions run. These local checks do not establish
 that the Windows build works.
+
+### CI follow-up after `18e4532f`
+
+The second pushed repair commit produced failures in CI run `32888081203`,
+Linux run `32888081136`, and MinGW run `32888081146` on 2026-08-25.
+
+macOS ran 105 tests, including `imgui_sdlgpu_backend_contract`, and passed all
+of them. Linux ran the same contract under CMake 3.31, but the standalone test
+script had no policy baseline; its regex was interpreted under old policy
+behavior and failed. All four standalone CMake test scripts now declare the
+project's CMake 3.25 baseline so their semantics do not vary by runner CMake
+version.
+
+The native matrix reached compilation after the MSVC environment assertion
+fix. Its remaining failures had three independent causes:
+
+- `PersonalShopTitleImp.cpp` passed an `int` and Windows `LONG` to an
+  unqualified `std::max`; the call now explicitly selects `int`.
+- the x64 shader-compilation row required DXC, but the dependency manifest did
+  not install it; `directx-dxc` is now an x64-Windows-only vcpkg dependency and
+  normal vcpkg tool discovery supplies `dxc`. The condition avoids installing
+  an unused target-architecture DXC in x86 rows, where shader compilation is
+  disabled.
+- x86 rows activated the x86-hosted compiler, which set
+  `__DOTNET_PREFERRED_BITNESS=32` while only the x64 .NET host was installed;
+  they now use the documented `amd64_x86` cross-tools environment.
+
+MinGW successfully installed OpenSSL, curl, and zlib and entered the OpenSSL
+vcpkg wrapper. The chainloaded MinGW toolchain was then loaded again and
+overwrote `CMAKE_FIND_ROOT_PATH`, discarding the roots vcpkg had added. Both
+toolchains now append their sysroot idempotently, preserving vcpkg roots across
+repeated toolchain loads.
+
+The hosted build matrix remains asymmetric: macOS covers arm64 Debug
+editor-OFF; Linux covers x64 editor-OFF/ON in Debug and again in Release in a
+separate workflow; native Windows covers x86/x64, Debug/Release,
+editor-OFF/ON; MinGW covers x86/x64 Release editor-OFF/ON. History shows this
+grew incrementally: the consolidated workflow began with one Debug lane per
+OS, then Windows expanded for its shipping architectures/configurations and a
+separate Linux Release workflow was retained. No repository documentation
+defines a principled policy for the final asymmetry.
+
+Shared tests must remain deterministic across every lane that registers them.
+Platform-, compiler-, architecture-, configuration-, and feature-specific
+tests can legitimately expose different failures because the compiled code
+and environment differ. The Linux/macOS contract discrepancy was not one of
+those legitimate differences: both lanes registered the same standalone CMake
+test, but the missing policy baseline made its semantics depend on the runner's
+CMake version. The policy declarations fix that root cause without multiplying
+the build matrix.
+
+Correct full-target local macOS verification after these follow-up changes:
+
+```text
+Debug editor-OFF default build: exit 0
+Debug editor-OFF CTest: 105/105 passed, 0 failed, 6.45 seconds
+Debug editor-ON default build: exit 0
+Debug editor-ON CTest: 104/104 passed, 0 failed, 6.45 seconds
+```
+
+The one-test count difference is expected: `editor_leak` is registered only
+when `ENABLE_EDITOR=OFF`. An earlier local command built only target `Main`
+before running the complete CTest registry; the resulting `*_NOT_BUILT`
+failures were invalid verification evidence, not a source or workflow failure.
+
+Quality-gate preflight found that formatting checked every line of a changed
+legacy file, so a one-line MSVC fix inherited unrelated historical formatting
+debt. The formatting step now derives `clang-format --lines` ranges from the
+Git diff and rejects only changed hunks. Full-file cppcheck also exposed three
+signed left-shift color packings in the touched personal-shop source; those now
+use the existing unsigned `RGBA()` packer with byte-identical channel values.
+The current file passes the workflow's cppcheck command.
