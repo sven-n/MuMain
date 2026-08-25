@@ -1703,7 +1703,7 @@ public:
                     texDst.h = pu.height;
                     texDst.d = 1;
 
-                    SDL_UploadToGPUTexture(copyPass, &texSrc, &texDst, false);
+                    SDL_UploadToGPUTexture(copyPass, &texSrc, &texDst, true);
                 }
 
                 SDL_EndGPUCopyPass(copyPass);
