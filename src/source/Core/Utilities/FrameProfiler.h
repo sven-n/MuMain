@@ -52,12 +52,21 @@ namespace FrameProfiler
         Overlay,   // $details/$glstats/FPS-counter self-cost. These render text as roughly one IR
                    // quad per glyph and used to be tagged Other, contaminating the exact bucket
                    // under investigation -- an observer effect large enough to mislead.
+        // AH-1118: split out of Other -- with the big buckets fixed, Other's ~250
+        // buffer appends per frame were the largest remaining unattributed cost
+        // on Android, and none of its constituents were separable.
+        Leaves,     // RenderLeaves() -- weather sprites (both call sites)
+        Points,     // RenderPoints() -- light glow points
+        EffShadows, // RenderEffectShadows()
+        Boids,      // RenderBoids()/RenderFishs() -- ambient critters
+        AfterFx,    // RenderAfterEffects()
         Count_
     };
 
     inline constexpr const char* kPassNames[(int)Pass::Count_] = {
         "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-        "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay"
+        "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay",
+        "Leaves", "Points", "EffShadows", "Boids", "AfterFx"
     };
 
     inline float& AccumulatorMs(Pass p)
