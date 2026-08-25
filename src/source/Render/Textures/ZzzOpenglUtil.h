@@ -133,6 +133,11 @@ struct GLRenderStateSnapshot
 GLRenderStateSnapshot GetRenderStateSnapshot();
 
 void RenderPlane3D(float Width, float Height, float Matrix[3][4]);
+// AH-1118: RenderPlane3D with the world position folded into the CPU-side
+// corner transform, so callers can batch many planes under one identity model
+// matrix instead of a UBO model update per plane (RenderLeaves measured 3
+// buffer writes per leaf per frame through the SetModel path).
+void RenderPlane3DAt(float Width, float Height, float Matrix[3][4], const vec3_t Position);
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Angle = 0.f, float u = 0.f, float v = 0.f, float uWidth = 1.f, float vHeight = 1.f);
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha = 1.f);
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha = 1.f, float Scale = 15.f);

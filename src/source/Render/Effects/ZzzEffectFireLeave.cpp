@@ -547,6 +547,22 @@ void RenderLeaves()
     }
 
     glColor3f(1.f, 1.f, 1.f);
+
+    // AH-1118: one identity model matrix for the whole loop; each plane's
+    // world position is folded into its CPU-side corner transform
+    // (RenderPlane3DAt). The old per-leaf PushModel/SetModel/PopModel cost
+    // 3 UBO buffer writes per leaf per frame -- measured at 240 buffer
+    // updates and 73 ms/frame for 80 leaves on Adreno 730 -- and broke the
+    // IR batch on every leaf. Now all same-texture leaves merge into one
+    // draw under one model update.
+    const bool spriteMap = (gMapManager.WorldActive == WD_2DEVIAS || IsIceCity() || IsSantaTown());
+    if (!spriteMap)
+    {
+        GlobalUBO::Instance().PushModel();
+        vec3_t vOrigin = { 0.f, 0.f, 0.f };
+        GlobalUBO::Instance().SetModel(vOrigin, 1.0f);
+    }
+
 #ifdef DEVIAS_XMAS_EVENT
     int iMaxLeaves;
     if (World == WD_2DEVIAS)
@@ -565,20 +581,17 @@ void RenderLeaves()
             )
         {
             BindTexture(o->Type);
-            if (gMapManager.WorldActive == WD_2DEVIAS || IsIceCity() || IsSantaTown())
+            if (spriteMap)
             {
                 RenderSprite(o->Type, o->Position, o->Scale, o->Scale, o->Light);
             }
             else
             {
-                GlobalUBO::Instance().PushModel();
-                GlobalUBO::Instance().SetModel(o->Position, 1.0f);
-
                 float Matrix[3][4];
                 AngleMatrix(o->Angle, Matrix);
 
                 if (gMapManager.InChaosCastle() == true)
-                    RenderPlane3D(o->TurningForce[0], o->TurningForce[1], Matrix);
+                    RenderPlane3DAt(o->TurningForce[0], o->TurningForce[1], Matrix, o->Position);
                 else
                 {
                     if (o->Type == BITMAP_RAIN)
@@ -586,21 +599,25 @@ void RenderLeaves()
                         if (gMapManager.WorldActive == WD_34CRYWOLF_1ST)
                         {
                             if (weather == 1)
-                                RenderPlane3D(1.f, 20.f, Matrix);
+                                RenderPlane3DAt(1.f, 20.f, Matrix, o->Position);
                         }
                         else
-                            RenderPlane3D(1.f, 20.f, Matrix);
+                            RenderPlane3DAt(1.f, 20.f, Matrix, o->Position);
                     }
                     else if (o->Type == BITMAP_FIRE_SNUFF)
-                        RenderPlane3D(o->Scale * 2.f, o->Scale * 4.f, Matrix);
+                        RenderPlane3DAt(o->Scale * 2.f, o->Scale * 4.f, Matrix, o->Position);
                     else
                     {
-                        RenderPlane3D(3.f, 3.f, Matrix);
+                        RenderPlane3DAt(3.f, 3.f, Matrix, o->Position);
                     }
                 }
-
-                GlobalUBO::Instance().PopModel();
             }
         }
+
+    }
+
+    if (!spriteMap)
+    {
+        GlobalUBO::Instance().PopModel();
     }
 }

@@ -5,6 +5,9 @@
 #include "stdafx.h"
 #include <math.h>
 #include <iterator>
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Core/BindState.h"
 #include "Core/Utilities/FrameProfiler.h"
@@ -1084,7 +1087,14 @@ static PFNGLPOPDEBUGGROUPPROC          fn_glPopDebugGroup          = nullptr;
 static bool LoadTerrainGLFunctions()
 {
     static bool loaded = false;
-    if (loaded) return true;
+    // AH-1118: latch on ATTEMPT, not on success. These loaders are called from
+    // per-draw paths; if any symbol fails to resolve (e.g. glPushDebugGroup on a
+    // driver without KHR_debug), a success-only latch re-runs every lookup on
+    // every call forever -- measured at ~10% of the render thread in the dynamic
+    // linker on Adreno 730, since eglGetProcAddress is a full symbol search.
+    static bool attempted = false;
+    if (attempted) return loaded;
+    attempted = true;
 
     fn_glGenBuffers              = (PFNGLGENBUFFERSPROC)SDL_GL_GetProcAddress("glGenBuffers");
     fn_glDeleteBuffers           = (PFNGLDELETEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteBuffers");
@@ -1098,6 +1108,15 @@ static bool LoadTerrainGLFunctions()
     fn_glPopDebugGroup           = (PFNGLPOPDEBUGGROUPPROC)SDL_GL_GetProcAddress("glPopDebugGroup");
 
     loaded = (fn_glGenBuffers && fn_glBindBuffer && fn_glBufferData && fn_glGenVertexArrays);
+#ifdef __ANDROID__
+    // A null pointer here is a silently disabled feature, not just a slow path --
+    // name the misses once so they can't hide behind the attempt-latch above.
+    __android_log_print(ANDROID_LOG_INFO, "MuMainGL",
+        "terrain GL procs: genBuf=%d bindBuf=%d bufData=%d genVAO=%d attrPtr=%d dbgGroup=%d",
+        fn_glGenBuffers != nullptr, fn_glBindBuffer != nullptr, fn_glBufferData != nullptr,
+        fn_glGenVertexArrays != nullptr, fn_glVertexAttribPointer != nullptr,
+        fn_glPushDebugGroup != nullptr);
+#endif
     return loaded;
 }
 

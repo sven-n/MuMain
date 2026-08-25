@@ -306,6 +306,15 @@ namespace FrameProfiler
         {
             GpuQueryFns& fns = QueryFns();
             if (fns.loaded) return true;
+            // AH-1118: latch on ATTEMPT, not on success. GL_TIMESTAMP queries are
+            // desktop-GL/EXT_disjoint_timer_query only, so on plain OpenGL ES
+            // QueryCounter never resolves and a success-only latch re-ran all four
+            // lookups from every GpuTimerBegin -- roughly ten times a frame, each a
+            // full dynamic-linker symbol search. Measured at ~11% of the render
+            // thread on Adreno 730: the instrumentation was distorting what it measured.
+            static bool s_attempted = false;
+            if (s_attempted) return fns.loaded;
+            s_attempted = true;
             fns.GenQueries          = (PFNGLGENQUERIESPROC)SDL_GL_GetProcAddress("glGenQueries");
             fns.QueryCounter        = (PFNGLQUERYCOUNTERPROC)SDL_GL_GetProcAddress("glQueryCounter");
             fns.GetQueryObjectiv    = (PFNGLGETQUERYOBJECTIVPROC)SDL_GL_GetProcAddress("glGetQueryObjectiv");

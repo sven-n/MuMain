@@ -257,7 +257,14 @@ namespace {
     bool LoadBufferGLFunctions()
     {
         static bool loaded = false;
-        if (loaded) return true;
+        // AH-1118: latch on ATTEMPT, not on success. These loaders are called from
+        // per-draw paths; if any symbol fails to resolve (e.g. glPushDebugGroup on a
+        // driver without KHR_debug), a success-only latch re-runs every lookup on
+        // every call forever -- measured at ~10% of the render thread in the dynamic
+        // linker on Adreno 730, since eglGetProcAddress is a full symbol search.
+        static bool attempted = false;
+        if (attempted) return loaded;
+        attempted = true;
         fn_glGenBuffers     = (PFNGLGENBUFFERSPROC)SDL_GL_GetProcAddress("glGenBuffers");
         fn_glBindBuffer     = (PFNGLBINDBUFFERPROC)SDL_GL_GetProcAddress("glBindBuffer");
         fn_glBufferData     = (PFNGLBUFFERDATAPROC)SDL_GL_GetProcAddress("glBufferData");
@@ -492,7 +499,14 @@ namespace {
     bool LoadUboRingSyncFunctions()
     {
         static bool loaded = false;
-        if (loaded) return true;
+        // AH-1118: latch on ATTEMPT, not on success. These loaders are called from
+        // per-draw paths; if any symbol fails to resolve (e.g. glPushDebugGroup on a
+        // driver without KHR_debug), a success-only latch re-runs every lookup on
+        // every call forever -- measured at ~10% of the render thread in the dynamic
+        // linker on Adreno 730, since eglGetProcAddress is a full symbol search.
+        static bool attempted = false;
+        if (attempted) return loaded;
+        attempted = true;
         fn_glFenceSync       = (PFNGLFENCESYNCPROC)SDL_GL_GetProcAddress("glFenceSync");
         fn_glClientWaitSync  = (PFNGLCLIENTWAITSYNCPROC)SDL_GL_GetProcAddress("glClientWaitSync");
         fn_glDeleteSync      = (PFNGLDELETESYNCPROC)SDL_GL_GetProcAddress("glDeleteSync");
@@ -511,7 +525,14 @@ namespace {
     bool LoadBufferStorageFunction()
     {
         static bool loaded = false;
-        if (loaded) return true;
+        // AH-1118: latch on ATTEMPT, not on success. These loaders are called from
+        // per-draw paths; if any symbol fails to resolve (e.g. glPushDebugGroup on a
+        // driver without KHR_debug), a success-only latch re-runs every lookup on
+        // every call forever -- measured at ~10% of the render thread in the dynamic
+        // linker on Adreno 730, since eglGetProcAddress is a full symbol search.
+        static bool attempted = false;
+        if (attempted) return loaded;
+        attempted = true;
         fn_glBufferStorage = (PFNGLBUFFERSTORAGEPROC)SDL_GL_GetProcAddress("glBufferStorage");
         if (fn_glBufferStorage == nullptr)
         {
@@ -964,7 +985,14 @@ namespace {
     bool LoadVertexLayoutGLFunctions()
     {
         static bool loaded = false;
-        if (loaded) return true;
+        // AH-1118: latch on ATTEMPT, not on success. These loaders are called from
+        // per-draw paths; if any symbol fails to resolve (e.g. glPushDebugGroup on a
+        // driver without KHR_debug), a success-only latch re-runs every lookup on
+        // every call forever -- measured at ~10% of the render thread in the dynamic
+        // linker on Adreno 730, since eglGetProcAddress is a full symbol search.
+        static bool attempted = false;
+        if (attempted) return loaded;
+        attempted = true;
         fn_glGenVertexArrays         = (PFNGLGENVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glGenVertexArrays");
         fn_glDeleteVertexArrays      = (PFNGLDELETEVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glDeleteVertexArrays");
         fn_glVertexAttribPointer     = (PFNGLVERTEXATTRIBPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribPointer");
