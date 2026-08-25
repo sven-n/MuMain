@@ -729,6 +729,7 @@ if (DOTNET_EXECUTABLE)
       # pinning it to one fixed config removes the config-dependence entirely instead of fixing it
       # per-config (which would just duplicate identical output under Debug/Release subdirs).
       COMMAND ${CMAKE_COMMAND} -E env
+              --unset=Platform
               "NUGET_PACKAGES=${DOTNET_NUGET_DIR_NATIVE}"
               "DOTNET_CLI_HOME=${DOTNET_TEMP_DIR_NATIVE}"
               "${DOTNET_EXECUTABLE}" run --project "${RESXGEN_PROJ_NATIVE}" -c Release

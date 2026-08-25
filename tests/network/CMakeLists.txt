@@ -23,7 +23,8 @@ mu_add_test(
 if(DOTNET_EXECUTABLE)
     add_test(
         NAME outbound_flush_loop
-        COMMAND "${DOTNET_EXECUTABLE}" run
+        COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
+            "${DOTNET_EXECUTABLE}" run
             --project ${CMAKE_CURRENT_SOURCE_DIR}/outbound_sender_self_check/OutboundSenderSelfCheck.csproj
             --configuration Release
     )

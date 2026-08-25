@@ -16,6 +16,8 @@ PERSONAL_SHOP_SOURCE = (
     ROOT / "src/source/GameLogic/Items/PersonalShopTitleImp.cpp"
 )
 SHADER_BLOB_VALIDATOR = ROOT / "cmake/ValidateShaderBlobs.cmake"
+SRC_CMAKE = ROOT / "src/CMakeLists.txt"
+NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
 SCRIPT_MODE_TESTS = (
     ROOT / "tests/core/test_msvc_runtime_dll_staging.cmake",
     ROOT / "tests/editor/test_leak.cmake",
@@ -166,6 +168,8 @@ mingw = MINGW_WORKFLOW.read_text(encoding="utf-8")
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
 vcpkg_manifest = json.loads(VCPKG_MANIFEST.read_text(encoding="utf-8"))
 shader_blob_validator = SHADER_BLOB_VALIDATOR.read_text(encoding="utf-8")
+src_cmake = SRC_CMAKE.read_text(encoding="utf-8")
+network_test_cmake = NETWORK_TEST_CMAKE.read_text(encoding="utf-8")
 personal_shop_source = PERSONAL_SHOP_SOURCE.read_text(encoding="utf-8")
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
@@ -241,6 +245,16 @@ check(
     and directx_dxc_dependencies[0].get("platform") == "windows & x64",
     "DXC must install only for the x64 Windows shader-compilation rows",
 )
+glslang_dependencies = [
+    dependency
+    for dependency in vcpkg_manifest.get("dependencies", [])
+    if isinstance(dependency, dict) and dependency.get("name") == "glslang"
+]
+check(
+    len(glslang_dependencies) == 1
+    and glslang_dependencies[0].get("features") == ["tools"],
+    "Windows dependency manifest must install the glslang command-line tools",
+)
 
 linux_rows = re.findall(
     r"(?ms)^          - editor: (\S+)\n(.*?)(?=^          - editor: |^\s{4}steps:)",
@@ -313,9 +327,9 @@ check(
 linux_upload = step(linux_job, "build-linux", "Upload artifact")
 for required in (
     "name: ${{ matrix.artifact_name }}-${{ github.ref_name }}",
-    "path: ${{ matrix.build_directory }}/src/Debug/",
+    "${{ matrix.build_directory }}/src/Debug/Main",
+    "${{ matrix.build_directory }}/src/Debug/MUnique.Client.Library.so",
     "if-no-files-found: error",
-    "include-hidden-files: true",
 ):
     check(required in linux_upload, f"Linux matrix upload missing {required}")
 
@@ -506,15 +520,30 @@ for required in (
     "-DMU_ENABLE_SHADER_COMPILATION=${{ matrix.shader_compilation }}",
     "-DGLSLANG_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/glslang/glslangValidator.exe",
     "-DSPIRV_CROSS_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/spirv-cross/spirv-cross.exe",
+    "-DDXC_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/directx-dxc/dxc.exe",
 ):
     count = native_configure_arguments.count(required)
     check(
         count == 1,
         f"Native strict shader configure argument must appear exactly once: {required}; found {count}",
     )
+check("DXC_EXE" not in mingw, "MinGW must not require the native MSVC DXC tool")
+
 check(
-    "DXC_EXE" not in ci + mingw,
-    "Windows workflows must use vcpkg tool discovery for DXC",
+    re.search(
+        r'(?ms)COMMAND \$\{CMAKE_COMMAND\} -E env\n\s*--unset=Platform\n\s*"NUGET_PACKAGES=.*?"\$\{DOTNET_EXECUTABLE\}" run --project "\$\{RESXGEN_PROJ_NATIVE\}"',
+        src_cmake,
+    )
+    is not None,
+    "ResxGen must discard the MSVC target Platform before running as a host tool",
+)
+check(
+    re.search(
+        r'(?ms)NAME outbound_flush_loop\n\s*COMMAND "\$\{CMAKE_COMMAND\}" -E env --unset=Platform\n\s*"\$\{DOTNET_EXECUTABLE\}" run',
+        network_test_cmake,
+    )
+    is not None,
+    "The .NET network self-check must discard the MSVC target Platform",
 )
 
 native_crt_stage = step(
@@ -843,12 +872,24 @@ check(
     f"Native job must contain exactly one artifact upload action; found {len(native_job_upload_actions)}",
 )
 check(
-    "path: ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/" in native_upload,
-    "Native upload must recursively package the complete runtime directory",
+    "${{ matrix.build_directory }}/src/${{ matrix.configuration }}/Main.exe"
+    in native_upload,
+    "Native upload must include Main.exe",
 )
-check("path: |" not in native_upload, "Native upload must not hand-pick runtime files")
-check("if-no-files-found: error" in native_upload, "Native upload must fail when the runtime directory is missing")
-check("include-hidden-files: true" in native_upload, "Native upload must include the complete runtime directory")
+check(
+    "${{ matrix.build_directory }}/src/${{ matrix.configuration }}/MUnique.Client.Library.dll"
+    in native_upload,
+    "Native upload must include the network library",
+)
+check("path: |" in native_upload, "Native upload must list the two required binaries")
+check(
+    "include-hidden-files" not in native_upload,
+    "Native binary-only upload must not include unrelated hidden files",
+)
+check(
+    "if-no-files-found: error" in native_upload,
+    "Native upload must fail when either required binary is missing",
+)
 check(
     "name: ${{ matrix.artifact_name }}-${{ github.ref_name }}" in native_upload,
     "Native upload must use the fully qualified matrix artifact name",
@@ -927,6 +968,10 @@ for stale_release_token in (
     )
 
 mingw_configure = step(mingw_job, "build-mingw", "Configure CMake")
+check(
+    "- name: Validate MinGW dependency roots" not in mingw_job,
+    "MinGW must rely on configure and link results instead of cache internals",
+)
 mingw_stage = step(mingw_job, "build-mingw", "Stage runnable directory")
 check(
     "-DCMAKE_BUILD_TYPE=Release" in mingw_configure,
@@ -1202,19 +1247,16 @@ check(
     "MinGW artifact name must encode toolchain, architecture, configuration, and editor state",
 )
 check(
-    "path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/"
+    "path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/Main.exe"
     in mingw_upload,
-    "MinGW upload must recursively package the complete runtime directory",
+    "MinGW upload must include only Main.exe",
 )
 check("path: |" not in mingw_upload, "MinGW upload must not hand-pick runtime files")
 check(
     "if-no-files-found: error" in mingw_upload,
     "MinGW upload must fail when the runtime directory is missing",
 )
-check(
-    "include-hidden-files: true" in mingw_upload,
-    "MinGW upload must include the complete staged runtime directory",
-)
+check("include-hidden-files" not in mingw_upload, "MinGW upload must exclude unrelated files")
 check(
     "MUnique.Client.Library.dll" not in mingw_upload,
     "MinGW upload must not package or claim NativeAOT",

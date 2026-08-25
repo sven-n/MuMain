@@ -251,6 +251,7 @@ jobs:
           -DMU_ENABLE_SHADER_COMPILATION=${{ matrix.shader_compilation }}
           -DGLSLANG_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/glslang/glslangValidator.exe
           -DSPIRV_CROSS_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/spirv-cross/spirv-cross.exe
+          -DDXC_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/directx-dxc/dxc.exe
           -DBUILD_TESTING=ON
 
       - name: Assert configured MSVC compiler

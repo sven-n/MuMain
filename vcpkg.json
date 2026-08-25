@@ -13,7 +13,10 @@
       "platform": "windows & x64"
     },
     "openssl",
-    "glslang",
+    {
+      "name": "glslang",
+      "features": ["tools"]
+    },
     "spirv-cross"
   ]
 }
