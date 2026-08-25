@@ -1549,7 +1549,7 @@ public:
         bool vertexDataReady = s_vtxOffset == 0u;
         if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset))
         {
-            void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, false);
+            void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, true);
             if (mapped)
             {
                 std::memcpy(mapped, s_vtxScratch.data(), s_vtxOffset);
@@ -1572,7 +1572,7 @@ public:
                 boneDataSize = static_cast<Uint32>(boneBytes);
                 if (EnsureBoneBufferCapacity(boneDataSize))
                 {
-                    void* mapped = SDL_MapGPUTransferBuffer(s_device, s_boneTransferBuf, false);
+                    void* mapped = SDL_MapGPUTransferBuffer(s_device, s_boneTransferBuf, true);
                     if (mapped)
                     {
                         std::memcpy(mapped, s_boneRowScratch.data(), boneDataSize);
@@ -1590,7 +1590,7 @@ public:
             // (EnsureStripIndexBuffer may release/create GPU resources).
             if (EnsureStripIndexBuffer(static_cast<Uint32>(s_stripIdxScratch.size())))
             {
-                void* pIdxMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, false);
+                void* pIdxMapped = SDL_MapGPUTransferBuffer(s_device, s_stripIdxTransfer, true);
                 if (pIdxMapped)
                 {
                     const Uint32 totalIdxBytes = static_cast<Uint32>(s_stripIdxScratch.size() * sizeof(Uint16));
@@ -1654,7 +1654,7 @@ public:
                     vtxDst.offset = 0;
                     vtxDst.size = s_vtxOffset;
 
-                    SDL_UploadToGPUBuffer(copyPass, &vtxSrc, &vtxDst, false);
+                    SDL_UploadToGPUBuffer(copyPass, &vtxSrc, &vtxDst, true);
                 }
 
                 if (boneDataSize > 0u && boneDataReady)
@@ -1668,7 +1668,7 @@ public:
                     boneDst.offset = 0;
                     boneDst.size = boneDataSize;
 
-                    SDL_UploadToGPUBuffer(copyPass, &boneSrc, &boneDst, false);
+                    SDL_UploadToGPUBuffer(copyPass, &boneSrc, &boneDst, true);
                 }
 
                 // Copy accumulated strip index data (all strips for this frame).
@@ -1685,7 +1685,7 @@ public:
                     idxDst.offset = 0;
                     idxDst.size = totalIdxBytes;
 
-                    SDL_UploadToGPUBuffer(copyPass, &idxSrc, &idxDst, false);
+                    SDL_UploadToGPUBuffer(copyPass, &idxSrc, &idxDst, true);
                 }
 
                 // Upload queued dynamic texture updates.
