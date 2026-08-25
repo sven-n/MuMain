@@ -1118,6 +1118,7 @@ for required in (
     "is_windows_system_dll",
     "kernel32.dll",
     "user32.dll",
+    "usp10.dll",
     "api-ms-win-*",
     "ext-ms-win-*",
     "basename -- \"${import_name}\"",

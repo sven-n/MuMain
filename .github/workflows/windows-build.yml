@@ -293,7 +293,7 @@ jobs:
 
           is_windows_system_dll() {
             case "${1,,}" in
-              advapi32.dll|avrt.dll|bcrypt.dll|cfgmgr32.dll|combase.dll|comctl32.dll|comdlg32.dll|crypt32.dll|d3d12.dll|dbghelp.dll|dinput8.dll|dnsapi.dll|dwmapi.dll|dxcore.dll|dxgi.dll|dxguid.dll|gdi32.dll|glu32.dll|hid.dll|imagehlp.dll|imm32.dll|iphlpapi.dll|kernel32.dll|mf.dll|mfplat.dll|mfreadwrite.dll|mfsensorgroup.dll|msvcrt.dll|normaliz.dll|ntdll.dll|ole32.dll|oleaut32.dll|opengl32.dll|powrprof.dll|propsys.dll|rpcrt4.dll|sechost.dll|secur32.dll|setupapi.dll|shell32.dll|shcore.dll|shlwapi.dll|ucrtbase.dll|uiautomationcore.dll|urlmon.dll|user32.dll|uuid.dll|version.dll|vfw32.dll|wininet.dll|winmm.dll|wintrust.dll|wldap32.dll|ws2_32.dll|wtsapi32.dll)
+              advapi32.dll|avrt.dll|bcrypt.dll|cfgmgr32.dll|combase.dll|comctl32.dll|comdlg32.dll|crypt32.dll|d3d12.dll|dbghelp.dll|dinput8.dll|dnsapi.dll|dwmapi.dll|dxcore.dll|dxgi.dll|dxguid.dll|gdi32.dll|glu32.dll|hid.dll|imagehlp.dll|imm32.dll|iphlpapi.dll|kernel32.dll|mf.dll|mfplat.dll|mfreadwrite.dll|mfsensorgroup.dll|msvcrt.dll|normaliz.dll|ntdll.dll|ole32.dll|oleaut32.dll|opengl32.dll|powrprof.dll|propsys.dll|rpcrt4.dll|sechost.dll|secur32.dll|setupapi.dll|shell32.dll|shcore.dll|shlwapi.dll|ucrtbase.dll|uiautomationcore.dll|urlmon.dll|user32.dll|usp10.dll|uuid.dll|version.dll|vfw32.dll|wininet.dll|winmm.dll|wintrust.dll|wldap32.dll|ws2_32.dll|wtsapi32.dll)
                 return 0
                 ;;
               *)
