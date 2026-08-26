@@ -242,15 +242,55 @@ static void MaybeCaptureFrame()
 // SDL_GL_SwapWindow instead of the Win32 ::SwapBuffers (issue #442). This is the one place all
 // of this file's/LoadingScene.cpp's/SceneManager.cpp's/UIMng.cpp's present call sites funnel
 // through, so branching here (rather than at each call site) covers all of them uniformly.
+#ifdef __ANDROID__
+#include <android/log.h>
+#include "Core/Utilities/FrameProfiler.h"
+#endif
+
 void PlatformSwapBuffers()
 {
     if (g_sdlWindow)
     {
+#ifdef __ANDROID__
+        // AH-1118: coarse frame-rate meter for the rendering-perf pass.
+        {
+            static Uint64 s_windowStart = 0;
+            static int s_frames = 0;
+            ++s_frames;
+            const Uint64 now = SDL_GetTicks();
+            if (s_windowStart == 0)
+            {
+                s_windowStart = now;
+            }
+            else if (now - s_windowStart >= 5000)
+            {
+                __android_log_print(ANDROID_LOG_INFO, "MuMainFPS", "fps=%.1f",
+                    s_frames * 1000.0 / static_cast<double>(now - s_windowStart));
+                s_windowStart = now;
+                s_frames = 0;
+            }
+        }
+#endif
         // GLP-19: IR defers its draw until the next incompatible Begin() or an explicit flush, so
         // the frame's last batch would otherwise sit unsubmitted until some later frame. Every
         // swap path in the tree funnels through here (SceneManager, LoadingScene, UIMng), which
         // makes this the one place that cannot be missed.
         IR::Flush();
+#ifdef __ANDROID__
+        // AH-1118: alarm on pathological presents -- measures the SwapWindow
+        // block that the off-CPU profile could not attribute.
+        {
+            const Uint64 t0 = SDL_GetTicksNS();
+            SDL_GL_SwapWindow(g_sdlWindow);
+            const Uint64 dtMs = (SDL_GetTicksNS() - t0) / 1000000ull;
+            if (dtMs >= 100)
+            {
+                __android_log_print(ANDROID_LOG_WARN, "MuMainPace",
+                    "SwapWindow blocked %llu ms", (unsigned long long)dtMs);
+            }
+            return;
+        }
+#endif
 #ifndef _WIN32
         MaybeCaptureFrame();
 #endif
@@ -1226,6 +1266,13 @@ MSG MainLoop()
                 else
                     SDL_StopTextInput(g_sdlWindow);
                 s_textInputActive = wantTextInput;
+#ifdef __ANDROID__
+                __android_log_print(ANDROID_LOG_INFO, "MuMainInput",
+                    "text input %s (focused=%p, started=%d, kbdShown=%d)",
+                    wantTextInput ? "START" : "STOP", (void*)focusedField,
+                    (int)SDL_TextInputActive(g_sdlWindow),
+                    (int)SDL_ScreenKeyboardShown(g_sdlWindow));
+#endif
             }
 
             // Anchor the IME candidate window at the caret (reference px -> window
@@ -1696,6 +1743,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Fullscreen is requested via an SDL window flag below; SDL handles the
     // display-mode change and restores it on teardown.
     g_ErrorReport.Write(L"> Screen size = %d x %d.\r\n", WindowWidth, WindowHeight);
+    g_ErrorReport.Write(L"> Renderer backend = %hs.\r\n", RHI::GetConfiguredBackendName());
 
     g_hInst = hInstance;
 
@@ -1713,7 +1761,16 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // every map/panel; compatibility (CoreProfile=0) remains available as a rollback.
     // Core additionally needs an explicit version request (compatibility takes the
     // driver's highest, and must keep doing so -- see the else branch below).
+#ifdef __ANDROID__
+    // AH-1118: run the modern core-profile engine path on a native OpenGL ES 3
+    // context; shader sources are transposed to `#version 300 es` at compile
+    // time (EsShaderShim.h). gl4es stays linked only to satisfy legacy GL
+    // symbols on code paths the core pipeline never executes.
+    g_CoreProfile = TRUE;
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+#else
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, g_CoreProfile ? SDL_GL_CONTEXT_PROFILE_CORE : SDL_GL_CONTEXT_PROFILE_COMPATIBILITY);
+#endif
 #if defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
     // KHR_debug callback (registered below, after context creation) needs the context
     // created with the debug flag to get synchronous, precisely-attributed messages.
@@ -1734,7 +1791,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         // Descend only on failure; the {3,3} rung is byte-identical to the pre-GLP-08 fixed
         // request, so a machine where the whole loop somehow misbehaves still ends up exactly
         // where it was before this change.
+#ifdef __ANDROID__
+        // OpenGL ES rungs; ES 3.0 is the floor the transposed shaders need.
+        static constexpr struct { int major, minor; } kCoreVersionAttempts[] = { {3, 2}, {3, 1}, {3, 0} };
+#else
         static constexpr struct { int major, minor; } kCoreVersionAttempts[] = { {4, 5}, {4, 3}, {3, 3} };
+#endif
         constexpr int kAttemptCount = sizeof(kCoreVersionAttempts) / sizeof(kCoreVersionAttempts[0]);
 
         // config.ini [Render] MaxGLVersion caps which rung the loop starts at -- rollback path
@@ -1811,6 +1873,25 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
     SDL_GL_MakeCurrent(g_sdlWindow, g_sdlGLContext);
+
+#ifdef __ANDROID__
+    // AH-1118: Android ignores the requested window size and hands back the
+    // native fullscreen surface; adopt its real pixel size so the viewport and
+    // UI cover the whole display instead of a 1024x768 corner.
+    {
+        int drawW = 0;
+        int drawH = 0;
+        SDL_GetWindowSizeInPixels(g_sdlWindow, &drawW, &drawH);
+        if (drawW > 0 && drawH > 0)
+        {
+            WindowWidth = static_cast<unsigned int>(drawW);
+            WindowHeight = static_cast<unsigned int>(drawH);
+            OpenglWindowWidth = WindowWidth;
+            OpenglWindowHeight = WindowHeight;
+        }
+    }
+#endif
+
     RHI::Init(nullptr, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
 
 #if defined(_DEBUG) && ENABLE_GL_KHR_DEBUG_CALLBACK
@@ -1914,6 +1995,21 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
 
     InitVSync();
+#ifdef __ANDROID__
+    // AH-1118 pacing experiment: the on-device profile shows the frame loop
+    // SLEEPING at ~0.7 FPS (CpuUsage/sleep_for dominate an otherwise idle CPU),
+    // so the pacing path is suspect. Force uncapped + vsync off and log every
+    // input to the decision so the real numbers are on record.
+    {
+        const bool vsAvail = IsVSyncAvailable();
+        const int fpsLimit = GetFPSLimit();
+        DisableVSync();
+        SetTargetFps(-1);
+        __android_log_print(ANDROID_LOG_INFO, "MuMainPace",
+            "vsyncAvailable=%d fpsLimit=%d forced=uncapped targetFps=%.2f",
+            vsAvail ? 1 : 0, fpsLimit, GetTargetFps());
+    }
+#else
     if (IsVSyncAvailable())
     {
         if (EnableVSync())
@@ -1925,6 +2021,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     {
         SetTargetFps(GetFPSLimit());
     }
+#endif
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.

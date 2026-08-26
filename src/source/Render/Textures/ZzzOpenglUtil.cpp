@@ -3,6 +3,9 @@
 
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
+#ifdef __ANDROID__
+#include <unordered_map>
+#endif
 #include "ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -183,6 +186,12 @@ GLRenderStateSnapshot GetRenderStateSnapshot()
     };
 }
 
+#ifdef __ANDROID__
+// AH-1118 diagnostics: which bitmap indices churn the texture binding (each
+// change breaks the IR batch). Read+cleared by the SceneManager 5s stats dump.
+std::unordered_map<int, unsigned int> g_muBindHisto;
+#endif
+
 void BindTexture(int tex)
 {
     if (CachTexture != tex)
@@ -195,6 +204,9 @@ void BindTexture(int tex)
         const uint32_t textureID = (tex >= 0) ? static_cast<uint32_t>(Bitmaps[tex].TextureNumber)
                                                : static_cast<uint32_t>(-1 * tex);
         BindTexture2D(0, textureID);
+#ifdef __ANDROID__
+        ++g_muBindHisto[tex];
+#endif
     }
 }
 
@@ -1067,6 +1079,31 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
     for (int j = 0; j < 4; j++)
     {
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
+    }
+
+    IR::Begin(GL_QUADS);
+    PassthroughShader::Instance().SetUseTexture(true);
+    IR::Color3f(1.f, 1.f, 1.f);
+    IR::TexCoord2f(0.f, 1.f); IR::Vertex3fv(TransformVertices[0]);
+    IR::TexCoord2f(1.f, 1.f); IR::Vertex3fv(TransformVertices[1]);
+    IR::TexCoord2f(1.f, 0.f); IR::Vertex3fv(TransformVertices[2]);
+    IR::TexCoord2f(0.f, 0.f); IR::Vertex3fv(TransformVertices[3]);
+    IR::End();
+}
+
+void RenderPlane3DAt(float Width, float Height, float Matrix[3][4], const vec3_t Position)
+{
+    vec3_t BoundingVertices[4];
+    Vector(-Width, -Width, Height, BoundingVertices[3]);
+    Vector(Width, Width, Height, BoundingVertices[2]);
+    Vector(Width, Width, -Height, BoundingVertices[1]);
+    Vector(-Width, -Width, -Height, BoundingVertices[0]);
+
+    vec3_t TransformVertices[4];
+    for (int j = 0; j < 4; j++)
+    {
+        VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
+        VectorAdd(TransformVertices[j], Position, TransformVertices[j]);
     }
 
     IR::Begin(GL_QUADS);

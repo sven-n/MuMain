@@ -160,8 +160,30 @@
 #endif
 
 //opengl
+#ifdef __ANDROID__
+// AH-1118 spike: GL4ES supplies the desktop GL API on top of GLES2. Its headers
+// declare everything as real functions exported by its libGL, so GLEW (which is
+// only a compile-time dependency here; glewInit is never called) drops out.
+// gl4es's glext.h is GL-2.1-era: rename its glShaderSource pointer typedef out
+// of the way of the engine's own (const-correct) declarations, and supply the
+// few modern enums the renderer references.
+#define PFNGLSHADERSOURCEPROC PFNGLSHADERSOURCEPROC_gl4es
+#include <GL/gl.h>
+#include <GL/glext.h>
+#undef PFNGLSHADERSOURCEPROC
+#ifndef GL_MAP_PERSISTENT_BIT
+#define GL_MAP_PERSISTENT_BIT 0x0040
+#endif
+#ifndef GL_MAP_COHERENT_BIT
+#define GL_MAP_COHERENT_BIT 0x0080
+#endif
+#ifndef GL_DEBUG_SOURCE_APPLICATION
+#define GL_DEBUG_SOURCE_APPLICATION 0x824A
+#endif
+#else
 #include <gl/glew.h>
 #include <gl/GL.h>
+#endif
 
 // DXP-08a Category 1: intercepts glColor3f/3fv/3ub/4f/4ub project-wide so every call site
 // keeps working under both GL profiles without a per-site rewrite -- see GLColorIntercept.h.

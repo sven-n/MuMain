@@ -254,21 +254,27 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
     RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_LEFT, m_Pos.x + 12, m_Pos.y + 119 - 14, 14, 14);
     RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT, m_Pos.x + 12 + 165 - 14, m_Pos.y + 119 - 14, 14, 14);
 
-    for (int x = m_Pos.x + 12 + 14; x < m_Pos.x + 12 + 165 - 14; ++x)
+    // AH-1118: stretched quads instead of 1px-strip loops -- identical texels,
+    // two draws instead of two texture rebinds per pixel column (see
+    // NewUIInventoryCtrl.cpp's border rendering for the measurement).
     {
-        RenderImage(IMAGE_CHAINFO_TABLE_TOP_PIXEL, x, m_Pos.y + 48, 1, 14);
-        RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x, m_Pos.y + 119 - 14, 1, 14);
+        const float x0 = m_Pos.x + 12 + 14;
+        const float xw = (m_Pos.x + 12 + 165 - 14) - x0;
+        RenderImage(IMAGE_CHAINFO_TABLE_TOP_PIXEL, x0, m_Pos.y + 48, xw, 14);
+        RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x0, m_Pos.y + 119 - 14, xw, 14);
     }
 
-    for (int x = m_Pos.x + 14; x < m_Pos.x + 12 + 165 - 4; ++x)
     {
-        RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x, m_Pos.y + 48 + 12, 1, 14);
+        const float x0 = m_Pos.x + 14;
+        const float xw = (m_Pos.x + 12 + 165 - 4) - x0;
+        RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x0, m_Pos.y + 48 + 12, xw, 14);
     }
 
-    for (int y = m_Pos.y + 48 + 14; y < m_Pos.y + 119 - 14; y++)
     {
-        RenderImage(IMAGE_CHAINFO_TABLE_LEFT_PIXEL, m_Pos.x + 12, y, 14, 1);
-        RenderImage(IMAGE_CHAINFO_TABLE_RIGHT_PIXEL, m_Pos.x + 12 + 165 - 14, y, 14, 1);
+        const float y0 = m_Pos.y + 48 + 14;
+        const float yh = (m_Pos.y + 119 - 14) - y0;
+        RenderImage(IMAGE_CHAINFO_TABLE_LEFT_PIXEL, m_Pos.x + 12, y0, 14, yh);
+        RenderImage(IMAGE_CHAINFO_TABLE_RIGHT_PIXEL, m_Pos.x + 12 + 165 - 14, y0, 14, yh);
     }
 
     RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x + 11, m_Pos.y + HEIGHT_STRENGTH, 170.f, 21.f);

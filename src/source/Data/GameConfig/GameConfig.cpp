@@ -45,6 +45,15 @@ GameConfig::GameConfig()
     m_configPath = exePath;
     m_configPath += L"config.ini";
 
+#ifdef __ANDROID__
+    // AH-1118 spike: on Android the "module path" resolves into the read-only
+    // system/APK area, so the file above is silently never found and every
+    // setting falls back to its default (including ServerIP=127.127.127.127).
+    // The app's working directory is set to its internal files dir before any
+    // initializer runs; the pushed config.ini lives there.
+    m_configPath = L"config.ini";
+#endif
+
     Load();
 }
 

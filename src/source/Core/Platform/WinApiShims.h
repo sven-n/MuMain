@@ -133,7 +133,10 @@ inline DWORD GetCurrentThreadId()
 {
     // pthread_t is 8 bytes on LP64; fold the high half into the low half before
     // truncating so two threads are less likely to collide on the low 32 bits.
-    const std::uint64_t id = reinterpret_cast<std::uintptr_t>(pthread_self());
+    // static_cast, not reinterpret_cast: glibc's pthread_t (unsigned long) made
+    // the reinterpret_cast a same-type no-op, but bionic's is signed long, and
+    // reinterpret_cast between distinct integral types is ill-formed.
+    const std::uint64_t id = static_cast<std::uint64_t>(pthread_self());
     return static_cast<DWORD>(id ^ (id >> 32));
 }
 

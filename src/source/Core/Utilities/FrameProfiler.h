@@ -52,12 +52,21 @@ namespace FrameProfiler
         Overlay,   // $details/$glstats/FPS-counter self-cost. These render text as roughly one IR
                    // quad per glyph and used to be tagged Other, contaminating the exact bucket
                    // under investigation -- an observer effect large enough to mislead.
+        // AH-1118: split out of Other -- with the big buckets fixed, Other's ~250
+        // buffer appends per frame were the largest remaining unattributed cost
+        // on Android, and none of its constituents were separable.
+        Leaves,     // RenderLeaves() -- weather sprites (both call sites)
+        Points,     // RenderPoints() -- light glow points
+        EffShadows, // RenderEffectShadows()
+        Boids,      // RenderBoids()/RenderFishs() -- ambient critters
+        AfterFx,    // RenderAfterEffects()
         Count_
     };
 
     inline constexpr const char* kPassNames[(int)Pass::Count_] = {
         "Terrain", "Objects", "Chars", "Items", "Effects", "Other", "CharWait", "MoveFx", "MovePart",
-        "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay"
+        "Skinning", "UI", "Present", "Sprites", "Particles", "Joints", "Overlay",
+        "Leaves", "Points", "EffShadows", "Boids", "AfterFx"
     };
 
     inline float& AccumulatorMs(Pass p)
@@ -297,6 +306,15 @@ namespace FrameProfiler
         {
             GpuQueryFns& fns = QueryFns();
             if (fns.loaded) return true;
+            // AH-1118: latch on ATTEMPT, not on success. GL_TIMESTAMP queries are
+            // desktop-GL/EXT_disjoint_timer_query only, so on plain OpenGL ES
+            // QueryCounter never resolves and a success-only latch re-ran all four
+            // lookups from every GpuTimerBegin -- roughly ten times a frame, each a
+            // full dynamic-linker symbol search. Measured at ~11% of the render
+            // thread on Adreno 730: the instrumentation was distorting what it measured.
+            static bool s_attempted = false;
+            if (s_attempted) return fns.loaded;
+            s_attempted = true;
             fns.GenQueries          = (PFNGLGENQUERIESPROC)SDL_GL_GetProcAddress("glGenQueries");
             fns.QueryCounter        = (PFNGLQUERYCOUNTERPROC)SDL_GL_GetProcAddress("glQueryCounter");
             fns.GetQueryObjectiv    = (PFNGLGETQUERYOBJECTIVPROC)SDL_GL_GetProcAddress("glGetQueryObjectiv");

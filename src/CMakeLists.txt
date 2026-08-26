@@ -78,6 +78,23 @@ endif()
 # Editor mode option (for admin builds)
 option(ENABLE_EDITOR "Enable editor features for admin builds" OFF)
 
+# Renderer selection is explicit even while OpenGL is the only completed
+# backend. AH-1308 replaces the guarded SDL_GPU branch with the first Vulkan
+# implementation; keeping the choice in CMake now prevents platform bootstrap
+# code from silently deciding which renderer is active.
+set(MU_RENDER_BACKEND "OpenGL" CACHE STRING "Renderer backend (OpenGL or SDL_GPU)")
+set_property(CACHE MU_RENDER_BACKEND PROPERTY STRINGS OpenGL SDL_GPU)
+if(NOT MU_RENDER_BACKEND STREQUAL "OpenGL" AND
+   NOT MU_RENDER_BACKEND STREQUAL "SDL_GPU")
+  message(FATAL_ERROR "Unknown MU_RENDER_BACKEND='${MU_RENDER_BACKEND}'. "
+    "Choose OpenGL or SDL_GPU.")
+endif()
+if(MU_RENDER_BACKEND STREQUAL "SDL_GPU")
+  message(FATAL_ERROR "MU_RENDER_BACKEND=SDL_GPU is reserved for the Vulkan "
+    "backend landing in AH-1308; use OpenGL for the reproducible baseline.")
+endif()
+message(STATUS "MuMain renderer backend: ${MU_RENDER_BACKEND}")
+
 # ---------------------------------------------------------------------------
 # Engine/game code -> static library (libMuClient); MuMain -> thin executable.
 #
@@ -171,6 +188,7 @@ endif()
 # links MuClient inherit them automatically.
 add_library(MuClient STATIC ${MU_CLIENT_SOURCES})
 target_compile_features(MuClient PUBLIC cxx_std_20)
+target_compile_definitions(MuClient PUBLIC MU_RENDER_BACKEND_OPENGL=1)
 
 # The in-game shop downloader uses libcurl off Windows (issue #462); on Windows
 # it uses the OS WinINet/urlmon stack and needs no extra dependency here.
@@ -213,10 +231,11 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
 elseif (APPLE)
   set(MU_APP_ENTRY "source/App/Platform/macOS/main.mm")
 elseif (ANDROID)
-  message(FATAL_ERROR "Android is not a supported build target yet: it needs "
-    "an OpenGL ES renderer port, and its entry point is android_main via "
-    "native_app_glue built as a shared library, not an executable. When that "
-    "work starts, add source/App/Platform/Android/ and replace this branch.")
+  # AH-1118 spike: Android entry (SDL3 SDL_main glue + gl4es env + chdir to the
+  # app's internal storage) plus the shared bootstrap from Winmain.cpp.
+  set(MU_APP_ENTRY
+    "source/App/Platform/Android/main.cpp"
+    "source/App/Platform/Windows/Winmain.cpp")
 elseif (UNIX)
   # Linux entry (main.cpp) plus the shared bootstrap/game-loop from Winmain.cpp,
   # which now compiles off Windows (issue #462). main() calls into it.
@@ -229,9 +248,18 @@ else()
     "and a branch above.")
 endif()
 
+if (ANDROID)
+  # AH-1118 spike: Android apps are a shared library loaded by SDLActivity, not
+  # an executable. Undefined symbols stay permitted at link (curl is stubbed at
+  # packaging time).
+  list(TRANSFORM MU_APP_ENTRY PREPEND "${CMAKE_CURRENT_SOURCE_DIR}/")
+  add_library(Main SHARED ${MU_APP_ENTRY})
+  set_target_properties(Main PROPERTIES OUTPUT_NAME main PREFIX "lib")
+else()
 add_executable(Main
   "${CMAKE_CURRENT_SOURCE_DIR}/${MU_APP_ENTRY}"
 )
+endif()
 target_compile_features(Main PUBLIC cxx_std_20)
 target_link_libraries(Main PRIVATE MuClient::MuClient)
 
@@ -320,6 +348,36 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
   )
 endif()
 
+if(ANDROID)
+  # Android baseline dependencies are built by tools/android/build-native.sh.
+  # Keep their locations as cache inputs instead of smuggling absolute paths
+  # through CMAKE_CXX_FLAGS/CMAKE_*_LINKER_FLAGS as the original spike did.
+  set(MU_ANDROID_GL4ES_ROOT "" CACHE PATH
+      "gl4es source root containing include/ for the Android OpenGL baseline")
+  set(MU_ANDROID_GL4ES_LIBRARY "" CACHE FILEPATH
+      "Android libGL.so produced by gl4es (SONAME must be libGL.so)")
+
+  if(NOT MU_ANDROID_GL4ES_ROOT OR
+     NOT EXISTS "${MU_ANDROID_GL4ES_ROOT}/include/GL/gl.h")
+    message(FATAL_ERROR "Set MU_ANDROID_GL4ES_ROOT to the gl4es source root. "
+      "tools/android/build-native.sh configures this automatically.")
+  endif()
+  if(NOT MU_ANDROID_GL4ES_LIBRARY OR
+     NOT EXISTS "${MU_ANDROID_GL4ES_LIBRARY}")
+    message(FATAL_ERROR "Set MU_ANDROID_GL4ES_LIBRARY to the staged libGL.so. "
+      "tools/android/build-native.sh configures this automatically.")
+  endif()
+
+  find_library(TURBOJPEG_LIBRARY NAMES turbojpeg REQUIRED)
+  target_include_directories(MuClient PUBLIC "${MU_ANDROID_GL4ES_ROOT}/include")
+  target_compile_definitions(MuClient PUBLIC GLEW_NO_GLU)
+  target_compile_options(MuClient PUBLIC -Wno-c++11-narrowing)
+  target_link_libraries(MuClient PUBLIC
+    ${MU_ANDROID_GL4ES_LIBRARY}
+    ${TURBOJPEG_LIBRARY}
+  )
+endif()
+
 # --- .NET / NuGet infrastructure (shared by wire-sizes codegen and ClientLibrary)
 # Lifted up here so the wire-sizes block below can resolve the OpenMU packet
 # XML from the same NuGet cache the ClientLibrary uses.
@@ -327,7 +385,9 @@ endif()
 # linux-x64 .so (a Windows dotnet.exe cannot cross-OS AOT). Everything else
 # (Windows/MinGW targets, including from WSL) prefers dotnet.exe so the win-*
 # AOT build works. Pick accordingly.
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ANDROID)
+  # AH-1118 spike: Android cross-builds run on a Linux host; the host dotnet
+  # drives both the ResxGen host tool and the linux-bionic AOT publish.
   find_program(DOTNET_EXECUTABLE dotnet)
   if (NOT DOTNET_EXECUTABLE)
     find_program(DOTNET_EXECUTABLE dotnet.exe)
@@ -542,7 +602,7 @@ if (DOTNET_EXECUTABLE)
   # 1. Define the output path. Native AOT emits a platform-native shared
   # library: .dll on Windows, .so on Linux (the runtime client dlopen's it by
   # this name).
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if (CMAKE_SYSTEM_NAME STREQUAL "Linux" OR ANDROID)
     set(DOTNET_LIB_NAME "MUnique.Client.Library.so")
   else()
     set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
@@ -582,7 +642,27 @@ if (DOTNET_EXECUTABLE)
   # Override environment variables to avoid issues with umlauts in Windows username
   # Determine the runtime identifier from the target OS and pointer width. Native
   # AOT has no linux-x86 target, so 32-bit is Windows-only.
-  if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
+  if (ANDROID)
+    # AH-1118 spike: Native AOT for Android via the linux-bionic RIDs, driven by
+    # the NDK toolchain (proven standalone; see task notes). ANDROID_NDK is set
+    # by the NDK's CMake toolchain file.
+    if (ANDROID_ABI STREQUAL "x86_64")
+      set(DOTNET_RID "linux-bionic-x64")
+      set(_NDK_CLANG "x86_64-linux-android28-clang")
+    else()
+      set(DOTNET_RID "linux-bionic-arm64")
+      set(_NDK_CLANG "aarch64-linux-android29-clang")
+    endif()
+    set(DOTNET_PLATFORM "AnyCPU")
+    set(_NDK_LLVM "${ANDROID_NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin")
+    set(DOTNET_EXTRA_ARGS
+        "-p:ci=true"
+        "-p:PublishAotUsingRuntimePack=true"
+        "-p:CppCompilerAndLinker=${_NDK_LLVM}/${_NDK_CLANG}"
+        "-p:LinkerFlavor=lld"
+        "-p:ObjCopyName=${_NDK_LLVM}/llvm-objcopy")
+    message(STATUS ".NET Client Library will build for ${DOTNET_RID} (Android ${ANDROID_ABI})")
+  elseif (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(DOTNET_RID "linux-x64")
     set(DOTNET_PLATFORM "x64")
     # The PreBuild XSLT step regenerates files using Windows-style backslash

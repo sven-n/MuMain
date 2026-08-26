@@ -767,6 +767,11 @@ class CUIRenderTextOriginal : public IUIRenderText
     BYTE* m_pFontBuffer;
     DWORD m_dwTextColor, m_dwBackColor;
     std::vector<BYTE> m_tightUploadBuffer;
+#ifdef __ANDROID__
+    // AH-1118: identifies the selected font in the string-texture cache key --
+    // the DC's selected font is not otherwise readable through the GDI shim.
+    HFONT m_hCurrentFont = nullptr;
+#endif
 public:
     CUIRenderTextOriginal();
     virtual ~CUIRenderTextOriginal();

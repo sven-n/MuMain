@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "Render/Shaders/EsShaderShim.h"
 #include "Render/Shaders/PlanarShadowShader.h"
 #include "Render/Core/BindState.h"
 #include "Render/Core/RenderConfig.h"
@@ -155,7 +156,7 @@ CPlanarShadowShader::~CPlanarShadowShader() { Shutdown(); }
 bool CPlanarShadowShader::LoadGLFunctions()
 {
     fn_glCreateShader       = (PFNGLCREATESHADERPROC)      SDL_GL_GetProcAddress("glCreateShader");
-    fn_glShaderSource       = (PFNGLSHADERSOURCEPROC)      SDL_GL_GetProcAddress("glShaderSource");
+    fn_glShaderSource       = (PFNGLSHADERSOURCEPROC)      MU_GLSHADERSOURCE_PROC;
     fn_glCompileShader      = (PFNGLCOMPILESHADERPROC)     SDL_GL_GetProcAddress("glCompileShader");
     fn_glGetShaderiv        = (PFNGLGETSHADERIVPROC)       SDL_GL_GetProcAddress("glGetShaderiv");
     fn_glCreateProgram      = (PFNGLCREATEPROGRAMPROC)     SDL_GL_GetProcAddress("glCreateProgram");

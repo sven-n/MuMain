@@ -475,8 +475,8 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
     if (renderEffects)
     {
-        RenderEffectShadows();
-        RenderBoids();
+        { FRAME_PROFILE(EffShadows); RenderEffectShadows(); }
+        { FRAME_PROFILE(Boids); RenderBoids(); }
     }
 
     { FRAME_PROFILE(Characters); RenderCharactersClient(); }
@@ -491,17 +491,17 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
     if (!g_Camera.TopViewEnable && renderDroppedItems)
         { FRAME_PROFILE(Items); RenderItems(); }
 
-    RenderFishs();
+    { FRAME_PROFILE(Boids); RenderFishs(); }
     RenderMount();
 
     if (renderWeatherEffects)
-        RenderLeaves();
+        { FRAME_PROFILE(Leaves); RenderLeaves(); }
 
     if (!gMapManager.InChaosCastle())
         ThePetProcess().RenderPets();
 
     if (renderEffects)
-        RenderBoids(true);
+        { FRAME_PROFILE(Boids); RenderBoids(true); }
 
     if (renderStatic)
         { FRAME_PROFILE(Objects); RenderObjects_AfterCharacter(); }
@@ -519,7 +519,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
     if (ShouldRenderLeaves())
     {
-        RenderLeaves();
+        FRAME_PROFILE(Leaves); RenderLeaves();
     }
 
     // GLP-24: these two were the frame's largest GL producers and fell outside every FRAME_PROFILE
@@ -530,12 +530,12 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
 
     if (IsWaterTerrain() == false)
     {
-        RenderPoints(byWaterMap);
+        FRAME_PROFILE(Points); RenderPoints(byWaterMap);
     }
 
     EndSprite();
 
-    RenderAfterEffects();
+    { FRAME_PROFILE(AfterFx); RenderAfterEffects(); }
 
     if (IsWaterTerrain() == true)
     {
@@ -553,11 +553,11 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         BeginSprite();
 
         if (gMapManager.WorldActive == WD_2DEVIAS && HeroTile != 3 && HeroTile < 10)
-            RenderLeaves();
+            { FRAME_PROFILE(Leaves); RenderLeaves(); }
 
         { FRAME_PROFILE(Sprites); RenderSprites(byWaterMap); }
         { FRAME_PROFILE(Particles); RenderParticles(byWaterMap); }
-        RenderPoints(byWaterMap);
+        { FRAME_PROFILE(Points); RenderPoints(byWaterMap); }
 
         EndSprite();
         EndOpengl();

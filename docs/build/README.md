@@ -17,6 +17,15 @@ A native Linux build produces a real, playable client: the engine plus the
 | Rider | [linux/rider.md](linux/rider.md) |
 | VS Code | [linux/vscode.md](linux/vscode.md) |
 
+### Android
+
+The Android port builds the native client in Linux/WSL and packages it with the
+Android SDK on Windows.
+
+| Setup | Guide |
+|-------|-------|
+| Command line | [android/console.md](android/console.md) |
+
 ### Windows
 
 The Windows client can be built natively on Windows, or cross-compiled from
@@ -33,8 +42,7 @@ Linux/WSL with MinGW-w64.
 
 ### Planned
 
-`android/` and `iOS/` are placeholders for future ports; the engine is not yet
-buildable for them. See the per-platform notes when that work lands.
+`iOS/` is a placeholder for a future port.
 
 ## Supported targets
 
@@ -43,6 +51,7 @@ buildable for them. See the per-platform notes when that work lands.
 | Linux | x64 | on / off | `MUnique.Client.Library.so` (linux-x64 AOT) | Full client |
 | Windows | x64 | on / off | `MUnique.Client.Library.dll` (win-x64 AOT) | Full client |
 | Windows | x86 | on / off | `MUnique.Client.Library.dll` (win-x86 AOT) | Full client |
+| Android | arm64 / x64 | off | `MUnique.Client.Library.so` (linux-bionic AOT) | Experimental client |
 | Linux | x86 | - | none | Not supported (see below) |
 
 CI builds every supported row: see [windows-build.yml](../../.github/workflows/windows-build.yml)

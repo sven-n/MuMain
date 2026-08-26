@@ -51,6 +51,28 @@ namespace RHI_GL_Impl {
 
 namespace RHI {
 
+Backend GetConfiguredBackend()
+{
+#if defined(MU_RENDER_BACKEND_OPENGL)
+    return Backend::OpenGL;
+#else
+#error "No MuMain renderer backend was selected by CMake."
+#endif
+}
+
+const char* GetConfiguredBackendName()
+{
+    switch (GetConfiguredBackend())
+    {
+    case Backend::OpenGL:
+        return "OpenGL";
+    case Backend::SdlGpu:
+        return "SDL_GPU";
+    }
+
+    return "Unknown";
+}
+
 const Caps& GetCaps()
 {
     return RHI_GL_Impl::GetCaps();

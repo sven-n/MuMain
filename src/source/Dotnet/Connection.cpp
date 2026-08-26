@@ -1,5 +1,8 @@
 #include "stdafx.h"
 #include <map>
+#ifdef __ANDROID__
+#include <android/log.h>
+#endif
 
 #include "Connection.h"
 
@@ -102,6 +105,16 @@ Connection::Connection(const wchar_t* host, int32_t port, bool isEncrypted, void
     }
 
     this->_handle = dotnet_connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
+#ifdef __ANDROID__
+    // AH-1118 spike diagnostics: surface the managed connect result in logcat.
+    {
+        char hostNarrow[128] = {0};
+        for (int i = 0; i < 127 && host[i]; ++i) hostNarrow[i] = static_cast<char>(host[i]);
+        __android_log_print(ANDROID_LOG_INFO, "MuMainNet",
+            "connect host=%s port=%d enc=%d -> handle=%d",
+            hostNarrow, port, isEncrypted ? 1 : 0, this->_handle);
+    }
+#endif
 
     if (IsConnected())
     {

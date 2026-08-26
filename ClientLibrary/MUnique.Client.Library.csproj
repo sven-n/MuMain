@@ -34,6 +34,16 @@
     <PackageReference Include="Pipelines.Sockets.Unofficial" Version="2.2.8" />
   </ItemGroup>
 
+  <!-- Spike AH-1118: linux-bionic (Android) is not a bundled AOT RID. Teach the SDK
+       that a NativeAOT runtime pack exists for it (nuget.org ships
+       Microsoft.NETCore.App.Runtime.NativeAOT.linux-bionic-arm64) and publish with
+       -p:PublishAotUsingRuntimePack=true. -->
+  <ItemGroup Condition="$(RuntimeIdentifier.StartsWith('linux-bionic'))">
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="10.0.11" />
+    <KnownRuntimePack Update="Microsoft.NETCore.App"
+                      RuntimePackRuntimeIdentifiers="linux-bionic-arm64;linux-bionic-arm;linux-bionic-x64;%(RuntimePackRuntimeIdentifiers)" />
+  </ItemGroup>
+
   <ItemGroup>
     <AdditionalFiles Include="..\stylecop.json" Link="stylecop.json" />
     <None Include="..\.editorconfig" Link=".editorconfig" />

@@ -27,6 +27,7 @@
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/NewUI/NewUISystem.h"
 #include <vector>
+#include <unordered_map>
 
 extern BYTE m_CrywolfState;
 
@@ -2700,7 +2701,13 @@ void CUIRenderTextOriginal::SetBgColor(BYTE byRed, BYTE byGreen, BYTE byBlue, BY
 }
 void CUIRenderTextOriginal::SetBgColor(DWORD dwColor) { m_dwBackColor = dwColor; }
 
-void CUIRenderTextOriginal::SetFont(HFONT hFont) { SelectObject(m_hFontDC, hFont); }
+void CUIRenderTextOriginal::SetFont(HFONT hFont)
+{
+    SelectObject(m_hFontDC, hFont);
+#ifdef __ANDROID__
+    m_hCurrentFont = hFont;
+#endif
+}
 
 /// \brief Reads the Picture created by GDI and copies it to the texture bitmap.
 void CUIRenderTextOriginal::WriteText(int iOffset, int iWidth, int iHeight)
@@ -2832,6 +2839,54 @@ void CUIRenderTextOriginal::UploadText(int sx, int sy, int Width, int Height)
     }
 }
 
+#ifdef __ANDROID__
+// AH-1118: string-texture cache. The stock path re-rasterizes every string with
+// stb_truetype, colorizes it pixel-by-pixel, and respecifies the one shared
+// 256x32 BITMAP_FONT texture per <=256px chunk -- per string, per frame. On a
+// tiled-GPU driver each mid-frame respecify of a texture still referenced by an
+// earlier draw forces a ghost copy, and the UI pass alone measured 35 ms/frame
+// in-game. Each distinct (font, text, color, clip, size) instead rasterizes
+// once into its own exactly-sized texture; repeat frames bind and draw a quad.
+// Draws go through the stock RenderBitmap via its negative-index raw-texture
+// convention, so IR batching/flush semantics stay identical.
+namespace
+{
+    struct MuTextCacheEntry
+    {
+        unsigned int texId = 0;
+        int w = 0, h = 0;
+        uint64_t lastUse = 0;
+    };
+    std::unordered_map<std::wstring, MuTextCacheEntry> g_muTextCache;
+    uint64_t g_muTextUseCounter = 0;
+    constexpr size_t kMuTextCacheCap = 512;
+
+    void MuTextCacheEvictOldest();
+}
+
+// Read+reset by the SceneManager stats dump: how much of the UI pass is still
+// rasterizing (misses) versus drawing cached quads (hits). Non-static on purpose.
+unsigned int g_muTextCacheHits = 0;
+unsigned int g_muTextCacheMisses = 0;
+
+namespace
+{
+    void MuTextCacheEvictOldest()
+    {
+        auto oldest = g_muTextCache.begin();
+        for (auto it = g_muTextCache.begin(); it != g_muTextCache.end(); ++it)
+        {
+            if (it->second.lastUse < oldest->second.lastUse) oldest = it;
+        }
+        if (oldest != g_muTextCache.end())
+        {
+            RHI::DestroyTexture(RHI::TextureHandle{ oldest->second.texId });
+            g_muTextCache.erase(oldest);
+        }
+    }
+}
+#endif
+
 /// \brief Renders the text with GDI to the location of m_hFontDC/m_pFontBuffer as black/white picture. Text is white.
 void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* pszText,
                                        int iBoxWidth /* = 0 */, int iBoxHeight /* = 0 */,
@@ -2935,6 +2990,85 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
         EndRenderColor();
     }
 
+#ifdef __ANDROID__
+    if (pszText[0] != '\0' && pszText[0] != 0x0a &&
+        RealRenderingSize.cx > 0 && RealRenderingSize.cy > 0)
+    {
+        // Key: font | text color | clip | rendered size | the text itself. The
+        // background quad above stays live-rendered, so bg color is not keyed.
+        std::wstring key;
+        key.reserve(wcslen(pszText) + 48);
+        wchar_t hdr[48];
+        mu_swprintf(hdr, L"%p|%08X|%d|%dx%d|",
+                    (void*)m_hCurrentFont, m_dwTextColor, iClipMove,
+                    RealRenderingSize.cx, RealRenderingSize.cy);
+        key.append(hdr);
+        key.append(pszText);
+
+        auto it = g_muTextCache.find(key);
+        if (it != g_muTextCache.end()) ++g_muTextCacheHits; else ++g_muTextCacheMisses;
+        if (it == g_muTextCache.end())
+        {
+            ::SetBkColor(m_hFontDC, RGB(0, 0, 0));
+            ::SetTextColor(m_hFontDC, RGB(255, 255, 255));
+            TextOut(m_hFontDC, 0, 0, pszText, lstrlen(pszText));
+
+            // Colorize straight from the DIB into an exactly-sized RGBA buffer --
+            // same per-pixel rules as WriteText(), minus the 256x32 atlas bound.
+            const int w = RealRenderingSize.cx;
+            const int h = RealRenderingSize.cy;
+            const SIZE dcSize = { (int)(REFERENCE_WIDTH * g_fScreenRate_x), (int)(REFERENCE_HEIGHT * g_fScreenRate_y) };
+            const int pitch = ((dcSize.cx * 24 + 31) & ~31) >> 3;
+            std::vector<unsigned char> rgba((size_t)w * h * 4, 0);
+            for (int y = 0; y < h && y < dcSize.cy; ++y)
+            {
+                int srcIndex = y * pitch + iClipMove * 3;
+                unsigned int* dst = reinterpret_cast<unsigned int*>(rgba.data() + (size_t)y * w * 4);
+                for (int x = 0; x < w && srcIndex + 2 < pitch * dcSize.cy; ++x, srcIndex += 3)
+                {
+                    const BYTE lum = m_pFontBuffer[srcIndex];
+                    if (lum == 255)
+                    {
+                        dst[x] = m_dwTextColor;
+                    }
+                    else if (lum != 0)
+                    {
+                        DWORD alpha = (DWORD)m_pFontBuffer[srcIndex] +
+                                      m_pFontBuffer[srcIndex + 1] +
+                                      m_pFontBuffer[srcIndex + 2];
+                        alpha /= 3;
+                        alpha <<= 24;
+                        alpha |= 0x00FFFFFF;
+                        dst[x] = m_dwTextColor & alpha;
+                    }
+                }
+            }
+
+            RHI::TextureDesc desc{ w, h, RHI::TexFilter::Nearest, RHI::TexWrap::Clamp };
+            const RHI::TextureHandle tex = RHI::CreateTexture(desc, rgba.data());
+            if (!tex.IsValid())
+            {
+                // Texture creation failed -- draw nothing this frame rather than
+                // falling into the shared-atlas path with a half-updated DIB.
+                if (lpTextSize)
+                {
+                    lpTextSize->cx = RealRenderingSize.cx / g_fScreenRate_x;
+                    lpTextSize->cy = RealRenderingSize.cy / g_fScreenRate_y;
+                }
+                return;
+            }
+            if (g_muTextCache.size() >= kMuTextCacheCap) MuTextCacheEvictOldest();
+            it = g_muTextCache.emplace(std::move(key), MuTextCacheEntry{ tex.id, w, h, 0 }).first;
+        }
+
+        it->second.lastUse = ++g_muTextUseCounter;
+        EnableAlphaTest();
+        RenderBitmap(-(int)it->second.texId,
+                     RealBoxPos.x + iTab, RealBoxPos.y,
+                     (float)it->second.w, (float)it->second.h,
+                     0.0f, 0.0f, 1.0f, 1.0f, false, false);
+    }
+#else
     if (pszText[0] != 0x0a)
     {
         ::SetBkColor(m_hFontDC, RGB(0, 0, 0));
@@ -2953,6 +3087,7 @@ void CUIRenderTextOriginal::RenderText(int iPos_x, int iPos_y, const wchar_t* ps
         WriteText(LIMIT_WIDTH * i * 3 + iClipMove, RealSectionLine.cx, RealSectionLine.cy);
         UploadText(RealBoxPos.x + LIMIT_WIDTH * i + iTab, RealBoxPos.y, RealSectionLine.cx, RealSectionLine.cy);
     }
+#endif
 
     if (lpTextSize)
     {

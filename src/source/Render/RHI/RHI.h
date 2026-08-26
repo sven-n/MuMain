@@ -15,6 +15,14 @@
 
 namespace RHI {
 
+enum class Backend {
+    OpenGL,
+    SdlGpu,
+};
+
+Backend GetConfiguredBackend();
+const char* GetConfiguredBackendName();
+
 // Opaque, backend-owned handles. Strongly typed so a BufferHandle can't be
 // passed where a TextureHandle is expected -- catches backend-swap mistakes
 // at compile time, not runtime.
