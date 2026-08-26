@@ -1,3 +1,9 @@
+## [1.1.0](https://github.com/yesid-bocanegra/MuMain/compare/v1.0.0...v1.1.0) (2026-08-26)
+
+### Features
+
+* **release:** publish data/no-data bundles ([a7ab21a](https://github.com/yesid-bocanegra/MuMain/commit/a7ab21a5107817447e357ddcface4f0c5906054b))
+
 ## 1.0.0 (2026-08-26)
 
 ### Features
