@@ -135,6 +135,10 @@ struct RendererStats
     std::uint32_t textureUploads = 0;
     std::uint32_t textureCreates = 0;
     std::uint32_t textureReleases = 0;
+    std::uint32_t pipelineBinds = 0;
+    std::uint32_t samplerBinds = 0;
+    std::uint32_t vertexUniformPushes = 0;
+    std::uint32_t fragmentUniformPushes = 0;
     double frameMilliseconds = 0.0;
     double replayMilliseconds = 0.0;
     double submitMilliseconds = 0.0;

@@ -34,6 +34,7 @@
 #include "MuRenderer.h"
 #include "QuadTopology.h"
 #include "SdlGpuPixelFormat.h"
+#include "SdlGpuReplayState.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #ifdef _EDITOR
@@ -438,6 +439,10 @@ static Uint32 s_dbgGpuDrawCallsThisFrame = 0u;
 static Uint32 s_dbgMergedDrawsThisFrame = 0u;
 static Uint32 s_dbgWhiteTextureDrawsThisFrame = 0u;
 static Uint32 s_dbgRealTextureDrawsThisFrame = 0u;
+static Uint32 s_dbgPipelineBindsThisFrame = 0u;
+static Uint32 s_dbgSamplerBindsThisFrame = 0u;
+static Uint32 s_dbgVertexUniformPushesThisFrame = 0u;
+static Uint32 s_dbgFragmentUniformPushesThisFrame = 0u;
 static bool s_dbgNullPipelineWarned = false;
 static bool s_frameTimingInitialized = false;
 static bool s_frameTimingEnabled = false;
@@ -689,6 +694,99 @@ static void PreparePendingEditorDrawData(SDL_GPUCommandBuffer* commandBuffer)
     g_MuEditorCore.PrepareDrawData(commandBuffer);
 }
 #endif
+
+static bool BindReplayPipeline(const RenderCmd& command, Render::SdlGpuReplayState& state, const SDL_Rect& scissor)
+{
+    if (!command.pipeline)
+        return false;
+    if (!state.SelectPipeline(command.pipeline))
+        return true;
+
+    SDL_BindGPUGraphicsPipeline(s_renderPass, command.pipeline);
+    SDL_SetGPUScissor(s_renderPass, &scissor);
+    ++s_dbgPipelineBindsThisFrame;
+    return true;
+}
+
+static void PushReplayVertexUniforms(const void* data, std::size_t size, Render::SdlGpuReplayState& state)
+{
+    const auto* bytes = static_cast<const std::byte*>(data);
+    if (!state.SelectVertexUniforms({bytes, size}))
+        return;
+
+    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, data, static_cast<Uint32>(size));
+    ++s_dbgVertexUniformPushesThisFrame;
+}
+
+static void PushReplayFragmentUniforms(const FogUniform& uniforms, Render::SdlGpuReplayState& state)
+{
+    const auto bytes = std::as_bytes(std::span{&uniforms, 1u});
+    if (!state.SelectFragmentUniforms(bytes))
+        return;
+
+    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &uniforms, sizeof(uniforms));
+    ++s_dbgFragmentUniformPushesThisFrame;
+}
+
+static void BindReplayFragmentSampler(const RenderCmd& command, Render::SdlGpuReplayState& state)
+{
+    if (!state.SelectFragmentSampler(command.texture, command.sampler))
+        return;
+
+    const SDL_GPUTextureSamplerBinding samplerBinding{command.texture, command.sampler};
+    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+    ++s_dbgSamplerBindsThisFrame;
+}
+
+static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize,
+                                  Render::SdlGpuReplayState& state)
+{
+    if (!state.SelectIndexBuffer(buffer, offset, elementSize))
+        return;
+
+    const SDL_GPUBufferBinding indexBinding{buffer, offset};
+    SDL_BindGPUIndexBuffer(s_renderPass, &indexBinding, elementSize);
+}
+
+static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, const SDL_Rect& scissor,
+                              Render::SdlGpuReplayState& state)
+{
+    const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
+    if (!command.texture || !command.sampler || (skinned && (!boneDataReady || !s_boneGpuBuf)) ||
+        !BindReplayPipeline(command, state, scissor))
+    {
+        return;
+    }
+
+    if (skinned)
+        PushReplayVertexUniforms(&command.skinningVu, sizeof(command.skinningVu), state);
+    else
+        PushReplayVertexUniforms(&command.vu, sizeof(command.vu), state);
+
+    const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, command.vtxOffset};
+    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vertexBinding, 1);
+
+    if (skinned && state.SelectVertexStorageBuffer(s_boneGpuBuf))
+    {
+        SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
+        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
+    }
+
+    if (command.type == RenderCmdType::DrawIndexedQuads)
+        BindReplayIndexBuffer(s_quadIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
+    else if (command.type == RenderCmdType::DrawIndexedStrip)
+        BindReplayIndexBuffer(s_stripIdxBuf, command.stripIdxOffset, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
+
+    BindReplayFragmentSampler(command, state);
+    PushReplayFragmentUniforms(command.fogUniform, state);
+
+    if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip)
+        SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, 0, 0, 0);
+    else
+        SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, 0, 0);
+    ++s_dbgGpuDrawCallsThisFrame;
+}
+
 // CPU-side scratch buffer for quad strip indices accumulated during the frame.
 // Copied to GPU in one shot in EndFrame before the render pass.
 static std::vector<Uint16> s_stripIdxScratch;
@@ -1474,6 +1572,10 @@ public:
         s_dbgMergedDrawsThisFrame = 0u;
         s_dbgWhiteTextureDrawsThisFrame = 0u;
         s_dbgRealTextureDrawsThisFrame = 0u;
+        s_dbgPipelineBindsThisFrame = 0u;
+        s_dbgSamplerBindsThisFrame = 0u;
+        s_dbgVertexUniformPushesThisFrame = 0u;
+        s_dbgFragmentUniformPushesThisFrame = 0u;
         ++s_dbgFrameCount;
         s_vtxScratch.clear();
 
@@ -1776,19 +1878,15 @@ public:
 
         if (s_renderPass)
         {
-            // Sticky scissor. Some GPU backends (notably Metal via SDL_GPU) appear to
-            // drop scissor state when a new pipeline binds, so the photo preview's
-            // 119×141 scissor was respected for the first draw and ignored for later
-            // ones — the character rasterized past its UI slot. We track the most
-            // recently requested scissor and re-apply it before every draw command.
-            // When no scissor has been set yet we default to the full swapchain
-            // (same as SDL_GPU's implicit initial state).
+            // Track explicit state. Pipeline changes re-apply the active scissor because
+            // SDL GPU backends may discard it while binding a new pipeline.
             SDL_GPUViewport s_currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH),
                                               0.0f, 1.0f};
             SDL_Rect s_currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
 
             // Replay state and editor commands after texture invalidation, but skip
             // game draws because their deferred texture pointers may be dangling.
+            Render::SdlGpuReplayState replayState;
             for (const auto& cmd : s_renderCmds)
             {
                 if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
@@ -1802,14 +1900,16 @@ public:
                 case RenderCmdType::SetViewport:
                 {
                     s_currentViewport = cmd.viewport;
-                    SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
+                    if (replayState.SelectViewport(s_currentViewport))
+                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
                     break;
                 }
 
                 case RenderCmdType::SetScissor:
                 {
                     s_currentScissor = cmd.scissor;
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    if (replayState.SelectScissor(s_currentScissor))
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                     break;
                 }
 
@@ -1817,160 +1917,22 @@ public:
                 case RenderCmdType::EditorOverlay:
                 {
                     g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
-                    SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    replayState.Invalidate();
+                    if (replayState.SelectViewport(s_currentViewport))
+                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
+                    if (replayState.SelectScissor(s_currentScissor))
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                     break;
                 }
 #endif
 
                 case RenderCmdType::DrawTriangles:
-                {
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    // Sticky scissor: re-apply after pipeline bind (see note above).
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawSkinnedTriangles:
-                {
-                    if (!boneDataReady || !s_boneGpuBuf || !cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.skinningVu, sizeof(SkinningVertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
-                    SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawIndexedQuads:
-                {
-                    // Guard against dangling sampler/texture — scene transitions may
-                    // unload assets mid-frame before EndFrame replays deferred commands.
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBufferBinding idxBind{};
-                    idxBind.buffer = s_quadIdxBuf;
-                    idxBind.offset = 0;
-                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawIndexedStrip:
-                {
-                    // Guard against dangling sampler/texture — scene transitions may
-                    // unload assets mid-frame before EndFrame replays deferred commands.
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBufferBinding idxBind{};
-                    idxBind.buffer = s_stripIdxBuf;
-                    idxBind.offset = cmd.stripIdxOffset;
-                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawTriangles2D:
                 {
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-                    // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
+                    ReplayDrawCommand(cmd, boneDataReady, s_currentScissor, replayState);
                     break;
                 }
                 } // switch
@@ -2040,6 +2002,10 @@ public:
         s_lastFrameStats.textureUploads = s_dbgTextureUploadsThisFrame;
         s_lastFrameStats.textureCreates = s_dbgTextureCreatesThisFrame;
         s_lastFrameStats.textureReleases = s_dbgTextureReleasesThisFrame;
+        s_lastFrameStats.pipelineBinds = s_dbgPipelineBindsThisFrame;
+        s_lastFrameStats.samplerBinds = s_dbgSamplerBindsThisFrame;
+        s_lastFrameStats.vertexUniformPushes = s_dbgVertexUniformPushesThisFrame;
+        s_lastFrameStats.fragmentUniformPushes = s_dbgFragmentUniformPushesThisFrame;
         if (IsFrameTimingEnabled())
         {
             const auto milliseconds = [](auto begin, auto end)
@@ -2055,12 +2021,14 @@ public:
             const auto logger = mu::log::Get("render");
             logger->debug(
                 "[RENDER diag] frame={} draw_calls={} replayed={} merged={} cmds={} vtx_bytes={} tex={} fallback={} "
-                "white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={}",
+                "white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={} "
+                "pipeline_binds={} sampler_binds={} vertex_uniform_pushes={} fragment_uniform_pushes={}",
                 s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame, s_dbgMergedDrawsThisFrame,
                 s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(), s_dbgFallbackTextureThisFrame,
                 s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
                 s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated, m_texture2DEnabled,
-                m_boundTextureId);
+                m_boundTextureId, s_dbgPipelineBindsThisFrame, s_dbgSamplerBindsThisFrame,
+                s_dbgVertexUniformPushesThisFrame, s_dbgFragmentUniformPushesThisFrame);
 
             logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
                           s_lastFrameStats.frameMilliseconds, s_lastFrameStats.replayMilliseconds,

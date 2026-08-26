@@ -18,6 +18,14 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sdl_gpu_replay_state_tests
+    SOURCES
+        test_sdl_gpu_replay_state.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/SdlGpuReplayState.cpp
+    LINK_LIBS SDL3::SDL3
+)
+
+mu_add_test(
     NAME aura_joint_lifecycle_tests
     SOURCES
         test_aura_joint_lifecycle.cpp
