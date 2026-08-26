@@ -3566,7 +3566,12 @@ private:
 
         // Rest-pose BMD geometry: one vertex storage buffer for packed bone rows, one uniform buffer.
         s_vertShaderSkinned =
-            createShader("skinned_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 1, /*fatal=*/false);
+            createShader("skinned_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 1, /*fatal=*/true);
+        if (!s_vertShaderSkinned)
+        {
+            ReleaseShaders();
+            return false;
+        }
 
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
         return true;
@@ -3847,8 +3852,8 @@ private:
 
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-8): CreatePipelines
-    // Builds every blend variant. The five non-skinned sets selected by current
-    // draw callers are required; unused 2D depth-on and skinned sets are optional.
+    // Builds every blend variant. The selected 3D, 2D depth-off, and skinned sets
+    // are required; unused 2D depth-on remains optional.
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
     {
@@ -3954,19 +3959,16 @@ private:
                 s_pipelines3DDepthReadOnly[i], blendState,
                 {"3d-depth-read-only", table[i].name, i, true, false, VertexLayout::ThreeDimensional, false});
 
-            if (s_vertShaderSkinned)
-            {
-                buildOptionalPipeline(s_pipelinesSkinned[i], blendState,
-                                      {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
-                buildOptionalPipeline(s_pipelinesSkinnedNoCull[i], blendState,
-                                      {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
-                buildOptionalPipeline(
-                    s_pipelinesSkinnedDepthOff[i], blendState,
-                    {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
-                buildOptionalPipeline(
-                    s_pipelinesSkinnedDepthReadOnly[i], blendState,
-                    {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
-            }
+            buildRequiredPipeline(s_pipelinesSkinned[i], blendState,
+                                  {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
+            buildRequiredPipeline(s_pipelinesSkinnedNoCull[i], blendState,
+                                  {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
+            buildRequiredPipeline(
+                s_pipelinesSkinnedDepthOff[i], blendState,
+                {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
+            buildRequiredPipeline(
+                s_pipelinesSkinnedDepthReadOnly[i], blendState,
+                {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
         }
 
         if (requiredFailureCount != 0)

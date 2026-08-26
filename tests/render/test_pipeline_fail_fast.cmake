@@ -79,6 +79,12 @@ require_source("${renderer_source}" "constexpr[ \t]+int[ \t]+k_PipelineCount[ \t
 require_shader_load_assignment(s_vertShader2D basic_textured vert VERTEX)
 require_shader_load_assignment(s_fragShaderTex basic_textured frag FRAGMENT)
 require_shader_load_assignment(s_vertShaderSkinned skinned_textured vert VERTEX)
+require_source("${executable_load_source}"
+    "s_vertShaderSkinned[ \t\r\n]*=[^;]*createShader[^;]*\"skinned_textured\"[^;]*SDL_GPU_SHADERSTAGE_VERTEX[^;]*true[ \t\r\n]*\\);"
+    "skinned_textured.vert must be fatal")
+require_source("${executable_load_source}"
+    "if[ \t\r\n]*\\(!s_vertShaderSkinned\\)[ \t\r\n]*\\{[^}]*ReleaseShaders[ \t\r\n]*\\([^}]*return false;"
+    "skinned shader failure must release earlier shader handles")
 require_source("${create_source}"
     "for[ \t]*\\([ \t]*int[ \t]+i[ \t]*=[ \t]*0;[ \t]*i[ \t]*<[ \t]*k_PipelineCount;[ \t]*\\+\\+i[ \t]*\\)"
     "pipeline creation must iterate over every blend variant")
@@ -87,8 +93,8 @@ string(REGEX MATCHALL "buildRequiredPipeline[ \t\r\n]*\\(" required_calls "${cre
 string(REGEX MATCHALL "buildOptionalPipeline[ \t\r\n]*\\(" optional_calls "${create_source}")
 list(LENGTH required_calls required_call_count)
 list(LENGTH optional_calls optional_call_count)
-if(NOT required_call_count EQUAL 5 OR NOT optional_call_count EQUAL 5)
-    message(FATAL_ERROR "CreatePipelines must build exactly five required and five optional sets")
+if(NOT required_call_count EQUAL 9 OR NOT optional_call_count EQUAL 1)
+    message(FATAL_ERROR "CreatePipelines must build exactly nine required sets and one optional set")
 endif()
 
 require_pipeline_descriptor(buildOptionalPipeline s_pipelines2D "2d-depth-on" true true TwoDimensional false)
@@ -97,10 +103,12 @@ require_pipeline_descriptor(buildRequiredPipeline s_pipelines3D "3d-culled" true
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DNoCull "3d-no-cull" true true ThreeDimensional false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DDepthOff "3d-depth-off" false false ThreeDimensional false)
 require_pipeline_descriptor(buildRequiredPipeline s_pipelines3DDepthReadOnly "3d-depth-read-only" true false ThreeDimensional false)
-require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinned "skinned-culled" true true Skinned true)
-require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedNoCull "skinned-no-cull" true true Skinned false)
-require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedDepthOff "skinned-depth-off" false false Skinned false)
-require_pipeline_descriptor(buildOptionalPipeline s_pipelinesSkinnedDepthReadOnly "skinned-depth-read-only" true false Skinned false)
+require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinned "skinned-culled" true true Skinned true)
+require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedNoCull "skinned-no-cull" true true Skinned false)
+require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthOff "skinned-depth-off" false false Skinned false)
+require_pipeline_descriptor(buildRequiredPipeline s_pipelinesSkinnedDepthReadOnly "skinned-depth-read-only" true false Skinned false)
+reject_source("${create_source}" "if[ \t\r\n]*\\([ \t\r\n]*s_vertShaderSkinned[ \t\r\n]*\\)"
+    "required skinned pipelines must not be guarded")
 
 require_source("${create_source}" "requiredFailureCount[ \t\r\n]*!=[ \t\r\n]*0" "required failures must be aggregated")
 require_source("${create_source}" "firstRequiredError" "the first required SDL error must be retained")
@@ -178,4 +186,4 @@ endif()
 math(EXPR skinned_length "${skinned_pipeline_end} - ${skinned_start}")
 string(SUBSTRING "${renderer_source}" ${skinned_start} ${skinned_length} skinned_source)
 require_source("${skinned_source}" "if[ \t\r\n]*\\(!pipeline\\)[ \t\r\n]*\\{[ \t\r\n]*return false;"
-    "RenderSkinnedTriangles must reject missing optional pipelines")
+    "RenderSkinnedTriangles must reject missing required pipelines")

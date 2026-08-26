@@ -750,6 +750,13 @@ static void RenderGLStats()
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
+    mu_swprintf(szLine, L"Skin GPU:%u CPU-ineligible:%u Failed:%u",
+                FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
     const auto batchDraws = FrameProfiler::CounterValue(Counter::BatchDraws);
     const auto batchVertices = FrameProfiler::CounterValue(Counter::BatchVertices);
     const float verticesPerBatch =
@@ -1177,6 +1184,30 @@ static void ManageMainSceneAudio()
     ManageBackgroundMusic();
 }
 
+static void LogFrameTiming()
+{
+    static bool enabled = std::getenv("MU_RENDER_TIMING") != nullptr;
+    static unsigned frameCounter = 0;
+    constexpr unsigned kLogInterval = 60;
+    if (!enabled || ++frameCounter % kLogInterval != 0)
+        return;
+
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    std::fprintf(stderr,
+                 "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
+                 "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms "
+                 "skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u\n",
+                 FrameProfiler::AccumulatorMs(Pass::Terrain), FrameProfiler::AccumulatorMs(Pass::Objects),
+                 FrameProfiler::AccumulatorMs(Pass::Characters), FrameProfiler::AccumulatorMs(Pass::Items),
+                 FrameProfiler::AccumulatorMs(Pass::Effects), FrameProfiler::AccumulatorMs(Pass::Other),
+                 FrameProfiler::AccumulatorMs(Pass::Sprites), FrameProfiler::AccumulatorMs(Pass::Particles),
+                 FrameProfiler::AccumulatorMs(Pass::Joints),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+}
+
 /**
  * @brief Main scene rendering and update function.
  *
@@ -1215,20 +1246,7 @@ void MainScene(HDC hDC)
     {
         Success = RenderCurrentScene(hDC);
 
-        static bool s_frameTimingEnabled = std::getenv("MU_RENDER_TIMING") != nullptr;
-        static unsigned s_frameTimingLogCounter = 0;
-        if (s_frameTimingEnabled && ++s_frameTimingLogCounter % 60 == 0)
-        {
-            using FP = FrameProfiler::Pass;
-            std::fprintf(stderr,
-                         "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
-                         "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms\n",
-                         FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
-                         FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
-                         FrameProfiler::AccumulatorMs(FP::Effects), FrameProfiler::AccumulatorMs(FP::Other),
-                         FrameProfiler::AccumulatorMs(FP::Sprites), FrameProfiler::AccumulatorMs(FP::Particles),
-                         FrameProfiler::AccumulatorMs(FP::Joints));
-        }
+        LogFrameTiming();
         {
             FRAME_PROFILE(Overlay);
             RenderDebugInfo();

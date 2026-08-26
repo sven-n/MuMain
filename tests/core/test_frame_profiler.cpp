@@ -19,6 +19,9 @@ TEST_CASE("renderer counters follow nested frame passes [core][profiling][frame_
             FrameProfiler::Count(Counter::MergedDraws, 2);
             FrameProfiler::Count(Counter::Merged2DDraws);
             FrameProfiler::Count(Counter::GlyphUploads, 3);
+            FrameProfiler::Count(Counter::GpuSkinningSubmissions, 4);
+            FrameProfiler::Count(Counter::CpuSkinningIneligible, 2);
+            FrameProfiler::Count(Counter::GpuSkinningFailures);
         }
 
         CHECK(FrameProfiler::CurrentPass() == Pass::Terrain);
@@ -29,9 +32,15 @@ TEST_CASE("renderer counters follow nested frame passes [core][profiling][frame_
     CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::MergedDraws) == 2);
     CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::Merged2DDraws) == 1);
     CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::GlyphUploads) == 3);
+    CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::GpuSkinningSubmissions) == 4);
+    CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::CpuSkinningIneligible) == 2);
+    CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::GpuSkinningFailures) == 1);
     CHECK(FrameProfiler::CounterValue(Counter::MergedDraws) == 2);
     CHECK(FrameProfiler::CounterValue(Counter::Merged2DDraws) == 1);
     CHECK(FrameProfiler::CounterValue(Counter::GlyphUploads) == 3);
+    CHECK(FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions) == 4);
+    CHECK(FrameProfiler::CounterValue(Counter::CpuSkinningIneligible) == 2);
+    CHECK(FrameProfiler::CounterValue(Counter::GpuSkinningFailures) == 1);
 
     FrameProfiler::g_CountersEnabled = false;
     FrameProfiler::ResetCounters();

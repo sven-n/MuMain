@@ -163,8 +163,8 @@ public:
     // Render independent world-space quads in perimeter order.
     virtual void RenderQuad3D(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Render rest-pose triangles using a GPU bone palette. Returns false when the backend
-    // cannot accept the draw so the caller can use its CPU-skinned fallback.
+    // Render rest-pose triangles using a GPU bone palette. False means an eligible draw failed
+    // submission and must not trigger CPU fallback.
     [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices,
                                                       std::uint32_t textureId, const SkinningParameters& parameters)
     {
