@@ -87,7 +87,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-linux-x64-editor-${{ matrix.editor }}
+          path: build-linux/src/
+          if-no-files-found: error
+
+      - name: Upload no-data client
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-linux-x64-editor-${{ matrix.editor }}-no-data
           path: |
-            build-linux/src/Main
-            build-linux/src/MUnique.Client.Library.so
+            build-linux/src/
+            !build-linux/src/Data/**
+            !build-linux/src/fonts/**
           if-no-files-found: error

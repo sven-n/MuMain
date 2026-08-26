@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(sys.argv[1]) if len(sys.argv) > 1 else Path(__file__).resolve().parents[1]
 CI_WORKFLOW = ROOT / ".github/workflows/ci.yml"
 MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
+LINUX_WORKFLOW = ROOT / ".github/workflows/linux-build.yml"
 RELEASE_CONFIG = ROOT / ".releaserc.json"
 VCPKG_MANIFEST = ROOT / "vcpkg.json"
 RENDERER_SOURCE = ROOT / "src/source/Render/Renderer/MuRendererSDLGpu.cpp"
@@ -116,11 +117,18 @@ EXPECTED_WINDOWS_OS_DLLS = {
     "wtsapi32.dll",
 }
 
-EXPECTED_RELEASE_ASSET = {
-    "path": "MuMain-windows-native-x64-release-editor-off.tar.gz",
-    "name": "MuMain-windows-native-x64-release-editor-off.tar.gz",
-    "label": "MuMain (Windows native x64 Release, editor OFF)",
-}
+EXPECTED_RELEASE_ASSETS = [
+    {
+        "path": "MuMain-windows-native-x64-release-editor-off.tar.gz",
+        "name": "MuMain-windows-native-x64-release-editor-off.tar.gz",
+        "label": "MuMain (Windows native x64 Release, editor OFF, with data)",
+    },
+    {
+        "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
+        "name": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
+        "label": "MuMain (Windows native x64 Release, editor OFF, no data)",
+    },
+]
 
 errors = []
 
@@ -173,6 +181,7 @@ def manifest(block, assignment):
 
 ci = CI_WORKFLOW.read_text(encoding="utf-8")
 mingw = MINGW_WORKFLOW.read_text(encoding="utf-8")
+linux = LINUX_WORKFLOW.read_text(encoding="utf-8")
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
 vcpkg_manifest = json.loads(VCPKG_MANIFEST.read_text(encoding="utf-8"))
 shader_blob_validator = SHADER_BLOB_VALIDATOR.read_text(encoding="utf-8")
@@ -184,9 +193,11 @@ multi_language_header = MULTI_LANGUAGE_HEADER.read_text(encoding="utf-8")
 personal_shop_source = PERSONAL_SHOP_SOURCE.read_text(encoding="utf-8")
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
+macos_job = job(ci, "build-macos")
 linux_job = job(ci, "build-linux")
 release_job = job(ci, "release")
 mingw_job = job(mingw, "build-mingw")
+standalone_linux_job = job(linux, "build-linux")
 
 check(
     shader_blob_validator.startswith("cmake_minimum_required(VERSION 3.25)\n"),
@@ -338,11 +349,60 @@ check(
 linux_upload = step(linux_job, "build-linux", "Upload artifact")
 for required in (
     "name: ${{ matrix.artifact_name }}-${{ github.ref_name }}",
-    "${{ matrix.build_directory }}/src/Debug/Main",
-    "${{ matrix.build_directory }}/src/Debug/MUnique.Client.Library.so",
+    "path: ${{ matrix.build_directory }}/src/Debug/",
     "if-no-files-found: error",
 ):
-    check(required in linux_upload, f"Linux matrix upload missing {required}")
+    check(required in linux_upload, f"Linux data bundle missing {required}")
+linux_no_data_upload = step(linux_job, "build-linux", "Upload no-data artifact")
+for required in (
+    "name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}",
+    "${{ matrix.build_directory }}/src/Debug/",
+    "!${{ matrix.build_directory }}/src/Debug/Data/**",
+    "!${{ matrix.build_directory }}/src/Debug/fonts/**",
+    "if-no-files-found: error",
+):
+    check(required in linux_no_data_upload, f"Linux no-data bundle missing {required}")
+
+macos_upload = step(macos_job, "build-macos", "Upload artifact")
+for required in (
+    "name: main-macos-arm64-${{ github.ref_name }}",
+    "path: out/build/macos-arm64/src/Debug/Main.app/",
+    "if-no-files-found: error",
+):
+    check(required in macos_upload, f"macOS data bundle missing {required}")
+macos_no_data_upload = step(macos_job, "build-macos", "Upload no-data artifact")
+for required in (
+    "name: main-macos-arm64-no-data-${{ github.ref_name }}",
+    "out/build/macos-arm64/src/Debug/Main.app/",
+    "!out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/Data/**",
+    "!out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/fonts/**",
+    "if-no-files-found: error",
+):
+    check(required in macos_no_data_upload, f"macOS no-data bundle missing {required}")
+
+standalone_linux_upload = step(
+    standalone_linux_job, "build-linux", "Upload client binary"
+)
+for required in (
+    "name: mu-client-linux-x64-editor-${{ matrix.editor }}",
+    "path: build-linux/src/",
+    "if-no-files-found: error",
+):
+    check(required in standalone_linux_upload, f"Standalone Linux data bundle missing {required}")
+standalone_linux_no_data_upload = step(
+    standalone_linux_job, "build-linux", "Upload no-data client"
+)
+for required in (
+    "name: mu-client-linux-x64-editor-${{ matrix.editor }}-no-data",
+    "build-linux/src/",
+    "!build-linux/src/Data/**",
+    "!build-linux/src/fonts/**",
+    "if-no-files-found: error",
+):
+    check(
+        required in standalone_linux_no_data_upload,
+        f"Standalone Linux no-data bundle missing {required}",
+    )
 
 renderer_source = RENDERER_SOURCE.read_text(encoding="utf-8")
 check(
@@ -890,36 +950,44 @@ native_job_upload_actions = re.findall(
     r"(?m)^        uses: actions/upload-artifact@\S+\s*$", native_job
 )
 check(
-    len(native_job_upload_actions) == 1,
-    f"Native job must contain exactly one artifact upload action; found {len(native_job_upload_actions)}",
+    len(native_job_upload_actions) == 2,
+    f"Native job must contain exactly two artifact upload actions; found {len(native_job_upload_actions)}",
 )
 check(
-    "${{ matrix.build_directory }}/src/${{ matrix.configuration }}/Main.exe"
+    "path: ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/"
     in native_upload,
-    "Native upload must include Main.exe",
-)
-check(
-    "${{ matrix.build_directory }}/src/${{ matrix.configuration }}/MUnique.Client.Library.dll"
-    in native_upload,
-    "Native upload must include the network library",
-)
-check("path: |" in native_upload, "Native upload must list the two required binaries")
-check(
-    "include-hidden-files" not in native_upload,
-    "Native binary-only upload must not include unrelated hidden files",
-)
-check(
-    "if-no-files-found: error" in native_upload,
-    "Native upload must fail when either required binary is missing",
+    "Native data bundle must include the complete runtime directory",
 )
 check(
     "name: ${{ matrix.artifact_name }}-${{ github.ref_name }}" in native_upload,
-    "Native upload must use the fully qualified matrix artifact name",
+    "Native data bundle must retain the existing artifact name",
+)
+check(
+    "include-hidden-files" not in native_upload,
+    "Native data bundle must exclude build metadata",
+)
+check(
+    "if-no-files-found: error" in native_upload,
+    "Native data bundle must fail when the runtime directory is missing",
 )
 check(
     "if: github.event_name == 'push' && matrix.configuration == 'Release'"
     in native_upload,
-    "Native runnable artifacts must upload only from Release rows",
+    "Native data bundles must upload only from Release rows",
+)
+native_no_data_upload = step(native_job, "build-windows", "Upload no-data artifact")
+for required in (
+    "name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}",
+    "${{ matrix.build_directory }}/src/${{ matrix.configuration }}/",
+    "!${{ matrix.build_directory }}/src/${{ matrix.configuration }}/Data/**",
+    "!${{ matrix.build_directory }}/src/${{ matrix.configuration }}/fonts/**",
+    "if-no-files-found: error",
+):
+    check(required in native_no_data_upload, f"Native no-data bundle missing {required}")
+check(
+    "if: github.event_name == 'push' && matrix.configuration == 'Release'"
+    in native_no_data_upload,
+    "Native no-data bundles must upload only from Release rows",
 )
 release_download = step(release_job, "release", "Download build artifact")
 check(
@@ -931,29 +999,59 @@ check(
     "Release must download the native x64 Release editor-OFF artifact",
 )
 check(
-    re.search(r"(?m)^\s*path: artifacts\s*$", release_download) is not None,
-    "Release must download the complete native runtime into artifacts",
+    re.search(r"(?m)^\s*path: artifacts/data\s*$", release_download) is not None,
+    "Release must download the native data bundle into artifacts/data",
 )
+release_no_data_download = step(
+    release_job, "release", "Download no-data build artifact"
+)
+for required in (
+    "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
+    "path: artifacts/no-data",
+):
+    check(required in release_no_data_download, f"Release no-data download missing {required}")
 release_archive = step(release_job, "release", "Archive native Windows runtime")
 archive_command = (
     "run: tar -czf MuMain-windows-native-x64-release-editor-off.tar.gz "
-    "-C artifacts ."
+    "-C artifacts/data ."
 )
 check(
     archive_command in release_archive,
-    "Release must archive the complete artifacts directory with the exact native x64 output name",
+    "Release must archive the native data bundle with the exact x64 output name",
+)
+release_no_data_archive = step(
+    release_job, "release", "Archive no-data Windows runtime"
+)
+no_data_archive_command = (
+    "run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz "
+    "-C artifacts/no-data ."
 )
 check(
-    release_job.count("tar -czf ") == 1,
-    "Release job must create exactly one runtime archive",
+    no_data_archive_command in release_no_data_archive,
+    "Release must archive the native no-data bundle with the exact x64 output name",
+)
+check(
+    release_job.count("tar -czf ") == 2,
+    "Release job must create exactly two runtime archives",
 )
 release_semantic = step(release_job, "release", "Semantic Release")
 release_download_position = release_job.find("- name: Download build artifact")
+release_no_data_download_position = release_job.find(
+    "- name: Download no-data build artifact"
+)
 release_archive_position = release_job.find("- name: Archive native Windows runtime")
+release_no_data_archive_position = release_job.find(
+    "- name: Archive no-data Windows runtime"
+)
 release_semantic_position = release_job.find("- name: Semantic Release")
 check(
-    -1 < release_download_position < release_archive_position < release_semantic_position,
-    "Release flow must download, archive, then publish in order",
+    -1
+    < release_download_position
+    < release_no_data_download_position
+    < release_archive_position
+    < release_no_data_archive_position
+    < release_semantic_position,
+    "Release flow must download both bundles, archive both, then publish",
 )
 check(
     "uses: cycjimmy/semantic-release-action@v4" in release_semantic,
@@ -980,8 +1078,8 @@ if len(github_plugins) == 1 and len(github_plugins[0]) == 2:
     if isinstance(github_options, dict):
         release_assets = github_options.get("assets", [])
 check(
-    release_assets == [EXPECTED_RELEASE_ASSET],
-    "Semantic release must publish exactly the native x64 Release editor-OFF runtime archive",
+    release_assets == EXPECTED_RELEASE_ASSETS,
+    "Semantic release must publish exactly the native data and no-data archives",
 )
 for stale_release_token in (
     "artifacts/Main.exe",
@@ -1274,11 +1372,10 @@ check(
     "MinGW artifact name must encode toolchain, architecture, configuration, and editor state",
 )
 check(
-    "path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/Main.exe"
+    "path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/"
     in mingw_upload,
-    "MinGW upload must include only Main.exe",
+    "MinGW data bundle must include the complete runtime directory",
 )
-check("path: |" not in mingw_upload, "MinGW upload must not hand-pick runtime files")
 check(
     "if-no-files-found: error" in mingw_upload,
     "MinGW upload must fail when the runtime directory is missing",
@@ -1288,6 +1385,15 @@ check(
     "MUnique.Client.Library.dll" not in mingw_upload,
     "MinGW upload must not package or claim NativeAOT",
 )
+mingw_no_data_upload = step(mingw_job, "build-mingw", "Upload no-data client")
+for required in (
+    "name: mu-client-windows-mingw-${{ matrix.arch }}-release-editor-${{ matrix.editor }}-no-data",
+    "${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/",
+    "!${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/Data/**",
+    "!${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/fonts/**",
+    "if-no-files-found: error",
+):
+    check(required in mingw_no_data_upload, f"MinGW no-data bundle missing {required}")
 
 if "- name: Validate artifacts" in native_job and "- name: Upload artifact" in native_job:
     check(

@@ -97,6 +97,15 @@ library next to the executable, so the build output directory is runnable:
 
 Run the client from that directory so it finds its assets and the library.
 
+### CI bundles
+
+CI publishes two runnable bundles for each platform and toolchain:
+
+- The existing artifact name is the data bundle: the complete runtime directory.
+- The `-no-data` artifact excludes only `Data/` and `fonts/`; it still includes
+  the executable, shaders, configuration, network library when supported, and
+  platform runtime libraries.
+
 ## Reference
 
 ### NuGet cache

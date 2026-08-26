@@ -409,5 +409,15 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-windows-mingw-${{ matrix.arch }}-release-editor-${{ matrix.editor }}
-          path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/Main.exe
+          path: ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/
+          if-no-files-found: error
+
+      - name: Upload no-data client
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-windows-mingw-${{ matrix.arch }}-release-editor-${{ matrix.editor }}-no-data
+          path: |
+            ${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/
+            !${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/Data/**
+            !${{ runner.temp }}/mu-client-mingw-${{ matrix.arch }}-editor-${{ matrix.editor }}/fonts/**
           if-no-files-found: error

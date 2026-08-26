@@ -584,9 +584,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-${{ github.ref_name }}
+          path: ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/
+          if-no-files-found: error
+
+      - name: Upload no-data artifact
+        if: github.event_name == 'push' && matrix.configuration == 'Release'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}
           path: |
-            ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/Main.exe
-            ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/MUnique.Client.Library.dll
+            ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/
+            !${{ matrix.build_directory }}/src/${{ matrix.configuration }}/Data/**
+            !${{ matrix.build_directory }}/src/${{ matrix.configuration }}/fonts/**
           if-no-files-found: error
 
   build-macos:
@@ -645,10 +654,19 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: main-macos-arm64-${{ github.ref_name }}
+          path: out/build/macos-arm64/src/Debug/Main.app/
+          if-no-files-found: error
+
+      - name: Upload no-data artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: main-macos-arm64-no-data-${{ github.ref_name }}
           path: |
-            out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/Main
-            out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/MUnique.Client.Library.dylib
-          if-no-files-found: warn
+            out/build/macos-arm64/src/Debug/Main.app/
+            !out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/Data/**
+            !out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/fonts/**
+          if-no-files-found: error
 
   build-linux:
     name: Linux Native Build (editor ${{ matrix.editor }})
@@ -725,9 +743,18 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-${{ github.ref_name }}
+          path: ${{ matrix.build_directory }}/src/Debug/
+          if-no-files-found: error
+
+      - name: Upload no-data artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}
           path: |
-            ${{ matrix.build_directory }}/src/Debug/Main
-            ${{ matrix.build_directory }}/src/Debug/MUnique.Client.Library.so
+            ${{ matrix.build_directory }}/src/Debug/
+            !${{ matrix.build_directory }}/src/Debug/Data/**
+            !${{ matrix.build_directory }}/src/Debug/fonts/**
           if-no-files-found: error
 
   release:
@@ -752,10 +779,19 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: mu-client-windows-native-x64-release-editor-off-main
-          path: artifacts
+          path: artifacts/data
+
+      - name: Download no-data build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: mu-client-windows-native-x64-release-editor-off-no-data-main
+          path: artifacts/no-data
 
       - name: Archive native Windows runtime
-        run: tar -czf MuMain-windows-native-x64-release-editor-off.tar.gz -C artifacts .
+        run: tar -czf MuMain-windows-native-x64-release-editor-off.tar.gz -C artifacts/data .
+
+      - name: Archive no-data Windows runtime
+        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C artifacts/no-data .
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4

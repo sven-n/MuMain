@@ -36,7 +36,12 @@
         {
           "path": "MuMain-windows-native-x64-release-editor-off.tar.gz",
           "name": "MuMain-windows-native-x64-release-editor-off.tar.gz",
-          "label": "MuMain (Windows native x64 Release, editor OFF)"
+          "label": "MuMain (Windows native x64 Release, editor OFF, with data)"
+        },
+        {
+          "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
+          "name": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
+          "label": "MuMain (Windows native x64 Release, editor OFF, no data)"
         }
       ]
     }],
