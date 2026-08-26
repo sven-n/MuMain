@@ -64,10 +64,11 @@ What needs to be done for Season 6:
 ## Release downloads
 
 CI validates Windows native x64 Release, Linux x64 Release, and
-macOS arm64 Release, all with the editor OFF; only Windows publishes a client
-runtime. The runtime excludes `Data/` and `fonts/`; download the
-separate data release tagged `data-<id>` and extract both archives into the
-same directory.
+macOS arm64 Release, all with the editor OFF, and uploads no-data runtime
+artifacts for all three. Only Windows publishes a client runtime as a GitHub
+Release asset. The runtimes exclude `Data/` and `fonts/`; download the separate
+data release tagged `data-<id>` and extract both archives into the same
+directory.
 
 x86, Debug, editor-ON, MinGW, and other configurations remain supported where
 listed below, but are not hosted artifacts. Whoever needs one must build locally.

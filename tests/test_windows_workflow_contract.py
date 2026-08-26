@@ -293,22 +293,45 @@ check(
     "Main Windows job must upload exactly one runtime artifact",
 )
 
-for platform_job, job_name, display_name, runner in (
-    (linux_job, "build-linux", "Linux Native Build (x64, Release, editor OFF)", "ubuntu-latest"),
-    (macos_job, "build-macos", "macOS Native Build (arm64, Release, editor OFF)", "macos-latest"),
+for platform_job, job_name, display_name, runner, artifact_name, artifact_path in (
+    (
+        linux_job,
+        "build-linux",
+        "Linux Native Build (x64, Release, editor OFF)",
+        "ubuntu-latest",
+        "mu-client-linux-native-x64-release-editor-off-no-data-main",
+        "out/build/linux-ci/src/Release/",
+    ),
+    (
+        macos_job,
+        "build-macos",
+        "macOS Native Build (arm64, Release, editor OFF)",
+        "macos-latest",
+        "mu-client-macos-native-arm64-release-editor-off-no-data-main",
+        "out/build/macos-ci/src/Release/Main.app/",
+    ),
 ):
     check("strategy:" not in platform_job, f"{display_name} must not use a matrix")
     check("matrix." not in platform_job, f"{display_name} must use fixed values")
-    check(
-        "actions/upload-artifact" not in platform_job,
-        f"{display_name} must not upload artifacts",
-    )
     for required in (
         f"name: {display_name}",
         f"runs-on: {runner}",
         "if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'",
     ):
         check(required in platform_job, f"{display_name} missing {required}")
+    platform_upload = step(platform_job, job_name, "Upload runtime artifact")
+    for required in (
+        "if: github.event_name == 'push'",
+        "uses: actions/upload-artifact@v4",
+        f"name: {artifact_name}",
+        f"path: {artifact_path}",
+        "if-no-files-found: error",
+    ):
+        check(required in platform_upload, f"{display_name} upload missing {required}")
+    check(
+        platform_job.count("uses: actions/upload-artifact@v4") == 1,
+        f"{display_name} must upload exactly one runtime artifact",
+    )
 
 linux_configure = step(linux_job, "build-linux", "Configure CMake")
 for required in (
@@ -456,8 +479,9 @@ for required in (
 for required in (
     "Windows native x64 Release",
     "Linux x64 Release",
-    "macOS arm64 Release",
-    "only Windows",
+    "mu-client-linux-native-x64-release-editor-off-no-data-main",
+    "mu-client-macos-native-arm64-release-editor-off-no-data-main",
+    "only Windows runtime published as a GitHub Release asset",
     "data-<id>",
     "MU_COPY_RUNTIME_ASSETS=OFF",
     "build locally",
@@ -467,8 +491,8 @@ for required in (
     "Windows native x64 Release",
     "Linux x64 Release",
     "macOS arm64 Release",
-    "only Windows",
-    "separate data release",
+    "Only Windows",
+    "data release tagged",
     "build locally",
 ):
     check(required in readme, f"README missing release policy: {required}")

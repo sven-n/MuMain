@@ -568,6 +568,14 @@ jobs:
             fi
           done
 
+      - name: Upload runtime artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-linux-native-x64-release-editor-off-no-data-main
+          path: out/build/linux-ci/src/Release/
+          if-no-files-found: error
+
   build-macos:
     name: macOS Native Build (arm64, Release, editor OFF)
     if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
@@ -632,6 +640,14 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Upload runtime artifact
+        if: github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-macos-native-arm64-release-editor-off-no-data-main
+          path: out/build/macos-ci/src/Release/Main.app/
+          if-no-files-found: error
 
   release:
     name: Semantic Release

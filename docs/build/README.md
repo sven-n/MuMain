@@ -51,7 +51,7 @@ buildable for them. See the per-platform notes when that work lands.
 | Linux | x86 | - | none | Not supported (see below) |
 
 Actions validate Windows native x64 Release, Linux x64 Release, and macOS arm64
-Release, all with the editor OFF; only Windows publishes a runtime artifact.
+Release, all with the editor OFF, and upload one no-data runtime artifact per OS.
 Build every other supported row locally using the setup guides above.
 
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
@@ -106,19 +106,22 @@ Run the client from that directory so it finds its assets and the library.
 
 ## Hosted releases
 
-Actions publish two independent release streams:
+Actions expose builds through CI artifacts and two independent release streams:
 
 - Semantic Release publishes
   `MuMain-windows-native-x64-release-editor-off-no-data.tar.gz`. This is the
-  only hosted build: Windows native x64 Release, editor OFF.
+  only Windows runtime published as a GitHub Release asset.
+- Each main-branch CI run also uploads
+  `mu-client-windows-native-x64-release-editor-off-no-data-main`,
+  `mu-client-linux-native-x64-release-editor-off-no-data-main`, and
+  `mu-client-macos-native-arm64-release-editor-off-no-data-main` artifacts.
 - The data workflow publishes `MuMain-data-<id>.tar.gz` and its
   `.sha256` file under tag `data-<id>`. The identifier is derived from the Git
   trees for `src/bin/Data/` and `src/bin/fonts/`, so unchanged data is reused
   across code releases.
 
-Linux x64 Release and macOS arm64 Release are build-and-test checks only; they
-do not upload artifacts. Windows x86, Debug, editor-ON, MinGW, and other
-configurations are not built by Actions; build locally when one is required.
+Windows x86, Debug, editor-ON, MinGW, and other configurations are not built by
+Actions; build locally when one is required.
 
 ### Assemble a release
 
