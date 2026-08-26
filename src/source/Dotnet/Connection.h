@@ -15,12 +15,9 @@ class PacketFunctions_ChatServer;
 class PacketFunctions_ConnectServer;
 class PacketFunctions_ClientToServer;
 
-// MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so"
-// MU_DOTNET_LIB_DIR is defined by CMake for UNIX platforms (Linux + macOS) as the absolute
-// binary output directory (CMAKE_RUNTIME_OUTPUT_DIRECTORY / TARGET_FILE_DIR:Main).
-// On UNIX, dlopen() with a bare filename does NOT search the executable directory, so an
-// absolute path is required. On Windows, LoadLibrary() searches the executable directory
-// by default, so a bare filename suffices. (Story 3.3.2 Risk R6 mitigation)
+// MU_DOTNET_LIB_EXT is defined by CMake (FindDotnetAOT.cmake): ".dll" | ".dylib" | ".so".
+// POSIX loaders do not search the executable directory for a bare filename, so resolve the
+// library beside the running executable. Windows keeps its native executable-directory search.
 // Defined in Connection.cpp (not anonymous namespace) to prevent per-TU copies if ever
 // included by a second translation unit. (Story 3.4.1 MEDIUM-4 fix)
 //
@@ -31,6 +28,23 @@ class PacketFunctions_ClientToServer;
 // before munique_client_library_handle calls Load(). An `inline` handle variable would
 // initialize at the point of #include "Connection.h" in Connection.cpp — before
 // g_dotnetLibPath is defined — causing dlopen("") and a NULL handle.
+inline std::string ManagedLibraryPath()
+{
+    const auto libraryName = "MUnique.Client.Library" + std::string(MU_DOTNET_LIB_EXT);
+#ifdef _WIN32
+    return libraryName;
+#else
+    constexpr DWORD executablePathCapacity = 4096;
+    wchar_t executablePath[executablePathCapacity] = {};
+    if (GetModuleFileNameW(nullptr, executablePath, executablePathCapacity) == 0)
+    {
+        return libraryName;
+    }
+
+    return (std::filesystem::path(mu_narrow_path(executablePath)).parent_path() / libraryName).string();
+#endif
+}
+
 extern const std::string g_dotnetLibPath;
 extern const mu::platform::LibraryHandle munique_client_library_handle;
 

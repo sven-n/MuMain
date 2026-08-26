@@ -481,12 +481,6 @@ target_compile_definitions(MuClient PUBLIC
   $<$<BOOL:${ENABLE_EDITOR}>:_EDITOR>  # Editor features for admin builds
 )
 
-if(UNIX)
-  target_compile_definitions(MuClient PUBLIC
-    "MU_DOTNET_LIB_DIR=\"$<TARGET_FILE_DIR:Main>\""
-  )
-endif()
-
 if (MSVC)
   target_compile_definitions(MuClient PUBLIC
     WIN32
