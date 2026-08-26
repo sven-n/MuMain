@@ -3,9 +3,10 @@
 // Single source of truth shared by every platform: the non-Windows GdiText shim
 // reads bundled files directly, while Windows privately registers the same files
 // with GDI. Family names match the options UI and config; paths are relative to
-// the executable directory.
+// the runtime directory normalized during startup.
 #pragma once
 
+#include <filesystem>
 #include <string_view>
 
 struct BundledFont
@@ -23,6 +24,13 @@ inline constexpr BundledFont kBundledFonts[] = {
 inline constexpr std::string_view kDefaultBundledFontFamily = "DejaVu Sans";
 inline constexpr BundledFont kBundledFixedFont{
     "Cousine", "fonts/Cousine-Regular.ttf", "fonts/Cousine-Regular.ttf"};
+
+[[nodiscard]] inline std::filesystem::path ResolveBundledFontPath(const std::filesystem::path& relativePath)
+{
+    std::error_code error;
+    const std::filesystem::path runtimeDirectory = std::filesystem::current_path(error);
+    return error ? relativePath : runtimeDirectory / relativePath;
+}
 
 [[nodiscard]] constexpr const BundledFont& ResolveBundledFont(std::string_view configuredFamily)
 {

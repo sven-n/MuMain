@@ -13,7 +13,6 @@
 #define STBTT_STATIC
 #define STB_TRUETYPE_IMPLEMENTATION
 #include "stb_truetype.h"
-#include <SDL3/SDL_filesystem.h>
 
 #include <algorithm>
 #include <cmath>
@@ -122,17 +121,6 @@ namespace
         return std::string(buf.data());   // stops at the trailing NUL
     }
 
-    // Directory of the running executable, so bundled fonts resolve regardless
-    // of the working directory on both macOS and Linux.
-    const std::string& ExeDir()
-    {
-        static const std::string dir = []() -> std::string {
-            const char* basePath = SDL_GetBasePath();
-            return basePath ? basePath : "";
-        }();
-        return dir;
-    }
-
     // Curated fonts shipped in the client's ./fonts directory. Resolving these by
     // name lets a chosen font work even when it is not installed system-wide, so
     // every option the UI offers is guaranteed present. Names match what the
@@ -140,10 +128,10 @@ namespace
     std::string BundledFontPath(const std::string& family, bool bold)
     {
         if (family == kBundledFixedFont.family)
-            return ExeDir() + (bold ? kBundledFixedFont.bold : kBundledFixedFont.regular);
+            return ResolveBundledFontPath(bold ? kBundledFixedFont.bold : kBundledFixedFont.regular).string();
         for (const auto& e : kBundledFonts)
             if (family == e.family)
-                return ExeDir() + (bold ? e.bold : e.regular);
+                return ResolveBundledFontPath(bold ? e.bold : e.regular).string();
         return {};
     }
 

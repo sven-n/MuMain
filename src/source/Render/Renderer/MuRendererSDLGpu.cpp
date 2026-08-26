@@ -859,9 +859,7 @@ static int s_cachedWinH = 0;
 #if MU_HAS_SDL_TTF
 [[nodiscard]] static std::string BundledFontPath(const char* relativePath)
 {
-    const char* basePath = SDL_GetBasePath();
-    const std::filesystem::path executableDir = basePath ? basePath : ".";
-    return (executableDir / relativePath).string();
+    return ResolveBundledFontPath(relativePath).string();
 }
 
 [[nodiscard]] static std::string FindDeveloperFontPath()
