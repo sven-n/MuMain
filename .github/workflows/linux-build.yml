@@ -86,14 +86,14 @@ jobs:
       - name: Upload client binary
         uses: actions/upload-artifact@v4
         with:
-          name: mu-client-linux-x64-editor-${{ matrix.editor }}
+          name: mu-client-linux-x64-release-editor-${{ matrix.editor }}
           path: build-linux/src/
           if-no-files-found: error
 
       - name: Upload no-data client
         uses: actions/upload-artifact@v4
         with:
-          name: mu-client-linux-x64-editor-${{ matrix.editor }}-no-data
+          name: mu-client-linux-x64-release-editor-${{ matrix.editor }}-no-data
           path: |
             build-linux/src/
             !build-linux/src/Data/**

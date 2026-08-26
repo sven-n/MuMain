@@ -99,12 +99,14 @@ Run the client from that directory so it finds its assets and the library.
 
 ### CI bundles
 
-CI publishes two runnable bundles for each platform and toolchain:
+CI publishes two runtime bundles for each platform and toolchain. Packaged
+artifact names include `release`:
 
 - The existing artifact name is the data bundle: the complete runtime directory.
-- The `-no-data` artifact excludes only `Data/` and `fonts/`; it still includes
-  the executable, shaders, configuration, network library when supported, and
-  platform runtime libraries.
+- The `-no-data` artifact is the normal redistributable runtime. It excludes
+  only `Data/` and `fonts/`; users must supply compatible copies before running
+  the client. The executable, shaders, configuration, network library when
+  supported, and platform runtime libraries remain included.
 
 ## Reference
 

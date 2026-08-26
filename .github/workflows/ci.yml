@@ -625,14 +625,14 @@ jobs:
         run: cmake --preset macos-arm64 -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
 
       - name: Build
-        run: cmake --build out/build/macos-arm64 --config Debug
+        run: cmake --build out/build/macos-arm64 --config Release
 
       - name: Run tests
-        run: ctest --test-dir out/build/macos-arm64 --build-config Debug --output-on-failure
+        run: ctest --test-dir out/build/macos-arm64 --build-config Release --output-on-failure
 
       - name: Validate artifacts
         run: |
-          EXE_DIR="out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS"
+          EXE_DIR="out/build/macos-arm64/src/Release/Main.app/Contents/MacOS"
           FAIL=0
           for f in \
             "$EXE_DIR/Main" \
@@ -653,19 +653,19 @@ jobs:
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: main-macos-arm64-${{ github.ref_name }}
-          path: out/build/macos-arm64/src/Debug/Main.app/
+          name: main-macos-arm64-release-${{ github.ref_name }}
+          path: out/build/macos-arm64/src/Release/Main.app/
           if-no-files-found: error
 
       - name: Upload no-data artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
-          name: main-macos-arm64-no-data-${{ github.ref_name }}
+          name: main-macos-arm64-release-no-data-${{ github.ref_name }}
           path: |
-            out/build/macos-arm64/src/Debug/Main.app/
-            !out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/Data/**
-            !out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/fonts/**
+            out/build/macos-arm64/src/Release/Main.app/
+            !out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/Data/**
+            !out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/fonts/**
           if-no-files-found: error
 
   build-linux:
@@ -677,10 +677,10 @@ jobs:
         include:
           - editor: 'OFF'
             build_directory: out/build/linux-ci-editor-off
-            artifact_name: mu-client-linux-native-x64-debug-editor-off
+            artifact_name: mu-client-linux-native-x64-release-editor-off
           - editor: 'ON'
             build_directory: out/build/linux-ci-editor-on
-            artifact_name: mu-client-linux-native-x64-debug-editor-on
+            artifact_name: mu-client-linux-native-x64-release-editor-on
 
     steps:
       - name: Checkout repository
@@ -715,14 +715,14 @@ jobs:
           -DBUILD_TESTING=ON
 
       - name: Build
-        run: cmake --build ${{ matrix.build_directory }} --config Debug
+        run: cmake --build ${{ matrix.build_directory }} --config Release
 
       - name: Run tests
-        run: ctest --test-dir ${{ matrix.build_directory }} --build-config Debug --output-on-failure --no-tests=error
+        run: ctest --test-dir ${{ matrix.build_directory }} --build-config Release --output-on-failure --no-tests=error
 
       - name: Validate artifacts
         run: |
-          EXE_DIR="${{ matrix.build_directory }}/src/Debug"
+          EXE_DIR="${{ matrix.build_directory }}/src/Release"
           FAIL=0
           for f in \
             "$EXE_DIR/Main" \
@@ -743,7 +743,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}-${{ github.ref_name }}
-          path: ${{ matrix.build_directory }}/src/Debug/
+          path: ${{ matrix.build_directory }}/src/Release/
           if-no-files-found: error
 
       - name: Upload no-data artifact
@@ -752,9 +752,9 @@ jobs:
         with:
           name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}
           path: |
-            ${{ matrix.build_directory }}/src/Debug/
-            !${{ matrix.build_directory }}/src/Debug/Data/**
-            !${{ matrix.build_directory }}/src/Debug/fonts/**
+            ${{ matrix.build_directory }}/src/Release/
+            !${{ matrix.build_directory }}/src/Release/Data/**
+            !${{ matrix.build_directory }}/src/Release/fonts/**
           if-no-files-found: error
 
   release:

@@ -286,12 +286,12 @@ expected_linux_rows = [
     {
         "editor": "OFF",
         "build_directory": "out/build/linux-ci-editor-off",
-        "artifact_name": "mu-client-linux-native-x64-debug-editor-off",
+        "artifact_name": "mu-client-linux-native-x64-release-editor-off",
     },
     {
         "editor": "ON",
         "build_directory": "out/build/linux-ci-editor-on",
-        "artifact_name": "mu-client-linux-native-x64-debug-editor-on",
+        "artifact_name": "mu-client-linux-native-x64-release-editor-on",
     },
 ]
 actual_linux_rows = []
@@ -332,59 +332,83 @@ for required in (
     check(required in linux_configure_arguments, f"Linux configure missing {required}")
 linux_build = step(linux_job, "build-linux", "Build")
 check(
-    "cmake --build ${{ matrix.build_directory }} --config Debug" in linux_build,
-    "Linux matrix build must use its isolated build directory",
+    "cmake --build ${{ matrix.build_directory }} --config Release" in linux_build,
+    "Linux matrix build must use Release in its isolated build directory",
 )
 linux_tests = step(linux_job, "build-linux", "Run tests")
 check(
-    "ctest --test-dir ${{ matrix.build_directory }} --build-config Debug --output-on-failure --no-tests=error"
+    "ctest --test-dir ${{ matrix.build_directory }} --build-config Release --output-on-failure --no-tests=error"
     in linux_tests,
-    "Linux editor-OFF/ON rows must both run CTest",
+    "Linux editor-OFF/ON rows must both run Release CTest",
 )
 linux_validation = step(linux_job, "build-linux", "Validate artifacts")
 check(
-    'EXE_DIR="${{ matrix.build_directory }}/src/Debug"' in linux_validation,
-    "Linux validation must use its isolated build directory",
+    'EXE_DIR="${{ matrix.build_directory }}/src/Release"' in linux_validation,
+    "Linux validation must use its isolated Release directory",
 )
 linux_upload = step(linux_job, "build-linux", "Upload artifact")
 for required in (
     "name: ${{ matrix.artifact_name }}-${{ github.ref_name }}",
-    "path: ${{ matrix.build_directory }}/src/Debug/",
+    "path: ${{ matrix.build_directory }}/src/Release/",
     "if-no-files-found: error",
 ):
     check(required in linux_upload, f"Linux data bundle missing {required}")
 linux_no_data_upload = step(linux_job, "build-linux", "Upload no-data artifact")
 for required in (
     "name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}",
-    "${{ matrix.build_directory }}/src/Debug/",
-    "!${{ matrix.build_directory }}/src/Debug/Data/**",
-    "!${{ matrix.build_directory }}/src/Debug/fonts/**",
+    "${{ matrix.build_directory }}/src/Release/",
+    "!${{ matrix.build_directory }}/src/Release/Data/**",
+    "!${{ matrix.build_directory }}/src/Release/fonts/**",
     "if-no-files-found: error",
 ):
     check(required in linux_no_data_upload, f"Linux no-data bundle missing {required}")
 
+macos_build = step(macos_job, "build-macos", "Build")
+check(
+    "cmake --build out/build/macos-arm64 --config Release" in macos_build,
+    "macOS build must use Release",
+)
+macos_tests = step(macos_job, "build-macos", "Run tests")
+check(
+    "ctest --test-dir out/build/macos-arm64 --build-config Release --output-on-failure"
+    in macos_tests,
+    "macOS tests must use Release",
+)
+macos_validation = step(macos_job, "build-macos", "Validate artifacts")
+check(
+    'EXE_DIR="out/build/macos-arm64/src/Release/Main.app/Contents/MacOS"'
+    in macos_validation,
+    "macOS validation must use the Release app",
+)
 macos_upload = step(macos_job, "build-macos", "Upload artifact")
 for required in (
-    "name: main-macos-arm64-${{ github.ref_name }}",
-    "path: out/build/macos-arm64/src/Debug/Main.app/",
+    "name: main-macos-arm64-release-${{ github.ref_name }}",
+    "path: out/build/macos-arm64/src/Release/Main.app/",
     "if-no-files-found: error",
 ):
     check(required in macos_upload, f"macOS data bundle missing {required}")
 macos_no_data_upload = step(macos_job, "build-macos", "Upload no-data artifact")
 for required in (
-    "name: main-macos-arm64-no-data-${{ github.ref_name }}",
-    "out/build/macos-arm64/src/Debug/Main.app/",
-    "!out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/Data/**",
-    "!out/build/macos-arm64/src/Debug/Main.app/Contents/MacOS/fonts/**",
+    "name: main-macos-arm64-release-no-data-${{ github.ref_name }}",
+    "out/build/macos-arm64/src/Release/Main.app/",
+    "!out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/Data/**",
+    "!out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/fonts/**",
     "if-no-files-found: error",
 ):
     check(required in macos_no_data_upload, f"macOS no-data bundle missing {required}")
 
+standalone_linux_configure = step(
+    standalone_linux_job, "build-linux", "Configure CMake"
+)
+check(
+    "-DCMAKE_BUILD_TYPE=Release" in standalone_linux_configure,
+    "Standalone Linux configure must use Release",
+)
 standalone_linux_upload = step(
     standalone_linux_job, "build-linux", "Upload client binary"
 )
 for required in (
-    "name: mu-client-linux-x64-editor-${{ matrix.editor }}",
+    "name: mu-client-linux-x64-release-editor-${{ matrix.editor }}",
     "path: build-linux/src/",
     "if-no-files-found: error",
 ):
@@ -393,7 +417,7 @@ standalone_linux_no_data_upload = step(
     standalone_linux_job, "build-linux", "Upload no-data client"
 )
 for required in (
-    "name: mu-client-linux-x64-editor-${{ matrix.editor }}-no-data",
+    "name: mu-client-linux-x64-release-editor-${{ matrix.editor }}-no-data",
     "build-linux/src/",
     "!build-linux/src/Data/**",
     "!build-linux/src/fonts/**",
