@@ -35,6 +35,7 @@
 #include "QuadTopology.h"
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuReplayState.h"
+#include "SdlGpuValidation.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #ifdef _EDITOR
@@ -1195,8 +1196,11 @@ public:
         // Create GPU device with all supported shader formats.
         // SDL_gpu selects the platform backend automatically:
         //   Metal on macOS, Vulkan on Linux, D3D12 on Windows.
+        mu::log::Get("render")->info("SDL_gpu -- validation: {}",
+                                      Render::kGpuValidationEnabled ? "enabled" : "disabled");
         s_device = SDL_CreateGPUDevice(
-            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL, true, nullptr);
+            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+            Render::kGpuValidationEnabled, nullptr);
 
         if (!s_device)
         {
