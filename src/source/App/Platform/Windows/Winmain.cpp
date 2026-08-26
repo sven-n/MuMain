@@ -1437,11 +1437,13 @@ bool RegisterBundledFonts()
 {
 #ifdef _WIN32
     std::vector<std::wstring> registeredPaths;
-    const auto rollback = [&registeredPaths]() {
+    const auto rollback = [&registeredPaths]()
+    {
         for (auto it = registeredPaths.rbegin(); it != registeredPaths.rend(); ++it)
             RemoveFontResourceExW(it->c_str(), FR_PRIVATE, nullptr);
     };
-    const auto registerPath = [&registeredPaths, &rollback](const char* relativePath) {
+    const auto registerPath = [&registeredPaths, &rollback](const char* relativePath)
+    {
         const std::wstring path = BundledFontFullPath(relativePath);
         if (!std::filesystem::is_regular_file(path))
         {
@@ -1452,7 +1454,7 @@ bool RegisterBundledFonts()
         if (AddFontResourceExW(path.c_str(), FR_PRIVATE, nullptr) == 0)
         {
             mu::log::Get("render")->error("GDI -- AddFontResourceExW failed path='{}' error={}", WideToUtf8(path),
-                                           GetLastError());
+                                          GetLastError());
             rollback();
             return false;
         }
