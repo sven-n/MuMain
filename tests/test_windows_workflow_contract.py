@@ -959,6 +959,10 @@ check(
     "uses: cycjimmy/semantic-release-action@v4" in release_semantic,
     "Release flow must publish the archive through semantic-release",
 )
+check(
+    "conventional-changelog-conventionalcommits@8.0.0" in release_semantic,
+    "Semantic release must pin a preset compatible with the action's changelog writer",
+)
 github_plugins = [
     plugin
     for plugin in release_config.get("plugins", [])
