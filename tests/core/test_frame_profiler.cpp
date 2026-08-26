@@ -17,6 +17,7 @@ TEST_CASE("renderer counters follow nested frame passes [core][profiling]")
         {
             FRAME_PROFILE(Objects);
             FrameProfiler::Count(Counter::MergedDraws, 2);
+            FrameProfiler::Count(Counter::Merged2DDraws);
         }
 
         CHECK(FrameProfiler::CurrentPass() == Pass::Terrain);
@@ -25,7 +26,9 @@ TEST_CASE("renderer counters follow nested frame passes [core][profiling]")
     CHECK(FrameProfiler::CurrentPass() == Pass::Other);
     CHECK(FrameProfiler::CounterValue(Pass::Terrain, Counter::DrawCalls) == 1);
     CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::MergedDraws) == 2);
+    CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::Merged2DDraws) == 1);
     CHECK(FrameProfiler::CounterValue(Counter::MergedDraws) == 2);
+    CHECK(FrameProfiler::CounterValue(Counter::Merged2DDraws) == 1);
 
     FrameProfiler::g_CountersEnabled = false;
     FrameProfiler::ResetCounters();

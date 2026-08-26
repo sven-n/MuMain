@@ -130,6 +130,7 @@ struct RendererStats
     std::uint32_t requestedDrawCalls = 0;
     std::uint32_t submittedDrawCalls = 0;
     std::uint32_t mergedDrawCalls = 0;
+    std::uint32_t merged2DDrawCalls = 0;
     std::uint32_t commandCount = 0;
     std::uint32_t vertexBytes = 0;
     std::uint32_t textureUploads = 0;

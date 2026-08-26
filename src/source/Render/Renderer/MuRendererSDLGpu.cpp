@@ -31,6 +31,7 @@
 #define MU_HAS_SDL_TTF 0
 #endif
 
+#include "DrawCommandHistory.h"
 #include "MuRenderer.h"
 #include "QuadTopology.h"
 #include "SdlGpuPixelFormat.h"
@@ -438,6 +439,7 @@ static Uint32 s_dbgTextureReleasesThisFrame = 0u;
 static Uint32 s_dbgRenderCmdsReplayedThisFrame = 0u;
 static Uint32 s_dbgGpuDrawCallsThisFrame = 0u;
 static Uint32 s_dbgMergedDrawsThisFrame = 0u;
+static Uint32 s_dbgMerged2DDrawsThisFrame = 0u;
 static Uint32 s_dbgWhiteTextureDrawsThisFrame = 0u;
 static Uint32 s_dbgRealTextureDrawsThisFrame = 0u;
 static Uint32 s_dbgPipelineBindsThisFrame = 0u;
@@ -548,10 +550,8 @@ struct RenderCmd
 };
 
 static std::vector<RenderCmd> s_renderCmds;
-static constexpr std::size_t kNoTriangleCommand = std::numeric_limits<std::size_t>::max();
-static std::size_t s_lastTriangleCommand = kNoTriangleCommand;
-static constexpr std::size_t kNoQuadCommand = std::numeric_limits<std::size_t>::max();
-static std::size_t s_lastQuadCommand = kNoQuadCommand;
+static constexpr std::size_t kNoDrawCommand = std::numeric_limits<std::size_t>::max();
+static Render::DrawCommandHistory s_previousDrawCommands;
 
 [[nodiscard]] static bool IsDrawCommand(RenderCmdType type)
 {
@@ -626,45 +626,47 @@ static std::size_t s_lastQuadCommand = kNoQuadCommand;
     return Counter::Count_;
 }
 
-[[nodiscard]] static bool MergeAdjacentTriangleCommand(const RenderCmd& command)
+[[nodiscard]] static bool MergeAdjacentTriangleCommand(const RenderCmd& command, std::size_t& previousCommand,
+                                                       Uint32 vertexStride)
 {
-    if (s_lastTriangleCommand == kNoTriangleCommand)
+    if (previousCommand == kNoDrawCommand)
     {
         return false;
     }
 
-    const RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
-    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
-    const FrameProfiler::Counter breakCause =
-        ClassifyBatchBreak(command, s_lastTriangleCommand, previousEnd == command.vtxOffset);
+    const RenderCmd& previous = s_renderCmds[previousCommand];
+    const bool geometryCanMerge = Render::Topology::CanMergeTriangleDraws(
+        previous.vtxOffset, previous.vtxCount, command.vtxOffset, vertexStride);
+    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, previousCommand, geometryCanMerge);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
         FrameProfiler::Count(breakCause);
         return false;
     }
 
-    s_renderCmds[s_lastTriangleCommand].vtxCount += command.vtxCount;
+    s_renderCmds[previousCommand].vtxCount += command.vtxCount;
     return true;
 }
 
-[[nodiscard]] static bool MergeAdjacentQuadCommand(const RenderCmd& command)
+[[nodiscard]] static bool MergeAdjacentQuadCommand(const RenderCmd& command, std::size_t& previousCommand,
+                                                   Uint32 vertexStride)
 {
-    if (s_lastQuadCommand == kNoQuadCommand)
+    if (previousCommand == kNoDrawCommand)
     {
         return false;
     }
 
-    const RenderCmd& previous = s_renderCmds[s_lastQuadCommand];
+    const RenderCmd& previous = s_renderCmds[previousCommand];
     const bool geometryCanMerge = Render::Topology::CanMergeQuadDraws(
-        previous.vtxOffset, previous.idxCount, command.vtxOffset, command.idxCount, sizeof(Vertex3D), k_MaxQuads);
-    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, s_lastQuadCommand, geometryCanMerge);
+        previous.vtxOffset, previous.idxCount, command.vtxOffset, command.idxCount, vertexStride, k_MaxQuads);
+    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, previousCommand, geometryCanMerge);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
         FrameProfiler::Count(breakCause);
         return false;
     }
 
-    s_renderCmds[s_lastQuadCommand].idxCount += command.idxCount;
+    s_renderCmds[previousCommand].idxCount += command.idxCount;
     return true;
 }
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
@@ -1556,8 +1558,7 @@ public:
         // so keep s_textureUpdates until EndFrame has submitted them.
         s_vtxOffset = 0u;
         s_renderCmds.clear();
-        s_lastTriangleCommand = kNoTriangleCommand;
-        s_lastQuadCommand = kNoQuadCommand;
+        s_previousDrawCommands.fill(kNoDrawCommand);
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -1574,6 +1575,7 @@ public:
         s_dbgRenderCmdsReplayedThisFrame = 0u;
         s_dbgGpuDrawCallsThisFrame = 0u;
         s_dbgMergedDrawsThisFrame = 0u;
+        s_dbgMerged2DDrawsThisFrame = 0u;
         s_dbgWhiteTextureDrawsThisFrame = 0u;
         s_dbgRealTextureDrawsThisFrame = 0u;
         s_dbgPipelineBindsThisFrame = 0u;
@@ -2001,6 +2003,7 @@ public:
         s_lastFrameStats.requestedDrawCalls = s_dbgDrawCallsThisFrame;
         s_lastFrameStats.submittedDrawCalls = s_dbgGpuDrawCallsThisFrame;
         s_lastFrameStats.mergedDrawCalls = s_dbgMergedDrawsThisFrame;
+        s_lastFrameStats.merged2DDrawCalls = s_dbgMerged2DDrawsThisFrame;
         s_lastFrameStats.commandCount = static_cast<std::uint32_t>(s_renderCmds.size());
         s_lastFrameStats.vertexBytes = s_dbgVtxBytesThisFrame;
         s_lastFrameStats.textureUploads = s_dbgTextureUploadsThisFrame;
@@ -2024,14 +2027,16 @@ public:
         {
             const auto logger = mu::log::Get("render");
             logger->debug(
-                "[RENDER diag] frame={} draw_calls={} replayed={} merged={} cmds={} vtx_bytes={} tex={} fallback={} "
+                "[RENDER diag] frame={} draw_calls={} replayed={} merged={} merged_2d={} cmds={} vtx_bytes={} tex={} "
+                "fallback={} "
                 "white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={} "
                 "pipeline_binds={} sampler_binds={} vertex_uniform_pushes={} fragment_uniform_pushes={}",
                 s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame, s_dbgMergedDrawsThisFrame,
-                s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(), s_dbgFallbackTextureThisFrame,
-                s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
-                s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated, m_texture2DEnabled,
-                m_boundTextureId, s_dbgPipelineBindsThisFrame, s_dbgSamplerBindsThisFrame,
+                s_dbgMerged2DDrawsThisFrame, s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(),
+                s_dbgFallbackTextureThisFrame, s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame,
+                s_dbgTextureUploadsThisFrame, s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame,
+                s_texturesInvalidated, m_texture2DEnabled, m_boundTextureId, s_dbgPipelineBindsThisFrame,
+                s_dbgSamplerBindsThisFrame,
                 s_dbgVertexUniformPushesThisFrame, s_dbgFragmentUniformPushesThisFrame);
 
             logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
@@ -2429,6 +2434,8 @@ public:
         cmd.vtxOffset = vtxOffset;
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
         cmd.fogUniform = m_fogUniform;
+        cmd.blendMode = BlendMode::Alpha;
+        cmd.blendEnabled = true;
         // 2D ortho projection for text — Y-up to match SDL_ttf GPU convention.
         // SDL_ttf negates Y in the vertex data (see SDL_gpu_textengine.c: "In the GPU API
         // positive y-axis is upwards so the signs of the y-coords is reversed").
@@ -2436,11 +2443,26 @@ public:
         // drawX/drawY offset the text to the correct screen position.
         cmd.vu.mvp =
             glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
-        s_renderCmds.push_back(cmd);
+        FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
+        std::size_t& previousCommand = Render::PreviousDrawCommand(
+            s_previousDrawCommands, Render::DrawCommandFamily::TextTriangles2D);
+        if (MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex2D)))
+        {
+            ++s_dbgMergedDrawsThisFrame;
+            ++s_dbgMerged2DDrawsThisFrame;
+            FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
+            FrameProfiler::Count(FrameProfiler::Counter::Merged2DDraws);
+        }
+        else
+        {
+            s_renderCmds.push_back(cmd);
+            previousCommand = s_renderCmds.size() - 1;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
         FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
@@ -2686,17 +2708,36 @@ public:
         cmd.vtxOffset = vtxOffset;
         cmd.idxCount = drawQuads * 6;
         cmd.fogUniform = m_fogUniform;
+        cmd.blendMode = m_activeBlendMode;
+        cmd.blendEnabled = m_blendEnabled;
+        cmd.depthTestEnabled = m_depthTestEnabled;
+        cmd.depthMaskEnabled = m_depthMaskEnabled;
+        cmd.cullFaceEnabled = m_cullFaceEnabled;
         // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
         // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
         // fogStart=fogEnd=0 → range=0 → vertex shader sets fogFactor=1.0 (no fog for 2D).
-        int winW = 0, winH = 0;
-        SDL_GetWindowSize(s_window, &winW, &winH);
-        cmd.vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
-        s_renderCmds.push_back(cmd);
+        cmd.vu.mvp =
+            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
+        FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
+        std::size_t& previousCommand = Render::PreviousDrawCommand(
+            s_previousDrawCommands, Render::DrawCommandFamily::ScreenQuads2D);
+        if (MergeAdjacentQuadCommand(cmd, previousCommand, sizeof(Vertex2D)))
+        {
+            ++s_dbgMergedDrawsThisFrame;
+            ++s_dbgMerged2DDrawsThisFrame;
+            FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
+            FrameProfiler::Count(FrameProfiler::Counter::Merged2DDraws);
+        }
+        else
+        {
+            s_renderCmds.push_back(cmd);
+            previousCommand = s_renderCmds.size() - 1;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
         FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
@@ -2770,7 +2811,9 @@ public:
         cmd.depthMaskEnabled = m_depthMaskEnabled;
         cmd.cullFaceEnabled = m_cullFaceEnabled;
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
-        if (MergeAdjacentTriangleCommand(cmd))
+        std::size_t& previousCommand =
+            Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Triangles3D);
+        if (MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
@@ -2778,7 +2821,7 @@ public:
         else
         {
             s_renderCmds.push_back(cmd);
-            s_lastTriangleCommand = s_renderCmds.size() - 1;
+            previousCommand = s_renderCmds.size() - 1;
             FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
             FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
         }
@@ -2864,7 +2907,9 @@ public:
         cmd.depthMaskEnabled = m_depthMaskEnabled;
         cmd.cullFaceEnabled = m_cullFaceEnabled;
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
-        if (MergeAdjacentQuadCommand(cmd))
+        std::size_t& previousCommand =
+            Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Quads3D);
+        if (MergeAdjacentQuadCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
@@ -2872,7 +2917,7 @@ public:
         else
         {
             s_renderCmds.push_back(cmd);
-            s_lastQuadCommand = s_renderCmds.size() - 1;
+            previousCommand = s_renderCmds.size() - 1;
             FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
             FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
         }

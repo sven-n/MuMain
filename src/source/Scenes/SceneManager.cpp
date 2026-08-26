@@ -713,7 +713,7 @@ static void RenderGLStats()
         Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
     };
 
-    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  VtxKB");
+    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
@@ -721,9 +721,10 @@ static void RenderGLStats()
     {
         const double vertexKilobytes =
             static_cast<double>(FrameProfiler::CounterValue(pass, Counter::VertexBytes)) / 1024.0;
-        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
+        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %3u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
                     FrameProfiler::AccumulatorMs(pass), FrameProfiler::CounterValue(pass, Counter::DrawCalls),
-                    FrameProfiler::CounterValue(pass, Counter::MergedDraws), vertexKilobytes);
+                    FrameProfiler::CounterValue(pass, Counter::MergedDraws),
+                    FrameProfiler::CounterValue(pass, Counter::Merged2DDraws), vertexKilobytes);
         g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
         y += DEBUG_TEXT_LINE_HEIGHT;
     }
@@ -733,8 +734,9 @@ static void RenderGLStats()
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
-    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
-                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.commandCount, stats.vertexBytes / 1024);
+    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u 2D:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
+                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.merged2DDrawCalls, stats.commandCount,
+                stats.vertexBytes / 1024);
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
