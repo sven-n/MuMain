@@ -750,6 +750,16 @@ static void RenderGLStats()
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
+    mu_swprintf(szLine, L"Bind Pipe:%u Samp:%u VU:%u FU:%u", stats.pipelineBinds, stats.samplerBinds,
+                stats.vertexUniformPushes, stats.fragmentUniformPushes);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"2D Merge:%u Glyph upload:%u", stats.merged2DDrawCalls,
+                FrameProfiler::CounterValue(Counter::GlyphUploads));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
     mu_swprintf(szLine, L"Skin GPU:%u CPU-ineligible:%u Failed:%u",
                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
@@ -1194,6 +1204,17 @@ static void LogFrameTiming()
 
     using Counter = FrameProfiler::Counter;
     using Pass = FrameProfiler::Pass;
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    std::fprintf(stderr,
+                 "[RENDER diag] requested=%u submitted=%u pipeline_binds=%u sampler_binds=%u "
+                 "vertex_uniform_pushes=%u fragment_uniform_pushes=%u merged_2d=%u "
+                 "glyph_uploads=%u skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u\n",
+                 stats.requestedDrawCalls, stats.submittedDrawCalls, stats.pipelineBinds, stats.samplerBinds,
+                 stats.vertexUniformPushes, stats.fragmentUniformPushes, stats.merged2DDrawCalls,
+                 FrameProfiler::CounterValue(Counter::GlyphUploads),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
     std::fprintf(stderr,
                  "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
                  "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms "

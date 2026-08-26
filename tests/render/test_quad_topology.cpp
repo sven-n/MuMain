@@ -12,6 +12,15 @@ static_assert(requires(mu::IMuRenderer& renderer, std::span<const mu::Vertex3D> 
     renderer.RenderQuad3D(vertices, 0u);
 });
 
+static_assert(requires(mu::RendererStats stats)
+{
+    stats.pipelineBinds;
+    stats.samplerBinds;
+    stats.vertexUniformPushes;
+    stats.fragmentUniformPushes;
+    stats.merged2DDrawCalls;
+});
+
 TEST_CASE("independent quads require four vertices [render][quad]")
 {
     CHECK(Render::Topology::IsValidQuadVertexCount(0));

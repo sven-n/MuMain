@@ -3,12 +3,17 @@
 How to build the MU client on each platform, with one file per setup (terminal,
 WSL, and the common IDEs). Pick the guide that matches your environment.
 
+Desktop rendering uses SDL GPU: Metal on macOS, Vulkan on Linux, D3D12 on
+Windows. The application policy is shared; see the
+[rendering parity guide](rendering-parity.md) for diagnostics and native
+verification requirements.
+
 ## Pick your setup
 
 ### Linux (native)
 
 A native Linux build produces a real, playable client: the engine plus the
-`linux-x64` network library, rendered through SDL/OpenGL.
+`linux-x64` network library, rendered through SDL GPU/Vulkan.
 
 | Setup | Guide |
 |-------|-------|
