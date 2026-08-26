@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.0...v1.1.1) (2026-08-26)
+
+### Bug Fixes
+
+* **ci:** publish explicit Release bundles ([de4e7ec](https://github.com/yesid-bocanegra/MuMain/commit/de4e7ececa154ef3e340fc0ae088e152874b80ac))
+* **runtime:** load network library beside executable ([2b36d87](https://github.com/yesid-bocanegra/MuMain/commit/2b36d870808a6292c14874a9a6a8be20e5195f94))
+
 ## [1.1.0](https://github.com/yesid-bocanegra/MuMain/compare/v1.0.0...v1.1.0) (2026-08-26)
 
 ### Features
