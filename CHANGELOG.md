@@ -1,3 +1,19 @@
+## [1.1.2](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.1...v1.1.2) (2026-08-26)
+
+### Bug Fixes
+
+* **render:** disable GPU validation in release ([617532e](https://github.com/yesid-bocanegra/MuMain/commit/617532e59120c098eccfa3b59499e3954cf85e67))
+* **render:** require GPU skinning resources ([e0e4a2a](https://github.com/yesid-bocanegra/MuMain/commit/e0e4a2ae2726d51464e2aa225ffde7d03f66494b))
+* **text:** resolve bundled fonts from runtime directory ([1a753d8](https://github.com/yesid-bocanegra/MuMain/commit/1a753d8deb9dd7f793771825c5f98e208368806f))
+* **text:** use bundled font roles ([7f49471](https://github.com/yesid-bocanegra/MuMain/commit/7f494710862d0f090861d91d0ef9f0c57e74ac46))
+
+### Performance
+
+* **render:** batch adjacent 2D draws ([04e0024](https://github.com/yesid-bocanegra/MuMain/commit/04e00247e94779f1d9b31453efefcb14e9b6f8d8))
+* **render:** cache repeated SDL GPU state ([aeaf084](https://github.com/yesid-bocanegra/MuMain/commit/aeaf084daab8d6abceaebd8967b8db8d28d8c689))
+* **text:** batch SDL_ttf glyph uploads ([9178a90](https://github.com/yesid-bocanegra/MuMain/commit/9178a902438ddf3416c106e76b829983c35b1652))
+* **text:** reuse prepared SDL_ttf text ([4021a12](https://github.com/yesid-bocanegra/MuMain/commit/4021a122260cfe9b5d00e686981e2fa94f0a947d))
+
 ## [1.1.1](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.0...v1.1.1) (2026-08-26)
 
 ### Bug Fixes
