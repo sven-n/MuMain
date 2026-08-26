@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <span>
+#include <string_view>
 
 // Story 4.4.1: Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
@@ -300,6 +301,10 @@ public:
     {
         return nullptr;
     }
+    [[nodiscard]] virtual bool ReloadTtfFonts(std::string_view /*fontFamily*/)
+    {
+        return false;
+    }
 
     // F-7 fix: Cached window height (updated per-frame in BeginFrame).
     [[nodiscard]] virtual int GetCachedWindowHeight()
@@ -418,7 +423,7 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow);
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily);
 void WaitForSDLGpuIdle();
 void ShutdownSDLGpuRenderer();
 

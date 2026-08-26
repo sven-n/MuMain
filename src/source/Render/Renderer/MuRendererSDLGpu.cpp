@@ -37,6 +37,7 @@
 #include "SdlGpuPixelFormat.h"
 #include "SdlGpuReplayState.h"
 #include "SdlGpuValidation.h"
+#include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #ifdef _EDITOR
@@ -845,39 +846,27 @@ static TTF_Font* s_ttfFontFixed = nullptr; // monospace
 static constexpr float k_DefaultFontPtSize = 14.0f;
 static constexpr float k_BigFontPtSize = 18.0f;
 
+#ifdef NDEBUG
+inline constexpr bool kAllowSystemFontFallback = false;
+#else
+inline constexpr bool kAllowSystemFontFallback = true;
+#endif
+
 // F-7 fix: Cached window dimensions, updated once per frame in BeginFrame().
 static int s_cachedWinW = 0;
 static int s_cachedWinH = 0;
 
-// Story 7.9.8 (AC-2): Discover a usable .ttf font file.
-// Searches game directory first (via SDL_GetBasePath), then system font paths.
-[[nodiscard]] static std::string FindFontPath()
+#if MU_HAS_SDL_TTF
+[[nodiscard]] static std::string BundledFontPath(const char* relativePath)
 {
-    // 1. Game-bundled font (preferred). Use SDL_GetBasePath() for exe-relative resolution
-    // instead of CWD-relative (F-6 fix).
-    std::filesystem::path gameFontDir;
     const char* basePath = SDL_GetBasePath();
-    if (basePath)
-    {
-        gameFontDir = std::filesystem::path(basePath) / "Data" / "Font";
-    }
-    else
-    {
-        gameFontDir = "Data/Font"; // fallback to CWD if SDL_GetBasePath fails
-    }
-    if (std::filesystem::exists(gameFontDir))
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(gameFontDir))
-        {
-            auto ext = entry.path().extension();
-            if (entry.is_regular_file() && (ext == ".ttf" || ext == ".otf" || ext == ".ttc"))
-            {
-                return entry.path().string();
-            }
-        }
-    }
+    const std::filesystem::path executableDir = basePath ? basePath : ".";
+    return (executableDir / relativePath).string();
+}
 
-    // 2. System font fallback (platform-specific).
+[[nodiscard]] static std::string FindDeveloperFontPath()
+{
+#ifndef NDEBUG
     static const char* const k_SystemFontPaths[] = {
 #ifdef __APPLE__
         "/System/Library/Fonts/Supplemental/Arial.ttf",
@@ -900,9 +889,97 @@ static int s_cachedWinH = 0;
             return path;
         }
     }
+#endif
 
     return {};
 }
+
+static void CloseTtfFont(TTF_Font*& font)
+{
+    if (!font)
+        return;
+    TTF_CloseFont(font);
+    font = nullptr;
+}
+
+[[nodiscard]] static TTF_Font* OpenTtfFontRole(std::string_view family, std::string_view role,
+                                               const char* relativePath, float pointSize)
+{
+    const std::string packagedPath = BundledFontPath(relativePath);
+    if (TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize))
+    {
+        mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role,
+                                      packagedPath);
+        return font;
+    }
+
+    mu::log::Get("render")->error("SDL_ttf -- bundled family='{}' role='{}' path='{}' failed: {}", family, role,
+                                   packagedPath, SDL_GetError());
+    if (!kAllowSystemFontFallback)
+        return nullptr;
+
+    const std::string fallbackPath = FindDeveloperFontPath();
+    if (fallbackPath.empty())
+        return nullptr;
+
+    mu::log::Get("render")->warn(
+        "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}'", family, role,
+        fallbackPath);
+    TTF_Font* fallback = TTF_OpenFont(fallbackPath.c_str(), pointSize);
+    if (!fallback)
+    {
+        mu::log::Get("render")->error(
+            "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}' failed: {}", family,
+            role, fallbackPath, SDL_GetError());
+    }
+    return fallback;
+}
+
+static void WarmTtfFonts()
+{
+    static constexpr const char* k_WarmupGlyphs =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
+    TTF_Font* fonts[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
+    for (TTF_Font* font : fonts)
+    {
+        TTF_Text* warmup = TTF_CreateText(s_textEngine, font, k_WarmupGlyphs, 0);
+        if (!warmup)
+            continue;
+        TTF_GetGPUTextDrawData(warmup);
+        TTF_DestroyText(warmup);
+    }
+}
+
+[[nodiscard]] static bool LoadTtfFonts(std::string_view configuredFamily)
+{
+    const BundledFont& family = ResolveBundledFont(configuredFamily);
+    TTF_Font* normal = OpenTtfFontRole(family.family, "normal", family.regular, k_DefaultFontPtSize);
+    TTF_Font* bold = OpenTtfFontRole(family.family, "bold", family.bold, k_DefaultFontPtSize);
+    TTF_Font* big = OpenTtfFontRole(family.family, "big-bold", family.bold, k_BigFontPtSize);
+    TTF_Font* fixed =
+        OpenTtfFontRole(kBundledFixedFont.family, "fixed", kBundledFixedFont.regular, k_DefaultFontPtSize);
+    if (!normal || !bold || !big || !fixed)
+    {
+        CloseTtfFont(fixed);
+        CloseTtfFont(big);
+        CloseTtfFont(bold);
+        CloseTtfFont(normal);
+        return false;
+    }
+
+    CloseTtfFont(s_ttfFontFixed);
+    CloseTtfFont(s_ttfFontBig);
+    CloseTtfFont(s_ttfFontBold);
+    CloseTtfFont(s_ttfFont);
+    s_ttfFont = normal;
+    s_ttfFontBold = bold;
+    s_ttfFontBig = big;
+    s_ttfFontFixed = fixed;
+    WarmTtfFonts();
+    return true;
+}
+#endif
 
 // ---------------------------------------------------------------------------
 // TextureRegistry: maps caller-provided uint32_t ids to SDL_GPUTexture*.
@@ -1186,7 +1263,7 @@ public:
     // Init: Create GPU device, claim window, initialize pipelines and buffers.
     // Called once after window creation, before the game loop.
     // -----------------------------------------------------------------------
-    [[nodiscard]] static bool Init(void* pNativeWindow)
+    [[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily)
     {
         s_window = static_cast<SDL_Window*>(pNativeWindow);
         if (!s_window)
@@ -1343,77 +1420,24 @@ public:
         }
 
 #if MU_HAS_SDL_TTF
-        // Story 7.9.8 (AC-2): Initialize SDL_ttf GPU text engine.
         if (!TTF_Init())
         {
-            mu::log::Get("render")->warn("SDL_ttf -- TTF_Init failed: {}", SDL_GetError());
-            // Non-fatal: renderer works, text won't render via SDL_ttf.
+            mu::log::Get("render")->error("SDL_ttf -- TTF_Init failed: {}", SDL_GetError());
+            Shutdown();
+            return false;
         }
-        else
+        s_textEngine = TTF_CreateGPUTextEngine(s_device);
+        if (!s_textEngine)
         {
-            s_textEngine = TTF_CreateGPUTextEngine(s_device);
-            if (!s_textEngine)
-            {
-                mu::log::Get("render")->warn("SDL_ttf -- TTF_CreateGPUTextEngine failed: {}", SDL_GetError());
-                TTF_Quit();
-            }
-            else
-            {
-                const std::string fontPath = FindFontPath();
-                if (fontPath.empty())
-                {
-                    mu::log::Get("render")->warn("SDL_ttf -- no .ttf font found (checked Data/Font/ and system paths)");
-                }
-                else
-                {
-                    s_ttfFont = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
-                    if (!s_ttfFont)
-                    {
-                        mu::log::Get("render")->warn("SDL_ttf -- TTF_OpenFont(\"{}\") failed: {}", fontPath,
-                                                     SDL_GetError());
-                    }
-                    else
-                    {
-                        mu::log::Get("render")->info("SDL_ttf -- loaded font \"{}\" at {:.0f} pt", fontPath,
-                                                     k_DefaultFontPtSize);
-
-                        // F-1 fix: Pre-load font variants for bold, big, and fixed-width text.
-                        // All variants use the same .ttf file at different sizes.
-                        // Known limitation (F-4): SDL_ttf 3.x doesn't support weight selection
-                        // from a single .ttf, so bold appears identical to normal. To fix,
-                        // bundle a separate bold .ttf (e.g., NotoSans-Bold.ttf) in a follow-up.
-                        s_ttfFontBold = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
-                        s_ttfFontBig = TTF_OpenFont(fontPath.c_str(), k_BigFontPtSize);
-                        s_ttfFontFixed = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
-                        // Log which variants loaded (non-fatal if some fail).
-                        if (!s_ttfFontBold || !s_ttfFontBig || !s_ttfFontFixed)
-                        {
-                            mu::log::Get("render")->warn(
-                                "SDL_ttf -- some font variants failed to load (bold={} big={} fixed={})",
-                                s_ttfFontBold != nullptr, s_ttfFontBig != nullptr, s_ttfFontFixed != nullptr);
-                        }
-
-                        // Story 7.9.8 (AC-STD-NFR-1): Warm up glyph atlas with common glyphs.
-                        // Forces FreeType rasterization + GPU atlas upload at init rather than
-                        // incurring a latency spike on the first frame that renders text.
-                        static constexpr const char* k_WarmupGlyphs =
-                            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-                            "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
-                        TTF_Font* fontsToWarm[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
-                        for (TTF_Font* f : fontsToWarm)
-                        {
-                            if (!f)
-                                continue;
-                            TTF_Text* warmup = TTF_CreateText(s_textEngine, f, k_WarmupGlyphs, 0);
-                            if (warmup)
-                            {
-                                TTF_GetGPUTextDrawData(warmup); // populate atlas; discard draw data
-                                TTF_DestroyText(warmup);
-                            }
-                        }
-                    }
-                }
-            }
+            mu::log::Get("render")->error("SDL_ttf -- TTF_CreateGPUTextEngine failed: {}", SDL_GetError());
+            TTF_Quit();
+            Shutdown();
+            return false;
+        }
+        if (!LoadTtfFonts(fontFamily))
+        {
+            Shutdown();
+            return false;
         }
 #endif
 
@@ -1440,26 +1464,10 @@ public:
 #if MU_HAS_SDL_TTF
         // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
         // Close font variants first, then default font, then engine.
-        if (s_ttfFontFixed)
-        {
-            TTF_CloseFont(s_ttfFontFixed);
-            s_ttfFontFixed = nullptr;
-        }
-        if (s_ttfFontBig)
-        {
-            TTF_CloseFont(s_ttfFontBig);
-            s_ttfFontBig = nullptr;
-        }
-        if (s_ttfFontBold)
-        {
-            TTF_CloseFont(s_ttfFontBold);
-            s_ttfFontBold = nullptr;
-        }
-        if (s_ttfFont)
-        {
-            TTF_CloseFont(s_ttfFont);
-            s_ttfFont = nullptr;
-        }
+        CloseTtfFont(s_ttfFontFixed);
+        CloseTtfFont(s_ttfFontBig);
+        CloseTtfFont(s_ttfFontBold);
+        CloseTtfFont(s_ttfFont);
         if (s_textEngine)
         {
             TTF_DestroyGPUTextEngine(s_textEngine);
@@ -2395,6 +2403,16 @@ public:
     [[nodiscard]] TTF_Font* GetTtfFontFixed() override
     {
         return s_ttfFontFixed ? s_ttfFontFixed : s_ttfFont;
+    }
+
+    [[nodiscard]] bool ReloadTtfFonts(std::string_view fontFamily) override
+    {
+#if MU_HAS_SDL_TTF
+        return s_textEngine && LoadTtfFonts(fontFamily);
+#else
+        (void)fontFamily;
+        return false;
+#endif
     }
 
     // F-7 fix: Cached window dimensions accessor (updated per-frame in BeginFrame).
@@ -4515,9 +4533,9 @@ private:
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow)
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily)
 {
-    return MuRendererSDLGpu::Init(pNativeWindow);
+    return MuRendererSDLGpu::Init(pNativeWindow, fontFamily);
 }
 
 void WaitForSDLGpuIdle()

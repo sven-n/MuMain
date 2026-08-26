@@ -12,12 +12,44 @@ file(MAKE_DIRECTORY
     "${asset_output}/fonts"
 )
 file(WRITE "${asset_source}/Data/Dec2.dat" "data")
-file(WRITE "${asset_source}/fonts/DejaVuSans.ttf" "font")
+foreach(font_file IN ITEMS
+    DejaVuSans.ttf
+    DejaVuSans-Bold.ttf
+    LiberationSans-Regular.ttf
+    LiberationSans-Bold.ttf
+    Cousine-Regular.ttf
+)
+    file(WRITE "${asset_source}/fonts/${font_file}" "font")
+endforeach()
 file(WRITE "${asset_source}/MuMainIcon.png" "icon")
 file(WRITE "${asset_source}/config.ini.template" "config")
 file(WRITE "${asset_source}/legacy.dll" "dll")
 file(WRITE "${asset_output}/Data/stale.dat" "stale")
 file(WRITE "${asset_output}/fonts/stale.ttf" "stale")
+
+execute_process(
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_ASSET_SOURCE=${asset_source}"
+        "-DMU_ASSET_OUTPUT=${asset_output}"
+        -DMU_COPY_RUNTIME_ASSETS=ON
+        -P "${CMAKE_CURRENT_LIST_DIR}/../cmake/CopyRuntimeAssets.cmake"
+    RESULT_VARIABLE copy_with_data_result
+)
+
+if(NOT copy_with_data_result EQUAL 0)
+    message(FATAL_ERROR "CopyRuntimeAssets with-data exited ${copy_with_data_result}")
+endif()
+foreach(required_file IN ITEMS
+    fonts/DejaVuSans.ttf
+    fonts/DejaVuSans-Bold.ttf
+    fonts/LiberationSans-Regular.ttf
+    fonts/LiberationSans-Bold.ttf
+    fonts/Cousine-Regular.ttf
+)
+    if(NOT EXISTS "${asset_output}/${required_file}")
+        message(FATAL_ERROR "missing copied runtime font: ${required_file}")
+    endif()
+endforeach()
 
 execute_process(
     COMMAND "${CMAKE_COMMAND}"
