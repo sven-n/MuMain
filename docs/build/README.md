@@ -45,8 +45,8 @@ buildable for them. See the per-platform notes when that work lands.
 | Windows | x86 | on / off | `MUnique.Client.Library.dll` (win-x86 AOT) | Full client |
 | Linux | x86 | - | none | Not supported (see below) |
 
-CI builds every supported row: see [windows-build.yml](../../.github/workflows/windows-build.yml)
-and [linux-build.yml](../../.github/workflows/linux-build.yml).
+Hosted Actions build only the primary Windows native x64 Release, editor-OFF
+runtime. Build every other supported row locally using the setup guides above.
 
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
@@ -65,6 +65,7 @@ These apply to every setup; the per-setup guides only cover what differs.
 | `CMAKE_BUILD_TYPE` | `Release` / `Debug` | Optimized vs. debuggable. |
 | `ENABLE_EDITOR` | `ON` / `OFF` | Builds the in-app ImGui editor (admin tooling). When `OFF`, nothing under `src/MuEditor/` is compiled in - enforced by the `editor_leak` test. |
 | `BUILD_TESTING` | `ON` / `OFF` | Builds and registers the unit tests (run with `ctest`). |
+| `MU_COPY_RUNTIME_ASSETS` | `ON` / `OFF` | Copies `Data/` and `fonts/` beside the executable. Defaults to `ON` for local runnable builds. |
 
 ### The network library
 
@@ -78,8 +79,8 @@ The build produces it automatically and copies it next to `Main`:
 - Windows target -> `MUnique.Client.Library.dll`
 
 Native AOT cannot cross-compile across OS boundaries: a Linux-hosted SDK cannot
-produce a Windows `.dll`, and vice versa. So a MinGW-on-Linux build (and CI)
-compiles and links the client but does **not** produce the `.dll`; build the
+produce a Windows `.dll`, and vice versa. A MinGW-on-Linux build compiles and
+links the client but does **not** produce the `.dll`; build the
 Windows client on Windows to get a connectable one.
 
 ### Output layout
@@ -97,16 +98,59 @@ library next to the executable, so the build output directory is runnable:
 
 Run the client from that directory so it finds its assets and the library.
 
-### CI bundles
+## Hosted releases
 
-CI publishes two runtime bundles for each platform and toolchain. Packaged
-artifact names include `release`:
+Actions publish two independent release streams:
 
-- The existing artifact name is the data bundle: the complete runtime directory.
-- The `-no-data` artifact is the normal redistributable runtime. It excludes
-  only `Data/` and `fonts/`; users must supply compatible copies before running
-  the client. The executable, shaders, configuration, network library when
-  supported, and platform runtime libraries remain included.
+- Semantic Release publishes
+  `MuMain-windows-native-x64-release-editor-off-no-data.tar.gz`. This is the
+  only hosted build: Windows native x64 Release, editor OFF.
+- The data workflow publishes `MuMain-data-<id>.tar.gz` and its
+  `.sha256` file under tag `data-<id>`. The identifier is derived from the Git
+  trees for `src/bin/Data/` and `src/bin/fonts/`, so unchanged data is reused
+  across code releases.
+
+Linux, macOS, Windows x86, Debug, and editor-ON configurations are not built by
+Actions; build locally when one is required.
+
+### Assemble a release
+
+Download the no-data runtime plus the desired `data-<id>` archive and checksum
+into one directory. On Linux, macOS, or Git Bash:
+
+```bash
+mkdir MuMain-runtime
+tar -xzf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C MuMain-runtime
+sha256sum --check MuMain-data-<id>.tar.gz.sha256
+tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
+```
+
+On PowerShell:
+
+```powershell
+New-Item -ItemType Directory MuMain-runtime
+tar -xzf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C MuMain-runtime
+$expected = (Get-Content MuMain-data-<id>.tar.gz.sha256).Split()[0].ToUpperInvariant()
+$actual = (Get-FileHash MuMain-data-<id>.tar.gz -Algorithm SHA256).Hash
+if ($actual -ne $expected) { throw "Data archive checksum mismatch." }
+tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
+```
+
+The assembled directory contains `Main.exe`, the network and runtime DLLs,
+configuration, shaders, `Data/`, and `fonts/`.
+
+### Build without copying data
+
+Local builds copy `Data/` and `fonts/` by default. Packaging or compile-only
+builds can skip them:
+
+```bash
+cmake --preset windows-x64 -DMU_COPY_RUNTIME_ASSETS=OFF
+cmake --build --preset windows-x64-release
+```
+
+Switching the option to `OFF` also removes stale `Data/` and `fonts/` from
+the selected build output.
 
 ## Reference
 

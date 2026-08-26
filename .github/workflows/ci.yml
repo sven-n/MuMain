@@ -3,6 +3,9 @@ name: CI
 on:
   push:
     branches: ['*']
+    paths-ignore:
+      - 'src/bin/Data/**'
+      - 'src/bin/fonts/**'
   pull_request:
     branches: [main]
 
@@ -11,7 +14,7 @@ concurrency:
   cancel-in-progress: ${{ github.ref != 'refs/heads/main' }}
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   quality:
@@ -114,78 +117,9 @@ jobs:
             --inline-suppr
 
   build-windows:
-    name: Windows Native Build (${{ matrix.architecture }}, ${{ matrix.configuration }}, editor ${{ matrix.editor }})
+    name: Windows Native Build (x64, Release, editor OFF)
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: windows-latest
-    permissions:
-      contents: read
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - architecture: x64
-            configuration: Debug
-            editor: 'OFF'
-            shader_compilation: 'OFF'
-            preset: windows-x64
-            triplet: x64-windows
-            build_directory: out/build/windows-ci-x64-debug
-            artifact_name: mu-client-windows-native-x64-debug-editor-off
-          - architecture: x64
-            configuration: Release
-            editor: 'OFF'
-            shader_compilation: 'ON'
-            preset: windows-x64
-            triplet: x64-windows
-            build_directory: out/build/windows-ci-x64-release
-            artifact_name: mu-client-windows-native-x64-release-editor-off
-          - architecture: x64
-            configuration: Debug
-            editor: 'ON'
-            shader_compilation: 'OFF'
-            preset: windows-x64-mueditor
-            triplet: x64-windows
-            build_directory: out/build/windows-ci-x64-editor-debug
-            artifact_name: mu-client-windows-native-x64-debug-editor-on
-          - architecture: x64
-            configuration: Release
-            editor: 'ON'
-            shader_compilation: 'OFF'
-            preset: windows-x64-mueditor
-            triplet: x64-windows
-            build_directory: out/build/windows-ci-x64-editor-release
-            artifact_name: mu-client-windows-native-x64-release-editor-on
-          - architecture: x86
-            configuration: Debug
-            editor: 'OFF'
-            shader_compilation: 'OFF'
-            preset: windows-x86
-            triplet: x86-windows
-            build_directory: out/build/windows-ci-x86-debug
-            artifact_name: mu-client-windows-native-x86-debug-editor-off
-          - architecture: x86
-            configuration: Release
-            editor: 'OFF'
-            shader_compilation: 'OFF'
-            preset: windows-x86
-            triplet: x86-windows
-            build_directory: out/build/windows-ci-x86-release
-            artifact_name: mu-client-windows-native-x86-release-editor-off
-          - architecture: x86
-            configuration: Debug
-            editor: 'ON'
-            shader_compilation: 'OFF'
-            preset: windows-x86-mueditor
-            triplet: x86-windows
-            build_directory: out/build/windows-ci-x86-editor-debug
-            artifact_name: mu-client-windows-native-x86-debug-editor-on
-          - architecture: x86
-            configuration: Release
-            editor: 'ON'
-            shader_compilation: 'OFF'
-            preset: windows-x86-mueditor
-            triplet: x86-windows
-            build_directory: out/build/windows-ci-x86-editor-release
-            artifact_name: mu-client-windows-native-x86-release-editor-on
 
     steps:
       - name: Checkout repository
@@ -199,7 +133,7 @@ jobs:
       - name: Activate Visual Studio developer environment
         uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756 # v1.13.0
         with:
-          arch: ${{ matrix.architecture == 'x86' && 'amd64_x86' || 'x64' }}
+          arch: x64
 
       - name: Assert MSVC developer environment
         shell: pwsh
@@ -208,7 +142,6 @@ jobs:
           $linker = (Get-Command link.exe -ErrorAction Stop).Source
           $compilerIdentity = (& $compiler /? 2>&1 | Out-String)
           $linkerIdentity = (& $linker /? 2>&1 | Out-String)
-          $targetIdentity = "for ${{ matrix.architecture }}"
 
           Write-Host "cl.exe:   $compiler"
           Write-Host "link.exe: $linker"
@@ -216,20 +149,22 @@ jobs:
           if ($compilerIdentity -notmatch 'Microsoft \(R\) C/C\+\+ Optimizing Compiler') {
             throw "cl.exe is not the Microsoft C/C++ compiler."
           }
-          if ($compilerIdentity -notmatch [regex]::Escape($targetIdentity)) {
-            throw "cl.exe does not target ${{ matrix.architecture }}."
+          if ($compilerIdentity -notmatch 'for x64') {
+            throw "cl.exe does not target x64."
           }
           if ($linkerIdentity -notmatch 'Microsoft \(R\) Incremental Linker') {
             throw "link.exe is not the Microsoft linker."
           }
           exit 0
 
-      - name: Cache FetchContent dependencies
+      - name: Cache FetchContent and NuGet dependencies
         uses: actions/cache@v4
         with:
-          path: ${{ matrix.build_directory }}/_deps
-          key: fetchcontent-windows-${{ matrix.architecture }}-${{ matrix.configuration }}-editor-${{ matrix.editor }}-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt') }}
-          restore-keys: fetchcontent-windows-${{ matrix.architecture }}-${{ matrix.configuration }}-editor-${{ matrix.editor }}-
+          path: |
+            out/build/windows-ci-x64-release/_deps
+            .nuget
+          key: windows-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: windows-x64-release-deps-
 
       - name: Cache vcpkg packages
         uses: actions/cache@v4
@@ -237,28 +172,30 @@ jobs:
           path: |
             C:/vcpkg/installed
             C:/vcpkg/packages
-          key: vcpkg-windows-${{ matrix.triplet }}-${{ hashFiles('vcpkg.json') }}
-          restore-keys: vcpkg-windows-${{ matrix.triplet }}-
+          key: vcpkg-windows-x64-${{ hashFiles('vcpkg.json') }}
+          restore-keys: vcpkg-windows-x64-
 
       - name: Configure CMake
         run: >
-          cmake --preset ${{ matrix.preset }}
-          -B ${{ matrix.build_directory }}
+          cmake --preset windows-x64
+          -B out/build/windows-ci-x64-release
           -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
-          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-${{ matrix.architecture }}.cmake
-          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+          -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${{ github.workspace }}/toolchain-x64.cmake
+          -DVCPKG_TARGET_TRIPLET=x64-windows
           -DVCPKG_INSTALLED_DIR=C:/vcpkg/installed
           -DVCPKG_MANIFEST_MODE=ON
-          -DMU_ENABLE_SHADER_COMPILATION=${{ matrix.shader_compilation }}
-          -DGLSLANG_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/glslang/glslangValidator.exe
-          -DSPIRV_CROSS_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/spirv-cross/spirv-cross.exe
-          -DDXC_EXE=C:/vcpkg/installed/${{ matrix.triplet }}/tools/directx-dxc/dxc.exe
+          -DENABLE_EDITOR=OFF
+          -DMU_ENABLE_SHADER_COMPILATION=ON
+          -DGLSLANG_EXE=C:/vcpkg/installed/x64-windows/tools/glslang/glslangValidator.exe
+          -DSPIRV_CROSS_EXE=C:/vcpkg/installed/x64-windows/tools/spirv-cross/spirv-cross.exe
+          -DDXC_EXE=C:/vcpkg/installed/x64-windows/tools/directx-dxc/dxc.exe
+          -DMU_COPY_RUNTIME_ASSETS=OFF
           -DBUILD_TESTING=ON
 
       - name: Assert configured MSVC compiler
         shell: pwsh
         run: |
-          $buildDirectory = "${{ matrix.build_directory }}"
+          $buildDirectory = "out/build/windows-ci-x64-release"
           $compilerStates = @(
             Get-ChildItem `
               -Path "$buildDirectory/CMakeFiles/*/CMakeCXXCompiler.cmake" `
@@ -296,20 +233,18 @@ jobs:
           }
 
       - name: Build
-        run: cmake --build ${{ matrix.build_directory }} --config ${{ matrix.configuration }}
+        run: cmake --build out/build/windows-ci-x64-release --config Release
 
       - name: Run tests
         run: >
-          ctest --test-dir ${{ matrix.build_directory }}
-          --build-config ${{ matrix.configuration }}
+          ctest --test-dir out/build/windows-ci-x64-release --build-config Release
           --output-on-failure
           --no-tests=error
 
       - name: Stage MSVC redistributable runtime
-        if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          $runtimeDirectory = "${{ matrix.build_directory }}/src/${{ matrix.configuration }}"
+          $runtimeDirectory = "out/build/windows-ci-x64-release/src/Release"
           if (-not (Test-Path -LiteralPath $runtimeDirectory -PathType Container)) {
             throw "Missing native runtime directory: $runtimeDirectory"
           }
@@ -317,10 +252,7 @@ jobs:
             throw "VCToolsRedistDir is missing from the active MSVC developer environment."
           }
 
-          $redistArchitectureDirectory = Join-Path $env:VCToolsRedistDir "${{ matrix.architecture }}"
-          if (-not (Test-Path -LiteralPath $redistArchitectureDirectory -PathType Container)) {
-            throw "Missing MSVC redistributable architecture directory: $redistArchitectureDirectory"
-          }
+          $redistArchitectureDirectory = Join-Path $env:VCToolsRedistDir "x64"
           $crtDirectories = @(
             Get-ChildItem -LiteralPath $redistArchitectureDirectory -Directory -Filter "Microsoft.VC*.CRT"
           )
@@ -328,70 +260,47 @@ jobs:
             throw "Expected one active Microsoft.VC*.CRT directory under $redistArchitectureDirectory; found $($crtDirectories.Count)."
           }
 
-          $crtDirectory = $crtDirectories[0]
           $crtDlls = @(
-            Get-ChildItem -LiteralPath $crtDirectory.FullName -File -Filter "*.dll" |
+            Get-ChildItem -LiteralPath $crtDirectories[0].FullName -File -Filter "*.dll" |
               Sort-Object Name
           )
           if ($crtDlls.Count -eq 0) {
-            throw "Active MSVC CRT directory contains no redistributable DLLs: $($crtDirectory.FullName)"
+            throw "Active MSVC CRT directory contains no redistributable DLLs."
           }
           Copy-Item -LiteralPath $crtDlls.FullName -Destination $runtimeDirectory -Force
-          Write-Host "Staged $($crtDlls.Count) MSVC CRT DLLs from $($crtDirectory.FullName)."
 
       - name: Validate artifacts
-        if: matrix.configuration == 'Release'
         shell: pwsh
         run: |
-          $runtimeDirectory = "${{ matrix.build_directory }}/src/${{ matrix.configuration }}"
+          $runtimeDirectory = "out/build/windows-ci-x64-release/src/Release"
           $requiredFiles = @(
             "$runtimeDirectory/Main.exe",
             "$runtimeDirectory/MUnique.Client.Library.dll",
-            "$runtimeDirectory/config.ini",
-            "$runtimeDirectory/Data/Dec2.dat",
-            "$runtimeDirectory/fonts/DejaVuSans.ttf"
+            "$runtimeDirectory/config.ini"
           )
-          $requiredDirectories = @(
-            "$runtimeDirectory/Data",
-            "$runtimeDirectory/shaders"
-          )
-
           foreach ($path in $requiredFiles) {
             if (-not (Test-Path -LiteralPath $path -PathType Leaf)) {
               throw "Missing required runtime file: $path"
             }
           }
-          foreach ($path in $requiredDirectories) {
-            if (-not (Test-Path -LiteralPath $path -PathType Container)) {
-              throw "Missing required runtime directory: $path"
+          if (-not (Test-Path -LiteralPath "$runtimeDirectory/shaders" -PathType Container)) {
+            throw "Missing required runtime directory: $runtimeDirectory/shaders"
+          }
+          foreach ($path in @("$runtimeDirectory/Data", "$runtimeDirectory/fonts")) {
+            if (Test-Path -LiteralPath $path) {
+              throw "Unexpected bundled game data: $path"
             }
           }
 
           $dumpbin = (Get-Command dumpbin.exe -ErrorAction Stop).Source
-          $expectedMachinePattern = switch ("${{ matrix.architecture }}") {
-            "x64" { '^\s*8664 machine \(x64\)\s*$' }
-            "x86" { '^\s*14C machine \(x86\)\s*$' }
-            default { throw "Unsupported native architecture: ${{ matrix.architecture }}" }
-          }
+          $expectedMachinePattern = '^\s*8664 machine \(x64\)\s*$' # 8664 machine (x64)
           if ([string]::IsNullOrWhiteSpace($env:WINDIR)) {
             throw "WINDIR is required for target Windows OS DLL validation."
           }
-          $targetSystemDirectory = switch ("${{ matrix.architecture }}") {
-            "x64" {
-              if ([Environment]::Is64BitProcess) {
-                Join-Path $env:WINDIR "System32"
-              } else {
-                Join-Path $env:WINDIR "Sysnative"
-              }
-            }
-            "x86" {
-              if ([Environment]::Is64BitOperatingSystem) {
-                Join-Path $env:WINDIR "SysWOW64"
-              } else {
-                Join-Path $env:WINDIR "System32"
-              }
-            }
-            default { throw "Unsupported native architecture: ${{ matrix.architecture }}" }
+          if ([Environment]::Is64BitProcess) {
+            $targetSystemDirectory = Join-Path $env:WINDIR "System32"
+          } else {
+            $targetSystemDirectory = Join-Path $env:WINDIR "Sysnative"
           }
           $windowsOsDlls = @(
             "advapi32.dll"
@@ -474,11 +383,9 @@ jobs:
             if ($LASTEXITCODE -ne 0) {
               throw "dumpbin /headers failed for $($binary.FullName) with exit code $LASTEXITCODE."
             }
-            $machineMatches = @(
-              $headers | Select-String -Pattern $expectedMachinePattern
-            )
+            $machineMatches = @($headers | Select-String -Pattern $expectedMachinePattern)
             if ($machineMatches.Count -ne 1) {
-              throw "Unexpected PE architecture for $($binary.FullName); expected ${{ matrix.architecture }}."
+              throw "Unexpected PE architecture for $($binary.FullName); expected x64."
             }
 
             $dependents = @(& $dumpbin /DEPENDENTS $binary.FullName 2>&1)
@@ -577,191 +484,22 @@ jobs:
             throw "Runtime shader manifest differs from the exact 18-file manifest."
           }
 
-          Write-Host "Validated native ${{ matrix.architecture }} runtime directory: $runtimeDirectory"
+          Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
 
-      - name: Upload artifact
-        if: github.event_name == 'push' && matrix.configuration == 'Release'
+      - name: Upload runtime artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.artifact_name }}-${{ github.ref_name }}
-          path: ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/
-          if-no-files-found: error
-
-      - name: Upload no-data artifact
-        if: github.event_name == 'push' && matrix.configuration == 'Release'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}
-          path: |
-            ${{ matrix.build_directory }}/src/${{ matrix.configuration }}/
-            !${{ matrix.build_directory }}/src/${{ matrix.configuration }}/Data/**
-            !${{ matrix.build_directory }}/src/${{ matrix.configuration }}/fonts/**
-          if-no-files-found: error
-
-  build-macos:
-    name: macOS Native Build
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
-
-      - name: Install build tools
-        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
-
-      - name: Cache SDL3 FetchContent
-        uses: actions/cache@v4
-        with:
-          path: out/build/macos-arm64/_deps
-          key: sdl3-macos-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt') }}
-          restore-keys: sdl3-macos-
-
-      - name: Configure CMake
-        run: cmake --preset macos-arm64 -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
-
-      - name: Build
-        run: cmake --build out/build/macos-arm64 --config Release
-
-      - name: Run tests
-        run: ctest --test-dir out/build/macos-arm64 --build-config Release --output-on-failure
-
-      - name: Validate artifacts
-        run: |
-          EXE_DIR="out/build/macos-arm64/src/Release/Main.app/Contents/MacOS"
-          FAIL=0
-          for f in \
-            "$EXE_DIR/Main" \
-            "$EXE_DIR/MUnique.Client.Library.dylib" \
-            "$EXE_DIR/config.ini" \
-            "$EXE_DIR/shaders"
-          do
-            if [ -e "$f" ]; then
-              echo "OK:      $f"
-            else
-              echo "MISSING: $f"
-              FAIL=1
-            fi
-          done
-          exit $FAIL
-
-      - name: Upload artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: main-macos-arm64-release-${{ github.ref_name }}
-          path: out/build/macos-arm64/src/Release/Main.app/
-          if-no-files-found: error
-
-      - name: Upload no-data artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: main-macos-arm64-release-no-data-${{ github.ref_name }}
-          path: |
-            out/build/macos-arm64/src/Release/Main.app/
-            !out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/Data/**
-            !out/build/macos-arm64/src/Release/Main.app/Contents/MacOS/fonts/**
-          if-no-files-found: error
-
-  build-linux:
-    name: Linux Native Build (editor ${{ matrix.editor }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - editor: 'OFF'
-            build_directory: out/build/linux-ci-editor-off
-            artifact_name: mu-client-linux-native-x64-release-editor-off
-          - editor: 'ON'
-            build_directory: out/build/linux-ci-editor-on
-            artifact_name: mu-client-linux-native-x64-release-editor-on
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Install build tools
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y \
-            cmake ninja-build gcc g++ \
-            libgl1-mesa-dev libglu1-mesa-dev \
-            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
-            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
-            libwayland-dev libxkbcommon-dev wayland-protocols \
-            libasound2-dev libpulse-dev \
-            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
-            glslang-tools spirv-cross \
-            pkg-config
-
-      - name: Cache SDL3 FetchContent
-        uses: actions/cache@v4
-        with:
-          path: ${{ matrix.build_directory }}/_deps
-          key: sdl3-linux-editor-${{ matrix.editor }}-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt') }}
-          restore-keys: sdl3-linux-editor-${{ matrix.editor }}-
-
-      - name: Configure CMake
-        run: >
-          cmake --preset linux-x64
-          -B ${{ matrix.build_directory }}
-          -DENABLE_EDITOR=${{ matrix.editor }}
-          -DBUILD_TESTING=ON
-
-      - name: Build
-        run: cmake --build ${{ matrix.build_directory }} --config Release
-
-      - name: Run tests
-        run: ctest --test-dir ${{ matrix.build_directory }} --build-config Release --output-on-failure --no-tests=error
-
-      - name: Validate artifacts
-        run: |
-          EXE_DIR="${{ matrix.build_directory }}/src/Release"
-          FAIL=0
-          for f in \
-            "$EXE_DIR/Main" \
-            "$EXE_DIR/config.ini" \
-            "$EXE_DIR/shaders"
-          do
-            if [ -e "$f" ]; then
-              echo "OK:      $f"
-            else
-              echo "MISSING: $f"
-              FAIL=1
-            fi
-          done
-          exit $FAIL
-
-      - name: Upload artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact_name }}-${{ github.ref_name }}
-          path: ${{ matrix.build_directory }}/src/Release/
-          if-no-files-found: error
-
-      - name: Upload no-data artifact
-        if: github.event_name == 'push'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.artifact_name }}-no-data-${{ github.ref_name }}
-          path: |
-            ${{ matrix.build_directory }}/src/Release/
-            !${{ matrix.build_directory }}/src/Release/Data/**
-            !${{ matrix.build_directory }}/src/Release/fonts/**
+          name: mu-client-windows-native-x64-release-editor-off-no-data-main
+          path: out/build/windows-ci-x64-release/src/Release/
           if-no-files-found: error
 
   release:
     name: Semantic Release
-    needs: [quality, build-windows, build-macos, build-linux]
+    needs: [quality, build-windows]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout repository
@@ -775,23 +513,14 @@ jobs:
         with:
           node-version: 22
 
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: mu-client-windows-native-x64-release-editor-off-main
-          path: artifacts/data
-
-      - name: Download no-data build artifact
+      - name: Download runtime artifact
         uses: actions/download-artifact@v4
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main
-          path: artifacts/no-data
+          path: artifacts/runtime
 
-      - name: Archive native Windows runtime
-        run: tar -czf MuMain-windows-native-x64-release-editor-off.tar.gz -C artifacts/data .
-
-      - name: Archive no-data Windows runtime
-        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C artifacts/no-data .
+      - name: Archive Windows runtime
+        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C artifacts/runtime .
 
       - name: Semantic Release
         uses: cycjimmy/semantic-release-action@v4

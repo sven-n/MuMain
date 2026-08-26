@@ -1,6 +1,5 @@
 # MU Online Client Sources
 
-[![MinGW Build](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml/badge.svg?branch=main)](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sven-n/MuMain)
 
 This is my special fork of the Season 5.2 client sources [uploaded by Luois](https://github.com/LouisEmulator/Main5.2).
@@ -61,6 +60,18 @@ What I have done so far:
 
 What needs to be done for Season 6:
   * Lucky Items
+
+## Release downloads
+
+GitHub Actions publishes one client runtime: Windows native x64 Release,
+editor OFF. The runtime excludes `Data/` and `fonts/`; download the
+separate data release tagged `data-<id>` and extract both archives into the
+same directory.
+
+Linux, macOS, x86, Debug, and editor builds remain supported where listed
+below, but are not hosted artifacts. Whoever needs one must build locally.
+See the [build guide](docs/build/README.md#hosted-releases) for checksum and
+assembly commands.
 
 ## How to build & run
 

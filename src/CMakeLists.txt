@@ -264,15 +264,22 @@ endif()
 
 # Copy assets directory next to executable. Platform-agnostic: any build
 # that produces the Main executable needs the assets alongside it.
-# The custom command's stamp file depends on every file under
-# ${ASSETS_DIR}, so the copy only runs when at least one asset is newer
-# than the stamp -- unchanged builds skip the copy entirely, edited
-# assets re-trigger it. CONFIGURE_DEPENDS makes CMake re-evaluate the
-# glob at build time so newly-added asset files are picked up without a
-# manual reconfigure.
+# The custom command's stamp file depends on the selected files under
+# ${ASSETS_DIR}, so unchanged builds skip the copy. CONFIGURE_DEPENDS
+# makes CMake re-evaluate the glob at build time when files are added.
 set(ASSETS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 message(STATUS "=== DEBUG: Assets directory: ${ASSETS_DIR}")
-file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/*")
+option(MU_COPY_RUNTIME_ASSETS "Copy Data and fonts beside Main" ON)
+if(MU_COPY_RUNTIME_ASSETS)
+  set(ASSETS_MODE "with-data")
+  file(GLOB_RECURSE ASSET_FILES CONFIGURE_DEPENDS "${ASSETS_DIR}/*")
+else()
+  set(ASSETS_MODE "no-data")
+  file(GLOB ASSET_FILES LIST_DIRECTORIES FALSE CONFIGURE_DEPENDS "${ASSETS_DIR}/*")
+endif()
+message(STATUS "=== DEBUG: Runtime asset mode: ${ASSETS_MODE}")
+set(ASSETS_MODE_FILE "${CMAKE_CURRENT_BINARY_DIR}/.assets_mode")
+file(GENERATE OUTPUT "${ASSETS_MODE_FILE}" CONTENT "${ASSETS_MODE}\n")
 # $<CONFIG> in the stamp name keeps multi-config generators (Visual
 # Studio, Xcode) honest: each configuration's output directory needs
 # its own stamp, otherwise switching from Debug to Release would see
@@ -284,9 +291,10 @@ add_custom_command(
   COMMAND "${CMAKE_COMMAND}"
           "-DMU_ASSET_SOURCE=${ASSETS_DIR}"
           "-DMU_ASSET_OUTPUT=$<TARGET_FILE_DIR:Main>"
+          "-DMU_COPY_RUNTIME_ASSETS=${MU_COPY_RUNTIME_ASSETS}"
           "-P" "${REPO_ROOT}/cmake/CopyRuntimeAssets.cmake"
   COMMAND ${CMAKE_COMMAND} -E touch "${ASSETS_STAMP}"
-  DEPENDS ${ASSET_FILES}
+  DEPENDS ${ASSET_FILES} "${ASSETS_MODE_FILE}"
   COMMENT "Copying game assets (sources changed)"
   VERBATIM
 )
