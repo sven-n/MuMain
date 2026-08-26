@@ -6,8 +6,8 @@ foreach(required_text IN ITEMS
     "Bind Pipe:%u Samp:%u VU:%u FU:%u"
     "2D Merge:%u Glyph upload:%u"
     "Skin GPU:%u CPU-ineligible:%u Failed:%u"
-    "[RENDER diag] requested=%u submitted=%u pipeline_binds=%u sampler_binds=%u"
-    "glyph_uploads=%u skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u"
+    "[RENDER diag] requested={} submitted={} pipeline_binds={} sampler_binds={}"
+    "glyph_uploads={} skin_gpu={} skin_cpu_ineligible={} skin_failed={}"
 )
     string(FIND "${scene_source}" "${required_text}" position)
     if(position EQUAL -1)

@@ -22,6 +22,22 @@ mu_add_test(
 
 if(DOTNET_EXECUTABLE)
     add_test(
+        NAME login_diagnostics_contract
+        COMMAND "${CMAKE_COMMAND}"
+            "-DMU_LOGIN_SOURCE=${CMAKE_SOURCE_DIR}/ClientLibrary/ConnectionManager.ClientToServer.Custom.cs"
+            -P "${CMAKE_CURRENT_SOURCE_DIR}/test_login_diagnostics.cmake"
+    )
+
+    add_test(
+        NAME managed_log_callback
+        COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
+            "${DOTNET_EXECUTABLE}" run
+            --project ${CMAKE_CURRENT_SOURCE_DIR}/managed_log_self_check/ManagedLogSelfCheck.csproj
+            --configuration Release
+    )
+    set_tests_properties(managed_log_callback PROPERTIES TIMEOUT 30)
+
+    add_test(
         NAME outbound_flush_loop
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
             "${DOTNET_EXECUTABLE}" run

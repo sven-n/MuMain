@@ -23,6 +23,15 @@ inline SendLoginFn dotnet_SendLogin =
 void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, const wchar_t* password,
                                                       const BYTE* clientVersion, const BYTE* clientSerial)
 {
+    if (!dotnet_SendLogin)
+    {
+        dotnet_SendLogin = LoadManagedSymbol<SendLoginFn>("ConnectionManager_SendLogin");
+        if (!dotnet_SendLogin)
+        {
+            return;
+        }
+    }
+
     // .NET expects UTF-16 (char16_t). On macOS, wchar_t is 4 bytes (UTF-32) — MU_C16 converts.
     dotnet_SendLogin(this->GetHandle(), MU_C16(username), MU_C16(password), GetTickCount(), clientVersion, clientSerial);
 }

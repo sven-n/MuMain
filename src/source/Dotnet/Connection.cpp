@@ -42,6 +42,42 @@ const mu::platform::LibraryHandle munique_client_library_handle =
 // Uses a template helper to avoid repeating the pattern for all ~200 bindings.
 namespace
 {
+enum class ManagedLogLevel : BYTE
+{
+    Debug,
+    Info,
+    Warning,
+    Error,
+    Critical,
+};
+
+void CORECLR_DELEGATE_CALLTYPE WriteManagedLog(BYTE level, const char* message)
+{
+    const auto logger = mu::log::Get("dotnet");
+    const char* safeMessage = message != nullptr ? message : "<null managed log message>";
+    switch (static_cast<ManagedLogLevel>(level))
+    {
+    case ManagedLogLevel::Debug:
+        logger->debug("{}", safeMessage);
+        break;
+    case ManagedLogLevel::Info:
+        logger->info("{}", safeMessage);
+        break;
+    case ManagedLogLevel::Warning:
+        logger->warn("{}", safeMessage);
+        break;
+    case ManagedLogLevel::Error:
+        logger->error("{}", safeMessage);
+        break;
+    case ManagedLogLevel::Critical:
+        logger->critical("{}", safeMessage);
+        break;
+    }
+}
+
+using ManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(BYTE, const char*);
+using SetManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(ManagedLogCallback);
+
 template <typename FnPtr>
 void ReResolve(FnPtr& var, const char* name)
 {
@@ -57,8 +93,14 @@ void ResolvePacketBindings()
     if (!munique_client_library_handle)
     {
         mu::log::Get("dotnet")->error("NET: ResolvePacketBindings -- library not loaded, skipping");
-        g_ErrorReport.Write(L"NET: ResolvePacketBindings -- library not loaded, skipping\r\n");
         return;
+    }
+
+    const auto setManagedLogCallback =
+        LoadManagedSymbol<SetManagedLogCallback>("ConnectionManager_SetLogCallback");
+    if (setManagedLogCallback != nullptr)
+    {
+        setManagedLogCallback(&WriteManagedLog);
     }
 
     // ConnectServer
@@ -277,8 +319,6 @@ void ResolvePacketBindings()
 
     mu::log::Get("dotnet")->info("NET: ResolvePacketBindings done (SendServerListRequest={})",
                                 dotnet_SendServerListRequest ? "resolved" : "NULL");
-    g_ErrorReport.Write(L"NET: ResolvePacketBindings done (SendServerListRequest=%hs)\r\n",
-                        dotnet_SendServerListRequest ? "resolved" : "NULL");
 }
 
 std::map<int32_t, Connection*> connections;
@@ -496,13 +536,11 @@ void Connection::OnDisconnected()
 
 void Connection::OnPacketReceived(const BYTE* data, const int32_t size)
 {
-    // Diagnostic: log first packet to confirm .NET→C++ callback path is working.
-    static bool s_firstPacketLogged = false;
-    if (!s_firstPacketLogged)
+    if (!this->_firstPacketLogged)
     {
         mu::log::Get("dotnet")->info("NET: First packet received -- handle={} size={} (callback path working)",
                                     this->_handle, size);
-        s_firstPacketLogged = true;
+        this->_firstPacketLogged = true;
     }
     this->_packetHandler(this->_handle, data, size);
 }

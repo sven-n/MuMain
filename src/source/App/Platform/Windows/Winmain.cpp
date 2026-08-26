@@ -1702,7 +1702,6 @@ static void InitializeWorkingDirectoryAndLog()
 {
     SetWorkingDirectoryToBasePath();
     mu::log::Init();
-    g_ErrorReport.Create(L"MuError.log");
 }
 
 #ifdef _WIN32

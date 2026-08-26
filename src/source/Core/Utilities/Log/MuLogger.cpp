@@ -9,7 +9,6 @@
 
 #include <spdlog/sinks/dist_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 
 namespace mu::log
 {
@@ -46,7 +45,6 @@ std::shared_ptr<spdlog::logger> CreateLogger(LoggerState& state, const std::stri
 void ConfigureSinks(LoggerState& state, const std::filesystem::path& directory)
 {
     std::vector<spdlog::sink_ptr> sinks;
-    sinks.push_back(std::make_shared<spdlog::sinks::stdout_color_sink_mt>());
     sinks.push_back(std::make_shared<spdlog::sinks::rotating_file_sink_mt>((directory / "MuError.log").string(),
                                                                            5 * 1024 * 1024, 3));
     state.sink->flush();

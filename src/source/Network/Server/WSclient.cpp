@@ -549,6 +549,7 @@ void ReceiveServerConnectBusy(const BYTE* ReceiveBuffer)
 void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 {
     auto Data2 = (LPPRECEIVE_JOIN_SERVER)ReceiveBuffer;
+    mu::log::Get("network")->info("NET: Login response result=0x{:02X}", Data2->Result);
 
     if (LogIn != 0)
     {
@@ -14977,8 +14978,15 @@ void ProcessPacketCallback(const PacketInfo* Packet)
         SuppressOptionalPresentation = Packet->SuppressOptionalPresentation;
         ProcessPacket(Packet->ReceiveBuffer.get(), Packet->Size);
     }
-    catch (const std::exception&)
+    catch (const std::exception& exception)
     {
+        mu::log::Get("network")->error("NET: Packet processing failed, handle={}, bytes={}: {}",
+                                       Packet->ConnectionHandle, Packet->Size, exception.what());
+    }
+    catch (...)
+    {
+        mu::log::Get("network")->error("NET: Packet processing failed, handle={}, bytes={}: unknown exception",
+                                       Packet->ConnectionHandle, Packet->Size);
     }
 }
 

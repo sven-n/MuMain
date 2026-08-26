@@ -6,6 +6,7 @@
 #include "turbojpeg.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Core/Platform/PathResolve.h"
+#include "Core/Utilities/Log/MuLogger.h"
 
 #include <SDL3/SDL_gpu.h>
 #include "Render/Renderer/MuRenderer.h"
@@ -558,8 +559,9 @@ bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename
             }
             else
             {
-                g_ErrorReport.Write(L"File not found %ls (%d)->%ls\r\n", pBitmap->FileName, uiBitmapIndex,
-                                    filename.c_str());
+                mu::log::Get("render")->debug("SDL_gpu -- bitmap id {} replaced: {} -> {}", uiBitmapIndex,
+                                              mu_wchar_to_utf8(pBitmap->FileName),
+                                              mu_wchar_to_utf8(filename.c_str()));
                 UnloadImage(uiBitmapIndex, true);
             }
         }
@@ -780,7 +782,8 @@ bool CGlobalBitmap::OpenJpegTurbo(GLuint uiBitmapIndex, const std::wstring& file
     std::ifstream compressedFile(NarrowPath(filename_ozj), std::ios::binary);
     if (!compressedFile)
     {
-        g_ErrorReport.Write(L"OpenJpegTurbo: file not found %ls\r\n", filename_ozj.c_str());
+        mu::log::Get("render")->debug("OpenJpegTurbo -- file not found: {}",
+                                      mu_wchar_to_utf8(filename_ozj.c_str()));
         return false;
     }
 
@@ -894,7 +897,7 @@ bool CGlobalBitmap::OpenTga(GLuint uiBitmapIndex, const std::wstring& filename, 
     std::ifstream input(NarrowPath(filename_ozt), std::ios::binary);
     if (!input)
     {
-        g_ErrorReport.Write(L"OpenTga: file not found %ls\r\n", filename_ozt.c_str());
+        mu::log::Get("render")->debug("OpenTga -- file not found: {}", mu_wchar_to_utf8(filename_ozt.c_str()));
         return false;
     }
 

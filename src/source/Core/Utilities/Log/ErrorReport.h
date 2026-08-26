@@ -1,7 +1,5 @@
 #pragma once
 
-#include <filesystem>
-#include <fstream>
 #include <cstdint>
 
 #define MAX_LENGTH_CPUNAME	( 128)
@@ -22,21 +20,9 @@ typedef struct
 class CErrorReport
 {
 public:
-    CErrorReport();
-    virtual ~CErrorReport();
+    CErrorReport() = default;
+    virtual ~CErrorReport() = default;
 
-    void Clear(void);
-
-protected:
-    std::ofstream m_fileStream;
-    std::filesystem::path m_filePath;
-    int m_iKey;
-public:
-    void Create(const wchar_t* lpszFileName);
-    void Destroy(void);
-protected:
-    void CutHead(void);
-public:
     void WriteDebugInfoStr(wchar_t* lpszToWrite);
     void Write(const wchar_t* lpszFormat, ...);
     void HexWrite(void* pBuffer, int iSize);

@@ -9,6 +9,7 @@
 #include <numeric>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
 
 //=============================================================================
@@ -1205,28 +1206,28 @@ static void LogFrameTiming()
     using Counter = FrameProfiler::Counter;
     using Pass = FrameProfiler::Pass;
     const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
-    std::fprintf(stderr,
-                 "[RENDER diag] requested=%u submitted=%u pipeline_binds=%u sampler_binds=%u "
-                 "vertex_uniform_pushes=%u fragment_uniform_pushes=%u merged_2d=%u "
-                 "glyph_uploads=%u skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u\n",
-                 stats.requestedDrawCalls, stats.submittedDrawCalls, stats.pipelineBinds, stats.samplerBinds,
-                 stats.vertexUniformPushes, stats.fragmentUniformPushes, stats.merged2DDrawCalls,
-                 FrameProfiler::CounterValue(Counter::GlyphUploads),
-                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
-                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
-                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
-    std::fprintf(stderr,
-                 "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
-                 "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms "
-                 "skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u\n",
-                 FrameProfiler::AccumulatorMs(Pass::Terrain), FrameProfiler::AccumulatorMs(Pass::Objects),
-                 FrameProfiler::AccumulatorMs(Pass::Characters), FrameProfiler::AccumulatorMs(Pass::Items),
-                 FrameProfiler::AccumulatorMs(Pass::Effects), FrameProfiler::AccumulatorMs(Pass::Other),
-                 FrameProfiler::AccumulatorMs(Pass::Sprites), FrameProfiler::AccumulatorMs(Pass::Particles),
-                 FrameProfiler::AccumulatorMs(Pass::Joints),
-                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
-                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
-                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    const auto logger = mu::log::Get("render");
+    logger->info(
+        "[RENDER diag] requested={} submitted={} pipeline_binds={} sampler_binds={} vertex_uniform_pushes={} "
+        "fragment_uniform_pushes={} merged_2d={} glyph_uploads={} skin_gpu={} skin_cpu_ineligible={} skin_failed={}",
+        stats.requestedDrawCalls, stats.submittedDrawCalls, stats.pipelineBinds, stats.samplerBinds,
+        stats.vertexUniformPushes, stats.fragmentUniformPushes, stats.merged2DDrawCalls,
+        FrameProfiler::CounterValue(Counter::GlyphUploads),
+        FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+        FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+        FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    logger->info(
+        "[FRAME timing] terrain={:.2f}ms objects={:.2f}ms characters={:.2f}ms items={:.2f}ms "
+        "effects={:.2f}ms other={:.2f}ms sprites={:.2f}ms particles={:.2f}ms joints={:.2f}ms "
+        "skin_gpu={} skin_cpu_ineligible={} skin_failed={}",
+        FrameProfiler::AccumulatorMs(Pass::Terrain), FrameProfiler::AccumulatorMs(Pass::Objects),
+        FrameProfiler::AccumulatorMs(Pass::Characters), FrameProfiler::AccumulatorMs(Pass::Items),
+        FrameProfiler::AccumulatorMs(Pass::Effects), FrameProfiler::AccumulatorMs(Pass::Other),
+        FrameProfiler::AccumulatorMs(Pass::Sprites), FrameProfiler::AccumulatorMs(Pass::Particles),
+        FrameProfiler::AccumulatorMs(Pass::Joints),
+        FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+        FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+        FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
 }
 
 /**

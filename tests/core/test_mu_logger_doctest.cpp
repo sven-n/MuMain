@@ -3,6 +3,13 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <cstdio>
+
+#ifdef _WIN32
+#include <io.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "Core/Platform/WinCompat.h"
 #include "Core/Platform/SecureCrt.h"
@@ -24,6 +31,57 @@ std::string ReadFile(const std::filesystem::path& path)
     std::ifstream file(path);
     return std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
 }
+
+class StdoutCapture
+{
+public:
+    StdoutCapture()
+        : m_capture(std::tmpfile())
+    {
+        REQUIRE(m_capture != nullptr);
+        std::fflush(stdout);
+#ifdef _WIN32
+        m_stdoutCopy = _dup(_fileno(stdout));
+        REQUIRE(m_stdoutCopy != -1);
+        REQUIRE(_dup2(_fileno(m_capture), _fileno(stdout)) == 0);
+#else
+        m_stdoutCopy = dup(fileno(stdout));
+        REQUIRE(m_stdoutCopy != -1);
+        REQUIRE(dup2(fileno(m_capture), fileno(stdout)) != -1);
+#endif
+    }
+
+    ~StdoutCapture()
+    {
+        std::fflush(stdout);
+#ifdef _WIN32
+        _dup2(m_stdoutCopy, _fileno(stdout));
+        _close(m_stdoutCopy);
+#else
+        dup2(m_stdoutCopy, fileno(stdout));
+        close(m_stdoutCopy);
+#endif
+        std::fclose(m_capture);
+    }
+
+    std::string Read() const
+    {
+        std::fflush(stdout);
+        std::fseek(m_capture, 0, SEEK_END);
+        const long size = std::ftell(m_capture);
+        std::rewind(m_capture);
+        std::string output(static_cast<std::size_t>(size), '\0');
+        if (!output.empty())
+        {
+            std::fread(output.data(), 1, output.size(), m_capture);
+        }
+        return output;
+    }
+
+private:
+    FILE* m_capture = nullptr;
+    int m_stdoutCopy = -1;
+};
 } // namespace
 
 TEST_CASE("early logger adopts explicit log directory")
@@ -73,4 +131,26 @@ TEST_CASE("logger shutdown allows explicit reinitialization")
     CHECK(logContents.find("mu logger reinit self-check") != std::string::npos);
     std::filesystem::remove_all(firstDirectory);
     std::filesystem::remove_all(secondDirectory);
+}
+
+TEST_CASE("logger writes to MuError.log without console output")
+{
+    const auto directory = TestDirectory("mu_logger_file_only");
+    std::filesystem::remove_all(directory);
+
+    std::string consoleOutput;
+    {
+        StdoutCapture capture;
+        mu::log::Init(directory);
+        const auto logger = mu::log::Get("core");
+        MU_LOG_ERROR(logger, "file-only logger self-check");
+        logger->flush();
+        mu::log::Shutdown();
+        consoleOutput = capture.Read();
+    }
+
+    const std::string logContents = ReadFile(directory / "MuError.log");
+    CHECK(logContents.find("file-only logger self-check") != std::string::npos);
+    CHECK(consoleOutput.empty());
+    std::filesystem::remove_all(directory);
 }

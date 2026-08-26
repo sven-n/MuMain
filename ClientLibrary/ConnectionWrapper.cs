@@ -7,7 +7,6 @@ namespace MUnique.Client.Library;
 using System;
 using System.Buffers;
 using System.Diagnostics;
-using System.IO;
 using System.IO.Pipelines;
 using System.Threading;
 using System.Threading.Tasks;
@@ -101,7 +100,7 @@ public sealed class ConnectionWrapper : IDisposable
     {
         if (this._isDisposed || Volatile.Read(ref this._isDisconnecting) != 0)
         {
-            Console.Error.WriteLine($"[NET] Send called on disposed connection handle={this._handle}");
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Send called on disposed connection handle={this._handle}");
             return;
         }
 
@@ -124,7 +123,7 @@ public sealed class ConnectionWrapper : IDisposable
     {
         if (this._isDisposed || Volatile.Read(ref this._isDisconnecting) != 0)
         {
-            Console.Error.WriteLine($"[NET] CreateAndSend called on disposed connection handle={this._handle}");
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: CreateAndSend called on disposed connection handle={this._handle}");
             return;
         }
 
@@ -168,12 +167,14 @@ public sealed class ConnectionWrapper : IDisposable
         }
 
         Volatile.Write(ref this._lastOutboundDiagnosticTimestamp, now);
-        Console.Error.WriteLine($"[OutboundFlush] handle={this._handle} lock={lockElapsed.TotalMilliseconds:F1}ms flush={flushElapsed.TotalMilliseconds:F1}ms");
+        ManagedLog.Write(
+            ManagedLog.Level.Info,
+            $"NET: Outbound flush handle={this._handle} lock={lockElapsed.TotalMilliseconds:F1}ms flush={flushElapsed.TotalMilliseconds:F1}ms");
     }
 
     private void OnSendFailed(Exception exception)
     {
-        Console.Error.WriteLine($"[NET] Send failed, handle={this._handle}: {exception}");
+        ManagedLog.Write(ManagedLog.Level.Error, $"NET: Send failed, handle={this._handle}: {exception}");
         this.DisconnectAndDispose();
     }
 
@@ -206,6 +207,7 @@ public sealed class ConnectionWrapper : IDisposable
         catch (Exception ex)
         {
             Debug.WriteLine(ex);
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Shutdown failed, handle={this._handle}: {ex}");
         }
         finally
         {
@@ -217,26 +219,24 @@ public sealed class ConnectionWrapper : IDisposable
     {
         try
         {
-            await this.WriteNetworkDiagnosticAsync($"Receive loop started, handle={this._handle}").ConfigureAwait(false);
+            this.WriteNetworkDiagnostic($"Receive loop started, handle={this._handle}");
             await this._connection.BeginReceiveAsync().ConfigureAwait(false);
-            await this.WriteNetworkDiagnosticAsync($"Receive loop ended, handle={this._handle}; remote peer closed the connection").ConfigureAwait(false);
+            this.WriteNetworkDiagnostic($"Receive loop ended, handle={this._handle}; remote peer closed the connection");
         }
         catch (Exception ex)
         {
-            await this.WriteNetworkDiagnosticAsync($"Receive loop failed, handle={this._handle}: {ex}").ConfigureAwait(false);
+            this.WriteNetworkDiagnostic($"Receive loop failed, handle={this._handle}: {ex}");
         }
     }
 
-    private async Task WriteNetworkDiagnosticAsync(string message)
+    private void WriteNetworkDiagnostic(string message)
     {
         if (!this._networkDiagnosticsEnabled)
         {
             return;
         }
 
-        var logLine = $"{DateTimeOffset.Now:O} [NET] {message}{Environment.NewLine}";
-        await File.AppendAllTextAsync(Path.Combine(Path.GetTempPath(), "MuNetwork.log"), logLine).ConfigureAwait(false);
-        await Console.Error.WriteAsync(logLine).ConfigureAwait(false);
+        ManagedLog.Write(ManagedLog.Level.Info, $"NET: {message}");
     }
 
     private unsafe ValueTask OnPacketReceivedAsync(ReadOnlySequence<byte> args)
@@ -244,6 +244,7 @@ public sealed class ConnectionWrapper : IDisposable
         if (this._isDisposed)
         {
             Trace.WriteLine($"[NET] OnPacketReceivedAsync called on disposed connection handle={this._handle}");
+            ManagedLog.Write(ManagedLog.Level.Debug, $"NET: Packet received on disposed connection handle={this._handle}");
             return ValueTask.CompletedTask;
         }
 
@@ -260,6 +261,7 @@ public sealed class ConnectionWrapper : IDisposable
             catch (Exception ex)
             {
                 Trace.WriteLine($"[NET] Error in OnPacketReceivedAsync handle={this._handle}: {ex}");
+                ManagedLog.Write(ManagedLog.Level.Error, $"NET: Packet callback failed, handle={this._handle}: {ex}");
             }
         }
 
@@ -271,13 +273,14 @@ public sealed class ConnectionWrapper : IDisposable
         try
         {
             Trace.WriteLine($"[NET] Connection disconnected, handle={this._handle}");
-            await this.WriteNetworkDiagnosticAsync($"Disconnected event, handle={this._handle}").ConfigureAwait(false);
+            this.WriteNetworkDiagnostic($"Disconnected event, handle={this._handle}");
             this.NotifyDisconnected();
             this.Dispose();
         }
         catch (Exception ex)
         {
             Trace.WriteLine($"[NET] Error in OnDisconnectedAsync handle={this._handle}: {ex}");
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Disconnect callback failed, handle={this._handle}: {ex}");
         }
     }
 

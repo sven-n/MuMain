@@ -27,6 +27,7 @@
 
 #include "Core/Platform/WinNls.h"      // WideCharToMultiByte / CP_UTF8
 #include "Core/Platform/BundledFonts.h" // curated font list shared with Windows
+#include "Core/Utilities/Log/MuLogger.h"
 
 namespace
 {
@@ -216,7 +217,7 @@ namespace
 #endif
 
         RecordFontDiag((bold ? "bold:    " : "regular: ") + std::string("bundled NOT FOUND ") + bundledPath);
-        std::fprintf(stderr, "[GdiText] Bundled TTF unavailable: %s\n", bundledPath.c_str());
+        mu::log::Get("render")->error("GdiText -- bundled TTF unavailable: {}", bundledPath);
         return nullptr;
     }
 

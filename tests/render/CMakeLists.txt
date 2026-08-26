@@ -58,6 +58,13 @@ add_test(
 )
 
 add_test(
+    NAME d3d12_culling_diagnostic_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_RENDERER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/MuRendererSDLGpu.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_d3d12_culling_diagnostic.cmake"
+)
+
+add_test(
     NAME world_clear_color_contract
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SCENE_MANAGER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Scenes/SceneManager.cpp"

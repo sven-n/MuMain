@@ -451,6 +451,7 @@ static bool s_dbgNullPipelineWarned = false;
 static bool s_frameTimingInitialized = false;
 static bool s_frameTimingEnabled = false;
 static bool s_statsEnabled = false;
+static bool s_disableD3D12Culling = false;
 static mu::RendererStats s_lastFrameStats;
 static std::chrono::steady_clock::time_point s_frameBeginTime;
 static std::chrono::steady_clock::time_point s_renderReplayBeginTime;
@@ -1287,6 +1288,15 @@ public:
 
         mu::log::Get("render")->info("SDL_gpu -- device driver: {}", SDL_GetGPUDeviceDriver(s_device));
 
+        const char* driverName = SDL_GetGPUDeviceDriver(s_device);
+        const char* disableCulling = std::getenv("MU_D3D12_DISABLE_CULLING");
+        s_disableD3D12Culling = driverName != nullptr && std::string_view(driverName) == "direct3d12" &&
+                               disableCulling != nullptr && std::string_view(disableCulling) == "1";
+        if (s_disableD3D12Culling)
+        {
+            mu::log::Get("render")->info("SDL_gpu -- D3D12 culling diagnostic: disabled");
+        }
+
         // Claim the window for the GPU device.
         if (!SDL_ClaimWindowForGPUDevice(s_device, s_window))
         {
@@ -1298,7 +1308,6 @@ public:
 
         // Story 4.3.2: Load real HLSL shader blobs from MU_SHADER_DIR.
         // Driver name used to select the correct blob format (SPIR-V/DXIL/MSL).
-        const char* driverName = SDL_GetGPUDeviceDriver(s_device);
         if (!LoadShaders(driverName))
         {
             mu::log::Get("render")->error("SDL_gpu -- shader loading failed; cannot build pipelines");
@@ -1522,6 +1531,7 @@ public:
         SDL_DestroyGPUDevice(s_device);
         s_device = nullptr;
         s_window = nullptr;
+        s_disableD3D12Culling = false;
 
         mu::log::Get("render")->info("SDL_gpu -- Shutdown complete");
     }
@@ -2696,9 +2706,9 @@ public:
         {
             if (!s_dbgNullPipelineWarned)
             {
-                SDL_Log("[RENDER diag] WARNING: RenderQuad2D pipeline is null (idx=%d depth=%d) — "
-                        "pipeline creation failed during Init",
-                        pipelineIdx, m_depthTestEnabled ? 1 : 0);
+                mu::log::Get("render")->error(
+                    "SDL_gpu -- RenderQuad2D pipeline is null: index={} depth_test={} pipeline creation failed",
+                    pipelineIdx, m_depthTestEnabled);
                 s_dbgNullPipelineWarned = true;
             }
             return;
@@ -2800,8 +2810,8 @@ public:
         {
             if (!s_dbgNullPipelineWarned)
             {
-                SDL_Log("[RENDER diag] WARNING: RenderTriangles pipeline is null (idx=%d depth=%d)", pipelineIdx,
-                        m_depthTestEnabled ? 1 : 0);
+                mu::log::Get("render")->error("SDL_gpu -- RenderTriangles pipeline is null: index={} depth_test={}",
+                                              pipelineIdx, m_depthTestEnabled);
                 s_dbgNullPipelineWarned = true;
             }
             return;
@@ -2897,8 +2907,8 @@ public:
         {
             if (!s_dbgNullPipelineWarned)
             {
-                SDL_Log("[RENDER diag] WARNING: RenderQuad3D pipeline is null (idx=%d depth=%d)", pipelineIdx,
-                        m_depthTestEnabled ? 1 : 0);
+                mu::log::Get("render")->error("SDL_gpu -- RenderQuad3D pipeline is null: index={} depth_test={}",
+                                              pipelineIdx, m_depthTestEnabled);
                 s_dbgNullPipelineWarned = true;
             }
             return;
@@ -2960,10 +2970,11 @@ public:
         }
 
         const int pipelineIdx = GetActivePipelineIndex();
+        const bool cullFaceEnabled = m_cullFaceEnabled && !s_disableD3D12Culling;
         SDL_GPUGraphicsPipeline* pipeline =
             m_depthTestEnabled
                 ? (m_depthMaskEnabled
-                       ? (m_cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
+                       ? (cullFaceEnabled ? s_pipelinesSkinned[pipelineIdx] : s_pipelinesSkinnedNoCull[pipelineIdx])
                        : s_pipelinesSkinnedDepthReadOnly[pipelineIdx])
                 : s_pipelinesSkinnedDepthOff[pipelineIdx];
         if (!pipeline)
@@ -3404,7 +3415,8 @@ private:
         {
             return s_pipelines3DDepthReadOnly[pipelineIdx];
         }
-        return m_cullFaceEnabled ? s_pipelines3D[pipelineIdx] : s_pipelines3DNoCull[pipelineIdx];
+        return m_cullFaceEnabled && !s_disableD3D12Culling ? s_pipelines3D[pipelineIdx]
+                                                          : s_pipelines3DNoCull[pipelineIdx];
     }
 
     [[nodiscard]] SDL_GPUGraphicsPipeline* GetActiveQuadPipeline(Render::Topology::QuadSpace space) const

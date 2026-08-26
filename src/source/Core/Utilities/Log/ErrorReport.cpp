@@ -15,20 +15,9 @@
 #include "Core/Platform/Audio/AudioDeviceNames.h"
 #include "Render/Renderer/MuRenderer.h"
 
-#include <filesystem>
-#include <fstream>
 #include <string>
-#include <vector>
 
 CErrorReport g_ErrorReport;
-
-// Max UTF-8 bytes for a single log line. Source buffer is wchar_t[1024]; UTF-8 needs
-// up to 3 bytes per BMP character (and 4 bytes per surrogate pair), so a 1024-wchar
-// input expands to at most ~3072 bytes. 4096 gives comfortable margin.
-constexpr int MAX_LOG_LINE_BYTES = 4096;
-// Hex-dump line buffer. Output is pure ASCII (hex digits, spaces, colons, CRLF),
-// so 1 byte per source wchar is sufficient with margin.
-constexpr int MAX_HEX_LINE_BYTES = 512;
 
 void DeleteSocket();
 
@@ -54,82 +43,6 @@ std::string WideToUtf8(const wchar_t* value)
 }
 }
 
-CErrorReport::CErrorReport()
-{
-    Clear();
-}
-
-CErrorReport::~CErrorReport()
-{
-    Destroy();
-}
-
-void CErrorReport::Clear(void)
-{
-    m_filePath.clear();
-    m_iKey = 0;
-}
-
-void CErrorReport::Create(const wchar_t* lpszFileName)
-{
-    if (m_fileStream.is_open())
-    {
-        m_fileStream.close();
-    }
-
-    m_iKey = 0;
-    m_filePath = std::filesystem::path(WideToUtf8(lpszFileName));
-
-    CutHead();
-    m_fileStream.open(m_filePath, std::ios::out | std::ios::app | std::ios::binary);
-}
-
-void CErrorReport::Destroy(void)
-{
-    if (m_fileStream.is_open())
-    {
-        m_fileStream.flush();
-        m_fileStream.close();
-    }
-    Clear();
-}
-
-void CErrorReport::CutHead(void)
-{
-    std::ifstream input(m_filePath, std::ios::in | std::ios::binary);
-    if (!input.is_open())
-    {
-        return;
-    }
-
-    const std::string content((std::istreambuf_iterator<char>(input)), std::istreambuf_iterator<char>());
-    constexpr std::string_view marker = "###### Log Begin ######";
-    std::vector<size_t> positions;
-    for (size_t position = content.find(marker); position != std::string::npos;
-         position = content.find(marker, position + marker.size()))
-    {
-        positions.push_back(position);
-    }
-
-    size_t keepFrom = 0;
-    if (positions.size() >= 5)
-    {
-        keepFrom = positions[positions.size() - 4];
-    }
-    else if (content.size() >= 32 * 1024 - 1)
-    {
-        keepFrom = content.size() / 2;
-    }
-
-    if (keepFrom == 0)
-    {
-        return;
-    }
-
-    std::ofstream output(m_filePath, std::ios::out | std::ios::trunc | std::ios::binary);
-    output.write(content.data() + keepFrom, static_cast<std::streamsize>(content.size() - keepFrom));
-}
-
 void CErrorReport::WriteDebugInfoStr(wchar_t* lpszToWrite)
 {
     std::string line = WideToUtf8(lpszToWrite);
@@ -153,21 +66,14 @@ void CErrorReport::Write(const wchar_t* lpszFormat, ...)
 void CErrorReport::HexWrite(void* pBuffer, int iSize)
 {
     wchar_t szLine[256] = { 0, };
-    char narrowLine[MAX_HEX_LINE_BYTES];
     int offset = 0;
-    int len = 0;
     offset += mu_swprintf(szLine, L"0x%00000008X : ", (DWORD*)pBuffer);
     for (int i = 0; i < iSize; i++) {
         offset += mu_swprintf(szLine + offset, L"%02X", *((BYTE*)pBuffer + i));
         if (i > 0 && i < iSize - 1) {
             if (i % 16 == 15) {	//. new line
                 offset += mu_swprintf(szLine + offset, L"\r\n");
-                len = WideCharToMultiByte(CP_UTF8, 0, szLine, -1, narrowLine, sizeof(narrowLine), nullptr, nullptr);
-                if (len > 1 && m_fileStream.is_open())
-                {
-                    m_fileStream.write(narrowLine, len - 1);
-                    m_fileStream.flush();
-                }
+                WriteDebugInfoStr(szLine);
                 offset = 0;
                 offset += mu_swprintf(szLine + offset, L"           : ");
             }
@@ -177,12 +83,7 @@ void CErrorReport::HexWrite(void* pBuffer, int iSize)
         }
     }
     offset += mu_swprintf(szLine + offset, L"\r\n");
-    len = WideCharToMultiByte(CP_UTF8, 0, szLine, -1, narrowLine, sizeof(narrowLine), nullptr, nullptr);
-    if (len > 1 && m_fileStream.is_open())
-    {
-        m_fileStream.write(narrowLine, len - 1);
-        m_fileStream.flush();
-    }
+    WriteDebugInfoStr(szLine);
 }
 
 void CErrorReport::AddSeparator(void)
