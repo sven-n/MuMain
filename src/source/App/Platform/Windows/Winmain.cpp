@@ -14,6 +14,7 @@
 #include <mach-o/dyld.h>
 #endif
 #include <clocale>
+#include <filesystem>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
@@ -1428,19 +1429,46 @@ std::wstring BundledFontFullPath(const char* relative)
 #endif
 
 // Privately register the TTFs bundled in ./fonts so GDI resolves their face
-// names even when they are not installed system-wide — parity with the Linux
-// GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the faces to
-// this process, leaving the system font list untouched. No-op off Windows,
+// names even when they are not installed system-wide — parity with the
+// non-Windows GdiText shim, which reads ./fonts directly. FR_PRIVATE scopes the
+// faces to this process, leaving the system font list untouched. No-op off Windows,
 // where bundled fonts are resolved by GdiText. Shares the kBundledFonts table.
-void RegisterBundledFonts()
+bool RegisterBundledFonts()
 {
 #ifdef _WIN32
+    std::vector<std::wstring> registeredPaths;
+    const auto rollback = [&registeredPaths]() {
+        for (auto it = registeredPaths.rbegin(); it != registeredPaths.rend(); ++it)
+            RemoveFontResourceExW(it->c_str(), FR_PRIVATE, nullptr);
+    };
+    const auto registerPath = [&registeredPaths, &rollback](const char* relativePath) {
+        const std::wstring path = BundledFontFullPath(relativePath);
+        if (!std::filesystem::is_regular_file(path))
+        {
+            mu::log::Get("render")->error("GDI -- bundled font missing path='{}'", WideToUtf8(path));
+            rollback();
+            return false;
+        }
+        if (AddFontResourceExW(path.c_str(), FR_PRIVATE, nullptr) == 0)
+        {
+            mu::log::Get("render")->error("GDI -- AddFontResourceExW failed path='{}' error={}", WideToUtf8(path),
+                                           GetLastError());
+            rollback();
+            return false;
+        }
+        registeredPaths.push_back(path);
+        return true;
+    };
+
     for (const auto& font : kBundledFonts)
     {
-        AddFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
-        AddFontResourceExW(BundledFontFullPath(font.bold).c_str(), FR_PRIVATE, nullptr);
+        if (!registerPath(font.regular) || !registerPath(font.bold))
+            return false;
     }
+    if (!registerPath(kBundledFixedFont.regular))
+        return false;
 #endif
+    return true;
 }
 
 // Mirrors RegisterBundledFonts so the process leaves no private faces behind.
@@ -1452,34 +1480,60 @@ void UnregisterBundledFonts()
         RemoveFontResourceExW(BundledFontFullPath(font.regular).c_str(), FR_PRIVATE, nullptr);
         RemoveFontResourceExW(BundledFontFullPath(font.bold).c_str(), FR_PRIVATE, nullptr);
     }
+    RemoveFontResourceExW(BundledFontFullPath(kBundledFixedFont.regular).c_str(), FR_PRIVATE, nullptr);
 #endif
+}
+
+HFONT CreateFontForFamily(int size, int weight, std::string_view family)
+{
+    const std::string familyName(family);
+    const std::wstring face = Utf8ToWide(familyName.c_str());
+    return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+                      CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, face.c_str());
 }
 
 HFONT CreateUIFont(int size, int weight)
 {
-    // UI font family from config ([UI] Font); empty keeps the built-in
-    // "Tahoma" default. On Windows GDI honors this face name directly; on
-    // Linux the GdiText shim resolves it via fontconfig (Core/Platform/GdiText.cpp).
-    std::wstring sel = GameConfig::GetInstance().GetFontSelection();
-    const wchar_t* face = sel.empty() ? L"Tahoma" : sel.c_str();
-    return CreateFont(size, 0, 0, 0, weight, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      CLEARTYPE_NATURAL_QUALITY, DEFAULT_PITCH | FF_DONTCARE, face);
+    const std::string configuredFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
+    return CreateFontForFamily(size, weight, ResolveBundledFont(configuredFamily).family);
 }
 
-void CreateNewFonts(FontSizes sizes)
+bool CreateNewFonts(FontSizes sizes)
 {
-    g_hFont = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
-    g_hFontBold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
-    g_hFontBig = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
-    g_hFixFont = CreateUIFont(sizes.fixFontSize, FW_NORMAL);
+    HFONT normal = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
+    HFONT bold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
+    HFONT big = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
+    HFONT fixed = CreateFontForFamily(sizes.fixFontSize, FW_NORMAL, kBundledFixedFont.family);
+    if (!normal || !bold || !big || !fixed)
+    {
+        if (normal)
+            DeleteObject(normal);
+        if (bold)
+            DeleteObject(bold);
+        if (big)
+            DeleteObject(big);
+        if (fixed)
+            DeleteObject(fixed);
+        return false;
+    }
+
+    g_hFont = normal;
+    g_hFontBold = bold;
+    g_hFontBig = big;
+    g_hFixFont = fixed;
+    return true;
 }
 
 void ReinitializeTextRenderer()
 {
-    // Recreates SDL_ttf font resources with the new screen rates.
     g_pRenderText->Release();
-    g_pRenderText->Create(g_hDC);
-    g_pRenderText->SetFont(g_hFont);
+    const std::string selectedFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
+    const bool fontsReloaded = mu::GetRenderer().ReloadTtfFonts(selectedFamily);
+    if (!fontsReloaded)
+        mu::log::Get("render")->error("SDL_ttf -- keeping the previous font set after reload failure");
+    const bool textCreated = g_pRenderText->Create(g_hDC);
+    if (textCreated)
+        g_pRenderText->SetFont(g_hFont);
 }
 
 void RefreshInventoryEquipmentSlots()
@@ -1505,7 +1559,11 @@ void ReinitializeFonts()
     HFONT hOldFixFont = g_hFixFont;
 
     FontSizes sizes = CalculateFontSizes();
-    CreateNewFonts(sizes);
+    if (!CreateNewFonts(sizes))
+    {
+        mu::log::Get("render")->error("GDI -- failed to create bundled font roles during live reload");
+        return;
+    }
     ReinitializeTextRenderer();
 
     if (hOldFont)
@@ -1808,7 +1866,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
 
-    if (!mu::InitSDLGpuRenderer(g_sdlWindow))
+    const std::string selectedFontFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
+    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily))
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
         ShutdownRendererWindow();
@@ -1891,8 +1950,20 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.
-    RegisterBundledFonts();
-    CreateNewFonts(CalculateFontSizes());
+    const bool fontsRegistered = RegisterBundledFonts();
+    const bool fontsCreated = CreateNewFonts(CalculateFontSizes());
+    if (!fontsRegistered || !fontsCreated)
+    {
+#ifdef NDEBUG
+        mu::log::Get("render")->error("Bundled font roles unavailable; aborting Release startup");
+        UnregisterBundledFonts();
+        ShutdownRendererWindow();
+        SDL_Quit();
+        return FALSE;
+#else
+        mu::log::Get("render")->warn("NON-PARITY developer font fallback -- bundled GDI roles unavailable");
+#endif
+    }
 
     // Log which UI font was resolved now that the fonts have been created (the
     // discovery is lazy on first CreateFont). Helps diagnose "no UI text".

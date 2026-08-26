@@ -3,9 +3,11 @@
 
 #include "CUIRenderTextSDLTtf.h"
 
+#include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Text/SDLTtfColorPack.h"
+#include "Render/Text/SdlTtfGpuTextProperties.h"
 
 #include <SDL3_ttf/SDL_ttf.h>
 
@@ -62,14 +64,16 @@ void RenderTextBackground(mu::IMuRenderer& renderer, const TextLayout& layout, i
     renderer.RenderQuad2D(vertices, 0u);
 }
 
-bool ConfigureText(TTF_Text* text, TTF_Font* font, const std::string& utf8, DWORD color)
+void ConsumeGlyphUploads(TTF_Text* text)
 {
-    const Uint8 red = static_cast<Uint8>(color & 0xFFu);
-    const Uint8 green = static_cast<Uint8>((color >> 8) & 0xFFu);
-    const Uint8 blue = static_cast<Uint8>((color >> 16) & 0xFFu);
-    const Uint8 alpha = static_cast<Uint8>((color >> 24) & 0xFFu);
-    return TTF_SetTextFont(text, font) && TTF_SetTextString(text, utf8.c_str(), utf8.size()) &&
-           TTF_SetTextColor(text, red, green, blue, alpha);
+    const SDL_PropertiesID properties = TTF_GetTextProperties(text);
+    const Sint64 uploadedGlyphs =
+        SDL_GetNumberProperty(properties, Render::Text::kUploadedGlyphCountProperty, 0);
+    if (uploadedGlyphs <= 0)
+        return;
+
+    FrameProfiler::Count(FrameProfiler::Counter::GlyphUploads, static_cast<std::uint32_t>(uploadedGlyphs));
+    SDL_SetNumberProperty(properties, Render::Text::kUploadedGlyphCountProperty, 0);
 }
 
 void SubmitTextDrawData(mu::IMuRenderer& renderer, const TTF_GPUAtlasDrawSequence* drawData, float drawX, float drawY,
@@ -121,17 +125,13 @@ bool CUIRenderTextSDLTtf::Create(HDC)
         return false;
     }
 
-    m_ttfText = TTF_CreateText(engine, m_activeFont, "", 0);
-    return m_ttfText != nullptr;
+    m_textCache.Reset(engine);
+    return true;
 }
 
 void CUIRenderTextSDLTtf::Release()
 {
-    if (m_ttfText != nullptr)
-    {
-        TTF_DestroyText(m_ttfText);
-        m_ttfText = nullptr;
-    }
+    m_textCache.Reset(nullptr);
     m_activeFont = nullptr;
 }
 
@@ -202,13 +202,12 @@ SIZE CUIRenderTextSDLTtf::MeasureText(const wchar_t* text, int length) const
 
     m_measureWideScratch.assign(text, length);
     mu_wchar_to_utf8(m_measureWideScratch.c_str(), m_measureUtf8Scratch);
-    int width = 0;
-    int height = 0;
-    if (TTF_GetStringSize(font, m_measureUtf8Scratch.c_str(), m_measureUtf8Scratch.size(), &width, &height))
-    {
-        size.cx = static_cast<LONG>(static_cast<float>(width) / g_fScreenRate_x);
-        size.cy = static_cast<LONG>(static_cast<float>(height) / g_fScreenRate_y);
-    }
+    auto prepared = m_textCache.Prepare(font, m_measureUtf8Scratch);
+    if (prepared.text == nullptr)
+        return size;
+
+    size.cx = static_cast<LONG>(static_cast<float>(prepared.width) / g_fScreenRate_x);
+    size.cy = static_cast<LONG>(static_cast<float>(prepared.height) / g_fScreenRate_y);
     return size;
 }
 
@@ -234,12 +233,12 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
         return;
     }
 
-    int measuredWidth = 0;
-    int measuredHeight = 0;
-    if (!TTF_GetStringSize(font, m_utf8Scratch.c_str(), m_utf8Scratch.size(), &measuredWidth, &measuredHeight))
-    {
+    auto prepared = m_textCache.Prepare(font, m_utf8Scratch);
+    if (prepared.text == nullptr)
         return;
-    }
+
+    const int measuredWidth = prepared.width;
+    const int measuredHeight = prepared.height;
 
     const TextLayout layout = BuildTextLayout(x, y, boxWidth, boxHeight, sort, measuredWidth, measuredHeight);
 
@@ -256,11 +255,8 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     }
 
     RenderTextBackground(renderer, layout, windowHeight, m_backColor);
-    if (!ConfigureText(m_ttfText, font, m_utf8Scratch, m_textColor))
-    {
-        return;
-    }
-
-    SubmitTextDrawData(renderer, TTF_GetGPUTextDrawData(m_ttfText), layout.renderX + layout.alignmentOffset,
+    const TTF_GPUAtlasDrawSequence* drawData = TTF_GetGPUTextDrawData(prepared.text);
+    ConsumeGlyphUploads(prepared.text);
+    SubmitTextDrawData(renderer, drawData, layout.renderX + layout.alignmentOffset,
                        static_cast<float>(windowHeight) - layout.screenY, m_textColor);
 }

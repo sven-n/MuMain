@@ -23,6 +23,21 @@ enum class QuadSpace
     return vertexCount % 4 == 0;
 }
 
+[[nodiscard]] constexpr bool CanMergeTriangleDraws(std::uint32_t previousVertexOffset,
+                                                   std::uint32_t previousVertexCount,
+                                                   std::uint32_t nextVertexOffset,
+                                                   std::uint32_t vertexStride)
+{
+    if (previousVertexCount == 0 || vertexStride == 0)
+    {
+        return false;
+    }
+
+    const std::uint64_t previousEnd = static_cast<std::uint64_t>(previousVertexOffset) +
+                                      static_cast<std::uint64_t>(previousVertexCount) * vertexStride;
+    return previousEnd == nextVertexOffset;
+}
+
 [[nodiscard]] constexpr bool CanMergeQuadDraws(std::uint32_t previousVertexOffset,
                                                std::uint32_t previousIndexCount,
                                                std::uint32_t nextVertexOffset,

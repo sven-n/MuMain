@@ -39,6 +39,11 @@ enum class Counter : int
 {
     DrawCalls,
     MergedDraws,
+    Merged2DDraws,
+    GlyphUploads,
+    GpuSkinningSubmissions,
+    CpuSkinningIneligible,
+    GpuSkinningFailures,
     VertexBytes,
     TextureUploads,
     BatchDraws,

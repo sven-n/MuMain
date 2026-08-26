@@ -339,11 +339,23 @@ foreach(symbol IN ITEMS "{0.0f, 0.0f" "s_swapW" "s_swapH" "0.0f, 1.0f}")
     endif()
 endforeach()
 require_match(end_frame
-    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*s_currentViewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentViewport[ \t]*\\)[ \t]*;"
-    "replay tracks and applies the active viewport")
+    "case[ \t]+RenderCmdType::SetViewport[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*s_currentViewport[ \t]*=[ \t]*cmd\.viewport[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*s_currentViewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentViewport[ \t]*\\)[ \t]*;"
+    "replay caches and applies the active viewport")
 require_match(end_frame
-    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*s_currentScissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentScissor[ \t]*\\)[ \t]*;"
-    "replay tracks and applies the active scissor")
+    "case[ \t]+RenderCmdType::SetScissor[ \t]*:[ \t\r\n]*\\{[ \t\r\n]*s_currentScissor[ \t]*=[ \t]*cmd\.scissor[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*s_currentScissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentScissor[ \t]*\\)[ \t]*;"
+    "replay caches and applies the active scissor")
+require_match(end_frame
+    "Render::SdlGpuReplayState[ \t]+replayState[ \t]*;[ \t\r\n]*for[ \t]*\\([ \t]*const[ \t]+auto&[ \t]+cmd[ \t]*:[ \t]*s_renderCmds[ \t]*\\)"
+    "EndFrame owns one render-pass-local replay cache")
+foreach(helper IN ITEMS
+        "BindReplayPipeline"
+        "PushReplayVertexUniforms"
+        "PushReplayFragmentUniforms"
+        "BindReplayFragmentSampler"
+        "BindReplayIndexBuffer"
+        "ReplayDrawCommand")
+    require_match(renderer_code "${helper}" "renderer must use ${helper} for cached replay")
+endforeach()
 
 forbid_symbol(end_frame "if (!s_texturesInvalidated)")
 require_match(renderer_code
@@ -371,8 +383,8 @@ endif()
 math(EXPR marker_case_length "${marker_case_end} - ${marker_case_start}")
 string(SUBSTRING "${end_frame}" ${marker_case_start} ${marker_case_length} marker_case)
 require_match(marker_case
-    "g_MuEditorCore\.RenderDrawData[ \t\r\n]*\\([ \t]*s_cmdBuf[ \t]*,[ \t]*s_renderPass[ \t]*\\)[ \t]*;[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentViewport[ \t]*\\)[ \t]*;[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentScissor[ \t]*\\)[ \t]*;[ \t\r\n]*break[ \t]*;"
-    "marker renders ImGui then immediately restores viewport and scissor")
+    "g_MuEditorCore\.RenderDrawData[ \t\r\n]*\\([ \t]*s_cmdBuf[ \t]*,[ \t]*s_renderPass[ \t]*\\)[ \t]*;[ \t\r\n]*replayState\.Invalidate[ \t\r\n]*\\([ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectViewport[ \t\r\n]*\\([ \t]*s_currentViewport[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUViewport[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentViewport[ \t]*\\)[ \t]*;[ \t\r\n]*if[ \t]*\\([ \t]*replayState\.SelectScissor[ \t\r\n]*\\([ \t]*s_currentScissor[ \t]*\\)[ \t]*\\)[ \t\r\n]*SDL_SetGPUScissor[ \t\r\n]*\\([ \t]*s_renderPass[ \t]*,[ \t]*&s_currentScissor[ \t]*\\)[ \t]*;[ \t\r\n]*break[ \t]*;"
+    "marker invalidates cached state then restores viewport and scissor")
 forbid_symbol(marker_case "return")
 
 strip_editor_sections(renderer_code renderer_editor_off_code)

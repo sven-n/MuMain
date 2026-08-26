@@ -18,9 +18,29 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME sdl_gpu_replay_state_tests
+    SOURCES
+        test_sdl_gpu_replay_state.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/Render/Renderer/SdlGpuReplayState.cpp
+    LINK_LIBS SDL3::SDL3
+)
+
+mu_add_test(
+    NAME sdl_gpu_validation_tests
+    SOURCES
+        test_sdl_gpu_validation.cpp
+)
+
+mu_add_test(
     NAME aura_joint_lifecycle_tests
     SOURCES
         test_aura_joint_lifecycle.cpp
+)
+
+mu_add_test(
+    NAME gpu_skinning_path_tests
+    SOURCES
+        test_gpu_skinning_path.cpp
 )
 
 add_test(
@@ -42,6 +62,13 @@ add_test(
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SCENE_MANAGER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Scenes/SceneManager.cpp"
         -P "${CMAKE_CURRENT_SOURCE_DIR}/test_world_clear_color.cmake"
+)
+
+add_test(
+    NAME render_diagnostics_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_SCENE_MANAGER_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Scenes/SceneManager.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_render_diagnostics.cmake"
 )
 
 add_test(

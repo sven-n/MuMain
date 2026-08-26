@@ -15,6 +15,7 @@
 
 #include <cstdint>
 #include <span>
+#include <string_view>
 
 // Story 4.4.1: Forward declaration of SDL_GPUDevice so IMuRenderer::GetDevice()
 // can be declared without pulling SDL3 headers into every TU that includes MuRenderer.h.
@@ -130,11 +131,16 @@ struct RendererStats
     std::uint32_t requestedDrawCalls = 0;
     std::uint32_t submittedDrawCalls = 0;
     std::uint32_t mergedDrawCalls = 0;
+    std::uint32_t merged2DDrawCalls = 0;
     std::uint32_t commandCount = 0;
     std::uint32_t vertexBytes = 0;
     std::uint32_t textureUploads = 0;
     std::uint32_t textureCreates = 0;
     std::uint32_t textureReleases = 0;
+    std::uint32_t pipelineBinds = 0;
+    std::uint32_t samplerBinds = 0;
+    std::uint32_t vertexUniformPushes = 0;
+    std::uint32_t fragmentUniformPushes = 0;
     double frameMilliseconds = 0.0;
     double replayMilliseconds = 0.0;
     double submitMilliseconds = 0.0;
@@ -158,8 +164,8 @@ public:
     // Render independent world-space quads in perimeter order.
     virtual void RenderQuad3D(std::span<const Vertex3D> vertices, std::uint32_t textureId) = 0;
 
-    // Render rest-pose triangles using a GPU bone palette. Returns false when the backend
-    // cannot accept the draw so the caller can use its CPU-skinned fallback.
+    // Render rest-pose triangles using a GPU bone palette. False means an eligible draw failed
+    // submission and must not trigger CPU fallback.
     [[nodiscard]] virtual bool RenderSkinnedTriangles(std::span<const SkinnedVertex3D> vertices,
                                                       std::uint32_t textureId, const SkinningParameters& parameters)
     {
@@ -295,6 +301,10 @@ public:
     {
         return nullptr;
     }
+    [[nodiscard]] virtual bool ReloadTtfFonts(std::string_view /*fontFamily*/)
+    {
+        return false;
+    }
 
     // F-7 fix: Cached window height (updated per-frame in BeginFrame).
     [[nodiscard]] virtual int GetCachedWindowHeight()
@@ -413,7 +423,7 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow);
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily);
 void WaitForSDLGpuIdle();
 void ShutdownSDLGpuRenderer();
 

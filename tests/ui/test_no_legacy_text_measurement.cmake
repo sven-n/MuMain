@@ -28,4 +28,9 @@ foreach(source_file IN LISTS source_files)
     if(source MATCHES "(^|[^A-Za-z0-9_])FontHeight([^A-Za-z0-9_]|$)")
         message(FATAL_ERROR "${relative_file} still uses the legacy global FontHeight")
     endif()
+
+    if(relative_file STREQUAL "Render/Text/CUIRenderTextSDLTtf.cpp" AND
+       source MATCHES "(^|[^A-Za-z0-9_])TTF_GetStringSize[ \\t\\r\\n]*\\(")
+        message(FATAL_ERROR "${relative_file} still bypasses retained SDL_ttf text layout")
+    endif()
 endforeach()

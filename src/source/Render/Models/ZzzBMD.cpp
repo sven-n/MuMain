@@ -25,6 +25,7 @@
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "Render/Models/GpuSkinningPath.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"
 #include "Core/Utilities/FrameProfiler.h"
@@ -1642,7 +1643,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     };
 
     const std::size_t maxVertexCount = static_cast<std::size_t>(m->NumTriangles) * 3;
-    if (CanGpuSkinMesh(finalRenderFlags, renderFlags, m_pCurrentBoneTransform))
+    const bool gpuSkinningEligible = CanGpuSkinMesh(finalRenderFlags, renderFlags, m_pCurrentBoneTransform);
+    bool gpuSkinningSubmitted = false;
+    if (gpuSkinningEligible)
     {
         const auto textureCoordinates = GetSkinningTextureCoordinates(renderFlags);
         auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
@@ -1695,12 +1698,24 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             .translate = m_LastTranslate,
             .lightEnabled = usesCpuLighting,
         };
-        if (mu::GetRenderer().RenderSkinnedTriangles(skinnedVertices.first(skinnedVertexCount), 0u, skinning))
-        {
-            return;
-        }
+        gpuSkinningSubmitted =
+            mu::GetRenderer().RenderSkinnedTriangles(skinnedVertices.first(skinnedVertexCount), 0u, skinning);
     }
 
+    const Render::Models::GpuSkinningPath skinningPath =
+        Render::Models::ResolveGpuSkinningPath(gpuSkinningEligible, gpuSkinningSubmitted);
+    if (skinningPath == Render::Models::GpuSkinningPath::GpuSubmitted)
+    {
+        FrameProfiler::Count(FrameProfiler::Counter::GpuSkinningSubmissions);
+        return;
+    }
+    if (skinningPath == Render::Models::GpuSkinningPath::GpuFailed)
+    {
+        FrameProfiler::Count(FrameProfiler::Counter::GpuSkinningFailures);
+        return;
+    }
+
+    FrameProfiler::Count(FrameProfiler::Counter::CpuSkinningIneligible);
     EnsureCpuVertices(meshIndex);
     materializeCpuDerivedData();
     auto rendererVertices = GetRendererVertexScratch(maxVertexCount);

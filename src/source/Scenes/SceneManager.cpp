@@ -713,7 +713,7 @@ static void RenderGLStats()
         Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
     };
 
-    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  VtxKB");
+    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
@@ -721,9 +721,10 @@ static void RenderGLStats()
     {
         const double vertexKilobytes =
             static_cast<double>(FrameProfiler::CounterValue(pass, Counter::VertexBytes)) / 1024.0;
-        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
+        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %3u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
                     FrameProfiler::AccumulatorMs(pass), FrameProfiler::CounterValue(pass, Counter::DrawCalls),
-                    FrameProfiler::CounterValue(pass, Counter::MergedDraws), vertexKilobytes);
+                    FrameProfiler::CounterValue(pass, Counter::MergedDraws),
+                    FrameProfiler::CounterValue(pass, Counter::Merged2DDraws), vertexKilobytes);
         g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
         y += DEBUG_TEXT_LINE_HEIGHT;
     }
@@ -733,8 +734,9 @@ static void RenderGLStats()
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
-    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
-                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.commandCount, stats.vertexBytes / 1024);
+    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u 2D:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
+                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.merged2DDrawCalls, stats.commandCount,
+                stats.vertexBytes / 1024);
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
@@ -745,6 +747,23 @@ static void RenderGLStats()
 
     mu_swprintf(szLine, L"Textures upload:%u create:%u release:%u", stats.textureUploads, stats.textureCreates,
                 stats.textureReleases);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Bind Pipe:%u Samp:%u VU:%u FU:%u", stats.pipelineBinds, stats.samplerBinds,
+                stats.vertexUniformPushes, stats.fragmentUniformPushes);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"2D Merge:%u Glyph upload:%u", stats.merged2DDrawCalls,
+                FrameProfiler::CounterValue(Counter::GlyphUploads));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Skin GPU:%u CPU-ineligible:%u Failed:%u",
+                FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
     g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
     y += DEBUG_TEXT_LINE_HEIGHT;
 
@@ -1175,6 +1194,41 @@ static void ManageMainSceneAudio()
     ManageBackgroundMusic();
 }
 
+static void LogFrameTiming()
+{
+    static bool enabled = std::getenv("MU_RENDER_TIMING") != nullptr;
+    static unsigned frameCounter = 0;
+    constexpr unsigned kLogInterval = 60;
+    if (!enabled || ++frameCounter % kLogInterval != 0)
+        return;
+
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    std::fprintf(stderr,
+                 "[RENDER diag] requested=%u submitted=%u pipeline_binds=%u sampler_binds=%u "
+                 "vertex_uniform_pushes=%u fragment_uniform_pushes=%u merged_2d=%u "
+                 "glyph_uploads=%u skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u\n",
+                 stats.requestedDrawCalls, stats.submittedDrawCalls, stats.pipelineBinds, stats.samplerBinds,
+                 stats.vertexUniformPushes, stats.fragmentUniformPushes, stats.merged2DDrawCalls,
+                 FrameProfiler::CounterValue(Counter::GlyphUploads),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    std::fprintf(stderr,
+                 "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
+                 "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms "
+                 "skin_gpu=%u skin_cpu_ineligible=%u skin_failed=%u\n",
+                 FrameProfiler::AccumulatorMs(Pass::Terrain), FrameProfiler::AccumulatorMs(Pass::Objects),
+                 FrameProfiler::AccumulatorMs(Pass::Characters), FrameProfiler::AccumulatorMs(Pass::Items),
+                 FrameProfiler::AccumulatorMs(Pass::Effects), FrameProfiler::AccumulatorMs(Pass::Other),
+                 FrameProfiler::AccumulatorMs(Pass::Sprites), FrameProfiler::AccumulatorMs(Pass::Particles),
+                 FrameProfiler::AccumulatorMs(Pass::Joints),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                 FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                 FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+}
+
 /**
  * @brief Main scene rendering and update function.
  *
@@ -1213,20 +1267,7 @@ void MainScene(HDC hDC)
     {
         Success = RenderCurrentScene(hDC);
 
-        static bool s_frameTimingEnabled = std::getenv("MU_RENDER_TIMING") != nullptr;
-        static unsigned s_frameTimingLogCounter = 0;
-        if (s_frameTimingEnabled && ++s_frameTimingLogCounter % 60 == 0)
-        {
-            using FP = FrameProfiler::Pass;
-            std::fprintf(stderr,
-                         "[FRAME timing] terrain=%.2fms objects=%.2fms characters=%.2fms items=%.2fms "
-                         "effects=%.2fms other=%.2fms sprites=%.2fms particles=%.2fms joints=%.2fms\n",
-                         FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
-                         FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
-                         FrameProfiler::AccumulatorMs(FP::Effects), FrameProfiler::AccumulatorMs(FP::Other),
-                         FrameProfiler::AccumulatorMs(FP::Sprites), FrameProfiler::AccumulatorMs(FP::Particles),
-                         FrameProfiler::AccumulatorMs(FP::Joints));
-        }
+        LogFrameTiming();
         {
             FRAME_PROFILE(Overlay);
             RenderDebugInfo();

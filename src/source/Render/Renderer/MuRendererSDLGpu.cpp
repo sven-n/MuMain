@@ -31,9 +31,13 @@
 #define MU_HAS_SDL_TTF 0
 #endif
 
+#include "DrawCommandHistory.h"
 #include "MuRenderer.h"
 #include "QuadTopology.h"
 #include "SdlGpuPixelFormat.h"
+#include "SdlGpuReplayState.h"
+#include "SdlGpuValidation.h"
+#include "Core/Platform/BundledFonts.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #ifdef _EDITOR
@@ -436,8 +440,13 @@ static Uint32 s_dbgTextureReleasesThisFrame = 0u;
 static Uint32 s_dbgRenderCmdsReplayedThisFrame = 0u;
 static Uint32 s_dbgGpuDrawCallsThisFrame = 0u;
 static Uint32 s_dbgMergedDrawsThisFrame = 0u;
+static Uint32 s_dbgMerged2DDrawsThisFrame = 0u;
 static Uint32 s_dbgWhiteTextureDrawsThisFrame = 0u;
 static Uint32 s_dbgRealTextureDrawsThisFrame = 0u;
+static Uint32 s_dbgPipelineBindsThisFrame = 0u;
+static Uint32 s_dbgSamplerBindsThisFrame = 0u;
+static Uint32 s_dbgVertexUniformPushesThisFrame = 0u;
+static Uint32 s_dbgFragmentUniformPushesThisFrame = 0u;
 static bool s_dbgNullPipelineWarned = false;
 static bool s_frameTimingInitialized = false;
 static bool s_frameTimingEnabled = false;
@@ -542,10 +551,8 @@ struct RenderCmd
 };
 
 static std::vector<RenderCmd> s_renderCmds;
-static constexpr std::size_t kNoTriangleCommand = std::numeric_limits<std::size_t>::max();
-static std::size_t s_lastTriangleCommand = kNoTriangleCommand;
-static constexpr std::size_t kNoQuadCommand = std::numeric_limits<std::size_t>::max();
-static std::size_t s_lastQuadCommand = kNoQuadCommand;
+static constexpr std::size_t kNoDrawCommand = std::numeric_limits<std::size_t>::max();
+static Render::DrawCommandHistory s_previousDrawCommands;
 
 [[nodiscard]] static bool IsDrawCommand(RenderCmdType type)
 {
@@ -620,45 +627,47 @@ static std::size_t s_lastQuadCommand = kNoQuadCommand;
     return Counter::Count_;
 }
 
-[[nodiscard]] static bool MergeAdjacentTriangleCommand(const RenderCmd& command)
+[[nodiscard]] static bool MergeAdjacentTriangleCommand(const RenderCmd& command, std::size_t& previousCommand,
+                                                       Uint32 vertexStride)
 {
-    if (s_lastTriangleCommand == kNoTriangleCommand)
+    if (previousCommand == kNoDrawCommand)
     {
         return false;
     }
 
-    const RenderCmd& previous = s_renderCmds[s_lastTriangleCommand];
-    const Uint32 previousEnd = previous.vtxOffset + previous.vtxCount * sizeof(Vertex3D);
-    const FrameProfiler::Counter breakCause =
-        ClassifyBatchBreak(command, s_lastTriangleCommand, previousEnd == command.vtxOffset);
+    const RenderCmd& previous = s_renderCmds[previousCommand];
+    const bool geometryCanMerge = Render::Topology::CanMergeTriangleDraws(
+        previous.vtxOffset, previous.vtxCount, command.vtxOffset, vertexStride);
+    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, previousCommand, geometryCanMerge);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
         FrameProfiler::Count(breakCause);
         return false;
     }
 
-    s_renderCmds[s_lastTriangleCommand].vtxCount += command.vtxCount;
+    s_renderCmds[previousCommand].vtxCount += command.vtxCount;
     return true;
 }
 
-[[nodiscard]] static bool MergeAdjacentQuadCommand(const RenderCmd& command)
+[[nodiscard]] static bool MergeAdjacentQuadCommand(const RenderCmd& command, std::size_t& previousCommand,
+                                                   Uint32 vertexStride)
 {
-    if (s_lastQuadCommand == kNoQuadCommand)
+    if (previousCommand == kNoDrawCommand)
     {
         return false;
     }
 
-    const RenderCmd& previous = s_renderCmds[s_lastQuadCommand];
+    const RenderCmd& previous = s_renderCmds[previousCommand];
     const bool geometryCanMerge = Render::Topology::CanMergeQuadDraws(
-        previous.vtxOffset, previous.idxCount, command.vtxOffset, command.idxCount, sizeof(Vertex3D), k_MaxQuads);
-    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, s_lastQuadCommand, geometryCanMerge);
+        previous.vtxOffset, previous.idxCount, command.vtxOffset, command.idxCount, vertexStride, k_MaxQuads);
+    const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, previousCommand, geometryCanMerge);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
         FrameProfiler::Count(breakCause);
         return false;
     }
 
-    s_renderCmds[s_lastQuadCommand].idxCount += command.idxCount;
+    s_renderCmds[previousCommand].idxCount += command.idxCount;
     return true;
 }
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
@@ -689,6 +698,99 @@ static void PreparePendingEditorDrawData(SDL_GPUCommandBuffer* commandBuffer)
     g_MuEditorCore.PrepareDrawData(commandBuffer);
 }
 #endif
+
+static bool BindReplayPipeline(const RenderCmd& command, Render::SdlGpuReplayState& state, const SDL_Rect& scissor)
+{
+    if (!command.pipeline)
+        return false;
+    if (!state.SelectPipeline(command.pipeline))
+        return true;
+
+    SDL_BindGPUGraphicsPipeline(s_renderPass, command.pipeline);
+    SDL_SetGPUScissor(s_renderPass, &scissor);
+    ++s_dbgPipelineBindsThisFrame;
+    return true;
+}
+
+static void PushReplayVertexUniforms(const void* data, std::size_t size, Render::SdlGpuReplayState& state)
+{
+    const auto* bytes = static_cast<const std::byte*>(data);
+    if (!state.SelectVertexUniforms({bytes, size}))
+        return;
+
+    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, data, static_cast<Uint32>(size));
+    ++s_dbgVertexUniformPushesThisFrame;
+}
+
+static void PushReplayFragmentUniforms(const FogUniform& uniforms, Render::SdlGpuReplayState& state)
+{
+    const auto bytes = std::as_bytes(std::span{&uniforms, 1u});
+    if (!state.SelectFragmentUniforms(bytes))
+        return;
+
+    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &uniforms, sizeof(uniforms));
+    ++s_dbgFragmentUniformPushesThisFrame;
+}
+
+static void BindReplayFragmentSampler(const RenderCmd& command, Render::SdlGpuReplayState& state)
+{
+    if (!state.SelectFragmentSampler(command.texture, command.sampler))
+        return;
+
+    const SDL_GPUTextureSamplerBinding samplerBinding{command.texture, command.sampler};
+    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &samplerBinding, 1);
+    ++s_dbgSamplerBindsThisFrame;
+}
+
+static void BindReplayIndexBuffer(SDL_GPUBuffer* buffer, Uint32 offset, SDL_GPUIndexElementSize elementSize,
+                                  Render::SdlGpuReplayState& state)
+{
+    if (!state.SelectIndexBuffer(buffer, offset, elementSize))
+        return;
+
+    const SDL_GPUBufferBinding indexBinding{buffer, offset};
+    SDL_BindGPUIndexBuffer(s_renderPass, &indexBinding, elementSize);
+}
+
+static void ReplayDrawCommand(const RenderCmd& command, bool boneDataReady, const SDL_Rect& scissor,
+                              Render::SdlGpuReplayState& state)
+{
+    const bool skinned = command.type == RenderCmdType::DrawSkinnedTriangles;
+    if (!command.texture || !command.sampler || (skinned && (!boneDataReady || !s_boneGpuBuf)) ||
+        !BindReplayPipeline(command, state, scissor))
+    {
+        return;
+    }
+
+    if (skinned)
+        PushReplayVertexUniforms(&command.skinningVu, sizeof(command.skinningVu), state);
+    else
+        PushReplayVertexUniforms(&command.vu, sizeof(command.vu), state);
+
+    const SDL_GPUBufferBinding vertexBinding{s_vtxGpuBuf, command.vtxOffset};
+    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vertexBinding, 1);
+
+    if (skinned && state.SelectVertexStorageBuffer(s_boneGpuBuf))
+    {
+        SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
+        SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
+    }
+
+    if (command.type == RenderCmdType::DrawIndexedQuads)
+        BindReplayIndexBuffer(s_quadIdxBuf, 0, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
+    else if (command.type == RenderCmdType::DrawIndexedStrip)
+        BindReplayIndexBuffer(s_stripIdxBuf, command.stripIdxOffset, SDL_GPU_INDEXELEMENTSIZE_16BIT, state);
+
+    BindReplayFragmentSampler(command, state);
+    PushReplayFragmentUniforms(command.fogUniform, state);
+
+    if (command.type == RenderCmdType::DrawIndexedQuads || command.type == RenderCmdType::DrawIndexedStrip)
+        SDL_DrawGPUIndexedPrimitives(s_renderPass, command.idxCount, 1, 0, 0, 0);
+    else
+        SDL_DrawGPUPrimitives(s_renderPass, command.vtxCount, 1, 0, 0);
+    ++s_dbgGpuDrawCallsThisFrame;
+}
+
 // CPU-side scratch buffer for quad strip indices accumulated during the frame.
 // Copied to GPU in one shot in EndFrame before the render pass.
 static std::vector<Uint16> s_stripIdxScratch;
@@ -744,39 +846,25 @@ static TTF_Font* s_ttfFontFixed = nullptr; // monospace
 static constexpr float k_DefaultFontPtSize = 14.0f;
 static constexpr float k_BigFontPtSize = 18.0f;
 
+#ifdef NDEBUG
+inline constexpr bool kAllowSystemFontFallback = false;
+#else
+inline constexpr bool kAllowSystemFontFallback = true;
+#endif
+
 // F-7 fix: Cached window dimensions, updated once per frame in BeginFrame().
 static int s_cachedWinW = 0;
 static int s_cachedWinH = 0;
 
-// Story 7.9.8 (AC-2): Discover a usable .ttf font file.
-// Searches game directory first (via SDL_GetBasePath), then system font paths.
-[[nodiscard]] static std::string FindFontPath()
+#if MU_HAS_SDL_TTF
+[[nodiscard]] static std::string BundledFontPath(const char* relativePath)
 {
-    // 1. Game-bundled font (preferred). Use SDL_GetBasePath() for exe-relative resolution
-    // instead of CWD-relative (F-6 fix).
-    std::filesystem::path gameFontDir;
-    const char* basePath = SDL_GetBasePath();
-    if (basePath)
-    {
-        gameFontDir = std::filesystem::path(basePath) / "Data" / "Font";
-    }
-    else
-    {
-        gameFontDir = "Data/Font"; // fallback to CWD if SDL_GetBasePath fails
-    }
-    if (std::filesystem::exists(gameFontDir))
-    {
-        for (const auto& entry : std::filesystem::directory_iterator(gameFontDir))
-        {
-            auto ext = entry.path().extension();
-            if (entry.is_regular_file() && (ext == ".ttf" || ext == ".otf" || ext == ".ttc"))
-            {
-                return entry.path().string();
-            }
-        }
-    }
+    return ResolveBundledFontPath(relativePath).string();
+}
 
-    // 2. System font fallback (platform-specific).
+[[nodiscard]] static std::string FindDeveloperFontPath()
+{
+#ifndef NDEBUG
     static const char* const k_SystemFontPaths[] = {
 #ifdef __APPLE__
         "/System/Library/Fonts/Supplemental/Arial.ttf",
@@ -799,9 +887,97 @@ static int s_cachedWinH = 0;
             return path;
         }
     }
+#endif
 
     return {};
 }
+
+static void CloseTtfFont(TTF_Font*& font)
+{
+    if (!font)
+        return;
+    TTF_CloseFont(font);
+    font = nullptr;
+}
+
+[[nodiscard]] static TTF_Font* OpenTtfFontRole(std::string_view family, std::string_view role,
+                                               const char* relativePath, float pointSize)
+{
+    const std::string packagedPath = BundledFontPath(relativePath);
+    if (TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize))
+    {
+        mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role,
+                                      packagedPath);
+        return font;
+    }
+
+    mu::log::Get("render")->error("SDL_ttf -- bundled family='{}' role='{}' path='{}' failed: {}", family, role,
+                                   packagedPath, SDL_GetError());
+    if (!kAllowSystemFontFallback)
+        return nullptr;
+
+    const std::string fallbackPath = FindDeveloperFontPath();
+    if (fallbackPath.empty())
+        return nullptr;
+
+    mu::log::Get("render")->warn(
+        "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}'", family, role,
+        fallbackPath);
+    TTF_Font* fallback = TTF_OpenFont(fallbackPath.c_str(), pointSize);
+    if (!fallback)
+    {
+        mu::log::Get("render")->error(
+            "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}' failed: {}", family,
+            role, fallbackPath, SDL_GetError());
+    }
+    return fallback;
+}
+
+static void WarmTtfFonts()
+{
+    static constexpr const char* k_WarmupGlyphs =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+        "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
+    TTF_Font* fonts[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
+    for (TTF_Font* font : fonts)
+    {
+        TTF_Text* warmup = TTF_CreateText(s_textEngine, font, k_WarmupGlyphs, 0);
+        if (!warmup)
+            continue;
+        TTF_GetGPUTextDrawData(warmup);
+        TTF_DestroyText(warmup);
+    }
+}
+
+[[nodiscard]] static bool LoadTtfFonts(std::string_view configuredFamily)
+{
+    const BundledFont& family = ResolveBundledFont(configuredFamily);
+    TTF_Font* normal = OpenTtfFontRole(family.family, "normal", family.regular, k_DefaultFontPtSize);
+    TTF_Font* bold = OpenTtfFontRole(family.family, "bold", family.bold, k_DefaultFontPtSize);
+    TTF_Font* big = OpenTtfFontRole(family.family, "big-bold", family.bold, k_BigFontPtSize);
+    TTF_Font* fixed =
+        OpenTtfFontRole(kBundledFixedFont.family, "fixed", kBundledFixedFont.regular, k_DefaultFontPtSize);
+    if (!normal || !bold || !big || !fixed)
+    {
+        CloseTtfFont(fixed);
+        CloseTtfFont(big);
+        CloseTtfFont(bold);
+        CloseTtfFont(normal);
+        return false;
+    }
+
+    CloseTtfFont(s_ttfFontFixed);
+    CloseTtfFont(s_ttfFontBig);
+    CloseTtfFont(s_ttfFontBold);
+    CloseTtfFont(s_ttfFont);
+    s_ttfFont = normal;
+    s_ttfFontBold = bold;
+    s_ttfFontBig = big;
+    s_ttfFontFixed = fixed;
+    WarmTtfFonts();
+    return true;
+}
+#endif
 
 // ---------------------------------------------------------------------------
 // TextureRegistry: maps caller-provided uint32_t ids to SDL_GPUTexture*.
@@ -1085,7 +1261,7 @@ public:
     // Init: Create GPU device, claim window, initialize pipelines and buffers.
     // Called once after window creation, before the game loop.
     // -----------------------------------------------------------------------
-    [[nodiscard]] static bool Init(void* pNativeWindow)
+    [[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily)
     {
         s_window = static_cast<SDL_Window*>(pNativeWindow);
         if (!s_window)
@@ -1097,8 +1273,11 @@ public:
         // Create GPU device with all supported shader formats.
         // SDL_gpu selects the platform backend automatically:
         //   Metal on macOS, Vulkan on Linux, D3D12 on Windows.
+        mu::log::Get("render")->info("SDL_gpu -- validation: {}",
+                                      Render::kGpuValidationEnabled ? "enabled" : "disabled");
         s_device = SDL_CreateGPUDevice(
-            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL, true, nullptr);
+            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+            Render::kGpuValidationEnabled, nullptr);
 
         if (!s_device)
         {
@@ -1239,77 +1418,24 @@ public:
         }
 
 #if MU_HAS_SDL_TTF
-        // Story 7.9.8 (AC-2): Initialize SDL_ttf GPU text engine.
         if (!TTF_Init())
         {
-            mu::log::Get("render")->warn("SDL_ttf -- TTF_Init failed: {}", SDL_GetError());
-            // Non-fatal: renderer works, text won't render via SDL_ttf.
+            mu::log::Get("render")->error("SDL_ttf -- TTF_Init failed: {}", SDL_GetError());
+            Shutdown();
+            return false;
         }
-        else
+        s_textEngine = TTF_CreateGPUTextEngine(s_device);
+        if (!s_textEngine)
         {
-            s_textEngine = TTF_CreateGPUTextEngine(s_device);
-            if (!s_textEngine)
-            {
-                mu::log::Get("render")->warn("SDL_ttf -- TTF_CreateGPUTextEngine failed: {}", SDL_GetError());
-                TTF_Quit();
-            }
-            else
-            {
-                const std::string fontPath = FindFontPath();
-                if (fontPath.empty())
-                {
-                    mu::log::Get("render")->warn("SDL_ttf -- no .ttf font found (checked Data/Font/ and system paths)");
-                }
-                else
-                {
-                    s_ttfFont = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
-                    if (!s_ttfFont)
-                    {
-                        mu::log::Get("render")->warn("SDL_ttf -- TTF_OpenFont(\"{}\") failed: {}", fontPath,
-                                                     SDL_GetError());
-                    }
-                    else
-                    {
-                        mu::log::Get("render")->info("SDL_ttf -- loaded font \"{}\" at {:.0f} pt", fontPath,
-                                                     k_DefaultFontPtSize);
-
-                        // F-1 fix: Pre-load font variants for bold, big, and fixed-width text.
-                        // All variants use the same .ttf file at different sizes.
-                        // Known limitation (F-4): SDL_ttf 3.x doesn't support weight selection
-                        // from a single .ttf, so bold appears identical to normal. To fix,
-                        // bundle a separate bold .ttf (e.g., NotoSans-Bold.ttf) in a follow-up.
-                        s_ttfFontBold = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
-                        s_ttfFontBig = TTF_OpenFont(fontPath.c_str(), k_BigFontPtSize);
-                        s_ttfFontFixed = TTF_OpenFont(fontPath.c_str(), k_DefaultFontPtSize);
-                        // Log which variants loaded (non-fatal if some fail).
-                        if (!s_ttfFontBold || !s_ttfFontBig || !s_ttfFontFixed)
-                        {
-                            mu::log::Get("render")->warn(
-                                "SDL_ttf -- some font variants failed to load (bold={} big={} fixed={})",
-                                s_ttfFontBold != nullptr, s_ttfFontBig != nullptr, s_ttfFontFixed != nullptr);
-                        }
-
-                        // Story 7.9.8 (AC-STD-NFR-1): Warm up glyph atlas with common glyphs.
-                        // Forces FreeType rasterization + GPU atlas upload at init rather than
-                        // incurring a latency spike on the first frame that renders text.
-                        static constexpr const char* k_WarmupGlyphs =
-                            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-                            "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
-                        TTF_Font* fontsToWarm[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
-                        for (TTF_Font* f : fontsToWarm)
-                        {
-                            if (!f)
-                                continue;
-                            TTF_Text* warmup = TTF_CreateText(s_textEngine, f, k_WarmupGlyphs, 0);
-                            if (warmup)
-                            {
-                                TTF_GetGPUTextDrawData(warmup); // populate atlas; discard draw data
-                                TTF_DestroyText(warmup);
-                            }
-                        }
-                    }
-                }
-            }
+            mu::log::Get("render")->error("SDL_ttf -- TTF_CreateGPUTextEngine failed: {}", SDL_GetError());
+            TTF_Quit();
+            Shutdown();
+            return false;
+        }
+        if (!LoadTtfFonts(fontFamily))
+        {
+            Shutdown();
+            return false;
         }
 #endif
 
@@ -1336,26 +1462,10 @@ public:
 #if MU_HAS_SDL_TTF
         // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
         // Close font variants first, then default font, then engine.
-        if (s_ttfFontFixed)
-        {
-            TTF_CloseFont(s_ttfFontFixed);
-            s_ttfFontFixed = nullptr;
-        }
-        if (s_ttfFontBig)
-        {
-            TTF_CloseFont(s_ttfFontBig);
-            s_ttfFontBig = nullptr;
-        }
-        if (s_ttfFontBold)
-        {
-            TTF_CloseFont(s_ttfFontBold);
-            s_ttfFontBold = nullptr;
-        }
-        if (s_ttfFont)
-        {
-            TTF_CloseFont(s_ttfFont);
-            s_ttfFont = nullptr;
-        }
+        CloseTtfFont(s_ttfFontFixed);
+        CloseTtfFont(s_ttfFontBig);
+        CloseTtfFont(s_ttfFontBold);
+        CloseTtfFont(s_ttfFont);
         if (s_textEngine)
         {
             TTF_DestroyGPUTextEngine(s_textEngine);
@@ -1454,8 +1564,7 @@ public:
         // so keep s_textureUpdates until EndFrame has submitted them.
         s_vtxOffset = 0u;
         s_renderCmds.clear();
-        s_lastTriangleCommand = kNoTriangleCommand;
-        s_lastQuadCommand = kNoQuadCommand;
+        s_previousDrawCommands.fill(kNoDrawCommand);
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -1472,8 +1581,13 @@ public:
         s_dbgRenderCmdsReplayedThisFrame = 0u;
         s_dbgGpuDrawCallsThisFrame = 0u;
         s_dbgMergedDrawsThisFrame = 0u;
+        s_dbgMerged2DDrawsThisFrame = 0u;
         s_dbgWhiteTextureDrawsThisFrame = 0u;
         s_dbgRealTextureDrawsThisFrame = 0u;
+        s_dbgPipelineBindsThisFrame = 0u;
+        s_dbgSamplerBindsThisFrame = 0u;
+        s_dbgVertexUniformPushesThisFrame = 0u;
+        s_dbgFragmentUniformPushesThisFrame = 0u;
         ++s_dbgFrameCount;
         s_vtxScratch.clear();
 
@@ -1776,19 +1890,15 @@ public:
 
         if (s_renderPass)
         {
-            // Sticky scissor. Some GPU backends (notably Metal via SDL_GPU) appear to
-            // drop scissor state when a new pipeline binds, so the photo preview's
-            // 119×141 scissor was respected for the first draw and ignored for later
-            // ones — the character rasterized past its UI slot. We track the most
-            // recently requested scissor and re-apply it before every draw command.
-            // When no scissor has been set yet we default to the full swapchain
-            // (same as SDL_GPU's implicit initial state).
+            // Track explicit state. Pipeline changes re-apply the active scissor because
+            // SDL GPU backends may discard it while binding a new pipeline.
             SDL_GPUViewport s_currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH),
                                               0.0f, 1.0f};
             SDL_Rect s_currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
 
             // Replay state and editor commands after texture invalidation, but skip
             // game draws because their deferred texture pointers may be dangling.
+            Render::SdlGpuReplayState replayState;
             for (const auto& cmd : s_renderCmds)
             {
                 if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
@@ -1802,14 +1912,16 @@ public:
                 case RenderCmdType::SetViewport:
                 {
                     s_currentViewport = cmd.viewport;
-                    SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
+                    if (replayState.SelectViewport(s_currentViewport))
+                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
                     break;
                 }
 
                 case RenderCmdType::SetScissor:
                 {
                     s_currentScissor = cmd.scissor;
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    if (replayState.SelectScissor(s_currentScissor))
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                     break;
                 }
 
@@ -1817,160 +1929,22 @@ public:
                 case RenderCmdType::EditorOverlay:
                 {
                     g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
-                    SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
+                    replayState.Invalidate();
+                    if (replayState.SelectViewport(s_currentViewport))
+                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
+                    if (replayState.SelectScissor(s_currentScissor))
+                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
                     break;
                 }
 #endif
 
                 case RenderCmdType::DrawTriangles:
-                {
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    // Sticky scissor: re-apply after pipeline bind (see note above).
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawSkinnedTriangles:
-                {
-                    if (!boneDataReady || !s_boneGpuBuf || !cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.skinningVu, sizeof(SkinningVertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBuffer* boneBuffer = s_boneGpuBuf;
-                    SDL_BindGPUVertexStorageBuffers(s_renderPass, 0, &boneBuffer, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawIndexedQuads:
-                {
-                    // Guard against dangling sampler/texture — scene transitions may
-                    // unload assets mid-frame before EndFrame replays deferred commands.
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBufferBinding idxBind{};
-                    idxBind.buffer = s_quadIdxBuf;
-                    idxBind.offset = 0;
-                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawIndexedStrip:
-                {
-                    // Guard against dangling sampler/texture — scene transitions may
-                    // unload assets mid-frame before EndFrame replays deferred commands.
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUBufferBinding idxBind{};
-                    idxBind.buffer = s_stripIdxBuf;
-                    idxBind.offset = cmd.stripIdxOffset;
-                    SDL_BindGPUIndexBuffer(s_renderPass, &idxBind, SDL_GPU_INDEXELEMENTSIZE_16BIT);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUIndexedPrimitives(s_renderPass, cmd.idxCount, 1, 0, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
-                    break;
-                }
-
                 case RenderCmdType::DrawTriangles2D:
                 {
-                    if (!cmd.texture || !cmd.sampler)
-                    {
-                        break;
-                    }
-                    // Story 7.9.8: Non-indexed 2D triangles for text atlas rendering.
-                    SDL_BindGPUGraphicsPipeline(s_renderPass, cmd.pipeline);
-                    SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    SDL_PushGPUVertexUniformData(s_cmdBuf, 0, &cmd.vu, sizeof(VertexUniforms));
-
-                    SDL_GPUBufferBinding vtxBind{};
-                    vtxBind.buffer = s_vtxGpuBuf;
-                    vtxBind.offset = cmd.vtxOffset;
-                    SDL_BindGPUVertexBuffers(s_renderPass, 0, &vtxBind, 1);
-
-                    SDL_GPUTextureSamplerBinding sampBind{};
-                    sampBind.texture = cmd.texture;
-                    sampBind.sampler = cmd.sampler;
-                    SDL_BindGPUFragmentSamplers(s_renderPass, 0, &sampBind, 1);
-
-                    SDL_PushGPUFragmentUniformData(s_cmdBuf, 0, &cmd.fogUniform, sizeof(FogUniform));
-                    SDL_DrawGPUPrimitives(s_renderPass, cmd.vtxCount, 1, 0, 0);
-                    ++s_dbgGpuDrawCallsThisFrame;
+                    ReplayDrawCommand(cmd, boneDataReady, s_currentScissor, replayState);
                     break;
                 }
                 } // switch
@@ -2035,11 +2009,16 @@ public:
         s_lastFrameStats.requestedDrawCalls = s_dbgDrawCallsThisFrame;
         s_lastFrameStats.submittedDrawCalls = s_dbgGpuDrawCallsThisFrame;
         s_lastFrameStats.mergedDrawCalls = s_dbgMergedDrawsThisFrame;
+        s_lastFrameStats.merged2DDrawCalls = s_dbgMerged2DDrawsThisFrame;
         s_lastFrameStats.commandCount = static_cast<std::uint32_t>(s_renderCmds.size());
         s_lastFrameStats.vertexBytes = s_dbgVtxBytesThisFrame;
         s_lastFrameStats.textureUploads = s_dbgTextureUploadsThisFrame;
         s_lastFrameStats.textureCreates = s_dbgTextureCreatesThisFrame;
         s_lastFrameStats.textureReleases = s_dbgTextureReleasesThisFrame;
+        s_lastFrameStats.pipelineBinds = s_dbgPipelineBindsThisFrame;
+        s_lastFrameStats.samplerBinds = s_dbgSamplerBindsThisFrame;
+        s_lastFrameStats.vertexUniformPushes = s_dbgVertexUniformPushesThisFrame;
+        s_lastFrameStats.fragmentUniformPushes = s_dbgFragmentUniformPushesThisFrame;
         if (IsFrameTimingEnabled())
         {
             const auto milliseconds = [](auto begin, auto end)
@@ -2054,13 +2033,17 @@ public:
         {
             const auto logger = mu::log::Get("render");
             logger->debug(
-                "[RENDER diag] frame={} draw_calls={} replayed={} merged={} cmds={} vtx_bytes={} tex={} fallback={} "
-                "white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={}",
+                "[RENDER diag] frame={} draw_calls={} replayed={} merged={} merged_2d={} cmds={} vtx_bytes={} tex={} "
+                "fallback={} "
+                "white_draws={} real_draws={} uploads={} creates={} releases={} invalidated={} tex2d={} bound={} "
+                "pipeline_binds={} sampler_binds={} vertex_uniform_pushes={} fragment_uniform_pushes={}",
                 s_dbgFrameCount, s_dbgDrawCallsThisFrame, s_dbgRenderCmdsReplayedThisFrame, s_dbgMergedDrawsThisFrame,
-                s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(), s_dbgFallbackTextureThisFrame,
-                s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame, s_dbgTextureUploadsThisFrame,
-                s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame, s_texturesInvalidated, m_texture2DEnabled,
-                m_boundTextureId);
+                s_dbgMerged2DDrawsThisFrame, s_renderCmds.size(), s_dbgVtxBytesThisFrame, s_textureMap.size(),
+                s_dbgFallbackTextureThisFrame, s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame,
+                s_dbgTextureUploadsThisFrame, s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame,
+                s_texturesInvalidated, m_texture2DEnabled, m_boundTextureId, s_dbgPipelineBindsThisFrame,
+                s_dbgSamplerBindsThisFrame,
+                s_dbgVertexUniformPushesThisFrame, s_dbgFragmentUniformPushesThisFrame);
 
             logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
                           s_lastFrameStats.frameMilliseconds, s_lastFrameStats.replayMilliseconds,
@@ -2420,6 +2403,16 @@ public:
         return s_ttfFontFixed ? s_ttfFontFixed : s_ttfFont;
     }
 
+    [[nodiscard]] bool ReloadTtfFonts(std::string_view fontFamily) override
+    {
+#if MU_HAS_SDL_TTF
+        return s_textEngine && LoadTtfFonts(fontFamily);
+#else
+        (void)fontFamily;
+        return false;
+#endif
+    }
+
     // F-7 fix: Cached window dimensions accessor (updated per-frame in BeginFrame).
     [[nodiscard]] int GetCachedWindowHeight() override
     {
@@ -2457,6 +2450,8 @@ public:
         cmd.vtxOffset = vtxOffset;
         cmd.vtxCount = static_cast<Uint32>(vertices.size());
         cmd.fogUniform = m_fogUniform;
+        cmd.blendMode = BlendMode::Alpha;
+        cmd.blendEnabled = true;
         // 2D ortho projection for text — Y-up to match SDL_ttf GPU convention.
         // SDL_ttf negates Y in the vertex data (see SDL_gpu_textengine.c: "In the GPU API
         // positive y-axis is upwards so the signs of the y-coords is reversed").
@@ -2464,11 +2459,26 @@ public:
         // drawX/drawY offset the text to the correct screen position.
         cmd.vu.mvp =
             glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
-        s_renderCmds.push_back(cmd);
+        FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
+        std::size_t& previousCommand = Render::PreviousDrawCommand(
+            s_previousDrawCommands, Render::DrawCommandFamily::TextTriangles2D);
+        if (MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex2D)))
+        {
+            ++s_dbgMergedDrawsThisFrame;
+            ++s_dbgMerged2DDrawsThisFrame;
+            FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
+            FrameProfiler::Count(FrameProfiler::Counter::Merged2DDraws);
+        }
+        else
+        {
+            s_renderCmds.push_back(cmd);
+            previousCommand = s_renderCmds.size() - 1;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
         FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
@@ -2714,17 +2724,36 @@ public:
         cmd.vtxOffset = vtxOffset;
         cmd.idxCount = drawQuads * 6;
         cmd.fogUniform = m_fogUniform;
+        cmd.blendMode = m_activeBlendMode;
+        cmd.blendEnabled = m_blendEnabled;
+        cmd.depthTestEnabled = m_depthTestEnabled;
+        cmd.depthMaskEnabled = m_depthMaskEnabled;
+        cmd.cullFaceEnabled = m_cullFaceEnabled;
         // 2D ortho MVP: maps [0,W]×[0,H] to NDC, replicating gluOrtho2D.
         // GLM_FORCE_DEPTH_ZERO_TO_ONE → correct Z [0,1] for Metal/Vulkan.
         // fogStart=fogEnd=0 → range=0 → vertex shader sets fogFactor=1.0 (no fog for 2D).
-        int winW = 0, winH = 0;
-        SDL_GetWindowSize(s_window, &winW, &winH);
-        cmd.vu.mvp = glm::ortho(0.0f, static_cast<float>(winW), 0.0f, static_cast<float>(winH), -1.0f, 1.0f);
-        s_renderCmds.push_back(cmd);
+        cmd.vu.mvp =
+            glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
+        FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
+        std::size_t& previousCommand = Render::PreviousDrawCommand(
+            s_previousDrawCommands, Render::DrawCommandFamily::ScreenQuads2D);
+        if (MergeAdjacentQuadCommand(cmd, previousCommand, sizeof(Vertex2D)))
+        {
+            ++s_dbgMergedDrawsThisFrame;
+            ++s_dbgMerged2DDrawsThisFrame;
+            FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
+            FrameProfiler::Count(FrameProfiler::Counter::Merged2DDraws);
+        }
+        else
+        {
+            s_renderCmds.push_back(cmd);
+            previousCommand = s_renderCmds.size() - 1;
+            FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
+            FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
+        }
 
         ++s_dbgDrawCallsThisFrame;
         s_dbgVtxBytesThisFrame += byteSize;
-        FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
         FrameProfiler::Count(FrameProfiler::Counter::VertexBytes, byteSize);
     }
 
@@ -2798,7 +2827,9 @@ public:
         cmd.depthMaskEnabled = m_depthMaskEnabled;
         cmd.cullFaceEnabled = m_cullFaceEnabled;
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
-        if (MergeAdjacentTriangleCommand(cmd))
+        std::size_t& previousCommand =
+            Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Triangles3D);
+        if (MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
@@ -2806,7 +2837,7 @@ public:
         else
         {
             s_renderCmds.push_back(cmd);
-            s_lastTriangleCommand = s_renderCmds.size() - 1;
+            previousCommand = s_renderCmds.size() - 1;
             FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
             FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
         }
@@ -2892,7 +2923,9 @@ public:
         cmd.depthMaskEnabled = m_depthMaskEnabled;
         cmd.cullFaceEnabled = m_cullFaceEnabled;
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
-        if (MergeAdjacentQuadCommand(cmd))
+        std::size_t& previousCommand =
+            Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Quads3D);
+        if (MergeAdjacentQuadCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
@@ -2900,7 +2933,7 @@ public:
         else
         {
             s_renderCmds.push_back(cmd);
-            s_lastQuadCommand = s_renderCmds.size() - 1;
+            previousCommand = s_renderCmds.size() - 1;
             FrameProfiler::Count(FrameProfiler::Counter::DrawCalls);
             FrameProfiler::Count(FrameProfiler::Counter::BatchDraws);
         }
@@ -3549,7 +3582,12 @@ private:
 
         // Rest-pose BMD geometry: one vertex storage buffer for packed bone rows, one uniform buffer.
         s_vertShaderSkinned =
-            createShader("skinned_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 1, /*fatal=*/false);
+            createShader("skinned_textured", "vert", SDL_GPU_SHADERSTAGE_VERTEX, 0, 1, 1, /*fatal=*/true);
+        if (!s_vertShaderSkinned)
+        {
+            ReleaseShaders();
+            return false;
+        }
 
         mu::log::Get("render")->info("SDL_gpu -- shaders loaded for driver: {}", driverName ? driverName : "unknown");
         return true;
@@ -3830,8 +3868,8 @@ private:
 
     // -----------------------------------------------------------------------
     // Story 4.3.2 (AC-8): CreatePipelines
-    // Builds every blend variant. The five non-skinned sets selected by current
-    // draw callers are required; unused 2D depth-on and skinned sets are optional.
+    // Builds every blend variant. The selected 3D, 2D depth-off, and skinned sets
+    // are required; unused 2D depth-on remains optional.
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
     {
@@ -3937,19 +3975,16 @@ private:
                 s_pipelines3DDepthReadOnly[i], blendState,
                 {"3d-depth-read-only", table[i].name, i, true, false, VertexLayout::ThreeDimensional, false});
 
-            if (s_vertShaderSkinned)
-            {
-                buildOptionalPipeline(s_pipelinesSkinned[i], blendState,
-                                      {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
-                buildOptionalPipeline(s_pipelinesSkinnedNoCull[i], blendState,
-                                      {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
-                buildOptionalPipeline(
-                    s_pipelinesSkinnedDepthOff[i], blendState,
-                    {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
-                buildOptionalPipeline(
-                    s_pipelinesSkinnedDepthReadOnly[i], blendState,
-                    {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
-            }
+            buildRequiredPipeline(s_pipelinesSkinned[i], blendState,
+                                  {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
+            buildRequiredPipeline(s_pipelinesSkinnedNoCull[i], blendState,
+                                  {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
+            buildRequiredPipeline(
+                s_pipelinesSkinnedDepthOff[i], blendState,
+                {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
+            buildRequiredPipeline(
+                s_pipelinesSkinnedDepthReadOnly[i], blendState,
+                {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});
         }
 
         if (requiredFailureCount != 0)
@@ -4496,9 +4531,9 @@ private:
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow)
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily)
 {
-    return MuRendererSDLGpu::Init(pNativeWindow);
+    return MuRendererSDLGpu::Init(pNativeWindow, fontFamily);
 }
 
 void WaitForSDLGpuIdle()
