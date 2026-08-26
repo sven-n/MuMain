@@ -45,8 +45,9 @@ buildable for them. See the per-platform notes when that work lands.
 | Windows | x86 | on / off | `MUnique.Client.Library.dll` (win-x86 AOT) | Full client |
 | Linux | x86 | - | none | Not supported (see below) |
 
-Hosted Actions build only the primary Windows native x64 Release, editor-OFF
-runtime. Build every other supported row locally using the setup guides above.
+Actions validate Windows native x64 Release, Linux x64 Release, and macOS arm64
+Release, all with the editor OFF; only Windows publishes a runtime artifact.
+Build every other supported row locally using the setup guides above.
 
 > **Why no 32-bit Linux?** .NET has no 32-bit Linux runtime at all - `dotnet
 > publish -r linux-x86` fails with `NETSDK1203` ("AOT is not supported"). A
@@ -110,8 +111,9 @@ Actions publish two independent release streams:
   trees for `src/bin/Data/` and `src/bin/fonts/`, so unchanged data is reused
   across code releases.
 
-Linux, macOS, Windows x86, Debug, and editor-ON configurations are not built by
-Actions; build locally when one is required.
+Linux x64 Release and macOS arm64 Release are build-and-test checks only; they
+do not upload artifacts. Windows x86, Debug, editor-ON, MinGW, and other
+configurations are not built by Actions; build locally when one is required.
 
 ### Assemble a release
 

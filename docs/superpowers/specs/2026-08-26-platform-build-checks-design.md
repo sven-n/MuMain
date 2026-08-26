@@ -22,6 +22,11 @@ the runtime output. Neither job uploads artifacts.
 Windows remains the only uploaded runtime. Semantic Release waits for all
 three platform checks, then publishes the Windows no-data archive.
 
+The GitHub release plugin does not comment on resolved pull requests. Fork
+history contains upstream pull request numbers that do not exist in this
+repository; comment discovery otherwise fails after a successful release
+publish.
+
 The standalone Linux and MinGW matrix workflows remain deleted. Developers
 build other architectures, configurations, and editor variants locally.
 
@@ -34,5 +39,5 @@ pushes continue to bypass code CI and use the independent data-assets workflow.
 
 The workflow contract checks exact job order, fixed platform configurations,
 absence of matrices and non-Windows uploads, release dependencies, and updated
-documentation. YAML, JSON, CMake asset tests, and whitespace checks remain
-required.
+documentation. It also requires GitHub success comments to remain disabled.
+YAML, JSON, CMake asset tests, and whitespace checks remain required.

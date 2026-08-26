@@ -179,8 +179,10 @@ jobs_block_match = re.search(r"(?ms)^jobs:\n(.*)$", ci)
 jobs_block = jobs_block_match.group(1) if jobs_block_match else ""
 job_names = re.findall(r"(?m)^  ([\w-]+):\n", jobs_block)
 check(
-    job_names == ["quality", "build-windows", "release"],
-    f"CI jobs must be quality, build-windows, release; found {job_names}",
+    job_names
+    == ["quality", "build-windows", "build-linux", "build-macos", "release"],
+    "CI jobs must be quality, build-windows, build-linux, build-macos, "
+    f"release; found {job_names}",
 )
 for ignored_path in ("src/bin/Data/**", "src/bin/fonts/**"):
     check(
@@ -190,6 +192,8 @@ for ignored_path in ("src/bin/Data/**", "src/bin/fonts/**"):
 
 quality_job = job(ci, "quality")
 native_job = job(ci, "build-windows")
+linux_job = job(ci, "build-linux")
+macos_job = job(ci, "build-macos")
 release_job = job(ci, "release")
 
 quality_detection = step(quality_job, "quality", "Detect changed C++ files")
@@ -289,7 +293,86 @@ check(
     "Main Windows job must upload exactly one runtime artifact",
 )
 
-check("needs: [quality, build-windows]" in release_job, "Release must need quality and main runtime")
+for platform_job, job_name, display_name, runner in (
+    (linux_job, "build-linux", "Linux Native Build (x64, Release, editor OFF)", "ubuntu-latest"),
+    (macos_job, "build-macos", "macOS Native Build (arm64, Release, editor OFF)", "macos-latest"),
+):
+    check("strategy:" not in platform_job, f"{display_name} must not use a matrix")
+    check("matrix." not in platform_job, f"{display_name} must use fixed values")
+    check(
+        "actions/upload-artifact" not in platform_job,
+        f"{display_name} must not upload artifacts",
+    )
+    for required in (
+        f"name: {display_name}",
+        f"runs-on: {runner}",
+        "if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'",
+    ):
+        check(required in platform_job, f"{display_name} missing {required}")
+
+linux_configure = step(linux_job, "build-linux", "Configure CMake")
+for required in (
+    "cmake --preset linux-x64",
+    "-B out/build/linux-ci",
+    "-DENABLE_EDITOR=OFF",
+    "-DMU_COPY_RUNTIME_ASSETS=OFF",
+    "-DBUILD_TESTING=ON",
+):
+    check(required in linux_configure, f"Linux configure missing {required}")
+check(
+    "cmake --build out/build/linux-ci --config Release"
+    in step(linux_job, "build-linux", "Build"),
+    "Linux check must build Release",
+)
+check(
+    "ctest --test-dir out/build/linux-ci --build-config Release"
+    in step(linux_job, "build-linux", "Run tests"),
+    "Linux check must run Release tests",
+)
+linux_validation = step(linux_job, "build-linux", "Validate runtime")
+for required in (
+    'runtime_directory="out/build/linux-ci/src/Release"',
+    '"$runtime_directory/Main"',
+    '"$runtime_directory/MUnique.Client.Library.so"',
+    '"$runtime_directory/config.ini"',
+    '"$runtime_directory/shaders"',
+):
+    check(required in linux_validation, f"Linux validation missing {required}")
+
+macos_configure = step(macos_job, "build-macos", "Configure CMake")
+for required in (
+    "cmake --preset macos-arm64",
+    "-B out/build/macos-ci",
+    "-DENABLE_EDITOR=OFF",
+    "-DMU_COPY_RUNTIME_ASSETS=OFF",
+    "-DBUILD_TESTING=ON",
+    "-DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)",
+):
+    check(required in macos_configure, f"macOS configure missing {required}")
+check(
+    "cmake --build out/build/macos-ci --config Release"
+    in step(macos_job, "build-macos", "Build"),
+    "macOS check must build Release",
+)
+check(
+    "ctest --test-dir out/build/macos-ci --build-config Release"
+    in step(macos_job, "build-macos", "Run tests"),
+    "macOS check must run Release tests",
+)
+macos_validation = step(macos_job, "build-macos", "Validate runtime")
+for required in (
+    'runtime_directory="out/build/macos-ci/src/Release/Main.app/Contents/MacOS"',
+    '"$runtime_directory/Main"',
+    '"$runtime_directory/MUnique.Client.Library.dylib"',
+    '"$runtime_directory/config.ini"',
+    '"$runtime_directory/shaders"',
+):
+    check(required in macos_validation, f"macOS validation missing {required}")
+
+check(
+    "needs: [quality, build-windows, build-linux, build-macos]" in release_job,
+    "Release must need quality and all hosted platform checks",
+)
 release_download = step(release_job, "release", "Download runtime artifact")
 for required in (
     "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
@@ -315,12 +398,18 @@ github_plugins = [
     if isinstance(plugin, list) and plugin and plugin[0] == "@semantic-release/github"
 ]
 check(len(github_plugins) == 1, "Release config must contain one GitHub plugin")
+github_options = {}
 release_assets = []
 if len(github_plugins) == 1 and len(github_plugins[0]) == 2:
     options = github_plugins[0][1]
     if isinstance(options, dict):
+        github_options = options
         release_assets = options.get("assets", [])
 check(release_assets == EXPECTED_RELEASE_ASSETS, "Semantic Release must publish only the no-data runtime")
+check(
+    github_options.get("successCommentCondition") is False,
+    "Semantic Release must skip fork-incompatible success comments",
+)
 
 for required in (
     "workflow_dispatch:",
@@ -366,6 +455,9 @@ for required in (
 
 for required in (
     "Windows native x64 Release",
+    "Linux x64 Release",
+    "macOS arm64 Release",
+    "only Windows",
     "data-<id>",
     "MU_COPY_RUNTIME_ASSETS=OFF",
     "build locally",
@@ -373,6 +465,9 @@ for required in (
     check(required in build_guide, f"Build guide missing distribution policy: {required}")
 for required in (
     "Windows native x64 Release",
+    "Linux x64 Release",
+    "macOS arm64 Release",
+    "only Windows",
     "separate data release",
     "build locally",
 ):

@@ -63,13 +63,14 @@ What needs to be done for Season 6:
 
 ## Release downloads
 
-GitHub Actions publishes one client runtime: Windows native x64 Release,
-editor OFF. The runtime excludes `Data/` and `fonts/`; download the
+CI validates Windows native x64 Release, Linux x64 Release, and
+macOS arm64 Release, all with the editor OFF; only Windows publishes a client
+runtime. The runtime excludes `Data/` and `fonts/`; download the
 separate data release tagged `data-<id>` and extract both archives into the
 same directory.
 
-Linux, macOS, x86, Debug, and editor builds remain supported where listed
-below, but are not hosted artifacts. Whoever needs one must build locally.
+x86, Debug, editor-ON, MinGW, and other configurations remain supported where
+listed below, but are not hosted artifacts. Whoever needs one must build locally.
 See the [build guide](docs/build/README.md#hosted-releases) for checksum and
 assembly commands.
 

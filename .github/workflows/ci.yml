@@ -493,9 +493,149 @@ jobs:
           path: out/build/windows-ci-x64-release/src/Release/
           if-no-files-found: error
 
+  build-linux:
+    name: Linux Native Build (x64, Release, editor OFF)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake ninja-build gcc g++ \
+            libgl1-mesa-dev libglu1-mesa-dev \
+            libx11-dev libxext-dev libxrandr-dev libxinerama-dev \
+            libxcursor-dev libxi-dev libxss-dev libxtst-dev libxxf86vm-dev \
+            libwayland-dev libxkbcommon-dev wayland-protocols \
+            libasound2-dev libpulse-dev \
+            libssl-dev libcurl4-openssl-dev libturbojpeg0-dev \
+            glslang-tools spirv-cross \
+            pkg-config
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/linux-ci/_deps
+            .nuget
+          key: linux-x64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: linux-x64-release-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset linux-x64
+          -B out/build/linux-ci
+          -DENABLE_EDITOR=OFF
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+
+      - name: Build
+        run: cmake --build out/build/linux-ci --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/linux-ci --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+      - name: Validate runtime
+        run: |
+          runtime_directory="out/build/linux-ci/src/Release"
+          for path in \
+            "$runtime_directory/Main" \
+            "$runtime_directory/MUnique.Client.Library.so" \
+            "$runtime_directory/config.ini" \
+            "$runtime_directory/shaders"
+          do
+            if [ ! -e "$path" ]; then
+              echo "Missing required runtime path: $path" >&2
+              exit 1
+            fi
+          done
+          for path in "$runtime_directory/Data" "$runtime_directory/fonts"; do
+            if [ -e "$path" ]; then
+              echo "Unexpected bundled game data: $path" >&2
+              exit 1
+            fi
+          done
+
+  build-macos:
+    name: macOS Native Build (arm64, Release, editor OFF)
+    if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install build tools
+        run: brew install cmake ninja openssl@3 curl brotli glslang spirv-cross
+
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            out/build/macos-ci/_deps
+            .nuget
+          key: macos-arm64-release-deps-${{ hashFiles('CMakeLists.txt', 'src/CMakeLists.txt', 'ClientLibrary/**/*.csproj', 'ClientLibrary/**/*.props') }}
+          restore-keys: macos-arm64-release-deps-
+
+      - name: Configure CMake
+        run: >
+          cmake --preset macos-arm64
+          -B out/build/macos-ci
+          -DENABLE_EDITOR=OFF
+          -DMU_COPY_RUNTIME_ASSETS=OFF
+          -DBUILD_TESTING=ON
+          -DOPENSSL_ROOT_DIR=$(brew --prefix openssl@3)
+
+      - name: Build
+        run: cmake --build out/build/macos-ci --config Release
+
+      - name: Run tests
+        run: >
+          ctest --test-dir out/build/macos-ci --build-config Release
+          --output-on-failure
+          --no-tests=error
+
+      - name: Validate runtime
+        run: |
+          runtime_directory="out/build/macos-ci/src/Release/Main.app/Contents/MacOS"
+          for path in \
+            "$runtime_directory/Main" \
+            "$runtime_directory/MUnique.Client.Library.dylib" \
+            "$runtime_directory/config.ini" \
+            "$runtime_directory/shaders"
+          do
+            if [ ! -e "$path" ]; then
+              echo "Missing required runtime path: $path" >&2
+              exit 1
+            fi
+          done
+          for path in "$runtime_directory/Data" "$runtime_directory/fonts"; do
+            if [ -e "$path" ]; then
+              echo "Unexpected bundled game data: $path" >&2
+              exit 1
+            fi
+          done
+
   release:
     name: Semantic Release
-    needs: [quality, build-windows]
+    needs: [quality, build-windows, build-linux, build-macos]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
