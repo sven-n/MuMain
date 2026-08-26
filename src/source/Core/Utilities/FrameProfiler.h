@@ -40,6 +40,7 @@ enum class Counter : int
     DrawCalls,
     MergedDraws,
     Merged2DDraws,
+    GlyphUploads,
     VertexBytes,
     TextureUploads,
     BatchDraws,

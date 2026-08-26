@@ -2,7 +2,7 @@
 
 #include "Core/Utilities/FrameProfiler.h"
 
-TEST_CASE("renderer counters follow nested frame passes [core][profiling]")
+TEST_CASE("renderer counters follow nested frame passes [core][profiling][frame_profiler]")
 {
     using Counter = FrameProfiler::Counter;
     using Pass = FrameProfiler::Pass;
@@ -18,6 +18,7 @@ TEST_CASE("renderer counters follow nested frame passes [core][profiling]")
             FRAME_PROFILE(Objects);
             FrameProfiler::Count(Counter::MergedDraws, 2);
             FrameProfiler::Count(Counter::Merged2DDraws);
+            FrameProfiler::Count(Counter::GlyphUploads, 3);
         }
 
         CHECK(FrameProfiler::CurrentPass() == Pass::Terrain);
@@ -27,14 +28,16 @@ TEST_CASE("renderer counters follow nested frame passes [core][profiling]")
     CHECK(FrameProfiler::CounterValue(Pass::Terrain, Counter::DrawCalls) == 1);
     CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::MergedDraws) == 2);
     CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::Merged2DDraws) == 1);
+    CHECK(FrameProfiler::CounterValue(Pass::Objects, Counter::GlyphUploads) == 3);
     CHECK(FrameProfiler::CounterValue(Counter::MergedDraws) == 2);
     CHECK(FrameProfiler::CounterValue(Counter::Merged2DDraws) == 1);
+    CHECK(FrameProfiler::CounterValue(Counter::GlyphUploads) == 3);
 
     FrameProfiler::g_CountersEnabled = false;
     FrameProfiler::ResetCounters();
 }
 
-TEST_CASE("frame profile macro supports two scopes on one source line [core][profiling]")
+TEST_CASE("frame profile macro supports two scopes on one source line [core][profiling][frame_profiler]")
 {
     { FRAME_PROFILE(Terrain); } { FRAME_PROFILE(Objects); }
     CHECK(true);

@@ -1,12 +1,11 @@
 #pragma once
 
-
+#include "Render/Text/SdlTtfTextCache.h"
 #include "UI/Legacy/UIControls.h"
 
 #include <string>
 
 struct TTF_Font;
-struct TTF_Text;
 
 class CUIRenderTextSDLTtf final : public IUIRenderText
 {
@@ -34,7 +33,7 @@ private:
     DWORD m_textColor = 0xFFFFFFFFu;
     DWORD m_backColor = 0u;
     TTF_Font* m_activeFont = nullptr;
-    TTF_Text* m_ttfText = nullptr;
+    mutable Render::Text::SdlTtfTextCache m_textCache;
     std::string m_utf8Scratch;
     mutable std::wstring m_measureWideScratch;
     mutable std::string m_measureUtf8Scratch;
