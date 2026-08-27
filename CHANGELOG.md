@@ -1,3 +1,11 @@
+## [1.1.5](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.4...v1.1.5) (2026-08-27)
+
+### Bug Fixes
+
+* **release:** publish all runtime assets ([9808288](https://github.com/yesid-bocanegra/MuMain/commit/9808288bd4b7adae4bfe836b1d9dbcdc73b24880))
+* **ui:** bound Senatus array initialization ([12e53c8](https://github.com/yesid-bocanegra/MuMain/commit/12e53c8c8ac276b2e0a59b21ab0ae697ef2761fd))
+* **ui:** restore labels and responsive layouts ([c336a27](https://github.com/yesid-bocanegra/MuMain/commit/c336a27ef1ec6ae4e5433201d93dc53845de489e))
+
 ## [1.1.4](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.3...v1.1.4) (2026-08-27)
 
 ### Bug Fixes
