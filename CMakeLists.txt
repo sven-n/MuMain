@@ -114,7 +114,8 @@ if(MU_ENABLE_SHADER_COMPILATION)
         )
         add_custom_command(
             OUTPUT "${dxil}"
-            COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main -Fo "${dxil}" "${src}"
+            COMMAND "${DXC_EXE}" -T "${dxil_profile}" -E main
+                -D MU_D3D12_RAW_STORAGE_BUFFER=1 -Fo "${dxil}" "${src}"
             DEPENDS "${src}" "${MU_SHADER_COMPILATION_STAMP}" "${DXC_EXE}"
             COMMENT "HLSL to DXIL: ${shader_name}.${stage}.hlsl"
             VERBATIM

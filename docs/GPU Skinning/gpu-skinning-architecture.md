@@ -49,10 +49,10 @@ The renderer appends these rows to per-frame bone scratch storage. The command
 stores the starting row and bone count. `EndFrame()` uploads the combined data
 to one SDL GPU storage buffer and binds it at vertex storage slot 0.
 
-Upstream's corrected `BoneUBO` slot-2 documentation does not transfer directly:
-the downstream HLSL declares `StructuredBuffer<float4> boneRows` at
-`register(t0, space0)`, matching the SDL GPU vertex-storage slot-0 binding.
-There is no downstream slot-1/slot-2 inconsistency.
+Upstream's corrected `BoneUBO` slot-2 documentation does not transfer directly.
+The downstream HLSL binds `boneRows` at `register(t0, space0)`, using a raw
+`ByteAddressBuffer` for D3D12 and a structured buffer elsewhere. Both match the
+SDL GPU vertex-storage slot-0 binding.
 
 ## Palette deduplication
 

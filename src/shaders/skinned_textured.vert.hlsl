@@ -1,5 +1,10 @@
 // GPU bone skinning for BMD rest-pose geometry.
+#ifdef MU_D3D12_RAW_STORAGE_BUFFER
+ByteAddressBuffer boneRows : register(t0, space0);
+static const uint BoneRowSizeBytes = 16;
+#else
 StructuredBuffer<float4> boneRows : register(t0, space0);
+#endif
 
 cbuffer Skinning : register(b0, space1)
 {
@@ -33,6 +38,13 @@ struct VSOutput
     float clipDist : SV_ClipDistance0;
 };
 
+#ifdef MU_D3D12_RAW_STORAGE_BUFFER
+float4 loadBoneRow(uint row)
+{
+    return asfloat(boneRows.Load4(row * BoneRowSizeBytes));
+}
+#endif
+
 float3 transformPosition(float3 position, int boneIndex)
 {
     if (boneIndex < 0 || boneIndex >= int(palette.y))
@@ -41,9 +53,15 @@ float3 transformPosition(float3 position, int boneIndex)
     }
 
     const uint row = palette.x + uint(boneIndex) * 3;
+#ifdef MU_D3D12_RAW_STORAGE_BUFFER
+    const float4 row0 = loadBoneRow(row);
+    const float4 row1 = loadBoneRow(row + 1);
+    const float4 row2 = loadBoneRow(row + 2);
+#else
     const float4 row0 = boneRows[row];
     const float4 row1 = boneRows[row + 1];
     const float4 row2 = boneRows[row + 2];
+#endif
     float3 transformed;
 
     if (boneScaleAndRestPoseScale.x == 1.0)
@@ -73,9 +91,15 @@ float3 transformNormal(float3 normal, int boneIndex)
     }
 
     const uint row = palette.x + uint(boneIndex) * 3;
+#ifdef MU_D3D12_RAW_STORAGE_BUFFER
+    return float3(dot(loadBoneRow(row).xyz, normal),
+                  dot(loadBoneRow(row + 1).xyz, normal),
+                  dot(loadBoneRow(row + 2).xyz, normal));
+#else
     return float3(dot(boneRows[row].xyz, normal),
                   dot(boneRows[row + 1].xyz, normal),
                   dot(boneRows[row + 2].xyz, normal));
+#endif
 }
 
 float2 getTextureCoordinates(float2 restCoordinates, float3 normal)
