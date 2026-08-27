@@ -1,3 +1,10 @@
+## [1.1.4](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.3...v1.1.4) (2026-08-27)
+
+### Bug Fixes
+
+* **d3d12:** read skinned bones from raw buffer ([07d0595](https://github.com/yesid-bocanegra/MuMain/commit/07d0595e84a29ba8069ef6c260067fc3b3260b95))
+* **dotnet:** defer managed symbol resolution ([8167839](https://github.com/yesid-bocanegra/MuMain/commit/81678399afee283d0f0b491ddada034db520667c))
+
 ## [1.1.3](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.2...v1.1.3) (2026-08-27)
 
 ### Bug Fixes
