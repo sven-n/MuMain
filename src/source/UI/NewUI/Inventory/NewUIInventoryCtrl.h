@@ -69,6 +69,7 @@ namespace SEASON3B
         int GetTargetLinealPos(CNewUIInventoryCtrl* pDest);
 
         bool IsVisible() const;
+        CNewUIObj* GetLayoutOwner() const override;
         void ShowPickedItem();
         void HidePickedItem();
 
@@ -231,6 +232,7 @@ namespace SEASON3B
         EVENT_STATE GetEventState();
 
         CNewUIObj* GetOwner() const;
+        CNewUIObj* GetLayoutOwner() const override;
         bool IsVisible() const;
         void ShowInventory();
         void HideInventory();

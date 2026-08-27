@@ -1876,6 +1876,7 @@ bool CNewUISystem::Update()
         m_pNewItemMng->Update();
     }
 
+    bool result = false;
     if (m_pNewUIMng)
     {
         if (!MouseLButton)
@@ -1895,9 +1896,10 @@ bool CNewUISystem::Update()
         }
 
         m_pNewUIMng->UpdateKeyEvent();
-        return m_pNewUIMng->Update();
+        result = m_pNewUIMng->Update();
     }
-    return false;
+
+    return result;
 }
 
 bool CNewUISystem::Render()

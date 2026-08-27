@@ -30,6 +30,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Scaling/UITransform.h"
 
 // External declarations
 extern int DeleteGuildIndex;
@@ -383,10 +384,6 @@ bool NewRenderLogInScene(HDC hDC)
     // Play login music (called every frame — PlayMp3 no-ops if already playing)
     ::PlayMp3(MUSIC_LOGIN_THEME);
 
-    int Width, Height;
-
-    Height = REFERENCE_HEIGHT;
-    Width = GetScreenWidth();
     mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
 
     // Set ViewFar BEFORE BeginOpengl so the projection matrix covers the full render distance
@@ -397,7 +394,8 @@ bool NewRenderLogInScene(HDC hDC)
 #endif
     g_Camera.ViewNear = 100.f;  // Push near plane out to preserve z-buffer precision
 
-    BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
+    const auto viewport = UI::Scaling::FullReferenceViewport();
+    BeginOpengl(viewport.x, viewport.y, viewport.width, viewport.height);
 
     // LoginScene doesn't call CreateFrustrum (DefaultCamera tour mode angles differ from
     // legacy hardcoded values). Instead, TestFrustrum2D is bypassed for LOG_IN_SCENE and

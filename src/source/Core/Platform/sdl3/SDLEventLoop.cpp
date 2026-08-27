@@ -4,7 +4,10 @@
 #include "Core/Platform/MuPlatform.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "UI/Scaling/UITransform.h"
 #include <SDL3/SDL.h>
+
+#include <algorithm>
 
 // SDL text input buffer (SDLKeyboardState.cpp) — populated here, read by UIControls.
 // [VS1-SDL-INPUT-TEXT]
@@ -30,6 +33,8 @@ void SetTargetFps(double fps);
 // Throttled FPS when inactive in fullscreen.
 // Must match REFERENCE_FPS in ZzzAI.h — duplicated to avoid Platform->Gameplay coupling.
 constexpr double INACTIVE_REFERENCE_FPS = 25.0;
+constexpr int kReferenceWidth = 640;
+constexpr int kReferenceHeight = 480;
 
 // Mouse state (ZzzOpenglUtil.cpp) — cleared on focus-loss in windowed mode,
 // and populated from SDL mouse events in PollEvents(). [VS1-SDL-INPUT-MOUSE]
@@ -49,11 +54,13 @@ extern int MouseWheel;
 // [VS1-SDL-INPUT-MOUSE]
 extern int MouseX;
 extern int MouseY;
+extern unsigned int WindowWidth;
+extern unsigned int WindowHeight;
 extern int g_iNoMouseTime;
 extern int g_iMousePopPosition_x;
 extern int g_iMousePopPosition_y;
-extern float g_fScreenRate_x;
-extern float g_fScreenRate_y;
+extern float g_fWindowMouseX;
+extern float g_fWindowMouseY;
 
 namespace
 {
@@ -226,24 +233,16 @@ bool SDLEventLoop::PollEvents()
         // in WndProc (MuMain.cpp). Coordinates normalized to 640x480 virtual space.
         case SDL_EVENT_MOUSE_MOTION:
             // SDL3: event.motion.x/y are float (window-relative pixels).
-            // Divide by screen rate to map to 640x480 virtual coordinate space.
-            MouseX = static_cast<int>(event.motion.x / g_fScreenRate_x);
-            MouseY = static_cast<int>(event.motion.y / g_fScreenRate_y);
-            if (MouseX < 0)
+            // Preserve raw pixels for panel hit testing. World input stays in
+            // full-window screen-overlay coordinates.
+            g_fWindowMouseX = event.motion.x;
+            g_fWindowMouseY = event.motion.y;
             {
-                MouseX = 0;
-            }
-            if (MouseX > 640)
-            {
-                MouseX = 640;
-            }
-            if (MouseY < 0)
-            {
-                MouseY = 0;
-            }
-            if (MouseY > 480)
-            {
-                MouseY = 480;
+                const auto transform = UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight);
+                MouseX =
+                    std::clamp(static_cast<int>(UI::Scaling::LogicalX(transform, event.motion.x)), 0, kReferenceWidth);
+                MouseY =
+                    std::clamp(static_cast<int>(UI::Scaling::LogicalY(transform, event.motion.y)), 0, kReferenceHeight);
             }
             break;
 

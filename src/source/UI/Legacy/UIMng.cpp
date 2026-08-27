@@ -19,6 +19,7 @@
 #include "UIControls.h"
 #include "Network/Server/ServerListManager.h"
 #include "Core/Utilities/Log/MuLogger.h"
+#include "UI/Scaling/UITransform.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -823,6 +824,9 @@ void CUIMng::Render()
     if (UIM_SCENE_NONE == m_nScene)
         return;
 
+    const auto previousTransform = UI::Scaling::GetActiveTransform();
+    UI::Scaling::SetActiveTransform(UI::Scaling::LegacyUiTransform(WindowWidth, WindowHeight));
+
     m_CharInfoBalloonMng.Render();
 
     CWin* pWin;
@@ -832,6 +836,8 @@ void CUIMng::Render()
         pWin = (CWin*)m_WinList.GetPrev(position);
         pWin->Render();
     }
+
+    UI::Scaling::SetActiveTransform(previousTransform);
 }
 
 void CUIMng::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)

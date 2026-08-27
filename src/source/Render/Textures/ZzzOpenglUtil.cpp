@@ -568,20 +568,30 @@ void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
 
 float ConvertX(float x)
 {
-    return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
+    return x * g_fScreenRate_x;
 }
 
 float ConvertY(float y)
 {
-    return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
+    return y * g_fScreenRate_y;
+}
+
+float ConvertPositionX(float x)
+{
+    return ConvertX(x) + g_fScreenOffset_x;
+}
+
+float ConvertPositionY(float y)
+{
+    return ConvertY(y) + g_fScreenOffset_y;
 }
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
-    x = x * WindowWidth / REFERENCE_WIDTH;
-    y = y * WindowHeight / REFERENCE_HEIGHT;
-    Width = Width * WindowWidth / REFERENCE_WIDTH;
-    Height = Height * WindowHeight / REFERENCE_HEIGHT;
+    x = static_cast<int>(ConvertPositionX(static_cast<float>(x)));
+    y = static_cast<int>(ConvertPositionY(static_cast<float>(y)));
+    Width = static_cast<int>(ConvertX(static_cast<float>(Width)));
+    Height = static_cast<int>(ConvertY(static_cast<float>(Height)));
 
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
@@ -1045,8 +1055,8 @@ void RenderColor(float x, float y, float Width, float Height, float Alpha, int F
 {
     DisableTexture();
 
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
@@ -1097,8 +1107,8 @@ void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned i
 {
     DisableTexture();
 
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
     y = WindowHeight - y;
@@ -1117,10 +1127,11 @@ void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness
 {
     DisableTexture();
 
-    x1 = ConvertX(x1);
-    y1 = ConvertY(y1);
-    x2 = ConvertX(x2);
-    y2 = ConvertY(y2);
+    x1 = ConvertPositionX(x1);
+    y1 = ConvertPositionY(y1);
+    x2 = ConvertPositionX(x2);
+    y2 = ConvertPositionY(y2);
+    thickness = ConvertX(thickness);
     y1 = WindowHeight - y1;
     y2 = WindowHeight - y2;
 
@@ -1148,8 +1159,8 @@ void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness
 
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, unsigned int color)
 {
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
 
     Width = ConvertX(Width);
     Height = ConvertY(Height);
@@ -1171,8 +1182,8 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
 {
     if (StartScale)
     {
-        x = ConvertX(x);
-        y = ConvertY(y);
+        x = ConvertPositionX(x);
+        y = ConvertPositionY(y);
     }
     if (Scale)
     {
@@ -1200,8 +1211,8 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
 void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v,
     float uWidth, float vHeight, unsigned int color)
 {
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
     // x -= Width *0.5f;
@@ -1339,8 +1350,8 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
         float dx, dy;
         dx = p4[0][0] + halfW;
         dy = p4[0][1] + halfH;
-        dx = dx * (float)((float)REFERENCE_WIDTH / WindowWidth);
-        dy = dy * (float)((float)REFERENCE_HEIGHT / WindowHeight);
+        dx = (dx - g_fScreenOffset_x) / g_fScreenRate_x;
+        dy = (dy - g_fScreenOffset_y) / g_fScreenRate_y;
         if (Num >= 100)
         {
             g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (REFERENCE_HEIGHT - dy) - (iHeight / 2), iWidth, iHeight);
@@ -1355,8 +1366,8 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
 {
     vec3_t p[4];
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     y = WindowHeight - y;
     Width = ConvertX(Width);
     Height = ConvertY(Height);
@@ -1431,8 +1442,8 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
 void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
     float vHeight, unsigned int color)
 {
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
     BindTexture(Texture);

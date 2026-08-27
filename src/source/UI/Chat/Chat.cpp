@@ -48,12 +48,13 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
+#include "Core/Text/WideString.h"
 
 namespace UI::Chat
 {
 typedef struct
 {
-    wchar_t   ID[32];
+    wchar_t   ID[MAX_MONSTER_NAME + 1];
     wchar_t      Union[30];
     wchar_t      Guild[30];
     wchar_t      szShopTitle[16];
@@ -378,7 +379,7 @@ void AddChat(CHAT* c, const wchar_t* chat_text, int flag)
     }
     else
     {
-        memset(c->Text[0], 0, 256);
+        memset(c->Text[0], 0, sizeof(c->Text[0]));
         wcscpy(c->Text[0], chat_text);
         c->LifeTime[0] = Time;
     }
@@ -466,7 +467,7 @@ void CreateChat(wchar_t* character_name, const wchar_t* chat_text, CHARACTER* Ow
         CHAT* c = &Chat[i];
         if (c->Owner == Owner)
         {
-            wcscpy(c->ID, character_name);
+            Core::Text::CopyWideString(c->ID, std::size(c->ID), character_name);
             c->Color = Color;
             AddGuildName(c, Owner);
             if (wcslen(chat_text) == 0)
@@ -493,7 +494,7 @@ void CreateChat(wchar_t* character_name, const wchar_t* chat_text, CHARACTER* Ow
         if (c->IDLifeTime <= 0 && c->LifeTime[0] <= 0)
         {
             c->Owner = Owner;
-            wcscpy(c->ID, character_name);
+            Core::Text::CopyWideString(c->ID, std::size(c->ID), character_name);
             c->Color = Color;
             AddGuildName(c, Owner);
             if (wcslen(chat_text) == 0)
@@ -527,7 +528,7 @@ int CreateChat(wchar_t* character_name, const wchar_t* chat_text, OBJECT* Owner,
         if (c->IDLifeTime <= 0 && c->LifeTime[0] <= 0)
         {
             c->Owner = NULL;
-            wcscpy(c->ID, character_name);
+            Core::Text::CopyWideString(c->ID, std::size(c->ID), character_name);
             c->Color = Color;
             c->GuildColor = 0;
             c->Guild[0] = 0;

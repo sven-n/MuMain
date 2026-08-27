@@ -826,7 +826,7 @@ void OrbitalCamera::UpdateFrustum()
 
     // Build frustum using the same viewport aspect ratio that BeginOpengl() will use.
     // BeginOpengl() scales reference coords (640×480) to actual window pixels.
-    // MainScene uses height=432 (480-48 for UI bar), CharacterScene uses 430, etc.
+    // MainScene reserves the bottom UI bar. Other scenes use the full reference viewport.
     extern unsigned int WindowWidth;
     extern unsigned int WindowHeight;
     extern EGameScene SceneFlag;
@@ -838,10 +838,6 @@ void OrbitalCamera::UpdateFrustum()
     {
         refWidth = GetScreenWidth();
         refHeight = g_Camera.TopViewEnable ? REFERENCE_HEIGHT : (REFERENCE_HEIGHT - 48);
-    }
-    else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
-    {
-        refHeight = 430;
     }
     float viewportWidth = (float)(refWidth * WindowWidth) / (float)REFERENCE_WIDTH;
     float viewportHeight = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;

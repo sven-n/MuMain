@@ -2,6 +2,7 @@
 
 #include "Render/Text/SdlTtfTextCache.h"
 #include "UI/Legacy/UIControls.h"
+#include "UI/Scaling/UITransform.h"
 
 #include <string>
 
@@ -33,6 +34,7 @@ private:
     DWORD m_textColor = 0xFFFFFFFFu;
     DWORD m_backColor = 0u;
     TTF_Font* m_activeFont = nullptr;
+    UI::Scaling::FontRole m_activeRole = UI::Scaling::FontRole::Normal;
     mutable Render::Text::SdlTtfTextCache m_textCache;
     std::string m_utf8Scratch;
     mutable std::wstring m_measureWideScratch;

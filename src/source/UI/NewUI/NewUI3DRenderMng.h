@@ -28,6 +28,7 @@ namespace SEASON3B
         UI_2DEFFECT_CALLBACK	pCallbackFunc;
         LPVOID					pClass;
         DWORD					dwParamA, dwParamB;
+        UI::Scaling::Transform transform;
     } UI_2DEFFECT_INFO;
 #pragma pack(pop)
 
@@ -38,6 +39,7 @@ namespace SEASON3B
     public:
         virtual void Render3D() = 0;
         virtual bool IsVisible() const = 0;
+        virtual CNewUIObj* GetLayoutOwner() const { return nullptr; }
     };
 
     class CNewUI3DCamera : public CNewUIObj

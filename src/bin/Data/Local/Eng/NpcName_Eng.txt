@@ -1,41 +1,41 @@
 // MAX : 512			
-//ºí·¯µåÄ³½½			
-//ºí·¯µåÄ³½½1			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½1			
 84	1	"Chief Skeleton Warrior"	
 85	1	"Chief Skeleton Archer"	
 86	1	"Dark Skull Soldier"	
 87	1	"Giant Ogre"	
 88	1	"Red Skeleton Knight"	
 89	1	"Magic Skeleton"	
-//ºí·¯µåÄ³½½2			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½2			
 90	1	"Chief Skeleton Warrior"	
 91	1	"Chief Skeleton Archer"	
 92	1	"Dark Skull Soldier"	
 93	1	"Giant Ogre"	
 94	1	"Red Skeleton Knight"	
 95	1	"Magic Skeleton"	
-//ºí·¯µåÄ³½½3			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½3			
 96	1	"Chief Skeleton Warrior"	
 97	1	"Chief Skeleton Archer"	
 98	1	"Dark Skull Soldier"	
 99	1	"Giant Ogre"	
 111	1	"Red Skeleton Knight"	
 112	1	"Magic Skeleton"	
-//ºí·¯µåÄ³½½4			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½4			
 113	1	"Chief Skeleton Warrior"	
 114	1	"Chief Skeleton Archer"	
 115	1	"Dark Skull Soldier"	
 116	1	"Giant Ogre"	
 117	1	"Red Skeleton Knight"	
 118	1	"Magic Skeleton"	
-//ºí·¯µåÄ³½½5			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½5			
 119	1	"Chief Skeleton Warrior"	
 120	1	"Chief Skeleton Archer"	
 121	1	"Dark Skull Soldier"	
 122	1	"Giant Ogre"	
 123	1	"Red Skeleton Knight"	
 124	1	"Magic Skeleton"	
-//ºí·¯µåÄ³½½6			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½6			
 125	1	"Chief Skeleton Warrior"	
 126	1	"Chief Skeleton Archer"	
 127	1	"Dark Skull Soldier"	
@@ -47,12 +47,12 @@
 133	1	"Statue of Saint"	
 134	1	"Statue of Saint"	
 			
-// ¹İÁöÀÇ ÀüÀï			
+// Â¹ÃÃÃ¶Ã€Ã‡ Ã€Ã¼Ã€Ã¯			
 135	1	"White wizard"	
 136	1	"Destructive ogre soldier"	
 137	1	"Destructive ogre archer"	
 			
-//ºí·¯µåÄ³½½7			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½7			
 138	1	"Chief Skeleton Warrior"	
 139	1	"Chief Skeleton Archer"	
 140	1	"Dark Skull Soldier"	
@@ -60,8 +60,8 @@
 142	1	"Red Skeleton Knight"	
 143	1	"Magic Skeleton"	
 			
-//Ä®¸®¸¶_¿ÀÈÄ 7:05 2004-08-25			
-// 1 Ä®¸®¸¶			
+//Ã„Â®Â¸Â®Â¸Â¶_Â¿Ã€ÃˆÃ„ 7:05 2004-08-25			
+// 1 Ã„Â®Â¸Â®Â¸Â¶			
 147	1	"Aegis"	
 148	1	"Rogue Centurion"	
 146	1	"Blood Soldier"	
@@ -70,7 +70,7 @@
 145	1	"Death Centurion"	
 160	1	"Schriker"	
 161	1	"Illusion of Kundun"	
-// 2 Ä®¸®¸¶			
+// 2 Ã„Â®Â¸Â®Â¸Â¶			
 177	1	"Aegis"	
 178	1	"Rogue Centurion"	
 176	1	"Blood Soldier"	
@@ -79,7 +79,7 @@
 175	1	"Death Centurion"	
 180	1	"Schriker"	
 181	1	"Illusion of Kundun"	
-// 3 Ä®¸®¸¶			
+// 3 Ã„Â®Â¸Â®Â¸Â¶			
 185	1	"Aegis"	
 186	1	"Rogue Centurion"	
 184	1	"Blood Soldier"	
@@ -88,7 +88,7 @@
 183	1	"Death Centurion"	
 188	1	"Schriker"	
 189	1	"Illusion of Kundun"	
-// 4 Ä®¸®¸¶			
+// 4 Ã„Â®Â¸Â®Â¸Â¶			
 193	1	"Aegis"	
 194	1	"Rogue Centurion"	
 192	1	"Blood Soldier"	
@@ -98,7 +98,7 @@
 196	1	"Schriker"	
 197	1	"Illusion of Kundun"	
  			
-//Ä«¿À½ºÄ³½½ ¸ó½ºÅÍ.			
+//Ã„Â«Â¿Ã€Â½ÂºÃ„Â³Â½Â½ Â¸Ã³Â½ÂºÃ…Ã.			
 162	1	"Chaos Castle 1"	
 163	1	"Chaos Castle 2"	
 164	1	"Chaos Castle 3"	
@@ -212,21 +212,21 @@
 156	1	"Magic stone of %s "	
 157	1	"Magic stone of %s "	
 158	1	"Magic stone of %s "	
-//158	1	"Shadow Knight"	'- ½¦µµ¿ì³ªÀÌÆ®¶ó´Â ¸÷ÀÌ ¾øÀ¸¹Ç·Î
+//158	1	"Shadow Knight"	'- Â½Â¦ÂµÂµÂ¿Ã¬Â³ÂªÃ€ÃŒÃ†Â®Â¶Ã³Â´Ã‚ Â¸Ã·Ã€ÃŒ Â¾Ã¸Ã€Â¸Â¹Ã‡Â·Ã
 			
-// ÇÔÁ¤ ( 100 ~ 110 )			
+// Ã‡Ã”ÃÂ¤ ( 100 ~ 110 )			
 100	1	"Lance"	
 101	1	"Iron Stick"	
 102	1	"Fire"	
 103	1	"Meteorite"	
 			
-// °ø¼ºÆ®·¦.            			
+// Â°Ã¸Â¼ÂºÃ†Â®Â·Â¦.            			
 104	1	"Trap"	
 105	1	"Canon Trap"	
 106	1	"Laser Trap"	
 200	1	"Soccer Ball"	
 			
-// Å©¶óÀÌ¿ïÇÁ ·¹ÀÌµå MVP (2005.9.23 ÀÌÇõÀç Ãß°¡)			
+// Ã…Â©Â¶Ã³Ã€ÃŒÂ¿Ã¯Ã‡Ã Â·Â¹Ã€ÃŒÂµÃ¥ MVP (2005.9.23 Ã€ÃŒÃ‡ÃµÃ€Ã§ ÃƒÃŸÂ°Â¡)			
 204	1	"Wolf Status"	
 205	1	"Wolf Altar1"	
 206	1	"Wolf Altar2"	
@@ -234,7 +234,7 @@
 208	1	"Wolf Altar4"	
 209	1	"Wolf Altar5"	
 215	1	"Shield"	
-// °ø¼º			
+// Â°Ã¸Â¼Âº			
 216	1	"Crown"	
 217	1	"Crown Switch2"	
 218	1	"Crown Switch1"	
@@ -278,8 +278,8 @@
 256	1	"Lahap"	
 257	1	"Shadow Phantom Soldier"	
 			
-//Ä®¸®¸¶ ¸ó½ºÅÍ			
-// 5 Ä®¸®¸¶			
+//Ã„Â®Â¸Â®Â¸Â¶ Â¸Ã³Â½ÂºÃ…Ã			
+// 5 Ã„Â®Â¸Â®Â¸Â¶			
 263	1	"Aegis"	
 264	1	"Rogue Centurion"	
 262	1	"Blood Soldier"	
@@ -288,7 +288,7 @@
 261	1	"Death Centurion"	
 266	1	"Schriker"	
 267	1	"Illusion of Kundun"	
-// 6 Ä®¸®¸¶			
+// 6 Ã„Â®Â¸Â®Â¸Â¶			
 271	1	"Aegis"	
 272	1	"Rogue Centurion"	
 270	1	"Blood Soldier"	
@@ -298,7 +298,7 @@
 274	1	"Schriker"	
 275	1	"Kundun"	
 			
-// °ø¼ºÀü ¸ó½ºÅÍ.			
+// Â°Ã¸Â¼ÂºÃ€Ã¼ Â¸Ã³Â½ÂºÃ…Ã.			
 277	1	"Castle Gate"	
 278	1	"Life Stone"	
 283	1	"Guardian Statue"	
@@ -307,7 +307,7 @@
 287	1	"Spearman"	
 288	1	"Canon Tower"	
 			
-//½Ã·ÃÀÇ ¶¥			
+//Â½ÃƒÂ·ÃƒÃ€Ã‡ Â¶Â¥			
 290	1	"Lizard Warrior"	
 291	1	"Fire Golem"	
 292	1	"Queen Bee"	
@@ -316,16 +316,16 @@
 295	1	"Erohim"	
 296	1	"Monster7"	
 			
-// ·Î·£Çù°îÀÌº¥Æ® ¸ó½ºÅÍ.			
+// Â·ÃÂ·Â£Ã‡Ã¹Â°Ã®Ã€ÃŒÂºÂ¥Ã†Â® Â¸Ã³Â½ÂºÃ…Ã.			
 300	1	"Hero Mutant"	
 301	1	"Omega Wing"	
 302	1	"Axl Hero"	
 303	1	"Gigas Golem"	
 			
 			
-//¾ÆÀÌ´Ù. Å©¶óÀÌ¿ïÇÁ. ÀÒ¾î¹ö¸° Ä®¸®¸¶ Ãß°¡ ÀÛ¾÷_±âÈ¹/Á¤µ¿ÀÏ (¿ÀÈÄ 3:18 2005-07-26)			
+//Â¾Ã†Ã€ÃŒÂ´Ã™. Ã…Â©Â¶Ã³Ã€ÃŒÂ¿Ã¯Ã‡Ã. Ã€Ã’Â¾Ã®Â¹Ã¶Â¸Â° Ã„Â®Â¸Â®Â¸Â¶ ÃƒÃŸÂ°Â¡ Ã€Ã›Â¾Ã·_Â±Ã¢ÃˆÂ¹/ÃÂ¤ÂµÂ¿Ã€Ã (Â¿Ã€ÃˆÃ„ 3:18 2005-07-26)			
 			
-//¾ÆÀÌ´Ù ¸ó½ºÅÍ			
+//Â¾Ã†Ã€ÃŒÂ´Ã™ Â¸Ã³Â½ÂºÃ…Ã			
 308	1	"Death Tree"	
 307	1	"Forest Orc"	
 306	1	"Death Rider"	
@@ -333,7 +333,7 @@
 304	1	"Witch Queen"	
 309	1	"Hell Maine"	
 			
-//Å©¶óÀÌ¿ïÇÁ			
+//Ã…Â©Â¶Ã³Ã€ÃŒÂ¿Ã¯Ã‡Ã			
 310	1	"Hammer Scout"	
 311	1	"Lance Scout"	
 312	1	"Bow Scout"	
@@ -343,15 +343,15 @@
 316	1	"Balram"	
 317	1	"Soram"	
 			
-// Å©¶óÀÌ¿ïÇÁ MVP ¸ó½ºÅÍ - Ãß°¡ 2005.11.23 (ÀÌÇõÀç)			
+// Ã…Â©Â¶Ã³Ã€ÃŒÂ¿Ã¯Ã‡Ã MVP Â¸Ã³Â½ÂºÃ…Ã - ÃƒÃŸÂ°Â¡ 2005.11.23 (Ã€ÃŒÃ‡ÃµÃ€Ã§)			
 340	1	"Dark Elf"	
 341	1	"Soram"	
 344	1	"Balram"	
 345	1	"Death spirit"	
 348	1	"Tanker"	
-349	1	"Balgass"	//MVP º¸½º
+349	1	"Balgass"	//MVP ÂºÂ¸Â½Âº
 			
-//ÀÒ¾î¹ö¸° Ä®¸®¸¶			
+//Ã€Ã’Â¾Ã®Â¹Ã¶Â¸Â° Ã„Â®Â¸Â®Â¸Â¶			
 331	1	"Aegis"	
 332	1	"Rogue Centurion"	
 333	1	"Blood Soldier"	
@@ -359,21 +359,21 @@
 335	1	"Necron"	
 336	1	"Death Centurion"	
 337	1	"Schriker"	
-338	1	"Illusion of Kundun"	//Á¦ 6Ä®¸®¸¶ À§Ä¡
+338	1	"Illusion of Kundun"	//ÃÂ¦ 6Ã„Â®Â¸Â®Â¸Â¶ Ã€Â§Ã„Â¡
 			
-// Å©¶óÀÌ¿ïÇÁ ¿ä»õ ¸Ê »óÀÎ _ 8¿ù 8ÀÏ ( ¿À½Â¾ğ ) : Å©¶óÀÌ¿ïÇÁ ¿ä»õ Á¶·Ã»ç ¹× ¼¼¸£ºñ½º ¸÷ ¹øÈ£ ¼öÁ¤			
-// ¾Æ·¡ 2 NPC´Â ÃßÈÄ Ãß°¡			
-// ÆÖ ½Ã½ºÅÛ ÀÌÈÄ µî·Ï			
+// Ã…Â©Â¶Ã³Ã€ÃŒÂ¿Ã¯Ã‡Ã Â¿Ã¤Â»Ãµ Â¸ÃŠ Â»Ã³Ã€Ã _ 8Â¿Ã¹ 8Ã€Ã ( Â¿Ã€Â½Ã‚Â¾Ã° ) : Ã…Â©Â¶Ã³Ã€ÃŒÂ¿Ã¯Ã‡Ã Â¿Ã¤Â»Ãµ ÃÂ¶Â·ÃƒÂ»Ã§ Â¹Ã— Â¼Â¼Â¸Â£ÂºÃ±Â½Âº Â¸Ã· Â¹Ã¸ÃˆÂ£ Â¼Ã¶ÃÂ¤			
+// Â¾Ã†Â·Â¡ 2 NPCÂ´Ã‚ ÃƒÃŸÃˆÃ„ ÃƒÃŸÂ°Â¡			
+// Ã†Ã– Â½ÃƒÂ½ÂºÃ…Ã› Ã€ÃŒÃˆÃ„ ÂµÃ®Â·Ã			
 //344	1	"Summoner"	
-// ³ë¸®¾ÆÀÇ Á¶ÇÕ °íºí¸°°ú µ¿ÀÏ. Á¶ÇÕ ¼öÁ¤ÇÑ ÀÌÈÄ ¹èÄ¡ ( Çö½ÃÁ¡¿¡¼­´Â Ãß°¡ ±İÁö )			
+// Â³Ã«Â¸Â®Â¾Ã†Ã€Ã‡ ÃÂ¶Ã‡Ã• Â°Ã­ÂºÃ­Â¸Â°Â°Ãº ÂµÂ¿Ã€Ã. ÃÂ¶Ã‡Ã• Â¼Ã¶ÃÂ¤Ã‡Ã‘ Ã€ÃŒÃˆÃ„ Â¹Ã¨Ã„Â¡ ( Ã‡Ã¶Â½ÃƒÃÂ¡Â¿Â¡Â¼Â­Â´Ã‚ ÃƒÃŸÂ°Â¡ Â±ÃÃÃ¶ )			
 //345	1	"Chaos Goblin"	
 			
-//ÀÌº¥Æ® Àü¿ë NPC Ãß°¡ - 2006.1.23 (ÀÌ¹ÎÁ¤)			
+//Ã€ÃŒÂºÂ¥Ã†Â® Ã€Ã¼Â¿Ã« NPC ÃƒÃŸÂ°Â¡ - 2006.1.23 (Ã€ÃŒÂ¹ÃÃÂ¤)			
 258	1	"Luke the Helper"	
-//2006.4.17 Ãß°¡ (ÀÌ¹ÎÁ¤)			
+//2006.4.17 ÃƒÃŸÂ°Â¡ (Ã€ÃŒÂ¹ÃÃÂ¤)			
 259	1	"Oracle Layla"	
 			
-//Ä­Åõ¸£ ¸ó½ºÅÍ Ãß°¡ - 2006.5.16 (±èº¸°æ)			
+//Ã„Â­Ã…ÃµÂ¸Â£ Â¸Ã³Â½ÂºÃ…Ã ÃƒÃŸÂ°Â¡ - 2006.5.16 (Â±Ã¨ÂºÂ¸Â°Ã¦)			
 350	1	"Berserker"	
 351	1	"Splinter Wolf"	
 352	1	"Iron Rider"	
@@ -390,73 +390,73 @@
 363	1	"Maya Hand"	
 364	1	"Maya"	
 			
-//Ä­Åõ¸£ npc			
+//Ã„Â­Ã…ÃµÂ¸Â£ npc			
 367	1	"Gateway Machine"	
 368	1	"Elpis"	
-//Á¶È­ÀÇ º¸¼® °ü·Ã npc			
+//ÃÂ¶ÃˆÂ­Ã€Ã‡ ÂºÂ¸Â¼Â® Â°Ã¼Â·Ãƒ npc			
 369	1	"Osbourne"	
 370	1	"Jerridon"	
 			
-//È­ÀÌÆ®¿£Á© ÀÌº¥Æ® ¾ÆÀÌÅÛ Áö±Ş NPC Ãß°¡ - 2006.8.23 ÀÌ¹ÎÁ¤			
+//ÃˆÂ­Ã€ÃŒÃ†Â®Â¿Â£ÃÂ© Ã€ÃŒÂºÂ¥Ã†Â® Â¾Ã†Ã€ÃŒÃ…Ã› ÃÃ¶Â±Ã NPC ÃƒÃŸÂ°Â¡ - 2006.8.23 Ã€ÃŒÂ¹ÃÃÂ¤			
 371	1	"Leo the Helper"	
 			
-//¿¤¸®Æ®ÇØ°ñÀü»çº¯½Å¹İÁö NPC Ãß°¡ - 2006.9.5 ÀÌ¹ÎÁ¤			
+//Â¿Â¤Â¸Â®Ã†Â®Ã‡Ã˜Â°Ã±Ã€Ã¼Â»Ã§ÂºÂ¯Â½Ã…Â¹ÃÃÃ¶ NPC ÃƒÃŸÂ°Â¡ - 2006.9.5 Ã€ÃŒÂ¹ÃÃÂ¤			
 372	1	"Elite Skull Soldier"	
 			
-//ÇÒ·ÎÀ©ÀÌº¥Æ® NPC Ãß°¡ - 2006.9.12 ÀÌ¹ÎÁ¤			
+//Ã‡Ã’Â·ÃÃ€Â©Ã€ÃŒÂºÂ¥Ã†Â® NPC ÃƒÃŸÂ°Â¡ - 2006.9.12 Ã€ÃŒÂ¹ÃÃÂ¤			
 373	1	"Jack Olantern"	
 			
-//Å©¸®½º¸¶½º º¯½Å¹İÁö¿ë NPC Ãß°¡ - 2006.11.30 ÀÌ¹ÎÁ¤			
+//Ã…Â©Â¸Â®Â½ÂºÂ¸Â¶Â½Âº ÂºÂ¯Â½Ã…Â¹ÃÃÃ¶Â¿Ã« NPC ÃƒÃŸÂ°Â¡ - 2006.11.30 Ã€ÃŒÂ¹ÃÃÂ¤			
 374	1	"Santa"	
 			
-// Ä«¿À½ºÄ«µå ´ã´ç			
+// Ã„Â«Â¿Ã€Â½ÂºÃ„Â«ÂµÃ¥ Â´Ã£Â´Ã§			
 375	1	"Chaos Card Master"	
 			
-// °ø¼ºÀü ½Å±Ô ¹°¾à NPC - 2007.1.22 ±èº¸°æ			
+// Â°Ã¸Â¼ÂºÃ€Ã¼ Â½Ã…Â±Ã” Â¹Â°Â¾Ã  NPC - 2007.1.22 Â±Ã¨ÂºÂ¸Â°Ã¦			
 376	1	"Pamela the Supplier"	
 377	1	"Angela the Supplier"	
 			
-// ¼³³¯ º¹ÁÖ¸Ó´Ï ÀÌ¸§			
+// Â¼Â³Â³Â¯ ÂºÂ¹ÃÃ–Â¸Ã“Â´Ã Ã€ÃŒÂ¸Â§			
 365	1	"Pouch of Blessing"	
 378	1	"GameMaster"	
 379	1	"Natasha the Firecracker Merchant"	
 			
-//½Å±Ô ÀÌº¥Æ®¸Ê			
+//Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ			
 380	1	"Stone Statue"	
 381	1	"MU Allies General"	
 382	1	"Illusion Sorcerer Elder"	
 383	1	"Alliance Sacred Item Storage"	
 384	1	"Illusion Castle Sacred Item Storage"	
 385	1	"Mirage"	
-// ½Å±Ô ÀÌº¥Æ®¸Ê 1 (·¹º§ 220~270)			
+// Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ 1 (Â·Â¹ÂºÂ§ 220~270)			
 386	1	"Illusion Sorcerer Spirit"	
 387	1	"Illusion Sorcerer Spirit"	
 388	1	"Illusion Sorcerer Spirit"	
-// ½Å±Ô ÀÌº¥Æ®¸Ê 2 (·¹º§ 271~320)			
+// Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ 2 (Â·Â¹ÂºÂ§ 271~320)			
 389	1	"Illusion Sorcerer Spirit"	
 390	1	"Illusion Sorcerer Spirit"	
 391	1	"Illusion Sorcerer Spirit"	
-// ½Å±Ô ÀÌº¥Æ®¸Ê 3 (·¹º§ 321~350)			
+// Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ 3 (Â·Â¹ÂºÂ§ 321~350)			
 392	1	"Illusion Sorcerer Spirit"	
 393	1	"Illusion Sorcerer Spirit"	
 394	1	"Illusion Sorcerer Spirit"	
-// ½Å±Ô ÀÌº¥Æ®¸Ê 4 (·¹º§ 351~380)			
+// Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ 4 (Â·Â¹ÂºÂ§ 351~380)			
 395	1	"Illusion Sorcerer Spirit"	
 396	1	"Illusion Sorcerer Spirit"	
 397	1	"Illusion Sorcerer Spirit"	
-// ½Å±Ô ÀÌº¥Æ®¸Ê 5 (·¹º§ 381~399)			
+// Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ 5 (Â·Â¹ÂºÂ§ 381~399)			
 398	1	"Illusion Sorcerer Spirit"	
 399	1	"Illusion Sorcerer Spirit"	
 400	1	"Illusion Sorcerer Spirit"	
-// ½Å±Ô ÀÌº¥Æ®¸Ê 6 (·¹º§ 400)			
+// Â½Ã…Â±Ã” Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ 6 (Â·Â¹ÂºÂ§ 400)			
 401	1	"Illusion Sorcerer Spirit"	
 402	1	"Illusion Sorcerer Spirit"	
 403	1	"Illusion Sorcerer Spirit"	
-// ÀÌº¥Æ®¸Ê Ä³¸¯ÅÍ º¯½Å¿ë ÀÎµ¦½º			
+// Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ Ã„Â³Â¸Â¯Ã…Ã ÂºÂ¯Â½Ã…Â¿Ã« Ã€ÃÂµÂ¦Â½Âº			
 404	1	"MU Allies"	
 405	1	"Illusion Sorcerer"	
 			
-// 3Â÷ Ã¼ÀÎÁö¾÷			
+// 3Ã‚Ã· ÃƒÂ¼Ã€ÃÃÃ¶Â¾Ã·			
 406	1	"Apostle Devin"	
 407	1	"Werewolf Quarel"	
 408	1	"Gatekeeper"	
@@ -465,14 +465,14 @@
 411	1	"Soram (Trainee Soldier)"	
 412	1	"Dark Elf (Trainee Soldier)"	
 			
-// Ãß¼®(2007)ÀÌº¥Æ®			
+// ÃƒÃŸÂ¼Â®(2007)Ã€ÃŒÂºÂ¥Ã†Â®			
 413	1	"Lunar Rabbit"	
 414	1	"Helper Ellen"	
-// ¿¤º£¶õµå  NPC			
+// Â¿Â¤ÂºÂ£Â¶ÃµÂµÃ¥  NPC			
 415	1	"Silvia"	
 416	1	"Rhea"	
 417	1	"Marce"	
-// ¿¤º£¶õµå »ç³ÉÅÍ (2007-09-18 ±èÇöÁö)			
+// Â¿Â¤ÂºÂ£Â¶ÃµÂµÃ¥ Â»Ã§Â³Ã‰Ã…Ã (2007-09-18 Â±Ã¨Ã‡Ã¶ÃÃ¶)			
 418	1	"Strange Rabbit"	
 419	1	"Hideous Rabbit"	
 420	1	"Werewolf"	
@@ -481,18 +481,18 @@
 423	1	"Totem Golem"	
 424	1	"Grizzly"	
 425	1	"Captain Grizzly"	
-// ÀÌº¥Æ®¸Ê µî±Ş Ãß°¡·Î ÀÎÇÑ ¸ó½ºÅÍ Ãß°¡(2007.10.16)			
-//Ä«¿À½ºÄ³½½7_È®Àå			
+// Ã€ÃŒÂºÂ¥Ã†Â®Â¸ÃŠ ÂµÃ®Â±Ã ÃƒÃŸÂ°Â¡Â·Ã Ã€ÃÃ‡Ã‘ Â¸Ã³Â½ÂºÃ…Ã ÃƒÃŸÂ°Â¡(2007.10.16)			
+//Ã„Â«Â¿Ã€Â½ÂºÃ„Â³Â½Â½7_ÃˆÂ®Ã€Ã¥			
 426	1	"Chaos Castle13"	
 427	1	"Chaos Castle14"	
-//ºí·¯µåÄ³½½8_È®Àå			
+//ÂºÃ­Â·Â¯ÂµÃ¥Ã„Â³Â½Â½8_ÃˆÂ®Ã€Ã¥			
 428	1	"Chief Skeleton Warrior"	
 429	1	"Chief Skeleton Archer"	
 430	1	"Dark Skull Soldier"	
 431	1	"Giant Ogre"	
 432	1	"Red Skeleton Knight"	
 433	1	"Magic Skeleton"	
-//¾Ç¸¶ÀÇ±¤Àå7_È®Àå			
+//Â¾Ã‡Â¸Â¶Ã€Ã‡Â±Â¤Ã€Ã¥7_ÃˆÂ®Ã€Ã¥			
 434	1	"Gigantis"	
 435	1	"Berserker"	
 436	1	"Balram (Trainee Soldier)"	
@@ -500,7 +500,7 @@
 438	1	"Persona"	
 439	1	"Dreadfear"	
 440	1	"Dark Elf"	
-// Æò¿ÂÀÇ ´Ë ¸ó½ºÅÍ Ãß°¡			
+// Ã†Ã²Â¿Ã‚Ã€Ã‡ Â´Ã‹ Â¸Ã³Â½ÂºÃ…Ã ÃƒÃŸÂ°Â¡			
 441	1	"Sapi-Unus"	
 442	1	"Sapi-Duo"	
 443	1	"Sapi-Tres"	
@@ -510,13 +510,13 @@
 447	1	"Thunder Napin"	
 448	1	"Ghost Napin"	
 449	1	"Blaze Napin"	 
-// º¢²ÉÀÌº¥Æ® npc Ãß°¡			
+// ÂºÂ¢Â²Ã‰Ã€ÃŒÂºÂ¥Ã†Â® npc ÃƒÃŸÂ°Â¡			
 450	1	"Cherry Blossom Spirit"	
 451	1	"Cherry Blossom Tree"	
-// ¼ÒÄÏ ½Ã½ºÅÛ NPC			
+// Â¼Ã’Ã„Ã Â½ÃƒÂ½ÂºÃ…Ã› NPC			
 452	1	"Seed Master"	
 453	1	"Seed Researcher"	
-// ¶óÅ¬¸®¿Â ¸ó½ºÅÍ Ãß°¡			
+// Â¶Ã³Ã…Â¬Â¸Â®Â¿Ã‚ Â¸Ã³Â½ÂºÃ…Ã ÃƒÃŸÂ°Â¡			
 454	1	"Ice Walker"	
 455	1	"Giant Mammoth"	
 456	1	"Ice Giant"	
@@ -526,13 +526,13 @@
 460	1	"Spider Eggs"	
 461	1	"Spider Eggs"	
 462	1	"Spider Eggs"	
-// ºÒ²ÉÁÖ¸Ó´Ï Ãß°¡			
+// ÂºÃ’Â²Ã‰ÃÃ–Â¸Ã“Â´Ã ÃƒÃŸÂ°Â¡			
 463	1	"Fire Flame Ghost"	
-// Ã¼Çè¼­¹ö¿ë NPC Ãß°¡			
+// ÃƒÂ¼Ã‡Ã¨Â¼Â­Â¹Ã¶Â¿Ã« NPC ÃƒÃŸÂ°Â¡			
 //464	1	"Re-Initialization Helper"	
-// »ó¿ëÈ­ 7ÁÖ³â ÀÌº¥Æ® NPC Ãß°¡			
+// Â»Ã³Â¿Ã«ÃˆÂ­ 7ÃÃ–Â³Ã¢ Ã€ÃŒÂºÂ¥Ã†Â® NPC ÃƒÃŸÂ°Â¡			
 478	1	"Delgado"	
-// Å©¸®½º¸¶½ºÀÌº¥Æ® NPC Ãß°¡(±¹³» Àû¿ë Ãß°¡)			
+// Ã…Â©Â¸Â®Â½ÂºÂ¸Â¶Â½ÂºÃ€ÃŒÂºÂ¥Ã†Â® NPC ÃƒÃŸÂ°Â¡(Â±Â¹Â³Â» Ã€Ã»Â¿Ã« ÃƒÃŸÂ°Â¡)			
 465	1	"Santa Claus"	
 466	1	"Cursed Goblin"	
 467	1	"Snowman"	
@@ -546,7 +546,7 @@
 475	1	"Blitzen"	
 476	1	"Cursed Santa"	
 477	1	"Transformed Snowman"	
-// PKÇÊµå ¸ó½ºÅÍ NPC Ãß°¡			
+// PKÃ‡ÃŠÂµÃ¥ Â¸Ã³Â½ÂºÃ…Ã NPC ÃƒÃŸÂ°Â¡			
 479	1	"Doorkeeper Titus"	
 480	1	"Zombie Fighter"	
 481	1	"Zombie Fighter"	
@@ -560,9 +560,9 @@
 489	1	"Burning Lava Giant"	
 490	1	"Ruthless Lava Giant"	
 491	1	"Ruthless Lava Giant"	
-// °×ºí NPC Ãß°¡			
+// Â°Ã—ÂºÃ­ NPC ÃƒÃŸÂ°Â¡			
 492	1	"Moss"	
-// È²±İ±º´ÜÀÌº¥Æ®(ÀÏº»)			
+// ÃˆÂ²Â±ÃÂ±ÂºÂ´ÃœÃ€ÃŒÂºÂ¥Ã†Â®(Ã€ÃÂºÂ»)			
 502	1	"Golden Rabbit"	
 493	1	"Golden Dark Knight"	
 494	1	"Golden Devil"	
@@ -573,12 +573,12 @@
 499	1	"Golden Iron Knight"	
 500	1	"Golden Napin"	
 501	1	"Great Golden Dragon"	
-// 5¿ù ÇÁ¸®¹Ì¾ö ¾ÆÀÌÅÛ (ÆÒ´õº¯½Å¹İÁö)			
+// 5Â¿Ã¹ Ã‡ÃÂ¸Â®Â¹ÃŒÂ¾Ã¶ Â¾Ã†Ã€ÃŒÃ…Ã› (Ã†Ã’Â´ÃµÂºÂ¯Â½Ã…Â¹ÃÃÃ¶)			
 503	1	"Transformed Panda"	
-// Á¦±¹ ¼öÈ£±º ¸ó½ºÅÍ NPC Ãß°¡			
-// ¸ó½ºÅÍ			
+// ÃÂ¦Â±Â¹ Â¼Ã¶ÃˆÂ£Â±Âº Â¸Ã³Â½ÂºÃ…Ã NPC ÃƒÃŸÂ°Â¡			
+// Â¸Ã³Â½ÂºÃ…Ã			
 504	1	"Gaion Kharein"	
-// ¸Ê º¸½º			
+// Â¸ÃŠ ÂºÂ¸Â½Âº			
 505	1	"Jerint"	
 506	1	"Raymond"	
 507	1	"Erkanne"	
@@ -586,35 +586,35 @@
 509	1	"Vermont"	
 510	1	"Kato"	
 511	1	"Galia"	
-// Á¸ º¸½º			
+// ÃÂ¸ ÂºÂ¸Â½Âº			
 512	1	"Quartermaster"	
 513	1	"Combat Instructor"	
 514	1	"Knight Commander"	
 515	1	"Grand Wizard"	
 516	1	"Master Assassin"	
 517	1	"Cavalry Captain"	
-// ÀÏ¹İ ¸ó½ºÅÍ			
+// Ã€ÃÂ¹Ã Â¸Ã³Â½ÂºÃ…Ã			
 518	1	"Shield Bearer"	
 519	1	"Medic"	
 520	1	"Knights"	
 521	1	"Bodyguard"	
 // NPC			
 522	1	"Jerint the Assistant"	
-// ¿ÀºêÁ§Æ® NPC			
+// Â¿Ã€ÂºÃªÃÂ§Ã†Â® NPC			
 523	1	"Trap"	
-524	1	"Castle Gate 1"	//³»·Á°¡´Â ¼º¹®(ÆòÀÏ)
-525	1	"Castle Gate 2"	//ÆÄ±«µÇ´Â ¼º¹®(ÆòÀÏ)
+524	1	"Castle Gate 1"	//Â³Â»Â·ÃÂ°Â¡Â´Ã‚ Â¼ÂºÂ¹Â®(Ã†Ã²Ã€Ã)
+525	1	"Castle Gate 2"	//Ã†Ã„Â±Â«ÂµÃ‡Â´Ã‚ Â¼ÂºÂ¹Â®(Ã†Ã²Ã€Ã)
 526	1	"Stone Statue 1"	
-527	1	"Castle Gate 3"	//³»·Á°¡´Â ¼º¹®(ÁÖ¸»)
-528	1	"Castle Gate 4"	//ÆÄ±«µÇ´Â ¼º¹®(ÁÖ¸»)
-// µµÇÃ°»¾î ¸ó½ºÅÍ NPC Ãß°¡			
-// ¸ó½ºÅÍ			
-// º¸½º ¸ó½ºÅÍ			
+527	1	"Castle Gate 3"	//Â³Â»Â·ÃÂ°Â¡Â´Ã‚ Â¼ÂºÂ¹Â®(ÃÃ–Â¸Â»)
+528	1	"Castle Gate 4"	//Ã†Ã„Â±Â«ÂµÃ‡Â´Ã‚ Â¼ÂºÂ¹Â®(ÃÃ–Â¸Â»)
+// ÂµÂµÃ‡ÃƒÂ°Â»Â¾Ã® Â¸Ã³Â½ÂºÃ…Ã NPC ÃƒÃŸÂ°Â¡			
+// Â¸Ã³Â½ÂºÃ…Ã			
+// ÂºÂ¸Â½Âº Â¸Ã³Â½ÂºÃ…Ã			
 529	1	"Furious Slaughterer"	
 530	1	"Slaughterer"	
-// ¹Ì¼Ç ¸ó½ºÅÍ			
+// Â¹ÃŒÂ¼Ã‡ Â¸Ã³Â½ÂºÃ…Ã			
 531	1	"Ice Walker"	
-// ÀÏ¹İ ¸ó½ºÅÍ			
+// Ã€ÃÂ¹Ã Â¸Ã³Â½ÂºÃ…Ã			
 532	1	"Larva"	
 533	1	"Doppelganger"	
 534	1	"Doppelganger Elf"	
@@ -627,14 +627,14 @@
 540	1	"Lugard"	
 541	1	"Interim Reward Chest"	
 542	1	"Final Reward Chest"	
-// °Õ½º NPC			
+// Â°Ã•Â½Âº NPC			
 543	1	"Gens Duprian Steward"	
 544	1	"Gens Vanert Steward"	
-//·Î·£½ÃÀå NPC Ãß°¡ 2009.11.24 È«½Â¿í			
+//Â·ÃÂ·Â£Â½ÃƒÃ€Ã¥ NPC ÃƒÃŸÂ°Â¡ 2009.11.24 ÃˆÂ«Â½Ã‚Â¿Ã­			
 545	1	"Christine the General Goods Merchant"	
 546	1	"Jeweler Raul"	
 547	1	"Market Union Member Julia"	
-//½ºÄÌ·¹Åæº¯½Å¹İÁö¿ë º¯½Å½ºÄÌ·¹Åæ Ãß°¡			
+//Â½ÂºÃ„ÃŒÂ·Â¹Ã…Ã¦ÂºÂ¯Â½Ã…Â¹ÃÃÃ¶Â¿Ã« ÂºÂ¯Â½Ã…Â½ÂºÃ„ÃŒÂ·Â¹Ã…Ã¦ ÃƒÃŸÂ°Â¡			
 548	1	"Transformed Skeleton"	
 549	1	"Bloody Orc"	
 550	1	"Bloody Death Rider"	
@@ -656,7 +656,7 @@
 566	1	"Mercenary Guild Manager Tercia"
 567	1	"Priestess Veina"
 568	1	"Wandering Merchant Zyro"
-// Ä®·çÅº ¸ó½ºÅÍ Ãß°¡ 2010-06-30 È«½Â¿í	
+// Ã„Â®Â·Ã§Ã…Âº Â¸Ã³Â½ÂºÃ…Ã ÃƒÃŸÂ°Â¡ 2010-06-30 ÃˆÂ«Â½Ã‚Â¿Ã­	
 569	1	"Venomous Chain Scorpion"
 570	1	"Bone Scorpion"
 571	1	"Orcus"
@@ -665,10 +665,10 @@
 574	1	"Crypos"
 575	1	"Condra"
 576	1	"Narcondra"																						
-// Ä®·çÅº NPC Ãß°¡ 2010-06-30 È«½Â¿í																													
+// Ã„Â®Â·Ã§Ã…Âº NPC ÃƒÃŸÂ°Â¡ 2010-06-30 ÃˆÂ«Â½Ã‚Â¿Ã­																													
 577	1	"Leina the General Goods Merchant"																											
 578	1	"Weapons Merchant Bolo"																											
-// ·°Å°¾ÆÀÌÅÛ NPC Ãß°¡ 2010-09-01 ÀÌ±â¼ö																													
+// Â·Â°Ã…Â°Â¾Ã†Ã€ÃŒÃ…Ã› NPC ÃƒÃŸÂ°Â¡ 2010-09-01 Ã€ÃŒÂ±Ã¢Â¼Ã¶																													
 579	1	"David"	
 585	1	"Scarecrow"	
 end			

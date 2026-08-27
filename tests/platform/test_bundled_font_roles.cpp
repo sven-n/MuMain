@@ -4,6 +4,7 @@
 #include <doctest.h>
 
 #include "Core/Platform/BundledFonts.h"
+#include "UI/Scaling/UITransform.h"
 
 TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]")
 {
@@ -21,4 +22,13 @@ TEST_CASE("bundled font paths follow the normalized runtime directory [platform]
 {
     const std::filesystem::path relativePath = "fonts/DejaVuSans.ttf";
     CHECK(ResolveBundledFontPath(relativePath) == std::filesystem::current_path() / relativePath);
+}
+
+TEST_CASE("bundled font roles load their maximum responsive size [platform][bundled_font]")
+{
+    using UI::Scaling::FontRole;
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Normal) == 13);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Bold) == 13);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Big) == 26);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Fixed) == 15);
 }

@@ -33,6 +33,7 @@
 #include "World/MapInfra/PortalMgr.h"
 #include "Guild/GuildCache.h"
 #include "UI/Legacy/UIMapName.h"
+#include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
@@ -371,7 +372,8 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
         outHeight = REFERENCE_HEIGHT;
     }
 
-    outWidth = GetScreenWidth();
+    outWidth = static_cast<int>(UI::Scaling::WorldViewportWidthForDock(
+        static_cast<float>(GetScreenWidth()), WindowWidth, WindowHeight));
 
     // NOTE: Clear color is set by SceneManager::SetWorldClearColor() before this function is called
     // All background colors are now centralized in SceneManager.cpp

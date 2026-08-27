@@ -17,6 +17,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraState.h"
+#include "UI/Combat/MonsterHealthBar.h"
 
 // DevEditor forward declarations (must be at global scope)
 #ifdef _EDITOR
@@ -158,6 +159,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     RenderMonsterHealthBars();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
+
     return true;
 }
 
@@ -205,7 +207,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 g_pRenderText->SetBgColor(100, 0, 0, 255);
                 g_pRenderText->RenderText(320, 2, c->ID, 0, 0, RT3_WRITE_CENTER);
 
-                if (c->HealthStatus > 0)
+                if (UI::Combat::HealthBar::ShouldRenderSelected(c->HealthStatus))
                 {
                     // Full-width bar centered under the selected monster's name.
                     DrawHealthBar(320, 15, c->HealthStatus, 20, 1.f);

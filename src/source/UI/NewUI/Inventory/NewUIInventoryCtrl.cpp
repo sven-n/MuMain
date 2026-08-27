@@ -11,6 +11,7 @@
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Network/Server/SocketSystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Items/MixMgr.h"
 using namespace SEASON3B;
@@ -168,6 +169,11 @@ bool SEASON3B::CNewUIPickedItem::IsVisible() const
     return m_bShow;
 }
 
+CNewUIObj* SEASON3B::CNewUIPickedItem::GetLayoutOwner() const
+{
+    return m_pSrcInventory ? m_pSrcInventory->GetOwner() : nullptr;
+}
+
 void SEASON3B::CNewUIPickedItem::ShowPickedItem()
 {
     m_bShow = true;
@@ -182,8 +188,11 @@ void SEASON3B::CNewUIPickedItem::Render3D()
 {
     if (m_pPickedItem && m_pPickedItem->Type >= 0)
     {
-        m_Pos.x = MouseX - m_Size.cx / 2;
-        m_Pos.y = MouseY - m_Size.cy / 2;
+        const auto position = UI::Scaling::CenteredLogicalPosition(
+            UI::Scaling::GetActiveTransform(), g_fWindowMouseX, g_fWindowMouseY, static_cast<float>(m_Size.cx),
+            static_cast<float>(m_Size.cy));
+        m_Pos.x = static_cast<LONG>(std::floor(position.x));
+        m_Pos.y = static_cast<LONG>(std::floor(position.y));
         RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level,
                      m_pPickedItem->ExcellentFlags, m_pPickedItem->AncientDiscriminator, true);
     }
@@ -1272,6 +1281,11 @@ CNewUIInventoryCtrl::EVENT_STATE SEASON3B::CNewUIInventoryCtrl::GetEventState()
 }
 
 CNewUIObj* SEASON3B::CNewUIInventoryCtrl::GetOwner() const
+{
+    return m_pOwner;
+}
+
+CNewUIObj* SEASON3B::CNewUIInventoryCtrl::GetLayoutOwner() const
 {
     return m_pOwner;
 }

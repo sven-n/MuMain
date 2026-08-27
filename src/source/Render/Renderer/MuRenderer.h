@@ -301,7 +301,8 @@ public:
     {
         return nullptr;
     }
-    [[nodiscard]] virtual bool ReloadTtfFonts(std::string_view /*fontFamily*/)
+    [[nodiscard]] virtual bool ReloadTtfFonts(std::string_view /*fontFamily*/, float /*normalPointSize*/,
+                                              float /*bigPointSize*/, float /*fixedPointSize*/)
     {
         return false;
     }
@@ -423,7 +424,8 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily);
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+                                      float bigPointSize, float fixedPointSize);
 void WaitForSDLGpuIdle();
 void ShutdownSDLGpuRenderer();
 

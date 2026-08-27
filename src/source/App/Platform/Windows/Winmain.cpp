@@ -71,6 +71,7 @@
 #include "GameLogic/Pets/w_PetProcess.h"
 
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
 #include "I18N/All.h"
@@ -857,16 +858,11 @@ bool InputDiagnosticsEnabled()
 
 void HandleMouseMotion(float winX, float winY)
 {
-    MouseX = static_cast<int>(winX / g_fScreenRate_x);
-    MouseY = static_cast<int>(winY / g_fScreenRate_y);
-    if (MouseX < 0)
-        MouseX = 0;
-    if (MouseX > REFERENCE_WIDTH)
-        MouseX = REFERENCE_WIDTH;
-    if (MouseY < 0)
-        MouseY = 0;
-    if (MouseY > REFERENCE_HEIGHT)
-        MouseY = REFERENCE_HEIGHT;
+    g_fWindowMouseX = winX;
+    g_fWindowMouseY = winY;
+    const auto transform = UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight);
+    MouseX = std::clamp(static_cast<int>(UI::Scaling::LogicalX(transform, winX)), 0, REFERENCE_WIDTH);
+    MouseY = std::clamp(static_cast<int>(UI::Scaling::LogicalY(transform, winY)), 0, REFERENCE_HEIGHT);
 
     static bool firstMotionLogged = false;
     if (InputDiagnosticsEnabled() && !firstMotionLogged)
@@ -955,11 +951,9 @@ void HandleWindowResize(int width, int height)
         return;
     WindowWidth = width;
     WindowHeight = height;
-    g_fScreenRate_x = static_cast<float>(WindowWidth) / static_cast<float>(REFERENCE_WIDTH);
-    g_fScreenRate_y = static_cast<float>(WindowHeight) / static_cast<float>(REFERENCE_HEIGHT);
+    UI::Scaling::SetActiveTransform(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
-    ReinitializeFonts();
     UpdateResolutionDependentSystems();
     UpdateCursorClip();
 }
@@ -1315,8 +1309,19 @@ MSG MainLoop()
             int cx, cy, cw, ch;
             if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
             {
-                const SDL_Rect area = {static_cast<int>(cx * g_fScreenRate_x), static_cast<int>(cy * g_fScreenRate_y),
-                                       static_cast<int>(cw * g_fScreenRate_x), static_cast<int>(ch * g_fScreenRate_y)};
+                auto transform = UI::Scaling::PanelTransform(WindowWidth, WindowHeight);
+                SEASON3B::CNewUIManager* manager =
+                    g_pNewUISystem != nullptr ? g_pNewUISystem->GetNewUIManager() : nullptr;
+                SEASON3B::CNewUIObj* owner =
+                    manager != nullptr ? manager->FindUIObjByRelatedWnd(reinterpret_cast<HWND>(focusedField)) : nullptr;
+                if (owner != nullptr)
+                {
+                    transform = UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
+                }
+                const SDL_Rect area = {static_cast<int>(UI::Scaling::PositionX(transform, static_cast<float>(cx))),
+                                       static_cast<int>(UI::Scaling::PositionY(transform, static_cast<float>(cy))),
+                                       static_cast<int>(UI::Scaling::SizeX(transform, static_cast<float>(cw))),
+                                       static_cast<int>(UI::Scaling::SizeY(transform, static_cast<float>(ch)))};
                 // Only push when the caret rect actually moves; resending every
                 // frame is wasteful and can flicker the candidate window.
                 static SDL_Rect s_lastArea = {0, 0, 0, 0};
@@ -1392,25 +1397,21 @@ MSG MainLoop()
 
 namespace
 {
-// Tahoma font size scales with window height; these are the tuned base values.
-constexpr int BASE_FONT_HEIGHT = 12;
-constexpr float FONT_HEIGHT_GROWTH_PER_PIXEL = 1.f / 200.f;
-constexpr int FIX_FONT_HEIGHT_SMALL = 14; // used when WindowHeight <= 600
-constexpr int FIX_FONT_HEIGHT_LARGE = 15;
-constexpr int SMALL_WINDOW_HEIGHT_THRESHOLD = 600;
-
 struct FontSizes
 {
-    int uiFontSize;
-    int fixFontSize;
+    int normal;
+    int big;
+    int fixed;
 };
 
 FontSizes CalculateFontSizes()
 {
-    const int uiFontHeight = static_cast<int>(
-        std::ceil(BASE_FONT_HEIGHT + (WindowHeight - REFERENCE_HEIGHT) * FONT_HEIGHT_GROWTH_PER_PIXEL));
-    int fixFontHeight = (WindowHeight <= SMALL_WINDOW_HEIGHT_THRESHOLD) ? FIX_FONT_HEIGHT_SMALL : FIX_FONT_HEIGHT_LARGE;
-    return {uiFontHeight - 1, fixFontHeight - 1};
+    using UI::Scaling::FontRole;
+    return {
+        UI::Scaling::MaximumFontPointSize(FontRole::Normal),
+        UI::Scaling::MaximumFontPointSize(FontRole::Big),
+        UI::Scaling::MaximumFontPointSize(FontRole::Fixed),
+    };
 }
 
 #ifdef _WIN32
@@ -1502,10 +1503,10 @@ HFONT CreateUIFont(int size, int weight)
 
 bool CreateNewFonts(FontSizes sizes)
 {
-    HFONT normal = CreateUIFont(sizes.uiFontSize, FW_NORMAL);
-    HFONT bold = CreateUIFont(sizes.uiFontSize, FW_SEMIBOLD);
-    HFONT big = CreateUIFont(sizes.uiFontSize * 2, FW_SEMIBOLD);
-    HFONT fixed = CreateFontForFamily(sizes.fixFontSize, FW_NORMAL, kBundledFixedFont.family);
+    HFONT normal = CreateUIFont(sizes.normal, FW_NORMAL);
+    HFONT bold = CreateUIFont(sizes.normal, FW_SEMIBOLD);
+    HFONT big = CreateUIFont(sizes.big, FW_SEMIBOLD);
+    HFONT fixed = CreateFontForFamily(sizes.fixed, FW_NORMAL, kBundledFixedFont.family);
     if (!normal || !bold || !big || !fixed)
     {
         if (normal)
@@ -1526,11 +1527,13 @@ bool CreateNewFonts(FontSizes sizes)
     return true;
 }
 
-void ReinitializeTextRenderer()
+void ReinitializeTextRenderer(FontSizes sizes)
 {
     g_pRenderText->Release();
     const std::string selectedFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
-    const bool fontsReloaded = mu::GetRenderer().ReloadTtfFonts(selectedFamily);
+    const bool fontsReloaded = mu::GetRenderer().ReloadTtfFonts(selectedFamily, static_cast<float>(sizes.normal),
+                                                                static_cast<float>(sizes.big),
+                                                                static_cast<float>(sizes.fixed));
     if (!fontsReloaded)
         mu::log::Get("render")->error("SDL_ttf -- keeping the previous font set after reload failure");
     const bool textCreated = g_pRenderText->Create(g_hDC);
@@ -1551,7 +1554,7 @@ void RefreshInventoryEquipmentSlots()
 
 } // namespace
 
-// Reinitialize fonts when window resolution changes
+// Reinitialize fonts after an explicit font-family change.
 void ReinitializeFonts()
 {
     // Save old font handles so we can delete them after the renderer has switched over
@@ -1560,13 +1563,13 @@ void ReinitializeFonts()
     HFONT hOldFontBig = g_hFontBig;
     HFONT hOldFixFont = g_hFixFont;
 
-    FontSizes sizes = CalculateFontSizes();
+    const FontSizes sizes = CalculateFontSizes();
     if (!CreateNewFonts(sizes))
     {
         mu::log::Get("render")->error("GDI -- failed to create bundled font roles during live reload");
         return;
     }
-    ReinitializeTextRenderer();
+    ReinitializeTextRenderer(sizes);
 
     if (hOldFont)
         DeleteObject(hOldFont);
@@ -1812,8 +1815,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                                                      _countof(m_Password));
     }
 
-    g_fScreenRate_x = (float)WindowWidth / (float)REFERENCE_WIDTH;
-    g_fScreenRate_y = (float)WindowHeight / (float)REFERENCE_HEIGHT;
+    const auto screenTransform = UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight);
+    UI::Scaling::SetActiveTransform(screenTransform);
+    g_fWindowMouseX = static_cast<float>(WindowWidth) * 0.5f;
+    g_fWindowMouseY = static_cast<float>(WindowHeight) * 0.5f;
+    MouseX = static_cast<int>(UI::Scaling::LogicalX(screenTransform, g_fWindowMouseX));
+    MouseY = static_cast<int>(UI::Scaling::LogicalY(screenTransform, g_fWindowMouseY));
 
     pMultiLanguage = new CMultiLanguage(g_strSelectedML);
 
@@ -1868,7 +1875,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     OpenglWindowHeight = WindowHeight;
 
     const std::string selectedFontFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
-    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily))
+    const FontSizes initialFontSizes = CalculateFontSizes();
+    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily, static_cast<float>(initialFontSizes.normal),
+                                static_cast<float>(initialFontSizes.big),
+                                static_cast<float>(initialFontSizes.fixed)))
     {
         g_ErrorReport.Write(L"SDL_gpu renderer init failed.\r\n");
         ShutdownRendererWindow();

@@ -295,8 +295,8 @@ void CSprite::Render()
     for (int i = LT; i < POS_MAX; ++i)
     {
         vertices[i] = {
-            m_aScrCoord[i].fX * m_fScaleX,
-            m_aScrCoord[i].fY * m_fScaleY,
+            m_aScrCoord[i].fX * m_fScaleX + g_fScreenOffset_x,
+            m_aScrCoord[i].fY * m_fScaleY - g_fScreenOffset_y,
             m_nTexID >= 0 ? m_aTexCoord[i].fTU : 0.f,
             m_nTexID >= 0 ? m_aTexCoord[i].fTV : 0.f,
             color,

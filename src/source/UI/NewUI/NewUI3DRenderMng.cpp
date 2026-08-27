@@ -10,6 +10,27 @@
 
 using namespace SEASON3B;
 
+namespace
+{
+UI::Scaling::Transform TransformForOwner(INewUI3DRenderObj* object)
+{
+    CNewUIObj* owner = dynamic_cast<CNewUIObj*>(object);
+    if (!owner)
+        owner = object->GetLayoutOwner();
+    if (!owner)
+        return UI::Scaling::GetActiveTransform();
+    return UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
+}
+
+void RenderWithOwnerLayout(INewUI3DRenderObj* object)
+{
+    const auto previousTransform = UI::Scaling::GetActiveTransform();
+    UI::Scaling::SetActiveTransform(TransformForOwner(object));
+    object->Render3D();
+    UI::Scaling::SetActiveTransform(previousTransform);
+}
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -81,6 +102,7 @@ void SEASON3B::CNewUI3DCamera::RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCallbackFu
     UI2DEffectInfo.pClass = pClass;
     UI2DEffectInfo.dwParamA = dwParamA;
     UI2DEffectInfo.dwParamB = dwParamB;
+    UI2DEffectInfo.transform = UI::Scaling::GetActiveTransform();
 
     m_deque2DEffects.push_back(UI2DEffectInfo);
 }
@@ -145,7 +167,7 @@ bool SEASON3B::CNewUI3DCamera::Render()
     {
         if ((*li)->IsVisible())
         {
-            (*li)->Render3D();
+            RenderWithOwnerLayout(*li);
         }
     }
     UpdateMousePositionn();
@@ -161,7 +183,10 @@ bool SEASON3B::CNewUI3DCamera::Render()
         UI_2DEFFECT_INFO& UI2DEffectInfo = m_deque2DEffects.front();
         if (UI2DEffectInfo.pCallbackFunc)
         {
+            const auto previousTransform = UI::Scaling::GetActiveTransform();
+            UI::Scaling::SetActiveTransform(UI2DEffectInfo.transform);
             (*UI2DEffectInfo.pCallbackFunc)(UI2DEffectInfo.pClass, UI2DEffectInfo.dwParamA, UI2DEffectInfo.dwParamB);
+            UI::Scaling::SetActiveTransform(previousTransform);
         }
         m_deque2DEffects.pop_front();
     }

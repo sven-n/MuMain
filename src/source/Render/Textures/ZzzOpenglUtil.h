@@ -84,6 +84,10 @@ void ClearDepthBuffer();
 void ClearColorAndDepthBuffers();
 void SetClearColor(float r, float g, float b, float a = 1.0f);
 void FlushGL();
+float ConvertX(float x);
+float ConvertY(float y);
+float ConvertPositionX(float x);
+float ConvertPositionY(float y);
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
 void EndOpengl();
 

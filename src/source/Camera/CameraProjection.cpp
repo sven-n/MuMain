@@ -50,9 +50,10 @@ void CameraProjection::SetViewport(int x, int y, int width, int height)
 void CameraProjection::ScreenToWorldRay(const CameraState& state, int sx, int sy,
                                          vec3_t outTarget, bool bFixView)
 {
-    // Convert reference coordinates to actual pixels
-    sx = sx * WindowWidth / REFERENCE_WIDTH;
-    sy = sy * WindowHeight / REFERENCE_HEIGHT;
+    // Convert active logical coordinates to window pixels. World picking uses
+    // the screen-overlay transform; panel item previews use the panel transform.
+    sx = static_cast<int>(static_cast<float>(sx) * g_fScreenRate_x + g_fScreenOffset_x);
+    sy = static_cast<int>(static_cast<float>(sy) * g_fScreenRate_y + g_fScreenOffset_y);
 
     vec3_t p1, p2;
 

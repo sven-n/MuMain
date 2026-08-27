@@ -10,10 +10,6 @@
 
 #include "Render/Textures/ZzzOpenglUtil.h"
 
-// From ZzzOpenglUtil.cpp -- viewport scaling helpers.
-float ConvertX(float x);
-float ConvertY(float y);
-
 extern unsigned int WindowWidth, WindowHeight;
 extern int MouseWheel;
 
@@ -40,8 +36,8 @@ namespace
     {
         mu::GetRenderer().SetTexture2D(false);
 
-        float gx = ConvertX((float)x);
-        float gy = ConvertY((float)y);
+        float gx = ConvertPositionX((float)x);
+        float gy = ConvertPositionY((float)y);
         float gw = ConvertX((float)w);
         float gh = ConvertY((float)h);
         gy = (float)WindowHeight - gy;

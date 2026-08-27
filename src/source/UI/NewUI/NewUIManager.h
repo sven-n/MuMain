@@ -37,6 +37,7 @@ namespace SEASON3B
         void ReleaseAllUIObj();
 
         CNewUIObj* FindUIObj(DWORD dwKey);
+        CNewUIObj* FindUIObjByRelatedWnd(HWND hWnd) const;
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();

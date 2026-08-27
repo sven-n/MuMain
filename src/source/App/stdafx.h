@@ -212,6 +212,12 @@ inline constexpr int REFERENCE_HEIGHT = 480;
 #include "Core/Globals/_crypt.h"
 
 inline std::wstring g_strSelectedML = L"";
-// Scale factors from REFERENCE_WIDTH/HEIGHT (above) to the actual window size.
+// Active logical-to-window transform. Screen overlays use full-window scale;
+// panel UI uses centered, capped scale plus offsets.
 inline float g_fScreenRate_x = 0;
 inline float g_fScreenRate_y = 0;
+inline float g_fScreenOffset_x = 0;
+inline float g_fScreenOffset_y = 0;
+inline float g_fTypographyScale = 1.0f;
+inline float g_fWindowMouseX = 0;
+inline float g_fWindowMouseY = 0;

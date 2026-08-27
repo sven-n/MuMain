@@ -1162,8 +1162,8 @@ protected:
     int m_iScrollLine = 0;   // first visible wrapped line (multiline vertical scroll)
     int m_iMaxLength = 0;    // text length limit (0 = unlimited)
     // Which global font this box draws with. Stored by kind (not by HFONT)
-    // because ReinitializeFonts() deletes and recreates the handles on a
-    // resolution change; CurrentFont() re-resolves the live handle each frame.
+    // because ReinitializeFonts() deletes and recreates the handles after a
+    // font-family change; CurrentFont() re-resolves the live handle each frame.
     enum class PortableFontKind
     {
         Default,

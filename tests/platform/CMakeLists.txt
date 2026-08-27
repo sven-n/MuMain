@@ -31,6 +31,7 @@ mu_add_test(
     NAME bundled_font_role_tests
     SOURCES
         test_bundled_font_roles.cpp
+    LINK_LIBS MuClient
 )
 
 add_test(

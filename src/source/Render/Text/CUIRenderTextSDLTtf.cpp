@@ -8,9 +8,11 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Text/SDLTtfColorPack.h"
 #include "Render/Text/SdlTtfGpuTextProperties.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 
 #include <SDL3_ttf/SDL_ttf.h>
 
+#include <cmath>
 #include <vector>
 
 namespace
@@ -26,17 +28,38 @@ struct TextLayout
     float alignmentOffset;
 };
 
-TextLayout BuildTextLayout(int x, int y, int boxWidth, int boxHeight, int sort, int measuredWidth, int measuredHeight)
+struct ScaledTextMetrics
 {
-    TextLayout layout{static_cast<float>(y) * g_fScreenRate_y, static_cast<float>(x) * g_fScreenRate_x,
-                      static_cast<float>(boxWidth) * g_fScreenRate_x, static_cast<float>(boxHeight) * g_fScreenRate_y,
-                      0.0f};
+    UI::Scaling::Transform transform;
+    float scale;
+    float width;
+    float height;
+};
+
+ScaledTextMetrics BuildScaledTextMetrics(UI::Scaling::FontRole role, int measuredWidth, int measuredHeight,
+                                         int boxWidth, int boxHeight)
+{
+    const auto transform = UI::Scaling::GetActiveTransform();
+    const float physicalBoxWidth = boxWidth > 0 ? UI::Scaling::SizeX(transform, static_cast<float>(boxWidth)) : 0.0f;
+    const float physicalBoxHeight = boxHeight > 0 ? UI::Scaling::SizeY(transform, static_cast<float>(boxHeight)) : 0.0f;
+    const float scale = UI::Scaling::FontScaleForBounds(role, transform, static_cast<float>(measuredWidth),
+                                                       static_cast<float>(measuredHeight), physicalBoxWidth,
+                                                       physicalBoxHeight);
+    return {transform, scale, static_cast<float>(measuredWidth) * scale,
+            static_cast<float>(measuredHeight) * scale};
+}
+
+TextLayout BuildTextLayout(int x, int y, int boxWidth, int boxHeight, int sort, float measuredWidth,
+                           float measuredHeight)
+{
+    TextLayout layout{ConvertPositionY(static_cast<float>(y)), ConvertPositionX(static_cast<float>(x)),
+                      ConvertX(static_cast<float>(boxWidth)), ConvertY(static_cast<float>(boxHeight)), 0.0f};
     if (layout.boxWidth == 0.0f)
         layout.boxWidth = static_cast<float>(measuredWidth);
     if (layout.boxHeight == 0.0f)
         layout.boxHeight = static_cast<float>(measuredHeight);
 
-    const bool textFits = measuredWidth < static_cast<int>(layout.boxWidth);
+    const bool textFits = measuredWidth < layout.boxWidth;
     if ((sort == RT3_SORT_CENTER || sort == RT3_WRITE_CENTER) && textFits)
         layout.alignmentOffset = (layout.boxWidth - static_cast<float>(measuredWidth)) / 2.0f;
     else if ((sort == RT3_SORT_RIGHT || sort == RT3_WRITE_RIGHT_TO_LEFT) && textFits)
@@ -77,7 +100,7 @@ void ConsumeGlyphUploads(TTF_Text* text)
 }
 
 void SubmitTextDrawData(mu::IMuRenderer& renderer, const TTF_GPUAtlasDrawSequence* drawData, float drawX, float drawY,
-                        DWORD color)
+                        float glyphScale, DWORD color)
 {
     static thread_local std::vector<mu::Vertex2D> vertices;
     if (vertices.capacity() > kMaxRetainedVertexCapacity)
@@ -93,7 +116,8 @@ void SubmitTextDrawData(mu::IMuRenderer& renderer, const TTF_GPUAtlasDrawSequenc
         for (int i = 0; i < sequence->num_indices; ++i)
         {
             const int index = sequence->indices[i];
-            vertices.push_back({sequence->xy[index].x + drawX, drawY + sequence->xy[index].y, sequence->uv[index].x,
+            vertices.push_back({sequence->xy[index].x * glyphScale + drawX,
+                                drawY + sequence->xy[index].y * glyphScale, sequence->uv[index].x,
                                 sequence->uv[index].y, color});
         }
         renderer.SubmitTextTriangles(vertices, sequence->atlas_texture, nullptr);
@@ -133,6 +157,7 @@ void CUIRenderTextSDLTtf::Release()
 {
     m_textCache.Reset(nullptr);
     m_activeFont = nullptr;
+    m_activeRole = UI::Scaling::FontRole::Normal;
 }
 
 DWORD CUIRenderTextSDLTtf::GetTextColor() const
@@ -170,18 +195,22 @@ void CUIRenderTextSDLTtf::SetFont(HFONT font)
     if (font == g_hFontBold)
     {
         m_activeFont = renderer.GetTtfFontBold();
+        m_activeRole = UI::Scaling::FontRole::Bold;
     }
     else if (font == g_hFontBig)
     {
         m_activeFont = renderer.GetTtfFontBig();
+        m_activeRole = UI::Scaling::FontRole::Big;
     }
     else if (font == g_hFixFont)
     {
         m_activeFont = renderer.GetTtfFontFixed();
+        m_activeRole = UI::Scaling::FontRole::Fixed;
     }
     else
     {
         m_activeFont = renderer.GetTtfFont();
+        m_activeRole = UI::Scaling::FontRole::Normal;
     }
 }
 
@@ -206,8 +235,9 @@ SIZE CUIRenderTextSDLTtf::MeasureText(const wchar_t* text, int length) const
     if (prepared.text == nullptr)
         return size;
 
-    size.cx = static_cast<LONG>(static_cast<float>(prepared.width) / g_fScreenRate_x);
-    size.cy = static_cast<LONG>(static_cast<float>(prepared.height) / g_fScreenRate_y);
+    const ScaledTextMetrics metrics = BuildScaledTextMetrics(m_activeRole, prepared.width, prepared.height, 0, 0);
+    size.cx = static_cast<LONG>(std::lround(metrics.width / metrics.transform.scaleX));
+    size.cy = static_cast<LONG>(std::lround(metrics.height / metrics.transform.scaleY));
     return size;
 }
 
@@ -237,15 +267,15 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     if (prepared.text == nullptr)
         return;
 
-    const int measuredWidth = prepared.width;
-    const int measuredHeight = prepared.height;
+    const ScaledTextMetrics metrics =
+        BuildScaledTextMetrics(m_activeRole, prepared.width, prepared.height, boxWidth, boxHeight);
 
-    const TextLayout layout = BuildTextLayout(x, y, boxWidth, boxHeight, sort, measuredWidth, measuredHeight);
+    const TextLayout layout = BuildTextLayout(x, y, boxWidth, boxHeight, sort, metrics.width, metrics.height);
 
     if (textSize != nullptr)
     {
-        textSize->cx = static_cast<LONG>(static_cast<float>(measuredWidth) / g_fScreenRate_x);
-        textSize->cy = static_cast<LONG>(static_cast<float>(measuredHeight) / g_fScreenRate_y);
+        textSize->cx = static_cast<LONG>(std::lround(metrics.width / metrics.transform.scaleX));
+        textSize->cy = static_cast<LONG>(std::lround(metrics.height / metrics.transform.scaleY));
     }
 
     const int windowHeight = renderer.GetCachedWindowHeight();
@@ -258,5 +288,5 @@ void CUIRenderTextSDLTtf::RenderText(int x, int y, const wchar_t* text, int boxW
     const TTF_GPUAtlasDrawSequence* drawData = TTF_GetGPUTextDrawData(prepared.text);
     ConsumeGlyphUploads(prepared.text);
     SubmitTextDrawData(renderer, drawData, layout.renderX + layout.alignmentOffset,
-                       static_cast<float>(windowHeight) - layout.screenY, m_textColor);
+                       static_cast<float>(windowHeight) - layout.screenY, metrics.scale, m_textColor);
 }

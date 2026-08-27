@@ -1,8 +1,40 @@
 #include "stdafx.h"
 #include "UI/NewUI/NewUIManager.h"
+#include "UI/NewUI/UILayoutPolicy.h"
 #include "UI/Legacy/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
+#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3B;
+
+namespace
+{
+struct LayoutInputState
+{
+    UI::Scaling::Transform transform;
+    int mouseX;
+    int mouseY;
+};
+
+LayoutInputState ActivateLayout(const CNewUIObj& object, bool transformMouse)
+{
+    const LayoutInputState state{UI::Scaling::GetActiveTransform(), MouseX, MouseY};
+    const auto transform = UI::Scaling::TransformForLayout(object.GetLayoutMode(), WindowWidth, WindowHeight);
+    UI::Scaling::SetActiveTransform(transform);
+    if (transformMouse)
+    {
+        MouseX = static_cast<int>(std::floor(UI::Scaling::LogicalX(transform, g_fWindowMouseX)));
+        MouseY = static_cast<int>(std::floor(UI::Scaling::LogicalY(transform, g_fWindowMouseY)));
+    }
+    return state;
+}
+
+void RestoreLayout(const LayoutInputState& state)
+{
+    MouseX = state.mouseX;
+    MouseY = state.mouseY;
+    UI::Scaling::SetActiveTransform(state.transform);
+}
+}
 
 SEASON3B::CNewUIManager::CNewUIManager()
 {
@@ -23,6 +55,7 @@ void SEASON3B::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
     auto mi = m_mapUI.find(dwKey);
     if (mi == m_mapUI.end())
     {
+        pUIObj->SetLayoutMode(UI::Layout::ForInterface(dwKey));
         m_vecUI.push_back(pUIObj);
         m_mapUI.insert(type_map_uibase::value_type(dwKey, pUIObj));
     }
@@ -103,6 +136,13 @@ CNewUIObj* SEASON3B::CNewUIManager::FindUIObj(DWORD dwKey)
     return NULL;
 }
 
+CNewUIObj* SEASON3B::CNewUIManager::FindUIObjByRelatedWnd(HWND hWnd) const
+{
+    const auto result = std::find_if(m_vecUI.begin(), m_vecUI.end(),
+                                     [hWnd](const CNewUIObj* object) { return object->GetRelatedWnd() == hWnd; });
+    return result != m_vecUI.end() ? *result : nullptr;
+}
+
 bool SEASON3B::CNewUIManager::UpdateMouseEvent()
 {
     m_pActiveMouseUIObj = NULL;
@@ -117,7 +157,9 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
         if ((*vi)->IsVisible())
         {
             CNewUIObj* obj_backup = (*vi);
+            const LayoutInputState layoutState = ActivateLayout(**vi, true);
             bool bResult = (*vi)->UpdateMouseEvent();
+            RestoreLayout(layoutState);
 
             auto vi2 = std::find(vecUI.begin(), vecUI.end(), obj_backup);
             if (vi2 != vecUI.end())
@@ -168,7 +210,10 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 
         if ((*vi)->IsEnabled() && hWnd == hRelatedWnd)
         {
-            if (false == (*vi)->UpdateKeyEvent())
+            const LayoutInputState layoutState = ActivateLayout(**vi, true);
+            const bool result = (*vi)->UpdateKeyEvent();
+            RestoreLayout(layoutState);
+            if (false == result)
             {
                 m_pActiveKeyUIObj = (*vi);
                 return false; //. stop calling UpdateKeyEvent functions
@@ -187,7 +232,10 @@ bool SEASON3B::CNewUIManager::Update()
     {
         if ((*vi)->IsEnabled())
         {
-            if (false == (*vi)->Update())
+            const LayoutInputState layoutState = ActivateLayout(**vi, true);
+            const bool result = (*vi)->Update();
+            RestoreLayout(layoutState);
+            if (false == result)
             {
                 return false; //. stop calling Update functions
             }
@@ -207,7 +255,9 @@ bool SEASON3B::CNewUIManager::Render()
     {
         if ((*vi)->IsVisible())
         {
+            const LayoutInputState layoutState = ActivateLayout(**vi, false);
             (*vi)->Render();
+            RestoreLayout(layoutState);
         }
     }
 
