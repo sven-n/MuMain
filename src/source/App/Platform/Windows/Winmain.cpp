@@ -1740,7 +1740,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
     WriteStartupDiagnostics(lpszExeVersion, wVersion);
-    ResolvePacketBindings();
+    InitializeDotNetBridge();
 
     g_ErrorReport.Write(L"> To read config.ini.\r\n");
 

@@ -20,960 +20,2112 @@
 
 void PacketFunctions_ClientToServer::SendPing(uint32_t tickCount, uint16_t attackSpeed)
 {
+    static const auto dotnet_SendPing = LoadManagedSymbol<::SendPing>("SendPing");
+    if (!dotnet_SendPing)
+    {
+        return;
+    }
+
     dotnet_SendPing(this->GetHandle(), tickCount, attackSpeed);
 }
 
 void PacketFunctions_ClientToServer::SendChecksumResponse(uint32_t checksum)
 {
+    static const auto dotnet_SendChecksumResponse = LoadManagedSymbol<::SendChecksumResponse>("SendChecksumResponse");
+    if (!dotnet_SendChecksumResponse)
+    {
+        return;
+    }
+
     dotnet_SendChecksumResponse(this->GetHandle(), checksum);
 }
 
 void PacketFunctions_ClientToServer::SendPublicChatMessage(const char16_t* character, const char16_t* message)
 {
+    static const auto dotnet_SendPublicChatMessage = LoadManagedSymbol<::SendPublicChatMessage>("SendPublicChatMessage");
+    if (!dotnet_SendPublicChatMessage)
+    {
+        return;
+    }
+
     dotnet_SendPublicChatMessage(this->GetHandle(), character, message);
 }
 
 void PacketFunctions_ClientToServer::SendWhisperMessage(const char16_t* receiverName, const char16_t* message)
 {
+    static const auto dotnet_SendWhisperMessage = LoadManagedSymbol<::SendWhisperMessage>("SendWhisperMessage");
+    if (!dotnet_SendWhisperMessage)
+    {
+        return;
+    }
+
     dotnet_SendWhisperMessage(this->GetHandle(), receiverName, message);
 }
 
 void PacketFunctions_ClientToServer::SendLoginLongPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
+    static const auto dotnet_SendLoginLongPassword = LoadManagedSymbol<::SendLoginLongPassword>("SendLoginLongPassword");
+    if (!dotnet_SendLoginLongPassword)
+    {
+        return;
+    }
+
     dotnet_SendLoginLongPassword(this->GetHandle(), username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendLoginShortPassword(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
+    static const auto dotnet_SendLoginShortPassword = LoadManagedSymbol<::SendLoginShortPassword>("SendLoginShortPassword");
+    if (!dotnet_SendLoginShortPassword)
+    {
+        return;
+    }
+
     dotnet_SendLoginShortPassword(this->GetHandle(), username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendLogin075(const BYTE* username, uint32_t usernameByteLength, const BYTE* password, uint32_t passwordByteLength, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
+    static const auto dotnet_SendLogin075 = LoadManagedSymbol<::SendLogin075>("SendLogin075");
+    if (!dotnet_SendLogin075)
+    {
+        return;
+    }
+
     dotnet_SendLogin075(this->GetHandle(), username, usernameByteLength, password, passwordByteLength, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendLogOut(LogOutType type)
 {
+    static const auto dotnet_SendLogOut = LoadManagedSymbol<::SendLogOut>("SendLogOut");
+    if (!dotnet_SendLogOut)
+    {
+        return;
+    }
+
     dotnet_SendLogOut(this->GetHandle(), type);
 }
 
 void PacketFunctions_ClientToServer::SendLogOutByCheatDetection(BYTE param, BYTE type)
 {
+    static const auto dotnet_SendLogOutByCheatDetection = LoadManagedSymbol<::SendLogOutByCheatDetection>("SendLogOutByCheatDetection");
+    if (!dotnet_SendLogOutByCheatDetection)
+    {
+        return;
+    }
+
     dotnet_SendLogOutByCheatDetection(this->GetHandle(), param, type);
 }
 
 void PacketFunctions_ClientToServer::SendResetCharacterPointRequest()
 {
+    static const auto dotnet_SendResetCharacterPointRequest = LoadManagedSymbol<::SendResetCharacterPointRequest>("SendResetCharacterPointRequest");
+    if (!dotnet_SendResetCharacterPointRequest)
+    {
+        return;
+    }
+
     dotnet_SendResetCharacterPointRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopSetItemPrice(BYTE itemSlot, uint32_t price)
 {
+    static const auto dotnet_SendPlayerShopSetItemPrice = LoadManagedSymbol<::SendPlayerShopSetItemPrice>("SendPlayerShopSetItemPrice");
+    if (!dotnet_SendPlayerShopSetItemPrice)
+    {
+        return;
+    }
+
     dotnet_SendPlayerShopSetItemPrice(this->GetHandle(), itemSlot, price);
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopOpen(const char16_t* storeName)
 {
+    static const auto dotnet_SendPlayerShopOpen = LoadManagedSymbol<::SendPlayerShopOpen>("SendPlayerShopOpen");
+    if (!dotnet_SendPlayerShopOpen)
+    {
+        return;
+    }
+
     dotnet_SendPlayerShopOpen(this->GetHandle(), storeName);
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopClose()
 {
+    static const auto dotnet_SendPlayerShopClose = LoadManagedSymbol<::SendPlayerShopClose>("SendPlayerShopClose");
+    if (!dotnet_SendPlayerShopClose)
+    {
+        return;
+    }
+
     dotnet_SendPlayerShopClose(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopItemListRequest(uint16_t playerId, const char16_t* playerName)
 {
+    static const auto dotnet_SendPlayerShopItemListRequest = LoadManagedSymbol<::SendPlayerShopItemListRequest>("SendPlayerShopItemListRequest");
+    if (!dotnet_SendPlayerShopItemListRequest)
+    {
+        return;
+    }
+
     dotnet_SendPlayerShopItemListRequest(this->GetHandle(), playerId, playerName);
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopItemBuyRequest(uint16_t playerId, const char16_t* playerName, BYTE itemSlot)
 {
+    static const auto dotnet_SendPlayerShopItemBuyRequest = LoadManagedSymbol<::SendPlayerShopItemBuyRequest>("SendPlayerShopItemBuyRequest");
+    if (!dotnet_SendPlayerShopItemBuyRequest)
+    {
+        return;
+    }
+
     dotnet_SendPlayerShopItemBuyRequest(this->GetHandle(), playerId, playerName, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendPlayerShopCloseOther(uint16_t playerId, const char16_t* playerName)
 {
+    static const auto dotnet_SendPlayerShopCloseOther = LoadManagedSymbol<::SendPlayerShopCloseOther>("SendPlayerShopCloseOther");
+    if (!dotnet_SendPlayerShopCloseOther)
+    {
+        return;
+    }
+
     dotnet_SendPlayerShopCloseOther(this->GetHandle(), playerId, playerName);
 }
 
 void PacketFunctions_ClientToServer::SendPickupItemRequest(uint16_t itemId)
 {
+    static const auto dotnet_SendPickupItemRequest = LoadManagedSymbol<::SendPickupItemRequest>("SendPickupItemRequest");
+    if (!dotnet_SendPickupItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendPickupItemRequest(this->GetHandle(), itemId);
 }
 
 void PacketFunctions_ClientToServer::SendPickupItemRequest075(uint16_t itemId)
 {
+    static const auto dotnet_SendPickupItemRequest075 = LoadManagedSymbol<::SendPickupItemRequest075>("SendPickupItemRequest075");
+    if (!dotnet_SendPickupItemRequest075)
+    {
+        return;
+    }
+
     dotnet_SendPickupItemRequest075(this->GetHandle(), itemId);
 }
 
 void PacketFunctions_ClientToServer::SendDropItemRequest(BYTE targetX, BYTE targetY, BYTE itemSlot)
 {
+    static const auto dotnet_SendDropItemRequest = LoadManagedSymbol<::SendDropItemRequest>("SendDropItemRequest");
+    if (!dotnet_SendDropItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendDropItemRequest(this->GetHandle(), targetX, targetY, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendItemMoveRequest(ItemStorageKind fromStorage, BYTE fromSlot, const BYTE* itemData, uint32_t itemDataByteLength, ItemStorageKind toStorage, BYTE toSlot)
 {
+    static const auto dotnet_SendItemMoveRequest = LoadManagedSymbol<::SendItemMoveRequest>("SendItemMoveRequest");
+    if (!dotnet_SendItemMoveRequest)
+    {
+        return;
+    }
+
     dotnet_SendItemMoveRequest(this->GetHandle(), fromStorage, fromSlot, itemData, itemDataByteLength, toStorage, toSlot);
 }
 
 void PacketFunctions_ClientToServer::SendItemMoveRequestExtended(ItemStorageKind fromStorage, BYTE fromSlot, ItemStorageKind toStorage, BYTE toSlot)
 {
+    static const auto dotnet_SendItemMoveRequestExtended = LoadManagedSymbol<::SendItemMoveRequestExtended>("SendItemMoveRequestExtended");
+    if (!dotnet_SendItemMoveRequestExtended)
+    {
+        return;
+    }
+
     dotnet_SendItemMoveRequestExtended(this->GetHandle(), fromStorage, fromSlot, toStorage, toSlot);
 }
 
 void PacketFunctions_ClientToServer::SendConsumeItemRequest(BYTE itemSlot, BYTE targetSlot, FruitUsage fruitConsumption)
 {
+    static const auto dotnet_SendConsumeItemRequest = LoadManagedSymbol<::SendConsumeItemRequest>("SendConsumeItemRequest");
+    if (!dotnet_SendConsumeItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendConsumeItemRequest(this->GetHandle(), itemSlot, targetSlot, fruitConsumption);
 }
 
 void PacketFunctions_ClientToServer::SendConsumeItemRequest075(BYTE itemSlot, BYTE targetSlot)
 {
+    static const auto dotnet_SendConsumeItemRequest075 = LoadManagedSymbol<::SendConsumeItemRequest075>("SendConsumeItemRequest075");
+    if (!dotnet_SendConsumeItemRequest075)
+    {
+        return;
+    }
+
     dotnet_SendConsumeItemRequest075(this->GetHandle(), itemSlot, targetSlot);
 }
 
 void PacketFunctions_ClientToServer::SendTalkToNpcRequest(uint16_t npcId)
 {
+    static const auto dotnet_SendTalkToNpcRequest = LoadManagedSymbol<::SendTalkToNpcRequest>("SendTalkToNpcRequest");
+    if (!dotnet_SendTalkToNpcRequest)
+    {
+        return;
+    }
+
     dotnet_SendTalkToNpcRequest(this->GetHandle(), npcId);
 }
 
 void PacketFunctions_ClientToServer::SendCloseNpcRequest()
 {
+    static const auto dotnet_SendCloseNpcRequest = LoadManagedSymbol<::SendCloseNpcRequest>("SendCloseNpcRequest");
+    if (!dotnet_SendCloseNpcRequest)
+    {
+        return;
+    }
+
     dotnet_SendCloseNpcRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendBuyItemFromNpcRequest(BYTE itemSlot)
 {
+    static const auto dotnet_SendBuyItemFromNpcRequest = LoadManagedSymbol<::SendBuyItemFromNpcRequest>("SendBuyItemFromNpcRequest");
+    if (!dotnet_SendBuyItemFromNpcRequest)
+    {
+        return;
+    }
+
     dotnet_SendBuyItemFromNpcRequest(this->GetHandle(), itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendSellItemToNpcRequest(BYTE itemSlot)
 {
+    static const auto dotnet_SendSellItemToNpcRequest = LoadManagedSymbol<::SendSellItemToNpcRequest>("SendSellItemToNpcRequest");
+    if (!dotnet_SendSellItemToNpcRequest)
+    {
+        return;
+    }
+
     dotnet_SendSellItemToNpcRequest(this->GetHandle(), itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendRepairItemRequest(BYTE itemSlot, BYTE isSelfRepair)
 {
+    static const auto dotnet_SendRepairItemRequest = LoadManagedSymbol<::SendRepairItemRequest>("SendRepairItemRequest");
+    if (!dotnet_SendRepairItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendRepairItemRequest(this->GetHandle(), itemSlot, isSelfRepair);
 }
 
 void PacketFunctions_ClientToServer::SendWarpCommandRequest(uint32_t commandKey, uint16_t warpInfoIndex)
 {
+    static const auto dotnet_SendWarpCommandRequest = LoadManagedSymbol<::SendWarpCommandRequest>("SendWarpCommandRequest");
+    if (!dotnet_SendWarpCommandRequest)
+    {
+        return;
+    }
+
     dotnet_SendWarpCommandRequest(this->GetHandle(), commandKey, warpInfoIndex);
 }
 
 void PacketFunctions_ClientToServer::SendEnterGateRequest(uint16_t gateNumber, BYTE teleportTargetX, BYTE teleportTargetY)
 {
+    static const auto dotnet_SendEnterGateRequest = LoadManagedSymbol<::SendEnterGateRequest>("SendEnterGateRequest");
+    if (!dotnet_SendEnterGateRequest)
+    {
+        return;
+    }
+
     dotnet_SendEnterGateRequest(this->GetHandle(), gateNumber, teleportTargetX, teleportTargetY);
 }
 
 void PacketFunctions_ClientToServer::SendEnterGateRequest075(BYTE gateNumber, BYTE teleportTargetX, BYTE teleportTargetY)
 {
+    static const auto dotnet_SendEnterGateRequest075 = LoadManagedSymbol<::SendEnterGateRequest075>("SendEnterGateRequest075");
+    if (!dotnet_SendEnterGateRequest075)
+    {
+        return;
+    }
+
     dotnet_SendEnterGateRequest075(this->GetHandle(), gateNumber, teleportTargetX, teleportTargetY);
 }
 
 void PacketFunctions_ClientToServer::SendTeleportTarget(uint16_t targetId, BYTE teleportTargetX, BYTE teleportTargetY)
 {
+    static const auto dotnet_SendTeleportTarget = LoadManagedSymbol<::SendTeleportTarget>("SendTeleportTarget");
+    if (!dotnet_SendTeleportTarget)
+    {
+        return;
+    }
+
     dotnet_SendTeleportTarget(this->GetHandle(), targetId, teleportTargetX, teleportTargetY);
 }
 
 void PacketFunctions_ClientToServer::SendServerChangeAuthentication(const BYTE* accountXor3, uint32_t accountXor3ByteLength, const BYTE* characterNameXor3, uint32_t characterNameXor3ByteLength, uint32_t authCode1, uint32_t authCode2, uint32_t authCode3, uint32_t authCode4, uint32_t tickCount, const BYTE* clientVersion, uint32_t clientVersionByteLength, const BYTE* clientSerial, uint32_t clientSerialByteLength)
 {
+    static const auto dotnet_SendServerChangeAuthentication = LoadManagedSymbol<::SendServerChangeAuthentication>("SendServerChangeAuthentication");
+    if (!dotnet_SendServerChangeAuthentication)
+    {
+        return;
+    }
+
     dotnet_SendServerChangeAuthentication(this->GetHandle(), accountXor3, accountXor3ByteLength, characterNameXor3, characterNameXor3ByteLength, authCode1, authCode2, authCode3, authCode4, tickCount, clientVersion, clientVersionByteLength, clientSerial, clientSerialByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeStatusRequest()
 {
+    static const auto dotnet_SendCastleSiegeStatusRequest = LoadManagedSymbol<::SendCastleSiegeStatusRequest>("SendCastleSiegeStatusRequest");
+    if (!dotnet_SendCastleSiegeStatusRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeStatusRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegistrationRequest()
 {
+    static const auto dotnet_SendCastleSiegeRegistrationRequest = LoadManagedSymbol<::SendCastleSiegeRegistrationRequest>("SendCastleSiegeRegistrationRequest");
+    if (!dotnet_SendCastleSiegeRegistrationRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeRegistrationRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeUnregisterRequest(BYTE isGivingUp)
 {
+    static const auto dotnet_SendCastleSiegeUnregisterRequest = LoadManagedSymbol<::SendCastleSiegeUnregisterRequest>("SendCastleSiegeUnregisterRequest");
+    if (!dotnet_SendCastleSiegeUnregisterRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeUnregisterRequest(this->GetHandle(), isGivingUp);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegistrationStateRequest()
 {
+    static const auto dotnet_SendCastleSiegeRegistrationStateRequest = LoadManagedSymbol<::SendCastleSiegeRegistrationStateRequest>("SendCastleSiegeRegistrationStateRequest");
+    if (!dotnet_SendCastleSiegeRegistrationStateRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeRegistrationStateRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeMarkRegistration(BYTE itemIndex)
 {
+    static const auto dotnet_SendCastleSiegeMarkRegistration = LoadManagedSymbol<::SendCastleSiegeMarkRegistration>("SendCastleSiegeMarkRegistration");
+    if (!dotnet_SendCastleSiegeMarkRegistration)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeMarkRegistration(this->GetHandle(), itemIndex);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeDefenseBuyRequest(uint32_t npcNumber, uint32_t npcIndex)
 {
+    static const auto dotnet_SendCastleSiegeDefenseBuyRequest = LoadManagedSymbol<::SendCastleSiegeDefenseBuyRequest>("SendCastleSiegeDefenseBuyRequest");
+    if (!dotnet_SendCastleSiegeDefenseBuyRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeDefenseBuyRequest(this->GetHandle(), npcNumber, npcIndex);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeDefenseRepairRequest(uint32_t npcNumber, uint32_t npcIndex)
 {
+    static const auto dotnet_SendCastleSiegeDefenseRepairRequest = LoadManagedSymbol<::SendCastleSiegeDefenseRepairRequest>("SendCastleSiegeDefenseRepairRequest");
+    if (!dotnet_SendCastleSiegeDefenseRepairRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeDefenseRepairRequest(this->GetHandle(), npcNumber, npcIndex);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeDefenseUpgradeRequest(uint32_t npcNumber, uint32_t npcIndex, uint32_t npcUpgradeType, uint32_t npcUpgradeValue)
 {
+    static const auto dotnet_SendCastleSiegeDefenseUpgradeRequest = LoadManagedSymbol<::SendCastleSiegeDefenseUpgradeRequest>("SendCastleSiegeDefenseUpgradeRequest");
+    if (!dotnet_SendCastleSiegeDefenseUpgradeRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeDefenseUpgradeRequest(this->GetHandle(), npcNumber, npcIndex, npcUpgradeType, npcUpgradeValue);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxInfoRequest()
 {
+    static const auto dotnet_SendCastleSiegeTaxInfoRequest = LoadManagedSymbol<::SendCastleSiegeTaxInfoRequest>("SendCastleSiegeTaxInfoRequest");
+    if (!dotnet_SendCastleSiegeTaxInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeTaxInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxChangeRequest(BYTE taxType, uint32_t taxRate)
 {
+    static const auto dotnet_SendCastleSiegeTaxChangeRequest = LoadManagedSymbol<::SendCastleSiegeTaxChangeRequest>("SendCastleSiegeTaxChangeRequest");
+    if (!dotnet_SendCastleSiegeTaxChangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeTaxChangeRequest(this->GetHandle(), taxType, taxRate);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeTaxMoneyWithdraw(uint32_t amount)
 {
+    static const auto dotnet_SendCastleSiegeTaxMoneyWithdraw = LoadManagedSymbol<::SendCastleSiegeTaxMoneyWithdraw>("SendCastleSiegeTaxMoneyWithdraw");
+    if (!dotnet_SendCastleSiegeTaxMoneyWithdraw)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeTaxMoneyWithdraw(this->GetHandle(), amount);
 }
 
 void PacketFunctions_ClientToServer::SendToggleCastleGateRequest(BYTE closeState, uint16_t gateId)
 {
+    static const auto dotnet_SendToggleCastleGateRequest = LoadManagedSymbol<::SendToggleCastleGateRequest>("SendToggleCastleGateRequest");
+    if (!dotnet_SendToggleCastleGateRequest)
+    {
+        return;
+    }
+
     dotnet_SendToggleCastleGateRequest(this->GetHandle(), closeState, gateId);
 }
 
 void PacketFunctions_ClientToServer::SendCastleGuildCommand(BYTE team, BYTE positionX, BYTE positionY, BYTE command)
 {
+    static const auto dotnet_SendCastleGuildCommand = LoadManagedSymbol<::SendCastleGuildCommand>("SendCastleGuildCommand");
+    if (!dotnet_SendCastleGuildCommand)
+    {
+        return;
+    }
+
     dotnet_SendCastleGuildCommand(this->GetHandle(), team, positionX, positionY, command);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeHuntingZoneEntranceSetting(BYTE isPublic)
 {
+    static const auto dotnet_SendCastleSiegeHuntingZoneEntranceSetting = LoadManagedSymbol<::SendCastleSiegeHuntingZoneEntranceSetting>("SendCastleSiegeHuntingZoneEntranceSetting");
+    if (!dotnet_SendCastleSiegeHuntingZoneEntranceSetting)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeHuntingZoneEntranceSetting(this->GetHandle(), isPublic);
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeGateListRequest()
 {
+    static const auto dotnet_SendCastleSiegeGateListRequest = LoadManagedSymbol<::SendCastleSiegeGateListRequest>("SendCastleSiegeGateListRequest");
+    if (!dotnet_SendCastleSiegeGateListRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeGateListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeStatueListRequest()
 {
+    static const auto dotnet_SendCastleSiegeStatueListRequest = LoadManagedSymbol<::SendCastleSiegeStatueListRequest>("SendCastleSiegeStatueListRequest");
+    if (!dotnet_SendCastleSiegeStatueListRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeStatueListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeRegisteredGuildsListRequest()
 {
+    static const auto dotnet_SendCastleSiegeRegisteredGuildsListRequest = LoadManagedSymbol<::SendCastleSiegeRegisteredGuildsListRequest>("SendCastleSiegeRegisteredGuildsListRequest");
+    if (!dotnet_SendCastleSiegeRegisteredGuildsListRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeRegisteredGuildsListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleOwnerListRequest()
 {
+    static const auto dotnet_SendCastleOwnerListRequest = LoadManagedSymbol<::SendCastleOwnerListRequest>("SendCastleOwnerListRequest");
+    if (!dotnet_SendCastleOwnerListRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleOwnerListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendFireCatapultRequest(uint16_t catapultId, BYTE targetAreaIndex)
 {
+    static const auto dotnet_SendFireCatapultRequest = LoadManagedSymbol<::SendFireCatapultRequest>("SendFireCatapultRequest");
+    if (!dotnet_SendFireCatapultRequest)
+    {
+        return;
+    }
+
     dotnet_SendFireCatapultRequest(this->GetHandle(), catapultId, targetAreaIndex);
 }
 
 void PacketFunctions_ClientToServer::SendWeaponExplosionRequest(uint16_t catapultId)
 {
+    static const auto dotnet_SendWeaponExplosionRequest = LoadManagedSymbol<::SendWeaponExplosionRequest>("SendWeaponExplosionRequest");
+    if (!dotnet_SendWeaponExplosionRequest)
+    {
+        return;
+    }
+
     dotnet_SendWeaponExplosionRequest(this->GetHandle(), catapultId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildLogoOfCastleOwnerRequest()
 {
+    static const auto dotnet_SendGuildLogoOfCastleOwnerRequest = LoadManagedSymbol<::SendGuildLogoOfCastleOwnerRequest>("SendGuildLogoOfCastleOwnerRequest");
+    if (!dotnet_SendGuildLogoOfCastleOwnerRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildLogoOfCastleOwnerRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCastleSiegeHuntingZoneEnterRequest(uint32_t money)
 {
+    static const auto dotnet_SendCastleSiegeHuntingZoneEnterRequest = LoadManagedSymbol<::SendCastleSiegeHuntingZoneEnterRequest>("SendCastleSiegeHuntingZoneEnterRequest");
+    if (!dotnet_SendCastleSiegeHuntingZoneEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendCastleSiegeHuntingZoneEnterRequest(this->GetHandle(), money);
 }
 
 void PacketFunctions_ClientToServer::SendCrywolfInfoRequest()
 {
+    static const auto dotnet_SendCrywolfInfoRequest = LoadManagedSymbol<::SendCrywolfInfoRequest>("SendCrywolfInfoRequest");
+    if (!dotnet_SendCrywolfInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendCrywolfInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCrywolfContractRequest(uint16_t statueId)
 {
+    static const auto dotnet_SendCrywolfContractRequest = LoadManagedSymbol<::SendCrywolfContractRequest>("SendCrywolfContractRequest");
+    if (!dotnet_SendCrywolfContractRequest)
+    {
+        return;
+    }
+
     dotnet_SendCrywolfContractRequest(this->GetHandle(), statueId);
 }
 
 void PacketFunctions_ClientToServer::SendCrywolfChaosRateBenefitRequest()
 {
+    static const auto dotnet_SendCrywolfChaosRateBenefitRequest = LoadManagedSymbol<::SendCrywolfChaosRateBenefitRequest>("SendCrywolfChaosRateBenefitRequest");
+    if (!dotnet_SendCrywolfChaosRateBenefitRequest)
+    {
+        return;
+    }
+
     dotnet_SendCrywolfChaosRateBenefitRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendWhiteAngelItemRequest()
 {
+    static const auto dotnet_SendWhiteAngelItemRequest = LoadManagedSymbol<::SendWhiteAngelItemRequest>("SendWhiteAngelItemRequest");
+    if (!dotnet_SendWhiteAngelItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendWhiteAngelItemRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEnterOnWerewolfRequest()
 {
+    static const auto dotnet_SendEnterOnWerewolfRequest = LoadManagedSymbol<::SendEnterOnWerewolfRequest>("SendEnterOnWerewolfRequest");
+    if (!dotnet_SendEnterOnWerewolfRequest)
+    {
+        return;
+    }
+
     dotnet_SendEnterOnWerewolfRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEnterOnGatekeeperRequest()
 {
+    static const auto dotnet_SendEnterOnGatekeeperRequest = LoadManagedSymbol<::SendEnterOnGatekeeperRequest>("SendEnterOnGatekeeperRequest");
+    if (!dotnet_SendEnterOnGatekeeperRequest)
+    {
+        return;
+    }
+
     dotnet_SendEnterOnGatekeeperRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLeoHelperItemRequest()
 {
+    static const auto dotnet_SendLeoHelperItemRequest = LoadManagedSymbol<::SendLeoHelperItemRequest>("SendLeoHelperItemRequest");
+    if (!dotnet_SendLeoHelperItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendLeoHelperItemRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendMoveToDeviasBySnowmanRequest()
 {
+    static const auto dotnet_SendMoveToDeviasBySnowmanRequest = LoadManagedSymbol<::SendMoveToDeviasBySnowmanRequest>("SendMoveToDeviasBySnowmanRequest");
+    if (!dotnet_SendMoveToDeviasBySnowmanRequest)
+    {
+        return;
+    }
+
     dotnet_SendMoveToDeviasBySnowmanRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendSantaClausItemRequest()
 {
+    static const auto dotnet_SendSantaClausItemRequest = LoadManagedSymbol<::SendSantaClausItemRequest>("SendSantaClausItemRequest");
+    if (!dotnet_SendSantaClausItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendSantaClausItemRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendKanturuInfoRequest()
 {
+    static const auto dotnet_SendKanturuInfoRequest = LoadManagedSymbol<::SendKanturuInfoRequest>("SendKanturuInfoRequest");
+    if (!dotnet_SendKanturuInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendKanturuInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendKanturuEnterRequest()
 {
+    static const auto dotnet_SendKanturuEnterRequest = LoadManagedSymbol<::SendKanturuEnterRequest>("SendKanturuEnterRequest");
+    if (!dotnet_SendKanturuEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendKanturuEnterRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendRaklionStateInfoRequest()
 {
+    static const auto dotnet_SendRaklionStateInfoRequest = LoadManagedSymbol<::SendRaklionStateInfoRequest>("SendRaklionStateInfoRequest");
+    if (!dotnet_SendRaklionStateInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendRaklionStateInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCashShopPointInfoRequest()
 {
+    static const auto dotnet_SendCashShopPointInfoRequest = LoadManagedSymbol<::SendCashShopPointInfoRequest>("SendCashShopPointInfoRequest");
+    if (!dotnet_SendCashShopPointInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopPointInfoRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendCashShopOpenState(BYTE isClosed)
 {
+    static const auto dotnet_SendCashShopOpenState = LoadManagedSymbol<::SendCashShopOpenState>("SendCashShopOpenState");
+    if (!dotnet_SendCashShopOpenState)
+    {
+        return;
+    }
+
     dotnet_SendCashShopOpenState(this->GetHandle(), isClosed);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopItemBuyRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag)
 {
+    static const auto dotnet_SendCashShopItemBuyRequest = LoadManagedSymbol<::SendCashShopItemBuyRequest>("SendCashShopItemBuyRequest");
+    if (!dotnet_SendCashShopItemBuyRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopItemBuyRequest(this->GetHandle(), packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopItemGiftRequest(uint32_t packageMainIndex, uint32_t category, uint32_t productMainIndex, uint16_t itemIndex, uint32_t coinIndex, BYTE mileageFlag, const char16_t* giftReceiverName, const char16_t* giftText)
 {
+    static const auto dotnet_SendCashShopItemGiftRequest = LoadManagedSymbol<::SendCashShopItemGiftRequest>("SendCashShopItemGiftRequest");
+    if (!dotnet_SendCashShopItemGiftRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopItemGiftRequest(this->GetHandle(), packageMainIndex, category, productMainIndex, itemIndex, coinIndex, mileageFlag, giftReceiverName, giftText);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopStorageListRequest(uint32_t pageIndex, BYTE inventoryType)
 {
+    static const auto dotnet_SendCashShopStorageListRequest = LoadManagedSymbol<::SendCashShopStorageListRequest>("SendCashShopStorageListRequest");
+    if (!dotnet_SendCashShopStorageListRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopStorageListRequest(this->GetHandle(), pageIndex, inventoryType);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopDeleteStorageItemRequest(uint32_t baseItemCode, uint32_t mainItemCode, BYTE productType)
 {
+    static const auto dotnet_SendCashShopDeleteStorageItemRequest = LoadManagedSymbol<::SendCashShopDeleteStorageItemRequest>("SendCashShopDeleteStorageItemRequest");
+    if (!dotnet_SendCashShopDeleteStorageItemRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopDeleteStorageItemRequest(this->GetHandle(), baseItemCode, mainItemCode, productType);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopStorageItemConsumeRequest(uint32_t baseItemCode, uint32_t mainItemCode, uint16_t itemIndex, BYTE productType)
 {
+    static const auto dotnet_SendCashShopStorageItemConsumeRequest = LoadManagedSymbol<::SendCashShopStorageItemConsumeRequest>("SendCashShopStorageItemConsumeRequest");
+    if (!dotnet_SendCashShopStorageItemConsumeRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopStorageItemConsumeRequest(this->GetHandle(), baseItemCode, mainItemCode, itemIndex, productType);
 }
 
 void PacketFunctions_ClientToServer::SendCashShopEventItemListRequest(uint32_t categoryIndex)
 {
+    static const auto dotnet_SendCashShopEventItemListRequest = LoadManagedSymbol<::SendCashShopEventItemListRequest>("SendCashShopEventItemListRequest");
+    if (!dotnet_SendCashShopEventItemListRequest)
+    {
+        return;
+    }
+
     dotnet_SendCashShopEventItemListRequest(this->GetHandle(), categoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendUnlockVault(uint16_t pin)
 {
+    static const auto dotnet_SendUnlockVault = LoadManagedSymbol<::SendUnlockVault>("SendUnlockVault");
+    if (!dotnet_SendUnlockVault)
+    {
+        return;
+    }
+
     dotnet_SendUnlockVault(this->GetHandle(), pin);
 }
 
 void PacketFunctions_ClientToServer::SendSetVaultPin(uint16_t pin, const char16_t* password)
 {
+    static const auto dotnet_SendSetVaultPin = LoadManagedSymbol<::SendSetVaultPin>("SendSetVaultPin");
+    if (!dotnet_SendSetVaultPin)
+    {
+        return;
+    }
+
     dotnet_SendSetVaultPin(this->GetHandle(), pin, password);
 }
 
 void PacketFunctions_ClientToServer::SendRemoveVaultPin(const char16_t* password)
 {
+    static const auto dotnet_SendRemoveVaultPin = LoadManagedSymbol<::SendRemoveVaultPin>("SendRemoveVaultPin");
+    if (!dotnet_SendRemoveVaultPin)
+    {
+        return;
+    }
+
     dotnet_SendRemoveVaultPin(this->GetHandle(), password);
 }
 
 void PacketFunctions_ClientToServer::SendVaultClosed()
 {
+    static const auto dotnet_SendVaultClosed = LoadManagedSymbol<::SendVaultClosed>("SendVaultClosed");
+    if (!dotnet_SendVaultClosed)
+    {
+        return;
+    }
+
     dotnet_SendVaultClosed(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendVaultMoveMoneyRequest(VaultMoneyMoveDirection direction, uint32_t amount)
 {
+    static const auto dotnet_SendVaultMoveMoneyRequest = LoadManagedSymbol<::SendVaultMoveMoneyRequest>("SendVaultMoveMoneyRequest");
+    if (!dotnet_SendVaultMoveMoneyRequest)
+    {
+        return;
+    }
+
     dotnet_SendVaultMoveMoneyRequest(this->GetHandle(), direction, amount);
 }
 
 void PacketFunctions_ClientToServer::SendLahapJewelMixRequest(MixType operation, ItemType item, StackSize mixingStackSize, BYTE unmixingSourceSlot)
 {
+    static const auto dotnet_SendLahapJewelMixRequest = LoadManagedSymbol<::SendLahapJewelMixRequest>("SendLahapJewelMixRequest");
+    if (!dotnet_SendLahapJewelMixRequest)
+    {
+        return;
+    }
+
     dotnet_SendLahapJewelMixRequest(this->GetHandle(), operation, item, mixingStackSize, unmixingSourceSlot);
 }
 
 void PacketFunctions_ClientToServer::SendPartyListRequest()
 {
+    static const auto dotnet_SendPartyListRequest = LoadManagedSymbol<::SendPartyListRequest>("SendPartyListRequest");
+    if (!dotnet_SendPartyListRequest)
+    {
+        return;
+    }
+
     dotnet_SendPartyListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendPartyPlayerKickRequest(BYTE playerIndex)
 {
+    static const auto dotnet_SendPartyPlayerKickRequest = LoadManagedSymbol<::SendPartyPlayerKickRequest>("SendPartyPlayerKickRequest");
+    if (!dotnet_SendPartyPlayerKickRequest)
+    {
+        return;
+    }
+
     dotnet_SendPartyPlayerKickRequest(this->GetHandle(), playerIndex);
 }
 
 void PacketFunctions_ClientToServer::SendPartyInviteRequest(uint16_t targetPlayerId)
 {
+    static const auto dotnet_SendPartyInviteRequest = LoadManagedSymbol<::SendPartyInviteRequest>("SendPartyInviteRequest");
+    if (!dotnet_SendPartyInviteRequest)
+    {
+        return;
+    }
+
     dotnet_SendPartyInviteRequest(this->GetHandle(), targetPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendPartyInviteResponse(BYTE accepted, uint16_t requesterId)
 {
+    static const auto dotnet_SendPartyInviteResponse = LoadManagedSymbol<::SendPartyInviteResponse>("SendPartyInviteResponse");
+    if (!dotnet_SendPartyInviteResponse)
+    {
+        return;
+    }
+
     dotnet_SendPartyInviteResponse(this->GetHandle(), accepted, requesterId);
 }
 
 void PacketFunctions_ClientToServer::SendWalkRequest(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength)
 {
+    static const auto dotnet_SendWalkRequest = LoadManagedSymbol<::SendWalkRequest>("SendWalkRequest");
+    if (!dotnet_SendWalkRequest)
+    {
+        return;
+    }
+
     dotnet_SendWalkRequest(this->GetHandle(), sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendWalkRequest075(BYTE sourceX, BYTE sourceY, BYTE stepCount, BYTE targetRotation, const BYTE* directions, uint32_t directionsByteLength)
 {
+    static const auto dotnet_SendWalkRequest075 = LoadManagedSymbol<::SendWalkRequest075>("SendWalkRequest075");
+    if (!dotnet_SendWalkRequest075)
+    {
+        return;
+    }
+
     dotnet_SendWalkRequest075(this->GetHandle(), sourceX, sourceY, stepCount, targetRotation, directions, directionsByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendInstantMoveRequest(BYTE targetX, BYTE targetY)
 {
+    static const auto dotnet_SendInstantMoveRequest = LoadManagedSymbol<::SendInstantMoveRequest>("SendInstantMoveRequest");
+    if (!dotnet_SendInstantMoveRequest)
+    {
+        return;
+    }
+
     dotnet_SendInstantMoveRequest(this->GetHandle(), targetX, targetY);
 }
 
 void PacketFunctions_ClientToServer::SendAnimationRequest(BYTE rotation, BYTE animationNumber)
 {
+    static const auto dotnet_SendAnimationRequest = LoadManagedSymbol<::SendAnimationRequest>("SendAnimationRequest");
+    if (!dotnet_SendAnimationRequest)
+    {
+        return;
+    }
+
     dotnet_SendAnimationRequest(this->GetHandle(), rotation, animationNumber);
 }
 
 void PacketFunctions_ClientToServer::SendRequestCharacterList(BYTE language)
 {
+    static const auto dotnet_SendRequestCharacterList = LoadManagedSymbol<::SendRequestCharacterList>("SendRequestCharacterList");
+    if (!dotnet_SendRequestCharacterList)
+    {
+        return;
+    }
+
     dotnet_SendRequestCharacterList(this->GetHandle(), language);
 }
 
 void PacketFunctions_ClientToServer::SendCreateCharacter(const char16_t* name, CharacterClassNumber class_)
 {
+    static const auto dotnet_SendCreateCharacter = LoadManagedSymbol<::SendCreateCharacter>("SendCreateCharacter");
+    if (!dotnet_SendCreateCharacter)
+    {
+        return;
+    }
+
     dotnet_SendCreateCharacter(this->GetHandle(), name, class_);
 }
 
 void PacketFunctions_ClientToServer::SendDeleteCharacter(const char16_t* name, const char16_t* securityCode)
 {
+    static const auto dotnet_SendDeleteCharacter = LoadManagedSymbol<::SendDeleteCharacter>("SendDeleteCharacter");
+    if (!dotnet_SendDeleteCharacter)
+    {
+        return;
+    }
+
     dotnet_SendDeleteCharacter(this->GetHandle(), name, securityCode);
 }
 
 void PacketFunctions_ClientToServer::SendSelectCharacter(const char16_t* name)
 {
+    static const auto dotnet_SendSelectCharacter = LoadManagedSymbol<::SendSelectCharacter>("SendSelectCharacter");
+    if (!dotnet_SendSelectCharacter)
+    {
+        return;
+    }
+
     dotnet_SendSelectCharacter(this->GetHandle(), name);
 }
 
 void PacketFunctions_ClientToServer::SendFocusCharacter(const char16_t* name)
 {
+    static const auto dotnet_SendFocusCharacter = LoadManagedSymbol<::SendFocusCharacter>("SendFocusCharacter");
+    if (!dotnet_SendFocusCharacter)
+    {
+        return;
+    }
+
     dotnet_SendFocusCharacter(this->GetHandle(), name);
 }
 
 void PacketFunctions_ClientToServer::SendIncreaseCharacterStatPoint(CharacterStatAttribute statType)
 {
+    static const auto dotnet_SendIncreaseCharacterStatPoint = LoadManagedSymbol<::SendIncreaseCharacterStatPoint>("SendIncreaseCharacterStatPoint");
+    if (!dotnet_SendIncreaseCharacterStatPoint)
+    {
+        return;
+    }
+
     dotnet_SendIncreaseCharacterStatPoint(this->GetHandle(), statType);
 }
 
 void PacketFunctions_ClientToServer::SendInventoryRequest()
 {
+    static const auto dotnet_SendInventoryRequest = LoadManagedSymbol<::SendInventoryRequest>("SendInventoryRequest");
+    if (!dotnet_SendInventoryRequest)
+    {
+        return;
+    }
+
     dotnet_SendInventoryRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendClientReadyAfterMapChange()
 {
+    static const auto dotnet_SendClientReadyAfterMapChange = LoadManagedSymbol<::SendClientReadyAfterMapChange>("SendClientReadyAfterMapChange");
+    if (!dotnet_SendClientReadyAfterMapChange)
+    {
+        return;
+    }
+
     dotnet_SendClientReadyAfterMapChange(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendSaveKeyConfiguration(const BYTE* configuration, uint32_t configurationByteLength)
 {
+    static const auto dotnet_SendSaveKeyConfiguration = LoadManagedSymbol<::SendSaveKeyConfiguration>("SendSaveKeyConfiguration");
+    if (!dotnet_SendSaveKeyConfiguration)
+    {
+        return;
+    }
+
     dotnet_SendSaveKeyConfiguration(this->GetHandle(), configuration, configurationByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendAddMasterSkillPoint(uint16_t skillId)
 {
+    static const auto dotnet_SendAddMasterSkillPoint = LoadManagedSymbol<::SendAddMasterSkillPoint>("SendAddMasterSkillPoint");
+    if (!dotnet_SendAddMasterSkillPoint)
+    {
+        return;
+    }
+
     dotnet_SendAddMasterSkillPoint(this->GetHandle(), skillId);
 }
 
 void PacketFunctions_ClientToServer::SendHitRequest(uint16_t targetId, BYTE attackAnimation, BYTE lookingDirection)
 {
+    static const auto dotnet_SendHitRequest = LoadManagedSymbol<::SendHitRequest>("SendHitRequest");
+    if (!dotnet_SendHitRequest)
+    {
+        return;
+    }
+
     dotnet_SendHitRequest(this->GetHandle(), targetId, attackAnimation, lookingDirection);
 }
 
 void PacketFunctions_ClientToServer::SendTargetedSkill(uint16_t skillId, uint16_t targetId)
 {
+    static const auto dotnet_SendTargetedSkill = LoadManagedSymbol<::SendTargetedSkill>("SendTargetedSkill");
+    if (!dotnet_SendTargetedSkill)
+    {
+        return;
+    }
+
     dotnet_SendTargetedSkill(this->GetHandle(), skillId, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendTargetedSkill075(BYTE skillIndex, uint16_t targetId)
 {
+    static const auto dotnet_SendTargetedSkill075 = LoadManagedSymbol<::SendTargetedSkill075>("SendTargetedSkill075");
+    if (!dotnet_SendTargetedSkill075)
+    {
+        return;
+    }
+
     dotnet_SendTargetedSkill075(this->GetHandle(), skillIndex, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendTargetedSkill095(BYTE skillIndex, uint16_t targetId)
 {
+    static const auto dotnet_SendTargetedSkill095 = LoadManagedSymbol<::SendTargetedSkill095>("SendTargetedSkill095");
+    if (!dotnet_SendTargetedSkill095)
+    {
+        return;
+    }
+
     dotnet_SendTargetedSkill095(this->GetHandle(), skillIndex, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendMagicEffectCancelRequest(uint16_t skillId, uint16_t playerId)
 {
+    static const auto dotnet_SendMagicEffectCancelRequest = LoadManagedSymbol<::SendMagicEffectCancelRequest>("SendMagicEffectCancelRequest");
+    if (!dotnet_SendMagicEffectCancelRequest)
+    {
+        return;
+    }
+
     dotnet_SendMagicEffectCancelRequest(this->GetHandle(), skillId, playerId);
 }
 
 void PacketFunctions_ClientToServer::SendAreaSkill(uint16_t skillId, BYTE targetX, BYTE targetY, BYTE rotation, uint16_t extraTargetId, BYTE animationCounter)
 {
+    static const auto dotnet_SendAreaSkill = LoadManagedSymbol<::SendAreaSkill>("SendAreaSkill");
+    if (!dotnet_SendAreaSkill)
+    {
+        return;
+    }
+
     dotnet_SendAreaSkill(this->GetHandle(), skillId, targetX, targetY, rotation, extraTargetId, animationCounter);
 }
 
 void PacketFunctions_ClientToServer::SendAreaSkill075(BYTE skillIndex, BYTE targetX, BYTE targetY, BYTE rotation)
 {
+    static const auto dotnet_SendAreaSkill075 = LoadManagedSymbol<::SendAreaSkill075>("SendAreaSkill075");
+    if (!dotnet_SendAreaSkill075)
+    {
+        return;
+    }
+
     dotnet_SendAreaSkill075(this->GetHandle(), skillIndex, targetX, targetY, rotation);
 }
 
 void PacketFunctions_ClientToServer::SendAreaSkill095(BYTE skillIndex, BYTE targetX, BYTE targetY, BYTE rotation)
 {
+    static const auto dotnet_SendAreaSkill095 = LoadManagedSymbol<::SendAreaSkill095>("SendAreaSkill095");
+    if (!dotnet_SendAreaSkill095)
+    {
+        return;
+    }
+
     dotnet_SendAreaSkill095(this->GetHandle(), skillIndex, targetX, targetY, rotation);
 }
 
 void PacketFunctions_ClientToServer::SendRageAttackRequest(uint16_t skillId, uint16_t targetId)
 {
+    static const auto dotnet_SendRageAttackRequest = LoadManagedSymbol<::SendRageAttackRequest>("SendRageAttackRequest");
+    if (!dotnet_SendRageAttackRequest)
+    {
+        return;
+    }
+
     dotnet_SendRageAttackRequest(this->GetHandle(), skillId, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendRageAttackRangeRequest(uint16_t skillId, uint16_t targetId)
 {
+    static const auto dotnet_SendRageAttackRangeRequest = LoadManagedSymbol<::SendRageAttackRangeRequest>("SendRageAttackRangeRequest");
+    if (!dotnet_SendRageAttackRangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendRageAttackRangeRequest(this->GetHandle(), skillId, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendTradeCancel()
 {
+    static const auto dotnet_SendTradeCancel = LoadManagedSymbol<::SendTradeCancel>("SendTradeCancel");
+    if (!dotnet_SendTradeCancel)
+    {
+        return;
+    }
+
     dotnet_SendTradeCancel(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendTradeButtonStateChange(TradeButtonState newState)
 {
+    static const auto dotnet_SendTradeButtonStateChange = LoadManagedSymbol<::SendTradeButtonStateChange>("SendTradeButtonStateChange");
+    if (!dotnet_SendTradeButtonStateChange)
+    {
+        return;
+    }
+
     dotnet_SendTradeButtonStateChange(this->GetHandle(), newState);
 }
 
 void PacketFunctions_ClientToServer::SendTradeRequest(uint16_t playerId)
 {
+    static const auto dotnet_SendTradeRequest = LoadManagedSymbol<::SendTradeRequest>("SendTradeRequest");
+    if (!dotnet_SendTradeRequest)
+    {
+        return;
+    }
+
     dotnet_SendTradeRequest(this->GetHandle(), playerId);
 }
 
 void PacketFunctions_ClientToServer::SendTradeRequestResponse(BYTE tradeAccepted)
 {
+    static const auto dotnet_SendTradeRequestResponse = LoadManagedSymbol<::SendTradeRequestResponse>("SendTradeRequestResponse");
+    if (!dotnet_SendTradeRequestResponse)
+    {
+        return;
+    }
+
     dotnet_SendTradeRequestResponse(this->GetHandle(), tradeAccepted);
 }
 
 void PacketFunctions_ClientToServer::SendSetTradeMoney(uint32_t amount)
 {
+    static const auto dotnet_SendSetTradeMoney = LoadManagedSymbol<::SendSetTradeMoney>("SendSetTradeMoney");
+    if (!dotnet_SendSetTradeMoney)
+    {
+        return;
+    }
+
     dotnet_SendSetTradeMoney(this->GetHandle(), amount);
 }
 
 void PacketFunctions_ClientToServer::SendLetterDeleteRequest(uint16_t letterIndex)
 {
+    static const auto dotnet_SendLetterDeleteRequest = LoadManagedSymbol<::SendLetterDeleteRequest>("SendLetterDeleteRequest");
+    if (!dotnet_SendLetterDeleteRequest)
+    {
+        return;
+    }
+
     dotnet_SendLetterDeleteRequest(this->GetHandle(), letterIndex);
 }
 
 void PacketFunctions_ClientToServer::SendLetterListRequest()
 {
+    static const auto dotnet_SendLetterListRequest = LoadManagedSymbol<::SendLetterListRequest>("SendLetterListRequest");
+    if (!dotnet_SendLetterListRequest)
+    {
+        return;
+    }
+
     dotnet_SendLetterListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLetterSendRequest(uint32_t letterId, const char16_t* receiver, const char16_t* title, BYTE rotation, BYTE animation, uint16_t messageLength, const char16_t* message)
 {
+    static const auto dotnet_SendLetterSendRequest = LoadManagedSymbol<::SendLetterSendRequest>("SendLetterSendRequest");
+    if (!dotnet_SendLetterSendRequest)
+    {
+        return;
+    }
+
     dotnet_SendLetterSendRequest(this->GetHandle(), letterId, receiver, title, rotation, animation, messageLength, message);
 }
 
 void PacketFunctions_ClientToServer::SendLetterReadRequest(uint16_t letterIndex)
 {
+    static const auto dotnet_SendLetterReadRequest = LoadManagedSymbol<::SendLetterReadRequest>("SendLetterReadRequest");
+    if (!dotnet_SendLetterReadRequest)
+    {
+        return;
+    }
+
     dotnet_SendLetterReadRequest(this->GetHandle(), letterIndex);
 }
 
 void PacketFunctions_ClientToServer::SendGuildKickPlayerRequest(const char16_t* playerName, const char16_t* securityCode)
 {
+    static const auto dotnet_SendGuildKickPlayerRequest = LoadManagedSymbol<::SendGuildKickPlayerRequest>("SendGuildKickPlayerRequest");
+    if (!dotnet_SendGuildKickPlayerRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildKickPlayerRequest(this->GetHandle(), playerName, securityCode);
 }
 
 void PacketFunctions_ClientToServer::SendGuildJoinRequest(uint16_t guildMasterPlayerId)
 {
+    static const auto dotnet_SendGuildJoinRequest = LoadManagedSymbol<::SendGuildJoinRequest>("SendGuildJoinRequest");
+    if (!dotnet_SendGuildJoinRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildJoinRequest(this->GetHandle(), guildMasterPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildJoinResponse(BYTE accepted, uint16_t requesterId)
 {
+    static const auto dotnet_SendGuildJoinResponse = LoadManagedSymbol<::SendGuildJoinResponse>("SendGuildJoinResponse");
+    if (!dotnet_SendGuildJoinResponse)
+    {
+        return;
+    }
+
     dotnet_SendGuildJoinResponse(this->GetHandle(), accepted, requesterId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildListRequest()
 {
+    static const auto dotnet_SendGuildListRequest = LoadManagedSymbol<::SendGuildListRequest>("SendGuildListRequest");
+    if (!dotnet_SendGuildListRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendGuildCreateRequest(const char16_t* guildName, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
 {
+    static const auto dotnet_SendGuildCreateRequest = LoadManagedSymbol<::SendGuildCreateRequest>("SendGuildCreateRequest");
+    if (!dotnet_SendGuildCreateRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildCreateRequest(this->GetHandle(), guildName, guildEmblem, guildEmblemByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendGuildCreateRequest075(const char16_t* guildName, const BYTE* guildEmblem, uint32_t guildEmblemByteLength)
 {
+    static const auto dotnet_SendGuildCreateRequest075 = LoadManagedSymbol<::SendGuildCreateRequest075>("SendGuildCreateRequest075");
+    if (!dotnet_SendGuildCreateRequest075)
+    {
+        return;
+    }
+
     dotnet_SendGuildCreateRequest075(this->GetHandle(), guildName, guildEmblem, guildEmblemByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendGuildMasterAnswer(BYTE showCreationDialog)
 {
+    static const auto dotnet_SendGuildMasterAnswer = LoadManagedSymbol<::SendGuildMasterAnswer>("SendGuildMasterAnswer");
+    if (!dotnet_SendGuildMasterAnswer)
+    {
+        return;
+    }
+
     dotnet_SendGuildMasterAnswer(this->GetHandle(), showCreationDialog);
 }
 
 void PacketFunctions_ClientToServer::SendCancelGuildCreation()
 {
+    static const auto dotnet_SendCancelGuildCreation = LoadManagedSymbol<::SendCancelGuildCreation>("SendCancelGuildCreation");
+    if (!dotnet_SendCancelGuildCreation)
+    {
+        return;
+    }
+
     dotnet_SendCancelGuildCreation(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendGuildWarResponse(BYTE accepted)
 {
+    static const auto dotnet_SendGuildWarResponse = LoadManagedSymbol<::SendGuildWarResponse>("SendGuildWarResponse");
+    if (!dotnet_SendGuildWarResponse)
+    {
+        return;
+    }
+
     dotnet_SendGuildWarResponse(this->GetHandle(), accepted);
 }
 
 void PacketFunctions_ClientToServer::SendGuildInfoRequest(uint32_t guildId)
 {
+    static const auto dotnet_SendGuildInfoRequest = LoadManagedSymbol<::SendGuildInfoRequest>("SendGuildInfoRequest");
+    if (!dotnet_SendGuildInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildInfoRequest(this->GetHandle(), guildId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildRoleAssignRequest(uint32_t role, const char16_t* playerName, BYTE type)
 {
+    static const auto dotnet_SendGuildRoleAssignRequest = LoadManagedSymbol<::SendGuildRoleAssignRequest>("SendGuildRoleAssignRequest");
+    if (!dotnet_SendGuildRoleAssignRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildRoleAssignRequest(this->GetHandle(), role, playerName, type);
 }
 
 void PacketFunctions_ClientToServer::SendGuildTypeChangeRequest(BYTE guildType)
 {
+    static const auto dotnet_SendGuildTypeChangeRequest = LoadManagedSymbol<::SendGuildTypeChangeRequest>("SendGuildTypeChangeRequest");
+    if (!dotnet_SendGuildTypeChangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildTypeChangeRequest(this->GetHandle(), guildType);
 }
 
 void PacketFunctions_ClientToServer::SendGuildRelationshipChangeRequest(GuildRelationshipType relationshipType, GuildRequestType requestType, uint16_t targetPlayerId)
 {
+    static const auto dotnet_SendGuildRelationshipChangeRequest = LoadManagedSymbol<::SendGuildRelationshipChangeRequest>("SendGuildRelationshipChangeRequest");
+    if (!dotnet_SendGuildRelationshipChangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendGuildRelationshipChangeRequest(this->GetHandle(), relationshipType, requestType, targetPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendGuildRelationshipChangeResponse(GuildRelationshipType relationshipType, GuildRequestType requestType, BYTE response, uint16_t targetPlayerId)
 {
+    static const auto dotnet_SendGuildRelationshipChangeResponse = LoadManagedSymbol<::SendGuildRelationshipChangeResponse>("SendGuildRelationshipChangeResponse");
+    if (!dotnet_SendGuildRelationshipChangeResponse)
+    {
+        return;
+    }
+
     dotnet_SendGuildRelationshipChangeResponse(this->GetHandle(), relationshipType, requestType, response, targetPlayerId);
 }
 
 void PacketFunctions_ClientToServer::SendRequestAllianceList()
 {
+    static const auto dotnet_SendRequestAllianceList = LoadManagedSymbol<::SendRequestAllianceList>("SendRequestAllianceList");
+    if (!dotnet_SendRequestAllianceList)
+    {
+        return;
+    }
+
     dotnet_SendRequestAllianceList(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendRemoveAllianceGuildRequest(const char16_t* guildName)
 {
+    static const auto dotnet_SendRemoveAllianceGuildRequest = LoadManagedSymbol<::SendRemoveAllianceGuildRequest>("SendRemoveAllianceGuildRequest");
+    if (!dotnet_SendRemoveAllianceGuildRequest)
+    {
+        return;
+    }
+
     dotnet_SendRemoveAllianceGuildRequest(this->GetHandle(), guildName);
 }
 
 void PacketFunctions_ClientToServer::SendPingResponse()
 {
+    static const auto dotnet_SendPingResponse = LoadManagedSymbol<::SendPingResponse>("SendPingResponse");
+    if (!dotnet_SendPingResponse)
+    {
+        return;
+    }
+
     dotnet_SendPingResponse(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendItemRepair(BYTE inventoryItemSlot)
 {
+    static const auto dotnet_SendItemRepair = LoadManagedSymbol<::SendItemRepair>("SendItemRepair");
+    if (!dotnet_SendItemRepair)
+    {
+        return;
+    }
+
     dotnet_SendItemRepair(this->GetHandle(), inventoryItemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendChaosMachineMixRequest(ChaosMachineMixType mixType, BYTE socketSlot)
 {
+    static const auto dotnet_SendChaosMachineMixRequest = LoadManagedSymbol<::SendChaosMachineMixRequest>("SendChaosMachineMixRequest");
+    if (!dotnet_SendChaosMachineMixRequest)
+    {
+        return;
+    }
+
     dotnet_SendChaosMachineMixRequest(this->GetHandle(), mixType, socketSlot);
 }
 
 void PacketFunctions_ClientToServer::SendCraftingDialogCloseRequest()
 {
+    static const auto dotnet_SendCraftingDialogCloseRequest = LoadManagedSymbol<::SendCraftingDialogCloseRequest>("SendCraftingDialogCloseRequest");
+    if (!dotnet_SendCraftingDialogCloseRequest)
+    {
+        return;
+    }
+
     dotnet_SendCraftingDialogCloseRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendFriendListRequest()
 {
+    static const auto dotnet_SendFriendListRequest = LoadManagedSymbol<::SendFriendListRequest>("SendFriendListRequest");
+    if (!dotnet_SendFriendListRequest)
+    {
+        return;
+    }
+
     dotnet_SendFriendListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendFriendAddRequest(const char16_t* friendName)
 {
+    static const auto dotnet_SendFriendAddRequest = LoadManagedSymbol<::SendFriendAddRequest>("SendFriendAddRequest");
+    if (!dotnet_SendFriendAddRequest)
+    {
+        return;
+    }
+
     dotnet_SendFriendAddRequest(this->GetHandle(), friendName);
 }
 
 void PacketFunctions_ClientToServer::SendFriendDelete(const char16_t* friendName)
 {
+    static const auto dotnet_SendFriendDelete = LoadManagedSymbol<::SendFriendDelete>("SendFriendDelete");
+    if (!dotnet_SendFriendDelete)
+    {
+        return;
+    }
+
     dotnet_SendFriendDelete(this->GetHandle(), friendName);
 }
 
 void PacketFunctions_ClientToServer::SendChatRoomCreateRequest(const char16_t* friendName)
 {
+    static const auto dotnet_SendChatRoomCreateRequest = LoadManagedSymbol<::SendChatRoomCreateRequest>("SendChatRoomCreateRequest");
+    if (!dotnet_SendChatRoomCreateRequest)
+    {
+        return;
+    }
+
     dotnet_SendChatRoomCreateRequest(this->GetHandle(), friendName);
 }
 
 void PacketFunctions_ClientToServer::SendFriendAddResponse(BYTE accepted, const char16_t* friendRequesterName)
 {
+    static const auto dotnet_SendFriendAddResponse = LoadManagedSymbol<::SendFriendAddResponse>("SendFriendAddResponse");
+    if (!dotnet_SendFriendAddResponse)
+    {
+        return;
+    }
+
     dotnet_SendFriendAddResponse(this->GetHandle(), accepted, friendRequesterName);
 }
 
 void PacketFunctions_ClientToServer::SendSetFriendOnlineState(BYTE onlineState)
 {
+    static const auto dotnet_SendSetFriendOnlineState = LoadManagedSymbol<::SendSetFriendOnlineState>("SendSetFriendOnlineState");
+    if (!dotnet_SendSetFriendOnlineState)
+    {
+        return;
+    }
+
     dotnet_SendSetFriendOnlineState(this->GetHandle(), onlineState);
 }
 
 void PacketFunctions_ClientToServer::SendChatRoomInvitationRequest(const char16_t* friendName, uint16_t roomId, uint32_t requestId)
 {
+    static const auto dotnet_SendChatRoomInvitationRequest = LoadManagedSymbol<::SendChatRoomInvitationRequest>("SendChatRoomInvitationRequest");
+    if (!dotnet_SendChatRoomInvitationRequest)
+    {
+        return;
+    }
+
     dotnet_SendChatRoomInvitationRequest(this->GetHandle(), friendName, roomId, requestId);
 }
 
 void PacketFunctions_ClientToServer::SendLegacyQuestStateRequest()
 {
+    static const auto dotnet_SendLegacyQuestStateRequest = LoadManagedSymbol<::SendLegacyQuestStateRequest>("SendLegacyQuestStateRequest");
+    if (!dotnet_SendLegacyQuestStateRequest)
+    {
+        return;
+    }
+
     dotnet_SendLegacyQuestStateRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLegacyQuestStateSetRequest(BYTE questNumber, LegacyQuestState newState)
 {
+    static const auto dotnet_SendLegacyQuestStateSetRequest = LoadManagedSymbol<::SendLegacyQuestStateSetRequest>("SendLegacyQuestStateSetRequest");
+    if (!dotnet_SendLegacyQuestStateSetRequest)
+    {
+        return;
+    }
+
     dotnet_SendLegacyQuestStateSetRequest(this->GetHandle(), questNumber, newState);
 }
 
 void PacketFunctions_ClientToServer::SendPetCommandRequest(PetType petType, PetCommandMode commandMode, uint16_t targetId)
 {
+    static const auto dotnet_SendPetCommandRequest = LoadManagedSymbol<::SendPetCommandRequest>("SendPetCommandRequest");
+    if (!dotnet_SendPetCommandRequest)
+    {
+        return;
+    }
+
     dotnet_SendPetCommandRequest(this->GetHandle(), petType, commandMode, targetId);
 }
 
 void PacketFunctions_ClientToServer::SendPetInfoRequest(PetType pet, StorageType storage, BYTE itemSlot)
 {
+    static const auto dotnet_SendPetInfoRequest = LoadManagedSymbol<::SendPetInfoRequest>("SendPetInfoRequest");
+    if (!dotnet_SendPetInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendPetInfoRequest(this->GetHandle(), pet, storage, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendIllusionTempleEnterRequest(BYTE mapNumber, BYTE itemSlot)
 {
+    static const auto dotnet_SendIllusionTempleEnterRequest = LoadManagedSymbol<::SendIllusionTempleEnterRequest>("SendIllusionTempleEnterRequest");
+    if (!dotnet_SendIllusionTempleEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendIllusionTempleEnterRequest(this->GetHandle(), mapNumber, itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendIllusionTempleSkillRequest(uint16_t skillNumber, BYTE targetObjectIndex, BYTE distance)
 {
+    static const auto dotnet_SendIllusionTempleSkillRequest = LoadManagedSymbol<::SendIllusionTempleSkillRequest>("SendIllusionTempleSkillRequest");
+    if (!dotnet_SendIllusionTempleSkillRequest)
+    {
+        return;
+    }
+
     dotnet_SendIllusionTempleSkillRequest(this->GetHandle(), skillNumber, targetObjectIndex, distance);
 }
 
 void PacketFunctions_ClientToServer::SendIllusionTempleRewardRequest()
 {
+    static const auto dotnet_SendIllusionTempleRewardRequest = LoadManagedSymbol<::SendIllusionTempleRewardRequest>("SendIllusionTempleRewardRequest");
+    if (!dotnet_SendIllusionTempleRewardRequest)
+    {
+        return;
+    }
+
     dotnet_SendIllusionTempleRewardRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLuckyCoinCountRequest()
 {
+    static const auto dotnet_SendLuckyCoinCountRequest = LoadManagedSymbol<::SendLuckyCoinCountRequest>("SendLuckyCoinCountRequest");
+    if (!dotnet_SendLuckyCoinCountRequest)
+    {
+        return;
+    }
+
     dotnet_SendLuckyCoinCountRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLuckyCoinRegistrationRequest()
 {
+    static const auto dotnet_SendLuckyCoinRegistrationRequest = LoadManagedSymbol<::SendLuckyCoinRegistrationRequest>("SendLuckyCoinRegistrationRequest");
+    if (!dotnet_SendLuckyCoinRegistrationRequest)
+    {
+        return;
+    }
+
     dotnet_SendLuckyCoinRegistrationRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendLuckyCoinExchangeRequest(uint32_t coinCount)
 {
+    static const auto dotnet_SendLuckyCoinExchangeRequest = LoadManagedSymbol<::SendLuckyCoinExchangeRequest>("SendLuckyCoinExchangeRequest");
+    if (!dotnet_SendLuckyCoinExchangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendLuckyCoinExchangeRequest(this->GetHandle(), coinCount);
 }
 
 void PacketFunctions_ClientToServer::SendDoppelgangerEnterRequest(BYTE ticketItemSlot)
 {
+    static const auto dotnet_SendDoppelgangerEnterRequest = LoadManagedSymbol<::SendDoppelgangerEnterRequest>("SendDoppelgangerEnterRequest");
+    if (!dotnet_SendDoppelgangerEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendDoppelgangerEnterRequest(this->GetHandle(), ticketItemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendEnterMarketPlaceRequest()
 {
+    static const auto dotnet_SendEnterMarketPlaceRequest = LoadManagedSymbol<::SendEnterMarketPlaceRequest>("SendEnterMarketPlaceRequest");
+    if (!dotnet_SendEnterMarketPlaceRequest)
+    {
+        return;
+    }
+
     dotnet_SendEnterMarketPlaceRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendMuHelperStatusChangeRequest(BYTE pauseStatus)
 {
+    static const auto dotnet_SendMuHelperStatusChangeRequest = LoadManagedSymbol<::SendMuHelperStatusChangeRequest>("SendMuHelperStatusChangeRequest");
+    if (!dotnet_SendMuHelperStatusChangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendMuHelperStatusChangeRequest(this->GetHandle(), pauseStatus);
 }
 
 void PacketFunctions_ClientToServer::SendMuHelperSaveDataRequest(const BYTE* helperData, uint32_t helperDataByteLength)
 {
+    static const auto dotnet_SendMuHelperSaveDataRequest = LoadManagedSymbol<::SendMuHelperSaveDataRequest>("SendMuHelperSaveDataRequest");
+    if (!dotnet_SendMuHelperSaveDataRequest)
+    {
+        return;
+    }
+
     dotnet_SendMuHelperSaveDataRequest(this->GetHandle(), helperData, helperDataByteLength);
 }
 
 void PacketFunctions_ClientToServer::SendQuestSelectRequest(uint16_t questNumber, uint16_t questGroup, BYTE selectedTextIndex)
 {
+    static const auto dotnet_SendQuestSelectRequest = LoadManagedSymbol<::SendQuestSelectRequest>("SendQuestSelectRequest");
+    if (!dotnet_SendQuestSelectRequest)
+    {
+        return;
+    }
+
     dotnet_SendQuestSelectRequest(this->GetHandle(), questNumber, questGroup, selectedTextIndex);
 }
 
 void PacketFunctions_ClientToServer::SendQuestProceedRequest(uint16_t questNumber, uint16_t questGroup, QuestProceedAction proceedAction)
 {
+    static const auto dotnet_SendQuestProceedRequest = LoadManagedSymbol<::SendQuestProceedRequest>("SendQuestProceedRequest");
+    if (!dotnet_SendQuestProceedRequest)
+    {
+        return;
+    }
+
     dotnet_SendQuestProceedRequest(this->GetHandle(), questNumber, questGroup, proceedAction);
 }
 
 void PacketFunctions_ClientToServer::SendQuestCompletionRequest(uint16_t questNumber, uint16_t questGroup)
 {
+    static const auto dotnet_SendQuestCompletionRequest = LoadManagedSymbol<::SendQuestCompletionRequest>("SendQuestCompletionRequest");
+    if (!dotnet_SendQuestCompletionRequest)
+    {
+        return;
+    }
+
     dotnet_SendQuestCompletionRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendQuestCancelRequest(uint16_t questNumber, uint16_t questGroup)
 {
+    static const auto dotnet_SendQuestCancelRequest = LoadManagedSymbol<::SendQuestCancelRequest>("SendQuestCancelRequest");
+    if (!dotnet_SendQuestCancelRequest)
+    {
+        return;
+    }
+
     dotnet_SendQuestCancelRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendQuestClientActionRequest(uint16_t questNumber, uint16_t questGroup)
 {
+    static const auto dotnet_SendQuestClientActionRequest = LoadManagedSymbol<::SendQuestClientActionRequest>("SendQuestClientActionRequest");
+    if (!dotnet_SendQuestClientActionRequest)
+    {
+        return;
+    }
+
     dotnet_SendQuestClientActionRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendActiveQuestListRequest()
 {
+    static const auto dotnet_SendActiveQuestListRequest = LoadManagedSymbol<::SendActiveQuestListRequest>("SendActiveQuestListRequest");
+    if (!dotnet_SendActiveQuestListRequest)
+    {
+        return;
+    }
+
     dotnet_SendActiveQuestListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendQuestStateRequest(uint16_t questNumber, uint16_t questGroup)
 {
+    static const auto dotnet_SendQuestStateRequest = LoadManagedSymbol<::SendQuestStateRequest>("SendQuestStateRequest");
+    if (!dotnet_SendQuestStateRequest)
+    {
+        return;
+    }
+
     dotnet_SendQuestStateRequest(this->GetHandle(), questNumber, questGroup);
 }
 
 void PacketFunctions_ClientToServer::SendEventQuestStateListRequest()
 {
+    static const auto dotnet_SendEventQuestStateListRequest = LoadManagedSymbol<::SendEventQuestStateListRequest>("SendEventQuestStateListRequest");
+    if (!dotnet_SendEventQuestStateListRequest)
+    {
+        return;
+    }
+
     dotnet_SendEventQuestStateListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendAvailableQuestsRequest()
 {
+    static const auto dotnet_SendAvailableQuestsRequest = LoadManagedSymbol<::SendAvailableQuestsRequest>("SendAvailableQuestsRequest");
+    if (!dotnet_SendAvailableQuestsRequest)
+    {
+        return;
+    }
+
     dotnet_SendAvailableQuestsRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendNpcBuffRequest()
 {
+    static const auto dotnet_SendNpcBuffRequest = LoadManagedSymbol<::SendNpcBuffRequest>("SendNpcBuffRequest");
+    if (!dotnet_SendNpcBuffRequest)
+    {
+        return;
+    }
+
     dotnet_SendNpcBuffRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEnterEmpireGuardianEvent(BYTE itemSlot)
 {
+    static const auto dotnet_SendEnterEmpireGuardianEvent = LoadManagedSymbol<::SendEnterEmpireGuardianEvent>("SendEnterEmpireGuardianEvent");
+    if (!dotnet_SendEnterEmpireGuardianEvent)
+    {
+        return;
+    }
+
     dotnet_SendEnterEmpireGuardianEvent(this->GetHandle(), itemSlot);
 }
 
 void PacketFunctions_ClientToServer::SendGensJoinRequest(GensType gensType)
 {
+    static const auto dotnet_SendGensJoinRequest = LoadManagedSymbol<::SendGensJoinRequest>("SendGensJoinRequest");
+    if (!dotnet_SendGensJoinRequest)
+    {
+        return;
+    }
+
     dotnet_SendGensJoinRequest(this->GetHandle(), gensType);
 }
 
 void PacketFunctions_ClientToServer::SendGensLeaveRequest()
 {
+    static const auto dotnet_SendGensLeaveRequest = LoadManagedSymbol<::SendGensLeaveRequest>("SendGensLeaveRequest");
+    if (!dotnet_SendGensLeaveRequest)
+    {
+        return;
+    }
+
     dotnet_SendGensLeaveRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendGensRewardRequest(GensType gensType)
 {
+    static const auto dotnet_SendGensRewardRequest = LoadManagedSymbol<::SendGensRewardRequest>("SendGensRewardRequest");
+    if (!dotnet_SendGensRewardRequest)
+    {
+        return;
+    }
+
     dotnet_SendGensRewardRequest(this->GetHandle(), gensType);
 }
 
 void PacketFunctions_ClientToServer::SendGensRankingRequest()
 {
+    static const auto dotnet_SendGensRankingRequest = LoadManagedSymbol<::SendGensRankingRequest>("SendGensRankingRequest");
+    if (!dotnet_SendGensRankingRequest)
+    {
+        return;
+    }
+
     dotnet_SendGensRankingRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendDevilSquareEnterRequest(BYTE squareLevel, BYTE ticketItemInventoryIndex)
 {
+    static const auto dotnet_SendDevilSquareEnterRequest = LoadManagedSymbol<::SendDevilSquareEnterRequest>("SendDevilSquareEnterRequest");
+    if (!dotnet_SendDevilSquareEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendDevilSquareEnterRequest(this->GetHandle(), squareLevel, ticketItemInventoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendMiniGameOpeningStateRequest(MiniGameType eventType, BYTE eventLevel)
 {
+    static const auto dotnet_SendMiniGameOpeningStateRequest = LoadManagedSymbol<::SendMiniGameOpeningStateRequest>("SendMiniGameOpeningStateRequest");
+    if (!dotnet_SendMiniGameOpeningStateRequest)
+    {
+        return;
+    }
+
     dotnet_SendMiniGameOpeningStateRequest(this->GetHandle(), eventType, eventLevel);
 }
 
 void PacketFunctions_ClientToServer::SendEventChipRegistrationRequest(BYTE type, BYTE itemIndex)
 {
+    static const auto dotnet_SendEventChipRegistrationRequest = LoadManagedSymbol<::SendEventChipRegistrationRequest>("SendEventChipRegistrationRequest");
+    if (!dotnet_SendEventChipRegistrationRequest)
+    {
+        return;
+    }
+
     dotnet_SendEventChipRegistrationRequest(this->GetHandle(), type, itemIndex);
 }
 
 void PacketFunctions_ClientToServer::SendMutoNumberRequest()
 {
+    static const auto dotnet_SendMutoNumberRequest = LoadManagedSymbol<::SendMutoNumberRequest>("SendMutoNumberRequest");
+    if (!dotnet_SendMutoNumberRequest)
+    {
+        return;
+    }
+
     dotnet_SendMutoNumberRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEventChipExitDialog()
 {
+    static const auto dotnet_SendEventChipExitDialog = LoadManagedSymbol<::SendEventChipExitDialog>("SendEventChipExitDialog");
+    if (!dotnet_SendEventChipExitDialog)
+    {
+        return;
+    }
+
     dotnet_SendEventChipExitDialog(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendEventChipExchangeRequest(BYTE type)
 {
+    static const auto dotnet_SendEventChipExchangeRequest = LoadManagedSymbol<::SendEventChipExchangeRequest>("SendEventChipExchangeRequest");
+    if (!dotnet_SendEventChipExchangeRequest)
+    {
+        return;
+    }
+
     dotnet_SendEventChipExchangeRequest(this->GetHandle(), type);
 }
 
 void PacketFunctions_ClientToServer::SendServerImmigrationRequest(const char16_t* securityCode)
 {
+    static const auto dotnet_SendServerImmigrationRequest = LoadManagedSymbol<::SendServerImmigrationRequest>("SendServerImmigrationRequest");
+    if (!dotnet_SendServerImmigrationRequest)
+    {
+        return;
+    }
+
     dotnet_SendServerImmigrationRequest(this->GetHandle(), securityCode);
 }
 
 void PacketFunctions_ClientToServer::SendLuckyNumberRequest(const char16_t* serial1, const char16_t* serial2, const char16_t* serial3)
 {
+    static const auto dotnet_SendLuckyNumberRequest = LoadManagedSymbol<::SendLuckyNumberRequest>("SendLuckyNumberRequest");
+    if (!dotnet_SendLuckyNumberRequest)
+    {
+        return;
+    }
+
     dotnet_SendLuckyNumberRequest(this->GetHandle(), serial1, serial2, serial3);
 }
 
 void PacketFunctions_ClientToServer::SendBloodCastleEnterRequest(BYTE castleLevel, BYTE ticketItemInventoryIndex)
 {
+    static const auto dotnet_SendBloodCastleEnterRequest = LoadManagedSymbol<::SendBloodCastleEnterRequest>("SendBloodCastleEnterRequest");
+    if (!dotnet_SendBloodCastleEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendBloodCastleEnterRequest(this->GetHandle(), castleLevel, ticketItemInventoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendMiniGameEventCountRequest(MiniGameType miniGame)
 {
+    static const auto dotnet_SendMiniGameEventCountRequest = LoadManagedSymbol<::SendMiniGameEventCountRequest>("SendMiniGameEventCountRequest");
+    if (!dotnet_SendMiniGameEventCountRequest)
+    {
+        return;
+    }
+
     dotnet_SendMiniGameEventCountRequest(this->GetHandle(), miniGame);
 }
 
 void PacketFunctions_ClientToServer::SendChaosCastleEnterRequest(BYTE castleLevel, BYTE ticketItemInventoryIndex)
 {
+    static const auto dotnet_SendChaosCastleEnterRequest = LoadManagedSymbol<::SendChaosCastleEnterRequest>("SendChaosCastleEnterRequest");
+    if (!dotnet_SendChaosCastleEnterRequest)
+    {
+        return;
+    }
+
     dotnet_SendChaosCastleEnterRequest(this->GetHandle(), castleLevel, ticketItemInventoryIndex);
 }
 
 void PacketFunctions_ClientToServer::SendChaosCastlePositionSet(BYTE positionX, BYTE positionY)
 {
+    static const auto dotnet_SendChaosCastlePositionSet = LoadManagedSymbol<::SendChaosCastlePositionSet>("SendChaosCastlePositionSet");
+    if (!dotnet_SendChaosCastlePositionSet)
+    {
+        return;
+    }
+
     dotnet_SendChaosCastlePositionSet(this->GetHandle(), positionX, positionY);
 }
 
 void PacketFunctions_ClientToServer::SendDuelStartRequest(uint16_t playerId, const char16_t* playerName)
 {
+    static const auto dotnet_SendDuelStartRequest = LoadManagedSymbol<::SendDuelStartRequest>("SendDuelStartRequest");
+    if (!dotnet_SendDuelStartRequest)
+    {
+        return;
+    }
+
     dotnet_SendDuelStartRequest(this->GetHandle(), playerId, playerName);
 }
 
 void PacketFunctions_ClientToServer::SendDuelStartResponse(BYTE response, uint16_t playerId, const char16_t* playerName)
 {
+    static const auto dotnet_SendDuelStartResponse = LoadManagedSymbol<::SendDuelStartResponse>("SendDuelStartResponse");
+    if (!dotnet_SendDuelStartResponse)
+    {
+        return;
+    }
+
     dotnet_SendDuelStartResponse(this->GetHandle(), response, playerId, playerName);
 }
 
 void PacketFunctions_ClientToServer::SendDuelStopRequest()
 {
+    static const auto dotnet_SendDuelStopRequest = LoadManagedSymbol<::SendDuelStopRequest>("SendDuelStopRequest");
+    if (!dotnet_SendDuelStopRequest)
+    {
+        return;
+    }
+
     dotnet_SendDuelStopRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendDuelChannelJoinRequest(BYTE channelId)
 {
+    static const auto dotnet_SendDuelChannelJoinRequest = LoadManagedSymbol<::SendDuelChannelJoinRequest>("SendDuelChannelJoinRequest");
+    if (!dotnet_SendDuelChannelJoinRequest)
+    {
+        return;
+    }
+
     dotnet_SendDuelChannelJoinRequest(this->GetHandle(), channelId);
 }
 
 void PacketFunctions_ClientToServer::SendDuelChannelQuitRequest()
 {
+    static const auto dotnet_SendDuelChannelQuitRequest = LoadManagedSymbol<::SendDuelChannelQuitRequest>("SendDuelChannelQuitRequest");
+    if (!dotnet_SendDuelChannelQuitRequest)
+    {
+        return;
+    }
+
     dotnet_SendDuelChannelQuitRequest(this->GetHandle());
 }
 
 void PacketFunctions_ClientToServer::SendChatCommandListRequest()
 {
+    static const auto dotnet_SendChatCommandListRequest = LoadManagedSymbol<::SendChatCommandListRequest>("SendChatCommandListRequest");
+    if (!dotnet_SendChatCommandListRequest)
+    {
+        return;
+    }
+
     dotnet_SendChatCommandListRequest(this->GetHandle());
 }

@@ -12,17 +12,16 @@
 //------------------------------------------------------------------------------
 
 #include "stdafx.h"
+#include "Connection.h"
 #include "PacketFunctions_ClientToServer.h"
-#include "PacketBindings_ClientToServer.h"
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendLoginFn)(int32_t, const char16_t*, const char16_t*, uint32_t, const BYTE*,
                                                      const BYTE*);
-inline SendLoginFn dotnet_SendLogin =
-    reinterpret_cast<SendLoginFn>(symLoad(munique_client_library_handle, "ConnectionManager_SendLogin"));
 
 void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, const wchar_t* password,
                                                       const BYTE* clientVersion, const BYTE* clientSerial)
 {
+    static SendLoginFn dotnet_SendLogin = nullptr;
     if (!dotnet_SendLogin)
     {
         dotnet_SendLogin = LoadManagedSymbol<SendLoginFn>("ConnectionManager_SendLogin");
@@ -33,23 +32,40 @@ void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, c
     }
 
     // .NET expects UTF-16 (char16_t). On macOS, wchar_t is 4 bytes (UTF-32) — MU_C16 converts.
-    dotnet_SendLogin(this->GetHandle(), MU_C16(username), MU_C16(password), GetTickCount(), clientVersion, clientSerial);
+    dotnet_SendLogin(this->GetHandle(), MU_C16(username), MU_C16(password), GetTickCount(), clientVersion,
+                     clientSerial);
 }
 
-typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExt)(int32_t, uint16_t, uint32_t);
-inline SendAuthenticateExt dotnet_SendAuthenticateExt = reinterpret_cast<SendAuthenticateExt>(
-    symLoad(munique_client_library_handle, "ConnectionManager_SendAuthenticateExt"));
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExtFn)(int32_t, uint16_t, uint32_t);
 
 void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)
 {
+    static SendAuthenticateExtFn dotnet_SendAuthenticateExt = nullptr;
+    if (!dotnet_SendAuthenticateExt)
+    {
+        dotnet_SendAuthenticateExt = LoadManagedSymbol<SendAuthenticateExtFn>("ConnectionManager_SendAuthenticateExt");
+        if (!dotnet_SendAuthenticateExt)
+        {
+            return;
+        }
+    }
+
     dotnet_SendAuthenticateExt(this->GetHandle(), roomId, token);
 }
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatMessageExtFn)(int32_t, BYTE, const char16_t*);
-inline SendChatMessageExtFn dotnet_SendChatMessageExt = reinterpret_cast<SendChatMessageExtFn>(
-    symLoad(munique_client_library_handle, "ConnectionManager_SendChatMessageExt"));
 
 void PacketFunctions_ChatServer_Custom::SendChatMessageExt(BYTE senderIndex, const wchar_t* message)
 {
+    static SendChatMessageExtFn dotnet_SendChatMessageExt = nullptr;
+    if (!dotnet_SendChatMessageExt)
+    {
+        dotnet_SendChatMessageExt = LoadManagedSymbol<SendChatMessageExtFn>("ConnectionManager_SendChatMessageExt");
+        if (!dotnet_SendChatMessageExt)
+        {
+            return;
+        }
+    }
+
     dotnet_SendChatMessageExt(this->GetHandle(), senderIndex, MU_C16(message));
 }

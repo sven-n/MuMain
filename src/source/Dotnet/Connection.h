@@ -81,17 +81,8 @@ template <typename T> T LoadManagedSymbol(const char* name)
 
 using DotNetBridge::LoadManagedSymbol;
 
-// Compatibility bridge for XSLT-generated PacketBindings_*.h files and PacketFunctions_Custom.cpp.
-inline void* symLoad(mu::platform::LibraryHandle handle, const char* name)
-{
-    return mu::platform::GetSymbol(handle, name);
-}
-
-// Re-resolve .NET packet function pointers that may be NULL due to SIOF (Static Initialization
-// Order Fiasco). The inline variables in PacketBindings_*.h call GetSymbol() at static init,
-// but the library handle may not be initialized yet depending on linker TU order.
-// Must be called early in main() before any packet send operations.
-void ResolvePacketBindings();
+// Register native services required by the managed bridge.
+void InitializeDotNetBridge();
 
 class Connection
 {

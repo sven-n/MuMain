@@ -16,8 +16,6 @@
 // Full definitions required: Connection.cpp allocates these types (new PacketFunctions_*()).
 // Connection.h uses only forward declarations to avoid include-order failures in TUs
 // that pull it in transitively through WSclient.h.
-#include "PacketBindings_ConnectServer.h"
-#include "PacketBindings_ChatServer.h"
 #include "PacketFunctions_ChatServer.h"
 #include "PacketFunctions_ConnectServer.h"
 #include "PacketFunctions_ClientToServer.h"
@@ -32,14 +30,6 @@ const std::string g_dotnetLibPath = ManagedLibraryPath();
 const mu::platform::LibraryHandle munique_client_library_handle =
     mu::platform::Load(g_dotnetLibPath.c_str());
 
-// PacketBindings_*.h define inline variables via GetSymbol(munique_client_library_handle, ...).
-// Due to SIOF, these may be NULL if the linker picks a TU where the handle isn't initialized yet.
-#include "PacketBindings_ChatServer.h"
-#include "PacketBindings_ConnectServer.h"
-#include "PacketBindings_ClientToServer.h"
-
-// Re-resolve any NULL inline binding variables. Called from MuMain() after static init.
-// Uses a template helper to avoid repeating the pattern for all ~200 bindings.
 namespace
 {
 enum class ManagedLogLevel : BYTE
@@ -78,21 +68,13 @@ void CORECLR_DELEGATE_CALLTYPE WriteManagedLog(BYTE level, const char* message)
 using ManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(BYTE, const char*);
 using SetManagedLogCallback = void(CORECLR_DELEGATE_CALLTYPE*)(ManagedLogCallback);
 
-template <typename FnPtr>
-void ReResolve(FnPtr& var, const char* name)
-{
-    if (!var && munique_client_library_handle)
-    {
-        var = reinterpret_cast<FnPtr>(mu::platform::GetSymbol(munique_client_library_handle, name));
-    }
-}
 } // anonymous namespace
 
-void ResolvePacketBindings()
+void InitializeDotNetBridge()
 {
     if (!munique_client_library_handle)
     {
-        mu::log::Get("dotnet")->error("NET: ResolvePacketBindings -- library not loaded, skipping");
+        mu::log::Get("dotnet")->error("NET: InitializeDotNetBridge -- library not loaded, skipping");
         return;
     }
 
@@ -102,223 +84,6 @@ void ResolvePacketBindings()
     {
         setManagedLogCallback(&WriteManagedLog);
     }
-
-    // ConnectServer
-    ReResolve(dotnet_SendConnectionInfoRequest075, "SendConnectionInfoRequest075");
-    ReResolve(dotnet_SendConnectionInfoRequest, "SendConnectionInfoRequest");
-    ReResolve(dotnet_SendConnectionInfo, "SendConnectionInfo");
-    ReResolve(dotnet_SendServerListRequest, "SendServerListRequest");
-    ReResolve(dotnet_SendServerListRequestOld, "SendServerListRequestOld");
-    ReResolve(dotnet_SendHello, "SendHello");
-    ReResolve(dotnet_SendPatchCheckRequest, "SendPatchCheckRequest");
-    ReResolve(dotnet_SendPatchVersionOkay, "SendPatchVersionOkay");
-    ReResolve(dotnet_SendClientNeedsPatch, "SendClientNeedsPatch");
-
-    // ChatServer
-    ReResolve(dotnet_SendAuthenticate, "SendAuthenticate");
-    ReResolve(dotnet_SendChatRoomClientJoined, "SendChatRoomClientJoined");
-    ReResolve(dotnet_SendLeaveChatRoom, "SendLeaveChatRoom");
-    ReResolve(dotnet_SendChatRoomClientLeft, "SendChatRoomClientLeft");
-    ReResolve(dotnet_SendChatMessage, "SendChatMessage");
-    ReResolve(dotnet_SendKeepAlive, "SendKeepAlive");
-
-    // ClientToServer — ALL 191 bindings resolved to prevent SIOF null pointers.
-    // Generated from: grep "^inline.*dotnet_" PacketBindings_ClientToServer.h
-    ReResolve(dotnet_SendPing, "SendPing");
-    ReResolve(dotnet_SendChecksumResponse, "SendChecksumResponse");
-    ReResolve(dotnet_SendPublicChatMessage, "SendPublicChatMessage");
-    ReResolve(dotnet_SendWhisperMessage, "SendWhisperMessage");
-    ReResolve(dotnet_SendLoginLongPassword, "SendLoginLongPassword");
-    ReResolve(dotnet_SendLoginShortPassword, "SendLoginShortPassword");
-    ReResolve(dotnet_SendLogin075, "SendLogin075");
-    ReResolve(dotnet_SendLogOut, "SendLogOut");
-    ReResolve(dotnet_SendLogOutByCheatDetection, "SendLogOutByCheatDetection");
-    ReResolve(dotnet_SendResetCharacterPointRequest, "SendResetCharacterPointRequest");
-    ReResolve(dotnet_SendPlayerShopSetItemPrice, "SendPlayerShopSetItemPrice");
-    ReResolve(dotnet_SendPlayerShopOpen, "SendPlayerShopOpen");
-    ReResolve(dotnet_SendPlayerShopClose, "SendPlayerShopClose");
-    ReResolve(dotnet_SendPlayerShopItemListRequest, "SendPlayerShopItemListRequest");
-    ReResolve(dotnet_SendPlayerShopItemBuyRequest, "SendPlayerShopItemBuyRequest");
-    ReResolve(dotnet_SendPlayerShopCloseOther, "SendPlayerShopCloseOther");
-    ReResolve(dotnet_SendPickupItemRequest, "SendPickupItemRequest");
-    ReResolve(dotnet_SendPickupItemRequest075, "SendPickupItemRequest075");
-    ReResolve(dotnet_SendDropItemRequest, "SendDropItemRequest");
-    ReResolve(dotnet_SendItemMoveRequest, "SendItemMoveRequest");
-    ReResolve(dotnet_SendItemMoveRequestExtended, "SendItemMoveRequestExtended");
-    ReResolve(dotnet_SendConsumeItemRequest, "SendConsumeItemRequest");
-    ReResolve(dotnet_SendConsumeItemRequest075, "SendConsumeItemRequest075");
-    ReResolve(dotnet_SendTalkToNpcRequest, "SendTalkToNpcRequest");
-    ReResolve(dotnet_SendCloseNpcRequest, "SendCloseNpcRequest");
-    ReResolve(dotnet_SendBuyItemFromNpcRequest, "SendBuyItemFromNpcRequest");
-    ReResolve(dotnet_SendSellItemToNpcRequest, "SendSellItemToNpcRequest");
-    ReResolve(dotnet_SendRepairItemRequest, "SendRepairItemRequest");
-    ReResolve(dotnet_SendWarpCommandRequest, "SendWarpCommandRequest");
-    ReResolve(dotnet_SendEnterGateRequest, "SendEnterGateRequest");
-    ReResolve(dotnet_SendEnterGateRequest075, "SendEnterGateRequest075");
-    ReResolve(dotnet_SendTeleportTarget, "SendTeleportTarget");
-    ReResolve(dotnet_SendServerChangeAuthentication, "SendServerChangeAuthentication");
-    ReResolve(dotnet_SendCastleSiegeStatusRequest, "SendCastleSiegeStatusRequest");
-    ReResolve(dotnet_SendCastleSiegeRegistrationRequest, "SendCastleSiegeRegistrationRequest");
-    ReResolve(dotnet_SendCastleSiegeUnregisterRequest, "SendCastleSiegeUnregisterRequest");
-    ReResolve(dotnet_SendCastleSiegeRegistrationStateRequest, "SendCastleSiegeRegistrationStateRequest");
-    ReResolve(dotnet_SendCastleSiegeMarkRegistration, "SendCastleSiegeMarkRegistration");
-    ReResolve(dotnet_SendCastleSiegeDefenseBuyRequest, "SendCastleSiegeDefenseBuyRequest");
-    ReResolve(dotnet_SendCastleSiegeDefenseRepairRequest, "SendCastleSiegeDefenseRepairRequest");
-    ReResolve(dotnet_SendCastleSiegeDefenseUpgradeRequest, "SendCastleSiegeDefenseUpgradeRequest");
-    ReResolve(dotnet_SendCastleSiegeTaxInfoRequest, "SendCastleSiegeTaxInfoRequest");
-    ReResolve(dotnet_SendCastleSiegeTaxChangeRequest, "SendCastleSiegeTaxChangeRequest");
-    ReResolve(dotnet_SendCastleSiegeTaxMoneyWithdraw, "SendCastleSiegeTaxMoneyWithdraw");
-    ReResolve(dotnet_SendToggleCastleGateRequest, "SendToggleCastleGateRequest");
-    ReResolve(dotnet_SendCastleGuildCommand, "SendCastleGuildCommand");
-    ReResolve(dotnet_SendCastleSiegeHuntingZoneEntranceSetting, "SendCastleSiegeHuntingZoneEntranceSetting");
-    ReResolve(dotnet_SendCastleSiegeGateListRequest, "SendCastleSiegeGateListRequest");
-    ReResolve(dotnet_SendCastleSiegeStatueListRequest, "SendCastleSiegeStatueListRequest");
-    ReResolve(dotnet_SendCastleSiegeRegisteredGuildsListRequest, "SendCastleSiegeRegisteredGuildsListRequest");
-    ReResolve(dotnet_SendCastleOwnerListRequest, "SendCastleOwnerListRequest");
-    ReResolve(dotnet_SendFireCatapultRequest, "SendFireCatapultRequest");
-    ReResolve(dotnet_SendWeaponExplosionRequest, "SendWeaponExplosionRequest");
-    ReResolve(dotnet_SendGuildLogoOfCastleOwnerRequest, "SendGuildLogoOfCastleOwnerRequest");
-    ReResolve(dotnet_SendCastleSiegeHuntingZoneEnterRequest, "SendCastleSiegeHuntingZoneEnterRequest");
-    ReResolve(dotnet_SendCrywolfInfoRequest, "SendCrywolfInfoRequest");
-    ReResolve(dotnet_SendCrywolfContractRequest, "SendCrywolfContractRequest");
-    ReResolve(dotnet_SendCrywolfChaosRateBenefitRequest, "SendCrywolfChaosRateBenefitRequest");
-    ReResolve(dotnet_SendWhiteAngelItemRequest, "SendWhiteAngelItemRequest");
-    ReResolve(dotnet_SendEnterOnWerewolfRequest, "SendEnterOnWerewolfRequest");
-    ReResolve(dotnet_SendEnterOnGatekeeperRequest, "SendEnterOnGatekeeperRequest");
-    ReResolve(dotnet_SendLeoHelperItemRequest, "SendLeoHelperItemRequest");
-    ReResolve(dotnet_SendMoveToDeviasBySnowmanRequest, "SendMoveToDeviasBySnowmanRequest");
-    ReResolve(dotnet_SendSantaClausItemRequest, "SendSantaClausItemRequest");
-    ReResolve(dotnet_SendKanturuInfoRequest, "SendKanturuInfoRequest");
-    ReResolve(dotnet_SendKanturuEnterRequest, "SendKanturuEnterRequest");
-    ReResolve(dotnet_SendRaklionStateInfoRequest, "SendRaklionStateInfoRequest");
-    ReResolve(dotnet_SendCashShopPointInfoRequest, "SendCashShopPointInfoRequest");
-    ReResolve(dotnet_SendCashShopOpenState, "SendCashShopOpenState");
-    ReResolve(dotnet_SendCashShopItemBuyRequest, "SendCashShopItemBuyRequest");
-    ReResolve(dotnet_SendCashShopItemGiftRequest, "SendCashShopItemGiftRequest");
-    ReResolve(dotnet_SendCashShopStorageListRequest, "SendCashShopStorageListRequest");
-    ReResolve(dotnet_SendCashShopDeleteStorageItemRequest, "SendCashShopDeleteStorageItemRequest");
-    ReResolve(dotnet_SendCashShopStorageItemConsumeRequest, "SendCashShopStorageItemConsumeRequest");
-    ReResolve(dotnet_SendCashShopEventItemListRequest, "SendCashShopEventItemListRequest");
-    ReResolve(dotnet_SendUnlockVault, "SendUnlockVault");
-    ReResolve(dotnet_SendSetVaultPin, "SendSetVaultPin");
-    ReResolve(dotnet_SendRemoveVaultPin, "SendRemoveVaultPin");
-    ReResolve(dotnet_SendVaultClosed, "SendVaultClosed");
-    ReResolve(dotnet_SendVaultMoveMoneyRequest, "SendVaultMoveMoneyRequest");
-    ReResolve(dotnet_SendLahapJewelMixRequest, "SendLahapJewelMixRequest");
-    ReResolve(dotnet_SendPartyListRequest, "SendPartyListRequest");
-    ReResolve(dotnet_SendPartyPlayerKickRequest, "SendPartyPlayerKickRequest");
-    ReResolve(dotnet_SendPartyInviteRequest, "SendPartyInviteRequest");
-    ReResolve(dotnet_SendPartyInviteResponse, "SendPartyInviteResponse");
-    ReResolve(dotnet_SendWalkRequest, "SendWalkRequest");
-    ReResolve(dotnet_SendWalkRequest075, "SendWalkRequest075");
-    ReResolve(dotnet_SendInstantMoveRequest, "SendInstantMoveRequest");
-    ReResolve(dotnet_SendAnimationRequest, "SendAnimationRequest");
-    ReResolve(dotnet_SendRequestCharacterList, "SendRequestCharacterList");
-    ReResolve(dotnet_SendCreateCharacter, "SendCreateCharacter");
-    ReResolve(dotnet_SendDeleteCharacter, "SendDeleteCharacter");
-    ReResolve(dotnet_SendSelectCharacter, "SendSelectCharacter");
-    ReResolve(dotnet_SendFocusCharacter, "SendFocusCharacter");
-    ReResolve(dotnet_SendIncreaseCharacterStatPoint, "SendIncreaseCharacterStatPoint");
-    ReResolve(dotnet_SendInventoryRequest, "SendInventoryRequest");
-    ReResolve(dotnet_SendClientReadyAfterMapChange, "SendClientReadyAfterMapChange");
-    ReResolve(dotnet_SendSaveKeyConfiguration, "SendSaveKeyConfiguration");
-    ReResolve(dotnet_SendAddMasterSkillPoint, "SendAddMasterSkillPoint");
-    ReResolve(dotnet_SendHitRequest, "SendHitRequest");
-    ReResolve(dotnet_SendTargetedSkill, "SendTargetedSkill");
-    ReResolve(dotnet_SendTargetedSkill075, "SendTargetedSkill075");
-    ReResolve(dotnet_SendTargetedSkill095, "SendTargetedSkill095");
-    ReResolve(dotnet_SendMagicEffectCancelRequest, "SendMagicEffectCancelRequest");
-    ReResolve(dotnet_SendAreaSkill, "SendAreaSkill");
-    ReResolve(dotnet_SendAreaSkill075, "SendAreaSkill075");
-    ReResolve(dotnet_SendAreaSkill095, "SendAreaSkill095");
-    ReResolve(dotnet_SendRageAttackRequest, "SendRageAttackRequest");
-    ReResolve(dotnet_SendRageAttackRangeRequest, "SendRageAttackRangeRequest");
-    ReResolve(dotnet_SendTradeCancel, "SendTradeCancel");
-    ReResolve(dotnet_SendTradeButtonStateChange, "SendTradeButtonStateChange");
-    ReResolve(dotnet_SendTradeRequest, "SendTradeRequest");
-    ReResolve(dotnet_SendTradeRequestResponse, "SendTradeRequestResponse");
-    ReResolve(dotnet_SendSetTradeMoney, "SendSetTradeMoney");
-    ReResolve(dotnet_SendLetterDeleteRequest, "SendLetterDeleteRequest");
-    ReResolve(dotnet_SendLetterListRequest, "SendLetterListRequest");
-    ReResolve(dotnet_SendLetterSendRequest, "SendLetterSendRequest");
-    ReResolve(dotnet_SendLetterReadRequest, "SendLetterReadRequest");
-    ReResolve(dotnet_SendGuildKickPlayerRequest, "SendGuildKickPlayerRequest");
-    ReResolve(dotnet_SendGuildJoinRequest, "SendGuildJoinRequest");
-    ReResolve(dotnet_SendGuildJoinResponse, "SendGuildJoinResponse");
-    ReResolve(dotnet_SendGuildListRequest, "SendGuildListRequest");
-    ReResolve(dotnet_SendGuildCreateRequest, "SendGuildCreateRequest");
-    ReResolve(dotnet_SendGuildCreateRequest075, "SendGuildCreateRequest075");
-    ReResolve(dotnet_SendGuildMasterAnswer, "SendGuildMasterAnswer");
-    ReResolve(dotnet_SendCancelGuildCreation, "SendCancelGuildCreation");
-    ReResolve(dotnet_SendGuildWarResponse, "SendGuildWarResponse");
-    ReResolve(dotnet_SendGuildInfoRequest, "SendGuildInfoRequest");
-    ReResolve(dotnet_SendGuildRoleAssignRequest, "SendGuildRoleAssignRequest");
-    ReResolve(dotnet_SendGuildTypeChangeRequest, "SendGuildTypeChangeRequest");
-    ReResolve(dotnet_SendGuildRelationshipChangeRequest, "SendGuildRelationshipChangeRequest");
-    ReResolve(dotnet_SendGuildRelationshipChangeResponse, "SendGuildRelationshipChangeResponse");
-    ReResolve(dotnet_SendRequestAllianceList, "SendRequestAllianceList");
-    ReResolve(dotnet_SendRemoveAllianceGuildRequest, "SendRemoveAllianceGuildRequest");
-    ReResolve(dotnet_SendPingResponse, "SendPingResponse");
-    ReResolve(dotnet_SendItemRepair, "SendItemRepair");
-    ReResolve(dotnet_SendChaosMachineMixRequest, "SendChaosMachineMixRequest");
-    ReResolve(dotnet_SendCraftingDialogCloseRequest, "SendCraftingDialogCloseRequest");
-    ReResolve(dotnet_SendFriendListRequest, "SendFriendListRequest");
-    ReResolve(dotnet_SendFriendAddRequest, "SendFriendAddRequest");
-    ReResolve(dotnet_SendFriendDelete, "SendFriendDelete");
-    ReResolve(dotnet_SendChatRoomCreateRequest, "SendChatRoomCreateRequest");
-    ReResolve(dotnet_SendFriendAddResponse, "SendFriendAddResponse");
-    ReResolve(dotnet_SendSetFriendOnlineState, "SendSetFriendOnlineState");
-    ReResolve(dotnet_SendChatRoomInvitationRequest, "SendChatRoomInvitationRequest");
-    ReResolve(dotnet_SendLegacyQuestStateRequest, "SendLegacyQuestStateRequest");
-    ReResolve(dotnet_SendLegacyQuestStateSetRequest, "SendLegacyQuestStateSetRequest");
-    ReResolve(dotnet_SendPetCommandRequest, "SendPetCommandRequest");
-    ReResolve(dotnet_SendPetInfoRequest, "SendPetInfoRequest");
-    ReResolve(dotnet_SendIllusionTempleEnterRequest, "SendIllusionTempleEnterRequest");
-    ReResolve(dotnet_SendIllusionTempleSkillRequest, "SendIllusionTempleSkillRequest");
-    ReResolve(dotnet_SendIllusionTempleRewardRequest, "SendIllusionTempleRewardRequest");
-    ReResolve(dotnet_SendLuckyCoinCountRequest, "SendLuckyCoinCountRequest");
-    ReResolve(dotnet_SendLuckyCoinRegistrationRequest, "SendLuckyCoinRegistrationRequest");
-    ReResolve(dotnet_SendLuckyCoinExchangeRequest, "SendLuckyCoinExchangeRequest");
-    ReResolve(dotnet_SendDoppelgangerEnterRequest, "SendDoppelgangerEnterRequest");
-    ReResolve(dotnet_SendEnterMarketPlaceRequest, "SendEnterMarketPlaceRequest");
-    ReResolve(dotnet_SendMuHelperStatusChangeRequest, "SendMuHelperStatusChangeRequest");
-    ReResolve(dotnet_SendMuHelperSaveDataRequest, "SendMuHelperSaveDataRequest");
-    ReResolve(dotnet_SendQuestSelectRequest, "SendQuestSelectRequest");
-    ReResolve(dotnet_SendQuestProceedRequest, "SendQuestProceedRequest");
-    ReResolve(dotnet_SendQuestCompletionRequest, "SendQuestCompletionRequest");
-    ReResolve(dotnet_SendQuestCancelRequest, "SendQuestCancelRequest");
-    ReResolve(dotnet_SendQuestClientActionRequest, "SendQuestClientActionRequest");
-    ReResolve(dotnet_SendActiveQuestListRequest, "SendActiveQuestListRequest");
-    ReResolve(dotnet_SendQuestStateRequest, "SendQuestStateRequest");
-    ReResolve(dotnet_SendEventQuestStateListRequest, "SendEventQuestStateListRequest");
-    ReResolve(dotnet_SendAvailableQuestsRequest, "SendAvailableQuestsRequest");
-    ReResolve(dotnet_SendNpcBuffRequest, "SendNpcBuffRequest");
-    ReResolve(dotnet_SendEnterEmpireGuardianEvent, "SendEnterEmpireGuardianEvent");
-    ReResolve(dotnet_SendGensJoinRequest, "SendGensJoinRequest");
-    ReResolve(dotnet_SendGensLeaveRequest, "SendGensLeaveRequest");
-    ReResolve(dotnet_SendGensRewardRequest, "SendGensRewardRequest");
-    ReResolve(dotnet_SendGensRankingRequest, "SendGensRankingRequest");
-    ReResolve(dotnet_SendDevilSquareEnterRequest, "SendDevilSquareEnterRequest");
-    ReResolve(dotnet_SendMiniGameOpeningStateRequest, "SendMiniGameOpeningStateRequest");
-    ReResolve(dotnet_SendEventChipRegistrationRequest, "SendEventChipRegistrationRequest");
-    ReResolve(dotnet_SendMutoNumberRequest, "SendMutoNumberRequest");
-    ReResolve(dotnet_SendEventChipExitDialog, "SendEventChipExitDialog");
-    ReResolve(dotnet_SendEventChipExchangeRequest, "SendEventChipExchangeRequest");
-    ReResolve(dotnet_SendServerImmigrationRequest, "SendServerImmigrationRequest");
-    ReResolve(dotnet_SendLuckyNumberRequest, "SendLuckyNumberRequest");
-    ReResolve(dotnet_SendBloodCastleEnterRequest, "SendBloodCastleEnterRequest");
-    ReResolve(dotnet_SendMiniGameEventCountRequest, "SendMiniGameEventCountRequest");
-    ReResolve(dotnet_SendChaosCastleEnterRequest, "SendChaosCastleEnterRequest");
-    ReResolve(dotnet_SendChaosCastlePositionSet, "SendChaosCastlePositionSet");
-    ReResolve(dotnet_SendDuelStartRequest, "SendDuelStartRequest");
-    ReResolve(dotnet_SendDuelStartResponse, "SendDuelStartResponse");
-    ReResolve(dotnet_SendDuelStopRequest, "SendDuelStopRequest");
-    ReResolve(dotnet_SendDuelChannelJoinRequest, "SendDuelChannelJoinRequest");
-    ReResolve(dotnet_SendDuelChannelQuitRequest, "SendDuelChannelQuitRequest");
-    ReResolve(dotnet_SendChatCommandListRequest, "SendChatCommandListRequest");
-
-    mu::log::Get("dotnet")->info("NET: ResolvePacketBindings done (SendServerListRequest={})",
-                                dotnet_SendServerListRequest ? "resolved" : "NULL");
 }
 
 std::map<int32_t, Connection*> connections;
@@ -386,10 +151,8 @@ bool IsManagedLibraryAvailable()
 }
 } // namespace DotNetBridge
 
-using DotNetBridge::DotNetErrorKind;
-using DotNetBridge::IsManagedLibraryAvailable;
-using DotNetBridge::ReportDotNetError;
-
+namespace
+{
 using onPacketReceived = void(int32_t, int32_t, BYTE*);
 using onDisconnected = void(int32_t);
 
@@ -398,13 +161,30 @@ typedef void(CORECLR_DELEGATE_CALLTYPE* Disconnect)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* BeginReceive)(int32_t);
 typedef void(CORECLR_DELEGATE_CALLTYPE* Send)(int32_t, const BYTE*, int32_t);
 
-Connect dotnet_connect = LoadManagedSymbol<Connect>("ConnectionManager_Connect");
+Connect GetConnect()
+{
+    static const auto function = LoadManagedSymbol<Connect>("ConnectionManager_Connect");
+    return function;
+}
 
-Disconnect dotnet_disconnect = LoadManagedSymbol<Disconnect>("ConnectionManager_Disconnect");
+Disconnect GetDisconnect()
+{
+    static const auto function = LoadManagedSymbol<Disconnect>("ConnectionManager_Disconnect");
+    return function;
+}
 
-BeginReceive dotnet_beginreceive = LoadManagedSymbol<BeginReceive>("ConnectionManager_BeginReceive");
+BeginReceive GetBeginReceive()
+{
+    static const auto function = LoadManagedSymbol<BeginReceive>("ConnectionManager_BeginReceive");
+    return function;
+}
 
-Send dotnet_send = LoadManagedSymbol<Send>("ConnectionManager_Send");
+Send GetSend()
+{
+    static const auto function = LoadManagedSymbol<Send>("ConnectionManager_Send");
+    return function;
+}
+} // anonymous namespace
 
 void Connection::OnPacketReceivedS(const int32_t handle, const int32_t size, BYTE* data)
 {
@@ -438,14 +218,14 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
                        void (*packetHandler)(int32_t, const BYTE*, int32_t))
 {
     this->_packetHandler = packetHandler;
-    if (!dotnet_connect)
+    const auto connect = GetConnect();
+    if (!connect)
     {
-        ReportDotNetError("ConnectionManager_Connect", DotNetErrorKind::SymbolNotFound);
         this->_handle = 0;
         return;
     }
 
-    this->_handle = dotnet_connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
+    this->_handle = connect(host, port, isEncrypted ? 1 : 0, &OnPacketReceivedS, &OnDisconnectedS);
 
     mu::log::Get("dotnet")->info("NET: dotnet_connect returned handle={} (encrypted={})",
                                 this->_handle, isEncrypted ? 1 : 0);
@@ -453,9 +233,9 @@ Connection::Connection(const char16_t* host, int32_t port, bool isEncrypted,
     if (IsConnected())
     {
         connections[this->_handle] = this;
-        if (dotnet_beginreceive)
+        if (const auto beginReceive = GetBeginReceive())
         {
-            dotnet_beginreceive(this->_handle);
+            beginReceive(this->_handle);
             mu::log::Get("dotnet")->info("NET: BeginReceive started for handle={}", this->_handle);
         }
 
@@ -477,9 +257,9 @@ Connection::~Connection()
         return;
     }
 
-    if (dotnet_disconnect)
+    if (const auto disconnect = GetDisconnect())
     {
-        dotnet_disconnect(_handle);
+        disconnect(_handle);
     }
 
     SAFE_DELETE(_chatServer);
@@ -499,13 +279,13 @@ void Connection::Send(const BYTE* data, const int32_t size)
         return;
     }
 
-    if (!dotnet_send)
+    const auto send = GetSend();
+    if (!send)
     {
-        ReportDotNetError("ConnectionManager_Send", DotNetErrorKind::SymbolNotFound);
         return;
     }
 
-    dotnet_send(this->_handle, data, size);
+    send(this->_handle, data, size);
 }
 
 void Connection::Close()
@@ -515,9 +295,9 @@ void Connection::Close()
         return;
     }
 
-    if (dotnet_disconnect)
+    if (const auto disconnect = GetDisconnect())
     {
-        dotnet_disconnect(this->_handle);
+        disconnect(this->_handle);
     }
 }
 

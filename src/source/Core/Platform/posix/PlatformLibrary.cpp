@@ -32,8 +32,6 @@ void* GetSymbol(LibraryHandle handle, const char* name)
 {
     if (handle == nullptr)
     {
-        // Packet binding globals can run before the managed-library handle is
-        // initialized. ResolvePacketBindings() retries them after startup.
         return nullptr;
     }
 

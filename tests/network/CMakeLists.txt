@@ -29,6 +29,17 @@ if(DOTNET_EXECUTABLE)
     )
 
     add_test(
+        NAME dotnet_binding_generator
+        COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
+            "${DOTNET_EXECUTABLE}" run
+            --project ${CMAKE_CURRENT_SOURCE_DIR}/binding_generator_self_check/BindingGeneratorSelfCheck.csproj
+            --configuration Release
+            -- ${CMAKE_SOURCE_DIR}/ClientLibrary/GenerateBindingsHeader.xslt
+               ${CMAKE_SOURCE_DIR}/ClientLibrary/GenerateFunctions.xslt
+               ${CMAKE_SOURCE_DIR}/src/source/Dotnet
+    )
+
+    add_test(
         NAME managed_log_callback
         COMMAND "${CMAKE_COMMAND}" -E env --unset=Platform
             "${DOTNET_EXECUTABLE}" run

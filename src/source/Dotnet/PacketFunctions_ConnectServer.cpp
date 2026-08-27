@@ -20,45 +20,99 @@
 
 void PacketFunctions_ConnectServer::SendConnectionInfoRequest075(BYTE serverId)
 {
+    static const auto dotnet_SendConnectionInfoRequest075 = LoadManagedSymbol<::SendConnectionInfoRequest075>("SendConnectionInfoRequest075");
+    if (!dotnet_SendConnectionInfoRequest075)
+    {
+        return;
+    }
+
     dotnet_SendConnectionInfoRequest075(this->GetHandle(), serverId);
 }
 
 void PacketFunctions_ConnectServer::SendConnectionInfoRequest(uint16_t serverId)
 {
+    static const auto dotnet_SendConnectionInfoRequest = LoadManagedSymbol<::SendConnectionInfoRequest>("SendConnectionInfoRequest");
+    if (!dotnet_SendConnectionInfoRequest)
+    {
+        return;
+    }
+
     dotnet_SendConnectionInfoRequest(this->GetHandle(), serverId);
 }
 
 void PacketFunctions_ConnectServer::SendConnectionInfo(const char16_t* ipAddress, uint16_t port)
 {
+    static const auto dotnet_SendConnectionInfo = LoadManagedSymbol<::SendConnectionInfo>("SendConnectionInfo");
+    if (!dotnet_SendConnectionInfo)
+    {
+        return;
+    }
+
     dotnet_SendConnectionInfo(this->GetHandle(), ipAddress, port);
 }
 
 void PacketFunctions_ConnectServer::SendServerListRequest()
 {
+    static const auto dotnet_SendServerListRequest = LoadManagedSymbol<::SendServerListRequest>("SendServerListRequest");
+    if (!dotnet_SendServerListRequest)
+    {
+        return;
+    }
+
     dotnet_SendServerListRequest(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendServerListRequestOld()
 {
+    static const auto dotnet_SendServerListRequestOld = LoadManagedSymbol<::SendServerListRequestOld>("SendServerListRequestOld");
+    if (!dotnet_SendServerListRequestOld)
+    {
+        return;
+    }
+
     dotnet_SendServerListRequestOld(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendHello()
 {
+    static const auto dotnet_SendHello = LoadManagedSymbol<::SendHello>("SendHello");
+    if (!dotnet_SendHello)
+    {
+        return;
+    }
+
     dotnet_SendHello(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendPatchCheckRequest(BYTE majorVersion, BYTE minorVersion, BYTE patchVersion)
 {
+    static const auto dotnet_SendPatchCheckRequest = LoadManagedSymbol<::SendPatchCheckRequest>("SendPatchCheckRequest");
+    if (!dotnet_SendPatchCheckRequest)
+    {
+        return;
+    }
+
     dotnet_SendPatchCheckRequest(this->GetHandle(), majorVersion, minorVersion, patchVersion);
 }
 
 void PacketFunctions_ConnectServer::SendPatchVersionOkay()
 {
+    static const auto dotnet_SendPatchVersionOkay = LoadManagedSymbol<::SendPatchVersionOkay>("SendPatchVersionOkay");
+    if (!dotnet_SendPatchVersionOkay)
+    {
+        return;
+    }
+
     dotnet_SendPatchVersionOkay(this->GetHandle());
 }
 
 void PacketFunctions_ConnectServer::SendClientNeedsPatch(BYTE patchVersion, const char16_t* patchAddress)
 {
+    static const auto dotnet_SendClientNeedsPatch = LoadManagedSymbol<::SendClientNeedsPatch>("SendClientNeedsPatch");
+    if (!dotnet_SendClientNeedsPatch)
+    {
+        return;
+    }
+
     dotnet_SendClientNeedsPatch(this->GetHandle(), patchVersion, patchAddress);
 }
