@@ -31,6 +31,7 @@
 #define MU_HAS_SDL_TTF 0
 #endif
 
+#include "D3D12Diagnostics.h"
 #include "DrawCommandHistory.h"
 #include "MuRenderer.h"
 #include "QuadTopology.h"
@@ -452,6 +453,7 @@ static bool s_frameTimingInitialized = false;
 static bool s_frameTimingEnabled = false;
 static bool s_statsEnabled = false;
 static bool s_disableD3D12Culling = false;
+static bool s_disableD3D12TriangleMerging = false;
 static mu::RendererStats s_lastFrameStats;
 static std::chrono::steady_clock::time_point s_frameBeginTime;
 static std::chrono::steady_clock::time_point s_renderReplayBeginTime;
@@ -460,6 +462,22 @@ static std::chrono::steady_clock::time_point s_submitTime;
 [[nodiscard]] static bool IsFrameTimingEnabled()
 {
     return s_frameTimingEnabled || s_statsEnabled;
+}
+
+static void ConfigureD3D12Diagnostics(const char* driverName)
+{
+    s_disableD3D12Culling = Render::D3D12DiagnosticEnabled(driverName, std::getenv("MU_D3D12_DISABLE_CULLING"));
+    s_disableD3D12TriangleMerging =
+        Render::D3D12DiagnosticEnabled(driverName, std::getenv("MU_D3D12_DISABLE_TRIANGLE_MERGING"));
+
+    if (s_disableD3D12Culling)
+    {
+        mu::log::Get("render")->info("SDL_gpu -- D3D12 culling diagnostic: disabled");
+    }
+    if (s_disableD3D12TriangleMerging)
+    {
+        mu::log::Get("render")->info("SDL_gpu -- D3D12 triangle merging diagnostic: disabled");
+    }
 }
 
 // Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
@@ -637,8 +655,8 @@ static Render::DrawCommandHistory s_previousDrawCommands;
     }
 
     const RenderCmd& previous = s_renderCmds[previousCommand];
-    const bool geometryCanMerge = Render::Topology::CanMergeTriangleDraws(
-        previous.vtxOffset, previous.vtxCount, command.vtxOffset, vertexStride);
+    const bool geometryCanMerge =
+        Render::Topology::CanMergeTriangleDraws(previous.vtxOffset, previous.vtxCount, command.vtxOffset, vertexStride);
     const FrameProfiler::Counter breakCause = ClassifyBatchBreak(command, previousCommand, geometryCanMerge);
     if (breakCause != FrameProfiler::Counter::Count_)
     {
@@ -901,19 +919,18 @@ static void CloseTtfFont(TTF_Font*& font)
     font = nullptr;
 }
 
-[[nodiscard]] static TTF_Font* OpenTtfFontRole(std::string_view family, std::string_view role,
-                                               const char* relativePath, float pointSize)
+[[nodiscard]] static TTF_Font* OpenTtfFontRole(std::string_view family, std::string_view role, const char* relativePath,
+                                               float pointSize)
 {
     const std::string packagedPath = BundledFontPath(relativePath);
     if (TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize))
     {
-        mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role,
-                                      packagedPath);
+        mu::log::Get("render")->info("SDL_ttf -- bundled family='{}' role='{}' path='{}'", family, role, packagedPath);
         return font;
     }
 
     mu::log::Get("render")->error("SDL_ttf -- bundled family='{}' role='{}' path='{}' failed: {}", family, role,
-                                   packagedPath, SDL_GetError());
+                                  packagedPath, SDL_GetError());
     if (!kAllowSystemFontFallback)
         return nullptr;
 
@@ -921,24 +938,22 @@ static void CloseTtfFont(TTF_Font*& font)
     if (fallbackPath.empty())
         return nullptr;
 
-    mu::log::Get("render")->warn(
-        "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}'", family, role,
-        fallbackPath);
+    mu::log::Get("render")->warn("SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}'",
+                                 family, role, fallbackPath);
     TTF_Font* fallback = TTF_OpenFont(fallbackPath.c_str(), pointSize);
     if (!fallback)
     {
         mu::log::Get("render")->error(
-            "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}' failed: {}", family,
-            role, fallbackPath, SDL_GetError());
+            "SDL_ttf -- NON-PARITY developer font fallback family='{}' role='{}' path='{}' failed: {}", family, role,
+            fallbackPath, SDL_GetError());
     }
     return fallback;
 }
 
 static void WarmTtfFonts()
 {
-    static constexpr const char* k_WarmupGlyphs =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-        "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
+    static constexpr const char* k_WarmupGlyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+                                                  "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
     TTF_Font* fonts[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
     for (TTF_Font* font : fonts)
     {
@@ -1275,10 +1290,10 @@ public:
         // SDL_gpu selects the platform backend automatically:
         //   Metal on macOS, Vulkan on Linux, D3D12 on Windows.
         mu::log::Get("render")->info("SDL_gpu -- validation: {}",
-                                      Render::kGpuValidationEnabled ? "enabled" : "disabled");
-        s_device = SDL_CreateGPUDevice(
-            SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-            Render::kGpuValidationEnabled, nullptr);
+                                     Render::kGpuValidationEnabled ? "enabled" : "disabled");
+        s_device =
+            SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+                                Render::kGpuValidationEnabled, nullptr);
 
         if (!s_device)
         {
@@ -1289,13 +1304,7 @@ public:
         mu::log::Get("render")->info("SDL_gpu -- device driver: {}", SDL_GetGPUDeviceDriver(s_device));
 
         const char* driverName = SDL_GetGPUDeviceDriver(s_device);
-        const char* disableCulling = std::getenv("MU_D3D12_DISABLE_CULLING");
-        s_disableD3D12Culling = driverName != nullptr && std::string_view(driverName) == "direct3d12" &&
-                               disableCulling != nullptr && std::string_view(disableCulling) == "1";
-        if (s_disableD3D12Culling)
-        {
-            mu::log::Get("render")->info("SDL_gpu -- D3D12 culling diagnostic: disabled");
-        }
+        ConfigureD3D12Diagnostics(driverName);
 
         // Claim the window for the GPU device.
         if (!SDL_ClaimWindowForGPUDevice(s_device, s_window))
@@ -1532,6 +1541,7 @@ public:
         s_device = nullptr;
         s_window = nullptr;
         s_disableD3D12Culling = false;
+        s_disableD3D12TriangleMerging = false;
 
         mu::log::Get("render")->info("SDL_gpu -- Shutdown complete");
     }
@@ -2052,8 +2062,7 @@ public:
                 s_dbgFallbackTextureThisFrame, s_dbgWhiteTextureDrawsThisFrame, s_dbgRealTextureDrawsThisFrame,
                 s_dbgTextureUploadsThisFrame, s_dbgTextureCreatesThisFrame, s_dbgTextureReleasesThisFrame,
                 s_texturesInvalidated, m_texture2DEnabled, m_boundTextureId, s_dbgPipelineBindsThisFrame,
-                s_dbgSamplerBindsThisFrame,
-                s_dbgVertexUniformPushesThisFrame, s_dbgFragmentUniformPushesThisFrame);
+                s_dbgSamplerBindsThisFrame, s_dbgVertexUniformPushesThisFrame, s_dbgFragmentUniformPushesThisFrame);
 
             logger->debug("[RENDER timing] total={:.2f}ms replay={:.2f}ms submit={:.2f}ms",
                           s_lastFrameStats.frameMilliseconds, s_lastFrameStats.replayMilliseconds,
@@ -2470,8 +2479,8 @@ public:
         cmd.vu.mvp =
             glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
-        std::size_t& previousCommand = Render::PreviousDrawCommand(
-            s_previousDrawCommands, Render::DrawCommandFamily::TextTriangles2D);
+        std::size_t& previousCommand =
+            Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::TextTriangles2D);
         if (MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex2D)))
         {
             ++s_dbgMergedDrawsThisFrame;
@@ -2745,8 +2754,8 @@ public:
         cmd.vu.mvp =
             glm::ortho(0.0f, static_cast<float>(s_cachedWinW), 0.0f, static_cast<float>(s_cachedWinH), -1.0f, 1.0f);
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, drawQuads * 4u);
-        std::size_t& previousCommand = Render::PreviousDrawCommand(
-            s_previousDrawCommands, Render::DrawCommandFamily::ScreenQuads2D);
+        std::size_t& previousCommand =
+            Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::ScreenQuads2D);
         if (MergeAdjacentQuadCommand(cmd, previousCommand, sizeof(Vertex2D)))
         {
             ++s_dbgMergedDrawsThisFrame;
@@ -2839,7 +2848,7 @@ public:
         FrameProfiler::Count(FrameProfiler::Counter::BatchVertices, cmd.vtxCount);
         std::size_t& previousCommand =
             Render::PreviousDrawCommand(s_previousDrawCommands, Render::DrawCommandFamily::Triangles3D);
-        if (MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
+        if (!s_disableD3D12TriangleMerging && MergeAdjacentTriangleCommand(cmd, previousCommand, sizeof(Vertex3D)))
         {
             ++s_dbgMergedDrawsThisFrame;
             FrameProfiler::Count(FrameProfiler::Counter::MergedDraws);
@@ -3416,7 +3425,7 @@ private:
             return s_pipelines3DDepthReadOnly[pipelineIdx];
         }
         return m_cullFaceEnabled && !s_disableD3D12Culling ? s_pipelines3D[pipelineIdx]
-                                                          : s_pipelines3DNoCull[pipelineIdx];
+                                                           : s_pipelines3DNoCull[pipelineIdx];
     }
 
     [[nodiscard]] SDL_GPUGraphicsPipeline* GetActiveQuadPipeline(Render::Topology::QuadSpace space) const
@@ -3991,9 +4000,8 @@ private:
                                   {"skinned-culled", table[i].name, i, true, true, VertexLayout::Skinned, true});
             buildRequiredPipeline(s_pipelinesSkinnedNoCull[i], blendState,
                                   {"skinned-no-cull", table[i].name, i, true, true, VertexLayout::Skinned, false});
-            buildRequiredPipeline(
-                s_pipelinesSkinnedDepthOff[i], blendState,
-                {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
+            buildRequiredPipeline(s_pipelinesSkinnedDepthOff[i], blendState,
+                                  {"skinned-depth-off", table[i].name, i, false, false, VertexLayout::Skinned, false});
             buildRequiredPipeline(
                 s_pipelinesSkinnedDepthReadOnly[i], blendState,
                 {"skinned-depth-read-only", table[i].name, i, true, false, VertexLayout::Skinned, false});

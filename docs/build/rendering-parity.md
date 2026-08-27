@@ -91,6 +91,13 @@ $env:MU_RENDER_TIMING = "1"
 .\Main.exe
 ```
 
+To isolate D3D12 non-indexed triangle batching, rerun with:
+
+```powershell
+$env:MU_D3D12_DISABLE_TRIANGLE_MERGING = "1"
+.\Main.exe
+```
+
 Then:
 
 1. Enable `$glstats on`.
