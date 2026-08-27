@@ -38,6 +38,16 @@
           "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
           "name": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
           "label": "MuMain (Windows native x64 Release, editor OFF; requires separate data release)"
+        },
+        {
+          "path": "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+          "name": "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+          "label": "MuMain (Linux native x64 Release, editor OFF; requires separate data release)"
+        },
+        {
+          "path": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+          "name": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+          "label": "MuMain (macOS native arm64 Release, editor OFF; requires separate data release)"
         }
       ]
     }],

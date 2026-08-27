@@ -106,27 +106,31 @@ Run the client from that directory so it finds its assets and the library.
 
 ## Hosted releases
 
-Actions expose builds through CI artifacts and two independent release streams:
+Actions expose builds through CI artifacts and two coordinated release streams:
 
-- Semantic Release publishes
-  `MuMain-windows-native-x64-release-editor-off-no-data.tar.gz`. This is the
-  only Windows runtime published as a GitHub Release asset.
+- Semantic Release publishes these no-data runtime archives:
+  `MuMain-windows-native-x64-release-editor-off-no-data.tar.gz`,
+  `MuMain-linux-native-x64-release-editor-off-no-data.tar.gz`, and
+  `MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz`.
 - Each main-branch CI run also uploads
   `mu-client-windows-native-x64-release-editor-off-no-data-main`,
   `mu-client-linux-native-x64-release-editor-off-no-data-main`, and
-  `mu-client-macos-native-arm64-release-editor-off-no-data-main` artifacts.
+  `mu-client-macos-native-arm64-release-editor-off-no-data-main` artifacts;
+  each contains its corresponding compressed runtime archive.
 - The data workflow publishes `MuMain-data-<id>.tar.gz` and its
   `.sha256` file under tag `data-<id>`. The identifier is derived from the Git
   trees for `src/bin/Data/` and `src/bin/fonts/`, so unchanged data is reused
   across code releases.
+- Each client release includes a **Compatible game data** link to its exact
+  `data-<id>` release.
 
 Windows x86, Debug, editor-ON, MinGW, and other configurations are not built by
 Actions; build locally when one is required.
 
 ### Assemble a release
 
-Download the no-data runtime plus the desired `data-<id>` archive and checksum
-into one directory. On Linux, macOS, or Git Bash:
+Download the no-data runtime for your OS plus the linked `data-<id>` archive and
+checksum into one working directory. On Windows through Git Bash:
 
 ```bash
 mkdir MuMain-runtime
@@ -135,7 +139,19 @@ sha256sum --check MuMain-data-<id>.tar.gz.sha256
 tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime
 ```
 
-On PowerShell:
+For Linux, use the same commands with
+`MuMain-linux-native-x64-release-editor-off-no-data.tar.gz`.
+
+On macOS, place the data beside the executable inside the application bundle:
+
+```bash
+mkdir MuMain-runtime
+tar -xzf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz -C MuMain-runtime
+sha256sum --check MuMain-data-<id>.tar.gz.sha256
+tar -xzf MuMain-data-<id>.tar.gz -C MuMain-runtime/Main.app/Contents/MacOS
+```
+
+On Windows PowerShell:
 
 ```powershell
 New-Item -ItemType Directory MuMain-runtime

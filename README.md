@@ -65,10 +65,10 @@ What needs to be done for Season 6:
 
 CI validates Windows native x64 Release, Linux x64 Release, and
 macOS arm64 Release, all with the editor OFF, and uploads no-data runtime
-artifacts for all three. Only Windows publishes a client runtime as a GitHub
-Release asset. The runtimes exclude `Data/` and `fonts/`; download the separate
-data release tagged `data-<id>` and extract both archives into the same
-directory.
+artifacts for all three. Semantic Release publishes all three as GitHub Release
+assets. The runtimes exclude `Data/` and `fonts/`; each release has a
+**Compatible game data** link to the exact separate data release tagged
+`data-<id>`. Follow the platform-specific assembly steps in the build guide.
 
 x86, Debug, editor-ON, MinGW, and other configurations remain supported where
 listed below, but are not hosted artifacts. Whoever needs one must build locally.

@@ -120,7 +120,17 @@ EXPECTED_RELEASE_ASSETS = [
         "path": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
         "name": "MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
         "label": "MuMain (Windows native x64 Release, editor OFF; requires separate data release)",
-    }
+    },
+    {
+        "path": "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+        "name": "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+        "label": "MuMain (Linux native x64 Release, editor OFF; requires separate data release)",
+    },
+    {
+        "path": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+        "name": "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+        "label": "MuMain (macOS native arm64 Release, editor OFF; requires separate data release)",
+    },
 ]
 
 errors = []
@@ -281,10 +291,17 @@ check(
 )
 
 native_upload = step(native_job, "build-windows", "Upload runtime artifact")
+native_archive = step(native_job, "build-windows", "Archive runtime")
+check(
+    "tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz "
+    "-C out/build/windows-ci-x64-release/src/Release ."
+    in native_archive,
+    "Main Windows build must archive the runtime before artifact upload",
+)
 for required in (
     "uses: actions/upload-artifact@v4",
     "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
-    "path: out/build/windows-ci-x64-release/src/Release/",
+    "path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz",
     "if-no-files-found: error",
 ):
     check(required in native_upload, f"Main Windows upload missing {required}")
@@ -293,14 +310,24 @@ check(
     "Main Windows job must upload exactly one runtime artifact",
 )
 
-for platform_job, job_name, display_name, runner, artifact_name, artifact_path in (
+for (
+    platform_job,
+    job_name,
+    display_name,
+    runner,
+    artifact_name,
+    archive_name,
+    archive_command,
+) in (
     (
         linux_job,
         "build-linux",
         "Linux Native Build (x64, Release, editor OFF)",
         "ubuntu-latest",
         "mu-client-linux-native-x64-release-editor-off-no-data-main",
-        "out/build/linux-ci/src/Release/",
+        "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+        "tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz "
+        "-C out/build/linux-ci/src/Release .",
     ),
     (
         macos_job,
@@ -308,7 +335,9 @@ for platform_job, job_name, display_name, runner, artifact_name, artifact_path i
         "macOS Native Build (arm64, Release, editor OFF)",
         "macos-latest",
         "mu-client-macos-native-arm64-release-editor-off-no-data-main",
-        "out/build/macos-ci/src/Release/Main.app/",
+        "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
+        "tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz "
+        "-C out/build/macos-ci/src/Release Main.app",
     ),
 ):
     check("strategy:" not in platform_job, f"{display_name} must not use a matrix")
@@ -319,12 +348,21 @@ for platform_job, job_name, display_name, runner, artifact_name, artifact_path i
         "if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'",
     ):
         check(required in platform_job, f"{display_name} missing {required}")
+    platform_archive = step(platform_job, job_name, "Archive runtime")
+    check(
+        "if: github.event_name == 'push'" in platform_archive,
+        f"{display_name} must archive only for artifact-producing pushes",
+    )
+    check(
+        archive_command in platform_archive,
+        f"{display_name} must archive the runtime before artifact upload",
+    )
     platform_upload = step(platform_job, job_name, "Upload runtime artifact")
     for required in (
         "if: github.event_name == 'push'",
         "uses: actions/upload-artifact@v4",
         f"name: {artifact_name}",
-        f"path: {artifact_path}",
+        f"path: {archive_name}",
         "if-no-files-found: error",
     ):
         check(required in platform_upload, f"{display_name} upload missing {required}")
@@ -396,24 +434,46 @@ check(
     "needs: [quality, build-windows, build-linux, build-macos]" in release_job,
     "Release must need quality and all hosted platform checks",
 )
-release_download = step(release_job, "release", "Download runtime artifact")
-for required in (
-    "name: mu-client-windows-native-x64-release-editor-off-no-data-main",
-    "path: artifacts/runtime",
+for platform, artifact_name in (
+    ("Windows", "mu-client-windows-native-x64-release-editor-off-no-data-main"),
+    ("Linux", "mu-client-linux-native-x64-release-editor-off-no-data-main"),
+    ("macOS", "mu-client-macos-native-arm64-release-editor-off-no-data-main"),
 ):
-    check(required in release_download, f"Release download missing {required}")
-release_archive = step(release_job, "release", "Archive Windows runtime")
-check(
-    "tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C artifacts/runtime ."
-    in release_archive,
-    "Release must archive exactly the no-data main runtime",
-)
-check(release_job.count("tar -czf ") == 1, "Release must create exactly one runtime archive")
+    release_download = step(
+        release_job, "release", f"Download {platform} runtime archive"
+    )
+    for required in (f"name: {artifact_name}", "path: ."):
+        check(required in release_download, f"Release download missing {required}")
+check("tar -czf " not in release_job, "Release must consume runner-created archives")
+
+data_release = step(release_job, "release", "Resolve compatible data release")
+for required in (
+    "git rev-parse HEAD:src/bin/Data",
+    "git rev-parse HEAD:src/bin/fonts",
+    "sha256sum",
+    'data_tag="data-${asset_id}"',
+    'gh release view "$data_tag" --json url --jq .url',
+    'echo "DATA_ASSET_ID=${asset_id}"',
+    'echo "DATA_RELEASE_URL=${data_release_url}"',
+):
+    check(required in data_release, f"Compatible data lookup missing {required}")
 release_semantic = step(release_job, "release", "Semantic Release")
 check(
     "uses: cycjimmy/semantic-release-action@v4" in release_semantic,
     "Release must use Semantic Release",
 )
+check("id: semantic" in release_semantic, "Semantic Release must expose action outputs")
+data_link = step(release_job, "release", "Link compatible data release")
+for required in (
+    "if: steps.semantic.outputs.new_release_published == 'true'",
+    "RELEASE_TAG: ${{ steps.semantic.outputs.new_release_git_tag }}",
+    'gh release view "$RELEASE_TAG" --json body --jq .body',
+    "## Compatible game data",
+    "DATA_ASSET_ID",
+    "DATA_RELEASE_URL",
+    'gh release edit "$RELEASE_TAG" --notes-file "$release_notes"',
+):
+    check(required in data_link, f"Compatible data link step missing {required}")
 
 github_plugins = [
     plugin
@@ -428,7 +488,10 @@ if len(github_plugins) == 1 and len(github_plugins[0]) == 2:
     if isinstance(options, dict):
         github_options = options
         release_assets = options.get("assets", [])
-check(release_assets == EXPECTED_RELEASE_ASSETS, "Semantic Release must publish only the no-data runtime")
+check(
+    release_assets == EXPECTED_RELEASE_ASSETS,
+    "Semantic Release must publish every hosted no-data runtime",
+)
 check(
     github_options.get("successCommentCondition") is False,
     "Semantic Release must skip fork-incompatible success comments",
@@ -479,10 +542,13 @@ for required in (
 for required in (
     "Windows native x64 Release",
     "Linux x64 Release",
+    "MuMain-linux-native-x64-release-editor-off-no-data.tar.gz",
+    "MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz",
     "mu-client-linux-native-x64-release-editor-off-no-data-main",
     "mu-client-macos-native-arm64-release-editor-off-no-data-main",
-    "only Windows runtime published as a GitHub Release asset",
+    "Compatible game data",
     "data-<id>",
+    "Main.app/Contents/MacOS",
     "MU_COPY_RUNTIME_ASSETS=OFF",
     "build locally",
 ):
@@ -491,8 +557,10 @@ for required in (
     "Windows native x64 Release",
     "Linux x64 Release",
     "macOS arm64 Release",
-    "Only Windows",
+    "Semantic Release publishes all three",
+    "Compatible game data",
     "data release tagged",
+    "platform-specific assembly steps",
     "build locally",
 ):
     check(required in readme, f"README missing release policy: {required}")

@@ -486,11 +486,14 @@ jobs:
 
           Write-Host "Validated native x64 runtime directory: $runtimeDirectory"
 
+      - name: Archive runtime
+        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C out/build/windows-ci-x64-release/src/Release .
+
       - name: Upload runtime artifact
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main
-          path: out/build/windows-ci-x64-release/src/Release/
+          path: MuMain-windows-native-x64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
   build-linux:
@@ -568,12 +571,16 @@ jobs:
             fi
           done
 
+      - name: Archive runtime
+        if: github.event_name == 'push'
+        run: tar -czf MuMain-linux-native-x64-release-editor-off-no-data.tar.gz -C out/build/linux-ci/src/Release .
+
       - name: Upload runtime artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-linux-native-x64-release-editor-off-no-data-main
-          path: out/build/linux-ci/src/Release/
+          path: MuMain-linux-native-x64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
   build-macos:
@@ -641,12 +648,16 @@ jobs:
             fi
           done
 
+      - name: Archive runtime
+        if: github.event_name == 'push'
+        run: tar -czf MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz -C out/build/macos-ci/src/Release Main.app
+
       - name: Upload runtime artifact
         if: github.event_name == 'push'
         uses: actions/upload-artifact@v4
         with:
           name: mu-client-macos-native-arm64-release-editor-off-no-data-main
-          path: out/build/macos-ci/src/Release/Main.app/
+          path: MuMain-macos-native-arm64-release-editor-off-no-data.tar.gz
           if-no-files-found: error
 
   release:
@@ -669,16 +680,42 @@ jobs:
         with:
           node-version: 22
 
-      - name: Download runtime artifact
+      - name: Download Windows runtime archive
         uses: actions/download-artifact@v4
         with:
           name: mu-client-windows-native-x64-release-editor-off-no-data-main
-          path: artifacts/runtime
+          path: .
 
-      - name: Archive Windows runtime
-        run: tar -czf MuMain-windows-native-x64-release-editor-off-no-data.tar.gz -C artifacts/runtime .
+      - name: Download Linux runtime archive
+        uses: actions/download-artifact@v4
+        with:
+          name: mu-client-linux-native-x64-release-editor-off-no-data-main
+          path: .
+
+      - name: Download macOS runtime archive
+        uses: actions/download-artifact@v4
+        with:
+          name: mu-client-macos-native-arm64-release-editor-off-no-data-main
+          path: .
+
+      - name: Resolve compatible data release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          data_tree=$(git rev-parse HEAD:src/bin/Data)
+          fonts_tree=$(git rev-parse HEAD:src/bin/fonts)
+          asset_id=$(printf '%s\n%s\n' "$data_tree" "$fonts_tree" | sha256sum | cut -c1-16)
+          data_tag="data-${asset_id}"
+          data_release_url=$(gh release view "$data_tag" --json url --jq .url)
+
+          {
+            echo "DATA_ASSET_ID=${asset_id}"
+            echo "DATA_RELEASE_URL=${data_release_url}"
+          } >> "$GITHUB_ENV"
 
       - name: Semantic Release
+        id: semantic
         uses: cycjimmy/semantic-release-action@v4
         with:
           extra_plugins: |
@@ -687,3 +724,20 @@ jobs:
             conventional-changelog-conventionalcommits@8.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Link compatible data release
+        if: steps.semantic.outputs.new_release_published == 'true'
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RELEASE_TAG: ${{ steps.semantic.outputs.new_release_git_tag }}
+        run: |
+          # ponytail: post-publish edit; use a generateNotes plugin if note updates become concurrent.
+          release_notes="${RUNNER_TEMP}/MuMain-release-notes.md"
+          gh release view "$RELEASE_TAG" --json body --jq .body > "$release_notes"
+          {
+            printf '\n## Compatible game data\n\n'
+            # shellcheck disable=SC2016
+            printf '[Download `MuMain-data-%s.tar.gz` and its checksum](%s).\n' "$DATA_ASSET_ID" "$DATA_RELEASE_URL"
+          } >> "$release_notes"
+          gh release edit "$RELEASE_TAG" --notes-file "$release_notes"
