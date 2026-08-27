@@ -1,3 +1,10 @@
+## [1.1.3](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.2...v1.1.3) (2026-08-27)
+
+### Bug Fixes
+
+* **render:** isolate D3D12 triangle batching ([180b0d2](https://github.com/yesid-bocanegra/MuMain/commit/180b0d2232647ed86b829bd1358bca92262d20f4))
+* **windows:** harden login and rendering ([eef5f57](https://github.com/yesid-bocanegra/MuMain/commit/eef5f5738c35ad25a3f69400e33276f9c5bda841))
+
 ## [1.1.2](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.1...v1.1.2) (2026-08-26)
 
 ### Bug Fixes
