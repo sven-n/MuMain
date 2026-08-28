@@ -59,6 +59,10 @@ The graphics and performance engine exposes runtime switches via `config.ini` an
   - `1`: Enforces **OpenGL 3.3 Core Profile** (`SDL_GL_CONTEXT_PROFILE_CORE`). All rendering runs via UBOs, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).
   - `0`: Requests **OpenGL Compatibility Profile** (`SDL_GL_CONTEXT_PROFILE_COMPATIBILITY`). Re-enables legacy FFP driver state toggles (e.g. `glAlphaTest`, `glEnable(GL_TEXTURE_2D)`) for legacy driver hook compatibility; all primary rendering remains shader and UBO driven.
 - **`[Render] MaxGLVersion`** (`GLP-08`): caps the GL context version the client will request. Without it the client walks a descending `{4,5} → {4,3} → {3,3}` chain and takes the highest that succeeds; set this to force a lower ceiling as a rollback path if a driver misbehaves on the newer context.
+- **`[Render] SortParticleDraws`** (Default: `0`):
+  - `1`: Groups particle draws by texture before submitting them, so consecutive sprites sharing a texture merge into one `IR::` batch instead of costing a draw call each. Particles are otherwise drawn in slot (allocation) order, which interleaves textures and breaks the batch on nearly every sprite.
+  - `0`: Draws particles in slot order, exactly as before.
+  - Only particles whose result cannot depend on draw order are moved: additive sprites whose effect type does not switch blend mode or toggle the depth test. Everything else keeps its position and acts as a barrier no draw is moved across. Opt-in until the reordering has been confirmed by eye against real effects on target hardware.
 - **`[UI] EnableAnimationTaskPool`** (Default: `0`):
   - `1`: Enables the multi-threaded character animation task pool (`AnimationTaskPool`) when $\ge 20$ active characters are present.
   - `0`: Runs character skeletal animation updates sequentially on the main thread.

@@ -22,6 +22,9 @@ float g_CurrentColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 // See RenderConfig.h -- matches EnableVSync()'s unconditional call at boot.
 bool g_VSyncEnabled = true;
 
+// See RenderConfig.h -- opt-in until the reordering has been confirmed by eye.
+bool g_SortParticleDraws = false;
+
 void InitRenderConfig()
 {
     wchar_t configPath[MAX_PATH];
@@ -54,6 +57,10 @@ void InitRenderConfig()
         g_MaxGLVersionMajor = maxMajor;
         g_MaxGLVersionMinor = maxMinor;
     }
+
+    int sortParticleDraws = GetPrivateProfileIntW(CfgSections::CfgSectionRender, CfgKeys::CfgKeySortParticleDraws,
+        CfgDefaults::CfgDefaultSortParticleDraws ? 1 : 0, configPath);
+    g_SortParticleDraws = (sortParticleDraws != 0);
 }
 
 void BuildPerspectiveProjection(float f, float aspect, float zNear, float zFar, float out[16])

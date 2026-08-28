@@ -52,6 +52,7 @@ endfunction()
 
 add_subdirectory(text)
 
+add_subdirectory(effects)
 add_subdirectory(terrain)
 
 add_subdirectory(editor)
