@@ -7,6 +7,20 @@ extern OBJECT       Boids[];
 extern OBJECT       Fishs[];
 
 extern float EarthQuake;
+
+// EarthQuake is a single global that DefaultCamera adds straight onto the camera
+// pitch, so writing it unconditionally from an effect shakes the local player's
+// screen for any caster in render scope -- however far away, and even off-screen.
+// On a populated map that reads as a permanent camera judder caused by strangers.
+//
+// Use this for shakes that belong to a specific world object: it applies the shake
+// only when that object is close enough for it to read as "this happened here",
+// scaling linearly to zero at the cutoff. Magnitude at zero distance is unchanged,
+// so the effect keeps its original feel for whoever is standing on top of it.
+//
+// Scripted, map-wide event shakes (Raklion, Hellas, Kanturu, Chaos Castle) are
+// deliberately NOT routed through this -- they are meant to shake the whole map.
+void SetEarthQuakeAt(const vec3_t sourcePosition, float magnitude);
 extern bool EnableShadow;
 extern float AmbientShadowAngle;
 extern float RainTarget;

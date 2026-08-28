@@ -69,6 +69,22 @@ OPERATE      Operates[MAX_OPERATES];
 //int   World = -1;
 float EarthQuake;
 
+void SetEarthQuakeAt(const vec3_t sourcePosition, float magnitude)
+{
+    if (Hero == nullptr) return;
+
+    // ~12 tiles: roughly what fits on screen, so anything that can shake the view
+    // is something the player can actually see happening.
+    const float kShakeRadius = TERRAIN_SCALE * 12.f;
+
+    const float dx = sourcePosition[0] - Hero->Object.Position[0];
+    const float dy = sourcePosition[1] - Hero->Object.Position[1];
+    const float distSq = dx * dx + dy * dy;
+    if (distSq >= kShakeRadius * kShakeRadius) return;
+
+    EarthQuake = magnitude * (1.f - sqrtf(distSq) / kShakeRadius);
+}
+
 static  int g_iThunderTime = 0;
 int g_iActionObjectType = -1;
 int g_iActionWorld = -1;
