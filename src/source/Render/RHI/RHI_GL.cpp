@@ -225,6 +225,11 @@ typedef void (APIENTRY* PFNGLBUFFERDATAPROC)(GLenum target, GLsizeiptr size, con
 typedef void (APIENTRY* PFNGLBUFFERSUBDATAPROC)(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
 typedef void (APIENTRY* PFNGLDELETEBUFFERSPROC)(GLsizei n, const GLuint* buffers);
 typedef void (APIENTRY* PFNGLBINDBUFFERBASEPROC)(GLenum target, GLuint index, GLuint buffer);
+// Declared here rather than with the UBO-ring group further down because
+// AppendBuffer (above that group) streams through them on the unsynchronised
+// path; the UBO ring's loader assigns the same pointers.
+typedef void*     (APIENTRY* PFNGLMAPBUFFERRANGEPROC)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+typedef GLboolean (APIENTRY* PFNGLUNMAPBUFFERPROC)(GLenum target);
 
 namespace {
     PFNGLGENBUFFERSPROC     fn_glGenBuffers     = nullptr;
@@ -233,6 +238,8 @@ namespace {
     PFNGLBUFFERSUBDATAPROC  fn_glBufferSubData  = nullptr;
     PFNGLDELETEBUFFERSPROC  fn_glDeleteBuffers  = nullptr;
     PFNGLBINDBUFFERBASEPROC fn_glBindBufferBase = nullptr;
+    PFNGLMAPBUFFERRANGEPROC fn_glMapBufferRange = nullptr;
+    PFNGLUNMAPBUFFERPROC    fn_glUnmapBuffer    = nullptr;
 
     bool LoadBufferGLFunctions()
     {
@@ -244,6 +251,10 @@ namespace {
         fn_glBufferSubData  = (PFNGLBUFFERSUBDATAPROC)SDL_GL_GetProcAddress("glBufferSubData");
         fn_glDeleteBuffers  = (PFNGLDELETEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteBuffers");
         fn_glBindBufferBase = (PFNGLBINDBUFFERBASEPROC)SDL_GL_GetProcAddress("glBindBufferBase");
+        // Core since GL 3.0, so guaranteed present given GLP-08's GL >= 3.3 floor. Not part of
+        // the `loaded` predicate: AppendBuffer falls back to glBufferSubData if they are null.
+        fn_glMapBufferRange = (PFNGLMAPBUFFERRANGEPROC)SDL_GL_GetProcAddress("glMapBufferRange");
+        fn_glUnmapBuffer    = (PFNGLUNMAPBUFFERPROC)SDL_GL_GetProcAddress("glUnmapBuffer");
         loaded = (fn_glGenBuffers != nullptr && fn_glBindBuffer != nullptr &&
                   fn_glBufferData != nullptr && fn_glBufferSubData != nullptr &&
                   fn_glDeleteBuffers != nullptr && fn_glBindBufferBase != nullptr);
@@ -374,7 +385,40 @@ size_t AppendBuffer(BufferHandle handle, const void* data, size_t sizeBytes)
         writeOffset = 0;
     }
 
-    fn_glBufferSubData(GL_ARRAY_BUFFER, writeOffset, neededSize, data);
+    // Write the append with an UNSYNCHRONIZED mapped range rather than glBufferSubData.
+    //
+    // The ring bookkeeping above already guarantees this byte range is not one the GPU can
+    // still be reading: writeOffset only ever moves forward, and the wrap/grow branches
+    // orphan the whole buffer before restarting at 0. glBufferSubData cannot be told that,
+    // so a driver is free to synchronise defensively -- and Apple's GL driver does exactly
+    // that, taking every append through GLDContextRec::flushResource -> flushContext and
+    // blocking on a semaphore until the GPU drains. Profiling the macOS client put ~53% of
+    // all main-thread samples inside that one call (RenderParticles -> EnableAlphaBlend ->
+    // IR::Flush -> AppendBuffer), which is what made the frame rate collapse as scene
+    // complexity rose. Desktop NVIDIA/AMD drivers hide the same hazard with implicit
+    // buffer renaming, which is why this only ever showed up on macOS.
+    //
+    // GL_MAP_UNSYNCHRONIZED_BIT states the no-overlap invariant explicitly, so the driver
+    // skips the wait. Core since GL 3.0 and therefore always present at GLP-08's GL >= 3.3
+    // floor; the glBufferSubData path is kept as a fallback for a driver that fails the map.
+    bool wrote = false;
+    if (fn_glMapBufferRange && fn_glUnmapBuffer)
+    {
+        void* dst = fn_glMapBufferRange(GL_ARRAY_BUFFER, writeOffset, neededSize,
+                                        GL_MAP_WRITE_BIT | GL_MAP_UNSYNCHRONIZED_BIT |
+                                        GL_MAP_INVALIDATE_RANGE_BIT);
+        if (dst)
+        {
+            memcpy(dst, data, sizeBytes);
+            wrote = (fn_glUnmapBuffer(GL_ARRAY_BUFFER) != GL_FALSE);
+            // A false unmap means the driver discarded the store (a GPU reset or memory
+            // event); fall through and respecify so the draw does not read stale bytes.
+        }
+    }
+    if (!wrote)
+    {
+        fn_glBufferSubData(GL_ARRAY_BUFFER, writeOffset, neededSize, data);
+    }
     FrameProfiler::CountGLCall(FrameProfiler::Counter::BufferUpdates);
     fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -407,8 +451,6 @@ typedef GLsync    (APIENTRY* PFNGLFENCESYNCPROC)(GLenum condition, GLbitfield fl
 typedef GLenum    (APIENTRY* PFNGLCLIENTWAITSYNCPROC)(GLsync sync, GLbitfield flags, GLuint64 timeout);
 typedef void      (APIENTRY* PFNGLDELETESYNCPROC)(GLsync sync);
 typedef void      (APIENTRY* PFNGLBUFFERSTORAGEPROC)(GLenum target, GLsizeiptr size, const void* data, GLbitfield flags);
-typedef void*     (APIENTRY* PFNGLMAPBUFFERRANGEPROC)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
-typedef GLboolean (APIENTRY* PFNGLUNMAPBUFFERPROC)(GLenum target);
 typedef void      (APIENTRY* PFNGLBINDBUFFERRANGEPROC)(GLenum target, GLuint index, GLuint buffer, GLintptr offset, GLsizeiptr size);
 
 namespace {
@@ -416,8 +458,6 @@ namespace {
     PFNGLCLIENTWAITSYNCPROC  fn_glClientWaitSync  = nullptr;
     PFNGLDELETESYNCPROC      fn_glDeleteSync      = nullptr;
     PFNGLBUFFERSTORAGEPROC   fn_glBufferStorage   = nullptr;
-    PFNGLMAPBUFFERRANGEPROC  fn_glMapBufferRange  = nullptr;
-    PFNGLUNMAPBUFFERPROC     fn_glUnmapBuffer     = nullptr;
     PFNGLBINDBUFFERRANGEPROC fn_glBindBufferRange = nullptr;
 
     // Sync objects + glMapBufferRange/glBindBufferRange are core since GL 3.0/3.2, always
@@ -989,7 +1029,7 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
     // free -- IR::Flush() calls straight back into here, but it clears its pending flag before
     // submitting, so the inner call is a no-op. Consecutive IR quads (particles, text runs) still
     // merge, because nothing else draws between them -- which is exactly the hot path.
-    IR::Flush();
+    IR::Flush(IR::FlushCause::Draw);
 
     GLenum mode;
     switch (topology)
@@ -1005,7 +1045,7 @@ void Draw(Topology topology, uint32_t vertexCount, uint32_t firstVertex)
 
 void DrawIndexed(Topology topology, uint32_t indexCount, uint32_t firstIndex)
 {
-    IR::Flush(); // GLP-19 -- see Draw()
+    IR::Flush(IR::FlushCause::Draw); // GLP-19 -- see Draw()
 
     GLenum mode;
     switch (topology)
@@ -1054,7 +1094,7 @@ void UpdateTexture(TextureHandle handle, int x, int y, int w, int h, const void*
     // per string). A pending IR batch still references the old content, so it must be drawn first;
     // otherwise every merged quad samples whatever was uploaded last, which showed up as UI text
     // where each line displayed a later line's glyphs.
-    IR::Flush();
+    IR::Flush(IR::FlushCause::Texture);
     BindTexture2D(0, handle.id);
     glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, w, h, GL_RGBA, GL_UNSIGNED_BYTE, pixelsRGBA);
 }

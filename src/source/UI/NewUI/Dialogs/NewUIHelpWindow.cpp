@@ -137,6 +137,7 @@ bool SEASON3B::CNewUIHelpWindow::Render()
             I18N::Game::F10LockUnlockCameraZoom,
             I18N::Game::F11ResetCameraView,
             I18N::Game::HomeToggleMUHelper,
+            I18N::Game::JToggleChatCommands,
         };
         for (const wchar_t* line : extraHelpLines)
         {

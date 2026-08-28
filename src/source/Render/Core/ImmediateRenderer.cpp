@@ -4,6 +4,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h" // GLP-19 -- GetRenderStateSnapshot()
 #include "Render/RHI/RHI.h"
 #include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Utilities/FrameProfiler.h"
 #include <vector>
 #include <cstring>
 
@@ -275,12 +276,35 @@ void End()
     // calls UnbindAllShaders() once per pass.
 }
 
-void Flush()
+namespace
+{
+    FrameProfiler::Counter FlushCauseCounter(FlushCause cause)
+    {
+        switch (cause)
+        {
+        case FlushCause::Texture: return FrameProfiler::Counter::IRBreakTexture;
+        case FlushCause::Blend:   return FrameProfiler::Counter::IRBreakBlend;
+        case FlushCause::Depth:   return FrameProfiler::Counter::IRBreakDepth;
+        case FlushCause::Program: return FrameProfiler::Counter::IRBreakProgram;
+        case FlushCause::Uniform: return FrameProfiler::Counter::IRBreakUniform;
+        case FlushCause::Matrix:  return FrameProfiler::Counter::IRBreakMatrix;
+        case FlushCause::Draw:    return FrameProfiler::Counter::IRBreakDraw;
+        default:                  return FrameProfiler::Counter::IRBreakOther;
+        }
+    }
+}
+
+void Flush(FlushCause cause)
 {
     if (!g_BatchPending) return;
     // Cleared before the draw, not after, so a re-entrant call can never see a batch that is
     // already being submitted.
     g_BatchPending = false;
+
+    // Counted here rather than at the call sites: the vast majority of Flush() calls find no
+    // pending batch and cost nothing, and counting those would drown the signal. What matters
+    // is the flushes that actually cut a batch short.
+    FrameProfiler::CountSkip(FlushCauseCounter(cause));
 
     if (g_VBO.IsValid() && !g_VertexBuffer.empty())
     {
@@ -300,6 +324,11 @@ void Flush()
         // pre-RHI DXP-26 step 2 behavior this replaces.
         RHI::BindVertexBuffer(g_VBO, RHI::VertexLayout::PosUvColor);
         RHI::Draw(topology, (uint32_t)g_VertexBuffer.size(), (uint32_t)(byteOffset / sizeof(IRVertex)));
+
+        // Tags, not GL calls: RHI::Draw already counted itself under DrawCalls. IRVertices
+        // divided by IRDraws is the average batch size.
+        FrameProfiler::CountSkip(FrameProfiler::Counter::IRDraws);
+        FrameProfiler::CountSkip(FrameProfiler::Counter::IRVertices, (uint32_t)g_VertexBuffer.size());
     }
 
     g_VertexBuffer.clear();

@@ -319,7 +319,7 @@ void PassthroughShader::BindGL()
         // Every IR::Begin() calls Bind(), so this is per-draw granularity for free. Dirty-checked
         // so unchanged alpha-test state (the common case) costs one float compare, not a glUniform1f.
         if (m_LocAlphaRef != -1 && fn_glUniform1f != nullptr && g_AlphaRef != m_LastAlphaRef) {
-            IR::Flush(); // GLP-19 -- alpha-test threshold is batch state; see SetUseTexture
+            IR::Flush(IR::FlushCause::Uniform); // GLP-19 -- alpha-test threshold is batch state; see SetUseTexture
             fn_glUniform1f(m_LocAlphaRef, g_AlphaRef);
             FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
             m_LastAlphaRef = g_AlphaRef;
@@ -345,7 +345,7 @@ void PassthroughShader::SetUseTexture(bool use)
         // GLP-19: flush BEFORE the uniform changes, so any batch IR has accumulated is drawn with
         // the value it was submitted under. This one hook covers all 17 call sites in the tree that
         // override SetUseTexture(false) right after IR::Begin() -- none of them need to change.
-        IR::Flush();
+        IR::Flush(IR::FlushCause::Uniform);
         fn_glUniform1i(m_LocUseTexture, v);
         FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
         m_LastUseTexture = v;
@@ -357,7 +357,7 @@ void PassthroughShader::SetUseFog(bool use)
     Bind();
     const int v = use ? 1 : 0;
     if (m_LocUseFog != -1 && fn_glUniform1i != nullptr && v != m_LastUseFog) {
-        IR::Flush(); // GLP-19 -- see SetUseTexture
+        IR::Flush(IR::FlushCause::Uniform); // GLP-19 -- see SetUseTexture
         fn_glUniform1i(m_LocUseFog, v);
         FrameProfiler::CountGLCall(FrameProfiler::Counter::UniformWrites);
         m_LastUseFog = v;

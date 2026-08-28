@@ -110,6 +110,7 @@ namespace SEASON3B
         INTERFACE_MUHELPER_EXT,
         INTERFACE_MUHELPER_SKILL_LIST,
         INTERFACE_SYSTEMLOGWINDOW,
+        INTERFACE_COMMAND_LIST,
         INTERFACE_END,
         INTERFACE_COUNT = INTERFACE_END - 2,
     };
@@ -3660,6 +3661,8 @@ enum COMMAND_TYPE
     COMMAND_ADD_FRIEND,
     COMMAND_FOLLOW,
     COMMAND_BATTLE,
+    // Leads to the chat commands the server offers to this player.
+    COMMAND_SPECIAL,
     COMMAND_END
 };
 

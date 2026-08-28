@@ -390,6 +390,7 @@ void CCharMakeWin::RequestCreateCharacter()
 void CCharMakeWin::RenderControls()
 {
     RenderCreateCharacter();
+    BeginBitmap();
     ::EnableAlphaTest();
 
     for (auto& sprite : m_asprBack)

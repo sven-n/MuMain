@@ -592,3 +592,6 @@ inline SendDuelChannelJoinRequest dotnet_SendDuelChannelJoinRequest = reinterpre
 
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendDuelChannelQuitRequest)(int32_t);
 inline SendDuelChannelQuitRequest dotnet_SendDuelChannelQuitRequest = reinterpret_cast<SendDuelChannelQuitRequest>(symLoad(munique_client_library_handle, "SendDuelChannelQuitRequest"));
+
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendChatCommandListRequest)(int32_t);
+inline SendChatCommandListRequest dotnet_SendChatCommandListRequest = reinterpret_cast<SendChatCommandListRequest>(symLoad(munique_client_library_handle, "SendChatCommandListRequest"));

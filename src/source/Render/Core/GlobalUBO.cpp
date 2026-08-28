@@ -170,7 +170,7 @@ void GlobalUBO::Upload()
     // accumulated under the old ones is drawn under the old ones.
     // Without this, BeginSprite/EndSprite (view push/pop) and BeginBitmap/EndBitmap (proj+view
     // swap) let UI text quads accumulate across a projection change -- observed as garbled glyphs.
-    IR::Flush();
+    IR::Flush(IR::FlushCause::Matrix);
 
     if (!m_UBOHandle.IsValid()) return;
 
