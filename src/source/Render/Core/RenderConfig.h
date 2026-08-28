@@ -22,6 +22,14 @@ extern int g_MaxGLVersionMinor;
 extern float g_AlphaRef;
 extern float g_AlphaFuncRef;
 
+// Groups particle draws by texture before submitting them, read from config.ini [Render]
+// SortParticleDraws. Particles are walked in slot order, which interleaves textures and so
+// breaks the IR batch on nearly every sprite; grouping them lets consecutive sprites merge
+// into one draw. Only runs whose result cannot depend on draw order are reordered (see
+// ZzzEffectParticle.cpp), so this is behaviour-preserving in principle -- it stays opt-in
+// until that has been confirmed by eye against real effects.
+extern bool g_SortParticleDraws;
+
 // Vsync flag mirroring SDL's actual swap interval (ZzzOpenglUtil.cpp's EnableVSync/
 // DisableVSync call SDL_GL_SetSwapInterval). Default true matches EnableVSync()'s
 // unconditional call at boot (Winmain.cpp).

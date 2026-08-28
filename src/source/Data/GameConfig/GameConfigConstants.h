@@ -48,6 +48,10 @@ namespace CfgKeys
     // (default) tries the highest of {4.5, 4.3, 3.3} the driver will grant. Rollback path for a
     // driver that mishandles the descending attempt loop.
     inline constexpr wchar_t CfgKeyMaxGLVersion[] = L"MaxGLVersion";
+    // Groups particle draws by texture so consecutive sprites merge into one IR batch instead
+    // of one draw each. Only reorders runs whose result cannot depend on draw order; 0 keeps
+    // the historical slot order. Opt-in until it has been visually checked on real effects.
+    inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
 }
 
 namespace CfgDefaults
@@ -85,4 +89,7 @@ namespace CfgDefaults
 
     // GLP-08: empty = no cap, try the highest core context available.
     inline constexpr wchar_t CfgDefaultMaxGLVersion[] = L"";
+
+    // Off until the reordering has been eyeballed against real effects on target hardware.
+    inline constexpr bool CfgDefaultSortParticleDraws = false;
 }
