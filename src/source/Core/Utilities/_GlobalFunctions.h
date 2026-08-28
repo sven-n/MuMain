@@ -84,9 +84,14 @@ BuffStateValueControl& TheBuffStateValueControl();
 #define g_BuffStateValueString( outstr, type ) \
 	TheBuffStateValueControl().GetBuffValueString( outstr, type )
 
-inline unsigned long RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
+// Returns DWORD rather than unsigned long: a packed RGBA colour is exactly 32
+// bits, and callers store it in DWORD (e.g. `DWORD adwColor[4] = { RGBA(...) }`).
+// On Windows unsigned long is 32-bit so the two agree, but on LP64 targets such
+// as macOS unsigned long is 64-bit and those initialisers become narrowing
+// conversions, which clang rejects outright.
+inline DWORD RGBA(unsigned char r, unsigned char g, unsigned char b, unsigned char a)
 {
-    return (r)+(g << 8) + (b << 16) + (a << 24);
+    return static_cast<DWORD>((r)+(g << 8) + (b << 16) + (a << 24));
 }
 inline unsigned char GetAlpha(unsigned long rgba)
 {

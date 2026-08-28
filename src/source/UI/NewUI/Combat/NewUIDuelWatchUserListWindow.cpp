@@ -93,7 +93,7 @@ bool CNewUIDuelWatchUserListWindow::Render()
     float fFontHeight = TextSize.cy / g_fScreenRate_y;
 
     POINT ptSize = { 57, 17 };
-    POINT ptOrigin = { m_Pos.x, m_Pos.y - (ptSize.y + 1) * (long)g_DuelMgr.GetDuelWatchUserCount() + (ptSize.y - (long)fFontHeight) / 2 + 1 };
+    POINT ptOrigin = { m_Pos.x, m_Pos.y - (ptSize.y + 1) * (LONG)g_DuelMgr.GetDuelWatchUserCount() + (ptSize.y - (LONG)fFontHeight) / 2 + 1 };
 
     for (int i = 0; i < g_DuelMgr.GetDuelWatchUserCount(); ++i)
     {

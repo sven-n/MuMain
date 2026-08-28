@@ -85,8 +85,13 @@ public:
     bool IsMBtnUp() { return m_bMBtnUp; }
     bool IsMBtnDbl() { return m_bMBtnDbl; }
 
-    long GetScreenWidth() { return m_lScreenWidth; }
-    long GetScreenHeight() { return m_lScreenHeight; }
+    // LONG, not long: these feed RECT/POINT fields, which are LONG (32-bit).
+    // Windows makes long 32-bit so the two coincide there, but on LP64 targets
+    // long is 64-bit and every `RECT rc = { 0, 0, GetScreenWidth(), ... }`
+    // becomes a narrowing conversion that clang rejects. A screen dimension
+    // never needs more than 32 bits.
+    LONG GetScreenWidth() { return static_cast<LONG>(m_lScreenWidth); }
+    LONG GetScreenHeight() { return static_cast<LONG>(m_lScreenHeight); }
     void SetLeftHandMode(bool bLeftHand) { m_bLeftHand = bLeftHand; }
     bool IsLeftHandMode() { return m_bLeftHand; }
     void SetTextEditMode(bool bTextEditMode) { m_bTextEditMode = bTextEditMode; }

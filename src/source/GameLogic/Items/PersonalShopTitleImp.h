@@ -10,7 +10,12 @@
 
 inline POINT MakePos(long x, long y)
 {
-    POINT pos = { x, y };
+    // POINT::x/y are LONG, which the Win32 compatibility layer defines as int
+    // (Windows keeps long at 32 bits). On LP64 targets such as macOS and Linux
+    // plain long is 64-bit, so brace initialisation here is a narrowing
+    // conversion and is ill-formed. The values are screen coordinates and
+    // always fit, so cast explicitly.
+    POINT pos = { static_cast<LONG>(x), static_cast<LONG>(y) };
     return pos;
 }
 inline SIZE MakeSize(int cx, int cy)
