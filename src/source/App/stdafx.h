@@ -91,7 +91,14 @@
 //c runtime
 #include <stdio.h>
 #include <stdlib.h>
+// macOS ships no <malloc.h>: the allocator introspection lives in
+// <malloc/malloc.h>, and alloca() has its own header there.
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#include <alloca.h>
+#else
 #include <malloc.h>
+#endif
 #include <memory.h>
 #include <assert.h>
 #include <time.h>

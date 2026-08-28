@@ -211,7 +211,12 @@ elseif (CMAKE_SYSTEM_NAME STREQUAL "iOS")
     "Store restricted. When that work starts, add source/App/Platform/iOS/ "
     "and replace this branch.")
 elseif (APPLE)
-  set(MU_APP_ENTRY "source/App/Platform/macOS/main.mm")
+  # macOS entry (main.mm) plus the shared bootstrap/game-loop from Winmain.cpp,
+  # which compiles off Windows (issue #462) - the same pairing the UNIX branch
+  # below uses. Listing main.mm alone leaves WinMain undefined at link time.
+  set(MU_APP_ENTRY
+    "source/App/Platform/macOS/main.mm"
+    "source/App/Platform/Windows/Winmain.cpp")
 elseif (ANDROID)
   message(FATAL_ERROR "Android is not a supported build target yet: it needs "
     "an OpenGL ES renderer port, and its entry point is android_main via "
@@ -237,7 +242,13 @@ target_link_libraries(Main PRIVATE MuClient::MuClient)
 
 if (NOT MSVC)
   set(MU_MAIN_MAP_FILE "${CMAKE_CURRENT_BINARY_DIR}/Main.map")
-  target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+  if (APPLE)
+    # Apple's ld64 spells the link-map flag -map, not GNU ld's -Map, and
+    # rejects the latter outright with "ld: unknown options: -Map".
+    target_link_options(Main PRIVATE "-Wl,-map,${MU_MAIN_MAP_FILE}")
+  else()
+    target_link_options(Main PRIVATE "-Wl,-Map,${MU_MAIN_MAP_FILE}")
+  endif()
 endif()
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
@@ -316,6 +327,30 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     OpenGL::GL
     OpenGL::GLU
     ${GLEW_LIBRARY}
+    ${TURBOJPEG_LIBRARY}
+  )
+endif()
+
+# macOS-native linkage, mirroring the Linux block above. OpenGL and GLU come
+# from the system OpenGL.framework (deprecated by Apple but still present and
+# what the fixed-function engine needs). libjpeg-turbo is keg-only under
+# Homebrew, so it is not on the default search path and needs an explicit hint;
+# the vendored headers in src/dependencies/include are used for both.
+if (APPLE)
+  find_package(OpenGL REQUIRED)
+  find_library(TURBOJPEG_LIBRARY
+    NAMES turbojpeg
+    HINTS
+      /opt/homebrew/opt/jpeg-turbo/lib   # Apple Silicon Homebrew
+      /usr/local/opt/jpeg-turbo/lib      # Intel Homebrew
+      /opt/local/lib                     # MacPorts
+    REQUIRED)
+  message(STATUS "Using libturbojpeg: ${TURBOJPEG_LIBRARY}")
+  target_link_libraries(MuClient PUBLIC
+    pthread
+    m
+    OpenGL::GL
+    OpenGL::GLU
     ${TURBOJPEG_LIBRARY}
   )
 endif()
@@ -544,6 +579,11 @@ if (DOTNET_EXECUTABLE)
   # this name).
   if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set(DOTNET_LIB_NAME "MUnique.Client.Library.so")
+  elseif (APPLE)
+    # Native AOT names the shared library after the platform convention, so on
+    # macOS it publishes a .dylib. Falling through to the .dll default here made
+    # the publish succeed and then fail on the copy, because no such file exists.
+    set(DOTNET_LIB_NAME "MUnique.Client.Library.dylib")
   else()
     set(DOTNET_LIB_NAME "MUnique.Client.Library.dll")
   endif()
@@ -590,6 +630,27 @@ if (DOTNET_EXECUTABLE)
     # skip it (ci=true) and use the checked-in output.
     set(DOTNET_EXTRA_ARGS "-p:ci=true")
     message(STATUS ".NET Client Library will build for linux-x64")
+  elseif (APPLE)
+    # Native AOT cannot cross-compile between operating systems, so macOS must
+    # publish an osx-* RID; falling through to the pointer-width branches below
+    # picks win-x64 and fails with "Cross-OS native compilation is not
+    # supported". Match the architecture actually being built rather than the
+    # host, so an explicit -DCMAKE_OSX_ARCHITECTURES=x86_64 still resolves.
+    if (CMAKE_OSX_ARCHITECTURES)
+      set(_mu_dotnet_arch "${CMAKE_OSX_ARCHITECTURES}")
+    else()
+      set(_mu_dotnet_arch "${CMAKE_SYSTEM_PROCESSOR}")
+    endif()
+    if (_mu_dotnet_arch MATCHES "arm64|aarch64")
+      set(DOTNET_RID "osx-arm64")
+      set(DOTNET_PLATFORM "arm64")
+    else()
+      set(DOTNET_RID "osx-x64")
+      set(DOTNET_PLATFORM "x64")
+    endif()
+    # Same Windows-path XSLT problem as Linux; use the checked-in generated code.
+    set(DOTNET_EXTRA_ARGS "-p:ci=true")
+    message(STATUS ".NET Client Library will build for ${DOTNET_RID}")
   elseif (CMAKE_SIZEOF_VOID_P EQUAL 8)
     set(DOTNET_RID "win-x64")
     set(DOTNET_PLATFORM "x64")

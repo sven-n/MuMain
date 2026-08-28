@@ -17,7 +17,25 @@
 #include "dlfcn.h"
 #include <unistd.h>   // readlink
 #include <string>
+#ifdef __APPLE__
+#include <cstdint>
+// Deliberately NOT <mach-o/dyld.h>: that header defines
+// `enum DYLD_BOOL { FALSE, TRUE };`, which would redefine the Win32 FALSE/TRUE
+// this codebase relies on in every translation unit that reaches this header -
+// e.g. `BOOL* pbEqual = FALSE` in UI/Legacy/UIWindows.cpp stops compiling.
+// Only one symbol is needed, so declare it directly.
+extern "C" int _NSGetExecutablePath(char* buf, std::uint32_t* bufsize);
+#endif
 #define symLoad dlsym
+#endif
+
+// Native AOT names its shared library after the platform convention: .dll on
+// Windows, .dylib on macOS, .so elsewhere. The build copies it next to the
+// executable under this name, and the loader below opens it by that name.
+#ifdef __APPLE__
+#define MUNIQUE_CLIENT_LIBRARY_NAME "MUnique.Client.Library.dylib"
+#else
+#define MUNIQUE_CLIENT_LIBRARY_NAME "MUnique.Client.Library.so"
 #endif
 
 // Construct-on-first-use: the library handle is loaded lazily on first access.
@@ -35,28 +53,42 @@ inline HINSTANCE get_munique_client_library_handle()
 #else
 inline void* get_munique_client_library_handle()
 {
-    // Native AOT emits a platform-native shared object on Linux (.so), not the
-    // Windows .dll, and the build copies it next to the executable. Resolve the
-    // executable's real directory (via /proc/self/exe) and load by absolute
+    // Native AOT emits a platform-native shared object (.so on Linux, .dylib on
+    // macOS), not the Windows .dll, and the build copies it next to the
+    // executable. Resolve the executable's real directory and load by absolute
     // path, so it works regardless of the working directory the client was
     // launched from; fall back to the loader search path.
+    //
+    // The directory lookup is platform-specific: /proc/self/exe does not exist
+    // on macOS, so Darwin uses _NSGetExecutablePath instead. Without this the
+    // absolute-path branch silently fails there and the fallback dlopen has to
+    // find the library on the loader path, which usually does not include the
+    // executable's own directory.
     // Not const-qualified return: dlsym() takes a non-const void* handle.
     static void* const handle = []() -> void* {
         char exe[4096];
+        std::string path;
+#ifdef __APPLE__
+        uint32_t size = sizeof(exe);
+        if (_NSGetExecutablePath(exe, &size) == 0)
+            path.assign(exe);
+#else
         const ssize_t n = ::readlink("/proc/self/exe", exe, sizeof(exe) - 1);
         if (n > 0)
+            path.assign(exe, static_cast<size_t>(n));
+#endif
+        if (!path.empty())
         {
-            std::string path(exe, static_cast<size_t>(n));
             const std::string::size_type slash = path.find_last_of('/');
             if (slash != std::string::npos)
             {
                 path.resize(slash + 1);
-                path += "MUnique.Client.Library.so";
+                path += MUNIQUE_CLIENT_LIBRARY_NAME;
                 if (void* h = dlopen(path.c_str(), RTLD_LAZY))
                     return h;
             }
         }
-        return dlopen("MUnique.Client.Library.so", RTLD_LAZY);
+        return dlopen(MUNIQUE_CLIENT_LIBRARY_NAME, RTLD_LAZY);
     }();
     return handle;
 }

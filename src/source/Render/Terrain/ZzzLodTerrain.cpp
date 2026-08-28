@@ -3,8 +3,15 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
+// Apple ships the OpenGL headers under an OpenGL/ framework directory rather
+// than the GL/ path used on Windows and Linux.
+#ifdef __APPLE__
+#include <OpenGL/gl.h>
+#include <OpenGL/glu.h>
+#else
 #include <GL/gl.h>
 #include <GL/glu.h>
+#endif
 #include <math.h>
 #include <iterator>
 #include "Render/Textures/ZzzOpenglUtil.h"

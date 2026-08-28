@@ -313,7 +313,7 @@ void SEASON3B::CNewUICatapultWindow::RenderButtons()
 
 void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { (LONG)fPos_x, (LONG)fPos_y };
     float fBoxWidth = fWidth;
 
     RenderImage(IMAGE_CATAPULT_TABLE_TOP_LEFT, ptOrigin.x + 12, ptOrigin.y - 4, 14, 14);
@@ -323,7 +323,7 @@ void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos
 
 void SEASON3B::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
-    POINT ptOrigin = { (long)fPos_x, (long)fPos_y };
+    POINT ptOrigin = { (LONG)fPos_x, (LONG)fPos_y };
     float fBoxWidth = fWidth;
     float fBoxHeight = fHeight;
 
