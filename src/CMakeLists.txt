@@ -25,6 +25,40 @@ set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(SDL3_ttf)
 set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
 
+# FreeType -- RmlUi's default font engine (below) requires a Freetype::Freetype target.
+# Not vendored separately, and no alias needed here either: SDL3_ttf's own CMakeLists.txt
+# (FetchContent'd above) already does `if(NOT TARGET Freetype::Freetype)
+# add_library(Freetype::Freetype ALIAS freetype)` for its own vendored copy -- confirmed in
+# _deps/sdl3_ttf-src/CMakeLists.txt. RmlUi's own Dependencies.cmake only checks
+# `if(NOT TARGET Freetype::Freetype)` (CMake/Utilities.cmake's
+# report_dependency_found_or_error), so it picks up SDL3_ttf's alias for free. A second
+# `add_library(... ALIAS ...)` here collided with it under vcpkg's `_add_library` override
+# (CMake error: "cannot create ALIAS target 'Freetype::Freetype' because another target
+# with the same name already exists") -- don't re-add it.
+
+mu_ensure_submodule("ThirdParty/RmlUi"
+  INDICATOR "CMakeLists.txt"
+  URL "https://github.com/mikke89/RmlUi.git")
+
+# RmlUi -- static link, no bundled samples/Lua bindings. We supply our own
+# Rml::RenderInterface/SystemInterface (source/Render/RmlUi/) targeting this branch's
+# IMuRenderer/SDL_GPU renderer instead of one of RmlUi's stock backends -- except for the
+# renderer, which (unlike on feature/rmlui-migration, where RHI:: was a closer match than
+# any of RmlUi's own backends) reuses RmlUi's own vendored RenderInterface_SDL_GPU
+# (Backends/RmlUi_Renderer_SDL_GPU.cpp, compiled explicitly below) rather than a hand-rolled
+# bridge -- see the rmlui-on-sdl-gpu port plan for why. RMLUI_BACKEND only selects which
+# backend the SAMPLES build against (RmlUi's own CMakeLists.txt validates it unconditionally
+# regardless of RMLUI_SAMPLES though, so it must still be left at a valid value from
+# CMake/OptionsLists.cmake; "auto" is a no-op here since RMLUI_SAMPLES is OFF). Font engine
+# left at RmlUi's own default (freetype, vendored above) rather than building a custom bridge
+# to this engine's text rendering. Not gated behind ENABLE_EDITOR (unlike imgui above): this
+# ships in the real game, not just admin/editor builds.
+set(RMLUI_SAMPLES OFF CACHE BOOL "" FORCE)
+set(RMLUI_BACKEND "auto" CACHE STRING "" FORCE)
+set(RMLUI_LUA_BINDINGS OFF CACHE BOOL "" FORCE)
+set(RMLUI_INSTALL OFF CACHE BOOL "" FORCE)
+add_subdirectory(ThirdParty/RmlUi EXCLUDE_FROM_ALL)
+
 # Determine architecture if CMAKE_SIZEOF_VOID_P isn't set
 if (NOT DEFINED CMAKE_SIZEOF_VOID_P OR CMAKE_SIZEOF_VOID_P EQUAL 0)
   # Try to detect from compiler path
@@ -105,6 +139,19 @@ list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\]Renderer[/\\]MuRend
 # compiled as a second backend.
 list(FILTER MU_CLIENT_SOURCES EXCLUDE REGEX "[/\\]Render[/\\](Core|RHI|Shaders)[/\\]")
 
+# RmlUi's official SDL input-event backend (RmlSDL::InputEventHandler/ConvertKey/
+# ConvertMouseButton/GetKeyModifierState) and SDL_GPU renderer backend
+# (RenderInterface_SDL_GPU) -- neither is part of RmlUi::Core itself (RMLUI_SAMPLES=OFF
+# above skips building any of RmlUi's bundled renderer/platform backends). Only these two
+# files are compiled, not the rest of ThirdParty/RmlUi/Backends/ (which also contains
+# GL2/GL3/Vulkan renderer backends and a SystemInterface_SDL class this project doesn't
+# need -- see RmlUiSystemInterface). Not picked up by the GLOB_RECURSE above since it globs
+# "source/*.cpp", not ThirdParty/.
+list(APPEND MU_CLIENT_SOURCES
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends/RmlUi_Platform_SDL.cpp"
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends/RmlUi_Renderer_SDL_GPU.cpp"
+)
+
 # Add MuEditor sources when editor is enabled
 if(ENABLE_EDITOR)
   file(GLOB_RECURSE MU_EDITOR_SOURCES
@@ -158,6 +205,15 @@ target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
 endif()
+
+# RmlUi (game UI middleware). The real target is rmlui_core, aliased as RmlUi::Core
+# (Source/Core/CMakeLists.txt).
+target_link_libraries(MuClient PUBLIC RmlUi::Core)
+target_include_directories(MuClient PUBLIC
+  "${CMAKE_CURRENT_SOURCE_DIR}/ThirdParty/RmlUi/Backends"
+)
+# RmlUi_Platform_SDL.h's SDL2-vs-SDL3 API switch -- this project is SDL3-only.
+target_compile_definitions(MuClient PUBLIC RMLUI_SDL_VERSION_MAJOR=3)
 
 # The in-game shop downloader uses libcurl on every platform.
 find_package(CURL REQUIRED)
