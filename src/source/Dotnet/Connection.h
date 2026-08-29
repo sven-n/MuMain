@@ -15,9 +15,14 @@
 #define symLoad GetProcAddress
 #else
 #include "dlfcn.h"
-#include <unistd.h>   // readlink
 #include <string>
+#include "Core/Platform/PathResolve.h"
 #define symLoad dlsym
+#ifdef __APPLE__
+constexpr const char kMuniqueClientLibraryName[] = "MUnique.Client.Library.dylib";
+#else
+constexpr const char kMuniqueClientLibraryName[] = "MUnique.Client.Library.so";
+#endif
 #endif
 
 // Construct-on-first-use: the library handle is loaded lazily on first access.
@@ -42,21 +47,14 @@ inline void* get_munique_client_library_handle()
     // launched from; fall back to the loader search path.
     // Not const-qualified return: dlsym() takes a non-const void* handle.
     static void* const handle = []() -> void* {
-        char exe[4096];
-        const ssize_t n = ::readlink("/proc/self/exe", exe, sizeof(exe) - 1);
-        if (n > 0)
+        const std::string dir = MuGetExecutableDir();
+        if (!dir.empty())
         {
-            std::string path(exe, static_cast<size_t>(n));
-            const std::string::size_type slash = path.find_last_of('/');
-            if (slash != std::string::npos)
-            {
-                path.resize(slash + 1);
-                path += "MUnique.Client.Library.so";
-                if (void* h = dlopen(path.c_str(), RTLD_LAZY))
-                    return h;
-            }
+            const std::string path = dir + kMuniqueClientLibraryName;
+            if (void* h = dlopen(path.c_str(), RTLD_LAZY))
+                return h;
         }
-        return dlopen("MUnique.Client.Library.so", RTLD_LAZY);
+        return dlopen(kMuniqueClientLibraryName, RTLD_LAZY);
     }();
     return handle;
 }

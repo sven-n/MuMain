@@ -17,5 +17,7 @@
 // paths for files being created resolve their directory and keep the new name,
 // and genuinely missing files still fail at open time.
 std::string MuResolvePath(const char* utf8Path);
+std::string MuGetExecutablePath();
+std::string MuGetExecutableDir();
 
 #endif // !_WIN32

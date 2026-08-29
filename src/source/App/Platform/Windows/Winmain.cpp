@@ -1734,7 +1734,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         // Descend only on failure; the {3,3} rung is byte-identical to the pre-GLP-08 fixed
         // request, so a machine where the whole loop somehow misbehaves still ends up exactly
         // where it was before this change.
-        static constexpr struct { int major, minor; } kCoreVersionAttempts[] = { {4, 5}, {4, 3}, {3, 3} };
+        static constexpr struct { int major, minor; } kCoreVersionAttempts[] = { {4, 5}, {4, 3}, {4, 1}, {3, 3} };
         constexpr int kAttemptCount = sizeof(kCoreVersionAttempts) / sizeof(kCoreVersionAttempts[0]);
 
         // config.ini [Render] MaxGLVersion caps which rung the loop starts at -- rollback path

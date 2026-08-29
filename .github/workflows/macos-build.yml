@@ -1,0 +1,78 @@
+name: macOS Build
+
+# Builds the full native macOS client: the engine, the SDL/OpenGL runtime,
+# and the osx-arm64 / osx-x64 Native AOT network library
+# (MUnique.Client.Library.dylib), for both editor configurations.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-macos:
+    name: build-macos (editor-${{ matrix.editor }})
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        editor: [OFF, ON]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Homebrew dependencies
+        run: |
+          brew install cmake ninja pkg-config glew jpeg-turbo
+
+      - name: Install .NET SDK 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build-macos -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DENABLE_EDITOR=${{ matrix.editor }} \
+            -DBUILD_TESTING=ON \
+            -DCMAKE_PREFIX_PATH="$(brew --prefix);$(brew --prefix jpeg-turbo);$(brew --prefix glew)"
+
+      - name: Build wire-size guards
+        run: cmake --build build-macos --target GenWireSizes
+
+      - name: Build client (engine + osx dylib) and tests
+        run: cmake --build build-macos -j"$(sysctl -n hw.ncpu)"
+
+      - name: Run unit tests
+        run: ctest --test-dir build-macos --output-on-failure
+
+      - name: Verify the client library was built and is loadable
+        run: |
+          dylib="build-macos/src/MUnique.Client.Library.dylib"
+          test -f "$dylib"
+          file "$dylib" | grep -q "Mach-O"
+          otool -L "$dylib"
+
+      - name: Launch the client (best effort)
+        continue-on-error: true
+        working-directory: build-macos/src
+        run: |
+          MU_CAPTURE_FRAME=120 MU_CAPTURE_PATH=frame.ppm ./Main &
+          pid=$!
+          sleep 60
+          kill $pid 2>/dev/null || true
+          wait $pid 2>/dev/null || true
+          test -f frame.ppm && echo "rendered a frame" || echo "no frame (no GL on runner)"
+
+      - name: Upload client binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: mu-client-macos-editor-${{ matrix.editor }}
+          path: |
+            build-macos/src/Main
+            build-macos/src/MUnique.Client.Library.dylib
+          if-no-files-found: error

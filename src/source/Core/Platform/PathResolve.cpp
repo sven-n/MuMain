@@ -3,8 +3,17 @@
 #include "Core/Platform/PathResolve.h"
 
 #include <dirent.h>
-#include <strings.h>   // strcasecmp
-#include <unistd.h>    // access
+#include <strings.h>
+#include <unistd.h>
+#ifdef __APPLE__
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <limits.h>
+#include <mach-o/dyld.h>
+#else
+#include <cstddef>
+#endif
 
 namespace
 {
@@ -83,6 +92,45 @@ std::string MuResolvePath(const char* utf8Path)
     }
 
     return resolved;
+}
+
+namespace
+{
+    constexpr std::size_t kExePathBufSize = 4096;
+}
+
+std::string MuGetExecutablePath()
+{
+#ifdef __APPLE__
+    std::string raw(kExePathBufSize, '\0');
+    uint32_t size = static_cast<uint32_t>(raw.size());
+    if (_NSGetExecutablePath(raw.data(), &size) != 0)
+    {
+        raw.resize(size);
+        if (_NSGetExecutablePath(raw.data(), &size) != 0)
+            return {};
+    }
+    raw.resize(std::strlen(raw.c_str()));
+    char resolved[PATH_MAX];
+    if (::realpath(raw.c_str(), resolved) == nullptr)
+        return raw;
+    return resolved;
+#else
+    char buf[kExePathBufSize];
+    const ssize_t n = ::readlink("/proc/self/exe", buf, sizeof(buf) - 1);
+    if (n <= 0)
+        return {};
+    return std::string(buf, static_cast<std::size_t>(n));
+#endif
+}
+
+std::string MuGetExecutableDir()
+{
+    const std::string path = MuGetExecutablePath();
+    const auto slash = path.find_last_of('/');
+    if (slash == std::string::npos)
+        return {};
+    return path.substr(0, slash + 1);
 }
 
 #endif // !_WIN32

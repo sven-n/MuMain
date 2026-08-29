@@ -8,7 +8,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
-inline POINT MakePos(long x, long y)
+inline POINT MakePos(LONG x, LONG y)
 {
     POINT pos = { x, y };
     return pos;
