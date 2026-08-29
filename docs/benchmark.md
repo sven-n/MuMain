@@ -41,9 +41,9 @@ properly.
 
 ### Getting numbers worth comparing
 
-- **Turn vsync off** (`$vsync off`). With it on, every frame time is the display refresh and
-  the client's actual cost is invisible. The report flags this, but flagging it afterwards
-  does not get the run back.
+- **Turn vsync off** (`$vsync off`). With it on, every frame time is pinned to the display
+  refresh, so the segments come out looking alike no matter what they switch off. The run says
+  so in chat as it starts, and the report flags it again — but neither gets the run back.
 - **Stand in the same place**, facing the same way, for both runs. The segments hold the
   effect configuration steady; they cannot hold the world steady.
 - **Don't alt-tab.** A frame longer than half a second discards its whole repeat — the client
@@ -65,7 +65,7 @@ surface costs at that spot.
 | Segment | What it isolates |
 |---|---|
 | `scene.full` | Nothing disabled. The reference every other row is read against. |
-| `fx.all.off` | All four effect surfaces at once — the upper bound. |
+| `fx.all.off` | Every effect surface at once, exactly as `$effects off` does it — the upper bound. |
 | `fx.sprites.off` | The sprite draw path. |
 | `fx.particles.off` | The particle draw path. |
 | `fx.joints.off` | Beam and tail-trail effects. |
@@ -117,6 +117,12 @@ threshold, so you can see what was actually tested. They describe the run; they 
 code change. The rules cover things like a segment whose frame time is mostly outside every
 profiled pass (work running unmeasured), a batching path merging nothing, a buffer ring
 wrapping repeatedly, drift across the run, and repeats that had to be discarded.
+
+One of them is worth knowing before you read a table: **`segment-inert`** fires when a segment
+submitted the same number of draw calls as the baseline. That segment disabled nothing here —
+either the scene had none of what it targets (no wings equipped, no particles on screen) or its
+configuration does not reach the path it names. Its timing is then not evidence that what it
+targets is cheap, and the report says so rather than leaving the row to be misread.
 
 ## 4. Recording which commit a run came from
 

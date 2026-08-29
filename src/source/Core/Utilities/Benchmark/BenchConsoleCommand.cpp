@@ -4,6 +4,7 @@
 
 #include "BenchRecorder.h"
 #include "BenchSegment.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
 #include "UI/NewUI/NewUISystem.h"
 
 #include <sstream>
@@ -87,6 +88,13 @@ namespace
             return;
         }
         Say(message);
+
+        // Said at the start, not only in the finished report: under vsync every segment's frame
+        // time is pinned to the display refresh, so the segments come out looking alike whatever
+        // they switch off. Learning that from the report costs a whole run.
+        if (IsVSyncEnabled())
+            Say(L"benchmark: vsync is ON -- frame times are pinned to the refresh rate and the "
+                L"segments will look alike. Run '$vsync off' and measure again.");
     }
 
     void RunWithArguments(const std::vector<std::wstring>& words)

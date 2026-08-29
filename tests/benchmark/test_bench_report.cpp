@@ -251,6 +251,46 @@ TEST_CASE("a discarded repeat is reported rather than silently averaged in")
     CHECK(HasRule(Findings::Evaluate(run, stats), "invalid-repeats"));
 }
 
+TEST_CASE("a segment that changed no draw calls is flagged as inert")
+{
+    // The failure this catches: a segment runs, produces a plausible timing, and is read as
+    // "what it disables is cheap" when in fact it disabled nothing at all.
+    RunData run = MakeRun();
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+
+    // Both segments in the fixture submit the same 100 draws/frame.
+    const std::vector<Findings::Finding> findings = Findings::Evaluate(run, stats);
+    CHECK(HasRule(findings, "segment-inert"));
+    for (const Findings::Finding& finding : findings)
+        if (finding.rule == "segment-inert") CHECK(finding.segment == "fx.particles.off");
+}
+
+TEST_CASE("a segment that really removed work is not flagged as inert")
+{
+    RunData run = MakeRun();
+    for (RepeatSamples& repeat : run.segments[1].repeats)
+        repeat.counters.total[0] /= 2;   // half the draw calls of the baseline
+
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+    CHECK_FALSE(HasRule(Findings::Evaluate(run, stats), "segment-inert"));
+}
+
+TEST_CASE("the drift control is never itself called inert")
+{
+    RunData run = MakeRun();
+    SegmentSamples driftControl;
+    driftControl.name = std::string(kBaselineSegmentName) + kDriftControlSuffix;
+    driftControl.repeats.push_back(MakeRepeat(0, 10, 10.0f));
+    run.segments.push_back(driftControl);
+
+    // Other rules may legitimately have something to say about it; "inert" must not, since it is
+    // a deliberate re-measurement of the baseline and identical draw counts are the point.
+    const std::vector<Stats::SegmentStats> stats = Stats::SummarizeRun(run);
+    for (const Findings::Finding& finding : Findings::Evaluate(run, stats))
+        if (finding.rule == "segment-inert")
+            CHECK(finding.segment != std::string(kBaselineSegmentName) + kDriftControlSuffix);
+}
+
 TEST_CASE("vsync and a dirty tree are flagged for the run as a whole")
 {
     RunData run = MakeRun();

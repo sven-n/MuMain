@@ -1,6 +1,9 @@
+#include "stdafx.h"
+
 #include "BenchScene.h"
 
 #include "Scenes/MainScene.h"
+#include "UI/NewUI/NewUISystem.h"
 
 namespace Core::Benchmark::Scene
 {
@@ -8,6 +11,7 @@ namespace Core::Benchmark::Scene
     {
         SceneConfig config;
         config.disableEffects = IsEffectsDisabledDebug();
+        config.disableAllEffectsOption = g_pOption && !g_pOption->GetRenderAllEffects();
         config.disableSprites = IsSpritesDisabledDebug();
         config.disableParticles = IsParticlesDisabledDebug();
         config.disableSkillEffectModels = IsSkillEffectModelsDisabledDebug();
@@ -21,6 +25,7 @@ namespace Core::Benchmark::Scene
     void ApplyConfig(const SceneConfig& config)
     {
         SetDisableEffects(config.disableEffects);
+        if (g_pOption) g_pOption->SetRenderAllEffects(!config.disableAllEffectsOption);
         SetDisableSprites(config.disableSprites);
         SetDisableParticles(config.disableParticles);
         SetDisableSkillEffectModels(config.disableSkillEffectModels);

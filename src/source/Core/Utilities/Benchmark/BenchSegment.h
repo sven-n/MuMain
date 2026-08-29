@@ -36,6 +36,12 @@ namespace Core::Benchmark
     struct SceneConfig
     {
         bool disableEffects = false;
+        // Mirrors the options window's "render all effects" switch, which `$effects off` turns
+        // off alongside SetDisableEffects. It is a separate flag because it is a separate gate:
+        // RenderSprites() and RenderParticles() early-return on this option and never look at
+        // SetDisableEffects at all, so a segment that sets only the latter leaves the two
+        // heaviest effect paths running.
+        bool disableAllEffectsOption = false;
         bool disableSprites = false;
         bool disableParticles = false;
         bool disableSkillEffectModels = false;

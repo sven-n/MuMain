@@ -124,6 +124,36 @@ namespace
             Fixed(ratio, 2) + " uniform-block skips per draw call -- check the dirty check is not over-skipping");
     }
 
+    // A segment that changed nothing the client submitted did not test what it claims to. Either
+    // the scene had none of what it disables (no wings equipped, no particles on screen) or the
+    // segment's configuration does not reach the path it names. Both are worth saying out loud:
+    // otherwise the row reads as "this costs nothing", which is a very different claim.
+    void CheckInertSegments(const RunData& run, const std::vector<Stats::SegmentStats>& stats,
+                            std::vector<Finding>& out)
+    {
+        const int drawsIndex = IndexOf(run.counterNames, "DrawCalls");
+        const int baselineIndex = Stats::FindSegment(stats, kBaselineSegmentName);
+        if (drawsIndex < 0 || baselineIndex < 0) return;
+
+        const double baselineDraws = stats[baselineIndex].counterPerFrame[drawsIndex];
+        if (baselineDraws <= 0.0) return;
+
+        for (const Stats::SegmentStats& segment : stats)
+        {
+            if (segment.name == kBaselineSegmentName) continue;
+            if (segment.name == std::string(kBaselineSegmentName) + kDriftControlSuffix) continue;
+
+            const double draws = segment.counterPerFrame[drawsIndex];
+            const double differencePercent = 100.0 * std::fabs(draws - baselineDraws) / baselineDraws;
+            if (differencePercent >= kInertSegmentDrawPercent) continue;
+
+            Add(out, Level::Warning, "segment-inert", segment.name,
+                "submitted " + Fixed(draws, 1) + " draws/frame against the baseline's " +
+                Fixed(baselineDraws, 1) + " -- this segment disabled nothing measurable here, so "
+                "its timing is not evidence that what it targets is cheap");
+        }
+    }
+
     // The opening and closing measurements of the baseline segment. They ran minutes apart on the
     // same scene, so any difference between them is the machine drifting under the run.
     void CheckDrift(const std::vector<Stats::SegmentStats>& stats, std::vector<Finding>& out)
@@ -175,6 +205,7 @@ std::vector<Finding> Evaluate(const RunData& run, const std::vector<Stats::Segme
 
     CheckRunStatus(run, findings);
     CheckDrift(stats, findings);
+    CheckInertSegments(run, stats, findings);
 
     for (const Stats::SegmentStats& segment : stats)
     {

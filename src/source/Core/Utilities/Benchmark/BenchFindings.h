@@ -23,6 +23,9 @@ namespace Core::Benchmark::Findings
     inline constexpr float kUboSkipSuspiciousRatio = 0.9f;   // skips per draw call
     inline constexpr float kBufferOrphansPerFrameWarn = 5.0f;
     inline constexpr int   kSubmissionBoundMinDraws = 100;
+    // Below this relative difference in draw calls per frame, a segment did not measurably change
+    // what the client submitted -- it turned nothing off at this spot, whatever it promised to.
+    inline constexpr float kInertSegmentDrawPercent = 1.0f;
     // An IR quad is 6 vertices after decomposition, so this is "fewer than two quads per draw".
     inline constexpr float kSubmissionBoundVerticesPerDraw = 12.0f;
 

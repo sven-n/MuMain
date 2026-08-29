@@ -14,8 +14,19 @@ namespace
               TagBaseline, SceneConfig{} },
 
             { "fx.all.off",
-              "All four effect surfaces off ($effects off). Upper bound on what effects cost here.",
-              TagEffects, [] { SceneConfig c; c.disableEffects = true; return c; }() },
+              "Every effect surface off, exactly as `$effects off` does it. Upper bound on what "
+              "effects cost here.",
+              TagEffects | TagSprites | TagParticles | TagJoints | TagModels,
+              [] {
+                  SceneConfig c;
+                  c.disableEffects = true;
+                  c.disableAllEffectsOption = true;
+                  // Joints are gated by neither of the two switches above (ZzzEffectJoint.cpp
+                  // checks only its own flag), so "all off" has to say so explicitly or the
+                  // segment quietly leaves the beam/tail path running.
+                  c.disableJoints = true;
+                  return c;
+              }() },
 
             { "fx.sprites.off",
               "RenderSprites() off. IR per-quad path.",
