@@ -10,6 +10,8 @@
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Core/Utilities/PlatformInfo.h"
+#include "Core/Utilities/BuildInfo.h"
+#include "Core/Utilities/Benchmark/BenchRecorder.h"
 #include "Render/Core/ImmediateRenderer.h"
 #include "Render/Shaders/PassthroughShader.h"
 #include "Render/Core/RenderConfig.h"
@@ -94,11 +96,19 @@ void SetShowFpsCounter(bool enabled)
 }
 
 // GLP-01: independent of the two flags above -- $glstats can be shown alongside $details or
-// $fpscounter, not just standalone. Also the single switch that gates FrameProfiler's counter/
-// GPU-timer increments themselves (FrameProfiler::g_CountersEnabled), so turning the overlay
-// off also stops paying for the instrumentation.
+// $fpscounter, not just standalone. Also switches FrameProfiler's counter/GPU-timer increments
+// themselves on (FrameProfiler::g_CountersEnabled), so turning the overlay off also stops paying
+// for the instrumentation.
+//
+// The overlay keeps its own flag because the counters have a second consumer: a benchmark run
+// needs them on whether or not anyone asked to see them, and it must not switch a large text
+// overlay on behind the user's back -- that overlay costs hundreds of draw calls per frame, in
+// the middle of the measurement.
+static bool g_bShowGLStatsOverlay = false;
+
 void SetShowGLStats(bool enabled)
 {
+    g_bShowGLStatsOverlay = enabled;
     FrameProfiler::g_CountersEnabled = enabled;
 }
 
@@ -115,6 +125,7 @@ static constexpr float THRESHOLD_60FPS_MS = 16.67f;  // 60 FPS threshold
 static constexpr float THRESHOLD_40FPS_MS = 25.0f;   // 40 FPS threshold
 static constexpr float DEBUG_TEXT_X = 10.0f;          // debug overlay X position
 static constexpr int DEBUG_TEXT_Y_START = 26;         // debug overlay Y start
+static constexpr int BENCH_STATUS_TEXT_Y = 14;        // benchmark progress line, above the overlays
 static constexpr int DEBUG_TEXT_LINE_HEIGHT = 10;     // line spacing
 static constexpr float DEBUG_GRAPH_WIDTH = 200.0f;    // frame graph width
 static constexpr float DEBUG_GRAPH_HEIGHT = 40.0f;    // frame graph height
@@ -542,38 +553,9 @@ static void RenderDebugInfo()
     // Compile-time build info: configuration, feature flags, compiler, arch,
     // and the binary's build timestamp. Useful for verifying which build is
     // actually running without having to check executable metadata.
-    constexpr const char* kBuildType =
-#if defined(_DEBUG) || defined(DEBUG)
-        "Debug";
-#else
-        "Release";
-#endif
-    constexpr const char* kEditor =
-#ifdef _EDITOR
-        "Editor";
-#else
-        "NoEditor";
-#endif
-    constexpr const char* kCompiler =
-#if defined(__MINGW32__) || defined(__MINGW64__)
-        "MinGW";
-#elif defined(__clang__)
-        "Clang";
-#elif defined(_MSC_VER)
-        "MSVC";
-#elif defined(__GNUC__)
-        "GCC";
-#else
-        "Unknown";
-#endif
-    constexpr const char* kArch =
-#if defined(_WIN64) || defined(__x86_64__) || defined(__aarch64__)
-        "x64";
-#else
-        "x86";
-#endif
     mu_swprintf(szLine, L"Build: %hs %hs %hs %hs  %hs %hs",
-             kBuildType, kEditor, kCompiler, kArch, __DATE__, __TIME__);
+             Core::Build::kConfiguration, Core::Build::kEditor, Core::Build::kCompiler,
+             Core::Build::kArchitecture, Core::Build::kDate, Core::Build::kTime);
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Runtime OS name and version (compile-time arch above doesn't capture which
@@ -657,7 +639,7 @@ static void RenderDebugInfo()
  */
 static void RenderGLStats()
 {
-    if (!FrameProfiler::g_CountersEnabled)
+    if (!g_bShowGLStatsOverlay || !FrameProfiler::g_CountersEnabled)
         return;
 
     BeginBitmap();
@@ -767,6 +749,31 @@ static void RenderGLStats()
         g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
     }
 
+    g_pRenderText->SetFont(g_hFont);
+    EndBitmap();
+}
+
+/**
+ * @brief Renders the one-line benchmark progress indicator while a $bench run is in flight.
+ *
+ * Always on during a run rather than behind its own toggle: a run reconfigures the scene and
+ * takes minutes, and a client that silently disables effects with no visible reason is a bug
+ * report waiting to happen.
+ */
+static void RenderBenchmarkStatus()
+{
+    const Core::Benchmark::Recorder& recorder = Core::Benchmark::Recorder::Instance();
+    if (!recorder.IsRunning())
+        return;
+
+    const std::string status = recorder.StatusText();
+    const std::wstring line(status.begin(), status.end());
+
+    BeginBitmap();
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetBgColor(0, 0, 0, 160);
+    g_pRenderText->SetTextColor(255, 220, 120, 255);
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, BENCH_STATUS_TEXT_Y, line.c_str());
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
 }
@@ -1203,7 +1210,13 @@ void MainScene(HDC hDC)
             RenderDebugInfo();
             RenderGLStats();
             RenderFpsCounter();
+            RenderBenchmarkStatus();
             UI::Reconnect::RenderDialog();
+
+            // Reads this frame's accumulators, so it has to run before the reset below and after
+            // every other overlay -- the benchmark's own numbers include the cost of drawing
+            // them, tagged Overlay, exactly as the $glstats reading does.
+            Core::Benchmark::Recorder::Instance().Tick();
 
             // Once per frame, unconditionally -- see the comment at the end of RenderDebugInfo()
             // for why this can't live inside either overlay function. AdvanceGpuTimers() must run

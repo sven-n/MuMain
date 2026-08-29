@@ -50,6 +50,8 @@ function(mu_add_test)
     doctest_discover_tests(${MAT_NAME})
 endfunction()
 
+add_subdirectory(benchmark)
+
 add_subdirectory(text)
 
 add_subdirectory(effects)

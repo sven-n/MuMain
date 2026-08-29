@@ -112,6 +112,13 @@ namespace FrameProfiler
         Count_
     };
 
+    inline constexpr const char* kCounterNames[(int)Counter::Count_] = {
+        "GLCalls", "DrawCalls", "BufferUpdates", "BufferOrphans", "ProgramBinds", "TextureBinds",
+        "UniformWrites", "UboSkips",
+        "IRDraws", "IRVertices", "IRBreakTexture", "IRBreakBlend", "IRBreakDepth", "IRBreakProgram",
+        "IRBreakUniform", "IRBreakMatrix", "IRBreakDraw", "IRBreakOther"
+    };
+
     // Per-[Pass][Counter] breakdown -- what tells you "terrain is 18,000 of the 23,000 GL
     // calls" in one reading. Attributed automatically via CurrentPass(), so hook sites never
     // need to know which pass they're running under.
