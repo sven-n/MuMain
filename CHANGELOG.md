@@ -1,3 +1,11 @@
+## [1.2.2](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.1...v1.2.2) (2026-08-30)
+
+### Bug Fixes
+
+* **build:** enforce UTF-8 sources ([4dd34bf](https://github.com/yesid-bocanegra/MuMain/commit/4dd34bf18b0c9acb3ae5c9cc9e67f457f7f44b01))
+* **build:** repair Windows presets ([427c88c](https://github.com/yesid-bocanegra/MuMain/commit/427c88c11c0325ce01e880f591d62c25478aed1d))
+* **render:** restore projected shadows ([68e1975](https://github.com/yesid-bocanegra/MuMain/commit/68e19754eed025b542602e503e96e3ac0e9ff4a4))
+
 ## [1.2.1](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.0...v1.2.1) (2026-08-30)
 
 ### Performance
