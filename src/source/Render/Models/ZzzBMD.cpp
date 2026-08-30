@@ -118,6 +118,11 @@ bool CanGpuSkinMesh(int finalRenderFlags, int renderFlags, const float (*boneMat
                                    GetSkinningTextureCoordinates(renderFlags) != mu::SkinningTextureCoordinates::Mesh;
     return boneMatrices && supportedMaterial && !(renderFlags & (RENDER_SHADOWMAP | RENDER_WAVE));
 }
+
+std::pair<int, int> ResolveMeshRange(int meshCount, int requestedStart, int requestedEnd)
+{
+    return {requestedStart == -1 ? 0 : requestedStart, requestedEnd == -1 ? meshCount : requestedEnd};
+}
 } // namespace
 
 bool  StopMotion = false;
@@ -2774,22 +2779,7 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
     DisableDepthMask();
     BeginRender(1.f);
 
-    // enable stencil and continue draw
-    mu::GetRenderer().SetStencilTest(true);
-    mu::GetRenderer().SetStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
-
-    int startMesh = 0;
-    int endMesh = NumMeshs;
-
-    if (startMeshNumber != -1)
-    {
-        startMesh = startMeshNumber;
-    }
-
-    if (endMeshNumber != -1)
-    {
-        endMesh = endMeshNumber;
-    }
+    const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, startMeshNumber, endMeshNumber);
 
     const float sx = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
     const float sy = 4000.f;
@@ -2806,8 +2796,6 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     EndRender();
     EnableDepthMask();
-
-    mu::GetRenderer().SetStencilTest(false);
 }
 
 void BMD::RenderObjectBoundingBox()

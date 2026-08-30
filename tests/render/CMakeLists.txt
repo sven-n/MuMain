@@ -79,6 +79,14 @@ add_test(
 )
 
 add_test(
+    NAME projected_shadow_state_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_BMD_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ZzzBMD.cpp"
+        "-DMU_SHADOW_VOLUME_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Render/Models/ShadowVolume.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_projected_shadow_state.cmake"
+)
+
+add_test(
     NAME checked_in_shader_blob_validation
     COMMAND "${CMAKE_COMMAND}"
         "-DMU_SHADER_BLOB_DIR=${MU_SHADER_COMPILED_DIR}"
