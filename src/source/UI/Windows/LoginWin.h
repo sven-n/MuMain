@@ -41,6 +41,11 @@ protected:
     wchar_t m_prevUsername[MAX_USERNAME_SIZE + 1] = {};
     wchar_t m_prevPassword[MAX_PASSWORD_SIZE + 1] = {};
 
+    // Snapshot of the "Remember Password" dialog's Pending state, taken in UpdateWhileShow()
+    // BEFORE UI::Login::Tick() can resolve it -- see UpdateWhileActive()'s own comment for why
+    // this is needed instead of just re-checking RememberPasswordChoiceState() live there.
+    bool m_bRememberPasswordPromptWasPending = false;
+
 public:
     CLoginWin();
     virtual ~CLoginWin();
