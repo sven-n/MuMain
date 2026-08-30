@@ -16,3 +16,4 @@ ServerPort=44405
 [UI]
 Locale=en
 Font=
+RmlTheme=legacy

@@ -1955,6 +1955,30 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
     // SDL_GPUDevice/SDL_Window from mu::GetRenderer() (GetDevice()/GetWindow()).
     RmlUiRuntime::Instance().Create(WindowWidth, WindowHeight);
+
+    // Content that must always sit visually on top of RmlUi, regardless of theme: the game
+    // cursor, and (login/character scenes specifically) CLoginWin's legacy CUITextInputBox text.
+    // Both would otherwise render earlier in the frame, as part of the normal legacy 2D pass --
+    // RmlUi always renders last (see SetPreSubmitCallback's own comment), so a theme whose
+    // #panel/.input-frame paints real pixels there (the "legacy" theme's login panel included --
+    // it reproduces the original opaque sprite art) would otherwise visually cover both.
+    // Registered here, not inside RmlUiRuntime.cpp, so that library stays scene-agnostic --
+    // this composition of game-specific overlay content belongs at the app tier, the same
+    // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
+    mu::GetRenderer().SetPostRmlUiCallback(
+        []()
+        {
+            extern EGameScene SceneFlag;
+            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+            {
+                BeginBitmap();
+                if (CUIMng::Instance().m_LoginWin.IsShow())
+                    CUIMng::Instance().m_LoginWin.RenderTextOnTop();
+                RenderCursor();
+                EndBitmap();
+            }
+        });
+
     g_ErrorReport.WriteSoundCardInfo();
 
     // SDL_CreateWindow already shows the window.

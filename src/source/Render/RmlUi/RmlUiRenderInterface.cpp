@@ -29,7 +29,21 @@ Rml::TextureHandle RmlUiRenderInterface::LoadTexture(Rml::Vector2i& texture_dime
     std::string normalized = source;
     std::replace(normalized.begin(), normalized.end(), '/', '\\');
     const std::wstring wpath = StringUtils::NarrowToWide(normalized); // Rml::String is std::string (RmlUi/Config/Config.h)
-    const GLuint bitmapIndex = Bitmaps.LoadImage(wpath, GL_LINEAR, GL_CLAMP_TO_EDGE);
+    // LoadImageExclusive, NOT LoadImage: this handle is cached indefinitely (by RmlUi's compiled
+    // geometry, and by m_FileBackedBitmapIndexByHandle below) for as long as the document lives,
+    // which today is the whole process -- but plain LoadImage() would find-and-share an existing
+    // numbered-slot entry if the same file is already resident there (e.g. login_back.tga at
+    // BITMAP_LOG_IN+7, preloaded unconditionally by ZzzOpenData.cpp). That slot gets *force*-
+    // reassigned to a completely different file whenever another scene claims it
+    // (ReleaseLogoSceneData() -> OpenCharacterSceneData() both touch BITMAP_LOG_IN.. BITMAP_LOG_IN_END
+    // unconditionally) -- invalidating this cached raw SDL_GPUTexture* out from under RmlUi with
+    // no notification, and no way for RmlUi to know to recompile the geometry that references it.
+    // A real, reproducible symptom of getting this wrong: log in, enter another scene, return to
+    // the login screen, re-select a server -- the panel renders garbled and the process crashes
+    // shortly after (confirmed and fixed 2026-08-30). LoadImageExclusive always creates its own
+    // independent entry, immune to any other scene's slot churn, at the cost of a small amount
+    // of duplicate VRAM for these two small UI textures.
+    const GLuint bitmapIndex = Bitmaps.LoadImageExclusive(wpath, GL_LINEAR, GL_CLAMP_TO_EDGE);
     if (bitmapIndex == BITMAP_UNKNOWN) return 0;
 
     BITMAP_t* bmp = Bitmaps.GetTexture(bitmapIndex);

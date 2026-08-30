@@ -1,0 +1,14 @@
+<rml>
+<head>
+	<title>Loading</title>
+	<link type="text/rcss" href="loading.rcss"/>
+</head>
+<body>
+	<div id="bg">
+		<img class="tile tile-top-left" src="/Interface/LSBg01.JPG"/>
+		<img class="tile tile-top-right" src="/Interface/LSBg02.JPG"/>
+		<img class="tile tile-bottom-left" src="/Interface/LSBg03.JPG"/>
+		<img class="tile tile-bottom-right" src="/Interface/LSBg04.JPG"/>
+	</div>
+</body>
+</rml>

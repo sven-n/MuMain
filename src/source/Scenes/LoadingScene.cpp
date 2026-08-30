@@ -15,6 +15,8 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "SceneCommon.h"
 #include "UI/NewUI/Dialogs/ReconnectDialog.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 
 #ifdef _EDITOR
@@ -71,31 +73,38 @@ void LoadingScene(HDC hDC)
 {
     g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
 
-    CUIMng& rUIMng = CUIMng::Instance();
+    // RmlUi migration plan Phase 1 pilot: replaces CLoadingScene's 4-tile CSprite rendering
+    // (the class above is left completely untouched -- not deleted, per the plan's retirement
+    // criteria: don't remove legacy code until parity is confirmed against a real build) with an
+    // equivalent RmlUi document, Data/Interface/RmlUi/loading.rml + loading.rcss. Loaded and
+    // closed within this single call, matching this function's own one-shot-per-flash lifecycle
+    // (renders exactly one frame, then flips SceneFlag away below). No explicit
+    // RmlUiRuntime::Update()/Render() call needed here, unlike the RHI-based port this was ported
+    // from -- this branch's IMuRenderer::SetPreSubmitCallback (see RmlUiRuntime::Create()) already
+    // fires automatically once per frame, for every scene, right before EndOpengl()'s underlying
+    // SDL_GPU submit -- so simply Show()-ing the document before EndOpengl() runs (below) is
+    // enough for it to render this one frame.
+    Rml::ElementDocument* rmlLoadingDoc = nullptr;
+
     if (!InitLoading)
     {
         LoadingWorld = 9999999;
-
         InitLoading = true;
-        LoadBitmap(L"Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg04.JPG", BITMAP_TITLE + 3, GL_LINEAR);
 
         ::StopMp3(MUSIC_LOGIN_THEME);
 
-        rUIMng.m_pLoadingScene = new CLoadingScene;
-        rUIMng.m_pLoadingScene->Create();
+        if (RmlUiRuntime::Instance().IsCreated())
+        {
+            rmlLoadingDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/loading.rml");
+            if (rmlLoadingDoc)
+                rmlLoadingDoc->Show();
+        }
     }
 
     FogEnable = false;
     ::BeginOpengl();
     mu::GetRenderer().ClearScreen();
-    ::BeginBitmap();
 
-    rUIMng.m_pLoadingScene->Render();
-
-    ::EndBitmap();
     ::EndOpengl();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
@@ -112,11 +121,10 @@ void LoadingScene(HDC hDC)
 #endif
     UI::Reconnect::RenderDialog();
 
-    SAFE_DELETE(rUIMng.m_pLoadingScene);
+    if (rmlLoadingDoc)
+        rmlLoadingDoc->Close();
 
     SceneFlag = MAIN_SCENE;
-    for (int i = 0; i < 4; ++i)
-        ::DeleteBitmap(BITMAP_TITLE + i);
 
     ::ClearInput();
 

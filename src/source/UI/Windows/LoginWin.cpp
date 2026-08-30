@@ -30,13 +30,30 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 
-#define	LIW_ACCOUNT		0
-#define	LIW_PASSWORD	1
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Event.h>
 
 #define LIW_OK			0
 #define LIW_CANCEL		1
 
-
+namespace
+{
+    // Mirrors the Narrow() idiom already used elsewhere in this codebase (e.g.
+    // Core/Platform/WinIni.cpp) -- Rml::String is UTF-8 std::string (RmlUi/Config/Config.h).
+    std::string WideToUtf8(const wchar_t* s)
+    {
+        if (!s) return std::string();
+        const int len = static_cast<int>(wcslen(s));
+        const int n = WideCharToMultiByte(CP_UTF8, 0, s, len, nullptr, 0, nullptr, nullptr);
+        if (n <= 0) return std::string();
+        std::string out(static_cast<size_t>(n), '\0');
+        WideCharToMultiByte(CP_UTF8, 0, s, len, out.data(), n, nullptr, nullptr);
+        return out;
+    }
+}
 
 extern int g_iChatInputType;
 extern int  LogIn;
@@ -74,10 +91,13 @@ void CLoginWin::Create()
     // The login background is fixed artwork and does not scale with the window
     // size, so keep the original height. The credential-consent controls fit on
     // the panel and the trust warning is drawn just below it (issue #462).
-    CWin::Create(329, 245, BITMAP_LOG_IN + 7);
-
-    m_asprInputBox[LIW_ACCOUNT].Create(156, 23, BITMAP_LOG_IN + 8);
-    m_asprInputBox[LIW_PASSWORD].Create(156, 23, BITMAP_LOG_IN + 8);
+    // CWin never draws anything for this window -- every theme's #panel/.input-frame renders the
+    // background/input-box-frame artwork itself (see themes/legacy/login.rcss and
+    // themes/modern/login.rcss). CWin::Create's own nTexID<=-2 sentinel (confirmed precedent:
+    // ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves m_psprBg null, and CWin::Render()'s existing
+    // `if (m_psprBg)` guard then draws nothing.
+    CWin::Create(329, 245, -2);
+    SetMovable(false);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -90,6 +110,17 @@ void CLoginWin::Create()
 
     m_aBtnSavePassword.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
     CWin::RegisterButton(&m_aBtnSavePassword);
+
+    // CButton::Update() auto-toggles m_bCheck on its own input polling whenever HasCheckVisuals()
+    // is true (both are 2-frame check-style art) -- independent of and in addition to
+    // RmlToggleRememberMe()/RmlToggleSavePassword()'s own SetCheck() flip below, since legacy
+    // input polling isn't gated by which UI tier's Context claimed the click. Left enabled, one
+    // click produces two flips (net no change). SetEnable(false) makes these pure state
+    // containers (SetCheck/IsCheck still work for every other call site); only the RmlUi handler
+    // drives them now. Plain action buttons (OK/Cancel) don't need this -- HasCheckVisuals() is
+    // false there, so redundant firing is harmless.
+    m_aBtnRememberMe.SetEnable(false);
+    m_aBtnSavePassword.SetEnable(false);
 
     SAFE_DELETE(m_pUsernameInputBox);
 
@@ -131,21 +162,59 @@ void CLoginWin::Create()
     m_pPasswordInputBox->GetText(m_prevPassword, _countof(m_prevPassword));
 
     this->FirstLoad = 1;
-}
 
-void CLoginWin::PreRelease()
-{
-    for (int i = 0; i < 2; ++i)
-        m_asprInputBox[i].Release();
+    // RmlUi migration plan Phase 1 pilot -- see this class's header comment. Guarded on
+    // m_pRmlDoc rather than unconditionally: CUIMng::RepositionSceneUI() re-runs
+    // CreateLoginScene() (and so this Create()) on every resolution change, to refresh the
+    // legacy sprites' stale screen-height-dependent Y-flip cache -- a problem RmlUi's own
+    // layout doesn't have (it already re-flows against the Context's current dimensions), so
+    // the document/data-model are set up once, ever, and only repositioned afterward (see
+    // SetPosition() below), not recreated.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        // The data model must exist BEFORE the document referencing it (via data-model="login")
+        // is loaded -- RmlUi resolves data-model/{{bindings}} while PARSING the RML, so a model
+        // created after LoadDocument() is too late: every {{...}} in the document falls back to
+        // rendering its own literal source text instead of the bound value (confirmed from a
+        // real screenshot: "{{account_label}}", "{{server_name}}" etc. rendered verbatim). Create
+        // the model first, then load the document.
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "login",
+            [this](Rml::DataModelConstructor& c, LoginRmlModel& model)
+            {
+                c.Bind("remember_me_checked", &model.rememberMeChecked);
+                c.Bind("save_password_checked", &model.savePasswordChecked);
+                c.Bind("server_name", &model.serverName);
+                c.Bind("account_label", &model.accountLabel);
+                c.Bind("password_label", &model.passwordLabel);
+                c.Bind("remember_me_label", &model.rememberMeLabel);
+                c.Bind("save_password_label", &model.savePasswordLabel);
+                c.Bind("trust_warning", &model.trustWarning);
+                c.Bind("ok_label", &model.okLabel);
+                c.Bind("cancel_label", &model.cancelLabel);
+
+                c.BindEventCallback("login_ok_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+                c.BindEventCallback("login_cancel_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+                c.BindEventCallback("login_toggle_remember_me",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRememberMe(); });
+                c.BindEventCallback("login_toggle_save_password",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSavePassword(); });
+            });
+
+        // Routed through UI::RmlBridge::LoadThemedDocument (not Context::LoadDocument directly)
+        // so this document resolves against the active theme's stylesheet -- see RmlTheme.h.
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login.rml");
+
+        // Deliberately NOT calling UI::RmlBridge::MakeDraggable() here -- the login screen is
+        // meant to stay static (see this class's CursorInWin(WA_MOVE) override, hardcoded false).
+    }
 }
 
 void CLoginWin::SetPosition(int x, int y)
 {
 	CWin::SetPosition(x, y);
-
-	const int boxOffsetX = x + 109;
-	m_asprInputBox[LIW_ACCOUNT].SetPosition(boxOffsetX, y + 106);
-	m_asprInputBox[LIW_PASSWORD].SetPosition(boxOffsetX, y + 131);
 
 	if (g_iChatInputType == 1)
 	{
@@ -161,6 +230,21 @@ void CLoginWin::SetPosition(int x, int y)
 	m_aBtnSavePassword.SetPosition(x + 109, y + 176);
 	m_aBtn[LIW_OK].SetPosition(x + 150, y + 200);
 	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 200);
+
+	// RmlUi panel overlay: positioned at the same real window-pixel origin CWin's own
+	// background sprite (m_psprBg) uses -- unlike the legacy g_pRenderText calls this replaces
+	// (which divided by g_fScreenRate_x/y to convert into the old 640x480 reference space),
+	// RmlUi's Context operates directly in real window pixels, so no scale conversion is
+	// needed here; the panel's children use fixed-pixel RCSS offsets relative to this container,
+	// matching "the login background is fixed artwork and does not scale" above.
+	if (m_pRmlDoc)
+	{
+		if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
+		{
+			panel->SetProperty("left", std::to_string(x) + "px");
+			panel->SetProperty("top", std::to_string(y) + "px");
+		}
+	}
 }
 
 void CLoginWin::Show(bool bShow)
@@ -169,7 +253,6 @@ void CLoginWin::Show(bool bShow)
 
     for (int i = 0; i < 2; ++i)
     {
-        m_asprInputBox[i].Show(bShow);
         m_aBtn[i].Show(bShow);
     }
     m_aBtnRememberMe.Show(bShow);
@@ -180,20 +263,27 @@ void CLoginWin::Show(bool bShow)
     const int iState = bShow ? UISTATE_NORMAL : UISTATE_HIDE;
     if (m_pUsernameInputBox) m_pUsernameInputBox->SetState(iState);
     if (m_pPasswordInputBox) m_pPasswordInputBox->SetState(iState);
+
+    if (m_pRmlDoc)
+    {
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        else       m_pRmlDoc->Hide();
+    }
 }
 
-bool CLoginWin::CursorInWin(int nArea)
+void CLoginWin::PreRelease()
 {
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
+    // CUIMng::RemoveWinList() (run on every scene transition) calls Release() on every window
+    // in its list unconditionally -- CWin's own Release()/PreRelease() has no knowledge of
+    // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
+    // window is ever Released() while still shown. In today's real login/cancel flow that
+    // never happens (RequestLogin()/CancelLogin() both call CUIMng::HideWin(this) first), but
+    // that's an incidental property of those two call sites, not something this class's own
+    // lifecycle actually guarantees -- explicit here rather than relying on it staying true.
+    // Hide(), not unload -- the document/model are meant to be created once and reused (see
+    // Create()'s own guard comment above).
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 void CLoginWin::UpdateWhileActive(double)
@@ -204,15 +294,17 @@ void CLoginWin::UpdateWhileActive(double)
 	if (!g_MessageBox->IsEmpty())
 		return;
 
-	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
+	if (m_aBtn[LIW_OK].IsClick() || m_bRmlOkClicked || CInput::Instance().IsKeyDown(VK_RETURN))
 	{
+		m_bRmlOkClicked = false;
 		PlayBuffer(SOUND_CLICK01);
 		RequestLogin();
 		return;
 	}
 
-	if (m_aBtn[LIW_CANCEL].IsClick() || CInput::Instance().IsKeyDown(VK_ESCAPE))
+	if (m_aBtn[LIW_CANCEL].IsClick() || m_bRmlCancelClicked || CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
+		m_bRmlCancelClicked = false;
 		PlayBuffer(SOUND_CLICK01);
 		CancelLogin();
 		CUIMng::Instance().SetSysMenuWinShow(false);
@@ -226,8 +318,9 @@ void CLoginWin::UpdateRememberCheckboxes()
 {
 	GameConfig& config = GameConfig::GetInstance();
 
-	if (m_aBtnRememberMe.IsClick())
+	if (m_aBtnRememberMe.IsClick() || m_bRmlRememberMeClicked)
 	{
+		m_bRmlRememberMeClicked = false;
 		m_RememberMe = m_aBtnRememberMe.IsCheck();
 		config.SetRememberMe(m_RememberMe != 0);
 
@@ -241,8 +334,9 @@ void CLoginWin::UpdateRememberCheckboxes()
 		}
 	}
 
-	if (!m_aBtnSavePassword.IsClick())
+	if (!m_aBtnSavePassword.IsClick() && !m_bRmlSavePasswordClicked)
 		return;
+	m_bRmlSavePasswordClicked = false;
 
 	if (!m_aBtnSavePassword.IsCheck())
 	{
@@ -329,36 +423,69 @@ void CLoginWin::RenderControls()
         FirstLoad = 0;
     }
 
-    CWin::RenderButtons();
-    m_asprInputBox[LIW_ACCOUNT].Render();
-    m_asprInputBox[LIW_PASSWORD].Render();
+    // All panel chrome (background, input-box frames, checkboxes, OK/Cancel buttons, labels,
+    // trust-warning text) now renders via the RmlUi overlay -- see this class's header comment
+    // and login.rml/.rcss. Nothing legacy left to draw here. RenderTextOnTop() below draws the
+    // actual CUITextInputBox text -- called directly here (not deferred to a later "after RmlUi"
+    // call site) since the default "legacy" theme's panel is transparent, so draw order doesn't
+    // matter yet; see RenderTextOnTop()'s own comment.
+    SyncRmlModel();
+    RenderTextOnTop();
+}
+
+void CLoginWin::RenderTextOnTop()
+{
     m_pUsernameInputBox->Render();
     m_pPasswordInputBox->Render();
+}
 
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
+void CLoginWin::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
 
-    const int baseX = GetXPos();
-    const int baseY = GetYPos();
+    const bool rememberChecked = m_aBtnRememberMe.IsCheck();
+    if (m_RmlBinder.GetModel().rememberMeChecked != rememberChecked)
+    {
+        m_RmlBinder.GetModel().rememberMeChecked = rememberChecked;
+        m_RmlBinder.MarkDirty("remember_me_checked");
+    }
 
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 113) / g_fScreenRate_y), I18N::Game::Account);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 139) / g_fScreenRate_y), I18N::Game::Password);
+    const bool saveChecked = m_aBtnSavePassword.IsCheck();
+    if (m_RmlBinder.GetModel().savePasswordChecked != saveChecked)
+    {
+        m_RmlBinder.GetModel().savePasswordChecked = saveChecked;
+        m_RmlBinder.MarkDirty("save_password_checked");
+    }
 
     wchar_t szServerName[MAX_TEXT_LENGTH] = {};
     const wchar_t* pServerStatus = g_ServerListManager->GetNonPVPInfo() ? I18N::Game::SDServer : I18N::Game::SDNonPvPServer;
     mu_swprintf(szServerName, pServerStatus, g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
-    g_pRenderText->RenderText(int((baseX + 111) / g_fScreenRate_x), int((baseY + 80) / g_fScreenRate_y), szServerName);
+    const std::string serverNameUtf8 = WideToUtf8(szServerName);
+    if (m_RmlBinder.GetModel().serverName != serverNameUtf8)
+    {
+        m_RmlBinder.GetModel().serverName = serverNameUtf8;
+        m_RmlBinder.MarkDirty("server_name");
+    }
 
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 159) / g_fScreenRate_y), I18N::Game::LoginRememberUsername);
-    g_pRenderText->RenderText(int((baseX + 130) / g_fScreenRate_x), int((baseY + 179) / g_fScreenRate_y), I18N::Game::LoginRememberPassword);
-
-    // Trust warning rendered just below the login panel (the panel artwork is a
-    // fixed size, so there is no room for this long line inside it). Position is
-    // eyeballed against the background and may need tuning.
-    g_pRenderText->SetTextColor(255, 210, 60, 255);
-    g_pRenderText->RenderText(int((baseX + 30) / g_fScreenRate_x), int((baseY + 252) / g_fScreenRate_y), I18N::Game::LoginTrustWarning);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
+    // Static (per-locale) labels, synced from the same I18N::Game::* slots the legacy
+    // g_pRenderText calls used directly -- cheap to re-check every call via the string
+    // comparison; only actually dirties the model on an active locale change, which is rare.
+    auto syncLabel = [this](Rml::String LoginRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const std::string utf8 = WideToUtf8(text);
+        if (m_RmlBinder.GetModel().*field != utf8)
+        {
+            m_RmlBinder.GetModel().*field = utf8;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    syncLabel(&LoginRmlModel::accountLabel, "account_label", I18N::Game::Account);
+    syncLabel(&LoginRmlModel::passwordLabel, "password_label", I18N::Game::Password);
+    syncLabel(&LoginRmlModel::rememberMeLabel, "remember_me_label", I18N::Game::LoginRememberUsername);
+    syncLabel(&LoginRmlModel::savePasswordLabel, "save_password_label", I18N::Game::LoginRememberPassword);
+    syncLabel(&LoginRmlModel::trustWarning, "trust_warning", I18N::Game::LoginTrustWarning);
+    syncLabel(&LoginRmlModel::okLabel, "ok_label", I18N::Game::OK);
+    syncLabel(&LoginRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
 }
 
 void CLoginWin::RequestLogin()
