@@ -962,6 +962,7 @@ void HandleWindowResize(int width, int height)
     UI::Scaling::SetActiveTransform(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
+    RmlUiRuntime::Instance().OnResize(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     UpdateResolutionDependentSystems();
     UpdateCursorClip();
 }
@@ -1223,16 +1224,28 @@ MSG MainLoop()
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:
+                // Always forwarded and always still applied to legacy position tracking --
+                // motion isn't an "action" to arbitrate, and legacy hit-testing (CNewUIManager
+                // etc.) needs MouseX/MouseY current regardless of what's hovered. RmlUi still
+                // needs this call to drive its own :hover state/hit-testing.
+                RmlUiRuntime::Instance().ProcessSdlEvent(event, g_sdlWindow);
                 HandleMouseMotion(event.motion.x, event.motion.y);
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                HandleMouseButton(event);
+                // RmlUi migration plan Phase 0.8: first consumer wins. If an RmlUi element
+                // claimed this click (returns false -- "no longer propagating"), don't also let
+                // it reach legacy button-state tracking/click-to-move.
+                if (RmlUiRuntime::Instance().ProcessSdlEvent(event, g_sdlWindow))
+                    HandleMouseButton(event);
                 break;
             case SDL_EVENT_MOUSE_WHEEL:
-                // SDL does not pre-correct flipped (natural) scrolling; invert.
-                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
-                                                                               : static_cast<int>(event.wheel.y);
+                if (RmlUiRuntime::Instance().ProcessSdlEvent(event, g_sdlWindow))
+                {
+                    // SDL does not pre-correct flipped (natural) scrolling; invert.
+                    MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
+                                                                                   : static_cast<int>(event.wheel.y);
+                }
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
@@ -1252,15 +1265,30 @@ MSG MainLoop()
                 HandleFocusChange(false);
                 break;
             case SDL_EVENT_TEXT_INPUT:
-                // Committed characters for the focused portable text field (#447).
-                FeedPortableTextInput(event.text.text);
+                // Committed characters for the focused portable text field (#447). Gated the
+                // same way as key-down below -- if an RmlUi text input has focus and consumed
+                // this, don't also feed it into a legacy portable text field.
+                if (RmlUiRuntime::Instance().ProcessSdlEvent(event, g_sdlWindow))
+                    FeedPortableTextInput(event.text.text);
                 break;
             case SDL_EVENT_TEXT_EDITING:
                 // IME composition preview for the focused portable field (#447).
                 if (auto* box = CUITextInputBox::GetFocusedPortable())
                     box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
+            case SDL_EVENT_KEY_UP:
+                // Legacy input has no key-up consumer, but RmlUi needs both halves of a
+                // press/release pair for correct modifier-key and held-key state tracking.
+                RmlUiRuntime::Instance().ProcessSdlEvent(event, g_sdlWindow);
+                break;
             case SDL_EVENT_KEY_DOWN:
+            {
+                // RmlUi migration plan Phase 0.8: only the final portable-field delivery below
+                // is gated on this -- the F10/Enter system-hotkey handling right after stays
+                // unconditional (camera zoom lock and the Enter-press latch are not text-editing
+                // concerns, and gating them risks breaking behavior those comments already
+                // carefully explain).
+                const bool rmlUiConsumed = !RmlUiRuntime::Instance().ProcessSdlEvent(event, g_sdlWindow);
 #ifndef _WIN32
                 // These mirror what WndProc does from Win32 messages, for the
                 // SDL-only input path. On Windows WndProc is still driven (via
@@ -1284,8 +1312,10 @@ MSG MainLoop()
                 }
 #endif
                 // Navigation/erase/clipboard for the focused portable field (#447).
-                FeedPortableKey(event.key);
+                if (!rmlUiConsumed)
+                    FeedPortableKey(event.key);
                 break;
+            }
             default:
                 break;
             }
