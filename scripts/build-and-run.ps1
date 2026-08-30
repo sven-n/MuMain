@@ -42,7 +42,7 @@ param(
     [ValidateSet('x64', 'x86')]
     [string]$Arch = 'x64',
 
-    [ValidateSet('Debug', 'Release')]
+    [ValidateSet('Debug', 'Release', 'RelWithDebInfo')]
     [string]$Config = 'Debug',
 
     [ValidateSet('vulkan', 'direct3d12', 'metal')]
