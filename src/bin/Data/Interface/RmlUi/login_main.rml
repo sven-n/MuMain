@@ -1,0 +1,27 @@
+<rml>
+<head>
+	<title>Login Main Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="login_main.rcss"/>
+</head>
+<body>
+	<!-- .btn-icon-label only matters for the modern theme (legacy hides it -- its real icon art
+	     already gives these buttons a visual identity, see themes/legacy/login_main.rcss). -->
+	<div id="panel">
+		<div id="btn_menu" class="btn-icon btn-icon-menu">
+			<span class="btn-icon-label">M</span>
+		</div>
+		<div id="btn_credit" class="btn-icon btn-icon-credit">
+			<!-- Deco (legacy theme's oversized decorative flourish) must paint BEFORE (behind)
+			     the button's own icon art -- matches the pre-RmlUi CLoginMainWin::RenderControls()
+			     order (m_sprDeco.Render() then CWin::RenderButtons()). .btn-icon-credit's own
+			     decorator is a parent-box background, which CSS always paints before any child --
+			     so the button's icon lives on its own child (.btn-credit-icon) placed AFTER deco,
+			     rather than on the parent, to get the right stacking order. -->
+			<div class="btn-credit-deco"></div>
+			<div class="btn-credit-icon"></div>
+			<span class="btn-icon-label">C</span>
+		</div>
+	</div>
+</body>
+</rml>

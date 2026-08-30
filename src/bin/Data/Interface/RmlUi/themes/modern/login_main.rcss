@@ -1,0 +1,55 @@
+/* "Modern" theme for the login-scene menu/credit button bar -- flat programmatic icon buttons, no
+   legacy sprite art (same approach as login.rcss's modern theme). No reserved I18N string exists
+   for these icon-only buttons, so each gets a plain single-letter monogram (.btn-icon-label,
+   "M"/"C") instead -- plain ASCII, not a Unicode symbol, since glyph coverage in the loaded font
+   isn't guaranteed (see login.rcss's checkmark comment). */
+
+#panel {
+	position: absolute;
+	/* Needed for .btn-icon-label's text -- matches login.rcss's #panel rather than relying on
+	   RmlUiRuntime's regular-weight fallback face to also resolve bold correctly. */
+	font-family: "Liberation Sans";
+	font-size: 14px;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+	border-radius: 4px;
+	text-align: center;
+	line-height: 30px;
+}
+.btn-icon:hover {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+}
+.btn-icon-label {
+	color: white;
+	font-weight: bold;
+}
+.btn-icon-menu {
+	left: 0px;
+	top: 0px;
+}
+/* left is pushed from C++ (screen-width dependent right-alignment). */
+.btn-icon-credit {
+	top: 0px;
+}
+
+/* No legacy deco art in this theme -- the modern theme is intentionally flat, matching
+   login.rcss's modern .input-frame precedent of standing in with a plain shape rather than
+   reproducing decorative sprite art pixel-for-pixel. */
+.btn-credit-deco {
+	display: none;
+}
+
+/* Legacy-only element (see themes/legacy/login_main.rcss's own comment) -- the modern theme's
+   button art is .btn-icon's own flat background-color/border above, not a child image layer. */
+.btn-credit-icon {
+	display: none;
+}
