@@ -585,7 +585,8 @@ void MoveChat()
             c->LifeTime[0]-=FPS_ANIMATION_FACTOR;
         if (c->LifeTime[1] > 0)
             c->LifeTime[1]-=FPS_ANIMATION_FACTOR;
-        if (c->Owner != NULL && (!c->Owner->Object.Live || !c->Owner->Object.Visible))
+        if (c->Owner != NULL &&
+            (!c->Owner->Object.Live || !c->Owner->Object.Visible || !HasCurrentOwnerName(c->ID, c->Owner->ID)))
         {
             c->IDLifeTime = 0;
             c->LifeTime[0] = 0;

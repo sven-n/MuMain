@@ -11660,6 +11660,7 @@ void ReleaseCharacters(void)
 void CreateCharacterPointer(CHARACTER* c, int Type, unsigned char PositionX, unsigned char PositionY, float Rotation)
 {
     OBJECT* o = &c->Object;
+    c->ClearDisplayName();
     c->PositionX = PositionX;
     c->PositionY = PositionY;
     c->TargetX = PositionX;

@@ -44,3 +44,9 @@ mu_add_test(
     SOURCES test_ui_scaling.cpp
     LINK_LIBS MuClient
 )
+
+mu_add_test(
+    NAME character_name_lifecycle_tests
+    SOURCES test_character_name_lifecycle.cpp
+    LINK_LIBS MuClient
+)

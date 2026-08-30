@@ -70,8 +70,7 @@ void CHARACTER::Initialize()
     m_byFriend = 0;
     MonsterSkill = 0;
 
-    for (int i = 0; i < 32; ++i)
-        ID[i] = 0;
+    ClearDisplayName();
 
     Movement = 0;
     MovementType = 0;
@@ -126,6 +125,11 @@ void CHARACTER::Initialize()
     m_CursedTempleCurSkillPacket = false;
     GensRanking = 0;
     GensContributionPoints = 0;
+}
+
+void CHARACTER::ClearDisplayName()
+{
+    memset(ID, 0, sizeof(ID));
 }
 
 void CHARACTER::Destroy() {}
