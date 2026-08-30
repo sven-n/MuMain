@@ -27,6 +27,47 @@ void SetInventorySquareColor(const vec3_t& color)
 }
 }
 
+POINT UI::Items::Drag::PickupOffset(int itemLeft, int itemTop, int itemWidth, int itemHeight,
+                                    int pointerX, int pointerY, bool preserveAnchor)
+{
+    if (itemWidth <= 0 || itemHeight <= 0)
+    {
+        return {0, 0};
+    }
+
+    if (preserveAnchor)
+    {
+        return {
+            std::clamp(pointerX - itemLeft, 0, itemWidth - 1),
+            std::clamp(pointerY - itemTop, 0, itemHeight - 1),
+        };
+    }
+
+    return {itemWidth / 2, itemHeight / 2};
+}
+
+POINT UI::Items::Drag::ItemTopLeft(int pointerX, int pointerY, const POINT& pickupOffset)
+{
+    return {pointerX - pickupOffset.x, pointerY - pickupOffset.y};
+}
+
+bool UI::Items::Drag::ShouldConsumePanelPress(bool hasPickedItem, bool leftButtonPressed)
+{
+    return hasPickedItem && leftButtonPressed;
+}
+
+bool UI::Items::Grid::Fits(int startIndex, int itemWidth, int itemHeight, int columnCount, int rowCount)
+{
+    if (startIndex < 0 || itemWidth <= 0 || itemHeight <= 0 || columnCount <= 0 || rowCount <= 0)
+    {
+        return false;
+    }
+
+    const int startColumn = startIndex % columnCount;
+    const int startRow = startIndex / columnCount;
+    return startColumn + itemWidth <= columnCount && startRow + itemHeight <= rowCount;
+}
+
 SEASON3B::CNewUIPickedItem::CNewUIPickedItem()
 {
     m_pNewItemMng = nullptr;
@@ -35,6 +76,7 @@ SEASON3B::CNewUIPickedItem::CNewUIPickedItem()
     m_bShow = true;
     m_Pos.x = m_Pos.y = 0;
     m_Size.cx = m_Size.cy = 0;
+    m_PickupOffset.x = m_PickupOffset.y = 0;
 }
 
 SEASON3B::CNewUIPickedItem::~CNewUIPickedItem()
@@ -42,7 +84,8 @@ SEASON3B::CNewUIPickedItem::~CNewUIPickedItem()
     Release();
 }
 
-bool SEASON3B::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem)
+bool SEASON3B::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem,
+                                       bool preservePickupAnchor)
 {
     if (g_pNewUI3DRenderMng == nullptr || pNewItemMng == nullptr || pItem == nullptr)
         return false;
@@ -59,8 +102,12 @@ bool SEASON3B::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUIInvent
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
     m_Size.cx = pItemAttr->Width * INVENTORY_SQUARE_WIDTH;
     m_Size.cy = pItemAttr->Height * INVENTORY_SQUARE_HEIGHT;
-    m_Pos.x = MouseX - m_Size.cx / 2;
-    m_Pos.y = MouseY - m_Size.cy / 2;
+    const bool hasGridAnchor = preservePickupAnchor && pSrc != nullptr;
+    const int itemLeft = hasGridAnchor ? pSrc->GetPos().x + pItem->x * INVENTORY_SQUARE_WIDTH : 0;
+    const int itemTop = hasGridAnchor ? pSrc->GetPos().y + pItem->y * INVENTORY_SQUARE_HEIGHT : 0;
+    m_PickupOffset = UI::Items::Drag::PickupOffset(itemLeft, itemTop, m_Size.cx, m_Size.cy,
+                                                   MouseX, MouseY, hasGridAnchor);
+    m_Pos = UI::Items::Drag::ItemTopLeft(MouseX, MouseY, m_PickupOffset);
 
     return true;
 }
@@ -73,6 +120,7 @@ void SEASON3B::CNewUIPickedItem::Release()
     m_pNewItemMng = nullptr;
     m_pSrcInventory = nullptr;
     m_bShow = true;
+    m_PickupOffset.x = m_PickupOffset.y = 0;
 }
 
 CNewUIInventoryCtrl* SEASON3B::CNewUIPickedItem::GetOwnerInventory() const
@@ -116,6 +164,11 @@ const SIZE& SEASON3B::CNewUIPickedItem::GetSize() const
     return m_Size;
 }
 
+const POINT& SEASON3B::CNewUIPickedItem::GetPickupOffset() const
+{
+    return m_PickupOffset;
+}
+
 void SEASON3B::CNewUIPickedItem::GetRect(RECT& rcBox)
 {
     rcBox.left = m_Pos.x;
@@ -142,14 +195,9 @@ bool SEASON3B::CNewUIPickedItem::GetTargetPos(CNewUIInventoryCtrl* pDest, int& i
 {
     if (pDest != nullptr)
     {
-        RECT rcInventory;
-        pDest->GetRect(rcInventory);
+        const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(MouseX, MouseY, m_PickupOffset);
 
-        const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[m_pPickedItem->Type];
-        const int iPickedItemX = MouseX - ((pItemAttr->Width - 1) * INVENTORY_SQUARE_WIDTH / 2);
-        const int iPickedItemY = MouseY - ((pItemAttr->Height - 1) * INVENTORY_SQUARE_HEIGHT / 2);
-
-        return pDest->GetSquarePosAtPt(iPickedItemX, iPickedItemY, iTargetColumnX, iTargetRowY);
+        return pDest->GetSquarePosAtPt(itemTopLeft.x, itemTopLeft.y, iTargetColumnX, iTargetRowY);
     }
     return false;
 }
@@ -188,11 +236,10 @@ void SEASON3B::CNewUIPickedItem::Render3D()
 {
     if (m_pPickedItem && m_pPickedItem->Type >= 0)
     {
-        const auto position = UI::Scaling::CenteredLogicalPosition(
-            UI::Scaling::GetActiveTransform(), g_fWindowMouseX, g_fWindowMouseY, static_cast<float>(m_Size.cx),
-            static_cast<float>(m_Size.cy));
-        m_Pos.x = static_cast<LONG>(std::floor(position.x));
-        m_Pos.y = static_cast<LONG>(std::floor(position.y));
+        const auto transform = UI::Scaling::GetActiveTransform();
+        const int pointerX = static_cast<int>(std::floor(UI::Scaling::LogicalX(transform, g_fWindowMouseX)));
+        const int pointerY = static_cast<int>(std::floor(UI::Scaling::LogicalY(transform, g_fWindowMouseY)));
+        m_Pos = UI::Items::Drag::ItemTopLeft(pointerX, pointerY, m_PickupOffset);
         RenderItem3D(m_Pos.x, m_Pos.y, m_Size.cx, m_Size.cy, m_pPickedItem->Type, m_pPickedItem->Level,
                      m_pPickedItem->ExcellentFlags, m_pPickedItem->AncientDiscriminator, true);
     }
@@ -903,7 +950,7 @@ bool SEASON3B::CNewUIInventoryCtrl::UpdateMouseEvent()
         ITEM* pItem = this->FindItem(m_iPointedSquareIndex);
         if (pItem)
         {
-            if (CreatePickedItem(this, pItem))
+            if (CreatePickedItem(this, pItem, true))
             {
                 RemoveItem(pItem);
                 return false;
@@ -1064,8 +1111,10 @@ void SEASON3B::CNewUIInventoryCtrl::Render()
             {
                 ITEM* pPickItem = ms_pPickedItem->GetItem();
                 const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pPickItem->Type];
-                const int iPickedItemX = MouseX - ((pItemAttr->Width - 1) * INVENTORY_SQUARE_WIDTH / 2);
-                const int iPickedItemY = MouseY - ((pItemAttr->Height - 1) * INVENTORY_SQUARE_HEIGHT / 2);
+                const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(
+                    MouseX, MouseY, ms_pPickedItem->GetPickupOffset());
+                const int iPickedItemX = itemTopLeft.x;
+                const int iPickedItemY = itemTopLeft.y;
 
                 int iColumnX = 0, iRowY = 0;
                 int nItemColumn = pItemAttr->Width, nItemRow = pItemAttr->Height;
@@ -1346,6 +1395,11 @@ bool SEASON3B::CNewUIInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iColumnX
 
 bool SEASON3B::CNewUIInventoryCtrl::CheckSlot(int startIndex, int width, int height)
 {
+    if (!UI::Items::Grid::Fits(startIndex, width, height, m_nColumn, m_nRow))
+    {
+        return false;
+    }
+
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
@@ -1585,12 +1639,13 @@ CNewUIPickedItem* SEASON3B::CNewUIInventoryCtrl::GetPickedItem()
     return ms_pPickedItem;
 }
 
-bool SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem)
+bool SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem,
+                                                     bool preservePickupAnchor)
 {
     if (g_pNewItemMng)
     {
         ms_pPickedItem = new CNewUIPickedItem;
-        return ms_pPickedItem->Create(g_pNewItemMng, pSrc, pItem);
+        return ms_pPickedItem->Create(g_pNewItemMng, pSrc, pItem, preservePickupAnchor);
     }
     return false;
 }

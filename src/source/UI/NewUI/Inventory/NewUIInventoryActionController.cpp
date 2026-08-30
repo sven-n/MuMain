@@ -39,7 +39,13 @@ bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl
         return false;
     }
 
-    if (CNewUIInventoryCtrl::GetPickedItem() && IsRelease(VK_LBUTTON))
+    const bool hasPickedItem = CNewUIInventoryCtrl::GetPickedItem() != nullptr;
+    if (UI::Items::Drag::ShouldConsumePanelPress(hasPickedItem, IsPress(VK_LBUTTON)))
+    {
+        return true;
+    }
+
+    if (hasPickedItem && IsRelease(VK_LBUTTON))
     {
         return HandlePickedItemPlacement(targetControl);
     }

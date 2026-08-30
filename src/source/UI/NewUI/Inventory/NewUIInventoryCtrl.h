@@ -13,6 +13,19 @@
 #include <span>
 #include "Render/Textures/ZzzTexture.h"
 
+namespace UI::Items::Drag
+{
+    POINT PickupOffset(int itemLeft, int itemTop, int itemWidth, int itemHeight,
+                       int pointerX, int pointerY, bool preserveAnchor);
+    POINT ItemTopLeft(int pointerX, int pointerY, const POINT& pickupOffset);
+    bool ShouldConsumePanelPress(bool hasPickedItem, bool leftButtonPressed);
+}
+
+namespace UI::Items::Grid
+{
+    bool Fits(int startIndex, int itemWidth, int itemHeight, int columnCount, int rowCount);
+}
+
 namespace SEASON3B
 {
     class CNewUIItemMng;
@@ -45,15 +58,17 @@ namespace SEASON3B
         CNewUIInventoryCtrl* m_pSrcInventory;
         ITEM* m_pPickedItem;
 
-        bool	m_bShow;
-        POINT	m_Pos;
-        SIZE	m_Size;
+        bool m_bShow;
+        POINT m_Pos;
+        SIZE m_Size;
+        POINT m_PickupOffset;
 
     public:
         CNewUIPickedItem();
         virtual ~CNewUIPickedItem();
 
-        bool Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem);
+        bool Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem,
+                    bool preservePickupAnchor);
         void Release();
 
         CNewUIInventoryCtrl* GetOwnerInventory() const;
@@ -62,6 +77,7 @@ namespace SEASON3B
 
         const POINT& GetPos() const;
         const SIZE& GetSize() const;
+        const POINT& GetPickupOffset() const;
         void GetRect(RECT& rcBox);
 
         int GetSourceLinealPos();
@@ -269,7 +285,7 @@ namespace SEASON3B
 
         //. PickedItem Control Functions
         static CNewUIPickedItem* GetPickedItem();
-        static bool CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem);
+        static bool CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem, bool preservePickupAnchor = false);
         static void DeletePickedItem();
         static void BackupPickedItem();
 

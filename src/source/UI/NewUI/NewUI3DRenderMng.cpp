@@ -24,10 +24,8 @@ UI::Scaling::Transform TransformForOwner(INewUI3DRenderObj* object)
 
 void RenderWithOwnerLayout(INewUI3DRenderObj* object)
 {
-    const auto previousTransform = UI::Scaling::GetActiveTransform();
-    UI::Scaling::SetActiveTransform(TransformForOwner(object));
+    UI::Scaling::ScopedActiveTransform layout(TransformForOwner(object), true);
     object->Render3D();
-    UI::Scaling::SetActiveTransform(previousTransform);
 }
 }
 
@@ -143,6 +141,17 @@ float SEASON3B::CNewUI3DCamera::GetLayerDepth()
 // NOT reached through this camera — they call EndBitmap()/gluPerspective2 directly themselves,
 // independent of CNewUI3DCamera.)
 
+void SEASON3B::CNewUI3DCamera::Render3D()
+{
+    for (auto* object : m_list3DObjs)
+    {
+        if (object->IsVisible())
+        {
+            RenderWithOwnerLayout(object);
+        }
+    }
+}
+
 bool SEASON3B::CNewUI3DCamera::Render()
 {
     if (m_list3DObjs.empty())
@@ -162,14 +171,7 @@ bool SEASON3B::CNewUI3DCamera::Render()
     EnableDepthMask();
     mu::GetRenderer().ClearDepthBuffer();
 
-    auto li = m_list3DObjs.begin();
-    for (; li != m_list3DObjs.end(); li++)
-    {
-        if ((*li)->IsVisible())
-        {
-            RenderWithOwnerLayout(*li);
-        }
-    }
+    Render3D();
     UpdateMousePositionn();
 
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
@@ -183,10 +185,8 @@ bool SEASON3B::CNewUI3DCamera::Render()
         UI_2DEFFECT_INFO& UI2DEffectInfo = m_deque2DEffects.front();
         if (UI2DEffectInfo.pCallbackFunc)
         {
-            const auto previousTransform = UI::Scaling::GetActiveTransform();
-            UI::Scaling::SetActiveTransform(UI2DEffectInfo.transform);
+            UI::Scaling::ScopedActiveTransform layout(UI2DEffectInfo.transform);
             (*UI2DEffectInfo.pCallbackFunc)(UI2DEffectInfo.pClass, UI2DEffectInfo.dwParamA, UI2DEffectInfo.dwParamB);
-            UI::Scaling::SetActiveTransform(previousTransform);
         }
         m_deque2DEffects.pop_front();
     }
