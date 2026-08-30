@@ -1,3 +1,14 @@
+## [1.2.1](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.0...v1.2.1) (2026-08-30)
+
+### Performance
+
+* **render:** group particle draws by texture behind [Render] SortParticleDraws ([dccda7f](https://github.com/yesid-bocanegra/MuMain/commit/dccda7fc4bb4841c81bdc98b4cb9e24fe89d1946))
+* **render:** upload only changed terrain light rows, not the whole array ([58742b8](https://github.com/yesid-bocanegra/MuMain/commit/58742b8da27c450b06c3a44c11017b14b82217e5))
+
+### Refactoring
+
+* **render:** extract RenderParticle from RenderParticles' loop body ([0f243f8](https://github.com/yesid-bocanegra/MuMain/commit/0f243f8c2643c0e3bc55b6c717ade8b45c1bfd6c))
+
 ## [1.2.0](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.5...v1.2.0) (2026-08-30)
 
 ### Features
