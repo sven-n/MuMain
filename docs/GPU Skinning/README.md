@@ -58,6 +58,9 @@ and HLSL shaders compiled for the active SDL GPU backend.
 
 - SDL GPU is the only renderer. The legacy `[Render] CoreProfile` key is not
   read; it cannot request either an OpenGL Core or Compatibility context.
+- `[Render] SortParticleDraws=1` groups safe additive particle stretches by
+  texture before SDL GPU submission. Default `0` preserves slot order until
+  effects are visually checked on target hardware.
 - `[UI] EnableAnimationTaskPool=1` enables parallel animation processing when
   at least 20 active characters are visible. Default `0` keeps sequential
   processing.

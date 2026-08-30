@@ -59,6 +59,7 @@ add_test(
 )
 
 add_subdirectory(text)
+add_subdirectory(effects)
 
 add_subdirectory(ui)
 

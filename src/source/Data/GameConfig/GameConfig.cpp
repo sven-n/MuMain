@@ -81,6 +81,7 @@ void GameConfig::Load()
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
+    m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no

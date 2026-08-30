@@ -44,6 +44,7 @@ namespace CfgKeys
     // Render
     // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
+    inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
 }
 
 namespace CfgDefaults
@@ -76,4 +77,7 @@ namespace CfgDefaults
 
     // Legacy config compatibility only. SDL GPU ignores this key and default.
     inline constexpr bool CfgDefaultCoreProfile = true;
+
+    // Opt-in until real effects have been visually checked on target hardware.
+    inline constexpr bool CfgDefaultSortParticleDraws = false;
 }
