@@ -128,6 +128,16 @@ public:
 
     GLuint LoadImage(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     bool LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
+    // Like LoadImage(filename, ...), but never shares an existing by-filename match -- always
+    // creates its own independent entry, even if the same file is already resident under a
+    // numbered slot (e.g. BITMAP_LOG_IN+7). Needed by callers that cache the resolved GPU
+    // texture handle indefinitely (RmlUiRenderInterface::LoadTexture): a numbered slot can be
+    // force-reassigned to a completely different file at any time (ReleaseLogoSceneData() ->
+    // OpenCharacterSceneData() reusing BITMAP_LOG_IN+7 for a different asset, say), which
+    // invalidates a shared handle out from under a caller with no way to know it happened. A
+    // dedicated entry costs a small amount of duplicate VRAM for the caller's own textures but
+    // is immune to any other scene's slot churn.
+    GLuint LoadImageExclusive(const std::wstring& filename, GLuint uiFilter = GL_NEAREST, GLuint uiWrapMode = GL_CLAMP_TO_EDGE);
     void UnloadImage(GLuint uiBitmapIndex, bool bForce = false);
     void UnloadAllImages();
 
