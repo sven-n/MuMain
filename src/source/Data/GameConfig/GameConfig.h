@@ -68,6 +68,10 @@ public:
     std::wstring GetFontSelection() const { return m_fontSelection; }
     void SetFontSelection(const std::wstring& font);
 
+    // Active RmlUi theme name ("legacy"/"modern") -- see UI::RmlBridge::RmlTheme.
+    std::wstring GetRmlTheme() const { return m_rmlTheme; }
+    void SetRmlTheme(const std::wstring& theme);
+
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
@@ -125,6 +129,7 @@ private:
 
     std::wstring m_uiLocale;
     std::wstring m_fontSelection;
+    std::wstring m_rmlTheme;
 
     int m_zoom;
     bool m_sortParticleDraws;

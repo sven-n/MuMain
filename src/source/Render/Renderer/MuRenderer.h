@@ -14,6 +14,7 @@
 #include "FramePixelReadback.h"
 
 #include <cstdint>
+#include <functional>
 #include <span>
 #include <string_view>
 
@@ -24,6 +25,12 @@
 struct SDL_GPUDevice;
 struct TTF_TextEngine;
 struct TTF_Font;
+
+// RmlUi port: forward declarations for the per-frame GPU context accessor below, same
+// opaque-pointer convention as GetDevice() -- callers cast after including SDL3 headers.
+struct SDL_GPUCommandBuffer;
+struct SDL_GPUTexture;
+struct SDL_Window;
 
 namespace mu
 {
@@ -124,6 +131,19 @@ struct SkinningParameters
     SkinningTextureCoordinates textureCoordinates = SkinningTextureCoordinates::Mesh;
     bool translate = false;
     bool lightEnabled = false;
+};
+
+// RmlUi port: the current frame's raw SDL_GPU submission context. RmlUi's own vendored
+// RenderInterface_SDL_GPU (ThirdParty/RmlUi/Backends/) manages its own pipelines/buffers but
+// needs the active command buffer + swapchain texture to record into and present through --
+// this is how it gets them without a direct dependency on MuRendererSDLGpu.cpp internals
+// (same pattern as GetDevice() below). All fields are null/zero outside BeginFrame()/EndFrame().
+struct FrameGpuContext
+{
+    SDL_GPUCommandBuffer* commandBuffer = nullptr;
+    SDL_GPUTexture* swapchainTexture = nullptr;
+    std::uint32_t width = 0;
+    std::uint32_t height = 0;
 };
 
 struct RendererStats
@@ -272,6 +292,43 @@ public:
     {
         return nullptr;
     }
+
+    // RmlUi port: SDL_Window* accessor, same opaque-pointer/nullptr-default convention as
+    // GetDevice() above. RenderInterface_SDL_GPU's constructor needs both.
+    [[nodiscard]] virtual SDL_Window* GetWindow()
+    {
+        return nullptr;
+    }
+
+    // RmlUi port: current frame's command buffer + swapchain texture. See FrameGpuContext's
+    // own comment above. Valid only between BeginFrame() and EndFrame(); default (all-null)
+    // outside that window, same as GetDevice()'s "not initialized" nullptr default.
+    [[nodiscard]] virtual FrameGpuContext GetFrameGpuContext()
+    {
+        return {};
+    }
+
+    // RmlUi port: resolves this engine's logical texture id (BITMAP_t::TextureNumber, despite
+    // its GLuint-typed name -- CGlobalBitmap sets it from CreateTexture()'s returned id, not a
+    // real GL name, on this backend) to the raw SDL_GPUTexture* RmlUi's own vendored
+    // RenderInterface_SDL_GPU expects as its TextureHandle. Returns nullptr if textureId isn't
+    // currently registered. Opaque void*, same convention as GetDevice().
+    [[nodiscard]] virtual void* GetRawTexture(std::uint32_t /*textureId*/)
+    {
+        return nullptr;
+    }
+
+    // RmlUi port: registers a callback the backend invokes once per frame after its own
+    // game-content replay/blit is fully recorded onto the frame's command buffer, but before
+    // that command buffer is submitted. This is the seam RmlUi needs to render "last" (see
+    // docs/rmlui-ui-system/architecture.md's ordering invariant) without EndFrame() itself
+    // knowing anything about RmlUi -- RmlUiRuntime::Create() is the only caller. Calling
+    // RenderScene() (or similar, mid-frame) is too early: game content is only *recorded* there,
+    // not yet replayed onto the command buffer, so anything drawn at that point would land
+    // before the game's own content instead of on top of it. Calling after EndFrame() returns is
+    // too late: the command buffer is already submitted and the swapchain texture is gone.
+    // Pass an empty std::function to unregister. Default no-op backend never calls anything.
+    virtual void SetPreSubmitCallback(std::function<void()> /*callback*/) {}
 
     // Story 7.9.8 (AC-2): SDL_ttf GPU text engine accessor.
     // Returns the TTF_TextEngine* for creating TTF_Text objects, or nullptr if unavailable.

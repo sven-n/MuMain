@@ -239,6 +239,9 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 static SDL_GPUDevice* s_device = nullptr;
 static SDL_Window* s_window = nullptr;
 
+// RmlUi port: see SetPreSubmitCallback's own comment (MuRenderer.h) for what this is and why.
+static std::function<void()> s_preSubmitCallback;
+
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
 static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
@@ -2012,6 +2015,18 @@ public:
             }
         }
 
+        // RmlUi port: fires after this frame's own game content is fully recorded onto s_cmdBuf
+        // (the blit-to-swapchain above) but before it's submitted -- see SetPreSubmitCallback's
+        // own comment (MuRenderer.h) for why this exact spot is the only correct one. Skipped on
+        // a frame that took the readback branch above and already submitted+nulled s_cmdBuf
+        // early (screenshot capture); RmlUi simply doesn't render that one frame, matching this
+        // path's existing "screenshots don't include the frame that happened to overlap them"
+        // character rather than adding new complexity to cover it.
+        if (s_cmdBuf && s_preSubmitCallback)
+        {
+            s_preSubmitCallback();
+        }
+
         if (s_cmdBuf)
         {
             SDL_SubmitGPUCommandBuffer(s_cmdBuf);
@@ -2394,6 +2409,36 @@ public:
             mu::log::Get("render")->warn("SDL_gpu -- GetDevice() called before Init() or after Shutdown()");
         }
         return s_device;
+    }
+
+    // RmlUi port: SDL_Window* accessor, mirrors GetDevice() above.
+    [[nodiscard]] SDL_Window* GetWindow() override
+    {
+        return s_window;
+    }
+
+    // RmlUi port: current frame's command buffer + swapchain texture, for
+    // RenderInterface_SDL_GPU::BeginFrame(). Null/zero outside BeginFrame()/EndFrame() --
+    // s_cmdBuf and s_swapchainTexture are reset at the top of BeginFrame() and s_cmdBuf is
+    // cleared to nullptr once submitted in EndFrame(), so this naturally reflects that window
+    // without extra bookkeeping here.
+    [[nodiscard]] FrameGpuContext GetFrameGpuContext() override
+    {
+        return FrameGpuContext{s_cmdBuf, s_swapchainTexture, s_swapW, s_swapH};
+    }
+
+    // RmlUi port: looks up s_textureMap directly rather than going through ResolveTextureId(),
+    // since RmlUi needs the actual SDL_GPUTexture* to hand to its own vendored backend, not a
+    // resolved logical id.
+    [[nodiscard]] void* GetRawTexture(std::uint32_t textureId) override
+    {
+        auto it = s_textureMap.find(textureId);
+        return it != s_textureMap.end() ? it->second : nullptr;
+    }
+
+    void SetPreSubmitCallback(std::function<void()> callback) override
+    {
+        s_preSubmitCallback = std::move(callback);
     }
 
     // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.

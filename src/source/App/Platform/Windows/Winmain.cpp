@@ -22,6 +22,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Network/Reconnect/ReconnectManager.h"
@@ -175,6 +176,12 @@ static void ShutdownRendererWindow()
         ReleaseDC(g_hWnd, g_hDC);
         g_hDC = nullptr;
     }
+
+    // Must run before ShutdownSDLGpuRenderer() -- Rml::Shutdown() (inside Destroy()) releases
+    // every outstanding compiled-geometry/texture handle via RmlUiRenderInterface, which needs
+    // a live SDL_GPUDevice while that happens. No-ops safely if Create() never ran (the
+    // InitSDLGpuRenderer failure path above also calls this function).
+    RmlUiRuntime::Instance().Destroy();
 
     mu::ShutdownSDLGpuRenderer();
     g_hRC = nullptr;
@@ -1914,6 +1921,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
     g_ErrorReport.AddSeparator();
+
+    // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
+    // SDL_GPUDevice/SDL_Window from mu::GetRenderer() (GetDevice()/GetWindow()).
+    RmlUiRuntime::Instance().Create(WindowWidth, WindowHeight);
     g_ErrorReport.WriteSoundCardInfo();
 
     // SDL_CreateWindow already shows the window.

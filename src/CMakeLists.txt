@@ -23,6 +23,7 @@ add_subdirectory(ThirdParty/SDL EXCLUDE_FROM_ALL)
 set(_saved_BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS}")
 set(BUILD_SHARED_LIBS OFF)
 FetchContent_MakeAvailable(SDL3_ttf)
+FetchContent_MakeAvailable(SDL3_image)
 set(BUILD_SHARED_LIBS "${_saved_BUILD_SHARED_LIBS}")
 
 # FreeType -- RmlUi's default font engine (below) requires a Freetype::Freetype target.
@@ -204,6 +205,9 @@ find_package(OpenSSL REQUIRED COMPONENTS Crypto)
 target_link_libraries(MuClient PUBLIC OpenSSL::Crypto)
 if(TARGET SDL3_ttf::SDL3_ttf)
   target_link_libraries(MuClient PUBLIC SDL3_ttf::SDL3_ttf)
+endif()
+if(TARGET SDL3_image::SDL3_image)
+  target_link_libraries(MuClient PUBLIC SDL3_image::SDL3_image)
 endif()
 
 # RmlUi (game UI middleware). The real target is rmlui_core, aliased as RmlUi::Core
