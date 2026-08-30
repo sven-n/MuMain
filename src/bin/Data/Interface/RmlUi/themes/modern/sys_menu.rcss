@@ -1,0 +1,13 @@
+/* "Modern" theme for the system menu -- flat programmatic panel, matching login.rcss's modern
+   theme's translucent-dark-panel-with-border look for visual consistency across modern windows.
+   Buttons rely entirely on base.rcss's shared .btn (see the legacy theme's identical note). */
+
+#panel {
+	position: absolute;
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+	background-color: rgba(18, 20, 28, 235);
+	border: 1px rgba(255, 255, 255, 30);
+	border-radius: 10px;
+}
