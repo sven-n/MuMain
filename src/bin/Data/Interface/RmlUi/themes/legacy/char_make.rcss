@@ -1,0 +1,134 @@
+/* RmlUi overlay for the character-creation dialog (CCharMakeWin). CWin draws nothing for the
+   outer window (m_winBack always used nTexID=-2, even before this migration -- the live 3D
+   character preview shows through everywhere #panel's children don't cover). Source art per
+   Engine/Object/ZzzOpenData.cpp's OpenCharacterSceneData(): cha_id.tga (346x38, the name-input
+   frame), cha_bt.tga (108x26-per-frame, 4-frame vertical strip -- frame 0 = unchecked, frame 3 =
+   checked, matching CButton::Create's nCheckUpFrame=3 param), and the same message_ok_b_all.tga/
+   loding_cancel_b_all.tga OK/Cancel art login.rcss already uses (BITMAP_BUTTON+0/+1). Only
+   idle/checked frames are reproduced -- same simplification precedent every other window's
+   buttons already established. The stat/description panels were always flat CSprite fills
+   (CSprite::SetColor/SetAlpha, not image art) in the original, reproduced here as plain
+   background-color, same as CCharSelMainWin's info-bar. */
+
+@spritesheet charmake-input-sheet
+{
+	src: "../../../cha_id.tga";
+	charmake-input-image: 0px 0px 346px 38px;
+}
+@spritesheet charmake-job-sheet
+{
+	src: "../../../cha_bt.tga";
+	charmake-job-unchecked: 0px 0px 108px 26px;
+	charmake-job-checked:   0px 78px 108px 26px;
+}
+@spritesheet charmake-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	charmake-ok-idle: 0px 0px 54px 30px;
+}
+@spritesheet charmake-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	charmake-cancel-idle: 0px 0px 54px 30px;
+}
+
+#panel {
+	position: absolute;
+	/* Width/height and every child's left/top are pushed from C++ (CCharMakeWin::Create/
+	   SetPosition) -- same idiom as every other migrated window. */
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+}
+
+.job-btn {
+	position: absolute;
+	width: 108px;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(charmake-job-unchecked);
+	/* Representative colors for the original's per-state text-color table (jobButtonColors in
+	   CharMakeWin.cpp) -- unchecked/enabled, checked, and disabled, without reproducing the
+	   hover/press color swaps (same "idle+checked only" simplification as the art above). */
+	color: #e2e2e2;
+}
+.job-btn.checked {
+	decorator: image(charmake-job-checked);
+	color: #ffffff;
+}
+.job-btn.disabled {
+	pointer-events: none;
+	color: #777777;
+	cursor: default;
+}
+
+/* Flat, semi-transparent backing panels -- always plain CSprite fills in the original, never
+   sprite art (see this file's header comment). .tall reproduces the Dark Lord-only extra stat
+   row's larger panel height (96px vs 80px, CMW_SPR_STAT's SetSize call). */
+.stat-panel, .desc-panel {
+	position: absolute;
+}
+.stat-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 108px;
+	height: 80px;
+	background-color: rgba(0, 0, 0, 143);
+}
+.stat-bg.tall {
+	height: 96px;
+}
+.desc-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 454px;
+	height: 51px;
+	background-color: rgba(0, 0, 0, 143);
+}
+
+.stat-row {
+	position: absolute;
+	left: 22px;
+}
+.stat-label {
+	color: #ffffff;
+}
+.stat-value {
+	position: absolute;
+	left: 32px;
+	color: #ffb400;
+}
+
+.desc-line {
+	position: absolute;
+	left: 10px;
+	white-space: nowrap;
+}
+
+.input-frame {
+	position: absolute;
+	width: 346px;
+	height: 38px;
+	decorator: image(charmake-input-image);
+	pointer-events: none;
+}
+
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.btn-ok {
+	decorator: image(charmake-ok-idle);
+}
+.btn-cancel {
+	decorator: image(charmake-cancel-idle);
+}

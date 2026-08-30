@@ -27,6 +27,13 @@
 #include <iterator>
 #include <string>
 
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Event.h>
+
 namespace
 {
     constexpr std::array<DWORD, BTN_IMG_MAX> kJobButtonColors{
@@ -148,6 +155,7 @@ void CCharMakeWin::Create()
 {
     CInput& rInput = CInput::Instance();
     CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    SetMovable(false);
 
     m_winBack.Create(454, 406, -2);
 
@@ -185,6 +193,53 @@ void CCharMakeWin::Create()
     m_nSelJob = CLASS_KNIGHT;
     m_abtnJob[m_nSelJob].SetCheck(true);
 
+    // RmlUi migration -- guarded the same way every other migrated window's Create() is
+    // (re-entrant on resolution change), so the document/model/array size are set up once, ever.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_make",
+            [this](Rml::DataModelConstructor& c, CharMakeRmlModel& model)
+            {
+                model.jobs.resize(MAX_CLASS);
+
+                auto job = c.RegisterStruct<JobButtonEntry>();
+                job.RegisterMember("rel_left", &JobButtonEntry::relLeft);
+                job.RegisterMember("rel_top", &JobButtonEntry::relTop);
+                job.RegisterMember("checked", &JobButtonEntry::checked);
+                job.RegisterMember("disabled", &JobButtonEntry::disabled);
+                job.RegisterMember("label", &JobButtonEntry::label);
+                c.RegisterArray<std::vector<JobButtonEntry>>();
+
+                c.Bind("jobs", &model.jobs);
+                c.Bind("dark_lord_extra", &model.darkLordExtra);
+                c.Bind("stat_label0", &model.statLabel0);
+                c.Bind("stat_label1", &model.statLabel1);
+                c.Bind("stat_label2", &model.statLabel2);
+                c.Bind("stat_label3", &model.statLabel3);
+                c.Bind("stat_label4", &model.statLabel4);
+                c.Bind("stat_value0", &model.statValue0);
+                c.Bind("stat_value1", &model.statValue1);
+                c.Bind("stat_value2", &model.statValue2);
+                c.Bind("stat_value3", &model.statValue3);
+                c.Bind("desc_line1", &model.descLine1);
+                c.Bind("desc_line2", &model.descLine2);
+
+                c.BindEventCallback("charmake_select_job",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickJob(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("charmake_ok_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+                c.BindEventCallback("charmake_cancel_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
+    }
+
     UpdateDisplay();
 }
 
@@ -193,11 +248,17 @@ void CCharMakeWin::PreRelease()
     for (int i = 0; i < CMW_SPR_MAX; ++i)
         m_asprBack[i].Release();
     m_winBack.Release();
+
+    // See CLoginMainWin::PreRelease()'s identical comment.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 {
     m_winBack.SetPosition(nXCoord, nYCoord);
+    m_nOriginX = nXCoord;
+    m_nOriginY = nYCoord;
 
     const int baseX = nXCoord + 346;
     m_asprBack[CMW_SPR_STAT].SetPosition(baseX, nYCoord + kStatSpriteOffsetY);
@@ -205,19 +266,40 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
     const int buttonHeight = m_abtnJob[0].GetHeight();
     int baseY = nYCoord + kJobButtonStartY;
 
-    for (int classIndex = 0; classIndex < 3; ++classIndex)
-        m_abtnJob[classIndex].SetPosition(baseX, baseY + classIndex * buttonHeight);
+    auto& jobs = m_RmlBinder.GetModel().jobs;
+    auto pushJobPos = [&](int classIndex, int screenX, int screenY)
+    {
+        if (jobs.empty()) return; // model not created yet (RmlUi not up) -- nothing to push
+        jobs[classIndex].relLeft = screenX - nXCoord;
+        jobs[classIndex].relTop = screenY - nYCoord;
+    };
 
-    m_abtnJob[CLASS_SUMMONER].SetPosition(baseX, baseY + kJobButtonSummonerRow * buttonHeight);
+    for (int classIndex = 0; classIndex < 3; ++classIndex)
+    {
+        const int y = baseY + classIndex * buttonHeight;
+        m_abtnJob[classIndex].SetPosition(baseX, y);
+        pushJobPos(classIndex, baseX, y);
+    }
+
+    {
+        const int y = baseY + kJobButtonSummonerRow * buttonHeight;
+        m_abtnJob[CLASS_SUMMONER].SetPosition(baseX, y);
+        pushJobPos(CLASS_SUMMONER, baseX, y);
+    }
 
     baseY = nYCoord + kJobButtonRageFighterY;
     m_abtnJob[CLASS_RAGEFIGHTER].SetPosition(baseX, baseY);
+    pushJobPos(CLASS_RAGEFIGHTER, baseX, baseY);
 
     for (int classIndex = CLASS_DARK; classIndex <= CLASS_DARK_LORD; ++classIndex)
     {
         const int row = (classIndex - CLASS_DARK) + 1;
-        m_abtnJob[classIndex].SetPosition(baseX, baseY + row * buttonHeight);
+        const int y = baseY + row * buttonHeight;
+        m_abtnJob[classIndex].SetPosition(baseX, y);
+        pushJobPos(classIndex, baseX, y);
     }
+    if (!jobs.empty())
+        m_RmlBinder.MarkDirty("jobs");
 
     baseY = nYCoord + kOkButtonOffsetY;
     m_aBtn[CMW_OK].SetPosition(baseX, baseY);
@@ -233,6 +315,32 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
     }
 
     m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + kDescSpriteOffsetY);
+
+    // RmlUi panel/sub-panels: positioned/sized to the same real window-pixel geometry the legacy
+    // sprites above use -- same idiom as every other migrated window's SetPosition().
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
+        {
+            panel->SetProperty("left", std::to_string(nXCoord) + "px");
+            panel->SetProperty("top", std::to_string(nYCoord) + "px");
+            panel->SetProperty("width", std::to_string(m_winBack.GetWidth()) + "px");
+            panel->SetProperty("height", std::to_string(m_winBack.GetHeight()) + "px");
+        }
+        auto setPos = [this](const char* id, int relLeft, int relTop)
+        {
+            if (Rml::Element* e = m_pRmlDoc->GetElementById(id))
+            {
+                e->SetProperty("left", std::to_string(relLeft) + "px");
+                e->SetProperty("top", std::to_string(relTop) + "px");
+            }
+        };
+        setPos("stat_panel", 346, kStatSpriteOffsetY);
+        setPos("desc_panel", 0, kDescSpriteOffsetY);
+        setPos("input_frame", 0, kInputSpriteOffsetY);
+        setPos("btn_ok", 346, kOkButtonOffsetY);
+        setPos("btn_cancel", kCancelButtonOffsetX, kOkButtonOffsetY);
+    }
 }
 
 void CCharMakeWin::Show(bool bShow)
@@ -271,20 +379,12 @@ void CCharMakeWin::Show(bool bShow)
             g_pSingleTextInputBox->SetState(UISTATE_HIDE);
         }
     }
-}
 
-bool CCharMakeWin::CursorInWin(int nArea)
-{
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
+    if (m_pRmlDoc)
     {
-    case WA_MOVE:
-        return false;
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        else       m_pRmlDoc->Hide();
     }
-
-    return CWin::CursorInWin(nArea);
 }
 
 void CCharMakeWin::UpdateDisplay()
@@ -315,11 +415,23 @@ void CCharMakeWin::UpdateDisplay()
     SelectCreateCharacter();
 }
 
+void CCharMakeWin::RmlClickJob(int nClassIndex)
+{
+    if (nClassIndex < 0 || nClassIndex >= MAX_CLASS)
+        return;
+    if (!m_abtnJob[nClassIndex].IsEnable())
+        return;
+    m_nRmlJobClickedIndex = nClassIndex;
+}
+
 void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 {
+    const int rmlJobClicked = m_nRmlJobClickedIndex;
+    m_nRmlJobClickedIndex = -1;
+
     for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
     {
-        if (!m_abtnJob[classIndex].IsClick())
+        if (!m_abtnJob[classIndex].IsClick() && classIndex != rmlJobClicked)
             continue;
 
         for (auto& button : m_abtnJob)
@@ -335,12 +447,14 @@ void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
     }
 
     {
-        if (m_aBtn[CMW_OK].IsClick())
+        if (m_aBtn[CMW_OK].IsClick() || m_bRmlOkClicked)
         {
+            m_bRmlOkClicked = false;
             RequestCreateCharacter();
         }
-        else if (m_aBtn[CMW_CANCEL].IsClick())
+        else if (m_aBtn[CMW_CANCEL].IsClick() || m_bRmlCancelClicked)
         {
+            m_bRmlCancelClicked = false;
             CUIMng::Instance().HideWin(this);
         }
         else if (CInput::Instance().IsKeyDown(VK_RETURN))
@@ -356,6 +470,11 @@ void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
         }
     }
     UpdateCreateCharacter();
+
+    // Input polling, moved here from RenderControls() (matches CLoginWin's own DoAction()
+    // placement) -- RenderTextOnTop() below now only draws, called from the post-RmlUi seam.
+    if (g_iChatInputType == 1)
+        g_pSingleTextInputBox->DoAction();
 }
 
 void CCharMakeWin::RequestCreateCharacter()
@@ -387,78 +506,82 @@ void CCharMakeWin::RequestCreateCharacter()
 
 void CCharMakeWin::RenderControls()
 {
+    // The live 3D preview stays exactly as before -- see this class's header comment for why it
+    // composites correctly underneath RmlUi's later render pass without any changes here.
     RenderCreateCharacter();
-    BeginBitmap();
-    ::EnableAlphaTest();
 
-    for (auto& sprite : m_asprBack)
-    {
-        sprite.Render();
-    }
-    CWin::RenderButtons();
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
+    // All 2D chrome (job buttons, stat/description panels, input-frame background, OK/Cancel)
+    // now renders via the RmlUi overlay -- see char_make.rml/.rcss. SyncRmlModel() is the only
+    // thing this override still needs to do; RenderTextOnTop() (the actual input text) is called
+    // from Winmain.cpp's SetPostRmlUiCallback instead of here, so it isn't drawn twice.
+    SyncRmlModel();
+}
 
-    const auto& stats = kClassStatTable[static_cast<std::size_t>(m_nSelJob)];
-    const int statBaseX = m_asprBack[CMW_SPR_STAT].GetXPos() + kStatTextOffsetX;
-    for (std::size_t statIndex = 0; statIndex < stats.values.size(); ++statIndex)
-    {
-        const int statScreenY = int(
-            (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + static_cast<int>(statIndex) * kStatLineSpacing)
-            / g_fScreenRate_y);
-
-        g_pRenderText->SetTextColor(CLRDW_ORANGE);
-        g_pRenderText->RenderText(
-            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
-            statScreenY,
-            stats.values[statIndex]);
-
-        g_pRenderText->SetTextColor(CLRDW_WHITE);
-        g_pRenderText->RenderText(
-            int(statBaseX / g_fScreenRate_x),
-            statScreenY,
-            I18N::Game::Lookup(kStatLabelBaseId + static_cast<int>(statIndex)));
-    }
-
-    if (m_nSelJob == CLASS_DARK_LORD)
-    {
-        const int leadershipY = int(
-            (m_asprBack[CMW_SPR_STAT].GetYPos() + kStatYOffset + 4 * kStatLineSpacing) / g_fScreenRate_y);
-
-        g_pRenderText->SetTextColor(CLRDW_ORANGE);
-        g_pRenderText->RenderText(
-            int((statBaseX + kStatValueOffset) / g_fScreenRate_x),
-            leadershipY,
-            kDarkLordLeadershipStatValue);
-        g_pRenderText->SetTextColor(CLRDW_WHITE);
-        g_pRenderText->RenderText(
-            int(statBaseX / g_fScreenRate_x),
-            leadershipY,
-            I18N::Game::Lookup(kDarkLordLeadershipTextId));
-    }
-
-    for (int lineIndex = 0; lineIndex < m_nDescLine; ++lineIndex)
-    {
-        g_pRenderText->RenderText(
-            int((m_asprBack[CMW_SPR_DESC].GetXPos() + kDescriptionTextOffsetX) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_DESC].GetYPos() + kDescriptionTextOffsetY + lineIndex * kDescriptionLineSpacing)
-                / g_fScreenRate_y),
-            m_aszJobDesc[lineIndex]);
-    }
-
-    g_pRenderText->SetFont(g_hFont);
-
+void CCharMakeWin::RenderTextOnTop()
+{
     if (g_iChatInputType == 1)
-    {
-        g_pSingleTextInputBox->DoAction();
         g_pSingleTextInputBox->Render();
-    }
     else if (g_iChatInputType == 0)
         ::RenderInputText(
-            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + 78) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + 21) / g_fScreenRate_y),
+            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + kInputTextOffsetX) / g_fScreenRate_x),
+            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + kInputTextOffsetY) / g_fScreenRate_y),
             0);
+}
+
+void CCharMakeWin::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    auto& model = m_RmlBinder.GetModel();
+    auto& jobs = model.jobs;
+    bool jobsDirty = false;
+    for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
+    {
+        JobButtonEntry& entry = jobs[classIndex];
+        const bool checked = m_abtnJob[classIndex].IsCheck();
+        const bool disabled = !m_abtnJob[classIndex].IsEnable();
+        if (entry.checked != checked) { entry.checked = checked; jobsDirty = true; }
+        if (entry.disabled != disabled) { entry.disabled = disabled; jobsDirty = true; }
+
+        const std::string label = StringUtils::WideToNarrow(I18N::Game::Lookup(kClassButtonTextIds[classIndex]));
+        if (entry.label != label) { entry.label = label; jobsDirty = true; }
+    }
+    if (jobsDirty)
+        m_RmlBinder.MarkDirty("jobs");
+
+    const bool isDarkLord = (m_nSelJob == CLASS_DARK_LORD);
+    if (model.darkLordExtra != isDarkLord)
+    {
+        model.darkLordExtra = isDarkLord;
+        m_RmlBinder.MarkDirty("dark_lord_extra");
+    }
+
+    auto syncLabel = [this](Rml::String CharMakeRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (m_RmlBinder.GetModel().*field != utf8)
+        {
+            m_RmlBinder.GetModel().*field = utf8;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    syncLabel(&CharMakeRmlModel::statLabel0, "stat_label0", I18N::Game::Lookup(kStatLabelBaseId + 0));
+    syncLabel(&CharMakeRmlModel::statLabel1, "stat_label1", I18N::Game::Lookup(kStatLabelBaseId + 1));
+    syncLabel(&CharMakeRmlModel::statLabel2, "stat_label2", I18N::Game::Lookup(kStatLabelBaseId + 2));
+    syncLabel(&CharMakeRmlModel::statLabel3, "stat_label3", I18N::Game::Lookup(kStatLabelBaseId + 3));
+    syncLabel(&CharMakeRmlModel::statLabel4, "stat_label4", I18N::Game::Lookup(kDarkLordLeadershipTextId));
+
+    const auto& stats = kClassStatTable[static_cast<std::size_t>(m_nSelJob)];
+    syncLabel(&CharMakeRmlModel::statValue0, "stat_value0", stats.values[0]);
+    syncLabel(&CharMakeRmlModel::statValue1, "stat_value1", stats.values[1]);
+    syncLabel(&CharMakeRmlModel::statValue2, "stat_value2", stats.values[2]);
+    syncLabel(&CharMakeRmlModel::statValue3, "stat_value3", stats.values[3]);
+    // The Dark Lord leadership row's value is a fixed constant in the original (not part of
+    // kClassStatTable) -- reproduced as-is, gated by dark_lord_extra above rather than a live
+    // 5th table column.
+
+    syncLabel(&CharMakeRmlModel::descLine1, "desc_line1", m_nDescLine > 0 ? m_aszJobDesc[0] : L"");
+    syncLabel(&CharMakeRmlModel::descLine2, "desc_line2", m_nDescLine > 1 ? m_aszJobDesc[1] : L"");
 }
 
 void CCharMakeWin::SelectCreateCharacter()

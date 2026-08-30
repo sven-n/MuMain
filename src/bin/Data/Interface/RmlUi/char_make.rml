@@ -1,0 +1,40 @@
+<rml>
+<head>
+	<title>Character Creation</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="char_make.rcss"/>
+</head>
+<body data-model="char_make">
+	<!-- No panel background at all (matches the legacy m_winBack, which already drew nothing --
+	     CWin::Create() used nTexID=-2 before this migration too): the live 3D character preview
+	     (CCharMakeWin::RenderCreateCharacter(), untouched) shows through everywhere #panel and its
+	     children don't cover. -->
+	<div id="panel">
+		<div class="job-btn" data-for="job : jobs" data-class-checked="job.checked" data-class-disabled="job.disabled"
+		     data-style-left="job.rel_left + 'px'" data-style-top="job.rel_top + 'px'"
+		     data-event-click="charmake_select_job(it_index)">{{job.label}}</div>
+
+		<div id="stat_panel" class="stat-panel">
+			<div class="stat-bg" data-class-tall="dark_lord_extra"></div>
+			<div class="stat-row" style="top: 10px;"><span class="stat-label">{{stat_label0}}</span><span class="stat-value">{{stat_value0}}</span></div>
+			<div class="stat-row" style="top: 27px;"><span class="stat-label">{{stat_label1}}</span><span class="stat-value">{{stat_value1}}</span></div>
+			<div class="stat-row" style="top: 44px;"><span class="stat-label">{{stat_label2}}</span><span class="stat-value">{{stat_value2}}</span></div>
+			<div class="stat-row" style="top: 61px;"><span class="stat-label">{{stat_label3}}</span><span class="stat-value">{{stat_value3}}</span></div>
+			<div class="stat-row" style="top: 78px;" data-class-hidden="!dark_lord_extra"><span class="stat-label">{{stat_label4}}</span><span class="stat-value">25</span></div>
+		</div>
+
+		<div id="desc_panel" class="desc-panel">
+			<div class="desc-bg"></div>
+			<div class="desc-line" style="top: 12px;">{{desc_line1}}</div>
+			<div class="desc-line" style="top: 31px;">{{desc_line2}}</div>
+		</div>
+
+		<!-- Background art only -- the actual name text is drawn on top afterward by legacy code
+		     (CCharMakeWin::RenderTextOnTop(), called from Winmain.cpp's SetPostRmlUiCallback). -->
+		<div id="input_frame" class="input-frame"></div>
+
+		<div id="btn_ok" class="btn btn-ok" data-event-click="charmake_ok_click"></div>
+		<div id="btn_cancel" class="btn btn-cancel" data-event-click="charmake_cancel_click"></div>
+	</div>
+</body>
+</rml>

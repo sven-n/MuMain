@@ -1,0 +1,110 @@
+/* "Modern" theme for the character-creation dialog -- flat programmatic chrome, no legacy sprite
+   art (same approach as every other migrated window's modern theme). Job buttons, OK/Cancel, and
+   the input frame all use flat background-color/border instead of image decorators; the stat and
+   description panels were already flat fills in the original (see the legacy theme's own
+   comment), so both themes share the identical treatment for those. */
+
+#panel {
+	position: absolute;
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+}
+
+.job-btn {
+	position: absolute;
+	width: 108px;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+	border-radius: 4px;
+	color: #e2e2e2;
+}
+.job-btn:hover {
+	background-color: rgba(192, 160, 80, 60);
+	border: 1px #c0a050;
+}
+.job-btn.checked {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+	color: #ffffff;
+}
+.job-btn.disabled {
+	pointer-events: none;
+	color: #777777;
+	cursor: default;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+}
+
+.stat-panel, .desc-panel {
+	position: absolute;
+}
+.stat-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 108px;
+	height: 80px;
+	background-color: rgba(0, 0, 0, 143);
+}
+.stat-bg.tall {
+	height: 96px;
+}
+.desc-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 454px;
+	height: 51px;
+	background-color: rgba(0, 0, 0, 143);
+}
+
+.stat-row {
+	position: absolute;
+	left: 22px;
+}
+.stat-label {
+	color: #ffffff;
+}
+.stat-value {
+	position: absolute;
+	left: 32px;
+	color: #ffb400;
+}
+
+.desc-line {
+	position: absolute;
+	left: 10px;
+	white-space: nowrap;
+}
+
+.input-frame {
+	position: absolute;
+	width: 346px;
+	height: 38px;
+	background-color: rgba(0, 0, 0, 110);
+	border: 1px rgba(255, 255, 255, 40);
+	border-radius: 3px;
+	pointer-events: none;
+}
+
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+	border-radius: 4px;
+	pointer-events: auto;
+}
+.btn:hover {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+}
