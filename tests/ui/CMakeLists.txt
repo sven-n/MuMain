@@ -48,7 +48,9 @@ mu_add_test(
 
 mu_add_test(
     NAME ui_scaling_tests
-    SOURCES test_ui_scaling.cpp
+    SOURCES
+        test_ui_scaling.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
     LINK_LIBS MuClient
 )
 

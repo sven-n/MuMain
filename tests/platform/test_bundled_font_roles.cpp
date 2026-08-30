@@ -6,6 +6,9 @@
 #include "Core/Platform/BundledFonts.h"
 #include "UI/Scaling/UITransform.h"
 
+int MouseX;
+int MouseY;
+
 TEST_CASE("bundled font roles resolve deterministically [platform][bundled_font]")
 {
     CHECK(ResolveBundledFont("").family == std::string_view("DejaVu Sans"));
@@ -27,8 +30,8 @@ TEST_CASE("bundled font paths follow the normalized runtime directory [platform]
 TEST_CASE("bundled font roles load their maximum responsive size [platform][bundled_font]")
 {
     using UI::Scaling::FontRole;
-    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Normal) == 13);
-    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Bold) == 13);
-    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Big) == 26);
-    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Fixed) == 15);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Normal) == 16);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Bold) == 16);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Big) == 32);
+    CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Fixed) == 18);
 }
