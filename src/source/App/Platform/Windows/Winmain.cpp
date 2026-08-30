@@ -951,6 +951,7 @@ void HandleWindowResize(int width, int height)
         return;
     WindowWidth = width;
     WindowHeight = height;
+    CInput::Instance().SetScreenSize(WindowWidth, WindowHeight);
     UI::Scaling::SetActiveTransform(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;

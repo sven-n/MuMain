@@ -307,8 +307,6 @@ void CUIMng::CreateCharacterScene()
 
     m_CharSelMainWin.Create();
     m_WinList.AddHead(&m_CharSelMainWin);
-    nBaseY = int(567.0f / 600.0f * (float)rInput.GetScreenHeight());
-    m_CharSelMainWin.SetPosition(22, nBaseY - m_CharSelMainWin.GetHeight() - 11);
 
     m_CharMakeWin.Create();
     m_WinList.AddHead(&m_CharMakeWin);

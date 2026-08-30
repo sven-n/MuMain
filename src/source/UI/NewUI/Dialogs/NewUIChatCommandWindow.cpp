@@ -157,7 +157,7 @@ void SEASON3B::CNewUIChatCommandWindow::InitButtons()
 
 float SEASON3B::CNewUIChatCommandWindow::GetLayerDepth()
 {
-    return 4.6f;
+    return LayerDepth;
 }
 
 float SEASON3B::CNewUIChatCommandWindow::GetKeyEventOrder()
@@ -586,7 +586,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WindowHeight))
     {
         return true;
     }
@@ -813,9 +813,9 @@ void SEASON3B::CNewUIChatCommandWindow::RenderBaseWindow()
 {
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
-    const auto middleHeight = static_cast<float>(WINDOW_HEIGHT - FRAME_TOP_HEIGHT - FRAME_BOTTOM_HEIGHT);
+    const auto middleHeight = static_cast<float>(WindowHeight - FRAME_TOP_HEIGHT - FRAME_BOTTOM_HEIGHT);
 
-    RenderImage(IMAGE_CHATCOMMAND_BACK, x, y, float(WINDOW_WIDTH), float(WINDOW_HEIGHT));
+    RenderImage(IMAGE_CHATCOMMAND_BACK, x, y, float(WINDOW_WIDTH), float(WindowHeight));
     RenderImage(IMAGE_CHATCOMMAND_TOP, x, y, float(WINDOW_WIDTH), float(FRAME_TOP_HEIGHT));
 
     // The side pieces are stretched instead of drawn one to one: the window is
@@ -828,7 +828,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderBaseWindow()
                        float(FRAME_SIDE_WIDTH), middleHeight, 0.f, 0.f, float(FRAME_SIDE_WIDTH),
                        float(FRAME_SIDE_TEXTURE_HEIGHT));
 
-    RenderImage(IMAGE_CHATCOMMAND_BOTTOM, x, y + float(WINDOW_HEIGHT - FRAME_BOTTOM_HEIGHT), float(WINDOW_WIDTH),
+    RenderImage(IMAGE_CHATCOMMAND_BOTTOM, x, y + float(WindowHeight - FRAME_BOTTOM_HEIGHT), float(WINDOW_WIDTH),
                 float(FRAME_BOTTOM_HEIGHT));
 }
 

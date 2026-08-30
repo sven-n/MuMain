@@ -5,8 +5,10 @@
 
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/NewUI/UILayoutPolicy.h"
 #include "UI/NewUI/Widgets/NewUIButton.h"
 #include "UI/Legacy/UIControls.h"
+#include "UI/Scaling/UITransform.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "GameLogic/Commands/ChatCommandTemplate.h"
 
@@ -40,7 +42,6 @@ class CNewUIChatCommandWindow : public CNewUIObj
     enum eWINDOW_SIZE
     {
         WINDOW_WIDTH = 190,
-        WINDOW_HEIGHT = 459,
         FRAME_TOP_HEIGHT = 64,
         FRAME_SIDE_WIDTH = 21,
         FRAME_BOTTOM_HEIGHT = 45,
@@ -84,6 +85,9 @@ class CNewUIChatCommandWindow : public CNewUIObj
     };
 
 public:
+    static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
+    static constexpr int WindowHeight = UI::Scaling::DockLogicalBottom;
+
     CNewUIChatCommandWindow();
     ~CNewUIChatCommandWindow() override;
 

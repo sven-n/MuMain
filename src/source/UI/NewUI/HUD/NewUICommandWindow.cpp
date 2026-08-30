@@ -285,7 +285,7 @@ void SEASON3B::CNewUICommandWindow::SetPos(int x, int y)
 
 float SEASON3B::CNewUICommandWindow::GetLayerDepth()
 {
-    return 4.6f;
+    return LayerDepth;
 }
 
 void SEASON3B::CNewUICommandWindow::RunCommand()

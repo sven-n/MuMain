@@ -2,10 +2,103 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+#include <algorithm>
+#include <cstddef>
+
 #include "UI/NewUI/NewUIBase.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "Network/MoveCommandData.h"
 #include "UI/NewUI/HUD/NewUIChatLogWindow.h"
+#include "UI/Scaling/UITransform.h"
+
+namespace UI::MoveCommand
+{
+    struct Layout
+    {
+        int windowWidth;
+        int windowHeight;
+        int visibleRows;
+        int listTop;
+        int closeTop;
+        int closeLeft;
+        int closeWidth;
+        int scrollTrackTop;
+        int scrollTrackHeight;
+        int thumbTravel;
+    };
+
+    struct DragState
+    {
+        int scrollOffset;
+        bool dragging;
+        bool releaseConsumed;
+    };
+
+    inline Layout CalculateLayout(int windowY, int rowHeight)
+    {
+        constexpr int kWindowWidth = 230;
+        constexpr int kFixedChromeHeight = 60;
+        constexpr int kListOffsetY = 38;
+        constexpr int kCloseBottomGap = 6;
+        constexpr int kCloseLeft = 2;
+        constexpr int kCloseRightGap = 5;
+        constexpr int kScrollBarCapHeight = 3;
+        constexpr int kScrollThumbHeight = 30;
+
+        const int safeRowHeight = std::max(rowHeight, 1);
+        const int availableHeight = UI::Scaling::DockLogicalBottom - windowY;
+        const int visibleRows = std::max(1, (availableHeight - kFixedChromeHeight) / safeRowHeight);
+        const int windowHeight = kFixedChromeHeight + visibleRows * safeRowHeight;
+        const int listTop = windowY + kListOffsetY;
+        const int closeTop = windowY + windowHeight - safeRowHeight - kCloseBottomGap;
+        const int closeWidth = kWindowWidth - kCloseRightGap;
+        const int scrollTrackTop = listTop - kScrollBarCapHeight;
+        const int scrollTrackHeight = visibleRows * safeRowHeight;
+        const int thumbTravel = std::max(0, scrollTrackHeight - kScrollThumbHeight);
+        return { kWindowWidth, windowHeight, visibleRows, listTop, closeTop, kCloseLeft, closeWidth, scrollTrackTop, scrollTrackHeight, thumbTravel };
+    }
+
+    inline int MaximumScrollOffset(std::size_t itemCount, int visibleRows)
+    {
+        if (visibleRows <= 0 || itemCount <= static_cast<std::size_t>(visibleRows))
+            return 0;
+        return static_cast<int>(itemCount - static_cast<std::size_t>(visibleRows));
+    }
+
+    inline int ClampScrollOffset(int offset, std::size_t itemCount, int visibleRows)
+    {
+        return std::clamp(offset, 0, MaximumScrollOffset(itemCount, visibleRows));
+    }
+
+    inline int ThumbYForScrollOffset(int offset, const Layout& layout, std::size_t itemCount)
+    {
+        const int maximumOffset = MaximumScrollOffset(itemCount, layout.visibleRows);
+        if (maximumOffset == 0 || layout.thumbTravel == 0)
+            return layout.scrollTrackTop;
+
+        const int clampedOffset = ClampScrollOffset(offset, itemCount, layout.visibleRows);
+        return layout.scrollTrackTop + (clampedOffset * layout.thumbTravel + maximumOffset / 2) / maximumOffset;
+    }
+
+    inline int ScrollOffsetForThumbY(int thumbY, const Layout& layout, std::size_t itemCount)
+    {
+        const int maximumOffset = MaximumScrollOffset(itemCount, layout.visibleRows);
+        if (maximumOffset == 0 || layout.thumbTravel == 0)
+            return 0;
+
+        const int travel = std::clamp(thumbY - layout.scrollTrackTop, 0, layout.thumbTravel);
+        return (travel * maximumOffset + layout.thumbTravel / 2) / layout.thumbTravel;
+    }
+
+    inline DragState UpdateDragState(bool dragging, bool released, int mouseY, int grabOffsetY, int scrollOffset,
+                                     const Layout& layout, std::size_t itemCount)
+    {
+        if (!dragging)
+            return { scrollOffset, false, false };
+
+        return { ScrollOffsetForThumbY(mouseY - grabOffsetY, layout, itemCount), !released, released };
+    }
+}
 
 namespace SEASON3B
 {
@@ -29,7 +122,6 @@ namespace SEASON3B
             MOVECOMMAND_SCROLLBAR_TOP_HEIGHT = 3,
             MOVECOMMAND_SCROLLBAR_MIDDLE_WIDTH = 7,
             MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT = 15,
-            MOVECOMMAND_MAX_RENDER_TEXTLINE = 31,
         };
 
         enum MOVECOMMAND_MOUSE_EVENT
@@ -53,31 +145,11 @@ namespace SEASON3B
         POINT						m_ReqLevelPos;
         POINT						m_ReqZenPos;
         int							m_iSelectedMapName;
-        POINT						m_ScrollBarPos;
-        POINT						m_ScrollBtnStartPos;
-        POINT						m_ScrollBtnPos;
-        int							m_iScrollBarHeightPixel;
-        int							m_iRenderStartTextIndex;
-        int							m_iRenderEndTextIndex;
         int							m_iSelectedTextIndex;
-        int							m_iScrollBtnInterval;
-        int							m_iScrollBarMiddleNum;
-        int							m_iScrollBarMiddleRemainderPixel;
-        int							m_iNumPage;
-        int							m_iCurPage;
-        int							m_iTotalMoveScrBtnPixel;
-        int							m_iRemainMoveScrBtnPixel;
-        int							m_icurMoveScrBtnPixelperStep;
-        int							m_iMaxMoveScrBtnPixelperStep;
-        int							m_iMinMoveScrBtnPixelperStep;
-        int							m_iTotalMoveScrBtnperStep;
-        int							m_iRemainMoveScrBtnperStep;
-        int							m_iTotalNumMaxMoveScrBtnperStep;
-        int							m_iTotalNumMinMoveScrBtnperStep;
-        int							m_iAcumMoveMouseScrollPixel;
-        int							m_iMousePosY;
         int							m_iScrollBtnMouseEvent;
-        bool						m_bScrollBtnActive;
+        UI::MoveCommand::Layout		m_layout{};
+        int							m_scrollOffset{0};
+        int							m_scrollDragGrabOffsetY{0};
         DWORD						m_dwMoveCommandKey;
 
     public:
@@ -112,13 +184,10 @@ namespace SEASON3B
     private:
         void SetStrifeMap();
         void SettingCanMoveMap();
+        void RefreshDataAndLayout();
+        void SetScrollOffset(int offset);
+        int VisibleEndIndex() const;
         void RenderFrame();
-        //void MoveScrollBtn(int iMoveValue);
-        void UpdateScrolling();
-        void ScrollUp(int iMoveValue);
-        void ScrollDown(int iMoveValue);
-        // bSign : true(DownScroll,+), false(UpScroll,-)
-        void RecursiveCalcScroll(IN int piScrollValue, OUT int* piMovePixel, bool bSign = true);
         void LoadImages();
         void UnloadImages();
     };
