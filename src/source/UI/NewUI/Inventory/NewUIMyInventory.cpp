@@ -561,19 +561,8 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         g_csItemOption.SetViewOptionList(true);
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
-    {
-        if (IsPress(VK_RBUTTON))
-        {
-            ResetMouseRButton();
-            return false;
-        }
-
-        if (IsNone(VK_LBUTTON) == false)
-        {
-            return false;
-        }
-    }
+    if (WindowProcess())
+        return false;
 
     return true;
 }
@@ -1577,6 +1566,21 @@ bool CNewUIMyInventory::InventoryProcess() const
     }
 
     return m_ActionController.HandleInventoryActions(m_pNewInventoryCtrl);
+}
+
+bool CNewUIMyInventory::WindowProcess()
+{
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    {
+        return false;
+    }
+
+    if (IsPress(VK_RBUTTON))
+    {
+        ResetMouseRButton();
+    }
+
+    return true;
 }
 
 bool CNewUIMyInventory::BtnProcess()

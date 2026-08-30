@@ -177,20 +177,24 @@ bool SEASON3B::CNewUIPurchaseShopInventory::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
-    {
-        if (SEASON3B::IsPress(VK_RBUTTON))
-        {
-            MouseRButton = false;
-            MouseRButtonPop = false;
-            MouseRButtonPush = false;
-            return false;
-        }
+    if (WindowProcess())
+        return false;
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
-        {
-            return false;
-        }
+    return true;
+}
+
+bool SEASON3B::CNewUIPurchaseShopInventory::WindowProcess()
+{
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    {
+        return false;
+    }
+
+    if (SEASON3B::IsPress(VK_RBUTTON))
+    {
+        MouseRButton = false;
+        MouseRButtonPop = false;
+        MouseRButtonPush = false;
     }
 
     return true;

@@ -149,15 +149,15 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT))
-    {
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
-        {
-            return false;
-        }
-    }
+    if (WindowProcess())
+        return false;
 
     return true;
+}
+
+bool SEASON3B::CNewUINPCShop::WindowProcess()
+{
+    return CheckMouseIn(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT);
 }
 
 bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
