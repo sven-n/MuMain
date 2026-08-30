@@ -42,6 +42,7 @@ void CMsgWin::Create()
     CInput rInput = CInput::Instance();
 
     CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    SetMovable(false);
 
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
 
@@ -137,20 +138,6 @@ void CMsgWin::Show(bool bShow)
         m_aBtn[MW_CANCEL].Show(false);
         m_sprInput.Show(false);
     }
-}
-
-bool CMsgWin::CursorInWin(int nArea)
-{
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
 }
 
 void CMsgWin::UpdateWhileActive(double dDeltaTick)

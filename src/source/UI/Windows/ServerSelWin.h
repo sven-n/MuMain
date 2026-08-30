@@ -54,7 +54,6 @@ public:
     void SetPosition(int nXCoord, int nYCoord);
     void UpdateDisplay();
     void Show(bool bShow);
-    bool CursorInWin(int nArea);
 
 protected:
     void PreRelease();

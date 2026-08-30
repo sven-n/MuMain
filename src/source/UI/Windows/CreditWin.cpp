@@ -112,6 +112,7 @@ void CCreditWin::Create()
 
 	CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
 	CWin::SetBgAlpha(255);
+	SetMovable(false);
 
 	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
 	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
@@ -183,20 +184,6 @@ void CCreditWin::Show(bool bShow)
 		Init();
 	else
 		m_eIllustState = HIDE;
-}
-
-bool CCreditWin::CursorInWin(int nArea)
-{
-	if (!CWin::m_bShow)
-		return false;
-
-	switch (nArea)
-	{
-	case WA_MOVE:
-		return false;
-	}
-
-	return CWin::CursorInWin(nArea);
 }
 
 void CCreditWin::UpdateWhileActive(double deltaMilliseconds)
