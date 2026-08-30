@@ -34,6 +34,7 @@ extern bool SelectFlag;
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInterface.h"
+#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3B;
 
@@ -468,7 +469,9 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         return false;
 
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
-    if (pPickedItem && IsPress(VK_LBUTTON) && CheckMouseIn(0, 0, GetScreenWidth(), 429))
+    if (pPickedItem && IsPress(VK_LBUTTON)
+        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
+                                                       g_fWindowMouseX, g_fWindowMouseY))
     {
         if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == true
             || g_pNewUISystem->IsVisible(INTERFACE_TRADE) == true

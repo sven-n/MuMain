@@ -2,6 +2,8 @@
 
 namespace UI::Scaling
 {
+    inline constexpr int DockLogicalBottom = 432;
+
     struct Transform
     {
         float scaleX;
@@ -36,19 +38,45 @@ namespace UI::Scaling
     enum class LayoutMode
     {
         Hud,
+        HudLeft,
+        HudCenter,
+        HudRight,
+        HudExperience,
         DockLeft,
         DockRight,
         Dialog,
         WorldOverlay,
     };
 
+    class ScopedActiveTransform
+    {
+    public:
+        explicit ScopedActiveTransform(const Transform& transform, bool transformMouse = false);
+        ~ScopedActiveTransform();
+        ScopedActiveTransform(const ScopedActiveTransform&) = delete;
+        ScopedActiveTransform& operator=(const ScopedActiveTransform&) = delete;
+
+    private:
+        Transform m_previousTransform;
+        int m_previousMouseX;
+        int m_previousMouseY;
+        bool m_restoreMouse;
+    };
+
     Transform ScreenOverlayTransform(int windowWidth, int windowHeight);
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
+    float BottomHudScale(int windowWidth, int windowHeight);
+    Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
+    Transform BottomHudCenterTransform(int windowWidth, int windowHeight);
+    Transform BottomHudRightTransform(int windowWidth, int windowHeight);
+    Transform BottomHudExperienceTransform(int windowWidth, int windowHeight);
     Transform DockLeftTransform(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
-    float WorldViewportWidthForDock(float layoutWidth, int windowWidth, int windowHeight);
+    Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
+    float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
+    bool BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY);
     Transform TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight);
     float PositionX(const Transform& transform, float x);
     float PositionY(const Transform& transform, float y);

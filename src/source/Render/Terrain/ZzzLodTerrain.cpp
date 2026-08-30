@@ -38,6 +38,7 @@
 #include "Camera/Frustum.h"
 #include "Camera/ConvexHull2D.h"
 #include "Engine/Object/CullingConstants.h"
+#include "UI/Scaling/UITransform.h"
 
 // DevEditor function declarations
 #ifdef _EDITOR
@@ -2077,15 +2078,21 @@ void CreateFrustrum2D(vec3_t Position)
             // Viewport aspect ratio (matching BeginOpengl's calculation)
             extern unsigned int WindowWidth, WindowHeight;
             extern EGameScene SceneFlag;
-            int refWidth = GetScreenWidth();
-            int refHeight = REFERENCE_HEIGHT;
-            if (SceneFlag == MAIN_SCENE && !g_Camera.TopViewEnable)
-                refHeight = REFERENCE_HEIGHT - 48;
-            else if (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
-                refHeight = 430;
-            float vpW = (float)(refWidth * WindowWidth) / (float)REFERENCE_WIDTH;
-            float vpH = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
-            float aspect = vpW / vpH;
+            float aspect = 0.0f;
+            if (SceneFlag == MAIN_SCENE)
+            {
+                aspect = UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+            }
+            else
+            {
+                const int refWidth = GetScreenWidth();
+                const int refHeight = (SceneFlag == CHARACTER_SCENE || SceneFlag == LOG_IN_SCENE)
+                                          ? 430
+                                          : REFERENCE_HEIGHT;
+                const float viewportWidth = static_cast<float>(refWidth * WindowWidth) / REFERENCE_WIDTH;
+                const float viewportHeight = static_cast<float>(refHeight * WindowHeight) / REFERENCE_HEIGHT;
+                aspect = viewportWidth / viewportHeight;
+            }
 
 #ifdef _EDITOR
             // DevEditor override: replace the view-cone pyramid with a user-defined

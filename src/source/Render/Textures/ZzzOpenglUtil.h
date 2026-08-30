@@ -89,6 +89,7 @@ float ConvertY(float y);
 float ConvertPositionX(float x);
 float ConvertPositionY(float y);
 void BeginOpengl(int x = 0, int y = 0, int Width = REFERENCE_WIDTH, int Height = REFERENCE_HEIGHT);
+void BeginOpenglPhysical(int x, int y, int width, int height);
 void EndOpengl();
 
 // Perspective setup for item/3D-UI rendering. Sets g_Camera perspective state

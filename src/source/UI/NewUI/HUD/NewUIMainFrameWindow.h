@@ -235,7 +235,14 @@ namespace SEASON3B
 
         bool BtnProcess();
 
-        void RenderFrame();
+        void RenderLeftRegion();
+        void RenderCenterRegion();
+        void RenderRightRegion();
+        void RenderExperienceRegion();
+        void RenderLeftFrame();
+        void RenderCenterFrame();
+        void RenderRightFrame();
+        void RenderExperienceBackground();
         void RenderLifeMana();
         void RenderGuageAG();
         void RenderGuageSD();

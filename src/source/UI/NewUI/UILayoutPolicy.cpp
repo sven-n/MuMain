@@ -31,7 +31,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_CRYWOLF:
     case INTERFACE_SIEGEWARFARE:
     case INTERFACE_MAINFRAME:
-    case INTERFACE_SKILL_LIST:
     case INTERFACE_ITEM_ENDURANCE_INFO:
     case INTERFACE_BUFF_WINDOW:
     case INTERFACE_MASTER_LEVEL:
@@ -45,6 +44,9 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_SYSTEMLOGWINDOW:
     case INTERFACE_CURSEDTEMPLE_GAMESYSTEM:
         return LayoutMode::Hud;
+
+    case INTERFACE_SKILL_LIST:
+        return LayoutMode::HudCenter;
 
     case INTERFACE_FRIEND:
     case INTERFACE_PARTY:

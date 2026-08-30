@@ -43,6 +43,7 @@
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
@@ -316,7 +317,9 @@ void SelectObjects()
     SelectedNpc = -1;
     SelectedOperate = -1;
 
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
+    const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
+        WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
+    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse())
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {

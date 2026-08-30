@@ -6,36 +6,6 @@
 
 using namespace SEASON3B;
 
-namespace
-{
-struct LayoutInputState
-{
-    UI::Scaling::Transform transform;
-    int mouseX;
-    int mouseY;
-};
-
-LayoutInputState ActivateLayout(const CNewUIObj& object, bool transformMouse)
-{
-    const LayoutInputState state{UI::Scaling::GetActiveTransform(), MouseX, MouseY};
-    const auto transform = UI::Scaling::TransformForLayout(object.GetLayoutMode(), WindowWidth, WindowHeight);
-    UI::Scaling::SetActiveTransform(transform);
-    if (transformMouse)
-    {
-        MouseX = static_cast<int>(std::floor(UI::Scaling::LogicalX(transform, g_fWindowMouseX)));
-        MouseY = static_cast<int>(std::floor(UI::Scaling::LogicalY(transform, g_fWindowMouseY)));
-    }
-    return state;
-}
-
-void RestoreLayout(const LayoutInputState& state)
-{
-    MouseX = state.mouseX;
-    MouseY = state.mouseY;
-    UI::Scaling::SetActiveTransform(state.transform);
-}
-}
-
 SEASON3B::CNewUIManager::CNewUIManager()
 {
     m_pActiveMouseUIObj = NULL;
@@ -157,9 +127,13 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
         if ((*vi)->IsVisible())
         {
             CNewUIObj* obj_backup = (*vi);
-            const LayoutInputState layoutState = ActivateLayout(**vi, true);
-            bool bResult = (*vi)->UpdateMouseEvent();
-            RestoreLayout(layoutState);
+            bool bResult;
+            {
+                const auto transform =
+                    UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+                UI::Scaling::ScopedActiveTransform layout(transform, true);
+                bResult = (*vi)->UpdateMouseEvent();
+            }
 
             auto vi2 = std::find(vecUI.begin(), vecUI.end(), obj_backup);
             if (vi2 != vecUI.end())
@@ -210,9 +184,13 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
 
         if ((*vi)->IsEnabled() && hWnd == hRelatedWnd)
         {
-            const LayoutInputState layoutState = ActivateLayout(**vi, true);
-            const bool result = (*vi)->UpdateKeyEvent();
-            RestoreLayout(layoutState);
+            bool result;
+            {
+                const auto transform =
+                    UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+                UI::Scaling::ScopedActiveTransform layout(transform, true);
+                result = (*vi)->UpdateKeyEvent();
+            }
             if (false == result)
             {
                 m_pActiveKeyUIObj = (*vi);
@@ -232,9 +210,13 @@ bool SEASON3B::CNewUIManager::Update()
     {
         if ((*vi)->IsEnabled())
         {
-            const LayoutInputState layoutState = ActivateLayout(**vi, true);
-            const bool result = (*vi)->Update();
-            RestoreLayout(layoutState);
+            bool result;
+            {
+                const auto transform =
+                    UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+                UI::Scaling::ScopedActiveTransform layout(transform, true);
+                result = (*vi)->Update();
+            }
             if (false == result)
             {
                 return false; //. stop calling Update functions
@@ -255,9 +237,9 @@ bool SEASON3B::CNewUIManager::Render()
     {
         if ((*vi)->IsVisible())
         {
-            const LayoutInputState layoutState = ActivateLayout(**vi, false);
+            const auto transform = UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
+            UI::Scaling::ScopedActiveTransform layout(transform, true);
             (*vi)->Render();
-            RestoreLayout(layoutState);
         }
     }
 

@@ -220,7 +220,8 @@ static void UpdateUIAndInput()
     if (g_Camera.TopViewEnable || LoadingWorld >= 30)
         return;
 
-    if (MouseY >= (int)(REFERENCE_HEIGHT - 48))
+    if (UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
+                                                  g_fWindowMouseX, g_fWindowMouseY))
         MouseOnWindow = true;
 
     g_pPartyManager->Update();
@@ -361,25 +362,16 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
 {
     outByWaterMap = 0;
 
-    if (g_Camera.TopViewEnable == false)
-    {
-        // Use hardcoded value from original game (in 640×480 reference coordinates)
-        // This is then scaled by BeginOpengl() to actual window size
-        outHeight = REFERENCE_HEIGHT - 48;
-    }
-    else
-    {
-        outHeight = REFERENCE_HEIGHT;
-    }
-
-    outWidth = static_cast<int>(UI::Scaling::WorldViewportWidthForDock(
-        static_cast<float>(GetScreenWidth()), WindowWidth, WindowHeight));
+    const auto viewport = UI::Scaling::WorldViewport(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+    outWidth = viewport.width;
+    outHeight = viewport.height;
 
     // NOTE: Clear color is set by SceneManager::SetWorldClearColor() before this function is called
     // All background colors are now centralized in SceneManager.cpp
 
-    BeginOpengl(0, 0, outWidth, outHeight);
-    CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
+    BeginOpenglPhysical(viewport.x, viewport.y, viewport.width, viewport.height);
+    CreateFrustrum(static_cast<float>(viewport.width) / WindowWidth,
+                   static_cast<float>(viewport.height) / WindowHeight, cameraPos);
 
     // Setup fog for battle castle
     if (gMapManager.InBattleCastle())
@@ -579,7 +571,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         byWaterMap = 2;
 
         EndOpengl();
-        BeginOpengl(0, 0, width, height);
+        BeginOpenglPhysical(0, 0, width, height);
         RenderWaterTerrain();
         { FRAME_PROFILE(Joints); RenderJoints(byWaterMap); }
         { FRAME_PROFILE(Effects); RenderEffects(true); RenderBlurs(); }
@@ -596,7 +588,7 @@ static void RenderGameWorld(BYTE& byWaterMap, int width, int height)
         EndSprite();
         EndOpengl();
 
-        BeginOpengl(0, 0, width, height);
+        BeginOpenglPhysical(0, 0, width, height);
     }
 
     if (gMapManager.InBattleCastle())

@@ -592,16 +592,23 @@ void BeginOpengl(int x, int y, int Width, int Height)
     y = static_cast<int>(ConvertPositionY(static_cast<float>(y)));
     Width = static_cast<int>(ConvertX(static_cast<float>(Width)));
     Height = static_cast<int>(ConvertY(static_cast<float>(Height)));
+    BeginOpenglPhysical(x, y, Width, Height);
+}
+
+void BeginOpenglPhysical(int x, int y, int width, int height)
+{
+    width = std::max(width, 1);
+    height = std::max(height, 1);
 
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(x, y, Width, Height);
+    SetRenderViewport(x, y, width, height);
 
     // Calculate aspect ratio dynamically from viewport dimensions
     // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
     // FOV stays constant, aspect ratio scales the horizontal view accordingly
-    float aspectRatio = (float)Width / (float)Height;
+    const float aspectRatio = static_cast<float>(width) / height;
 
     // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);

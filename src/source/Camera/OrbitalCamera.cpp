@@ -8,6 +8,7 @@
 #include <cmath>
 
 #include "UI/Legacy/UIControls.h"
+#include "UI/Scaling/UITransform.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "CameraDebugLog.h"
 
@@ -824,24 +825,15 @@ void OrbitalCamera::UpdateFrustum()
     up[1] = ca0 * ca2;
     up[2] = -sa0;
 
-    // Build frustum using the same viewport aspect ratio that BeginOpengl() will use.
-    // BeginOpengl() scales reference coords (640×480) to actual window pixels.
-    // MainScene reserves the bottom UI bar. Other scenes use the full reference viewport.
+    // Build the frustum with the same aspect ratio as the active projection.
+    // MainScene's BeginOpenglPhysical() and WorldViewportAspect() both use the full physical window.
     extern unsigned int WindowWidth;
     extern unsigned int WindowHeight;
     extern EGameScene SceneFlag;
-    extern int GetScreenWidth();
 
-    int refWidth = REFERENCE_WIDTH;
-    int refHeight = REFERENCE_HEIGHT;
+    float aspectRatio = static_cast<float>(WindowWidth) / WindowHeight;
     if (SceneFlag == MAIN_SCENE)
-    {
-        refWidth = GetScreenWidth();
-        refHeight = g_Camera.TopViewEnable ? REFERENCE_HEIGHT : (REFERENCE_HEIGHT - 48);
-    }
-    float viewportWidth = (float)(refWidth * WindowWidth) / (float)REFERENCE_WIDTH;
-    float viewportHeight = (float)(refHeight * WindowHeight) / (float)REFERENCE_HEIGHT;
-    float aspectRatio = viewportWidth / viewportHeight;
+        aspectRatio = UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
 
     // Override was already applied at the top of this function (if enabled).
     float effectiveFarPlane = m_Config.farPlane;

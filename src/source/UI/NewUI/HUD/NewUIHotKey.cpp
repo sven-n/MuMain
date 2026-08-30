@@ -11,6 +11,7 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
+#include "UI/Scaling/UITransform.h"
 
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Legacy/UIControls.h"
@@ -457,7 +458,8 @@ bool SEASON3B::CNewUIHotKey::AutoGetItem()
         CNewUIInventoryCtrl::GetPickedItem() == NULL
         && SEASON3B::IsPress(VK_SPACE)
         && g_pChatInputBox->HaveFocus() == false
-        && CheckMouseIn(0, 0, GetScreenWidth(), 429)
+        && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
+                                                       g_fWindowMouseX, g_fWindowMouseY)
         )
     {
         for (int i = 0; i < MAX_ITEMS; ++i)

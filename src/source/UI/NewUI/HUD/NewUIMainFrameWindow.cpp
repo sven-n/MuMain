@@ -24,12 +24,31 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/NewUI/HUD/Skills/SkillTooltip.h"
+#include "UI/Scaling/UITransform.h"
 #include "Core/Time/CTimCheck.h"
 #include "GameLogic/Social/MonkSystem.h"
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
 #include "GameShop/InGameShopSystem.h"
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
+
+namespace
+{
+    constexpr float kHudTop = 429.0f;
+    constexpr float kHudContentHeight = 41.0f;
+    constexpr float kExperienceTop = 470.0f;
+    constexpr float kExperienceHeight = 10.0f;
+    constexpr float kLeftBandWidth = 152.0f;
+    constexpr float kCenterBandStart = 152.0f;
+    constexpr float kMenu1CenterWidth = 104.0f;
+    constexpr float kMenu2Start = 256.0f;
+    constexpr float kMenu2Width = 128.0f;
+    constexpr float kMenu3Start = 384.0f;
+    constexpr float kMenu3CenterWidth = 104.0f;
+    constexpr float kRightBandStart = 488.0f;
+    constexpr float kRightBandWidth = 152.0f;
+    constexpr float kMenu3RightSourceX = 104.0f;
+}
 
 SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
 {
@@ -170,18 +189,44 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
 {
     EnableAlphaTest();
 
-    RenderFrame();
+    const auto leftTransform = UI::Scaling::BottomHudLeftTransform(WindowWidth, WindowHeight);
+    const auto centerTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+    const auto rightTransform = UI::Scaling::BottomHudRightTransform(WindowWidth, WindowHeight);
+    const auto experienceTransform = UI::Scaling::BottomHudExperienceTransform(WindowWidth, WindowHeight);
 
-    m_pNewUI3DRenderMng->RenderUI2DEffect(ITEMHOTKEYNUMBER_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
+    {
+        UI::Scaling::ScopedActiveTransform layout(leftTransform);
+        RenderLeftFrame();
+    }
+    {
+        UI::Scaling::ScopedActiveTransform layout(centerTransform);
+        RenderCenterFrame();
+    }
+    {
+        UI::Scaling::ScopedActiveTransform layout(rightTransform);
+        RenderRightFrame();
+    }
+    {
+        UI::Scaling::ScopedActiveTransform layout(experienceTransform);
+        RenderExperienceBackground();
+    }
 
-    g_pSkillList->RenderCurrentSkillAndHotSkillList();
-
-    EnableAlphaTest();
-    RenderLifeMana();
-    RenderGuageSD();
-    RenderGuageAG();
-    RenderButtons();
-    RenderExperience();
+    {
+        UI::Scaling::ScopedActiveTransform layout(leftTransform, true);
+        RenderLeftRegion();
+    }
+    {
+        UI::Scaling::ScopedActiveTransform layout(centerTransform, true);
+        RenderCenterRegion();
+    }
+    {
+        UI::Scaling::ScopedActiveTransform layout(rightTransform, true);
+        RenderRightRegion();
+    }
+    {
+        UI::Scaling::ScopedActiveTransform layout(experienceTransform, true);
+        RenderExperienceRegion();
+    }
     DisableAlphaBlend();
 
     return true;
@@ -189,6 +234,8 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
 
 void SEASON3B::CNewUIMainFrameWindow::Render3D()
 {
+    const auto transform = UI::Scaling::BottomHudLeftTransform(WindowWidth, WindowHeight);
+    UI::Scaling::ScopedActiveTransform layout(transform);
     m_ItemHotKey.RenderItems();
 }
 
@@ -202,27 +249,62 @@ bool SEASON3B::CNewUIMainFrameWindow::IsVisible() const
     return CNewUIObj::IsVisible();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderFrame()
+void SEASON3B::CNewUIMainFrameWindow::RenderLeftRegion()
 {
-    float width, height;
-    float x, y;
+    m_pNewUI3DRenderMng->RenderUI2DEffect(ITEMHOTKEYNUMBER_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
+}
 
-    width = 256.f; height = 51.f;
-    x = 0.f; y = (float)REFERENCE_HEIGHT - height;
-    SEASON3B::RenderImage(IMAGE_MENU_1, x, y, width, height);
-    width = 128.f;
-    x = 256.f;
-    SEASON3B::RenderImage(IMAGE_MENU_2, x, y, width, height);
-    width = 256.f;
-    x = 256.f + 128.f;
-    SEASON3B::RenderImage(IMAGE_MENU_3, x, y, width, height);
+void SEASON3B::CNewUIMainFrameWindow::RenderCenterRegion()
+{
+    g_pSkillList->RenderCurrentSkillAndHotSkillList();
+    RenderLifeMana();
+    RenderGuageSD();
+    RenderGuageAG();
+}
 
-    if (g_pSkillList->IsSkillListUp() == true)
-    {
-        width = 160.f; height = 40.f;
-        x = 222.f;
-        SEASON3B::RenderImage(IMAGE_MENU_2_1, x, y, width, height);
-    }
+void SEASON3B::CNewUIMainFrameWindow::RenderRightRegion()
+{
+    RenderButtons();
+}
+
+void SEASON3B::CNewUIMainFrameWindow::RenderExperienceRegion()
+{
+    RenderExperience();
+}
+
+void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
+{
+    RenderImageStretch(IMAGE_MENU_1, 0.0f, kHudTop, kLeftBandWidth, kHudContentHeight,
+                       0.0f, 0.0f, kLeftBandWidth, kHudContentHeight);
+}
+
+void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
+{
+    RenderImageStretch(IMAGE_MENU_1, kCenterBandStart, kHudTop, kMenu1CenterWidth, kHudContentHeight,
+                       kCenterBandStart, 0.0f, kMenu1CenterWidth, kHudContentHeight);
+    RenderImageStretch(IMAGE_MENU_2, kMenu2Start, kHudTop, kMenu2Width, kHudContentHeight,
+                       0.0f, 0.0f, kMenu2Width, kHudContentHeight);
+    RenderImageStretch(IMAGE_MENU_3, kMenu3Start, kHudTop, kMenu3CenterWidth, kHudContentHeight,
+                       0.0f, 0.0f, kMenu3CenterWidth, kHudContentHeight);
+
+    if (g_pSkillList->IsSkillListUp())
+        RenderImage(IMAGE_MENU_2_1, 222.0f, kHudTop, 160.0f, 40.0f);
+}
+
+void SEASON3B::CNewUIMainFrameWindow::RenderRightFrame()
+{
+    RenderImageStretch(IMAGE_MENU_3, kRightBandStart, kHudTop, kRightBandWidth, kHudContentHeight,
+                       kMenu3RightSourceX, 0.0f, kRightBandWidth, kHudContentHeight);
+}
+
+void SEASON3B::CNewUIMainFrameWindow::RenderExperienceBackground()
+{
+    RenderImageStretch(IMAGE_MENU_1, 0.0f, kExperienceTop, 256.0f, kExperienceHeight,
+                       0.0f, kHudContentHeight, 256.0f, kExperienceHeight);
+    RenderImageStretch(IMAGE_MENU_2, 256.0f, kExperienceTop, 128.0f, kExperienceHeight,
+                       0.0f, kHudContentHeight, 128.0f, kExperienceHeight);
+    RenderImageStretch(IMAGE_MENU_3, 384.0f, kExperienceTop, 256.0f, kExperienceHeight,
+                       0.0f, kHudContentHeight, 256.0f, kExperienceHeight);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
@@ -719,17 +801,12 @@ void SEASON3B::CNewUIMainFrameWindow::RenderFriendButtonState()
 
 bool SEASON3B::CNewUIMainFrameWindow::UpdateMouseEvent()
 {
-    if (g_pNewUIHotKey->IsStateGameOver() == true)
-    {
+    if (g_pNewUIHotKey->IsStateGameOver())
         return true;
-    }
 
-    if (BtnProcess() == true)
-    {
-        return false;
-    }
-
-    return true;
+    const auto transform = UI::Scaling::BottomHudRightTransform(WindowWidth, WindowHeight);
+    UI::Scaling::ScopedActiveTransform layout(transform, true);
+    return !BtnProcess();
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
@@ -889,6 +966,8 @@ int SEASON3B::CNewUIMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
 
 void SEASON3B::CNewUIMainFrameWindow::UseHotKeyItemRButton()
 {
+    const auto transform = UI::Scaling::BottomHudLeftTransform(WindowWidth, WindowHeight);
+    UI::Scaling::ScopedActiveTransform layout(transform, true);
     m_ItemHotKey.UseItemRButton();
 }
 

@@ -83,9 +83,11 @@ for rendering and mouse input:
    Bottom bars, chat, minimap, event timers, status widgets, and other edge HUD
    elements therefore reach the real viewport edges.
 2. **Dock right** keeps the existing aspect-preserving panel scale, clamped to
-   `[1.0, 1.5]`, but anchors the logical 640-wide canvas to the right viewport
-   edge. Existing one-, two-, and three-column panel positions remain valid.
-3. **Dock left** uses the same capped scale, anchored to the left edge.
+   `[1.0, 2.25]`, but anchors the logical 640-wide canvas to the right viewport
+   edge and its logical `y=432` line to the top of the HUD. Existing one-, two-,
+   and three-column panel positions remain valid.
+3. **Dock left** uses the same capped scale, anchored to the left edge and HUD
+   top.
 4. **Dialog** uses the capped scale and centers its logical 640x480 canvas.
    Message boxes and modal event dialogs remain centered and do not become giant
    at high resolution.
@@ -93,10 +95,10 @@ for rendering and mouse input:
    monster labels and bars, ground-item labels, and other projected overlays
    stay aligned with the 3D scene.
 
-At 1920x1080, a dialog keeps the capped 960x720 canvas at offset `480,180`.
-A right-docked panel uses the same scale at offset `960,180`, putting logical
-`x=450..640` exactly against the physical right edge. The HUD and world-overlay
-spaces cover all `1920x1080` pixels.
+At 1920x1080, a dialog keeps the capped 1280x960 canvas at offset `320,60`.
+A right-docked panel uses a 2.25x canvas at offset `480,6`, putting logical
+`x=450..640` against the physical right edge and logical `y=432` at the HUD
+top. The HUD and world-overlay spaces cover all `1920x1080` pixels.
 
 The manager activates an object's layout only around that object's render,
 update, and mouse-event calls. Mouse coordinates use the matching inverse
@@ -113,10 +115,10 @@ viewport. The former 25-pixel top offset and 430-pixel height are removed, so
 the scene fills the window vertically. Camera FOV remains unchanged; frustum
 dimensions follow the same full-height viewport.
 
-When right-docked panels reserve world space, the scene viewport maps the
-legacy logical width through the dock transform and then back through the
-full-window transform. The 3D viewport therefore ends at the panel's rendered
-left edge instead of leaving an unused strip between the world and the UI.
+The main 3D viewport keeps the full logical width behind docked panels. Its
+projection, terrain culling, and default/orbital camera frusta use the same
+physical aspect, so opening a panel does not expose black gaps from narrower
+culling.
 
 ## Font Scaling and Text Fit
 
@@ -124,14 +126,14 @@ Stop reloading one globally resolution-scaled font set. SDL_ttf keeps one
 preloaded maximum-size atlas per role and scales glyph geometry down for the
 active layout:
 
-- normal and bold: readable range 11-13 points
-- big bold: readable range 22-26 points
-- fixed: readable range 13-15 points
+- normal and bold: readable range 11-16 points
+- big bold: readable range 22-32 points
+- fixed: readable range 13-18 points
 
 The active point size comes from the rendered layout height, not the complete
-window alone. Growth is gradual between 1x and the capped 1.5x panel height and
-stops at the role maximum. A 1.5x dialog or docked panel therefore uses
-13-point normal text; larger HUD transforms remain capped at 13 points.
+window alone. Font growth is gradual between 1x and 2.25x and stops at the role
+maximum. A 2x dialog uses 15-point normal text; a 2.25x dock uses 16-point
+normal text. Larger HUD transforms remain capped at the role maximum.
 
 Before alignment, text calculates its physical box from the active transform.
 When a bounded string exceeds the box width or height, glyph scale reduces to
