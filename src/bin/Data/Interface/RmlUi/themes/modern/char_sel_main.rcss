@@ -1,0 +1,79 @@
+/* "Modern" theme for the character-select scene's button bar -- flat programmatic icon buttons,
+   no legacy sprite art (same approach as login_main.rcss's modern theme). No reserved I18N
+   string exists for these icon-only buttons, so each gets a short plain-ASCII label
+   (.btn-icon-label) instead of real art -- matching login_main.rcss modern theme's "M"/"C"
+   precedent (avoiding a Unicode symbol since glyph coverage in the loaded font isn't
+   guaranteed). */
+
+#panel {
+	position: absolute;
+	/* Needed for .btn-icon-label's text -- matches login.rcss/login_main.rcss's modern theme
+	   rather than relying on RmlUiRuntime's regular-weight fallback face to also resolve bold
+	   correctly. */
+	font-family: "Liberation Sans";
+	font-size: 14px;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+	border-radius: 4px;
+	text-align: center;
+	line-height: 30px;
+	color: white;
+	font-weight: bold;
+}
+.btn-icon:hover {
+	background-color: #c0a050;
+	border: 1px #c0a050;
+}
+.btn-icon.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1px rgba(255, 255, 255, 50);
+}
+
+/* No legacy deco art in this theme -- intentionally flat, matching login_main.rcss's modern
+   .btn-credit-deco precedent. */
+.deco {
+	display: none;
+}
+
+/* Same flat, semi-transparent backing panel as the legacy theme -- this element was never
+   sprite-art in the first place (a plain CSprite::SetColor/SetAlpha fill), so both themes share
+   the identical treatment. */
+.info-bar {
+	position: absolute;
+	height: 21px;
+	background-color: rgba(0, 0, 0, 143);
+	pointer-events: none;
+}
+
+/* Identical to the legacy theme -- this message was never sprite-art either, so there's no
+   "flat vs. real art" distinction to make here. See themes/legacy/char_sel_main.rcss's comment
+   for the full rationale behind the fixed 640px-wide centering box and the 18px line-height. */
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330px;
+	width: 640px;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18px;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: #000000;
+	background-color: rgba(255, 255, 0, 128);
+	white-space: nowrap;
+	padding: 0 2px;
+}

@@ -1,0 +1,24 @@
+<rml>
+<head>
+	<title>Character Select Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="char_sel_main.rcss"/>
+</head>
+<body data-model="char_sel_main">
+	<div id="panel">
+		<div id="deco" class="deco"></div>
+		<div id="info_bar" class="info-bar"></div>
+		<div id="btn_create" class="btn-icon" data-class-disabled="create_disabled" data-event-click="charsel_create_click"><span class="btn-icon-label">+</span></div>
+		<div id="btn_menu" class="btn-icon" data-event-click="charsel_menu_click"><span class="btn-icon-label">M</span></div>
+		<div id="btn_connect" class="btn-icon" data-class-disabled="connect_disabled" data-event-click="charsel_connect_click"><span class="btn-icon-label">GO</span></div>
+		<div id="btn_delete" class="btn-icon" data-class-disabled="delete_disabled" data-event-click="charsel_delete_click"><span class="btn-icon-label">X</span></div>
+	</div>
+	<!-- Rarely shown (only when an account has an item-blocked character) -- see
+	     CCharSelMainWin::SyncRmlModel(). Fixed screen position, unrelated to #panel's own
+	     geometry -- see char_sel_main.rcss's #account_block_message comment. -->
+	<div id="account_block_message" data-class-hidden="account_block_hidden">
+		<div class="line-row"><span class="line">{{account_block_line1}}</span></div>
+		<div class="line-row"><span class="line">{{account_block_line2}}</span></div>
+	</div>
+</body>
+</rml>

@@ -1,0 +1,120 @@
+/* RmlUi overlay for the character-select scene's button bar (CCharSelMainWin). CWin draws
+   nothing for this window (CWin::Create() uses nTexID=-2, same sentinel as login_main.rcss's
+   panel). Only the idle frame of each button's frame strip is reproduced (no RmlUi decorator
+   swap for hover/press/disabled frames) -- same simplification precedent login.rcss/
+   login_main.rcss already established. Source art per Engine/Object/ZzzOpenData.cpp's
+   OpenCharacterSceneData(): b_create.tga/b_connect.tga/b_delete.tga (each a 54x30-per-frame,
+   4-frame vertical strip -- idle = frame 0, top 54x30 rect), server_menu_b_all.tga (3-frame
+   strip, same idle rect, shared with CLoginMainWin's own Menu button), and deco.tga (189x103,
+   single frame, shared with CCreditWin's own deco). Same @spritesheet-with-explicit-rect
+   technique login.rcss/base.rcss use, for the same reason (this engine's .OZT loader pads
+   textures to the next power-of-two size). */
+
+@spritesheet charsel-create-sheet
+{
+	src: "../../../b_create.tga";
+	charsel-create-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-menu-sheet
+{
+	src: "../../../server_menu_b_all.tga";
+	charsel-menu-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-connect-sheet
+{
+	src: "../../../b_connect.tga";
+	charsel-connect-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-delete-sheet
+{
+	src: "../../../b_delete.tga";
+	charsel-delete-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-deco-sheet
+{
+	src: "../../../deco.tga";
+	charsel-deco-image: 0px 0px 189px 103px;
+}
+
+#panel {
+	position: absolute;
+	/* Width/height and every child's left/top are pushed from C++ (CCharSelMainWin::Create/
+	   SetPosition) -- the whole bar is screen-width-dependent (four fixed 54px buttons plus a
+	   variable-width info strip), the same idiom as CLoginMainWin/CSysMenuWin. */
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Reproduces CButton::SetEnable(false) -- blocks the click at RmlUi's own hit-test level too,
+   not just the C++ handler's own RmlClickX() guard. Opacity dim over the idle art rather than
+   the sprite's real 4th (disabled) frame -- same simplification as base.rcss's .btn.disabled. */
+.btn-icon.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+}
+#btn_create { decorator: image(charsel-create-icon); }
+#btn_menu { decorator: image(charsel-menu-icon); }
+#btn_connect { decorator: image(charsel-connect-icon); }
+#btn_delete { decorator: image(charsel-delete-icon); }
+/* Real icon art already gives these buttons a visual identity -- see themes/modern's own rule
+   for why the label exists there instead. */
+.btn-icon-label {
+	display: none;
+}
+
+/* Stands in for CSprite m_asprBack[CSMW_SPR_INFO] -- a flat, semi-transparent black backing
+   strip behind the (rarely shown) account-block message; decorative only. Left/top/width are
+   pushed from C++ (screen-width dependent); height is fixed, matching the original CSprite's
+   fixed 21px height. */
+.info-bar {
+	position: absolute;
+	height: 21px;
+	background-color: rgba(0, 0, 0, 143);
+	pointer-events: none;
+}
+
+/* Stands in for CSprite m_asprBack[CSMW_SPR_DECO] -- decorative flourish overlapping the
+   Connect/Delete buttons' top-right corner; must paint BEHIND them (declared first in
+   char_sel_main.rml, matching the original's sprite-then-buttons render order). Not interactive. */
+.deco {
+	position: absolute;
+	width: 189px;
+	height: 103px;
+	pointer-events: none;
+	decorator: image(charsel-deco-image);
+}
+
+/* Stands in for the two RenderAccountBlockMessage() g_pRenderText calls this replaces -- black
+   text on a translucent yellow highlight (SetTextColor(0,0,0,255)/SetBgColor(255,255,0,128) in
+   the original), centered around a fixed screen X (320px) unrelated to this window's own
+   position -- reproduced as a fixed, un-scaled overlay rather than pushed from C++, since the
+   original never scaled by resolution either. A 640px-wide box with left:0 gives a visual
+   center at x=320px on any resolution, matching the original's RT3_WRITE_CENTER effect exactly.
+   Each line is its own inline-block, shrink-wrapped to its own text (not the full 640px), so the
+   yellow highlight hugs just the text -- matching the original per-line highlight box, not one
+   giant band. line-height:18px on each row reproduces the 18px gap between the original's two Y
+   coordinates (330, 348) without needing a separate margin value. */
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330px;
+	width: 640px;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18px;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: #000000;
+	background-color: rgba(255, 255, 0, 128);
+	white-space: nowrap;
+	padding: 0 2px;
+}

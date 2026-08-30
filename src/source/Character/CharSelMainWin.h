@@ -10,6 +10,7 @@
 
 #include "UI/Widgets/Win.h"
 #include "UI/Widgets/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 
 #define CSMW_SPR_DECO 0
 #define CSMW_SPR_INFO 1
@@ -109,6 +110,19 @@ namespace UI::CharacterSelection
     }
 }
 
+namespace Rml { class ElementDocument; }
+
+// RmlUi migration: character-select scene, following CLoginMainWin/CSysMenuWin's established
+// hybrid pattern. CWin::Create() now passes nTexID=-2 (was the default -1) -- RmlUi renders 100%
+// of this bar's visuals (buttons, the info-bar background, the decorative flourish, and the rare
+// account-block message) in every theme; the legacy CSprites/CButtons stay alive purely as
+// bookkeeping (button click-detection redundancy, geometry used by ApplyLayout's math), never
+// rendered. See docs/rmlui-ui-system/README.md for the shared architecture this follows.
+//
+// Rebased onto upstream's responsive-scaling work (UI::CharacterSelection::CalculateLayout()
+// above): ApplyLayout() is now the single source of truth for every element's screen rect
+// (position AND size -- buttons/deco/info-bar can scale up to 2x on larger screens, not just
+// move), pushed to both the legacy CButton/CSprite bookkeeping and the RmlUi elements together.
 class CCharSelMainWin : public CWin
 {
 protected:
@@ -123,8 +137,16 @@ public:
     void Create();
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow);
-    bool CursorInWin(int nArea);
     void UpdateDisplay();
+
+    // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
+    // cleared exactly like the legacy CButton::IsClick() edge triggers they supplement in
+    // UpdateWhileActive() -- mirrors CSysMenuWin's RmlClickX() shape, including the same-guard
+    // gating for buttons that can be genuinely disabled (Create/Connect/Delete, not Menu).
+    void RmlClickCreate() { if (m_bCreateEnabled) m_bRmlCreateClicked = true; }
+    void RmlClickMenu() { m_bRmlMenuClicked = true; }
+    void RmlClickConnect() { if (m_bConnectEnabled) m_bRmlConnectClicked = true; }
+    void RmlClickDelete() { if (m_bDeleteEnabled) m_bRmlDeleteClicked = true; }
 
 protected:
     void PreRelease();
@@ -134,4 +156,27 @@ protected:
 
 private:
     void ApplyLayout(const UI::CharacterSelection::Layout& layout);
+
+    struct CharSelMainRmlModel
+    {
+        bool createDisabled = false;
+        bool connectDisabled = false;
+        bool deleteDisabled = false;
+        bool accountBlockHidden = true;
+        Rml::String accountBlockLine1;
+        Rml::String accountBlockLine2;
+    };
+    RmlModelBinder<CharSelMainRmlModel> m_RmlBinder;
+    Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    bool m_bCreateEnabled = false;
+    bool m_bConnectEnabled = false;
+    bool m_bDeleteEnabled = false;
+
+    bool m_bRmlCreateClicked = false;
+    bool m_bRmlMenuClicked = false;
+    bool m_bRmlConnectClicked = false;
+    bool m_bRmlDeleteClicked = false;
+
+    void SyncRmlModel();
 };

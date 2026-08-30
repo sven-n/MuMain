@@ -16,12 +16,18 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
-#include "UI/Scaling/UITransform.h"
 
 #include <algorithm>
 #include <utility>
 
 #include "Scenes/SceneCommon.h"
+
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Event.h>
 
 namespace
 {
@@ -37,9 +43,13 @@ namespace
     constexpr int kInputTextOffsetX = 78;
     constexpr int kInputTextOffsetY = 21;
     constexpr int kDescriptionSpriteOffsetY = 355;
-    constexpr int kAccountBlockMsgX = 320;
-    constexpr int kAccountBlockPrimaryY = 330;
-    constexpr int kAccountBlockSecondaryY = 348;
+    // The account-block message's on-screen position (X=320, Y=330/348 in the pre-RmlUi
+    // g_pRenderText calls this replaced) is now expressed directly in char_sel_main.rcss
+    // (#account_block_message) instead of here -- it is a fixed, screen-absolute position
+    // unrelated to this window's own geometry, so it needs no C++ push (see SetPosition()).
+    // The old per-element offset constants (button spacing, deco/info offsets) are gone too --
+    // UI::CharacterSelection::CalculateLayout() (CharSelMainWin.h) replaces them with a single
+    // responsive-scaling calculator.
     constexpr int kWindowAlpha = 143;
 
     template <typename Predicate>
@@ -81,14 +91,6 @@ namespace
         if (SelectedHero < 0 || SelectedHero >= kCharacterSlotCount)
             return nullptr;
         return &CharactersClient[SelectedHero];
-    }
-
-    void RenderAccountBlockMessage()
-    {
-        g_pRenderText->SetTextColor(0, 0, 0, 255);
-        g_pRenderText->SetBgColor(255, 255, 0, 128);
-        g_pRenderText->RenderText(kAccountBlockMsgX, kAccountBlockPrimaryY, I18N::Game::ThisAccountIsItemBlocked, 0, 0, RT3_WRITE_CENTER);
-        g_pRenderText->RenderText(kAccountBlockMsgX, kAccountBlockSecondaryY, I18N::Game::PleaseCheckOnHttpMuonlineWebzenComSite, 0, 0, RT3_WRITE_CENTER);
     }
 }
 
@@ -133,12 +135,42 @@ void CCharSelMainWin::Create()
         BITMAP_LOG_IN + 6, 4, 2, 1, 3);
 
     CWin::Create(layout.window.width, layout.window.height, -2);
+    SetMovable(false);
 
     for (int i = 0; i < CSMW_BTN_MAX; ++i)
         CWin::RegisterButton(&m_aBtn[i]);
 
     ApplyLayout(layout);
     m_bAccountBlockItem = HasAccountBlockedCharacter();
+
+    // RmlUi migration -- see this class's header comment. Guarded the same way CLoginWin::Create()
+    // is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change), so the document/model
+    // are created once, ever, and only repositioned/resized/re-synced afterward.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_sel_main",
+            [this](Rml::DataModelConstructor& c, CharSelMainRmlModel& model)
+            {
+                c.Bind("create_disabled", &model.createDisabled);
+                c.Bind("connect_disabled", &model.connectDisabled);
+                c.Bind("delete_disabled", &model.deleteDisabled);
+                c.Bind("account_block_hidden", &model.accountBlockHidden);
+                c.Bind("account_block_line1", &model.accountBlockLine1);
+                c.Bind("account_block_line2", &model.accountBlockLine2);
+
+                c.BindEventCallback("charsel_create_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCreate(); });
+                c.BindEventCallback("charsel_menu_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMenu(); });
+                c.BindEventCallback("charsel_connect_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConnect(); });
+                c.BindEventCallback("charsel_delete_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDelete(); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
+    }
 }
 
 void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
@@ -157,12 +189,52 @@ void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
         m_aBtn[i].SetSize(button.width, button.height);
         m_aBtn[i].SetPosition(button.x, button.y);
     }
+
+    // RmlUi panel: positioned/sized to the same scaled window-pixel box CWin's own bookkeeping
+    // now uses. Every child is pushed as a full rect (not just left/top), converted to
+    // panel-relative (subtracting the window's own origin, since #panel is the positioned
+    // ancestor every child's RCSS position:absolute resolves against) -- a fixed-px RCSS size,
+    // this migration's original assumption, no longer holds once the responsive-scaling system
+    // can grow buttons/deco/info-bar up to 2x on larger screens.
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
+        {
+            panel->SetProperty("left", std::to_string(layout.window.x) + "px");
+            panel->SetProperty("top", std::to_string(layout.window.y) + "px");
+            panel->SetProperty("width", std::to_string(layout.window.width) + "px");
+            panel->SetProperty("height", std::to_string(layout.window.height) + "px");
+        }
+
+        auto setRect = [this, &layout](const char* id, const UI::CharacterSelection::Rect& rect)
+        {
+            if (Rml::Element* e = m_pRmlDoc->GetElementById(id))
+            {
+                e->SetProperty("left", std::to_string(rect.x - layout.window.x) + "px");
+                e->SetProperty("top", std::to_string(rect.y - layout.window.y) + "px");
+                e->SetProperty("width", std::to_string(rect.width) + "px");
+                e->SetProperty("height", std::to_string(rect.height) + "px");
+            }
+        };
+        setRect("deco", layout.decoration);
+        setRect("info_bar", layout.information);
+        static const char* const kBtnIds[CSMW_BTN_MAX] = { "btn_create", "btn_menu", "btn_connect", "btn_delete" };
+        for (int i = 0; i < CSMW_BTN_MAX; ++i)
+            setRect(kBtnIds[i], layout.buttons[static_cast<std::size_t>(i)]);
+    }
 }
 
 void CCharSelMainWin::PreRelease()
 {
     for (int i = 0; i < CSMW_SPR_MAX; ++i)
         m_asprBack[i].Release();
+
+    // See CLoginMainWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s
+    // every window on every scene transition, and CWin's own Release() has no knowledge of
+    // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
+    // window happened to be open at the moment of transition.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
@@ -175,6 +247,20 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
         sprite.SetPosition(sprite.GetXPos() + deltaX, sprite.GetYPos() + deltaY);
     for (auto& button : m_aBtn)
         button.SetPosition(button.GetXPos() + deltaX, button.GetYPos() + deltaY);
+
+    // RmlUi panel: every child is panel-relative (see ApplyLayout()'s comment), so re-pointing
+    // #panel's own absolute left/top is enough to move the whole bar -- no per-child push needed
+    // here, unlike ApplyLayout()'s Create()-time case where sizes can also change. No call site
+    // actually invokes this today (CUIMng::RepositionSceneUI() re-runs Create() wholesale
+    // instead), kept correct anyway since it is part of CWin's public contract.
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
+        {
+            panel->SetProperty("left", std::to_string(nXCoord) + "px");
+            panel->SetProperty("top", std::to_string(nYCoord) + "px");
+        }
+    }
 }
 
 void CCharSelMainWin::Show(bool bShow)
@@ -185,29 +271,24 @@ void CCharSelMainWin::Show(bool bShow)
         sprite.Show(bShow);
     for (auto& button : m_aBtn)
         button.Show(bShow);
-}
 
-bool CCharSelMainWin::CursorInWin(int nArea)
-{
-    if (!CWin::m_bShow)
-        return false;
-
-    switch (nArea)
+    if (m_pRmlDoc)
     {
-    case WA_MOVE:
-        return false;
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        else       m_pRmlDoc->Hide();
     }
-
-    return CWin::CursorInWin(nArea);
 }
 
 void CCharSelMainWin::UpdateDisplay()
 {
-    m_aBtn[CSMW_BTN_CREATE].SetEnable(HasEmptyCharacterSlot());
+    m_bCreateEnabled = HasEmptyCharacterSlot();
+    m_aBtn[CSMW_BTN_CREATE].SetEnable(m_bCreateEnabled);
 
     const bool hasSelection = (SelectedHero > -1);
-    m_aBtn[CSMW_BTN_CONNECT].SetEnable(hasSelection);
-    m_aBtn[CSMW_BTN_DELETE].SetEnable(hasSelection);
+    m_bConnectEnabled = hasSelection;
+    m_bDeleteEnabled = hasSelection;
+    m_aBtn[CSMW_BTN_CONNECT].SetEnable(m_bConnectEnabled);
+    m_aBtn[CSMW_BTN_DELETE].SetEnable(m_bDeleteEnabled);
 
     if (!HasLiveCharacter())
     {
@@ -220,44 +301,66 @@ void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
 {
     CUIMng& uiManager = CUIMng::Instance();
 
-    if (m_aBtn[CSMW_BTN_CONNECT].IsClick())
+    if (m_aBtn[CSMW_BTN_CONNECT].IsClick() || m_bRmlConnectClicked)
     {
+        m_bRmlConnectClicked = false;
         ::StartGame();
     }
-    else if (m_aBtn[CSMW_BTN_MENU].IsClick())
+    else if (m_aBtn[CSMW_BTN_MENU].IsClick() || m_bRmlMenuClicked)
     {
+        m_bRmlMenuClicked = false;
         uiManager.ShowWin(&uiManager.m_SysMenuWin);
         uiManager.SetSysMenuWinShow(true);
     }
-    else if (m_aBtn[CSMW_BTN_CREATE].IsClick())
+    else if (m_aBtn[CSMW_BTN_CREATE].IsClick() || m_bRmlCreateClicked)
     {
+        m_bRmlCreateClicked = false;
         uiManager.ShowWin(&uiManager.m_CharMakeWin);
     }
-    else if (m_aBtn[CSMW_BTN_DELETE].IsClick())
+    else if (m_aBtn[CSMW_BTN_DELETE].IsClick() || m_bRmlDeleteClicked)
     {
+        m_bRmlDeleteClicked = false;
         DeleteCharacter();
     }
 }
 
 void CCharSelMainWin::RenderControls()
 {
-    const UI::Scaling::Transform physicalPixels{1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
+    // RmlUi's #panel now owns 100% of this bar's visuals (buttons, info-bar background, deco
+    // flourish, account-block message) in every theme -- see this class's header comment. The
+    // legacy CSprites/CButtons stay alive purely for their geometry/click-detection bookkeeping,
+    // never rendered; SyncRmlModel() is the only thing this override still needs to do.
+    SyncRmlModel();
+}
+
+void CCharSelMainWin::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    auto syncBool = [this](bool CharSelMainRmlModel::* field, const char* boundName, bool value)
     {
-        UI::Scaling::ScopedActiveTransform scoped(physicalPixels);
-        for (auto& sprite : m_asprBack)
-            sprite.Render();
-    }
+        if (m_RmlBinder.GetModel().*field != value)
+        {
+            m_RmlBinder.GetModel().*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    syncBool(&CharSelMainRmlModel::createDisabled, "create_disabled", !m_bCreateEnabled);
+    syncBool(&CharSelMainRmlModel::connectDisabled, "connect_disabled", !m_bConnectEnabled);
+    syncBool(&CharSelMainRmlModel::deleteDisabled, "delete_disabled", !m_bDeleteEnabled);
+    syncBool(&CharSelMainRmlModel::accountBlockHidden, "account_block_hidden", !m_bAccountBlockItem);
 
-    ::EnableAlphaTest();
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
-
-    if (m_bAccountBlockItem)
-        RenderAccountBlockMessage();
-
-    UI::Scaling::ScopedActiveTransform scoped(physicalPixels);
-    CWin::RenderButtons();
+    auto syncLabel = [this](Rml::String CharSelMainRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (m_RmlBinder.GetModel().*field != utf8)
+        {
+            m_RmlBinder.GetModel().*field = utf8;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    syncLabel(&CharSelMainRmlModel::accountBlockLine1, "account_block_line1", I18N::Game::ThisAccountIsItemBlocked);
+    syncLabel(&CharSelMainRmlModel::accountBlockLine2, "account_block_line2", I18N::Game::PleaseCheckOnHttpMuonlineWebzenComSite);
 }
 
 void CCharSelMainWin::DeleteCharacter()
