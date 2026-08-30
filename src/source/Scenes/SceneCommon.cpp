@@ -284,10 +284,10 @@ void RenderInfomation()
 
     CUIMng::Instance().Render();
 
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        RenderCursor();
-    }
+    // The login/character-scene cursor render that used to happen here moved to
+    // Winmain.cpp's SetPostRmlUiCallback registration, which fires after RmlUi's own render
+    // pass -- RmlUi always renders after this point in the frame, so drawing the cursor here
+    // (before it) let an opaque RmlUi panel visually cover it.
 
     RenderInfomation3D();
 }
