@@ -15,7 +15,7 @@ class CNewUIRenderNumber
 {
 public:
     enum IMAGE_LIST
-    {                                                      //. max: 1°³
+    {                                                      //. max: 1ê°œ
         IMAGE_NUMBER1 = BITMAP_INTERFACE_NEW_NUMBER_BEGIN, // newui_number1.tga
     };
 

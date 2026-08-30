@@ -39,7 +39,7 @@ namespace SEASON3B
             IMAGE_PARTY_HPBAR_BACK = BITMAP_PARTY_INFO_BEGIN,		// newui_party_lifebar01.jpg	(151, 8)
             IMAGE_PARTY_HPBAR,										// newui_party_lifebar02.jpg	(147, 4)
             IMAGE_PARTY_FLAG,										// newui_party_flag.tga			(10, 12)
-            IMAGE_PARTY_EXIT,										// newui_Party_x.tga			(13, 26)	// ÀÓ½Ã
+            IMAGE_PARTY_EXIT,										// newui_Party_x.tga			(13, 26)	// ì„ì‹œ
         };
 
     private:
@@ -54,10 +54,10 @@ namespace SEASON3B
         POINT						m_Pos;
 
         // Exit Button
-        CNewUIButton				m_BtnExit;							// ÆÄÆ¼Ã¢ ³ª°¡±â¹öÆ°
-        CNewUIButton				m_BtnPartyExit[MAX_PARTYS];			// ÆÄÆ¼Å»Åğ¹öÆ°
+        CNewUIButton				m_BtnExit;							// íŒŒí‹°ì°½ ë‚˜ê°€ê¸°ë²„íŠ¼
+        CNewUIButton				m_BtnPartyExit[MAX_PARTYS];			// íŒŒí‹°íƒˆí‡´ë²„íŠ¼
 
-        int							m_iSelectedCharID;		// Party List¿¡¼­ Ä³¸¯ÅÍ ID¸¦ ¼±ÅÃ (default : -1)
+        int							m_iSelectedCharID;		// Party Listì—ì„œ ìºë¦­í„° IDë¥¼ ì„ íƒ (default : -1)
 
         bool						m_bParty;
 
@@ -82,7 +82,7 @@ namespace SEASON3B
         void OpenningProcess();
         void ClosingProcess();
 
-        bool LeaveParty(const int iIndex);	// ÆÄÆ¼ÀåÀÌ »ó´ë¹æÀ» °­Åğ
+        bool LeaveParty(const int iIndex);	// íŒŒí‹°ì¥ì´ ìƒëŒ€ë°©ì„ ê°•í‡´
 
         void SetParty(bool bParty);
 

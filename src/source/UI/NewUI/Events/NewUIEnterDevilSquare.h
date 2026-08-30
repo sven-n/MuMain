@@ -46,7 +46,7 @@ namespace SEASON3B
 
         enum
         {
-            ENTER_BTN_VAL = 33,			// ¹öÆ° »çÀÌÀÇ °£°İ
+            ENTER_BTN_VAL = 33,			// ë²„íŠ¼ ì‚¬ì´ì˜ ê°„ê²©
 
             MAX_ENTER_GRADE = 7,
         };
@@ -61,7 +61,7 @@ namespace SEASON3B
         CNewUIButton				m_BtnEnter[MAX_ENTER_GRADE];			// Devil Square Enter Button
 
         int							m_iDevilSquareLimitLevel[MAX_ENTER_GRADE * 2][2];
-        int							m_iNumActiveBtn;		// È°¼ºÈ­ µÇ¾îÀÖ´Â ¹öÆ°
+        int							m_iNumActiveBtn;		// í™œì„±í™” ë˜ì–´ìˆëŠ” ë²„íŠ¼
         DWORD						m_dwBtnTextColor[2];	// 0 - Disabled, 1 - Enable
 
     public:

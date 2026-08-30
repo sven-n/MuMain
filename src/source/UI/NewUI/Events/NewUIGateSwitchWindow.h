@@ -48,7 +48,7 @@ namespace SEASON3B
         POINT m_Pos;
 
         CNewUIButton m_BtnExit;
-        CNewUIButton m_BtnOpen;			// ¿­±â ¹öÆ°
+        CNewUIButton m_BtnOpen;			// ì—´ê¸° ë²„íŠ¼
 
     public:
         CNewUIGateSwitchWindow();

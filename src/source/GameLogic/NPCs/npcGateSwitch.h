@@ -2,11 +2,11 @@
 //
 //  npcGateSwitch.h
 //
-//  ¼º¹® ½ºÀ§Ä¡ Ã³¸®
+//  ì„±ë¬¸ ìŠ¤ìœ„ì¹˜ ì²˜ë¦¬
 //
-//  ³¯  Â¥ : 2004/12/09
+//  ë‚   ì§œ : 2004/12/09
 //
-//  ÀÛ¼ºÀÚ : Á¶±ÔÇÏ.
+//  ì‘ì„±ì : ì¡°ê·œí•˜.
 //
 //////////////////////////////////////////////////////////////////////////
 #ifndef __NPC_GATE_SWITCH_H__
@@ -26,8 +26,8 @@ void GateClose(CHARACTER* c, OBJECT* o);
 void DoInterfaceOpen(int Key);
 void ProcessState(int Key, BYTE GateOnOff, BYTE State);
 
-void SendToggleGate(); // ¼º¹® ´İ±â/¿­±â ÆĞÅ¶ Àü¼Û
-bool IsGateOpened();   // ¼º¹®ÀÌ ¿­·Á ÀÖ³ª
+void SendToggleGate(); // ì„±ë¬¸ ë‹«ê¸°/ì—´ê¸° íŒ¨í‚· ì „ì†¡
+bool IsGateOpened();   // ì„±ë¬¸ì´ ì—´ë ¤ ìˆë‚˜
 }; // namespace npcGateSwitch
 
 using namespace npcGateSwitch;

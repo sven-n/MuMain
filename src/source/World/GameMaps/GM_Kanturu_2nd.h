@@ -12,28 +12,28 @@
 // TODO
 namespace M38Kanturu2nd
 {
-    // Ä­Åõ·ç ¿ÀºêÁ§Æ® °ü·Ã
-    bool Create_Kanturu2nd_Object(OBJECT* o);										// ¿ÀºêÁ§Æ® »ı¼º
-    bool Move_Kanturu2nd_Object(OBJECT* o);											// ¿ÀºêÁ§Æ® ¾÷µ¥ÀÌÆ®
-    bool Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b);							// ¿ÀºêÁ§Æ® ÀÌÆåÆ® È¿°ú
-    bool Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);			// ¿ÀºêÁ§Æ® ·»´õ¸µ(¸ó½ºÅÍ Æ÷ÇÔ)
+    // ì¹¸íˆ¬ë£¨ ì˜¤ë¸Œì íŠ¸ ê´€ë ¨
+    bool Create_Kanturu2nd_Object(OBJECT* o);										// ì˜¤ë¸Œì íŠ¸ ìƒì„±
+    bool Move_Kanturu2nd_Object(OBJECT* o);											// ì˜¤ë¸Œì íŠ¸ ì—…ë°ì´íŠ¸
+    bool Render_Kanturu2nd_ObjectVisual(OBJECT* o, BMD* b);							// ì˜¤ë¸Œì íŠ¸ ì´í™íŠ¸ íš¨ê³¼
+    bool Render_Kanturu2nd_ObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);			// ì˜¤ë¸Œì íŠ¸ ë Œë”ë§(ëª¬ìŠ¤í„° í¬í•¨)
     void Render_Kanturu2nd_AfterObjectMesh(OBJECT* o, BMD* b);
 
-    // Ä­Åõ·ç³»ºÎ ¸ó½ºÅÍ °ü·Ã
-    CHARACTER* Create_Kanturu2nd_Monster(int iType, int PosX, int PosY, int Key);	// ¸ó½ºÅÍ »ı¼º ÇÔ¼ö
-    bool	Set_CurrentAction_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o);		// ¸ó½ºÅÍ ÇöÀç ¾×¼Ç ¼¼ÆÃ
-    bool	AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD* b);	// ¸ó½ºÅÍ °ø°İ ÀÌÆåÆ®
-    bool	Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);		// ¸ó½ºÅÍ È¿°ú ¾÷µ¥ÀÌÆ®
-    void	Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b);		// ¸ó½ºÅÍ ¹«±âÀÇ ÀÜ»ó Ã³¸®
-    bool	Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);	// ¸ó½ºÅÍ ¿ÀºêÁ§Æ® ·»´õ¸µ
-    bool	Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// ¸ó½ºÅÍ È¿°ú ·»´õ¸µ
+    // ì¹¸íˆ¬ë£¨ë‚´ë¶€ ëª¬ìŠ¤í„° ê´€ë ¨
+    CHARACTER* Create_Kanturu2nd_Monster(int iType, int PosX, int PosY, int Key);	// ëª¬ìŠ¤í„° ìƒì„± í•¨ìˆ˜
+    bool	Set_CurrentAction_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o);		// ëª¬ìŠ¤í„° í˜„ì¬ ì•¡ì…˜ ì„¸íŒ…
+    bool	AttackEffect_Kanturu2nd_Monster(CHARACTER* c, OBJECT* o, BMD* b);	// ëª¬ìŠ¤í„° ê³µê²© ì´í™íŠ¸
+    bool	Move_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);		// ëª¬ìŠ¤í„° íš¨ê³¼ ì—…ë°ì´íŠ¸
+    void	Move_Kanturu2nd_BlurEffect(CHARACTER* c, OBJECT* o, BMD* b);		// ëª¬ìŠ¤í„° ë¬´ê¸°ì˜ ì”ìƒ ì²˜ë¦¬
+    bool	Render_Kanturu2nd_MonsterObjectMesh(OBJECT* o, BMD* b, int ExtraMon);	// ëª¬ìŠ¤í„° ì˜¤ë¸Œì íŠ¸ ë Œë”ë§
+    bool	Render_Kanturu2nd_MonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);	// ëª¬ìŠ¤í„° íš¨ê³¼ ë Œë”ë§
 
-    // Ä­Åõ·ç³»ºÎ ¸Ê °ü·Ã
-    bool		Is_Kanturu2nd();						// Ä­Åõ·ç³»ºÎ ¸ÊÀÎ°¡?
-    bool		Is_Kanturu2nd_3rd();					// Ä­Åõ·ç³»ºÎ¿Í 3Â÷ ¸ÊÀÎ°¡?
+    // ì¹¸íˆ¬ë£¨ë‚´ë¶€ ë§µ ê´€ë ¨
+    bool		Is_Kanturu2nd();						// ì¹¸íˆ¬ë£¨ë‚´ë¶€ ë§µì¸ê°€?
+    bool		Is_Kanturu2nd_3rd();					// ì¹¸íˆ¬ë£¨ë‚´ë¶€ì™€ 3ì°¨ ë§µì¸ê°€?
 
-    // »ç¿îµå
-    void	Sound_Kanturu2nd_Object(OBJECT* o);		// ¿ÀºêÁ§Æ® »ç¿îµå
+    // ì‚¬ìš´ë“œ
+    void	Sound_Kanturu2nd_Object(OBJECT* o);		// ì˜¤ë¸Œì íŠ¸ ì‚¬ìš´ë“œ
     void	PlayBGM();
 };
 

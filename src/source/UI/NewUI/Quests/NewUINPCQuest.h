@@ -21,7 +21,7 @@ namespace SEASON3B
     public:
         enum IMAGE_LIST
         {
-            // �⺻â
+            // 기본창
             IMAGE_NPCQUEST_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
             IMAGE_NPCQUEST_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
             IMAGE_NPCQUEST_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)

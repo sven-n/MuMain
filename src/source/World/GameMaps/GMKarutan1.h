@@ -1,7 +1,7 @@
 //*****************************************************************************
 // File: GMKarutan1.h
 //
-// Desc: Å³·çÅº1 ¸Ê, ¸ó½ºÅÍ.
+// Desc: í‚¬ë£¨íƒ„1 ë§µ, ëª¬ìŠ¤í„°.
 //
 // producer: Ahn Sang-Kyu (10.08.03)
 //*****************************************************************************
@@ -28,39 +28,39 @@ public:
     static CGMKarutan1Ptr Make();
 
     // Object
-    // ¿ÀºêÁ§Æ® »ı¼º
+    // ì˜¤ë¸Œì íŠ¸ ìƒì„±
     virtual bool CreateObject(OBJECT* o);
-    // ¿ÀºêÁ§Æ® ÇÁ·Î¼¼¼­
+    // ì˜¤ë¸Œì íŠ¸ í”„ë¡œì„¸ì„œ
     virtual bool MoveObject(OBJECT* o);
-    // ¿ÀºêÁ§Æ® ÀÌÆåÆ®
+    // ì˜¤ë¸Œì íŠ¸ ì´í™íŠ¸
     virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
-    // ¿ÀºêÁ§Æ® ·£´õ
+    // ì˜¤ë¸Œì íŠ¸ ëœë”
     virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
-    // ¸Ê °ü·Ã ¿ÀºêÁ§Æ® ÀÌÆåÆ®
+    // ë§µ ê´€ë ¨ ì˜¤ë¸Œì íŠ¸ ì´í™íŠ¸
     virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
 
 #ifdef ASG_ADD_KARUTAN_MONSTERS
     // Character
-    // ¸ó½ºÅÍ »ı¼º
+    // ëª¬ìŠ¤í„° ìƒì„±
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
-    // ¸ó½ºÅÍ(NPC) ÇÁ·Î¼¼¼­
+    // ëª¬ìŠ¤í„°(NPC) í”„ë¡œì„¸ì„œ
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
-    // ¸ó½ºÅÍ ½ºÅ³ ºí·¯ ÀÌÆåÆ®
+    // ëª¬ìŠ¤í„° ìŠ¤í‚¬ ë¸”ëŸ¬ ì´í™íŠ¸
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);
-    // ¸ó½ºÅÍ ÀÌÆåÆ® ( ÀÏ¹İ )
+    // ëª¬ìŠ¤í„° ì´í™íŠ¸ ( ì¼ë°˜ )
     virtual bool RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b);
-    // ¸ó½ºÅÍ ÀÌÆåÆ® ( ½ºÅ³ )
+    // ëª¬ìŠ¤í„° ì´í™íŠ¸ ( ìŠ¤í‚¬ )
     virtual bool AttackEffectMonster(CHARACTER* c, OBJECT* o, BMD* b);
-    // ½ºÅ³ ¾Ö´Ï¸ŞÀÌ¼Ç °ü·Ã ÇÔ¼ö
+    // ìŠ¤í‚¬ ì• ë‹ˆë©”ì´ì…˜ ê´€ë ¨ í•¨ìˆ˜
     virtual bool SetCurrentActionMonster(CHARACTER* c, OBJECT* o);
 
     // Sound
-    // ¸ó½ºÅÍ »ç¿îµå
+    // ëª¬ìŠ¤í„° ì‚¬ìš´ë“œ
     virtual bool PlayMonsterSound(OBJECT* o);
 #endif // ASG_ADD_KARUTAN_MONSTERS
-    // ¿ÀºêÁ§Æ® »ç¿îµå
+    // ì˜¤ë¸Œì íŠ¸ ì‚¬ìš´ë“œ
     virtual void PlayObjectSound(OBJECT* o);
-    // ¹è°æÀ½¾Ç
+    // ë°°ê²½ìŒì•…
     void PlayBGM();
 };
 

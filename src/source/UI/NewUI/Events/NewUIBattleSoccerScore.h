@@ -2,7 +2,7 @@
 // File: NewUIBattleSoccerScore.h
 //
 // Desc: interface for the CNewUIBattleSoccerScore class.
-//		 ÀüÅõÃà±¸ Á¡¼ö UI Å¬·¡½º.
+//		 ì „íˆ¬ì¶•êµ¬ ì ìˆ˜ UI í´ë˜ìŠ¤.
 //
 // producer: Ahn Sang-Kyu
 //*****************************************************************************
@@ -32,8 +32,8 @@ private:
         BSS_HEIGHT = 70,
     };
 
-    CNewUIManager* m_pNewUIMng; // UI ¸Å´ÏÀú.
-    POINT m_Pos;                // Ã¢ÀÇ À§Ä¡.
+    CNewUIManager* m_pNewUIMng; // UI ë§¤ë‹ˆì €.
+    POINT m_Pos;                // ì°½ì˜ ìœ„ì¹˜.
 
 public:
     CNewUIBattleSoccerScore();

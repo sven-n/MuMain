@@ -30,7 +30,7 @@ public:
     void MoveEffects();
 
 protected:
-    OBJECT m_SkillEffects[MAX_SKILL_EFFECTS]; // ½ºÅ³ ÆÇÁ¤¿¡ »ç¿ëÇÏ´Â ÀÌÆåÆ®µé (ºí·¯µå¾îÅÃ µî)
+    OBJECT m_SkillEffects[MAX_SKILL_EFFECTS]; // ìŠ¤í‚¬ íŒì •ì— ì‚¬ìš©í•˜ëŠ” ì´í™íŠ¸ë“¤ (ë¸”ëŸ¬ë“œì–´íƒ ë“±)
 };
 
 extern CSkillEffectMgr g_SkillEffects;

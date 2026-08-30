@@ -23,7 +23,7 @@ class CMsgBoxIGSUseItemConfirm : public CNewUIMessageBoxBase
 public:
     enum IMAGE_IGS_USEITEM_CONFIRM
     {
-        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON, // ÀÎ°ÔÀÓ¼¥ ¹öÆ°
+        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON, // ì¸ê²Œìž„ìƒµ ë²„íŠ¼
         IMAGE_IGS_BACK = CNewUIOptionWindow::IMAGE_OPTION_FRAME_BACK,
         IMAGE_IGS_UP = CNewUIOptionWindow::IMAGE_OPTION_FRAME_UP,
         IMAGE_IGS_DOWN = CNewUIOptionWindow::IMAGE_OPTION_FRAME_DOWN,
@@ -33,22 +33,22 @@ public:
 
     enum IMAGE_IGS_USEITEM_CONFIRM_SIZE
     {
-        IMAGE_IGS_WINDOW_WIDTH = 640, // ÀÎ°ÔÀÓ¼¥ ¹è°æ »çÀÌÁî
+        IMAGE_IGS_WINDOW_WIDTH = 640, // ì¸ê²Œìž„ìƒµ ë°°ê²½ ì‚¬ì´ì¦ˆ
         IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 190, // ¸Þ¼¼Áö¹Ú½º Size
+        IMAGE_IGS_FRAME_WIDTH = 190, // ë©”ì„¸ì§€ë°•ìŠ¤ Size
         IMAGE_IGS_FRAME_HEIGHT = 179,
         IMAGE_IGS_UP_HEIGHT = 64,
         IMAGE_IGS_DOWN_HEIGHT = 45,
         IMAGE_IGS_LINE_WIDTH = 21,
         IMAGE_IGS_LINE_HEIGHT = 10,
-        IMAGE_IGS_BTN_WIDTH = 52, // ¹öÆ° Size
+        IMAGE_IGS_BTN_WIDTH = 52, // ë²„íŠ¼ Size
         IMAGE_IGS_BTN_HEIGHT = 26,
     };
 
-    // ¸Þ¼¼Áö¹Ú½º»óÀÇ »ó´ëÁÂÇ¥
+    // ë©”ì„¸ì§€ë°•ìŠ¤ìƒì˜ ìƒëŒ€ì¢Œí‘œ
     enum IGS_USEITEM_CONFIRM_POS
     {
-        IGS_BTN_OK_POS_X = 33, // ¹öÆ° Pos
+        IGS_BTN_OK_POS_X = 33, // ë²„íŠ¼ Pos
         IGS_BTN_CANCEL_POS_X = 105,
         IGS_BTN_POS_Y = 140,
         IGS_TEXT_TITLE_Y = 10, // Title
@@ -97,11 +97,11 @@ private:
 
     int m_iDesciptionLine;
 
-    int m_iStorageSeq;                     // º¸°üÇÔ ¼ø¹ø
-    int m_iStorageItemSeq;                 // º¸°üÇÔ »óÇ° ¼ø¹ø
-    WORD m_wItemCode;                      // ¾ÆÀÌÅÛ ÄÚµå
-    wchar_t m_szItemName[MAX_TEXT_LENGTH]; // ¾ÆÀÌÅÛÀÌ¸§
-    char m_szItemType;                     // »óÇ°±¸ºÐ (C : Ä³½Ã, P : »óÇ°)
+    int m_iStorageSeq;                     // ë³´ê´€í•¨ ìˆœë²ˆ
+    int m_iStorageItemSeq;                 // ë³´ê´€í•¨ ìƒí’ˆ ìˆœë²ˆ
+    WORD m_wItemCode;                      // ì•„ì´í…œ ì½”ë“œ
+    wchar_t m_szItemName[MAX_TEXT_LENGTH]; // ì•„ì´í…œì´ë¦„
+    char m_szItemType;                     // ìƒí’ˆêµ¬ë¶„ (C : ìºì‹œ, P : ìƒí’ˆ)
 };
 
 ////////////////////////////////////////////////////////////////////

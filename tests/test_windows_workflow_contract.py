@@ -19,6 +19,7 @@ PERSONAL_SHOP_SOURCE = ROOT / "src/source/GameLogic/Items/PersonalShopTitleImp.c
 SHADER_BLOB_VALIDATOR = ROOT / "cmake/ValidateShaderBlobs.cmake"
 COPY_RUNTIME_ASSETS = ROOT / "cmake/CopyRuntimeAssets.cmake"
 SRC_CMAKE = ROOT / "src/CMakeLists.txt"
+SOURCE_ROOT = ROOT / "src/source"
 NETWORK_TEST_CMAKE = ROOT / "tests/network/CMakeLists.txt"
 BUILD_GUIDE = ROOT / "docs/build/README.md"
 README = ROOT / "README.md"
@@ -182,6 +183,28 @@ src_cmake = SRC_CMAKE.read_text(encoding="utf-8")
 copy_runtime_assets = COPY_RUNTIME_ASSETS.read_text(encoding="utf-8")
 build_guide = BUILD_GUIDE.read_text(encoding="utf-8")
 readme = README.read_text(encoding="utf-8")
+
+for source_path in SOURCE_ROOT.rglob("*"):
+    if source_path.suffix.lower() not in {".c", ".cc", ".cpp", ".h", ".hh", ".hpp"}:
+        continue
+    try:
+        source_path.read_text(encoding="utf-8", errors="strict")
+    except UnicodeDecodeError as error:
+        errors.append(
+            f"C/C++ source must be valid UTF-8: {source_path.relative_to(ROOT)} "
+            f"({error})"
+        )
+
+check(
+    re.search(
+        r"(?ms)if\s*\(\s*MSVC\s*\).*?"
+        r"target_compile_options\s*\(\s*MuClient\s+PRIVATE\s+/utf-8\s+/we4828\s*\).*?"
+        r"endif\s*\(\s*\)",
+        src_cmake,
+    )
+    is not None,
+    "MuClient MSVC builds must compile UTF-8 sources and reject invalid bytes",
+)
 
 configure_presets = {
     preset["name"]: preset for preset in cmake_presets["configurePresets"]

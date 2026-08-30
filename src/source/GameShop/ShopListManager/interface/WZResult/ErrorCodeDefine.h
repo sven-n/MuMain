@@ -1,14 +1,14 @@
 #pragma once
 
-// 傍烹 内靛
+// 瓿淀喌 旖旊摐
 #define WZ_SUCCESS 0x00000000
 #define WZ_USER_BREAK 0x00000001
 
-// 诀单捞飘 俊矾 内靛
+// 鞐呺嵃鞚错姼 鞐愲煬 旖旊摐
 #define GU_FAILED 0xF0000000
 #define GU_EMPTY_FILELIST (0x00000001 | GU_FAILED)
 
-// 滚傈 俊矾 内靛
+// 氩勳爠 鞐愲煬 旖旊摐
 #define VS_FAILED 0x10000000
 #define VS_EXCEPTION (0x00000001 | DL_FAILED)
 #define VS_NO_INFO (0x00000002 | VS_FAILED)
@@ -17,7 +17,7 @@
 #define VS_WRITE_VERSION_FILE (0x00000005 | VS_FAILED)
 #define VS_INVALID_VERSION (0x00000006 | VS_FAILED)
 
-// 促款肺靛 俊矾 内靛
+// 雼れ毚搿滊摐 鞐愲煬 旖旊摐
 #define DL_FAILED 0x20000000
 #define DL_EXCEPTION (0x00000001 | DL_FAILED)
 #define DL_NO_INFO (0x00000002 | DL_FAILED)
@@ -35,7 +35,7 @@
 #define DL_HTTP_QUERY_INFO (0x0000000E | DL_FAILED)
 #define DL_HTTP_STATUS_NOT_OK (0x0000000F | DL_FAILED)
 
-// 菩媚 俊矾 内靛
+// 韺硱 鞐愲煬 旖旊摐
 #define PT_FAILED 0x40000000
 #define PT_EXCEPTION (0x00000001 | PT_FAILED)
 #define PT_NO_INFO (0x00000002 | PT_FAILED)
@@ -45,7 +45,7 @@
 #define PT_UNPATCH_IN_ADAPTER (0x00000006 | PT_FAILED)
 #define PT_CHECKFILES_IN_ADAPTER (0x00000007 | PT_FAILED)
 
-// Setting 俊矾 内靛
+// Setting 鞐愲煬 旖旊摐
 #define ST_FAILED 0x80000000
 #define ST_EXCEPTION (0x00000001 | ST_FAILED)
 #define ST_XML_OPEN (0x00000002 | ST_FAILED)
