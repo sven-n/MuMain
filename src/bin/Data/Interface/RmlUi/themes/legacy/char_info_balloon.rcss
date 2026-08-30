@@ -1,0 +1,54 @@
+/* RmlUi overlay for the character-select scene's per-character name/guild/level tags
+   (CCharInfoBalloonMng). Source art per Engine/Object/ZzzOpenData.cpp's
+   OpenCharacterSceneData(): character_ex.tga (118x54, single frame). Same
+   @spritesheet-with-explicit-rect technique every other window's legacy theme uses (this
+   engine's .OZT loader pads textures to the next power-of-two size). */
+
+@spritesheet charballoon-bg-sheet
+{
+	src: "../../../character_ex.tga";
+	charballoon-bg-image: 0px 0px 118px 54px;
+}
+
+/* Each instance is positioned every frame from C++ (left/top via data-style, see
+   char_info_balloon.rml) -- width/height match the original CSprite's 118x54 art exactly, since
+   C++ already subtracts the (59, 54) anchor offset before pushing screen_x/screen_y. */
+.balloon {
+	position: absolute;
+	width: 118px;
+	height: 54px;
+	pointer-events: none;
+}
+.balloon-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 118px;
+	height: 54px;
+	decorator: image(charballoon-bg-image);
+}
+
+/* Matches the original's three RenderText calls exactly: name (color varies -- see
+   CCharInfoBalloon::GetNameColor()), guild (white, parenthesized upstream in C++), and
+   class+level (orange), stacked at the same 6/22/38px offsets within the 118px-wide box. */
+.balloon-name, .balloon-guild, .balloon-class {
+	position: absolute;
+	left: 0;
+	width: 118px;
+	text-align: center;
+	white-space: nowrap;
+	font-size: 12px;
+}
+.balloon-name {
+	top: 6px;
+	/* color is pushed per-instance (data-style-color) -- see CharInfoBalloonMng.cpp's
+	   ColorToCssHex(). */
+}
+.balloon-guild {
+	top: 22px;
+	color: #ffffff;
+}
+.balloon-class {
+	top: 38px;
+	color: #ffd927;
+}
