@@ -99,9 +99,13 @@
 .stat-label {
 	color: #ffffff;
 }
+/* left:54px matches the original's kStatValueOffset constant exactly (CharMakeWin.cpp) --
+   value X = statBaseX + 54, label X = statBaseX, both measured from the same origin .stat-row
+   is already positioned at (kStatTextOffsetX=22px). Using a smaller offset here previously
+   caused the value to overlap the label text (e.g. "Strength" is wider than 32px). */
 .stat-value {
 	position: absolute;
-	left: 32px;
+	left: 54px;
 	color: #ffb400;
 }
 

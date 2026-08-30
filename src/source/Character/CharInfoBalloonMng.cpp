@@ -13,6 +13,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Legacy/UIMng.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 namespace
@@ -113,6 +114,26 @@ void CCharInfoBalloonMng::Render()
     for (auto& balloon : m_charInfoBalloons)
         balloon.Render();
 
+    // Before this migration, this manager's Render() drew the balloons as ordinary legacy 2D
+    // content, in the same pass and *before* CUIMng::Render()'s CWin list (CCharMakeWin, CMsgWin)
+    // -- so those windows' own legacy drawing correctly painted over the balloons whenever they
+    // were open. RmlUi renders unconditionally last in the frame now, so that relationship
+    // inverted: with nothing telling it otherwise, a balloon would paint on top of the character-
+    // creation dialog or a CMsgWin confirmation prompt instead of being covered by them, since
+    // both are themselves drawn earlier in the frame (CCharMakeWin's own panel is RmlUi too, but
+    // CMsgWin's isn't, and either way neither has any relationship to *when* RmlUi's pass runs).
+    // Restore the original visual hierarchy explicitly: hide the whole balloon document while
+    // either window is shown, since both used to legitimately cover it.
+    CUIMng& uiMng = CUIMng::Instance();
+    const bool shouldHide = uiMng.m_CharMakeWin.IsShow() || uiMng.m_MsgWin.IsShow();
+    if (m_pRmlDoc)
+    {
+        if (shouldHide) m_pRmlDoc->Hide();
+        else            m_pRmlDoc->Show();
+    }
+    if (shouldHide)
+        return;
+
     SyncRmlModel();
 }
 
@@ -140,12 +161,14 @@ void CCharInfoBalloonMng::SyncRmlModel()
         BalloonEntry& entry = balloons[i];
 
         entry.hidden = !balloon.IsShow();
-        // Reproduces CSprite::Create's (59, 54) anchor offset -- the balloon's real art/text box
-        // is bottom-center-anchored at the projected point (see CCharInfoBalloon::Render()'s own
-        // comment), so the RmlUi element's top-left (real screen pixels, matching this engine's
-        // Rml::Context sizing) needs that same offset subtracted.
-        entry.screenX = balloon.GetXPos() - 59;
-        entry.screenY = balloon.GetYPos() - 54;
+        // CSprite::SetPosition() already subtracts the (59, 54) anchor offset internally when
+        // computing what GetXPos()/GetYPos() return (Sprite.cpp: m_aScrCoord[LT].fX = nXCoord -
+        // m_fDatumX) -- GetXPos()/GetYPos() already ARE the anchor-adjusted top-left corner, the
+        // same thing an RmlUi element's left/top needs. Subtracting the offset again here (an
+        // earlier version of this code did) double-applies it, shifting the balloon uniformly
+        // off to the upper-left of every character instead of centered above it.
+        entry.screenX = balloon.GetXPos();
+        entry.screenY = balloon.GetYPos();
         entry.nameColor = ColorToCssHex(balloon.GetNameColor());
         entry.name = StringUtils::WideToNarrow(balloon.GetName());
         entry.guild = StringUtils::WideToNarrow(balloon.GetGuildText());

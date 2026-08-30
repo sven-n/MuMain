@@ -18,6 +18,10 @@
 	width: 118px;
 	height: 54px;
 	pointer-events: none;
+	/* Every other window's #panel sets this; this document has no #panel, so it needs setting
+	   somewhere -- without it RmlUi logs "No font face defined" and draws no text at all. */
+	font-family: "Liberation Sans";
+	color: white;
 }
 .balloon-bg {
 	position: absolute;

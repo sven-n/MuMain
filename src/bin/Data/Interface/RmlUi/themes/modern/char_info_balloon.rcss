@@ -8,6 +8,7 @@
 	height: 54px;
 	pointer-events: none;
 	font-family: "Liberation Sans";
+	color: white;
 }
 .balloon-bg {
 	position: absolute;
