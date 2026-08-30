@@ -23,9 +23,9 @@ endfunction()
 
 string(REGEX MATCHALL "\\$<TARGET_RUNTIME_DLLS:Main>" runtime_dll_occurrences "${cmake_code}")
 list(LENGTH runtime_dll_occurrences runtime_dll_count)
-if(NOT runtime_dll_count EQUAL 1)
+if(NOT runtime_dll_count EQUAL 2)
     message(FATAL_ERROR
-        "Expected exactly one $<TARGET_RUNTIME_DLLS:Main> occurrence, found ${runtime_dll_count}")
+        "Expected guarded command and argument $<TARGET_RUNTIME_DLLS:Main> occurrences, found ${runtime_dll_count}")
 endif()
 
 foreach(forbidden IN ITEMS DLL_SEARCH_PATH REQUIRED_DLL_NAMES REQUIRED_DLLS glew32)
@@ -93,8 +93,8 @@ require_match("${staging_command}"
     "add_custom_command[ \t\r\n]*\\([ \t\r\n]*TARGET[ \t]+Main[ \t]+POST_BUILD"
     "transitive staging is a Main POST_BUILD command")
 require_match("${staging_command}"
-    "COMMAND[ \t\r\n]+\"?\\$\\{CMAKE_COMMAND\\}\"?[ \t\r\n]+-E[ \t\r\n]+copy_if_different[ \t\r\n]+\\$<TARGET_RUNTIME_DLLS:Main>[ \t\r\n]+\"?\\$<TARGET_FILE_DIR:Main>\"?"
-    "one copy command stages only linked-target DLLs beside Main")
+    "COMMAND[ \t\r\n]+\"?\\$\\{CMAKE_COMMAND\\}\"?[ \t\r\n]+-E[ \t\r\n]+\"?\\$<IF:\\$<BOOL:\\$<TARGET_RUNTIME_DLLS:Main>>,copy_if_different,true>\"?[ \t\r\n]+\\$<TARGET_RUNTIME_DLLS:Main>[ \t\r\n]+\"?\\$<TARGET_FILE_DIR:Main>\"?"
+    "empty runtime DLL lists use a successful no-op; non-empty lists copy beside Main")
 require_match("${staging_command}" "COMMAND_EXPAND_LISTS" "transitive staging expands the DLL list")
 require_match("${staging_command}" "VERBATIM" "transitive staging remains VERBATIM")
 

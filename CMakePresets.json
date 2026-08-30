@@ -30,9 +30,11 @@
         "value": "x86",
         "strategy": "external"
       },
-      "toolchainFile": "${sourceDir}/toolchain-x86.cmake",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
-        "ENABLE_EDITOR": "OFF"
+        "ENABLE_EDITOR": "OFF",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
+        "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
     },
     {
@@ -44,9 +46,11 @@
         "value": "x86",
         "strategy": "external"
       },
-      "toolchainFile": "${sourceDir}/toolchain-x86.cmake",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
-        "ENABLE_EDITOR": "ON"
+        "ENABLE_EDITOR": "ON",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
+        "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
     },
     {
@@ -58,9 +62,11 @@
         "value": "x64",
         "strategy": "external"
       },
-      "toolchainFile": "${sourceDir}/toolchain-x64.cmake",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
-        "ENABLE_EDITOR": "OFF"
+        "ENABLE_EDITOR": "OFF",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
     },
     {
@@ -72,9 +78,11 @@
         "value": "x64",
         "strategy": "external"
       },
-      "toolchainFile": "${sourceDir}/toolchain-x64.cmake",
+      "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
-        "ENABLE_EDITOR": "ON"
+        "ENABLE_EDITOR": "ON",
+        "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
+        "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
     },
     {

@@ -529,7 +529,7 @@ if (MSVC)
   # ponytail: native CI uses dynamic vcpkg triplets; guard an empty runtime
   # DLL list if static triplets are added.
   add_custom_command(TARGET Main POST_BUILD
-    COMMAND "${CMAKE_COMMAND}" -E copy_if_different
+    COMMAND "${CMAKE_COMMAND}" -E "$<IF:$<BOOL:$<TARGET_RUNTIME_DLLS:Main>>,copy_if_different,true>"
       $<TARGET_RUNTIME_DLLS:Main>
       "$<TARGET_FILE_DIR:Main>"
     COMMAND_EXPAND_LISTS

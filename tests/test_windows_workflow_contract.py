@@ -13,6 +13,7 @@ MINGW_WORKFLOW = ROOT / ".github/workflows/windows-build.yml"
 LINUX_WORKFLOW = ROOT / ".github/workflows/linux-build.yml"
 RELEASE_CONFIG = ROOT / ".releaserc.json"
 VCPKG_MANIFEST = ROOT / "vcpkg.json"
+CMAKE_PRESETS = ROOT / "CMakePresets.json"
 RENDERER_SOURCE = ROOT / "src/source/Render/Renderer/MuRendererSDLGpu.cpp"
 PERSONAL_SHOP_SOURCE = ROOT / "src/source/GameLogic/Items/PersonalShopTitleImp.cpp"
 SHADER_BLOB_VALIDATOR = ROOT / "cmake/ValidateShaderBlobs.cmake"
@@ -176,10 +177,37 @@ ci = read_optional(CI_WORKFLOW)
 data_workflow = read_optional(DATA_WORKFLOW)
 release_config = json.loads(RELEASE_CONFIG.read_text(encoding="utf-8"))
 vcpkg_manifest = json.loads(VCPKG_MANIFEST.read_text(encoding="utf-8"))
+cmake_presets = json.loads(CMAKE_PRESETS.read_text(encoding="utf-8"))
 src_cmake = SRC_CMAKE.read_text(encoding="utf-8")
 copy_runtime_assets = COPY_RUNTIME_ASSETS.read_text(encoding="utf-8")
 build_guide = BUILD_GUIDE.read_text(encoding="utf-8")
 readme = README.read_text(encoding="utf-8")
+
+configure_presets = {
+    preset["name"]: preset for preset in cmake_presets["configurePresets"]
+}
+for preset_name, architecture, triplet in (
+    ("windows-x86", "x86", "x86-windows"),
+    ("windows-x86-mueditor", "x86", "x86-windows"),
+    ("windows-x64", "x64", "x64-windows"),
+    ("windows-x64-mueditor", "x64", "x64-windows"),
+):
+    preset = configure_presets[preset_name]
+    check(
+        preset.get("toolchainFile")
+        == "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+        f"{preset_name} must configure through the vcpkg toolchain",
+    )
+    cache_variables = preset.get("cacheVariables", {})
+    check(
+        cache_variables.get("VCPKG_CHAINLOAD_TOOLCHAIN_FILE")
+        == f"${{sourceDir}}/toolchain-{architecture}.cmake",
+        f"{preset_name} must chainload the project {architecture} toolchain",
+    )
+    check(
+        cache_variables.get("VCPKG_TARGET_TRIPLET") == triplet,
+        f"{preset_name} must select {triplet}",
+    )
 
 check(not MINGW_WORKFLOW.exists(), "Hosted MinGW matrix workflow must be removed")
 check(not LINUX_WORKFLOW.exists(), "Hosted Linux matrix workflow must be removed")
