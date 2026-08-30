@@ -1,3 +1,16 @@
+## [1.2.0](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.5...v1.2.0) (2026-08-30)
+
+### Features
+
+* **ui:** add responsive HUD layouts ([fe407e1](https://github.com/yesid-bocanegra/MuMain/commit/fe407e1b8a6abda812f3b026b35e8dca1a5b3c61))
+
+### Bug Fixes
+
+* **ui:** align scaled item interactions ([2bdd366](https://github.com/yesid-bocanegra/MuMain/commit/2bdd3660fdc016857b66ce767d3c97e71895b2f7))
+* **ui:** block world hover behind panels ([1e0099b](https://github.com/yesid-bocanegra/MuMain/commit/1e0099bcc9b2e7361e568173bd2eb13cd1a3069c))
+* **ui:** scale auxiliary game windows ([a1ef8f8](https://github.com/yesid-bocanegra/MuMain/commit/a1ef8f85c41234a300ee864a755ac38040dc2b69))
+* **ui:** stabilize character and NPC labels ([307a4a2](https://github.com/yesid-bocanegra/MuMain/commit/307a4a242b185c19f14ace1f82e7e9685654a27e))
+
 ## [1.1.5](https://github.com/yesid-bocanegra/MuMain/compare/v1.1.4...v1.1.5) (2026-08-27)
 
 ### Bug Fixes
