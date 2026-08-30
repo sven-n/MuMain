@@ -242,6 +242,13 @@ static SDL_Window* s_window = nullptr;
 // RmlUi port: see SetPreSubmitCallback's own comment (MuRenderer.h) for what this is and why.
 static std::function<void()> s_preSubmitCallback;
 
+// RmlUi port: see SetPostRmlUiCallback's own comment (MuRenderer.h). Fires after RmlUi's own
+// render pass has closed, for content that must sit visually on top of RmlUi (the game cursor,
+// legacy CUITextInputBox text) -- see EndFrame()'s own comment at the call site for why this
+// needs its own small render pass rather than just calling RenderQuad2D-style functions from
+// inside s_preSubmitCallback itself.
+static std::function<void()> s_postRmlUiCallback;
+
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
 static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
@@ -2027,6 +2034,157 @@ public:
             s_preSubmitCallback();
         }
 
+        // RmlUi port: content that must sit visually on top of RmlUi (the game cursor, legacy
+        // CUITextInputBox text -- see SetPostRmlUiCallback's own comment, MuRenderer.h). Fires
+        // after RmlUi's own render pass (opened/closed inside s_preSubmitCallback above) has
+        // closed, so this needs its OWN render pass rather than reusing the main one above: the
+        // main pass's replay loop (and the s_renderCmds it consumes) already ran and closed
+        // before s_preSubmitCallback fired, so anything the callback below pushes via the normal
+        // RenderQuad2D-style functions lands at the *tail* of s_renderCmds, past what that loop
+        // already replayed -- it would otherwise sit unreplayed until next frame's BeginFrame()
+        // clears it away unseen (dropped, not delayed). LOAD_OP_LOAD (not CLEAR) on both targets
+        // so this stacks on top of the main pass's content and RmlUi's, rather than erasing them.
+        if (s_cmdBuf && s_postRmlUiCallback)
+        {
+            const std::size_t postUiCmdStart = s_renderCmds.size();
+
+            // RenderQuad2D/RenderTriangles/etc. all early-return on !s_frameActive, which was
+            // set false at the very top of this function -- correct for the normal "recording"
+            // window (BeginFrame..EndFrame's own replay), but this callback runs deep inside
+            // EndFrame, after that window closed. Without this, every draw call the callback
+            // makes (RenderCursor, CLoginWin::RenderTextOnTop) is silently dropped -- no warning,
+            // no crash, just nothing on screen. Restored to false right after: nothing past this
+            // point should still be recording new frame content.
+            // Also reset the per-family "previous draw command" merge tracking (normally only
+            // reset once per frame, in BeginFrame): it's a persistent index into s_renderCmds
+            // that survives across this whole function, unaware of postUiCmdStart above. Without
+            // this, MergeAdjacentQuadCommand/MergeAdjacentTriangleCommand happily merge the
+            // callback's draws (RenderCursor's quad, say) backward into the LAST matching
+            // command from the main pass -- one that was already replayed and closed several
+            // lines up -- growing its vtxCount/idxCount instead of appending a new command here.
+            // That command is never replayed again, so the merged-in geometry silently never
+            // renders: s_renderCmds.size() doesn't even grow, so postUiCmdStart's own "were any
+            // commands pushed" check below sees nothing happened, no crash, no warning.
+            s_previousDrawCommands.fill(kNoDrawCommand);
+
+            s_frameActive = true;
+            s_postRmlUiCallback();
+            s_frameActive = false;
+
+            // Re-stage vertex data: UploadVertices() (RenderQuad2D etc., called by the callback
+            // above) only appends to the CPU-side s_vtxScratch and advances s_vtxOffset -- it does
+            // NOT touch the GPU. The actual transfer-buffer map+memcpy and the copy-pass that
+            // moves it into s_vtxGpuBuf (what ReplayDrawCommand's SDL_BindGPUVertexBuffers
+            // actually reads) already ran once, early in this function ("Phase 1"), using
+            // whatever s_vtxOffset was BEFORE this callback grew it further. Without redoing both
+            // steps here, every draw command the callback just pushed references a byte range in
+            // s_vtxGpuBuf that was never written this frame (stale/uninitialized GPU memory) --
+            // explains why the draw calls "succeed" (valid buffer/offsets, no validation error)
+            // yet nothing recognizable ever appears on screen. Re-copying the whole scratch
+            // buffer (not just the delta) is simplest and correct: offsets already used by the
+            // main pass are unchanged, only the tail is new.
+            if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset))
+            {
+                void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, true);
+                if (mapped)
+                {
+                    std::memcpy(mapped, s_vtxScratch.data(), s_vtxOffset);
+                    SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+
+                    SDL_GPUCopyPass* postUiCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
+                    if (postUiCopyPass)
+                    {
+                        SDL_GPUTransferBufferLocation vtxSrc{};
+                        vtxSrc.transfer_buffer = s_vtxTransferBuf;
+                        vtxSrc.offset = 0;
+
+                        SDL_GPUBufferRegion vtxDst{};
+                        vtxDst.buffer = s_vtxGpuBuf;
+                        vtxDst.offset = 0;
+                        vtxDst.size = s_vtxOffset;
+
+                        SDL_UploadToGPUBuffer(postUiCopyPass, &vtxSrc, &vtxDst, true);
+                        SDL_EndGPUCopyPass(postUiCopyPass);
+                    }
+                }
+                else
+                {
+                    mu::log::Get("render")->warn(
+                        "SDL_gpu -- failed to map vertex transfer buffer for post-RmlUi re-stage: {}",
+                        SDL_GetError());
+                }
+            }
+
+            if (s_renderCmds.size() > postUiCmdStart)
+            {
+                SDL_GPUColorTargetInfo postUiColorTarget{};
+                postUiColorTarget.texture = s_swapchainTexture;
+                postUiColorTarget.load_op = SDL_GPU_LOADOP_LOAD;
+                postUiColorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+                SDL_GPUDepthStencilTargetInfo postUiDepthTarget{};
+                postUiDepthTarget.texture = s_depthTexture;
+                postUiDepthTarget.load_op = SDL_GPU_LOADOP_LOAD;
+                postUiDepthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+                postUiDepthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+                postUiDepthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+
+                // ReplayDrawCommand/BindReplayPipeline (below) bind against the global
+                // s_renderPass directly, not a parameter -- assign it here (matching the main
+                // pass's own SDL_BeginGPURenderPass call above, which does the same), not just a
+                // local. Assigning only a local here left every SDL_Bind*/SDL_Draw* call inside
+                // them targeting the *already-nulled* s_renderPass from the main pass's own
+                // close (a few lines up) -- SDL_GPU silently no-ops a null render pass rather
+                // than crashing, which is why this had no visible symptom beyond "nothing drawn".
+                s_renderPass = SDL_BeginGPURenderPass(
+                    s_cmdBuf, &postUiColorTarget, 1, s_depthTexture ? &postUiDepthTarget : nullptr);
+                if (s_renderPass)
+                {
+                    SDL_GPUViewport postUiViewport{0.0f, 0.0f, static_cast<float>(s_swapW),
+                                                    static_cast<float>(s_swapH), 0.0f, 1.0f};
+                    SDL_Rect postUiScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
+                    Render::SdlGpuReplayState postUiReplayState;
+
+                    for (std::size_t i = postUiCmdStart; i < s_renderCmds.size(); ++i)
+                    {
+                        const RenderCmd& cmd = s_renderCmds[i];
+                        if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
+                        {
+                            continue;
+                        }
+
+                        switch (cmd.type)
+                        {
+                        case RenderCmdType::SetViewport:
+                            postUiViewport = cmd.viewport;
+                            if (postUiReplayState.SelectViewport(postUiViewport))
+                                SDL_SetGPUViewport(s_renderPass, &postUiViewport);
+                            break;
+                        case RenderCmdType::SetScissor:
+                            postUiScissor = cmd.scissor;
+                            if (postUiReplayState.SelectScissor(postUiScissor))
+                                SDL_SetGPUScissor(s_renderPass, &postUiScissor);
+                            break;
+#ifdef _EDITOR
+                        case RenderCmdType::EditorOverlay:
+                            break; // Not expected in the post-RmlUi tail; nothing to do.
+#endif
+                        case RenderCmdType::DrawTriangles:
+                        case RenderCmdType::DrawSkinnedTriangles:
+                        case RenderCmdType::DrawIndexedQuads:
+                        case RenderCmdType::DrawIndexedStrip:
+                        case RenderCmdType::DrawTriangles2D:
+                            ReplayDrawCommand(cmd, boneDataReady, postUiScissor, postUiReplayState);
+                            break;
+                        }
+                    }
+
+                    SDL_EndGPURenderPass(s_renderPass);
+                    s_renderPass = nullptr;
+                }
+            }
+        }
+
         if (s_cmdBuf)
         {
             SDL_SubmitGPUCommandBuffer(s_cmdBuf);
@@ -2439,6 +2597,11 @@ public:
     void SetPreSubmitCallback(std::function<void()> callback) override
     {
         s_preSubmitCallback = std::move(callback);
+    }
+
+    void SetPostRmlUiCallback(std::function<void()> callback) override
+    {
+        s_postRmlUiCallback = std::move(callback);
     }
 
     // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.

@@ -330,6 +330,20 @@ public:
     // Pass an empty std::function to unregister. Default no-op backend never calls anything.
     virtual void SetPreSubmitCallback(std::function<void()> /*callback*/) {}
 
+    // Fires after RmlUi's own render pass (the one SetPreSubmitCallback above triggers) has
+    // already closed, still before the frame's command buffer is submitted -- the seam for
+    // content that must sit visually on top of RmlUi (the game cursor, legacy CUITextInputBox
+    // text; see docs/rmlui-ui-system/gotchas-and-patterns.md's "pointer-events swallows every
+    // click" neighbor bug and its cursor/text-ordering counterpart). Backed by its own small
+    // render pass (LOAD, not CLEAR) that replays whatever this callback pushes via the normal
+    // RenderQuad2D-style functions -- calling those same functions from inside
+    // SetPreSubmitCallback's callback instead does NOT work: the main render pass (and the
+    // s_renderCmds list it replays) is already closed by the time that callback fires, so
+    // anything pushed there lands unreplayed at the tail of s_renderCmds until next frame's
+    // BeginFrame() silently clears it away. Pass an empty std::function to unregister. Default
+    // no-op backend never calls anything.
+    virtual void SetPostRmlUiCallback(std::function<void()> /*callback*/) {}
+
     // Story 7.9.8 (AC-2): SDL_ttf GPU text engine accessor.
     // Returns the TTF_TextEngine* for creating TTF_Text objects, or nullptr if unavailable.
     [[nodiscard]] virtual TTF_TextEngine* GetTextEngine()
