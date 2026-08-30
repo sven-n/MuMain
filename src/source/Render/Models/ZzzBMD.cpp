@@ -514,7 +514,7 @@ void BMD::EnsureCpuNormals(int mesh) const
         VectorRotate(sn->Normal, m_pCurrentBoneTransform[sn->Node], tn);
         if (LightEnable)
         {
-            float Luminosity = DotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
+            float Luminosity = VectorDotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
             if (Luminosity < 0.2f)
                 Luminosity = 0.2f;
             IntensityTransform[mesh][j] = Luminosity;
@@ -612,7 +612,7 @@ void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Bou
             if (LightEnable)
             {
                 float Luminosity;
-                Luminosity = DotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
+                Luminosity = VectorDotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
 
                 if (Luminosity < 0.2f) Luminosity = 0.2f;
                 IntensityTransform[i][j] = Luminosity;
@@ -1027,10 +1027,10 @@ void BMD::Chrome(float* pchrome, int bone, vec3_t normal)
         g_chromeage[bone] = g_smodels_total;
     }
 
-    n = DotProduct(normal, g_chromeright[bone]);
+    n = VectorDotProduct(normal, g_chromeright[bone]);
     pchrome[0] = (n + 1.f); // FIX: make this a float
 
-    n = DotProduct(normal, g_chromeup[bone]);
+    n = VectorDotProduct(normal, g_chromeup[bone]);
     pchrome[1] = (n + 1.f); // FIX: make this a float
 }
 
@@ -1040,7 +1040,7 @@ void BMD::Lighting(float* pLight, Light_t* lp, vec3_t Position, vec3_t Normal)
     VectorSubtract(lp->Position, Position, Light);
     float Length = sqrtf(Light[0] * Light[0] + Light[1] * Light[1] + Light[2] * Light[2]);
 
-    float LightCos = (DotProduct(Normal, Light) / Length) * 0.8f + 0.3f;
+    float LightCos = (VectorDotProduct(Normal, Light) / Length) * 0.8f + 0.3f;
     if (Length > lp->Range) LightCos -= (Length - lp->Range) * 0.01f;
     if (LightCos < 0.f) LightCos = 0.f;
     pLight[0] += LightCos * lp->Color[0];
@@ -1111,7 +1111,7 @@ void BMD::CreateLightMapSurface(Light_t* lp, Mesh_t* m, int i, int j, int MapWid
     Triangle_t* tp = &m->Triangles[j];
     float* np = NormalTransform[i][tp->NormalIndex[0]];
     float* vp = VertexTransform[i][tp->VertexIndex[0]];
-    float d = -DotProduct(vp, np);
+    float d = -VectorDotProduct(vp, np);
 
     Bitmap_t* lmp = &LightMaps[NumLightMaps];
     if (lmp->Buffer == nullptr)
@@ -1263,7 +1263,7 @@ int BMD::AddToCoinHeap(int coinIndex, int target_vertex_index)
 
             VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
 
-            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+            Vector4Set(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
 
             auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
             texCoords[target_vertex_index][0] = texco.TexCoordU;
@@ -1602,19 +1602,19 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             }
             else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
             {
-                g_chrome[j][0] = DotProduct(normal, LightVector);
+                g_chrome[j][0] = VectorDotProduct(normal, LightVector);
                 g_chrome[j][1] = 1.0f - g_chrome[j][0];
             }
             else if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
             {
-                g_chrome[j][0] = DotProduct(normal, light);
+                g_chrome[j][0] = VectorDotProduct(normal, light);
                 g_chrome[j][1] = 1.0f - g_chrome[j][0];
                 g_chrome[j][1] -= normal[2] * 0.5f + wave * 3.0f;
                 g_chrome[j][0] += normal[1] * 0.5f + light[1] * 3.0f;
             }
             else if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
             {
-                g_chrome[j][0] = DotProduct(normal, light);
+                g_chrome[j][0] = VectorDotProduct(normal, light);
                 g_chrome[j][1] = 1.0f - g_chrome[j][0];
                 g_chrome[j][1] -= normal[2] * 2.5f + wave;
                 g_chrome[j][0] += normal[1] * 3.0f + light[1] * 5.0f;
@@ -1738,7 +1738,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             vec4_t colorComponents;
             vec2_t texCoord;
             VectorCopy(VertexTransform[meshIndex][source_vertex_index], position);
-            Vector4(shadowMap ? 0.0f : BodyLight[0] * colorScale,
+            Vector4Set(shadowMap ? 0.0f : BodyLight[0] * colorScale,
                     shadowMap ? 0.0f : BodyLight[1] * colorScale,
                     shadowMap ? 0.0f : BodyLight[2] * colorScale,
                     baseAlpha,
@@ -1763,7 +1763,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                     if (enableLight)
                     {
                         auto light = LightTransform[meshIndex][normalIndex];
-                        Vector4(light[0], light[1], light[2], alpha, colorComponents);
+                        Vector4Set(light[0], light[1], light[2], alpha, colorComponents);
                     }
 
                     break;
@@ -1921,13 +1921,13 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             }
             else if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3)
             {
-                g_chrome[j][0] = DotProduct(Normal, LightVector);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, LightVector);
+                g_chrome[j][0] = VectorDotProduct(Normal, LightVector);
+                g_chrome[j][1] = 1.f - VectorDotProduct(Normal, LightVector);
             }
             else if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
             {
-                g_chrome[j][0] = DotProduct(Normal, L);
-                g_chrome[j][1] = 1.f - DotProduct(Normal, L);
+                g_chrome[j][0] = VectorDotProduct(Normal, L);
+                g_chrome[j][1] = 1.f - VectorDotProduct(Normal, L);
                 g_chrome[j][1] -= Normal[2] * 0.5f + Wave * 3.f;
                 g_chrome[j][0] += Normal[1] * 0.5f + L[1] * 3.f;
             }
@@ -1935,8 +1935,8 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             {
                 Vector(0.1f, -0.23f, 0.22f, LightVector2);
 
-                g_chrome[j][0] = (DotProduct(Normal, LightVector2) /*+ Normal[1] + LightVector2[1]*3.f */) / 1.08f;
-                g_chrome[j][1] = (1.f - DotProduct(Normal, LightVector2) /*- Normal[2]*0.5f + 3.f */) / 1.08f;
+                g_chrome[j][0] = (VectorDotProduct(Normal, LightVector2) /*+ Normal[1] + LightVector2[1]*3.f */) / 1.08f;
+                g_chrome[j][1] = (1.f - VectorDotProduct(Normal, LightVector2) /*- Normal[2]*0.5f + 3.f */) / 1.08f;
             }
             else if ((RenderFlag & RENDER_CHROME6) == RENDER_CHROME6)
             {
@@ -1947,8 +1947,8 @@ void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFl
             {
                 Vector(0.1f, -0.23f, 0.22f, LightVector2);
 
-                g_chrome[j][0] = (DotProduct(Normal, LightVector2)) / 1.08f;
-                g_chrome[j][1] = (1.f - DotProduct(Normal, LightVector2)) / 1.08f;
+                g_chrome[j][0] = (VectorDotProduct(Normal, LightVector2)) / 1.08f;
+                g_chrome[j][1] = (1.f - VectorDotProduct(Normal, LightVector2)) / 1.08f;
             }
             else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME)
             {
