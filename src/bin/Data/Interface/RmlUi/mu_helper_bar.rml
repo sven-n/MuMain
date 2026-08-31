@@ -1,0 +1,38 @@
+<rml>
+<head>
+	<title>MU Helper Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="mu_helper_bar.rcss"/>
+</head>
+<body data-model="mu_helper_bar">
+	<!-- Fixed dp size, anchored top-left via base.rcss's .anchor-top-left utility class
+	     (docs/rmlui-ui-system/layout-and-scaling.md) -- matches the legacy CNewUIHeroPositionInfo's
+	     own on-screen position (created at (0,0), transformed only by UI::Scaling's
+	     ScreenOverlayTransform for LayoutMode::Hud, which is a pure resolution scale with zero
+	     offset -- i.e. this widget has always rendered at the screen's top-left corner). -->
+	<div id="panel" class="anchor-top-left">
+		<div id="seg_a"></div>
+		<div id="seg_b"></div>
+		<div id="seg_c"></div>
+		<div id="text">{{position_text}}</div>
+
+		<!-- .dot children only matter for the modern theme (legacy hides them -- its real icon
+		     art, set via decorator on the parent .mu-btn, already gives these buttons a visual
+		     identity; see themes/legacy/mu_helper_bar.rcss's own .dot rule). -->
+		<div id="btn_config" class="mu-btn" data-event-click="hero_position_config_click">
+			<div class="dot"></div>
+			<span class="tooltip">{{config_tooltip}}</span>
+		</div>
+		<!-- Start/Stop share one screen position -- mutually exclusive by mu_helper_active,
+		     matching the original's own Render() ternary (m_BtnStop vs. m_BtnStart). -->
+		<div id="btn_start" class="mu-btn" data-class-hidden="mu_helper_active" data-event-click="hero_position_toggle_click">
+			<div class="dot"></div>
+			<span class="tooltip">{{start_tooltip}}</span>
+		</div>
+		<div id="btn_stop" class="mu-btn" data-class-hidden="!mu_helper_active" data-event-click="hero_position_toggle_click">
+			<div class="dot"></div>
+			<span class="tooltip">{{stop_tooltip}}</span>
+		</div>
+	</div>
+</body>
+</rml>

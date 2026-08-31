@@ -1966,11 +1966,23 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // Registered here, not inside RmlUiRuntime.cpp, so that library stays scene-agnostic --
     // this composition of game-specific overlay content belongs at the app tier, the same
     // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
+    //
+    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin/COptionWin are
+    // shared CUIMng instances already reachable from gameplay via the in-game ESC menu
+    // (SceneCommon.cpp's RenderInfomation() calls CUIMng::Instance().Render() unconditionally
+    // every MAIN_SCENE frame), so RmlUi content was already live during gameplay before this
+    // change -- the cursor just wasn't being pulled back on top of it, because this callback
+    // used to skip MAIN_SCENE entirely while MainScene.cpp's own inline RenderCursor() call ran
+    // too early (before RmlUi's frame-final pass). That inline call is removed in favor of this
+    // one now covering MAIN_SCENE too -- see MainScene.cpp's RenderMainSceneUI() comment.
+    // LoginWin/CharMakeWin/MsgWin's own IsShow() guards make it safe to leave their calls
+    // unconditional across every scene this callback now covers -- those windows are never shown
+    // outside LOG_IN_SCENE/CHARACTER_SCENE regardless.
     mu::GetRenderer().SetPostRmlUiCallback(
         []()
         {
             extern EGameScene SceneFlag;
-            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {
                 BeginBitmap();
                 if (CUIMng::Instance().m_LoginWin.IsShow())

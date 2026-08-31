@@ -10,12 +10,17 @@
 #include "World/MapInfra/MapManager.h"
 #include "MUHelper/MuHelper.h"
 
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+
 using namespace SEASON3B;
 
 CNewUIHeroPositionInfo::CNewUIHeroPositionInfo()
 {
     m_pNewUIMng = NULL;
-    m_Pos.x = m_Pos.y = 0;
     m_CurHeroPosition.x = m_CurHeroPosition.y = 0;
 }
 
@@ -34,63 +39,40 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_HERO_POSITION_INFO, this);
 
-    WidenX = (HERO_POSITION_INFO_BASEB_WINDOW_WIDTH + (HERO_POSITION_INFO_BASEB_WINDOW_WIDTH * 0.2f));
-    if (WindowWidth > 800)
+    // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
+    // window's Create() (re-run on resolution change), so the document/model are created once,
+    // ever.
+    // RmlUi-facing assets are named "mu_helper_bar", not after this legacy class -- see this
+    // class's header comment for why (the widget's own tooltips identify it as the "Official MU
+    // Helper" mini control bar, not a generic position readout; "_bar" distinguishes it from the
+    // full MU Helper settings panel, NewUIMuHelper.cpp/CNewUIMuHelper). The C++ class/file name
+    // stays CNewUIHeroPositionInfo/NewUIHeroPositionInfo.* to match the existing
+    // INTERFACE_HERO_POSITION_INFO enum, CNewUISystem::m_pNewHeroPositionInfo member, and
+    // g_pHeroPositionInfo macro -- renaming those has a much bigger blast radius than this pilot
+    // warrants and isn't needed for the RmlUi content itself to have a better name.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
-        WidenX = (HERO_POSITION_INFO_BASEB_WINDOW_WIDTH + (HERO_POSITION_INFO_BASEB_WINDOW_WIDTH * 0.4f));
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_bar",
+            [this](Rml::DataModelConstructor& c, HeroPositionInfoRmlModel& model)
+            {
+                c.Bind("position_text", &model.positionText);
+                c.Bind("mu_helper_active", &model.muHelperActive);
+                c.Bind("config_tooltip", &model.configTooltip);
+                c.Bind("start_tooltip", &model.startTooltip);
+                c.Bind("stop_tooltip", &model.stopTooltip);
+
+                c.BindEventCallback("hero_position_config_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConfig(); });
+                c.BindEventCallback("hero_position_toggle_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickToggle(); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/mu_helper_bar.rml");
+
+        if (m_pRmlDoc)
+            m_pRmlDoc->Show();
     }
-
-    SetPos(x, y);
-    LoadImages();
-
-    SetButtonInfo(
-        &m_BtnConfig,
-        IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 3,
-        x + WidenX + 41,
-        y,
-        18,
-        13,
-        1,
-        0,
-        1,
-        1u,
-        nullptr,
-        &I18N::Game::OfficialMUHelperSetting,
-        0);
-
-    SetButtonInfo(
-        &m_BtnStart,
-        IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 4,
-        x + WidenX + 59,
-        y,
-        18,
-        13,
-        1,
-        0,
-        1,
-        1u,
-        nullptr,
-        &I18N::Game::StartOfficialMUHelper,
-        0);
-
-    SetButtonInfo(
-        &m_BtnStop,
-        IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 5,
-        x + WidenX + 59,
-        y,
-        18,
-        13,
-        1,
-        0,
-        1,
-        1u,
-        nullptr,
-        &I18N::Game::StopOfficialMUHelper,
-        0);
-
-    MoveTextTipPos(&m_BtnConfig, -20, 9);
-    MoveTextTipPos(&m_BtnStart, -20, 9);
-    MoveTextTipPos(&m_BtnStop, -20, 9);
 
     Show(true);
 
@@ -99,55 +81,22 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 void CNewUIHeroPositionInfo::Release()
 {
-    UnloadImages();
-
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-}
 
-void CNewUIHeroPositionInfo::SetPos(int x, int y)
-{
-    m_Pos.x = x;
-    m_Pos.y = y;
-}
-
-bool CNewUIHeroPositionInfo::BtnProcess()
-{
-    if (m_BtnConfig.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER);
-        PlayBuffer(SOUND_CLICK01);
-        return true;
-    }
-
-    if (m_BtnStart.UpdateMouseEvent())
-    {
-        MUHelper::g_MuHelper.Toggle();
-
-        PlayBuffer(SOUND_CLICK01);
-        return true;
-    }
-
-    return false;
+    // See CLoginWin::PreRelease()'s identical rationale -- this object's release has no knowledge
+    // of m_pRmlDoc otherwise, and RmlUi renders last in the frame regardless of scene.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 bool CNewUIHeroPositionInfo::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
-    {
-        return false;
-    }
-
-    int Width = HERO_POSITION_INFO_BASEA_WINDOW_WIDTH + WidenX + 73;
-
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, Width, HERO_POSITION_INFO_BASE_WINDOW_HEIGHT))
-    {
-        return false;
-    }
-
+    // RmlUi's own context does hit-testing now (see this class's header comment) -- never
+    // consumes the legacy mouse event.
     return true;
 }
 
@@ -158,41 +107,72 @@ bool CNewUIHeroPositionInfo::UpdateKeyEvent()
 
 bool CNewUIHeroPositionInfo::Update()
 {
+    if (m_bRmlConfigClicked)
+    {
+        m_bRmlConfigClicked = false;
+        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER);
+        PlayBuffer(SOUND_CLICK01);
+    }
+    else if (m_bRmlToggleClicked)
+    {
+        m_bRmlToggleClicked = false;
+        MUHelper::g_MuHelper.Toggle();
+        PlayBuffer(SOUND_CLICK01);
+    }
+
     if ((IsVisible() == true) && (Hero != NULL))
     {
         m_CurHeroPosition.x = (Hero->PositionX);
         m_CurHeroPosition.y = (Hero->PositionY);
     }
 
+    SyncRmlModel();
+
     return true;
 }
 
 bool CNewUIHeroPositionInfo::Render()
 {
-    wchar_t szText[255] = {};
-
-    EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW, m_Pos.x, m_Pos.y, float(HERO_POSITION_INFO_BASEA_WINDOW_WIDTH), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT));
-
-    RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1, m_Pos.x + HERO_POSITION_INFO_BASEA_WINDOW_WIDTH, m_Pos.y, float(WidenX), float(HERO_POSITION_INFO_BASE_WINDOW_HEIGHT), 0.1f, 0.f, 22.4f / 32.f, 25.f / 32.f);
-
-    RenderImage(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2, m_Pos.x + HERO_POSITION_INFO_BASEA_WINDOW_WIDTH + WidenX, m_Pos.y, 73.f, 20.f);
-    //--
-    m_BtnConfig.Render();
-
-    MUHelper::g_MuHelper.IsActive() ? m_BtnStop.Render() : m_BtnStart.Render();
-    //--
-    mu_swprintf(szText, L"%ls (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
-
-    g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 5, szText, WidenX + 20, 13 - 4, RT3_SORT_CENTER);
-
-    DisableAlphaBlend();
+    // RmlUi's #panel now owns 100% of this widget's visuals -- see this class's header comment.
+    // Nothing left to draw here; SyncRmlModel() (called from Update()) is what keeps the RmlUi
+    // model current.
     return true;
+}
+
+void CNewUIHeroPositionInfo::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    wchar_t szText[255] = {};
+    mu_swprintf(szText, L"%ls (%d , %d)", gMapManager.GetMapName(gMapManager.WorldActive), m_CurHeroPosition.x, m_CurHeroPosition.y);
+    const std::string positionUtf8 = StringUtils::WideToNarrow(szText);
+    if (model.positionText != positionUtf8)
+    {
+        model.positionText = positionUtf8;
+        m_RmlBinder.MarkDirty("position_text");
+    }
+
+    const bool active = MUHelper::g_MuHelper.IsActive();
+    if (model.muHelperActive != active)
+    {
+        model.muHelperActive = active;
+        m_RmlBinder.MarkDirty("mu_helper_active");
+    }
+
+    auto syncLabel = [this](Rml::String HeroPositionInfoRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (m_RmlBinder.GetModel().*field != utf8)
+        {
+            m_RmlBinder.GetModel().*field = utf8;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    syncLabel(&HeroPositionInfoRmlModel::configTooltip, "config_tooltip", I18N::Game::OfficialMUHelperSetting);
+    syncLabel(&HeroPositionInfoRmlModel::startTooltip, "start_tooltip", I18N::Game::StartOfficialMUHelper);
+    syncLabel(&HeroPositionInfoRmlModel::stopTooltip, "stop_tooltip", I18N::Game::StopOfficialMUHelper);
 }
 
 float CNewUIHeroPositionInfo::GetLayerDepth()
@@ -206,46 +186,4 @@ void CNewUIHeroPositionInfo::OpenningProcess()
 
 void CNewUIHeroPositionInfo::ClosingProcess()
 {
-}
-
-void CNewUIHeroPositionInfo::SetCurHeroPosition(int x, int y)
-{
-    m_CurHeroPosition.x = x;
-    m_CurHeroPosition.y = y;
-}
-
-void CNewUIHeroPositionInfo::LoadImages()
-{
-    LoadBitmap(L"Interface\\Minimap_positionA.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW, GL_LINEAR);
-    LoadBitmap(L"Interface\\Minimap_positionB.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1, GL_LINEAR);
-    LoadBitmap(L"Interface\\MacroUI\\Minimap_positionC.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2, GL_LINEAR);
-    LoadBitmap(L"Interface\\MacroUI\\MacroUI_Setup.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 3, GL_LINEAR);
-    LoadBitmap(L"Interface\\MacroUI\\MacroUI_Start.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 4, GL_LINEAR);
-    LoadBitmap(L"Interface\\MacroUI\\MacroUI_Stop.tga", IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 5, GL_LINEAR);
-}
-
-void CNewUIHeroPositionInfo::UnloadImages()
-{
-    DeleteBitmap(IMAGE_HERO_POSITION_INFO_BASE_WINDOW);
-    DeleteBitmap(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 1);
-    DeleteBitmap(IMAGE_HERO_POSITION_INFO_BASE_WINDOW + 2);
-}
-
-void CNewUIHeroPositionInfo::SetButtonInfo(CNewUIButton* m_Btn, int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, const wchar_t* const* btnameSlot, const wchar_t* const* tooltipSlot, bool istoppos)
-{
-    m_Btn->ChangeButtonImgState(1, imgindex, overflg, isimgwidth, bClickEffect);
-    m_Btn->ChangeButtonInfo(x, y, sx, sy);
-
-    if (btnameSlot != nullptr) m_Btn->ChangeText(btnameSlot);
-    if (tooltipSlot != nullptr) m_Btn->ChangeToolTipText(tooltipSlot, istoppos);
-
-    if (MoveTxt)
-    {
-        m_Btn->MoveTextPos(0, -1);
-    }
-}
-
-void CNewUIHeroPositionInfo::MoveTextTipPos(CNewUIButton* m_Btn, int iX, int iY)
-{
-    m_Btn->MoveTextTipPos(iX, iY);
 }

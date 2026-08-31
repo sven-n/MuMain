@@ -1,0 +1,97 @@
+/* "Modern" theme for the MU Helper mini control bar + hero position readout -- flat programmatic
+   chrome, no legacy sprite art (same approach as every other migrated window's modern theme).
+   See themes/legacy/mu_helper_bar.rcss's header comment for the shared layout math/rationale;
+   only the visual treatment differs here. */
+
+#panel {
+	position: absolute;
+	width: 207dp;
+	height: 25dp;
+	font-family: "Liberation Sans";
+	font-size: 11dp;
+	background-color: rgba(20, 20, 20, 180);
+	border: 1dp rgba(255, 255, 255, 40);
+	border-radius: 3dp;
+}
+
+/* No legacy seam art in this theme -- the three background segments collapse into #panel's own
+   flat fill above; these elements stay in the document (data bindings target them by id) but
+   render nothing of their own. */
+#seg_a, #seg_b, #seg_c {
+	display: none;
+}
+
+#text {
+	position: absolute;
+	left: 10dp;
+	top: 5dp;
+	width: 132dp;
+	height: 9dp;
+	text-align: center;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* RmlUi's RCSS has no ::before/::after generated-content support (grepped the vendored source --
+   only match is unrelated to CSS), so each button's color-coded "dot" is a real child element
+   (.dot, in mu_helper_bar.rml) rather than generated content. */
+.mu-btn {
+	position: absolute;
+	top: 2dp;
+	width: 18dp;
+	height: 13dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1dp rgba(255, 255, 255, 50);
+	border-radius: 2dp;
+}
+.mu-btn:hover {
+	background-color: #c0a050;
+	border: 1dp #c0a050;
+}
+#btn_config { left: 153dp; }
+#btn_start  { left: 171dp; }
+#btn_stop   { left: 171dp; }
+
+/* Flat theme still needs *some* visual identity per button since there's no icon art -- a plain
+   colored dot is enough at 18x13dp (too small for real text). Config: neutral gray. Start: green
+   (matches this codebase's general "go/active" color convention). Stop: red. */
+.dot {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 6dp;
+	height: 6dp;
+	transform: translate(-50%, -50%);
+	/* border-radius doesn't take a percentage anywhere else in this codebase's RCSS -- 3dp is
+	   exactly half of this element's own fixed 6dp size, so it's still a true circle. */
+	border-radius: 3dp;
+	pointer-events: none;
+}
+#btn_config .dot { background-color: #a0a0a0; }
+#btn_start .dot  { background-color: #4caf50; }
+#btn_stop .dot   { background-color: #e05050; }
+
+/* Below rather than above the button (top:, not bottom:) -- see themes/legacy/mu_helper_bar.rcss's
+   identical comment: this widget is pinned to the very top of the screen, so a tooltip positioned
+   above it would render off the top edge of the viewport. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 18dp;
+	left: 50%;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2dp 4dp;
+	border-radius: 3dp;
+	font-family: "Liberation Sans";
+	font-size: 11dp;
+	pointer-events: none;
+}
+.mu-btn:hover .tooltip {
+	display: block;
+}
