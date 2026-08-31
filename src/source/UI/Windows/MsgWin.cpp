@@ -22,6 +22,12 @@
 #include "Scenes/SceneCommon.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+
 #define	MW_OK		0
 #define	MW_CANCEL	1
 
@@ -41,7 +47,9 @@ void CMsgWin::Create()
 {
     CInput rInput = CInput::Instance();
 
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
+    // Full-screen bounding rect, unchanged from before this port -- see this class's header
+    // comment for why that matters (IsCursorOnUI() correctness for a modal dialog).
+    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -2);
     SetMovable(false);
 
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
@@ -61,12 +69,46 @@ void CMsgWin::Create()
     m_nMsgCode = -1;
     m_nGameExit = -1;
     m_dDeltaTickSum = 0.0;
+
+    // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
+    // window's Create() (CUIMng::RepositionSceneUI() re-runs Create() on resolution change), so
+    // the document/model are created once, ever.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "msg_win",
+            [this](Rml::DataModelConstructor& c, MsgWinRmlModel& model)
+            {
+                c.Bind("line1", &model.line1);
+                c.Bind("line2", &model.line2);
+                c.Bind("line2_hidden", &model.line2Hidden);
+                c.Bind("no_buttons", &model.noButtons);
+                c.Bind("mode_cancel_only", &model.modeCancelOnly);
+                c.Bind("mode_ok_only", &model.modeOkOnly);
+                c.Bind("mode_both", &model.modeBoth);
+                c.Bind("mode_input", &model.modeInput);
+                c.Bind("ok_label", &model.okLabel);
+                c.Bind("cancel_label", &model.cancelLabel);
+
+                c.BindEventCallback("msgwin_ok_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+                c.BindEventCallback("msgwin_cancel_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
+    }
 }
 
 void CMsgWin::PreRelease()
 {
     m_sprInput.Release();
     m_sprBack.Release();
+
+    // See CLoginWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s every
+    // window on every scene transition, and CWin's own Release() has no knowledge of m_pRmlDoc.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 void CMsgWin::SetPosition(int nXCoord, int nYCoord)
@@ -138,6 +180,12 @@ void CMsgWin::Show(bool bShow)
         m_aBtn[MW_CANCEL].Show(false);
         m_sprInput.Show(false);
     }
+
+    if (m_pRmlDoc)
+    {
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        else       m_pRmlDoc->Hide();
+    }
 }
 
 void CMsgWin::UpdateWhileActive(double dDeltaTick)
@@ -177,10 +225,16 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
         }
         CUIMng::Instance().SetSysMenuWinShow(false);
     }
-    else if (m_aBtn[MW_OK].IsClick())
+    else if (m_aBtn[MW_OK].IsClick() || m_bRmlOkClicked)
+    {
+        m_bRmlOkClicked = false;
         ManageOKClick();
-    else if (m_aBtn[MW_CANCEL].IsClick())
+    }
+    else if (m_aBtn[MW_CANCEL].IsClick() || m_bRmlCancelClicked)
+    {
+        m_bRmlCancelClicked = false;
         ManageCancelClick();
+    }
     else if (m_nMsgCode == MESSAGE_GAME_END_COUNTDOWN)
     {
         if (m_nGameExit != -1)
@@ -208,57 +262,64 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
 
 void CMsgWin::RenderControls()
 {
-    m_sprBack.Render();
+    // RmlUi's #panel now owns 100% of this dialog's visuals (background frame, message text,
+    // OK/Cancel, the resident-password input frame's background) in every theme -- see this
+    // class's header comment. The legacy CSprite/CButton objects stay alive purely as bookkeeping
+    // (redundant click detection), never rendered. SyncRmlModel() is the only thing this override
+    // still needs to do; RenderTextOnTop() (the resident-password live text) is called from
+    // Winmain.cpp's SetPostRmlUiCallback instead of here, so it isn't drawn twice.
+    SyncRmlModel();
+}
 
-    int nTextPosX, nTextPosY;
+void CMsgWin::RenderTextOnTop()
+{
+    if (m_nMsgCode != MESSAGE_DELETE_CHARACTER_RESIDENT)
+        return;
 
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
-
-    if (1 == m_nMsgLine)
+    if (g_iChatInputType == 1)
+        g_pSinglePasswdInputBox->Render();
+    else if (g_iChatInputType == 0)
     {
-        nTextPosX = int(m_sprBack.GetXPos() / g_fScreenRate_x);
-        if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 38) / g_fScreenRate_y);
-        else
-            nTextPosY = int((m_sprBack.GetYPos() + 54) / g_fScreenRate_y);
-        g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[0],
-            m_sprBack.GetWidth() / g_fScreenRate_x, 0, RT3_SORT_CENTER);
+        InputTextWidth = 100;
+        ::RenderInputText(
+            int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
+            int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y), 0, 0);
+        InputTextWidth = 256;
     }
-    else if (2 == m_nMsgLine)
+}
+
+void CMsgWin::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    auto syncLabel = [this](Rml::String MsgWinRmlModel::* field, const char* boundName, const wchar_t* text)
     {
-        nTextPosX = int((m_sprBack.GetXPos() + 25) / g_fScreenRate_x);
-        if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 32) / g_fScreenRate_y);
-        else
-            nTextPosY = int((m_sprBack.GetYPos() + 44) / g_fScreenRate_y);
-        g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[0]);
-
-        if (MWT_NON != m_eType)
-            nTextPosY = int((m_sprBack.GetYPos() + 51) / g_fScreenRate_y);
-        else
-            nTextPosY = int((m_sprBack.GetYPos() + 66) / g_fScreenRate_y);
-        g_pRenderText->RenderText(nTextPosX, nTextPosY, m_aszMsg[1]);
-    }
-
-    m_sprInput.Render();
-
-    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
-    {
-        if (g_iChatInputType == 1)
-            g_pSinglePasswdInputBox->Render();
-        else if (g_iChatInputType == 0)
+        const std::string utf8 = StringUtils::WideToNarrow(text);
+        if (m_RmlBinder.GetModel().*field != utf8)
         {
-            InputTextWidth = 100;
-            ::RenderInputText(
-                int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-                int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y), 0, 0);
-            InputTextWidth = 256;
+            m_RmlBinder.GetModel().*field = utf8;
+            m_RmlBinder.MarkDirty(boundName);
         }
-    }
+    };
+    auto syncBool = [this](bool MsgWinRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlBinder.GetModel().*field != value)
+        {
+            m_RmlBinder.GetModel().*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
 
-    CWin::RenderButtons();
+    syncLabel(&MsgWinRmlModel::line1, "line1", m_nMsgLine > 0 ? m_aszMsg[0] : L"");
+    syncLabel(&MsgWinRmlModel::line2, "line2", m_nMsgLine > 1 ? m_aszMsg[1] : L"");
+    syncBool(&MsgWinRmlModel::line2Hidden, "line2_hidden", m_nMsgLine <= 1);
+    syncBool(&MsgWinRmlModel::noButtons, "no_buttons", m_eType == MWT_NON);
+    syncBool(&MsgWinRmlModel::modeCancelOnly, "mode_cancel_only", m_eType == MWT_BTN_CANCEL);
+    syncBool(&MsgWinRmlModel::modeOkOnly, "mode_ok_only", m_eType == MWT_BTN_OK);
+    syncBool(&MsgWinRmlModel::modeBoth, "mode_both", m_eType == MWT_BTN_BOTH);
+    syncBool(&MsgWinRmlModel::modeInput, "mode_input", m_eType == MWT_STR_INPUT);
+    syncLabel(&MsgWinRmlModel::okLabel, "ok_label", I18N::Game::OK);
+    syncLabel(&MsgWinRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
 }
 
 void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2)

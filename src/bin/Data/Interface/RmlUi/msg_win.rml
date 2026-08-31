@@ -1,0 +1,32 @@
+<rml>
+<head>
+	<title>Message Box</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="msg_win.rcss"/>
+</head>
+<body data-model="msg_win">
+	<!-- Centered via base.rcss's .center-both utility class with a fixed dp size (docs/rmlui-ui-
+	     system/layout-and-scaling.md) -- built this way from day one, no C++-pushed rect.
+	     mode-* classes select which of CMsgWin's five MSG_WIN_TYPE variants is active; see
+	     msg_win.rcss for what each one changes (button visibility/position, input-frame
+	     visibility, message vertical offset). -->
+	<div id="panel" class="center-both"
+	     data-class-no-buttons="no_buttons"
+	     data-class-mode-cancel-only="mode_cancel_only"
+	     data-class-mode-ok-only="mode_ok_only"
+	     data-class-mode-both="mode_both"
+	     data-class-mode-input="mode_input">
+		<div id="msg_line1" class="msg-line" data-class-multi-line="!line2_hidden">{{line1}}</div>
+		<div id="msg_line2" class="msg-line" data-class-hidden="line2_hidden">{{line2}}</div>
+
+		<!-- Background art only for the resident-password re-entry step (MWT_STR_INPUT) -- the
+		     live text is drawn on top afterward by legacy code (CMsgWin::RenderTextOnTop(),
+		     called from Winmain.cpp's SetPostRmlUiCallback), same split as char_make.rml's own
+		     #input_frame. -->
+		<div id="input_frame"></div>
+
+		<div id="btn_ok" class="btn" data-event-click="msgwin_ok_click">{{ok_label}}</div>
+		<div id="btn_cancel" class="btn" data-event-click="msgwin_cancel_click">{{cancel_label}}</div>
+	</div>
+</body>
+</rml>

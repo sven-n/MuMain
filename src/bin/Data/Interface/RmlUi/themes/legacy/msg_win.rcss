@@ -1,0 +1,135 @@
+/* RmlUi overlay for the generic message/confirm dialog (CMsgWin). CWin::Create() uses nTexID=-2
+   (same sentinel as every other hybrid window). OK/Cancel reproduce all 3 button states (idle/
+   hover/active) using the exact same source art CLoginWin's own OK/Cancel already use --
+   message_ok_b_all.tga / loding_cancel_b_all.tga (CMsgWin::Create() and CLoginWin::Create() both
+   call CButton::Create(54, 30, BITMAP_BUTTON+i, 3, 2, 1)). Declared again here rather than shared
+   from login.rcss -- that file is deliberately self-contained/unretrofitted (see its own header
+   comment), so duplicating this small spritesheet block keeps this file self-contained too,
+   rather than creating a one-off cross-file dependency.
+
+   Built under the 2026-08-31 layout-and-scaling retrofit from day one (docs/rmlui-ui-system/
+   layout-and-scaling.md): #panel is centered via base.rcss's `.center-both` with a fixed `dp`
+   size, not a C++-pushed rect. The four `mode-*` classes on #panel mirror CMsgWin's own
+   MSG_WIN_TYPE 1:1 (see MsgWin.h's MsgWinRmlModel) and drive OK/Cancel visibility and their
+   per-mode left offset -- the same left/top numbers CMsgWin::SetCtrlPosition() computes,
+   reproduced here as CSS instead of being pushed from C++. */
+
+@spritesheet msgwin-back-sheet
+{
+	src: "../../../message_back.tga";
+	msgwin-back-image: 0px 0px 352px 113px;
+}
+@spritesheet msgwin-input-sheet
+{
+	src: "../../../delete_secret_number.tga";
+	msgwin-input-image: 0px 0px 171px 23px;
+}
+@spritesheet msgwin-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	msgwin-ok-idle:   0px  0px 54px 30px;
+	msgwin-ok-hover:  0px 30px 54px 30px;
+	msgwin-ok-active: 0px 60px 54px 30px;
+}
+@spritesheet msgwin-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	msgwin-cancel-idle:   0px  0px 54px 30px;
+	msgwin-cancel-hover:  0px 30px 54px 30px;
+	msgwin-cancel-active: 0px 60px 54px 30px;
+}
+
+#panel {
+	position: absolute;
+	width: 352dp;
+	height: 113dp;
+	font-family: "Liberation Sans";
+	font-size: 12dp;
+	decorator: image(msgwin-back-image);
+}
+
+/* Native reference offsets, straight from CMsgWin::RenderControls()'s original
+   g_pRenderText calls (now retired) -- +38/+54 for a single centered line (buttons-shown vs.
+   MWT_NON), +32/+44 and +51/+66 for the two-line, left-aligned-at-x+25 case. Two genuinely
+   different treatments in the original, not a simplification: a short single-line message reads
+   better centered across the whole 352dp width; a message long enough to need two lines already
+   fills most of that width, so left-aligning both lines looks steadier than re-centering each one
+   independently. */
+#msg_line1 {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 38dp;
+	text-align: center;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.no-buttons #msg_line1 { top: 54dp; }
+#msg_line1.multi-line {
+	left: 25dp;
+	right: auto;
+	text-align: left;
+	top: 32dp;
+}
+.no-buttons #msg_line1.multi-line { top: 44dp; }
+
+#msg_line2 {
+	position: absolute;
+	left: 25dp;
+	top: 51dp;
+	text-align: left;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.no-buttons #msg_line2 { top: 66dp; }
+
+/* Background art only for the resident-password re-entry step -- the live text is drawn on top
+   afterward by legacy code (CMsgWin::RenderTextOnTop()), same split as char_make.rcss's own
+   .input-frame. */
+#input_frame {
+	display: none;
+	position: absolute;
+	left: 32dp;
+	top: 76dp;
+	width: 171dp;
+	height: 23dp;
+	decorator: image(msgwin-input-image);
+	pointer-events: none;
+}
+.mode-input #input_frame { display: block; }
+
+.btn {
+	display: none;
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	top: 72dp;
+	cursor: pointer;
+	pointer-events: auto;
+	/* Real sprite art (below) already renders "OK"/"Cancel" text baked in -- hides the bound
+	   {{ok_label}}/{{cancel_label}} text behind it instead of drawing both (same precedent as
+	   themes/legacy/login.rcss's own `.btn` rule). */
+	color: transparent;
+}
+
+#btn_ok {
+	left: 149dp;
+	decorator: image(msgwin-ok-idle);
+}
+#btn_ok:hover { decorator: image(msgwin-ok-hover); }
+#btn_ok:active { decorator: image(msgwin-ok-active); }
+.mode-ok-only #btn_ok, .mode-both #btn_ok, .mode-input #btn_ok { display: block; }
+.mode-both #btn_ok { left: 98dp; }
+.mode-input #btn_ok { left: 209dp; }
+
+#btn_cancel {
+	left: 149dp;
+	decorator: image(msgwin-cancel-idle);
+}
+#btn_cancel:hover { decorator: image(msgwin-cancel-hover); }
+#btn_cancel:active { decorator: image(msgwin-cancel-active); }
+.mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
+.mode-both #btn_cancel { left: 200dp; }
+.mode-input #btn_cancel { left: 264dp; }

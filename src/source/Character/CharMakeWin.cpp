@@ -223,6 +223,8 @@ void CCharMakeWin::Create()
                 c.Bind("stat_value3", &model.statValue3);
                 c.Bind("desc_line1", &model.descLine1);
                 c.Bind("desc_line2", &model.descLine2);
+                c.Bind("ok_label", &model.okLabel);
+                c.Bind("cancel_label", &model.cancelLabel);
 
                 c.BindEventCallback("charmake_select_job",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -582,6 +584,9 @@ void CCharMakeWin::SyncRmlModel()
 
     syncLabel(&CharMakeRmlModel::descLine1, "desc_line1", m_nDescLine > 0 ? m_aszJobDesc[0] : L"");
     syncLabel(&CharMakeRmlModel::descLine2, "desc_line2", m_nDescLine > 1 ? m_aszJobDesc[1] : L"");
+
+    syncLabel(&CharMakeRmlModel::okLabel, "ok_label", I18N::Game::OK);
+    syncLabel(&CharMakeRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
 }
 
 void CCharMakeWin::SelectCreateCharacter()

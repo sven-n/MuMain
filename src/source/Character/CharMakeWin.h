@@ -105,6 +105,11 @@ private:
 
         Rml::String descLine1;
         Rml::String descLine2;
+
+        // Only matters for the modern theme (legacy hides it -- real sprite art already gives
+        // OK/Cancel a visual identity, see themes/legacy/char_make.rcss's `color: transparent`).
+        // Same I18N::Game::OK/Cancel + {{ok_label}}/{{cancel_label}} pattern as LoginWin.cpp.
+        Rml::String okLabel, cancelLabel;
     };
     RmlModelBinder<CharMakeRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;

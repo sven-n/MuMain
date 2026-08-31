@@ -129,6 +129,10 @@
 	height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
+	/* Real sprite art (below) already renders "OK"/"Cancel" text baked in -- hides the
+	   {{ok_label}}/{{cancel_label}} bound text (added 2026-08-31, see char_make.rml) behind it
+	   instead of drawing both. Same precedent as themes/legacy/login.rcss's own `.btn` rule. */
+	color: transparent;
 }
 .btn-ok {
 	decorator: image(charmake-ok-idle);

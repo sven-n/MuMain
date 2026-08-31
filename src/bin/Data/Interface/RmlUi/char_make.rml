@@ -33,8 +33,8 @@
 		     (CCharMakeWin::RenderTextOnTop(), called from Winmain.cpp's SetPostRmlUiCallback). -->
 		<div id="input_frame" class="input-frame"></div>
 
-		<div id="btn_ok" class="btn btn-ok" data-event-click="charmake_ok_click"></div>
-		<div id="btn_cancel" class="btn btn-cancel" data-event-click="charmake_cancel_click"></div>
+		<div id="btn_ok" class="btn btn-ok" data-event-click="charmake_ok_click">{{ok_label}}</div>
+		<div id="btn_cancel" class="btn btn-cancel" data-event-click="charmake_cancel_click">{{cancel_label}}</div>
 	</div>
 </body>
 </rml>

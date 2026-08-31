@@ -1957,9 +1957,9 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     RmlUiRuntime::Instance().Create(WindowWidth, WindowHeight);
 
     // Content that must always sit visually on top of RmlUi, regardless of theme: the game
-    // cursor, and (login/character scenes specifically) CLoginWin's and CCharMakeWin's legacy
-    // name-input text. All would otherwise render earlier in the frame, as part of the normal
-    // legacy 2D pass --
+    // cursor, and (login/character scenes specifically) CLoginWin's, CCharMakeWin's, and
+    // CMsgWin's legacy name/password-input text. All would otherwise render earlier in the frame,
+    // as part of the normal legacy 2D pass --
     // RmlUi always renders last (see SetPreSubmitCallback's own comment), so a theme whose
     // #panel/.input-frame paints real pixels there (the "legacy" theme's login panel included --
     // it reproduces the original opaque sprite art) would otherwise visually cover both.
@@ -1977,6 +1977,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                     CUIMng::Instance().m_LoginWin.RenderTextOnTop();
                 if (CUIMng::Instance().m_CharMakeWin.IsShow())
                     CUIMng::Instance().m_CharMakeWin.RenderTextOnTop();
+                if (CUIMng::Instance().m_MsgWin.IsShow())
+                    CUIMng::Instance().m_MsgWin.RenderTextOnTop();
                 RenderCursor();
                 EndBitmap();
             }

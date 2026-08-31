@@ -1,0 +1,91 @@
+/* "Modern" theme for the generic message/confirm dialog -- flat programmatic chrome, no legacy
+   sprite art (same approach as every other migrated window's modern theme). OK/Cancel show real
+   localized text ({{ok_label}}/{{cancel_label}}, bound in msg_win.rml) instead of art. */
+
+#panel {
+	position: absolute;
+	width: 352dp;
+	height: 113dp;
+	font-family: "Liberation Sans";
+	font-size: 12dp;
+	color: white;
+	background-color: rgba(20, 20, 20, 220);
+	border: 1dp rgba(255, 255, 255, 60);
+	border-radius: 4dp;
+}
+
+/* Same two-treatment split as the legacy theme -- see that file's comment for why a single-line
+   message centers across the full width while a two-line message left-aligns both lines instead.
+   Native reference offsets are identical between themes (this content was never sprite-art, so
+   there's no "flat vs. real art" distinction to make here). */
+#msg_line1 {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 38dp;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.no-buttons #msg_line1 { top: 54dp; }
+#msg_line1.multi-line {
+	left: 25dp;
+	right: auto;
+	text-align: left;
+	top: 32dp;
+}
+.no-buttons #msg_line1.multi-line { top: 44dp; }
+
+#msg_line2 {
+	position: absolute;
+	left: 25dp;
+	top: 51dp;
+	text-align: left;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.no-buttons #msg_line2 { top: 66dp; }
+
+#input_frame {
+	display: none;
+	position: absolute;
+	left: 32dp;
+	top: 76dp;
+	width: 171dp;
+	height: 23dp;
+	background-color: rgba(0, 0, 0, 110);
+	border: 1dp rgba(255, 255, 255, 40);
+	border-radius: 3dp;
+	pointer-events: none;
+}
+.mode-input #input_frame { display: block; }
+
+.btn {
+	display: none;
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	top: 72dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(255, 255, 255, 15);
+	border: 1dp rgba(255, 255, 255, 50);
+	border-radius: 4dp;
+}
+.btn:hover {
+	background-color: #c0a050;
+	border: 1dp #c0a050;
+}
+
+#btn_ok { left: 149dp; }
+.mode-ok-only #btn_ok, .mode-both #btn_ok, .mode-input #btn_ok { display: block; }
+.mode-both #btn_ok { left: 98dp; }
+.mode-input #btn_ok { left: 209dp; }
+
+#btn_cancel { left: 149dp; }
+.mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
+.mode-both #btn_cancel { left: 200dp; }
+.mode-input #btn_cancel { left: 264dp; }
