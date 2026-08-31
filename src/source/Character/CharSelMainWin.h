@@ -108,6 +108,65 @@ namespace UI::CharacterSelection
                              Scale(NativeDecorationHeight, scale)};
         return layout;
     }
+
+    // 133dp inset used by char_sel_main.rcss's .info-bar (both themes) -- see that file's own
+    // comment for the derivation (NativeOuterMargin+NativeButtonWidth+NativeButtonGap+
+    // NativeButtonWidth+NativeInformationGap). Named here so CalculateFixedAnchorLayout() below
+    // and the RCSS stay derived from the same source constants instead of a second hard-coded 133.
+    inline constexpr int NativeInformationInset =
+        NativeOuterMargin + NativeButtonWidth + NativeButtonGap + NativeButtonWidth + NativeInformationGap;
+    // .info-bar's bottom:15dp and .deco's bottom:-3dp in char_sel_main.rcss.
+    inline constexpr int NativeInformationBottomGap = 15;
+    inline constexpr int NativeDecorationBottomOffset = 3;
+
+    // Fixed, dp-anchored counterpart to CalculateLayout() above, mirroring char_sel_main.rcss's
+    // 2026-08-31 layout-and-scaling retrofit exactly (docs/rmlui-ui-system/layout-and-scaling.md).
+    // CalculateLayout() (upstream's auto-scale-to-fit-800x600 system) is no longer used by this
+    // window: once the RmlUi visuals switched from mirroring that resolution-proportional rect to
+    // fixed-dp/anchor-class CSS positioning, continuing to position the legacy CButton/CSprite
+    // hit-test objects via CalculateLayout()'s math left them visually detached from the buttons
+    // actually on screen at any resolution other than a coincidental match -- a real, confirmed
+    // bug, not a cosmetic one: CUIMng::IsCursorOnUI() consults each CWin's own rect, and a cursor
+    // genuinely over the visible (RmlUi-rendered) Delete button but outside the legacy
+    // calculator's own rect at that same resolution was reported as NOT on UI, letting
+    // CharacterScene::Update()'s world-click handler fire in the very same frame and reset
+    // SelectedHero to -1 *before* DeleteCharacter() ran -- so Delete silently no-op'd instead of
+    // opening the confirmation prompt. uiScale is GameConfig::GetUIScalePercent()/100.0f, the same
+    // ratio RmlUi's own `dp` unit uses (Rml::Context::SetDensityIndependentPixelRatio()), so these
+    // rects always match the RmlUi buttons pixel-for-pixel regardless of screen resolution.
+    inline Layout CalculateFixedAnchorLayout(int screenWidth, int screenHeight, float uiScale)
+    {
+        const int buttonWidth = Scale(NativeButtonWidth, uiScale);
+        const int buttonHeight = Scale(NativeButtonHeight, uiScale);
+        const int buttonGap = Scale(NativeButtonGap, uiScale);
+        const int outerMargin = Scale(NativeOuterMargin, uiScale);
+        const int bottomGap = Scale(NativeBottomGap, uiScale);
+        const int windowTop = screenHeight - bottomGap - buttonHeight;
+
+        Layout layout{};
+        layout.scale = uiScale;
+        layout.buttons = CalculateButtons(screenWidth, outerMargin, windowTop, buttonWidth, buttonHeight, buttonGap);
+
+        const int infoInset = Scale(NativeInformationInset, uiScale);
+        const int infoHeight = Scale(NativeInformationHeight, uiScale);
+        const int infoBottomGap = Scale(NativeInformationBottomGap, uiScale);
+        layout.information = {infoInset, screenHeight - infoBottomGap - infoHeight,
+                              std::max(0, screenWidth - 2 * infoInset), infoHeight};
+
+        const int decorationWidth = Scale(NativeDecorationWidth, uiScale);
+        const int decorationHeight = Scale(NativeDecorationHeight, uiScale);
+        const int decorationBottomOffset = Scale(NativeDecorationBottomOffset, uiScale);
+        layout.decoration = {screenWidth - decorationWidth, screenHeight + decorationBottomOffset - decorationHeight,
+                             decorationWidth, decorationHeight};
+
+        // Overall bounding box for CWin::SetSize/SetPosition -- CUIMng::IsCursorOnUI() treats any
+        // cursor position inside this rect as "on UI" (see CWin::CursorInWin()), so it must cover
+        // every element positioned above, not just the buttons, or hovering the info-bar/deco
+        // alone would wrongly fall through to the legacy world-click handler.
+        const int top = std::min({layout.buttons[CSMW_BTN_CREATE].y, layout.decoration.y, layout.information.y});
+        layout.window = {0, top, screenWidth, screenHeight - top};
+        return layout;
+    }
 }
 
 namespace Rml { class ElementDocument; }
@@ -116,13 +175,18 @@ namespace Rml { class ElementDocument; }
 // hybrid pattern. CWin::Create() now passes nTexID=-2 (was the default -1) -- RmlUi renders 100%
 // of this bar's visuals (buttons, the info-bar background, the decorative flourish, and the rare
 // account-block message) in every theme; the legacy CSprites/CButtons stay alive purely as
-// bookkeeping (button click-detection redundancy, geometry used by ApplyLayout's math), never
-// rendered. See docs/rmlui-ui-system/README.md for the shared architecture this follows.
+// bookkeeping (button click-detection redundancy, IsCursorOnUI() hit-testing), never rendered.
+// See docs/rmlui-ui-system/README.md for the shared architecture this follows.
 //
-// Rebased onto upstream's responsive-scaling work (UI::CharacterSelection::CalculateLayout()
-// above): ApplyLayout() is now the single source of truth for every element's screen rect
-// (position AND size -- buttons/deco/info-bar can scale up to 2x on larger screens, not just
-// move), pushed to both the legacy CButton/CSprite bookkeeping and the RmlUi elements together.
+// 2026-08-31 layout-and-scaling retrofit (docs/rmlui-ui-system/layout-and-scaling.md): the RmlUi
+// visuals position themselves via char_sel_main.rcss's fixed-dp/anchor-class rules, NOT via
+// ApplyLayout() pushing a computed rect anymore. ApplyLayout() still runs, but only feeds the
+// legacy CButton/CSprite bookkeeping objects, and does so via
+// UI::CharacterSelection::CalculateFixedAnchorLayout() (mirroring the RCSS's own fixed-dp math)
+// rather than the older CalculateLayout() (upstream's auto-scale-to-fit-800x600 system, kept above
+// for reference/potential reuse elsewhere but no longer used by this window) -- see
+// CalculateFixedAnchorLayout()'s own comment for why using the mismatched old math was a real,
+// user-visible bug (Delete silently no-op'ing) and not just a style inconsistency.
 class CCharSelMainWin : public CWin
 {
 protected:

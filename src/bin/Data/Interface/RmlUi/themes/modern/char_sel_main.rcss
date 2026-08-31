@@ -3,7 +3,12 @@
    string exists for these icon-only buttons, so each gets a short plain-ASCII label
    (.btn-icon-label) instead of real art -- matching login_main.rcss modern theme's "M"/"C"
    precedent (avoiding a Unicode symbol since glyph coverage in the loaded font isn't
-   guaranteed). */
+   guaranteed).
+
+   2026-08-31 retrofit (docs/rmlui-ui-system/layout-and-scaling.md): positioning now matches
+   themes/legacy/char_sel_main.rcss's identical retrofit -- anchor-*/stretch-x utility classes
+   (base.rcss) with fixed `dp` sizes, applied in char_sel_main.rml, instead of a C++-pushed
+   absolute rect. See that file's comment for the full derivation of the dp offsets below. */
 
 #panel {
 	position: absolute;
@@ -11,33 +16,53 @@
 	   rather than relying on RmlUiRuntime's regular-weight fallback face to also resolve bold
 	   correctly. */
 	font-family: "Liberation Sans";
-	font-size: 14px;
+	font-size: 14dp;
 }
 
 .btn-icon {
 	position: absolute;
-	width: 54px;
-	height: 30px;
+	width: 54dp;
+	height: 30dp;
+	bottom: 11dp;
 	cursor: pointer;
 	pointer-events: auto;
 	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
-	border-radius: 4px;
+	border: 1dp rgba(255, 255, 255, 50);
+	border-radius: 4dp;
 	text-align: center;
-	line-height: 30px;
+	line-height: 30dp;
+}
+#btn_create { left: 22dp; }
+#btn_menu   { left: 77dp; }
+#btn_connect { right: 77dp; }
+#btn_delete  { right: 22dp; }
+
+/* font-family/font-size are declared directly here rather than relying on inheritance from
+   #panel (as login_main.rcss's identical-shaped .btn-icon-label does successfully) because, in
+   THIS document only, that inheritance silently fails: MuError.log logged "No font face defined.
+   Missing 'font-family' property" for every one of these spans even though #panel (their
+   grandparent) declares it. Root cause not fully chased down -- the one structural difference
+   from login_main.rml is this document's `data-model`/data-event-click bindings, which may
+   interact with RmlUi's inherited-property cache -- but redeclaring the two font properties
+   directly on the element that actually needs them sidesteps it entirely and is confirmed
+   working (2026-08-31 verification). */
+.btn-icon-label {
 	color: white;
 	font-weight: bold;
+	font-family: "Liberation Sans";
+	font-size: 14dp;
 }
+
 .btn-icon:hover {
 	background-color: #c0a050;
-	border: 1px #c0a050;
+	border: 1dp #c0a050;
 }
 .btn-icon.disabled {
 	pointer-events: none;
 	opacity: 0.5;
 	cursor: default;
 	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
+	border: 1dp rgba(255, 255, 255, 50);
 }
 
 /* No legacy deco art in this theme -- intentionally flat, matching login_main.rcss's modern
@@ -48,26 +73,29 @@
 
 /* Same flat, semi-transparent backing panel as the legacy theme -- this element was never
    sprite-art in the first place (a plain CSprite::SetColor/SetAlpha fill), so both themes share
-   the identical treatment. */
+   the identical treatment and the identical stretch-between-buttons positioning. */
 .info-bar {
 	position: absolute;
-	height: 21px;
+	left: 133dp;
+	right: 133dp;
+	bottom: 15dp;
+	height: 21dp;
 	background-color: rgba(0, 0, 0, 143);
 	pointer-events: none;
 }
 
 /* Identical to the legacy theme -- this message was never sprite-art either, so there's no
    "flat vs. real art" distinction to make here. See themes/legacy/char_sel_main.rcss's comment
-   for the full rationale behind the fixed 640px-wide centering box and the 18px line-height. */
+   for the full rationale behind the fixed 640dp-wide centering box and the 18dp line-height. */
 #account_block_message {
 	position: absolute;
 	left: 0;
-	top: 330px;
-	width: 640px;
+	top: 330dp;
+	width: 640dp;
 	pointer-events: none;
 }
 .line-row {
-	line-height: 18px;
+	line-height: 18dp;
 	text-align: center;
 }
 .line {
@@ -75,5 +103,5 @@
 	color: #000000;
 	background-color: rgba(255, 255, 0, 128);
 	white-space: nowrap;
-	padding: 0 2px;
+	padding: 0 2dp;
 }

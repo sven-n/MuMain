@@ -72,6 +72,12 @@ public:
     std::wstring GetRmlTheme() const { return m_rmlTheme; }
     void SetRmlTheme(const std::wstring& theme);
 
+    // Global RmlUi UI scale, as a percentage (100 = normal) -- see
+    // docs/rmlui-ui-system/layout-and-scaling.md. Drives RmlUiRuntime's
+    // Context::SetDensityIndependentPixelRatio() call; only RCSS authored in `dp` responds.
+    int GetUIScalePercent() const { return m_uiScalePercent; }
+    void SetUIScalePercent(int percent);
+
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
@@ -130,6 +136,7 @@ private:
     std::wstring m_uiLocale;
     std::wstring m_fontSelection;
     std::wstring m_rmlTheme;
+    int m_uiScalePercent;
 
     int m_zoom;
     bool m_sortParticleDraws;

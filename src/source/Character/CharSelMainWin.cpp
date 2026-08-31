@@ -24,9 +24,9 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
-#include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
 namespace
@@ -48,9 +48,17 @@ namespace
     // (#account_block_message) instead of here -- it is a fixed, screen-absolute position
     // unrelated to this window's own geometry, so it needs no C++ push (see SetPosition()).
     // The old per-element offset constants (button spacing, deco/info offsets) are gone too --
-    // UI::CharacterSelection::CalculateLayout() (CharSelMainWin.h) replaces them with a single
-    // responsive-scaling calculator.
+    // UI::CharacterSelection::CalculateFixedAnchorLayout() (CharSelMainWin.h) replaces them with a
+    // single fixed-dp-anchor calculator, mirroring char_sel_main.rcss's own math.
     constexpr int kWindowAlpha = 143;
+
+    // Same ratio RmlUiRuntime applies via Rml::Context::SetDensityIndependentPixelRatio() -- used
+    // here so UI::CharacterSelection::CalculateFixedAnchorLayout()'s legacy hit-test rects always
+    // match the RmlUi-rendered buttons pixel-for-pixel (see that function's own comment).
+    float GetUIScaleRatio()
+    {
+        return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f;
+    }
 
     template <typename Predicate>
     bool AnyCharacter(Predicate&& predicate)
@@ -105,8 +113,8 @@ CCharSelMainWin::~CCharSelMainWin()
 void CCharSelMainWin::Create()
 {
     CInput& input = CInput::Instance();
-    const auto layout = UI::CharacterSelection::CalculateLayout(
-        static_cast<int>(input.GetScreenWidth()), static_cast<int>(input.GetScreenHeight()));
+    const auto layout = UI::CharacterSelection::CalculateFixedAnchorLayout(
+        static_cast<int>(input.GetScreenWidth()), static_cast<int>(input.GetScreenHeight()), GetUIScaleRatio());
 
     m_asprBack[CSMW_SPR_DECO].Create(
         UI::CharacterSelection::NativeDecorationWidth,
@@ -140,12 +148,13 @@ void CCharSelMainWin::Create()
     for (int i = 0; i < CSMW_BTN_MAX; ++i)
         CWin::RegisterButton(&m_aBtn[i]);
 
-    ApplyLayout(layout);
-    m_bAccountBlockItem = HasAccountBlockedCharacter();
-
     // RmlUi migration -- see this class's header comment. Guarded the same way CLoginWin::Create()
     // is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change), so the document/model
-    // are created once, ever, and only repositioned/resized/re-synced afterward.
+    // are created once, ever, and only repositioned/resized/re-synced afterward. Must run BEFORE
+    // ApplyLayout() below -- that call pushes the computed rects into the RmlUi elements too, and
+    // does nothing on a null m_pRmlDoc, so calling it first (as an earlier version of this method
+    // briefly did, after rebasing onto upstream's own Create() ordering) left every RmlUi element
+    // at its unstyled default position on the window's very first Create() call.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
         const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_sel_main",
@@ -171,6 +180,9 @@ void CCharSelMainWin::Create()
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
     }
+
+    ApplyLayout(layout);
+    m_bAccountBlockItem = HasAccountBlockedCharacter();
 }
 
 void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
@@ -190,38 +202,16 @@ void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
         m_aBtn[i].SetPosition(button.x, button.y);
     }
 
-    // RmlUi panel: positioned/sized to the same scaled window-pixel box CWin's own bookkeeping
-    // now uses. Every child is pushed as a full rect (not just left/top), converted to
-    // panel-relative (subtracting the window's own origin, since #panel is the positioned
-    // ancestor every child's RCSS position:absolute resolves against) -- a fixed-px RCSS size,
-    // this migration's original assumption, no longer holds once the responsive-scaling system
-    // can grow buttons/deco/info-bar up to 2x on larger screens.
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
-        {
-            panel->SetProperty("left", std::to_string(layout.window.x) + "px");
-            panel->SetProperty("top", std::to_string(layout.window.y) + "px");
-            panel->SetProperty("width", std::to_string(layout.window.width) + "px");
-            panel->SetProperty("height", std::to_string(layout.window.height) + "px");
-        }
-
-        auto setRect = [this, &layout](const char* id, const UI::CharacterSelection::Rect& rect)
-        {
-            if (Rml::Element* e = m_pRmlDoc->GetElementById(id))
-            {
-                e->SetProperty("left", std::to_string(rect.x - layout.window.x) + "px");
-                e->SetProperty("top", std::to_string(rect.y - layout.window.y) + "px");
-                e->SetProperty("width", std::to_string(rect.width) + "px");
-                e->SetProperty("height", std::to_string(rect.height) + "px");
-            }
-        };
-        setRect("deco", layout.decoration);
-        setRect("info_bar", layout.information);
-        static const char* const kBtnIds[CSMW_BTN_MAX] = { "btn_create", "btn_menu", "btn_connect", "btn_delete" };
-        for (int i = 0; i < CSMW_BTN_MAX; ++i)
-            setRect(kBtnIds[i], layout.buttons[static_cast<std::size_t>(i)]);
-    }
+    // Deliberately does NOT push anything to the RmlUi elements (an earlier version of this
+    // method did). 2026-08-31 retrofit (docs/rmlui-ui-system/layout-and-scaling.md): #panel and
+    // every child position themselves via base.rcss's anchor-*/stretch-x utility classes with a
+    // fixed `dp` size (char_sel_main.rcss) instead. `layout` above (now
+    // CalculateFixedAnchorLayout(), not the old resolution-proportional CalculateLayout() --
+    // see that function's own comment for why the switch was necessary, not just stylistic) still
+    // feeds the legacy CSprite/CButton objects, which genuinely still need real screen-pixel rects
+    // for their own hit-testing/IsCursorOnUI() bookkeeping -- but those rects are now derived from
+    // the SAME fixed-dp-anchor math as the RmlUi visuals, so the two stay pixel-for-pixel aligned
+    // at every resolution and UI-scale setting instead of just at the historical 800x600/100% case.
 }
 
 void CCharSelMainWin::PreRelease()
@@ -248,19 +238,12 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
     for (auto& button : m_aBtn)
         button.SetPosition(button.GetXPos() + deltaX, button.GetYPos() + deltaY);
 
-    // RmlUi panel: every child is panel-relative (see ApplyLayout()'s comment), so re-pointing
-    // #panel's own absolute left/top is enough to move the whole bar -- no per-child push needed
-    // here, unlike ApplyLayout()'s Create()-time case where sizes can also change. No call site
-    // actually invokes this today (CUIMng::RepositionSceneUI() re-runs Create() wholesale
-    // instead), kept correct anyway since it is part of CWin's public contract.
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
-        {
-            panel->SetProperty("left", std::to_string(nXCoord) + "px");
-            panel->SetProperty("top", std::to_string(nYCoord) + "px");
-        }
-    }
+    // No RmlUi push here (an earlier version had one) -- see ApplyLayout()'s comment. #panel is
+    // a fixed full-screen container now (char_sel_main.rcss), not something this window's own
+    // screen position moves; the RmlUi visuals are positioned independently via anchor classes.
+    // No call site actually invokes this method today (CUIMng::RepositionSceneUI() re-runs
+    // Create() wholesale instead) -- the legacy CSprite/CButton delta-shift above is kept
+    // correct anyway since it is part of CWin's public contract.
 }
 
 void CCharSelMainWin::Show(bool bShow)

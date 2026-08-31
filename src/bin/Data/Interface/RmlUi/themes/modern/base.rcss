@@ -79,3 +79,66 @@ body {
 .hidden {
 	display: none;
 }
+
+/* ============================================================================
+   Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- identical
+   to themes/legacy/base.rcss's copy (pure layout, no visual styling, so there
+   is nothing theme-specific to vary). See that file's comment for the full
+   rationale.
+   ============================================================================ */
+
+.anchor-top-left {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.anchor-top-right {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.anchor-bottom-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.anchor-bottom-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+.center-x {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+.center-both {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.stretch-x {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+.stretch-y {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.stretch-both {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}

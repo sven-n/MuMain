@@ -6,6 +6,22 @@
 #include <RmlUi/Core/Core.h>
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/Renderer/MuRenderer.h"
+#include "Data/GameConfig/GameConfig.h"
+
+namespace
+{
+    // Global UI scale (docs/rmlui-ui-system/layout-and-scaling.md) -- the one RmlUi-native call
+    // site every `dp`-authored RCSS dimension responds to, per GameConfig::GetUIScalePercent().
+    // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
+    // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and
+    // removes any doubt about whether some other code path could have reset it in between.
+    void ApplyUIScale(Rml::Context* context)
+    {
+        if (!context) return;
+        const int percent = GameConfig::GetInstance().GetUIScalePercent();
+        context->SetDensityIndependentPixelRatio(static_cast<float>(percent) / 100.0f);
+    }
+}
 
 RmlUiRuntime& RmlUiRuntime::Instance()
 {
@@ -54,6 +70,7 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
 
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
+    ApplyUIScale(m_Context);
 
     // Renders once per frame, after this frame's game content is recorded onto the command
     // buffer but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h)
@@ -89,6 +106,7 @@ void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 {
     if (!m_Context) return;
     m_Context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
+    ApplyUIScale(m_Context);
 }
 
 void RmlUiRuntime::Update()

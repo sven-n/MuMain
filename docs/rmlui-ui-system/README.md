@@ -17,7 +17,9 @@ character-select scene's `CLoginWin` (pilot), `CLoginMainWin`, `CSysMenuWin`, an
 
 See also: **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
-positioning ownership).
+positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
+UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
+and a worked example of retrofitting an already-migrated window.
 
 ## Renderer integration: SDL_GPU
 

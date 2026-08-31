@@ -5,17 +5,25 @@
 	<link type="text/rcss" href="char_sel_main.rcss"/>
 </head>
 <body data-model="char_sel_main">
+	<!-- 2026-08-31 retrofit (docs/rmlui-ui-system/layout-and-scaling.md): #panel now spans the
+	     whole screen (a pure positioning container, pointer-events:none) and every child anchors
+	     to a screen edge/corner via base.rcss's anchor-* classes with a fixed `dp` size, instead
+	     of C++ computing a scaled absolute rect per element and pushing left/top/width/height
+	     here every Create()/resize. CCharSelMainWin::ApplyLayout() still computes
+	     UI::CharacterSelection::CalculateLayout() and applies it to the legacy CSprite/CButton
+	     objects (still genuinely needed for their own hit-testing), it just no longer pushes
+	     anything to these elements. -->
 	<div id="panel">
-		<div id="deco" class="deco"></div>
-		<div id="info_bar" class="info-bar"></div>
-		<div id="btn_create" class="btn-icon" data-class-disabled="create_disabled" data-event-click="charsel_create_click"><span class="btn-icon-label">+</span></div>
-		<div id="btn_menu" class="btn-icon" data-event-click="charsel_menu_click"><span class="btn-icon-label">M</span></div>
-		<div id="btn_connect" class="btn-icon" data-class-disabled="connect_disabled" data-event-click="charsel_connect_click"><span class="btn-icon-label">GO</span></div>
-		<div id="btn_delete" class="btn-icon" data-class-disabled="delete_disabled" data-event-click="charsel_delete_click"><span class="btn-icon-label">X</span></div>
+		<div id="deco" class="deco anchor-bottom-right"></div>
+		<div id="info_bar" class="info-bar stretch-x"></div>
+		<div id="btn_create" class="btn-icon anchor-bottom-left" data-class-disabled="create_disabled" data-event-click="charsel_create_click"><span class="btn-icon-label">+</span></div>
+		<div id="btn_menu" class="btn-icon anchor-bottom-left" data-event-click="charsel_menu_click"><span class="btn-icon-label">M</span></div>
+		<div id="btn_connect" class="btn-icon anchor-bottom-right" data-class-disabled="connect_disabled" data-event-click="charsel_connect_click"><span class="btn-icon-label">GO</span></div>
+		<div id="btn_delete" class="btn-icon anchor-bottom-right" data-class-disabled="delete_disabled" data-event-click="charsel_delete_click"><span class="btn-icon-label">X</span></div>
 	</div>
 	<!-- Rarely shown (only when an account has an item-blocked character) -- see
-	     CCharSelMainWin::SyncRmlModel(). Fixed screen position, unrelated to #panel's own
-	     geometry -- see char_sel_main.rcss's #account_block_message comment. -->
+	     CCharSelMainWin::SyncRmlModel(). Fixed, centered screen position unrelated to #panel's
+	     own geometry -- see char_sel_main.rcss's #account_block_message comment. -->
 	<div id="account_block_message" data-class-hidden="account_block_hidden">
 		<div class="line-row"><span class="line">{{account_block_line1}}</span></div>
 		<div class="line-row"><span class="line">{{account_block_line2}}</span></div>

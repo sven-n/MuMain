@@ -230,3 +230,84 @@ body {
 .hidden {
 	display: none;
 }
+
+/* ============================================================================
+   Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- anchor/
+   center/stretch utility classes. Pure layout, no visual styling, identical in
+   both themes (unlike everything else in this file, which reproduces real
+   sprite art for legacy specifically). Apply ONE of these to an element to
+   express its intended responsive behavior declaratively instead of computing
+   a screen rect in C++ and pushing left/top/width/height by hand -- this
+   migration's original convention (CCharSelMainWin before its 2026-08-31
+   retrofit), now superseded for anything whose position is a static anchor
+   rather than genuinely data-driven per frame (CCharInfoBalloon's live 3D
+   projection is the one case that still needs a C++ push, and still does).
+   Give the element its own size (dp, if it should respect the user's UI
+   scale) alongside one of these classes -- none of them set a size.
+   ============================================================================ */
+
+.anchor-top-left {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.anchor-top-right {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.anchor-bottom-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.anchor-bottom-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+/* Centers via transform, not margin tricks -- this branch's vendored RmlUi backend implements
+   SetTransform for real (unlike the RHI-based renderer this project once had, which left it at
+   its no-op default). Needs an explicit width/height (or intrinsic content size) for `-50%` to
+   mean anything -- RmlUi resolves transform percentages against the element's own box, not its
+   parent's. */
+.center-x {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+.center-both {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+/* Stretches between the parent's opposing edges -- confirmed safe by this file's own
+   .panel-middle above (LayoutDetails::BuildBoxWidth/BuildBoxHeight correctly derives width/
+   height from left+right or top+bottom on a position:absolute element; no measurement needed).
+   Pair with an explicit height (.stretch-x) or width (.stretch-y), plus whatever left/right/
+   top/bottom inset the caller needs beyond the 0 default. */
+.stretch-x {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+.stretch-y {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.stretch-both {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}

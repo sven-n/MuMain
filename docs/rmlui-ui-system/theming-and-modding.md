@@ -137,19 +137,19 @@ game-asset pipeline everything else still depends on.
 
 ## Coordinates, scaling, and positioning — what a theme actually controls
 
-### Scaling: nothing is automatic today
+### Scaling: a global user setting, opt-in per element
 
-Every coordinate in both existing themes is **fixed pixels** (`left: 150px`, `width: 54px`, ...);
-nothing scales those values based on resolution or window size. A theme renders its panel at the
-same physical pixel size regardless of window resolution — only the panel's on-screen *position*
-changes, driven by legacy centering math, not by anything RmlUi does.
-
-RmlUi itself has real scaling primitives — `%`, `vw`/`vh`, and `dp` (density-independent pixels,
-globally rescaled via `Context::SetDensityIndependentPixelRatio()`) — but nothing in this engine
-calls that API with anything other than its default yet, so `dp` has no visible effect over `px`
-today. This is also the practically correct choice for raster sprite art regardless: an image has
-a native resolution, and stretching it non-uniformly or upscaling it blurs/pixelates. A
-custom-sprite theme should expect to look the same physical size at every resolution.
+**See [Layout, Anchoring & Scaling](layout-and-scaling.md) for the full policy** — condensed here:
+`GameConfig::GetUIScalePercent()` (`[UI] UIScalePercent`, default 100) is applied once via
+`Context::SetDensityIndependentPixelRatio()` (`RmlUiRuntime::Create()`/`OnResize()`). A coordinate
+written in `dp` scales with that setting; one written in `px` never does. Most of the original
+two themes still use fixed `px` throughout and are simply unaffected by the setting until
+retrofitted — that's fine, not a bug. A theme renders `px` content at the same physical pixel size
+regardless of window resolution or `UIScalePercent`; this is also the practically correct choice
+for raster sprite art regardless of the scaling mechanism available, since an image has a native
+resolution and stretching it non-uniformly or upscaling it blurs/pixelates. A custom-sprite theme
+should expect to look the same physical size at every resolution unless it deliberately opts a
+coordinate into `dp`.
 
 ### Panel position vs. element layout vs. draggability — three different owners
 
