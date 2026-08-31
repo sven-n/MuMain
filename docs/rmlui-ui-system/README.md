@@ -1,5 +1,11 @@
 # RmlUi UI System
 
+> **Start with [`architecture-principles.md`](architecture-principles.md)** — the governing
+> policy for this migration (layout intent, responsive/scalable/themeable/moddable design). This
+> README and every other doc here implement or report status against it; none of them repeat its
+> reasoning. Check [`STATUS.md`](STATUS.md) for what's actually done, known gaps, and open
+> conflicts against that policy.
+
 How [RmlUi](https://github.com/mikke89/RmlUi) (HTML/CSS-driven UI middleware) is integrated into
 this client's SDL_GPU renderer, and the patterns/gotchas worth knowing before migrating the next
 window. Condensed to what matters for building on this branch — not a full history, not every
@@ -9,16 +15,11 @@ detail.
 
 The client's game UI is spread across three legacy widget frameworks (`UI/Widgets`,
 `UI/Legacy/UIControls`, `UI/NewUI`) with no layout engine, retained scene graph, or data-binding
-layer between them. RmlUi is being adopted as the long-term replacement, migrated window by
-window, old and new systems coexisting rather than a big-bang rewrite. The login/character-select
-scene (`CWin`-tier: `CLoginWin`, `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`,
-`CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`) is fully migrated — no
-remaining legacy-`CWin`-rendered chrome anywhere in that scene. `COptionWin` was ported but
-deliberately not wired up — see [Coexistence patterns](#coexistence-patterns) below. The in-game
-HUD (`UI/NewUI`, a structurally different `CNewUIObj` tier) has two pilots so far
-(`CMuHelperBar`, the "MU Helper bar"; `CBuffStrip`, the active-buff icon strip — the first
-`data-for`/dynamic-array pilot at this tier) — see [the NewUI-tier adapter
-doc](newui-tier-adapter.md) before touching that tier.
+layer between them. RmlUi is being adopted as the long-term replacement per
+[`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
+new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.md) for what's
+migrated so far. `COptionWin` was ported but deliberately not wired up — see [Coexistence
+patterns](#coexistence-patterns) below.
 
 See also: **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
@@ -182,10 +183,6 @@ open on purpose.
 
 ## Status
 
-Functional parity across the login/character-select scene's `CWin`-tier migrated windows is
-complete and verified (build + runtime) — no remaining legacy-`CWin`-rendered chrome anywhere in
-that scene. `COptionWin`'s dead-code status is deliberate, not an oversight. The in-game HUD
-(`CNewUIObj` tier, `UI/NewUI`) has two verified pilots (see
-[newui-tier-adapter.md](newui-tier-adapter.md)); the rest of that tier — including the main HUD
-frame (HP/MP/EXP/hotbar/skill-list), drag-and-drop, and 3D-camera-space rendering — is not yet
-migrated. All further RmlUi UI work continues on this branch.
+See [`STATUS.md`](STATUS.md) — what's migrated, the per-port checklist, empirical findings worth
+knowing before the next port, and known gaps against `architecture-principles.md`. All further
+RmlUi UI work continues on this branch.

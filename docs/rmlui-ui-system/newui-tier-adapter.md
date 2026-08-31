@@ -129,12 +129,12 @@ don't invent a new ownership boundary as part of a straight RmlUi port.
 member/accessor/macro that referenced it, updated to match (`INTERFACE_MU_HELPER_BAR`,
 `GetUI_MuHelperBar()`, `g_pMuHelperBar`, etc.) — reassessed and corrected in place 2026-08-31 after
 the first version of this pattern (deferring the C++ name alongside directory reorg) was flagged
-as inconsistent with the amendment's item 5. **What's still deferred**, unchanged: the physical
-file location (`UI/NewUI/HUD/`) and the `CNewUIObj` base class/tier boundary itself — that's
-structural (touches the ~88 other still-unported `CNewUIObj` windows' shared machinery), not a
-per-class naming choice, and stays premature with only 2 pilots. See
-`.ai-os/memory/tasks/rmlui-ui-architecture-amendment.md`'s "Tracked deferral" section for the full
-reasoning and the actual condition for revisiting the file-location piece.
+as inconsistent with [`architecture-principles.md`](architecture-principles.md)'s §12. **What's
+still deferred**, unchanged: the physical file location (`UI/NewUI/HUD/`) and the `CNewUIObj`
+base class/tier boundary itself — that's structural (touches the ~88 other still-unported
+`CNewUIObj` windows' shared machinery), not a per-class naming choice, and stays premature with
+only 2 pilots. See [`STATUS.md`](STATUS.md)'s "Tracked deferral" section for the full reasoning
+and the actual condition for revisiting the file-location piece.
 
 ## Proven by `CBuffStrip` (the second pilot)
 
@@ -190,7 +190,8 @@ reasoning and the actual condition for revisiting the file-location piece.
   *fourth*, simple CSS-only hover-tooltip pattern rather than trying to unify with any of them
   (`CBuffStrip`'s is also plain-text, not the original's per-line-colored rich tooltip — a
   separate, deliberately deferred simplification). Consolidating is explicitly deferred
-  (architecture amendment item 6) until more of the tier is actually ported.
+  ([`architecture-principles.md`](architecture-principles.md) §12) until more of the tier is
+  actually ported.
 - **Right-click-distinct-from-left-click in a `data-event-click` binding** — the original
   `CNewUIBuffWindow` had a right-click-to-cancel special case (Infinity Arrow / Swell of Magic
   Power) that `CBuffStrip` does not reproduce; no RmlUi content in this codebase has ever

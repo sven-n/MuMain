@@ -1,8 +1,9 @@
 # Layout, Anchoring & Scaling
 
-Governing policy for how RmlUi content is sized and positioned, adopted 2026-08-31 as part of a
-broader UI/UX architecture amendment (`.ai-os/memory/tasks/rmlui-ui-architecture-amendment.md`).
-Read this before porting the next window or touching an existing one's RCSS.
+How this branch implements [`architecture-principles.md`](architecture-principles.md)'s §§1, 5,
+7–9, 23–24 (layout intent, responsive/aspect-ratio behavior, centralized UI scale, no
+resolution-specific hacks) concretely, in RCSS. Read this before porting the next window or
+touching an existing one's RCSS.
 
 ## Reference resolution: there isn't one
 
