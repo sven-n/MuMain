@@ -80,7 +80,7 @@ CNewUISystem::CNewUISystem()
     m_pNewCommandWindow = nullptr;
     m_pNewWindowMenu = nullptr;
     m_pNewOptionWindow = nullptr;
-    m_pNewHeroPositionInfo = nullptr;
+    m_pMuHelperBar = nullptr;
     m_pNewHelpWindow = nullptr;
     m_pNewChatCommandWindow = nullptr;
     m_pNewItemExplanationWindow = nullptr;
@@ -89,7 +89,7 @@ CNewUISystem::CNewUISystem()
     m_pNewMoveCommandWindow = nullptr;
     m_pNewSiegeWarfare = nullptr;
     m_pNewItemEnduranceInfo = nullptr;
-    m_pNewBuffWindow = nullptr;
+    m_pBuffStrip = nullptr;
     m_pNewCryWolfInterface = nullptr;
     m_pNewMaster_Level_Interface = nullptr;
     m_pNewCursedTempleResultWindow = nullptr;
@@ -360,8 +360,8 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
-    m_pNewHeroPositionInfo = new CNewUIHeroPositionInfo;
-    if (m_pNewHeroPositionInfo->Create(m_pNewUIMng, 0, 0) == false)
+    m_pMuHelperBar = new CMuHelperBar;
+    if (m_pMuHelperBar->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
@@ -422,8 +422,8 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
-    m_pNewBuffWindow = new CNewUIBuffWindow;
-    if (m_pNewBuffWindow->Create(m_pNewUIMng, 220, 15) == false)
+    m_pBuffStrip = new CBuffStrip;
+    if (m_pBuffStrip->Create(m_pNewUIMng, 220, 15) == false)
     {
         return false;
     }
@@ -597,12 +597,12 @@ void CNewUISystem::UnloadMainSceneInterface()
     SAFE_DELETE(m_pNewBloodCastle);
     SAFE_DELETE(m_pNewChaosCastleTime);
     SAFE_DELETE(m_pNewCommandWindow);
-    SAFE_DELETE(m_pNewHeroPositionInfo);
+    SAFE_DELETE(m_pMuHelperBar);
     SAFE_DELETE(m_pNewMoveCommandWindow);
     SAFE_DELETE(m_pNewUIHotKey);
     SAFE_DELETE(m_pNewSiegeWarfare);
     SAFE_DELETE(m_pNewItemEnduranceInfo);
-    SAFE_DELETE(m_pNewBuffWindow);
+    SAFE_DELETE(m_pBuffStrip);
     SAFE_DELETE(m_pNewCursedTempleResultWindow);
     SAFE_DELETE(m_pNewCursedTempleWindow);
     SAFE_DELETE(m_pNewCursedTempleEnterWindow);
@@ -716,13 +716,13 @@ void CNewUISystem::Show(DWORD dwKey)
         if (IsVisible(INTERFACE_STORAGE))
         {
             g_pStorageInventory->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
 
         if (IsVisible(INTERFACE_MYSHOP_INVENTORY))
         {
             g_pMyShopInventory->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
             if (IsVisible(INTERFACE_MYQUEST))
             {
                 Hide(INTERFACE_MYQUEST);
@@ -744,17 +744,17 @@ void CNewUISystem::Show(DWORD dwKey)
         if (IsVisible(INTERFACE_NPCSHOP))
         {
             g_pNPCShop->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
         if (IsVisible(INTERFACE_MIXINVENTORY))
         {
             g_pMixInventory->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
         if (IsVisible(INTERFACE_TRADE))
         {
             g_pTrade->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
     }
     else if (dwKey == INTERFACE_CHARACTER)
@@ -769,7 +769,7 @@ void CNewUISystem::Show(DWORD dwKey)
             if (IsVisible(INTERFACE_INVENTORY_EXT))
             {
                 g_pMyInventory->SetPos(PanelColumnX(3), 0);
-                Hide(INTERFACE_HERO_POSITION_INFO);
+                Hide(INTERFACE_MU_HELPER_BAR);
             }
         }
         else if (IsVisible(INTERFACE_MYQUEST))
@@ -837,12 +837,12 @@ void CNewUISystem::Show(DWORD dwKey)
         {
             Show(INTERFACE_INVENTORY_EXT);
             g_pStorageInventory->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
         else
         {
             g_pStorageInventory->SetPos(PanelColumnX(2), 0);
-            Show(INTERFACE_HERO_POSITION_INFO);
+            Show(INTERFACE_MU_HELPER_BAR);
         }
 
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
@@ -854,7 +854,7 @@ void CNewUISystem::Show(DWORD dwKey)
             m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY_EXT, false);
         }
 
-        Hide(INTERFACE_HERO_POSITION_INFO);
+        Hide(INTERFACE_MU_HELPER_BAR);
         g_pStorageInventory->SetPos(PanelColumnX(2), 0);
         g_pStorageInventoryExt->SetPos(PanelColumnX(3), 0);
 
@@ -870,12 +870,12 @@ void CNewUISystem::Show(DWORD dwKey)
         {
             Show(INTERFACE_INVENTORY_EXT);
             g_pMyShopInventory->SetPos(PanelColumnX(3), 0);
-            Hide(INTERFACE_HERO_POSITION_INFO);
+            Hide(INTERFACE_MU_HELPER_BAR);
         }
         else
         {
             g_pMyShopInventory->SetPos(PanelColumnX(2), 0);
-            Show(INTERFACE_HERO_POSITION_INFO);
+            Show(INTERFACE_MU_HELPER_BAR);
         }
 
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, true);
@@ -975,9 +975,9 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         HideAllGroupB();
     }
-    else if (dwKey == INTERFACE_HERO_POSITION_INFO)
+    else if (dwKey == INTERFACE_MU_HELPER_BAR)
     {
-        m_pNewHeroPositionInfo->OpenningProcess();
+        m_pMuHelperBar->OpenningProcess();
     }
     else if (dwKey == INTERFACE_CHAOSCASTLE_TIME)
     {
@@ -1041,7 +1041,7 @@ void CNewUISystem::Show(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_BUFF_WINDOW)
     {
-        m_pNewBuffWindow->OpenningProcess();
+        m_pBuffStrip->OpenningProcess();
     }
     else if (dwKey == INTERFACE_CRYWOLF)
     {
@@ -1156,11 +1156,11 @@ void CNewUISystem::Show(DWORD dwKey)
 
     m_pNewUIMng->ShowInterface(dwKey);
 
-    UpdateHeroPositionInfoVisibilityForLayoutChange(dwKey);
+    UpdateMuHelperBarVisibilityForLayoutChange(dwKey);
 
     int iScreenWidth = GetScreenWidth();
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
-    m_pNewBuffWindow->SetPos(iScreenWidth);
+    m_pBuffStrip->SetPos(iScreenWidth);
     m_pNewPartyListWindow->SetPos(iScreenWidth);
 }
 
@@ -1224,7 +1224,7 @@ void CNewUISystem::Hide(DWORD dwKey)
             g_pMixInventory->SetPos(secondColumnX, 0);
         }
 
-        Show(INTERFACE_HERO_POSITION_INFO);
+        Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_INVENTORY)
     {
@@ -1304,7 +1304,7 @@ void CNewUISystem::Hide(DWORD dwKey)
         }
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
-        Show(INTERFACE_HERO_POSITION_INFO);
+        Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_NPCSHOP)
     {
@@ -1328,7 +1328,7 @@ void CNewUISystem::Hide(DWORD dwKey)
             g_pPurchaseShopInventory->ClosingProcess();
         }
         g_pMyInventory->SetPos(PanelColumnX(1), 0);
-        Show(INTERFACE_HERO_POSITION_INFO);
+        Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_STORAGE)
     {
@@ -1341,11 +1341,11 @@ void CNewUISystem::Hide(DWORD dwKey)
             Hide(INTERFACE_INVENTORY_EXT);
         }
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
-        Show(INTERFACE_HERO_POSITION_INFO);
+        Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_STORAGE_EXT)
     {
-        Show(INTERFACE_HERO_POSITION_INFO);
+        Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_PET)
     {
@@ -1402,7 +1402,7 @@ void CNewUISystem::Hide(DWORD dwKey)
         g_pTrade->ProcessClosing();
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_MYINVEN, false);
         m_pNewUIMng->ShowInterface(INTERFACE_INVENTORY, false);
-        Show(INTERFACE_HERO_POSITION_INFO);
+        Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_CATAPULT)
     {
@@ -1427,9 +1427,9 @@ void CNewUISystem::Hide(DWORD dwKey)
     else if (dwKey == INTERFACE_OPTION)
     {
     }
-    else if (dwKey == INTERFACE_HERO_POSITION_INFO)
+    else if (dwKey == INTERFACE_MU_HELPER_BAR)
     {
-        m_pNewHeroPositionInfo->ClosingProcess();
+        m_pMuHelperBar->ClosingProcess();
     }
     else if (dwKey == INTERFACE_HELP)
     {
@@ -1473,7 +1473,7 @@ void CNewUISystem::Hide(DWORD dwKey)
     }
     else if (dwKey == INTERFACE_BUFF_WINDOW)
     {
-        m_pNewBuffWindow->ClosingProcess();
+        m_pBuffStrip->ClosingProcess();
     }
     else if (dwKey == INTERFACE_CURSEDTEMPLE_RESULT)
     {
@@ -1588,11 +1588,11 @@ void CNewUISystem::Hide(DWORD dwKey)
 
     m_pNewUIMng->ShowInterface(dwKey, false);
 
-    UpdateHeroPositionInfoVisibilityForLayoutChange(dwKey);
+    UpdateMuHelperBarVisibilityForLayoutChange(dwKey);
 
     int iScreenWidth = GetScreenWidth();
     m_pNewItemEnduranceInfo->SetPos(iScreenWidth);
-    m_pNewBuffWindow->SetPos(iScreenWidth);
+    m_pBuffStrip->SetPos(iScreenWidth);
     m_pNewPartyListWindow->SetPos(iScreenWidth);
 }
 
@@ -1762,25 +1762,36 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
     }
 }
 
-void CNewUISystem::UpdateHeroPositionInfoVisibilityForLayoutChange(DWORD dwKey)
+void CNewUISystem::SyncMainSceneHudVisibility()
+{
+    extern EGameScene SceneFlag;
+    const bool sceneAllowsShow = (SceneFlag == MAIN_SCENE);
+
+    if (m_pMuHelperBar)
+        m_pMuHelperBar->SyncDocVisibility(sceneAllowsShow);
+    if (m_pBuffStrip)
+        m_pBuffStrip->SyncDocVisibility(sceneAllowsShow);
+}
+
+void CNewUISystem::UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey)
 {
     if (IsHeroPositionLayoutInterface(dwKey))
     {
-        SyncHeroPositionInfoVisibility();
+        SyncMuHelperBarVisibility();
     }
 }
 
-void CNewUISystem::SyncHeroPositionInfoVisibility()
+void CNewUISystem::SyncMuHelperBarVisibility()
 {
     if (!m_pNewUIMng)
     {
         return;
     }
 
-    m_pNewUIMng->ShowInterface(INTERFACE_HERO_POSITION_INFO, !ShouldHideHeroPositionInfo());
+    m_pNewUIMng->ShowInterface(INTERFACE_MU_HELPER_BAR, !ShouldHideMuHelperBar());
 }
 
-bool CNewUISystem::ShouldHideHeroPositionInfo()
+bool CNewUISystem::ShouldHideMuHelperBar()
 {
     if (!m_pNewUIMng)
     {
@@ -1993,7 +2004,7 @@ bool CNewUISystem::IsImpossibleHideInterface(DWORD dwKey)
         || dwKey == INTERFACE_BATTLE_SOCCER_SCORE
         || dwKey == INTERFACE_DUEL_WINDOW
         || dwKey == INTERFACE_CRYWOLF
-        || dwKey == INTERFACE_HERO_POSITION_INFO
+        || dwKey == INTERFACE_MU_HELPER_BAR
         || dwKey == INTERFACE_NAME_WINDOW
         || dwKey == INTERFACE_SIEGEWARFARE
         || dwKey == INTERFACE_ITEM_TOOLTIP
@@ -2327,9 +2338,9 @@ CNewUIOptionWindow* CNewUISystem::GetUI_NewOptionWindow() const
     return m_pNewOptionWindow;
 }
 
-CNewUIHeroPositionInfo* CNewUISystem::GetUI_NewHeroPositionInfo() const
+CMuHelperBar* CNewUISystem::GetUI_MuHelperBar() const
 {
-    return m_pNewHeroPositionInfo;
+    return m_pMuHelperBar;
 }
 
 CNewUIHelpWindow* CNewUISystem::GetUI_NewHelpWindow() const
@@ -2382,9 +2393,9 @@ CNewUIItemEnduranceInfo* CNewUISystem::GetUI_NewItemEnduranceInfo() const
     return m_pNewItemEnduranceInfo;
 }
 
-CNewUIBuffWindow* CNewUISystem::GetUI_NewBuffWindow() const
+CBuffStrip* CNewUISystem::GetUI_BuffStrip() const
 {
-    return m_pNewBuffWindow;
+    return m_pBuffStrip;
 }
 
 CNewUICursedTempleEnter* CNewUISystem::GetUI_NewCursedTempleEnterWindow() const

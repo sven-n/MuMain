@@ -1,0 +1,51 @@
+<rml>
+<head>
+	<title>Buff Strip</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="buff_strip.rcss"/>
+</head>
+<body data-model="buff_strip">
+	<!-- Horizontally centered (.center-x, base.rcss) + a fixed top offset -- NOT a fixed left
+	     offset "beside the MU Helper bar" (an earlier version of this file assumed that, caught
+	     as wrong during verification). Derived from CNewUIBuffWindow::SetPos(int iScreenWidth)
+	     (NewUISystem.cpp): its four hardcoded (iScreenWidth -> x) pairs all solve
+	     x = (iScreenWidth - 200) / 2 -- true horizontal centering within the available "clear"
+	     middle-of-screen width (200 = BUFF_MAX_LINE_COUNT * (BUFF_IMG_WIDTH + BUFF_IMG_SPACE), the
+	     strip's own full-row content width), where iScreenWidth itself shrinks as inventory-style
+	     side panels dock and eat into that space (Engine/Object/ZzzInventory.cpp's
+	     GetScreenWidth()). The panel-width-reactive shrinking isn't reproduced (fixed-anchor
+	     policy, docs/rmlui-ui-system/layout-and-scaling.md), but the CENTERING itself is the
+	     actual layout intent and is reproduced -- .center-x behaves correctly at any resolution,
+	     unlike a fixed px/dp offset would. -->
+	<div id="panel" class="center-x">
+		<!-- One template instance per active buff -- see BuffStrip.h's own comment: the actual
+		     thing this pilot verifies is whether this data-for array correctly re-renders when
+		     the bound vector's SIZE changes every frame (buffs gained/expiring), not just its
+		     contents. slot_left/slot_top are pre-computed grid positions (C++ side, BuffStrip.cpp
+		     SyncRmlModel()) -- no arithmetic done here, same "push already-computed pixel values"
+		     pattern char_make.rml's job buttons already use.
+
+		     Bound with + 'dp', NOT + 'px' like that job-button precedent -- confirmed by direct
+		     in-game testing that the two are NOT interchangeable here: RmlUi's `dp` unit is scaled
+		     by Context::SetDensityIndependentPixelRatio() (RmlUiRuntime.cpp's ApplyUIScale(),
+		     driven by GameConfig's user-configurable UI scale), while `px` is always literal,
+		     unscaled pixels (RmlUi/Source/Core/ComputeProperty.cpp). buff-slot/buff-icon-art's own
+		     sizes are declared in `dp` (buff_strip.rcss), so at any UI scale other than 100% a
+		     `px`-based offset drifts out of step with them -- visible here as icons with no gap
+		     between them at all (BUFF_IMG_SPACE compressed away) despite the same C++-computed
+		     pixel math job buttons use successfully. This file's own grid math is unitless by
+		     design (BuffStrip.cpp) specifically so the RML side can pick whichever unit its own
+		     sibling CSS actually uses -- job buttons' panel/buttons are all `px`-sized in
+		     char_make.rcss, this strip's are all `dp`-sized, hence the difference here. -->
+		<div class="buff-slot" data-for="buff : buffs"
+		     data-style-left="buff.slot_left + 'dp'" data-style-top="buff.slot_top + 'dp'">
+			<!-- decorator is a full pre-built value, e.g. "image(atlas1-23)" (BuffStrip.cpp's
+			     BuildIconDecorator(), see BuffEntry::decorator's comment in BuffStrip.h for why
+			     this replaced an earlier, confirmed-non-working clipped-oversized-image attempt)
+			     -- picks one of the named @spritesheet rects declared in buff_strip.rcss. -->
+			<div class="buff-icon-art" data-style-decorator="buff.decorator"></div>
+			<span class="tooltip">{{buff.tooltip}}</span>
+		</div>
+	</div>
+</body>
+</rml>

@@ -42,7 +42,7 @@
 #include "UI/NewUI/HUD/NewUICommandWindow.h"
 #include "UI/NewUI/Dialogs/NewUIWindowMenu.h"
 #include "UI/NewUI/Options/NewUIOptionWindow.h"
-#include "UI/NewUI/HUD/NewUIHeroPositionInfo.h"
+#include "UI/NewUI/HUD/MuHelperBar.h"
 #include "UI/NewUI/Dialogs/NewUIHelpWindow.h"
 #include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
 #include "UI/NewUI/Inventory/NewUIItemExplanationWindow.h"
@@ -53,7 +53,7 @@
 #include "UI/NewUI/Combat/NewUISeigeWarfare.h"
 #include "UI/NewUI/Character/NewUINameWindow.h"
 #include "UI/NewUI/Inventory/NewUIItemEnduranceInfo.h"
-#include "UI/NewUI/HUD/NewUIBuffWindow.h"
+#include "UI/NewUI/HUD/BuffStrip.h"
 #include "UI/NewUI/Events/NewUICursedTempleEnter.h"
 #include "UI/NewUI/Events/NewUICursedTempleSystem.h"
 #include "UI/NewUI/Events/NewUICursedTempleResult.h"
@@ -124,6 +124,16 @@ namespace SEASON3B
         bool Update();
         bool Render();
 
+        // Re-syncs the MU Helper bar's and buff strip's RmlUi documents against the current
+        // scene, independent of Update()/Render() above (which -- like everything else in this
+        // class -- only ever run while SceneFlag == MAIN_SCENE, MainScene.cpp). That was already
+        // a complete visibility gate before these two became RmlUi-backed (nothing drew
+        // otherwise); now that a persistent RmlUi document owns their visuals, leaving MAIN_SCENE
+        // needs an explicit hide, from somewhere that keeps ticking after Update() stops -- called
+        // every frame, regardless of scene, from Winmain.cpp's SetPostRmlUiCallback. See
+        // CMuHelperBar::SyncDocVisibility()'s header comment for the full rationale.
+        void SyncMainSceneHudVisibility();
+
         CNewUIManager* GetNewUIManager() const;
         CNewUI3DRenderMng* GetNewUI3DRenderMng() const;
         CNewUIHotKey* GetNewUIHotKey() const;
@@ -142,9 +152,9 @@ namespace SEASON3B
         void HideAllGroupA();
         void HideAllGroupB();
         void HideGroupBeforeOpenInterface();
-        void UpdateHeroPositionInfoVisibilityForLayoutChange(DWORD dwKey);
-        void SyncHeroPositionInfoVisibility();
-        bool ShouldHideHeroPositionInfo();
+        void UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey);
+        void SyncMuHelperBarVisibility();
+        bool ShouldHideMuHelperBar();
 
         /* Interface classes */
     private:
@@ -186,7 +196,7 @@ namespace SEASON3B
         CNewUIChaosCastleTime* m_pNewChaosCastleTime;
         CNewUIBattleSoccerScore* m_pNewBattleSoccerScore;
         CNewUICommandWindow* m_pNewCommandWindow;
-        CNewUIHeroPositionInfo* m_pNewHeroPositionInfo;
+        CMuHelperBar* m_pMuHelperBar;
         CNewUIWindowMenu* m_pNewWindowMenu;
         CNewUIOptionWindow* m_pNewOptionWindow;
         CNewUIHelpWindow* m_pNewHelpWindow;
@@ -199,7 +209,7 @@ namespace SEASON3B
         CNewUINameWindow* m_pNewNameWindow;
         CNewUISiegeWarfare* m_pNewSiegeWarfare;
         CNewUIItemEnduranceInfo* m_pNewItemEnduranceInfo;
-        CNewUIBuffWindow* m_pNewBuffWindow;
+        CBuffStrip* m_pBuffStrip;
         CNewUICursedTempleEnter* m_pNewCursedTempleEnterWindow;
         CNewUICursedTempleSystem* m_pNewCursedTempleWindow;
         CNewUICursedTempleResult* m_pNewCursedTempleResultWindow;
@@ -271,7 +281,7 @@ namespace SEASON3B
         CNewUIChaosCastleTime* GetUI_NewChaosCastleTime() const;
         CNewUIBattleSoccerScore* GetUI_NewBattleSoccerScore() const;
         CNewUICommandWindow* GetUI_NewCommandWindow() const;
-        CNewUIHeroPositionInfo* GetUI_NewHeroPositionInfo() const;
+        CMuHelperBar* GetUI_MuHelperBar() const;
         CNewUIWindowMenu* GetUI_NewWindowMenu() const;
         CNewUIOptionWindow* GetUI_NewOptionWindow() const;
         CNewUIHelpWindow* GetUI_NewHelpWindow() const;
@@ -283,7 +293,7 @@ namespace SEASON3B
         CNewUIDuelWindow* GetUI_NewDuelWindow() const;
         CNewUISiegeWarfare* GetUI_NewSiegeWarfare() const;
         CNewUIItemEnduranceInfo* GetUI_NewItemEnduranceInfo() const;
-        CNewUIBuffWindow* GetUI_NewBuffWindow() const;
+        CBuffStrip* GetUI_BuffStrip() const;
         CNewUICursedTempleEnter* GetUI_NewCursedTempleEnterWindow() const;
         CNewUICursedTempleSystem* GetUI_NewCursedTempleWindow() const;
         CNewUICursedTempleResult* GetUI_NewCursedTempleResultWindow() const;
@@ -362,7 +372,7 @@ namespace SEASON3B
 #define g_pCommandWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCommandWindow()
 #define g_pWindowMenu SEASON3B::CNewUISystem::GetInstance()->GetUI_NewWindowMenu()
 #define g_pOption SEASON3B::CNewUISystem::GetInstance()->GetUI_NewOptionWindow()
-#define g_pHeroPositionInfo SEASON3B::CNewUISystem::GetInstance()->GetUI_NewHeroPositionInfo()
+#define g_pMuHelperBar SEASON3B::CNewUISystem::GetInstance()->GetUI_MuHelperBar()
 #define g_pHelp SEASON3B::CNewUISystem::GetInstance()->GetUI_NewHelpWindow()
 #define g_pItemExplanation SEASON3B::CNewUISystem::GetInstance()->GetUI_NewItemExplanationWindow()
 #define g_pSetItemExplanation SEASON3B::CNewUISystem::GetInstance()->GetUI_NewSetItemExplanation()
@@ -371,7 +381,7 @@ namespace SEASON3B
 #define g_pDuelWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewDeulWindow()
 #define g_pSiegeWarfare SEASON3B::CNewUISystem::GetInstance()->GetUI_NewSiegeWarfare()
 #define g_pItemEnduranceInfo SEASON3B::CNewUISystem::GetInstance()->GetUI_NewItemEnduranceInfo()
-#define g_pBuffWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewBuffWindow()
+#define g_pBuffStrip SEASON3B::CNewUISystem::GetInstance()->GetUI_BuffStrip()
 #define g_pCursedTempleEnterWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCursedTempleEnterWindow()
 #define g_pCursedTempleWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCursedTempleWindow()
 #define g_pCursedTempleResultWindow SEASON3B::CNewUISystem::GetInstance()->GetUI_NewCursedTempleResultWindow()

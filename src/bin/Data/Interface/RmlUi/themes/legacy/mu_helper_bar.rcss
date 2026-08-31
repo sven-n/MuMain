@@ -1,12 +1,12 @@
 /* RmlUi overlay for the "Official MU Helper" mini control bar + hero position readout
-   (CNewUIHeroPositionInfo -- see NewUIHeroPositionInfo.h's own comment for why the RmlUi-facing
-   name here is "mu_helper_bar" rather than matching the legacy class name, and for why this is
-   ported as one component rather than split into a separate position-readout piece). First pilot
-   of the CNewUIObj-tier RmlUi adapter pattern (2026-08-31).
+   (CMuHelperBar, MuHelperBar.h/.cpp -- renamed 2026-08-31 from CNewUIHeroPositionInfo; see that
+   file's own header comment for why, and for why this is ported as one component rather than
+   split into a separate position-readout piece). First pilot of the CNewUIObj-tier RmlUi adapter
+   pattern (2026-08-31).
 
    Same @spritesheet-with-explicit-rect technique every prior legacy theme file uses (this
    engine's .OZT/.OZJ loader pads textures to the next power-of-two size). Source art per
-   NewUIHeroPositionInfo.cpp's LoadImages(): Minimap_positionA.tga (left cap, 22x25),
+   MuHelperBar.cpp's LoadImages() (unchanged by the rename): Minimap_positionA.tga (left cap, 22x25),
    Minimap_positionB.tga (stretchy middle segment -- the real content sub-rect within its padded
    texture is a best-effort approximation, not measured against the actual file; verify visually
    and adjust the named-sprite rect below if it looks wrong), Minimap_positionC.tga (right end

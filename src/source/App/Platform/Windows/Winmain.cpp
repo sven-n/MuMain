@@ -1982,6 +1982,21 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         []()
         {
             extern EGameScene SceneFlag;
+
+            // CNewUISystem's own RmlUi-backed HUD (MU Helper bar, buff strip -- 2026-08-31
+            // pilots) needs a real per-scene visibility gate of its own now, unlike
+            // LoginWin/CharMakeWin/MsgWin below: those are explicitly Show()/Hide()'d by app
+            // logic at their own scene's enter/exit points, but CNewUISystem is a single
+            // app-lifetime singleton whose Update()/Render() only ever run while
+            // SceneFlag == MAIN_SCENE (MainScene.cpp) -- previously a complete visibility gate on
+            // its own (nothing drew otherwise), now insufficient since a persistent RmlUi
+            // document keeps rendering regardless of whether Update() is still being called.
+            // Placed outside the scene-restricted block below (unconditional every frame) so
+            // leaving MAIN_SCENE for ANY scene -- not just the two this callback already
+            // special-cases -- correctly hides them.
+            if (g_pNewUISystem)
+                g_pNewUISystem->SyncMainSceneHudVisibility();
+
             if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {
                 BeginBitmap();

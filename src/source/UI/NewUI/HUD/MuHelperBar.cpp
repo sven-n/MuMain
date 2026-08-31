@@ -1,8 +1,8 @@
-// NewUIHeroPositionInfo.cpp: implementation of the CNewUIHeroPositionInfo class.
+// MuHelperBar.cpp: implementation of the CMuHelperBar class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/NewUI/HUD/NewUIHeroPositionInfo.h"
+#include "UI/NewUI/HUD/MuHelperBar.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -18,42 +18,34 @@
 
 using namespace SEASON3B;
 
-CNewUIHeroPositionInfo::CNewUIHeroPositionInfo()
+CMuHelperBar::CMuHelperBar()
 {
     m_pNewUIMng = NULL;
     m_CurHeroPosition.x = m_CurHeroPosition.y = 0;
 }
 
-CNewUIHeroPositionInfo::~CNewUIHeroPositionInfo()
+CMuHelperBar::~CMuHelperBar()
 {
     Release();
 }
 
 //---------------------------------------------------------------------------------------------
 // Create
-bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CMuHelperBar::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_HERO_POSITION_INFO, this);
+    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MU_HELPER_BAR, this);
 
     // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
     // window's Create() (re-run on resolution change), so the document/model are created once,
     // ever.
-    // RmlUi-facing assets are named "mu_helper_bar", not after this legacy class -- see this
-    // class's header comment for why (the widget's own tooltips identify it as the "Official MU
-    // Helper" mini control bar, not a generic position readout; "_bar" distinguishes it from the
-    // full MU Helper settings panel, NewUIMuHelper.cpp/CNewUIMuHelper). The C++ class/file name
-    // stays CNewUIHeroPositionInfo/NewUIHeroPositionInfo.* to match the existing
-    // INTERFACE_HERO_POSITION_INFO enum, CNewUISystem::m_pNewHeroPositionInfo member, and
-    // g_pHeroPositionInfo macro -- renaming those has a much bigger blast radius than this pilot
-    // warrants and isn't needed for the RmlUi content itself to have a better name.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
         const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_bar",
-            [this](Rml::DataModelConstructor& c, HeroPositionInfoRmlModel& model)
+            [this](Rml::DataModelConstructor& c, MuHelperBarRmlModel& model)
             {
                 c.Bind("position_text", &model.positionText);
                 c.Bind("mu_helper_active", &model.muHelperActive);
@@ -61,9 +53,9 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
                 c.Bind("start_tooltip", &model.startTooltip);
                 c.Bind("stop_tooltip", &model.stopTooltip);
 
-                c.BindEventCallback("hero_position_config_click",
+                c.BindEventCallback("mu_helper_config_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConfig(); });
-                c.BindEventCallback("hero_position_toggle_click",
+                c.BindEventCallback("mu_helper_toggle_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickToggle(); });
             });
 
@@ -79,7 +71,7 @@ bool CNewUIHeroPositionInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIHeroPositionInfo::Release()
+void CMuHelperBar::Release()
 {
     if (m_pNewUIMng)
     {
@@ -93,19 +85,19 @@ void CNewUIHeroPositionInfo::Release()
         m_pRmlDoc->Hide();
 }
 
-bool CNewUIHeroPositionInfo::UpdateMouseEvent()
+bool CMuHelperBar::UpdateMouseEvent()
 {
     // RmlUi's own context does hit-testing now (see this class's header comment) -- never
     // consumes the legacy mouse event.
     return true;
 }
 
-bool CNewUIHeroPositionInfo::UpdateKeyEvent()
+bool CMuHelperBar::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIHeroPositionInfo::Update()
+bool CMuHelperBar::Update()
 {
     if (m_bRmlConfigClicked)
     {
@@ -131,7 +123,7 @@ bool CNewUIHeroPositionInfo::Update()
     return true;
 }
 
-bool CNewUIHeroPositionInfo::Render()
+bool CMuHelperBar::Render()
 {
     // RmlUi's #panel now owns 100% of this widget's visuals -- see this class's header comment.
     // Nothing left to draw here; SyncRmlModel() (called from Update()) is what keeps the RmlUi
@@ -139,7 +131,7 @@ bool CNewUIHeroPositionInfo::Render()
     return true;
 }
 
-void CNewUIHeroPositionInfo::SyncRmlModel()
+void CMuHelperBar::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
@@ -161,7 +153,7 @@ void CNewUIHeroPositionInfo::SyncRmlModel()
         m_RmlBinder.MarkDirty("mu_helper_active");
     }
 
-    auto syncLabel = [this](Rml::String HeroPositionInfoRmlModel::* field, const char* boundName, const wchar_t* text)
+    auto syncLabel = [this](Rml::String MuHelperBarRmlModel::* field, const char* boundName, const wchar_t* text)
     {
         const std::string utf8 = StringUtils::WideToNarrow(text);
         if (m_RmlBinder.GetModel().*field != utf8)
@@ -170,20 +162,30 @@ void CNewUIHeroPositionInfo::SyncRmlModel()
             m_RmlBinder.MarkDirty(boundName);
         }
     };
-    syncLabel(&HeroPositionInfoRmlModel::configTooltip, "config_tooltip", I18N::Game::OfficialMUHelperSetting);
-    syncLabel(&HeroPositionInfoRmlModel::startTooltip, "start_tooltip", I18N::Game::StartOfficialMUHelper);
-    syncLabel(&HeroPositionInfoRmlModel::stopTooltip, "stop_tooltip", I18N::Game::StopOfficialMUHelper);
+    syncLabel(&MuHelperBarRmlModel::configTooltip, "config_tooltip", I18N::Game::OfficialMUHelperSetting);
+    syncLabel(&MuHelperBarRmlModel::startTooltip, "start_tooltip", I18N::Game::StartOfficialMUHelper);
+    syncLabel(&MuHelperBarRmlModel::stopTooltip, "stop_tooltip", I18N::Game::StopOfficialMUHelper);
 }
 
-float CNewUIHeroPositionInfo::GetLayerDepth()
+float CMuHelperBar::GetLayerDepth()
 {
     return 4.3f;
 }
 
-void CNewUIHeroPositionInfo::OpenningProcess()
+void CMuHelperBar::SyncDocVisibility(bool sceneAllowsShow)
+{
+    if (!m_pRmlDoc) return;
+
+    if (IsVisible() && sceneAllowsShow)
+        m_pRmlDoc->Show();
+    else
+        m_pRmlDoc->Hide();
+}
+
+void CMuHelperBar::OpenningProcess()
 {
 }
 
-void CNewUIHeroPositionInfo::ClosingProcess()
+void CMuHelperBar::ClosingProcess()
 {
 }
