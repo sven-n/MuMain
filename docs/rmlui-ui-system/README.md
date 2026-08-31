@@ -10,16 +10,23 @@ detail.
 The client's game UI is spread across three legacy widget frameworks (`UI/Widgets`,
 `UI/Legacy/UIControls`, `UI/NewUI`) with no layout engine, retained scene graph, or data-binding
 layer between them. RmlUi is being adopted as the long-term replacement, migrated window by
-window, old and new systems coexisting rather than a big-bang rewrite. So far: the login/
-character-select scene's `CLoginWin` (pilot), `CLoginMainWin`, `CSysMenuWin`, and
-`RememberPasswordPrompt`. `COptionWin` was ported but deliberately not wired up — see
-[Coexistence patterns](#coexistence-patterns) below.
+window, old and new systems coexisting rather than a big-bang rewrite. The login/character-select
+scene (`CWin`-tier: `CLoginWin`, `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`,
+`CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`) is fully migrated — no
+remaining legacy-`CWin`-rendered chrome anywhere in that scene. `COptionWin` was ported but
+deliberately not wired up — see [Coexistence patterns](#coexistence-patterns) below. The in-game
+HUD (`UI/NewUI`, a structurally different `CNewUIObj` tier) has one pilot so far
+(`CNewUIHeroPositionInfo` → the "MU Helper bar") — see
+[the NewUI-tier adapter doc](newui-tier-adapter.md) before touching that tier.
 
 See also: **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
 positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
 UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
-and a worked example of retrofitting an already-migrated window.
+and a worked example of retrofitting an already-migrated window. **[NewUI-Tier Adapter
+Pattern](newui-tier-adapter.md)** — the `CNewUIObj`/`CNewUIManager` tier (in-game HUD, distinct
+from `CWin`/`CUIMng`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
+still unproven there.
 
 ## Renderer integration: SDL_GPU
 
@@ -168,11 +175,16 @@ open on purpose.
 | Draggable helper | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) |
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
-| Migrated windows | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up) |
+| Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h) |
+| Migrated windows (`CNewUIObj` tier) | [`CNewUIHeroPositionInfo`](../../src/source/UI/NewUI/HUD/NewUIHeroPositionInfo.h) — pilot only, see [newui-tier-adapter.md](newui-tier-adapter.md) |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status
 
-Functional parity across the login/character-select scene's migrated windows is complete and
-verified (build + runtime). `COptionWin`'s dead-code status is deliberate, not an oversight — all
-further RmlUi UI work continues on this branch.
+Functional parity across the login/character-select scene's `CWin`-tier migrated windows is
+complete and verified (build + runtime) — no remaining legacy-`CWin`-rendered chrome anywhere in
+that scene. `COptionWin`'s dead-code status is deliberate, not an oversight. The in-game HUD
+(`CNewUIObj` tier, `UI/NewUI`) has one verified pilot (see
+[newui-tier-adapter.md](newui-tier-adapter.md)); the rest of that tier — including the main HUD
+frame (HP/MP/EXP/hotbar/skill-list), drag-and-drop, and 3D-camera-space rendering — is not yet
+migrated. All further RmlUi UI work continues on this branch.
