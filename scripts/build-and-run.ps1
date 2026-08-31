@@ -36,6 +36,13 @@
 .EXAMPLE
   ./scripts/build-and-run.ps1 -- connect /u192.168.0.20 /p55902
   Pass extra arguments through to Main.exe (after --).
+
+.EXAMPLE
+  ./scripts/build-and-run.ps1 -Config RelWithDebInfo -GpuDriver direct3d12 -CompileShaders
+  Recompile the HLSL shaders (SPIR-V/MSL/DXIL) via glslang/SPIRV-Cross/DXC instead of copying the
+  checked-in blobs, then build and run forced onto the D3D12 backend. Requires vcpkg's
+  directx-dxc/glslang/spirv-cross ports (see vcpkg.json) -- already satisfied once vcpkg is
+  chain-loaded, same as every other dependency this script resolves.
 #>
 [CmdletBinding()]
 param(
@@ -57,6 +64,7 @@ param(
     [switch]$Clean,
     [switch]$NoBuild,
     [switch]$Detached,
+    [switch]$CompileShaders,
 
     [Parameter(ValueFromRemainingArguments = $true)]
     [string[]]$ClientArgs = @()
@@ -158,11 +166,18 @@ if (-not $NoBuild) {
     try {
         # CMAKE_TOOLCHAIN_FILE sticks to a build tree after its first configure --
         # -Clean (or a first-ever configure) is required to actually change it.
-        Write-Host "Configuring preset '$presetBase' ..."
-        cmake --preset $presetBase `
-            "-DCMAKE_TOOLCHAIN_FILE=$($vcpkgToolchain -replace '\\','/')" `
-            "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$($repoRoot -replace '\\','/')/toolchain-$Arch.cmake" `
+        $configureArgs = @(
+            "-DCMAKE_TOOLCHAIN_FILE=$($vcpkgToolchain -replace '\\','/')"
+            "-DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$($repoRoot -replace '\\','/')/toolchain-$Arch.cmake"
             "-DVCPKG_TARGET_TRIPLET=$VcpkgTriplet"
+        )
+        # Explicit ON/OFF each run (not just when -CompileShaders is passed) -- this is a CMake
+        # cache variable, so it would otherwise stick at whatever it was set to last time and
+        # silently keep recompiling shaders (or keep skipping them) regardless of this flag.
+        $configureArgs += "-DMU_ENABLE_SHADER_COMPILATION=$(if ($CompileShaders) { 'ON' } else { 'OFF' })"
+
+        Write-Host "Configuring preset '$presetBase' ..."
+        cmake --preset $presetBase @configureArgs
         if ($LASTEXITCODE -ne 0) { throw 'cmake configure failed.' }
 
         Write-Host "Building preset '$buildPreset' ..."
