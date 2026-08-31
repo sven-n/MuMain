@@ -131,3 +131,21 @@ case in a shared table. These are structural — they touch the other ~88 still-
 `CNewUIObj` windows' shared machinery, not just the pilots so far — and stay premature with only 2
 data points. Revisit once more of `UI/NewUI` is ported and the real shape of a unified directory
 scheme is visible from real examples.
+
+## Upstream sync log (PR #572)
+
+This branch sits on top of `sven-n/MuMain` PR #572 (head: `yesid-bocanegra/MuMain:main`, the
+SDL_GPU renderer branch) rather than `main` directly, since #572 hasn't merged yet. Log every
+rebase onto a newer PR #572 head here — one line per sync, not one row per upstream commit. That's
+a deliberately lighter shape than the SDL-migration branch's per-source-commit replay ledgers
+(`docs/porting/*-ledger.md` on `pr572/main`): those exist because that branch replays an
+independently-evolved commit history into a differently-restructured target and has to prove each
+source commit's *behavior* survived the restructuring. We don't have that problem — this branch's
+own commits are ours, `git log` already documents them faithfully, and each sync so far has been a
+clean, non-overlapping rebase. If a future sync ever needs real reconciliation (upstream renames or
+restructures a file this branch has also touched), that's the trigger to consider a heavier
+per-commit ledger — not before.
+
+| Date | Upstream commits pulled in | Conflict verdict | Resulting local tip |
+|---|---|---|---|
+| 2026-09-01 | `a9739fb2` docs(render): document Windows parity gaps (docs-only, 2 files, zero overlap with anything this branch touches) | Clean — verified in an isolated worktree before applying to the real branch; identical tree except the 2 upstream docs files | `878f35e4` |
