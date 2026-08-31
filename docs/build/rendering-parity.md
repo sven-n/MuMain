@@ -132,6 +132,95 @@ Do not replace pending rows with build-only results.
 | pending | pending | Linux / Vulkan | pending | pending | pending | disabled | pending | pending | pending | pending | pending | pending | pending | runtime evidence pending |
 | pending | pending | Windows / D3D12 | pending | pending | pending | disabled | pending | pending | pending | pending | pending | pending | pending | runtime evidence pending |
 
+## Windows D3D12 investigation handoff (2026-08-30)
+
+Windows is the authoritative environment for the next investigation session.
+macOS currently has the desired UI scaling behavior. Linux runtime behavior has
+not been tested.
+
+### Confirmed from source
+
+- Chat commands, including `$vsync on` and `$vsync off`, run from UI processing
+  inside `RenderScene()`, after `BeginFrame()` and before `EndFrame()`.
+- `MuRendererSDLGpu::SetVSyncEnabled()` immediately calls
+  `SDL_SetGPUSwapchainParameters()`.
+- SDL's D3D12 implementation waits for the device, destroys the current
+  swapchain, and recreates it when the present mode changes. Doing this while
+  the current frame owns an acquired command buffer and swapchain texture can
+  invalidate active frame state. This is a credible root cause for the reported
+  `$vsync off` crash, but still requires Windows runtime confirmation.
+- A claimed SDL GPU window starts in VSync mode. Successful startup VSync
+  currently disables software pacing with `SetTargetFps(-1)`.
+- `$glstats` displays `SDL_GetGPUDeviceDriver()`. `$details` does not display the
+  active driver.
+- The renderer records draws into `std::vector<RenderCmd>` and replays them in
+  `EndFrame()`. Each command snapshots matrices, fog, skinning, pipeline,
+  texture, sampler, and fixed render state. The cost is application-side and is
+  therefore affected by unoptimized Debug code and MSVC checked iterators.
+
+### Reported runtime behavior — not yet reproduced in this workspace
+
+- Windows D3D12 does not reliably follow the display refresh cap while VSync is
+  enabled. Release can run too fast, with visible animation errors.
+- `$vsync off` can crash on Windows D3D12.
+- Windows Debug performance is substantially worse than the pre-SDL renderer.
+- Windows UI scaling differs from the desired macOS result.
+- The rendered cursor and inventory/storage hit testing are offset: item hover
+  effects appear down and right of the pointer, leaving some item cells
+  difficult or impossible to reach.
+
+### Input-scaling boundaries to test
+
+The current SDL path stores mouse events in window coordinates, converts them
+through `ScreenOverlayTransform(WindowWidth, WindowHeight)`, and temporarily
+recomputes `MouseX`/`MouseY` for panel-specific transforms. The window is
+created with `SDL_WINDOW_HIGH_PIXEL_DENSITY`; rendering also uses swapchain
+pixel dimensions. The Windows-only offset may therefore be caused by one of
+these unverified mismatches:
+
+- SDL window coordinates versus swapchain pixel coordinates under Windows DPI
+  scaling;
+- a panel rendered with one transform while its hover region uses another;
+- stale logical dimensions after a DPI, fullscreen, or display change.
+
+Do not patch any one boundary until diagnostics identify the first divergent
+coordinate pair.
+
+### Next Windows session
+
+1. Record revision, Windows version, GPU, graphics-driver version, display
+   resolution, refresh rate, Windows scaling percentage, window mode, and
+   configured game resolution.
+2. Capture the same stationary scene in Debug and Release with:
+
+   ```powershell
+   $env:SDL_GPU_DRIVER = "direct3d12"
+   $env:MU_RENDER_TIMING = "1"
+   .\Main.exe
+   ```
+
+   Enable `$details on` and `$glstats on`, warm the scene, then retain at least
+   five 60-frame timing samples.
+3. Repeat Debug with
+   `MU_D3D12_DISABLE_TRIANGLE_MERGING=1`. Compare replay, submit, total-frame,
+   command, requested-draw, and submitted-draw values. This tests the deferred
+   command/merge hypothesis instead of assuming Debug slowness is unavoidable.
+4. Reproduce inventory and storage hover offsets with
+   `MU_INPUT_DIAGNOSTICS=1`. Test Windows scaling at 100% and the affected
+   scaling percentage; capture pointer location, rendered item cell, logical
+   mouse coordinates, window size, and pixel size.
+5. Trace the first transform where rendered and hit-test coordinates diverge.
+   Fix that boundary only; preserve the working macOS behavior.
+6. Move present-mode changes to a safe frame boundary. Before choosing an
+   uncapped mode, query support and evaluate MAILBOX before IMMEDIATE. Measure
+   whether D3D12 also requires software pacing while VSync is requested.
+7. Add the active SDL GPU driver to `$details`; retain the existing `$glstats`
+   line.
+8. Re-run Debug/Release captures, `$vsync on`/`$vsync off` transitions,
+   inventory/storage hover tests, and full CTest. Record results in the native
+   verification table above.
+9. Test Linux/Vulkan after Windows D3D12 and input parity are closed.
+
 ## Existing CI evidence
 
 GitHub Actions run `32982393578` proved a native Windows x64 Release,
