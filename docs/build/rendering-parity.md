@@ -32,10 +32,15 @@ Release builds resolve every text role from files beside the executable:
 | Bold | Selected family bold file |
 | Big bold | Selected family bold file |
 | Fixed | `fonts/Cousine-Regular.ttf` |
+| Missing glyph fallback | `fonts/NanumGothic-Regular.ttf` |
 
 Selectable families are DejaVu Sans and Liberation Sans. Empty or unknown
 configuration selects DejaVu Sans. SDL_ttf, Windows GDI, and the non-Windows
 GDI shim use the same registry.
+
+SDL_ttf attaches Nanum Gothic to every role at startup. This preserves the
+selected Latin family while rendering Hangul labels instead of missing-glyph
+boxes; bold roles use SDL_ttf's synthetic bold style for the fallback face.
 
 Missing or corrupt packaged roles abort Release renderer startup. Windows also
 requires private GDI registration of every packaged role; partial registration

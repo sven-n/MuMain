@@ -24,6 +24,9 @@ inline constexpr BundledFont kBundledFonts[] = {
 inline constexpr std::string_view kDefaultBundledFontFamily = "DejaVu Sans";
 inline constexpr BundledFont kBundledFixedFont{
     "Cousine", "fonts/Cousine-Regular.ttf", "fonts/Cousine-Regular.ttf"};
+// ponytail: one Hangul face; SDL_ttf synthesizes bold, bundle NanumGothic-Bold if metric parity requires it.
+inline constexpr BundledFont kBundledFallbackFont{"Nanum Gothic", "fonts/NanumGothic-Regular.ttf",
+                                                  "fonts/NanumGothic-Regular.ttf"};
 
 [[nodiscard]] inline std::filesystem::path ResolveBundledFontPath(const std::filesystem::path& relativePath)
 {
