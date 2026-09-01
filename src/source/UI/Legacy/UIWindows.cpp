@@ -19,6 +19,7 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
@@ -532,11 +533,14 @@ void CUIWindowMgr::HandleMessage()
             m_WindowArrangeListIter = m_WindowArrangeList.end();
             --m_WindowArrangeListIter;
 
-            if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1 || GetFocus() == g_hWnd)
+            const bool inputOwnsSelection = CUITextInputBox::IsFocusedForParent(m_WorkMessage.m_iParam1);
+            if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1
+                || (GetFocus() == g_hWnd && !inputOwnsSelection))
             {
                 m_WindowArrangeList.remove(m_WorkMessage.m_iParam1);
                 m_WindowArrangeList.push_back(m_WorkMessage.m_iParam1);
-                SendUIMessageToWindow(m_WorkMessage.m_iParam1, UI_MESSAGE_SELECTED, 0, 0);
+                if (!inputOwnsSelection)
+                    SendUIMessageToWindow(m_WorkMessage.m_iParam1, UI_MESSAGE_SELECTED, 0, 0);
             }
 
             SetWindowsEnable(m_WorkMessage.m_iParam1);
@@ -1811,9 +1815,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y,
-        m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
-    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
+    const auto viewport = UI::Scaling::ViewportForLogicalRect(
+        UI::Scaling::GetActiveTransform(), m_iPos_x, m_iPos_y, m_iWidth, 141.0f);
+    SetRenderViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+    gluPerspective2(1.f, static_cast<float>(viewport.width) / static_cast<float>(viewport.height), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();

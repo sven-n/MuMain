@@ -1083,6 +1083,10 @@ public:
     {
         return s_pFocusedPortable != nullptr && s_pFocusedPortable->m_iState != UISTATE_HIDE;
     }
+    static bool IsFocusedForParent(DWORD parentUIID)
+    {
+        return IsAnyInputBoxFocused() && s_pFocusedPortable->GetParentUIID() == parentUIID;
+    }
 
     // Release keyboard focus from the focused portable field (counterpart to
     // GiveFocus()); the field stays visible. Defined in the .cpp.

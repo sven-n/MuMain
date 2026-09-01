@@ -246,6 +246,17 @@ float UI::Scaling::SizeY(const Transform& transform, float height)
     return height * transform.scaleY;
 }
 
+UI::Scaling::Viewport UI::Scaling::ViewportForLogicalRect(const Transform& transform, float x, float y, float width,
+                                                          float height)
+{
+    return {
+        static_cast<int>(std::lround(PositionX(transform, x))),
+        static_cast<int>(std::lround(PositionY(transform, y))),
+        std::max(static_cast<int>(std::lround(SizeX(transform, width))), 1),
+        std::max(static_cast<int>(std::lround(SizeY(transform, height))), 1),
+    };
+}
+
 float UI::Scaling::LogicalX(const Transform& transform, float windowX)
 {
     return (windowX - transform.offsetX) / transform.scaleX;

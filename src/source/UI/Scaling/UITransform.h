@@ -82,6 +82,7 @@ namespace UI::Scaling
     float PositionY(const Transform& transform, float y);
     float SizeX(const Transform& transform, float width);
     float SizeY(const Transform& transform, float height);
+    Viewport ViewportForLogicalRect(const Transform& transform, float x, float y, float width, float height);
     float LogicalX(const Transform& transform, float windowX);
     float LogicalY(const Transform& transform, float windowY);
     Position CenteredLogicalPosition(const Transform& transform, float windowX, float windowY, float width,

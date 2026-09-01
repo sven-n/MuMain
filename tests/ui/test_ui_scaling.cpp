@@ -9,6 +9,7 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMapName.h"
 #include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
 #include "UI/NewUI/HUD/NewUICommandWindow.h"
@@ -703,6 +704,29 @@ TEST_CASE("positions include offsets and sizes do not [ui][scaling]")
     CHECK(UI::Scaling::SizeY(transform, 20.0f) == doctest::Approx(40.0f));
     CHECK(UI::Scaling::LogicalX(transform, 340.0f) == doctest::Approx(10.0f));
     CHECK(UI::Scaling::LogicalY(transform, 100.0f) == doctest::Approx(20.0f));
+}
+
+TEST_CASE("letter preview viewport includes active layout offsets [ui][scaling]")
+{
+    const UI::Scaling::Transform transform{2.25f, 2.25f, 480.0f, 6.0f, 2.25f};
+    const auto viewport = UI::Scaling::ViewportForLogicalRect(transform, 351.0f, 151.0f, 119.0f, 141.0f);
+
+    CHECK(viewport.x == 1270);
+    CHECK(viewport.y == 346);
+    CHECK(viewport.width == 268);
+    CHECK(viewport.height == 317);
+}
+
+TEST_CASE("focused letter input owns its parent window selection [ui][input]")
+{
+    CUITextInputBox input;
+    input.SetParentUIID(42);
+    input.GiveFocus(FALSE);
+
+    CHECK(CUITextInputBox::IsFocusedForParent(42));
+    CHECK_FALSE(CUITextInputBox::IsFocusedForParent(41));
+
+    CUITextInputBox::ReleaseFocus();
 }
 
 TEST_CASE("screen overlays fill the window [ui][scaling]")
