@@ -139,6 +139,18 @@ namespace SEASON3B
         // near-identical index blocks (see the 3 IMAGE_SKILLBOX_USE call sites).
         bool IsHotKeySlotCurrentSkill(int iSlotIndex);
 
+        // 2026-09-02: exposes the same hotkey-number RenderSkillIcon()'s own RenderNumber(x+20,
+        // y+20, iHotKey) call already computes (search m_iHotKeySkillType[] for this slot's own
+        // index -- reduces to iIndex itself barring duplicate assignments) to
+        // CNewUIMainFrameWindow::SyncRmlModel(), so modern theme can show it as a
+        // .slot-hotkey-label span (upper-left corner, main_frame.rml/.rcss) instead of the legacy
+        // digit-sprite subscript in RenderSkillIcon() (feedback: "move the assigned number
+        // shortcut ... to the upper left corner too, same as Q W E R"). Returns -1 for an empty
+        // slot (m_iHotKeySkillType[iIndex] == -1) -- SyncRmlModel() turns that into an empty
+        // label string, same "nothing bound, draw nothing" behavior RenderCurrentSkillAndHotSkillList()'s
+        // own `continue` already has for the legacy path.
+        int GetHotKeySlotNumber(int iSlotIndex);
+
         bool IsSkillListUp();
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
@@ -376,6 +388,14 @@ namespace SEASON3B
 
             float hpFraction = 0.f, mpFraction = 0.f, agFraction = 0.f, sdFraction = 0.f;
             Rml::String hpText, mpText, agText, sdText;
+
+            // 2026-09-02: current-value-only readout ("935", not "935 / 935") -- legacy theme's
+            // own gauge numbers use this instead of hpText/etc (feedback: "remove the Y in the
+            // X/Y value of the gauge bars" for legacy specifically, without touching modern).
+            // Computed unconditionally alongside hpText/etc, both themes, same values just
+            // formatted differently -- modern's main_frame.rml still binds hpText/etc; only which
+            // field each theme's own markup references differs, no C++ theme check anywhere.
+            Rml::String hpCurrentText, mpCurrentText, agCurrentText, sdCurrentText;
             Rml::String hpTooltip, mpTooltip, agTooltip, sdTooltip;
             bool poisoned = false; // true -> HP fill swaps red to green (eDeBuff_Poison)
 
@@ -412,6 +432,12 @@ namespace SEASON3B
             // other bool in this struct.
             bool skillSlot0Selected = false, skillSlot1Selected = false, skillSlot2Selected = false,
                  skillSlot3Selected = false, skillSlot4Selected = false;
+
+            // 2026-09-02: the hotkey number (1-9,0) each of #skill_slot_0..4 is bound to -- see
+            // CNewUISkillList::GetHotKeySlotNumber()'s own comment. Empty string for an unbound
+            // slot (RmlUi's {{ }} interpolation of an empty string renders nothing, same "draw
+            // nothing" behavior the legacy digit-sprite path already has for that case).
+            Rml::String skillSlot0Hotkey, skillSlot1Hotkey, skillSlot2Hotkey, skillSlot3Hotkey, skillSlot4Hotkey;
         };
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

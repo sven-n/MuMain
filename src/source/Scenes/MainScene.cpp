@@ -9,6 +9,7 @@
 #include "SceneCommon.h"
 #include "Camera/CameraUtility.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -64,6 +65,9 @@ extern float EarthQuake;
 extern int CheckSkill;
 extern int MouseY;
 extern int LoadingWorld;
+// LoadingScene.cpp -- closes the RmlUi loading-screen wallpaper it keeps open past its own
+// one-frame flash. Called below once LoadingWorld drops below the "world ready" threshold.
+extern void HideLoadingSceneOverlay();
 extern DWORD g_dwKeyFocusUIID;
 extern int ErrorMessage;
 extern int HeroTile;
@@ -657,8 +661,24 @@ bool RenderMainScene()
 
     if ((LoadingWorld) > 30)
     {
+        // Keep something on screen every frame while the world/hero data isn't back from the
+        // server yet. LoadingScene.cpp's own flash only drew one frame (SceneFlag flips to
+        // MAIN_SCENE immediately after it, well before LoadingWorld actually drops below 30) --
+        // without a fresh clear here each of the frames in between, the swapchain just kept
+        // presenting whatever stale buffer content was left, seen as flicker between black and
+        // that one flash frame. The RmlUi loading wallpaper (kept Shown by LoadingScene(), not
+        // closed after its flash) renders on top of this clear automatically, same as any other
+        // persistent RmlUi document.
+        BeginOpengl();
+        mu::GetRenderer().ClearScreen();
+        EndOpengl();
         return false;
     }
+
+    // World is ready this frame -- close the loading wallpaper now, before it (or the mainframe
+    // HUD it was gating alongside, see CNewUISystem::SyncMainSceneHudVisibility) would otherwise
+    // sit on top of the real scene about to render below.
+    HideLoadingSceneOverlay();
 
     // Per-camera fog default: Orbital uses fog (noticeable at longer view distances),
     // Default camera's fog zone sits at/beyond its far clip and reads as visual noise,

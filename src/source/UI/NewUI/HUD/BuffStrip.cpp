@@ -229,8 +229,10 @@ bool CBuffStrip::Create(CNewUIManager* pNewUIMng, int x, int y)
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/buff_strip.rml");
 
-        if (m_pRmlDoc)
-            m_pRmlDoc->Show();
+        // Deliberately NOT Show()n here -- see NewUIMainFrameWindow.cpp's identical comment.
+        // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
+        // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
+        // shows it the first time CNewUISystem::SyncMainSceneHudVisibility()'s gate allows it.
     }
 
     Show(true);

@@ -3,9 +3,10 @@
 **Read this before touching any RmlUi UI code on this branch — before opening `README.md` or any
 other doc in this directory.** Everything else in `docs/rmlui-ui-system/` is either an
 implementation of these principles on this specific codebase (`layout-and-scaling.md`,
-theming-and-modding.md`, `newui-tier-adapter.md`) or a status report against them (`STATUS.md`).
-None of them repeat the reasoning here — if something below and something elsewhere in this
-directory ever seem to disagree, this file wins; go fix the other file.
+`theming-and-modding.md`, `newui-tier-adapter.md`), an amendment scoped to one recurring question
+(`legacy-theme-modernization.md`), or a status report against all of the above (`STATUS.md`). None
+of them repeat the reasoning here — if something below and something elsewhere in this directory
+ever seem to disagree, this file wins; go fix the other file.
 
 This is the governing policy for the RmlUi UI migration, issued by the user 2026-08-31. It
 reframes the migration's success criterion: not "the old UI now renders through RmlUi" but "a
@@ -358,5 +359,9 @@ version-specific UI implementation.
 
 ---
 
-**Next**: [`STATUS.md`](STATUS.md) for what's actually implemented against this document today,
-known gaps, and open conflicts between this policy and other standing decisions on this branch.
+**Next**: [`legacy-theme-modernization.md`](legacy-theme-modernization.md) — an amendment
+resolving one recurring question this document leaves implicit: when legacy-theme UI behavior
+currently lives in C++, when should maintaining/migrating it mean moving that behavior into
+RML/RCSS, and when does it genuinely stay in C++. Then [`STATUS.md`](STATUS.md) for what's
+actually implemented against both documents today, known gaps, and open conflicts with other
+standing decisions on this branch.

@@ -22,8 +22,14 @@
 		     without C++ knowing which theme is active. -->
 		<div id="item_hotkey_anchor" class="layout-anchor"></div>
 		<div id="skill_list_anchor" class="layout-anchor"></div>
-		<div id="gauge_bg_left" class="slot-frame slot-fill"></div>
-		<div id="gauge_bg_right" class="slot-frame slot-fill"></div>
+		<!-- #gauge_frame (the continuous top border) is deliberately declared AFTER the two fill
+		     divs, not before -- same-stacking-level siblings paint in DOM order, and
+		     #gauge_fill_left/right's own solid background otherwise paints over #gauge_frame's
+		     thin top border wherever the two overlap (the left/right zones), leaving the border
+		     visible only in the middle where nothing else paints on top of it. -->
+		<div id="gauge_fill_left"></div>
+		<div id="gauge_fill_right"></div>
+		<div id="gauge_frame"></div>
 		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
 			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
@@ -67,13 +73,17 @@
 			<div id="item_slot_2" class="slot-frame"><span class="slot-hotkey-label">E</span></div>
 			<div id="item_slot_3" class="slot-frame"><span class="slot-hotkey-label">R</span></div>
 		</div>
-		<!-- data-class-selected mirrors which hotkey slot currently shows the equipped skill. -->
+		<!-- data-class-selected mirrors which hotkey slot currently shows the equipped skill.
+		     skill-hotkey-label shows the assigned hotkey number -- own class, not
+		     .slot-hotkey-label (the potion Q/W/E/R labels' class), since legacy wants this one
+		     genuinely visible (own real content, not baked into any sprite) where it hides the
+		     other. Empty string -> nothing rendered, for an unbound slot. -->
 		<div id="skill_slots">
-			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected"></div>
-			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected"></div>
-			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected"></div>
-			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected"></div>
-			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected"></div>
+			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected"><span class="skill-hotkey-label">{{skill_slot_0_hotkey}}</span></div>
+			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected"><span class="skill-hotkey-label">{{skill_slot_1_hotkey}}</span></div>
+			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected"><span class="skill-hotkey-label">{{skill_slot_2_hotkey}}</span></div>
+			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected"><span class="skill-hotkey-label">{{skill_slot_3_hotkey}}</span></div>
+			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected"><span class="skill-hotkey-label">{{skill_slot_4_hotkey}}</span></div>
 			<div id="current_skill_slot" class="slot-frame"></div>
 		</div>
 	</div>

@@ -115,10 +115,47 @@
 .frame-btn:hover { filter: brightness(1.25); }
 
 .btn-icon-label { display: none; }
-#item_slots, #skill_slots { display: none; }
+/* #item_slots stays fully hidden -- Q/W/E/R are baked into the real IMAGE_MENU_1 sprite art
+   (.slot-hotkey-label below). #skill_slots is NOT hidden (2026-09-02): its own outline/highlight
+   classes (.slot-frame, .selected) are still unstyled here so they stay invisible on their own,
+   but .skill-hotkey-label needs it visible now that the assigned hotkey number moved here from
+   the legacy digit-sprite subscript RenderSkillIcon() used to draw (feedback: "move the legacy
+   subscripts from C++ code to RmlUi scope too ... the legacy theme will rely on rml instead of
+   hardcoded behavior"). */
+#item_slots { display: none; }
 #buttons_top { display: none; }
 #gauge_bg_left, #gauge_bg_right { display: none; }
 .slot-hotkey-label { display: none; }
+
+/* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
+   (NewUIMainFrameWindow.cpp) -- #skill_list_anchor sits at the origin for legacy (own main_frame.rcss,
+   zero shift), so these need no offset the way modern's shifted copy does. Purely a positioning
+   context for .skill-hotkey-label below; #skill_slot_0..4/#current_skill_slot paint nothing of
+   their own here (.slot-frame/.selected are unstyled in this theme). */
+#skill_slots { position: absolute; left: 0; top: 0; }
+#skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_3 { position: absolute; left: 318px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
+#current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
+
+/* Bottom-right, matching where RenderNumber(x+20, y+20, ...) used to draw the same subscript
+   (NewUIMainFrameWindow.cpp, retired) -- plain text instead of the legacy digit-sprite atlas, same
+   simplification already established for this window's HP/MP/AG/SD/EXP numbers (.gauge-num). */
+.skill-hotkey-label {
+	position: absolute;
+	right: 2px;
+	bottom: 1px;
+	color: #ffffff;
+	font-family: "Liberation Sans";
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 9px;
+	line-height: 9px;
+	white-space: nowrap;
+	pointer-events: none;
+}
 
 #btn_cshop    { left: 1px;   decorator: image(mainframe-btn-cshop-normal); }
 #btn_cshop.open    { decorator: image(mainframe-btn-cshop-open); }

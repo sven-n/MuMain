@@ -1765,7 +1765,16 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
 void CNewUISystem::SyncMainSceneHudVisibility()
 {
     extern EGameScene SceneFlag;
-    const bool sceneAllowsShow = (SceneFlag == MAIN_SCENE);
+    // LoadingWorld < 30, not just SceneFlag == MAIN_SCENE: SceneFlag flips to MAIN_SCENE the
+    // instant LoadingScene()'s one-frame flash ends (LoadingScene.cpp), well before the world/
+    // hero data the server sends back is actually ready -- LoadingWorld stays >= 30 for that
+    // whole gap (set to 9999999 on scene entry, dropped to ~30-50 once the server confirms
+    // placement, then counts down to 0). MainScene.cpp's own UpdateUIAndInput() already treats
+    // LoadingWorld >= 30 as "not really in MAIN_SCENE yet" and skips input/Update() for exactly
+    // this reason; this is the same gate applied to the persistent RmlUi HUD documents' own
+    // Show()/Hide(), which otherwise render every frame regardless of Update() ever running.
+    extern int LoadingWorld;
+    const bool sceneAllowsShow = (SceneFlag == MAIN_SCENE) && (LoadingWorld < 30);
 
     if (m_pMuHelperBar)
         m_pMuHelperBar->SyncDocVisibility(sceneAllowsShow);

@@ -24,25 +24,25 @@
 		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
 			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{hp_text}}</span>
+			<span class="gauge-num">{{hp_current_text}}</span>
 		</div>
 		<span class="tooltip tooltip-hp">{{hp_tooltip}}</span>
 		<div id="bar_sd" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-sd gauge-fill-vertical" data-style-height="sd_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-sd gauge-fill-horizontal" data-style-width="sd_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{sd_text}}</span>
+			<span class="gauge-num">{{sd_current_text}}</span>
 		</div>
 		<span class="tooltip tooltip-sd">{{sd_tooltip}}</span>
 		<div id="bar_ag" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-ag gauge-fill-vertical" data-style-height="ag_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-ag gauge-fill-horizontal" data-style-width="ag_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{ag_text}}</span>
+			<span class="gauge-num">{{ag_current_text}}</span>
 		</div>
 		<span class="tooltip tooltip-ag">{{ag_tooltip}}</span>
 		<div id="bar_mp" class="gauge-slot slot-frame slot-fill">
 			<div class="gauge-fill gauge-fill-mp gauge-fill-vertical" data-style-height="mp_fraction * 100 + '%'"></div>
 			<div class="gauge-fill gauge-fill-mp gauge-fill-horizontal" data-style-width="mp_fraction * 100 + '%'"></div>
-			<span class="gauge-num">{{mp_text}}</span>
+			<span class="gauge-num">{{mp_current_text}}</span>
 		</div>
 		<span class="tooltip tooltip-mp">{{mp_tooltip}}</span>
 
@@ -91,13 +91,16 @@
 			<div id="item_slot_2" class="slot-frame"><span class="slot-hotkey-label">E</span></div>
 			<div id="item_slot_3" class="slot-frame"><span class="slot-hotkey-label">R</span></div>
 		</div>
-		<!-- data-class-selected mirrors which hotkey slot currently shows the equipped skill. -->
+		<!-- data-class-selected mirrors which hotkey slot currently shows the equipped skill.
+		     skill-hotkey-label shows the assigned hotkey number -- the legacy digit-sprite
+		     subscript RenderSkillIcon() used to draw here is retired; this is now the only place
+		     it's drawn, for both themes. -->
 		<div id="skill_slots">
-			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected"></div>
-			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected"></div>
-			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected"></div>
-			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected"></div>
-			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected"></div>
+			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected"><span class="skill-hotkey-label">{{skill_slot_0_hotkey}}</span></div>
+			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected"><span class="skill-hotkey-label">{{skill_slot_1_hotkey}}</span></div>
+			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected"><span class="skill-hotkey-label">{{skill_slot_2_hotkey}}</span></div>
+			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected"><span class="skill-hotkey-label">{{skill_slot_3_hotkey}}</span></div>
+			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected"><span class="skill-hotkey-label">{{skill_slot_4_hotkey}}</span></div>
 			<div id="current_skill_slot" class="slot-frame"></div>
 		</div>
 	</div>

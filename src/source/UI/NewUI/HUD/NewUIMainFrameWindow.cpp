@@ -121,6 +121,10 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
                 c.Bind("mp_text", &model.mpText);
                 c.Bind("ag_text", &model.agText);
                 c.Bind("sd_text", &model.sdText);
+                c.Bind("hp_current_text", &model.hpCurrentText);
+                c.Bind("mp_current_text", &model.mpCurrentText);
+                c.Bind("ag_current_text", &model.agCurrentText);
+                c.Bind("sd_current_text", &model.sdCurrentText);
                 c.Bind("hp_tooltip", &model.hpTooltip);
                 c.Bind("mp_tooltip", &model.mpTooltip);
                 c.Bind("ag_tooltip", &model.agTooltip);
@@ -151,6 +155,12 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
                 c.Bind("skill_slot_3_selected", &model.skillSlot3Selected);
                 c.Bind("skill_slot_4_selected", &model.skillSlot4Selected);
 
+                c.Bind("skill_slot_0_hotkey", &model.skillSlot0Hotkey);
+                c.Bind("skill_slot_1_hotkey", &model.skillSlot1Hotkey);
+                c.Bind("skill_slot_2_hotkey", &model.skillSlot2Hotkey);
+                c.Bind("skill_slot_3_hotkey", &model.skillSlot3Hotkey);
+                c.Bind("skill_slot_4_hotkey", &model.skillSlot4Hotkey);
+
                 c.BindEventCallback("mainframe_cshop_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCShop(); });
                 c.BindEventCallback("mainframe_chainfo_click",
@@ -166,8 +176,15 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/main_frame.rml");
 
-        if (m_pRmlDoc)
-            m_pRmlDoc->Show();
+        // Deliberately NOT Show()n here -- Create() runs during WebzenScene()'s own boot-time
+        // loading screen (LoadMainSceneInterface(), called well before SceneFlag ever reaches
+        // MAIN_SCENE), and this document renders every frame once shown regardless of scene (see
+        // SyncDocVisibility()'s own comment). An eager Show() here raced ahead of the first
+        // SyncMainSceneHudVisibility() gate check, so the HUD flashed once on whatever frame
+        // WebzenScene() happened to render before flipping SceneFlag to LOG_IN_SCENE. Left
+        // hidden (RmlUi documents start unshown after LoadDocument()); SyncDocVisibility(),
+        // called every frame regardless of scene, shows it the first time the gate actually
+        // allows it.
     }
 
     Show(true);
@@ -340,10 +357,11 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
 {
     if (UI::RmlBridge::GetActiveThemeName() == "modern")
     {
+        // 2026-09-02: no border lines here anymore -- this panel's own top/bottom/outer-edge
+        // outline read as a visible divider once the whole bottom HUD strip got a single
+        // continuous top border of its own (#gauge_frame, themes/modern/main_frame.rcss), drawn
+        // over this same span. Fill only; the unified RmlUi border is now the only outline.
         RenderColorQuadARGB(0.0f, kHudTop, kLeftBandWidth, kHudContentHeight, 0x960A0A0Au);
-        RenderColorLineARGB(0.0f, kHudTop, kLeftBandWidth, kHudTop, 1.0f, 0x3CFFFFFFu);
-        RenderColorLineARGB(0.0f, kHudTop + kHudContentHeight, kLeftBandWidth, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
-        RenderColorLineARGB(0.0f, kHudTop, 0.0f, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
         return;
     }
 
@@ -370,12 +388,12 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
         // exactly where RenderLeftFrame()'s own shifted right edge does
         // (kLeftBandWidth+GetItemHotkeyOffsetX() = 152+140=292) -- the two chrome panels meet
         // flush, no gap or overlap, despite using two different offsets.
+        // 2026-09-02: no border lines here anymore -- same reasoning as RenderLeftFrame()'s
+        // identical change (this panel's own outline read as a divider once the whole strip got
+        // one continuous top border of its own, #gauge_frame). Fill only.
         const float left = 214.0f;
         const float right = 424.0f;
         RenderColorQuadARGB(left, kHudTop, right - left, kHudContentHeight, 0x960A0A0Au);
-        RenderColorLineARGB(left, kHudTop, right, kHudTop, 1.0f, 0x3CFFFFFFu);
-        RenderColorLineARGB(left, kHudTop + kHudContentHeight, right, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
-        RenderColorLineARGB(right, kHudTop, right, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
 
         // Modern equivalent of the legacy IMAGE_MENU_2_1 "skill list expanded" highlight below --
         // same trigger/rect, flat translucent overlay instead of a sprite frame.
@@ -628,6 +646,10 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
     syncWide(&MainFrameRmlModel::hpText, "hp_text", szNum);
     mu_swprintf(szNum, L"%d / %d", wMana, wManaMax);
     syncWide(&MainFrameRmlModel::mpText, "mp_text", szNum);
+    mu_swprintf(szNum, L"%d", wLife);
+    syncWide(&MainFrameRmlModel::hpCurrentText, "hp_current_text", szNum);
+    mu_swprintf(szNum, L"%d", wMana);
+    syncWide(&MainFrameRmlModel::mpCurrentText, "mp_current_text", szNum);
 
     wchar_t szTip[256] = {};
     mu_swprintf(szTip, I18N::Game::LifeDD, wLife, wLifeMax);
@@ -650,6 +672,8 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
     syncFloat(&MainFrameRmlModel::agFraction, "ag_fraction", dwSkillMana / (float)dwMaxSkillMana);
     mu_swprintf(szNum, L"%d / %d", dwSkillMana, dwMaxSkillMana);
     syncWide(&MainFrameRmlModel::agText, "ag_text", szNum);
+    mu_swprintf(szNum, L"%d", dwSkillMana);
+    syncWide(&MainFrameRmlModel::agCurrentText, "ag_current_text", szNum);
     mu_swprintf(szTip, I18N::Game::AGDD, dwSkillMana, dwMaxSkillMana);
     syncWide(&MainFrameRmlModel::agTooltip, "ag_tooltip", szTip);
 
@@ -668,6 +692,8 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
     syncFloat(&MainFrameRmlModel::sdFraction, "sd_fraction", wShield / (float)wMaxShield);
     mu_swprintf(szNum, L"%d / %d", wShield, wMaxShield);
     syncWide(&MainFrameRmlModel::sdText, "sd_text", szNum);
+    mu_swprintf(szNum, L"%d", wShield);
+    syncWide(&MainFrameRmlModel::sdCurrentText, "sd_current_text", szNum);
     mu_swprintf(szTip, I18N::Game::SDDD, wShield, wMaxShield);
     syncWide(&MainFrameRmlModel::sdTooltip, "sd_tooltip", szTip);
 
@@ -792,6 +818,16 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
     syncBool(&MainFrameRmlModel::skillSlot2Selected, "skill_slot_2_selected", g_pSkillList->IsHotKeySlotCurrentSkill(2));
     syncBool(&MainFrameRmlModel::skillSlot3Selected, "skill_slot_3_selected", g_pSkillList->IsHotKeySlotCurrentSkill(3));
     syncBool(&MainFrameRmlModel::skillSlot4Selected, "skill_slot_4_selected", g_pSkillList->IsHotKeySlotCurrentSkill(4));
+
+    // Skill-hotkey number labels (modern theme only -- see MainFrameRmlModel::skillSlot0Hotkey's
+    // own comment and CNewUISkillList::GetHotKeySlotNumber()). -1 (empty slot) becomes an empty
+    // string, same "draw nothing" behavior the legacy digit-sprite path already has for that case.
+    auto hotkeyText = [](int hotkey) { return hotkey >= 0 ? std::to_string(hotkey) : Rml::String(); };
+    syncText(&MainFrameRmlModel::skillSlot0Hotkey, "skill_slot_0_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(0)));
+    syncText(&MainFrameRmlModel::skillSlot1Hotkey, "skill_slot_1_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(1)));
+    syncText(&MainFrameRmlModel::skillSlot2Hotkey, "skill_slot_2_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(2)));
+    syncText(&MainFrameRmlModel::skillSlot3Hotkey, "skill_slot_3_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(3)));
+    syncText(&MainFrameRmlModel::skillSlot4Hotkey, "skill_slot_4_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(4)));
 }
 
 float SEASON3B::CNewUIMainFrameWindow::GetLayerDepth()
@@ -1951,6 +1987,37 @@ bool SEASON3B::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
     return Hero->CurrentSkill == m_iHotKeySkillType[iIndex];
 }
 
+int SEASON3B::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
+{
+    // Mirrors RenderCurrentSkillAndHotSkillList()'s own loop exactly (iStartSkillIndex/iIndex
+    // wraparound, the -1 "empty slot" check, the pet-command "no pet -> treat as empty" check) --
+    // same duplication precedent as IsHotKeySlotCurrentSkill() just above. Unlike that function,
+    // this doesn't also check Hero->CurrentSkill -- the number shows for every occupied slot, not
+    // just the currently-active one (matching RenderSkillIcon()'s own RenderNumber() call, which
+    // draws for every icon it renders, not only the equipped skill's).
+    if (iSlotIndex < 0 || iSlotIndex >= 5)
+        return -1;
+
+    if (CharacterAttribute->SkillNumber == 0)
+        return -1;
+
+    int iStartSkillIndex = m_bHotKeySkillListUp ? 6 : 1;
+    int iIndex = iStartSkillIndex + iSlotIndex;
+    if (iIndex == 10)
+        iIndex = 0;
+
+    if (m_iHotKeySkillType[iIndex] == -1)
+        return -1;
+
+    if (m_iHotKeySkillType[iIndex] >= AT_PET_COMMAND_DEFAULT && m_iHotKeySkillType[iIndex] < AT_PET_COMMAND_END)
+    {
+        if (Hero->m_pPet == NULL)
+            return -1;
+    }
+
+    return iIndex;
+}
+
 bool SEASON3B::CNewUISkillList::Render()
 {
     int i;
@@ -2501,20 +2568,13 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         }
     }
 
-    int iHotKey = -1;
-    for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
-    {
-        if (m_iHotKeySkillType[i] == iIndex)
-        {
-            iHotKey = i;
-            break;
-        }
-    }
-
-    if (iHotKey != -1)
-    {
-        SEASON3B::RenderNumber(x + 20, y + 20, iHotKey);
-    }
+    // 2026-09-02: the hotkey-number subscript this used to draw here (RenderNumber(x+20, y+20,
+    // ...), a search through m_iHotKeySkillType[] for this icon's own slot) is retired -- both
+    // themes now show it through RmlUi instead (#skill_slot_0..4's .skill-hotkey-label,
+    // main_frame.rml/.rcss, bound from CNewUISkillList::GetHotKeySlotNumber() every frame),
+    // matching feedback ("move the legacy subscripts from C++ code to RmlUi scope too ... the
+    // legacy theme will rely on rml instead of hardcoded behavior") -- no theme check needed here
+    // at all now since neither theme's C++ path draws it any more.
 
     if ((bySkillType == AT_SKILL_CHAIN_DRIVE
         || bySkillType == AT_SKILL_CHAIN_DRIVE_STR

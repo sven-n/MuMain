@@ -28,7 +28,9 @@ UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new w
 and a worked example of retrofitting an already-migrated window. **[NewUI-Tier Adapter
 Pattern](newui-tier-adapter.md)** — the `CNewUIObj`/`CNewUIManager` tier (in-game HUD, distinct
 from `CWin`/`CUIMng`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
-still unproven there.
+still unproven there. **[Legacy Theme Modernization Policy](legacy-theme-modernization.md)** —
+when legacy-theme C++ behavior should move into RML/RCSS versus genuinely stay in C++, and how to
+classify a given piece of legacy code either way.
 
 ## Renderer integration: SDL_GPU
 

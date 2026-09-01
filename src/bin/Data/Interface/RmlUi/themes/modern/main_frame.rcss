@@ -45,10 +45,49 @@
 #bar_mp { left: 510px; top: 437px; width: 122px; height: 16px; }
 #bar_ag { left: 510px; top: 455px; width: 122px; height: 8px;  }
 
-/* Background panels spanning the full row height, flush with the exp bar below -- left panel runs
-   canvas-edge to potions' chrome start, right panel from skills' chrome end to the other edge. */
-#gauge_bg_left  { position: absolute; left: 0px;   top: 429px; width: 140px; height: 41px; pointer-events: none; }
-#gauge_bg_right { position: absolute; left: 502px; top: 429px; width: 138px; height: 41px; pointer-events: none; }
+/* One continuous top edge spanning the full row, giving the whole strip a single unbroken line
+   instead of three separately-outlined pieces -- no fill of its own: RmlUi composites its whole
+   document AFTER the still-legacy 3D-rendered potion/skill icons in the middle, so a background
+   there would paint over and hide them (confirmed the hard way -- an earlier version filled this
+   whole span solid and did exactly that). #gauge_fill_left/right instead carry the actual
+   translucent-dark background, restricted to the two zones that have no icon content underneath;
+   the potions/skills band in between stays genuinely unfilled, same as it always was. Top border
+   only (2026-09-02: was a full border+radius box outline all the way around, feedback asked for
+   just the top edge) -- flush with the exp bar below. */
+#gauge_frame {
+	position: absolute;
+	left: 0px;
+	top: 429px;
+	width: 640px;
+	height: 41px;
+	border-top: 1px rgba(255, 255, 255, 60);
+	pointer-events: none;
+}
+
+/* Left/right fill zones -- same span as the original two-box layout, just without their own
+   border now (the border lives on #gauge_frame above instead). Rounded only on the OUTER corner
+   pair (the one that meets #gauge_frame's own rounded end) -- the inner corner stays square since
+   nothing marks a boundary there anymore, it just fades into the unfilled middle band. */
+#gauge_fill_left {
+	position: absolute;
+	left: 0px;
+	top: 429px;
+	width: 140px;
+	height: 41px;
+	background-color: rgba(10, 10, 10, 150);
+	border-radius: 3px 0 0 3px;
+	pointer-events: none;
+}
+#gauge_fill_right {
+	position: absolute;
+	left: 502px;
+	top: 429px;
+	width: 138px;
+	height: 41px;
+	background-color: rgba(10, 10, 10, 150);
+	border-radius: 0 3px 3px 0;
+	pointer-events: none;
+}
 
 .gauge-fill-vertical { display: none; }
 .gauge-fill-horizontal {
@@ -243,22 +282,37 @@
 	left: 50%;
 }
 
-/* Decorative item-hotkey (potion) / skill-icon slot outlines -- .slot-frame only (no .slot-fill,
-   see header comment). Wrapper offsets match #item_hotkey_anchor/#skill_list_anchor exactly; kept
-   in sync by hand, nothing connects them automatically. */
+/* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border (2026-09-02:
+   removed per feedback, these read as an unwanted divider against the now-unfilled middle band --
+   see #gauge_frame's own comment). Still no .slot-fill either: RmlUi composites its whole document
+   AFTER the still-legacy 3D-rendered icons these wrap, so a filled box would hide them. Wrapper
+   offsets match #item_hotkey_anchor/#skill_list_anchor exactly; kept in sync by hand, nothing
+   connects them automatically. */
 #item_slots { position: absolute; left: 140px; top: 0; }
 #skill_slots { position: absolute; left: 78px; top: 0; }
 
-#item_slot_0 { position: absolute; left: 6px;   top: 439px; width: 28px; height: 28px; }
-#item_slot_1 { position: absolute; left: 44px;  top: 439px; width: 28px; height: 28px; }
-#item_slot_2 { position: absolute; left: 82px;  top: 439px; width: 28px; height: 28px; }
-#item_slot_3 { position: absolute; left: 120px; top: 439px; width: 28px; height: 28px; }
+#item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
+#current_skill_slot {
+	border: none;
+}
 
+/* 2026-09-02: same width/height/top as #skill_slot_0..4 (32x38, top:431px) -- was 28x28 at
+   top:439px, sized/positioned independently of the skill row, which read as misaligned once both
+   rows sat on the same continuous background band. left offsets (own pitch, unrelated to the
+   skill row's) are unchanged. */
+#item_slot_0 { position: absolute; left: 6px;   top: 431px; width: 32px; height: 38px; }
+#item_slot_1 { position: absolute; left: 44px;  top: 431px; width: 32px; height: 38px; }
+#item_slot_2 { position: absolute; left: 82px;  top: 431px; width: 32px; height: 38px; }
+#item_slot_3 { position: absolute; left: 120px; top: 431px; width: 32px; height: 38px; }
+
+/* 2026-09-02: upper-left corner of the slot box (was centered above it, outside the box) --
+   feedback asked for the label inside the box now that the box matches the skill slots' own
+   size. */
 .slot-hotkey-label {
 	position: absolute;
-	left: 50%;
-	top: -8px;
-	transform: translateX(-50%);
+	left: 2px;
+	top: 2px;
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
@@ -268,8 +322,25 @@
 	pointer-events: none;
 }
 
-/* Skill slots are contiguous (pitch == width, no gap) -- no padding, so adjacent frames share a
-   single border line instead of doubling it up. */
+/* Same upper-left placement as .slot-hotkey-label -- separate class (see main_frame.rml's own
+   comment) purely because legacy needs independent control over this one vs. the potion Q/W/E/R
+   labels, not because modern's own treatment differs. */
+.skill-hotkey-label {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 8px;
+	line-height: 8px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Skill slots are contiguous (pitch == width, no gap). The border-radius values below only
+   matter for the .selected highlight now (no default outline) -- square off the touching inner
+   edges so only the strip's outer two corners round when a slot lights up. */
 #skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
