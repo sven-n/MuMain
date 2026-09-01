@@ -6,6 +6,7 @@
 #include "Core/Input/Input.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_enum.h"
+#include "Engine/Object/ZzzInventory.h"
 #include "UI/Legacy/UIMapName.h"
 #include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
 #include "UI/NewUI/HUD/NewUICommandWindow.h"
@@ -197,6 +198,14 @@ TEST_CASE("inventory drag keeps the clicked point anchored to the item [ui][inve
     const POINT itemTopLeft = UI::Items::Drag::ItemTopLeft(183, 317, offset);
     CHECK(itemTopLeft.x == 180);
     CHECK(itemTopLeft.y == 260);
+}
+
+TEST_CASE("inventory item hover animation ignores world input capture [ui][inventory]")
+{
+    CHECK(UI::Items::ShouldAnimatePreview(true, false, false));
+    CHECK(UI::Items::ShouldAnimatePreview(true, true, true));
+    CHECK_FALSE(UI::Items::ShouldAnimatePreview(true, true, false));
+    CHECK_FALSE(UI::Items::ShouldAnimatePreview(false, false, false));
 }
 
 TEST_CASE("inventory drag centers items without a grid pickup anchor [ui][inventory]")

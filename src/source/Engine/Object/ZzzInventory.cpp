@@ -9699,24 +9699,15 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     RenderPartObject(o, Type, NULL, Light, alpha, ItemLevel, excellentFlags, ancientDiscriminator, true, true, true);
 }
 
+bool UI::Items::ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, bool renderingPickedItem)
+{
+    return pointerInside && (!pickedItemActive || renderingPickedItem);
+}
+
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp)
 {
-    bool Success = false;
-    if ((g_pPickedItem == NULL || PickUp)
-        && SEASON3B::CheckMouseIn(sx, sy, Width, Height))
-    {
-#ifdef PBG_ADD_INGAMESHOPMSGBOX
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP))
-        {
-            Success = true;
-        }
-        else
-#endif //PBG_ADD_INGAMESHOPMSGBOX
-        {
-            if (g_pNewUISystem->CheckMouseUse() == false)
-                Success = true;
-        }
-    }
+    const bool Success = UI::Items::ShouldAnimatePreview(SEASON3B::CheckMouseIn(sx, sy, Width, Height),
+                                                         g_pPickedItem != nullptr, PickUp);
 
     if (Type >= ITEM_SWORD && Type < ITEM_SWORD + MAX_ITEM_INDEX)
     {
