@@ -205,13 +205,14 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     if (!(iOption & UIADDWND_FORCEPOSITION))
     {
+        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
         for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
         {
             if (m_WindowMapIter->second->GetPosition_x() == iPos_x && m_WindowMapIter->second->GetPosition_y() == iPos_y)
             {
-                if (iPos_x + pbw->GetWidth() + 20 <= REFERENCE_WIDTH) iPos_x += 20;
-                if (iPos_y + pbw->GetHeight() + 20 <= REFERENCE_HEIGHT) iPos_y += 20;
-                if (iPos_x + pbw->GetWidth() + 20 > REFERENCE_WIDTH && iPos_y + pbw->GetHeight() + 20 > REFERENCE_HEIGHT)
+                if (iPos_x + pbw->GetWidth() + 20 <= bounds.width) iPos_x += 20;
+                if (iPos_y + pbw->GetHeight() + 20 <= bounds.height) iPos_y += 20;
+                if (iPos_x + pbw->GetWidth() + 20 > bounds.width && iPos_y + pbw->GetHeight() + 20 > bounds.height)
                 {
                     if (iPos_y % 10 == 9)
                     {
@@ -414,7 +415,10 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
         int iHideSize = m_HideWindowList.size();
         if (iHideSize - iCount > 0)
         {
-            OpenMainWnd(REFERENCE_WIDTH - 250, 432 - 170);
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+            const int contentHeight = static_cast<int>(
+                UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+            OpenMainWnd(bounds.width - 250, contentHeight - 170);
         }
         if (iCount > 0 && GetTopNotMainWindowUIID() > 0)
         {
@@ -1145,20 +1149,21 @@ BOOL CUIBaseWindow::DoMouseAction()
     {
         if (MouseLButton == true)
         {
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
             if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
             MouseOnWindow = true;
 
             if (m_iPos_x + MouseX - m_iMouseClickPos_x < 0) m_iPos_x = 0;
-            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
+            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > bounds.width) m_iPos_x = bounds.width - m_iWidth;
             else m_iPos_x += MouseX - m_iMouseClickPos_x;
 
             if (m_iPos_y + MouseY - m_iMouseClickPos_y < 0)
             {
                 m_iPos_y = 0;
             }
-            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT)
+            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > bounds.height)
             {
-                m_iPos_y = REFERENCE_HEIGHT - m_iHeight;
+                m_iPos_y = bounds.height - m_iHeight;
             }
             else
             {
@@ -1178,12 +1183,13 @@ BOOL CUIBaseWindow::DoMouseAction()
     {
         if (MouseLButton == true)
         {
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
             if (m_iResizeDir == 135)
             {
                 if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
                 MouseOnWindow = true;
 
-                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iWidth = REFERENCE_WIDTH - m_iPos_x;
+                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > bounds.width) m_iWidth = bounds.width - m_iPos_x;
                 else m_iWidth += MouseX - m_iMouseClickPos_x;
 
                 if (m_iWidth < m_iMinWidth)
@@ -1196,7 +1202,7 @@ BOOL CUIBaseWindow::DoMouseAction()
                 }
                 else m_iMouseClickPos_x = MouseX;
 
-                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT) m_iHeight = REFERENCE_HEIGHT - m_iPos_y;
+                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > bounds.height) m_iHeight = bounds.height - m_iPos_y;
                 else m_iHeight += MouseY - m_iMouseClickPos_y;
 
                 if (m_iHeight < m_iMinHeight)
@@ -1249,7 +1255,7 @@ void CUIBaseWindow::Maximize()
         m_iBackPos_y = m_iPos_y;
         m_iBackHeight = m_iHeight;
         m_iPos_y = 0;
-        m_iHeight = REFERENCE_HEIGHT - 48;
+        m_iHeight = static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
         Refresh();
         m_bIsMaximize = TRUE;
     }
@@ -1618,7 +1624,8 @@ BOOL CUIChatWindow::HandleMessage()
 
                 UpdateInvitePalList();
 
-                if (m_iPos_x + m_iWidth > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
+                const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+                if (m_iPos_x + m_iWidth > bounds.width) m_iPos_x = bounds.width - m_iWidth;
                 Refresh();
             }
             else if (m_iShowType >= 2)

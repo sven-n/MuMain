@@ -691,8 +691,35 @@ TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scalin
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_HOTKEY) == LayoutMode::Hud);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_INVENTORY) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
+}
+
+TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")
+{
+    const auto transform = UI::Scaling::FloatingWorkspaceTransform(3840, 2160);
+    const auto bounds = UI::Scaling::FloatingWorkspaceBounds(3840, 2160);
+
+    CHECK(transform.scaleX == doctest::Approx(2.25f));
+    CHECK(transform.scaleY == doctest::Approx(2.25f));
+    CHECK(transform.offsetX == doctest::Approx(0.0f));
+    CHECK(transform.offsetY == doctest::Approx(0.0f));
+    CHECK(bounds.width == 1706);
+    CHECK(bounds.height == 960);
+    CHECK(UI::Scaling::PositionX(transform, static_cast<float>(bounds.width)) <= 3840.0f);
+    CHECK(UI::Scaling::PositionY(transform, static_cast<float>(bounds.height)) <= 2160.0f);
+}
+
+TEST_CASE("screen coverage follows the capped HUD boundary [ui][scaling]")
+{
+    const auto screen = UI::Scaling::ScreenOverlayTransform(3840, 2160);
+    const float screenHeight = UI::Scaling::ScreenOverlayContentHeight(3840, 2160);
+
+    CHECK(screenHeight == doctest::Approx(457.333333f));
+    CHECK(UI::Scaling::SizeY(screen, screenHeight) == doctest::Approx(2058.0f));
+    CHECK(UI::Scaling::ScreenOverlayContentHeight(640, 480) == doctest::Approx(429.0f));
+    CHECK(UI::Scaling::FloatingWorkspaceContentHeight(3840, 2160) == doctest::Approx(914.666667f));
 }
 
 TEST_CASE("positions include offsets and sizes do not [ui][scaling]")

@@ -173,6 +173,39 @@ UI::Scaling::Transform UI::Scaling::DockRightTransform(int windowWidth, int wind
     return transform;
 }
 
+UI::Scaling::Transform UI::Scaling::FloatingWorkspaceTransform(int windowWidth, int windowHeight)
+{
+    const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumDockScale);
+    return {scale, scale, 0.0f, 0.0f, scale};
+}
+
+UI::Scaling::Viewport UI::Scaling::FloatingWorkspaceBounds(int windowWidth, int windowHeight)
+{
+    const Transform transform = FloatingWorkspaceTransform(windowWidth, windowHeight);
+    return {
+        0,
+        0,
+        std::max(static_cast<int>(std::floor(static_cast<float>(windowWidth) / transform.scaleX)), 1),
+        std::max(static_cast<int>(std::floor(static_cast<float>(windowHeight) / transform.scaleY)), 1),
+    };
+}
+
+float UI::Scaling::ScreenOverlayContentHeight(int windowWidth, int windowHeight)
+{
+    const Transform transform = ScreenOverlayTransform(windowWidth, windowHeight);
+    const float physicalHeight =
+        static_cast<float>(windowHeight) - kHudFrameHeight * BottomHudScale(windowWidth, windowHeight);
+    return physicalHeight / transform.scaleY;
+}
+
+float UI::Scaling::FloatingWorkspaceContentHeight(int windowWidth, int windowHeight)
+{
+    const Transform transform = FloatingWorkspaceTransform(windowWidth, windowHeight);
+    const float physicalHeight =
+        static_cast<float>(windowHeight) - kHudFrameHeight * BottomHudScale(windowWidth, windowHeight);
+    return physicalHeight / transform.scaleY;
+}
+
 UI::Scaling::Viewport UI::Scaling::WorldViewport(int windowWidth, int windowHeight, bool)
 {
     const int physicalWidth = std::max(windowWidth, 1);
@@ -223,6 +256,8 @@ UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int wind
         return DockLeftTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::DockRight)
         return DockRightTransform(windowWidth, windowHeight);
+    if (mode == LayoutMode::FloatingWorkspace)
+        return FloatingWorkspaceTransform(windowWidth, windowHeight);
     return PanelTransform(windowWidth, windowHeight);
 }
 

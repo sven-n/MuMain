@@ -44,6 +44,7 @@ namespace UI::Scaling
         HudExperience,
         DockLeft,
         DockRight,
+        FloatingWorkspace,
         Dialog,
         WorldOverlay,
     };
@@ -74,6 +75,10 @@ namespace UI::Scaling
     Transform BottomHudExperienceTransform(int windowWidth, int windowHeight);
     Transform DockLeftTransform(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
+    Transform FloatingWorkspaceTransform(int windowWidth, int windowHeight);
+    Viewport FloatingWorkspaceBounds(int windowWidth, int windowHeight);
+    float ScreenOverlayContentHeight(int windowWidth, int windowHeight);
+    float FloatingWorkspaceContentHeight(int windowWidth, int windowHeight);
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
     bool BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY);

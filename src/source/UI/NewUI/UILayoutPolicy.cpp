@@ -17,6 +17,9 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_MOVEMAP:
         return LayoutMode::DockLeft;
 
+    case INTERFACE_FRIEND:
+        return LayoutMode::FloatingWorkspace;
+
     case INTERFACE_CHATINPUTBOX:
     case INTERFACE_WINDOW_MENU:
     case INTERFACE_KANTURU_INFO:
@@ -48,7 +51,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_SKILL_LIST:
         return LayoutMode::HudCenter;
 
-    case INTERFACE_FRIEND:
     case INTERFACE_PARTY:
     case INTERFACE_MYQUEST:
     case INTERFACE_NPCQUEST:

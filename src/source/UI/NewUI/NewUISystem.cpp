@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/Scaling/UITransform.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "World/MapInfra/MapManager.h"
@@ -688,7 +689,10 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         g_pMainFrame->SetBtnState(MAINFRAME_BTN_FRIEND, true);
 
-        m_pNewFriendWindow->OpenMainWnd(640 - 250, 432 - 173);
+        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+        const int contentHeight =
+            static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+        m_pNewFriendWindow->OpenMainWnd(bounds.width - 250, contentHeight - 170);
     }
     else if (dwKey == INTERFACE_INVENTORY)
     {
