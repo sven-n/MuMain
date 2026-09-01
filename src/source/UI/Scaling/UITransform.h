@@ -88,9 +88,13 @@ namespace UI::Scaling
                                      float height);
     int MinimumFontPointSize(FontRole role);
     int MaximumFontPointSize(FontRole role);
+    int CachedFontPointSize(FontRole role);
     int FontPointSize(FontRole role, const Transform& transform);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
+    float ContentScaleFromMetrics(float displayScale, float pixelDensity);
+    float GetWindowContentScale();
+    void SetWindowContentScale(float contentScale);
     Transform GetActiveTransform();
     void SetActiveTransform(const Transform& transform);
 }

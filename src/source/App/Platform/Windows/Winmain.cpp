@@ -856,6 +856,47 @@ bool InputDiagnosticsEnabled()
     return enabled;
 }
 
+struct WindowScaleMetrics
+{
+    int windowWidth = 0;
+    int windowHeight = 0;
+    int pixelWidth = 0;
+    int pixelHeight = 0;
+    float pixelDensity = 1.0f;
+    float displayScale = 1.0f;
+    float contentScale = 1.0f;
+};
+
+WindowScaleMetrics ReadWindowScaleMetrics()
+{
+    WindowScaleMetrics metrics;
+    if (g_sdlWindow == nullptr)
+        return metrics;
+
+    SDL_GetWindowSize(g_sdlWindow, &metrics.windowWidth, &metrics.windowHeight);
+    SDL_GetWindowSizeInPixels(g_sdlWindow, &metrics.pixelWidth, &metrics.pixelHeight);
+    metrics.pixelDensity = SDL_GetWindowPixelDensity(g_sdlWindow);
+    metrics.displayScale = SDL_GetWindowDisplayScale(g_sdlWindow);
+    metrics.contentScale = UI::Scaling::ContentScaleFromMetrics(metrics.displayScale, metrics.pixelDensity);
+    return metrics;
+}
+
+bool RefreshWindowContentScale()
+{
+    const WindowScaleMetrics metrics = ReadWindowScaleMetrics();
+    const float previousScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(metrics.contentScale);
+    const bool changed = std::abs(previousScale - UI::Scaling::GetWindowContentScale()) > 0.001f;
+    if (InputDiagnosticsEnabled())
+    {
+        mu::log::Get("input")->info(
+            "[InputDiag] window scale window={}x{} pixels={}x{} density={:.3f} display={:.3f} content={:.3f}",
+            metrics.windowWidth, metrics.windowHeight, metrics.pixelWidth, metrics.pixelHeight, metrics.pixelDensity,
+            metrics.displayScale, metrics.contentScale);
+    }
+    return changed;
+}
+
 void HandleMouseMotion(float winX, float winY)
 {
     g_fWindowMouseX = winX;
@@ -867,8 +908,12 @@ void HandleMouseMotion(float winX, float winY)
     static bool firstMotionLogged = false;
     if (InputDiagnosticsEnabled() && !firstMotionLogged)
     {
-        mu::log::Get("input")->info("[InputDiag] first mouse motion window=({:.1f},{:.1f}) logical=({},{}) active={}",
-                                    winX, winY, MouseX, MouseY, g_bWndActive);
+        const WindowScaleMetrics metrics = ReadWindowScaleMetrics();
+        mu::log::Get("input")->info(
+            "[InputDiag] first mouse motion raw=({:.1f},{:.1f}) logical=({},{}) window={}x{} pixels={}x{} "
+            "density={:.3f} display={:.3f} content={:.3f} active={}",
+            winX, winY, MouseX, MouseY, metrics.windowWidth, metrics.windowHeight, metrics.pixelWidth,
+            metrics.pixelHeight, metrics.pixelDensity, metrics.displayScale, metrics.contentScale, g_bWndActive);
         firstMotionLogged = true;
     }
 }
@@ -879,9 +924,13 @@ void HandleMouseButton(const SDL_Event& e)
     const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
     if (InputDiagnosticsEnabled())
     {
+        const WindowScaleMetrics metrics = ReadWindowScaleMetrics();
         mu::log::Get("input")->info(
-            "[InputDiag] mouse button={} down={} window=({:.1f},{:.1f}) logical=({},{}) active={}", e.button.button,
-            down, e.button.x, e.button.y, MouseX, MouseY, g_bWndActive);
+            "[InputDiag] mouse button={} down={} raw=({:.1f},{:.1f}) logical=({},{}) window={}x{} pixels={}x{} "
+            "density={:.3f} display={:.3f} content={:.3f} active={}",
+            e.button.button, down, e.button.x, e.button.y, MouseX, MouseY, metrics.windowWidth, metrics.windowHeight,
+            metrics.pixelWidth, metrics.pixelHeight, metrics.pixelDensity, metrics.displayScale, metrics.contentScale,
+            g_bWndActive);
     }
     g_iNoMouseTime = 0;
     switch (e.button.button)
@@ -1230,6 +1279,10 @@ MSG MainLoop()
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
                 break;
+            case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+                if (RefreshWindowContentScale())
+                    ReinitializeFonts();
+                break;
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 HandleFocusChange(true);
                 break;
@@ -1409,9 +1462,9 @@ FontSizes CalculateFontSizes()
 {
     using UI::Scaling::FontRole;
     return {
-        UI::Scaling::MaximumFontPointSize(FontRole::Normal),
-        UI::Scaling::MaximumFontPointSize(FontRole::Big),
-        UI::Scaling::MaximumFontPointSize(FontRole::Fixed),
+        UI::Scaling::CachedFontPointSize(FontRole::Normal),
+        UI::Scaling::CachedFontPointSize(FontRole::Big),
+        UI::Scaling::CachedFontPointSize(FontRole::Fixed),
     };
 }
 
@@ -1856,6 +1909,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
+
+    RefreshWindowContentScale();
 
 #if defined(__linux__)
     SDL_Surface* applicationIcon = SDL_LoadPNG("MuMainIcon.png");

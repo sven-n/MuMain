@@ -679,6 +679,25 @@ TEST_CASE("screen overlays fill the window [ui][scaling]")
     CHECK(transform.offsetY == doctest::Approx(0.0f));
 }
 
+TEST_CASE("Windows content scaling enlarges capped UI without double-scaling Retina [ui][scaling]")
+{
+    CHECK(UI::Scaling::ContentScaleFromMetrics(2.0f, 1.0f) == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ContentScaleFromMetrics(2.0f, 2.0f) == doctest::Approx(1.0f));
+    CHECK(UI::Scaling::ContentScaleFromMetrics(0.0f, 0.0f) == doctest::Approx(1.0f));
+
+    const float previousScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(2.0f);
+
+    const auto dialog = UI::Scaling::PanelTransform(3840, 2160);
+    CHECK(dialog.scaleX == doctest::Approx(4.0f));
+    CHECK(dialog.scaleY == doctest::Approx(4.0f));
+    CHECK(dialog.offsetX == doctest::Approx(640.0f));
+    CHECK(dialog.offsetY == doctest::Approx(120.0f));
+    CHECK(UI::Scaling::CachedFontPointSize(FontRole::Normal) == 32);
+
+    UI::Scaling::SetWindowContentScale(previousScale);
+}
+
 TEST_CASE("login and character scenes use the full reference viewport [ui][scaling]")
 {
     const auto viewport = UI::Scaling::FullReferenceViewport();
