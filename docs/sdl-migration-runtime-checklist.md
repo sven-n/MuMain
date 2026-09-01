@@ -24,6 +24,7 @@
 - [ ] Windows cursor alignment passes at 100% and non-100% display scaling.
 - [ ] Windows D3D12 `$vsync off` and `$vsync on` transition without a crash.
 - [ ] Windows D3D12 VSync follows the intended refresh-rate pacing policy.
+- [ ] `$vsync off` survives restart plus windowed/fullscreen and resolution changes.
 - [ ] Debug and Release rendering captures identify replay, submit, and frame costs.
 
 ## Baseline Audit

@@ -82,6 +82,7 @@ void GameConfig::Load()
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
+    m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -125,6 +126,7 @@ void GameConfig::Save()
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
+    WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -184,6 +186,11 @@ void GameConfig::SetSoundVolume(int level)
 void GameConfig::SetMusicVolume(int level)
 {
     m_musicVolume = level;
+}
+
+void GameConfig::SetVSyncEnabled(bool enabled)
+{
+    m_vsyncEnabled = enabled;
 }
 
 void GameConfig::SetRememberMe(bool remember)

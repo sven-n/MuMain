@@ -15,6 +15,8 @@
 #endif
 #include <clocale>
 #include <filesystem>
+#include <utility>
+#include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
@@ -24,6 +26,7 @@
 #include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Scenes/SceneManager.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -278,6 +281,50 @@ int GetFPSLimit()
         }
     }
     return DEFAULT_REFRESH_HZ;
+}
+
+namespace
+{
+bool g_hasPendingVSyncPreference = false;
+bool g_pendingVSyncPreference = true;
+
+void ApplyVSyncPreferenceNow(bool enabled)
+{
+    if (!IsVSyncAvailable())
+    {
+        SetTargetFps(GetFPSLimit());
+        return;
+    }
+
+    const bool applied = enabled ? EnableVSync() : DisableVSync();
+    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : GetFPSLimit());
+    ResetFrameStats();
+}
+
+void ApplyPendingVSyncPreference()
+{
+    if (!g_hasPendingVSyncPreference)
+    {
+        return;
+    }
+
+    g_hasPendingVSyncPreference = false;
+    ApplyVSyncPreferenceNow(g_pendingVSyncPreference);
+}
+} // namespace
+
+void MuSetVSyncPreference(bool enabled)
+{
+    GameConfig::GetInstance().SetVSyncEnabled(enabled);
+    GameConfig::GetInstance().Save();
+    g_pendingVSyncPreference = enabled;
+    g_hasPendingVSyncPreference = true;
+}
+
+void MuReapplyVSyncPreference()
+{
+    g_pendingVSyncPreference = GameConfig::GetInstance().GetVSyncEnabled();
+    g_hasPendingVSyncPreference = true;
 }
 
 BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
@@ -1184,6 +1231,44 @@ bool FeedPortableKey(const SDL_KeyboardEvent& key)
 }
 } // namespace
 
+std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions()
+{
+    std::vector<std::pair<int, int>> resolutions;
+    if (g_sdlWindow == nullptr)
+    {
+        return resolutions;
+    }
+
+    SDL_DisplayID display = SDL_GetDisplayForWindow(g_sdlWindow);
+    if (display == 0)
+    {
+        display = SDL_GetPrimaryDisplay();
+    }
+    if (display == 0)
+    {
+        return resolutions;
+    }
+
+    int modeCount = 0;
+    SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(display, &modeCount);
+    if (modes == nullptr)
+    {
+        mu::log::Get("platform")->warn("SDL_GetFullscreenDisplayModes failed: {}", SDL_GetError());
+        return resolutions;
+    }
+
+    resolutions.reserve(static_cast<size_t>(modeCount));
+    for (int i = 0; i < modeCount; ++i)
+    {
+        if (modes[i] != nullptr)
+        {
+            resolutions.emplace_back(modes[i]->w, modes[i]->h);
+        }
+    }
+    SDL_free(modes);
+    return resolutions;
+}
+
 // Resolution change through SDL (issue #462). SDL owns the window on every
 // platform, so resize it via SDL rather than the OS. The old Windows path in
 // ApplyResolution() drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
@@ -1230,6 +1315,7 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     int actualW = w, actualH = h;
     SDL_GetWindowSize(g_sdlWindow, &actualW, &actualH);
     HandleWindowResize(actualW, actualH);
+    MuReapplyVSyncPreference();
 }
 
 MSG MainLoop()
@@ -1426,6 +1512,7 @@ MSG MainLoop()
 #endif
 
                 RequestDiagnosticFrameCapture();
+                ApplyPendingVSyncPreference();
                 mu::GetRenderer().BeginFrame();
                 RenderScene(g_hDC);
                 mu::GetRenderer().EndFrame();
@@ -1999,21 +2086,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
 
     InitVSync();
-    if (IsVSyncAvailable())
-    {
-        if (EnableVSync())
-        {
-            SetTargetFps(-1); // VSync paces frames, no separate cap needed.
-        }
-        else
-        {
-            SetTargetFps(GetFPSLimit());
-        }
-    }
-    else
-    {
-        SetTargetFps(GetFPSLimit());
-    }
+    ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.

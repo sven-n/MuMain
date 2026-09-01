@@ -6,6 +6,8 @@
 #include "Core/Input/Input.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_enum.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfigConstants.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Legacy/UIMapName.h"
 #include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
@@ -15,6 +17,7 @@
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/NPCs/NewUINPCShop.h"
+#include "UI/NewUI/Options/NewUIOptionWindow.h"
 #include "UI/NewUI/UILayoutPolicy.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/Widgets/Button.h"
@@ -206,6 +209,38 @@ TEST_CASE("inventory item hover animation ignores world input capture [ui][inven
     CHECK(UI::Items::ShouldAnimatePreview(true, true, true));
     CHECK_FALSE(UI::Items::ShouldAnimatePreview(true, true, false));
     CHECK_FALSE(UI::Items::ShouldAnimatePreview(false, false, false));
+}
+
+TEST_CASE("display resolution options use unique supported sizes [ui][options]")
+{
+    std::vector<UI::Options::DisplayResolution> modes = {
+        {1920, 1080}, {1280, 720}, {1920, 1080}, {0, 1080}, {3840, 2160},
+    };
+
+    const auto resolutions = UI::Options::NormalizeDisplayResolutions(std::move(modes));
+
+    REQUIRE(resolutions.size() == 3);
+    CHECK(resolutions[0] == UI::Options::DisplayResolution(1280, 720));
+    CHECK(resolutions[1] == UI::Options::DisplayResolution(1920, 1080));
+    CHECK(resolutions[2] == UI::Options::DisplayResolution(3840, 2160));
+    CHECK(UI::Options::FindExactDisplayResolutionIndex(resolutions, 1920, 1080) == 1);
+    CHECK(UI::Options::FindExactDisplayResolutionIndex(resolutions, 1600, 900) == -1);
+    CHECK(UI::Options::FindClosestDisplayResolutionIndex(resolutions, 1366, 768) == 0);
+}
+
+TEST_CASE("VSync preference defaults on and remains mutable [config][render]")
+{
+    CHECK(CfgDefaults::CfgDefaultVSync);
+
+    auto& config = GameConfig::GetInstance();
+    const bool previous = config.GetVSyncEnabled();
+
+    config.SetVSyncEnabled(false);
+    CHECK_FALSE(config.GetVSyncEnabled());
+    config.SetVSyncEnabled(true);
+    CHECK(config.GetVSyncEnabled());
+
+    config.SetVSyncEnabled(previous);
 }
 
 TEST_CASE("inventory drag centers items without a grid pickup anchor [ui][inventory]")

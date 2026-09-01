@@ -7,9 +7,22 @@
 
 #pragma once
 
+#include <string>
+#include <utility>
+#include <vector>
+
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
 #include "UI/NewUI/Widgets/NewUIComboBox.h"
+
+namespace UI::Options
+{
+using DisplayResolution = std::pair<int, int>;
+
+std::vector<DisplayResolution> NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions);
+int FindExactDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
+int FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
+} // namespace UI::Options
 
 namespace SEASON3B
 {
@@ -103,6 +116,10 @@ namespace SEASON3B
         bool m_bWindowedMode;
         int m_iLanguageIndex;
         int m_iFontIndex;
+
+        std::vector<UI::Options::DisplayResolution> m_resolutions;
+        std::vector<std::wstring> m_resolutionLabels;
+        std::vector<const wchar_t*> m_resolutionLabelPointers;
 
         // Set when a combo consumes a click; swallows the rest of that mouse-hold
         // so the release can't fall through to the Close button (see UpdateMouseEvent).
