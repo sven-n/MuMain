@@ -32,12 +32,23 @@
 #include "GameShop/InGameShopSystem.h"
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+#include "GameLogic/Quests/QuestMng.h"
+#include "UI/NewUI/Party/NewUIFriendWindow.h"
+
 namespace
 {
+    // Still used by RenderLeftFrame()/RenderCenterFrame() -- the two chrome regions that still
+    // host legacy content (item hotkeys, skill list) and so stay legacy-rendered; see this class's
+    // header comment for why the other two bands' chrome moved to RmlUi instead.
     constexpr float kHudTop = 429.0f;
     constexpr float kHudContentHeight = 41.0f;
-    constexpr float kExperienceTop = 470.0f;
-    constexpr float kExperienceHeight = 10.0f;
     constexpr float kLeftBandWidth = 152.0f;
     constexpr float kCenterBandStart = 152.0f;
     constexpr float kMenu1CenterWidth = 104.0f;
@@ -45,9 +56,6 @@ namespace
     constexpr float kMenu2Width = 128.0f;
     constexpr float kMenu3Start = 384.0f;
     constexpr float kMenu3CenterWidth = 104.0f;
-    constexpr float kRightBandStart = 488.0f;
-    constexpr float kRightBandWidth = 152.0f;
-    constexpr float kMenu3RightSourceX = 104.0f;
 }
 
 SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
@@ -70,18 +78,6 @@ void SEASON3B::CNewUIMainFrameWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
     LoadBitmap(L"Interface\\partCharge1\\newui_menu03.jpg", IMAGE_MENU_3, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu_blue.jpg", IMAGE_GAUGE_BLUE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu_green.jpg", IMAGE_GAUGE_GREEN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu_red.jpg", IMAGE_GAUGE_RED, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu_ag.jpg", IMAGE_GAUGE_AG, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_menu_sd.jpg", IMAGE_GAUGE_SD, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exbar.jpg", IMAGE_GAUGE_EXBAR, GL_LINEAR);
-    LoadBitmap(L"Interface\\Exbar_Master.jpg", IMAGE_MASTER_GAUGE_BAR, GL_LINEAR);
-    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt05.jpg", IMAGE_MENU_BTN_CSHOP, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt01.jpg", IMAGE_MENU_BTN_CHAINFO, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt02.jpg", IMAGE_MENU_BTN_MYINVEN, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt03.jpg", IMAGE_MENU_BTN_FRIEND, GL_LINEAR, GL_CLAMP_TO_EDGE);
-    LoadBitmap(L"Interface\\partCharge1\\newui_menu_Bt04.jpg", IMAGE_MENU_BTN_WINDOW, GL_LINEAR, GL_CLAMP_TO_EDGE);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::UnloadImages()
@@ -90,16 +86,6 @@ void SEASON3B::CNewUIMainFrameWindow::UnloadImages()
     DeleteBitmap(IMAGE_MENU_2);
     DeleteBitmap(IMAGE_MENU_3);
     DeleteBitmap(IMAGE_MENU_2_1);
-    DeleteBitmap(IMAGE_GAUGE_BLUE);
-    DeleteBitmap(IMAGE_GAUGE_GREEN);
-    DeleteBitmap(IMAGE_GAUGE_RED);
-    DeleteBitmap(IMAGE_GAUGE_AG);
-    DeleteBitmap(IMAGE_GAUGE_SD);
-    DeleteBitmap(IMAGE_GAUGE_EXBAR);
-    DeleteBitmap(IMAGE_MENU_BTN_CHAINFO);
-    DeleteBitmap(IMAGE_MENU_BTN_MYINVEN);
-    DeleteBitmap(IMAGE_MENU_BTN_FRIEND);
-    DeleteBitmap(IMAGE_MENU_BTN_WINDOW);
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
@@ -115,57 +101,78 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
 
     LoadImages();
 
-    SetButtonInfo();
+    // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
+    // window's Create() (re-run on resolution change), so the document/model are created once,
+    // ever.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "main_frame",
+            [this](Rml::DataModelConstructor& c, MainFrameRmlModel& model)
+            {
+                c.Bind("bars_left", &model.barsLeft);
+                c.Bind("bars_top", &model.barsTop);
+                c.Bind("bars_scale", &model.barsScale);
+
+                c.Bind("hp_fraction", &model.hpFraction);
+                c.Bind("mp_fraction", &model.mpFraction);
+                c.Bind("ag_fraction", &model.agFraction);
+                c.Bind("sd_fraction", &model.sdFraction);
+                c.Bind("hp_text", &model.hpText);
+                c.Bind("mp_text", &model.mpText);
+                c.Bind("ag_text", &model.agText);
+                c.Bind("sd_text", &model.sdText);
+                c.Bind("hp_tooltip", &model.hpTooltip);
+                c.Bind("mp_tooltip", &model.mpTooltip);
+                c.Bind("ag_tooltip", &model.agTooltip);
+                c.Bind("sd_tooltip", &model.sdTooltip);
+                c.Bind("poisoned", &model.poisoned);
+
+                c.Bind("exp_fraction", &model.expFraction);
+                c.Bind("exp_digit", &model.expDigit);
+                c.Bind("exp_tooltip", &model.expTooltip);
+
+                c.Bind("cshop_open", &model.cShopOpen);
+                c.Bind("chainfo_open", &model.chaInfoOpen);
+                c.Bind("myinven_open", &model.myInvenOpen);
+                c.Bind("friend_open", &model.friendOpen);
+                c.Bind("window_open", &model.windowOpen);
+                c.Bind("cshop_tooltip", &model.cShopTooltip);
+                c.Bind("chainfo_tooltip", &model.chaInfoTooltip);
+                c.Bind("myinven_tooltip", &model.myInvenTooltip);
+                c.Bind("friend_tooltip", &model.friendTooltip);
+                c.Bind("window_tooltip", &model.windowTooltip);
+
+                c.Bind("chainfo_alert", &model.chaInfoAlert);
+                c.Bind("friend_alert", &model.friendAlert);
+
+                c.Bind("skill_slot_0_selected", &model.skillSlot0Selected);
+                c.Bind("skill_slot_1_selected", &model.skillSlot1Selected);
+                c.Bind("skill_slot_2_selected", &model.skillSlot2Selected);
+                c.Bind("skill_slot_3_selected", &model.skillSlot3Selected);
+                c.Bind("skill_slot_4_selected", &model.skillSlot4Selected);
+
+                c.BindEventCallback("mainframe_cshop_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCShop(); });
+                c.BindEventCallback("mainframe_chainfo_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickChaInfo(); });
+                c.BindEventCallback("mainframe_myinven_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMyInven(); });
+                c.BindEventCallback("mainframe_friend_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickFriend(); });
+                c.BindEventCallback("mainframe_window_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickWindow(); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/main_frame.rml");
+
+        if (m_pRmlDoc)
+            m_pRmlDoc->Show();
+    }
 
     Show(true);
 
     return true;
-}
-
-void SEASON3B::CNewUIMainFrameWindow::SetButtonInfo()
-{
-    int x_Next = 489;
-    int y_Next = REFERENCE_HEIGHT - 51;
-    int x_Add = 30;
-    int y_Add = 41;
-    m_BtnCShop.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnCShop.ChangeButtonImgState(true, IMAGE_MENU_BTN_CSHOP, true);
-    m_BtnCShop.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
-    x_Next += x_Add;
-    m_BtnCShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnCShop.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnCShop.ChangeToolTipText(&I18N::Game::MUItemShopX, true);
-
-    m_BtnChaInfo.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnChaInfo.ChangeButtonImgState(true, IMAGE_MENU_BTN_CHAINFO, true);
-    m_BtnChaInfo.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
-    x_Next += x_Add;
-    m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnChaInfo.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnChaInfo.ChangeToolTipText(&I18N::Game::CharacterC, true);
-
-    m_BtnMyInven.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnMyInven.ChangeButtonImgState(true, IMAGE_MENU_BTN_MYINVEN, true);
-    m_BtnMyInven.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
-    x_Next += x_Add;
-    m_BtnMyInven.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnMyInven.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnMyInven.ChangeToolTipText(&I18N::Game::InventoryIV, true);
-
-    m_BtnFriend.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnFriend.ChangeButtonImgState(true, IMAGE_MENU_BTN_FRIEND, true);
-    m_BtnFriend.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
-    x_Next += x_Add;
-    m_BtnFriend.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnFriend.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnFriend.ChangeToolTipText(&I18N::Game::FriendF, true);
-
-    m_BtnWindow.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnWindow.ChangeButtonImgState(true, IMAGE_MENU_BTN_WINDOW, true);
-    m_BtnWindow.ChangeButtonInfo(x_Next, y_Next, x_Add, y_Add);
-    m_BtnWindow.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnWindow.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
-    m_BtnWindow.ChangeToolTipText(&I18N::Game::MenuU, true);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::Release()
@@ -183,16 +190,53 @@ void SEASON3B::CNewUIMainFrameWindow::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    // See CMuHelperBar::Release()'s identical rationale -- RmlUi renders last in the frame
+    // regardless of scene, so this object's own release has no other way to hide it.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::Render()
 {
+    // Thin passthrough, not a full no-op -- see this class's header comment. Only the two chrome
+    // bands/content calls that still host legacy content (item hotkeys' left band, skill list's
+    // center band) remain; the right (buttons) and experience bands, plus the bars, moved to
+    // RmlUi (main_frame.rml/.rcss) and are synced every frame by SyncRmlModel() (called from
+    // Update()) instead of drawn here.
+    //
+    // 2026-09-01: the item-hotkey ("potion") band now reuses centerTransform, not its own
+    // BottomHudLeftTransform -- per explicit feedback, anchor it next to the HP bar (which sits
+    // at reference x=158, just right of this band's own x=0-152) rather than the legacy
+    // window-left-edge anchor. Both bands still use their own internal 0-152-relative reference
+    // coordinates unmodified; only which transform places that local space on screen changed.
+    //
+    // 2026-09-02: leftTransform/centerTransform are no longer identical -- each now carries its
+    // OWN theme-provided offset (GetItemHotkeyOffsetX()/GetSkillListOffsetX(), read from
+    // main_frame.rml's #item_hotkey_anchor/#skill_list_anchor markers -- see those methods' own
+    // header comment in NewUIMainFrameWindow.h) on top of the same base BottomHudCenterTransform,
+    // so a theme can independently reposition the item-hotkey and skill-hotkey bands via ordinary
+    // RCSS. Both offsets default to 0 for legacy (unchanged behavior).
+    //
+    // 2026-09-02 bug fix: `* baseTransform.scaleX`, not a bare add -- confirmed by reading
+    // Element::GetAbsoluteOffset() (ThirdParty/RmlUi/Source/Core/Element.cpp) directly:
+    // it accumulates plain layout offsets up the tree and never looks at CSS `transform` at all,
+    // so the marker's reported position ignores #bars's own `transform: scale(bars_scale)`
+    // entirely -- GetItemHotkeyOffsetX()/GetSkillListOffsetX() are therefore UNSCALED reference-
+    // pixel deltas (effectively just the marker's own local `left` value), not real screen
+    // pixels. Transform::offsetX IS real screen pixels (screenX = offsetX + refX*scaleX), so
+    // adding the raw delta under-shifted the actual icons relative to the correctly-scaled
+    // RmlUi-only outline boxes around them (#item_slots/#skill_slots, themes/modern/
+    // main_frame.rcss) -- reported as "the boxes for the potions and skills ... seem misaligned".
     EnableAlphaTest();
 
-    const auto leftTransform = UI::Scaling::BottomHudLeftTransform(WindowWidth, WindowHeight);
-    const auto centerTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-    const auto rightTransform = UI::Scaling::BottomHudRightTransform(WindowWidth, WindowHeight);
-    const auto experienceTransform = UI::Scaling::BottomHudExperienceTransform(WindowWidth, WindowHeight);
+    const auto baseTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+
+    auto leftTransform = baseTransform;
+    leftTransform.offsetX += GetItemHotkeyOffsetX() * baseTransform.scaleX;
+
+    auto centerTransform = baseTransform;
+    centerTransform.offsetX += GetSkillListOffsetX() * baseTransform.scaleX;
 
     {
         UI::Scaling::ScopedActiveTransform layout(leftTransform);
@@ -201,14 +245,6 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
     {
         UI::Scaling::ScopedActiveTransform layout(centerTransform);
         RenderCenterFrame();
-    }
-    {
-        UI::Scaling::ScopedActiveTransform layout(rightTransform);
-        RenderRightFrame();
-    }
-    {
-        UI::Scaling::ScopedActiveTransform layout(experienceTransform);
-        RenderExperienceBackground();
     }
 
     {
@@ -219,14 +255,6 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
         UI::Scaling::ScopedActiveTransform layout(centerTransform, true);
         RenderCenterRegion();
     }
-    {
-        UI::Scaling::ScopedActiveTransform layout(rightTransform, true);
-        RenderRightRegion();
-    }
-    {
-        UI::Scaling::ScopedActiveTransform layout(experienceTransform, true);
-        RenderExperienceRegion();
-    }
     DisableAlphaBlend();
 
     return true;
@@ -234,8 +262,28 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
 
 void SEASON3B::CNewUIMainFrameWindow::Render3D()
 {
-    const auto transform = UI::Scaling::BottomHudLeftTransform(WindowWidth, WindowHeight);
-    UI::Scaling::ScopedActiveTransform layout(transform);
+    // centerTransform, not BottomHudLeftTransform -- see Render()'s header comment (2026-09-01,
+    // item-hotkey band now anchors next to the HP bar instead of the window's left edge).
+    //
+    // 2026-09-01: `true` (transformMouse) is required here, not optional -- RenderItems() ->
+    // RenderItem3D() (ZzzInventory.cpp) does its own hover-to-animate check via CheckMouseIn(),
+    // which compares raw MouseX/MouseY against this function's reference-space sx/sy directly, no
+    // ConvertPositionX/Y involved. Without transformMouse, MouseX/MouseY stay real screen pixels
+    // while the rect is reference-space, so the hover test only lines up when centerTransform
+    // happens to be identity scale/offset -- at any other window size the real cursor has to sit
+    // well left of the actual on-screen icon before the raw numbers happen to satisfy the box test
+    // (reported as "need to hover further left than the intended potion"). UseHotKeyItemRButton()
+    // right below already passes true for exactly this reason -- Render3D()'s hover path was the
+    // one call site that didn't match.
+    //
+    // 2026-09-02: += GetItemHotkeyOffsetX() * scaleX -- must match Render()'s own leftTransform
+    // exactly, or the 3D icons render in a different place than where RenderLeftFrame()'s chrome
+    // and the click hit-test (UseHotKeyItemRButton()) expect them. `* scaleX` is required, not
+    // optional -- see Render()'s own comment on this same bug (GetItemHotkeyOffsetX() is an
+    // unscaled reference-pixel delta, Transform::offsetX is real screen pixels).
+    auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+    transform.offsetX += GetItemHotkeyOffsetX() * transform.scaleX;
+    UI::Scaling::ScopedActiveTransform layout(transform, true);
     m_ItemHotKey.RenderItems();
 }
 
@@ -256,30 +304,86 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLeftRegion()
 
 void SEASON3B::CNewUIMainFrameWindow::RenderCenterRegion()
 {
+    // HP/MP/AG/SD bars moved to RmlUi (SyncRmlModel()/main_frame.rcss) -- the skill row/current-
+    // skill icon stays legacy, out of scope for this pilot (see this class's header comment).
     g_pSkillList->RenderCurrentSkillAndHotSkillList();
-    RenderLifeMana();
-    RenderGuageSD();
-    RenderGuageAG();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderRightRegion()
-{
-    RenderButtons();
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderExperienceRegion()
-{
-    RenderExperience();
-}
-
+// 2026-09-01: theme-aware for the modern theme (feedback: "the potions/skill icons are still
+// using the old sprites as background", "we need to solve this ... since the inventory UI
+// contains lots of 3D items too"). These two functions are the ONE place in the whole frame
+// where this is actually fixable without touching RmlUi's render architecture: RmlUiRuntime
+// hooks a single SetPreSubmitCallback that runs once, after EVERYTHING else in the frame
+// (world, legacy 2D chrome, AND the 3D-composited item/skill icons -- see Render3D()/
+// RenderLeftRegion()) is already recorded (RmlUiRuntime.cpp's own Create() comment). RmlUi
+// therefore can never paint "behind" those 3D icons, in this window or any other -- an
+// RmlUi-drawn background here would always cover them, not sit under them (this is exactly why
+// main_frame.rml's #item_slots/#skill_slots outlines below are border-only, no fill). This
+// function, by contrast, already runs in the correct pass -- it draws the legacy sprite chrome
+// BEFORE Render3D()'s icon compositing happens later in the same frame, the same ordering that
+// has always put icons on top of this exact background. Swapping the sprite for a flat
+// RenderColorQuadARGB() here, for modern theme only, gets a real (not outline-only) themed
+// background that correctly sits behind the icons, using the one call site that was already
+// proven to composite correctly with them -- the general pattern to reuse for Inventory's own
+// still-legacy 3D item icons whenever that window's turn comes, not a one-off here.
+//
+// Colors match themes/modern/main_frame.rcss's .slot-fill/.slot-frame tokens exactly (rgba(10,10,
+// 10,150) / rgba(255,255,255,60)) so the legacy-drawn panel and the RmlUi-drawn gauges/buttons
+// sitting on top of it read as one consistent surface, not two different systems -- the "unified
+// styling" ask. One panel spans the full legacy chrome extent (x=0-488, kLeftBandWidth's end
+// through kMenu3Start+kMenu3CenterWidth) since RenderLeftFrame()/RenderCenterFrame() are called
+// back-to-back under the identical transform (Render()'s leftTransform is centerTransform's own
+// alias) -- drawn as two flush quads (one per function, no visible seam, same flat color) rather
+// than restructuring these into one function, to keep each function's own responsibility (its
+// own band) unchanged for legacy theme.
 void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
 {
+    if (UI::RmlBridge::GetActiveThemeName() == "modern")
+    {
+        RenderColorQuadARGB(0.0f, kHudTop, kLeftBandWidth, kHudContentHeight, 0x960A0A0Au);
+        RenderColorLineARGB(0.0f, kHudTop, kLeftBandWidth, kHudTop, 1.0f, 0x3CFFFFFFu);
+        RenderColorLineARGB(0.0f, kHudTop + kHudContentHeight, kLeftBandWidth, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
+        RenderColorLineARGB(0.0f, kHudTop, 0.0f, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
+        return;
+    }
+
     RenderImageStretch(IMAGE_MENU_1, 0.0f, kHudTop, kLeftBandWidth, kHudContentHeight,
                        0.0f, 0.0f, kLeftBandWidth, kHudContentHeight);
 }
 
 void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
 {
+    if (UI::RmlBridge::GetActiveThemeName() == "modern")
+    {
+        // 2026-09-02: was kCenterBandStart(152) to kMenu3Start+kMenu3CenterWidth(488), a 336-unit
+        // span sized to cover the vertical HP/SD/AG/MP gauges that used to be interleaved inside
+        // it (redesign #3 and earlier) -- now that those gauges have moved out to their own
+        // stacks at the canvas edges (redesign #5, themes/modern/main_frame.rcss), that width is
+        // just dead chrome space around the skill icons (their own real footprint is 222-416),
+        // and since this whole quad also now shifts by GetSkillListOffsetX() (Render()'s
+        // centerTransform), its old right edge landed PAST the new MP/AG stack's own left edge --
+        // reported as "the background/container for the potions and skills list seems extended
+        // ... not sure if this was intended to contain also the gauge/bars" (it wasn't). Narrowed
+        // to hug just the skill icons, padded 8px each side to match RenderLeftFrame()'s own
+        // potions padding (152 vs their 142-wide native span) -- 214 = 222-8, 424 = 416+8. These
+        // two numbers are also chosen so this panel's shifted left edge (214+78=292) lands
+        // exactly where RenderLeftFrame()'s own shifted right edge does
+        // (kLeftBandWidth+GetItemHotkeyOffsetX() = 152+140=292) -- the two chrome panels meet
+        // flush, no gap or overlap, despite using two different offsets.
+        const float left = 214.0f;
+        const float right = 424.0f;
+        RenderColorQuadARGB(left, kHudTop, right - left, kHudContentHeight, 0x960A0A0Au);
+        RenderColorLineARGB(left, kHudTop, right, kHudTop, 1.0f, 0x3CFFFFFFu);
+        RenderColorLineARGB(left, kHudTop + kHudContentHeight, right, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
+        RenderColorLineARGB(right, kHudTop, right, kHudTop + kHudContentHeight, 1.0f, 0x3CFFFFFFu);
+
+        // Modern equivalent of the legacy IMAGE_MENU_2_1 "skill list expanded" highlight below --
+        // same trigger/rect, flat translucent overlay instead of a sprite frame.
+        if (g_pSkillList->IsSkillListUp())
+            RenderColorQuadARGB(222.0f, kHudTop, 160.0f, 40.0f, 0x40FFFFFFu);
+        return;
+    }
+
     RenderImageStretch(IMAGE_MENU_1, kCenterBandStart, kHudTop, kMenu1CenterWidth, kHudContentHeight,
                        kCenterBandStart, 0.0f, kMenu1CenterWidth, kHudContentHeight);
     RenderImageStretch(IMAGE_MENU_2, kMenu2Start, kHudTop, kMenu2Width, kHudContentHeight,
@@ -291,628 +395,26 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
         RenderImage(IMAGE_MENU_2_1, 222.0f, kHudTop, 160.0f, 40.0f);
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderRightFrame()
-{
-    RenderImageStretch(IMAGE_MENU_3, kRightBandStart, kHudTop, kRightBandWidth, kHudContentHeight,
-                       kMenu3RightSourceX, 0.0f, kRightBandWidth, kHudContentHeight);
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderExperienceBackground()
-{
-    RenderImageStretch(IMAGE_MENU_1, 0.0f, kExperienceTop, 256.0f, kExperienceHeight,
-                       0.0f, kHudContentHeight, 256.0f, kExperienceHeight);
-    RenderImageStretch(IMAGE_MENU_2, 256.0f, kExperienceTop, 128.0f, kExperienceHeight,
-                       0.0f, kHudContentHeight, 128.0f, kExperienceHeight);
-    RenderImageStretch(IMAGE_MENU_3, 384.0f, kExperienceTop, 256.0f, kExperienceHeight,
-                       0.0f, kHudContentHeight, 256.0f, kExperienceHeight);
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderLifeMana()
-{
-    DWORD wLifeMax, wLife, wManaMax, wMana;
-
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
-    {
-        wLifeMax = Master_Level_Data.wMaxLife;
-        wLife = std::min<int>(std::max<int>(0, CharacterAttribute->Life), wLifeMax);
-        wManaMax = Master_Level_Data.wMaxMana;
-        wMana = std::min<int>(std::max<int>(0, CharacterAttribute->Mana), wManaMax);
-    }
-    else
-    {
-        wLifeMax = CharacterAttribute->LifeMax;
-        wLife = std::min<int>(std::max<int>(0, CharacterAttribute->Life), wLifeMax);
-        wManaMax = CharacterAttribute->ManaMax;
-        wMana = std::min<int>(std::max<int>(0, CharacterAttribute->Mana), wManaMax);
-    }
-
-    if (wLifeMax > 0)
-    {
-        if (wLife > 0 && (wLife / (float)wLifeMax) < 0.2f)
-        {
-            PlayBuffer(SOUND_HEART);
-        }
-    }
-
-    float fLife = 0.f;
-    float fMana = 0.f;
-
-    if (wLifeMax > 0)
-    {
-        fLife = (wLifeMax - wLife) / (float)wLifeMax;
-    }
-    if (wManaMax > 0)
-    {
-        fMana = (wManaMax - wMana) / (float)wManaMax;
-    }
-
-    float width, height;
-    float x, y;
-    float fY, fH, fV;
-
-    // life
-    width = 45.f;
-    x = 158;
-    height = 39.f;
-    y = (float)REFERENCE_HEIGHT - 48.f;
-
-    fY = y + (fLife * height);
-    fH = height - (fLife * height);
-    fV = fLife;
-    if (g_isCharacterBuff((&Hero->Object), eDeBuff_Poison))
-    {
-        RenderBitmap(IMAGE_GAUGE_GREEN, x, fY, width, fH, 0.f, fV * height / 64.f, width / 64.f, (1.0f - fV) * height / 64.f);
-    }
-    else
-    {
-        RenderBitmap(IMAGE_GAUGE_RED, x, fY, width, fH, 0.f, fV * height / 64.f, width / 64.f, (1.0f - fV) * height / 64.f);
-    }
-
-    SEASON3B::RenderNumber(x + 25, REFERENCE_HEIGHT - 18, wLife);
-
-    wchar_t strTipText[256];
-    if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        mu_swprintf(strTipText, I18N::Game::LifeDD, wLife, wLifeMax);
-        RenderTipText((int)x, (int)418, strTipText);
-    }
-
-    // mana
-    width = 45.f;
-    x = 256.f + 128.f + 53.f;
-    height = 39.f;
-    y = (float)REFERENCE_HEIGHT - 48.f;
-
-    fY = y + (fMana * height);
-    fH = height - (fMana * height);
-    fV = fMana;
-    RenderBitmap(IMAGE_GAUGE_BLUE, x, fY, width, fH, 0.f, fV * height / 64.f, width / 64.f, (1.0f - fV) * height / 64.f);
-
-    SEASON3B::RenderNumber(x + 30, REFERENCE_HEIGHT - 18, wMana);
-
-    // mana
-    if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        mu_swprintf(strTipText, I18N::Game::ManaDD359, wMana, wManaMax);
-        RenderTipText((int)x, (int)418, strTipText);
-    }
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderGuageAG()
-{
-    float x, y, width, height;
-    float fY, fH, fV;
-
-    DWORD dwMaxSkillMana, dwSkillMana;
-
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
-    {
-        dwMaxSkillMana = std::max<int>(1, Master_Level_Data.wMaxBP);
-        dwSkillMana = std::min<int>(dwMaxSkillMana, CharacterAttribute->SkillMana);
-    }
-    else
-    {
-        dwMaxSkillMana = std::max<int>(1, CharacterAttribute->SkillManaMax);
-        dwSkillMana = std::min<int>(dwMaxSkillMana, CharacterAttribute->SkillMana);
-    }
-
-    float fSkillMana = 0.0f;
-
-    if (dwMaxSkillMana > 0)
-    {
-        fSkillMana = (dwMaxSkillMana - dwSkillMana) / (float)dwMaxSkillMana;
-    }
-
-    width = 16.f, height = 39.f;
-    x = 256 + 128 + 36; y = (float)REFERENCE_HEIGHT - 49.f;
-    fY = y + (fSkillMana * height);
-    fH = height - (fSkillMana * height);
-    fV = fSkillMana;
-
-    RenderBitmap(IMAGE_GAUGE_AG, x, fY, width, fH, 0.f, fV * height / 64.f, width / 16.f, (1.0f - fV) * height / 64.f);
-    SEASON3B::RenderNumber(x + 10, REFERENCE_HEIGHT - 18, (int)dwSkillMana);
-
-    if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        wchar_t strTipText[256];
-
-        mu_swprintf(strTipText, I18N::Game::AGDD, dwSkillMana, dwMaxSkillMana);
-        RenderTipText((int)x - 20, (int)418, strTipText);
-    }
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderGuageSD()
-{
-    float x, y, width, height;
-    float fY, fH, fV;
-    DWORD wMaxShield, wShield;
-
-    //Master_Level_Data.wMaxShield
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
-    {
-        wMaxShield = std::max<int>(1, Master_Level_Data.wMaxShield);
-        wShield = std::min<int>(wMaxShield, CharacterAttribute->Shield);
-    }
-    else
-    {
-        wMaxShield = std::max<int>(1, CharacterAttribute->ShieldMax);
-        wShield = std::min<int>(wMaxShield, CharacterAttribute->Shield);
-    }
-
-    float fShield = 0.0f;
-
-    if (wMaxShield > 0)
-    {
-        fShield = (wMaxShield - wShield) / (float)wMaxShield;
-    }
-
-    width = 16.f, height = 39.f;
-    x = 204; y = (float)REFERENCE_HEIGHT - 49.f;
-    fY = y + (fShield * height);
-    fH = height - (fShield * height);
-    fV = fShield;
-
-    RenderBitmap(IMAGE_GAUGE_SD, x, fY, width, fH, 0.f, fV * height / 64.f, width / 16.f, (1.0f - fV) * height / 64.f);
-    SEASON3B::RenderNumber(x + 15, REFERENCE_HEIGHT - 18, (int)wShield);
-
-    height = 39.f;
-    y = (float)REFERENCE_HEIGHT - 10.f - 39.f;
-    if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        wchar_t strTipText[256];
-
-        mu_swprintf(strTipText, I18N::Game::SDDD, wShield, wMaxShield);
-        RenderTipText((int)x - 20, (int)418, strTipText);
-    }
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderExperience()
-{
-    __int64 wLevel;
-    __int64 dwNexExperience;
-    __int64 dwExperience;
-    double x, y, width, height;
-    const auto buildExpSegment = [](const double ratio, int& digit, double& fraction)
-    {
-        const double clampedRatio = std::clamp(ratio, 0.0, 1.0);
-        if (clampedRatio >= 1.0)
-        {
-            digit = 9;
-            fraction = 1.0;
-            return;
-        }
-
-        const double scaled = clampedRatio * 10.0;
-        digit = std::clamp(static_cast<int>(scaled), 0, 9);
-        fraction = scaled - static_cast<double>(static_cast<long long>(scaled));
-        fraction = std::clamp(fraction, 0.0, 1.0);
-    };
-
-    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
-    {
-        wLevel = (__int64)Master_Level_Data.nMLevel;
-        dwNexExperience = (__int64)Master_Level_Data.lNext_MasterLevel_Experince;
-        dwExperience = (__int64)Master_Level_Data.lMasterLevel_Experince;
-    }
-    else
-    {
-        wLevel = CharacterAttribute->Level;
-        dwNexExperience = CharacterAttribute->NextExperience;
-        dwExperience = CharacterAttribute->Experience;
-    }
-
-    if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
-    {
-        x = 0; y = 470; width = 6; height = 4;
-
-        __int64 iTotalLevel = wLevel + 400;
-        __int64 iTOverLevel = iTotalLevel - 255;
-        __int64 iBaseExperience = 0;
-
-        __int64 iData_Master =	// A
-            (
-                (
-                    (__int64)9 + (__int64)iTotalLevel
-                    )
-                * (__int64)iTotalLevel
-                * (__int64)iTotalLevel
-                * (__int64)10
-                )
-            +
-            (
-                (
-                    (__int64)9 + (__int64)iTOverLevel
-                    )
-                * (__int64)iTOverLevel
-                * (__int64)iTOverLevel
-                * (__int64)1000
-                );
-        iBaseExperience = (iData_Master - (__int64)3892250000) / (__int64)2;	// B
-
-        const __int64 lowerBound = iBaseExperience;
-        __int64 upperBound = dwNexExperience;
-        if (upperBound < lowerBound)
-        {
-            upperBound = lowerBound;
-        }
-
-        const double fNeedExp = static_cast<double>(upperBound - lowerBound);
-        const double fClampedExp = std::clamp(static_cast<double>(dwExperience), static_cast<double>(lowerBound), static_cast<double>(upperBound));
-        const double fRatio = (fNeedExp > 0.0) ? std::clamp((fClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0) : 0.0;
-        int iExp = 0;
-        double fProgress = 0.0;
-        buildExpSegment(fRatio, iExp, fProgress);
-
-        if (m_bExpEffect == true)
-        {
-            double fPreProgress = 0.f;
-            if (m_loPreExp < lowerBound)
-            {
-                x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
-                RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                RenderColorQuadARGB(x, y, width, height, 0x99FFFFFFu);
-            }
-            else
-            {
-                int iPreExpBarNum = 0;
-                if (fNeedExp > 0.f)
-                {
-                    const double fPreClampedExp = std::clamp(static_cast<double>(m_loPreExp), static_cast<double>(lowerBound), static_cast<double>(upperBound));
-                    const double fPreRatio = std::clamp((fPreClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0);
-                    buildExpSegment(fPreRatio, iPreExpBarNum, fPreProgress);
-                }
-
-                if (iExp > iPreExpBarNum)
-                {
-                    x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
-                    RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    RenderColorQuadARGB(x, y, width, height, 0x99FFFFFFu);
-                }
-                else
-                {
-                    double fGapProgress = fProgress - fPreProgress;
-                    fGapProgress = std::clamp(fGapProgress, 0.0, 1.0);
-                    x = 2.f; y = 473.f; width = (double)fPreProgress * (double)629.f; height = 4.f;
-                    RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-
-                    x += width; width = (double)fGapProgress * (double)629.f;
-                    RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    RenderColorQuadARGB(x, y, width, height, 0x99FFFFFFu);
-                }
-            }
-        }
-        else
-        {
-            x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
-            RenderBitmap(IMAGE_MASTER_GAUGE_BAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-        }
-
-        x = 635.f; y = 469.f;
-        SEASON3B::RenderNumber(x, y, iExp);
-
-        x = 2.f; y = 473.f; width = 629.f; height = 4.f;
-        if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            wchar_t strTipText[256];
-
-            mu_swprintf(strTipText, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
-            RenderTipText(280, 418, strTipText);
-        }
-    }
-    else
-    {
-        x = 0; y = 470; width = 6; height = 4;
-
-        __int64 iPriorLevel = wLevel - 1;
-        __int64 iPriorExperience = 0;
-
-        if (iPriorLevel > 0)
-        {
-            iPriorExperience = (9 + iPriorLevel) * iPriorLevel * iPriorLevel * 10;
-
-            if (iPriorLevel > 255)
-            {
-                const __int64 iLevelOverN = iPriorLevel - 255;
-                iPriorExperience += (9 + iLevelOverN) * iLevelOverN * iLevelOverN * 1000;
-            }
-        }
-
-        const __int64 lowerBound = iPriorExperience;
-        __int64 upperBound = dwNexExperience;
-        if (upperBound < lowerBound)
-        {
-            upperBound = lowerBound;
-        }
-
-        const double fNeedExp = static_cast<double>(upperBound - lowerBound);
-        const double fClampedExp = std::clamp(static_cast<double>(dwExperience), static_cast<double>(lowerBound), static_cast<double>(upperBound));
-        const double fRatio = (fNeedExp > 0.0) ? std::clamp((fClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0) : 0.0;
-        int iExp = 0;
-        double fProgress = 0.0;
-        buildExpSegment(fRatio, iExp, fProgress);
-
-        if (m_bExpEffect == true)
-        {
-            double fPreProgress = 0.f;
-            if (m_dwPreExp < lowerBound)
-            {
-                x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
-                RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                RenderColorQuadARGB(x, y, width, height, 0x66FFFFFFu);
-            }
-            else
-            {
-                int iPreExpBarNum = 0;
-                if (fNeedExp > 0.f)
-                {
-                    const double fPreClampedExp = std::clamp(static_cast<double>(m_dwPreExp), static_cast<double>(lowerBound), static_cast<double>(upperBound));
-                    const double fPreRatio = std::clamp((fPreClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0);
-                    buildExpSegment(fPreRatio, iPreExpBarNum, fPreProgress);
-                }
-
-                if (iExp > iPreExpBarNum)
-                {
-                    x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
-                    RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    RenderColorQuadARGB(x, y, width, height, 0x66FFFFFFu);
-                }
-                else
-                {
-                    double fGapProgress = fProgress - fPreProgress;
-                    fGapProgress = std::clamp(fGapProgress, 0.0, 1.0);
-                    x = 2.f; y = 473.f; width = fPreProgress * 629.f; height = 4.f;
-                    RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    x += width; width = fGapProgress * 629.f;
-                    RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-                    RenderColorQuadARGB(x, y, width, height, 0x66FFFFFFu);
-                }
-            }
-        }
-        else
-        {
-            x = 2.f; y = 473.f; width = fProgress * 629.f; height = 4.f;
-            RenderBitmap(IMAGE_GAUGE_EXBAR, x, y, width, height, 0.f, 0.f, 6.f / 8.f, 4.f / 4.f);
-        }
-
-        x = 635.f; y = 469.f;
-        SEASON3B::RenderNumber(x, y, iExp);
-
-        x = 2.f; y = 473.f; width = 629.f; height = 4.f;
-        if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            wchar_t strTipText[256];
-
-            mu_swprintf(strTipText, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
-            RenderTipText(280, 418, strTipText);
-        }
-    }
-}
+// RenderRightFrame()/RenderExperienceBackground() (chrome) and RenderLifeMana()/RenderGuageAG()/
+// RenderGuageSD()/RenderExperience() (content, computed each frame into the RmlUi model instead --
+// see SyncRmlModel()) removed -- moved to RmlUi (main_frame.rml/.rcss). See this class's header
+// comment for why these bands, but not the left/center bands, could move (no remaining legacy
+// content occupies the same pixels).
 
 void SEASON3B::CNewUIMainFrameWindow::RenderHotKeyItemCount()
 {
     m_ItemHotKey.RenderItemCount();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderButtons()
-{
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    m_BtnCShop.Render();
-#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-
-    RenderCharInfoButton();
-    m_BtnMyInven.Render();
-
-    RenderFriendButton();
-
-    m_BtnWindow.Render();
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderCharInfoButton()
-{
-    m_BtnChaInfo.Render();
-
-    if (g_QuestMng.IsQuestIndexByEtcListEmpty())
-        return;
-
-    if (g_Time.GetTimeCheck(5, 500))
-        m_bButtonBlink = !m_bButtonBlink;
-
-    if (m_bButtonBlink)
-    {
-        if (!(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER)))
-            RenderImage(IMAGE_MENU_BTN_CHAINFO, 489 + 30, REFERENCE_HEIGHT - 51, 30, 41, 0.0f, 41.f);
-    }
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderFriendButton()
-{
-    m_BtnFriend.Render();
-
-    int iBlinkTemp = g_pFriendMenu->GetBlinkTemp();
-    BOOL bIsAlertTime = (iBlinkTemp % 24 < 12);
-
-    if (g_pFriendMenu->IsNewChatAlert() && bIsAlertTime)
-    {
-        RenderFriendButtonState();
-    }
-    if (g_pFriendMenu->IsNewMailAlert())
-    {
-        if (bIsAlertTime)
-        {
-            RenderFriendButtonState();
-
-            if (iBlinkTemp % 24 == 11)
-            {
-                g_pFriendMenu->IncreaseLetterBlink();
-            }
-        }
-    }
-    else if (g_pLetterList->CheckNoReadLetter())
-    {
-        RenderFriendButtonState();
-    }
-
-    g_pFriendMenu->IncreaseBlinkTemp();
-}
-
-void SEASON3B::CNewUIMainFrameWindow::RenderFriendButtonState()
-{
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
-    {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 489 + (30 * 3), REFERENCE_HEIGHT - 51, 30, 41, 0.0f, 123.f);
-    }
-    else
-    {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 489 + (30 * 3), REFERENCE_HEIGHT - 51, 30, 41, 0.0f, 41.f);
-    }
-#else //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
-    {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 488 + 76, REFERENCE_HEIGHT - 51, 38, 42, 0.0f, 126.f);
-    }
-    else
-    {
-        RenderImage(IMAGE_MENU_BTN_FRIEND, 488 + 76, REFERENCE_HEIGHT - 51, 38, 42, 0.0f, 42.f);
-    }
-#endif//defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
-}
-
+// RenderButtons()/RenderCharInfoButton()/RenderFriendButton()/RenderFriendButtonState() and
+// BtnProcess() removed -- the 5 corner buttons moved to RmlUi (data-event-click bindings, see
+// Create()); RmlUi's own Context now does hit-testing for them, so this never has legacy button
+// objects left to check.
 bool SEASON3B::CNewUIMainFrameWindow::UpdateMouseEvent()
 {
-    if (g_pNewUIHotKey->IsStateGameOver())
-        return true;
-
-    const auto transform = UI::Scaling::BottomHudRightTransform(WindowWidth, WindowHeight);
-    UI::Scaling::ScopedActiveTransform layout(transform, true);
-    return !BtnProcess();
-}
-
-bool SEASON3B::CNewUIMainFrameWindow::BtnProcess()
-{
-    if (g_pNewUIHotKey->CanUpdateKeyEventRelatedMyInventory() == true)
-    {
-        if (m_BtnMyInven.UpdateMouseEvent() == true)
-        {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
-            PlayBuffer(SOUND_CLICK01);
-            return true;
-        }
-    }
-    else if (g_pNewUIHotKey->CanUpdateKeyEvent() == true)
-    {
-        if (m_BtnMyInven.UpdateMouseEvent() == true)
-        {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
-            PlayBuffer(SOUND_CLICK01);
-            return true;
-        }
-        else if (m_BtnChaInfo.UpdateMouseEvent() == true)
-        {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_CHARACTER);
-
-            PlayBuffer(SOUND_CLICK01);
-
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER))
-                g_QuestMng.SendQuestIndexByEtcSelection();
-
-            return true;
-        }
-        else if (m_BtnFriend.UpdateMouseEvent() == true)
-        {
-            if (gMapManager.InChaosCastle() == true)
-            {
-                PlayBuffer(SOUND_CLICK01);
-                return true;
-            }
-
-            int iLevel = CharacterAttribute->Level;
-
-            if (iLevel < 6)
-            {
-                if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
-                {
-                    g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                }
-            }
-            else
-            {
-                g_pNewUISystem->Toggle(SEASON3B::INTERFACE_FRIEND);
-            }
-            PlayBuffer(SOUND_CLICK01);
-            return true;
-        }
-        else if (m_BtnWindow.UpdateMouseEvent() == true)
-        {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_WINDOW_MENU);
-            PlayBuffer(SOUND_CLICK01);
-            return true;
-        }
-
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-        else if (m_BtnCShop.UpdateMouseEvent() == true)
-        {
-            if (g_pInGameShop->IsInGameShopOpen() == false)
-                return false;
-
-#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-            if (g_InGameShopSystem->IsScriptDownload() == true)
-            {
-                if (g_InGameShopSystem->ScriptDownload() == false)
-                    return false;
-            }
-
-            if (g_InGameShopSystem->IsBannerDownload() == true)
-            {
-                g_InGameShopSystem->BannerDownload();
-            }
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
-            {
-                if (g_InGameShopSystem->GetIsRequestShopOpenning() == false)
-                {
-                    SocketClient->ToGameServer()->SendCashShopOpenState(0);
-                    g_InGameShopSystem->SetIsRequestShopOpenning(true);
-
-#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-                    g_pMainFrame->SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
-#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-                }
-            }
-            else
-            {
-                SocketClient->ToGameServer()->SendCashShopOpenState(1);
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
-            }
-
-            return true;
-        }
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    }
-
-    return false;
+    // RmlUi's own context does hit-testing now (see this class's header comment) -- never
+    // consumes the legacy mouse event.
+    return true;
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::UpdateKeyEvent()
@@ -936,7 +438,360 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
         }
     }
 
+    // Button clicks -- polled-and-cleared exactly like every other migrated window's RmlClickX()
+    // pattern (see CMuHelperBar::Update()). Logic ported verbatim from the legacy BtnProcess(),
+    // minus the CNewUIButton hit-test wrapper (RmlUi's data-event-click already tells us the click
+    // landed).
+    if (m_bRmlMyInvenClicked)
+    {
+        m_bRmlMyInvenClicked = false;
+        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
+        PlayBuffer(SOUND_CLICK01);
+    }
+    if (m_bRmlChaInfoClicked)
+    {
+        m_bRmlChaInfoClicked = false;
+        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_CHARACTER);
+        PlayBuffer(SOUND_CLICK01);
+        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER))
+            g_QuestMng.SendQuestIndexByEtcSelection();
+    }
+    if (m_bRmlFriendClicked)
+    {
+        m_bRmlFriendClicked = false;
+        if (gMapManager.InChaosCastle() == true)
+        {
+            PlayBuffer(SOUND_CLICK01);
+        }
+        else
+        {
+            int iLevel = CharacterAttribute->Level;
+            if (iLevel < 6)
+            {
+                if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
+                {
+                    g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                }
+            }
+            else
+            {
+                g_pNewUISystem->Toggle(SEASON3B::INTERFACE_FRIEND);
+            }
+            PlayBuffer(SOUND_CLICK01);
+        }
+    }
+    if (m_bRmlWindowClicked)
+    {
+        m_bRmlWindowClicked = false;
+        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_WINDOW_MENU);
+        PlayBuffer(SOUND_CLICK01);
+    }
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+    if (m_bRmlCShopClicked)
+    {
+        m_bRmlCShopClicked = false;
+        if (g_pInGameShop->IsInGameShopOpen() == false)
+        {
+            // matches the legacy BtnProcess()'s early-out -- nothing to do until the server
+            // confirms the shop is actually open.
+        }
+        else
+        {
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+            if (g_InGameShopSystem->IsScriptDownload() == true)
+            {
+                g_InGameShopSystem->ScriptDownload();
+            }
+            if (g_InGameShopSystem->IsBannerDownload() == true)
+            {
+                g_InGameShopSystem->BannerDownload();
+            }
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
+            {
+                if (g_InGameShopSystem->GetIsRequestShopOpenning() == false)
+                {
+                    SocketClient->ToGameServer()->SendCashShopOpenState(0);
+                    g_InGameShopSystem->SetIsRequestShopOpenning(true);
+#ifdef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+                    SetBtnState(MAINFRAME_BTN_PARTCHARGE, true);
+#endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
+                }
+            }
+            else
+            {
+                SocketClient->ToGameServer()->SendCashShopOpenState(1);
+                g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+            }
+        }
+    }
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+
+    SyncRmlModel();
+
     return true;
+}
+
+void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    // --- HP/MP/AG/SD/EXP: fraction/text/tooltip helper, mirrors CMuHelperBar's syncLabel() ---
+    auto syncFloat = [this](float MainFrameRmlModel::* field, const char* boundName, float value)
+    {
+        if (m_RmlBinder.GetModel().*field != value)
+        {
+            m_RmlBinder.GetModel().*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    auto syncBool = [this](bool MainFrameRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlBinder.GetModel().*field != value)
+        {
+            m_RmlBinder.GetModel().*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    auto syncText = [this](Rml::String MainFrameRmlModel::* field, const char* boundName, const Rml::String& value)
+    {
+        if (m_RmlBinder.GetModel().*field != value)
+        {
+            m_RmlBinder.GetModel().*field = value;
+            m_RmlBinder.MarkDirty(boundName);
+        }
+    };
+    auto syncWide = [&](Rml::String MainFrameRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        syncText(field, boundName, StringUtils::WideToNarrow(text));
+    };
+
+    // Shared #bars/#buttons/#exp transform -- must track the still-legacy center-band chrome's
+    // own window-size-driven scale (see MainFrameRmlModel::barsLeft's header comment for the full
+    // history of how this became one shared group instead of three independent ones). All three
+    // use static *reference-pixel*, UN-rebased coordinates identical to the legacy render calls'
+    // own constants -- this transform alone maps that whole local reference space onto real
+    // window pixels (screenPos = refPos * scale + offset, same formula PositionX()/PositionY()
+    // compute internally).
+    {
+        const auto centerTransform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+        syncFloat(&MainFrameRmlModel::barsLeft, "bars_left", centerTransform.offsetX);
+        syncFloat(&MainFrameRmlModel::barsTop, "bars_top", centerTransform.offsetY);
+        syncFloat(&MainFrameRmlModel::barsScale, "bars_scale", centerTransform.scaleX);
+
+        // 2026-09-02: item-hotkey/skill-hotkey band offsets -- read from #item_hotkey_anchor/
+        // #skill_list_anchor's real screen position (Element::GetAbsoluteOffset()) and turned
+        // into a delta from centerTransform's own unshifted offsetX. The still-legacy Render()/
+        // Render3D()/UseHotKeyItemRButton() (item hotkey) and CNewUISkillList's own Render()/
+        // UpdateMouseEvent() (skill hotkey) each apply this delta to whichever transform they use,
+        // keeping render AND click hit-testing in sync automatically -- see
+        // GetItemHotkeyOffsetX()'s own header comment (NewUIMainFrameWindow.h) for why this reads
+        // an RmlUi element instead of a per-theme C++ branch. One frame of lag is possible here
+        // (this runs before this frame's own RmlUi Update(), so the marker reflects last frame's
+        // layout) -- harmless in practice, these markers only move when the active theme changes,
+        // not every frame.
+        if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("item_hotkey_anchor"))
+            m_fItemHotkeyOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
+        if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("skill_list_anchor"))
+            m_fSkillListOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
+    }
+
+    // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.
+    DWORD wLifeMax, wLife, wManaMax, wMana;
+    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    {
+        wLifeMax = Master_Level_Data.wMaxLife;
+        wLife = std::min<int>(std::max<int>(0, CharacterAttribute->Life), wLifeMax);
+        wManaMax = Master_Level_Data.wMaxMana;
+        wMana = std::min<int>(std::max<int>(0, CharacterAttribute->Mana), wManaMax);
+    }
+    else
+    {
+        wLifeMax = CharacterAttribute->LifeMax;
+        wLife = std::min<int>(std::max<int>(0, CharacterAttribute->Life), wLifeMax);
+        wManaMax = CharacterAttribute->ManaMax;
+        wMana = std::min<int>(std::max<int>(0, CharacterAttribute->Mana), wManaMax);
+    }
+    if (wLifeMax > 0 && wLife > 0 && (wLife / (float)wLifeMax) < 0.2f)
+        PlayBuffer(SOUND_HEART);
+
+    syncFloat(&MainFrameRmlModel::hpFraction, "hp_fraction", wLifeMax > 0 ? wLife / (float)wLifeMax : 0.f);
+    syncFloat(&MainFrameRmlModel::mpFraction, "mp_fraction", wManaMax > 0 ? wMana / (float)wManaMax : 0.f);
+    syncBool(&MainFrameRmlModel::poisoned, "poisoned", g_isCharacterBuff((&Hero->Object), eDeBuff_Poison));
+
+    // 2026-09-02: "X / Y" (current/max), not just "X" -- feedback: "the gauge bars can also
+    // display the max value instead of just the current value". Shared model field, both themes.
+    wchar_t szNum[32] = {};
+    mu_swprintf(szNum, L"%d / %d", wLife, wLifeMax);
+    syncWide(&MainFrameRmlModel::hpText, "hp_text", szNum);
+    mu_swprintf(szNum, L"%d / %d", wMana, wManaMax);
+    syncWide(&MainFrameRmlModel::mpText, "mp_text", szNum);
+
+    wchar_t szTip[256] = {};
+    mu_swprintf(szTip, I18N::Game::LifeDD, wLife, wLifeMax);
+    syncWide(&MainFrameRmlModel::hpTooltip, "hp_tooltip", szTip);
+    mu_swprintf(szTip, I18N::Game::ManaDD359, wMana, wManaMax);
+    syncWide(&MainFrameRmlModel::mpTooltip, "mp_tooltip", szTip);
+
+    // AG (stamina/skill-mana) -- legacy RenderGuageAG().
+    DWORD dwMaxSkillMana, dwSkillMana;
+    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    {
+        dwMaxSkillMana = std::max<int>(1, Master_Level_Data.wMaxBP);
+        dwSkillMana = std::min<int>(dwMaxSkillMana, CharacterAttribute->SkillMana);
+    }
+    else
+    {
+        dwMaxSkillMana = std::max<int>(1, CharacterAttribute->SkillManaMax);
+        dwSkillMana = std::min<int>(dwMaxSkillMana, CharacterAttribute->SkillMana);
+    }
+    syncFloat(&MainFrameRmlModel::agFraction, "ag_fraction", dwSkillMana / (float)dwMaxSkillMana);
+    mu_swprintf(szNum, L"%d / %d", dwSkillMana, dwMaxSkillMana);
+    syncWide(&MainFrameRmlModel::agText, "ag_text", szNum);
+    mu_swprintf(szTip, I18N::Game::AGDD, dwSkillMana, dwMaxSkillMana);
+    syncWide(&MainFrameRmlModel::agTooltip, "ag_tooltip", szTip);
+
+    // SD (shield) -- legacy RenderGuageSD().
+    DWORD wMaxShield, wShield;
+    if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
+    {
+        wMaxShield = std::max<int>(1, Master_Level_Data.wMaxShield);
+        wShield = std::min<int>(wMaxShield, CharacterAttribute->Shield);
+    }
+    else
+    {
+        wMaxShield = std::max<int>(1, CharacterAttribute->ShieldMax);
+        wShield = std::min<int>(wMaxShield, CharacterAttribute->Shield);
+    }
+    syncFloat(&MainFrameRmlModel::sdFraction, "sd_fraction", wShield / (float)wMaxShield);
+    mu_swprintf(szNum, L"%d / %d", wShield, wMaxShield);
+    syncWide(&MainFrameRmlModel::sdText, "sd_text", szNum);
+    mu_swprintf(szTip, I18N::Game::SDDD, wShield, wMaxShield);
+    syncWide(&MainFrameRmlModel::sdTooltip, "sd_tooltip", szTip);
+
+    // EXP -- legacy RenderExperience(), flash-highlight overlay intentionally not reproduced (see
+    // this class's header comment). expFraction is progress *within* the current decile, matching
+    // buildExpSegment()'s original digit/fraction split.
+    {
+        __int64 wLevel, dwNexExperience, dwExperience;
+        const bool masterActive = gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level);
+        if (masterActive)
+        {
+            wLevel = (__int64)Master_Level_Data.nMLevel;
+            dwNexExperience = (__int64)Master_Level_Data.lNext_MasterLevel_Experince;
+            dwExperience = (__int64)Master_Level_Data.lMasterLevel_Experince;
+        }
+        else
+        {
+            wLevel = CharacterAttribute->Level;
+            dwNexExperience = CharacterAttribute->NextExperience;
+            dwExperience = CharacterAttribute->Experience;
+        }
+
+        __int64 lowerBound;
+        if (masterActive)
+        {
+            const __int64 iTotalLevel = wLevel + 400;
+            const __int64 iTOverLevel = iTotalLevel - 255;
+            const __int64 iData_Master =
+                (((__int64)9 + iTotalLevel) * iTotalLevel * iTotalLevel * (__int64)10)
+                + (((__int64)9 + iTOverLevel) * iTOverLevel * iTOverLevel * (__int64)1000);
+            lowerBound = (iData_Master - (__int64)3892250000) / (__int64)2;
+        }
+        else
+        {
+            const __int64 iPriorLevel = wLevel - 1;
+            __int64 iPriorExperience = 0;
+            if (iPriorLevel > 0)
+            {
+                iPriorExperience = (9 + iPriorLevel) * iPriorLevel * iPriorLevel * 10;
+                if (iPriorLevel > 255)
+                {
+                    const __int64 iLevelOverN = iPriorLevel - 255;
+                    iPriorExperience += (9 + iLevelOverN) * iLevelOverN * iLevelOverN * 1000;
+                }
+            }
+            lowerBound = iPriorExperience;
+        }
+
+        __int64 upperBound = dwNexExperience;
+        if (upperBound < lowerBound)
+            upperBound = lowerBound;
+
+        const double fNeedExp = static_cast<double>(upperBound - lowerBound);
+        const double fClampedExp = std::clamp(static_cast<double>(dwExperience), static_cast<double>(lowerBound), static_cast<double>(upperBound));
+        const double fRatio = (fNeedExp > 0.0) ? std::clamp((fClampedExp - static_cast<double>(lowerBound)) / fNeedExp, 0.0, 1.0) : 0.0;
+
+        const double scaled = std::clamp(fRatio, 0.0, 1.0) * 10.0;
+        int iExp = std::clamp(static_cast<int>(scaled), 0, 9);
+        double fProgress = std::clamp(scaled - static_cast<double>(static_cast<long long>(scaled)), 0.0, 1.0);
+        if (fRatio >= 1.0) { iExp = 9; fProgress = 1.0; }
+
+        syncFloat(&MainFrameRmlModel::expFraction, "exp_fraction", static_cast<float>(fProgress));
+        wchar_t szExp[8] = {};
+        mu_swprintf(szExp, L"%d", iExp);
+        syncWide(&MainFrameRmlModel::expDigit, "exp_digit", szExp);
+        mu_swprintf(szTip, I18N::Game::EXPI64dI64d, dwExperience, dwNexExperience);
+        syncWide(&MainFrameRmlModel::expTooltip, "exp_tooltip", szTip);
+    }
+
+    // Button tooltips -- static strings, re-checked every frame like CMuHelperBar's syncLabel()
+    // for consistency, but effectively set-once.
+    syncWide(&MainFrameRmlModel::chaInfoTooltip, "chainfo_tooltip", I18N::Game::CharacterC);
+    syncWide(&MainFrameRmlModel::myInvenTooltip, "myinven_tooltip", I18N::Game::InventoryIV);
+    syncWide(&MainFrameRmlModel::friendTooltip, "friend_tooltip", I18N::Game::FriendF);
+    syncWide(&MainFrameRmlModel::windowTooltip, "window_tooltip", I18N::Game::MenuU);
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+    syncWide(&MainFrameRmlModel::cShopTooltip, "cshop_tooltip", I18N::Game::MUItemShopX);
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+
+    // Char-info quest-available blink -- legacy RenderCharInfoButton().
+    bool chaInfoAlert = false;
+    if (!g_QuestMng.IsQuestIndexByEtcListEmpty())
+    {
+        if (g_Time.GetTimeCheck(5, 500))
+            m_bButtonBlink = !m_bButtonBlink;
+        chaInfoAlert = m_bButtonBlink
+            && !(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
+                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER));
+    }
+    syncBool(&MainFrameRmlModel::chaInfoAlert, "chainfo_alert", chaInfoAlert);
+
+    // Friend mail/chat blink -- legacy RenderFriendButton()/RenderFriendButtonState().
+    const int iBlinkTemp = g_pFriendMenu->GetBlinkTemp();
+    const bool bIsAlertTime = (iBlinkTemp % 24 < 12);
+    bool friendAlert = false;
+    if (g_pFriendMenu->IsNewChatAlert() && bIsAlertTime)
+    {
+        friendAlert = true;
+    }
+    if (g_pFriendMenu->IsNewMailAlert())
+    {
+        if (bIsAlertTime)
+        {
+            friendAlert = true;
+            if (iBlinkTemp % 24 == 11)
+                g_pFriendMenu->IncreaseLetterBlink();
+        }
+    }
+    else if (g_pLetterList->CheckNoReadLetter())
+    {
+        friendAlert = true;
+    }
+    g_pFriendMenu->IncreaseBlinkTemp();
+    syncBool(&MainFrameRmlModel::friendAlert, "friend_alert", friendAlert);
+
+    // Skill-hotkey row selection highlight (modern theme only, see MainFrameRmlModel::
+    // skillSlot0Selected's own comment and CNewUISkillList::IsHotKeySlotCurrentSkill()) -- read
+    // every frame like everything else above; g_pSkillList itself is still fully legacy (Phase 2),
+    // this just also mirrors its per-slot selected state into this pilot's own model.
+    syncBool(&MainFrameRmlModel::skillSlot0Selected, "skill_slot_0_selected", g_pSkillList->IsHotKeySlotCurrentSkill(0));
+    syncBool(&MainFrameRmlModel::skillSlot1Selected, "skill_slot_1_selected", g_pSkillList->IsHotKeySlotCurrentSkill(1));
+    syncBool(&MainFrameRmlModel::skillSlot2Selected, "skill_slot_2_selected", g_pSkillList->IsHotKeySlotCurrentSkill(2));
+    syncBool(&MainFrameRmlModel::skillSlot3Selected, "skill_slot_3_selected", g_pSkillList->IsHotKeySlotCurrentSkill(3));
+    syncBool(&MainFrameRmlModel::skillSlot4Selected, "skill_slot_4_selected", g_pSkillList->IsHotKeySlotCurrentSkill(4));
 }
 
 float SEASON3B::CNewUIMainFrameWindow::GetLayerDepth()
@@ -966,7 +821,11 @@ int SEASON3B::CNewUIMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
 
 void SEASON3B::CNewUIMainFrameWindow::UseHotKeyItemRButton()
 {
-    const auto transform = UI::Scaling::BottomHudLeftTransform(WindowWidth, WindowHeight);
+    // centerTransform, not BottomHudLeftTransform, += GetItemHotkeyOffsetX() * scaleX -- must
+    // match Render3D()'s (and Render()'s leftTransform) exactly, or right-click hit-testing lands
+    // on the wrong screen position. `* scaleX` -- see Render()'s own comment on this bug.
+    auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+    transform.offsetX += GetItemHotkeyOffsetX() * transform.scaleX;
     UI::Scaling::ScopedActiveTransform layout(transform, true);
     m_ItemHotKey.UseItemRButton();
 }
@@ -1462,11 +1321,34 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
         return true;
     }
 
-    x = 385.f; y = 431.f; width = 32.f; height = 38.f;
-    if (SEASON3B::CheckMouseIn(x, y, width, height))
+    // 2026-09-02: bug fix, found while building the item-hotkey/skill-list layout-anchor
+    // mechanism (NewUIMainFrameWindow.h's GetSkillListOffsetX() comment) -- this function is
+    // registered directly with CNewUIManager (Create()'s AddUIObj()) and called by its generic
+    // per-object UpdateMouseEvent() dispatch (NewUIManager.cpp), which applies NO window-specific
+    // transform. Every CheckMouseIn() call below was therefore running under whatever the GLOBAL
+    // baseline transform happened to be at the time -- UI::Scaling::LegacyUiTransform (an
+    // unclamped, non-uniform stretch-to-window, set once per frame in UIMng.cpp) -- while this
+    // same content actually RENDERS via RenderCurrentSkillAndHotSkillList()/Render()
+    // (CNewUIMainFrameWindow::RenderCenterRegion(), wrapped in centerTransform: a DIFFERENT,
+    // clamped/uniform/centered transform). These two transforms only coincide at resolutions that
+    // are an exact 4:3 multiple of the 640x480 reference (e.g. 1024x768) -- everywhere else
+    // (1280x720 included) they diverge for real, so skill-icon clicks have very likely been
+    // landing in the wrong place at most non-4:3 resolutions. Fixed the same way Render3D()'s
+    // identical potion-hover bug was fixed earlier in this pilot: wrap this function's own body in
+    // the SAME transform its render path uses (centerTransform + GetSkillListOffsetX(), matching
+    // RenderCenterRegion() exactly), via RAII so every early-return path below is still covered.
     {
-        MouseOnWindow = true;
-    }
+        // `* transform.scaleX` -- see Render()'s own comment on this bug (GetSkillListOffsetX()
+        // is an unscaled reference-pixel delta, Transform::offsetX is real screen pixels).
+        auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+        transform.offsetX += g_pMainFrame->GetSkillListOffsetX() * transform.scaleX;
+        UI::Scaling::ScopedActiveTransform layout(transform, true);
+
+        x = 385.f; y = 431.f; width = 32.f; height = 38.f;
+        if (SEASON3B::CheckMouseIn(x, y, width, height))
+        {
+            MouseOnWindow = true;
+        }
 
     if (m_EventState == EVENT_NONE && MouseLButtonPush == false
         && SEASON3B::CheckMouseIn(x, y, width, height) == true)
@@ -1792,6 +1674,7 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
     }
 
     return true;
+    } // end of the ScopedActiveTransform block opened right after the bySkillNumber<=0 guard above
 }
 
 bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
@@ -2023,7 +1906,14 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 
             if (Hero->CurrentSkill == m_iHotKeySkillType[iIndex])
             {
-                SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
+                // 2026-09-01: modern theme skips this legacy sprite -- #skill_slot_0..4
+                // (main_frame.rml/.rcss) highlight the selected slot with a bound CSS class
+                // instead (feedback: "seems to use the legacy sprite outline ... change this to
+                // just programmatic outline"), synced every frame from
+                // IsHotKeySlotCurrentSkill() below (same iIndex/pet logic as here). Legacy theme
+                // keeps the real sprite, its own established look.
+                if (UI::RmlBridge::GetActiveThemeName() != "modern")
+                    SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
             }
             RenderSkillIcon(m_iHotKeySkillType[iIndex], x + 6, y + 6, 20, 28);
         }
@@ -2033,12 +1923,54 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
     }
 }
 
+bool SEASON3B::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
+{
+    // Mirrors RenderCurrentSkillAndHotSkillList()'s own loop exactly (iStartSkillIndex/iIndex
+    // wraparound, the -1 "empty slot" check, the pet-command "no pet -> treat as empty" check) --
+    // see that function's own comment for why this duplicates rather than shares the math.
+    if (iSlotIndex < 0 || iSlotIndex >= 5)
+        return false;
+
+    if (CharacterAttribute->SkillNumber == 0)
+        return false;
+
+    int iStartSkillIndex = m_bHotKeySkillListUp ? 6 : 1;
+    int iIndex = iStartSkillIndex + iSlotIndex;
+    if (iIndex == 10)
+        iIndex = 0;
+
+    if (m_iHotKeySkillType[iIndex] == -1)
+        return false;
+
+    if (m_iHotKeySkillType[iIndex] >= AT_PET_COMMAND_DEFAULT && m_iHotKeySkillType[iIndex] < AT_PET_COMMAND_END)
+    {
+        if (Hero->m_pPet == NULL)
+            return false;
+    }
+
+    return Hero->CurrentSkill == m_iHotKeySkillType[iIndex];
+}
+
 bool SEASON3B::CNewUISkillList::Render()
 {
     int i;
     float x, y, width, height;
 
     BYTE bySkillNumber = CharacterAttribute->SkillNumber;
+
+    // 2026-09-02: same missing-transform bug as UpdateMouseEvent() (see that function's own
+    // comment for the full explanation) -- this is the expanded skill grid, ALSO registered
+    // directly with CNewUIManager and called by its generic, untransformed Render() dispatch, so
+    // it was rendering under the global LegacyUiTransform baseline instead of the centerTransform
+    // (+GetSkillListOffsetX()) the compact hotkey row it expands from actually uses
+    // (RenderCurrentSkillAndHotSkillList(), via CNewUIMainFrameWindow::RenderCenterRegion()) --
+    // meaning the expanded grid would visually misalign from that row at any non-4:3 resolution.
+    // Scoped to the WHOLE function (single, unconditional block) since this simpler function has
+    // no early returns to worry about, unlike UpdateMouseEvent(). `* transform.scaleX` -- see
+    // Render()'s own comment on this bug.
+    auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
+    transform.offsetX += g_pMainFrame->GetSkillListOffsetX() * transform.scaleX;
+    UI::Scaling::ScopedActiveTransform layout(transform, true);
 
     if (bySkillNumber > 0)
     {
@@ -2680,111 +2612,62 @@ void SEASON3B::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
     }
 }
 
+
 void SEASON3B::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
+    // Sets a bound "open" model boolean instead of swapping legacy CNewUIButton sprite frames --
+    // see this class's header comment. main_frame.rcss selects the "panel open" sprite rect when
+    // the corresponding *_open field is true.
+    if (!m_pRmlDoc) return;
+
     switch (iBtnType)
     {
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     case MAINFRAME_BTN_PARTCHARGE:
-    {
-        if (bStateDown)
+        if (m_RmlBinder.GetModel().cShopOpen != bStateDown)
         {
-            m_BtnCShop.UnRegisterButtonState();
-            m_BtnCShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_CSHOP, 2);
-            m_BtnCShop.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_CSHOP, 3);
-            m_BtnCShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_CSHOP, 2);
-            m_BtnCShop.ChangeImgIndex(IMAGE_MENU_BTN_CSHOP, 2);
+            m_RmlBinder.GetModel().cShopOpen = bStateDown;
+            m_RmlBinder.MarkDirty("cshop_open");
         }
-        else
-        {
-            m_BtnCShop.UnRegisterButtonState();
-            m_BtnCShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_CSHOP, 0);
-            m_BtnCShop.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_CSHOP, 1);
-            m_BtnCShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_CSHOP, 2);
-            m_BtnCShop.ChangeImgIndex(IMAGE_MENU_BTN_CSHOP, 0);
-        }
-    }
-    break;
-#endif //defined defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
+        break;
+#endif //defined PBG_ADD_INGAMESHOP_UI_MAINFRAME
     case MAINFRAME_BTN_CHAINFO:
-    {
-        if (bStateDown)
+        if (m_RmlBinder.GetModel().chaInfoOpen != bStateDown)
         {
-            m_BtnChaInfo.UnRegisterButtonState();
-            m_BtnChaInfo.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_CHAINFO, 2);
-            m_BtnChaInfo.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_CHAINFO, 3);
-            m_BtnChaInfo.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_CHAINFO, 2);
-            m_BtnChaInfo.ChangeImgIndex(IMAGE_MENU_BTN_CHAINFO, 2);
+            m_RmlBinder.GetModel().chaInfoOpen = bStateDown;
+            m_RmlBinder.MarkDirty("chainfo_open");
         }
-        else
-        {
-            m_BtnChaInfo.UnRegisterButtonState();
-            m_BtnChaInfo.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_CHAINFO, 0);
-            m_BtnChaInfo.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_CHAINFO, 1);
-            m_BtnChaInfo.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_CHAINFO, 2);
-            m_BtnChaInfo.ChangeImgIndex(IMAGE_MENU_BTN_CHAINFO, 0);
-        }
-    }
-    break;
+        break;
     case MAINFRAME_BTN_MYINVEN:
-    {
-        if (bStateDown)
+        if (m_RmlBinder.GetModel().myInvenOpen != bStateDown)
         {
-            m_BtnMyInven.UnRegisterButtonState();
-            m_BtnMyInven.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_MYINVEN, 2);
-            m_BtnMyInven.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_MYINVEN, 3);
-            m_BtnMyInven.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_MYINVEN, 2);
-            m_BtnMyInven.ChangeImgIndex(IMAGE_MENU_BTN_MYINVEN, 2);
+            m_RmlBinder.GetModel().myInvenOpen = bStateDown;
+            m_RmlBinder.MarkDirty("myinven_open");
         }
-        else
-        {
-            m_BtnMyInven.UnRegisterButtonState();
-            m_BtnMyInven.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_MYINVEN, 0);
-            m_BtnMyInven.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_MYINVEN, 1);
-            m_BtnMyInven.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_MYINVEN, 2);
-            m_BtnMyInven.ChangeImgIndex(IMAGE_MENU_BTN_MYINVEN, 0);
-        }
-    }
-    break;
+        break;
     case MAINFRAME_BTN_FRIEND:
-    {
-        if (bStateDown)
+        if (m_RmlBinder.GetModel().friendOpen != bStateDown)
         {
-            m_BtnFriend.UnRegisterButtonState();
-            m_BtnFriend.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_FRIEND, 2);
-            m_BtnFriend.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_FRIEND, 3);
-            m_BtnFriend.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_FRIEND, 2);
-            m_BtnFriend.ChangeImgIndex(IMAGE_MENU_BTN_FRIEND, 2);
+            m_RmlBinder.GetModel().friendOpen = bStateDown;
+            m_RmlBinder.MarkDirty("friend_open");
         }
-        else
-        {
-            m_BtnFriend.UnRegisterButtonState();
-            m_BtnFriend.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_FRIEND, 0);
-            m_BtnFriend.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_FRIEND, 1);
-            m_BtnFriend.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_FRIEND, 2);
-            m_BtnFriend.ChangeImgIndex(IMAGE_MENU_BTN_FRIEND, 0);
-        }
-    }
-    break;
+        break;
     case MAINFRAME_BTN_WINDOW:
-    {
-        if (bStateDown)
+        if (m_RmlBinder.GetModel().windowOpen != bStateDown)
         {
-            m_BtnWindow.UnRegisterButtonState();
-            m_BtnWindow.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_WINDOW, 2);
-            m_BtnWindow.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_WINDOW, 3);
-            m_BtnWindow.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_WINDOW, 2);
-            m_BtnWindow.ChangeImgIndex(IMAGE_MENU_BTN_WINDOW, 2);
+            m_RmlBinder.GetModel().windowOpen = bStateDown;
+            m_RmlBinder.MarkDirty("window_open");
         }
-        else
-        {
-            m_BtnWindow.UnRegisterButtonState();
-            m_BtnWindow.RegisterButtonState(BUTTON_STATE_UP, IMAGE_MENU_BTN_WINDOW, 0);
-            m_BtnWindow.RegisterButtonState(BUTTON_STATE_OVER, IMAGE_MENU_BTN_WINDOW, 1);
-            m_BtnWindow.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_MENU_BTN_WINDOW, 2);
-            m_BtnWindow.ChangeImgIndex(IMAGE_MENU_BTN_WINDOW, 0);
-        }
+        break;
     }
-    break;
-    }
+}
+
+void SEASON3B::CNewUIMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
+{
+    if (!m_pRmlDoc) return;
+
+    if (IsVisible() && sceneAllowsShow)
+        m_pRmlDoc->Show();
+    else
+        m_pRmlDoc->Hide();
 }

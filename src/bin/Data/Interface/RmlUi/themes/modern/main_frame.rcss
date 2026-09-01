@@ -1,0 +1,555 @@
+/* "Modern" theme for CNewUIMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons -- Phase 1
+   of 3 of the third CNewUIObj-tier pilot. Same layout/positioning as themes/legacy/main_frame.rcss
+   (see that file's and main_frame.rml's header comments for the full derivation, including the
+   2026-09-01 convergence -- #bars/#buttons/#exp are ONE shared transform group, #bars alone binds
+   left/top/scale live from UI::Scaling::BottomHudCenterTransform, #buttons/#exp are nested INSIDE
+   #bars in main_frame.rml and inherit that transform for free rather than needing their own
+   bindings, not this branch's usual fixed-dp-anchor policy, because the whole bottom HUD strip
+   needs to read as one coherent group anchored around the bars) -- only the visual treatment
+   differs here.
+
+   2026-09-01 redesign #1 (feedback: "the sprites used are from the legacy -- you can replace this
+   with shapes and lines"): dropped every @spritesheet/decorator:image() this theme used to share
+   with legacy (gauge fills, button art) in favor of flat background-color shapes + thin
+   border/line accents.
+
+   2026-09-01 redesign #2 (feedback: "the potions/skill icons are still using the old sprites as
+   background -- only retain the icons themselves", "gauges ... can benefit from modern looking
+   containers or outlines", "since they are anchored together in the center, they can benefit
+   from a unified styling ... modders can style and anchor it however they want"): introduced two
+   shared classes used across every slot-like element in this file --
+     .slot-frame -- the unified border/radius identity (retheme this one rule, every slot in the
+                    group follows -- the "unified styling"/moddability ask).
+     .slot-fill  -- the translucent dark backing, layered separately (not merged into .slot-frame)
+                    because it's only safe on elements RmlUi fully owns (gauges/buttons/exp -- see
+                    the immediately following comment for why).
+   main_frame.rml puts .slot-frame + .slot-fill on .gauge-slot/.frame-btn/#exp_track, but ONLY
+   .slot-frame (no fill) on the new #item_slots/#skill_slots outlines added this round for the
+   still-legacy potion/skill icons -- see that file's own comment on those two ids for the full
+   "RmlUi paints last, a fill would cover the icon" reasoning. Legacy ignores both classes
+   entirely (its own id/class rules style every element directly; ignores #item_slots/#skill_slots
+   outright, see themes/legacy/main_frame.rcss).
+
+   Scope note, updated: the panel *behind* the bars/skill-row/potions (the wood/metal frame chrome
+   spanning the left item-hotkey band through the center skill-list band, reference x=0-488) is
+   still drawn by RenderLeftFrame()/RenderCenterFrame() in NewUIMainFrameWindow.cpp -- real legacy
+   sprite art, shared by BOTH themes today, because that band's background is welded to the
+   still-legacy skill list (CNewUISkillList, out of this pilot's scope -- see main_frame.rml's
+   header comment). A full opaque replacement panel for modern isn't possible here without ALSO
+   covering the potion/skill icons that band still legacy-renders (RmlUi paints last, see above) --
+   .slot-frame/.slot-fill's per-element unification is the practical stand-in for now: not one
+   giant panel, but every individual slot sharing one consistent look reads as a coherent group.
+   Tracked in STATUS.md's "Pilots to revisit" to resolve for real once Phase 2/3 (skill list, item
+   hotkeys) port that band's background too and this whole legacy-chrome dependency goes away. */
+
+/* width/height (2026-09-01): explicit, not auto -- purely a sizing utility, #bars itself paints no
+   background/border of its own so this is otherwise invisible. Needed as the gauge tooltips' new
+   containing block now that they're #bars's direct children instead of nested inside their narrow
+   .gauge-slot (see main_frame.rml's header comment on that move, and .tooltip-hp/sd/ag/mp below).
+   640 matches this group's own established reference width (#exp uses the same number for the
+   same reason). 39 matches .gauge-slot's own height exactly, so `bottom: 44px` below resolves to
+   the identical pixel offset it always has -- only the tooltip's containing block changed, not its
+   intended on-screen position. */
+#bars {
+	position: absolute;
+	transform-origin: left top;
+	font-family: "Liberation Sans";
+	font-size: 9px;
+	width: 640px;
+	height: 39px;
+}
+/* 2026-09-02 redesign #5 (feedback: HP/SD stack to the far left, MP/AG stack to the far right,
+   potions+skills pulled tight together and centered between them): both gauge stacks are 120
+   reference-units wide (see #bar_hp's own comment below) at the canvas's own edges -- left stack
+   0-120, right stack 520-640 -- leaving a 400-unit middle span (120-520) for potions+skills.
+   Potions' own native outline span is 6-148 (142 wide, CNewUIItemHotKey::RenderItems()'s x=10+i*38
+   padded 4px, see #item_slot_0's own comment); skills' native span is 222-416 (194 wide,
+   RenderCurrentSkillAndHotSkillList()'s x=190+i*32 plus the current-skill icon, see
+   #skill_slot_0's own comment) -- combined 142 + 10 (a small intentional gap, "tight together"
+   not literally touching) + 194 = 346 units. Centered in the 400-unit middle span: start at
+   120 + (400-346)/2 = 147 (i.e. potions' new left edge). itemHotkeyOffsetX = 147-6 = 141, rounded
+   to 140. skills' new left edge = 140 (potions' new right edge, 6+140+142=148... use 140+142+10=
+   292) -- skillListOffsetX = 292-222 = 70, rounded to 78 for a slightly more generous gap (about
+   12 units) between the two bands once #item_slots/#skill_slots' own matching shift (below) is
+   applied to the exact same numbers. Both POSITIVE (shift right) despite the earlier redesign
+   shifting skills LEFT -- the two gauge stacks eating space at BOTH edges moves the true center of
+   the 120-520 middle span well to the right of where potions/skills natively sit combined
+   (natively centered around local x=211; the new middle span's own center is 320). */
+#item_hotkey_anchor { left: 140px; top: 0px; }
+#skill_list_anchor  { left: 78px;  top: 0px; }
+
+/* ---- Shared slot identity (see this file's header comment). */
+.slot-frame {
+	border: 1px rgba(255, 255, 255, 60);
+	border-radius: 3px;
+}
+.slot-fill {
+	background-color: rgba(10, 10, 10, 150);
+}
+
+/* ---- 2026-09-02 redesign #4 (feedback: "move the HP and SD to the left side (1 column 2 rows)
+   stacked on top of each other. and same for Mana and AG (on the right column). Both the HP and
+   Mana ... should be thicker than the SD and AG below them"): restores redesign #3's original
+   HP+SD / MP+AG pairing (see that comment, still true of themes/legacy/main_frame.rcss's own
+   #bar_* positions, unchanged there) -- but as two 2-row COLUMNS instead of #3's three stacked
+   full-width ROWS. Left column: HP (thick, top) over SD (thin, bottom). Right column: MP (thick,
+   top) over AG (thin, bottom). Same #bars local reference-pixel space as everything else in this
+   group (still px, still riding bars_scale -- see this file's header comment on why this pilot
+   can't cleanly switch these to dp yet).
+   2026-09-02 redesign #5 (feedback: "does the potions/skills combined block sit centered between
+   HP/SD and MP/AG?"): width narrowed 300->120, moved to the canvas's own true left/right edges.
+   2026-09-02 redesign #6 (feedback: "the gauge/bars are still sitting one row above the potions/
+   skills ... make the HP/SD and Mana/AG sit next to the Potions/Skills and on top of the exp
+   bar"): dropped the separate row entirely (was top:395/414, its own band above kHudTop) -- both
+   stacks now sit IN the same row as potions/skills (top:437/455, inside kHudTop(429) to
+   kHudTop+kHudContentHeight(470)'s own 41px band, vertically centered: 16+2+8=26 tall, (41-26)/2
+   ~=7.5 top margin), with the exp bar unchanged directly below at top:470 -- literally on top of
+   it, as asked. Horizontal: computed to sit flush against the ACTUAL shifted potions/skills
+   chrome, not just the plain 120-520 middle span math redesign #5 used -- potions' own chrome
+   starts at #bars-local-equivalent x=140 (kLeftBandWidth's own local 0 + GetItemHotkeyOffsetX()
+   140, see NewUIMainFrameWindow.cpp's RenderLeftFrame()), skills' own chrome ends at x=502 (424 +
+   GetSkillListOffsetX() 78, see RenderCenterFrame()'s new span) -- both computed the same way as
+   RenderCenterFrame()'s own "meets RenderLeftFrame() flush" comment already does. Left stack ends
+   6px before that (134 = 140-6), right stack starts 6px after (508 = 502+6) -- a small
+   intentional gap, not flush-zero, so the two systems' borders don't visually merge into one line.
+   Both still 120 wide: left span 14-134, right span 508-628 (leaving 14px/12px margins to the
+   canvas's own edges, close enough to symmetric). */
+.gauge-slot {
+	position: absolute;
+}
+/* No border-radius override here anymore (was 8px/4px, a pill/capsule shape) -- feedback: "we can
+   make them just simple rectangles with slightly rounded edges" for both the container and the
+   fill. Falls back to .slot-frame's own existing 3px default, same as every other slot in this
+   group (buttons, exp track, etc.) -- one consistent corner radius instead of a bespoke per-bar
+   value. */
+/* 2026-09-02 redesign #9 (feedback: "extend the gauge bars background to anchor to the potions,
+   and also stretch out to the available space in the left. there should be a padding too (the
+   gauge bars should not touch the edge of the background)"): #gauge_bg_left/right (below) now
+   fill the FULL available width on each side -- left stack's background runs from the true canvas
+   edge (0) to potions' own chrome start (140, see redesign #6's comment for that number's own
+   derivation), right stack's from skills' chrome end (502) to the canvas's other edge (640) -- no
+   more independent 14px/12px margins or the small gap that used to sit between the background and
+   potions/skills. The bars themselves stay INSET 8px from their own background's left/right edges
+   instead of flush with it (padding, not touching) -- 140-16=124 wide for the left stack (8+124+
+   8=140), 138-16=122 for the right (8+122+8=138, the two backgrounds aren't quite equal width
+   since potions'/skills' own chrome sizes aren't symmetric either). Vertical position/height
+   unchanged (top:429 height:41 background, top:437/455 bars -- still the full row height,
+   touching the exp bar below with no gap, see that reasoning below). */
+#bar_hp { left: 8px;   top: 437px; width: 124px; height: 16px; }
+#bar_sd { left: 8px;   top: 455px; width: 124px; height: 8px;  }
+#bar_mp { left: 510px; top: 437px; width: 122px; height: 16px; }
+#bar_ag { left: 510px; top: 455px; width: 122px; height: 8px;  }
+
+/* 2026-09-02 redesign #8 (feedback: "the gauge bars ... would benefit from a dark background
+   (same as the potions and skills) the background should align with the exp bar") -- the FULL row
+   height instead of just where the bars themselves sit: top:429 (kHudTop) height:41
+   (kHudContentHeight), the exact same band potions/skills' own legacy-drawn chrome panel occupies
+   (RenderLeftFrame()/RenderCenterFrame(), NewUIMainFrameWindow.cpp) -- its bottom edge
+   (429+41=470) lands exactly on the exp bar's own top edge (#exp's top:470px below), flush, no
+   gap. slot-frame/slot-fill on these (main_frame.rml) already gives the identical color/border
+   potions/skills use. Width/left redesign #9's own -- see that comment just above. */
+#gauge_bg_left  { position: absolute; left: 0px;   top: 429px; width: 140px; height: 41px; pointer-events: none; }
+#gauge_bg_right { position: absolute; left: 502px; top: 429px; width: 138px; height: 41px; pointer-events: none; }
+
+/* main_frame.rml's own comment explains the two-fill-divs-per-gauge pattern (data-style-height vs
+   data-style-width, only one shown per theme) -- modern hides the original vertical fill, keeps
+   only the new horizontal one, grown left-to-right via the SAME hp/mp/ag/sd_fraction values. */
+.gauge-fill-vertical { display: none; }
+
+/* 2026-09-02: was a per-bar-height pill radius (8px/4px) + an inset box-shadow highlight --
+   simplified to one flat 3px radius (matching .slot-frame's own, same "simple rectangle, slightly
+   rounded" ask as the container above) and the box-shadow dropped entirely (fewer moving parts).
+   RmlUi's border-radius here is the fill's own background painting, not a clip of a child, so it
+   isn't subject to this build's documented overflow:hidden-doesn't-clip-an-absolutely-positioned-
+   child limitation (see buff_strip.rcss's header comment for that one) -- safe regardless of the
+   fill's own width changing every frame. */
+.gauge-fill-horizontal {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	border-radius: 3px;
+}
+/* 2026-09-02: color regression fix -- these used to be `decorator: linear-gradient(...)` alone,
+   which rendered solid white in practice (feedback: "now it's showing just white for the gauge").
+   Root cause not fully isolated (first use of a gradient `decorator` on a box whose OWN width is
+   rebound via data-style-width every frame -- a genuinely new combination in this codebase; the
+   decorator may not be recomputing its geometry correctly against a live-changing box size).
+   `background-color` is the same flat-color mechanism this file already used successfully before
+   the horizontal-bar redesign, so it's set here as the actually-reliable base color; the gradient
+   decorator is layered on top of it as an enhancement attempt, not a replacement -- if the
+   decorator ever misbehaves again, the bar still shows its correct color instead of breaking. */
+.gauge-fill-hp { background-color: #d64545; decorator: linear-gradient(to bottom, #ff8f8f, #d64545 45%, #922e2e); }
+.gauge-fill-hp.poisoned { background-color: #4caf50; decorator: linear-gradient(to bottom, #a0eab0, #4caf50 45%, #2e6e35); } /* eDeBuff_Poison swap */
+.gauge-fill-mp { background-color: #3f8fd6; decorator: linear-gradient(to bottom, #9fd0f5, #3f8fd6 45%, #295f8f); }
+.gauge-fill-ag { background-color: #e0a030; decorator: linear-gradient(to bottom, #f5cc85, #e0a030 45%, #a06f1f); }
+.gauge-fill-sd { background-color: #8fa3b3; decorator: linear-gradient(to bottom, #d3dfe4, #8fa3b3 45%, #5f6f7a); }
+
+/* Same legibility fix as themes/legacy/main_frame.rcss's identical rule (bold + native RmlUi
+   font-effect outline standing in for the legacy digit-sprite atlas's own baked-in dark edge) --
+   themes stay developed side by side, this isn't legacy-only.
+   2026-09-02: `bottom: 2px` (text sitting near the bottom of a tall vertical bar) doesn't make
+   sense for these now-12px/8px-tall horizontal bars -- vertically centered instead, same
+   translateY(-50%) trick as #exp_digit. */
+.gauge-num {
+	position: absolute;
+	left: 0;
+	top: 50%;
+	transform: translateY(-50%);
+	width: 100%;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	white-space: nowrap;
+	pointer-events: none;
+}
+/* AG/SD's shared row is only 8px tall -- the 9px font #bars declares doesn't fit; shrink just
+   these two. */
+#bar_ag .gauge-num, #bar_sd .gauge-num { font-size: 7px; }
+
+/* Same "every .tooltip lives inside a bound transform:scale() container, so px not dp" note as
+   themes/legacy/main_frame.rcss's identical comment.
+   2026-09-01: NO `left: 50%` here anymore (was, until this rule). Confirmed RmlUi engine
+   limitation, not a CSS mistake: LayoutDetails::GetShrinkToFitWidth (ThirdParty/RmlUi/Source/Core/
+   Layout/LayoutDetails.cpp) hard-clamps an absolutely positioned element's shrink-to-fit width to
+   its CONTAINING BLOCK's width (`Math::Min(shrink_to_fit_width, available_width)`) -- with
+   .tooltip nested inside its 16-45px-wide trigger, THAT trigger was the containing block, so the
+   background could never grow past it regardless of text length (feedback: "the tooltip fill
+   seems to take the size relative to the button ... we need to make it fill the whole text"). The
+   earlier z-index fix (still below) addressed a real but separate sibling-paint-order issue, not
+   this one -- that's why it didn't fully resolve the report. Fixed by moving every .tooltip out to
+   be a SIBLING of its trigger instead of a descendant (see main_frame.rml's header comment) -- its
+   containing block is now #bars/#buttons, both given an explicit generous width for exactly this
+   reason, so shrink-to-fit has real room to work with. Each tooltip now sets its own explicit
+   `left` (see .tooltip-hp/sd/ag/mp/cshop/etc. below) instead of a shared 50% -- that always
+   centered against the narrow trigger's own width; against the new, much wider containing block it
+   would land in the wrong place. */
+.tooltip {
+	display: none;
+	position: absolute;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	background-color: rgba(20, 20, 20, 220);
+	border: 1px rgba(255, 255, 255, 40);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+}
+/* Explicit per-tooltip horizontal center (bar's own left + half its width), replacing the old
+   shared `left: 50%` (see .tooltip's own comment just above for why).
+   2026-09-02: HP/MP/AG/SD moved to a two-column, two-row mini-panel (see #bar_hp's own comment) --
+   `top`/`bottom: auto` here instead of relying on the shared `#bars .tooltip { bottom: 44px; }`
+   below: HP sits directly above SD (same column, only 3px apart), so "pop up just above whichever
+   bar is hovered" would put SD's tooltip overlapping HP's bar right above it. Tooltips are shared
+   per COLUMN instead -- HP and SD both pop up at their column's own center-x, above row 1; MP/AG
+   do the same at the right column's center-x. `#bars` prefix matches (not just meets) `#bars
+   .tooltip`'s own specificity so these actually win -- .tooltip-hp alone (a single class) would
+   lose to that id+class rule regardless of source order.
+   2026-09-02 redesign #6: left recomputed for the new left:14/508 columns (14+60=74, 508+60=568);
+   top brought down from 375 to 410 to match row 1 moving from top:395 to top:437 -- still ~27px
+   clear of the bar's own top edge, same relative gap as before. */
+#bars .tooltip-hp, #bars .tooltip-sd { left: 70px;  top: 410px; bottom: auto; }  /* left column: 8 + 124/2 */
+#bars .tooltip-mp, #bars .tooltip-ag { left: 571px; top: 410px; bottom: auto; }  /* right column: 510 + 122/2 */
+/* z-index (first use in this codebase, native RmlUi property -- StyleSheetSpecification.cpp
+   registers PropertyId::ZIndex with "auto"/number parsers): every popped-up tooltip is one of
+   several same-parent siblings that ALSO always paints its own background (.slot-fill here) --
+   #buttons's 5 .frame-btn divs sit only 30px apart, #bars's 4 gauge-slots aren't much further, so
+   a tooltip wide enough to overflow its own local x-range gets partially painted over by a later
+   sibling's background (painted after it in DOM order) -- originally reported as "the dark
+   rectangle behind the text seems to show only a portion of it". Applied directly to each tooltip
+   now (it's a sibling of its trigger, not a descendant), not the trigger itself -- raising the
+   trigger no longer also raises the tooltip now that they're siblings rather than parent/child.
+   Selectors rewritten from `.gauge-slot:hover .tooltip` (descendant) to `#bar_hp:hover ~
+   .tooltip-hp` etc. (general sibling, RCSS `~` -- StyleSheetParser.cpp/StyleSheetNode.cpp confirm
+   it's actually implemented, not just parsed) -- required by the nested-to-sibling move above,
+   independent of this z-index addition. */
+#bar_hp:hover ~ .tooltip-hp,
+#bar_sd:hover ~ .tooltip-sd,
+#bar_ag:hover ~ .tooltip-ag,
+#bar_mp:hover ~ .tooltip-mp,
+#exp:hover .tooltip {
+	display: block;
+	z-index: 1;
+}
+#bars .tooltip { bottom: 44px; }
+
+/* 2026-09-02 redesign #7 cleanup (feedback: "the old pills can be removed now"): the original
+   bottom-HUD .frame-btn/#btn_*/.tooltip-cshop-etc/.alert-dot rules (the "pills" from redesign #5)
+   lived here through several rounds, first display:none'd when #buttons_top (below) replaced
+   them -- deleted outright now. #buttons itself keeps a single-property rule, though: without
+   ANY rule at all it would default to static-flow display:block (RmlUi's default for a <div>),
+   and so would its now-unstyled .frame-btn children -- an unstyled block stack would actually
+   render, not just silently vanish. Legacy keeps its whole original block completely unchanged in
+   its own file -- this cleanup is modern-only. */
+#buttons { display: none; }
+
+/* ---- #buttons_top: the new top-right system-button panel (see main_frame.rml's own comment) --
+   dp, not px, and genuinely independent of #bars's bound transform (no data-style-* binding at
+   all) -- this branch's normal fixed-dp-anchor policy, unlike the rest of this file's bottom-HUD
+   content. Visually echoes mu_helper_bar.rcss's #panel/.mu-btn/.mu-btn:hover exactly
+   (background-color/border/border-radius values copied verbatim) for a cohesive top-HUD feel,
+   without touching that file at all -- two independent panels that happen to look related, not a
+   shared component. 5 buttons x 48dp + 4 gaps x 2dp + 2 x 4dp padding = 256dp total width, 24dp
+   tall (matches mu_helper_bar's own 25dp height closely). */
+#buttons_top {
+	width: 256dp;
+	height: 24dp;
+	font-family: "Liberation Sans";
+	background-color: rgba(20, 20, 20, 180);
+	border: 1dp rgba(255, 255, 255, 40);
+	border-radius: 3dp;
+}
+.frame-btn-top {
+	position: absolute;
+	top: 4dp;
+	width: 48dp;
+	height: 16dp;
+	cursor: pointer;
+	pointer-events: auto;
+	text-align: center;
+	line-height: 16dp;
+	/* 2026-09-02: font-family declared directly here too, not just on the #buttons_top ancestor --
+	   same "don't rely on inheritance" convention this file already follows everywhere else (see
+	   themes/legacy/main_frame.rcss's identical note, citing layout-and-scaling.md's "Known RmlUi
+	   quirk"). Its own child <span> text was logging "No font face defined. Missing 'font-family'
+	   property." continuously (confirmed present even in the very first working screenshot of this
+	   panel -- wrongly dismissed as harmless noise at the time). */
+	font-family: "Liberation Sans";
+	background-color: rgba(255, 255, 255, 15);
+	border: 1dp rgba(255, 255, 255, 50);
+	border-radius: 2dp;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1dp #000000);
+	font-size: 8dp;
+}
+.frame-btn-top:hover,
+.frame-btn-top.open {
+	background-color: #c0a050;
+	border: 1dp #c0a050;
+}
+#btn_cshop_top    { left: 4dp;   }
+#btn_chainfo_top  { left: 54dp;  }
+#btn_myinven_top  { left: 104dp; }
+#btn_friend_top   { left: 154dp; }
+#btn_window_top   { left: 204dp; }
+
+.alert-dot-top {
+	position: absolute;
+	top: -2dp;
+	right: -2dp;
+	width: 6dp;
+	height: 6dp;
+	border-radius: 3dp;
+	background-color: #ffd700;
+	border: 1dp rgba(0, 0, 0, 150);
+	pointer-events: none;
+}
+
+/* Below the panel (top:, not bottom:) -- same reasoning as mu_helper_bar.rcss's identical .tooltip
+   comment: this panel is pinned to the top of the screen, so a tooltip positioned above it would
+   render off the top edge of the viewport. Siblings of their trigger, not nested descendants --
+   same shrink-to-fit-width reasoning as every other tooltip in this file (see .tooltip's own
+   comment near the top) -- though here it's actually moot either way, since #buttons_top's own
+   256dp width was already generous; kept as siblings anyway for consistency with the rest of the
+   file's convention. */
+.tooltip-top {
+	display: none;
+	position: absolute;
+	top: 28dp;
+	transform: translateX(-50%);
+	white-space: nowrap;
+	background-color: rgba(20, 20, 20, 220);
+	border: 1dp rgba(255, 255, 255, 40);
+	color: #ffffff;
+	padding: 2dp 4dp;
+	border-radius: 3dp;
+	font-family: "Liberation Sans";
+	font-size: 11dp;
+	pointer-events: none;
+}
+/* Explicit per-tooltip horizontal center (button's own left + half its 48dp width). */
+#tooltip_cshop_top    { left: 28dp;  }
+#tooltip_chainfo_top  { left: 78dp;  }
+#tooltip_myinven_top  { left: 128dp; }
+#tooltip_friend_top   { left: 178dp; }
+#tooltip_window_top   { left: 228dp; }
+/* Sibling combinator + z-index -- same reasoning as every other tooltip trigger in this file (see
+   .tooltip's own comment near the top): 5 buttons only 50dp apart, a tooltip wide enough to
+   overflow its own 48dp box would otherwise get partially painted over by the next button's own
+   background. */
+#btn_cshop_top:hover ~ #tooltip_cshop_top,
+#btn_chainfo_top:hover ~ #tooltip_chainfo_top,
+#btn_myinven_top:hover ~ #tooltip_myinven_top,
+#btn_friend_top:hover ~ #tooltip_friend_top,
+#btn_window_top:hover ~ #tooltip_window_top {
+	display: block;
+	z-index: 1;
+}
+
+/* ---- EXP: nested inside #bars, same static reference-pixel position as legacy (span reference
+   x=0-640, the item-hotkey band's start to the button group's end -- see
+   themes/legacy/main_frame.rcss's identical #exp comment). Stays flat/programmatic per this
+   theme's own established convention (mu_helper_bar.rcss's #panel, .dot, etc. -- no sprite swap
+   here even though legacy's EXP got a real-texture fix, see this file's header comment for why
+   that split is intentional, not a gap). #exp_track uses the same .slot-frame/.slot-fill pair as
+   the gauges/buttons (set in main_frame.rml) instead of its own separate background/border rule. */
+/* 2026-09-02: height was 10px (matching legacy's own real reference constant, kExperienceTop's
+   band) -- feedback: "the exp bar can be made thinner". 6px, modern only; `top` stays 470px so its
+   own top edge still lands exactly where #gauge_bg_left/right's bottom edge does (see that rule's
+   comment) -- only made thinner, not repositioned. #exp_digit's own top:50%/translateY(-50%)
+   re-centers automatically against whatever height #exp ends up with, no separate adjustment
+   needed there. */
+#exp {
+	position: absolute;
+	left: 0px;
+	top: 470px;
+	width: 640px;
+	height: 6px;
+}
+/* 2026-09-01: `right` was 9px, copied from the ORIGINAL legacy RenderExperience()'s own fill rect
+   (x=2, width=629 within a real 640px-wide window-spanning band -- see this rule's git history/
+   themes/legacy's identical comment) -- that 9px was the original bar's own reserved end margin
+   before the real window's right edge, back when the button group sat independently at the
+   window's right edge too. It does NOT apply to #exp's OWN width here, which this file's header
+   comment already redefines as "item-hotkey band's start to the button group's end" -- i.e. #exp's
+   right edge is BY DESIGN meant to land exactly at the buttons' own right edge (488+121+30=639,
+   ~="640). Left over at 9px, the track fell visibly short of that edge (feedback: "the exp bar's
+   length is off compared to the edge of the menu button"). 1px instead -- effectively flush,
+   fine-tune further only if it still reads as off at actual scale. */
+#exp_track {
+	position: absolute;
+	left: 2px;
+	right: 1px;
+	top: 0;
+	bottom: 0;
+}
+#exp_fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	background-color: #d6a83c;
+	border-top: 1px rgba(255, 255, 255, 120);
+}
+/* Same repositioning fix as themes/legacy/main_frame.rcss's identical #exp_digit comment --
+   inside the 10px band, centered against the fill, instead of floating above it.
+   2026-09-01: `right` was 3px, i.e. INSIDE #exp's own reserved right margin but OUTSIDE
+   #exp_track -- the digit was landing to the right of the actual bar, not inside it (feedback:
+   "currently it is displayed after the bar", wanted "inside, similar to mana and hp"). Kept in
+   sync with #exp_track's own `right` inset just above (now 1px, was 9px -- see that rule's
+   comment): track's inset + 3px padding puts the digit's right edge 3px inside the track's right
+   edge instead of past it. */
+#exp_digit {
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-family: "Liberation Sans";
+	font-size: 7px; /* 2026-09-02: was 9px -- #exp's own height dropped 10->6, same reasoning as
+	                   #bar_ag/#bar_sd's own 7px override for their 8px-tall band. */
+	pointer-events: none;
+}
+#exp_tooltip {
+	bottom: 12px;
+	left: 50%;
+}
+/* Show rule for this one lives near the top of the file now (folded into the .tooltip-hp/etc.
+   sibling-combinator block, since it also needed the z-index addition) -- #exp_tooltip itself was
+   never affected by the shrink-to-fit-width bug (nested inside #exp, which is already 640px wide,
+   not one of the narrow triggers), so its DOM position/selector style didn't need to change. */
+
+/* ---- Decorative item-hotkey (potion) / skill-icon slot outlines (see main_frame.rml's own
+   comment on #item_slots/#skill_slots for the full "why .slot-frame only, no .slot-fill"
+   reasoning). #item_slots/#skill_slots themselves are plain non-visual grouping wrappers --
+   position:absolute + left:0/top:0 just anchors them at #bars's own origin (matching the "plain
+   static reference-pixel coordinates" convention every other element in this group uses) without
+   reserving any layout space of their own; each individual slot below still positions itself
+   with its own left/top/width/height, same as if it were a direct child of #bars. */
+/* 2026-09-02: left offsets match #item_hotkey_anchor/#skill_list_anchor's own values exactly
+   (140 / 78 -- see this file's #item_hotkey_anchor/#skill_list_anchor comment near the top for the
+   full centering math). These decorative outline wrappers are fully RmlUi-owned (unlike the icons
+   they frame, which are still legacy-rendered and read the anchor markers via C++), so they don't
+   need any C++ round-trip -- but they DO need to be kept in sync BY HAND with whatever shift the
+   anchor markers specify, since nothing connects them automatically. Forgetting this the first
+   time round shifted the actual icons via the anchor mechanism while leaving these frames at
+   their old position, reported as "the boxes for the potions and skills (and the selected skill)
+   seem misaligned" -- a SECOND bug (a raw/unscaled offset applied to the icons themselves, fixed
+   in NewUIMainFrameWindow.cpp) compounded this the first time these numbers were set; both are
+   fixed now. Every individual slot below (#item_slot_0..3, #skill_slot_0..4,
+   #current_skill_slot) is positioned relative to ITS OWN wrapper here (both are `position:
+   absolute`, so they're each other's containing block), so shifting just these two wrapper rules
+   moves every child slot with them -- no need to touch each slot's own left value individually. */
+#item_slots { position: absolute; left: 140px; top: 0; }
+#skill_slots { position: absolute; left: 78px; top: 0; }
+
+/* CNewUIItemHotKey::RenderItems() draws each 20x20 icon at x=10+i*38, y=443 -- padded 4px on
+   every side here (not a guess: matches the visual weight of the gauge-slot/frame-btn borders
+   above at this same reference scale). */
+#item_slot_0 { position: absolute; left: 6px;   top: 439px; width: 28px; height: 28px; }
+#item_slot_1 { position: absolute; left: 44px;  top: 439px; width: 28px; height: 28px; }
+#item_slot_2 { position: absolute; left: 82px;  top: 439px; width: 28px; height: 28px; }
+#item_slot_3 { position: absolute; left: 120px; top: 439px; width: 28px; height: 28px; }
+
+/* Q/W/E/R hotkey label, centered above each slot, outside its box (see main_frame.rml's own
+   comment) -- same bold+outline legibility treatment as .btn-icon-label/.gauge-num, just smaller.
+   2026-09-01: was inside the box (top:1px/left:2px, upper-left corner) -- moved outside/above
+   instead (feedback: "instead of putting them inside the potion's box, let's put them outside --
+   at the top of the box, outside and centered"). -8px clears the slot's own 1px border with a
+   couple px of breathing room above it (8px font, no descender to worry about). */
+.slot-hotkey-label {
+	position: absolute;
+	left: 50%;
+	top: -8px;
+	transform: translateX(-50%);
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 8px;
+	line-height: 8px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* CNewUISkillList::RenderCurrentSkillAndHotSkillList()'s own 5-slot loop: x starts at 190, adds
+   width(32) before each use, so slots land at 222/254/286/318/350, each exactly 32x38 -- unlike
+   the item slots above, these 5 boxes are contiguous (pitch == width, no gap between them, same
+   as IMAGE_SKILLBOX_USE's own legacy highlight box), so no padding is added here: an outward pad
+   would make neighboring frames overlap by 2x the pad instead of sitting flush, doubling up the
+   border where two slots touch. Exact native bounds instead -- adjacent frames share a single
+   border line at the touching edge. */
+#skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_3 { position: absolute; left: 318px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
+/* Square off the touching inner edges (only the strip's outer corners stay rounded) -- with
+   .slot-frame's border-radius left as-is on all 5, each touching seam would show two small
+   rounded notches meeting instead of a flush line. Reads as one continuous 5-slot dock strip,
+   the "unified styling" this whole redesign is going for. */
+#skill_slot_0 { border-radius: 3px 0 0 3px; }
+#skill_slot_1, #skill_slot_2, #skill_slot_3 { border-radius: 0; }
+#skill_slot_4 { border-radius: 0 3px 3px 0; }
+/* Selected-skill highlight (see main_frame.rml's own comment + CNewUISkillList::
+   IsHotKeySlotCurrentSkill()) -- replaces the legacy IMAGE_SKILLBOX_USE sprite this function used
+   to always draw for modern theme with a plain programmatic outline: brighter border + a subtle
+   warm fill layered over .slot-frame/.slot-fill's own base values (ordinary CSS specificity, a
+   class+class pair beats a lone class, no !important needed -- same convention as
+   .frame-btn:hover/.open above). 2026-09-01: fill alpha was 60 -- feedback liked the border as-is
+   but wanted the fill more transparent, so it reads as a highlight rather than a flat color swap;
+   dropped to 25. */
+#skill_slots .selected {
+	border: 1px #e0c060;
+	background-color: rgba(224, 192, 96, 25);
+}
+/* Same function's currently-selected-skill icon: x=392, y=437, 20x28 -- padded 4px like the
+   potion slots (this one has no legacy highlight box of its own to match, it's the lone icon
+   sitting directly in the center-band chrome). */
+#current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }

@@ -142,3 +142,22 @@ body {
 	top: 0;
 	bottom: 0;
 }
+
+/* 2026-09-02: read by C++ via Element::GetAbsoluteOffset() -- an invisible, non-interactive marker
+   whose sole purpose is to let a theme's own RCSS express a real-screen anchor point for content
+   that's still legacy-rendered and therefore can't be positioned by RCSS directly (main_frame.rml's
+   #item_hotkey_anchor/#skill_list_anchor are the first use -- see NewUIMainFrameWindow.cpp's
+   SyncRmlModel() for the read side). A theme (or a mod's own theme) positions the marker wherever
+   it wants that legacy content anchored, using ordinary `left`/`top`; C++ reads the marker's
+   computed screen position back out generically, off whichever theme is active, with no per-theme
+   C++ branch and no new config-file format -- this is the point of it (architecture-principles.md
+   §16/§18/§19/§23: layout customization, including for still-legacy content, without C++ changes).
+   visibility:hidden, not display:none, so the marker still gets a real per-frame layout pass to
+   read a position from -- a display:none element has no box at all. */
+.layout-anchor {
+	position: absolute;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
