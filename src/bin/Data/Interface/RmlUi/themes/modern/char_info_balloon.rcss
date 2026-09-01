@@ -1,6 +1,5 @@
-/* "Modern" theme for the character-select scene's per-character name/guild/level tags -- a
-   flat, semi-transparent rounded backing instead of the legacy sprite art (same approach as
-   every other migrated window's modern theme). */
+/* Modern theme for the character-select scene's per-character name/guild/level tags -- flat,
+   semi-transparent rounded backing instead of legacy sprite art. */
 
 .balloon {
 	position: absolute;

@@ -1,6 +1,5 @@
-/* "Modern" theme for the generic message/confirm dialog -- flat programmatic chrome, no legacy
-   sprite art (same approach as every other migrated window's modern theme). OK/Cancel show real
-   localized text ({{ok_label}}/{{cancel_label}}, bound in msg_win.rml) instead of art. */
+/* Modern theme for the generic message/confirm dialog -- flat programmatic chrome, no legacy
+   sprite art. OK/Cancel show real localized text instead of art. */
 
 #panel {
 	position: absolute;
@@ -14,10 +13,6 @@
 	border-radius: 4dp;
 }
 
-/* Same two-treatment split as the legacy theme -- see that file's comment for why a single-line
-   message centers across the full width while a two-line message left-aligns both lines instead.
-   Native reference offsets are identical between themes (this content was never sprite-art, so
-   there's no "flat vs. real art" distinction to make here). */
 #msg_line1 {
 	position: absolute;
 	left: 0;

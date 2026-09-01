@@ -5,10 +5,8 @@
 	<link type="text/rcss" href="char_make.rcss"/>
 </head>
 <body data-model="char_make">
-	<!-- No panel background at all (matches the legacy m_winBack, which already drew nothing --
-	     CWin::Create() used nTexID=-2 before this migration too): the live 3D character preview
-	     (CCharMakeWin::RenderCreateCharacter(), untouched) shows through everywhere #panel and its
-	     children don't cover. -->
+	<!-- Character-creation dialog. No panel background -- the live 3D character preview shows
+	     through everywhere #panel's children don't cover. -->
 	<div id="panel">
 		<div class="job-btn" data-for="job : jobs" data-class-checked="job.checked" data-class-disabled="job.disabled"
 		     data-style-left="job.rel_left + 'px'" data-style-top="job.rel_top + 'px'"
@@ -29,8 +27,7 @@
 			<div class="desc-line" style="top: 31px;">{{desc_line2}}</div>
 		</div>
 
-		<!-- Background art only -- the actual name text is drawn on top afterward by legacy code
-		     (CCharMakeWin::RenderTextOnTop(), called from Winmain.cpp's SetPostRmlUiCallback). -->
+		<!-- Background art only -- name text is drawn on top afterward by legacy code. -->
 		<div id="input_frame" class="input-frame"></div>
 
 		<div id="btn_ok" class="btn btn-ok" data-event-click="charmake_ok_click">{{ok_label}}</div>

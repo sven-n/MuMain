@@ -1,14 +1,6 @@
-/* RmlUi overlay for the character-creation dialog (CCharMakeWin). CWin draws nothing for the
-   outer window (m_winBack always used nTexID=-2, even before this migration -- the live 3D
-   character preview shows through everywhere #panel's children don't cover). Source art per
-   Engine/Object/ZzzOpenData.cpp's OpenCharacterSceneData(): cha_id.tga (346x38, the name-input
-   frame), cha_bt.tga (108x26-per-frame, 4-frame vertical strip -- frame 0 = unchecked, frame 3 =
-   checked, matching CButton::Create's nCheckUpFrame=3 param), and the same message_ok_b_all.tga/
-   loding_cancel_b_all.tga OK/Cancel art login.rcss already uses (BITMAP_BUTTON+0/+1). Only
-   idle/checked frames are reproduced -- same simplification precedent every other window's
-   buttons already established. The stat/description panels were always flat CSprite fills
-   (CSprite::SetColor/SetAlpha, not image art) in the original, reproduced here as plain
-   background-color, same as CCharSelMainWin's info-bar. */
+/* Legacy theme for the character-creation dialog (CCharMakeWin). Only idle/checked button frames
+   are reproduced. Stat/description panels were always flat CSprite fills in the original, so
+   they're plain background-color here too. */
 
 @spritesheet charmake-input-sheet
 {
@@ -34,8 +26,7 @@
 
 #panel {
 	position: absolute;
-	/* Width/height and every child's left/top are pushed from C++ (CCharMakeWin::Create/
-	   SetPosition) -- same idiom as every other migrated window. */
+	/* Width/height and every child's left/top are pushed from C++ (CCharMakeWin). */
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
@@ -51,9 +42,6 @@
 	cursor: pointer;
 	pointer-events: auto;
 	decorator: image(charmake-job-unchecked);
-	/* Representative colors for the original's per-state text-color table (jobButtonColors in
-	   CharMakeWin.cpp) -- unchecked/enabled, checked, and disabled, without reproducing the
-	   hover/press color swaps (same "idle+checked only" simplification as the art above). */
 	color: #e2e2e2;
 }
 .job-btn.checked {
@@ -66,9 +54,6 @@
 	cursor: default;
 }
 
-/* Flat, semi-transparent backing panels -- always plain CSprite fills in the original, never
-   sprite art (see this file's header comment). .tall reproduces the Dark Lord-only extra stat
-   row's larger panel height (96px vs 80px, CMW_SPR_STAT's SetSize call). */
 .stat-panel, .desc-panel {
 	position: absolute;
 }
@@ -99,10 +84,6 @@
 .stat-label {
 	color: #ffffff;
 }
-/* left:54px matches the original's kStatValueOffset constant exactly (CharMakeWin.cpp) --
-   value X = statBaseX + 54, label X = statBaseX, both measured from the same origin .stat-row
-   is already positioned at (kStatTextOffsetX=22px). Using a smaller offset here previously
-   caused the value to overlap the label text (e.g. "Strength" is wider than 32px). */
 .stat-value {
 	position: absolute;
 	left: 54px;
@@ -129,9 +110,7 @@
 	height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	/* Real sprite art (below) already renders "OK"/"Cancel" text baked in -- hides the
-	   {{ok_label}}/{{cancel_label}} bound text (added 2026-08-31, see char_make.rml) behind it
-	   instead of drawing both. Same precedent as themes/legacy/login.rcss's own `.btn` rule. */
+	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it. */
 	color: transparent;
 }
 .btn-ok {

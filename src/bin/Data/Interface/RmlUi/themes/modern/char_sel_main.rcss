@@ -1,20 +1,9 @@
-/* "Modern" theme for the character-select scene's button bar -- flat programmatic icon buttons,
-   no legacy sprite art (same approach as login_main.rcss's modern theme). No reserved I18N
-   string exists for these icon-only buttons, so each gets a short plain-ASCII label
-   (.btn-icon-label) instead of real art -- matching login_main.rcss modern theme's "M"/"C"
-   precedent (avoiding a Unicode symbol since glyph coverage in the loaded font isn't
-   guaranteed).
-
-   2026-08-31 retrofit (docs/rmlui-ui-system/layout-and-scaling.md): positioning now matches
-   themes/legacy/char_sel_main.rcss's identical retrofit -- anchor-*/stretch-x utility classes
-   (base.rcss) with fixed `dp` sizes, applied in char_sel_main.rml, instead of a C++-pushed
-   absolute rect. See that file's comment for the full derivation of the dp offsets below. */
+/* Modern theme for the character-select scene's button bar -- flat programmatic icon buttons, no
+   legacy sprite art. Icon-only buttons get a short plain-ASCII label (.btn-icon-label) instead of
+   real art. Positioning matches legacy's anchor-*/dp retrofit exactly. */
 
 #panel {
 	position: absolute;
-	/* Needed for .btn-icon-label's text -- matches login.rcss/login_main.rcss's modern theme
-	   rather than relying on RmlUiRuntime's regular-weight fallback face to also resolve bold
-	   correctly. */
 	font-family: "Liberation Sans";
 	font-size: 14dp;
 }
@@ -37,15 +26,8 @@
 #btn_connect { right: 77dp; }
 #btn_delete  { right: 22dp; }
 
-/* font-family/font-size are declared directly here rather than relying on inheritance from
-   #panel (as login_main.rcss's identical-shaped .btn-icon-label does successfully) because, in
-   THIS document only, that inheritance silently fails: MuError.log logged "No font face defined.
-   Missing 'font-family' property" for every one of these spans even though #panel (their
-   grandparent) declares it. Root cause not fully chased down -- the one structural difference
-   from login_main.rml is this document's `data-model`/data-event-click bindings, which may
-   interact with RmlUi's inherited-property cache -- but redeclaring the two font properties
-   directly on the element that actually needs them sidesteps it entirely and is confirmed
-   working (2026-08-31 verification). */
+/* font-family/size redeclared directly here (not inherited from #panel) -- this document's
+   data-model bindings make inheritance silently fail for this text in this RmlUi build. */
 .btn-icon-label {
 	color: white;
 	font-weight: bold;
@@ -65,15 +47,10 @@
 	border: 1dp rgba(255, 255, 255, 50);
 }
 
-/* No legacy deco art in this theme -- intentionally flat, matching login_main.rcss's modern
-   .btn-credit-deco precedent. */
 .deco {
 	display: none;
 }
 
-/* Same flat, semi-transparent backing panel as the legacy theme -- this element was never
-   sprite-art in the first place (a plain CSprite::SetColor/SetAlpha fill), so both themes share
-   the identical treatment and the identical stretch-between-buttons positioning. */
 .info-bar {
 	position: absolute;
 	left: 133dp;
@@ -84,9 +61,6 @@
 	pointer-events: none;
 }
 
-/* Identical to the legacy theme -- this message was never sprite-art either, so there's no
-   "flat vs. real art" distinction to make here. See themes/legacy/char_sel_main.rcss's comment
-   for the full rationale behind the fixed 640dp-wide centering box and the 18dp line-height. */
 #account_block_message {
 	position: absolute;
 	left: 0;

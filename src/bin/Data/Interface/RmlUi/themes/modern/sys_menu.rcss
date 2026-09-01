@@ -1,6 +1,5 @@
-/* "Modern" theme for the system menu -- flat programmatic panel, matching login.rcss's modern
-   theme's translucent-dark-panel-with-border look for visual consistency across modern windows.
-   Buttons rely entirely on base.rcss's shared .btn (see the legacy theme's identical note). */
+/* Modern theme for the system menu -- flat programmatic panel, matching login.rcss's modern
+   translucent-dark-panel look. Buttons rely entirely on base.rcss's shared .btn. */
 
 #panel {
 	position: absolute;

@@ -1,8 +1,6 @@
-/* "Modern" theme for the character-creation dialog -- flat programmatic chrome, no legacy sprite
-   art (same approach as every other migrated window's modern theme). Job buttons, OK/Cancel, and
-   the input frame all use flat background-color/border instead of image decorators; the stat and
-   description panels were already flat fills in the original (see the legacy theme's own
-   comment), so both themes share the identical treatment for those. */
+/* Modern theme for the character-creation dialog -- flat programmatic chrome, no legacy sprite
+   art. Stat/description panels share the identical treatment as legacy (already flat fills in
+   the original). */
 
 #panel {
 	position: absolute;
@@ -72,8 +70,6 @@
 .stat-label {
 	color: #ffffff;
 }
-/* left:54px matches the original's kStatValueOffset constant -- see themes/legacy/char_make.rcss's
-   identical comment for the full derivation. */
 .stat-value {
 	position: absolute;
 	left: 54px;

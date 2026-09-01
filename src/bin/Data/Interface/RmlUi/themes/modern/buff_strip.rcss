@@ -1,16 +1,7 @@
-/* "Modern" theme for the active-buff icon strip. Unlike every other migrated window's modern
-   theme, this one does NOT go flat/programmatic for its main visual (the icon art) -- these are
-   real buff icons (newui_statusicon.jpg/2), not decorative chrome standing in for legacy sprite
-   art, so there's nothing to simplify away; both themes render the identical icon atlas via the
-   same generated @spritesheet rects (only a cosmetic border/radius around each icon differs here).
-   Only the tooltip box styling differs otherwise, matching this theme's flat/dark treatment used
-   everywhere else (mu_helper_bar.rcss, char_make.rcss, etc.). See themes/legacy/buff_strip.rcss's
-   header comment for the full rationale of the named-sprite icon technique (and why an earlier
-   clipped-oversized-image attempt was replaced) -- identical here. */
+/* Modern theme for the active-buff icon strip -- shares the identical icon atlas as legacy (real
+   buff icons, nothing to simplify away); only a cosmetic border/radius per icon plus the tooltip
+   box styling differ. */
 
-/* Position (centering + top offset) comes from base.rcss's .center-x class, applied in
-   buff_strip.rml -- see themes/legacy/buff_strip.rcss's identical comment for the full
-   derivation. */
 #panel {
 	top: 15dp;
 	width: 200dp;
@@ -34,14 +25,11 @@
 	pointer-events: auto;
 	border: 1dp rgba(255, 255, 255, 40);
 	border-radius: 2dp;
-	/* decorator itself is set per-instance via data-style-decorator (buff_strip.rml), one of the
-	   atlas1-N/atlas2-N sprites declared below -- nothing static to put here. */
+	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
 
-/* @spritesheet declarations are per-stylesheet, not shared across themes (LoadThemedDocument,
-   RmlTheme.cpp, loads a wholly separate buff_strip.rcss per theme directory) -- duplicated here
-   identically from themes/legacy/buff_strip.rcss (same source art, see that file's header
-   comment for the full rationale/derivation). */
+/* @spritesheet declarations are per-stylesheet, duplicated identically from
+   themes/legacy/buff_strip.rcss (same source art). */
 @spritesheet buff-atlas-1
 {
 	src: "../../../newui_statusicon.jpg";
@@ -237,8 +225,6 @@
 	position: absolute;
 	top: 32dp;
 	left: 0dp;
-	/* See themes/legacy/buff_strip.rcss's identical rule for why an explicit width (not auto) is
-	   required here -- confirmed by direct in-game testing. */
 	width: 160dp;
 	white-space: pre-line;
 	background-color: rgba(20, 20, 20, 220);

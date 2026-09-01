@@ -1,24 +1,6 @@
-/* RmlUi overlay for the active-buff icon strip (CBuffStrip, BuffStrip.h/.cpp -- renamed from the
-   legacy CNewUIBuffWindow at port time, see .ai-os/memory/tasks/rmlui-ui-architecture-amendment.md's
-   "Tracked deferral" section for the naming policy). Second pilot of the CNewUIObj-tier RmlUi
-   adapter pattern (2026-08-31) -- see docs/rmlui-ui-system/newui-tier-adapter.md and this file's
-   sibling BuffStrip.h for the full rationale of the two remaining deliberate simplifications from
-   the original (no right-click-cancel, plain-text tooltip).
-
-   Icon atlas: named @spritesheet rects, one per 20x28 tile, 10 columns x 9 rows (0-89) generated
-   per atlas below -- the SAME mechanism every other migrated window's icons already use (see e.g.
-   char_make.rcss's charmake-job-sheet). An earlier attempt used a clipped-oversized-image
-   technique instead (a small overflow:hidden container holding a full-atlas-sized image,
-   positioned by a per-item negative offset) specifically to avoid hand-enumerating ~160 rects --
-   confirmed by direct in-game testing NOT to work in this RmlUi build: ContainerBox::Close()
-   submits a box's scrollable-overflow rect (which ElementUtilities::GetClippingRegion()'s
-   has_clipping_content check reads to decide whether overflow:hidden/clip:always actually produce
-   a scissor) before ClosePositionedElements() ever places an absolutely-positioned child, so the
-   container always computes "nothing to clip" for exactly this shape of content, regardless of
-   its own overflow/clip properties. Rather than keep chasing that, the rects are generated
-   (BuildIconDecorator(), BuffStrip.cpp) instead of hand-authored -- see BuffEntry::decorator's
-   comment in BuffStrip.h for the full story, including why generation is capped at 90 tiles/atlas
-   (rows 0-8) rather than covering eBuffState's full numeric range. */
+/* Legacy theme for the active-buff icon strip (CBuffStrip). Icon atlas: named @spritesheet rects,
+   one per 20x28 tile, 10 columns x 9 rows, generated per atlas (BuildIconDecorator(),
+   BuffStrip.cpp) rather than hand-authored. */
 
 @spritesheet buff-atlas-1
 {
@@ -210,11 +192,8 @@
 	atlas2-89: 180px 224px 20px 28px;
 }
 
-/* Position (centering + top offset) comes from base.rcss's .center-x class, applied in
-   buff_strip.rml -- #panel itself must NOT set left/position here, or it would override
-   .center-x's own left:50%/transform (ID beats class specificity). width:200dp matches the grid's
-   own full-row content width (BUFF_MAX_LINE_COUNT * (BUFF_IMG_WIDTH + BUFF_IMG_SPACE)) so the
-   centering is exact, not centering an arbitrary/auto-sized box. */
+/* Position (centering + top offset) comes from base.rcss's .center-x, applied in buff_strip.rml.
+   width matches the strip's own full-row content width so the centering is exact. */
 #panel {
 	top: 15dp;
 	width: 200dp;
@@ -236,29 +215,16 @@
 	width: 20dp;
 	height: 28dp;
 	pointer-events: auto;
-	/* decorator itself is set per-instance via data-style-decorator (buff_strip.rml), one of the
-	   atlas1-N/atlas2-N sprites declared above -- nothing static to put here. */
+	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
 
-/* Below the icon, not above -- unlike mu_helper_bar's tooltip (pinned to the screen's top edge,
-   so "above" would go off-screen), this strip has room below it. white-space:pre-line renders the
-   \n-joined lines from BuildTooltipText() (BuffStrip.cpp) as real line breaks -- see that
-   function's own comment for why this is one plain-colored block instead of the original's
-   bold-header/white-body/purple-duration per-line coloring. */
+/* Below the icon (this strip has room below it, unlike a top-of-screen widget). width is explicit
+   -- this build's shrink-to-fit undersizes a multi-line pre-line box to its longest word. */
 .tooltip {
 	display: none;
 	position: absolute;
 	top: 32dp;
 	left: 0dp;
-	/* Explicit width, not auto/shrink-to-fit -- confirmed by direct in-game testing that this
-	   RmlUi build's shrink-to-fit width computation for an absolutely-positioned, display:block,
-	   multi-line (white-space:pre-line) box with no declared width badly undersizes: the
-	   background/padding box ended up sized to only the single longest WORD, not the longest
-	   LINE, so every line wrapped down to one word each even though the background is a normal
-	   block box (which does otherwise correctly cover its own full computed height/width -- this
-	   is purely a width-computation bug, not a "background doesn't follow multi-line inline
-	   content" issue, since .tooltip is already display:block, not the default span inline). A
-	   fixed width sidesteps that computation entirely. */
 	width: 160dp;
 	white-space: pre-line;
 	background-color: rgba(0, 0, 0, 200);

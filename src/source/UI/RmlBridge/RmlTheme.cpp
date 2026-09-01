@@ -44,16 +44,6 @@ namespace UI::RmlBridge
 
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath)
     {
-        std::ifstream file(documentPath, std::ios::binary);
-        if (!file)
-        {
-            g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs'.\r\n", documentPath);
-            return nullptr;
-        }
-
-        std::ostringstream buffer;
-        buffer << file.rdbuf();
-
         // documentPath's basename (the part after the last '/') is what the per-theme source URL
         // needs -- e.g. "Data/Interface/RmlUi/login.rml" -> "login.rml".
         const std::string path(documentPath);
@@ -61,6 +51,31 @@ namespace UI::RmlBridge
         const std::string documentName = (lastSlash == std::string::npos) ? path : path.substr(lastSlash + 1);
 
         const std::string sourceUrl = ThemedDocumentSourceUrl(documentName.c_str(), GetActiveThemeName());
+
+        // 2026-09-02: prefer a per-theme override of the document's own MARKUP (not just its
+        // styling) at themes/<theme>/<name>.rml, falling back to the shared documentPath when no
+        // such override exists -- every window but main_frame.rml still has none, so this is a
+        // no-op for them (one extra failed ifstream open, immediately falls through). Exists
+        // because CSS-only hiding proved unreliable for content that must genuinely differ, not
+        // just look different, per theme (modern's old bottom-HUD button row leaked through a
+        // stylesheet `display: none` rule no matter how it was hardened; a data-model boolean
+        // gating `data-if` also worked but put per-theme awareness into C++, which is exactly the
+        // kind of per-context branching this branch's architecture avoids everywhere else -- see
+        // NewUIMainFrameWindow's git history for that attempt). This keeps theme differentiation
+        // where it already lives for every other window: which file gets loaded, decided purely
+        // by directory convention, zero runtime "which theme" logic in C++.
+        std::ifstream file(sourceUrl, std::ios::binary);
+        if (!file)
+            file.open(documentPath, std::ios::binary);
+        if (!file)
+        {
+            g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs' or '%hs'.\r\n", sourceUrl.c_str(), documentPath);
+            return nullptr;
+        }
+
+        std::ostringstream buffer;
+        buffer << file.rdbuf();
+
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(buffer.str(), sourceUrl);
         if (!doc)
             g_ErrorReport.Write(L"> [RmlTheme] Failed to load '%hs' as theme '%hs' (source url '%hs').\r\n",

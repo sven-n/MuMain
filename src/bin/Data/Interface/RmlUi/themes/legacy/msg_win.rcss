@@ -1,18 +1,6 @@
-/* RmlUi overlay for the generic message/confirm dialog (CMsgWin). CWin::Create() uses nTexID=-2
-   (same sentinel as every other hybrid window). OK/Cancel reproduce all 3 button states (idle/
-   hover/active) using the exact same source art CLoginWin's own OK/Cancel already use --
-   message_ok_b_all.tga / loding_cancel_b_all.tga (CMsgWin::Create() and CLoginWin::Create() both
-   call CButton::Create(54, 30, BITMAP_BUTTON+i, 3, 2, 1)). Declared again here rather than shared
-   from login.rcss -- that file is deliberately self-contained/unretrofitted (see its own header
-   comment), so duplicating this small spritesheet block keeps this file self-contained too,
-   rather than creating a one-off cross-file dependency.
-
-   Built under the 2026-08-31 layout-and-scaling retrofit from day one (docs/rmlui-ui-system/
-   layout-and-scaling.md): #panel is centered via base.rcss's `.center-both` with a fixed `dp`
-   size, not a C++-pushed rect. The four `mode-*` classes on #panel mirror CMsgWin's own
-   MSG_WIN_TYPE 1:1 (see MsgWin.h's MsgWinRmlModel) and drive OK/Cancel visibility and their
-   per-mode left offset -- the same left/top numbers CMsgWin::SetCtrlPosition() computes,
-   reproduced here as CSS instead of being pushed from C++. */
+/* Legacy theme for the generic message/confirm dialog (CMsgWin). Reuses the same OK/Cancel art as
+   CLoginWin. #panel centers via base.rcss's .center-both with a fixed dp size; the four mode-*
+   classes mirror CMsgWin's own MSG_WIN_TYPE and drive OK/Cancel visibility + per-mode offset. */
 
 @spritesheet msgwin-back-sheet
 {
@@ -48,13 +36,7 @@
 	decorator: image(msgwin-back-image);
 }
 
-/* Native reference offsets, straight from CMsgWin::RenderControls()'s original
-   g_pRenderText calls (now retired) -- +38/+54 for a single centered line (buttons-shown vs.
-   MWT_NON), +32/+44 and +51/+66 for the two-line, left-aligned-at-x+25 case. Two genuinely
-   different treatments in the original, not a simplification: a short single-line message reads
-   better centered across the whole 352dp width; a message long enough to need two lines already
-   fills most of that width, so left-aligning both lines looks steadier than re-centering each one
-   independently. */
+/* Single-line messages center across the full width; two-line messages left-align both lines. */
 #msg_line1 {
 	position: absolute;
 	left: 0;
@@ -85,9 +67,7 @@
 }
 .no-buttons #msg_line2 { top: 66dp; }
 
-/* Background art only for the resident-password re-entry step -- the live text is drawn on top
-   afterward by legacy code (CMsgWin::RenderTextOnTop()), same split as char_make.rcss's own
-   .input-frame. */
+/* Background art only for the resident-password re-entry step; live text drawn on top by legacy code. */
 #input_frame {
 	display: none;
 	position: absolute;
@@ -108,9 +88,6 @@
 	top: 72dp;
 	cursor: pointer;
 	pointer-events: auto;
-	/* Real sprite art (below) already renders "OK"/"Cancel" text baked in -- hides the bound
-	   {{ok_label}}/{{cancel_label}} text behind it instead of drawing both (same precedent as
-	   themes/legacy/login.rcss's own `.btn` rule). */
 	color: transparent;
 }
 

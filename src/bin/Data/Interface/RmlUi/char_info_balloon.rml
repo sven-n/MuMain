@@ -5,10 +5,9 @@
 	<link type="text/rcss" href="char_info_balloon.rcss"/>
 </head>
 <body data-model="char_info_balloons">
-	<!-- One instance per character slot (up to 5), positioned every frame from C++
-	     (CCharInfoBalloonMng::SyncRmlModel) via data-style-left/top -- each balloon's screen
-	     position tracks its live 3D->screen projection, not a fixed layout position like every
-	     other migrated window's panel. -->
+	<!-- One balloon per character slot (up to 5), positioned every frame from C++ via its live
+	     3D->screen projection -- the one element whose position is genuinely per-frame computed
+	     rather than a static anchor. -->
 	<div class="balloon" data-for="balloon : balloons" data-class-hidden="balloon.hidden"
 	     data-style-left="balloon.screen_x + 'px'" data-style-top="balloon.screen_y + 'px'">
 		<div class="balloon-bg"></div>

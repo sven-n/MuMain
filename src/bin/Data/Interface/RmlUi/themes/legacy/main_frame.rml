@@ -1,0 +1,105 @@
+<rml>
+<head>
+	<title>Main Frame</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="main_frame.rcss"/>
+</head>
+<body data-model="main_frame">
+	<!-- Legacy theme's own copy of CNewUIMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner
+	     buttons (Phase 1 of 3 of the CNewUIObj-tier pilot; skill list / item hotkeys are out of
+	     scope, still fully legacy-rendered). Per-theme file (UI::RmlBridge::LoadThemedDocument)
+	     because modern's button row genuinely differs in structure, not just style -- keep this
+	     file's ids/classes/bindings in sync with themes/modern/main_frame.rml except #buttons/
+	     #buttons_top. #bars binds left/top/scale live from C++ (tracks the still-legacy
+	     center-band chrome's own scale); #buttons/#exp nest inside #bars to inherit that
+	     transform, using plain reference-pixel coordinates. -->
+	<div id="bars" data-style-left="bars_left + 'px'" data-style-top="bars_top + 'px'" data-style-transform="'scale(' + bars_scale + ')'">
+		<!-- Read-only-from-C++ anchors marking where the still-legacy item-hotkey/skill-hotkey
+		     bands should be positioned -- lets each theme control that legacy content's anchor
+		     without C++ knowing which theme is active. -->
+		<div id="item_hotkey_anchor" class="layout-anchor"></div>
+		<div id="skill_list_anchor" class="layout-anchor"></div>
+		<div id="gauge_bg_left" class="slot-frame slot-fill"></div>
+		<div id="gauge_bg_right" class="slot-frame slot-fill"></div>
+		<div id="bar_hp" class="gauge-slot slot-frame slot-fill">
+			<div id="bar_hp_fill" class="gauge-fill gauge-fill-hp gauge-fill-vertical" data-class-poisoned="poisoned" data-style-height="hp_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-hp gauge-fill-horizontal" data-class-poisoned="poisoned" data-style-width="hp_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{hp_text}}</span>
+		</div>
+		<span class="tooltip tooltip-hp">{{hp_tooltip}}</span>
+		<div id="bar_sd" class="gauge-slot slot-frame slot-fill">
+			<div class="gauge-fill gauge-fill-sd gauge-fill-vertical" data-style-height="sd_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-sd gauge-fill-horizontal" data-style-width="sd_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{sd_text}}</span>
+		</div>
+		<span class="tooltip tooltip-sd">{{sd_tooltip}}</span>
+		<div id="bar_ag" class="gauge-slot slot-frame slot-fill">
+			<div class="gauge-fill gauge-fill-ag gauge-fill-vertical" data-style-height="ag_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-ag gauge-fill-horizontal" data-style-width="ag_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{ag_text}}</span>
+		</div>
+		<span class="tooltip tooltip-ag">{{ag_tooltip}}</span>
+		<div id="bar_mp" class="gauge-slot slot-frame slot-fill">
+			<div class="gauge-fill gauge-fill-mp gauge-fill-vertical" data-style-height="mp_fraction * 100 + '%'"></div>
+			<div class="gauge-fill gauge-fill-mp gauge-fill-horizontal" data-style-width="mp_fraction * 100 + '%'"></div>
+			<span class="gauge-num">{{mp_text}}</span>
+		</div>
+		<span class="tooltip tooltip-mp">{{mp_tooltip}}</span>
+
+		<!-- Legacy's real, original bottom-HUD button row -- sprite icons via .frame-btn/#btn_*. -->
+		<div id="buttons">
+			<div id="btn_cshop" class="frame-btn slot-frame slot-fill" data-class-open="cshop_open" data-event-click="mainframe_cshop_click">
+				<span class="btn-icon-label">SHOP</span>
+			</div>
+			<span class="tooltip tooltip-cshop">{{cshop_tooltip}}</span>
+			<div id="btn_chainfo" class="frame-btn slot-frame slot-fill" data-class-open="chainfo_open" data-event-click="mainframe_chainfo_click">
+				<span class="btn-icon-label">CHAR</span>
+				<div class="alert-dot" data-class-hidden="!chainfo_alert"></div>
+			</div>
+			<span class="tooltip tooltip-chainfo">{{chainfo_tooltip}}</span>
+			<div id="btn_myinven" class="frame-btn slot-frame slot-fill" data-class-open="myinven_open" data-event-click="mainframe_myinven_click">
+				<span class="btn-icon-label">INV</span>
+			</div>
+			<span class="tooltip tooltip-myinven">{{myinven_tooltip}}</span>
+			<div id="btn_friend" class="frame-btn slot-frame slot-fill" data-class-open="friend_open" data-event-click="mainframe_friend_click">
+				<span class="btn-icon-label">FRIEND</span>
+				<div class="alert-dot" data-class-hidden="!friend_alert"></div>
+			</div>
+			<span class="tooltip tooltip-friend">{{friend_tooltip}}</span>
+			<div id="btn_window" class="frame-btn slot-frame slot-fill" data-class-open="window_open" data-event-click="mainframe_window_click">
+				<span class="btn-icon-label">MENU</span>
+			</div>
+			<span class="tooltip tooltip-window">{{window_tooltip}}</span>
+		</div>
+
+		<!-- EXP: spans this group's own reference width (item-hotkey band's start to button
+		     group's end). exp_fraction is progress within the current decile, not overall level. -->
+		<div id="exp">
+			<div id="exp_track" class="slot-frame slot-fill">
+				<div id="exp_fill" data-style-width="exp_fraction * 100 + '%'"></div>
+			</div>
+			<span id="exp_digit">{{exp_digit}}</span>
+			<span class="tooltip" id="exp_tooltip">{{exp_tooltip}}</span>
+		</div>
+
+		<!-- Decorative slot outlines for the still-legacy item-hotkey/skill icons -- modern theme
+		     only; legacy hides these (#item_slots/#skill_slots), its own sprite chrome already
+		     frames the slots. -->
+		<div id="item_slots">
+			<div id="item_slot_0" class="slot-frame"><span class="slot-hotkey-label">Q</span></div>
+			<div id="item_slot_1" class="slot-frame"><span class="slot-hotkey-label">W</span></div>
+			<div id="item_slot_2" class="slot-frame"><span class="slot-hotkey-label">E</span></div>
+			<div id="item_slot_3" class="slot-frame"><span class="slot-hotkey-label">R</span></div>
+		</div>
+		<!-- data-class-selected mirrors which hotkey slot currently shows the equipped skill. -->
+		<div id="skill_slots">
+			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected"></div>
+			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected"></div>
+			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected"></div>
+			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected"></div>
+			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected"></div>
+			<div id="current_skill_slot" class="slot-frame"></div>
+		</div>
+	</div>
+</body>
+</rml>

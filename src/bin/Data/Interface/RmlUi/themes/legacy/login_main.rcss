@@ -1,15 +1,5 @@
-/* RmlUi overlay for the login-scene menu/credit button bar (CLoginMainWin). CWin draws nothing
-   for this window (CWin::Create() uses nTexID=-2, same sentinel as login.rcss's panel). Only the
-   IDLE frame of each button's 3-frame art is reproduced (no RmlUi decorator swap for hover/press
-   frames in this pass) -- same simplification precedent login.rcss's own checkboxes/buttons
-   already established (flat/static art standing in for the legacy frame-based sprite system,
-   documented there as "out of scope for proving the pipeline"). Source art per
-   Engine/Object/ZzzOpenData.cpp's OpenLoginSceneData(): server_menu_b_all.tga /
-   server_credit_b_all.tga (each a 54x30-per-frame, 3-frame vertical strip -- CButton::Create lays
-   frames out at Y = nHeight * frameIndex, so the idle frame is the sheet's top 54x30 rect) and
-   deco.tga (189x103, single frame). Same @spritesheet-with-explicit-rect technique login.rcss
-   uses, for the same reason (this engine's .OZT loader pads textures to the next power-of-two
-   size; a plain decorator:image() would sample the whole padded texture, not just the real art). */
+/* Legacy theme for the login-scene menu/credit button bar (CLoginMainWin). Only the idle frame of
+   each button is reproduced. */
 
 @spritesheet login-main-menu-sheet
 {
@@ -29,9 +19,7 @@
 
 #panel {
 	position: absolute;
-	/* Width/height are pushed from C++ (CLoginMainWin::SetPosition/Create) -- the bar spans
-	   (screen width - 60px) and is exactly one button tall, both screen-size-dependent, unlike
-	   login's fixed 329x245 panel. */
+	/* Width/height pushed from C++ -- the bar spans (screen width - 60px), screen-size dependent. */
 }
 
 .btn-icon {
@@ -46,18 +34,13 @@
 	top: 0px;
 	decorator: image(login-main-menu-icon);
 }
-/* left is pushed from C++ (screen-width dependent right-alignment, matching the legacy
-   CButton::SetPosition math in CLoginMainWin::SetPosition). No decorator of its own -- see
-   .btn-credit-icon below for why the actual button art moved off this element. */
+/* left pushed from C++ (screen-width dependent right-alignment). */
 .btn-icon-credit {
 	top: 0px;
 }
 
-/* Stands in for CSprite m_sprDeco -- decorative only, must not intercept clicks meant for the
-   credit button beneath/around it. Original CSprite::Create's trailing (105, 59) args are this
-   engine's sprite anchor-point offset (the pixel within the 189x103 art that lines up with
-   SetPosition()'s coords); reproduced here as a fixed offset from the credit button's own
-   top-left, since deco is a child of #btn_credit and inherits its positioning context. */
+/* Stands in for the original decorative sprite -- must paint behind the credit button (a child,
+   declared first, so its own icon layer paints on top of it). */
 .btn-credit-deco {
 	position: absolute;
 	left: -105px;
@@ -68,12 +51,6 @@
 	decorator: image(login-main-deco-image);
 }
 
-/* The button's own idle-frame art, moved onto a dedicated child (login_main.rml) rather than
-   living directly on .btn-icon-credit's own box background -- CSS always paints a parent's
-   background before any of its children, so with the icon on the parent, .btn-credit-deco (a
-   child, declared first) would paint AFTER it and cover it. Matches the original render order
-   this replaces exactly: CLoginMainWin::RenderControls() called m_sprDeco.Render() BEFORE
-   CWin::RenderButtons(), i.e. deco behind, the real button icon on top. */
 .btn-credit-icon {
 	position: absolute;
 	left: 0;
@@ -84,8 +61,6 @@
 	decorator: image(login-main-credit-icon);
 }
 
-/* Only the modern theme needs a text glyph -- these buttons' real icon art above already gives
-   them a visual identity (see themes/modern/login_main.rcss's own .btn-icon-label rule). */
 .btn-icon-label {
 	display: none;
 }

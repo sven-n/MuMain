@@ -1,29 +1,11 @@
-/* Shared, cross-window RCSS -- generic (non-positional) rules reused by more than one migrated
-   window, extracted from themes/legacy/login.rcss's originals (which stay self-contained and
-   unretrofitted -- see the RmlUi migration plan's "Batch 2" section). Every new migrated
-   window's <head> links this file first, then its own per-window positional .rcss.
+/* Shared, cross-window RCSS for the legacy theme: generic (non-positional) rules reused by more
+   than one migrated window (SysMenuWin/OptionWin's shared button/checkbox/panel-chrome art, plus
+   the anchor/center/stretch layout utility classes every window uses). Every migrated window's
+   <head> links this file first, then its own per-window positional .rcss. */
 
-   Unlike login.rcss's own checkboxes/buttons (deliberately flat -- see that file's header
-   comment), .btn/.checkbox-box here reproduce the real legacy sprite art, since this file is
-   genuinely shared across windows (SysMenuWin/OptionWin's buttons are the exact same
-   BITMAP_TEXT_BTN asset -- "shared component" in the literal sense) and both source assets are
-   already loaded unconditionally at startup (Engine/Object/ZzzOpenData.cpp's OpenBasicData(),
-   not scene-gated). Kept for the legacy theme only -- modern stays fully flat/programmatic, see
-   themes/modern/base.rcss. */
-
-/* This engine's legacy .OZT loader pads every non-power-of-two texture up to the next power-of-
-   two size (see login.rcss's identical note) -- op1_b_all.tga (108x120, padded to 128x128) and
-   op2_ch.tga (already 16x32, both dimensions POT, so technically un-padded -- declared as a
-   spritesheet anyway purely to select a single frame's sub-rect, the same mechanism, different
-   reason) both need named sub-rects rather than direct decorator: image() references. */
 @spritesheet legacy-btn-sheet
 {
 	src: "../../../op1_b_all.tga";
-	/* CButton::Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1) -- frames stack vertically at
-	   y = frameHeight * frameIndex (Button.cpp). Frame 0 = idle/up, 1 = active/hover,
-	   2 = down/pressed; frame 3 exists in the art (4 frames total) but this engine's own
-	   CButton::Create call never assigns a disabled frame (nDisableFrame left default), so
-	   .btn.disabled below stays an opacity dim over the idle frame rather than a 4th art state. */
 	legacy-btn-idle:   0px  0px 108px 30px;
 	legacy-btn-hover:  0px 30px 108px 30px;
 	legacy-btn-active: 0px 60px 108px 30px;
@@ -32,31 +14,13 @@
 @spritesheet legacy-checkbox-sheet
 {
 	src: "../../../op2_ch.tga";
-	/* CButton::Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1) -- frame 0 (up/down/active
-	   all mapped to it) = unchecked, frame 1 (every check-* slot mapped to it) = checked. */
 	legacy-checkbox-unchecked: 0px  0px 16px 16px;
 	legacy-checkbox-checked:   0px 16px 16px 16px;
 }
 
-/* Shared panel-chrome art for SysMenuWin/OptionWin's CWinEx backing (Engine/Object/ZzzOpenData.cpp
-   BITMAP_SYS_WIN family) -- both windows use the identical center/bottom-cap images, differing
-   only in their own top-cap image (op1_back1.tga for SysMenuWin, op2_back1.tga for OptionWin --
-   declared per-window, see sys_menu.rcss/option.rcss).
-
-   Reproduces 3 of CWinEx's 5 real pieces as three stacked elements (.panel-cap-top/.panel-middle/
-   .panel-cap-bottom below), NOT RmlUi's tiled-vertical decorator -- an earlier version of this
-   file used tiled-vertical(top, center, bottom) on a single #panel element, which turned out
-   wrong: confirmed by reading DecoratorTiled(Vertical).cpp, tiled-vertical's tile property never
-   registers RmlUi's fit-mode sub-property at all (RegisterTileProperty is called without its
-   register_fit_modes flag), so every tile -- including the center -- is hardcoded to FILL
-   (stretch-to-fit), never REPEAT. The center tile rendered as a single blurry stretched copy of a
-   128x128 texture instead of a repeating pattern, which read as "no texture" in-game. The plain
-   `image` decorator (DecoratorTiledImage), by contrast, DOES register fit-mode support
-   (RegisterTileProperty("image", true)) including a real `repeat` keyword -- so the fix is three
-   separate elements, each using `image()`, rather than one tiled-vertical call. The two remaining
-   real pieces, the 5px left/right edge trim strips (op1_back3.jpg/op1_back4.jpg), are still NOT
-   reproduced -- would need two more absolutely-positioned strip elements; at 5px wide the visual
-   cost of omitting them is minor, flagged here and in the migration task log as a fast-follow. */
+/* Panel chrome for SysMenuWin/OptionWin's CWinEx backing, reproduced as three stacked elements
+   (.panel-cap-top/.panel-middle/.panel-cap-bottom) rather than RmlUi's tiled-vertical decorator,
+   which doesn't support REPEAT fit mode in this build. */
 @spritesheet legacy-panel-bottom-sheet
 {
 	src: "../../../op1_back2.tga";
@@ -64,27 +28,10 @@
 }
 @spritesheet legacy-panel-center-sheet
 {
-	/* op1_stone.jpg is already 128x128 (exact power-of-two) -- declared as a named sprite for the
-	   same reason every other tile in this file is: it's the only reliably-working reference form
-	   confirmed in this codebase. A raw quoted path was tried instead (to unlock RmlUi's `repeat`
-	   fit mode, which explicitly rejects sprite sources -- see the removed comment this replaced,
-	   kept in git history/the migration task log) and rendered nothing, most likely because
-	   PropertyParserString.cpp's ParseValue does zero quote-stripping -- a quoted literal inside a
-	   decorator shorthand argument (unlike a top-level property like font-family, which goes
-	   through a different parse path) may retain its literal quote characters as part of the
-	   "path", which then fails to resolve to any real file -- and this engine's texture loader
-	   fails 100% silently on a bad path (documented in theming-and-modding.md), matching exactly
-	   what was observed: no visible art, no warning anywhere in MuError.log. Not fully confirmed
-	   (would need a live debugger to prove definitively), but the sprite/FILL form below is the
-	   one every other decorator in this file already proves reliable, so it's the one this uses
-	   -- tiling is a nice-to-have deferred behind actually rendering, not the other way around. */
 	src: "../../../op1_stone.jpg";
 	legacy-panel-center: 0px 0px 128px 128px;
 }
 
-/* Structural shape shared by SysMenuWin/OptionWin's panel background -- top/bottom heights and
-   the top image are window-specific (see sys_menu.rcss/option.rcss), the bottom image and the
-   tiling center are identical for both and declared once here. */
 .panel-cap-top {
 	position: absolute;
 	left: 0;
@@ -99,47 +46,14 @@
 	height: 43px;
 	decorator: image(legacy-panel-bottom);
 }
-/* NOT a band confined to the gap between the two caps -- confirmed against the real CWinEx source
-   (Win widgets, not RmlUi) that this replaces: WinEx.cpp's CWinEx::Render() draws WE_BG_CENTER
-   FIRST (enum value 0, drawn before WE_BG_TOP/BOTTOM/LEFT/RIGHT in the same loop), and
-   SetPosition()/SetLine() size and position it to span nearly the FULL panel -- inset by
-   WE_CENTER_SPR_POS (3px) on every side, not confined between the caps. The top/bottom cap
-   images are drawn ON TOP of it afterward; their own art has transparent "negative space" around
-   the ornate scrollwork linework, so the center tile shows through underneath in the cap regions
-   too, not just the visible gap. An earlier version of this file modeled the three pieces as
-   non-overlapping stacked bands (top 0-64px, middle 64px-to-bottom-cap, bottom cap) -- this
-   rendered the middle band correctly but left the cap regions showing through to whatever's
-   behind the document, because that model never gave the center tile any presence under the caps
-   to begin with. Fixed by reordering panel_middle to be the FIRST child in the RML
-   (sys_menu.rml/option.rml), so it paints before both caps.
-
-   The 3px inset itself is expressed here in pure RCSS (left/top/right/bottom, no width/height) --
-   NOT pushed from C++, despite an earlier version doing exactly that out of unconfirmed caution
-   about whether RmlUi correctly derives width/height from opposing edges on a position:absolute
-   element. It does: confirmed by reading LayoutDetails::BuildBoxWidth/BuildBoxHeight
-   (Layout/LayoutDetails.cpp) directly, which implement the standard CSS 2.1 algorithm --
-   `absolutely_positioned` elements use left+right (and top+bottom) as an explicit width/height
-   constraint when no width/height is set, not an unverified corner case. Keeping this in RCSS
-   matters beyond tidiness: this project's stated goal is that a theme -- including a modder's --
-   needs zero C++ changes and zero recompilation (see theming-and-modding.md). A hardcoded C++
-   inset would mean any future theme wanting a similar real-art composite, with a different inset
-   than 3px, couldn't express that without engine changes; this way it's exactly the same kind of
-   per-theme override any other positioned element in this file already is. */
+/* Spans nearly the full panel (3px inset each side), matching CWinEx's real WE_BG_CENTER --
+   painted first so it shows through the caps' own transparent negative space. */
 .panel-middle {
 	position: absolute;
 	left: 3px;
 	top: 3px;
 	right: 3px;
 	bottom: 3px;
-	/* Plain FILL (stretch-to-fit, the default -- no fit-mode argument at all), matching every
-	   other decorator in this file exactly. This stretches the 128x128 source across its box
-	   instead of tiling it -- visually softer than a true repeating pattern, but this is the one
-	   form already proven to actually render in this codebase (buttons/checkboxes/caps all use
-	   it). A `repeat`-tiled version was attempted first and hit three separate real bugs in
-	   sequence (wrong shorthand argument order; repeat rejected outright for sprite sources; then
-	   a raw-path attempt that most likely lost its quoting) -- full writeup in
-	   docs/rmlui-ui-system/gotchas-and-patterns.md and the migration task log. Revisit true
-	   tiling later as a deliberate, isolated experiment, not blocking on it now. */
 	decorator: image(legacy-panel-center);
 }
 
@@ -147,19 +61,10 @@ body {
 	width: 100%;
 	height: 100%;
 	margin: 0;
-	/* See login.rcss's identical comment -- body spans the whole real window, so this must stay
-	   "none" with specific elements opting back in, or every click on screen gets swallowed for
-	   legacy-input purposes the moment a full-window document is shown. */
 	pointer-events: none;
 }
 
-/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin) that previously relied
-   on CWin::Create()'s default nTexID=-1 (a real alpha=128 black CSprite, Win.cpp:19-31). Placed
-   as the first child of <body>, before #panel, so it paints underneath. pointer-events:auto (not
-   inherited "none") because CWin::CursorInWin(WA_ALL) already spans the whole screen while either
-   legacy window is shown -- any click anywhere is already treated as "on this UI" today, so this
-   reproduces existing behavior (clicking the dimmed area does nothing but is still consumed)
-   rather than introducing click-through as a side effect of migrating. */
+/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
 #backdrop {
 	position: absolute;
 	left: 0;
@@ -191,9 +96,6 @@ body {
 	white-space: nowrap;
 }
 
-/* Sized for the 108x30 BITMAP_TEXT_BTN shape shared by SysMenuWin's 4 buttons and OptionWin's
-   Close button -- login's own 54x30 image buttons stay defined in login.rcss's own .btn rule,
-   unaffected since login.rml/.rcss don't link this file. */
 .btn {
 	position: absolute;
 	width: 108px;
@@ -211,40 +113,19 @@ body {
 .btn:active {
 	decorator: image(legacy-btn-active);
 }
-/* Reproduces CButton::SetEnable(false) -- blocks the click at RmlUi's own hit-test level rather
-   than relying solely on the C++ handler's own guard. Opacity dim over the idle art rather than a
-   distinct art frame -- see the spritesheet comment above for why. */
 .btn.disabled {
 	pointer-events: none;
 	opacity: 0.5;
 	cursor: default;
 }
 
-/* For a button that should be genuinely absent (not clickable-but-grayed) in the current context
-   -- SysMenuWin's Select Server button, hidden entirely in the login scene rather than disabled,
-   since a dimmed-but-still-drawn button visibly collided with the Option button when the panel
-   uses the login scene's shorter height (CWinEx::SetLine(6) leaves no real vertical room for 4
-   button slots). Every button here is position:absolute with no shared flow, so display:none
-   removing this element from layout doesn't shift any sibling's position -- safe to use for any
-   future conditionally-absent element in this shape, not just this one case. */
 .hidden {
 	display: none;
 }
 
-/* ============================================================================
-   Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- anchor/
-   center/stretch utility classes. Pure layout, no visual styling, identical in
-   both themes (unlike everything else in this file, which reproduces real
-   sprite art for legacy specifically). Apply ONE of these to an element to
-   express its intended responsive behavior declaratively instead of computing
-   a screen rect in C++ and pushing left/top/width/height by hand -- this
-   migration's original convention (CCharSelMainWin before its 2026-08-31
-   retrofit), now superseded for anything whose position is a static anchor
-   rather than genuinely data-driven per frame (CCharInfoBalloon's live 3D
-   projection is the one case that still needs a C++ push, and still does).
-   Give the element its own size (dp, if it should respect the user's UI
-   scale) alongside one of these classes -- none of them set a size.
-   ============================================================================ */
+/* Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- pure layout, no visual
+   styling, identical in both themes. Apply one to an element to express its intended responsive
+   behavior declaratively; give it its own size (dp if it should respect UI scale) alongside it. */
 
 .anchor-top-left {
 	position: absolute;
@@ -267,11 +148,6 @@ body {
 	bottom: 0;
 }
 
-/* Centers via transform, not margin tricks -- this branch's vendored RmlUi backend implements
-   SetTransform for real (unlike the RHI-based renderer this project once had, which left it at
-   its no-op default). Needs an explicit width/height (or intrinsic content size) for `-50%` to
-   mean anything -- RmlUi resolves transform percentages against the element's own box, not its
-   parent's. */
 .center-x {
 	position: absolute;
 	left: 50%;
@@ -289,11 +165,6 @@ body {
 	transform: translate(-50%, -50%);
 }
 
-/* Stretches between the parent's opposing edges -- confirmed safe by this file's own
-   .panel-middle above (LayoutDetails::BuildBoxWidth/BuildBoxHeight correctly derives width/
-   height from left+right or top+bottom on a position:absolute element; no measurement needed).
-   Pair with an explicit height (.stretch-x) or width (.stretch-y), plus whatever left/right/
-   top/bottom inset the caller needs beyond the 0 default. */
 .stretch-x {
 	position: absolute;
 	left: 0;
@@ -312,17 +183,10 @@ body {
 	bottom: 0;
 }
 
-/* 2026-09-02: read by C++ via Element::GetAbsoluteOffset() -- an invisible, non-interactive marker
-   whose sole purpose is to let a theme's own RCSS express a real-screen anchor point for content
-   that's still legacy-rendered and therefore can't be positioned by RCSS directly (main_frame.rml's
-   #item_hotkey_anchor/#skill_list_anchor are the first use -- see NewUIMainFrameWindow.cpp's
-   SyncRmlModel() for the read side). A theme (or a mod's own theme) positions the marker wherever
-   it wants that legacy content anchored, using ordinary `left`/`top`; C++ reads the marker's
-   computed screen position back out generically, off whichever theme is active, with no per-theme
-   C++ branch and no new config-file format -- this is the point of it (architecture-principles.md
-   §16/§18/§19/§23: layout customization, including for still-legacy content, without C++ changes).
-   visibility:hidden, not display:none, so the marker still gets a real per-frame layout pass to
-   read a position from -- a display:none element has no box at all. */
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset() -- lets a theme's RCSS express a
+   real-screen anchor point for content that's still legacy-rendered and can't be positioned by
+   RCSS directly (main_frame.rml's #item_hotkey_anchor/#skill_list_anchor). visibility:hidden, not
+   display:none, so it still gets a real layout pass to read a position from. */
 .layout-anchor {
 	position: absolute;
 	visibility: hidden;

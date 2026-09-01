@@ -1,28 +1,8 @@
-/* RmlUi overlay for the character-select scene's button bar (CCharSelMainWin). CWin draws
-   nothing for this window (CWin::Create() uses nTexID=-2, same sentinel as login_main.rcss's
-   panel). Only the idle frame of each button's frame strip is reproduced (no RmlUi decorator
-   swap for hover/press/disabled frames) -- same simplification precedent login.rcss/
-   login_main.rcss already established. Source art per Engine/Object/ZzzOpenData.cpp's
-   OpenCharacterSceneData(): b_create.tga/b_connect.tga/b_delete.tga (each a 54x30-per-frame,
-   4-frame vertical strip -- idle = frame 0, top 54x30 rect), server_menu_b_all.tga (3-frame
-   strip, same idle rect, shared with CLoginMainWin's own Menu button), and deco.tga (189x103,
-   single frame, shared with CCreditWin's own deco). Same @spritesheet-with-explicit-rect
-   technique login.rcss/base.rcss use, for the same reason (this engine's .OZT loader pads
-   textures to the next power-of-two size).
-
-   2026-08-31 retrofit (docs/rmlui-ui-system/layout-and-scaling.md): every element below is now
-   positioned via base.rcss's anchor-*/stretch-x utility classes with a fixed `dp` size, instead
-   of a C++-computed absolute rect pushed from CCharSelMainWin::ApplyLayout() every frame/resize.
-   Sizes/offsets are `dp` so they respond to the user's global UI-scale setting
-   (GameConfig::UIScalePercent); they do NOT auto-scale with screen resolution the way this
-   window's legacy CButton/CSprite bookkeeping still does via
-   UI::CharacterSelection::CalculateLayout() -- that calculator now feeds only the legacy
-   hit-testing objects, not these elements. The dp values below are exactly that calculator's
-   Native* reference constants (CharSelMainWin.h), so at 100% UI scale and the historical 800x600
-   reference resolution the two are visually identical; they intentionally diverge at other
-   resolutions, since "fixed size, anchored to a corner" (this file) rather than "scaled
-   proportionally to an 800x600 reference" (the legacy calculator) is the responsive-layout
-   policy this migration is standardizing on going forward. */
+/* Legacy theme for the character-select scene's button bar (CCharSelMainWin). Only the idle frame
+   of each button is reproduced. Every element anchors to a screen edge/corner via base.rcss's
+   anchor-*/stretch-x utility classes with a fixed dp size (docs/rmlui-ui-system/
+   layout-and-scaling.md) -- CCharSelMainWin::ApplyLayout() still computes the legacy
+   CButton/CSprite hit-test rects separately, unrelated to these visuals. */
 
 @spritesheet charsel-create-sheet
 {
@@ -50,9 +30,8 @@
 	charsel-deco-image: 0px 0px 189px 103px;
 }
 
-/* Full-screen positioning container, not a bar-shaped box -- every child below anchors directly
-   to a screen edge/corner (base.rcss's anchor-* classes) rather than to this element. Purely
-   structural: no visual of its own, doesn't intercept clicks meant for whatever's behind it. */
+/* Full-screen positioning container, not a bar-shaped box -- every child anchors directly to a
+   screen edge/corner. */
 #panel {
 	position: absolute;
 	left: 0;
@@ -70,17 +49,11 @@
 	cursor: pointer;
 	pointer-events: auto;
 }
-/* Native reference offsets (UI::CharacterSelection::NativeOuterMargin=22,
-   NativeButtonWidth=54, NativeButtonGap=1) -- Create/Menu anchor from the left, Connect/Delete
-   mirror from the right. */
 #btn_create { left: 22dp; }
 #btn_menu   { left: 77dp; }
 #btn_connect { right: 77dp; }
 #btn_delete  { right: 22dp; }
 
-/* Reproduces CButton::SetEnable(false) -- blocks the click at RmlUi's own hit-test level too,
-   not just the C++ handler's own RmlClickX() guard. Opacity dim over the idle art rather than
-   the sprite's real 4th (disabled) frame -- same simplification as base.rcss's .btn.disabled. */
 .btn-icon.disabled {
 	pointer-events: none;
 	opacity: 0.5;
@@ -90,19 +63,11 @@
 #btn_menu { decorator: image(charsel-menu-icon); }
 #btn_connect { decorator: image(charsel-connect-icon); }
 #btn_delete { decorator: image(charsel-delete-icon); }
-/* Real icon art already gives these buttons a visual identity -- see themes/modern's own rule
-   for why the label exists there instead. */
 .btn-icon-label {
 	display: none;
 }
 
-/* Stands in for CSprite m_asprBack[CSMW_SPR_INFO] -- a flat, semi-transparent black backing
-   strip behind the (rarely shown) account-block message; decorative only. Stretches between the
-   two button clusters (native reference: 22+54+1+54+2 = 133dp inset from each edge) instead of a
-   C++-measured width -- confirmed safe by base.rcss's own .panel-middle precedent (RmlUi derives
-   width correctly from left+right on a position:absolute element). Height/vertical position are
-   fixed dp, matching the original CSprite's fixed 21px height and its 5dp-below-the-buttons
-   offset. */
+/* Flat, semi-transparent backing strip behind the (rarely shown) account-block message. */
 .info-bar {
 	position: absolute;
 	left: 133dp;
@@ -113,14 +78,8 @@
 	pointer-events: none;
 }
 
-/* Stands in for CSprite m_asprBack[CSMW_SPR_DECO] -- decorative flourish overlapping the
-   Connect/Delete buttons' top-right corner; must paint BEHIND them (declared first in
-   char_sel_main.rml, matching the original's sprite-then-buttons render order). Not interactive.
-   right:0/bottom:-3dp is an exact derivation from the native reference constants
-   (NativeOuterMargin and NativeDecorationWindowOutset are both 22, so they cancel: the deco's
-   right edge lands exactly on the screen edge; its bottom edge sits 3dp below the button row's
-   own bottom, matching NativeDecorationTopOffset(59) - NativeDecorationHeight(103) +
-   NativeButtonHeight(30) + NativeBottomGap(11) = -3). */
+/* Decorative flourish overlapping the Connect/Delete buttons' top-right corner -- paints behind
+   them (declared first in char_sel_main.rml). */
 .deco {
 	position: absolute;
 	width: 189dp;
@@ -131,16 +90,7 @@
 	decorator: image(charsel-deco-image);
 }
 
-/* Stands in for the two RenderAccountBlockMessage() g_pRenderText calls this replaces -- black
-   text on a translucent yellow highlight (SetTextColor(0,0,0,255)/SetBgColor(255,255,0,128) in
-   the original), centered around a fixed screen X (320px @ 100% scale) unrelated to this
-   window's own position. A 640dp-wide box with left:0 gives a visual center at x=320dp on any
-   resolution, matching the original's RT3_WRITE_CENTER effect (now also responding to the
-   user's UI scale, since it's dp rather than the original's un-scaled px). Each line is its own
-   inline-block, shrink-wrapped to its own text (not the full 640dp), so the yellow highlight
-   hugs just the text -- matching the original per-line highlight box, not one giant band.
-   line-height:18dp on each row reproduces the 18px gap between the original's two Y coordinates
-   (330, 348) without needing a separate margin value. */
+/* Centered around a fixed screen X unrelated to this window's own position. */
 #account_block_message {
 	position: absolute;
 	left: 0;

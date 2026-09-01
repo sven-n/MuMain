@@ -1,8 +1,7 @@
-/* Shared, cross-window RCSS -- generic (non-positional) rules reused by more than one migrated
-   window, extracted from themes/modern/login.rcss's originals (which stay self-contained and
-   unretrofitted -- see the RmlUi migration plan's "Batch 2" section). Every new migrated
-   window's <head> links this file first, then its own per-window positional .rcss. Colors here
-   match login.rcss's existing modern-theme palette so windows sharing a theme look consistent. */
+/* Shared, cross-window RCSS for the modern theme: generic (non-positional) rules reused by more
+   than one migrated window, plus the anchor/center/stretch layout utility classes every window
+   uses. Every migrated window's <head> links this file first, then its own per-window positional
+   .rcss. */
 
 body {
 	width: 100%;
@@ -11,8 +10,7 @@ body {
 	pointer-events: none;
 }
 
-/* See themes/legacy/base.rcss's identical #backdrop comment for the CWin::Create() nTexID=-1
-   parity rationale. */
+/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
 #backdrop {
 	position: absolute;
 	left: 0;
@@ -47,9 +45,6 @@ body {
 	white-space: nowrap;
 }
 
-/* Sized for the 108x30 BITMAP_TEXT_BTN shape shared by SysMenuWin's 4 buttons and OptionWin's
-   Close button -- login's own 54x30 image buttons stay defined in login.rcss's own .btn rule,
-   unaffected since login.rml/.rcss don't link this file. */
 .btn {
 	position: absolute;
 	width: 108px;
@@ -73,19 +68,12 @@ body {
 	cursor: default;
 }
 
-/* See themes/legacy/base.rcss's identical comment -- SysMenuWin's Select Server button uses this
-   in the login scene instead of .disabled, since a dimmed-but-still-drawn button visibly
-   collided with Option there. */
 .hidden {
 	display: none;
 }
 
-/* ============================================================================
-   Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- identical
-   to themes/legacy/base.rcss's copy (pure layout, no visual styling, so there
-   is nothing theme-specific to vary). See that file's comment for the full
-   rationale.
-   ============================================================================ */
+/* Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- identical to
+   themes/legacy/base.rcss's copy; pure layout, nothing theme-specific to vary. */
 
 .anchor-top-left {
 	position: absolute;
@@ -143,17 +131,8 @@ body {
 	bottom: 0;
 }
 
-/* 2026-09-02: read by C++ via Element::GetAbsoluteOffset() -- an invisible, non-interactive marker
-   whose sole purpose is to let a theme's own RCSS express a real-screen anchor point for content
-   that's still legacy-rendered and therefore can't be positioned by RCSS directly (main_frame.rml's
-   #item_hotkey_anchor/#skill_list_anchor are the first use -- see NewUIMainFrameWindow.cpp's
-   SyncRmlModel() for the read side). A theme (or a mod's own theme) positions the marker wherever
-   it wants that legacy content anchored, using ordinary `left`/`top`; C++ reads the marker's
-   computed screen position back out generically, off whichever theme is active, with no per-theme
-   C++ branch and no new config-file format -- this is the point of it (architecture-principles.md
-   §16/§18/§19/§23: layout customization, including for still-legacy content, without C++ changes).
-   visibility:hidden, not display:none, so the marker still gets a real per-frame layout pass to
-   read a position from -- a display:none element has no box at all. */
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset() -- see themes/legacy/base.rcss's
+   identical comment for the full mechanism. */
 .layout-anchor {
 	position: absolute;
 	visibility: hidden;

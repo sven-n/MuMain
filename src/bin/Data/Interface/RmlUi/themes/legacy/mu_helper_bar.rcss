@@ -1,25 +1,6 @@
-/* RmlUi overlay for the "Official MU Helper" mini control bar + hero position readout
-   (CMuHelperBar, MuHelperBar.h/.cpp -- renamed 2026-08-31 from CNewUIHeroPositionInfo; see that
-   file's own header comment for why, and for why this is ported as one component rather than
-   split into a separate position-readout piece). First pilot of the CNewUIObj-tier RmlUi adapter
-   pattern (2026-08-31).
-
-   Same @spritesheet-with-explicit-rect technique every prior legacy theme file uses (this
-   engine's .OZT/.OZJ loader pads textures to the next power-of-two size). Source art per
-   MuHelperBar.cpp's LoadImages() (unchanged by the rename): Minimap_positionA.tga (left cap, 22x25),
-   Minimap_positionB.tga (stretchy middle segment -- the real content sub-rect within its padded
-   texture is a best-effort approximation, not measured against the actual file; verify visually
-   and adjust the named-sprite rect below if it looks wrong), Minimap_positionC.tga (right end
-   cap, 73x20, under MacroUI/), MacroUI_Setup.tga/MacroUI_Start.tga/MacroUI_Stop.tga (18x13
-   single-frame button icons, under MacroUI/ -- SetButtonInfo()'s ChangeButtonImgState(1, ...)
-   first argument is a 1-frame count, so no hover/press art variant exists to reproduce).
-
-   Fixed dp layout, anchored top-left via base.rcss's .anchor-top-left (see mu_helper_bar.rml's
-   own comment) -- 207dp total width (22 + 112 + 73, the native reference dimensions) x 25dp
-   tall, using the "WindowWidth > 800" WidenX case from the original (112) as the single fixed
-   dp value; this widget no longer auto-widens by resolution, same fixed-size-anchored policy
-   change already applied to every other retrofitted/new window this session
-   (docs/rmlui-ui-system/layout-and-scaling.md). */
+/* Legacy theme for the "Official MU Helper" mini control bar + hero position readout
+   (CMuHelperBar). Fixed dp layout, anchored top-left via base.rcss's .anchor-top-left -- 207dp
+   total width x 25dp tall, no longer auto-widening by resolution. */
 
 @spritesheet muhelper-seg-a-sheet
 {
@@ -29,8 +10,6 @@
 @spritesheet muhelper-seg-b-sheet
 {
 	src: "../../../Minimap_positionB.tga";
-	/* Approximated sub-rect (see file header comment) -- source is 32x32 padded, original UV
-	   params (0.1, 0, 22.4/32, 25/32) converted to pixels: (3,0)-(22,25). */
 	muhelper-seg-b-image: 3px 0px 19px 25px;
 }
 @spritesheet muhelper-seg-c-sheet
@@ -123,22 +102,12 @@
 	decorator: image(muhelper-stop-image);
 }
 
-/* Real icon art already gives these buttons a visual identity -- see themes/modern's own .dot
-   rule for why it exists there instead. */
 .dot {
 	display: none;
 }
 
-/* Small floating label below the button -- not a reproduction of the original's own
-   CNewUIButton::MoveTextTipPos()-based tooltip geometry (tuned for a different rendering system),
-   just a straightforward hover tooltip using the pattern every other migrated interactive
-   element's spec expects: display:none by default, shown via :hover. Below rather than above
-   the button (top:, not bottom:) because this whole widget is pinned to the very top of the
-   screen -- a tooltip positioned above the button would render off the top edge of the viewport,
-   entirely out of view. font-family/font-size declared directly here rather than relying on
-   inheritance from #panel -- see docs/rmlui-ui-system/layout-and-scaling.md's "Known RmlUi
-   quirk" section (text nested in a <span> two-plus levels from the font-declaring ancestor can
-   silently fail to inherit it). */
+/* Below rather than above the button -- this widget is pinned to the top of the screen, so a
+   tooltip above it would render off the top edge. */
 .tooltip {
 	display: none;
 	position: absolute;
