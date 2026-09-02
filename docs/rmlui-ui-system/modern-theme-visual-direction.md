@@ -84,6 +84,7 @@ warm brown-black in favor of a cooler near-black.
 | `surface-1` | `#1a1b1d` | Base panel background |
 | `surface-2` | `#2c2f32` | Elevated panel / header background |
 | `surface-3` | `rgba(255, 244, 224, 12)` | Interactive control, resting (warm-white wash over `surface-1`/`surface-2`, not pure white) |
+| `surface-tooltip` | `rgba(20, 20, 20, 220)` | Tooltip/floating-label background. **Added 2026-09-03** to close a gap `STATUS.md`'s own "Pilots to revisit" table had flagged: `main_frame.rcss`/`buff_strip.rcss` already used this exact value uncommented (no token to point at), and `mu_helper_bar.rcss`'s own tooltip had drifted to a different bespoke value (`rgba(0, 0, 0, 200)`, pure black) — genuinely different code, not a deliberate variant. All three now reference this one token; use it for any future tooltip instead of picking a new near-black. |
 
 ### Accent colors
 

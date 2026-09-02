@@ -64,14 +64,28 @@
 #btn_start .dot  { background-color: #6fae6f; } /* semantic-success */
 #btn_stop .dot   { background-color: #b2394a; } /* semantic-danger */
 
+/* Siblings of .mu-btn (mu_helper_bar.rml), not nested children -- this build's shrink-to-fit
+   width hard-clamps to the containing block (main_frame.rcss's own tooltip comment documents the
+   same finding), so a tooltip nested inside an 18dp-wide button was clamped to ~18dp regardless of
+   its own text length -- the reported "background fill is the same size as the button" bug. As a
+   sibling of #panel (207dp wide) instead, shrink-to-fit has real room to work with.
+
+   2026-09-03: given an explicit width (100dp) rather than left to shrink-to-fit, and positioned
+   via a precomputed static `left` (button center minus half that width) instead of
+   translateX(-50%) -- main_frame.rcss's own tooltips used that same combination and it produced a
+   real bug there (hover rendered with no visible background, floating at the wrong position; read
+   TransformUtilities.cpp -- `%` in a transform resolves against the element's own
+   already-computed border-box, which isn't reliably available yet exactly when `display` flips
+   from none to block on :hover). Fixed proactively here the same way rather than waiting for a
+   report against this file specifically -- same suspect combination, same fix. */
 .tooltip {
 	display: none;
 	position: absolute;
 	top: 18dp;
-	left: 50%;
-	transform: translateX(-50%);
+	width: 100dp;
 	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
+	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 2dp 4dp;
 	border-radius: 3dp; /* radius-sm */
@@ -79,6 +93,14 @@
 	font-size: 11dp;
 	pointer-events: none;
 }
-.mu-btn:hover .tooltip {
+/* left = button center (button's own left + half its 18dp width) minus half this tooltip's 100dp
+   width. */
+.tooltip-config { left: 112dp; } /* button center 162dp */
+.tooltip-start,
+.tooltip-stop   { left: 130dp; } /* button center 180dp */
+#btn_config:hover ~ .tooltip-config,
+#btn_start:hover ~ .tooltip-start,
+#btn_stop:hover ~ .tooltip-stop {
 	display: block;
+	z-index: 1;
 }

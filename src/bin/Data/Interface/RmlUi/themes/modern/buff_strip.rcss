@@ -227,7 +227,7 @@
 	left: 0dp;
 	width: 160dp;
 	white-space: pre-line;
-	background-color: rgba(20, 20, 20, 220);
+	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
 	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 3dp 5dp;

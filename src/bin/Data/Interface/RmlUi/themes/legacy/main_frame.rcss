@@ -16,8 +16,14 @@
 	height: 39px;
 }
 #item_hotkey_anchor, #skill_list_anchor { left: 0px; top: 0px; }
+/* 2026-09-03: pointer-events:auto added -- these never opted back into pointer-events from
+   body's inherited `none` (base.rcss's documented pointer-events trap), so #bar_hp:hover ~
+   .tooltip-hp etc. below could never actually fire; the HP/MP/AG/SD tooltips were never once
+   shown since this HUD shipped, in either theme (found the same bug in modern's own copy of this
+   file, fixed there too). */
 .gauge-slot {
 	position: absolute;
+	pointer-events: auto;
 }
 #bar_hp   { left: 158px; top: 432px; width: 45px; height: 39px; }
 #bar_sd   { left: 204px; top: 431px; width: 16px; height: 39px; }
@@ -62,11 +68,29 @@
    the wide #bars/#buttons group, not the narrow trigger itself -- this build's shrink-to-fit
    width hard-clamps to the containing block, so a nested tooltip could never grow past its
    trigger's own width. Each needs its own explicit `left` (no shared 50%) and a z-index bump so a
-   later sibling's opaque background doesn't paint over it. */
+   later sibling's opaque background doesn't paint over it.
+
+   2026-09-03: explicit width added -- being a sibling of the wide #bars group wasn't enough on
+   its own in modern's identical setup (reported: "background does not fully fill the text");
+   fixed the same way there, applying the same fix here proactively since the structure (and
+   presumably the bug) is identical. Sidesteps shrink-to-fit entirely rather than the exact
+   remaining mechanism.
+
+   2026-09-03 (second fix, same day): also dropped `transform: translateX(-50%)` -- once the box
+   got a real width, modern's identical setup rendered hover text with no visible background,
+   floating near the top of the screen. Root cause (see modern's own main_frame.rcss comment on
+   this same fix): `%` in a transform resolves against the element's own already-computed
+   border-box (TransformUtilities.cpp), which isn't reliably available yet for an element that's
+   `display:none` until the exact moment it flips to `:hover`. Every `left` below is now a
+   precomputed static value (original anchor minus half the fixed 160px width) instead of relying
+   on the transform to center it -- applies to every tooltip in this file, not just HP/MP/AG/SD,
+   since they all share this one base .tooltip rule (#buttons -- unlike modern's separate,
+   unscaled #top_right_row -- nests inside #bars here too, per this file's own header comment, so
+   .tooltip-cshop etc. below are equally exposed). */
 .tooltip {
 	display: none;
 	position: absolute;
-	transform: translateX(-50%);
+	width: 160px;
 	white-space: nowrap;
 	background-color: rgba(0, 0, 0, 200);
 	color: #ffffff;
@@ -76,10 +100,10 @@
 	font-size: 11px;
 	pointer-events: none;
 }
-.tooltip-hp { left: 180.5px; }
-.tooltip-sd { left: 212px;   }
-.tooltip-ag { left: 428px;   }
-.tooltip-mp { left: 459.5px; }
+.tooltip-hp { left: 100.5px; } /* anchor 180.5px */
+.tooltip-sd { left: 132px;   } /* anchor 212px */
+.tooltip-ag { left: 348px;   } /* anchor 428px */
+.tooltip-mp { left: 379.5px; } /* anchor 459.5px */
 #bar_hp:hover ~ .tooltip-hp,
 #bar_sd:hover ~ .tooltip-sd,
 #bar_ag:hover ~ .tooltip-ag,
@@ -243,11 +267,11 @@
 #btn_window   { left: 121px; decorator: image(mainframe-btn-window-normal); }
 #btn_window.open   { decorator: image(mainframe-btn-window-open); }
 
-.tooltip-cshop    { left: 16px;  }
-.tooltip-chainfo  { left: 46px;  }
-.tooltip-myinven  { left: 76px;  }
-.tooltip-friend   { left: 106px; }
-.tooltip-window   { left: 136px; }
+.tooltip-cshop    { left: -64px; } /* anchor 16px */
+.tooltip-chainfo  { left: -34px; } /* anchor 46px */
+.tooltip-myinven  { left: -4px;  } /* anchor 76px */
+.tooltip-friend   { left: 26px;  } /* anchor 106px */
+.tooltip-window   { left: 56px;  } /* anchor 136px */
 #btn_cshop:hover ~ .tooltip-cshop,
 #btn_chainfo:hover ~ .tooltip-chainfo,
 #btn_myinven:hover ~ .tooltip-myinven,
@@ -269,13 +293,16 @@
 	pointer-events: none;
 }
 
-/* EXP: nested inside #bars, spans reference x=0-640 (item-hotkey band start to button group end). */
+/* EXP: nested inside #bars, spans reference x=0-640 (item-hotkey band start to button group end).
+   pointer-events:auto for the same reason as .gauge-slot above -- #exp:hover .tooltip below never
+   fired without it. */
 #exp {
 	position: absolute;
 	left: 0px;
 	top: 470px;
 	width: 640px;
 	height: 10px;
+	pointer-events: auto;
 }
 #exp_track {
 	position: absolute;
@@ -307,7 +334,9 @@
 	font-size: 9px;
 	pointer-events: none;
 }
+/* left is a precomputed centered value (#exp's own 640px width, minus half .tooltip's 160px), not
+   left:50%+transform:translateX(-50%) -- same fix and same reason as .tooltip-hp etc. above. */
 #exp_tooltip {
 	bottom: 12px;
-	left: 50%;
+	left: 240px;
 }

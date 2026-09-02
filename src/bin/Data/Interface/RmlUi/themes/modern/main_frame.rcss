@@ -36,9 +36,14 @@
 }
 
 /* HP/SD left column, MP/AG right column, both in the same row as potions/skills, sitting on top
-   of the exp bar. */
+   of the exp bar. 2026-09-03: pointer-events:auto added -- these never opted back into
+   pointer-events from body's inherited `none` (base.rcss's documented pointer-events trap), so
+   #bar_hp:hover ~ .tooltip-hp etc. below could never actually fire; the HP/MP/AG/SD tooltips were
+   never once shown since this HUD shipped. Confirmed the same bug independently in legacy's own
+   .gauge-slot, not something specific to this file. */
 .gauge-slot {
 	position: absolute;
+	pointer-events: auto;
 }
 #bar_hp { left: 8px;   top: 437px; width: 124px; height: 16px; }
 #bar_sd { left: 8px;   top: 455px; width: 124px; height: 8px;  }
@@ -123,13 +128,31 @@
 /* Tooltips are siblings of their trigger (not nested descendants) so their containing block is
    the wide #bars group, not the narrow trigger -- this build's shrink-to-fit width hard-clamps to
    the containing block. Shared per column (not per bar), since HP/SD sit directly above/below
-   each other in the same column. */
+   each other in the same column.
+
+   2026-09-03: explicit width added -- being a sibling of the wide #bars group turned out not to
+   be enough on its own (reported: "background does not fully fill the text"), same visible
+   symptom as mu_helper_bar.rcss's own tooltip bug even though the structural cause documented
+   above was already addressed here. Sidesteps shrink-to-fit entirely rather than chasing the
+   exact remaining mechanism -- same fix #skill_tooltip/buff_strip's tooltip already use
+   successfully.
+
+   2026-09-03 (second fix, same day): also dropped `transform: translateX(-50%)` for centering --
+   once the box actually got a real width, hovering rendered the text with no visible background
+   at all, floating near the top of the screen instead of near the HP/MP/AG/SD bars. Read
+   TransformUtilities.cpp directly: `%` in a transform resolves against `e.GetBox()`, the
+   element's OWN already-computed border-box -- for an element that's `display:none` until
+   `:hover`, that box is only known AFTER the display flip, and the transform apparently isn't
+   being freshly resolved against it at the right moment, producing translateX(-50%) of a
+   stale/zero width instead of the real 160px. Replaced with a precomputed static `left` per
+   tooltip (anchor position minus half the fixed width) so no `%`-in-transform resolution has to
+   happen at all -- deterministic regardless of that timing question. */
 .tooltip {
 	display: none;
 	position: absolute;
-	transform: translateX(-50%);
+	width: 160px;
 	white-space: nowrap;
-	background-color: rgba(20, 20, 20, 220);
+	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
 	border: 1px rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 2px 4px;
@@ -138,8 +161,10 @@
 	font-size: 11px;
 	pointer-events: none;
 }
-#bars .tooltip-hp, #bars .tooltip-sd { left: 70px;  top: 410px; bottom: auto; }
-#bars .tooltip-mp, #bars .tooltip-ag { left: 571px; top: 410px; bottom: auto; }
+/* left = original anchor (bar center) minus half the fixed 160px width, replacing
+   translateX(-50%) -- see the comment above for why. */
+#bars .tooltip-hp, #bars .tooltip-sd { left: -10px; top: 410px; bottom: auto; } /* anchor 70px */
+#bars .tooltip-mp, #bars .tooltip-ag { left: 491px; top: 410px; bottom: auto; } /* anchor 571px */
 #bar_hp:hover ~ .tooltip-hp,
 #bar_sd:hover ~ .tooltip-sd,
 #bar_ag:hover ~ .tooltip-ag,
@@ -148,7 +173,14 @@
 	display: block;
 	z-index: 1;
 }
-#bars .tooltip { bottom: 44px; }
+/* 2026-09-03: removed `#bars .tooltip { bottom: 44px; }`, which used to live here -- same
+   specificity as #bars .tooltip-hp/.tooltip-sd/.tooltip-mp/.tooltip-ag above (ID+class each) and
+   declared textually after them, so it silently won the tie and overrode their `bottom: auto`
+   back to `bottom: 44px` -- combined with their own explicit `top: 410px` and no explicit height,
+   that's a top+bottom-constrained box with no height set, which this engine doesn't handle
+   gracefully (found the real cause of "still not fixed" after the transform fix). #exp_tooltip
+   was never affected (its own #exp_tooltip ID rule's `bottom: 12px` already wins on specificity
+   regardless of order) -- this rule had no other real consumer left to justify keeping it. */
 
 /* #top_right_row / #buttons_top: the top-right system-button panel (see main_frame.rml's header
    comment for the flex-over-`right` positioning rationale). #top_right_row is a plain full-width
@@ -218,7 +250,7 @@
 	top: 28dp;
 	transform: translateX(-50%);
 	white-space: nowrap;
-	background-color: rgba(20, 20, 20, 220);
+	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
 	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 2dp 4dp;
@@ -242,13 +274,15 @@
 }
 
 /* EXP: nested inside #bars, same reference span as legacy (x=0-640). Stays flat/programmatic per
-   this theme's convention. */
+   this theme's convention. pointer-events:auto for the same reason as .gauge-slot above --
+   #exp:hover .tooltip below never fired without it. */
 #exp {
 	position: absolute;
 	left: 0px;
 	top: 470px;
 	width: 640px;
 	height: 6px;
+	pointer-events: auto;
 }
 #exp_track {
 	position: absolute;
@@ -277,9 +311,11 @@
 	font-size: 7px;
 	pointer-events: none;
 }
+/* left is a precomputed centered value (#exp's own 640px width, minus half .tooltip's 160px), not
+   left:50%+transform:translateX(-50%) -- same fix and same reason as .tooltip-hp etc. above. */
 #exp_tooltip {
 	bottom: 12px;
-	left: 50%;
+	left: 240px;
 }
 
 /* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border (2026-09-02:
@@ -420,7 +456,7 @@
 #skill_tooltip {
 	transform: translateY(-100%);
 	width: 220px;
-	background-color: rgba(20, 20, 20, 220);
+	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
 	border: 1px rgba(140, 146, 152, 130); /* border-metal */
 	border-radius: 3px; /* radius-sm */
 	padding: 4px 6px;

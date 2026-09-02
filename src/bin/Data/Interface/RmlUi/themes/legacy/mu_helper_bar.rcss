@@ -107,13 +107,24 @@
 }
 
 /* Below rather than above the button -- this widget is pinned to the top of the screen, so a
-   tooltip above it would render off the top edge. */
+   tooltip above it would render off the top edge.
+
+   2026-09-03: .tooltip-* are now siblings of their trigger button (mu_helper_bar.rml), not nested
+   children -- required to follow modern theme's own fix for the same file (this build's
+   shrink-to-fit width hard-clamps to the containing block, so a tooltip nested inside an
+   18dp-wide button was clamped to ~18dp regardless of its own text length; see modern's
+   mu_helper_bar.rcss for the full explanation). Legacy had the identical bug, just never
+   reported against this theme -- fixed the same way, own bespoke color kept unchanged.
+
+   2026-09-03 (second fix, same day): explicit width (100dp) instead of shrink-to-fit, and a
+   precomputed static `left` instead of translateX(-50%) -- same second bug modern's own
+   mu_helper_bar.rcss and main_frame.rcss hit (see either for the full TransformUtilities.cpp
+   explanation), fixed proactively here too rather than waiting for a report against legacy. */
 .tooltip {
 	display: none;
 	position: absolute;
 	top: 16dp;
-	left: 50%;
-	transform: translateX(-50%);
+	width: 100dp;
 	white-space: nowrap;
 	background-color: rgba(0, 0, 0, 200);
 	color: #ffffff;
@@ -123,6 +134,14 @@
 	font-size: 11dp;
 	pointer-events: none;
 }
-.mu-btn:hover .tooltip {
+/* left = button center (button's own left + half its 18dp width) minus half this tooltip's 100dp
+   width. */
+.tooltip-config { left: 112dp; } /* button center 162dp */
+.tooltip-start,
+.tooltip-stop   { left: 130dp; } /* button center 180dp */
+#btn_config:hover ~ .tooltip-config,
+#btn_start:hover ~ .tooltip-start,
+#btn_stop:hover ~ .tooltip-stop {
 	display: block;
+	z-index: 1;
 }

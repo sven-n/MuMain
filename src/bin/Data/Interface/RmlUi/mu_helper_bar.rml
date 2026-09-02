@@ -12,19 +12,22 @@
 		<div id="seg_c"></div>
 		<div id="text">{{position_text}}</div>
 
+		<!-- .tooltip-* are siblings of their trigger button, not nested children -- see
+		     mu_helper_bar.rcss's own comment on .tooltip for why (shrink-to-fit containing-block
+		     clamping, same bug main_frame.rcss's tooltips already document/avoid this way). -->
 		<div id="btn_config" class="mu-btn" data-event-click="mu_helper_config_click">
 			<div class="dot"></div>
-			<span class="tooltip">{{config_tooltip}}</span>
 		</div>
+		<span class="tooltip tooltip-config">{{config_tooltip}}</span>
 		<!-- Start/Stop share one screen position, mutually exclusive by mu_helper_active. -->
 		<div id="btn_start" class="mu-btn" data-class-hidden="mu_helper_active" data-event-click="mu_helper_toggle_click">
 			<div class="dot"></div>
-			<span class="tooltip">{{start_tooltip}}</span>
 		</div>
+		<span class="tooltip tooltip-start">{{start_tooltip}}</span>
 		<div id="btn_stop" class="mu-btn" data-class-hidden="!mu_helper_active" data-event-click="mu_helper_toggle_click">
 			<div class="dot"></div>
-			<span class="tooltip">{{stop_tooltip}}</span>
 		</div>
+		<span class="tooltip tooltip-stop">{{stop_tooltip}}</span>
 	</div>
 </body>
 </rml>
