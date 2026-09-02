@@ -19,4 +19,9 @@ namespace Core::Platform
     return flags;
 }
 
+[[nodiscard]] constexpr bool HasSDLWindowInputFocus(SDL_WindowFlags flags)
+{
+    return (flags & SDL_WINDOW_INPUT_FOCUS) != 0;
+}
+
 } // namespace Core::Platform

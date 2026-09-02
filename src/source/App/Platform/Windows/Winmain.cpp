@@ -518,9 +518,12 @@ void DestroyWindow()
         gMapManager.DeleteObjects();
 
         // Object.
-        for (int i = MODEL_LOGO; i < MAX_MODELS; i++)
+        if (Models != nullptr)
         {
-            Models[i].Release();
+            for (int i = MODEL_LOGO; i < MAX_MODELS; i++)
+            {
+                Models[i].Release();
+            }
         }
 
         // Bitmap
@@ -1322,6 +1325,8 @@ MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
     auto precise = timeBeginPeriod(target_resolution);
+
+    HandleFocusChange(Core::Platform::HasSDLWindowInputFocus(SDL_GetWindowFlags(g_sdlWindow)));
 
     while (!Destroy)
     {
