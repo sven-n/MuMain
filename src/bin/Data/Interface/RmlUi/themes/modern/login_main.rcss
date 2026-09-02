@@ -13,18 +13,18 @@
 	height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
-	border-radius: 4px;
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4px; /* radius-md */
 	text-align: center;
 	line-height: 30px;
 }
 .btn-icon:hover {
-	background-color: #c0a050;
-	border: 1px #c0a050;
+	background-color: #c0a050; /* accent-gold */
+	border: 1px #c0a050; /* accent-gold */
 }
 .btn-icon-label {
-	color: white;
+	color: #d9d3c5; /* text-body */
 	font-weight: bold;
 }
 .btn-icon-menu {

@@ -28,8 +28,8 @@
 #skill_list_anchor  { left: 78px;  top: 0px; }
 
 .slot-frame {
-	border: 1px rgba(255, 255, 255, 60);
-	border-radius: 3px;
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3px; /* radius-sm */
 }
 .slot-fill {
 	background-color: rgba(10, 10, 10, 150);
@@ -60,7 +60,7 @@
 	top: 429px;
 	width: 640px;
 	height: 41px;
-	border-top: 1px rgba(255, 255, 255, 60);
+	border-top: 1px rgba(140, 146, 152, 130); /* border-metal */
 	pointer-events: none;
 }
 
@@ -130,10 +130,10 @@
 	transform: translateX(-50%);
 	white-space: nowrap;
 	background-color: rgba(20, 20, 20, 220);
-	border: 1px rgba(255, 255, 255, 40);
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 2px 4px;
-	border-radius: 3px;
+	border-radius: 3px; /* radius-sm */
 	font-family: "Liberation Sans";
 	font-size: 11px;
 	pointer-events: none;
@@ -168,8 +168,8 @@
 	height: 24dp;
 	font-family: "Liberation Sans";
 	background-color: rgba(20, 20, 20, 180);
-	border: 1dp rgba(255, 255, 255, 40);
-	border-radius: 3dp;
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3dp; /* radius-sm */
 }
 .frame-btn-top {
 	position: absolute;
@@ -181,8 +181,8 @@
 	text-align: center;
 	line-height: 16dp;
 	font-family: "Liberation Sans";
-	background-color: rgba(255, 255, 255, 15);
-	border: 1dp rgba(255, 255, 255, 50);
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	border-radius: 2dp;
 	color: #ffffff;
 	font-weight: bold;
@@ -191,8 +191,8 @@
 }
 .frame-btn-top:hover,
 .frame-btn-top.open {
-	background-color: #c0a050;
-	border: 1dp #c0a050;
+	background-color: #c0a050; /* accent-gold */
+	border: 1dp #c0a050; /* accent-gold */
 }
 #btn_cshop_top    { left: 4dp;   }
 #btn_chainfo_top  { left: 54dp;  }
@@ -206,8 +206,8 @@
 	right: -2dp;
 	width: 6dp;
 	height: 6dp;
-	border-radius: 3dp;
-	background-color: #ffd700;
+	border-radius: 3dp; /* radius-sm */
+	background-color: #d69a3e; /* semantic-warning */
 	border: 1dp rgba(0, 0, 0, 150);
 	pointer-events: none;
 }
@@ -219,10 +219,10 @@
 	transform: translateX(-50%);
 	white-space: nowrap;
 	background-color: rgba(20, 20, 20, 220);
-	border: 1dp rgba(255, 255, 255, 40);
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 2dp 4dp;
-	border-radius: 3dp;
+	border-radius: 3dp; /* radius-sm */
 	font-family: "Liberation Sans";
 	font-size: 11dp;
 	pointer-events: none;
@@ -359,8 +359,8 @@
 #skill_slot_1, #skill_slot_2, #skill_slot_3 { border-radius: 0; }
 #skill_slot_4 { border-radius: 0 3px 3px 0; }
 #skill_slots .selected {
-	border: 1px #e0c060;
-	background-color: rgba(224, 192, 96, 25);
+	border: 1px #e0c060; /* accent-gold-bright */
+	background-color: rgba(176, 182, 188, 25);
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
@@ -391,12 +391,12 @@
 	height: 38px;
 	pointer-events: auto;
 	cursor: pointer;
-	border: 1px rgba(255, 255, 255, 60);
-	border-radius: 3px;
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3px; /* radius-sm */
 }
 .skill-cell.selected {
-	border: 1px #e0c060;
-	background-color: rgba(224, 192, 96, 25);
+	border: 1px #e0c060; /* accent-gold-bright */
+	background-color: rgba(176, 182, 188, 25);
 }
 
 /* Bottom-anchored translucent wipe -- shrinks from the top down as the skill's cooldown counts
@@ -421,8 +421,8 @@
 	transform: translateY(-100%);
 	width: 220px;
 	background-color: rgba(20, 20, 20, 220);
-	border: 1px rgba(255, 255, 255, 40);
-	border-radius: 3px;
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3px; /* radius-sm */
 	padding: 4px 6px;
 	font-family: "Liberation Sans";
 	font-size: 10px;
@@ -445,7 +445,7 @@
 	min-height: 1.2em;
 	line-height: 1.2em;
 }
-.tt-line.tt-blue { color: #6fa8ff; }
+.tt-line.tt-blue { color: #6f9bc4; } /* accent-blue */
 .tt-line.tt-red { color: #ff6060; }
 .tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
 .tt-line.bold { font-weight: bold; }

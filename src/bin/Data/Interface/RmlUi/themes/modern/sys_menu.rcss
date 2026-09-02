@@ -6,7 +6,7 @@
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
-	background-color: rgba(18, 20, 28, 235);
+	background-color: rgba(26, 27, 29, 228);
 	border: 1px rgba(255, 255, 255, 30);
 	border-radius: 10px;
 }

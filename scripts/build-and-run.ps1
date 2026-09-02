@@ -31,7 +31,9 @@
 
 .EXAMPLE
   ./scripts/build-and-run.ps1 -NoBuild -GpuDriver vulkan -Detached
-  Skip the build, just (re)launch the already-built exe forced onto Vulkan.
+  Skip compiling, just re-stage Data/ (RML/RCSS/etc. -- see CopyAssets target, src/CMakeLists.txt)
+  and (re)launch the already-built exe forced onto Vulkan. Fast path for asset-only iteration
+  (RmlUi RML/RCSS, other Data/ files) that doesn't need a C++ recompile.
 
 .EXAMPLE
   ./scripts/build-and-run.ps1 -- connect /u192.168.0.20 /p55902
@@ -187,6 +189,22 @@ if (-not $NoBuild) {
     finally {
         Pop-Location
     }
+}
+elseif (Test-Path $buildDir) {
+    # Data/ (RML/RCSS/etc.) is staged into the output directory only as a side effect of building
+    # the Main target -- CopyAssets is a dependency of Main, not something that runs on its own at
+    # launch time (src/CMakeLists.txt). Without this, -NoBuild would silently run whatever Data/
+    # was last copied, however stale, even though the exe itself is up to date. Building just this
+    # one target is fast (no C++ compile).
+    Write-Host "Setting up VC environment for $Arch (needed for cmake/ninja on PATH) ..."
+    Import-VcVars -Arch $Arch
+
+    Write-Host 'Re-staging Data/ (CopyAssets target) ...'
+    cmake --build --preset $buildPreset --target CopyAssets
+    if ($LASTEXITCODE -ne 0) { throw 'cmake CopyAssets build failed.' }
+}
+else {
+    Write-Warning "'$buildDir' doesn't exist yet -- run without -NoBuild first. Skipping asset re-stage."
 }
 
 if (-not (Test-Path $exePath)) {

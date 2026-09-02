@@ -23,7 +23,7 @@
 	width: 20dp;
 	height: 28dp;
 	pointer-events: auto;
-	border: 1dp rgba(255, 255, 255, 40);
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	border-radius: 2dp;
 	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
@@ -228,10 +228,10 @@
 	width: 160dp;
 	white-space: pre-line;
 	background-color: rgba(20, 20, 20, 220);
-	border: 1dp rgba(255, 255, 255, 40);
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	color: #ffffff;
 	padding: 3dp 5dp;
-	border-radius: 3dp;
+	border-radius: 3dp; /* radius-sm */
 	font-family: "Liberation Sans";
 	font-size: 11dp;
 	pointer-events: none;

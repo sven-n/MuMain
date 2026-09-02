@@ -30,7 +30,9 @@ Pattern](newui-tier-adapter.md)** — the `CNewUIObj`/`CNewUIManager` tier (in-g
 from `CWin`/`CUIMng`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
 still unproven there. **[Legacy Theme Modernization Policy](legacy-theme-modernization.md)** —
 when legacy-theme C++ behavior should move into RML/RCSS versus genuinely stay in C++, and how to
-classify a given piece of legacy code either way.
+classify a given piece of legacy code either way. **[Modern Theme Visual Direction](modern-theme-visual-direction.md)**
+— the `modern` theme's color/border/shadow token table and the design-language goals it serves;
+`legacy` is explicitly out of scope for it.
 
 ## Renderer integration: SDL_GPU
 

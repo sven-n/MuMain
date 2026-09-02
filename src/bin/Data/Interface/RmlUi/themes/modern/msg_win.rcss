@@ -7,10 +7,10 @@
 	height: 113dp;
 	font-family: "Liberation Sans";
 	font-size: 12dp;
-	color: white;
+	color: #d9d3c5; /* text-body */
 	background-color: rgba(20, 20, 20, 220);
-	border: 1dp rgba(255, 255, 255, 60);
-	border-radius: 4dp;
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4dp; /* radius-md */
 }
 
 #msg_line1 {
@@ -49,8 +49,8 @@
 	width: 171dp;
 	height: 23dp;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1dp rgba(255, 255, 255, 40);
-	border-radius: 3dp;
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3dp; /* radius-sm */
 	pointer-events: none;
 }
 .mode-input #input_frame { display: block; }
@@ -66,13 +66,13 @@
 	line-height: 30dp;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1dp rgba(255, 255, 255, 50);
-	border-radius: 4dp;
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4dp; /* radius-md */
 }
 .btn:hover {
-	background-color: #c0a050;
-	border: 1dp #c0a050;
+	background-color: #c0a050; /* accent-gold */
+	border: 1dp #c0a050; /* accent-gold */
 }
 
 #btn_ok { left: 149dp; }

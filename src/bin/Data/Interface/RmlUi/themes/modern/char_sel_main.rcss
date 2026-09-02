@@ -15,9 +15,9 @@
 	bottom: 11dp;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1dp rgba(255, 255, 255, 50);
-	border-radius: 4dp;
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4dp; /* radius-md */
 	text-align: center;
 	line-height: 30dp;
 }
@@ -29,22 +29,22 @@
 /* font-family/size redeclared directly here (not inherited from #panel) -- this document's
    data-model bindings make inheritance silently fail for this text in this RmlUi build. */
 .btn-icon-label {
-	color: white;
+	color: #d9d3c5; /* text-body */
 	font-weight: bold;
 	font-family: "Liberation Sans";
 	font-size: 14dp;
 }
 
 .btn-icon:hover {
-	background-color: #c0a050;
-	border: 1dp #c0a050;
+	background-color: #c0a050; /* accent-gold */
+	border: 1dp #c0a050; /* accent-gold */
 }
 .btn-icon.disabled {
 	pointer-events: none;
 	opacity: 0.5;
 	cursor: default;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1dp rgba(255, 255, 255, 50);
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 }
 
 .deco {
@@ -74,8 +74,8 @@
 }
 .line {
 	display: inline-block;
-	color: #000000;
-	background-color: rgba(255, 255, 0, 128);
+	color: #efe6d3; /* text-title */
+	background-color: #b2394a; /* semantic-danger -- account-block messaging, a genuinely blocking state */
 	white-space: nowrap;
 	padding: 0 2dp;
 }

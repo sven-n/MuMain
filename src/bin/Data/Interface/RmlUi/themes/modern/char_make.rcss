@@ -6,7 +6,7 @@
 	position: absolute;
 	font-family: "Liberation Sans";
 	font-size: 12px;
-	color: white;
+	color: #d9d3c5; /* text-body */
 }
 
 .job-btn {
@@ -18,26 +18,26 @@
 	line-height: 26px;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
-	border-radius: 4px;
-	color: #e2e2e2;
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4px; /* radius-md */
+	color: #d9d3c5; /* text-body */
 }
 .job-btn:hover {
-	background-color: rgba(192, 160, 80, 60);
-	border: 1px #c0a050;
+	background-color: rgba(140, 146, 152, 60); /* accent-gold wash */
+	border: 1px #c0a050; /* accent-gold */
 }
 .job-btn.checked {
-	background-color: #c0a050;
-	border: 1px #c0a050;
-	color: #ffffff;
+	background-color: #c0a050; /* accent-gold */
+	border: 1px #c0a050; /* accent-gold */
+	color: #efe6d3; /* text-title */
 }
 .job-btn.disabled {
 	pointer-events: none;
-	color: #777777;
+	color: #9a958c; /* semantic-neutral */
 	cursor: default;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
 }
 
 .stat-panel, .desc-panel {
@@ -68,12 +68,12 @@
 	left: 22px;
 }
 .stat-label {
-	color: #ffffff;
+	color: #d9d3c5; /* text-body */
 }
 .stat-value {
 	position: absolute;
 	left: 54px;
-	color: #ffb400;
+	color: #c0a050; /* accent-gold */
 }
 
 .desc-line {
@@ -87,8 +87,8 @@
 	width: 346px;
 	height: 38px;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1px rgba(255, 255, 255, 40);
-	border-radius: 3px;
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3px; /* radius-sm */
 	pointer-events: none;
 }
 
@@ -97,12 +97,12 @@
 	width: 54px;
 	height: 30px;
 	cursor: pointer;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
-	border-radius: 4px;
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4px; /* radius-md */
 	pointer-events: auto;
 }
 .btn:hover {
-	background-color: #c0a050;
-	border: 1px #c0a050;
+	background-color: #c0a050; /* accent-gold */
+	border: 1px #c0a050; /* accent-gold */
 }

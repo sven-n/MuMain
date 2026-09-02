@@ -828,6 +828,16 @@ add_custom_target(CheckGLWrapperMonopoly ALL
 )
 add_dependencies(MuClient CheckGLWrapperMonopoly)
 
+# No OUTPUT means this target is always considered out-of-date and re-runs every build. See
+# tools/check_rml_rcss_syntax.py's own docstring for what it does and doesn't check.
+add_custom_target(CheckRmlRcssSyntax ALL
+  COMMAND "${Python3_EXECUTABLE}" "${REPO_ROOT}/tools/check_rml_rcss_syntax.py"
+          --asset-root "${ASSETS_DIR}/Data/Interface/RmlUi"
+  COMMENT "Checking RML/RCSS syntax (comment nesting, brace balance)"
+  VERBATIM
+)
+add_dependencies(Main CheckRmlRcssSyntax)
+
 # MinGW (32-bit or 64-bit) cross-toolchains: link against the Windows/OpenGL
 # system libraries so that gl*, wgl*, Imm*, timeGetTime, etc. resolve.
 # For turbojpeg and wzAudio we link against the logically named libraries,

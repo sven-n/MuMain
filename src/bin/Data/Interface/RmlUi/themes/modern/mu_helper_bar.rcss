@@ -8,8 +8,8 @@
 	font-family: "Liberation Sans";
 	font-size: 11dp;
 	background-color: rgba(20, 20, 20, 180);
-	border: 1dp rgba(255, 255, 255, 40);
-	border-radius: 3dp;
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 3dp; /* radius-sm */
 }
 
 /* No legacy seam art -- the three segments collapse into #panel's own flat fill; elements stay in
@@ -25,7 +25,7 @@
 	width: 132dp;
 	height: 9dp;
 	text-align: center;
-	color: #ffffff;
+	color: #d9d3c5; /* text-body */
 	white-space: nowrap;
 	pointer-events: none;
 }
@@ -37,19 +37,19 @@
 	height: 13dp;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1dp rgba(255, 255, 255, 50);
+	background-color: rgba(255, 244, 224, 12); /* surface-3 */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
 	border-radius: 2dp;
 }
 .mu-btn:hover {
-	background-color: #c0a050;
-	border: 1dp #c0a050;
+	background-color: #c0a050; /* accent-gold */
+	border: 1dp #c0a050; /* accent-gold */
 }
 #btn_config { left: 153dp; }
 #btn_start  { left: 171dp; }
 #btn_stop   { left: 171dp; }
 
-/* Plain colored dot per button (no icon art) -- config: gray, start: green, stop: red. */
+/* Plain colored dot per button (no icon art) -- config: neutral, start: success, stop: danger. */
 .dot {
 	position: absolute;
 	left: 50%;
@@ -60,9 +60,9 @@
 	border-radius: 3dp;
 	pointer-events: none;
 }
-#btn_config .dot { background-color: #a0a0a0; }
-#btn_start .dot  { background-color: #4caf50; }
-#btn_stop .dot   { background-color: #e05050; }
+#btn_config .dot { background-color: #9a958c; } /* semantic-neutral */
+#btn_start .dot  { background-color: #6fae6f; } /* semantic-success */
+#btn_stop .dot   { background-color: #b2394a; } /* semantic-danger */
 
 .tooltip {
 	display: none;
@@ -74,7 +74,7 @@
 	background-color: rgba(0, 0, 0, 200);
 	color: #ffffff;
 	padding: 2dp 4dp;
-	border-radius: 3dp;
+	border-radius: 3dp; /* radius-sm */
 	font-family: "Liberation Sans";
 	font-size: 11dp;
 	pointer-events: none;
