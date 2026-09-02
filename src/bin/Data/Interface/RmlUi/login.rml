@@ -1,13 +1,18 @@
 <rml>
 <head>
 	<title>Login</title>
+	<link type="text/rcss" href="base.rcss"/>
 	<link type="text/rcss" href="login.rcss"/>
 </head>
 <body>
-	<!-- Login panel: labels, input-box frames, remember-me/save-password checkboxes, OK/Cancel. -->
-	<div id="panel" data-model="login">
-		<div class="frame-accent"></div>
-		<div class="login-content"></div>
+	<!-- Login panel: labels, input-box frames, remember-me/save-password checkboxes, OK/Cancel.
+	     #panel/.frame-accent/.login-content consume base.rcss's shared modern-frame/modern-panel/
+	     modern-frame-accent primitives (plus the -crimson palette variants extracted from this
+	     window) rather than login.rcss's own now-removed hand-rolled copies -- see base.rcss's own
+	     comment on those classes for the shared-structure/per-window-palette split. -->
+	<div id="panel" class="modern-frame modern-frame-crimson" data-model="login">
+		<div class="modern-frame-accent modern-frame-accent-crimson frame-accent"></div>
+		<div class="modern-panel modern-panel-crimson login-content"></div>
 		<div class="header-glow"></div>
 		<span class="label label-server">{{server_name}}</span>
 		<span class="label label-account">{{account_label}}</span>

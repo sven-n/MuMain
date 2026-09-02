@@ -136,14 +136,30 @@ body {
 	decorator: none;
 }
 
-/* Reusable window-layering primitives -- pilot: login.rcss. Intended usage: apply .modern-frame
-   to the outer positioned panel element itself (it keeps that element's own position/size), then
-   add ONE decorative child div with .modern-panel, inset a few px on all sides, as the FIRST
-   child (so it paints behind real content, same convention as .layout-anchor/.panel-header) --
-   the small reveal between the frame's inner edge and the panel's own border is deliberate, it's
-   the frame's own material showing as a third visual band. Real content stays direct children of
-   the .modern-frame element at their original positions -- do NOT nest content inside
-   .modern-panel, its inset would shift every child's effective position. */
+/* Reusable window-layering primitives. Intended usage: apply .modern-frame to the outer
+   positioned panel element itself (it keeps that element's own position/size), then add ONE
+   decorative child div with .modern-panel, inset a few px on all sides, as the FIRST child (so it
+   paints behind real content, same convention as .layout-anchor/.panel-header) -- the small
+   reveal between the frame's inner edge and the panel's own border is deliberate, it's the
+   frame's own material showing as a third visual band. Real content stays direct children of the
+   .modern-frame element at their original positions -- do NOT nest content inside .modern-panel,
+   its inset would shift every child's effective position.
+
+   These are documented as "reusable" since 2026-09-02 but were unused by every window, login.rcss
+   included, until 2026-09-03 -- there's no CSS variable mechanism on this engine (confirmed, see
+   modern-theme-visual-direction.md), so a shared class can only carry *structural* properties
+   (border-width, the bevel/gradient mechanism) portably; a window's own specific palette (login's
+   warm bronze/crimson, say) still has to come from somewhere. The pattern that actually closes
+   that gap, proven by .btn/.btn-ok above: keep .modern-frame/.modern-panel as generic gray
+   defaults, and add a *named palette variant* modifier class per distinct look a window
+   contributes (e.g. .modern-frame-crimson below, extracted from login.rcss's own #panel) instead
+   of leaving every window to hand-roll its own copy of the whole bevel mechanism from scratch.
+   Apply both classes together (class="modern-frame modern-frame-crimson"); the variant only
+   overrides color/decorator properties, .modern-frame's own border-width/mechanism still applies
+   underneath. Window-specific structural values (width, height, border-radius, the exact inset
+   used for a "leaves room for a header above" child panel) stay the consuming window's own
+   responsibility either way -- these classes were never meant to carry position/size, see the
+   original usage note above. */
 .modern-frame {
 	background-color: rgba(38, 40, 42, 190);
 	decorator: linear-gradient(to bottom, rgba(58, 62, 66, 190) 0%, rgba(38, 40, 42, 190) 40%, rgba(20, 21, 22, 190) 100%);
@@ -169,6 +185,48 @@ body {
 	border-right-color: rgba(255, 255, 255, 20);
 	border-radius: 8px;
 }
+
+/* Warm bronze/near-black palette variant -- extracted from login.rcss's own #panel/.login-content
+   (2026-09-03), the first real consumer of these primitives. Apply alongside .modern-frame/
+   .modern-panel (class="modern-frame modern-frame-crimson"), not instead of them. Despite the
+   name this isn't crimson itself (that's accent-crimson, reserved for a primary button/banner,
+   see modern-theme-visual-direction.md's Accent colors) -- it's the dark warm *base* those accent
+   colors sit on top of in login's dialog, named for the family it belongs to rather than
+   "warm-bronze-panel" since accent-crimson is what makes that family recognizable. */
+.modern-frame-crimson {
+	background-color: #1b1713;
+	decorator: linear-gradient(to bottom, #29231d, #1b1713 28%, #11100e);
+	border-top-color: rgba(210, 174, 105, 90); /* warm highlight catching the top edge */
+	border-left-color: rgba(0, 0, 0, 160);
+	border-right-color: rgba(0, 0, 0, 160);
+	border-bottom-color: rgba(0, 0, 0, 220);
+}
+.modern-panel-crimson {
+	background-color: #100e0c;
+	decorator: linear-gradient(to bottom, #181512, #100e0c 55%, #0b0a08);
+	border-top-color: rgba(135, 103, 60, 45);
+	border-bottom-color: rgba(0, 0, 0, 240);
+	border-left-color: #070605;
+	border-right-color: #070605;
+}
+
+/* Thin accent line just inside .modern-frame -- border only, no fill, so the frame's own gradient
+   still shows through it. Extracted from login.rcss's .frame-accent (2026-09-03); apply as a
+   direct child of .modern-frame, inset a few px more than .modern-panel so .modern-panel's own
+   position/size stays exactly as documented above -- this is a fourth visual band, not a
+   replacement for the frame/panel pair. Position/size (left/right/top/bottom/border-radius) stay
+   the consuming window's own responsibility, same as .modern-frame/.modern-panel themselves. */
+.modern-frame-accent {
+	position: absolute;
+	pointer-events: none;
+	border-width: 1px;
+}
+.modern-frame-accent-crimson {
+	border-color: rgba(139, 108, 62, 166);
+	border-top-color: rgba(255, 220, 150, 70);
+	border-bottom-color: rgba(0, 0, 0, 200);
+}
+
 /* Border-only recessed bevel, no fill -- for an element with legacy-drawn content painted
    underneath it (RmlUi always composites last, so any fill here would hide that content; see
    login.rcss's .input-frame comment for a concrete example). Gives the "sunk into the panel"

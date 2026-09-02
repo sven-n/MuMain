@@ -7,7 +7,7 @@
 <body data-model="msg_win">
 	<!-- Generic message/confirm dialog, centered via .center-both. mode-* classes select which
 	     of CMsgWin's five MSG_WIN_TYPE variants is active. -->
-	<div id="panel" class="center-both"
+	<div id="panel" class="center-both modern-frame modern-frame-crimson"
 	     data-class-no-buttons="no_buttons"
 	     data-class-mode-cancel-only="mode_cancel_only"
 	     data-class-mode-ok-only="mode_ok_only"

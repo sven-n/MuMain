@@ -24,8 +24,12 @@ body {
 	pointer-events: none;
 }
 
-/* Outer frame -- gradient fill, bevel baked into the border's own per-side color (mockup's flat
-   #080706 border + separate inset box-shadows collapse into one border here). */
+/* Outer frame -- position/size/font/border-width/radius stay local (window-specific structural
+   values, never carried by the shared class per its own doc comment); the gradient fill and
+   per-side border-color bevel come from base.rcss's .modern-frame-crimson (applied in login.rml
+   alongside .modern-frame itself) instead of being redeclared here -- 2026-09-03, this file's
+   first real use of a class from base.rcss (now linked; previously fully self-contained, see this
+   file's own history in git blame if curious why that was a hard NOTE below for so long). */
 #panel {
 	position: absolute;
 	width: 329px;
@@ -33,49 +37,30 @@ body {
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: #d9d0c0;
-	background-color: #1b1713;
-	decorator: linear-gradient(to bottom, #29231d, #1b1713 28%, #11100e);
 	border-width: 1px;
-	border-top-color: rgba(210, 174, 105, 90); /* warm highlight catching the top edge */
-	border-left-color: rgba(0, 0, 0, 160);
-	border-right-color: rgba(0, 0, 0, 160);
-	border-bottom-color: rgba(0, 0, 0, 220);
 	border-radius: 7px;
 }
 
-/* Thin bronze accent line just inside the frame -- border only, no fill, so the frame's own
-   gradient still shows through it (mockup's #panel::before). Spans the whole panel, behind the
-   header text/lines AND .login-content below. */
+/* Thin accent line just inside the frame -- structure/position local, palette from base.rcss's
+   .modern-frame-accent-crimson (applied in login.rml). Spans the whole panel, behind the header
+   text/lines AND .login-content below. */
 .frame-accent {
-	position: absolute;
 	left: 4px;
 	right: 4px;
 	top: 4px;
 	bottom: 4px;
-	pointer-events: none;
-	border-width: 1px;
-	border-color: rgba(139, 108, 62, 166);
-	border-top-color: rgba(255, 220, 150, 70);
-	border-bottom-color: rgba(0, 0, 0, 200);
 	border-radius: 5px;
 }
 
-/* Recessed content surface -- starts below the (unboxed) header, not full-inset like a typical
-   frame/panel pair, matching the mockup's .login-content sitting under its .window-header rather
-   than behind it. Darker than the outer frame, its own separate bevel. */
+/* Recessed content surface -- starts below the (unboxed) header, not full-inset like
+   .modern-panel's own documented default (top:4px on all sides) -- overridden locally, exactly
+   the "leaves room for a header above" case base.rcss's own comment on .modern-panel anticipates.
+   Palette from .modern-panel-crimson (applied in login.rml). */
 .login-content {
-	position: absolute;
 	left: 10px;
 	right: 10px;
 	top: 44px;
 	bottom: 10px;
-	pointer-events: none;
-	background-color: #100e0c;
-	decorator: linear-gradient(to bottom, #181512, #100e0c 55%, #0b0a08);
-	border-width: 1px;
-	border-color: #070605;
-	border-top-color: rgba(135, 103, 60, 45);
-	border-bottom-color: rgba(0, 0, 0, 240);
 	border-radius: 4px;
 }
 
@@ -145,11 +130,12 @@ body {
 .checkbox-remember-me  { left: 109px; top: 134px; }
 .checkbox-save-password{ left: 109px; top: 158px; }
 
-/* NOTE: login.rml links only login.rcss, not base.rcss (unlike sys_menu/main_frame/etc.) -- this
-   file's .checkbox-box/.btn below must stay fully self-contained, not just position deltas, or
-   they lose all visual styling. Values here intentionally diverge from base.rcss's own
-   .checkbox-box/.btn (this file follows the 2026-09-02 mockup direction; base.rcss hasn't been
-   revisited against it yet). */
+/* NOTE 2026-09-03: login.rml now links base.rcss too (see the frame/panel/accent rules above),
+   but .checkbox-box/.btn below are deliberately left as their own full, self-contained copies
+   rather than deduped against base.rcss's now-identical .checkbox-box/.checkbox-box.checked and
+   .btn+.btn-ok -- this pass stayed scoped to the frame primitives specifically. They're provably
+   the same values today (base.rcss's copies were retrofitted from these exact ones), so deduping
+   is safe whenever it's actually worth doing, just not bundled into this pass. */
 .checkbox-box {
 	display: inline-block;
 	position: relative;

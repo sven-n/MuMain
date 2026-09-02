@@ -92,17 +92,17 @@
 	pointer-events: none;
 }
 
+/* 2026-09-03: background-color/border/border-radius removed -- only width genuinely needs to
+   differ from base.rcss's own .btn (54px here vs. base's 108px default) here. The removed
+   `border` shorthand was silently stomping .btn-ok's crimson border-color/border-top-color back
+   to gray border-metal on #btn_ok (same specificity, this file linked after base.rcss, tie always
+   went to this rule) -- the fill still showed crimson (decorator, untouched) but with a
+   mismatched gray border instead of a clean crimson one, same bug independently present in
+   msg_win.rcss (see that file's own comment on the identical fix). */
 .btn {
 	position: absolute;
 	width: 54px;
 	height: 30px;
 	cursor: pointer;
-	background-color: rgba(255, 244, 224, 12); /* surface-3 */
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 4px; /* radius-md */
 	pointer-events: auto;
-}
-.btn:hover {
-	background-color: #c0a050; /* accent-gold */
-	border: 1px #c0a050; /* accent-gold */
 }
