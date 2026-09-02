@@ -1,3 +1,9 @@
+## [1.2.4](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.3...v1.2.4) (2026-09-02)
+
+### Bug Fixes
+
+* **render:** initialize fullscreen focus ([a78b3d1](https://github.com/yesid-bocanegra/MuMain/commit/a78b3d11e7f42c54c32a7943a9d3663894528fd0))
+
 ## [1.2.3](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.2...v1.2.3) (2026-09-01)
 
 ### Bug Fixes
