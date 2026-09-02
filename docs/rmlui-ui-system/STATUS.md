@@ -14,11 +14,18 @@ against this document.
   `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`.
   `COptionWin` ported but deliberately not wired up (confirmed unreachable in live play — see
   `README.md`'s Coexistence patterns). Built and verified against a real server, both themes.
-- **In-game HUD (`CNewUIObj` tier)** — two pilots: `CMuHelperBar` (map/position readout + MU
-  Helper bot control bar) and `CBuffStrip` (active-buff icon strip, the first `data-for`/dynamic-
-  array pilot at this tier). Both built and verified against a real server, both themes. The rest
-  of this tier — ~88 other `CNewUIObj` windows, including the main HP/MP/EXP/hotbar/skill-list
-  HUD frame, drag-and-drop, and 3D-camera-space rendering — is not yet migrated.
+- **In-game HUD (`CNewUIObj` tier)** — `CMuHelperBar` (map/position readout + MU Helper bot
+  control bar) and `CBuffStrip` (active-buff icon strip, the first `data-for`/dynamic-array pilot
+  at this tier) are fully done. The third pilot, `CNewUIMainFrameWindow`'s 3-phase HUD-frame port,
+  is **2 of 3 phases done**: Phase 1 (HP/MP/AG/SD/EXP bars + 5 corner buttons) and Phase 2
+  (`CNewUISkillList` — compact hotkey row click/hover/cooldown, expanded skill grid, pet-command
+  row, and skill tooltips for both themes, replacing the old hand-rolled `EVENT_STATE` hover/click
+  machine entirely). **Icon/box-frame art for the skill grid and pet row stays legacy 2D**, a
+  deliberate Phase 2 scope cut — see the pilots-to-revisit table below. Phase 3 (`CNewUIItemHotKey`
+  — potion slots, 3D-camera-composited icons, no RmlUi pattern proven for that yet) is not started.
+  All landed pilots built and verified against a real server, both themes. The rest of this tier —
+  ~87 other `CNewUIObj` windows, drag-and-drop, and 3D-camera-space rendering generally — is not
+  yet migrated.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -38,7 +45,11 @@ against this document.
    (§1, §16).
 5. RmlUi-facing asset naming, and now the C++ class name itself, reflects what the component
    actually is, not the legacy tier it came from (§12) — e.g. `mu_helper_bar`/`CMuHelperBar`, not
-   `hero_position_info`/`CNewUIHeroPositionInfo`.
+   `hero_position_info`/`CNewUIHeroPositionInfo`. **Renamed at port time, not deferred** — the one
+   exception found so far is a legacy file that welds multiple classes together where only some
+   are ported in the current pass (`CNewUIMainFrameWindow`'s own file — see "Tracked deferral:
+   `CNewUIMainFrameWindow`'s own class rename" below); don't treat that as a general excuse to
+   defer a rename otherwise.
 6. Both themes updated in the same pass, never one left behind (own standing instruction,
    independent of the principles doc). A rendering technique (e.g. an icon atlas) is verified to
    actually work at runtime before being trusted — see "Findings" below for a case where it
@@ -70,6 +81,23 @@ for visibility:
   own; it stops being one once a window's visuals move to a persistent RmlUi document, which
   renders every frame regardless of scene. See `newui-tier-adapter.md`'s third `MAIN_SCENE`
   prerequisite.
+- **RmlUi's own default `display` value is `inline`, not `block`, for every element including
+  `<div>`** (confirmed against the vendored source, `StyleSheetSpecification.cpp` — there's no
+  browser-style user-agent stylesheet giving `<div>` a block default the way HTML does). Every
+  `position:absolute` element gets a block box regardless (a side effect of being
+  out-of-flow), which is why this went unnoticed through two pilots and Phase 1 — every div so far
+  was absolutely positioned. The first normal in-flow stacked content (Phase 2's skill-tooltip
+  lines, one `<div>` per line via `data-for`) rendered as one run-on inline paragraph instead of
+  separate lines until `display: block` was added explicitly. Give any non-absolutely-positioned
+  element `display: block` (or whatever `display` it actually needs) explicitly — never assume a
+  `<div>` gets one for free.
+- **A confusingly-named legacy method can silently bind to the wrong RmlUi field.**
+  `CNewUISkillList::IsSkillListUp()` (pre-existing, predates RmlUi) reports whether the hotkey row
+  is scrolled to its "upper" slot set (6-9,0), not whether the expanded skill-list *popup* is open
+  — despite what the name suggests. Phase 2 initially bound `main_frame.rml`'s `skill_grid_open` to
+  it, which compiled fine and looked plausible in code review, but meant clicking the current-skill
+  slot never visibly opened the grid. Fixed with a correctly-named `IsSkillGridOpen()`. Read what a
+  legacy getter actually returns, not just what its name implies, before binding it into a model.
 
 ## Known gaps against the principles (honest status, not yet built)
 
@@ -98,6 +126,14 @@ for "the full architecture is in place":
   been explicitly audited** — carried over from `feature/rmlui-migration` unchanged, not
   re-examined against these specific concerns (does a dragged position survive a UI-scale change
   sensibly? A theme change?).
+- **`UI::RmlBridge::MakeDraggable()` (`RmlDraggable.h/.cpp`) has zero live call sites and isn't yet
+  §10-11-compliant even in prototype form** (2026-09-02 audit finding). It writes the dragged
+  position as an absolute `px` inline style, which never scales with `UIScalePercent`
+  (`layout-and-scaling.md`'s `dp`-vs-`px` rule), and nothing persists the result anywhere — no
+  `GameConfig` position-storage mechanism exists yet for any RmlUi panel. Not a live bug (nothing
+  depends on it today), but the next window that reaches for it will silently inherit both gaps.
+  See the header comment on `RmlDraggable.h` for the full note; resolve before, not after, the
+  first real caller.
 - **No reusable-component catalog exists as such** (§20) — `RmlModelBinder<T>`,
   `UI::RmlBridge` helpers, and the anchor/center/stretch RCSS classes are the closest things to
   reusable primitives today, all C++/CSS mechanisms rather than named, documented UI components
@@ -122,8 +158,10 @@ one of the trigger initiatives on the right.
 | All `CWin`-tier windows, `CMuHelperBar`, `CBuffStrip` | No resolution × UI-scale × theme × drag-state validation matrix has been run against any of them (§25) — verification so far has been ad hoc per window | A validation-matrix/test-plan artifact is built — run it retroactively against every already-migrated window, not just new ones going forward. |
 | All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | The drag/preference-integration audit (itself an unstarted gap, above) happens — check these windows specifically, don't just audit the mechanism in the abstract. |
 | `CBuffStrip` | Right-click-to-cancel not reproduced; tooltip is plain-text instead of the original's per-line-colored rich tooltip (both already documented as deliberate scope cuts in `newui-tier-adapter.md`, not silent gaps) | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding, or the three non-unified tooltip mechanisms (§12) get consolidated — whichever comes first. |
-| `CNewUIMainFrameWindow` (`RenderLeftFrame()`/`RenderCenterFrame()`, `NewUIMainFrameWindow.cpp`) | Modern theme's flat background fill behind the still-legacy 3D-rendered potion/skill icons is drawn in C++ (`RenderColorQuadARGB`, gated on `GetActiveThemeName() == "modern"`), not RCSS — audited against `legacy-theme-modernization.md`'s classification and kept deliberately: RmlUi always composites its whole document as the frame's last pass, after those icons already rendered, so an RmlUi-drawn fill in that screen region would always paint *over* them, not behind — the same reason `#item_slots`/`#skill_slots` are border-only in RmlUi, never filled. The border lines that used to live alongside this same fill were **not** similarly exempt — moved to RmlUi (`#gauge_frame`) once audited, since a thin outline has no such paint-order constraint. Likewise the skill-hotkey-number subscript and the gauge current/max text, both fully retired from C++ this pass (`GetHotKeySlotNumber()`/`hp_current_text` etc. — pure theme-agnostic data, each theme's own markup decides what to show). | Phase 2/3 of this pilot (skill list, item hotkeys → real RmlUi) lands and this legacy chrome retires entirely, same as `UIScalePercent` row below. |
-| `CNewUIMainFrameWindow` (`main_frame.rcss`, both themes — HP/MP/AG/SD/EXP bars + 5 corner buttons, first of 3 planned phases) | Doesn't respect `UIScalePercent` (§9, §23–24) — `bars_scale`/`bars_left`/`bars_top` derive entirely from `UI::Scaling::BottomHudScale()`/`BottomHudCenterTransform()`, a window-size-driven, 1x–2x-clamped auto-scale that has never read the config option (matches the original pre-RmlUi window's own behavior — this HUD band predates that setting). `main_frame.rcss` deliberately uses `px`, not `dp`, throughout for this reason, so it tracks `bars_scale` exactly instead of being scaled a second time. See `MainFrameRmlModel::barsLeft`'s header comment (`NewUIMainFrameWindow.h`) for the full reasoning. | Either (a) a scoped fix: fold `GameConfig::GetUIScalePercent()` into `UI::Scaling::BottomHudScale()` as a post-clamp multiplier — `NewUIMainFrameWindow.cpp/.h` are its *only* consumers codebase-wide (grepped), so every dependent transform (RmlUi bars/buttons/exp, the still-legacy chrome render, 3D potion-icon placement, and potion/skill click hit-testing) moves together automatically since they all already share this one function — no risk of the two-independent-calculators drift bug `CCharSelMainWin` hit (`layout-and-scaling.md`). This is `UI::Scaling`'s first-ever `GameConfig` dependency (currently pure geometry), and touches gameplay-critical click hit-testing, so it needs verifying by actually using a potion/skill at more than one `UIScalePercent` value *and* resolution before shipping, not just a visual check. Or (b) Phase 2/3 of this pilot (skill list, item hotkeys → real RmlUi, both still fully legacy today) lands and `BottomHudScale` is retired from this window entirely in favor of the branch's normal fixed-`dp`/`UIScalePercent` policy, same as every other migrated window. |
+| `CNewUIMainFrameWindow` (`RenderLeftFrame()`/`RenderCenterFrame()`, `NewUIMainFrameWindow.cpp`) | Modern theme's flat background fill behind the still-legacy 3D-rendered potion/skill icons is drawn in C++ (`RenderColorQuadARGB`, gated on `GetActiveThemeName() == "modern"`), not RCSS — audited against `legacy-theme-modernization.md`'s classification and kept deliberately: RmlUi always composites its whole document as the frame's last pass, after those icons already rendered, so an RmlUi-drawn fill in that screen region would always paint *over* them, not behind — the same reason `#item_slots`/`#skill_slots` are border-only in RmlUi, never filled. The border lines that used to live alongside this same fill were **not** similarly exempt — moved to RmlUi (`#gauge_frame`) once audited, since a thin outline has no such paint-order constraint. Likewise the skill-hotkey-number subscript and the gauge current/max text, both fully retired from C++ this pass (`GetHotKeySlotNumber()`/`hp_current_text` etc. — pure theme-agnostic data, each theme's own markup decides what to show). | Phase 2 landed 2026-09-02 but did **not** retire this — icon/box-frame art for the skill grid/pet row stayed legacy 2D too (mid-implementation scope adjustment: `RenderSkillIcon()`'s atlas lookup turned out too irregular — mixed 8/12-column addressing, a separate master-level atlas — to port blind without a way to visually verify against the real decoded `.OZJ` textures). Retires once a separately-scoped icon-atlas port lands (Phase 3 territory or its own follow-up), not before. |
+| `CNewUISkillList::RenderCurrentSkillAndHotSkillList()` (`NewUIMainFrameWindow.cpp`, still fully legacy) | The selected-skill-slot highlight is gated `GetActiveThemeName() != "modern"` in C++ (audited 2026-09-02, kept deliberately — see that call site's own comment for the full reasoning: modern's RmlUi `.selected` outline always paints on top of it since RmlUi composites last, so drawing the legacy `IMAGE_SKILLBOX_USE` sprite unconditionally would double up the highlight for modern; legacy genuinely wants the real sprite, which has no RmlUi asset equivalent ported yet). Same exception class as the row above, not a separate issue. | Same icon-atlas-port follow-up as the row above retires this — not attempted in Phase 2 itself (see that row). **Extended, not retired, 2026-09-02**: the expanded grid's own box-frame draw (`Render()`, distinct call site from this one) got the identical `GetActiveThemeName() != "modern"` treatment for the same reason (feedback: "the skill list are using the legacy border instead of the programmatic border already used in the skill hotkeys slots") — modern's grid cells now use a plain CSS border (`.skill-cell`, `main_frame.rcss`) instead of `IMAGE_SKILLBOX`/`IMAGE_SKILLBOX_USE`; legacy keeps the real sprite for both call sites. Two call sites now share this exception, not one. |
+| `main_frame.rml` (both themes) | Two independently-maintained RML files, not the one-shared-RML-per-window pattern every other migrated window uses — `theming-and-modding.md`'s "Exception: per-theme RML override" section documents why and the criteria for when this is legitimate (2026-09-02, written up after a 2026-09-02 audit found the mechanism had shipped silently, undocumented, back on 2026-09-01/02). The two files' shared ids/classes/bindings require hand-sync, called out in each file's own header comment. | Either a cleaner RCSS-only structural fix is found and one file retires, or this is accepted long-term and the same criteria get applied consistently if another window ever needs it — not before a second real case shows up. |
+| `CNewUIMainFrameWindow` (`main_frame.rcss`, both themes — HP/MP/AG/SD/EXP bars + 5 corner buttons, first of 3 planned phases) | Doesn't respect `UIScalePercent` (§9, §23–24) — `bars_scale`/`bars_left`/`bars_top` derive entirely from `UI::Scaling::BottomHudScale()`/`BottomHudCenterTransform()`, a window-size-driven, 1x–2x-clamped auto-scale that has never read the config option (matches the original pre-RmlUi window's own behavior — this HUD band predates that setting). `main_frame.rcss` deliberately uses `px`, not `dp`, throughout for this reason, so it tracks `bars_scale` exactly instead of being scaled a second time. See `MainFrameRmlModel::barsLeft`'s header comment (`NewUIMainFrameWindow.h`) for the full reasoning. | Either (a) a scoped fix: fold `GameConfig::GetUIScalePercent()` into `UI::Scaling::BottomHudScale()` as a post-clamp multiplier — `NewUIMainFrameWindow.cpp/.h` are its *only* consumers codebase-wide (grepped), so every dependent transform (RmlUi bars/buttons/exp, the still-legacy chrome render, 3D potion-icon placement, and potion/skill click hit-testing) moves together automatically since they all already share this one function — no risk of the two-independent-calculators drift bug `CCharSelMainWin` hit (`layout-and-scaling.md`). This is `UI::Scaling`'s first-ever `GameConfig` dependency (currently pure geometry), and touches gameplay-critical click hit-testing, so it needs verifying by actually using a potion/skill at more than one `UIScalePercent` value *and* resolution before shipping, not just a visual check. Or (b) Phase 3 (item hotkeys → real RmlUi) lands — plus a follow-up icon-atlas port for the Phase 2 skill grid/pet row's still-legacy icon art (see the two rows above) — and `BottomHudScale` is retired from this window entirely in favor of the branch's normal fixed-`dp`/`UIScalePercent` policy, same as every other migrated window. Phase 2 alone (landed 2026-09-02) did not touch this — the grid still calls `BottomHudCenterTransform()` for its still-legacy icon positioning/hit-testing. |
 
 ## Tracked deferral: C++ adapter classes still live in `UI/NewUI/HUD/` under `CNewUIObj`
 
@@ -136,6 +174,29 @@ case in a shared table. These are structural — they touch the other ~88 still-
 `CNewUIObj` windows' shared machinery, not just the pilots so far — and stay premature with only 2
 data points. Revisit once more of `UI/NewUI` is ported and the real shape of a unified directory
 scheme is visible from real examples.
+
+## Tracked deferral: `CNewUIMainFrameWindow`'s own class rename
+
+A third, distinct deferral from the one above — different reasoning, don't conflate the two.
+
+`CMuHelperBar`/`CBuffStrip` were each renamed at port time (class name and every referencing
+`INTERFACE_*`/`CNewUISystem` member/accessor/macro), per the checklist above and
+[`newui-tier-adapter.md`](newui-tier-adapter.md)'s Naming section. `CNewUIMainFrameWindow` (Phase 1
+of its own 3-phase pilot, `main_frame.rml`/`.rcss`) was **not** renamed when ported — a real,
+2026-09-02-audit-caught gap against that rule, not an intentional first application of this
+deferral at the time.
+
+The reason it's being deferred now rather than fixed immediately: `NewUIMainFrameWindow.cpp/.h`
+welds three classes together — `CNewUIMainFrameWindow` (ported, Phase 1), `CNewUISkillList` (still
+fully legacy, Phase 2), `CNewUIItemHotKey` (still fully legacy, Phase 3). Renaming just
+`CNewUIMainFrameWindow` now would leave the file's other two, still-legacy-named residents mismatched
+against it for however long Phase 2/3 take — a complication `CMuHelperBar`/`CBuffStrip` never had,
+since each of those ports covered its entire file in one pass. Decided 2026-09-02: rename all three
+classes (and the file itself, `NewUIMainFrameWindow.cpp/.h` → whatever the merged concept should be
+called) together, in one pass, once Phase 3 lands — not `CNewUIMainFrameWindow` alone now. Revisit
+when Phase 3 (item hotkeys) actually lands; if Phase 2 lands first and Phase 3 stalls for a long
+while afterward, reassess whether waiting for Phase 3 is still the right call rather than renaming
+the two already-ported classes and leaving `CNewUIItemHotKey` alone.
 
 ## Upstream sync log (PR #572)
 

@@ -1,4 +1,4 @@
-﻿//////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////
 // NewUIMainFrameWindow.cpp: implementation of the CNewUIMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 
@@ -160,6 +160,67 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
                 c.Bind("skill_slot_2_hotkey", &model.skillSlot2Hotkey);
                 c.Bind("skill_slot_3_hotkey", &model.skillSlot3Hotkey);
                 c.Bind("skill_slot_4_hotkey", &model.skillSlot4Hotkey);
+
+                // Phase 2 (skill list) -- see docs/rmlui-ui-system's Phase 2 plan and
+                // MainFrameRmlModel::skillGridOpen's own header comment.
+                c.Bind("skill_slot_0_cooldown", &model.skillSlot0Cooldown);
+                c.Bind("skill_slot_1_cooldown", &model.skillSlot1Cooldown);
+                c.Bind("skill_slot_2_cooldown", &model.skillSlot2Cooldown);
+                c.Bind("skill_slot_3_cooldown", &model.skillSlot3Cooldown);
+                c.Bind("skill_slot_4_cooldown", &model.skillSlot4Cooldown);
+                c.Bind("current_skill_cooldown", &model.currentSkillCooldown);
+
+                auto skillCell = c.RegisterStruct<SkillCellEntry>();
+                skillCell.RegisterMember("left", &SkillCellEntry::left);
+                skillCell.RegisterMember("top", &SkillCellEntry::top);
+                skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
+                skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
+                skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
+                skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
+                c.RegisterArray<std::vector<SkillCellEntry>>();
+
+                c.Bind("skill_grid_open", &model.skillGridOpen);
+                c.Bind("skill_grid_cells", &model.skillGridCells);
+                c.Bind("pet_skill_cells", &model.petSkillCells);
+
+                auto tooltipLine = c.RegisterStruct<SkillTooltipLineEntry>();
+                tooltipLine.RegisterMember("text", &SkillTooltipLineEntry::text);
+                tooltipLine.RegisterMember("color_blue", &SkillTooltipLineEntry::colorBlue);
+                tooltipLine.RegisterMember("color_red", &SkillTooltipLineEntry::colorRed);
+                tooltipLine.RegisterMember("color_dark_red", &SkillTooltipLineEntry::colorDarkRed);
+                tooltipLine.RegisterMember("bold", &SkillTooltipLineEntry::bold);
+                c.RegisterArray<std::vector<SkillTooltipLineEntry>>();
+
+                c.Bind("skill_tooltip_visible", &model.skillTooltipVisible);
+                c.Bind("skill_tooltip_left", &model.skillTooltipLeft);
+                c.Bind("skill_tooltip_top", &model.skillTooltipTop);
+                c.Bind("skill_tooltip_lines", &model.skillTooltipLines);
+
+                // Phase 2 click/hover bindings -- route straight into CNewUISkillList (this
+                // document's model is owned by CNewUIMainFrameWindow, but g_pSkillList has no
+                // RmlUi document of its own, same established split as GetHotKeySlotNumber() etc,
+                // see NewUIMainFrameWindow.h's own comment on that). Args are literal ints in the
+                // RML expression itself (e.g. data-event-click="skill_hotkey_click(0)"), or the
+                // bound cell's own skill_index field for the data-for'd grid/pet lists (e.g.
+                // "skill_grid_click(cell.skill_index)") -- Variant::Get<int>() resolves either.
+                c.BindEventCallback("skill_hotkey_click",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnHotkeySlotClick(args.empty() ? 0 : args[0].Get<int>()); });
+                c.BindEventCallback("skill_hotkey_hover",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>()); });
+                c.BindEventCallback("skill_current_click",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnCurrentSkillClick(); });
+                c.BindEventCallback("skill_current_hover",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnCurrentSkillHover(); });
+                c.BindEventCallback("skill_grid_click",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellClick(args.empty() ? -1 : args[0].Get<int>()); });
+                c.BindEventCallback("skill_grid_hover",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnGridCellHover(args.empty() ? -1 : args[0].Get<int>()); });
+                c.BindEventCallback("skill_pet_click",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnPetCellClick(args.empty() ? -1 : args[0].Get<int>()); });
+                c.BindEventCallback("skill_pet_hover",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { g_pSkillList->OnPetCellHover(args.empty() ? -1 : args[0].Get<int>()); });
+                c.BindEventCallback("skill_unhover",
+                    [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnUnhover(); });
 
                 c.BindEventCallback("mainframe_cshop_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCShop(); });
@@ -828,6 +889,69 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
     syncText(&MainFrameRmlModel::skillSlot2Hotkey, "skill_slot_2_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(2)));
     syncText(&MainFrameRmlModel::skillSlot3Hotkey, "skill_slot_3_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(3)));
     syncText(&MainFrameRmlModel::skillSlot4Hotkey, "skill_slot_4_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(4)));
+
+    // Phase 2 (skill list) additions -- see docs/rmlui-ui-system's Phase 2 plan.
+    syncFloat(&MainFrameRmlModel::skillSlot0Cooldown, "skill_slot_0_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(0));
+    syncFloat(&MainFrameRmlModel::skillSlot1Cooldown, "skill_slot_1_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(1));
+    syncFloat(&MainFrameRmlModel::skillSlot2Cooldown, "skill_slot_2_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(2));
+    syncFloat(&MainFrameRmlModel::skillSlot3Cooldown, "skill_slot_3_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(3));
+    syncFloat(&MainFrameRmlModel::skillSlot4Cooldown, "skill_slot_4_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(4));
+    syncFloat(&MainFrameRmlModel::currentSkillCooldown, "current_skill_cooldown", g_pSkillList->GetCurrentSkillCooldownFraction());
+
+    syncBool(&MainFrameRmlModel::skillGridOpen, "skill_grid_open", g_pSkillList->IsSkillGridOpen());
+
+    // Dynamic-count lists -- SkillCellEntry is shared verbatim between CNewUISkillList's own
+    // snapshot and this model (no per-field conversion needed). Unconditional copy+MarkDirty every
+    // frame while the grid is open, matching CBuffStrip's own proven "unconditional MarkDirty()
+    // correctly re-renders the list" approach (newui-tier-adapter.md) -- cooldown fractions change
+    // every frame anyway, so a change-check would rarely save anything.
+    if (model.skillGridOpen)
+    {
+        model.skillGridCells = g_pSkillList->GetGridSnapshot();
+        model.petSkillCells = g_pSkillList->GetPetSnapshot();
+        m_RmlBinder.MarkDirty("skill_grid_cells");
+        m_RmlBinder.MarkDirty("pet_skill_cells");
+    }
+
+    // Shared skill tooltip -- one hover target queued at a time (QueueTooltip()/OnUnhover(),
+    // CNewUISkillList). BuildModelForSlot() is the same content resolution (pet-command dispatch,
+    // BuildModel()) SkillTooltip.cpp's own Render() uses for this pilot's still-legacy siblings
+    // (NewUIMuHelper.cpp, NewUISiegeWarBase.cpp) -- only the destination (RmlUi vs. legacy
+    // TextList) differs.
+    if (g_pSkillList->IsTooltipPending())
+    {
+        UI::Skills::Tooltip::Model tooltipModel;
+        if (UI::Skills::Tooltip::BuildModelForSlot(g_pSkillList->GetTooltipSkillIndex(), tooltipModel))
+        {
+            model.skillTooltipLines.clear();
+            for (int i = 0; i < tooltipModel.count; ++i)
+            {
+                const UI::Skills::Tooltip::Line& src = tooltipModel.lines[i];
+                SkillTooltipLineEntry line;
+                line.text = StringUtils::WideToNarrow(src.text);
+                line.colorBlue = (src.color == UI::Skills::Tooltip::LineColor::Blue);
+                line.colorRed = (src.color == UI::Skills::Tooltip::LineColor::Red);
+                line.colorDarkRed = (src.color == UI::Skills::Tooltip::LineColor::DarkRed);
+                line.bold = src.isBold;
+                model.skillTooltipLines.push_back(line);
+            }
+            model.skillTooltipLeft = g_pSkillList->GetTooltipAnchorX();
+            model.skillTooltipTop = g_pSkillList->GetTooltipAnchorY();
+            model.skillTooltipVisible = true;
+            m_RmlBinder.MarkDirty("skill_tooltip_lines");
+            m_RmlBinder.MarkDirty("skill_tooltip_left");
+            m_RmlBinder.MarkDirty("skill_tooltip_top");
+            m_RmlBinder.MarkDirty("skill_tooltip_visible");
+        }
+        else
+        {
+            syncBool(&MainFrameRmlModel::skillTooltipVisible, "skill_tooltip_visible", false);
+        }
+    }
+    else
+    {
+        syncBool(&MainFrameRmlModel::skillTooltipVisible, "skill_tooltip_visible", false);
+    }
 }
 
 float SEASON3B::CNewUIMainFrameWindow::GetLayerDepth()
@@ -1270,11 +1394,11 @@ bool SEASON3B::CNewUISkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderM
 
 void SEASON3B::CNewUISkillList::Release()
 {
-    if (m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
-    }
-
+    // 2026-09-02, Phase 2: the UI2DEffectObject registration/DeleteUI2DEffectObject() call here
+    // is removed along with UI2DEffectCallback/RenderSkillInfo() -- the tooltip no longer queues
+    // through CNewUI3DRenderMng's 2D-effect-in-3D-pass mechanism at all now that it's a plain
+    // RmlUi element (which always composites last in the frame regardless -- see README.md's
+    // Frame Lifecycle section), so there's nothing registered on this object to unregister.
     UnloadImages();
 
     if (m_pNewUIMng)
@@ -1289,17 +1413,20 @@ void SEASON3B::CNewUISkillList::Reset()
     m_bSkillList = false;
     m_bHotKeySkillListUp = false;
 
-    m_bRenderSkillInfo = false;
-    m_iRenderSkillInfoType = 0;
-    m_iRenderSkillInfoPosX = 0;
-    m_iRenderSkillInfoPosY = 0;
-
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
         m_iHotKeySkillType[i] = -1;
     }
 
-    m_EventState = EVENT_NONE;
+    // Phase 2 additions, replacing the removed m_bRenderSkillInfo/m_iRenderSkillInfoType/PosX/PosY
+    // and m_EventState resets above.
+    m_GridSnapshot.clear();
+    m_PetSnapshot.clear();
+    m_bTooltipPending = false;
+    m_iTooltipSkillIndex = -1;
+    m_fTooltipAnchorX = 0.f;
+    m_fTooltipAnchorY = 0.f;
+    m_iHoveredGridSkillIndex = -1;
 }
 
 void SEASON3B::CNewUISkillList::LoadImages()
@@ -1332,385 +1459,14 @@ void SEASON3B::CNewUISkillList::UnloadImages()
 
 bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
 {
-#ifdef MOD_SKILLLIST_UPDATEMOUSE_BLOCK
-    if (GFxProcess::GetInstancePtr()->GetUISelect() == 1)
-    {
-        return true;
-    }
-#endif //MOD_SKILLLIST_UPDATEMOUSE_BLOCK
-
-    if (g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
-    {
-        m_bSkillList = false;
-        return true;
-    }
-
-    BYTE bySkillNumber = CharacterAttribute->SkillNumber;
-    BYTE bySkillMasterNumber = CharacterAttribute->SkillMasterNumber;
-
-    float x, y, width, height;
-
-    m_bRenderSkillInfo = false;
-
-    if (bySkillNumber <= 0)
-    {
-        return true;
-    }
-
-    // 2026-09-02: bug fix, found while building the item-hotkey/skill-list layout-anchor
-    // mechanism (NewUIMainFrameWindow.h's GetSkillListOffsetX() comment) -- this function is
-    // registered directly with CNewUIManager (Create()'s AddUIObj()) and called by its generic
-    // per-object UpdateMouseEvent() dispatch (NewUIManager.cpp), which applies NO window-specific
-    // transform. Every CheckMouseIn() call below was therefore running under whatever the GLOBAL
-    // baseline transform happened to be at the time -- UI::Scaling::LegacyUiTransform (an
-    // unclamped, non-uniform stretch-to-window, set once per frame in UIMng.cpp) -- while this
-    // same content actually RENDERS via RenderCurrentSkillAndHotSkillList()/Render()
-    // (CNewUIMainFrameWindow::RenderCenterRegion(), wrapped in centerTransform: a DIFFERENT,
-    // clamped/uniform/centered transform). These two transforms only coincide at resolutions that
-    // are an exact 4:3 multiple of the 640x480 reference (e.g. 1024x768) -- everywhere else
-    // (1280x720 included) they diverge for real, so skill-icon clicks have very likely been
-    // landing in the wrong place at most non-4:3 resolutions. Fixed the same way Render3D()'s
-    // identical potion-hover bug was fixed earlier in this pilot: wrap this function's own body in
-    // the SAME transform its render path uses (centerTransform + GetSkillListOffsetX(), matching
-    // RenderCenterRegion() exactly), via RAII so every early-return path below is still covered.
-    {
-        // `* transform.scaleX` -- see Render()'s own comment on this bug (GetSkillListOffsetX()
-        // is an unscaled reference-pixel delta, Transform::offsetX is real screen pixels).
-        auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-        transform.offsetX += g_pMainFrame->GetSkillListOffsetX() * transform.scaleX;
-        UI::Scaling::ScopedActiveTransform layout(transform, true);
-
-        x = 385.f; y = 431.f; width = 32.f; height = 38.f;
-        if (SEASON3B::CheckMouseIn(x, y, width, height))
-        {
-            MouseOnWindow = true;
-        }
-
-    if (m_EventState == EVENT_NONE && MouseLButtonPush == false
-        && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        m_EventState = EVENT_BTN_HOVER_CURRENTSKILL;
-        return true;
-    }
-    if (m_EventState == EVENT_BTN_HOVER_CURRENTSKILL && MouseLButtonPush == false
-        && SEASON3B::CheckMouseIn(x, y, width, height) == false)
-    {
-        m_EventState = EVENT_NONE;
-        return true;
-    }
-    if (m_EventState == EVENT_BTN_HOVER_CURRENTSKILL && (MouseLButtonPush == true || MouseLButtonDBClick == true)
-        && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        m_EventState = EVENT_BTN_DOWN_CURRENTSKILL;
-        return false;
-    }
-    if (m_EventState == EVENT_BTN_DOWN_CURRENTSKILL)
-    {
-        if (MouseLButtonPush == false && MouseLButtonDBClick == false)
-        {
-            if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-            {
-                m_bSkillList = !m_bSkillList;
-                PlayBuffer(SOUND_CLICK01);
-                m_EventState = EVENT_NONE;
-                return false;
-            }
-            m_EventState = EVENT_NONE;
-            return true;
-        }
-    }
-
-    if (m_EventState == EVENT_BTN_HOVER_CURRENTSKILL)
-    {
-        m_bRenderSkillInfo = true;
-        m_iRenderSkillInfoType = Hero->CurrentSkill;
-        m_iRenderSkillInfoPosX = x - 5;
-        m_iRenderSkillInfoPosY = y;
-
-        return false;
-    }
-    else if (m_EventState == EVENT_BTN_DOWN_CURRENTSKILL)
-    {
-        return false;
-    }
-
-    x = 222.f; y = 431.f; width = 32.f * 5.f; height = 38.f;
-    if (SEASON3B::CheckMouseIn(x, y, width, height))
-    {
-        MouseOnWindow = true;
-    }
-
-    if (m_EventState == EVENT_NONE && MouseLButtonPush == false
-        && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        m_EventState = EVENT_BTN_HOVER_SKILLHOTKEY;
-        return true;
-    }
-    if (m_EventState == EVENT_BTN_HOVER_SKILLHOTKEY && MouseLButtonPush == false
-        && SEASON3B::CheckMouseIn(x, y, width, height) == false)
-    {
-        m_EventState = EVENT_NONE;
-        return true;
-    }
-    if (m_EventState == EVENT_BTN_HOVER_SKILLHOTKEY && MouseLButtonPush == true
-        && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-    {
-        m_EventState = EVENT_BTN_DOWN_SKILLHOTKEY;
-        return false;
-    }
-
-    x = 190.f; y = 431.f; width = 32.f; height = 38.f;
-    int iStartIndex = (m_bHotKeySkillListUp == true) ? 6 : 1;
-    for (int i = 0, iIndex = iStartIndex; i < 5; ++i, iIndex++)
-    {
-        x += width;
-
-        if (iIndex == 10)
-        {
-            iIndex = 0;
-        }
-        if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            if (m_iHotKeySkillType[iIndex] == -1)
-            {
-                if (m_EventState == EVENT_BTN_HOVER_SKILLHOTKEY)
-                {
-                    m_bRenderSkillInfo = false;
-                    m_iRenderSkillInfoType = -1;
-                }
-                if (m_EventState == EVENT_BTN_DOWN_SKILLHOTKEY && MouseLButtonPush == false)
-                {
-                    m_EventState = EVENT_NONE;
-                }
-                continue;
-            }
-
-            WORD bySkillType = CharacterAttribute->Skill[m_iHotKeySkillType[iIndex]];
-
-            if (bySkillType == 0 || (bySkillType >= AT_SKILL_STUN && bySkillType <= AT_SKILL_REMOVAL_BUFF))
-                continue;
-
-            BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
-
-            if (bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
-            {
-                continue;
-            }
-
-            if (m_EventState == EVENT_BTN_HOVER_SKILLHOTKEY)
-            {
-                m_bRenderSkillInfo = true;
-                m_iRenderSkillInfoType = m_iHotKeySkillType[iIndex];
-                m_iRenderSkillInfoPosX = x - 5;
-                m_iRenderSkillInfoPosY = y;
-                return true;
-            }
-            if (m_EventState == EVENT_BTN_DOWN_SKILLHOTKEY)
-            {
-                if (MouseLButtonPush == false)
-                {
-                    if (m_iRenderSkillInfoType == m_iHotKeySkillType[iIndex])
-                    {
-                        m_EventState = EVENT_NONE;
-                        m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-                        Hero->CurrentSkill = m_iHotKeySkillType[iIndex];
-                        PlayBuffer(SOUND_CLICK01);
-                        return false;
-                    }
-                    else
-                    {
-                        m_EventState = EVENT_NONE;
-                    }
-                }
-            }
-        }
-    }
-
-    x = 222.f; y = 431.f; width = 32.f * 5.f; height = 38.f;
-    if (m_EventState == EVENT_BTN_DOWN_SKILLHOTKEY)
-    {
-        if (MouseLButtonPush == false && SEASON3B::CheckMouseIn(x, y, width, height) == false)
-        {
-            m_EventState = EVENT_NONE;
-            return true;
-        }
-        return false;
-    }
-
-    if (m_bSkillList == false)
-        return true;
-
-    WORD bySkillType = 0;
-
-    int iSkillCount = 0;
-    bool bMouseOnSkillList = false;
-
-    x = 385.f; y = 390; width = 32; height = 38;
-    float fOrigX = 385.f;
-
-    EVENT_STATE PrevEventState = m_EventState;
-
-    for (int i = 0; i < MAX_MAGIC; ++i)
-    {
-        bySkillType = CharacterAttribute->Skill[i];
-
-        if (bySkillType == 0 || (bySkillType >= AT_SKILL_STUN && bySkillType <= AT_SKILL_REMOVAL_BUFF))
-            continue;
-
-        BYTE bySkillUseType = SkillAttribute[bySkillType].SkillUseType;
-
-        if (bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
-        {
-            continue;
-        }
-
-        if (iSkillCount == 18)
-        {
-            y -= height;
-        }
-
-        if (iSkillCount < 14)
-        {
-            int iRemainder = iSkillCount % 2;
-            int iQuotient = iSkillCount / 2;
-
-            if (iRemainder == 0)
-            {
-                x = fOrigX + iQuotient * width;
-            }
-            else
-            {
-                x = fOrigX - (iQuotient + 1) * width;
-            }
-        }
-        else if (iSkillCount >= 14 && iSkillCount < 18)
-        {
-            x = fOrigX - (8 * width) - ((iSkillCount - 14) * width);
-        }
-        else
-        {
-            x = fOrigX - (12 * width) + ((iSkillCount - 17) * width);
-        }
-
-        iSkillCount++;
-
-        if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            bMouseOnSkillList = true;
-            MouseOnWindow = true;
-            if (m_EventState == EVENT_NONE && MouseLButtonPush == false)
-            {
-                m_EventState = EVENT_BTN_HOVER_SKILLLIST;
-                break;
-            }
-        }
-
-        if (m_EventState == EVENT_BTN_HOVER_SKILLLIST && MouseLButtonPush == true
-            && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            m_EventState = EVENT_BTN_DOWN_SKILLLIST;
-            break;
-        }
-
-        if (m_EventState == EVENT_BTN_HOVER_SKILLLIST && MouseLButtonPush == false
-            && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            m_bRenderSkillInfo = true;
-            m_iRenderSkillInfoType = i;
-            m_iRenderSkillInfoPosX = x;
-            m_iRenderSkillInfoPosY = y;
-        }
-
-        if (m_EventState == EVENT_BTN_DOWN_SKILLLIST && MouseLButtonPush == false
-            && m_iRenderSkillInfoType == i && SEASON3B::CheckMouseIn(x, y, width, height) == true)
-        {
-            m_EventState = EVENT_NONE;
-
-            m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-
-            Hero->CurrentSkill = i;
-            m_bSkillList = false;
-
-            PlayBuffer(SOUND_CLICK01);
-            return false;
-        }
-    }
-
-    if (PrevEventState != m_EventState)
-    {
-        if (m_EventState == EVENT_NONE || m_EventState == EVENT_BTN_HOVER_SKILLLIST)
-            return true;
-        return false;
-    }
-
-    if (Hero->m_pPet != NULL)
-    {
-        x = 353.f; y = 352; width = 32; height = 38;
-        for (int i = AT_PET_COMMAND_DEFAULT; i < AT_PET_COMMAND_END; ++i)
-        {
-            if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
-            {
-                bMouseOnSkillList = true;
-                MouseOnWindow = true;
-
-                if (m_EventState == EVENT_NONE && MouseLButtonPush == false)
-                {
-                    m_EventState = EVENT_BTN_HOVER_SKILLLIST;
-                    return true;
-                }
-                if (m_EventState == EVENT_BTN_HOVER_SKILLLIST && MouseLButtonPush == true)
-                {
-                    m_EventState = EVENT_BTN_DOWN_SKILLLIST;
-                    return false;
-                }
-
-                if (m_EventState == EVENT_BTN_HOVER_SKILLLIST)
-                {
-                    m_bRenderSkillInfo = true;
-                    m_iRenderSkillInfoType = i;
-                    m_iRenderSkillInfoPosX = x;
-                    m_iRenderSkillInfoPosY = y;
-                }
-                if (m_EventState == EVENT_BTN_DOWN_SKILLLIST && MouseLButtonPush == false
-                    && m_iRenderSkillInfoType == i)
-                {
-                    m_EventState = EVENT_NONE;
-
-                    m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
-
-                    Hero->CurrentSkill = i;
-                    m_bSkillList = false;
-                    PlayBuffer(SOUND_CLICK01);
-                    return false;
-                }
-            }
-            x += width;
-        }
-    }
-
-    if (bMouseOnSkillList == false && m_EventState == EVENT_BTN_HOVER_SKILLLIST)
-    {
-        m_EventState = EVENT_NONE;
-        return true;
-    }
-    if (bMouseOnSkillList == false && MouseLButtonPush == false
-        && m_EventState == EVENT_BTN_DOWN_SKILLLIST)
-    {
-        m_EventState = EVENT_NONE;
-        return false;
-    }
-    if (m_EventState == EVENT_BTN_DOWN_SKILLLIST)
-    {
-        if (MouseLButtonPush == false)
-        {
-            m_EventState = EVENT_NONE;
-            return true;
-        }
-        return false;
-    }
-
+    // RmlUi migration, Phase 2 (see docs/rmlui-ui-system's Phase 2 plan) -- the old hand-rolled
+    // EVENT_STATE hover/down/release machine for the current-skill icon, compact hotkey row, and
+    // expanded grid/pet row is retired entirely. RmlUi's own Context now does hit-testing for all
+    // of them (data-event-click/mouseover/mouseout, main_frame.rml -- see OnHotkeySlotClick()/
+    // OnCurrentSkillClick()/OnGridCellClick()/OnPetCellClick() and their *Hover() counterparts),
+    // same "always not consumed" convention every other fully-ported CNewUIObj-tier widget uses
+    // (newui-tier-adapter.md).
     return true;
-    } // end of the ScopedActiveTransform block opened right after the bySkillNumber<=0 guard above
 }
 
 bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
@@ -1728,7 +1484,11 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
         UseHotKey(0);
     }
 
-    if (m_EventState == EVENT_BTN_HOVER_SKILLLIST)
+    // 2026-09-02, Phase 2: m_iHoveredGridSkillIndex replaces EVENT_STATE==EVENT_BTN_HOVER_SKILLLIST
+    // as the "Ctrl+digit assignment armed" signal -- set by OnGridCellHover()/OnPetCellHover(),
+    // cleared by OnUnhover(). Same Ctrl+digit-while-hovering-the-grid assignment behavior as
+    // before, unaffected by the EVENT_STATE removal.
+    if (m_iHoveredGridSkillIndex != -1)
     {
         if (SEASON3B::IsRepeat(VK_CONTROL))
         {
@@ -1736,7 +1496,7 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
             {
                 if (SEASON3B::IsPress('1' + i))
                 {
-                    SetHotKey(i + 1, m_iRenderSkillInfoType);
+                    SetHotKey(i + 1, m_iHoveredGridSkillIndex);
 
                     return false;
                 }
@@ -1744,7 +1504,7 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
 
             if (SEASON3B::IsPress('0'))
             {
-                SetHotKey(0, m_iRenderSkillInfoType);
+                SetHotKey(0, m_iHoveredGridSkillIndex);
 
                 return false;
             }
@@ -1898,6 +1658,14 @@ bool SEASON3B::CNewUISkillList::Update()
         }
     }
 
+    // 2026-09-02, Phase 2: refresh the RmlUi-facing overlay snapshot (GetGridSnapshot()/
+    // GetPetSnapshot()) while the expanded grid is open -- see RebuildGridSnapshot()'s own
+    // comment. Left stale (harmless, hidden via skill_grid_open) while closed.
+    if (m_bSkillList)
+    {
+        RebuildGridSnapshot();
+    }
+
     return true;
 }
 
@@ -1942,12 +1710,39 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 
             if (Hero->CurrentSkill == m_iHotKeySkillType[iIndex])
             {
-                // 2026-09-01: modern theme skips this legacy sprite -- #skill_slot_0..4
-                // (main_frame.rml/.rcss) highlight the selected slot with a bound CSS class
-                // instead (feedback: "seems to use the legacy sprite outline ... change this to
-                // just programmatic outline"), synced every frame from
-                // IsHotKeySlotCurrentSkill() below (same iIndex/pet logic as here). Legacy theme
-                // keeps the real sprite, its own established look.
+                // 2026-09-01: audited 2026-09-02 against legacy-theme-modernization.md and kept
+                // deliberately, same exception class as RenderLeftFrame()/RenderCenterFrame()'s
+                // own GetActiveThemeName() checks just above in this file -- NOT an oversight, so
+                // don't "fix" this by deleting the branch outright.
+                //
+                // Modern theme: #skill_slot_0..4 (main_frame.rml/.rcss) highlight the selected
+                // slot with a bound CSS class instead (feedback: "seems to use the legacy sprite
+                // outline ... change this to just programmatic outline"), synced every frame from
+                // IsHotKeySlotCurrentSkill() below (same iIndex/pet logic as here). RmlUi always
+                // composites last in the frame (README.md's Frame Lifecycle section), so that
+                // outline will paint on top of this sprite regardless -- unconditionally drawing
+                // IMAGE_SKILLBOX_USE for modern would show a doubled highlight (legacy sprite
+                // underneath, RmlUi outline on top), reintroducing the exact "uses the legacy
+                // sprite outline" look the feedback above asked to remove. This isn't a paint-
+                // order *impossibility* (unlike RenderLeftFrame()'s background fill, which really
+                // can't sit behind the 3D icons) -- it's a real, working design choice to suppress
+                // the sprite for modern, kept as C++ only because a raw RenderBitmap() call has no
+                // RmlUi-side element to gate from RCSS.
+                //
+                // Legacy theme: keeps the real sprite -- its own established look, matching
+                // legacy-theme-modernization.md's "preserve legacy sprites/textures where
+                // appropriate" (this is real pixel-parity art, not reproducible with a plain CSS
+                // outline). main_frame.rml/.rcss (legacy) already bind #skill_slot_N's own
+                // .selected class for symmetry with modern, but deliberately leave it unstyled
+                // (see themes/legacy/main_frame.rcss's own comment) so only this sprite shows,
+                // never a doubled highlight there either.
+                //
+                // Retiring this branch for real means porting IMAGE_SKILLBOX_USE's source art into
+                // an RmlUi @spritesheet for legacy theme's own .selected rule (theming-and-
+                // modding.md's asset-reuse pattern) so legacy no longer needs this C++ draw call
+                // at all -- real work, not a quick fix, and belongs with the rest of Phase 2
+                // (CNewUISkillList -> RmlUi, STATUS.md's "What's migrated") rather than bundled
+                // into an unrelated cleanup pass.
                 if (UI::RmlBridge::GetActiveThemeName() != "modern")
                     SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
             }
@@ -2020,114 +1815,52 @@ int SEASON3B::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
 
 bool SEASON3B::CNewUISkillList::Render()
 {
-    int i;
-    float x, y, width, height;
-
     BYTE bySkillNumber = CharacterAttribute->SkillNumber;
 
-    // 2026-09-02: same missing-transform bug as UpdateMouseEvent() (see that function's own
-    // comment for the full explanation) -- this is the expanded skill grid, ALSO registered
-    // directly with CNewUIManager and called by its generic, untransformed Render() dispatch, so
-    // it was rendering under the global LegacyUiTransform baseline instead of the centerTransform
-    // (+GetSkillListOffsetX()) the compact hotkey row it expands from actually uses
-    // (RenderCurrentSkillAndHotSkillList(), via CNewUIMainFrameWindow::RenderCenterRegion()) --
-    // meaning the expanded grid would visually misalign from that row at any non-4:3 resolution.
-    // Scoped to the WHOLE function (single, unconditional block) since this simpler function has
-    // no early returns to worry about, unlike UpdateMouseEvent(). `* transform.scaleX` -- see
-    // Render()'s own comment on this bug.
+    // 2026-09-02: same missing-transform bug UpdateMouseEvent() used to have (see git history) --
+    // this is the expanded skill grid, ALSO registered directly with CNewUIManager and called by
+    // its generic, untransformed Render() dispatch, so it was rendering under the global
+    // LegacyUiTransform baseline instead of the centerTransform (+GetSkillListOffsetX()) the
+    // compact hotkey row it expands from actually uses (RenderCurrentSkillAndHotSkillList(), via
+    // CNewUIMainFrameWindow::RenderCenterRegion()) -- meaning the expanded grid would visually
+    // misalign from that row at any non-4:3 resolution. Scoped to the WHOLE function (single,
+    // unconditional block) since this simpler function has no early returns to worry about.
+    // `* transform.scaleX` -- see Render()'s own comment on this bug.
     auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
     transform.offsetX += g_pMainFrame->GetSkillListOffsetX() * transform.scaleX;
     UI::Scaling::ScopedActiveTransform layout(transform, true);
 
-    if (bySkillNumber > 0)
+    // 2026-09-02, Phase 2 (mid-implementation scope adjustment -- see NewUIMainFrameWindow.h's
+    // SkillCellEntry comment): icon art stays legacy 2D for both themes (the atlas lookup is too
+    // irregular to port blind). The box-FRAME sprite (IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE) is
+    // different -- same audited exception already applied to the compact row's selected-highlight
+    // sprite (RenderCurrentSkillAndHotSkillList(), see that call site's own comment): modern theme
+    // suppresses it entirely, relying on .skill-cell's own programmatic border + .selected
+    // highlight (main_frame.rcss) instead, matching the hotkey slots' look (feedback: "the skill
+    // list are using the legacy border instead of the programmatic border already used in the
+    // skill hotkeys slots"). Legacy theme keeps the real sprite, its own established look. This
+    // loop now just DRAWS from m_GridSnapshot/m_PetSnapshot (positions/skill indices/current-
+    // selected already computed by Update()'s RebuildGridSnapshot() call) instead of also
+    // computing them itself -- hit-testing/tooltip-queueing (the rest of the old Render() body)
+    // moved to RmlUi entirely, see OnGridCellClick()/OnGridCellHover() etc.
+    if (bySkillNumber > 0 && m_bSkillList == true)
     {
-        if (m_bSkillList == true)
+        const bool bDrawBoxSprite = (UI::RmlBridge::GetActiveThemeName() != "modern");
+        for (const SkillCellEntry& entry : m_GridSnapshot)
         {
-            x = 385; y = 390; width = 32; height = 38;
-            float fOrigX = 385.f;
-            int iSkillType = 0;
-            int iSkillCount = 0;
-
-            for (i = 0; i < MAX_MAGIC; ++i)
-            {
-                iSkillType = CharacterAttribute->Skill[i];
-
-                if (iSkillType != 0 && (iSkillType < AT_SKILL_STUN || iSkillType > AT_SKILL_REMOVAL_BUFF))
-                {
-                    BYTE bySkillUseType = SkillAttribute[iSkillType].SkillUseType;
-
-                    if (bySkillUseType == SKILL_USE_TYPE_MASTER || bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
-                    {
-                        continue;
-                    }
-
-                    if (iSkillCount == 18)
-                    {
-                        y -= height;
-                    }
-
-                    if (iSkillCount < 14)
-                    {
-                        int iRemainder = iSkillCount % 2;
-                        int iQuotient = iSkillCount / 2;
-
-                        if (iRemainder == 0)
-                        {
-                            x = fOrigX + iQuotient * width;
-                        }
-                        else
-                        {
-                            x = fOrigX - (iQuotient + 1) * width;
-                        }
-                    }
-                    else if (iSkillCount >= 14 && iSkillCount < 18)
-                    {
-                        x = fOrigX - (8 * width) - ((iSkillCount - 14) * width);
-                    }
-                    else
-                    {
-                        x = fOrigX - (12 * width) + ((iSkillCount - 17) * width);
-                    }
-
-                    iSkillCount++;
-
-                    if (i == Hero->CurrentSkill)
-                    {
-                        SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
-                    }
-                    else
-                    {
-                        SEASON3B::RenderImage(IMAGE_SKILLBOX, x, y, width, height);
-                    }
-
-                    RenderSkillIcon(i, x + 6, y + 6, 20, 28);
-                }
-            }
-            RenderPetSkill();
+            if (bDrawBoxSprite)
+                SEASON3B::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
+            RenderSkillIcon(entry.skillIndex, entry.left + 6.f, entry.top + 6.f, 20.f, 28.f);
+        }
+        for (const SkillCellEntry& entry : m_PetSnapshot)
+        {
+            if (bDrawBoxSprite)
+                SEASON3B::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
+            RenderSkillIcon(entry.skillIndex, entry.left + 6.f, entry.top + 6.f, 20.f, 28.f);
         }
     }
 
-    // Do NOT reset m_bRenderSkillInfo here. UpdateMouseEvent() runs once per fixed 50Hz tick and is
-    // the sole authority on hover state (it re-derives true/false fresh every tick), but Render()
-    // runs at full render rate (~120fps+, decoupled from the tick since the fixed-timestep refactor
-    // -- see SceneManager.cpp's UpdateSceneState()). Clearing the flag here was a one-shot
-    // consume-and-reset that only rendered the tooltip on the first render frame after each tick,
-    // then skipped it for the remaining ~1-2 render frames until the next tick fired -- a rapid
-    // strobe, reported as the tooltip "rapidly blinking" while hovering. Safe to just read it every
-    // frame instead: CNewUI3DCamera::Render() already drains m_deque2DEffects fully every single
-    // call (NewUI3DRenderMng.cpp), so re-queuing every render frame while still hovering does not
-    // accumulate or leak.
-    if (m_bRenderSkillInfo == true && m_pNewUI3DRenderMng)
-    {
-        m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
-    }
-
     return true;
-}
-
-void SEASON3B::CNewUISkillList::RenderSkillInfo()
-{
-    UI::Skills::Tooltip::Render(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
 }
 
 float SEASON3B::CNewUISkillList::GetLayerDepth()
@@ -2143,32 +1876,6 @@ WORD SEASON3B::CNewUISkillList::GetHeroPriorSkill()
 void SEASON3B::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
 {
     m_wHeroPriorSkill = bySkill;
-}
-
-void SEASON3B::CNewUISkillList::RenderPetSkill()
-{
-    if (Hero->m_pPet == NULL)
-    {
-        return;
-    }
-
-    float x, y, width, height;
-
-    x = 353.f; y = 352; width = 32; height = 38;
-    for (int i = AT_PET_COMMAND_DEFAULT; i < AT_PET_COMMAND_END; ++i)
-    {
-        if (i == Hero->CurrentSkill)
-        {
-            SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
-        }
-        else
-        {
-            SEASON3B::RenderImage(IMAGE_SKILLBOX, x, y, width, height);
-        }
-
-        RenderSkillIcon(i, x + 6, y + 6, 20, 28);
-        x += width;
-    }
 }
 
 void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
@@ -2583,40 +2290,302 @@ void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, fl
         || bySkillType == AT_SKILL_DRAGON_ROAR_STR) && (bCantSkill))
         return;
 
-    if ((bySkillType != AT_SKILL_INFINITY_ARROW)
-        && (bySkillType != AT_SKILL_INFINITY_ARROW_STR)
-        && (bySkillType != AT_SKILL_EXPANSION_OF_WIZARDRY)
-        && (bySkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_STR)
-        && (bySkillType != AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
-        )
+    // 2026-09-02, Phase 2: RenderSkillDelay() call removed here -- the cooldown wipe moves to
+    // RmlUi (SkillCellEntry::cooldownFraction / ComputeSkillCooldownFraction(), computed
+    // independently in RebuildGridSnapshot()/GetHotKeySlotCooldownFraction()/
+    // GetCurrentSkillCooldownFraction() -- see those for the exact same fraction math and the
+    // same 5-skill exclusion this tail condition used to gate).
+}
+
+namespace
+{
+    // 2026-09-02, Phase 2: RenderSkillDelay()'s own fraction math (iSkillDelay/iSkillMaxDelay),
+    // with its exact draw call replaced by a plain return -- see the gate/internal-resolution
+    // split comment below for why this isn't quite a 1-line change. Feeds
+    // SkillCellEntry::cooldownFraction (RebuildGridSnapshot()) and
+    // GetHotKeySlotCooldownFraction()/GetCurrentSkillCooldownFraction().
+    //
+    // Known, deliberately accepted gap: the original RenderSkillIcon() additionally suppressed
+    // RenderSkillDelay() for AT_SKILL_CHAIN_DRIVE/_STR, AT_SKILL_DRAGON_KICK, AT_SKILL_DRAGON_ROAR/
+    // _STR specifically when bCantSkill was also true (an early `return;` before reaching the
+    // delay call, RenderSkillIcon()'s own tail) -- reproducing that here would need this whole
+    // ~200-line eligibility block re-derived a second time for 4 skills' rare double-condition.
+    // Not reproduced: the cooldown wipe may show for those 4 skills even while bCantSkill is also
+    // true, a minor double-signal, not a functional bug -- revisit only if this proves visible.
+    float ComputeSkillCooldownFraction(int iIndex)
     {
-        RenderSkillDelay(iIndex, x, y, width, height);
+        // Mirrors RenderSkillIcon()'s own bySkillType resolution -- used only to decide whether the
+        // delay overlay applies at all (the 5-skill exclusion list), matching that function's own
+        // gate before it used to call RenderSkillDelay(). RenderSkillDelay() itself, preserved
+        // below, resolves its OWN (non-pet-aware) skill type from CharacterAttribute->Skill[iIndex]
+        // directly -- a pre-existing inconsistency between the two original functions, preserved
+        // exactly rather than "fixed" here.
+        WORD bySkillTypeForGate = CharacterAttribute->Skill[iIndex];
+        if (iIndex >= AT_PET_COMMAND_DEFAULT)
+            bySkillTypeForGate = (WORD)iIndex;
+
+        if (bySkillTypeForGate == AT_SKILL_INFINITY_ARROW || bySkillTypeForGate == AT_SKILL_INFINITY_ARROW_STR
+            || bySkillTypeForGate == AT_SKILL_EXPANSION_OF_WIZARDRY || bySkillTypeForGate == AT_SKILL_EXPANSION_OF_WIZARDRY_STR
+            || bySkillTypeForGate == AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY)
+            return 0.f;
+
+        // From here down: RenderSkillDelay()'s own original body, draw call replaced with a
+        // fraction return.
+        int iSkillDelay = CharacterAttribute->SkillDelay[iIndex];
+        if (iSkillDelay <= 0)
+            return 0.f;
+
+        int iSkillType = CharacterAttribute->Skill[iIndex];
+
+        if (iSkillType == AT_SKILL_PLASMA_STORM_FENRIR && !CheckAttack())
+            return 0.f;
+
+        int iSkillMaxDelay = SkillAttribute[iSkillType].Delay;
+        if (iSkillMaxDelay == 0)
+            return 0.f; // avoid a divide-by-zero the original's own float division would also hit
+
+        return iSkillDelay / (float)iSkillMaxDelay;
     }
 }
 
-void SEASON3B::CNewUISkillList::RenderSkillDelay(int iIndex, float x, float y, float width, float height)
+void SEASON3B::CNewUISkillList::RebuildGridSnapshot()
 {
-    int iSkillDelay = CharacterAttribute->SkillDelay[iIndex];
-    if (iSkillDelay > 0)
-    {
-        int iSkillType = CharacterAttribute->Skill[iIndex];
+    // 2026-09-02, Phase 2: same iteration/filter/zig-zag-position math the legacy grid-drawing
+    // loop always used (see git history's old Render()), now producing data instead of drawing.
+    // Render() (still-legacy icon/box art) iterates the resulting snapshot instead of recomputing
+    // positions itself -- computed once, read by both.
+    m_GridSnapshot.clear();
+    m_PetSnapshot.clear();
 
-        if (iSkillType == AT_SKILL_PLASMA_STORM_FENRIR)
+    if (CharacterAttribute->SkillNumber == 0)
+        return;
+
+    float x = 385.f, y = 390.f;
+    constexpr float width = 32.f, height = 38.f;
+    const float fOrigX = 385.f;
+    int iSkillCount = 0;
+
+    for (int i = 0; i < MAX_MAGIC; ++i)
+    {
+        int iSkillType = CharacterAttribute->Skill[i];
+
+        if (iSkillType == 0 || (iSkillType >= AT_SKILL_STUN && iSkillType <= AT_SKILL_REMOVAL_BUFF))
+            continue;
+
+        BYTE bySkillUseType = SkillAttribute[iSkillType].SkillUseType;
+        if (bySkillUseType == SKILL_USE_TYPE_MASTER || bySkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
+            continue;
+
+        if (iSkillCount == 18)
         {
-            if (!CheckAttack())
-            {
-                return;
-            }
+            y -= height;
         }
 
-        int iSkillMaxDelay = SkillAttribute[iSkillType].Delay;
+        if (iSkillCount < 14)
+        {
+            int iRemainder = iSkillCount % 2;
+            int iQuotient = iSkillCount / 2;
+            x = (iRemainder == 0) ? (fOrigX + iQuotient * width) : (fOrigX - (iQuotient + 1) * width);
+        }
+        else if (iSkillCount < 18)
+        {
+            x = fOrigX - (8 * width) - ((iSkillCount - 14) * width);
+        }
+        else
+        {
+            x = fOrigX - (12 * width) + ((iSkillCount - 17) * width);
+        }
 
-        auto fPersent = (float)(iSkillDelay / (float)iSkillMaxDelay);
+        iSkillCount++;
 
-        EnableAlphaTest();
-        float fdeltaH = height * fPersent;
-        RenderColorQuadARGB(x, y + height - fdeltaH, width, fdeltaH, 0x80FF8080u);
+        SkillCellEntry entry;
+        entry.left = x;
+        entry.top = y;
+        entry.skillIndex = i;
+        entry.isPet = false;
+        entry.isCurrent = (i == Hero->CurrentSkill);
+        entry.cooldownFraction = ComputeSkillCooldownFraction(i);
+        m_GridSnapshot.push_back(entry);
     }
+
+    if (Hero->m_pPet != NULL)
+    {
+        float px = 353.f, py = 352.f;
+        for (int i = AT_PET_COMMAND_DEFAULT; i < AT_PET_COMMAND_END; ++i)
+        {
+            SkillCellEntry entry;
+            entry.left = px;
+            entry.top = py;
+            entry.skillIndex = i;
+            entry.isPet = true;
+            entry.isCurrent = (i == Hero->CurrentSkill);
+            entry.cooldownFraction = ComputeSkillCooldownFraction(i);
+            m_PetSnapshot.push_back(entry);
+            px += width;
+        }
+    }
+}
+
+void SEASON3B::CNewUISkillList::QueueTooltip(int iSkillIndex, float x, float y)
+{
+    m_bTooltipPending = true;
+    m_iTooltipSkillIndex = iSkillIndex;
+    m_fTooltipAnchorX = x;
+    m_fTooltipAnchorY = y;
+}
+
+float SEASON3B::CNewUISkillList::GetHotKeySlotCooldownFraction(int iSlotIndex)
+{
+    if (iSlotIndex < 0 || iSlotIndex >= 5)
+        return 0.f;
+    if (CharacterAttribute->SkillNumber == 0)
+        return 0.f;
+
+    int iStartSkillIndex = m_bHotKeySkillListUp ? 6 : 1;
+    int iIndex = iStartSkillIndex + iSlotIndex;
+    if (iIndex == 10)
+        iIndex = 0;
+
+    if (m_iHotKeySkillType[iIndex] == -1)
+        return 0.f;
+
+    if (m_iHotKeySkillType[iIndex] >= AT_PET_COMMAND_DEFAULT && m_iHotKeySkillType[iIndex] < AT_PET_COMMAND_END)
+    {
+        if (Hero->m_pPet == NULL)
+            return 0.f;
+    }
+
+    return ComputeSkillCooldownFraction(m_iHotKeySkillType[iIndex]);
+}
+
+float SEASON3B::CNewUISkillList::GetCurrentSkillCooldownFraction()
+{
+    return ComputeSkillCooldownFraction(Hero->CurrentSkill);
+}
+
+// 2026-09-02, Phase 2: click/hover entry points bound from main_frame.rml's data-event-click/
+// mouseover/mouseout (Create(), CNewUIMainFrameWindow.cpp) -- see each one's own comment for the
+// exact legacy mouse-click/hover behavior preserved (traced from the retired EVENT_STATE machine,
+// see git history's old UpdateMouseEvent()).
+void SEASON3B::CNewUISkillList::OnHotkeySlotClick(int iSlotIndex)
+{
+    if (iSlotIndex < 0 || iSlotIndex >= 5)
+        return;
+    if (CharacterAttribute->SkillNumber == 0)
+        return;
+
+    int iStartSkillIndex = m_bHotKeySkillListUp ? 6 : 1;
+    int iIndex = iStartSkillIndex + iSlotIndex;
+    if (iIndex == 10)
+        iIndex = 0;
+
+    if (m_iHotKeySkillType[iIndex] == -1)
+        return;
+
+    // Mirrors the legacy EVENT_BTN_DOWN_SKILLHOTKEY release branch exactly -- deliberately NOT
+    // UseHotKey(), which the mouse click never went through even before this port (only the
+    // keyboard 0-9 press does). UseHotKey() additionally applies a pet-ownership check and the
+    // teleport/auto-attack-cancel rule that the original mouse click never applied; preserved
+    // faithfully here, not "fixed"/unified with the keyboard path.
+    WORD bySkillType = CharacterAttribute->Skill[m_iHotKeySkillType[iIndex]];
+    if (bySkillType == 0 || (bySkillType >= AT_SKILL_STUN && bySkillType <= AT_SKILL_REMOVAL_BUFF))
+        return;
+    if (SkillAttribute[bySkillType].SkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
+        return;
+
+    m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
+    Hero->CurrentSkill = m_iHotKeySkillType[iIndex];
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void SEASON3B::CNewUISkillList::OnHotkeySlotHover(int iSlotIndex)
+{
+    if (iSlotIndex < 0 || iSlotIndex >= 5)
+        return;
+    if (CharacterAttribute->SkillNumber == 0)
+        return;
+
+    int iStartSkillIndex = m_bHotKeySkillListUp ? 6 : 1;
+    int iIndex = iStartSkillIndex + iSlotIndex;
+    if (iIndex == 10)
+        iIndex = 0;
+
+    if (m_iHotKeySkillType[iIndex] == -1)
+        return;
+
+    WORD bySkillType = CharacterAttribute->Skill[m_iHotKeySkillType[iIndex]];
+    if (bySkillType == 0 || (bySkillType >= AT_SKILL_STUN && bySkillType <= AT_SKILL_REMOVAL_BUFF))
+        return;
+    if (SkillAttribute[bySkillType].SkillUseType == SKILL_USE_TYPE_MASTERLEVEL)
+        return;
+
+    // Anchor: local x of this slot in #bars's own reference space -- matches
+    // RenderCurrentSkillAndHotSkillList()'s own x for the same slot (190 + (iSlotIndex+1)*32).
+    QueueTooltip(m_iHotKeySkillType[iIndex], 190.f + (iSlotIndex + 1) * 32.f, 431.f);
+}
+
+void SEASON3B::CNewUISkillList::OnCurrentSkillClick()
+{
+    m_bSkillList = !m_bSkillList;
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void SEASON3B::CNewUISkillList::OnCurrentSkillHover()
+{
+    QueueTooltip(Hero->CurrentSkill, 392.f, 437.f);
+}
+
+void SEASON3B::CNewUISkillList::OnGridCellClick(int iSkillIndex)
+{
+    m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
+    Hero->CurrentSkill = iSkillIndex;
+    m_bSkillList = false;
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void SEASON3B::CNewUISkillList::OnGridCellHover(int iSkillIndex)
+{
+    m_iHoveredGridSkillIndex = iSkillIndex;
+    for (const SkillCellEntry& entry : m_GridSnapshot)
+    {
+        if (entry.skillIndex == iSkillIndex)
+        {
+            QueueTooltip(iSkillIndex, entry.left, entry.top);
+            break;
+        }
+    }
+}
+
+void SEASON3B::CNewUISkillList::OnPetCellClick(int iSkillIndex)
+{
+    m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
+    Hero->CurrentSkill = iSkillIndex;
+    m_bSkillList = false;
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void SEASON3B::CNewUISkillList::OnPetCellHover(int iSkillIndex)
+{
+    // 2026-09-02: pet-row entries arm Ctrl+digit assignment the same way grid entries do -- the
+    // legacy code's own m_EventState machine never distinguished the two loops for this purpose
+    // (both set m_iRenderSkillInfoType on hover, UpdateKeyEvent()'s check didn't care which loop
+    // set it); preserved, not a new capability.
+    m_iHoveredGridSkillIndex = iSkillIndex;
+    for (const SkillCellEntry& entry : m_PetSnapshot)
+    {
+        if (entry.skillIndex == iSkillIndex)
+        {
+            QueueTooltip(iSkillIndex, entry.left, entry.top);
+            break;
+        }
+    }
+}
+
+void SEASON3B::CNewUISkillList::OnUnhover()
+{
+    m_bTooltipPending = false;
+    m_iTooltipSkillIndex = -1;
+    m_iHoveredGridSkillIndex = -1;
 }
 
 bool SEASON3B::CNewUISkillList::IsSkillListUp()
@@ -2629,15 +2598,6 @@ void SEASON3B::CNewUISkillList::ResetMouseLButton()
     MouseLButton = false;
     MouseLButtonPop = false;
     MouseLButtonPush = false;
-}
-
-void SEASON3B::CNewUISkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
-{
-    if (pClass)
-    {
-        auto* pSkillList = (CNewUISkillList*)(pClass);
-        pSkillList->RenderSkillInfo();
-    }
 }
 
 void SEASON3B::CNewUIMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)

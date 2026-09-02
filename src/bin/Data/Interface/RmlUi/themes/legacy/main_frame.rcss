@@ -140,6 +140,81 @@
 #skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
 #current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
 
+/* Phase 2 (skill list): #skill_slot_0..4/#current_skill_slot are now real click/hover targets
+   (main_frame.rml) -- opt back into pointer-events (inherited `none` from body). */
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
+#current_skill_slot {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Expanded grid + pet-command row + shared tooltip -- zero shift, same as #skill_slots above
+   (#skill_list_anchor sits at the origin for legacy, see that rule's own comment). SkillCellEntry
+   left/top and the tooltip's own left/top are raw reference-space values straight from
+   CNewUISkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly what the still-legacy
+   icon draw uses for the same cell. Containers stay non-interactive; only .skill-cell opts back
+   into pointer-events, same "container inert, children interactive" pattern as #skill_slots. */
+#skill_grid, #pet_skill_row, #skill_tooltip {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+}
+
+/* No border here (unlike themes/modern/main_frame.rcss's own .skill-cell) -- legacy always draws
+   the real IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE box-frame sprite underneath (NewUIMainFrameWindow.cpp's
+   Render(), unaffected by the modern-only suppression added there 2026-09-02), so an RmlUi border
+   here would double up. */
+.skill-cell {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+/* .selected deliberately left unstyled here, same as #skill_slots' own .selected -- legacy keeps
+   the real still-legacy IMAGE_SKILLBOX_USE sprite as its current-skill highlight (see that C++
+   call site's own comment, NewUIMainFrameWindow.cpp); an RmlUi outline here would double it up. */
+
+/* Bottom-anchored translucent wipe -- shrinks from the top down as cooldown counts down, matching
+   the retired RenderSkillDelay()'s own ARGB-quad direction exactly (0x80FF8080, alpha ~50%). */
+.cooldown-wipe {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgba(255, 128, 128, 128);
+	pointer-events: none;
+}
+
+/* Shared skill tooltip -- see themes/modern/main_frame.rcss's identical block for the positioning
+   rationale (C++-pushed left/top, flipped to grow upward via translateY(-100%)). Legacy's own flat
+   black tooltip styling, matching .tooltip above rather than modern's bordered-panel look. */
+#skill_tooltip {
+	transform: translateY(-100%);
+	width: 220px;
+	background-color: rgba(0, 0, 0, 200);
+	border-radius: 3px;
+	padding: 4px 6px;
+	font-family: "Liberation Sans";
+	font-size: 10px;
+	z-index: 2;
+}
+/* display:block required -- see themes/modern/main_frame.rcss's identical rule for the full
+   explanation (RmlUi's own default `display` is `inline`, not `block`, for every element
+   including <div>). */
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: normal;
+	min-height: 1.2em;
+	line-height: 1.2em;
+}
+.tt-line.tt-blue { color: #6fa8ff; }
+.tt-line.tt-red { color: #ff6060; }
+.tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
+.tt-line.bold { font-weight: bold; }
+
 /* Bottom-right, matching where RenderNumber(x+20, y+20, ...) used to draw the same subscript
    (NewUIMainFrameWindow.cpp, retired) -- plain text instead of the legacy digit-sprite atlas, same
    simplification already established for this window's HP/MP/AG/SD/EXP numbers (.gauge-num). */

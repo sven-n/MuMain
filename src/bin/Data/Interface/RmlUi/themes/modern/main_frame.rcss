@@ -297,6 +297,15 @@
 	border: none;
 }
 
+/* Phase 2 (skill list): #skill_slot_0..4/#current_skill_slot are now real click/hover targets
+   (main_frame.rml) -- opt back into pointer-events (inherited `none` from body, base.rcss's
+   pointer-events trap) same as every other interactive element in this document. */
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
+#current_skill_slot {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
 /* 2026-09-02: same width/height/top as #skill_slot_0..4 (32x38, top:431px) -- was 28x28 at
    top:439px, sized/positioned independently of the skill row, which read as misaligned once both
    rows sat on the same continuous background band. left offsets (own pitch, unrelated to the
@@ -354,3 +363,89 @@
 	background-color: rgba(224, 192, 96, 25);
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
+
+/* Phase 2 (skill list): expanded grid + pet-command row + shared tooltip. Same 78px local-origin
+   shift as #skill_slots above (#skill_list_anchor's own left, read back by C++ via
+   GetSkillListOffsetX() -- see NewUIMainFrameWindow.cpp's Render()/UpdateMouseEvent() comments)
+   -- SkillCellEntry::left/top and the tooltip's own left/top are raw, UN-rebased reference-space
+   values straight from CNewUISkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly
+   what the still-legacy icon draw uses for the same cell, so nesting here at the same 78px offset
+   keeps the RmlUi overlay and the legacy art it sits over pixel-aligned. Containers themselves
+   stay non-interactive (pointer-events:none) -- only .skill-cell opts back in, same "container
+   inert, children interactive" pattern as #skill_slots/#item_slots. */
+#skill_grid, #pet_skill_row, #skill_tooltip {
+	position: absolute;
+	left: 78px;
+	top: 0;
+	pointer-events: none;
+}
+
+/* 2026-09-02: permanent border, same look as .slot-frame (the hotkey slots) -- the still-legacy
+   IMAGE_SKILLBOX box-frame sprite is now suppressed for modern theme (NewUIMainFrameWindow.cpp's
+   Render(), same audited exception as the compact row's selected-highlight sprite), so this is
+   the grid's only box outline now (feedback: "the skill list are using the legacy border instead
+   of the programmatic border already used in the skill hotkeys slots"). */
+.skill-cell {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	pointer-events: auto;
+	cursor: pointer;
+	border: 1px rgba(255, 255, 255, 60);
+	border-radius: 3px;
+}
+.skill-cell.selected {
+	border: 1px #e0c060;
+	background-color: rgba(224, 192, 96, 25);
+}
+
+/* Bottom-anchored translucent wipe -- shrinks from the top down as the skill's cooldown counts
+   down, matching the retired RenderSkillDelay()'s own ARGB-quad direction exactly (0x80FF8080,
+   alpha 0x80 = ~50%). Height is bound per-instance (data-style-height, main_frame.rml). */
+.cooldown-wipe {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgba(255, 128, 128, 128);
+	pointer-events: none;
+}
+
+/* Shared skill tooltip, positioned via C++-pushed left/top (see comment above) then flipped to
+   grow upward from that point via translateY(-100%) -- reproduces the legacy renderer's own
+   "sy -= Height" auto-flip without porting that height math into C++ (a plain data-for list of
+   lines has no fixed height to precompute up front the way the legacy fixed-buffer model did).
+   Explicit width (not shrink-to-fit) per this build's own known quirk (layout-and-scaling.md /
+   newui-tier-adapter.md: an absolutely-positioned multi-line box undersizes without one). */
+#skill_tooltip {
+	transform: translateY(-100%);
+	width: 220px;
+	background-color: rgba(20, 20, 20, 220);
+	border: 1px rgba(255, 255, 255, 40);
+	border-radius: 3px;
+	padding: 4px 6px;
+	font-family: "Liberation Sans";
+	font-size: 10px;
+	z-index: 2;
+}
+/* 2026-09-02: display:block is required here, not optional -- RmlUi's own default `display` for
+   any element (including <div>) is `inline` (StyleSheetSpecification.cpp registers it that way;
+   there's no HTML-style user-agent stylesheet giving <div> a block default the way a browser
+   does). Every other div in this file gets a block box for free via `position:absolute`, but
+   these ARE meant to flow normally (stacked, not each independently positioned) -- without this,
+   all the tooltip's lines rendered inline, one run-on paragraph instead of separate lines
+   (feedback: "the text display inside the tooltips is not properly separated by new lines").
+   min-height/line-height also guarantee a blank spacer line (UI::Skills::Tooltip::Model's
+   isBlank lines, text is a lone "\n") still reserves visible vertical space even though its own
+   collapsed-whitespace content renders as nothing. */
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: normal;
+	min-height: 1.2em;
+	line-height: 1.2em;
+}
+.tt-line.tt-blue { color: #6fa8ff; }
+.tt-line.tt-red { color: #ff6060; }
+.tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
+.tt-line.bold { font-weight: bold; }

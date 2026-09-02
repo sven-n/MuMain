@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <vector>
+
 #include "UI/NewUI/NewUIBase.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/NewUI/NewUI3DRenderMng.h"
@@ -68,27 +70,58 @@ namespace SEASON3B
         int m_iHotKeyItemLevel[HOTKEY_COUNT];
     };
 
+    // RmlUi migration, Phase 2 of 3 of the CNewUIMainFrameWindow pilot (see
+    // docs/rmlui-ui-system/STATUS.md). One interactive overlay cell in the expanded skill grid or
+    // pet-command row -- position/eligibility/cooldown computed fresh in
+    // CNewUISkillList::Update() every frame the grid is open. Icon/box-frame ART IS NOT PART OF
+    // THIS STRUCT and stays a legacy 2D draw at the same position (mid-implementation scope
+    // adjustment, see the Phase 2 plan: RenderSkillIcon()'s atlas lookup is too irregular -- mixed
+    // 8/12-column addressing, a separate master-level atlas -- to port blind without a way to
+    // visually verify against the real decoded textures). This struct only drives RmlUi's
+    // interactive overlay: hit target (click/hover replacing the old EVENT_STATE machine),
+    // cooldown wipe, and (modern theme) selection highlight.
+    struct SkillCellEntry
+    {
+        float left = 0.f, top = 0.f;   // px, in #bars's own local reference space -- matches the
+                                        // legacy zig-zag/pet-row position exactly (same values the
+                                        // still-legacy icon/box draw uses for this same cell)
+        int skillIndex = -1;           // CharacterAttribute->Skill[] index (grid) or the raw
+                                        // AT_PET_COMMAND_* enum value (pet row) -- passed back
+                                        // verbatim to the click handler, matching the legacy click
+                                        // branches' own `Hero->CurrentSkill = i` (see
+                                        // CNewUISkillList::OnGridCellClick()'s comment for why this
+                                        // does NOT go through UseHotKey())
+        bool isPet = false;            // true for pet-row entries -- click routes to the pet path
+        bool isCurrent = false;        // Hero->CurrentSkill == skillIndex
+        float cooldownFraction = 0.f;  // 0 = ready; shrinks toward 0 as the skill's delay counts
+                                        // down -- same bottom-anchored-wipe intent as
+                                        // RenderSkillDelay()'s retired ARGB-quad draw
+    };
+
+    // One line of a skill tooltip. Field-for-field mirror of UI::Skills::Tooltip::Line
+    // (SkillTooltipModel.h) so CNewUIMainFrameWindow::SyncRmlModel() can copy directly -- kept as
+    // its own RmlUi-facing type rather than reusing Line itself since Rml::DataModelConstructor
+    // needs a bindable Rml::String, not Line's fixed wchar_t[] buffer.
+    struct SkillTooltipLineEntry
+    {
+        Rml::String text;
+        // Discrete bool-per-color flags, not a class-name string -- matches this codebase's own
+        // established data-class-* convention (data-class-poisoned/open/selected elsewhere in
+        // this same file) rather than introducing string-equality expressions into RML, which no
+        // other window here has ever needed. White (UI::Skills::Tooltip::LineColor::White) is the
+        // implicit default: no flag true -> themes/{legacy,modern}/main_frame.rcss's plain
+        // .tt-line text color applies.
+        bool colorBlue = false;
+        bool colorRed = false;
+        bool colorDarkRed = false;
+        bool bold = false;
+    };
+
     class CNewUISkillList : public CNewUIObj
     {
         enum
         {
             SKILLHOTKEY_COUNT = 10
-        };
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-
-            // currentskill
-            EVENT_BTN_HOVER_CURRENTSKILL,
-            EVENT_BTN_DOWN_CURRENTSKILL,
-
-            // skillhotkey
-            EVENT_BTN_HOVER_SKILLHOTKEY,
-            EVENT_BTN_DOWN_SKILLHOTKEY,
-
-            // skilllist
-            EVENT_BTN_HOVER_SKILLLIST,
-            EVENT_BTN_DOWN_SKILLLIST,
         };
 
     public:
@@ -116,7 +149,6 @@ namespace SEASON3B
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-        void RenderSkillInfo();
         float GetLayerDepth();		// 10.6f
 
         WORD GetHeroPriorSkill();
@@ -151,9 +183,63 @@ namespace SEASON3B
         // own `continue` already has for the legacy path.
         int GetHotKeySlotNumber(int iSlotIndex);
 
+        // 2026-09-02, Phase 2: per-slot cooldown fraction for the compact hotkey row + current-
+        // skill slot (0 == ready). Mirrors RenderSkillDelay()'s own iSkillDelay/iSkillMaxDelay
+        // fraction, computed independently per slot (same "duplicate rather than refactor" style
+        // as the two getters above) since RenderSkillDelay() itself takes an icon index, not a
+        // hotkey-slot index, and the two don't share a convenient common call shape.
+        float GetHotKeySlotCooldownFraction(int iSlotIndex);
+        float GetCurrentSkillCooldownFraction();
+
+        // Despite the name, this reports whether the compact hotkey row is scrolled to its "upper"
+        // set (6-9,0 vs 1-5, m_bHotKeySkillListUp) -- a legacy naming trap, NOT whether the
+        // expanded grid popup is open. Only ever correct for RenderCenterFrame()'s own
+        // "IMAGE_MENU_2_1 highlight" trigger (NewUIMainFrameWindow.cpp), which predates this pilot
+        // and was never about the grid either. Use IsSkillGridOpen() below for the grid's own
+        // open/closed state -- a 2026-09-02 bug (main_frame.rml's #skill_grid/#pet_skill_row bound
+        // to THIS method instead) meant clicking the current-skill slot never visibly opened the
+        // grid; SyncRmlModel() now binds skill_grid_open to IsSkillGridOpen() instead.
         bool IsSkillListUp();
 
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
+        // 2026-09-02, Phase 2: the actual "is the expanded skill grid popup open" state
+        // (m_bSkillList) -- see IsSkillListUp()'s own comment for why that similarly-named,
+        // pre-existing method is NOT this.
+        bool IsSkillGridOpen() const { return m_bSkillList; }
+
+        // 2026-09-02, Phase 2: click/hover entry points bound from main_frame.rml's
+        // data-event-click/mouseover/mouseout (Create(), CNewUIMainFrameWindow.cpp) -- replace the
+        // old EVENT_STATE hover/down/release machine entirely (RmlUi's own Context now does
+        // hit-testing). Each pair mirrors one of the 3 widgets UpdateMouseEvent() used to gate
+        // sequentially; see each .cpp definition's own comment for the exact legacy behavior
+        // preserved (which is NOT always the same as UseHotKey()'s keyboard-press path -- the
+        // original mouse-click branches never called UseHotKey() and so never applied its
+        // pet-check/auto-attack-cancel-on-teleport rule; preserved faithfully, not "fixed").
+        void OnHotkeySlotClick(int iSlotIndex);
+        void OnHotkeySlotHover(int iSlotIndex);
+        void OnCurrentSkillClick();
+        void OnCurrentSkillHover();
+        void OnGridCellClick(int iSkillIndex);
+        void OnGridCellHover(int iSkillIndex);
+        void OnPetCellClick(int iSkillIndex);
+        void OnPetCellHover(int iSkillIndex);
+        void OnUnhover();
+
+        // 2026-09-02, Phase 2: the two dynamic-count overlay lists CNewUIMainFrameWindow::
+        // SyncRmlModel() copies into the shared main_frame RmlUi model's skill_grid_cells/
+        // pet_skill_cells arrays every frame. Populated by Update() (while the grid is open) from
+        // the exact same position/filter logic Render()'s still-legacy icon/box draw uses for the
+        // same cells -- computed once, read by both, not duplicated (unlike the small getters
+        // above, this one's genuinely shared by two call sites within this same class).
+        const std::vector<SkillCellEntry>& GetGridSnapshot() const { return m_GridSnapshot; }
+        const std::vector<SkillCellEntry>& GetPetSnapshot() const { return m_PetSnapshot; }
+
+        // 2026-09-02, Phase 2: true whenever a hover callback above has a tooltip queued for
+        // SyncRmlModel() to copy this frame -- consumed (not cleared) every frame like every other
+        // polled field in this pilot; cleared only by OnUnhover()/a new hover target replacing it.
+        bool IsTooltipPending() const { return m_bTooltipPending; }
+        int GetTooltipSkillIndex() const { return m_iTooltipSkillIndex; }
+        float GetTooltipAnchorX() const { return m_fTooltipAnchorX; }
+        float GetTooltipAnchorY() const { return m_fTooltipAnchorY; }
 
     private:
         void LoadImages();
@@ -163,8 +249,24 @@ namespace SEASON3B
         void UseHotKey(int iHotKey);
 
         void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
-        void RenderSkillDelay(int iIndex, float x, float y, float width, float height);
-        void RenderPetSkill();
+        // RenderSkillDelay()/RenderPetSkill() removed, Phase 2 -- see RebuildGridSnapshot()'s own
+        // comment (cooldown math lives in the free function ComputeSkillCooldownFraction() now,
+        // NewUIMainFrameWindow.cpp; pet-row drawing is inlined into Render() directly).
+
+        // 2026-09-02, Phase 2: rebuilds m_GridSnapshot/m_PetSnapshot from the current
+        // m_bSkillList/pet state -- same iteration/filter/zig-zag-position math the legacy grid
+        // loop always used (CharacterAttribute->Skill[] scan, buff-range + MASTERLEVEL skip,
+        // AT_PET_COMMAND_DEFAULT..END for the pet row), called once per frame from Update() while
+        // the grid is open. Render() (still-legacy icon/box art) iterates the resulting snapshot
+        // instead of recomputing positions itself.
+        void RebuildGridSnapshot();
+
+        // 2026-09-02, Phase 2: queues a tooltip for the given skill/pet-command index, anchored at
+        // (x, y) in #bars's own local reference space -- shared by all 5 hover entry points above
+        // rather than duplicated per widget, since the actual tooltip content build
+        // (UI::Skills::Tooltip::BuildModel(), pet-command dispatch) is identical regardless of
+        // which widget triggered it.
+        void QueueTooltip(int iSkillIndex, float x, float y);
 
         void ResetMouseLButton();
 
@@ -177,13 +279,22 @@ namespace SEASON3B
 
         bool m_bSkillList;
 
-        bool m_bRenderSkillInfo;
-        int m_iRenderSkillInfoType;
-        int m_iRenderSkillInfoPosX;
-        int m_iRenderSkillInfoPosY;
-
-        EVENT_STATE m_EventState;
         WORD m_wHeroPriorSkill;
+
+        // Phase 2 additions -- replace EVENT_STATE (removed) and m_bRenderSkillInfo/
+        // m_iRenderSkillInfoType/PosX/PosY (removed, see QueueTooltip()'s comment).
+        std::vector<SkillCellEntry> m_GridSnapshot;
+        std::vector<SkillCellEntry> m_PetSnapshot;
+
+        bool m_bTooltipPending = false;
+        int m_iTooltipSkillIndex = -1;
+        float m_fTooltipAnchorX = 0.f, m_fTooltipAnchorY = 0.f;
+
+        // 2026-09-02: replaces EVENT_STATE's EVENT_BTN_HOVER_SKILLLIST as the "is Ctrl+digit
+        // assignment armed" signal for UpdateKeyEvent()'s SetHotKey() path -- set by
+        // OnGridCellHover(), cleared by OnUnhover()/a different hover target. -1 == nothing
+        // hovered in the grid right now.
+        int m_iHoveredGridSkillIndex = -1;
     };
 
     // RmlUi migration (2026-09-01) -- Phase 1 of 3 of the third CNewUIObj-tier pilot (see
@@ -438,6 +549,37 @@ namespace SEASON3B
             // slot (RmlUi's {{ }} interpolation of an empty string renders nothing, same "draw
             // nothing" behavior the legacy digit-sprite path already has for that case).
             Rml::String skillSlot0Hotkey, skillSlot1Hotkey, skillSlot2Hotkey, skillSlot3Hotkey, skillSlot4Hotkey;
+
+            // Phase 2 (skill list) additions -- see docs/rmlui-ui-system's Phase 2 plan and
+            // CNewUISkillList's own new members/methods (NewUIMainFrameWindow.h, right above this
+            // class). Cooldown wipe for the compact row + current-skill slot: same "5 separate
+            // fields" convention as skillSlot0..4Hotkey above, plus one for #current_skill_slot.
+            float skillSlot0Cooldown = 0.f, skillSlot1Cooldown = 0.f, skillSlot2Cooldown = 0.f,
+                  skillSlot3Cooldown = 0.f, skillSlot4Cooldown = 0.f;
+            float currentSkillCooldown = 0.f;
+
+            // Expanded skill grid + pet-command row -- mirrors CNewUISkillList::IsSkillGridOpen()
+            // (NOT the similarly-named IsSkillListUp(), a legacy naming trap -- see that method's
+            // own comment; binding this to it instead was a real 2026-09-02 bug, fixed). Gates
+            // #skill_grid/#pet_skill_row visibility in RCSS. Cell arrays are dynamic-count
+            // data-for lists (SkillCellEntry, RegisterStruct'd in Create()), same shape as
+            // CBuffStrip's already-proven buffs array -- rebuilt every frame the grid is open,
+            // left stale (harmless, hidden) while closed.
+            bool skillGridOpen = false;
+            std::vector<SkillCellEntry> skillGridCells;
+            std::vector<SkillCellEntry> petSkillCells;
+
+            // Shared skill tooltip -- one RmlUi element reused for the hotkey row, current-skill
+            // slot, grid, and pet row alike (matches the legacy RenderSkillInfo()'s own "one
+            // tooltip object, repositioned/repopulated per hover target" shape). left/top are in
+            // #bars's own local reference space (same as skillGridCells' own left/top) so the
+            // tooltip can simply nest inside #bars too; main_frame.rcss anchors the tooltip's
+            // BOTTOM edge at (top) via `transform: translateY(-100%)` so it grows upward
+            // regardless of line count, reproducing RenderTipTextList()'s own "sy -= Height"
+            // auto-flip without needing that height math ported into C++.
+            bool skillTooltipVisible = false;
+            float skillTooltipLeft = 0.f, skillTooltipTop = 0.f;
+            std::vector<SkillTooltipLineEntry> skillTooltipLines;
         };
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

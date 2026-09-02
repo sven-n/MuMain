@@ -28,12 +28,16 @@ int LegacyColor(LineColor c)
 }
 }
 
-void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STRP_NONE*/)
+bool BuildModelForSlot(int Type, Model& outModel)
 {
-    // Pet command icons get a different UI entirely (delegated to giPetManager).
-    if (giPetManager::RenderPetCmdInfo(sx, sy, Type)) return;
+    outModel.Reset();
 
-    if (!CharacterAttribute) return;
+    // Pet command icons get a different UI entirely (delegated to giPetManager). Mirrors Render()'s
+    // own dispatch exactly -- see GIPetManager::BuildPetCmdTooltipModel's own comment for why this
+    // is a parallel new function, not a repurposed RenderPetCmdInfo().
+    if (giPetManager::BuildPetCmdTooltipModel(Type, outModel)) return true;
+
+    if (!CharacterAttribute) return false;
 
     const int skillType = CharacterAttribute->Skill[Type];
 
@@ -42,8 +46,14 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
     options.skillSlotIndex = Type;
     options.includeCharacterSpecific = true;
 
+    BuildModel(options, outModel);
+    return true;
+}
+
+void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STRP_NONE*/)
+{
     Model model;
-    BuildModel(options, model);
+    if (!BuildModelForSlot(Type, model)) return;
 
     // Copy the model into the legacy TextList / Color / Bold buffers that
     // RenderTipTextList consumes. Pre-allocated globals, no heap. The legacy

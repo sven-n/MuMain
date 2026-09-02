@@ -79,12 +79,51 @@
 		     genuinely visible (own real content, not baked into any sprite) where it hides the
 		     other. Empty string -> nothing rendered, for an unbound slot. -->
 		<div id="skill_slots">
-			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected"><span class="skill-hotkey-label">{{skill_slot_0_hotkey}}</span></div>
-			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected"><span class="skill-hotkey-label">{{skill_slot_1_hotkey}}</span></div>
-			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected"><span class="skill-hotkey-label">{{skill_slot_2_hotkey}}</span></div>
-			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected"><span class="skill-hotkey-label">{{skill_slot_3_hotkey}}</span></div>
-			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected"><span class="skill-hotkey-label">{{skill_slot_4_hotkey}}</span></div>
-			<div id="current_skill_slot" class="slot-frame"></div>
+			<div id="skill_slot_0" class="slot-frame" data-class-selected="skill_slot_0_selected" data-event-click="skill_hotkey_click(0)" data-event-mouseover="skill_hotkey_hover(0)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_0_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_0_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_1" class="slot-frame" data-class-selected="skill_slot_1_selected" data-event-click="skill_hotkey_click(1)" data-event-mouseover="skill_hotkey_hover(1)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_1_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_1_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_2" class="slot-frame" data-class-selected="skill_slot_2_selected" data-event-click="skill_hotkey_click(2)" data-event-mouseover="skill_hotkey_hover(2)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_2_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_2_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_3" class="slot-frame" data-class-selected="skill_slot_3_selected" data-event-click="skill_hotkey_click(3)" data-event-mouseover="skill_hotkey_hover(3)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_3_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_3_cooldown * 100 + '%'"></div></div>
+			<div id="skill_slot_4" class="slot-frame" data-class-selected="skill_slot_4_selected" data-event-click="skill_hotkey_click(4)" data-event-mouseover="skill_hotkey_hover(4)" data-event-mouseout="skill_unhover"><span class="skill-hotkey-label">{{skill_slot_4_hotkey}}</span><div class="cooldown-wipe" data-style-height="skill_slot_4_cooldown * 100 + '%'"></div></div>
+			<div id="current_skill_slot" class="slot-frame" data-event-click="skill_current_click" data-event-mouseover="skill_current_hover" data-event-mouseout="skill_unhover"><div class="cooldown-wipe" data-style-height="current_skill_cooldown * 100 + '%'"></div></div>
+		</div>
+
+		<!-- Phase 2 (skill list): expanded grid + pet-command row. Interactive overlay ONLY (hit
+		     target, cooldown wipe, current-skill highlight) -- icon/box-frame art stays legacy 2D
+		     underneath (NewUIMainFrameWindow.h's SkillCellEntry comment explains why: the atlas
+		     lookup is too irregular to port blind). Fully data-driven (data-for) since the cell
+		     count varies with how many skills the character has learned -- no static markup
+		     possible, same shape as buff_strip.rml's already-proven dynamic list. -->
+		<div id="skill_grid" data-class-hidden="!skill_grid_open">
+			<div class="skill-cell" data-for="cell : skill_grid_cells"
+			     data-style-left="cell.left + 'px'" data-style-top="cell.top + 'px'"
+			     data-class-selected="cell.is_current"
+			     data-event-click="skill_grid_click(cell.skill_index)"
+			     data-event-mouseover="skill_grid_hover(cell.skill_index)"
+			     data-event-mouseout="skill_unhover">
+				<div class="cooldown-wipe" data-style-height="cell.cooldown_fraction * 100 + '%'"></div>
+			</div>
+		</div>
+		<div id="pet_skill_row" data-class-hidden="!skill_grid_open">
+			<div class="skill-cell" data-for="cell : pet_skill_cells"
+			     data-style-left="cell.left + 'px'" data-style-top="cell.top + 'px'"
+			     data-class-selected="cell.is_current"
+			     data-event-click="skill_pet_click(cell.skill_index)"
+			     data-event-mouseover="skill_pet_hover(cell.skill_index)"
+			     data-event-mouseout="skill_unhover">
+				<div class="cooldown-wipe" data-style-height="cell.cooldown_fraction * 100 + '%'"></div>
+			</div>
+		</div>
+
+		<!-- Shared skill tooltip -- one element reused for the hotkey row/current-skill slot/grid/
+		     pet row alike (mirrors the legacy RenderSkillInfo()'s own "one tooltip object,
+		     repositioned/repopulated per hover target" shape). left/top are in #bars's own local
+		     reference space, same as skill_grid_cells' own left/top -- bottom-edge-anchored via
+		     transform:translateY(-100%) (main_frame.rcss) so it grows upward regardless of line
+		     count, reproducing the legacy renderer's own auto-flip without height math in C++. -->
+		<div id="skill_tooltip" data-class-hidden="!skill_tooltip_visible" data-style-left="skill_tooltip_left + 'px'" data-style-top="skill_tooltip_top + 'px'">
+			<div class="tt-line" data-for="line : skill_tooltip_lines"
+			     data-class-tt-blue="line.color_blue" data-class-tt-red="line.color_red"
+			     data-class-tt-darkred="line.color_dark_red" data-class-bold="line.bold">{{line.text}}</div>
 		</div>
 	</div>
 
