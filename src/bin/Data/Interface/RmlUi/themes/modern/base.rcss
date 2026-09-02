@@ -1,7 +1,20 @@
 /* Shared, cross-window RCSS for the modern theme: generic (non-positional) rules reused by more
    than one migrated window, plus the anchor/center/stretch layout utility classes every window
    uses. Every migrated window's <head> links this file first, then its own per-window positional
-   .rcss. */
+   .rcss.
+
+   Colors/borders/shadows below are named against the token table in
+   docs/rmlui-ui-system/modern-theme-visual-direction.md -- keep the trailing token-name comment
+   next to each value; that table is the source of truth, this file is its first application.
+
+   Depth primitives (.modern-frame/.modern-panel/.modern-inset, .btn/.checkbox-box below) simulate
+   raised/recessed physical surfaces without box-shadow, which this engine's RenderInterface can't
+   composite (confirmed broken -- see the token doc). The substitute is per-side border-color
+   bevels (RmlUi supports border-top/right/bottom/left-color as independent properties) plus
+   `decorator: linear-gradient(...)`, which IS a real working decorator here (proven by
+   main_frame.rcss's gauge fills before this). Light source is fixed upper-left throughout: a
+   RAISED surface gets a lighter top/left border and a lighter gradient corner there, darker
+   bottom/right; a RECESSED surface inverts both. Never mix the two directions on one element. */
 
 body {
 	width: 100%;
@@ -17,7 +30,7 @@ body {
 	top: 0;
 	width: 100%;
 	height: 100%;
-	background-color: rgba(0, 0, 0, 128);
+	background-color: rgba(10, 9, 8, 190); /* surface-0 */
 	pointer-events: auto;
 }
 
@@ -26,17 +39,26 @@ body {
 	cursor: pointer;
 	pointer-events: auto;
 }
+/* 2026-09-03: matches login.rcss's own checkbox exactly (that file can't reference this rule --
+   it doesn't link base.rcss, see login.rcss's own note -- so the values are duplicated by hand;
+   keep the two in sync if either changes). A real gradient + bevel border, not the flat
+   bevel-only version this used before -- nothing else currently uses .checkbox-box (grepped, only
+   login.rml does, and it has its own copy), so this had no visible effect on anything else. */
 .checkbox-box {
 	display: inline-block;
 	width: 16px;
 	height: 16px;
-	border: 1px rgba(255, 255, 255, 60);
-	border-radius: 3px;
-	background-color: rgba(255, 255, 255, 20);
+	background-color: #0b0907;
+	decorator: linear-gradient(to bottom, #211b15, #0b0907);
+	border-width: 1px;
+	border-color: #725b39;
+	border-top-color: rgba(0, 0, 0, 180);
+	border-radius: 3px; /* radius-sm */
 }
 .checkbox-box.checked {
-	background-color: #c0a050;
-	border: 1px #c0a050;
+	background-color: #604319;
+	decorator: linear-gradient(to bottom, #a47732, #604319); /* accent-gold family */
+	border-color: #c0934c; /* accent-gold */
 }
 .checkbox-label {
 	position: absolute;
@@ -45,6 +67,9 @@ body {
 	white-space: nowrap;
 }
 
+/* Flat (per feedback -- no gradient fill/bevel), but the border carries a faint gold tint at rest
+   that brightens into a real gold glow on hover, rather than a purely neutral steel border. Gray
+   surface stays the base material; gold is the accent, not the structure. */
 .btn {
 	position: absolute;
 	width: 108px;
@@ -53,19 +78,111 @@ body {
 	vertical-align: middle;
 	line-height: 30px;
 	cursor: pointer;
-	background-color: rgba(255, 255, 255, 15);
-	border: 1px rgba(255, 255, 255, 50);
-	border-radius: 4px;
+	color: #d9d3c5; /* text-body */
+	background-color: #34373a;
+	border: 1px rgba(190, 160, 110, 90); /* faint accent-gold */
+	border-radius: 4px; /* radius-md */
 	pointer-events: auto;
 }
 .btn:hover {
-	background-color: #c0a050;
-	border: 1px #c0a050;
+	background-color: #454950;
+	border-color: rgba(224, 192, 96, 210); /* accent-gold-bright */
+}
+.btn:active {
+	/* Native :active pseudo-class, unverified against this branch's own mouse-input routing
+	   (RmlUi's default SDL translation is bypassed here for unrelated reasons -- see README.md's
+	   Gotchas). Degrades gracefully if it never fires. */
+	background-color: #222426;
+	border-color: rgba(190, 160, 110, 130);
 }
 .btn.disabled {
 	pointer-events: none;
-	opacity: 0.5;
+	background-color: #2a2c2e;
+	color: #9a958c; /* semantic-neutral */
+	border-color: rgba(140, 146, 152, 60); /* stays neutral when disabled, no gold */
+	opacity: 0.55;
 	cursor: default;
+}
+
+/* 2026-09-03: opt-in primary/hero variant -- apply alongside .btn (class="btn btn-ok") for a
+   window's one confirm-style action; plain .btn above stays flat/neutral, unaffected, still the
+   right choice for a list of equal-weight actions (sys_menu.rcss's four stacked menu buttons).
+   Exact same accent-crimson gradient/bevel as login.rcss's own .btn (that file has its own copy,
+   same reason as .checkbox-box above -- it doesn't link base.rcss). Overrides only color
+   properties, not layout -- .btn's own position/size/border-width apply underneath. Must stay
+   textually after .btn/.btn:hover/.btn:active above (equal specificity once combined with .btn on
+   the same element, source order decides). */
+.btn-ok {
+	background-color: #35100e;
+	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e); /* accent-crimson family */
+	border-color: #0a0706;
+	border-top-color: rgba(213, 143, 106, 115);
+}
+.btn-ok:hover {
+	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
+	border-color: #9a6841;
+}
+.btn-ok:active {
+	border-top-color: rgba(180, 92, 68, 65);
+	border-bottom-color: rgba(0, 0, 0, 200);
+}
+.btn-ok.disabled {
+	/* .btn.disabled's own flat neutral background-color/border-color/opacity already apply
+	   (two-class selector, same specificity as this rule, doesn't touch decorator either way).
+	   This rule's own job is just resetting decorator to none -- two classes here beats .btn-ok's
+	   one-class decorator declaration on specificity alone, not source order. Without it, the
+	   crimson gradient decorator paints over/hides the disabled neutral fill entirely, since
+	   decorators composite on top of background-color. */
+	decorator: none;
+}
+
+/* Reusable window-layering primitives -- pilot: login.rcss. Intended usage: apply .modern-frame
+   to the outer positioned panel element itself (it keeps that element's own position/size), then
+   add ONE decorative child div with .modern-panel, inset a few px on all sides, as the FIRST
+   child (so it paints behind real content, same convention as .layout-anchor/.panel-header) --
+   the small reveal between the frame's inner edge and the panel's own border is deliberate, it's
+   the frame's own material showing as a third visual band. Real content stays direct children of
+   the .modern-frame element at their original positions -- do NOT nest content inside
+   .modern-panel, its inset would shift every child's effective position. */
+.modern-frame {
+	background-color: rgba(38, 40, 42, 190);
+	decorator: linear-gradient(to bottom, rgba(58, 62, 66, 190) 0%, rgba(38, 40, 42, 190) 40%, rgba(20, 21, 22, 190) 100%);
+	border-width: 2px;
+	border-top-color: rgba(200, 205, 210, 160); /* bevel-light: brighter than the fill for a real edge-catch */
+	border-left-color: rgba(200, 205, 210, 160);
+	border-bottom-color: rgba(0, 0, 0, 190); /* bevel-dark */
+	border-right-color: rgba(0, 0, 0, 190);
+}
+.modern-panel {
+	position: absolute;
+	left: 4px;
+	right: 4px;
+	top: 4px;
+	bottom: 4px;
+	pointer-events: none;
+	background-color: rgba(20, 21, 22, 180); /* surface-1 */
+	decorator: linear-gradient(to bottom, rgba(28, 29, 30, 180) 0%, rgba(16, 17, 18, 180) 100%);
+	border-width: 1px;
+	border-top-color: rgba(0, 0, 0, 140); /* bevel-dark-inset: recessed relative to the frame */
+	border-left-color: rgba(0, 0, 0, 140);
+	border-bottom-color: rgba(255, 255, 255, 20); /* bevel-light-inset */
+	border-right-color: rgba(255, 255, 255, 20);
+	border-radius: 8px;
+}
+/* Border-only recessed bevel, no fill -- for an element with legacy-drawn content painted
+   underneath it (RmlUi always composites last, so any fill here would hide that content; see
+   login.rcss's .input-frame comment for a concrete example). Gives the "sunk into the panel"
+   read from the border bevel alone. */
+.modern-inset {
+	border-width: 1px;
+	border-top-color: rgba(0, 0, 0, 190); /* bevel-dark-inset */
+	border-left-color: rgba(0, 0, 0, 190);
+	border-bottom-color: rgba(255, 244, 224, 35); /* bevel-light-inset */
+	border-right-color: rgba(255, 244, 224, 35);
+}
+.modern-inset.focused {
+	border-top-color: rgba(192, 160, 80, 170); /* accent-gold, restrained -- not a glow, just a stronger edge */
+	border-left-color: rgba(192, 160, 80, 170);
 }
 
 .hidden {

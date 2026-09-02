@@ -19,8 +19,8 @@
 		<!-- Background art only for the resident-password re-entry step; live text drawn on top by legacy code. -->
 		<div id="input_frame"></div>
 
-		<div id="btn_ok" class="btn" data-event-click="msgwin_ok_click">{{ok_label}}</div>
-		<div id="btn_cancel" class="btn" data-event-click="msgwin_cancel_click">{{cancel_label}}</div>
+		<div id="btn_ok" class="btn btn-ok" data-event-click="msgwin_ok_click">{{ok_label}}</div>
+		<div id="btn_cancel" class="btn btn-cancel" data-event-click="msgwin_cancel_click">{{cancel_label}}</div>
 	</div>
 </body>
 </rml>

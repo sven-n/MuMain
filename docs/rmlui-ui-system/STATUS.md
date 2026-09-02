@@ -91,6 +91,67 @@ for visibility:
   separate lines until `display: block` was added explicitly. Give any non-absolutely-positioned
   element `display: block` (or whatever `display` it actually needs) explicitly — never assume a
   `<div>` gets one for free.
+- **`linear-gradient`/`radial-gradient`/`conic-gradient` all route through
+  `RenderInterface::CompileShader()`, not a shader-free vertex-colored mesh — fixed 2026-09-02,
+  corrects an earlier wrong belief.** An earlier pass of this document claimed `linear-gradient`
+  "genuinely works, built as an actual vertex-colored mesh, no shader needed" and that only
+  `radial-gradient` needed `CompileShader`. Re-reading RmlUi's own Core decorator source
+  (`DecoratorGradient.cpp`) showed that's wrong: `DecoratorLinearGradient::GenerateElementData`
+  calls `RenderManager::CompileShader("linear-gradient", ...)` exactly like radial and conic do, and
+  bails out (renders nothing) if it fails — the shader-free mesh path only exists for the older,
+  deprecated `horizontal-gradient`/`vertical-gradient` decorator, which nothing in this project's
+  RCSS uses. Since this project's `RmlUiRenderInterface` (actually `RenderInterface_SDL_GPU`, the
+  vendored SDL_GPU backend it inherits from) never overrode `CompileShader` before this fix, every
+  `linear-gradient`/`radial-gradient`/`conic-gradient` decorator across the whole modern theme was
+  silently failing — confirmed empirically with a before/after screenshot of the login dialog on an
+  otherwise-identical build: elements that also set a plain `background-color` (the HUD's
+  `.gauge-fill-*` rules) fell back to that flat color and looked "close enough" to go unnoticed;
+  elements with only a gradient decorator and no background/border (login's
+  `.header-line-left/right`, `.separator`, `.header-glow`) were rendering fully invisible.
+  **Now fixed**: `RenderInterface_SDL_GPU` (`src/ThirdParty/RmlUi/Backends/`) implements
+  `CompileShader`/`RenderShader`/`ReleaseShader` for the gradient family, porting the upstream GL3
+  reference backend's shader math (`RmlUi_Renderer_GL3.cpp`) to a new HLSL fragment shader
+  (`RmlUi_SDL_GPU/shader_frag_gradient.frag`) baked into `ShadersCompiledSPV.h` alongside the
+  existing color/texture shaders — reusing the existing vertex shader unchanged, and this project's
+  own `glslangValidator`/`spirv-cross`/`dxc` toolchain (already vendored for `MU_ENABLE_SHADER_COMPILATION`)
+  instead of the external `SDL_shadercross` tool `compile_shaders.py` normally expects. Verified
+  both `linear-gradient` and `radial-gradient` render correctly (real elliptical falloff, not just a
+  flat fill) against a real build. **`box-shadow`/`blur`/`backdrop-filter` are still unimplemented
+  and explicitly out of scope for this fix** — those route through a completely different code path
+  (`PushLayer`/`CompositeLayers`/`CompileFilter`/`RenderFilter`, RmlUi's layer/filter/compositing
+  subsystem for rendering an element off-screen and blurring it in multiple passes), none of which
+  `RenderInterface_SDL_GPU` implements — a materially bigger task, not bundled into this one. Same
+  standing lesson as the `box-shadow` finding below: a property having docs/a working parser doesn't
+  mean the render interface actually implements it — check for a `CompileShader`/render-interface
+  override, or test the specific decorator in isolation, rather than trusting a casual screenshot.
+- **`box-shadow` (and `filter`/`backdrop-filter`) parse but don't render on this engine — confirmed
+  2026-09-02.** `PropertyId::BoxShadow` has a working RCSS parser, which reads as "supported" if you
+  only check property registration (`StyleSheetSpecification.cpp`) — but `RmlUiRenderInterface`
+  leaves layer/filter compositing unimplemented, so a blurred `box-shadow` paints as a solid opaque
+  block instead of a blur. Already known and documented pre-2026-09-02 in `login.rcss`'s own
+  `#panel` comment; missed before `modern-theme-visual-direction.md`'s first draft called
+  `box-shadow` "good news," which then broke `base.rcss`'s `.checkbox-box`/`.btn` at runtime
+  (solid white fills, no visible border, checkboxes collapsed to hairlines) — reverted. Don't
+  parser-check a rendering capability; check the render interface, or just grep for prior art
+  first (this exact caveat already existed in the codebase and was missed). **Caveat on this
+  finding**: it was diagnosed while `base.rcss` also had the unrelated nested-comment parse bug
+  below active in the same file at the same time, so the observed symptom was confounded and
+  hasn't been re-verified in isolation on a clean file — treat as likely still true (the
+  independent, pre-existing `login.rcss` comment is real corroboration) rather than fully settled.
+- **RCSS comments don't nest, and a broken one in a shared file silently corrupts every document
+  that links it.** `/* ... "/* example */" ... */` closes at the *first* `*/`, not the intended
+  one — everything between that premature close and the next real `*/` gets parsed as garbage
+  CSS. A comment added to `base.rcss`'s file header (2026-09-02, describing its own
+  `/* token-name */` annotation convention by literally writing that syntax inside another
+  comment) did exactly this, and since `base.rcss` is linked by nearly every modern-theme window,
+  it broke `mu_helper_bar`, `buff_strip`, `msg_win`'s centering, and (very likely) `main_frame`'s
+  own `#top_right_row` positioning all at once — a wide, confusing blast radius from one file that
+  took most of a session to trace back to its actual source, because the symptom (several
+  seemingly-unrelated windows losing interactivity/positioning/visibility) didn't look like a
+  syntax error. If a shared file's change is followed by multiple, seemingly-unrelated windows
+  breaking at once, suspect the shared file's own syntax before anything else. Never write a
+  literal `/* ... */` sequence inside prose that's itself inside a comment — describe the
+  convention without the delimiters instead.
 - **A confusingly-named legacy method can silently bind to the wrong RmlUi field.**
   `CNewUISkillList::IsSkillListUp()` (pre-existing, predates RmlUi) reports whether the hotkey row
   is scrolled to its "upper" slot set (6-9,0), not whether the expanded skill-list *popup* is open
@@ -110,9 +171,17 @@ for "the full architecture is in place":
   hardcoded directories (`themes/legacy/`, `themes/modern/`) selected by `GameConfig`'s theme
   name — no "user override on top of a theme" layer, no documented precedence order, no tooling
   for a third party to ship a partial theme that inherits the rest from a base theme.
-- **No design-token/shared-variable layer** (§21). Each window's theme RCSS repeats its own
-  `font-family`/`font-size`/color literals rather than referencing shared `ui-*` tokens. Whether
-  this vendored RmlUi version supports CSS custom-property-style tokens hasn't been investigated.
+- **No design-token/shared-variable layer, `modern` theme only, now addressed (2026-09-02)**.
+  [`modern-theme-visual-direction.md`](modern-theme-visual-direction.md) defines a palette/border
+  token table for `modern` and confirms this vendored RmlUi has no `var()`/custom-property
+  mechanism (grepped `StyleSheetSpecification.cpp`'s property table) — so tokens are a
+  documented-value convention, not a language feature. Every modern-theme `.rcss` file is
+  retrofitted to it (borders, resting-control backgrounds, panel/label text — see that doc's
+  Rollout section for the deliberately-untouched categories: HUD-over-3D-world text, gameplay-status
+  colors, skill-tooltip line-color semantics). No shadow/glow tokens exist — `box-shadow` parses but
+  doesn't render on this engine, see the Findings entry below. `font-family` literals are still
+  repeated per file (explicitly deferred — see that doc's Typography section). `legacy` has no token
+  layer and isn't in scope for one (theme-specific by design).
 - **No Custom/Test theme — direct, open conflict with §25.** §25 explicitly wants a Custom/Test
   theme that looks substantially different from Legacy, specifically to surface accidental
   component/presentation coupling. The standing instruction on this branch has been "only Legacy

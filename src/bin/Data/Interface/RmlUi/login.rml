@@ -6,12 +6,15 @@
 <body>
 	<!-- Login panel: labels, input-box frames, remember-me/save-password checkboxes, OK/Cancel. -->
 	<div id="panel" data-model="login">
+		<div class="frame-accent"></div>
+		<div class="login-content"></div>
+		<div class="header-glow"></div>
 		<span class="label label-server">{{server_name}}</span>
 		<span class="label label-account">{{account_label}}</span>
 		<span class="label label-password">{{password_label}}</span>
 
-		<div class="input-frame input-account"></div>
-		<div class="input-frame input-password"></div>
+		<div class="input-frame modern-inset input-account"></div>
+		<div class="input-frame modern-inset input-password"></div>
 
 		<div class="checkbox-row checkbox-remember-me" data-event-click="login_toggle_remember_me">
 			<div class="checkbox-box" data-class-checked="remember_me_checked">
@@ -37,6 +40,8 @@
 			</div>
 			<span class="checkbox-label">{{save_password_label}}</span>
 		</div>
+
+		<div class="separator"></div>
 
 		<div class="btn btn-ok" data-event-click="login_ok_click">{{ok_label}}</div>
 		<div class="btn btn-cancel" data-event-click="login_cancel_click">{{cancel_label}}</div>

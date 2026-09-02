@@ -201,20 +201,39 @@ void CLoginWin::SetPosition(int x, int y)
 {
 	CWin::SetPosition(x, y);
 
+	// This class draws the real text/hit-testing for the two input boxes (RmlUi's own
+	// .input-frame divs are border-only overlays with no background, so they never cover what's
+	// typed here) plus the otherwise-inert checkbox/button state objects below (SetEnable(false)
+	// elsewhere in this file; RmlUi owns their real click handling and visuals in both themes, so
+	// these are kept in sync only to avoid a silently-stale coordinate set, not because anything
+	// still renders or hit-tests through them). These pixel offsets must track each theme's own
+	// RCSS positions for the same elements (login.rcss's .input-account/.input-password/
+	// .checkbox-remember-me/.checkbox-save-password/.btn-ok/.btn-cancel) -- legacy's are fixed to
+	// match its real sprite art (login_back.tga/login_me.tga, pixel-faithful, never moves);
+	// modern's are its own, currently more spaced-out layout. This function isn't itself
+	// theme-aware anywhere else, but the two themes' positions genuinely diverge here, so branch
+	// just for these offsets rather than picking one theme's numbers and silently misplacing the
+	// real input text in the other.
+	const bool bModernTheme = (UI::RmlBridge::GetActiveThemeName() == "modern");
+	const int usernameY = (bModernTheme ? 72 : 112);
+	const int passwordY = (bModernTheme ? 105 : 137);
+	const int rememberMeY = (bModernTheme ? 134 : 156);
+	const int savePasswordY = (bModernTheme ? 158 : 176);
+	const int buttonRowY = (bModernTheme ? 196 : 200);
+
 	if (g_iChatInputType == 1)
 	{
 		const int boxX = int((x + 115) / g_fScreenRate_x);
-		m_pUsernameInputBox->SetPosition(boxX, int((y + 112) / g_fScreenRate_y));
-		m_pPasswordInputBox->SetPosition(boxX, int((y + 137) / g_fScreenRate_y));
+		m_pUsernameInputBox->SetPosition(boxX, int((y + usernameY) / g_fScreenRate_y));
+		m_pPasswordInputBox->SetPosition(boxX, int((y + passwordY) / g_fScreenRate_y));
 	}
 
-	// "Remember Username" (row 1) and "Remember Password" (row 2) stack
-	// vertically; the OK/Cancel buttons move down to make room. These pixel
-	// offsets are eyeballed against the login background and may need tuning.
-	m_aBtnRememberMe.SetPosition(x + 109, y + 156);
-	m_aBtnSavePassword.SetPosition(x + 109, y + 176);
-	m_aBtn[LIW_OK].SetPosition(x + 150, y + 200);
-	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + 200);
+	// "Remember Username" (row 1) and "Remember Password" (row 2) stack vertically; the OK/Cancel
+	// buttons move down to make room.
+	m_aBtnRememberMe.SetPosition(x + 109, y + rememberMeY);
+	m_aBtnSavePassword.SetPosition(x + 109, y + savePasswordY);
+	m_aBtn[LIW_OK].SetPosition(x + 150, y + buttonRowY);
+	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + buttonRowY);
 
 	// RmlUi panel overlay: positioned at the same real window-pixel origin CWin's own
 	// background sprite (m_psprBg) uses -- unlike the legacy g_pRenderText calls this replaces

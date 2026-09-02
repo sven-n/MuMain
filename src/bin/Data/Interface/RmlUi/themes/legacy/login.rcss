@@ -41,6 +41,14 @@ body {
 	decorator: image(login-back-image);
 }
 
+/* modern-only decorative elements (login.rml, shared markup) -- legacy's #panel/.input-frame
+   already supply their whole look via real sprite art (login-back-image/login-input-frame-image
+   above), so these get no rule at all beyond explicitly hiding them; .modern-inset just sets
+   border-color with no border-width anywhere in this file, so it's a no-op here already. */
+.frame-accent, .login-content, .header-glow, .separator {
+	display: none;
+}
+
 .label {
 	position: absolute;
 }
