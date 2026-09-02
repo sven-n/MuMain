@@ -1,8 +1,11 @@
 #include "App/stdafx.h"
 
 #include <array>
+#include <chrono>
 #include <filesystem>
+#include <fstream>
 #include <memory>
+#include <string>
 
 #include "doctest.h"
 
@@ -104,11 +107,25 @@ TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
     REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
     backend->m_initialized = true;
 
-    const std::filesystem::path assetPath =
-        std::filesystem::path(MU_TEST_ASSET_SOURCE) / "data" / "sound" / "ibuttonclick.wav";
-    const std::wstring wideAssetPath = assetPath.wstring();
+    constexpr std::array<unsigned char, 46> wav = {
+        'R',  'I',  'F',  'F',  0x26, 0x00, 0x00, 0x00, 'W',  'A',  'V',  'E',  'f',  'm',  't',  ' ',
+        0x10, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0x80, 0x3e, 0x00, 0x00,
+        0x02, 0x00, 0x10, 0x00, 'd',  'a',  't',  'a',  0x02, 0x00, 0x00, 0x00, 0x00, 0x00,
+    };
+    const auto timestamp = std::chrono::steady_clock::now().time_since_epoch().count();
+    const std::filesystem::path testDirectory =
+        std::filesystem::temp_directory_path() / ("mu_audio_path_" + std::to_string(timestamp));
+    const std::filesystem::path assetPath = testDirectory / "Data" / "Sound" / "iButtonClick.wav";
+    REQUIRE(std::filesystem::create_directories(assetPath.parent_path()));
+    {
+        std::ofstream file(assetPath, std::ios::binary);
+        REQUIRE(file.write(reinterpret_cast<const char*>(wav.data()), wav.size()).good());
+    }
+
+    const std::wstring wideAssetPath = (testDirectory / "data" / "sound" / "ibuttonclick.wav").wstring();
     backend->LoadSound(SOUND_CLICK01, wideAssetPath.c_str(), 1, false);
 
     CHECK(backend->m_soundLoaded[static_cast<int>(SOUND_CLICK01)]);
     backend->Shutdown();
+    std::filesystem::remove_all(testDirectory);
 }
