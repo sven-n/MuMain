@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.4...v1.2.5) (2026-09-02)
+
+### Bug Fixes
+
+* **audio:** resolve case-sensitive sound paths ([d3b5df0](https://github.com/yesid-bocanegra/MuMain/commit/d3b5df05e96447c74b8d392f5f2116eba98250f1))
+* **ui:** keep right-side overlays docked ([2dec83d](https://github.com/yesid-bocanegra/MuMain/commit/2dec83d4c4ca424b190ed928349d6a91105a008c))
+
 ## [1.2.4](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.3...v1.2.4) (2026-09-02)
 
 ### Bug Fixes
