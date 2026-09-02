@@ -15,6 +15,8 @@
 #endif
 #include <clocale>
 #include <filesystem>
+#include <utility>
+#include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
 #include "UI/Legacy/UIWindows.h"
@@ -25,6 +27,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
+#include "Scenes/SceneManager.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -287,6 +290,50 @@ int GetFPSLimit()
     return DEFAULT_REFRESH_HZ;
 }
 
+namespace
+{
+bool g_hasPendingVSyncPreference = false;
+bool g_pendingVSyncPreference = true;
+
+void ApplyVSyncPreferenceNow(bool enabled)
+{
+    if (!IsVSyncAvailable())
+    {
+        SetTargetFps(GetFPSLimit());
+        return;
+    }
+
+    const bool applied = enabled ? EnableVSync() : DisableVSync();
+    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : GetFPSLimit());
+    ResetFrameStats();
+}
+
+void ApplyPendingVSyncPreference()
+{
+    if (!g_hasPendingVSyncPreference)
+    {
+        return;
+    }
+
+    g_hasPendingVSyncPreference = false;
+    ApplyVSyncPreferenceNow(g_pendingVSyncPreference);
+}
+} // namespace
+
+void MuSetVSyncPreference(bool enabled)
+{
+    GameConfig::GetInstance().SetVSyncEnabled(enabled);
+    GameConfig::GetInstance().Save();
+    g_pendingVSyncPreference = enabled;
+    g_hasPendingVSyncPreference = true;
+}
+
+void MuReapplyVSyncPreference()
+{
+    g_pendingVSyncPreference = GameConfig::GetInstance().GetVSyncEnabled();
+    g_hasPendingVSyncPreference = true;
+}
+
 BOOL GetFileNameOfFilePath(wchar_t* lpszFile, wchar_t* lpszPath)
 {
     auto iFind = (int)'\\';
@@ -478,9 +525,12 @@ void DestroyWindow()
         gMapManager.DeleteObjects();
 
         // Object.
-        for (int i = MODEL_LOGO; i < MAX_MODELS; i++)
+        if (Models != nullptr)
         {
-            Models[i].Release();
+            for (int i = MODEL_LOGO; i < MAX_MODELS; i++)
+            {
+                Models[i].Release();
+            }
         }
 
         // Bitmap
@@ -863,6 +913,47 @@ bool InputDiagnosticsEnabled()
     return enabled;
 }
 
+struct WindowScaleMetrics
+{
+    int windowWidth = 0;
+    int windowHeight = 0;
+    int pixelWidth = 0;
+    int pixelHeight = 0;
+    float pixelDensity = 1.0f;
+    float displayScale = 1.0f;
+    float contentScale = 1.0f;
+};
+
+WindowScaleMetrics ReadWindowScaleMetrics()
+{
+    WindowScaleMetrics metrics;
+    if (g_sdlWindow == nullptr)
+        return metrics;
+
+    SDL_GetWindowSize(g_sdlWindow, &metrics.windowWidth, &metrics.windowHeight);
+    SDL_GetWindowSizeInPixels(g_sdlWindow, &metrics.pixelWidth, &metrics.pixelHeight);
+    metrics.pixelDensity = SDL_GetWindowPixelDensity(g_sdlWindow);
+    metrics.displayScale = SDL_GetWindowDisplayScale(g_sdlWindow);
+    metrics.contentScale = UI::Scaling::ContentScaleFromMetrics(metrics.displayScale, metrics.pixelDensity);
+    return metrics;
+}
+
+bool RefreshWindowContentScale()
+{
+    const WindowScaleMetrics metrics = ReadWindowScaleMetrics();
+    const float previousScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(metrics.contentScale);
+    const bool changed = std::abs(previousScale - UI::Scaling::GetWindowContentScale()) > 0.001f;
+    if (InputDiagnosticsEnabled())
+    {
+        mu::log::Get("input")->info(
+            "[InputDiag] window scale window={}x{} pixels={}x{} density={:.3f} display={:.3f} content={:.3f}",
+            metrics.windowWidth, metrics.windowHeight, metrics.pixelWidth, metrics.pixelHeight, metrics.pixelDensity,
+            metrics.displayScale, metrics.contentScale);
+    }
+    return changed;
+}
+
 void HandleMouseMotion(float winX, float winY)
 {
     g_fWindowMouseX = winX;
@@ -874,8 +965,12 @@ void HandleMouseMotion(float winX, float winY)
     static bool firstMotionLogged = false;
     if (InputDiagnosticsEnabled() && !firstMotionLogged)
     {
-        mu::log::Get("input")->info("[InputDiag] first mouse motion window=({:.1f},{:.1f}) logical=({},{}) active={}",
-                                    winX, winY, MouseX, MouseY, g_bWndActive);
+        const WindowScaleMetrics metrics = ReadWindowScaleMetrics();
+        mu::log::Get("input")->info(
+            "[InputDiag] first mouse motion raw=({:.1f},{:.1f}) logical=({},{}) window={}x{} pixels={}x{} "
+            "density={:.3f} display={:.3f} content={:.3f} active={}",
+            winX, winY, MouseX, MouseY, metrics.windowWidth, metrics.windowHeight, metrics.pixelWidth,
+            metrics.pixelHeight, metrics.pixelDensity, metrics.displayScale, metrics.contentScale, g_bWndActive);
         firstMotionLogged = true;
     }
 }
@@ -886,9 +981,13 @@ void HandleMouseButton(const SDL_Event& e)
     const bool down = (e.type == SDL_EVENT_MOUSE_BUTTON_DOWN);
     if (InputDiagnosticsEnabled())
     {
+        const WindowScaleMetrics metrics = ReadWindowScaleMetrics();
         mu::log::Get("input")->info(
-            "[InputDiag] mouse button={} down={} window=({:.1f},{:.1f}) logical=({},{}) active={}", e.button.button,
-            down, e.button.x, e.button.y, MouseX, MouseY, g_bWndActive);
+            "[InputDiag] mouse button={} down={} raw=({:.1f},{:.1f}) logical=({},{}) window={}x{} pixels={}x{} "
+            "density={:.3f} display={:.3f} content={:.3f} active={}",
+            e.button.button, down, e.button.x, e.button.y, MouseX, MouseY, metrics.windowWidth, metrics.windowHeight,
+            metrics.pixelWidth, metrics.pixelHeight, metrics.pixelDensity, metrics.displayScale, metrics.contentScale,
+            g_bWndActive);
     }
     g_iNoMouseTime = 0;
     switch (e.button.button)
@@ -1143,6 +1242,44 @@ bool FeedPortableKey(const SDL_KeyboardEvent& key)
 }
 } // namespace
 
+std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions()
+{
+    std::vector<std::pair<int, int>> resolutions;
+    if (g_sdlWindow == nullptr)
+    {
+        return resolutions;
+    }
+
+    SDL_DisplayID display = SDL_GetDisplayForWindow(g_sdlWindow);
+    if (display == 0)
+    {
+        display = SDL_GetPrimaryDisplay();
+    }
+    if (display == 0)
+    {
+        return resolutions;
+    }
+
+    int modeCount = 0;
+    SDL_DisplayMode** modes = SDL_GetFullscreenDisplayModes(display, &modeCount);
+    if (modes == nullptr)
+    {
+        mu::log::Get("platform")->warn("SDL_GetFullscreenDisplayModes failed: {}", SDL_GetError());
+        return resolutions;
+    }
+
+    resolutions.reserve(static_cast<size_t>(modeCount));
+    for (int i = 0; i < modeCount; ++i)
+    {
+        if (modes[i] != nullptr)
+        {
+            resolutions.emplace_back(modes[i]->w, modes[i]->h);
+        }
+    }
+    SDL_free(modes);
+    return resolutions;
+}
+
 // Resolution change through SDL (issue #462). SDL owns the window on every
 // platform, so resize it via SDL rather than the OS. The old Windows path in
 // ApplyResolution() drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
@@ -1189,12 +1326,15 @@ void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windo
     int actualW = w, actualH = h;
     SDL_GetWindowSize(g_sdlWindow, &actualW, &actualH);
     HandleWindowResize(actualW, actualH);
+    MuReapplyVSyncPreference();
 }
 
 MSG MainLoop()
 {
     constexpr auto target_resolution = 1;
     auto precise = timeBeginPeriod(target_resolution);
+
+    HandleFocusChange(Core::Platform::HasSDLWindowInputFocus(SDL_GetWindowFlags(g_sdlWindow)));
 
     while (!Destroy)
     {
@@ -1249,6 +1389,10 @@ MSG MainLoop()
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
+                break;
+            case SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED:
+                if (RefreshWindowContentScale())
+                    ReinitializeFonts();
                 break;
             case SDL_EVENT_WINDOW_FOCUS_GAINED:
                 HandleFocusChange(true);
@@ -1410,6 +1554,7 @@ MSG MainLoop()
 #endif
 
                 RequestDiagnosticFrameCapture();
+                ApplyPendingVSyncPreference();
                 mu::GetRenderer().BeginFrame();
                 RenderScene(g_hDC);
                 mu::GetRenderer().EndFrame();
@@ -1446,9 +1591,9 @@ FontSizes CalculateFontSizes()
 {
     using UI::Scaling::FontRole;
     return {
-        UI::Scaling::MaximumFontPointSize(FontRole::Normal),
-        UI::Scaling::MaximumFontPointSize(FontRole::Big),
-        UI::Scaling::MaximumFontPointSize(FontRole::Fixed),
+        UI::Scaling::CachedFontPointSize(FontRole::Normal),
+        UI::Scaling::CachedFontPointSize(FontRole::Big),
+        UI::Scaling::CachedFontPointSize(FontRole::Fixed),
     };
 }
 
@@ -1894,6 +2039,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
+    RefreshWindowContentScale();
+
 #if defined(__linux__)
     SDL_Surface* applicationIcon = SDL_LoadPNG("MuMainIcon.png");
     if (applicationIcon != nullptr)
@@ -2041,21 +2188,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
 
     InitVSync();
-    if (IsVSyncAvailable())
-    {
-        if (EnableVSync())
-        {
-            SetTargetFps(-1); // VSync paces frames, no separate cap needed.
-        }
-        else
-        {
-            SetTargetFps(GetFPSLimit());
-        }
-    }
-    else
-    {
-        SetTargetFps(GetFPSLimit());
-    }
+    ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.

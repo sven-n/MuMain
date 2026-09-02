@@ -17,3 +17,12 @@ TEST_CASE("SDL window flags preserve fullscreen and resizable requests [platform
     CHECK((flags & SDL_WINDOW_FULLSCREEN) != 0);
     CHECK((flags & SDL_WINDOW_RESIZABLE) != 0);
 }
+
+TEST_CASE("SDL startup focus follows the input-focus window flag [platform][sdl]")
+{
+    const SDL_WindowFlags unfocusedFullscreen = SDL_WINDOW_FULLSCREEN;
+    const SDL_WindowFlags focusedFullscreen = SDL_WINDOW_FULLSCREEN | SDL_WINDOW_INPUT_FOCUS;
+
+    CHECK_FALSE(Core::Platform::HasSDLWindowInputFocus(unfocusedFullscreen));
+    CHECK(Core::Platform::HasSDLWindowInputFocus(focusedFullscreen));
+}

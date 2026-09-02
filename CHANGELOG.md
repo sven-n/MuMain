@@ -1,3 +1,33 @@
+## [1.2.5](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.4...v1.2.5) (2026-09-02)
+
+### Bug Fixes
+
+* **audio:** resolve case-sensitive sound paths ([d3b5df0](https://github.com/yesid-bocanegra/MuMain/commit/d3b5df05e96447c74b8d392f5f2116eba98250f1))
+* **ui:** keep right-side overlays docked ([2dec83d](https://github.com/yesid-bocanegra/MuMain/commit/2dec83d4c4ca424b190ed928349d6a91105a008c))
+
+## [1.2.4](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.3...v1.2.4) (2026-09-02)
+
+### Bug Fixes
+
+* **render:** initialize fullscreen focus ([a78b3d1](https://github.com/yesid-bocanegra/MuMain/commit/a78b3d11e7f42c54c32a7943a9d3663894528fd0))
+
+## [1.2.3](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.2...v1.2.3) (2026-09-01)
+
+### Bug Fixes
+
+* **audio:** restore playback semantics ([261a498](https://github.com/yesid-bocanegra/MuMain/commit/261a498cf9c15cb9f5570d1ffa0e9269edb89e50))
+* **build:** order SDL_ttf before SDL3 ([e0472ec](https://github.com/yesid-bocanegra/MuMain/commit/e0472ec0080341fb2db48a2dd55f64a4ebcb23f3))
+* **ui:** add Hangul font fallback ([0b5b61b](https://github.com/yesid-bocanegra/MuMain/commit/0b5b61be400fe70177d991df9c2a0c309a259ec1))
+* **ui:** align letter form controls ([17b9087](https://github.com/yesid-bocanegra/MuMain/commit/17b9087af027f29c08dd46cd165f030e8fe8e2a6))
+* **ui:** honor monitor modes and VSync preferences ([f188d5a](https://github.com/yesid-bocanegra/MuMain/commit/f188d5a0991cb792a9e96ad48070f89566fb04e7))
+* **ui:** restore inventory hover animations ([50dc1f1](https://github.com/yesid-bocanegra/MuMain/commit/50dc1f1e82a50e3d9b70b5667c1bca039ee8a0a3))
+* **ui:** scale widescreen overlay bounds ([a0eaf0a](https://github.com/yesid-bocanegra/MuMain/commit/a0eaf0a5f18565dfb7581b789f0f11ba043ca7bb))
+* **ui:** scale Windows menus to drawable content ([e5d8f66](https://github.com/yesid-bocanegra/MuMain/commit/e5d8f66a2fb327325ac482158a63732525ff7421))
+
+### Refactoring
+
+* **ui:** replace legacy window casts ([f94cfd1](https://github.com/yesid-bocanegra/MuMain/commit/f94cfd11ae8d8d1c89e8ce010582a1df0d648d3f))
+
 ## [1.2.2](https://github.com/yesid-bocanegra/MuMain/compare/v1.2.1...v1.2.2) (2026-08-30)
 
 ### Bug Fixes

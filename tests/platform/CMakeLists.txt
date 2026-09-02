@@ -31,7 +31,10 @@ mu_add_test(
     NAME bundled_font_role_tests
     SOURCES
         test_bundled_font_roles.cpp
-    LINK_LIBS MuClient
+    LINK_LIBS MuClient SDL3_ttf::SDL3_ttf SDL3::SDL3
+)
+target_compile_definitions(bundled_font_role_tests PRIVATE
+    MU_TEST_ASSET_SOURCE="${CMAKE_SOURCE_DIR}/src/bin"
 )
 
 add_test(

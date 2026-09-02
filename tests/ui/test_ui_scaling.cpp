@@ -6,6 +6,10 @@
 #include "Core/Input/Input.h"
 #include "Core/Platform/WinCompat.h"
 #include "Core/Globals/_enum.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfigConstants.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMapName.h"
 #include "UI/NewUI/Dialogs/NewUIChatCommandWindow.h"
 #include "UI/NewUI/HUD/NewUICommandWindow.h"
@@ -14,6 +18,7 @@
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/NewUI/NPCs/NewUINPCShop.h"
+#include "UI/NewUI/Options/NewUIOptionWindow.h"
 #include "UI/NewUI/UILayoutPolicy.h"
 #include "UI/Scaling/UITransform.h"
 #include "UI/Widgets/Button.h"
@@ -199,6 +204,46 @@ TEST_CASE("inventory drag keeps the clicked point anchored to the item [ui][inve
     CHECK(itemTopLeft.y == 260);
 }
 
+TEST_CASE("inventory item hover animation ignores world input capture [ui][inventory]")
+{
+    CHECK(UI::Items::ShouldAnimatePreview(true, false, false));
+    CHECK(UI::Items::ShouldAnimatePreview(true, true, true));
+    CHECK_FALSE(UI::Items::ShouldAnimatePreview(true, true, false));
+    CHECK_FALSE(UI::Items::ShouldAnimatePreview(false, false, false));
+}
+
+TEST_CASE("display resolution options use unique supported sizes [ui][options]")
+{
+    std::vector<UI::Options::DisplayResolution> modes = {
+        {1920, 1080}, {1280, 720}, {1920, 1080}, {0, 1080}, {3840, 2160},
+    };
+
+    const auto resolutions = UI::Options::NormalizeDisplayResolutions(std::move(modes));
+
+    REQUIRE(resolutions.size() == 3);
+    CHECK(resolutions[0] == UI::Options::DisplayResolution(1280, 720));
+    CHECK(resolutions[1] == UI::Options::DisplayResolution(1920, 1080));
+    CHECK(resolutions[2] == UI::Options::DisplayResolution(3840, 2160));
+    CHECK(UI::Options::FindExactDisplayResolutionIndex(resolutions, 1920, 1080) == 1);
+    CHECK(UI::Options::FindExactDisplayResolutionIndex(resolutions, 1600, 900) == -1);
+    CHECK(UI::Options::FindClosestDisplayResolutionIndex(resolutions, 1366, 768) == 0);
+}
+
+TEST_CASE("VSync preference defaults on and remains mutable [config][render]")
+{
+    CHECK(CfgDefaults::CfgDefaultVSync);
+
+    auto& config = GameConfig::GetInstance();
+    const bool previous = config.GetVSyncEnabled();
+
+    config.SetVSyncEnabled(false);
+    CHECK_FALSE(config.GetVSyncEnabled());
+    config.SetVSyncEnabled(true);
+    CHECK(config.GetVSyncEnabled());
+
+    config.SetVSyncEnabled(previous);
+}
+
 TEST_CASE("inventory drag centers items without a grid pickup anchor [ui][inventory]")
 {
     const POINT offset = UI::Items::Drag::PickupOffset(0, 0, 40, 60, 183, 317, false);
@@ -288,6 +333,26 @@ TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][s
     CHECK(UI::Scaling::PositionX(dock, 450.0f) == doctest::Approx(1492.5f));
     CHECK(UI::Scaling::PositionX(dock, 640.0f) == doctest::Approx(1920.0f));
     CHECK(UI::Scaling::LogicalX(dock, 1492.5f) == doctest::Approx(450.0f));
+}
+
+TEST_CASE("right-side status overlays stay adjacent to right-docked panels [ui][scaling]")
+{
+    using UI::Scaling::LayoutMode;
+    for (const auto interfaceKey : {SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, SEASON3B::INTERFACE_PARTY_INFO_WINDOW})
+    {
+        const auto overlayMode = UI::Layout::ForInterface(interfaceKey);
+        CHECK(overlayMode == LayoutMode::DockRight);
+
+        for (const auto [width, height] : {std::pair{640, 480}, std::pair{1920, 1080}, std::pair{3840, 2160}})
+        {
+            const auto overlay = UI::Scaling::TransformForLayout(overlayMode, width, height);
+            const auto panel = UI::Scaling::DockRightTransform(width, height);
+            const float overlayRight = UI::Scaling::PositionX(overlay, 448.0f);
+            const float panelLeft = UI::Scaling::PositionX(panel, 450.0f);
+
+            CHECK(panelLeft - overlayRight == doctest::Approx(UI::Scaling::SizeX(panel, 2.0f)));
+        }
+    }
 }
 
 TEST_CASE("docked command window ends at the bottom HUD top [ui][scaling]")
@@ -644,10 +709,39 @@ TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scalin
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MAINFRAME) == LayoutMode::Hud);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_INVENTORY) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
+}
+
+TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")
+{
+    const auto transform = UI::Scaling::FloatingWorkspaceTransform(3840, 2160);
+    const auto bounds = UI::Scaling::FloatingWorkspaceBounds(3840, 2160);
+
+    CHECK(transform.scaleX == doctest::Approx(2.25f));
+    CHECK(transform.scaleY == doctest::Approx(2.25f));
+    CHECK(transform.offsetX == doctest::Approx(0.0f));
+    CHECK(transform.offsetY == doctest::Approx(0.0f));
+    CHECK(bounds.width == 1706);
+    CHECK(bounds.height == 960);
+    CHECK(UI::Scaling::PositionX(transform, static_cast<float>(bounds.width)) <= 3840.0f);
+    CHECK(UI::Scaling::PositionY(transform, static_cast<float>(bounds.height)) <= 2160.0f);
+}
+
+TEST_CASE("screen coverage follows the capped HUD boundary [ui][scaling]")
+{
+    const auto screen = UI::Scaling::ScreenOverlayTransform(3840, 2160);
+    const float screenHeight = UI::Scaling::ScreenOverlayContentHeight(3840, 2160);
+
+    CHECK(screenHeight == doctest::Approx(457.333333f));
+    CHECK(UI::Scaling::SizeY(screen, screenHeight) == doctest::Approx(2058.0f));
+    CHECK(UI::Scaling::ScreenOverlayContentHeight(640, 480) == doctest::Approx(429.0f));
+    CHECK(UI::Scaling::FloatingWorkspaceContentHeight(3840, 2160) == doctest::Approx(914.666667f));
 }
 
 TEST_CASE("positions include offsets and sizes do not [ui][scaling]")
@@ -661,6 +755,29 @@ TEST_CASE("positions include offsets and sizes do not [ui][scaling]")
     CHECK(UI::Scaling::LogicalY(transform, 100.0f) == doctest::Approx(20.0f));
 }
 
+TEST_CASE("letter preview viewport includes active layout offsets [ui][scaling]")
+{
+    const UI::Scaling::Transform transform{2.25f, 2.25f, 480.0f, 6.0f, 2.25f};
+    const auto viewport = UI::Scaling::ViewportForLogicalRect(transform, 351.0f, 151.0f, 119.0f, 141.0f);
+
+    CHECK(viewport.x == 1270);
+    CHECK(viewport.y == 346);
+    CHECK(viewport.width == 268);
+    CHECK(viewport.height == 317);
+}
+
+TEST_CASE("focused letter input owns its parent window selection [ui][input]")
+{
+    CUITextInputBox input;
+    input.SetParentUIID(42);
+    input.GiveFocus(FALSE);
+
+    CHECK(CUITextInputBox::IsFocusedForParent(42));
+    CHECK_FALSE(CUITextInputBox::IsFocusedForParent(41));
+
+    CUITextInputBox::ReleaseFocus();
+}
+
 TEST_CASE("screen overlays fill the window [ui][scaling]")
 {
     const auto transform = UI::Scaling::ScreenOverlayTransform(1280, 720);
@@ -668,6 +785,25 @@ TEST_CASE("screen overlays fill the window [ui][scaling]")
     CHECK(transform.scaleY == doctest::Approx(1.5f));
     CHECK(transform.offsetX == doctest::Approx(0.0f));
     CHECK(transform.offsetY == doctest::Approx(0.0f));
+}
+
+TEST_CASE("Windows content scaling enlarges capped UI without double-scaling Retina [ui][scaling]")
+{
+    CHECK(UI::Scaling::ContentScaleFromMetrics(2.0f, 1.0f) == doctest::Approx(2.0f));
+    CHECK(UI::Scaling::ContentScaleFromMetrics(2.0f, 2.0f) == doctest::Approx(1.0f));
+    CHECK(UI::Scaling::ContentScaleFromMetrics(0.0f, 0.0f) == doctest::Approx(1.0f));
+
+    const float previousScale = UI::Scaling::GetWindowContentScale();
+    UI::Scaling::SetWindowContentScale(2.0f);
+
+    const auto dialog = UI::Scaling::PanelTransform(3840, 2160);
+    CHECK(dialog.scaleX == doctest::Approx(4.0f));
+    CHECK(dialog.scaleY == doctest::Approx(4.0f));
+    CHECK(dialog.offsetX == doctest::Approx(640.0f));
+    CHECK(dialog.offsetY == doctest::Approx(120.0f));
+    CHECK(UI::Scaling::CachedFontPointSize(FontRole::Normal) == 32);
+
+    UI::Scaling::SetWindowContentScale(previousScale);
 }
 
 TEST_CASE("login and character scenes use the full reference viewport [ui][scaling]")

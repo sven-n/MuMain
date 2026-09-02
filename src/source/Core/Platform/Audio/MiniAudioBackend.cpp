@@ -177,6 +177,9 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     // On Windows, forward slashes work identically to backslashes for file paths.
     // Mirrors the PlayMusic() normalization pattern from Story 5.2.1.
     std::replace(utf8Path.begin(), utf8Path.end(), '\\', '/');
+#ifndef _WIN32
+    utf8Path = MuResolvePath(utf8Path.c_str());
+#endif
 
     // Clamp channels to the array dimension
     const int numChannels = (channels > 0 && channels <= MAX_CHANNEL) ? channels : MAX_CHANNEL;
@@ -260,10 +263,10 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
     // each ambient SFX (canonical reproducer: Lorencia anvil sounding
     // "hundreds of times" instead of once per hammer cycle).
     //
-    // Event-driven SFX (UI clicks, attack swings, item pickups, repair)
-    // pass pObject == nullptr and continue to overlap freely on the
-    // round-robin slots, so rapid swings still layer correctly.
-    if (pObject != nullptr || looped)
+    // Single-channel buffers also rely on DirectSound's already-playing
+    // no-op behavior. Multi-channel event SFX continue to overlap through
+    // their round-robin slots.
+    if (m_loadedChannels[bufIdx] == 1 || pObject != nullptr || looped)
     {
         for (int existingCh = 0; existingCh < m_loadedChannels[bufIdx]; ++existingCh)
         {

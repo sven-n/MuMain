@@ -9,6 +9,7 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Legacy/UIControls.h"
+#include "UI/Scaling/UITransform.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -80,13 +81,17 @@ bool SEASON3B::CNewUIFriendWindow::UpdateMouseEvent()
         CUIFriendWindow* pMainWnd = m_pFriendWindowMgr->GetFriendMainWindow();
         if (pMainWnd)
         {
+            const int maxY = std::max(static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(
+                                          WindowWidth, WindowHeight))
+                                          - pMainWnd->GetHeight(),
+                                      0);
             if (pMainWnd->GetPosition_y() < 0)
             {
                 pMainWnd->SetPosition(pMainWnd->GetPosition_x(), 0);
             }
-            if (pMainWnd->GetPosition_y() > 259)
+            if (pMainWnd->GetPosition_y() > maxY)
             {
-                pMainWnd->SetPosition(pMainWnd->GetPosition_x(), 259);
+                pMainWnd->SetPosition(pMainWnd->GetPosition_x(), maxY);
             }
 
             if (CheckMouseIn(pMainWnd->GetPosition_x(), pMainWnd->GetPosition_y(), pMainWnd->GetWidth(),

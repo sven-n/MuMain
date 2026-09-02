@@ -18,3 +18,5 @@ Locale=en
 Font=
 RmlTheme=legacy
 UIScalePercent=100
+[Render]
+VSync=1

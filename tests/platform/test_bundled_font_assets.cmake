@@ -9,6 +9,8 @@ set(required_assets
     fonts/LiberationSans-LICENSE
     fonts/Cousine-Regular.ttf
     fonts/Cousine-LICENSE.txt
+    fonts/NanumGothic-Regular.ttf
+    fonts/NanumGothic-LICENSE
 )
 foreach(relative_path IN LISTS required_assets)
     set(source_path "${MU_ASSET_SOURCE}/${relative_path}")

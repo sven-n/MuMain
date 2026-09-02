@@ -19,6 +19,7 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
@@ -112,7 +113,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         pbw = new CUIChatWindow;
         if (m_dwMainWindowUIID != 0)
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -124,11 +125,11 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
             m_dwMainWindowUIID = pbw->GetUIID();
             if (g_pFriendMenu->IsNewMailAlert() == TRUE)
             {
-                ((CUIFriendWindow*)pbw)->SetTabIndex(1);
+                static_cast<CUIFriendWindow*>(pbw)->SetTabIndex(1);
             }
             else
             {
-                ((CUIFriendWindow*)pbw)->SetTabIndex(m_iLastFriendWindowTabIndex);
+                static_cast<CUIFriendWindow*>(pbw)->SetTabIndex(m_iLastFriendWindowTabIndex);
             }
             g_pFriendMenu->SetNewMailAlert(FALSE);
             if (IsServerEnable() == FALSE)
@@ -142,7 +143,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         if (g_dwTopWindow != 0) return 0;
         pbw = new CUITextInputWindow;
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -152,7 +153,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     case UIWNDTYPE_QUESTION_FORCE:
         pbw = new CUIQuestionWindow(0);
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
 
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::Question);
@@ -165,7 +166,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     case UIWNDTYPE_OK_FORCE:
         pbw = new CUIQuestionWindow(1);
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::OK);
         }
@@ -176,7 +177,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         pbw = new CUILetterReadWindow;
         if (m_dwMainWindowUIID != 0)
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -186,7 +187,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         pbw = new CUILetterWriteWindow;
         if (m_dwMainWindowUIID != 0)
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -204,13 +205,17 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     if (!(iOption & UIADDWND_FORCEPOSITION))
     {
+        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
         for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
         {
-            if (m_WindowMapIter->second->GetPosition_x() == iPos_x && m_WindowMapIter->second->GetPosition_y() == iPos_y)
+            if (m_WindowMapIter->second->GetPosition_x() == iPos_x &&
+                m_WindowMapIter->second->GetPosition_y() == iPos_y)
             {
-                if (iPos_x + pbw->GetWidth() + 20 <= REFERENCE_WIDTH) iPos_x += 20;
-                if (iPos_y + pbw->GetHeight() + 20 <= REFERENCE_HEIGHT) iPos_y += 20;
-                if (iPos_x + pbw->GetWidth() + 20 > REFERENCE_WIDTH && iPos_y + pbw->GetHeight() + 20 > REFERENCE_HEIGHT)
+                if (iPos_x + pbw->GetWidth() + 20 <= bounds.width)
+                    iPos_x += 20;
+                if (iPos_y + pbw->GetHeight() + 20 <= bounds.height)
+                    iPos_y += 20;
+                if (iPos_x + pbw->GetWidth() + 20 > bounds.width && iPos_y + pbw->GetHeight() + 20 > bounds.height)
                 {
                     if (iPos_y % 10 == 9)
                     {
@@ -234,7 +239,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     pbw->Refresh();
     if (iWindowType == UIWNDTYPE_CHAT)
     {
-        ((CUIChatWindow*)pbw)->FocusReset();
+        static_cast<CUIChatWindow*>(pbw)->FocusReset();
     }
 
     return dwUIID;
@@ -259,7 +264,7 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
             m_iMainWindowWidth = pWindow->GetWidth();
             m_iMainWindowHeight = pWindow->GetHeight();
             pWindow->GetBackPosition(&m_bIsMainWindowMaximize, &m_iMainWindowBackPos_y, &m_iMainWindowBackHeight);
-            m_iLastFriendWindowTabIndex = ((CUIFriendWindow*)pWindow)->GetTabIndex();
+            m_iLastFriendWindowTabIndex = static_cast<CUIFriendWindow*>(pWindow)->GetTabIndex();
         }
         m_dwMainWindowUIID = 0;
     }
@@ -289,7 +294,7 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
 
     if (m_dwMainWindowUIID != 0)
     {
-        auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+        auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
         if (pMainWnd != NULL)
             pMainWnd->RemoveWindow(dwUIID);
     }
@@ -413,7 +418,10 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
         int iHideSize = m_HideWindowList.size();
         if (iHideSize - iCount > 0)
         {
-            OpenMainWnd(REFERENCE_WIDTH - 250, 432 - 170);
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+            const int contentHeight =
+                static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+            OpenMainWnd(bounds.width - 250, contentHeight - 170);
         }
         if (iCount > 0 && GetTopNotMainWindowUIID() > 0)
         {
@@ -532,11 +540,14 @@ void CUIWindowMgr::HandleMessage()
             m_WindowArrangeListIter = m_WindowArrangeList.end();
             --m_WindowArrangeListIter;
 
-            if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1 || GetFocus() == g_hWnd)
+            const bool inputOwnsSelection = CUITextInputBox::IsFocusedForParent(m_WorkMessage.m_iParam1);
+            if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1
+                || (GetFocus() == g_hWnd && !inputOwnsSelection))
             {
                 m_WindowArrangeList.remove(m_WorkMessage.m_iParam1);
                 m_WindowArrangeList.push_back(m_WorkMessage.m_iParam1);
-                SendUIMessageToWindow(m_WorkMessage.m_iParam1, UI_MESSAGE_SELECTED, 0, 0);
+                if (!inputOwnsSelection)
+                    SendUIMessageToWindow(m_WorkMessage.m_iParam1, UI_MESSAGE_SELECTED, 0, 0);
             }
 
             SetWindowsEnable(m_WorkMessage.m_iParam1);
@@ -715,11 +726,12 @@ void CUIWindowMgr::RefreshMainWndChatRoomList()
 {
     CUIBaseWindow* pWindow = GetWindow(m_dwMainWindowUIID);
     if (pWindow == NULL) return;
-    ((CUIFriendWindow*)pWindow)->ResetWindow();
+    static_cast<CUIFriendWindow*>(pWindow)->ResetWindow();
     for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
     {
         if (m_dwMainWindowUIID != m_WindowMapIter->first && m_WindowMapIter->second->GetState() != UISTATE_READY)
-            ((CUIFriendWindow*)pWindow)->AddWindow(m_WindowMapIter->first, m_WindowMapIter->second->GetTitle());
+            static_cast<CUIFriendWindow*>(pWindow)->AddWindow(m_WindowMapIter->first,
+                                                              m_WindowMapIter->second->GetTitle());
     }
 }
 
@@ -1141,20 +1153,25 @@ BOOL CUIBaseWindow::DoMouseAction()
     {
         if (MouseLButton == true)
         {
-            if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+            if (g_dwMouseUseUIID == 0)
+                g_dwMouseUseUIID = GetUIID();
             MouseOnWindow = true;
 
-            if (m_iPos_x + MouseX - m_iMouseClickPos_x < 0) m_iPos_x = 0;
-            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
-            else m_iPos_x += MouseX - m_iMouseClickPos_x;
+            if (m_iPos_x + MouseX - m_iMouseClickPos_x < 0)
+                m_iPos_x = 0;
+            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > bounds.width)
+                m_iPos_x = bounds.width - m_iWidth;
+            else
+                m_iPos_x += MouseX - m_iMouseClickPos_x;
 
             if (m_iPos_y + MouseY - m_iMouseClickPos_y < 0)
             {
                 m_iPos_y = 0;
             }
-            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT)
+            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > bounds.height)
             {
-                m_iPos_y = REFERENCE_HEIGHT - m_iHeight;
+                m_iPos_y = bounds.height - m_iHeight;
             }
             else
             {
@@ -1174,13 +1191,17 @@ BOOL CUIBaseWindow::DoMouseAction()
     {
         if (MouseLButton == true)
         {
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
             if (m_iResizeDir == 135)
             {
-                if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
+                if (g_dwMouseUseUIID == 0)
+                    g_dwMouseUseUIID = GetUIID();
                 MouseOnWindow = true;
 
-                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iWidth = REFERENCE_WIDTH - m_iPos_x;
-                else m_iWidth += MouseX - m_iMouseClickPos_x;
+                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > bounds.width)
+                    m_iWidth = bounds.width - m_iPos_x;
+                else
+                    m_iWidth += MouseX - m_iMouseClickPos_x;
 
                 if (m_iWidth < m_iMinWidth)
                 {
@@ -1190,10 +1211,13 @@ BOOL CUIBaseWindow::DoMouseAction()
                 {
                     m_iWidth = m_iMaxWidth;
                 }
-                else m_iMouseClickPos_x = MouseX;
+                else
+                    m_iMouseClickPos_x = MouseX;
 
-                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT) m_iHeight = REFERENCE_HEIGHT - m_iPos_y;
-                else m_iHeight += MouseY - m_iMouseClickPos_y;
+                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > bounds.height)
+                    m_iHeight = bounds.height - m_iPos_y;
+                else
+                    m_iHeight += MouseY - m_iMouseClickPos_y;
 
                 if (m_iHeight < m_iMinHeight)
                 {
@@ -1245,7 +1269,7 @@ void CUIBaseWindow::Maximize()
         m_iBackPos_y = m_iPos_y;
         m_iBackHeight = m_iHeight;
         m_iPos_y = 0;
-        m_iHeight = REFERENCE_HEIGHT - 48;
+        m_iHeight = static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
         Refresh();
         m_bIsMaximize = TRUE;
     }
@@ -1614,7 +1638,9 @@ BOOL CUIChatWindow::HandleMessage()
 
                 UpdateInvitePalList();
 
-                if (m_iPos_x + m_iWidth > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
+                const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+                if (m_iPos_x + m_iWidth > bounds.width)
+                    m_iPos_x = bounds.width - m_iWidth;
                 Refresh();
             }
             else if (m_iShowType >= 2)
@@ -1811,9 +1837,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();
-    SetRenderViewport(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y,
-        m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
-    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
+    const auto viewport = UI::Scaling::ViewportForLogicalRect(
+        UI::Scaling::GetActiveTransform(), m_iPos_x, m_iPos_y, m_iWidth, 141.0f);
+    SetRenderViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+    gluPerspective2(1.f, static_cast<float>(viewport.width) / static_cast<float>(viewport.height), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
     mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
     mu::GetRenderer().PushMatrix();
     mu::GetRenderer().LoadIdentity();

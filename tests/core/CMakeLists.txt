@@ -47,6 +47,15 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_audio_playback
+    SOURCES
+        test_audio_playback.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
+)
+
+mu_add_test(
     NAME test_platform_crypto
     SOURCES
         test_platform_crypto.cpp

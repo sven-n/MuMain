@@ -694,12 +694,36 @@ if (DOTNET_EXECUTABLE)
       "TMP=${DOTNET_TEMP_DIR_NATIVE}"
     )
 
-    if (UNIX AND OPENSSL_CRYPTO_LIBRARY)
-      get_filename_component(MU_OPENSSL_LIBRARY_PATH "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
-      if (DEFINED ENV{LIBRARY_PATH} AND NOT "$ENV{LIBRARY_PATH}" STREQUAL "")
-        string(APPEND MU_OPENSSL_LIBRARY_PATH ":$ENV{LIBRARY_PATH}")
+    if (UNIX)
+      set(MU_NATIVE_AOT_LIBRARY_PATH "" CACHE STRING
+        "Additional Native AOT linker search directories")
+      set(MU_NATIVE_AOT_LIBRARY_DIRS ${MU_NATIVE_AOT_LIBRARY_PATH})
+
+      if (OPENSSL_CRYPTO_LIBRARY)
+        get_filename_component(MU_OPENSSL_LIBRARY_DIR "${OPENSSL_CRYPTO_LIBRARY}" DIRECTORY)
+        list(APPEND MU_NATIVE_AOT_LIBRARY_DIRS "${MU_OPENSSL_LIBRARY_DIR}")
       endif()
-      list(APPEND DOTNET_PUBLISH_ENV "LIBRARY_PATH=${MU_OPENSSL_LIBRARY_PATH}")
+
+      if (APPLE)
+        find_package(PkgConfig QUIET)
+        if (PkgConfig_FOUND)
+          pkg_check_modules(MU_BROTLI QUIET libbrotlienc libbrotlidec libbrotlicommon)
+          list(APPEND MU_NATIVE_AOT_LIBRARY_DIRS ${MU_BROTLI_LIBRARY_DIRS})
+        endif()
+        if (NOT MU_BROTLI_FOUND AND NOT MU_NATIVE_AOT_LIBRARY_PATH)
+          message(FATAL_ERROR
+            "Native AOT requires Brotli libraries. Install Brotli or set "
+            "MU_NATIVE_AOT_LIBRARY_PATH to its library directory.")
+        endif()
+      endif()
+
+      if (DEFINED ENV{LIBRARY_PATH} AND NOT "$ENV{LIBRARY_PATH}" STREQUAL "")
+        string(REPLACE ":" ";" MU_ENV_LIBRARY_DIRS "$ENV{LIBRARY_PATH}")
+        list(APPEND MU_NATIVE_AOT_LIBRARY_DIRS ${MU_ENV_LIBRARY_DIRS})
+      endif()
+      list(REMOVE_DUPLICATES MU_NATIVE_AOT_LIBRARY_DIRS)
+      list(JOIN MU_NATIVE_AOT_LIBRARY_DIRS ":" MU_NATIVE_AOT_LIBRARY_PATH_VALUE)
+      list(APPEND DOTNET_PUBLISH_ENV "LIBRARY_PATH=${MU_NATIVE_AOT_LIBRARY_PATH_VALUE}")
     endif()
 
     add_custom_command(

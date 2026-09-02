@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/NewUI/Inventory/NewUIItemEnduranceInfo.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
@@ -78,47 +79,47 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    int iNextPosY = m_UIStartPos.y;
-
-    if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
-        || Hero->Helper.Type == MODEL_DEMON
-        || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN
-        || Hero->Helper.Type == MODEL_PET_RUDOLF
-        || Hero->Helper.Type == MODEL_PET_PANDA
-        || Hero->Helper.Type == MODEL_PET_UNICORN
-        || Hero->Helper.Type == MODEL_PET_SKELETON
-        || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
-        if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
-            return false;
+        UI::Scaling::ScopedActiveTransform layout(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight), true);
+        int iNextPosY = m_UIStartPos.y;
 
-        iNextPosY += (static_cast<int>(UI_INTERVAL_HEIGHT) + PETHP_FRAME_HEIGHT);
-    }
-
-    if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
-    {
-        if (Hero->m_pPet != NULL)
+        if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM ||
+            Hero->Helper.Type == MODEL_DEMON || Hero->Helper.Type == MODEL_SPIRIT_OF_GUARDIAN ||
+            Hero->Helper.Type == MODEL_PET_RUDOLF || Hero->Helper.Type == MODEL_PET_PANDA ||
+            Hero->Helper.Type == MODEL_PET_UNICORN || Hero->Helper.Type == MODEL_PET_SKELETON ||
+            Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
         {
             if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
                 return false;
 
             iNextPosY += (static_cast<int>(UI_INTERVAL_HEIGHT) + PETHP_FRAME_HEIGHT);
         }
-    }
 
-    if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
-    {
-        if (SummonLife > 0)
+        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
         {
-            if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
-                return false;
+            if (Hero->m_pPet != NULL)
+            {
+                if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
+                    return false;
 
-            iNextPosY += (static_cast<int>(UI_INTERVAL_HEIGHT) + PETHP_FRAME_HEIGHT);
+                iNextPosY += (static_cast<int>(UI_INTERVAL_HEIGHT) + PETHP_FRAME_HEIGHT);
+            }
+        }
+
+        if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)
+        {
+            if (SummonLife > 0)
+            {
+                if (CheckMouseIn(m_UIStartPos.x, iNextPosY, PETHP_FRAME_WIDTH, PETHP_FRAME_HEIGHT))
+                    return false;
+
+                iNextPosY += (static_cast<int>(UI_INTERVAL_HEIGHT) + PETHP_FRAME_HEIGHT);
+            }
         }
     }
 
     bool bRenderRingWarning = false;
-    int	icntItemDurIcon = 0;
+    int icntItemDurIcon = 0;
     auto ItemDurPos = POINT(m_ItemDurUIStartPos);
 
     for (int i = EQUIPMENT_WEAPON_RIGHT; i < MAX_EQUIPMENT; ++i)
@@ -259,6 +260,8 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Render()
 
 void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
 {
+    UI::Scaling::ScopedActiveTransform layout(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
+
     // Todo
     int iNextPosY = m_UIStartPos.y;
 

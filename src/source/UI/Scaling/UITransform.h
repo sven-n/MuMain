@@ -44,6 +44,7 @@ namespace UI::Scaling
         HudExperience,
         DockLeft,
         DockRight,
+        FloatingWorkspace,
         Dialog,
         WorldOverlay,
     };
@@ -74,6 +75,10 @@ namespace UI::Scaling
     Transform BottomHudExperienceTransform(int windowWidth, int windowHeight);
     Transform DockLeftTransform(int windowWidth, int windowHeight);
     Transform DockRightTransform(int windowWidth, int windowHeight);
+    Transform FloatingWorkspaceTransform(int windowWidth, int windowHeight);
+    Viewport FloatingWorkspaceBounds(int windowWidth, int windowHeight);
+    float ScreenOverlayContentHeight(int windowWidth, int windowHeight);
+    float FloatingWorkspaceContentHeight(int windowWidth, int windowHeight);
     Viewport WorldViewport(int windowWidth, int windowHeight, bool topViewEnabled);
     float WorldViewportAspect(int windowWidth, int windowHeight, bool topViewEnabled);
     bool BottomHudContainsWindowPoint(int windowWidth, int windowHeight, float windowX, float windowY);
@@ -82,15 +87,20 @@ namespace UI::Scaling
     float PositionY(const Transform& transform, float y);
     float SizeX(const Transform& transform, float width);
     float SizeY(const Transform& transform, float height);
+    Viewport ViewportForLogicalRect(const Transform& transform, float x, float y, float width, float height);
     float LogicalX(const Transform& transform, float windowX);
     float LogicalY(const Transform& transform, float windowY);
     Position CenteredLogicalPosition(const Transform& transform, float windowX, float windowY, float width,
                                      float height);
     int MinimumFontPointSize(FontRole role);
     int MaximumFontPointSize(FontRole role);
+    int CachedFontPointSize(FontRole role);
     int FontPointSize(FontRole role, const Transform& transform);
     float FontScaleForBounds(FontRole role, const Transform& transform, float measuredWidth, float measuredHeight,
                              float boxWidth, float boxHeight);
+    float ContentScaleFromMetrics(float displayScale, float pixelDensity);
+    float GetWindowContentScale();
+    void SetWindowContentScale(float contentScale);
     Transform GetActiveTransform();
     void SetActiveTransform(const Transform& transform);
 }

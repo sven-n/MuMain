@@ -31,6 +31,8 @@ constexpr int kBigFontPointSize = 22;
 constexpr int kMaximumBigFontPointSize = 32;
 constexpr int kFixedFontPointSize = 13;
 constexpr int kMaximumFixedFontPointSize = 18;
+// ponytail: one gameplay window; move scale into a window context if multi-window rendering is added.
+float g_windowContentScale = 1.0f;
 
 struct FontPointRange
 {
@@ -72,7 +74,9 @@ float CappedUniformScale(int windowWidth, int windowHeight, float maximumScale)
 {
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
-    return std::clamp(std::min(widthScale, heightScale), kMinimumPanelScale, maximumScale);
+    const float contentScale = UI::Scaling::GetWindowContentScale();
+    return std::clamp(std::min(widthScale, heightScale), kMinimumPanelScale * contentScale,
+                      maximumScale * contentScale);
 }
 
 UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
@@ -124,7 +128,9 @@ float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
 {
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
-    return std::clamp(std::min(widthScale, heightScale), kMinimumHudScale, kMaximumHudScale);
+    const float contentScale = GetWindowContentScale();
+    return std::clamp(std::min(widthScale, heightScale), kMinimumHudScale * contentScale,
+                      kMaximumHudScale * contentScale);
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudLeftTransform(int windowWidth, int windowHeight)
@@ -165,6 +171,39 @@ UI::Scaling::Transform UI::Scaling::DockRightTransform(int windowWidth, int wind
     Transform transform = DockTransform(windowWidth, windowHeight);
     transform.offsetX = static_cast<float>(windowWidth) - kReferenceWidth * transform.scaleX;
     return transform;
+}
+
+UI::Scaling::Transform UI::Scaling::FloatingWorkspaceTransform(int windowWidth, int windowHeight)
+{
+    const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumDockScale);
+    return {scale, scale, 0.0f, 0.0f, scale};
+}
+
+UI::Scaling::Viewport UI::Scaling::FloatingWorkspaceBounds(int windowWidth, int windowHeight)
+{
+    const Transform transform = FloatingWorkspaceTransform(windowWidth, windowHeight);
+    return {
+        0,
+        0,
+        std::max(static_cast<int>(std::floor(static_cast<float>(windowWidth) / transform.scaleX)), 1),
+        std::max(static_cast<int>(std::floor(static_cast<float>(windowHeight) / transform.scaleY)), 1),
+    };
+}
+
+float UI::Scaling::ScreenOverlayContentHeight(int windowWidth, int windowHeight)
+{
+    const Transform transform = ScreenOverlayTransform(windowWidth, windowHeight);
+    const float physicalHeight =
+        static_cast<float>(windowHeight) - kHudFrameHeight * BottomHudScale(windowWidth, windowHeight);
+    return physicalHeight / transform.scaleY;
+}
+
+float UI::Scaling::FloatingWorkspaceContentHeight(int windowWidth, int windowHeight)
+{
+    const Transform transform = FloatingWorkspaceTransform(windowWidth, windowHeight);
+    const float physicalHeight =
+        static_cast<float>(windowHeight) - kHudFrameHeight * BottomHudScale(windowWidth, windowHeight);
+    return physicalHeight / transform.scaleY;
 }
 
 UI::Scaling::Viewport UI::Scaling::WorldViewport(int windowWidth, int windowHeight, bool)
@@ -217,6 +256,8 @@ UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int wind
         return DockLeftTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::DockRight)
         return DockRightTransform(windowWidth, windowHeight);
+    if (mode == LayoutMode::FloatingWorkspace)
+        return FloatingWorkspaceTransform(windowWidth, windowHeight);
     return PanelTransform(windowWidth, windowHeight);
 }
 
@@ -238,6 +279,17 @@ float UI::Scaling::SizeX(const Transform& transform, float width)
 float UI::Scaling::SizeY(const Transform& transform, float height)
 {
     return height * transform.scaleY;
+}
+
+UI::Scaling::Viewport UI::Scaling::ViewportForLogicalRect(const Transform& transform, float x, float y, float width,
+                                                          float height)
+{
+    return {
+        static_cast<int>(std::lround(PositionX(transform, x))),
+        static_cast<int>(std::lround(PositionY(transform, y))),
+        std::max(static_cast<int>(std::lround(SizeX(transform, width))), 1),
+        std::max(static_cast<int>(std::lround(SizeY(transform, height))), 1),
+    };
 }
 
 float UI::Scaling::LogicalX(const Transform& transform, float windowX)
@@ -266,12 +318,17 @@ int UI::Scaling::MaximumFontPointSize(FontRole role)
     return GetFontPointRange(role).maximum;
 }
 
+int UI::Scaling::CachedFontPointSize(FontRole role)
+{
+    return std::max(static_cast<int>(std::lround(MaximumFontPointSize(role) * GetWindowContentScale())), 1);
+}
+
 int UI::Scaling::FontPointSize(FontRole role, const Transform& transform)
 {
     const FontPointRange range = GetFontPointRange(role);
-    const float growth = std::clamp((transform.typographyScale - kMinimumPanelScale) /
-                                        (kMaximumTypographyScale - kMinimumPanelScale),
-                                    0.0f, 1.0f);
+    const float typographyScale = transform.typographyScale / GetWindowContentScale();
+    const float growth =
+        std::clamp((typographyScale - kMinimumPanelScale) / (kMaximumTypographyScale - kMinimumPanelScale), 0.0f, 1.0f);
     const float pointSize = static_cast<float>(range.minimum) +
                             static_cast<float>(range.maximum - range.minimum) * growth;
     return static_cast<int>(std::lround(pointSize));
@@ -290,6 +347,23 @@ float UI::Scaling::FontScaleForBounds(FontRole role, const Transform& transform,
         scale = std::min(scale, boxHeight / measuredHeight);
 
     return std::clamp(scale, minimumScale, 1.0f);
+}
+
+float UI::Scaling::ContentScaleFromMetrics(float displayScale, float pixelDensity)
+{
+    if (!std::isfinite(displayScale) || !std::isfinite(pixelDensity) || displayScale <= 0.0f || pixelDensity <= 0.0f)
+        return 1.0f;
+    return displayScale / pixelDensity;
+}
+
+float UI::Scaling::GetWindowContentScale()
+{
+    return g_windowContentScale;
+}
+
+void UI::Scaling::SetWindowContentScale(float contentScale)
+{
+    g_windowContentScale = std::isfinite(contentScale) && contentScale > 0.0f ? contentScale : 1.0f;
 }
 
 UI::Scaling::Transform UI::Scaling::GetActiveTransform()

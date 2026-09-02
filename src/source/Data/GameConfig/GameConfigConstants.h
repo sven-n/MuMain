@@ -53,6 +53,7 @@ namespace CfgKeys
     // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
+    inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
 }
 
 namespace CfgDefaults
@@ -96,4 +97,5 @@ namespace CfgDefaults
 
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
+    inline constexpr bool CfgDefaultVSync = true;
 }

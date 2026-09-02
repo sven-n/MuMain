@@ -3627,9 +3627,11 @@ void RenderOutSides()
         EnableAlphaTest();
         EnableAlphaBlend();
         float WindX = (float)((int)WorldTime % 100000) * 0.0002f;
-        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+        RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                       UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
         float WindX2 = (float)((int)WorldTime % 100000) * 0.001f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                       UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, 0.f, 3.f, 2.f);
     }
 #ifdef ASG_ADD_MAP_KARUTAN
     else if (IsKarutanMap())
@@ -3637,7 +3639,8 @@ void RenderOutSides()
         EnableAlphaTest();
         EnableAlphaBlend();
         float fWindX = (float)((int)WorldTime % 100000) * 0.004f;
-        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, fWindX, 0.f, 3.f, 2.f);
+        RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                       UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), fWindX, 0.f, 3.f, 2.f);
     }
 #endif	// ASG_ADD_MAP_KARUTAN
     else if (WD_34CRYWOLF_1ST == gMapManager.WorldActive)

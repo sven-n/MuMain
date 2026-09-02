@@ -291,6 +291,7 @@ The client reads options from `config.ini` in the executable directory:
 | **`[UI]`** | `EnableAnimationTaskPool` | `0` | Set to `1` to process character animation through `AnimationTaskPool` when at least 20 active characters are visible. `0` keeps sequential updates. |
 | **`[UI]`** | `Locale` | `"en"` | Active generated UI locale. The Options window persists runtime language changes here. |
 | **`[Camera]`** | `Zoom` | `1735` | Persisted Orbital-camera distance. |
+| **`[Render]`** | `VSync` | `1` | `1` enables display-paced presentation; `0` keeps VSync disabled across restarts and fullscreen/resolution changes. `$vsync on` / `$vsync off` update this value. |
 
 Rendering always uses the SDL GPU backend. The legacy `[Render] CoreProfile`
 key is not read; values `0` and `1` have no effect and do not select an OpenGL

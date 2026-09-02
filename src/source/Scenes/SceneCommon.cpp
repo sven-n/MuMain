@@ -7,6 +7,7 @@
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "Camera/CameraProjection.h"
+#include "Core/Platform/IPlatformAudio.h"
 #include "Render/Renderer/MuRenderer.h"
 
 //=============================================================================
@@ -181,19 +182,14 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 
 void SetEffectVolumeLevel(int level)
 {
-    if (level > 9)
-        level = 9;
+    if (level > 10)
+        level = 10;
     if (level < 0)
         level = 0;
 
-    if (level == 0)
+    if (g_platformAudio != nullptr)
     {
-        SetMasterVolume(-10000);
-    }
-    else
-    {
-        long vol = -2000 * log10(10.f / float(level));
-        SetMasterVolume(vol);
+        g_platformAudio->SetSFXVolume(static_cast<float>(level) / 10.0f);
     }
 }
 

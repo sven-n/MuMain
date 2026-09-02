@@ -13,7 +13,6 @@
 #include <fcntl.h>
 #include <iostream>
 #include "Engine/Object/ZzzInterface.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
 #include "WindowsConsole.h"
 
 #include "Render/Sprites/GlobalBitmap.h"
@@ -126,22 +125,12 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     }
     else if (strCommand.compare(L"$vsync on") == 0)
     {
-        if (EnableVSync())
-        {
-            SetTargetFps(-1);
-        }
-        else
-        {
-            SetTargetFps(GetFPSLimit());
-        }
-        ResetFrameStats();
+        MuSetVSyncPreference(true);
         return true;
     }
     else if (strCommand.compare(L"$vsync off") == 0)
     {
-        DisableVSync();
-        SetTargetFps(-1);
-        ResetFrameStats();
+        MuSetVSyncPreference(false);
         return true;
     }
     else if (strCommand.compare(L"$effects off") == 0)

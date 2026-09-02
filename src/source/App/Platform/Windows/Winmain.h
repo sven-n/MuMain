@@ -87,6 +87,8 @@ extern void DestroyWindow();
 extern void DestroySound();
 extern void ReinitializeFonts();
 extern void UpdateResolutionDependentSystems();
+extern void MuSetVSyncPreference(bool enabled);
+extern void MuReapplyVSyncPreference();
 
 // Confines the mouse cursor to the window's client area when in fullscreen
 // and the window is active; releases clipping otherwise. Safe to call any

@@ -6,6 +6,7 @@
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"	// self
 #include "UI/NewUI/NewUIManager.h"
 #include "UI/Legacy/UIControls.h"
+#include "UI/Scaling/UITransform.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 using namespace SEASON3B;
@@ -121,10 +122,10 @@ void SEASON3B::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWO
 
 void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
 {
-    float fWidth = (float)REFERENCE_WIDTH, fHeight = (float)REFERENCE_HEIGHT;
-    float fPosX = 0.0f, fPosY = 0.0f;
     if (_bRender)
     {
+        UI::Scaling::ScopedActiveTransform layout(
+            UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
         EnableAlphaTest();
         const auto toByte = [](float value)
         {
@@ -134,7 +135,8 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
             | (toByte(m_vColor[0]) << 16)
             | (toByte(m_vColor[1]) << 8)
             | toByte(m_vColor[2]);
-        RenderColorQuadARGB(fPosX, fPosY, fWidth, fHeight - 50.0f, color);
+        RenderColorQuadARGB(0.0f, 0.0f, static_cast<float>(REFERENCE_WIDTH),
+                            UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), color);
 
         DisableAlphaBlend();
         EnableAlphaTest();

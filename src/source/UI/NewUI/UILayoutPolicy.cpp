@@ -17,11 +17,13 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_MOVEMAP:
         return LayoutMode::DockLeft;
 
+    case INTERFACE_FRIEND:
+        return LayoutMode::FloatingWorkspace;
+
     case INTERFACE_CHATINPUTBOX:
     case INTERFACE_WINDOW_MENU:
     case INTERFACE_KANTURU_INFO:
     case INTERFACE_CHATLOGWINDOW:
-    case INTERFACE_PARTY_INFO_WINDOW:
     case INTERFACE_BLOODCASTLE_TIME:
     case INTERFACE_CHAOSCASTLE_TIME:
     case INTERFACE_BATTLE_SOCCER_SCORE:
@@ -31,7 +33,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_CRYWOLF:
     case INTERFACE_SIEGEWARFARE:
     case INTERFACE_MAINFRAME:
-    case INTERFACE_ITEM_ENDURANCE_INFO:
     case INTERFACE_BUFF_WINDOW:
     case INTERFACE_MASTER_LEVEL:
     case INTERFACE_DUELWATCH_MAINFRAME:
@@ -48,7 +49,6 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_SKILL_LIST:
         return LayoutMode::HudCenter;
 
-    case INTERFACE_FRIEND:
     case INTERFACE_PARTY:
     case INTERFACE_MYQUEST:
     case INTERFACE_NPCQUEST:
@@ -89,6 +89,8 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_MUHELPER_EXT:
     case INTERFACE_MUHELPER_SKILL_LIST:
     case INTERFACE_COMMAND_LIST:
+    case INTERFACE_ITEM_ENDURANCE_INFO:
+    case INTERFACE_PARTY_INFO_WINDOW:
         return LayoutMode::DockRight;
 
     default:

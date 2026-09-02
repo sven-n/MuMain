@@ -54,6 +54,16 @@ mu_add_test(
     LINK_LIBS MuClient
 )
 
+add_test(
+    NAME display_settings_contract
+    COMMAND "${CMAKE_COMMAND}"
+        "-DMU_CONFIG_CONSTANTS=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfigConstants.h"
+        "-DMU_CONFIG_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Data/GameConfig/GameConfig.cpp"
+        "-DMU_WINMAIN_SOURCE=${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp"
+        "-DMU_CONSOLE_SOURCE=${CMAKE_SOURCE_DIR}/src/source/Core/Utilities/Log/muConsoleDebug.cpp"
+        -P "${CMAKE_CURRENT_SOURCE_DIR}/test_display_settings_contract.cmake"
+)
+
 mu_add_test(
     NAME character_name_lifecycle_tests
     SOURCES test_character_name_lifecycle.cpp

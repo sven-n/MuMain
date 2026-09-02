@@ -872,6 +872,10 @@ static TTF_Font* s_ttfFont = nullptr;      // normal (default)
 static TTF_Font* s_ttfFontBold = nullptr;  // bold weight
 static TTF_Font* s_ttfFontBig = nullptr;   // larger size, bold
 static TTF_Font* s_ttfFontFixed = nullptr; // monospace
+static TTF_Font* s_ttfFallback = nullptr;
+static TTF_Font* s_ttfFallbackBold = nullptr;
+static TTF_Font* s_ttfFallbackBig = nullptr;
+static TTF_Font* s_ttfFallbackFixed = nullptr;
 
 #ifdef NDEBUG
 inline constexpr bool kAllowSystemFontFallback = false;
@@ -958,10 +962,35 @@ static void CloseTtfFont(TTF_Font*& font)
     return fallback;
 }
 
+[[nodiscard]] static TTF_Font* OpenTtfFallbackRole(std::string_view role, float pointSize)
+{
+    const std::string packagedPath = BundledFontPath(kBundledFallbackFont.regular);
+    TTF_Font* font = TTF_OpenFont(packagedPath.c_str(), pointSize);
+    if (font)
+    {
+        mu::log::Get("render")->info("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}'",
+                                     kBundledFallbackFont.family, role, packagedPath);
+        return font;
+    }
+
+    mu::log::Get("render")->error("SDL_ttf -- bundled fallback family='{}' role='{}' path='{}' failed: {}",
+                                  kBundledFallbackFont.family, role, packagedPath, SDL_GetError());
+    return nullptr;
+}
+
+[[nodiscard]] static bool AttachTtfFallback(TTF_Font* font, TTF_Font* fallback, std::string_view role)
+{
+    if (TTF_AddFallbackFont(font, fallback))
+        return true;
+
+    mu::log::Get("render")->error("SDL_ttf -- fallback attach failed for role='{}': {}", role, SDL_GetError());
+    return false;
+}
+
 static void WarmTtfFonts()
 {
     static constexpr const char* k_WarmupGlyphs = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-                                                  "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\";
+                                                  "0123456789 !@#$%^&*()-_=+[]{}|;:',.<>?/~`\"\\한글";
     TTF_Font* fonts[] = {s_ttfFont, s_ttfFontBold, s_ttfFontBig, s_ttfFontFixed};
     for (TTF_Font* font : fonts)
     {
@@ -982,12 +1011,26 @@ static void WarmTtfFonts()
     TTF_Font* big = OpenTtfFontRole(family.family, "big-bold", family.bold, bigPointSize);
     TTF_Font* fixed =
         OpenTtfFontRole(kBundledFixedFont.family, "fixed", kBundledFixedFont.regular, fixedPointSize);
-    if (!normal || !bold || !big || !fixed)
+    TTF_Font* fallback = OpenTtfFallbackRole("normal", normalPointSize);
+    TTF_Font* fallbackBold = OpenTtfFallbackRole("bold", normalPointSize);
+    TTF_Font* fallbackBig = OpenTtfFallbackRole("big-bold", bigPointSize);
+    TTF_Font* fallbackFixed = OpenTtfFallbackRole("fixed", fixedPointSize);
+    if (fallbackBold)
+        TTF_SetFontStyle(fallbackBold, TTF_STYLE_BOLD);
+    if (fallbackBig)
+        TTF_SetFontStyle(fallbackBig, TTF_STYLE_BOLD);
+    if (!normal || !bold || !big || !fixed || !fallback || !fallbackBold || !fallbackBig || !fallbackFixed ||
+        !AttachTtfFallback(normal, fallback, "normal") || !AttachTtfFallback(bold, fallbackBold, "bold") ||
+        !AttachTtfFallback(big, fallbackBig, "big-bold") || !AttachTtfFallback(fixed, fallbackFixed, "fixed"))
     {
         CloseTtfFont(fixed);
         CloseTtfFont(big);
         CloseTtfFont(bold);
         CloseTtfFont(normal);
+        CloseTtfFont(fallbackFixed);
+        CloseTtfFont(fallbackBig);
+        CloseTtfFont(fallbackBold);
+        CloseTtfFont(fallback);
         return false;
     }
 
@@ -995,10 +1038,18 @@ static void WarmTtfFonts()
     CloseTtfFont(s_ttfFontBig);
     CloseTtfFont(s_ttfFontBold);
     CloseTtfFont(s_ttfFont);
+    CloseTtfFont(s_ttfFallbackFixed);
+    CloseTtfFont(s_ttfFallbackBig);
+    CloseTtfFont(s_ttfFallbackBold);
+    CloseTtfFont(s_ttfFallback);
     s_ttfFont = normal;
     s_ttfFontBold = bold;
     s_ttfFontBig = big;
     s_ttfFontFixed = fixed;
+    s_ttfFallback = fallback;
+    s_ttfFallbackBold = fallbackBold;
+    s_ttfFallbackBig = fallbackBig;
+    s_ttfFallbackFixed = fallbackFixed;
     WarmTtfFonts();
     return true;
 }
@@ -1494,6 +1545,10 @@ public:
         CloseTtfFont(s_ttfFontBig);
         CloseTtfFont(s_ttfFontBold);
         CloseTtfFont(s_ttfFont);
+        CloseTtfFont(s_ttfFallbackFixed);
+        CloseTtfFont(s_ttfFallbackBig);
+        CloseTtfFont(s_ttfFallbackBold);
+        CloseTtfFont(s_ttfFallback);
         if (s_textEngine)
         {
             TTF_DestroyGPUTextEngine(s_textEngine);
