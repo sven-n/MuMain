@@ -7,13 +7,25 @@ namespace Rml
     class Element;
 }
 
-// Makes an RmlUi panel draggable-by-mouse, with zero legacy CWin dependency -- see the
-// migration plan and docs/rmlui-ui-system/architecture.md for why this exists: CWin's own
-// dragging (CWin::Update()'s WS_MOVE state machine, gated by CursorInWin(WA_MOVE)) only works
-// for windows still tied to that legacy positioning system, and re-implementing an equivalent
-// per migrated window would be exactly the kind of duplicated logic Coding Rule #4 warns against.
-// A future migrated panel that wants to be draggable should just call MakeDraggable() once --
-// no per-window state machine, no CWin involvement at all.
+// Makes an RmlUi panel draggable-by-mouse, with zero legacy CWin dependency -- see
+// docs/rmlui-ui-system/architecture-principles.md for why this exists: CWin's own dragging
+// (CWin::Update()'s WS_MOVE state machine, gated by CursorInWin(WA_MOVE)) only works for windows
+// still tied to that legacy positioning system, and re-implementing an equivalent per migrated
+// window would be exactly the kind of duplicated logic Coding Rule #4 warns against. A future
+// migrated panel that wants to be draggable should just call MakeDraggable() once -- no
+// per-window state machine, no CWin involvement at all.
+//
+// 2026-09-02 audit finding, not yet fixed -- read before wiring this up on the first real window:
+// this helper has ZERO live call sites today (grepped) and, as written, doesn't yet satisfy
+// architecture-principles.md §10-11 even in prototype form:
+//   - It writes the dragged position as an absolute `px` inline style (see MakeDraggable()'s own
+//     .cpp). `px` never scales with the user's UIScalePercent setting (layout-and-scaling.md's
+//     dp-vs-px rule) -- a position dragged at one UI scale will read wrong at another.
+//   - Nothing persists the result anywhere. There is no GameConfig position-storage mechanism for
+//     RmlUi panels at all yet (grepped) -- a dragged position is lost on every restart.
+// Neither is a bug in the narrow sense (nothing depends on this today), but both need a real
+// answer -- likely an anchor-relative `dp` offset persisted through GameConfig, not a raw px
+// pair -- before the first window actually calls this, not discovered after.
 namespace UI::RmlBridge
 {
     // Fired every time the panel's position changes during a drag, with its new absolute
@@ -31,9 +43,9 @@ namespace UI::RmlBridge
     // or in this pilot's test, a label positioned outside the panel's own box), not usually
     // `panel` itself. Using the whole panel as its own handle only works if the panel's
     // `pointer-events` is `auto` -- a full-window document following the pointer-events fix
-    // (docs/rmlui-ui-system/gotchas-and-patterns.md) sets its panel to inherit `none` from `body`
-    // by default, specifically so clicks pass through to whatever's underneath, which is exactly
-    // why a dedicated handle is the correct pattern here, not a workaround for a limitation.
+    // (README.md's Gotchas section) sets its panel to inherit `none` from `body` by default,
+    // specifically so clicks pass through to whatever's underneath, which is exactly why a
+    // dedicated handle is the correct pattern here, not a workaround for a limitation.
     //
     // `panel` is the element that actually moves -- must be `position: absolute` with `left`/
     // `top` already resolved to fixed `px` values (true of every window built so far, see

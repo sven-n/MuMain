@@ -78,8 +78,8 @@ namespace UI::RmlBridge
         // to remember a matching RCSS rule just to make this actually fire.
         handle->SetProperty("drag", "drag");
 
-        // pointer-events is inherited (see docs/rmlui-ui-system/gotchas-and-patterns.md's
-        // pointer-events entry) -- any full-window document following that same fix sets
+        // pointer-events is inherited (see README.md's Gotchas section's pointer-events entry)
+        // -- any full-window document following that same fix sets
         // `body { pointer-events: none; }` with only specific interactive elements opting back
         // in via `auto`. A handle that inherited `none` is invisible to RmlUi's own hit-testing
         // (GetElementAtPoint explicitly skips pointer-events:none elements), so it would never

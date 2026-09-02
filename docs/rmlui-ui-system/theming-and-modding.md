@@ -37,7 +37,36 @@ drawn by the legacy `CWin`/`CSprite` path underneath it. A "legacy-look" theme r
 original art by pointing its own RCSS decorators at the same image files the old sprites used;
 a "modern" theme uses flat colors/vector shapes instead.
 
-## Adding a new theme — step by step
+## Exception: per-theme RML override
+
+The Core Principle above is a hard default, not an absolute — one window breaks it today, and the
+criteria for when that's legitimate are worth stating explicitly so it doesn't become a habit.
+
+`UI::RmlBridge::LoadThemedDocument()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
+looks for `themes/<theme>/<name>.rml` first, falling back to the shared `<name>.rml` when no such
+file exists. Every window but `main_frame` has no per-theme override, so this is a no-op for them
+(one extra failed `ifstream` open). `main_frame` has two independently-maintained files —
+[`themes/legacy/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/legacy/main_frame.rml)
+and
+[`themes/modern/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/modern/main_frame.rml)
+— because modern's bottom-HUD button row moved to a genuinely different place in the document
+(a top-right panel, `#top_right_row`, echoing `mu_helper_bar`'s styling) while legacy's stayed
+nested inside `#bars` where the original bottom-HUD button row always was. Two things were tried
+and rejected first: CSS-only hiding (`display: none` on modern's copy of the old row leaked
+through no matter how it was hardened) and a `data-if` bound to a C++-set "is modern" model
+boolean (rejected as the same kind of per-context C++ branching
+[`legacy-theme-modernization.md`](legacy-theme-modernization.md) exists to move *out* of C++, just
+relocated into a model field instead of an `if` statement).
+
+**Use this escape hatch only when the two themes' content genuinely differs in DOM structure or
+position, not merely in visibility or style** — "this element doesn't exist in the other theme's
+layout at all" (main_frame's button row), not "this element is hidden/styled differently in the
+other theme" (ordinary RCSS `.hidden`/selector differences, the normal case, no override needed).
+Two real costs come with it, both currently paid manually for `main_frame`: the two files' shared
+ids/classes/bindings have to be hand-kept in sync (each file's own header comment says so
+explicitly — check the other file's comment before editing either one), and any future window
+tempted to reach for this needs the same structural-difference test applied first, not just "it's
+easier than fighting the CSS."
 
 No source changes, no recompilation.
 

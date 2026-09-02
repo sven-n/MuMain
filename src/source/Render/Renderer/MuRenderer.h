@@ -321,7 +321,7 @@ public:
     // RmlUi port: registers a callback the backend invokes once per frame after its own
     // game-content replay/blit is fully recorded onto the frame's command buffer, but before
     // that command buffer is submitted. This is the seam RmlUi needs to render "last" (see
-    // docs/rmlui-ui-system/architecture.md's ordering invariant) without EndFrame() itself
+    // README.md's Frame Lifecycle section's ordering invariant) without EndFrame() itself
     // knowing anything about RmlUi -- RmlUiRuntime::Create() is the only caller. Calling
     // RenderScene() (or similar, mid-frame) is too early: game content is only *recorded* there,
     // not yet replayed onto the command buffer, so anything drawn at that point would land
@@ -333,8 +333,8 @@ public:
     // Fires after RmlUi's own render pass (the one SetPreSubmitCallback above triggers) has
     // already closed, still before the frame's command buffer is submitted -- the seam for
     // content that must sit visually on top of RmlUi (the game cursor, legacy CUITextInputBox
-    // text; see docs/rmlui-ui-system/gotchas-and-patterns.md's "pointer-events swallows every
-    // click" neighbor bug and its cursor/text-ordering counterpart). Backed by its own small
+    // text; see README.md's Gotchas section's "pointer-events swallows every click" neighbor
+    // bug and its cursor/text-ordering counterpart). Backed by its own small
     // render pass (LOAD, not CLEAR) that replays whatever this callback pushes via the normal
     // RenderQuad2D-style functions -- calling those same functions from inside
     // SetPreSubmitCallback's callback instead does NOT work: the main render pass (and the

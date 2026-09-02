@@ -20,7 +20,7 @@ namespace Rml
 // image files the old sprites used (e.g. themes/legacy/login.rcss's `decorator: image(...)`) --
 // that's a choice of asset, not a choice of renderer. There used to be a per-theme
 // `UsesLegacySpriteChrome` manifest flag letting a theme opt back into CWin drawing the
-// background -- removed (see docs/rmlui-ui-system/gotchas-and-patterns.md) because it worked
+// background -- removed (see README.md's Coexistence patterns section) because it worked
 // against the migration's actual point: once a window is migrated, RmlUi owns 100% of its
 // rendering, unconditionally.
 //

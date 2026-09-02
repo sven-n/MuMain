@@ -136,6 +136,16 @@ base class/tier boundary itself — that's structural (touches the ~88 other sti
 only 2 pilots. See [`STATUS.md`](STATUS.md)'s "Tracked deferral" section for the full reasoning
 and the actual condition for revisiting the file-location piece.
 
+**One exception to "rename at port time," found by the third pilot**: when a legacy file welds
+multiple classes together and a single pass only ports some of them, renaming just the ported one
+leaves the file's still-legacy residents mismatched for the remaining phases —
+`CNewUIMainFrameWindow` (ported) sharing a file with still-fully-legacy `CNewUISkillList`/
+`CNewUIItemHotKey` is the concrete case. See `STATUS.md`'s own "Tracked deferral:
+`CNewUIMainFrameWindow`'s own class rename" section — the rename is deferred to when the whole
+file's classes are ported and can be renamed together, not skipped. Don't generalize this beyond
+that specific shape (a shared file, a partial port); a clean one-class-one-file port still renames
+at port time, no exception.
+
 ## Proven by `CBuffStrip` (the second pilot)
 
 - **Data-driven lists whose SIZE changes every frame** (`data-for`/array binding over a
