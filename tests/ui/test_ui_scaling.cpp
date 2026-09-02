@@ -335,6 +335,26 @@ TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][s
     CHECK(UI::Scaling::LogicalX(dock, 1492.5f) == doctest::Approx(450.0f));
 }
 
+TEST_CASE("right-side status overlays stay adjacent to right-docked panels [ui][scaling]")
+{
+    using UI::Scaling::LayoutMode;
+    for (const auto interfaceKey : {SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, SEASON3B::INTERFACE_PARTY_INFO_WINDOW})
+    {
+        const auto overlayMode = UI::Layout::ForInterface(interfaceKey);
+        CHECK(overlayMode == LayoutMode::DockRight);
+
+        for (const auto [width, height] : {std::pair{640, 480}, std::pair{1920, 1080}, std::pair{3840, 2160}})
+        {
+            const auto overlay = UI::Scaling::TransformForLayout(overlayMode, width, height);
+            const auto panel = UI::Scaling::DockRightTransform(width, height);
+            const float overlayRight = UI::Scaling::PositionX(overlay, 448.0f);
+            const float panelLeft = UI::Scaling::PositionX(panel, 450.0f);
+
+            CHECK(panelLeft - overlayRight == doctest::Approx(UI::Scaling::SizeX(panel, 2.0f)));
+        }
+    }
+}
+
 TEST_CASE("docked command window ends at the bottom HUD top [ui][scaling]")
 {
     CHECK(UI::Scaling::PositionY(
@@ -689,6 +709,8 @@ TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scalin
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MAINFRAME) == LayoutMode::Hud);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_INVENTORY) == LayoutMode::DockRight);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
     CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
