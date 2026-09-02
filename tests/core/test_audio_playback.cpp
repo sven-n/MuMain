@@ -1,6 +1,7 @@
 #include "App/stdafx.h"
 
 #include <array>
+#include <filesystem>
 #include <memory>
 
 #include "doctest.h"
@@ -90,4 +91,24 @@ TEST_CASE("an active one-channel sound is not restarted [audio][ambient]")
 
     backend->Shutdown();
     ma_audio_buffer_uninit(&audioBuffer);
+}
+
+TEST_CASE("sound effects resolve Windows-spelled asset paths [audio][paths]")
+{
+    auto backend = std::make_unique<mu::MiniAudioBackend>();
+
+    ma_engine_config engineConfig = ma_engine_config_init();
+    engineConfig.noDevice = MA_TRUE;
+    engineConfig.channels = 1;
+    engineConfig.sampleRate = 48000;
+    REQUIRE(ma_engine_init(&engineConfig, &backend->m_engine) == MA_SUCCESS);
+    backend->m_initialized = true;
+
+    const std::filesystem::path assetPath =
+        std::filesystem::path(MU_TEST_ASSET_SOURCE) / "data" / "sound" / "ibuttonclick.wav";
+    const std::wstring wideAssetPath = assetPath.wstring();
+    backend->LoadSound(SOUND_CLICK01, wideAssetPath.c_str(), 1, false);
+
+    CHECK(backend->m_soundLoaded[static_cast<int>(SOUND_CLICK01)]);
+    backend->Shutdown();
 }

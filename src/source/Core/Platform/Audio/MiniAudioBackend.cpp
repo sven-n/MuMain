@@ -177,6 +177,9 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     // On Windows, forward slashes work identically to backslashes for file paths.
     // Mirrors the PlayMusic() normalization pattern from Story 5.2.1.
     std::replace(utf8Path.begin(), utf8Path.end(), '\\', '/');
+#ifndef _WIN32
+    utf8Path = MuResolvePath(utf8Path.c_str());
+#endif
 
     // Clamp channels to the array dimension
     const int numChannels = (channels > 0 && channels <= MAX_CHANNEL) ? channels : MAX_CHANNEL;

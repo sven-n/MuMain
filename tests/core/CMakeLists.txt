@@ -54,6 +54,9 @@ mu_add_test(
     LINK_LIBS
         MuClient
 )
+target_compile_definitions(test_audio_playback PRIVATE
+    MU_TEST_ASSET_SOURCE="${CMAKE_SOURCE_DIR}/src/bin"
+)
 
 mu_add_test(
     NAME test_platform_crypto
