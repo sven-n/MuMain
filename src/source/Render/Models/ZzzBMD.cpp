@@ -18,11 +18,6 @@
 #include "Engine/AI/ZzzAI.h"
 #include "SMD.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "Render/Shaders/ItemSpecularShader.h"
-#include "Render/Shaders/PlanarShadowShader.h"
-#include "Render/Shaders/BMDMeshShader.h"
-#include "Render/Core/BoneUBO.h"
-#include "Render/Core/GlobalUBO.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Camera/CameraState.h"
 
@@ -30,66 +25,12 @@
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "UI/NewUI/NewUISystem.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Core/BindState.h"
-#include "Render/Shaders/PassthroughShader.h"
+#include "Render/Models/GpuSkinningPath.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Core/Utilities/FrameProfiler.h"
-#include <SDL3/SDL.h>
 
-#ifndef APIENTRY
-#define APIENTRY
-#endif
-
-typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC)(GLsizei n, GLuint* arrays);
-typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC)(GLsizei n, const GLuint* arrays);
-typedef void (APIENTRY* PFNGLVERTEXATTRIBPOINTERPROC)(GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride, const void* pointer);
-typedef void (APIENTRY* PFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint index);
-typedef void (APIENTRY* PFNGLGENBUFFERSPROC)(GLsizei n, GLuint* buffers);
-typedef void (APIENTRY* PFNGLBINDBUFFERPROC)(GLenum target, GLuint buffer);
-typedef void (APIENTRY* PFNGLBUFFERDATAPROC)(GLenum target, GLsizeiptr size, const void* data, GLenum usage);
-typedef void (APIENTRY* PFNGLBUFFERSUBDATAPROC)(GLenum target, GLintptr offset, GLsizeiptr size, const void* data);
-typedef void (APIENTRY* PFNGLDELETEBUFFERSPROC)(GLsizei n, const GLuint* buffers);
-typedef void (APIENTRY* PFNGLVERTEXATTRIBIPOINTERPROC)(GLuint index, GLint size, GLenum type, GLsizei stride, const void* pointer);
-
-static PFNGLGENVERTEXARRAYSPROC          fn_glGenVertexArrays          = nullptr;
-static PFNGLDELETEVERTEXARRAYSPROC       fn_glDeleteVertexArrays       = nullptr;
-static PFNGLVERTEXATTRIBPOINTERPROC      fn_glVertexAttribPointer      = nullptr;
-static PFNGLENABLEVERTEXATTRIBARRAYPROC  fn_glEnableVertexAttribArray  = nullptr;
-static PFNGLGENBUFFERSPROC               fn_glGenBuffers               = nullptr;
-static PFNGLBINDBUFFERPROC               fn_glBindBuffer               = nullptr;
-static PFNGLBUFFERDATAPROC               fn_glBufferData               = nullptr;
-static PFNGLBUFFERSUBDATAPROC            fn_glBufferSubData            = nullptr;
-static PFNGLDELETEBUFFERSPROC            fn_glDeleteBuffers            = nullptr;
-static PFNGLVERTEXATTRIBIPOINTERPROC     fn_glVertexAttribIPointer     = nullptr;
-
-static bool LoadBMDGLFunctions()
-{
-    static bool loaded = false;
-    if (loaded) return true;
-
-    fn_glGenVertexArrays          = (PFNGLGENVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glGenVertexArrays");
-    fn_glDeleteVertexArrays       = (PFNGLDELETEVERTEXARRAYSPROC)SDL_GL_GetProcAddress("glDeleteVertexArrays");
-    fn_glVertexAttribPointer      = (PFNGLVERTEXATTRIBPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribPointer");
-    fn_glEnableVertexAttribArray  = (PFNGLENABLEVERTEXATTRIBARRAYPROC)SDL_GL_GetProcAddress("glEnableVertexAttribArray");
-    fn_glGenBuffers               = (PFNGLGENBUFFERSPROC)SDL_GL_GetProcAddress("glGenBuffers");
-    fn_glBindBuffer               = (PFNGLBINDBUFFERPROC)SDL_GL_GetProcAddress("glBindBuffer");
-    fn_glBufferData               = (PFNGLBUFFERDATAPROC)SDL_GL_GetProcAddress("glBufferData");
-    fn_glBufferSubData            = (PFNGLBUFFERSUBDATAPROC)SDL_GL_GetProcAddress("glBufferSubData");
-    fn_glDeleteBuffers            = (PFNGLDELETEBUFFERSPROC)SDL_GL_GetProcAddress("glDeleteBuffers");
-    fn_glVertexAttribIPointer     = (PFNGLVERTEXATTRIBIPOINTERPROC)SDL_GL_GetProcAddress("glVertexAttribIPointer");
-
-    loaded = (fn_glGenVertexArrays != nullptr &&
-              fn_glDeleteVertexArrays != nullptr &&
-              fn_glVertexAttribPointer != nullptr &&
-              fn_glEnableVertexAttribArray != nullptr &&
-              fn_glGenBuffers != nullptr &&
-              fn_glBindBuffer != nullptr &&
-              fn_glBufferData != nullptr &&
-              fn_glBufferSubData != nullptr &&
-              fn_glDeleteBuffers != nullptr);
-    return loaded;
-}
+using mu::PackABGR;
 
 BMD* Models;
 BMD* ModelsDump;
@@ -119,11 +60,70 @@ vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 // IntensityTransform (last-writer-wins global scratch, same sharing model as before this increment).
 // g_LazyCpuSkin is a kill switch -- false reproduces pre-increment-4 eager behavior exactly.
 static uint32_t g_SkinStampCounter = 0;
-static bool     g_LazyCpuSkin = true; // DXP-20 inc4 Step D: gate flipped on -- see DXP-20-inc4-plan.md
+static bool g_LazyCpuSkin = true; // DXP-20 inc4 Step D: gate flipped on -- see DXP-20-inc4-plan.md
 
 vec3_t RenderArrayVertices[MAX_VERTICES * 3];
 vec4_t RenderArrayColors[MAX_VERTICES * 3];
 vec2_t RenderArrayTexCoords[MAX_VERTICES * 3];
+
+namespace
+{
+std::span<mu::Vertex3D> GetRendererVertexScratch(std::size_t requiredVertexCount)
+{
+    static thread_local std::vector<mu::Vertex3D> vertices;
+    if (vertices.size() < requiredVertexCount)
+    {
+        vertices.resize(requiredVertexCount);
+    }
+    return {vertices.data(), requiredVertexCount};
+}
+
+std::span<mu::SkinnedVertex3D> GetRendererSkinnedVertexScratch(std::size_t requiredVertexCount)
+{
+    static thread_local std::vector<mu::SkinnedVertex3D> vertices;
+    if (vertices.size() < requiredVertexCount)
+    {
+        vertices.resize(requiredVertexCount);
+    }
+    return {vertices.data(), requiredVertexCount};
+}
+
+mu::SkinningTextureCoordinates GetSkinningTextureCoordinates(int renderFlags)
+{
+    if ((renderFlags & RENDER_CHROME2) == RENDER_CHROME2)
+        return mu::SkinningTextureCoordinates::Chrome2;
+    if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
+        return mu::SkinningTextureCoordinates::Chrome3;
+    if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
+        return mu::SkinningTextureCoordinates::Chrome4;
+    if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
+        return mu::SkinningTextureCoordinates::Chrome5;
+    if ((renderFlags & RENDER_CHROME6) == RENDER_CHROME6)
+        return mu::SkinningTextureCoordinates::Chrome6;
+    if ((renderFlags & RENDER_CHROME7) == RENDER_CHROME7)
+        return mu::SkinningTextureCoordinates::Chrome7;
+    if ((renderFlags & RENDER_OIL) == RENDER_OIL)
+        return mu::SkinningTextureCoordinates::Oil;
+    if ((renderFlags & RENDER_CHROME) == RENDER_CHROME)
+        return mu::SkinningTextureCoordinates::Chrome;
+    if ((renderFlags & RENDER_METAL) == RENDER_METAL)
+        return mu::SkinningTextureCoordinates::Metal;
+    return mu::SkinningTextureCoordinates::Mesh;
+}
+
+bool CanGpuSkinMesh(int finalRenderFlags, int renderFlags, const float (*boneMatrices)[3][4])
+{
+    const bool supportedMaterial = finalRenderFlags == RENDER_TEXTURE || finalRenderFlags == RENDER_COLOR ||
+                                   finalRenderFlags == RENDER_BRIGHT ||
+                                   GetSkinningTextureCoordinates(renderFlags) != mu::SkinningTextureCoordinates::Mesh;
+    return boneMatrices && supportedMaterial && !(renderFlags & (RENDER_SHADOWMAP | RENDER_WAVE));
+}
+
+std::pair<int, int> ResolveMeshRange(int meshCount, int requestedStart, int requestedEnd)
+{
+    return {requestedStart == -1 ? 0 : requestedStart, requestedEnd == -1 ? meshCount : requestedEnd};
+}
+} // namespace
 
 bool  StopMotion = false;
 thread_local float ParentMatrix[3][4];
@@ -131,7 +131,9 @@ thread_local float ParentMatrix[3][4];
 static vec3_t LightVector = { 0.f, -0.1f, -0.8f };
 static vec3_t LightVector2 = { 0.f, -0.5f, -0.8f };
 
-void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction, vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4], short CurrentActionArg, int BoneMatrixCapacity)
+void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float PriorFrame, unsigned short PriorAction,
+                    vec3_t Angle, vec3_t HeadAngle, bool Parent, bool Translate, const float (*ExtParentMatrix)[4],
+                    short CurrentActionArg, int BoneMatrixCapacity)
 {
     if (NumActions <= 0) return;
 
@@ -228,9 +230,18 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
             // of units away -- which PlanarShadowShader's skew division then amplifies into the
             // "infinity shadow". The tail fill below only covers slots >= NumBones; Dummy slots
             // live INSIDE [0, NumBones) and need the same identity treatment.
-            BoneMatrix[i][0][0] = 1.f; BoneMatrix[i][0][1] = 0.f; BoneMatrix[i][0][2] = 0.f; BoneMatrix[i][0][3] = 0.f;
-            BoneMatrix[i][1][0] = 0.f; BoneMatrix[i][1][1] = 1.f; BoneMatrix[i][1][2] = 0.f; BoneMatrix[i][1][3] = 0.f;
-            BoneMatrix[i][2][0] = 0.f; BoneMatrix[i][2][1] = 0.f; BoneMatrix[i][2][2] = 1.f; BoneMatrix[i][2][3] = 0.f;
+            BoneMatrix[i][0][0] = 1.f;
+            BoneMatrix[i][0][1] = 0.f;
+            BoneMatrix[i][0][2] = 0.f;
+            BoneMatrix[i][0][3] = 0.f;
+            BoneMatrix[i][1][0] = 0.f;
+            BoneMatrix[i][1][1] = 1.f;
+            BoneMatrix[i][1][2] = 0.f;
+            BoneMatrix[i][1][3] = 0.f;
+            BoneMatrix[i][2][0] = 0.f;
+            BoneMatrix[i][2][1] = 0.f;
+            BoneMatrix[i][2][2] = 1.f;
+            BoneMatrix[i][2][3] = 0.f;
             continue;
         }
         const BoneMatrix_t* bm1 = &b->BoneMatrixes[PriorAction];
@@ -302,21 +313,27 @@ void BMD::Animation(float(*BoneMatrix)[3][4], float AnimationFrame, float PriorF
     // above only ever writes BoneMatrix[0..NumBones). BoneMatrix is caller-supplied and shared/reused
     // across different models' Animation() calls (not cleared between them), so slots >= NumBones
     // would otherwise keep holding a PREVIOUS, differently-boned model's real (not garbage) transform
-    // matrix. BoneUBO::UploadBones() always uploads the full MAX_BONES-slot buffer regardless, so any
-    // mesh vertex whose a_BoneIndex lands in that untouched tail would read a foreign character's
-    // matrix -- confirmed via RenderDoc to be the root cause of a shadow-rendering vertex explosion
-    // (PlanarShadowShader's ground-skew division amplifies a stale-but-plausible foreign matrix into
-    // an astronomical position when it lands near the division's singularity; see
-    // .ai-os/memory/tasks/dxp/DXP-24-shadow-bone-matrix-corruption.md). Identity-fill the unused tail
+    // matrix. GPU skinning uploads the caller's full palette capacity, so any mesh vertex whose
+    // bone index lands in that untouched tail would read a foreign character's matrix. Identity-fill
+    // the unused tail
     // so any out-of-range bone index reads a safe no-op transform instead. Bounded by the caller's
     // declared buffer capacity -- NOT MAX_BONES -- because several internal callers pass
     // NumBones-sized heap scratch buffers (AnimationTransformWithAttachHighModel* /
     // AnimationTransformOnlySelf), which a MAX_BONES-bound loop would overflow.
     for (int i = NumBones; i < BoneMatrixCapacity; i++)
     {
-        BoneMatrix[i][0][0] = 1.f; BoneMatrix[i][0][1] = 0.f; BoneMatrix[i][0][2] = 0.f; BoneMatrix[i][0][3] = 0.f;
-        BoneMatrix[i][1][0] = 0.f; BoneMatrix[i][1][1] = 1.f; BoneMatrix[i][1][2] = 0.f; BoneMatrix[i][1][3] = 0.f;
-        BoneMatrix[i][2][0] = 0.f; BoneMatrix[i][2][1] = 0.f; BoneMatrix[i][2][2] = 1.f; BoneMatrix[i][2][3] = 0.f;
+        BoneMatrix[i][0][0] = 1.f;
+        BoneMatrix[i][0][1] = 0.f;
+        BoneMatrix[i][0][2] = 0.f;
+        BoneMatrix[i][0][3] = 0.f;
+        BoneMatrix[i][1][0] = 0.f;
+        BoneMatrix[i][1][1] = 1.f;
+        BoneMatrix[i][1][2] = 0.f;
+        BoneMatrix[i][1][3] = 0.f;
+        BoneMatrix[i][2][0] = 0.f;
+        BoneMatrix[i][2][1] = 0.f;
+        BoneMatrix[i][2][2] = 1.f;
+        BoneMatrix[i][2][3] = 0.f;
     }
 }
 
@@ -328,7 +345,8 @@ float BoneScale = 1.f;
 
 void BMD::ClaimSkinStamp() const
 {
-    if (m_SkinStamp == g_SkinStampCounter) return;
+    if (m_SkinStamp == g_SkinStampCounter)
+        return;
 #ifdef _DEBUG
     // Reaching here means some OTHER BMD's TransformCheap() ran since this BMD's own last one --
     // this BMD's slice of the shared scratch arrays was evicted, and we're about to re-derive it
@@ -336,7 +354,8 @@ void BMD::ClaimSkinStamp() const
     // Transform() wins), not new to DXP-20 inc4 -- but a consumer reaching this branch means it
     // read/wrote the arrays OUTSIDE the Calc/Draw (or equivalent) bracket that owns this BMD's
     // data, which is worth knowing about if the soak turns up anything odd.
-    g_ErrorReport.Write(L"[DXP-20-inc4] ClaimSkinStamp: stale skin stamp (this=%p, stamp=%u vs current=%u) -- self-healing\r\n",
+    g_ErrorReport.Write(
+        L"[DXP-20-inc4] ClaimSkinStamp: stale skin stamp (this=%p, stamp=%u vs current=%u) -- self-healing\r\n",
         (void*)this, m_SkinStamp, g_SkinStampCounter);
 #endif
     m_SkinStamp = ++g_SkinStampCounter;
@@ -347,15 +366,16 @@ void BMD::ClaimSkinStamp() const
     }
 }
 
-void BMD::TransformCheap(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate, float _Scale)
+void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB,
+                         bool Translate, float _Scale)
 {
     m_pCurrentBoneTransform = BoneMatrix;
     SetActiveBoneTransform(BoneMatrix);
-    m_LastTranslate = Translate; // persist for RenderMesh GPU skinning path
-    m_LastSkinScale = _Scale;    // DXP-20 inc4: stashed for EnsureCpuVertices()
-    m_LastBoneScale = BoneScale; // DXP-20 inc4: snapshot of the global -- callers mutate it right
-                                  // after Transform() returns (e.g. monster edge-scale resets),
-                                  // so a deferred read of the live global would skin wrong.
+    m_LastTranslate = Translate;        // persist for RenderMesh GPU skinning path
+    m_LastSkinScale = _Scale;           // DXP-20 inc4: stashed for EnsureCpuVertices()
+    m_LastBoneScale = BoneScale;        // DXP-20 inc4: snapshot of the global -- callers mutate it right
+                                        // after Transform() returns (e.g. monster edge-scale resets),
+                                        // so a deferred read of the live global would skin wrong.
     m_SkinStamp = ++g_SkinStampCounter; // this BMD now owns the shared scratch arrays
     for (int i = 0; i < MAX_MESH; i++)
     {
@@ -406,7 +426,8 @@ void BMD::TransformCheap(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t
     // here is no worse than the existing sharing model.
 }
 
-void BMD::SkinVertex(int mesh, int vertexIndex, float(*BoneMatrix)[3][4], bool Translate, float _Scale, vec3_t out) const
+void BMD::SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool Translate, float _Scale,
+                     vec3_t out) const
 {
     const Vertex_t* v = &Meshs[mesh].Vertices[vertexIndex];
 
@@ -442,7 +463,7 @@ void BMD::SkinVertex(int mesh, int vertexIndex, float(*BoneMatrix)[3][4], bool T
         VectorAdd(out, BodyOrigin, out);
 }
 
-void BMD::SkinVertices(int mesh, float(*BoneMatrix)[3][4], bool Translate, float _Scale) const
+void BMD::SkinVertices(int mesh, float (*BoneMatrix)[3][4], bool Translate, float _Scale) const
 {
     const Mesh_t* m = &Meshs[mesh];
     for (int j = 0; j < m->NumVertices; j++)
@@ -460,8 +481,10 @@ void BMD::EnsureCpuVertices(int mesh) const
         return;
     }
 
-    if (mesh >= MAX_MESH || mesh >= NumMeshs) return;
-    if (m_CpuVertsReady[mesh]) return;
+    if (mesh >= MAX_MESH || mesh >= NumMeshs)
+        return;
+    if (m_CpuVertsReady[mesh])
+        return;
 
     SkinVertices(mesh, m_pCurrentBoneTransform, m_LastTranslate, m_LastSkinScale);
     m_CpuVertsReady[mesh] = true;
@@ -478,8 +501,10 @@ void BMD::EnsureCpuNormals(int mesh) const
         return;
     }
 
-    if (mesh >= MAX_MESH || mesh >= NumMeshs) return;
-    if (m_CpuNormalsReady[mesh]) return;
+    if (mesh >= MAX_MESH || mesh >= NumMeshs)
+        return;
+    if (m_CpuNormalsReady[mesh])
+        return;
 
     const Mesh_t* m = &Meshs[mesh];
     for (int j = 0; j < m->NumNormals; j++)
@@ -490,7 +515,8 @@ void BMD::EnsureCpuNormals(int mesh) const
         if (LightEnable)
         {
             float Luminosity = DotProduct(tn, m_LastLightPosition) * 0.8f + 0.4f;
-            if (Luminosity < 0.2f) Luminosity = 0.2f;
+            if (Luminosity < 0.2f)
+                Luminosity = 0.2f;
             IntensityTransform[mesh][j] = Luminosity;
         }
     }
@@ -499,12 +525,14 @@ void BMD::EnsureCpuNormals(int mesh) const
 
 void BMD::MarkCpuVerticesExternallyWritten(int mesh) const
 {
-    if (mesh < 0 || mesh >= MAX_MESH) return;
+    if (mesh < 0 || mesh >= MAX_MESH)
+        return;
     ClaimSkinStamp();
     m_CpuVertsReady[mesh] = true;
 }
 
-void BMD::Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate, float _Scale)
+void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate,
+                    float _Scale)
 {
     FRAME_PROFILE(Skinning); // DXP-20 increment 1 baseline measurement
     TransformCheap(BoneMatrix, BoundingBoxMin, BoundingBoxMax, OBB, Translate, _Scale);
@@ -607,8 +635,9 @@ void BMD::Transform(float(*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t Boun
         OBB->ZAxis[0] = 0.f;
         OBB->ZAxis[1] = 0.f;
     }
-    fTransformedSize = std::max<float>(std::max<float>(BoundingMax[0] - BoundingMin[0], BoundingMax[1] - BoundingMin[1]),
-        BoundingMax[2] - BoundingMin[2]);
+    fTransformedSize =
+        std::max<float>(std::max<float>(BoundingMax[0] - BoundingMin[0], BoundingMax[1] - BoundingMin[1]),
+                        BoundingMax[2] - BoundingMin[2]);
 }
 
 void BMD::TransformByObjectBone(vec3_t vResultPosition, OBJECT* pObject, int iBoneNumber, vec3_t vRelativePosition)
@@ -896,7 +925,8 @@ void BMD::AnimationTransformOnlySelf(vec3_t* arrOutSetfAllBonePositions, const O
 
     memset(arrBonesTMLocal, 0, sizeof(vec34_t) * NumBones);
 
-    Animation(arrBonesTMLocal, oSelf->AnimationFrame, oSelf->PriorAnimationFrame, oSelf->PriorAction, (const_cast<OBJECT*>(oSelf))->Angle, Temp, false, true, nullptr, -1, NumBones);
+    Animation(arrBonesTMLocal, oSelf->AnimationFrame, oSelf->PriorAnimationFrame, oSelf->PriorAction,
+              (const_cast<OBJECT*>(oSelf))->Angle, Temp, false, true, nullptr, -1, NumBones);
 
     for (int i_ = 0; i_ < NumBones; ++i_)
     {
@@ -953,11 +983,8 @@ void BMD::AnimationTransformOnlySelf(vec3_t* arrOutSetfAllBonePositions,
             LInterpolationF(fAnimationFrame, fAnimationFrameStart, fAnimationFrameEnd, fWeight);
         }
 
-        Animation(arrBonesTMLocal,
-            fAnimationFrame,
-            fPiriorAnimationFrame,
-            iPiriorAction,
-            v3RootAngle, Temp, false, true, nullptr, -1, NumBones);
+        Animation(arrBonesTMLocal, fAnimationFrame, fPiriorAnimationFrame, iPiriorAction, v3RootAngle, Temp, false,
+                  true, nullptr, -1, NumBones);
     }
 
     vec3_t	v3RelatePos;
@@ -1166,15 +1193,12 @@ void BMD::BindLightMaps()
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
             SmoothBitmap(lmp->Width, lmp->Height, lmp->Buffer);
 
-            BindTexture2D(0, i + IndexLightMap);
-            // DXP-08a: same GL_TEXTURE_ENV no-op as GlobalBitmap.cpp's OpenTga — FFP-only
-            // texture-combiner state the shader path never reads, guarded rather than deleted.
-            if (!g_CoreProfile) glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, lmp->Width, lmp->Height, 0, GL_RGB, GL_UNSIGNED_BYTE, lmp->Buffer);
+            mu::GetRenderer().BindTexture(i + IndexLightMap);
+            mu::GetRenderer().SetTexEnv(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+            mu::GetRenderer().SetTexParameter(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         }
     }
     LightMapEnable = true;
@@ -1195,47 +1219,14 @@ void BMD::ReleaseLightMaps()
     LightMapEnable = false;
 }
 
-// TASK-27: per-body MVP cache. Both VBO paths in RenderMesh() need Proj*ModelView, but
-// querying it via glGetFloatv per mesh is redundant driver work — the GL matrices provably
-// cannot change between meshes of one BeginRender()/EndRender() bracket (RenderMesh contains
-// no matrix ops, and no bracket in the codebase mutates matrices between RenderMesh calls;
-// verified 2026-07-31 across ZzzObject.cpp + all GameMap callers). The cache is scoped
-// strictly to the bracket: direct RenderMesh() calls outside a bracket always recompute,
-// and nested brackets (BeginRender → RenderBody → EndRender) fall back to recomputing
-// after the inner EndRender — conservative, never stale. Render-thread only.
-static GLfloat s_BodyMVP[16];
-static bool    s_InBodyRender = false;
-static bool    s_BodyMVPValid = false;
-
-// GlobalUBO is the CPU source of truth for MVP (fed by BeginOpengl()/BeginBitmap() per DXP-07a/b);
-// GetCurrentMVP() just applies the per-body cache on top of it.
-static void GetCurrentMVP(GLfloat outMVP[16])
-{
-    if (s_InBodyRender && s_BodyMVPValid)
-    {
-        memcpy(outMVP, s_BodyMVP, sizeof(s_BodyMVP));
-        return;
-    }
-
-    memcpy(outMVP, GlobalUBO::Instance().GetMVP(), sizeof(GLfloat) * 16);
-
-    if (s_InBodyRender)
-    {
-        memcpy(s_BodyMVP, outMVP, sizeof(s_BodyMVP));
-        s_BodyMVPValid = true;
-    }
-}
-
 void BMD::BeginRender(float Alpha)
 {
-    s_InBodyRender = true;
-    s_BodyMVPValid = false;
+    mu::GetRenderer().PushMatrix();
 }
 
 void BMD::EndRender()
 {
-    s_InBodyRender = false;
-    s_BodyMVPValid = false;
+    mu::GetRenderer().PopMatrix();
 }
 
 extern double WorldTime;
@@ -1291,17 +1282,17 @@ void BMD::EndRenderCoinHeap(int coinCount)
 
     constexpr int meshIndex = 0;
     Mesh_t* m = &Meshs[meshIndex];
-    const int vertexCount = m->NumTriangles * 3 * coinCount;
 
-    PassthroughShader::Instance().SetUseTexture(true);
-    IR::Begin(GL_TRIANGLES);
-    for (int i = 0; i < vertexCount; i++)
+    const int numVerts = m->NumTriangles * 3 * coinCount;
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
     {
-        IR::Color4f(colors[i][0], colors[i][1], colors[i][2], colors[i][3]);
-        IR::TexCoord2f(texCoords[i][0], texCoords[i][1]);
-        IR::Vertex3fv(vertices[i]);
+        const vec4_t& c = colors[i];
+        const std::uint32_t color = PackABGR(c[0], c[1], c[2], c[3]);
+        muVerts[static_cast<std::size_t>(i)] =
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, texCoords[i][0], texCoords[i][1], color};
     }
-    IR::End();
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
 void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshIndex, float blendMeshAlpha, float blendMeshTextureCoordU, float blendMeshTextureCoordV, int explicitTextureIndex)
@@ -1357,14 +1348,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     }
 
     bool enableLight = LightEnable;
-    // FIX-549: modulates the bodyLight value fed to BMDMeshShader::Bind() below for the
-    // blendMeshIndex<=-2 branch (Force Wave / MODEL_WAVES-style fade effects). Under Core
-    // Profile, glColor3f() (used further down for this same branch) is intercepted into a
-    // no-op -- the shader never sees the fade, so it must be carried through explicitly here.
-    float blendTintAlpha = 1.0f;
     if (meshIndex == StreamMesh)
     {
-        glColor3fv(BodyLight);
         enableLight = false;
     }
     // DXP-20 inc4 Step C: the LightTransform-materializing loop that used to run right here
@@ -1374,6 +1359,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     // that actually read it.
 
     int finalRenderFlags = renderFlags;
+    bool useBlendMeshColor = false;
     if ((renderFlags & RENDER_COLOR) == RENDER_COLOR)
     {
         finalRenderFlags = RENDER_COLOR;
@@ -1396,14 +1382,9 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
 
         DisableTexture();
-        if (alpha >= 0.99f)
-        {
-            glColor3fv(BodyLight);
-        }
-        else
+        if (alpha < 0.99f)
         {
             EnableAlphaTest();
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], alpha);
         }
     }
     else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME ||
@@ -1520,12 +1501,8 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             DisableDepthTest();
         }
 
-        glColor3f(BodyLight[0] * blendMeshAlpha,
-            BodyLight[1] * blendMeshAlpha,
-            BodyLight[2] * blendMeshAlpha);
-        //glColor3f(BlendMeshLight,BlendMeshLight,BlendMeshLight);
+        useBlendMeshColor = true;
         enableLight = false;
-        blendTintAlpha = blendMeshAlpha;
     }
     else if ((renderFlags & RENDER_TEXTURE) == RENDER_TEXTURE)
     {
@@ -1583,353 +1560,170 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
         }
     }
 
-    bool enableColor = (enableLight && finalRenderFlags == RENDER_TEXTURE)
-        || finalRenderFlags == RENDER_CHROME
-        || finalRenderFlags == RENDER_CHROME4
-        || finalRenderFlags == RENDER_OIL;
+    const bool shadowMap = (renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP;
+    const float colorScale = useBlendMeshColor ? blendMeshAlpha : 1.0f;
+    const float baseAlpha = (useBlendMeshColor || meshIndex == StreamMesh) ? 1.0f : alpha;
+    const bool useChrome = (renderFlags & RENDER_CHROME) || (renderFlags & RENDER_CHROME2) ||
+                           (renderFlags & RENDER_CHROME3) || (renderFlags & RENDER_CHROME4) ||
+                           (renderFlags & RENDER_CHROME5) || (renderFlags & RENDER_CHROME6) ||
+                           (renderFlags & RENDER_CHROME7) || (renderFlags & RENDER_OIL) || (renderFlags & RENDER_METAL);
+    const bool usesCpuLighting = enableLight && finalRenderFlags == RENDER_TEXTURE;
 
-    bool bShaderActive = CItemSpecularShader::Instance().GetActiveVariant() != SHADER_VARIANT_NONE;
-
-    const bool useChrome = (renderFlags & RENDER_CHROME)  || (renderFlags & RENDER_CHROME2) ||
-                           (renderFlags & RENDER_CHROME3)  || (renderFlags & RENDER_CHROME4) ||
-                           (renderFlags & RENDER_CHROME5)  || (renderFlags & RENDER_CHROME6) ||
-                           (renderFlags & RENDER_CHROME7)  || (renderFlags & RENDER_OIL)     ||
-                           (renderFlags & RENDER_METAL);
-
-    // TASK-28 increment 2 / DXP-02 increments 1-3: item specular tiers 1-4 (+7/+8, +9/+10, +11/+12,
-    // +13/+15 gear) — renderFlags here carries no chrome bits at all (the multi-texture blend is
-    // purely a function of the bound CItemSpecularShader variant, not renderFlags), so `useChrome`
-    // is false for this call; only the blanket `!bShaderActive` below excludes it from the GPU path.
-    const EShaderVariant activeSpecularVariant = CItemSpecularShader::Instance().GetActiveVariant();
-    const bool itemSpecularGpuEligible = bShaderActive &&
-        (activeSpecularVariant == SHADER_VARIANT_CHROME_1 || activeSpecularVariant == SHADER_VARIANT_CHROME_METAL ||
-         activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V1 || activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V2);
-
-    // DXP-20 inc4 Step C: materializes NormalTransform/IntensityTransform plus the two CPU-fallback-
-    // only derived products (LightTransform, g_chrome) that used to be computed unconditionally
-    // earlier in this function -- even for meshes that end up on the GPU-skinned draw path below,
-    // which computes lighting and chrome UVs in-shader and never reads either array. Called from
-    // both CPU-fallback sub-paths (UploadDynamicBuffers and the legacy client-array loop) right
-    // before each needs the result; a no-op for meshes that take the true GPU-skinned return path,
-    // since neither call site is reached in that case. Bodies are unchanged from their original
-    // locations (were: the `else if (enableLight)` block above, and the chrome dispatch's
-    // Wave2/L/g_chrome loop above).
-    auto materializeCpuLightingAndChrome = [&]()
+    auto materializeCpuDerivedData = [&]()
     {
+        if (!usesCpuLighting && !useChrome && !(renderFlags & RENDER_WAVE))
+        {
+            return;
+        }
         EnsureCpuNormals(meshIndex);
 
-        if (enableLight)
+        if (usesCpuLighting)
         {
-            for (int j = 0; j < m->NumNormals; j++)
+            for (int j = 0; j < m->NumNormals; ++j)
             {
                 VectorScale(BodyLight, IntensityTransform[meshIndex][j], LightTransform[meshIndex][j]);
             }
         }
 
-        if (useChrome)
+        if (!useChrome)
         {
-            float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
-            vec3_t L = { (float)(cos(WorldTime * 0.001f)), (float)(sin(WorldTime * 0.002f)), 1.f };
-            for (int j = 0; j < m->NumNormals; j++)
-            {
-                if (j > MAX_VERTICES) break;
-                const auto normal = NormalTransform[meshIndex][j];
+            return;
+        }
 
-                if ((renderFlags & RENDER_CHROME2) == RENDER_CHROME2)
-                {
-                    g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + Wave2 * 2.f;
-                    g_chrome[j][1] = (normal[1] + normal[0]) * 1.0f + Wave2 * 3.f;
-                }
-                else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
-                {
-                    g_chrome[j][0] = DotProduct(normal, LightVector);
-                    g_chrome[j][1] = 1.f - DotProduct(normal, LightVector);
-                }
-                else if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
-                {
-                    g_chrome[j][0] = DotProduct(normal, L);
-                    g_chrome[j][1] = 1.f - DotProduct(normal, L);
-                    g_chrome[j][1] -= normal[2] * 0.5f + wave * 3.f;
-                    g_chrome[j][0] += normal[1] * 0.5f + L[1] * 3.f;
-                }
-                else if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
-                {
-                    g_chrome[j][0] = DotProduct(normal, L);
-                    g_chrome[j][1] = 1.f - DotProduct(normal, L);
-                    g_chrome[j][1] -= normal[2] * 2.5f + wave * 1.f;
-                    g_chrome[j][0] += normal[1] * 3.f + L[1] * 5.f;
-                }
-                else if ((renderFlags & RENDER_CHROME6) == RENDER_CHROME6)
-                {
-                    g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + Wave2 * 2.f;
-                    g_chrome[j][1] = (normal[2] + normal[0]) * 0.8f + Wave2 * 2.f;
-                }
-                else if ((renderFlags & RENDER_CHROME7) == RENDER_CHROME7)
-                {
-                    g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + static_cast<float>(WorldTime) * 0.00006f;
-                    g_chrome[j][1] = (normal[2] + normal[0]) * 0.8f + static_cast<float>(WorldTime) * 0.00006f;
-                }
-                else if ((renderFlags & RENDER_OIL) == RENDER_OIL)
-                {
-                    g_chrome[j][0] = normal[0];
-                    g_chrome[j][1] = normal[1];
-                }
-                else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME)
-                {
-                    g_chrome[j][0] = normal[2] * 0.5f + wave;
-                    g_chrome[j][1] = normal[1] * 0.5f + wave * 2.f;
-                }
-                else
-                {
-                    g_chrome[j][0] = normal[2] * 0.5f + 0.2f;
-                    g_chrome[j][1] = normal[1] * 0.5f + 0.5f;
-                }
+        const float wave2 = static_cast<int>(WorldTime) % 5000 * 0.00024f - 0.4f;
+        vec3_t light = {static_cast<float>(cos(WorldTime * 0.001f)), static_cast<float>(sin(WorldTime * 0.002f)), 1.0f};
+        for (int j = 0; j < m->NumNormals && j < MAX_VERTICES; ++j)
+        {
+            const auto normal = NormalTransform[meshIndex][j];
+            if ((renderFlags & RENDER_CHROME2) == RENDER_CHROME2)
+            {
+                g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + wave2 * 2.0f;
+                g_chrome[j][1] = (normal[1] + normal[0]) + wave2 * 3.0f;
+            }
+            else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
+            {
+                g_chrome[j][0] = DotProduct(normal, LightVector);
+                g_chrome[j][1] = 1.0f - g_chrome[j][0];
+            }
+            else if ((renderFlags & RENDER_CHROME4) == RENDER_CHROME4)
+            {
+                g_chrome[j][0] = DotProduct(normal, light);
+                g_chrome[j][1] = 1.0f - g_chrome[j][0];
+                g_chrome[j][1] -= normal[2] * 0.5f + wave * 3.0f;
+                g_chrome[j][0] += normal[1] * 0.5f + light[1] * 3.0f;
+            }
+            else if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
+            {
+                g_chrome[j][0] = DotProduct(normal, light);
+                g_chrome[j][1] = 1.0f - g_chrome[j][0];
+                g_chrome[j][1] -= normal[2] * 2.5f + wave;
+                g_chrome[j][0] += normal[1] * 3.0f + light[1] * 5.0f;
+            }
+            else if ((renderFlags & RENDER_CHROME6) == RENDER_CHROME6)
+            {
+                g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + wave2 * 2.0f;
+                g_chrome[j][1] = g_chrome[j][0];
+            }
+            else if ((renderFlags & RENDER_CHROME7) == RENDER_CHROME7)
+            {
+                g_chrome[j][0] = (normal[2] + normal[0]) * 0.8f + static_cast<float>(WorldTime) * 0.00006f;
+                g_chrome[j][1] = g_chrome[j][0];
+            }
+            else if ((renderFlags & RENDER_OIL) == RENDER_OIL)
+            {
+                g_chrome[j][0] = normal[0];
+                g_chrome[j][1] = normal[1];
+            }
+            else if ((renderFlags & RENDER_CHROME) == RENDER_CHROME)
+            {
+                g_chrome[j][0] = normal[2] * 0.5f + wave;
+                g_chrome[j][1] = normal[1] * 0.5f + wave * 2.0f;
+            }
+            else
+            {
+                g_chrome[j][0] = normal[2] * 0.5f + 0.2f;
+                g_chrome[j][1] = normal[1] * 0.5f + 0.5f;
             }
         }
     };
 
-    if ((!bShaderActive || itemSpecularGpuEligible) && !(renderFlags & (RENDER_SHADOWMAP | RENDER_WAVE)))
+    const std::size_t maxVertexCount = static_cast<std::size_t>(m->NumTriangles) * 3;
+    const bool gpuSkinningEligible = CanGpuSkinMesh(finalRenderFlags, renderFlags, m_pCurrentBoneTransform);
+    bool gpuSkinningSubmitted = false;
+    if (gpuSkinningEligible)
     {
-        // Only attempt upload if not yet tried. m_MeshIndexCount is allocated at the TOP
-        // of UploadStaticVBOs() before the threshold check, so non-null means already attempted.
-        // Without this sentinel, models below the threshold call UploadStaticVBOs every frame.
-        if (m_VAO_Static == 0 && m_MeshIndexCount == nullptr)
+        const auto textureCoordinates = GetSkinningTextureCoordinates(renderFlags);
+        auto skinnedVertices = GetRendererSkinnedVertexScratch(maxVertexCount);
+        std::size_t skinnedVertexCount = 0;
+        for (int j = 0; j < m->NumTriangles; ++j)
         {
-            UploadStaticVBOs();
+            const auto* triangle = &m->Triangles[j];
+            for (int k = 0; k < triangle->Polygon; ++k)
+            {
+                const int vertexIndex = triangle->VertexIndex[k];
+                const int normalIndex = triangle->NormalIndex[k];
+                const auto& vertex = m->Vertices[vertexIndex];
+                const auto& normal = m->Normals[normalIndex];
+                const auto& texCoord = m->TexCoords[triangle->TexCoordIndex[k]];
+                const bool useMeshTextureCoordinates = textureCoordinates == mu::SkinningTextureCoordinates::Mesh;
+                const float u =
+                    texCoord.TexCoordU + (useMeshTextureCoordinates && EnableWave ? blendMeshTextureCoordU : 0.0f);
+                const float v =
+                    texCoord.TexCoordV + (useMeshTextureCoordinates && EnableWave ? blendMeshTextureCoordV : 0.0f);
+                const std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
+                                                     BodyLight[2] * colorScale, baseAlpha);
+                skinnedVertices[skinnedVertexCount++] = {vertex.Position[0],
+                                                         vertex.Position[1],
+                                                         vertex.Position[2],
+                                                         normal.Normal[0],
+                                                         normal.Normal[1],
+                                                         normal.Normal[2],
+                                                         u,
+                                                         v,
+                                                         color,
+                                                         vertex.Node,
+                                                         normal.Node};
+            }
         }
 
-        // GPU Skinning path for static meshes (when chrome UV is not needed, or is the plain
-        // RENDER_CHROME variant — TASK-28 increment 1: the chrome UV is generated in-shader from
-        // the GPU-skinned normal instead of requiring the CPU dynamic-VBO rebuild below. Other
-        // chrome variants (CHROME2..7/OIL/METAL) are unchanged and still fall through to that path.
-        const bool chromeGpuEligible = (finalRenderFlags == RENDER_CHROME) && !bShaderActive;
-        const bool staticGpuBufferReady = (m_VAO_StaticGPU != 0);
-        if (m_HasStaticGPUVBO && staticGpuBufferReady && (!useChrome || chromeGpuEligible) &&
-            m_MeshIndexCount && m_MeshIndexOffset && m_MeshIndexCount[meshIndex] > 0)
-        {
-            int shaderRenderMode = 0;
-            if (finalRenderFlags == RENDER_BRIGHT) shaderRenderMode = 2;
-            else if (chromeGpuEligible) shaderRenderMode = 3;
-            else if (itemSpecularGpuEligible)
-            {
-                if (activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V2) shaderRenderMode = 7;
-                else if (activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V1) shaderRenderMode = 6;
-                else if (activeSpecularVariant == SHADER_VARIANT_CHROME_METAL) shaderRenderMode = 5;
-                else shaderRenderMode = 4;
-            }
-
-            // TASK-27: MVP fetched via per-body cache — computed once per BeginRender/EndRender
-            // bracket instead of re-querying the driver for every mesh.
-            GLfloat mvp[16];
-            GetCurrentMVP(mvp);
-
-            // Upload active object's bone transformation palette to BoneUBO (Slot 2).
-            // Always upload all MAX_BONES (200) matrices because armor items reference character bones > NumBones.
-            // UploadBones() dedups against (pointer, g_BoneTransformVersion) — body + every
-            // equipped armor piece of one character share the same palette and version, so
-            // only the first RenderMesh() call of that group actually re-uploads.
-            const void* activeBones = g_pActiveBoneTransform ? (const void*)g_pActiveBoneTransform : (m_pCurrentBoneTransform ? (const void*)m_pCurrentBoneTransform : (const void*)BoneTransform);
-            BoneUBO::Instance().UploadBones(activeBones, MAX_BONES, g_BoneTransformVersion);
-
-            GLuint activeTexID = texture ? texture->TextureNumber : 0;
-            // GPU skinning world-space placement:
-            //   Translate=true  → bone matrices are in local skeleton space; BodyOrigin+BodyScale shift to world.
-            //   Translate=false → bone matrices already encode world position (world objects, effects);
-            //                     pass identity (origin=0, scale=1) so the shader adds nothing.
-            const float* gpuBodyOrigin = m_LastTranslate ? BodyOrigin : nullptr; // nullptr → BMDMeshShader uses (0,0,0)
-            float        gpuBodyScale  = m_LastTranslate ? BodyScale  : 1.0f;
-            // `wave` (function-top local, computed at line ~1118) matches the CPU g_chrome[] formula's
-            // wave term exactly — consumed by the shader when shaderRenderMode is 3 (chromeGpuEligible)
-            // or 4 (itemSpecularGpuEligible).
-            GLuint chromeTex1ID = 0;
-            GLuint metalTexID = 0;
-            GLuint chromeTex2ID = 0;
-            float chromeWave2 = 0.0f;
-            float chromeLightVecX = 0.0f, chromeLightVecY = 0.0f;
-            const float* specularTint = nullptr;
-            int chromeVariant = 0;
-            float chromeTimeTerm = 0.0f;
-            if (itemSpecularGpuEligible)
-            {
-                chromeTex1ID = Bitmaps.GetTexture(BITMAP_CHROME)->TextureNumber;
-                specularTint = CItemSpecularShader::Instance().GetSpecularTint();
-                if (activeSpecularVariant == SHADER_VARIANT_CHROME_METAL || activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V1 ||
-                    activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V2)
-                    metalTexID = Bitmaps.GetTexture(BITMAP_SHINY)->TextureNumber;
-                if (activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V1 || activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V2)
-                    chromeTex2ID = Bitmaps.GetTexture(BITMAP_CHROME2)->TextureNumber;
-                if (activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V1)
-                {
-                    // Matches the CPU g_chrome[] RENDER_CHROME2 prepass's Wave2s exactly (ZzzBMD.cpp ~1631).
-                    chromeWave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
-                }
-                else if (activeSpecularVariant == SHADER_VARIANT_FULL_SPECULAR_V2)
-                {
-                    // Matches the CPU g_chrome[] RENDER_CHROME4 prepass's Lp vector exactly (ZzzBMD.cpp ~1633).
-                    chromeLightVecX = (float)cos(WorldTime * 0.001f);
-                    chromeLightVecY = (float)sin(WorldTime * 0.002f);
-                }
-            }
-            else if (chromeGpuEligible)
-            {
-                // DXP-20 inc5: finalRenderFlags collapses CHROME2/3/5/6/7/METAL down to RENDER_CHROME
-                // (see the `finalRenderFlags = RENDER_CHROME;` default a few hundred lines up), so this
-                // GPU-skinned path was already silently taking these variants before this uniform
-                // existed -- always with the plain-chrome formula. Select the CPU-verified per-variant
-                // formula (ZzzBMD.cpp's g_chrome[] loop, same bit-check order) via u_ChromeVariant.
-                // CHROME4 and OIL get their own distinct finalRenderFlags and never reach this branch --
-                // they correctly stay on the CPU dynamic-VBO path (mode 1) with the right formula already.
-                if ((renderFlags & RENDER_CHROME2) == RENDER_CHROME2)
-                {
-                    chromeVariant = 1;
-                    chromeWave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
-                }
-                else if ((renderFlags & RENDER_CHROME3) == RENDER_CHROME3)
-                {
-                    chromeVariant = 2;
-                }
-                else if ((renderFlags & RENDER_CHROME5) == RENDER_CHROME5)
-                {
-                    chromeVariant = 3;
-                    chromeLightVecX = (float)cos(WorldTime * 0.001f);
-                    chromeLightVecY = (float)sin(WorldTime * 0.002f);
-                }
-                else if ((renderFlags & RENDER_CHROME6) == RENDER_CHROME6)
-                {
-                    chromeVariant = 4;
-                    chromeWave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
-                }
-                else if ((renderFlags & RENDER_CHROME7) == RENDER_CHROME7)
-                {
-                    chromeVariant = 5;
-                    chromeTimeTerm = static_cast<float>(WorldTime) * 0.00006f;
-                }
-                else if ((renderFlags & RENDER_METAL) == RENDER_METAL)
-                {
-                    chromeVariant = 6;
-                }
-                // else: plain RENDER_CHROME -> chromeVariant stays 0 (existing formula, untouched).
-            }
-            // DXP-20 increment 1: lighting moves in-shader (BMDMeshShader now computes it from the
-            // GPU-skinned normal + u_LightDir/u_BodyLight/u_LightEnable) — the per-corner
-            // LightTransform color VBO upload that used to run here every draw is gone; only alpha
-            // and the light state need passing, as uniforms. `useLight` mirrors BMD::Transform's
-            // IntensityTransform gating (RENDER_BRIGHT / !LightEnable / StreamMesh keep flat BodyLight).
-            bool isBright = (renderFlags & RENDER_BRIGHT) != 0;
-            bool useLight = !isBright && (LightEnable && meshIndex != StreamMesh);
-
-            // FIX-549: blendTintAlpha is 1.0 outside the blendMeshIndex<=-2 branch (no-op here),
-            // and blendMeshAlpha inside it -- carries that branch's fade into the shader uniform
-            // since glColor3f() above is a no-op under Core Profile.
-            const float shaderBodyLight[3] = {
-                BodyLight[0] * blendTintAlpha,
-                BodyLight[1] * blendTintAlpha,
-                BodyLight[2] * blendTintAlpha
-            };
-
-            BMDMeshShader::Instance().Bind(shaderRenderMode, EnableWave ? blendMeshTextureCoordU : 0.0f, EnableWave ? blendMeshTextureCoordV : 0.0f, activeTexID, mvp, 1, gpuBodyOrigin, gpuBodyScale, wave, chromeTex1ID, specularTint, metalTexID, chromeTex2ID, chromeWave2, chromeLightVecX, chromeLightVecY, m_LastLightPosition, shaderBodyLight, useLight ? 1 : 0, alpha, chromeVariant, chromeTimeTerm);
-
-            const int flatCount  = m_MeshIndexCount[meshIndex];
-            const int baseCorner = m_MeshIndexOffset[meshIndex];
-
-            BindVAO(m_VAO_StaticGPU);
-
-            glDrawArrays(GL_TRIANGLES, baseCorner, flatCount);
-            FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
-
-            // DXP-22 step 4: no reflexive BindVAO(0)/Unbind() here -- the next draw's own Bind()/
-            // BindVAO() call (any of the 4 shader classes, or this same one) self-corrects via the
-            // cache regardless of what's left bound. The only case that needs program forced back to
-            // 0 is immediately before raw fixed-function glBegin/glEnd draws (ZzzLodTerrain.cpp's
-            // grass-pass sites), which now call UnbindAllShaders() explicitly at pass level instead
-            // of relying on this per-mesh reset. See DXP-22-bind-state-monopoly-perf.md.
-            // GLP-06: no trailing glBindBuffer(GL_ARRAY_BUFFER, 0) either -- a VAO doesn't consult
-            // the generic GL_ARRAY_BUFFER binding point at draw time, only what was bound when each
-            // glVertexAttribPointer call captured it, so this unbind affected nothing.
-            return;
-        }
-
-        // Excludes bShaderActive: this branch binds BMDMeshShader directly, which would silently
-        // steal the GL program away from CItemSpecularShader's already-bound program (TASK-28
-        // increment 2) for any item-specular mesh that falls through here (e.g. lacking a static
-        // GPU VBO). Such meshes must instead fall all the way through to the legacy
-        // CItemSpecularShader CPU path below, which is unaffected by this exclusion.
-        if (!bShaderActive && m_StaticGeomReady && m_MeshIndexCount && m_MeshIndexOffset
-            && m_MeshIndexCount[meshIndex] > 0)
-        {
-            materializeCpuLightingAndChrome(); // DXP-20 inc4: UploadDynamicBuffers() reads LightTransform/g_chrome
-            UploadDynamicBuffers(meshIndex, alpha, renderFlags);
-
-            // Only draw via VBO path if dynamic buffers were successfully uploaded this frame
-            const bool dynVBReady = (m_VBO_Dynamic != 0);
-            if (m_DynBufsReady && dynVBReady)
-            {
-                int shaderRenderMode = 0;
-                if (finalRenderFlags == RENDER_BRIGHT)
-                {
-                    shaderRenderMode = 2;
-                }
-                else if (finalRenderFlags == RENDER_CHROME || finalRenderFlags == RENDER_CHROME4 || finalRenderFlags == RENDER_OIL)
-                {
-                    shaderRenderMode = 1;
-                }
-
-                // TASK-27: MVP fetched via per-body cache — computed once per BeginRender/EndRender
-                // bracket instead of re-querying the driver for every mesh.
-                GLfloat mvp[16];
-                GetCurrentMVP(mvp);
-
-                GLuint activeTexID = texture ? texture->TextureNumber : 0;
-                BMDMeshShader::Instance().Bind(shaderRenderMode, EnableWave ? blendMeshTextureCoordU : 0.0f, EnableWave ? blendMeshTextureCoordV : 0.0f, activeTexID, mvp, 0);
-
-                // GLP-06: single interleaved VBO (Pos vec3 | UV vec2 | Color vec4, 9 floats/36 bytes
-                // stride) whose attribute format is baked into m_VAO_Static once, the first time
-                // UploadDynamicBuffers() creates m_VBO_Dynamic (see that function) -- not
-                // re-specified here on every draw. BindVAO alone is enough; the VAO already knows
-                // which buffer and layout to read.
-                BindVAO(m_VAO_Static);
-
-                // Flat expansion — glDrawArrays starting at index 0.
-                glDrawArrays(GL_TRIANGLES, 0, m_MeshIndexCount[meshIndex]);
-                FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
-
-                // DXP-22 step 4: no reflexive BindVAO(0)/Unbind() here -- see the GPU-skinned path
-                // above for the full reasoning (self-corrects via the wrapper cache). GLP-06: no
-                // trailing glBindBuffer(GL_ARRAY_BUFFER, 0) either, same reasoning as that path.
-                return;
-            }
-        }
+        mu::SkinningParameters skinning{
+            .boneMatrices = {&m_pCurrentBoneTransform[0][0][0], MAX_BONES * 12u},
+            .paletteVersion = g_BoneTransformVersion,
+            .bodyOrigin = {BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]},
+            .bodyScale = BodyScale,
+            .boneScale = m_LastBoneScale,
+            .restPoseScale = m_LastSkinScale,
+            .lightDirection = {m_LastLightPosition[0], m_LastLightPosition[1], m_LastLightPosition[2]},
+            .textureCoordinateOffset = {blendMeshTextureCoordU, blendMeshTextureCoordV},
+            .chromeWave = wave,
+            .chromeWave2 = static_cast<int>(WorldTime) % 5000 * 0.00024f - 0.4f,
+            .chromeLight = {static_cast<float>(cos(WorldTime * 0.001f)), static_cast<float>(sin(WorldTime * 0.002f))},
+            .chromeTimeTerm = static_cast<float>(WorldTime) * 0.00006f,
+            .textureCoordinates = textureCoordinates,
+            .translate = m_LastTranslate,
+            .lightEnabled = usesCpuLighting,
+        };
+        gpuSkinningSubmitted =
+            mu::GetRenderer().RenderSkinnedTriangles(skinnedVertices.first(skinnedVertexCount), 0u, skinning);
     }
 
-#ifdef _DEBUG
-    // DXP-08a Category 4 investigation (temporary): one-shot log of why this (model,mesh)
-    // fell through to the legacy client-array path instead of a GPU VBO path, keyed on
-    // (this, meshIndex) so repeats across frames don't spam. Remove once the trigger
-    // condition is understood and the fallback itself is ported.
+    const Render::Models::GpuSkinningPath skinningPath =
+        Render::Models::ResolveGpuSkinningPath(gpuSkinningEligible, gpuSkinningSubmitted);
+    if (skinningPath == Render::Models::GpuSkinningPath::GpuSubmitted)
     {
-        static std::set<std::pair<void*, int>> s_seenFallback;
-        if (s_seenFallback.insert({ (void*)this, meshIndex }).second)
-        {
-            g_ErrorReport.Write(L"[DXP-08a-CAT4] RenderMesh fallback: this=%p meshIndex=%d NumMeshs=%d "
-                L"bShaderActive=%d m_VAO_Static=%u m_MeshIndexCount=%p m_HasStaticGPUVBO=%d "
-                L"m_VAO_StaticGPU=%u m_DynBufsReady=%d m_VBO_Dynamic=%u renderFlags=0x%X\r\n",
-                (void*)this, meshIndex, NumMeshs, bShaderActive ? 1 : 0,
-                m_VAO_Static, (void*)m_MeshIndexCount, m_HasStaticGPUVBO ? 1 : 0,
-                m_VAO_StaticGPU, m_DynBufsReady ? 1 : 0, m_VBO_Dynamic, renderFlags);
-        }
+        FrameProfiler::Count(FrameProfiler::Counter::GpuSkinningSubmissions);
+        return;
     }
-#endif // _DEBUG
+    if (skinningPath == Render::Models::GpuSkinningPath::GpuFailed)
+    {
+        FrameProfiler::Count(FrameProfiler::Counter::GpuSkinningFailures);
+        return;
+    }
 
-    // DXP-20 inc4: legacy client-array path -- reads VertexTransform/NormalTransform (RENDER_WAVE)
-    // directly below, plus LightTransform/g_chrome via materializeCpuLightingAndChrome() (the
-    // UploadDynamicBuffers call above already ran its own copy of this for its own fallthrough case;
-    // both are idempotent per-mesh, so no double work if this is reached after that one).
+    FrameProfiler::Count(FrameProfiler::Counter::CpuSkinningIneligible);
     EnsureCpuVertices(meshIndex);
-    materializeCpuLightingAndChrome();
-
-    auto vertices = RenderArrayVertices;
-    auto colors = RenderArrayColors;
-    auto texCoords = RenderArrayTexCoords;
+    materializeCpuDerivedData();
+    auto rendererVertices = GetRendererVertexScratch(maxVertexCount);
 
     int target_vertex_index = -1;
     for (int j = 0; j < m->NumTriangles; j++)
@@ -1940,13 +1734,19 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             const int source_vertex_index = triangle->VertexIndex[k];
             target_vertex_index++;
 
-            VectorCopy(VertexTransform[meshIndex][source_vertex_index], vertices[target_vertex_index]);
-
-            Vector4(BodyLight[0], BodyLight[1], BodyLight[2], alpha, colors[target_vertex_index]);
+            vec3_t position;
+            vec4_t colorComponents;
+            vec2_t texCoord;
+            VectorCopy(VertexTransform[meshIndex][source_vertex_index], position);
+            Vector4(shadowMap ? 0.0f : BodyLight[0] * colorScale,
+                    shadowMap ? 0.0f : BodyLight[1] * colorScale,
+                    shadowMap ? 0.0f : BodyLight[2] * colorScale,
+                    baseAlpha,
+                    colorComponents);
 
             auto texco = m->TexCoords[triangle->TexCoordIndex[k]];
-            texCoords[target_vertex_index][0] = texco.TexCoordU;
-            texCoords[target_vertex_index][1] = texco.TexCoordV;
+            texCoord[0] = texco.TexCoordU;
+            texCoord[1] = texco.TexCoordV;
 
             int normalIndex = triangle->NormalIndex[k];
 
@@ -1956,42 +1756,42 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 {
                     if (EnableWave)
                     {
-                        texCoords[target_vertex_index][0] += blendMeshTextureCoordU;
-                        texCoords[target_vertex_index][1] += blendMeshTextureCoordV;
+                        texCoord[0] += blendMeshTextureCoordU;
+                        texCoord[1] += blendMeshTextureCoordV;
                     }
 
                     if (enableLight)
                     {
                         auto light = LightTransform[meshIndex][normalIndex];
-                        Vector4(light[0], light[1], light[2], alpha, colors[target_vertex_index]);
+                        Vector4(light[0], light[1], light[2], alpha, colorComponents);
                     }
 
                     break;
                 }
                 case RENDER_CHROME:
                 {
-                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0];
-                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1];
+                    texCoord[0] = g_chrome[normalIndex][0];
+                    texCoord[1] = g_chrome[normalIndex][1];
                     break;
                 }
                 case RENDER_CHROME4:
                 {
-                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] + blendMeshTextureCoordU;
-                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] + blendMeshTextureCoordV;
+                    texCoord[0] = g_chrome[normalIndex][0] + blendMeshTextureCoordU;
+                    texCoord[1] = g_chrome[normalIndex][1] + blendMeshTextureCoordV;
                     break;
                 }
                 case RENDER_OIL:
                 {
-                    texCoords[target_vertex_index][0] = g_chrome[normalIndex][0] * texCoords[target_vertex_index][0] + blendMeshTextureCoordU;
-                    texCoords[target_vertex_index][1] = g_chrome[normalIndex][1] * texCoords[target_vertex_index][1] + blendMeshTextureCoordV;
+                    texCoord[0] = g_chrome[normalIndex][0] * texCoord[0] + blendMeshTextureCoordU;
+                    texCoord[1] = g_chrome[normalIndex][1] * texCoord[1] + blendMeshTextureCoordV;
                     break;
                 }
             }
 
-            if ((renderFlags & RENDER_SHADOWMAP) == RENDER_SHADOWMAP)
+            if (shadowMap)
             {
                 vec3_t pos;
-                VectorSubtract(vertices[target_vertex_index], BodyOrigin, pos);
+                VectorSubtract(position, BodyOrigin, pos);
 
                 pos[0] += pos[2] * (pos[0] + 2000.f) / (pos[2] - 4000.f);
                 pos[2] = 5.f;
@@ -2004,52 +1804,350 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
                 float* normal = NormalTransform[meshIndex][normalIndex];
                 for (int iCoord = 0; iCoord < 3; ++iCoord)
                 {
-                    vertices[target_vertex_index][iCoord] += normal[iCoord] * time_sin;
+                    position[iCoord] += normal[iCoord] * time_sin;
                 }
             }
+
+            const std::uint32_t color = PackABGR(colorComponents[0], colorComponents[1], colorComponents[2],
+                                                  colorComponents[3]);
+            rendererVertices[static_cast<std::size_t>(target_vertex_index)] =
+                {position[0], position[1], position[2], 0.f, 0.f, 0.f, texCoord[0], texCoord[1], color};
         }
     }
 
-    const int vertexCount = target_vertex_index + 1;
+    const std::size_t renderedVertexCount = static_cast<std::size_t>(target_vertex_index + 1);
+    mu::GetRenderer().RenderTriangles(rendererVertices.first(renderedVertexCount), 0u);
+}
 
-#ifdef _DEBUG
-    // DXP-08a Category 4 investigation part 2 (temporary): the port didn't fix visibility on
-    // first soak -- log what's actually about to be submitted, in case vertexCount is 0/bogus
-    // or alpha is fully transparent, before assuming the IR:: submission itself is broken.
+void BMD::RenderMeshAlternative(int iRndExtFlag, int iParam, int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
+{
+    if (i >= NumMeshs || i < 0) return;
+
+    Mesh_t* m = &Meshs[i];
+    if (m->NumTriangles == 0) return;
+    float Wave = (int)WorldTime % 10000 * 0.0001f;
+
+    int Texture = IndexTexture[m->Texture];
+    if (Texture == BITMAP_HIDE)
+        return;
+    if (MeshTexture != -1)
+        Texture = MeshTexture;
+
+    BITMAP_t* pBitmap = Bitmaps.GetTexture(Texture);
+
+    bool EnableWave = false;
+    int streamMesh = StreamMesh;
+    if (m->m_csTScript != nullptr)
     {
-        static std::set<std::pair<void*, int>> s_seenSubmit;
-        if (s_seenSubmit.insert({ (void*)this, meshIndex }).second)
+        if (m->m_csTScript->getStreamMesh())
         {
-            g_ErrorReport.Write(L"[DXP-08a-CAT4-SUBMIT] this=%p meshIndex=%d vertexCount=%d "
-                L"NumTriangles=%d alpha=%.3f color0=(%.2f,%.2f,%.2f,%.2f) vertex0=(%.2f,%.2f,%.2f) "
-                L"finalRenderFlags=0x%X enableColor=%d enableLight=%d\r\n",
-                (void*)this, meshIndex, vertexCount, m->NumTriangles, alpha,
-                vertexCount > 0 ? colors[0][0] : -1.f, vertexCount > 0 ? colors[0][1] : -1.f,
-                vertexCount > 0 ? colors[0][2] : -1.f, vertexCount > 0 ? colors[0][3] : -1.f,
-                vertexCount > 0 ? vertices[0][0] : 0.f, vertexCount > 0 ? vertices[0][1] : 0.f,
-                vertexCount > 0 ? vertices[0][2] : 0.f, finalRenderFlags, enableColor ? 1 : 0,
-                enableLight ? 1 : 0);
+            streamMesh = i;
         }
     }
-#endif // _DEBUG
-
-    // DXP-08a Category 4: legacy client-array submit replaced with IR:: — the per-vertex
-    // computation above (position/color/texcoord, including the CHROME/OIL/WAVE variants)
-    // is unchanged; only how the already-computed vertices reach the GPU changes. This path
-    // is reached when bShaderActive is true but the active CItemSpecularShader variant isn't
-    // one of the GPU-eligible ones (see the m_VAO_Static gate above) — items render with the
-    // plain textured look here rather than their specular effect, matching what the stale
-    // "falls through to the legacy CItemSpecularShader CPU path" comment used to describe
-    // before DXP-02 removed that path; the alternative was rendering nothing at all under
-    // Core Profile, which is what this replaces.
-    IR::Begin(GL_TRIANGLES);
-    for (int i = 0; i < vertexCount; i++)
+    if ((i == BlendMesh || i == streamMesh) && (BlendMeshTexCoordU != 0.f || BlendMeshTexCoordV != 0.f))
     {
-        IR::Color4f(colors[i][0], colors[i][1], colors[i][2], colors[i][3]);
-        IR::TexCoord2f(texCoords[i][0], texCoords[i][1]);
-        IR::Vertex3fv(vertices[i]);
+        EnableWave = true;
     }
-    IR::End();
+
+    bool EnableLight = LightEnable;
+    if (i == StreamMesh)
+    {
+        EnableLight = false;
+    }
+    else if (EnableLight)
+    {
+        for (int j = 0; j < m->NumNormals; j++)
+        {
+            VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+        }
+    }
+
+    int Render = RenderFlag;
+    bool useBlendMeshColor = false;
+    if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
+    {
+        Render = RENDER_COLOR;
+        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+            EnableAlphaBlend();
+        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+            EnableAlphaBlendMinus();
+        else
+            DisableAlphaBlend();
+
+        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        {
+            DisableDepthTest();
+        }
+
+        DisableTexture();
+        if (Alpha < 0.99f)
+        {
+            EnableAlphaTest();
+        }
+    }
+    else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME ||
+        (RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 ||
+        (RenderFlag & RENDER_CHROME3) == RENDER_CHROME3 ||
+        (RenderFlag & RENDER_CHROME4) == RENDER_CHROME4 ||
+        (RenderFlag & RENDER_CHROME5) == RENDER_CHROME5 ||
+        (RenderFlag & RENDER_CHROME7) == RENDER_CHROME7 ||
+        (RenderFlag & RENDER_METAL) == RENDER_METAL ||
+        (RenderFlag & RENDER_OIL) == RENDER_OIL
+        )
+    {
+        if (m->m_csTScript != nullptr)
+        {
+            if (m->m_csTScript->getNoneBlendMesh()) return;
+        }
+        if (m->NoneBlendMesh)
+            return;
+        Render = RENDER_CHROME;
+        if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
+        {
+            Render = RENDER_CHROME4;
+        }
+        float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
+
+        vec3_t L = { (float)(cos(WorldTime * 0.001f)), (float)(sin(WorldTime * 0.002f)), 1.f };
+        for (int j = 0; j < m->NumNormals; j++)
+        {
+            if (j > MAX_VERTICES) break;
+            float* Normal = NormalTransform[i][j];
+
+            if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2)
+            {
+                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][1] = (Normal[1] + Normal[0]) * 1.0f + Wave2 * 3.f;
+            }
+            else if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3)
+            {
+                g_chrome[j][0] = DotProduct(Normal, LightVector);
+                g_chrome[j][1] = 1.f - DotProduct(Normal, LightVector);
+            }
+            else if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4)
+            {
+                g_chrome[j][0] = DotProduct(Normal, L);
+                g_chrome[j][1] = 1.f - DotProduct(Normal, L);
+                g_chrome[j][1] -= Normal[2] * 0.5f + Wave * 3.f;
+                g_chrome[j][0] += Normal[1] * 0.5f + L[1] * 3.f;
+            }
+            else if ((RenderFlag & RENDER_CHROME5) == RENDER_CHROME5)
+            {
+                Vector(0.1f, -0.23f, 0.22f, LightVector2);
+
+                g_chrome[j][0] = (DotProduct(Normal, LightVector2) /*+ Normal[1] + LightVector2[1]*3.f */) / 1.08f;
+                g_chrome[j][1] = (1.f - DotProduct(Normal, LightVector2) /*- Normal[2]*0.5f + 3.f */) / 1.08f;
+            }
+            else if ((RenderFlag & RENDER_CHROME6) == RENDER_CHROME6)
+            {
+                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][1] = (Normal[1] + Normal[0]) * 1.0f + Wave2 * 3.f;
+            }
+            else if ((RenderFlag & RENDER_CHROME7) == RENDER_CHROME7)
+            {
+                Vector(0.1f, -0.23f, 0.22f, LightVector2);
+
+                g_chrome[j][0] = (DotProduct(Normal, LightVector2)) / 1.08f;
+                g_chrome[j][1] = (1.f - DotProduct(Normal, LightVector2)) / 1.08f;
+            }
+            else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME)
+            {
+                g_chrome[j][0] = Normal[2] * 0.5f + Wave;
+                g_chrome[j][1] = Normal[1] * 0.5f + Wave * 2.f;
+            }
+            else
+            {
+                g_chrome[j][0] = Normal[2] * 0.5f + 0.2f;
+                g_chrome[j][1] = Normal[1] * 0.5f + 0.5f;
+            }
+        }
+
+        if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3
+            || (RenderFlag & RENDER_CHROME4) == RENDER_CHROME4
+            || (RenderFlag & RENDER_CHROME5) == RENDER_CHROME5
+            || (RenderFlag & RENDER_CHROME7) == RENDER_CHROME7
+            )
+        {
+            if (Alpha < 0.99f)
+            {
+                BodyLight[0] *= Alpha; BodyLight[1] *= Alpha; BodyLight[2] *= Alpha;
+            }
+            EnableAlphaBlend();
+        }
+        else if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+        {
+            if (Alpha < 0.99f)
+            {
+                BodyLight[0] *= Alpha; BodyLight[1] *= Alpha; BodyLight[2] *= Alpha;
+            }
+            EnableAlphaBlend();
+        }
+        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+            EnableAlphaBlendMinus();
+        else if ((RenderFlag & RENDER_LIGHTMAP) == RENDER_LIGHTMAP)
+            EnableLightMap();
+        else if (Alpha >= 0.99f)
+        {
+            DisableAlphaBlend();
+        }
+        else
+        {
+            EnableAlphaTest();
+        }
+
+        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        {
+            DisableDepthTest();
+        }
+
+        if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 && MeshTexture == -1)
+        {
+            BindTexture(BITMAP_CHROME2);
+        }
+        else if ((RenderFlag & RENDER_CHROME3) == RENDER_CHROME3 && MeshTexture == -1)
+        {
+            BindTexture(BITMAP_CHROME2);
+        }
+        else if ((RenderFlag & RENDER_CHROME4) == RENDER_CHROME4 && MeshTexture == -1)
+        {
+            BindTexture(BITMAP_CHROME2);
+        }
+        else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME && MeshTexture == -1)
+            BindTexture(BITMAP_CHROME);
+        else if ((RenderFlag & RENDER_METAL) == RENDER_METAL && MeshTexture == -1)
+            BindTexture(BITMAP_SHINY);
+        else
+            BindTexture(Texture);
+    }
+    else if (BlendMesh <= -2 || m->Texture == BlendMesh)
+    {
+        Render = RENDER_TEXTURE;
+        BindTexture(Texture);
+        if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+            EnableAlphaBlendMinus();
+        else
+            EnableAlphaBlend();
+
+        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        {
+            DisableDepthTest();
+        }
+
+        useBlendMeshColor = true;
+        EnableLight = false;
+    }
+    else if ((RenderFlag & RENDER_TEXTURE) == RENDER_TEXTURE)
+    {
+        Render = RENDER_TEXTURE;
+        BindTexture(Texture);
+        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+        {
+            EnableAlphaBlend();
+        }
+        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+        {
+            EnableAlphaBlendMinus();
+        }
+        else if (Alpha < 0.99f || pBitmap->Components == 4)
+        {
+            EnableAlphaTest();
+        }
+        else
+        {
+            DisableAlphaBlend();
+        }
+
+        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        {
+            DisableDepthTest();
+        }
+    }
+    else if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+    {
+        if (pBitmap->Components == 4 || m->Texture == BlendMesh)
+        {
+            return;
+        }
+        Render = RENDER_BRIGHT;
+        EnableAlphaBlend();
+        DisableTexture();
+        DisableDepthMask();
+
+        if ((RenderFlag & RENDER_NODEPTH) == RENDER_NODEPTH)
+        {
+            DisableDepthTest();
+        }
+    }
+    else
+    {
+        Render = RENDER_TEXTURE;
+    }
+
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
+    std::size_t vertexIndex = 0;
+    for (int j = 0; j < m->NumTriangles; j++)
+    {
+        Triangle_t* tp = &m->Triangles[j];
+        for (int k = 0; k < tp->Polygon; k++)
+        {
+            int vi = tp->VertexIndex[k];
+            int ni = tp->NormalIndex[k];
+
+            float u = 0.f;
+            float v = 0.f;
+            const float colorScale = useBlendMeshColor ? BlendMeshLight : 1.0f;
+            const float baseAlpha = (useBlendMeshColor || i == StreamMesh) ? 1.0f : Alpha;
+            std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
+                                           BodyLight[2] * colorScale, baseAlpha);
+
+            switch (Render)
+            {
+            case RENDER_TEXTURE:
+            {
+                TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
+                u = EnableWave ? texp->TexCoordU + BlendMeshTexCoordU : texp->TexCoordU;
+                v = EnableWave ? texp->TexCoordV + BlendMeshTexCoordV : texp->TexCoordV;
+                if (EnableLight)
+                {
+                    float* Light = LightTransform[i][ni];
+                    color = (Alpha >= 0.99f) ? PackABGR(Light[0], Light[1], Light[2], 1.f)
+                                             : PackABGR(Light[0], Light[1], Light[2], Alpha);
+                }
+                break;
+            }
+            case RENDER_CHROME:
+            {
+                u = g_chrome[ni][0];
+                v = g_chrome[ni][1];
+                color = (Alpha >= 0.99f) ? PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], 1.f)
+                                         : PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
+                break;
+            }
+            }
+            float px;
+            float py;
+            float pz;
+            if ((iRndExtFlag & RNDEXT_WAVE))
+            {
+                float fParam = static_cast<float>(static_cast<int>(WorldTime) + vi * 931) * 0.007f;
+                float fSin = sinf(fParam);
+                float* Normal = NormalTransform[i][ni];
+                px = VertexTransform[i][vi][0] + Normal[0] * fSin * 28.0f;
+                py = VertexTransform[i][vi][1] + Normal[1] * fSin * 28.0f;
+                pz = VertexTransform[i][vi][2] + Normal[2] * fSin * 28.0f;
+            }
+            else
+            {
+                px = VertexTransform[i][vi][0];
+                py = VertexTransform[i][vi][1];
+                pz = VertexTransform[i][vi][2];
+            }
+
+            float* n = NormalTransform[i][ni];
+            muVerts[vertexIndex++] = {px, py, pz, n[0], n[1], n[2], u, v, color};
+        }
+    }
+    mu::GetRenderer().RenderTriangles(muVerts.first(vertexIndex), 0u);
 }
 
 void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* obj)
@@ -2219,13 +2317,7 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
 
     int iBlendMesh = BlendMesh;
     BeginRender(Alpha);
-    if (!LightEnable)
-    {
-        if (Alpha >= 0.99f)
-            glColor3fv(BodyLight);
-        else
-            glColor4f(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
-    }
+    (void)LightEnable;
     for (int i = 0; i < NumMeshs; i++)
     {
         iBlendMesh = BlendMesh;
@@ -2245,24 +2337,14 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
                 if (shadowType == SHADOW_RENDER_COLOR)
                 {
                     DisableAlphaBlend();
-                    if (Alpha >= 0.99f)
-                        glColor3f(0.f, 0.f, 0.f);
-                    else
-                        glColor4f(0.f, 0.f, 0.f, Alpha);
 
                     RenderMesh(i, RENDER_COLOR | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV);
-                    glColor3f(1.f, 1.f, 1.f);
                 }
                 else if (shadowType == SHADOW_RENDER_TEXTURE)
                 {
                     DisableAlphaBlend();
-                    if (Alpha >= 0.99f)
-                        glColor3f(0.f, 0.f, 0.f);
-                    else
-                        glColor4f(0.f, 0.f, 0.f, Alpha);
 
                     RenderMesh(i, RENDER_TEXTURE | RENDER_SHADOWMAP, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV);
-                    glColor3f(1.f, 1.f, 1.f);
                 }
             }
         }
@@ -2272,6 +2354,264 @@ void BMD::RenderBody(int Flag, float Alpha, int BlendMesh, float BlendMeshLight,
             {
                 RenderMesh(i, Flag, Alpha, iBlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV, Texture);
             }
+        }
+    }
+    EndRender();
+}
+
+void BMD::RenderBodyAlternative(int iRndExtFlag, int iParam, int Flag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int HiddenMesh, int Texture)
+{
+    if (NumMeshs == 0) return;
+
+    BeginRender(Alpha);
+    (void)LightEnable;
+    for (int i = 0; i < NumMeshs; i++)
+    {
+        if (i != HiddenMesh)
+        {
+            RenderMeshAlternative(iRndExtFlag, iParam, i, Flag, Alpha, BlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV, Texture);
+        }
+    }
+    EndRender();
+}
+
+void BMD::RenderMeshTranslate(int i, int RenderFlag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int MeshTexture)
+{
+    if (i >= NumMeshs || i < 0) return;
+
+    Mesh_t* m = &Meshs[i];
+    if (m->NumTriangles == 0) return;
+    float Wave = (int)WorldTime % 10000 * 0.0001f;
+
+    int Texture = IndexTexture[m->Texture];
+    if (Texture == BITMAP_HIDE)
+        return;
+    if (Texture == BITMAP_SKIN)
+    {
+        if (HideSkin) return;
+        Texture = BITMAP_SKIN + Skin;
+    }
+    else if (Texture == BITMAP_WATER)
+    {
+        Texture = BITMAP_WATER + WaterTextureNumber;
+    }
+    if (MeshTexture != -1)
+        Texture = MeshTexture;
+
+    BITMAP_t* pBitmap = Bitmaps.GetTexture(Texture);
+
+    bool EnableWave = false;
+    int streamMesh = StreamMesh;
+    if (m->m_csTScript != nullptr)
+    {
+        if (m->m_csTScript->getStreamMesh())
+        {
+            streamMesh = i;
+        }
+    }
+    if ((i == BlendMesh || i == streamMesh) && (BlendMeshTexCoordU != 0.f || BlendMeshTexCoordV != 0.f))
+        EnableWave = true;
+
+    bool EnableLight = LightEnable;
+    if (i == StreamMesh)
+    {
+        EnableLight = false;
+    }
+    else if (EnableLight)
+    {
+        for (int j = 0; j < m->NumNormals; j++)
+        {
+            VectorScale(BodyLight, IntensityTransform[i][j], LightTransform[i][j]);
+        }
+    }
+
+    int Render = RenderFlag;
+    bool useBlendMeshColor = false;
+    if ((RenderFlag & RENDER_COLOR) == RENDER_COLOR)
+    {
+        Render = RENDER_COLOR;
+        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+            EnableAlphaBlend();
+        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+            EnableAlphaBlendMinus();
+        else
+            DisableAlphaBlend();
+        DisableTexture();
+    }
+    else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME
+        || (RenderFlag & RENDER_METAL) == RENDER_METAL
+        || (RenderFlag & RENDER_CHROME2) == RENDER_CHROME2
+        || (RenderFlag & RENDER_CHROME6) == RENDER_CHROME6
+        )
+    {
+        if (m->m_csTScript != nullptr)
+        {
+            if (m->m_csTScript->getNoneBlendMesh()) return;
+        }
+        if (m->NoneBlendMesh)
+            return;
+        Render = RENDER_CHROME;
+
+        float Wave2 = (int)WorldTime % 5000 * 0.00024f - 0.4f;
+
+        for (int j = 0; j < m->NumNormals; j++)
+        {
+            //			Normal_t *np = &m->Normals[j];
+            if (j > MAX_VERTICES) break;
+            float* Normal = NormalTransform[i][j];
+
+            if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2)
+            {
+                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][1] = (Normal[1] + Normal[0]) * 1.0f + Wave2 * 3.f;
+            }
+            else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME)
+            {
+                g_chrome[j][0] = Normal[2] * 0.5f + Wave;
+                g_chrome[j][1] = Normal[1] * 0.5f + Wave * 2.f;
+            }
+            else if ((RenderFlag & RENDER_CHROME6) == RENDER_CHROME6)
+            {
+                g_chrome[j][0] = (Normal[2] + Normal[0]) * 0.8f + Wave2 * 2.f;
+                g_chrome[j][1] = (Normal[1] + Normal[0]) * 1.0f + Wave2 * 3.f;
+            }
+            else
+            {
+                g_chrome[j][0] = Normal[2] * 0.5f + 0.2f;
+                g_chrome[j][1] = Normal[1] * 0.5f + 0.5f;
+            }
+        }
+
+        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+            EnableAlphaBlend();
+        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+            EnableAlphaBlendMinus();
+        else if ((RenderFlag & RENDER_LIGHTMAP) == RENDER_LIGHTMAP)
+            EnableLightMap();
+        else
+            DisableAlphaBlend();
+
+        if ((RenderFlag & RENDER_CHROME2) == RENDER_CHROME2 && MeshTexture == -1)
+        {
+            BindTexture(BITMAP_CHROME2);
+        }
+        else if ((RenderFlag & RENDER_CHROME) == RENDER_CHROME && MeshTexture == -1)
+            BindTexture(BITMAP_CHROME);
+        else if ((RenderFlag & RENDER_METAL) == RENDER_METAL && MeshTexture == -1)
+            BindTexture(BITMAP_SHINY);
+        else
+            BindTexture(Texture);
+    }
+    else if (BlendMesh <= -2 || m->Texture == BlendMesh)
+    {
+        Render = RENDER_TEXTURE;
+        BindTexture(Texture);
+        if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+            EnableAlphaBlendMinus();
+        else
+            EnableAlphaBlend();
+        useBlendMeshColor = true;
+        EnableLight = false;
+    }
+    else if ((RenderFlag & RENDER_TEXTURE) == RENDER_TEXTURE)
+    {
+        Render = RENDER_TEXTURE;
+        BindTexture(Texture);
+        if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+        {
+            EnableAlphaBlend();
+        }
+        else if ((RenderFlag & RENDER_DARK) == RENDER_DARK)
+        {
+            EnableAlphaBlendMinus();
+        }
+        else if (Alpha < 0.99f || pBitmap->Components == 4)
+        {
+            EnableAlphaTest();
+        }
+        else
+        {
+            DisableAlphaBlend();
+        }
+    }
+    else if ((RenderFlag & RENDER_BRIGHT) == RENDER_BRIGHT)
+    {
+        if (pBitmap->Components == 4 || m->Texture == BlendMesh)
+        {
+            return;
+        }
+        Render = RENDER_BRIGHT;
+        EnableAlphaBlend();
+        DisableTexture();
+        DisableDepthMask();
+    }
+    else
+    {
+        Render = RENDER_TEXTURE;
+    }
+
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(m->NumTriangles) * 3);
+    std::size_t vertexIndex = 0;
+    for (int j = 0; j < m->NumTriangles; j++)
+    {
+        vec3_t  pos;
+        Triangle_t* tp = &m->Triangles[j];
+        for (int k = 0; k < tp->Polygon; k++)
+        {
+            int vi = tp->VertexIndex[k];
+            int ni = tp->NormalIndex[k];
+
+            float u = 0.f;
+            float v = 0.f;
+            const float colorScale = useBlendMeshColor ? BlendMeshLight : 1.0f;
+            const float baseAlpha = (useBlendMeshColor || i == StreamMesh) ? 1.0f : Alpha;
+            std::uint32_t color = PackABGR(BodyLight[0] * colorScale, BodyLight[1] * colorScale,
+                                           BodyLight[2] * colorScale, baseAlpha);
+
+            switch (Render)
+            {
+            case RENDER_TEXTURE:
+            {
+                TexCoord_t* texp = &m->TexCoords[tp->TexCoordIndex[k]];
+                u = EnableWave ? texp->TexCoordU + BlendMeshTexCoordU : texp->TexCoordU;
+                v = EnableWave ? texp->TexCoordV + BlendMeshTexCoordV : texp->TexCoordV;
+                if (EnableLight)
+                {
+                    float* Light = LightTransform[i][ni];
+                    color = (Alpha >= 0.99f) ? PackABGR(Light[0], Light[1], Light[2], 1.f)
+                                             : PackABGR(Light[0], Light[1], Light[2], Alpha);
+                }
+                break;
+            }
+            case RENDER_CHROME:
+            {
+                u = g_chrome[ni][0];
+                v = g_chrome[ni][1];
+                color = (Alpha >= 0.99f) ? PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], 1.f)
+                                         : PackABGR(BodyLight[0], BodyLight[1], BodyLight[2], Alpha);
+                break;
+            }
+            }
+            VectorAdd(VertexTransform[i][vi], BodyOrigin, pos);
+
+            float* n = NormalTransform[i][ni];
+            muVerts[vertexIndex++] = {pos[0], pos[1], pos[2], n[0], n[1], n[2], u, v, color};
+        }
+    }
+    mu::GetRenderer().RenderTriangles(muVerts.first(vertexIndex), 0u);
+}
+
+void BMD::RenderBodyTranslate(int Flag, float Alpha, int BlendMesh, float BlendMeshLight, float BlendMeshTexCoordU, float BlendMeshTexCoordV, int HiddenMesh, int Texture)
+{
+    if (NumMeshs == 0) return;
+
+    BeginRender(Alpha);
+    (void)LightEnable;
+    for (int i = 0; i < NumMeshs; i++)
+    {
+        if (i != HiddenMesh)
+        {
+            RenderMeshTranslate(i, Flag, Alpha, BlendMesh, BlendMeshLight, BlendMeshTexCoordU, BlendMeshTexCoordV, Texture);
         }
     }
     EndRender();
@@ -2302,13 +2642,11 @@ __forceinline void CalcShadowPosition(vec3_t* position, const vec3_t origin, con
 __forceinline void GetClothShadowPosition(vec3_t* target, CPhysicsCloth* pCloth, const int index, const vec3_t origin, const float sx, const float sy)
 {
     pCloth->GetPosition(index, target);
-    if (!CPlanarShadowShader::Instance().IsActive())
-    {
-        CalcShadowPosition(target, origin, sx, sy);
-    }
+    CalcShadowPosition(target, origin, sx, sy);
 }
 
-void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy) const
+void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, const float sx, const float sy,
+    const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
@@ -2361,51 +2699,21 @@ void BMD::AddClothesShadowTriangles(void* pClothes, const int clothesCount, cons
         return;
     }
 
-    // DXP-06: when the shader is active, vertices are still raw (unskewed) world positions — the
-    // GPU vertex shader does the ground-skew projection now instead of CalcShadowPosition() above.
-    // Submit through CPlanarShadowShader's own VAO/VBO (explicit attribute 0), not the legacy
-    // glVertexPointer path, which would read attribute 0 from unrelated client-array state.
-    if (CPlanarShadowShader::Instance().IsActive())
+    const int numVerts = target_vertex_index + 1;
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
     {
-        CPlanarShadowShader::Instance().Draw(reinterpret_cast<const float*>(vertices), target_vertex_index + 1);
+        muVerts[static_cast<std::size_t>(i)] =
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, color};
     }
-    else
-    {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 0, vertices);
-        glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
-        FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
-void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh, const int endMesh, const float sx, const float sy) const
+void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, const int startMesh,
+    const int endMesh, const float sx, const float sy, const std::uint32_t color) const
 {
     auto vertices = RenderArrayVertices;
     int target_vertex_index = -1;
-
-    const bool bShaderActive = CPlanarShadowShader::Instance().IsActive();
-
-    // DXP-20 increment 3: a mesh with a ready static GPU VBO (built once by UploadStaticVBOs(),
-    // independent of chrome/render-mode eligibility -- shadows are flat silhouettes, so texture
-    // doesn't matter) skips the CPU VertexTransform replay entirely and draws straight from that
-    // VBO, skinning + ground-skewing inside CPlanarShadowShader's vertex shader. Meshes without one
-    // (below the static-VBO size threshold, or not yet uploaded) fall back to the CPU path below,
-    // batched into one draw call exactly as before.
-    const float* gpuBodyOrigin = nullptr;
-    float gpuBodyScale = 1.0f;
-    if (bShaderActive)
-    {
-        // Mirrors RenderMesh()'s GPU skinning world-space placement exactly (ZzzBMD.cpp ~1502-1507).
-        gpuBodyOrigin = m_LastTranslate ? BodyOrigin : nullptr;
-        gpuBodyScale  = m_LastTranslate ? BodyScale  : 1.0f;
-
-        // Mirrors RenderMesh()'s active-bone-palette resolution (ZzzBMD.cpp ~1498-1500);
-        // UploadBones() dedups on (pointer, g_BoneTransformVersion), so this is cheap even when
-        // RenderMesh() already uploaded the same palette earlier this frame.
-        const void* activeBones = g_pActiveBoneTransform ? (const void*)g_pActiveBoneTransform : (m_pCurrentBoneTransform ? (const void*)m_pCurrentBoneTransform : (const void*)BoneTransform);
-        BoneUBO::Instance().UploadBones(activeBones, MAX_BONES, g_BoneTransformVersion);
-    }
 
     for (int i = startMesh; i < endMesh; i++)
     {
@@ -2420,14 +2728,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
             continue;
         }
 
-        if (bShaderActive && m_HasStaticGPUVBO && m_VAO_StaticGPU != 0 &&
-            m_MeshIndexCount && m_MeshIndexOffset && m_MeshIndexCount[i] > 0)
-        {
-            CPlanarShadowShader::Instance().DrawGPUSkinned(m_VAO_StaticGPU, m_MeshIndexOffset[i], m_MeshIndexCount[i], gpuBodyOrigin, gpuBodyScale);
-            continue;
-        }
-
-        EnsureCpuVertices(i); // DXP-20 inc4: CPU shadow fallback for meshes without a static GPU VBO
+        EnsureCpuVertices(i);
 
         for (int j = 0; j < mesh->NumTriangles; j++)
         {
@@ -2439,10 +2740,7 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
 
                 VectorCopy(VertexTransform[i][source_vertex_index], vertices[target_vertex_index]);
 
-                if (!bShaderActive)
-                {
-                    CalcShadowPosition(&vertices[target_vertex_index], BodyOrigin, sx, sy);
-                }
+                CalcShadowPosition(&vertices[target_vertex_index], BodyOrigin, sx, sy);
             }
         }
     }
@@ -2452,22 +2750,18 @@ void BMD::AddMeshShadowTriangles(const int blendMesh, const int hiddenMesh, cons
         return;
     }
 
-    // DXP-06: see AddClothesShadowTriangles() above for why this branches on shader activity.
-    if (bShaderActive)
+    const int numVerts = target_vertex_index + 1;
+    auto muVerts = GetRendererVertexScratch(static_cast<std::size_t>(numVerts));
+    for (int i = 0; i < numVerts; ++i)
     {
-        CPlanarShadowShader::Instance().Draw(reinterpret_cast<const float*>(vertices), target_vertex_index + 1);
+        muVerts[static_cast<std::size_t>(i)] =
+            {vertices[i][0], vertices[i][1], vertices[i][2], 0.f, 0.f, 0.f, 0.f, 0.f, color};
     }
-    else
-    {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 0, vertices);
-        glDrawArrays(GL_TRIANGLES, 0, target_vertex_index + 1);
-        FrameProfiler::CountGLCall(FrameProfiler::Counter::DrawCalls);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
+    mu::GetRenderer().RenderTriangles(muVerts, 0u);
 }
 
-void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber, const int endMeshNumber, void* pClothes, const int clothesCount)
+void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int startMeshNumber,
+    const int endMeshNumber, void* pClothes, const int clothesCount, const float alpha)
 {
     if (!g_pOption->GetRenderAllEffects())
     {
@@ -2481,449 +2775,144 @@ void BMD::RenderBodyShadow(const int blendMesh, const int hiddenMesh, const int 
 
     EnableAlphaTest(false);
 
-    glColor4f(0.0f, 0.0f, 0.0f, 0.5f); // 50% opacity for shadows
-
     DisableTexture();
     DisableDepthMask();
     BeginRender(1.f);
 
-    int startMesh = 0;
-    int endMesh = NumMeshs;
-
-    if (startMeshNumber != -1)
-    {
-        startMesh = startMeshNumber;
-    }
-
-    if (endMeshNumber != -1)
-    {
-        endMesh = endMeshNumber;
-    }
+    const auto [startMesh, endMesh] = ResolveMeshRange(NumMeshs, startMeshNumber, endMeshNumber);
 
     const float sx = gMapManager.InBattleCastle() ? 2500.f : 2000.f;
     const float sy = 4000.f;
-
-    // GPU Planar Shadow Integration: Offloads 100% of character & monster ground skew projection to GLSL vertex shader
-    // DXP-06: MVP is the plain camera view*projection matrix (shadow vertices are pre-transformed
-    // to world space on the CPU, same as BMD::RenderMesh()'s non-GPU-skinned dynamic-VBO path) —
-    // reuse the existing per-body cache instead of a fresh glGetFloatv (TASK-27).
-    GLfloat shadowMVP[16];
-    GetCurrentMVP(shadowMVP);
-    bool bShaderActive = CPlanarShadowShader::Instance().Begin(BodyOrigin, shadowMVP, sx, sy, 0.45f);
+    const std::uint32_t shadowColor = PackABGR(0.f, 0.f, 0.f, std::clamp(alpha, 0.f, 1.f));
 
     if (clothesCount == 0)
     {
-        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy);
+        AddMeshShadowTriangles(blendMesh, hiddenMesh, startMesh, endMesh, sx, sy, shadowColor);
     }
     else
     {
-        AddClothesShadowTriangles(pClothes, clothesCount, sx, sy);
-    }
-
-    if (bShaderActive)
-    {
-        CPlanarShadowShader::Instance().End();
+        AddClothesShadowTriangles(pClothes, clothesCount, sx, sy, shadowColor);
     }
 
     EndRender();
     EnableDepthMask();
 }
 
-void BMD::UploadStaticVBOs()
+void BMD::RenderObjectBoundingBox()
 {
-    if (!Meshs || NumMeshs <= 0) return;
-    if (m_VAO_Static != 0) return;
-
-    if (!LoadBMDGLFunctions() ||
-        !fn_glGenVertexArrays ||
-        !fn_glGenBuffers || !fn_glBindBuffer ||
-        !fn_glBufferData || !fn_glVertexAttribPointer ||
-        !fn_glEnableVertexAttribArray) return;
-
-    ReleaseStaticVBOs();
-
-    m_MeshUVOffset    = new int[NumMeshs]();
-    m_MeshIndexOffset = new int[NumMeshs]();  // flat corner offset
-    m_MeshIndexCount  = new int[NumMeshs]();  // flat corner count (drawn via glDrawArrays)
-
-    // Count flat corners per mesh (triangles × 3, quads × 6).
-    // UV is NOT built here — it is dynamic (chrome vs texture) and uploaded
-    // per-mesh per-frame inside UploadDynamicBuffers.
-    int flatOffset = 0;
-    for (int i = 0; i < NumMeshs; i++)
+    DisableTexture();
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().Translate(BodyOrigin[0], BodyOrigin[1], BodyOrigin[2]);
+    mu::GetRenderer().Scale(BodyScale, BodyScale, BodyScale);
+    for (int i = 0; i < NumBones; i++)
     {
-        Mesh_t* m = &Meshs[i];
-        m_MeshUVOffset[i]    = flatOffset;
-        m_MeshIndexOffset[i] = flatOffset;
-        if (!m || !m->Triangles || !m->Vertices || m->NumTriangles <= 0 || m->NumVertices <= 0)
+        Bone_t* b = &Bones[i];
+        if (b->BoundingBox)
         {
-            m_MeshIndexCount[i] = 0;
-            continue;
-        }
+            vec3_t BoundingVertices[8];
+            for (int j = 0; j < 8; j++)
+            {
+                VectorTransform(b->BoundingVertices[j], BoneTransform[i], BoundingVertices[j]);
+            }
 
-        int meshFlatCount = 0;
-        for (int j = 0; j < m->NumTriangles; j++)
-        {
-            int p = m->Triangles[j].Polygon;
-            if (p == 3)       meshFlatCount += 3;
-            else if (p == 4)  meshFlatCount += 6;  // quad → 2 triangles
-        }
-        m_MeshIndexCount[i] = meshFlatCount;
-        flatOffset += meshFlatCount;
-    }
+            auto MakeVtx = [&](const vec3_t& pos, float u, float v, std::uint32_t c) -> mu::Vertex3D
+            { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, u, v, c}; };
 
-    if (flatOffset <= 0) return;  // Genuinely empty model — nothing to draw.
+            constexpr std::uint32_t cDark = 0xFF333333u;
+            constexpr std::uint32_t cMid = 0xFF999999u;
+            constexpr std::uint32_t cLight = 0xFF666666u;
 
-    // Pre-allocate CPU staging buffer once per model — 9 floats per flat corner.
-    // This eliminates per-frame std::vector heap allocations during dynamic upload.
-    m_Staging.assign(flatOffset * 9, 0.0f);
+            auto verts = GetRendererVertexScratch(36);
+            std::size_t vertexIndex = 0;
 
-    // Create VAO for OpenGL core profile (dynamic VBO fallback path)
-    fn_glGenVertexArrays(1, &m_VAO_Static);
-    BindVAO(m_VAO_Static);
-    BindVAO(0);
-
-    // Build Static Geometry VBO (GL_STATIC_DRAW) for GPU Bone Skinning path
-    // Interleaved layout per corner: RestPos (3 floats) | static UV (2 floats) | RestNormal (3 floats) | BoneIndex (1 int)
-    // Stride = 9 floats/ints (36 bytes)
-    std::vector<float> gpuGeomBuffer(flatOffset * 9, 0.0f);
-    int gpuIdx = 0;
-
-#ifdef _DEBUG
-    // GLP-12 investigation: what is the actual highest bone Node index any model's vertices
-    // reference, versus GPU_MAX_BONES (200)? Debug-only, additive -- doesn't change uploaded
-    // data or runtime behavior. Logs only when a NEW session-wide maximum is found, so this
-    // stays quiet across a normal session instead of spamming once per model.
-    int debugMaxNodeThisModel = -1;
-#endif
-
-    for (int i = 0; i < NumMeshs; i++) {
-        Mesh_t* m = &Meshs[i];
-        if (!m || !m->Triangles || !m->Vertices || m->NumTriangles <= 0 || m->NumVertices <= 0) continue;
-
-        for (int j = 0; j < m->NumTriangles; j++) {
-            const Triangle_t& tri = m->Triangles[j];
-            auto emitGPUCorner = [&](int k) {
-                int vi  = tri.VertexIndex[k];
-                int ni  = (tri.NormalIndex != nullptr) ? tri.NormalIndex[k] : -1;
-                int tci = (tri.TexCoordIndex != nullptr) ? tri.TexCoordIndex[k] : -1;
-
-                // Rest Position (3 floats) & Bone Index
-                int boneNode = 0;
-                if (vi >= 0 && vi < m->NumVertices) {
-                    gpuGeomBuffer[gpuIdx * 9 + 0] = m->Vertices[vi].Position[0];
-                    gpuGeomBuffer[gpuIdx * 9 + 1] = m->Vertices[vi].Position[1];
-                    gpuGeomBuffer[gpuIdx * 9 + 2] = m->Vertices[vi].Position[2];
-                    boneNode = m->Vertices[vi].Node;
-#ifdef _DEBUG
-                    if (boneNode > debugMaxNodeThisModel) debugMaxNodeThisModel = boneNode;
-#endif
-                }
-                // Static UV (2 floats)
-                if (m->TexCoords && tci >= 0 && tci < m->NumTexCoords) {
-                    gpuGeomBuffer[gpuIdx * 9 + 3] = m->TexCoords[tci].TexCoordU;
-                    gpuGeomBuffer[gpuIdx * 9 + 4] = m->TexCoords[tci].TexCoordV;
-                }
-                // Rest Normal (3 floats)
-                if (m->Normals && ni >= 0 && ni < m->NumNormals) {
-                    gpuGeomBuffer[gpuIdx * 9 + 5] = m->Normals[ni].Normal[0];
-                    gpuGeomBuffer[gpuIdx * 9 + 6] = m->Normals[ni].Normal[1];
-                    gpuGeomBuffer[gpuIdx * 9 + 7] = m->Normals[ni].Normal[2];
-                }
-                // Bone Index (1 int bitcast to float storage)
-                int32_t bNode = (int32_t)boneNode;
-                float bFloat = 0.0f;
-                memcpy(&bFloat, &bNode, sizeof(int32_t));
-                gpuGeomBuffer[gpuIdx * 9 + 8] = bFloat;
-
-                gpuIdx++;
+            auto EmitQuad = [&](const vec3_t& q0, float u0, float v0, const vec3_t& q1, float u1, float v1,
+                                const vec3_t& q2, float u2, float v2, const vec3_t& q3, float u3, float v3,
+                                std::uint32_t col)
+            {
+                verts[vertexIndex++] = MakeVtx(q0, u0, v0, col);
+                verts[vertexIndex++] = MakeVtx(q1, u1, v1, col);
+                verts[vertexIndex++] = MakeVtx(q2, u2, v2, col);
+                verts[vertexIndex++] = MakeVtx(q0, u0, v0, col);
+                verts[vertexIndex++] = MakeVtx(q2, u2, v2, col);
+                verts[vertexIndex++] = MakeVtx(q3, u3, v3, col);
             };
 
-            if (tri.Polygon == 3) {
-                emitGPUCorner(0); emitGPUCorner(1); emitGPUCorner(2);
-            } else if (tri.Polygon == 4) {
-                emitGPUCorner(0); emitGPUCorner(1); emitGPUCorner(2);
-                emitGPUCorner(0); emitGPUCorner(2); emitGPUCorner(3);
-            }
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f, BoundingVertices[4], 0.f, 0.f,
+                     BoundingVertices[5], 0.f, 1.f, cDark);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[2], 1.f, 1.f, BoundingVertices[3], 1.f, 0.f,
+                     BoundingVertices[1], 0.f, 0.f, cDark);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[3], 1.f, 0.f, BoundingVertices[2], 0.f, 0.f,
+                     BoundingVertices[6], 0.f, 1.f, cMid);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[1], 1.f, 1.f, BoundingVertices[5], 1.f, 0.f,
+                     BoundingVertices[4], 0.f, 0.f, cMid);
+            EmitQuad(BoundingVertices[7], 1.f, 1.f, BoundingVertices[5], 1.f, 0.f, BoundingVertices[1], 0.f, 0.f,
+                     BoundingVertices[3], 0.f, 1.f, cLight);
+            EmitQuad(BoundingVertices[0], 0.f, 1.f, BoundingVertices[4], 1.f, 1.f, BoundingVertices[6], 1.f, 0.f,
+                     BoundingVertices[2], 0.f, 0.f, cLight);
+
+            mu::GetRenderer().RenderTriangles(verts, 0u);
         }
     }
-
-#ifdef _DEBUG
-    if (debugMaxNodeThisModel >= 0) {
-        static int s_debugSessionMaxNode = -1;
-        if (debugMaxNodeThisModel > s_debugSessionMaxNode) {
-            s_debugSessionMaxNode = debugMaxNodeThisModel;
-            g_ErrorReport.Write(L"[GLP-12] New session-max bone Node: %d (model \"%hs\", this model's own NumBones=%d)\r\n",
-                s_debugSessionMaxNode, Name, NumBones);
-        }
-    }
-#endif
-
-    if (!gpuGeomBuffer.empty()) {
-        m_StaticGeomReady = true;
-
-        fn_glGenVertexArrays(1, &m_VAO_StaticGPU);
-        fn_glGenBuffers(1, &m_VBO_StaticGeom);
-
-        BindVAO(m_VAO_StaticGPU);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_StaticGeom);
-        fn_glBufferData(GL_ARRAY_BUFFER, gpuGeomBuffer.size() * sizeof(float), gpuGeomBuffer.data(), GL_STATIC_DRAW);
-
-        constexpr GLsizei stride = 9 * sizeof(float); // 36 bytes
-
-        // location 0: Rest Position (3 floats) at offset 0
-        fn_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-        fn_glEnableVertexAttribArray(0);
-
-        // location 1: Static UV (2 floats) at offset 12
-        fn_glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-        fn_glEnableVertexAttribArray(1);
-
-        // location 3: Rest Normal (3 floats) at offset 20
-        fn_glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
-        fn_glEnableVertexAttribArray(3);
-
-        // location 4: Bone Index (1 int) at offset 32
-        if (fn_glVertexAttribIPointer != nullptr) {
-            fn_glVertexAttribIPointer(4, 1, GL_INT, stride, (void*)(8 * sizeof(float)));
-            fn_glEnableVertexAttribArray(4);
-        }
-
-        BindVAO(0);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
-        m_HasStaticGPUVBO = true; // TASK-20 re-enabled 2026-07-31 for retest — was unconditionally disabled here, making the GPU-skin path (BoneUBO, u_UseGPUSkin, bone-index VAO) dead code despite the task file claiming it was "verified OK". Watch armor/linked items/procedural effects specifically — that's what the disabling comment cited.
-
-        // Pre-allocate color buffer for GPU skinning path — sized for all flat corners
-        // so glBufferSubData(offset=0, size=meshFlatCount*16) is always in-bounds.
-        fn_glGenBuffers(1, &m_VBO_Color);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Color);
-        fn_glBufferData(GL_ARRAY_BUFFER, flatOffset * 4 * sizeof(float), nullptr, GL_STREAM_DRAW);
-        
-        BindVAO(m_VAO_StaticGPU);
-        fn_glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-        fn_glEnableVertexAttribArray(2);
-        BindVAO(0);
-        
-        fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
+    mu::GetRenderer().PopMatrix();
+    DisableAlphaBlend();
 }
 
-
-void BMD::UploadDynamicBuffers(int meshIndex, float alpha, int renderFlags)
+void BMD::RenderBone(float(*BoneMatrix)[3][4])
 {
-    if (!Meshs || meshIndex < 0 || meshIndex >= NumMeshs) return;
-    Mesh_t* m = &Meshs[meshIndex];
-    if (!m || !m->Triangles || !m->Vertices || m->NumTriangles <= 0 || m->NumVertices <= 0) return;
+    DisableTexture();
+    mu::GetRenderer().SetDepthFunc(GL_ALWAYS);
 
-    // VertexTransform, LightTransform, g_chrome are GLOBAL STATIC ARRAYS — never null.
-    if (!m_MeshIndexCount || m_MeshIndexCount[meshIndex] == 0) return;
+    constexpr std::uint32_t boneColor = 0xFF33CCCCu;
+    auto allLines = GetRendererVertexScratch(static_cast<std::size_t>(NumBones) * 6);
+    std::size_t vertexIndex = 0;
 
-    if (!LoadBMDGLFunctions() || !fn_glGenBuffers || !fn_glBindBuffer || !fn_glBufferData) return;
-
-    // DXP-20 inc4: only called from RenderMesh()'s CPU dynamic-VBO fallback branch (never the
-    // GPU-skinned path), so an unconditional Ensure here can't defeat the gate for GPU-eligible
-    // meshes. g_chrome/LightTransform (read below) are populated by RenderMesh()'s own prologue
-    // loops, handled separately (DXP-20 inc4 Step C).
-    EnsureCpuVertices(meshIndex);
-
-    // Lazy-create single dynamic interleaved VBO on first use
-    if (m_VBO_Dynamic == 0)
+    for (int i = 0; i < NumBones; i++)
     {
-        fn_glGenBuffers(1, &m_VBO_Dynamic);
-
-        // GLP-06: bake the vertex attribute format into m_VAO_Static here, once, instead of
-        // RenderMesh()'s draw path re-issuing all six calls on every mesh draw. This is the one
-        // point both m_VAO_Static (created earlier in UploadStaticVBOs() -- guaranteed to already
-        // exist, since reaching this line means m_MeshIndexCount[meshIndex] > 0, which is the
-        // same condition that gates m_VAO_Static's creation there) and this buffer are known to
-        // exist together. glVertexAttribPointer captures whatever is bound to GL_ARRAY_BUFFER at
-        // call time, so the bind below must happen before these calls and nothing else may bind
-        // GL_ARRAY_BUFFER in between.
-        BindVAO(m_VAO_Static);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Dynamic);
-
-        constexpr GLsizei stride = 9 * sizeof(float);
-
-        // Location 0: Position (3 floats) at offset 0
-        fn_glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, (void*)0);
-        fn_glEnableVertexAttribArray(0);
-
-        // Location 1: UV (2 floats) at offset 12 bytes (3 * sizeof(float))
-        fn_glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
-        fn_glEnableVertexAttribArray(1);
-
-        // Location 2: Color (4 floats) at offset 20 bytes (5 * sizeof(float))
-        fn_glVertexAttribPointer(2, 4, GL_FLOAT, GL_FALSE, stride, (void*)(5 * sizeof(float)));
-        fn_glEnableVertexAttribArray(2);
-
-        BindVAO(0);
-        fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-
-    const int flatCount  = m_MeshIndexCount[meshIndex];
-    const int baseCorner = m_MeshIndexOffset[meshIndex];
-
-    // Determine UV source:
-    //   Chrome modes: g_chrome[NormalIndex[k]] — per-frame, computed from NormalTransform
-    //   Texture mode: TexCoords[TexCoordIndex[k]] — static mesh UVs
-    const bool useChrome = (renderFlags & RENDER_CHROME)  || (renderFlags & RENDER_CHROME2) ||
-                           (renderFlags & RENDER_CHROME3)  || (renderFlags & RENDER_CHROME4) ||
-                           (renderFlags & RENDER_CHROME5)  || (renderFlags & RENDER_CHROME6) ||
-                           (renderFlags & RENDER_CHROME7)  || (renderFlags & RENDER_OIL)     ||
-                           (renderFlags & RENDER_METAL);
-
-    // RENDER_BRIGHT uses BodyLight as color for ALL corners (matching FFP enableColor=false).
-    const bool isBright  = (renderFlags & RENDER_BRIGHT) != 0;
-    const bool useLight  = !isBright && (LightEnable && meshIndex != StreamMesh);
-
-    // Ensure m_Staging is large enough
-    if ((int)m_Staging.size() < (baseCorner + flatCount) * 9)
-    {
-        m_Staging.resize((baseCorner + flatCount) * 9, 0.0f);
-    }
-
-    float* dst = m_Staging.data() + baseCorner * 9;
-    int idx = 0;
-
-    for (int j = 0; j < m->NumTriangles && idx < flatCount; j++)
-    {
-        const Triangle_t& tri = m->Triangles[j];
-
-        auto emitCorner = [&](int k)
+        Bone_t* b = &Bones[i];
+        if (!b->Dummy)
         {
-            int vi   = tri.VertexIndex[k];
-            int ni   = (tri.NormalIndex   != nullptr) ? tri.NormalIndex[k]   : -1;
-            int tci  = (tri.TexCoordIndex != nullptr) ? tri.TexCoordIndex[k] : -1;
-
-            // Position (3 floats)
-            if (vi >= 0 && vi < m->NumVertices)
+            BoneMatrix_t* bm = &b->BoneMatrixes[CurrentAction];
+            int Parent = b->Parent;
+            if (Parent > 0)
             {
-                dst[0] = VertexTransform[meshIndex][vi][0];
-                dst[1] = VertexTransform[meshIndex][vi][1];
-                dst[2] = VertexTransform[meshIndex][vi][2];
+                float Scale = 1.f;
+                float dx = bm->Position[CurrentAnimationFrame][0];
+                float dy = bm->Position[CurrentAnimationFrame][1];
+                float dz = bm->Position[CurrentAnimationFrame][2];
+                Scale = sqrtf(dx * dx + dy * dy + dz * dz) * 0.05f;
+                vec3_t Position[3];
+                Vector(0.f, 0.f, -Scale, Position[0]);
+                Vector(0.f, 0.f, Scale, Position[1]);
+                Vector(0.f, 0.f, 0.f, Position[2]);
+                vec3_t BoneVertices[3];
+                VectorTransform(Position[0], BoneMatrix[Parent], BoneVertices[0]);
+                VectorTransform(Position[1], BoneMatrix[Parent], BoneVertices[1]);
+                VectorTransform(Position[2], BoneMatrix[i], BoneVertices[2]);
+                for (auto& BoneVertice : BoneVertices)
+                {
+                    VectorMA(BodyOrigin, BodyScale, BoneVertice, BoneVertice);
+                }
+                auto MakeVtx = [&](const vec3_t& pos) -> mu::Vertex3D
+                { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, 0.f, 0.f, boneColor}; };
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[0]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[1]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[1]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[2]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[2]);
+                allLines[vertexIndex++] = MakeVtx(BoneVertices[0]);
             }
-            else
-            {
-                dst[0] = dst[1] = dst[2] = 0.0f;
-            }
-
-            // UV (2 floats)
-            if (useChrome && ni >= 0 && ni < m->NumNormals)
-            {
-                dst[3] = g_chrome[ni][0];
-                dst[4] = g_chrome[ni][1];
-            }
-            else if (!useChrome && m->TexCoords && tci >= 0 && tci < m->NumTexCoords)
-            {
-                dst[3] = m->TexCoords[tci].TexCoordU;
-                dst[4] = m->TexCoords[tci].TexCoordV;
-            }
-            else
-            {
-                dst[3] = dst[4] = 0.0f;
-            }
-
-            // Color (4 floats)
-            if (useLight && ni >= 0 && ni < m->NumNormals)
-            {
-                dst[5] = LightTransform[meshIndex][ni][0];
-                dst[6] = LightTransform[meshIndex][ni][1];
-                dst[7] = LightTransform[meshIndex][ni][2];
-            }
-            else
-            {
-                dst[5] = BodyLight[0];
-                dst[6] = BodyLight[1];
-                dst[7] = BodyLight[2];
-            }
-            dst[8] = alpha;
-
-            dst += 9;
-            idx++;
-        };
-
-        if (tri.Polygon == 3)
-        {
-            emitCorner(0); emitCorner(1); emitCorner(2);
-        }
-        else if (tri.Polygon == 4)
-        {
-            emitCorner(0); emitCorner(1); emitCorner(2);
-            emitCorner(0); emitCorner(2); emitCorner(3);
         }
     }
-
-    // Single 1x interleaved VBO orphan-upload per mesh (map-discard semantics)
-    fn_glBindBuffer(GL_ARRAY_BUFFER, m_VBO_Dynamic);
-    fn_glBufferData(GL_ARRAY_BUFFER, flatCount * 9 * sizeof(float), m_Staging.data() + baseCorner * 9, GL_STREAM_DRAW);
-    fn_glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    m_DynBufsReady = true;
-}
-
-
-
-void BMD::ReleaseDynamicVBOs()
-{
-    LoadBMDGLFunctions();
-    if (m_VBO_Dynamic != 0 && fn_glDeleteBuffers) {
-        fn_glDeleteBuffers(1, &m_VBO_Dynamic);
-        m_VBO_Dynamic = 0;
+    if (vertexIndex != 0)
+    {
+        mu::GetRenderer().RenderLines(allLines.first(vertexIndex), 0u);
     }
-    m_Staging.clear();
-    m_Staging.shrink_to_fit();
-    m_DynBufsReady = false;
-}
 
-void BMD::ReleaseStaticVBOs()
-{
-    m_StaticGeomReady = false;
-
-    // GLP-06: m_VAO_Static's baked vertex attribute format (UploadDynamicBuffers(), first use)
-    // is tied to m_VBO_Dynamic's specific GL buffer name. Deleting m_VAO_Static below without
-    // also resetting m_VBO_Dynamic would let a later UploadStaticVBOs() rebuild create a *new*,
-    // unconfigured VAO that UploadDynamicBuffers()'s lazy-init check (`if (m_VBO_Dynamic == 0)`)
-    // would then never re-configure, since the old buffer name would still be non-zero -- same
-    // class of bug RHI_GL::DestroyTexture's InvalidateTextureCache() call guards against. Both
-    // current call sites (Release(), and this function's own re-entry from UploadStaticVBOs())
-    // already happen to be safe, but tying the lifecycles together here makes that true by
-    // construction instead of by audit.
-    ReleaseDynamicVBOs();
-
-    LoadBMDGLFunctions();
-    if (m_EBO != 0 && fn_glDeleteBuffers) {
-        fn_glDeleteBuffers(1, &m_EBO);
-        m_EBO = 0;
-    }
-    if (m_VBO_StaticGeom != 0 && fn_glDeleteBuffers) {
-        fn_glDeleteBuffers(1, &m_VBO_StaticGeom);
-        m_VBO_StaticGeom = 0;
-    }
-    if (m_VBO_Color != 0 && fn_glDeleteBuffers) {
-        fn_glDeleteBuffers(1, &m_VBO_Color);
-        m_VBO_Color = 0;
-    }
-    if (m_VAO_StaticGPU != 0 && fn_glDeleteVertexArrays) {
-        fn_glDeleteVertexArrays(1, &m_VAO_StaticGPU);
-        m_VAO_StaticGPU = 0;
-        InvalidateVAOCache(); // DXP-22 fix: deleted id may get recycled by a later model's VAO
-    }
-    m_HasStaticGPUVBO = false;
-    if (m_VAO_Static != 0 && fn_glDeleteVertexArrays) {
-        fn_glDeleteVertexArrays(1, &m_VAO_Static);
-        m_VAO_Static = 0;
-        InvalidateVAOCache();
-    }
-    if (m_MeshUVOffset) { delete[] m_MeshUVOffset; m_MeshUVOffset = nullptr; }
-    if (m_MeshIndexOffset) { delete[] m_MeshIndexOffset; m_MeshIndexOffset = nullptr; }
-    if (m_MeshIndexCount) { delete[] m_MeshIndexCount; m_MeshIndexCount = nullptr; }
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
 }
 
 void BMD::Release()
 {
-    ReleaseDynamicVBOs();
-    ReleaseStaticVBOs();
-
     if (Bones)
     {
         for (int i = 0; i < NumBones; ++i)
@@ -3334,11 +3323,6 @@ bool BMD::Open2(const wchar_t* DirName, const wchar_t* ModelFileName, bool bReAl
     }
 
     Init(false);
-
-    if (NumMeshs > 0)
-    {
-        UploadStaticVBOs();
-    }
 
     m_bCompletedAlloc = true;
     return true;

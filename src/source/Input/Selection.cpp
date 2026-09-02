@@ -43,6 +43,7 @@
 #include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
+#include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
@@ -116,7 +117,6 @@ int SelectCharacter(BYTE Kind)
     Vector(0.8f, 0.8f, 0.8f, Light);
     int iSelected = -1;
     float fNearestDist = 1000000000000.0f;
-
     for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
     {
         CHARACTER* c = &CharactersClient[i];
@@ -267,6 +267,16 @@ void SelectObjects()
 {
     BYTE CKind_1, CKind_2;
 
+    if (SceneFlag == CHARACTER_SCENE)
+    {
+        SelectedCharacter = SelectCharacter(KIND_PLAYER);
+        SelectedItem = -1;
+        SelectedNpc = -1;
+        SelectedOperate = -1;
+        Attacking = -1;
+        return;
+    }
+
     if (g_pOption->IsAutoAttack() && gMapManager.WorldActive != WD_6STADIUM && gMapManager.InChaosCastle() == false)
     {
         if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_CLIENT + 1)
@@ -307,7 +317,9 @@ void SelectObjects()
     SelectedNpc = -1;
     SelectedOperate = -1;
 
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && SEASON3B::CheckMouseIn(0, 0, GetScreenWidth(), 429))
+    const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
+        WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
+    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse())
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {

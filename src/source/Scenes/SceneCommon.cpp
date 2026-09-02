@@ -7,10 +7,8 @@
 #include "SceneCommon.h"
 #include "SceneCore.h"
 #include "Camera/CameraProjection.h"
-#include "Camera/CameraState.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Platform/IPlatformAudio.h"
+#include "Render/Renderer/MuRenderer.h"
 
 //=============================================================================
 // Character Selection State Implementation
@@ -30,11 +28,11 @@ int& SelectedHero = g_characterSelection.GetLegacyReference();
 SceneInitializationState g_sceneInit;
 
 // Legacy global references (for backward compatibility)
-bool& InitLogIn = g_sceneInit.GetInitLogIn();
-bool& InitLoading = g_sceneInit.GetInitLoading();
-bool& InitCharacterScene = g_sceneInit.GetInitCharacterScene();
-bool& InitMainScene = g_sceneInit.GetInitMainScene();
-bool& EnableMainRender = g_sceneInit.GetEnableMainRender();
+bool& InitLogIn = g_sceneInit.LegacyRefInitLogIn();
+bool& InitLoading = g_sceneInit.LegacyRefInitLoading();
+bool& InitCharacterScene = g_sceneInit.LegacyRefInitCharacterScene();
+bool& InitMainScene = g_sceneInit.LegacyRefInitMainScene();
+bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 
 //=============================================================================
 // Scene Common Utilities
@@ -184,19 +182,14 @@ BOOL CheckOptionMouseClick(int iOptionPos_y, BOOL bPlayClickSound)
 
 void SetEffectVolumeLevel(int level)
 {
-    if (level > 9)
-        level = 9;
+    if (level > 10)
+        level = 10;
     if (level < 0)
         level = 0;
 
-    if (level == 0)
+    if (g_platformAudio != nullptr)
     {
-        SetMasterVolume(-10000);
-    }
-    else
-    {
-        long vol = -2000 * log10(10.f / float(level));
-        SetMasterVolume(vol);
+        g_platformAudio->SetSFXVolume(static_cast<float>(level) / 10.0f);
     }
 }
 
@@ -232,43 +225,15 @@ void RenderInfomation3D()
 
     if (Success)
     {
-        // DXP-07d increment 1, stage 1: snapshot the pre-panel GlobalUBO proj/view (already the
-        // CPU source of truth per DXP-07a/b) so the post-pop restore below can be checked for
-        // symmetry, before this panel overwrites them.
-        memcpy(s_PreInfo3DProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreInfo3DProj));
-        memcpy(s_PreInfo3DView, GlobalUBO::Instance().GetView(), sizeof(s_PreInfo3DView));
-
-        SaveCameraPerspective();
-        glViewport2(0, 0, WindowWidth, WindowHeight);
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        SetRenderViewport(0, 0, WindowWidth, WindowHeight);
         gluPerspective2(1.f, (float)(WindowWidth) / (float)(WindowHeight), g_Camera.ViewNear, g_Camera.ViewFar);
-        // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket,
-        // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, and shadow-compare diagnostic
-        // are deleted — DXP-07d already proved this closed form matches bit-for-bit, and
-        // GlobalUBO is the only consumer. This panel's projection is a plain
-        // gluPerspective(1.f deg, aspect, ViewNear, ViewFar) closed form (same formula DXP-07b
-        // already validated for the main camera, different args), and its view is identity.
-        {
-            float aspect = (float)WindowWidth / (float)WindowHeight;
-            float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
-            float f = 1.0f / tanf(fovRad);
-            float zNear = g_Camera.ViewNear;
-            float zFar  = g_Camera.ViewFar;
-            float cpuProj[16];
-            BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
-            float cpuView[16] = {
-                1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
-            };
-
-            GlobalUBO::Instance().SetProj(cpuProj);
-            GlobalUBO::Instance().SetView(cpuView);
-
-            // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used
-            // to produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
-            static const float s_IdentityCameraMatrix[3][4] = {
-                {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-            };
-            memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-        }
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PushMatrix();
+        mu::GetRenderer().LoadIdentity();
+        CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
         EnableDepthTest();
         EnableDepthMask();
 
@@ -301,14 +266,11 @@ void RenderInfomation3D()
             break;
         }
 
+        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+        mu::GetRenderer().PopMatrix();
+        mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+        mu::GetRenderer().PopMatrix();
         UpdateMousePositionn();
-
-        // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the restore-symmetry
-        // shadow-compare are deleted — GlobalUBO is restored directly from the pre-panel snapshot
-        // taken at entry (same shape as DXP-07a's EndBitmap() restore).
-        RestoreCameraPerspective();
-        GlobalUBO::Instance().SetProj(s_PreInfo3DProj);
-        GlobalUBO::Instance().SetView(s_PreInfo3DView);
     }
 }
 

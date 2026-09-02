@@ -8,7 +8,6 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 
-#include "UIWindows.h"
 #ifdef ASG_ADD_GENS_SYSTEM
 #include "Engine/Object/ZzzInventory.h"
 #endif	// ASG_ADD_GENS_SYSTEM
@@ -19,19 +18,14 @@
 #define	UIMN_SHOW_TIME			5000
 #define	UIMN_ALPHA_VARIATION	0.015f
 
-#define	UIMN_IMG_WIDTH			166.0f
-#define	UIMN_IMG_HEIGHT			90.0f
-
 #ifdef ASG_ADD_GENS_SYSTEM
 #define UIMN_STRIFE_HEIGHT		28.0f
 #endif	// ASG_ADD_GENS_SYSTEM
 
-#define	UIMN_IMG_POS_X		((::GetScreenWidth() * g_fScreenRate_x - UIMN_IMG_WIDTH) / 2.0f)
-#define	UIMN_IMG_POS_Y		(220.0f * g_fScreenRate_y)
-
-#ifdef ASG_ADD_GENS_SYSTEM
-#define UIMN_STRIFE_POS_Y	(UIMN_IMG_POS_Y - UIMN_STRIFE_HEIGHT)
-#endif	// ASG_ADD_GENS_SYSTEM
+namespace
+{
+    constexpr float kImageTop = 220.0f;
+}
 
 CUIMapName::CUIMapName()
 {
@@ -208,17 +202,22 @@ void CUIMapName::Render()
     if (HIDE == m_eState)
         return;
 
+    const float imageX = UI::MapName::PhysicalLeft(WindowWidth);
+    const float imageY = kImageTop * g_fScreenRate_y;
+
     ::EnableAlphaTest();
-    ::glColor4f(1.0f, 1.0f, 1.0f, m_fAlpha);
 
 #ifdef ASG_ADD_GENS_SYSTEM
     if (m_bStrife)
-        ::RenderBitmap(BITMAP_INTERFACE_EX + 47, UIMN_IMG_POS_X, UIMN_STRIFE_POS_Y,
-            UIMN_IMG_WIDTH, UIMN_STRIFE_HEIGHT, 0.0f, 0.0f, UIMN_IMG_WIDTH / 256.0f, UIMN_STRIFE_HEIGHT / 32.0f, false, false);
+        ::RenderBitmap(BITMAP_INTERFACE_EX + 47, imageX, imageY - UIMN_STRIFE_HEIGHT,
+            UI::MapName::ImageWidth, UIMN_STRIFE_HEIGHT, 0.0f, 0.0f,
+            UI::MapName::ImageWidth / 256.0f,
+            UIMN_STRIFE_HEIGHT / 32.0f, false, false, m_fAlpha);
 #endif	// ASG_ADD_GENS_SYSTEM
-    ::RenderBitmap(BITMAP_INTERFACE_EX + 45, UIMN_IMG_POS_X, UIMN_IMG_POS_Y,
-        UIMN_IMG_WIDTH, UIMN_IMG_HEIGHT, 0.0f, 0.0f, UIMN_IMG_WIDTH / 256.0f, UIMN_IMG_HEIGHT / 128.0f, false, false);
+    ::RenderBitmap(BITMAP_INTERFACE_EX + 45, imageX, imageY,
+        UI::MapName::ImageWidth, UI::MapName::ImageHeight, 0.0f, 0.0f,
+        UI::MapName::ImageWidth / 256.0f,
+        UI::MapName::ImageHeight / 128.0f, false, false, m_fAlpha);
 
-    ::glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     ::DisableAlphaBlend();
 }

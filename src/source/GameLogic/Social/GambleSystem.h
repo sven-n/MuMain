@@ -20,11 +20,7 @@ struct BuyItemInfo
         };
     };
 
-    constexpr BuyItemInfo() noexcept
-        : itemIndex(0)
-        , itemCost(0)
-    {
-    }
+    constexpr BuyItemInfo() noexcept : itemIndex(0), itemCost(0) {}
 };
 using BuyItemInfoPtr = BuyItemInfo*;
 using LPBUYITEMINFO = BuyItemInfoPtr; // Legacy alias; prefer BuyItemInfoPtr going forward.
@@ -43,14 +39,29 @@ public:
 
     void Init();
 
-    void SetGambleShop(bool isGambleShop = true) { m_isGambleShop = isGambleShop; }
-    bool IsGambleShop() const { return m_isGambleShop; }
+    void SetGambleShop(bool isGambleShop = true)
+    {
+        m_isGambleShop = isGambleShop;
+    }
+    bool IsGambleShop() const
+    {
+        return m_isGambleShop;
+    }
 
     void SetBuyItemInfo(std::int32_t index, std::uint32_t cost);
-    const BuyItemInfo& GetBuyItemInfoConst() const { return m_itemInfo; }
+    const BuyItemInfo& GetBuyItemInfoConst() const
+    {
+        return m_itemInfo;
+    }
 
-    void SetBuyItemPosition(std::uint8_t position) { m_buyItemPosition = position; }
-    std::uint8_t GetBuyItemPosition() const { return m_buyItemPosition; }
+    void SetBuyItemPosition(std::uint8_t position)
+    {
+        m_buyItemPosition = position;
+    }
+    std::uint8_t GetBuyItemPosition() const
+    {
+        return m_buyItemPosition;
+    }
 
 private:
     GambleSystem();

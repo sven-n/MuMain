@@ -40,7 +40,7 @@ public:
     void Init();
     void Destroy();
 
-public: //Weather
+public: // Weather
     bool CreateRain(PARTICLE* o);
     void SetWeather(int weather);
 

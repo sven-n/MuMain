@@ -79,7 +79,6 @@ bool CMsgBoxIGSBuyConfirm::Update()
 bool CMsgBoxIGSBuyConfirm::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderMsgBackColor(true);
 

@@ -5,12 +5,12 @@
 
 struct TimeCheck
 {
-    double		iBackupTime;	// �ð� ���� ���
-    int		iIndex;			// �ð� ���� ��ȣ
-    bool	bTimeCheck;		// �ð� ���� üũ
+    double iBackupTime; // �ð� ���� ���
+    int iIndex;         // �ð� ���� ��ȣ
+    bool bTimeCheck;    // �ð� ���� üũ
 };
 
-class CTimeCheck : public Singleton <CTimeCheck>
+class CTimeCheck : public Singleton<CTimeCheck>
 {
 public:
     std::vector<TimeCheck> stl_Time;
@@ -19,7 +19,7 @@ public:
     CTimeCheck();
     virtual ~CTimeCheck();
 
-    int	 CheckIndex(int index);
+    int CheckIndex(int index);
     bool GetTimeCheck(int index, int DelayTime);
     void DeleteTimeIndex(int index);
 };

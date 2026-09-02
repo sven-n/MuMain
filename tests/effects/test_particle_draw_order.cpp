@@ -32,7 +32,8 @@ namespace
 
     void Group(std::vector<Entry>& entries)
     {
-        GroupByTexture(entries.data(), entries.size());
+        std::vector<Entry> scratch(entries.size());
+        GroupByTexture(entries.data(), entries.size(), scratch.data());
     }
 }
 
@@ -117,10 +118,11 @@ TEST_CASE("particle draw order: degenerate inputs are safe")
     CHECK(IndexOrder(single) == std::vector<int>{ 0 });
 
     std::vector<Entry> empty;
-    GroupByTexture(empty.data(), 0);
+    GroupByTexture(empty.data(), 0, empty.data());
     CHECK(empty.empty());
 
-    GroupByTexture(nullptr, 4);
+    GroupByTexture(nullptr, 4, single.data());
+    GroupByTexture(single.data(), 4, nullptr);
 }
 
 TEST_CASE("particle draw order: every particle is drawn exactly once")

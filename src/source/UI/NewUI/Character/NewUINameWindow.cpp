@@ -17,6 +17,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/CameraState.h"
+#include "UI/Combat/MonsterHealthBar.h"
 
 // DevEditor forward declarations (must be at global scope)
 #ifdef _EDITOR
@@ -27,7 +28,6 @@ using namespace SEASON3B;
 
 namespace
 {
-constexpr int GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME = 32;
 
 // Draws a segmented monster HP bar, horizontally centered on centerX with its
 // top edge at topY. `steps` is the segment count (HP granularity); `scale`
@@ -47,17 +47,15 @@ void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
 
     // Drop shadow.
     EnableAlphaTest();
-    glColor4f(0.f, 0.f, 0.f, 0.5f);
-    RenderColor((float)(x + 1), (float)(y + 1), totalWidth, 5.f);
+    RenderColorQuadARGB((float)(x + 1), (float)(y + 1), totalWidth, 5.f, 0x80000000u);
 
     // Dark backing.
     EnableAlphaBlend();
-    glColor3f(0.2f, 0.0f, 0.0f);
-    RenderColor((float)x, (float)y, totalWidth, 5.f);
+    RenderColorQuadARGB((float)x, (float)y, totalWidth, 5.f, 0xFF330000u);
 
     // Inner track.
-    glColor3f(50.f / 255.f, 10.f / 255.f, 0.f);
-    RenderColor((float)(x + borderWidth), (float)(y + borderHeight), stepsWidth, 1.f);
+    RenderColorQuadARGB((float)(x + borderWidth), (float)(y + borderHeight), stepsWidth, 1.f,
+        0xFF320A00u);
 
     // HealthStatus < 0 is the "HP unknown" sentinel (server sends 0xFF -> -1, and
     // the field is initialized to -1), so render a full bar instead of an empty one.
@@ -65,14 +63,14 @@ void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
     const int stepHP = (int)(clampedHealth * steps);
 
     // Filled health segments.
-    glColor3f(250.f / 255.f, 10.f / 255.f, 0.f);
     for (int k = 0; k < stepHP; ++k)
     {
-        RenderColor(
+        RenderColorQuadARGB(
             (float)(x + borderWidth + (k * widthPerStep)),
             (float)(y + borderHeight),
             widthPerStep - stepSeparatorWidth,
-            2.f);
+            2.f,
+            0xFFFA0A00u);
     }
     DisableAlphaBlend();
 }
@@ -154,7 +152,6 @@ bool SEASON3B::CNewUINameWindow::Update()
 bool SEASON3B::CNewUINameWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderName();
     RenderTimes();
     matchEvent::RenderMatchTimes();
@@ -162,6 +159,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     RenderMonsterHealthBars();
     DrawPersonalShopTitleImp();
     DisableAlphaBlend();
+
     return true;
 }
 
@@ -209,7 +207,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
                 g_pRenderText->SetBgColor(100, 0, 0, 255);
                 g_pRenderText->RenderText(320, 2, c->ID, 0, 0, RT3_WRITE_CENTER);
 
-                if (c->HealthStatus > 0)
+                if (UI::Combat::HealthBar::ShouldRenderSelected(c->HealthStatus))
                 {
                     // Full-width bar centered under the selected monster's name.
                     DrawHealthBar(320, 15, c->HealthStatus, 20, 1.f);
@@ -239,8 +237,6 @@ void SEASON3B::CNewUINameWindow::RenderName()
 
     if (m_bShowItemName || SEASON3B::IsRepeat(VK_MENU))
     {
-        SetGroundItemLabelBuildBudget(GROUND_ITEM_LABEL_BUILD_BUDGET_PER_FRAME);
-
 #ifdef _EDITOR
         bool renderLabels = DevEditor_ShouldRenderItemLabels();
 #else

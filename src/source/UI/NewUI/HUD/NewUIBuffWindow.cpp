@@ -276,7 +276,6 @@ bool SEASON3B::CNewUIBuffWindow::Update()
 bool SEASON3B::CNewUIBuffWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderBuffStatus(BUFF_RENDER_ICON);
 
@@ -402,8 +401,6 @@ void SEASON3B::CNewUIBuffWindow::RenderBuffTooltip(eBuffClass& eBuffClassType, e
         TextNum += 1;
     }
 
-    SIZE TextSize = { 0, 0 };
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
     RenderTipTextList(x, y, TextNum, 0);
 }
 

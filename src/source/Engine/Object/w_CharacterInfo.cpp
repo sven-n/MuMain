@@ -7,6 +7,7 @@
 
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
 
+// cppcheck-suppress uninitMemberVar
 CHARACTER::CHARACTER()
 {
     Initialize();
@@ -69,7 +70,7 @@ void CHARACTER::Initialize()
     m_byFriend = 0;
     MonsterSkill = 0;
 
-    for (int i = 0; i < 32; ++i) ID[i] = 0;
+    ClearDisplayName();
 
     Movement = 0;
     MovementType = 0;
@@ -113,7 +114,8 @@ void CHARACTER::Initialize()
     InitPetInfo(PET_TYPE_DARK_HORSE);
     InitPetInfo(PET_TYPE_DARK_SPIRIT);
 
-    for (int i = 0; i < 32; ++i) OwnerID[i] = 0;
+    for (int i = 0; i < 32; ++i)
+        OwnerID[i] = 0;
 
     m_pPostMoveProcess = NULL;
 
@@ -125,9 +127,12 @@ void CHARACTER::Initialize()
     GensContributionPoints = 0;
 }
 
-void CHARACTER::Destroy()
+void CHARACTER::ClearDisplayName()
 {
+    memset(ID, 0, sizeof(ID));
 }
+
+void CHARACTER::Destroy() {}
 
 void CHARACTER::InitPetInfo(int iPetType)
 {
@@ -143,7 +148,8 @@ void CHARACTER::PostMoveProcess_Active(unsigned int uiLimitCount)
 {
     if (m_pPostMoveProcess != NULL)
     {
-        delete m_pPostMoveProcess; m_pPostMoveProcess = NULL;
+        delete m_pPostMoveProcess;
+        m_pPostMoveProcess = NULL;
     }
 
     m_pPostMoveProcess = new ST_POSTMOVE_PROCESS();

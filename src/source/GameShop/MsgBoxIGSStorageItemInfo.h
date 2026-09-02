@@ -22,35 +22,35 @@ class CMsgBoxIGSStorageItemInfo : public CNewUIMessageBoxBase, public INewUI3DRe
 public:
     enum IMAGE_IGS_STORAGE_ITEM_INFO
     {
-        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,				// ÀÎ°ÔÀÓ¼¥ ¹öÆ°
-        IMAGE_IGS_FRAME = BITMAP_IGS_MSGBOX_STORAGE_ITEM,		// Main Frame
+        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,      // ì¸ê²Œì„ìƒµ ë²„íŠ¼
+        IMAGE_IGS_FRAME = BITMAP_IGS_MSGBOX_STORAGE_ITEM, // Main Frame
     };
 
     enum IMAGESIZE_IGS_STORAGE_ITEM_INFO
     {
-        IMAGE_IGS_WINDOW_WIDTH = 640,	// ÀÎ°ÔÀÓ¼¥ ¹è°æ »çÀÌÁî
+        IMAGE_IGS_WINDOW_WIDTH = 640, // ì¸ê²Œì„ìƒµ ë°°ê²½ ì‚¬ì´ì¦ˆ
         IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 210,	// ¸Ş¼¼Áö¹Ú½º Size
+        IMAGE_IGS_FRAME_WIDTH = 210, // ë©”ì„¸ì§€ë°•ìŠ¤ Size
         IMAGE_IGS_FRAME_HEIGHT = 202,
-        IMAGE_IGS_BTN_WIDTH = 52,		// ¹öÆ° Size
+        IMAGE_IGS_BTN_WIDTH = 52, // ë²„íŠ¼ Size
         IMAGE_IGS_BTN_HEIGHT = 26,
     };
 
-    // ¸Ş¼¼Áö¹Ú½º»óÀÇ »ó´ëÁÂÇ¥
+    // ë©”ì„¸ì§€ë°•ìŠ¤ìƒì˜ ìƒëŒ€ì¢Œí‘œ
     enum IGS_STORAGE_ITEM_INFO_POS
     {
-        IGS_BTN_OK_POS_X = 43,	// ¹öÆ°
+        IGS_BTN_OK_POS_X = 43, // ë²„íŠ¼
         IGS_BTN_CANCEL_POS_X = 115,
         IGS_BTN_POS_Y = 168,
-        IGS_TEXT_TITLE_POS_Y = 10,	// Title
-        IGS_TEXT_ITEM_NAME_POS_Y = 100,	// ItemName
-        IGS_TEXT_ITEM_INFO_POS_X = 30,	// ItemInfo
+        IGS_TEXT_TITLE_POS_Y = 10,      // Title
+        IGS_TEXT_ITEM_NAME_POS_Y = 100, // ItemName
+        IGS_TEXT_ITEM_INFO_POS_X = 30,  // ItemInfo
         IGS_TEXT_ITEM_INFO_NUM_POS_Y = 124,
         IGS_TEXT_ITEM_INFO_PERIOD_POS_Y = 140,
         IGS_TEXT_ITEM_INFO_WIDTH = 150,
-        IGS_3DITEM_POS_X = 56,		// 3D ¾ÆÀÌÅÛ ·£´õ ½ÃÀÛ À§Ä¡(BOX ±âÁØ)
+        IGS_3DITEM_POS_X = 56, // 3D ì•„ì´í…œ ëœë” ì‹œì‘ ìœ„ì¹˜(BOX ê¸°ì¤€)
         IGS_3DITEM_POS_Y = 34,
-        IGS_3DITEM_WIDTH = 97,		// 3D ¾ÆÀÌÅÛ ·£´õ °ø°£¼³Á¤
+        IGS_3DITEM_WIDTH = 97, // 3D ì•„ì´í…œ ëœë” ê³µê°„ì„¤ì •
         IGS_3DITEM_HEIGHT = 60,
     };
 
@@ -67,8 +67,8 @@ public:
 
     void Render3D();
 
-    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, char szItemType,
-        wchar_t* pszName, wchar_t* pszNum, wchar_t* pszPeriod);
+    void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, char szItemType, wchar_t* pszName,
+                    wchar_t* pszNum, wchar_t* pszPeriod);
 
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -90,14 +90,14 @@ private:
     CNewUIMessageBoxButton m_BtnUse;
     CNewUIMessageBoxButton m_BtnCancel;
 
-    int		m_iStorageSeq;			// º¸°üÇÔ ¼ø¹ø
-    int		m_iStorageItemSeq;		// º¸°üÇÔ »óÇ° ¼ø¹ø
-    WORD	m_wItemCode;			// ¾ÆÀÌÅÛ ÄÚµå
+    int m_iStorageSeq;     // ë³´ê´€í•¨ ìˆœë²ˆ
+    int m_iStorageItemSeq; // ë³´ê´€í•¨ ìƒí’ˆ ìˆœë²ˆ
+    WORD m_wItemCode;      // ì•„ì´í…œ ì½”ë“œ
 
-    wchar_t m_szName[MAX_TEXT_LENGTH];		// ¾ÆÀÌÅÛ ÀÌ¸§
+    wchar_t m_szName[MAX_TEXT_LENGTH]; // ì•„ì´í…œ ì´ë¦„
     wchar_t m_szNum[MAX_TEXT_LENGTH];
     wchar_t m_szPeriod[MAX_TEXT_LENGTH];
-    char    m_szItemType;	// »óÇ°±¸ºĞ (C : Ä³½Ã, P : »óÇ°)
+    char m_szItemType; // ìƒí’ˆêµ¬ë¶„ (C : ìºì‹œ, P : ìƒí’ˆ)
 };
 
 ////////////////////////////////////////////////////////////////////

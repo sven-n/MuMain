@@ -4,9 +4,7 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/BindState.h"
-#include "Render/RHI/RHI.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -23,6 +21,7 @@
 #include "Scenes/SceneCore.h"
 
 #include "Core/Utilities/Debouncer.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -47,7 +46,6 @@
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>
-#include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
@@ -56,7 +54,6 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Camera/CameraProjection.h"
 
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern int g_iChatInputType;
 extern CUIGuildListBox* g_pGuildListBox;
 
@@ -218,7 +215,7 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
             g_pRenderText->SetFont(g_hFont);
         }
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &Size[i]);
+        Size[i] = g_pRenderText->MeasureText(TextList[i], lstrlen(TextList[i]));
 
         if (TextWidth < Size[i].cx)
         {
@@ -228,43 +225,22 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 
     if (Tab == 0)
     {
-        sx -= (TextWidth + Tab) * REFERENCE_WIDTH / WindowWidth / 2;
+        sx -= (TextWidth + Tab) / 2;
     }
 
     for (int i = 0; i < TextNum; i++)
     {
-        g_pRenderText->SetTextColor(0xffffffff);
-
         switch (TextListColor[i])
         {
-        case TEXT_COLOR_WHITE:
-        case TEXT_COLOR_DARKRED:
-        case TEXT_COLOR_DARKBLUE:
-        case TEXT_COLOR_DARKYELLOW:
-            glColor3f(1.f, 1.f, 1.f);
-            break;
-        case TEXT_COLOR_BLUE:
-            glColor3f(0.5f, 0.7f, 1.f);
-            break;
-        case TEXT_COLOR_GRAY:
-            glColor3f(0.4f, 0.4f, 0.4f);
-            break;
-        case TEXT_COLOR_GREEN_BLUE:
-            glColor3f(1.f, 1.f, 1.f);
-            break;
-        case TEXT_COLOR_RED:
-            glColor3f(1.f, 0.2f, 0.1f);
-            break;
-        case TEXT_COLOR_YELLOW:
-            glColor3f(1.f, 0.8f, 0.1f);
-            break;
-        case TEXT_COLOR_GREEN:
-            glColor3f(0.1f, 1.f, 0.5f);
-            break;
-        case TEXT_COLOR_PURPLE:
-            glColor3f(1.f, 0.1f, 1.f);
-            break;
+        case TEXT_COLOR_BLUE: g_pRenderText->SetTextColor(128, 179, 255, 255); break;
+        case TEXT_COLOR_GRAY: g_pRenderText->SetTextColor(102, 102, 102, 255); break;
+        case TEXT_COLOR_RED: g_pRenderText->SetTextColor(255, 51, 26, 255); break;
+        case TEXT_COLOR_YELLOW: g_pRenderText->SetTextColor(255, 204, 26, 255); break;
+        case TEXT_COLOR_GREEN: g_pRenderText->SetTextColor(26, 255, 128, 255); break;
+        case TEXT_COLOR_PURPLE: g_pRenderText->SetTextColor(255, 26, 255, 255); break;
+        default: g_pRenderText->SetTextColor(255, 255, 255, 255); break;
         }
+
         if (TEXT_COLOR_DARKRED == TextListColor[i])
         {
             g_pRenderText->SetBgColor(160, 0, 0, 255);
@@ -305,7 +281,6 @@ int RenderTextList(int sx, int sy, int TextNum, int Tab, int iSort = RT3_SORT_CE
 void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSort, int iRenderPoint, BOOL bUseBG)
 {
     SIZE TextSize = { 0, 0 };
-    int TextLine = 0; int EmptyLine = 0;
     float fWidth = 0; float fHeight = 0;
     for (int i = 0; i < TextNum; ++i)
     {
@@ -324,33 +299,26 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
             g_pRenderText->SetFont(g_hFont);
         }
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
+        TextSize = g_pRenderText->MeasureText(TextList[i], lstrlen(TextList[i]));
 
         if (fWidth < TextSize.cx)
             fWidth = TextSize.cx;
 
-        if (TextList[i][0] == '\n')
-        {
-            ++EmptyLine;
-        }
-        else
-        {
-            ++TextLine;
-        }
+        const bool halfLine = TextList[i][0] == '\n';
+        const bool spacer = halfLine || (TextList[i][0] == L' ' && TextList[i][1] == L'\0');
+        const SIZE lineSize = spacer ? g_pRenderText->MeasureText(L"Q", 1) : TextSize;
+        fHeight += static_cast<float>(lineSize.cy) * (halfLine ? 0.55f : 1.1f);
     }
 
-    fHeight = TextSize.cy * TextLine + TextSize.cy / 2.0f * EmptyLine;
-    fHeight /= g_fScreenRate_y / 1.1f;
     EnableAlphaTest();
-    fWidth /= g_fScreenRate_x;
     if (Tab > 0)
-        fWidth = Tab / g_fScreenRate_x * 2;
+        fWidth = Tab * 2;
     fWidth += 4;
     int iPos_x = sx - fWidth / 2;
     if (iPos_x < 0) iPos_x = 0;
-    if (iPos_x + fWidth > (int)WindowWidth / g_fScreenRate_x)
+    if (iPos_x + fWidth > REFERENCE_WIDTH)
     {
-        iPos_x = ((int)WindowWidth) / g_fScreenRate_x - fWidth - 1;
+        iPos_x = REFERENCE_WIDTH - fWidth - 1;
     }
 
     float fsx = iPos_x + 1;
@@ -370,15 +338,13 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
 
     if (bUseBG == TRUE && TextNum > 0)
     {
-        glColor4f(0.0f, 0.0f, 0.0f, 1.0f);
-        RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1);
-        RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1);
-        RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1);
-        RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1);
+        RenderColor((float)iPos_x - 1, fsy - 1, (float)fWidth + 1, (float)1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1, fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1 + fWidth + 1, (float)fsy - 1, (float)1, (float)fHeight + 1, 1.0f, 1);
+        RenderColor((float)iPos_x - 1, fsy - 1 + fHeight + 1, (float)fWidth + 2, (float)1, 1.0f, 1);
 
-        glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-        RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight);
-        EnableTexture2D();
+        RenderColor((float)iPos_x, fsy, (float)fWidth, (float)fHeight, 0.8f, 1);
+        mu::GetRenderer().SetTexture2D(true);
     }
 
     for (int i = 0; i < TextNum; i++)
@@ -395,50 +361,23 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         float fHeight = 0;
         if (TextList[i][0] == 0x0a || (TextList[i][0] == ' ' && TextList[i][1] == 0x00))
         {
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[i], lstrlen(TextList[i]), &TextSize);
-            fHeight = (float)TextSize.cy / g_fScreenRate_y / (TextList[i][0] == 0x0a ? 2.0f : 1.0f);
+            TextSize = g_pRenderText->MeasureText(L"Q", 1);
+            fHeight = static_cast<float>(TextSize.cy) / (TextList[i][0] == 0x0a ? 2.0f : 1.0f);
         }
         else
         {
-            g_pRenderText->SetTextColor(0xffffffff);
             switch (TextListColor[i])
             {
-            case TEXT_COLOR_WHITE:
-            case TEXT_COLOR_DARKRED:
-            case TEXT_COLOR_DARKBLUE:
-            case TEXT_COLOR_DARKYELLOW:
-                glColor3f(1.f, 1.f, 1.f);
-                break;
-            case TEXT_COLOR_BLUE:
-                glColor3f(0.5f, 0.7f, 1.f);
-                break;
-            case TEXT_COLOR_GRAY:
-                glColor3f(0.4f, 0.4f, 0.4f);
-                break;
-            case TEXT_COLOR_GREEN_BLUE:
-                glColor3f(1.f, 1.f, 1.f);
-                break;
-            case TEXT_COLOR_RED:
-                glColor3f(1.f, 0.2f, 0.1f);
-                break;
-            case TEXT_COLOR_YELLOW:
-                glColor3f(1.f, 0.8f, 0.1f);
-                break;
-            case TEXT_COLOR_GREEN:
-                glColor3f(0.1f, 1.f, 0.5f);
-                break;
-            case TEXT_COLOR_PURPLE:
-                glColor3f(1.f, 0.1f, 1.f);
-                break;
-            case TEXT_COLOR_REDPURPLE:
-                glColor3f(0.8f, 0.5f, 0.8f);
-                break;
-            case TEXT_COLOR_VIOLET:
-                glColor3f(0.7f, 0.4f, 1.0f);
-                break;
-            case TEXT_COLOR_ORANGE:
-                glColor3f(0.9f, 0.42f, 0.04f);
-                break;
+            case TEXT_COLOR_BLUE: g_pRenderText->SetTextColor(128, 179, 255, 255); break;
+            case TEXT_COLOR_GRAY: g_pRenderText->SetTextColor(102, 102, 102, 255); break;
+            case TEXT_COLOR_RED: g_pRenderText->SetTextColor(255, 51, 26, 255); break;
+            case TEXT_COLOR_YELLOW: g_pRenderText->SetTextColor(255, 204, 26, 255); break;
+            case TEXT_COLOR_GREEN: g_pRenderText->SetTextColor(26, 255, 128, 255); break;
+            case TEXT_COLOR_PURPLE: g_pRenderText->SetTextColor(255, 26, 255, 255); break;
+            case TEXT_COLOR_REDPURPLE: g_pRenderText->SetTextColor(204, 128, 204, 255); break;
+            case TEXT_COLOR_VIOLET: g_pRenderText->SetTextColor(179, 102, 255, 255); break;
+            case TEXT_COLOR_ORANGE: g_pRenderText->SetTextColor(230, 107, 10, 255); break;
+            default: g_pRenderText->SetTextColor(255, 255, 255, 255); break;
             }
             if (TEXT_COLOR_DARKRED == TextListColor[i])
             {
@@ -468,7 +407,6 @@ void RenderTipTextList(const int sx, const int sy, int TextNum, int Tab, int iSo
         fsy += fHeight * 1.1f;
     }
 
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     DisableAlphaBlend();
 }
 
@@ -833,13 +771,13 @@ void RenderHelpLine(int iColumnType, const wchar_t* pPrintStyle, int& TabSpace, 
 
     if (pGapText == NULL)
     {
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]), &TextSize);
+        TextSize = g_pRenderText->MeasureText(TextList[TextNum - 1], lstrlen(TextList[TextNum - 1]));
     }
     else
     {
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), pGapText, wcslen(pGapText), &TextSize);
+        TextSize = g_pRenderText->MeasureText(pGapText, wcslen(pGapText));
     }
-    TabSpace += int(TextSize.cx / g_fScreenRate_x);
+    TabSpace += TextSize.cx;
     if (iType == 6)
     {
         TabSpace += 5;
@@ -5619,7 +5557,6 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextNum = g_SocketItemMgr.AttachToolTipForSocketItem(ip, TextNum);
 
         SIZE TextSize = { 0, 0 };
-        float fRateY = g_fScreenRate_y;
         int	Height = 0;
         int	EmptyLine = 0;
         int TextLine = 0;
@@ -5630,12 +5567,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
             else if (TextList[i][0] == '\n')	++EmptyLine;
             else							++TextLine;
         }
-        fRateY = fRateY / 1.1f;
         g_pRenderText->SetFont(g_hFont);
+        TextSize = g_pRenderText->MeasureText(L"Q", 1);
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-
-        Height = (TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) / fRateY;
+        Height = static_cast<int>((TextLine * TextSize.cy + EmptyLine * TextSize.cy / 2.0f) * 1.1f);
 
         int iScreenHeight = 420;
 
@@ -5945,11 +5880,9 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
     mu_swprintf(TextList[TextNum], L"\n"); TextNum++; SkipNum++;
 
-    SIZE TextSize = { 0, 0 };
-
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), TextList[0], 1, &TextSize);
-
-    int Height = ((TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2) * REFERENCE_HEIGHT / WindowHeight;
+    g_pRenderText->SetFont(TextBold[0] ? g_hFontBold : g_hFont);
+    const SIZE TextSize = g_pRenderText->MeasureText(L"Q", 1);
+    int Height = (TextNum - SkipNum) * TextSize.cy + SkipNum * TextSize.cy / 2;
     if (sy - Height >= 0)
         sy -= Height;
     else
@@ -6049,7 +5982,6 @@ bool GetAttackDamage(int* iMinDamage, int* iMaxDamage)
 
 void SetTextColor(float r, float g, float b)
 {
-    glColor3f(r, g, b);
     g_pRenderText->SetTextColor(r * 255, g * 255, b * 255, 255);
 }
 
@@ -6284,11 +6216,6 @@ std::unordered_set<int> orangeTextItems = {
 
 namespace
 {
-constexpr size_t GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES = 1500;
-constexpr DWORD GROUND_ITEM_LABEL_CACHE_MAX_IDLE_MS = 10 * 1000;
-
-int g_groundItemLabelBuildBudgetRemaining = 0;
-
 struct GroundItemLabelDescriptor
 {
     wchar_t Name[80]{};
@@ -6296,50 +6223,6 @@ struct GroundItemLabelDescriptor
     DWORD TextColor = 0xFFFFFFFF;
     DWORD BgColor = 0xFF000000;
 };
-
-struct GroundItemLabelCacheKey
-{
-    int Type = -1;
-    int Level = 0;
-    BYTE ExcellentFlags = 0;
-    BYTE AncientDiscriminator = 0;
-    BYTE FeatureFlags = 0;
-
-    bool operator==(const GroundItemLabelCacheKey& other) const
-    {
-        return this->Type == other.Type
-            && this->Level == other.Level
-            && this->ExcellentFlags == other.ExcellentFlags
-            && this->AncientDiscriminator == other.AncientDiscriminator
-            && this->FeatureFlags == other.FeatureFlags;
-    }
-};
-
-struct GroundItemLabelCacheKeyHasher
-{
-    size_t operator()(const GroundItemLabelCacheKey& key) const
-    {
-        size_t seed = std::hash<int>{}(key.Type);
-        seed ^= std::hash<int>{}(key.Level) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.ExcellentFlags)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.AncientDiscriminator)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        seed ^= std::hash<unsigned int>{}(static_cast<unsigned int>(key.FeatureFlags)) + 0x9e3779b9 + (seed << 6) + (seed >> 2);
-        return seed;
-    }
-};
-
-struct GroundItemLabelCacheEntry
-{
-    GLuint TextureId = 0;
-    int TextWidth = 0;
-    int TextHeight = 0;
-    int TextureWidth = 0;
-    int TextureHeight = 0;
-    DWORD BgColor = 0;
-    DWORD LastUsedTick = 0;
-};
-
-std::unordered_map<GroundItemLabelCacheKey, GroundItemLabelCacheEntry, GroundItemLabelCacheKeyHasher> g_groundItemLabelCache;
 
 DWORD MakeRgba(BYTE red, BYTE green, BYTE blue, BYTE alpha = 255)
 {
@@ -6392,92 +6275,6 @@ void AppendGroundItemLabelText(wchar_t(&buffer)[BufferSize], const wchar_t* form
     }
 
     _snwprintf_s(buffer + currentLength, BufferSize - currentLength, _TRUNCATE, format, args...);
-}
-
-GroundItemLabelCacheKey BuildGroundItemLabelCacheKey(OBJECT* o, ITEM* ip)
-{
-    GroundItemLabelCacheKey key;
-    key.Type = o->Type;
-    key.Level = ip->Level;
-    key.ExcellentFlags = static_cast<BYTE>(ip->ExcellentFlags);
-    key.AncientDiscriminator = static_cast<BYTE>(ip->AncientDiscriminator);
-    key.FeatureFlags = 0;
-    if (ip->HasSkill)
-    {
-        key.FeatureFlags |= 1;
-    }
-    if (ip->HasLuck)
-    {
-        key.FeatureFlags |= 2;
-    }
-    if (ip->OptionLevel > 0)
-    {
-        key.FeatureFlags |= 4;
-    }
-    return key;
-}
-
-int GetNextPowerOfTwo(int value)
-{
-    int result = 1;
-    while (result < value)
-    {
-        result <<= 1;
-    }
-
-    return result;
-}
-
-void DeleteGroundItemLabelTexture(GLuint textureId)
-{
-    if (textureId != 0)
-    {
-        // DXP-12: RHI::DestroyTexture invalidates BindState's texture cache internally.
-        RHI::DestroyTexture(RHI::TextureHandle{ textureId });
-    }
-}
-
-void PruneGroundItemLabelCache(DWORD currentTick)
-{
-    for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end();)
-    {
-        if (currentTick - cacheEntryIterator->second.LastUsedTick > GROUND_ITEM_LABEL_CACHE_MAX_IDLE_MS)
-        {
-            DeleteGroundItemLabelTexture(cacheEntryIterator->second.TextureId);
-            cacheEntryIterator = g_groundItemLabelCache.erase(cacheEntryIterator);
-        }
-        else
-        {
-            ++cacheEntryIterator;
-        }
-    }
-
-    if (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES)
-    {
-        const size_t entryCountToEvict = g_groundItemLabelCache.size() - GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES;
-        std::vector<decltype(g_groundItemLabelCache.begin())> cacheEntryIterators;
-        cacheEntryIterators.reserve(g_groundItemLabelCache.size());
-
-        for (auto cacheEntryIterator = g_groundItemLabelCache.begin(); cacheEntryIterator != g_groundItemLabelCache.end(); ++cacheEntryIterator)
-        {
-            cacheEntryIterators.push_back(cacheEntryIterator);
-        }
-
-        std::nth_element(
-            cacheEntryIterators.begin(),
-            cacheEntryIterators.begin() + entryCountToEvict,
-            cacheEntryIterators.end(),
-            [](const auto& left, const auto& right)
-            {
-                return left->second.LastUsedTick < right->second.LastUsedTick;
-            });
-
-        for (size_t i = 0; i < entryCountToEvict; ++i)
-        {
-            DeleteGroundItemLabelTexture(cacheEntryIterators[i]->second.TextureId);
-            g_groundItemLabelCache.erase(cacheEntryIterators[i]);
-        }
-    }
 }
 
 void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescriptor& descriptor)
@@ -6875,187 +6672,6 @@ void ApplyGroundItemLabelDescriptor(const GroundItemLabelDescriptor& descriptor)
     g_pRenderText->SetBgColor(descriptor.BgColor);
 }
 
-bool CreateGroundItemLabelTexture(const GroundItemLabelDescriptor& descriptor, GroundItemLabelCacheEntry& cacheEntry)
-{
-    HDC fontDc = g_pRenderText->GetFontDC();
-    BYTE* fontBuffer = g_pRenderText->GetFontBuffer();
-    if (fontDc == nullptr || fontBuffer == nullptr || descriptor.Name[0] == L'\0')
-    {
-        return false;
-    }
-
-    g_pRenderText->SetFont(descriptor.Font);
-
-    SIZE textSize{};
-    GetTextExtentPoint32(fontDc, descriptor.Name, lstrlen(descriptor.Name), &textSize);
-    if (textSize.cx <= 0 || textSize.cy <= 0)
-    {
-        return false;
-    }
-
-    RECT clearRect = {0, 0, textSize.cx, textSize.cy};
-    FillRect(fontDc, &clearRect, reinterpret_cast<HBRUSH>(GetStockObject(BLACK_BRUSH)));
-
-    ::SetBkColor(fontDc, RGB(0, 0, 0));
-    ::SetTextColor(fontDc, RGB(255, 255, 255));
-    TextOut(fontDc, 0, 0, descriptor.Name, lstrlen(descriptor.Name));
-
-    SIZE fontDcSize = { static_cast<int>(640 * g_fScreenRate_x), static_cast<int>(480 * g_fScreenRate_y) };
-    int sourcePitch = ((fontDcSize.cx * 24 + 31) & ~31) >> 3;
-    int sourceBufferLength = sourcePitch * fontDcSize.cy;
-
-    int textureWidth = GetNextPowerOfTwo(textSize.cx);
-    int textureHeight = GetNextPowerOfTwo(textSize.cy);
-
-    std::vector<DWORD> textureBuffer(static_cast<size_t>(textureWidth) * textureHeight, 0);
-    for (int y = 0; y < textSize.cy; ++y)
-    {
-        int sourceIndex = y * sourcePitch;
-        int destinationIndex = y * textureWidth;
-        for (int x = 0; x < textSize.cx; ++x)
-        {
-            if (sourceIndex + 2 >= sourceBufferLength)
-            {
-                return false;
-            }
-
-            DWORD pixelColor = 0;
-            if (*(fontBuffer + sourceIndex) == 255)
-            {
-                pixelColor = descriptor.TextColor;
-            }
-            else if (*(fontBuffer + sourceIndex) != 0)
-            {
-                DWORD alpha = *(fontBuffer + sourceIndex);
-                alpha += *(fontBuffer + sourceIndex + 1);
-                alpha += *(fontBuffer + sourceIndex + 2);
-                alpha /= 3;
-                alpha <<= 24;
-                alpha |= 0x00FFFFFF;
-                pixelColor = descriptor.TextColor & alpha;
-            }
-
-            textureBuffer[destinationIndex] = pixelColor;
-            sourceIndex += 3;
-            destinationIndex += 1;
-        }
-    }
-
-    // DXP-12: textureBuffer is already RGBA8 (DWORD-packed pixelColor, alpha from font AA) --
-    // no format conversion needed here, unlike GlobalBitmap.cpp's JPEG path.
-    RHI::TextureDesc desc;
-    desc.width = textureWidth;
-    desc.height = textureHeight;
-    desc.filter = RHI::TexFilter::Nearest;
-    desc.wrap = RHI::TexWrap::Clamp;
-    GLuint textureId = RHI::CreateTexture(desc, textureBuffer.data()).id;
-    if (textureId == 0)
-    {
-        return false;
-    }
-
-    cacheEntry.TextureId = textureId;
-    cacheEntry.TextWidth = textSize.cx;
-    cacheEntry.TextHeight = textSize.cy;
-    cacheEntry.TextureWidth = textureWidth;
-    cacheEntry.TextureHeight = textureHeight;
-    cacheEntry.BgColor = descriptor.BgColor;
-    return true;
-}
-
-void RenderGroundItemLabelTexture(OBJECT* o, const GroundItemLabelCacheEntry& cacheEntry)
-{
-    if (cacheEntry.TextureId == 0)
-    {
-        return;
-    }
-
-    // Match RenderText center behavior: subtract integer half-width to avoid half-pixel blur on odd widths.
-    float renderX = static_cast<float>(o->ScreenX) * g_fScreenRate_x - static_cast<float>(cacheEntry.TextWidth / 2);
-    float renderY = static_cast<float>(o->ScreenY - 15) * g_fScreenRate_y;
-
-    if (cacheEntry.BgColor != 0)
-    {
-        EnableAlphaTest();
-        glColor4ub(GetRed(cacheEntry.BgColor), GetGreen(cacheEntry.BgColor), GetBlue(cacheEntry.BgColor), GetAlpha(cacheEntry.BgColor));
-        RenderColor(renderX / g_fScreenRate_x, renderY / g_fScreenRate_y,
-            static_cast<float>(cacheEntry.TextWidth) / g_fScreenRate_x, static_cast<float>(cacheEntry.TextHeight) / g_fScreenRate_y);
-        EndRenderColor();
-    }
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-    float textureUWidth = (cacheEntry.TextWidth + 0.01f) / static_cast<float>(cacheEntry.TextureWidth);
-    float textureVHeight = (cacheEntry.TextHeight + 0.01f) / static_cast<float>(cacheEntry.TextureHeight);
-    RenderBitmap(-static_cast<int>(cacheEntry.TextureId), renderX, renderY, static_cast<float>(cacheEntry.TextWidth),
-        static_cast<float>(cacheEntry.TextHeight), 0.f, 0.f, textureUWidth, textureVHeight, false, false);
-}
-
-bool RenderGroundItemLabelCached(OBJECT* o, ITEM* ip)
-{
-    GroundItemLabelCacheKey cacheKey = BuildGroundItemLabelCacheKey(o, ip);
-    DWORD currentTick = timeGetTime();
-
-    auto cacheIterator = g_groundItemLabelCache.find(cacheKey);
-    if (cacheIterator != g_groundItemLabelCache.end())
-    {
-        cacheIterator->second.LastUsedTick = currentTick;
-        RenderGroundItemLabelTexture(o, cacheIterator->second);
-        return true;
-    }
-
-    if (g_groundItemLabelBuildBudgetRemaining <= 0)
-    {
-        return false;
-    }
-
-    --g_groundItemLabelBuildBudgetRemaining;
-
-    GroundItemLabelDescriptor descriptor;
-    BuildGroundItemLabelDescriptor(o, ip, descriptor);
-
-    GroundItemLabelCacheEntry cacheEntry;
-    if (!CreateGroundItemLabelTexture(descriptor, cacheEntry))
-    {
-        return false;
-    }
-
-    cacheEntry.LastUsedTick = currentTick;
-
-    auto insertResult = g_groundItemLabelCache.emplace(cacheKey, cacheEntry);
-    if (!insertResult.second)
-    {
-        DeleteGroundItemLabelTexture(cacheEntry.TextureId);
-    }
-
-    PruneGroundItemLabelCache(currentTick);
-
-    auto insertedIterator = g_groundItemLabelCache.find(cacheKey);
-    if (insertedIterator != g_groundItemLabelCache.end())
-    {
-        RenderGroundItemLabelTexture(o, insertedIterator->second);
-        return true;
-    }
-
-    return false;
-}
-}
-
-void SetGroundItemLabelBuildBudget(int buildBudget)
-{
-    g_groundItemLabelBuildBudgetRemaining = buildBudget > 0 ? buildBudget : 0;
-
-    constexpr DWORD pruneIntervalMs = 250;
-    static DWORD lastPruneTick = 0;
-    DWORD currentTick = timeGetTime();
-
-    if (!g_groundItemLabelCache.empty()
-        && (g_groundItemLabelCache.size() > GROUND_ITEM_LABEL_CACHE_MAX_ENTRIES
-            || lastPruneTick == 0
-            || currentTick - lastPruneTick >= pruneIntervalMs))
-    {
-        PruneGroundItemLabelCache(currentTick);
-        lastPruneTick = currentTick;
-    }
 }
 
 void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
@@ -7071,7 +6687,10 @@ void RenderItemName(int i, OBJECT* o, ITEM* ip, bool Sort)
     }
     else
     {
-        RenderGroundItemLabelCached(o, ip);
+        GroundItemLabelDescriptor descriptor;
+        BuildGroundItemLabelDescriptor(o, ip, descriptor);
+        ApplyGroundItemLabelDescriptor(descriptor);
+        g_pRenderText->RenderText(o->ScreenX, o->ScreenY - 15, descriptor.Name, 0, 0, RT3_WRITE_CENTER);
     }
 
     g_pRenderText->SetTextColor(255, 230, 200, 255);
@@ -10080,24 +9699,15 @@ void RenderObjectScreen(int Type, int ItemLevel, int excellentFlags, int ancient
     RenderPartObject(o, Type, NULL, Light, alpha, ItemLevel, excellentFlags, ancientDiscriminator, true, true, true);
 }
 
+bool UI::Items::ShouldAnimatePreview(bool pointerInside, bool pickedItemActive, bool renderingPickedItem)
+{
+    return pointerInside && (!pickedItemActive || renderingPickedItem);
+}
+
 void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int Level, int excellentFlags, int ancientDiscriminator, bool PickUp)
 {
-    bool Success = false;
-    if ((g_pPickedItem == NULL || PickUp)
-        && SEASON3B::CheckMouseIn(sx, sy, Width, Height))
-    {
-#ifdef PBG_ADD_INGAMESHOPMSGBOX
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP))
-        {
-            Success = true;
-        }
-        else
-#endif //PBG_ADD_INGAMESHOPMSGBOX
-        {
-            if (g_pNewUISystem->CheckMouseUse() == false)
-                Success = true;
-        }
-    }
+    const bool Success = UI::Items::ShouldAnimatePreview(SEASON3B::CheckMouseIn(sx, sy, Width, Height),
+                                                         g_pPickedItem != nullptr, PickUp);
 
     if (Type >= ITEM_SWORD && Type < ITEM_SWORD + MAX_ITEM_INDEX)
     {
@@ -10653,39 +10263,7 @@ void RenderItem3D(float sx, float sy, float Width, float Height, int Type, int L
 
 void InventoryColor(ITEM* p)
 {
-    switch (p->Color)
-    {
-    case 0:
-        glColor3f(1.f, 1.f, 1.f);
-        break;
-    case 1:
-        glColor3f(0.8f, 0.8f, 0.8f);
-        break;
-    case 2:
-        glColor3f(0.6f, 0.7f, 1.f);
-        break;
-    case 3:
-        glColor3f(1.f, 0.2f, 0.1f);
-        break;
-    case 4:
-        glColor3f(0.5f, 1.f, 0.6f);
-        break;
-    case 5:
-        glColor4f(0.8f, 0.7f, 0.f, 1.f);
-        break;
-    case 6:
-        glColor4f(0.8f, 0.5f, 0.f, 1.f);
-        break;
-    case 7:
-        glColor4f(0.8f, 0.3f, 0.3f, 1.f);
-        break;
-    case 8:
-        glColor4f(1.0f, 0.f, 0.f, 1.f);
-        break;
-    case 99:
-        glColor3f(1.f, 0.2f, 0.1f);
-        break;
-    }
+    (void)p;
 }
 
 void RenderEqiupmentBox()
@@ -10986,7 +10564,7 @@ void MovePersonalShop()
             {
                 if (g_bEnablePersonalShop)
                 {
-                    SocketClient->ToGameServer()->SendPlayerShopOpen(g_szPersonalShopTitle);
+                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
                     g_pUIManager->Close(INTERFACE_INVENTORY);
                 }
                 else
@@ -11037,7 +10615,7 @@ void ClosePersonalShop()
         }
         if (g_PersonalShopSeller.Key)
         {
-            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, g_PersonalShopSeller.ID);
+            SocketClient->ToGameServer()->SendPlayerShopCloseOther(g_PersonalShopSeller.Key, MU_C16(g_PersonalShopSeller.ID));
         }
     }
 
@@ -11195,6 +10773,11 @@ void CreateGuildMark(int nMarkIndex, bool blend)
     Width = (int)b->Width;
     Height = (int)b->Height;
     BYTE* Buffer = b->Buffer;
+    if (!Buffer || Width == 0 || Height == 0)
+    {
+        mu::log::Get("gameplay")->error("[CreateGuildMark] BITMAP_GUILD not loaded (BitmapIndex={})", b->BitmapIndex);
+        return;
+    }
     int alpha = 128;
     if (blend)
     {
@@ -11235,9 +10818,9 @@ void CreateGuildMark(int nMarkIndex, bool blend)
         }
     }
 
-    // DXP-12: repaints an already-created, fixed-size texture in place -- RHI::UpdateTexture's
-    // full-rect form is the sub-image equivalent of the old full glTexImage2D re-specify.
-    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
+    mu::GetRenderer().QueueTextureUpdate(b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(Width),
+                                         static_cast<std::uint32_t>(Height));
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void CreateCastleMark(int Type, BYTE* buffer, bool blend)
@@ -11316,70 +10899,37 @@ void CreateCastleMark(int Type, BYTE* buffer, bool blend)
             offset += 4;
         }
     }
-    // DXP-12: same in-place repaint pattern as CreateGuildMark, see its comment.
-    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
+    mu::GetRenderer().QueueTextureUpdate(
+        b->BitmapIndex, b->Buffer, static_cast<std::uint32_t>(b->Width), static_cast<std::uint32_t>(b->Height));
+    mu::GetRenderer().BindTexture(b->BitmapIndex);
 }
 
 void RenderGuildColor(float x, float y, int SizeX, int SizeY, int Index)
 {
     RenderBitmap(BITMAP_INVENTORY + 18, x - 1, y - 1, (float)SizeX + 2, (float)SizeY + 2, 0.f, 0.f, SizeX / 32.f, SizeY / 30.f);
 
-    BITMAP_t* b = &Bitmaps[BITMAP_GUILD];
-
-    int Width, Height;
-
-    Width = (int)b->Width;
-    Height = (int)b->Height;
-    BYTE* Buffer = b->Buffer;
-    unsigned int Color = MarkColor[Index];
-
     if (Index == 0)
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                *((unsigned int*)(Buffer)) = 255 << 24;
-                Buffer += 4;
-            }
-        }
-        Color = (255 << 24) + (128 << 16) + (128 << 8) + (128);
-        Buffer = b->Buffer;
-        for (int i = 0; i < 8; i++)
-        {
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 + 4;
-        }
-        Buffer = b->Buffer + 7 * 4;
-        for (int i = 0; i < 8; i++)
-        {
-            *((unsigned int*)(Buffer)) = Color;
-            Buffer += 8 * 4 - 4;
-        }
+        const unsigned int black = (255u << 24);
+        const unsigned int gray = (255u << 24) | (128u << 16) | (128u << 8) | 128u;
+        const float fx = x;
+        const float fy = y;
+        const float fw = (float)SizeX;
+        const float fh = (float)SizeY;
+        RenderColorQuadARGB(fx, fy, fw, fh, black);
+        RenderColorLineARGB(fx, fy, fx + fw, fy + fh, 2.0f, gray);
+        RenderColorLineARGB(fx + fw, fy, fx, fy + fh, 2.0f, gray);
     }
     else
     {
-        for (int i = 0; i < Height; i++)
-        {
-            for (int j = 0; j < Width; j++)
-            {
-                *((unsigned int*)(Buffer)) = Color;
-                Buffer += 4;
-            }
-        }
+        RenderColorQuadARGB(x, y, (float)SizeX, (float)SizeY, MarkColor[Index]);
     }
-
-    // DXP-12: same in-place repaint pattern as CreateGuildMark, see its comment.
-    RHI::UpdateTexture(RHI::TextureHandle{ b->TextureNumber }, 0, 0, Width, Height, b->Buffer);
-    RenderBitmap(BITMAP_GUILD, x, y, (float)SizeX, (float)SizeY);
 }
 
 void RenderGuildList(int StartX, int StartY)
 {
     GuildListStartX = StartX;
     GuildListStartY = StartY;
-
-    glColor3f(1.f, 1.f, 1.f);
 
     DisableAlphaBlend();
     float x, y, Width, Height;
@@ -11433,7 +10983,6 @@ void RenderServerDivision()
 
     float Width, Height, x, y;
 
-    glColor3f(1.f, 1.f, 1.f);
     EnableAlphaTest();
 
     InventoryStartX = REFERENCE_WIDTH - 190;
@@ -11474,14 +11023,9 @@ void RenderServerDivision()
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::Cancel, 0, 0, RT3_WRITE_CENTER);
 
     Width = 120; Height = 24; x = (float)InventoryStartX + 35; y = 320;//(Width/2.f); y = 231;
-    if (g_bServerDivisionAccept)
-        glColor3f(1.f, 1.f, 1.f);
-    else
-        glColor3f(0.5f, 0.5f, 0.5f);
     RenderBitmap(BITMAP_INTERFACE + 10, (float)x, (float)y, (float)Width, (float)Height, 0.f, 0.f, 213.f / 256.f);
     g_pRenderText->RenderText((int)(x + (Width / 2)), (int)(y + 5), I18N::Game::OK, 0, 0, RT3_WRITE_CENTER);
 
-    glColor3f(1.f, 1.f, 1.f);
 }
 
 BYTE CaculateFreeTicketLevel(int iType)

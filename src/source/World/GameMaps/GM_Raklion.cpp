@@ -13,6 +13,7 @@
 
 #include "World/MapInfra/w_MapHeaders.h"
 #include "Audio/DSPlaySound.h"
+#include "UI/Scaling/UITransform.h"
 
 using namespace SEASON4A;
 
@@ -41,13 +42,9 @@ CGM_Raklion::~CGM_Raklion()
     Destroy();
 }
 
-void CGM_Raklion::Init()
-{
-}
+void CGM_Raklion::Init() {}
 
-void CGM_Raklion::Destroy()
-{
-}
+void CGM_Raklion::Destroy() {}
 
 bool CGM_Raklion::CreateObject(OBJECT* o)
 {
@@ -67,7 +64,7 @@ bool CGM_Raklion::CreateObject(OBJECT* o)
         CreateEffect(MODEL_WARP3, Position, o->Angle, o->Light, 1);
         */
     }
-    return true;
+        return true;
     case MODEL_WARP4:
     {
         vec3_t Position;
@@ -80,7 +77,7 @@ bool CGM_Raklion::CreateObject(OBJECT* o)
         Vector(o->Position[0], o->Position[1] - 20.f, o->Position[2] + 520.f, Position);
         CreateEffect(MODEL_WARP6, Position, o->Angle, o->Light, 1);
     }
-    return true;
+        return true;
     }
 
     return false;
@@ -94,7 +91,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     case MONSTER_ICE_WALKER:
         OpenMonsterModel(MONSTER_MODEL_ICE_WALKER);
         pCharacter = CreateCharacter(Key, MODEL_ICE_WALKER, PosX, PosY);
-        //pCharacter->Object.Scale = 1.0f;
+        // pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.2f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -192,7 +189,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_DARK_MAMMOTH);
         pCharacter = CreateCharacter(Key, MODEL_DARK_MAMMOTH, PosX, PosY);
-        //pCharacter->Object.Scale = 1.7f;
+        // pCharacter->Object.Scale = 1.7f;
         pCharacter->Object.Scale = 1.9f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -208,7 +205,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_DARK_GIANT);
         pCharacter = CreateCharacter(Key, MODEL_DARK_GIANT, PosX, PosY);
-        //pCharacter->Object.Scale = 1.0f;
+        // pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.1f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -220,7 +217,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_DARK_COOLUTIN);
         pCharacter = CreateCharacter(Key, MODEL_DARK_COOLUTIN, PosX, PosY);
-        //pCharacter->Object.Scale = 1.0f;
+        // pCharacter->Object.Scale = 1.0f;
         pCharacter->Object.Scale = 1.3f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -230,7 +227,7 @@ CHARACTER* CGM_Raklion::CreateMonster(int iType, int PosX, int PosY, int Key)
     {
         OpenMonsterModel(MONSTER_MODEL_DARK_IRON_KNIGHT);
         pCharacter = CreateCharacter(Key, MODEL_DARK_IRON_KNIGHT, PosX, PosY);
-        //pCharacter->Object.Scale = 1.5f;
+        // pCharacter->Object.Scale = 1.5f;
         pCharacter->Object.Scale = 1.8f;
         pCharacter->Weapon[0].Type = -1;
         pCharacter->Weapon[1].Type = -1;
@@ -283,13 +280,13 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
         {
             if (o->AnimationFrame > 4.4f && o->AnimationFrame < 4.7f)
             {
-                //const float OFFSETLEN = 250.0f, POS_HEIGHT = 220.0f;
+                // const float OFFSETLEN = 250.0f, POS_HEIGHT = 220.0f;
                 const float ANG_REVISION = 20.0f;
 
                 vec3_t v3Pos, v3Ang_, v3BasisPos;
 
-                //vec3_t v3Dir_, v3Dir;
-                //float  matRotation[3][4];
+                // vec3_t v3Dir_, v3Dir;
+                // float  matRotation[3][4];
 
                 // a. Bipad Header
                 b->TransformByObjectBone(v3BasisPos, o, 8);
@@ -415,11 +412,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
                 Vector(0.4f, 0.6f, 1.0f, vLight);
                 b->TransformByObjectBone(vPos, o, 19);
-                CreateEffect(MODEL_1_STREAMBREATHFIRE,
-                    vPos,
-                    o->Angle,
-                    vLight,
-                    0, 0, -1, 0, 0, 0, fSize, -1);
+                CreateEffect(MODEL_1_STREAMBREATHFIRE, vPos, o->Angle, vLight, 0, 0, -1, 0, 0, 0, fSize, -1);
             }
             break;
             case MONSTER01_ATTACK2:
@@ -430,11 +423,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
                 Vector(0.0f, 0.9f, 0.1f, vLight);
                 b->TransformByObjectBone(vPos, o, 19);
-                CreateEffect(MODEL_1_STREAMBREATHFIRE,
-                    vPos,
-                    o->Angle,
-                    vLight,
-                    0, 0, -1, 0, 0, 0, fSize, -1);
+                CreateEffect(MODEL_1_STREAMBREATHFIRE, vPos, o->Angle, vLight, 0, 0, -1, 0, 0, 0, fSize, -1);
             }
             break;
             } // switch(o->CurrentAction)
@@ -737,7 +726,8 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                     CreateParticle(BITMAP_SMOKE, vPos2, o->Angle, vLight, 50, fScale);
                     CreateParticle(BITMAP_SMOKELINE1 + rand() % 3, vPos2, o->Angle, vLight, 0, fScale);
 
-                    if (m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_7)
+                    if (m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6 ||
+                        m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_7)
                     {
                         CreateParticle(BITMAP_FIRE_HIK1_MONO, vPos1, o->Angle, vLight, 0, o->Scale);
                         CreateParticle(BITMAP_FIRE_HIK1_MONO, vPos2, o->Angle, vLight, 0, o->Scale);
@@ -762,11 +752,6 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
                 if (i == 0)
                 {
                     vPos[0] += 100.f;
-                }
-                else if (i == 1)
-                {
-                    vPos[0] += 100.f;
-                    vPos[1] += 100.f;
                 }
 
                 vPos[0] += rand() % 60 - 30.f;
@@ -866,11 +851,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
                 Vector(0.4f, 0.6f, 1.0f, vLight);
                 b->TransformByObjectBone(vPos, o, 19);
-                CreateEffect(MODEL_1_STREAMBREATHFIRE,
-                    vPos,
-                    o->Angle,
-                    vLight,
-                    0, 0, -1, 0, 0, 0, fSize, -1);
+                CreateEffect(MODEL_1_STREAMBREATHFIRE, vPos, o->Angle, vLight, 0, 0, -1, 0, 0, 0, fSize, -1);
             }
             break;
             case MONSTER01_ATTACK2:
@@ -881,11 +862,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
                 Vector(0.0f, 0.9f, 0.1f, vLight);
                 b->TransformByObjectBone(vPos, o, 19);
-                CreateEffect(MODEL_1_STREAMBREATHFIRE,
-                    vPos,
-                    o->Angle,
-                    vLight,
-                    0, 0, -1, 0, 0, 0, fSize, -1);
+                CreateEffect(MODEL_1_STREAMBREATHFIRE, vPos, o->Angle, vLight, 0, 0, -1, 0, 0, 0, fSize, -1);
             }
             break;
             } // switch(o->CurrentAction)
@@ -953,7 +930,7 @@ bool CGM_Raklion::MoveMonsterVisual(OBJECT* o, BMD* b)
 
 void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
 {
-    //int iType = MODEL_MONSTER01+455;
+    // int iType = MODEL_MONSTER01+455;
 
     switch (o->Type)
     {
@@ -969,10 +946,12 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     {
         float Start_Frame = 3.f;
         float End_Frame = 8.0f;
-        if ((o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame && o->CurrentAction == MONSTER01_ATTACK1)
-            || (o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame && o->CurrentAction == MONSTER01_ATTACK2))
+        if ((o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame &&
+             o->CurrentAction == MONSTER01_ATTACK1) ||
+            (o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame &&
+             o->CurrentAction == MONSTER01_ATTACK2))
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(1.0f, 1.2f, 2.f, Light);
 
             vec3_t StartPos, StartRelative;
@@ -983,7 +962,8 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
             {
-                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                             o->HeadAngle);
 
                 Vector(0.f, 0.f, 0.f, StartRelative);
                 Vector(0.f, 0.f, 0.f, EndRelative);
@@ -1027,10 +1007,12 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
     {
         float Start_Frame = 3.f;
         float End_Frame = 8.0f;
-        if ((o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame && o->CurrentAction == MONSTER01_ATTACK1)
-            || (o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame && o->CurrentAction == MONSTER01_ATTACK2))
+        if ((o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame &&
+             o->CurrentAction == MONSTER01_ATTACK1) ||
+            (o->AnimationFrame >= Start_Frame && o->AnimationFrame <= End_Frame &&
+             o->CurrentAction == MONSTER01_ATTACK2))
         {
-            vec3_t  Light;
+            vec3_t Light;
             Vector(1.0f, 1.2f, 2.f, Light);
 
             vec3_t StartPos, StartRelative;
@@ -1041,7 +1023,8 @@ void CGM_Raklion::MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b)
             float fAnimationFrame = o->AnimationFrame - fActionSpeed;
             for (int i = 0; i < 10; i++)
             {
-                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+                b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                             o->HeadAngle);
 
                 Vector(0.f, 0.f, 0.f, StartRelative);
                 Vector(0.f, 0.f, 0.f, EndRelative);
@@ -1086,7 +1069,8 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             }
         }
         Vector(1.0f, 1.0f, 1.0f, o->Light);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -1097,7 +1081,8 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             SetAction(o, rand() % 2);
         }
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -1131,7 +1116,8 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             SetAction(o, rand() % 2);
         }
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -1196,16 +1182,21 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             }
         }
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
 
         return true;
     }
     else if (o->Type == 20)
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(1, RENDER_CHROME2 | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
-        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_CHROME2 | RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_CHROME8);
+        b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_CHROME8);
 
         if (o->CurrentAction == 0)
         {
@@ -1309,7 +1300,8 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             }
         }
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -1326,9 +1318,10 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         b->TransformPosition(BoneTransform[1], vRelativePos, vWorldPos, false);
         vec3_t vLight;
         Vector(1.0f, 1.0f, 1.0f, vLight);
-        //CreateEffect(BITMAP_GATHERING,vWorldPos,o->Angle,vLight,3,o);
+        // CreateEffect(BITMAP_GATHERING,vWorldPos,o->Angle,vLight,3,o);
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
         return true;
     }
@@ -1348,15 +1341,18 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
         if (o->Type == MODEL_WARP)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
         else if (o->Type == MODEL_WARP2)
         {
-            b->RenderBody(RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
         else if (o->Type == MODEL_WARP3)
         {
-            b->RenderMesh(0, RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_DARK, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
 
         return true;
@@ -1375,15 +1371,18 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 
         if (o->Type == MODEL_WARP4)
         {
-            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
         else if (o->Type == MODEL_WARP5)
         {
-            b->RenderBody(RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderBody(RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
         else if (o->Type == MODEL_WARP6)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
         }
 
         return true;
@@ -1396,16 +1395,13 @@ bool CGM_Raklion::RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
             o->PriorAnimationFrame = 0;
         }
 
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
         return true;
     }
-    else if ((o->Type >= MODEL_ICE_WALKER && o->Type <= MODEL_SPIDER_EGGS_3)
-        || o->Type == MODEL_DARK_MAMMOTH
-        || o->Type == MODEL_DARK_GIANT
-        || o->Type == MODEL_DARK_IRON_KNIGHT
-        || o->Type == MODEL_DARK_COOLUTIN
-        )
+    else if ((o->Type >= MODEL_ICE_WALKER && o->Type <= MODEL_SPIDER_EGGS_3) || o->Type == MODEL_DARK_MAMMOTH ||
+             o->Type == MODEL_DARK_GIANT || o->Type == MODEL_DARK_IRON_KNIGHT || o->Type == MODEL_DARK_COOLUTIN)
     {
         RenderMonster(o, b, ExtraMon);
 
@@ -1421,21 +1417,26 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     {
     case MODEL_ICE_WALKER:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
         return true;
     }
     break;
     case MODEL_GIANT_MAMMOTH:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
-        //b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        //b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        //b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        // b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+        // o->BlendMeshTexCoordV); b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+        // o->BlendMeshTexCoordU, o->BlendMeshTexCoordV); b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh,
+        // o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
-        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -1445,14 +1446,22 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
             return true;
         }
@@ -1460,8 +1469,10 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
 
     case MODEL_COOLUTIN:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
         return true;
     }
@@ -1470,49 +1481,69 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     case MODEL_IRON_KNIGHT:
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
         }
         else
         {
             float fLumi = (sinf(WorldTime * 0.01f) + 1.0f) * 0.4f + 0.2f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_IRONKNIGHT_BODY_BRIGHT);
-            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.7f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_IRONKNIGHT_BODY_BRIGHT);
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.7f, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                          o->HiddenMesh);
         }
 
         return true;
 
     case MODEL_SELUPAN:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
-        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
-        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
-        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(4, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
 
-        b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, o->BlendMeshLight, (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f, o->HiddenMesh);
+        b->RenderMesh(5, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 5, o->BlendMeshLight,
+                      (int)WorldTime % 10000 * 0.0002f, (int)WorldTime % 10000 * 0.0002f, o->HiddenMesh);
 
         float fLumi2 = (sinf(WorldTime * 0.002f) + 1.f) * 0.5f;
 
-        b->RenderMesh(4, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
-        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(4, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
+        b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi2, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, BITMAP_SERUFAN_ARM_R);
 
         if (m_byDetailState >= BATTLE_OF_SELUPAN_PATTERN_2)
         {
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_MAGIC_EMBLEM);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_MAGIC_EMBLEM);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_CHROME4 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
         }
 
-        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
 
         return true;
     }
@@ -1550,17 +1581,21 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 }
 
                 Calc_RenderObject(o, true, false, 0);
-                b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-                b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fBlendLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 3, fBlendLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh);
             }
 
-            //b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
+            // b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
         }
         else
         {
-            //b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
+            // b->RenderBody(RENDER_TEXTURE,o->Alpha,o->BlendMesh,o->BlendMeshLight,o->BlendMeshTexCoordU,o->BlendMeshTexCoordV,o->HiddenMesh);
 
             vec3_t vOriginPos;
             VectorCopy(o->Position, vOriginPos);
@@ -1587,7 +1622,8 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
                 }
 
                 Calc_RenderObject(o, true, false, 0);
-                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+                b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                              o->BlendMeshTexCoordV, o->HiddenMesh);
 
                 vec3_t vPos, vLight;
                 float fLumi = (sinf(WorldTime * 0.004f) + 1.2f) * 0.5f + 0.1f;
@@ -1633,8 +1669,10 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     break;
     case MODEL_DARK_MAMMOTH:
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_CHROME6 | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
         return true;
     }
@@ -1644,14 +1682,22 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
         if (o->CurrentAction != MONSTER01_DIE)
         {
             Vector(1.0f, 1.0f, 1.0f, b->BodyLight);
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
-            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME7, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(2, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
+            b->RenderMesh(3, RENDER_TEXTURE | RENDER_BRIGHT | RENDER_CHROME, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                          o->BlendMeshTexCoordU, o->BlendMeshTexCoordV);
 
             return true;
         }
@@ -1659,24 +1705,32 @@ bool CGM_Raklion::RenderMonster(OBJECT* o, BMD* b, bool ExtraMon)
     break;
     case MODEL_DARK_COOLUTIN:
     {
-        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, o->BlendMesh, o->BlendMeshLight,
+                      o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     break;
     case MODEL_DARK_IRON_KNIGHT:
     {
         if (o->CurrentAction == MONSTER01_DIE)
         {
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
         }
         else
         {
             float fLumi = (sinf(WorldTime * 0.01f) + 1.0f) * 0.4f + 0.2f;
-            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, BITMAP_IRONKNIGHT_BODY_BRIGHT);
-            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.7f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
-            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(0, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 0, fLumi, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, BITMAP_IRONKNIGHT_BODY_BRIGHT);
+            b->RenderMesh(1, RENDER_TEXTURE, 0.4f, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_TEXTURE | RENDER_BRIGHT, o->Alpha, 1, 0.7f, o->BlendMeshTexCoordU,
+                          o->BlendMeshTexCoordV, o->HiddenMesh);
+            b->RenderMesh(1, RENDER_CHROME | RENDER_BRIGHT, 0.5f, 1, 0.5f, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV,
+                          o->HiddenMesh);
         }
 
         return true;
@@ -1762,7 +1816,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         else if (o->CurrentAction == MONSTER01_DIE && (int)o->LifeTime == 100)
         {
             const int nBonesCount = 8;
-            int iBones[nBonesCount] = { 4, 7, 10, 22, 39, 44, 12, 24 };
+            int iBones[nBonesCount] = {4, 7, 10, 22, 39, 44, 12, 24};
             for (int i = 0; i < nBonesCount; ++i)
             {
                 Vector(0.3f, 0.6f, 1.0f, vLight);
@@ -1797,7 +1851,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     break;
     case MODEL_IRON_KNIGHT:
     {
-        vec3_t  Light;
+        vec3_t Light;
         Vector(1.0f, 1.2f, 2.f, Light);
 
         vec3_t StartPos, StartRelative;
@@ -1808,7 +1862,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)
         {
-            b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+            b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                         o->HeadAngle);
 
             Vector(0.f, 0.f, 0.f, StartRelative);
             Vector(0.f, 0.f, 0.f, EndRelative);
@@ -1820,11 +1875,12 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             fAnimationFrame += fSpeedPerFrame;
         }
 
-        int iBones[] = { 20, 37, 45, 51 };
+        int iBones[] = {20, 37, 45, 51};
 
         for (int i = 0; i < 4; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (rand() % 6 > 0)
+                continue;
 
             if (rand() % 3 > 0)
             {
@@ -1865,7 +1921,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
             if (c->AttackTime <= 8 && rand_fps_check(1))
             {
-                vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
+                vec3_t Position2 = {0.0f, 0.0f, 0.0f};
                 b->TransformPosition(o->BoneTransform[26], Position2, o->m_vPosSword, true);
 
                 float fDistance = 300.0f;
@@ -1875,27 +1931,24 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
             {
                 vec3_t Position;
-                vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
+                vec3_t Position2 = {0.0f, 0.0f, 0.0f};
 
                 b->TransformPosition(o->BoneTransform[26], Position2, Position, true);
 
                 float fDistance = 100.0f + (float)(c->AttackTime - 8) * 10.0f;
                 Position[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 Position[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
-                vec3_t Light = { 1.0f, 1.0f, 1.0f };
+                vec3_t Light = {1.0f, 1.0f, 1.0f};
                 CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 1, o);
                 // 				CreateEffect( MODEL_SPEAR, Position, o->Angle, Light, 1, o);
 
                 if (c->TargetCharacter != -1)
                 {
                     CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                    if (c->TargetCharacter != -1)
+                    OBJECT* to = &tc->Object;
+                    if (10 <= c->AttackTime && to->Live)
                     {
-                        OBJECT* to = &tc->Object;
-                        if (10 <= c->AttackTime && to->Live)
-                        {
-                            to->m_byHurtByDeathstab = 35;
-                        }
+                        to->m_byHurtByDeathstab = 35;
                     }
                 }
             }
@@ -1909,7 +1962,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame < 1.0f && rand_fps_check(1))
         {
-            int iBones[] = { 20, 37, 45, 51 };
+            int iBones[] = {20, 37, 45, 51};
             for (int i = 0; i < 4; ++i)
             {
                 Vector(0.3f, 0.5f, 1.0f, vLight);
@@ -1923,7 +1976,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     break;
     case MODEL_SELUPAN:
     {
-        vec3_t  Light;
+        vec3_t Light;
         Vector(1.0f, 1.2f, 2.f, Light);
 
         vec3_t StartPos, StartRelative;
@@ -1934,7 +1987,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)
         {
-            b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+            b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                         o->HeadAngle);
 
             Vector(0.f, 0.f, 0.f, StartRelative);
             Vector(0.f, 0.f, 0.f, EndRelative);
@@ -2018,7 +2072,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         else if (o->CurrentAction == MONSTER01_DIE && (int)o->LifeTime == 100)
         {
             const int nBonesCount = 8;
-            int iBones[nBonesCount] = { 4, 7, 10, 22, 39, 44, 12, 24 };
+            int iBones[nBonesCount] = {4, 7, 10, 22, 39, 44, 12, 24};
             for (int i = 0; i < nBonesCount; ++i)
             {
                 Vector(0.3f, 0.6f, 1.0f, vLight);
@@ -2050,7 +2104,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
     break;
     case MODEL_DARK_IRON_KNIGHT:
     {
-        vec3_t  Light;
+        vec3_t Light;
         Vector(1.0f, 1.2f, 2.f, Light);
 
         vec3_t StartPos, StartRelative;
@@ -2061,7 +2115,8 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         float fAnimationFrame = o->AnimationFrame - fActionSpeed;
         for (int i = 0; i < 10; i++)
         {
-            b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle, o->HeadAngle);
+            b->Animation(BoneTransform, fAnimationFrame, o->PriorAnimationFrame, o->PriorAction, o->Angle,
+                         o->HeadAngle);
 
             Vector(0.f, 0.f, 0.f, StartRelative);
             Vector(0.f, 0.f, 0.f, EndRelative);
@@ -2073,11 +2128,12 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             fAnimationFrame += fSpeedPerFrame;
         }
 
-        int iBones[] = { 20, 37, 45, 51 };
+        int iBones[] = {20, 37, 45, 51};
 
         for (int i = 0; i < 4; ++i)
         {
-            if (rand() % 6 > 0) continue;
+            if (rand() % 6 > 0)
+                continue;
 
             if (rand() % 3 > 0)
             {
@@ -2117,7 +2173,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             }
             if (c->AttackTime <= 8)
             {
-                vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
+                vec3_t Position2 = {0.0f, 0.0f, 0.0f};
                 b->TransformPosition(o->BoneTransform[26], Position2, o->m_vPosSword, true);
 
                 float fDistance = 300.0f;
@@ -2127,27 +2183,24 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
             if (6 <= c->AttackTime && c->AttackTime <= 12 && rand_fps_check(2))
             {
                 vec3_t Position;
-                vec3_t Position2 = { 0.0f, 0.0f, 0.0f };
+                vec3_t Position2 = {0.0f, 0.0f, 0.0f};
 
                 b->TransformPosition(o->BoneTransform[26], Position2, Position, true);
 
                 float fDistance = 100.0f + (float)(c->AttackTime - 8) * 10.0f;
                 Position[0] += fDistance * sinf(o->Angle[2] * Q_PI / 180.0f);
                 Position[1] += -fDistance * cosf(o->Angle[2] * Q_PI / 180.0f);
-                vec3_t Light = { 1.0f, 1.0f, 1.0f };
+                vec3_t Light = {1.0f, 1.0f, 1.0f};
                 CreateEffect(MODEL_SPEAR, Position, o->Angle, Light, 1, o);
                 // 				CreateEffect( MODEL_SPEAR, Position, o->Angle, Light, 1, o);
 
                 if (c->TargetCharacter != -1)
                 {
                     CHARACTER* tc = &CharactersClient[c->TargetCharacter];
-                    if (c->TargetCharacter != -1)
+                    OBJECT* to = &tc->Object;
+                    if (10 <= c->AttackTime && to->Live)
                     {
-                        OBJECT* to = &tc->Object;
-                        if (10 <= c->AttackTime && to->Live)
-                        {
-                            to->m_byHurtByDeathstab = 35;
-                        }
+                        to->m_byHurtByDeathstab = 35;
                     }
                 }
             }
@@ -2161,7 +2214,7 @@ bool CGM_Raklion::RenderMonsterVisual(CHARACTER* c, OBJECT* o, BMD* b)
         }
         else if (o->CurrentAction == MONSTER01_DIE && o->AnimationFrame < 1.0f)
         {
-            int iBones[] = { 20, 37, 45, 51 };
+            int iBones[] = {20, 37, 45, 51};
             for (int i = 0; i < 4; ++i)
             {
                 Vector(0.3f, 0.5f, 1.0f, vLight);
@@ -2186,7 +2239,8 @@ void CGM_Raklion::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
 {
     if (o->Type == 46 || o->Type == 53)
     {
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
     }
     else if (o->Type == 76)
     {
@@ -2195,7 +2249,8 @@ void CGM_Raklion::RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon)
         G = (float)sinf(WorldTime * 0.0015f) * 0.2f + 0.5f;
         B = (float)sinf(WorldTime * 0.0014f) * 0.2f + 0.5f;
         Vector(R, G, B, o->Light);
-        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU, o->BlendMeshTexCoordV, o->HiddenMesh);
+        b->RenderBody(RENDER_TEXTURE, o->Alpha, o->BlendMesh, o->BlendMeshLight, o->BlendMeshTexCoordU,
+                      o->BlendMeshTexCoordV, o->HiddenMesh);
     }
 }
 
@@ -2212,9 +2267,8 @@ bool CGM_Raklion::CreateSnow(PARTICLE* o)
     }
 
     Vector(Hero->Object.Position[0] + (float)(rand() % 1600 - 800),
-        Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
-        Hero->Object.Position[2] + (float)(rand() % 200 + 200),
-        o->Position);
+           Hero->Object.Position[1] + (float)(rand() % 1400 - 500),
+           Hero->Object.Position[2] + (float)(rand() % 200 + 200), o->Position);
     Vector(-(float)(rand() % 30 + 50), 0.f, 0.f, o->Angle);
     vec3_t Velocity;
     Vector(0.f, 0.f, -(float)(rand() % 20 + 30), Velocity);
@@ -2228,12 +2282,13 @@ bool CGM_Raklion::CreateSnow(PARTICLE* o)
 void CGM_Raklion::RenderBaseSmoke()
 {
     EnableAlphaBlend();
-    glColor3f(0.4f, 0.4f, 0.45f);
     float WindX2 = (float)((int)WorldTime % 100000) * 0.0006f;
     float WindY2 = -(float)((int)WorldTime % 100000) * 0.0006f;
-    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX2, WindY2, 3.0f, 2.0f);
+    RenderBitmapUV(BITMAP_CHROME + 3, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                   UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX2, WindY2, 3.0f, 2.0f);
     float WindX = (float)((int)WorldTime % 100000) * 0.0001f;
-    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH, (float)REFERENCE_HEIGHT - 45.f, WindX, 0.f, 0.3f, 0.3f);
+    RenderBitmapUV(BITMAP_CHROME + 2, 0.f, 0.f, (float)REFERENCE_WIDTH,
+                   UI::Scaling::ScreenOverlayContentHeight(WindowWidth, WindowHeight), WindX, 0.f, 0.3f, 0.3f);
 }
 
 bool IsIceCity()
@@ -2406,9 +2461,7 @@ bool CGM_Raklion::SetCurrentActionMonster(CHARACTER* c, OBJECT* o)
 
 void CGM_Raklion::SetBossMonsterAction(CHARACTER* c, OBJECT* o)
 {
-    if (c->MonsterSkill == 37
-        || !(c->MonsterSkill >= 34 && c->MonsterSkill <= 42)
-        || m_bBossHeightMove == true)
+    if (c->MonsterSkill == 37 || !(c->MonsterSkill >= 34 && c->MonsterSkill <= 42) || m_bBossHeightMove == true)
     {
         c->Object.Position[2] = RequestTerrainHeight(o->Position[0], o->Position[1]);
         m_bBossHeightMove = false;
@@ -2502,7 +2555,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
 
     switch (o->Type)
     {
-    case MODEL_ICE_WALKER:		// Ice Walker
+    case MODEL_ICE_WALKER: // Ice Walker
         if (MONSTER01_ATTACK1 == o->CurrentAction || MONSTER01_ATTACK2 == o->CurrentAction)
         {
             PlayBuffer(SOUND_RAKLION_ICEWALKER_ATTACK);
@@ -2526,19 +2579,17 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         {
             PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_ATTACK);
         }
-        else
-            if (o->CurrentAction == MONSTER01_WALK)
+        else if (o->CurrentAction == MONSTER01_WALK)
+        {
+            if (rand_fps_check(100))
             {
-                if (rand_fps_check(100))
-                {
-                    PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_MOVE);
-                }
+                PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_MOVE);
             }
-            else
-                if (o->CurrentAction == MONSTER01_DIE)
-                {
-                    PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
-                }
+        }
+        else if (o->CurrentAction == MONSTER01_DIE)
+        {
+            PlayBuffer(SOUND_RAKLION_GIANT_MAMUD_DEATH);
+        }
         return true;
     case MODEL_ICE_GIANT:
         if (o->CurrentAction == MONSTER01_WALK)
@@ -2578,7 +2629,8 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         {
             PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
         }
-        else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_WALK)
+        else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
+                 o->CurrentAction == MONSTER01_WALK)
         {
             PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_MOVE);
         }
@@ -2638,7 +2690,8 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
         {
             PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_ATTACK);
         }
-        else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 || o->CurrentAction == MONSTER01_WALK)
+        else if (o->CurrentAction == MONSTER01_STOP1 || o->CurrentAction == MONSTER01_STOP2 ||
+                 o->CurrentAction == MONSTER01_WALK)
         {
             PlayBuffer(SOUND_RAKLION_IRON_KNIGHT_MOVE);
         }
@@ -2672,9 +2725,7 @@ bool CGM_Raklion::PlayMonsterSound(OBJECT* o)
     return false;
 }
 
-void CGM_Raklion::PlayObjectSound(OBJECT* o)
-{
-}
+void CGM_Raklion::PlayObjectSound(OBJECT* o) {}
 
 bool CGM_Raklion::CanGoBossMap()
 {
@@ -2699,8 +2750,8 @@ void CGM_Raklion::SetState(BYTE byState, BYTE byDetailState)
     {
         m_byDetailState = byDetailState;
 
-        if (m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_2 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_3
-            || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_5 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6)
+        if (m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_2 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_3 ||
+            m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_5 || m_byDetailState == BATTLE_OF_SELUPAN_PATTERN_6)
         {
             PlayBuffer(SOUND_RAKLION_SERUFAN_RAGE);
         }

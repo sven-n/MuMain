@@ -6,11 +6,28 @@
 #include "UI/NewUI/NewUI3DRenderMng.h"
 #include "UI/NewUI/NewUIManager.h"
 #include "Camera/CameraProjection.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Core/Utilities/Log/ErrorReport.h"
+#include "Render/Renderer/MuRenderer.h"
 
 using namespace SEASON3B;
+
+namespace
+{
+UI::Scaling::Transform TransformForOwner(INewUI3DRenderObj* object)
+{
+    CNewUIObj* owner = dynamic_cast<CNewUIObj*>(object);
+    if (!owner)
+        owner = object->GetLayoutOwner();
+    if (!owner)
+        return UI::Scaling::GetActiveTransform();
+    return UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
+}
+
+void RenderWithOwnerLayout(INewUI3DRenderObj* object)
+{
+    UI::Scaling::ScopedActiveTransform layout(TransformForOwner(object), true);
+    object->Render3D();
+}
+}
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -83,6 +100,7 @@ void SEASON3B::CNewUI3DCamera::RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCallbackFu
     UI2DEffectInfo.pClass = pClass;
     UI2DEffectInfo.dwParamA = dwParamA;
     UI2DEffectInfo.dwParamB = dwParamB;
+    UI2DEffectInfo.transform = UI::Scaling::GetActiveTransform();
 
     m_deque2DEffects.push_back(UI2DEffectInfo);
 }
@@ -123,70 +141,51 @@ float SEASON3B::CNewUI3DCamera::GetLayerDepth()
 // NOT reached through this camera — they call EndBitmap()/gluPerspective2 directly themselves,
 // independent of CNewUI3DCamera.)
 
+void SEASON3B::CNewUI3DCamera::Render3D()
+{
+    for (auto* object : m_list3DObjs)
+    {
+        if (object->IsVisible())
+        {
+            RenderWithOwnerLayout(object);
+        }
+    }
+}
+
 bool SEASON3B::CNewUI3DCamera::Render()
 {
     if (m_list3DObjs.empty())
         return true;
 
     EndBitmap();
-    SaveCameraPerspective();
-    glViewport2(0, 0, m_uiWidth, m_uiHeight);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(0, 0, m_uiWidth, m_uiHeight);
     gluPerspective2(1.f, (float)(m_uiWidth) / (float)(m_uiHeight), RENDER_ITEMVIEW_NEAR, RENDER_ITEMVIEW_FAR);
-    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity bracket and
-    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read, plus the shadow-compare diagnostic
-    // that used to validate this closed form, are deleted — DXP-07d already proved this exact
-    // formula matches bit-for-bit across multiple soaks, and GlobalUBO is the only consumer
-    // (same finding Category 3 already used to delete BeginOpengl/BeginBitmap's own
-    // matrix-stack calls). Same closed-form shape as increment 1 (RenderInfomation3D) — plain
-    // gluPerspective(1.f deg, aspect, near, far) and identity view, just with this camera's own
-    // m_uiWidth/m_uiHeight and RENDER_ITEMVIEW_NEAR/FAR args.
-    {
-        float aspect = (float)m_uiWidth / (float)m_uiHeight;
-        float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
-        float f = 1.0f / tanf(fovRad);
-        float zNear = RENDER_ITEMVIEW_NEAR;
-        float zFar  = RENDER_ITEMVIEW_FAR;
-        float cpuProj[16];
-        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
-        float cpuView[16] = {
-            1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
-        };
-
-        GlobalUBO::Instance().SetProj(cpuProj);
-        GlobalUBO::Instance().SetView(cpuView);
-
-        // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used to
-        // produce from a GL_MODELVIEW_MATRIX read) is identity here, matching cpuView above.
-        static const float s_IdentityCameraMatrix[3][4] = {
-            {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-        };
-        memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-    }
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
-    ClearDepthBuffer();
+    mu::GetRenderer().ClearDepthBuffer();
 
-    auto li = m_list3DObjs.begin();
-    for (; li != m_list3DObjs.end(); li++)
-    {
-        if ((*li)->IsVisible())
-        {
-            (*li)->Render3D();
-        }
-    }
+    Render3D();
     UpdateMousePositionn();
 
-    // DXP-08a: the matching glMatrixMode/glPopMatrix pops and the post-restore shadow-compare are
-    // deleted — BeginBitmap() (already fully CPU-sourced per DXP-07a) is GlobalUBO's real restore;
-    // the deleted block only re-set GlobalUBO to its own just-restored value, a no-op.
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
     BeginBitmap();
-    RestoreCameraPerspective();
 
     while (!m_deque2DEffects.empty())
     {
         UI_2DEFFECT_INFO& UI2DEffectInfo = m_deque2DEffects.front();
         if (UI2DEffectInfo.pCallbackFunc)
         {
+            UI::Scaling::ScopedActiveTransform layout(UI2DEffectInfo.transform);
             (*UI2DEffectInfo.pCallbackFunc)(UI2DEffectInfo.pClass, UI2DEffectInfo.dwParamA, UI2DEffectInfo.dwParamB);
         }
         m_deque2DEffects.pop_front();

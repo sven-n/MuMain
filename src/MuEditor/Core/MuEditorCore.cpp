@@ -5,7 +5,7 @@
 #include "MuEditorCore.h"
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
-#include "imgui_impl_opengl2.h"
+#include "imgui_impl_sdlgpu3.h"
 #include "MuInputBlockerCore.h"
 #include "../Config/MuEditorConfig.h"
 #include "../MuEditor/UI/Common/MuEditorCenterPaneUI.h"
@@ -16,6 +16,12 @@
 #include "../UI/Console/MuEditorConsoleUI.h"
 #include "I18N/All.h"
 #include "Core/Utilities/StringUtils.h"
+#include "Render/Renderer/MuRenderer.h"
+
+namespace mu
+{
+void QueueEditorRenderCommand();
+}
 
 #ifndef _WIN32
 #include <cstdio>    // popen / pclose
@@ -56,10 +62,54 @@ constexpr float EDITOR_BTN_Y = 8.0f;
 constexpr float EDITOR_BTN_WIDTH = 100.0f;
 constexpr float EDITOR_BTN_HEIGHT = 24.0f;
 
+namespace
+{
+bool InitializeImGuiBackends(SDL_Window* window)
+{
+    SDL_GPUDevice* device = static_cast<SDL_GPUDevice*>(mu::GetRenderer().GetDevice());
+    if (device == nullptr)
+    {
+        fwprintf(stderr, L"[MuEditor] Initialize failed: SDL GPU device is null\n");
+        fflush(stderr);
+        return false;
+    }
+
+    const SDL_GPUTextureFormat colorTargetFormat = SDL_GetGPUSwapchainTextureFormat(device, window);
+    if (colorTargetFormat == SDL_GPU_TEXTUREFORMAT_INVALID)
+    {
+        fwprintf(stderr, L"[MuEditor] Initialize failed: invalid SDL GPU swapchain format: %hs\n", SDL_GetError());
+        fflush(stderr);
+        return false;
+    }
+
+    if (!ImGui_ImplSDL3_InitForSDLGPU(window))
+    {
+        fwprintf(stderr, L"[MuEditor] ImGui_ImplSDL3_InitForSDLGPU failed\n");
+        fflush(stderr);
+        return false;
+    }
+
+    ImGui_ImplSDLGPU3_InitInfo initInfo = {};
+    initInfo.Device = device;
+    initInfo.ColorTargetFormat = colorTargetFormat;
+    initInfo.MSAASamples = SDL_GPU_SAMPLECOUNT_1;
+    if (!ImGui_ImplSDLGPU3_Init(&initInfo))
+    {
+        fwprintf(stderr, L"[MuEditor] ImGui_ImplSDLGPU3_Init failed\n");
+        fflush(stderr);
+        ImGui_ImplSDL3_Shutdown();
+        return false;
+    }
+
+    return true;
+}
+}
+
 CMuEditorCore::CMuEditorCore()
     : m_bEditorMode(false)
     , m_bInitialized(false)
     , m_bFrameStarted(false)
+    , m_bDrawDataReady(false)
     , m_bShowItemEditor(false)
     , m_bShowSkillEditor(false)
     , m_bShowDevEditor(false)
@@ -80,14 +130,14 @@ CMuEditorCore& CMuEditorCore::GetInstance()
     return instance;
 }
 
-void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
+void CMuEditorCore::Initialize(SDL_Window* window)
 {
     if (m_bInitialized)
         return;
 
-    if (window == nullptr || glContext == nullptr)
+    if (window == nullptr)
     {
-        fwprintf(stderr, L"[MuEditor] Initialize failed: window or glContext is null\n");
+        fwprintf(stderr, L"[MuEditor] Initialize failed: window is null\n");
         fflush(stderr);
         return;
     }
@@ -284,18 +334,8 @@ void CMuEditorCore::Initialize(SDL_Window* window, void* glContext)
     style.WindowRounding = 0.0f;
     style.Colors[ImGuiCol_WindowBg] = ImVec4(0.12f, 0.12f, 0.12f, 1.0f);
 
-    if (!ImGui_ImplSDL3_InitForOpenGL(window, glContext))
+    if (!InitializeImGuiBackends(window))
     {
-        fwprintf(stderr, L"[MuEditor] ImGui_ImplSDL3_InitForOpenGL failed\n");
-        fflush(stderr);
-        ImGui::DestroyContext();
-        return;
-    }
-    if (!ImGui_ImplOpenGL2_Init())
-    {
-        fwprintf(stderr, L"[MuEditor] ImGui_ImplOpenGL2_Init failed\n");
-        fflush(stderr);
-        ImGui_ImplSDL3_Shutdown();
         ImGui::DestroyContext();
         return;
     }
@@ -328,11 +368,13 @@ void CMuEditorCore::Shutdown()
     // Save skill editor preferences before shutting down
     g_MuSkillEditorUI.SaveColumnPreferences();
 
-    ImGui_ImplOpenGL2_Shutdown();
+    mu::WaitForSDLGpuIdle();
+    ImGui_ImplSDLGPU3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
 
     m_bInitialized = false;
+    m_bDrawDataReady = false;
 }
 
 void CMuEditorCore::Update()
@@ -343,7 +385,8 @@ void CMuEditorCore::Update()
     // Only start a new frame if we haven't already
     if (!m_bFrameStarted)
     {
-        ImGui_ImplOpenGL2_NewFrame();
+        m_bDrawDataReady = false;
+        ImGui_ImplSDLGPU3_NewFrame();
 
         // The SDL3 backend fills display size and mouse/keyboard from the SDL
         // events fed via ImGui_ImplSDL3_ProcessEvent, so it works the same
@@ -512,12 +555,35 @@ void CMuEditorCore::Render()
     }
 #endif
 
-    // Render ImGui and reset frame state
+    // Finalize draw data. Task 4.2 uploads and renders it inside the engine's
+    // existing SDL GPU pass; starting another pass here would break ownership.
     ImGui::Render();
-    ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+    m_bDrawDataReady = true;
+    mu::QueueEditorRenderCommand();
 
     // Frame is complete, reset for next frame
     m_bFrameStarted = false;
+}
+
+void CMuEditorCore::PrepareDrawData(SDL_GPUCommandBuffer* commandBuffer)
+{
+    if (!m_bDrawDataReady)
+    {
+        return;
+    }
+
+    ImGui_ImplSDLGPU3_PrepareDrawData(ImGui::GetDrawData(), commandBuffer);
+}
+
+void CMuEditorCore::RenderDrawData(SDL_GPUCommandBuffer* commandBuffer, SDL_GPURenderPass* renderPass)
+{
+    if (!m_bDrawDataReady)
+    {
+        return;
+    }
+
+    ImGui_ImplSDLGPU3_RenderDrawData(ImGui::GetDrawData(), commandBuffer, renderPass);
+    m_bDrawDataReady = false;
 }
 
 #endif // _EDITOR

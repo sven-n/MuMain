@@ -1,11 +1,7 @@
 //************************************************************************
 //
-// Decompiled by @myheart, @synth3r
-// <https://forum.ragezone.com/members/2000236254.html>
-//
-//
 // FILE: ShopPackage.cpp
-//
+// Removed #ifdef _WIN32 guard (Story 7.6.6)
 //
 
 #include "stdafx.h"
@@ -16,25 +12,24 @@
 
 #include <iterator>
 
+// cppcheck-suppress uninitMemberVar
 CShopPackage::CShopPackage() // OK
 {
     this->LeftCount = -1;
     this->ProductSeqList.clear();
     this->PriceSeqList.clear();
 }
-CShopPackage::~CShopPackage() // OK
-{
-}
+CShopPackage::~CShopPackage() {}
 
-bool	CShopPackage::SetPackage(std::wstring strdata) // OK
+bool CShopPackage::SetPackage(std::wstring strdata)
 {
     if (strdata.empty())
-        return 0;
+        return false;
 
     CStringToken token(strdata, L"@");
 
     if (token.hasMoreTokens() == 0)
-        return 0;
+        return false;
 
     this->ProductDisplaySeq = _wtoi(token.nextToken().c_str());
     this->ViewOrder = _wtoi(token.nextToken().c_str());
@@ -64,75 +59,75 @@ bool	CShopPackage::SetPackage(std::wstring strdata) // OK
     this->CashType = _wtoi(token.nextToken().c_str());
     this->CashTypeFlag = _wtoi(token.nextToken().c_str());
 
-    return 1;
+    return true;
 }
 
-void	CShopPackage::SetLeftCount(int nCount) // OK
+void CShopPackage::SetLeftCount(int nCount)
 {
     this->LeftCount = nCount;
 }
 
-int		CShopPackage::GetProductCount() // OK
+int CShopPackage::GetProductCount()
 {
     return static_cast<int>(this->ProductSeqList.size());
 }
 
-void	CShopPackage::SetProductSeqFirst() // OK
+void CShopPackage::SetProductSeqFirst()
 {
     this->ProductSeqIter = this->ProductSeqList.begin();
 }
 
-bool	CShopPackage::GetProductSeqFirst(int& ProductSeq) // OK
+bool CShopPackage::GetProductSeqFirst(int& ProductSeq)
 {
     this->ProductSeqIter = this->ProductSeqList.begin();
 
     if (this->ProductSeqIter == this->ProductSeqList.end())
-        return 0;
+        return false;
     ProductSeq = (*this->ProductSeqIter);
     this->ProductSeqIter++;
-    return 1;
+    return true;
 }
 
-bool	CShopPackage::GetProductSeqNext(int& ProductSeq) // OK
+bool CShopPackage::GetProductSeqNext(int& ProductSeq)
 {
     if (this->ProductSeqIter == this->ProductSeqList.end())
-        return 0;
+        return false;
     ProductSeq = (*this->ProductSeqIter);
     this->ProductSeqIter++;
-    return 1;
+    return true;
 }
 
-int		CShopPackage::GetPriceCount()
+int CShopPackage::GetPriceCount()
 {
     return static_cast<int>(this->PriceSeqList.size());
 }
 
-void	CShopPackage::SetPriceSeqFirst()
+void CShopPackage::SetPriceSeqFirst()
 {
     this->PriceSeqIter = this->PriceSeqList.begin();
 }
 
-bool	CShopPackage::GetPriceSeqFirst(int& PriceSeq) // OK
+bool CShopPackage::GetPriceSeqFirst(int& PriceSeq)
 {
     this->PriceSeqIter = this->PriceSeqList.begin();
 
     if (this->PriceSeqIter == this->PriceSeqList.end())
-        return 0;
+        return false;
     PriceSeq = (*this->PriceSeqIter);
     this->PriceSeqIter++;
-    return 1;
+    return true;
 }
 
-bool	CShopPackage::GetPriceSeqNext(int& PriceSeq) // OK
+bool CShopPackage::GetPriceSeqNext(int& PriceSeq)
 {
     if (this->PriceSeqIter == this->PriceSeqList.end())
-        return 0;
+        return false;
     PriceSeq = (*this->PriceSeqIter);
     this->PriceSeqIter++;
-    return 1;
+    return true;
 }
 
-void	CShopPackage::SetProductSeqList(std::wstring strdata) // OK
+void CShopPackage::SetProductSeqList(std::wstring strdata)
 {
     CStringToken token(strdata, L"|");
 
@@ -140,13 +135,14 @@ void	CShopPackage::SetProductSeqList(std::wstring strdata) // OK
     {
         std::wstring data = token.nextToken();
 
-        if (data.empty()) break;
+        if (data.empty())
+            break;
 
         this->ProductSeqList.push_back(_wtoi(data.c_str()));
     }
 }
 
-void	CShopPackage::SetPriceSeqList(std::wstring strdata) // OK
+void CShopPackage::SetPriceSeqList(std::wstring strdata)
 {
     CStringToken token(strdata, L"|");
 
@@ -154,7 +150,8 @@ void	CShopPackage::SetPriceSeqList(std::wstring strdata) // OK
     {
         std::wstring data = token.nextToken();
 
-        if (data.empty()) break;
+        if (data.empty())
+            break;
 
         this->PriceSeqList.push_back(_wtoi(data.c_str()));
     }

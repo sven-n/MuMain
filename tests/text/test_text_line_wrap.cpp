@@ -225,6 +225,14 @@ TEST_CASE("wrap to width: text which fits stays on one line")
     CHECK(lines[0] == L"Handles the command");
 }
 
+TEST_CASE("wrap to width: whitespace-only text preserves a spacer line")
+{
+    const auto lines = WrapTextToWidth(L" ", 32, OneUnitPerCharacter());
+
+    REQUIRE(lines.size() == 1);
+    CHECK(lines[0] == L" ");
+}
+
 TEST_CASE("wrap to width: breaks at spaces and drops them")
 {
     const auto lines = WrapTextToWidth(L"Handles the chat command", 12, OneUnitPerCharacter());

@@ -2,9 +2,7 @@
 #include "ReconnectDialog.h"
 
 #include "Network/Reconnect/ReconnectManager.h"
-#include "Render/Textures/ZzzOpenglUtil.h"   // RenderColor, BeginBitmap/EndBitmap, Mouse*
-#include "Render/Core/RenderConfig.h"
-#include "Render/RHI/RHI.h"
+#include "Render/Textures/ZzzOpenglUtil.h" // RenderColor, BeginBitmap/EndBitmap, Mouse*
 #include <vector>
 #include "Render/Sprites/GlobalBitmap.h"     // Bitmaps (texture-loaded check)
 #include "UI/Legacy/UIControls.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
@@ -12,6 +10,7 @@
 #include "UI/NewUI/Dialogs/NewUIMessageBox.h"// CNewUIMessageBoxMng::IMAGE_MSGBOX_*
 #include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
 #include "I18N/All.h"
+#include "Render/Renderer/MuRenderer.h"
 
 namespace UI::Reconnect
 {
@@ -20,7 +19,7 @@ namespace
     using MsgBox = SEASON3B::CNewUIMessageBoxMng;
 
     // Frozen game frame captured at disconnect, shown during the re-login phase.
-    GLuint s_backgroundTex = 0;
+    std::uint32_t s_backgroundTex = 0;
     bool s_hasBackground = false;
 
     // Native message-box frame slice sizes (match CNewUICommonMessageBox).
@@ -133,16 +132,11 @@ namespace
             return;
         }
 
-        // Re-login: the world is torn down. Show the frozen disconnect frame
-        // (BindTexture takes a negative id as a raw GL texture; DXP-12: captured
-        // via RHI::ReadColorFramebuffer now, which is top-down by contract, so no
-        // V-flip is needed here -- unlike the old glCopyTexImage2D capture, which
-        // was bottom-up and needed one) so the player doesn't see a black screen
-        // or the login world.
+        // Re-login: the world is torn down. Show the frozen disconnect frame so
+        // the player doesn't see a black screen or the login world.
         if (s_hasBackground && s_backgroundTex != 0)
         {
-            EnableTexture2D();
-            RenderColorBitmap(-static_cast<int>(s_backgroundTex), 0.0f, 0.0f,
+            RenderColorBitmap(static_cast<int>(s_backgroundTex), 0.0f, 0.0f,
                 REFERENCE_WIDTH, REFERENCE_HEIGHT, 0.0f, 0.0f, 1.0f, 1.0f, 0xFFFFFFFF);
             FillBlack(0.0f, 0.0f, REFERENCE_WIDTH, REFERENCE_HEIGHT, DIM_ALPHA);
             return;
@@ -182,8 +176,6 @@ namespace
 
     void DrawNative(bool cancelHovered)
     {
-        EnableTexture2D();
-
         // Inner background, then the top/middle*n/bottom border frame on top.
         SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_BACK, PANEL_X, PANEL_Y + 2.0f,
             MSGBOX_WIDTH - BACK_BLANK_W, PANEL_H - BACK_BLANK_H);
@@ -243,48 +235,8 @@ void CaptureBackground()
         return;
     }
 
-    const int w = static_cast<int>(WindowWidth);
-    const int h = static_cast<int>(WindowHeight);
-
-    // DXP-12: RHI has no framebuffer-to-texture copy primitive (D3D11 has no single-call
-    // equivalent either) -- compose from ReadColorFramebuffer + CreateTexture instead of
-    // the old glCopyTexImage2D GPU-side copy.
-    std::vector<unsigned char> rgb(static_cast<size_t>(w) * h * 3);
-
-    // Read the displayed (front) buffer - this runs right after the frame was
-    // presented and before the dialog draws, so it's a clean game frame. RHI has
-    // no read-buffer selector; glReadBuffer stays raw GL here, same narrow class
-    // of gap as GlobalBitmap.cpp's GL_TEXTURE_ENV no-op -- not RHI's scope yet.
-    glReadBuffer(GL_FRONT);
-    RHI::ReadColorFramebuffer(0, 0, w, h, rgb.data());
-    glReadBuffer(GL_BACK);
-
-    // RHI textures are RGBA8-only; expand same as GlobalBitmap.cpp's JPEG path (alpha=255).
-    std::vector<unsigned char> rgba(static_cast<size_t>(w) * h * 4);
-    for (size_t i = 0, n = static_cast<size_t>(w) * h; i < n; ++i)
-    {
-        rgba[i * 4 + 0] = rgb[i * 3 + 0];
-        rgba[i * 4 + 1] = rgb[i * 3 + 1];
-        rgba[i * 4 + 2] = rgb[i * 3 + 2];
-        rgba[i * 4 + 3] = 255;
-    }
-
-    // The old glCopyTexImage2D re-specified storage from scratch every call (the
-    // window can be resized between reconnects) -- destroy+recreate matches that
-    // exactly. Runs once per disconnect event, not a hot path.
-    if (s_backgroundTex != 0)
-    {
-        RHI::DestroyTexture(RHI::TextureHandle{ s_backgroundTex });
-    }
-
-    RHI::TextureDesc desc;
-    desc.width = w;
-    desc.height = h;
-    desc.filter = RHI::TexFilter::Linear;
-    desc.wrap = RHI::TexWrap::Clamp;
-    s_backgroundTex = RHI::CreateTexture(desc, rgba.data()).id;
-
-    s_hasBackground = true;
+    s_backgroundTex = mu::GetRenderer().CaptureFrameTexture(s_backgroundTex);
+    s_hasBackground = s_backgroundTex != 0u;
 }
 
 void RenderDialog()

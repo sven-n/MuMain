@@ -1,6 +1,5 @@
 # MU Online Client Sources
 
-[![MinGW Build](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml/badge.svg?branch=main)](https://github.com/sven-n/MuMain/actions/workflows/mingw-build.yml)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/sven-n/MuMain)
 
 This is my special fork of the Season 5.2 client sources [uploaded by Luois](https://github.com/LouisEmulator/Main5.2).
@@ -18,14 +17,14 @@ What I have done so far:
       * V-Sync: `$vsync on` / `$vsync off`
       * Show simple FPS counter: `$fpscounter on` / `$fpscounter off`
       * Show detailed performance overlay (FPS stats, percentiles, frame graph): `$details on` / `$details off`
-      * Show GL call/draw/buffer counters and per-pass GPU timers: `$glstats on` / `$glstats off`
-  * 🔥 Optimized some OpenGL calls by using vertex arrays. This should result in
-    a better frame rate when many players and objects are visible.
-  * 🔥 Core Profile GL performance series (see [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)):
-    ring-buffer UBO streaming instead of per-update buffer orphaning, terrain draw calls
-    collapsed via texture-pair bucketing (~25x fewer draws), and redundant per-draw GL state
-    changes removed. Measured net win on dev hardware: avg FPS +4.4%, 1% Low +28.0%, frame
-    time -4.1%.
+      * Show SDL GPU draw, merge, buffer, texture, and per-pass CPU statistics: `$glstats on` / `$glstats off`
+  * 🔥 Rendering uses deferred SDL GPU commands, indexed quads and strips,
+    growable per-frame buffers, and safe adjacent draw merging.
+  * 🔥 The upstream Core Profile performance series is mapped to SDL GPU (see
+    [docs/GPU Skinning/glperf](docs/GPU%20Skinning/glperf/README.md)): packed
+    3x4 bone palettes, renderer statistics, pass attribution, buffer growth,
+    and heap-free sprite geometry generation are retained without restoring the
+    retired OpenGL RHI or its hardware-specific measurements.
   * 🔥 Added inventory and vault extensions.
   * 🔥 The master skill tree system was upgraded to Season 6
   * 🔥 Unicode support: The client works with UTF-16LE instead of ANSI in memory.
@@ -61,6 +60,20 @@ What I have done so far:
 
 What needs to be done for Season 6:
   * Lucky Items
+
+## Release downloads
+
+CI validates Windows native x64 Release, Linux x64 Release, and
+macOS arm64 Release, all with the editor OFF, and uploads no-data runtime
+artifacts for all three. Semantic Release publishes all three as GitHub Release
+assets. The runtimes exclude `Data/` and `fonts/`; each release has a
+**Compatible game data** link to the exact separate data release tagged
+`data-<id>`. Follow the platform-specific assembly steps in the build guide.
+
+x86, Debug, editor-ON, MinGW, and other configurations remain supported where
+listed below, but are not hosted artifacts. Whoever needs one must build locally.
+See the [build guide](docs/build/README.md#hosted-releases) for checksum and
+assembly commands.
 
 ## How to build & run
 
@@ -269,24 +282,33 @@ The [OpenMU launcher](https://github.com/MUnique/OpenMU/releases/download/v0.8.1
 will work as well. By default, it connects to localhost and port `44406`.
 The client identifies itself with Version `2.04d` and serial `k1Pk2jcET48mxL3b`.
 
-#### Client Configuration (`config.ini`)
+#### Client configuration (`config.ini`)
+
 The client reads options from `config.ini` in the executable directory:
 
 | Section | Key | Default Value | Description |
 | :--- | :--- | :--- | :--- |
-| **`[Render]`** | `CoreProfile` | `1` | **OpenGL Context Profile Switch**<br>`1` = Enforces **OpenGL 3.3 Core Profile** (Default). All rendering runs via UBO matrices, GLSL 3.3 shaders, GPU skeletal skinning, and `ImmediateRenderer` (`IR::`).<br>`0` = Requests **OpenGL Compatibility Profile** context (Re-enables legacy FFP driver state toggles like `glAlphaTest`/`glEnable(GL_TEXTURE_2D)` for legacy driver hooks; shader & UBO pipelines remain active). |
-| **`[UI]`** | `EnableAnimationTaskPool` | `0` | **Parallel Animation Processing**<br>`1` = Enables multi-threaded character animation tick pool (`AnimationTaskPool`) for crowded scenes ($\ge 20$ active characters).<br>`0` = Sequential single-threaded animation calculation. |
-| **`[UI]`** | `Locale` | `"en"` | **UI Language Locale** (`en`, `es`, `pt`, `ru`, `ko`). |
-| **`[Camera]`** | `Zoom` | `1735` | **3D Camera Default Distance**. |
+| **`[UI]`** | `EnableAnimationTaskPool` | `0` | Set to `1` to process character animation through `AnimationTaskPool` when at least 20 active characters are visible. `0` keeps sequential updates. |
+| **`[UI]`** | `Locale` | `"en"` | Active generated UI locale. The Options window persists runtime language changes here. |
+| **`[Camera]`** | `Zoom` | `1735` | Persisted Orbital-camera distance. |
+| **`[Render]`** | `VSync` | `1` | `1` enables display-paced presentation; `0` keeps VSync disabled across restarts and fullscreen/resolution changes. `$vsync on` / `$vsync off` update this value. |
 
-#### Command Line Flags & Options
-- **Connection string**: `main.exe connect /u<IP> /p<PORT>`
-- **`--enable-taskpool`**: Forces `AnimationTaskPool` multi-threaded character animation updates on at launch.
-- **`--editor`**: Enables the ImGui in-game editor (toggle with **F12** on `*_mueditor` builds).
+Rendering always uses the SDL GPU backend. The legacy `[Render] CoreProfile`
+key is not read; values `0` and `1` have no effect and do not select an OpenGL
+context.
+
+#### Command-line flags and options
+
+- **Connection string**: `main.exe connect /u<IP> /p<PORT>`.
+- **`--enable-taskpool`**: Enables `AnimationTaskPool` regardless of
+  `config.ini`; the 20-character threshold still applies.
+- **`--editor`**: Starts the ImGui editor enabled on `*_mueditor` builds;
+  **F12** toggles it.
 
 ## Documentation
 
-- [GPU Skinning & Core Profile](docs/GPU%20Skinning/README.md) - architecture, UBO layouts, ImmediateRenderer (`IR::`), the FFP-retirement milestone catalog (`DXP-01` to `DXP-27`), and the Core Profile GL performance regression series (`GLP-xx`, `$glstats`).
+- [GPU skinning and SDL GPU rendering](docs/GPU%20Skinning/README.md) - the
+  downstream mapping for upstream Core Profile, GPU skinning, and DXP work.
 - [Camera system](docs/camera-system.md) - modes, switching (F9), config,
   frustum culling, `$details` overlay, and the gameplay behaviour changes
   from the 3D camera rework.

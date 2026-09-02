@@ -1,25 +1,22 @@
 #pragma once
 
-// Music playback subsystem (SDL_mixer-backed).  The legacy free
-// functions (PlayMp3, StopMp3, StopMusic, IsEndMp3, GetMp3PlayPosition)
-// are declared in Winmain.h to preserve existing call sites; their
-// definitions live in AudioPlayer.cpp.
-
-typedef struct MIX_Mixer MIX_Mixer;
+// Music playback facade backed by the shared miniaudio platform backend.
+// The legacy free functions (PlayMp3, StopMp3, StopMusic, IsEndMp3,
+// GetMp3PlayPosition) are declared in Winmain.h to preserve existing call sites;
+// their definitions live in AudioPlayer.cpp.
 
 namespace AudioPlayer
 {
     // Music volume levels are stored as a 0..MaxVolumeLevel scale in
-    // the project's config; SDL_mixer expects a 0.0..1.0 gain.
+    // the project's config; miniaudio expects a 0.0..1.0 gain.
     constexpr int MinVolumeLevel = 0;
     constexpr int MaxVolumeLevel = 10;
     constexpr int DefaultVolumeLevel = 5;
 
-    // Initialize SDL audio + the mixer device, then apply the saved
-    // music volume from GameConfig.  Safe to call once at startup.
+    // Apply the saved music volume after the platform audio backend starts.
     void Initialize();
 
-    // Tear the mixer down.  Safe to call even if Initialize() failed.
+    // Stop and release the active music stream before backend shutdown.
     void Shutdown();
 
     // Apply a music volume on the project's 0..10 scale.  Out-of-range
@@ -28,8 +25,4 @@ namespace AudioPlayer
 
     int ClampVolume(int level);
 
-    // The shared SDL mixer device, so other audio consumers (the sound-effect
-    // backend) reuse it instead of opening a second device.  Null before
-    // Initialize(), after Shutdown(), or when initialization failed.
-    MIX_Mixer* GetMixer();
 }

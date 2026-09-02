@@ -18,6 +18,7 @@ public:
     virtual void Create(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], BMD* b, OBJECT* o, bool SkipTga = true);
     virtual void Destroy(void);
     void Render(vec3_t ppVertexTransformed[MAX_MESH][MAX_VERTICES], vec3_t ppLightTransformed[MAX_MESH][MAX_VERTICES]);
+
 protected:
     void RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2);
 };

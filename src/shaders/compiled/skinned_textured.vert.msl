@@ -1,0 +1,165 @@
+#include <metal_stdlib>
+#include <simd/simd.h>
+
+using namespace metal;
+
+struct Skinning
+{
+    float4x4 mvp;
+    float4 bodyOriginAndScale;
+    float4 boneScaleAndRestPoseScale;
+    uint4 palette;
+    float4 lightDirection;
+    float4 fogParameters;
+    uint4 textureCoordinateMode;
+    float4 chromeParameters;
+    float4 textureCoordinateParameters;
+};
+
+struct boneRows
+{
+    float4 _data[1];
+};
+
+struct main0_out
+{
+    float2 _entryPointOutput_uv [[user(locn0)]];
+    float4 _entryPointOutput_color [[user(locn1)]];
+    float _entryPointOutput_fogFactor [[user(locn2)]];
+    float4 gl_Position [[position]];
+    float gl_ClipDistance [[clip_distance]] [1];
+    float gl_ClipDistance_0 [[user(clip0)]];
+};
+
+struct main0_in
+{
+    float3 input_pos [[attribute(0)]];
+    float3 input_normal [[attribute(1)]];
+    float2 input_uv [[attribute(2)]];
+    float4 input_color [[attribute(3)]];
+    int input_positionBoneIndex [[attribute(4)]];
+    int input_normalBoneIndex [[attribute(5)]];
+};
+
+vertex main0_out main0(main0_in in [[stage_in]], constant Skinning& _45 [[buffer(0)]], const device boneRows& boneRows_1 [[buffer(1)]])
+{
+    main0_out out = {};
+    float3 _1061;
+    do
+    {
+        if ((in.input_positionBoneIndex < 0) || (in.input_positionBoneIndex >= int(_45.palette.y)))
+        {
+            _1061 = in.input_pos;
+            break;
+        }
+        uint _696 = _45.palette.x + (uint(in.input_positionBoneIndex) * 3u);
+        float4 _671 = boneRows_1._data[_696];
+        uint _701 = _696 + 1u;
+        float4 _672 = boneRows_1._data[_701];
+        uint _705 = _696 + 2u;
+        float4 _673 = boneRows_1._data[_705];
+        float3 _1059;
+        if (_45.boneScaleAndRestPoseScale.x == 1.0)
+        {
+            float4 _724 = float4(in.input_pos * ((_45.boneScaleAndRestPoseScale.y != 0.0) ? _45.boneScaleAndRestPoseScale.y : 1.0), 1.0);
+            _1059 = float3(dot(boneRows_1._data[_696], _724), dot(boneRows_1._data[_701], _724), dot(boneRows_1._data[_705], _724));
+        }
+        else
+        {
+            _1059 = (float3(dot(boneRows_1._data[_696].xyz, in.input_pos), dot(boneRows_1._data[_701].xyz, in.input_pos), dot(boneRows_1._data[_705].xyz, in.input_pos)) * _45.boneScaleAndRestPoseScale.x) + float3(_671.w, _672.w, _673.w);
+        }
+        float3 _1060;
+        if (_45.palette.z != 0u)
+        {
+            _1060 = _45.bodyOriginAndScale.xyz + (_1059 * _45.bodyOriginAndScale.w);
+        }
+        else
+        {
+            _1060 = _1059;
+        }
+        _1061 = _1060;
+        break;
+    } while(false);
+    float3 _1062;
+    do
+    {
+        if ((in.input_normalBoneIndex < 0) || (in.input_normalBoneIndex >= int(_45.palette.y)))
+        {
+            _1062 = in.input_normal;
+            break;
+        }
+        uint _800 = _45.palette.x + (uint(in.input_normalBoneIndex) * 3u);
+        _1062 = float3(dot(boneRows_1._data[_800].xyz, in.input_normal), dot(boneRows_1._data[_800 + 1u].xyz, in.input_normal), dot(boneRows_1._data[_800 + 2u].xyz, in.input_normal));
+        break;
+    } while(false);
+    float4 _608 = _45.mvp * float4(_1061, 1.0);
+    float4 _1008 = _608;
+    float3 _586 = _1062;
+    float2 _1063;
+    do
+    {
+        float2 _829 = _45.chromeParameters.zw;
+        if (_45.textureCoordinateMode.x == 1u)
+        {
+            _1063 = float2((_586.z * 0.5) + _45.chromeParameters.x, (_586.y * 0.5) + (_45.chromeParameters.x * 2.0));
+            break;
+        }
+        if (_45.textureCoordinateMode.x == 2u)
+        {
+            _1063 = float2(((_586.z + _586.x) * 0.800000011920928955078125) + (_45.chromeParameters.y * 2.0), (_586.y + _586.x) + (_45.chromeParameters.y * 3.0));
+            break;
+        }
+        if (_45.textureCoordinateMode.x == 3u)
+        {
+            float _896 = dot(_1062, float3(0.0, -0.100000001490116119384765625, -0.800000011920928955078125));
+            _1063 = float2(_896, 1.0 - _896);
+            break;
+        }
+        if ((_45.textureCoordinateMode.x == 4u) || (_45.textureCoordinateMode.x == 5u))
+        {
+            float _913 = dot(_1062, float3(_45.chromeParameters.zw, 1.0));
+            _1063 = float2((_913 + (_586.y * ((_45.textureCoordinateMode.x == 4u) ? 0.5 : 3.0))) + (_829.y * ((_45.textureCoordinateMode.x == 4u) ? 3.0 : 5.0)), ((1.0 - _913) - (_586.z * ((_45.textureCoordinateMode.x == 4u) ? 0.5 : 2.5))) - (_45.chromeParameters.x * ((_45.textureCoordinateMode.x == 4u) ? 3.0 : 1.0))) + _45.textureCoordinateParameters.xy;
+            break;
+        }
+        if (_45.textureCoordinateMode.x == 6u)
+        {
+            _1063 = float2(((_586.z + _586.x) * 0.800000011920928955078125) + (_45.chromeParameters.y * 2.0));
+            break;
+        }
+        if (_45.textureCoordinateMode.x == 7u)
+        {
+            _1063 = float2(((_586.z + _586.x) * 0.800000011920928955078125) + _45.textureCoordinateParameters.z);
+            break;
+        }
+        if (_45.textureCoordinateMode.x == 8u)
+        {
+            _1063 = (_1062.xy * in.input_uv) + _45.textureCoordinateParameters.xy;
+            break;
+        }
+        if (_45.textureCoordinateMode.x == 9u)
+        {
+            _1063 = float2((_586.z * 0.5) + 0.20000000298023223876953125, (_586.y * 0.5) + 0.5);
+            break;
+        }
+        _1063 = in.input_uv;
+        break;
+    } while(false);
+    float4 _1010 = in.input_color;
+    if (_45.palette.w != 0u)
+    {
+        float4 _631 = _1010;
+        float3 _637 = fast::clamp(_631.xyz * fast::max((dot(_1062, _45.lightDirection.xyz) * 0.800000011920928955078125) + 0.4000000059604644775390625, 0.20000000298023223876953125), float3(0.0), float3(1.0));
+        _1010.x = _637.x;
+        _1010.y = _637.y;
+        _1010.z = _637.z;
+    }
+    float _653 = _45.fogParameters.y - _45.fogParameters.x;
+    out.gl_Position = _608;
+    out._entryPointOutput_uv = _1063;
+    out._entryPointOutput_color = _1010;
+    out._entryPointOutput_fogFactor = (_653 > 0.001000000047497451305389404296875) ? fast::clamp((_45.fogParameters.y - abs(_1008.w)) / _653, 0.0, 1.0) : 1.0;
+    out.gl_ClipDistance[0] = _1008.w - 1.0;
+    out.gl_ClipDistance_0 = out.gl_ClipDistance[0];
+    return out;
+}
+

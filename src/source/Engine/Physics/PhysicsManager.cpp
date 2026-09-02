@@ -4,10 +4,8 @@
 #include "stdafx.h"
 #include "PhysicsManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Render/Core/ImmediateRenderer.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "World/MapInfra/MapManager.h"
@@ -783,18 +781,6 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
         break;
     }
 
-    vec3_t vFaceColor;
-    if (pvColor)
-    {
-        glColor3fv(*pvColor);
-        VectorCopy(*pvColor, vFaceColor);
-    }
-    else
-    {
-        glColor3f(1.f, 1.f, 1.f);
-        Vector(1.f, 1.f, 1.f, vFaceColor);
-    }
-
     if (PCT_MASK_LIGHT & m_dwType)
     {
         float  Lum = sinf(WorldTime * 0.001f) * 0.1f + 0.4f;
@@ -814,16 +800,28 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
                 iOffset++;
             }
         }
-        glColor3f(Lum, Lum, Lum);
-        Vector(Lum, Lum, Lum, vFaceColor);
         EnableAlphaBlend();
     }
 #ifdef RENDER_CLOTH
     {
-        RenderFace(TRUE, m_iTexFront, pvRenderPos, vFaceColor);
+        float clothR = pvColor ? (*pvColor)[0] : 1.f;
+        float clothG = pvColor ? (*pvColor)[1] : 1.f;
+        float clothB = pvColor ? (*pvColor)[2] : 1.f;
+        if (PCT_MASK_LIGHT & m_dwType)
+        {
+            const float clothLum = sinf(WorldTime * 0.001f) * 0.1f + 0.4f;
+            clothR = clothLum;
+            clothG = clothLum;
+            clothB = clothLum;
+        }
+        auto rByte = static_cast<uint8_t>(clothR * 255.f);
+        auto gByte = static_cast<uint8_t>(clothG * 255.f);
+        auto bByte = static_cast<uint8_t>(clothB * 255.f);
+        uint32_t clothColor = (0xFFu << 24) | (bByte << 16) | (gByte << 8) | rByte;
+        RenderFace(TRUE, m_iTexFront, pvRenderPos, clothColor);
         if ((PCT_MASK_DRAW & m_dwType) != PCT_MASK_BLEND || !(PCT_MASK_LIGHT & m_dwType))
         {
-            RenderFace(FALSE, m_iTexBack, pvRenderPos, vFaceColor);
+            RenderFace(FALSE, m_iTexBack, pvRenderPos, clothColor);
         }
     }
 #endif
@@ -831,24 +829,23 @@ void CPhysicsCloth::Render(vec3_t* pvColor, int iLevel)
     delete[] pvRenderPos;
 }
 
-void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, const float* color)
+void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, uint32_t vertexColor)
 {
-    BindTexture(iTexture);	//BITMAP_ROBE
+	BindTexture(iTexture);	//BITMAP_ROBE
 
-    // Cloth vertices are rebuilt by physics simulation every frame, so IR:: (CPU submit
-    // per frame) is the right tool here — no VBO needed. Color is threaded through
-    // explicitly (set once, right after Begin()) since the legacy path relies on ambient
-    // glColor state that IR:: doesn't share.
-    auto EmitVertex = [&](int xVertex, int yVertex)
+    auto makeVert = [&](int xVertex, int yVertex) -> mu::Vertex3D
     {
         int iVertex = m_iNumHor * yVertex + xVertex;
         vec3_t* pvPos = &pvRenderPos[iVertex];
-        IR::TexCoord2f((float)xVertex / (float)(m_iNumHor - 1), std::min<float>(0.99f, (float)yVertex / (float)(m_iNumVer - 1)));
-        IR::Vertex3f((*pvPos)[0], (*pvPos)[1], (*pvPos)[2]);
+        float u = static_cast<float>(xVertex) / static_cast<float>(m_iNumHor - 1);
+        float v = std::min<float>(0.99f, static_cast<float>(yVertex) / static_cast<float>(m_iNumVer - 1));
+        return {(*pvPos)[0], (*pvPos)[1], (*pvPos)[2], 0.f, 0.f, 1.f, u, v, vertexColor};
     };
 
-    IR::Begin(GL_QUADS);
-    IR::Color3fv(color);
+    const int numQuads = (m_iNumHor - 1) * (m_iNumVer - 1);
+    static thread_local std::vector<mu::Vertex3D> quadVerts;
+    quadVerts.clear();
+    quadVerts.reserve(numQuads * 4);
 
     if (bFront)
     {
@@ -856,10 +853,14 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, c
         {
             for (int i = 0; i < m_iNumHor - 1; ++i)
             {
-                EmitVertex(i, j);
-                EmitVertex(i + 1, j);
-                EmitVertex(i + 1, j + 1);
-                EmitVertex(i, j + 1);
+                mu::Vertex3D v0 = makeVert(i, j);
+                mu::Vertex3D v1 = makeVert(i + 1, j);
+                mu::Vertex3D v2 = makeVert(i + 1, j + 1);
+                mu::Vertex3D v3 = makeVert(i, j + 1);
+                quadVerts.push_back(v0);
+                quadVerts.push_back(v1);
+                quadVerts.push_back(v2);
+                quadVerts.push_back(v3);
             }
         }
     }
@@ -869,15 +870,47 @@ void CPhysicsCloth::RenderFace(BOOL bFront, int iTexture, vec3_t* pvRenderPos, c
         {
             for (int i = 0; i < m_iNumHor - 1; ++i)
             {
-                EmitVertex(i, j);
-                EmitVertex(i, j + 1);
-                EmitVertex(i + 1, j + 1);
-                EmitVertex(i + 1, j);
+                mu::Vertex3D v0 = makeVert(i, j);
+                mu::Vertex3D v1 = makeVert(i, j + 1);
+                mu::Vertex3D v2 = makeVert(i + 1, j + 1);
+                mu::Vertex3D v3 = makeVert(i + 1, j);
+                quadVerts.push_back(v0);
+                quadVerts.push_back(v1);
+                quadVerts.push_back(v2);
+                quadVerts.push_back(v3);
             }
         }
     }
 
-    IR::End();
+    mu::GetRenderer().RenderQuad3D(quadVerts, 0);
+}
+
+void CPhysicsCloth::RenderCollisions(void)
+{
+#ifdef RENDER_COLLISION
+    BindTexture(BITMAP_CLOUD);
+    CNode<CPhysicsCollision*>* pHead = m_lstCollision.FindHead();
+    for (; pHead; pHead = m_lstCollision.GetNext(pHead))
+    {
+        CPhysicsCollision* pCol = pHead->GetData();
+        if (CLT_SPHERE == pCol->GetType())
+        {
+            CPhysicsColSphere* pColSph = (CPhysicsColSphere*)pCol;
+
+            static GLUquadricObj* pQuad = NULL;
+            if (NULL == pQuad)
+            {
+                pQuad = gluNewQuadric();
+            }
+            mu::GetRenderer().PushMatrix();
+            vec3_t vCenter;
+            pColSph->GetCenter(vCenter);
+            mu::GetRenderer().Translate(vCenter[0], vCenter[1], vCenter[2]);
+            gluSphere(pQuad, pColSph->GetRadius() - 2.0f, 20, 20);
+            mu::GetRenderer().PopMatrix();
+        }
+    }
+#endif
 }
 
 void CPhysicsCloth::AddCollisionSphere(float fXPos, float fYPos, float fZPos, float fRadius, int iBone)

@@ -11,10 +11,6 @@
 
 extern CTimer* g_pTimer;
 
-CInput::CInput() {}
-
-CInput::~CInput() {}
-
 CInput& CInput::Instance()
 {
     static CInput s_Input;
@@ -33,8 +29,7 @@ bool CInput::Create(HWND hWnd, long lScreenWidth, long lScreenHeight)
 #endif
 
     m_hWnd = hWnd;
-    m_lScreenWidth = lScreenWidth;
-    m_lScreenHeight = lScreenHeight;
+    SetScreenSize(lScreenWidth, lScreenHeight);
 
     ::GetCursorPos(&m_ptCursor);
     ::ScreenToClient(m_hWnd, &m_ptCursor);

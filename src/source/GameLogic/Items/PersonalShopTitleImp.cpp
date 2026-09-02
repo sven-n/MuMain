@@ -11,6 +11,16 @@
 #include "UI/NewUI/NewUISystem.h"
 #include "Camera/CameraProjection.h"
 
+namespace
+{
+SIZE ToPhysicalTextSize(SIZE logicalSize)
+{
+    logicalSize.cx = static_cast<LONG>(static_cast<float>(logicalSize.cx) * g_fScreenRate_x);
+    logicalSize.cy = static_cast<LONG>(static_cast<float>(logicalSize.cy) * g_fScreenRate_y);
+    return logicalSize;
+}
+} // namespace
+
 CPersonalShopTitleImp::CPersonalShopTitleImp() : m_iHighlightFrame(0), m_bShow(true)
 {}
 CPersonalShopTitleImp::~CPersonalShopTitleImp()
@@ -203,7 +213,7 @@ DWORD CPersonalShopTitleImp::GetShopTextColor(CHARACTER* pPlayer)
         case PVP_MURDERER1:
             return RGBA(230, 110, 0, 255);
         default:
-            return IsShopTitleHighlight(pPlayer) ? (255 << 24) + (255 << 16) + (230 << 8) + (230) : (255 << 24) + (0 << 16) + (230 << 8) + (230);
+            return IsShopTitleHighlight(pPlayer) ? RGBA(230, 230, 255, 255) : RGBA(230, 230, 0, 255);
         }
     }
 }
@@ -224,7 +234,7 @@ DWORD CPersonalShopTitleImp::GetShopText2Color(CHARACTER* pPlayer)
         case PVP_MURDERER1:
             return RGBA(230, 110, 0, 255);
         default:
-            return IsShopTitleHighlight(pPlayer) ? (255 << 24) + (41 << 16) + (57 << 8) + (108) : (255 << 24) + (0 << 16) + (150 << 8) + (250);
+            return IsShopTitleHighlight(pPlayer) ? RGBA(108, 57, 41, 255) : RGBA(250, 150, 0, 255);
         }
     }
 }
@@ -245,7 +255,7 @@ DWORD CPersonalShopTitleImp::GetShopBGColor(CHARACTER* pPlayer)
         case PVP_MURDERER1:
             return IsShopTitleHighlight(pPlayer) ? RGBA(182, 122, 82, 128) : RGBA(108, 57, 41, 128);
         default:
-            return IsShopTitleHighlight(pPlayer) ? (128 << 24) + (0 << 16) + (150 << 8) + (250) : (128 << 24) + (41 << 16) + (57 << 8) + (108);
+            return IsShopTitleHighlight(pPlayer) ? RGBA(250, 150, 0, 128) : RGBA(108, 57, 41, 128);
         }
     }
 }
@@ -453,7 +463,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::SetBoxContent(const std::wstring&
     m_fulltitle = title;
 
     g_pRenderText->SetFont(g_hFontBold);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Store, wcslen(I18N::Game::Store), &m_icon);
+    m_icon = ToPhysicalTextSize(g_pRenderText->MeasureText(I18N::Game::Store, wcslen(I18N::Game::Store)));
 
     SeparateShopTitle(title, m_topTitle, m_bottomTitle);
     CalculateBooleanSize(name, m_topTitle, m_bottomTitle, m_size);
@@ -545,7 +555,7 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::Draw(int iPkLevel)
     POINT RenderPos = { static_cast<LONG>(m_pos.x / g_fScreenRate_x), static_cast<LONG>(m_pos.y / g_fScreenRate_y) };
     SIZE RenderBoxSize = { static_cast<LONG>(m_size.cx / g_fScreenRate_x), static_cast<LONG>(m_size.cy / g_fScreenRate_y) };
     SIZE RenderIconSize = { static_cast<LONG>(m_icon.cx / g_fScreenRate_x), static_cast<LONG>(m_icon.cy / g_fScreenRate_y) };
-    int iLineHeight = FontHeight / g_fScreenRate_y;
+    const int iLineHeight = std::max<int>(1, RenderIconSize.cy);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(iIconBkColor);
@@ -589,26 +599,26 @@ void CPersonalShopTitleImp::CShopTitleDrawObj::CalculateBooleanSize(IN const std
 {
     SIZE text_size[3];
     g_pRenderText->SetFont(g_hFontBold);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), name.c_str(), name.size(), &text_size[0]);
+    text_size[0] = ToPhysicalTextSize(g_pRenderText->MeasureText(name.c_str(), static_cast<int>(name.size())));
     g_pRenderText->SetFont(g_hFont);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), topTitle.c_str(), topTitle.size(), &text_size[1]);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), bottomTitle.c_str(), bottomTitle.size(), &text_size[2]);
+    text_size[1] = ToPhysicalTextSize(g_pRenderText->MeasureText(topTitle.c_str(), static_cast<int>(topTitle.size())));
+    text_size[2] = ToPhysicalTextSize(g_pRenderText->MeasureText(bottomTitle.c_str(), static_cast<int>(bottomTitle.size())));
 
     int maxWidth, maxHeight;
     if (!bottomTitle.empty())
     {
         maxWidth = std::max<int>(text_size[0].cx + m_icon.cx, std::max<int>(text_size[1].cx, text_size[2].cx));
-        maxHeight = FontHeight * 3;
+        maxHeight = std::max<int>(text_size[0].cy, m_icon.cy) + text_size[1].cy + text_size[2].cy;
     }
     else if (!topTitle.empty())
     {
         maxWidth = std::max<int>(text_size[0].cx + m_icon.cx, text_size[1].cx);
-        maxHeight = FontHeight * 2;
+        maxHeight = std::max<int>(text_size[0].cy, m_icon.cy) + text_size[1].cy;
     }
     else
     {
         maxWidth = text_size[0].cx + m_icon.cx;
-        maxHeight = FontHeight;
+        maxHeight = std::max<int>(text_size[0].cy, m_icon.cy);
     }
 
     size.cx = maxWidth;

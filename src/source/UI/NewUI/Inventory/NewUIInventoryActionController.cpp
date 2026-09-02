@@ -25,10 +25,7 @@
 namespace SEASON3B
 {
 
-CNewUIInventoryActionController::CNewUIInventoryActionController()
-    : m_pContext(nullptr)
-{
-}
+CNewUIInventoryActionController::CNewUIInventoryActionController() : m_pContext(nullptr) {}
 
 void CNewUIInventoryActionController::SetContext(IInventoryActionContext* pContext)
 {
@@ -42,7 +39,13 @@ bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl
         return false;
     }
 
-    if (CNewUIInventoryCtrl::GetPickedItem() && IsRelease(VK_LBUTTON))
+    const bool hasPickedItem = CNewUIInventoryCtrl::GetPickedItem() != nullptr;
+    if (UI::Items::Drag::ShouldConsumePanelPress(hasPickedItem, IsPress(VK_LBUTTON)))
+    {
+        return true;
+    }
+
+    if (hasPickedItem && IsRelease(VK_LBUTTON))
     {
         return HandlePickedItemPlacement(targetControl);
     }
@@ -78,8 +81,8 @@ bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryC
     const int iTargetIndex = pPickedItem->GetTargetLinealPos(targetControl);
 
     const bool bFromInventorySystem =
-        (pPickedItem->GetOwnerInventory() == targetControl)
-        || (g_pMyInventoryExt != nullptr && g_pMyInventoryExt->GetOwnerOf(pPickedItem) != nullptr);
+        (pPickedItem->GetOwnerInventory() == targetControl) ||
+        (g_pMyInventoryExt != nullptr && g_pMyInventoryExt->GetOwnerOf(pPickedItem) != nullptr);
 
     if (bFromInventorySystem)
     {
@@ -102,17 +105,20 @@ bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryC
     return false;
 }
 
-bool CNewUIInventoryActionController::TryApplyJewel(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CNewUIInventoryActionController::TryApplyJewel(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
+                                                    ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     return ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
 }
 
-bool CNewUIInventoryActionController::TryStackItem(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CNewUIInventoryActionController::TryStackItem(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem,
+                                                   int iSourceIndex, int iTargetIndex) const
 {
     return TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex);
 }
 
-bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
+                                                  ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     if (iTargetIndex < 0 || !targetControl->CanMove(iTargetIndex, pPickItem))
     {
@@ -124,8 +130,7 @@ bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetCon
 
     if (iTargetIndex != iSourceIndex)
     {
-        return SendRequestEquipmentItem(sourceStorageType, iSourceIndex,
-            pPickItem, targetStorageType, iTargetIndex);
+        return SendRequestEquipmentItem(sourceStorageType, iSourceIndex, pPickItem, targetStorageType, iTargetIndex);
     }
 
     CNewUIInventoryCtrl::BackupPickedItem();
@@ -477,17 +482,14 @@ bool CNewUIInventoryActionController::RepairItemAtMousePoint(CNewUIInventoryCtrl
     return true;
 }
 
-bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
+                                                  ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
-    const bool bIsJewelType =
-        pPickItem->Type == ITEM_JEWEL_OF_BLESS
-        || pPickItem->Type == ITEM_JEWEL_OF_SOUL
-        || pPickItem->Type == ITEM_JEWEL_OF_LIFE
-        || pPickItem->Type == ITEM_JEWEL_OF_HARMONY
-        || pPickItem->Type == ITEM_LOWER_REFINE_STONE
-        || pPickItem->Type == ITEM_HIGHER_REFINE_STONE
-        || pPickItem->Type == ITEM_POTION + 160
-        || pPickItem->Type == ITEM_POTION + 161;
+    const bool bIsJewelType = pPickItem->Type == ITEM_JEWEL_OF_BLESS || pPickItem->Type == ITEM_JEWEL_OF_SOUL ||
+                              pPickItem->Type == ITEM_JEWEL_OF_LIFE || pPickItem->Type == ITEM_JEWEL_OF_HARMONY ||
+                              pPickItem->Type == ITEM_LOWER_REFINE_STONE ||
+                              pPickItem->Type == ITEM_HIGHER_REFINE_STONE || pPickItem->Type == ITEM_POTION + 160 ||
+                              pPickItem->Type == ITEM_POTION + 161;
 
     if (!bIsJewelType)
     {
@@ -500,18 +502,16 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         return false;
     }
 
-    const int iType       = pItem->Type;
-    const int iLevel      = pItem->Level;
+    const int iType = pItem->Type;
+    const int iLevel = pItem->Level;
     const int iDurability = pItem->Durability;
 
     bool bSuccess = true;
 
-    if (iType > ITEM_WINGS_OF_DARKNESS
-        && iType != ITEM_CAPE_OF_LORD
-        && !(iType >= ITEM_WING_OF_STORM && iType <= ITEM_WING_OF_DIMENSION)
-        && !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134)
-        && !(iType >= ITEM_CAPE_OF_FIGHTER && iType <= ITEM_CAPE_OF_OVERRULE)
-        && (iType != ITEM_WING + 135))
+    if (iType > ITEM_WINGS_OF_DARKNESS && iType != ITEM_CAPE_OF_LORD &&
+        !(iType >= ITEM_WING_OF_STORM && iType <= ITEM_WING_OF_DIMENSION) &&
+        !(ITEM_WING + 130 <= iType && iType <= ITEM_WING + 134) &&
+        !(iType >= ITEM_CAPE_OF_FIGHTER && iType <= ITEM_CAPE_OF_OVERRULE) && (iType != ITEM_WING + 135))
     {
         bSuccess = false;
     }
@@ -521,15 +521,13 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         bSuccess = false;
     }
 
-    if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS && iLevel >= 6)
-        || (pPickItem->Type == ITEM_JEWEL_OF_SOUL && iLevel >= 9))
+    if ((pPickItem->Type == ITEM_JEWEL_OF_BLESS && iLevel >= 6) ||
+        (pPickItem->Type == ITEM_JEWEL_OF_SOUL && iLevel >= 9))
     {
         bSuccess = false;
     }
 
-    if (pPickItem->Type == ITEM_JEWEL_OF_BLESS
-        && iType == ITEM_HORN_OF_FENRIR
-        && iDurability != 255)
+    if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
     {
         CFenrirRepairMsgBox* pMsgBox = nullptr;
         CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
@@ -554,8 +552,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         }
         else
         {
-            const StrengthenItem strengthitem =
-                g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pItem->Type));
+            const StrengthenItem strengthitem = g_pUIJewelHarmonyinfo->GetItemType(static_cast<int>(pItem->Type));
 
             if (strengthitem == SI_None)
             {
@@ -564,8 +561,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         }
     }
 
-    if (pPickItem->Type == ITEM_LOWER_REFINE_STONE
-        || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
+    if (pPickItem->Type == ITEM_LOWER_REFINE_STONE || pPickItem->Type == ITEM_HIGHER_REFINE_STONE)
     {
         if (g_SocketItemMgr.IsSocketItem(pItem))
         {
@@ -582,11 +578,13 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         bSuccess = false;
         if (pPickItem->Type == ITEM_POTION + 161)
         {
-            if (pItem->Jewel_Of_Harmony_Option == 0) bSuccess = true;
+            if (pItem->Jewel_Of_Harmony_Option == 0)
+                bSuccess = true;
         }
         else if (pPickItem->Type == ITEM_POTION + 160)
         {
-            if (pItem->Durability > 0)               bSuccess = true;
+            if (pItem->Durability > 0)
+                bSuccess = true;
         }
     }
 
@@ -601,14 +599,15 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
     return false;
 }
 
-bool CNewUIInventoryActionController::TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
+bool CNewUIInventoryActionController::TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem,
+                                                    int iSourceIndex, int iTargetIndex) const
 {
     if (ITEM* pItem = targetControl->FindItem(iTargetIndex))
     {
         if (targetControl->AreItemsStackable(pPickItem, pItem))
         {
-            SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex,
-                pPickItem, STORAGE_TYPE::INVENTORY, iTargetIndex);
+            SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pPickItem, STORAGE_TYPE::INVENTORY,
+                                     iTargetIndex);
             return true;
         }
     }
@@ -629,24 +628,19 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    const auto isApple  = pItem->Type == ITEM_APPLE;
-    const auto isPotion =
-        (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_ALE)
-        || (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
+    const auto isApple = pItem->Type == ITEM_APPLE;
+    const auto isPotion = (pItem->Type >= ITEM_APPLE && pItem->Type <= ITEM_ALE) ||
+                          (pItem->Type >= ITEM_SMALL_SHIELD_POTION && pItem->Type <= ITEM_LARGE_COMPLEX_POTION);
 
-    if (isApple || isPotion
-        || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0)
-        || (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK)
-        || (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14)
-        || (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71)
-        || (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77)
-        || pItem->Type == ITEM_HELPER + 60
-        || pItem->Type == ITEM_POTION + 94
-        || (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL)
-        || (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98)
-        || pItem->Type == ITEM_HELPER + 81
-        || pItem->Type == ITEM_HELPER + 82
-        || pItem->Type == ITEM_POTION + 133)
+    if (isApple || isPotion || (pItem->Type == ITEM_POTION + 20 && pItem->Level == 0) ||
+        (pItem->Type >= ITEM_JACK_OLANTERN_BLESSINGS && pItem->Type <= ITEM_JACK_OLANTERN_DRINK) ||
+        (pItem->Type == ITEM_BOX_OF_LUCK && pItem->Level == 14) ||
+        (pItem->Type >= ITEM_POTION + 70 && pItem->Type <= ITEM_POTION + 71) ||
+        (pItem->Type >= ITEM_POTION + 72 && pItem->Type <= ITEM_POTION + 77) || pItem->Type == ITEM_HELPER + 60 ||
+        pItem->Type == ITEM_POTION + 94 ||
+        (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL) ||
+        (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98) || pItem->Type == ITEM_HELPER + 81 ||
+        pItem->Type == ITEM_HELPER + 82 || pItem->Type == ITEM_POTION + 133)
     {
         SendRequestUse(iIndex, 0);
         if (isApple)
@@ -680,31 +674,26 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return false;
     }
 
-    if ((pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 57)
-        || (pItem->Type == ITEM_HELPER + 58
-            && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
+    if ((pItem->Type >= ITEM_HELPER + 54 && pItem->Type <= ITEM_HELPER + 57) ||
+        (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD))
     {
-        WORD point[5] = { 0, };
-        point[0] = CharacterAttribute->Strength  + CharacterAttribute->AddStrength;
+        WORD point[5] = {
+            0,
+        };
+        point[0] = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
         point[1] = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
-        point[2] = CharacterAttribute->Vitality  + CharacterAttribute->AddVitality;
-        point[3] = CharacterAttribute->Energy    + CharacterAttribute->AddEnergy;
-        point[4] = CharacterAttribute->Charisma  + CharacterAttribute->AddCharisma;
+        point[2] = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
+        point[3] = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
+        point[4] = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
-        const unsigned char nStat[MAX_CLASS][5] =
-        {
-            18, 18, 15, 30,  0,
-            28, 20, 25, 10,  0,
-            22, 25, 20, 15,  0,
-            26, 26, 26, 26,  0,
-            26, 20, 20, 15, 25,
-            21, 21, 18, 23,  0,
-            32, 27, 25, 20,  0,
+        const unsigned char nStat[MAX_CLASS][5] = {
+            18, 18, 15, 30, 0,  28, 20, 25, 10, 0,  22, 25, 20, 15, 0,  26, 26, 26,
+            26, 0,  26, 20, 20, 15, 25, 21, 21, 18, 23, 0,  32, 27, 25, 20, 0,
         };
 
-        const int attributeType   = pItem->Type - (ITEM_HELPER + 54);
-        const int characterClass  = gCharacterManager.GetBaseClass(Hero->Class);
-        point[attributeType]     -= nStat[characterClass][attributeType];
+        const int attributeType = pItem->Type - (ITEM_HELPER + 54);
+        const int characterClass = gCharacterManager.GetBaseClass(Hero->Class);
+        point[attributeType] -= nStat[characterClass][attributeType];
 
         if (point[attributeType] < (pItem->Durability * 10))
         {
@@ -717,8 +706,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if (pItem->Type == ITEM_HELPER + 58
-        && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
+    if (pItem->Type == ITEM_HELPER + 58 && gCharacterManager.GetBaseClass(Hero->Class) != CLASS_DARK_LORD)
     {
         CreateOkMessageBox(I18N::Game::OnlyDarklordCanUseIt);
         return true;
@@ -817,27 +805,21 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         return true;
     }
 
-    if ((pItem->Type >= ITEM_SCROLL_OF_POISON && pItem->Type < ITEM_ETC + MAX_ITEM_INDEX)
-        || (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_GREATER_FORTITUDE)
-        || (pItem->Type >= ITEM_ORB_OF_FIRE_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB)
-        || (pItem->Type == ITEM_WING + 20)
-        || (pItem->Type >= ITEM_SCROLL_OF_FIREBURST && pItem->Type <= ITEM_SCROLL_OF_ELECTRIC_SPARK)
-        || (pItem->Type == ITEM_SCROLL_OF_FIRE_SCREAM)
-        || (pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
-        || (pItem->Type == ITEM_CRYSTAL_OF_FLAME_STRIKE)
-        || (pItem->Type == ITEM_CRYSTAL_OF_RECOVERY)
-        || (pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT)
-        || (pItem->Type == ITEM_SCROLL_OF_CHAOTIC_DISEIER)
-        || (pItem->Type == ITEM_SCROLL_OF_GIGANTIC_STORM)
-        || (pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE))
+    if ((pItem->Type >= ITEM_SCROLL_OF_POISON && pItem->Type < ITEM_ETC + MAX_ITEM_INDEX) ||
+        (pItem->Type >= ITEM_ORB_OF_TWISTING_SLASH && pItem->Type <= ITEM_ORB_OF_GREATER_FORTITUDE) ||
+        (pItem->Type >= ITEM_ORB_OF_FIRE_SLASH && pItem->Type <= ITEM_ORB_OF_DEATH_STAB) ||
+        (pItem->Type == ITEM_WING + 20) ||
+        (pItem->Type >= ITEM_SCROLL_OF_FIREBURST && pItem->Type <= ITEM_SCROLL_OF_ELECTRIC_SPARK) ||
+        (pItem->Type == ITEM_SCROLL_OF_FIRE_SCREAM) || (pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION) ||
+        (pItem->Type == ITEM_CRYSTAL_OF_FLAME_STRIKE) || (pItem->Type == ITEM_CRYSTAL_OF_RECOVERY) ||
+        (pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT) || (pItem->Type == ITEM_SCROLL_OF_CHAOTIC_DISEIER) ||
+        (pItem->Type == ITEM_SCROLL_OF_GIGANTIC_STORM) || (pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE))
     {
         bool bReadBookGem = true;
 
-        if (pItem->Type == ITEM_SCROLL_OF_NOVA
-            || pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE
-            || pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT
-            || pItem->Type == ITEM_CRYSTAL_OF_RECOVERY
-            || pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
+        if (pItem->Type == ITEM_SCROLL_OF_NOVA || pItem->Type == ITEM_SCROLL_OF_WIZARDRY_ENHANCE ||
+            pItem->Type == ITEM_CRYSTAL_OF_MULTI_SHOT || pItem->Type == ITEM_CRYSTAL_OF_RECOVERY ||
+            pItem->Type == ITEM_CRYSTAL_OF_DESTRUCTION)
         {
             if (g_csQuest.getQuestState2(QUEST_CHANGE_UP_3) != QUEST_END)
             {
@@ -856,11 +838,10 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         if (bReadBookGem)
         {
             const WORD wStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
-            const WORD wEnergy   = CharacterAttribute->Energy   + CharacterAttribute->AddEnergy;
+            const WORD wEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
 
-            if (CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel
-                && wEnergy   >= pItem->RequireEnergy
-                && wStrength >= pItem->RequireStrength)
+            if (CharacterAttribute->Level >= ItemAttribute[pItem->Type].RequireLevel &&
+                wEnergy >= pItem->RequireEnergy && wStrength >= pItem->RequireStrength)
             {
                 SendRequestUse(iIndex, 0);
             }
@@ -914,8 +895,13 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         bool bUse = false;
         switch (pItem->Level)
         {
-        case 0: bUse = true; break;
-        case 1: if (Hero->GuildStatus != G_MASTER) bUse = true; break;
+        case 0:
+            bUse = true;
+            break;
+        case 1:
+            if (Hero->GuildStatus != G_MASTER)
+                bUse = true;
+            break;
         }
 
         if (bUse)
@@ -1008,8 +994,7 @@ bool CNewUIInventoryActionController::TryTransferBetweenInventorySections(CNewUI
 
     if (sourceControl == g_pMyInventory->GetInventoryCtrl())
     {
-        destinationIndex = g_pMyInventoryExt->FindEmptySlot(
-            itemAttribute->Width, itemAttribute->Height);
+        destinationIndex = g_pMyInventoryExt->FindEmptySlot(itemAttribute->Width, itemAttribute->Height);
     }
     else
     {
@@ -1037,8 +1022,8 @@ bool CNewUIInventoryActionController::TryTransferBetweenInventorySections(CNewUI
 
     pPickedItem->HidePickedItem();
 
-    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, sourceIndex,
-        pPickedItem->GetItem(), STORAGE_TYPE::INVENTORY, destinationIndex))
+    if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, sourceIndex, pPickedItem->GetItem(), STORAGE_TYPE::INVENTORY,
+                                  destinationIndex))
     {
         CNewUIInventoryCtrl::BackupPickedItem();
         return false;

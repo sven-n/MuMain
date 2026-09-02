@@ -6,8 +6,6 @@
 #include <SDL3/SDL.h>
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Core/RenderConfig.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -17,12 +15,17 @@
 #include "Engine/AI/ZzzAI.h"
 #include "ZzzEffect.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Effects/AuraJointLifecycle.h"
 #include "Network/Server/WSclient.h"
 #include "GameLogic/Pets/CSPetSystem.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Scenes/MainScene.h"
 
+using mu::PackABGR;
+
 extern float g_fBoneSave[10][3][4];
-extern int   EditFlag;
+extern int EditFlag;
 
 void CreateJointFpsChecked(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle, int SubType, OBJECT* Target, float Scale, short PKKey,
     WORD SkillIndex, WORD SkillSerialNum, int iChaIndex, const float* vPriorColor, short int sTargetindex)
@@ -419,8 +422,12 @@ void CreateJoint(int Type, vec3_t Position, vec3_t TargetPosition, vec3_t Angle,
 
                     switch (o->SubType)
                     {
-                    case 55: UpdateJointTargetPosition(o, o->Target->EyeLeft); break; //left
-                    case 56: UpdateJointTargetPosition(o, o->Target->EyeRight); break; //rifht
+                    case 55:
+                        UpdateJointTargetPosition(o, o->Target->EyeLeft);
+                        break; // left
+                    case 56:
+                        UpdateJointTargetPosition(o, o->Target->EyeRight);
+                        break; // rifht
                     }
                 }
                 break;
@@ -3022,7 +3029,8 @@ void MoveJoint(JOINT* o, int iIndex)
         AddTerrainLight(o->Position[0], o->Position[1], Light, 4, PrimaryTerrainLight);
         break;
     case BITMAP_SCOLPION_TAIL:
-        if (IsValidJointPosition(o->Target->EyeLeft)) VectorCopy(o->Target->EyeLeft, o->Position);
+        if (IsValidJointPosition(o->Target->EyeLeft))
+            VectorCopy(o->Target->EyeLeft, o->Position);
         if (!o->Target->Live)
         {
             o->Live = false;
@@ -4417,7 +4425,10 @@ void MoveJoint(JOINT* o, int iIndex)
 
             if (o->SubType == 4 || o->SubType == 9)
             {
-                if (g_isCharacterBuff(o->Target, eBuff_Defense) || g_isCharacterBuff(o->Target, eBuff_HelpNpc))
+                const bool hasAttack = g_isCharacterBuff(o->Target, eBuff_Attack);
+                const bool hasDefense = g_isCharacterBuff(o->Target, eBuff_Defense);
+                const bool hasHelpNpc = g_isCharacterBuff(o->Target, eBuff_HelpNpc);
+                if (Render::Effects::ShouldKeepAuraJointAlive(hasAttack, hasDefense, hasHelpNpc))
                 {
                     o->LifeTime = 100;
                 }
@@ -6706,11 +6717,13 @@ void MoveJoint(JOINT* o, int iIndex)
                             // real game object's picking box).
                             if (EditFlag == 2)
                             {
-                                b->Transform(BoneTransform, o->Target->BoundingBoxMin, o->Target->BoundingBoxMax, &o->Target->OBB, false);
+                                b->Transform(BoneTransform, o->Target->BoundingBoxMin, o->Target->BoundingBoxMax,
+                                             &o->Target->OBB, false);
                             }
                             else
                             {
-                                b->TransformCheap(BoneTransform, o->Target->BoundingBoxMin, o->Target->BoundingBoxMax, &o->Target->OBB, false);
+                                b->TransformCheap(BoneTransform, o->Target->BoundingBoxMin, o->Target->BoundingBoxMax,
+                                                  &o->Target->OBB, false);
                                 b->SkinVertices(0, BoneTransform, false, 0.f);
                             }
 
@@ -7012,58 +7025,19 @@ void RenderJoints(BYTE bRenderOneMore)
 
             if (o->Type == MODEL_SPEARSKILL)
             {
-                float fAlpha;
-                switch (o->SubType)
-                {
-                case 0:
-                case 1:
-                case 2:
-                case 4:
-                case 9:
-                case 10:
-                    fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.05f;
-                    IR::Color3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
-                    break;
-                case 3:
-                case 5:
-                case 6:
-                case 7:
-                case 8:
-                case 16:
-                case 14:
-                case 17:
-                    IR::Color3f(o->Light[0], o->Light[1], o->Light[2]);
-                    break;
-                case 15:
-                    IR::Color3f(o->Light[0], o->Light[1], o->Light[2]);
+                if (o->SubType == 15)
                     EnableAlphaBlendMinus();
-                    break;
-                }
             }
             else if (o->Type == BITMAP_FLARE_BLUE && o->SubType == 20)
             {
                 EnableAlphaBlend2();
-                IR::Color3fv(o->Light);
-            }
-            else if (o->Type == BITMAP_SMOKE && o->SubType == 0)
-            {
-                float fAlpha = (float)std::min<int>(o->LifeTime, 20) * 0.1f;
-                IR::Color3f(fAlpha * o->Light[0], fAlpha * o->Light[1], fAlpha * o->Light[2]);
             }
             else if (o->Type == BITMAP_JOINT_SPARK)
             {
-                IR::Color3fv(o->Light);
                 if (o->SubType == 5)
                     BindTexture(o->TexType);
             }
-            else
-            {
-                IR::Color3fv(o->Light);
-            }
-
             BindTexture(o->TexType);
-
-            IR::Begin(GL_QUADS);
 
             for (int j = 0; j < (int)o->NumTails; j++)
             {
@@ -7124,8 +7098,8 @@ void RenderJoints(BYTE bRenderOneMore)
                     Light1 -= Scroll;
                     Light2 -= Scroll;
                 }
-                if (o->Type == BITMAP_FLARE_FORCE && o->SubType >= 0 && o->SubType <= 4
-                    || (o->SubType >= 11 && o->SubType <= 13)	//^ 펜릴 스킬 관련
+                if (o->Type == BITMAP_FLARE_FORCE &&
+                    ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13))	//^ 펜릴 스킬 관련
                     )
                 {
                     Light1 = ((int)o->NumTails - (j)) / (float)((o->MaxTails - 1) / 2);
@@ -7146,11 +7120,16 @@ void RenderJoints(BYTE bRenderOneMore)
                     float Luminosity = ((float)((o->MaxTails - j) / (float)(o->MaxTails)) * 2);
                     Luminosity *= powf(o->Light[0], FPS_ANIMATION_FACTOR);
 
-                    IR::Color3f(Luminosity, Luminosity, Luminosity);
-                    IR::TexCoord2f(Light1, 0.f); IR::Vertex3fv(currentTail[0]);
-                    IR::TexCoord2f(Light1, 1.f); IR::Vertex3fv(currentTail[1]);
-                    IR::TexCoord2f(Light2, 1.f); IR::Vertex3fv(nextTail[1]);
-                    IR::TexCoord2f(Light2, 0.f); IR::Vertex3fv(nextTail[0]);
+                    const std::uint32_t forceColor = PackABGR(Luminosity, Luminosity, Luminosity, 1.f);
+                    const mu::Vertex3D forceVerts[4] = {
+                        {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                         forceColor},
+                        {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                         forceColor},
+                        {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, forceColor},
+                        {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, forceColor},
+                    };
+                    mu::GetRenderer().RenderQuad3D(forceVerts, static_cast<std::uint32_t>(o->TexType));
                 }
                 else
                 {
@@ -7172,17 +7151,14 @@ void RenderJoints(BYTE bRenderOneMore)
                             if (fJointHeight > 0)
                             {
                                 Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
-                                IR::Color3fv(Light);
                             }
                             else
                             {
                                 VectorCopy(o->Light, Light);
-                                IR::Color3fv(o->Light);
                             }
                         }
                         else
                         {
-                            IR::Color3f(1.f, 1.f, 1.f);
                         }
 
                         if (j == ((int)o->NumTails / 2))
@@ -7208,7 +7184,6 @@ void RenderJoints(BYTE bRenderOneMore)
                             float  fJointHeight = (j) * 0.01f;
                             VectorScale(o->Light, powf(0.9978f, FPS_ANIMATION_FACTOR), o->Light);
                             Vector(o->Light[0] - fJointHeight, o->Light[1] - fJointHeight, o->Light[2] - fJointHeight, Light);
-                            IR::Color3fv(Light);
 
                             vec3_t  Position;
 
@@ -7221,23 +7196,6 @@ void RenderJoints(BYTE bRenderOneMore)
 
                             if (o->SubType == 9) scale = 0.5f;
                             CreateSprite(BITMAP_FLARE_BLUE, Position, scale, Light, NULL);
-                        }
-                    }
-                    else if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
-                    {
-                        int tail = (int)(o->Light[2]);
-                        if (tail == j)
-                        {
-                            float l = o->Light[2] - j;
-                            IR::Color3f(l, l, l);
-                        }
-                        else if (tail < j)
-                        {
-                            IR::Color3f(0.f, 0.f, 0.f);
-                        }
-                        else
-                        {
-                            IR::Color3f(0.7f, 0.7f, 0.7f);
                         }
                     }
                     else if (o->Type == BITMAP_FLARE + 1 && o->SubType == 6)
@@ -7272,20 +7230,72 @@ void RenderJoints(BYTE bRenderOneMore)
                             CreateSprite(BITMAP_SHINY + 1, Position, 1.f, o->Light, NULL, (float)(rand() % 360), 3);
                         }
                     }
-                    else if (o->Type == BITMAP_FLARE_FORCE && (o->SubType >= 0 && o->SubType <= 4)
-                        || (o->SubType >= 11 && o->SubType <= 13)
+                    std::uint32_t faceColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                    if (o->Type == BITMAP_JOINT_THUNDER + 1 && o->SubType == 0)
+                    {
+                        int tail = (int)(o->Light[2]);
+                        if (tail == j)
+                        {
+                            float l = o->Light[2] - j;
+                            faceColor = PackABGR(l, l, l, 1.f);
+                        }
+                        else if (tail < j)
+                        {
+                            faceColor = PackABGR(0.f, 0.f, 0.f, 1.f);
+                        }
+                        else
+                        {
+                            faceColor = PackABGR(0.7f, 0.7f, 0.7f, 1.f);
+                        }
+                    }
+                    else if (o->Type == BITMAP_FLARE_FORCE &&
+                        ((o->SubType >= 0 && o->SubType <= 4) || (o->SubType >= 11 && o->SubType <= 13))
                         )
                     {
                         float Luminosity = ((float)(((int)o->NumTails - 1 - j) / (float)(o->MaxTails)) * 2);
-
-                        IR::Color3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
+                        faceColor =
+                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
                     }
                     else if (o->Type == BITMAP_JOINT_FORCE && o->SubType == 1)
                     {
                         float Luminosity = (1.f - ((int)o->NumTails - j) / (float)(o->NumTails)) * 2.f;
-
-                        IR::Color3f(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity);
+                        faceColor =
+                            PackABGR(o->Light[0] * Luminosity, o->Light[1] * Luminosity, o->Light[2] * Luminosity, 1.f);
                     }
+#ifdef GUILD_WAR_EVENT
+                    if (o->Type == BITMAP_FLARE && o->SubType == 22)
+                    {
+                        vec3_t t_bias;
+                        VectorSubtract(o->Target->Position, o->StartPosition, t_bias);
+                        mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+                        mu::GetRenderer().PushMatrix();
+                        mu::GetRenderer().Translate(t_bias[0], t_bias[1], t_bias[2]);
+
+                        const std::uint32_t guildColor = PackABGR(o->Light[0], o->Light[1], o->Light[2], 1.f);
+                        const mu::Vertex3D guildFace1[4] = {
+                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                             guildColor},
+                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                             guildColor},
+                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                        };
+                        mu::GetRenderer().RenderQuad3D(guildFace1, static_cast<std::uint32_t>(o->TexType));
+
+                        const mu::Vertex3D guildFace2[4] = {
+                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, Light1, 0.f,
+                             guildColor},
+                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, Light1, 1.f,
+                             guildColor},
+                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, Light2, 1.f, guildColor},
+                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, Light2, 0.f, guildColor},
+                        };
+                        mu::GetRenderer().RenderQuad3D(guildFace2, static_cast<std::uint32_t>(o->TexType));
+
+                        mu::GetRenderer().PopMatrix();
+                        continue;
+                    }
+#endif //GUILD_WAR_EVENT
 
                     float V1 = 0.f;
                     float V2 = 1.f;
@@ -7304,10 +7314,13 @@ void RenderJoints(BYTE bRenderOneMore)
 
                     if ((o->RenderFace & RENDER_FACE_ONE) == RENDER_FACE_ONE)
                     {
-                        IR::TexCoord2f(L1, V2); IR::Vertex3fv(currentTail[2]);
-                        IR::TexCoord2f(L1, V1); IR::Vertex3fv(currentTail[3]);
-                        IR::TexCoord2f(L2, V1); IR::Vertex3fv(nextTail[3]);
-                        IR::TexCoord2f(L2, V2); IR::Vertex3fv(nextTail[2]);
+                        const mu::Vertex3D faceOneVerts[4] = {
+                            {currentTail[2][0], currentTail[2][1], currentTail[2][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                            {currentTail[3][0], currentTail[3][1], currentTail[3][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                            {nextTail[3][0], nextTail[3][1], nextTail[3][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                            {nextTail[2][0], nextTail[2][1], nextTail[2][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                        };
+                        mu::GetRenderer().RenderQuad3D(faceOneVerts, static_cast<std::uint32_t>(o->TexType));
                     }
 
                     if ((o->RenderFace & RENDER_FACE_TWO) == RENDER_FACE_TWO)
@@ -7317,16 +7330,16 @@ void RenderJoints(BYTE bRenderOneMore)
                             L1 += Scroll * 2.f;
                             L2 += Scroll * 2.f;
                         }
-                        IR::TexCoord2f(L1, V1); IR::Vertex3fv(currentTail[0]);
-                        IR::TexCoord2f(L1, V2); IR::Vertex3fv(currentTail[1]);
-                        IR::TexCoord2f(L2, V2); IR::Vertex3fv(nextTail[1]);
-                        IR::TexCoord2f(L2, V1); IR::Vertex3fv(nextTail[0]);
+                        const mu::Vertex3D faceTwoVerts[4] = {
+                            {currentTail[0][0], currentTail[0][1], currentTail[0][2], 0.f, 0.f, 0.f, L1, V1, faceColor},
+                            {currentTail[1][0], currentTail[1][1], currentTail[1][2], 0.f, 0.f, 0.f, L1, V2, faceColor},
+                            {nextTail[1][0], nextTail[1][1], nextTail[1][2], 0.f, 0.f, 0.f, L2, V2, faceColor},
+                            {nextTail[0][0], nextTail[0][1], nextTail[0][2], 0.f, 0.f, 0.f, L2, V1, faceColor},
+                        };
+                        mu::GetRenderer().RenderQuad3D(faceTwoVerts, static_cast<std::uint32_t>(o->TexType));
                     }
                 }
             }
-
-            IR::End();
-
             if (o->Type == BITMAP_JOINT_HEALING && o->SubType == 8)
             {
                 EnableDepthTest();

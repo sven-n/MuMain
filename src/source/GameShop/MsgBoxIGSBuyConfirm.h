@@ -71,7 +71,8 @@ public:
     bool Update();
     bool Render();
 
-    void Initialize(WORD wItemCode, int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod);
+    void Initialize(WORD wItemCode, int iPackageSeq, int iDisplaySeq, int iPriceSeq, int iCashType, wchar_t* pszName,
+                    wchar_t* pszPrice, wchar_t* pszPeriod);
     static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
@@ -90,18 +91,18 @@ private:
     CNewUIMessageBoxButton m_BtnCancel;
 
     int m_iMiddleCount;
-    WORD	m_wItemCode;
-    int		m_iPackageSeq;
-    int		m_iDisplaySeq;
-    int		m_iPriceSeq;
-    int		m_iCashType;
+    WORD m_wItemCode;
+    int m_iPackageSeq;
+    int m_iDisplaySeq;
+    int m_iPriceSeq;
+    int m_iCashType;
 
     wchar_t m_szItemName[MAX_TEXT_LENGTH];
     wchar_t m_szItemPrice[MAX_TEXT_LENGTH];
     wchar_t m_szItemPeriod[MAX_TEXT_LENGTH];
     wchar_t m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
 
-    int		m_iNumNoticeLine;
+    int m_iNumNoticeLine;
 };
 
 class CMsgBoxIGSBuyConfirmLayout : public TMsgBoxLayout<CMsgBoxIGSBuyConfirm>

@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UIWindows.h"
 #include "Core/Time/FrameTimerScheduler.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -12,14 +13,13 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Engine/AI/GOBoid.h"
 #include "UIManager.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
 #include "Character/CSParts.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "I18N/All.h"
@@ -28,7 +28,6 @@
 extern int	 g_iChatInputType;
 extern DWORD g_dwActiveUIID;
 extern DWORD g_dwMouseUseUIID;
-extern CUITextInputBox* g_pSingleTextInputBox;
 extern DWORD g_dwTopWindow;
 extern DWORD g_dwKeyFocusUIID;
 extern void ReceiveLetterText(std::span<const BYTE> ReceiveBuffer, bool isCached);
@@ -114,7 +113,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         pbw = new CUIChatWindow;
         if (m_dwMainWindowUIID != 0)
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -126,11 +125,11 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
             m_dwMainWindowUIID = pbw->GetUIID();
             if (g_pFriendMenu->IsNewMailAlert() == TRUE)
             {
-                ((CUIFriendWindow*)pbw)->SetTabIndex(1);
+                static_cast<CUIFriendWindow*>(pbw)->SetTabIndex(1);
             }
             else
             {
-                ((CUIFriendWindow*)pbw)->SetTabIndex(m_iLastFriendWindowTabIndex);
+                static_cast<CUIFriendWindow*>(pbw)->SetTabIndex(m_iLastFriendWindowTabIndex);
             }
             g_pFriendMenu->SetNewMailAlert(FALSE);
             if (IsServerEnable() == FALSE)
@@ -144,7 +143,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         if (g_dwTopWindow != 0) return 0;
         pbw = new CUITextInputWindow;
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -154,7 +153,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     case UIWNDTYPE_QUESTION_FORCE:
         pbw = new CUIQuestionWindow(0);
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
 
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::Question);
@@ -167,7 +166,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     case UIWNDTYPE_OK_FORCE:
         pbw = new CUIQuestionWindow(1);
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), I18N::Game::OK);
         }
@@ -178,7 +177,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         pbw = new CUILetterReadWindow;
         if (m_dwMainWindowUIID != 0)
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -188,7 +187,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
         pbw = new CUILetterWriteWindow;
         if (m_dwMainWindowUIID != 0)
         {
-            auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+            auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
             if (pMainWnd != NULL)
                 pMainWnd->AddWindow(pbw->GetUIID(), pszTitle);
         }
@@ -206,13 +205,17 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
 
     if (!(iOption & UIADDWND_FORCEPOSITION))
     {
+        const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
         for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
         {
-            if (m_WindowMapIter->second->GetPosition_x() == iPos_x && m_WindowMapIter->second->GetPosition_y() == iPos_y)
+            if (m_WindowMapIter->second->GetPosition_x() == iPos_x &&
+                m_WindowMapIter->second->GetPosition_y() == iPos_y)
             {
-                if (iPos_x + pbw->GetWidth() + 20 <= REFERENCE_WIDTH) iPos_x += 20;
-                if (iPos_y + pbw->GetHeight() + 20 <= REFERENCE_HEIGHT) iPos_y += 20;
-                if (iPos_x + pbw->GetWidth() + 20 > REFERENCE_WIDTH && iPos_y + pbw->GetHeight() + 20 > REFERENCE_HEIGHT)
+                if (iPos_x + pbw->GetWidth() + 20 <= bounds.width)
+                    iPos_x += 20;
+                if (iPos_y + pbw->GetHeight() + 20 <= bounds.height)
+                    iPos_y += 20;
+                if (iPos_x + pbw->GetWidth() + 20 > bounds.width && iPos_y + pbw->GetHeight() + 20 > bounds.height)
                 {
                     if (iPos_y % 10 == 9)
                     {
@@ -236,7 +239,7 @@ DWORD CUIWindowMgr::AddWindow(int iWindowType, int iPos_x, int iPos_y, const wch
     pbw->Refresh();
     if (iWindowType == UIWNDTYPE_CHAT)
     {
-        ((CUIChatWindow*)pbw)->FocusReset();
+        static_cast<CUIChatWindow*>(pbw)->FocusReset();
     }
 
     return dwUIID;
@@ -261,7 +264,7 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
             m_iMainWindowWidth = pWindow->GetWidth();
             m_iMainWindowHeight = pWindow->GetHeight();
             pWindow->GetBackPosition(&m_bIsMainWindowMaximize, &m_iMainWindowBackPos_y, &m_iMainWindowBackHeight);
-            m_iLastFriendWindowTabIndex = ((CUIFriendWindow*)pWindow)->GetTabIndex();
+            m_iLastFriendWindowTabIndex = static_cast<CUIFriendWindow*>(pWindow)->GetTabIndex();
         }
         m_dwMainWindowUIID = 0;
     }
@@ -291,7 +294,7 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
 
     if (m_dwMainWindowUIID != 0)
     {
-        auto* pMainWnd = (CUIFriendWindow*)GetWindow(m_dwMainWindowUIID);
+        auto* pMainWnd = static_cast<CUIFriendWindow*>(GetWindow(m_dwMainWindowUIID));
         if (pMainWnd != NULL)
             pMainWnd->RemoveWindow(dwUIID);
     }
@@ -415,7 +418,10 @@ void CUIWindowMgr::HideAllWindow(BOOL bHide, BOOL bMainClose)
         int iHideSize = m_HideWindowList.size();
         if (iHideSize - iCount > 0)
         {
-            OpenMainWnd(REFERENCE_WIDTH - 250, 432 - 170);
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+            const int contentHeight =
+                static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
+            OpenMainWnd(bounds.width - 250, contentHeight - 170);
         }
         if (iCount > 0 && GetTopNotMainWindowUIID() > 0)
         {
@@ -534,11 +540,14 @@ void CUIWindowMgr::HandleMessage()
             m_WindowArrangeListIter = m_WindowArrangeList.end();
             --m_WindowArrangeListIter;
 
-            if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1 || GetFocus() == g_hWnd)
+            const bool inputOwnsSelection = CUITextInputBox::IsFocusedForParent(m_WorkMessage.m_iParam1);
+            if ((int)(*m_WindowArrangeListIter) != m_WorkMessage.m_iParam1
+                || (GetFocus() == g_hWnd && !inputOwnsSelection))
             {
                 m_WindowArrangeList.remove(m_WorkMessage.m_iParam1);
                 m_WindowArrangeList.push_back(m_WorkMessage.m_iParam1);
-                SendUIMessageToWindow(m_WorkMessage.m_iParam1, UI_MESSAGE_SELECTED, 0, 0);
+                if (!inputOwnsSelection)
+                    SendUIMessageToWindow(m_WorkMessage.m_iParam1, UI_MESSAGE_SELECTED, 0, 0);
             }
 
             SetWindowsEnable(m_WorkMessage.m_iParam1);
@@ -717,11 +726,12 @@ void CUIWindowMgr::RefreshMainWndChatRoomList()
 {
     CUIBaseWindow* pWindow = GetWindow(m_dwMainWindowUIID);
     if (pWindow == NULL) return;
-    ((CUIFriendWindow*)pWindow)->ResetWindow();
+    static_cast<CUIFriendWindow*>(pWindow)->ResetWindow();
     for (m_WindowMapIter = m_WindowMap.begin(); m_WindowMapIter != m_WindowMap.end(); ++m_WindowMapIter)
     {
         if (m_dwMainWindowUIID != m_WindowMapIter->first && m_WindowMapIter->second->GetState() != UISTATE_READY)
-            ((CUIFriendWindow*)pWindow)->AddWindow(m_WindowMapIter->first, m_WindowMapIter->second->GetTitle());
+            static_cast<CUIFriendWindow*>(pWindow)->AddWindow(m_WindowMapIter->first,
+                                                              m_WindowMapIter->second->GetTitle());
     }
 }
 
@@ -808,49 +818,29 @@ void CUIWindowMgr::SetServerEnable(BOOL bFlag)
 }
 void SetLineColor(int iType, float fAlphaRate = 1.0f)
 {
-    GLubyte ubWindowAlpha = 255 * fAlphaRate;
-
+    const BYTE windowAlpha = static_cast<BYTE>(255.f * fAlphaRate);
     switch (iType)
     {
-    case 0:
-        glColor4ub(146, 134, 121, ubWindowAlpha);	break;
-    case 1:
-        glColor4ub(37, 37, 37, ubWindowAlpha);		break;
-    case 2:
-        glColor4ub(106, 97, 88, ubWindowAlpha);		break;
-    case 3:
-        glColor4ub(0, 0, 0, 179 * fAlphaRate);		break;
-    case 4:
-        glColor4ub(173, 167, 150, ubWindowAlpha);	break;
-    case 5:
-        glColor4ub(53, 49, 48, ubWindowAlpha);		break;
-    case 6:
-        glColor4ub(26, 22, 21, ubWindowAlpha);		break;
-    case 7:
-        glColor4ub(0, 0, 0, 255 * fAlphaRate);		break;
-    case 8:
-        glColor4ub(153, 156, 166, ubWindowAlpha);	break;
-    case 9:
-        glColor4ub(136, 138, 147, ubWindowAlpha);	break;
-    case 10:
-        glColor4ub(83, 85, 93, ubWindowAlpha);		break;
-    case 11:
-        glColor4ub(102, 104, 112, ubWindowAlpha);	break;
-    case 12:
-        glColor4ub(0, 0, 8, ubWindowAlpha);			break;
-    case 13:
-        glColor4ub(0, 0, 0, ubWindowAlpha);			break;
-    case 14:
-        glColor4ub(185, 185, 185, ubWindowAlpha);	break;
-    case 15:
-        glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-    case 16:
-        glColor4ub(194, 194, 194, ubWindowAlpha);	break;
-    case 17:
-        glColor4ub(209, 188, 134, ubWindowAlpha);	break;
-    case 18:
-        glColor4ub(205, 209, 133, ubWindowAlpha);	break;
-    default:	break;
+    case 0: SetRenderColor(146, 134, 121, windowAlpha); break;
+    case 1: SetRenderColor(37, 37, 37, windowAlpha); break;
+    case 2: SetRenderColor(106, 97, 88, windowAlpha); break;
+    case 3: SetRenderColor(0, 0, 0, static_cast<BYTE>(179.f * fAlphaRate)); break;
+    case 4: SetRenderColor(173, 167, 150, windowAlpha); break;
+    case 5: SetRenderColor(53, 49, 48, windowAlpha); break;
+    case 6: SetRenderColor(26, 22, 21, windowAlpha); break;
+    case 7: SetRenderColor(0, 0, 0, static_cast<BYTE>(255.f * fAlphaRate)); break;
+    case 8: SetRenderColor(153, 156, 166, windowAlpha); break;
+    case 9: SetRenderColor(136, 138, 147, windowAlpha); break;
+    case 10: SetRenderColor(83, 85, 93, windowAlpha); break;
+    case 11: SetRenderColor(102, 104, 112, windowAlpha); break;
+    case 12: SetRenderColor(0, 0, 8, windowAlpha); break;
+    case 13: SetRenderColor(0, 0, 0, windowAlpha); break;
+    case 14: SetRenderColor(185, 185, 185, windowAlpha); break;
+    case 15: SetRenderColor(194, 194, 194, windowAlpha); break;
+    case 16: SetRenderColor(194, 194, 194, windowAlpha); break;
+    case 17: SetRenderColor(209, 188, 134, windowAlpha); break;
+    case 18: SetRenderColor(205, 209, 133, windowAlpha); break;
+    default: break;
     }
 }
 
@@ -911,6 +901,18 @@ void CUIBaseWindow::SetTitle(const wchar_t* pszTitle)
     m_strTitle = std::wstring(pszTitle);
 }
 
+void CUIBaseWindow::SetReturnText(const wchar_t* text)
+{
+    m_returnText = text ? text : L"";
+}
+
+std::wstring CUIBaseWindow::TakeReturnText()
+{
+    std::wstring text;
+    text.swap(m_returnText);
+    return text;
+}
+
 void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 {
     SetLineColor(0);
@@ -951,17 +953,7 @@ void CUIBaseWindow::DrawOutLine(int iPos_x, int iPos_y, int iWidth, int iHeight)
 
 void CUIBaseWindow::SetControlButtonColor(int iSelect)
 {
-    if (m_iControlButtonClick == iSelect && CheckMouseIn(m_iPos_x + m_iWidth - 38, m_iPos_y + 8, 38, 9) == TRUE)
-    {
-        if (MouseLButtonPush == true)
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
-        else
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    }
-    else
-    {
-        glColor4f(0.8f, 0.8f, 0.8f, 1.0f);
-    }
+    (void)iSelect;
 }
 
 void CUIBaseWindow::Render()
@@ -997,8 +989,6 @@ void CUIBaseWindow::Render()
     {
         bBackWindow = TRUE;
     }
-    if (bBackWindow == TRUE)
-        glColor4f(0.5f, 0.5f, 0.5f, 1.0f);
     if (CheckOption(UIWINDOWSTYLE_FRAME))
     {
         if (CheckOption(UIWINDOWSTYLE_TITLEBAR))
@@ -1061,7 +1051,6 @@ void CUIBaseWindow::Render()
         }
         SetControlButtonColor(3);
         RenderBitmap(BITMAP_INTERFACE_EX + 10, (float)m_iPos_x + m_iWidth - 16, (float)m_iPos_y + 8, (float)9, (float)9, 0.f, 9.f / 32.f, 9.f / 32.f, 9.f / 32.f);
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         g_pRenderText->SetFont(g_hFont);
     }
     if (CheckOption(UIWINDOWSTYLE_RESIZEABLE))
@@ -1071,7 +1060,6 @@ void CUIBaseWindow::Render()
     }
     if (g_pWindowMgr->GetTopWindowUIID() != GetUIID() || !g_pUIManager->IsOpen(INTERFACE_FRIEND))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
     }
 
@@ -1165,20 +1153,25 @@ BOOL CUIBaseWindow::DoMouseAction()
     {
         if (MouseLButton == true)
         {
-            if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+            if (g_dwMouseUseUIID == 0)
+                g_dwMouseUseUIID = GetUIID();
             MouseOnWindow = true;
 
-            if (m_iPos_x + MouseX - m_iMouseClickPos_x < 0) m_iPos_x = 0;
-            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
-            else m_iPos_x += MouseX - m_iMouseClickPos_x;
+            if (m_iPos_x + MouseX - m_iMouseClickPos_x < 0)
+                m_iPos_x = 0;
+            else if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > bounds.width)
+                m_iPos_x = bounds.width - m_iWidth;
+            else
+                m_iPos_x += MouseX - m_iMouseClickPos_x;
 
             if (m_iPos_y + MouseY - m_iMouseClickPos_y < 0)
             {
                 m_iPos_y = 0;
             }
-            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT)
+            else if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > bounds.height)
             {
-                m_iPos_y = REFERENCE_HEIGHT - m_iHeight;
+                m_iPos_y = bounds.height - m_iHeight;
             }
             else
             {
@@ -1198,13 +1191,17 @@ BOOL CUIBaseWindow::DoMouseAction()
     {
         if (MouseLButton == true)
         {
+            const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
             if (m_iResizeDir == 135)
             {
-                if (g_dwMouseUseUIID == 0) g_dwMouseUseUIID = GetUIID();
+                if (g_dwMouseUseUIID == 0)
+                    g_dwMouseUseUIID = GetUIID();
                 MouseOnWindow = true;
 
-                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > REFERENCE_WIDTH) m_iWidth = REFERENCE_WIDTH - m_iPos_x;
-                else m_iWidth += MouseX - m_iMouseClickPos_x;
+                if (m_iPos_x + m_iWidth + MouseX - m_iMouseClickPos_x > bounds.width)
+                    m_iWidth = bounds.width - m_iPos_x;
+                else
+                    m_iWidth += MouseX - m_iMouseClickPos_x;
 
                 if (m_iWidth < m_iMinWidth)
                 {
@@ -1214,10 +1211,13 @@ BOOL CUIBaseWindow::DoMouseAction()
                 {
                     m_iWidth = m_iMaxWidth;
                 }
-                else m_iMouseClickPos_x = MouseX;
+                else
+                    m_iMouseClickPos_x = MouseX;
 
-                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > REFERENCE_HEIGHT) m_iHeight = REFERENCE_HEIGHT - m_iPos_y;
-                else m_iHeight += MouseY - m_iMouseClickPos_y;
+                if (m_iPos_y + m_iHeight + MouseY - m_iMouseClickPos_y > bounds.height)
+                    m_iHeight = bounds.height - m_iPos_y;
+                else
+                    m_iHeight += MouseY - m_iMouseClickPos_y;
 
                 if (m_iHeight < m_iMinHeight)
                 {
@@ -1269,7 +1269,7 @@ void CUIBaseWindow::Maximize()
         m_iBackPos_y = m_iPos_y;
         m_iBackHeight = m_iHeight;
         m_iPos_y = 0;
-        m_iHeight = REFERENCE_HEIGHT - 48;
+        m_iHeight = static_cast<int>(UI::Scaling::FloatingWorkspaceContentHeight(WindowWidth, WindowHeight));
         Refresh();
         m_bIsMaximize = TRUE;
     }
@@ -1397,7 +1397,7 @@ void CUIChatWindow::ConnectToChatServer(const wchar_t* pszIP, DWORD dwRoomNumber
 {
     m_dwRoomNumber = dwRoomNumber;
 
-    _connection = new Connection(pszIP, 55980, true, &HandlePacketS);
+    _connection = new Connection(MU_C16(pszIP), 55980, true, &HandlePacketS);
 
     if (!_connection->IsConnected())
     {
@@ -1419,6 +1419,7 @@ void CUIChatWindow::DisconnectToChatServer()
             _connection->Close();
         }
 
+        delete _connection;
         _connection = nullptr;
     }
 }
@@ -1637,7 +1638,9 @@ BOOL CUIChatWindow::HandleMessage()
 
                 UpdateInvitePalList();
 
-                if (m_iPos_x + m_iWidth > REFERENCE_WIDTH) m_iPos_x = REFERENCE_WIDTH - m_iWidth;
+                const auto bounds = UI::Scaling::FloatingWorkspaceBounds(WindowWidth, WindowHeight);
+                if (m_iPos_x + m_iWidth > bounds.width)
+                    m_iPos_x = bounds.width - m_iWidth;
                 Refresh();
             }
             else if (m_iShowType >= 2)
@@ -1666,7 +1669,7 @@ BOOL CUIChatWindow::HandleMessage()
                 else
                 {
                     SocketClient->ToGameServer()->SendChatRoomInvitationRequest(
-                        m_InvitePalListBox.GetSelectedText()->m_szID,
+                        MU_C16(m_InvitePalListBox.GetSelectedText()->m_szID),
                         m_dwRoomNumber,
                         GetUIID());
                 }
@@ -1799,12 +1802,7 @@ static void PhotoMakeRotationX(float degrees, float* out)
 {
     float rad = degrees * Q_PI / 180.0f;
     float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, c,   s,   0.f,
-        0.f, -s,  c,   0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
+    float m[16] = {1.f, 0.f, 0.f, 0.f, 0.f, c, s, 0.f, 0.f, -s, c, 0.f, 0.f, 0.f, 0.f, 1.f};
     memcpy(out, m, sizeof(m));
 }
 
@@ -1812,23 +1810,13 @@ static void PhotoMakeRotationZ(float degrees, float* out)
 {
     float rad = degrees * Q_PI / 180.0f;
     float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        c,   s,   0.f, 0.f,
-        -s,  c,   0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
+    float m[16] = {c, s, 0.f, 0.f, -s, c, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f};
     memcpy(out, m, sizeof(m));
 }
 
 static void PhotoMakeTranslation(float x, float y, float z, float* out)
 {
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        x,   y,   z,   1.f
-    };
+    float m[16] = {1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, 0.f, 0.f, 0.f, 1.f, 0.f, x, y, z, 1.f};
     memcpy(out, m, sizeof(m));
 }
 
@@ -1846,67 +1834,33 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     MoveMount(&m_PhotoHelper, TRUE);
     gMapManager.WorldActive = WorldBackup;
 
-    // Snapshot the CPU source of truth before this panel overwrites GlobalUBO — this panel has no
-    // EndBitmap()/BeginBitmap() bracket of its own (unlike every other DXP-07d panel), so its
-    // restore below needs this snapshot instead of either of those idioms.
-    memcpy(s_PrePhotoProj, GlobalUBO::Instance().GetProj(), sizeof(s_PrePhotoProj));
-    memcpy(s_PrePhotoView, GlobalUBO::Instance().GetView(), sizeof(s_PrePhotoView));
-
-    SaveCameraPerspective();
-    glViewport2(m_iPos_x * g_fScreenRate_x, m_iPos_y * g_fScreenRate_y, m_iWidth * g_fScreenRate_x, 141 * g_fScreenRate_y);
-    gluPerspective2(1.f, (float)(m_iWidth * g_fScreenRate_x) / (float)(141 * g_fScreenRate_y), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
-
-    // DXP-08a: the matching glMatrixMode/glPushMatrix/glLoadIdentity(x2) bracket and
-    // CameraProjection::GetOpenGLMatrix(g_Camera.Matrix) read are deleted — g_Camera.Matrix is
-    // identity here (matching the original glLoadIdentity()-before-rotate capture; the real photo
-    // camera below feeds GlobalUBO directly, not g_Camera.Matrix, same as every other panel).
-    static const float s_IdentityCameraMatrix[3][4] = {
-        {1.f,0.f,0.f,0.f}, {0.f,1.f,0.f,0.f}, {0.f,0.f,1.f,0.f}
-    };
-    memcpy(g_Camera.Matrix, s_IdentityCameraMatrix, sizeof(g_Camera.Matrix));
-
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    const auto viewport = UI::Scaling::ViewportForLogicalRect(
+        UI::Scaling::GetActiveTransform(), m_iPos_x, m_iPos_y, m_iWidth, 141.0f);
+    SetRenderViewport(viewport.x, viewport.y, viewport.width, viewport.height);
+    gluPerspective2(1.f, static_cast<float>(viewport.width) / static_cast<float>(viewport.height), 2000, 20000);//g_Camera.ViewNear,g_Camera.ViewFar);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
     EnableDepthTest();
     EnableDepthMask();
 
-    // DXP-08a: the real glRotatef/glRotatef/glTranslatef/glTranslatef sequence that used to build
-    // this panel's "photo camera" is deleted — DXP-07d increment 6 already proved the CPU closed
-    // form below matches bit-for-bit across multiple soaks, and GlobalUBO (fed from that closed
-    // form just below) is the only consumer (same finding used for every other
-    // panel and for BeginOpengl/BeginBitmap in Category 3).
-    // CPU closed form for the same camera — proj = gluPerspective(1.f deg, aspect, 2000, 20000)
-    // closed form (this panel's own literal near/far, unlike RENDER_ITEMVIEW_NEAR/FAR
-    // elsewhere); view = Rx(-90) * Rz(-90) * T(-10000,0,-75) * T(-o->Position...) composed in
-    // GL's right-multiply order (translate applied first, closest to the vertex — matches the
-    // glRotatef/glRotatef/glTranslatef/glTranslatef call order above exactly).
-    {
-        float aspect = (m_iWidth * g_fScreenRate_x) / (141.f * g_fScreenRate_y);
-        float fovRad = 1.f * 0.5f * Q_PI / 180.0f;
-        float f = 1.0f / tanf(fovRad);
-        float zNear = 2000.f, zFar = 20000.f;
-        float cpuProj[16];
-        BuildPerspectiveProjection(f, aspect, zNear, zFar, cpuProj);
+    mu::GetRenderer().Rotate(-90.0f, 1.f, 0.f, 0.f);
+    mu::GetRenderer().Rotate(-90.0f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().Translate(-10000.0f, 0.0f, -75.f);
 
-        float rx[16]; PhotoMakeRotationX(-90.0f, rx);
-        float rz[16]; PhotoMakeRotationZ(-90.0f, rz);
-        float t1[16]; PhotoMakeTranslation(-10000.0f, 0.0f, -75.f, t1);
-        float t2[16];
-        if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
-            PhotoMakeTranslation(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f, t2);
-        else
-            PhotoMakeTranslation(-o->Position[0], -o->Position[1], -o->Position[2], t2);
-
-        float m1[16]; PhotoMat4Multiply(m1, rx, rz);
-        float m2[16]; PhotoMat4Multiply(m2, m1, t1);
-        float cpuView[16]; PhotoMat4Multiply(cpuView, m2, t2);
-
-        GlobalUBO::Instance().SetProj(cpuProj);
-        GlobalUBO::Instance().SetView(cpuView);
-    }
+    if (c->Helper.Type == MODEL_DARK_HORSE_ITEM)
+        mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2] - 50.0f);
+    else
+        mu::GetRenderer().Translate(-o->Position[0], -o->Position[1], -o->Position[2]);
 
     Vector(0.0f, 0.0f, m_fCurrentAngle, o->Angle);
 
-    DisableAlphaTestRaw();
-    EnableTexture2D();
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(true);
     EnableDepthTest();
     EnableCullFace();
     EnableDepthMask();
@@ -1916,10 +1870,10 @@ void CUIPhotoViewer::RenderPhotoCharacter()
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    SetDepthFuncLEqual();
-    SetAlphaFuncRef(0.25f);
-    DisableFog();
-    ClearDepthBuffer();
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
+    mu::GetRenderer().SetFogEnabled(false);
+    mu::GetRenderer().ClearDepthBuffer();
     o->Scale = 0.7f * m_fCurrentZoom;
     m_PhotoHelper.Scale = m_fPhotoHelperScale * m_fCurrentZoom;
     Vector(1, 1, 1, o->Light);
@@ -1940,12 +1894,11 @@ void CUIPhotoViewer::RenderPhotoCharacter()
         m_PhotoHelper.Position[2] -= 25;
     RenderCharacter(c, o);
 
-    // DXP-08a: the matching glMatrixMode/glPopMatrix pops are deleted — GlobalUBO is restored
-    // directly from the pre-panel snapshot taken at entry instead of a fresh GL read.
-    glViewport2(0, 0, WindowWidth, WindowHeight);
-    RestoreCameraPerspective();
-    GlobalUBO::Instance().SetProj(s_PrePhotoProj);
-    GlobalUBO::Instance().SetView(s_PrePhotoView);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
 }
 
 int CUIPhotoViewer::SetPhotoPose(int iCurrentAni, int iMoveDir)
@@ -2564,7 +2517,6 @@ void CUIPhotoViewer::Render()
 {
     if (m_bIsWebzenMail == TRUE)
     {
-        glColor4f(0.f, 0.f, 0.f, 1.0f);
         RenderColor(m_iPos_x, m_iPos_y, 119.f, 141.f);
         EndRenderColor();
         RenderBitmap(BITMAP_INTERFACE_EX + 22, m_iPos_x + 20, m_iPos_y + 38, 80.f, 62.f, 0.f, 0.f, 256.f / 256.f, 195.f / 256.f);
@@ -2602,7 +2554,6 @@ void CUIPhotoViewer::Render()
 
     if (CheckOption(UIPHOTOVIEWER_CANCONTROL))
     {
-        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         DisableAlphaBlend();
         if (m_bHelpEnable == FALSE)
         {
@@ -2610,17 +2561,14 @@ void CUIPhotoViewer::Render()
         }
         else
         {
-            glColor4f(0.6f, 0.6f, 0.6f, 1.0f);
             RenderBitmap(BITMAP_INTERFACE_EX + 20, m_iPos_x + 2, m_iPos_y + m_iHeight - 16, 15.0f, 15.0f, 0.f, 0.f, 15.f / 16.f, 15.f / 16.f);
-            glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
             TextNum = 0;
             mu_swprintf(TextList[TextNum], I18N::Game::WheelButtonZoomInOut); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::LeftClickRotation); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
             mu_swprintf(TextList[TextNum], I18N::Game::RightClickDefault); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
-            SIZE TextSize;
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"Z", 1, &TextSize);
-            TextSize.cy /= g_fScreenRate_y;
+            g_pRenderText->SetFont(g_hFont);
+            const SIZE TextSize = g_pRenderText->MeasureText(L"Z", 1);
             RenderTipTextList(m_iPos_x + m_iWidth / 2, m_iPos_y + m_iHeight - TextNum * (TextSize.cy + 2), TextNum, 0, RT3_SORT_LEFT);
         }
     }
@@ -2628,10 +2576,8 @@ void CUIPhotoViewer::Render()
 
 void CUILetterWriteWindow::InitControls()
 {
-    SIZE size;
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
-
-    size.cx = (size.cx / g_fScreenRate_x) + 0.5f;
+    g_pRenderText->SetFont(g_hFont);
+    const SIZE size = g_pRenderText->MeasureText(I18N::Game::Receiver, wcslen(I18N::Game::Receiver));
 
     m_MailtoInputBox.Init(g_hWnd, 238, 14, 50);
     m_MailtoInputBox.SetParentUIID(m_dwUIID);
@@ -2789,12 +2735,11 @@ void CUILetterWriteWindow::RenderSub()
     RenderColor((float)RPos_x(0), (float)RPos_y(0) + RHeight() - 19, (float)RWidth(), 1.0f);
     EndRenderColor();
 
-    SIZE size;
-
+    g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::Receiver, wcslen(I18N::Game::Receiver), &size);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
-    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title, size.cx / g_fScreenRate_x, 0, RT3_SORT_RIGHT);
+    const SIZE size = g_pRenderText->MeasureText(I18N::Game::Receiver, wcslen(I18N::Game::Receiver));
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(3), I18N::Game::Receiver, size.cx, 0, RT3_SORT_RIGHT);
+    g_pRenderText->RenderText(RPos_x(3), RPos_y(18), I18N::Game::Title, size.cx, 0, RT3_SORT_RIGHT);
 
     m_MailtoInputBox.Render();
     m_TitleInputBox.Render();
@@ -2942,7 +2887,7 @@ BOOL CUILetterWriteWindow::HandleMessage()
                 int iZoom = (m_Photo.GetCurrentZoom() * 100.0f - 80 + 5) / 10;
                 BYTE Data1 = (iZoom << 6) & 0xC0 | iAngle & 0x3F;
                 BYTE Data2 = m_Photo.GetCurrentAction() - AT_ATTACK1;
-                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), szMailto, szTitle, Data1, Data2, len, szText);
+                SocketClient->ToGameServer()->SendLetterSendRequest(GetUIID(), MU_C16(szMailto), MU_C16(szTitle), Data1, Data2, len, MU_C16(szText));
             }
             break;
         case 2:
@@ -3605,7 +3550,7 @@ BOOL CUIFriendListTabWindow::HandleMessage()
                     if (g_pWindowMgr->GetChatReject() == FALSE && g_pFriendMenu->IsRequestWindow(pszName) == FALSE)
                     {
                         g_pFriendMenu->AddRequestWindow(pszName);
-                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(pszName);
+                        SocketClient->ToGameServer()->SendChatRoomCreateRequest(MU_C16(pszName));
                     }
                 }
                 else if (dwDuplicationCheck == -1);
@@ -3642,18 +3587,20 @@ BOOL CUIFriendListTabWindow::HandleMessage()
     }
     break;
     case UI_MESSAGE_TXTRETURN:
-        if (m_WorkMessage.m_iParam2 != 0)
         {
-            wchar_t* pText = (wchar_t*)m_WorkMessage.m_iParam2;
-            SocketClient->ToGameServer()->SendFriendAddRequest(pText);
-            delete[] pText;
+            std::wstring text = TakeReturnText();
+            if (text.empty())
+            {
+                break;
+            }
+            SocketClient->ToGameServer()->SendFriendAddRequest(MU_C16(text.c_str()));
         }
         break;
     case UI_MESSAGE_YNRETURN:
         if (m_WorkMessage.m_iParam2 == 1)
         {
             if (GetCurrentSelectedFriend() == NULL) break;
-            SocketClient->ToGameServer()->SendFriendDelete(GetCurrentSelectedFriend());
+            SocketClient->ToGameServer()->SendFriendDelete(MU_C16(GetCurrentSelectedFriend()));
         }
         break;
     default:
@@ -4828,6 +4775,7 @@ void CUIFriendWindow::RenderSub()
 
     SIZE TextSize;
     int TextLen;
+    g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
 
     if (m_FriendListWnd.GetTitle() != NULL)
@@ -4843,9 +4791,9 @@ void CUIFriendWindow::RenderSub()
 
         TextLen = lstrlen(m_FriendListWnd.GetTitle());
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_FriendListWnd.GetTitle(), TextLen, &TextSize);
-        g_pRenderText->RenderText(RPos_x(0) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2,
-            RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_FriendListWnd.GetTitle());
+        TextSize = g_pRenderText->MeasureText(m_FriendListWnd.GetTitle(), TextLen);
+        g_pRenderText->RenderText(RPos_x(0) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_FriendListWnd.GetTitle());
     }
     if (m_LetterBoxWnd.GetTitle() != NULL)
     {
@@ -4859,8 +4807,9 @@ void CUIFriendWindow::RenderSub()
         }
         TextLen = lstrlen(m_LetterBoxWnd.GetTitle());
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_LetterBoxWnd.GetTitle(), TextLen, &TextSize);
-        g_pRenderText->RenderText(RPos_x(54) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
+        TextSize = g_pRenderText->MeasureText(m_LetterBoxWnd.GetTitle(), TextLen);
+        g_pRenderText->RenderText(RPos_x(54) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_LetterBoxWnd.GetTitle());
     }
     if (m_ChatRoomListWnd.GetTitle() != NULL)
     {
@@ -4874,16 +4823,18 @@ void CUIFriendWindow::RenderSub()
         }
         TextLen = lstrlen(m_ChatRoomListWnd.GetTitle());
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_ChatRoomListWnd.GetTitle(), TextLen, &TextSize);
-        g_pRenderText->RenderText(RPos_x(107) + (52 - (float)TextSize.cx / g_fScreenRate_x + 0.5f) / 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
+        TextSize = g_pRenderText->MeasureText(m_ChatRoomListWnd.GetTitle(), TextLen);
+        g_pRenderText->RenderText(RPos_x(107) + (52 - static_cast<float>(TextSize.cx) + 0.5f) / 2,
+            RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, m_ChatRoomListWnd.GetTitle());
     }
 
     g_pRenderText->SetTextColor(230, 220, 200, 255);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat), &TextSize);
-    g_pRenderText->RenderText(RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2, RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2, I18N::Game::RefuseChat);
+    TextSize = g_pRenderText->MeasureText(I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat));
+    g_pRenderText->RenderText(RPos_x(0) + RWidth() - static_cast<float>(TextSize.cx) - 2,
+        RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2, I18N::Game::RefuseChat);
 
-    float fCheckBoxPos_x = RPos_x(0) + RWidth() - (float)TextSize.cx / g_fScreenRate_x - 2 - 14;
-    float fCheckBoxPos_y = RPos_y(0) + (24 - (float)TextSize.cy / g_fScreenRate_y + 0.5f) / 2;
+    float fCheckBoxPos_x = RPos_x(0) + RWidth() - static_cast<float>(TextSize.cx) - 2 - 14;
+    float fCheckBoxPos_y = RPos_y(0) + (24 - static_cast<float>(TextSize.cy) + 0.5f) / 2;
 
     RenderCheckBox(fCheckBoxPos_x - 1, fCheckBoxPos_y - 1, g_pWindowMgr->GetChatReject());
 }
@@ -5004,9 +4955,9 @@ void CUIFriendWindow::DoMouseActionSub()
     else
     {
         m_iTabMouseOverIndex = m_iTabIndex;
-        SIZE TextSize;
-
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat), &TextSize);
+        g_pRenderText->SetFont(g_hFont);
+        const SIZE TextSize = g_pRenderText->MeasureText(
+            I18N::Game::RefuseChat, wcslen(I18N::Game::RefuseChat));
 
         if (CheckMouseIn(RPos_x(0) + RWidth() - TextSize.cx - 2 - 14,
             RPos_y(4), TextSize.cx + 2 + 14, 20) == TRUE)
@@ -5101,12 +5052,22 @@ void CUITextInputWindow::RenderSub()
 
 void CUITextInputWindow::ReturnText()
 {
-    wchar_t* pszReturnText = new wchar_t[MAX_TEXT_LENGTH + 1];
-    m_TextInputBox.GetText(pszReturnText);
+    wchar_t returnText[MAX_TEXT_LENGTH + 1] = { 0 };
+    m_TextInputBox.GetText(returnText, MAX_TEXT_LENGTH + 1);
     m_TextInputBox.SetText(NULL);
-    if (pszReturnText[0] == '\0') return;
+    if (returnText[0] == L'\0')
+    {
+        return;
+    }
 
-    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), reinterpret_cast<LONG_PTR>(pszReturnText));
+    CUIBaseWindow* returnWindow = g_pWindowMgr->GetWindow(m_dwReturnWindowUIID);
+    if (returnWindow == NULL)
+    {
+        return;
+    }
+
+    returnWindow->SetReturnText(returnText);
+    g_pWindowMgr->SendUIMessageToWindow(m_dwReturnWindowUIID, UI_MESSAGE_TXTRETURN, GetUIID(), 0);
     g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, GetUIID(), 0);
 }
 
@@ -5237,7 +5198,7 @@ BOOL CUIQuestionWindow::HandleMessage()
         case 1:
             if (m_dwReturnWindowUIID == -1)
             {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, m_szSaveID);
+                SocketClient->ToGameServer()->SendFriendAddResponse(0x01, MU_C16(m_szSaveID));
             }
             else if (m_dwReturnWindowUIID != 0)
             {
@@ -5249,7 +5210,7 @@ BOOL CUIQuestionWindow::HandleMessage()
             if (m_iDialogType != 0) break;
             if (m_dwReturnWindowUIID == -1)
             {
-                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, m_szSaveID);
+                SocketClient->ToGameServer()->SendFriendAddResponse(0x00, MU_C16(m_szSaveID));
             }
             else if (m_dwReturnWindowUIID != 0)
             {
@@ -5514,10 +5475,8 @@ void CUIFriendMenu::RenderSub()
 {
     if (m_fLineHeight == 0)
     {
-        SIZE TextSize;
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), L"0", 1, &TextSize);
-
-        m_fLineHeight = TextSize.cy / g_fScreenRate_y;
+        g_pRenderText->SetFont(g_hFont);
+        m_fLineHeight = g_pRenderText->MeasureText(L"0", 1).cy;
     }
     m_fMenuAlpha += m_fMenuAlphaAdd;
     if (m_fMenuAlpha < 0.0f)
@@ -5630,9 +5589,7 @@ void CUIFriendMenu::RenderWindowList()
         auto* pWindow = (CUIChatWindow*)g_pWindowMgr->GetWindow(*m_WindowListIter);
         if (pWindow != NULL && pWindow->GetUserCount() > 2)
         {
-            glColor3f(255, 0, 0);
             RenderBitmap(BITMAP_INTERFACE_EX + 15, (float)m_iPos_x + m_iWidth - 7, (float)m_iFriendMenuPos_y - (m_fLineHeight + 4) * i + 5, (float)4, (float)6, 0.f, 0.f, 4.f / 8.f, 6.f / 8.f);
-            glColor3f(255, 255, 255);
         }
     }
 }

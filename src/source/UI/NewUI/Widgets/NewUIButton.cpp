@@ -70,19 +70,17 @@ bool CNewUIBaseButton::RadioProcess()
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
     if (isMousein)
     {
+        if (m_EventState == BUTTON_STATE_UP)
+        {
+            m_EventState = BUTTON_STATE_OVER;
+        }
+
         if (SEASON3B::IsPress(VK_LBUTTON))
         {
             if (m_EventState == BUTTON_STATE_OVER)
             {
                 m_EventState = BUTTON_STATE_DOWN;
                 return true;
-            }
-        }
-        else
-        {
-            if (m_EventState == BUTTON_STATE_UP)
-            {
-                m_EventState = BUTTON_STATE_OVER;
             }
         }
     }
@@ -119,7 +117,7 @@ bool CNewUIBaseButton::Process()
     {
         m_EventState = BUTTON_STATE_OVER;
     }
-    else if (SEASON3B::IsRepeat(VK_LBUTTON) && isMousein)
+    else if ((SEASON3B::IsRepeat(VK_LBUTTON) || SEASON3B::IsPress(VK_LBUTTON)) && isMousein)
     {
         m_EventState = BUTTON_STATE_DOWN;
     }
@@ -458,12 +456,8 @@ bool SEASON3B::CNewUIButton::Render(bool RendOption)
 
     if (m_Name.size() != 0)
     {
-        SIZE Fontsize;
         g_pRenderText->SetFont(m_hTextFont);
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
-
-        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
-        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
+        const SIZE Fontsize = g_pRenderText->MeasureText(m_Name.c_str(), static_cast<int>(m_Name.size()));
 
         int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
         int y = m_Pos.y + ((m_Size.y / 2) - (Fontsize.cy / 2));
@@ -486,12 +480,9 @@ bool SEASON3B::CNewUIButton::Render(bool RendOption)
     {
         if (CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y))
         {
-            SIZE Fontsize;
             g_pRenderText->SetFont(m_hToolTipFont);
-            GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_TooltipText.c_str(), m_TooltipText.size(), &Fontsize);
-
-            Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
-            Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
+            const SIZE Fontsize = g_pRenderText->MeasureText(
+                m_TooltipText.c_str(), static_cast<int>(m_TooltipText.size()));
 
             int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
             int y = m_Pos.y + m_Size.y + 2;
@@ -809,18 +800,13 @@ bool CNewUIRadioButton::Render()
 
     if (m_Name.size() != 0)
     {
-        SIZE Fontsize;
-
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         g_pRenderText->SetFont(m_hTextFont);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
         g_pRenderText->SetFont(g_hFont);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-        GetTextExtentPoint32(g_pRenderText->GetFontDC(), m_Name.c_str(), m_Name.size(), &Fontsize);
-
-        Fontsize.cx = Fontsize.cx / ((float)WindowWidth / REFERENCE_WIDTH);
-        Fontsize.cy = Fontsize.cy / ((float)WindowHeight / REFERENCE_HEIGHT);
+        const SIZE Fontsize = g_pRenderText->MeasureText(m_Name.c_str(), static_cast<int>(m_Name.size()));
 
         int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
         int y = m_Pos.y + ((m_Size.y / 2) - (Fontsize.cy / 2));
@@ -1289,7 +1275,6 @@ bool SEASON3B::CNewUICheckBox::GetBoxState()
 void SEASON3B::CNewUICheckBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderImage(s_ImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.0, (State) ? 0.0 : m_Size.y);
 

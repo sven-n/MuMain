@@ -438,7 +438,7 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
                     else
                     {
                         wcscpy(g_szPersonalShopTitle, shopTitle);
-                        SocketClient->ToGameServer()->SendPlayerShopOpen(shopTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
 
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
                         g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
@@ -464,20 +464,24 @@ bool SEASON3B::CNewUIMyShopInventory::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
-    {
-        if (SEASON3B::IsPress(VK_RBUTTON))
-        {
-            MouseRButton = false;
-            MouseRButtonPop = false;
-            MouseRButtonPush = false;
-            return false;
-        }
+    if (WindowProcess())
+        return false;
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
-        {
-            return false;
-        }
+    return true;
+}
+
+bool SEASON3B::CNewUIMyShopInventory::WindowProcess()
+{
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    {
+        return false;
+    }
+
+    if (SEASON3B::IsPress(VK_RBUTTON))
+    {
+        MouseRButton = false;
+        MouseRButtonPop = false;
+        MouseRButtonPush = false;
     }
 
     return true;
@@ -552,7 +556,6 @@ void SEASON3B::CNewUIMyShopInventory::RenderTextInfo()
 bool SEASON3B::CNewUIMyShopInventory::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
 
     RenderFrame();
 

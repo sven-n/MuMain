@@ -9,11 +9,8 @@
 #include <numeric>
 #include "SceneManager.h"
 #include "Core/Utilities/FrameProfiler.h"
+#include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Utilities/PlatformInfo.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/RHI/RHI.h"
 
 //=============================================================================
 // Frame Timing State Implementation
@@ -31,7 +28,10 @@ FrameTimingState g_frameTiming;
 #include "CharacterScene.h"
 #include "MainScene.h"
 #include "LoadingScene.h"
+#include "ScreenshotCaptureState.h"
 #include "Audio/DSPlaySound.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
@@ -72,6 +72,17 @@ extern bool Destroy;
 extern double WorldTime;
 extern float FPS_ANIMATION_FACTOR;
 
+namespace
+{
+    void ClearMousePressState()
+    {
+        MouseLButtonPush = false;
+        MouseRButtonPush = false;
+        MouseMButtonPush = false;
+        Core::Input::ClearLeftMouseButtonPressEdge();
+    }
+}
+
 static bool g_bShowDebugInfo =
 #ifdef _DEBUG
     true;
@@ -93,13 +104,10 @@ void SetShowFpsCounter(bool enabled)
     if (enabled) g_bShowDebugInfo = false;
 }
 
-// GLP-01: independent of the two flags above -- $glstats can be shown alongside $details or
-// $fpscounter, not just standalone. Also the single switch that gates FrameProfiler's counter/
-// GPU-timer increments themselves (FrameProfiler::g_CountersEnabled), so turning the overlay
-// off also stops paying for the instrumentation.
 void SetShowGLStats(bool enabled)
 {
     FrameProfiler::g_CountersEnabled = enabled;
+    mu::GetRenderer().SetStatsEnabled(enabled);
 }
 
 //=============================================================================
@@ -220,19 +228,74 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     wcscat(outMessage, lpszTemp);
 }
 
-/**
- * @brief Captures the current frame buffer and saves it as a JPEG screenshot.
- */
-static void CaptureScreenshot()
+static ScreenshotCaptureState g_screenshotCapture;
+
+static bool PrepareJpegPixels(mu::FramePixels& pixels)
 {
-    std::vector<unsigned char> Buffer(WindowWidth * WindowHeight * 3);
-    // DXP-12: RHI::ReadColorFramebuffer's contract is top-down (unlike raw glReadPixels'
-    // bottom-up) -- WriteJpeg's bottomUp=false tells turbojpeg to skip its own flip.
-    RHI::ReadColorFramebuffer(0, 0, static_cast<int>(WindowWidth), static_cast<int>(WindowHeight), Buffer.data());
-    WriteJpeg(GrabFileName, WindowWidth, WindowHeight, Buffer.data(), 100, false);
+    const std::size_t rowBytes = static_cast<std::size_t>(pixels.width) * 3;
+    const std::size_t expectedBytes = rowBytes * pixels.height;
+    if (rowBytes == 0 || pixels.rgb.size() != expectedBytes)
+    {
+        return false;
+    }
+
+    for (std::uint32_t row = 0; row < pixels.height / 2; ++row)
+    {
+        auto top = pixels.rgb.begin() + static_cast<std::size_t>(row) * rowBytes;
+        auto bottom = pixels.rgb.begin() + static_cast<std::size_t>(pixels.height - row - 1) * rowBytes;
+        std::swap_ranges(top, top + rowBytes, bottom);
+    }
+    return true;
+}
+
+static void ConsumeScreenshot()
+{
+    if (!g_screenshotCapture.HasPending())
+    {
+        return;
+    }
+
+    mu::FramePixels pixels;
+    if (!mu::GetRenderer().ConsumeFramePixels(pixels))
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    if (!PrepareJpegPixels(pixels))
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
+
+    std::wstring fileName = g_screenshotCapture.FileName();
+    const bool saved = WriteJpeg(fileName.data(), static_cast<int>(pixels.width), static_cast<int>(pixels.height),
+                                 pixels.rgb.data(), 100);
+    if (saved)
+    {
+        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
+    }
 
     GrabScreen++;
     GrabScreen %= 10000;
+    g_screenshotCapture.Clear();
+}
+
+static void RequestScreenshot()
+{
+    wchar_t screenshotText[256];
+    GenerateScreenshotFilename(GrabFileName, screenshotText);
+
+    if (!g_screenshotCapture.Begin(GrabFileName, screenshotText))
+    {
+        return;
+    }
+
+    if (!mu::GetRenderer().RequestFramePixels())
+    {
+        g_screenshotCapture.Clear();
+        return;
+    }
 }
 
 /**
@@ -240,6 +303,8 @@ static void CaptureScreenshot()
  */
 static void HandleScreenshotCapture()
 {
+    ConsumeScreenshot();
+
     if (PressKey(VK_SNAPSHOT))
     {
         GrabEnable = !GrabEnable;
@@ -250,23 +315,7 @@ static void HandleScreenshotCapture()
         return;
     }
 
-    const bool addTimeStampToCapture = !Core::Input::IsKeyDown(VK_SHIFT);
-    wchar_t screenshotText[256];
-
-    GenerateScreenshotFilename(GrabFileName, screenshotText);
-
-    if (addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
-    CaptureScreenshot();
-
-    if (!addTimeStampToCapture)
-    {
-        g_pSystemLogBox->AddText(screenshotText, SEASON3B::TYPE_SYSTEM_MESSAGE);
-    }
-
+    RequestScreenshot();
     GrabEnable = false;
 }
 
@@ -327,13 +376,13 @@ static void UpdateWaterAnimation()
 {
     constexpr int NumberOfWaterTextures = 32;
     const double timePerFrame = 1000 / REFERENCE_FPS;
-    auto time_since_last_render = g_frameTiming.currentTickCount - g_frameTiming.lastWaterChange;
+    auto time_since_last_render = g_frameTiming.GetCurrentTickCount() - g_frameTiming.GetLastWaterChange();
     while (time_since_last_render > timePerFrame)
     {
         WaterTextureNumber++;
         WaterTextureNumber %= NumberOfWaterTextures;
         time_since_last_render -= timePerFrame;
-        g_frameTiming.lastWaterChange = g_frameTiming.currentTickCount;
+        g_frameTiming.SetLastWaterChange(g_frameTiming.GetCurrentTickCount());
     }
 }
 
@@ -356,7 +405,7 @@ static void UpdateCoreSystems()
 static void SetClearAndFogColor(float r, float g, float b)
 {
     extern GLfloat FogColor[4];
-    SetClearColor(r, g, b, 1.f);
+    mu::GetRenderer().SetClearColor(r, g, b, 1.f);
     FogColor[0] = r;
     FogColor[1] = g;
     FogColor[2] = b;
@@ -381,7 +430,7 @@ static void SetWorldClearColor()
     if (world == WD_0LORENCIA)
         rgb8(10, 20, 14);                              // Dark green
     else if (world == WD_2DEVIAS)
-        SetClearAndFogColor(0.75f, 0.85f, 1.0f);       // Light snowy blue
+        rgb8(0, 0, 10);                                // Dark navy abyss
     else if (world == WD_10HEAVEN)
         rgb8(3, 25, 44);                               // Blue
     else if (world == WD_73NEW_LOGIN_SCENE || world == WD_74NEW_CHARACTER_SCENE)
@@ -401,7 +450,7 @@ static void SetWorldClearColor()
     else
         SetClearAndFogColor(0.f, 0.f, 0.f);            // Black (default)
 
-    ClearColorAndDepthBuffers();
+    mu::GetRenderer().ClearScreen();
 }
 
 /**
@@ -452,33 +501,28 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
     float glBottom = (float)WindowHeight - gy - gh;
     float glTop = (float)WindowHeight - gy;
 
-    DisableTexture2D();
-    EnableBlend();
-    SetBlendFuncAlpha();
+    DisableTexture();
+    EnableAlphaBlend3();
 
-    IR::Begin(GL_QUADS);
-    PassthroughShader::Instance().SetUseTexture(false);
-    IR::Color4f(0.0f, 0.0f, 0.0f, 0.5f);
-    IR::Vertex2f(gx, glBottom);
-    IR::Vertex2f(gx + gw, glBottom);
-    IR::Vertex2f(gx + gw, glTop);
-    IR::Vertex2f(gx, glTop);
-    IR::End();
+    const auto RenderRect = [](float x, float bottom, float width, float height, std::uint32_t color)
+    {
+        const mu::Vertex2D vertices[4] = {
+            {x, bottom, 0.f, 0.f, color},
+            {x + width, bottom, 0.f, 0.f, color},
+            {x + width, bottom + height, 0.f, 0.f, color},
+            {x, bottom + height, 0.f, 0.f, color},
+        };
+        mu::GetRenderer().RenderQuad2D(vertices, 0u);
+    };
+    RenderRect(gx, glBottom, gw, gh, mu::PackABGR(0.f, 0.f, 0.f, 0.5f));
 
     float target60 = THRESHOLD_60FPS_MS / GRAPH_MAX_MS;
     float lineY = glBottom + target60 * gh;
-    IR::Begin(GL_LINES);
-    PassthroughShader::Instance().SetUseTexture(false);
-    IR::Color4f(0.3f, 0.8f, 0.3f, 0.5f);
-    IR::Vertex2f(gx, lineY);
-    IR::Vertex2f(gx + gw, lineY);
-    IR::End();
+    RenderRect(gx, lineY, gw, 1.f, mu::PackABGR(0.3f, 0.8f, 0.3f, 0.5f));
 
     float barW = gw / FRAME_HISTORY_SIZE;
     int oldest = (s_frameCount < FRAME_HISTORY_SIZE) ? 0 : s_frameIndex;
 
-    IR::Begin(GL_QUADS);
-    PassthroughShader::Instance().SetUseTexture(false);
     for (int i = 0; i < s_frameCount; i++)
     {
         int idx = (oldest + i) % FRAME_HISTORY_SIZE;
@@ -486,22 +530,19 @@ static void RenderFrameGraph(float graphX, float graphY, float graphW, float gra
         float norm = std::min(ms / GRAPH_MAX_MS, 1.0f);
         float barH = norm * gh;
 
+        // Color: green < 16.67ms, yellow < 25ms, red >= 25ms
+        std::uint32_t color;
         if (ms < THRESHOLD_60FPS_MS)
-            IR::Color4f(0.2f, 0.9f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.2f, 0.9f, 0.2f, 0.8f);
         else if (ms < THRESHOLD_40FPS_MS)
-            IR::Color4f(0.9f, 0.9f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.9f, 0.9f, 0.2f, 0.8f);
         else
-            IR::Color4f(0.9f, 0.2f, 0.2f, 0.8f);
+            color = mu::PackABGR(0.9f, 0.2f, 0.2f, 0.8f);
 
         float bx = gx + i * barW;
-        IR::Vertex2f(bx, glBottom);
-        IR::Vertex2f(bx + barW, glBottom);
-        IR::Vertex2f(bx + barW, glBottom + barH);
-        IR::Vertex2f(bx, glBottom + barH);
+        RenderRect(bx, glBottom, barW, barH, color);
     }
-    IR::End();
-
-    EnableTexture2D();
+    mu::GetRenderer().SetTexture2D(true);
 }
 
 /**
@@ -589,12 +630,11 @@ static void RenderDebugInfo()
     // major render passes in MainScene. Reset just below so next frame starts fresh.
     using FP = FrameProfiler::Pass;
     mu_swprintf(szLine, L"Frame ms  T:%5.2f  O:%5.2f  C:%5.2f  I:%5.2f  E:%5.2f  Oth:%5.2f",
-             FrameProfiler::AccumulatorMs(FP::Terrain),
-             FrameProfiler::AccumulatorMs(FP::Objects),
-             FrameProfiler::AccumulatorMs(FP::Characters),
-             FrameProfiler::AccumulatorMs(FP::Items),
-             FrameProfiler::AccumulatorMs(FP::Effects),
-             FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost only now (Present split out below, DXP-23)
+                FrameProfiler::AccumulatorMs(FP::Terrain), FrameProfiler::AccumulatorMs(FP::Objects),
+                FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
+                FrameProfiler::AccumulatorMs(FP::Effects),
+                FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost
+                                                          // only now (Present split out below, DXP-23)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
@@ -642,129 +682,127 @@ static void RenderDebugInfo()
     g_pRenderText->SetFont(g_hFont);
     EndBitmap();
 
-    // FrameProfiler::ResetFrame() used to live here, which meant AccumulatorMs only ever reset
-    // when $details itself was on -- with $glstats added as an independent overlay reading the
-    // same accumulators, that would show a running session total instead of a per-frame value
-    // whenever $details was off. Reset now happens once per frame unconditionally, after every
-    // reader (this function and RenderGLStats() below) has had a chance to read -- see the
-    // FrameProfiler::ResetFrame()/ResetCounters()/AdvanceGpuTimers() call in MainScene().
+    // MainScene resets profiling after every overlay has read this frame.
 }
 
 /**
- * @brief Renders the $glstats overlay: per-pass GL call/draw/buffer counters and GPU pass
- * timers (GLP-01). Independent of $details -- reads the same FrameProfiler accumulators but
- * is gated by its own flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
+ * @brief Renders the $glstats overlay: per-pass CPU and SDL GPU submission statistics.
+ * Independent of $details -- reads the same FrameProfiler accumulators but is gated by its own
+ * flag (FrameProfiler::g_CountersEnabled, set via SetShowGLStats()).
  */
 static void RenderGLStats()
 {
     if (!FrameProfiler::g_CountersEnabled)
+    {
         return;
+    }
 
     BeginBitmap();
 
-    wchar_t szLine[128];
+    wchar_t szLine[160];
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0, 0, 0, 100);
     g_pRenderText->SetTextColor(255, 255, 255, 200);
 
-    // Right-hand column so this can be shown alongside $details' left-aligned overlay without
-    // the two overlapping.
     const float x = DEBUG_TEXT_X + 260.0f;
     int y = DEBUG_TEXT_Y_START;
 
-    using FP = FrameProfiler::Pass;
-    using FC = FrameProfiler::Counter;
-
-    mu_swprintf(szLine, L"GLStats  Pass       CPUms  GPUms     GL   Draw BufUpd(Orph)");
-    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
-
-    // One row per GL-call-bearing pass. The passes left out are the ones that genuinely issue no
-    // GL calls of their own -- MoveEffects, MoveParticles (update-phase simulation), Skinning and
-    // CharWait (CPU work) and Present (buffer swap); $details already covers their CPU cost.
-    //
-    // GLP-24: `Other` used to be left out too, on the same justification, and that was wrong -- it
-    // is the remainder bucket, not a CPU-only pass, and it was the frame's largest GL producer.
-    // The list had been copied from kGpuTimedPasses, where excluding Other IS correct (it has no
-    // timestamp pair). Rows must sum to the printed totals below; if they don't, a pass is missing
-    // from this list. Other's GPU-ms column reads 0 by design -- it is untimed, not free.
-    static constexpr FP kRows[] = {
-        FP::Terrain, FP::Objects, FP::Characters, FP::Items, FP::Effects,
-        FP::Sprites, FP::Particles, FP::Joints, FP::UI, FP::Overlay, FP::Other
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    static constexpr Pass kRows[] = {
+        Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
+        Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
     };
-    for (FP pass : kRows)
+
+    mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    for (Pass pass : kRows)
     {
-        const int gpuIdx = FrameProfiler::GpuTimedIndex(pass);
-        const float gpuMs = (gpuIdx >= 0) ? FrameProfiler::GpuMs(pass) : 0.0f;
-        // '!' marks a GPU reading that dropped entries at kMaxEntriesPerPass -- a truncated sum
-        // must never be mistaken for a complete one.
-        const char* truncFlag = (gpuIdx >= 0 && FrameProfiler::GpuMsTruncated(pass)) ? "!" : " ";
-        mu_swprintf(szLine, L"%-10hs %6.2f %6.2f%hs %5u %5u %5u(%u)",
-            FrameProfiler::kPassNames[(int)pass],
-            FrameProfiler::AccumulatorMs(pass),
-            gpuMs,
-            truncFlag,
-            FrameProfiler::CounterValue(pass, FC::GLCalls),
-            FrameProfiler::CounterValue(pass, FC::DrawCalls),
-            FrameProfiler::CounterValue(pass, FC::BufferUpdates),
-            FrameProfiler::CounterValue(pass, FC::BufferOrphans));
-        g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+        const double vertexKilobytes =
+            static_cast<double>(FrameProfiler::CounterValue(pass, Counter::VertexBytes)) / 1024.0;
+        mu_swprintf(szLine, L"%-10hs %6.2f %5u %5u %3u %6.1f", FrameProfiler::kPassNames[static_cast<int>(pass)],
+                    FrameProfiler::AccumulatorMs(pass), FrameProfiler::CounterValue(pass, Counter::DrawCalls),
+                    FrameProfiler::CounterValue(pass, Counter::MergedDraws),
+                    FrameProfiler::CounterValue(pass, Counter::Merged2DDraws), vertexKilobytes);
+        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+        y += DEBUG_TEXT_LINE_HEIGHT;
     }
 
-    // Frame totals -- includes binds/uniform writes, which aren't broken out per-row above
-    // (would make the table too wide to read at a glance).
-    mu_swprintf(szLine, L"Total  GL:%u  Draw:%u  BufUpd:%u(%u)  ProgBind:%u  TexBind:%u  UniWr:%u  UboSkip:%u",
-        FrameProfiler::CounterValue(FC::GLCalls),
-        FrameProfiler::CounterValue(FC::DrawCalls),
-        FrameProfiler::CounterValue(FC::BufferUpdates),
-        FrameProfiler::CounterValue(FC::BufferOrphans),
-        FrameProfiler::CounterValue(FC::ProgramBinds),
-        FrameProfiler::CounterValue(FC::TextureBinds),
-        FrameProfiler::CounterValue(FC::UniformWrites),
-        FrameProfiler::CounterValue(FC::UboSkips)); // GLP-10
-    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    mu_swprintf(szLine, L"SDL GPU: %hs", mu::GetRenderer().GetGPUDriverName());
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // ImmediateRenderer batching. Vtx/Draw is the headline: an IR batch is 6 vertices per quad
-    // after decomposition, so ~6 means every sprite is still its own draw call and GLP-19's
-    // batching is merging nothing. Anything well above that means runs are merging.
-    const uint32_t irDraws = FrameProfiler::CounterValue(FC::IRDraws);
-    const uint32_t irVertices = FrameProfiler::CounterValue(FC::IRVertices);
-    const float vtxPerDraw = (irDraws > 0) ? ((float)irVertices / (float)irDraws) : 0.0f;
-    mu_swprintf(szLine, L"IR     Draw:%u  Vtx:%u  Vtx/Draw:%.1f",
-        irDraws, irVertices, vtxPerDraw);
-    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    mu_swprintf(szLine, L"Last frame Req:%u Draw:%u Merge:%u 2D:%u Cmd:%u Vtx:%uKB", stats.requestedDrawCalls,
+                stats.submittedDrawCalls, stats.mergedDrawCalls, stats.merged2DDrawCalls, stats.commandCount,
+                stats.vertexBytes / 1024);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // What cut those batches short. The largest bucket is where a batching fix has to aim; a
-    // breakdown dominated by Tex means draws are ordered so the texture keeps changing, which
-    // is a scheduling problem rather than a batching one.
-    mu_swprintf(szLine, L"IRbreak Tex:%u Blend:%u Depth:%u Prog:%u Uni:%u Mtx:%u Draw:%u Other:%u",
-        FrameProfiler::CounterValue(FC::IRBreakTexture),
-        FrameProfiler::CounterValue(FC::IRBreakBlend),
-        FrameProfiler::CounterValue(FC::IRBreakDepth),
-        FrameProfiler::CounterValue(FC::IRBreakProgram),
-        FrameProfiler::CounterValue(FC::IRBreakUniform),
-        FrameProfiler::CounterValue(FC::IRBreakMatrix),
-        FrameProfiler::CounterValue(FC::IRBreakDraw),
-        FrameProfiler::CounterValue(FC::IRBreakOther));
-    g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+    mu_swprintf(szLine, L"CPU frame:%5.2f replay:%5.2f submit:%5.2f ms", stats.frameMilliseconds,
+                stats.replayMilliseconds, stats.submitMilliseconds);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // Per-pass batch quality for the three IR-heavy passes. GLP-24 split these out of Other
-    // precisely because they were the frame's largest draw-call producers while invisible;
-    // this is the same split for batching.
-    static constexpr FP kIRRows[] = { FP::Sprites, FP::Particles, FP::Joints, FP::UI };
-    for (FP pass : kIRRows)
+    mu_swprintf(szLine, L"Textures upload:%u create:%u release:%u", stats.textureUploads, stats.textureCreates,
+                stats.textureReleases);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Bind Pipe:%u Samp:%u VU:%u FU:%u", stats.pipelineBinds, stats.samplerBinds,
+                stats.vertexUniformPushes, stats.fragmentUniformPushes);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"2D Merge:%u Glyph upload:%u", stats.merged2DDrawCalls,
+                FrameProfiler::CounterValue(Counter::GlyphUploads));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(szLine, L"Skin GPU:%u CPU-ineligible:%u Failed:%u",
+                FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+                FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+                FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    const auto batchDraws = FrameProfiler::CounterValue(Counter::BatchDraws);
+    const auto batchVertices = FrameProfiler::CounterValue(Counter::BatchVertices);
+    const float verticesPerBatch =
+        batchDraws > 0 ? static_cast<float>(batchVertices) / static_cast<float>(batchDraws) : 0.0f;
+    mu_swprintf(szLine, L"Batch Draw:%u Vtx:%u Vtx/Draw:%.1f", batchDraws, batchVertices, verticesPerBatch);
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    mu_swprintf(
+        szLine, L"Break Tex:%u Blend:%u Depth:%u Prog:%u Uni:%u Mtx:%u Draw:%u Other:%u",
+        FrameProfiler::CounterValue(Counter::BatchBreakTexture), FrameProfiler::CounterValue(Counter::BatchBreakBlend),
+        FrameProfiler::CounterValue(Counter::BatchBreakDepth), FrameProfiler::CounterValue(Counter::BatchBreakProgram),
+        FrameProfiler::CounterValue(Counter::BatchBreakUniform), FrameProfiler::CounterValue(Counter::BatchBreakMatrix),
+        FrameProfiler::CounterValue(Counter::BatchBreakDraw), FrameProfiler::CounterValue(Counter::BatchBreakOther));
+    g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+    y += DEBUG_TEXT_LINE_HEIGHT;
+
+    static constexpr Pass kBatchRows[] = {Pass::Sprites, Pass::Particles, Pass::Joints, Pass::UI};
+    for (Pass pass : kBatchRows)
     {
-        const uint32_t passDraws = FrameProfiler::CounterValue(pass, FC::IRDraws);
-        if (passDraws == 0) continue;
+        const auto passDraws = FrameProfiler::CounterValue(pass, Counter::BatchDraws);
+        if (passDraws == 0)
+        {
+            continue;
+        }
 
-        const uint32_t passVertices = FrameProfiler::CounterValue(pass, FC::IRVertices);
-        mu_swprintf(szLine, L"  %-9hs Draw:%5u  Vtx/Draw:%5.1f  Tex:%u Blend:%u Draw:%u",
-            FrameProfiler::kPassNames[(int)pass],
-            passDraws,
-            (float)passVertices / (float)passDraws,
-            FrameProfiler::CounterValue(pass, FC::IRBreakTexture),
-            FrameProfiler::CounterValue(pass, FC::IRBreakBlend),
-            FrameProfiler::CounterValue(pass, FC::IRBreakDraw));
-        g_pRenderText->RenderText((int)x, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+        const auto passVertices = FrameProfiler::CounterValue(pass, Counter::BatchVertices);
+        mu_swprintf(szLine, L"  %-9hs Draw:%5u Vtx/Draw:%5.1f Tex:%u Blend:%u Draw:%u",
+                    FrameProfiler::kPassNames[static_cast<int>(pass)], passDraws,
+                    static_cast<float>(passVertices) / static_cast<float>(passDraws),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakTexture),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakBlend),
+                    FrameProfiler::CounterValue(pass, Counter::BatchBreakDraw));
+        g_pRenderText->RenderText(static_cast<int>(x), y, szLine);
+        y += DEBUG_TEXT_LINE_HEIGHT;
     }
 
     g_pRenderText->SetFont(g_hFont);
@@ -1157,6 +1195,41 @@ static void ManageMainSceneAudio()
     ManageBackgroundMusic();
 }
 
+static void LogFrameTiming()
+{
+    static bool enabled = std::getenv("MU_RENDER_TIMING") != nullptr;
+    static unsigned frameCounter = 0;
+    constexpr unsigned kLogInterval = 60;
+    if (!enabled || ++frameCounter % kLogInterval != 0)
+        return;
+
+    using Counter = FrameProfiler::Counter;
+    using Pass = FrameProfiler::Pass;
+    const mu::RendererStats stats = mu::GetRenderer().GetFrameStats();
+    const auto logger = mu::log::Get("render");
+    logger->info(
+        "[RENDER diag] requested={} submitted={} pipeline_binds={} sampler_binds={} vertex_uniform_pushes={} "
+        "fragment_uniform_pushes={} merged_2d={} glyph_uploads={} skin_gpu={} skin_cpu_ineligible={} skin_failed={}",
+        stats.requestedDrawCalls, stats.submittedDrawCalls, stats.pipelineBinds, stats.samplerBinds,
+        stats.vertexUniformPushes, stats.fragmentUniformPushes, stats.merged2DDrawCalls,
+        FrameProfiler::CounterValue(Counter::GlyphUploads),
+        FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+        FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+        FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+    logger->info(
+        "[FRAME timing] terrain={:.2f}ms objects={:.2f}ms characters={:.2f}ms items={:.2f}ms "
+        "effects={:.2f}ms other={:.2f}ms sprites={:.2f}ms particles={:.2f}ms joints={:.2f}ms "
+        "skin_gpu={} skin_cpu_ineligible={} skin_failed={}",
+        FrameProfiler::AccumulatorMs(Pass::Terrain), FrameProfiler::AccumulatorMs(Pass::Objects),
+        FrameProfiler::AccumulatorMs(Pass::Characters), FrameProfiler::AccumulatorMs(Pass::Items),
+        FrameProfiler::AccumulatorMs(Pass::Effects), FrameProfiler::AccumulatorMs(Pass::Other),
+        FrameProfiler::AccumulatorMs(Pass::Sprites), FrameProfiler::AccumulatorMs(Pass::Particles),
+        FrameProfiler::AccumulatorMs(Pass::Joints),
+        FrameProfiler::CounterValue(Counter::GpuSkinningSubmissions),
+        FrameProfiler::CounterValue(Counter::CpuSkinningIneligible),
+        FrameProfiler::CounterValue(Counter::GpuSkinningFailures));
+}
+
 /**
  * @brief Main scene rendering and update function.
  *
@@ -1194,25 +1267,17 @@ void MainScene(HDC hDC)
     try
     {
         Success = RenderCurrentScene(hDC);
+
+        LogFrameTiming();
         {
-            // GLP-24: tagged Overlay, not Other. These three render text as roughly one IR quad per
-            // glyph, so with $glstats on they were adding hundreds of draw calls to the very bucket
-            // the overlay exists to investigate -- an observer effect big enough to mislead. Keep
-            // the Reset/Advance calls inside this scope; see the comment below for the ordering.
             FRAME_PROFILE(Overlay);
             RenderDebugInfo();
             RenderGLStats();
             RenderFpsCounter();
             UI::Reconnect::RenderDialog();
-
-            // Once per frame, unconditionally -- see the comment at the end of RenderDebugInfo()
-            // for why this can't live inside either overlay function. AdvanceGpuTimers() must run
-            // after this frame's Terrain/Objects/Characters/Items/Effects/UI passes have all
-            // issued their GpuTimerBegin/End calls, which RenderCurrentScene() above guarantees.
-            FrameProfiler::ResetFrame();
-            FrameProfiler::ResetCounters();
-            FrameProfiler::AdvanceGpuTimers();
         }
+        FrameProfiler::ResetFrame();
+        FrameProfiler::ResetCounters();
 
         if (Success)
         {
@@ -1229,13 +1294,6 @@ void MainScene(HDC hDC)
                 EndBitmap();
             }
 #endif
-            // DXP-23: split into its own Present bucket (was folded into Other). A large reading
-            // here means the CPU is stalling waiting for the GPU command queue to drain (GPU-side
-            // cost, e.g. vsync block or genuine fill-rate/shader cost), not CPU-side render logic.
-            {
-                FRAME_PROFILE(Present);
-                PlatformSwapBuffers();
-            }
         }
 
         CheckServerConnection();
@@ -1243,22 +1301,9 @@ void MainScene(HDC hDC)
     }
     catch (const std::exception& e)
     {
-        // DXP-16: was OutputDebugStringA-only, invisible without a debugger attached. Since
-        // PlatformSwapBuffers() above only runs `if (Success)` (Success comes from
-        // RenderCurrentScene()'s return value), anything throwing in that path silently skips the
-        // frame's Present() with zero trace in MuError.log -- mirror it to g_ErrorReport too so a
-        // skipped-frame theory is checkable instead of invisible.
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in MainScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
-        g_ErrorReport.Write(L"[MainScene] std::exception: %hs\r\n", e.what());
-    }
-    catch (...)
-    {
-        // DXP-16: pairs with the std::exception catch above -- a non-std exception (SEH,
-        // _com_error, etc.) previously had no handler here at all, which for MSVC's default SEH
-        // translation could itself explain a skipped/aborted frame with zero log trace anywhere.
-        g_ErrorReport.Write(L"[MainScene] non-std exception (SEH/other)\r\n");
+        wchar_t errorMessage[256] = {};
+        mbstowcs(errorMessage, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in MainScene: %ls\r\n", errorMessage);
     }
 }
 
@@ -1273,10 +1318,6 @@ void RenderScene(HDC hDC)
     ReconnectManager::Instance().Update();
 
     g_frameTiming.MarkFrameRendered();
-
-    // Pairs with PlatformSwapBuffers()'s RHI::EndFrame() call -- reserved per-frame
-    // backend hook (currently a no-op on GL).
-    RHI::BeginFrame();
 
     try
     {
@@ -1298,14 +1339,17 @@ void RenderScene(HDC hDC)
 
         if (g_iNoMouseTime > 31)
         {
-            KillGLWindow();
+            Destroy = true;
         }
     }
     catch (const std::exception& e)
     {
-        // Log exception in RenderScene
-        char errorMsg[256];
-        sprintf_s(errorMsg, sizeof(errorMsg), "Exception in RenderScene: %s", e.what());
-        OutputDebugStringA(errorMsg);
+        wchar_t errorMessage[256] = {};
+        mbstowcs(errorMessage, e.what(), 255);
+        g_ErrorReport.Write(L"Exception in RenderScene: %ls\r\n", errorMessage);
     }
+
+    // SDL may deliver button-down and button-up in one event batch. Keep these
+    // one-shot flags alive until scene logic has consumed the rendered frame.
+    ClearMousePressState();
 }

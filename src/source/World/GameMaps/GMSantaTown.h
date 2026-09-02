@@ -13,14 +13,14 @@ public:
     static CGMSantaTownPtr Make();
     virtual ~CGMSantaTown();
 
-public:	// Object
+public: // Object
     virtual bool CreateObject(OBJECT* o);
     virtual bool MoveObject(OBJECT* o);
     virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
     virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
     virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
 
-public:	// Character
+public: // Character
     virtual CHARACTER* CreateMonster(int iType, int PosX, int PosY, int Key);
     virtual bool MoveMonsterVisual(OBJECT* o, BMD* b);
     virtual void MoveBlurEffect(CHARACTER* c, OBJECT* o, BMD* b);

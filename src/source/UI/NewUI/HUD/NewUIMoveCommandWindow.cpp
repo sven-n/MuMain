@@ -19,7 +19,14 @@ using namespace SEASON3B;
 
 namespace
 {
-    const int MapNameCount = 6;
+    constexpr int MapNameCount = 6;
+    constexpr int kDefaultRowHeight = 14;
+    constexpr int kStrifeCenterOffsetX = 20;
+    constexpr int kMapCenterOffsetX = 62;
+    constexpr int kRequiredLevelCenterOffsetX = 119;
+    constexpr int kZenCenterOffsetX = 159;
+    constexpr int kScrollBarOffsetX = 14;
+    constexpr int kScrollThumbOffsetX = 4;
 
     const std::wstring MapName[MapNameCount] =
     {
@@ -31,7 +38,7 @@ namespace
         L"LostTower",
     };
 
-    const bool IsLuckySeal(const std::wstring& name)
+    bool IsLuckySeal(const std::wstring& name)
     {
         if (name.size() != 0) {
             for (int i = 0; i < MapNameCount; ++i) {
@@ -59,19 +66,7 @@ CNewUIMoveCommandWindow::CNewUIMoveCommandWindow()
     memset(&m_ReqZenPos, 0, sizeof(POINT));
     m_iSelectedMapName = -1;
 
-    memset(&m_ScrollBarPos, 0, sizeof(POINT));
-    memset(&m_ScrollBtnStartPos, 0, sizeof(POINT));
-    memset(&m_ScrollBtnPos, 0, sizeof(POINT));
-    m_iScrollBarHeightPixel = 0;
-    m_iRenderStartTextIndex = 0;
     m_iSelectedTextIndex = -1;
-    m_iScrollBtnInterval = 0;
-    m_iScrollBarMiddleNum = 0;
-    m_iScrollBarMiddleRemainderPixel = 0;
-    m_iNumPage = 0;
-    m_iCurPage = 0;
-    m_iMousePosY = 0;
-    m_bScrollBtnActive = false;
     m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
 }
 
@@ -113,99 +108,42 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
     m_Pos.x = x;
     m_Pos.y = y;
 
-    m_StrifePos.x = m_Pos.x + 20;
-    switch (WindowWidth)
-    {
-    case REFERENCE_WIDTH:
-        m_MapNameUISize.x = 220; m_MapNamePos.x = m_Pos.x + 62; m_ReqLevelPos.x = m_Pos.x + 119; m_ReqZenPos.x = m_Pos.x + 159;
-        break;
-    case 800:
-        m_MapNameUISize.x = 200; m_MapNamePos.x = m_Pos.x + 69; m_ReqLevelPos.x = m_Pos.x + 129; m_ReqZenPos.x = m_Pos.x + 174;
-        break;
-    case 1024:
-        m_MapNameUISize.x = 180; m_MapNamePos.x = m_Pos.x + 64; m_ReqLevelPos.x = m_Pos.x + 119; m_ReqZenPos.x = m_Pos.x + 159;
-        break;
-    case 1280:
-        m_MapNameUISize.x = 160; m_MapNamePos.x = m_Pos.x + 59; m_ReqLevelPos.x = m_Pos.x + 104; m_ReqZenPos.x = m_Pos.x + 139;
-        break;
-    case 1366:
-        m_MapNameUISize.x = 150; m_MapNamePos.x = m_Pos.x + 56; m_ReqLevelPos.x = m_Pos.x + 101; m_ReqZenPos.x = m_Pos.x + 134;
-        break;
-    case 1440:
-        m_MapNameUISize.x = 140; m_MapNamePos.x = m_Pos.x + 53; m_ReqLevelPos.x = m_Pos.x + 97; m_ReqZenPos.x = m_Pos.x + 129;
-        break;
-    case 1600:
-        m_MapNameUISize.x = 120; m_MapNamePos.x = m_Pos.x + 46; m_ReqLevelPos.x = m_Pos.x + 86; m_ReqZenPos.x = m_Pos.x + 114;
-        break;
-    case 1680:
-        m_MapNameUISize.x = 115; m_MapNamePos.x = m_Pos.x + 44; m_ReqLevelPos.x = m_Pos.x + 83; m_ReqZenPos.x = m_Pos.x + 110;
-        break;
-    case 1920:
-        m_MapNameUISize.x = 110; m_MapNamePos.x = m_Pos.x + 38; m_ReqLevelPos.x = m_Pos.x + 70; m_ReqZenPos.x = m_Pos.x + 93;
-        break;
-    default:
-        // handle unsupported resolutions here
-        break;
-    }
+    RefreshDataAndLayout();
+}
 
-    m_MapNameUISize.x += 10;
-
+void SEASON3B::CNewUIMoveCommandWindow::RefreshDataAndLayout()
+{
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
-    m_iRealFontHeight = FontHeight * REFERENCE_WIDTH / WindowWidth + 2;
+    g_pRenderText->SetFont(g_hFont);
+    const int measuredFontHeight = g_pRenderText->MeasureText(L"Q", 1).cy;
+    m_iRealFontHeight = measuredFontHeight > 0 ? measuredFontHeight + 2 : kDefaultRowHeight;
+    m_layout = UI::MoveCommand::CalculateLayout(m_Pos.y, m_iRealFontHeight);
 
-    m_MapNameUISize.y = 60 + (m_iRealFontHeight * MOVECOMMAND_MAX_RENDER_TEXTLINE);
-
-    m_StartUISubjectName.x = m_Pos.x + m_MapNameUISize.x / 2;
+    m_MapNameUISize.x = m_layout.windowWidth;
+    m_MapNameUISize.y = m_layout.windowHeight;
+    m_StartUISubjectName.x = m_Pos.x + m_layout.windowWidth / 2;
     m_StartUISubjectName.y = m_Pos.y + 4;
-
     m_StartMapNamePos.x = m_Pos.x + 2;
-    m_StartMapNamePos.y = m_Pos.y + 38;
+    m_StartMapNamePos.y = m_layout.listTop;
+    m_StrifePos.x = m_Pos.x + kStrifeCenterOffsetX;
+    m_StrifePos.y = m_layout.listTop;
+    m_MapNamePos.x = m_Pos.x + kMapCenterOffsetX;
+    m_MapNamePos.y = m_layout.listTop;
+    m_ReqLevelPos.x = m_Pos.x + kRequiredLevelCenterOffsetX;
+    m_ReqLevelPos.y = m_layout.listTop;
+    m_ReqZenPos.x = m_Pos.x + kZenCenterOffsetX;
+    m_ReqZenPos.y = m_layout.listTop;
+    SetScrollOffset(m_scrollOffset);
+}
 
-    m_StrifePos.y = m_StartMapNamePos.y;
+void SEASON3B::CNewUIMoveCommandWindow::SetScrollOffset(int offset)
+{
+    m_scrollOffset = UI::MoveCommand::ClampScrollOffset(offset, m_listMoveInfoData.size(), m_layout.visibleRows);
+}
 
-    m_MapNamePos.y = m_StartMapNamePos.y;
-    m_ReqLevelPos.y = m_StartMapNamePos.y;
-    m_ReqZenPos.y = m_StartMapNamePos.y;
-    m_ScrollBarPos.x = m_Pos.x + m_MapNameUISize.x - 14;
-    m_ScrollBarPos.y = m_Pos.y + m_StartMapNamePos.y - MOVECOMMAND_SCROLLBAR_TOP_HEIGHT;
-
-    m_ScrollBtnStartPos.x = m_ScrollBarPos.x - (MOVECOMMAND_SCROLLBTN_WIDTH / 2 - MOVECOMMAND_SCROLLBAR_TOP_WIDTH / 2);
-    m_ScrollBtnStartPos.y = m_ScrollBarPos.y;
-    m_ScrollBtnPos.x = m_ScrollBtnStartPos.x;
-    m_ScrollBtnPos.y = m_ScrollBtnStartPos.y;
-
-    m_iScrollBarHeightPixel = MOVECOMMAND_MAX_RENDER_TEXTLINE * m_iRealFontHeight;
-
-    m_iScrollBarMiddleNum = (m_iScrollBarHeightPixel - (MOVECOMMAND_SCROLLBAR_TOP_HEIGHT * 2)) / MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT;
-    m_iScrollBarMiddleRemainderPixel = (m_iScrollBarHeightPixel - (MOVECOMMAND_SCROLLBAR_TOP_HEIGHT * 2)) % MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT;
-
-    m_iNumPage = 1 + (m_listMoveInfoData.size() / MOVECOMMAND_MAX_RENDER_TEXTLINE);
-
-    m_iCurPage = 1;
-
-    m_iTotalMoveScrBtnperStep = m_listMoveInfoData.size() - MOVECOMMAND_MAX_RENDER_TEXTLINE;
-    m_iRemainMoveScrBtnperStep = m_iTotalMoveScrBtnperStep;
-    m_iTotalMoveScrBtnPixel = m_iScrollBarHeightPixel - MOVECOMMAND_SCROLLBTN_HEIGHT;
-    m_iRemainMoveScrBtnPixel = m_iTotalMoveScrBtnPixel;
-    m_iMinMoveScrBtnPixelperStep = m_iTotalMoveScrBtnPixel / m_iTotalMoveScrBtnperStep;
-    m_iMaxMoveScrBtnPixelperStep = m_iMinMoveScrBtnPixelperStep + 1;
-    m_iTotalNumMaxMoveScrBtnperStep = m_iTotalMoveScrBtnPixel - (m_iTotalMoveScrBtnperStep * m_iMinMoveScrBtnPixelperStep);
-    m_iTotalNumMinMoveScrBtnperStep = m_iTotalMoveScrBtnperStep - m_iTotalNumMaxMoveScrBtnperStep;
-    m_icurMoveScrBtnPixelperStep = m_iMaxMoveScrBtnPixelperStep;
-    m_iAcumMoveMouseScrollPixel = 0;
-
-    if (m_iNumPage > 1)
-    {
-        m_bScrollBtnActive = true;
-    }
-
-    m_iRenderStartTextIndex = 0;
-    m_iRenderEndTextIndex = m_iRenderStartTextIndex + MOVECOMMAND_MAX_RENDER_TEXTLINE;
-
-    if (m_iRenderEndTextIndex > (int)m_listMoveInfoData.size())
-    {
-        m_iRenderEndTextIndex -= (m_iRenderEndTextIndex - m_listMoveInfoData.size());
-    }
+int SEASON3B::CNewUIMoveCommandWindow::VisibleEndIndex() const
+{
+    return std::min(m_scrollOffset + m_layout.visibleRows, static_cast<int>(m_listMoveInfoData.size()));
 }
 
 bool SEASON3B::CNewUIMoveCommandWindow::IsLuckySealBuff()
@@ -252,11 +190,10 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
-            auto li = m_listMoveInfoData.begin();
-            for (int i = 0; i < m_iRenderEndTextIndex; i++, li++) {
-                if (!wcscmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
-                    if ((*li)->_bCanMove == true) {
-                        return IsLuckySeal((*li)->_ReqInfo.szSubMapName);
+            for (const auto* moveInfo : m_listMoveInfoData) {
+                if (!wcscmp(lpszStr2, moveInfo->_ReqInfo.szMainMapName)) {
+                    if (moveInfo->_bCanMove == true) {
+                        return IsLuckySeal(moveInfo->_ReqInfo.szSubMapName);
                     }
                 }
             }
@@ -271,11 +208,10 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
             if (lpszStr2 == NULL) return false;
 
             SettingCanMoveMap();
-            auto li = m_listMoveInfoData.begin();
-            for (int i = 0; i < m_iRenderEndTextIndex; i++, li++) {
-                if (!wcsicmp(lpszStr2, (*li)->_ReqInfo.szMainMapName)) {
-                    if ((*li)->_bCanMove == true) {
-                        return IsLuckySeal((*li)->_ReqInfo.szSubMapName);
+            for (const auto* moveInfo : m_listMoveInfoData) {
+                if (!wcsicmp(lpszStr2, moveInfo->_ReqInfo.szMainMapName)) {
+                    if (moveInfo->_bCanMove == true) {
+                        return IsLuckySeal(moveInfo->_ReqInfo.szSubMapName);
                     }
                 }
             }
@@ -335,27 +271,15 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
     DWORD iZen;
     int iLevel, iReqLevel, iReqZen;
 
-    auto li = m_listMoveInfoData.begin();
-    for (int i = 0; i < m_iRenderEndTextIndex; i++, li++)
+    for (auto* moveInfo : m_listMoveInfoData)
     {
-        if (li == m_listMoveInfoData.end())
-        {
-            break;
-        }
-        if (i < m_iRenderStartTextIndex)
-        {
-            continue;
-        }
-
-        (*li)->_bCanMove = false;
-        (*li)->_bSelected = false;
-
-        //	if( i < m_iRenderEndTextIndex-1 )	continue;
+        moveInfo->_bCanMove = false;
+        moveInfo->_bSelected = false;
 
         iLevel = CharacterAttribute->Level;
         iZen = CharacterMachine->Gold;
-        iReqLevel = (*li)->_ReqInfo.iReqLevel;
-        iReqZen = (*li)->_ReqInfo.iReqZen;
+        iReqLevel = moveInfo->_ReqInfo.iReqLevel;
+        iReqZen = moveInfo->_ReqInfo.iReqZen;
 
         if ((gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK_LORD
             || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_RAGEFIGHTER)
@@ -371,7 +295,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
             ITEM* pEquipedHelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
             ITEM* pEquipedWing = &CharacterMachine->Equipment[EQUIPMENT_WING];
 
-            if (wcscmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
+            if (wcscmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Icarus) == 0)
             {
                 if (
                     (
@@ -388,97 +312,76 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
                     && (g_ChangeRingMgr->CheckBanMoveIcarusMap(pEquipedRightRing->Type, pEquipedLeftRing->Type) == false)
                     )
                 {
-                    (*li)->_bCanMove = true;
+                    moveInfo->_bCanMove = true;
                 }
                 else
                 {
-                    (*li)->_bCanMove = false;
+                    moveInfo->_bCanMove = false;
                 }
             }
-            else if (wcsncmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Atlans, wcslen(I18N::Game::Atlans)) == 0)
+            else if (wcsncmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Atlans, wcslen(I18N::Game::Atlans)) == 0)
             {
                 if (pEquipedHelper->Type == ITEM_HORN_OF_UNIRIA || pEquipedHelper->Type == ITEM_HORN_OF_DINORANT)
                 {
-                    (*li)->_bCanMove = false;
+                    moveInfo->_bCanMove = false;
                 }
                 else
                 {
-                    (*li)->_bCanMove = true;
+                    moveInfo->_bCanMove = true;
                 }
             }
-            else if ((g_ServerListManager->IsNonPvP() == true) && (wcscmp((*li)->_ReqInfo.szMainMapName, I18N::Game::Vulcanus) == 0))
+            else if ((g_ServerListManager->IsNonPvP() == true) && (wcscmp(moveInfo->_ReqInfo.szMainMapName, I18N::Game::Vulcanus) == 0))
             {
-                (*li)->_bCanMove = false;
+                moveInfo->_bCanMove = false;
             }
             else
             {
-                (*li)->_bCanMove = true;
+                moveInfo->_bCanMove = true;
             }
         }
 
-        if ((*li)->_bCanMove && (*li)->_bStrife && 0 == Hero->m_byGensInfluence)
-            (*li)->_bCanMove = false;
+        if (moveInfo->_bCanMove && moveInfo->_bStrife && 0 == Hero->m_byGensInfluence)
+            moveInfo->_bCanMove = false;
     }
 }
 
 bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 {
-    int iX, iY;
+    const int maximumOffset = UI::MoveCommand::MaximumScrollOffset(m_listMoveInfoData.size(), m_layout.visibleRows);
+    const int scrollBarX = m_Pos.x + m_layout.windowWidth - kScrollBarOffsetX;
+    const int thumbX = scrollBarX - kScrollThumbOffsetX;
+    const int thumbY = UI::MoveCommand::ThumbYForScrollOffset(m_scrollOffset, m_layout, m_listMoveInfoData.size());
+    const bool wasDragging = m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED;
 
-    if (CheckMouseIn(m_ScrollBtnPos.x, m_ScrollBtnPos.y, MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT))
+    if (!wasDragging
+        && maximumOffset > 0
+        && CheckMouseIn(thumbX, thumbY, MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT)
+        && IsPress(VK_LBUTTON))
     {
-        if (IsPress(VK_LBUTTON))
-        {
-            m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_CLICKED;
-            m_iMousePosY = MouseY;
-            m_iAcumMoveMouseScrollPixel = 0;
-        }
+        m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_CLICKED;
+        m_scrollDragGrabOffsetY = MouseY - thumbY;
     }
 
-    if (IsRelease(VK_LBUTTON))
+    if (wasDragging)
+    {
+        const auto dragState = UI::MoveCommand::UpdateDragState(
+            true, IsRelease(VK_LBUTTON), MouseY, m_scrollDragGrabOffsetY, m_scrollOffset, m_layout,
+            m_listMoveInfoData.size());
+        SetScrollOffset(dragState.scrollOffset);
+        m_iScrollBtnMouseEvent = dragState.dragging
+            ? MOVECOMMAND_MOUSEBTN_CLICKED
+            : MOVECOMMAND_MOUSEBTN_NORMAL;
+
+        if (dragState.releaseConsumed)
+        {
+            return true;
+        }
+    }
+    else if (IsRelease(VK_LBUTTON))
     {
         m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
-        m_iAcumMoveMouseScrollPixel = 0;
     }
 
-    //	if( CheckMouseIn( 0, m_ScrollBarPos.y, 640, m_iTotalMoveScrBtnPixel) )
-    //	{
-    if (m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED && m_icurMoveScrBtnPixelperStep > 0)
-    {
-        //MoveScrollBtn(MouseY-m_iMousePosY);
-        int iMoveValue = MouseY - m_iMousePosY;
-
-        if (iMoveValue < 0)
-        {
-            if (MouseY <= m_ScrollBtnPos.y + (MOVECOMMAND_SCROLLBTN_HEIGHT / 2))
-            {
-                if (-(iMoveValue) > (m_iTotalMoveScrBtnPixel - m_iRemainMoveScrBtnPixel))
-                {
-                    iMoveValue = -(m_iTotalMoveScrBtnPixel - m_iRemainMoveScrBtnPixel);
-                }
-                ScrollUp(-iMoveValue);
-            }
-        }
-        else if (iMoveValue > 0)
-        {
-            if (MouseY >= m_ScrollBtnPos.y + (MOVECOMMAND_SCROLLBTN_HEIGHT / 2))
-            {
-                if (iMoveValue > m_iRemainMoveScrBtnPixel)
-                {
-                    iMoveValue = m_iRemainMoveScrBtnPixel;
-                }
-                ScrollDown(iMoveValue);
-            }
-        }
-        m_iMousePosY = MouseY;
-        //UpdateScrolling();
-    }
-    //	}
-    // 	else
-    // 	{
-    // 		m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
-    // 		m_iAcumMoveMouseScrollPixel = 0;
-    // 	}
     if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y) && IsPress(VK_LBUTTON))
     {
         SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
@@ -488,35 +391,19 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y))
     {
-        if (m_icurMoveScrBtnPixelperStep > 0)
-        {
-            if (MouseWheel > 0)
-            {
-                ScrollUp(m_icurMoveScrBtnPixelperStep);
-            }
-            else if (MouseWheel < 0)
-            {
-                ScrollDown(m_icurMoveScrBtnPixelperStep);
-            }
-        }
+        if (MouseWheel != 0)
+            SetScrollOffset(m_scrollOffset - MouseWheel);
         MouseWheel = 0;
 
         auto li = m_listMoveInfoData.begin();
-        int iCurRenderTextIndex = 0;
-        for (int i = 0; i < m_iRenderEndTextIndex; i++, li++)
-        {
-            if (li == m_listMoveInfoData.end())
-            {
-                break;
-            }
+        for (int i = 0; i < m_scrollOffset && li != m_listMoveInfoData.end(); ++i)
+            ++li;
 
-            if (i < m_iRenderStartTextIndex)
-            {
-                continue;
-            }
-            iX = m_StartMapNamePos.x;
-            iY = m_StartMapNamePos.y + (m_iRealFontHeight * iCurRenderTextIndex);
-            if (CheckMouseIn(iX, iY, m_MapNameUISize.x - 22, m_iRealFontHeight))
+        int visibleIndex = 0;
+        while (li != m_listMoveInfoData.end() && m_scrollOffset + visibleIndex < VisibleEndIndex())
+        {
+            const int itemY = m_layout.listTop + m_iRealFontHeight * visibleIndex;
+            if (CheckMouseIn(m_StartMapNamePos.x, itemY, m_layout.windowWidth - 22, m_iRealFontHeight))
             {
                 if ((*li)->_bCanMove == true)
                 {
@@ -537,13 +424,15 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
                 }
             }
 
-            iCurRenderTextIndex++;
+            ++li;
+            ++visibleIndex;
+        }
 
-            if (SEASON3B::IsRelease(VK_LBUTTON) && CheckMouseIn(3, m_MapNameUISize.y - m_iRealFontHeight - 6, m_MapNameUISize.x - 5, m_iRealFontHeight))
-            {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_MOVEMAP);
-                return true;
-            }
+        if (SEASON3B::IsRelease(VK_LBUTTON)
+            && CheckMouseIn(m_Pos.x + m_layout.closeLeft, m_layout.closeTop, m_layout.closeWidth, m_iRealFontHeight))
+        {
+            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MOVEMAP);
+            return true;
         }
     }
     return false;
@@ -579,198 +468,50 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
 
 bool SEASON3B::CNewUIMoveCommandWindow::Update()
 {
-    if (!IsVisible())
-    {
-        return true;
-    }
-
-    UpdateScrolling();
-
     return true;
-}
-
-void SEASON3B::CNewUIMoveCommandWindow::ScrollUp(int iMoveValue)
-{
-    if (m_iRemainMoveScrBtnperStep < m_iTotalMoveScrBtnperStep)
-    {
-        int iMovePixel = 0;
-        m_iAcumMoveMouseScrollPixel -= iMoveValue;
-        if ((-m_iAcumMoveMouseScrollPixel) < m_icurMoveScrBtnPixelperStep)
-        {
-            return;
-        }
-        else
-        {
-            //m_iAcumMoveMouseScrollPixel = 0;
-            RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, false);
-
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-
-            m_ScrollBtnPos.y += iMovePixel;
-            m_iAcumMoveMouseScrollPixel -= iMovePixel;
-
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"iMoveValue : (%d)", -iMoveValue);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
-        }
-    }
-}
-
-void SEASON3B::CNewUIMoveCommandWindow::ScrollDown(int iMoveValue)
-{
-    if (m_iRemainMoveScrBtnperStep > 0)
-    {
-        int iMovePixel = 0;
-        m_iAcumMoveMouseScrollPixel += iMoveValue;
-        if (m_iAcumMoveMouseScrollPixel < m_icurMoveScrBtnPixelperStep)
-        {
-            return;
-        }
-        else
-        {
-            RecursiveCalcScroll(m_iAcumMoveMouseScrollPixel, &iMovePixel, true);
-
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-
-            m_iAcumMoveMouseScrollPixel -= iMovePixel;
-            m_ScrollBtnPos.y += iMovePixel;
-
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_ScrollBtnPos.y : (%d)", m_ScrollBtnPos.y);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"iMoveValue : (%d)", iMoveValue);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnPixel : (%d)", m_iRemainMoveScrBtnPixel);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_icurMoveScrBtnPixelperStep : (%d)", m_icurMoveScrBtnPixelperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iRemainMoveScrBtnperStep : (%d)", m_iRemainMoveScrBtnperStep);
-            g_ConsoleDebug->Write(MCD_NORMAL, L"m_iAcumMoveMouseScrollPixel : (%d)", m_iAcumMoveMouseScrollPixel);
-        }
-    }
-}
-
-void SEASON3B::CNewUIMoveCommandWindow::RecursiveCalcScroll(IN int piScrollValue, OUT int* piMovePixel, bool bSign /* = true */)
-{
-    if (bSign == true)
-    { // DownScroll
-        if (m_iRemainMoveScrBtnperStep > 0)
-        {
-            m_iRemainMoveScrBtnperStep--;
-            m_iRemainMoveScrBtnPixel -= m_icurMoveScrBtnPixelperStep;
-            piScrollValue -= m_icurMoveScrBtnPixelperStep;
-            (*piMovePixel) += m_icurMoveScrBtnPixelperStep;
-
-            if (m_iRemainMoveScrBtnperStep > m_iTotalNumMinMoveScrBtnperStep)
-            {
-                m_icurMoveScrBtnPixelperStep = m_iMaxMoveScrBtnPixelperStep;
-            }
-            else
-            {
-                m_icurMoveScrBtnPixelperStep = m_iMinMoveScrBtnPixelperStep;
-            }
-
-            if (piScrollValue >= m_icurMoveScrBtnPixelperStep)
-            {
-                RecursiveCalcScroll(piScrollValue, piMovePixel, bSign);
-            }
-        }
-        else
-        {
-            (*piMovePixel) = piScrollValue;
-        }
-    }
-    else
-    { // UpScroll
-        if (m_iRemainMoveScrBtnperStep < m_iTotalMoveScrBtnperStep)
-        {
-            m_iRemainMoveScrBtnperStep++;
-            m_iRemainMoveScrBtnPixel += m_icurMoveScrBtnPixelperStep;
-            piScrollValue += m_icurMoveScrBtnPixelperStep;
-            (*piMovePixel) -= m_icurMoveScrBtnPixelperStep;
-
-            if (m_iRemainMoveScrBtnperStep >= m_iTotalNumMinMoveScrBtnperStep)
-            {
-                m_icurMoveScrBtnPixelperStep = m_iMaxMoveScrBtnPixelperStep;
-            }
-            else
-            {
-                m_icurMoveScrBtnPixelperStep = m_iMinMoveScrBtnPixelperStep;
-            }
-
-            if ((-piScrollValue) >= m_icurMoveScrBtnPixelperStep)
-            {
-                RecursiveCalcScroll(piScrollValue, piMovePixel, bSign);
-            }
-        }
-        else
-        {
-            (*piMovePixel) = piScrollValue;
-        }
-    }
-
-    return;
-}
-
-void SEASON3B::CNewUIMoveCommandWindow::UpdateScrolling()
-{
-    m_iRenderStartTextIndex = m_iTotalMoveScrBtnperStep - m_iRemainMoveScrBtnperStep;
-
-    m_iRenderEndTextIndex = m_iRenderStartTextIndex + MOVECOMMAND_MAX_RENDER_TEXTLINE;
-
-    if (m_iRenderEndTextIndex > (int)m_listMoveInfoData.size())
-    {
-        m_iRenderEndTextIndex -= (m_iRenderEndTextIndex - m_listMoveInfoData.size());
-    }
 }
 
 void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 {
-    glColor4f(0.0f, 0.0f, 0.0f, 0.8f);
-
-    RenderColor((float)m_Pos.x, (float)m_Pos.y, (float)m_MapNameUISize.x, (float)m_MapNameUISize.y);
-
-    glColor4f(0.6f, 0.f, 0.f, 1.f);
-
-    RenderColor(m_StartMapNamePos.x, m_MapNameUISize.y - m_iRealFontHeight - 6, m_MapNameUISize.x - 5, m_iRealFontHeight);
-
-    glColor4f(1.f, 1.f, 1.f, 1.f);
     EnableAlphaTest();
 
-    RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, m_ScrollBarPos.x, m_ScrollBarPos.y, MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT);		// TOP
+    RenderColorQuadARGB((float)m_Pos.x, (float)m_Pos.y, (float)m_layout.windowWidth,
+        (float)m_layout.windowHeight, 0xCC000000u);
+    RenderColorQuadARGB(m_Pos.x + m_layout.closeLeft, m_layout.closeTop,
+        m_layout.closeWidth, m_iRealFontHeight, 0xFF990000u);
 
-    int icntText = 0;
-    for (int i = 0; i < m_iScrollBarMiddleNum; i++)
+    const int scrollBarX = m_Pos.x + m_layout.windowWidth - kScrollBarOffsetX;
+    RenderImage(IMAGE_MOVECOMMAND_SCROLL_TOP, scrollBarX, m_layout.scrollTrackTop,
+        MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT);
+
+    const int middleTop = m_layout.scrollTrackTop + MOVECOMMAND_SCROLLBAR_TOP_HEIGHT;
+    const int middleBottom = m_layout.scrollTrackTop + m_layout.scrollTrackHeight - MOVECOMMAND_SCROLLBAR_TOP_HEIGHT;
+    for (int middleY = middleTop; middleY < middleBottom; middleY += MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT)
     {
-        icntText = i;
-        RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x,
-            m_ScrollBarPos.y + MOVECOMMAND_SCROLLBAR_TOP_HEIGHT + (i * MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-            MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT);	// MIDDLE
+        const int middleHeight = std::min(static_cast<int>(MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT), middleBottom - middleY);
+        RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, scrollBarX, middleY,
+            MOVECOMMAND_SCROLLBAR_MIDDLE_WIDTH, middleHeight);
     }
-    if (m_iScrollBarMiddleRemainderPixel > 0)
-    {
-        RenderImage(IMAGE_MOVECOMMAND_SCROLL_MIDDLE, m_ScrollBarPos.x,
-            m_ScrollBarPos.y + MOVECOMMAND_SCROLLBAR_TOP_HEIGHT + (icntText * MOVECOMMAND_SCROLLBAR_MIDDLE_HEIGHT),
-            MOVECOMMAND_SCROLLBAR_TOP_WIDTH, m_iScrollBarMiddleRemainderPixel);	// MIDDLE 나머지
-    }
 
-    RenderImage(IMAGE_MOVECOMMAND_SCROLL_BOTTOM, m_ScrollBarPos.x, m_ScrollBarPos.y + m_iScrollBarHeightPixel - MOVECOMMAND_SCROLLBAR_TOP_HEIGHT,
-        MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT);		// BOTTOM
+    RenderImage(IMAGE_MOVECOMMAND_SCROLL_BOTTOM, scrollBarX,
+        m_layout.scrollTrackTop + m_layout.scrollTrackHeight - MOVECOMMAND_SCROLLBAR_TOP_HEIGHT,
+        MOVECOMMAND_SCROLLBAR_TOP_WIDTH, MOVECOMMAND_SCROLLBAR_TOP_HEIGHT);
 
-    if (m_bScrollBtnActive == true)
+    const int thumbX = scrollBarX - kScrollThumbOffsetX;
+    const int thumbY = UI::MoveCommand::ThumbYForScrollOffset(m_scrollOffset, m_layout, m_listMoveInfoData.size());
+    if (UI::MoveCommand::MaximumScrollOffset(m_listMoveInfoData.size(), m_layout.visibleRows) > 0)
     {
-        if (m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED)
-        {
-            glColor4f(0.7f, 0.7f, 0.7f, 1.0f);
-        }
-        RenderImage(IMAGE_MOVECOMMAND_SCROLLBAR_ON, m_ScrollBtnPos.x, m_ScrollBtnPos.y,
-            MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT);
+        const DWORD color = m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED
+            ? 0xFFB3B3B3u
+            : 0xFFFFFFFFu;
+        RenderImage(IMAGE_MOVECOMMAND_SCROLLBAR_ON, thumbX, thumbY,
+            MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT, 0.f, 0.f, color);
     }
     else
     {
-        RenderImage(IMAGE_MOVECOMMAND_SCROLLBAR_OFF, m_ScrollBtnPos.x, m_ScrollBtnPos.y,
+        RenderImage(IMAGE_MOVECOMMAND_SCROLLBAR_OFF, thumbX, thumbY,
             MOVECOMMAND_SCROLLBTN_WIDTH, MOVECOMMAND_SCROLLBTN_HEIGHT);
     }
-
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -786,37 +527,24 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
 
 bool SEASON3B::CNewUIMoveCommandWindow::Render()
 {
-    EnableAlphaTest();
-    glColor4f(1.f, 1.f, 1.f, 1.f);
-
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
 
     RenderFrame();
 
     auto li = m_listMoveInfoData.begin();
-    int iX, iY;
+    for (int i = 0; i < m_scrollOffset && li != m_listMoveInfoData.end(); ++i)
+        ++li;
 
     int iLevel = CharacterAttribute->Level;
     DWORD iZen = CharacterMachine->Gold;
     int iReqLevel;
     wchar_t szText[24];
 
-    int iCurRenderTextIndex = 0;
-    for (int i = 0; i < m_iRenderEndTextIndex; i++, li++)
+    int visibleIndex = 0;
+    while (li != m_listMoveInfoData.end() && m_scrollOffset + visibleIndex < VisibleEndIndex())
     {
-        if (li == m_listMoveInfoData.end())
-        {
-            break;
-        }
-
-        if (i < m_iRenderStartTextIndex)
-        {
-            continue;
-        }
-
-        iX = m_StartMapNamePos.x;
-        iY = m_StartMapNamePos.y + (m_iRealFontHeight * iCurRenderTextIndex);
+        const int itemY = m_layout.listTop + m_iRealFontHeight * visibleIndex;
 
         iReqLevel = (*li)->_ReqInfo.iReqLevel;
         if ((gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK || gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_DARK_LORD
@@ -831,18 +559,16 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             g_pRenderText->SetTextColor(255, 255, 255, 255);
 
             if ((*li)->_bStrife)
-                g_pRenderText->RenderText(m_StrifePos.x, iY, I18N::Game::Battle2987, 0, 0, RT3_WRITE_CENTER);
-            g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
+                g_pRenderText->RenderText(m_StrifePos.x, itemY, I18N::Game::Battle2987, 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(m_MapNamePos.x, itemY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
             _itow(iReqLevel, szText, 10);
-            g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(m_ReqLevelPos.x, itemY, szText, 0, 0, RT3_WRITE_CENTER);
             _itow((*li)->_ReqInfo.iReqZen, szText, 10);
-            g_pRenderText->RenderText(m_ReqZenPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(m_ReqZenPos.x, itemY, szText, 0, 0, RT3_WRITE_CENTER);
 
             if ((*li)->_bSelected == true)
             {
-                glColor4f(0.8f, 0.8f, 0.1f, 0.6f);
-                RenderColor(iX, iY - 1, m_MapNameUISize.x - 22, m_iRealFontHeight);
-                glColor4f(1.f, 1.f, 1.f, 1.f);
+                RenderColorQuadARGB(m_StartMapNamePos.x, itemY - 1, m_layout.windowWidth - 22, m_iRealFontHeight, 0x99CCCC1Au);
                 EnableAlphaTest();
             }
         }
@@ -851,9 +577,9 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             g_pRenderText->SetTextColor(164, 39, 17, 255);
 
             if ((*li)->_bStrife)
-                g_pRenderText->RenderText(m_StrifePos.x, iY, I18N::Game::Battle2987, 0, 0, RT3_WRITE_CENTER);
+                g_pRenderText->RenderText(m_StrifePos.x, itemY, I18N::Game::Battle2987, 0, 0, RT3_WRITE_CENTER);
 
-            g_pRenderText->RenderText(m_MapNamePos.x, iY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(m_MapNamePos.x, itemY, (*li)->_ReqInfo.szMainMapName, 0, 0, RT3_WRITE_CENTER);
 
             _itow(iReqLevel, szText, 10);
             if (iReqLevel > iLevel)
@@ -864,7 +590,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             {
                 g_pRenderText->SetTextColor(164, 39, 17, 255);
             }
-            g_pRenderText->RenderText(m_ReqLevelPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(m_ReqLevelPos.x, itemY, szText, 0, 0, RT3_WRITE_CENTER);
 
             _itow((*li)->_ReqInfo.iReqZen, szText, 10);
             if ((*li)->_ReqInfo.iReqZen > (int)iZen)
@@ -875,34 +601,29 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
             {
                 g_pRenderText->SetTextColor(164, 39, 17, 255);
             }
-            g_pRenderText->RenderText(m_ReqZenPos.x, iY, szText, 0, 0, RT3_WRITE_CENTER);
+            g_pRenderText->RenderText(m_ReqZenPos.x, itemY, szText, 0, 0, RT3_WRITE_CENTER);
         }
 
-        iCurRenderTextIndex++;
+        ++li;
+        ++visibleIndex;
     }
 
     g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_MapNameUISize.x / 2, m_MapNameUISize.y - m_iRealFontHeight - 5, I18N::Game::Close388, 0, 0, RT3_WRITE_CENTER);
+    g_pRenderText->RenderText(m_Pos.x + m_layout.windowWidth / 2, m_layout.closeTop + 1, I18N::Game::Close388, 0, 0, RT3_WRITE_CENTER);
     DisableAlphaBlend();
     return true;
 }
 
 void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
 {
-    SetPos(m_Pos.x, m_Pos.y);
+    RefreshDataAndLayout();
+    SetScrollOffset(0);
+    m_iSelectedMapName = -1;
+    m_iSelectedTextIndex = -1;
     SetStrifeMap();
     SettingCanMoveMap();
 
     m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
-    m_ScrollBtnPos.y = m_ScrollBtnStartPos.y;
-    m_iRenderStartTextIndex = 0;
-
-    m_iRenderEndTextIndex = m_iRenderStartTextIndex + MOVECOMMAND_MAX_RENDER_TEXTLINE;
-
-    if (m_iRenderEndTextIndex > (int)m_listMoveInfoData.size())
-    {
-        m_iRenderEndTextIndex -= (m_iRenderEndTextIndex - m_listMoveInfoData.size());
-    }
 }
 
 void SEASON3B::CNewUIMoveCommandWindow::ClosingProcess()

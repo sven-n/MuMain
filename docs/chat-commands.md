@@ -8,8 +8,8 @@ prints them as blue chat messages, which scroll away.
 The chat commands window lists them instead, fills in their values, and sends
 them for you.
 
-> Requires a server which answers the command list request (OpenMU 0.9.11 and
-> newer). Against an older server the window stays empty and says so.
+> Requires a server which answers the command list request. Against an older
+> server the window stays empty and says so.
 
 ---
 

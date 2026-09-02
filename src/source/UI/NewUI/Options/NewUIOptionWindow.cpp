@@ -8,6 +8,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
 #include <algorithm>
 #include <cstring>
@@ -18,37 +19,64 @@ extern int m_SoundOnOff;
 extern unsigned int WindowWidth, WindowHeight;
 extern BOOL g_bUseWindowMode;
 void ReinitializeFonts();
+std::vector<std::pair<int, int>> MuGetSupportedDisplayResolutions();
 void MuApplyWindowResolution(unsigned int width, unsigned int height, bool windowed);
 float ConvertX(float x);
 float ConvertY(float y);
 
 using namespace SEASON3B;
 
-static const struct { int width; int height; const wchar_t* label; } s_Resolutions[] = {
-    { 640, 480, L"640 x 480" },
-    { 800, 600, L"800 x 600" },
-    { 1024, 768, L"1024 x 768" },
-    { 1280, 720, L"1280 x 720" },
-    { 1280, 1024, L"1280 x 1024" },
-    { 1600, 900, L"1600 x 900" },
-    { 1600, 1200, L"1600 x 1200" },
-    { 1680, 1050, L"1680 x 1050" },
-    { 1920, 1080, L"1920 x 1080" },
-    { 2560, 1440, L"2560 x 1440" },
-};
-static const int s_NumResolutions = sizeof(s_Resolutions) / sizeof(s_Resolutions[0]);
-static const int s_DefaultResolutionIndex = 8;  // the 1920 x 1080 entry above
-
-// Index into s_Resolutions of an exact size match, or -1 when the size is not
-// a listed mode (e.g. borderless desktop on an unlisted display size).
-static int FindListedResolutionIndex(int width, int height)
+std::vector<UI::Options::DisplayResolution>
+UI::Options::NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions)
 {
-    for (int i = 0; i < s_NumResolutions; ++i)
+    resolutions.erase(std::remove_if(resolutions.begin(), resolutions.end(), [](const DisplayResolution& resolution)
+                                     { return resolution.first <= 0 || resolution.second <= 0; }),
+                      resolutions.end());
+    std::sort(resolutions.begin(), resolutions.end());
+    resolutions.erase(std::unique(resolutions.begin(), resolutions.end()), resolutions.end());
+    return resolutions;
+}
+
+int UI::Options::FindExactDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width,
+                                                 int height)
+{
+    const auto match = std::find(resolutions.begin(), resolutions.end(), DisplayResolution(width, height));
+    if (match == resolutions.end())
     {
-        if (s_Resolutions[i].width == width && s_Resolutions[i].height == height)
-            return i;
+        return -1;
     }
-    return -1;
+
+    return static_cast<int>(std::distance(resolutions.begin(), match));
+}
+
+int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width,
+                                                   int height)
+{
+    if (resolutions.empty())
+    {
+        return -1;
+    }
+
+    int bestIndex = 0;
+    const auto distanceSquared = [width, height](const DisplayResolution& resolution)
+    {
+        const long long deltaWidth = static_cast<long long>(resolution.first) - width;
+        const long long deltaHeight = static_cast<long long>(resolution.second) - height;
+        return deltaWidth * deltaWidth + deltaHeight * deltaHeight;
+    };
+    long long bestDistance = distanceSquared(resolutions.front());
+
+    for (size_t i = 1; i < resolutions.size(); ++i)
+    {
+        const long long distance = distanceSquared(resolutions[i]);
+        if (distance < bestDistance)
+        {
+            bestIndex = static_cast<int>(i);
+            bestDistance = distance;
+        }
+    }
+
+    return bestIndex;
 }
 
 // I18N locale codes (ASCII) paired with the language's display name in that
@@ -71,21 +99,6 @@ static const struct { const char* code; const wchar_t* label; } s_Languages[] = 
     { "zh-TW", L"\u7e41\u9ad4\u4e2d\u6587" },                                      // 繁體中文
 };
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
-
-// Label pointer array for the resolution combo box. Built once on first use
-// from s_Resolutions so the combo can consume a plain `const wchar_t* const*`.
-static const wchar_t* const* GetResolutionLabels()
-{
-    static const wchar_t* labels[s_NumResolutions] = {};
-    static bool initialized = false;
-    if (!initialized)
-    {
-        for (int i = 0; i < s_NumResolutions; i++)
-            labels[i] = s_Resolutions[i].label;
-        initialized = true;
-    }
-    return labels;
-}
 
 static const wchar_t* const* GetLanguageLabels()
 {
@@ -191,7 +204,7 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iMusicLevel = GameConfig::GetInstance().GetMusicVolume();
     m_iRenderLevel = 4;
     m_bRenderAllEffects = true;
-    m_iResolutionIndex = FindCurrentResolutionIndex();
+    m_iResolutionIndex = 0;
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_iFontIndex = FindCurrentFontIndex();
@@ -221,13 +234,37 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
 
 void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
 {
+    m_resolutions = UI::Options::NormalizeDisplayResolutions(MuGetSupportedDisplayResolutions());
+    if (m_resolutions.empty())
+    {
+        const int fallbackWidth = WindowWidth > 0 ? static_cast<int>(WindowWidth) : CfgDefaults::CfgDefaultWindowWidth;
+        const int fallbackHeight =
+            WindowHeight > 0 ? static_cast<int>(WindowHeight) : CfgDefaults::CfgDefaultWindowHeight;
+        m_resolutions.emplace_back(fallbackWidth, fallbackHeight);
+    }
+
+    m_iResolutionIndex = FindCurrentResolutionIndex();
+    m_resolutionLabels.clear();
+    m_resolutionLabels.reserve(m_resolutions.size());
+    for (const auto& [width, height] : m_resolutions)
+    {
+        m_resolutionLabels.push_back(std::to_wstring(width) + L" x " + std::to_wstring(height));
+    }
+
+    m_resolutionLabelPointers.clear();
+    m_resolutionLabelPointers.reserve(m_resolutionLabels.size());
+    for (const std::wstring& label : m_resolutionLabels)
+    {
+        m_resolutionLabelPointers.push_back(label.c_str());
+    }
+
     m_ResolutionCombo.Setup(
         m_Pos.x + RES_COMBO_X_LOCAL,
         m_Pos.y + RES_COMBO_Y_LOCAL,
         RES_COMBO_WIDTH,
         RES_COMBO_HEIGHT,
-        GetResolutionLabels(),
-        s_NumResolutions,
+        m_resolutionLabelPointers.data(),
+        static_cast<int>(m_resolutions.size()),
         m_iResolutionIndex,
         RES_COMBO_MAX_VISIBLE);
 }
@@ -501,7 +538,6 @@ bool SEASON3B::CNewUIOptionWindow::Update()
 bool SEASON3B::CNewUIOptionWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
     RenderFrame();
     RenderContents();
     RenderButtons();
@@ -523,9 +559,7 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
 {
     // Resync state that may have been changed externally while the window was hidden.
     m_bSwallowClickHold = false;   // drop any stale combo click-swallow latch
-    m_iResolutionIndex = FindCurrentResolutionIndex();
-    m_ResolutionCombo.SetSelectedIndex(m_iResolutionIndex);
-    m_ResolutionCombo.Close();
+    InitResolutionCombo();
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_LanguageCombo.SetSelectedIndex(m_iLanguageIndex);
     m_LanguageCombo.Close();
@@ -811,8 +845,8 @@ bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()
 {
-    const int listed = FindListedResolutionIndex((int)WindowWidth, (int)WindowHeight);
-    return listed >= 0 ? listed : s_DefaultResolutionIndex;
+    return UI::Options::FindClosestDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
+                                                          static_cast<int>(WindowHeight));
 }
 
 int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
@@ -869,8 +903,12 @@ void SEASON3B::CNewUIOptionWindow::ApplyFont()
 
 void SEASON3B::CNewUIOptionWindow::ApplyResolution()
 {
-    const unsigned int newWidth  = s_Resolutions[m_iResolutionIndex].width;
-    const unsigned int newHeight = s_Resolutions[m_iResolutionIndex].height;
+    if (m_iResolutionIndex < 0 || m_iResolutionIndex >= static_cast<int>(m_resolutions.size()))
+    {
+        return;
+    }
+
+    const auto [newWidth, newHeight] = m_resolutions[m_iResolutionIndex];
 
     // SDL owns the window on every platform, so resize through SDL. The old
     // Windows path drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
@@ -880,7 +918,8 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
     // resizes via SDL regardless of the resizable flag and updates
     // WindowWidth/Height synchronously through HandleWindowResize, so the
     // Save() below records the size the user actually got.
-    MuApplyWindowResolution(newWidth, newHeight, g_bUseWindowMode != FALSE);
+    MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight),
+                            g_bUseWindowMode != FALSE);
 
     // SDL may have coerced the request (closest fullscreen mode, borderless
     // desktop fallback): WindowWidth/Height now hold the size that actually
@@ -896,7 +935,8 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
 // records the real size.
 void SEASON3B::CNewUIOptionWindow::SyncResolutionComboToWindow()
 {
-    const int listed = FindListedResolutionIndex((int)WindowWidth, (int)WindowHeight);
+    const int listed = UI::Options::FindExactDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
+                                                                    static_cast<int>(WindowHeight));
     if (listed < 0)
         return;
     m_iResolutionIndex = listed;

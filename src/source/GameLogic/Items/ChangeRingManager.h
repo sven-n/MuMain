@@ -5,7 +5,11 @@ class CChangeRingManager
 public:
     CChangeRingManager();
     virtual ~CChangeRingManager();
-    static CChangeRingManager* GetInstance() { static CChangeRingManager s_Instance; return &s_Instance; }
+    static CChangeRingManager* GetInstance()
+    {
+        static CChangeRingManager s_Instance;
+        return &s_Instance;
+    }
     void LoadItemModel();
     void LoadItemTexture();
     bool CheckDarkLordHair(int iType);

@@ -111,6 +111,7 @@ public:
 
 public:
     void			Initialize();
+    void            ClearDisplayName();
     void			Destroy();
     void			InitPetInfo(int iPetType);
     PET_INFO* GetEquipedPetInfo(int iPetType);

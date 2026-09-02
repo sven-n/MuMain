@@ -85,7 +85,6 @@ bool CMsgBoxIGSSendGiftConfirm::Update()
 bool CMsgBoxIGSSendGiftConfirm::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderMsgBackColor(true);
 
@@ -136,8 +135,8 @@ CALLBACK_RESULT CMsgBoxIGSSendGiftConfirm::OKButtonDown(class CNewUIMessageBoxBa
         pOwnMsgBox->m_wItemCode,
         pOwnMsgBox->m_iCashType,
         0,
-        pOwnMsgBox->m_szID,
-        pOwnMsgBox->m_szMessage);
+        MU_C16(pOwnMsgBox->m_szID),
+        MU_C16(pOwnMsgBox->m_szMessage));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

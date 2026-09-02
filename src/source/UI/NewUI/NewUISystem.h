@@ -91,6 +91,7 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         CNewUI3DRenderMng* m_pNewUI3DRenderMng;
         CNewUIHotKey* m_pNewUIHotKey;
+        bool m_mouseInputCaptured = false;
 
     public:
         ~CNewUISystem();
@@ -228,6 +229,9 @@ namespace SEASON3B
         CNewUIMuHelper* m_pNewUIMuHelper;
         CNewUIMuHelperExt* m_pNewUIMuHelperExt;
         CNewUIMuHelperSkillList* m_pNewUIMuHelperSkillList;
+
+        bool CreateChatCommandWindow();
+
     public:
         CNewUIChatInputBox* GetUI_NewChatInputBox() const;
         CNewUIChatLogWindow* GetUI_NewChatLogWindow() const;

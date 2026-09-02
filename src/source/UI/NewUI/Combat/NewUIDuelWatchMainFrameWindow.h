@@ -29,9 +29,9 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         CNewUI3DRenderMng* m_pNewUI3DRenderMng;
 
-        CNewUIButton m_BtnExit;			// ´İ±â ¹öÆ°
+        CNewUIButton m_BtnExit;			// ë‹«ê¸° ë²„íŠ¼
 
-        BOOL m_bHasHPReceived;	// HP ÃÊ±â»óÅÂÀÎ°¡
+        BOOL m_bHasHPReceived;	// HP ì´ˆê¸°ìƒíƒœì¸ê°€
         float m_fPrevHPRate1;
         float m_fPrevHPRate2;
         float m_fPrevSDRate1;

@@ -133,7 +133,6 @@ namespace
 
 
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSingleTextInputBox;
 
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle);
 
@@ -258,10 +257,9 @@ void CCharMakeWin::Show(bool bShow)
         InputTextMax[0] = MAX_USERNAME_SIZE;
         if (g_iChatInputType == 1)
         {
-            g_pSingleTextInputBox->SetState(UISTATE_NORMAL);
-            g_pSingleTextInputBox->SetOption(UIOPTION_NULL);
-            g_pSingleTextInputBox->SetBackColor(0, 0, 0, 0);
-            g_pSingleTextInputBox->SetTextLimit(10);
+            g_pSingleTextInputBox->Configure({
+                .textLimit = 10,
+            });
             g_pSingleTextInputBox->GiveFocus();
         }
     }
@@ -269,7 +267,7 @@ void CCharMakeWin::Show(bool bShow)
     {
         if (g_iChatInputType == 1)
         {
-            g_pSingleTextInputBox->SetText(NULL);
+            g_pSingleTextInputBox->SetText(nullptr);
             g_pSingleTextInputBox->SetState(UISTATE_HIDE);
         }
     }
@@ -380,7 +378,7 @@ void CCharMakeWin::RequestCreateCharacter()
     {
         const auto classByte = static_cast<CharacterClassNumber>((CharacterView.Class << 2) + CharacterView.Skin);
         CurrentProtocolState = REQUEST_CREATE_CHARACTER;
-        SocketClient->ToGameServer()->SendCreateCharacter(InputText[0], classByte);
+        SocketClient->ToGameServer()->SendCreateCharacter(MU_C16(InputText[0]), classByte);
         //SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
         rUIMng.HideWin(this);
         rUIMng.PopUpMsgWin(MESSAGE_WAIT);
@@ -452,7 +450,10 @@ void CCharMakeWin::RenderControls()
     g_pRenderText->SetFont(g_hFont);
 
     if (g_iChatInputType == 1)
+    {
+        g_pSingleTextInputBox->DoAction();
         g_pSingleTextInputBox->Render();
+    }
     else if (g_iChatInputType == 0)
         ::RenderInputText(
             int((m_asprBack[CMW_SPR_INPUT].GetXPos() + 78) / g_fScreenRate_x),
@@ -500,7 +501,7 @@ void CCharMakeWin::RenderCreateCharacter()
 
     RenderCharacter(&CharacterView, o);
 
-    glViewport2(0, 0, WindowWidth, WindowHeight);
+    SetRenderViewport(0, 0, WindowWidth, WindowHeight);
 
     EndOpengl();
 }

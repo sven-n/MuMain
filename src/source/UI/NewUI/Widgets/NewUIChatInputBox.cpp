@@ -539,7 +539,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
 
                     if (m_pWhsprIDInputBox->GetState() == UISTATE_NORMAL && wcslen(szChatText) && wcslen(szWhisperID) > 0)
                     {
-                        SocketClient->ToGameServer()->SendWhisperMessage(szWhisperID, wstrText.c_str());
+                        SocketClient->ToGameServer()->SendWhisperMessage(MU_C16(szWhisperID), MU_C16(wstrText.c_str()));
                         g_pChatListBox->AddText(Hero->ID, szChatText, SEASON3B::TYPE_WHISPER_MESSAGE);
                         AddWhsprIDHistory(szWhisperID);
                     }
@@ -562,7 +562,7 @@ bool SEASON3B::CNewUIChatInputBox::UpdateKeyEvent()
                             UI::Chat::CheckChatText(szChatText);
                         }
 
-                        SocketClient->ToGameServer()->SendPublicChatMessage(Hero->ID, wstrText.c_str());
+                        SocketClient->ToGameServer()->SendPublicChatMessage(MU_C16(Hero->ID), MU_C16(wstrText.c_str()));
                         AddChatHistory(wstrText);
                     }
                 }
@@ -679,7 +679,6 @@ bool SEASON3B::CNewUIChatInputBox::Update()
 bool SEASON3B::CNewUIChatInputBox::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderButtons();
@@ -695,9 +694,8 @@ bool SEASON3B::CNewUIChatInputBox::Render()
         g_pRenderText->RenderText(m_pWhsprIDInputBox->GetPosition_x(), m_pWhsprIDInputBox->GetPosition_y(), szWhisperID);
 
         EnableAlphaTest();
-        glColor4f(0.5f, 0.2f, 0.2f, 0.2f);
-        RenderColor(m_WndPos.x + 2, m_WndPos.y + 28, 61, 17);
-        EndRenderColor();
+        constexpr unsigned int BlockedWhisperColor = 0x33803333u;
+        RenderColorQuadARGB(m_WndPos.x + 2, m_WndPos.y + 28, 61, 17, BlockedWhisperColor);
     }
 
     DisableAlphaBlend();
@@ -758,13 +756,8 @@ void SEASON3B::CNewUIChatInputBox::RenderTooltip()
 
     mu_swprintf(strTooltip, L"%ls", I18N::Game::Lookup(iTextIndex[m_iTooltipType]));
 
-    SIZE fontsize;
     g_pRenderText->SetFont(g_hFont);
-    GetTextExtentPoint32(g_pRenderText->GetFontDC(), strTooltip, wcslen(strTooltip), &fontsize);
-
-    const auto multiplier = ((float)WindowHeight / REFERENCE_HEIGHT);
-    fontsize.cx = fontsize.cx / multiplier;
-    fontsize.cy = fontsize.cy / multiplier;
+    const SIZE fontsize = g_pRenderText->MeasureText(strTooltip, wcslen(strTooltip));
 
     int x = m_WndPos.x
         + (m_iTooltipType * BUTTON_WIDTH)

@@ -8,7 +8,7 @@
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -32,6 +32,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "LoginScene.h"
 #include "Camera/CameraProjection.h"
+#include "UI/Scaling/UITransform.h"
 #ifdef _EDITOR
 #include "Camera/CameraMode.h"
 #include "Camera/FrustumRenderer.h"
@@ -44,7 +45,6 @@ extern CHARACTER CharacterView;
 extern int SelectedCharacter;
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;
-extern CUITextInputBox* g_pSinglePasswdInputBox;
 extern BOOL g_bIMEBlock;
 extern DWORD g_dwBKConv;
 extern DWORD g_dwBKSent;
@@ -153,6 +153,8 @@ void NewMoveCharacterScene()
         return;
     }
 
+    MouseOnWindow = false;
+
     if (!InitCharacterScene)
     {
         InitCharacterScene = true;
@@ -244,19 +246,20 @@ static void SetupCharacterSceneViewport(int& outWidth, int& outHeight)
 
     MoveMainCamera();
 
-    glColor3f(1.f, 1.f, 1.f);
-    outHeight = REFERENCE_HEIGHT;
-    outWidth = GetScreenWidth();
+    const auto viewport = UI::Scaling::FullReferenceViewport();
+    outWidth = viewport.width;
+    outHeight = viewport.height;
 
-    SetClearColor(0.f, 0.f, 0.f, 1.f);
-    BeginOpengl(0, 25, REFERENCE_WIDTH, 430);
+    mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
+    BeginOpengl(viewport.x, viewport.y, outWidth, outHeight);
 
     // Build global frustum arrays for TestFrustrum/TestFrustrum2D
     // Must be called after BeginOpengl (needs GL matrices) in every scene that renders terrain/objects
     {
         vec3_t cameraPos;
         VectorCopy(g_Camera.Position, cameraPos);
-        CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH, 430.f / (float)REFERENCE_HEIGHT, cameraPos);
+        CreateFrustrum((float)outWidth / (float)REFERENCE_WIDTH,
+                       (float)outHeight / (float)REFERENCE_HEIGHT, cameraPos);
     }
 
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);

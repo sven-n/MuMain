@@ -71,15 +71,26 @@ public:
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
-    const std::vector<std::wstring>& GetChatCommandFavourites() const { return m_chatCommandFavourites; }
+    const std::vector<std::wstring>& GetChatCommandFavourites() const
+    {
+        return m_chatCommandFavourites;
+    }
     void SetChatCommandFavourites(const std::vector<std::wstring>& favourites);
 
-    const std::vector<std::wstring>& GetChatCommandTemplates() const { return m_chatCommandTemplates; }
+    const std::vector<std::wstring>& GetChatCommandTemplates() const
+    {
+        return m_chatCommandTemplates;
+    }
     void SetChatCommandTemplates(const std::vector<std::wstring>& templates);
 
     // Camera
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
+
+    // Render
+    bool GetSortParticleDraws() const { return m_sortParticleDraws; }
+    bool GetVSyncEnabled() const { return m_vsyncEnabled; }
+    void SetVSyncEnabled(bool enabled);
 
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
@@ -118,6 +129,8 @@ private:
     std::wstring m_fontSelection;
 
     int m_zoom;
+    bool m_sortParticleDraws;
+    bool m_vsyncEnabled;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

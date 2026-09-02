@@ -4,6 +4,8 @@
 #include "stdafx.h"
 #include "ZzzOpenglUtil.h"
 #include "ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -17,13 +19,6 @@
 #include "Camera/CameraManager.h"
 #include "Camera/CameraMode.h"
 #include "Camera/CameraConfig.h"
-#include "Render/Core/RenderConfig.h"
-#include "Render/Core/GlobalUBO.h"
-#include "Render/Core/SceneUBO.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Core/BindState.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Core/Utilities/Log/ErrorReport.h"
 
 #ifdef _EDITOR
 extern "C" bool DevEditor_IsCameraOverrideEnabled(const char* cameraName);
@@ -43,7 +38,7 @@ GLfloat FogDensity = 0.0004f;
 GLfloat FogColor[4] = { 30 / 256.f,20 / 256.f,10 / 256.f, };
 
 bool _isVSyncAvailable = false;
-
+bool _isVSyncEnabled = false;
 
 unsigned int WindowWidth = 1024;
 unsigned int WindowHeight = 768;
@@ -160,74 +155,72 @@ bool DepthMaskEnable;
 bool AlphaTestEnable;
 int  AlphaBlendType;
 
-// Sets the fixed-function alpha test threshold and mirrors it to g_AlphaFuncRef (DXP-01) so
-// shader-side `discard` can replicate glAlphaFunc once FFP alpha test is retired. If alpha
-// test is currently enabled, also updates the live g_AlphaRef immediately — callers like
-// GM_Kanturu_1st.cpp/GMDoppelGanger4.cpp change the threshold mid-sequence without toggling
-// AlphaTestEnable, so the shader ref must track the threshold even while enabled continuously.
-void SetAlphaFuncRef(float ref)
-{
-    if (!g_CoreProfile) glAlphaFunc(GL_GREATER, ref);
-    g_AlphaFuncRef = ref;
-    if (AlphaTestEnable)
-        g_AlphaRef = ref;
-}
-
-GLRenderStateSnapshot GetRenderStateSnapshot()
-{
-    // GLP-19 -- see ZzzOpenglUtil.h. Plain reads of already-cached values; no GL calls.
-    return GLRenderStateSnapshot{
-        AlphaBlendType, AlphaTestEnable, g_AlphaRef,
-        DepthTestEnable, DepthMaskEnable, CullFaceEnable,
-        TextureEnable, FogEnable, CachTexture
-    };
-}
-
 void BindTexture(int tex)
 {
-    if (CachTexture != tex)
-    {
-        // GLP-19: a texture change invalidates any batch IR has accumulated but not yet drawn --
-        // those quads were submitted against the OLD texture. Only fires inside this dirty-check,
-        // so the common case (consecutive same-texture particles) costs nothing and still merges.
-        IR::Flush(IR::FlushCause::Texture);
-        CachTexture = tex;
-        const uint32_t textureID = (tex >= 0) ? static_cast<uint32_t>(Bitmaps[tex].TextureNumber)
-                                               : static_cast<uint32_t>(-1 * tex);
-        BindTexture2D(0, textureID);
-    }
+    // Always forward to the renderer. In the deferred SDL renderer this only
+    // updates logical state, and caching can desync when callers bind directly.
+    mu::GetRenderer().BindTexture(tex);
 }
 
 bool TextureStream = false;
 
 extern  int test;
+void BindTextureStream(int tex)
+{
+    mu::GetRenderer().BindTexture(tex);
+    TextureStream = true;
+}
 
 void EndTextureStream()
 {
-    if (TextureStream)
-        glEnd();
     TextureStream = false;
 }
 
-// DXP-10 dumb single-call state wrappers -- see ZzzOpenglUtil.h for why these are separate
-// from the bundled Enable/Disable* family below (no caching, no side effects, no CoreProfile
-// gating beyond what the original call site had).
-void EnableTexture2D()  { if (!g_CoreProfile) glEnable(GL_TEXTURE_2D); }
-void DisableTexture2D() { if (!g_CoreProfile) glDisable(GL_TEXTURE_2D); }
-void EnableAlphaTestRaw()  { if (!g_CoreProfile) glEnable(GL_ALPHA_TEST); }
-void DisableAlphaTestRaw() { if (!g_CoreProfile) glDisable(GL_ALPHA_TEST); }
-// GL_FOG is FFP-only and inert under Core Profile like every other call above -- gating it here
-// mirrors the guard already used at every other glEnable/glDisable(GL_FOG) call site in this
-// file; the one caller that used to call this unguarded (GMBattleCastle.cpp) had no observable
-// effect from that call under Core Profile anyway (no FFP fog machinery exists to enable).
-void EnableFog()  { if (!g_CoreProfile) glEnable(GL_FOG); }
-void DisableFog() { if (!g_CoreProfile) glDisable(GL_FOG); }
-void EnableBlend()  { glEnable(GL_BLEND); }
-void DisableBlend() { glDisable(GL_BLEND); }
-void SetBlendFuncAlpha() { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); }
-void SetDepthFuncLEqual() { glDepthFunc(GL_LEQUAL); }
+void SetAlphaFuncRef(float ref)
+{
+    glAlphaFunc(GL_GREATER, ref);
+}
 
-namespace { float g_ClearColor[4] = { 0.f, 0.f, 0.f, 1.f }; }
+void EnableTexture2D()
+{
+    glEnable(GL_TEXTURE_2D);
+}
+void DisableTexture2D()
+{
+    glDisable(GL_TEXTURE_2D);
+}
+void EnableAlphaTestRaw()
+{
+    glEnable(GL_ALPHA_TEST);
+}
+void DisableAlphaTestRaw()
+{
+    glDisable(GL_ALPHA_TEST);
+}
+void EnableFog()
+{
+    glEnable(GL_FOG);
+}
+void DisableFog()
+{
+    glDisable(GL_FOG);
+}
+void EnableBlend()
+{
+    glEnable(GL_BLEND);
+}
+void DisableBlend()
+{
+    glDisable(GL_BLEND);
+}
+void SetBlendFuncAlpha()
+{
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+void SetDepthFuncLEqual()
+{
+    glDepthFunc(GL_LEQUAL);
+}
 void ClearColorBuffer()
 {
     glClear(GL_COLOR_BUFFER_BIT);
@@ -242,18 +235,19 @@ void ClearColorAndDepthBuffers()
 }
 void SetClearColor(float r, float g, float b, float a)
 {
-    g_ClearColor[0] = r; g_ClearColor[1] = g; g_ClearColor[2] = b; g_ClearColor[3] = a;
     glClearColor(r, g, b, a);
 }
-void FlushGL() { glFlush(); }
+void FlushGL()
+{
+    glFlush();
+}
 
 void EnableDepthTest()
 {
     if (!DepthTestEnable)
     {
-        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- depth state is batch state; flush before it changes
         DepthTestEnable = true;
-        glEnable(GL_DEPTH_TEST);
+        mu::GetRenderer().SetDepthTest(true);
     }
 }
 
@@ -261,9 +255,8 @@ void DisableDepthTest()
 {
     if (DepthTestEnable)
     {
-        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         DepthTestEnable = false;
-        glDisable(GL_DEPTH_TEST);
+        mu::GetRenderer().SetDepthTest(false);
     }
 }
 
@@ -271,9 +264,8 @@ void EnableDepthMask()
 {
     if (!DepthMaskEnable)
     {
-        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         DepthMaskEnable = true;
-        glDepthMask(true);
+        mu::GetRenderer().SetDepthMask(true);
     }
 }
 
@@ -281,9 +273,8 @@ void DisableDepthMask()
 {
     if (DepthMaskEnable)
     {
-        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         DepthMaskEnable = false;
-        glDepthMask(false);
+        mu::GetRenderer().SetDepthMask(false);
     }
 }
 
@@ -291,9 +282,8 @@ void EnableCullFace()
 {
     if (!CullFaceEnable)
     {
-        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         CullFaceEnable = true;
-        glEnable(GL_CULL_FACE);
+        mu::GetRenderer().SetCullFace(true);
     }
 }
 
@@ -301,23 +291,20 @@ void DisableCullFace()
 {
     if (CullFaceEnable)
     {
-        IR::Flush(IR::FlushCause::Depth); // GLP-19 -- see EnableDepthTest
         CullFaceEnable = false;
-        glDisable(GL_CULL_FACE);
+        mu::GetRenderer().SetCullFace(false);
     }
 }
 
 void DisableTexture(bool AlphaTest)
 {
     EnableDepthMask();
-
     if (AlphaTest == true)
     {
         if (!AlphaTestEnable)
         {
             AlphaTestEnable = true;
-            g_AlphaRef = g_AlphaFuncRef;
-            if (!g_CoreProfile) glEnable(GL_ALPHA_TEST);
+            mu::GetRenderer().SetAlphaTest(true);
         }
     }
     else
@@ -325,14 +312,13 @@ void DisableTexture(bool AlphaTest)
         if (AlphaTestEnable)
         {
             AlphaTestEnable = false;
-            g_AlphaRef = -1.0f;
-            if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+            mu::GetRenderer().SetAlphaTest(false);
         }
     }
     if (TextureEnable)
     {
         TextureEnable = false;
-        if (!g_CoreProfile) glDisable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(false);
     }
 }
 
@@ -340,37 +326,31 @@ void DisableAlphaBlend()
 {
     if (AlphaBlendType != 0)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- blend func is batch state; flush BEFORE it changes
         AlphaBlendType = 0;
-        glDisable(GL_BLEND);
+        mu::GetRenderer().DisableBlend();
     }
     EnableCullFace();
     EnableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaTest(bool DepthMask)
 {
     if (AlphaBlendType != 2)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 2;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     }
     DisableCullFace();
     if (DepthMask)
@@ -378,190 +358,156 @@ void EnableAlphaTest(bool DepthMask)
     if (!AlphaTestEnable)
     {
         AlphaTestEnable = true;
-        g_AlphaRef = g_AlphaFuncRef;
-        if (!g_CoreProfile) glEnable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(true);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend()
 {
     if (AlphaBlendType != 3)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 3;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Glow);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glDisable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(false);
 }
 
 void EnableAlphaBlendMinus()
 {
     if (AlphaBlendType != 4)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- subtractive blend (ZERO, ONE_MINUS_SRC_COLOR); a batch leaking
-                      // into this is exactly the black-polygon artifact
         AlphaBlendType = 4;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_ONE_MINUS_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Subtract);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend2()
 {
     if (AlphaBlendType != 5)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 5;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE_MINUS_SRC_COLOR, GL_ONE);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Luminance);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend3()
 {
     if (AlphaBlendType != 6)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 6;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Alpha);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableAlphaBlend4()
 {
     if (AlphaBlendType != 7)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 7;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::Mixed);
     }
     DisableCullFace();
     DisableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
 void EnableLightMap()
 {
     if (AlphaBlendType != 1)
     {
-        IR::Flush(IR::FlushCause::Blend); // GLP-19 -- see AlphaBlendType 0
         AlphaBlendType = 1;
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ZERO, GL_SRC_COLOR);
+        mu::GetRenderer().SetBlendMode(mu::BlendMode::LightMap);
     }
     EnableCullFace();
     EnableDepthMask();
     if (AlphaTestEnable)
     {
         AlphaTestEnable = false;
-        g_AlphaRef = -1.0f;
-        if (!g_CoreProfile) glDisable(GL_ALPHA_TEST);
+        mu::GetRenderer().SetAlphaTest(false);
     }
     if (!TextureEnable)
     {
         TextureEnable = true;
-        if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
+        mu::GetRenderer().SetTexture2D(true);
     }
     if (FogEnable)
-    {
-        if (!g_CoreProfile) glEnable(GL_FOG);
-    }
+        mu::GetRenderer().SetFogEnabled(true);
 }
 
-void glViewport2(int x, int y, int Width, int Height)
+void SetRenderViewport(int x, int y, int Width, int Height)
 {
     OpenglWindowX = x;
     OpenglWindowY = y;
@@ -609,13 +555,7 @@ void RestoreCameraPerspective()
 // RestoreCameraPerspective to avoid leaking FOV=1 values to ScreenToWorldRay.
 void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
 {
-    // DXP-08a: every current caller (the 6-UI-panel item-preview population) feeds GlobalUBO from
-    // its own CPU closed form right after this call (see their DXP-07d comments) and every caller's
-    // own glPushMatrix/glPopMatrix bracket stays intact, so this real GLU/FFP call's effect on
-    // GL_PROJECTION_MATRIX is provably never read by anything before the matching pop undoes it —
-    // same "GlobalUBO is the only live consumer" finding Category 3 already proved
-    // for BeginOpengl/BeginBitmap, deleted the same way (unconditionally, not profile-guarded).
-    // ZNear/ZFar were only used by the deleted call; Fov/Aspect still feed PerspectiveX/Y below.
+    gluPerspective(Fov, Aspect, ZNear, ZFar);
 
     g_Camera.ScreenCenterX = OpenglWindowX + OpenglWindowWidth / 2;
     g_Camera.ScreenCenterY = OpenglWindowY + OpenglWindowHeight / 2;
@@ -628,135 +568,75 @@ void gluPerspective2(float Fov, float Aspect, float ZNear, float ZFar)
 
 float ConvertX(float x)
 {
-    return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
+    return x * g_fScreenRate_x;
 }
 
 float ConvertY(float y)
 {
-    return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
+    return y * g_fScreenRate_y;
 }
 
-// --- DXP-07b stage 1: CPU camera matrix builders ---
-// Column-major float[16], matching glGetFloatv(GL_..._MATRIX) layout (index = col*4 + row).
-// out = a * b (GL right-multiply composition: applying b first, then a).
-static void Mat4Multiply(float* out, const float* a, const float* b)
+float ConvertPositionX(float x)
 {
-    float result[16];
-    for (int col = 0; col < 4; ++col)
-    {
-        for (int row = 0; row < 4; ++row)
-        {
-            // Accumulate in double: the translation column's dot products can involve
-            // catastrophic cancellation (large rotated-position terms summing to a small
-            // result), where float32 accumulation leaves a few-ULP residue that a relative
-            // epsilon against the small *output* magnitude reads as a mismatch. Rounding
-            // to float only at the end (matching glGetFloatv's storage precision) removes
-            // that self-inflicted noise without touching the compare's epsilon.
-            double sum = 0.0;
-            for (int k = 0; k < 4; ++k)
-                sum += (double)a[k * 4 + row] * (double)b[col * 4 + k];
-            result[col * 4 + row] = (float)sum;
-        }
-    }
-    memcpy(out, result, sizeof(result));
+    return ConvertX(x) + g_fScreenOffset_x;
 }
 
-static void MakeRotationX(float degrees, float* out)
+float ConvertPositionY(float y)
 {
-    float rad = degrees * Q_PI / 180.0f;
-    float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, c,   s,   0.f,
-        0.f, -s,  c,   0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
-    memcpy(out, m, sizeof(m));
-}
-
-static void MakeRotationY(float degrees, float* out)
-{
-    float rad = degrees * Q_PI / 180.0f;
-    float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        c,   0.f, -s,  0.f,
-        0.f, 1.f, 0.f, 0.f,
-        s,   0.f, c,   0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
-    memcpy(out, m, sizeof(m));
-}
-
-static void MakeRotationZ(float degrees, float* out)
-{
-    float rad = degrees * Q_PI / 180.0f;
-    float c = cosf(rad), s = sinf(rad);
-    float m[16] = {
-        c,   s,   0.f, 0.f,
-        -s,  c,   0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
-    memcpy(out, m, sizeof(m));
-}
-
-static void MakeTranslation(float x, float y, float z, float* out)
-{
-    float m[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        x,   y,   z,   1.f
-    };
-    memcpy(out, m, sizeof(m));
+    return ConvertY(y) + g_fScreenOffset_y;
 }
 
 void BeginOpengl(int x, int y, int Width, int Height)
 {
-    IR::Flush(); // GLP-19 -- viewport + perspective change below; see BeginBitmap()
+    x = static_cast<int>(ConvertPositionX(static_cast<float>(x)));
+    y = static_cast<int>(ConvertPositionY(static_cast<float>(y)));
+    Width = static_cast<int>(ConvertX(static_cast<float>(Width)));
+    Height = static_cast<int>(ConvertY(static_cast<float>(Height)));
+    BeginOpenglPhysical(x, y, Width, Height);
+}
 
-    x = x * WindowWidth / REFERENCE_WIDTH;
-    y = y * WindowHeight / REFERENCE_HEIGHT;
-    Width = Width * WindowWidth / REFERENCE_WIDTH;
-    Height = Height * WindowHeight / REFERENCE_HEIGHT;
+void BeginOpenglPhysical(int x, int y, int width, int height)
+{
+    width = std::max(width, 1);
+    height = std::max(height, 1);
 
-    glViewport2(x, y, Width, Height);
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    SetRenderViewport(x, y, width, height);
 
     // Calculate aspect ratio dynamically from viewport dimensions
     // This ensures camera adapts to window resizing (WM_SIZE updates WindowWidth/WindowHeight)
     // FOV stays constant, aspect ratio scales the horizontal view accordingly
-    float aspectRatio = (float)Width / (float)Height;
+    const float aspectRatio = static_cast<float>(width) / height;
 
     // Apply RENDER_DISTANCE_MULTIPLIER for consistent rendering distance across all systems
     CameraProjection::SetupPerspective(g_Camera, g_Camera.FOV, aspectRatio, g_Camera.ViewNear, g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER);
 
-    // This per-frame reset must actually reach the GPU, not just the DepthTestEnable/CullFaceEnable/
-    // DepthMaskEnable bookkeeping bools below -- EnableCullFace()/EnableDepthTest()/EnableDepthMask()
-    // (this file) all gate on those bools ("if already true, skip") to avoid redundant driver calls,
-    // so blindly setting them true here without telling the GPU leaves stale state (e.g. the
-    // previous frame's last alpha-tested/double-sided mesh left cull off) silently in effect for
-    // every draw this frame until something happens to force it back -- surfaced as back-facing/
-    // "underground" geometry bleeding through on the next frame's opaque meshes.
-    if (!g_CoreProfile) { glDisable(GL_ALPHA_TEST); glEnable(GL_TEXTURE_2D); }
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glDepthMask(true);
-    glDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
+    mu::GetRenderer().Rotate(g_Camera.Angle[1], 0.f, 1.f, 0.f);
+    if (g_Camera.TopViewEnable == false)
+        mu::GetRenderer().Rotate(g_Camera.Angle[0], 1.f, 0.f, 0.f);
+    mu::GetRenderer().Rotate(g_Camera.Angle[2], 0.f, 0.f, 1.f);
+    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
+
+    mu::GetRenderer().SetAlphaTest(false);
+    mu::GetRenderer().SetTexture2D(true);
+    mu::GetRenderer().SetDepthTest(true);
+    mu::GetRenderer().SetCullFace(true);
+    mu::GetRenderer().SetDepthMask(true);
+
     AlphaTestEnable = false;
-    g_AlphaRef = -1.0f; // per-frame reset must clear the shader ref too, or draws before the first EnableAlphaTest() this frame inherit last frame's discard threshold
     TextureEnable = true;
     DepthTestEnable = true;
     CullFaceEnable = true;
     DepthMaskEnable = true;
-    SetAlphaFuncRef(0.25f);
+    mu::GetRenderer().SetDepthFunc(GL_LEQUAL);
+    mu::GetRenderer().SetAlphaFunc(GL_GREATER, 0.25f);
     if (FogEnable)
     {
-        if (!g_CoreProfile)
-        {
-            glEnable(GL_FOG);
-            glFogi(GL_FOG_MODE, GL_LINEAR);
-        }
-
         // Fog scales dynamically with view distance (g_Camera.ViewFar) so it
         // stays at consistent percentages when zooming. The actual GL far clip
         // plane is at g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER (1.4 — see
@@ -777,119 +657,57 @@ void BeginOpengl(int x, int y, int Width, int Height)
         }
 #endif
 
-        if (!g_CoreProfile)
-        {
-            glFogf(GL_FOG_START, fogStart);
-            glFogf(GL_FOG_END, fogEnd);
-
-            glFogfv(GL_FOG_COLOR, FogColor);
-        }
-
-        SceneUBO::Instance().SetFog(fogStart, fogEnd, FogColor, true);
+        mu::FogParams fogParams{};
+        fogParams.mode = GL_LINEAR;
+        fogParams.start = fogStart;
+        fogParams.end = fogEnd;
+        fogParams.density = FogDensity;
+        fogParams.color[0] = FogColor[0];
+        fogParams.color[1] = FogColor[1];
+        fogParams.color[2] = FogColor[2];
+        fogParams.color[3] = FogColor[3];
+        mu::GetRenderer().SetFog(fogParams);
     }
     else
     {
-        if (!g_CoreProfile) glDisable(GL_FOG);
-        SceneUBO::Instance().SetFogEnabled(false);
+        mu::GetRenderer().SetFogEnabled(false);
     }
 
-    {
-        // --- DXP-07b stage 2: GlobalUBO fed from the CPU-computed camera matrices (verified
-        // bit-exact against the old GL-derived matrices across three stage-1 soaks before the GL
-        // side was deleted in DXP-08a — see DXP-07b-beginopengl-cpu-camera.md for the full trail).
-        float zFar = g_Camera.ViewFar * RENDER_DISTANCE_MULTIPLIER;
-        float fovRad = g_Camera.FOV * 0.5f * Q_PI / 180.0f;
-        float f = 1.0f / tanf(fovRad);
-        float cpuProj[16];
-        BuildPerspectiveProjection(f, aspectRatio, g_Camera.ViewNear, zFar, cpuProj);
-
-        // Same composition the old glRotatef/glTranslatef sequence used to build: Ry * [Rx] * Rz * T(-Pos).
-        float cpuView[16];
-        MakeRotationY(g_Camera.Angle[1], cpuView);
-        if (!g_Camera.TopViewEnable)
-        {
-            float rx[16];
-            MakeRotationX(g_Camera.Angle[0], rx);
-            Mat4Multiply(cpuView, cpuView, rx);
-        }
-        float rz[16];
-        MakeRotationZ(g_Camera.Angle[2], rz);
-        Mat4Multiply(cpuView, cpuView, rz);
-        float t[16];
-        MakeTranslation(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2], t);
-        Mat4Multiply(cpuView, cpuView, t);
-
-        GlobalUBO::Instance().SetProj(cpuProj);
-        GlobalUBO::Instance().SetView(cpuView);
-        float deltaTime = (FPS > 0.0) ? (float)(1.0 / FPS) : 0.016f;
-        GlobalUBO::Instance().SetTime((float)WorldTime, deltaTime);
-
-        // g_Camera.Matrix (3x4 row-major, same layout CameraProjection::GetOpenGLMatrix() used to
-        // produce from a GL_MODELVIEW_MATRIX read) is now sourced directly from cpuView -- the same
-        // CPU value just fed to GlobalUBO above, not a separate GL round-trip.
-        float cpuCameraMatrix[3][4];
-        for (int i = 0; i < 3; ++i)
-            for (int j = 0; j < 4; ++j)
-                cpuCameraMatrix[i][j] = cpuView[j * 4 + i];
-
-        memcpy(g_Camera.Matrix, cpuCameraMatrix, sizeof(cpuCameraMatrix));
-    }
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
 }
 
 void EndOpengl()
 {
+    mu::GetRenderer().SetMatrixMode(GL_MODELVIEW);
+    mu::GetRenderer().PopMatrix();
+    mu::GetRenderer().SetMatrixMode(GL_PROJECTION);
+    mu::GetRenderer().PopMatrix();
 }
 
-// CPU equivalent for UpdateMousePositionn()'s MousePosition. For any view matrix
-// M = R * T(-camPos) (proper rotation R composed with translation), VectorIRotate(-M[:,3], M)
-// algebraically reduces to R^T * R * camPos = camPos for any R (R orthonormal => R^T = R^-1) — see
-// DXP-07c-picking-off-gl-state.md for the full derivation. MousePosition is therefore always just
-// g_Camera.Position; no GL read is needed to compute it.
 void UpdateMousePositionn()
 {
-    Vector(g_Camera.Position[0], g_Camera.Position[1], g_Camera.Position[2], MousePosition);
+    vec3_t vPos;
+
+    mu::GetRenderer().LoadIdentity();
+    mu::GetRenderer().Translate(-g_Camera.Position[0], -g_Camera.Position[1], -g_Camera.Position[2]);
+    CameraProjection::GetOpenGLMatrix(g_Camera.Matrix);
+
+    Vector(-g_Camera.Matrix[0][3], -g_Camera.Matrix[1][3], -g_Camera.Matrix[2][3], vPos);
+    VectorIRotate(vPos, g_Camera.Matrix, MousePosition);
 }
 
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL IsGLExtensionSupported(const wchar_t* extension)
 {
-    const size_t extlen = wcslen(extension);
-    const wchar_t* supported = NULL;
-
-    // Try To Use wglGetExtensionStringARB On Current DC, If Possible
-    auto wglGetExtString = wglGetProcAddress("wglGetExtensionsStringARB");
-
-    if (wglGetExtString)
-        supported = ((wchar_t* (__stdcall*)(HDC))wglGetExtString)(wglGetCurrentDC());
-
-    // If That Failed, Try Standard Opengl Extensions String
-    if (supported == NULL)
-        supported = (wchar_t*)glGetString(GL_EXTENSIONS);
-
-    // If That Failed Too, Must Be No Extensions Supported
-    if (supported == NULL)
-        return FALSE;
-
-    // Begin Examination At Start Of String, Increment By 1 On False Match
-    for (const wchar_t* p = supported; ; p++)
-    {
-        // Advance p Up To The Next Possible Match
-        p = wcsstr(p, extension);
-
-        if (p == NULL)
-            return FALSE;															// No Match
-
-        if ((p == supported || p[-1] == ' ') && (p[extlen] == '\0' || p[extlen] == ' '))
-            return TRUE;															// Match
-    }
+    (void)extension;
+    return FALSE;
 }
 
 #endif // LDS_ADD_MULTISAMPLEANTIALIASING
 
 void InitVSync()
 {
-    // SDL controls the swap interval on the current GL context on every platform;
-    // EnableVSync/DisableVSync just toggle it. No WGL extension probing needed.
+    // SDL GPU swapchains always support VSync. The renderer applies present-mode changes.
     _isVSyncAvailable = true;
 }
 
@@ -900,28 +718,30 @@ bool IsVSyncAvailable()
 
 bool IsVSyncEnabled()
 {
-    return g_VSyncEnabled;
+    return _isVSyncEnabled;
 }
 
 bool EnableVSync()
 {
-    if (SDL_GL_SetSwapInterval(1))
+    if (mu::GetRenderer().SetVSyncEnabled(true))
     {
-        g_VSyncEnabled = true;
+        _isVSyncEnabled = true;
         return true;
     }
-    g_VSyncEnabled = false;
+
+    _isVSyncEnabled = false;
     return false;
 }
 
 bool DisableVSync()
 {
-    if (SDL_GL_SetSwapInterval(0))
+    if (mu::GetRenderer().SetVSyncEnabled(false))
     {
-        g_VSyncEnabled = false;
+        _isVSyncEnabled = false;
         return true;
     }
-    g_VSyncEnabled = true;
+
+    _isVSyncEnabled = true;
     return false;
 }
 
@@ -931,105 +751,19 @@ bool DisableVSync()
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 BOOL InitGLMultisample(HINSTANCE hInstance, HWND hWnd, PIXELFORMATDESCRIPTOR pfd, int iRequestMSAAValue, int& OutiPixelFormat)
 {
-    BOOL bIsGLMultisampleSupported = FALSE;
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // See If The String Exists In WGL!
-    if (!IsGLExtensionSupported(L"WGL_ARB_multisample"))
-    {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-    // Get Our Pixel Format
-    PFNWGLCHOOSEPIXELFORMATARBPROC wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress(L"wglChoosePixelFormatARB");
-    if (!wglChoosePixelFormatARB)
-    {
-        bIsGLMultisampleSupported = FALSE;
-        return FALSE;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Get Our Current Device Context
-    HDC hDC = GetDC(hWnd);
-
-    int		valid;
-    UINT	numFormats;
-    float	fAttributes[] = { 0,0 };
-
-    // These Attributes Are The Bits We Want To Test For In Our Sample
-    // Everything Is Pretty Standard, The Only One We Want To
-    // Really Focus On Is The SAMPLE BUFFERS ARB And WGL SAMPLES
-    // These Two Are Going To Do The Main Testing For Whether Or Not
-    // We Support Multisampling On This Hardware.
-    int iAttributes[] =
-    {
-        WGL_DRAW_TO_WINDOW_ARB,GL_TRUE,
-            WGL_SUPPORT_OPENGL_ARB,GL_TRUE,
-            WGL_ACCELERATION_ARB,WGL_FULL_ACCELERATION_ARB,
-            WGL_COLOR_BITS_ARB,24,
-            WGL_ALPHA_BITS_ARB,8,
-            WGL_DEPTH_BITS_ARB,16,
-            WGL_STENCIL_BITS_ARB,0,
-            WGL_DOUBLE_BUFFER_ARB,GL_TRUE,
-            WGL_SAMPLE_BUFFERS_ARB,GL_TRUE,
-            WGL_SAMPLES_ARB, iRequestMSAAValue,					// xN MultiSampling (N=4,2,1)
-            0,0
-    };
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // First We Check To See If We Can Get A Pixel Format For 4 Samples
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // If We Returned True, And Our Format Count Is Greater Than 1
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Our Pixel Format With 4 Samples Failed, Test For 2 Samples
-    iAttributes[19] = 2;
-    valid = wglChoosePixelFormatARB(hDC, iAttributes, fAttributes, 1, &OutiPixelFormat, &numFormats);
-    if (valid && numFormats >= 1)
-    {
-        bIsGLMultisampleSupported = TRUE;
-        return bIsGLMultisampleSupported;
-    }
-
-#if defined(_DEBUG)
-    CheckGLError(__FILE__, __LINE__);
-#endif // defined(_DEBUG)
-
-    // Return The Valid Format
-    return  bIsGLMultisampleSupported;
+    (void)hInstance;
+    (void)hWnd;
+    (void)pfd;
+    (void)iRequestMSAAValue;
+    (void)OutiPixelFormat;
+    return FALSE;
 }
 
 void SetEnableMultisample()
 {
     if (TRUE == g_bSupportedMSAA)
     {
-        glEnable(GL_MULTISAMPLE_ARB);							// Enable Multisampling
+        mu::GetRenderer().SetMultisample(true);
     }
 
 #if defined(_DEBUG)
@@ -1041,7 +775,7 @@ void SetDisableMultisample()
 {
     if (TRUE == g_bSupportedMSAA)
     {
-        glDisable(GL_MULTISAMPLE_ARB);							// Enable Multisampling
+        mu::GetRenderer().SetMultisample(false);
     }
 
 #if defined(_DEBUG)
@@ -1054,6 +788,49 @@ void SetDisableMultisample()
 ///////////////////////////////////////////////////////////////////////////////
 // render util
 ///////////////////////////////////////////////////////////////////////////////
+
+void RenderBox(float Matrix[3][4])
+{
+    vec3_t BoundingBoxMin;
+    vec3_t BoundingBoxMax;
+    Vector(-10.f, -30.f, -10.f, BoundingBoxMin);
+    Vector(10.f, 0.f, 10.f, BoundingBoxMax);
+
+    vec3_t BoundingVertices[8];
+    Vector(BoundingBoxMax[0], BoundingBoxMax[1], BoundingBoxMax[2], BoundingVertices[0]);
+    Vector(BoundingBoxMax[0], BoundingBoxMax[1], BoundingBoxMin[2], BoundingVertices[1]);
+    Vector(BoundingBoxMax[0], BoundingBoxMin[1], BoundingBoxMax[2], BoundingVertices[2]);
+    Vector(BoundingBoxMax[0], BoundingBoxMin[1], BoundingBoxMin[2], BoundingVertices[3]);
+    Vector(BoundingBoxMin[0], BoundingBoxMax[1], BoundingBoxMax[2], BoundingVertices[4]);
+    Vector(BoundingBoxMin[0], BoundingBoxMax[1], BoundingBoxMin[2], BoundingVertices[5]);
+    Vector(BoundingBoxMin[0], BoundingBoxMin[1], BoundingBoxMax[2], BoundingVertices[6]);
+    Vector(BoundingBoxMin[0], BoundingBoxMin[1], BoundingBoxMin[2], BoundingVertices[7]);
+
+    vec3_t TransformVertices[8];
+    for (int j = 0; j < 8; j++)
+    {
+        VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
+    }
+
+    const auto MakeVtx = [](const vec3_t& pos, float u, float v, std::uint32_t color) -> mu::Vertex3D
+    { return {pos[0], pos[1], pos[2], 0.f, 0.f, 1.f, u, v, color}; };
+    std::vector<mu::Vertex3D> verts;
+    verts.reserve(24);
+    const auto EmitQuad = [&](const vec3_t& a, const vec3_t& b, const vec3_t& c, const vec3_t& d, std::uint32_t color)
+    {
+        verts.push_back(MakeVtx(a, 1.f, 1.f, color));
+        verts.push_back(MakeVtx(b, 1.f, 0.f, color));
+        verts.push_back(MakeVtx(c, 0.f, 0.f, color));
+        verts.push_back(MakeVtx(d, 0.f, 1.f, color));
+    };
+    EmitQuad(TransformVertices[7], TransformVertices[6], TransformVertices[4], TransformVertices[5], mu::PackABGR(.2f, .2f, .2f, 1.f));
+    EmitQuad(TransformVertices[0], TransformVertices[2], TransformVertices[3], TransformVertices[1], mu::PackABGR(.2f, .2f, .2f, 1.f));
+    EmitQuad(TransformVertices[7], TransformVertices[3], TransformVertices[2], TransformVertices[6], mu::PackABGR(.6f, .6f, .6f, 1.f));
+    EmitQuad(TransformVertices[0], TransformVertices[1], TransformVertices[5], TransformVertices[4], mu::PackABGR(.6f, .6f, .6f, 1.f));
+    EmitQuad(TransformVertices[7], TransformVertices[5], TransformVertices[1], TransformVertices[3], mu::PackABGR(.4f, .4f, .4f, 1.f));
+    EmitQuad(TransformVertices[0], TransformVertices[4], TransformVertices[6], TransformVertices[2], mu::PackABGR(.4f, .4f, .4f, 1.f));
+    mu::GetRenderer().RenderQuad3D(verts, 0u);
+}
 
 void RenderPlane3D(float Width, float Height, float Matrix[3][4])
 {
@@ -1069,32 +846,24 @@ void RenderPlane3D(float Width, float Height, float Matrix[3][4])
         VectorTransform(BoundingVertices[j], Matrix, TransformVertices[j]);
     }
 
-    IR::Begin(GL_QUADS);
-    PassthroughShader::Instance().SetUseTexture(true);
-    IR::Color3f(1.f, 1.f, 1.f);
-    IR::TexCoord2f(0.f, 1.f); IR::Vertex3fv(TransformVertices[0]);
-    IR::TexCoord2f(1.f, 1.f); IR::Vertex3fv(TransformVertices[1]);
-    IR::TexCoord2f(1.f, 0.f); IR::Vertex3fv(TransformVertices[2]);
-    IR::TexCoord2f(0.f, 0.f); IR::Vertex3fv(TransformVertices[3]);
-    IR::End();
+    const mu::Vertex3D verts[4] = {
+        {TransformVertices[0][0], TransformVertices[0][1], TransformVertices[0][2], 0.f, 0.f, 1.f, 0.f, 1.f, 0xFFFFFFFFu},
+        {TransformVertices[1][0], TransformVertices[1][1], TransformVertices[1][2], 0.f, 0.f, 1.f, 1.f, 1.f, 0xFFFFFFFFu},
+        {TransformVertices[2][0], TransformVertices[2][1], TransformVertices[2][2], 0.f, 0.f, 1.f, 1.f, 0.f, 0xFFFFFFFFu},
+        {TransformVertices[3][0], TransformVertices[3][1], TransformVertices[3][2], 0.f, 0.f, 1.f, 0.f, 0.f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad3D(verts, 0u);
 }
 
 void BeginSprite()
 {
-    // Sprites pre-transform their position into view space on the CPU (VectorTransform
-    // against g_Camera.Matrix below), matching the FFP identity-modelview trick above.
-    // Override GlobalUBO's view to identity for the duration of the sprite batch so the
-    // shader doesn't apply the camera view transform a second time.
-    static const float s_Identity[16] = {
-        1.f,0.f,0.f,0.f,  0.f,1.f,0.f,0.f,  0.f,0.f,1.f,0.f,  0.f,0.f,0.f,1.f
-    };
-    GlobalUBO::Instance().PushView();
-    GlobalUBO::Instance().SetView(s_Identity);
+    mu::GetRenderer().PushMatrix();
+    mu::GetRenderer().LoadIdentity();
 }
 
 void EndSprite()
 {
-    GlobalUBO::Instance().PopView();
+    mu::GetRenderer().PopMatrix();
 }
 
 void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_t Light, float Rotation, float u, float v, float uWidth, float vHeight)
@@ -1107,6 +876,11 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     float x = p2[0];
     float y = p2[1];
     float z = p2[2];
+
+    if (z >= -1.0f)
+    {
+        return;
+    }
 
     Width *= 0.5f;
     Height *= 0.5f;
@@ -1121,14 +895,7 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     }
     else
     {
-        // GLP-29 2c: AngleMatrix() + VectorRotate() with a Z-only angle reduces exactly to a 2D
-        // rotation -- this is an algebraic identity, not an approximation. With
-        // angles = (0, 0, Rotation), AngleMatrix (ZzzMathLib.cpp:194) has sp=0, cp=1, sr=0, cr=1,
-        // so the matrix is [cy -sy 0; sy cy 0; 0 0 1] and VectorRotate's three dot products give
-        //   out.x = in.x*cy - in.y*sy      out.y = in.x*sy + in.y*cy      out.z = in.z
-        // Same arithmetic and the same degrees->radians constant, minus three sinf/cosf pairs
-        // (two of them on a constant 0) and ~20 multiplies for every rotated sprite. This is a hot
-        // per-particle path: smoke, clouds and explosions all pass a non-zero Rotation.
+        // GLP-29: Z-only AngleMatrix/VectorRotate reduces exactly to this 2D rotation.
         const float rad = Rotation * (Q_PI * 2 / 360);
         const float sy  = sinf(rad);
         const float cy  = cosf(rad);
@@ -1148,25 +915,30 @@ void RenderSprite(int Texture, vec3_t Position, float Width, float Height, vec3_
     TEXCOORD(c[1], u + uWidth, v + vHeight);
     TEXCOORD(c[0], u, v + vHeight);
 
-    // IR::Begin() already binds PassthroughShader with SetUseTexture(true) internally — this is a
-    // hot per-particle call (DXP-26), so avoid the redundant second glUseProgram/glUniform1i that
-    // a duplicate SetUseTexture(true) here would cost.
-    IR::Begin(GL_QUADS);
+    std::uint32_t color;
     if (Bitmaps[Texture].Components == 3)
-        IR::Color3fv(Light);
+    {
+        color = mu::PackABGR(Light[0], Light[1], Light[2], 1.0f);
+    }
     else
     {
         if (Texture == BITMAP_BLOOD + 1 || Texture == BITMAP_FONT_HIT)
-            IR::Color4f(Light[0], Light[1], Light[2], 1.f);
+        {
+            color = mu::PackABGR(Light[0], Light[1], Light[2], 1.0f);
+        }
         else
-            IR::Color4f(Light[0], Light[1], Light[2], Light[0]);
+        {
+            color = mu::PackABGR(Light[0], Light[1], Light[2], Light[0]);
+        }
     }
-    for (int i = 0; i < 4; i++)
-    {
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex3fv(p[i]);
-    }
-    IR::End();
+
+    const mu::Vertex3D vertices[4] = {
+        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, c[0][0], c[0][1], color},
+        {p[1][0], p[1][1], p[1][2], 0.f, 0.f, 0.f, c[1][0], c[1][1], color},
+        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, c[2][0], c[2][1], color},
+        {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, c[3][0], c[3][1], color},
+    };
+    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, float(*UV)[2], vec3_t Light[4], float Alpha)
@@ -1179,6 +951,11 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     float y = p2[1];
     float z = p2[2];
 
+    if (z >= -1.0f)
+    {
+        return;
+    }
+
     Width *= 0.5f;
     Height *= 0.5f;
     vec3_t p[4];
@@ -1187,17 +964,13 @@ void RenderSpriteUV(int Texture, vec3_t Position, float Width, float Height, flo
     Vector(x + Width, y + Height, z, p[2]);
     Vector(x - Width, y + Height, z, p[3]);
 
-    // IR::Begin() already binds PassthroughShader with SetUseTexture(true) internally — this is a
-    // hot per-sprite call (DXP-26, e.g. floating damage numbers), so avoid the redundant second
-    // glUseProgram/glUniform1i that a duplicate SetUseTexture(true) here would cost.
-    IR::Begin(GL_QUADS);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        IR::TexCoord2f(UV[i][0], UV[i][1]);
-        IR::Vertex3fv(p[i]);
-    }
-    IR::End();
+    const mu::Vertex3D vertices[4] = {
+        {p[0][0], p[0][1], p[0][2], 0.f, 0.f, 0.f, UV[0][0], UV[0][1], mu::PackABGR(Light[0][0], Light[0][1], Light[0][2], Alpha)},
+        {p[1][0], p[1][1], p[1][2], 0.f, 0.f, 0.f, UV[1][0], UV[1][1], mu::PackABGR(Light[1][0], Light[1][1], Light[1][2], Alpha)},
+        {p[2][0], p[2][1], p[2][2], 0.f, 0.f, 0.f, UV[2][0], UV[2][1], mu::PackABGR(Light[2][0], Light[2][1], Light[2][2], Alpha)},
+        {p[3][0], p[3][1], p[3][2], 0.f, 0.f, 0.f, UV[3][0], UV[3][1], mu::PackABGR(Light[3][0], Light[3][1], Light[3][2], Alpha)},
+    };
+    mu::GetRenderer().RenderQuad3D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Scale)
@@ -1245,7 +1018,7 @@ void RenderNumber(vec3_t Position, int Num, vec3_t Color, float Alpha, float Sca
     }
 }
 
-float RenderNumber2D(float x, float y, int Num, float Width, float Height)
+float RenderNumber2D(float x, float y, int Num, float Width, float Height, unsigned int color)
 {
     wchar_t Text[32];
     _itow(Num, Text, 10);
@@ -1254,167 +1027,170 @@ float RenderNumber2D(float x, float y, int Num, float Width, float Height)
     for (int i = 0; i < Length; i++)
     {
         float u = (float)(Text[i] - 48) * 16.f / 256.f;
-        //glColor3fv(Color);
-        RenderBitmap(BITMAP_FONT + 1, x, y, Width, Height, u, 0.f, 16.f / 256.f, 16.f / 32.f);
+        RenderColorBitmap(BITMAP_FONT + 1, x, y, Width, Height, u, 0.f,
+            16.f / 256.f, 16.f / 32.f, color);
         x += Width * 0.7f;
     }
     return x;
 }
 
-static float s_PreBitmapProj[16];
-static float s_PreBitmapView[16];
-
 void BeginBitmap()
 {
-    // GLP-19: flush before glViewport changes. The GlobalUBO::Upload() hook covers the matrix
-    // swap below, but the viewport change happens first and also affects rasterization, so a
-    // batch left pending here would be drawn into the new viewport.
-    IR::Flush();
-
-    // Always use full window dimensions for UI/bitmap rendering
-    // UI bitmaps use ConvertX/Y to scale from 640×480 reference,
-    // so we need the full window size here (not the game viewport which may be smaller)
-    //
-    glViewport(0, 0, WindowWidth, WindowHeight);
+    mu::GetRenderer().Begin2DPass();
     DisableDepthTest();
-
-    // DXP-16: tried an explicit EnableAlphaTest() here to give the whole 2D pass a known blend
-    // state (theory: ambient blend state carried over from the last 3D draw call was the cause
-    // of the reported login-screen flicker). REVERTED -- user confirmed zero effect on the
-    // flicker (still blinking exactly as before). Whatever forces the blend/alpha-test state
-    // that RenderDoc's pixel history caught (transparent glyph quad drawn opaque) into play, it
-    // isn't simply "BeginBitmap should set a default and doesn't" -- something later in the 2D
-    // pass is still landing on the wrong state even with this forced default, or the forced
-    // default itself isn't reaching the draw in question. Needs more direct evidence (e.g. a
-    // RenderDoc capture of an actual black frame, comparing its blend state / g_AlphaRef at the
-    // bad draw against a known-good one) rather than another guess.
-
-    // Saved so EndBitmap() can restore GlobalUBO to whatever camera it held on entry --
-    // GlobalUBO is the CPU source of truth (DXP-07a/b), so this is a snapshot of it, not a GL read.
-    memcpy(s_PreBitmapProj, GlobalUBO::Instance().GetProj(), sizeof(s_PreBitmapProj));
-    memcpy(s_PreBitmapView, GlobalUBO::Instance().GetView(), sizeof(s_PreBitmapView));
-
-    // gluOrtho2D(0,W,0,H) with the implicit near=-1/far=1, closed form.
-    float w = (float)WindowWidth;
-    float h = (float)WindowHeight;
-    float cpuProj[16] = {
-        2.f / w, 0.f,     0.f,  0.f,
-        0.f,     2.f / h, 0.f,  0.f,
-        0.f,     0.f,    -1.f,  0.f,
-       -1.f,    -1.f,     0.f,  1.f
-    };
-    static const float cpuView[16] = {
-        1.f, 0.f, 0.f, 0.f,
-        0.f, 1.f, 0.f, 0.f,
-        0.f, 0.f, 1.f, 0.f,
-        0.f, 0.f, 0.f, 1.f
-    };
-
-    GlobalUBO::Instance().SetProj(cpuProj);
-    GlobalUBO::Instance().SetView(cpuView);
 }
 
 void EndBitmap()
 {
-    GlobalUBO::Instance().SetProj(s_PreBitmapProj);
-    GlobalUBO::Instance().SetView(s_PreBitmapView);
+    mu::GetRenderer().End2DPass();
+}
+
+namespace
+{
+std::uint32_t g_renderColor = 0xFFFFFFFFu;
+}
+
+void SetRenderColor(BYTE red, BYTE green, BYTE blue, BYTE alpha)
+{
+    g_renderColor = (static_cast<std::uint32_t>(alpha) << 24) |
+                    (static_cast<std::uint32_t>(blue) << 16) |
+                    (static_cast<std::uint32_t>(green) << 8) |
+                    static_cast<std::uint32_t>(red);
 }
 
 void RenderColor(float x, float y, float Width, float Height, float Alpha, int Flag)
 {
     DisableTexture();
 
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
-    float p[4][2];
     y = WindowHeight - y;
 
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
-
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
+    std::uint32_t color;
     if (Alpha > 0.f)
     {
+        const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
+        const auto a = static_cast<std::uint32_t>(clampedAlpha * 255.0f);
         if (Flag == 0)
         {
-            currColor[0] = 1.f; currColor[1] = 1.f; currColor[2] = 1.f; currColor[3] = Alpha;
+            color = (a << 24) | 0x00FFFFFFu;
         }
-        else if (Flag == 1)
+        else
         {
-            currColor[0] = 0.f; currColor[1] = 0.f; currColor[2] = 0.f; currColor[3] = Alpha;
+            color = (a << 24);
         }
     }
     else
     {
-        memcpy(currColor, g_CurrentColor, sizeof(currColor));
+        color = g_renderColor;
     }
 
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(false);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::Vertex2f(p[i][0], p[i][1]);
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, 0.0f, 0.0f, color},
+        {x, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
 }
 void EndRenderColor()
 {
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-    if (!g_CoreProfile) glEnable(GL_TEXTURE_2D);
-    IR::Color4f(1.0f, 1.0f, 1.0f, 1.0f);
-    PassthroughShader::Instance().SetUseTexture(true);
+    mu::GetRenderer().SetTexture2D(true);
+}
+
+static inline std::uint32_t ArgbToAbgr(unsigned int argb)
+{
+    const std::uint32_t a = (argb >> 24) & 0xffu;
+    const std::uint32_t r = (argb >> 16) & 0xffu;
+    const std::uint32_t g = (argb >> 8) & 0xffu;
+    const std::uint32_t b = argb & 0xffu;
+    return (a << 24) | (b << 16) | (g << 8) | r;
+}
+
+void RenderColorQuadARGB(float x, float y, float Width, float Height, unsigned int argbColor)
+{
+    DisableTexture();
+
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
+    Width = ConvertX(Width);
+    Height = ConvertY(Height);
+    y = WindowHeight - y;
+
+    const std::uint32_t color = ArgbToAbgr(argbColor);
+    const mu::Vertex2D vertices[4] = {
+        {x, y, 0.0f, 0.0f, color},
+        {x, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y - Height, 0.0f, 0.0f, color},
+        {x + Width, y, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
+}
+
+void RenderColorLineARGB(float x1, float y1, float x2, float y2, float thickness, unsigned int argbColor)
+{
+    DisableTexture();
+
+    x1 = ConvertPositionX(x1);
+    y1 = ConvertPositionY(y1);
+    x2 = ConvertPositionX(x2);
+    y2 = ConvertPositionY(y2);
+    thickness = ConvertX(thickness);
+    y1 = WindowHeight - y1;
+    y2 = WindowHeight - y2;
+
+    const float dx = x2 - x1;
+    const float dy = y2 - y1;
+    const float len = sqrtf(dx * dx + dy * dy);
+    if (len < 1e-6f)
+    {
+        return;
+    }
+
+    const float halfT = thickness * 0.5f;
+    const float ox = -dy / len * halfT;
+    const float oy = dx / len * halfT;
+
+    const std::uint32_t color = ArgbToAbgr(argbColor);
+    const mu::Vertex2D vertices[4] = {
+        {x1 + ox, y1 + oy, 0.0f, 0.0f, color},
+        {x1 - ox, y1 - oy, 0.0f, 0.0f, color},
+        {x2 - ox, y2 - oy, 0.0f, 0.0f, color},
+        {x2 + ox, y2 + oy, 0.0f, 0.0f, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, 0u);
 }
 
 void RenderColorBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, unsigned int color)
 {
-    BindTexture(Texture);
-    PassthroughShader::Instance().SetUseTexture(true);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
 
-    x = ConvertX(x);
-    y = ConvertY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
-    float p[4][2];
+    BindTexture(Texture);
+
     y = WindowHeight - y;
 
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
-
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    IR::Begin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4ub(static_cast<GLubyte>((color & 0xff)),
-            static_cast<GLubyte>((color >> 8) & 0xff),
-            static_cast<GLubyte>((color >> 16) & 0xff),
-            static_cast<GLubyte>((color >> 24) & 0xff));
-
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex2f(p[i][0], p[i][1]);
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v, color},
+        {x, y - Height, u, v + vHeight, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmap(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight, bool Scale, bool StartScale, float Alpha)
 {
     if (StartScale)
     {
-        x = ConvertX(x);
-        y = ConvertY(y);
+        x = ConvertPositionX(x);
+        y = ConvertPositionY(y);
     }
     if (Scale)
     {
@@ -1424,51 +1200,34 @@ void RenderBitmap(int Texture, float x, float y, float Width, float Height, floa
 
     BindTexture(Texture);
 
-    float p[4][2];
     y = WindowHeight - y;
 
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
+    const float clampedAlpha = (Alpha > 1.0f) ? 1.0f : Alpha;
+    const std::uint32_t color =
+        (clampedAlpha > 0.0f) ? (static_cast<std::uint32_t>(clampedAlpha * 255.0f) << 24) | 0x00FFFFFFu : 0xFFFFFFFFu;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
-    if (Alpha > 0.f)
-    {
-        currColor[0] = 1.f; currColor[1] = 1.f; currColor[2] = 1.f; currColor[3] = Alpha;
-    }
-    else
-    {
-        memcpy(currColor, g_CurrentColor, sizeof(currColor));
-    }
-
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex2f(p[i][0], p[i][1]);
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v, color},
+        {x, y - Height, u, v + vHeight, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
-void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
+void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v,
+    float uWidth, float vHeight, unsigned int color)
 {
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
-
+    // x -= Width *0.5f;
+    // y -= Height*0.5f;
     BindTexture(Texture);
 
     vec3_t p[4], p2[4];
+
     y = WindowHeight - y;
 
     Vector(-Width * 0.5f, Height * 0.5f, 0.f, p[0]);
@@ -1481,25 +1240,18 @@ void RenderBitmapRotate(int Texture, float x, float y, float Width, float Height
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
+    VectorRotate(p[0], Matrix, p2[0]);
+    VectorRotate(p[1], Matrix, p2[1]);
+    VectorRotate(p[2], Matrix, p2[2]);
+    VectorRotate(p[3], Matrix, p2[3]);
 
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
-    memcpy(currColor, g_CurrentColor, sizeof(currColor));
-
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        VectorRotate(p[i], Matrix, p2[i]);
-        IR::Vertex2f(p2[i][0] + x, p2[i][1] + y);
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {p2[0][0] + x, p2[0][1] + y, u, v, color},
+        {p2[1][0] + x, p2[1][1] + y, u, v + vHeight, color},
+        {p2[2][0] + x, p2[2][1] + y, u + uWidth, v + vHeight, color},
+        {p2[3][0] + x, p2[3][1] + y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitRotate(int Texture, float x, float y, float Width, float Height, float Rotate)
@@ -1512,6 +1264,7 @@ void RenderBitRotate(int Texture, float x, float y, float Width, float Height, f
     BindTexture(Texture);
 
     vec3_t p[4], p2[4];
+
     y = Height - y;
 
     float cx = (Width / 2.f) - (Width - x);
@@ -1532,32 +1285,27 @@ void RenderBitRotate(int Texture, float x, float y, float Width, float Height, f
     float Matrix[3][4];
     AngleMatrix(Angle, Matrix);
 
-    float c[4][2];
-    TEXCOORD(c[0], 0.f, 0.f);
-    TEXCOORD(c[3], 1.f, 0.f);
-    TEXCOORD(c[2], 1.f, 1.f);
-    TEXCOORD(c[1], 0.f, 1.f);
+    VectorRotate(p[0], Matrix, p2[0]);
+    VectorRotate(p[1], Matrix, p2[1]);
+    VectorRotate(p[2], Matrix, p2[2]);
+    VectorRotate(p[3], Matrix, p2[3]);
 
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
-    memcpy(currColor, g_CurrentColor, sizeof(currColor));
+    const float halfW = WindowWidth / 2.f;
+    const float halfH = WindowHeight / 2.f;
 
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        VectorRotate(p[i], Matrix, p2[i]);
-        IR::Vertex2f(p2[i][0] + (WindowWidth / 2.f), p2[i][1] + (WindowHeight / 2.f));
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {p2[0][0] + halfW, p2[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
+        {p2[1][0] + halfW, p2[1][1] + halfH, 0.0f, 1.0f, 0xFFFFFFFFu},
+        {p2[2][0] + halfW, p2[2][1] + halfH, 1.0f, 1.0f, 0xFFFFFFFFu},
+        {p2[3][0] + halfW, p2[3][1] + halfH, 1.0f, 0.0f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHeight, float x, float y, float Width, float Height, float Rotate, float Rotate_Loc, float uWidth, float vHeight, int Num)
 {
-    int i = 0;
     vec3_t p, p2[4], p3, p4[4], Angle;
-    float c[4][2], Matrix[3][4];
+    float Matrix[3][4];
 
     ix = ConvertX(ix);
     iy = ConvertY(iy);
@@ -1586,36 +1334,31 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
     Vector(0.f, 0.f, Rotate_Loc, Angle);
     AngleMatrix(Angle, Matrix);
 
-    TEXCOORD(c[0], 0.f, 0.f);
-    TEXCOORD(c[3], uWidth, 0.f);
-    TEXCOORD(c[2], uWidth, vHeight);
-    TEXCOORD(c[1], 0.f, vHeight);
+    Matrix[0][3] = p3[0] + 25;
+    Matrix[1][3] = p3[1];
+    VectorTransform(p2[0], Matrix, p4[0]);
+    VectorTransform(p2[1], Matrix, p4[1]);
+    VectorTransform(p2[2], Matrix, p4[2]);
+    VectorTransform(p2[3], Matrix, p4[3]);
 
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
-    memcpy(currColor, g_CurrentColor, sizeof(currColor));
+    const float halfW = WindowWidth / 2.f;
+    const float halfH = WindowHeight / 2.f;
 
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::TexCoord2f(c[i][0], c[i][1]);
-
-        Matrix[0][3] = p3[0] + 25;
-        Matrix[1][3] = p3[1];
-        VectorTransform(p2[i], Matrix, p4[i]);
-
-        IR::Vertex2f(p4[i][0] + (WindowWidth / 2.f), p4[i][1] + (WindowHeight / 2.f));
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {p4[0][0] + halfW, p4[0][1] + halfH, 0.0f, 0.0f, 0xFFFFFFFFu},
+        {p4[1][0] + halfW, p4[1][1] + halfH, 0.0f, vHeight, 0xFFFFFFFFu},
+        {p4[2][0] + halfW, p4[2][1] + halfH, uWidth, vHeight, 0xFFFFFFFFu},
+        {p4[3][0] + halfW, p4[3][1] + halfH, uWidth, 0.0f, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 
     if (Num > -1)
     {
         float dx, dy;
-        dx = p4[0][0] + (WindowWidth / 2.f);
-        dy = p4[0][1] + (WindowHeight / 2.f);
-        dx = dx * (float)((float)REFERENCE_WIDTH / WindowWidth);
-        dy = dy * (float)((float)REFERENCE_HEIGHT / WindowHeight);
+        dx = p4[0][0] + halfW;
+        dy = p4[0][1] + halfH;
+        dx = (dx - g_fScreenOffset_x) / g_fScreenRate_x;
+        dy = (dy - g_fScreenOffset_y) / g_fScreenRate_y;
         if (Num >= 100)
         {
             g_pNewUIMiniMap->SetBtnPos(Num - 100, dx - (iWidth / 2), (REFERENCE_HEIGHT - dy) - (iHeight / 2), iWidth, iHeight);
@@ -1629,45 +1372,36 @@ void RenderPointRotate(int Texture, float ix, float iy, float iWidth, float iHei
 
 void RenderBitmapLocalRotate(int Texture, float x, float y, float Width, float Height, float Rotate, float u, float v, float uWidth, float vHeight)
 {
-    BindTexture(Texture);
-
     vec3_t p[4];
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     y = WindowHeight - y;
     Width = ConvertX(Width);
     Height = ConvertY(Height);
 
+    BindTexture(Texture);
+
+    const float sinR = sinf(Rotate);
+    const float cosR = cosf(Rotate);
     vec3_t vCenter, vDir;
     Vector(x, y, 0, vCenter);
     Vector(Width * 0.5f, -Height * 0.5f, 0, vDir);
-    p[0][0] = vCenter[0] + (vDir[0]) * cosf(Rotate);
-    p[0][1] = vCenter[1] + (vDir[1]) * sinf(Rotate);
-    p[1][0] = vCenter[0] + (vDir[0]) * sinf(Rotate);
-    p[1][1] = vCenter[1] - (vDir[1]) * cosf(Rotate);
-    p[2][0] = vCenter[0] - (vDir[0]) * cosf(Rotate);
-    p[2][1] = vCenter[1] - (vDir[1]) * sinf(Rotate);
-    p[3][0] = vCenter[0] - (vDir[0]) * sinf(Rotate);
-    p[3][1] = vCenter[1] + (vDir[1]) * cosf(Rotate);
+    p[0][0] = vCenter[0] + (vDir[0]) * cosR;
+    p[0][1] = vCenter[1] + (vDir[1]) * sinR;
+    p[1][0] = vCenter[0] + (vDir[0]) * sinR;
+    p[1][1] = vCenter[1] - (vDir[1]) * cosR;
+    p[2][0] = vCenter[0] - (vDir[0]) * cosR;
+    p[2][1] = vCenter[1] - (vDir[1]) * sinR;
+    p[3][0] = vCenter[0] - (vDir[0]) * sinR;
+    p[3][1] = vCenter[1] + (vDir[1]) * cosR;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight);
-
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
-    memcpy(currColor, g_CurrentColor, sizeof(currColor));
-
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex2f(p[i][0], p[i][1]);
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {p[0][0], p[0][1], u, v, 0xFFFFFFFFu},
+        {p[1][0], p[1][1], u, v + vHeight, 0xFFFFFFFFu},
+        {p[2][0], p[2][1], u + uWidth, v + vHeight, 0xFFFFFFFFu},
+        {p[3][0], p[3][1], u + uWidth, v, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Height)
@@ -1681,16 +1415,19 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
         for (int x = 0; x < 4; x++)
         {
             float p[4][2];
-            p[0][0] = sx + ((x)*Width) * 0.25f; p[0][1] = sy - ((y)*Height) * 0.25f;
-            p[1][0] = sx + ((x)*Width) * 0.25f; p[1][1] = sy - ((y + 1) * Height) * 0.25f;
-            p[2][0] = sx + ((x + 1) * Width) * 0.25f; p[2][1] = sy - ((y + 1) * Height) * 0.25f;
-            p[3][0] = sx + ((x + 1) * Width) * 0.25f; p[3][1] = sy - ((y)*Height) * 0.25f;
+            p[0][0] = sx + (static_cast<float>(x) * Width) * 0.25f;
+            p[0][1] = sy - (static_cast<float>(y) * Height) * 0.25f;
+            p[1][0] = sx + (static_cast<float>(x) * Width) * 0.25f;
+            p[1][1] = sy - (static_cast<float>(y + 1) * Height) * 0.25f;
+            p[2][0] = sx + (static_cast<float>(x + 1) * Width) * 0.25f;
+            p[2][1] = sy - (static_cast<float>(y + 1) * Height) * 0.25f;
+            p[3][0] = sx + (static_cast<float>(x + 1) * Width) * 0.25f;
+            p[3][1] = sy - (static_cast<float>(y) * Height) * 0.25f;
 
-            float c[4][2];
-            TEXCOORD(c[0], (x) * 0.25f, (y) * 0.25f);
-            TEXCOORD(c[1], (x) * 0.25f, (y + 1) * 0.25f);
-            TEXCOORD(c[2], (x + 1) * 0.25f, (y + 1) * 0.25f);
-            TEXCOORD(c[3], (x + 1) * 0.25f, (y) * 0.25f);
+            const float u0 = static_cast<float>(x) * 0.25f;
+            const float v0 = static_cast<float>(y) * 0.25f;
+            const float u1 = static_cast<float>(x + 1) * 0.25f;
+            const float v1 = static_cast<float>(y + 1) * 0.25f;
 
             float Alpha[4] = { 1.f,1.f,1.f,1.f };
             if (x == 0) { Alpha[0] = 0.f; Alpha[1] = 0.f; }
@@ -1698,52 +1435,35 @@ void RenderBitmapAlpha(int Texture, float sx, float sy, float Width, float Heigh
             if (y == 0) { Alpha[0] = 0.f; Alpha[3] = 0.f; }
             if (y == 3) { Alpha[1] = 0.f; Alpha[2] = 0.f; }
 
-            IR::Begin(GL_TRIANGLE_FAN);
-            PassthroughShader::Instance().SetUseTexture(true);
-            for (int i = 0; i < 4; i++)
-            {
-                IR::Color4f(1.f, 1.f, 1.f, Alpha[i]);
-                IR::TexCoord2f(c[i][0], c[i][1]);
-                IR::Vertex2f(p[i][0], p[i][1]);
-            }
-            IR::End();
+            const mu::Vertex2D vertices[4] = {
+                {p[0][0], p[0][1], u0, v0, (static_cast<std::uint32_t>(Alpha[0] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[1][0], p[1][1], u0, v1, (static_cast<std::uint32_t>(Alpha[1] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[2][0], p[2][1], u1, v1, (static_cast<std::uint32_t>(Alpha[2] * 255.0f) << 24) | 0x00FFFFFFu},
+                {p[3][0], p[3][1], u1, v0, (static_cast<std::uint32_t>(Alpha[3] * 255.0f) << 24) | 0x00FFFFFFu},
+            };
+            mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
         }
     }
 }
 
-void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth, float vHeight)
+void RenderBitmapUV(int Texture, float x, float y, float Width, float Height, float u, float v, float uWidth,
+    float vHeight, unsigned int color)
 {
-    x = ConvertX(x);
-    y = ConvertY(y);
+    x = ConvertPositionX(x);
+    y = ConvertPositionY(y);
     Width = ConvertX(Width);
     Height = ConvertY(Height);
     BindTexture(Texture);
 
-    float p[4][2];
     y = WindowHeight - y;
-    p[0][0] = x; p[0][1] = y;
-    p[1][0] = x; p[1][1] = y - Height;
-    p[2][0] = x + Width; p[2][1] = y - Height;
-    p[3][0] = x + Width; p[3][1] = y;
 
-    float c[4][2];
-    TEXCOORD(c[0], u, v + vHeight * 0.25f);
-    TEXCOORD(c[3], u + uWidth, v);
-    TEXCOORD(c[2], u + uWidth, v + vHeight);
-    TEXCOORD(c[1], u, v + vHeight - vHeight * 0.25f);
-
-    float currColor[4] = { 1.f, 1.f, 1.f, 1.f };
-    memcpy(currColor, g_CurrentColor, sizeof(currColor));
-
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (int i = 0; i < 4; i++)
-    {
-        IR::Color4f(currColor[0], currColor[1], currColor[2], currColor[3]);
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex2f(p[i][0], p[i][1]);
-    }
-    IR::End();
+    const mu::Vertex2D vertices[4] = {
+        {x, y, u, v + vHeight * 0.25f, color},
+        {x, y - Height, u, v + vHeight - vHeight * 0.25f, color},
+        {x + Width, y - Height, u + uWidth, v + vHeight, color},
+        {x + Width, y, u + uWidth, v, color},
+    };
+    mu::GetRenderer().RenderQuad2D(vertices, static_cast<std::uint32_t>(Texture));
 }
 
 ///////////////////////////////////////////////////////////////////////////////

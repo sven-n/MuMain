@@ -2,8 +2,6 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Core/RenderConfig.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -16,6 +14,8 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Random.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 
 #include <algorithm>
 #include <array>
@@ -91,6 +91,52 @@ std::array<Blur, MAX_BLURS> g_blurs{};
 std::array<ObjectBlur, MAX_OBJECT_BLURS> g_objectBlurs{};
 std::array<physics_vertex, FLAG_HEIGHT * FLAG_WIDTH> g_flagVertices{};
 std::array<physics_face, (FLAG_HEIGHT - 1) * (FLAG_WIDTH - 1)> g_flagFaces{};
+
+template <typename BlurType>
+void RenderBlurSegment(const BlurType& blur, int segment, float firstLight, float secondLight)
+{
+    const float firstU = segment / static_cast<float>(blur.Number);
+    const float secondU = (segment + 1) / static_cast<float>(blur.Number);
+    const std::uint32_t firstColor =
+        mu::PackABGR(blur.Light[0] * firstLight, blur.Light[1] * firstLight, blur.Light[2] * firstLight, 1.f);
+    const std::uint32_t secondColor =
+        mu::PackABGR(blur.Light[0] * secondLight, blur.Light[1] * secondLight, blur.Light[2] * secondLight, 1.f);
+
+    const mu::Vertex3D firstTop = {blur.P1[segment][0], blur.P1[segment][1], blur.P1[segment][2],
+                                   0.f, 0.f, 1.f, firstU, 1.f, firstColor};
+    const mu::Vertex3D firstBottom = {blur.P2[segment][0], blur.P2[segment][1], blur.P2[segment][2],
+                                      0.f, 0.f, 1.f, firstU, 0.f, firstColor};
+    const mu::Vertex3D secondBottom = {blur.P2[segment + 1][0], blur.P2[segment + 1][1], blur.P2[segment + 1][2],
+                                       0.f, 0.f, 1.f, secondU, 0.f, secondColor};
+    const mu::Vertex3D secondTop = {blur.P1[segment + 1][0], blur.P1[segment + 1][1], blur.P1[segment + 1][2],
+                                    0.f, 0.f, 1.f, secondU, 1.f, secondColor};
+    const mu::Vertex3D vertices[4] = {
+        firstTop, firstBottom, secondBottom, secondTop,
+    };
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+}
+
+void RenderFlagFace(OBJECT* object, const vec3_t light, int texture, const float texCoord[4][2],
+                    const physics_face& face, bool reverse)
+{
+    BindTexture(texture);
+    mu::Vertex3D vertices[4];
+    for (int output = 0; output < 4; ++output)
+    {
+        const int source = reverse ? 3 - output : output;
+        const physics_vertex& vertex = g_flagVertices[face.vlist[source]];
+        vec3_t localPosition;
+        vec3_t worldPosition;
+        Vector(vertex.p[0] + 9.f, vertex.p[1] - 12.f, vertex.p[2] - 35.f, localPosition);
+        Models[object->Type].TransformPosition(object->BoneTransform[19], localPosition, worldPosition, true);
+        vertices[output] = {
+            worldPosition[0], worldPosition[1], worldPosition[2], 0.f, 0.f, 1.f,
+            texCoord[source][0], texCoord[source][1],
+            mu::PackABGR(light[0] * vertex.light, light[1] * vertex.light, light[2] * vertex.light, 1.f),
+        };
+    }
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
+}
 
 } // namespace
 
@@ -215,30 +261,17 @@ void RenderBlurs()
             BindTexture(nTexture);
             for (int j = 0; j < blur.Number - 1; j++)
             {
-                IR::Begin(GL_TRIANGLE_FAN);
-                float Light;
-                float TexU;
+                float firstLight;
                 if (blur.Owner->Level == 0)
-                    Light = (blur.Number - j) / static_cast<float>(blur.Number);
+                    firstLight = (blur.Number - j) / static_cast<float>(blur.Number);
                 else
-                    Light = 1.f;
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j) / static_cast<float>(blur.Number);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j]);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j]);
+                    firstLight = 1.f;
+                float secondLight;
                 if (blur.Owner->Level == 0)
-                    Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
+                    secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
                 else
-                    Light = 1.f;
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j + 1) / static_cast<float>(blur.Number);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j + 1]);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j + 1]);
-                IR::End();
+                    secondLight = 1.f;
+                RenderBlurSegment(blur, j, firstLight, secondLight);
             }
         }
     }
@@ -385,22 +418,9 @@ void RenderObjectBlurs()
                     }
                 }
 
-                IR::Begin(GL_TRIANGLE_FAN);
-                float Light = (blur.Number - j) / static_cast<float>(blur.Number);
-                float TexU = (j) / static_cast<float>(blur.Number);
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j]);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j]);
-                Light = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
-                IR::Color3f(blur.Light[0] * Light, blur.Light[1] * Light, blur.Light[2] * Light);
-                TexU = (j + 1) / static_cast<float>(blur.Number);
-                IR::TexCoord2f(TexU, 0.f);
-                IR::Vertex3fv(blur.P2[j + 1]);
-                IR::TexCoord2f(TexU, 1.f);
-                IR::Vertex3fv(blur.P1[j + 1]);
-                IR::End();
+                const float firstLight = (blur.Number - j) / static_cast<float>(blur.Number);
+                const float secondLight = (blur.Number - (j + 1)) / static_cast<float>(blur.Number);
+                RenderBlurSegment(blur, j, firstLight, secondLight);
             }
         }
     }
@@ -632,35 +652,8 @@ void RenderFlagFace(OBJECT* o, int x, int y, vec3_t Light, int Tex1, int Tex2)
         v->light = (-v->normal[0] + v->normal[1]) * 0.5f + 0.5f;
     }
 
-    BindTexture(Tex2);
-    IR::Begin(GL_QUADS);
-    for (int i = 0; i < n; i++)
-    {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        IR::TexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        IR::Color3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
-        vec3_t p, Position;
-        Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
-        Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        IR::Vertex3f(Position[0], Position[1], Position[2]);
-    }
-    IR::End();
-
-    BindTexture(Tex1);
-    IR::Begin(GL_QUADS);
-    for (int i = n - 1; i >= 0; i--)
-    {
-        int vlist = f->vlist[i];
-        physics_vertex* v = &g_flagVertices[vlist];
-        IR::TexCoord2f(TexCoord[i][0], TexCoord[i][1]);
-        IR::Color3f(Light[0] * v->light, Light[1] * v->light, Light[2] * v->light);
-        vec3_t p, Position;
-        Vector(v->p[0] + 9.f, v->p[1] - 12.f, v->p[2] - 35.f, p);
-        Models[o->Type].TransformPosition(o->BoneTransform[19], p, Position, true);
-        IR::Vertex3f(Position[0], Position[1], Position[2]);
-    }
-    IR::End();
+    RenderFlagFace(o, Light, Tex2, TexCoord, *f, false);
+    RenderFlagFace(o, Light, Tex1, TexCoord, *f, true);
 }
 
 void RenderFlag(OBJECT* o, vec3_t Light, int Tex1, int Tex2)

@@ -6,10 +6,10 @@
 class CKanturuDirection
 {
 public:
-    int		m_iKanturuState;
-    int		m_iMayaState;
-    int		m_iNightmareState;
-    bool	m_bKanturuDirection;
+    int m_iKanturuState;
+    int m_iMayaState;
+    int m_iNightmareState;
+    bool m_bKanturuDirection;
 
     CKanturuDirection();
     virtual ~CKanturuDirection();
@@ -34,9 +34,9 @@ private:
         float distance;
     };
 
-    bool	m_bMayaDie;
-    bool	m_bMayaAppear;
-    bool	m_bDirectionEnd;
+    bool m_bMayaDie;
+    bool m_bMayaAppear;
+    bool m_bDirectionEnd;
 
     void GetKanturuMayaState(std::uint8_t DetailState);
     void GetKanturuNightmareState(std::uint8_t DetailState);

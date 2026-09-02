@@ -73,7 +73,6 @@ bool SEASON3B::CNewUIDuelWindow::Update()
 bool SEASON3B::CNewUIDuelWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     RenderFrame();
     RenderContents();

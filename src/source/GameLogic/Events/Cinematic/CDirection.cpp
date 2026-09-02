@@ -21,35 +21,32 @@ static CDirection Direction;
 
 namespace
 {
-    constexpr float kPi = 3.14159265358979323846f;
-    constexpr float kRadToDeg = 180.0f / kPi;
+constexpr float kPi = 3.14159265358979323846f;
+constexpr float kRadToDeg = 180.0f / kPi;
 
-    float UnwindDegrees360(float degrees)
-    {
-        degrees = std::fmod(degrees, 360.0f);
-        if (degrees < 0.0f)
-            degrees += 360.0f;
-        return degrees;
-    }
-
-    CHARACTER* FindLiveCharacterByKey(int key)
-    {
-        auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
-        auto* const it = std::find_if(CharactersClient, end, [key](const CHARACTER& c) {
-            return c.Object.Live && c.Key == key;
-        });
-        return (it != end) ? it : nullptr;
-    }
+float UnwindDegrees360(float degrees)
+{
+    degrees = std::fmod(degrees, 360.0f);
+    if (degrees < 0.0f)
+        degrees += 360.0f;
+    return degrees;
 }
+
+CHARACTER* FindLiveCharacterByKey(int key)
+{
+    auto* const end = CharactersClient + MAX_CHARACTERS_CLIENT;
+    auto* const it =
+        std::find_if(CharactersClient, end, [key](const CHARACTER& c) { return c.Object.Live && c.Key == key; });
+    return (it != end) ? it : nullptr;
+}
+} // namespace
 
 CDirection::CDirection()
 {
     Init();
 }
 
-CDirection::~CDirection()
-{
-}
+CDirection::~CDirection() {}
 
 void CDirection::Init()
 {
@@ -183,10 +180,13 @@ float CDirection::CalculateAngle(CHARACTER* c, int x, int y, float Angle)
     return UnwindDegrees360(yawFromPositiveY);
 }
 
-void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni, float AniSpeed)
+void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angle, bool NextCheck, bool SummonAni,
+                                     float AniSpeed)
 {
     CHARACTER* c = nullptr;
-    DirectionMonster DMonster = { 0, };
+    DirectionMonster DMonster = {
+        0,
+    };
 
     DMonster.m_Index = stl_Monster.size();
     DMonster.m_bAngleCheck = true;
@@ -205,14 +205,28 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
 
     switch (Type)
     {
-    case 344: Index = MODEL_BALRAM;	break;
-    case 341: Index = MODEL_SORAM;	break;
+    case 344:
+        Index = MODEL_BALRAM;
+        break;
+    case 341:
+        Index = MODEL_SORAM;
+        break;
     case 440:
-    case 340: Index = MODEL_DARK_ELF_1;	break;
-    case 345: Index = MODEL_DEATH_SPIRIT;	break;
-    case 348: Index = MODEL_BALLISTA;	break;
-    case 349: Index = MODEL_BALGASS;	break;
-    case 361: Index = MODEL_DARK_SKULL_SOLDIER_5;	break;
+    case 340:
+        Index = MODEL_DARK_ELF_1;
+        break;
+    case 345:
+        Index = MODEL_DEATH_SPIRIT;
+        break;
+    case 348:
+        Index = MODEL_BALLISTA;
+        break;
+    case 349:
+        Index = MODEL_BALGASS;
+        break;
+    case 361:
+        Index = MODEL_DARK_SKULL_SOLDIER_5;
+        break;
     }
 
     BMD* b = &Models[Index];
@@ -258,7 +272,8 @@ void CDirection::SummonCreateMonster(EMonsterType Type, int x, int y, float Angl
         }
     }
 
-    if (NextCheck) m_iCheckTime++;
+    if (NextCheck)
+        m_iCheckTime++;
 }
 
 bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Speed)
@@ -273,7 +288,8 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
     int PresentX = (int)(c->Object.Position[0]) / TERRAIN_SCALE;
     int PresentY = (int)(c->Object.Position[1]) / TERRAIN_SCALE;
 
-    if (PresentX == x && PresentY == y) bNext = true;
+    if (PresentX == x && PresentY == y)
+        bNext = true;
 
     if (!bNext)
     {
@@ -281,7 +297,7 @@ bool CDirection::MoveCreatedMonster(int Index, int x, int y, float Angle, int Sp
 
         if (stl_Monster[Index].m_bAngleCheck)
         {
-            int	iAngle1 = (int)CalculateAngle(c, x, y, Angle);
+            int iAngle1 = (int)CalculateAngle(c, x, y, Angle);
             int iAngle2 = (int)c->Object.Angle[2];
 
             if ((iAngle1 - Angle) > 180)
@@ -335,7 +351,8 @@ bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool Tan
     if (c == nullptr)
         return false;
 
-    if (stl_Monster[Index].m_iActionCheck == Count) bNext = true;
+    if (stl_Monster[Index].m_iActionCheck == Count)
+        bNext = true;
 
     if (!bNext)
     {
@@ -346,7 +363,8 @@ bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool Tan
             stl_Monster[Index].m_iActionCheck++;
 
             if (TankerAttack)
-                CreateEffect(MODEL_ARROW_TANKER, c->Object.Position, c->Object.Angle, c->Object.Light, 1, &c->Object, c->Object.PKKey);
+                CreateEffect(MODEL_ARROW_TANKER, c->Object.Position, c->Object.Angle, c->Object.Light, 1, &c->Object,
+                             c->Object.PKKey);
         }
     }
     else
@@ -357,7 +375,8 @@ bool CDirection::ActionCreatedMonster(int Index, int Action, int Count, bool Tan
             m_iCheckTime++;
         }
 
-        if (c->Object.AnimationFrame >= 8.0f) return true;
+        if (c->Object.AnimationFrame >= 8.0f)
+            return true;
     }
 
     return false;
@@ -421,7 +440,8 @@ void CDirection::HeroFallingDownInit()
 
 void CDirection::CameraLevelUp()
 {
-    if (m_CameraLevel < 4) m_CameraLevel++;
+    if (m_CameraLevel < 4)
+        m_CameraLevel++;
 }
 
 void CDirection::SetNextDirectionPosition(int x, int y, int z, float Speed)

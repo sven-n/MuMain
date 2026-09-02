@@ -6,24 +6,28 @@ namespace Render::Effects::DrawOrder
 {
     namespace
     {
-        // Groups one stretch [first, last) of reorderable entries by texture.
-        //
-        // std::stable_sort, not sort: two particles sharing a texture must keep their
-        // relative order. They are additive and so commutative in colour, but keeping the
-        // order makes the result identical to the unsorted path rather than merely
-        // equivalent, which is what makes an A/B comparison meaningful.
-        void GroupStretch(Entry* first, Entry* last)
+        void GroupStretch(Entry* entries, Entry* scratch, size_t count)
         {
-            std::stable_sort(first, last, [](const Entry& a, const Entry& b)
+            for (size_t width = 1; width < count; width *= 2)
             {
-                return a.textureKey < b.textureKey;
-            });
+                for (size_t first = 0; first < count; first += width * 2)
+                {
+                    const size_t middle = std::min(first + width, count);
+                    const size_t last = std::min(first + width * 2, count);
+                    std::merge(entries + first, entries + middle, entries + middle, entries + last,
+                        scratch + first, [](const Entry& left, const Entry& right)
+                        {
+                            return left.textureKey < right.textureKey;
+                        });
+                }
+                std::copy_n(scratch, count, entries);
+            }
         }
     }
 
-    void GroupByTexture(Entry* entries, size_t count)
+    void GroupByTexture(Entry* entries, size_t count, Entry* scratch)
     {
-        if (entries == nullptr || count < 2) return;
+        if (entries == nullptr || scratch == nullptr || count < 2) return;
 
         size_t stretchStart = 0;
         for (size_t i = 0; i <= count; i++)
@@ -34,7 +38,7 @@ namespace Render::Effects::DrawOrder
             // A stretch of one cannot be reordered into anything different.
             if (i - stretchStart >= 2)
             {
-                GroupStretch(entries + stretchStart, entries + i);
+                GroupStretch(entries + stretchStart, scratch + stretchStart, i - stretchStart);
             }
             stretchStart = i + 1;
         }

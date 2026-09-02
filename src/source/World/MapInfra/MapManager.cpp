@@ -1,4 +1,4 @@
-// MapManager.cpp: implementation of the CMapManager class.
+﻿// MapManager.cpp: implementation of the CMapManager class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -109,7 +109,7 @@ void CMapManager::Load() // OK
         gLoadData.AccessModel(MODEL_BOSS_HEAD, L"Data\\Object6\\", L"BossHead", 1);
         gLoadData.AccessModel(MODEL_PRINCESS, L"Data\\Object6\\", L"Princess", 1);
         for (int i = MODEL_BIG_METEO1; i <= MODEL_PRINCESS; i++)
-            gLoadData.OpenTexture(i, L"Object6\\");
+            gLoadData.OpenTexture(i, L"Object6\\", GL_NEAREST);
         break;
     case WD_6STADIUM:
         gLoadData.AccessModel(MODEL_BUG01, L"Data\\Object7\\", L"Bug", 1);
@@ -1506,16 +1506,16 @@ void CMapManager::LoadWorld(int Map)
         g_pNewUIMiniMap->UnloadImages();
         g_pNewUIMiniMap->LoadImages(WorldName);
     }
-
-    CreateTerrainVBO();
 }
 
 void CMapManager::DeleteObjects()
 {
-    DestroyTerrainVBO();
-    for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+    if (Models != nullptr)
     {
-        Models[i].Release();
+        for (int i = MODEL_WORLD_OBJECT; i < MAX_WORLD_OBJECTS; i++)
+        {
+            Models[i].Release();
+        }
     }
 
     for (int i = 0; i < 16; i++)

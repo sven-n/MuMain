@@ -94,7 +94,6 @@ bool SEASON3B::CNewUIHelpWindow::Update()
 bool SEASON3B::CNewUIHelpWindow::Render()
 {
     EnableAlphaTest();
-    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 
     // Reference-bind to the global arrays in ZzzInventory.cpp. A naive
     // `extern wchar_t TextList[50][100];` here would resolve to
@@ -132,12 +131,8 @@ bool SEASON3B::CNewUIHelpWindow::Render()
         // Insert engine-added camera and MU Helper hotkey entries between F4
         // and the rest of the shipped entries.
         const wchar_t* const extraHelpLines[] = {
-            I18N::Game::F8ToggleMonsterHPBar,
-            I18N::Game::F9Toggle3DCamera,
-            I18N::Game::F10LockUnlockCameraZoom,
-            I18N::Game::F11ResetCameraView,
-            I18N::Game::HomeToggleMUHelper,
-            I18N::Game::JToggleChatCommands,
+            I18N::Game::F8ToggleMonsterHPBar, I18N::Game::F9Toggle3DCamera,   I18N::Game::F10LockUnlockCameraZoom,
+            I18N::Game::F11ResetCameraView,   I18N::Game::HomeToggleMUHelper, I18N::Game::JToggleChatCommands,
         };
         for (const wchar_t* line : extraHelpLines)
         {
@@ -268,13 +263,12 @@ void SEASON3B::CNewUIHelpWindow::OpenningProcess()
     m_iIndex = 0;
 }
 
-void SEASON3B::CNewUIHelpWindow::ClosingProcess()
-{
-}
+void SEASON3B::CNewUIHelpWindow::ClosingProcess() {}
 
 void SEASON3B::CNewUIHelpWindow::AutoUpdateIndex()
 {
-    if (++m_iIndex > 1) {
+    if (++m_iIndex > 1)
+    {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
     }
 }

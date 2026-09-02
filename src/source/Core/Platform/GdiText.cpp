@@ -2,10 +2,10 @@
 //
 // CUIRenderText draws UI text the Win32 way: TextOut rasterizes white-on-black
 // into a 24bpp top-down DIB section, and the engine scans those pixels into a
-// GL texture. This file reproduces exactly that contract with stb_truetype:
-// CreateFont resolves a system TTF by weight, CreateDIBSection allocates the
-// pixel buffer with DIB pitch rules, and TextOut composites antialiased glyph
-// coverage between the DC's background and text colors.
+// GL texture. This file reproduces that contract with stb_truetype. CreateFont
+// resolves packaged roles, with system lookup allowed only in Debug builds.
+// CreateDIBSection allocates the pixel buffer with DIB pitch rules, and TextOut
+// composites antialiased glyph coverage between the DC's colors.
 #ifndef _WIN32
 
 #include "Core/Platform/WinGdi.h"
@@ -25,9 +25,9 @@
 #include <utility>
 #include <vector>
 
-#include <unistd.h>                    // readlink (executable path)
 #include "Core/Platform/WinNls.h"      // WideCharToMultiByte / CP_UTF8
 #include "Core/Platform/BundledFonts.h" // curated font list shared with Windows
+#include "Core/Utilities/Log/MuLogger.h"
 
 namespace
 {
@@ -82,9 +82,7 @@ namespace
         return (obj && obj->kind == kind) ? static_cast<T*>(obj) : nullptr;
     }
 
-    // Candidate faces per weight class, tried in order. MU_FONT/MU_FONT_BOLD
-    // override the lookup for systems whose fonts live elsewhere.
-
+#ifndef NDEBUG
     // Ask fontconfig for a font file via fc-match. This is the distro-agnostic
     // way to locate a system font (paths differ across Debian/Fedora/Arch/etc.),
     // and works without linking libfontconfig. `family` is the requested UI font
@@ -110,6 +108,7 @@ namespace
             out.pop_back();
         return out;
     }
+#endif
 
     // UTF-8 copy of a wide string via the WideCharToMultiByte shim - the same
     // conversion the rest of the engine uses, rather than a hand-rolled encoder.
@@ -123,32 +122,17 @@ namespace
         return std::string(buf.data());   // stops at the trailing NUL
     }
 
-    // Directory of the running executable (with a trailing '/'), so bundled fonts
-    // resolve regardless of the working directory. Read via /proc/self/exe, the
-    // same way Dotnet/Connection.h locates the client library. Empty on failure.
-    const std::string& ExeDir()
-    {
-        static const std::string dir = []() -> std::string {
-            char buf[4096];
-            const ssize_t n = ::readlink("/proc/self/exe", buf, sizeof(buf) - 1);
-            if (n <= 0) return {};
-            buf[n] = '\0';
-            const std::string path(buf);
-            const auto slash = path.find_last_of('/');
-            return slash == std::string::npos ? std::string() : path.substr(0, slash + 1);
-        }();
-        return dir;
-    }
-
     // Curated fonts shipped in the client's ./fonts directory. Resolving these by
     // name lets a chosen font work even when it is not installed system-wide, so
     // every option the UI offers is guaranteed present. Names match what the
     // options UI lists and what config stores.
     std::string BundledFontPath(const std::string& family, bool bold)
     {
+        if (family == kBundledFixedFont.family)
+            return ResolveBundledFontPath(bold ? kBundledFixedFont.bold : kBundledFixedFont.regular).string();
         for (const auto& e : kBundledFonts)
             if (family == e.family)
-                return ExeDir() + (bold ? e.bold : e.regular);
+                return ResolveBundledFontPath(bold ? e.bold : e.regular).string();
         return {};
     }
 
@@ -164,20 +148,21 @@ namespace
         {
             if (it->second.valid)
                 return &it->second;
-            // Already scanned and failed: bold reuses regular, regular gives up.
+#ifndef NDEBUG
             return bold ? LoadFace(family, false) : nullptr;
+#else
+            return nullptr;
+#endif
         }
         MuGdiFace& face = s_cache[key];   // default-inserts the (empty) entry
 
-        // Order: explicit override, then fontconfig for the requested family,
-        // then well-known paths as a last resort if fontconfig is missing.
+        const std::string bundledPath = BundledFontPath(family, bold);
         std::vector<std::string> candidates;
+        if (!bundledPath.empty())
+            candidates.push_back(bundledPath);
+#ifndef NDEBUG
         if (const char* envPath = std::getenv(bold ? "MU_FONT_BOLD" : "MU_FONT"))
             candidates.emplace_back(envPath);
-        // Prefer a bundled curated font (./fonts) so a chosen name always works,
-        // even without a system install. Falls through to fontconfig if absent.
-        if (std::string bundled = BundledFontPath(family, bold); !bundled.empty())
-            candidates.push_back(std::move(bundled));
         if (std::string fc = FontconfigMatch(family, bold); !fc.empty())
             candidates.push_back(std::move(fc));
         const char* fallbacks[] = {
@@ -194,6 +179,7 @@ namespace
         };
         for (const char* f : fallbacks)
             candidates.emplace_back(f);
+#endif
 
         for (const std::string& path : candidates)
         {
@@ -215,23 +201,23 @@ namespace
             std::fclose(fp);
             if (face.valid)
             {
-                RecordFontDiag((bold ? "bold:    " : "regular: ") + path);
+                const char* source = path == bundledPath ? "bundled " : "NON-PARITY developer fallback ";
+                RecordFontDiag((bold ? "bold:    " : "regular: ") + std::string(source) + path);
                 return &face;
             }
             face.data.clear();
         }
 
-        // No bold face found: fall back to the regular one rather than no text.
+#ifndef NDEBUG
         if (bold)
         {
-            RecordFontDiag("bold:    not found, using regular");
+            RecordFontDiag("bold:    NON-PARITY developer fallback using regular");
             return LoadFace(family, false);
         }
+#endif
 
-        RecordFontDiag("regular: NOT FOUND (fontconfig and known paths failed)");
-        std::fprintf(stderr, "[GdiText] No usable TTF found; UI text disabled. "
-                             "Install a sans-serif font (e.g. fonts-dejavu-core) "
-                             "or set MU_FONT to a .ttf path.\n");
+        RecordFontDiag((bold ? "bold:    " : "regular: ") + std::string("bundled NOT FOUND ") + bundledPath);
+        mu::log::Get("render")->error("GdiText -- bundled TTF unavailable: {}", bundledPath);
         return nullptr;
     }
 
@@ -262,14 +248,9 @@ HFONT CreateFontW(int cHeight, int /*cWidth*/, int /*cEscapement*/, int /*cOrien
                   DWORD /*iCharSet*/, DWORD /*iOutPrecision*/, DWORD /*iClipPrecision*/,
                   DWORD /*iQuality*/, DWORD /*iPitchAndFamily*/, LPCWSTR pszFaceName)
 {
-    // The requested GDI face name is the font selector's channel: the shared font
-    // factory passes the configured UI font name here. "Tahoma" is the built-in
-    // default and has no Linux equivalent, so map it to the empty family and let
-    // fontconfig pick the system sans-serif (unchanged default look). Any other
-    // name is resolved as-is via fontconfig.
     std::string family = ToUtf8(pszFaceName);
-    if (family == "Tahoma")
-        family.clear();
+    if (family.empty() || family == "Tahoma")
+        family = std::string(kDefaultBundledFontFamily);
 
     const MuGdiFace* face = LoadFace(family, cWeight >= FW_SEMIBOLD);
     if (!face)

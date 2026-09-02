@@ -137,7 +137,7 @@ BOOL CDuelMgr::IsDuelPlayer(WORD wIndex, int iPlayerNum)
 
 void CDuelMgr::SendDuelRequestAnswer(int iPlayerNum, BOOL bOK)
 {
-    SocketClient->ToGameServer()->SendDuelStartResponse(bOK, m_DuelPlayer[iPlayerNum].m_sIndex, m_DuelPlayer[iPlayerNum].m_szID);
+    SocketClient->ToGameServer()->SendDuelStartResponse(bOK, m_DuelPlayer[iPlayerNum].m_sIndex, MU_C16(m_DuelPlayer[iPlayerNum].m_szID));
 }
 
 void CDuelMgr::SetDuelChannel(int iChannelIndex, BOOL bEnable, BOOL bJoinable, const wchar_t* pszID1, const wchar_t* pszID2)

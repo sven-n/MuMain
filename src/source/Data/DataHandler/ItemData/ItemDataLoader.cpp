@@ -25,7 +25,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     {
         std::wstringstream ss;
         ss << fileName << L" - File not exist.";
-        DataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ReportError(ss.str().c_str());
         return false;
     }
 
@@ -35,9 +35,7 @@ bool ItemDataLoader::Load(wchar_t* fileName)
     fseek(fp, 0, SEEK_SET);
 
     const int LegacySize = sizeof(ITEM_ATTRIBUTE_FILE_LEGACY);
-    const int NewSize = sizeof(ITEM_ATTRIBUTE_FILE);
     const long expectedLegacySize = LegacySize * MAX_ITEM + sizeof(DWORD);
-    const long expectedNewSize = NewSize * MAX_ITEM + sizeof(DWORD);
 
     bool isLegacyFormat = (fileSize == expectedLegacySize);
     bool success = false;
@@ -101,7 +99,7 @@ bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
     {
         std::wstringstream ss;
         ss << L"Failed to read item file (" << formatName << L").";
-        DataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ReportError(ss.str().c_str());
         return false;
     }
 
@@ -110,7 +108,7 @@ bool ItemDataLoader::LoadFormat(FILE* fp, const wchar_t* formatName)
     {
         std::wstringstream ss;
         ss << L"Item file corrupted (" << formatName << L").";
-        DataFileIO::ShowErrorAndExit(ss.str().c_str());
+        DataFileIO::ReportError(ss.str().c_str());
         return false;
     }
 

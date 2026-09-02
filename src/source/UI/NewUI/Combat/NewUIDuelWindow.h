@@ -46,8 +46,8 @@ namespace SEASON3B
         void RenderFrame();
         void RenderContents();
 
-        CNewUIManager* m_pNewUIMng;		// UI ¸Å´ÏÀú.
-        POINT m_Pos;					// Ã¢ÀÇ À§Ä¡.
+        CNewUIManager* m_pNewUIMng;		// UI ë§¤ë‹ˆì €.
+        POINT m_Pos;					// ì°½ì˜ ìœ„ì¹˜.
     };
 }
 

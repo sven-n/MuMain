@@ -1,72 +1,101 @@
-# Gotchas, Technical Invariants & Architectural Patterns
+# GPU Rendering Gotchas and Invariants
 
-This document catalogues critical technical gotchas, thread safety rules, cache invalidation pitfalls, and performance invariants established during the implementation of the GPU skinning engine and modern graphics subsystem.
+## Bone palettes
 
----
+- A palette is a contiguous span of row-major 3x4 affine matrices: exactly 12
+  floats per bone. `RenderSkinnedTriangles()` rejects empty or misaligned spans.
+- Position and normal bone indices are separate. Reusing the position index for
+  normals changes lighting on models whose source data distinguishes them.
+- Pointer-only palette deduplication is unsafe. Stack-local arrays may reuse an
+  address with different contents. Cache identity therefore includes both the
+  palette pointer and `paletteVersion`.
+- The per-frame bone storage buffer must grow before recording an offset. A
+  failed growth or upload returns the draw to CPU fallback rather than recording
+  a partial command.
+- Uniform arrays and the nested skinning uniform block are value-initialized.
+  The shader reads full 16-byte lanes even when C++ assigns only the used fields.
 
-## 1. Skeletal Skinning & Memory Invariants
+## Lazy CPU materialization
 
-### 1.1 `MAX_BONES = 200` Allocation & Upload Rule
-- **Gotcha**: Equipped armor models (`bmdArmor`) store small internal `NumBones` counts (e.g. 12 to 15), but armor vertices reference bone indices across the entire character skeleton (0 to 199).
-- **Rule**: `BoneUBO::UploadBones()` must upload all `MAX_BONES` (200) matrices. Heap allocations for `BoneTransform` across all character, pet, and object structures must allocate `new vec34_t[MAX_BONES]` to prevent out-of-bounds heap reads during upload.
+- `TransformCheap()` records animation state without eagerly transforming every
+  vertex.
+- `EnsureCpuVertices()` and `EnsureCpuNormals()` materialize data for fallback
+  consumers. State such as body scale, bone scale, and translate mode must be
+  captured when the deferred transform is requested, not read later from
+  mutable globals.
+- Cloth, shadow-volume, shadow-map, and vertex-wave paths intentionally remain
+  CPU consumers. GPU eligibility must not bypass their materialization calls.
 
-### 1.2 Version-Stamped Palette Deduplication vs. Stack-Local Pointer Hazard
-- **Gotcha**: Sub-item rendering (e.g., wings, attached effect meshes) allocates `BoneTransform` arrays on the CPU execution stack. Consecutive rendering calls frequently receive the *exact same stack memory address* populated with *different matrix data*.
-- **Rule**: Never use pointer-only comparison (`pTransform == g_pLastTransform`) to skip uploading bone matrix uniform buffers. Updates MUST bump a version stamp (`g_BoneTransformVersion++`), and cache checks must validate both `(ptr, version)` pairs.
+## Shader compatibility
 
-### 1.3 `TransformCheap` Lazy Materialization & Ambient Global State Snapshotting
-- **Pattern**: `BMD::TransformCheap()` defers CPU vertex skinning calculations until a consumer explicitly requests CPU vertex/normal positions via `EnsureCpuVertices()`.
-- **Gotcha**: Ambient global state (such as `BoneScale`) set prior to `Transform()` and reset immediately after will be lost if read later during deferred materialization.
-- **Rule**: Deferred computations depending on ambient global state **MUST** snapshot that state into instance variables (e.g., `m_LastBoneScale`) at the moment the request is made.
+- `SkinningTextureCoordinates` distinguishes mesh UVs, Chrome through Chrome7,
+  Oil, and Metal. Do not collapse modes merely because legacy render flags share
+  bits.
+- Chrome UVs depend on animated wave, light, offset, and time values. A GPU path
+  is equivalent only when those parameters are forwarded.
+- `translate == false` means placement is already represented by the palette;
+  the shader must not add body origin a second time.
+- C++ uniform layout, HLSL declarations, and generated MSL/SPIR-V bindings form
+  one contract. Keep size assertions and shader validation together.
 
-### 1.4 Planar Shadow Division Explosion & Dummy Bones
-- **Gotcha**: Planar shadow projection applies a GPU skew matrix involving division: $\text{skewX} = \frac{z_{\text{rel}} \cdot (x_{\text{rel}} + s_x)}{z_{\text{rel}} - s_y}$. Models with uninitialized or Dummy bone slots carry stale memory into `u_Bones`, causing division near zero and stretching shadows across billions of world units ("infinity shadow").
-- **Rule**: `BoneTransform` arrays must be fully initialized/zeroed, including Dummy bone slots that do not contain mesh vertex weights.
+## Deferred command lifetime
 
----
+- Draw inputs must be copied into renderer-owned per-frame scratch storage before
+  the caller's span expires.
+- A `RenderCmd` snapshots pipeline, texture, sampler, offsets, fog, and vertex
+  uniforms. Replay must not consult mutable draw state from a later call.
+- Commands replay in submission order. Merging is allowed only for adjacent
+  triangle commands with identical compatible state.
+- `BeginFrame()` and `EndFrame()` bound all queued data. Submission outside an
+  active frame is rejected.
 
-## 2. Rendering, Shaders & Color Pipeline Gotchas
+## Batching and profiling
 
-### 2.1 Vertex Color Clamping in GLSL Shaders
-- **Gotcha**: Fixed-function OpenGL clamped vertex colors `glColor3fv()` to `[0, 1]` automatically before texture modulation. In GLSL shaders, unclamped vertex color values $> 1.0$ (from intense point lights) multiply texture colors to pure blown-out white.
-- **Rule**: All fragment shaders modulating vertex colors must explicitly clamp input colors: `clamp(v_Color, 0.0, 1.0)`.
+- Do not reorder blended terrain by texture pair. Base and overlay layers are
+  separate downstream draws, and overlays may render with depth testing off.
+  Only adjacent compatible commands may merge.
+- A merge key must include pipeline, texture, sampler, MVP, fog, and contiguous
+  vertex storage. Omitting captured state can replay earlier geometry with a
+  later draw's settings.
+- `FrameProfiler` is renderer-neutral. Do not add raw GL or SDL GPU query calls
+  to it; backend statistics belong in `RendererStats`.
+- `$glstats` reports CPU pass and SDL GPU submission timings. It does not claim
+  per-pass GPU time.
+- Reset profiler values after every overlay has consumed them, including frames
+  where neither overlay is visible.
 
-### 2.2 Collapsed/Aliased Render-Mode Enum Dispatch
-- **Gotcha**: `BMD::RenderMesh()` evaluates GPU skinning eligibility against `finalRenderFlags`. Multiple distinct visual flags (CHROME2, CHROME3, CHROME5, CHROME6, CHROME7, METAL) collapse into the single enum value `RENDER_CHROME`.
-- **Rule**: When adding GPU shader eligibility checks keyed on an enum, verify every flag that maps to that bucket shares identical downstream shader mathematics.
+## Textures and resources
 
-### 2.3 Bind Cache Invalidation on Resource Deletion (`glDelete*`)
-- **Gotcha**: Driver resource deletion functions (`glDeleteVertexArrays`, `glDeleteTextures`) silently reset active driver bindings to 0 when deleting the currently bound resource. A driver bind cache unaware of deletion retains stale resource IDs, causing subsequent `Bind*(id)` calls to falsely hit the cache and skip real binding.
-- **Rule**: Every deletion call site must explicitly invalidate binding caches via `InvalidateVAOCache()`, `InvalidateTextureCache()`, etc.
+- Game bitmap IDs are not SDL GPU handles. Resolve them through the renderer's
+  texture and sampler registries.
+- Unknown textures, unavailable pipelines, or failed buffer growth skip the GPU
+  draw safely. Never enqueue a command with incomplete resources.
+- Frame readback is request-driven. Ordinary frames must not allocate transfer
+  buffers or wait on readback fences.
 
----
+## Compatibility boundary
 
-## 3. Concurrency, Animation & Frame Decoupled Sync
+- Historical GL-shaped helpers are wrappers, not permission for gameplay code
+  to call raw graphics APIs.
+- `tools/check_gl_wrapper_monopoly.py` must remain green. New rendering behavior
+  belongs in `IMuRenderer`, its SDL GPU backend, or an existing render-layer
+  compatibility wrapper.
 
-### 3.1 `AnimationTaskPool` Thread Safety & Read Barriers
-- **Gotcha**: `AnimationTaskPool` computes character skeletal animations asynchronously across background worker threads. `WaitCharactersAnimation()` provides the mandatory synchronization barrier.
-- **Rule**: Code executing outside the main render pass (e.g., logic ticks or mouse updates) **MUST NEVER** read `o->BoneTransform` matrices directly while worker threads are actively mutating them.
+## Animation synchronization
 
-### 3.2 Decoupled Render FPS & Fixed-Timestep Animation Acceleration
-- **Gotcha**: Functions advancing state by a fixed per-call increment scaled by `FPS_ANIMATION_FACTOR` (cloth physics `Move2()`, wing flap animation, tour cameras) will speed up proportionally when render FPS increases from 60 FPS to 250+ FPS if invoked from a render-frequency call site.
-- **Rule**: All render-frequency animation/physics updates must be throttled using real-time timers (`std::chrono::steady_clock`) to maintain a constant ~60 Hz simulation rate independent of rendering frame rate.
+- `AnimationTaskPool` workers may update bone transforms asynchronously. Callers
+  must honor the established wait barrier before reading shared palettes.
+- Render-frequency code must not advance fixed-step simulation once per rendered
+  frame. Existing timing controls preserve animation and cloth cadence when FPS
+  changes.
 
-### 3.3 One-Shot UI Render Flags
-- **Gotcha**: UI flags that are set by logic ticks and immediately cleared on the first render frame (e.g., `m_bRenderSkillInfo`) cause visual flickering/strobing when rendering uncapped above the 50 Hz/60 Hz logic tick rate.
-- **Rule**: Render pass code must only **read** UI state flags; logic tick handlers remain the sole authority responsible for clearing interaction flags.
+## Batch-break attribution
 
----
-
-## 4. Profiling & Instrumentation Gotchas
-
-### 4.1 GPU Timer Scope Must Not Exceed the Real Draw Submission
-- **Gotcha**: `FrameProfiler::Scope`'s default `GL_TIMESTAMP` pair brackets the *entire* CPU-scope lifetime (`FRAME_PROFILE(Pass)`), not just the GL draw calls inside it. `GL_TIMESTAMP` measures wall-clock time between two points in the GPU's command stream — if the CPU does real work (gather, sort, culling) between pushing the begin-marker and submitting the actual draw, and the GPU finishes the begin-marker before the CPU finishes that work, the resulting "GPU time" reading includes that CPU-bound idle wait. This produced a false ~3-5ms "GPU regression" for [GLP-16](glperf/README.md#glp-16--bucket-terrain-tiles-by-texture-pair)'s terrain bucketing, when the terrain draws themselves cost <0.01ms (confirmed via Nsight Graphics GPU Trace) — three code-change attempts chased a cost that didn't exist before the measurement bug itself was found.
-- **Rule**: For any pass whose `FRAME_PROFILE` scope spans non-trivial CPU work *before* its GL draw calls, use `FRAME_PROFILE_CPU_ONLY(Pass)` instead of `FRAME_PROFILE(Pass)`, and call `FrameProfiler::GpuTimerBegin(Pass)` / `GpuTimerEnd(Pass)` manually, tightly around just the real draw submission. CPU-ms accounting (`AccumulatorMs`) is unaffected either way — the CPU scope should still cover the whole pass; only the GPU timer's bracket needs narrowing. Trust an outlier GPU-ms reading only as far as the code that produced it — cross-check with an external GPU profiler (Nsight Graphics, RenderDoc) before spending implementation effort chasing it.
-- **Corollary — which direction the artifact runs.** It inflates GPU *toward* CPU; it cannot invent GPU time that exceeds the CPU scope. So `GPU ≈ CPU` on a pass that dribbles out many small draws is probably starvation, not GPU work — but `GPU ≫ CPU` (e.g. `Chars` at GPU 1.51 ms against CPU 0.24 ms) is the one shape the artifact **cannot** manufacture, and can be trusted as real GPU cost.
-- **Related discriminator, not a GPU-timer issue**: GPU work is build-independent, CPU work is not. If a cost is roughly equal in Debug and Release it is GPU or driver; if it shrinks ~3× in Release it was MSVC Debug instrumentation (`_ITERATOR_DEBUG_LEVEL=2` inflates every `std::vector` operation frame-wide). Several apparent wins in the GLP series evaporated on that test — check it *before* acting on a Debug measurement, not after.
-
-### 4.2 State Writers Flush IR *Before* Mutating — So the Batch Key Never Sees the Mismatch
-- **Gotcha**: `IR::Flush()` is called from inside each state writer's dirty check, **before** the state actually changes (`EnableAlphaBlend()` flushes, *then* sets `AlphaBlendType = 3`). This ordering is correct and required — the pending batch must be drawn under the state it was built with. But it means the batch is already gone by the time the next `IR::Begin()` compares `IRBatchKey` against live state, so `Begin()` records **no key mismatch**, only "nothing was pending."
-- **Why this misleads**: instrumenting `Begin()`'s merge decision on a frame with 2,918 unbatched particle draws reported `key mismatches: 0`, which reads as "render state never changes" — the exact opposite of the truth. It was read that way, and a correct earlier finding (that `RenderParticles()` churns blend mode per particle) was retracted on the strength of it. The real answer only appeared after tagging the flush *call sites*: `blend: 2,940` against 2,918 particles, i.e. one blend change per particle.
-- **Rule**: `Begin()`'s key comparison can only explain batch breaks that `Begin()` itself causes. To find out why a pass is not batching, attribute the **`IR::Flush()` call sites**, not the key fields. A `key mismatch: 0` reading is evidence about `Begin()`, and about nothing else.
-- **Related — fixed, but read the history**: `$glstats` used to have **no blend-mode counter**. `TexBind`/`ProgBind`/`UniWr` staying flat across a burst does not mean state is stable — blend is the state that churns in the particle path, and none of those three counters could see it. Absence of a counter was twice misread here as absence of change. The `IRbreak` row now carries the flush-site attribution described in this rule permanently (`Tex/Blend/Depth/Prog/Uni/Mtx/Draw/Other`), so the ad-hoc tagging that produced the `blend: 2,940` finding no longer has to be re-added by hand. The general lesson stands: a counter that does not exist reads exactly like a counter that reads zero.
+- `$glstats` reports SDL GPU triangle batch draws, vertices per batch, and break
+  causes for texture, blend, depth, pipeline, uniform, matrix, intervening draw,
+  or other barriers.
+- Attribute breaks where deferred SDL GPU commands fail to merge. State-wrapper
+  calls only update logical renderer state; adding flush hooks there would restore
+  the retired OpenGL ownership model and double-count attempted changes.
+- Do not count the first triangle command of a frame as a break. A break requires
+  an existing triangle batch candidate that the next submission cannot join.

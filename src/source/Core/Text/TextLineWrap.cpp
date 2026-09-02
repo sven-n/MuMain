@@ -105,13 +105,18 @@ void TrimTrailingSpaces(std::wstring& line)
         line.pop_back();
     }
 }
-}
+} // namespace
 
 std::vector<std::wstring> WrapTextToWidth(const std::wstring& text, int maxWidth, const MeasureTextWidth& measureWidth)
 {
     std::vector<std::wstring> lines;
     if (text.empty() || maxWidth <= 0 || !measureWidth)
     {
+        return lines;
+    }
+    if (text.find_first_not_of(L' ') == std::wstring::npos)
+    {
+        lines.push_back(text);
         return lines;
     }
 

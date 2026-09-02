@@ -14,8 +14,7 @@ public:
 
 private:
     // Generic template method for loading any skill format
-    template<typename TFileFormat>
-    static bool LoadFormat(FILE* fp, const wchar_t* formatName);
+    template <typename TFileFormat> static bool LoadFormat(FILE* fp, const wchar_t* formatName);
 
     // Load legacy format (32-byte names)
     static bool LoadLegacyFormat(FILE* fp, long fileSize);

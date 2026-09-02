@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "UI/Legacy/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -126,7 +127,7 @@ void RenderWaterTerrain(int Texture, float xf, float yf, float SizeX, float Size
 
 void SettingHellasColor()
 {
-    SetClearColor(0.f, 0.f, 0.f, 1.f);
+    mu::GetRenderer().SetClearColor(0.f, 0.f, 0.f, 1.f);
 }
 
 BYTE GetHellasLevel(CLASS_TYPE Class, int Level)
@@ -276,7 +277,6 @@ void AddObjectDescription(wchar_t* Text, vec3_t position)
 
 void RenderObjectDescription()
 {
-    glColor3f(1.f, 1.f, 1.f);
     while (!g_qObjDes.empty())
     {
         ObjectDescript QD = g_qObjDes.front();

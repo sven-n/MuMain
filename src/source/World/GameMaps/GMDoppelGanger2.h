@@ -17,6 +17,7 @@ public:
     virtual bool RenderObjectVisual(OBJECT* o, BMD* b);
     virtual bool RenderObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
     virtual void RenderAfterObjectMesh(OBJECT* o, BMD* b, bool ExtraMon = 0);
+
 public:
     bool CreateFireSpark(PARTICLE* o);
 

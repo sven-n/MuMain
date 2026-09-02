@@ -1,9 +1,9 @@
 /**************************************************************************************************
 
-ÀüÃ¼ Ä«Å×°í¸® ¸ñ·Ï °´Ã¼
+ì „ì²´ ì¹´í…Œê³ ë¦¬ ëª©ë¡ ê°ì²´
 
-iterator¸¦ ÀÌ¿ëÇÏ¿© ¼øÂ÷ÀûÀ¸·Î Ä«Å×°í¸® °´Ã¼¸¦ °¡Á®¿Ã ¼ö ÀÖ´Ù.
-Ä«Å×°í¸® ¹øÈ£¸¦ ÀÌ¿ëÇÏ¿© Ä«Å×°í¸® °´Ã¼¸¦ °¡Á®¿Ã ¼ö ÀÖ´Ù.
+iteratorë¥¼ ì´ìš©í•˜ì—¬ ìˆœì°¨ì ìœ¼ë¡œ ì¹´í…Œê³ ë¦¬ ê°ì²´ë¥¼ ê°€ì ¸ì˜¬ ìˆ˜ ìˆë‹¤.
+ì¹´í…Œê³ ë¦¬ ë²ˆí˜¸ë¥¼ ì´ìš©í•˜ì—¬ ì¹´í…Œê³ ë¦¬ ê°ì²´ë¥¼ ê°€ì ¸ì˜¬ ìˆ˜ ìˆë‹¤.
 
 **************************************************************************************************/
 
@@ -23,17 +23,17 @@ public:
     int GetSize();
     virtual void Append(CShopCategory category);
 
-    void SetFirst();											// Ä«Å×°í¸® ¸ñ·Ï¿¡¼­ Ã¹ ¹øÂ° Ä«Å×°í¸®¸¦ °¡¸®Å°°Ô ÇÑ´Ù.
-    bool GetNext(CShopCategory& category);						// ÇöÀç Ä«Å×°í¸® °´Ã¼¸¦ ³Ñ±â°í ´ÙÀ½ Ä«Å×°í¸® °´Ã¼¸¦ °¡¸®Å°°Ô ÇÑ´Ù.
+    void SetFirst();                       // ì¹´í…Œê³ ë¦¬ ëª©ë¡ì—ì„œ ì²« ë²ˆì§¸ ì¹´í…Œê³ ë¦¬ë¥¼ ê°€ë¦¬í‚¤ê²Œ í•œë‹¤.
+    bool GetNext(CShopCategory& category); // í˜„ì¬ ì¹´í…Œê³ ë¦¬ ê°ì²´ë¥¼ ë„˜ê¸°ê³  ë‹¤ìŒ ì¹´í…Œê³ ë¦¬ ê°ì²´ë¥¼ ê°€ë¦¬í‚¤ê²Œ í•œë‹¤.
 
-    bool GetValueByKey(int nKey, CShopCategory& category);		// Ä«Å×°í¸® ¼ø¹øÀ¸·Î Ä«Å×°í¸® °´Ã¼¸¦ °¡Á®¿Â´Ù.
-    bool GetValueByIndex(int nIndex, CShopCategory& category);	// ÀÎµ¦½º ¹øÈ£·Î Ä«Å×°í¸® °´Ã¼¸¦ °¡Á®¿Â´Ù.
+    bool GetValueByKey(int nKey, CShopCategory& category);     // ì¹´í…Œê³ ë¦¬ ìˆœë²ˆìœ¼ë¡œ ì¹´í…Œê³ ë¦¬ ê°ì²´ë¥¼ ê°€ì ¸ì˜¨ë‹¤.
+    bool GetValueByIndex(int nIndex, CShopCategory& category); // ì¸ë±ìŠ¤ ë²ˆí˜¸ë¡œ ì¹´í…Œê³ ë¦¬ ê°ì²´ë¥¼ ê°€ì ¸ì˜¨ë‹¤.
 
     bool InsertPackage(int Category, int Package);
     bool RefreshPackageSeq(int Category, int PackageSeqs[], int PackageCount);
 
 protected:
-    std::map<int, CShopCategory> m_Categroys;				// Ä«Å×°í¸® °´Ã¼ ¸Ê
-    std::map<int, CShopCategory>::iterator m_Categoryiter;	// Ä«Å×°í¸® iterator
-    std::vector<int> m_CategoryIndex;						// Ä«Å×°í¸® ¹øÈ£ ÀÎµ¦½º ¸ñ·Ï
+    std::map<int, CShopCategory> m_Categroys;              // ì¹´í…Œê³ ë¦¬ ê°ì²´ ë§µ
+    std::map<int, CShopCategory>::iterator m_Categoryiter; // ì¹´í…Œê³ ë¦¬ iterator
+    std::vector<int> m_CategoryIndex;                      // ì¹´í…Œê³ ë¦¬ ë²ˆí˜¸ ì¸ë±ìŠ¤ ëª©ë¡
 };

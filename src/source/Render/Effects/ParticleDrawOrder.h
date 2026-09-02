@@ -40,6 +40,6 @@ namespace Render::Effects::DrawOrder
     // keep their relative order within the stretch.
     //
     // With every entry non-reorderable this is a no-op, which is what makes the classifier
-    // free to be as conservative as it likes.
-    void GroupByTexture(Entry* entries, size_t count);
+    // free to be as conservative as it likes. scratch must point to at least count entries.
+    void GroupByTexture(Entry* entries, size_t count, Entry* scratch);
 }

@@ -7,6 +7,7 @@ class CItemManager
 public:
     CItemManager();
     virtual ~CItemManager();
+
 public:
 };
 

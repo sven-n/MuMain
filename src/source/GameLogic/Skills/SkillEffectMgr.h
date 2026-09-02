@@ -9,11 +9,15 @@ public:
     CSkillEffectMgr();
     virtual ~CSkillEffectMgr();
 
-    int GetSize() { return MAX_SKILL_EFFECTS; }
+    int GetSize()
+    {
+        return MAX_SKILL_EFFECTS;
+    }
     OBJECT* GetEffect(int iIndex);
 
-    BOOL IsSkillEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL, short PKKey = -1,
-        WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0, float Scale = 0.0f, short int sTargetIndex = -1);
+    BOOL IsSkillEffect(int Type, vec3_t Position, vec3_t Angle, vec3_t Light, int SubType = 0, OBJECT* Target = NULL,
+                       short PKKey = -1, WORD SkillIndex = 0, WORD Skill = 0, WORD SkillSerialNum = 0,
+                       float Scale = 0.0f, short int sTargetIndex = -1);
     OBJECT* CreateEffect();
 
     bool DeleteEffect(int Type, OBJECT* Owner, int iSubType = -1);
@@ -26,7 +30,7 @@ public:
     void MoveEffects();
 
 protected:
-    OBJECT m_SkillEffects[MAX_SKILL_EFFECTS];		// ½ºÅ³ ÆÇÁ¤¿¡ »ç¿ëÇÏ´Â ÀÌÆåÆ®µé (ºí·¯µå¾îÅÃ µî)
+    OBJECT m_SkillEffects[MAX_SKILL_EFFECTS]; // ìŠ¤í‚¬ íŒì •ì— ì‚¬ìš©í•˜ëŠ” ì´í™íŠ¸ë“¤ (ë¸”ëŸ¬ë“œì–´íƒ ë“±)
 };
 
 extern CSkillEffectMgr g_SkillEffects;

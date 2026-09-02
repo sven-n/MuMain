@@ -14,13 +14,11 @@
 #include "StringToken.h"
 #include "StringMethod.h"
 
+#include <atomic>
+#include <filesystem>
 #include <iterator>
 
-#ifdef _WIN32
-#include <urlmon.h>
-
-#pragma comment(lib,"Urlmon.lib")
-#endif
+#include "GameShop/FileDownloader/CurlFileDownloader.h"
 
 CBannerInfo::CBannerInfo() // OK
 {
@@ -66,14 +64,11 @@ bool CBannerInfo::SetBanner(std::wstring strdata, std::wstring strDirPath, bool 
 
         StringCchPrintf(this->BannerImagePath, std::size(this->BannerImagePath), L"%ls%ls", strDirPath.c_str(), sub.c_str());
 
-        if (bDonwLoad || GetFileAttributes(this->BannerImagePath) == INVALID_FILE_ATTRIBUTES)
+        std::error_code error;
+        if (bDonwLoad || !std::filesystem::exists(std::filesystem::path(this->BannerImagePath), error))
         {
-#ifdef _WIN32
-            URLDownloadToFile(0, this->BannerImageURL, this->BannerImagePath, 0, 0);
-#else
-            // No portable downloader yet (issue #462); the banner simply stays
-            // absent and the shop renders without it.
-#endif
+            const std::atomic_bool cancel = false;
+            CurlFileDownloader::DownloadFile(this->BannerImageURL, this->BannerImagePath, L"", L"", true, &cancel);
         }
     }
 

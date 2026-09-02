@@ -15,12 +15,14 @@
 #include "Scenes/SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
 #include "UI/NewUI/NewUISystem.h"
+#include "UI/Scaling/UITransform.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "UI/Legacy/UIManager.h"
@@ -29,6 +31,9 @@
 // External variable declarations
 extern short g_shCameraLevel;
 extern float g_fSpecialHeight;
+extern unsigned int WindowWidth;
+extern unsigned int WindowHeight;
+extern EGameScene SceneFlag;
 
 #ifdef _EDITOR
 // DevEditor per-camera config override (global scope required for extern "C").
@@ -84,6 +89,13 @@ namespace
     };
     constexpr int PLAYER_ZOOM_LEVEL_DEFAULT = 3;
     constexpr int PLAYER_ZOOM_LEVEL_COUNT   = static_cast<int>(std::size(PLAYER_ZOOM_LADDER));
+
+    float CurrentViewportAspect()
+    {
+        if (SceneFlag == MAIN_SCENE)
+            return UI::Scaling::WorldViewportAspect(WindowWidth, WindowHeight, g_Camera.TopViewEnable);
+        return static_cast<float>(WindowWidth) / WindowHeight;
+    }
 }
 
 DefaultCamera::DefaultCamera(CameraState& state)
@@ -844,9 +856,14 @@ void DefaultCamera::HandleEditorMode()
         if (IsHeroValid())
         {
             // Apply rotation and movement
-            vec3_t z_angle = { 0.f, 0.f, -m_State.Angle[2] };
+            auto& renderer = mu::GetRenderer();
+            renderer.SetMatrixMode(GL_MODELVIEW);
+            renderer.PushMatrix();
+            renderer.LoadIdentity();
+            renderer.Rotate(-m_State.Angle[2], 0.f, 0.f, 1.f);
             float Matrix[3][4];
-            AngleMatrix(z_angle, Matrix);
+            CameraProjection::GetOpenGLMatrix(Matrix);
+            renderer.PopMatrix();
             VectorRotate(p1, Matrix, p2);
             VectorAdd(Hero->Object.Position, p2, Hero->Object.Position);
         }
@@ -906,9 +923,7 @@ void DefaultCamera::UpdateFrustum()
     VectorNormalize(up);
 
     // Build frustum from current configuration
-    extern unsigned int WindowWidth;
-    extern unsigned int WindowHeight;
-    float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    const float aspectRatio = CurrentViewportAspect();
 
     // Phase 5 FIX: ALWAYS use m_Config values for frustum culling
     // (Override was already applied at the top of this function.)
@@ -983,9 +998,7 @@ bool DefaultCamera::NeedsFrustumUpdate() const
     // Check aspect ratio change (window resize / runtime resolution switch).
     // Frustum width depends on aspect; without this the cache would stay valid
     // through a resize and culling at the screen edges would go stale.
-    extern unsigned int WindowWidth;
-    extern unsigned int WindowHeight;
-    const float aspectRatio = (float)WindowWidth / (float)WindowHeight;
+    const float aspectRatio = CurrentViewportAspect();
     if (fabs(aspectRatio - m_FrustumCache.AspectRatio) > EPSILON)
     {
         return true;

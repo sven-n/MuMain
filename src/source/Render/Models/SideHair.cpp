@@ -10,11 +10,9 @@
 #include "Render/Models/ShadowVolume.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Textures/ZzzTexture.h"
+#include "Render/Renderer/MuRenderer.h"
 #include "SideHair.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Render/Core/RenderConfig.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -99,7 +97,6 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
 {
     vec3_t p1, p2, d;
 
-    glColor3f(1.f, 1.f, 1.f);
     VectorSubtract(v2, v1, d);
     const float fLength = VectorLength(d);
     float fTextureMove = 0.0f;
@@ -113,20 +110,21 @@ void CSideHair::RenderLine(vec3_t v1, vec3_t v2, vec3_t c1, vec3_t c2)
     VectorAdd(p2, d, p2);
 
     float fTextureV = (float)(rand() % 100) * 0.01f;
-    glColor3f(1.f, 1.f, 1.f);
     BindTexture(BITMAP_ROBE + 4);
     EnableAlphaBlendMinus();
     vec3_t vOrtho;
     CrossProduct(m_vLight, d, vOrtho);
     VectorNormalize(vOrtho);
     VectorScale(vOrtho, 10.f, vOrtho);
-
-    IR::Begin(GL_QUADS);
-    PassthroughShader::Instance().SetUseTexture(true);
-    IR::Color3f(1.f, 1.f, 1.f);
-    IR::TexCoord2f(0.f, 0.f + fTextureMove + fTextureV); IR::Vertex3f(p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2]);
-    IR::TexCoord2f(0.f, 1.f - fTextureMove + fTextureV); IR::Vertex3f(p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2]);
-    IR::TexCoord2f(1.f, 1.f - fTextureMove + fTextureV); IR::Vertex3f(p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2]);
-    IR::TexCoord2f(1.f, 0.f + fTextureMove + fTextureV); IR::Vertex3f(p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2]);
-    IR::End();
+    const mu::Vertex3D quad[4] = {
+        {p1[0] - vOrtho[0], p1[1] - vOrtho[1], p1[2] - vOrtho[2], 0.f, 0.f, 1.f,
+         0.f, fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p2[0] - vOrtho[0], p2[1] - vOrtho[1], p2[2] - vOrtho[2], 0.f, 0.f, 1.f,
+         0.f, 1.f - fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p2[0] + vOrtho[0], p2[1] + vOrtho[1], p2[2] + vOrtho[2], 0.f, 0.f, 1.f,
+         1.f, 1.f - fTextureMove + fTextureV, 0xFFFFFFFFu},
+        {p1[0] + vOrtho[0], p1[1] + vOrtho[1], p1[2] + vOrtho[2], 0.f, 0.f, 1.f,
+         1.f, fTextureMove + fTextureV, 0xFFFFFFFFu},
+    };
+    mu::GetRenderer().RenderQuad3D(quad, 0u);
 }

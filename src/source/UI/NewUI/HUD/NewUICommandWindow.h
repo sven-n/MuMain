@@ -7,9 +7,11 @@
 #pragma once
 
 #include "UI/NewUI/Inventory/NewUIMyInventory.h"
+#include "UI/NewUI/UILayoutPolicy.h"
 #include "UI/NewUI/Widgets/NewUIButton.h"
+#include "UI/Scaling/UITransform.h"
 
-#define MAX_COMMAND_BTN		( 12 )
+#define MAX_COMMAND_BTN (12)
 
 #define COMMAND_BTN_INTERVAL_SIZE	(1)
 
@@ -18,6 +20,8 @@ namespace SEASON3B
     class CNewUICommandWindow : public CNewUIObj
     {
     public:
+        static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
+
         enum eIMAGE_LIST
         {
             // Base Window (Reference)
@@ -34,7 +38,7 @@ namespace SEASON3B
         enum eCOMMAND_WINDOW_SIZE
         {
             COMMAND_WINDOW_WIDTH = 190,
-            COMMAND_WINDOW_HEIGHT = 459,
+            COMMAND_WINDOW_HEIGHT = UI::Scaling::DockLogicalBottom,
             // How tall newui_item_back02-L/R actually are.
             COMMAND_WINDOW_SIDE_TEXTURE_HEIGHT = 320,
         };

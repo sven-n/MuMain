@@ -13,7 +13,7 @@ using namespace SEASON3B;
 
 ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
 {
-    ItemCreationParams params = { };
+    ItemCreationParams params = {};
 
     if (itemData.size() < 5)
         return params;
@@ -83,39 +83,38 @@ SEASON3B::CNewUIItemMng::~CNewUIItemMng()
 
 ITEM* SEASON3B::CNewUIItemMng::CreateItem(std::span<const BYTE> itemData)
 {
-    
+
     return CreateItemExtended(itemData);
-    
 }
 
 /// <summary>
-    /// Layout:
-    ///   Group:  4 bit
-    ///   Number: 12 bit
-    ///   Level:  8 bit
-    ///   Dura:   8 bit
-    ///   OptFlags: 8 bit
-    ///     HasOpt
-    ///     HasLuck
-    ///     HasSkill
-    ///     HasExc
-    ///     HasAnc
-    ///     HasGuardian
-    ///     HasHarmony
-    ///     HasSockets
-    ///   Optional, depending on Flags:
-    ///     Opt_Lvl 4 bit
-    ///     Opt_Typ 4 bit
-    ///     Exc:    8 bit
-    ///     Anc_Dis 4 bit
-    ///     Anc_Bon 4 bit
-    ///     Harmony 8 bit
-    ///     Soc_Bon 4 bit
-    ///     Soc_Cnt 4 bit
-    ///     Sockets n * 8 bit
-    ///   
-    ///  Total: 5 ~ 15 bytes.
-    /// </summary>
+/// Layout:
+///   Group:  4 bit
+///   Number: 12 bit
+///   Level:  8 bit
+///   Dura:   8 bit
+///   OptFlags: 8 bit
+///     HasOpt
+///     HasLuck
+///     HasSkill
+///     HasExc
+///     HasAnc
+///     HasGuardian
+///     HasHarmony
+///     HasSockets
+///   Optional, depending on Flags:
+///     Opt_Lvl 4 bit
+///     Opt_Typ 4 bit
+///     Exc:    8 bit
+///     Anc_Dis 4 bit
+///     Anc_Bon 4 bit
+///     Harmony 8 bit
+///     Soc_Bon 4 bit
+///     Soc_Cnt 4 bit
+///     Sockets n * 8 bit
+///
+///  Total: 5 ~ 15 bytes.
+/// </summary>
 ITEM* SEASON3B::CNewUIItemMng::CreateItemExtended(std::span<const BYTE> itemData)
 {
     if (itemData.size() < 5)
@@ -134,9 +133,11 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacket
     byOption380 = pbyItemPacket[5];
     byOptionHarmony = pbyItemPacket[6];
 
-    BYTE bySocketOption[5] = { pbyItemPacket[7], pbyItemPacket[8], pbyItemPacket[9], pbyItemPacket[10], pbyItemPacket[11] };
+    BYTE bySocketOption[5] = {pbyItemPacket[7], pbyItemPacket[8], pbyItemPacket[9], pbyItemPacket[10],
+                              pbyItemPacket[11]};
 
-    return CNewUIItemMng::CreateItem(wType / MAX_ITEM_INDEX, wType % MAX_ITEM_INDEX, pbyItemPacket[1], pbyItemPacket[2], pbyItemPacket[3], pbyItemPacket[4], byOption380, byOptionHarmony, bySocketOption);
+    return CNewUIItemMng::CreateItem(wType / MAX_ITEM_INDEX, wType % MAX_ITEM_INDEX, pbyItemPacket[1], pbyItemPacket[2],
+                                     pbyItemPacket[3], pbyItemPacket[4], byOption380, byOptionHarmony, bySocketOption);
 }
 
 ITEM* SEASON3B::CNewUIItemMng::CreateItemByParameters(const ItemCreationParams* parameters)
@@ -191,16 +192,10 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItemByParameters(const ItemCreationParams* 
     return pNewItem;
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItem(
-    BYTE byType, 
-    BYTE bySubType,
-    BYTE byLevel /* = 0 */,
-    BYTE byDurability /* = 255 */,
-    BYTE byOption1 /* = 0 */,
-    BYTE ancientByte /* = 0 */,
-    BYTE byOption380 /* = 0 */,
-    BYTE byOptionHarmony /* = 0 */,
-    BYTE* pbySocketOptions /*= NULL*/)
+ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */,
+                                          BYTE byDurability /* = 255 */, BYTE byOption1 /* = 0 */,
+                                          BYTE ancientByte /* = 0 */, BYTE byOption380 /* = 0 */,
+                                          BYTE byOptionHarmony /* = 0 */, BYTE* pbySocketOptions /*= NULL*/)
 {
     ITEM* pNewItem = new ITEM;
     memset(pNewItem, 0, sizeof(ITEM));
@@ -211,7 +206,7 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(
     pNewItem->Durability = byDurability;
     pNewItem->ExcellentFlags = byOption1;
     pNewItem->AncientDiscriminator = ancientByte & 0x03;
-    pNewItem->AncientBonusOption = (ancientByte & (0x04+0x08)) >> 2;
+    pNewItem->AncientBonusOption = (ancientByte & (0x04 + 0x08)) >> 2;
     if ((((byOption380 & 0x08) << 4) >> 7) > 0)
         pNewItem->option_380 = true;
     else
@@ -362,7 +357,7 @@ void SEASON3B::CNewUIItemMng::Update()
     if (m_UpdateTimer.IsTime())
     {
         auto li = m_listItem.begin();
-        for (; li != m_listItem.end(); )
+        for (; li != m_listItem.end();)
         {
             if ((*li)->RefCount <= 0)
             {

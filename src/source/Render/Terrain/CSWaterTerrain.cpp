@@ -8,6 +8,7 @@
 #include <array>
 #include <chrono>
 #include <cmath>
+#include <vector>
 
 #include "Core/Utilities/Random.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -22,9 +23,8 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "CSWaterTerrain.h"
 #include "World/MapInfra/MapManager.h"
-#include "Render/Core/ImmediateRenderer.h"
-#include "Render/Shaders/PassthroughShader.h"
-#include "Render/Core/RenderConfig.h"
+#include "Render/Renderer/MuRenderer.h"
+#include "Render/Renderer/RenderUtils.h"
 
 extern  double   WorldTime;
 extern  float   TerrainMappingAlpha[TERRAIN_SIZE * TERRAIN_SIZE];
@@ -63,10 +63,7 @@ void CSWaterTerrain::Render(void)
 
     CreateTerrain((Hero->PositionX) * 2, (Hero->PositionY) * 2);
 
-    float g_chrome[MAX_WATER_GRID * MAX_WATER_GRID][2];
-    int   offset;
-    float alpha;
-    int   i, j;
+    int i;
     for (i = 0; i < MAX_WATER_GRID * MAX_WATER_GRID; i++)
     {
         float* Normal = m_Normals[i];
@@ -76,30 +73,31 @@ void CSWaterTerrain::Render(void)
 
     EnableAlphaTest();
     BindTexture(BITMAP_MAPTILE);
-    IR::Begin(GL_TRIANGLES);
-    PassthroughShader::Instance().SetUseTexture(true);
-    IR::Color3f(0.2f, 0.5f, 0.65f);
-    for (j = 0; j < m_iTriangleListNum; j++)
+    static thread_local std::vector<mu::Vertex3D> vertices;
+    vertices.resize(static_cast<std::size_t>(m_iTriangleListNum));
+    const std::uint32_t waterColor = mu::PackABGR(0.2f, 0.5f, 0.65f, 1.f);
+    for (int j = 0; j < m_iTriangleListNum; ++j)
     {
-        offset = m_iTriangleList[j];
-        IR::TexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
-        IR::Vertex3fv(m_Vertices[offset]);
+        const int offset = m_iTriangleList[j];
+        vertices[static_cast<std::size_t>(j)] = {
+            m_Vertices[offset][0], m_Vertices[offset][1], m_Vertices[offset][2], 0.f, 0.f, 1.f,
+            g_chrome[offset][1], g_chrome[offset][0], waterColor,
+        };
     }
-    IR::End();
+    mu::GetRenderer().RenderTriangles(vertices, 0u);
 
     EnableAlphaBlend();
     BindTexture(BITMAP_MAPTILE + 1);
-    IR::Begin(GL_TRIANGLES);
-    PassthroughShader::Instance().SetUseTexture(true);
-    for (j = 0; j < m_iTriangleListNum; j++)
+    for (int j = 0; j < m_iTriangleListNum; ++j)
     {
-        offset = m_iTriangleList[j];
-        alpha = 1.f - DotProduct(m_Normals[offset], m_vLightVector);
-        IR::Color3f(alpha, alpha * 2.5f, alpha * 3.f);
-        IR::TexCoord2f(g_chrome[offset][1], g_chrome[offset][0]);
-        IR::Vertex3fv(m_Vertices[offset]);
+        const int offset = m_iTriangleList[j];
+        const float alpha = 1.f - DotProduct(m_Normals[offset], m_vLightVector);
+        vertices[static_cast<std::size_t>(j)] = {
+            m_Vertices[offset][0], m_Vertices[offset][1], m_Vertices[offset][2], 0.f, 0.f, 1.f,
+            g_chrome[offset][1], g_chrome[offset][0], mu::PackABGR(alpha, alpha * 2.5f, alpha * 3.f, 1.f),
+        };
     }
-    IR::End();
+    mu::GetRenderer().RenderTriangles(vertices, 0u);
 }
 
 void CSWaterTerrain::SpawnAmbientWave(double currentTimeMs)
@@ -354,10 +352,7 @@ float CSWaterTerrain::GetWaterTerrain(float xf, float yf)
 
 void CSWaterTerrain::RenderWaterAlphaBitmap(int Texture, float xf, float yf, float SizeX, float SizeY, vec3_t Light, float Rotation, float Alpha, float Height)
 {
-    if (Alpha == 1.f)
-        glColor3fv(Light);
-    else
-        glColor4f(Light[0], Light[1], Light[2], Alpha);
+    const std::uint32_t waterBitmapColor = mu::PackABGR(Light[0], Light[1], Light[2], Alpha);
 
     vec3_t Angle;
     Vector(0.f, 0.f, Rotation, Angle);
@@ -398,12 +393,14 @@ void CSWaterTerrain::RenderWaterAlphaBitmap(int Texture, float xf, float yf, flo
                 //if((p2[i][0]>=0.f && p2[i][0]<=1.f) || (p2[i][1]>=0.f && p2[i][1]<=1.f)) Clip = true;
             }
             //if(Clip==true)
-            RenderWaterBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height);
+            RenderWaterBitmapTile((float)mxi + x, (float)myi + y, 1.f, 1, p2, false, Alpha, Height,
+                                  waterBitmapColor);
         }
     }
 }
 
-void    CSWaterTerrain::RenderWaterBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable, float Alpha, float Height)
+void CSWaterTerrain::RenderWaterBitmapTile(float xf, float yf, float lodf, int lodi, vec3_t c[4], bool LightEnable,
+                                           float Alpha, float Height, std::uint32_t fallbackColor)
 {
     vec3_t TerrainVertex[4];
     int xi = (int)xf;
@@ -430,19 +427,16 @@ void    CSWaterTerrain::RenderWaterBitmapTile(float xf, float yf, float lodf, in
         VectorCopy(PrimaryTerrainLight[TerrainIndex4], Light[3]);
     }
 
-    IR::Begin(GL_TRIANGLE_FAN);
-    PassthroughShader::Instance().SetUseTexture(true);
+    mu::Vertex3D vertices[4];
     for (int i = 0; i < 4; i++)
     {
+        std::uint32_t color = fallbackColor;
         if (LightEnable)
-        {
-            if (Alpha == 1.f)
-                IR::Color3fv(Light[i]);
-            else
-                IR::Color4f(Light[i][0], Light[i][1], Light[i][2], Alpha);
-        }
-        IR::TexCoord2f(c[i][0], c[i][1]);
-        IR::Vertex3fv(TerrainVertex[i]);
+            color = mu::PackABGR(Light[i][0], Light[i][1], Light[i][2], Alpha);
+        vertices[i] = {
+            TerrainVertex[i][0], TerrainVertex[i][1], TerrainVertex[i][2], 0.f, 0.f, 1.f,
+            c[i][0], c[i][1], color,
+        };
     }
-    IR::End();
+    mu::GetRenderer().RenderQuad3D(vertices, 0u);
 }
