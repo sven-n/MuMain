@@ -3585,8 +3585,15 @@ void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
     c->Object.Angle[2] = ((float)(Data->Angle) - 1.f) * 45.f;
     c->Movement = false;
 
-    c->Object.Position[0] = c->TargetX * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
-    c->Object.Position[1] = c->TargetY * TERRAIN_SCALE + TERRAIN_SCALE * 0.5f;
+    // Park the model on the tile the character occupies right now, not on the far end of
+    // the walk this action interrupted. c->TargetX/Y is the destination of the last move
+    // packet and can be a whole path away, while MovePath keeps c->PositionX/Y on the
+    // current path tile. Snapping to the destination teleported the model forward, and the
+    // next MoveMonsterClient tick - which re-paths from c->PositionX/Y - dragged it back,
+    // which is the jump-then-slide seen when an action lands mid-step. Ranged attacks hit
+    // this most often because they fire between tiles far more than melee swings do.
+    c->Object.Position[0] = ((c->PositionX) + 0.5f) * TERRAIN_SCALE;
+    c->Object.Position[1] = ((c->PositionY) + 0.5f) * TERRAIN_SCALE;
     switch (Data->Action)
     {
     case AT_STAND1:
