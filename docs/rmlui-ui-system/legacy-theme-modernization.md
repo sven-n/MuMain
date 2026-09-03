@@ -3,7 +3,7 @@
 Amends [`architecture-principles.md`](architecture-principles.md) — read that first. This file
 governs one recurring question that doc leaves implicit: when legacy-theme UI behavior currently
 lives in C++, when does modernizing/maintaining it mean moving that behavior into RML/RCSS, and
-when does it genuinely stay in C++? Issued by the user 2026-09-02.
+when does it genuinely stay in C++? Issued by the user.
 
 ## Legacy Theme Modernization Policy
 

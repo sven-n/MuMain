@@ -8,9 +8,9 @@ implementation of these principles on this specific codebase (`layout-and-scalin
 of them repeat the reasoning here — if something below and something elsewhere in this directory
 ever seem to disagree, this file wins; go fix the other file.
 
-This is the governing policy for the RmlUi UI migration, issued by the user 2026-08-31. It
-reframes the migration's success criterion: not "the old UI now renders through RmlUi" but "a
-unified, maintainable, resolution-independent UI framework." It is written to stand on its own —
+This is the governing policy for the RmlUi UI migration, issued by the user. It reframes the
+migration's success criterion: not "the old UI now renders through RmlUi" but "a unified,
+maintainable, resolution-independent UI framework." It is written to stand on its own —
 it does not assume familiarity with this repository's specific classes or history, only with
 RmlUi/RCSS in general. **This file changes rarely and should stay stable; project-specific status
 (what's done, what's still a gap, known open conflicts) belongs in `STATUS.md`, not here.**
@@ -365,19 +365,9 @@ e.g. render ordering forces a choice between two visually-equivalent techniques)
 filled backgrounds instead of borders"), never on the theme's **name** (`GetActiveThemeName() ==
 "modern"`). A name check silently stops applying the moment a differently-named theme wants the
 same behavior, and coupling behavior to an identity string is exactly the kind of hidden,
-undiscoverable dependency §18–19's override system is meant to prevent. This isn't a hypothetical
-— see `STATUS.md`'s findings for two real violations found in this codebase (2026-09-04), both
-still unresolved. A theme wanting non-default C++ behavior should be **stating** that want (a
-manifest property, a data flag), not being **recognized by name**.
-
-*Added 2026-09-04, after concrete evidence: two C++ call sites keyed on the literal string
-`"modern"` were found, and — separately — three "shared" RML files were found to have theme-
-specific class names (`modern-frame`, `modern-panel`, etc.) baked into what was supposed to be the
-theme-neutral file, which is a related failure of the same kind: an implementation detail of one
-theme leaking into a place every theme was supposed to share equally. Principle 15/18 already
-covered the shape of the fix (a theme may bring its own RML, a mod may override just a piece) —
-this section names the C++-side half of that same discipline explicitly, since it wasn't spelled
-out before and the violation had already shipped twice.*
+undiscoverable dependency §18–19's override system is meant to prevent. A theme wanting
+non-default C++ behavior should be **stating** that want (a manifest property, a data flag), not
+being **recognized by name**. See `STATUS.md` for known current violations of this rule.
 
 ---
 

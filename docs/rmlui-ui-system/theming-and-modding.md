@@ -5,12 +5,6 @@ one — without touching engine source code.
 
 ## Core principle: `legacy` is the canonical reference; other themes may fork freely
 
-**Revised 2026-09-04** — the previous version of this section ("RML is theme-agnostic, RCSS is
-the swappable unit, a new theme is never a new RML file") turned out to already be violated by
-real code, and turned out to understate what `architecture-principles.md` §15/§18 always asked
-for. Corrected here, not there — that file is the one that wins on disagreement, and it was
-already right.
-
 **The `legacy` theme's RML+RCSS pair is the canonical, documented reference implementation** —
 the plainest expression of what a window needs: which elements must exist, which ids/classes C++
 binds to (`GetElementById`, `DataModelConstructor::Bind`, event callbacks), and a straightforward
@@ -27,8 +21,8 @@ a theme needs more than that.
 `remember_password_prompt.rml` currently have `modern`-specific class names (`modern-frame`,
 `modern-frame-accent`, `modern-panel`, etc.) hardcoded directly into what's supposed to be the
 shared, theme-neutral file — e.g. `login.rml`'s `<div id="panel" class="modern-frame
-modern-frame-crimson" ...>`. That's backwards under this corrected policy: it means `legacy` is
-the one being constrained by `modern`'s vocabulary, not the other way around. See `STATUS.md`'s
+modern-frame-crimson" ...>`. That's backwards: it means `legacy` is the one being constrained by
+`modern`'s vocabulary, not the other way around. See `STATUS.md`'s
 gap list — this needs an actual migration (strip theme-specific classes back out of the shared
 file, give `modern` its own forked copy), not a docs-only fix.
 
@@ -70,11 +64,6 @@ a "modern" theme uses flat colors/vector shapes instead.
 
 ## Forking a theme's RML: the mechanism, and today's one real example
 
-**Renamed 2026-09-04** (was "Exception: per-theme RML override") — the corrected Core Principle
-above already makes this the *expected* path for a theme with real structural ambition, not an
-exception to justify. What follows is unchanged as a description of the mechanism and the one
-place it's actually used today.
-
 `UI::RmlBridge::LoadThemedDocument()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
 looks for `themes/<theme>/<name>.rml` first, falling back to the shared `<name>.rml` when no such
 file exists. Every window but `main_frame` has no per-theme override, so this is a no-op for them
@@ -115,14 +104,14 @@ No source changes, no recompilation.
 4. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`.
 5. Relaunch. No rebuild needed — this is a pure data/config change.
 
-**Only two themes are currently built: `legacy` and `modern`.** Clarified 2026-09-04: these two
-exist to *validate* that the architecture actually supports arbitrary themes, not because two is
-the intended ceiling — `architecture-principles.md` §25/§28 always envisioned a Custom/Test theme
-beyond these two, specifically because a theme that looks substantially different from `legacy` is
-what would expose accidental coupling between a component's implementation and one particular
-visual design. A third (or fourth, or user-authored) theme is expected eventually; it just hasn't
-been built yet, and isn't scheduled ahead of other work (see `STATUS.md`). Keep `legacy` and
-`modern` updated together for any window content change in the meantime — don't let one lag.
+**Only two themes are currently built: `legacy` and `modern`.** These two exist to *validate* that
+the architecture actually supports arbitrary themes, not because two is the intended ceiling —
+`architecture-principles.md` §25/§28 envisions a Custom/Test theme beyond these two, specifically
+because a theme that looks substantially different from `legacy` is what would expose accidental
+coupling between a component's implementation and one particular visual design. A third (or
+fourth, or user-authored) theme is expected eventually; see `STATUS.md` for current sequencing.
+Keep `legacy` and `modern` updated together for any window content change in the meantime — don't
+let one lag.
 
 ### `#backdrop` usage
 
@@ -240,18 +229,18 @@ coordinate into `dp`.
 - **Custom theme images require the engine's proprietary OZT/OZJ format, not plain PNG/JPG** —
   see [Bringing your own images to a theme](#bringing-your-own-images-to-a-theme) above. No
   converter tool exists in this repo today, and a missing/wrong-format image fails silently.
-- **Corrected 2026-09-04, was stale**: `dp`-scaling *is* wired up globally now (RmlUi's density-
-  independent-pixel ratio auto-fits to window size and folds in `UIScalePercent`, `layout-and-
-  scaling.md`'s "Global UI scale" section) — a hybrid window's on-screen *position* still isn't
-  theme-controlled, though (see [Coordinates, scaling, and positioning](#coordinates-scaling-and-positioning--what-a-theme-actually-controls)
-  above) — that part of the original limitation still stands.
-- **Corrected 2026-09-04, was stale**: eleven windows are routed through `LoadThemedDocument()`
-  today, not four — `CLoginWin`, `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`,
-  `CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`,
-  `CBuffStrip`, and `CNewUIMainFrameWindow` (`COptionWin` is wired the same way but not reachable
-  in live play — see the main [README](README.md#coexistence-patterns)). Extending a new window to
-  support theming is the same established pattern, not new design work — this list will keep
-  growing and isn't worth maintaining exhaustively; grep `LoadThemedDocument(` for the live count.
+- **`dp`-scaling is wired up globally** (RmlUi's density-independent-pixel ratio auto-fits to
+  window size and folds in `UIScalePercent`, `layout-and-scaling.md`'s "Global UI scale" section)
+  — but a hybrid window's on-screen *position* still isn't theme-controlled (see
+  [Coordinates, scaling, and positioning](#coordinates-scaling-and-positioning--what-a-theme-actually-controls)
+  above).
+- **Eleven windows are routed through `LoadThemedDocument()` today**: `CLoginWin`,
+  `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`,
+  `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`, `CBuffStrip`, and `CNewUIMainFrameWindow`
+  (`COptionWin` is wired the same way but not reachable in live play — see the main
+  [README](README.md#coexistence-patterns)). Extending a new window to support theming is the same
+  established pattern, not new design work — this list will keep growing and isn't worth
+  maintaining exhaustively; grep `LoadThemedDocument(` for the live count.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Two known
   violations exist today (`NewUIMainFrameWindow.cpp`'s background-fill and skill-highlight logic,
   both keyed on `GetActiveThemeName() == "modern"`), tracked as debt in `STATUS.md`, not accepted

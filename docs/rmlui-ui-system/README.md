@@ -55,17 +55,16 @@ slot causes a real crash on scene re-entry.
 
 ## Frame lifecycle: RmlUi renders last — via two seams
 
-**RmlUi always renders after all other content for that frame, today.** Get this wrong and an
-opaque RmlUi panel covers legacy content (cursor, text) that's supposed to stay visible on top of
-it — so treat it as a real invariant of the *current* integration when building anything that
-touches frame ordering. **But it's an integration choice, not a proven RmlUi requirement**
-(corrected 2026-09-04, see `STATUS.md`'s "Known gaps") — `RmlUiRuntime::Render()` fires from
-exactly one fixed pre-submit callback below; nobody's investigated whether RmlUi's own rendering
-could be interleaved with legacy content instead (multiple contexts, or a callback hook legacy
-content renders through at the right point in RmlUi's own z-order). That question is *why*
-`NewUIMainFrameWindow.cpp` still has two C++ call sites that pick between an RmlUi fill and a
-legacy one based on paint order — see `STATUS.md` for the open investigation. Two callbacks on
-`IMuRenderer`, registered once in `Winmain.cpp`, make today's ordering work:
+**RmlUi always renders after all other content for that frame.** `RmlUiRuntime::Render()` fires
+from exactly one fixed pre-submit callback (below) — this is how the integration works today, not
+a proven RmlUi requirement; nobody's investigated whether interleaving with legacy content is
+possible instead (multiple contexts, or a callback hook legacy content renders through at the
+right point in RmlUi's own z-order). See `STATUS.md` for that open question and the two C++ call
+sites (`NewUIMainFrameWindow.cpp`) that currently work around today's ordering by picking between
+an RmlUi fill and a legacy one. Until that's resolved, treat today's ordering as real: get it
+wrong and an opaque RmlUi panel covers legacy content (cursor, text) that's supposed to stay
+visible on top of it. Two callbacks on `IMuRenderer`, registered once in `Winmain.cpp`, make it
+work:
 
 - **`SetPreSubmitCallback`** — fires after the frame's game/legacy-2D content is recorded onto
   the command buffer but before submit. `RmlUiRuntime` registers this once in `Create()`; this is
@@ -109,21 +108,18 @@ recompile. `UI::RmlBridge::LoadThemedDocument()` (`UI/RmlBridge/RmlTheme.h/.cpp`
 syntheticThemeSourceUrl)` — RmlUi resolves the document's `<link href="...">` against that
 synthetic URL, so `login.rml` ends up pulling `themes/<active-theme>/login.rcss`.
 
-**Corrected 2026-09-04**: this used to say the RML itself always stays "shared and un-duplicated
-across themes" — that's the common case, not a hard rule. `legacy`'s RML+RCSS pair is the
-canonical reference; any theme (`modern` included) is expected to fork the RML entirely, not just
-restyle it in RCSS, the moment it needs genuinely different structure — `main_frame.rml` already
-does this. See **[Theming & Modding](theming-and-modding.md)**'s corrected Core Principle section
-for the full policy, including known debt (three files still have theme-specific classes wrongly
-baked into what should be the shared file) and the drift-check tooling this doesn't have yet.
+`legacy`'s RML+RCSS pair is the canonical reference implementation; any theme (`modern` included)
+is expected to fork the RML entirely, not just restyle it in RCSS, the moment it needs genuinely
+different structure — `main_frame.rml` already does. See **[Theming & Modding](theming-and-modding.md)**
+for the full policy, known debt, and the drift-check tooling a forked theme still needs.
 
 **Two themes are currently built: `legacy`** (real sprite art, pixel-parity with the original
 look) **and `modern`** (flat/programmatic) — whenever a window's RmlUi content changes or a bug is
 fixed in one, update the other's RCSS in the same pass, not as a follow-up. These two exist to
 *validate* the architecture supports arbitrary themes, not as a permanent ceiling — see
-`STATUS.md`'s corrected Custom/Test-theme entry. Shared cross-window rules live in
-`themes/<name>/base.rcss` (`.btn`, `.checkbox-box`, `#backdrop`, `.hidden`, the mandatory `body {
-pointer-events: none; }` reset — see [Gotchas](#gotchas) below).
+`STATUS.md`. Shared cross-window rules live in `themes/<name>/base.rcss` (`.btn`, `.checkbox-box`,
+`#backdrop`, `.hidden`, the mandatory `body { pointer-events: none; }` reset — see
+[Gotchas](#gotchas) below).
 
 Full mechanism, the step-by-step guide for adding a theme, and the modding constraints (image
 format, scaling, positioning ownership) are in **[Theming & Modding](theming-and-modding.md)**.

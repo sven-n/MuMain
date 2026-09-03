@@ -7,7 +7,7 @@ anything under `UI/NewUI/`; the `CWin`-tier docs (`README.md`, `theming-and-modd
 `layout-and-scaling.md`) still apply for RML/RCSS content itself, just not for how the C++ side
 plugs in.
 
-Proven on two pilots so far, both 2026-08-31: `CMuHelperBar` (`UI/NewUI/HUD/MuHelperBar.h/.cpp` →
+Proven on two pilots so far: `CMuHelperBar` (`UI/NewUI/HUD/MuHelperBar.h/.cpp` →
 `Data/Interface/RmlUi/mu_helper_bar.rml`, renamed at port time from the legacy `CNewUIHeroPositionInfo`)
 and `CBuffStrip` (`UI/NewUI/HUD/BuffStrip.h/.cpp` → `Data/Interface/RmlUi/buff_strip.rml`, renamed
 from `CNewUIBuffWindow` — the active-buff icon strip, and the first `data-for`/dynamic-array pilot
@@ -19,12 +19,12 @@ at this tier). This doc is the pattern extracted from both; expect it to keep fi
 Every window migrated before this was `CWin`-tier: `CWin::Create(w, h, -2)` (opaque-nothing
 sentinel), `CUIMng` owns the window list, `Rml::Context::IsMouseInteracting()`'s absence from
 `CUIMng::IsCursorOnUI()` didn't need a *new* mechanism added the way this tier did — that check
-already existed and just needed the right rect to stay in sync (see `layout-and-scaling.md`'s
-`CalculateFixedAnchorLayout()` story). **"Just needed to stay in sync" undersold how hard that
-actually is — corrected 2026-09-04**: `CursorInWin()`'s rect going stale is exactly the mechanism
-behind four separate confirmed bugs in this same `CWin` tier (`STATUS.md`'s "three parallel
-input-tracking systems" finding) — the *comparison* below (this tier needed a new flag,
-`CWin`-tier didn't) is still accurate, but don't read "already existed" as "already reliable."
+already existed via `CursorInWin()`, it just needed its rect kept in sync with the RmlUi visuals
+(see `layout-and-scaling.md`'s `CalculateFixedAnchorLayout()` story). **Don't read "already
+existed" as "already reliable"**: `CursorInWin()`'s rect going stale is the mechanism behind four
+separate confirmed bugs in this same `CWin` tier (`STATUS.md`'s "three parallel input-tracking
+systems" finding) — the comparison here (this tier needed a new flag, `CWin`-tier didn't) still
+holds, but staying in sync is a real, unresolved reliability problem, not a solved detail.
 `UI/NewUI` has none of that: a different base class (`CNewUIObj`, not `CWin`), a different manager
 (`CNewUIManager`, not `CUIMng`), and — critically — it's the tier that renders during `MAIN_SCENE`
 (actual gameplay), which had never run any RmlUi content through its input-gating path before this
@@ -64,11 +64,9 @@ and `Show()`/`Enable()` (already implemented on the base, not overridden). Porti
 
 ## The `MAIN_SCENE` prerequisites (already fixed, applies to every future port here)
 
-Three things had to work before *any* `CNewUIObj`-tier RmlUi content could behave correctly —
-the first two fixed alongside the first pilot, matter beyond that one window since
-`CSysMenuWin`/`COptionWin` (already `CWin`-tier RmlUi) are reachable from gameplay via the in-game
-ESC menu, so RmlUi content was already live during `MAIN_SCENE` before these fixes, just not
-correctly composited/gated; the third found and fixed alongside the second pilot:
+Three things must work before *any* `CNewUIObj`-tier RmlUi content behaves correctly — all three
+matter beyond just this tier's own pilots, since `CSysMenuWin`/`COptionWin` (`CWin`-tier RmlUi) are
+also reachable from gameplay via the in-game ESC menu:
 
 1. **The cursor now renders on top of RmlUi content during `MAIN_SCENE`.**
    `Winmain.cpp`'s `SetPostRmlUiCallback` — the seam that draws the cursor *after* RmlUi's own
@@ -132,17 +130,16 @@ don't invent a new ownership boundary as part of a straight RmlUi port.
 **The C++ adapter class itself is renamed at port time, dropping tier-historical names** —
 `CNewUIHeroPositionInfo` → `CMuHelperBar`, and every `INTERFACE_*`/`CNewUISystem`
 member/accessor/macro that referenced it, updated to match (`INTERFACE_MU_HELPER_BAR`,
-`GetUI_MuHelperBar()`, `g_pMuHelperBar`, etc.) — reassessed and corrected in place 2026-08-31 after
-the first version of this pattern (deferring the C++ name alongside directory reorg) was flagged
-as inconsistent with [`architecture-principles.md`](architecture-principles.md)'s §12. **What's
-still deferred**, unchanged: the physical file location (`UI/NewUI/HUD/`) and the `CNewUIObj`
-base class/tier boundary itself — that's structural (touches the ~88 other still-unported
-`CNewUIObj` windows' shared machinery), not a per-class naming choice, and stays premature with
-only 2 pilots. See [`STATUS.md`](STATUS.md)'s "Tracked deferral" section for the full reasoning
-and the actual condition for revisiting the file-location piece.
+`GetUI_MuHelperBar()`, `g_pMuHelperBar`, etc.) — required by
+[`architecture-principles.md`](architecture-principles.md)'s §12. **What's still deferred**: the
+physical file location (`UI/NewUI/HUD/`) and the `CNewUIObj` base class/tier boundary itself —
+that's structural (touches the ~88 other still-unported `CNewUIObj` windows' shared machinery),
+not a per-class naming choice, and stays premature with only 2 pilots. See
+[`STATUS.md`](STATUS.md)'s "Tracked deferral" section for the full reasoning and the actual
+condition for revisiting the file-location piece.
 
-**One exception to "rename at port time," found by the third pilot**: when a legacy file welds
-multiple classes together and a single pass only ports some of them, renaming just the ported one
+**One exception to "rename at port time"**: when a legacy file welds multiple classes together and
+a single pass only ports some of them, renaming just the ported one
 leaves the file's still-legacy residents mismatched for the remaining phases —
 `CNewUIMainFrameWindow` (ported) sharing a file with still-fully-legacy `CNewUISkillList`/
 `CNewUIItemHotKey` is the concrete case. See `STATUS.md`'s own "Tracked deferral:

@@ -27,28 +27,24 @@ using `px` throughout is simply unaffected by `UIScalePercent` until it's retrof
 already-migrated windows (login, menu bar, system menu, remember-password) still use `px` and
 that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
 
-## Two scaling systems, now cross-wired onto both axes (2026-09-03)
+## Two scaling systems, cross-wired onto both axes
 
 A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
 auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
 `FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. It drives still-legacy
 `CWin`/`CNewUIObj` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
 (`NewUIMainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
-that one window uses this system instead of `dp`). Until 2026-09-03 these two systems were built
-independently and never cross-wired: RmlUi's `dp` ratio only ever knew about `UIScalePercent`, and
-`UI::Scaling` only ever knew about `WindowContentScale` — each blind to the other system's axis.
-Concretely, two axes exist:
+that one window uses this system instead of `dp`). Two axes exist, and both systems now respect
+both:
 
 - **`UIScalePercent`** — the user's own config-driven preference (`config.ini`'s `[UI]
-  UIScalePercent`). RmlUi's `dp` ratio always respected this. `UI::Scaling`'s functions didn't
-  until 2026-09-03 — see `STATUS.md`'s `CNewUIMainFrameWindow` pilots-to-revisit row for the fix.
+  UIScalePercent`). Both RmlUi's `dp` ratio and `UI::Scaling`'s functions respect this.
 - **`WindowContentScale`** (`UI::Scaling::GetWindowContentScale()`/`SetWindowContentScale()`) — an
   OS display-scale/pixel-density correction factor (`ContentScaleFromMetrics()` =
-  `SDL_GetWindowDisplayScale() / SDL_GetWindowPixelDensity()`), added by the `origin/main` merge,
-  refreshed at startup and on `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` (`Winmain.cpp`). Folded into
-  `UI::Scaling`'s clamp *bounds* (both min and max multiplied by it, widening the auto-scale's own
-  headroom). RmlUi's `dp` ratio didn't know about this at all until 2026-09-03, when
-  `RmlUiRuntime.cpp`'s `ApplyUIScale()` was extended to multiply it in too.
+  `SDL_GetWindowDisplayScale() / SDL_GetWindowPixelDensity()`), refreshed at startup and on
+  `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` (`Winmain.cpp`). Folded into `UI::Scaling`'s clamp
+  *bounds* (both min and max multiplied by it, widening the auto-scale's own headroom), and into
+  RmlUi's `dp` ratio via `RmlUiRuntime.cpp`'s `ApplyUIScale()`.
 
 **The two axes are applied differently, deliberately.** `UIScalePercent` is a direct user dial, so
 everywhere it's folded into `UI::Scaling` it's a **post-clamp** multiplier — at a window size where
@@ -106,26 +102,26 @@ anchor class, give it a `dp` size, done.
 | Centered prompts/messages | `.center-x` / `.center-y` / `.center-both` |
 | Backgrounds/bars meant to fill available space | `.stretch-x` / `.stretch-y` / `.stretch-both` — use only when the element is genuinely meant to grow with its container (an info bar between two buttons), not as a default |
 | Content whose position is a genuine live computed result (3D-projection, following a moving target) | Still fine to push from C++ every frame — `CCharInfoBalloonMng`'s balloons are the standing example. This isn't something the anchor-class system should be forced onto. |
-| A panel whose real screen position also drives an unrelated live 3D viewport in real pixels | Stays fixed `px`, not `dp` — `CCharMakeWin`'s `#panel` is the standing example (2026-09-03): its real position feeds `RenderCreateCharacter()`'s `BeginOpengl()` call directly, a separate scale mechanism that isn't safe to grow via `dp` without also correctly rescaling. A documented, deliberate non-scaling exception, not a gap. |
+| A panel whose real screen position also drives an unrelated live 3D viewport in real pixels | Stays fixed `px`, not `dp` — `CCharMakeWin`'s `#panel` is the standing example: its real position feeds `RenderCreateCharacter()`'s `BeginOpengl()` call directly, a separate scale mechanism that isn't safe to grow via `dp` without also correctly rescaling. A documented, deliberate non-scaling exception, not a gap. |
 
-## 2026-09-03: the "C++ pushes real pixels into RmlUi" pattern is retired everywhere except one documented exception
+## The "C++ pushes real pixels into RmlUi" pattern is retired everywhere except one documented exception
 
 Every migrated window's `Element::SetProperty("left"/"top"/"width"/"height", ...)` push from C++ —
-the pattern `char_sel_main` retired first (see the worked example below) — is now gone from
-`login`, `login_main`, `sys_menu`, and `remember_password_prompt` too (commits `48ec3ad0`,
-`a5483ddc`, `42597c85`). RCSS anchor classes + fixed `dp` sizes own every element's layout; C++'s
-only remaining roles are: a window's own genuine screen placement (still legitimately C++-computed
-— `#panel`'s `left`/`top`, not its internal layout), keeping a real non-RmlUi companion object
-(a `CButton` kept for click-detection redundancy, a `CUITextInputBox` for real text entry) in sync
-with what RCSS decided by scaling the same fixed offsets by the same combined ratio RmlUi's own
-`dp` ratio uses (`GameConfig::GetUIScalePercent() × UI::Scaling::ViewportFitScale()`) —
-`UI::Scaling::CompanionRatio(windowWidth, windowHeight)` (`UITransform.cpp`) is the single shared
-implementation of this, extracted 2026-09-03 after `CharSelMainWin.cpp`'s `GetUIScaleRatio()`,
-`LoginMainWin.cpp`'s inline version, and `LoginWin.cpp`'s `LoginUIScaleRatio()` had each
-independently hand-copied it — and the exact same staleness bug (reading
-`CInput::Instance().GetScreenWidth()/GetScreenHeight()` instead of the `WindowWidth`/`WindowHeight`
-globals RmlUi itself uses) got reintroduced and re-fixed in more than one of those copies before
-this existed. `LoginWin.cpp` still keeps its own thin zero-arg `LoginUIScaleRatio()` wrapper for
+the pattern `char_sel_main` retired first (see the worked example below) — is gone from `login`,
+`login_main`, `sys_menu`, and `remember_password_prompt` too. RCSS anchor classes + fixed `dp`
+sizes own every element's layout; C++'s only remaining roles are: a window's own genuine screen
+placement (still legitimately C++-computed — `#panel`'s `left`/`top`, not its internal layout),
+keeping a real non-RmlUi companion object (a `CButton` kept for click-detection redundancy, a
+`CUITextInputBox` for real text entry) in sync with what RCSS decided by scaling the same fixed
+offsets by the same combined ratio RmlUi's own `dp` ratio uses (`GameConfig::GetUIScalePercent() ×
+UI::Scaling::ViewportFitScale()`) — `UI::Scaling::CompanionRatio(windowWidth, windowHeight)`
+(`UITransform.cpp`) is the single shared implementation of this, extracted after
+`CharSelMainWin.cpp`'s `GetUIScaleRatio()`, `LoginMainWin.cpp`'s inline version, and
+`LoginWin.cpp`'s `LoginUIScaleRatio()` had each independently hand-copied it — and the exact same
+staleness bug (reading `CInput::Instance().GetScreenWidth()/GetScreenHeight()` instead of the
+`WindowWidth`/`WindowHeight` globals RmlUi itself uses) got reintroduced and re-fixed in more than
+one of those copies before this existed. `LoginWin.cpp` still keeps its own thin zero-arg
+`LoginUIScaleRatio()` wrapper for
 its two call sites' convenience, but it just forwards to `UI::Scaling::CompanionRatio()` now —
 `CharSelMainWin.cpp`/`LoginMainWin.cpp` call the shared function directly. The formula itself
 lives in exactly one place either way. See also `char_make`'s deliberate `#panel` exception in the
