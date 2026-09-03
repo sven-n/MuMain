@@ -26,6 +26,16 @@ namespace Rml
 // Neither is a bug in the narrow sense (nothing depends on this today), but both need a real
 // answer -- likely an anchor-relative `dp` offset persisted through GameConfig, not a raw px
 // pair -- before the first window actually calls this, not discovered after.
+//
+// 2026-09-03 addendum, found while migrating login/char_make off C++-pushed layout: a THIRD gap,
+// specific to any window with a real Type-2 companion object (a functional CUITextInputBox, not
+// just a redundant click-detection CButton -- docs/rmlui-ui-system/layout-and-scaling.md's
+// "C++ pushes real pixels" retirement note has the full distinction). OnPanelMoved below exists
+// for exactly this hybrid-sync case, but whatever a caller wires into it will need to scale by the
+// same combined ratio (GameConfig::GetUIScalePercent() x UI::Scaling::ViewportFitScale()) RmlUi's
+// own dp ratio uses now -- LoginWin.cpp's LoginUIScaleRatio() is the reference implementation --
+// not just a raw position sync, or the companion object will drift from the dragged RmlUi element
+// at any UI scale/resolution other than the reference case.
 namespace UI::RmlBridge
 {
     // Fired every time the panel's position changes during a drag, with its new absolute

@@ -106,6 +106,28 @@ anchor class, give it a `dp` size, done.
 | Centered prompts/messages | `.center-x` / `.center-y` / `.center-both` |
 | Backgrounds/bars meant to fill available space | `.stretch-x` / `.stretch-y` / `.stretch-both` — use only when the element is genuinely meant to grow with its container (an info bar between two buttons), not as a default |
 | Content whose position is a genuine live computed result (3D-projection, following a moving target) | Still fine to push from C++ every frame — `CCharInfoBalloonMng`'s balloons are the standing example. This isn't something the anchor-class system should be forced onto. |
+| A panel whose real screen position also drives an unrelated live 3D viewport in real pixels | Stays fixed `px`, not `dp` — `CCharMakeWin`'s `#panel` is the standing example (2026-09-03): its real position feeds `RenderCreateCharacter()`'s `BeginOpengl()` call directly, a separate scale mechanism that isn't safe to grow via `dp` without also correctly rescaling. A documented, deliberate non-scaling exception, not a gap. |
+
+## 2026-09-03: the "C++ pushes real pixels into RmlUi" pattern is retired everywhere except one documented exception
+
+Every migrated window's `Element::SetProperty("left"/"top"/"width"/"height", ...)` push from C++ —
+the pattern `char_sel_main` retired first (see the worked example below) — is now gone from
+`login`, `login_main`, `sys_menu`, and `remember_password_prompt` too (commits `48ec3ad0`,
+`a5483ddc`, `42597c85`). RCSS anchor classes + fixed `dp` sizes own every element's layout; C++'s
+only remaining roles are: a window's own genuine screen placement (still legitimately C++-computed
+— `#panel`'s `left`/`top`, not its internal layout), keeping a real non-RmlUi companion object
+(a `CButton` kept for click-detection redundancy, a `CUITextInputBox` for real text entry) in sync
+with what RCSS decided by scaling the same fixed offsets by the same combined ratio RmlUi's own
+`dp` ratio uses (`GameConfig::GetUIScalePercent() × UI::Scaling::ViewportFitScale()`) — see
+`CharSelMainWin.cpp`'s `GetUIScaleRatio()`, `LoginMainWin.cpp`'s inline version, and
+`LoginWin.cpp`'s `LoginUIScaleRatio()` for the same pattern applied three times — and (one case)
+`char_make`'s deliberate `#panel` exception in the table above. If a window with a real Type-2 companion (a functional `CUITextInputBox`, not just a redundant
+click-detection `CButton`) is ever made draggable, `UI::RmlBridge::MakeDraggable()`'s existing
+`OnPanelMoved` callback (`RmlDraggable.h` — zero live callers today) is the right hook for this,
+but whatever gets wired into it will need to include the same combined-ratio scaling this section
+describes, not just a raw position sync — `RmlDraggable.h`'s own gap note doesn't mention this yet
+(it flags `px`-vs-`UIScalePercent` and missing persistence, both about the panel's *own* position,
+not a companion object's).
 
 ## Worked example: `CCharSelMainWin`'s retrofit
 
