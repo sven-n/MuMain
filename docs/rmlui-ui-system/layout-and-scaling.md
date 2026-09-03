@@ -27,6 +27,50 @@ using `px` throughout is simply unaffected by `UIScalePercent` until it's retrof
 already-migrated windows (login, menu bar, system menu, remember-password) still use `px` and
 that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
 
+## Two scaling systems, now cross-wired onto both axes (2026-09-03)
+
+A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
+auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
+`FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. It drives still-legacy
+`CWin`/`CNewUIObj` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
+(`NewUIMainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
+that one window uses this system instead of `dp`). Until 2026-09-03 these two systems were built
+independently and never cross-wired: RmlUi's `dp` ratio only ever knew about `UIScalePercent`, and
+`UI::Scaling` only ever knew about `WindowContentScale` — each blind to the other system's axis.
+Concretely, two axes exist:
+
+- **`UIScalePercent`** — the user's own config-driven preference (`config.ini`'s `[UI]
+  UIScalePercent`). RmlUi's `dp` ratio always respected this. `UI::Scaling`'s functions didn't
+  until 2026-09-03 — see `STATUS.md`'s `CNewUIMainFrameWindow` pilots-to-revisit row for the fix.
+- **`WindowContentScale`** (`UI::Scaling::GetWindowContentScale()`/`SetWindowContentScale()`) — an
+  OS display-scale/pixel-density correction factor (`ContentScaleFromMetrics()` =
+  `SDL_GetWindowDisplayScale() / SDL_GetWindowPixelDensity()`), added by the `origin/main` merge,
+  refreshed at startup and on `SDL_EVENT_WINDOW_DISPLAY_SCALE_CHANGED` (`Winmain.cpp`). Folded into
+  `UI::Scaling`'s clamp *bounds* (both min and max multiplied by it, widening the auto-scale's own
+  headroom). RmlUi's `dp` ratio didn't know about this at all until 2026-09-03, when
+  `RmlUiRuntime.cpp`'s `ApplyUIScale()` was extended to multiply it in too.
+
+**The two axes are applied differently, deliberately.** `UIScalePercent` is a direct user dial, so
+everywhere it's folded into `UI::Scaling` it's a **post-clamp** multiplier — at a window size where
+the auto-scale already sits at its ceiling (common at typical/large resolutions), a clamp-bound
+fold would mean changing the percent does nothing, silently defeating the setting. `contentScale`
+is folded into the **clamp bounds** instead, since its job is widening legitimate high-DPI headroom,
+not acting as a 1:1 user dial.
+
+**`WindowContentScale`-into-`dp` is not yet verified on real mismatched-density hardware.**
+`Rml::Context`'s dimensions are set from SDL's window-coordinate size (`RmlUiRuntime::OnResize`),
+not `SDL_GetWindowSizeInPixels()`, and the SDL window requests `SDL_WINDOW_HIGH_PIXEL_DENSITY`
+(`SDLWindowFlags.h`) — so window-coordinate size and real pixel size can genuinely diverge on a
+scaled display. Whether `RenderInterface_SDL_GPU`'s viewport already stretches that
+window-coordinate-sized canvas across the full pixel framebuffer (in which case the `dp`-ratio
+multiply would double-scale) or renders it 1:1 (in which case the multiply is the missing piece)
+wasn't resolved by reading code alone — confirm on real scaled-display hardware, or with a debug
+`UI::Scaling::SetWindowContentScale()` override, before trusting it in play. In the common case
+where `SDL_GetWindowDisplayScale()` and `SDL_GetWindowPixelDensity()` already agree, `contentScale`
+is 1.0 and this multiply is a no-op either way — the mismatch only shows up on the edge cases
+`WindowContentScale` exists for (Wayland fractional scaling, a window dragged to a different-DPI
+monitor), so a mistake here won't necessarily surface on typical hardware.
+
 **Known RmlUi quirk**: in at least one document (`char_sel_main.rml`, which has a `data-model` and
 several `data-event-click` bindings), a `font-family`/`font-size` declared on an ancestor
 (`#panel`) failed to inherit down to a `<span>` two levels deep — RmlUi logged "No font face

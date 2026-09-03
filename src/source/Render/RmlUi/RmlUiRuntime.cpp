@@ -7,11 +7,28 @@
 #include <RmlUi_Platform_SDL.h> // ThirdParty/RmlUi/Backends -- see the CMakeLists.txt addition
 #include "Render/Renderer/MuRenderer.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "UI/Scaling/UITransform.h"
 
 namespace
 {
     // Global UI scale (docs/rmlui-ui-system/layout-and-scaling.md) -- the one RmlUi-native call
-    // site every `dp`-authored RCSS dimension responds to, per GameConfig::GetUIScalePercent().
+    // site every `dp`-authored RCSS dimension responds to, per GameConfig::GetUIScalePercent()
+    // *and* UI::Scaling::GetWindowContentScale() (the OS display-scale/pixel-density factor the
+    // legacy UI::Scaling transforms already fold in -- see BottomHudScale/CappedUniformScale,
+    // UITransform.cpp). Cross-wiring both axes into this one ratio keeps every already-migrated
+    // RmlUi window (this context is shared by all of them) as OS-display-scale-aware as the HUD
+    // band's own bars_scale transform, rather than leaving RmlUi blind to real display DPI while
+    // only the legacy-transform-driven HUD responds to it.
+    //
+    // NOT yet verified on real mismatched-density hardware -- Rml::Context's dimensions are set
+    // from SDL's window-coordinate size (RmlUiRuntime::OnResize, see its own comment), not
+    // SDL_GetWindowSizeInPixels(), and the SDL window requests SDL_WINDOW_HIGH_PIXEL_DENSITY
+    // (SDLWindowFlags.h). Whether RenderInterface_SDL_GPU's viewport already stretches that
+    // window-coordinate-sized canvas across the full pixel framebuffer (in which case this
+    // multiply would double-scale) or renders it 1:1 (in which case this is the missing piece)
+    // needs a real scaled display or a UI::Scaling::SetWindowContentScale() debug override to
+    // confirm directly -- see docs/rmlui-ui-system/layout-and-scaling.md.
+    //
     // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
     // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and
     // removes any doubt about whether some other code path could have reset it in between.
@@ -19,7 +36,8 @@ namespace
     {
         if (!context) return;
         const int percent = GameConfig::GetInstance().GetUIScalePercent();
-        context->SetDensityIndependentPixelRatio(static_cast<float>(percent) / 100.0f);
+        context->SetDensityIndependentPixelRatio((static_cast<float>(percent) / 100.0f) *
+                                                 UI::Scaling::GetWindowContentScale());
     }
 }
 

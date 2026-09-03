@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "App/stdafx.h"
+#include "Data/GameConfig/GameConfig.h"
 
 namespace
 {
@@ -33,6 +34,18 @@ constexpr int kFixedFontPointSize = 13;
 constexpr int kMaximumFixedFontPointSize = 18;
 // ponytail: one gameplay window; move scale into a window context if multi-window rendering is added.
 float g_windowContentScale = 1.0f;
+
+// GameConfig::GetUIScalePercent() is an in-memory singleton read (no disk I/O per call, unlike
+// the SDL queries GetWindowContentScale() caches), so this reads it directly rather than adding a
+// second cached global -- docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section.
+// Applied post-clamp everywhere it's used (see BottomHudScale/CappedUniformScale below), unlike
+// GetWindowContentScale()'s clamp-bound fold: a direct user dial needs a proportional, visible
+// effect at every window size, including ones where the auto-scale already sits at its ceiling --
+// folding it into the clamp bounds instead would silently defeat the setting there.
+float UIScalePercentMultiplier()
+{
+    return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f;
+}
 
 struct FontPointRange
 {
@@ -75,8 +88,9 @@ float CappedUniformScale(int windowWidth, int windowHeight, float maximumScale)
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
     const float contentScale = UI::Scaling::GetWindowContentScale();
-    return std::clamp(std::min(widthScale, heightScale), kMinimumPanelScale * contentScale,
-                      maximumScale * contentScale);
+    const float autoScale = std::clamp(std::min(widthScale, heightScale), kMinimumPanelScale * contentScale,
+                                       maximumScale * contentScale);
+    return autoScale * UIScalePercentMultiplier();
 }
 
 UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
@@ -129,8 +143,9 @@ float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
     const float contentScale = GetWindowContentScale();
-    return std::clamp(std::min(widthScale, heightScale), kMinimumHudScale * contentScale,
-                      kMaximumHudScale * contentScale);
+    const float autoScale = std::clamp(std::min(widthScale, heightScale), kMinimumHudScale * contentScale,
+                                       kMaximumHudScale * contentScale);
+    return autoScale * UIScalePercentMultiplier();
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudLeftTransform(int windowWidth, int windowHeight)

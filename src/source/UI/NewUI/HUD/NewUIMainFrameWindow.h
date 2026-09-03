@@ -479,22 +479,24 @@ namespace SEASON3B
             // #bars in main_frame.rml specifically so they inherit this transform for free,
             // rather than needing their own redundant bindings of the same 3 values).
             //
-            // Known limitation, not yet fixed (feedback: "not sure if this HUD follows the
-            // config.ini scale %" -- confirmed it doesn't): barsScale comes from
-            // UI::Scaling::BottomHudScale alone, which has never read GameConfig::
-            // GetUIScalePercent() (grepped UITransform.cpp -- no reference), matching the
-            // original legacy CNewUIMainFrameWindow's own behavior (this HUD band predates that
-            // config option). Every RmlUi-authored length in main_frame.rcss is `px`, not `dp`,
-            // specifically so it tracks bars_scale exactly instead of being scaled a second time
-            // by RmlUiRuntime's context-wide density-independent-pixel ratio (see that ratio's own
-            // ApplyUIScale() comment). Composing UIScalePercent into barsScale here would need the
-            // SAME extra factor folded into Render()/Render3D()/UseHotKeyItemRButton()'s own
-            // BottomHudCenterTransform() calls (still real UI::Scaling C++, used for the
-            // still-legacy item-hotkey band's hit-testing and 3D icon placement) to keep the two
-            // in sync -- deferred rather than done as a quick multiply-in-place here, to avoid
-            // touching gameplay-critical potion click hit-testing under this pilot's own scope.
-            // Revisit alongside the rest of this carve-out once Phase 2/3 land and the whole
-            // mechanism gets replaced with the branch's normal fixed-dp/UIScalePercent policy.
+            // FIXED (was "not sure if this HUD follows the config.ini scale %" -- confirmed it
+            // didn't): UI::Scaling::BottomHudScale() itself now folds in
+            // GameConfig::GetUIScalePercent() as a post-clamp multiplier (UITransform.cpp), so
+            // barsScale picks it up automatically here, and so does every other caller of
+            // BottomHudScale/BottomHudCenterTransform codebase-wide -- in particular
+            // Render()/Render3D()/UseHotKeyItemRButton()'s own BottomHudCenterTransform() calls
+            // (still real UI::Scaling C++, used for the still-legacy item-hotkey band's
+            // hit-testing and 3D icon placement) -- for free, from the one shared function, with
+            // no separate wiring needed here. This is exactly why the fix landed in
+            // BottomHudScale() itself rather than as a multiply-in-place on barsScale alone: the
+            // two call sites can't drift out of sync the way CCharSelMainWin's independent
+            // calculators once did (layout-and-scaling.md). Every RmlUi-authored length in
+            // main_frame.rcss is still `px`, not `dp`, so it continues to track bars_scale exactly
+            // instead of being scaled a second time by RmlUiRuntime's context-wide
+            // density-independent-pixel ratio (see that ratio's own ApplyUIScale() comment) --
+            // that split is unchanged by this fix. Verify by exercising a potion/skill at more
+            // than one UIScalePercent value and resolution, not just a visual check, before
+            // trusting this in play (docs/rmlui-ui-system/layout-and-scaling.md).
             float barsLeft = 0.f, barsTop = 0.f, barsScale = 1.f;
 
             float hpFraction = 0.f, mpFraction = 0.f, agFraction = 0.f, sdFraction = 0.f;
