@@ -20,6 +20,7 @@
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "UI/Legacy/UIMng.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/UiInputRouter.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Server/CSMapServer.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
@@ -206,7 +207,15 @@ void NewMoveCharacterScene()
     }
     // ESC menu toggle is handled by CUIMng::Update()
 
-    if (rUIMng.IsCursorOnUI())
+    // Core::Input::IsMouseOverUI() added as a 2nd gate (2026-09-04, STATUS.md's "three parallel
+    // input-tracking systems" finding) -- IsCursorOnUI() alone runs on CCharSelMainWin's legacy
+    // CursorInWin() rect (CalculateFixedAnchorLayout()'s hand-duplicated math), which has already
+    // gone stale relative to the real RmlUi-rendered buttons once (see that function's own
+    // comment on the Delete-button no-op bug). RmlUi's own hit-test is authoritative here without
+    // any new per-window bounding-box query: char_sel_main.rml's #panel spans the full screen but
+    // is pointer-events:none, so IsMouseOverUI() only reports true over the real interactive
+    // children.
+    if (rUIMng.IsCursorOnUI() || Core::Input::IsMouseOverUI())
     {
         return;
     }
@@ -305,7 +314,9 @@ static void RenderCharacterScene3D()
     RenderCharactersClient();
     RenderMount();
 
-    if (!CUIMng::Instance().IsCursorOnUI())
+    // Core::Input::IsMouseOverUI() added as a 2nd gate here too (2026-09-04) -- same rationale as
+    // the check in Update() above.
+    if (!CUIMng::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();
 
     RenderBlurs();
