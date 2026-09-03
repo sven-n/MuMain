@@ -2,12 +2,34 @@
    art. Stat/description panels share the identical treatment as legacy (already flat fills in
    the original). */
 
+/* 2026-09-03: width/height and every child's left/top below are now static RCSS instead of
+   C++-pushed -- CharMakeWin.cpp's SetPosition() still pushes #panel's own left/top (a genuine
+   screen-placement value, same carve-out as every other migrated window), but stopped pushing
+   these, since they're constants that never actually varied at runtime (CCharMakeWin.h's own
+   comment already called out the job buttons -- the one genuinely per-instance-positioned
+   piece -- as "not recomputed per frame... mirrors the legacy per-class layout math exactly").
+   Deliberately `px`, not `dp`, and NOT part of the global auto-fit other migrated dialogs joined
+   this same pass: m_winBack (CharMakeWin.cpp) is a fixed-size CWin whose real screen position
+   also drives the live 3D character-preview viewport (BeginOpengl() call in
+   RenderCreateCharacter(), a completely separate, untested-here scale mechanism already reading
+   m_winBack's real unscaled pixel bounds) -- growing #panel via dp without also correctly scaling
+   that viewport would visibly desync the 2D chrome from the 3D preview it's meant to frame. Left
+   as a documented non-scaling exception, same class as main_frame's still-legacy HUD band and
+   char_info_balloon's live-projected position (layout-and-scaling.md's Fixed-vs-fluid table). */
 #panel {
 	position: absolute;
+	width: 454px;
+	height: 406px;
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: #d9d3c5; /* text-body */
 }
+
+#stat_panel  { left: 346px; top: 24px;  }
+#desc_panel  { left: 0px;   top: 355px; }
+#input_frame { left: 0px;   top: 317px; }
+#btn_ok      { left: 346px; top: 325px; }
+#btn_cancel  { left: 400px; top: 325px; }
 
 .job-btn {
 	position: absolute;

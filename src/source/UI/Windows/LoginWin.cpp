@@ -32,10 +32,34 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
+#include <cmath>
+
+namespace
+{
+    // Same combined ratio RmlUi's own dp unit uses (RmlUiRuntime.cpp's ApplyUIScale(),
+    // UIScalePercent x UI::Scaling::ViewportFitScale()) -- every fixed reference-pixel offset
+    // this window's C++ still computes (the panel's own legacy bounding-box size, the real
+    // CUITextInputBox placement, the checkbox/OK/Cancel legacy CButton companions) must scale by
+    // this to stay pixel-for-pixel aligned with login.rcss's own now-dp values, the same lockstep
+    // requirement CharSelMainWin.cpp/LoginMainWin.cpp already established for their own windows.
+    float LoginUIScaleRatio()
+    {
+        return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f *
+            UI::Scaling::ViewportFitScale(static_cast<int>(CInput::Instance().GetScreenWidth()),
+                                          static_cast<int>(CInput::Instance().GetScreenHeight()),
+                                          UI::Scaling::MaximumPanelScale);
+    }
+
+    int ScaledOffset(int value, float ratio)
+    {
+        return static_cast<int>(std::lround(value * ratio));
+    }
+}
 
 #define LIW_OK			0
 #define LIW_CANCEL		1
@@ -73,15 +97,20 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    // The login background is fixed artwork and does not scale with the window
-    // size, so keep the original height. The credential-consent controls fit on
-    // the panel and the trust warning is drawn just below it (issue #462).
     // CWin never draws anything for this window -- every theme's #panel/.input-frame renders the
     // background/input-box-frame artwork itself (see themes/legacy/login.rcss and
     // themes/modern/login.rcss). CWin::Create's own nTexID<=-2 sentinel (confirmed precedent:
     // ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves m_psprBg null, and CWin::Render()'s existing
     // `if (m_psprBg)` guard then draws nothing.
-    CWin::Create(329, 245, -2);
+    //
+    // 2026-09-03: the legacy bounding-box size passed here now tracks login.rcss's own #panel
+    // width/height (329dp/245dp, both themes) by the same ratio, instead of the fixed 329x245 this
+    // used to always be -- CWin's default CursorInWin() reads m_Size, and letting it go stale
+    // against the now-auto-fitting RmlUi visuals risks the same class of bug
+    // CharSelMainWin.h/CalculateFixedAnchorLayout()'s own comment documents in detail (a correctly
+    // rendered element whose legacy hit-test rect no longer matches it).
+    const float uiScale = LoginUIScaleRatio();
+    CWin::Create(ScaledOffset(329, uiScale), ScaledOffset(245, uiScale), -2);
     SetMovable(false);
 
     for (int i = 0; i < 2; ++i)
@@ -206,41 +235,54 @@ void CLoginWin::SetPosition(int x, int y)
 	// typed here) plus the otherwise-inert checkbox/button state objects below (SetEnable(false)
 	// elsewhere in this file; RmlUi owns their real click handling and visuals in both themes, so
 	// these are kept in sync only to avoid a silently-stale coordinate set, not because anything
-	// still renders or hit-tests through them). These pixel offsets must track each theme's own
-	// RCSS positions for the same elements (login.rcss's .input-account/.input-password/
+	// still renders or hit-tests through them). These offsets must track each theme's own RCSS
+	// positions for the same elements (login.rcss's .input-account/.input-password/
 	// .checkbox-remember-me/.checkbox-save-password/.btn-ok/.btn-cancel) -- legacy's are fixed to
 	// match its real sprite art (login_back.tga/login_me.tga, pixel-faithful, never moves);
 	// modern's are its own, currently more spaced-out layout. This function isn't itself
 	// theme-aware anywhere else, but the two themes' positions genuinely diverge here, so branch
 	// just for these offsets rather than picking one theme's numbers and silently misplacing the
 	// real input text in the other.
+	//
+	// 2026-09-03: every offset below is now scaled by LoginUIScaleRatio() -- login.rcss's own
+	// positions became dp (grow with UIScalePercent/window size) the same day, and without this
+	// these real, functional CUITextInputBox/legacy-CButton placements would silently drift from
+	// the now-auto-fitting RmlUi visuals at any ratio other than 1.0. Highest-stakes instance of
+	// the lockstep requirement this whole migration pass has been applying (CharSelMainWin,
+	// LoginMainWin, sys_menu) -- this window has real, functional text entry, not just redundant
+	// click-detection companions, so a mismatch here is the most consequential.
 	const bool bModernTheme = (UI::RmlBridge::GetActiveThemeName() == "modern");
-	const int usernameY = (bModernTheme ? 72 : 112);
-	const int passwordY = (bModernTheme ? 105 : 137);
-	const int rememberMeY = (bModernTheme ? 134 : 156);
-	const int savePasswordY = (bModernTheme ? 158 : 176);
-	const int buttonRowY = (bModernTheme ? 196 : 200);
+	const float uiScale = LoginUIScaleRatio();
+	const int usernameY = ScaledOffset(bModernTheme ? 72 : 112, uiScale);
+	const int passwordY = ScaledOffset(bModernTheme ? 105 : 137, uiScale);
+	const int rememberMeY = ScaledOffset(bModernTheme ? 134 : 156, uiScale);
+	const int savePasswordY = ScaledOffset(bModernTheme ? 158 : 176, uiScale);
+	const int buttonRowY = ScaledOffset(bModernTheme ? 196 : 200, uiScale);
+	const int checkboxButtonX = ScaledOffset(109, uiScale);
+	const int okButtonX = ScaledOffset(150, uiScale);
+	const int cancelButtonX = ScaledOffset(211, uiScale);
 
 	if (g_iChatInputType == 1)
 	{
-		const int boxX = int((x + 115) / g_fScreenRate_x);
+		const int boxX = int((x + ScaledOffset(115, uiScale)) / g_fScreenRate_x);
 		m_pUsernameInputBox->SetPosition(boxX, int((y + usernameY) / g_fScreenRate_y));
 		m_pPasswordInputBox->SetPosition(boxX, int((y + passwordY) / g_fScreenRate_y));
 	}
 
 	// "Remember Username" (row 1) and "Remember Password" (row 2) stack vertically; the OK/Cancel
 	// buttons move down to make room.
-	m_aBtnRememberMe.SetPosition(x + 109, y + rememberMeY);
-	m_aBtnSavePassword.SetPosition(x + 109, y + savePasswordY);
-	m_aBtn[LIW_OK].SetPosition(x + 150, y + buttonRowY);
-	m_aBtn[LIW_CANCEL].SetPosition(x + 211, y + buttonRowY);
+	m_aBtnRememberMe.SetPosition(x + checkboxButtonX, y + rememberMeY);
+	m_aBtnSavePassword.SetPosition(x + checkboxButtonX, y + savePasswordY);
+	m_aBtn[LIW_OK].SetPosition(x + okButtonX, y + buttonRowY);
+	m_aBtn[LIW_CANCEL].SetPosition(x + cancelButtonX, y + buttonRowY);
 
 	// RmlUi panel overlay: positioned at the same real window-pixel origin CWin's own
 	// background sprite (m_psprBg) uses -- unlike the legacy g_pRenderText calls this replaces
 	// (which divided by g_fScreenRate_x/y to convert into the old 640x480 reference space),
-	// RmlUi's Context operates directly in real window pixels, so no scale conversion is
-	// needed here; the panel's children use fixed-pixel RCSS offsets relative to this container,
-	// matching "the login background is fixed artwork and does not scale" above.
+	// RmlUi's Context operates directly in real window pixels, so no scale conversion is needed
+	// for the panel's own origin here; it's the panel's own SIZE (login.rcss's #panel
+	// width/height) and every child's position that are dp now, scaled automatically by RmlUi
+	// itself -- this C++-pushed left/top is just the panel's screen placement, not its layout.
 	if (m_pRmlDoc)
 	{
 		if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))

@@ -24,13 +24,26 @@
 	charmake-cancel-idle: 0px 0px 54px 30px;
 }
 
+/* 2026-09-03: see themes/modern/char_make.rcss's own comment -- width/height and every child's
+   left/top below are now static RCSS instead of C++-pushed, except #panel's own left/top itself
+   (still pushed, genuine screen placement) and the job buttons (genuinely per-instance data via
+   data-for/data-style-*, unaffected either way). Deliberately stays px, not dp -- this panel's
+   real screen position also drives the live 3D character-preview viewport, a separate scale
+   mechanism not touched here; see the modern theme's comment for the full reasoning. */
 #panel {
 	position: absolute;
-	/* Width/height and every child's left/top are pushed from C++ (CCharMakeWin). */
+	width: 454px;
+	height: 406px;
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
 }
+
+#stat_panel  { left: 346px; top: 24px;  }
+#desc_panel  { left: 0px;   top: 355px; }
+#input_frame { left: 0px;   top: 317px; }
+#btn_ok      { left: 346px; top: 325px; }
+#btn_cancel  { left: 400px; top: 325px; }
 
 .job-btn {
 	position: absolute;

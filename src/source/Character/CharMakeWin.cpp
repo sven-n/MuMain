@@ -318,30 +318,20 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 
     m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + kDescSpriteOffsetY);
 
-    // RmlUi panel/sub-panels: positioned/sized to the same real window-pixel geometry the legacy
-    // sprites above use -- same idiom as every other migrated window's SetPosition().
+    // RmlUi panel: only its own screen origin is still pushed here (genuine placement, same
+    // carve-out as every other migrated window) -- width/height and every static child position
+    // (stat_panel/desc_panel/input_frame/btn_ok/btn_cancel) moved to char_make.rcss as of
+    // 2026-09-03 (both themes), since none of those five ever actually varied at runtime. See
+    // that file's own comment for why #panel stays fixed-px rather than joining the other
+    // migrated dialogs' dp auto-fit (the live 3D character-preview viewport below reads
+    // m_winBack's real unscaled bounds directly).
     if (m_pRmlDoc)
     {
         if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
         {
             panel->SetProperty("left", std::to_string(nXCoord) + "px");
             panel->SetProperty("top", std::to_string(nYCoord) + "px");
-            panel->SetProperty("width", std::to_string(m_winBack.GetWidth()) + "px");
-            panel->SetProperty("height", std::to_string(m_winBack.GetHeight()) + "px");
         }
-        auto setPos = [this](const char* id, int relLeft, int relTop)
-        {
-            if (Rml::Element* e = m_pRmlDoc->GetElementById(id))
-            {
-                e->SetProperty("left", std::to_string(relLeft) + "px");
-                e->SetProperty("top", std::to_string(relTop) + "px");
-            }
-        };
-        setPos("stat_panel", 346, kStatSpriteOffsetY);
-        setPos("desc_panel", 0, kDescSpriteOffsetY);
-        setPos("input_frame", 0, kInputSpriteOffsetY);
-        setPos("btn_ok", 346, kOkButtonOffsetY);
-        setPos("btn_cancel", kCancelButtonOffsetX, kOkButtonOffsetY);
     }
 }
 

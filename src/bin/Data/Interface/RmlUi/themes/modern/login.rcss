@@ -32,40 +32,40 @@ body {
    file's own history in git blame if curious why that was a hard NOTE below for so long). */
 #panel {
 	position: absolute;
-	width: 329px;
-	height: 245px;
+	width: 329dp;
+	height: 245dp;
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: #d9d0c0;
-	border-width: 1px;
-	border-radius: 7px;
+	border-width: 1dp;
+	border-radius: 7dp;
 }
 
 /* Thin accent line just inside the frame -- structure/position local, palette from base.rcss's
    .modern-frame-accent-crimson (applied in login.rml). Spans the whole panel, behind the header
    text/lines AND .login-content below. */
 .frame-accent {
-	left: 4px;
-	right: 4px;
-	top: 4px;
-	bottom: 4px;
-	border-radius: 5px;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
+	border-radius: 5dp;
 }
 
 /* Recessed content surface -- starts below the (unboxed) header, not full-inset like
-   .modern-panel's own documented default (top:4px on all sides) -- overridden locally, exactly
+   .modern-panel's own documented default (top:4dp on all sides) -- overridden locally, exactly
    the "leaves room for a header above" case base.rcss's own comment on .modern-panel anticipates.
    Palette from .modern-panel-crimson (applied in login.rml). */
 .login-content {
-	left: 10px;
-	right: 10px;
-	top: 44px;
-	bottom: 10px;
-	border-radius: 4px;
+	left: 10dp;
+	right: 10dp;
+	top: 44dp;
+	bottom: 10dp;
+	border-radius: 4dp;
 }
 
 .modern-inset {
-	border-width: 1px;
+	border-width: 1dp;
 	border-color: #665237;
 	border-top-color: rgba(0, 0, 0, 170); /* recessed: dark top/left */
 	border-left-color: rgba(0, 0, 0, 170);
@@ -78,15 +78,15 @@ body {
 	position: absolute;
 }
 .label-server {
-	left: 111px;
-	top: 14px;
+	left: 111dp;
+	top: 14dp;
 	color: #e2d7c5;
 	font-weight: bold;
 	letter-spacing: 1.5px;
 	font-effect: outline(1px #000000);
 }
-.label-account { left: 30px; top: 73px; }
-.label-password{ left: 30px; top: 106px; }
+.label-account { left: 30dp; top: 73dp; }
+.label-password{ left: 30dp; top: 106dp; }
 
 /* Soft ambient glow behind the title -- yellow at the center, cooling to red further out (fading
    to transparent at the very edge so it still reads as a glow, not a hard-edged shape), a true
@@ -101,34 +101,39 @@ body {
    visible without needing to brighten it. */
 .header-glow {
 	position: absolute;
-	left: 40px;
-	right: 40px;
-	top: 8px;
-	height: 26px;
+	left: 40dp;
+	right: 40dp;
+	top: 8dp;
+	height: 26dp;
 	pointer-events: none;
 	decorator: radial-gradient(ellipse, rgba(255, 222, 150, 130), rgba(140, 25, 20, 140) 55%, transparent 90%);
 }
 
 /* Border-only outline standing in for the legacy input-box frame -- no background, so it never
    covers the legacy input text drawn underneath (border-COLOR comes from .modern-inset, applied
-   alongside this class in login.rml -- deliberately no background here for the same reason). */
+   alongside this class in login.rml -- deliberately no background here for the same reason).
+   LoginWin.cpp::SetPosition() positions the real CUITextInputBox text a fixed few px below/right
+   of this frame's own top/left (72/105 vs this rule's 66/99 -- text padding within the frame, a
+   pre-existing relationship, not a typo) and now scales that offset by the same ratio this file's
+   dp values respond to -- keep the two in sync if either changes (see that function's own
+   comment). */
 .input-frame {
 	position: absolute;
-	width: 156px;
-	height: 23px;
-	border-radius: 4px; /* radius-md */
+	width: 156dp;
+	height: 23dp;
+	border-radius: 4dp; /* radius-md */
 	pointer-events: none;
 }
-.input-account  { left: 109px; top: 66px; }
-.input-password { left: 109px; top: 99px; }
+.input-account  { left: 109dp; top: 66dp; }
+.input-password { left: 109dp; top: 99dp; }
 
 .checkbox-row {
 	position: absolute;
 	cursor: pointer;
 	pointer-events: auto;
 }
-.checkbox-remember-me  { left: 109px; top: 134px; }
-.checkbox-save-password{ left: 109px; top: 158px; }
+.checkbox-remember-me  { left: 109dp; top: 134dp; }
+.checkbox-save-password{ left: 109dp; top: 158dp; }
 
 /* NOTE 2026-09-03: login.rml now links base.rcss too (see the frame/panel/accent rules above),
    but .checkbox-box/.btn below are deliberately left as their own full, self-contained copies
@@ -139,14 +144,14 @@ body {
 .checkbox-box {
 	display: inline-block;
 	position: relative;
-	width: 16px;
-	height: 16px;
+	width: 16dp;
+	height: 16dp;
 	background-color: #0b0907;
 	decorator: linear-gradient(to bottom, #211b15, #0b0907);
-	border-width: 1px;
+	border-width: 1dp;
 	border-color: #725b39;
 	border-top-color: rgba(0, 0, 0, 180);
-	border-radius: 3px;
+	border-radius: 3dp;
 }
 .checkbox-box.checked {
 	background-color: #604319;
@@ -158,20 +163,20 @@ body {
    "pixels" stair-stepping into a blocky tick shape. */
 .tick-px {
 	position: absolute;
-	width: 2px;
-	height: 2px;
+	width: 2dp;
+	height: 2dp;
 	background-color: #16100a;
 }
-.tick-px-1 { left: 3px;  top: 7px; }
-.tick-px-2 { left: 5px;  top: 9px; }
-.tick-px-3 { left: 7px;  top: 7px; }
-.tick-px-4 { left: 9px;  top: 5px; }
-.tick-px-5 { left: 11px; top: 3px; }
+.tick-px-1 { left: 3dp;  top: 7dp; }
+.tick-px-2 { left: 5dp;  top: 9dp; }
+.tick-px-3 { left: 7dp;  top: 7dp; }
+.tick-px-4 { left: 9dp;  top: 5dp; }
+.tick-px-5 { left: 11dp; top: 3dp; }
 
 .checkbox-tick {
 	display: none;
 	position: absolute;
-	left: 0; top: 0; width: 16px; height: 16px;
+	left: 0; top: 0; width: 16dp; height: 16dp;
 }
 .checkbox-box.checked .checkbox-tick {
 	display: block;
@@ -179,18 +184,18 @@ body {
 
 .checkbox-label {
 	position: absolute;
-	left: 21px;
-	top: 1px;
+	left: 21dp;
+	top: 1dp;
 	white-space: nowrap;
 }
 
 /* Gradient-to-transparent divider above the button row (mockup's .separator). */
 .separator {
 	position: absolute;
-	left: 20px;
-	right: 20px;
-	top: 186px;
-	height: 1px;
+	left: 20dp;
+	right: 20dp;
+	top: 186dp;
+	height: 1dp;
 	pointer-events: none;
 	decorator: linear-gradient(to right, transparent, #5d472c 15%, #81633a 50%, #5d472c 85%, transparent);
 }
@@ -203,20 +208,20 @@ body {
    bevel below is the whole effect). */
 .btn {
 	position: absolute;
-	width: 54px;
-	height: 30px;
+	width: 54dp;
+	height: 30dp;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 30px;
+	line-height: 30dp;
 	cursor: pointer;
 	color: #f0e0bc;
 	font-effect: outline(1px #000000);
 	background-color: #35100e;
 	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e);
-	border-width: 1px;
+	border-width: 1dp;
 	border-color: #0a0706;
 	border-top-color: rgba(213, 143, 106, 115);
-	border-radius: 5px;
+	border-radius: 5dp;
 	pointer-events: auto;
 }
 .btn:hover {
@@ -224,23 +229,23 @@ body {
 	border-color: #9a6841;
 }
 .btn:active {
-	/* Shifts down 2px to read as physically pressed -- both .btn-ok/.btn-cancel share the same
-	   top:196px below, so one absolute value covers both. Native :active pseudo-class, unverified
+	/* Shifts down 2dp to read as physically pressed -- both .btn-ok/.btn-cancel share the same
+	   top:196dp below, so one absolute value covers both. Native :active pseudo-class, unverified
 	   against this branch's own mouse-input routing (RmlUi's default SDL translation is bypassed
 	   here for unrelated reasons -- see README.md's Gotchas). Degrades gracefully if it never
 	   fires -- worst case the button just doesn't visibly depress. */
-	top: 198px;
+	top: 198dp;
 	border-top-color: rgba(180, 92, 68, 65);
 	border-bottom-color: rgba(0, 0, 0, 200);
 }
-.btn-ok { left: 150px; top: 196px; }
+.btn-ok { left: 150dp; top: 196dp; }
 
 /* Neutral secondary button (Cancel) -- overrides .btn's crimson fill/border, single flat-gray
    decorator instead, keeps its bevel/hover/active mechanics. Must stay textually after
    .btn/.btn:hover/.btn:active above (same specificity, source order decides). */
 .btn-cancel {
-	left: 211px;
-	top: 196px;
+	left: 211dp;
+	top: 196dp;
 	background-color: #17130f;
 	decorator: linear-gradient(to bottom, #37302a, #28221c 40%, #17130f 75%, #0d0b09);
 	border-color: #665237;
@@ -252,8 +257,8 @@ body {
 
 .trust-warning {
 	position: absolute;
-	left: 30px;
-	top: 252px;
-	width: 280px;
+	left: 30dp;
+	top: 252dp;
+	width: 280dp;
 	color: #d69a3e; /* semantic-warning */
 }
