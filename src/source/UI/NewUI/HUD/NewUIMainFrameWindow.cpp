@@ -416,7 +416,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterRegion()
 // own band) unchanged for legacy theme.
 void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
 {
-    if (UI::RmlBridge::GetActiveThemeName() == "modern")
+    if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
         // 2026-09-02: no border lines here anymore -- this panel's own top/bottom/outer-edge
         // outline read as a visible divider once the whole bottom HUD strip got a single
@@ -432,7 +432,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
 
 void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
 {
-    if (UI::RmlBridge::GetActiveThemeName() == "modern")
+    if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
         // 2026-09-02: was kCenterBandStart(152) to kMenu3Start+kMenu3CenterWidth(488), a 336-unit
         // span sized to cover the vertical HP/SD/AG/MP gauges that used to be interleaved inside
@@ -1743,7 +1743,7 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
                 // at all -- real work, not a quick fix, and belongs with the rest of Phase 2
                 // (CNewUISkillList -> RmlUi, STATUS.md's "What's migrated") rather than bundled
                 // into an unrelated cleanup pass.
-                if (UI::RmlBridge::GetActiveThemeName() != "modern")
+                if (!UI::RmlBridge::ThemeProvidesOwnIconChrome())
                     SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
             }
             RenderSkillIcon(m_iHotKeySkillType[iIndex], x + 6, y + 6, 20, 28);
@@ -1845,7 +1845,7 @@ bool SEASON3B::CNewUISkillList::Render()
     // moved to RmlUi entirely, see OnGridCellClick()/OnGridCellHover() etc.
     if (bySkillNumber > 0 && m_bSkillList == true)
     {
-        const bool bDrawBoxSprite = (UI::RmlBridge::GetActiveThemeName() != "modern");
+        const bool bDrawBoxSprite = !UI::RmlBridge::ThemeProvidesOwnIconChrome();
         for (const SkillCellEntry& entry : m_GridSnapshot)
         {
             if (bDrawBoxSprite)

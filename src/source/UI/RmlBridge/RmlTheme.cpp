@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "RmlTheme.h"
 #include "Data/GameConfig/GameConfig.h"
+#include "Core/Platform/WinIni.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -29,11 +30,32 @@ namespace UI::RmlBridge
             std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return (char)std::tolower(c); });
             return s;
         }
+
+        // Inverse of NarrowAscii -- theme.ini paths built from GetActiveThemeName() are plain
+        // ASCII by the same convention, so a naive widen is safe here.
+        std::wstring WidenAscii(const std::string& s)
+        {
+            std::wstring out(s.size(), L'\0');
+            std::transform(s.begin(), s.end(), out.begin(), [](char c) { return static_cast<wchar_t>(c); });
+            return out;
+        }
     }
 
     const std::string& GetActiveThemeName()
     {
         static const std::string cached = ToLower(NarrowAscii(GameConfig::GetInstance().GetRmlTheme()));
+        return cached;
+    }
+
+    bool ThemeProvidesOwnIconChrome()
+    {
+        // Cached the same way GetActiveThemeName() is -- read once, the active theme is fixed for
+        // the process lifetime (see this file's own theme-hot-swap comment on LoadThemedDocument).
+        static const bool cached = []
+        {
+            const std::string iniPath = "Data/Interface/RmlUi/themes/" + GetActiveThemeName() + "/theme.ini";
+            return GetPrivateProfileIntW(L"Capabilities", L"ProvidesOwnIconChrome", 0, WidenAscii(iniPath).c_str()) != 0;
+        }();
         return cached;
     }
 
