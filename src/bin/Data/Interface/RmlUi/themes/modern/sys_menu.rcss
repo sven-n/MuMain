@@ -1,12 +1,30 @@
 /* Modern theme for the system menu -- flat programmatic panel, matching login.rcss's modern
-   translucent-dark-panel look. Buttons rely entirely on base.rcss's shared .btn. */
+   translucent-dark-panel look. Buttons rely entirely on base.rcss's shared .btn.
 
+   2026-09-03: #panel no longer C++-positioned/sized -- centered via base.rcss's .center-both
+   utility class (applied in sys_menu.rml), fixed dp size matching CWinEx's own real geometry
+   exactly (213 = the panel art's sprite width; 187/155 = TOP.height(64) + BOTTOM.height(43) +
+   LEFT.texHeight(8) * 10-or-6 lines, SysMenuWin.cpp's SetLine() math -- 10 lines in the character
+   scene, 6 in the login scene, toggled here via .compact rather than pushed from C++). Every
+   button below is a fixed dp offset from the panel's own edges -- SetPosition()'s old per-button
+   math (SMW_BTN_GAP=4, base offsets 33/height-52) is now baked into these numbers directly, no
+   scene-awareness needed since exit-game/select-server anchor from the top and option/close
+   anchor from the bottom (bottom-anchoring absorbs the .compact height difference for free). */
 #panel {
-	position: absolute;
+	width: 213dp;
+	height: 187dp;
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
 	background-color: rgba(26, 27, 29, 228);
-	border: 1px rgba(255, 255, 255, 30);
-	border-radius: 10px;
+	border: 1dp rgba(255, 255, 255, 30);
+	border-radius: 10dp;
 }
+#panel.compact {
+	height: 155dp;
+}
+
+#btn_exit_game    { left: 52dp; top: 33dp; }
+#btn_select_server{ left: 52dp; top: 67dp; }
+#btn_option       { left: 52dp; bottom: 86dp; }
+#btn_close        { left: 52dp; bottom: 52dp; }

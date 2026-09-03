@@ -8,14 +8,25 @@
 	sys-menu-top: 0px 0px 213px 64px;
 }
 
+/* 2026-09-03: #panel no longer C++-positioned/sized -- see themes/modern/sys_menu.rcss's own
+   comment for the full derivation of these numbers (identical here, theme-agnostic geometry). */
 #panel {
-	position: absolute;
+	width: 213dp;
+	height: 187dp;
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
 }
+#panel.compact {
+	height: 155dp;
+}
+
+#btn_exit_game    { left: 52dp; top: 33dp; }
+#btn_select_server{ left: 52dp; top: 67dp; }
+#btn_option       { left: 52dp; bottom: 86dp; }
+#btn_close        { left: 52dp; bottom: 52dp; }
 
 .panel-cap-top {
-	height: 64px;
+	height: 64dp;
 	decorator: image(sys-menu-top);
 }

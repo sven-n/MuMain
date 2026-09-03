@@ -136,53 +136,13 @@ void CSysMenuWin::SetPosition(int nXCoord, int nYCoord)
     m_aBtn[SMW_BTN_CLOSE].SetPosition(nBtnPosX, nCloseBtnPosY);
     m_aBtn[SMW_BTN_OPTION].SetPosition(nBtnPosX, nCloseBtnPosY - nBtnGap);
 
-    // RmlUi panel: positioned/sized to match m_winBack's real (screen-absolute, quantized-height)
-    // geometry, same idiom as CLoginWin::SetPosition. Buttons below are positioned panel-relative
-    // (not screen-absolute like the legacy CButtons above) -- their offsets only depend on
-    // m_winBack's width/height, not its screen position, so this is the same math as above minus
-    // m_winBack.GetXPos()/GetYPos().
-    if (m_pRmlDoc)
-    {
-        if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
-        {
-            panel->SetProperty("left", std::to_string(nXCoord) + "px");
-            panel->SetProperty("top", std::to_string(nYCoord) + "px");
-            panel->SetProperty("width", std::to_string(m_winBack.GetWidth()) + "px");
-            panel->SetProperty("height", std::to_string(m_winBack.GetHeight()) + "px");
-        }
-
-        // #panel_middle's own inset/size is pure RCSS now (base.rcss's .panel-middle rule,
-        // left/top/right/bottom) -- no C++ push needed, since RmlUi's layout engine correctly
-        // derives width/height from opposing edges on a position:absolute element (confirmed by
-        // reading LayoutDetails::BuildBoxWidth/BuildBoxHeight directly). An earlier version of
-        // this method pushed it explicitly out of unconfirmed caution about that; removed once
-        // actually confirmed unnecessary, since a theme-specific geometry value living in C++
-        // would mean any future theme needing a different inset couldn't express that without an
-        // engine change -- this project's stated goal is that themes need zero C++/recompilation.
-
-        const int nRelBtnPosX = (m_winBack.GetWidth() - m_aBtn[0].GetWidth()) / 2;
-        const int nRelBtnPosBaseTop = 33;
-        const char* aBtnIds[SMW_BTN_MAX] = { "btn_exit_game", "btn_select_server", "btn_option", "btn_close" };
-        for (int i = 0; i < SMW_BTN_OPTION; ++i)
-        {
-            if (Rml::Element* btn = m_pRmlDoc->GetElementById(aBtnIds[i]))
-            {
-                btn->SetProperty("left", std::to_string(nRelBtnPosX) + "px");
-                btn->SetProperty("top", std::to_string(nRelBtnPosBaseTop + i * nBtnGap) + "px");
-            }
-        }
-        const int nRelCloseBtnPosY = m_winBack.GetHeight() - 52;
-        if (Rml::Element* btn = m_pRmlDoc->GetElementById("btn_close"))
-        {
-            btn->SetProperty("left", std::to_string(nRelBtnPosX) + "px");
-            btn->SetProperty("top", std::to_string(nRelCloseBtnPosY) + "px");
-        }
-        if (Rml::Element* btn = m_pRmlDoc->GetElementById("btn_option"))
-        {
-            btn->SetProperty("left", std::to_string(nRelBtnPosX) + "px");
-            btn->SetProperty("top", std::to_string(nRelCloseBtnPosY - nBtnGap) + "px");
-        }
-    }
+    // 2026-09-03: no longer pushes anything to the RmlUi elements -- #panel centers itself via
+    // base.rcss's .center-both utility class and sizes itself via a fixed dp width/height plus a
+    // .compact modifier for the shorter login-scene variant (sys_menu.rml/.rcss, both themes);
+    // every button is a fixed dp offset from the panel's own edges. See sys_menu.rcss's own
+    // comment for the full derivation from this function's old math. The legacy m_winBack/m_aBtn
+    // positioning above is unchanged -- still real screen-pixel geometry, still needed for their
+    // own click-detection redundancy (UpdateWhileActive()'s `||`).
 }
 void CSysMenuWin::Show(bool bShow)
 {
