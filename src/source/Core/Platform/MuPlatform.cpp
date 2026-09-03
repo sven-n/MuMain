@@ -1,6 +1,5 @@
 #include "Core/Platform/MuPlatform.h"
 #include "Core/Platform/IPlatformWindow.h"
-#include "Core/Platform/IPlatformEventLoop.h"
 #include "Core/Utilities/Log/MuLogger.h"
 
 #include <memory>
@@ -10,14 +9,12 @@
 #endif
 
 #include "Core/Platform/sdl3/SDLWindow.h"
-#include "Core/Platform/sdl3/SDLEventLoop.h"
 #include <SDL3/SDL.h>
 
 namespace mu
 {
 
 static std::unique_ptr<IPlatformWindow> s_pWindow;
-static std::unique_ptr<IPlatformEventLoop> s_pEventLoop;
 static bool s_bInitialized = false;
 
 bool MuPlatform::Initialize()
@@ -42,7 +39,6 @@ bool MuPlatform::Initialize()
 
 void MuPlatform::Shutdown()
 {
-    s_pEventLoop.reset();
     if (s_pWindow)
     {
         s_pWindow->Destroy();
@@ -72,22 +68,12 @@ bool MuPlatform::CreatePlatformWindow(const char* title, int width, int height, 
         return false;
     }
     s_pWindow = std::move(window);
-    s_pEventLoop = std::make_unique<SDLEventLoop>();
     return true;
 }
 
 IPlatformWindow* MuPlatform::GetWindow()
 {
     return s_pWindow.get();
-}
-
-bool MuPlatform::PollEvents()
-{
-    if (!s_pEventLoop)
-    {
-        return false;
-    }
-    return s_pEventLoop->PollEvents();
 }
 
 void MuPlatform::SetFullscreen(bool fullscreen)

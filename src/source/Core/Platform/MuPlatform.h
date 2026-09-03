@@ -15,7 +15,6 @@ public:
 
     [[nodiscard]] static bool CreatePlatformWindow(const char* title, int width, int height, uint32_t flags);
     [[nodiscard]] static IPlatformWindow* GetWindow();
-    [[nodiscard]] static bool PollEvents();
 
     static void SetFullscreen(bool fullscreen);
     static void SetMouseGrab(bool grab);
