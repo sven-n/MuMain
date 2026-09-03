@@ -11,15 +11,20 @@ document — it stays a pixel-faithful reproduction of the original game's look,
 `modern` should read as a dark, atmospheric, premium action-RPG interface — not a generic light
 dashboard, not a flat web-app aesthetic. Concretely:
 
-- Dark neutral surfaces, layered by shade rather than by heavy borders, to establish hierarchy —
-  still the default for *structural* elements: outer frames/panels, HUD backgrounds, tooltips (see
-  [Color tokens](#color-tokens) below; `.modern-frame`/`.modern-panel`/`.modern-inset` are
-  deliberately untouched by the crimson/gold work described there).
-- Two warm metallic accent families, used for meaning/emphasis, not as a base material for
-  structural surfaces — see [Color tokens](#color-tokens): `accent-gold` for secondary highlights
-  (hover/checked/selected borders, bevel highlights, dividers), `accent-crimson` for primary/hero
-  emphasis (a window's one confirm-style action, a title banner). The two aren't interchangeable —
-  see Accent colors below for which is which and why.
+- Dark neutral surfaces (`surface-0`/`-1`/`-2`, always gray/near-black, never warm) layered by
+  shade rather than heavy borders, to establish hierarchy. A dialog's own decorative frame/panel
+  material (the `.modern-frame-crimson`/`.modern-panel-crimson` family — `login`,
+  `remember_password_prompt`, `msg_win`) is **also** gray/metallic/near-black now, not warm
+  bronze — see [Borders and frames](#borders-and-frames) below for that specific recolor. **Text
+  (title/body) and the checkbox deliberately stay warm/gold** — only the structural frame/panel
+  material itself went cool; this isn't a blanket "remove all warmth" pass.
+- Three accent families, used for meaning/emphasis, not as a base material for structural
+  surfaces — see [Color tokens](#color-tokens): `accent-steel` for general interactive chrome
+  (hover/focused borders, bevel highlights, dividers), `accent-crimson` for primary/hero emphasis
+  (a window's one confirm-style action, a title banner), and `accent-gold` reserved for inline
+  text emphasis, item/skill-slot selected/active highlights, and the checkbox's checked state —
+  never for general window/dialog chrome otherwise. The three aren't interchangeable — see Accent
+  colors below for which is which and why.
 - Subtle framing (thin metallic edges, bevel highlights) reserved for major panels; small
   HUD/tooltip elements stay simple.
 - High contrast only where interaction or readability actually needs it — most of the surface
@@ -30,21 +35,29 @@ dashboard, not a flat web-app aesthetic. Concretely:
 - Visually consistent across HUD, dialogs, tooltips, buttons, and panels — a shared vocabulary
   applied everywhere, not a one-off restyle per window.
 - Color/composition may be informed by real MU Online screenshots as reference (the login dialog's
-  crimson-banner-plus-gold-button treatment was built this way) — but `modern` must still be a
-  genuine from-scratch RCSS implementation, never a reuse of `legacy`'s own literal sprite pixels
-  or assets as a shortcut.
+  crimson-banner treatment was built this way) — but `modern` must still be a genuine from-scratch
+  RCSS implementation, never a reuse of `legacy`'s own literal sprite pixels or assets as a
+  shortcut.
 
 ## Design tokens
 
 **This vendored RmlUi build has no `var()`/custom-property mechanism** (confirmed against
 `StyleSheetSpecification.cpp`'s property registration table — no `var()` parser exists; the two
 properties that look like CSS variables, `--rmlui-language`/`--rmlui-direction`, are hardcoded
-internal properties using that naming convention, not a general indirection feature). So a
-"token" here is **a documented value, not a language construct** — the table below is the single
-source of truth; each RCSS rule that uses one of these values should comment the token name next
-to the literal (`background-color: #1b1714; /* surface-1 */`), the same way sprite-sheet rects
-already get named. There's no compiler to catch drift — keeping RCSS in sync with this table is a
-review discipline, the same one already in place for keeping `legacy`/`modern` themselves in sync.
+internal properties using that naming convention, not a general indirection feature). **Fixed
+2026-09-04, without any RmlUi engine change**: `UI::RmlBridge::LoadThemedDocument()`
+(`RmlTheme.cpp`) now resolves a `token(name)` marker in an `.rcss` file against
+`themes/<theme>/tokens.ini`'s `[Tokens]` section before RmlUi ever sees the text — reusing the
+fact that RmlUi's own `XMLNodeHandlerHead` treats an inline `<style>` block in `<head>` identically
+to an external `<link type="text/rcss">` for cascade purposes, so a tokenized stylesheet gets
+spliced in as `<style>` instead of linked. Content-driven, not theme-name-driven (a stylesheet
+with no `token(...)` marker is left completely untouched — the exact code path every window
+already took before this existed), so `legacy` (no token layer, still theme-specific by design)
+is unaffected. The table below is still the single source of truth for what each token *means* —
+`themes/modern/tokens.ini` is where its actual *value* lives now, and the two must stay in sync
+the same review-discipline way `legacy`/`modern` themselves already do (there's still no compiler
+to catch drift between the table and the ini file, only between `token(name)` and a name that
+doesn't exist in the ini, which fails loudly — an empty resolved value, not a silent wrong color).
 
 **`box-shadow` does not render on this engine.** `PropertyId::BoxShadow` parses fine — property
 registration alone doesn't mean the render interface implements it. This engine's
@@ -63,34 +76,46 @@ capability — check the render interface, or test the specific decorator in iso
 | `surface-0` | `rgba(10, 9, 8, 190)` | Full-screen dim backdrop (`#backdrop`) |
 | `surface-1` | `#1a1b1d` | Base panel background |
 | `surface-2` | `#2c2f32` | Elevated panel / header background |
-| `surface-3` | `rgba(255, 244, 224, 12)` | Interactive control, resting (warm-white wash over `surface-1`/`surface-2`, not pure white) |
+| `surface-3` | `rgba(255, 255, 255, 12)` | Interactive control, resting (neutral white wash over `surface-1`/`surface-2`) |
 | `surface-tooltip` | `rgba(20, 20, 20, 220)` | Tooltip/floating-label background — used by `main_frame.rcss`, `buff_strip.rcss`, `mu_helper_bar.rcss`. Use this for any new tooltip rather than picking a new near-black. |
 
 ### Accent colors
 
-Two accent families, not interchangeable. `accent-gold` is a genuine accent (not a base material)
-layered on top of the neutral gray surfaces/borders, for *secondary* emphasis —
-hover/checked/selected states, bevel highlights, dividers. It does not mean "the important one" by
-itself.
+Three accent families, not interchangeable, each with a distinct job:
 
-`accent-crimson` is reserved for a window's one *primary/hero* element — a single confirm-style
-action button, or a title banner — never applied to more than one thing per window, and never to a
-plain list of equal-weight actions (see Direction's `sys_menu.rcss` example above). Where both
-appear together (the login dialog), crimson reads as "the one thing to do here" and gold reads as
-"state, not identity" — losing that distinction (e.g. making every button crimson) is exactly the
-"high contrast everywhere" mistake Direction warns against, just executed in the other color.
+- **`accent-steel`** — general interactive chrome: hover, checked, focused-border, dividers, bevel
+  highlights, a resting button's border glow. This is the role `accent-gold` used to play; gold no
+  longer means "interactive," steel does.
+- **`accent-crimson`** — a window's one *primary/hero* element: a single confirm-style action
+  button, or a title banner. Never applied to more than one thing per window, and never to a plain
+  list of equal-weight actions (see Direction's `sys_menu.rcss` example above).
+- **`accent-gold`** — scoped to inline text emphasis, item/skill-slot selected/active/current
+  highlights (`.skill-cell.selected`, the hotkey current-selection glow), and the checkbox's
+  checked state (`.checkbox-box.checked`) — kept warm deliberately, not part of the frame-material
+  recolor. Never used for general window/dialog chrome otherwise. **Inconsistency worth knowing**:
+  `char_make.rcss`'s `.job-btn.checked` (the class-selection buttons) uses `accent-steel`, not
+  gold, even though it's also a "checked" state — that one wasn't part of the checkbox exception,
+  so it kept the general-chrome treatment. Not a bug, just two different "checked" controls
+  landing on different sides of the gold/steel line; don't assume one implies the other.
 
-Both are real gradients in practice (bright top-ish stop fading to a dark bottom-ish stop, plus a
-bevel border), not flat fills — see `login.rcss`'s `.header-banner`/`.btn` and `base.rcss`'s
-`.btn-ok` for the actual stop sequences; the table below gives representative resting/bright
-values for reference and comment-naming, not the literal 4-stop gradients themselves.
+Where crimson and steel appear together (the login dialog), crimson reads as "the one thing to do
+here" and steel reads as "state, not identity" — losing that distinction (e.g. making every button
+crimson) is exactly the "high contrast everywhere" mistake Direction warns against, just executed
+in the other color.
+
+Crimson is a real gradient in practice (bright top-ish stop fading to a dark bottom-ish stop, plus
+a bevel border), not a flat fill — see `login.rcss`'s `.header-banner` and `base.rcss`'s `.btn-ok`
+for the actual stop sequence; the table below gives representative resting/bright values for
+reference and comment-naming, not the literal 4-stop gradient itself.
 
 | Token | Value | Use |
 |---|---|---|
-| `accent-gold` | `#c0934c` | Secondary accent — hover/checked/selected states, dividers, bevel highlights. Layered on top of the gray surfaces/borders, not the base material itself. |
-| `accent-gold-bright` | `#e0c060` | Selected/current state, brighter than resting hover/checked |
+| `accent-steel` | `#b0bac4` | General interactive chrome — hover/checked/focused states, dividers, bevel highlights, a resting button's border glow. Layered on top of the gray surfaces/borders, not the base material itself. |
+| `accent-steel-bright` | `#d4dce4` | Hover-bright state for the same chrome |
 | `accent-crimson` | `#70221f` | Primary/hero accent — a window's one confirm-style button, a title banner. One per window, never a whole list of equal-weight actions. |
 | `accent-crimson-bright` | `#8c2b26` | Hover/bright state for the same primary element |
+| `accent-gold` | `#c0a050` | Semantic highlight — inline text emphasis, item/skill-slot selected/active highlights, the checkbox's checked state. Not general window/dialog chrome. |
+| `accent-gold-bright` | `#e0c060` | Brighter variant of the same semantic highlight (current/active skill-slot state) |
 | `accent-blue` | `#6f9bc4` | Secondary accent — informational, non-primary interactive hints |
 
 ### Semantic colors
@@ -121,13 +146,15 @@ danger prompts, success feedback), not item-quality colors.
 
 ### Borders
 
-Structural borders (frame/panel/hairline) stay steel gray — gold is reserved for accent states
-(see Accent colors above), not the base material.
+Structural borders (frame/panel/hairline) stay neutral steel gray — `accent-steel` is reserved for
+*interactive* accent states (see Accent colors above), not the structural base material; the two
+share a hue family (both gray/metallic) but `accent-steel` sits brighter/more saturated so hover/
+checked/focused states read as distinctly "activated" against the quieter structural borders.
 
 | Token | Value | Use |
 |---|---|---|
 | `border-subtle` | `rgba(255, 255, 255, 12)` | Hairline separator/highlight on a dark panel |
-| `border-metal` | `rgba(140, 146, 152, 140)` | Thin metallic edge — small controls, HUD elements |
+| `border-metal` | `rgba(140, 146, 152, 130)` | Thin metallic edge — small controls, HUD elements |
 | `border-strong` | `rgba(176, 182, 188, 180)` | Heavier metallic frame — major windows/dialogs only |
 
 **No shadow/glow tokens as such** — `box-shadow` is confirmed broken on this engine (see above).
@@ -140,9 +167,10 @@ darker bottom/right; recessed surfaces invert both.
 **`.btn` itself stays flat** (background-color + a single border-color, no gradient/bevel) — a
 glossy raised-button treatment (gradient fill, per-side bevel, hover/active gradient swaps) was
 tried and found unwanted; the frame/panel layering technique above is unaffected, only buttons
-stay flat. The border carries `accent-gold` at low alpha (`rgba(190, 160, 110, 90)`) rather than
-`border-metal` — a faint gold glow at rest, brightening to `accent-gold-bright` on hover — so
-buttons read as accented, not just gray, even though the fill itself has no gradient.
+stay flat. The border carries `accent-steel` at low alpha (`rgba(176, 186, 196, 90)`) rather than
+`border-metal` — a faint steel glow at rest, brightening to `accent-steel-bright`
+(`rgba(212, 220, 228, 210)`) on hover — so buttons read as accented, not just gray, even though the
+fill itself has no gradient.
 
 **`.btn-ok` is the one deliberate exception**: a `.btn-ok` modifier class (applied alongside
 `.btn`, e.g. `class="btn btn-ok"`) gets a real `accent-crimson` gradient fill and bevel border —
@@ -179,15 +207,33 @@ surface (full windows/dialogs) — HUD elements, small controls, lists, and tool
 `border-metal`/`border-subtle`, matching how `main_frame.rcss`'s `.skill-cell` already keeps its
 border thin and non-ornamental.
 
+### The `-crimson`-named frame/panel variant is gray/metallic now, not warm bronze
+
+`base.rcss`'s `.modern-frame-crimson`/`.modern-panel-crimson`/`.modern-frame-accent-crimson` — the
+palette variant `login`, `remember_password_prompt`, and `msg_win` apply alongside the generic
+`.modern-frame`/`.modern-panel`/`.modern-frame-accent` primitives — were originally a warm
+bronze/near-black material with warm-gold edge highlights (styled off a real MU screenshot's
+warm-bronze/crimson dialog look). That base material is now cool gray/metallic (steel-tinted edge
+highlights instead of gold ones); text, the checkbox, the header glow, and the primary button's
+crimson fill all stay warm on top of it. The classes keep their `-crimson` name for now even
+though the frame material itself no longer is — renaming is a real cleanup worth doing eventually
+(touches 3 `.rml` files' `class` attributes plus `base.rcss`'s own selectors) but wasn't bundled
+into the color change itself. `login.rcss` also has its own local `.modern-inset`/
+`.modern-inset.focused` override (the input-box frame border) that went through the identical
+warm→cool treatment for the same reason.
+
 ## Component states
 
 Every interactive element should express, through this same token set, whichever of these actually
-apply: normal (`surface-3` resting wash), hover (`accent-gold` background — `base.rcss`'s
-`.btn:hover` convention), pressed, focused (`accent-gold-bright` border — no glow available, see
+apply: normal (`surface-3` resting wash), hover (`accent-steel` background — `base.rcss`'s
+`.btn:hover` convention), pressed, focused (`accent-steel-bright` border — no glow available, see
 the `box-shadow` caveat above), disabled (`semantic-neutral` text/border + reduced opacity —
-`.btn.disabled`'s convention), selected/active (`accent-gold-bright` border, `.skill-cell.selected`'s
-convention). State differences come from brightness/contrast/background/border changes, not new
-shapes or layout shifts.
+`.btn.disabled`'s convention). **Selected/active and the checkbox's checked state use gold, not
+steel** (`accent-gold-bright` border, `.skill-cell.selected`'s convention; `accent-gold`,
+`.checkbox-box.checked`'s convention) — both are semantic "this specific thing is the current
+one/is checked" highlights, not general interactive chrome, so they keep the gold accent rather
+than switching to steel. State differences come from brightness/contrast/background/border
+changes, not new shapes or layout shifts.
 
 ## Panels, HUD, and tooltips
 

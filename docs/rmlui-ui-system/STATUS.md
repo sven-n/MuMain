@@ -149,21 +149,33 @@ section in full detail; summarized here for visibility.
     `m_bActive` entirely — safe because `RmlUiRuntime::ProcessSdlEvent()` (where these fire) runs
     from Winmain's SDL event pump, always before `CUIMng::Update()` the same frame. No
     `m_bRmlXClicked`-style flags remain anywhere in the codebase.
-  - **Still open**: `CUIMng::IsCursorOnUI()`/`m_bCursorOnUI` (the "is the cursor on UI, should the
-    world-click handler underneath be suppressed" decision, consulted every frame) still runs
-    entirely through the same legacy `CursorInWin()` hit-testing, with the same staleness/
-    list-order risk already fixed above for click *dispatch*. A world-click could still leak
-    through under an RmlUi panel, or a UI click could still fall through to the game world. Three
-    parallel, not-always-agreeing input-tracking systems are the root cause throughout this whole
-    finding: `CInput`/`SEASON3B::CNewKeyInput`'s VK-polling (drives `CUIMng`'s activation/hit-test
-    loop), `Winmain.cpp`'s own event-driven `MouseLButton`/`Push`/`Pop` globals
-    (`HandleMouseButton`/`HandleMouseMotion`, legacy 2D world input — `Core/Platform/sdl3/
-    SDLEventLoop.cpp` looked like the source of this but was actually dead code, zero live call
-    sites; deleted 2026-09-04, don't go looking for it at all any more), and RmlUi's own
-    event-driven `Context::ProcessMouseButtonDown/Up`. The real fix
-    is making RmlUi's own hit-testing authoritative for anything RmlUi renders, retiring
-    `CursorInWin`/`IsCursorOnUI`'s role for those elements entirely rather than continuing to
-    patch each new symptom — see "Known gaps." Not yet scoped or started.
+  - **The "world-click leaks through an RmlUi panel" half — fixed 2026-09-04, smaller than it
+    looked.** `CUIMng::IsCursorOnUI()`/`m_bCursorOnUI` runs entirely through the legacy
+    `CursorInWin()` hit-testing, with the same staleness risk already fixed above for click
+    *dispatch* — but a full-codebase grep found it has exactly **2 live call sites, both in
+    `Scenes/CharacterScene.cpp`** (character-select's click-to-select and 3D object-picking), not
+    a sprawling problem across every scene. Both now also gate on `Core::Input::IsMouseOverUI()`,
+    the exact same proven pattern as the `Selection.cpp`/`ZzzInterface.cpp` fix below — sufficient
+    without inventing any new per-window bounding-box query, because `char_sel_main.rml`'s `#panel`
+    is `pointer-events: none` (a pure positioning container spanning the full screen), so RmlUi's
+    own hit-test already only reports true over the real interactive children. Closes the
+    confirmed bug class (`CharSelMainWin.h`'s `CalculateFixedAnchorLayout()` comment — a
+    resolution where its hand-duplicated rect diverged from the real RmlUi Delete button once made
+    a genuine click read as "not on UI," silently no-op'ing Delete).
+    **Deliberately still open**: `CalculateFixedAnchorLayout()`'s hand-duplicated math itself
+    wasn't retired (the new gate means it's no longer the *only* thing standing between a stale
+    rect and a wrong outcome, but a live RmlUi-element-bounds query replacing it entirely is a
+    larger refactor with no confirmed bug driving it now); `CUIMng`'s two *other*, purely internal
+    uses of `CursorInWin()` (click-activation dispatch, hover/`ActiveBtns`, `UIMng.cpp` ~732/~780)
+    aren't touched either — hybrid windows' real clicks already bypass `m_bActive`/activation
+    entirely via `RmlClickX()` (the fix above this one), so that staleness has no confirmed live
+    consequence today. Three parallel, not-always-agreeing input-tracking systems are still the
+    root cause worth remembering for the next symptom: `CInput`/`SEASON3B::CNewKeyInput`'s
+    VK-polling (drives `CUIMng`'s activation/hit-test loop), `Winmain.cpp`'s own event-driven
+    `MouseLButton`/`Push`/`Pop` globals (`HandleMouseButton`/`HandleMouseMotion`, legacy 2D world
+    input — `Core/Platform/sdl3/SDLEventLoop.cpp` looked like the source of this but was actually
+    dead code, zero live call sites; deleted 2026-09-04, don't go looking for it at all any more),
+    and RmlUi's own event-driven `Context::ProcessMouseButtonDown/Up`.
 
 ## Known gaps against the principles (honest status, not yet built)
 
@@ -180,17 +192,21 @@ for "the full architecture is in place":
   future themes are a real, stated want (see the Custom/Test-theme entry below), not just legacy
   and modern. Correctly *sequenced* behind other work (nobody's shipping a mod today), but it's a
   stated requirement waiting on priority, not an open question about whether to build it.
-- **No design-token/shared-variable layer for `legacy`; `modern`'s own layer is a naming
-  convention, not a real mechanism.** [`modern-theme-visual-direction.md`](modern-theme-visual-direction.md)
-  defines a palette/border token table for `modern`; this vendored RmlUi has no `var()`/custom
-  -property mechanism at all, so a "token" is a documented value with a comment next to each use
-  (`background-color: #1b1714; /* surface-1 */`), not a language feature. Changing an accent color
-  still means grep-and-replace across every tagged file, not a one-place edit. A real fix is
-  buildable without engine changes: a small token-substitution pass (RCSS authored with
-  placeholder tokens, resolved against a per-theme token file before the text reaches RmlUi — the
-  same kind of text transform `LoadThemedDocument()` already does for its synthetic per-theme
-  URL). Not built. `legacy` has no token layer and isn't in scope for one (theme-specific by
-  design).
+- ~~No design-token/shared-variable layer for `legacy`; `modern`'s own layer is a naming
+  convention, not a real mechanism.~~ **Fixed 2026-09-04 for `modern`.**
+  [`modern-theme-visual-direction.md`](modern-theme-visual-direction.md) defines the palette/
+  border/typography token table; `UI::RmlBridge::LoadThemedDocument()` (`RmlTheme.cpp`) now
+  resolves a `token(name)` marker against `themes/modern/tokens.ini` before RmlUi ever sees the
+  RCSS text — no engine changes needed (reuses RmlUi's own inline-`<style>`-block support). All 11
+  already-shipped `themes/modern/*.rcss` files were migrated (mechanically, via the one-off
+  `Tools/migrate_rcss_tokens.py`) from the old "value + comment" convention to real `token(...)`
+  references, including a `font-title`/`font-body` split for the previously-repeated
+  `font-family: "Liberation Sans"` literal (both stay the same value for now — no distinct
+  display font chosen yet, this only names the future split). Caught and fixed one real,
+  independent drift as part of the migration: the table said `border-metal` was
+  `rgba(140, 146, 152, 140)`, but every actual shipped usage consistently used alpha `130` — the
+  table had the typo, not the RCSS; both now say `130`. `legacy` still has no token layer and
+  isn't in scope for one (theme-specific by design).
 - ~~Three "shared" RML files have theme-specific class names baked into them — `architecture-
   principles.md` §15 violation.~~ **Fixed 2026-09-04.** `login.rml`, `msg_win.rml`, and
   `remember_password_prompt.rml` used to have `modern`-specific classes (`modern-frame`,
@@ -249,14 +265,28 @@ for "the full architecture is in place":
   deliberately not built speculatively (no real caller yet to confirm the right shape). See the
   header comment on `RmlDraggable.h` for the full note; resolve before, not after, the first real
   caller.
-- **No reusable-component catalog exists as such** (§20) — `RmlModelBinder<T>`,
-  `UI::RmlBridge` helpers, and the anchor/center/stretch RCSS classes are the closest things to
-  reusable primitives today, all C++/CSS mechanisms rather than named, documented UI components
-  (`Window`, `Panel`, `ItemSlot`, etc.) a future window's markup could just reference.
+- ~~No reusable-component catalog exists as such~~ (§20) — **addressed 2026-09-04**:
+  [`component-catalog.md`](component-catalog.md) inventories what already functions as a reusable
+  primitive (`RmlModelBinder<T>`, `UI::RmlBridge` helpers, the anchor/center/stretch RCSS classes,
+  Button/Checkbox's real shared contract) versus what genuinely doesn't exist yet (`ItemSlot`,
+  `ProgressBar`, a unified `Tooltip`, `Dialog`, etc.) — a documentation deliverable, not new code;
+  the underlying gaps it records are still open, just now named and tracked in one place instead
+  of undiscoverable.
 - **No rollout/phasing plan sequences the remaining ~88 `UI/NewUI` windows against the full
   checklist above.** Work has been pilot-by-pilot, each individually verified. This document is a
   first step toward tracking that, not a substitute for an actual sequenced plan if one is
   wanted.
+- **`MuPlatform::Initialize()`/`CreatePlatformWindow()`/`GetWindow()`/`Shutdown()`/
+  `SetFullscreen()`/`SetMouseGrab()`/`GetDisplaySize()`, and the `IPlatformWindow`/`SDLWindow`
+  classes they own, show zero external callers in a first-pass grep** — found 2026-09-04 while
+  deleting the confirmed-dead `SDLEventLoop`/`PollEvents()` path this file's own `MuPlatform.cpp`
+  used to also contain (see the Findings entry above). Surprising: `MuPlatform::Initialize()` is
+  the only place `SDL_Init(SDL_INIT_VIDEO)` is called anywhere in `src/source`, yet the game
+  clearly runs and creates its window (`SDL_CreateWindow` directly in `Winmain.cpp`). Needs its own
+  careful audit (does this SDL3 version actually require an explicit `SDL_Init` before
+  `SDL_CreateWindow`, what do non-Windows paths do) before touching — deleting the wrong thing here
+  could break window creation outright, unlike the narrowly-scoped `SDLEventLoop` deletion. **Not
+  investigated yet — deliberately parked**, not bundled into that cleanup.
 
 ## Pilots to revisit when the relevant phase arrives
 
