@@ -15,17 +15,19 @@ namespace Rml
 // migrated panel that wants to be draggable should just call MakeDraggable() once -- no
 // per-window state machine, no CWin involvement at all.
 //
-// 2026-09-02 audit finding, not yet fixed -- read before wiring this up on the first real window:
-// this helper has ZERO live call sites today (grepped) and, as written, doesn't yet satisfy
-// architecture-principles.md §10-11 even in prototype form:
-//   - It writes the dragged position as an absolute `px` inline style (see MakeDraggable()'s own
-//     .cpp). `px` never scales with the user's UIScalePercent setting (layout-and-scaling.md's
-//     dp-vs-px rule) -- a position dragged at one UI scale will read wrong at another.
-//   - Nothing persists the result anywhere. There is no GameConfig position-storage mechanism for
-//     RmlUi panels at all yet (grepped) -- a dragged position is lost on every restart.
-// Neither is a bug in the narrow sense (nothing depends on this today), but both need a real
-// answer -- likely an anchor-relative `dp` offset persisted through GameConfig, not a raw px
-// pair -- before the first window actually calls this, not discovered after.
+// 2026-09-02 audit finding against architecture-principles.md §10-11 -- this helper has ZERO live
+// call sites today (grepped), so neither gap below was a live bug in the narrow sense, but both
+// needed a real answer before the first window actually called this, not discovered after:
+//   - FIXED (2026-09-04): it used to write the dragged position as an absolute `px` inline style,
+//     which never scales with the user's UIScalePercent setting (layout-and-scaling.md's dp-vs-px
+//     rule) -- a position dragged at one UI scale would read wrong at another. MakeDraggable()'s
+//     own .cpp now divides by the panel's own Context::GetDensityIndependentPixelRatio() and
+//     writes `dp`, matching every other dp-authored sibling.
+//   - STILL OPEN: nothing persists the result anywhere. There is no GameConfig position-storage
+//     mechanism for RmlUi panels at all yet (grepped) -- a dragged position is lost on every
+//     restart. Deliberately not built speculatively here -- there's no real caller yet to confirm
+//     the right shape (likely an anchor-relative `dp` offset keyed per window, not a raw pixel
+//     pair) -- but resolve it before, not after, the first real caller, same as before.
 //
 // 2026-09-03 addendum, found while migrating login/char_make off C++-pushed layout: a THIRD gap,
 // specific to any window with a real Type-2 companion object (a functional CUITextInputBox, not

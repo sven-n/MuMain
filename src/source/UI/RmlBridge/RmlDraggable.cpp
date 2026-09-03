@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "RmlDraggable.h"
 
+#include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
 #include <RmlUi/Core/Property.h>
@@ -26,20 +28,40 @@ namespace UI::RmlBridge
                 case Rml::EventId::Dragstart:
                     m_DragStartMouseX = event.GetParameter<int>("mouse_x", 0);
                     m_DragStartMouseY = event.GetParameter<int>("mouse_y", 0);
-                    m_DragStartPanelLeft = ResolvedPx("left");
-                    m_DragStartPanelTop = ResolvedPx("top");
+                    // GetOffsetLeft()/Top() -- the element's own resolved pixel offset from its
+                    // offset parent -- rather than parsing the "left"/"top" Property directly:
+                    // unit-agnostic (works whether the panel's current position came from `px`,
+                    // `dp`, or RCSS-authored `%`), unlike Property::Get<float>() which returns the
+                    // raw authored number with no unit conversion.
+                    m_DragStartPanelLeft = m_Panel->GetOffsetLeft();
+                    m_DragStartPanelTop = m_Panel->GetOffsetTop();
                     break;
 
                 case Rml::EventId::Drag:
                 {
                     const int mouseX = event.GetParameter<int>("mouse_x", 0);
                     const int mouseY = event.GetParameter<int>("mouse_y", 0);
-                    const float newLeft = m_DragStartPanelLeft + static_cast<float>(mouseX - m_DragStartMouseX);
-                    const float newTop = m_DragStartPanelTop + static_cast<float>(mouseY - m_DragStartMouseY);
-                    m_Panel->SetProperty("left", std::to_string(newLeft) + "px");
-                    m_Panel->SetProperty("top", std::to_string(newTop) + "px");
+                    const float newLeftPx = m_DragStartPanelLeft + static_cast<float>(mouseX - m_DragStartMouseX);
+                    const float newTopPx = m_DragStartPanelTop + static_cast<float>(mouseY - m_DragStartMouseY);
+
+                    // Write in dp, not raw px (architecture-principles.md §10-11;
+                    // layout-and-scaling.md's dp-vs-px rule) -- `px` never scales with
+                    // UIScalePercent, so a dragged position would silently drift out of step with
+                    // every dp-authored sibling the moment UI scale changes. Divide by the same
+                    // density-independent-pixel ratio RmlUiRuntime::ApplyUIScale() sets on the
+                    // context -- same source of truth, no new dependency on GameConfig/UI::Scaling
+                    // here.
+                    const float dpRatio = m_Panel->GetOwnerDocument()->GetContext()->GetDensityIndependentPixelRatio();
+                    const float newLeftDp = dpRatio > 0.0f ? newLeftPx / dpRatio : newLeftPx;
+                    const float newTopDp = dpRatio > 0.0f ? newTopPx / dpRatio : newTopPx;
+                    m_Panel->SetProperty("left", std::to_string(newLeftDp) + "dp");
+                    m_Panel->SetProperty("top", std::to_string(newTopDp) + "dp");
+
+                    // onMove's own contract (RmlDraggable.h) is real window pixels, for syncing a
+                    // hybrid window's legacy CWin position (CWin::SetPosition() takes real
+                    // pixels) -- pass the px values, not the dp ones just written to the property.
                     if (m_OnMove)
-                        m_OnMove(newLeft, newTop);
+                        m_OnMove(newLeftPx, newTopPx);
                     break;
                 }
 
@@ -51,16 +73,6 @@ namespace UI::RmlBridge
             void OnDetach(Rml::Element*) override { delete this; }
 
         private:
-            // m_Panel is always position:absolute with left/top already in fixed px (see this
-            // header's own comment on that constraint) -- Get<float>() on a px-unit Property
-            // returns the raw pixel number directly, no unit conversion needed.
-            float ResolvedPx(const char* property) const
-            {
-                if (const Rml::Property* prop = m_Panel->GetProperty(property))
-                    return prop->Get<float>();
-                return 0.0f;
-            }
-
             Rml::Element* m_Panel;
             OnPanelMoved m_OnMove;
             int m_DragStartMouseX = 0;
