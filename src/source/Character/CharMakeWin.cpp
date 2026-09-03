@@ -68,6 +68,13 @@ namespace
     constexpr int kDescriptionTextOffsetY = 12;
     constexpr int kDescriptionLineSpacing = 19;
 
+    constexpr bool IsCharacterCreationAllowed(CLASS_TYPE classType)
+    {
+        return classType != CLASS_DARK_LORD
+            && classType != CLASS_SUMMONER
+            && classType != CLASS_RAGEFIGHTER;
+    }
+
     struct ClassStats
     {
         std::array<const wchar_t*, 4> values;
@@ -302,6 +309,10 @@ void CCharMakeWin::UpdateDisplay()
     m_abtnJob[CLASS_SUMMONER].SetEnable(true);
 #endif //PBG_ADD_CHARACTERCARD
 
+    m_abtnJob[CLASS_DARK_LORD].SetEnable(false);
+    m_abtnJob[CLASS_SUMMONER].SetEnable(false);
+    m_abtnJob[CLASS_RAGEFIGHTER].SetEnable(false);
+
     const bool isDarkLord = (m_nSelJob == CLASS_DARK_LORD);
     m_asprBack[CMW_SPR_STAT].SetSize(0, isDarkLord ? kDarkLordStatHeight : kDefaultStatHeight, Y);
 
@@ -364,6 +375,12 @@ void CCharMakeWin::RequestCreateCharacter()
         g_pSingleTextInputBox->GetText(InputText[0]);
 
     CUIMng& rUIMng = CUIMng::Instance();
+
+    if (!IsCharacterCreationAllowed(CharacterView.Class))
+    {
+        rUIMng.PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
+        return;
+    }
 
     const std::wstring characterName = InputText[0];
 
