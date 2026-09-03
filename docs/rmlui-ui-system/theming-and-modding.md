@@ -17,23 +17,20 @@ for — a theme that only wants to restyle colors/borders/fonts can still get aw
 reskin against the shared file, but nothing about the architecture should discourage forking when
 a theme needs more than that.
 
-**Known current debt, not yet cleaned up**: `login.rml`, `msg_win.rml`, and
-`remember_password_prompt.rml` currently have `modern`-specific class names (`modern-frame`,
-`modern-frame-accent`, `modern-panel`, etc.) hardcoded directly into what's supposed to be the
-shared, theme-neutral file — e.g. `login.rml`'s `<div id="panel" class="modern-frame
-modern-frame-crimson" ...>`. That's backwards: it means `legacy` is the one being constrained by
-`modern`'s vocabulary, not the other way around. See `STATUS.md`'s
-gap list — this needs an actual migration (strip theme-specific classes back out of the shared
-file, give `modern` its own forked copy), not a docs-only fix.
+**Fixed 2026-09-04** — `login.rml`, `msg_win.rml`, and `remember_password_prompt.rml` used to have
+`modern`-specific class names (`modern-frame`, `modern-frame-accent`, `modern-panel`, etc.)
+hardcoded directly into what's supposed to be the shared, theme-neutral file — backwards, since it
+meant `legacy` was the one being constrained by `modern`'s vocabulary, not the other way around.
+Each now has a `themes/modern/` fork carrying those classes; the shared file is `legacy`'s own
+theme-neutral copy, same pattern as `main_frame`'s existing two-file case below.
 
-**Forking safely needs a check that doesn't exist yet**: whichever theme's RML a window loads, the
-C++ side still expects the exact same ids/`data-model` bindings/event-callback names to exist —
-nothing currently verifies that a forked theme's copy actually satisfies that contract. A missing
-or renamed id fails **completely silently** (a dead button, not a build error or even a log line)
-— the same failure shape as `main_frame`'s existing two-file hand-sync burden below. A real fix
-would be a script (a sibling to `check_rml_rcss_syntax.py`) that diffs the ids/bindings a window's
-C++ actually references against every theme's copy of that window's RML and fails the build if one
-theme is missing something the code needs. Not built — tracked in `STATUS.md`.
+**Forking safely needs a check — built 2026-09-04**: whichever theme's RML a window loads, the
+C++ side still expects the exact same ids/`data-model` bindings/event-callback names to exist.
+`Tools/check_rml_rcss_drift.py` (a sibling to `check_rml_rcss_syntax.py`, wired into the same build
+step) diffs the ids/bindings a window's C++ actually references against every theme's copy of that
+window's RML and fails the build if none of them provide something the code needs — otherwise a
+missing or renamed id would fail **completely silently** (a dead button, not a build error or even
+a log line), the same failure shape as `main_frame`'s existing two-file hand-sync burden below.
 
 ## How theme resolution works
 
@@ -241,17 +238,19 @@ coordinate into `dp`.
   [README](README.md#coexistence-patterns)). Extending a new window to support theming is the same
   established pattern, not new design work — this list will keep growing and isn't worth
   maintaining exhaustively; grep `LoadThemedDocument(` for the live count.
-- **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Two known
-  violations exist today (`NewUIMainFrameWindow.cpp`'s background-fill and skill-highlight logic,
-  both keyed on `GetActiveThemeName() == "modern"`), tracked as debt in `STATUS.md`, not accepted
-  design — see that section for why they exist (a real render-ordering constraint) and the next
-  bullet for whether that constraint is actually permanent.
+- **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Fixed
+  2026-09-04: `NewUIMainFrameWindow.cpp`'s background-fill and skill-highlight logic used to key
+  on `GetActiveThemeName() == "modern"`; both now key on `UI::RmlBridge::ThemeProvidesOwnIconChrome()`,
+  a declared capability (`themes/modern/theme.ini`) — see `STATUS.md` for the real render-ordering
+  constraint that makes the conditional itself legitimate (only the name-check was the violation),
+  and the next bullet for whether that constraint is actually permanent.
 - **RmlUi rendering strictly last in the frame is an integration choice, not a proven RmlUi
   requirement.** `RmlUiRuntime::Render()` fires from one fixed pre-submit callback, always after
-  every legacy 2D/3D draw call for the frame — which is *why* the two violations above exist (an
+  every legacy 2D/3D draw call for the frame — which is *why* the conditional above exists (an
   RmlUi-drawn fill would always paint over content that needs to render on top of it, since RmlUi
   composites last). Nobody has investigated whether interleaving is possible (multiple contexts,
   or a callback hook legacy content renders through at the right point in RmlUi's own z-order) —
-  it may well be, and would remove the need for those two workarounds entirely rather than fixing
-  them with a capability flag. Not investigated — tracked in `STATUS.md` as its own design
-  question, separate from and potentially larger than the §30 fix.
+  it may well be, and would remove the need for that workaround (and its now-fixed capability
+  flag) entirely, rather than living with a paint-order workaround permanently. Not investigated
+  — tracked in `STATUS.md` as its own design question, separate from and potentially larger than
+  the §30 fix.
