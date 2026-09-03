@@ -121,9 +121,16 @@
 	position: absolute;
 	width: 54px;
 	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it. */
+	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it.
+	   line-height/text-align/vertical-align above are declared explicitly for the same reason as
+	   the modern theme's identical fix (2026-09-03) even though color:transparent hides any
+	   visible effect today -- height already was fixed px here, but this rule shouldn't rely on
+	   inheriting anything from base.rcss's now-dp .btn regardless. */
 	color: transparent;
 }
 .btn-ok {

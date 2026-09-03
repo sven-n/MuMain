@@ -59,7 +59,12 @@ void CLoginMainWin::Create()
     for (int i = 0; i <= LMW_BTN_CREDIT; ++i)
         m_aBtn[i].Create(54, 30, BITMAP_LOG_IN + 4 + i, 3, 2, 1);
 
-    CWin::Create(CInput::Instance().GetScreenWidth() - 30 * 2, m_aBtn[0].GetHeight(), -2);
+    // WindowWidth (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth() -- same latent
+    // staleness risk as the bug SetPosition()'s own comment documents fixing elsewhere; this call
+    // predates that fix and was missed. #panel's width is pushed from this exact CWin::GetWidth()
+    // value (below), and #btn_credit anchors right:0dp off #panel's own right edge, so a stale
+    // width here would misplace/misclick that button specifically.
+    CWin::Create(static_cast<int>(WindowWidth) - 30 * 2, m_aBtn[0].GetHeight(), -2);
     SetMovable(false);
 
     // Legacy CButtons stay registered for redundant click detection only -- RenderControls() is

@@ -9,7 +9,13 @@
    button below is a fixed dp offset from the panel's own edges -- SetPosition()'s old per-button
    math (SMW_BTN_GAP=4, base offsets 33/height-52) is now baked into these numbers directly, no
    scene-awareness needed since exit-game/select-server anchor from the top and option/close
-   anchor from the bottom (bottom-anchoring absorbs the .compact height difference for free). */
+   anchor from the bottom (bottom-anchoring absorbs the .compact height difference for free).
+
+   2026-09-03 fix: #btn_option/#btn_close's `bottom` values are the old C++'s "distance from panel
+   bottom to the button's TOP" (86/52) minus the button's own 30dp height, not those numbers
+   directly -- CSS `bottom` measures to the button's BOTTOM edge, not its top. Using 86/52 as-is
+   put every bottom-anchored button 30dp higher than intended, overlapping #btn_select_server
+   above it (confirmed the hard way: real in-game screenshot showed the buttons colliding). */
 #panel {
 	width: 213dp;
 	height: 187dp;
@@ -26,5 +32,5 @@
 
 #btn_exit_game    { left: 52dp; top: 33dp; }
 #btn_select_server{ left: 52dp; top: 67dp; }
-#btn_option       { left: 52dp; bottom: 86dp; }
-#btn_close        { left: 52dp; bottom: 52dp; }
+#btn_option       { left: 52dp; bottom: 56dp; }
+#btn_close        { left: 52dp; bottom: 22dp; }
