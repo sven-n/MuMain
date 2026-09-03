@@ -357,8 +357,15 @@ void CCharMakeWin::Show(bool bShow)
         InputTextMax[0] = MAX_USERNAME_SIZE;
         if (g_iChatInputType == 1)
         {
+            // Text color left at InputBoxConfig's default (opaque black) rendered nearly invisible
+            // against the input-frame's dark fill -- matches LoginWin.cpp's own m_pUsernameInputBox/
+            // m_pPasswordInputBox light-cream convention (SetTextColor(255,255,230,210)) instead.
             g_pSingleTextInputBox->Configure({
                 .textLimit = 10,
+                .textAlpha = 255,
+                .textR = 255,
+                .textG = 230,
+                .textB = 210,
             });
             g_pSingleTextInputBox->GiveFocus();
         }
