@@ -420,41 +420,50 @@ void CCharMakeWin::RmlClickJob(int nClassIndex)
         return;
     if (!m_abtnJob[nClassIndex].IsEnable())
         return;
-    m_nRmlJobClickedIndex = nClassIndex;
+    SelectJob(nClassIndex);
+}
+
+void CCharMakeWin::SelectJob(int classIndex)
+{
+    for (auto& button : m_abtnJob)
+        button.SetCheck(false);
+    m_abtnJob[classIndex].SetCheck(true);
+
+    if (m_nSelJob != classIndex)
+    {
+        m_nSelJob = static_cast<CLASS_TYPE>(classIndex);
+        UpdateDisplay();
+    }
+}
+
+void CCharMakeWin::SubmitCreateCharacter()
+{
+    RequestCreateCharacter();
+}
+
+void CCharMakeWin::CloseDialog()
+{
+    CUIMng::Instance().HideWin(this);
 }
 
 void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
 {
-    const int rmlJobClicked = m_nRmlJobClickedIndex;
-    m_nRmlJobClickedIndex = -1;
-
     for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
     {
-        if (!m_abtnJob[classIndex].IsClick() && classIndex != rmlJobClicked)
+        if (!m_abtnJob[classIndex].IsClick())
             continue;
-
-        for (auto& button : m_abtnJob)
-            button.SetCheck(false);
-        m_abtnJob[classIndex].SetCheck(true);
-
-        if (m_nSelJob != classIndex)
-        {
-            m_nSelJob = static_cast<CLASS_TYPE>(classIndex);
-            UpdateDisplay();
-        }
+        SelectJob(classIndex);
         break;
     }
 
     {
-        if (m_aBtn[CMW_OK].IsClick() || m_bRmlOkClicked)
+        if (m_aBtn[CMW_OK].IsClick())
         {
-            m_bRmlOkClicked = false;
-            RequestCreateCharacter();
+            SubmitCreateCharacter();
         }
-        else if (m_aBtn[CMW_CANCEL].IsClick() || m_bRmlCancelClicked)
+        else if (m_aBtn[CMW_CANCEL].IsClick())
         {
-            m_bRmlCancelClicked = false;
-            CUIMng::Instance().HideWin(this);
+            CloseDialog();
         }
         else if (CInput::Instance().IsKeyDown(VK_RETURN))
         {

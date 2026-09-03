@@ -60,11 +60,17 @@ public:
     void Show(bool bShow);
     void UpdateDisplay();
 
-    // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
-    // cleared exactly like every other migrated window's RmlClickX() pattern.
+    // Invoked from the RmlUi document's data-event-click bindings (see Create()). 2026-09-03: act
+    // immediately here instead of setting a flag for UpdateWhileActive() to consume later -- see
+    // CLoginMainWin::RmlClickMenu()'s header comment (STATUS.md's "Findings worth knowing") for
+    // why: UpdateWhileActive() is gated behind CWin::m_bActive, which the legacy CUIMng
+    // activation system doesn't reliably grant on a timely basis. Confirmed safe to call straight
+    // into the action here for the same reason as CLoginMainWin's fix: this fires from
+    // RmlUiRuntime::ProcessSdlEvent(), called from Winmain's SDL event pump, always before
+    // CUIMng::Update() runs the same frame.
     void RmlClickJob(int nClassIndex);
-    void RmlClickOk() { m_bRmlOkClicked = true; }
-    void RmlClickCancel() { m_bRmlCancelClicked = true; }
+    void RmlClickOk() { SubmitCreateCharacter(); }
+    void RmlClickCancel() { CloseDialog(); }
 
     // Draws the legacy name-input text on top of RmlUi's input-frame background. Called from
     // Winmain.cpp's SetPostRmlUiCallback (already registered for CHARACTER_SCENE) so it renders
@@ -117,9 +123,11 @@ private:
     int m_nOriginX = 0;
     int m_nOriginY = 0;
 
-    int m_nRmlJobClickedIndex = -1;
-    bool m_bRmlOkClicked = false;
-    bool m_bRmlCancelClicked = false;
+    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s legacy
+    // CButton::IsClick() polling.
+    void SelectJob(int classIndex);
+    void SubmitCreateCharacter();
+    void CloseDialog();
 
     void SyncRmlModel();
 };

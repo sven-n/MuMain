@@ -32,10 +32,18 @@ public:
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow);
 
-    void RmlClickExitGame() { m_bRmlExitGameClicked = true; }
-    void RmlClickSelectServer() { if (m_bSelectServerEnabled) m_bRmlSelectServerClicked = true; }
-    void RmlClickOption() { m_bRmlOptionClicked = true; }
-    void RmlClickClose() { m_bRmlCloseClicked = true; }
+    // 2026-09-03: act immediately here instead of setting a flag for UpdateWhileActive() to
+    // consume later -- see CLoginMainWin::RmlClickMenu()'s header comment (STATUS.md's "Findings
+    // worth knowing") for why: UpdateWhileActive() is gated behind CWin::m_bActive, which the
+    // legacy CUIMng activation system doesn't reliably grant on a timely basis, and this file's
+    // old flag-consumed-in-an-if/else-if-chain shape is exactly the pattern that let a stale flag
+    // win over a fresh one there. Confirmed safe to call straight into CUIMng methods here for the
+    // same reason as CLoginMainWin's fix: this fires from RmlUiRuntime::ProcessSdlEvent(), called
+    // from Winmain's SDL event pump, always before CUIMng::Update() runs the same frame.
+    void RmlClickExitGame() { ExitGame(); }
+    void RmlClickSelectServer() { if (m_bSelectServerEnabled) SelectServer(); }
+    void RmlClickOption() { OpenOptions(); }
+    void RmlClickClose() { Close(); }
 
 protected:
     void PreRelease();
@@ -59,10 +67,12 @@ private:
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     bool m_bSelectServerEnabled = false;
 
-    bool m_bRmlExitGameClicked = false;
-    bool m_bRmlSelectServerClicked = false;
-    bool m_bRmlOptionClicked = false;
-    bool m_bRmlCloseClicked = false;
+    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s legacy
+    // CButton::IsClick() polling.
+    void ExitGame();
+    void SelectServer();
+    void OpenOptions();
+    void Close();
 
     void SyncRmlModel();
 };

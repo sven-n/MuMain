@@ -184,7 +184,7 @@ for visibility:
   running often enough at all (not just during a held click) to consume the flags before they
   went stale.
 - **`UpdateWhileActive()`-gated RmlUi click flags can go stale and fire on the wrong button later
-  — fixed 2026-09-03 in `CLoginMainWin`, same pattern still latent elsewhere.** The
+  — fixed 2026-09-03/04 in every window that had it.** The
   `m_bRmlXClicked`-flag-set-by-a-listener/consumed-in-`UpdateWhileActive()` pattern (used by
   `CLoginMainWin`, `CLoginWin`, `CSysMenuWin`, `CCharMakeWin`) defers acting on an RmlUi click to
   a later poll gated behind `CWin::m_bActive` — but that gate can go many frames without opening
@@ -192,13 +192,18 @@ for visibility:
   RmlUi's own event), during which multiple flags can accumulate. Since the consumer is an
   `if/else if` checked in a fixed order, whichever flag is stale-but-still-true wins over a
   genuinely fresh one the *next* time it finally runs — observed exactly as "click credit, nothing
-  happens; click menu later, credits open instead." Fixed in `CLoginMainWin` by having
-  `RmlClickMenu()`/`RmlClickCredit()` act immediately in the RmlUi event callback instead of
-  setting a flag for `UpdateWhileActive()` to poll later — confirmed safe since
-  `RmlUiRuntime::ProcessSdlEvent()` (where these fire) runs from Winmain's SDL event pump, always
-  before `CUIMng::Update()` the same frame. `CLoginWin`/`CSysMenuWin`/`CCharMakeWin` still use the
-  deferred-flag shape and likely carry the same latent bug, just not yet reported for them — same
-  fix (act in the callback, don't defer through `UpdateWhileActive()`) applies if/when it surfaces.
+  happens; click menu later, credits open instead." Fixed first in `CLoginMainWin`
+  (`RmlClickMenu()`/`RmlClickCredit()`), then applied preemptively to the other three windows once
+  the mechanism was proven, not waiting for each to individually misbehave: every `RmlClickX()`
+  callback across `CLoginWin`, `CSysMenuWin`, and `CCharMakeWin` now acts immediately (calling a
+  shared action method also used by the legacy `CButton::IsClick()`/keyboard polling paths that
+  remain in each `UpdateWhileActive()`), instead of setting a flag for a later poll. Confirmed safe
+  since `RmlUiRuntime::ProcessSdlEvent()` (where these fire) runs from Winmain's SDL event pump,
+  always before `CUIMng::Update()` the same frame. `CLoginWin`'s version also re-checks the
+  "remember password" prompt's live Pending state in each immediate callback, preserving the same
+  guard `UpdateWhileActive()` applies via its `m_bRememberPasswordPromptWasPending` snapshot (see
+  `RmlClickOk()`'s own comment for why the live check is equivalent there). No `m_bRmlXClicked`-
+  style flags remain anywhere in the codebase.
 
 ## Known gaps against the principles (honest status, not yet built)
 

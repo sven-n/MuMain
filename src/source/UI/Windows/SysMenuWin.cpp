@@ -161,41 +161,49 @@ void CSysMenuWin::Show(bool bShow)
 
 void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
 {
-    if (m_aBtn[SMW_BTN_GAME_END].IsClick() || m_bRmlExitGameClicked)
-    {
-        m_bRmlExitGameClicked = false;
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_GAME_END_COUNTDOWN);
-    }
-    else if ((m_aBtn[SMW_BTN_SERVER_SEL].IsClick() || m_bRmlSelectServerClicked) && m_bSelectServerEnabled)
-    {
-        m_bRmlSelectServerClicked = false;
-        g_ErrorReport.Write(L"> Menu - Join another server.");
-        g_ErrorReport.WriteCurrentTime();
-        LogOut = true;
-        SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToServerSelection);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
-
-        CUIMng& rUIMng = CUIMng::Instance();
-        rUIMng.HideWin(this);
-        rUIMng.HideWin(&rUIMng.m_CharSelMainWin);
-    }
-    else if (m_aBtn[SMW_BTN_OPTION].IsClick() || m_bRmlOptionClicked)
-    {
-        m_bRmlOptionClicked = false;
-        CUIMng& rUIMng = CUIMng::Instance();
-        rUIMng.HideWin(this);
-        g_pNewUISystem->Show(SEASON3B::INTERFACE_OPTION);
-    }
-    else if (m_aBtn[SMW_BTN_CLOSE].IsClick() || m_bRmlCloseClicked)
-    {
-        m_bRmlCloseClicked = false;
-        CUIMng::Instance().HideWin(this);
-    }
+    if (m_aBtn[SMW_BTN_GAME_END].IsClick())
+        ExitGame();
+    else if (m_aBtn[SMW_BTN_SERVER_SEL].IsClick() && m_bSelectServerEnabled)
+        SelectServer();
+    else if (m_aBtn[SMW_BTN_OPTION].IsClick())
+        OpenOptions();
+    else if (m_aBtn[SMW_BTN_CLOSE].IsClick())
+        Close();
     else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
     {
         // ESC toggle is handled by CUIMng::Update()
         // No action needed here — CUIMng already hid this window
     }
+}
+
+void CSysMenuWin::ExitGame()
+{
+    CUIMng::Instance().PopUpMsgWin(MESSAGE_GAME_END_COUNTDOWN);
+}
+
+void CSysMenuWin::SelectServer()
+{
+    g_ErrorReport.Write(L"> Menu - Join another server.");
+    g_ErrorReport.WriteCurrentTime();
+    LogOut = true;
+    SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToServerSelection);
+    g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
+
+    CUIMng& rUIMng = CUIMng::Instance();
+    rUIMng.HideWin(this);
+    rUIMng.HideWin(&rUIMng.m_CharSelMainWin);
+}
+
+void CSysMenuWin::OpenOptions()
+{
+    CUIMng& rUIMng = CUIMng::Instance();
+    rUIMng.HideWin(this);
+    g_pNewUISystem->Show(SEASON3B::INTERFACE_OPTION);
+}
+
+void CSysMenuWin::Close()
+{
+    CUIMng::Instance().HideWin(this);
 }
 
 void CSysMenuWin::RenderControls()

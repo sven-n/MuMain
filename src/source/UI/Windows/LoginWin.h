@@ -73,32 +73,37 @@ public:
     void RenderTextOnTop();
 
     // Called from the RmlUi login document's data-event-click callbacks (see Create()'s
-    // DataModelConstructor::BindEventCallback registrations). Polled-and-cleared exactly like
-    // the legacy CButton::IsClick() edge triggers they supplement in UpdateWhileActive()/
-    // UpdateRememberCheckboxes() -- kept as separate flags rather than faking IsClick() so the
-    // legacy CButton objects themselves (m_aBtn/m_aBtnRememberMe/m_aBtnSavePassword) are
-    // untouched and still own real check-state for every existing internal call site
-    // (RequestLogin, ApplyRememberPasswordChoice, etc).
-    void RmlClickOk() { m_bRmlOkClicked = true; }
-    void RmlClickCancel() { m_bRmlCancelClicked = true; }
-    void RmlToggleRememberMe()
-    {
-        m_aBtnRememberMe.SetCheck(!m_aBtnRememberMe.IsCheck());
-        m_bRmlRememberMeClicked = true;
-    }
-    void RmlToggleSavePassword()
-    {
-        m_aBtnSavePassword.SetCheck(!m_aBtnSavePassword.IsCheck());
-        m_bRmlSavePasswordClicked = true;
-    }
+    // DataModelConstructor::BindEventCallback registrations). 2026-09-03: act immediately here
+    // instead of setting a flag for UpdateWhileActive() to consume later -- see
+    // CLoginMainWin::RmlClickMenu()'s header comment (STATUS.md's "Findings worth knowing") for
+    // why: UpdateWhileActive() is gated behind CWin::m_bActive, which the legacy CUIMng
+    // activation system doesn't reliably grant on a timely basis, so a click could sit unconsumed
+    // and later fire out of order against a different stale flag. Confirmed safe to call
+    // straight into RequestLogin()/CancelLogin()/etc. here for the same reason as
+    // CLoginMainWin's fix: this fires from RmlUiRuntime::ProcessSdlEvent(), called from
+    // Winmain's SDL event pump, always before CUIMng::Update() runs the same frame. Each still
+    // re-checks the "remember password" prompt's Pending state (the same guard
+    // UpdateWhileActive() applies) directly rather than via m_bRememberPasswordPromptWasPending --
+    // that snapshot exists only to protect UpdateWhileActive()'s own polling order relative to
+    // UpdateWhileShow()'s Tick() call later this same frame (see UpdateWhileActive()'s comment);
+    // these callbacks run earlier in the frame, before Tick() has had a chance to resolve
+    // anything, so the live state is exactly what the snapshot would capture anyway.
+    void RmlClickOk();
+    void RmlClickCancel();
+    void RmlToggleRememberMe();
+    void RmlToggleSavePassword();
 
 private:
     int FirstLoad = 0;
 
-    bool m_bRmlOkClicked = false;
-    bool m_bRmlCancelClicked = false;
-    bool m_bRmlRememberMeClicked = false;
-    bool m_bRmlSavePasswordClicked = false;
+    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s legacy polling
+    // (CButton::IsClick(), keyboard) -- each re-checks the "remember password" prompt's Pending
+    // state itself (see RmlClickOk()'s .cpp-side comment for why that's safe/correct here even
+    // without the m_bRememberPasswordPromptWasPending snapshot UpdateWhileActive() itself needs).
+    void SubmitLogin();
+    void SubmitCancel();
+    void ApplyRememberMeChange();
+    void ApplySavePasswordChange();
 
     struct LoginRmlModel
     {

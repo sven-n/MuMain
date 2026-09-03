@@ -339,6 +339,23 @@ void CLoginWin::PreRelease()
         m_pRmlDoc->Hide();
 }
 
+void CLoginWin::RmlClickOk() { SubmitLogin(); }
+void CLoginWin::RmlClickCancel() { SubmitCancel(); }
+
+void CLoginWin::RmlToggleRememberMe()
+{
+	m_aBtnRememberMe.SetCheck(!m_aBtnRememberMe.IsCheck());
+	if (UI::Login::RememberPasswordChoiceState() != UI::Login::RememberPasswordChoice::Pending)
+		ApplyRememberMeChange();
+}
+
+void CLoginWin::RmlToggleSavePassword()
+{
+	m_aBtnSavePassword.SetCheck(!m_aBtnSavePassword.IsCheck());
+	if (UI::Login::RememberPasswordChoiceState() != UI::Login::RememberPasswordChoice::Pending)
+		ApplySavePasswordChange();
+}
+
 void CLoginWin::UpdateWhileActive(double)
 {
 	// While the "Remember Password" confirmation dialog is open, let it own the
@@ -361,49 +378,72 @@ void CLoginWin::UpdateWhileActive(double)
 		|| m_bRememberPasswordPromptWasPending)
 		return;
 
-	if (m_aBtn[LIW_OK].IsClick() || m_bRmlOkClicked || CInput::Instance().IsKeyDown(VK_RETURN))
+	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
 	{
-		m_bRmlOkClicked = false;
-		PlayBuffer(SOUND_CLICK01);
-		RequestLogin();
+		SubmitLogin();
 		return;
 	}
 
-	if (m_aBtn[LIW_CANCEL].IsClick() || m_bRmlCancelClicked || CInput::Instance().IsKeyDown(VK_ESCAPE))
+	if (m_aBtn[LIW_CANCEL].IsClick() || CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
-		m_bRmlCancelClicked = false;
-		PlayBuffer(SOUND_CLICK01);
-		CancelLogin();
-		CUIMng::Instance().SetSysMenuWinShow(false);
+		SubmitCancel();
 		return;
 	}
 
 	UpdateRememberCheckboxes();
 }
 
+// 2026-09-03: RmlClickOk()/RmlClickCancel() (see LoginWin.h's header comment) call these directly,
+// bypassing UpdateWhileActive()'s m_bActive gate entirely -- UpdateWhileActive()'s own
+// CButton::IsClick()/keyboard branches above call the same functions, so there is exactly one
+// place each action's logic lives regardless of which path triggered it. Each re-checks the
+// "remember password" prompt's live Pending state rather than trusting the caller: cheap, and
+// correct from both call sites (UpdateWhileActive() already returned early above if pending; the
+// immediate RmlUi callbacks haven't had a chance to observe that yet without this).
+void CLoginWin::SubmitLogin()
+{
+	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
+		return;
+	PlayBuffer(SOUND_CLICK01);
+	RequestLogin();
+}
+
+void CLoginWin::SubmitCancel()
+{
+	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
+		return;
+	PlayBuffer(SOUND_CLICK01);
+	CancelLogin();
+	CUIMng::Instance().SetSysMenuWinShow(false);
+}
+
 void CLoginWin::UpdateRememberCheckboxes()
 {
+	if (m_aBtnRememberMe.IsClick())
+		ApplyRememberMeChange();
+	if (m_aBtnSavePassword.IsClick())
+		ApplySavePasswordChange();
+}
+
+void CLoginWin::ApplyRememberMeChange()
+{
 	GameConfig& config = GameConfig::GetInstance();
+	m_RememberMe = m_aBtnRememberMe.IsCheck();
+	config.SetRememberMe(m_RememberMe != 0);
 
-	if (m_aBtnRememberMe.IsClick() || m_bRmlRememberMeClicked)
+	// Switching off "remember me" revokes everything: drop the stored
+	// credentials from config.ini now so they can't linger if the game is
+	// closed before the next login.
+	if (!m_RememberMe)
 	{
-		m_bRmlRememberMeClicked = false;
-		m_RememberMe = m_aBtnRememberMe.IsCheck();
-		config.SetRememberMe(m_RememberMe != 0);
-
-		// Switching off "remember me" revokes everything: drop the stored
-		// credentials from config.ini now so they can't linger if the game is
-		// closed before the next login.
-		if (!m_RememberMe)
-		{
-			m_aBtnSavePassword.SetCheck(false);
-			config.ClearCredentials();
-		}
+		m_aBtnSavePassword.SetCheck(false);
+		config.ClearCredentials();
 	}
+}
 
-	if (!m_aBtnSavePassword.IsClick() && !m_bRmlSavePasswordClicked)
-		return;
-	m_bRmlSavePasswordClicked = false;
+void CLoginWin::ApplySavePasswordChange()
+{
+	GameConfig& config = GameConfig::GetInstance();
 
 	if (!m_aBtnSavePassword.IsCheck())
 	{
