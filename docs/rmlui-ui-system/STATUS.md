@@ -156,8 +156,10 @@ section in full detail; summarized here for visibility.
     through under an RmlUi panel, or a UI click could still fall through to the game world. Three
     parallel, not-always-agreeing input-tracking systems are the root cause throughout this whole
     finding: `CInput`/`SEASON3B::CNewKeyInput`'s VK-polling (drives `CUIMng`'s activation/hit-test
-    loop), `SDLEventLoop.cpp`'s own event-driven `MouseLButton`/`Push`/`Pop` globals (legacy 2D
-    world input), and RmlUi's own event-driven `Context::ProcessMouseButtonDown/Up`. The real fix
+    loop), `Winmain.cpp`'s own event-driven `MouseLButton`/`Push`/`Pop` globals (`HandleMouseButton`/
+    `HandleMouseMotion`, legacy 2D world input — `Core/Platform/sdl3/SDLEventLoop.cpp` looks like
+    the source of this but is actually dead code, zero live call sites; don't go looking for the
+    fix there), and RmlUi's own event-driven `Context::ProcessMouseButtonDown/Up`. The real fix
     is making RmlUi's own hit-testing authoritative for anything RmlUi renders, retiring
     `CursorInWin`/`IsCursorOnUI`'s role for those elements entirely rather than continuing to
     patch each new symptom — see "Known gaps." Not yet scoped or started.
