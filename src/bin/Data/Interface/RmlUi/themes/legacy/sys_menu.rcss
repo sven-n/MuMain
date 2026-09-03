@@ -14,7 +14,7 @@
 	width: 213dp;
 	height: 187dp;
 	font-family: "Liberation Sans";
-	font-size: 12px;
+	font-size: 12dp;
 	color: white;
 }
 #panel.compact {

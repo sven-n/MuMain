@@ -36,7 +36,7 @@ body {
 	width: 329dp;
 	height: 245dp;
 	font-family: "Liberation Sans";
-	font-size: 12px;
+	font-size: 12dp;
 	color: white;
 	decorator: image(login-back-image);
 }

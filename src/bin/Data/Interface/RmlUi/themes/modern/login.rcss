@@ -35,7 +35,7 @@ body {
 	width: 329dp;
 	height: 245dp;
 	font-family: "Liberation Sans";
-	font-size: 12px;
+	font-size: 12dp;
 	color: #d9d0c0;
 	border-width: 1dp;
 	border-radius: 7dp;
