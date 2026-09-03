@@ -13,7 +13,6 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
-#include <RmlUi/Core/Property.h>
 
 // RmlUi migration, Batch 2: previously built on the shared SEASON3B::CNewUICommonMessageBox /
 // g_MessageBox engine (~80 other unrelated dialogs also ride that singleton stack -- confirmed by
@@ -71,21 +70,10 @@ namespace
         if (modelCreated)
             g_pDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/remember_password_prompt.rml");
 
-        if (g_pDoc)
-        {
-            // Centered once at creation -- this document has no CWin/resize hook (see the
-            // migration plan's known-gap note), so a live resolution change while it's open
-            // would leave it off-center until the next open. Accepted, not solved here.
-            if (Rml::Element* panel = g_pDoc->GetElementById("panel"))
-            {
-                const Rml::Property* widthProp = panel->GetProperty("width");
-                const Rml::Property* heightProp = panel->GetProperty("height");
-                const float panelWidth = widthProp ? widthProp->Get<float>() : 0.0f;
-                const float panelHeight = heightProp ? heightProp->Get<float>() : 0.0f;
-                panel->SetProperty("left", std::to_string((CInput::Instance().GetScreenWidth() - panelWidth) / 2) + "px");
-                panel->SetProperty("top", std::to_string((CInput::Instance().GetScreenHeight() - panelHeight) / 2) + "px");
-            }
-        }
+        // 2026-09-03: no longer centered from here -- #panel's own `.center-both` RCSS class
+        // (remember_password_prompt.rml) does it instead, and unlike the old GetProperty()-based
+        // read-back this way it stays centered on every resize/UI-scale change too, not just at
+        // creation (see this function's git history for the block this replaced).
     }
 
     void SyncLabels()

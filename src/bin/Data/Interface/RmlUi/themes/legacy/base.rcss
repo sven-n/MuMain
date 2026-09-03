@@ -43,17 +43,17 @@
 	left: 0;
 	bottom: 0;
 	width: 100%;
-	height: 43px;
+	height: 43dp;
 	decorator: image(legacy-panel-bottom);
 }
-/* Spans nearly the full panel (3px inset each side), matching CWinEx's real WE_BG_CENTER --
+/* Spans nearly the full panel (3dp inset each side), matching CWinEx's real WE_BG_CENTER --
    painted first so it shows through the caps' own transparent negative space. */
 .panel-middle {
 	position: absolute;
-	left: 3px;
-	top: 3px;
-	right: 3px;
-	bottom: 3px;
+	left: 3dp;
+	top: 3dp;
+	right: 3dp;
+	bottom: 3dp;
 	decorator: image(legacy-panel-center);
 }
 
@@ -82,8 +82,8 @@ body {
 }
 .checkbox-box {
 	display: inline-block;
-	width: 16px;
-	height: 16px;
+	width: 16dp;
+	height: 16dp;
 	decorator: image(legacy-checkbox-unchecked);
 }
 .checkbox-box.checked {
@@ -91,18 +91,18 @@ body {
 }
 .checkbox-label {
 	position: absolute;
-	left: 21px;
-	top: 1px;
+	left: 21dp;
+	top: 1dp;
 	white-space: nowrap;
 }
 
 .btn {
 	position: absolute;
-	width: 108px;
-	height: 30px;
+	width: 108dp;
+	height: 30dp;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 30px;
+	line-height: 30dp;
 	cursor: pointer;
 	decorator: image(legacy-btn-idle);
 	pointer-events: auto;

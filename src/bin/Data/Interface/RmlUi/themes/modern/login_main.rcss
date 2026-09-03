@@ -9,30 +9,34 @@
 
 .btn-icon {
 	position: absolute;
-	width: 54px;
-	height: 30px;
+	width: 54dp;
+	height: 30dp;
 	cursor: pointer;
 	pointer-events: auto;
 	background-color: rgba(255, 244, 224, 12); /* surface-3 */
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 4px; /* radius-md */
+	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border-radius: 4dp; /* radius-md */
 	text-align: center;
-	line-height: 30px;
+	line-height: 30dp;
 }
 .btn-icon:hover {
 	background-color: #c0a050; /* accent-gold */
-	border: 1px #c0a050; /* accent-gold */
+	border: 1dp #c0a050; /* accent-gold */
 }
 .btn-icon-label {
 	color: #d9d3c5; /* text-body */
 	font-weight: bold;
 }
 .btn-icon-menu {
-	left: 0px;
-	top: 0px;
+	left: 0;
+	top: 0;
 }
+/* 2026-09-03: right:0dp replaces a C++-pushed `left` (LoginMainWin.cpp) -- anchors to #panel's own
+   right edge instead of a computed real-pixel offset, so it tracks .btn-icon's now-dp width
+   automatically instead of needing a matching C++ recompute on every resize. */
 .btn-icon-credit {
-	top: 0px;
+	top: 0;
+	right: 0dp;
 }
 
 .btn-credit-deco {

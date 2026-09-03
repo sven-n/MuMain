@@ -46,14 +46,14 @@ body {
    login.rml does, and it has its own copy), so this had no visible effect on anything else. */
 .checkbox-box {
 	display: inline-block;
-	width: 16px;
-	height: 16px;
+	width: 16dp;
+	height: 16dp;
 	background-color: #0b0907;
 	decorator: linear-gradient(to bottom, #211b15, #0b0907);
-	border-width: 1px;
+	border-width: 1dp;
 	border-color: #725b39;
 	border-top-color: rgba(0, 0, 0, 180);
-	border-radius: 3px; /* radius-sm */
+	border-radius: 3dp; /* radius-sm */
 }
 .checkbox-box.checked {
 	background-color: #604319;
@@ -62,8 +62,8 @@ body {
 }
 .checkbox-label {
 	position: absolute;
-	left: 21px;
-	top: 1px;
+	left: 21dp;
+	top: 1dp;
 	white-space: nowrap;
 }
 
@@ -72,16 +72,16 @@ body {
    surface stays the base material; gold is the accent, not the structure. */
 .btn {
 	position: absolute;
-	width: 108px;
-	height: 30px;
+	width: 108dp;
+	height: 30dp;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 30px;
+	line-height: 30dp;
 	cursor: pointer;
 	color: #d9d3c5; /* text-body */
 	background-color: #34373a;
-	border: 1px rgba(190, 160, 110, 90); /* faint accent-gold */
-	border-radius: 4px; /* radius-md */
+	border: 1dp rgba(190, 160, 110, 90); /* faint accent-gold */
+	border-radius: 4dp; /* radius-md */
 	pointer-events: auto;
 }
 .btn:hover {
@@ -163,7 +163,7 @@ body {
 .modern-frame {
 	background-color: rgba(38, 40, 42, 190);
 	decorator: linear-gradient(to bottom, rgba(58, 62, 66, 190) 0%, rgba(38, 40, 42, 190) 40%, rgba(20, 21, 22, 190) 100%);
-	border-width: 2px;
+	border-width: 2dp;
 	border-top-color: rgba(200, 205, 210, 160); /* bevel-light: brighter than the fill for a real edge-catch */
 	border-left-color: rgba(200, 205, 210, 160);
 	border-bottom-color: rgba(0, 0, 0, 190); /* bevel-dark */
@@ -171,19 +171,19 @@ body {
 }
 .modern-panel {
 	position: absolute;
-	left: 4px;
-	right: 4px;
-	top: 4px;
-	bottom: 4px;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
 	pointer-events: none;
 	background-color: rgba(20, 21, 22, 180); /* surface-1 */
 	decorator: linear-gradient(to bottom, rgba(28, 29, 30, 180) 0%, rgba(16, 17, 18, 180) 100%);
-	border-width: 1px;
+	border-width: 1dp;
 	border-top-color: rgba(0, 0, 0, 140); /* bevel-dark-inset: recessed relative to the frame */
 	border-left-color: rgba(0, 0, 0, 140);
 	border-bottom-color: rgba(255, 255, 255, 20); /* bevel-light-inset */
 	border-right-color: rgba(255, 255, 255, 20);
-	border-radius: 8px;
+	border-radius: 8dp;
 }
 
 /* Warm bronze/near-black palette variant -- extracted from login.rcss's own #panel/.login-content
@@ -219,7 +219,7 @@ body {
 .modern-frame-accent {
 	position: absolute;
 	pointer-events: none;
-	border-width: 1px;
+	border-width: 1dp;
 }
 .modern-frame-accent-crimson {
 	border-color: rgba(139, 108, 62, 166);
@@ -232,7 +232,7 @@ body {
    login.rcss's .input-frame comment for a concrete example). Gives the "sunk into the panel"
    read from the border bevel alone. */
 .modern-inset {
-	border-width: 1px;
+	border-width: 1dp;
 	border-top-color: rgba(0, 0, 0, 190); /* bevel-dark-inset */
 	border-left-color: rgba(0, 0, 0, 190);
 	border-bottom-color: rgba(255, 244, 224, 35); /* bevel-light-inset */

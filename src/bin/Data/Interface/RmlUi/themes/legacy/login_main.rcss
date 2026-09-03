@@ -24,29 +24,32 @@
 
 .btn-icon {
 	position: absolute;
-	width: 54px;
-	height: 30px;
+	width: 54dp;
+	height: 30dp;
 	cursor: pointer;
 	pointer-events: auto;
 }
 .btn-icon-menu {
-	left: 0px;
-	top: 0px;
+	left: 0;
+	top: 0;
 	decorator: image(login-main-menu-icon);
 }
-/* left pushed from C++ (screen-width dependent right-alignment). */
+/* 2026-09-03: right:0dp replaces a C++-pushed `left` (LoginMainWin.cpp) -- anchors to #panel's own
+   right edge instead of a computed real-pixel offset, so it tracks .btn-icon's now-dp width
+   automatically instead of needing a matching C++ recompute on every resize. */
 .btn-icon-credit {
-	top: 0px;
+	top: 0;
+	right: 0dp;
 }
 
 /* Stands in for the original decorative sprite -- must paint behind the credit button (a child,
    declared first, so its own icon layer paints on top of it). */
 .btn-credit-deco {
 	position: absolute;
-	left: -105px;
-	top: -59px;
-	width: 189px;
-	height: 103px;
+	left: -105dp;
+	top: -59dp;
+	width: 189dp;
+	height: 103dp;
 	pointer-events: none;
 	decorator: image(login-main-deco-image);
 }
@@ -55,8 +58,8 @@
 	position: absolute;
 	left: 0;
 	top: 0;
-	width: 54px;
-	height: 30px;
+	width: 54dp;
+	height: 30dp;
 	pointer-events: none;
 	decorator: image(login-main-credit-icon);
 }

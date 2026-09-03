@@ -11,10 +11,13 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
+#include "Data/GameConfig/GameConfig.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
+#include <cmath>
 #include <functional>
 
 namespace
@@ -97,14 +100,29 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
 {
     CWin::SetPosition(nXCoord, nYCoord);
 
+    // Same combined ratio RmlUi's own dp unit uses (RmlUiRuntime.cpp's ApplyUIScale(),
+    // UIScalePercent x UI::Scaling::ViewportFitScale()) -- the legacy credit button's own
+    // click-detection width must track login_main.rcss's now-dp .btn-icon width, or its hit rect
+    // drifts from the RmlUi-rendered button at any UI scale/resolution other than the reference
+    // case. Lower stakes than CharSelMainWin's IsCursorOnUI() case (this window's click handling
+    // already treats the legacy CButton and RmlUi's own click listener as redundant -- see
+    // UpdateWhileActive()'s `||`), but the same fix is cheap and correct to apply here too.
+    const float uiScale = static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f *
+        UI::Scaling::ViewportFitScale(static_cast<int>(CInput::Instance().GetScreenWidth()),
+                                      static_cast<int>(CInput::Instance().GetScreenHeight()),
+                                      UI::Scaling::MaximumPanelScale);
+    const int creditWidth = static_cast<int>(std::lround(m_aBtn[LMW_BTN_CREDIT].GetWidth() * uiScale));
+
     m_aBtn[LMW_BTN_MENU].SetPosition(nXCoord, nYCoord);
+    m_aBtn[LMW_BTN_CREDIT].SetPosition(nXCoord + CWin::GetWidth() - creditWidth, nYCoord);
 
-    m_aBtn[LMW_BTN_CREDIT].SetPosition(nXCoord + CWin::GetWidth() - m_aBtn[LMW_BTN_CREDIT].GetWidth(), nYCoord);
-
-    // RmlUi panel: positioned at the same real window-pixel origin CWin's own bookkeeping uses
-    // (see CLoginWin::SetPosition's identical comment). btn_credit's left is pushed separately
-    // (not a fixed RCSS offset like btn_menu) because it's screen-width-dependent, matching the
-    // legacy CButton positioning math right above.
+    // RmlUi panel: positioned/sized to the same real window-pixel geometry CWin's own bookkeeping
+    // uses (see CLoginWin::SetPosition's identical comment) -- #panel's own bounding box is a
+    // genuinely computed value (tied to screen size and this bar's placement relative to sibling
+    // login-scene elements, layout-and-scaling.md's "genuine live computed result" carve-out), so
+    // it stays C++-pushed. Its CHILDREN don't anymore, as of 2026-09-03: btn_menu/btn_credit
+    // position themselves via login_main.rcss's anchor-left/right:0dp rules instead, picking up
+    // the same dp auto-fit .btn-icon's own width/height already have.
     if (m_pRmlDoc)
     {
         if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
@@ -114,8 +132,6 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
             panel->SetProperty("width", std::to_string(CWin::GetWidth()) + "px");
             panel->SetProperty("height", std::to_string(CWin::GetHeight()) + "px");
         }
-        if (Rml::Element* credit = m_pRmlDoc->GetElementById("btn_credit"))
-            credit->SetProperty("left", std::to_string(CWin::GetWidth() - m_aBtn[LMW_BTN_CREDIT].GetWidth()) + "px");
     }
 }
 
