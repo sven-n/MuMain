@@ -204,6 +204,25 @@ for visibility:
   guard `UpdateWhileActive()` applies via its `m_bRememberPasswordPromptWasPending` snapshot (see
   `RmlClickOk()`'s own comment for why the live check is equivalent there). No `m_bRmlXClicked`-
   style flags remain anywhere in the codebase.
+- **Three parallel, not-always-agreeing input-tracking systems exist, and only half the resulting
+  bug class is fixed.** The two findings above fixed *whether an RmlUi click's action fires* — but
+  there's a second, still-open half: `CUIMng::IsCursorOnUI()`/`m_bCursorOnUI` (the "is the cursor
+  on UI, should the world-click handler underneath be suppressed" decision, consulted every frame)
+  still runs entirely through the same legacy `CursorInWin()` hit-testing, with the same
+  staleness/list-order risk already found and fixed for click *dispatch*, for every RmlUi-rendered
+  window. A world-click could still leak through under an RmlUi panel, or a UI click could still
+  fall through to the game world, on the same class of hit-box drift this session spent most of
+  its time on. This isn't speculative — it's the same three systems (`CInput`/
+  `SEASON3B::CNewKeyInput`'s VK-polling driving `CUIMng`'s activation/hit-test loop;
+  `SDLEventLoop.cpp`'s own event-driven `MouseLButton`/`Push`/`Pop` globals for legacy 2D world
+  input; RmlUi's own event-driven `Context::ProcessMouseButtonDown/Up`) that already produced four
+  confirmed, independently-discovered bugs this session (the `CInput`-vs-`WindowWidth` staleness
+  bug, fixed in four files; the `SetActiveWin` held-click oscillation; the `CreateLoginScene()`
+  hit-box overlap; the `m_bRmlXClicked` stale-flag bug, fixed in four windows). The real fix is
+  making RmlUi's own hit-testing authoritative for anything RmlUi renders, retiring
+  `CursorInWin`/`IsCursorOnUI`'s role for those elements entirely rather than continuing to patch
+  each new symptom. Proven by repetition in the same way the `CompanionRatio()` extraction and the
+  click-flag fix were — the next real candidate for foundational work, not yet scoped or started.
 
 ## Known gaps against the principles (honest status, not yet built)
 
@@ -215,7 +234,12 @@ for "the full architecture is in place":
 - **No mod/user-override resource-precedence system** (§18–19). Themes today are exactly two
   hardcoded directories (`themes/legacy/`, `themes/modern/`) selected by `GameConfig`'s theme
   name — no "user override on top of a theme" layer, no documented precedence order, no tooling
-  for a third party to ship a partial theme that inherits the rest from a base theme.
+  for a third party to ship a partial theme that inherits the rest from a base theme. **Not
+  speculative** — §18/§19 have called for this since the governing doc was written, and 2026-09-04
+  confirmed the user wants arbitrary future themes to actually be supportable, not just legacy and
+  modern (see the corrected Custom/Test entry below). Still correctly *sequenced* behind other
+  work (nobody's shipping a mod today), but it shouldn't be read as "maybe never" — it's a stated
+  requirement waiting on priority, not an open question about whether to build it at all.
 - **No design-token/shared-variable layer, `modern` theme only, now addressed (2026-09-02)**.
   [`modern-theme-visual-direction.md`](modern-theme-visual-direction.md) defines a palette/border
   token table for `modern` and confirms this vendored RmlUi has no `var()`/custom-property
@@ -226,11 +250,60 @@ for "the full architecture is in place":
   colors, skill-tooltip line-color semantics). No shadow/glow tokens exist — `box-shadow` parses but
   doesn't render on this engine, see the Findings entry below. `font-family` literals are still
   repeated per file (explicitly deferred — see that doc's Typography section). `legacy` has no token
-  layer and isn't in scope for one (theme-specific by design).
-- **No Custom/Test theme — direct, open conflict with §25.** §25 explicitly wants a Custom/Test
-  theme that looks substantially different from Legacy, specifically to surface accidental
-  component/presentation coupling. The standing instruction on this branch has been "only Legacy
-  and Modern, no third theme." **Unresolved — ask before building a third theme either way.**
+  layer and isn't in scope for one (theme-specific by design). **2026-09-04: confirmed as a real,
+  not speculative, want** — the "documented convention, not a mechanism" gap is real: changing an
+  accent color still means grep-and-replace across every file tagged with that token's comment,
+  not a one-place edit, since this RmlUi build has no `var()`/custom-property support at all. A
+  real fix is buildable without engine changes: a small token-substitution pass (RCSS authored
+  with placeholder tokens, resolved against a per-theme token file before the text reaches RmlUi —
+  the same kind of text transform `LoadThemedDocument()` already does for its synthetic per-theme
+  URL). Not built. Moderate scope, not attempted yet.
+- **Three "shared" RML files have theme-specific class names baked into them —
+  `architecture-principles.md` §15 violation, found 2026-09-04.** `login.rml`, `msg_win.rml`, and
+  `remember_password_prompt.rml` all have `modern`-specific classes (`modern-frame`,
+  `modern-frame-accent`, `modern-panel`, etc.) hardcoded directly into the file every theme is
+  supposed to share equally — e.g. `login.rml`'s `<div id="panel" class="modern-frame
+  modern-frame-crimson" ...>`. `legacy`'s RCSS has to either style classes named for a different
+  theme or leave them inert. See `theming-and-modding.md`'s corrected Core Principle section for
+  the fix (`legacy` becomes the canonical file, `modern` forks its own copy) — not done, this is
+  a real migration across three files plus their RCSS, not a docs-only fix.
+- **No drift-check tooling for a forked theme's RML.** Whichever theme's RML a window loads, C++
+  still expects the exact same ids/`data-model` bindings/event-callback names to exist — nothing
+  verifies a forked copy actually satisfies that contract, and a missing/renamed id fails
+  completely silently (a dead button, no error, no log line). Needed once theme-forking becomes
+  more common than `main_frame`'s one existing case. A script sibling to
+  `check_rml_rcss_syntax.py`, diffing referenced ids/bindings against every theme's copy, would
+  close this. Not built.
+- **Two C++ call sites branch on theme *name*, violating the newly-added §30 — found 2026-09-04,
+  not yet fixed.** `NewUIMainFrameWindow.cpp`'s background-fill-behind-legacy-icons and
+  selected-skill-slot-highlight logic are both gated on `GetActiveThemeName() == "modern"` (one)
+  / `!= "modern"` (the other) — previously recorded in this file as a deliberately-kept, justified
+  exception (see the "Pilots to revisit" table below), which undersold the problem: the
+  *reason* for some conditional behavior (see the render-ordering entry directly below) is
+  legitimate, but keying it off the theme's **name** specifically means a third theme wanting the
+  same treatment silently doesn't get it. The fix is a declared theme capability/property, not
+  necessarily removing the conditional — not done.
+- **RmlUi rendering strictly last in the frame — an unexamined integration choice, not a proven
+  requirement, found 2026-09-04.** `RmlUiRuntime::Render()` fires from exactly one fixed
+  pre-submit callback, always after every legacy 2D/3D draw call for the frame — which is *why*
+  the two §30 violations above exist (an RmlUi-drawn element would always paint over legacy
+  content that needs to render on top of it). Nobody has investigated whether interleaving is
+  actually possible for this engine's RmlUi integration (multiple contexts triggered at different
+  frame points, or a callback hook legacy content renders through at the right point in RmlUi's
+  own z-order) — if it is, it would remove the need for the §30 workarounds entirely rather than
+  patching them with a capability flag. Bigger and riskier than the §30 fix itself (core
+  render-loop timing, not one call site) — deserves its own dedicated design pass before assuming
+  either direction. Not investigated.
+- **No Custom/Test theme yet — corrected 2026-09-04, was misleadingly recorded as a conflict.**
+  §25/§28 have always wanted a Custom/Test theme that looks substantially different from Legacy,
+  specifically to surface accidental component/presentation coupling. This was previously recorded
+  here as "the standing instruction on this branch has been only Legacy and Modern, no third
+  theme, unresolved conflict" — that framing was backwards and is now corrected: **Legacy and
+  Modern exist specifically to validate that the architecture supports arbitrary themes, not as
+  the intended ceiling.** A third theme is genuinely wanted eventually; it's simply not scheduled
+  ahead of other work today. Nothing here is an open policy conflict — it's an ordinary sequencing
+  decision. Don't reintroduce the old "no third theme, period" framing in future updates to this
+  file; check with the user on *timing*, not on whether it should happen at all.
 - **No systematic resolution × UI-scale × theme × drag-state validation matrix** (§25).
   Verification so far has been ad hoc per window (a handful of resolutions checked interactively;
   UI scale exercised incidentally — e.g. discovering the `dp`-vs-`px` bug during `CBuffStrip`
@@ -264,6 +337,15 @@ not rewritten to chase each gap in isolation** (§26 — incremental, don't rewr
 but each specific deviation below is tied to whichever future initiative would naturally fix it,
 so it gets folded into that pass instead of being forgotten. Check this list whenever starting
 one of the trigger initiatives on the right.
+
+**Correction, 2026-09-04**: the two `GetActiveThemeName() == "modern"`/`!= "modern"` rows below
+were recorded as fully justified, deliberately-kept exceptions. The paint-order *reason* for some
+conditional behavior is real and still stands (see the render-ordering gap in "Known gaps"
+above) — but keying that conditional on the theme's **name** specifically is itself a separate
+problem (§30, added 2026-09-04): a third theme wanting the same treatment wouldn't get it, since
+the check only recognizes the literal string `"modern"`. Both rows' "kept deliberately" framing
+undersold this — treat them as tracked debt (a capability flag, not a name check), not settled
+design, alongside whatever the render-ordering investigation concludes.
 
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|

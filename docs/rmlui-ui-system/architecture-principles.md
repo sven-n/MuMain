@@ -357,6 +357,28 @@ adding a new UI should naturally use the unified components, declarative layout,
 scaling, existing drag infrastructure, and theme/mod system rather than introducing another
 version-specific UI implementation.
 
+## 30. Theme Identity Must Never Be a C++ Branch Condition
+
+If C++ genuinely must behave differently depending on the active theme (a real, narrow case —
+e.g. render ordering forces a choice between two visually-equivalent techniques), branch on a
+**declared theme capability/property** (a boolean or enum the theme itself states, e.g. "wants
+filled backgrounds instead of borders"), never on the theme's **name** (`GetActiveThemeName() ==
+"modern"`). A name check silently stops applying the moment a differently-named theme wants the
+same behavior, and coupling behavior to an identity string is exactly the kind of hidden,
+undiscoverable dependency §18–19's override system is meant to prevent. This isn't a hypothetical
+— see `STATUS.md`'s findings for two real violations found in this codebase (2026-09-04), both
+still unresolved. A theme wanting non-default C++ behavior should be **stating** that want (a
+manifest property, a data flag), not being **recognized by name**.
+
+*Added 2026-09-04, after concrete evidence: two C++ call sites keyed on the literal string
+`"modern"` were found, and — separately — three "shared" RML files were found to have theme-
+specific class names (`modern-frame`, `modern-panel`, etc.) baked into what was supposed to be the
+theme-neutral file, which is a related failure of the same kind: an implementation detail of one
+theme leaking into a place every theme was supposed to share equally. Principle 15/18 already
+covered the shape of the fix (a theme may bring its own RML, a mod may override just a piece) —
+this section names the C++-side half of that same discipline explicitly, since it wasn't spelled
+out before and the violation had already shipped twice.*
+
 ---
 
 **Next**: [`legacy-theme-modernization.md`](legacy-theme-modernization.md) — an amendment
