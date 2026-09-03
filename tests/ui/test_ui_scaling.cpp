@@ -144,11 +144,15 @@ TEST_CASE("teleport drag release maps, exits, and consumes input [ui][scaling]")
 
 TEST_CASE("dialogs scale with the viewport and stop at a readable cap [ui][scaling]")
 {
+    // 1280x720's raw fit (1.5) sits strictly between the reference (1.0) and the 2x ceiling, so
+    // ViewportFitScale's damping curve (UITransform.cpp, 2026-09-03) pulls it toward 1.25 instead
+    // of the pre-damping 1.5 -- see that function's own comment. 1920x1080/3840x2160 below are
+    // already at the ceiling either way, so the damping curve's endpoints leave them unchanged.
     const auto hd = UI::Scaling::PanelTransform(1280, 720);
-    CHECK(hd.scaleX == doctest::Approx(1.5f));
-    CHECK(hd.scaleY == doctest::Approx(1.5f));
-    CHECK(hd.offsetX == doctest::Approx(160.0f));
-    CHECK(hd.offsetY == doctest::Approx(0.0f));
+    CHECK(hd.scaleX == doctest::Approx(1.25f));
+    CHECK(hd.scaleY == doctest::Approx(1.25f));
+    CHECK(hd.offsetX == doctest::Approx(240.0f));
+    CHECK(hd.offsetY == doctest::Approx(60.0f));
 
     const auto fullHd = UI::Scaling::PanelTransform(1920, 1080);
     CHECK(fullHd.scaleX == doctest::Approx(2.0f));
@@ -175,9 +179,12 @@ TEST_CASE("HUD fills the viewport while dialogs stay capped [ui][scaling]")
 
 TEST_CASE("docks use a moderate large-screen cap without changing dialogs [ui][scaling]")
 {
+    // Same damping as the dialogs test above, against the dock's own 2.25x ceiling instead of
+    // 2.0x (raw 1.5 -> dampened 1.2 here, a bigger pull since the dock's reference-to-ceiling
+    // range is wider).
     const auto smallDock = UI::Scaling::DockLeftTransform(1280, 720);
-    CHECK(smallDock.scaleX == doctest::Approx(1.5f));
-    CHECK(smallDock.scaleY == doctest::Approx(1.5f));
+    CHECK(smallDock.scaleX == doctest::Approx(1.2f));
+    CHECK(smallDock.scaleY == doctest::Approx(1.2f));
 
     const auto fullHdDock = UI::Scaling::DockLeftTransform(1920, 1080);
     CHECK(fullHdDock.scaleX == doctest::Approx(2.25f));
@@ -572,27 +579,31 @@ TEST_CASE("bottom HUD regions reconstruct at 640x480 and 1024x768 [ui][scaling]"
     CHECK(UI::Scaling::PositionX(referenceCenter, 488.0f) == doctest::Approx(488.0f));
     CHECK(UI::Scaling::PositionX(referenceRight, 488.0f) == doctest::Approx(488.0f));
 
+    // 1024x768's raw fit (1.6) is damped to 1.36 (UITransform.cpp's ViewportFitScale, 2026-09-03).
     const auto left = UI::Scaling::BottomHudLeftTransform(1024, 768);
     const auto center = UI::Scaling::BottomHudCenterTransform(1024, 768);
     const auto right = UI::Scaling::BottomHudRightTransform(1024, 768);
-    CHECK(left.scaleX == doctest::Approx(1.6f));
-    CHECK(UI::Scaling::PositionX(left, 152.0f) == doctest::Approx(243.2f));
-    CHECK(UI::Scaling::PositionX(center, 152.0f) == doctest::Approx(243.2f));
-    CHECK(UI::Scaling::PositionX(center, 488.0f) == doctest::Approx(780.8f));
-    CHECK(UI::Scaling::PositionX(right, 488.0f) == doctest::Approx(780.8f));
+    CHECK(left.scaleX == doctest::Approx(1.36f));
+    CHECK(UI::Scaling::PositionX(left, 152.0f) == doctest::Approx(206.72f));
+    CHECK(UI::Scaling::PositionX(center, 152.0f) == doctest::Approx(283.52f));
+    CHECK(UI::Scaling::PositionX(center, 488.0f) == doctest::Approx(740.48f));
+    CHECK(UI::Scaling::PositionX(right, 488.0f) == doctest::Approx(817.28f));
 }
 
 TEST_CASE("bottom HUD uses symmetric wide gaps and caps at 2x [ui][scaling]")
 {
+    // 1280x720's raw fit (1.5) is damped to 1.25 (UITransform.cpp's ViewportFitScale,
+    // 2026-09-03) -- 320.0 stays an algebraic invariant regardless (BottomHudCenterTransform's
+    // offsetX is defined so the reference center 320 always maps to windowWidth/2, at any scale).
     const auto hdLeft = UI::Scaling::BottomHudLeftTransform(1280, 720);
     const auto hdCenter = UI::Scaling::BottomHudCenterTransform(1280, 720);
     const auto hdRight = UI::Scaling::BottomHudRightTransform(1280, 720);
-    CHECK(hdCenter.scaleX == doctest::Approx(1.5f));
-    CHECK(UI::Scaling::PositionX(hdLeft, 152.0f) == doctest::Approx(228.0f));
-    CHECK(UI::Scaling::PositionX(hdCenter, 152.0f) == doctest::Approx(388.0f));
+    CHECK(hdCenter.scaleX == doctest::Approx(1.25f));
+    CHECK(UI::Scaling::PositionX(hdLeft, 152.0f) == doctest::Approx(190.0f));
+    CHECK(UI::Scaling::PositionX(hdCenter, 152.0f) == doctest::Approx(430.0f));
     CHECK(UI::Scaling::PositionX(hdCenter, 320.0f) == doctest::Approx(640.0f));
-    CHECK(UI::Scaling::PositionX(hdCenter, 488.0f) == doctest::Approx(892.0f));
-    CHECK(UI::Scaling::PositionX(hdRight, 488.0f) == doctest::Approx(1052.0f));
+    CHECK(UI::Scaling::PositionX(hdCenter, 488.0f) == doctest::Approx(850.0f));
+    CHECK(UI::Scaling::PositionX(hdRight, 488.0f) == doctest::Approx(1090.0f));
 
     const auto wideLeft = UI::Scaling::BottomHudLeftTransform(1920, 1200);
     const auto wideCenter = UI::Scaling::BottomHudCenterTransform(1920, 1200);
@@ -631,8 +642,12 @@ TEST_CASE("world viewport spans the window while docks remain at the rounded HUD
     CHECK(hd.width == 1280);
     CHECK(hd.height == 720);
     CHECK(UI::Scaling::WorldViewportAspect(1280, 720, false) == doctest::Approx(1280.0f / 720.0f));
+    // RoundedBottomHudTop(1280,720) shifts from 644 to 656 under the damped BottomHudScale
+    // (UITransform.cpp's ViewportFitScale, 2026-09-03) -- DockLeftTransform's own scale doesn't
+    // matter for this specific check (PositionY at DockLogicalBottom is an algebraic invariant
+    // that always equals RoundedBottomHudTop by construction), only the HUD scale it's anchored to.
     const auto hdDock = UI::Scaling::DockLeftTransform(1280, 720);
-    CHECK(UI::Scaling::PositionY(hdDock, 432.0f) == doctest::Approx(644.0f));
+    CHECK(UI::Scaling::PositionY(hdDock, 432.0f) == doctest::Approx(656.0f));
 
     const auto sxga = UI::Scaling::WorldViewport(1280, 1024, false);
     CHECK(sxga.width == 1280);
@@ -670,19 +685,23 @@ TEST_CASE("world viewport clamps zero and tiny dimensions before deriving aspect
 
 TEST_CASE("bottom HUD hit-region edges block controls and preserve wide gaps [ui][scaling]")
 {
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 643.49f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 643.5f));
+    // Every boundary below shifts with 1280x720's damped scale (1.25 instead of the
+    // pre-damping 1.5 -- UITransform.cpp's ViewportFitScale, 2026-09-03): the content-top edge
+    // moves from y=643.5 to y=656.25, and the left/center/right band x-edges move to
+    // 190/430/850/1090 (matching this file's "bottom HUD uses symmetric wide gaps" test above).
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 656.24f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 656.25f));
 
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 227.99f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 228.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 300.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 387.99f, 660.0f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 388.0f, 660.0f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 891.99f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 892.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 980.0f, 660.0f));
-    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1051.99f, 660.0f));
-    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1052.0f, 660.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 189.99f, 680.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 190.0f, 680.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 300.0f, 680.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 429.99f, 680.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 430.0f, 680.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 849.99f, 680.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 850.0f, 680.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 980.0f, 680.0f));
+    CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1089.99f, 680.0f));
+    CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 1090.0f, 680.0f));
 
     CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 0.0f, 705.0f));
     CHECK(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 300.0f, 710.0f));
@@ -873,11 +892,16 @@ TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scal
     CHECK(UI::Scaling::FontPointSize(FontRole::Big, reference) == 22);
     CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, reference) == 13);
 
+    // PanelTransform(1280,720)'s typographyScale is damped from 1.5 to 1.25 (UITransform.cpp's
+    // ViewportFitScale, 2026-09-03), so its font point size grows less too (13 -> 12). The second
+    // FontScaleForBounds check stays 11.0f/16.0f either way -- the box-width clamp (100/160=0.625)
+    // already pulls it down to the MinimumFontPointSize floor regardless of which typography
+    // scale it started from.
     const auto dialog = UI::Scaling::PanelTransform(1280, 720);
-    CHECK(UI::Scaling::FontPointSize(FontRole::Normal, dialog) == 13);
+    CHECK(UI::Scaling::FontPointSize(FontRole::Normal, dialog) == 12);
     CHECK(UI::Scaling::MaximumFontPointSize(FontRole::Normal) == 16);
     CHECK(UI::Scaling::FontScaleForBounds(FontRole::Normal, dialog, 160.0f, 20.0f, 200.0f, 30.0f)
-          == doctest::Approx(13.0f / 16.0f));
+          == doctest::Approx(12.0f / 16.0f));
     CHECK(UI::Scaling::FontScaleForBounds(FontRole::Normal, dialog, 160.0f, 20.0f, 100.0f, 30.0f)
           == doctest::Approx(11.0f / 16.0f));
 

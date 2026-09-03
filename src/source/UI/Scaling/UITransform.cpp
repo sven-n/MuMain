@@ -25,6 +25,15 @@ constexpr float kMaximumHudScale = 2.0f;
 // ponytail: 2.25x dock ceiling; adjust only from rebuilt native screenshots.
 constexpr float kMaximumDockScale = 2.25f;
 constexpr float kMaximumTypographyScale = 2.25f;
+// ponytail: 2.0 = quadratic damping (a resolution halfway between reference and the ceiling scales
+// up about 1/4 as far as a linear fit would, same endpoints preserved either way). Raise toward 1.0
+// for less damping (1.0 = no damping, the original linear behavior), or above 2.0 for more, only
+// from rebuilt native screenshots at a few real resolutions -- 2026-09-03, added after user feedback
+// that a modest ~1024x768 window made every ViewportFitScale-driven dialog/HUD look noticeably
+// larger than its authored size, not just "a little scaled." Deliberately doesn't touch
+// kReferenceWidth/Height or any of the ceilings above -- same "no scaling" and "fully capped"
+// endpoints as before, only the ramp in between changes.
+constexpr float kFitDampingExponent = 2.0f;
 constexpr int kNormalFontPointSize = 11;
 constexpr int kMaximumNormalFontPointSize = 16;
 constexpr int kBigFontPointSize = 22;
@@ -143,7 +152,22 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
     const float contentScale = GetWindowContentScale();
-    return std::clamp(std::min(widthScale, heightScale), 1.0f * contentScale, maximumScale * contentScale);
+    const float minBound = 1.0f * contentScale;
+    const float maxBound = maximumScale * contentScale;
+    const float raw = std::clamp(std::min(widthScale, heightScale), minBound, maxBound);
+
+    // Dampen the ramp between the two endpoints (2026-09-03) -- raw itself already IS the answer
+    // at the reference resolution (minBound, t=0) and at/past the ceiling (maxBound, t=1); only
+    // resolutions strictly between the two get pulled down toward minBound, by kFitDampingExponent
+    // (see its own comment). Reduces the reference/ceiling gap to a fraction [0,1] first
+    // (`range` guards the degenerate case where they're equal, e.g. contentScale collapses both to
+    // the same value), applies the curve, then remaps back -- so this stays purely a reshaping of
+    // the existing formula's output, not a second independent scale factor.
+    const float range = maxBound - minBound;
+    if (range <= 0.0f)
+        return raw;
+    const float t = (raw - minBound) / range;
+    return minBound + std::pow(t, kFitDampingExponent) * range;
 }
 
 float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
