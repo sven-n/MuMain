@@ -5,12 +5,14 @@
 	<link type="text/rcss" href="msg_win.rcss"/>
 </head>
 <body data-model="msg_win">
-	<!-- Legacy theme's canonical generic message/confirm dialog, centered via .center-both. This
-	     is the theme-neutral reference file (architecture-principles.md §15) -- themes/modern/
-	     msg_win.rml forks it to add modern's own modern-frame/modern-frame-crimson decoration;
-	     keep both files' ids/data-model names in sync, MsgWin.cpp binds against both by the same
-	     names. mode-* classes select which of CMsgWin's five MSG_WIN_TYPE variants is active. -->
-	<div id="panel" class="center-both"
+	<!-- Modern theme's own copy of the generic message/confirm dialog. Per-theme file
+	     (UI::RmlBridge::LoadThemedDocument) because modern-frame/modern-frame-crimson is genuinely
+	     modern-specific structure, not just style -- the shared ../../msg_win.rml is legacy's own
+	     theme-neutral copy and carries neither class (architecture-principles.md §15: a "shared"
+	     file must not bake in one theme's vocabulary). mode-* classes select which of CMsgWin's
+	     five MSG_WIN_TYPE variants is active -- keep this file's ids/data-model names in sync with
+	     ../../msg_win.rml, MsgWin.cpp binds against both by the same names. -->
+	<div id="panel" class="center-both modern-frame modern-frame-crimson"
 	     data-class-no-buttons="no_buttons"
 	     data-class-mode-cancel-only="mode_cancel_only"
 	     data-class-mode-ok-only="mode_ok_only"

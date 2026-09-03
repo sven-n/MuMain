@@ -5,22 +5,23 @@
 	<link type="text/rcss" href="login.rcss"/>
 </head>
 <body>
-	<!-- Legacy theme's canonical login panel: labels, input-box frames, remember-me/save-password
-	     checkboxes, OK/Cancel. This is the theme-neutral reference file (architecture-
-	     principles.md §15) -- themes/modern/login.rml forks it to add modern's own decorative
-	     layering (modern-frame/modern-panel/modern-frame-accent primitives, plus the -crimson
-	     palette variant); keep both files' ids/data-model/event-callback names in sync, LoginWin.cpp
-	     binds against both by the same names. -->
-	<div id="panel" data-model="login">
-		<div class="frame-accent"></div>
-		<div class="login-content"></div>
+	<!-- Modern theme's own copy of the login panel. Per-theme file (UI::RmlBridge::LoadThemedDocument)
+	     because modern's decorative layering (modern-frame/modern-panel/modern-frame-accent, plus
+	     the -crimson palette variant) is genuinely modern-specific structure, not just style --
+	     the shared ../../login.rml is legacy's own theme-neutral copy and carries none of these
+	     classes (architecture-principles.md §15: a "shared" file must not bake in one theme's
+	     vocabulary). Keep this file's ids/data-model/event-callback names in sync with
+	     ../../login.rml -- LoginWin.cpp binds against both by the same names. -->
+	<div id="panel" class="modern-frame modern-frame-crimson" data-model="login">
+		<div class="modern-frame-accent modern-frame-accent-crimson frame-accent"></div>
+		<div class="modern-panel modern-panel-crimson login-content"></div>
 		<div class="header-glow"></div>
 		<span class="label label-server">{{server_name}}</span>
 		<span class="label label-account">{{account_label}}</span>
 		<span class="label label-password">{{password_label}}</span>
 
-		<div class="input-frame input-account"></div>
-		<div class="input-frame input-password"></div>
+		<div class="input-frame modern-inset input-account"></div>
+		<div class="input-frame modern-inset input-password"></div>
 
 		<div class="checkbox-row checkbox-remember-me" data-event-click="login_toggle_remember_me">
 			<div class="checkbox-box" data-class-checked="remember_me_checked">
