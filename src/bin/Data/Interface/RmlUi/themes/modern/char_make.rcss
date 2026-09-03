@@ -20,9 +20,9 @@
 	position: absolute;
 	width: 454px;
 	height: 406px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12px;
-	color: #d9d3c5; /* text-body */
+	color: token(text-body);
 }
 
 #stat_panel  { left: 346px; top: 24px;  }
@@ -40,26 +40,26 @@
 	line-height: 26px;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: rgba(255, 244, 224, 12); /* surface-3 */
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 4px; /* radius-md */
-	color: #d9d3c5; /* text-body */
+	background-color: token(surface-3);
+	border: 1px token(border-metal);
+	border-radius: token(radius-md)px;
+	color: token(text-body);
 }
 .job-btn:hover {
-	background-color: rgba(140, 146, 152, 60); /* accent-gold wash */
-	border: 1px #c0a050; /* accent-gold */
+	background-color: token(accent-steel);
+	border: 1px token(accent-steel);
 }
 .job-btn.checked {
-	background-color: #c0a050; /* accent-gold */
-	border: 1px #c0a050; /* accent-gold */
-	color: #efe6d3; /* text-title */
+	background-color: token(accent-steel);
+	border: 1px token(accent-steel);
+	color: token(text-title);
 }
 .job-btn.disabled {
 	pointer-events: none;
-	color: #9a958c; /* semantic-neutral */
+	color: token(semantic-neutral);
 	cursor: default;
-	background-color: rgba(255, 244, 224, 12); /* surface-3 */
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	background-color: token(surface-3);
+	border: 1px token(border-metal);
 }
 
 .stat-panel, .desc-panel {
@@ -90,12 +90,12 @@
 	left: 22px;
 }
 .stat-label {
-	color: #d9d3c5; /* text-body */
+	color: token(text-body);
 }
 .stat-value {
 	position: absolute;
 	left: 54px;
-	color: #c0a050; /* accent-gold */
+	color: token(accent-gold);
 }
 
 .desc-line {
@@ -109,8 +109,8 @@
 	width: 346px;
 	height: 38px;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 3px; /* radius-sm */
+	border: 1px token(border-metal);
+	border-radius: token(radius-sm)px;
 	pointer-events: none;
 }
 

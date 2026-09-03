@@ -5,7 +5,7 @@
 #panel {
 	top: 15dp;
 	width: 200dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 11dp;
 	pointer-events: none;
 }
@@ -23,7 +23,7 @@
 	width: 20dp;
 	height: 28dp;
 	pointer-events: auto;
-	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	border: 1dp token(border-metal);
 	border-radius: 2dp;
 	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
@@ -227,12 +227,12 @@
 	left: 0dp;
 	width: 160dp;
 	white-space: pre-line;
-	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
-	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-metal);
 	color: #ffffff;
 	padding: 3dp 5dp;
-	border-radius: 3dp; /* radius-sm */
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)dp;
+	font-family: "token(font-body)";
 	font-size: 11dp;
 	pointer-events: none;
 }

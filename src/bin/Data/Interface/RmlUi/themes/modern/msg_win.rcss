@@ -10,11 +10,11 @@
 	position: absolute;
 	width: 352dp;
 	height: 113dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: #d9d3c5; /* text-body */
+	color: token(text-body);
 	border-width: 1dp;
-	border-radius: 4dp; /* radius-md */
+	border-radius: token(radius-md)dp;
 }
 
 #msg_line1 {
@@ -53,8 +53,8 @@
 	width: 171dp;
 	height: 23dp;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 3dp; /* radius-sm */
+	border: 1dp token(border-metal);
+	border-radius: token(radius-sm)dp;
 	pointer-events: none;
 }
 .mode-input #input_frame { display: block; }

@@ -6,8 +6,8 @@
 	width: 118px;
 	height: 54px;
 	pointer-events: none;
-	font-family: "Liberation Sans";
-	color: #d9d3c5; /* text-body */
+	font-family: "token(font-body)";
+	color: token(text-body);
 }
 .balloon-bg {
 	position: absolute;
@@ -16,7 +16,7 @@
 	width: 118px;
 	height: 54px;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border: 1px token(border-metal);
 	border-radius: 6px;
 }
 
@@ -34,9 +34,9 @@
 }
 .balloon-guild {
 	top: 22px;
-	color: #d9d3c5; /* text-body */
+	color: token(text-body);
 }
 .balloon-class {
 	top: 38px;
-	color: #c0a050; /* accent-gold */
+	color: token(accent-gold);
 }

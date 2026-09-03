@@ -17,7 +17,7 @@
 #bars {
 	position: absolute;
 	transform-origin: left top;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 9px;
 	width: 640px;
 	height: 39px;
@@ -28,8 +28,8 @@
 #skill_list_anchor  { left: 78px;  top: 0px; }
 
 .slot-frame {
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 3px; /* radius-sm */
+	border: 1px token(border-metal);
+	border-radius: token(radius-sm)px;
 }
 .slot-fill {
 	background-color: rgba(10, 10, 10, 150);
@@ -65,7 +65,7 @@
 	top: 429px;
 	width: 640px;
 	height: 41px;
-	border-top: 1px rgba(140, 146, 152, 130); /* border-metal */
+	border-top: 1px token(border-metal);
 	pointer-events: none;
 }
 
@@ -152,12 +152,12 @@
 	position: absolute;
 	width: 160px;
 	white-space: nowrap;
-	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
+	background-color: token(surface-tooltip);
+	border: 1px token(border-metal);
 	color: #ffffff;
 	padding: 2px 4px;
-	border-radius: 3px; /* radius-sm */
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
 	font-size: 11px;
 	pointer-events: none;
 }
@@ -198,10 +198,10 @@
 	position: relative;
 	width: 256dp;
 	height: 24dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	background-color: rgba(20, 20, 20, 180);
-	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 3dp; /* radius-sm */
+	border: 1dp token(border-metal);
+	border-radius: token(radius-sm)dp;
 }
 .frame-btn-top {
 	position: absolute;
@@ -212,9 +212,9 @@
 	pointer-events: auto;
 	text-align: center;
 	line-height: 16dp;
-	font-family: "Liberation Sans";
-	background-color: rgba(255, 244, 224, 12); /* surface-3 */
-	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	font-family: "token(font-body)";
+	background-color: token(surface-3);
+	border: 1dp token(border-metal);
 	border-radius: 2dp;
 	color: #ffffff;
 	font-weight: bold;
@@ -223,8 +223,8 @@
 }
 .frame-btn-top:hover,
 .frame-btn-top.open {
-	background-color: #c0a050; /* accent-gold */
-	border: 1dp #c0a050; /* accent-gold */
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
 }
 #btn_cshop_top    { left: 4dp;   }
 #btn_chainfo_top  { left: 54dp;  }
@@ -238,8 +238,8 @@
 	right: -2dp;
 	width: 6dp;
 	height: 6dp;
-	border-radius: 3dp; /* radius-sm */
-	background-color: #d69a3e; /* semantic-warning */
+	border-radius: token(radius-sm)dp;
+	background-color: token(semantic-warning);
 	border: 1dp rgba(0, 0, 0, 150);
 	pointer-events: none;
 }
@@ -258,12 +258,12 @@
 	top: 28dp;
 	width: 100dp;
 	white-space: nowrap;
-	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
-	border: 1dp rgba(140, 146, 152, 130); /* border-metal */
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-metal);
 	color: #ffffff;
 	padding: 2dp 4dp;
-	border-radius: 3dp; /* radius-sm */
-	font-family: "Liberation Sans";
+	border-radius: token(radius-sm)dp;
+	font-family: "token(font-body)";
 	font-size: 11dp;
 	pointer-events: none;
 }
@@ -317,7 +317,7 @@
 	color: #ffffff;
 	font-weight: bold;
 	font-effect: outline(1px #000000);
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 7px;
 	pointer-events: none;
 }
@@ -405,7 +405,7 @@
 #skill_slot_1, #skill_slot_2, #skill_slot_3 { border-radius: 0; }
 #skill_slot_4 { border-radius: 0 3px 3px 0; }
 #skill_slots .selected {
-	border: 1px #e0c060; /* accent-gold-bright */
+	border: 1px token(accent-gold-bright);
 	background-color: rgba(176, 182, 188, 25);
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
@@ -437,11 +437,11 @@
 	height: 38px;
 	pointer-events: auto;
 	cursor: pointer;
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 3px; /* radius-sm */
+	border: 1px token(border-metal);
+	border-radius: token(radius-sm)px;
 }
 .skill-cell.selected {
-	border: 1px #e0c060; /* accent-gold-bright */
+	border: 1px token(accent-gold-bright);
 	background-color: rgba(176, 182, 188, 25);
 }
 
@@ -466,11 +466,11 @@
 #skill_tooltip {
 	transform: translateY(-100%);
 	width: 220px;
-	background-color: rgba(20, 20, 20, 220); /* surface-tooltip */
-	border: 1px rgba(140, 146, 152, 130); /* border-metal */
-	border-radius: 3px; /* radius-sm */
+	background-color: token(surface-tooltip);
+	border: 1px token(border-metal);
+	border-radius: token(radius-sm)px;
 	padding: 4px 6px;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 10px;
 	z-index: 2;
 }

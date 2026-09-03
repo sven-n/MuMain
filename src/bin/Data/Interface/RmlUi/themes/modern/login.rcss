@@ -1,21 +1,24 @@
 /* Modern theme for the login dialog -- fully programmatic, flat colors/vector shapes instead of
-   legacy art. Same class names/structure as legacy throughout. Styled against a real MU Online
-   reference screenshot's dark warm-bronze/crimson RPG dialog look, not a generic web mockup, so
-   there's no ::before/::after or box-shadow to substitute for here -- every effect below is a
-   primitive this engine's render interface actually implements: per-side border-*-color bevels for
-   depth, real extra <div>s (.frame-accent/.login-content/.header-glow/.separator, added to
-   login.rml) for decorative elements, font-effect:outline for text-shadow (unregistered on this
-   engine), decorator:linear-gradient/radial-gradient (both need RenderInterface_SDL_GPU's
-   CompileShader/RenderShader, STATUS.md's Findings 2026-09-02) for fills and glows. Outer
-   drop-shadow (blur outside the box) and box-shadow/filter/backdrop-filter have no substitute at
-   all and are simply not reproduced -- this engine leaves layer/filter compositing unimplemented.
+   legacy art. Same class names/structure as legacy throughout. Originally styled against a real
+   MU Online reference screenshot's dark warm-bronze/crimson RPG dialog look; the frame/panel
+   material itself was later cooled to gray/metallic (steel highlights instead of warm-bronze
+   ones) -- text (title/body), the checkbox, the header glow, and the primary button's crimson
+   fill deliberately stayed warm/gold/crimson, only the structural frame material went cool. No
+   ::before/::after or box-shadow to substitute for here -- every effect below is a primitive this
+   engine's render interface actually implements: per-side border-*-color bevels for depth, real
+   extra <div>s (.frame-accent/.login-content/.header-glow/.separator, added to login.rml) for
+   decorative elements, font-effect:outline for text-shadow (unregistered on this engine),
+   decorator:linear-gradient/radial-gradient (both need RenderInterface_SDL_GPU's
+   CompileShader/RenderShader) for fills and glows. Outer drop-shadow (blur outside the box) and
+   box-shadow/filter/backdrop-filter have no substitute at all and are simply not reproduced --
+   this engine leaves layer/filter compositing unimplemented.
 
    Color roles: the title header has a yellow-to-red radial glow behind the title (.header-glow,
    no separate flanking-line elements -- tried and removed, the glow alone read better). The
    primary button (.btn, OK) shares that same crimson family for its own base fill (a vertical
    linear-gradient, bright top to dark maroon bottom, no glow layer of its own -- tried, didn't
-   read well, removed) -- so the whole dialog reads as one crimson family, not two unrelated
-   colors. */
+   read well, removed) -- so the glow/button/text stay one warm/crimson family, sitting on top of
+   the now-cool gray/metallic frame material rather than being part of it. */
 
 body {
 	width: 100%;
@@ -34,7 +37,7 @@ body {
 	position: absolute;
 	width: 329dp;
 	height: 245dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
 	color: #d9d0c0;
 	border-width: 1dp;
@@ -66,12 +69,12 @@ body {
 
 .modern-inset {
 	border-width: 1dp;
-	border-color: #665237;
+	border-color: #4a4e54; /* cool steel-gray frame border, was warm bronze */
 	border-top-color: rgba(0, 0, 0, 170); /* recessed: dark top/left */
 	border-left-color: rgba(0, 0, 0, 170);
 }
 .modern-inset.focused {
-	border-color: #96663f;
+	border-color: token(accent-steel);
 }
 
 .label {
@@ -121,7 +124,7 @@ body {
 	position: absolute;
 	width: 156dp;
 	height: 23dp;
-	border-radius: 4dp; /* radius-md */
+	border-radius: token(radius-md)dp;
 	pointer-events: none;
 }
 .input-account  { left: 109dp; top: 66dp; }
@@ -260,5 +263,5 @@ body {
 	left: 30dp;
 	top: 252dp;
 	width: 280dp;
-	color: #d69a3e; /* semantic-warning */
+	color: token(semantic-warning);
 }
