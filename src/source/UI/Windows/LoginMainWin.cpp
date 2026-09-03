@@ -20,6 +20,8 @@
 #include <cmath>
 #include <functional>
 
+extern unsigned int WindowWidth, WindowHeight;
+
 namespace
 {
     // Mirrors UI::RmlBridge::RmlDraggable.cpp's self-owning listener pattern -- this window has
@@ -107,9 +109,14 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     // case. Lower stakes than CharSelMainWin's IsCursorOnUI() case (this window's click handling
     // already treats the legacy CButton and RmlUi's own click listener as redundant -- see
     // UpdateWhileActive()'s `||`), but the same fix is cheap and correct to apply here too.
+    //
+    // Reads the WindowWidth/WindowHeight globals (ZzzOpenglUtil.cpp), not
+    // CInput::Instance().GetScreenWidth()/GetScreenHeight() -- see LoginWin.cpp's
+    // LoginUIScaleRatio() for why: a real, screenshot-confirmed bug in that window traced back to
+    // CInput's own copy of the screen size not reliably matching WindowWidth/WindowHeight (the
+    // exact values RmlUiRuntime::OnResize() uses), fixed there and proactively fixed here too.
     const float uiScale = static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f *
-        UI::Scaling::ViewportFitScale(static_cast<int>(CInput::Instance().GetScreenWidth()),
-                                      static_cast<int>(CInput::Instance().GetScreenHeight()),
+        UI::Scaling::ViewportFitScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
                                       UI::Scaling::MaximumPanelScale);
     const int creditWidth = static_cast<int>(std::lround(m_aBtn[LMW_BTN_CREDIT].GetWidth() * uiScale));
 

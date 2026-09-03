@@ -39,6 +39,8 @@
 #include <RmlUi/Core/Event.h>
 #include <cmath>
 
+extern unsigned int WindowWidth, WindowHeight;
+
 namespace
 {
     // Same combined ratio RmlUi's own dp unit uses (RmlUiRuntime.cpp's ApplyUIScale(),
@@ -47,11 +49,19 @@ namespace
     // CUITextInputBox placement, the checkbox/OK/Cancel legacy CButton companions) must scale by
     // this to stay pixel-for-pixel aligned with login.rcss's own now-dp values, the same lockstep
     // requirement CharSelMainWin.cpp/LoginMainWin.cpp already established for their own windows.
+    //
+    // Deliberately reads the WindowWidth/WindowHeight globals (ZzzOpenglUtil.cpp, set from
+    // Winmain.cpp's HandleWindowResize() -- the exact same values RmlUiRuntime::OnResize() is
+    // called with), NOT CInput::Instance().GetScreenWidth()/GetScreenHeight(): a real bug, found
+    // via a screenshot showing the panel rendering off-center and the username text/caret
+    // floating outside the input box entirely -- CInput's own copy of the screen size is a
+    // separate value that isn't guaranteed to already equal WindowWidth/WindowHeight at the
+    // moment this runs (confirmed by the visible drift; not fully root-caused beyond that, but
+    // reading the same global RmlUi itself uses removes any possibility of the two disagreeing).
     float LoginUIScaleRatio()
     {
         return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f *
-            UI::Scaling::ViewportFitScale(static_cast<int>(CInput::Instance().GetScreenWidth()),
-                                          static_cast<int>(CInput::Instance().GetScreenHeight()),
+            UI::Scaling::ViewportFitScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
                                           UI::Scaling::MaximumPanelScale);
     }
 

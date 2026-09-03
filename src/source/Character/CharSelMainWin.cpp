@@ -30,6 +30,8 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
+extern unsigned int WindowWidth, WindowHeight;
+
 namespace
 {
     constexpr int kCharacterSlotCount = 5;
@@ -121,9 +123,14 @@ CCharSelMainWin::~CCharSelMainWin()
 
 void CCharSelMainWin::Create()
 {
-    CInput& input = CInput::Instance();
-    const int screenWidth = static_cast<int>(input.GetScreenWidth());
-    const int screenHeight = static_cast<int>(input.GetScreenHeight());
+    // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not
+    // CInput::Instance().GetScreenWidth()/GetScreenHeight() -- see LoginWin.cpp's
+    // LoginUIScaleRatio() for why: a real, screenshot-confirmed bug traced back to CInput's own
+    // copy of the screen size not reliably matching WindowWidth/WindowHeight (the exact values
+    // RmlUiRuntime::OnResize() uses), fixed there and proactively fixed here too -- both the
+    // layout dimensions and the ratio need the authoritative real window size, not just the ratio.
+    const int screenWidth = static_cast<int>(WindowWidth);
+    const int screenHeight = static_cast<int>(WindowHeight);
     const auto layout = UI::CharacterSelection::CalculateFixedAnchorLayout(
         screenWidth, screenHeight, GetUIScaleRatio(screenWidth, screenHeight));
 
