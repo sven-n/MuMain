@@ -32,7 +32,11 @@ still unproven there. **[Legacy Theme Modernization Policy](legacy-theme-moderni
 when legacy-theme C++ behavior should move into RML/RCSS versus genuinely stay in C++, and how to
 classify a given piece of legacy code either way. **[Modern Theme Visual Direction](modern-theme-visual-direction.md)**
 — the `modern` theme's color/border/shadow token table and the design-language goals it serves;
-`legacy` is explicitly out of scope for it.
+`legacy` is explicitly out of scope for it. **[Component Catalog](component-catalog.md)** — an
+honest inventory of what already exists as a reusable UI primitive (Window/Panel, Button,
+Checkbox, layout utilities, data binding, theming, dragging) versus what a future port would be
+the first real use case for (ItemSlot, ProgressBar, Tooltip unification, Dialog, and more) — check
+here before inventing a new one-off mechanism.
 
 ## Renderer integration: SDL_GPU
 
