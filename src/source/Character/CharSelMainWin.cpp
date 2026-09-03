@@ -24,6 +24,7 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Scaling/UITransform.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -52,12 +53,20 @@ namespace
     // single fixed-dp-anchor calculator, mirroring char_sel_main.rcss's own math.
     constexpr int kWindowAlpha = 143;
 
-    // Same ratio RmlUiRuntime applies via Rml::Context::SetDensityIndependentPixelRatio() -- used
-    // here so UI::CharacterSelection::CalculateFixedAnchorLayout()'s legacy hit-test rects always
-    // match the RmlUi-rendered buttons pixel-for-pixel (see that function's own comment).
-    float GetUIScaleRatio()
+    // Same ratio RmlUiRuntime applies via Rml::Context::SetDensityIndependentPixelRatio()
+    // (RmlUiRuntime.cpp's ApplyUIScale()) -- used here so
+    // UI::CharacterSelection::CalculateFixedAnchorLayout()'s legacy hit-test rects always match
+    // the RmlUi-rendered buttons pixel-for-pixel (see that function's own comment). Two factors,
+    // composed the same way and in the same order ApplyUIScale() does: UIScalePercent (the user's
+    // dial) times UI::Scaling::ViewportFitScale() (auto-fit-to-window-size, added 2026-09-03
+    // alongside making RmlUi's dp ratio globally auto-fit -- char_sel_main.rcss is dp, so its
+    // visuals started growing with resolution the moment that landed; this must grow the hit-test
+    // rects in lockstep or Create/Delete/Connect clicks land outside the visually-correct buttons,
+    // same failure mode this function's own header comment already documents having happened once).
+    float GetUIScaleRatio(int screenWidth, int screenHeight)
     {
-        return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f;
+        const float percent = static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f;
+        return percent * UI::Scaling::ViewportFitScale(screenWidth, screenHeight, UI::Scaling::MaximumPanelScale);
     }
 
     template <typename Predicate>
@@ -113,8 +122,10 @@ CCharSelMainWin::~CCharSelMainWin()
 void CCharSelMainWin::Create()
 {
     CInput& input = CInput::Instance();
+    const int screenWidth = static_cast<int>(input.GetScreenWidth());
+    const int screenHeight = static_cast<int>(input.GetScreenHeight());
     const auto layout = UI::CharacterSelection::CalculateFixedAnchorLayout(
-        static_cast<int>(input.GetScreenWidth()), static_cast<int>(input.GetScreenHeight()), GetUIScaleRatio());
+        screenWidth, screenHeight, GetUIScaleRatio(screenWidth, screenHeight));
 
     m_asprBack[CSMW_SPR_DECO].Create(
         UI::CharacterSelection::NativeDecorationWidth,

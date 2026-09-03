@@ -12,32 +12,40 @@
 namespace
 {
     // Global UI scale (docs/rmlui-ui-system/layout-and-scaling.md) -- the one RmlUi-native call
-    // site every `dp`-authored RCSS dimension responds to, per GameConfig::GetUIScalePercent()
-    // *and* UI::Scaling::GetWindowContentScale() (the OS display-scale/pixel-density factor the
-    // legacy UI::Scaling transforms already fold in -- see BottomHudScale/CappedUniformScale,
-    // UITransform.cpp). Cross-wiring both axes into this one ratio keeps every already-migrated
-    // RmlUi window (this context is shared by all of them) as OS-display-scale-aware as the HUD
-    // band's own bars_scale transform, rather than leaving RmlUi blind to real display DPI while
-    // only the legacy-transform-driven HUD responds to it.
+    // site every `dp`-authored RCSS dimension responds to. Two multipliers, composed the same way
+    // UI::Scaling's own legacy transforms compose them (UITransform.cpp):
+    //   - GameConfig::GetUIScalePercent() -- the user's own preference dial.
+    //   - UI::Scaling::ViewportFitScale() -- auto-fit-to-window-size (the same formula the still-
+    //     legacy HUD band's bars_scale uses via BottomHudScale/BottomHudCenterTransform), which
+    //     already folds in UI::Scaling::GetWindowContentScale() (OS display-scale/pixel-density)
+    //     internally -- do NOT also multiply GetWindowContentScale() here, it would double-count.
+    // Before 2026-09-03 this ratio had no auto-fit term at all, so every dp-authored window (mu
+    // helper bar, buff strip, the HUD's top-right button row, and -- since dialogs were deliberately
+    // un-exempted the same day -- login/sys_menu/msg_win/etc.) stayed a fixed size regardless of
+    // window resolution while the still-legacy HUD bars right next to them grew with it. This
+    // makes every dp window participate in the same auto-fit the legacy transforms already have.
     //
     // NOT yet verified on real mismatched-density hardware -- Rml::Context's dimensions are set
     // from SDL's window-coordinate size (RmlUiRuntime::OnResize, see its own comment), not
     // SDL_GetWindowSizeInPixels(), and the SDL window requests SDL_WINDOW_HIGH_PIXEL_DENSITY
     // (SDLWindowFlags.h). Whether RenderInterface_SDL_GPU's viewport already stretches that
-    // window-coordinate-sized canvas across the full pixel framebuffer (in which case this
-    // multiply would double-scale) or renders it 1:1 (in which case this is the missing piece)
-    // needs a real scaled display or a UI::Scaling::SetWindowContentScale() debug override to
-    // confirm directly -- see docs/rmlui-ui-system/layout-and-scaling.md.
+    // window-coordinate-sized canvas across the full pixel framebuffer (in which case the
+    // content-scale term folded into ViewportFitScale would double-scale) or renders it 1:1 (in
+    // which case it's the missing piece) needs a real scaled display or a
+    // UI::Scaling::SetWindowContentScale() debug override to confirm directly -- see
+    // docs/rmlui-ui-system/layout-and-scaling.md. This was already an open question before this
+    // change; adding the auto-fit term doesn't add a new one, just carries the existing one forward.
     //
     // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
     // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and
     // removes any doubt about whether some other code path could have reset it in between.
-    void ApplyUIScale(Rml::Context* context)
+    void ApplyUIScale(Rml::Context* context, int windowWidth, int windowHeight)
     {
         if (!context) return;
         const int percent = GameConfig::GetInstance().GetUIScalePercent();
-        context->SetDensityIndependentPixelRatio((static_cast<float>(percent) / 100.0f) *
-                                                 UI::Scaling::GetWindowContentScale());
+        const float autoFit =
+            UI::Scaling::ViewportFitScale(windowWidth, windowHeight, UI::Scaling::MaximumPanelScale);
+        context->SetDensityIndependentPixelRatio((static_cast<float>(percent) / 100.0f) * autoFit);
     }
 }
 
@@ -88,7 +96,7 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
 
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
-    ApplyUIScale(m_Context);
+    ApplyUIScale(m_Context, windowWidth, windowHeight);
 
     // Renders once per frame, after this frame's game content is recorded onto the command
     // buffer but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h)
@@ -124,7 +132,7 @@ void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
 {
     if (!m_Context) return;
     m_Context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
-    ApplyUIScale(m_Context);
+    ApplyUIScale(m_Context, windowWidth, windowHeight);
 }
 
 void RmlUiRuntime::Update()

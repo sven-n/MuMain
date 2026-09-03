@@ -3,6 +3,10 @@
 namespace UI::Scaling
 {
     inline constexpr int DockLogicalBottom = 432;
+    // Shared ceiling for "general" (non-HUD-band, non-dock) uniform auto-fit -- PanelTransform's
+    // own cap, and RmlUiRuntime.cpp's dp-ratio auto-fit reuses the same number (single source of
+    // truth: docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section).
+    inline constexpr float MaximumPanelScale = 2.0f;
 
     struct Transform
     {
@@ -68,6 +72,7 @@ namespace UI::Scaling
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
+    float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
     float BottomHudScale(int windowWidth, int windowHeight);
     Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
     Transform BottomHudCenterTransform(int windowWidth, int windowHeight);

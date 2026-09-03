@@ -17,12 +17,11 @@ constexpr float kLeftBandEnd = 152.0f;
 constexpr float kCenterBandStart = 152.0f;
 constexpr float kCenterBandEnd = 488.0f;
 constexpr float kRightBandStart = 488.0f;
-constexpr float kMinimumHudScale = 1.0f;
 // ponytail: 2x HUD ceiling; raise only if native screenshots show unreadable controls.
 constexpr float kMaximumHudScale = 2.0f;
-constexpr float kMinimumPanelScale = 1.0f;
-// ponytail: 2x ceiling; raise only if native screenshots still show unreadable UI.
-constexpr float kMaximumPanelScale = 2.0f;
+// ponytail: 2x ceiling; raise only if native screenshots still show unreadable UI. Public copy of
+// this value lives at UI::Scaling::MaximumPanelScale (UITransform.h) -- RmlUiRuntime.cpp's dp-ratio
+// auto-fit reuses it, so it can't stay anonymous-namespace-only anymore.
 // ponytail: 2.25x dock ceiling; adjust only from rebuilt native screenshots.
 constexpr float kMaximumDockScale = 2.25f;
 constexpr float kMaximumTypographyScale = 2.25f;
@@ -85,12 +84,7 @@ int RoundedBottomHudTop(int windowWidth, int windowHeight)
 
 float CappedUniformScale(int windowWidth, int windowHeight, float maximumScale)
 {
-    const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
-    const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
-    const float contentScale = UI::Scaling::GetWindowContentScale();
-    const float autoScale = std::clamp(std::min(widthScale, heightScale), kMinimumPanelScale * contentScale,
-                                       maximumScale * contentScale);
-    return autoScale * UIScalePercentMultiplier();
+    return UI::Scaling::ViewportFitScale(windowWidth, windowHeight, maximumScale) * UIScalePercentMultiplier();
 }
 
 UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
@@ -128,7 +122,7 @@ UI::Scaling::Transform UI::Scaling::LegacyUiTransform(int windowWidth, int windo
 
 UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHeight)
 {
-    const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumPanelScale);
+    const float scale = CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);
     return {
         scale,
         scale,
@@ -138,14 +132,23 @@ UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHe
     };
 }
 
-float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
+// Pure geometry + WindowContentScale, deliberately NOT including UIScalePercent -- every caller
+// that needs the user's preference multiplies UIScalePercentMultiplier() in itself, once, so it's
+// never double-counted (docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section).
+// The one shared "fit the reference size to the real window, clamped" core, now used by both the
+// legacy UI::Scaling transforms (via CappedUniformScale/BottomHudScale below) and RmlUiRuntime.cpp's
+// dp-ratio auto-fit -- previously two near-identical private copies of this same formula.
+float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float maximumScale)
 {
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
     const float contentScale = GetWindowContentScale();
-    const float autoScale = std::clamp(std::min(widthScale, heightScale), kMinimumHudScale * contentScale,
-                                       kMaximumHudScale * contentScale);
-    return autoScale * UIScalePercentMultiplier();
+    return std::clamp(std::min(widthScale, heightScale), 1.0f * contentScale, maximumScale * contentScale);
+}
+
+float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
+{
+    return ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale) * UIScalePercentMultiplier();
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudLeftTransform(int windowWidth, int windowHeight)
@@ -343,7 +346,7 @@ int UI::Scaling::FontPointSize(FontRole role, const Transform& transform)
     const FontPointRange range = GetFontPointRange(role);
     const float typographyScale = transform.typographyScale / GetWindowContentScale();
     const float growth =
-        std::clamp((typographyScale - kMinimumPanelScale) / (kMaximumTypographyScale - kMinimumPanelScale), 0.0f, 1.0f);
+        std::clamp((typographyScale - 1.0f) / (kMaximumTypographyScale - 1.0f), 0.0f, 1.0f);
     const float pointSize = static_cast<float>(range.minimum) +
                             static_cast<float>(range.maximum - range.minimum) * growth;
     return static_cast<int>(std::lround(pointSize));
