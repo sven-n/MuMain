@@ -90,40 +90,61 @@ namespace UI::RmlBridge
         // no var()/custom-property mechanism, so a themed .rcss authored with token(name) markers
         // needs its tokens resolved before RmlUi ever sees the text. RmlUi's own
         // XMLNodeHandlerHead supports an inline <style> block in <head>, handled identically to an
-        // external <link type="text/rcss"> for cascade purposes -- so this finds the RML's
-        // <link>, reads the .rcss file it points at, and (only if that file actually contains a
-        // token(...) marker) splices the substituted text in as <style> instead.
+        // external <link type="text/rcss"> for cascade purposes -- so this finds every <link> in
+        // the RML's <head> (every migrated document links at least two: base.rcss, then its own
+        // <name>.rcss), reads the .rcss file each one points at, and (only for a file that
+        // actually contains a token(...) marker) splices the substituted text in as <style>
+        // instead, in the same position, preserving cascade order.
+        //
+        // 2026-09-04 fix: this used to std::regex_search for a single match and return after
+        // handling it -- correct for a document with exactly one stylesheet link, silently wrong
+        // for the (universal, in practice) two-link case: base.rcss's link is first in every
+        // document's <head>, so it was the only one ever substituted, and every window's own
+        // <name>.rcss -- where nearly every token(...) call actually lives -- was left as a
+        // literal, unsubstituted <link>, sending literal text like `token(font-body)`/
+        // `token(semantic-warning)` straight to RmlUi's parser. Symptom: labels/tooltips/button
+        // text silently failing to render across every migrated window, not just login. Iterating
+        // every <link> match fixes this for any number of stylesheet links, not just two.
         //
         // Content-driven, not theme-name-driven, on purpose (architecture-principles.md §30 --
         // same reasoning as ThemeProvidesOwnIconChrome() above): a stylesheet with no token(...)
-        // marker leaves the <link> completely untouched, the exact code path every window already
-        // took before this existed. `legacy` (and any future non-tokenized file) never enters the
-        // substitution branch at all, rather than being special-cased by name.
+        // marker leaves its own <link> completely untouched, the exact code path every window
+        // already took before this existed. `legacy` (and any future non-tokenized file) never
+        // enters the substitution branch at all, rather than being special-cased by name.
         std::string InlineTokenizedStylesheet(const std::string& rmlText, const std::string& resolvedRmlPath)
         {
             // Custom raw-string delimiter (R"re(...)re") -- the pattern's own text contains `)"`
             // (the capture group closing right before a literal quote), which would otherwise be
             // misread as the raw string's own terminator.
             static const std::regex linkPattern(R"re(<link\s+type="text/rcss"\s+href="([^"]+)"\s*/>)re");
-            std::smatch linkMatch;
-            if (!std::regex_search(rmlText, linkMatch, linkPattern))
-                return rmlText; // no stylesheet link -- nothing to do, let the document load as-is
 
-            const std::string rcssPath = DirectoryOf(resolvedRmlPath) + linkMatch[1].str();
-            std::ifstream rcssFile(rcssPath, std::ios::binary);
-            if (!rcssFile)
-                return rmlText; // can't read it here -- let RmlUi's own <link> loading surface the real error
+            std::string out;
+            out.reserve(rmlText.size());
+            size_t lastEnd = 0;
+            for (auto it = std::sregex_iterator(rmlText.begin(), rmlText.end(), linkPattern);
+                 it != std::sregex_iterator(); ++it)
+            {
+                const std::smatch& m = *it;
+                out.append(rmlText, lastEnd, static_cast<size_t>(m.position(0)) - lastEnd);
 
-            std::ostringstream rcssBuffer;
-            rcssBuffer << rcssFile.rdbuf();
-            const std::string rcssText = rcssBuffer.str();
+                std::string replacement = m.str(0); // default: leave this <link> exactly as authored
+                std::ifstream rcssFile(DirectoryOf(resolvedRmlPath) + m[1].str(), std::ios::binary);
+                if (rcssFile)
+                {
+                    std::ostringstream rcssBuffer;
+                    rcssBuffer << rcssFile.rdbuf();
+                    const std::string rcssText = rcssBuffer.str();
+                    if (rcssText.find("token(") != std::string::npos)
+                        replacement = "<style>" + SubstituteTokens(rcssText) + "</style>";
+                }
+                // If the file can't be read here, replacement stays the original <link> -- let
+                // RmlUi's own <link> loading attempt it and surface the real error, same as before.
 
-            if (rcssText.find("token(") == std::string::npos)
-                return rmlText; // no tokens used -- leave the <link> exactly as authored
-
-            const std::string styleBlock = "<style>" + SubstituteTokens(rcssText) + "</style>";
-            return rmlText.substr(0, linkMatch.position(0)) + styleBlock +
-                rmlText.substr(static_cast<size_t>(linkMatch.position(0) + linkMatch.length(0)));
+                out += replacement;
+                lastEnd = static_cast<size_t>(m.position(0) + m.length(0));
+            }
+            out.append(rmlText, lastEnd, rmlText.size() - lastEnd);
+            return out;
         }
     }
 
