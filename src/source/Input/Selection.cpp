@@ -48,7 +48,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "UI/NewUI/HUD/NewUIGensRanking.h"
-#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Input/UiInputRouter.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern int SelectedCharacter, SelectedNpc, SelectedItem, SelectedOperate;
@@ -320,14 +320,15 @@ void SelectObjects()
 
     const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
         WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
-    // RmlUiRuntime::IsMouseOverUI() added as a 4th gate (2026-08-31, NewUI/HUD RmlUi pilot) --
+    // Core::Input::IsMouseOverUI() added as a 4th gate (2026-08-31, NewUI/HUD RmlUi pilot) --
     // none of the other three flags know about RmlUi-rendered content (CSysMenuWin/COptionWin,
     // already reachable from gameplay via the ESC menu, plus any RmlUi-migrated NewUI-tier HUD
-    // element). Queries RmlUi's own authoritative hit-test state directly, so it stays correct
-    // regardless of how any individual migrated element's legacy CNewUIObj bookkeeping is
-    // positioned -- see docs/rmlui-ui-system/layout-and-scaling.md's CalculateFixedAnchorLayout()
-    // section for why "authoritative state, not a shadow rect" matters here.
-    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse() && !RmlUiRuntime::Instance().IsMouseOverUI())
+    // element). Routes to whichever UI framework is registered as the active input consumer
+    // (UiInputRouter.h -- RmlUiRuntime today), so it stays correct regardless of how any
+    // individual migrated element's legacy CNewUIObj bookkeeping is positioned -- see
+    // docs/rmlui-ui-system/layout-and-scaling.md's CalculateFixedAnchorLayout() section for why
+    // "authoritative state, not a shadow rect" matters here.
+    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {

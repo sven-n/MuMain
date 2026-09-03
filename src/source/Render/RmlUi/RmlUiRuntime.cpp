@@ -105,12 +105,18 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // for free, including Webzen (which had no hook at all before) -- an incidental fix, not
     // something this port set out to change.
     mu::GetRenderer().SetPreSubmitCallback([]() { RmlUiRuntime::Instance().RenderFrame(); });
+
+    // Register as the active UI input consumer (UiInputRouter.h) -- Winmain.cpp's event pump and
+    // gameplay's mouse-gating checks (Selection.cpp, ZzzInterface.cpp) go through the router, not
+    // this concrete type, from this point on.
+    Core::Input::SetUiInputConsumer(this);
 }
 
 void RmlUiRuntime::Destroy()
 {
     if (!m_Context) return;
 
+    Core::Input::SetUiInputConsumer(nullptr);
     mu::GetRenderer().SetPreSubmitCallback(nullptr);
 
     // Rml::Shutdown() releases every context it owns, including m_Context -- do not call

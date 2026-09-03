@@ -7,7 +7,7 @@
 #include "UI/Legacy/UIManager.h"
 #include "UI/Legacy/TextSearch.h"
 #include "Render/Renderer/MuRenderer.h"
-#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Input/UiInputRouter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -2537,9 +2537,9 @@ void Attack(CHARACTER* c)
 {
     const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
         WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
-    // RmlUiRuntime::IsMouseOverUI() added as a 4th gate here too (2026-08-31) -- same rationale as
+    // Core::Input::IsMouseOverUI() added as a 4th gate here too (2026-08-31) -- same rationale as
     // the duplicate check in Input/Selection.cpp's SelectObjects(), kept in sync with it.
-    if ((MouseOnWindow || mouseOnHud || RmlUiRuntime::Instance().IsMouseOverUI()) && MouseLButtonPush)
+    if ((MouseOnWindow || mouseOnHud || Core::Input::IsMouseOverUI()) && MouseLButtonPush)
     {
         MouseRButtonPop = false;
         MouseRButtonPush = false;

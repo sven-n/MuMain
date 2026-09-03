@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "Core/Input/UiInputRouter.h"
 #include <RmlUi/Core/Context.h>
 #include <memory>
 
@@ -13,7 +14,12 @@ struct SDL_Window;
 // registers RenderFrame() as the SDL_GPU renderer's pre-submit callback (see
 // IMuRenderer::SetPreSubmitCallback, MuRenderer.h) -- a true single choke point every frame
 // funnels through regardless of active scene, unlike the RHI-based version's per-Scene hooks.
-class RmlUiRuntime
+//
+// Implements Core::Input::IUiInputConsumer so input-routing call sites (Winmain.cpp's event pump,
+// gameplay's mouse-gating checks) depend on that interface instead of this concrete type -- see
+// UiInputRouter.h. Create()/Destroy() register/clear this instance as the router's active
+// consumer.
+class RmlUiRuntime : public Core::Input::IUiInputConsumer
 {
 public:
     static RmlUiRuntime& Instance();
@@ -50,12 +56,12 @@ public:
     // migrated-window content and still-legacy windows occupy disjoint z-order bands (Phase
     // 0.8's "one contiguous band" approach), wrong if a legacy window ever needs to sit visually
     // on top of migrated RmlUi content. Revisit if that situation arises.
-    bool ProcessSdlEvent(SDL_Event& event, SDL_Window* window);
+    bool ProcessSdlEvent(SDL_Event& event, SDL_Window* window) override;
 
     // Rml::Context::IsMouseInteracting() -- true while the mouse is hovering/pressed over any
     // RmlUi element. Intended as a third click-to-move gate alongside MouseOnWindow (Legacy tier)
     // and g_pNewUISystem->CheckMouseUse() (NewUI tier) at Input/Selection.cpp's world-pick check.
-    bool IsMouseOverUI() const;
+    bool IsMouseOverUI() const override;
 
     Rml::Context* GetContext() const { return m_Context; }
 
