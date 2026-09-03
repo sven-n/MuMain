@@ -35,19 +35,34 @@ public:
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow);
 
-    // Invoked from the RmlUi document's click listeners (see Create()). Polled-and-cleared
-    // exactly like the legacy CButton::IsClick() edge triggers they supplement in
-    // UpdateWhileActive() -- mirrors CLoginWin::RmlClickOk()'s shape.
-    void RmlClickMenu() { m_bRmlMenuClicked = true; }
-    void RmlClickCredit() { m_bRmlCreditClicked = true; }
+    // Invoked from the RmlUi document's click listeners (see Create()) -- act immediately rather
+    // than deferring to UpdateWhileActive() via a polled-and-cleared flag (the shape this used to
+    // mirror, same as CLoginWin::RmlClickOk()). 2026-09-03: found, via a real reproduction (a
+    // credit-button click that visibly did nothing, followed later by an unrelated click on the
+    // menu button that opened the *credits* window instead of the menu -- proof the credit click
+    // itself had registered and just sat unconsumed), that UpdateWhileActive() can go many frames
+    // without running at all: it's gated behind CWin::m_bActive, driven by CUIMng's legacy
+    // click-activation system (list-order hit-testing, deferred one-frame activation -- see
+    // UIMng.cpp/STATUS.md's "Findings worth knowing" entry), which is a fundamentally less
+    // reliable signal than RmlUi's own click event -- this listener already firing IS proof the
+    // click happened, with no need to wait for anything else to agree. Safe to call CUIMng
+    // methods (ShowWin, list mutation) directly here: this fires from
+    // RmlUiRuntime::ProcessSdlEvent(), called from Winmain.cpp's SDL event pump, which always
+    // completes before CUIMng::Update() runs later the same frame -- no concurrent list iteration.
+    void RmlClickMenu() { OpenSysMenu(); }
+    void RmlClickCredit() { OpenCredits(); }
 
 protected:
     void PreRelease();
     void UpdateWhileActive(double dDeltaTick);
 
 private:
-    bool m_bRmlMenuClicked = false;
-    bool m_bRmlCreditClicked = false;
+    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s legacy
+    // m_aBtn[...].IsClick() polling (the redundant CButton companion's own click path -- see this
+    // class's header comment on why the legacy CButtons stay registered).
+    void OpenSysMenu();
+    void OpenCredits();
+
     Rml::ElementDocument* m_pRmlDoc = nullptr;
 };
 

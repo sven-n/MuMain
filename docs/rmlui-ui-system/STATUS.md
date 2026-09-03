@@ -159,6 +159,46 @@ for visibility:
   it, which compiled fine and looked plausible in code review, but meant clicking the current-skill
   slot never visibly opened the grid. Fixed with a correctly-named `IsSkillGridOpen()`. Read what a
   legacy getter actually returns, not just what its name implies, before binding it into a model.
+- **`CWin`/`CUIMng`'s legacy click-activation system could starve `UpdateWhileActive()` for a
+  window's entire clicked-and-held duration — fixed 2026-09-03, predates RmlUi entirely.**
+  `CUIMng::Update()` re-enters `SetActiveWin(pWin)` on every frame `IsLBtnDn()` is true
+  (`Input.cpp` — level-triggered, true for every frame the button stays physically held, not just
+  the press frame), including frames where `pWin` is already the active head. `SetActiveWin()`
+  always deactivates "whatever's currently head" first, even when that's the very window being
+  re-clicked, then only re-arms activation for the *next* frame via a deferred flag
+  (`m_bWinActive`) — so between one frame's redundant deactivation and the next frame's deferred
+  reactivation, `m_bActive` was false every frame of a held click, exactly when `CWin::Update()`
+  (called later the same frame, `UIMng.cpp`) checks it to decide whether to run
+  `UpdateWhileActive()`. Every migrated window's RmlUi click/keyboard consumption lives in
+  `UpdateWhileActive()` — including real `CUITextInputBox` keystroke polling — so this was a
+  systemic gap affecting any window with a Type-1 or Type-2 companion, not one window's bug;
+  surfaced as `CLoginMainWin`'s menu/credit buttons needing repeated clicks before responding.
+  Fixed in the click-processing loop (`UIMng.cpp`) by skipping the redundant `SetActiveWin()` call
+  when the clicked window is already active and already head, making a held click on an
+  already-active window a true no-op instead of an oscillation. Any future window relying on
+  `UpdateWhileActive()` for click/keyboard handling inherits this fix automatically; no per-window
+  changes needed.
+  **Real, but not the full story — see the next entry.** A precise user repro (crediting-clicking
+  did nothing, a later unrelated menu-button click opened *credits* instead) proved RmlUi's click
+  listeners were firing reliably all along; the actual bug was `UpdateWhileActive()` simply not
+  running often enough at all (not just during a held click) to consume the flags before they
+  went stale.
+- **`UpdateWhileActive()`-gated RmlUi click flags can go stale and fire on the wrong button later
+  — fixed 2026-09-03 in `CLoginMainWin`, same pattern still latent elsewhere.** The
+  `m_bRmlXClicked`-flag-set-by-a-listener/consumed-in-`UpdateWhileActive()` pattern (used by
+  `CLoginMainWin`, `CLoginWin`, `CSysMenuWin`, `CCharMakeWin`) defers acting on an RmlUi click to
+  a later poll gated behind `CWin::m_bActive` — but that gate can go many frames without opening
+  at all (the legacy `CUIMng` activation system is a fundamentally less reliable signal than
+  RmlUi's own event), during which multiple flags can accumulate. Since the consumer is an
+  `if/else if` checked in a fixed order, whichever flag is stale-but-still-true wins over a
+  genuinely fresh one the *next* time it finally runs — observed exactly as "click credit, nothing
+  happens; click menu later, credits open instead." Fixed in `CLoginMainWin` by having
+  `RmlClickMenu()`/`RmlClickCredit()` act immediately in the RmlUi event callback instead of
+  setting a flag for `UpdateWhileActive()` to poll later — confirmed safe since
+  `RmlUiRuntime::ProcessSdlEvent()` (where these fire) runs from Winmain's SDL event pump, always
+  before `CUIMng::Update()` the same frame. `CLoginWin`/`CSysMenuWin`/`CCharMakeWin` still use the
+  deferred-flag shape and likely carry the same latent bug, just not yet reported for them — same
+  fix (act in the callback, don't defer through `UpdateWhileActive()`) applies if/when it surfaces.
 
 ## Known gaps against the principles (honest status, not yet built)
 

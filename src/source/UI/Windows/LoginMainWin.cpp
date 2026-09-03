@@ -12,7 +12,6 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Scaling/UITransform.h"
-#include "Data/GameConfig/GameConfig.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
@@ -115,14 +114,12 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     // already treats the legacy CButton and RmlUi's own click listener as redundant -- see
     // UpdateWhileActive()'s `||`), but the same fix is cheap and correct to apply here too.
     //
-    // Reads the WindowWidth/WindowHeight globals (ZzzOpenglUtil.cpp), not
-    // CInput::Instance().GetScreenWidth()/GetScreenHeight() -- see LoginWin.cpp's
-    // LoginUIScaleRatio() for why: a real, screenshot-confirmed bug in that window traced back to
-    // CInput's own copy of the screen size not reliably matching WindowWidth/WindowHeight (the
-    // exact values RmlUiRuntime::OnResize() uses), fixed there and proactively fixed here too.
-    const float uiScale = static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f *
-        UI::Scaling::ViewportFitScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
-                                      UI::Scaling::MaximumPanelScale);
+    // UI::Scaling::CompanionRatio() (UITransform.cpp) is the single shared implementation of this
+    // formula -- pass the WindowWidth/WindowHeight globals (ZzzOpenglUtil.cpp), not
+    // CInput::Instance().GetScreenWidth()/GetScreenHeight(): a real, screenshot-confirmed bug in
+    // LoginWin.cpp traced back to CInput's own copy of the screen size not reliably matching
+    // WindowWidth/WindowHeight (the exact values RmlUiRuntime::OnResize() uses).
+    const float uiScale = UI::Scaling::CompanionRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     const int creditWidth = static_cast<int>(std::lround(m_aBtn[LMW_BTN_CREDIT].GetWidth() * uiScale));
 
     m_aBtn[LMW_BTN_MENU].SetPosition(nXCoord, nYCoord);
@@ -163,22 +160,29 @@ void CLoginMainWin::Show(bool bShow)
 
 void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
 {
+    // RmlUi-triggered clicks no longer come through here -- see RmlClickMenu()/RmlClickCredit()'s
+    // header comment. This is now only the legacy CButton companion's own (still m_bActive-gated)
+    // click-detection path.
+    if (m_aBtn[LMW_BTN_MENU].IsClick())
+        OpenSysMenu();
+    else if (m_aBtn[LMW_BTN_CREDIT].IsClick())
+        OpenCredits();
+}
+
+void CLoginMainWin::OpenSysMenu()
+{
     CUIMng& rUIMng = CUIMng::Instance();
+    rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
+    rUIMng.SetSysMenuWinShow(true);
+}
 
-    if (m_aBtn[LMW_BTN_MENU].IsClick() || m_bRmlMenuClicked)
-    {
-        m_bRmlMenuClicked = false;
-        rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
-        rUIMng.SetSysMenuWinShow(true);
-    }
-    else if (m_aBtn[LMW_BTN_CREDIT].IsClick() || m_bRmlCreditClicked)
-    {
-        m_bRmlCreditClicked = false;
-        SocketClient->ToConnectServer()->SendServerListRequest();
+void CLoginMainWin::OpenCredits()
+{
+    CUIMng& rUIMng = CUIMng::Instance();
+    SocketClient->ToConnectServer()->SendServerListRequest();
 
-        rUIMng.ShowWin(&rUIMng.m_CreditWin);
+    rUIMng.ShowWin(&rUIMng.m_CreditWin);
 
-        ::StopMp3(MUSIC_MAIN_THEME);
-        ::PlayMp3(MUSIC_MUTHEME);
-    }
+    ::StopMp3(MUSIC_MAIN_THEME);
+    ::PlayMp3(MUSIC_MUTHEME);
 }

@@ -247,11 +247,21 @@ void CUIMng::CreateLoginScene()
 
     m_CharInfoBalloonMng.Release();
 
-    CInput& rInput = CInput::Instance();
-
+    // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
+    // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
+    // the screen size isn't guaranteed to already match WindowWidth/WindowHeight (the exact
+    // values every migrated window's own Create()/SetPosition() now uses internally). This
+    // function is the one place that positions m_LoginWin and m_LoginMainWin *relative to each
+    // other* -- their legacy hit-test boxes (CursorInWin(WA_ALL), Win.cpp) sit only ~11px apart
+    // vertically at the reference resolution, so a drift between this function's source of screen
+    // size and each window's own internal one can close that gap into an overlap, letting
+    // m_LoginWin (checked first in m_WinList) silently win clicks meant for m_LoginMainWin's
+    // menu/credit buttons -- RmlUi's own click listener still fires correctly regardless (it has
+    // no such z-order ambiguity), but CWin::Update()'s UpdateWhileActive() gate never runs for
+    // m_LoginMainWin as a result, so the click has no visible effect.
     m_MsgWin.Create();
     m_WinList.AddHead(&m_MsgWin);
-    m_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2, (rInput.GetScreenHeight() - 113) / 2);
+    m_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
@@ -262,18 +272,18 @@ void CUIMng::CreateLoginScene()
     m_LoginMainWin.Create();
     m_WinList.AddHead(&m_LoginMainWin);
 
-    int nBaseY = int(567.0f / 600.0f * (float)rInput.GetScreenHeight());
+    int nBaseY = int(567.0f / 600.0f * static_cast<float>(WindowHeight));
     m_LoginMainWin.SetPosition(30, nBaseY - m_LoginMainWin.GetHeight() - 11);
 
     m_ServerSelWin.Create();
     m_WinList.AddHead(&m_ServerSelWin);
-    m_ServerSelWin.SetPosition((rInput.GetScreenWidth() - m_ServerSelWin.GetWidth()) / 2,
-                               (rInput.GetScreenHeight() - m_ServerSelWin.GetHeight()) / 2);
+    m_ServerSelWin.SetPosition((static_cast<int>(WindowWidth) - m_ServerSelWin.GetWidth()) / 2,
+                               (static_cast<int>(WindowHeight) - m_ServerSelWin.GetHeight()) / 2);
 
     m_LoginWin.Create();
     m_WinList.AddHead(&m_LoginWin);
-    m_LoginWin.SetPosition((rInput.GetScreenWidth() - m_LoginWin.GetWidth()) / 2,
-                           (rInput.GetScreenHeight() - m_LoginWin.GetHeight()) * 2 / 3);
+    m_LoginWin.SetPosition((static_cast<int>(WindowWidth) - m_LoginWin.GetWidth()) / 2,
+                           (static_cast<int>(WindowHeight) - m_LoginWin.GetHeight()) * 2 / 3);
 
     m_CreditWin.Create();
     m_WinList.AddHead(&m_CreditWin);
@@ -721,7 +731,22 @@ void CUIMng::Update(double dDeltaTick)
 
             if (pWin->CursorInWin(WA_ALL))
             {
-                SetActiveWin(pWin);
+                // IsLBtnDn() is level-triggered (true every frame the button stays physically
+                // held, Input.cpp), so without this guard, holding a click on a window that's
+                // already the active head re-enters SetActiveWin() every single frame. That call
+                // always deactivates "whatever's currently head" first (its own pBeforeActWin
+                // step) even when that's the very window being re-clicked, then only re-arms
+                // activation for the NEXT frame via the deferred m_bWinActive flag -- so between
+                // this frame's redundant deactivation and next frame's deferred reactivation,
+                // m_bActive was false for every frame of a held click. Update(), called later this
+                // same frame below, gates UpdateWhileActive() on m_bActive -- so click/keyboard
+                // consumption for the clicked window (every migrated window's RmlUi companion
+                // state, real CUITextInputBox keystroke polling) was silently starved for the
+                // click's entire held duration, only catching up once the button was released and
+                // this loop stopped re-triggering the cycle. Skipping the call when the window is
+                // already active and already head makes it a true no-op instead of a bug.
+                if (m_WinList.GetHead() != pWin || !pWin->IsActive())
+                    SetActiveWin(pWin);
                 bWinClick = true;
                 break;
             }
