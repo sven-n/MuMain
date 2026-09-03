@@ -49,20 +49,17 @@ namespace
     // CUITextInputBox placement, the checkbox/OK/Cancel legacy CButton companions) must scale by
     // this to stay pixel-for-pixel aligned with login.rcss's own now-dp values, the same lockstep
     // requirement CharSelMainWin.cpp/LoginMainWin.cpp already established for their own windows.
-    //
-    // Deliberately reads the WindowWidth/WindowHeight globals (ZzzOpenglUtil.cpp, set from
-    // Winmain.cpp's HandleWindowResize() -- the exact same values RmlUiRuntime::OnResize() is
-    // called with), NOT CInput::Instance().GetScreenWidth()/GetScreenHeight(): a real bug, found
-    // via a screenshot showing the panel rendering off-center and the username text/caret
-    // floating outside the input box entirely -- CInput's own copy of the screen size is a
-    // separate value that isn't guaranteed to already equal WindowWidth/WindowHeight at the
-    // moment this runs (confirmed by the visible drift; not fully root-caused beyond that, but
-    // reading the same global RmlUi itself uses removes any possibility of the two disagreeing).
+    // UI::Scaling::CompanionRatio() (UITransform.cpp) is the single shared implementation of this
+    // formula (extracted 2026-09-03 after this exact function, CharSelMainWin.cpp's
+    // GetUIScaleRatio(), and LoginMainWin.cpp's inline version had each independently hand-copied
+    // it) -- it's the reason to keep reading the WindowWidth/WindowHeight globals here rather than
+    // CInput::Instance().GetScreenWidth()/GetScreenHeight(): a real bug, found via a screenshot
+    // showing the panel rendering off-center and the username text/caret floating outside the
+    // input box entirely, traced to CInput's own copy of the screen size not reliably matching
+    // WindowWidth/WindowHeight (the exact values RmlUiRuntime::OnResize() uses).
     float LoginUIScaleRatio()
     {
-        return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f *
-            UI::Scaling::ViewportFitScale(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight),
-                                          UI::Scaling::MaximumPanelScale);
+        return UI::Scaling::CompanionRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     }
 
     int ScaledOffset(int value, float ratio)

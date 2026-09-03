@@ -170,6 +170,24 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
     return minBound + std::pow(t, kFitDampingExponent) * range;
 }
 
+// Combined ratio every legacy "Type-2 companion" object -- a real, functional non-RmlUi widget
+// (a CUITextInputBox, or a CButton scaled to match a dp-sized RmlUi sibling) kept in sync with a
+// migrated window's now-RCSS-owned layout -- must scale its own fixed reference-pixel offsets by,
+// to stay pixel-for-pixel aligned with the RmlUi element it's shadowing. Same composition
+// RmlUiRuntime.cpp's ApplyUIScale() uses for RmlUi's own dp ratio (UIScalePercent x
+// ViewportFitScale(MaximumPanelScale)) -- extracted 2026-09-03 as the single shared implementation
+// of a formula that had been hand-copied per window (CharSelMainWin.cpp's GetUIScaleRatio(),
+// LoginMainWin.cpp's inline version, LoginWin.cpp's LoginUIScaleRatio()); the same staleness bug
+// (reading CInput::Instance().GetScreenWidth()/GetScreenHeight() instead of the WindowWidth/
+// WindowHeight globals RmlUiRuntime::OnResize() actually uses) got independently reintroduced and
+// re-fixed in more than one of those copies before this existed. Callers must pass
+// WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not a separate copy of the screen size --
+// see docs/rmlui-ui-system/layout-and-scaling.md's "2026-09-03" section.
+float UI::Scaling::CompanionRatio(int windowWidth, int windowHeight)
+{
+    return CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);
+}
+
 float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
 {
     return ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale) * UIScalePercentMultiplier();

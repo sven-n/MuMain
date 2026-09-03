@@ -73,6 +73,7 @@ namespace UI::Scaling
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
     float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
+    float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
     Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
     Transform BottomHudCenterTransform(int windowWidth, int windowHeight);

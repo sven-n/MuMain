@@ -133,10 +133,10 @@ namespace UI::CharacterSelection
     // SelectedHero to -1 *before* DeleteCharacter() ran -- so Delete silently no-op'd instead of
     // opening the confirmation prompt. uiScale must be the same combined ratio RmlUi's own `dp`
     // unit uses (Rml::Context::SetDensityIndependentPixelRatio(), RmlUiRuntime.cpp's
-    // ApplyUIScale()) -- CharSelMainWin.cpp's GetUIScaleRatio(screenWidth, screenHeight) computes
-    // it (UIScalePercent times UI::Scaling::ViewportFitScale(), not UIScalePercent alone since
-    // 2026-09-03), so these rects always match the RmlUi buttons pixel-for-pixel regardless of
-    // screen resolution or UI-scale setting.
+    // ApplyUIScale()) -- UI::Scaling::CompanionRatio(screenWidth, screenHeight) (UITransform.cpp)
+    // computes it (UIScalePercent times UI::Scaling::ViewportFitScale(), not UIScalePercent alone
+    // since 2026-09-03), so these rects always match the RmlUi buttons pixel-for-pixel regardless
+    // of screen resolution or UI-scale setting.
     inline Layout CalculateFixedAnchorLayout(int screenWidth, int screenHeight, float uiScale)
     {
         const int buttonWidth = Scale(NativeButtonWidth, uiScale);

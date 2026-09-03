@@ -118,10 +118,18 @@ only remaining roles are: a window's own genuine screen placement (still legitim
 — `#panel`'s `left`/`top`, not its internal layout), keeping a real non-RmlUi companion object
 (a `CButton` kept for click-detection redundancy, a `CUITextInputBox` for real text entry) in sync
 with what RCSS decided by scaling the same fixed offsets by the same combined ratio RmlUi's own
-`dp` ratio uses (`GameConfig::GetUIScalePercent() × UI::Scaling::ViewportFitScale()`) — see
-`CharSelMainWin.cpp`'s `GetUIScaleRatio()`, `LoginMainWin.cpp`'s inline version, and
-`LoginWin.cpp`'s `LoginUIScaleRatio()` for the same pattern applied three times — and (one case)
-`char_make`'s deliberate `#panel` exception in the table above. If a window with a real Type-2 companion (a functional `CUITextInputBox`, not just a redundant
+`dp` ratio uses (`GameConfig::GetUIScalePercent() × UI::Scaling::ViewportFitScale()`) —
+`UI::Scaling::CompanionRatio(windowWidth, windowHeight)` (`UITransform.cpp`) is the single shared
+implementation of this, extracted 2026-09-03 after `CharSelMainWin.cpp`'s `GetUIScaleRatio()`,
+`LoginMainWin.cpp`'s inline version, and `LoginWin.cpp`'s `LoginUIScaleRatio()` had each
+independently hand-copied it — and the exact same staleness bug (reading
+`CInput::Instance().GetScreenWidth()/GetScreenHeight()` instead of the `WindowWidth`/`WindowHeight`
+globals RmlUi itself uses) got reintroduced and re-fixed in more than one of those copies before
+this existed. `LoginWin.cpp` still keeps its own thin zero-arg `LoginUIScaleRatio()` wrapper for
+its two call sites' convenience, but it just forwards to `UI::Scaling::CompanionRatio()` now —
+`CharSelMainWin.cpp`/`LoginMainWin.cpp` call the shared function directly. The formula itself
+lives in exactly one place either way. See also `char_make`'s deliberate `#panel` exception in the
+table above. If a window with a real Type-2 companion (a functional `CUITextInputBox`, not just a redundant
 click-detection `CButton`) is ever made draggable, `UI::RmlBridge::MakeDraggable()`'s existing
 `OnPanelMoved` callback (`RmlDraggable.h` — zero live callers today) is the right hook for this,
 but whatever gets wired into it will need to include the same combined-ratio scaling this section
