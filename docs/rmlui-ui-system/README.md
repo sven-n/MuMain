@@ -55,10 +55,17 @@ slot causes a real crash on scene re-entry.
 
 ## Frame lifecycle: RmlUi renders last — via two seams
 
-**RmlUi always renders after all other content for that frame.** This is a z-order/compositing
-invariant, not incidental — get it wrong and an opaque RmlUi panel covers legacy content (cursor,
-text) that's supposed to stay visible on top of it. Two callbacks on `IMuRenderer`, registered
-once in `Winmain.cpp`, make this work:
+**RmlUi always renders after all other content for that frame, today.** Get this wrong and an
+opaque RmlUi panel covers legacy content (cursor, text) that's supposed to stay visible on top of
+it — so treat it as a real invariant of the *current* integration when building anything that
+touches frame ordering. **But it's an integration choice, not a proven RmlUi requirement**
+(corrected 2026-09-04, see `STATUS.md`'s "Known gaps") — `RmlUiRuntime::Render()` fires from
+exactly one fixed pre-submit callback below; nobody's investigated whether RmlUi's own rendering
+could be interleaved with legacy content instead (multiple contexts, or a callback hook legacy
+content renders through at the right point in RmlUi's own z-order). That question is *why*
+`NewUIMainFrameWindow.cpp` still has two C++ call sites that pick between an RmlUi fill and a
+legacy one based on paint order — see `STATUS.md` for the open investigation. Two callbacks on
+`IMuRenderer`, registered once in `Winmain.cpp`, make today's ordering work:
 
 - **`SetPreSubmitCallback`** — fires after the frame's game/legacy-2D content is recorded onto
   the command buffer but before submit. `RmlUiRuntime` registers this once in `Create()`; this is
@@ -97,18 +104,26 @@ clicks via a plain `Rml::Element::AddEventListener` + a small self-owning listen
 ## Theming
 
 A theme is a **folder name**, not a closed enum — adding one is a drop-a-folder operation, no
-recompile. `UI::RmlBridge::LoadThemedDocument()` (`UI/RmlBridge/RmlTheme.h/.cpp`) keeps the RML
-shared and un-duplicated across themes: it reads a window's `.rml` text once, then calls
-`Rml::Context::LoadDocumentFromMemory(text, syntheticThemeSourceUrl)` — RmlUi resolves the
-document's `<link href="...">` against that synthetic URL, so `login.rml` (unchanged) ends up
-pulling `themes/<active-theme>/login.rcss` without any per-theme RML duplication.
+recompile. `UI::RmlBridge::LoadThemedDocument()` (`UI/RmlBridge/RmlTheme.h/.cpp`) reads a window's
+`.rml` text once, then calls `Rml::Context::LoadDocumentFromMemory(text,
+syntheticThemeSourceUrl)` — RmlUi resolves the document's `<link href="...">` against that
+synthetic URL, so `login.rml` ends up pulling `themes/<active-theme>/login.rcss`.
 
-**Exactly two themes exist and are meant to stay developed side by side: `legacy`** (real sprite
-art, pixel-parity with the original look) **and `modern`** (flat/programmatic) — whenever a
-window's RmlUi content changes or a bug is fixed in one theme, update the other theme's RCSS in
-the same pass, not as a follow-up. Shared cross-window rules live in `themes/<name>/base.rcss`
-(`.btn`, `.checkbox-box`, `#backdrop`, `.hidden`, the mandatory `body { pointer-events: none; }`
-reset — see [Gotchas](#gotchas) below).
+**Corrected 2026-09-04**: this used to say the RML itself always stays "shared and un-duplicated
+across themes" — that's the common case, not a hard rule. `legacy`'s RML+RCSS pair is the
+canonical reference; any theme (`modern` included) is expected to fork the RML entirely, not just
+restyle it in RCSS, the moment it needs genuinely different structure — `main_frame.rml` already
+does this. See **[Theming & Modding](theming-and-modding.md)**'s corrected Core Principle section
+for the full policy, including known debt (three files still have theme-specific classes wrongly
+baked into what should be the shared file) and the drift-check tooling this doesn't have yet.
+
+**Two themes are currently built: `legacy`** (real sprite art, pixel-parity with the original
+look) **and `modern`** (flat/programmatic) — whenever a window's RmlUi content changes or a bug is
+fixed in one, update the other's RCSS in the same pass, not as a follow-up. These two exist to
+*validate* the architecture supports arbitrary themes, not as a permanent ceiling — see
+`STATUS.md`'s corrected Custom/Test-theme entry. Shared cross-window rules live in
+`themes/<name>/base.rcss` (`.btn`, `.checkbox-box`, `#backdrop`, `.hidden`, the mandatory `body {
+pointer-events: none; }` reset — see [Gotchas](#gotchas) below).
 
 Full mechanism, the step-by-step guide for adding a theme, and the modding constraints (image
 format, scaling, positioning ownership) are in **[Theming & Modding](theming-and-modding.md)**.
@@ -182,7 +197,7 @@ open on purpose.
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
 | Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h) |
-| Migrated windows (`CNewUIObj` tier) | [`CMuHelperBar`](../../src/source/UI/NewUI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/NewUI/HUD/BuffStrip.h) — pilots only, see [newui-tier-adapter.md](newui-tier-adapter.md) |
+| Migrated windows (`CNewUIObj` tier) | [`CMuHelperBar`](../../src/source/UI/NewUI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/NewUI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/NewUI/HUD/NewUIMainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status

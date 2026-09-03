@@ -18,8 +18,13 @@ at this tier). This doc is the pattern extracted from both; expect it to keep fi
 
 Every window migrated before this was `CWin`-tier: `CWin::Create(w, h, -2)` (opaque-nothing
 sentinel), `CUIMng` owns the window list, `Rml::Context::IsMouseInteracting()`'s absence from
-`CUIMng::IsCursorOnUI()` was never an issue because that check already existed and just needed the
-right rect to stay in sync (see `layout-and-scaling.md`'s `CalculateFixedAnchorLayout()` story).
+`CUIMng::IsCursorOnUI()` didn't need a *new* mechanism added the way this tier did — that check
+already existed and just needed the right rect to stay in sync (see `layout-and-scaling.md`'s
+`CalculateFixedAnchorLayout()` story). **"Just needed to stay in sync" undersold how hard that
+actually is — corrected 2026-09-04**: `CursorInWin()`'s rect going stale is exactly the mechanism
+behind four separate confirmed bugs in this same `CWin` tier (`STATUS.md`'s "three parallel
+input-tracking systems" finding) — the *comparison* below (this tier needed a new flag,
+`CWin`-tier didn't) is still accurate, but don't read "already existed" as "already reliable."
 `UI/NewUI` has none of that: a different base class (`CNewUIObj`, not `CWin`), a different manager
 (`CNewUIManager`, not `CUIMng`), and — critically — it's the tier that renders during `MAIN_SCENE`
 (actual gameplay), which had never run any RmlUi content through its input-gating path before this

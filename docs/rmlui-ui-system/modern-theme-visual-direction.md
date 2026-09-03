@@ -273,9 +273,10 @@ Land in two passes, per the standing "audit → tokens → retrofit" sequencing:
 Stays entirely inside `modern`. Do not modify `legacy` to match. Both themes continue sharing the
 same RML/component structure — this document only constrains what `modern`'s own RCSS values are,
 per the existing `Unified Components → {Legacy Theme, Modern Theme}` split
-(`architecture-principles.md` §13, §29). This is **not** a third theme — the "only `legacy` and
-`modern`, kept side by side" standing rule (`README.md`, `theming-and-modding.md`) is unchanged;
-this is `modern`'s own visual system maturing, not a new option next to it.
+(`architecture-principles.md` §13, §29). This is **not** a third theme — only `legacy` and
+`modern` are currently built (`README.md`, `theming-and-modding.md` — see the latter's corrected
+framing, 2026-09-04, for why that's not a permanent ceiling); this document is `modern`'s own
+visual system maturing, not a new option next to it.
 
 ## Acceptance criteria
 
