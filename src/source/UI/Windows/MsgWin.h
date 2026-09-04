@@ -14,7 +14,7 @@ namespace Rml { class ElementDocument; }
 
 // RmlUi migration: the generic message/confirm dialog, following the same hybrid CWin+RmlUi
 // pattern as CLoginWin/CCharMakeWin/CCharSelMainWin. Shown from both LOG_IN_SCENE and
-// CHARACTER_SCENE (CUIMng::CreateLoginScene()/CreateCharacterScene() both Create() it;
+// CHARACTER_SCENE (CSceneUICoordinator::CreateLoginScene()/CreateCharacterScene() both Create() it;
 // CreateMainScene() never does -- a pre-existing characteristic, not something this port changes
 // or needs to cover).
 //
@@ -26,7 +26,7 @@ namespace Rml { class ElementDocument; }
 // SEASON3B::CNewUIObj. Previously, CWin::Create() spanning the full screen was what made
 // CUIMng::IsCursorOnUI() report true for any cursor position while this dialog was shown --
 // UpdateMouseEvent() below now does that job directly (unconditionally claims the click while
-// shown, no rect check needed), and CUIMng::Update() folds new-style claims into m_bCursorOnUI
+// shown, no rect check needed), and CSceneUICoordinator::Update() folds new-style claims into m_bCursorOnUI
 // the same way it already folds them into the legacy click-walk skip. A modal message box
 // genuinely swallows every click no matter how imprecisely the legacy CButton bookkeeping below
 // lines up with the RmlUi visuals -- unlike CCharSelMainWin, this window has no legitimate

@@ -19,7 +19,6 @@
 #include "UI/Legacy/UIControls.h"
 #include "UI/Legacy/UIMapName.h"	// rozy
 #include "Core/Time/Timer.h"
-#include "UI/Legacy/UIMng.h"
 #include "LoadingScene.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 

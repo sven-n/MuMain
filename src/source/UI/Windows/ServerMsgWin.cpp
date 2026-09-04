@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "ServerMsgWin.h"
 #include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/UsefulDef.h"
 
@@ -47,7 +47,7 @@ void CServerMsgWin::Create()
     ::memset(m_aszMsg, 0, sizeof(wchar_t) * SMW_MSG_LINE_MAX * SMW_MSG_ROW_MAX);
     m_nMsgLine = 0;
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SERVER_MESSAGE, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SERVER_MESSAGE, this);
     Show(false);
 }
 

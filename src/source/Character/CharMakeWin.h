@@ -84,7 +84,7 @@ public:
     // activation system doesn't reliably grant on a timely basis. Confirmed safe to call straight
     // into the action here for the same reason as CLoginMainWin's fix: this fires from
     // RmlUiRuntime::ProcessSdlEvent(), called from Winmain's SDL event pump, always before
-    // CUIMng::Update() runs the same frame.
+    // CSceneUICoordinator::Update() runs the same frame.
     void RmlClickJob(int nClassIndex);
     void RmlClickOk() { SubmitCreateCharacter(); }
     void RmlClickCancel() { CloseDialog(); }

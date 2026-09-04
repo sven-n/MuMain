@@ -21,7 +21,6 @@
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Camera/CameraState.h"
 
-#include "UI/Legacy/UIMng.h"
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
 #include "UI/NewUI/NewUISystem.h"

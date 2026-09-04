@@ -18,7 +18,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/w_PetProcess.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
@@ -71,7 +71,7 @@ void StartGame()
         }
 
         if (CTLCODE_01BLOCKCHAR & CharactersClient[SelectedHero].CtlCode)
-            CUIMng::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
+            CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
         else
         {
             CharacterAttribute->Level = CharactersClient[SelectedHero].Level;
@@ -105,7 +105,7 @@ void CreateCharacterScene()
     CharacterView.Object.Kind = 0;
 
     SelectedHero = -1;
-    CUIMng::Instance().CreateCharacterScene();
+    CSceneUICoordinator::Instance().CreateCharacterScene();
 
     ClearInventory();
     CharacterAttribute->SkillNumber = 0;
@@ -192,7 +192,7 @@ void NewMoveCharacterScene()
 #endif
 
     CInput& rInput = CInput::Instance();
-    CUIMng& rUIMng = CUIMng::Instance();
+    CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
 
     if (rInput.IsKeyDown(VK_RETURN))
     {
@@ -208,7 +208,7 @@ void NewMoveCharacterScene()
             ::StartGame();
         }
     }
-    // ESC menu toggle is handled by CUIMng::Update()
+    // ESC menu toggle is handled by CSceneUICoordinator::Update()
 
     // Core::Input::IsMouseOverUI() added as a 2nd gate (2026-09-04, STATUS.md's "three parallel
     // input-tracking systems" finding) -- IsCursorOnUI() alone runs on CCharSelMainWin's own
@@ -319,7 +319,7 @@ static void RenderCharacterScene3D()
 
     // Core::Input::IsMouseOverUI() added as a 2nd gate here too (2026-09-04) -- same rationale as
     // the check in Update() above.
-    if (!CUIMng::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
+    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();
 
     RenderBlurs();

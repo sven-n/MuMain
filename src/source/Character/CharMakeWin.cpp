@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "CharMakeWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -249,7 +249,7 @@ void CCharMakeWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_MAKE, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_MAKE, this);
 
     UpdateDisplay();
     Show(false);
@@ -522,7 +522,7 @@ void CCharMakeWin::RequestCreateCharacter()
     if (g_iChatInputType == 1)
         g_pSingleTextInputBox->GetText(InputText[0]);
 
-    CUIMng& rUIMng = CUIMng::Instance();
+    CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
 
     const std::wstring characterName = InputText[0];
 

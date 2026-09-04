@@ -33,10 +33,11 @@ namespace Rml { class ElementDocument; }
 // phase, strictly before RmlUiRuntime's SetPreSubmitCallback fires later the same frame -- see
 // docs/rmlui-ui-system/README.md's frame-lifecycle section.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md), Phase 3 -- was never a CWin (CUIMng
-// drove it via a direct, hardcoded call rather than through any list), but registers with
-// CUIMng::GetNewStyleMng() the same way every migrated CWin does, so Phase 4 can delete CUIMng
-// with zero hardcoded per-window calls left. Most of the INewUIBase surface below is thin/inert
+// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md), Phase 3 -- was never a CWin (CUIMng,
+// since renamed to CSceneUICoordinator in Phase 4, drove it via a direct, hardcoded call rather
+// than through any list), but registers with CSceneUICoordinator::GetNewStyleMng() the same way
+// every migrated CWin does, so CSceneUICoordinator has zero hardcoded per-window calls left. Most
+// of the INewUIBase surface below is thin/inert
 // for this class -- it has no interaction and no shown-vs-active distinction to make (see each
 // override's own comment) -- registering it is about uniformity for Phase 4, not new behavior.
 class CCharInfoBalloonMng : public SEASON3B::CNewUIObj

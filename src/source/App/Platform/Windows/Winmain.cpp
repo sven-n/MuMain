@@ -72,7 +72,7 @@
 #endif
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "Character/CharMakeWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
@@ -504,7 +504,7 @@ void DestroyWindow()
     g_pNewUISystem->Release();
     g_pRenderText->Release();
 
-    CUIMng::Instance().Release();
+    CSceneUICoordinator::Instance().Release();
 
     //. release font handle
     if (g_hFont)
@@ -1826,7 +1826,7 @@ void UpdateResolutionDependentSystems()
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.
-    CUIMng::Instance().RepositionSceneUI();
+    CSceneUICoordinator::Instance().RepositionSceneUI();
 }
 
 static void ShutdownRuntime(std::thread& cpuUsageRecorder)
@@ -2129,10 +2129,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // this composition of game-specific overlay content belongs at the app tier, the same
     // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
     //
-    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin is a shared
-    // CUIMng instance already reachable from gameplay via the in-game ESC menu
-    // (SceneCommon.cpp's RenderInfomation() calls CUIMng::Instance().Render() unconditionally
-    // every MAIN_SCENE frame), so RmlUi content was already live during gameplay before this
+    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin is reachable from
+    // gameplay via the in-game ESC menu (SceneCommon.cpp's RenderInfomation() calls
+    // CSceneUICoordinator::Instance().Render() unconditionally every MAIN_SCENE frame), so RmlUi
+    // content was already live during gameplay before this
     // change -- the cursor just wasn't being pulled back on top of it, because this callback
     // used to skip MAIN_SCENE entirely while MainScene.cpp's own inline RenderCursor() call ran
     // too early (before RmlUi's frame-final pass). That inline call is removed in favor of this
@@ -2311,7 +2311,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_petProcess = PetProcess::Make();
 
-    CUIMng::Instance().Create();
+    CSceneUICoordinator::Instance().Create();
 
     if (g_iChatInputType == 1)
     {

@@ -1,9 +1,9 @@
 //*****************************************************************************
-// File: UIMng.cpp
+// File: SceneUICoordinator.cpp
 //*****************************************************************************
 
 #include "stdafx.h"
-#include "UIMng.h"
+#include "SceneUICoordinator.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerMsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
@@ -26,17 +26,17 @@
 #include "Network/Server/ServerListManager.h"
 #include "UI/Scaling/UITransform.h"
 
-CUIMng::CUIMng() {}
+CSceneUICoordinator::CSceneUICoordinator() {}
 
-CUIMng::~CUIMng() {}
+CSceneUICoordinator::~CSceneUICoordinator() {}
 
-CUIMng& CUIMng::Instance()
+CSceneUICoordinator& CSceneUICoordinator::Instance()
 {
-    static CUIMng s_UIMng;
-    return s_UIMng;
+    static CSceneUICoordinator s_Coordinator;
+    return s_Coordinator;
 }
 
-void CUIMng::Create()
+void CSceneUICoordinator::Create()
 {
     m_bCursorOnUI = false;
     m_nScene = UIM_SCENE_NONE;
@@ -44,7 +44,7 @@ void CUIMng::Create()
     return;
 }
 
-void CUIMng::Release()
+void CSceneUICoordinator::Release()
 {
     g_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
@@ -60,7 +60,7 @@ void CUIMng::Release()
     m_nScene = UIM_SCENE_NONE;
 }
 
-void CUIMng::CreateLoginScene()
+void CSceneUICoordinator::CreateLoginScene()
 {
     g_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
@@ -106,7 +106,7 @@ void CUIMng::CreateLoginScene()
     m_nScene = UIM_SCENE_LOGIN;
 }
 
-void CUIMng::CreateCharacterScene()
+void CSceneUICoordinator::CreateCharacterScene()
 {
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
@@ -144,7 +144,7 @@ void CUIMng::CreateCharacterScene()
     m_nScene = UIM_SCENE_CHARACTER;
 }
 
-void CUIMng::CreateMainScene()
+void CSceneUICoordinator::CreateMainScene()
 {
     g_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
@@ -160,7 +160,7 @@ void CUIMng::CreateMainScene()
     m_nScene = UIM_SCENE_MAIN;
 }
 
-void CUIMng::RepositionSceneUI()
+void CSceneUICoordinator::RepositionSceneUI()
 {
     // A lightweight SetPosition sweep isn't enough: CSprite caches
     // m_fScrHeight = WindowHeight at Create() time and uses it for the
@@ -217,7 +217,7 @@ void CUIMng::RepositionSceneUI()
     // MainScene uses the new UI system which resizes itself; nothing to do.
 }
 
-void CUIMng::Update(double dDeltaTick)
+void CSceneUICoordinator::Update(double dDeltaTick)
 {
     if (UIM_SCENE_NONE == m_nScene)
         return;
@@ -269,7 +269,7 @@ void CUIMng::Update(double dDeltaTick)
     m_NewStyleMng.Update();
 }
 
-void CUIMng::Render()
+void CSceneUICoordinator::Render()
 {
     if (UIM_SCENE_NONE == m_nScene)
         return;
@@ -282,7 +282,7 @@ void CUIMng::Render()
     UI::Scaling::SetActiveTransform(previousTransform);
 }
 
-void CUIMng::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)
+void CSceneUICoordinator::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)
 {
     if (UIM_SCENE_NONE == m_nScene || UIM_SCENE_TITLE == m_nScene || UIM_SCENE_LOADING == m_nScene)
         return;
@@ -293,7 +293,7 @@ void CUIMng::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)
     g_MsgWin.PopUp(nMsgCode, pszMsg);
 }
 
-void CUIMng::AddServerMsg(wchar_t* pszMsg)
+void CSceneUICoordinator::AddServerMsg(wchar_t* pszMsg)
 {
     if (UIM_SCENE_CHARACTER != m_nScene)
         return;

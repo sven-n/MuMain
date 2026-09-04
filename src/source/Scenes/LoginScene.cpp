@@ -18,7 +18,7 @@
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/CreditWin.h"
 #include "Core/Input/Input.h"
 #include "Network/Server/WSclient.h"
@@ -283,7 +283,7 @@ void CreateLogInScene()
 
     OpenLogoSceneData();
 
-    CUIMng::Instance().CreateLoginScene();
+    CSceneUICoordinator::Instance().CreateLoginScene();
 
     CurrentProtocolState = REQUEST_JOIN_SERVER;
     CreateSocket(szServerIpAddress, g_ServerPort);
@@ -348,7 +348,7 @@ void NewMoveLogInScene()
         ThePetProcess().UpdatePets();
     }
 
-    // ESC menu toggle is handled by CUIMng::Update()
+    // ESC menu toggle is handled by CSceneUICoordinator::Update()
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
     {
         g_ErrorReport.Write(L"> Request Character list\r\n");

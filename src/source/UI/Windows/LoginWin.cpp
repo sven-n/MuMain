@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "UI/Windows/LoginWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/MsgWin.h"
@@ -186,7 +186,7 @@ void CLoginWin::Create()
     this->FirstLoad = 1;
 
     // RmlUi migration plan Phase 1 pilot -- see this class's header comment. Guarded on
-    // m_pRmlDoc rather than unconditionally: CUIMng::RepositionSceneUI() re-runs
+    // m_pRmlDoc rather than unconditionally: CSceneUICoordinator::RepositionSceneUI() re-runs
     // CreateLoginScene() (and so this Create()) on every resolution change, to refresh the
     // legacy sprites' stale screen-height-dependent Y-flip cache -- a problem RmlUi's own
     // layout doesn't have (it already re-flows against the Context's current dimensions), so
@@ -233,7 +233,7 @@ void CLoginWin::Create()
         // meant to stay static.
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN, this);
     Show(false);
 }
 
@@ -470,12 +470,12 @@ bool CLoginWin::UpdateWhileShown()
     // resubmit the login form behind it.
     //
     // WasSysMenuToggledByEscThisFrame() is needed IN ADDITION to the live g_SysMenuWin.IsVisible()
-    // check -- found via live testing: CUIMng::Update()'s ESC-toggle-system-menu block runs
+    // check -- found via live testing: CSceneUICoordinator::Update()'s ESC-toggle-system-menu block runs
     // entirely before this (see its own comment), so an ESC press that just CLOSED the menu this
     // same frame already reads back IsVisible()==false here, and without this flag this window
     // would treat that as "not covered" and ALSO fire SubmitCancel() off the very same keypress.
     SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible()
-                || CUIMng::Instance().WasSysMenuToggledByEscThisFrame()
+                || CSceneUICoordinator::Instance().WasSysMenuToggledByEscThisFrame()
                 || UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
 
     m_pUsernameInputBox->DoAction();
@@ -681,9 +681,9 @@ void CLoginWin::RequestLogin()
     }
 
     if (wcslen(m_Username) <= 0)
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_INPUT_ID);
     else if (wcslen(m_Password) <= 0)
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
     else
     {
         if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)

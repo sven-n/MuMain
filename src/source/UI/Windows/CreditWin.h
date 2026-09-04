@@ -39,7 +39,7 @@
 #define	CRW_INDEX_MAX			6
 
 // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) Phase 1 pilot: the first CUIMng window
-// migrated off CWin onto SEASON3B::CNewUIObj/CUIMng::GetNewStyleMng() -- the lowest-complexity
+// migrated off CWin onto SEASON3B::CNewUIObj/CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity
 // real case (still fully legacy-2D, no RmlUi entanglement, no shown-vs-active split needed),
 // chosen to prove the registry/dispatch mechanics before touching anything RmlUi-coupled. See
 // g_CreditWin's own comment below for the ownership/registration shape.
@@ -83,7 +83,8 @@ public:
 	void Create();
 	void Release(); // was CWin::PreRelease() (an override hook CWin::Release() called
 	                 // automatically) -- called explicitly now, same call sites Create() itself
-	                 // uses to reset state, plus wherever CUIMng tears the login scene down.
+	                 // uses to reset state, plus wherever CSceneUICoordinator tears the login
+	                 // scene down.
 	void SetPosition();
 	void Show(bool bShow) override;
 
@@ -110,8 +111,8 @@ protected:
 };
 
 // Replaces CUIMng's old `CCreditWin m_CreditWin;` member -- static storage duration matches the
-// same lifetime CUIMng's own singleton member had. Registers itself with
-// CUIMng::Instance().GetNewStyleMng() inside Create() (see that method), not with the shared
+// same lifetime that singleton member had. Registers itself with
+// CSceneUICoordinator::Instance().GetNewStyleMng() inside Create() (see that method), not with the shared
 // g_pNewUIMng that MAIN_SCENE's windows use (CCreditWin only ever exists during LOG_IN_SCENE).
 // External access (Winmain.cpp's RenderTextOnTop-style late pass, WSclient.cpp/LoginScene.cpp's
 // IsVisible() checks, LoginMainWin.cpp's OpenCredits) goes through this global directly, same

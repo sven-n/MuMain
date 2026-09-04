@@ -14,7 +14,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "CharMakeWin.h"
 #include <RmlUi/Core/ElementDocument.h>
@@ -52,10 +52,10 @@ void CCharInfoBalloonMng::Release()
 
     m_isInitialized = false;
 
-    // See CLoginMainWin::PreRelease()'s identical comment -- this class isn't a CWin, so it has
-    // no CUIMng::RemoveWinList() sweep to rely on; Release() is called explicitly at every
-    // character-scene exit point instead (CUIMng::CreateLoginScene()/CUIMng::Release()), which is
-    // exactly the right place to hide the document too.
+    // See CLoginMainWin::PreRelease()'s identical comment -- this class isn't a CWin, so it never
+    // had any shared-list sweep to rely on; Release() is called explicitly at every character-scene
+    // exit point instead (CSceneUICoordinator::CreateLoginScene()/CreateMainScene()/Release()),
+    // which is exactly the right place to hide the document too.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -102,7 +102,7 @@ void CCharInfoBalloonMng::Create()
         }
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_INFO_BALLOON, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_INFO_BALLOON, this);
 }
 
 //*****************************************************************************
@@ -124,7 +124,7 @@ bool CCharInfoBalloonMng::Render()
         balloon.Render();
 
     // Before this migration, this manager's Render() drew the balloons as ordinary legacy 2D
-    // content, in the same pass and *before* CUIMng::Render()'s CWin list (CCharMakeWin, CMsgWin,
+    // content, in the same pass and *before* CSceneUICoordinator::Render()'s CWin list (CCharMakeWin, CMsgWin,
     // CSysMenuWin) -- so those windows' own legacy drawing correctly painted over the balloons
     // whenever they were open. RmlUi renders unconditionally last in the frame now, so that
     // relationship inverted: with nothing telling it otherwise, a balloon would paint on top of

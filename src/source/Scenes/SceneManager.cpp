@@ -36,7 +36,7 @@ FrameTimingState g_frameTiming;
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "UI/NewUI/Dialogs/ReconnectDialog.h"
@@ -364,7 +364,7 @@ static void UpdateLoginAndCharacterScenes()
     dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
 
     CInput::Instance().Update();
-    CUIMng::Instance().Update(dDeltaTick);
+    CSceneUICoordinator::Instance().Update(dDeltaTick);
 }
 
 /**
@@ -868,7 +868,7 @@ static void CheckServerConnection()
         g_ErrorReport.Write(L"> Connection closed. ");
         g_ErrorReport.WriteCurrentTime();
         g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
     }
 }
 

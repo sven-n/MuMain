@@ -18,7 +18,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // is what actually governs a registered window's layout mode.
     case INTERFACE_CREDITS:
     // CServerMsgWin/CServerSelWin (Phase 2) compute real screen pixels themselves too (position
-    // derived from real WindowWidth/Height in CUIMng::CreateLoginScene()/CreateCharacterScene()),
+    // derived from real WindowWidth/Height in CSceneUICoordinator::CreateLoginScene()/CreateCharacterScene()),
     // same reasoning as INTERFACE_CREDITS.
     case INTERFACE_SERVER_MESSAGE:
     case INTERFACE_SERVER_SELECT:
@@ -49,7 +49,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // then `nPosX * g_fScreenRate_x` (CharInfoBalloon.cpp), the exact "multiply by whatever
     // transform is ambient when this runs" contract INTERFACE_NAME_WINDOW/INTERFACE_ITEM_TOOLTIP
     // already use WorldOverlay for -- WorldOverlay resolves to the same
-    // scale-640x480-reference-to-real-window transform CUIMng::Render() used to set manually
+    // scale-640x480-reference-to-real-window transform CSceneUICoordinator::Render() used to set manually
     // (UI::Scaling::LegacyUiTransform(WindowWidth, WindowHeight) IS ScreenOverlayTransform(), which
     // WorldOverlay/Hud both resolve to) before this adapter existed. Originally given
     // LayoutMode::Legacy (identity) by mistake -- that made g_fScreenRate_x/y always 1.0 regardless

@@ -51,7 +51,7 @@ bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 #include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
 extern wchar_t AbuseFilter[][20];
@@ -278,7 +278,7 @@ void RenderInfomation()
 {
     UI::Notices::Render();
 
-    CUIMng::Instance().Render();
+    CSceneUICoordinator::Instance().Render();
 
     // The login/character-scene cursor render that used to happen here moved to
     // Winmain.cpp's SetPostRmlUiCallback registration, which fires after RmlUi's own render

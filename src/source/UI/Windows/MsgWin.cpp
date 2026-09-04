@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "UI/Windows/MsgWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "Character/CharMakeWin.h"
@@ -72,7 +72,7 @@ void CMsgWin::Create()
     m_dDeltaTickSum = 0.0;
 
     // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
-    // window's Create() (CUIMng::RepositionSceneUI() re-runs Create() on resolution change), so
+    // window's Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so
     // the document/model are created once, ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
@@ -100,7 +100,7 @@ void CMsgWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_MSG_WINDOW, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_MSG_WINDOW, this);
     Show(false);
 }
 
@@ -111,8 +111,9 @@ void CMsgWin::Release()
     m_sprInput.Release();
     m_sprBack.Release();
 
-    // See CLoginWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s every
-    // window on every scene transition, and this class has no base-class knowledge of m_pRmlDoc.
+    // See CLoginWin::PreRelease()'s identical comment -- each migrated window's Release() is called
+    // explicitly at every scene transition, not swept automatically by any shared list, and this
+    // class has no base-class knowledge of m_pRmlDoc.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -223,7 +224,7 @@ bool CMsgWin::Update()
 
     // dDeltaTick previously threaded through from CWin::UpdateWhileActive(double); this window's
     // migrated Update() takes no parameters, same as every other CNewUIObj window -- read the
-    // same clamped expression CUIMng::Update(dDeltaTick) itself resolves to in steady state (see
+    // same clamped expression CSceneUICoordinator::Update(dDeltaTick) itself resolves to in steady state (see
     // docs/newui-legacy-merger.md's g_pTimer gotcha).
     extern float FPS_ANIMATION_FACTOR;
     const double dDeltaTick = 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR);

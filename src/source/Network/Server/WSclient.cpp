@@ -40,7 +40,7 @@
 #include "GameLogic/Items/InventoryUtils.h"
 #include "UI/Legacy/UIMapName.h" // rozy
 #include "GameLogic/Commands/ChatCommandCatalog.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginMainWin.h"
@@ -563,7 +563,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
     }
     else
     {
-        CUIMng& rUIMng = CUIMng::Instance();
+        CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
 
         switch (Data2->Result)
         {
@@ -835,15 +835,15 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         CMultiLanguage::ConvertFromUtf8(CharactersClient[Data->Index].ID, Data->ID, MAX_USERNAME_SIZE);
         CharactersClient[Data->Index].ID[MAX_USERNAME_SIZE] = L'\0';
         CurrentProtocolState = RECEIVE_CREATE_CHARACTER_SUCCESS;
-        CUIMng& rUIMng = CUIMng::Instance();
+        CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
         rUIMng.CloseMsgWin();
         g_CharSelMainWin.UpdateDisplay();
         g_CharInfoBalloonMng.UpdateDisplay();
     }
     else if (Data->Result == 0)
-        CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL);
+        CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL);
     else if (Data->Result == 2)
-        CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
+        CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL2);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x01 [ReceiveCreateCharacter]");
 }
@@ -857,17 +857,17 @@ void ReceiveDeleteCharacter(const BYTE* ReceiveBuffer)
         INT iKey;
         iKey = CharactersClient[SelectedHero].Key;
         DeleteCharacter(iKey);
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_SUCCESS);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_SUCCESS);
         break;
     case 0:
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_GUILDWARNING);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_GUILDWARNING);
         break;
     case 3:
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_ITEM_BLOCK);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_DELETE_CHARACTER_ITEM_BLOCK);
         break;
     case 2:
     default:
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_STORAGE_RESIDENTWRONG);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_STORAGE_RESIDENTWRONG);
         break;
     }
 }
@@ -2019,7 +2019,7 @@ void ReceiveNotice(const BYTE* ReceiveBuffer)
         }
         else
         {
-            CUIMng& rUIMng = CUIMng::Instance();
+            CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
             rUIMng.AddServerMsg(Text);
         }
     }
@@ -13485,7 +13485,7 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
                 CheckHack();
                 break;
             case 0x00:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PASSWORD);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PASSWORD);
                 break;
             case 0x01:
                 CurrentProtocolState = RECEIVE_LOG_IN_SUCCESS;
@@ -13493,60 +13493,60 @@ static void ProcessPacket(const BYTE* ReceiveBuffer, int32_t Size)
                 CheckHack();
                 break;
             case 0x02:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID);
                 break;
             case 0x03:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID_CONNECTED);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID_CONNECTED);
                 break;
             case 0x04:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_SERVER_BUSY);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_SERVER_BUSY);
                 break;
             case 0x05:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID_BLOCK);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ID_BLOCK);
                 break;
             case 0x06:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_VERSION);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_VERSION);
                 g_ErrorReport.Write(L"Version dismatch. - Login\r\n");
                 break;
             case 0x07:
             default:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CONNECT);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CONNECT);
                 break;
             case 0x08:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ERROR);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ERROR);
                 break;
             case 0x09:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_NO_PAYMENT_INFO);
                 break;
             case 0x0a:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_USER_TIME1);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_USER_TIME1);
                 break;
             case 0x0b:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_USER_TIME2);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_USER_TIME2);
                 break;
             case 0x0c:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PC_TIME1);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PC_TIME1);
                 break;
             case 0x0d:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PC_TIME2);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_PC_TIME2);
                 break;
             case 0x11:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ONLY_OVER_15);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_ONLY_OVER_15);
                 break;
             case 0x40:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL);
                 break;
             case 0xc0:
             case 0xd0:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_DATE);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_DATE);
                 break;
             case 0xc1:
             case 0xd1:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_HOUR);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_POINT_HOUR);
                 break;
             case 0xc2:
             case 0xd2:
-                CUIMng::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_INVALID_IP);
+                CSceneUICoordinator::Instance().PopUpMsgWin(RECEIVE_LOG_IN_FAIL_INVALID_IP);
                 break;
             }
             break;

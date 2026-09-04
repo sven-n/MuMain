@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "ServerSelWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "App/Platform/Windows/Local.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -90,7 +90,7 @@ void CServerSelWin::Create()
     m_Size.cy = SERVER_BTN_HEIGHT * SSW_SERVER_MAX + SSW_GAP_HEIGHT * 2 + SERVER_GROUP_BTN_HEIGHT +
                 m_winDescription.GetHeight();
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SERVER_SELECT, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SERVER_SELECT, this);
     Show(false);
 
     UpdateDisplay();
@@ -469,7 +469,7 @@ bool CServerSelWin::Update()
             }
             else if (pServerInfo->m_iPercent < 128)
             {
-                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
+                CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
             }
         }
     }

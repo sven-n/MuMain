@@ -94,7 +94,7 @@ public:
     // for a frame if it went through that path instead. Confirmed safe to call straight into
     // RequestLogin()/CancelLogin()/etc. here for the same reason as CLoginMainWin's fix: this
     // fires from RmlUiRuntime::ProcessSdlEvent(), called from Winmain's SDL event pump, always
-    // before CUIMng::Update() runs the same frame. Each still re-checks the "remember password"
+    // before CSceneUICoordinator::Update() runs the same frame. Each still re-checks the "remember password"
     // prompt's Pending state directly (the same guard UpdateWhileShown()'s SetActive() computation
     // applies) since these callbacks run earlier in the frame, before UpdateWhileShown()'s Tick()
     // call has had a chance to resolve anything.

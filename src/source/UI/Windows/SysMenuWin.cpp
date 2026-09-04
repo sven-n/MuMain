@@ -7,7 +7,7 @@
 #include "I18N/All.h"
 
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "Character/CharSelMainWin.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Scenes/SceneCore.h"
@@ -81,7 +81,7 @@ void CSysMenuWin::Create()
     m_bSelectServerEnabled = (SceneFlag == CHARACTER_SCENE);
 
     // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
-    // CLoginWin::Create() is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change).
+    // CLoginWin::Create() is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change).
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
         const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "sys_menu",
@@ -107,7 +107,7 @@ void CSysMenuWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/sys_menu.rml");
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SYS_MENU, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SYS_MENU, this);
 
     CInput rInput = CInput::Instance();
     SetPosition((rInput.GetScreenWidth() - m_winBack.GetWidth()) / 2,
@@ -124,10 +124,12 @@ void CSysMenuWin::Release()
     m_aBtn[3].Release();
     m_winBack.Release();
 
-    // See CLoginMainWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s
-    // every window on every scene transition, and this class has no base-class knowledge of
-    // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
-    // window happened to be open at the moment of transition.
+    // See CLoginMainWin::PreRelease()'s identical comment -- each migrated window's Release() is
+    // called explicitly at every scene transition (CSceneUICoordinator's CreateLoginScene()/
+    // CreateCharacterScene()/CreateMainScene()/Release()), not swept automatically by any shared
+    // list, and this class has no base-class knowledge of m_pRmlDoc, so without this it can keep
+    // rendering into whatever scene comes next if this window happened to be open at the moment
+    // of transition.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -186,7 +188,7 @@ bool CSysMenuWin::Update()
         OpenOptions();
     else if (m_aBtn[SMW_BTN_CLOSE].IsClick())
         Close();
-    // ESC toggle is handled by CUIMng::Update() -- no action needed here, same as before
+    // ESC toggle is handled by CSceneUICoordinator::Update() -- no action needed here, same as before
     // this window migrated off CWin.
 
     return true;
@@ -194,7 +196,7 @@ bool CSysMenuWin::Update()
 
 void CSysMenuWin::ExitGame()
 {
-    CUIMng::Instance().PopUpMsgWin(MESSAGE_GAME_END_COUNTDOWN);
+    CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_GAME_END_COUNTDOWN);
 }
 
 void CSysMenuWin::SelectServer()

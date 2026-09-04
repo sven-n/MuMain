@@ -8,7 +8,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
 #include "Core/Globals/_enum.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -156,12 +156,12 @@ void CCreditWin::Create()
 	LoadText();
 	SetPosition();
 
-	// docs/rmlui-ui-system's CUIMng/CNewUIManager merger -- registers with CUIMng's own
-	// scene-scoped manager instance, not the shared g_pNewUIMng (this window only ever exists
-	// during LOG_IN_SCENE; see CUIMng::GetNewStyleMng()'s own comment for why). AddUIObj() is
-	// already idempotent (no-ops if already registered), so this is safe to call again on every
-	// RepositionSceneUI()-triggered recreate.
-	CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CREDITS, this);
+	// docs/rmlui-ui-system's CUIMng/CNewUIManager merger -- registers with CSceneUICoordinator's
+	// own scene-scoped manager instance, not the shared g_pNewUIMng (this window only ever exists
+	// during LOG_IN_SCENE; see CSceneUICoordinator::GetNewStyleMng()'s own comment for why).
+	// AddUIObj() is already idempotent (no-ops if already registered), so this is safe to call
+	// again on every RepositionSceneUI()-triggered recreate.
+	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CREDITS, this);
 
 	// Matches CWin::Create()'s own unconditional m_bShow=false reset -- RepositionSceneUI()
 	// snapshots visibility before calling this and restores it right after.

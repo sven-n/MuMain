@@ -6,7 +6,7 @@
 #include "UI/Windows/LoginMainWin.h"
 
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "Network/Server/WSclient.h"
@@ -66,7 +66,7 @@ void CLoginMainWin::Create()
     m_ptPos.x = m_ptPos.y = 0;
 
     // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
-    // CLoginWin::Create() is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change),
+    // CLoginWin::Create() is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change),
     // so the document is loaded once, ever, and only repositioned/resized afterward.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
@@ -80,7 +80,7 @@ void CLoginMainWin::Create()
         }
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN_MAIN, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN_MAIN, this);
     Show(false);
 }
 

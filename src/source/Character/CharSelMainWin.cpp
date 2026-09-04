@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "CharSelMainWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "Character/CharMakeWin.h"
 #include "Render/Models/ZzzBMD.h"
@@ -144,7 +144,7 @@ void CCharSelMainWin::Create()
     m_Size.cx = m_Size.cy = 0;
 
     // RmlUi migration -- see this class's header comment. Guarded the same way CLoginWin::Create()
-    // is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change), so the document/model
+    // is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so the document/model
     // are created once, ever, and only repositioned/resized/re-synced afterward. Must run BEFORE
     // ApplyLayout() below -- that call pushes the computed rects into the RmlUi elements too, and
     // does nothing on a null m_pRmlDoc, so calling it first (as an earlier version of this method
@@ -176,7 +176,7 @@ void CCharSelMainWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
     }
 
-    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_SEL_MAIN, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_SEL_MAIN, this);
 
     ApplyLayout(layout);
     m_bAccountBlockItem = HasAccountBlockedCharacter();
@@ -223,10 +223,11 @@ void CCharSelMainWin::Release()
     for (auto& button : m_aBtn)
         button.Release();
 
-    // See CLoginMainWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s
-    // every window on every scene transition, and this class has no base-class knowledge of
-    // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
-    // window happened to be open at the moment of transition.
+    // See CLoginMainWin::PreRelease()'s identical comment -- each migrated window's Release() is
+    // called explicitly at every scene transition, not swept automatically by any shared list, and
+    // this class has no base-class knowledge of m_pRmlDoc, so without this it can keep rendering
+    // into whatever scene comes next if this window happened to be open at the moment of
+    // transition.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -246,7 +247,7 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
     // No RmlUi push here (an earlier version had one) -- see ApplyLayout()'s comment. #panel is
     // a fixed full-screen container now (char_sel_main.rcss), not something this window's own
     // screen position moves; the RmlUi visuals are positioned independently via anchor classes.
-    // No call site actually invokes this method today (CUIMng::RepositionSceneUI() re-runs
+    // No call site actually invokes this method today (CSceneUICoordinator::RepositionSceneUI() re-runs
     // Create() wholesale instead) -- the legacy CSprite/CButton delta-shift above is kept
     // correct anyway since it was part of CWin's public contract before this migration.
 }
@@ -386,7 +387,7 @@ void CCharSelMainWin::DeleteCharacter()
     if (selected == nullptr)
         return;
 
-    CUIMng& uiManager = CUIMng::Instance();
+    CSceneUICoordinator& uiManager = CSceneUICoordinator::Instance();
 
     if (selected->GuildStatus != G_NONE)
     {

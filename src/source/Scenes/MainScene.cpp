@@ -17,7 +17,7 @@
 #include "Input/Selection.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Legacy/SceneUICoordinator.h"
 #include "UI/NewUI/NewUISystem.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
@@ -145,7 +145,7 @@ static void InitializeMainScene()
     // Remember which character is in play so auto-reconnect can re-select it.
     ReconnectManager::Instance().CacheCharacter(CharactersClient[SelectedHero].ID);
 
-    CUIMng::Instance().CreateMainScene();
+    CSceneUICoordinator::Instance().CreateMainScene();
 
     g_Camera.Angle[2] = -45.f;
 

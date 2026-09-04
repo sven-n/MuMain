@@ -24,7 +24,7 @@ namespace Rml { class ElementDocument; }
 // SEASON3B::CNewUIObj, same pattern as CMsgWin (its own header comment covers the shared
 // reasoning -- full-screen click-swallow via UpdateMouseEvent(), LayoutMode::Legacy for the
 // legacy CWinEx/CButton real-pixel geometry). ESC is NOT handled here at all (never was --
-// UpdateWhileActive()'s own ESC branch below was already a no-op): CUIMng::Update()'s dedicated
+// UpdateWhileActive()'s own ESC branch below was already a no-op): CSceneUICoordinator::Update()'s dedicated
 // ESC-toggle block owns opening/closing this window directly, so this migration doesn't touch
 // that logic or its ordering.
 class CSysMenuWin : public SEASON3B::CNewUIObj
@@ -50,7 +50,7 @@ public:
     // old flag-consumed-in-an-if/else-if-chain shape is exactly the pattern that let a stale flag
     // win over a fresh one there. Confirmed safe to call straight into CUIMng methods here for the
     // same reason as CLoginMainWin's fix: this fires from RmlUiRuntime::ProcessSdlEvent(), called
-    // from Winmain's SDL event pump, always before CUIMng::Update() runs the same frame.
+    // from Winmain's SDL event pump, always before CSceneUICoordinator::Update() runs the same frame.
     void RmlClickExitGame() { ExitGame(); }
     void RmlClickSelectServer() { if (m_bSelectServerEnabled) SelectServer(); }
     void RmlClickOption() { OpenOptions(); }

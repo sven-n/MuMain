@@ -15,7 +15,7 @@
 
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/NewUI/NewUIManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM

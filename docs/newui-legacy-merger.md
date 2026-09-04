@@ -385,16 +385,57 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   now has zero remaining `CWin`-list members (`m_WinList` is permanently empty) and zero remaining
   direct hardcoded per-window calls -- every window it drives goes through `m_NewStyleMng`
   generically. Clear to start Phase 4.
-- **Phase 4 (delete `CUIMng`)** — not started; fully unblocked, Phases 2-3 both done and verified.
-  `CWin` has a closed, fully-enumerated subclass set (confirmed by a full-tree grep) — no hidden
-  subclass elsewhere to worry about now that all 9 non-deleted ones (`COptionWin` deleted, not
-  counted) have migrated.
-- **Phase 5 (rename cleanup)** — not started; deliberately deferred until Phases 1-4 are complete
-  and the split is fully retired. Once there is only one window-object system left, drop the
-  "New"/`NewUI*` naming (`CNewUIObj`, `CNewUIManager`, `NewUIBase.h`, the `INTERFACE_*` prefix,
-  etc.) — it only ever meant "new relative to `CUIMng`", which stops being a meaningful
-  distinction once `CUIMng` is gone. Also sweep code comments (this doc's own included) that
-  reference the old "New UI"/"Legacy UI" framing once it's no longer accurate.
+- **Phase 4 (delete `CUIMng`)** — done. Three rounds of research (a full inventory of every member/
+  method, a complete grep-based blast-radius map of every external call site, and a trace of how
+  the three scene files drive it) found `CUIMng` had become a grab-bag of three unrelated things:
+  confirmed-dead `CWin`/`m_WinList` plumbing, the title-screen loading-bar sprites (never actually
+  related to the window-system merger, just historically bundled in), and its one real remaining
+  job (scene-transition orchestration + forwarding to its own `CNewUIManager` instance). Landed as
+  three independently-built-and-verified steps:
+  1. Stripped the dead `CWin`/`m_WinList` machinery outright (`ShowWin`/`HideWin`/`SetActiveWin`/
+     `CheckDockWin`/`SetDockWinPosition`/`RemoveWinList`, `Update()`'s/`Render()`'s dead per-window
+     walks) — all confirmed genuinely unreachable, not just unused. Also caught and removed three
+     more pieces of dead state found during this pass: `m_bSysMenuWinShow`/`SetSysMenuWinShow()`/
+     `IsSysMenuWinShow()` (write-only — the setter had 6 external callers, the getter zero),
+     `m_bBlockCharMove` (written twice, read nowhere), and `m_pLoadingScene` (a public member set
+     to `NULL` in the constructor and never touched again anywhere).
+  2. Extracted `CreateTitleSceneUI()`/`ReleaseTitleSceneUI()`/`RenderTitleSceneUI()` (confirmed zero
+     references to `m_WinList`/`CWin`/`m_NewStyleMng` in their bodies) into a new
+     `TitleSceneUI::CreateSceneUI()`/`ReleaseSceneUI()`/`RenderSceneUI()` free-function trio
+     (`src/source/Scenes/TitleSceneUI.h`/`.cpp`) — used from only 2 files
+     (`WebzenScene.cpp`, `ZzzOpenData.cpp`'s `OpenBasicData()`), too small a surface for a singleton
+     class of its own.
+  3. Renamed what was left — `CUIMng` → `CSceneUICoordinator`, `UIMng.h`/`.cpp` →
+     `SceneUICoordinator.h`/`.cpp` (same `UI/Legacy/` folder; a further move to a more fitting home
+     is a Phase-5-adjacent cosmetic follow-up, not required here) — a pure rename, not a redesign:
+     every method name/signature/body unchanged, so all ~50 call sites across ~30 files changed
+     only their type name (`CUIMng::Instance()` → `CSceneUICoordinator::Instance()`), verified by a
+     full rebuild (the real check for a rename this size — anything missed would be a compile
+     error, not a silent bug). Three dead transitive `#include "UI/Legacy/UIMng.h"` lines
+     (`ZzzBMD.cpp`, `LoadingScene.cpp`, `SceneCore.cpp`) dropped outright; `NewUIHotKey.cpp`'s real
+     but transitive `CNewUIManager` dependency given its own direct include.
+
+  **`CUIMng` no longer exists as a class or a file.** `CWin` itself (the base class every migrated
+  window used to derive from) is untouched — it's still composed by `CWinEx`/`CButton`/
+  `CUITextInputBox`-family widgets various migrated windows keep as their own private members
+  (e.g. `CServerSelWin`'s `m_winDescription`), so it isn't part of this deletion and has no reason
+  to be.
+
+  **Deliberately not done, a documented follow-up**: `m_nScene`'s `UIM_SCENE_*` values (`NONE`/
+  `TITLE`/`LOGIN`/`LOADING`/`CHARACTER`/`MAIN` = 0-5) are numerically and semantically identical to
+  the already-existing, already-global `EGameScene`/`SceneFlag` (`Core/Globals/_define.h`) —
+  `m_nScene` looks like a redundant shadow copy that predates `SceneFlag`, and every `m_nScene ==`
+  check in `CSceneUICoordinator` could probably read `SceneFlag ==` directly instead, dropping the
+  variable (and its own `UIM_SCENE_*` macros) entirely. Confirming that's safe needs verifying
+  `SceneFlag`'s exact set-before-read ordering across all three scene files' per-frame dispatch,
+  which nothing in this phase's research nailed down precisely enough to act on — a real
+  simplification opportunity for whoever picks it up next, not attempted here.
+- **Phase 5 (rename cleanup)** — not started; now unblocked, Phases 1-4 all complete and the split
+  fully retired. Drop the "New"/`NewUI*` naming (`CNewUIObj`, `CNewUIManager`, `NewUIBase.h`, the
+  `INTERFACE_*` prefix, etc.) — it only ever meant "new relative to `CUIMng`", which stopped being
+  a meaningful distinction once `CUIMng` was deleted in Phase 4. Also sweep code comments (this
+  doc's own included) that reference the old "New UI"/"Legacy UI" framing now that it's no longer
+  accurate.
 
 ## Gotchas worth knowing before the next migration
 
