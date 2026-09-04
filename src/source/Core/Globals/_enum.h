@@ -121,6 +121,8 @@ enum INTERFACE_LIST
     INTERFACE_CREDITS,
     // Phase 2: CServerMsgWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SERVER_MESSAGE,
+    // Phase 2: CServerSelWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_SERVER_SELECT,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

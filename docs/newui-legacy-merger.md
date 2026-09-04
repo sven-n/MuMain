@@ -69,8 +69,23 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     actually filtered anything. `OptionWin.h/.cpp` deleted (not left as untracked dead code this
     time, unlike the earlier RmlUi-porting decision to skip-but-keep it — this merger's Phase 4
     goal is zero `CUIMng`-owned windows, and there was no remaining reason to keep it around).
-  - Still to do: `CServerSelWin` (no RmlUi entanglement, same low-complexity shape as
-    `CServerMsgWin`), then the RmlUi-hybrid ones (`CMsgWin`, `CSysMenuWin`, `CLoginMainWin`,
+  - `CServerSelWin` — done, verified against a real server (server selection and the
+    login-main bar's credits/exit buttons both confirmed still working). The most interactive
+    window migrated so far (37 real `CButton`s across two
+    arrays, `CGaugeBar`s, decorative sprites, a `CWinEx`-based description panel) — unlike
+    `CCreditWin`/`CServerMsgWin` it needed real click-handling ported: `UpdateMouseEvent()` claims
+    (consumes) any click within its own bounding box, ported directly from
+    `CWin::CursorInWin(WA_ALL)`'s rect math, coexisting correctly with `CCreditWin`'s depth-100
+    override (sort-by-depth dispatch means `CCreditWin` still always wins while shown, regardless
+    of this window's own depth). `m_winDescription` stays a composed `CWinEx` member as before —
+    `CWinEx` itself isn't retiring, only `CServerSelWin`'s own base class is, so nothing needed
+    porting there. **Found and deliberately preserved (not fixed) a pre-existing render gap**:
+    `m_aBtnDeco`/`m_aArrowDeco`/`m_winDescription` are positioned and `Show()`-toggled but were
+    never actually rendered in the original `CWin`-based `RenderControls()` either — ported as-is
+    for parity rather than silently drawing content that wasn't drawn before; worth a separate,
+    deliberate look if the decorative art/description panel is supposed to be visible.
+    `g_ServerSelWin` replaces `CUIMng::m_ServerSelWin`, same convention as `g_CreditWin`.
+  - Still to do: the RmlUi-hybrid ones (`CMsgWin`, `CSysMenuWin`, `CLoginMainWin`,
     `CCharSelMainWin`, `CCharMakeWin`).
 - **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started. `CLoginWin` is the one window
   that genuinely needs the new shown/active split (keeps ticking its text inputs and "Remember
@@ -80,6 +95,12 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
 - **Phase 4 (delete `CUIMng`)** — not started; blocked on Phases 2-3. `CWin` has a closed,
   fully-enumerated subclass set (confirmed by a full-tree grep) — no hidden subclass elsewhere to
   worry about once the remaining 9 (`COptionWin` deleted, not counted) are gone.
+- **Phase 5 (rename cleanup)** — not started; deliberately deferred until Phases 1-4 are complete
+  and the split is fully retired. Once there is only one window-object system left, drop the
+  "New"/`NewUI*` naming (`CNewUIObj`, `CNewUIManager`, `NewUIBase.h`, the `INTERFACE_*` prefix,
+  etc.) — it only ever meant "new relative to `CUIMng`", which stops being a meaningful
+  distinction once `CUIMng` is gone. Also sweep code comments (this doc's own included) that
+  reference the old "New UI"/"Legacy UI" framing once it's no longer accurate.
 
 ## Gotchas worth knowing before the next migration
 

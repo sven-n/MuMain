@@ -6,6 +6,7 @@
 #include "UI/Windows/MsgWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/ServerSelWin.h"
 #include "Core/Platform/CrtDbg.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -370,7 +371,7 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = I18N::Game::TheServerIsFull;
         break;
     case RECEIVE_JOIN_SERVER_WAITING:
-        rUIMng.ShowWin(&rUIMng.m_ServerSelWin);
+        g_ServerSelWin.Show(true);
         lpszMsg = I18N::Game::TheServerIsFull;
         break;
     case MESSAGE_SERVER_LOST:

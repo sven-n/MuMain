@@ -6,6 +6,7 @@
 #include "UIMng.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerMsgWin.h"
+#include "UI/Windows/ServerSelWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
 #include "Audio/DSPlaySound.h"
@@ -60,8 +61,6 @@ const char* WindowName(const CUIMng& manager, const CWin* window)
         return "system-menu";
     if (window == &manager.m_LoginMainWin)
         return "login-main";
-    if (window == &manager.m_ServerSelWin)
-        return "server-select";
     if (window == &manager.m_LoginWin)
         return "login";
     if (window == &manager.m_CharSelMainWin)
@@ -236,6 +235,7 @@ void CUIMng::Release()
     m_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
+    g_ServerSelWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -247,6 +247,7 @@ void CUIMng::CreateLoginScene()
     m_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
+    g_ServerSelWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
@@ -273,10 +274,9 @@ void CUIMng::CreateLoginScene()
     int nBaseY = int(567.0f / 600.0f * static_cast<float>(WindowHeight));
     m_LoginMainWin.SetPosition(30, nBaseY - m_LoginMainWin.GetHeight() - 11);
 
-    m_ServerSelWin.Create();
-    m_WinList.AddHead(&m_ServerSelWin);
-    m_ServerSelWin.SetPosition((static_cast<int>(WindowWidth) - m_ServerSelWin.GetWidth()) / 2,
-                               (static_cast<int>(WindowHeight) - m_ServerSelWin.GetHeight()) / 2);
+    g_ServerSelWin.Create();
+    g_ServerSelWin.SetPosition((static_cast<int>(WindowWidth) - g_ServerSelWin.GetWidth()) / 2,
+                               (static_cast<int>(WindowHeight) - g_ServerSelWin.GetHeight()) / 2);
 
     m_LoginWin.Create();
     m_WinList.AddHead(&m_LoginWin);
@@ -295,6 +295,7 @@ void CUIMng::CreateCharacterScene()
 
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
+    g_ServerSelWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
@@ -335,6 +336,7 @@ void CUIMng::CreateMainScene()
     m_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
+    g_ServerSelWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -356,7 +358,7 @@ void CUIMng::RepositionSceneUI()
         const bool wasShown_MsgWin = m_MsgWin.IsShow();
         const bool wasShown_SysMenuWin = m_SysMenuWin.IsShow();
         const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
-        const bool wasShown_ServerSelWin = m_ServerSelWin.IsShow();
+        const bool wasShown_ServerSelWin = g_ServerSelWin.IsVisible();
         const bool wasShown_LoginWin = m_LoginWin.IsShow();
         const bool wasShown_CreditWin = g_CreditWin.IsVisible();
 
@@ -373,7 +375,7 @@ void CUIMng::RepositionSceneUI()
         if (wasShown_LoginMainWin)
             ShowWin(&m_LoginMainWin);
         if (wasShown_ServerSelWin)
-            ShowWin(&m_ServerSelWin);
+            g_ServerSelWin.Show(true);
         if (wasShown_LoginWin)
             ShowWin(&m_LoginWin);
         if (wasShown_CreditWin)
@@ -383,7 +385,7 @@ void CUIMng::RepositionSceneUI()
         // network-side data. Create() clears the button labels, so without
         // this the server list and groups render empty after a resolution
         // change.
-        m_ServerSelWin.UpdateDisplay();
+        g_ServerSelWin.UpdateDisplay();
     }
     else if (m_nScene == UIM_SCENE_CHARACTER)
     {

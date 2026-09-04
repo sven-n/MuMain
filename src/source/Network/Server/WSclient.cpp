@@ -42,6 +42,7 @@
 #include "GameLogic/Commands/ChatCommandCatalog.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/CreditWin.h"
+#include "UI/Windows/ServerSelWin.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
 #include "Engine/Physics/PhysicsManager.h"
@@ -505,13 +506,13 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
     {
         mu::log::Get("input")->info(
             "[InputDiag] server-list groups={} selector(show={},active={}) login-main(show={},active={}) credits={}",
-            g_ServerListManager->GetServerGroupSize(), rUIMng.m_ServerSelWin.IsShow(), rUIMng.m_ServerSelWin.IsActive(),
+            g_ServerListManager->GetServerGroupSize(), g_ServerSelWin.IsVisible(), g_ServerSelWin.IsActive(),
             rUIMng.m_LoginMainWin.IsShow(), rUIMng.m_LoginMainWin.IsActive(), g_CreditWin.IsVisible());
     }
     if (!g_CreditWin.IsVisible())
     {
-        rUIMng.ShowWin(&rUIMng.m_ServerSelWin);
-        rUIMng.m_ServerSelWin.UpdateDisplay();
+        g_ServerSelWin.Show(true);
+        g_ServerSelWin.UpdateDisplay();
         rUIMng.ShowWin(&rUIMng.m_LoginMainWin);
     }
 

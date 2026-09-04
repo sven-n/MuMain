@@ -17,9 +17,11 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // SetLayoutMode() a window's own constructor called -- this table entry, not the constructor,
     // is what actually governs a registered window's layout mode.
     case INTERFACE_CREDITS:
-    // CServerMsgWin (Phase 2) computes real screen pixels itself too (position derived from
-    // real ScreenHeight in CUIMng::CreateCharacterScene()), same reasoning as INTERFACE_CREDITS.
+    // CServerMsgWin/CServerSelWin (Phase 2) compute real screen pixels themselves too (position
+    // derived from real WindowWidth/Height in CUIMng::CreateLoginScene()/CreateCharacterScene()),
+    // same reasoning as INTERFACE_CREDITS.
     case INTERFACE_SERVER_MESSAGE:
+    case INTERFACE_SERVER_SELECT:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:

@@ -7,7 +7,6 @@
 #include "UI/Windows/MsgWin.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/LoginMainWin.h"
-#include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
@@ -32,7 +31,6 @@ public:
     CMsgWin m_MsgWin;
     CSysMenuWin m_SysMenuWin;
     CLoginMainWin m_LoginMainWin;
-    CServerSelWin m_ServerSelWin;
     CLoginWin m_LoginWin;
     CCharSelMainWin m_CharSelMainWin;
     CCharMakeWin m_CharMakeWin;

@@ -107,8 +107,8 @@ void CLoginWin::Create()
     // CWin never draws anything for this window -- every theme's #panel/.input-frame renders the
     // background/input-box-frame artwork itself (see themes/legacy/login.rcss and
     // themes/modern/login.rcss). CWin::Create's own nTexID<=-2 sentinel (confirmed precedent:
-    // ServerSelWin.cpp's CWin::Create(0,0,-2)) leaves m_psprBg null, and CWin::Render()'s existing
-    // `if (m_psprBg)` guard then draws nothing.
+    // CharSelMainWin.cpp's CWin::Create(layout.window.width, layout.window.height, -2)) leaves
+    // m_psprBg null, and CWin::Render()'s existing `if (m_psprBg)` guard then draws nothing.
     //
     // 2026-09-03: the legacy bounding-box size passed here now tracks login.rcss's own #panel
     // width/height (329dp/245dp, both themes) by the same ratio, instead of the fixed 329x245 this

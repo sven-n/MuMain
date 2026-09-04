@@ -22,7 +22,7 @@ class CServerMsgWin : public SEASON3B::CNewUIObj
 {
     // Was CWinEx's WE_BG_* (WinEx.h) -- kept private here instead of reusing those shared macros
     // since this window no longer goes through CWinEx (still used by other not-yet-migrated
-    // CWin/CWinEx windows: CServerSelWin, SysMenuWin).
+    // CWin/CWinEx windows: SysMenuWin).
     enum { BG_CENTER, BG_TOP, BG_BOTTOM, BG_LEFT, BG_RIGHT, BG_MAX };
 
 protected:
