@@ -27,6 +27,7 @@
 	text-align: center;
 	white-space: nowrap;
 	font-size: 12px;
+	font-family: "token(font-body)";
 }
 .balloon-name {
 	top: 6px;

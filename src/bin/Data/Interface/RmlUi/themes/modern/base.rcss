@@ -65,6 +65,7 @@ body {
 	left: 21dp;
 	top: 1dp;
 	white-space: nowrap;
+	font-family: "token(font-body)";
 }
 
 /* Flat (per feedback -- no gradient fill/bevel), but the border carries a faint steel tint at rest
@@ -80,6 +81,7 @@ body {
 	line-height: 30dp;
 	cursor: pointer;
 	color: token(text-body);
+	font-family: "token(font-body)";
 	background-color: #34373a;
 	border: 1dp rgba(176, 186, 196, 90); /* faint accent-steel */
 	border-radius: token(radius-md)dp;

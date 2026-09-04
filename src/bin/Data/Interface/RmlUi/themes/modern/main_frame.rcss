@@ -119,6 +119,7 @@
 	text-align: center;
 	color: #ffffff;
 	font-weight: bold;
+	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
 	white-space: nowrap;
 	pointer-events: none;
@@ -370,6 +371,7 @@
 	top: 2px;
 	color: #ffffff;
 	font-weight: bold;
+	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
 	font-size: 8px;
 	line-height: 8px;
@@ -386,6 +388,7 @@
 	top: 2px;
 	color: #ffffff;
 	font-weight: bold;
+	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
 	font-size: 8px;
 	line-height: 8px;
@@ -490,6 +493,7 @@
 	white-space: normal;
 	min-height: 1.2em;
 	line-height: 1.2em;
+	font-family: "token(font-body)";
 }
 .tt-line.tt-blue { color: #6f9bc4; } /* accent-blue */
 .tt-line.tt-red { color: #ff6060; }

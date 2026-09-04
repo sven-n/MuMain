@@ -79,6 +79,7 @@ body {
 
 .label {
 	position: absolute;
+	font-family: "token(font-body)";
 }
 .label-server {
 	left: 111dp;
@@ -190,6 +191,7 @@ body {
 	left: 21dp;
 	top: 1dp;
 	white-space: nowrap;
+	font-family: "token(font-body)";
 }
 
 /* Gradient-to-transparent divider above the button row (mockup's .separator). */
@@ -218,6 +220,7 @@ body {
 	line-height: 30dp;
 	cursor: pointer;
 	color: #f0e0bc;
+	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
 	background-color: #35100e;
 	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e);
@@ -264,4 +267,5 @@ body {
 	top: 252dp;
 	width: 280dp;
 	color: token(semantic-warning);
+	font-family: "token(font-body)";
 }

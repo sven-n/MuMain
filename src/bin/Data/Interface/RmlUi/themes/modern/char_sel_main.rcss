@@ -78,4 +78,5 @@
 	background-color: token(semantic-danger);
 	white-space: nowrap;
 	padding: 0 2dp;
+	font-family: "token(font-body)";
 }

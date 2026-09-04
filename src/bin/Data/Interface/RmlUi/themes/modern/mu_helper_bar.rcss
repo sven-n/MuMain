@@ -26,6 +26,7 @@
 	height: 9dp;
 	text-align: center;
 	color: token(text-body);
+	font-family: "token(font-body)";
 	white-space: nowrap;
 	pointer-events: none;
 }

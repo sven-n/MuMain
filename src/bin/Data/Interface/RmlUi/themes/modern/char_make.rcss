@@ -44,6 +44,7 @@
 	border: 1px token(border-metal);
 	border-radius: token(radius-md)px;
 	color: token(text-body);
+	font-family: "token(font-body)";
 }
 .job-btn:hover {
 	background-color: token(accent-steel);
@@ -91,17 +92,20 @@
 }
 .stat-label {
 	color: token(text-body);
+	font-family: "token(font-body)";
 }
 .stat-value {
 	position: absolute;
 	left: 54px;
 	color: token(accent-gold);
+	font-family: "token(font-body)";
 }
 
 .desc-line {
 	position: absolute;
 	left: 10px;
 	white-space: nowrap;
+	font-family: "token(font-body)";
 }
 
 .input-frame {

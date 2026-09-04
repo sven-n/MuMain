@@ -25,6 +25,7 @@
 	text-align: center;
 	white-space: nowrap;
 	pointer-events: none;
+	font-family: "token(font-body)";
 }
 .no-buttons #msg_line1 { top: 54dp; }
 #msg_line1.multi-line {
@@ -42,6 +43,7 @@
 	text-align: left;
 	white-space: nowrap;
 	pointer-events: none;
+	font-family: "token(font-body)";
 }
 .no-buttons #msg_line2 { top: 66dp; }
 
