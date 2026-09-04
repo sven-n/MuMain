@@ -67,6 +67,9 @@
 #include "Core/Input/Input.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Platform/Audio/MiniAudioBackend.h"
+#ifndef _WIN32
+#include "Core/Platform/posix/PosixSignalHandlers.h"
+#endif
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Legacy/UIMng.h"
@@ -2024,6 +2027,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         MessageBox(nullptr, L"Windows aplication error!", L"Aplication Error", MB_ICONERROR);
         return 0;
     }
+
+#ifndef _WIN32
+    // Story 7.1.2: install POSIX crash-diagnostic signal handlers. After SDL_Init (R8
+    // mitigation) and after mu::log::Init() (InitializeWorkingDirectoryAndLog(), above).
+    // [VS0-QUAL-SIGNAL-HANDLERS]
+    mu::platform::InstallSignalHandlers();
+#endif
 
 #if defined(__APPLE__)
     SetWorkingDirectoryToBasePath();

@@ -293,17 +293,21 @@ for "the full architecture is in place":
   checklist above.** Work has been pilot-by-pilot, each individually verified. This document is a
   first step toward tracking that, not a substitute for an actual sequenced plan if one is
   wanted.
-- **`MuPlatform::Initialize()`/`CreatePlatformWindow()`/`GetWindow()`/`Shutdown()`/
+- ~~`MuPlatform::Initialize()`/`CreatePlatformWindow()`/`GetWindow()`/`Shutdown()`/
   `SetFullscreen()`/`SetMouseGrab()`/`GetDisplaySize()`, and the `IPlatformWindow`/`SDLWindow`
-  classes they own, show zero external callers in a first-pass grep** — found 2026-09-04 while
-  deleting the confirmed-dead `SDLEventLoop`/`PollEvents()` path this file's own `MuPlatform.cpp`
-  used to also contain (see the Findings entry above). Surprising: `MuPlatform::Initialize()` is
-  the only place `SDL_Init(SDL_INIT_VIDEO)` is called anywhere in `src/source`, yet the game
-  clearly runs and creates its window (`SDL_CreateWindow` directly in `Winmain.cpp`). Needs its own
-  careful audit (does this SDL3 version actually require an explicit `SDL_Init` before
-  `SDL_CreateWindow`, what do non-Windows paths do) before touching — deleting the wrong thing here
-  could break window creation outright, unlike the narrowly-scoped `SDLEventLoop` deletion. **Not
-  investigated yet — deliberately parked**, not bundled into that cleanup.
+  classes they own, show zero external callers.~~ **Investigated and fixed 2026-09-04.** Root
+  cause: `MuPlatform` was scaffolding added in `7f06b3af` (Jul 9) alongside unrelated audio-port
+  work, never adopted — `Winmain.cpp`'s `WinMain()` (confirmed, via `Linux/main.cpp` and
+  `macOS/main.mm`, the one real cross-platform entry point) has always done its own
+  `SDL_InitSubSystem`/`SDL_CreateWindow`/`SDL_SetWindowFullscreen`/`SDL_Quit()` directly, in
+  parallel to `MuPlatform`, on every platform. The mechanism itself wasn't unsound — the real
+  finding was that `mu::platform::InstallSignalHandlers()` (POSIX crash diagnostics, Story 7.1.2)
+  was only ever called from inside the dead `MuPlatform::Initialize()`, so it silently never
+  installed on Linux/macOS. Fixed by calling `InstallSignalHandlers()` directly from `WinMain()`
+  (`#ifndef _WIN32`, right after `SDL_InitSubSystem` succeeds, preserving the documented ordering)
+  and deleting `MuPlatform.cpp`/`.h`, `IPlatformWindow.h`, and `sdl3/SDLWindow.cpp`/`.h` — this
+  decouples the still-needed feature from the facade that never got used for its actual purpose.
+  Verified via a full incremental build.
 
 ## Pilots to revisit when the relevant phase arrives
 
