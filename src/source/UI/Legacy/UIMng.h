@@ -13,7 +13,6 @@
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
 #include "Character/CharInfoBalloonMng.h"
-#include "UI/Windows/ServerMsgWin.h"
 #include "UI/NewUI/NewUIManager.h"
 
 #define UIM_SCENE_NONE 0
@@ -40,7 +39,6 @@ public:
     CCharSelMainWin m_CharSelMainWin;
     CCharMakeWin m_CharMakeWin;
     CCharInfoBalloonMng m_CharInfoBalloonMng;
-    CServerMsgWin m_ServerMsgWin;
     CLoadingScene* m_pLoadingScene;
 
 protected:

@@ -119,6 +119,8 @@ enum INTERFACE_LIST
     // migrating CUIMng's CWin-derived windows onto CNewUIManager's registry. Inserted just before
     // INTERFACE_END so every other entry's numeric value is unaffected.
     INTERFACE_CREDITS,
+    // Phase 2: CServerMsgWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_SERVER_MESSAGE,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

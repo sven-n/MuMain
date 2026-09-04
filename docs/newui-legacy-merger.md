@@ -43,10 +43,19 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   1024x768) against a real server. First window fully off `CWin`, onto `CNewUIObj`/`CUIMng`'s new
   scene-scoped manager instance. `g_CreditWin` replaces `CUIMng::m_CreditWin` (same convention as
   `g_pSkillList` — a raw global, not routed through `FindUIObj()` for its few external call sites).
-- **Phase 2 (remaining `CUIMng` windows)** — not started. Still-legacy-2D first (`COptionWin`,
-  `CServerSelWin`, `CServerMsgWin` — no RmlUi entanglement, same low-complexity shape as
-  `CCreditWin`), then the RmlUi-hybrid ones (`CMsgWin`, `CSysMenuWin`, `CLoginMainWin`,
-  `CCharSelMainWin`, `CCharMakeWin`).
+- **Phase 2 (remaining `CUIMng` windows)** — in progress.
+  - `CServerMsgWin` — done, verified against a real server (character-select scene, server
+    message posted and rendered correctly). Even simpler than `CCreditWin`: purely passive (its old `CWinEx::CursorInWin(WA_ALL)` override
+    always returned `false`, so it could never become `CUIMng`'s "active" window -- confirmed no
+    drag/resize behavior was ever reachable in practice), so `UpdateMouseEvent()` just always
+    returns `true` (never consumes) with no click-handling logic to port at all. Ported `CWinEx`'s
+    5-sprite composite background (`WE_BG_*`) directly into the window's own private sprite array
+    instead of reusing `CWinEx` (still used by not-yet-migrated `COptionWin`/`CServerSelWin`/
+    `SysMenuWin`) -- matches the "no shared rect/hit-test facility" design principle below.
+    `g_ServerMsgWin` replaces `CUIMng::m_ServerMsgWin`, same convention as `g_CreditWin`.
+  - Still to do: `COptionWin`, `CServerSelWin` (no RmlUi entanglement, same low-complexity shape),
+    then the RmlUi-hybrid ones (`CMsgWin`, `CSysMenuWin`, `CLoginMainWin`, `CCharSelMainWin`,
+    `CCharMakeWin`).
 - **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started. `CLoginWin` is the one window
   that genuinely needs the new shown/active split (keeps ticking its text inputs and "Remember
   Password" dialog while inactive, per its own `UpdateWhileShow()`/`UpdateWhileActive()` split);
@@ -84,6 +93,13 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     process-wide by `UI::Scaling::SetActiveTransform()`) — a genuinely mixed, partial dependency,
     not an all-or-nothing one. A wrong active transform therefore corrupts text scale/position and
     sprite offset, but never sprite *scale*.
+- **Check whether a window's `CursorInWin(WA_ALL)` override is hardcoded to always return `false`
+  before assuming it needs real click-handling ported.** `CServerMsgWin` had one (it could never
+  become `CUIMng`'s "active" window as a result, which in turn meant its inherited
+  `CWinEx::CheckAdditionalState()` drag-resize behavior was reachable in the code but never
+  actually triggerable) -- its migrated `UpdateMouseEvent()` is just `return true;`, no porting
+  needed. Worth checking explicitly per window rather than assuming interactivity from the
+  presence of buttons/sliders in its member list.
 - **`g_pTimer` (the global `CTimer*` `SceneManager.cpp` reads for `CUIMng::Update(dDeltaTick)`) is
   never reset anywhere in this codebase** (`ResetTimer()` has zero callers on it) — its
   `GetTimeElapsed()` is total process uptime, not a per-frame delta. The existing

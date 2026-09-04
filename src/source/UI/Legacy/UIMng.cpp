@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "UIMng.h"
 #include "UI/Windows/CreditWin.h"
+#include "UI/Windows/ServerMsgWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
 #include "Audio/DSPlaySound.h"
@@ -69,8 +70,6 @@ const char* WindowName(const CUIMng& manager, const CWin* window)
         return "character-select";
     if (window == &manager.m_CharMakeWin)
         return "character-create";
-    if (window == &manager.m_ServerMsgWin)
-        return "server-message";
     return window == nullptr ? "none" : "unknown";
 }
 } // namespace
@@ -238,6 +237,7 @@ void CUIMng::Release()
 
     m_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
+    g_ServerMsgWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -248,6 +248,7 @@ void CUIMng::CreateLoginScene()
 
     m_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
+    g_ServerMsgWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
@@ -298,6 +299,7 @@ void CUIMng::CreateCharacterScene()
     RemoveWinList();
 
     g_CreditWin.Release();
+    g_ServerMsgWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
@@ -307,10 +309,9 @@ void CUIMng::CreateCharacterScene()
     m_WinList.AddHead(&m_MsgWin);
     m_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2, (rInput.GetScreenHeight() - 113) / 2);
 
-    m_ServerMsgWin.Create();
-    m_WinList.AddHead(&m_ServerMsgWin);
+    g_ServerMsgWin.Create();
     int nBaseY = int(31.0f / 600.0f * (float)rInput.GetScreenHeight());
-    m_ServerMsgWin.SetPosition(10, nBaseY + 10);
+    g_ServerMsgWin.SetPosition(10, nBaseY + 10);
 
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
@@ -341,6 +342,7 @@ void CUIMng::CreateMainScene()
 
     m_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
+    g_ServerMsgWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -903,5 +905,5 @@ void CUIMng::AddServerMsg(wchar_t* pszMsg)
     if (UIM_SCENE_CHARACTER != m_nScene)
         return;
 
-    m_ServerMsgWin.AddMsg(pszMsg);
+    g_ServerMsgWin.AddMsg(pszMsg);
 }
