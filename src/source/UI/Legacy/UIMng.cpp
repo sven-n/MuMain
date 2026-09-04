@@ -8,6 +8,8 @@
 #include "UI/Windows/ServerMsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "Character/CharSelMainWin.h"
+#include "Character/CharMakeWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
 #include "Audio/DSPlaySound.h"
@@ -60,10 +62,6 @@ const char* WindowName(const CUIMng& manager, const CWin* window)
         return "login-main";
     if (window == &manager.m_LoginWin)
         return "login";
-    if (window == &manager.m_CharSelMainWin)
-        return "character-select";
-    if (window == &manager.m_CharMakeWin)
-        return "character-create";
     return window == nullptr ? "none" : "unknown";
 }
 } // namespace
@@ -235,6 +233,8 @@ void CUIMng::Release()
     g_ServerSelWin.Release();
     g_MsgWin.Release();
     g_SysMenuWin.Release();
+    g_CharSelMainWin.Release();
+    g_CharMakeWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -249,6 +249,8 @@ void CUIMng::CreateLoginScene()
     g_ServerSelWin.Release();
     g_MsgWin.Release();
     g_SysMenuWin.Release();
+    g_CharSelMainWin.Release();
+    g_CharMakeWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
@@ -297,6 +299,8 @@ void CUIMng::CreateCharacterScene()
     g_ServerSelWin.Release();
     g_MsgWin.Release();
     g_SysMenuWin.Release();
+    g_CharSelMainWin.Release();
+    g_CharMakeWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
@@ -311,18 +315,15 @@ void CUIMng::CreateCharacterScene()
 
     g_SysMenuWin.Create();
 
-    m_CharSelMainWin.Create();
-    m_WinList.AddHead(&m_CharSelMainWin);
+    g_CharSelMainWin.Create();
 
-    m_CharMakeWin.Create();
-    m_WinList.AddHead(&m_CharMakeWin);
+    g_CharMakeWin.Create();
+    g_CharMakeWin.SetPosition((rInput.GetScreenWidth() - 454) / 2, (rInput.GetScreenHeight() - 406) / 2);
 
-    m_CharMakeWin.SetPosition((rInput.GetScreenWidth() - 454) / 2, (rInput.GetScreenHeight() - 406) / 2);
-
-    m_CharSelMainWin.UpdateDisplay();
+    g_CharSelMainWin.UpdateDisplay();
     m_CharInfoBalloonMng.UpdateDisplay();
 
-    ShowWin(&m_CharSelMainWin);
+    g_CharSelMainWin.Show(true);
 
     m_bSysMenuWinShow = false;
     m_nScene = UIM_SCENE_CHARACTER;
@@ -338,6 +339,8 @@ void CUIMng::CreateMainScene()
     g_ServerSelWin.Release();
     g_MsgWin.Release();
     g_SysMenuWin.Release();
+    g_CharSelMainWin.Release();
+    g_CharMakeWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -390,7 +393,7 @@ void CUIMng::RepositionSceneUI()
     }
     else if (m_nScene == UIM_SCENE_CHARACTER)
     {
-        // CreateCharacterScene() ends with an explicit ShowWin(&m_CharSelMainWin)
+        // CreateCharacterScene() ends with an explicit g_CharSelMainWin.Show(true)
         // so visibility of the main panel is already preserved. Other character-
         // scene windows (msg box, server msg, char make) are shown on demand
         // by game events, matching the fresh-scene state.
@@ -731,7 +734,7 @@ void CUIMng::Update(double dDeltaTick)
                 g_SysMenuWin.Show(false);
             }
             else if (!g_MsgWin.IsVisible() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
-                     !m_CharMakeWin.IsShow())
+                     !g_CharMakeWin.IsVisible())
             {
                 ::PlayBuffer(SOUND_CLICK01);
                 g_SysMenuWin.Show(true);

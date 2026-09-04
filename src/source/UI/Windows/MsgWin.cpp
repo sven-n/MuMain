@@ -7,6 +7,8 @@
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/ServerSelWin.h"
+#include "Character/CharMakeWin.h"
+#include "Character/CharSelMainWin.h"
 #include "Core/Platform/CrtDbg.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -499,7 +501,7 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         CharactersClient[SelectedHero].Object.Live = false;
         DeleteMount(&CharactersClient[SelectedHero].Object);
         SelectedHero = -1;
-        rUIMng.m_CharSelMainWin.UpdateDisplay();
+        g_CharSelMainWin.UpdateDisplay();
         rUIMng.m_CharInfoBalloonMng.UpdateDisplay();
         lpszMsg = I18N::Game::CharacterWasDeletedSuccessfully;
         break;
@@ -516,11 +518,11 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         lpszMsg = I18N::Game::CannotUseSymbols;
         break;
     case RECEIVE_CREATE_CHARACTER_FAIL:
-        rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
+        g_CharMakeWin.Show(true);
         lpszMsg = I18N::Game::IncorrectCharacterNameWasEnteredOrSameCharacterNameExists;
         break;
     case RECEIVE_CREATE_CHARACTER_FAIL2:
-        rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
+        g_CharMakeWin.Show(true);
         lpszMsg = I18N::Game::NoMoreCharactersCanBeCreated;
         break;
     default:

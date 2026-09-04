@@ -8,6 +8,7 @@
 
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "Character/CharSelMainWin.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Scenes/SceneCore.h"
 
@@ -204,9 +205,8 @@ void CSysMenuWin::SelectServer()
     SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToServerSelection);
     g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
 
-    CUIMng& rUIMng = CUIMng::Instance();
     Show(false);
-    rUIMng.HideWin(&rUIMng.m_CharSelMainWin);
+    g_CharSelMainWin.Show(false);
 }
 
 void CSysMenuWin::OpenOptions()

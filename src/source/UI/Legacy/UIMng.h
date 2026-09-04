@@ -7,8 +7,6 @@
 #include "UI/Windows/MsgWin.h"
 #include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/LoginWin.h"
-#include "Character/CharSelMainWin.h"
-#include "Character/CharMakeWin.h"
 #include "Character/CharInfoBalloonMng.h"
 #include "UI/NewUI/NewUIManager.h"
 
@@ -29,8 +27,6 @@ class CUIMng
 public:
     CLoginMainWin m_LoginMainWin;
     CLoginWin m_LoginWin;
-    CCharSelMainWin m_CharSelMainWin;
-    CCharMakeWin m_CharMakeWin;
     CCharInfoBalloonMng m_CharInfoBalloonMng;
     CLoadingScene* m_pLoadingScene;
 

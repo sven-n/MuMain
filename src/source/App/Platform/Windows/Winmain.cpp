@@ -73,6 +73,7 @@
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Legacy/UIMng.h"
+#include "Character/CharMakeWin.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -2160,8 +2161,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                 BeginBitmap();
                 if (CUIMng::Instance().m_LoginWin.IsShow())
                     CUIMng::Instance().m_LoginWin.RenderTextOnTop();
-                if (CUIMng::Instance().m_CharMakeWin.IsShow())
-                    CUIMng::Instance().m_CharMakeWin.RenderTextOnTop();
+                if (g_CharMakeWin.IsVisible())
+                    g_CharMakeWin.RenderTextOnTop();
                 if (g_MsgWin.IsVisible())
                     g_MsgWin.RenderTextOnTop();
                 RenderCursor();

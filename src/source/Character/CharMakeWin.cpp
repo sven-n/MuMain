@@ -16,6 +16,7 @@
 #include "Scenes/SceneCore.h"
 #include "UI/Legacy/UIControls.h"
 #include "I18N/All.h"
+#include "Core/Globals/_enum.h"
 
 #include "App/Platform/Windows/Local.h"
 #include "CharacterManager.h"
@@ -137,11 +138,11 @@ namespace
 #define	CMW_OK		0
 #define	CMW_CANCEL	1
 
-
-
 extern int g_iChatInputType;
 
 void MoveCharacterCamera(vec3_t Origin, vec3_t Position, vec3_t Angle);
+
+CCharMakeWin g_CharMakeWin;
 
 CCharMakeWin::CCharMakeWin()
 {
@@ -149,13 +150,21 @@ CCharMakeWin::CCharMakeWin()
 
 CCharMakeWin::~CCharMakeWin()
 {
+    Release();
 }
 
 void CCharMakeWin::Create()
 {
+    Release();
+
     CInput& rInput = CInput::Instance();
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
-    SetMovable(false);
+
+    // Real, visible full-screen dimming overlay -- see this class's header comment for why this
+    // one (unlike CMsgWin/CSysMenuWin) genuinely needs to render. Mirrors CWin::Create()'s own
+    // default-nTexID=-1 path exactly (Win.cpp).
+    m_sprBg.Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -1, 0, NULL, 0, 0, false);
+    m_sprBg.SetAlpha(128);
+    m_sprBg.SetColor(0, 0, 0);
 
     m_winBack.Create(454, 406, -2);
 
@@ -177,13 +186,11 @@ void CCharMakeWin::Create()
         m_abtnJob[classIndex].Create(108, 26, BITMAP_LOG_IN + 1, 4, 2, 1, 0, 3, 3, 3, 0);
         const int textId = kClassButtonTextIds[classIndex];
         m_abtnJob[classIndex].SetText(I18N::Game::Lookup(textId), jobButtonColors.data());
-        CWin::RegisterButton(&m_abtnJob[classIndex]);
     }
 
     for (int i = 0; i < 2; ++i)
     {
         m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-        CWin::RegisterButton(&m_aBtn[i]);
     }
 
     std::fill(&m_aszJobDesc[0][0],
@@ -242,14 +249,22 @@ void CCharMakeWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
     }
 
+    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_MAKE, this);
+
     UpdateDisplay();
+    Show(false);
 }
 
-void CCharMakeWin::PreRelease()
+void CCharMakeWin::Release()
 {
     for (int i = 0; i < CMW_SPR_MAX; ++i)
         m_asprBack[i].Release();
+    for (auto& button : m_abtnJob)
+        button.Release();
+    for (auto& button : m_aBtn)
+        button.Release();
     m_winBack.Release();
+    m_sprBg.Release();
 
     // See CLoginMainWin::PreRelease()'s identical comment.
     if (m_pRmlDoc)
@@ -337,7 +352,9 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 
 void CCharMakeWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    SEASON3B::CNewUIObj::Show(bShow);
+
+    m_sprBg.Show(bShow);
 
     int i;
     for (i = 0; i < CMW_SPR_MAX; ++i)
@@ -443,20 +460,33 @@ void CCharMakeWin::SubmitCreateCharacter()
 
 void CCharMakeWin::CloseDialog()
 {
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 }
 
-void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
+bool CCharMakeWin::Update()
 {
-    for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
-    {
-        if (!m_abtnJob[classIndex].IsClick())
-            continue;
-        SelectJob(classIndex);
-        break;
-    }
+    if (!IsVisible())
+        return true;
 
+    for (auto& button : m_abtnJob)
+        button.Update();
+    m_aBtn[CMW_OK].Update();
+    m_aBtn[CMW_CANCEL].Update();
+
+    // A CMsgWin validation-error dialog (name too short/invalid/special) can be shown on top of
+    // this one without hiding it first (see GetLayerDepth()'s own comment) -- skip this window's
+    // own click/key consequences while that's up, same reasoning as CCharSelMainWin's modal gate
+    // (docs/newui-legacy-merger.md).
+    if (!g_MsgWin.IsVisible())
     {
+        for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
+        {
+            if (!m_abtnJob[classIndex].IsClick())
+                continue;
+            SelectJob(classIndex);
+            break;
+        }
+
         if (m_aBtn[CMW_OK].IsClick())
         {
             SubmitCreateCharacter();
@@ -473,16 +503,19 @@ void CCharMakeWin::UpdateWhileActive(double dDeltaTick)
         else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
         {
             ::PlayBuffer(SOUND_CLICK01);
-            CUIMng::Instance().HideWin(this);
+            Show(false);
             CUIMng::Instance().SetSysMenuWinShow(false);
         }
     }
+
     UpdateCreateCharacter();
 
     // Input polling, moved here from RenderControls() (matches CLoginWin's own DoAction()
     // placement) -- RenderTextOnTop() below now only draws, called from the post-RmlUi seam.
     if (g_iChatInputType == 1)
         g_pSingleTextInputBox->DoAction();
+
+    return true;
 }
 
 void CCharMakeWin::RequestCreateCharacter()
@@ -507,13 +540,17 @@ void CCharMakeWin::RequestCreateCharacter()
         CurrentProtocolState = REQUEST_CREATE_CHARACTER;
         SocketClient->ToGameServer()->SendCreateCharacter(MU_C16(InputText[0]), classByte);
         //SendRequestCreateCharacter(InputText[0], CharacterView.Class, CharacterView.Skin);
-        rUIMng.HideWin(this);
+        Show(false);
         rUIMng.PopUpMsgWin(MESSAGE_WAIT);
     }
 }
 
-void CCharMakeWin::RenderControls()
+bool CCharMakeWin::Render()
 {
+    // Real, visible dimming overlay -- see this class's header comment for why this one (unlike
+    // CMsgWin/CSysMenuWin) genuinely needs rendering, not just RmlUi bookkeeping.
+    m_sprBg.Render();
+
     // The live 3D preview stays exactly as before -- see this class's header comment for why it
     // composites correctly underneath RmlUi's later render pass without any changes here.
     RenderCreateCharacter();
@@ -523,6 +560,7 @@ void CCharMakeWin::RenderControls()
     // thing this override still needs to do; RenderTextOnTop() (the actual input text) is called
     // from Winmain.cpp's SetPostRmlUiCallback instead of here, so it isn't drawn twice.
     SyncRmlModel();
+    return true;
 }
 
 void CCharMakeWin::RenderTextOnTop()
@@ -620,7 +658,14 @@ void CCharMakeWin::RenderCreateCharacter()
     g_Camera.FOV = 10.f;
     MoveCharacterCamera(CharacterView.Object.Position, Position, Angle);
 
-    BeginOpengl(m_winBack.GetXPos() / g_fScreenRate_x, m_winBack.GetYPos() / g_fScreenRate_y, 410 / g_fScreenRate_x, 335 / g_fScreenRate_y);
+    // Real pixels, not divided by g_fScreenRate_x/y -- BeginOpengl() rescales its arguments by
+    // *whatever transform is active when it runs* (ConvertPositionX/Y, ZzzOpenglUtil.cpp), same
+    // hazard as CMsgWin's resident-password gotcha (docs/newui-legacy-merger.md). Render() (below)
+    // runs under this window's own LayoutMode::Legacy (identity) ScopedActiveTransform, so passing
+    // real pixels directly here is what keeps the viewport aligned with m_winBack's actual
+    // position -- dividing here (as the pre-migration CWin-era code did, correctly, when this ran
+    // unscoped) would shrink and misplace the live character preview.
+    BeginOpengl(m_winBack.GetXPos(), m_winBack.GetYPos(), 410, 335);
 
     const ClassRenderParameters params = GetRenderParameters(CharacterView.Class);
     if (params.overrideAngle)

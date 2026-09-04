@@ -20,6 +20,8 @@
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "Character/CharSelMainWin.h"
+#include "Character/CharMakeWin.h"
 #include "Core/Input/Input.h"
 #include "Core/Input/UiInputRouter.h"
 #include "Network/Server/WSclient.h"
@@ -194,7 +196,7 @@ void NewMoveCharacterScene()
 
     if (rInput.IsKeyDown(VK_RETURN))
     {
-        if (!(g_MsgWin.IsVisible() || rUIMng.m_CharMakeWin.IsShow()
+        if (!(g_MsgWin.IsVisible() || g_CharMakeWin.IsVisible()
             || g_SysMenuWin.IsVisible())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
@@ -209,19 +211,19 @@ void NewMoveCharacterScene()
     // ESC menu toggle is handled by CUIMng::Update()
 
     // Core::Input::IsMouseOverUI() added as a 2nd gate (2026-09-04, STATUS.md's "three parallel
-    // input-tracking systems" finding) -- IsCursorOnUI() alone runs on CCharSelMainWin's legacy
-    // CursorInWin() rect (CalculateFixedAnchorLayout()'s hand-duplicated math), which has already
-    // gone stale relative to the real RmlUi-rendered buttons once (see that function's own
-    // comment on the Delete-button no-op bug). RmlUi's own hit-test is authoritative here without
-    // any new per-window bounding-box query: char_sel_main.rml's #panel spans the full screen but
-    // is pointer-events:none, so IsMouseOverUI() only reports true over the real interactive
-    // children.
+    // input-tracking systems" finding) -- IsCursorOnUI() alone runs on CCharSelMainWin's own
+    // UpdateMouseEvent() rect (CalculateFixedAnchorLayout()'s hand-duplicated math), which has
+    // already gone stale relative to the real RmlUi-rendered buttons once (see that function's
+    // own comment on the Delete-button no-op bug). RmlUi's own hit-test is authoritative here
+    // without any new per-window bounding-box query: char_sel_main.rml's #panel spans the full
+    // screen but is pointer-events:none, so IsMouseOverUI() only reports true over the real
+    // interactive children.
     if (rUIMng.IsCursorOnUI() || Core::Input::IsMouseOverUI())
     {
         return;
     }
 
-    if (rInput.IsLBtnDbl() && rUIMng.m_CharSelMainWin.IsShow())
+    if (rInput.IsLBtnDbl() && g_CharSelMainWin.IsVisible())
     {
         if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_PER_ACCOUNT)
         {
@@ -237,7 +239,7 @@ void NewMoveCharacterScene()
             SelectedHero = -1;
         else
             SelectedHero = SelectedCharacter;
-        rUIMng.m_CharSelMainWin.UpdateDisplay();
+        g_CharSelMainWin.UpdateDisplay();
     }
 
     g_ConsoleDebug->UpdateMainScene();

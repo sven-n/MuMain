@@ -128,6 +128,10 @@ enum INTERFACE_LIST
     INTERFACE_MSG_WINDOW,
     // Phase 2: CSysMenuWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SYS_MENU,
+    // Phase 2: CCharSelMainWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_CHAR_SEL_MAIN,
+    // Phase 2: CCharMakeWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_CHAR_MAKE,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

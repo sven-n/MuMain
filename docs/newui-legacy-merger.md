@@ -159,7 +159,51 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     `CCharSelMainWin`/`CCharMakeWin` migrate (Phase 2's next two windows) onto the same
     deterministic `UpdateMouseEvent()`-claims-while-shown pattern already proven three times over —
     not patched here to avoid guessing at a fix for a system about to be replaced anyway.
-  - Still to do: `CLoginMainWin`, `CCharSelMainWin`, `CCharMakeWin`.
+  - `CCharSelMainWin`/`CCharMakeWin` — done together, verified against a real server (the Menu
+    button correctly inert while character creation is open; character creation itself including
+    the 3D preview, job selection, and name input; character deletion; connect via double-click
+    and Enter). Migrated as a pair specifically to land the real fix for the bug above:
+    **`CCharSelMainWin::Update()` now explicitly checks
+    `g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible()` and skips all
+    button click-consequence processing while any is true** (buttons still `Update()` regardless —
+    `CButton` self-gates on its own `Show()` flag, matching `CServerSelWin`'s established pattern —
+    just their `IsClick()`/`RmlClick*()` results go unconsumed). This is deliberate, explicit
+    C++-side gating, not a side effect of the manager's `UpdateMouseEvent()` dispatch: that
+    dispatch only decides who claims a given *click* for the legacy-walk-skip and
+    `IsCursorOnUI()`'s fold-in, and is entirely separate from `Update()`'s own independent
+    per-object dispatch pass (gated only by `IsEnabled()`, which nothing here touches) — so a
+    higher-depth modal claiming the mouse does **not**, by itself, stop a lower-depth window's own
+    `Update()` from still processing button state it already gathered. Same reasoning applied
+    defensively to `CCharMakeWin::Update()` itself (skips its own job/OK/Cancel/Enter/Escape
+    handling while `g_MsgWin` — its own validation-error dialog — is shown, see its
+    `GetLayerDepth()` comment for why the two can coexist).
+    - `CCharSelMainWin` is **not modal** — `UpdateMouseEvent()` claims only within its own
+      bounding rect (`CalculateFixedAnchorLayout()`'s math, unchanged), exactly `CServerSelWin`'s
+      pattern, not `CMsgWin`'s full-screen one — the world behind this bottom bar must stay
+      clickable/rotatable.
+    - `CCharMakeWin` genuinely **is** modal, and unlike every other Phase 2 window its own
+      `CWin::Create()` call used the *default* `nTexID=-1`, not `-2` — a real, visible full-screen
+      dimming sprite (`CWin::m_psprBg`), not RmlUi bookkeeping-only content. Ported as an explicit
+      `m_sprBg` member, rendered first in `Render()` (same convention as `CCreditWin`'s own
+      `m_sprBg`) — dropping it would have been a real, visible regression, not a redundant-
+      bookkeeping cleanup.
+    - **Caught proactively before any user report**: `RenderCreateCharacter()`'s live 3D preview
+      viewport calls `BeginOpengl(m_winBack.GetXPos() / g_fScreenRate_x, ...)` — the exact same
+      "pre-divide, rely on a later same-transform multiply to cancel it out" hazard as `CMsgWin`'s
+      resident-password gotcha (`BeginOpengl()` → `ConvertPositionX/Y`, same helpers
+      `RenderColorQuadARGB`/`CUITextInputBox::Render()` use). This call moves from an unscoped
+      context (`CWin::Render()`'s old per-window walk) into this window's own `LayoutMode::Legacy`
+      (identity) `ScopedActiveTransform` scope, so the division would have shrunk and mispositioned
+      the character preview. Fixed by passing real pixels directly (no division) before ever
+      building or shipping this migration — checking every `g_fScreenRate_x`/`g_fScreenRate_y`
+      division in a window before migrating it, not just the ones already known to be `CWin`/
+      `CUIControl`-family widgets, is now standard practice for the remaining migrations too.
+    `g_CharSelMainWin`/`g_CharMakeWin` replace `CUIMng::m_CharSelMainWin`/`m_CharMakeWin`, same
+    convention as `g_CreditWin` — 6 external call sites updated across `MsgWin.cpp`,
+    `WSclient.cpp`, `Winmain.cpp`, `CharacterScene.cpp`, `SysMenuWin.cpp`,
+    `CharInfoBalloonMng.cpp` (several needed the same "add the explicit include `UIMng.h` no
+    longer provides transitively" fix `CSysMenuWin`'s migration already found).
+  - Still to do: `CLoginMainWin`.
 - **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started. `CLoginWin` is the one window
   that genuinely needs the new shown/active split (keeps ticking its text inputs and "Remember
   Password" dialog while inactive, per its own `UpdateWhileShow()`/`UpdateWhileActive()` split);

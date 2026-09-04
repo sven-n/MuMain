@@ -28,8 +28,13 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // same reasoning as INTERFACE_CREDITS above.
     // CSysMenuWin (Phase 2) keeps its legacy CWinEx/CButton geometry as real-pixel click-
     // detection redundancy behind RmlUi's own primary click bindings -- same reasoning.
+    // CCharSelMainWin/CCharMakeWin (Phase 2): same reasoning -- both compute real screen pixels
+    // themselves (CalculateFixedAnchorLayout(), the live 3D character-preview viewport's
+    // BeginOpengl() call) rather than reference-space coordinates meant to be rescaled here.
     case INTERFACE_MSG_WINDOW:
     case INTERFACE_SYS_MENU:
+    case INTERFACE_CHAR_SEL_MAIN:
+    case INTERFACE_CHAR_MAKE:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:

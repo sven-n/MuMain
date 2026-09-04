@@ -43,6 +43,7 @@
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerSelWin.h"
+#include "Character/CharSelMainWin.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
 #include "Engine/Physics/PhysicsManager.h"
@@ -834,7 +835,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         CurrentProtocolState = RECEIVE_CREATE_CHARACTER_SUCCESS;
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.CloseMsgWin();
-        rUIMng.m_CharSelMainWin.UpdateDisplay();
+        g_CharSelMainWin.UpdateDisplay();
         rUIMng.m_CharInfoBalloonMng.UpdateDisplay();
     }
     else if (Data->Result == 0)

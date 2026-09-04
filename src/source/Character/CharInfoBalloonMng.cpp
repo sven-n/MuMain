@@ -15,6 +15,7 @@
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "CharMakeWin.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 namespace
@@ -129,8 +130,7 @@ void CCharInfoBalloonMng::Render()
     // painting behind the balloon) -- this check needs the same treatment for every future
     // CHARACTER_SCENE-relevant migration too, same as the IsCursorOnUI() fold-in
     // (docs/newui-legacy-merger.md).
-    CUIMng& uiMng = CUIMng::Instance();
-    const bool shouldHide = uiMng.m_CharMakeWin.IsShow() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
+    const bool shouldHide = g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
     if (m_pRmlDoc)
     {
         if (shouldHide) m_pRmlDoc->Hide();

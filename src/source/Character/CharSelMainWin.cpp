@@ -7,6 +7,7 @@
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "Character/CharMakeWin.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -17,6 +18,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
+#include "Core/Globals/_enum.h"
 
 #include <algorithm>
 #include <utility>
@@ -35,24 +37,6 @@ extern unsigned int WindowWidth, WindowHeight;
 namespace
 {
     constexpr int kCharacterSlotCount = 5;
-    constexpr int kStatPanelBaseXOffset = 346;
-    constexpr int kStatPanelOffsetY = 24;
-    constexpr int kJobButtonsStartY = 131;
-    constexpr int kRageFighterButtonsY = 246;
-    constexpr int kSummonerRow = 3;
-    constexpr int kActionButtonsRowOffsetY = 325;
-    constexpr int kCancelButtonOffsetX = 400;
-    constexpr int kInputSpriteOffsetY = 317;
-    constexpr int kInputTextOffsetX = 78;
-    constexpr int kInputTextOffsetY = 21;
-    constexpr int kDescriptionSpriteOffsetY = 355;
-    // The account-block message's on-screen position (X=320, Y=330/348 in the pre-RmlUi
-    // g_pRenderText calls this replaced) is now expressed directly in char_sel_main.rcss
-    // (#account_block_message) instead of here -- it is a fixed, screen-absolute position
-    // unrelated to this window's own geometry, so it needs no C++ push (see SetPosition()).
-    // The old per-element offset constants (button spacing, deco/info offsets) are gone too --
-    // UI::CharacterSelection::CalculateFixedAnchorLayout() (CharSelMainWin.h) replaces them with a
-    // single fixed-dp-anchor calculator, mirroring char_sel_main.rcss's own math.
     constexpr int kWindowAlpha = 143;
 
     template <typename Predicate>
@@ -95,7 +79,16 @@ namespace
             return nullptr;
         return &CharactersClient[SelectedHero];
     }
+
+    // The three windows a modal open over CHARACTER_SCENE can be -- see this window's own header
+    // comment and docs/newui-legacy-merger.md for why this window's own Update() must check this.
+    bool IsCharacterSceneModalOpen()
+    {
+        return g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
+    }
 }
+
+CCharSelMainWin g_CharSelMainWin;
 
 CCharSelMainWin::CCharSelMainWin()
 {
@@ -103,10 +96,13 @@ CCharSelMainWin::CCharSelMainWin()
 
 CCharSelMainWin::~CCharSelMainWin()
 {
+    Release();
 }
 
 void CCharSelMainWin::Create()
 {
+    Release();
+
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not
     // CInput::Instance().GetScreenWidth()/GetScreenHeight() -- see LoginWin.cpp's
     // LoginUIScaleRatio() for why: a real, screenshot-confirmed bug traced back to CInput's own
@@ -144,11 +140,8 @@ void CCharSelMainWin::Create()
         UI::CharacterSelection::NativeButtonHeight,
         BITMAP_LOG_IN + 6, 4, 2, 1, 3);
 
-    CWin::Create(layout.window.width, layout.window.height, -2);
-    SetMovable(false);
-
-    for (int i = 0; i < CSMW_BTN_MAX; ++i)
-        CWin::RegisterButton(&m_aBtn[i]);
+    m_ptPos.x = m_ptPos.y = 0;
+    m_Size.cx = m_Size.cy = 0;
 
     // RmlUi migration -- see this class's header comment. Guarded the same way CLoginWin::Create()
     // is (CUIMng::RepositionSceneUI() re-runs Create() on resolution change), so the document/model
@@ -183,14 +176,20 @@ void CCharSelMainWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
     }
 
+    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_SEL_MAIN, this);
+
     ApplyLayout(layout);
     m_bAccountBlockItem = HasAccountBlockedCharacter();
+
+    Show(false);
 }
 
 void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
 {
-    CWin::SetSize(layout.window.width, layout.window.height);
-    CWin::SetPosition(layout.window.x, layout.window.y);
+    m_Size.cx = layout.window.width;
+    m_Size.cy = layout.window.height;
+    m_ptPos.x = layout.window.x;
+    m_ptPos.y = layout.window.y;
 
     m_asprBack[CSMW_SPR_DECO].SetSize(layout.decoration.width, layout.decoration.height);
     m_asprBack[CSMW_SPR_DECO].SetPosition(layout.decoration.x, layout.decoration.y);
@@ -211,18 +210,21 @@ void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
     // CalculateFixedAnchorLayout(), not the old resolution-proportional CalculateLayout() --
     // see that function's own comment for why the switch was necessary, not just stylistic) still
     // feeds the legacy CSprite/CButton objects, which genuinely still need real screen-pixel rects
-    // for their own hit-testing/IsCursorOnUI() bookkeeping -- but those rects are now derived from
-    // the SAME fixed-dp-anchor math as the RmlUi visuals, so the two stay pixel-for-pixel aligned
-    // at every resolution and UI-scale setting instead of just at the historical 800x600/100% case.
+    // for their own hit-testing/UpdateMouseEvent() bookkeeping -- but those rects are now derived
+    // from the SAME fixed-dp-anchor math as the RmlUi visuals, so the two stay pixel-for-pixel
+    // aligned at every resolution and UI-scale setting instead of just at the historical
+    // 800x600/100% case.
 }
 
-void CCharSelMainWin::PreRelease()
+void CCharSelMainWin::Release()
 {
-    for (int i = 0; i < CSMW_SPR_MAX; ++i)
-        m_asprBack[i].Release();
+    for (auto& sprite : m_asprBack)
+        sprite.Release();
+    for (auto& button : m_aBtn)
+        button.Release();
 
     // See CLoginMainWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s
-    // every window on every scene transition, and CWin's own Release() has no knowledge of
+    // every window on every scene transition, and this class has no base-class knowledge of
     // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
     // window happened to be open at the moment of transition.
     if (m_pRmlDoc)
@@ -231,9 +233,10 @@ void CCharSelMainWin::PreRelease()
 
 void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
 {
-    const int deltaX = nXCoord - CWin::GetXPos();
-    const int deltaY = nYCoord - CWin::GetYPos();
-    CWin::SetPosition(nXCoord, nYCoord);
+    const int deltaX = nXCoord - m_ptPos.x;
+    const int deltaY = nYCoord - m_ptPos.y;
+    m_ptPos.x = nXCoord;
+    m_ptPos.y = nYCoord;
 
     for (auto& sprite : m_asprBack)
         sprite.SetPosition(sprite.GetXPos() + deltaX, sprite.GetYPos() + deltaY);
@@ -245,12 +248,12 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
     // screen position moves; the RmlUi visuals are positioned independently via anchor classes.
     // No call site actually invokes this method today (CUIMng::RepositionSceneUI() re-runs
     // Create() wholesale instead) -- the legacy CSprite/CButton delta-shift above is kept
-    // correct anyway since it is part of CWin's public contract.
+    // correct anyway since it was part of CWin's public contract before this migration.
 }
 
 void CCharSelMainWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    SEASON3B::CNewUIObj::Show(bShow);
 
     for (auto& sprite : m_asprBack)
         sprite.Show(bShow);
@@ -277,13 +280,42 @@ void CCharSelMainWin::UpdateDisplay()
 
     if (!HasLiveCharacter())
     {
-        CUIMng& rUIMng = CUIMng::Instance();
-        rUIMng.ShowWin(&rUIMng.m_CharMakeWin);
+        g_CharMakeWin.Show(true);
     }
 }
 
-void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
+bool CCharSelMainWin::UpdateMouseEvent()
 {
+    if (!IsVisible())
+        return true;
+
+    // Was CWin::CursorInWin(WA_ALL) -- ported directly (see CServerSelWin's identical pattern).
+    RECT rc;
+    ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+    if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
+        return false;
+
+    return true;
+}
+
+bool CCharSelMainWin::Update()
+{
+    if (!IsVisible())
+        return true;
+
+    // The actual fix for a real, reported bug -- see this class's header comment. Block button
+    // click-state processing entirely while a modal overlay is open, since the legacy
+    // CWin::m_bActive gate this used to rely on for the same purpose doesn't reliably deactivate
+    // on a timely basis. Buttons still Update() below regardless (matching CServerSelWin -- CButton
+    // self-gates on its own Show() flag), just their IsClick()/RmlClick* results go unconsumed.
+    const bool modalOpen = IsCharacterSceneModalOpen();
+
+    for (auto& button : m_aBtn)
+        button.Update();
+
+    if (modalOpen)
+        return true;
+
     CUIMng& uiManager = CUIMng::Instance();
 
     if (m_aBtn[CSMW_BTN_CONNECT].IsClick() || m_bRmlConnectClicked)
@@ -300,22 +332,25 @@ void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
     else if (m_aBtn[CSMW_BTN_CREATE].IsClick() || m_bRmlCreateClicked)
     {
         m_bRmlCreateClicked = false;
-        uiManager.ShowWin(&uiManager.m_CharMakeWin);
+        g_CharMakeWin.Show(true);
     }
     else if (m_aBtn[CSMW_BTN_DELETE].IsClick() || m_bRmlDeleteClicked)
     {
         m_bRmlDeleteClicked = false;
         DeleteCharacter();
     }
+
+    return true;
 }
 
-void CCharSelMainWin::RenderControls()
+bool CCharSelMainWin::Render()
 {
     // RmlUi's #panel now owns 100% of this bar's visuals (buttons, info-bar background, deco
     // flourish, account-block message) in every theme -- see this class's header comment. The
     // legacy CSprites/CButtons stay alive purely for their geometry/click-detection bookkeeping,
     // never rendered; SyncRmlModel() is the only thing this override still needs to do.
     SyncRmlModel();
+    return true;
 }
 
 void CCharSelMainWin::SyncRmlModel()
