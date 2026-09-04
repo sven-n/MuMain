@@ -26,6 +26,7 @@
 .btn-icon-label {
 	color: token(text-body);
 	font-weight: bold;
+	font-family: "token(font-body)";
 }
 .btn-icon-menu {
 	left: 0;

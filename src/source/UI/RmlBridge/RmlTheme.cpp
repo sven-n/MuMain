@@ -88,29 +88,15 @@ namespace UI::RmlBridge
 
         // Design-token substitution (modern-theme-visual-direction.md) -- this vendored RmlUi has
         // no var()/custom-property mechanism, so a themed .rcss authored with token(name) markers
-        // needs its tokens resolved before RmlUi ever sees the text. RmlUi's own
-        // XMLNodeHandlerHead supports an inline <style> block in <head>, handled identically to an
-        // external <link type="text/rcss"> for cascade purposes -- so this finds every <link> in
-        // the RML's <head> (every migrated document links at least two: base.rcss, then its own
-        // <name>.rcss), reads the .rcss file each one points at, and (only for a file that
-        // actually contains a token(...) marker) splices the substituted text in as <style>
-        // instead, in the same position, preserving cascade order.
+        // needs its tokens resolved before RmlUi ever sees the text. RmlUi's XMLNodeHandlerHead
+        // treats an inline <style> block in <head> identically to an external
+        // <link type="text/rcss"> for cascade purposes, so this iterates every <link> in the
+        // RML's <head> (a document typically links two: base.rcss, then its own <name>.rcss) and
+        // substitutes each stylesheet independently, in place, preserving order.
         //
-        // 2026-09-04 fix: this used to std::regex_search for a single match and return after
-        // handling it -- correct for a document with exactly one stylesheet link, silently wrong
-        // for the (universal, in practice) two-link case: base.rcss's link is first in every
-        // document's <head>, so it was the only one ever substituted, and every window's own
-        // <name>.rcss -- where nearly every token(...) call actually lives -- was left as a
-        // literal, unsubstituted <link>, sending literal text like `token(font-body)`/
-        // `token(semantic-warning)` straight to RmlUi's parser. Symptom: labels/tooltips/button
-        // text silently failing to render across every migrated window, not just login. Iterating
-        // every <link> match fixes this for any number of stylesheet links, not just two.
-        //
-        // Content-driven, not theme-name-driven, on purpose (architecture-principles.md §30 --
-        // same reasoning as ThemeProvidesOwnIconChrome() above): a stylesheet with no token(...)
-        // marker leaves its own <link> completely untouched, the exact code path every window
-        // already took before this existed. `legacy` (and any future non-tokenized file) never
-        // enters the substitution branch at all, rather than being special-cased by name.
+        // Content-driven, not theme-name-driven (architecture-principles.md §30, same reasoning
+        // as ThemeProvidesOwnIconChrome() above): a stylesheet with no token(...) marker leaves
+        // its own <link> untouched, so `legacy` never enters the substitution branch at all.
         std::string InlineTokenizedStylesheet(const std::string& rmlText, const std::string& resolvedRmlPath)
         {
             // Custom raw-string delimiter (R"re(...)re") -- the pattern's own text contains `)"`
@@ -194,12 +180,8 @@ namespace UI::RmlBridge
         // where it already lives for every other window: which file gets loaded, decided purely
         // by directory convention, zero runtime "which theme" logic in C++.
         std::ifstream file(sourceUrl, std::ios::binary);
-        std::string resolvedPath = sourceUrl;
         if (!file)
-        {
             file.open(documentPath, std::ios::binary);
-            resolvedPath = documentPath;
-        }
         if (!file)
         {
             g_ErrorReport.Write(L"> [RmlTheme] Failed to open '%hs' or '%hs'.\r\n", sourceUrl.c_str(), documentPath);
@@ -209,9 +191,11 @@ namespace UI::RmlBridge
         std::ostringstream buffer;
         buffer << file.rdbuf();
 
-        // Design-token substitution -- see InlineTokenizedStylesheet()'s own comment. No-op for
-        // any stylesheet that doesn't use token(...) markers.
-        const std::string rmlText = InlineTokenizedStylesheet(buffer.str(), resolvedPath);
+        // Design-token substitution -- see InlineTokenizedStylesheet()'s own comment. Resolves a
+        // <link href> against sourceUrl's directory (always themes/<theme>/), matching what
+        // RmlUi's own LoadDocumentFromMemory(rmlText, sourceUrl) resolves it against internally,
+        // regardless of which path the RML text itself was actually read from.
+        const std::string rmlText = InlineTokenizedStylesheet(buffer.str(), sourceUrl);
 
         Rml::ElementDocument* doc = context->LoadDocumentFromMemory(rmlText, sourceUrl);
         if (!doc)

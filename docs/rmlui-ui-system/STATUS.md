@@ -64,6 +64,23 @@ a couple are about the legacy `CWin`/`CUIMng` C++ architecture surrounding RmlUi
 -specific findings (`CNewUIObj`-tier) live in `newui-tier-adapter.md`'s "Proven by CBuffStrip"
 section in full detail; summarized here for visibility.
 
+- **This RmlUi build silently fails to inherit `font-family` into most subtrees** — a descendant
+  needs its own explicit `font-family` declaration; relying on inheritance from an ancestor
+  (`#panel`, `body`, a shared class) renders that element's text invisible with no error. Not
+  scoped to `data-model`-bound documents specifically (an earlier, wrong diagnosis) — `login_main.rml`
+  has no `data-model` at all and still needs this. Every text-bearing selector across
+  `themes/modern/*.rcss` now declares its own `font-family: "token(font-body)"` rather than
+  inheriting one.
+- **`UI::RmlBridge::LoadThemedDocument()`'s design-token substitution (`RmlTheme.cpp`) must
+  resolve a `<link href>` against `sourceUrl`'s directory, not wherever the RML text was actually
+  read from.** For any document with no `themes/<theme>/<name>.rml` override (everything except
+  `login`/`msg_win`/`remember_password_prompt`/`main_frame`), the RML content itself comes from
+  the shared fallback path, but RmlUi still resolves `<link href="base.rcss">` against
+  `sourceUrl` (always `themes/<theme>/`) when it later parses the substituted text — using the
+  fallback content's own directory to find the `.rcss` file to substitute looks in the wrong
+  place, fails silently, and leaves the `<link>` (and every `token(...)` inside it) untouched.
+  Also fixed the same function iterating only the first `<link>` match instead of every one
+  (a document links `base.rcss` then its own `<name>.rcss`; only the first was ever substituted).
 - **`overflow:hidden` does not clip an absolutely-positioned oversized child in this RmlUi
   build**, even with `clip: always`. Use generated named `@spritesheet` rects instead for sprite
   atlases — see `newui-tier-adapter.md`.
