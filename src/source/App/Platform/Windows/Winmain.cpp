@@ -76,6 +76,7 @@
 #include "Character/CharMakeWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "UI/Windows/LoginWin.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -2164,10 +2165,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                 // Also gated on !g_CreditWin.IsVisible()/!g_SysMenuWin.IsVisible() -- these are
                 // raw CUITextInputBox pixels drawn directly, not RmlUi content, so they'd
                 // otherwise paint over both regardless of which one is currently covering the
-                // login dialog (found via user testing; see CLoginWin::RenderControls()'s own,
+                // login dialog (found via user testing; see CLoginWin::Render()'s own,
                 // more detailed comment on this same condition).
-                if (CUIMng::Instance().m_LoginWin.IsShow() && !g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible())
-                    CUIMng::Instance().m_LoginWin.RenderTextOnTop();
+                if (g_LoginWin.IsVisible() && !g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible())
+                    g_LoginWin.RenderTextOnTop();
                 if (g_CharMakeWin.IsVisible())
                     g_CharMakeWin.RenderTextOnTop();
                 if (g_MsgWin.IsVisible())

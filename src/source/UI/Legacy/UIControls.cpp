@@ -3393,6 +3393,11 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
     if (iCaret < 0) iCaret = 0;
     else if (iCaret > iLength) iCaret = iLength;
 
+    // Hoisted above the selection-highlight block below (it used to be computed further down,
+    // only for the caret blink) -- see that block's own comment for why the highlight needs it
+    // too now.
+    const bool bFocused = (s_pFocusedPortable == this);
+
     // Horizontal scroll: never start past the caret, advance until it fits, then
     // recede left so deleting / moving left brings hidden text back into view.
     if (m_iFirstVisible > iCaret) m_iFirstVisible = iCaret;
@@ -3408,8 +3413,15 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
         --m_iFirstVisible;
     }
 
-    // Selection highlight (suppressed while an IME composition is active).
-    if (compStart < 0 && HasSelection())
+    // Selection highlight (suppressed while an IME composition is active, and while this field
+    // isn't the focused one). HasSelection() alone isn't enough: GiveFocus(TRUE) (Tab-cycling
+    // between two fields, e.g. CLoginWin's username/password) selects the destination field's
+    // text but never collapses the source field's own now-stale m_iSelAnchor/m_iCaret range on
+    // the way out -- without the bFocused check here, tabbing back and forth left BOTH fields
+    // satisfying HasSelection() at once, so both rendered as highlighted even though only one
+    // ever actually has keyboard focus (the caret-blink check a few lines down already gated on
+    // bFocused; this one just hadn't).
+    if (compStart < 0 && bFocused && HasSelection())
     {
         const int iSelStart = SelectionStart();
         const int iSelEnd = SelectionEnd();
@@ -3461,7 +3473,6 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
     m_iCaretAreaY = m_iPos_y;
     m_iCaretAreaH = iLineHeight;
 
-    const bool bFocused = (s_pFocusedPortable == this);
     const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
     if (bFocused && bBlinkOn)
     {
@@ -3491,7 +3502,11 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
 
     const bool bFocused = (s_pFocusedPortable == this);
     const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
-    const bool bSelection = (compStart < 0) && HasSelection();
+    // bFocused required, not just HasSelection() -- see RenderPortableSingleLine()'s identical
+    // fix/comment: GiveFocus(TRUE) tab-cycling leaves the field just tabbed away from with its own
+    // stale selection range still set, which would otherwise render as highlighted right alongside
+    // the newly-focused field's own selection.
+    const bool bSelection = bFocused && (compStart < 0) && HasSelection();
     const int iSelStart = SelectionStart();
     const int iSelEnd = SelectionEnd();
 

@@ -24,14 +24,14 @@ namespace Rml { class ElementDocument; }
 // harmless detection path); RmlUi renders 100% of this bar's visuals in every theme.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// SEASON3B::CNewUIObj -- the last of the login/character-scene CWin windows besides CLoginWin
-// itself (Phase 3). Not modal -- UpdateMouseEvent() claims only within its own bounding rect
+// SEASON3B::CNewUIObj. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
 // (CServerSelWin's established pattern), matching this bar's small footprint. This migration also
-// permanently retires the last live consequence of the m_LoginWin/m_LoginMainWin hit-test-overlap
+// permanently retired the last live consequence of the g_LoginWin/g_LoginMainWin hit-test-overlap
 // bug CreateLoginScene()'s own comment documents (RmlClickMenu()/RmlClickCredit() already bypassed
-// it; the legacy CButton companion's click path no longer can be starved by m_LoginWin's own
-// list-order priority now that this window's dispatch runs before any legacy m_WinList walk at
-// all, regardless of overlap).
+// it; the legacy CButton companion's click path could no longer be starved by the old m_LoginWin's
+// list-order priority once this window's dispatch started running before any legacy m_WinList walk
+// at all, regardless of overlap) -- moot now that CLoginWin itself has since migrated too (Phase 3)
+// and there's no m_WinList walk left to race against.
 class CLoginMainWin : public SEASON3B::CNewUIObj
 {
 protected:

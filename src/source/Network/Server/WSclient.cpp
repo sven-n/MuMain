@@ -44,6 +44,8 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginMainWin.h"
+#include "UI/Windows/LoginWin.h"
+#include "Character/CharInfoBalloonMng.h"
 #include "Character/CharSelMainWin.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
@@ -571,8 +573,8 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
             // don't surface the manual login window underneath it.
             if (!ReconnectManager::Instance().IsActive())
             {
-                rUIMng.ShowWin(&rUIMng.m_LoginWin);
-                rUIMng.m_LoginWin.GetUsernameInputBox()->GiveFocus();
+                g_LoginWin.Show(true);
+                g_LoginWin.GetUsernameInputBox()->GiveFocus();
             }
             HeroKey = ((int)(Data2->NumberH) << 8) + Data2->NumberL;
             CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
@@ -597,7 +599,7 @@ void ReceiveJoinServer(const BYTE* ReceiveBuffer)
 
         if (actual < received)
         {
-            rUIMng.HideWin(&rUIMng.m_LoginWin);
+            g_LoginWin.Show(false);
             rUIMng.PopUpMsgWin(MESSAGE_VERSION);
             g_ErrorReport.Write(L"Version dismatch - Join server.\r\n");
         }
@@ -837,7 +839,7 @@ void ReceiveCreateCharacter(const BYTE* ReceiveBuffer)
         CUIMng& rUIMng = CUIMng::Instance();
         rUIMng.CloseMsgWin();
         g_CharSelMainWin.UpdateDisplay();
-        rUIMng.m_CharInfoBalloonMng.UpdateDisplay();
+        g_CharInfoBalloonMng.UpdateDisplay();
     }
     else if (Data->Result == 0)
         CUIMng::Instance().PopUpMsgWin(RECEIVE_CREATE_CHARACTER_FAIL);

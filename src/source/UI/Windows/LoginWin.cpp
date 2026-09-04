@@ -8,6 +8,8 @@
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "UI/Windows/MsgWin.h"
+#include "Core/Globals/_enum.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -79,6 +81,9 @@ extern wchar_t LogInID[MAX_USERNAME_SIZE + 1];
 extern BYTE Version[SIZE_PROTOCOLVERSION];
 extern BYTE Serial[SIZE_PROTOCOLSERIAL + 1];
 
+// Replaces CUIMng's old `CLoginWin m_LoginWin;` member, same convention as g_CreditWin.
+CLoginWin g_LoginWin;
+
 CLoginWin::CLoginWin()
 {
     m_pUsernameInputBox = NULL;
@@ -106,33 +111,27 @@ void CLoginWin::Create()
         m_Password[0] = L'\0';
     }
 
-    // CWin never draws anything for this window -- every theme's #panel/.input-frame renders the
-    // background/input-box-frame artwork itself (see themes/legacy/login.rcss and
-    // themes/modern/login.rcss). CWin::Create's own nTexID<=-2 sentinel (confirmed precedent:
-    // CharSelMainWin.cpp's CWin::Create(layout.window.width, layout.window.height, -2)) leaves
-    // m_psprBg null, and CWin::Render()'s existing `if (m_psprBg)` guard then draws nothing.
+    // This window draws none of its own chrome -- every theme's #panel/.input-frame renders the
+    // background/input-box-frame artwork itself (see this class's header comment).
     //
-    // 2026-09-03: the legacy bounding-box size passed here now tracks login.rcss's own #panel
-    // width/height (329dp/245dp, both themes) by the same ratio, instead of the fixed 329x245 this
-    // used to always be -- CWin's default CursorInWin() reads m_Size, and letting it go stale
+    // 2026-09-03: the legacy bounding-box size tracks login.rcss's own #panel width/height
+    // (329dp/245dp, both themes) by the same ratio, instead of a fixed 329x245 this used to always
+    // be -- UpdateMouseEvent() reads m_Size for its own hit-test rect, and letting it go stale
     // against the now-auto-fitting RmlUi visuals risks the same class of bug
     // CharSelMainWin.h/CalculateFixedAnchorLayout()'s own comment documents in detail (a correctly
     // rendered element whose legacy hit-test rect no longer matches it).
     const float uiScale = LoginUIScaleRatio();
-    CWin::Create(ScaledOffset(329, uiScale), ScaledOffset(245, uiScale), -2);
-    SetMovable(false);
+    m_Size.cx = ScaledOffset(329, uiScale);
+    m_Size.cy = ScaledOffset(245, uiScale);
+    m_ptPos.x = m_ptPos.y = 0;
 
     for (int i = 0; i < 2; ++i)
     {
         m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-        CWin::RegisterButton(&m_aBtn[i]);
     }
 
     m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
-    CWin::RegisterButton(&m_aBtnRememberMe);
-
     m_aBtnSavePassword.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
-    CWin::RegisterButton(&m_aBtnSavePassword);
 
     // CButton::Update() auto-toggles m_bCheck on its own input polling whenever HasCheckVisuals()
     // is true (both are 2-frame check-style art) -- independent of and in addition to
@@ -231,13 +230,17 @@ void CLoginWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login.rml");
 
         // Deliberately NOT calling UI::RmlBridge::MakeDraggable() here -- the login screen is
-        // meant to stay static (see this class's CursorInWin(WA_MOVE) override, hardcoded false).
+        // meant to stay static.
     }
+
+    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN, this);
+    Show(false);
 }
 
 void CLoginWin::SetPosition(int x, int y)
 {
-	CWin::SetPosition(x, y);
+	m_ptPos.x = x;
+	m_ptPos.y = y;
 
 	// This class draws the real text/hit-testing for the two input boxes (RmlUi's own
 	// .input-frame divs are border-only overlays with no background, so they never cover what's
@@ -273,9 +276,19 @@ void CLoginWin::SetPosition(int x, int y)
 
 	if (g_iChatInputType == 1)
 	{
-		const int boxX = int((x + ScaledOffset(115, uiScale)) / g_fScreenRate_x);
-		m_pUsernameInputBox->SetPosition(boxX, int((y + usernameY) / g_fScreenRate_y));
-		m_pPasswordInputBox->SetPosition(boxX, int((y + passwordY) / g_fScreenRate_y));
+		// Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::Render() rescales the
+		// position it's given via ConvertPositionX/Y using *whatever transform is active when
+		// Render() runs* (see RenderTextOnTop()'s own comment), a fundamentally different contract
+		// than CSprite's "store real pixels, ignore the transform entirely". Dividing here relied
+		// on a later multiply landing under the exact same ambient transform to cancel it back
+		// out -- true unconditionally only as long as this ran unscoped (CWin days); once this
+		// window's own dispatch can run inside a ScopedActiveTransform(LayoutMode::Legacy) scope,
+		// dividing by the ambient rate here while the identity scope is active would silently
+		// store an un-descaled value. Same fix as CMsgWin's resident-password gotcha
+		// (docs/newui-legacy-merger.md) -- store real pixels on both ends instead.
+		const int boxX = x + ScaledOffset(115, uiScale);
+		m_pUsernameInputBox->SetPosition(boxX, y + usernameY);
+		m_pPasswordInputBox->SetPosition(boxX, y + passwordY);
 	}
 
 	// "Remember Username" (row 1) and "Remember Password" (row 2) stack vertically; the OK/Cancel
@@ -285,13 +298,12 @@ void CLoginWin::SetPosition(int x, int y)
 	m_aBtn[LIW_OK].SetPosition(x + okButtonX, y + buttonRowY);
 	m_aBtn[LIW_CANCEL].SetPosition(x + cancelButtonX, y + buttonRowY);
 
-	// RmlUi panel overlay: positioned at the same real window-pixel origin CWin's own
-	// background sprite (m_psprBg) uses -- unlike the legacy g_pRenderText calls this replaces
-	// (which divided by g_fScreenRate_x/y to convert into the old 640x480 reference space),
-	// RmlUi's Context operates directly in real window pixels, so no scale conversion is needed
-	// for the panel's own origin here; it's the panel's own SIZE (login.rcss's #panel
-	// width/height) and every child's position that are dp now, scaled automatically by RmlUi
-	// itself -- this C++-pushed left/top is just the panel's screen placement, not its layout.
+	// RmlUi panel overlay: positioned at the same real window-pixel origin this window's own
+	// bounding box (m_ptPos) uses -- RmlUi's Context operates directly in real window pixels, so
+	// no scale conversion is needed for the panel's own origin here; it's the panel's own SIZE
+	// (login.rcss's #panel width/height) and every child's position that are dp now, scaled
+	// automatically by RmlUi itself -- this C++-pushed left/top is just the panel's screen
+	// placement, not its layout.
 	if (m_pRmlDoc)
 	{
 		if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
@@ -304,7 +316,7 @@ void CLoginWin::SetPosition(int x, int y)
 
 void CLoginWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    SEASON3B::CNewUIObj::Show(bShow);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -326,17 +338,12 @@ void CLoginWin::Show(bool bShow)
     }
 }
 
-void CLoginWin::PreRelease()
+void CLoginWin::Release()
 {
-    // CUIMng::RemoveWinList() (run on every scene transition) calls Release() on every window
-    // in its list unconditionally -- CWin's own Release()/PreRelease() has no knowledge of
-    // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
-    // window is ever Released() while still shown. In today's real login/cancel flow that
-    // never happens (RequestLogin()/CancelLogin() both call CUIMng::HideWin(this) first), but
-    // that's an incidental property of those two call sites, not something this class's own
-    // lifecycle actually guarantees -- explicit here rather than relying on it staying true.
-    // Hide(), not unload -- the document/model are meant to be created once and reused (see
-    // Create()'s own guard comment above).
+    // Every scene transition calls Release() explicitly on this global now (CreateLoginScene()
+    // etc.), same as every other migrated window -- this window no longer lives in any list that
+    // would do it automatically. Hide(), not unload -- the document/model are meant to be created
+    // once and reused (see Create()'s own guard comment above).
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -358,50 +365,32 @@ void CLoginWin::RmlToggleSavePassword()
 		ApplySavePasswordChange();
 }
 
-void CLoginWin::UpdateWhileActive(double)
+bool CLoginWin::UpdateWhileActive()
 {
-	// While the "Remember Password" confirmation dialog is open, let it own the
-	// input so Enter/Esc/clicks don't also drive the login screen behind it. The
-	// dialog's outcome is applied on the next frame, once it has closed. Scoped to this
-	// dialog's own Pending state (not the old shared g_MessageBox->IsEmpty() stack-wide check --
-	// this dialog no longer registers with that engine, see RememberPasswordPrompt.cpp).
-	//
-	// Also gated on m_bRememberPasswordPromptWasPending (a snapshot taken in UpdateWhileShow(),
-	// BEFORE UI::Login::Tick() ran) rather than trusting a second live read of
-	// RememberPasswordChoiceState() here: CWin::Update() always calls UpdateWhileShow() (which
-	// calls Tick()) before UpdateWhileActive() in the very same frame, so by the time this runs,
-	// Tick() has *already* resolved a Pending dialog and cleared it -- a live re-check here would
-	// read "not Pending" and fall through to the exact same still-held Escape/Enter keypress that
-	// Tick() just consumed, immediately chaining into RequestLogin()/CancelLogin() as an
-	// unintended side effect. Confirmed the hard way: dismissing the prompt with Esc also
-	// silently triggered "back to server select" every single time (deterministic, not a rare
-	// held-key race -- Tick() unconditionally resolves before this function ever sees the key).
-	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending
-		|| m_bRememberPasswordPromptWasPending)
-		return;
-
 	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
 	{
 		SubmitLogin();
-		return;
+		return true;
 	}
 
 	if (m_aBtn[LIW_CANCEL].IsClick() || CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
 		SubmitCancel();
-		return;
+		return true;
 	}
 
 	UpdateRememberCheckboxes();
+	return true;
 }
 
 // 2026-09-03: RmlClickOk()/RmlClickCancel() (see LoginWin.h's header comment) call these directly,
-// bypassing UpdateWhileActive()'s m_bActive gate entirely -- UpdateWhileActive()'s own
-// CButton::IsClick()/keyboard branches above call the same functions, so there is exactly one
-// place each action's logic lives regardless of which path triggered it. Each re-checks the
-// "remember password" prompt's live Pending state rather than trusting the caller: cheap, and
-// correct from both call sites (UpdateWhileActive() already returned early above if pending; the
-// immediate RmlUi callbacks haven't had a chance to observe that yet without this).
+// bypassing the shown/active split entirely -- UpdateWhileActive()'s own CButton::IsClick()/
+// keyboard branches above call the same functions, so there is exactly one place each action's
+// logic lives regardless of which path triggered it. Each re-checks the "remember password"
+// prompt's live Pending state rather than trusting the caller: cheap, and correct from both call
+// sites (UpdateWhileActive() never even runs while pending, per UpdateWhileShown()'s SetActive()
+// computation; the immediate RmlUi callbacks haven't had a chance to observe that yet without
+// this).
 void CLoginWin::SubmitLogin()
 {
 	if (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending)
@@ -471,16 +460,27 @@ void CLoginWin::ApplySavePasswordChange()
 	UI::Login::OpenRememberPasswordPrompt();
 }
 
-void CLoginWin::UpdateWhileShow(double dDeltaTick)
+bool CLoginWin::UpdateWhileShown()
 {
+    // Computed BEFORE Tick() (below) can resolve a pending Remember-Password prompt -- see this
+    // method's own header comment for why that ordering matters. Also folds in the "don't let
+    // Enter/Esc double-fire past an overlaying modal" gate CCharSelMainWin/CCharMakeWin already
+    // needed once: a higher-depth modal claiming UpdateMouseEvent() doesn't, by itself, stop this
+    // window's own Update() from still polling VK_RETURN/VK_ESCAPE directly in UpdateWhileActive()
+    // below -- without this, pressing Enter to dismiss a CMsgWin login-failure message could also
+    // resubmit the login form behind it.
+    //
+    // WasSysMenuToggledByEscThisFrame() is needed IN ADDITION to the live g_SysMenuWin.IsVisible()
+    // check -- found via live testing: CUIMng::Update()'s ESC-toggle-system-menu block runs
+    // entirely before this (see its own comment), so an ESC press that just CLOSED the menu this
+    // same frame already reads back IsVisible()==false here, and without this flag this window
+    // would treat that as "not covered" and ALSO fire SubmitCancel() off the very same keypress.
+    SetActive(!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible()
+                || CUIMng::Instance().WasSysMenuToggledByEscThisFrame()
+                || UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending));
+
     m_pUsernameInputBox->DoAction();
     m_pPasswordInputBox->DoAction();
-
-    // Snapshot BEFORE Tick() can resolve it -- see UpdateWhileActive()'s own comment for why
-    // UpdateWhileActive() (called later this same frame, per CWin::Update()'s fixed call order)
-    // must consult this snapshot rather than a live re-check of RememberPasswordChoiceState().
-    m_bRememberPasswordPromptWasPending =
-        (UI::Login::RememberPasswordChoiceState() == UI::Login::RememberPasswordChoice::Pending);
 
     // Polls the "Remember Password" dialog's own Enter/Esc while it's open -- ticked from here
     // (not UpdateWhileActive) for the same reason ApplyRememberPasswordChoice() is, right below.
@@ -488,13 +488,14 @@ void CLoginWin::UpdateWhileShow(double dDeltaTick)
 
     ApplyRememberPasswordChoice();
     RevokeSavedCredentialsIfEdited();
+    return true;
 }
 
 void CLoginWin::ApplyRememberPasswordChoice()
 {
     // Applied here rather than in UpdateWhileActive because the modal message box
     // leaves the login window inactive (so UpdateWhileActive stops running),
-    // while UpdateWhileShow keeps being called.
+    // while UpdateWhileShown keeps being called.
     const UI::Login::RememberPasswordChoice choice = UI::Login::RememberPasswordChoiceState();
     if (choice != UI::Login::RememberPasswordChoice::Ok
         && choice != UI::Login::RememberPasswordChoice::Cancel)
@@ -534,7 +535,7 @@ void CLoginWin::RevokeSavedCredentialsIfEdited()
     wcscpy_s(m_prevPassword, _countof(m_prevPassword), curPass);
 }
 
-void CLoginWin::RenderControls()
+bool CLoginWin::Render()
 {
     if (FirstLoad)
     {
@@ -547,9 +548,12 @@ void CLoginWin::RenderControls()
     // frame-final document render (docs/rmlui-ui-system/README.md's "RmlUi renders last") --
     // login.rml's own panel would otherwise always paint over it regardless of which was opened
     // more recently, the same "RmlUi always wins" gap CCharInfoBalloonMng's own shouldHide check
-    // exists to work around. Toggled every frame here (not just on Show()), same idempotent
-    // pattern as that check, since credits can open/close at any time while this dialog is
-    // already showing.
+    // exists to work around. This is a PERMANENT gap, not one this class's own migration onto
+    // CNewUIObj retires: GetLayerDepth()'s sort only orders this manager's own dispatch, not
+    // RmlUi's separate, always-last compositor pass, so no depth choice can substitute for this
+    // toggle (docs/newui-legacy-merger.md). Toggled every frame here (not just on Show()), same
+    // idempotent pattern as that check, since credits can open/close at any time while this
+    // dialog is already showing.
     const bool coveredByCredits = g_CreditWin.IsVisible();
     if (m_pRmlDoc)
     {
@@ -568,13 +572,23 @@ void CLoginWin::RenderControls()
     // Also skip while g_SysMenuWin is shown -- its own RmlUi panel already stacks correctly
     // against login.rml's (both are same-phase RmlUi documents; no fix needed there), but these
     // are raw CUITextInputBox pixels drawn directly, not RmlUi content, so RmlUi's own document
-    // ordering has no effect on them at all.
+    // ordering has no effect on them at all. Same permanent-gap reasoning as coveredByCredits
+    // above.
     if (!coveredByCredits && !g_SysMenuWin.IsVisible())
         RenderTextOnTop();
+
+    return true;
 }
 
 void CLoginWin::RenderTextOnTop()
 {
+    // Force identity so this agrees with SetPosition()'s now-real-pixel values regardless of
+    // which context runs this call (Render()'s own call above, under whatever transform
+    // CNewUIManager::Render() applies for this window's LayoutMode::Legacy, or Winmain.cpp's
+    // completely unscoped post-RmlUi callback) -- same fix as CMsgWin's resident-password gotcha
+    // (docs/newui-legacy-merger.md).
+    const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
+    UI::Scaling::ScopedActiveTransform identity(transform);
     m_pUsernameInputBox->Render();
     m_pPasswordInputBox->Render();
 }
@@ -628,12 +642,28 @@ void CLoginWin::SyncRmlModel()
     syncLabel(&LoginRmlModel::cancelLabel, "cancel_label", I18N::Game::Cancel);
 }
 
+bool CLoginWin::UpdateMouseEvent()
+{
+    if (!IsVisible())
+        return true;
+
+    // Was CWin::CursorInWin(WA_ALL) -- ported directly (see CServerSelWin/CLoginMainWin's
+    // identical pattern). Not modal: only claims a click within its own bounding box, leaving the
+    // world/credits/system-menu reachable around it.
+    RECT rc;
+    ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+    if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
+        return false;
+
+    return true;
+}
+
 void CLoginWin::RequestLogin()
 {
     if (CurrentProtocolState == REQUEST_JOIN_SERVER)
         return;
 
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 
     m_pUsernameInputBox->GetText(m_Username, _countof(m_Username));
     m_pPasswordInputBox->GetText(m_Password, _countof(m_Password));
@@ -683,7 +713,7 @@ void CLoginWin::RequestLogin()
 void CLoginWin::CancelLogin()
 {
     ConnectConnectionServer();
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 }
 
 void CLoginWin::ConnectConnectionServer()

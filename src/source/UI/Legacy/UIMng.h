@@ -5,8 +5,6 @@
 
 #include "Core/Utilities/PList.h"
 #include "UI/Windows/MsgWin.h"
-#include "UI/Windows/LoginWin.h"
-#include "Character/CharInfoBalloonMng.h"
 #include "UI/NewUI/NewUIManager.h"
 
 #define UIM_SCENE_NONE 0
@@ -24,8 +22,6 @@ class CLoadingScene;
 class CUIMng
 {
 public:
-    CLoginWin m_LoginWin;
-    CCharInfoBalloonMng m_CharInfoBalloonMng;
     CLoadingScene* m_pLoadingScene;
 
 protected:
@@ -37,6 +33,14 @@ protected:
     int m_nScene;
     bool m_bWinActive;
     bool m_bSysMenuWinShow;
+
+    // True only during the Update() call in which the ESC-toggle-system-menu block itself opened
+    // or closed g_SysMenuWin -- reset at the top of every Update(). See Update()'s own comment for
+    // the race this exists to prevent: that block runs entirely before m_NewStyleMng's depth-sorted
+    // dispatch (not as part of it), so a migrated window whose own Escape polling depends on
+    // g_SysMenuWin::IsVisible() (CLoginWin) would otherwise see this frame's POST-toggle value and
+    // could react to the very same keypress a second time.
+    bool m_bSysMenuToggledByEscThisFrame = false;
 
     // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- a scene-scoped CNewUIManager instance
     // (own object, not the shared g_pNewUIMng that MAIN_SCENE's ~79 windows use): CNewUIManager's
@@ -67,8 +71,10 @@ public:
      * Height. Call after a runtime resolution change so info boxes, menus,
      * etc. don't end up anchored to the old screen size.
      *
-     * Only affects the old-style CWin-based windows owned by CUIMng; the
-     * new-style CNewUI* windows are driven by g_pNewUISystem separately.
+     * Only affects the login/character-scene windows CUIMng itself drives
+     * (g_CreditWin, g_LoginWin, g_MsgWin, etc. -- CUIMng/CNewUIManager merger,
+     * docs/newui-legacy-merger.md); the MAIN_SCENE-only CNewUI* windows are
+     * driven by g_pNewUISystem separately.
      */
     void RepositionSceneUI();
 
@@ -96,6 +102,11 @@ public:
     {
         return m_bSysMenuWinShow;
     };
+    // See m_bSysMenuToggledByEscThisFrame's own comment.
+    bool WasSysMenuToggledByEscThisFrame() const
+    {
+        return m_bSysMenuToggledByEscThisFrame;
+    }
 
     // See m_NewStyleMng's own comment -- windows migrating off CWin register here instead of the
     // shared g_pNewUIMng.

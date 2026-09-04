@@ -8,8 +8,10 @@
 #include "UI/Windows/ServerMsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/SysMenuWin.h"
+#include "UI/Windows/LoginWin.h"
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
+#include "Character/CharInfoBalloonMng.h"
 #include "UI/Windows/LoginMainWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
@@ -57,10 +59,8 @@ bool InputDiagnosticsEnabled()
     return enabled;
 }
 
-const char* WindowName(const CUIMng& manager, const CWin* window)
+const char* WindowName(const CUIMng&, const CWin* window)
 {
-    if (window == &manager.m_LoginWin)
-        return "login";
     return window == nullptr ? "none" : "unknown";
 }
 } // namespace
@@ -226,7 +226,7 @@ void CUIMng::Release()
 {
     RemoveWinList();
 
-    m_CharInfoBalloonMng.Release();
+    g_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
@@ -235,6 +235,7 @@ void CUIMng::Release()
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
     g_LoginMainWin.Release();
+    g_LoginWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -243,7 +244,7 @@ void CUIMng::CreateLoginScene()
 {
     RemoveWinList();
 
-    m_CharInfoBalloonMng.Release();
+    g_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
@@ -252,20 +253,18 @@ void CUIMng::CreateLoginScene()
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
     g_LoginMainWin.Release();
+    g_LoginWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
     // the screen size isn't guaranteed to already match WindowWidth/WindowHeight (the exact
     // values every migrated window's own Create()/SetPosition() now uses internally). This
-    // function is the one place that positions m_LoginWin and g_LoginMainWin relative to each
+    // function is the one place that positions g_LoginWin and g_LoginMainWin relative to each
     // other -- their hit-test boxes sit only ~11px apart vertically at the reference resolution.
-    // Before g_LoginMainWin's own CUIMng/CNewUIManager-merger migration, a drift between this
-    // function's source of screen size and each window's own internal one could close that gap
-    // into an overlap, letting m_LoginWin (checked first in m_WinList) silently win clicks meant
-    // for the menu/credit buttons; that's no longer reachable now that g_LoginMainWin's dispatch
-    // runs before any legacy m_WinList walk at all, regardless of overlap (see its own header
-    // comment) -- m_LoginWin itself can still be thrown off by this same drift, though, until its
-    // own Phase 3 migration.
+    // A drift between this function's source of screen size and each window's own internal one
+    // could close that gap into an overlap, but that's no longer a starvation risk either way
+    // (docs/newui-legacy-merger.md, Phase 3): both windows' dispatch now goes through the same
+    // depth-sorted CNewUIManager claim, not a first-checked-wins list walk.
     g_MsgWin.Create();
     g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
@@ -280,10 +279,9 @@ void CUIMng::CreateLoginScene()
     g_ServerSelWin.SetPosition((static_cast<int>(WindowWidth) - g_ServerSelWin.GetWidth()) / 2,
                                (static_cast<int>(WindowHeight) - g_ServerSelWin.GetHeight()) / 2);
 
-    m_LoginWin.Create();
-    m_WinList.AddHead(&m_LoginWin);
-    m_LoginWin.SetPosition((static_cast<int>(WindowWidth) - m_LoginWin.GetWidth()) / 2,
-                           (static_cast<int>(WindowHeight) - m_LoginWin.GetHeight()) * 2 / 3);
+    g_LoginWin.Create();
+    g_LoginWin.SetPosition((static_cast<int>(WindowWidth) - g_LoginWin.GetWidth()) / 2,
+                           (static_cast<int>(WindowHeight) - g_LoginWin.GetHeight()) * 2 / 3);
 
     g_CreditWin.Create();
 
@@ -303,8 +301,9 @@ void CUIMng::CreateCharacterScene()
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
     g_LoginMainWin.Release();
+    g_LoginWin.Release();
 
-    m_CharInfoBalloonMng.Create();
+    g_CharInfoBalloonMng.Create();
 
     CInput& rInput = CInput::Instance();
 
@@ -323,7 +322,7 @@ void CUIMng::CreateCharacterScene()
     g_CharMakeWin.SetPosition((rInput.GetScreenWidth() - 454) / 2, (rInput.GetScreenHeight() - 406) / 2);
 
     g_CharSelMainWin.UpdateDisplay();
-    m_CharInfoBalloonMng.UpdateDisplay();
+    g_CharInfoBalloonMng.UpdateDisplay();
 
     g_CharSelMainWin.Show(true);
 
@@ -335,7 +334,7 @@ void CUIMng::CreateMainScene()
 {
     RemoveWinList();
 
-    m_CharInfoBalloonMng.Release();
+    g_CharInfoBalloonMng.Release();
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
@@ -344,6 +343,7 @@ void CUIMng::CreateMainScene()
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
     g_LoginMainWin.Release();
+    g_LoginWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -366,7 +366,7 @@ void CUIMng::RepositionSceneUI()
         const bool wasShown_SysMenuWin = g_SysMenuWin.IsVisible();
         const bool wasShown_LoginMainWin = g_LoginMainWin.IsVisible();
         const bool wasShown_ServerSelWin = g_ServerSelWin.IsVisible();
-        const bool wasShown_LoginWin = m_LoginWin.IsShow();
+        const bool wasShown_LoginWin = g_LoginWin.IsVisible();
         const bool wasShown_CreditWin = g_CreditWin.IsVisible();
 
         CreateLoginScene();
@@ -384,7 +384,7 @@ void CUIMng::RepositionSceneUI()
         if (wasShown_ServerSelWin)
             g_ServerSelWin.Show(true);
         if (wasShown_LoginWin)
-            ShowWin(&m_LoginWin);
+            g_LoginWin.Show(true);
         if (wasShown_CreditWin)
             g_CreditWin.Show(true);
 
@@ -704,11 +704,56 @@ void CUIMng::Update(double dDeltaTick)
     const bool bNewStyleConsumedClick = m_NewStyleMng.GetActiveMouseUIObj() != nullptr;
     m_bCursorOnUI = bNewStyleConsumedClick;
 
-    if (m_WinList.IsEmpty())
+    CInput& rInput = CInput::Instance();
+
+    // ESC toggles system menu in login/character scenes. Checked before m_NewStyleMng.Update()
+    // (below) runs -- a migrated window's own ESC handling (e.g. CMsgWin closing itself on ESC)
+    // must not also flip g_MsgWin.IsVisible() to false in time to fool this same frame's check,
+    // same relative ordering the legacy m_WinList per-window Update() walk further down already
+    // has with this block.
+    //
+    // Unconditional -- must run even now that m_WinList is permanently empty (g_LoginWin, Phase 3,
+    // was the last CWin ever added to it). This used to sit after an `if (m_WinList.IsEmpty()) {
+    // m_NewStyleMng.Update(); return; }` early-out, which silently stopped this whole block (and
+    // therefore ESC-driven system-menu open/close) from ever running the moment that list emptied
+    // for good -- found via live testing, not caught by the build. The legacy per-window
+    // bookkeeping below (m_bWinActive, the click walk, docking) has no such requirement, so it
+    // still exits early when the list is empty.
+    //
+    // Also resets/sets m_bSysMenuToggledByEscThisFrame (own comment) -- found via live testing:
+    // closing the menu here, then letting m_NewStyleMng.Update() (below) run g_LoginWin's own
+    // Escape-cancel gate in the same frame, made a single ESC press both close the menu AND cancel
+    // the login form behind it (a synchronous CreateSocket() reconnect, visible as a multi-second
+    // hang). Unlike CCreditWin (depth 100) and CMsgWin (depth 50), both handled entirely inside
+    // m_NewStyleMng's own depth-sorted dispatch (so a lower-depth g_LoginWin's Update() always runs
+    // BEFORE theirs, seeing pre-close state for free), g_SysMenuWin's ESC close happens here,
+    // completely outside that dispatch and unconditionally before it -- g_LoginWin has no ordering
+    // protection against it on its own.
+    m_bSysMenuToggledByEscThisFrame = false;
+    if (rInput.IsKeyDown(VK_ESCAPE))
     {
-        m_NewStyleMng.Update();
-        return;
+        extern EGameScene SceneFlag;
+        if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
+        {
+            if (g_SysMenuWin.IsVisible())
+            {
+                g_SysMenuWin.Show(false);
+                m_bSysMenuToggledByEscThisFrame = true;
+            }
+            else if (!g_MsgWin.IsVisible() && !g_LoginWin.IsVisible() && !g_CreditWin.IsVisible() &&
+                     !g_CharMakeWin.IsVisible())
+            {
+                ::PlayBuffer(SOUND_CLICK01);
+                g_SysMenuWin.Show(true);
+                m_bSysMenuToggledByEscThisFrame = true;
+            }
+        }
     }
+
+    m_NewStyleMng.Update();
+
+    if (m_WinList.IsEmpty())
+        return;
 
     if (m_bWinActive)
     {
@@ -719,33 +764,6 @@ void CUIMng::Update(double dDeltaTick)
             m_bWinActive = false;
         }
     }
-
-    CInput& rInput = CInput::Instance();
-
-    // ESC toggles system menu in login/character scenes. Checked before m_NewStyleMng.Update()
-    // (below) runs -- a migrated window's own ESC handling (e.g. CMsgWin closing itself on ESC)
-    // must not also flip g_MsgWin.IsVisible() to false in time to fool this same frame's check,
-    // same relative ordering the legacy m_WinList per-window Update() walk further down already
-    // has with this block.
-    if (rInput.IsKeyDown(VK_ESCAPE))
-    {
-        extern EGameScene SceneFlag;
-        if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-        {
-            if (g_SysMenuWin.IsVisible())
-            {
-                g_SysMenuWin.Show(false);
-            }
-            else if (!g_MsgWin.IsVisible() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
-                     !g_CharMakeWin.IsVisible())
-            {
-                ::PlayBuffer(SOUND_CLICK01);
-                g_SysMenuWin.Show(true);
-            }
-        }
-    }
-
-    m_NewStyleMng.Update();
 
     CWin* pWin;
     NODE* position;
@@ -879,7 +897,10 @@ void CUIMng::Render()
     const auto previousTransform = UI::Scaling::GetActiveTransform();
     UI::Scaling::SetActiveTransform(UI::Scaling::LegacyUiTransform(WindowWidth, WindowHeight));
 
-    m_CharInfoBalloonMng.Render();
+    // g_CharInfoBalloonMng no longer rendered directly here (docs/newui-legacy-merger.md, Phase 3)
+    // -- it's registered with m_NewStyleMng below like every other migrated window, which calls
+    // its Render() under its own LayoutMode::Legacy-derived transform (equivalent to the
+    // LegacyUiTransform set just above) as part of the generic per-object walk.
 
     CWin* pWin;
     NODE* position = m_WinList.GetTailPosition();

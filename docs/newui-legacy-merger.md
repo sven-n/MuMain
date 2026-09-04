@@ -222,11 +222,13 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   - **Phase 2 complete.** All of `CUIMng`'s still-`CWin` windows are migrated except `CLoginWin`
     (Phase 3, deliberately last — see below) and `CCharInfoBalloonMng` (never a `CWin`, its own
     Phase 3 item).
-- **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started (migration itself). `CLoginWin`
-  is the one window that genuinely needs the new shown/active split (keeps ticking its text inputs
-  and "Remember Password" dialog while inactive, per its own `UpdateWhileShow()`/
-  `UpdateWhileActive()` split); `CCharInfoBalloonMng` was never a `CWin` at all (`CUIMng` already
-  drives it by a direct call, outside `m_WinList`) and needs its own thin adapter.
+- **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — done. `CLoginWin` migrated onto
+  `SEASON3B::CNewUIObj`, `g_LoginWin` replaces `CUIMng::m_LoginWin` (same convention as
+  `g_CreditWin`) -- 8 external call sites updated across `UIMng.cpp`, `MsgWin.cpp`, `WSclient.cpp`,
+  `ReconnectManager.cpp`, `Winmain.cpp`. The one window in this whole series that genuinely needed
+  the shown/active split added in Phase 0 (`IsActive()`/`SetActive()`,
+  `UpdateWhileShown()`/`UpdateWhileActive()`) -- every other migrated window collapses straight to
+  a single `Update()` override instead, leaving that split unused until now.
 
   **Found via user testing, fixed ahead of the migration itself (both are `CLoginWin`-side gaps,
   same root cause category as `CCharInfoBalloonMng`'s own `shouldHide` fix from Phase 2)**: once
@@ -251,13 +253,142 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     was currently covering the login dialog. Since this content isn't an RmlUi document at all,
     hiding `login.rml` doesn't touch it; fixed by gating both call sites on
     `!g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible()` directly.
-  - Both fixes are narrow, targeted patches on the still-legacy `CLoginWin`, not a preview of its
-    real Phase 3 migration -- once that lands, this whole class of gap retires the same way it did
-    for every other Phase 2 window (a proper `UpdateMouseEvent()`/depth-ordered claim rather than
-    a hand-written condition per call site).
-- **Phase 4 (delete `CUIMng`)** — not started; blocked on Phases 2-3. `CWin` has a closed,
-  fully-enumerated subclass set (confirmed by a full-tree grep) — no hidden subclass elsewhere to
-  worry about once the remaining 9 (`COptionWin` deleted, not counted) are gone.
+  - **Correction, found while actually doing the migration**: both gates turned out to be
+    *permanent*, not a stopgap the migration itself retires. `GetLayerDepth()`'s sort only orders
+    `CNewUIManager`'s own dispatch of its registered objects' `Update()`/`Render()` calls -- it has
+    no effect at all on RmlUi's own, completely separate compositor pass, which still renders every
+    document last regardless of which `CNewUIObj` "rendered" (i.e., ran `SyncRmlModel()`) most
+    recently. `CLoginWin::Render()` still carries both checks unchanged after migrating -- same
+    permanent-gap category as `CCharInfoBalloonMng`'s own `shouldHide`, not a temporary one.
+  - Ported unchanged into `CLoginWin::Render()`/`RenderTextOnTop()` once the real migration landed
+    (see below) rather than re-derived.
+
+  **The shown/active split, applied for real**: `CLoginWin::UpdateWhileShown()`'s first statement
+  computes and pushes `SetActive()` from *current* (pre-`Tick()`) state --
+  `!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() || RememberPasswordChoiceState() == Pending)`
+  -- then the rest of the body (both `DoAction()` calls, `UI::Login::Tick()`,
+  `ApplyRememberPasswordChoice()`, `RevokeSavedCredentialsIfEdited()`) runs unconditionally, same as
+  before. `CNewUIObj::Update()`'s own dispatch (`UpdateWhileShown()` always; `UpdateWhileActive()`
+  only if the just-set `m_bActive` is true) then gates the OK/Cancel/Enter/Esc handling
+  automatically -- no need to re-check `RememberPasswordChoiceState()` a second time inside
+  `UpdateWhileActive()` itself the way the old `CWin`-based code had to (that redundant check, and
+  the `m_bRememberPasswordPromptWasPending` snapshot member it needed, both dropped: setting
+  `SetActive()` from pre-`Tick()` state at the *top* of `UpdateWhileShown()` reproduces the same
+  "snapshot before `Tick()` can resolve it" ordering with no separate field). This single mechanism
+  also incidentally fixed a real, not-yet-reported bug found via code review while designing the
+  migration: `CLoginWin` polled `VK_RETURN`/`VK_ESCAPE` directly with no check for whether
+  `CMsgWin`/`CSysMenuWin`/`CCreditWin` was covering it -- the same "a higher-depth modal claiming
+  `UpdateMouseEvent()` doesn't stop a lower window's own `Update()`" gap already fixed once for
+  `CCharSelMainWin`/`CCharMakeWin` (Phase 2) -- folded into the same `SetActive()` computation
+  rather than a second, separate check. **Any future window needing this split should look at
+  whether it also needs this same modal-coexistence gate folded into the same `SetActive()` call**,
+  not just whatever originally motivated adding the split.
+
+  `CLoginWin`'s own `g_fScreenRate_x`/`g_fScreenRate_y` divide in `SetPosition()` (storing the
+  input boxes' position pre-divided, relying on `Render()`'s later `ConvertPositionX/Y` multiply to
+  cancel it back out) got the same proactive fix `CCharMakeWin`'s `BeginOpengl()` call already
+  needed: store real pixels directly, and wrap `RenderTextOnTop()` in its own explicit
+  `LayoutMode::Legacy` `ScopedActiveTransform` so both ends agree on identity unconditionally
+  (same fix as `CMsgWin`'s resident-password gotcha).
+
+  `CCharInfoBalloonMng` also now derives from `SEASON3B::CNewUIObj` and registers with
+  `GetNewStyleMng()`, promoted to a global `g_CharInfoBalloonMng` (same convention). Most of the
+  `INewUIBase` surface is thin/inert for it -- no interaction (`UpdateMouseEvent()`/
+  `UpdateKeyEvent()` never consume), no shown-vs-active distinction to make (`Update()` is a bare
+  `return true;` -- nothing drives a per-frame update distinct from `UpdateDisplay()`'s
+  event-driven refresh), `IsVisible()` overridden to mean `m_isInitialized` rather than the base
+  `m_bRender` flag (nothing meaningfully toggles "shown" for this manager beyond init/release).
+  `Render()`'s `shouldHide` check ports unchanged -- registering with the manager doesn't replace
+  it, same permanent cross-render-phase reasoning as `CLoginWin`'s own credits/sysmenu gates above.
+  `CUIMng::Render()`'s old direct, unconditional `m_CharInfoBalloonMng.Render()` call is gone --
+  `m_NewStyleMng.Render()`'s generic per-object walk now calls it instead, which also moves *when
+  in the frame* it renders (previously before the legacy `CWin*` walk, which no longer exists in
+  `CHARACTER_SCENE` regardless since Phase 2 finished) -- not expected to matter, since the
+  `shouldHide` toggle rather than draw-order governs its stacking, but flagged for the live-server
+  verification pass. This was about uniformity for Phase 4 (zero hardcoded per-window calls left in
+  `CUIMng`), not new behavior -- `CCharInfoBalloonMng` had no shown/active or interaction need of
+  its own to speak of.
+
+  **Two regressions found via live testing right after landing, both fixed in the same commit**:
+  - **ESC no longer opened/closed the system menu, in both `LOG_IN_SCENE` and `CHARACTER_SCENE`.**
+    `CUIMng::Update()` had `if (m_WinList.IsEmpty()) { m_NewStyleMng.Update(); return; }` guarding
+    the ESC-toggle-system-menu block below it -- harmless before this migration (`g_LoginWin` kept
+    the list non-empty throughout `LOG_IN_SCENE`), but `g_LoginWin` was the *last* window ever added
+    to `m_WinList`, so once it migrated the list is permanently empty and that early return fires
+    every frame, silently skipping the ESC block (and the rest of the legacy per-window walk) for
+    good. Symptom the user could actually see: pressing ESC over the system menu no longer closed
+    it. Fixed by moving the ESC-toggle block (and the `m_NewStyleMng.Update()` call) to run
+    unconditionally, and moving the `m_WinList.IsEmpty()` check down to guard only the genuinely
+    `m_WinList`-specific bookkeeping below it (`m_bWinActive`, the click walk, docking -- all
+    correctly dead code now, kept only in case a `CWin` subclass ever reappears before Phase 4).
+    **Originally suspected to also explain a second symptom, a mysterious "hang" on ESC at idle --
+    turned out not to be `CreateSocket()` being slow at all.** Confirmed by later live testing: once
+    the actual race below (closing the system menu via ESC also canceling the login form) was fixed,
+    the hang was gone entirely, with or without any dialog open. So the hang was the race itself,
+    not `CreateSocket()`'s connect cost surfacing more often as speculated here originally -- left
+    this paragraph in place, corrected, as a reminder not to accept a plausible-sounding "that's just
+    pre-existing cost, not a new bug" explanation without confirming it against a retest.
+  - **Character-select balloons only positioned correctly at exactly 640x480.**
+    `INTERFACE_CHAR_INFO_BALLOON` was given `LayoutMode::Legacy` (identity) in
+    `UILayoutPolicy.cpp` on the assumption that, like every other window in this migration series,
+    it computes real screen pixels itself. It doesn't: `CCharInfoBalloon::Render()`
+    (`CharInfoBalloon.cpp`) computes `nPosX`/`nPosY` via `CameraProjection::WorldToScreen()` (into
+    the 640x480 reference space) and then does `nPosX * g_fScreenRate_x` -- the exact "multiply by
+    whatever transform is ambient when this runs" contract `INTERFACE_NAME_WINDOW`/
+    `INTERFACE_ITEM_TOOLTIP` already use `LayoutMode::WorldOverlay` for. `LayoutMode::Legacy` made
+    `g_fScreenRate_x/y` always `1.0` regardless of window size, so the multiply became a no-op --
+    correct by coincidence only at 640x480 (where the "real" scale also happens to be 1.0), visibly
+    wrong everywhere else. Fixed by moving `INTERFACE_CHAR_INFO_BALLOON` to `LayoutMode::WorldOverlay`
+    (which resolves to `ScreenOverlayTransform()`, the same transform `UI::Scaling::LegacyUiTransform()`
+    used to set manually before this adapter existed). **Worth checking for on any future adapter
+    for legacy 2D content**: `LayoutMode::Legacy` is only correct for a window that computes real
+    screen pixels itself; one that scales up from the 640x480 reference space (anything reading
+    `g_fScreenRate_x/y` as a multiplier, as opposed to the CUIControl-family "divide then rely on a
+    later multiply" hazard documented separately below) needs `WorldOverlay`/`Hud` instead.
+
+  **A second live-testing pass, right after the first fix landed, found two more bugs**:
+  - **Closing the system menu via ESC also canceled the login form behind it** (visible as the
+    same multi-second `CreateSocket()` hang the first pass's ESC-hang note already flagged as
+    pre-existing -- this occurrence, though, is a real, new-to-this-migration bug, not just that
+    pre-existing cost surfacing). Root cause: `CUIMng::Update()`'s ESC-toggle block runs and closes
+    `g_SysMenuWin` *entirely before* `m_NewStyleMng.Update()` -- not as part of its depth-sorted
+    dispatch at all. Every other pair of Escape consumers in this manager gets ordering protection
+    for free from that dispatch (e.g. `g_LoginWin`'s depth 20 < `g_CreditWin`'s depth 100 means
+    `g_LoginWin::Update()` always runs first, seeing `g_CreditWin` pre-close), but `g_SysMenuWin`'s
+    own ESC close isn't part of that dispatch at all, so `g_LoginWin`'s `SetActive()` gate (which
+    includes `g_SysMenuWin.IsVisible()`) read the POST-close value in the very same frame the menu
+    closed, saw "not covered", and fired `SubmitCancel()` off the same keypress. Fixed with a new
+    `CUIMng::m_bSysMenuToggledByEscThisFrame` flag, set whenever that block acts (either direction)
+    and reset every `Update()`, which `CLoginWin::UpdateWhileShown()`'s `SetActive()` computation
+    now also ORs in alongside the live visibility check. **General lesson for any future window
+    whose own Escape (or similar directly-polled key) gate depends on another window's visibility**:
+    check whether that other window's own show/hide-on-that-key path runs through the shared
+    depth-sorted dispatch (ordering protects it for free) or through a special-cased, out-of-band
+    call site like this one (it needs an explicit same-frame flag like this instead).
+  - **Tab-cycling between `CLoginWin`'s username/password fields visually highlighted both at
+    once** (pre-existing in `CUITextInputBox`/`UIControls.cpp`, not something this migration
+    touched or introduced, but real and now fixed alongside it since it was blocking verification).
+    `RenderPortableSingleLine()`/`RenderPortableMultiline()` drew the selection-highlight rectangle
+    whenever `HasSelection()` (`m_iSelAnchor != m_iCaret`) was true, with no check that the field
+    was actually the focused one (`s_pFocusedPortable == this`) -- only the caret blink had that
+    guard. `GiveFocus(TRUE)` (what Tab calls on the destination field) selects all of *its* text but
+    never collapses the field being tabbed *away from*'s own now-stale selection range, so
+    tabbing back and forth left both fields satisfying `HasSelection()` simultaneously, each
+    rendering its own highlight regardless of which actually had keyboard focus. Fixed by requiring
+    `bFocused` too in both rendering paths -- a real, previously-undiagnosed widget bug, not
+    specific to `CLoginWin` (anything using two `CUITextInputBox`es with `SetTabTarget()` between
+    them would have shown the same symptom).
+
+  **Phase 3 complete and fully verified against a live server** (as of 2026-09-05), all four
+  regressions/bugs above fixed, including the `CHARACTER_SCENE` ESC concern -- confirmed no longer
+  reproducing (the fixed same-frame race above was the actual cause; not a separate crash). `CUIMng`
+  now has zero remaining `CWin`-list members (`m_WinList` is permanently empty) and zero remaining
+  direct hardcoded per-window calls -- every window it drives goes through `m_NewStyleMng`
+  generically. Clear to start Phase 4.
+- **Phase 4 (delete `CUIMng`)** — not started; fully unblocked, Phases 2-3 both done and verified.
+  `CWin` has a closed, fully-enumerated subclass set (confirmed by a full-tree grep) — no hidden
+  subclass elsewhere to worry about now that all 9 non-deleted ones (`COptionWin` deleted, not
+  counted) have migrated.
 - **Phase 5 (rename cleanup)** — not started; deliberately deferred until Phases 1-4 are complete
   and the split is fully retired. Once there is only one window-object system left, drop the
   "New"/`NewUI*` naming (`CNewUIObj`, `CNewUIManager`, `NewUIBase.h`, the `INTERFACE_*` prefix,
@@ -364,3 +495,21 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   **Any future migrated window driving a `CUIControl`-family widget (`CUITextInputBox` and
   siblings, `UIControls.h`) needs this same "identity at both ends" treatment** — it's a different
   hazard from the `CSprite`-based `LayoutMode::Legacy` gotcha above, not a duplicate of it.
+- **A window using `CNewUIObj`'s shown/active split should compute `SetActive()` from *every*
+  condition that ought to suspend its "active" handling, not just whatever originally motivated
+  adding the split.** `CLoginWin` (Phase 3, the first real user of this split) needed it purely for
+  its own "Remember Password" sub-dialog, but its `UpdateWhileActive()` also independently polled
+  `VK_RETURN`/`VK_ESCAPE` with no check for whether `CMsgWin`/`CSysMenuWin`/`CCreditWin` was
+  currently covering it — the same "a higher-depth modal claiming `UpdateMouseEvent()` doesn't
+  stop a lower window's own `Update()`" gap `CCharSelMainWin`/`CCharMakeWin` needed an explicit
+  `modalOpen` check for in Phase 2. Rather than adding a second, separate check, both conditions
+  fold into the same `SetActive(...)` call at the top of `UpdateWhileShown()` (`!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() || RememberPasswordChoiceState() == Pending)`)
+  — `CNewUIObj::Update()`'s own dispatch then gates `UpdateWhileActive()` on the result
+  automatically, so there's exactly one place this logic lives instead of one check embedded in
+  the split and a second, separately-invented one for modal coexistence. Also worth noting since it
+  generalizes beyond the split itself: setting `SetActive()` (or any per-frame gating flag) from
+  state read *before* a call that might resolve/consume that same state later in the same function
+  (here, `UpdateWhileShown()` computing `SetActive()` before calling `UI::Login::Tick()`, which can
+  resolve a Pending prompt) reproduces a "snapshot before it changes" ordering for free, without a
+  dedicated snapshot member — `CLoginWin` dropped its old `m_bRememberPasswordPromptWasPending`
+  field this way once it moved onto `CNewUIObj`.

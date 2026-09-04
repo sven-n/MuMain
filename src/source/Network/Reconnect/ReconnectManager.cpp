@@ -12,7 +12,7 @@
 #include "Scenes/SceneCommon.h"        // SelectedHero, MAX_CHARACTERS_PER_ACCOUNT
 #include "Scenes/CharacterScene.h"     // StartGame
 #include "Engine/Object/ZzzCharacter.h"// CharactersClient
-#include "UI/Legacy/UIMng.h"           // CUIMng, m_LoginWin
+#include "UI/Windows/LoginWin.h"       // g_LoginWin
 #include "MUHelper/MuHelper.h"         // MUHelper::g_MuHelper
 
 // Timing (milliseconds). WorldTime is the wall-clock ms timer the rest of the
@@ -326,8 +326,7 @@ void ReconnectManager::UpdateConnecting()
     // to 0 by the teardown, so it takes the login branch).
     if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
     {
-        CUIMng& uiMng = CUIMng::Instance();
-        uiMng.HideWin(&uiMng.m_LoginWin);
+        g_LoginWin.Show(false);
 
         LogIn = 1;
         wcscpy_s(LogInID, _countof(LogInID), m_username);

@@ -31,15 +31,33 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // CCharSelMainWin/CCharMakeWin (Phase 2): same reasoning -- both compute real screen pixels
     // themselves (CalculateFixedAnchorLayout(), the live 3D character-preview viewport's
     // BeginOpengl() call) rather than reference-space coordinates meant to be rescaled here.
+    // CLoginWin (Phase 3): same reasoning -- its own SetPosition() computes real screen pixels
+    // from WindowWidth/WindowHeight, and its legacy CUITextInputBox pair does real click-detection
+    // and text rendering against real, untransformed mouse/screen coordinates.
     case INTERFACE_MSG_WINDOW:
     case INTERFACE_SYS_MENU:
     case INTERFACE_CHAR_SEL_MAIN:
     case INTERFACE_CHAR_MAKE:
     case INTERFACE_LOGIN_MAIN:
+    case INTERFACE_LOGIN:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:
     case INTERFACE_ITEM_TOOLTIP:
+    // CCharInfoBalloonMng's adapter (Phase 3) -- unlike every window above, this one's own
+    // CCharInfoBalloon::Render() computes its screen position via CameraProjection::WorldToScreen()
+    // then `nPosX * g_fScreenRate_x` (CharInfoBalloon.cpp), the exact "multiply by whatever
+    // transform is ambient when this runs" contract INTERFACE_NAME_WINDOW/INTERFACE_ITEM_TOOLTIP
+    // already use WorldOverlay for -- WorldOverlay resolves to the same
+    // scale-640x480-reference-to-real-window transform CUIMng::Render() used to set manually
+    // (UI::Scaling::LegacyUiTransform(WindowWidth, WindowHeight) IS ScreenOverlayTransform(), which
+    // WorldOverlay/Hud both resolve to) before this adapter existed. Originally given
+    // LayoutMode::Legacy (identity) by mistake -- that made g_fScreenRate_x/y always 1.0 regardless
+    // of window size, so the balloons only landed in the right place at exactly 640x480 and drifted
+    // at every other resolution (found via live testing). LayoutMode::Legacy is for windows that
+    // compute real screen pixels themselves (CLoginWin, CSysMenuWin, etc. above) -- this one
+    // deliberately doesn't, so it needs the scaling WorldOverlay provides instead.
+    case INTERFACE_CHAR_INFO_BALLOON:
         return LayoutMode::WorldOverlay;
 
     case INTERFACE_MOVEMAP:

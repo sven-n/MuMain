@@ -134,6 +134,12 @@ enum INTERFACE_LIST
     INTERFACE_CHAR_MAKE,
     // Phase 2: CLoginMainWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_LOGIN_MAIN,
+    // Phase 3: CLoginWin (distinct from INTERFACE_LOGIN_MAIN, CLoginMainWin's own key), same
+    // reasoning as INTERFACE_CREDITS above.
+    INTERFACE_LOGIN,
+    // Phase 3: CCharInfoBalloonMng's thin adapter -- never a CWin, previously driven by direct
+    // CUIMng calls rather than through any list at all; same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_CHAR_INFO_BALLOON,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

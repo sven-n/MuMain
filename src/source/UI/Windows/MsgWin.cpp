@@ -7,8 +7,10 @@
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/ServerSelWin.h"
+#include "UI/Windows/LoginWin.h"
 #include "Character/CharMakeWin.h"
 #include "Character/CharSelMainWin.h"
+#include "Character/CharInfoBalloonMng.h"
 #include "Core/Platform/CrtDbg.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -502,7 +504,7 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
         DeleteMount(&CharactersClient[SelectedHero].Object);
         SelectedHero = -1;
         g_CharSelMainWin.UpdateDisplay();
-        rUIMng.m_CharInfoBalloonMng.UpdateDisplay();
+        g_CharInfoBalloonMng.UpdateDisplay();
         lpszMsg = I18N::Game::CharacterWasDeletedSuccessfully;
         break;
     case MESSAGE_BLOCKED_CHARACTER:
@@ -536,7 +538,6 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
 
 void CMsgWin::ManageOKClick()
 {
-    CUIMng& rUIMng = CUIMng::Instance();
     Show(false);
 
     switch (m_nMsgCode)
@@ -563,14 +564,14 @@ void CMsgWin::ManageOKClick()
     case RECEIVE_LOG_IN_FAIL_POINT_HOUR:
     case RECEIVE_LOG_IN_FAIL_INVALID_IP:
     case RECEIVE_LOG_IN_FAIL_CHARGED_CHANNEL:
-        rUIMng.ShowWin(&rUIMng.m_LoginWin);
-        CUIMng::Instance().m_LoginWin.GetUsernameInputBox()->GiveFocus(TRUE);
+        g_LoginWin.Show(true);
+        g_LoginWin.GetUsernameInputBox()->GiveFocus(TRUE);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_INPUT_PASSWORD:
     case RECEIVE_LOG_IN_FAIL_PASSWORD:
-        rUIMng.ShowWin(&rUIMng.m_LoginWin);
-        CUIMng::Instance().m_LoginWin.GetPasswordInputBox()->GiveFocus(TRUE);
+        g_LoginWin.Show(true);
+        g_LoginWin.GetPasswordInputBox()->GiveFocus(TRUE);
         CurrentProtocolState = RECEIVE_JOIN_SERVER_SUCCESS;
         break;
     case MESSAGE_DELETE_CHARACTER_CONFIRM:

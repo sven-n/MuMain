@@ -10,6 +10,7 @@
 #include "CharInfoBalloonMng.h"
 
 #include "CharInfoBalloon.h"
+#include "Core/Globals/_enum.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -17,6 +18,10 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "CharMakeWin.h"
 #include <RmlUi/Core/ElementDocument.h>
+
+// Replaces CUIMng's old `CCharInfoBalloonMng m_CharInfoBalloonMng;` member, same convention as
+// g_CreditWin.
+CCharInfoBalloonMng g_CharInfoBalloonMng;
 
 namespace
 {
@@ -96,16 +101,18 @@ void CCharInfoBalloonMng::Create()
                 m_pRmlDoc->Show();
         }
     }
+
+    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_INFO_BALLOON, this);
 }
 
 //*****************************************************************************
 // 함수 이름 : Render()
 // 함수 설명 : 캐릭터 정보 풍선들 렌더.
 //*****************************************************************************
-void CCharInfoBalloonMng::Render()
+bool CCharInfoBalloonMng::Render()
 {
     if (!m_isInitialized)
-        return;
+        return true;
 
     // Each balloon.Render() call recomputes its own live world->screen projection (position only
     // now -- see CCharInfoBalloon's header comment); SyncRmlModel() then pushes the result, plus
@@ -129,7 +136,11 @@ void CCharInfoBalloonMng::Render()
     // when its own CUIMng/CNewUIManager-merger migration surfaced this exact symptom (the menu
     // painting behind the balloon) -- this check needs the same treatment for every future
     // CHARACTER_SCENE-relevant migration too, same as the IsCursorOnUI() fold-in
-    // (docs/newui-legacy-merger.md).
+    // (docs/newui-legacy-merger.md). This registered adapter's own GetLayerDepth() can't replace
+    // this check even now that every window involved is a CNewUIObj: that depth-sort only orders
+    // *this manager's own* dispatch, not RmlUi's separate, always-last compositor pass, so a
+    // permanent explicit toggle is still the only fix (same reasoning as CLoginWin's own
+    // credits/sysmenu render-side gates -- see its Render()'s comment).
     const bool shouldHide = g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
     if (m_pRmlDoc)
     {
@@ -137,9 +148,10 @@ void CCharInfoBalloonMng::Render()
         else            m_pRmlDoc->Show();
     }
     if (shouldHide)
-        return;
+        return true;
 
     SyncRmlModel();
+    return true;
 }
 
 //*****************************************************************************
