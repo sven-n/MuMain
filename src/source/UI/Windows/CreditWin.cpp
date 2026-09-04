@@ -104,12 +104,10 @@ CCreditWin::CCreditWin()
     , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
-	// LayoutMode::Legacy (identity transform, see its own comment) -- this window computes real
-	// screen pixels itself (fScaleX/fScaleY against an assumed 800x600, not UI::Scaling's own
-	// 640x480 reference), so any other LayoutMode double-rescales its g_pRenderText calls
-	// (CUIRenderTextSDLTtf.cpp consults the active transform) and remaps the mouse coordinates
-	// CNewUIManager::UpdateMouseEvent() feeds its click hit-testing into the wrong space.
-	SetLayoutMode(UI::Scaling::LayoutMode::Legacy);
+	// Not SetLayoutMode() here -- CNewUIManager::AddUIObj() (called from Create(), below)
+	// overwrites it unconditionally on first registration via UI::Layout::ForInterface(), which
+	// is the actual authority; see that policy table's own INTERFACE_CREDITS entry
+	// (UILayoutPolicy.cpp) for why this window needs LayoutMode::Legacy specifically.
 }
 
 CCreditWin::~CCreditWin()
