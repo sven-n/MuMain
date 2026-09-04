@@ -193,9 +193,7 @@ bool CLoginMainWin::Update()
 
 void CLoginMainWin::OpenSysMenu()
 {
-    CUIMng& rUIMng = CUIMng::Instance();
     g_SysMenuWin.Show(true);
-    rUIMng.SetSysMenuWinShow(true);
 }
 
 void CLoginMainWin::OpenCredits()

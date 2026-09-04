@@ -232,7 +232,6 @@ bool CCreditWin::Update()
 	{
 		::PlayBuffer(SOUND_CLICK01);
 		CloseWin();
-		CUIMng::Instance().SetSysMenuWinShow(false);
 	}
 
 	for (int i = 0; i <= CRW_INDEX_NAME; ++i)

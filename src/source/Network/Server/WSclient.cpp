@@ -505,7 +505,6 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
         Offset += sizeof(PRECEIVE_SERVER_LIST);
     }
 
-    CUIMng& rUIMng = CUIMng::Instance();
     if (std::getenv("MU_INPUT_DIAGNOSTICS") != nullptr)
     {
         mu::log::Get("input")->info(

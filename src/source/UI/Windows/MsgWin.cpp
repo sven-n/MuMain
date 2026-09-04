@@ -253,7 +253,6 @@ bool CMsgWin::Update()
             ::PlayBuffer(SOUND_CLICK01);
             ManageCancelClick();
         }
-        CUIMng::Instance().SetSysMenuWinShow(false);
     }
     else if (m_aBtn[MW_OK].IsClick() || m_bRmlOkClicked)
     {
@@ -382,7 +381,6 @@ void CMsgWin::SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpsz
 
 void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
 {
-    CUIMng& rUIMng = CUIMng::Instance();
     std::wstring lpszMsg = L"";
     std::wstring lpszMsg2 = L"";
     MSG_WIN_TYPE eType = MWT_BTN_OK;

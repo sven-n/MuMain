@@ -316,8 +316,6 @@ bool CCharSelMainWin::Update()
     if (modalOpen)
         return true;
 
-    CUIMng& uiManager = CUIMng::Instance();
-
     if (m_aBtn[CSMW_BTN_CONNECT].IsClick() || m_bRmlConnectClicked)
     {
         m_bRmlConnectClicked = false;
@@ -327,7 +325,6 @@ bool CCharSelMainWin::Update()
     {
         m_bRmlMenuClicked = false;
         g_SysMenuWin.Show(true);
-        uiManager.SetSysMenuWinShow(true);
     }
     else if (m_aBtn[CSMW_BTN_CREATE].IsClick() || m_bRmlCreateClicked)
     {

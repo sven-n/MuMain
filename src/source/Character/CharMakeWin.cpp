@@ -504,7 +504,6 @@ bool CCharMakeWin::Update()
         {
             ::PlayBuffer(SOUND_CLICK01);
             Show(false);
-            CUIMng::Instance().SetSysMenuWinShow(false);
         }
     }
 

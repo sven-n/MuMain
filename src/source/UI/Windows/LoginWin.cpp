@@ -405,7 +405,6 @@ void CLoginWin::SubmitCancel()
 		return;
 	PlayBuffer(SOUND_CLICK01);
 	CancelLogin();
-	CUIMng::Instance().SetSysMenuWinShow(false);
 }
 
 void CLoginWin::UpdateRememberCheckboxes()

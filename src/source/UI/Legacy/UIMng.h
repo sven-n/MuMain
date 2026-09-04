@@ -3,7 +3,6 @@
 //*****************************************************************************
 #pragma once
 
-#include "Core/Utilities/PList.h"
 #include "UI/Windows/MsgWin.h"
 #include "UI/NewUI/NewUIManager.h"
 
@@ -16,23 +15,14 @@
 
 class CSprite;
 class CGaugeBar;
-class CWin;
-class CLoadingScene;
 
 class CUIMng
 {
-public:
-    CLoadingScene* m_pLoadingScene;
-
 protected:
     CSprite* m_asprTitle;
     CGaugeBar* m_pgbLoding;
-    CPList m_WinList;
     bool m_bCursorOnUI;
-    bool m_bBlockCharMove;
     int m_nScene;
-    bool m_bWinActive;
-    bool m_bSysMenuWinShow;
 
     // True only during the Update() call in which the ESC-toggle-system-menu block itself opened
     // or closed g_SysMenuWin -- reset at the top of every Update(). See Update()'s own comment for
@@ -81,9 +71,6 @@ public:
     void Update(double dDeltaTick);
     void Render();
 
-    void ShowWin(CWin* pWin);
-    void HideWin(CWin* pWin);
-
     bool IsCursorOnUI()
     {
         return m_bCursorOnUI;
@@ -94,14 +81,6 @@ public:
     {
         g_MsgWin.Show(false);
     }
-    void SetSysMenuWinShow(bool bShow)
-    {
-        m_bSysMenuWinShow = bShow;
-    }
-    bool IsSysMenuWinShow()
-    {
-        return m_bSysMenuWinShow;
-    };
     // See m_bSysMenuToggledByEscThisFrame's own comment.
     bool WasSysMenuToggledByEscThisFrame() const
     {
@@ -117,9 +96,4 @@ public:
 
 protected:
     CUIMng();
-
-    void RemoveWinList();
-    CWin* SetActiveWin(CWin* pWin);
-    void CheckDockWin();
-    bool SetDockWinPosition(CWin* pMoveWin, int nDockX, int nDockY);
 };
