@@ -237,6 +237,36 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/main_frame.rml");
 
+        // RmlUi-behind-3D-icons proof of concept -- see m_BgRmlBinder's own header comment.
+        // Gated on ThemeProvidesOwnIconChrome(), same as RenderLeftFrame()/RenderCenterFrame()'s
+        // own check below: no theme without that capability ships main_frame_bg.rml, so trying to
+        // load it there would just log a spurious "file not found" every Create().
+        if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
+        {
+            if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+            {
+                const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "main_frame_bg",
+                    [](Rml::DataModelConstructor& c, MainFrameBgRmlModel& model)
+                    {
+                        c.Bind("root_x", &model.rootX);
+                        c.Bind("root_y", &model.rootY);
+                        c.Bind("root_scale", &model.rootScale);
+                        c.Bind("left_offset_x", &model.leftOffsetX);
+                        c.Bind("center_offset_x", &model.centerOffsetX);
+                    });
+                if (bgModelCreated)
+                {
+                    m_pRmlBgDoc = UI::RmlBridge::LoadThemedDocument(bgContext, "Data/Interface/RmlUi/main_frame_bg.rml");
+                    // Shown immediately, unlike m_pRmlDoc below -- RenderBackgroundLayer() is only
+                    // ever called from RenderLeftFrame(), itself only reached while this window's
+                    // own Render() runs (i.e. already gated the same way m_pRmlDoc's visibility
+                    // is), so there is no separate "wrong scene" case to guard against here.
+                    if (m_pRmlBgDoc)
+                        m_pRmlBgDoc->Show();
+                }
+            }
+        }
+
         // Deliberately NOT Show()n here -- Create() runs during WebzenScene()'s own boot-time
         // loading screen (LoadMainSceneInterface(), called well before SceneFlag ever reaches
         // MAIN_SCENE), and this document renders every frame once shown regardless of scene (see
@@ -273,6 +303,12 @@ void SEASON3B::CNewUIMainFrameWindow::Release()
     // regardless of scene, so this object's own release has no other way to hide it.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
+
+    // Not load-bearing the same way m_pRmlDoc's Hide() is above -- m_pRmlBgDoc only ever renders
+    // via an explicit RenderBackgroundLayer() call from RenderLeftFrame(), itself unreachable once
+    // m_pNewUIMng->RemoveUIObj(this) above takes effect. Hidden anyway, defensively.
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
 }
 
 bool SEASON3B::CNewUIMainFrameWindow::Render()
@@ -389,40 +425,44 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterRegion()
 
 // 2026-09-01: theme-aware for the modern theme (feedback: "the potions/skill icons are still
 // using the old sprites as background", "we need to solve this ... since the inventory UI
-// contains lots of 3D items too"). These two functions are the ONE place in the whole frame
-// where this is actually fixable without touching RmlUi's render architecture: RmlUiRuntime
-// hooks a single SetPreSubmitCallback that runs once, after EVERYTHING else in the frame
-// (world, legacy 2D chrome, AND the 3D-composited item/skill icons -- see Render3D()/
-// RenderLeftRegion()) is already recorded (RmlUiRuntime.cpp's own Create() comment). RmlUi
-// therefore can never paint "behind" those 3D icons, in this window or any other -- an
-// RmlUi-drawn background here would always cover them, not sit under them (this is exactly why
-// main_frame.rml's #item_slots/#skill_slots outlines below are border-only, no fill). This
-// function, by contrast, already runs in the correct pass -- it draws the legacy sprite chrome
-// BEFORE Render3D()'s icon compositing happens later in the same frame, the same ordering that
-// has always put icons on top of this exact background. Swapping the sprite for a flat
-// RenderColorQuadARGB() here, for modern theme only, gets a real (not outline-only) themed
-// background that correctly sits behind the icons, using the one call site that was already
-// proven to composite correctly with them -- the general pattern to reuse for Inventory's own
-// still-legacy 3D item icons whenever that window's turn comes, not a one-off here.
+// contains lots of 3D items too"). Originally fixed (2026-09-01/02) with a hand-matched-color
+// legacy RenderColorQuadARGB() quad, because RmlUiRuntime's single "main" Rml::Context always
+// renders once, after everything else in the frame (world, legacy 2D chrome, AND the
+// 3D-composited item/skill icons -- see Render3D()/RenderLeftRegion()) -- an RmlUi-drawn
+// background through that context could never sit behind those icons, only ever cover them.
 //
-// Colors match themes/modern/main_frame.rcss's .slot-fill/.slot-frame tokens exactly (rgba(10,10,
-// 10,150) / rgba(255,255,255,60)) so the legacy-drawn panel and the RmlUi-drawn gauges/buttons
-// sitting on top of it read as one consistent surface, not two different systems -- the "unified
-// styling" ask. One panel spans the full legacy chrome extent (x=0-488, kLeftBandWidth's end
-// through kMenu3Start+kMenu3CenterWidth) since RenderLeftFrame()/RenderCenterFrame() are called
-// back-to-back under the identical transform (Render()'s leftTransform is centerTransform's own
-// alias) -- drawn as two flush quads (one per function, no visible seam, same flat color) rather
-// than restructuring these into one function, to keep each function's own responsibility (its
-// own band) unchanged for legacy theme.
+// 2026-09-04: replaced with the real fix instead (docs/rmlui-ui-system/STATUS.md's "RmlUi renders
+// last" finding) -- RmlUiRuntime::RenderBackgroundLayer() drives a second, background-only
+// Rml::Context that this function (not RenderCenterFrame(), see its own comment) calls
+// explicitly, mid-frame, right here -- still BEFORE Render3D()'s icon compositing runs later this
+// same frame, the same ordering the legacy quad relied on, except the panel is now real RmlUi
+// content (main_frame_bg.rml/.rcss) instead of a C++-authored color. General mechanism, not a
+// one-off: the same RenderBackgroundLayer() call is what Inventory's own still-legacy 3D item
+// icons (and every other window sharing CNewUI3DRenderMng) would use whenever their own port's
+// turn comes.
+//
+// main_frame_bg.rcss's colors still match main_frame.rcss's .slot-fill/.slot-frame tokens exactly
+// (rgba(10,10,10,150) / rgba(255,255,255,60)) so the RmlUi-drawn panel and the RmlUi-drawn
+// gauges/buttons sitting on top of it read as one consistent surface, not two different systems --
+// the "unified styling" ask. One document (main_frame_bg.rml) covers the full legacy chrome
+// extent (x=0-488, kLeftBandWidth's end through kMenu3Start+kMenu3CenterWidth) since
+// RenderLeftFrame()/RenderCenterFrame() are called back-to-back under the identical transform
+// (Render()'s leftTransform is centerTransform's own alias) -- #bg_left/#bg_center inside it stay
+// two separate elements (no visible seam, same flat color) rather than merging into one, mirroring
+// each function's own still-separate responsibility (its own band) for legacy theme.
 void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
-        // 2026-09-02: no border lines here anymore -- this panel's own top/bottom/outer-edge
-        // outline read as a visible divider once the whole bottom HUD strip got a single
-        // continuous top border of its own (#gauge_frame, themes/modern/main_frame.rcss), drawn
-        // over this same span. Fill only; the unified RmlUi border is now the only outline.
-        RenderColorQuadARGB(0.0f, kHudTop, kLeftBandWidth, kHudContentHeight, 0x960A0A0Au);
+        // Both panels (this band's #bg_left AND RenderCenterFrame()'s own #bg_center) come from
+        // ONE RmlUiRuntime::RenderBackgroundLayer() call, made here -- see m_BgRmlBinder's own
+        // header comment (NewUIMainFrameWindow.h) for the full mechanism (a second Rml::Context
+        // that can render mid-frame, behind the 3D-composited icons Render3D() draws later this
+        // same frame). Safe to call unconditionally even before m_pRmlBgDoc exists (e.g. a theme
+        // that declares the capability but genuinely has no main_frame_bg.rml yet) -- it's a
+        // documented no-op in that case. Must run before RenderCenterFrame() (Render()'s own
+        // ordering, unchanged) so that panel doesn't need its own, second, redundant call.
+        RmlUiRuntime::Instance().RenderBackgroundLayer();
         return;
     }
 
@@ -449,15 +489,19 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
         // exactly where RenderLeftFrame()'s own shifted right edge does
         // (kLeftBandWidth+GetItemHotkeyOffsetX() = 152+140=292) -- the two chrome panels meet
         // flush, no gap or overlap, despite using two different offsets.
-        // 2026-09-02: no border lines here anymore -- same reasoning as RenderLeftFrame()'s
-        // identical change (this panel's own outline read as a divider once the whole strip got
-        // one continuous top border of its own, #gauge_frame). Fill only.
-        const float left = 214.0f;
-        const float right = 424.0f;
-        RenderColorQuadARGB(left, kHudTop, right - left, kHudContentHeight, 0x960A0A0Au);
-
-        // Modern equivalent of the legacy IMAGE_MENU_2_1 "skill list expanded" highlight below --
-        // same trigger/rect, flat translucent overlay instead of a sprite frame.
+        //
+        // The panel fill itself moved to main_frame_bg.rml's #bg_center, rendered by
+        // RenderLeftFrame()'s single RenderBackgroundLayer() call (runs first, same frame) --
+        // left/right/kHudTop above stay as this comment's own record of that span's derivation,
+        // now also encoded as main_frame_bg.rcss's #bg_center rule (214px width, 429px top).
+        //
+        // This highlight overlay, unlike the panel fill, stays a legacy quad: it's a dynamic,
+        // frame-conditional overlay (not a static background), and it already renders in the
+        // correct pass here (before Render3D()'s icon compositing, same as the fill used to) --
+        // moving it into RmlUi isn't blocked by anything, just genuinely unnecessary work with no
+        // paint-order problem to fix. Modern equivalent of the legacy IMAGE_MENU_2_1 "skill list
+        // expanded" highlight below -- same trigger/rect, flat translucent overlay instead of a
+        // sprite frame.
         if (g_pSkillList->IsSkillListUp())
             RenderColorQuadARGB(222.0f, kHudTop, 160.0f, 40.0f, 0x40FFFFFFu);
         return;
@@ -675,6 +719,25 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
             m_fItemHotkeyOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
         if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("skill_list_anchor"))
             m_fSkillListOffsetX = pAnchor->GetAbsoluteOffset().x - centerTransform.offsetX;
+
+        // Background-layer panel (m_BgRmlBinder's own header comment) -- same 3 values as
+        // bars_left/top/scale above, plus the two anchor deltas just computed, so it tracks the
+        // exact same legacy-chrome position/scale the still-legacy Render3D() icons composite
+        // against.
+        if (m_pRmlBgDoc)
+        {
+            auto& bg = m_BgRmlBinder.GetModel();
+            bg.rootX = centerTransform.offsetX;
+            bg.rootY = centerTransform.offsetY;
+            bg.rootScale = centerTransform.scaleX;
+            bg.leftOffsetX = m_fItemHotkeyOffsetX;
+            bg.centerOffsetX = m_fSkillListOffsetX;
+            m_BgRmlBinder.MarkDirty("root_x");
+            m_BgRmlBinder.MarkDirty("root_y");
+            m_BgRmlBinder.MarkDirty("root_scale");
+            m_BgRmlBinder.MarkDirty("left_offset_x");
+            m_BgRmlBinder.MarkDirty("center_offset_x");
+        }
     }
 
     // HP/MP -- legacy RenderLifeMana(). fLife/fMana there are the EMPTY fraction; store filled.

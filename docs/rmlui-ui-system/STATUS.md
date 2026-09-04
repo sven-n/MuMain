@@ -249,40 +249,58 @@ for "the full architecture is in place":
   needed a new file. The underlying paint-order constraint itself is unchanged (see the next
   entry) — this fix is the capability flag the entry below already anticipated, not a removal of
   the conditional.
-- **RmlUi rendering strictly last in the frame is a real, systemic constraint, not one HUD
-  window's quirk — architecture design in progress 2026-09-04.** Two directions:
-  - **Legacy content rendering *after* RmlUi is already solved and shipping** —
-    `MuRenderer.h`'s `SetPostRmlUiCallback` (game cursor, `CMsgWin`, `CharMakeWin`, `MuHelperBar`,
-    `NewUISystem`) already provides this. Not a gap.
-  - **RmlUi content rendering *before* a specific mid-frame point — the direction
-    `NewUIMainFrameWindow.cpp`'s icon-chrome conditional needs — is a shared-infrastructure gap,
-    not a one-window problem.** `CNewUI3DCamera` (the class that composites every 3D item/skill
-    icon in the game) is itself a `CNewUIObj`, registered into the same single z-ordered window
-    list every other legacy 2D `CNewUIObj` window uses (`CNewUI3DRenderMng`, owned by
-    `CNewUISystem`, one instance for the whole game). `CNewUIManager::Render()` sorts and renders
-    that entire list as one pass, called once per frame (`MainScene.cpp`'s
-    `g_pNewUISystem->Render()`) — entirely before RmlUi's own single, fixed render callback fires
-    later in the frame. Every window wired to this shared manager hits the identical constraint
-    `NewUIMainFrameWindow.cpp` does: `RmlUiRuntime` holds exactly one `Rml::Context`, rendered once,
-    always last, so none of them can ever get an RmlUi-authored layer *behind* their own 3D icons
-    without new infrastructure. That list is not one window — it includes the still-unported
-    inventory-family tier `component-catalog.md` already flags as the next real target
-    (`ItemSlot`/`ItemGrid`, "no RmlUi pattern proven yet"): `NewUIMyInventory`,
-    `NewUIInventoryExtension`, `NewUIMyShopInventory`/`NewUIPurchaseShopInventory` (personal/web
-    shop), `NewUITrade`, `NewUIStorageInventory`/`NewUIStorageInventoryExt` (vault), `NewUIMixInventory`
-    (chaos machine), `NewUIUnitedMarketPlaceWindow`, `NewUILuckyItemWnd`, `NewUINPCShop`,
-    `NewUIGuildInfoWindow`, several `GameShop MsgBoxIGS*` dialogs, `NewUINPCQuest`,
-    `NewUIDoppelGangerWindow`, `NewUIEmpireGuardianNPC`, `NewUIDuelWatchMainFrameWindow`,
-    `NewUICommonMessageBox`/`NewUICustomMessageBox` — none RmlUi-ported yet, all registered with
-    the same `CNewUI3DRenderMng`. The concrete mechanism (confirmed feasible, not yet built): a
-    **second `Rml::Context`** plus a **new render seam** mirroring `SetPostRmlUiCallback`'s own
-    callback+dedicated-pass pattern, hooked at the point `g_pNewUISystem->Render()` is called from
-    `MainScene.cpp`, so it serves every current and future window on this shared manager instead
-    of each one hand-rolling its own color-matched legacy quad. Superseded the earlier "not worth
-    building" framing this entry carried for a few hours the same day — that conclusion was scoped
-    to `NewUIMainFrameWindow.cpp` alone and didn't check whether the shape recurred elsewhere; it
-    does, broadly. Full architecture plan in progress; see this doc's next revision or a dedicated
-    design doc once written.
+- ~~RmlUi rendering strictly last in the frame — a real, systemic constraint, not one HUD
+  window's quirk.~~ **Phase 1 (the primitive + one proven caller) built 2026-09-04.** Two
+  directions:
+  - **Legacy content rendering *after* RmlUi** — `MuRenderer.h`'s `SetPostRmlUiCallback` (game
+    cursor, `CMsgWin`, `CharMakeWin`, `MuHelperBar`, `NewUISystem`) already provided this. Not a
+    gap, never was.
+  - **RmlUi content rendering *before* a specific mid-frame point** — the direction
+    `NewUIMainFrameWindow.cpp`'s icon-chrome conditional needed, and every other window sharing
+    `CNewUI3DRenderMng` (the still-unported inventory-family tier: `NewUIMyInventory`,
+    `NewUIInventoryExtension`, personal/web shop, `NewUITrade`, vault/storage, chaos machine,
+    market place, NPC shop, several message-box/quest/duel windows) will hit too once ported —
+    was genuinely missing infrastructure, now built:
+    - **`IMuRenderer::FlushRenderCommands()`** (`MuRenderer.h`/`MuRendererSDLGpu.cpp`) — opens a
+      real render pass *mid-recording*, replaying only what's been recorded since the last flush
+      (or frame start). Turned out bigger than "add one more callback like
+      `SetPostRmlUiCallback`": rendering here is fully deferred (`g_pNewUISystem->Render()` only
+      appends to `s_renderCmds`; nothing reaches the GPU until `EndFrame()`'s one pass, which
+      unconditionally `CLEAR`s) — a pass opened earlier would just get wiped by that clear. Fixed
+      by refactoring `EndFrame()`'s vertex/bone/strip/texture staging (`StageDeferredGpuData()`)
+      and its render-pass replay loop (`ReplayCommandRange()`) into helpers callable more than
+      once per frame, tracked via `s_replayedCmdCount`/`s_mainColorPassOpenedThisFrame` (reset in
+      `BeginFrame()`) so the first pass of the frame — a flush or `EndFrame()`'s own — `CLEAR`s and
+      every one after `LOAD`s. The pre-existing screenshot/readback capture path (a different
+      target texture than the swapchain) is untouched: it always does a full `CLEAR`+full-replay
+      of its own, recovering flushed content from `s_renderCmds` even though the flush itself only
+      ever wrote to the swapchain.
+    - **`RmlUiRuntime::GetBackgroundContext()`/`RenderBackgroundLayer()`** (`RmlUiRuntime.h`/`.cpp`)
+      — a second, background-only `Rml::Context`, driven explicitly (flush, then
+      `Update()`+`Render()`) instead of through the single-slot `SetPreSubmitCallback` the "main"
+      context uses. Needs no input routing at all (never registered as an `IUiInputConsumer`) —
+      every document loaded into it is `pointer-events: none`, same convention as
+      `char_sel_main.rml`'s `#panel`.
+    - **Proven end-to-end**: `NewUIMainFrameWindow.cpp`'s `RenderLeftFrame()`/`RenderCenterFrame()`
+      background-fill hack (`RenderColorQuadARGB` + `ThemeProvidesOwnIconChrome()`) is retired —
+      replaced by `themes/modern/main_frame_bg.rml`/`.rcss`, a real RmlUi document rendered via
+      `RenderBackgroundLayer()`, tracking the same `BottomHudCenterTransform`/anchor-offset values
+      `main_frame.rml`'s own `#bars` group already used (`CNewUIMainFrameWindow::SyncRmlModel()`,
+      a second small `RmlModelBinder`). The skill-list-up highlight overlay in the same function
+      stays a legacy quad — never blocked by this constraint, no reason to move it.
+  - **Not yet done (Phase 2, deliberately deferred)**: generalizing the one proven call site into
+    a single insertion point inside `CNewUIManager::Render()`'s own z-sorted loop (gated on
+    crossing `INVENTORY_CAMERA_Z_ORDER`, 5.5 — every `CNewUI3DCamera` z-order, unlike every
+    2D-chrome window's, not yet audited project-wide) so every window on `CNewUI3DRenderMng`
+    benefits automatically instead of each one wiring its own `RenderBackgroundLayer()` call.
+    Ship this when the first inventory-family window's own port actually needs it, not
+    speculatively ahead of that — `component-catalog.md` §26.
+  - Also caught and fixed while writing `check_rml_rcss_drift.py`'s test against this change: the
+    checker pooled every `.Bind()`/`.BindEventCallback()`/`GetElementById()` call in a `.cpp` file
+    into *every* document that file loads — silently correct as long as no file owned more than
+    one themed document. `NewUIMainFrameWindow.cpp` now owns two (`main_frame`,
+    `main_frame_bg`); fixed by scoping each call to whichever `RmlModelBinder::Create()`/document
+    pointer it's textually associated with, not the whole file.
 - **No Custom/Test theme yet.** §25/§28 want a Custom/Test theme that looks substantially
   different from Legacy, specifically to surface accidental component/presentation coupling.
   **Legacy and Modern exist to validate that the architecture supports arbitrary themes, not as

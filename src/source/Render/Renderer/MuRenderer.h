@@ -344,6 +344,19 @@ public:
     // no-op backend never calls anything.
     virtual void SetPostRmlUiCallback(std::function<void()> /*callback*/) {}
 
+    // RmlUi-behind-3D-icons seam (docs/rmlui-ui-system/STATUS.md's "RmlUi renders last" finding):
+    // opens a real render pass NOW, mid-recording, replaying only what's been recorded into this
+    // frame's command list since the last flush (or frame start), instead of waiting for the one
+    // pass EndFrame normally opens once. Content drawn immediately after this call (e.g. a second
+    // Rml::Context's Render()) lands behind whatever legacy content the caller records next, and
+    // in front of everything recorded before this call -- the two existing seams above only let
+    // content render after ALL game content for the frame; this is the one that lets something
+    // render in the *middle*. CLEARs the very first time it (or EndFrame's own final pass) runs
+    // each frame, LOADs every time after -- callers don't need to know which. Default no-op
+    // backend does nothing (nothing to flush). See MuRendererSDLGpu.cpp's implementation comment
+    // for the concrete pass-sequencing/state-tracking this requires.
+    virtual void FlushRenderCommands() {}
+
     // Story 7.9.8 (AC-2): SDL_ttf GPU text engine accessor.
     // Returns the TTF_TextEngine* for creating TTF_Text objects, or nullptr if unavailable.
     [[nodiscard]] virtual TTF_TextEngine* GetTextEngine()

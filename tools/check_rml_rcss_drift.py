@@ -50,27 +50,77 @@ import re
 import sys
 
 LOAD_THEMED_RE = re.compile(r'LoadThemedDocument\([^,]*,\s*"Data/Interface/RmlUi/([A-Za-z0-9_]+)\.rml"\)')
+LOAD_THEMED_ASSIGN_RE = re.compile(
+    r'([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:UI::RmlBridge::)?LoadThemedDocument\('
+    r'[^,]*,\s*"Data/Interface/RmlUi/([A-Za-z0-9_]+)\.rml"\)'
+)
+CREATE_MODEL_RE = re.compile(r'\.Create\(\s*[^,]+,\s*"([A-Za-z0-9_]+)"')
 BIND_RE = re.compile(r'\.Bind\(\s*"([^"]+)"')
 BIND_EVENT_RE = re.compile(r'\.BindEventCallback\(\s*"([^"]+)"')
-GET_ELEMENT_RE = re.compile(r'GetElementById\(\s*"([^"]+)"')
+GET_ELEMENT_RE = re.compile(r'([A-Za-z_][A-Za-z0-9_]*)->GetElementById\(\s*"([^"]+)"')
 
 
 def find_document_windows(source_root: pathlib.Path) -> dict[str, set[str]]:
     """Maps each RML document name (e.g. "login") to the union of ids/bound field
-    names/event-callback names its owning .cpp file(s) reference."""
+    names/event-callback names its owning .cpp file(s) reference.
+
+    A .cpp file may own more than one themed document (e.g. NewUIMainFrameWindow.cpp's
+    "main_frame" and its background-layer companion "main_frame_bg", 2026-09-04) --
+    .Bind()/.BindEventCallback() calls are scoped to whichever RmlModelBinder::Create()
+    call's model-name string ("main_frame", "main_frame_bg", ...) textually precedes them
+    in the file (each one's registration lambda is a single contiguous block, never
+    interleaved with another's), not pooled file-wide. GetElementById() calls aren't
+    inside a Create() lambda at all -- scoped instead by which document pointer they're
+    called on (`ptr->GetElementById(...)`), resolved via that same pointer's own
+    `ptr = LoadThemedDocument(..., "name.rml")` assignment earlier in the file. A file
+    with no .Create() call found at all (a themed document with no data model) falls
+    back to whole-file pooling, this script's original behavior, rather than checking
+    nothing."""
     windows: dict[str, set[str]] = {}
     for path in sorted(source_root.rglob("*.cpp")):
         text = path.read_text(encoding="utf-8", errors="ignore")
         doc_names = set(LOAD_THEMED_RE.findall(text))
         if not doc_names:
             continue
-        referenced = (
-            set(BIND_RE.findall(text))
-            | set(BIND_EVENT_RE.findall(text))
-            | set(GET_ELEMENT_RE.findall(text))
-        )
+
+        model_starts = sorted((m.start(), m.group(1)) for m in CREATE_MODEL_RE.finditer(text))
+
+        def owning_model(pos: int) -> str | None:
+            owner = None
+            for start, name in model_starts:
+                if start <= pos:
+                    owner = name
+                else:
+                    break
+            return owner
+
+        if not model_starts:
+            # No RmlModelBinder::Create() call in this file at all -- can't scope by model,
+            # fall back to the original whole-file-pooled behavior.
+            referenced = (
+                set(BIND_RE.findall(text))
+                | set(BIND_EVENT_RE.findall(text))
+                | set(m.group(2) for m in GET_ELEMENT_RE.finditer(text))
+            )
+            for doc_name in doc_names:
+                windows.setdefault(doc_name, set()).update(referenced)
+            continue
+
+        referenced_by_model: dict[str, set[str]] = {}
+        for regex in (BIND_RE, BIND_EVENT_RE):
+            for m in regex.finditer(text):
+                owner = owning_model(m.start())
+                if owner:
+                    referenced_by_model.setdefault(owner, set()).add(m.group(1))
+
+        var_to_doc = {m.group(1): m.group(2) for m in LOAD_THEMED_ASSIGN_RE.finditer(text)}
+        for m in GET_ELEMENT_RE.finditer(text):
+            owner = var_to_doc.get(m.group(1))
+            if owner:
+                referenced_by_model.setdefault(owner, set()).add(m.group(2))
+
         for doc_name in doc_names:
-            windows.setdefault(doc_name, set()).update(referenced)
+            windows.setdefault(doc_name, set()).update(referenced_by_model.get(doc_name, set()))
     return windows
 
 

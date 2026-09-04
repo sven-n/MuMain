@@ -586,6 +586,33 @@ namespace SEASON3B
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
 
+        // RmlUi-behind-3D-icons proof of concept (docs/rmlui-ui-system/STATUS.md's "RmlUi renders
+        // last" finding) -- RenderLeftFrame()'s own header comment explains why this exists: the
+        // left/center HUD-strip background fill can never be RmlUi-drawn through m_pRmlDoc's own
+        // "main" context (it must sit BEHIND the legacy 3D-composited item/skill icons, which
+        // always render after everything in that context), so it lives in
+        // RmlUiRuntime::GetBackgroundContext() instead, rendered explicitly via
+        // RmlUiRuntime::RenderBackgroundLayer() from inside RenderLeftFrame(). Separate document/
+        // model/context from m_pRmlDoc's -- RmlUi data models are per-context, and this one only
+        // ever needs the 5 fields below, not main_frame's full model.
+        struct MainFrameBgRmlModel
+        {
+            // Mirrors MainFrameRmlModel::barsLeft/barsTop/barsScale exactly (same
+            // UI::Scaling::BottomHudCenterTransform() values, synced from the same place in
+            // SyncRmlModel()) -- #bg_root (main_frame_bg.rml) uses the identical
+            // data-style-left/top/transform:scale() convention #bars does, so this reference-space
+            // panel scales/tracks the legacy chrome the same way #bars's own children do.
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            // GetItemHotkeyOffsetX()/GetSkillListOffsetX()'s own values (same members
+            // m_fItemHotkeyOffsetX/m_fSkillListOffsetX Render()'s leftTransform/centerTransform
+            // already add) -- added on top of rootX inside main_frame_bg.rml's own child elements
+            // so the two panels track their real anchors exactly like the legacy quads did.
+            float leftOffsetX = 0.f, centerOffsetX = 0.f;
+        };
+        RmlModelBinder<MainFrameBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
         bool m_bRmlCShopClicked = false;
         bool m_bRmlChaInfoClicked = false;
         bool m_bRmlMyInvenClicked = false;

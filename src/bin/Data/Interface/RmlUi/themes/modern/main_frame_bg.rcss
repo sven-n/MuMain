@@ -1,0 +1,28 @@
+/* Background-layer companion to main_frame.rcss -- see main_frame_bg.rml's own header comment.
+   Loaded into a separate RmlUi context that renders behind the legacy 3D-composited item/skill
+   icons, so this file only ever holds flat fills, no interactive elements. */
+
+#bg_root {
+	position: absolute;
+	pointer-events: none;
+}
+
+#bg_left, #bg_center {
+	position: absolute;
+	top: 429px;
+	pointer-events: none;
+	/* Same literal as main_frame.rcss's .slot-fill -- duplicated, not shared via a second <link>,
+	   to keep this file (and the separate context it loads into) fully independent. Keep in sync
+	   by inspection if .slot-fill's own value ever changes. */
+	background-color: rgba(10, 10, 10, 150);
+}
+
+#bg_left {
+	width: 152px;
+	height: 41px;
+}
+
+#bg_center {
+	width: 210px; /* 424 - 214, RenderCenterFrame()'s own reference-space span */
+	height: 41px;
+}

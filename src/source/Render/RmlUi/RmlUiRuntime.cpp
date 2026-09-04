@@ -98,6 +98,12 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
     ApplyUIScale(m_Context, windowWidth, windowHeight);
 
+    // See m_BackgroundContext's own comment (RmlUiRuntime.h) -- a second, independent context,
+    // same dimensions/scale as "main", named distinctly so RmlUi's own context registry and any
+    // future debug tooling can tell them apart.
+    m_BackgroundContext = Rml::CreateContext("background", Rml::Vector2i(windowWidth, windowHeight));
+    ApplyUIScale(m_BackgroundContext, windowWidth, windowHeight);
+
     // Renders once per frame, after this frame's game content is recorded onto the command
     // buffer but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h)
     // for why this exact seam is required instead of a per-scene Update()/Render() call site
@@ -126,6 +132,7 @@ void RmlUiRuntime::Destroy()
     // m_RenderInterface before this call.
     Rml::Shutdown();
     m_Context = nullptr;
+    m_BackgroundContext = nullptr; // released by the same Rml::Shutdown() call above
 
     // Per RenderInterface.h/SystemInterface.h's own contract: the application must keep these
     // alive until after Rml::Shutdown() and destroy them itself afterward -- RmlUi never takes
@@ -139,6 +146,12 @@ void RmlUiRuntime::OnResize(int windowWidth, int windowHeight)
     if (!m_Context) return;
     m_Context->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
     ApplyUIScale(m_Context, windowWidth, windowHeight);
+
+    if (m_BackgroundContext)
+    {
+        m_BackgroundContext->SetDimensions(Rml::Vector2i(windowWidth, windowHeight));
+        ApplyUIScale(m_BackgroundContext, windowWidth, windowHeight);
+    }
 }
 
 void RmlUiRuntime::Update()
@@ -209,4 +222,27 @@ void RmlUiRuntime::RenderFrame()
 {
     Update();
     Render();
+}
+
+void RmlUiRuntime::RenderBackgroundLayer()
+{
+    if (!m_BackgroundContext) return;
+
+    // Opens a real render pass now, replaying whatever the caller's own legacy content has
+    // recorded so far this frame -- see FlushRenderCommands()'s own comment (MuRenderer.h) for
+    // why this is required before this context can render into the same command buffer at this
+    // point, rather than waiting for the frame's one pre-existing pass. A no-op (returns
+    // immediately) if nothing new has been recorded since the last flush -- harmless either way,
+    // this context still renders below regardless.
+    mu::GetRenderer().FlushRenderCommands();
+
+    // Same seam Render() uses for "main" -- see that method's own comment for why this is only
+    // valid here (still inside Begin/EndFrame's command buffer) and needs no state save/restore.
+    const mu::FrameGpuContext ctx = mu::GetRenderer().GetFrameGpuContext();
+    if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
+
+    m_BackgroundContext->Update();
+    m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height);
+    m_BackgroundContext->Render();
+    m_RenderInterface->EndFrame();
 }
