@@ -19,6 +19,7 @@
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/CreditWin.h"
 #include "Core/Input/Input.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
@@ -327,7 +328,7 @@ void NewMoveLogInScene()
         CreateLogInScene();
     }
 
-    if (!CUIMng::Instance().m_CreditWin.IsShow())
+    if (!g_CreditWin.IsVisible())
     {
         InitTerrainLight();
         MoveObjects();
@@ -403,7 +404,7 @@ bool NewRenderLogInScene(HDC hDC)
     // don't restrict the render loop.
     ResetFrustrumBoundsFullTerrain();
 
-    if (!CUIMng::Instance().m_CreditWin.IsShow())
+    if (!g_CreditWin.IsVisible())
     {
         { FRAME_PROFILE(Terrain); RenderTerrain(false); }
         { FRAME_PROFILE(Characters); RenderCharactersClient(); }

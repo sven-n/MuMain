@@ -4,6 +4,8 @@
 
 #include "stdafx.h"
 #include "UIMng.h"
+#include "UI/Windows/CreditWin.h"
+#include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Sprites/Sprite.h"
@@ -63,8 +65,6 @@ const char* WindowName(const CUIMng& manager, const CWin* window)
         return "server-select";
     if (window == &manager.m_LoginWin)
         return "login";
-    if (window == &manager.m_CreditWin)
-        return "credits";
     if (window == &manager.m_CharSelMainWin)
         return "character-select";
     if (window == &manager.m_CharMakeWin)
@@ -237,6 +237,7 @@ void CUIMng::Release()
     RemoveWinList();
 
     m_CharInfoBalloonMng.Release();
+    g_CreditWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -246,6 +247,7 @@ void CUIMng::CreateLoginScene()
     RemoveWinList();
 
     m_CharInfoBalloonMng.Release();
+    g_CreditWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
@@ -285,8 +287,7 @@ void CUIMng::CreateLoginScene()
     m_LoginWin.SetPosition((static_cast<int>(WindowWidth) - m_LoginWin.GetWidth()) / 2,
                            (static_cast<int>(WindowHeight) - m_LoginWin.GetHeight()) * 2 / 3);
 
-    m_CreditWin.Create();
-    m_WinList.AddHead(&m_CreditWin);
+    g_CreditWin.Create();
 
     m_bSysMenuWinShow = false;
     m_nScene = UIM_SCENE_LOGIN;
@@ -295,6 +296,8 @@ void CUIMng::CreateLoginScene()
 void CUIMng::CreateCharacterScene()
 {
     RemoveWinList();
+
+    g_CreditWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
@@ -337,6 +340,7 @@ void CUIMng::CreateMainScene()
     RemoveWinList();
 
     m_CharInfoBalloonMng.Release();
+    g_CreditWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -361,7 +365,7 @@ void CUIMng::RepositionSceneUI()
         const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
         const bool wasShown_ServerSelWin = m_ServerSelWin.IsShow();
         const bool wasShown_LoginWin = m_LoginWin.IsShow();
-        const bool wasShown_CreditWin = m_CreditWin.IsShow();
+        const bool wasShown_CreditWin = g_CreditWin.IsVisible();
 
         CreateLoginScene();
 
@@ -382,7 +386,7 @@ void CUIMng::RepositionSceneUI()
         if (wasShown_LoginWin)
             ShowWin(&m_LoginWin);
         if (wasShown_CreditWin)
-            ShowWin(&m_CreditWin);
+            g_CreditWin.Show(true);
 
         // Re-populate the server / server-group buttons from the existing
         // network-side data. Create() clears the button labels, so without
@@ -682,7 +686,22 @@ bool CUIMng::SetDockWinPosition(CWin* pMoveWin, int nDockX, int nDockY)
 
 void CUIMng::Update(double dDeltaTick)
 {
-    if (UIM_SCENE_NONE == m_nScene || m_WinList.IsEmpty())
+    if (UIM_SCENE_NONE == m_nScene)
+        return;
+
+    // New-style (CNewUIObj-tier) windows migrating off CWin/m_WinList (docs/rmlui-ui-system's
+    // CUIMng/CNewUIManager merger) -- dispatched first, and independent of m_WinList's own
+    // emptiness below, since this must keep running even once every CWin window has migrated
+    // away and m_WinList is permanently empty. bNewStyleConsumedClick lets the legacy click-walk
+    // further down skip itself when a new-style window already claimed the click -- reproducing
+    // the same "full-screen exclusive window blocks everything behind it" behavior CCreditWin had
+    // as m_WinList's own head entry before migrating off it.
+    m_NewStyleMng.UpdateMouseEvent();
+    m_NewStyleMng.UpdateKeyEvent();
+    const bool bNewStyleConsumedClick = m_NewStyleMng.GetActiveMouseUIObj() != nullptr;
+    m_NewStyleMng.Update();
+
+    if (m_WinList.IsEmpty())
         return;
 
     if (m_bWinActive)
@@ -707,7 +726,7 @@ void CUIMng::Update(double dDeltaTick)
             {
                 HideWin(&m_SysMenuWin);
             }
-            else if (!m_MsgWin.IsShow() && !m_OptionWin.IsShow() && !m_LoginWin.IsShow() && !m_CreditWin.IsShow() &&
+            else if (!m_MsgWin.IsShow() && !m_OptionWin.IsShow() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
                      !m_CharMakeWin.IsShow())
             {
                 ::PlayBuffer(SOUND_CLICK01);
@@ -721,7 +740,7 @@ void CUIMng::Update(double dDeltaTick)
 
     m_bCursorOnUI = false;
 
-    if (rInput.IsLBtnDn())
+    if (rInput.IsLBtnDn() && !bNewStyleConsumedClick)
     {
         bool bWinClick = false;
         position = m_WinList.GetHeadPosition();
@@ -859,6 +878,11 @@ void CUIMng::Render()
         pWin = (CWin*)m_WinList.GetPrev(position);
         pWin->Render();
     }
+
+    // New-style (CNewUIObj-tier) windows migrating off CWin/m_WinList -- rendered last so they
+    // paint on top of whatever legacy CWin content remains, same as CCreditWin's old position at
+    // m_WinList's own head (Render()'s tail-to-head walk paints the head last/on top).
+    m_NewStyleMng.Render();
 
     UI::Scaling::SetActiveTransform(previousTransform);
 }

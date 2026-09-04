@@ -45,7 +45,11 @@ namespace SEASON3B
         void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
         UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
 
-        void Show(bool bShow)
+        // Virtual (CUIMng/CNewUIManager merger) -- a window that must do more than flip a flag on
+        // show/hide (e.g. CCreditWin toggling its own sprites' visibility, matching CWin::Show()'s
+        // equivalent override contract) needs this to actually run when called through a base
+        // CNewUIObj*/INewUIBase* pointer, e.g. CNewUIManager::ShowInterface()'s generic dispatch.
+        virtual void Show(bool bShow)
         {
             m_bRender = bShow;
         }

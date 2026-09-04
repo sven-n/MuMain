@@ -7,6 +7,7 @@
 
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/CreditWin.h"
 #include "Network/Server/WSclient.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -181,7 +182,7 @@ void CLoginMainWin::OpenCredits()
     CUIMng& rUIMng = CUIMng::Instance();
     SocketClient->ToConnectServer()->SendServerListRequest();
 
-    rUIMng.ShowWin(&rUIMng.m_CreditWin);
+    g_CreditWin.Show(true);
 
     ::StopMp3(MUSIC_MAIN_THEME);
     ::PlayMp3(MUSIC_MUTHEME);

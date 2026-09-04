@@ -115,6 +115,10 @@ enum INTERFACE_LIST
     INTERFACE_MUHELPER_SKILL_LIST,
     INTERFACE_SYSTEMLOGWINDOW,
     INTERFACE_COMMAND_LIST,
+    // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- CCreditWin is the Phase 1 pilot for
+    // migrating CUIMng's CWin-derived windows onto CNewUIManager's registry. Inserted just before
+    // INTERFACE_END so every other entry's numeric value is unaffected.
+    INTERFACE_CREDITS,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

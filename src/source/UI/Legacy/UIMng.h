@@ -10,11 +10,11 @@
 #include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginWin.h"
-#include "UI/Windows/CreditWin.h"
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
 #include "Character/CharInfoBalloonMng.h"
 #include "UI/Windows/ServerMsgWin.h"
+#include "UI/NewUI/NewUIManager.h"
 
 #define UIM_SCENE_NONE 0
 #define UIM_SCENE_TITLE 1
@@ -37,7 +37,6 @@ public:
     CLoginMainWin m_LoginMainWin;
     CServerSelWin m_ServerSelWin;
     CLoginWin m_LoginWin;
-    CCreditWin m_CreditWin;
     CCharSelMainWin m_CharSelMainWin;
     CCharMakeWin m_CharMakeWin;
     CCharInfoBalloonMng m_CharInfoBalloonMng;
@@ -53,6 +52,16 @@ protected:
     int m_nScene;
     bool m_bWinActive;
     bool m_bSysMenuWinShow;
+
+    // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- a scene-scoped CNewUIManager instance
+    // (own object, not the shared g_pNewUIMng that MAIN_SCENE's ~79 windows use): CNewUIManager's
+    // dispatch is only ever driven from MainScene.cpp today, so a window that only exists during
+    // login/character scenes (like CCreditWin, the Phase 1 pilot) would never update/render if
+    // registered with the shared instance instead. Update()/Render() below (already called
+    // unconditionally every frame, regardless of scene) forward to this one, giving migrated
+    // CUIMng windows the same INewUIBase interface and dispatch semantics as the CNewUIObj tier
+    // without touching the MAIN_SCENE-only shared manager at all.
+    SEASON3B::CNewUIManager m_NewStyleMng;
 
 public:
     virtual ~CUIMng();
@@ -102,6 +111,13 @@ public:
     {
         return m_bSysMenuWinShow;
     };
+
+    // See m_NewStyleMng's own comment -- windows migrating off CWin register here instead of the
+    // shared g_pNewUIMng.
+    SEASON3B::CNewUIManager& GetNewStyleMng()
+    {
+        return m_NewStyleMng;
+    }
 
 protected:
     CUIMng();
