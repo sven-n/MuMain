@@ -249,18 +249,40 @@ for "the full architecture is in place":
   needed a new file. The underlying paint-order constraint itself is unchanged (see the next
   entry) — this fix is the capability flag the entry below already anticipated, not a removal of
   the conditional.
-- **RmlUi rendering strictly last in the frame — an unexamined integration choice, not a proven
-  requirement.** `RmlUiRuntime::Render()` fires from exactly one fixed pre-submit callback, always
-  after every legacy 2D/3D draw call for the frame — which is *why* `NewUIMainFrameWindow.cpp`'s
-  icon-chrome conditional (previous entry) exists at all (an RmlUi-drawn element would always
-  paint over legacy content that needs to render on top of it). Nobody has investigated whether
-  interleaving is actually possible for this engine's RmlUi integration (multiple contexts
-  triggered at different frame points, or a callback hook legacy content renders through at the
-  right point in RmlUi's own z-order) — if it is, it would remove the need for that conditional
-  (and its now-fixed capability flag) entirely, rather than living with a paint-order workaround
-  permanently. Bigger and riskier than the §30 fix itself (core render-loop timing, not one call
-  site) —
-  deserves its own dedicated design pass before assuming either direction. Not investigated.
+- **RmlUi rendering strictly last in the frame is a real, systemic constraint, not one HUD
+  window's quirk — architecture design in progress 2026-09-04.** Two directions:
+  - **Legacy content rendering *after* RmlUi is already solved and shipping** —
+    `MuRenderer.h`'s `SetPostRmlUiCallback` (game cursor, `CMsgWin`, `CharMakeWin`, `MuHelperBar`,
+    `NewUISystem`) already provides this. Not a gap.
+  - **RmlUi content rendering *before* a specific mid-frame point — the direction
+    `NewUIMainFrameWindow.cpp`'s icon-chrome conditional needs — is a shared-infrastructure gap,
+    not a one-window problem.** `CNewUI3DCamera` (the class that composites every 3D item/skill
+    icon in the game) is itself a `CNewUIObj`, registered into the same single z-ordered window
+    list every other legacy 2D `CNewUIObj` window uses (`CNewUI3DRenderMng`, owned by
+    `CNewUISystem`, one instance for the whole game). `CNewUIManager::Render()` sorts and renders
+    that entire list as one pass, called once per frame (`MainScene.cpp`'s
+    `g_pNewUISystem->Render()`) — entirely before RmlUi's own single, fixed render callback fires
+    later in the frame. Every window wired to this shared manager hits the identical constraint
+    `NewUIMainFrameWindow.cpp` does: `RmlUiRuntime` holds exactly one `Rml::Context`, rendered once,
+    always last, so none of them can ever get an RmlUi-authored layer *behind* their own 3D icons
+    without new infrastructure. That list is not one window — it includes the still-unported
+    inventory-family tier `component-catalog.md` already flags as the next real target
+    (`ItemSlot`/`ItemGrid`, "no RmlUi pattern proven yet"): `NewUIMyInventory`,
+    `NewUIInventoryExtension`, `NewUIMyShopInventory`/`NewUIPurchaseShopInventory` (personal/web
+    shop), `NewUITrade`, `NewUIStorageInventory`/`NewUIStorageInventoryExt` (vault), `NewUIMixInventory`
+    (chaos machine), `NewUIUnitedMarketPlaceWindow`, `NewUILuckyItemWnd`, `NewUINPCShop`,
+    `NewUIGuildInfoWindow`, several `GameShop MsgBoxIGS*` dialogs, `NewUINPCQuest`,
+    `NewUIDoppelGangerWindow`, `NewUIEmpireGuardianNPC`, `NewUIDuelWatchMainFrameWindow`,
+    `NewUICommonMessageBox`/`NewUICustomMessageBox` — none RmlUi-ported yet, all registered with
+    the same `CNewUI3DRenderMng`. The concrete mechanism (confirmed feasible, not yet built): a
+    **second `Rml::Context`** plus a **new render seam** mirroring `SetPostRmlUiCallback`'s own
+    callback+dedicated-pass pattern, hooked at the point `g_pNewUISystem->Render()` is called from
+    `MainScene.cpp`, so it serves every current and future window on this shared manager instead
+    of each one hand-rolling its own color-matched legacy quad. Superseded the earlier "not worth
+    building" framing this entry carried for a few hours the same day — that conclusion was scoped
+    to `NewUIMainFrameWindow.cpp` alone and didn't check whether the shape recurred elsewhere; it
+    does, broadly. Full architecture plan in progress; see this doc's next revision or a dedicated
+    design doc once written.
 - **No Custom/Test theme yet.** §25/§28 want a Custom/Test theme that looks substantially
   different from Legacy, specifically to surface accidental component/presentation coupling.
   **Legacy and Modern exist to validate that the architecture supports arbitrary themes, not as
