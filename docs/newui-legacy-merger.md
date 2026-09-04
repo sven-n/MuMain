@@ -203,12 +203,58 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     `WSclient.cpp`, `Winmain.cpp`, `CharacterScene.cpp`, `SysMenuWin.cpp`,
     `CharInfoBalloonMng.cpp` (several needed the same "add the explicit include `UIMng.h` no
     longer provides transitively" fix `CSysMenuWin`'s migration already found).
-  - Still to do: `CLoginMainWin`.
-- **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started. `CLoginWin` is the one window
-  that genuinely needs the new shown/active split (keeps ticking its text inputs and "Remember
-  Password" dialog while inactive, per its own `UpdateWhileShow()`/`UpdateWhileActive()` split);
-  `CCharInfoBalloonMng` was never a `CWin` at all (`CUIMng` already drives it by a direct call,
-  outside `m_WinList`) and needs its own thin adapter.
+  - `CLoginMainWin` — done, verified against a real server (Menu/Credits buttons both confirmed
+    working). The simplest of the five RmlUi-hybrid windows: no `RmlModelBinder` at all (its two
+    buttons are pure image buttons with no dynamic state, wired via a plain
+    `Rml::Element::AddEventListener` self-owning listener, `UI::RmlBridge::RmlDraggable.cpp`'s
+    idiom), and its `RmlClickMenu()`/`RmlClickCredit()` already acted immediately rather than
+    deferring through the flaky legacy activation gate (a fix already landed here before this
+    merger even started, 2026-09-03, after a real reproduction). `UpdateMouseEvent()` claims only
+    within its own small bounding rect, `CServerSelWin`'s non-modal pattern, not `CMsgWin`'s
+    full-screen one. This migration also permanently retires the last live consequence of a
+    documented `m_LoginWin`/`CLoginMainWin` hit-test-overlap bug (`CreateLoginScene()`'s own
+    comment): the overlap could previously starve the legacy `CButton` companion's click path by
+    letting `m_LoginWin` (checked first in `m_WinList`) win the click instead, but now that this
+    window's dispatch runs before any legacy `m_WinList` walk at all, that starvation is no longer
+    reachable regardless of overlap — `m_LoginWin` itself can still be thrown off by the same
+    drift until its own Phase 3 migration. `g_LoginMainWin` replaces `CUIMng::m_LoginMainWin`, same
+    convention as `g_CreditWin` — 2 external call sites updated in `WSclient.cpp`.
+  - **Phase 2 complete.** All of `CUIMng`'s still-`CWin` windows are migrated except `CLoginWin`
+    (Phase 3, deliberately last — see below) and `CCharInfoBalloonMng` (never a `CWin`, its own
+    Phase 3 item).
+- **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started (migration itself). `CLoginWin`
+  is the one window that genuinely needs the new shown/active split (keeps ticking its text inputs
+  and "Remember Password" dialog while inactive, per its own `UpdateWhileShow()`/
+  `UpdateWhileActive()` split); `CCharInfoBalloonMng` was never a `CWin` at all (`CUIMng` already
+  drives it by a direct call, outside `m_WinList`) and needs its own thin adapter.
+
+  **Found via user testing, fixed ahead of the migration itself (both are `CLoginWin`-side gaps,
+  same root cause category as `CCharInfoBalloonMng`'s own `shouldHide` fix from Phase 2)**: once
+  `CSysMenuWin`/`CCreditWin` had real content behind `login.rml`'s still-un-migrated dialog, two
+  z-order bugs surfaced when opening either while the login dialog was up:
+  - **Credits opened on top of the login dialog's own panel, not behind it.** `CCreditWin`'s
+    visuals are plain `CSprite`/`g_pRenderText` content (Phase 1), drawn in a C++ pass strictly
+    *before* RmlUi's own frame-final document render (`docs/rmlui-ui-system/README.md`'s "RmlUi
+    renders last") — `login.rml`'s own panel therefore always painted over it regardless of which
+    was opened more recently, a cross-render-phase case no RmlUi-side z-index could fix (the two
+    are sequential passes, not comparable layers). Fixed the same way as
+    `CCharInfoBalloonMng::Render()`'s own `shouldHide` check: `CLoginWin::RenderControls()` now
+    toggles `login.rml`'s document `Show()`/`Hide()` every frame based on `g_CreditWin.IsVisible()`
+    alone (`CSysMenuWin`'s own RmlUi panel already stacks correctly against `login.rml`'s — both
+    are same-phase RmlUi documents — so it's deliberately not part of this condition).
+  - **The raw username/password text (`CUITextInputBox::Render()`, not RmlUi content at all)
+    painted over both the system menu and the credits screen.** This runs from two call sites --
+    `CLoginWin::RenderControls()` itself (the legacy-theme-only "draw order doesn't matter since
+    the panel's transparent" shortcut, still true) and Winmain.cpp's post-RmlUi
+    `SetPostRmlUiCallback` (the theme-independent, eventually-canonical call site, per
+    `RenderTextOnTop()`'s own header comment) -- and neither previously checked whether anything
+    was currently covering the login dialog. Since this content isn't an RmlUi document at all,
+    hiding `login.rml` doesn't touch it; fixed by gating both call sites on
+    `!g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible()` directly.
+  - Both fixes are narrow, targeted patches on the still-legacy `CLoginWin`, not a preview of its
+    real Phase 3 migration -- once that lands, this whole class of gap retires the same way it did
+    for every other Phase 2 window (a proper `UpdateMouseEvent()`/depth-ordered claim rather than
+    a hand-written condition per call site).
 - **Phase 4 (delete `CUIMng`)** — not started; blocked on Phases 2-3. `CWin` has a closed,
   fully-enumerated subclass set (confirmed by a full-tree grep) — no hidden subclass elsewhere to
   worry about once the remaining 9 (`COptionWin` deleted, not counted) are gone.

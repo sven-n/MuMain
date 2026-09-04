@@ -6,6 +6,8 @@
 #include "UI/Windows/LoginWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/CreditWin.h"
+#include "UI/Windows/SysMenuWin.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -540,6 +542,21 @@ void CLoginWin::RenderControls()
         FirstLoad = 0;
     }
 
+    // g_CreditWin's own visuals are plain CSprite/g_pRenderText content (CUIMng/CNewUIManager
+    // merger, docs/newui-legacy-merger.md), drawn in a C++ pass strictly *before* RmlUi's own
+    // frame-final document render (docs/rmlui-ui-system/README.md's "RmlUi renders last") --
+    // login.rml's own panel would otherwise always paint over it regardless of which was opened
+    // more recently, the same "RmlUi always wins" gap CCharInfoBalloonMng's own shouldHide check
+    // exists to work around. Toggled every frame here (not just on Show()), same idempotent
+    // pattern as that check, since credits can open/close at any time while this dialog is
+    // already showing.
+    const bool coveredByCredits = g_CreditWin.IsVisible();
+    if (m_pRmlDoc)
+    {
+        if (coveredByCredits) m_pRmlDoc->Hide();
+        else                  m_pRmlDoc->Show();
+    }
+
     // All panel chrome (background, input-box frames, checkboxes, OK/Cancel buttons, labels,
     // trust-warning text) now renders via the RmlUi overlay -- see this class's header comment
     // and login.rml/.rcss. Nothing legacy left to draw here. RenderTextOnTop() below draws the
@@ -547,7 +564,13 @@ void CLoginWin::RenderControls()
     // call site) since the default "legacy" theme's panel is transparent, so draw order doesn't
     // matter yet; see RenderTextOnTop()'s own comment.
     SyncRmlModel();
-    RenderTextOnTop();
+
+    // Also skip while g_SysMenuWin is shown -- its own RmlUi panel already stacks correctly
+    // against login.rml's (both are same-phase RmlUi documents; no fix needed there), but these
+    // are raw CUITextInputBox pixels drawn directly, not RmlUi content, so RmlUi's own document
+    // ordering has no effect on them at all.
+    if (!coveredByCredits && !g_SysMenuWin.IsVisible())
+        RenderTextOnTop();
 }
 
 void CLoginWin::RenderTextOnTop()

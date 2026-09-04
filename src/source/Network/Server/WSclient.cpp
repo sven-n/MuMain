@@ -43,6 +43,7 @@
 #include "UI/Legacy/UIMng.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerSelWin.h"
+#include "UI/Windows/LoginMainWin.h"
 #include "Character/CharSelMainWin.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Character/CSParts.h"
@@ -508,13 +509,13 @@ void ReceiveServerList(const BYTE* ReceiveBuffer)
         mu::log::Get("input")->info(
             "[InputDiag] server-list groups={} selector(show={},active={}) login-main(show={},active={}) credits={}",
             g_ServerListManager->GetServerGroupSize(), g_ServerSelWin.IsVisible(), g_ServerSelWin.IsActive(),
-            rUIMng.m_LoginMainWin.IsShow(), rUIMng.m_LoginMainWin.IsActive(), g_CreditWin.IsVisible());
+            g_LoginMainWin.IsVisible(), g_LoginMainWin.IsActive(), g_CreditWin.IsVisible());
     }
     if (!g_CreditWin.IsVisible())
     {
         g_ServerSelWin.Show(true);
         g_ServerSelWin.UpdateDisplay();
-        rUIMng.ShowWin(&rUIMng.m_LoginMainWin);
+        g_LoginMainWin.Show(true);
     }
 
     g_ErrorReport.Write(L"Success Receive Server List.\r\n");

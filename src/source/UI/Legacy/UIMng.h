@@ -5,7 +5,6 @@
 
 #include "Core/Utilities/PList.h"
 #include "UI/Windows/MsgWin.h"
-#include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "Character/CharInfoBalloonMng.h"
 #include "UI/NewUI/NewUIManager.h"
@@ -25,7 +24,6 @@ class CLoadingScene;
 class CUIMng
 {
 public:
-    CLoginMainWin m_LoginMainWin;
     CLoginWin m_LoginWin;
     CCharInfoBalloonMng m_CharInfoBalloonMng;
     CLoadingScene* m_pLoadingScene;

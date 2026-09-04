@@ -10,6 +10,7 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "Character/CharSelMainWin.h"
 #include "Character/CharMakeWin.h"
+#include "UI/Windows/LoginMainWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
 #include "Audio/DSPlaySound.h"
@@ -58,8 +59,6 @@ bool InputDiagnosticsEnabled()
 
 const char* WindowName(const CUIMng& manager, const CWin* window)
 {
-    if (window == &manager.m_LoginMainWin)
-        return "login-main";
     if (window == &manager.m_LoginWin)
         return "login";
     return window == nullptr ? "none" : "unknown";
@@ -235,6 +234,7 @@ void CUIMng::Release()
     g_SysMenuWin.Release();
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
+    g_LoginMainWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -251,29 +251,30 @@ void CUIMng::CreateLoginScene()
     g_SysMenuWin.Release();
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
+    g_LoginMainWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
     // the screen size isn't guaranteed to already match WindowWidth/WindowHeight (the exact
     // values every migrated window's own Create()/SetPosition() now uses internally). This
-    // function is the one place that positions m_LoginWin and m_LoginMainWin *relative to each
-    // other* -- their legacy hit-test boxes (CursorInWin(WA_ALL), Win.cpp) sit only ~11px apart
-    // vertically at the reference resolution, so a drift between this function's source of screen
-    // size and each window's own internal one can close that gap into an overlap, letting
-    // m_LoginWin (checked first in m_WinList) silently win clicks meant for m_LoginMainWin's
-    // menu/credit buttons -- RmlUi's own click listener still fires correctly regardless (it has
-    // no such z-order ambiguity), but CWin::Update()'s UpdateWhileActive() gate never runs for
-    // m_LoginMainWin as a result, so the click has no visible effect.
+    // function is the one place that positions m_LoginWin and g_LoginMainWin relative to each
+    // other -- their hit-test boxes sit only ~11px apart vertically at the reference resolution.
+    // Before g_LoginMainWin's own CUIMng/CNewUIManager-merger migration, a drift between this
+    // function's source of screen size and each window's own internal one could close that gap
+    // into an overlap, letting m_LoginWin (checked first in m_WinList) silently win clicks meant
+    // for the menu/credit buttons; that's no longer reachable now that g_LoginMainWin's dispatch
+    // runs before any legacy m_WinList walk at all, regardless of overlap (see its own header
+    // comment) -- m_LoginWin itself can still be thrown off by this same drift, though, until its
+    // own Phase 3 migration.
     g_MsgWin.Create();
     g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
     g_SysMenuWin.Create();
 
-    m_LoginMainWin.Create();
-    m_WinList.AddHead(&m_LoginMainWin);
+    g_LoginMainWin.Create();
 
     int nBaseY = int(567.0f / 600.0f * static_cast<float>(WindowHeight));
-    m_LoginMainWin.SetPosition(30, nBaseY - m_LoginMainWin.GetHeight() - 11);
+    g_LoginMainWin.SetPosition(30, nBaseY - g_LoginMainWin.GetHeight() - 11);
 
     g_ServerSelWin.Create();
     g_ServerSelWin.SetPosition((static_cast<int>(WindowWidth) - g_ServerSelWin.GetWidth()) / 2,
@@ -301,6 +302,7 @@ void CUIMng::CreateCharacterScene()
     g_SysMenuWin.Release();
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
+    g_LoginMainWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
@@ -341,6 +343,7 @@ void CUIMng::CreateMainScene()
     g_SysMenuWin.Release();
     g_CharSelMainWin.Release();
     g_CharMakeWin.Release();
+    g_LoginMainWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -361,7 +364,7 @@ void CUIMng::RepositionSceneUI()
     {
         const bool wasShown_MsgWin = g_MsgWin.IsVisible();
         const bool wasShown_SysMenuWin = g_SysMenuWin.IsVisible();
-        const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
+        const bool wasShown_LoginMainWin = g_LoginMainWin.IsVisible();
         const bool wasShown_ServerSelWin = g_ServerSelWin.IsVisible();
         const bool wasShown_LoginWin = m_LoginWin.IsShow();
         const bool wasShown_CreditWin = g_CreditWin.IsVisible();
@@ -377,7 +380,7 @@ void CUIMng::RepositionSceneUI()
         if (wasShown_SysMenuWin)
             g_SysMenuWin.Show(true);
         if (wasShown_LoginMainWin)
-            ShowWin(&m_LoginMainWin);
+            g_LoginMainWin.Show(true);
         if (wasShown_ServerSelWin)
             g_ServerSelWin.Show(true);
         if (wasShown_LoginWin)

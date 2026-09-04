@@ -74,6 +74,8 @@
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Legacy/UIMng.h"
 #include "Character/CharMakeWin.h"
+#include "UI/Windows/CreditWin.h"
+#include "UI/Windows/SysMenuWin.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -2159,7 +2161,12 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
             if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
             {
                 BeginBitmap();
-                if (CUIMng::Instance().m_LoginWin.IsShow())
+                // Also gated on !g_CreditWin.IsVisible()/!g_SysMenuWin.IsVisible() -- these are
+                // raw CUITextInputBox pixels drawn directly, not RmlUi content, so they'd
+                // otherwise paint over both regardless of which one is currently covering the
+                // login dialog (found via user testing; see CLoginWin::RenderControls()'s own,
+                // more detailed comment on this same condition).
+                if (CUIMng::Instance().m_LoginWin.IsShow() && !g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible())
                     CUIMng::Instance().m_LoginWin.RenderTextOnTop();
                 if (g_CharMakeWin.IsVisible())
                     g_CharMakeWin.RenderTextOnTop();

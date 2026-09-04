@@ -132,6 +132,8 @@ enum INTERFACE_LIST
     INTERFACE_CHAR_SEL_MAIN,
     // Phase 2: CCharMakeWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_CHAR_MAKE,
+    // Phase 2: CLoginMainWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_LOGIN_MAIN,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

@@ -35,6 +35,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_SYS_MENU:
     case INTERFACE_CHAR_SEL_MAIN:
     case INTERFACE_CHAR_MAKE:
+    case INTERFACE_LOGIN_MAIN:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:
