@@ -120,12 +120,12 @@ void CCharInfoBalloonMng::Render()
     // were open. RmlUi renders unconditionally last in the frame now, so that relationship
     // inverted: with nothing telling it otherwise, a balloon would paint on top of the character-
     // creation dialog or a CMsgWin confirmation prompt instead of being covered by them, since
-    // both are themselves drawn earlier in the frame (CCharMakeWin's own panel is RmlUi too, but
-    // CMsgWin's isn't, and either way neither has any relationship to *when* RmlUi's pass runs).
-    // Restore the original visual hierarchy explicitly: hide the whole balloon document while
-    // either window is shown, since both used to legitimately cover it.
+    // both are themselves drawn earlier in the frame (both CCharMakeWin's and CMsgWin's own
+    // panels are RmlUi too, and either way neither has any relationship to *when* RmlUi's pass
+    // runs). Restore the original visual hierarchy explicitly: hide the whole balloon document
+    // while either window is shown, since both used to legitimately cover it.
     CUIMng& uiMng = CUIMng::Instance();
-    const bool shouldHide = uiMng.m_CharMakeWin.IsShow() || uiMng.m_MsgWin.IsShow();
+    const bool shouldHide = uiMng.m_CharMakeWin.IsShow() || g_MsgWin.IsVisible();
     if (m_pRmlDoc)
     {
         if (shouldHide) m_pRmlDoc->Hide();

@@ -28,7 +28,6 @@ class CLoadingScene;
 class CUIMng
 {
 public:
-    CMsgWin m_MsgWin;
     CSysMenuWin m_SysMenuWin;
     CLoginMainWin m_LoginMainWin;
     CLoginWin m_LoginWin;
@@ -95,7 +94,7 @@ public:
     void AddServerMsg(wchar_t* pszMsg);
     void CloseMsgWin()
     {
-        HideWin(&m_MsgWin);
+        g_MsgWin.Show(false);
     }
     void SetSysMenuWinShow(bool bShow)
     {

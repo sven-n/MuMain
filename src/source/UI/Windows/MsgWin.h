@@ -3,7 +3,7 @@
 //*****************************************************************************
 #pragma once
 
-#include "UI/Widgets/Win.h"
+#include "UI/NewUI/NewUIBase.h"
 #include "UI/Widgets/Button.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
@@ -20,13 +20,18 @@ namespace Rml { class ElementDocument; }
 //
 // 2026-08-31, built under docs/rmlui-ui-system/layout-and-scaling.md from day one: the panel is
 // centered via base.rcss's `.center-both` utility class with a fixed `dp` size, not a C++-pushed
-// rect. CWin::Create() still spans the full screen exactly as before the port -- that is what
-// makes CUIMng::IsCursorOnUI() report true for any cursor position while this dialog is shown,
-// regardless of the RmlUi panel's own (much smaller, centered) footprint, so a modal message box
+// rect.
+//
+// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
+// SEASON3B::CNewUIObj. Previously, CWin::Create() spanning the full screen was what made
+// CUIMng::IsCursorOnUI() report true for any cursor position while this dialog was shown --
+// UpdateMouseEvent() below now does that job directly (unconditionally claims the click while
+// shown, no rect check needed), and CUIMng::Update() folds new-style claims into m_bCursorOnUI
+// the same way it already folds them into the legacy click-walk skip. A modal message box
 // genuinely swallows every click no matter how imprecisely the legacy CButton bookkeeping below
 // lines up with the RmlUi visuals -- unlike CCharSelMainWin, this window has no legitimate
 // "world click" competing for input that a hit-test mismatch could wrongly let through.
-class CMsgWin : public CWin
+class CMsgWin : public SEASON3B::CNewUIObj
 {
 protected:
     enum MSG_WIN_TYPE
@@ -50,10 +55,12 @@ protected:
 
 public:
     CMsgWin();
-    virtual ~CMsgWin();
+    ~CMsgWin() override;
     void Create();
+    void Release(); // was CWin::PreRelease() (an override hook CWin::Release() called
+                     // automatically) -- called explicitly now, same as CCreditWin's own Release().
     void SetPosition(int nXCoord, int nYCoord);
-    void Show(bool bShow);
+    void Show(bool bShow) override;
     void PopUp(int nMsgCode, wchar_t* pszMsg = nullptr);
 
     // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
@@ -67,10 +74,28 @@ public:
     // MWT_STR_INPUT.
     void RenderTextOnTop();
 
+    // SEASON3B::INewUIBase
+    bool Render() override;
+    bool Update() override;
+    // Was CWin::Create()'s full-screen bounding rect + CWin::CursorInWin(WA_ALL) -- see this
+    // class's header comment. Unconditionally claims while shown; no rect check needed.
+    bool UpdateMouseEvent() override
+    {
+        return !IsVisible();
+    }
+    bool UpdateKeyEvent() override
+    {
+        return true;
+    }
+    // Below CCreditWin's full-screen-exclusive 100.0f -- the two are not known to ever coexist in
+    // practice (CCreditWin is LOG_IN_SCENE-only decorative content; nothing pops a message box
+    // while it's shown), but if they ever did, CCreditWin winning is the safer default.
+    float GetLayerDepth() override
+    {
+        return 50.0f;
+    }
+
 protected:
-    void PreRelease();
-    void UpdateWhileActive(double dDeltaTick);
-    void RenderControls();
     void SetCtrlPosition();
     void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = L"");
     void ManageOKClick();
@@ -102,3 +127,6 @@ private:
 
     void SyncRmlModel();
 };
+
+// Replaces CUIMng's old `CMsgWin m_MsgWin;` member, same convention as g_CreditWin.
+extern CMsgWin g_MsgWin;

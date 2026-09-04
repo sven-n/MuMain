@@ -1,4 +1,4 @@
-﻿//*****************************************************************************
+//*****************************************************************************
 // File: MsgWin.cpp
 //*****************************************************************************
 
@@ -22,6 +22,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
 #include "Core/Utilities/Log/ErrorReport.h"
+#include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -32,9 +33,9 @@
 #define	MW_OK		0
 #define	MW_CANCEL	1
 
-
-
 extern int g_iChatInputType;
+
+CMsgWin g_MsgWin;
 
 CMsgWin::CMsgWin()
 {
@@ -42,16 +43,12 @@ CMsgWin::CMsgWin()
 
 CMsgWin::~CMsgWin()
 {
+    Release();
 }
 
 void CMsgWin::Create()
 {
-    CInput rInput = CInput::Instance();
-
-    // Full-screen bounding rect, unchanged from before this port -- see this class's header
-    // comment for why that matters (IsCursorOnUI() correctness for a modal dialog).
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -2);
-    SetMovable(false);
+    Release();
 
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
 
@@ -60,7 +57,6 @@ void CMsgWin::Create()
     for (int i = 0; i < 2; ++i)
     {
         m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-        CWin::RegisterButton(&m_aBtn[i]);
     }
 
     memset(m_aszMsg[0], 0, sizeof(char) * MW_MSG_LINE_MAX * MW_MSG_ROW_MAX);
@@ -99,15 +95,20 @@ void CMsgWin::Create()
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
     }
+
+    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_MSG_WINDOW, this);
+    Show(false);
 }
 
-void CMsgWin::PreRelease()
+void CMsgWin::Release()
 {
+    m_aBtn[0].Release();
+    m_aBtn[1].Release();
     m_sprInput.Release();
     m_sprBack.Release();
 
     // See CLoginWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s every
-    // window on every scene transition, and CWin's own Release() has no knowledge of m_pRmlDoc.
+    // window on every scene transition, and this class has no base-class knowledge of m_pRmlDoc.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -141,16 +142,27 @@ void CMsgWin::SetCtrlPosition()
         m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 264, nBtnYPos);
         if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
             if (g_iChatInputType == 1)
-                g_pSinglePasswdInputBox->SetPosition(
-                    int((m_sprInput.GetXPos() + 10) / g_fScreenRate_x),
-                    int((m_sprInput.GetYPos() + 8) / g_fScreenRate_y));
+                // Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::SetPosition()
+                // stores this raw and only rescales it at Render() time via ConvertPositionX/Y's
+                // *ambient* active transform (UIControls.cpp/ZzzOpenglUtil.cpp). The old division
+                // here relied on that ambient transform being the same one active when this ran --
+                // true when this only ever ran unscoped (CWin days), but this call chain now
+                // reaches here through ManageOKClick()->PopUp()->SetMsg(), inside CMsgWin::Update()
+                // itself, which CNewUIManager::Update() wraps in a LayoutMode::Legacy (identity)
+                // ScopedActiveTransform -- dividing by that identity is a no-op, so the position
+                // got stored as real pixels while still being *labeled* reference-space, then
+                // rescaled a second time by RenderTextOnTop()'s own (correctly ambient,
+                // non-identity) transform at render time. Storing real pixels directly and
+                // forcing identity at the one consuming Render() call (below) instead keeps both
+                // sides consistent regardless of which context triggered this.
+                g_pSinglePasswdInputBox->SetPosition(m_sprInput.GetXPos() + 10, m_sprInput.GetYPos() + 8);
         break;
     }
 }
 
 void CMsgWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    SEASON3B::CNewUIObj::Show(bShow);
 
     m_sprBack.Show(bShow);
 
@@ -189,8 +201,14 @@ void CMsgWin::Show(bool bShow)
     }
 }
 
-void CMsgWin::UpdateWhileActive(double dDeltaTick)
+bool CMsgWin::Update()
 {
+    if (!IsVisible())
+        return true;
+
+    m_aBtn[MW_OK].Update();
+    m_aBtn[MW_CANCEL].Update();
+
     if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
         g_pSinglePasswdInputBox != nullptr && g_pSinglePasswdInputBox->GetState() == UISTATE_NORMAL)
     {
@@ -198,6 +216,13 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
     }
 
     CInput& rInput = CInput::Instance();
+
+    // dDeltaTick previously threaded through from CWin::UpdateWhileActive(double); this window's
+    // migrated Update() takes no parameters, same as every other CNewUIObj window -- read the
+    // same clamped expression CUIMng::Update(dDeltaTick) itself resolves to in steady state (see
+    // docs/newui-legacy-merger.md's g_pTimer gotcha).
+    extern float FPS_ANIMATION_FACTOR;
+    const double dDeltaTick = 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR);
 
     if (rInput.IsKeyDown(VK_RETURN))
     {
@@ -259,9 +284,11 @@ void CMsgWin::UpdateWhileActive(double dDeltaTick)
             }
         }
     }
+
+    return true;
 }
 
-void CMsgWin::RenderControls()
+bool CMsgWin::Render()
 {
     // RmlUi's #panel now owns 100% of this dialog's visuals (background frame, message text,
     // OK/Cancel, the resident-password input frame's background) in every theme -- see this
@@ -270,6 +297,7 @@ void CMsgWin::RenderControls()
     // still needs to do; RenderTextOnTop() (the resident-password live text) is called from
     // Winmain.cpp's SetPostRmlUiCallback instead of here, so it isn't drawn twice.
     SyncRmlModel();
+    return true;
 }
 
 void CMsgWin::RenderTextOnTop()
@@ -278,7 +306,14 @@ void CMsgWin::RenderTextOnTop()
         return;
 
     if (g_iChatInputType == 1)
+    {
+        // Force identity to match SetCtrlPosition()'s now-real-pixel SetPosition() call (see its
+        // own comment) -- this runs unscoped (Winmain.cpp's post-RmlUi callback), so without this
+        // it would rescale by whatever the ambient/default transform happens to be instead.
+        const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
+        UI::Scaling::ScopedActiveTransform identity(transform);
         g_pSinglePasswdInputBox->Render();
+    }
     else if (g_iChatInputType == 0)
     {
         InputTextWidth = 100;
@@ -494,13 +529,13 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
     }
 
     SetMsg(eType, lpszMsg, lpszMsg2);
-    rUIMng.ShowWin(this);
+    Show(true);
 }
 
 void CMsgWin::ManageOKClick()
 {
     CUIMng& rUIMng = CUIMng::Instance();
-    rUIMng.HideWin(this);
+    Show(false);
 
     switch (m_nMsgCode)
     {
@@ -555,9 +590,8 @@ void CMsgWin::ManageCancelClick()
         g_pSinglePasswdInputBox->SetState(UISTATE_HIDE);
     }
 
-    CUIMng& rUIMng = CUIMng::Instance();
     m_nMsgCode = -1;
-    rUIMng.HideWin(this);
+    Show(false);
 }
 
 void CMsgWin::InitResidentNumInput()

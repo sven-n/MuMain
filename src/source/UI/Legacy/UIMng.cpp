@@ -55,8 +55,6 @@ bool InputDiagnosticsEnabled()
 
 const char* WindowName(const CUIMng& manager, const CWin* window)
 {
-    if (window == &manager.m_MsgWin)
-        return "message";
     if (window == &manager.m_SysMenuWin)
         return "system-menu";
     if (window == &manager.m_LoginMainWin)
@@ -236,6 +234,7 @@ void CUIMng::Release()
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
+    g_MsgWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -248,6 +247,7 @@ void CUIMng::CreateLoginScene()
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
+    g_MsgWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
@@ -261,9 +261,8 @@ void CUIMng::CreateLoginScene()
     // menu/credit buttons -- RmlUi's own click listener still fires correctly regardless (it has
     // no such z-order ambiguity), but CWin::Update()'s UpdateWhileActive() gate never runs for
     // m_LoginMainWin as a result, so the click has no visible effect.
-    m_MsgWin.Create();
-    m_WinList.AddHead(&m_MsgWin);
-    m_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
+    g_MsgWin.Create();
+    g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
@@ -296,14 +295,14 @@ void CUIMng::CreateCharacterScene()
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
+    g_MsgWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
     CInput& rInput = CInput::Instance();
 
-    m_MsgWin.Create();
-    m_WinList.AddHead(&m_MsgWin);
-    m_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2, (rInput.GetScreenHeight() - 113) / 2);
+    g_MsgWin.Create();
+    g_MsgWin.SetPosition((rInput.GetScreenWidth() - 352) / 2, (rInput.GetScreenHeight() - 113) / 2);
 
     g_ServerMsgWin.Create();
     int nBaseY = int(31.0f / 600.0f * (float)rInput.GetScreenHeight());
@@ -337,6 +336,7 @@ void CUIMng::CreateMainScene()
     g_CreditWin.Release();
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
+    g_MsgWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -355,7 +355,7 @@ void CUIMng::RepositionSceneUI()
     // current visibility here and restore it right after.
     if (m_nScene == UIM_SCENE_LOGIN)
     {
-        const bool wasShown_MsgWin = m_MsgWin.IsShow();
+        const bool wasShown_MsgWin = g_MsgWin.IsVisible();
         const bool wasShown_SysMenuWin = m_SysMenuWin.IsShow();
         const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
         const bool wasShown_ServerSelWin = g_ServerSelWin.IsVisible();
@@ -369,7 +369,7 @@ void CUIMng::RepositionSceneUI()
         // parent when `UpdateDisplay()` decides which sub-elements to show.
         // If the parent is still hidden at that moment, nothing renders.
         if (wasShown_MsgWin)
-            ShowWin(&m_MsgWin);
+            g_MsgWin.Show(true);
         if (wasShown_SysMenuWin)
             ShowWin(&m_SysMenuWin);
         if (wasShown_LoginMainWin)
@@ -683,19 +683,25 @@ void CUIMng::Update(double dDeltaTick)
         return;
 
     // New-style (CNewUIObj-tier) windows migrating off CWin/m_WinList (docs/rmlui-ui-system's
-    // CUIMng/CNewUIManager merger) -- dispatched first, and independent of m_WinList's own
-    // emptiness below, since this must keep running even once every CWin window has migrated
-    // away and m_WinList is permanently empty. bNewStyleConsumedClick lets the legacy click-walk
-    // further down skip itself when a new-style window already claimed the click -- reproducing
-    // the same "full-screen exclusive window blocks everything behind it" behavior CCreditWin had
-    // as m_WinList's own head entry before migrating off it.
+    // CUIMng/CNewUIManager merger) -- UpdateMouseEvent()/UpdateKeyEvent() dispatched first, and
+    // independent of m_WinList's own emptiness below, since this must keep running even once
+    // every CWin window has migrated away and m_WinList is permanently empty.
+    // bNewStyleConsumedClick lets the legacy click-walk further down skip itself when a
+    // new-style window already claimed the click -- reproducing the same "full-screen exclusive
+    // window blocks everything behind it" behavior CCreditWin had as m_WinList's own head entry
+    // before migrating off it. m_bCursorOnUI folds it in too (docs/newui-legacy-merger.md), so a
+    // migrated modal like CMsgWin still blocks CharacterScene.cpp's world-click/rotation gating
+    // the same way its old full-screen CWin::CursorInWin(WA_ALL) rect used to.
     m_NewStyleMng.UpdateMouseEvent();
     m_NewStyleMng.UpdateKeyEvent();
     const bool bNewStyleConsumedClick = m_NewStyleMng.GetActiveMouseUIObj() != nullptr;
-    m_NewStyleMng.Update();
+    m_bCursorOnUI = bNewStyleConsumedClick;
 
     if (m_WinList.IsEmpty())
+    {
+        m_NewStyleMng.Update();
         return;
+    }
 
     if (m_bWinActive)
     {
@@ -709,7 +715,11 @@ void CUIMng::Update(double dDeltaTick)
 
     CInput& rInput = CInput::Instance();
 
-    // ESC toggles system menu in login/character scenes
+    // ESC toggles system menu in login/character scenes. Checked before m_NewStyleMng.Update()
+    // (below) runs -- a migrated window's own ESC handling (e.g. CMsgWin closing itself on ESC)
+    // must not also flip g_MsgWin.IsVisible() to false in time to fool this same frame's check,
+    // same relative ordering the legacy m_WinList per-window Update() walk further down already
+    // has with this block.
     if (rInput.IsKeyDown(VK_ESCAPE))
     {
         extern EGameScene SceneFlag;
@@ -719,7 +729,7 @@ void CUIMng::Update(double dDeltaTick)
             {
                 HideWin(&m_SysMenuWin);
             }
-            else if (!m_MsgWin.IsShow() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
+            else if (!g_MsgWin.IsVisible() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
                      !m_CharMakeWin.IsShow())
             {
                 ::PlayBuffer(SOUND_CLICK01);
@@ -728,10 +738,10 @@ void CUIMng::Update(double dDeltaTick)
         }
     }
 
+    m_NewStyleMng.Update();
+
     CWin* pWin;
     NODE* position;
-
-    m_bCursorOnUI = false;
 
     if (rInput.IsLBtnDn() && !bNewStyleConsumedClick)
     {
@@ -888,7 +898,7 @@ void CUIMng::PopUpMsgWin(int nMsgCode, wchar_t* pszMsg)
     if (UIM_SCENE_MAIN == m_nScene)
         return;
 
-    m_MsgWin.PopUp(nMsgCode, pszMsg);
+    g_MsgWin.PopUp(nMsgCode, pszMsg);
 }
 
 void CUIMng::AddServerMsg(wchar_t* pszMsg)

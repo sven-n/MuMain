@@ -193,7 +193,7 @@ void NewMoveCharacterScene()
 
     if (rInput.IsKeyDown(VK_RETURN))
     {
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
+        if (!(g_MsgWin.IsVisible() || rUIMng.m_CharMakeWin.IsShow()
             || rUIMng.m_SysMenuWin.IsShow())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {

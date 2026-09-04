@@ -2162,8 +2162,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                     CUIMng::Instance().m_LoginWin.RenderTextOnTop();
                 if (CUIMng::Instance().m_CharMakeWin.IsShow())
                     CUIMng::Instance().m_CharMakeWin.RenderTextOnTop();
-                if (CUIMng::Instance().m_MsgWin.IsShow())
-                    CUIMng::Instance().m_MsgWin.RenderTextOnTop();
+                if (g_MsgWin.IsVisible())
+                    g_MsgWin.RenderTextOnTop();
                 RenderCursor();
                 EndBitmap();
             }

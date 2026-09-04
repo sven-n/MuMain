@@ -123,6 +123,9 @@ enum INTERFACE_LIST
     INTERFACE_SERVER_MESSAGE,
     // Phase 2: CServerSelWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SERVER_SELECT,
+    // Phase 2: CMsgWin (distinct from INTERFACE_MESSAGEBOX, the unrelated MAIN_SCENE-tier
+    // CNewUIMessageBoxBase key) -- same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_MSG_WINDOW,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

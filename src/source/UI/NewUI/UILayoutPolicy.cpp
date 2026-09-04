@@ -22,6 +22,11 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // same reasoning as INTERFACE_CREDITS.
     case INTERFACE_SERVER_MESSAGE:
     case INTERFACE_SERVER_SELECT:
+    // CMsgWin (Phase 2) renders 100% via RmlUi's own #panel now, but its legacy CButtons still
+    // do real click-detection bookkeeping (CursorInObject() against real, untransformed mouse
+    // coordinates) against real-pixel positions computed from a real-pixel-positioned CSprite --
+    // same reasoning as INTERFACE_CREDITS above.
+    case INTERFACE_MSG_WINDOW:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:
