@@ -108,7 +108,58 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     sometimes inside `CMsgWin::Update()`'s own `LayoutMode::Legacy` scope) and where it was
     rendered (unscoped, ambient transform), causing its stored position to be scaled twice. `g_MsgWin`
     replaces `CUIMng::m_MsgWin`, same convention as `g_CreditWin`.
-  - Still to do: `CSysMenuWin`, `CLoginMainWin`, `CCharSelMainWin`, `CCharMakeWin`.
+  - `CSysMenuWin` — done, builds clean (RelWithDebInfo); not yet visually verified against a live
+    server. Same shape as `CMsgWin` (RmlUi's `#backdrop`/`#panel` own 100% of the visuals, legacy
+    `CWinEx`/`CButton`s kept purely as click-detection redundancy behind RmlUi's own primary
+    bindings, `UpdateMouseEvent()` unconditionally claims while shown) but smaller: no
+    `RmlModelBinder` complexity beyond simple label/visibility sync, and ESC was never this
+    window's own concern even before migration (`UpdateWhileActive()`'s ESC branch was already a
+    no-op comment — `CUIMng::Update()`'s dedicated ESC-toggle block opens/closes it directly), so
+    none of `CMsgWin`'s three fixes needed re-deriving here. One real, if narrow, coexistence case
+    handled deliberately: `ExitGame()` pops up a `MESSAGE_GAME_END_COUNTDOWN` `CMsgWin` *without*
+    hiding itself first (unlike `SelectServer()`/`OpenOptions()`/`Close()`, which all do) — given
+    depth 40.0f, below `CMsgWin`'s 50.0f, so the actionable countdown dialog wins input priority
+    over the superseded menu backdrop during that brief overlap. `g_SysMenuWin` replaces
+    `CUIMng::m_SysMenuWin`, same convention as `g_CreditWin` — note this needed adding an explicit
+    `#include "UI/Windows/SysMenuWin.h"` to its 3 external call sites (`CharSelMainWin.cpp`,
+    `LoginMainWin.cpp`, `CharacterScene.cpp`): removing the `m_SysMenuWin` member also removed
+    `UIMng.h`'s own `#include "UI/Windows/SysMenuWin.h"` (no longer needed for the member
+    declaration), which those three files had been relying on transitively without an include of
+    their own. Worth checking for on every future migration, not just this one.
+    **Found via user testing: the menu painted behind the character-info balloon** in
+    `CHARACTER_SCENE` — `CCharInfoBalloonMng::Render()`'s `shouldHide` check (added when the
+    balloon's own RmlUi port first needed to explicitly restore z-order against `CCharMakeWin`/
+    `CMsgWin`, since "RmlUi renders last" flattened their previous legacy-2D-draw-order
+    relationship) never accounted for `CSysMenuWin` at all — an omission the balloon's own author
+    couldn't have anticipated since `CSysMenuWin` wasn't RmlUi-hybrid-*and*-`CHARACTER_SCENE`-
+    relevant from `CCharInfoBalloonMng`'s perspective until this migration made it a genuine peer
+    of `CCharMakeWin`/`CMsgWin` in that check. Fixed by adding `g_SysMenuWin.IsVisible()` to the
+    `shouldHide` condition, same treatment as the other two. **Any future
+    `CHARACTER_SCENE`-relevant migration needs the same addition here** — this is a third instance
+    of the same category of gap as `IsCursorOnUI()`'s fold-in (`CMsgWin`'s entry above): a
+    balloon-adjacent modal/overlay window needs explicit registration in more than one place
+    (`IsCursorOnUI()`'s fold-in is now generic via the manager; this `shouldHide` check is not, and
+    would need its own per-window addition until/unless it's generalized the same way).
+
+    **Also reported, not fixed in this session — a pre-existing gap, not caused by this
+    migration**: while `CCharMakeWin` (character creation) is open, `CCharSelMainWin`'s own "Menu"
+    button remains clickable and still opens `CSysMenuWin` (which then paints in front of, not
+    behind, `CCharMakeWin` — expected once the balloon-style fix above is generalized, but the
+    underlying question is whether it should be reachable at all while a modal dialog is open).
+    Root cause, from static inspection: unlike `CMsgWin`/`CSysMenuWin` (which each get a
+    C++-side, unconditional-while-shown `UpdateMouseEvent()` full-screen claim) or `sys_menu.rml`
+    (which has its own `#backdrop` `pointer-events: auto` element), **`char_make.rml`/`.rcss` has
+    no full-screen input-blocking element at all** — grepped for `#backdrop` across every `.rml`
+    document; only `sys_menu.rml` has one. `CCharMakeWin` relies entirely on the legacy `CWin`
+    `m_bActive` gate (`CCharSelMainWin::UpdateWhileActive()`'s own menu-button check is correctly
+    gated by it) to block background interactions, and that gate is the same one already
+    documented elsewhere (`CLoginMainWin`/`CSysMenuWin`'s "act immediately" `RmlClick*()` methods,
+    added specifically because `m_bActive` "doesn't reliably grant on a timely basis") as
+    unreliable for RmlUi-sourced clicks specifically. Likely resolves naturally once
+    `CCharSelMainWin`/`CCharMakeWin` migrate (Phase 2's next two windows) onto the same
+    deterministic `UpdateMouseEvent()`-claims-while-shown pattern already proven three times over —
+    not patched here to avoid guessing at a fix for a system about to be replaced anyway.
+  - Still to do: `CLoginMainWin`, `CCharSelMainWin`, `CCharMakeWin`.
 - **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started. `CLoginWin` is the one window
   that genuinely needs the new shown/active split (keeps ticking its text inputs and "Remember
   Password" dialog while inactive, per its own `UpdateWhileShow()`/`UpdateWhileActive()` split);

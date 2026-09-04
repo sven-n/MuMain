@@ -26,7 +26,10 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // do real click-detection bookkeeping (CursorInObject() against real, untransformed mouse
     // coordinates) against real-pixel positions computed from a real-pixel-positioned CSprite --
     // same reasoning as INTERFACE_CREDITS above.
+    // CSysMenuWin (Phase 2) keeps its legacy CWinEx/CButton geometry as real-pixel click-
+    // detection redundancy behind RmlUi's own primary click bindings -- same reasoning.
     case INTERFACE_MSG_WINDOW:
+    case INTERFACE_SYS_MENU:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:

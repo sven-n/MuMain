@@ -14,6 +14,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/SysMenuWin.h"
 #include <RmlUi/Core/ElementDocument.h>
 
 namespace
@@ -115,17 +116,21 @@ void CCharInfoBalloonMng::Render()
         balloon.Render();
 
     // Before this migration, this manager's Render() drew the balloons as ordinary legacy 2D
-    // content, in the same pass and *before* CUIMng::Render()'s CWin list (CCharMakeWin, CMsgWin)
-    // -- so those windows' own legacy drawing correctly painted over the balloons whenever they
-    // were open. RmlUi renders unconditionally last in the frame now, so that relationship
-    // inverted: with nothing telling it otherwise, a balloon would paint on top of the character-
-    // creation dialog or a CMsgWin confirmation prompt instead of being covered by them, since
-    // both are themselves drawn earlier in the frame (both CCharMakeWin's and CMsgWin's own
-    // panels are RmlUi too, and either way neither has any relationship to *when* RmlUi's pass
-    // runs). Restore the original visual hierarchy explicitly: hide the whole balloon document
-    // while either window is shown, since both used to legitimately cover it.
+    // content, in the same pass and *before* CUIMng::Render()'s CWin list (CCharMakeWin, CMsgWin,
+    // CSysMenuWin) -- so those windows' own legacy drawing correctly painted over the balloons
+    // whenever they were open. RmlUi renders unconditionally last in the frame now, so that
+    // relationship inverted: with nothing telling it otherwise, a balloon would paint on top of
+    // the character-creation dialog, a CMsgWin confirmation prompt, or the system menu instead of
+    // being covered by them, since all three are themselves drawn earlier in the frame (their own
+    // panels are RmlUi too, and either way none has any relationship to *when* RmlUi's pass runs).
+    // Restore the original visual hierarchy explicitly: hide the whole balloon document while any
+    // of the three is shown, since all of them used to legitimately cover it. g_SysMenuWin added
+    // when its own CUIMng/CNewUIManager-merger migration surfaced this exact symptom (the menu
+    // painting behind the balloon) -- this check needs the same treatment for every future
+    // CHARACTER_SCENE-relevant migration too, same as the IsCursorOnUI() fold-in
+    // (docs/newui-legacy-merger.md).
     CUIMng& uiMng = CUIMng::Instance();
-    const bool shouldHide = uiMng.m_CharMakeWin.IsShow() || g_MsgWin.IsVisible();
+    const bool shouldHide = uiMng.m_CharMakeWin.IsShow() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
     if (m_pRmlDoc)
     {
         if (shouldHide) m_pRmlDoc->Hide();

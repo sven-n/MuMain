@@ -7,6 +7,7 @@
 
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "Network/Server/WSclient.h"
 
@@ -173,7 +174,7 @@ void CLoginMainWin::UpdateWhileActive(double dDeltaTick)
 void CLoginMainWin::OpenSysMenu()
 {
     CUIMng& rUIMng = CUIMng::Instance();
-    rUIMng.ShowWin(&rUIMng.m_SysMenuWin);
+    g_SysMenuWin.Show(true);
     rUIMng.SetSysMenuWinShow(true);
 }
 

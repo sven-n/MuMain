@@ -126,6 +126,8 @@ enum INTERFACE_LIST
     // Phase 2: CMsgWin (distinct from INTERFACE_MESSAGEBOX, the unrelated MAIN_SCENE-tier
     // CNewUIMessageBoxBase key) -- same reasoning as INTERFACE_CREDITS above.
     INTERFACE_MSG_WINDOW,
+    // Phase 2: CSysMenuWin, same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_SYS_MENU,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

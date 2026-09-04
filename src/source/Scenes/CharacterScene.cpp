@@ -19,6 +19,7 @@
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/SysMenuWin.h"
 #include "Core/Input/Input.h"
 #include "Core/Input/UiInputRouter.h"
 #include "Network/Server/WSclient.h"
@@ -194,7 +195,7 @@ void NewMoveCharacterScene()
     if (rInput.IsKeyDown(VK_RETURN))
     {
         if (!(g_MsgWin.IsVisible() || rUIMng.m_CharMakeWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow())
+            || g_SysMenuWin.IsVisible())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
             ::PlayBuffer(SOUND_CLICK01);

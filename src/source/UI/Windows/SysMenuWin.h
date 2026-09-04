@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UI/NewUI/NewUIBase.h"
 #include "UI/Widgets/WinEx.h"
 #include "UI/Widgets/Button.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
@@ -18,7 +19,15 @@ namespace Rml { class ElementDocument; }
 // (Create()/SetLine()/GetWidth()/GetHeight()), never rendered. RmlUi renders 100% of this
 // window's visuals in every theme; the legacy CButtons stay registered (redundant, harmless
 // detection path) alongside Rml*Click*() methods mirroring CLoginWin's pattern.
-class CSysMenuWin : public CWin
+//
+// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
+// SEASON3B::CNewUIObj, same pattern as CMsgWin (its own header comment covers the shared
+// reasoning -- full-screen click-swallow via UpdateMouseEvent(), LayoutMode::Legacy for the
+// legacy CWinEx/CButton real-pixel geometry). ESC is NOT handled here at all (never was --
+// UpdateWhileActive()'s own ESC branch below was already a no-op): CUIMng::Update()'s dedicated
+// ESC-toggle block owns opening/closing this window directly, so this migration doesn't touch
+// that logic or its ordering.
+class CSysMenuWin : public SEASON3B::CNewUIObj
 {
 protected:
     CWinEx m_winBack;
@@ -26,11 +35,13 @@ protected:
 
 public:
     CSysMenuWin();
-    virtual ~CSysMenuWin();
+    ~CSysMenuWin() override;
 
     void Create();
+    void Release(); // was CWin::PreRelease() (an override hook CWin::Release() called
+                     // automatically) -- called explicitly now, same as CCreditWin's own Release().
     void SetPosition(int nXCoord, int nYCoord);
-    void Show(bool bShow);
+    void Show(bool bShow) override;
 
     // 2026-09-03: act immediately here instead of setting a flag for UpdateWhileActive() to
     // consume later -- see CLoginMainWin::RmlClickMenu()'s header comment (STATUS.md's "Findings
@@ -45,10 +56,36 @@ public:
     void RmlClickOption() { OpenOptions(); }
     void RmlClickClose() { Close(); }
 
+    // SEASON3B::INewUIBase
+    bool Render() override;
+    bool Update() override;
+    // Was CWin::Create()'s full-screen bounding rect + CWin::CursorInWin(WA_ALL) -- same
+    // full-screen click-swallow as CMsgWin (this window is a modal-ish overlay too). See
+    // CMsgWin.h's own comment for why this needs no rect check.
+    bool UpdateMouseEvent() override
+    {
+        return !IsVisible();
+    }
+    bool UpdateKeyEvent() override
+    {
+        return true;
+    }
+    // Below CMsgWin's 50.0f: CSysMenuWin::ExitGame() pops up a MESSAGE_GAME_END_COUNTDOWN
+    // CMsgWin without hiding itself first (unlike SelectServer()/OpenOptions()/Close(), which all
+    // call Show(false)), so the two are a real, if brief, coexistence case -- the actionable
+    // countdown dialog should win input priority over the now-superseded menu backdrop.
+    float GetLayerDepth() override
+    {
+        return 40.0f;
+    }
+
 protected:
-    void PreRelease();
-    void UpdateWhileActive(double dDeltaTick);
-    void RenderControls();
+    // Shared by the immediate RmlUi callbacks above and Update()'s legacy CButton::IsClick()
+    // polling.
+    void ExitGame();
+    void SelectServer();
+    void OpenOptions();
+    void Close();
 
 private:
     struct SysMenuRmlModel
@@ -67,12 +104,8 @@ private:
     Rml::ElementDocument* m_pRmlDoc = nullptr;
     bool m_bSelectServerEnabled = false;
 
-    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s legacy
-    // CButton::IsClick() polling.
-    void ExitGame();
-    void SelectServer();
-    void OpenOptions();
-    void Close();
-
     void SyncRmlModel();
 };
+
+// Replaces CUIMng's old `CSysMenuWin m_SysMenuWin;` member, same convention as g_CreditWin.
+extern CSysMenuWin g_SysMenuWin;

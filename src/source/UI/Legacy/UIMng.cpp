@@ -7,6 +7,7 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/ServerMsgWin.h"
 #include "UI/Windows/ServerSelWin.h"
+#include "UI/Windows/SysMenuWin.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Input/Input.h"
 #include "Audio/DSPlaySound.h"
@@ -55,8 +56,6 @@ bool InputDiagnosticsEnabled()
 
 const char* WindowName(const CUIMng& manager, const CWin* window)
 {
-    if (window == &manager.m_SysMenuWin)
-        return "system-menu";
     if (window == &manager.m_LoginMainWin)
         return "login-main";
     if (window == &manager.m_LoginWin)
@@ -235,6 +234,7 @@ void CUIMng::Release()
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
     g_MsgWin.Release();
+    g_SysMenuWin.Release();
 
     m_nScene = UIM_SCENE_NONE;
 }
@@ -248,6 +248,7 @@ void CUIMng::CreateLoginScene()
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
     g_MsgWin.Release();
+    g_SysMenuWin.Release();
 
     // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
     // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
@@ -264,8 +265,7 @@ void CUIMng::CreateLoginScene()
     g_MsgWin.Create();
     g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
-    m_SysMenuWin.Create();
-    m_WinList.AddHead(&m_SysMenuWin);
+    g_SysMenuWin.Create();
 
     m_LoginMainWin.Create();
     m_WinList.AddHead(&m_LoginMainWin);
@@ -296,6 +296,7 @@ void CUIMng::CreateCharacterScene()
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
     g_MsgWin.Release();
+    g_SysMenuWin.Release();
 
     m_CharInfoBalloonMng.Create();
 
@@ -308,8 +309,7 @@ void CUIMng::CreateCharacterScene()
     int nBaseY = int(31.0f / 600.0f * (float)rInput.GetScreenHeight());
     g_ServerMsgWin.SetPosition(10, nBaseY + 10);
 
-    m_SysMenuWin.Create();
-    m_WinList.AddHead(&m_SysMenuWin);
+    g_SysMenuWin.Create();
 
     m_CharSelMainWin.Create();
     m_WinList.AddHead(&m_CharSelMainWin);
@@ -337,6 +337,7 @@ void CUIMng::CreateMainScene()
     g_ServerMsgWin.Release();
     g_ServerSelWin.Release();
     g_MsgWin.Release();
+    g_SysMenuWin.Release();
 
     m_nScene = UIM_SCENE_MAIN;
 }
@@ -356,7 +357,7 @@ void CUIMng::RepositionSceneUI()
     if (m_nScene == UIM_SCENE_LOGIN)
     {
         const bool wasShown_MsgWin = g_MsgWin.IsVisible();
-        const bool wasShown_SysMenuWin = m_SysMenuWin.IsShow();
+        const bool wasShown_SysMenuWin = g_SysMenuWin.IsVisible();
         const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
         const bool wasShown_ServerSelWin = g_ServerSelWin.IsVisible();
         const bool wasShown_LoginWin = m_LoginWin.IsShow();
@@ -371,7 +372,7 @@ void CUIMng::RepositionSceneUI()
         if (wasShown_MsgWin)
             g_MsgWin.Show(true);
         if (wasShown_SysMenuWin)
-            ShowWin(&m_SysMenuWin);
+            g_SysMenuWin.Show(true);
         if (wasShown_LoginMainWin)
             ShowWin(&m_LoginMainWin);
         if (wasShown_ServerSelWin)
@@ -725,15 +726,15 @@ void CUIMng::Update(double dDeltaTick)
         extern EGameScene SceneFlag;
         if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
         {
-            if (m_SysMenuWin.IsShow())
+            if (g_SysMenuWin.IsVisible())
             {
-                HideWin(&m_SysMenuWin);
+                g_SysMenuWin.Show(false);
             }
             else if (!g_MsgWin.IsVisible() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
                      !m_CharMakeWin.IsShow())
             {
                 ::PlayBuffer(SOUND_CLICK01);
-                ShowWin(&m_SysMenuWin);
+                g_SysMenuWin.Show(true);
             }
         }
     }

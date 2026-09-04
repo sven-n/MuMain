@@ -17,6 +17,7 @@
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/ErrorReport.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
+#include "Core/Globals/_enum.h"
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -30,20 +31,20 @@
 extern EGameScene  SceneFlag;
 extern bool LogOut;
 
+CSysMenuWin g_SysMenuWin;
+
 CSysMenuWin::CSysMenuWin()
 {
 }
 
 CSysMenuWin::~CSysMenuWin()
 {
+    Release();
 }
 
 void CSysMenuWin::Create()
 {
-    CInput rInput = CInput::Instance();
-    // RmlUi migration, Batch 2: -2 (was the default -1) -- see this class's header comment.
-    CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -2);
-    SetMovable(false);
+    Release();
 
     SImgInfo aiiBack[WE_BG_MAX] =
     {
@@ -63,7 +64,6 @@ void CSysMenuWin::Create()
     {
         m_aBtn[i].Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1);
         m_aBtn[i].SetText(apszBtnText[i], adwBtnClr);
-        CWin::RegisterButton(&m_aBtn[i]);
     }
 
     switch (SceneFlag)
@@ -106,16 +106,25 @@ void CSysMenuWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/sys_menu.rml");
     }
 
+    CUIMng::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SYS_MENU, this);
+
+    CInput rInput = CInput::Instance();
     SetPosition((rInput.GetScreenWidth() - m_winBack.GetWidth()) / 2,
         (rInput.GetScreenHeight() - m_winBack.GetHeight()) / 2);
+
+    Show(false);
 }
 
-void CSysMenuWin::PreRelease()
+void CSysMenuWin::Release()
 {
+    m_aBtn[0].Release();
+    m_aBtn[1].Release();
+    m_aBtn[2].Release();
+    m_aBtn[3].Release();
     m_winBack.Release();
 
     // See CLoginMainWin::PreRelease()'s identical comment -- CUIMng::RemoveWinList() Release()s
-    // every window on every scene transition, and CWin's own Release() has no knowledge of
+    // every window on every scene transition, and this class has no base-class knowledge of
     // m_pRmlDoc, so without this it can keep rendering into whatever scene comes next if this
     // window happened to be open at the moment of transition.
     if (m_pRmlDoc)
@@ -142,11 +151,12 @@ void CSysMenuWin::SetPosition(int nXCoord, int nYCoord)
     // every button is a fixed dp offset from the panel's own edges. See sys_menu.rcss's own
     // comment for the full derivation from this function's old math. The legacy m_winBack/m_aBtn
     // positioning above is unchanged -- still real screen-pixel geometry, still needed for their
-    // own click-detection redundancy (UpdateWhileActive()'s `||`).
+    // own click-detection redundancy (Update()'s `||`).
 }
+
 void CSysMenuWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    SEASON3B::CNewUIObj::Show(bShow);
 
     m_winBack.Show(bShow);
     for (int i = 0; i < SMW_BTN_MAX; ++i)
@@ -159,8 +169,14 @@ void CSysMenuWin::Show(bool bShow)
     }
 }
 
-void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
+bool CSysMenuWin::Update()
 {
+    if (!IsVisible())
+        return true;
+
+    for (int i = 0; i < SMW_BTN_MAX; ++i)
+        m_aBtn[i].Update();
+
     if (m_aBtn[SMW_BTN_GAME_END].IsClick())
         ExitGame();
     else if (m_aBtn[SMW_BTN_SERVER_SEL].IsClick() && m_bSelectServerEnabled)
@@ -169,11 +185,10 @@ void CSysMenuWin::UpdateWhileActive(double dDeltaTick)
         OpenOptions();
     else if (m_aBtn[SMW_BTN_CLOSE].IsClick())
         Close();
-    else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
-    {
-        // ESC toggle is handled by CUIMng::Update()
-        // No action needed here — CUIMng already hid this window
-    }
+    // ESC toggle is handled by CUIMng::Update() -- no action needed here, same as before
+    // this window migrated off CWin.
+
+    return true;
 }
 
 void CSysMenuWin::ExitGame()
@@ -190,29 +205,28 @@ void CSysMenuWin::SelectServer()
     g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
 
     CUIMng& rUIMng = CUIMng::Instance();
-    rUIMng.HideWin(this);
+    Show(false);
     rUIMng.HideWin(&rUIMng.m_CharSelMainWin);
 }
 
 void CSysMenuWin::OpenOptions()
 {
-    CUIMng& rUIMng = CUIMng::Instance();
-    rUIMng.HideWin(this);
+    Show(false);
     g_pNewUISystem->Show(SEASON3B::INTERFACE_OPTION);
 }
 
 void CSysMenuWin::Close()
 {
-    CUIMng::Instance().HideWin(this);
+    Show(false);
 }
 
-void CSysMenuWin::RenderControls()
+bool CSysMenuWin::Render()
 {
     // m_winBack no longer renders -- RmlUi's #backdrop/#panel own 100% of this window's visuals
-    // (see this class's header comment). CWin::RenderButtons() also draws nothing visible since
-    // the legacy CButtons are unregistered from any bitmap/text draw path once RmlUi renders
-    // their labels; kept registered purely for redundant click detection like CLoginWin's.
+    // (see this class's header comment). The legacy CButtons draw nothing visible either (never
+    // called here); kept updating purely for redundant click detection like CLoginWin's.
     SyncRmlModel();
+    return true;
 }
 
 void CSysMenuWin::SyncRmlModel()

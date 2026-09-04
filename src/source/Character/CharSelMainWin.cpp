@@ -6,6 +6,7 @@
 #include "CharSelMainWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Legacy/UIMng.h"
+#include "UI/Windows/SysMenuWin.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
@@ -293,7 +294,7 @@ void CCharSelMainWin::UpdateWhileActive(double dDeltaTick)
     else if (m_aBtn[CSMW_BTN_MENU].IsClick() || m_bRmlMenuClicked)
     {
         m_bRmlMenuClicked = false;
-        uiManager.ShowWin(&uiManager.m_SysMenuWin);
+        g_SysMenuWin.Show(true);
         uiManager.SetSysMenuWinShow(true);
     }
     else if (m_aBtn[CSMW_BTN_CREATE].IsClick() || m_bRmlCreateClicked)
