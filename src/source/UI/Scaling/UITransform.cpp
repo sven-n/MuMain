@@ -302,6 +302,8 @@ bool UI::Scaling::BottomHudContainsWindowPoint(int windowWidth, int windowHeight
 
 UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight)
 {
+    if (mode == LayoutMode::Legacy)
+        return {1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
     if (mode == LayoutMode::Hud || mode == LayoutMode::WorldOverlay)
         return ScreenOverlayTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::HudLeft)

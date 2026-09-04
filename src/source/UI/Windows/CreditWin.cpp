@@ -7,7 +7,6 @@
 #include "UI/Windows/CreditWin.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
-#include "Core/Time/Timer.h"
 #include "Core/Globals/_enum.h"
 #include "UI/Legacy/UIMng.h"
 #include "UI/Scaling/UITransform.h"
@@ -22,8 +21,6 @@
 #include "Core/Platform/PathResolve.h"
 
 #include "UI/Legacy/UIControls.h"
-
-extern CTimer* g_pTimer;
 
 #include <algorithm>
 #include <chrono>
@@ -107,11 +104,12 @@ CCreditWin::CCreditWin()
     , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
-	// Closest available LayoutMode to the old CUIMng::Render()'s LegacyUiTransform -- both reduce
-	// to UI::Scaling::ScreenOverlayTransform() (LegacyUiTransform only additionally forces
-	// typographyScale to 1.0, which this window's own RenderText() calls don't consult), so this
-	// keeps every absolute-pixel sprite position below resolving the same way it always did.
-	SetLayoutMode(UI::Scaling::LayoutMode::Hud);
+	// LayoutMode::Legacy (identity transform, see its own comment) -- this window computes real
+	// screen pixels itself (fScaleX/fScaleY against an assumed 800x600, not UI::Scaling's own
+	// 640x480 reference), so any other LayoutMode double-rescales its g_pRenderText calls
+	// (CUIRenderTextSDLTtf.cpp consults the active transform) and remaps the mouse coordinates
+	// CNewUIManager::UpdateMouseEvent() feeds its click hit-testing into the wrong space.
+	SetLayoutMode(UI::Scaling::LayoutMode::Legacy);
 }
 
 CCreditWin::~CCreditWin()
@@ -217,13 +215,14 @@ void CCreditWin::Show(bool bShow)
 
 bool CCreditWin::Update()
 {
-	// g_pTimer->GetTimeElapsed() is a pure query (Timer.cpp), not a consume-and-reset call, so
-	// reading it here is safe even though SceneManager.cpp's own CUIMng::Update(dDeltaTick) call
-	// already reads it once earlier the same frame -- both see the same (or a few microseconds
-	// later, practically identical) value. Was passed down as CWin::Update()'s dDeltaTick
-	// parameter before this window had no such parameter to receive (INewUIBase::Update() takes
-	// none); this reads the same underlying source directly instead.
-	const DurationMs deltaTime{ g_pTimer->GetTimeElapsed() };
+	// g_pTimer is never reset, so GetTimeElapsed() is total process uptime, not a per-frame delta.
+	// SceneManager.cpp's own dDeltaTick (what CWin::Update() used to pass this window as its
+	// deltaMilliseconds parameter) only behaves like a delta because it's clamped to
+	// 200.0 * FPS_ANIMATION_FACTOR, a ceiling the raw uptime value exceeds almost immediately and
+	// forever after -- in steady state it reduces to exactly that clamped constant, so this reads
+	// the same effective value directly instead of going through g_pTimer at all.
+	extern float FPS_ANIMATION_FACTOR;
+	const DurationMs deltaTime{ 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR) };
 
 	// m_btnClose.Update() used to run automatically inside CWin::Update()'s own button-list step
 	// (RegisterButton()) -- called explicitly now.

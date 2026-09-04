@@ -51,6 +51,16 @@ namespace UI::Scaling
         FloatingWorkspace,
         Dialog,
         WorldOverlay,
+        // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- for a migrated window whose own
+        // rendering (CSprite-based sprites, raw g_pRenderText calls) already computes real screen
+        // pixels itself (its own fScaleX/fScaleY against whatever resolution it assumes, e.g.
+        // CCreditWin's 800x600) rather than reference-space coordinates meant to be rescaled by
+        // this transform system. Every other LayoutMode rescales against kReferenceWidth/Height
+        // (640x480) -- applying any of them to this kind of window doubly (and wrongly) rescales
+        // it, and (via CNewUIManager's UpdateMouseEvent() -- transformMouse=true) remaps the
+        // global MouseX/MouseY into that same wrong reference space, breaking click hit-testing
+        // too. TransformForLayout() maps this to a genuine identity transform instead.
+        Legacy,
     };
 
     class ScopedActiveTransform
