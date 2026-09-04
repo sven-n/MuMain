@@ -287,7 +287,9 @@ for "the full architecture is in place":
       `RenderBackgroundLayer()`, tracking the same `BottomHudCenterTransform`/anchor-offset values
       `main_frame.rml`'s own `#bars` group already used (`CNewUIMainFrameWindow::SyncRmlModel()`,
       a second small `RmlModelBinder`). The skill-list-up highlight overlay in the same function
-      stays a legacy quad — never blocked by this constraint, no reason to move it.
+      stays a legacy quad — never blocked by this constraint, no reason to move it. **Verified
+      visually against a real server, modern theme, 2026-09-04**: potions and skill icons still
+      render and animate correctly on top of the now-RmlUi-authored background, no regression.
   - **Not yet done (Phase 2, deliberately deferred)**: generalizing the one proven call site into
     a single insertion point inside `CNewUIManager::Render()`'s own z-sorted loop (gated on
     crossing `INVENTORY_CAMERA_Z_ORDER`, 5.5 — every `CNewUI3DCamera` z-order, unlike every
