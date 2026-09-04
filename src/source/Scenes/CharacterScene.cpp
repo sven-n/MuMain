@@ -194,7 +194,7 @@ void NewMoveCharacterScene()
     if (rInput.IsKeyDown(VK_RETURN))
     {
         if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow())
+            || rUIMng.m_SysMenuWin.IsShow())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
             ::PlayBuffer(SOUND_CLICK01);

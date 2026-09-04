@@ -2125,8 +2125,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // this composition of game-specific overlay content belongs at the app tier, the same
     // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
     //
-    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin/COptionWin are
-    // shared CUIMng instances already reachable from gameplay via the in-game ESC menu
+    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin is a shared
+    // CUIMng instance already reachable from gameplay via the in-game ESC menu
     // (SceneCommon.cpp's RenderInfomation() calls CUIMng::Instance().Render() unconditionally
     // every MAIN_SCENE frame), so RmlUi content was already live during gameplay before this
     // change -- the cursor just wasn't being pulled back on top of it, because this callback

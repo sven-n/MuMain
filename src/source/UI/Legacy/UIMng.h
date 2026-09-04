@@ -6,7 +6,6 @@
 #include "Core/Utilities/PList.h"
 #include "UI/Windows/MsgWin.h"
 #include "UI/Windows/SysMenuWin.h"
-#include "UI/Windows/OptionWin.h"
 #include "UI/Windows/LoginMainWin.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginWin.h"
@@ -32,7 +31,6 @@ class CUIMng
 public:
     CMsgWin m_MsgWin;
     CSysMenuWin m_SysMenuWin;
-    COptionWin m_OptionWin;
     CLoginMainWin m_LoginMainWin;
     CServerSelWin m_ServerSelWin;
     CLoginWin m_LoginWin;

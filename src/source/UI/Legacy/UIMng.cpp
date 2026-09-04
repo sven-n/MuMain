@@ -58,8 +58,6 @@ const char* WindowName(const CUIMng& manager, const CWin* window)
         return "message";
     if (window == &manager.m_SysMenuWin)
         return "system-menu";
-    if (window == &manager.m_OptionWin)
-        return "options";
     if (window == &manager.m_LoginMainWin)
         return "login-main";
     if (window == &manager.m_ServerSelWin)
@@ -269,9 +267,6 @@ void CUIMng::CreateLoginScene()
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
 
-    m_OptionWin.Create();
-    m_WinList.AddHead(&m_OptionWin);
-
     m_LoginMainWin.Create();
     m_WinList.AddHead(&m_LoginMainWin);
 
@@ -315,9 +310,6 @@ void CUIMng::CreateCharacterScene()
 
     m_SysMenuWin.Create();
     m_WinList.AddHead(&m_SysMenuWin);
-
-    m_OptionWin.Create();
-    m_WinList.AddHead(&m_OptionWin);
 
     m_CharSelMainWin.Create();
     m_WinList.AddHead(&m_CharSelMainWin);
@@ -363,7 +355,6 @@ void CUIMng::RepositionSceneUI()
     {
         const bool wasShown_MsgWin = m_MsgWin.IsShow();
         const bool wasShown_SysMenuWin = m_SysMenuWin.IsShow();
-        const bool wasShown_OptionWin = m_OptionWin.IsShow();
         const bool wasShown_LoginMainWin = m_LoginMainWin.IsShow();
         const bool wasShown_ServerSelWin = m_ServerSelWin.IsShow();
         const bool wasShown_LoginWin = m_LoginWin.IsShow();
@@ -379,8 +370,6 @@ void CUIMng::RepositionSceneUI()
             ShowWin(&m_MsgWin);
         if (wasShown_SysMenuWin)
             ShowWin(&m_SysMenuWin);
-        if (wasShown_OptionWin)
-            ShowWin(&m_OptionWin);
         if (wasShown_LoginMainWin)
             ShowWin(&m_LoginMainWin);
         if (wasShown_ServerSelWin)
@@ -728,7 +717,7 @@ void CUIMng::Update(double dDeltaTick)
             {
                 HideWin(&m_SysMenuWin);
             }
-            else if (!m_MsgWin.IsShow() && !m_OptionWin.IsShow() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
+            else if (!m_MsgWin.IsShow() && !m_LoginWin.IsShow() && !g_CreditWin.IsVisible() &&
                      !m_CharMakeWin.IsShow())
             {
                 ::PlayBuffer(SOUND_CLICK01);

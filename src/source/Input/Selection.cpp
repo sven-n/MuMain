@@ -321,8 +321,8 @@ void SelectObjects()
     const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
         WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
     // Core::Input::IsMouseOverUI() added as a 4th gate (2026-08-31, NewUI/HUD RmlUi pilot) --
-    // none of the other three flags know about RmlUi-rendered content (CSysMenuWin/COptionWin,
-    // already reachable from gameplay via the ESC menu, plus any RmlUi-migrated NewUI-tier HUD
+    // none of the other three flags know about RmlUi-rendered content (CSysMenuWin, already
+    // reachable from gameplay via the ESC menu, plus any RmlUi-migrated NewUI-tier HUD
     // element). Routes to whichever UI framework is registered as the active input consumer
     // (UiInputRouter.h -- RmlUiRuntime today), so it stays correct regardless of how any
     // individual migrated element's legacy CNewUIObj bookkeeping is positioned -- see

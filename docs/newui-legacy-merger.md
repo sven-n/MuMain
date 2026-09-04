@@ -10,9 +10,10 @@ The "Legacy" (`CWin`/`CUIMng`) vs "NewUI" (`CNewUIObj`/`CNewUIManager`) framing 
 artifact of *when* each was written (`CNewUIManager` is Webzen's own `SEASON3B`-era content
 generation, built because `CUIMng`'s fixed-member design couldn't scale to that era's flood of new
 panels), not a live distinction — both serve the same current game. The goal is one window-object
-system, not two, with `CUIMng`'s 11 windows migrating onto `CNewUIObj`/`CNewUIManager` one at a
+system, not two, with `CUIMng`'s windows migrating onto `CNewUIObj`/`CNewUIManager` one at a
 time, matching the incremental, independently-verified discipline the RmlUi migration
-(`docs/rmlui-ui-system/`) already established.
+(`docs/rmlui-ui-system/`) already established. Of the 11 windows `CUIMng` originally owned, one
+(`COptionWin`) turned out to be dead code rather than a migration candidate — see Phase 2 below.
 
 ## Design
 
@@ -53,9 +54,24 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
     instead of reusing `CWinEx` (still used by not-yet-migrated `COptionWin`/`CServerSelWin`/
     `SysMenuWin`) -- matches the "no shared rect/hit-test facility" design principle below.
     `g_ServerMsgWin` replaces `CUIMng::m_ServerMsgWin`, same convention as `g_CreditWin`.
-  - Still to do: `COptionWin`, `CServerSelWin` (no RmlUi entanglement, same low-complexity shape),
-    then the RmlUi-hybrid ones (`CMsgWin`, `CSysMenuWin`, `CLoginMainWin`, `CCharSelMainWin`,
-    `CCharMakeWin`).
+  - **`COptionWin` deleted, not migrated** — confirmed genuinely unreachable in live play (a
+    finding this branch's own pre-merger RmlUi-porting work had already made once, independently
+    reconfirmed here before starting its migration): the only call site that ever showed it
+    (`CUIMng::RepositionSceneUI()`'s restore-if-was-shown path) never had anything to restore,
+    because nothing else ever called `ShowWin(&m_OptionWin)` in the first place — `CSysMenuWin`'s
+    own "Option" button opens `g_pNewUISystem->Show(INTERFACE_OPTION)` (`CNewUIOptionWindow`)
+    instead, and has since before this merger started. Migrating dead code onto the new manager
+    would have been pure wasted effort, so it was deleted outright instead: removed from `CUIMng`
+    (member, `Create*Scene()` calls, `WindowName()` lookup, `RepositionSceneUI()`'s restore
+    logic) and its two `IsShow()` click-passthrough gate references (`UIMng.cpp`'s ESC-toggle
+    gate, `CharacterScene.cpp`'s Enter-key gate) simply dropped their `!m_OptionWin.IsShow()`
+    clause — behavior-preserving, since that flag was always `false` (never shown) and so never
+    actually filtered anything. `OptionWin.h/.cpp` deleted (not left as untracked dead code this
+    time, unlike the earlier RmlUi-porting decision to skip-but-keep it — this merger's Phase 4
+    goal is zero `CUIMng`-owned windows, and there was no remaining reason to keep it around).
+  - Still to do: `CServerSelWin` (no RmlUi entanglement, same low-complexity shape as
+    `CServerMsgWin`), then the RmlUi-hybrid ones (`CMsgWin`, `CSysMenuWin`, `CLoginMainWin`,
+    `CCharSelMainWin`, `CCharMakeWin`).
 - **Phase 3 (`CLoginWin` + `CCharInfoBalloonMng`)** — not started. `CLoginWin` is the one window
   that genuinely needs the new shown/active split (keeps ticking its text inputs and "Remember
   Password" dialog while inactive, per its own `UpdateWhileShow()`/`UpdateWhileActive()` split);
@@ -63,7 +79,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   outside `m_WinList`) and needs its own thin adapter.
 - **Phase 4 (delete `CUIMng`)** — not started; blocked on Phases 2-3. `CWin` has a closed,
   fully-enumerated subclass set (confirmed by a full-tree grep) — no hidden subclass elsewhere to
-  worry about once these 11 are gone.
+  worry about once the remaining 9 (`COptionWin` deleted, not counted) are gone.
 
 ## Gotchas worth knowing before the next migration
 

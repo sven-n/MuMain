@@ -18,7 +18,7 @@ namespace Rml { class ElementDocument; }
 
 // RmlUi migration, Batch 2 (see the login/character-select scope in the migration plan): this
 // window's two buttons are pure image buttons with no I18N text and no dynamic state, so unlike
-// CLoginWin/CSysMenuWin/COptionWin it needs no UI::RmlBridge::RmlModelBinder -- click detection is
+// CLoginWin/CSysMenuWin it needs no UI::RmlBridge::RmlModelBinder -- click detection is
 // wired directly via Rml::Element::AddEventListener, same idiom UI::RmlBridge::RmlDraggable.cpp
 // already uses for its own self-owning listener. The legacy CButtons stay registered (redundant,
 // harmless detection path); RmlUi renders 100% of this bar's visuals in every theme.
