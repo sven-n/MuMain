@@ -18,7 +18,7 @@
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Network/MoveCommandData.h"
-#include "UI/Legacy/UIMng.h"
+#include "Scenes/TitleSceneUI.h"
 #include "Data/DataHandler/LoadData.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
@@ -5145,9 +5145,7 @@ void ReleaseCharacterSceneData()
 
 void OpenBasicData(HDC hDC)
 {
-    CUIMng& rUIMng = CUIMng::Instance();
-
-    rUIMng.RenderTitleSceneUI(hDC, 0, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 0, 11);
 
     LoadBitmap(L"Interface\\Cursor.tga", BITMAP_CURSOR, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Interface\\CursorPush.tga", BITMAP_CURSOR + 1, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -5464,7 +5462,7 @@ void OpenBasicData(HDC hDC)
     LoadBitmap(L"Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS, GL_LINEAR, GL_CLAMP_TO_EDGE);
     LoadBitmap(L"Effect\\lightmarks.jpg", BITMAP_LIGHTMARKS_FOREIGN, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
-    rUIMng.RenderTitleSceneUI(hDC, 1, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 1, 11);
 
     ::LoadBitmap(L"Item\\partCharge1\\entrance_R.jpg", BITMAP_FREETICKET_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
     ::LoadBitmap(L"Item\\partCharge1\\juju_R.jpg", BITMAP_CHAOSCARD_R, GL_LINEAR, GL_CLAMP_TO_EDGE);
@@ -5576,25 +5574,25 @@ void OpenBasicData(HDC hDC)
 
     OpenPlayers();
 
-    rUIMng.RenderTitleSceneUI(hDC, 2, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 2, 11);
 
     OpenPlayerTextures();
-    rUIMng.RenderTitleSceneUI(hDC, 3, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 3, 11);
 
     OpenItems();
-    rUIMng.RenderTitleSceneUI(hDC, 4, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 4, 11);
 
     OpenItemTextures();
-    rUIMng.RenderTitleSceneUI(hDC, 5, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 5, 11);
 
     OpenSkills();
-    rUIMng.RenderTitleSceneUI(hDC, 6, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 6, 11);
 
     OpenImages();
-    rUIMng.RenderTitleSceneUI(hDC, 7, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 7, 11);
 
     OpenSounds();
-    rUIMng.RenderTitleSceneUI(hDC, 8, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 8, 11);
 
     wchar_t Text[100];
 
@@ -5644,7 +5642,7 @@ void OpenBasicData(HDC hDC)
     g_pMasterLevelInterface->OpenMasterSkillTreeData(L"Data\\Local\\MasterSkillTreeData.bmd");
     g_pMasterLevelInterface->OpenMasterSkillTooltip(L"Data\\Local\\Eng\\MasterSkillTooltip_eng.bmd");
 
-    rUIMng.RenderTitleSceneUI(hDC, 9, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 9, 11);
 
     LoadWaveFile(SOUND_TITLE01, L"Data\\Sound\\iTitle.wav", 1);
     LoadWaveFile(SOUND_MENU01, L"Data\\Sound\\iButtonMove.wav", 2);
@@ -5663,7 +5661,7 @@ void OpenBasicData(HDC hDC)
     LoadWaveFile(SOUND_RING_EVENT_START, L"Data\\Sound\\iEventStart.wav", 1);
     LoadWaveFile(SOUND_RING_EVENT_END, L"Data\\Sound\\iEventEnd.wav", 1);
 
-    rUIMng.RenderTitleSceneUI(hDC, 10, 11);
+    TitleSceneUI::RenderSceneUI(hDC, 10, 11);
 }
 
 void ReleaseMainData()

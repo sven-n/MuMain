@@ -13,14 +13,9 @@
 #define UIM_SCENE_CHARACTER 4
 #define UIM_SCENE_MAIN 5
 
-class CSprite;
-class CGaugeBar;
-
 class CUIMng
 {
 protected:
-    CSprite* m_asprTitle;
-    CGaugeBar* m_pgbLoding;
     bool m_bCursorOnUI;
     int m_nScene;
 
@@ -47,9 +42,6 @@ public:
 
     static CUIMng& Instance();
 
-    void CreateTitleSceneUI();
-    void ReleaseTitleSceneUI();
-    void RenderTitleSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal);
     void Create();
     void Release();
     void CreateLoginScene();
