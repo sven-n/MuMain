@@ -12,7 +12,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"
 #include "UI/NPCs/NewUINPCShop.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 
 namespace mu::ui::window
 {

@@ -13,7 +13,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/HUD/NewUIChatLogWindow.h"
 #include "NewUIGuildMakeWindow.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "GuildConstants.h"
 
 namespace mu::ui::window

@@ -9,7 +9,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "Network/Server/WSclient.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/HUD/NewUIMainFrameWindow.h"

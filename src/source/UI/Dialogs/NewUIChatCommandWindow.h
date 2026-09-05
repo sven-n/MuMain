@@ -6,7 +6,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Core/UILayoutPolicy.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Commands/ChatCommandCatalog.h"

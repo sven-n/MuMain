@@ -10,7 +10,7 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/NewUIMyInventory.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 
 namespace mu::ui::window

@@ -2,7 +2,7 @@
 //	NewUIScrollBar.cpp
 //=============================================================================
 #include "stdafx.h"
-#include "UI/Widgets/NewUIScrollBar.h"
+#include "UI/Widgets/Window/ScrollBar.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

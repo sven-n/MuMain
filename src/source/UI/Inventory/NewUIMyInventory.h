@@ -10,7 +10,7 @@
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Core/Window3DRenderMng.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Inventory/NewUIInventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
 #include <span>

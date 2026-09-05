@@ -8,7 +8,7 @@
 
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Core/UILayoutPolicy.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Scaling/UITransform.h"
 
 #define MAX_COMMAND_BTN (12)

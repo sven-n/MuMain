@@ -2,7 +2,7 @@
 //	NewUITextBox.cpp
 //=============================================================================
 #include "stdafx.h"
-#include "UI/Widgets/NewUITextBox.h"
+#include "UI/Widgets/Window/TextBox.h"
 #include "UI/Widgets/UIControls.h"
 #include "Core/Utilities/UsefulDef.h"
 

@@ -11,7 +11,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "Guild/NewUIGuildInfoWindow.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "World/MapInfra/MapManager.h"

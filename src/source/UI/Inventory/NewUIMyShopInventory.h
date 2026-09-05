@@ -10,7 +10,7 @@
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/UIControls.h"
 
 namespace mu::ui::window

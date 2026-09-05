@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 
-#include "UI/Widgets/NewUIRenderNumber.h"	// self
+#include "UI/Widgets/Window/RenderNumber.h"	// self
 
 mu::ui::window::CRenderNumber* mu::ui::window::CRenderNumber::GetInstance()
 {

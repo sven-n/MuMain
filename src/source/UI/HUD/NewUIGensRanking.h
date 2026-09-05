@@ -9,9 +9,9 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"
-#include "UI/Widgets/NewUIButton.h"
-#include "UI/Widgets/NewUIScrollBar.h"
-#include "UI/Widgets/NewUITextBox.h"
+#include "UI/Widgets/Window/Button.h"
+#include "UI/Widgets/Window/ScrollBar.h"
+#include "UI/Widgets/Window/TextBox.h"
 #define MAX_TITLELENGTH		32
 
 namespace mu::ui::window

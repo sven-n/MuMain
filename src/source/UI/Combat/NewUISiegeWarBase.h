@@ -9,7 +9,7 @@
 
 #define MAX_COMMANDGROUP ( 7 )
 
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/HUD/NewUIMainFrameWindow.h"
 
 namespace mu::ui::window

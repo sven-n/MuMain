@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 
 #pragma warning(disable : 4786)
 #include <string>

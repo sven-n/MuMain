@@ -3,7 +3,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Widgets/NewUIComboBox.h"
+#include "UI/Widgets/Window/ComboBox.h"
 #include "UI/Widgets/UIControls.h"  // for g_pRenderText macro
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"

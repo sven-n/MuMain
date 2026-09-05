@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 
 constexpr auto MAX_MASTER_SKILL_DATA = 512;
 

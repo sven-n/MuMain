@@ -13,7 +13,7 @@
 
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/NewUIMyInventory.h"
-#include "UI/Widgets/NewUIComboBox.h"
+#include "UI/Widgets/Window/ComboBox.h"
 
 namespace UI::Options
 {

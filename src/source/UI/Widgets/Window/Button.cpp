@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 
-#include "UI/Widgets/NewUIButton.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/UIControls.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"

@@ -5,7 +5,7 @@
 
 #include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Widgets/NewUIChatInputBox.h"
+#include "UI/Widgets/Window/ChatInputBox.h"
 
 #pragma warning(disable : 4786)
 #include <string>

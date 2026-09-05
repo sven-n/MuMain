@@ -6,7 +6,7 @@
 #include "Core/Input/KeyState.h"
 
 #include "UI/Core/WindowCommon.h"
-#include "UI/Widgets/NewUIRenderNumber.h"
+#include "UI/Widgets/Window/RenderNumber.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
