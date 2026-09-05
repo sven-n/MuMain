@@ -17,21 +17,6 @@ namespace
     {
         p.x = x; p.y = y;
     }
-
-    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, HFONT hFont, DWORD color, DWORD backcolor, int sort)
-    {
-        g_pRenderText->SetFont(hFont);
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(color);
-        g_pRenderText->SetBgColor(backcolor);
-        g_pRenderText->RenderText(x, y, text, sx, sy, sort);
-
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
-    }
 };
 
 using namespace SEASON3B;
@@ -138,7 +123,7 @@ bool CBaseButton::Process()
 mu::ui::window::CButton::CButton() : CBaseButton(), m_CurImgIndex(0),
 m_CurImgState(0), m_ImgWidth(0), m_ImgHeight(0),
 m_NameColor(0xFFFFFFFF), m_NameBackColor(0x00000000),
-m_CurImgColor(0xFFFFFFFF), m_TooltipTextColor(0xFFFFFFFF), m_IsTopPos(false),
+m_CurImgColor(0xFFFFFFFF),
 #ifndef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE			// #ifndef
 m_IsImgWidth(false),
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
@@ -155,7 +140,7 @@ mu::ui::window::CButton::~CButton()
 void mu::ui::window::CButton::Initialize()
 {
     m_hTextFont = g_hFont;
-    m_hToolTipFont = g_hFont;
+    m_tooltip.SetFont(g_hFont);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     m_iMoveTextPosX = 0;
     m_iMoveTextPosY = 0;
@@ -187,10 +172,8 @@ void mu::ui::window::CButton::ChangeText(const wchar_t* const* nameSlot)
 
 void mu::ui::window::CButton::ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos)
 {
-    m_pTooltipSlot = tooltipSlot;
-    m_TooltipText = (tooltipSlot != nullptr && *tooltipSlot != nullptr) ? *tooltipSlot : L"";
-    m_IsTopPos = istoppos;
-    EnsureLocaleObserver();
+    m_tooltip.SetText(tooltipSlot);
+    m_tooltip.SetAnchorAbove(istoppos);
 }
 
 void mu::ui::window::CButton::EnsureLocaleObserver()
@@ -207,10 +190,7 @@ void mu::ui::window::CButton::OnLocaleChanged(void* ctx) noexcept
     {
         self->m_Name = *self->m_pNameSlot;
     }
-    if (self->m_pTooltipSlot != nullptr && *self->m_pTooltipSlot != nullptr)
-    {
-        self->m_TooltipText = *self->m_pTooltipSlot;
-    }
+    // Tooltip-slot refresh is m_tooltip's own concern -- it registers its own locale observer.
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
@@ -463,37 +443,22 @@ bool mu::ui::window::CButton::Render(bool RendOption)
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         if ((m_bClickEffect == true) && (GetBTState() == BUTTON_STATE_DOWN))
         {
-            RenderText(m_Name.c_str(), x + m_iMoveTextPosX + 1, y + m_iMoveTextPosY + 1, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
+            RenderTextWithColors(m_Name.c_str(), x + m_iMoveTextPosX + 1, y + m_iMoveTextPosY + 1, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
         }
         else
         {
-            RenderText(m_Name.c_str(), x + m_iMoveTextPosX, y + m_iMoveTextPosY, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
+            RenderTextWithColors(m_Name.c_str(), x + m_iMoveTextPosX, y + m_iMoveTextPosY, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
         }
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        RenderText(m_Name.c_str(), x, y, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
+        RenderTextWithColors(m_Name.c_str(), x, y, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
     }
 
-    if (m_TooltipText.size() != 0)
-    {
-        if (CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y))
-        {
-            g_pRenderText->SetFont(m_hToolTipFont);
-            const SIZE Fontsize = g_pRenderText->MeasureText(
-                m_TooltipText.c_str(), static_cast<int>(m_TooltipText.size()));
-
-            int x = m_Pos.x + ((m_Size.x / 2) - (Fontsize.cx / 2));
-            int y = m_Pos.y + m_Size.y + 2;
-
-            int _iTempWidth = x + Fontsize.cx + 6;
-            x = (_iTempWidth > REFERENCE_WIDTH) ? (x - (_iTempWidth - REFERENCE_WIDTH)) : x;
-
-            if (m_IsTopPos) y = m_Pos.y - (Fontsize.cy + 2);
-
-            RenderText(m_TooltipText.c_str(), x + m_iMoveTextTipPosX, y + m_iMoveTextTipPosY, Fontsize.cx + 6, 0, m_hToolTipFont, m_TooltipTextColor, RGBA(0, 0, 0, 180), RT3_SORT_CENTER);
-            //RenderText( m_TooltipText.c_str(), x, y, Fontsize.cx+6, 0, m_hToolTipFont, m_TooltipTextColor, RGBA(0, 0, 0, 180), RT3_SORT_CENTER );
-        }
-    }
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+    m_tooltip.Render(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, m_iMoveTextTipPosX, m_iMoveTextTipPosY);
+#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+    m_tooltip.Render(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     return true;
 }
@@ -812,14 +777,14 @@ bool mu::ui::window::CRadioButton::Render()
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         if ((m_bClickEffect == true) && GetBTState() == BUTTON_STATE_DOWN)
         {
-            RenderText(m_Name.c_str(), x + 1, y + 1, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
+            RenderTextWithColors(m_Name.c_str(), x + 1, y + 1, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
         }
         else
         {
-            RenderText(m_Name.c_str(), x, y, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
+            RenderTextWithColors(m_Name.c_str(), x, y, m_Size.x, 0, m_hTextFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
         }
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        RenderText(m_Name.c_str(), x, y, m_Size.x, 0, g_hFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
+        RenderTextWithColors(m_Name.c_str(), x, y, m_Size.x, 0, g_hFont, m_NameColor, m_NameBackColor, RT3_SORT_LEFT);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
     }
 

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include "UI/Widgets/Window/Tooltip.h"
+
 namespace mu::ui::window
 {
     enum BUTTON_STATE
@@ -151,6 +153,8 @@ namespace mu::ui::window
         void ChangeTextBackColor(const DWORD bcolor);
         void ChangeTextColor(const DWORD color);
 
+        // Forward to the owned CTooltip (Widgets/Window/Tooltip.h) -- kept as CButton's own
+        // method names since every existing call site already uses them.
         void ChangeToolTipText(std::wstring tooltiptext, bool istoppos = false);
         // Slot overload — see ChangeText(const wchar_t* const*).
         void ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos = false);
@@ -175,22 +179,22 @@ namespace mu::ui::window
 
     private:
        std::wstring		m_Name;
-       std::wstring		m_TooltipText;
        // Optional I18N indirection: when non-null, the corresponding cached
        // string is refreshed from *m_p*Slot on every locale change. Set by
-       // the slot-pointer overloads of ChangeText / ChangeToolTipText.
+       // the slot-pointer overload of ChangeText.
        const wchar_t* const* m_pNameSlot = nullptr;
-       const wchar_t* const* m_pTooltipSlot = nullptr;
        // True once we have called I18N::RegisterLocaleObserver for this
        // instance, so EnsureLocaleObserver is idempotent and the destructor
        // knows whether an Unregister call is owed.
        bool                  m_LocaleObserverRegistered = false;
 
+       // Owned tooltip -- Widgets/Window/Tooltip.h. Manages its own text/font/color/locale
+       // refresh; ChangeToolTipText()/etc. above just forward into it.
+       CTooltip              m_tooltip;
+
         HFONT					m_hTextFont;
-        HFONT					m_hToolTipFont;
         DWORD					m_NameColor;
         DWORD					m_NameBackColor;
-        DWORD					m_TooltipTextColor;
 
         int						m_CurImgIndex;
         int						m_CurImgState;
@@ -199,7 +203,6 @@ namespace mu::ui::window
         WORD					m_ImgHeight;
 
         unsigned int			m_CurImgColor;
-        bool					m_IsTopPos;
         bool                    m_IsImgWidth;
 
         unsigned char			m_fAlpha;
@@ -251,23 +254,20 @@ namespace mu::ui::window
     inline
         void CButton::ChangeToolTipText(std::wstring tooltiptext, bool istoppos)
     {
-        // See ChangeText(std::wstring): literal overrides drop the slot.
-        m_pTooltipSlot = nullptr;
-        m_TooltipText = tooltiptext;
-        m_IsTopPos = istoppos;
-        //m_hToolTipFont = g_hFont;
+        m_tooltip.SetText(std::move(tooltiptext));
+        m_tooltip.SetAnchorAbove(istoppos);
     }
 
     inline
         void CButton::SetToolTipFont(HFONT hFont)
     {
-        m_hToolTipFont = hFont;
+        m_tooltip.SetFont(hFont);
     }
 
     inline
         void CButton::ChangeToolTipTextColor(const DWORD color)
     {
-        m_TooltipTextColor = color;
+        m_tooltip.SetTextColor(color);
     }
 
     class CRadioButton : public CBaseButton

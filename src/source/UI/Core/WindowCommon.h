@@ -31,6 +31,13 @@ namespace mu::ui::window
 
     float RenderNumber(float x, float y, int iNum, float fScale = 1.0f);
 
+    // Renders text with an explicit color/background, restoring g_pRenderText's previous
+    // color/background afterward so callers don't leak state into whatever renders next.
+    // Shared by CButton and CTooltip (Widgets/Window/{Button,Tooltip}.h) -- both draw a run of
+    // text in a color that differs from whatever the shared renderer was last set to.
+    void RenderTextWithColors(const wchar_t* text, int x, int y, int width, int height, HFONT font,
+                              DWORD color, DWORD backColor, int sort);
+
     bool IsNone(int iVirtKey);
     bool IsRelease(int iVirtKey);
     bool IsPress(int iVirtKey);

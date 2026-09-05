@@ -6,6 +6,7 @@
 #include "UI/Widgets/Window/RenderNumber.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Widgets/UIControls.h"  // g_pRenderText
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 
@@ -116,6 +117,22 @@ void mu::ui::window::RenderImage(GLuint uiImageType, float x, float y, float wid
 float mu::ui::window::RenderNumber(float x, float y, int iNum, float fScale)
 {
     return g_RenderNumber->RenderNumber(x, y, iNum, fScale);
+}
+
+void mu::ui::window::RenderTextWithColors(const wchar_t* text, int x, int y, int width, int height,
+                                          HFONT font, DWORD color, DWORD backColor, int sort)
+{
+    g_pRenderText->SetFont(font);
+
+    DWORD backupTextColor = g_pRenderText->GetTextColor();
+    DWORD backupBgColor = g_pRenderText->GetBgColor();
+
+    g_pRenderText->SetTextColor(color);
+    g_pRenderText->SetBgColor(backColor);
+    g_pRenderText->RenderText(x, y, text, width, height, sort);
+
+    g_pRenderText->SetTextColor(backupTextColor);
+    g_pRenderText->SetBgColor(backupBgColor);
 }
 
 bool mu::ui::window::IsNone(int iVirtKey)
