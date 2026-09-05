@@ -1,5 +1,3 @@
-// NewUIMyShopInventory.cpp: implementation of the CMyShopInventory class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Inventory/MyShopInventory.h"

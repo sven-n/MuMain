@@ -1,5 +1,3 @@
-// NewUIExchangeLuckyCoin.h: interface for the CExchangeLuckyCoin class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 

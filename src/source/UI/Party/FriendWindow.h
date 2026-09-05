@@ -1,5 +1,3 @@
-// NewUIFriendWindow.h: interface for the CFriendWindow class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

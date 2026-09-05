@@ -15,29 +15,24 @@ namespace Rml
 // migrated panel that wants to be draggable should just call MakeDraggable() once -- no
 // per-window state machine, no CWin involvement at all.
 //
-// 2026-09-02 audit finding against architecture-principles.md §10-11 -- this helper has ZERO live
-// call sites today (grepped), so neither gap below was a live bug in the narrow sense, but both
-// needed a real answer before the first window actually called this, not discovered after:
-//   - FIXED (2026-09-04): it used to write the dragged position as an absolute `px` inline style,
-//     which never scales with the user's UIScalePercent setting (layout-and-scaling.md's dp-vs-px
-//     rule) -- a position dragged at one UI scale would read wrong at another. MakeDraggable()'s
-//     own .cpp now divides by the panel's own Context::GetDensityIndependentPixelRatio() and
-//     writes `dp`, matching every other dp-authored sibling.
-//   - STILL OPEN: nothing persists the result anywhere. There is no GameConfig position-storage
-//     mechanism for RmlUi panels at all yet (grepped) -- a dragged position is lost on every
-//     restart. Deliberately not built speculatively here -- there's no real caller yet to confirm
-//     the right shape (likely an anchor-relative `dp` offset keyed per window, not a raw pixel
-//     pair) -- but resolve it before, not after, the first real caller, same as before.
+// Currently has zero live call sites. Two things to get right before the first real caller:
+//   - The dragged position is written as `dp` (divided by the panel's own
+//     Context::GetDensityIndependentPixelRatio()), matching every other dp-authored sibling --
+//     see layout-and-scaling.md's dp-vs-px rule. Do not write a raw `px` inline style; it would
+//     read wrong at any UIScalePercent other than the one it was dragged at.
+//   - Nothing persists the result anywhere. There is no GameConfig position-storage mechanism for
+//     RmlUi panels yet, so a dragged position is lost on every restart. Deliberately not built
+//     speculatively -- resolve the right shape (likely an anchor-relative `dp` offset keyed per
+//     window, not a raw pixel pair) once a real caller needs it.
 //
-// 2026-09-03 addendum, found while migrating login/char_make off C++-pushed layout: a THIRD gap,
-// specific to any window with a real Type-2 companion object (a functional CUITextInputBox, not
-// just a redundant click-detection CButton -- docs/rmlui-ui-system/layout-and-scaling.md's
-// "C++ pushes real pixels" retirement note has the full distinction). OnPanelMoved below exists
-// for exactly this hybrid-sync case, but whatever a caller wires into it will need to scale by the
-// same combined ratio (GameConfig::GetUIScalePercent() x UI::Scaling::ViewportFitScale()) RmlUi's
-// own dp ratio uses now -- LoginWin.cpp's LoginUIScaleRatio() is the reference implementation --
-// not just a raw position sync, or the companion object will drift from the dragged RmlUi element
-// at any UI scale/resolution other than the reference case.
+// A window with a real Type-2 companion object (a functional CUITextInputBox, not just a
+// redundant click-detection CButton -- docs/rmlui-ui-system/layout-and-scaling.md's "C++ pushes
+// real pixels" note has the full distinction) needs OnPanelMoved below to keep that companion in
+// sync: scale by the same combined ratio (GameConfig::GetUIScalePercent() x
+// UI::Scaling::ViewportFitScale()) RmlUi's own dp ratio uses -- LoginWin.cpp's
+// LoginUIScaleRatio() is the reference implementation -- not just a raw position sync, or the
+// companion object will drift from the dragged RmlUi element at any UI scale/resolution other
+// than the reference case.
 namespace UI::RmlBridge
 {
     // Fired every time the panel's position changes during a drag, with its new absolute

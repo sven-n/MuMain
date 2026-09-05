@@ -1,5 +1,3 @@
-// NewUIPetInformation.h: interface for the CPetInfoWindow class.
-////////////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIPETINFORMATION_H__A1B6EB0C_4F9F_4285_B89A_7BB680BF84D6__INCLUDED_)
 #define AFX_NEWUIPETINFORMATION_H__A1B6EB0C_4F9F_4285_B89A_7BB680BF84D6__INCLUDED_

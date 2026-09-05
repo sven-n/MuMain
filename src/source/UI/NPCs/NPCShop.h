@@ -1,6 +1,3 @@
-// NewUINPCShop.h: interface for the CNPCShop class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUINPCSHOP_H__EEE639A8_C89E_47B3_8DBA_22560F102D98__INCLUDED_)
 #define AFX_NEWUINPCSHOP_H__EEE639A8_C89E_47B3_8DBA_22560F102D98__INCLUDED_

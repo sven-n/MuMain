@@ -1,5 +1,3 @@
-// NewUIGuildMakeWindow.cpp: implementation of the CGuildMakeWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "GuildMakeWindow.h"

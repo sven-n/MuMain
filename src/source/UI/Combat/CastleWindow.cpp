@@ -1,6 +1,3 @@
-// NewUICastleWindow.cpp: implementation of the CCastleWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

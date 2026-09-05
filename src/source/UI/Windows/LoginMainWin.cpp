@@ -130,7 +130,7 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     // bookkeeping uses (see CLoginWin::SetPosition's identical comment) -- #panel's own bounding
     // box is a genuinely computed value (tied to screen size and this bar's placement relative to
     // sibling login-scene elements, layout-and-scaling.md's "genuine live computed result"
-    // carve-out), so it stays C++-pushed. Its CHILDREN don't anymore, as of 2026-09-03:
+    // carve-out), so it stays C++-pushed. Its CHILDREN don't:
     // btn_menu/btn_credit position themselves via login_main.rcss's anchor-left/right:0dp rules
     // instead, picking up the same dp auto-fit .btn-icon's own width/height already have.
     if (m_pRmlDoc)

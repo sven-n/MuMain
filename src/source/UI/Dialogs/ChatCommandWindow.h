@@ -1,5 +1,3 @@
-// NewUIChatCommandWindow.h: interface for the CChatCommandWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 

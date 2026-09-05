@@ -1,7 +1,4 @@
-﻿// GM_Kanturu_In.cpp: implementation of the GM_Kanturu_In class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"

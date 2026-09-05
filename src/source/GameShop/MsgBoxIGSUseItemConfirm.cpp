@@ -1,6 +1,3 @@
-// MsgBoxIGSUseItemConfirm.cpp: implementation of the CMsgBoxIGSUseItemConfirm class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

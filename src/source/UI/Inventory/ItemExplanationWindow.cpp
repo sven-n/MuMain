@@ -1,7 +1,4 @@
-﻿// NewUIItemExplanationWindow.cpp: implementation of the CItemExplanationWindow class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Inventory/ItemExplanationWindow.h"
 #include "UI/Core/WindowSystem.h"

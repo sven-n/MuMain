@@ -1,6 +1,3 @@
-// GlobalBitmap.h: interface for the CGlobalBitmap class.
-//
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #pragma warning(disable : 4786)

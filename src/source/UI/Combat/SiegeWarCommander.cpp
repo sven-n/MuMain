@@ -1,6 +1,4 @@
-﻿// NewUISiegeWarCommander.cpp: implementation of the CSiegeWarCommander class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarCommander.h"
 #include "UI/Widgets/UIControls.h"

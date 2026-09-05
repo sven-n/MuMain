@@ -156,7 +156,7 @@ void CCreditWin::Create()
 	LoadText();
 	SetPosition();
 
-	// docs/rmlui-ui-system's CUIMng/CNewUIManager merger -- registers with CSceneUICoordinator's
+	// docs/newui-legacy-merger.md's CUIMng/CNewUIManager merger -- registers with CSceneUICoordinator's
 	// own scene-scoped manager instance, not the shared g_pNewUIMng (this window only ever exists
 	// during LOG_IN_SCENE; see CSceneUICoordinator::GetNewStyleMng()'s own comment for why).
 	// AddUIObj() is already idempotent (no-ops if already registered), so this is safe to call

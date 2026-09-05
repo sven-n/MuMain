@@ -1,6 +1,3 @@
-// NewUISiegeWarObserver.h: interface for the CSiegeWarObserver class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUISIEGEWAROBSERVER_H__023A30CE_13AE_4C7F_B690_9243328FB0BC__INCLUDED_)
 #define AFX_NEWUISIEGEWAROBSERVER_H__023A30CE_13AE_4C7F_B690_9243328FB0BC__INCLUDED_

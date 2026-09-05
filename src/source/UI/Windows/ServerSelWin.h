@@ -18,7 +18,7 @@
 
 class CServerGroup;
 
-// CUIMng/CNewUIManager merger (docs/rmlui-ui-system) Phase 2: migrated off CWin the same way as
+// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin the same way as
 // CCreditWin/CServerMsgWin. The most interactive of the three so far (real buttons + gauge bars,
 // not just passive display), but still fully self-contained real-pixel 2D rendering, no RmlUi
 // entanglement. Its own CWinEx member (m_winDescription) is untouched -- CWinEx itself isn't

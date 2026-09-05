@@ -6,7 +6,7 @@
 </head>
 <body>
 	<div id="backdrop"></div>
-	<!-- center-both + compact (2026-09-03) replace C++-pushed centering/sizing -- select_server_hidden
+	<!-- center-both + compact replace C++-pushed centering/sizing -- select_server_hidden
 	     doubles as "is the shorter login-scene panel" (true exactly then), see sys_menu.rcss's own
 	     comment for the geometry derivation. -->
 	<div id="panel" class="center-both" data-class-compact="select_server_hidden" data-model="sys_menu">

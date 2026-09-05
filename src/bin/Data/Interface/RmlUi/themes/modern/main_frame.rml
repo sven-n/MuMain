@@ -5,7 +5,7 @@
 	<link type="text/rcss" href="main_frame.rcss"/>
 </head>
 <body data-model="main_frame">
-	<!-- Modern theme's own copy of CNewUIMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner
+	<!-- Modern theme's own copy of CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner
 	     buttons (Phase 1 of 3 of the CNewUIObj-tier pilot; skill list / item hotkeys are out of
 	     scope, still fully legacy-rendered). Per-theme file (UI::RmlBridge::LoadThemedDocument)
 	     because the bottom-HUD button row is genuinely absent here (moved to #top_right_row
@@ -89,7 +89,7 @@
 
 		<!-- Phase 2 (skill list): expanded grid + pet-command row. Interactive overlay ONLY (hit
 		     target, cooldown wipe, current-skill highlight) -- icon/box-frame art stays legacy 2D
-		     underneath (NewUIMainFrameWindow.h's SkillCellEntry comment explains why: the atlas
+		     underneath (MainFrameWindow.h's SkillCellEntry comment explains why: the atlas
 		     lookup is too irregular to port blind). Fully data-driven (data-for) since the cell
 		     count varies with how many skills the character has learned -- no static markup
 		     possible, same shape as buff_strip.rml's already-proven dynamic list. -->

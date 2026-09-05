@@ -1,5 +1,3 @@
-// NewUIMoveCommandWindow.h: interface for the CMoveCommandWindow class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include <algorithm>

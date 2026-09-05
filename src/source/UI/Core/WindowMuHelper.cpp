@@ -195,7 +195,6 @@ void CUIMuHelper::InitButtons()
     InsertButton(IMAGE_MACROUI_HELPER_RAGEMINUS, m_Pos.x + 56, m_Pos.y + 97, 16, 15, 0, 0, 0, 0, nullptr, nullptr, BUTTON_ID_PICK_RANGE_MINUS, 1);
     InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 208, 38, 24, 1, 0, 1, 1, &I18N::Game::Add, nullptr, BUTTON_ID_ADD_OTHER_ITEM, 1); //-- Buff
     InsertButton(IMAGE_CLEARNESS_BTN, m_Pos.x + 132, m_Pos.y + 309, 38, 24, 1, 0, 1, 1, &I18N::Game::Delete, nullptr, BUTTON_ID_DELETE_OTHER_ITEM, 1); //-- Buff
-    //--
     InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 120, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, &I18N::Game::SaveSetting, nullptr, BUTTON_ID_SAVE_CONFIG, -1);
     InsertButton(IMAGE_IGS_BUTTON, m_Pos.x + 65, m_Pos.y + 388, 52, 26, 1, 0, 1, 1, &I18N::Game::Initialization, nullptr, BUTTON_ID_INIT_CONFIG, -1);
     InsertButton(IMAGE_BASE_WINDOW_BTN_EXIT, m_Pos.x + 20, m_Pos.y + 388, 36, 29, 0, 0, 0, 0, nullptr, &I18N::Game::Close388, BUTTON_ID_EXIT_CONFIG, -1);
@@ -260,13 +259,11 @@ void CUIMuHelper::InitCheckBox()
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 185, 15, 15, 0, &I18N::Game::Zen, CHECKBOX_ID_PICK_ZEN, 1);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 85, m_Pos.y + 185, 15, 15, 0, &I18N::Game::ExcellentItem, CHECKBOX_ID_PICK_EXCELLENT, 1);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 22, m_Pos.y + 200, 15, 15, 0, &I18N::Game::AddExtraItem, CHECKBOX_ID_ADD_OTHER_ITEM, 1);
-    //--
 
     InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 94, m_Pos.y + 235, 15, 15, 0, &I18N::Game::CeaseAttack, CHECKBOX_ID_DR_ATTACK_CEASE, 0);
     InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 235, 15, 15, 0, &I18N::Game::AutoAttack, CHECKBOX_ID_DR_ATTACK_AUTO, 0);
     InsertCheckBox(IMAGE_MACROUI_HELPER_OPTIONBUTTON, m_Pos.x + 30, m_Pos.y + 250, 15, 15, 0, &I18N::Game::AttackTogether, CHECKBOX_ID_DR_ATTACK_TOGETHER, 0);
 
-    //--
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 80, 15, 15, 0, &I18N::Game::AutoAcceptFriend, CHECKBOX_ID_AUTO_ACCEPT_FRIEND, 2);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 125, 15, 15, 0, &I18N::Game::PVPCounterattack, CHECKBOX_ID_AUTO_DEFEND, 2);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 97, 15, 15, 0, &I18N::Game::AutoAcceptGuildMember, CHECKBOX_ID_AUTO_ACCEPT_GUILD, 2);
@@ -361,16 +358,13 @@ void CUIMuHelper::InitText()
     InsertText(m_Pos.x + 18, m_Pos.y + 78, I18N::Game::Range, 1, 0); // Range
     InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 2, 0);
     InsertText(m_Pos.x + 110, m_Pos.y + 141, I18N::Game::Distance, 3, 0); // Distance
-    //InsertText(m_Pos.x + 162, m_Pos.y + 141, I18N::Game::Min, 4, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 141, L"s", 4, 0);
 
     InsertText(m_Pos.x + 18, m_Pos.y + 160, I18N::Game::BasicSkill, 5, 0); // Basic Skill
     InsertText(m_Pos.x + 59, m_Pos.y + 160, I18N::Game::ActivationSkill1, 7, 0); // Activation Skill 1
-    //InsertText(m_Pos.x + 162, m_Pos.y + 178, I18N::Game::Min, 8, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 178, L"s", 8, 0);
     InsertText(m_Pos.x + 59, m_Pos.y + 212, I18N::Game::ActivationSkill2, 9, 0); // Activation Skill 2
 
-    //InsertText(m_Pos.x + 162, m_Pos.y + 230, I18N::Game::Min, 10, 0);
     InsertText(m_Pos.x + 162, m_Pos.y + 230, L"s", 10, 0);
     InsertText(m_Pos.x + 18, m_Pos.y + 78, I18N::Game::Range, 11, 1); // Range
     InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 12, 1);
@@ -735,7 +729,6 @@ bool CUIMuHelper::UpdateKeyEvent()
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER);
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
-            //PlayBuffer(SOUND_CLICK01);
             SetFocus(g_hWnd);
             CUITextInputBox::ReleaseFocus();
 
@@ -1281,7 +1274,6 @@ void CUIMuHelper::LoadImages()
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputNumber.tga", IMAGE_MACROUI_HELPER_INPUTNUMBER, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputString.tga", IMAGE_MACROUI_HELPER_INPUTSTRING, GL_LINEAR, GL_CLAMP, 1, 0);
-    //--
     LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
 }
 
@@ -1291,12 +1283,8 @@ void CUIMuHelper::UnloadImages()
     DeleteBitmap(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     DeleteBitmap(IMAGE_MACROUI_HELPER_INPUTNUMBER);
     DeleteBitmap(IMAGE_MACROUI_HELPER_INPUTSTRING);
-    //--
     DeleteBitmap(IMAGE_IGS_BUTTON);
 }
-
-//===============================================================================================================
-//===============================================================================================================
 
 void CUIMuHelper::RegisterButton(int Identifier, CButtonTap button)
 {
@@ -1378,9 +1366,6 @@ int CUIMuHelper::UpdateMouseBtnList()
     return -1;
 }
 
-//===============================================================================================================
-//===============================================================================================================
-
 void CUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_CheckBoxList.find(Identifier);
@@ -1457,9 +1442,6 @@ int CUIMuHelper::UpdateMouseBoxList()
     }
     return -1;
 }
-
-//===============================================================================================================
-//===============================================================================================================
 
 void CUIMuHelper::RenderIconList()
 {
@@ -1543,9 +1525,6 @@ void CUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int Ide
 
     RegisterIcon(Identifier, cImage);
 }
-
-//===============================================================================================================
-//===============================================================================================================
 
 void CUIMuHelper::RenderTextList()
 {
@@ -1821,7 +1800,6 @@ CMuHelperSkillList::~CMuHelperSkillList()
     Release();
 }
 
-
 bool CMuHelperSkillList::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng)
@@ -1921,7 +1899,6 @@ bool CMuHelperSkillList::UpdateKeyEvent()
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_SKILL_LIST);
             SetFocus(g_hWnd);
             CUITextInputBox::ReleaseFocus();
-            //PlayBuffer(SOUND_CLICK01);
 
             return false;
         }
@@ -2610,7 +2587,6 @@ void CMuHelperExt::LoadImages()
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputNumber.tga", IMAGE_MACROUI_HELPER_INPUTNUMBER, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_InputString.tga", IMAGE_MACROUI_HELPER_INPUTSTRING, GL_LINEAR, GL_CLAMP, 1, 0);
-    //--
     LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
 }
 
@@ -2620,7 +2596,6 @@ void CMuHelperExt::UnloadImages()
     DeleteBitmap(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     DeleteBitmap(IMAGE_MACROUI_HELPER_INPUTNUMBER);
     DeleteBitmap(IMAGE_MACROUI_HELPER_INPUTSTRING);
-    //--
     DeleteBitmap(IMAGE_IGS_BUTTON);
 }
 
@@ -2884,7 +2859,6 @@ bool CMuHelperExt::UpdateKeyEvent()
         if (IsPress(VK_ESCAPE) == true)
         {
             g_pNewUISystem->Hide(INTERFACE_MUHELPER_EXT);
-            //PlayBuffer(SOUND_CLICK01);
 
             return false;
         }

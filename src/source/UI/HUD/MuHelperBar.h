@@ -1,5 +1,3 @@
-// MuHelperBar.h: interface for the CMuHelperBar class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 
@@ -11,11 +9,10 @@ namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
-    // RmlUi migration (2026-08-31) -- first pilot of the CObject-tier adapter pattern
-    // (docs/rmlui-ui-system/newui-tier-adapter.md; see .ai-os/memory/tasks/rmlui-sdl-gpu-port.md
-    // for the full session history). Chosen as the pilot for being small, self-contained (no
-    // drag-drop, no I3DRenderObj/3D-camera rendering), and having genuine interaction (two
-    // real button clicks, live per-frame text) to prove the pattern against.
+    // First pilot of the CObject-tier adapter pattern (docs/rmlui-ui-system/newui-tier-adapter.md).
+    // Chosen as the pilot for being small, self-contained (no drag-drop, no I3DRenderObj/3D-camera
+    // rendering), and having genuine interaction (two real button clicks, live per-frame text) to
+    // prove the pattern against.
     //
     // This widget's own tooltips (I18N::Game::OfficialMUHelperSetting/StartOfficialMUHelper/
     // StopOfficialMUHelper) identify it as the "Official MU Helper" mini control bar (Config/
@@ -24,14 +21,13 @@ namespace mu::ui::window
     // position, no existing seam to split the two concerns along. Ported as one component to
     // match, not split into two.
     //
-    // 2026-08-31, renamed from CNewUIHeroPositionInfo (a name that reflected the position readout
-    // only, not what the widget actually is): the original class name, along with
+    // Renamed from CNewUIHeroPositionInfo (a name that reflected the position readout only, not
+    // what the widget actually is): the original class name, along with
     // INTERFACE_HERO_POSITION_INFO, CSystem::m_pNewHeroPositionInfo/
     // GetUI_NewHeroPositionInfo()/g_pHeroPositionInfo, and the Sync/Update/ShouldHide*Visibility
-    // helper methods, all renamed to match at the same time -- see
-    // .ai-os/memory/tasks/rmlui-ui-architecture-amendment.md's "Tracked deferral" section for why
-    // this rename happened now (in place) rather than being deferred alongside a future physical
-    // directory reorg (still deferred, unrelated to this naming pass).
+    // helper methods, all renamed to match at the same time -- see STATUS.md's "Tracked deferral"
+    // section for what's still deferred (the base-class/tier boundary itself, unrelated to this
+    // naming pass).
     //
     // Render() is now a no-op -- RmlUi renders 100% of this widget's visuals via the normal
     // SetPreSubmitCallback seam. UpdateMouseEvent()/UpdateKeyEvent() always report "not consumed"
@@ -79,7 +75,7 @@ namespace mu::ui::window
 
         // Re-derives the RmlUi document's actual Show()/Hide() state from IsVisible() (the
         // layout-driven flag CObject::Show() already sets -- panel docking etc., see
-        // NewUISystem.cpp's Hide/Show(INTERFACE_MU_HELPER_BAR) call sites) ANDed with
+        // WindowSystem.cpp's Hide/Show(INTERFACE_MU_HELPER_BAR) call sites) ANDed with
         // sceneAllowsShow. Needed because this widget's Update() (the only place that used to
         // touch the RmlUi doc) only ever runs while SceneFlag == MAIN_SCENE (MainScene.cpp) --
         // before this widget became RmlUi-backed, that same MAIN_SCENE-only call site was already

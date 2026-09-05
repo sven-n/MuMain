@@ -1,5 +1,3 @@
-// NewUIPetInformation.cpp: imp0lementation of the CPetInfoWindow class.
-////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

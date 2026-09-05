@@ -1,6 +1,3 @@
-// NewUILuckyItemWnd.h: interface for the CLuckyItemWnd class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUILUCKYITEMWND_H__F57DF84F_0A44_444A_838D_78CBC35544EB__INCLUDED_)
 #define AFX_NEWUILUCKYITEMWND_H__F57DF84F_0A44_444A_838D_78CBC35544EB__INCLUDED_

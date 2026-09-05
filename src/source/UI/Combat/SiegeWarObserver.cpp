@@ -1,5 +1,3 @@
-// NewUISiegeWarObserver.cpp: implementation of the CSiegeWarObserver class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarObserver.h"

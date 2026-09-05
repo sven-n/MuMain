@@ -1,5 +1,3 @@
-// NewUIGoldBowmanLena.h: interface for the NewUIGoldBowmanLena class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowManager.h"

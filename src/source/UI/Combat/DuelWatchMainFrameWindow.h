@@ -1,5 +1,3 @@
-// NewUIDuelWatchMainFrameWindow.h: interface for the CDuelWatchMainFrameWindow class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

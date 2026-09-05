@@ -70,10 +70,9 @@ namespace
         if (modelCreated)
             g_pDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/remember_password_prompt.rml");
 
-        // 2026-09-03: no longer centered from here -- #panel's own `.center-both` RCSS class
-        // (remember_password_prompt.rml) does it instead, and unlike the old GetProperty()-based
-        // read-back this way it stays centered on every resize/UI-scale change too, not just at
-        // creation (see this function's git history for the block this replaced).
+        // Centering is #panel's own `.center-both` RCSS class (remember_password_prompt.rml), not
+        // pushed from here -- it stays centered on every resize/UI-scale change too, not just at
+        // creation.
     }
 
     void SyncLabels()

@@ -1,6 +1,3 @@
-// NewUI3DRenderMng.cpp: implementation of the C3DRenderMng class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Core/Window3DRenderMng.h"
@@ -29,10 +26,6 @@ void RenderWithOwnerLayout(I3DRenderObj* object)
     object->Render3D();
 }
 }
-
-//////////////////////////////////////////////////////////////////////
-// Construction/Destruction
-//////////////////////////////////////////////////////////////////////
 
 mu::ui::window::C3DCamera::C3DCamera()
 {
@@ -130,17 +123,11 @@ float mu::ui::window::C3DCamera::GetLayerDepth()
     return m_fZOrder;
 }
 
-// DXP-07d increment 2's shadow-compare diagnostic (proj/view vs. CPU closed form) validated this
-// camera's projection formula across multiple soaks; DXP-08a deleted the diagnostic and the FFP
-// matrix-stack calls it was validating once GlobalUBO was confirmed the only consumer
-// — see Render()'s own comments below. Pre-implementation read of every
-// I3DRenderObj::Render3D() implementer registered with this camera (12 call sites across
-// NewUIMyInventory, NewUIInventoryCtrl, NewUIEmpireGuardianNPC, NewUINPCQuest,
-// NewUIDoppelGangerWindow, NewUICustomMessageBox, NewUICommonMessageBox, and 4 GameShop MsgBoxIGS*
-// dialogs) found none touch the GL matrix stack — they all just call RenderItem3D(), which carries no
-// GL model transform. (NewUIGoldBowmanLena/NewUIRegistrationLuckyCoin's own Render3D() methods are
-// NOT reached through this camera — they call EndBitmap()/gluPerspective2 directly themselves,
-// independent of C3DCamera.)
+// Every I3DRenderObj::Render3D() implementer registered with this camera calls RenderItem3D(),
+// which carries no GL model transform of its own — none of them touch the GL matrix stack this
+// class sets up in Render() below. CGoldBowmanLena/CRegistrationLuckyCoin are the exception: their
+// own Render3D() methods call EndBitmap()/gluPerspective2 directly themselves and are never
+// reached through this camera at all.
 
 void mu::ui::window::C3DCamera::Render3D()
 {

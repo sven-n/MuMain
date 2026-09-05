@@ -1,6 +1,3 @@
-// NewUIExchangeLuckyCoin.cpp: implementation of the CExchangeLuckyCoin class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Events/ExchangeLuckyCoin.h"

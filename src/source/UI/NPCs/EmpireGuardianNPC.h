@@ -1,5 +1,3 @@
-// CEmpireGuardianNPC.h: interface for the CEmpireGuardianNPC class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

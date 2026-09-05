@@ -1,5 +1,3 @@
-// NewUIGensRanking.h: interface for the CGensRanking class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 #include "Core/Globals/_TextureIndex.h"
 

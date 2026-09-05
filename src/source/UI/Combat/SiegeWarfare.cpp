@@ -1,5 +1,3 @@
-// CSiegeWarfare.cpp: implementation of the CSiegeWarfare class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarfare.h"

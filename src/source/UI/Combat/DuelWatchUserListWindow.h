@@ -1,5 +1,3 @@
-// NewUIDuelWatchUserListWindow.h: interface for the CDuelWatchUserListWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 

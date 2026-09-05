@@ -2,7 +2,7 @@
    art. Stat/description panels share the identical treatment as legacy (already flat fills in
    the original). */
 
-/* 2026-09-03: width/height and every child's left/top below are now static RCSS instead of
+/* Width/height and every child's left/top below are static RCSS instead of
    C++-pushed -- CharMakeWin.cpp's SetPosition() still pushes #panel's own left/top (a genuine
    screen-placement value, same carve-out as every other migrated window), but stopped pushing
    these, since they're constants that never actually varied at runtime (CCharMakeWin.h's own
@@ -118,22 +118,19 @@
 	pointer-events: none;
 }
 
-/* 2026-09-03: background-color/border/border-radius removed -- only width genuinely needs to
-   differ from base.rcss's own .btn (54px here vs. base's 108px default) here. The removed
-   `border` shorthand was silently stomping .btn-ok's crimson border-color/border-top-color back
-   to gray border-metal on #btn_ok (same specificity, this file linked after base.rcss, tie always
-   went to this rule) -- the fill still showed crimson (decorator, untouched) but with a
-   mismatched gray border instead of a clean crimson one, same bug independently present in
-   msg_win.rcss (see that file's own comment on the identical fix).
+/* Only width genuinely needs to differ from base.rcss's own .btn (54px here vs. base's 108px
+   default). Do NOT add a `border` shorthand here -- it silently stomps .btn-ok's crimson
+   border-color/border-top-color back to gray border-metal on #btn_ok (same specificity, this file
+   linked after base.rcss, tie always goes to this rule), leaving the fill crimson (decorator,
+   unaffected) but the border mismatched gray -- same bug independently present in msg_win.rcss
+   (see that file's own comment on the identical fix).
 
-   2026-09-03, second fix: height/line-height/text-align/vertical-align now explicit here too, not
-   left to inherit from base.rcss's own .btn -- that shared rule is dp now (this session's global
-   auto-fit retrofit), but #panel here deliberately stays fixed px (see this file's own #panel
-   comment, the 3D-viewport-coupling exception). Inheriting a dp line-height/height into a
-   px-positioned, px-widthed button meant the box grew taller than its fixed width/position
-   intended at any ratio other than 1.0 -- a real, screenshot-reported bug ("OK/Cancel text
-   position not properly scaled"). Every property this button needs must be self-contained px now,
-   matching the rest of this file's deliberate non-scaling design. */
+   height/line-height/text-align/vertical-align are explicit here too, not left to inherit from
+   base.rcss's own .btn -- that shared rule is dp, but #panel here deliberately stays fixed px (see
+   this file's own #panel comment, the 3D-viewport-coupling exception). Inheriting a dp
+   line-height/height into a px-positioned, px-widthed button grows the box taller than its fixed
+   width/position intends at any ratio other than 1.0. Every property this button needs must be
+   self-contained px, matching the rest of this file's deliberate non-scaling design. */
 .btn {
 	position: absolute;
 	width: 54px;

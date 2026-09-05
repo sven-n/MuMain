@@ -1,6 +1,3 @@
-// NewUICursedTempleSystem.h: interface for the CCursedTempleSystem class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICURSEDTEMPLESYSTEM_H__3018484F_9F75_48EB_8D76_31103617DCB7__INCLUDED_)
 #define AFX_NEWUICURSEDTEMPLESYSTEM_H__3018484F_9F75_48EB_8D76_31103617DCB7__INCLUDED_

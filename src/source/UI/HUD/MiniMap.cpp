@@ -1,5 +1,3 @@
-// NewUIGuildInfoWindow.cpp: implementation of the CGuildInfoWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

@@ -1,5 +1,3 @@
-// PartyManager.cpp: implementation of the CPartyManager class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "GameLogic/Social/PartyManager.h"

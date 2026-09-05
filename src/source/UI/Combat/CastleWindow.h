@@ -1,6 +1,3 @@
-// NewUICastleWindow.h: interface for the CCastleWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICASTLEWINDOW_H__C0C75F67_38B5_48C4_98EF_DC0F4E9EB866__INCLUDED_)
 #define AFX_NEWUICASTLEWINDOW_H__C0C75F67_38B5_48C4_98EF_DC0F4E9EB866__INCLUDED_

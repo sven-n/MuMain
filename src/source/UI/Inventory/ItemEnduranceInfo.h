@@ -1,6 +1,3 @@
-// NewUIItemEnduranceInfo.h: interface for the CItemEnduranceInfo class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIITEMENDURANCEINFO_H__ADB04FC1_C3E3_47B5_8026_C78C5800500C__INCLUDED_)
 #define AFX_NEWUIITEMENDURANCEINFO_H__ADB04FC1_C3E3_47B5_8026_C78C5800500C__INCLUDED_

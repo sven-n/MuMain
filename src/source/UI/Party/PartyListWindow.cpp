@@ -1,5 +1,3 @@
-// NewUIPartyListWindow.cpp: implementation of the CNewUIPartyInfo class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Chat/Chat.h"

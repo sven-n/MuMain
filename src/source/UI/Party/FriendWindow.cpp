@@ -1,6 +1,3 @@
-// NewUIFriendWindow.cpp: implementation of the CFriendWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 

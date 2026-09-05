@@ -1,6 +1,3 @@
-// NewUINameWindow.h: interface for the CNameWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUINAMEWINDOW_H__76B140FF_46CB_4DB6_9DA2_5F84F294D212__INCLUDED_)
 #define AFX_NEWUINAMEWINDOW_H__76B140FF_46CB_4DB6_9DA2_5F84F294D212__INCLUDED_

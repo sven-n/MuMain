@@ -1,6 +1,3 @@
-// NewUIChatCommandWindow.cpp: implementation of the CChatCommandWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

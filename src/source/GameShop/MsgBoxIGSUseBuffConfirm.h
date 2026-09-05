@@ -1,5 +1,3 @@
-// MsgBoxIGSUseBuffConfirm.h: interface for the CMsgBoxIGSUseBuffConfirm class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM

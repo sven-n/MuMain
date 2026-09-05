@@ -1,6 +1,4 @@
-﻿// NewUIItemEnduranceInfo.cpp: implementation of the CItemEnduranceInfo class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Inventory/ItemEnduranceInfo.h"
 #include "UI/Core/WindowSystem.h"

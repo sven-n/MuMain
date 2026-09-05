@@ -1,5 +1,3 @@
-// NewUIUnitedMarketPlaceWindow.cpp: implementation of the CUnitedMarketPlaceWindow class.
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Inventory/UnitedMarketPlaceWindow.h"
 #include "UI/Core/WindowSystem.h"

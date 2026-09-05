@@ -1,5 +1,3 @@
-// MsgBoxIGSBuyPackageItem.cpp: implementation of the CMsgBoxIGSBuyPackageItem class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

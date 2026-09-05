@@ -1,5 +1,3 @@
-// ItemAddOptioninfo.cpp: implementation of the ItemAddOptioninfo class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

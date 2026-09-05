@@ -1,5 +1,3 @@
-// MsgBoxIGSCommon.h: interface for the CMsgBoxIGSCommon class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSCOMMON_H__5E2E9B11_C6F5_411E_BC68_1CF1D1DAE3C0__INCLUDED_)
 #define AFX_MSGBOXIGSCOMMON_H__5E2E9B11_C6F5_411E_BC68_1CF1D1DAE3C0__INCLUDED_

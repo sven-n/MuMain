@@ -54,9 +54,9 @@ namespace
     // this to stay pixel-for-pixel aligned with login.rcss's own now-dp values, the same lockstep
     // requirement CharSelMainWin.cpp/LoginMainWin.cpp already established for their own windows.
     // UI::Scaling::CompanionRatio() (UITransform.cpp) is the single shared implementation of this
-    // formula (extracted 2026-09-03 after this exact function, CharSelMainWin.cpp's
-    // GetUIScaleRatio(), and LoginMainWin.cpp's inline version had each independently hand-copied
-    // it) -- it's the reason to keep reading the WindowWidth/WindowHeight globals here rather than
+    // formula, rather than each window hand-copying it (this function, CharSelMainWin.cpp's
+    // GetUIScaleRatio(), and LoginMainWin.cpp's inline version once did) -- keep reading the
+    // WindowWidth/WindowHeight globals here rather than
     // CInput::Instance().GetScreenWidth()/GetScreenHeight(): a real bug, found via a screenshot
     // showing the panel rendering off-center and the username text/caret floating outside the
     // input box entirely, traced to CInput's own copy of the screen size not reliably matching
@@ -114,9 +114,9 @@ void CLoginWin::Create()
     // This window draws none of its own chrome -- every theme's #panel/.input-frame renders the
     // background/input-box-frame artwork itself (see this class's header comment).
     //
-    // 2026-09-03: the legacy bounding-box size tracks login.rcss's own #panel width/height
-    // (329dp/245dp, both themes) by the same ratio, instead of a fixed 329x245 this used to always
-    // be -- UpdateMouseEvent() reads m_Size for its own hit-test rect, and letting it go stale
+    // The legacy bounding-box size tracks login.rcss's own #panel width/height (329dp/245dp, both
+    // themes) by the same ratio, instead of a fixed 329x245 -- UpdateMouseEvent() reads m_Size for
+    // its own hit-test rect, and letting it go stale
     // against the now-auto-fitting RmlUi visuals risks the same class of bug
     // CharSelMainWin.h/CalculateFixedAnchorLayout()'s own comment documents in detail (a correctly
     // rendered element whose legacy hit-test rect no longer matches it).
@@ -185,7 +185,7 @@ void CLoginWin::Create()
 
     this->FirstLoad = 1;
 
-    // RmlUi migration plan Phase 1 pilot -- see this class's header comment. Guarded on
+    // See this class's header comment. Guarded on
     // m_pRmlDoc rather than unconditionally: CSceneUICoordinator::RepositionSceneUI() re-runs
     // CreateLoginScene() (and so this Create()) on every resolution change, to refresh the
     // legacy sprites' stale screen-height-dependent Y-flip cache -- a problem RmlUi's own
@@ -256,8 +256,8 @@ void CLoginWin::SetPosition(int x, int y)
 	// just for these offsets rather than picking one theme's numbers and silently misplacing the
 	// real input text in the other.
 	//
-	// 2026-09-03: every offset below is now scaled by LoginUIScaleRatio() -- login.rcss's own
-	// positions became dp (grow with UIScalePercent/window size) the same day, and without this
+	// Every offset below is scaled by LoginUIScaleRatio() -- login.rcss's own positions are dp
+	// (grow with UIScalePercent/window size), and without this
 	// these real, functional CUITextInputBox/legacy-CButton placements would silently drift from
 	// the now-auto-fitting RmlUi visuals at any ratio other than 1.0. Highest-stakes instance of
 	// the lockstep requirement this whole migration pass has been applying (CharSelMainWin,
@@ -383,7 +383,7 @@ bool CLoginWin::UpdateWhileActive()
 	return true;
 }
 
-// 2026-09-03: RmlClickOk()/RmlClickCancel() (see LoginWin.h's header comment) call these directly,
+// RmlClickOk()/RmlClickCancel() (see LoginWin.h's header comment) call these directly,
 // bypassing the shown/active split entirely -- UpdateWhileActive()'s own CButton::IsClick()/
 // keyboard branches above call the same functions, so there is exactly one place each action's
 // logic lives regardless of which path triggered it. Each re-checks the "remember password"

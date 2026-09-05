@@ -1,5 +1,3 @@
-// NewUISiegeWarBase.cpp: implementation of the CSiegeWarBase class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 

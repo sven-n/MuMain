@@ -1,5 +1,3 @@
-// w_CharacterInfo.cpp: implementation of the CHARACTER class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Engine/Object/w_CharacterInfo.h"

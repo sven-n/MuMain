@@ -1,7 +1,4 @@
-﻿// Event.cpp: implementation of the CEvent class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 // common
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"

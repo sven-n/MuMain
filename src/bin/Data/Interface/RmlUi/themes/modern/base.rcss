@@ -39,11 +39,9 @@ body {
 	cursor: pointer;
 	pointer-events: auto;
 }
-/* 2026-09-03: matches login.rcss's own checkbox exactly (that file can't reference this rule --
-   it doesn't link base.rcss, see login.rcss's own note -- so the values are duplicated by hand;
-   keep the two in sync if either changes). A real gradient + bevel border, not the flat
-   bevel-only version this used before -- nothing else currently uses .checkbox-box (grepped, only
-   login.rml does, and it has its own copy), so this had no visible effect on anything else. */
+/* Matches login.rcss's own checkbox exactly (that file can't reference this rule -- it doesn't
+   link base.rcss, see login.rcss's own note -- so the values are duplicated by hand; keep the two
+   in sync if either changes). A real gradient + bevel border. */
 .checkbox-box {
 	display: inline-block;
 	width: 16dp;
@@ -68,7 +66,7 @@ body {
 	font-family: "token(font-body)";
 }
 
-/* Flat (per feedback -- no gradient fill/bevel), but the border carries a faint steel tint at rest
+/* Flat -- no gradient fill/bevel -- but the border carries a faint steel tint at rest
    that brightens into a real steel glow on hover. Gray surface stays the base material; steel is
    the accent, not the structure -- gold is reserved for text emphasis/item-skill highlights, not
    general chrome (see modern-theme-visual-direction.md). */
@@ -107,7 +105,7 @@ body {
 	cursor: default;
 }
 
-/* 2026-09-03: opt-in primary/hero variant -- apply alongside .btn (class="btn btn-ok") for a
+/* Opt-in primary/hero variant -- apply alongside .btn (class="btn btn-ok") for a
    window's one confirm-style action; plain .btn above stays flat/neutral, unaffected, still the
    right choice for a list of equal-weight actions (sys_menu.rcss's four stacked menu buttons).
    Exact same accent-crimson gradient/bevel as login.rcss's own .btn (that file has its own copy,
@@ -148,8 +146,7 @@ body {
    .modern-frame element at their original positions -- do NOT nest content inside .modern-panel,
    its inset would shift every child's effective position.
 
-   These are documented as "reusable" since 2026-09-02 but were unused by every window, login.rcss
-   included, until 2026-09-03 -- there's no CSS variable mechanism on this engine (confirmed, see
+   There's no CSS variable mechanism on this engine (confirmed, see
    modern-theme-visual-direction.md), so a shared class can only carry *structural* properties
    (border-width, the bevel/gradient mechanism) portably; a window's own specific palette (login's
    warm bronze/crimson, say) still has to come from somewhere. The pattern that actually closes
@@ -216,7 +213,7 @@ body {
 }
 
 /* Thin accent line just inside .modern-frame -- border only, no fill, so the frame's own gradient
-   still shows through it. Extracted from login.rcss's .frame-accent (2026-09-03); apply as a
+   still shows through it. Extracted from login.rcss's .frame-accent; apply as a
    direct child of .modern-frame, inset a few px more than .modern-panel so .modern-panel's own
    position/size stays exactly as documented above -- this is a fourth visual band, not a
    replacement for the frame/panel pair. Position/size (left/right/top/bottom/border-radius) stay

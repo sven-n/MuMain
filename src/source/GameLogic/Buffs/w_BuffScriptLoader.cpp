@@ -1,6 +1,3 @@
-// BuffScriptLoader.cpp: implementation of the CBuffScriptLoader class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Core/Utilities/ReadScript.h"

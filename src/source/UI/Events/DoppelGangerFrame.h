@@ -1,5 +1,3 @@
-// NewUIDoppelGangerFrame.h: interface for the CDoppelGangerFrame class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

@@ -1,5 +1,3 @@
-// NewUIMyShopInventory.h: interface for the CMyShopInventory class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIMYSHOPINVENTORY_H__A0C3DD4A_C4D5_4CF2_9702_DF54540DB6FD__INCLUDED_)
 #define AFX_NEWUIMYSHOPINVENTORY_H__A0C3DD4A_C4D5_4CF2_9702_DF54540DB6FD__INCLUDED_

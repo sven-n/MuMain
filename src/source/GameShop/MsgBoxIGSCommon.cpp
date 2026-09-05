@@ -1,5 +1,3 @@
-// MsgBoxIGSCommon.cpp: implementation of the CMsgBoxIGSCommon class.
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "I18N/All.h"
 

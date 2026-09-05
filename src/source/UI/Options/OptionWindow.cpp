@@ -1,6 +1,3 @@
-// NewUIOptionWindow.cpp: implementation of the COptionWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Options/OptionWindow.h"

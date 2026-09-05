@@ -24,8 +24,8 @@
 	charmake-cancel-idle: 0px 0px 54px 30px;
 }
 
-/* 2026-09-03: see themes/modern/char_make.rcss's own comment -- width/height and every child's
-   left/top below are now static RCSS instead of C++-pushed, except #panel's own left/top itself
+/* See themes/modern/char_make.rcss's own comment -- width/height and every child's
+   left/top below are static RCSS instead of C++-pushed, except #panel's own left/top itself
    (still pushed, genuine screen placement) and the job buttons (genuinely per-instance data via
    data-for/data-style-*, unaffected either way). Deliberately stays px, not dp -- this panel's
    real screen position also drives the live 3D character-preview viewport, a separate scale
@@ -128,7 +128,7 @@
 	pointer-events: auto;
 	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it.
 	   line-height/text-align/vertical-align above are declared explicitly for the same reason as
-	   the modern theme's identical fix (2026-09-03) even though color:transparent hides any
+	   the modern theme's identical fix even though color:transparent hides any
 	   visible effect today -- height already was fixed px here, but this rule shouldn't rely on
 	   inheriting anything from base.rcss's now-dp .btn regardless. */
 	color: transparent;

@@ -1,7 +1,7 @@
 /* Modern theme for the generic message/confirm dialog -- flat programmatic chrome, no legacy
    sprite art. OK/Cancel show real localized text instead of art.
 
-   2026-09-03: #panel now consumes base.rcss's .modern-frame-crimson (applied in msg_win.rml)
+   #panel consumes base.rcss's .modern-frame-crimson (applied in msg_win.rml)
    instead of its own bespoke gray background/border -- reasonable here since most of this
    dialog's modes show a real crimson .btn-ok primary action (see .btn below). Position/size/font/
    border-width/radius stay local/structural (.modern-frame itself sets no border-radius at all,
@@ -61,13 +61,12 @@
 }
 .mode-input #input_frame { display: block; }
 
-/* 2026-09-03: background-color/border/border-radius removed -- this rule used to fully redefine
-   them (in dp, vs. base.rcss's own px), which doesn't just diverge cosmetically: `border` is a
-   shorthand that resets border-color on all four sides, so it was silently stomping .btn-ok's
-   crimson border-color/border-top-color back to gray border-metal every time (same specificity,
-   this file linked after base.rcss, so this rule always won the tie) -- the OK button's fill
-   still showed crimson (decorator, a different property, was never touched) but with a mismatched
-   gray border instead of a clean crimson one. Only what's genuinely local/dp-specific stays here:
+/* Do NOT redeclare background-color/border/border-radius here -- `border` is a shorthand that
+   resets border-color on all four sides, so it would silently stomp .btn-ok's crimson
+   border-color/border-top-color back to gray border-metal (same specificity, this file linked
+   after base.rcss, so this rule always wins the tie), leaving the OK button's fill crimson
+   (decorator, a different property, unaffected) but the border mismatched gray. Only what's
+   genuinely local/dp-specific stays here:
    the mode-gated default-hidden state, this window's own top offset, and its dp-based size
    (deliberately dp, unlike base.rcss's px .btn -- not part of this fix, a pre-existing choice for
    this window). */

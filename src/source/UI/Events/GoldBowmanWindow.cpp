@@ -1,5 +1,3 @@
-// NewUIGoldBowmanWindow.cpp: implementation of the CGoldBowmanWindow class.
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Events/GoldBowmanWindow.h"
 #include "UI/Core/WindowSystem.h"

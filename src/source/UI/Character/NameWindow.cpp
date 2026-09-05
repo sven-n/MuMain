@@ -1,6 +1,3 @@
-// NewUINameWindow.cpp: implementation of the CNameWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Chat/Chat.h"

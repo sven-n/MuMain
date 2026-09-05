@@ -1,5 +1,3 @@
-// NewUINPCShop.cpp: implementation of the CNPCShop class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/NPCs/NPCShop.h"

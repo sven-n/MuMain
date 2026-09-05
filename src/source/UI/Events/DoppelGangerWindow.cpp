@@ -1,6 +1,4 @@
-﻿// NewUIDoppelGangerWindow.cpp: implementation of the CDoppelGangerWindow class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Events/DoppelGangerWindow.h"
 #include "UI/Core/WindowSystem.h"

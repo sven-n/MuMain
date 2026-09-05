@@ -148,7 +148,7 @@ void CSysMenuWin::SetPosition(int nXCoord, int nYCoord)
     m_aBtn[SMW_BTN_CLOSE].SetPosition(nBtnPosX, nCloseBtnPosY);
     m_aBtn[SMW_BTN_OPTION].SetPosition(nBtnPosX, nCloseBtnPosY - nBtnGap);
 
-    // 2026-09-03: no longer pushes anything to the RmlUi elements -- #panel centers itself via
+    // This function no longer pushes anything to the RmlUi elements -- #panel centers itself via
     // base.rcss's .center-both utility class and sizes itself via a fixed dp width/height plus a
     // .compact modifier for the shorter login-scene variant (sys_menu.rml/.rcss, both themes);
     // every button is a fixed dp offset from the panel's own edges. See sys_menu.rcss's own

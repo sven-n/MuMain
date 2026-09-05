@@ -1,5 +1,3 @@
-// MsgBoxIGSStorageItemInfo.cpp: implementation of the MsgBoxIGSUseItem class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

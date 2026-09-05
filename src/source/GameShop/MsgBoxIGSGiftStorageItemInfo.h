@@ -1,5 +1,3 @@
-// MsgBoxIGSGiftStorageItemInfo.h: interface for the CMsgBoxIGSGiftStorageItemInfo class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSGIFTSTORAGEITEMINFO_H__C2B5CD4A_A0D5_4F4D_854B_C9119EE0EED6__INCLUDED_)
 #define AFX_MSGBOXIGSGIFTSTORAGEITEMINFO_H__C2B5CD4A_A0D5_4F4D_854B_C9119EE0EED6__INCLUDED_

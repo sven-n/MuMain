@@ -1,6 +1,3 @@
-// NewUIChaosCastleSystem.cpp: implementation of the CNewUIChaosCastleSystem class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

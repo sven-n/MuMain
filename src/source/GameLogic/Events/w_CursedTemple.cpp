@@ -1,7 +1,4 @@
-﻿// w_CursedTemple.cpp: implementation of the CursedTemple class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "w_CursedTemple.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

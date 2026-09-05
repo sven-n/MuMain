@@ -8,10 +8,10 @@
 	sys-menu-top: 0px 0px 213px 64px;
 }
 
-/* 2026-09-03: #panel no longer C++-positioned/sized -- see themes/modern/sys_menu.rcss's own
-   comment for the full derivation of these numbers (identical here, theme-agnostic geometry),
-   including the same-day bottom-anchor fix (86/52 -> 56/22, CSS `bottom` measures to the
-   button's own bottom edge, not its top). */
+/* #panel is not C++-positioned/sized -- see themes/modern/sys_menu.rcss's own comment for the
+   full derivation of these numbers (identical here, theme-agnostic geometry), including the
+   bottom-anchor fix (86/52 -> 56/22, CSS `bottom` measures to the button's own bottom edge, not
+   its top). */
 #panel {
 	width: 213dp;
 	height: 187dp;

@@ -1,5 +1,3 @@
-// NewUIDuelWatchMainFrameWindow.cpp: implementation of the CDuelWatchMainFrameWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Combat/DuelWatchMainFrameWindow.h"

@@ -1,5 +1,3 @@
-// NewUICommandWindow.h: interface for the CCommandWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICOMMANDWINDOW_H__6C0AA8A8_EF69_45F3_BCE4_F957F08310C5__INCLUDED_)
 #define AFX_NEWUICOMMANDWINDOW_H__6C0AA8A8_EF69_45F3_BCE4_F957F08310C5__INCLUDED_

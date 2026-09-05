@@ -19,11 +19,6 @@ namespace
     //     legacy HUD band's bars_scale uses via BottomHudScale/BottomHudCenterTransform), which
     //     already folds in UI::Scaling::GetWindowContentScale() (OS display-scale/pixel-density)
     //     internally -- do NOT also multiply GetWindowContentScale() here, it would double-count.
-    // Before 2026-09-03 this ratio had no auto-fit term at all, so every dp-authored window (mu
-    // helper bar, buff strip, the HUD's top-right button row, and -- since dialogs were deliberately
-    // un-exempted the same day -- login/sys_menu/msg_win/etc.) stayed a fixed size regardless of
-    // window resolution while the still-legacy HUD bars right next to them grew with it. This
-    // makes every dp window participate in the same auto-fit the legacy transforms already have.
     //
     // NOT yet verified on real mismatched-density hardware -- Rml::Context's dimensions are set
     // from SDL's window-coordinate size (RmlUiRuntime::OnResize, see its own comment), not
@@ -33,8 +28,7 @@ namespace
     // content-scale term folded into ViewportFitScale would double-scale) or renders it 1:1 (in
     // which case it's the missing piece) needs a real scaled display or a
     // UI::Scaling::SetWindowContentScale() debug override to confirm directly -- see
-    // docs/rmlui-ui-system/layout-and-scaling.md. This was already an open question before this
-    // change; adding the auto-fit term doesn't add a new one, just carries the existing one forward.
+    // docs/rmlui-ui-system/layout-and-scaling.md.
     //
     // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
     // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and
@@ -69,8 +63,7 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     if (!device || !window)
     {
         // Matches GetDevice()/GetWindow()'s own "not initialized" nullptr contract -- Create()
-        // must run after the SDL_GPU renderer's Init(), same ordering requirement the RHI-based
-        // version had (RHI::Init() before RmlUiRuntime::Create()).
+        // must run after the SDL_GPU renderer's Init().
         return;
     }
 
@@ -106,10 +99,8 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
 
     // Renders once per frame, after this frame's game content is recorded onto the command
     // buffer but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h)
-    // for why this exact seam is required instead of a per-scene Update()/Render() call site
-    // the way the RHI-based version had it. This also means every scene gets RmlUi rendering
-    // for free, including Webzen (which had no hook at all before) -- an incidental fix, not
-    // something this port set out to change.
+    // for why this exact seam is required. A single choke point every scene renders through
+    // uniformly, including Webzen.
     mu::GetRenderer().SetPreSubmitCallback([]() { RmlUiRuntime::Instance().RenderFrame(); });
 
     // Register as the active UI input consumer (UiInputRouter.h) -- Winmain.cpp's event pump and
@@ -206,10 +197,8 @@ void RmlUiRuntime::Render()
     // starts its own render pass on that same buffer/texture (so it composites on top of
     // everything already recorded, not into a separate image), Context::Render() records RmlUi's
     // draws into it via the base class's own compile/replay pipeline, and EndFrame() closes that
-    // render pass. Nothing here needs to save/restore any renderer state the way the RHI-based
-    // version had to (GlobalUBO's proj/view/model stack, RHI::BlendMode) -- SDL_GPU pipelines
-    // carry their own state per draw, so there is nothing global left to leak into whatever
-    // renders next.
+    // render pass. SDL_GPU pipelines carry their own state per draw, so there's no global
+    // renderer state to save/restore around this.
     const mu::FrameGpuContext ctx = mu::GetRenderer().GetFrameGpuContext();
     if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
 

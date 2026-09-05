@@ -1,6 +1,3 @@
-// NewUIDuelWindow.h: interface for the CDuelWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIDUELWINDOW_H__446BA52D_E675_4B70_8A9B_65A672B9FBEB__INCLUDED_)
 #define AFX_NEWUIDUELWINDOW_H__446BA52D_E675_4B70_8A9B_65A672B9FBEB__INCLUDED_

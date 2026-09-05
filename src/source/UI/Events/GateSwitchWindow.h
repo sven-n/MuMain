@@ -1,6 +1,3 @@
-// NewUIGateSwitchWindow.h: interface for the CGateSwitchWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIGATESWITCHWINDOW_H__89BA066C_7870_4064_B38E_F2F5AA919F9F__INCLUDED_)
 #define AFX_NEWUIGATESWITCHWINDOW_H__89BA066C_7870_4064_B38E_F2F5AA919F9F__INCLUDED_

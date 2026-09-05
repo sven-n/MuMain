@@ -30,9 +30,9 @@ body {
 /* Outer frame -- position/size/font/border-width/radius stay local (window-specific structural
    values, never carried by the shared class per its own doc comment); the gradient fill and
    per-side border-color bevel come from base.rcss's .modern-frame-crimson (applied in login.rml
-   alongside .modern-frame itself) instead of being redeclared here -- 2026-09-03, this file's
-   first real use of a class from base.rcss (now linked; previously fully self-contained, see this
-   file's own history in git blame if curious why that was a hard NOTE below for so long). */
+   alongside .modern-frame itself) instead of being redeclared here. See the NOTE below for why
+   .checkbox-box/.btn stay separately self-contained rather than also being deduped against
+   base.rcss. */
 #panel {
 	position: absolute;
 	width: 329dp;
@@ -95,7 +95,7 @@ body {
 /* Soft ambient glow behind the title -- yellow at the center, cooling to red further out (fading
    to transparent at the very edge so it still reads as a glow, not a hard-edged shape), a true
    radial falloff now that RenderInterface_SDL_GPU implements CompileShader/RenderShader for the
-   gradient family (STATUS.md's Findings, 2026-09-02). This engine still has no filter:blur()/
+   gradient family (STATUS.md's Findings). This engine still has no filter:blur()/
    text-shadow/box-shadow (all confirmed unregistered or non-rendering), so this is the only
    ambient-glow technique available. Sits behind .label-server (declared first, base.rcss/
    login.rcss paint-order convention: earlier siblings paint first). Center stop kept low-alpha
@@ -139,7 +139,7 @@ body {
 .checkbox-remember-me  { left: 109dp; top: 134dp; }
 .checkbox-save-password{ left: 109dp; top: 158dp; }
 
-/* NOTE 2026-09-03: login.rml now links base.rcss too (see the frame/panel/accent rules above),
+/* NOTE: login.rml now links base.rcss too (see the frame/panel/accent rules above),
    but .checkbox-box/.btn below are deliberately left as their own full, self-contained copies
    rather than deduped against base.rcss's now-identical .checkbox-box/.checkbox-box.checked and
    .btn+.btn-ok -- this pass stayed scoped to the frame primitives specifically. They're provably

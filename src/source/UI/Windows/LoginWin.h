@@ -12,7 +12,7 @@ class CUITextInputBox;
 
 namespace Rml { class ElementDocument; }
 
-// RmlUi migration plan Phase 1 pilot (login dialog): this window draws nothing of its own chrome
+// The login-dialog RmlUi pilot: this window draws nothing of its own chrome
 // -- the RmlUi document (Data/Interface/RmlUi/login.rml) renders the panel background, input-box
 // frames, checkboxes, buttons, labels, and trust warning as an overlay -- the "legacy" theme
 // reproduces the original look by pointing its RCSS decorators at the same art files
@@ -122,7 +122,7 @@ public:
     }
 
 protected:
-    // The shown-vs-active split (CObject/NewUIBase.h, added in Phase 0 -- first real use here).
+    // The shown-vs-active split (CObject/WindowObject.h, added in Phase 0 -- first real use here).
     // UpdateWhileShown() always runs while shown: keeps ticking text-input state and the
     // Remember-Password sub-dialog even while something else has taken over input. Its first
     // statement computes and pushes this frame's IsActive() via SetActive() -- true unless

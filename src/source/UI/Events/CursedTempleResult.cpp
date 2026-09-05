@@ -1,5 +1,3 @@
-// NewUICursedTempleResult.cpp: implementation of the CCursedTempleResult class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Events/CursedTempleResult.h"

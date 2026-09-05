@@ -1,5 +1,3 @@
-// MsgBoxIGSBuyConfirm.cpp: implementation of the CMsgBoxIGSBuyConfirm class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

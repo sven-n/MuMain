@@ -167,18 +167,16 @@ namespace UI::RmlBridge
 
         const std::string sourceUrl = ThemedDocumentSourceUrl(documentName.c_str(), GetActiveThemeName());
 
-        // 2026-09-02: prefer a per-theme override of the document's own MARKUP (not just its
-        // styling) at themes/<theme>/<name>.rml, falling back to the shared documentPath when no
-        // such override exists -- every window but main_frame.rml still has none, so this is a
-        // no-op for them (one extra failed ifstream open, immediately falls through). Exists
-        // because CSS-only hiding proved unreliable for content that must genuinely differ, not
-        // just look different, per theme (modern's old bottom-HUD button row leaked through a
-        // stylesheet `display: none` rule no matter how it was hardened; a data-model boolean
-        // gating `data-if` also worked but put per-theme awareness into C++, which is exactly the
-        // kind of per-context branching this branch's architecture avoids everywhere else -- see
-        // NewUIMainFrameWindow's git history for that attempt). This keeps theme differentiation
-        // where it already lives for every other window: which file gets loaded, decided purely
-        // by directory convention, zero runtime "which theme" logic in C++.
+        // Prefer a per-theme override of the document's own MARKUP (not just its styling) at
+        // themes/<theme>/<name>.rml, falling back to the shared documentPath when no such override
+        // exists -- every window but main_frame.rml still has none, so this is a no-op for them
+        // (one extra failed ifstream open, immediately falls through). This exists for content
+        // that must genuinely differ, not just look different, per theme; CSS-only hiding
+        // (`display: none`) and a data-model boolean gating `data-if` both put per-theme awareness
+        // into C++, which is exactly the kind of per-context branching this branch's architecture
+        // avoids everywhere else. A per-theme markup override keeps theme differentiation where it
+        // already lives for every other window: which file gets loaded, decided purely by
+        // directory convention, zero runtime "which theme" logic in C++.
         std::ifstream file(sourceUrl, std::ios::binary);
         if (!file)
             file.open(documentPath, std::ios::binary);

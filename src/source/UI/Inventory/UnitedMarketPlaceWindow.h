@@ -1,5 +1,3 @@
-// NewUIUnitedMarketPlaceWindow.h: interface for the CUnitedMarketPlaceWindow class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

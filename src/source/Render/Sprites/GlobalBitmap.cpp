@@ -1,6 +1,3 @@
-// GlobalBitmap.cpp: implementation of the CGlobalBitmap class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "turbojpeg.h"

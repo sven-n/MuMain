@@ -1,5 +1,3 @@
-// NewUIChaosCastleTime.cpp: implementation of the CChaosCastleTime class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"

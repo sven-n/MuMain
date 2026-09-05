@@ -1,5 +1,3 @@
-// NewUISlideWindow.cpp: implementation of the CSlideWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 

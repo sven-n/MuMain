@@ -1,5 +1,3 @@
-// NewUIGoldBowmanLena.cpp: implementation of the NewUIGoldBowmanLena class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Events/GoldBowmanLena.h"

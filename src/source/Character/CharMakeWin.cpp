@@ -335,8 +335,8 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 
     // RmlUi panel: only its own screen origin is still pushed here (genuine placement, same
     // carve-out as every other migrated window) -- width/height and every static child position
-    // (stat_panel/desc_panel/input_frame/btn_ok/btn_cancel) moved to char_make.rcss as of
-    // 2026-09-03 (both themes), since none of those five ever actually varied at runtime. See
+    // (stat_panel/desc_panel/input_frame/btn_ok/btn_cancel) moved to char_make.rcss (both themes),
+    // since none of those five ever actually varies at runtime. See
     // that file's own comment for why #panel stays fixed-px rather than joining the other
     // migrated dialogs' dp auto-fit (the live 3D character-preview viewport below reads
     // m_winBack's real unscaled bounds directly).

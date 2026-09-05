@@ -1,6 +1,3 @@
-// NewUIGuardWindow.h: interface for the CGuardWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIGUARDWINDOW_H__0FFE1FE7_59B6_47D8_B79C_7E3DD9912E14__INCLUDED_)
 #define AFX_NEWUIGUARDWINDOW_H__0FFE1FE7_59B6_47D8_B79C_7E3DD9912E14__INCLUDED_

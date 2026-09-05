@@ -1,5 +1,3 @@
-// NewUIDuelWatchUserListWindow.cpp: implementation of the CDuelWatchUserListWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Combat/DuelWatchUserListWindow.h"

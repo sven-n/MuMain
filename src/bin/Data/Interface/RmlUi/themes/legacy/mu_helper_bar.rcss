@@ -109,17 +109,14 @@
 /* Below rather than above the button -- this widget is pinned to the top of the screen, so a
    tooltip above it would render off the top edge.
 
-   2026-09-03: .tooltip-* are now siblings of their trigger button (mu_helper_bar.rml), not nested
-   children -- required to follow modern theme's own fix for the same file (this build's
-   shrink-to-fit width hard-clamps to the containing block, so a tooltip nested inside an
-   18dp-wide button was clamped to ~18dp regardless of its own text length; see modern's
-   mu_helper_bar.rcss for the full explanation). Legacy had the identical bug, just never
-   reported against this theme -- fixed the same way, own bespoke color kept unchanged.
+   .tooltip-* are siblings of their trigger button (mu_helper_bar.rml), not nested children --
+   this build's shrink-to-fit width hard-clamps to the containing block, so a tooltip nested inside
+   an 18dp-wide button would clamp to ~18dp regardless of its own text length (see modern's
+   mu_helper_bar.rcss for the full explanation; own bespoke color kept unchanged here).
 
-   2026-09-03 (second fix, same day): explicit width (100dp) instead of shrink-to-fit, and a
-   precomputed static `left` instead of translateX(-50%) -- same second bug modern's own
-   mu_helper_bar.rcss and main_frame.rcss hit (see either for the full TransformUtilities.cpp
-   explanation), fixed proactively here too rather than waiting for a report against legacy. */
+   Explicit width (100dp) instead of shrink-to-fit, and a precomputed static `left` instead of
+   translateX(-50%) -- same fix modern's own mu_helper_bar.rcss and main_frame.rcss need (see
+   either for the full TransformUtilities.cpp explanation). */
 .tooltip {
 	display: none;
 	position: absolute;

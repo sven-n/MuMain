@@ -1,6 +1,4 @@
-﻿// NewUICharacterInfoWindow.cpp: implementation of the CCharacterInfoWindow class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Character/CharacterInfoWindow.h"

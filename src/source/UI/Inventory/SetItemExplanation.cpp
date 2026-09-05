@@ -1,6 +1,3 @@
-// NewUISetItemExplanation.cpp: implementation of the CSetItemExplanation class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 

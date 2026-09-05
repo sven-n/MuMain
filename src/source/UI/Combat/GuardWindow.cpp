@@ -1,5 +1,3 @@
-// NewUIGuardWindow.cpp: implementation of the CGuardWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Combat/GuardWindow.h"

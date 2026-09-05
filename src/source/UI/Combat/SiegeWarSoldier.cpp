@@ -1,7 +1,4 @@
-﻿// NewUISiegeWarSoldier.cpp: implementation of the NewUISiegeWarSoldier class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Combat/SiegeWarSoldier.h"
 

@@ -1,12 +1,3 @@
-//*****************************************************************************
-// File: NewUIBattleSoccerScore.h
-//
-// Desc: interface for the CBattleSoccerScore class.
-//		 전투축구 점수 UI 클래스.
-//
-// producer: Ahn Sang-Kyu
-//*****************************************************************************
-
 #if !defined(AFX_NEWUIBATTLESOCCERSCORE_H__68E768E4_5FB7_4D33_A604_54315C1D26C6__INCLUDED_)
 #define AFX_NEWUIBATTLESOCCERSCORE_H__68E768E4_5FB7_4D33_A604_54315C1D26C6__INCLUDED_
 

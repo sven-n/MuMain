@@ -1,6 +1,3 @@
-// NewUICommandWindow.cpp: implementation of the CCommandWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

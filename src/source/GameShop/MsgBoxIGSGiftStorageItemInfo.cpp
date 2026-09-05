@@ -1,6 +1,3 @@
-// MsgBoxIGSGiftStorageItemInfo.cpp: implementation of the CMsgBoxIGSGiftStorageItemInfo class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

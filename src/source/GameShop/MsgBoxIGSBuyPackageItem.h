@@ -1,5 +1,3 @@
-// MsgBoxIGSBuyPackageItem.h: interface for the CMsgBoxIGSBuyPackageItem class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSBUYPACKAGEITEM_H__42A6E746_9439_4E71_9C86_7CDF5F96AFE3__INCLUDED_)
 #define AFX_MSGBOXIGSBUYPACKAGEITEM_H__42A6E746_9439_4E71_9C86_7CDF5F96AFE3__INCLUDED_

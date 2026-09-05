@@ -1,5 +1,3 @@
-// NewUIBloodCastleTime.cpp: implementation of the CNewUIPartyInfo class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"

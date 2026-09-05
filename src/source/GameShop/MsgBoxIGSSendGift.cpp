@@ -1,5 +1,3 @@
-// MsgBoxIGSSendGift.cpp: implementation of the CMsgBoxIGSSendGift class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

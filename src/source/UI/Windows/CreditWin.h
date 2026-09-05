@@ -38,7 +38,7 @@
 #define	CRW_INDEX_NAME3			5
 #define	CRW_INDEX_MAX			6
 
-// CUIMng/CNewUIManager merger (docs/rmlui-ui-system) Phase 1 pilot: the first CUIMng window
+// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 1 pilot: the first CUIMng window
 // migrated off CWin onto mu::ui::window::CObject/CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity
 // real case (still fully legacy-2D, no RmlUi entanglement, no shown-vs-active split needed),
 // chosen to prove the registry/dispatch mechanics before touching anything RmlUi-coupled. See

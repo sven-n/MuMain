@@ -1,6 +1,3 @@
-// NewUIRenderNumber.h: interface for the CRenderNumber class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIRENDERNUMBER_H__A97FE76D_3AC4_4835_B4B2_61103E6AF831__INCLUDED_)
 #define AFX_NEWUIRENDERNUMBER_H__A97FE76D_3AC4_4835_B4B2_61103E6AF831__INCLUDED_

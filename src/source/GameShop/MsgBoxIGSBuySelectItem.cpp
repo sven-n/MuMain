@@ -1,5 +1,3 @@
-// MsgBoxIGSBuySelectItem.cpp: implementation of the CMsgBoxIGSBuySelectItem class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

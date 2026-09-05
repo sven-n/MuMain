@@ -1,5 +1,3 @@
-// NewUIDoppelGangerWindow.h: interface for the CDoppelGangerWindow class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 #include "UI/Core/WindowObject.h"
 #include "UI/Widgets/Window/Button.h"

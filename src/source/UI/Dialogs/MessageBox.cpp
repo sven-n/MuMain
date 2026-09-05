@@ -1,6 +1,3 @@
-// NewUIMessageBoxWindow.cpp: implementation of the CNewUIMessageBoxWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Dialogs/MessageBox.h"	// self

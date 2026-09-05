@@ -1,6 +1,3 @@
-// NewUICatapultWindow.cpp: implementation of the CCatapultWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Events/CatapultWindow.h"

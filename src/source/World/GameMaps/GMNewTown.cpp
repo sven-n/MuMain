@@ -1,7 +1,4 @@
-﻿// GMNewTown.cpp: implementation of the GMNewTown class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"

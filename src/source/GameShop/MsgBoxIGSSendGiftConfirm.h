@@ -1,5 +1,3 @@
-// MsgBoxIGSSendGiftConfirm.h: interface for the CMsgBoxIGSSendGiftConfirm class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "UI/Widgets/UIControls.h"

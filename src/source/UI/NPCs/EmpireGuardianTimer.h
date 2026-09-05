@@ -1,5 +1,3 @@
-// CEmpireGuardianTimer.h: interface for the CEmpireGuardianTimer class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

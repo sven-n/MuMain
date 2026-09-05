@@ -1,5 +1,3 @@
-// MsgBoxIGSDeleteItemConfirm.h: interface for the CMgsBoxIGSDeleteItemConfirm class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSDELETEITEMCONFIRM_H__96E35556_24A7_4A3B_86C3_D1ABF002AD99__INCLUDED_)
 #define AFX_MSGBOXIGSDELETEITEMCONFIRM_H__96E35556_24A7_4A3B_86C3_D1ABF002AD99__INCLUDED_

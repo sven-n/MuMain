@@ -1,5 +1,3 @@
-// NewUIEmpireGuardianTimer.cpp: implementation of the CEmpireGuardianTimer class.
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/NPCs/EmpireGuardianTimer.h"

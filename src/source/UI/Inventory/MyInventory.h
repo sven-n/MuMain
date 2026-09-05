@@ -1,5 +1,3 @@
-// NewUIPersonalInventory.h: interface for the CMyInventory class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIMYINVENTORY_H__74DA6D7A_CF5A_46E9_8C72_9D38F0DC95EC__INCLUDED_)
 #define AFX_NEWUIMYINVENTORY_H__74DA6D7A_CF5A_46E9_8C72_9D38F0DC95EC__INCLUDED_

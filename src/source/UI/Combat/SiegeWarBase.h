@@ -1,6 +1,3 @@
-// NewUISiegeWarBase.h: interface for the CSiegeWarBase class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUISIEGEWARBASE_H__13F2F04C_290F_41FC_A7A5_2F56F22B3478__INCLUDED_)
 #define AFX_NEWUISIEGEWARBASE_H__13F2F04C_290F_41FC_A7A5_2F56F22B3478__INCLUDED_

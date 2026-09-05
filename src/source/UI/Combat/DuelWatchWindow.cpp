@@ -1,5 +1,3 @@
-// NewUIDuelWatchWindow.cpp: implementation of the CDuelWatchWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Combat/DuelWatchWindow.h"

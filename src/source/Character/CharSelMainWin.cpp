@@ -203,8 +203,8 @@ void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
         m_aBtn[i].SetPosition(button.x, button.y);
     }
 
-    // Deliberately does NOT push anything to the RmlUi elements (an earlier version of this
-    // method did). 2026-08-31 retrofit (docs/rmlui-ui-system/layout-and-scaling.md): #panel and
+    // Deliberately does NOT push anything to the RmlUi elements (see
+    // docs/rmlui-ui-system/layout-and-scaling.md): #panel and
     // every child position themselves via base.rcss's anchor-*/stretch-x utility classes with a
     // fixed `dp` size (char_sel_main.rcss) instead. `layout` above (now
     // CalculateFixedAnchorLayout(), not the old resolution-proportional CalculateLayout() --

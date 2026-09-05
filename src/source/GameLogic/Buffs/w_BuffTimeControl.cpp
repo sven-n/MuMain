@@ -1,5 +1,3 @@
-// w_BuffTimeControl.cpp: implementation of the BuffTimeControl class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"

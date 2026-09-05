@@ -4012,9 +4012,6 @@ CALLBACK_RESULT CCherryBlossomMsgBox::LButtonUp(class CMessageBoxBase* pOwner, c
 
 CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
-    //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_WHITE);
-
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -4023,9 +4020,6 @@ CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CMessageBoxBase* pOwn
 
 CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
-    //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_RED);
-
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -4034,9 +4028,6 @@ CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CMessageBoxBase* pOwner
 
 CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
-    //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_GOLD);
-
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 

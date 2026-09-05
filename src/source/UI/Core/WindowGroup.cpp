@@ -1,6 +1,3 @@
-//=============================================================================
-//	NewUIGroup.cpp
-//=============================================================================
 #include "stdafx.h"
 #include "UI/Core/WindowGroup.h"
 
@@ -71,8 +68,6 @@ bool CGroup::UpdateMouseEvent()
         {
             CObject* pUIObj = (*vi);
             pUIObj->UpdateMouseEvent();
-            // 			if( pUIObj->UpdateMouseEvent() == true )
-            // 				break;
         }
     }
 
@@ -96,8 +91,6 @@ bool CGroup::UpdateKeyEvent()
         {
             CObject* pUIObj = (*vi);
             pUIObj->UpdateKeyEvent();
-            // 			if( pUIObj->UpdateKeyEvent() == true )
-            // 				break;
         }
     }
 

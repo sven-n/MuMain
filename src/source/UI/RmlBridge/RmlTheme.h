@@ -8,21 +8,16 @@ namespace Rml
     class ElementDocument;
 }
 
-// Which RmlUi visual theme is active -- see the RmlUi migration plan's Theming / Scaling & DPI
-// sections. A theme is identified purely by NAME (a folder), not hardcoded in C++: just
-// Data/Interface/RmlUi/themes/<name>/<document>.rcss, no manifest file needed. This is deliberate:
-// it's what makes a theme (including one a modder drops in, not just "legacy"/"modern") a
-// plug-in-a-folder operation with zero source changes or recompilation.
+// Which RmlUi visual theme is active. A theme is identified purely by NAME (a folder), not
+// hardcoded in C++: just Data/Interface/RmlUi/themes/<name>/<document>.rcss, no manifest file
+// needed. This is deliberate: it's what makes a theme (including one a modder drops in, not just
+// "legacy"/"modern") a plug-in-a-folder operation with zero source changes or recompilation.
 //
 // Every migrated window renders its own visuals entirely through RmlUi -- CWin (and any other
 // legacy widget) never draws background/frame art for a migrated window, in any theme. A
 // "legacy-look" theme reproduces the original art by pointing its own RCSS decorators at the same
 // image files the old sprites used (e.g. themes/legacy/login.rcss's `decorator: image(...)`) --
-// that's a choice of asset, not a choice of renderer. There used to be a per-theme
-// `UsesLegacySpriteChrome` manifest flag letting a theme opt back into CWin drawing the
-// background -- removed (see README.md's Coexistence patterns section) because it worked
-// against the migration's actual point: once a window is migrated, RmlUi owns 100% of its
-// rendering, unconditionally.
+// that's a choice of asset, not a choice of renderer.
 //
 // Read once from GameConfig at startup, not a live in-game hot-swap yet -- switching themes today
 // means editing config.ini's [UI] RmlTheme value and relaunching. A true runtime toggle needs each
@@ -38,7 +33,7 @@ namespace UI::RmlBridge
     // theme's NAME -- a theme wanting non-default behavior states that want itself, via an
     // optional themes/<name>/theme.ini, [Capabilities] section, key "ProvidesOwnIconChrome").
     // True means the active theme supplies its own RmlUi border/fill/highlight treatment for the
-    // still-legacy-2D-rendered skill/potion icon chrome (NewUIMainFrameWindow.cpp), so C++ should
+    // still-legacy-2D-rendered skill/potion icon chrome (MainFrameWindow.cpp), so C++ should
     // skip drawing the legacy sprite fill/highlight there. Missing file or missing key both
     // default to false (draw the real legacy sprite) -- the safe default for any theme that
     // hasn't declared an opinion, including a future modder-supplied one.

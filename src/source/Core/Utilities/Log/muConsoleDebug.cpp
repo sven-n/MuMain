@@ -1,5 +1,3 @@
-// muDebugHelper.cpp: implementation of the CmuConsoleDebug class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include <cstdlib>

@@ -6,20 +6,18 @@
 
 // Generalizes the model/renderer split already proven by UI::Skills::Tooltip's
 // SkillTooltipModel.h/.cpp (a plain-data Model, consumed today by two independent renderers)
-// into a reusable per-window wrapper for RmlUi's Rml::DataModel binding. See the RmlUi
-// migration plan's Phase 0.6/0.7.
+// into a reusable per-window wrapper for RmlUi's Rml::DataModel binding.
 //
 // This does NOT do reflection-based auto-binding -- RmlUi's own DataModelConstructor::Bind()
 // requires each field to be registered by name explicitly (its actual API, not a limitation of
 // this wrapper), so each window still writes its own small "register my fields" function. What
 // this wrapper standardizes is the surrounding lifecycle: owning the Model instance, creating
 // the Rml::DataModelHandle once, and exposing a single MarkDirty() call so packet-handler/action-
-// controller call sites that mutate Model fields (per the adapter pattern, e.g.
-// CNewUIMyInventoryRmlAdapter::InsertItem()) don't need to know RmlUi's binding API directly --
-// that dependency is isolated to this one header and each window's registration function.
+// controller call sites that mutate Model fields don't need to know RmlUi's binding API directly
+// -- that dependency is isolated to this one header and each window's registration function.
 //
 // Usage (illustrative -- the actual Model type and registration function are written per
-// migrated window, starting with the Phase 1 pilot):
+// migrated window):
 //
 //   struct PilotModel { Rml::String title; int secondsRemaining = 0; };
 //

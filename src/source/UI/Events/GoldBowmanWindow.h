@@ -1,5 +1,3 @@
-// NewUIGoldBowmanWindow.h: interface for the CGoldBowmanWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 #include "UI/Core/WindowManager.h"

@@ -1,12 +1,3 @@
-//*****************************************************************************
-// File: NewUITrade.h
-//
-// Desc: interface for the CTrade class.
-//       Trade Window class.
-//
-// producer: Ahn Sang-Kyu
-//*****************************************************************************
-
 #if !defined(AFX_NEWUITRADE_H__25FC9B24_8F86_4791_B246_689326623DFB__INCLUDED_)
 #define AFX_NEWUITRADE_H__25FC9B24_8F86_4791_B246_689326623DFB__INCLUDED_
 

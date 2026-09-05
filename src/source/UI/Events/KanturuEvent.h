@@ -1,5 +1,3 @@
-// NewUIKanturu2ndEnterNpc.h: interface for the CKanturu2ndEnterNpc class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIKANTURU2NDENTERNPC_H__4CDE30B6_3570_47BA_9401_0EA282BA1949__INCLUDED_)
 #define AFX_NEWUIKANTURU2NDENTERNPC_H__4CDE30B6_3570_47BA_9401_0EA282BA1949__INCLUDED_

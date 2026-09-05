@@ -1,6 +1,3 @@
-// NewUI3DRenderMng.h: interface for the C3DRenderMng class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUI3DRENDERMNG_H__BD260911_DD18_4B6D_8BA0_C6A062043C7A__INCLUDED_)
 #define AFX_NEWUI3DRENDERMNG_H__BD260911_DD18_4B6D_8BA0_C6A062043C7A__INCLUDED_

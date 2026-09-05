@@ -1,6 +1,4 @@
-﻿// CEmpireGuardianNPC.cpp: implementation of the CEmpireGuardianNPC class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowCommon.h"

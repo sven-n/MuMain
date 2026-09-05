@@ -1,10 +1,3 @@
-//*****************************************************************************
-// File: CharInfoBalloonMng.cpp
-//
-// Desc: implementation of the CCharInfoBalloonMng class.
-//
-// producer: Ahn Sang-Kyu
-//*****************************************************************************
 
 #include "stdafx.h"
 #include "CharInfoBalloonMng.h"

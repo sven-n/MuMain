@@ -1,6 +1,3 @@
-// MsgBoxIGSDeleteItemConfirm.cpp: implementation of the CMsgBoxIGSDeleteItemConfirm class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

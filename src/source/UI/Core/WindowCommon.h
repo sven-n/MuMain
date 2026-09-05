@@ -1,5 +1,6 @@
 //////////////////////////////////////////////////////////////////////
-// NewUICommon.h: interface for the CNewUICommon class.
+// WindowCommon.h: shared free functions (message boxes, image blitting,
+// key-state queries) for the mu::ui::window tier.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICOMMON_H__0668BCBC_7537_454B_82FD_9D6BBBBDBA84__INCLUDED_)

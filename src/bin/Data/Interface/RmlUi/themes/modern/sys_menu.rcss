@@ -1,7 +1,7 @@
 /* Modern theme for the system menu -- flat programmatic panel, matching login.rcss's modern
    translucent-dark-panel look. Buttons rely entirely on base.rcss's shared .btn.
 
-   2026-09-03: #panel no longer C++-positioned/sized -- centered via base.rcss's .center-both
+   #panel is not C++-positioned/sized -- centered via base.rcss's .center-both
    utility class (applied in sys_menu.rml), fixed dp size matching CWinEx's own real geometry
    exactly (213 = the panel art's sprite width; 187/155 = TOP.height(64) + BOTTOM.height(43) +
    LEFT.texHeight(8) * 10-or-6 lines, SysMenuWin.cpp's SetLine() math -- 10 lines in the character
@@ -11,11 +11,10 @@
    scene-awareness needed since exit-game/select-server anchor from the top and option/close
    anchor from the bottom (bottom-anchoring absorbs the .compact height difference for free).
 
-   2026-09-03 fix: #btn_option/#btn_close's `bottom` values are the old C++'s "distance from panel
-   bottom to the button's TOP" (86/52) minus the button's own 30dp height, not those numbers
-   directly -- CSS `bottom` measures to the button's BOTTOM edge, not its top. Using 86/52 as-is
-   put every bottom-anchored button 30dp higher than intended, overlapping #btn_select_server
-   above it (confirmed the hard way: real in-game screenshot showed the buttons colliding). */
+   #btn_option/#btn_close's `bottom` values are the old C++'s "distance from panel bottom to the
+   button's TOP" (86/52) minus the button's own 30dp height, not those numbers directly -- CSS
+   `bottom` measures to the button's BOTTOM edge, not its top. Using 86/52 as-is would put every
+   bottom-anchored button 30dp higher than intended, overlapping #btn_select_server above it. */
 #panel {
 	width: 213dp;
 	height: 187dp;

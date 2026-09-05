@@ -1,6 +1,3 @@
-// NewUIMixInventory.cpp: implementation of the CMixInventory class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Inventory/MixInventory.h"

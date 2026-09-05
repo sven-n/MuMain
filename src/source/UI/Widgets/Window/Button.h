@@ -1,5 +1,3 @@
-// NewUIButton.h: interface for the CButton class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_)
 #define AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_

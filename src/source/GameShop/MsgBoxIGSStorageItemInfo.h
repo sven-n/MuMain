@@ -1,6 +1,3 @@
-// MsgBoxIGSStorageItemInfo.h: interface for the MsgBoxIGSUseItem class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSUSEITEM_H__5E717B05_9D6D_4E85_B168_47D5EEA59CF7__INCLUDED_)
 #define AFX_MSGBOXIGSUSEITEM_H__5E717B05_9D6D_4E85_B168_47D5EEA59CF7__INCLUDED_

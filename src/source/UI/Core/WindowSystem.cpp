@@ -652,11 +652,6 @@ bool CSystem::IsVisible(DWORD dwKey)
     return false;
 }
 
-//bool SortUiObj(const IObject& lhs, const IObject& rhs)
-//{
-//	return lhs.GetDisplayOrder() > rhs.GetDisplayOrder();
-//}
-
 void CSystem::Show(DWORD dwKey)
 {
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
@@ -668,21 +663,6 @@ void CSystem::Show(DWORD dwKey)
         return;
     }
 
-    /*
-    std::list<IObject*> visiblePages = {};
-
-    for (int i = INTERFACE_LIST::INTERFACE_BEGIN; i < INTERFACE_LIST::INTERFACE_END; i++)
-    {
-        auto const uiObj = m_pNewUIMng->FindUIObj(i);
-        if (uiObj->IsVisible() && uiObj->IsRightSideMenu())
-        {
-            visiblePages.push_back(uiObj);
-        }
-    }
-
-    visiblePages.sort(SortUiObj);
-    // TODO: Close all above the margin.
-    */
     // TODO: Refactor this whole method. How would be a fixed priority order
     // for each window. And a maximum of open windows, depending on resolution
 
@@ -1629,9 +1609,6 @@ void CSystem::HideAllGroupA()
     Hide(INTERFACE_CHARACTER);
 
     DWORD dwGroupA[] = {
-        // mu::ui::window::INTERFACE_INVENTORY,
-        // mu::ui::window::INTERFACE_CHARACTER,
-        // mu::ui::window::INTERFACE_WINDOW_MENU,
         INTERFACE_MUHELPER,
         INTERFACE_MUHELPER_EXT,
         INTERFACE_MUHELPER_SKILL_LIST,
@@ -1652,9 +1629,6 @@ void CSystem::HideAllGroupA()
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_DUELWATCH,
         INTERFACE_DOPPELGANGER_NPC,
-        // mu::ui::window::INTERFACE_HELP,
-        // mu::ui::window::INTERFACE_ITEM_EXPLANATION,
-        // mu::ui::window::INTERFACE_SETITEM_EXPLANATION,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_NPC_DIALOGUE,
@@ -1690,11 +1664,6 @@ void CSystem::HideAllGroupB()
     Hide(INTERFACE_CHARACTER);
 
     DWORD dwGroupB[] = {
-        // mu::ui::window::INTERFACE_FRIEND,
-        // mu::ui::window::INTERFACE_INVENTORY,
-        // mu::ui::window::INTERFACE_CHARACTER,
-        // mu::ui::window::INTERFACE_WINDOW_MENU,
-
         INTERFACE_MIXINVENTORY,
         INTERFACE_STORAGE,
         INTERFACE_NPCSHOP,
@@ -1713,9 +1682,6 @@ void CSystem::HideAllGroupB()
         INTERFACE_CURSEDTEMPLE_NPC,
         INTERFACE_DUELWATCH,
         INTERFACE_DOPPELGANGER_NPC,
-        // mu::ui::window::INTERFACE_HELP,
-        // mu::ui::window::INTERFACE_ITEM_EXPLANATION,
-        // mu::ui::window::INTERFACE_SETITEM_EXPLANATION,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_NPC_DIALOGUE,
@@ -2142,7 +2108,6 @@ void CSystem::UpdateSendMoveInterface()
     }
 }
 
-// GetInstance()
 CSystem* CSystem::GetInstance()
 {
     static CSystem s_NewUISystem;

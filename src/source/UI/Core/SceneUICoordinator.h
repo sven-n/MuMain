@@ -13,12 +13,10 @@
 #define UIM_SCENE_CHARACTER 4
 #define UIM_SCENE_MAIN 5
 
-// Was CUIMng (docs/newui-legacy-merger.md, Phase 4) -- that class used to own a CWin-derived
-// window list of its own; every one of those windows has since migrated onto
-// mu::ui::window::CObject/CManager (Phases 1-3), so all that remained of it was this class's
-// actual, still-needed job: creating/releasing/positioning the login- and character-scene g_*Win
-// globals per scene transition, and forwarding Update()/Render() to its own CManager instance.
-// Renamed to describe that job directly, not a "CWin manager" that no longer manages any CWin.
+// Creates/releases/positions the login- and character-scene g_*Win globals per scene transition,
+// and forwards Update()/Render() to its own CManager instance (m_NewStyleMng below). No
+// CWin-derived window list of its own -- every window that formerly needed one has migrated onto
+// mu::ui::window::CObject/CManager (see docs/newui-legacy-merger.md).
 class CSceneUICoordinator
 {
 protected:

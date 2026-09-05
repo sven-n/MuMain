@@ -1,6 +1,3 @@
-// NewUIPartyListWindow.h: interface for the CNewUIPartyInfo class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(_NEWUIPARTYMINIWINDOW_H_)
 #define _NEWUIPARTYMINIWINDOW_H_

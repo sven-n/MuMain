@@ -51,7 +51,7 @@ namespace UI::Scaling
         FloatingWorkspace,
         Dialog,
         WorldOverlay,
-        // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- for a migrated window whose own
+        // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) -- for a migrated window whose own
         // rendering (CSprite-based sprites, raw g_pRenderText calls) already computes real screen
         // pixels itself (its own fScaleX/fScaleY against whatever resolution it assumes, e.g.
         // CCreditWin's 800x600) rather than reference-space coordinates meant to be rescaled by

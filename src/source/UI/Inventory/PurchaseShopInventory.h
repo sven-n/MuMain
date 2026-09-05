@@ -1,6 +1,3 @@
-// NewUIPurchaseShopInventory.h: interface for the CPurchaseShopInventory class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIPURCHASESHOPINVENTORY_H__5D417396_5ACE_46AF_9477_102810B6A1B8__INCLUDED_)
 #define AFX_NEWUIPURCHASESHOPINVENTORY_H__5D417396_5ACE_46AF_9477_102810B6A1B8__INCLUDED_

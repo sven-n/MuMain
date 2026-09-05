@@ -1,6 +1,3 @@
-// NewUICommon.cpp: implementation of the CNewUICommon class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"

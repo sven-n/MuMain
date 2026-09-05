@@ -1,6 +1,3 @@
-// NewUIGuildMakeWindow.h: interface for the CGuildMakeWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIGUILDMAKEWINDOW_H__68B0DE4B_7E07_4928_B8CF_2F7A6A15EEBD__INCLUDED_)
 #define AFX_NEWUIGUILDMAKEWINDOW_H__68B0DE4B_7E07_4928_B8CF_2F7A6A15EEBD__INCLUDED_

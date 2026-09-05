@@ -1,5 +1,3 @@
-// NewUIDoppelGangerFrame.cpp: implementation of the CDoppelGangerFrame class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Events/DoppelGangerFrame.h"

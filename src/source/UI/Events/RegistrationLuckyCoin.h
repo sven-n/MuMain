@@ -1,5 +1,3 @@
-// NewUIRegistrationLuckyCoin.h: interface for the CRegistrationLuckyCoin class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 

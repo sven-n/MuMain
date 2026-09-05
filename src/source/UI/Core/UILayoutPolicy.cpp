@@ -10,12 +10,11 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
 
     switch (interfaceKey)
     {
-    // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- CCreditWin computes real screen
-    // pixels itself (fScaleX/fScaleY against an assumed 800x600), not reference-space coordinates
-    // meant to be rescaled by this policy table's other entries. AddUIObj() (NewUIManager.cpp)
-    // calls this unconditionally on first registration, silently overwriting whatever
-    // SetLayoutMode() a window's own constructor called -- this table entry, not the constructor,
-    // is what actually governs a registered window's layout mode.
+    // CCreditWin computes real screen pixels itself (fScaleX/fScaleY against an assumed 800x600),
+    // not reference-space coordinates meant to be rescaled by this policy table's other entries.
+    // AddUIObj() (WindowManager.cpp) calls this unconditionally on first registration, silently
+    // overwriting whatever SetLayoutMode() a window's own constructor called -- this table entry,
+    // not the constructor, is what actually governs a registered window's layout mode.
     case INTERFACE_CREDITS:
     // CServerMsgWin/CServerSelWin (Phase 2) compute real screen pixels themselves too (position
     // derived from real WindowWidth/Height in CSceneUICoordinator::CreateLoginScene()/CreateCharacterScene()),

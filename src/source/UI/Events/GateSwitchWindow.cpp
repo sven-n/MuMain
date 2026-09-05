@@ -1,5 +1,3 @@
-// NewUIGateSwitchWindow.cpp: implementation of the CGateSwitchWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Events/GateSwitchWindow.h"

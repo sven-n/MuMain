@@ -1,6 +1,3 @@
-// NewUIBloodCastleEnter.h: interface for the CNewUIPartyInfo class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #ifndef _ENTERBLOODCASTLE_H_
 #define _ENTERBLOODCASTLE_H_

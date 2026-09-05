@@ -1,5 +1,3 @@
-// NewUIRenderNumber.cpp: implementation of the CRenderNumber class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 

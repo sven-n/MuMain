@@ -1,7 +1,4 @@
-﻿// NewUICursedTempleEnter.cpp: implementation of the CCursedTempleEnter class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "I18N/All.h"
 

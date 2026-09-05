@@ -1,5 +1,3 @@
-// NewUIQuickCommandWindow.h: interface for the CQuickCommandWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIQUICKCOMMANDWINDOW_H__3A1D6614_8C41_4066_A831_2954B3C461D5__INCLUDED_)
 #define AFX_NEWUIQUICKCOMMANDWINDOW_H__3A1D6614_8C41_4066_A831_2954B3C461D5__INCLUDED_

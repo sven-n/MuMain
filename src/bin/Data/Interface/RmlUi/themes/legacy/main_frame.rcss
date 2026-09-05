@@ -1,4 +1,4 @@
-/* Legacy theme for CNewUIMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. #bars binds
+/* Legacy theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. #bars binds
    left/top/scale live from C++ (tracks the still-legacy center-band chrome's own window-size
    scale); #buttons/#exp nest inside #bars in main_frame.rml to inherit that transform, so their
    own coordinates below are plain reference pixels (px, not dp -- an ancestor scale already
@@ -16,11 +16,9 @@
 	height: 39px;
 }
 #item_hotkey_anchor, #skill_list_anchor { left: 0px; top: 0px; }
-/* 2026-09-03: pointer-events:auto added -- these never opted back into pointer-events from
-   body's inherited `none` (base.rcss's documented pointer-events trap), so #bar_hp:hover ~
-   .tooltip-hp etc. below could never actually fire; the HP/MP/AG/SD tooltips were never once
-   shown since this HUD shipped, in either theme (found the same bug in modern's own copy of this
-   file, fixed there too). */
+/* pointer-events:auto is required -- these would otherwise inherit body's `none` (base.rcss's
+   documented pointer-events trap), and #bar_hp:hover ~ .tooltip-hp etc. below could never fire
+   without it (same fix needed in modern's own copy of this file). */
 .gauge-slot {
 	position: absolute;
 	pointer-events: auto;
@@ -70,16 +68,14 @@
    trigger's own width. Each needs its own explicit `left` (no shared 50%) and a z-index bump so a
    later sibling's opaque background doesn't paint over it.
 
-   2026-09-03: explicit width added -- being a sibling of the wide #bars group wasn't enough on
-   its own in modern's identical setup (reported: "background does not fully fill the text");
-   fixed the same way there, applying the same fix here proactively since the structure (and
-   presumably the bug) is identical. Sidesteps shrink-to-fit entirely rather than the exact
-   remaining mechanism.
+   Explicit width added -- being a sibling of the wide #bars group isn't enough on its own to give
+   the background a real fill; this and modern's identical setup share the same structure (and the
+   same fix). Sidesteps shrink-to-fit entirely rather than chasing the exact remaining mechanism.
 
-   2026-09-03 (second fix, same day): also dropped `transform: translateX(-50%)` -- once the box
-   got a real width, modern's identical setup rendered hover text with no visible background,
-   floating near the top of the screen. Root cause (see modern's own main_frame.rcss comment on
-   this same fix): `%` in a transform resolves against the element's own already-computed
+   Also drops `transform: translateX(-50%)`: relying on it to center the box against the real width
+   above renders hover text with no visible background, floating near the top of the screen (see
+   modern's own main_frame.rcss comment on this same fix). Root cause: `%` in a
+   transform resolves against the element's own already-computed
    border-box (TransformUtilities.cpp), which isn't reliably available yet for an element that's
    `display:none` until the exact moment it flips to `:hover`. Every `left` below is now a
    precomputed static value (original anchor minus half the fixed 160px width) instead of relying
@@ -140,19 +136,17 @@
 
 .btn-icon-label { display: none; }
 /* #item_slots stays fully hidden -- Q/W/E/R are baked into the real IMAGE_MENU_1 sprite art
-   (.slot-hotkey-label below). #skill_slots is NOT hidden (2026-09-02): its own outline/highlight
-   classes (.slot-frame, .selected) are still unstyled here so they stay invisible on their own,
-   but .skill-hotkey-label needs it visible now that the assigned hotkey number moved here from
-   the legacy digit-sprite subscript RenderSkillIcon() used to draw (feedback: "move the legacy
-   subscripts from C++ code to RmlUi scope too ... the legacy theme will rely on rml instead of
-   hardcoded behavior"). */
+   (.slot-hotkey-label below). #skill_slots is NOT hidden: its own outline/highlight classes
+   (.slot-frame, .selected) are still unstyled here so they stay invisible on their own, but
+   .skill-hotkey-label needs it visible to show the assigned hotkey number (retired from the legacy
+   digit-sprite subscript RenderSkillIcon() used to draw). */
 #item_slots { display: none; }
 #buttons_top { display: none; }
 #gauge_bg_left, #gauge_bg_right { display: none; }
 .slot-hotkey-label { display: none; }
 
 /* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
-   (NewUIMainFrameWindow.cpp) -- #skill_list_anchor sits at the origin for legacy (own main_frame.rcss,
+   (MainFrameWindow.cpp) -- #skill_list_anchor sits at the origin for legacy (own main_frame.rcss,
    zero shift), so these need no offset the way modern's shifted copy does. Purely a positioning
    context for .skill-hotkey-label below; #skill_slot_0..4/#current_skill_slot paint nothing of
    their own here (.slot-frame/.selected are unstyled in this theme). */
@@ -175,7 +169,7 @@
 /* Expanded grid + pet-command row + shared tooltip -- zero shift, same as #skill_slots above
    (#skill_list_anchor sits at the origin for legacy, see that rule's own comment). SkillCellEntry
    left/top and the tooltip's own left/top are raw reference-space values straight from
-   CNewUISkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly what the still-legacy
+   CSkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly what the still-legacy
    icon draw uses for the same cell. Containers stay non-interactive; only .skill-cell opts back
    into pointer-events, same "container inert, children interactive" pattern as #skill_slots. */
 #skill_grid, #pet_skill_row, #skill_tooltip {
@@ -186,8 +180,8 @@
 }
 
 /* No border here (unlike themes/modern/main_frame.rcss's own .skill-cell) -- legacy always draws
-   the real IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE box-frame sprite underneath (NewUIMainFrameWindow.cpp's
-   Render(), unaffected by the modern-only suppression added there 2026-09-02), so an RmlUi border
+   the real IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE box-frame sprite underneath (MainFrameWindow.cpp's
+   Render(), unaffected by the modern-only suppression there), so an RmlUi border
    here would double up. */
 .skill-cell {
 	position: absolute;
@@ -198,7 +192,7 @@
 }
 /* .selected deliberately left unstyled here, same as #skill_slots' own .selected -- legacy keeps
    the real still-legacy IMAGE_SKILLBOX_USE sprite as its current-skill highlight (see that C++
-   call site's own comment, NewUIMainFrameWindow.cpp); an RmlUi outline here would double it up. */
+   call site's own comment, MainFrameWindow.cpp); an RmlUi outline here would double it up. */
 
 /* Bottom-anchored translucent wipe -- shrinks from the top down as cooldown counts down, matching
    the retired RenderSkillDelay()'s own ARGB-quad direction exactly (0x80FF8080, alpha ~50%). */
@@ -240,7 +234,7 @@
 .tt-line.bold { font-weight: bold; }
 
 /* Bottom-right, matching where RenderNumber(x+20, y+20, ...) used to draw the same subscript
-   (NewUIMainFrameWindow.cpp, retired) -- plain text instead of the legacy digit-sprite atlas, same
+   (MainFrameWindow.cpp, retired) -- plain text instead of the legacy digit-sprite atlas, same
    simplification already established for this window's HP/MP/AG/SD/EXP numbers (.gauge-num). */
 .skill-hotkey-label {
 	position: absolute;

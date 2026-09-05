@@ -1,6 +1,3 @@
-// NewUICommonMessageBox.h: interface for the NewUICommonMessageBox class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICOMMONMESSAGEBOX_H__AA370602_D171_41DC_9A79_345D75F678D4__INCLUDED_)
 #define AFX_NEWUICOMMONMESSAGEBOX_H__AA370602_D171_41DC_9A79_345D75F678D4__INCLUDED_

@@ -1,5 +1,3 @@
-// NewUIInventoryCtrl.h: interface for the CInventoryCtrl class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIINVENTORYCTRL_H__3A635AF1_3FFA_44B5_9BF6_3DFE0F061927__INCLUDED_)
 #define AFX_NEWUIINVENTORYCTRL_H__3A635AF1_3FFA_44B5_9BF6_3DFE0F061927__INCLUDED_

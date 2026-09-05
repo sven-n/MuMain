@@ -1,5 +1,3 @@
-// MsgBoxIGSBuySelectItem.h: interface for the CMsgBoxIGSBuySelectItem class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSBUYSELECTITEM_H__96137D00_144C_4E10_B335_383E5DAB5D50__INCLUDED_)
 #define AFX_MSGBOXIGSBUYSELECTITEM_H__96137D00_144C_4E10_B335_383E5DAB5D50__INCLUDED_

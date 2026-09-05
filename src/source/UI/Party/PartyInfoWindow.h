@@ -1,6 +1,3 @@
-// NewUIPartyInfo.h: interface for the CNewUIPartyInfo class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIPARTYINFO_H__8F1E7392_C9CC_487E_8EAD_10DBD47AF20F__INCLUDED_)
 #define AFX_NEWUIPARTYINFO_H__8F1E7392_C9CC_487E_8EAD_10DBD47AF20F__INCLUDED_

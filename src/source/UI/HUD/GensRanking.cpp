@@ -1,5 +1,3 @@
-// NewUIGensRanking.cpp: implementation of the CGensRanking class.
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "I18N/All.h"
 

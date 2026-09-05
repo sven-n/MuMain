@@ -1,6 +1,4 @@
-﻿// NewUILuckyItemWnd.cpp: implementation of the CLuckyItemWnd class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "I18N/All.h"
 

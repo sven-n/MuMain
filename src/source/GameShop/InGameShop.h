@@ -1,5 +1,3 @@
-// NewUIInGameShop.h: interface for the NewUIInGameShop class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIINGAMESHOP_H__AE3CE531_70BE_4CBB_9938_0D80B26F21A8__INCLUDED_)
 #define AFX_NEWUIINGAMESHOP_H__AE3CE531_70BE_4CBB_9938_0D80B26F21A8__INCLUDED_

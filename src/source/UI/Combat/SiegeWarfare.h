@@ -1,6 +1,3 @@
-// CSiegeWarfare.h: interface for the CSiegeWarfare class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_CNewUISiegeWarfare_H__6810678B_808B_4765_B9AC_AC34344E7E2D__INCLUDED_)
 #define AFX_CNewUISiegeWarfare_H__6810678B_808B_4765_B9AC_AC34344E7E2D__INCLUDED_

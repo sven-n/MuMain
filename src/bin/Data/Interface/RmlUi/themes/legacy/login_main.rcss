@@ -34,7 +34,7 @@
 	top: 0;
 	decorator: image(login-main-menu-icon);
 }
-/* 2026-09-03: right:0dp replaces a C++-pushed `left` (LoginMainWin.cpp) -- anchors to #panel's own
+/* right:0dp replaces a C++-pushed `left` (LoginMainWin.cpp) -- anchors to #panel's own
    right edge instead of a computed real-pixel offset, so it tracks .btn-icon's now-dp width
    automatically instead of needing a matching C++ recompute on every resize. */
 .btn-icon-credit {

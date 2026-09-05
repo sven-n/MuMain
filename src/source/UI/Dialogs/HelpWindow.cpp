@@ -1,5 +1,3 @@
-// NewUIHelpWindow.cpp: implementation of the CHelpWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Dialogs/HelpWindow.h"

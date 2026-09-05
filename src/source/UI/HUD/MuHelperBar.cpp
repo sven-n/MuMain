@@ -1,5 +1,3 @@
-// MuHelperBar.cpp: implementation of the CMuHelperBar class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/HUD/MuHelperBar.h"
@@ -63,7 +61,7 @@ bool CMuHelperBar::Create(CManager* pNewUIMng, int x, int y)
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/mu_helper_bar.rml");
 
-        // Deliberately NOT Show()n here -- see NewUIMainFrameWindow.cpp's identical comment.
+        // Deliberately NOT Show()n here -- see MainFrameWindow.cpp's identical comment.
         // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
         // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
         // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.

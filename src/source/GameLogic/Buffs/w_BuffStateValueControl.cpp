@@ -1,6 +1,3 @@
-// w_BuffStateControl.cpp: implementation of the BuffStateControl class.
-//
-//////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"

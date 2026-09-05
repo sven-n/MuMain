@@ -1,6 +1,4 @@
-﻿// NewUICursedTempleSystem.cpp: implementation of the CCursedTempleSystem class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "UI/Events/CursedTempleSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"

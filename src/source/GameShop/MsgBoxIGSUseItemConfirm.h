@@ -1,6 +1,3 @@
-// MsgBoxIGSUseItemConfirm.h: interface for the CMsgBoxIGSUseItemConfirm class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSUSEITEMCONFIRM_H__71CD07AD_7713_4096_B88D_E06A464E39B6__INCLUDED_)
 #define AFX_MSGBOXIGSUSEITEMCONFIRM_H__71CD07AD_7713_4096_B88D_E06A464E39B6__INCLUDED_

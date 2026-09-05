@@ -1,6 +1,3 @@
-// NewUISiegeWarCommander.h: interface for the CSiegeWarCommander class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUISIEGEWARCOMMANDER_H__7D918ECD_BB86_421F_B62C_CA9E294D1E7D__INCLUDED_)
 #define AFX_NEWUISIEGEWARCOMMANDER_H__7D918ECD_BB86_421F_B62C_CA9E294D1E7D__INCLUDED_

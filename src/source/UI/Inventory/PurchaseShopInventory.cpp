@@ -1,5 +1,3 @@
-// NewUIPurchaseShopInventory.cpp: implementation of the CPurchaseShopInventory class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "UI/Inventory/PurchaseShopInventory.h"

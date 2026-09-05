@@ -1,5 +1,3 @@
-// NewUIMyQuestInfoWindow.h: interface for the CMyQuestInfoWindow class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 

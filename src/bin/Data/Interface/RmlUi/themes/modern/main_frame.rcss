@@ -1,4 +1,4 @@
-/* Modern theme for CNewUIMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. Same
+/* Modern theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. Same
    layout/transform group as themes/legacy/main_frame.rcss (#bars binds left/top/scale live from
    C++, tracking the still-legacy center-band chrome's own scale; #exp nests inside #bars to
    inherit that transform) -- only the visual treatment differs here: flat background-color/border
@@ -11,7 +11,7 @@
    still-legacy-rendered icons they frame (RmlUi paints its document last, after those icons).
 
    The panel behind the bars/skill-row/potions (wood/metal frame chrome) is still drawn by legacy
-   code (RenderLeftFrame()/RenderCenterFrame(), NewUIMainFrameWindow.cpp) -- shared by both
+   code (RenderLeftFrame()/RenderCenterFrame(), MainFrameWindow.cpp) -- shared by both
    themes, since that band is welded to the still-legacy skill list (out of this pilot's scope). */
 
 #bars {
@@ -36,11 +36,9 @@
 }
 
 /* HP/SD left column, MP/AG right column, both in the same row as potions/skills, sitting on top
-   of the exp bar. 2026-09-03: pointer-events:auto added -- these never opted back into
-   pointer-events from body's inherited `none` (base.rcss's documented pointer-events trap), so
-   #bar_hp:hover ~ .tooltip-hp etc. below could never actually fire; the HP/MP/AG/SD tooltips were
-   never once shown since this HUD shipped. Confirmed the same bug independently in legacy's own
-   .gauge-slot, not something specific to this file. */
+   of the exp bar. pointer-events:auto is required -- these would otherwise inherit body's `none`
+   (base.rcss's documented pointer-events trap), and #bar_hp:hover ~ .tooltip-hp etc. below could
+   never fire without it (same fix needed in legacy's own .gauge-slot). */
 .gauge-slot {
 	position: absolute;
 	pointer-events: auto;
@@ -57,8 +55,7 @@
    whole span solid and did exactly that). #gauge_fill_left/right instead carry the actual
    translucent-dark background, restricted to the two zones that have no icon content underneath;
    the potions/skills band in between stays genuinely unfilled, same as it always was. Top border
-   only (2026-09-02: was a full border+radius box outline all the way around, feedback asked for
-   just the top edge) -- flush with the exp bar below. */
+   only -- flush with the exp bar below. */
 #gauge_frame {
 	position: absolute;
 	left: 0px;
@@ -131,17 +128,16 @@
    the containing block. Shared per column (not per bar), since HP/SD sit directly above/below
    each other in the same column.
 
-   2026-09-03: explicit width added -- being a sibling of the wide #bars group turned out not to
-   be enough on its own (reported: "background does not fully fill the text"), same visible
-   symptom as mu_helper_bar.rcss's own tooltip bug even though the structural cause documented
-   above was already addressed here. Sidesteps shrink-to-fit entirely rather than chasing the
-   exact remaining mechanism -- same fix #skill_tooltip/buff_strip's tooltip already use
-   successfully.
+   Explicit width added -- being a sibling of the wide #bars group isn't enough on its own to
+   fill the background, same visible symptom as mu_helper_bar.rcss's own tooltip bug even though
+   the structural cause documented above is already addressed here. Sidesteps shrink-to-fit
+   entirely rather than chasing the exact remaining mechanism -- same fix #skill_tooltip/
+   buff_strip's tooltip already use successfully.
 
-   2026-09-03 (second fix, same day): also dropped `transform: translateX(-50%)` for centering --
-   once the box actually got a real width, hovering rendered the text with no visible background
-   at all, floating near the top of the screen instead of near the HP/MP/AG/SD bars. Read
-   TransformUtilities.cpp directly: `%` in a transform resolves against `e.GetBox()`, the
+   Also drops `transform: translateX(-50%)` for centering: relying on it to center the box against
+   the real width above renders hover text with no visible background at all, floating near the top
+   of the screen instead of near the HP/MP/AG/SD bars. Root cause, read directly from
+   TransformUtilities.cpp: `%` in a transform resolves against `e.GetBox()`, the
    element's OWN already-computed border-box -- for an element that's `display:none` until
    `:hover`, that box is only known AFTER the display flip, and the transform apparently isn't
    being freshly resolved against it at the right moment, producing translateX(-50%) of a
@@ -174,14 +170,12 @@
 	display: block;
 	z-index: 1;
 }
-/* 2026-09-03: removed `#bars .tooltip { bottom: 44px; }`, which used to live here -- same
-   specificity as #bars .tooltip-hp/.tooltip-sd/.tooltip-mp/.tooltip-ag above (ID+class each) and
-   declared textually after them, so it silently won the tie and overrode their `bottom: auto`
-   back to `bottom: 44px` -- combined with their own explicit `top: 410px` and no explicit height,
-   that's a top+bottom-constrained box with no height set, which this engine doesn't handle
-   gracefully (found the real cause of "still not fixed" after the transform fix). #exp_tooltip
-   was never affected (its own #exp_tooltip ID rule's `bottom: 12px` already wins on specificity
-   regardless of order) -- this rule had no other real consumer left to justify keeping it. */
+/* Do NOT add a `#bars .tooltip { bottom: ... }` rule here -- it has the same specificity as
+   #bars .tooltip-hp/.tooltip-sd/.tooltip-mp/.tooltip-ag above (ID+class each), so declared after
+   them it silently wins the tie and overrides their `bottom: auto` -- combined with their own
+   explicit `top: 410px` and no explicit height, that's a top+bottom-constrained box with no height
+   set, which this engine doesn't handle gracefully. #exp_tooltip is unaffected either way (its own
+   #exp_tooltip ID rule's `bottom: 12px` already wins on specificity regardless of order). */
 
 /* #top_right_row / #buttons_top: the top-right system-button panel (see main_frame.rml's header
    comment for the flex-over-`right` positioning rationale). #top_right_row is a plain full-width
@@ -245,11 +239,12 @@
 	pointer-events: none;
 }
 
-/* Same translateX(-50%)-on-display:none-toggle bug already fixed everywhere else in this file and
-   in mu_helper_bar.rcss/buff_strip.rcss (2026-09-03) -- missed here at the time. TransformUtilities.cpp:
+/* Same translateX(-50%)-on-display:none-toggle bug fixed everywhere else in this file and in
+   mu_helper_bar.rcss/buff_strip.rcss. TransformUtilities.cpp:
    `%` in a transform resolves against the element's own already-computed border-box, which isn't
-   reliably available at the exact moment `display` flips from none to block on hover, so this was
-   rendering with no visible background at the wrong position on first hover. Fixed the same way:
+   reliably available at the exact moment `display` flips from none to block on hover, so without
+   this fix it would render with no visible background at the wrong position on first hover. Fixed
+   the same way:
    explicit width, precomputed static `left` (button center minus half this tooltip's width)
    instead of a transform. width:100dp matches mu_helper_bar.rcss's own button tooltips, which this
    file's header comment already says these are meant to visually echo. */
@@ -329,9 +324,9 @@
 	left: 240px;
 }
 
-/* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border (2026-09-02:
-   removed per feedback, these read as an unwanted divider against the now-unfilled middle band --
-   see #gauge_frame's own comment). Still no .slot-fill either: RmlUi composites its whole document
+/* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border (it would
+   read as an unwanted divider against the now-unfilled middle band -- see #gauge_frame's own
+   comment). Still no .slot-fill either: RmlUi composites its whole document
    AFTER the still-legacy 3D-rendered icons these wrap, so a filled box would hide them. Wrapper
    offsets match #item_hotkey_anchor/#skill_list_anchor exactly; kept in sync by hand, nothing
    connects them automatically. */
@@ -353,17 +348,15 @@
 	cursor: pointer;
 }
 
-/* 2026-09-02: same width/height/top as #skill_slot_0..4 (32x38, top:431px) -- was 28x28 at
-   top:439px, sized/positioned independently of the skill row, which read as misaligned once both
-   rows sat on the same continuous background band. left offsets (own pitch, unrelated to the
-   skill row's) are unchanged. */
+/* Same width/height/top as #skill_slot_0..4 (32x38, top:431px) -- sized/positioned to match the
+   skill row now that both rows sit on the same continuous background band. left offsets (own
+   pitch, unrelated to the skill row's) are unchanged. */
 #item_slot_0 { position: absolute; left: 6px;   top: 431px; width: 32px; height: 38px; }
 #item_slot_1 { position: absolute; left: 44px;  top: 431px; width: 32px; height: 38px; }
 #item_slot_2 { position: absolute; left: 82px;  top: 431px; width: 32px; height: 38px; }
 #item_slot_3 { position: absolute; left: 120px; top: 431px; width: 32px; height: 38px; }
 
-/* 2026-09-02: upper-left corner of the slot box (was centered above it, outside the box) --
-   feedback asked for the label inside the box now that the box matches the skill slots' own
+/* Upper-left corner of the slot box, inside it, now that the box matches the skill slots' own
    size. */
 .slot-hotkey-label {
 	position: absolute;
@@ -413,11 +406,11 @@
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
-/* Phase 2 (skill list): expanded grid + pet-command row + shared tooltip. Same 78px local-origin
+/* Expanded grid + pet-command row + shared tooltip. Same 78px local-origin
    shift as #skill_slots above (#skill_list_anchor's own left, read back by C++ via
-   GetSkillListOffsetX() -- see NewUIMainFrameWindow.cpp's Render()/UpdateMouseEvent() comments)
+   GetSkillListOffsetX() -- see MainFrameWindow.cpp's Render()/UpdateMouseEvent() comments)
    -- SkillCellEntry::left/top and the tooltip's own left/top are raw, UN-rebased reference-space
-   values straight from CNewUISkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly
+   values straight from CSkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly
    what the still-legacy icon draw uses for the same cell, so nesting here at the same 78px offset
    keeps the RmlUi overlay and the legacy art it sits over pixel-aligned. Containers themselves
    stay non-interactive (pointer-events:none) -- only .skill-cell opts back in, same "container
@@ -429,11 +422,10 @@
 	pointer-events: none;
 }
 
-/* 2026-09-02: permanent border, same look as .slot-frame (the hotkey slots) -- the still-legacy
-   IMAGE_SKILLBOX box-frame sprite is now suppressed for modern theme (NewUIMainFrameWindow.cpp's
-   Render(), same audited exception as the compact row's selected-highlight sprite), so this is
-   the grid's only box outline now (feedback: "the skill list are using the legacy border instead
-   of the programmatic border already used in the skill hotkeys slots"). */
+/* Permanent border, same look as .slot-frame (the hotkey slots) -- the still-legacy
+   IMAGE_SKILLBOX box-frame sprite is suppressed for modern theme (MainFrameWindow.cpp's
+   Render(), same exception as the compact row's selected-highlight sprite), so this is
+   the grid's only box outline. */
 .skill-cell {
 	position: absolute;
 	width: 32px;
@@ -477,13 +469,12 @@
 	font-size: 10px;
 	z-index: 2;
 }
-/* 2026-09-02: display:block is required here, not optional -- RmlUi's own default `display` for
+/* display:block is required here, not optional -- RmlUi's own default `display` for
    any element (including <div>) is `inline` (StyleSheetSpecification.cpp registers it that way;
    there's no HTML-style user-agent stylesheet giving <div> a block default the way a browser
    does). Every other div in this file gets a block box for free via `position:absolute`, but
    these ARE meant to flow normally (stacked, not each independently positioned) -- without this,
-   all the tooltip's lines rendered inline, one run-on paragraph instead of separate lines
-   (feedback: "the text display inside the tooltips is not properly separated by new lines").
+   all the tooltip's lines render inline, one run-on paragraph instead of separate lines.
    min-height/line-height also guarantee a blank spacer line (UI::Skills::Tooltip::Model's
    isBlank lines, text is a lone "\n") still reserves visible vertical space even though its own
    collapsed-whitespace content renders as nothing. */

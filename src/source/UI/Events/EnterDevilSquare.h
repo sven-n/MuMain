@@ -1,6 +1,3 @@
-// NewUIEnterDevilSquare.h: interface for the CNewUIPartyInfo class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #ifndef _ENTERDEVILSQUARE_H_
 #define _ENTERDEVILSQUARE_H_

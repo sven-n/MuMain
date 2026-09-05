@@ -1,6 +1,3 @@
-// NewUISiegeWarSoldier.h: interface for the NewUISiegeWarSoldier class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUISIEGEWARSOLDIER_H__6316C0AE_6E09_4BBE_9308_9DC81353DD59__INCLUDED_)
 #define AFX_NEWUISIEGEWARSOLDIER_H__6316C0AE_6E09_4BBE_9308_9DC81353DD59__INCLUDED_

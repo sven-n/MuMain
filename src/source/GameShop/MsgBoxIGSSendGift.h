@@ -1,5 +1,3 @@
-// MsgBoxIGSSendGift.h: interface for the CMsgBoxIGSSendGift class.
-//////////////////////////////////////////////////////////////////////
 
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM

@@ -1,5 +1,3 @@
-// NewUIInGameShop.cpp: implementation of the NewUIInGameShop class.
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "I18N/All.h"

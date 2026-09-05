@@ -1,6 +1,4 @@
-﻿// GM3rdChangeUp.cpp: implementation of the CGM3rdChangeUp class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"

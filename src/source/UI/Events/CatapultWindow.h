@@ -1,6 +1,3 @@
-// NewUICatapultWindow.h: interface for the CCatapultWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICATAPULTWINDOW_H__064BC38C_5F26_4003_A6C7_7270A11DEEBF__INCLUDED_)
 #define AFX_NEWUICATAPULTWINDOW_H__064BC38C_5F26_4003_A6C7_7270A11DEEBF__INCLUDED_

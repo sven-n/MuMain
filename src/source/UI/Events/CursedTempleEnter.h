@@ -1,6 +1,3 @@
-// NewUICursedTempleEnter.h: interface for the CCursedTempleEnter class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICURSEDTEMPLEENTER_H__1151C4F9_04A5_47B1_A717_E7905BEEAD08__INCLUDED_)
 #define AFX_NEWUICURSEDTEMPLEENTER_H__1151C4F9_04A5_47B1_A717_E7905BEEAD08__INCLUDED_

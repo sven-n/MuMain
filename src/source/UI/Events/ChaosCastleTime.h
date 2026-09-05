@@ -1,6 +1,3 @@
-// NewUIChaosCastleTime.h: interface for the CChaosCastleTime class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICHAOSCASTLETIME_H__96004B21_205A_40BE_9B6B_3C099D8E41F6__INCLUDED_)
 #define AFX_NEWUICHAOSCASTLETIME_H__96004B21_205A_40BE_9B6B_3C099D8E41F6__INCLUDED_

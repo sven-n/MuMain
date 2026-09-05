@@ -1,5 +1,3 @@
-// NewUICharacterInfoWindow.h: interface for the CCharacterInfoWindow class.
-//////////////////////////////////////////////////////////////////////
 #pragma once
 
 #include "UI/Core/WindowObject.h"

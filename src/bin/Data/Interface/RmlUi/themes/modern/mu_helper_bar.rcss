@@ -67,11 +67,11 @@
 
 /* Siblings of .mu-btn (mu_helper_bar.rml), not nested children -- this build's shrink-to-fit
    width hard-clamps to the containing block (main_frame.rcss's own tooltip comment documents the
-   same finding), so a tooltip nested inside an 18dp-wide button was clamped to ~18dp regardless of
-   its own text length -- the reported "background fill is the same size as the button" bug. As a
+   same finding), so a tooltip nested inside an 18dp-wide button would clamp to ~18dp regardless of
+   its own text length, the background fill ending up the same size as the button. As a
    sibling of #panel (207dp wide) instead, shrink-to-fit has real room to work with.
 
-   2026-09-03: given an explicit width (100dp) rather than left to shrink-to-fit, and positioned
+   Given an explicit width (100dp) rather than left to shrink-to-fit, and positioned
    via a precomputed static `left` (button center minus half that width) instead of
    translateX(-50%) -- main_frame.rcss's own tooltips used that same combination and it produced a
    real bug there (hover rendered with no visible background, floating at the wrong position; read

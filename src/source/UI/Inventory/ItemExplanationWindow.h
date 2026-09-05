@@ -1,6 +1,3 @@
-// NewUIItemExplanationWindow.h: interface for the CItemExplanationWindow class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIITEMEXPLANATIONWINDOW_H__4029DCB0_6E92_4032_A68B_CE62B878F615__INCLUDED_)
 #define AFX_NEWUIITEMEXPLANATIONWINDOW_H__4029DCB0_6E92_4032_A68B_CE62B878F615__INCLUDED_

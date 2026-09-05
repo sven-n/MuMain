@@ -1,5 +1,3 @@
-// MsgBoxIGSBuyConfirm.h: interface for the CMsgBoxIGSBuyConfirm class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSBUYCONFIRM_H__7C4F8295_EA55_4F9C_A7C3_B514C11BE83C__INCLUDED_)
 #define AFX_MSGBOXIGSBUYCONFIRM_H__7C4F8295_EA55_4F9C_A7C3_B514C11BE83C__INCLUDED_

@@ -1,6 +1,3 @@
-// NewUICursedTempleResult.h: interface for the CCursedTempleResult class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICURSEDTEMPLERESULT_H__573A17F1_A967_4C70_AF42_6214CCD165EE__INCLUDED_)
 #define AFX_NEWUICURSEDTEMPLERESULT_H__573A17F1_A967_4C70_AF42_6214CCD165EE__INCLUDED_

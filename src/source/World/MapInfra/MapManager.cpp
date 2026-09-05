@@ -1,6 +1,4 @@
-﻿// MapManager.cpp: implementation of the CMapManager class.
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
