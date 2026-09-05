@@ -87,7 +87,7 @@ Recorded here so a future session doesn't assume otherwise — each of these is 
 per-window, or entirely unbuilt:
 
 - **ItemSlot / ItemGrid** — still 100% legacy 2D rendering (`STATUS.md`: "no RmlUi pattern proven
-  yet"). `CNewUIItemHotKey` (potion slots, 3D-camera-composited icons) is the next real candidate
+  yet"). `CItemHotKey` (potion slots, 3D-camera-composited icons) is the next real candidate
   to prove a pattern against, once it's scoped.
 - **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s HP/MP/AG/SD/EXP
   gauge-fill rules (`#hp_fill` etc.) are ad hoc per-window CSS, not an abstracted, reusable bar
@@ -101,7 +101,7 @@ per-window, or entirely unbuilt:
   `RememberPasswordPrompt`) is its own hand-built RML/RCSS pair; no shared "Dialog" scaffold
   (title/body/button-row layout contract) exists for a new one to reference.
 - **Tab / TabBar, List, ScrollContainer, Notification, HUDContainer** — none of the currently
-  migrated windows have needed one yet, so none exist. `CNewUIMainFrameWindow`'s still-legacy
+  migrated windows have needed one yet, so none exist. `CMainFrameWindow`'s still-legacy
   skill grid/pet-command row is the closest thing to a "grid" concept in the codebase, and it
   hasn't been abstracted either (see `STATUS.md`'s pilots-to-revisit entry for why its icon art
   stayed legacy 2D).

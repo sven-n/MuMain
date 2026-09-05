@@ -14,7 +14,7 @@ C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/
 |---|---|---|---|
 | Sprite widgets | `CButton : CSprite`, `CGaugeBar`, `CWin`, `CWinEx : CWin` | `UI/Widgets/{Button,GaugeBar,Win,WinEx}.h` | **Closed.** `CWin`/`CWinEx` have zero live subclasses anywhere in the tree — every window that still uses these is `mu::ui::window::CObject`-derived today and only kept these as composed *members* from before its Phase 1-3 migration off `CWin`. Don't add a new consumer. |
 | `CUIControl` family | `CUIControl : CUIMessage`, `CUIButton`, `CUITextListBox<T>`, `CUITextInputBox`, `CUIChatInputBox`, `CUIBaseWindow : CUIControl`, `CUIWindowMgr`, `CRadioButton`, `CUISlideHelp`/`CSlideHelpMgr` | `UI/Widgets/UIControls.h`, `UI/Party/UIWindows.h` | **Fully live**, but effectively closed to new *window-manager* consumers — `CUIBaseWindow`/`CUIWindowMgr`'s only live subsystem is the friend/mail/chat-room feature in `UIWindows.cpp` (see below). `CUITextInputBox` is the one class here still legitimately reused by brand-new `mu::ui::window::CObject` windows (`NewUIGuildMakeWindow`, `NewUIMyShopInventory`, etc.) — there's no equivalent yet in that tier, so this is a sanctioned exception, not technical debt to avoid. |
-| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox`/`CChatInputBox` | `UI/Core/{NewUIBase,NewUIManager}.h`, `UI/Widgets/NewUI*.h` | **The default for all new work.** This is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. |
+| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox`/`CChatInputBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **The default for all new work.** This is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. |
 
 ## Quick decision guide for a new window, dialog, or HUD panel
 
@@ -35,7 +35,7 @@ C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/
 5. **Porting/wrapping an existing big legacy subsystem instead of writing one from scratch?** Wrap
    it behind a thin `mu::ui::window::CObject` adapter whose methods forward into the legacy
    implementation, rather than reimplementing it or inventing a second parallel manager.
-   `CNewUIFriendWindow` (owns and forwards to `CUIWindowMgr`, see below) is the template — it's the
+   `CFriendWindow` (owns and forwards to `CUIWindowMgr`, see below) is the template — it's the
    same shape `newui-tier-adapter.md` documents for porting a window's *rendering* to RmlUi, just
    applied one layer earlier (wrapping the object lifecycle before the render target changes at
    all).
@@ -95,11 +95,11 @@ qualification at the actual use site (`::CRadioButton` if you mean the `UIContro
 - **`UIDefaultBase`** — deleted during the `UI/` directory restructure (`docs/newui-legacy-merger.md`),
   fully inert (`#ifdef`-gated on a macro that was never defined).
 
-## The `UIWindows.cpp` / `CNewUIFriendWindow` pattern — a legitimate exception, not confusion
+## The `UIWindows.cpp` / `CFriendWindow` pattern — a legitimate exception, not confusion
 
 `UI/Party/UIWindows.h/.cpp` (`CUIBaseWindow`, `CUIWindowMgr`, `CUIFriendWindow`, mail, chat-room
 list) is a fully live, self-contained legacy subsystem — not dead code, not superseded. It's
-reached through exactly one seam: `CNewUIFriendWindow : public mu::ui::window::CObject` owns one
+reached through exactly one seam: `CFriendWindow : public mu::ui::window::CObject` owns one
 `CUIWindowMgr*` and every one of its public methods is a one-line forward into it. Mail
 (`CUILetterReadWindow`/`WriteWindow`) and the chat-room list (`CUIChatRoomListTabWindow`) have no
 `mu::ui::window`-native reimplementation anywhere — this file is their only implementation. If you

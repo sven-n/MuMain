@@ -332,9 +332,9 @@ technique that originally produced it.**
 
 ---
 
-**Worked example on this branch**: `CNewUIMainFrameWindow`'s skill-hotkey number readout
+**Worked example on this branch**: `mu::ui::window::CMainFrameWindow`'s skill-hotkey number readout
 (`RenderSkillIcon()`, `MainFrameWindow.cpp`) used to draw a legacy digit-sprite subscript in
-C++, unconditionally for both themes. Retired entirely — `CNewUISkillList::GetHotKeySlotNumber()`
+C++, unconditionally for both themes. Retired entirely — `CSkillList::GetHotKeySlotNumber()`
 now just returns the assigned number (pure data, theme-agnostic), `SyncRmlModel()` binds it into
 the shared model, and each theme's own `main_frame.rml`/`.rcss` decides where and how to show it
 (modern: upper-left corner of the slot, matching its Q/W/E/R treatment; legacy: bottom-right,

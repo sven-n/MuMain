@@ -20,8 +20,8 @@ see `docs/newui-legacy-merger.md` for the folder history) — with no layout eng
 graph, or data-binding layer between them. RmlUi is being adopted as the long-term replacement per
 [`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
 new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.md) for what's
-migrated so far. `COptionWin` was ported but deliberately not wired up — see [Coexistence
-patterns](#coexistence-patterns) below.
+migrated so far. `COptionWin` was ported but confirmed unreachable in live play, then deleted
+outright as confirmed-dead code — see [Coexistence patterns](#coexistence-patterns) below.
 
 See also: **[Building New UI](building-new-ui.md)** — which of the three overlapping C++ widget
 toolkits (sprite widgets, `CUIControl`, `mu::ui::window::CObject`) to use for a new window, dialog, HUD panel,
@@ -33,7 +33,7 @@ positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)**
 UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
 and a worked example of retrofitting an already-migrated window. **[NewUI-Tier Adapter
 Pattern](newui-tier-adapter.md)** — the `mu::ui::window::CObject`/`mu::ui::window::CManager` tier (in-game HUD, distinct
-from `CWin`/`CUIMng`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
+from `CWin`/`CSceneUICoordinator`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
 still unproven there. **[Legacy Theme Modernization Policy](legacy-theme-modernization.md)** —
 when legacy-theme C++ behavior should move into RML/RCSS versus genuinely stay in C++, and how to
 classify a given piece of legacy code either way. **[Modern Theme Visual Direction](modern-theme-visual-direction.md)**
@@ -56,6 +56,18 @@ through `CGlobalBitmap` instead of the vendored backend's generic SDL_image load
 read this engine's proprietary formats at all. `SetTransform` (CSS `transform`) is a real,
 working capability of this backend — worth knowing if a future theme wants to use it.
 
+`linear-gradient`/`radial-gradient` are also real, working capabilities — fixed 2026-09-04:
+`RenderInterface_SDL_GPU` implements `CompileShader`/`RenderShader`/`ReleaseShader` for the
+gradient family, porting the upstream GL3 reference backend's shader math to a new HLSL fragment
+shader baked into `ShadersCompiledSPV.h` via this project's own
+`glslangValidator`/`spirv-cross`/`dxc` toolchain. **`box-shadow`/`blur`/`backdrop-filter` are
+not** — they parse fine (a working RCSS property registration reads as "supported" if that's all
+you check) but silently render as a solid opaque block or not at all, since RmlUi's own
+layer/filter/compositing subsystem (`PushLayer`/`CompileFilter`/`RenderFilter`) isn't implemented
+in this backend at all — a materially bigger task than the gradient one was. Check the render
+interface (or test the decorator in isolation), never just the RCSS parser, before assuming a CSS
+visual property actually renders.
+
 **Texture-lifetime rule**: `CGlobalBitmap`'s numbered-slot cache is designed for code that
 re-resolves a texture by logical id every frame (`CSprite` etc.) — slots get silently
 force-reassigned to a different file across scene transitions. RmlUi caches a resolved texture
@@ -63,23 +75,18 @@ handle indefinitely instead, so any RmlUi-loaded texture must use
 `CGlobalBitmap::LoadImageExclusive()`, never the shared, ref-counted `LoadImage()` — sharing a
 slot causes a real crash on scene re-entry.
 
-## Frame lifecycle: RmlUi renders last — via two seams
+## Frame lifecycle: three render seams
 
-**RmlUi always renders after all other content for that frame.** `RmlUiRuntime::Render()` fires
-from exactly one fixed pre-submit callback (below) — this is how the integration works today, not
-a proven RmlUi requirement; nobody's investigated whether interleaving with legacy content is
-possible instead (multiple contexts, or a callback hook legacy content renders through at the
-right point in RmlUi's own z-order). See `STATUS.md` for that open question and the two C++ call
-sites (`MainFrameWindow.cpp`) that currently work around today's ordering by picking between
-an RmlUi fill and a legacy one. Until that's resolved, treat today's ordering as real: get it
+**The "main" `Rml::Context` always renders after all other content for that frame.**
+`RmlUiRuntime::RenderFrame()` (`Update()` then `Render()`) fires from exactly one fixed pre-submit
+callback (below) — a single choke point every scene funnels through uniformly. Get this ordering
 wrong and an opaque RmlUi panel covers legacy content (cursor, text) that's supposed to stay
-visible on top of it. Two callbacks on `IMuRenderer`, registered once in `Winmain.cpp`, make it
-work:
+visible on top of it. Two callbacks on `IMuRenderer`, registered once in `Winmain.cpp`, bracket
+it:
 
 - **`SetPreSubmitCallback`** — fires after the frame's game/legacy-2D content is recorded onto
   the command buffer but before submit. `RmlUiRuntime` registers this once in `Create()`; this is
-  where `Rml::Context::Render()` actually happens. A single choke point every scene funnels
-  through uniformly.
+  where the "main" context's `Rml::Context::Render()` actually happens.
 - **`SetPostRmlUiCallback`** — fires after RmlUi's own pass, for content that must render even
   later than RmlUi itself (the cursor, `CLoginWin::RenderTextOnTop()`'s input-box text). By the
   time RmlUi's pass is recorded its render pass is already closed, so drawing more content after
@@ -90,6 +97,24 @@ work:
   pass never backward-merges into a stale command from the main pass, and assigning the new
   render pass to the renderer's own tracked handle (not a local) so its draw calls actually land
   in it. Full detail in `.ai-os/memory/tasks/rmlui-sdl-gpu-port.md` if this seam needs revisiting.
+
+**A third seam answers the interleaving question this doc used to call open** — whether RmlUi
+content could render at a specific mid-frame point (behind legacy content drawn later the same
+frame) instead of only ever last. Resolved 2026-09-04 (`STATUS.md`'s "RmlUi renders last" finding,
+Phase 1 built) with a second, independent `Rml::Context` —
+`RmlUiRuntime::GetBackgroundContext()`/`RenderBackgroundLayer()` — driven explicitly by the caller
+(flush pending draws via the new `IMuRenderer::FlushRenderCommands()`, then `Update()`+`Render()`
+on that context) instead of through the single-slot `SetPreSubmitCallback` the "main" context
+uses. It never receives input — no `IUiInputConsumer` registration; every document loaded into it
+is `pointer-events: none`. Proven end-to-end in `MainFrameWindow.cpp`'s
+`CMainFrameWindow::RenderLeftFrame()`/`RenderCenterFrame()`: the modern theme's background panel
+behind the still-legacy, 3D-composited potion/skill icons is now a real RmlUi document
+(`main_frame_bg.rml`) instead of a hand-matched-color legacy quad. **Not yet generalized** —
+folding this into a single automatic insertion point inside `mu::ui::window::CManager::Render()`'s
+own z-sorted loop (Phase 2) is deliberately deferred until the first still-unported
+inventory-family window (everything on `mu::ui::window::C3DRenderMng`: inventory, shops, trade, vault, chaos
+machine, several message/quest/duel windows) actually needs it — until then, each caller wires its
+own `RenderBackgroundLayer()` call, the way `MainFrameWindow.cpp` does today.
 
 **A same-frame update-order gotcha worth knowing for any similar modal**: `CWin::Update()` always
 calls `UpdateWhileShow()` before `UpdateWhileActive()` in the same frame. A dialog that resolves
@@ -144,27 +169,44 @@ than hand-rolled mouse tracking. Two things worth knowing before using it: `hand
 events never fire at all, not even hover), and it moves **both** axes — a horizontal-only slider
 thumb has to reset `top` back to a fixed value on every drag tick or it visibly drifts.
 
+**Currently has zero live call sites.** Its only caller, `COptionWin`'s two sliders, was deleted
+outright as confirmed-dead code during the CUIMng/CNewUIManager merger
+(`docs/newui-legacy-merger.md`) — not a retirement of this primitive itself. The primitive was
+fixed 2026-09-04 (`STATUS.md`) to write the dragged position as `dp` (divided by the panel's own
+`Context::GetDensityIndependentPixelRatio()`) instead of a raw `px` inline style that never
+scaled with `UIScalePercent`. **Still open**: nothing persists a dragged position anywhere — no
+`GameConfig` storage mechanism exists yet for any RmlUi panel — deliberately not built
+speculatively ahead of a real caller. Resolve that before, not after, the next window actually
+calls this.
+
 ## Coexistence patterns
 
 Two structural shapes exist for a migrated window: a **hybrid** `CWin` + RmlUi overlay that keeps
 the legacy window's position/hit-testing bookkeeping but draws no visual chrome itself
 (`CWin::Create()` always passes `nTexID=-2`) — `CLoginWin`, `CLoginMainWin`, `CSysMenuWin` — and a
-**pure RmlUi** window with no `CWin`/`CUIMng` involvement at all — `RememberPasswordPrompt`, a
+**pure RmlUi** window with no `CWin`/`CSceneUICoordinator` involvement at all — `RememberPasswordPrompt`, a
 free-function module in `namespace UI::Login`.
 
-**`CWin::Release()` has no idea `m_pRmlDoc` exists.** `CUIMng::RemoveWinList()` calls `Release()`
-on every window on every scene transition; the legacy `Release()`/`PreRelease()` path never
-touches an RmlUi document, so a hybrid window's document (created once, reused forever) stays
-exactly as visible as it was — and since RmlUi renders last in the frame, it then paints on top
-of whatever the *next* scene draws, indefinitely. Every hybrid window's `PreRelease()` override
-must unconditionally `if (m_pRmlDoc) m_pRmlDoc->Hide();` — not optional boilerplate, even if some
-other call site currently happens to hide it first.
+**`CWin::Release()` has no idea `m_pRmlDoc` exists.** `CSceneUICoordinator` calls each hybrid
+window's own `Release()` by name on every scene transition (`CreateLoginScene()`/
+`CreateCharacterScene()`/`CreateMainScene()`/its own `Release()` — no generic window-list walk
+does this any more; that mechanism, `CUIMng::RemoveWinList()`, was confirmed unreachable and
+deleted outright in `docs/newui-legacy-merger.md`'s Phase 4). Either way, the legacy
+`Release()`/`PreRelease()` path never touches an RmlUi document, so a hybrid window's document
+(created once, reused forever) stays exactly as visible as it was — and since RmlUi renders last
+in the frame, it then paints on top of whatever the *next* scene draws, indefinitely. Every hybrid
+window's `PreRelease()` override must unconditionally `if (m_pRmlDoc) m_pRmlDoc->Hide();` — not
+optional boilerplate, even if some other call site currently happens to hide it first.
 
-**`COptionWin` was ported but is deliberately not wired up** — confirmed unreachable in live
-play: `CSysMenuWin`'s Option button opens `SEASON3B::CNewUIOptionWindow` instead. Its RmlUi
-content is self-contained (own model, own slider-drag math) so leaving it un-rewired carries no
-shared-dependency risk. Retiring one of the two implementations is a real product decision, left
-open on purpose.
+**`COptionWin` was ported but confirmed unreachable in live play, and has since been deleted** —
+`CSysMenuWin`'s Option button has always opened `mu::ui::window::COptionWindow` instead
+(`g_pNewUISystem->Show(INTERFACE_OPTION)`), never `CUIMng::m_OptionWin`. Unlike `COptionWin`,
+which retained its own self-contained RmlUi content (own model, own slider-drag math), migrating
+it onto the new manager would have been pure wasted effort on dead code — it was deleted outright
+(2026-09-04, part of the `CUIMng`/`CNewUIManager` merger's Phase 4) rather than ported. See
+`newui-legacy-merger.md` for that merger's full history; the product decision this once left open
+(retire one of the two options-window implementations) is resolved — only
+`mu::ui::window::COptionWindow` remains.
 
 ## Gotchas
 
@@ -187,7 +229,13 @@ open on purpose.
   decorative border placed as a *child* can still paint over another child that's meant to sit on
   top of it if that child comes earlier in document order — reorder by moving the visually-topmost
   element later in the document, not by trying to fight it with z-index tricks.
-- **Same-frame update-order cascades** — see [Frame lifecycle](#frame-lifecycle-rmlui-renders-last--via-two-seams) above.
+- **Same-frame update-order cascades** — see [Frame lifecycle](#frame-lifecycle-three-render-seams) above.
+- **RCSS comments don't nest.** `/* ... */` closes at the first `*/`, not the intended one —
+  content between a premature close and the next real `*/` parses as garbage CSS. `base.rcss` is
+  linked by nearly every modern-theme window, so a broken comment there has a wide, confusing
+  blast radius (multiple unrelated windows losing interactivity/positioning/visibility at once)
+  that doesn't look like a syntax error at first glance. If a shared file's change is followed by
+  several unrelated windows breaking at once, suspect that file's own syntax first.
 
 ## Source map
 
@@ -202,8 +250,8 @@ open on purpose.
 | Draggable helper | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) |
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
-| Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h) |
-| Migrated windows (`mu::ui::window::CObject` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/HUD/MainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
+| Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h). (`OptionWin` was ported then confirmed unreachable in live play — see [Coexistence patterns](#coexistence-patterns) — and has since been deleted as confirmed-dead code.) |
+| Migrated windows (`mu::ui::window::CObject` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CMainFrameWindow`](../../src/source/UI/HUD/MainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CSkillList`/`CItemHotKey`), not yet ported. |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status

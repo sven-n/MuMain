@@ -26,7 +26,7 @@ theme-neutral copy, same pattern as `main_frame`'s existing two-file case below.
 
 **Forking safely needs a check — built 2026-09-04**: whichever theme's RML a window loads, the
 C++ side still expects the exact same ids/`data-model` bindings/event-callback names to exist.
-`Tools/check_rml_rcss_drift.py` (a sibling to `check_rml_rcss_syntax.py`, wired into the same build
+`tools/check_rml_rcss_drift.py` (a sibling to `check_rml_rcss_syntax.py`, wired into the same build
 step) diffs the ids/bindings a window's C++ actually references against every theme's copy of that
 window's RML and fails the build if none of them provide something the code needs — otherwise a
 missing or renamed id would fail **completely silently** (a dead button, not a build error or even
@@ -233,9 +233,8 @@ coordinate into `dp`.
   above).
 - **Eleven windows are routed through `LoadThemedDocument()` today**: `CLoginWin`,
   `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`,
-  `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`, `CBuffStrip`, and `CNewUIMainFrameWindow`
-  (`COptionWin` is wired the same way but not reachable in live play — see the main
-  [README](README.md#coexistence-patterns)). Extending a new window to support theming is the same
+  `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`, `CBuffStrip`, and `CMainFrameWindow`. Extending
+  a new window to support theming is the same
   established pattern, not new design work — this list will keep growing and isn't worth
   maintaining exhaustively; grep `LoadThemedDocument(` for the live count.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Fixed

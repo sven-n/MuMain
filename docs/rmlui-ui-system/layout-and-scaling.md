@@ -147,7 +147,7 @@ scaled-proportionally-to-800x600, is the policy going forward).
 
 **The legacy hit-test objects must stay numerically in sync with the CSS, not just visually
 similar.** `CCharSelMainWin` still keeps a `CButton`/`CSprite` per element alive purely for
-`CUIMng::IsCursorOnUI()`/click-detection bookkeeping (never rendered — RmlUi owns 100% of the
+`CSceneUICoordinator::IsCursorOnUI()`/click-detection bookkeeping (never rendered — RmlUi owns 100% of the
 visuals). Positioning those legacy objects via the *old* `CalculateLayout()` while the RmlUi
 visuals moved to the *new* fixed-dp-anchor math caused a real, user-visible bug: at resolutions
 where the two calculations diverge, a click on the visually-correct (RmlUi-rendered) Delete button
