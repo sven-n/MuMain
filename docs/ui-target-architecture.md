@@ -10,9 +10,19 @@ document. Produced 2026-09-05.
 two independent, potentially-disagreeing input samplers. A follow-up trace of the actual call
 chain (`Core::Input::IsKeyDown()` → `CNewKeyInput::ScanAsyncKeyState()` → the
 `IsPress`/`IsRelease`/`IsNone`/`IsRepeat` free functions) found that's wrong: `CInput` is built
-*on top of* `CNewKeyInput` (its keyboard queries are pure forwards; its own mouse-button state is
+_on top of_ `CNewKeyInput` (its keyboard queries are pure forwards; its own mouse-button state is
 derived by calling the same free functions), not a competing root sampler. Sections A, C, D, H,
 and Rule 5 below are corrected accordingly.
+
+**Correction, 2026-09-05 (second pass)**: a cross-check against
+[`architecture-principles.md`](rmlui-ui-system/architecture-principles.md) found this document's
+first pass overstated the native/RmlUi hybrid boundary as permanent for buttons, chrome, and
+sprite-atlas icon rendering generally, when only live 3D-camera-viewport content and world-anchored
+overlays actually have no RmlUi equivalent. Sections A, D, E, H, and Rule 3 below are corrected to
+frame the native button/chrome population as transitional, not a coequal permanent family — see
+Section E for the reasoning. As with the first correction: **where this document and
+`architecture-principles.md` ever disagree, that governing doc wins** (it says the same of every
+other file in its own directory); this document is a proposal built on top of it, not a peer.
 
 ## A. Architecture Verdict
 
@@ -23,14 +33,14 @@ re-verifying:
   `Contains()`" — `CManager`'s own dispatch (`WindowManager.cpp`) proves the design intent: every
   `Update()`/`Render()`/`UpdateMouseEvent()`/`UpdateKeyEvent()` call is wrapped in a
   `ScopedActiveTransform` derived purely from `GetLayoutMode()`, with **zero** reference to any
-  bounds on the object itself. The manager provides *only* a coordinate space; every window is
+  bounds on the object itself. The manager provides _only_ a coordinate space; every window is
   trusted to do its own hit-testing inside it. This is a coherent, deliberate contract, not an
   oversight — but it does mean "add a new window" always includes "reinvent your own rect."
 - **The `mu::ui::window::CButton` proposal needs real qualification, not a rubber stamp.** Reading
   `Widgets/Window/Button.cpp` in full changes the verdict from the prior assessment's implicit
   "yes, canonicalize this":
   - It does **not** use `CSprite` at all — it renders via a free function `RenderImage()` against
-    a global `Bitmaps[]` table, a *third* rendering primitive alongside `CSprite` and RmlUi,
+    a global `Bitmaps[]` table, a _third_ rendering primitive alongside `CSprite` and RmlUi,
     re-implementing atlas frame-offset math (`m_CurImgState * m_Size.y`) that `CSprite` already
     solves.
   - It hit-tests via `CheckMouseIn()` — a function that lives in `UIControls.h`, the very "legacy
@@ -39,9 +49,9 @@ re-verifying:
   - It polls input via free functions `IsPress`/`IsRelease`/`IsNone` (`UI/Core/WindowCommon.cpp`),
     which wrap `CNewKeyInput`/`g_pNewKeyInput` — confirmed, on tracing the full chain, to be the
     single root input sampler for both keyboard and mouse-button-as-VK state (`Core::Input::
-    IsKeyDown()`, SDL3-backed — `ScanAsyncKeyState()`'s name is stale, it hasn't called
+IsKeyDown()`, SDL3-backed — `ScanAsyncKeyState()`'s name is stale, it hasn't called
     `GetAsyncKeyState()` since the SDL3 port). The legacy `::CButton` instead polls
-    `CInput::Instance()` — which turns out to be a thin façade *built on the same free functions*
+    `CInput::Instance()` — which turns out to be a thin façade _built on the same free functions_
     for its keyboard queries, adding only its own scene-scoped (`LOG_IN_SCENE`/`CHARACTER_SCENE`
     only) mouse-button/double-click/left-hand-mode/cursor-position bookkeeping on top. Not two
     competing samplers, in other words — one root sampler plus one narrow, correctly-scoped
@@ -55,15 +65,18 @@ re-verifying:
     behavior, it has up to four, selected at compile time.
   - It does not consult `UI::Scaling`'s `Transform`/`PositionX()`/`PositionY()` at all — it draws
     and hit-tests at raw `m_Pos`/`m_Size`, assuming the caller already resolved real pixels.
-    That's *consistent* with how `CTrade`/`CMyInventory` use it, but it means this "canonical"
+    That's _consistent_ with how `CTrade`/`CMyInventory` use it, but it means this "canonical"
     widget has no self-contained scaling story — it inherits whatever discipline its owning
     window happens to apply.
 
-  None of this makes it a bad choice — it's still the most-adopted, most-feature-complete of the
-  three C++ button families, and evolving it costs less than inventing a fourth. But **calling it
-  canonical as-is would enshrine a widget with a parallel rendering path, a parallel input system,
-  and compile-time behavior forks.** Canonicalizing it has to include fixing those things, not
-  just picking a name.
+  None of this makes it a bad choice for what it should actually be used for — it's still the
+  most-adopted, most-feature-complete of the three C++ button families, and evolving it costs less
+  than inventing a fourth. But **calling it canonical as-is would enshrine a widget with a parallel
+  rendering path, a parallel input system, and compile-time behavior forks.** Canonicalizing it has
+  to include fixing those things — and, per the second-pass correction above, framing it as a
+  transitional bridge for the still-native population, not a permanent peer to RmlUi's own button
+  convention (see Section D).
+
 - **`UI::Scaling::UITransform`/`UILayoutPolicy` is stronger than the prior assessment gave credit
   for.** Reading the full header: seven `LayoutMode` variants (`Hud*`, `Dock*`,
   `FloatingWorkspace`, `Dialog`, `WorldOverlay`, `Legacy`), a real RAII `ScopedActiveTransform`,
@@ -78,9 +91,9 @@ re-verifying:
   assessment's characterization of RmlUi as "additive, composed into a Generation-2 window" is
   accurate.
 - **One thing the prior assessment got directionally right but didn't push far enough**: it
-  treated `CObject`'s lack of geometry as a gap to *fill*. Having now seen `CManager`'s
+  treated `CObject`'s lack of geometry as a gap to _fill_. Having now seen `CManager`'s
   transform-per-object dispatch model in full, the more accurate framing is that `CObject` was
-  *deliberately* kept thin, and the correct fix is a **composable geometry component**, not a
+  _deliberately_ kept thin, and the correct fix is a **composable geometry component**, not a
   base-class field — see Section C.
 
 ## B. Definition of the Unified UI Kit
@@ -139,7 +152,7 @@ private:
 }
 ```
 
-This is deliberately a *value object a window owns*, not a mixin base `CObject` derives from —
+This is deliberately a _value object a window owns_, not a mixin base `CObject` derives from —
 matching the instinct to prefer composition where it minimizes coupling. A window that wants it
 declares `WindowGeometry m_geometry;` and calls `m_geometry.Contains(...)` from its own
 `UpdateMouseEvent()` instead of hand-rolling the same rect math ~88 times. Windows with no
@@ -150,7 +163,7 @@ it exists — dispatch stays exactly as it is today.
 reason.** A window's rendering is either `CSprite`-based, RmlUi-based, or both simultaneously
 during migration — there is no single "Render" contract narrower than the `bool Render()`
 `CObject` already declares that would fit all three without becoming a leaky abstraction. Input
-is already unified at the *dispatch* level (`CManager`'s topmost-first, consume-and-stop loop,
+is already unified at the _dispatch_ level (`CManager`'s topmost-first, consume-and-stop loop,
 confirmed correct and coherent in `WindowManager.cpp`); the widget-level input-polling API is
 already effectively unified too, once `CInput`'s real relationship to `CNewKeyInput` is understood
 (Section D) — the remaining question is RmlUi's separate event system, which is fine as its own
@@ -158,55 +171,68 @@ thing since it only ever drives RmlUi-owned elements.
 
 ## D. Canonical Components
 
-| Concern | Current owners (verified) | Canonical owner | Reason |
-|---|---|---|---|
-| Window lifecycle | `CObject`/`CManager` | **`CObject`/`CManager`, unchanged** | Already ~88/97 windows; zero live top-level `CWin` subclasses remain |
-| Dispatch / input propagation | `CManager`'s depth-sorted, consume-and-stop loop | **`CManager`, unchanged** | Verified correct and coherent (topmost-first, `ScopedActiveTransform` per object) — this was never actually broken |
-| Widget-level input polling | `CNewKeyInput`/`g_pNewKeyInput` via the `IsPress`/`IsRelease`/`IsNone`/`IsRepeat` free functions (new-tier widgets, ~15+ files, and `CInput`'s own keyboard queries), `CInput` (legacy `::CButton`, login/char-select only), RmlUi's own event system | **Already `CNewKeyInput`/the free functions — no change needed.** `CInput` stays, scoped to the login/char-select window family only | Tracing the chain found `CInput` is built on the free functions, not a competing root sampler — the "duplication" is one root plus one correctly-scoped façade, not two disagreeing systems |
-| Geometry / hit-testing | Hand-rolled per window (`CWin`'s own, `CUIControl`'s own, ~88 independent rect checks) | **New opt-in `WindowGeometry` (Section C)** | No existing implementation is reusable as-is; all are per-family, not per-concern |
-| Coordinate transforms | `UI::Scaling::UITransform`/`UILayoutPolicy` | **Unchanged — already canonical** | 100% dispatch coverage confirmed in `WindowManager.cpp`; the strongest existing primitive in the codebase |
-| Buttons (native-only contexts) | 4 implementations | **Evolved `mu::ui::window::CButton`, after removing its `CUIControl`/`CNewKeyInput` dependencies and macro-forked behavior** | Most adopted, richest feature set; not clean enough to canonicalize unmodified |
-| Buttons (RmlUi-reachable contexts) | ad hoc per-window `.btn` CSS | **`base.rcss`'s `.btn` + a documented variant convention** | RmlUi is the long-term presentation layer; a native button abstraction is a transitional concern there, not a permanent one |
-| Text input | `CUITextInputBox` | **Unchanged — already canonical** | Genuinely shared across every generation including RmlUi-hybrid windows; don't touch what already works |
-| Tooltips | 4 mechanisms | **New standalone `UI::Tooltip` primitive** (native) + **`base.rcss`'s `.tooltip` convention** (RmlUi) | Same two-horizon split as buttons; extract from `mu::ui::window::CButton`'s existing anchor/position logic rather than inventing new math |
-| Window chrome | None — every window reimplements | **Not unified natively.** For RmlUi-reachable windows, chrome is a theme/RCSS concern (already true). For native-only windows, not worth building — see Section F | Building a generic native chrome abstraction for a shrinking population (windows not yet, and possibly never, ported) is negative-value work |
-| Layout/scaling | `UILayoutPolicy` | **Unchanged — already canonical** | Same as above |
-| Rendering | `CSprite`, raw `RenderImage()`, RmlUi | **`CSprite` for native visuals, RmlUi for ported visuals — retire the second `RenderImage()` path** | `RenderImage()` re-derives what `CSprite`'s frame/atlas system already does; no reason for a second implementation |
-| Theme | `UI::RmlBridge::LoadThemedDocument()`/`GetActiveThemeName()`/capability flags | **Unchanged — already canonical** | Independently verified well-designed: name-agnostic, capability-flag-gated, single required entry point |
-| Window-repositioning drag | `CWin::SetMovable()` (legacy, inert now) / `MakeDraggable()` (RmlUi, unused) | **`MakeDraggable()`, once it gets a first real caller** | Well-designed, narrowly scoped, honestly documents its own two open gaps |
-| Item-slot drag/drop | `CInventoryActionController` | **Unchanged, explicitly not part of the UI kit** | Domain logic wearing UI clothing — see Section F |
-| Open/close mutual exclusion (inventory family) | `CUIManager` | **Unchanged, rename its `INTERFACE_*` enum values only** | Legitimate, narrow domain policy; the only real defect is the name collision with the tier's own registry key |
+| Concern                                        | Current owners (verified)                                                                                                                                                                                                                             | Canonical owner                                                                                                                                                   | Reason                                                                                                                                                                                      |
+| ---------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Window lifecycle                               | `CObject`/`CManager`                                                                                                                                                                                                                                  | **`CObject`/`CManager`, unchanged**                                                                                                                               | Already ~88/97 windows; zero live top-level `CWin` subclasses remain                                                                                                                        |
+| Dispatch / input propagation                   | `CManager`'s depth-sorted, consume-and-stop loop                                                                                                                                                                                                      | **`CManager`, unchanged**                                                                                                                                         | Verified correct and coherent (topmost-first, `ScopedActiveTransform` per object) — this was never actually broken                                                                          |
+| Widget-level input polling                     | `CNewKeyInput`/`g_pNewKeyInput` via the `IsPress`/`IsRelease`/`IsNone`/`IsRepeat` free functions (new-tier widgets, ~15+ files, and `CInput`'s own keyboard queries), `CInput` (legacy `::CButton`, login/char-select only), RmlUi's own event system | **Already `CNewKeyInput`/the free functions — no change needed.** `CInput` stays, scoped to the login/char-select window family only                              | Tracing the chain found `CInput` is built on the free functions, not a competing root sampler — the "duplication" is one root plus one correctly-scoped façade, not two disagreeing systems |
+| Geometry / hit-testing                         | Hand-rolled per window (`CWin`'s own, `CUIControl`'s own, ~88 independent rect checks)                                                                                                                                                                | **New opt-in `WindowGeometry` (Section C)**                                                                                                                       | No existing implementation is reusable as-is; all are per-family, not per-concern                                                                                                           |
+| Coordinate transforms                          | `UI::Scaling::UITransform`/`UILayoutPolicy`                                                                                                                                                                                                           | **Unchanged — already canonical**                                                                                                                                 | 100% dispatch coverage confirmed in `WindowManager.cpp`; the strongest existing primitive in the codebase                                                                                   |
+| Buttons                                        | 4 implementations, split further into native/RmlUi contexts                                                                                                                                                                                          | **`base.rcss`'s `.btn` + a documented variant convention, going forward.** The evolved `mu::ui::window::CButton` (after removing its `CUIControl`/`CNewKeyInput` dependencies and macro-forked behavior) is a **transitional bridge for the still-native population only**, not a coequal permanent family | No hybrid window found actually needs a *primary* native button — every documented case (`CMsgWin`, `CSysMenuWin`) is a redundant click-detector already being retired; the native family should shrink toward zero, not stand alongside RmlUi as a second permanent target |
+| Text input                                     | `CUITextInputBox`                                                                                                                                                                                                                                     | **Unchanged — already canonical**                                                                                                                                 | Genuinely shared across every generation including RmlUi-hybrid windows; don't touch what already works                                                                                     |
+| Tooltips                                       | 4 mechanisms                                                                                                                                                                                                                                          | **New standalone `UI::Tooltip` primitive** (native, transitional) + **`base.rcss`'s `.tooltip` convention** (RmlUi, the long-term target)                        | Same transitional-vs-permanent split as buttons; extract from `mu::ui::window::CButton`'s existing anchor/position logic rather than inventing new math                                     |
+| Window chrome                                  | None — every window reimplements                                                                                                                                                                                                                      | **Not unified natively.** For RmlUi-reachable windows, chrome is a theme/RCSS concern (already true). For native-only windows, not worth building — see Section F | Building a generic native chrome abstraction for a shrinking population (windows not yet, and possibly never, ported) is negative-value work                                                |
+| Layout/scaling                                 | `UILayoutPolicy`                                                                                                                                                                                                                                      | **Unchanged — already canonical**                                                                                                                                 | Same as above                                                                                                                                                                               |
+| Rendering                                      | `CSprite`, raw `RenderImage()`, RmlUi                                                                                                                                                                                                                 | **`CSprite` for native visuals, RmlUi for ported visuals — retire the second `RenderImage()` path**                                                               | `RenderImage()` re-derives what `CSprite`'s frame/atlas system already does; no reason for a second implementation                                                                          |
+| Theme                                          | `UI::RmlBridge::LoadThemedDocument()`/`GetActiveThemeName()`/capability flags                                                                                                                                                                         | **Unchanged — already canonical**                                                                                                                                 | Independently verified well-designed: name-agnostic, capability-flag-gated, single required entry point                                                                                     |
+| Window-repositioning drag                      | `CWin::SetMovable()` (legacy, inert now) / `MakeDraggable()` (RmlUi, unused)                                                                                                                                                                          | **`MakeDraggable()`, once it gets a first real caller**                                                                                                           | Well-designed, narrowly scoped, honestly documents its own two open gaps                                                                                                                    |
+| Item-slot drag/drop                            | `CInventoryActionController`                                                                                                                                                                                                                          | **Unchanged, explicitly not part of the UI kit**                                                                                                                  | Domain logic wearing UI clothing — see Section F                                                                                                                                            |
+| Open/close mutual exclusion (inventory family) | `CUIManager`                                                                                                                                                                                                                                          | **Unchanged, rename its `INTERFACE_*` enum values only**                                                                                                          | Legitimate, narrow domain policy; the only real defect is the name collision with the tier's own registry key                                                                               |
+
+`architecture-principles.md` §20 also names `Panel`/`Dialog`/`ScrollContainer`/`HUDContainer` as
+target reusable components — deliberately not a row above. RmlUi's own DOM composition already
+gives any ported window real containment for free; the only population that would need a *native*
+container abstraction is the same transitional, shrinking native-only population the Buttons row
+above describes. Building one now would be investing in a population this plan is actively
+retiring, not filling a permanent gap.
 
 ## E. RmlUi Strategy
 
-**Answer: C (hybrid) — but as the deliberate, permanent target shape for one category of window,
-not a temporary state on the way to "B."**
+**Answer: C (hybrid) — but the permanent slice of that hybrid is narrower than this document
+originally claimed.** Correcting an overreach from the first pass: "camera-composited" was used
+to cover two genuinely different things, only one of which is actually permanent.
 
-The evidence for this, not just an assumption:
-
-1. The background-layer flush mechanism (`IMuRenderer::FlushRenderCommands()`,
-   `RmlUiRuntime::GetBackgroundContext()`/`RenderBackgroundLayer()`) was purpose-built to let
-   RmlUi content interleave with mid-frame 3D rendering — this is real engineering investment in
-   making hybrid work *well*, not a stopgap being tolerated until everything moves to RmlUi.
-2. `component-catalog.md`'s own documented gap list still has no plan for item-slot
-   3D-composited icon rendering inside RmlUi — because RmlUi has no primitive for "a real-time 3D
-   camera view composited into a 2D layout," and building one is a materially different problem
-   than porting static chrome.
-3. World-anchored content (`CCharInfoBalloonMng`, name tags) is fundamentally a
-   `WorldToScreen()` projection problem, not a layout problem — RmlUi's box model doesn't help
+**Permanent, not a migration debt** — content with no RmlUi equivalent at all:
+1. **Live 3D-camera-viewport content** (e.g. `CCharMakeWin`'s real-time character-preview panel,
+   driven by direct `BeginOpengl()` calls into the 3D pipeline) — RmlUi has no primitive for
+   compositing a live camera render into its layout, and nothing in `architecture-principles.md`
+   anticipates this case (a real, honest gap in the governing doc, not something this proposal can
+   resolve). The background-layer flush mechanism (`IMuRenderer::FlushRenderCommands()`,
+   `RmlUiRuntime::GetBackgroundContext()`/`RenderBackgroundLayer()`) makes RmlUi content interleave
+   *around* this kind of content mid-frame; it doesn't make the 3D content itself portable.
+2. **World-anchored content** (`CCharInfoBalloonMng`, name tags) — fundamentally a
+   `WorldToScreen()` projection problem, not a layout problem; RmlUi's box model doesn't help
    there regardless of migration completeness.
 
-So the boundary is not "how much is ported yet" but **what kind of content it is**:
+**Temporary, sequenced — not permanent, despite looking similar at a glance:**
+3. **2D sprite-atlas icon rendering** (the skill-grid/pet-row icons `MainFrameWindow.cpp` still
+   draws as legacy 2D sprites). `STATUS.md` itself calls this "a deliberate Phase 2 scope cut,"
+   blocked on `RenderSkillIcon()`'s irregular atlas addressing, not on any RmlUi limitation — this
+   is a decoded-texture-atlas problem, not a live-3D-compositing one. It's expected to retire into
+   RmlUi (most likely via generated `@spritesheet` rects, the same mechanism `STATUS.md` already
+   documents solving an equivalent atlas case elsewhere) once that port lands. Treating it as
+   permanent, as this document's first pass did, would wrongly justify never doing that port.
+
+So the durable boundary is **"can this content be represented as a live 3D render target or a
+world-space projection at all,"** not "is this currently hard to port":
 
 ```
-RmlUi owns:                              Native C++ (CSprite/CObject) owns:
-  - all static 2D chrome/layout/text       - anything camera-composited (item/skill
-    for any window that has been            icons rendered against the live 3D scene)
-    or will be ported                     - world-anchored overlays (name tags,
-  - buttons/checkboxes/text once             character-info balloons) -- WorldOverlay
-    a window is ported                       transform, not a layout concern
-  - tooltips once a window is ported       - anything not yet ported (transitional,
-                                              shrinks over time)
+RmlUi owns (eventually all of this):     Native C++ owns permanently:
+  - all static 2D chrome/layout/text       - live 3D-camera-viewport content
+  - buttons/checkboxes/text                  (e.g. character-preview panels)
+  - tooltips                               - world-anchored overlays (name tags,
+  - icon/sprite-atlas art (once the           character-info balloons) -- WorldOverlay
+    atlas port lands)                         transform, not a layout concern
 ```
 
 A ported window keeps exactly one native companion pattern, not native widgets generally: a
@@ -216,13 +242,16 @@ click-consumption behind RmlUi's real click handling, kept only because the lega
 gate was unreliable — already documented and already being retired as windows get their own
 direct `RmlClickX()` handlers). Neither is "native UI persisting because RmlUi migration
 stalled" — both are documented, bounded exceptions. New windows should not add a third kind of
-native companion without a specific, new reason as strong as those two.
+native companion without a specific, new reason as strong as those two. Neither pattern requires
+the evolved native `CButton` family to be a permanent fixture — a Type-1 click-detector is exactly
+the kind of use that disappears as windows get direct `RmlClickX()` handlers, consistent with
+Section D's "transitional bridge, not a coequal family" framing.
 
 ## F. Non-Unified Areas
 
 Explicitly kept separate, with the concrete reason each earns it:
 
-- **`CInventoryActionController`/item drag-drop** — this is inventory *business logic*
+- **`CInventoryActionController`/item drag-drop** — this is inventory _business logic_
   (move/split/stack rules, server round-trips) that happens to render through UI, not a UI
   mechanism. Folding it into a generic "UI drag" abstraction would force domain rules through a
   presentation-layer interface for no reuse benefit — nothing else in the game needs "split a
@@ -239,17 +268,17 @@ Explicitly kept separate, with the concrete reason each earns it:
   out on its own. It's inert as a base class already; touching it buys nothing unless that
   specific window is being changed for another reason anyway.
 - **Skill-specific tooltip content logic** (`UI::Skills::Tooltip::BuildModelForSlot`) — the
-  *rendering* should converge on the one canonical Tooltip primitive (Section D), but the domain
-  logic that decides *what a skill tooltip says* is correctly separate and should stay that way,
+  _rendering_ should converge on the one canonical Tooltip primitive (Section D), but the domain
+  logic that decides _what a skill tooltip says_ is correctly separate and should stay that way,
   same reasoning as item drag-drop.
 
 ## G. Developer Usage Model
 
-Concretely, for *"a settings window with a title, three tabs, labels, checkboxes, a text field, a
-slider, and a tooltip"* — the answer genuinely forks on one question first, because that's what
+Concretely, for _"a settings window with a title, three tabs, labels, checkboxes, a text field, a
+slider, and a tooltip"_ — the answer genuinely forks on one question first, because that's what
 the evidence in Section E demands:
 
-**Does this window need any 3D-camera-composited or world-anchored content?** No, for a settings
+**Does this window need any live 3D-camera-viewport or world-anchored content?** No, for a settings
 window. So the path is:
 
 ```
@@ -280,8 +309,8 @@ window. So the path is:
 7. Done. No CWin, no CUIControl, no legacy CButton, no CNewKeyInput poll.
 ```
 
-**If** the window had a 3D-composited element (it doesn't, but for contrast — e.g. an equipment
-preview panel), only *that* element stays native: a `CSprite`/3D-camera-rendered sub-view
+**If** the window had a live 3D-camera-viewport element (it doesn't, but for contrast — e.g. an equipment
+preview panel), only _that_ element stays native: a `CSprite`/3D-camera-rendered sub-view
 composited via the background-layer flush mechanism (Section E), while every other control on the
 same window still goes through the RmlUi path above. The developer never has to choose between
 "the CWin way" and "the CUIControl way" and "the mu::ui::window::CButton way" — those three only
@@ -293,14 +322,16 @@ for touching them is in Section H.
 Ordered by leverage-per-risk, using what's actually true today (not a generic template):
 
 **Needed immediately (cheap, zero behavior risk, unblocks clear thinking):**
+
 1. Rename `CUIManager`'s `INTERFACE_*` enum values (e.g. `INTERFACE_INVENTORY` →
    `MUTEX_INVENTORY`) so no two enums share names. Pure mechanical rename.
-2. Document, in the repo's dev instructions (Section I), that `mu::ui::window::CButton`/
-   `CCheckBox`/`CRadioButton` are the native-only canonical family and RmlUi + `base.rcss` is
-   canonical for anything with a presentation layer — so no new window picks a fourth path by
-   default.
+2. Document, in the repo's dev instructions (Section I), that RmlUi + `base.rcss` is canonical for
+   anything with a presentation layer, `mu::ui::window::CButton`/`CCheckBox`/`CRadioButton` is the
+   transitional bridge for the still-native population only, and nothing else — so no new window
+   picks a fourth path by default.
 
 **Needed before further native UI development continues at any real pace:**
+
 3. ~~Consolidate `CNewKeyInput` and `CInput`~~ — **resolved by investigation, no code change
    needed.** `CInput` is already built on `CNewKeyInput`'s free functions; the only action item is
    documenting `CInput`'s scope (Rule 5) so no future `MAIN_SCENE` or non-UI code reaches for its
@@ -311,38 +342,86 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
    touched for other reasons.
 
 **Can wait (real value, not blocking):**
+
 6. Retire `mu::ui::window::CButton`'s `RenderImage()` path in favor of `CSprite`, and its
-   `CheckMouseIn()` dependency on `UIControls.h` in favor of the new `WindowGeometry`. Do this
-   opportunistically per-window, not as a dedicated sweep.
+   `CheckMouseIn()` dependency on `UIControls.h` in favor of the new `WindowGeometry` — steps
+   toward shrinking the transitional native family, not toward hardening it as permanent.
 7. Migrate new UI screens onto the RmlUi path (Section G) by default; migrate existing
    native-only screens to RmlUi only when they're being touched for another reason anyway
    (matches the branch's own established practice).
 8. Deprecate and eventually remove `::CButton : CSprite`, `CUIButton : CUIControl`, and the
-   global `::CRadioButton` once grep shows zero remaining callers.
+   global `::CRadioButton` once grep shows zero remaining callers. The evolved
+   `mu::ui::window::CButton` family itself is next once its own remaining callers (the
+   not-yet-ported window population) reach zero — it is not exempt from this same trajectory.
 
 **Should never be done:**
+
 9. Do not add geometry/rendering/input/styling fields to `CObject` itself (Section C) — the thin
    base class is correct, not a gap.
 10. Do not fold `CInventoryActionController`, `CUIManager`'s domain policy, or 3D-camera/
     world-overlay rendering into a generic UI abstraction (Section F).
-11. Do not attempt a full RmlUi replacement of native rendering for camera-composited/
-    world-anchored content (Section E) — the hybrid boundary there is permanent, not a migration
-    debt.
+11. Do not attempt a full RmlUi replacement of native rendering for **live 3D-camera-viewport
+    content or world-anchored overlays** (Section E) — that narrower boundary is permanent. Do
+    *not* extend this exemption to sprite-atlas icon rendering or to native buttons/chrome
+    generally — those are transitional and should keep shrinking (items 6–8 above).
 12. Do not build a generic native "window chrome" base class for the shrinking population of
     not-yet-ported windows — that population is meant to shrink toward RmlUi, not grow a parallel
     framework of its own.
 
+**Needed to complete UI-kit coherence:**
+
+13. Normalize the canonical UI surface.
+
+    Once the canonical primitives are stable, reorganize or facade them so
+    developers encounter one obvious component family rather than historical
+    header/layout boundaries.
+
+    Do not mass-rename solely for aesthetics. Prefer compatibility aliases or
+    forwarding headers where migration risk is high.
+
+14. Publish the canonical component catalog.
+
+    Document the supported primitive for each reusable UI responsibility and
+    explicitly mark superseded implementations.
+
+15. Establish reference screens.
+
+    Maintain representative examples for:
+    - RmlUi-only 2D UI
+    - native-only UI
+    - hybrid RmlUi/native 3D UI
+    - world-overlay UI
+
+    New UI should follow these reference implementations rather than copying
+    arbitrary neighboring legacy windows.
+
+16. Enforce deprecation boundaries.
+
+    Deprecated widget families may remain while old screens migrate, but:
+    - no new call sites
+    - no new features added to them
+    - no new components derived from them
+
+17. Define and track migration exit criteria.
+
+    The migration is complete when every common UI concern has one canonical
+    implementation or an explicitly documented presentation-specific split,
+    and developers can discover the correct component without historical
+    knowledge of the codebase.
+
 ## I. Architectural Rules (for repo dev instructions)
 
 1. **New UI screens are RmlUi documents by default.** A native-only window requires a specific
-   reason (3D-camera-composited content, world-space anchoring, or a documented Type-1/Type-2
+   reason (live 3D-camera-viewport content, world-space anchoring, or a documented Type-1/Type-2
    RmlUi-companion pattern) — not "it was faster to hand-roll."
 2. **`mu::ui::window::CObject`/`CManager` is the only window base/registry.** Never derive a new
    window from `CWin`/`CWinEx`, and never add a new `INTERFACE_*`-keyed registry alongside
    `CManager`'s.
-3. **One button/checkbox/radio family for native contexts: `mu::ui::window::CButton`/
-   `CCheckBox`/`CRadioButton`.** Do not add a new native button implementation, and do not reach
-   for `::CButton : CSprite` or `CUIButton : CUIControl` in new code.
+3. **For the still-native population, one transitional button/checkbox/radio family:
+   `mu::ui::window::CButton`/`CCheckBox`/`CRadioButton`.** Do not add a new native button
+   implementation, and do not reach for `::CButton : CSprite` or `CUIButton : CUIControl` in new
+   code. Treat this family itself as something to migrate away from as its windows port to RmlUi
+   (Rule 1), not as a permanent second component system.
 4. **For anything with an RmlUi presentation, controls are RmlUi + `base.rcss`'s shared classes
    (`.btn`, `.checkbox-box`, `.tooltip`).** Do not hand-roll a new native widget for a window that
    already has a document.
