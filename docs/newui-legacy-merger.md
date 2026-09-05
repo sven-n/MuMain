@@ -436,6 +436,22 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   a meaningful distinction once `CUIMng` was deleted in Phase 4. Also sweep code comments (this
   doc's own included) that reference the old "New UI"/"Legacy UI" framing now that it's no longer
   accurate.
+  **Target scheme, decided during the directory-restructure follow-up research
+  (`docs/rmlui-ui-system/building-new-ui.md` has the full widget-toolkit map this comes from), not
+  yet executed**: real namespaces instead of prefix soup, since a blind `New*` strip collides with
+  existing classes outside this tier — `CNewUIButton` → `CButton` collides with
+  `UI/Widgets/Button.h`'s already-existing `CButton`, and `CNewUIRadioButton` → `CRadioButton`
+  collides with `UIControls.h`'s already-existing `CRadioButton`. Resolve by namespace, not by
+  inventing a disambiguating name: `namespace SEASON3B` (itself a literal historical-version name,
+  which `architecture-principles.md` already says not to organize around) becomes `UI::Window`
+  (`CNewUIObj`→`CObject`, `CNewUIManager`→`CManager`, `CNewUIButton`→`CButton`, etc.); the sprite
+  widget set (`Button.h`/`GaugeBar.h`/`Win.h`/`WinEx.h`, closed, `CWin`-heritage) moves into
+  `UI::Sprite`; the `UIControls.h` family moves into `UI::Controls` (matching its own file name).
+  Three unqualified `CButton`s in three different namespaces need no awkward compound name at all
+  — the namespace itself disambiguates. This also aligns with the domain-first `<Layer>::<Concern>`
+  namespace convention `docs/CODING_RULES.md` already established for new free-function
+  extractions, extended one level up to the toolkit/generation identity these whole class
+  hierarchies belong to.
 - **Directory restructure (done, 2026-09-05)** — `src/source/UI/Legacy/` and `src/source/UI/NewUI/`
   no longer exist. Neither folder name meant anything real anymore: `Legacy/` was a grab-bag (a
   widget toolkit, five unrelated base-less game-feature state classes, a second self-contained

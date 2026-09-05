@@ -23,7 +23,11 @@ new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.
 migrated so far. `COptionWin` was ported but deliberately not wired up — see [Coexistence
 patterns](#coexistence-patterns) below.
 
-See also: **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
+See also: **[Building New UI](building-new-ui.md)** — which of the three overlapping C++ widget
+toolkits (sprite widgets, `CUIControl`, `CNewUIObj`) to use for a new window, dialog, HUD panel,
+or widget, the folder-by-domain convention, and the known near-identical-name collisions to avoid
+(`CButton`/`CUIButton`/`CNewUIButton`, `CRadioButton`/`CNewUIRadioButton`). Read this before
+starting anything new under `UI/`. **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
 positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
 UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
