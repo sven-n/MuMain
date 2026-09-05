@@ -97,7 +97,7 @@ bool CursedTemple::GetInterfaceState(int type, int subtype)
 
     bool result = m_InterfaceState;
 
-    if (type == INTERFACE_COMMAND)
+    if (type == mu::ui::window::INTERFACE_COMMAND)
     {
         auto tempSubtype = (COMMAND_TYPE)(subtype);
 

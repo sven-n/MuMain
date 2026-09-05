@@ -6437,7 +6437,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 5:
-        g_pUIManager->Open(::INTERFACE_SERVERDIVISION);
+        g_pUIManager->Open(::MUTEX_SERVERDIVISION);
         break;
 
     case 6:

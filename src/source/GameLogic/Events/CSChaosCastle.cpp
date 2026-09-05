@@ -139,7 +139,7 @@ void ChangeChaosCastleUnit(CHARACTER* c)
     {
         g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, t_dwUIID, 0);
     }
-    if (g_pUIManager->IsOpen(INTERFACE_FRIEND))
+    if (g_pUIManager->IsOpen(MUTEX_FRIEND))
     {
         CUIFriendWindow* t_pFW = g_pWindowMgr->GetFriendMainWindow();
         t_pFW->Close();

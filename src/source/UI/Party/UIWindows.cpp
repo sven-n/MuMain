@@ -1058,7 +1058,7 @@ void CUIBaseWindow::Render()
         RenderBitmap(BITMAP_INTERFACE_EX + 11, (float)m_iPos_x + m_iWidth - 10, (float)m_iPos_y + m_iHeight - 10, (float)9, (float)9,
             0.f, 0.f, 9.f / 16.f, 9.f / 16.f);
     }
-    if (g_pWindowMgr->GetTopWindowUIID() != GetUIID() || !g_pUIManager->IsOpen(INTERFACE_FRIEND))
+    if (g_pWindowMgr->GetTopWindowUIID() != GetUIID() || !g_pUIManager->IsOpen(MUTEX_FRIEND))
     {
         DisableAlphaBlend();
     }

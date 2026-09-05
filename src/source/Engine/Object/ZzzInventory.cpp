@@ -482,7 +482,7 @@ bool IsCanUseItem()
 
 bool IsCanTrade()
 {
-    if (g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE))
+    if (g_pUIManager->IsOpen(MUTEX_PERSONALSHOPSALE) || g_pUIManager->IsOpen(MUTEX_PERSONALSHOPPURCHASE))
     {
         return false;
     }
@@ -10429,7 +10429,7 @@ void InitPartyList()
 
 void MoveServerDivisionInventory()
 {
-    if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
+    if (!g_pUIManager->IsOpen(MUTEX_SERVERDIVISION)) return;
     int x = REFERENCE_WIDTH - 190;
     int y = 0;
     int Width, Height;
@@ -10537,7 +10537,7 @@ bool g_bPadPushed = false;
 
 void MovePersonalShop()
 {
-    if ((g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPSALE) || g_pUIManager->IsOpen(INTERFACE_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)
+    if ((g_pUIManager->IsOpen(MUTEX_PERSONALSHOPSALE) || g_pUIManager->IsOpen(MUTEX_PERSONALSHOPPURCHASE)) && g_iPShopWndType == PSHOPWNDTYPE_SALE)
     {
         if (g_iPersonalShopMsgType == 1)
         {
@@ -10565,7 +10565,7 @@ void MovePersonalShop()
                 if (g_bEnablePersonalShop)
                 {
                     SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(g_szPersonalShopTitle));
-                    g_pUIManager->Close(INTERFACE_INVENTORY);
+                    g_pUIManager->Close(MUTEX_INVENTORY);
                 }
                 else
                 {
@@ -10979,7 +10979,7 @@ void RenderGuildList(int StartX, int StartY)
 
 void RenderServerDivision()
 {
-    if (!g_pUIManager->IsOpen(INTERFACE_SERVERDIVISION)) return;
+    if (!g_pUIManager->IsOpen(MUTEX_SERVERDIVISION)) return;
 
     float Width, Height, x, y;
 

@@ -1836,9 +1836,9 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
 void CloseNPCGMWindow()
 {
-    if (!g_pUIManager->IsOpen(INTERFACE_NPCGUILDMASTER))
+    if (!g_pUIManager->IsOpen(MUTEX_NPCGUILDMASTER))
         return;
-    g_pUIManager->Close(INTERFACE_NPCGUILDMASTER);
+    g_pUIManager->Close(MUTEX_NPCGUILDMASTER);
 }
 
 void SendMove(CHARACTER* c, OBJECT* o)

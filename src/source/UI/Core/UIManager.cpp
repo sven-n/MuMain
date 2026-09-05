@@ -159,7 +159,7 @@ void CUIManager::Render()
 
 void CUIManager::CloseAll()
 {
-    for (DWORD dwInterface = INTERFACE_FRIEND; dwInterface < INTERFACE_MAX_COUNT; ++dwInterface)
+    for (DWORD dwInterface = MUTEX_FRIEND; dwInterface < MUTEX_MAX_COUNT; ++dwInterface)
     {
         if (g_pUIManager->IsOpen(dwInterface))
         {
@@ -179,7 +179,7 @@ bool CUIManager::IsOpen(DWORD dwInterface)
 {
     if (dwInterface == 0)
     {
-        for (DWORD dwInterface = INTERFACE_FRIEND; dwInterface < INTERFACE_MAX_COUNT; ++dwInterface)
+        for (DWORD dwInterface = MUTEX_FRIEND; dwInterface < MUTEX_MAX_COUNT; ++dwInterface)
         {
             if (IsOpen(dwInterface))
                 return true;
@@ -188,14 +188,14 @@ bool CUIManager::IsOpen(DWORD dwInterface)
 
     switch (dwInterface)
     {
-    case INTERFACE_INVENTORY:
+    case MUTEX_INVENTORY:
         return HeroInventoryEnable;
-    case INTERFACE_STORAGE:
+    case MUTEX_STORAGE:
         return StorageInventoryEnable;
-    case INTERFACE_PERSONALSHOPSALE:
-    case INTERFACE_PERSONALSHOPPURCHASE:
+    case MUTEX_PERSONALSHOPSALE:
+    case MUTEX_PERSONALSHOPPURCHASE:
         return g_bPersonalShopWnd;
-    case INTERFACE_SERVERDIVISION:
+    case MUTEX_SERVERDIVISION:
         return g_bServerDivisionEnable;
     default:
         return false;
@@ -210,7 +210,7 @@ bool CUIManager::IsCanOpen(DWORD dwInterfaceFlag)
 
 void CUIManager::GetInterfaceAll(std::list<DWORD>& outflag)
 {
-    for (DWORD flag = INTERFACE_FRIEND; flag < INTERFACE_MAX_COUNT; ++flag)
+    for (DWORD flag = MUTEX_FRIEND; flag < MUTEX_MAX_COUNT; ++flag)
     {
         outflag.push_back(flag);
     }
@@ -238,7 +238,7 @@ void CUIManager::GetDeleteInterface(std::list<DWORD>& outflag, DWORD deleteflag)
 
 bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
 {
-    if (IsOpen(INTERFACE_REFINERYINFO))
+    if (IsOpen(MUTEX_REFINERYINFO))
         return false;
     if (IsOpen(dwInterface))
         return false;
@@ -250,11 +250,11 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
     std::list<DWORD> closeinterfaceflag;
     GetInterfaceAll(closeinterfaceflag);
     GetDeleteInterface(closeinterfaceflag, dwInterface);
-    GetDeleteInterface(closeinterfaceflag, INTERFACE_FRIEND);
+    GetDeleteInterface(closeinterfaceflag, MUTEX_FRIEND);
 
     switch (dwInterface)
     {
-    case INTERFACE_INVENTORY:
+    case MUTEX_INVENTORY:
     {
         bool bResult = CloseInterface(closeinterfaceflag);
         if (bResult)
@@ -263,14 +263,14 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
         }
     }
     break;
-    case INTERFACE_PERSONALSHOPSALE:
+    case MUTEX_PERSONALSHOPSALE:
     {
-        GetDeleteInterface(closeinterfaceflag, INTERFACE_INVENTORY);
+        GetDeleteInterface(closeinterfaceflag, MUTEX_INVENTORY);
 
         bool bResult = CloseInterface(closeinterfaceflag);
         if (bResult)
         {
-            Open(INTERFACE_INVENTORY);
+            Open(MUTEX_INVENTORY);
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE) {
                 g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
@@ -284,12 +284,12 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
         }
     }
     break;
-    case INTERFACE_PERSONALSHOPPURCHASE:
+    case MUTEX_PERSONALSHOPPURCHASE:
     {
         bool bResult = CloseInterface(closeinterfaceflag);
         if (bResult)
         {
-            Open(INTERFACE_INVENTORY);
+            Open(MUTEX_INVENTORY);
 
             if (g_iPShopWndType != PSHOPWNDTYPE_NONE) {
                 g_ErrorReport.Write(L"@ OpenPersonalShop : SendRequestInventory\n");
@@ -302,7 +302,7 @@ bool CUIManager::Open(DWORD dwInterface, DWORD dwExtraData)
         }
     }
     break;
-    case INTERFACE_SERVERDIVISION:
+    case MUTEX_SERVERDIVISION:
     {
         bool bResult = CloseInterface(closeinterfaceflag);
         if (bResult)
@@ -328,22 +328,22 @@ bool CUIManager::Close(DWORD dwInterface, DWORD dwExtraData)
 
     switch (dwInterface)
     {
-    case INTERFACE_INVENTORY:
+    case MUTEX_INVENTORY:
     {
         bool bResult = true;
         if (bResult)
         {
             std::list<DWORD> closeinterfaceflag;
 
-            GetInsertInterface(closeinterfaceflag, INTERFACE_TRADE);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_STORAGE);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_GUILDSTORAGE);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_MIXINVENTORY);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_PERSONALSHOPSALE);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_NPCBREEDER);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_NPCSHOP);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_SENATUS);
-            GetInsertInterface(closeinterfaceflag, INTERFACE_REFINERY);
+            GetInsertInterface(closeinterfaceflag, MUTEX_TRADE);
+            GetInsertInterface(closeinterfaceflag, MUTEX_STORAGE);
+            GetInsertInterface(closeinterfaceflag, MUTEX_GUILDSTORAGE);
+            GetInsertInterface(closeinterfaceflag, MUTEX_MIXINVENTORY);
+            GetInsertInterface(closeinterfaceflag, MUTEX_PERSONALSHOPSALE);
+            GetInsertInterface(closeinterfaceflag, MUTEX_NPCBREEDER);
+            GetInsertInterface(closeinterfaceflag, MUTEX_NPCSHOP);
+            GetInsertInterface(closeinterfaceflag, MUTEX_SENATUS);
+            GetInsertInterface(closeinterfaceflag, MUTEX_REFINERY);
             bResult = CloseInterface(closeinterfaceflag, dwExtraData);
             if (bResult)
             {
@@ -354,13 +354,13 @@ bool CUIManager::Close(DWORD dwInterface, DWORD dwExtraData)
         }
     }
     break;
-    case INTERFACE_STORAGE:
-    case INTERFACE_GUILDSTORAGE:
-    case INTERFACE_MIXINVENTORY:
-    case INTERFACE_TRADE:
-    case INTERFACE_NPCBREEDER:
-    case INTERFACE_NPCSHOP:
-    case INTERFACE_GUARDSMAN:
+    case MUTEX_STORAGE:
+    case MUTEX_GUILDSTORAGE:
+    case MUTEX_MIXINVENTORY:
+    case MUTEX_TRADE:
+    case MUTEX_NPCBREEDER:
+    case MUTEX_NPCSHOP:
+    case MUTEX_GUARDSMAN:
     {
         std::list<DWORD> closeinterfaceflag;
         GetInsertInterface(closeinterfaceflag, dwInterface);
@@ -368,7 +368,7 @@ bool CUIManager::Close(DWORD dwInterface, DWORD dwExtraData)
         if (bResult)
         {
             std::list<DWORD> closeflag;
-            GetInsertInterface(closeflag, INTERFACE_INVENTORY);
+            GetInsertInterface(closeflag, MUTEX_INVENTORY);
             CloseInterface(closeflag, dwExtraData);
         }
     }
