@@ -56,6 +56,15 @@ namespace mu::ui::window
         bool RadioProcess();
         bool Process();
 
+    private:
+        // Hit-test via the opt-in WindowGeometry component (UI/Core/WindowGeometry.h) instead of
+        // hand-rolling the rect compare inline at each call site -- see
+        // docs/ui-target-architecture.md Section C/Rule 7. Built fresh from m_Pos/m_Size on each
+        // call rather than kept as a persistent member: those two fields (and the public
+        // GetPos()/GetSize() built around them) are already this class's source of truth, so a
+        // second persistent copy would just be state to keep in sync for no benefit.
+        bool IsMouseIn() const;
+
     protected:
         POINT					m_Pos;
         POINT					m_Size;

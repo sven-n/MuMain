@@ -3,6 +3,7 @@
 
 #include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/UIControls.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Render/Sprites/GlobalBitmap.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "I18N/All.h"
@@ -46,9 +47,14 @@ void CBaseButton::SetSize(int sx, int sy)
     PointSet(m_Size, sx, sy);
 }
 
+bool CBaseButton::IsMouseIn() const
+{
+    return mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y).Contains(MouseX, MouseY);
+}
+
 bool CBaseButton::RadioProcess()
 {
-    bool isMousein = CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y);
+    bool isMousein = IsMouseIn();
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
     if (isMousein)
@@ -94,7 +100,7 @@ bool CBaseButton::RadioProcess()
 
 bool CBaseButton::Process()
 {
-    bool isMousein = CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y);
+    bool isMousein = IsMouseIn();
 
     if (mu::ui::window::IsNone(VK_LBUTTON) && isMousein)
     {
