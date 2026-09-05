@@ -8,13 +8,26 @@ accidentally reach for a closed, historical one. Read `architecture-principles.m
 overall philosophy this follows; this doc is the concrete "what do I actually type" answer for the
 C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/RCSS layer).
 
+**Read this before the toolkit table below**: for anything with a visible presentation, RmlUi +
+`base.rcss`'s shared classes (`.btn`, `.checkbox-box`, `.tooltip`) is canonical — not a fourth
+option alongside the three toolkits here. The `mu::ui::window` tier's own widget family
+(`Widgets/Window/*.h`, the cheat sheet below) is a **transitional bridge for content that must stay
+native** — live 3D-camera-viewport content (e.g. `CCharMakeWin`'s character-preview panel),
+world-anchored overlays, or a documented Type-1/Type-2 RmlUi-companion pattern (a redundant
+click-detector behind a real RmlUi button, or a real widget RmlUi can't host yet like
+`CUITextInputBox`) — not a permanent alternative to RmlUi for ordinary 2D chrome. See
+[`../ui-target-architecture.md`](../ui-target-architecture.md) for the full reasoning and the
+cross-check against `architecture-principles.md` that established this. **This doc's base-class
+guidance below is unchanged** (`mu::ui::window::CObject`, always) — what changed is which widgets a
+*new* window reaches for once it has one.
+
 ## The three toolkits
 
 | Toolkit | Base class(es) | Real home | Status |
 |---|---|---|---|
 | Sprite widgets | `CButton : CSprite`, `CGaugeBar`, `CWin`, `CWinEx : CWin` | `UI/Widgets/{Button,GaugeBar,Win,WinEx}.h` | **Closed.** `CWin`/`CWinEx` have zero live subclasses anywhere in the tree — every window that still uses these is `mu::ui::window::CObject`-derived today and only kept these as composed *members* from before its Phase 1-3 migration off `CWin`. Don't add a new consumer. |
 | `CUIControl` family | `CUIControl : CUIMessage`, `CUIButton`, `CUITextListBox<T>`, `CUITextInputBox`, `CUIChatInputBox`, `CUIBaseWindow : CUIControl`, `CUIWindowMgr`, `CRadioButton`, `CUISlideHelp`/`CSlideHelpMgr` | `UI/Widgets/UIControls.h`, `UI/Party/UIWindows.h` | **Fully live**, but effectively closed to new *window-manager* consumers — `CUIBaseWindow`/`CUIWindowMgr`'s only live subsystem is the friend/mail/chat-room feature in `UIWindows.cpp` (see below). `CUITextInputBox` is the one class here still legitimately reused by brand-new `mu::ui::window::CObject` windows (`NewUIGuildMakeWindow`, `NewUIMyShopInventory`, etc.) — there's no equivalent yet in that tier, so this is a sanctioned exception, not technical debt to avoid. |
-| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox`/`CChatInputBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **The default for all new work.** This is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. |
+| `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox`/`CChatInputBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the default base class for all new work** — this is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. Its own **widget family is transitional**, for native-only content only (see the note above) — for anything with an RmlUi presentation, use RmlUi + `base.rcss` instead. |
 
 ## Quick decision guide for a new window, dialog, or HUD panel
 
@@ -40,7 +53,11 @@ C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/
    applied one layer earlier (wrapping the object lifecycle before the render target changes at
    all).
 
-## Widget cheat sheet (new `mu::ui::window::CObject` windows)
+## Widget cheat sheet (native-only content on new `mu::ui::window::CObject` windows)
+
+Applies only to content that must stay native (see the note above) — for anything with an RmlUi
+presentation, skip this table and use RmlUi + `base.rcss`'s `.btn`/`.checkbox-box`/`.tooltip`
+instead.
 
 | Need | Use | Header | Don't confuse with |
 |---|---|---|---|
@@ -107,6 +124,9 @@ ever need to touch the friend/mail/chat-room feature, this is the file; don't bu
 
 ## Cross-references
 
+- [`../ui-target-architecture.md`](../ui-target-architecture.md) — the canonical/transitional
+  framing this doc's widget guidance follows, the full RmlUi-vs-native boundary reasoning, and the
+  broader UI-kit migration plan this is one item of.
 - [`newui-legacy-merger.md`](../newui-legacy-merger.md) — the `CUIMng`/`CWin` retirement history,
   the `UI/` directory restructure, and Phase 5's namespace/rename work.
 - [`newui-tier-adapter.md`](newui-tier-adapter.md) — how to port a window's *rendering* to RmlUi
