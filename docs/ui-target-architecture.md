@@ -6,6 +6,14 @@ against source (not against its own text) and proposes a target architecture, ca
 components, an RmlUi strategy, and a migration plan. No code has been changed as part of either
 document. Produced 2026-09-05.
 
+**Correction, 2026-09-05**: this document originally characterized `CInput` and `CNewKeyInput` as
+two independent, potentially-disagreeing input samplers. A follow-up trace of the actual call
+chain (`Core::Input::IsKeyDown()` → `CNewKeyInput::ScanAsyncKeyState()` → the
+`IsPress`/`IsRelease`/`IsNone`/`IsRepeat` free functions) found that's wrong: `CInput` is built
+*on top of* `CNewKeyInput` (its keyboard queries are pure forwards; its own mouse-button state is
+derived by calling the same free functions), not a competing root sampler. Sections A, C, D, H,
+and Rule 5 below are corrected accordingly.
+
 ## A. Architecture Verdict
 
 **The prior assessment's diagnosis is correct and, if anything, understated.** Independently
@@ -29,14 +37,17 @@ re-verifying:
     `CUIControl` toolkit" the prior assessment treated as a separate, competing generation. The
     "new" tier's own canonical button is not actually independent of the "old" one.
   - It polls input via free functions `IsPress`/`IsRelease`/`IsNone` (`UI/Core/WindowCommon.cpp`),
-    which wrap a **third, independent input-sampling system**, `CNewKeyInput`/`g_pNewKeyInput`,
-    polling `GetAsyncKeyState()` directly. The legacy `::CButton` instead polls
-    `CInput::Instance()`. Neither goes through `CManager`'s own `UpdateMouseEvent()` return-value
-    contract at the individual-widget level. **This is a finding the prior assessment missed
-    entirely** — it flagged RmlUi-vs-legacy input as "two systems, not three" (quoting
-    `STATUS.md`) but didn't catch that a large fraction of `CObject`-tier windows (grep:
-    `InventoryCtrl.cpp`, `Trade.cpp`, `MixInventory.cpp`, `GoldBowmanWindow.cpp`, and others)
-    bypass both `CInput` and RmlUi's event system for a third, direct `GetAsyncKeyState()` poll.
+    which wrap `CNewKeyInput`/`g_pNewKeyInput` — confirmed, on tracing the full chain, to be the
+    single root input sampler for both keyboard and mouse-button-as-VK state (`Core::Input::
+    IsKeyDown()`, SDL3-backed — `ScanAsyncKeyState()`'s name is stale, it hasn't called
+    `GetAsyncKeyState()` since the SDL3 port). The legacy `::CButton` instead polls
+    `CInput::Instance()` — which turns out to be a thin façade *built on the same free functions*
+    for its keyboard queries, adding only its own scene-scoped (`LOG_IN_SCENE`/`CHARACTER_SCENE`
+    only) mouse-button/double-click/left-hand-mode/cursor-position bookkeeping on top. Not two
+    competing samplers, in other words — one root sampler plus one narrow, correctly-scoped
+    convenience layer. Neither goes through `CManager`'s own `UpdateMouseEvent()` return-value
+    contract at the individual-widget level, though — consumption is purely a dispatch-order
+    convention (Section D), not a property either input path enforces itself.
   - It duplicates `EnsureLocaleObserver()`/`OnLocaleChanged()` nearly verbatim three times
     (`CButton`, `CRadioButton`, `CCheckBox`) instead of once on `CBaseButton`.
   - Its behavior forks under `#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM`/
@@ -140,9 +151,10 @@ reason.** A window's rendering is either `CSprite`-based, RmlUi-based, or both s
 during migration — there is no single "Render" contract narrower than the `bool Render()`
 `CObject` already declares that would fit all three without becoming a leaky abstraction. Input
 is already unified at the *dispatch* level (`CManager`'s topmost-first, consume-and-stop loop,
-confirmed correct and coherent in `WindowManager.cpp`); the actual defect is one level down —
-three different widget-level input-polling APIs (`CInput`, `CNewKeyInput`, RmlUi events) — which
-Section D addresses directly rather than by adding a fourth abstraction on top.
+confirmed correct and coherent in `WindowManager.cpp`); the widget-level input-polling API is
+already effectively unified too, once `CInput`'s real relationship to `CNewKeyInput` is understood
+(Section D) — the remaining question is RmlUi's separate event system, which is fine as its own
+thing since it only ever drives RmlUi-owned elements.
 
 ## D. Canonical Components
 
@@ -150,7 +162,7 @@ Section D addresses directly rather than by adding a fourth abstraction on top.
 |---|---|---|---|
 | Window lifecycle | `CObject`/`CManager` | **`CObject`/`CManager`, unchanged** | Already ~88/97 windows; zero live top-level `CWin` subclasses remain |
 | Dispatch / input propagation | `CManager`'s depth-sorted, consume-and-stop loop | **`CManager`, unchanged** | Verified correct and coherent (topmost-first, `ScopedActiveTransform` per object) — this was never actually broken |
-| Widget-level input polling | `CInput` (legacy `::CButton`), `CNewKeyInput`/`g_pNewKeyInput` (new-tier widgets, ~15+ files), RmlUi's own event system | **`CInput`, consolidate the other two onto it** | `CNewKeyInput` independently polls `GetAsyncKeyState()` — a real, previously-uncaught duplicate input sampler, not just a naming difference |
+| Widget-level input polling | `CNewKeyInput`/`g_pNewKeyInput` via the `IsPress`/`IsRelease`/`IsNone`/`IsRepeat` free functions (new-tier widgets, ~15+ files, and `CInput`'s own keyboard queries), `CInput` (legacy `::CButton`, login/char-select only), RmlUi's own event system | **Already `CNewKeyInput`/the free functions — no change needed.** `CInput` stays, scoped to the login/char-select window family only | Tracing the chain found `CInput` is built on the free functions, not a competing root sampler — the "duplication" is one root plus one correctly-scoped façade, not two disagreeing systems |
 | Geometry / hit-testing | Hand-rolled per window (`CWin`'s own, `CUIControl`'s own, ~88 independent rect checks) | **New opt-in `WindowGeometry` (Section C)** | No existing implementation is reusable as-is; all are per-family, not per-concern |
 | Coordinate transforms | `UI::Scaling::UITransform`/`UILayoutPolicy` | **Unchanged — already canonical** | 100% dispatch coverage confirmed in `WindowManager.cpp`; the strongest existing primitive in the codebase |
 | Buttons (native-only contexts) | 4 implementations | **Evolved `mu::ui::window::CButton`, after removing its `CUIControl`/`CNewKeyInput` dependencies and macro-forked behavior** | Most adopted, richest feature set; not clean enough to canonicalize unmodified |
@@ -289,9 +301,10 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
    default.
 
 **Needed before further native UI development continues at any real pace:**
-3. Consolidate `CNewKeyInput`'s `GetAsyncKeyState()` polling onto `CInput` (or vice versa —
-   whichever is the real, intended source of truth; that's a one-question investigation, not a
-   redesign) so there's one input sampler, not two disagreeing ones.
+3. ~~Consolidate `CNewKeyInput` and `CInput`~~ — **resolved by investigation, no code change
+   needed.** `CInput` is already built on `CNewKeyInput`'s free functions; the only action item is
+   documenting `CInput`'s scope (Rule 5) so no future `MAIN_SCENE` or non-UI code reaches for its
+   stale-outside-login/char-select mouse/cursor state.
 4. Extract the Tooltip primitive out of `mu::ui::window::CButton::ChangeToolTipText`'s existing
    logic into a standalone, attachable component.
 5. Build the opt-in `WindowGeometry` component (Section C) and start using it in any window
@@ -333,9 +346,15 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
 4. **For anything with an RmlUi presentation, controls are RmlUi + `base.rcss`'s shared classes
    (`.btn`, `.checkbox-box`, `.tooltip`).** Do not hand-roll a new native widget for a window that
    already has a document.
-5. **All widget-level mouse/key polling goes through `CInput`.** Do not call
-   `GetAsyncKeyState()` directly or add a call site to `CNewKeyInput`'s free functions in new
-   code.
+5. **All widget-level mouse/key polling goes through `mu::ui::window::IsPress`/`IsRelease`/
+   `IsNone`/`IsRepeat`** (the `CNewKeyInput`-backed free functions, `UI/Core/WindowCommon.h`) —
+   the single, always-updated, all-scene input source, already SDL3-backed (not
+   `GetAsyncKeyState()`, despite `ScanAsyncKeyState()`'s stale name). **`CInput::Instance()` is
+   reserved for the login/character-select window family's own real-pixel needs** (double-click
+   detection, left-hand-mode swap, raw untransformed cursor position) — its mouse/cursor state is
+   only updated during `LOG_IN_SCENE`/`CHARACTER_SCENE` and is stale everywhere else, so do not
+   reach for it from `MAIN_SCENE` or non-UI code; its `IsKeyDown()`/`IsKeyHeldDown()` forwards are
+   fine to use if already in scope, but new code should call the free functions directly.
 6. **All coordinate math goes through `UI::Scaling`.** Never introduce a second
    `g_fScreenRate_x`-style global or a hand-rolled reference-resolution scale; add a `LayoutMode`
    case if none of the existing seven fit.
