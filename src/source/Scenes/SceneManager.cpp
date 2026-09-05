@@ -42,7 +42,7 @@ FrameTimingState g_frameTiming;
 #include "UI/Dialogs/ReconnectDialog.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/HUD/Notices.h"
 #include "I18N/All.h"

@@ -5,9 +5,9 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 
-#include "UI/Core/NewUICommon.h"
+#include "UI/Core/WindowCommon.h"
 #include "UI/Widgets/NewUIRenderNumber.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

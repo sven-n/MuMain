@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <memory>
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Widgets/Button.h"
 #include "Render/Sprites/Sprite.h"
 

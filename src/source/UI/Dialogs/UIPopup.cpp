@@ -7,7 +7,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Core/UIManager.h"
 #include "UIPopup.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
 extern int g_iChatInputType;

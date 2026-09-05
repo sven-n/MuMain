@@ -16,7 +16,7 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "Render/Terrain/CSWaterTerrain.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"

@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Inventory/NewUIItemEnduranceInfo.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "I18N/All.h"
 

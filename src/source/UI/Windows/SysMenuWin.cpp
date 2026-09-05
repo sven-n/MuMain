@@ -13,7 +13,7 @@
 #include "Scenes/SceneCore.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/ErrorReport.h"

@@ -5,7 +5,7 @@
 #include "I18N/All.h"
 
 #include "UI/Character/NewUIPetInfoWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CharacterManager.h"

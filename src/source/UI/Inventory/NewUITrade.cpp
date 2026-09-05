@@ -6,7 +6,7 @@
 #include "I18N/All.h"
 
 #include "UI/Inventory/NewUITrade.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICustomMessageBox.h"
 
 #include "GameLogic/Items/CComGem.h"

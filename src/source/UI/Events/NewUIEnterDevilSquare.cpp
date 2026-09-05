@@ -5,7 +5,7 @@
 #include "I18N/All.h"
 
 #include "UI/Events/NewUIEnterDevilSquare.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"

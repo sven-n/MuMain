@@ -126,7 +126,7 @@ namespace
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Social/MonkSystem.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;

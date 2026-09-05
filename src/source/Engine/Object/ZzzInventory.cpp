@@ -42,7 +42,7 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
 #include "World/MapInfra/PortalMgr.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>

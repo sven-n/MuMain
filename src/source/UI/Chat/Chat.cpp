@@ -39,7 +39,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"

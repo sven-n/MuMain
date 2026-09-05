@@ -2,7 +2,7 @@
 #include "UI/Chat/Whisper.h"
 
 #include "Engine/Object/ZzzInfomation.h"     // CharacterAttribute
-#include "UI/Core/NewUISystem.h"            // g_pSystemLogBox
+#include "UI/Core/WindowSystem.h"            // g_pSystemLogBox
 #include "UI/HUD/NewUIChatLogWindow.h" // mu::ui::window::TYPE_SYSTEM_MESSAGE
 #include "UI/Widgets/UIControls.h"            // g_pRenderText
 #include "I18N/All.h"

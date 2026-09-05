@@ -19,7 +19,7 @@
 #include "UI/Widgets/UIControls.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

@@ -20,7 +20,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Input/Input.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"

@@ -5,7 +5,7 @@
 #include "stdafx.h"
 
 #include "UI/Inventory/NewUISetItemExplanation.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Audio/DSPlaySound.h"
 

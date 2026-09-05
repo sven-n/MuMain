@@ -82,7 +82,7 @@
 
 #include "GameLogic/Pets/w_PetProcess.h"
 
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"

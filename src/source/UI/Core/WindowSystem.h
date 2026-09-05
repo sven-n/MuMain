@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "UI/Core/NewUIManager.h"
-#include "UI/Core/NewUI3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/Core/Window3DRenderMng.h"
 #include "UI/HUD/NewUIHotKey.h"
 #include "UI/HUD/NewUIChatLogWindow.h"
 #include "UI/Widgets/NewUISlideWindow.h"
@@ -82,7 +82,7 @@
 #include "UI/Inventory/NewUIUnitedMarketPlaceWindow.h"
 
 #include "UI/Inventory/NewUILuckyItemWnd.h"
-#include "UI/Core/NewUIMuHelper.h"
+#include "UI/Core/WindowMuHelper.h"
 
 namespace mu::ui::window
 {

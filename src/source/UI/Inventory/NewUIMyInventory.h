@@ -6,10 +6,10 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
-#include "UI/Core/NewUI3DRenderMng.h"
+#include "UI/Core/Window3DRenderMng.h"
 #include "UI/Widgets/NewUIButton.h"
 #include "UI/Inventory/NewUIInventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"

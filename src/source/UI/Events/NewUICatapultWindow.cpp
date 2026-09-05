@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Events/NewUICatapultWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"

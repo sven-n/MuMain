@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Events/NewUIChaosCastleTime.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/MatchEvent.h"
 #include "I18N/All.h"
 

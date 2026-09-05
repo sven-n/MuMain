@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Widgets/NewUIButton.h"
 
 constexpr auto MAX_MASTER_SKILL_DATA = 512;

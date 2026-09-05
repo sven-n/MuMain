@@ -6,7 +6,7 @@
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 

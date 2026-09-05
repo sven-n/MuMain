@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Widgets/NewUIChatInputBox.h"
 

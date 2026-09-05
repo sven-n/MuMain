@@ -3,7 +3,7 @@
 //*****************************************************************************
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"
 #include "UI/Quests/NewUIQuestProgress.h"
 #include "GameLogic/Quests/QuestMng.h"

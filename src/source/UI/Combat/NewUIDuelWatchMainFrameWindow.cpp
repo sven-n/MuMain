@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Combat/NewUIDuelWatchMainFrameWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "I18N/All.h"
 

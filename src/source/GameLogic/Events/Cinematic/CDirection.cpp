@@ -11,7 +11,7 @@
 
 #include "World/MapInfra/MapManager.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include <algorithm>
 #include <cmath>

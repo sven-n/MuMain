@@ -5,8 +5,8 @@
 
 #ifdef PBG_ADD_GENSRANKING
 
-#include "UI/Core/NewUIBase.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Widgets/NewUIButton.h"

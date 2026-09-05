@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Inventory/NewUIUnitedMarketPlaceWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"

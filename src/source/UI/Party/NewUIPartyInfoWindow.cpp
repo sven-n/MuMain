@@ -5,7 +5,7 @@
 #include "I18N/All.h"
 
 #include "UI/Party/NewUIPartyInfoWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Events/w_CursedTemple.h"

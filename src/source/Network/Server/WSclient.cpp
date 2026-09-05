@@ -54,7 +54,7 @@
 #include "GameLogic/Items/MixMgr.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Events/UIGuardsMan.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"

@@ -8,7 +8,7 @@
 #include "I18N/All.h"
 
 #include "UI/Core/UIManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Camera/CameraProjection.h"
 
 namespace

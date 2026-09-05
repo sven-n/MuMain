@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Combat/NewUIDuelWatchUserListWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;

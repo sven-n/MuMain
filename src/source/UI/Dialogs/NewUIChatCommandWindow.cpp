@@ -10,7 +10,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Core/Text/TextLineWrap.h"
 #include "GameLogic/Commands/ChatCommandFavourites.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include <algorithm>
 

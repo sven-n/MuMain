@@ -3,7 +3,7 @@
 #include "Render/Textures/ZzzTexture.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "UI/Widgets/UIControls.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/HUD/NewUIMasterLevel.h"
 #include "I18N/All.h"
 

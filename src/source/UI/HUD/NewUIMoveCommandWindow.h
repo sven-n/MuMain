@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <cstddef>
 
-#include "UI/Core/NewUIBase.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
 #include "Network/MoveCommandData.h"
 #include "UI/HUD/NewUIChatLogWindow.h"
 #include "UI/Scaling/UITransform.h"

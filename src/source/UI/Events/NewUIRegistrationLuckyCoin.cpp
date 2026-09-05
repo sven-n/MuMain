@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Events/NewUIRegistrationLuckyCoin.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "I18N/All.h"

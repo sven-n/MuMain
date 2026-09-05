@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Windows/MsgWin.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 
 #define UIM_SCENE_NONE 0
 #define UIM_SCENE_TITLE 1

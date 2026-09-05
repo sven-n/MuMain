@@ -2,8 +2,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Core/NewUISystem.h"
-#include "UI/Core/NewUICommon.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowCommon.h"
 #include "UI/NPCs/NewUIEmpireGuardianNPC.h"
 #include "I18N/All.h"
 

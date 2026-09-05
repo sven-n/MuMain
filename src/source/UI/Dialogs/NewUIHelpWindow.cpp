@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Dialogs/NewUIHelpWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"

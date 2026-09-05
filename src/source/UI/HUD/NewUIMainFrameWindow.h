@@ -9,9 +9,9 @@
 
 #include <vector>
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Core/NewUI3DRenderMng.h"
+#include "UI/Core/Window3DRenderMng.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 namespace Rml { class ElementDocument; }

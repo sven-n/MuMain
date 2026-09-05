@@ -14,7 +14,7 @@
 
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "App/Platform/Windows/Local.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 
 extern int				g_iChatInputType;

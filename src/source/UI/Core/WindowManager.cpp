@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
 #include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
 #include "UI/Scaling/UITransform.h"

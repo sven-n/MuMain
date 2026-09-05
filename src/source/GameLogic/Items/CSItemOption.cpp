@@ -12,7 +12,7 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
 #include "UI/Widgets/UIControls.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"

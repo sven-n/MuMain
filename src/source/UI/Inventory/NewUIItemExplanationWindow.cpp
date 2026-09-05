@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Inventory/NewUIItemExplanationWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CSItemOption.h"

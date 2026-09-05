@@ -19,7 +19,7 @@
 #include "Audio/DSPlaySound.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Scenes/MainScene.h"
 
 int EnableEvent = 0;

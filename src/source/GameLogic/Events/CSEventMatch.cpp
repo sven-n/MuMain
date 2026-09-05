@@ -12,7 +12,7 @@
 #include "I18N/All.h"
 
 #include "UI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include <algorithm>
 #include <chrono>

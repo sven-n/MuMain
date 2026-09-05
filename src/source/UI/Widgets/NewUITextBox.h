@@ -2,7 +2,7 @@
 //	NewUITextBox.h
 //=============================================================================
 #pragma once
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 
 namespace mu::ui::window
 {

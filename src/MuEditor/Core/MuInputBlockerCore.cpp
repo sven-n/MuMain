@@ -5,7 +5,7 @@
 #include "MuInputBlockerCore.h"
 
 #include "imgui.h"
-#include "UI/Core/NewUICommon.h"
+#include "UI/Core/WindowCommon.h"
 
 CMuInputBlockerCore& CMuInputBlockerCore::GetInstance()
 {

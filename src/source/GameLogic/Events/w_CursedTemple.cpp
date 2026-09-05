@@ -16,7 +16,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/Widgets/UIControls.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "World/MapInfra/MapManager.h"
 #include "I18N/All.h"

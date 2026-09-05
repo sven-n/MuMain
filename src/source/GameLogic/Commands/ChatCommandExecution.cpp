@@ -3,7 +3,7 @@
 
 #include "Engine/Object/ZzzCharacter.h"
 #include "Network/Server/WSclient.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 namespace GameLogic::Commands
 {

@@ -3,8 +3,8 @@
 #include <array>
 #include <vector>
 
-#include "UI/Core/NewUIBase.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Widgets/NewUIButton.h"
 #include "MUHelper/MuHelper.h"
 

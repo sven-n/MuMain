@@ -7,8 +7,8 @@
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
-#include "UI/Core/NewUICommon.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowCommon.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 
 using namespace SEASON3B;

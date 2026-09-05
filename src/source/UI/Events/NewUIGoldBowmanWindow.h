@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"

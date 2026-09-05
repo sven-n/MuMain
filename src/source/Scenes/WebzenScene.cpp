@@ -10,7 +10,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/TitleSceneUI.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 // External declarations
 extern EGameScene SceneFlag;

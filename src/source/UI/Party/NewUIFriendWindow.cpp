@@ -5,8 +5,8 @@
 #include "stdafx.h"
 
 #include "UI/Party/NewUIFriendWindow.h"
-#include "UI/Core/NewUIManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Scaling/UITransform.h"

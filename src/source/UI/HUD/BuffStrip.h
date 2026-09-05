@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 #include <vector>

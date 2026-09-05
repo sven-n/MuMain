@@ -3,8 +3,8 @@
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Core/NewUI3DRenderMng.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/Window3DRenderMng.h"
+#include "UI/Core/WindowManager.h"
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 

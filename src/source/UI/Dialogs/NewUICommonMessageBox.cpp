@@ -20,7 +20,7 @@
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Inventory/NewUILuckyItemWnd.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"

@@ -18,7 +18,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraProjection.h"
 #include "Core/Utilities/Log/ErrorReport.h"

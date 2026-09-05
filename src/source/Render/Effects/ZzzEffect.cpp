@@ -19,7 +19,7 @@
 #include "GameLogic/Skills/SkillEffectMgr.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Scenes/MainScene.h"
 

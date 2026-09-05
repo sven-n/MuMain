@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 
 namespace mu::ui::window

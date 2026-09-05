@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Events/NewUIGoldBowmanLena.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/MixMgr.h"

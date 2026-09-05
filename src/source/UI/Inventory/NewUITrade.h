@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"

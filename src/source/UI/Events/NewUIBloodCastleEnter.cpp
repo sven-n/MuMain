@@ -5,7 +5,7 @@
 #include "I18N/All.h"
 
 #include "UI/Events/NewUIBloodCastleEnter.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"

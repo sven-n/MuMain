@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Options/NewUIOptionWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"

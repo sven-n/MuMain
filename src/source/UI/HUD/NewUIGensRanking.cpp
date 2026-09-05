@@ -5,7 +5,7 @@
 
 #ifdef PBG_ADD_GENSRANKING
 #include "UI/HUD/NewUIGensRanking.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 
 using namespace SEASON3B;

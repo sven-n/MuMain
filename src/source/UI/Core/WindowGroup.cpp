@@ -2,7 +2,7 @@
 //	NewUIGroup.cpp
 //=============================================================================
 #include "stdafx.h"
-#include "UI/Core/NewUIGroup.h"
+#include "UI/Core/WindowGroup.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

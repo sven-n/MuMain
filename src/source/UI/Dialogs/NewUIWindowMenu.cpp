@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Dialogs/NewUIWindowMenu.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Widgets/UIControls.h"

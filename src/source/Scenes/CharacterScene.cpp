@@ -27,7 +27,7 @@
 #include "Network/Server/WSclient.h"
 #include "Network/Server/CSMapServer.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "SceneCommon.h"

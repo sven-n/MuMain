@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "NewUIGuildInfoWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "Audio/DSPlaySound.h"

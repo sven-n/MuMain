@@ -8,7 +8,7 @@
 #pragma once
 
 #include "UI/Dialogs/NewUIMessageBox.h"
-#include "UI/Core/NewUI3DRenderMng.h"
+#include "UI/Core/Window3DRenderMng.h"
 
 namespace mu::ui::window
 {

@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Combat/NewUISeigeWarfare.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Combat/NewUISiegeWarCommander.h"
 #include "UI/Combat/NewUISiegeWarSoldier.h"
 #include "UI/Combat/NewUISiegeWarObserver.h"

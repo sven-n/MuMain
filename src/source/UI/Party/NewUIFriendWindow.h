@@ -2,7 +2,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Party/UIWindows.h"
 
 namespace mu::ui::window

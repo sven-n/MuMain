@@ -22,7 +22,7 @@
 
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Data/DataHandler/LoadData.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 CTrapCanon g_TrapCanon;
 

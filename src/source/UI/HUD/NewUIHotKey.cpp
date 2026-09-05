@@ -3,7 +3,7 @@
 #include "I18N/All.h"
 
 #include "UI/HUD/NewUIHotKey.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "Audio/DSPlaySound.h"
@@ -15,7 +15,7 @@
 
 #include "Render/Effects/ZzzEffect.h"
 #include "UI/Widgets/UIControls.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM

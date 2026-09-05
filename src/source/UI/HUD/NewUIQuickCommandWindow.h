@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/NewUIWindowMenu.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"

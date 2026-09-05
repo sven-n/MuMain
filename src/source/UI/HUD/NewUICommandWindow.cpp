@@ -8,7 +8,7 @@
 #include "UI/HUD/NewUICommandWindow.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Events/w_CursedTemple.h"

@@ -3,7 +3,7 @@
 //=============================================================================
 
 #pragma once
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include <vector>
 
 namespace mu::ui::window

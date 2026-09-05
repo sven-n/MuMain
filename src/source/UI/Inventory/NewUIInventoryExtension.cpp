@@ -2,7 +2,7 @@
 #include "UI/Inventory/NewUIInventoryExtension.h"
 #include "I18N/All.h"
 
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

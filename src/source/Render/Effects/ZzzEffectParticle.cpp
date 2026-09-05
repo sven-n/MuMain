@@ -15,7 +15,7 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/WSclient.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Effects/ParticleDrawOrder.h"
 #include "Data/GameConfig/GameConfig.h"

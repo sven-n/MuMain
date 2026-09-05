@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/Quests/NewUINPCQuest.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Quests/DialogStructure.h"
 #include "I18N/All.h"

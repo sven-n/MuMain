@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "Guild/NewUIGuildInfoWindow.h"

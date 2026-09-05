@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "UI/Inventory/NewUIItemMng.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "GameLogic/Items/CComGem.h"
 #include "GameLogic/Pets/GIPetManager.h"

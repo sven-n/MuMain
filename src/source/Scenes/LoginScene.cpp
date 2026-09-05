@@ -29,7 +29,7 @@
 #include "SceneCommon.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/Scaling/UITransform.h"
 

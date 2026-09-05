@@ -3,7 +3,7 @@
 
 #include "stdafx.h"
 #include "UI/Inventory/NewUIMyInventory.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 extern bool SelectFlag;
 #ifdef _EDITOR

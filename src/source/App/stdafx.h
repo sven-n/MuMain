@@ -183,7 +183,7 @@
 #include "Dotnet/PacketFunctions_ClientToServer_Enums.h"
 #include "Core/Utilities/_GlobalFunctions.h"
 #include "Core/Globals/_TextureIndex.h"
-#include "UI/Core/NewUICommon.h"
+#include "UI/Core/WindowCommon.h"
 #include "Core/Math/ZzzMathLib.h"
 
 // Reference resolution -- all UI coordinates and screen-space math use this as the base.

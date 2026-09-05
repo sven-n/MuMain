@@ -15,7 +15,7 @@
 
 #include "UI/Widgets/UIControls.h"
 
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include "Core/Globals/_enum.h"
 

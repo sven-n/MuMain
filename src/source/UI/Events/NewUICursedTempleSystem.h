@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Widgets/NewUIButton.h"
 #include "Network/Server/WSclient.h"

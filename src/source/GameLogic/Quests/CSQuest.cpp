@@ -31,7 +31,7 @@
 #include "Core/Utilities/UsefulDef.h"
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "Character/CharacterManager.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 bool bCheckNPC = false;
 extern  int  g_iMessageTextStart;

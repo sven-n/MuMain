@@ -7,8 +7,8 @@
 
 #include "UI/Widgets/UIControls.h"
 #include "UI/HUD/Skills/SkillTooltip.h"
-#include "UI/Core/NewUISystem.h"
-#include "UI/Core/NewUIMuHelper.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowMuHelper.h"
 #include "Character/CharacterManager.h"
 #include "MUHelper/MuHelper.h"
 

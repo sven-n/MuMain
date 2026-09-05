@@ -21,7 +21,7 @@
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 

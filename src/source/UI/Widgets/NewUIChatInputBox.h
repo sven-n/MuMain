@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Widgets/NewUIButton.h"
 
 #pragma warning(disable : 4786)

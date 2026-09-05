@@ -7,7 +7,7 @@
 #include "Guild/UIGuildInfo.h"
 #include "UIGuardsMan.h"
 #include "UI/Inventory/NewUIMyInventory.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 CUIGuardsMan g_GuardsMan;
 

@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "UI/HUD/NewUIMoveCommandWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Core/Utilities/KeyGenerator.h"

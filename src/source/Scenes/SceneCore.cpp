@@ -22,7 +22,7 @@
 #include "LoadingScene.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include <chrono>
 #include <thread>
 

@@ -2,10 +2,10 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Widgets/NewUIButton.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
-#include "UI/Core/NewUI3DRenderMng.h"
+#include "UI/Core/Window3DRenderMng.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 
 namespace mu::ui::window

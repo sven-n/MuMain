@@ -11,7 +11,7 @@
 #include <utility>
 #include <vector>
 
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Widgets/NewUIComboBox.h"
 

@@ -5,7 +5,7 @@
 #include "UI/Chat/Chat.h"
 
 #include "UI/Party/NewUIPartyListWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"

@@ -20,7 +20,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"

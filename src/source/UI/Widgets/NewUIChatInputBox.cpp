@@ -6,7 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/HUD/NewUIChatLogWindow.h"
 #include "UI/Widgets/UIControls.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
 #include "Engine/Object/ZzzInterface.h"

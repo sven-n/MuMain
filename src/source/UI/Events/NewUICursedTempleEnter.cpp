@@ -18,7 +18,7 @@
 #include "Character/CharacterManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Widgets/UIControls.h"
 
 //////////////////////////////////////////////////////////////////////

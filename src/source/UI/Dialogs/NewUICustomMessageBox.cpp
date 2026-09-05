@@ -16,7 +16,7 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "GameLogic/Items/InventoryUtils.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Core/Text/TextLineWrap.h"
 
 extern int DeleteIndex;

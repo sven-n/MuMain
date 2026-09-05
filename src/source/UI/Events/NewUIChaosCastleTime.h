@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/Core/NewUIBase.h"
+#include "UI/Core/WindowObject.h"
 #include "UI/Events/NewUIBloodCastleTime.h"
 
 namespace mu::ui::window

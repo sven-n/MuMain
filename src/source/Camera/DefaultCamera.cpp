@@ -21,7 +21,7 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"

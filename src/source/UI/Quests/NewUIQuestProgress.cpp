@@ -7,7 +7,7 @@
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include "Core/Utilities/UsefulDef.h"
 

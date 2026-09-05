@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Character/NewUICharacterInfoWindow.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Audio/DSPlaySound.h"

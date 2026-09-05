@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "UI/Events/NewUIKanturuEvent.h"
 #include "UI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "I18N/All.h"

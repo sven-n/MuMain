@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Scaling/UITransform.h"
 

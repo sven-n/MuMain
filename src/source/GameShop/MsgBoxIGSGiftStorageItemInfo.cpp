@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "I18N/All.h"
 
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 

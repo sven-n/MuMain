@@ -18,7 +18,7 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "World/MapInfra/MapManager.h"
 #include "UI/Core/SceneUICoordinator.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Pets/w_PetProcess.h"

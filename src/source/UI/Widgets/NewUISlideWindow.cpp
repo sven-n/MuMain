@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 #include "UI/Widgets/NewUISlideWindow.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowManager.h"
 
 mu::ui::window::CSlideWindow::CSlideWindow()
 {

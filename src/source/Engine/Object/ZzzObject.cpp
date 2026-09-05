@@ -33,7 +33,7 @@
 #include "Character/CharacterManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Social/MonkSystem.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Camera/CameraManager.h"
 #include "Camera/CameraProjection.h"
 #include "Camera/OrbitalCamera.h"

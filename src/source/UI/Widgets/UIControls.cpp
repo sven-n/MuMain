@@ -24,7 +24,7 @@
 #include "GameLogic/Events/Cinematic/CMVP1stDirection.h"
 #include "UI/Core/UIManager.h"
 #include "GameLogic/Items/InventoryUtils.h"
-#include "UI/Core/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include <vector>
 
 extern BYTE m_CrywolfState;

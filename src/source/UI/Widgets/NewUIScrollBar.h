@@ -2,8 +2,8 @@
 //	NewUIScrollBar.h
 //=============================================================================
 #pragma once
-#include "UI/Core/NewUIBase.h"
-#include "UI/Core/NewUIManager.h"
+#include "UI/Core/WindowObject.h"
+#include "UI/Core/WindowManager.h"
 #include "UI/HUD/NewUIChatLogWindow.h"
 
 namespace mu::ui::window
