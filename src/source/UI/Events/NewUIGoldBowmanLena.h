@@ -10,19 +10,19 @@
 
 namespace mu::ui::window
 {
-    class CNewUIGoldBowmanLena : public CNewUIObj
+    class CGoldBowmanLena : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GBL_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_GBL_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_GBL_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GBL_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GBL_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GBL_EXCHANGEBTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_GBL_BTN_SERIAL = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_GBL_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_GBL_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_GBL_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
+            IMAGE_GBL_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_GBL_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_GBL_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_GBL_EXCHANGEBTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
+            IMAGE_GBL_BTN_SERIAL = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
+            IMAGE_GBL_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
         };
 
     private:
@@ -33,16 +33,16 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUIManager* m_pNewUIMng;
-        CNewUIButton			m_BtnRegister;
-        CNewUIButton			m_BtnExit;
+        CManager* m_pNewUIMng;
+        CButton			m_BtnRegister;
+        CButton			m_BtnExit;
         POINT					m_Pos;
 
     public:
-        CNewUIGoldBowmanLena();
-        virtual ~CNewUIGoldBowmanLena();
+        CGoldBowmanLena();
+        virtual ~CGoldBowmanLena();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -69,13 +69,13 @@ namespace mu::ui::window
     };
 
     inline
-        void CNewUIGoldBowmanLena::SetPos(int x, int y)
+        void CGoldBowmanLena::SetPos(int x, int y)
     {
         m_Pos.x = x; m_Pos.y = y;
     }
 
     inline
-        const POINT& CNewUIGoldBowmanLena::GetPos()
+        const POINT& CGoldBowmanLena::GetPos()
     {
         return m_Pos;
     }

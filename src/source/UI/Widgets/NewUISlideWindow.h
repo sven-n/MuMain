@@ -5,16 +5,16 @@
 
 namespace mu::ui::window
 {
-    class CNewUIManager;
+    class CManager;
 
-    class CNewUISlideWindow : public CNewUIObj
+    class CSlideWindow : public CObject
     {
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
     public:
-        CNewUISlideWindow();
-        virtual ~CNewUISlideWindow();
+        CSlideWindow();
+        virtual ~CSlideWindow();
 
-        bool Create(CNewUIManager* pNewUIMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool UpdateMouseEvent();

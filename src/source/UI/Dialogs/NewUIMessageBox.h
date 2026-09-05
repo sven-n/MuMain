@@ -21,7 +21,7 @@ namespace mu::ui::window
         CALLBACK_EXCEPTION,
         CALLBACK_POP_ALL_EVENTS,
     };
-    typedef CALLBACK_RESULT(*EVENT_CALLBACK)(class CNewUIMessageBoxBase*, const leaf::xstreambuf&);
+    typedef CALLBACK_RESULT(*EVENT_CALLBACK)(class CMessageBoxBase*, const leaf::xstreambuf&);
 
     enum
     {
@@ -105,9 +105,9 @@ namespace mu::ui::window
         MSGBOX_EVENT_USER_CUSTOM_GEM_SELECT,
     };
 
-    class CNewUIManager;
+    class CManager;
 
-    class CNewUIMessageBoxBase
+    class CMessageBoxBase
     {
         typedef std::map<DWORD, EVENT_CALLBACK>	type_map_callback;
 
@@ -121,8 +121,8 @@ namespace mu::ui::window
         float m_fOpacityAlpha;
         vec3_t m_vColor;
     public:
-        CNewUIMessageBoxBase();
-        virtual ~CNewUIMessageBoxBase();
+        CMessageBoxBase();
+        virtual ~CMessageBoxBase();
 
         virtual bool Create(int x, int y, int width, int height, float fPriority = 3.f);
         virtual void Release();
@@ -145,8 +145,8 @@ namespace mu::ui::window
         virtual bool Update() = 0;
         virtual bool Render() = 0;
 
-        void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent);
-        void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
+        void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent);
+        void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
         void RenderMsgBackColor(bool _bRender = false);
         void SetMsgBackOpacity(float _fAlpha = 0.5f);
         const float& GetMsgBackOpacity() const { return m_fOpacityAlpha; }
@@ -154,14 +154,14 @@ namespace mu::ui::window
         const vec3_t& GetMsgBackColor() const { return m_vColor; }
     };
 
-    class CNewUIMessageBoxFactory
+    class CMessageBoxFactory
     {
-        typedef std::list<CNewUIMessageBoxBase*>	type_list_msgbox;
+        typedef std::list<CMessageBoxBase*>	type_list_msgbox;
         type_list_msgbox	m_listMsgBoxes;
 
     public:
-        CNewUIMessageBoxFactory() {}
-        ~CNewUIMessageBoxFactory() { DeleteAllMessageBoxes(); }
+        CMessageBoxFactory() {}
+        ~CMessageBoxFactory() { DeleteAllMessageBoxes(); }
 
         enum INSTANCE_STATE { INSTANCE_NEW = 1, INSTANCE_REFERENCE };
         template <class T>
@@ -207,7 +207,7 @@ namespace mu::ui::window
             return pObj;
         }
 
-        void DeleteMessageBox(const CNewUIMessageBoxBase* pObj)
+        void DeleteMessageBox(const CMessageBoxBase* pObj)
         {
             auto li =
                 std::find(m_listMsgBoxes.begin(), m_listMsgBoxes.end(), pObj);
@@ -226,24 +226,24 @@ namespace mu::ui::window
         }
     };
 
-    class CNewUIMessageBoxMng : public CNewUIObj
+    class CMessageBoxMng : public CObject
     {
-        class CNewUIEvent
+        class CEvent
         {
-            CNewUIMessageBoxBase* m_pOwner;
+            CMessageBoxBase* m_pOwner;
             DWORD	m_dwEvent;
             leaf::xstreambuf	m_xParam;
 
         public:
-            CNewUIEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent) : m_pOwner(pOwner), m_dwEvent(dwEvent) {}
-            CNewUIEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& param)
+            CEvent(CMessageBoxBase* pOwner, DWORD dwEvent) : m_pOwner(pOwner), m_dwEvent(dwEvent) {}
+            CEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& param)
             {
                 m_pOwner = pOwner;
                 m_dwEvent = dwEvent;
                 m_xParam = param;
             }
 
-            CNewUIMessageBoxBase* GetOwner() const { return m_pOwner; }
+            CMessageBoxBase* GetOwner() const { return m_pOwner; }
             DWORD GetEvent() const { return m_dwEvent; }
             const leaf::xstreambuf& GetParam() const { return m_xParam; }
         };
@@ -256,11 +256,11 @@ namespace mu::ui::window
             EVENT_WND_MOUSE_RBUTTON_DOWN,
         };
 
-        typedef std::vector<CNewUIMessageBoxBase*> type_vector_msgbox;
-        typedef std::queue<CNewUIEvent*>	type_queue_event;
+        typedef std::vector<CMessageBoxBase*> type_vector_msgbox;
+        typedef std::queue<CEvent*>	type_queue_event;
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUIMessageBoxFactory* m_pMsgBoxFactory;
+        CManager* m_pNewUIMng;
+        CMessageBoxFactory* m_pMsgBoxFactory;
         type_vector_msgbox			m_vecMsgBoxes;
         type_queue_event			m_queueEvents;
         EVENT_STATE					m_EventState;
@@ -287,9 +287,9 @@ namespace mu::ui::window
             IMAGE_MSGBOX_DUEL_BACK,
         };
 
-        virtual ~CNewUIMessageBoxMng();
+        virtual ~CMessageBoxMng();
 
-        bool Create(CNewUIManager* pNewUIMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool UpdateMouseEvent();
@@ -300,12 +300,12 @@ namespace mu::ui::window
         float GetLayerDepth();		//. 10.7f
         float GetKeyEventOrder();	//. 10.f
 
-        static CNewUIMessageBoxMng* GetInstance();
-        static bool ComparePriority(CNewUIMessageBoxBase* pObj1, CNewUIMessageBoxBase* pObj2);
+        static CMessageBoxMng* GetInstance();
+        static bool ComparePriority(CMessageBoxBase* pObj1, CMessageBoxBase* pObj2);
 
         template <class T>
 
-		T* NewMessageBox(const CNewUIMessageBoxFactory::TContainer<T>& container)
+		T* NewMessageBox(const CMessageBoxFactory::TContainer<T>& container)
         {
             T* pMsgBox = NULL;
             if (m_pMsgBoxFactory)
@@ -316,17 +316,17 @@ namespace mu::ui::window
             return pMsgBox;
         }
 
-        void DeleteMessageBox(const CNewUIMessageBoxBase* pObj);
+        void DeleteMessageBox(const CMessageBoxBase* pObj);
         void PopMessageBox();
         void PopAllMessageBoxes();
 
         bool IsEmpty();
 
-        void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent);
-        void SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
+        void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent);
+        void SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam);
 
     protected:
-        CNewUIMessageBoxMng();
+        CMessageBoxMng();
 
         void PopEvent();
         void PopAllEvents();
@@ -349,8 +349,8 @@ namespace mu::ui::window
     public:
         TMsgBoxLayout()
         {
-            CNewUIMessageBoxMng* pNewUIMsgBoxMng = CNewUIMessageBoxMng::GetInstance();
-            CNewUIMessageBoxFactory::TContainer<_M> container;
+            CMessageBoxMng* pNewUIMsgBoxMng = CMessageBoxMng::GetInstance();
+            CMessageBoxFactory::TContainer<_M> container;
             ms_pMsgBox = pNewUIMsgBoxMng->NewMessageBox(container);
         }
         virtual ~TMsgBoxLayout() {}
@@ -408,5 +408,5 @@ namespace mu::ui::window
 }
 
 #define MSGBOX_LAYOUT_CLASS(x) mu::ui::window::TMsgBoxLayoutContainer<x>()
-#define MSGBOX_CLASS(x) mu::ui::window::CNewUIMessageBoxFactory::TContainer<x>()
-#define g_MessageBox mu::ui::window::CNewUIMessageBoxMng::GetInstance()
+#define MSGBOX_CLASS(x) mu::ui::window::CMessageBoxFactory::TContainer<x>()
+#define g_MessageBox mu::ui::window::CMessageBoxMng::GetInstance()

@@ -13,9 +13,9 @@ namespace UI::Skills::Tooltip
     // relative to (sx, sy); STRP_NONE means "use legacy positioning".
     void Render(int sx, int sy, int Type, int SkillNum = 0, int iRenderPoint = STRP_NONE);
 
-    // 2026-09-02, CNewUIMainFrameWindow pilot Phase 2: the same content resolution Render() itself
+    // 2026-09-02, CMainFrameWindow pilot Phase 2: the same content resolution Render() itself
     // performs (pet-command dispatch via GIPetManager, then BuildOptions/BuildModel()) with no
-    // drawing at all -- lets CNewUIMainFrameWindow::SyncRmlModel() bind the result into RmlUi
+    // drawing at all -- lets CMainFrameWindow::SyncRmlModel() bind the result into RmlUi
     // instead of the legacy TextList/RenderTipTextList path Render() still uses for its other
     // callers (NewUIMuHelper.cpp, NewUISiegeWarBase.cpp -- unrelated, still-legacy windows,
     // unaffected by this addition; Render() itself is unchanged apart from delegating to this).

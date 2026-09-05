@@ -10,7 +10,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-class CMsgBoxIGSSendGift : public CNewUIMessageBoxBase
+class CMsgBoxIGSSendGift : public CMessageBoxBase
 {
 public:
     enum IMAGE_IGS_SEND_GIFT
@@ -81,9 +81,9 @@ public:
     void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszName,
                     wchar_t* pszPrice, wchar_t* pszPeriod);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -102,8 +102,8 @@ private:
 
 private:
     // buttons
-    CNewUIMessageBoxButton m_BtnOk;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnOk;
+    CMessageBoxButton m_BtnCancel;
 
     CUITextInputBox m_IDInputBox;
     CUITextInputBox m_MessageInputBox;

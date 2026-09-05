@@ -1,4 +1,4 @@
-// NewUIMyShopInventory.cpp: implementation of the CNewUIMyShopInventory class.
+// NewUIMyShopInventory.cpp: implementation of the CMyShopInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -32,7 +32,7 @@ namespace
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false)
+mu::ui::window::CMyShopInventory::CMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false)
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
@@ -42,12 +42,12 @@ mu::ui::window::CNewUIMyShopInventory::CNewUIMyShopInventory() : m_SourceIndex(-
     m_bIsEnableInputValueTextBox = false;
 }
 
-mu::ui::window::CNewUIMyShopInventory::~CNewUIMyShopInventory()
+mu::ui::window::CMyShopInventory::~CMyShopInventory()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -59,7 +59,7 @@ bool mu::ui::window::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int
 
     LoadImages();
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::MYSHOP, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
@@ -68,7 +68,7 @@ bool mu::ui::window::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int
 
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_MY_SHOP);
 
-    m_Button = new CNewUIButton[MYSHOPINVENTORY_MAXBUTTONCOUNT];
+    m_Button = new CButton[MYSHOPINVENTORY_MAXBUTTONCOUNT];
 
     m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_EXIT_BTN, false);
     m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
@@ -98,7 +98,7 @@ bool mu::ui::window::CNewUIMyShopInventory::Create(CNewUIManager* pNewUIMng, int
     return true;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::Release()
+void mu::ui::window::CMyShopInventory::Release()
 {
     SAFE_DELETE(m_pNewInventoryCtrl);
     SAFE_DELETE_ARRAY(m_Button);
@@ -113,7 +113,7 @@ void mu::ui::window::CNewUIMyShopInventory::Release()
     UnloadImages();
 }
 
-void mu::ui::window::CNewUIMyShopInventory::LoadImages()
+void mu::ui::window::CMyShopInventory::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MYSHOPINVENTORY_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_MYSHOPINVENTORY_TOP, GL_LINEAR);
@@ -126,7 +126,7 @@ void mu::ui::window::CNewUIMyShopInventory::LoadImages()
     LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_MYSHOPINVENTORY_CLOSE, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIMyShopInventory::UnloadImages()
+void mu::ui::window::CMyShopInventory::UnloadImages()
 {
     DeleteBitmap(IMAGE_MYSHOPINVENTORY_CLOSE);
     DeleteBitmap(IMAGE_MYSHOPINVENTORY_OPEN);
@@ -139,7 +139,7 @@ void mu::ui::window::CNewUIMyShopInventory::UnloadImages()
     DeleteBitmap(IMAGE_MYSHOPINVENTORY_BACK);
 }
 
-void mu::ui::window::CNewUIMyShopInventory::SetPos(int x, int y)
+void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -156,17 +156,17 @@ void mu::ui::window::CNewUIMyShopInventory::SetPos(int x, int y)
     }
 }
 
-void mu::ui::window::CNewUIMyShopInventory::GetTitle(wchar_t* titletext)
+void mu::ui::window::CMyShopInventory::GetTitle(wchar_t* titletext)
 {
      m_EditBox->GetText(titletext, iMAX_SHOPTITLE_MULTI);
 }
 
-void mu::ui::window::CNewUIMyShopInventory::SetTitle(wchar_t* titletext)
+void mu::ui::window::CMyShopInventory::SetTitle(wchar_t* titletext)
 {
     m_EditBox->SetText(titletext);
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool mu::ui::window::CMyShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -176,7 +176,7 @@ bool mu::ui::window::CNewUIMyShopInventory::InsertItem(int iIndex, std::span<con
     return false;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::DeleteItem(int iIndex)
+void mu::ui::window::CMyShopInventory::DeleteItem(int iIndex)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -186,7 +186,7 @@ void mu::ui::window::CNewUIMyShopInventory::DeleteItem(int iIndex)
     }
 }
 
-void mu::ui::window::CNewUIMyShopInventory::DeleteAllItems()
+void mu::ui::window::CMyShopInventory::DeleteAllItems()
 {
     if (m_pNewInventoryCtrl)
     {
@@ -194,14 +194,14 @@ void mu::ui::window::CNewUIMyShopInventory::DeleteAllItems()
     }
 }
 
-ITEM* mu::ui::window::CNewUIMyShopInventory::FindItem(int iLinealPos)
+ITEM* mu::ui::window::CMyShopInventory::FindItem(int iLinealPos)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItem(iLinealPos);
     return NULL;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::ChangePersonal(bool state)
+void mu::ui::window::CMyShopInventory::ChangePersonal(bool state)
 {
     m_EnablePersonalShop = state;
 
@@ -227,7 +227,7 @@ void mu::ui::window::CNewUIMyShopInventory::ChangePersonal(bool state)
     }
 }
 
-void mu::ui::window::CNewUIMyShopInventory::OpenButtonLock()
+void mu::ui::window::CMyShopInventory::OpenButtonLock()
 {
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(100, 100, 100, 255));
@@ -235,7 +235,7 @@ void mu::ui::window::CNewUIMyShopInventory::OpenButtonLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
 }
 
-void mu::ui::window::CNewUIMyShopInventory::OpenButtonUnLock()
+void mu::ui::window::CMyShopInventory::OpenButtonUnLock()
 {
     m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
@@ -243,12 +243,12 @@ void mu::ui::window::CNewUIMyShopInventory::OpenButtonUnLock()
     m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Apply, true);
 }
 
-const bool mu::ui::window::CNewUIMyShopInventory::IsEnablePersonalShop() const
+const bool mu::ui::window::CMyShopInventory::IsEnablePersonalShop() const
 {
     return m_EnablePersonalShop;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::ChangeEditBox(const UISTATES type)
+void mu::ui::window::CMyShopInventory::ChangeEditBox(const UISTATES type)
 {
     m_EditBox->SetState(type);
 
@@ -259,7 +259,7 @@ void mu::ui::window::CNewUIMyShopInventory::ChangeEditBox(const UISTATES type)
 
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::UpdateKeyEvent()
+bool mu::ui::window::CMyShopInventory::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYSHOP_INVENTORY) == true)
     {
@@ -274,14 +274,14 @@ bool mu::ui::window::CNewUIMyShopInventory::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::MyShopInventoryProcess()
+bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
     {
         return false;
     }
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
     if (m_pNewInventoryCtrl && pPickedItem && IsRelease(VK_LBUTTON))
     {
@@ -379,7 +379,7 @@ bool mu::ui::window::CNewUIMyShopInventory::MyShopInventoryProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::UpdateMouseEvent()
+bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
     {
@@ -471,7 +471,7 @@ bool mu::ui::window::CNewUIMyShopInventory::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::WindowProcess()
+bool mu::ui::window::CMyShopInventory::WindowProcess()
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
     {
@@ -488,7 +488,7 @@ bool mu::ui::window::CNewUIMyShopInventory::WindowProcess()
     return true;
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::Update()
+bool mu::ui::window::CMyShopInventory::Update()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
     {
@@ -498,7 +498,7 @@ bool mu::ui::window::CNewUIMyShopInventory::Update()
     return true;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::RenderFrame()
+void mu::ui::window::CMyShopInventory::RenderFrame()
 {
     RenderImage(IMAGE_MYSHOPINVENTORY_BACK, m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT);
     RenderImage(IMAGE_MYSHOPINVENTORY_TOP, m_Pos.x, m_Pos.y, INVENTORY_WIDTH, 64.f);
@@ -512,7 +512,7 @@ void mu::ui::window::CNewUIMyShopInventory::RenderFrame()
     RenderText(Text, m_Pos.x, m_Pos.y + 15, INVENTORY_WIDTH, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUIMyShopInventory::RenderTextInfo()
+void mu::ui::window::CMyShopInventory::RenderTextInfo()
 {
     wchar_t Text[100];
 
@@ -554,7 +554,7 @@ void mu::ui::window::CNewUIMyShopInventory::RenderTextInfo()
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::Render()
+bool mu::ui::window::CMyShopInventory::Render()
 {
     EnableAlphaTest();
 
@@ -582,25 +582,25 @@ bool mu::ui::window::CNewUIMyShopInventory::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::ClosingProcess()
+void mu::ui::window::CMyShopInventory::ClosingProcess()
 {
-    CNewUIInventoryCtrl::BackupPickedItem();
+    CInventoryCtrl::BackupPickedItem();
     g_pMyInventory->ChangeMyShopButtonStateOpen();
     SetFocus(g_hWnd);
     CUITextInputBox::ReleaseFocus();
 }
 
-int mu::ui::window::CNewUIMyShopInventory::GetPointedItemIndex()
+int mu::ui::window::CMyShopInventory::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
-int mu::ui::window::CNewUIMyShopInventory::GetItemInventoryIndex(ITEM* pItem)
+int mu::ui::window::CMyShopInventory::GetItemInventoryIndex(ITEM* pItem)
 {
     return m_pNewInventoryCtrl->GetIndexByItem(pItem);
 }
 
-void mu::ui::window::CNewUIMyShopInventory::ResetSubject()
+void mu::ui::window::CMyShopInventory::ResetSubject()
 {
     if (m_EditBox)
     {
@@ -608,12 +608,12 @@ void mu::ui::window::CNewUIMyShopInventory::ResetSubject()
     }
 }
 
-bool mu::ui::window::CNewUIMyShopInventory::IsEnableInputValueTextBox()
+bool mu::ui::window::CMyShopInventory::IsEnableInputValueTextBox()
 {
     return m_bIsEnableInputValueTextBox;
 }
 
-void mu::ui::window::CNewUIMyShopInventory::SetInputValueTextBox(bool bIsEnable)
+void mu::ui::window::CMyShopInventory::SetInputValueTextBox(bool bIsEnable)
 {
     m_bIsEnableInputValueTextBox = bIsEnable;
 }

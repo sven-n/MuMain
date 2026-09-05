@@ -1,4 +1,4 @@
-// NewUIPurchaseShopInventory.h: interface for the CNewUIPurchaseShopInventory class.
+// NewUIPurchaseShopInventory.h: interface for the CPurchaseShopInventory class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -16,18 +16,18 @@
 
 namespace mu::ui::window
 {
-    class CNewUIPurchaseShopInventory : public CNewUIObj
+    class CPurchaseShopInventory : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_MSGBOX_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_INVENTORY_BACK_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_INVENTORY_BACK_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_INVENTORY_BACK_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_INVENTORY_BACK_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_INVENTORY_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_MYSHOPINVENTORY_EDIT = CNewUIMyShopInventory::IMAGE_MYSHOPINVENTORY_EDIT,
+            IMAGE_MSGBOX_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_INVENTORY_BACK_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_INVENTORY_BACK_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_INVENTORY_BACK_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_INVENTORY_BACK_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_INVENTORY_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_MYSHOPINVENTORY_EDIT = CMyShopInventory::IMAGE_MYSHOPINVENTORY_EDIT,
         };
 
     private:
@@ -38,10 +38,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUIPurchaseShopInventory();
-        virtual ~CNewUIPurchaseShopInventory();
+        CPurchaseShopInventory();
+        virtual ~CPurchaseShopInventory();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
         void SetPos(int x, int y);
         bool UpdateMouseEvent();
@@ -53,7 +53,7 @@ namespace mu::ui::window
 
     public:
         float GetLayerDepth();	//. 3.2f
-        CNewUIInventoryCtrl* GetInventoryCtrl() const;
+        CInventoryCtrl* GetInventoryCtrl() const;
         const int GetShopCharacterIndex();
         const std::wstring& GetTitleText();
         const int GetSourceIndex();
@@ -83,65 +83,65 @@ namespace mu::ui::window
         void RenderTextInfo();
 
     private:
-        CNewUIManager* m_pNewUIMng;
-        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        CManager* m_pNewUIMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
         POINT					m_Pos;
         int						m_ShopCharacterIndex;
        std::wstring		m_TitleText;
-        CNewUIButton* m_Button;
+        CButton* m_Button;
         int						m_SourceIndex;
     };
 
     inline
-        void CNewUIPurchaseShopInventory::SetPos(int x, int y)
+        void CPurchaseShopInventory::SetPos(int x, int y)
     {
         m_Pos.x = x; m_Pos.y = y;
     }
 
     inline
-        void CNewUIPurchaseShopInventory::ChangeShopCharacterIndex(int index)
+        void CPurchaseShopInventory::ChangeShopCharacterIndex(int index)
     {
         m_ShopCharacterIndex = index;
     }
 
     inline
-        void CNewUIPurchaseShopInventory::ChangeTitleText(wchar_t* text)
+        void CPurchaseShopInventory::ChangeTitleText(wchar_t* text)
     {
         m_TitleText = text;
     }
 
     inline
-        void CNewUIPurchaseShopInventory::ChangeSourceIndex(int sindex)
+        void CPurchaseShopInventory::ChangeSourceIndex(int sindex)
     {
         m_SourceIndex = sindex;
     }
 
     inline
-        CNewUIInventoryCtrl* CNewUIPurchaseShopInventory::GetInventoryCtrl() const
+        CInventoryCtrl* CPurchaseShopInventory::GetInventoryCtrl() const
     {
         return m_pNewInventoryCtrl;
     }
 
     inline
-        float CNewUIPurchaseShopInventory::GetLayerDepth()
+        float CPurchaseShopInventory::GetLayerDepth()
     {
         return 3.2f;
     }
 
     inline
-        const int CNewUIPurchaseShopInventory::GetShopCharacterIndex()
+        const int CPurchaseShopInventory::GetShopCharacterIndex()
     {
         return m_ShopCharacterIndex;
     }
 
     inline
-        const std::wstring& CNewUIPurchaseShopInventory::GetTitleText()
+        const std::wstring& CPurchaseShopInventory::GetTitleText()
     {
         return m_TitleText;
     }
 
     inline
-        const int CNewUIPurchaseShopInventory::GetSourceIndex()
+        const int CPurchaseShopInventory::GetSourceIndex()
     {
         return m_SourceIndex;
     }

@@ -55,7 +55,7 @@ namespace
     }
 }
 
-void CNewUIComboBox::Setup(int x, int y, int width, int itemHeight,
+void CComboBox::Setup(int x, int y, int width, int itemHeight,
                             const wchar_t* const* labels, int itemCount, int initialIdx,
                             int maxVisibleItems)
 {
@@ -71,7 +71,7 @@ void CNewUIComboBox::Setup(int x, int y, int width, int itemHeight,
     m_bOpen = false;
 }
 
-void CNewUIComboBox::SetSelectedIndex(int idx)
+void CComboBox::SetSelectedIndex(int idx)
 {
     if (m_ItemCount <= 0)
     {
@@ -84,32 +84,32 @@ void CNewUIComboBox::SetSelectedIndex(int idx)
     ScrollToShowIndex(m_SelectedIndex);
 }
 
-int CNewUIComboBox::GetVisibleCount() const
+int CComboBox::GetVisibleCount() const
 {
     if (m_MaxVisibleItems <= 0 || m_MaxVisibleItems >= m_ItemCount)
         return m_ItemCount;
     return m_MaxVisibleItems;
 }
 
-int CNewUIComboBox::GetMaxScrollOffset() const
+int CComboBox::GetMaxScrollOffset() const
 {
     const int visible = GetVisibleCount();
     return (m_ItemCount > visible) ? (m_ItemCount - visible) : 0;
 }
 
-bool CNewUIComboBox::IsScrollable() const
+bool CComboBox::IsScrollable() const
 {
     return m_MaxVisibleItems > 0 && m_ItemCount > m_MaxVisibleItems;
 }
 
-void CNewUIComboBox::ClampScrollOffset()
+void CComboBox::ClampScrollOffset()
 {
     const int maxOffset = GetMaxScrollOffset();
     if (m_ScrollOffset < 0)            m_ScrollOffset = 0;
     if (m_ScrollOffset > maxOffset)    m_ScrollOffset = maxOffset;
 }
 
-void CNewUIComboBox::ScrollToShowIndex(int idx)
+void CComboBox::ScrollToShowIndex(int idx)
 {
     if (!IsScrollable())
     {
@@ -123,7 +123,7 @@ void CNewUIComboBox::ScrollToShowIndex(int idx)
     ClampScrollOffset();
 }
 
-int CNewUIComboBox::GetItemIndexAtMouse() const
+int CComboBox::GetItemIndexAtMouse() const
 {
     if (!m_bOpen)
         return -1;
@@ -142,7 +142,7 @@ int CNewUIComboBox::GetItemIndexAtMouse() const
     return -1;
 }
 
-bool CNewUIComboBox::IsMouseOverWidget() const
+bool CComboBox::IsMouseOverWidget() const
 {
     if (CheckMouseIn(m_X, m_Y, m_Width, m_ItemHeight))
         return true;
@@ -151,7 +151,7 @@ bool CNewUIComboBox::IsMouseOverWidget() const
     return false;
 }
 
-bool CNewUIComboBox::UpdateMouseEvent()
+bool CComboBox::UpdateMouseEvent()
 {
     // Mouse-wheel scrolling inside the open dropdown (consumed so it doesn't
     // leak to other handlers like the volume sliders).
@@ -199,7 +199,7 @@ bool CNewUIComboBox::UpdateMouseEvent()
     return changed;
 }
 
-void CNewUIComboBox::Render()
+void CComboBox::Render()
 {
     if (m_ItemCount <= 0 || m_Labels == nullptr)
         return;

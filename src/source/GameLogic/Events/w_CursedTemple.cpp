@@ -88,7 +88,7 @@ void CursedTemple::SetInterfaceState(bool state, int subtype)
     {
         if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT))
         {
-            mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             g_pNewUISystem->HideAll();
         }
     }
@@ -1170,7 +1170,7 @@ void CursedTemple::ReceiveCursedTempleState(const eCursedTempleState state)
         SetTerrainWaterState(m_TerrainWaterIndex, 1);
         m_TerrainWaterIndex.clear();
         SetInterfaceState(false);
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 }
 

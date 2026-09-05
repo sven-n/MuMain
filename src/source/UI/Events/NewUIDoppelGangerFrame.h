@@ -1,4 +1,4 @@
-// NewUIDoppelGangerFrame.h: interface for the CNewUIDoppelGangerFrame class.
+// NewUIDoppelGangerFrame.h: interface for the CDoppelGangerFrame class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -7,7 +7,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIDoppelGangerFrame : public CNewUIObj
+    class CDoppelGangerFrame : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -28,7 +28,7 @@ namespace mu::ui::window
             DOPPELGANGER_FRAME_WINDOW_HEIGHT = 87,
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
         typedef struct _PARTY_POSITION
@@ -38,10 +38,10 @@ namespace mu::ui::window
         } PARTY_POSITION;
 
     public:
-        CNewUIDoppelGangerFrame();
-        virtual ~CNewUIDoppelGangerFrame();
+        CDoppelGangerFrame();
+        virtual ~CDoppelGangerFrame();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

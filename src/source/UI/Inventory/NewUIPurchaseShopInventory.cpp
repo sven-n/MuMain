@@ -1,4 +1,4 @@
-// NewUIPurchaseShopInventory.cpp: implementation of the CNewUIPurchaseShopInventory class.
+// NewUIPurchaseShopInventory.cpp: implementation of the CPurchaseShopInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -30,18 +30,18 @@ namespace
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIPurchaseShopInventory::CNewUIPurchaseShopInventory() : m_pNewUIMng(NULL), m_pNewInventoryCtrl(NULL)
+mu::ui::window::CPurchaseShopInventory::CPurchaseShopInventory() : m_pNewUIMng(NULL), m_pNewInventoryCtrl(NULL)
 {
     m_Pos.x = m_Pos.y = 0;
     m_ShopCharacterIndex = -1;
 }
 
-mu::ui::window::CNewUIPurchaseShopInventory::~CNewUIPurchaseShopInventory()
+mu::ui::window::CPurchaseShopInventory::~CPurchaseShopInventory()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -53,7 +53,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::Create(CNewUIManager* pNewUIMn
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY, this);
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
@@ -63,7 +63,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::Create(CNewUIManager* pNewUIMn
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_PURCHASE_SHOP);
     m_pNewInventoryCtrl->LockInventory();
 
-    m_Button = new CNewUIButton;
+    m_Button = new CButton;
     m_Button->ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_Button->ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
 
@@ -72,7 +72,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::Create(CNewUIManager* pNewUIMn
     return true;
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::Release()
+void mu::ui::window::CPurchaseShopInventory::Release()
 {
     SAFE_DELETE(m_Button);
 
@@ -87,7 +87,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::Release()
     UnloadImages();
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool mu::ui::window::CPurchaseShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -97,7 +97,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::InsertItem(int iIndex, std::sp
     return false;
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::DeleteItem(int iIndex)
+void mu::ui::window::CPurchaseShopInventory::DeleteItem(int iIndex)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -110,7 +110,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::DeleteItem(int iIndex)
     }
 }
 
-ITEM* mu::ui::window::CNewUIPurchaseShopInventory::FindItem(int iLinealPos)
+ITEM* mu::ui::window::CPurchaseShopInventory::FindItem(int iLinealPos)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -120,7 +120,7 @@ ITEM* mu::ui::window::CNewUIPurchaseShopInventory::FindItem(int iLinealPos)
     return NULL;
 }
 
-int mu::ui::window::CNewUIPurchaseShopInventory::GetItemInventoryIndex(ITEM* pItem)
+int mu::ui::window::CPurchaseShopInventory::GetItemInventoryIndex(ITEM* pItem)
 {
     if (m_pNewInventoryCtrl && pItem)
     {
@@ -130,7 +130,7 @@ int mu::ui::window::CNewUIPurchaseShopInventory::GetItemInventoryIndex(ITEM* pIt
     return -1;
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::LoadImages()
+void mu::ui::window::CPurchaseShopInventory::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
@@ -141,7 +141,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::LoadImages()
     LoadBitmap(L"Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::UnloadImages()
+void mu::ui::window::CPurchaseShopInventory::UnloadImages()
 {
     DeleteBitmap(IMAGE_MYSHOPINVENTORY_EDIT);
     DeleteBitmap(IMAGE_INVENTORY_EXIT_BTN);
@@ -152,7 +152,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::UnloadImages()
     DeleteBitmap(IMAGE_MSGBOX_BACK);
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::UpdateMouseEvent()
+bool mu::ui::window::CPurchaseShopInventory::UpdateMouseEvent()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY))
@@ -184,7 +184,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::WindowProcess()
+bool mu::ui::window::CPurchaseShopInventory::WindowProcess()
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
     {
@@ -201,12 +201,12 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::WindowProcess()
     return true;
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::UpdateKeyEvent()
+bool mu::ui::window::CPurchaseShopInventory::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::PurchaseShopInventoryProcess()
+bool mu::ui::window::CPurchaseShopInventory::PurchaseShopInventoryProcess()
 {
     if (m_pNewInventoryCtrl && IsPress(VK_LBUTTON))
     {
@@ -223,7 +223,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::PurchaseShopInventoryProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::Update()
+bool mu::ui::window::CPurchaseShopInventory::Update()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
     {
@@ -232,7 +232,7 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::Update()
     return true;
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::RenderFrame()
+void mu::ui::window::CPurchaseShopInventory::RenderFrame()
 {
     RenderImage(IMAGE_MSGBOX_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_INVENTORY_BACK_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -242,7 +242,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::RenderFrame()
     RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x + 12, m_Pos.y + 49, 169.f, 26.f);
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::RenderTextInfo()
+void mu::ui::window::CPurchaseShopInventory::RenderTextInfo()
 {
     RenderText(I18N::Game::PersonalStore, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
     RenderText(m_TitleText.c_str(), m_Pos.x, m_Pos.y + 58, 190, 0, RGBA(0, 255, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
@@ -281,7 +281,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::RenderTextInfo()
     RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
 }
 
-bool mu::ui::window::CNewUIPurchaseShopInventory::Render()
+bool mu::ui::window::CPurchaseShopInventory::Render()
 {
     EnableAlphaTest();
 
@@ -301,12 +301,12 @@ bool mu::ui::window::CNewUIPurchaseShopInventory::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIPurchaseShopInventory::ClosingProcess()
+void mu::ui::window::CPurchaseShopInventory::ClosingProcess()
 {
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->RemoveAllItems();
-        g_ErrorReport.Write(L"@ [Notice] CNewUIPurchaseShopInventory::ClosingProcess():m_pNewInventoryCtrl->RemoveAllItems(); )\n");
+        g_ErrorReport.Write(L"@ [Notice] CPurchaseShopInventory::ClosingProcess():m_pNewInventoryCtrl->RemoveAllItems(); )\n");
     }
 
     m_ShopCharacterIndex = -1;
@@ -314,7 +314,7 @@ void mu::ui::window::CNewUIPurchaseShopInventory::ClosingProcess()
     g_pMyInventory->ChangeMyShopButtonStateOpen();
 }
 
-int mu::ui::window::CNewUIPurchaseShopInventory::GetPointedItemIndex()
+int mu::ui::window::CPurchaseShopInventory::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }

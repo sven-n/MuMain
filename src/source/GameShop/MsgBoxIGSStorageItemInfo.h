@@ -18,7 +18,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-class CMsgBoxIGSStorageItemInfo : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+class CMsgBoxIGSStorageItemInfo : public CMessageBoxBase, public I3DRenderObj
 {
 public:
     enum IMAGE_IGS_STORAGE_ITEM_INFO
@@ -71,9 +71,9 @@ public:
     void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, char szItemType, wchar_t* pszName,
                     wchar_t* pszNum, wchar_t* pszPeriod);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -88,8 +88,8 @@ private:
 
 private:
     // buttons
-    CNewUIMessageBoxButton m_BtnUse;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnUse;
+    CMessageBoxButton m_BtnCancel;
 
     int m_iStorageSeq;     // 보관함 순번
     int m_iStorageItemSeq; // 보관함 상품 순번

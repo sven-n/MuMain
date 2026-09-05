@@ -1,4 +1,4 @@
-// NewUIFriendWindow.cpp: implementation of the CNewUIFriendWindow class.
+// NewUIFriendWindow.cpp: implementation of the CFriendWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -15,14 +15,14 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUIFriendWindow::CNewUIFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL) {}
+mu::ui::window::CFriendWindow::CFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL) {}
 
-mu::ui::window::CNewUIFriendWindow::~CNewUIFriendWindow()
+mu::ui::window::CFriendWindow::~CFriendWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIFriendWindow::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CFriendWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -42,7 +42,7 @@ bool mu::ui::window::CNewUIFriendWindow::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void mu::ui::window::CNewUIFriendWindow::Reset()
+void mu::ui::window::CFriendWindow::Reset()
 {
     m_pFriendWindowMgr->Reset();
 
@@ -51,7 +51,7 @@ void mu::ui::window::CNewUIFriendWindow::Reset()
     GetFriendMenu()->Reset();
 }
 
-void mu::ui::window::CNewUIFriendWindow::Release()
+void mu::ui::window::CFriendWindow::Release()
 {
     SAFE_DELETE(m_pFriendWindowMgr);
     if (m_pNewUIMng)
@@ -61,7 +61,7 @@ void mu::ui::window::CNewUIFriendWindow::Release()
     }
 }
 
-bool mu::ui::window::CNewUIFriendWindow::Render()
+bool mu::ui::window::CFriendWindow::Render()
 {
     if (m_pFriendWindowMgr)
     {
@@ -72,7 +72,7 @@ bool mu::ui::window::CNewUIFriendWindow::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUIFriendWindow::UpdateMouseEvent()
+bool mu::ui::window::CFriendWindow::UpdateMouseEvent()
 {
     if (m_pFriendWindowMgr)
     {
@@ -109,7 +109,7 @@ bool mu::ui::window::CNewUIFriendWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIFriendWindow::UpdateKeyEvent()
+bool mu::ui::window::CFriendWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_FRIEND) == true)
     {
@@ -123,27 +123,27 @@ bool mu::ui::window::CNewUIFriendWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIFriendWindow::Update()
+bool mu::ui::window::CFriendWindow::Update()
 {
     return true;
 }
 
-float mu::ui::window::CNewUIFriendWindow::GetLayerDepth()
+float mu::ui::window::CFriendWindow::GetLayerDepth()
 {
     return 6.f;
 }
 
-CFriendList* mu::ui::window::CNewUIFriendWindow::GetFriendList()
+CFriendList* mu::ui::window::CFriendWindow::GetFriendList()
 {
     static CFriendList s_FriendList;
     return &s_FriendList;
 }
-CLetterList* mu::ui::window::CNewUIFriendWindow::GetLetterList()
+CLetterList* mu::ui::window::CFriendWindow::GetLetterList()
 {
     static CLetterList s_LetterList;
     return &s_LetterList;
 }
-CUIFriendMenu* mu::ui::window::CNewUIFriendWindow::GetFriendMenu()
+CUIFriendMenu* mu::ui::window::CFriendWindow::GetFriendMenu()
 {
     static CUIFriendMenu s_FriendMenu;
     return &s_FriendMenu;

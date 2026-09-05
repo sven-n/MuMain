@@ -12,7 +12,7 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 using namespace matchEvent;
 
-CNewUIBloodCastle::CNewUIBloodCastle()
+CBloodCastle::CBloodCastle()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -22,12 +22,12 @@ CNewUIBloodCastle::CNewUIBloodCastle()
     m_iKilledMonster = 0;
 }
 
-CNewUIBloodCastle::~CNewUIBloodCastle()
+CBloodCastle::~CBloodCastle()
 {
     Release();
 }
 
-bool CNewUIBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CBloodCastle::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -44,7 +44,7 @@ bool CNewUIBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIBloodCastle::Release()
+void CBloodCastle::Release()
 {
     UnloadImages();
 
@@ -55,13 +55,13 @@ void CNewUIBloodCastle::Release()
     }
 }
 
-void CNewUIBloodCastle::SetPos(int x, int y)
+void CBloodCastle::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIBloodCastle::UpdateMouseEvent()
+bool CBloodCastle::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -72,12 +72,12 @@ bool CNewUIBloodCastle::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIBloodCastle::UpdateKeyEvent()
+bool CBloodCastle::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIBloodCastle::Update()
+bool CBloodCastle::Update()
 {
     if (!IsVisible())
         return true;
@@ -90,7 +90,7 @@ bool CNewUIBloodCastle::Update()
     return true;
 }
 
-bool CNewUIBloodCastle::Render()
+bool CBloodCastle::Render()
 {
     if (g_csMatchInfo == NULL)
     {
@@ -135,35 +135,35 @@ bool CNewUIBloodCastle::Render()
     return true;
 }
 
-bool CNewUIBloodCastle::BtnProcess()
+bool CBloodCastle::BtnProcess()
 {
     return false;
 }
 
-float CNewUIBloodCastle::GetLayerDepth()
+float CBloodCastle::GetLayerDepth()
 {
     return 1.2f;
 }
 
-void CNewUIBloodCastle::OpenningProcess()
+void CBloodCastle::OpenningProcess()
 {
 }
 
-void CNewUIBloodCastle::ClosingProcess()
+void CBloodCastle::ClosingProcess()
 {
 }
 
-void CNewUIBloodCastle::LoadImages()
+void CBloodCastle::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_BLOODCASTLE_TIME_WINDOW, GL_LINEAR);
 }
 
-void CNewUIBloodCastle::UnloadImages()
+void CBloodCastle::UnloadImages()
 {
     DeleteBitmap(IMAGE_BLOODCASTLE_TIME_WINDOW);
 }
 
-void CNewUIBloodCastle::SetTime(int iTime)
+void CBloodCastle::SetTime(int iTime)
 {
     m_iTime = iTime;
 
@@ -180,7 +180,7 @@ void CNewUIBloodCastle::SetTime(int iTime)
     }
 }
 
-void CNewUIBloodCastle::SetKillMonsterStatue(int iKilled, int iMaxKill)
+void CBloodCastle::SetKillMonsterStatue(int iKilled, int iMaxKill)
 {
     m_iKilledMonster = iKilled;
     m_iMaxKillMonster = iMaxKill;

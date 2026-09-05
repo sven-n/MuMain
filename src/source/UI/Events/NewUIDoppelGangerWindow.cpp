@@ -1,4 +1,4 @@
-﻿// NewUIDoppelGangerWindow.cpp: implementation of the CNewUIDoppelGangerWindow class.
+﻿// NewUIDoppelGangerWindow.cpp: implementation of the CDoppelGangerWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -19,7 +19,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIDoppelGangerWindow::CNewUIDoppelGangerWindow()
+CDoppelGangerWindow::CDoppelGangerWindow()
 {
     m_pNewUIMng = NULL;
     m_pNewUI3DRenderMng = NULL;
@@ -28,12 +28,12 @@ CNewUIDoppelGangerWindow::CNewUIDoppelGangerWindow()
     m_bIsEnterButtonLocked = FALSE;
 }
 
-CNewUIDoppelGangerWindow::~CNewUIDoppelGangerWindow()
+CDoppelGangerWindow::~CDoppelGangerWindow()
 {
     Release();
 }
 
-bool CNewUIDoppelGangerWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CDoppelGangerWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -56,7 +56,7 @@ bool CNewUIDoppelGangerWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMn
     return true;
 }
 
-void CNewUIDoppelGangerWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CDoppelGangerWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -66,7 +66,7 @@ void CNewUIDoppelGangerWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIDoppelGangerWindow::Release()
+void CDoppelGangerWindow::Release()
 {
     UnloadImages();
 
@@ -83,13 +83,13 @@ void CNewUIDoppelGangerWindow::Release()
     }
 }
 
-void CNewUIDoppelGangerWindow::SetPos(int x, int y)
+void CDoppelGangerWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIDoppelGangerWindow::UpdateMouseEvent()
+bool CDoppelGangerWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -100,7 +100,7 @@ bool CNewUIDoppelGangerWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIDoppelGangerWindow::UpdateKeyEvent()
+bool CDoppelGangerWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DOPPELGANGER_NPC) == true)
     {
@@ -114,7 +114,7 @@ bool CNewUIDoppelGangerWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIDoppelGangerWindow::Update()
+bool CDoppelGangerWindow::Update()
 {
     if (IsVisible())
     {
@@ -122,12 +122,12 @@ bool CNewUIDoppelGangerWindow::Update()
     return true;
 }
 
-bool CNewUIDoppelGangerWindow::IsVisible() const
+bool CDoppelGangerWindow::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-bool CNewUIDoppelGangerWindow::Render()
+bool CDoppelGangerWindow::Render()
 {
     EnableAlphaTest();
 
@@ -188,12 +188,12 @@ bool CNewUIDoppelGangerWindow::Render()
     return true;
 }
 
-void CNewUIDoppelGangerWindow::Render3D()
+void CDoppelGangerWindow::Render3D()
 {
     RenderItem3D();
 }
 
-void CNewUIDoppelGangerWindow::RenderItem3D()
+void CDoppelGangerWindow::RenderItem3D()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
 
@@ -203,22 +203,22 @@ void CNewUIDoppelGangerWindow::RenderItem3D()
     ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 75, 20.f, 27, nItemType, nItemLevel, 0, 0, false);
 }
 
-void CNewUIDoppelGangerWindow::OpeningProcess()
+void CDoppelGangerWindow::OpeningProcess()
 {
     LockEnterButton(FALSE);
 }
 
-void CNewUIDoppelGangerWindow::ClosingProcess()
+void CDoppelGangerWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float CNewUIDoppelGangerWindow::GetLayerDepth()
+float CDoppelGangerWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIDoppelGangerWindow::LoadImages()
+void CDoppelGangerWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_DOPPELGANGERWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_DOPPELGANGERWINDOW_TOP, GL_LINEAR);
@@ -229,7 +229,7 @@ void CNewUIDoppelGangerWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_DOPPELGANGERWINDOW_LINE, GL_LINEAR);
 }
 
-void CNewUIDoppelGangerWindow::UnloadImages()
+void CDoppelGangerWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_RIGHT);
@@ -240,7 +240,7 @@ void CNewUIDoppelGangerWindow::UnloadImages()
     DeleteBitmap(IMAGE_DOPPELGANGERWINDOW_LINE);
 }
 
-void CNewUIDoppelGangerWindow::RenderFrame()
+void CDoppelGangerWindow::RenderFrame()
 {
     RenderImage(IMAGE_DOPPELGANGERWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_DOPPELGANGERWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -260,7 +260,7 @@ void CNewUIDoppelGangerWindow::RenderFrame()
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUIDoppelGangerWindow::BtnProcess()
+bool CDoppelGangerWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DOPPELGANGER_NPC);
@@ -279,7 +279,7 @@ bool CNewUIDoppelGangerWindow::BtnProcess()
     return false;
 }
 
-void CNewUIDoppelGangerWindow::SetRemainTime(int iTime)
+void CDoppelGangerWindow::SetRemainTime(int iTime)
 {
     m_iRemainTime = iTime;
     if (iTime != 0)
@@ -288,7 +288,7 @@ void CNewUIDoppelGangerWindow::SetRemainTime(int iTime)
     }
 }
 
-void CNewUIDoppelGangerWindow::LockEnterButton(BOOL bLock)
+void CDoppelGangerWindow::LockEnterButton(BOOL bLock)
 {
     m_bIsEnterButtonLocked = bLock;
 }

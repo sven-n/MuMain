@@ -1,4 +1,4 @@
-// NewUINameWindow.h: interface for the CNewUINameWindow class.
+// NewUINameWindow.h: interface for the CNameWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -12,13 +12,13 @@
 namespace mu::ui::window
 {
     // item name
-    class CNewUINameWindow : public CNewUIObj
+    class CNameWindow : public CObject
     {
     public:
-        CNewUINameWindow();
-        virtual ~CNewUINameWindow();
+        CNameWindow();
+        virtual ~CNameWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -33,7 +33,7 @@ namespace mu::ui::window
     private:
         void RenderName();
 
-        CNewUIManager* m_pNewUIMng;		// UI manager
+        CManager* m_pNewUIMng;		// UI manager
         POINT m_Pos;					// window position
 
         bool m_bShowItemName;

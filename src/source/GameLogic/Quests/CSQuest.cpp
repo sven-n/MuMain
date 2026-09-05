@@ -701,7 +701,7 @@ bool CSQuest::BeQuestItem(void)
 
 int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 {
-    mu::ui::window::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
 
     int nItemsInInven = pInvenCtrl->GetNumberOfItems();
     ITEM* pItem = nullptr;

@@ -1,4 +1,4 @@
-// NewUICatapultWindow.cpp: implementation of the CNewUICatapultWindow class.
+// NewUICatapultWindow.cpp: implementation of the CCatapultWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -19,19 +19,19 @@ using namespace mu::ui::window;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::CCatapultGroupButton()
+mu::ui::window::CCatapultWindow::CCatapultGroupButton::CCatapultGroupButton()
 {
     m_pButton = NULL;
 
     Initialize();
 }
 
-mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::~CCatapultGroupButton()
+mu::ui::window::CCatapultWindow::CCatapultGroupButton::~CCatapultGroupButton()
 {
     SAFE_DELETE_ARRAY(m_pButton);
 }
 
-void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Initialize()
+void mu::ui::window::CCatapultWindow::CCatapultGroupButton::Initialize()
 {
     SAFE_DELETE_ARRAY(m_pButton);
 
@@ -39,7 +39,7 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Initialize()
     m_iIndex = -1;
 }
 
-void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POINT ptWindow)
+void mu::ui::window::CCatapultWindow::CCatapultGroupButton::Create(int iType, POINT ptWindow)
 {
     Initialize();
 
@@ -48,7 +48,7 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Create(int iTyp
     if (iType == CATAPULT_ATTACK)
     {
         m_iBtnNum = 4;
-        m_pButton = new CNewUIButton[m_iBtnNum];
+        m_pButton = new CButton[m_iBtnNum];
         m_pButton[0].ChangeText(&I18N::Game::CastleGate1);
         m_pButton[0].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[0].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_SMALL, true);
@@ -77,7 +77,7 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Create(int iTyp
     else if (iType == CATAPULT_DEFENSE)
     {
         m_iBtnNum = 3;
-        m_pButton = new CNewUIButton[m_iBtnNum];
+        m_pButton = new CButton[m_iBtnNum];
         m_pButton[0].ChangeText(&I18N::Game::FrontYard1);
         m_pButton[0].ChangeTextBackColor(RGBA(255, 255, 255, 0));
         m_pButton[0].ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_BIG, true);
@@ -99,7 +99,7 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Create(int iTyp
     }
 }
 
-void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::AllUnLock()
+void mu::ui::window::CCatapultWindow::CCatapultGroupButton::AllUnLock()
 {
     for (int i = 0; i < m_iBtnNum; ++i)
     {
@@ -109,7 +109,7 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::AllUnLock()
     }
 }
 
-void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::BtnSelected(int iIndex)
+void mu::ui::window::CCatapultWindow::CCatapultGroupButton::BtnSelected(int iIndex)
 {
     if (iIndex < 0 || iIndex > m_iBtnNum)
     {
@@ -123,12 +123,12 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::BtnSelected(int
     m_pButton[iIndex].Lock();
 }
 
-int mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::GetIndex()
+int mu::ui::window::CCatapultWindow::CCatapultGroupButton::GetIndex()
 {
     return m_iIndex;
 }
 
-int mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::UpdateMouseEvent()
+int mu::ui::window::CCatapultWindow::CCatapultGroupButton::UpdateMouseEvent()
 {
     int iResult = -1;
 
@@ -146,7 +146,7 @@ int mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::UpdateMouseEvent
     return iResult;
 }
 
-void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Render()
+void mu::ui::window::CCatapultWindow::CCatapultGroupButton::Render()
 {
     int iCount = 0;
 
@@ -165,7 +165,7 @@ void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Render()
     }
 }
 
-mu::ui::window::CNewUICatapultWindow::CNewUICatapultWindow()
+mu::ui::window::CCatapultWindow::CCatapultWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -173,12 +173,12 @@ mu::ui::window::CNewUICatapultWindow::CNewUICatapultWindow()
     OpenningProcess();
 }
 
-mu::ui::window::CNewUICatapultWindow::~CNewUICatapultWindow()
+mu::ui::window::CCatapultWindow::~CCatapultWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUICatapultWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCatapultWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -197,7 +197,7 @@ bool mu::ui::window::CNewUICatapultWindow::Create(CNewUIManager* pNewUIMng, int 
     return true;
 }
 
-void mu::ui::window::CNewUICatapultWindow::Release()
+void mu::ui::window::CCatapultWindow::Release()
 {
     UnloadImages();
 
@@ -208,7 +208,7 @@ void mu::ui::window::CNewUICatapultWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUICatapultWindow::SetButtonInfo()
+void mu::ui::window::CCatapultWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -221,7 +221,7 @@ void mu::ui::window::CNewUICatapultWindow::SetButtonInfo()
     m_BtnFire.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void mu::ui::window::CNewUICatapultWindow::SetPos(int x, int y)
+void mu::ui::window::CCatapultWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -230,7 +230,7 @@ void mu::ui::window::CNewUICatapultWindow::SetPos(int x, int y)
     m_BtnFire.ChangeButtonInfo(m_Pos.x + 41, m_Pos.y + 250, 108, 29);
 }
 
-bool mu::ui::window::CNewUICatapultWindow::UpdateMouseEvent()
+bool mu::ui::window::CCatapultWindow::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
     {
@@ -240,7 +240,7 @@ bool mu::ui::window::CNewUICatapultWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICatapultWindow::UpdateKeyEvent()
+bool mu::ui::window::CCatapultWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CATAPULT) == true)
     {
@@ -255,12 +255,12 @@ bool mu::ui::window::CNewUICatapultWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICatapultWindow::Update()
+bool mu::ui::window::CCatapultWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUICatapultWindow::Render()
+bool mu::ui::window::CCatapultWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -272,7 +272,7 @@ bool mu::ui::window::CNewUICatapultWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUICatapultWindow::RenderFrame()
+void mu::ui::window::CCatapultWindow::RenderFrame()
 {
     RenderImage(IMAGE_CATAPULT_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_CATAPULT_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -281,7 +281,7 @@ void mu::ui::window::CNewUICatapultWindow::RenderFrame()
     RenderImage(IMAGE_CATAPULT_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 }
 
-void mu::ui::window::CNewUICatapultWindow::RenderTexts()
+void mu::ui::window::CCatapultWindow::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
@@ -303,7 +303,7 @@ void mu::ui::window::CNewUICatapultWindow::RenderTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + fLine, I18N::Game::ToShoot, 190, 0, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUICatapultWindow::RenderButtons()
+void mu::ui::window::CCatapultWindow::RenderButtons()
 {
     m_BtnExit.Render();
     m_BtnFire.Render();
@@ -311,7 +311,7 @@ void mu::ui::window::CNewUICatapultWindow::RenderButtons()
     m_BtnChoiceArea.Render();
 }
 
-void mu::ui::window::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void mu::ui::window::CCatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -321,7 +321,7 @@ void mu::ui::window::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, floa
     RenderImage(IMAGE_CATAPULT_TABLE_TOP_PIXEL, ptOrigin.x + 25, ptOrigin.y - 4, fBoxWidth - 21, 14);
 }
 
-void mu::ui::window::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void mu::ui::window::CCatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -334,12 +334,12 @@ void mu::ui::window::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, floa
     RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL, ptOrigin.x + 25, ptOrigin.y + fBoxHeight + 3, fBoxWidth - 21, 14);
 }
 
-float mu::ui::window::CNewUICatapultWindow::GetLayerDepth()
+float mu::ui::window::CCatapultWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void mu::ui::window::CNewUICatapultWindow::OpenningProcess()
+void mu::ui::window::CCatapultWindow::OpenningProcess()
 {
     m_iType = 0;
     m_iNpcKey = 0;
@@ -350,12 +350,12 @@ void mu::ui::window::CNewUICatapultWindow::OpenningProcess()
     m_BtnFire.ChangeTextColor(RGBA(100, 100, 100, 255));
 }
 
-void mu::ui::window::CNewUICatapultWindow::ClosingProcess()
+void mu::ui::window::CCatapultWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-void mu::ui::window::CNewUICatapultWindow::Init(int iKey, int iType)
+void mu::ui::window::CCatapultWindow::Init(int iKey, int iType)
 {
     m_iNpcKey = iKey;
     m_iType = iType;
@@ -370,7 +370,7 @@ void mu::ui::window::CNewUICatapultWindow::Init(int iKey, int iType)
     }
 }
 
-void mu::ui::window::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iType, int iPositionX, int iPositionY)
+void mu::ui::window::CCatapultWindow::DoFire(int iKey, int iResult, int iType, int iPositionX, int iPositionY)
 {
     int iIndex = FindCharacterIndex(iKey);
     CHARACTER* c = &CharactersClient[iIndex];
@@ -409,7 +409,7 @@ void mu::ui::window::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iTy
     PlayBuffer(SOUND_BC_CATAPULT_ATTACK);
 }
 
-void mu::ui::window::CNewUICatapultWindow::DoFireFixStartPosition(int iType, int iPositionX, int iPositionY)
+void mu::ui::window::CCatapultWindow::DoFireFixStartPosition(int iType, int iPositionX, int iPositionY)
 {
     vec3_t vPos, vTargetPos;
 
@@ -434,12 +434,12 @@ void mu::ui::window::CNewUICatapultWindow::DoFireFixStartPosition(int iType, int
     PlayBuffer(SOUND_BC_CATAPULT_ATTACK);
 }
 
-void mu::ui::window::CNewUICatapultWindow::SetCameraPos(float x, float y, float z)
+void mu::ui::window::CCatapultWindow::SetCameraPos(float x, float y, float z)
 {
     Vector(x, y, z, m_vCameraPos);
 }
 
-void mu::ui::window::CNewUICatapultWindow::GetCameraPos(vec3_t& vPos)
+void mu::ui::window::CCatapultWindow::GetCameraPos(vec3_t& vPos)
 {
     if (m_vCameraPos[0] != 0.f || m_vCameraPos[1] != 0.f || m_vCameraPos[2] != 0.f)
     {
@@ -451,7 +451,7 @@ void mu::ui::window::CNewUICatapultWindow::GetCameraPos(vec3_t& vPos)
     }
 }
 
-void mu::ui::window::CNewUICatapultWindow::LoadImages()
+void mu::ui::window::CCatapultWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CATAPULT_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CATAPULT_TOP, GL_LINEAR);
@@ -475,7 +475,7 @@ void mu::ui::window::CNewUICatapultWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CATAPULT_TABLE_RIGHT_PIXEL);
 }
 
-void mu::ui::window::CNewUICatapultWindow::UnloadImages()
+void mu::ui::window::CCatapultWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CATAPULT_BTN_BIG);
     DeleteBitmap(IMAGE_CATAPULT_BTN_SMALL);
@@ -498,7 +498,7 @@ void mu::ui::window::CNewUICatapultWindow::UnloadImages()
     DeleteBitmap(IMAGE_CATAPULT_BACK);
 }
 
-bool mu::ui::window::CNewUICatapultWindow::BtnProcess()
+bool mu::ui::window::CCatapultWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CATAPULT))

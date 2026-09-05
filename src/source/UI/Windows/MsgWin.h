@@ -23,7 +23,7 @@ namespace Rml { class ElementDocument; }
 // rect.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CNewUIObj. Previously, CWin::Create() spanning the full screen was what made
+// mu::ui::window::CObject. Previously, CWin::Create() spanning the full screen was what made
 // CUIMng::IsCursorOnUI() report true for any cursor position while this dialog was shown --
 // UpdateMouseEvent() below now does that job directly (unconditionally claims the click while
 // shown, no rect check needed), and CSceneUICoordinator::Update() folds new-style claims into m_bCursorOnUI
@@ -31,7 +31,7 @@ namespace Rml { class ElementDocument; }
 // genuinely swallows every click no matter how imprecisely the legacy CButton bookkeeping below
 // lines up with the RmlUi visuals -- unlike CCharSelMainWin, this window has no legitimate
 // "world click" competing for input that a hit-test mismatch could wrongly let through.
-class CMsgWin : public mu::ui::window::CNewUIObj
+class CMsgWin : public mu::ui::window::CObject
 {
 protected:
     enum MSG_WIN_TYPE
@@ -74,7 +74,7 @@ public:
     // MWT_STR_INPUT.
     void RenderTextOnTop();
 
-    // mu::ui::window::INewUIBase
+    // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
     // Was CWin::Create()'s full-screen bounding rect + CWin::CursorInWin(WA_ALL) -- see this

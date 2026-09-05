@@ -7,7 +7,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIManager::CNewUIManager()
+mu::ui::window::CManager::CManager()
 {
     m_pActiveMouseUIObj = NULL;
     m_pActiveKeyUIObj = NULL;
@@ -16,12 +16,12 @@ mu::ui::window::CNewUIManager::CNewUIManager()
 #endif // PBG_MOD_STAMINA_UI
 }
 
-mu::ui::window::CNewUIManager::~CNewUIManager()
+mu::ui::window::CManager::~CManager()
 {
     RemoveAllUIObjs();
 }
 
-void mu::ui::window::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
+void mu::ui::window::CManager::AddUIObj(DWORD dwKey, CObject* pUIObj)
 {
     auto mi = m_mapUI.find(dwKey);
     if (mi == m_mapUI.end())
@@ -32,7 +32,7 @@ void mu::ui::window::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
     }
 }
 
-void mu::ui::window::CNewUIManager::RemoveUIObj(DWORD dwKey)
+void mu::ui::window::CManager::RemoveUIObj(DWORD dwKey)
 {
     auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
@@ -46,7 +46,7 @@ void mu::ui::window::CNewUIManager::RemoveUIObj(DWORD dwKey)
     }
 }
 
-void mu::ui::window::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
+void mu::ui::window::CManager::RemoveUIObj(CObject* pUIObj)
 {
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
@@ -65,7 +65,7 @@ void mu::ui::window::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
     }
 }
 
-void mu::ui::window::CNewUIManager::RemoveAllUIObjs()
+void mu::ui::window::CManager::RemoveAllUIObjs()
 {
 #if defined(_DEBUG)
 
@@ -76,7 +76,7 @@ void mu::ui::window::CNewUIManager::RemoveAllUIObjs()
         for (; mi != m_mapUI.end(); ++mi)
         {
             DWORD dwKey = (*mi).first;
-            CNewUIObj* pUIObj = (*mi).second;
+            CObject* pUIObj = (*mi).second;
             if (pUIObj != NULL)
             {
                 __TraceF(TEXT("UIKEY(%d) : mapUI \n"), uiUIManageCNT, dwKey);
@@ -86,7 +86,7 @@ void mu::ui::window::CNewUIManager::RemoveAllUIObjs()
         type_vector_uibase::iterator vi = m_vecUI.begin();
         for (; vi < m_vecUI.end(); ++vi)
         {
-            CNewUIObj* pUIObj = (*vi);
+            CObject* pUIObj = (*vi);
             if (pUIObj != NULL)
             {
                 __TraceF(TEXT("vecUI \n"), uiUIManageCNT);
@@ -99,7 +99,7 @@ void mu::ui::window::CNewUIManager::RemoveAllUIObjs()
     m_mapUI.clear();
 }
 
-CNewUIObj* mu::ui::window::CNewUIManager::FindUIObj(DWORD dwKey)
+CObject* mu::ui::window::CManager::FindUIObj(DWORD dwKey)
 {
     auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
@@ -107,14 +107,14 @@ CNewUIObj* mu::ui::window::CNewUIManager::FindUIObj(DWORD dwKey)
     return NULL;
 }
 
-CNewUIObj* mu::ui::window::CNewUIManager::FindUIObjByRelatedWnd(HWND hWnd) const
+CObject* mu::ui::window::CManager::FindUIObjByRelatedWnd(HWND hWnd) const
 {
     const auto result = std::find_if(m_vecUI.begin(), m_vecUI.end(),
-                                     [hWnd](const CNewUIObj* object) { return object->GetRelatedWnd() == hWnd; });
+                                     [hWnd](const CObject* object) { return object->GetRelatedWnd() == hWnd; });
     return result != m_vecUI.end() ? *result : nullptr;
 }
 
-bool mu::ui::window::CNewUIManager::UpdateMouseEvent()
+bool mu::ui::window::CManager::UpdateMouseEvent()
 {
     m_pActiveMouseUIObj = NULL;
 
@@ -127,7 +127,7 @@ bool mu::ui::window::CNewUIManager::UpdateMouseEvent()
     {
         if ((*vi)->IsVisible())
         {
-            CNewUIObj* obj_backup = (*vi);
+            CObject* obj_backup = (*vi);
             bool bResult;
             {
                 const auto transform =
@@ -157,7 +157,7 @@ bool mu::ui::window::CNewUIManager::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIManager::UpdateKeyEvent()
+bool mu::ui::window::CManager::UpdateKeyEvent()
 {
     m_pActiveKeyUIObj = NULL;
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
@@ -202,7 +202,7 @@ bool mu::ui::window::CNewUIManager::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIManager::Update()
+bool mu::ui::window::CManager::Update()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
@@ -228,7 +228,7 @@ bool mu::ui::window::CNewUIManager::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIManager::Render()
+bool mu::ui::window::CManager::Render()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
     auto vecUI = m_vecUI;
@@ -247,25 +247,25 @@ bool mu::ui::window::CNewUIManager::Render()
     return true;
 }
 
-CNewUIObj* mu::ui::window::CNewUIManager::GetActiveMouseUIObj()
+CObject* mu::ui::window::CManager::GetActiveMouseUIObj()
 {
     return m_pActiveMouseUIObj;
 }
 
-CNewUIObj* mu::ui::window::CNewUIManager::GetActiveKeyUIObj()
+CObject* mu::ui::window::CManager::GetActiveKeyUIObj()
 {
     return m_pActiveKeyUIObj;
 }
 
-void mu::ui::window::CNewUIManager::ResetActiveUIObj()
+void mu::ui::window::CManager::ResetActiveUIObj()
 {
     m_pActiveMouseUIObj = NULL;
     m_pActiveKeyUIObj = NULL;
 }
 
-bool mu::ui::window::CNewUIManager::IsInterfaceVisible(DWORD dwKey)
+bool mu::ui::window::CManager::IsInterfaceVisible(DWORD dwKey)
 {
-    CNewUIObj* pObj = FindUIObj(dwKey);
+    CObject* pObj = FindUIObj(dwKey);
     if (NULL == pObj)
     {
         return false;
@@ -273,59 +273,59 @@ bool mu::ui::window::CNewUIManager::IsInterfaceVisible(DWORD dwKey)
     return pObj->IsVisible();
 }
 
-bool mu::ui::window::CNewUIManager::IsInterfaceEnabled(DWORD dwKey)
+bool mu::ui::window::CManager::IsInterfaceEnabled(DWORD dwKey)
 {
-    CNewUIObj* pObj = FindUIObj(dwKey);
+    CObject* pObj = FindUIObj(dwKey);
     if (NULL == pObj)
         return false;
     return pObj->IsEnabled();
 }
 
-void mu::ui::window::CNewUIManager::ShowInterface(DWORD dwKey, bool bShow /* = true*/)
+void mu::ui::window::CManager::ShowInterface(DWORD dwKey, bool bShow /* = true*/)
 {
-    CNewUIObj* pObj = FindUIObj(dwKey);
+    CObject* pObj = FindUIObj(dwKey);
     if (NULL != pObj)
         pObj->Show(bShow);
 }
 
-void mu::ui::window::CNewUIManager::EnableInterface(DWORD dwKey, bool bEnable /* = true*/)
+void mu::ui::window::CManager::EnableInterface(DWORD dwKey, bool bEnable /* = true*/)
 {
-    CNewUIObj* pObj = FindUIObj(dwKey);
+    CObject* pObj = FindUIObj(dwKey);
     if (NULL != pObj)
         pObj->Enable(bEnable);
 }
 
-void mu::ui::window::CNewUIManager::ShowAllInterfaces(bool bShow /* = true*/)
+void mu::ui::window::CManager::ShowAllInterfaces(bool bShow /* = true*/)
 {
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bShow);
 }
 
-void mu::ui::window::CNewUIManager::EnableAllInterfaces(bool bEnable /* = true*/)
+void mu::ui::window::CManager::EnableAllInterfaces(bool bEnable /* = true*/)
 {
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bEnable);
 }
 
-bool mu::ui::window::CNewUIManager::CompareLayerDepth(INewUIBase* pObj1, INewUIBase* pObj2)
+bool mu::ui::window::CManager::CompareLayerDepth(IObject* pObj1, IObject* pObj2)
 {
     return pObj1->GetLayerDepth() < pObj2->GetLayerDepth();
 }
 
-bool mu::ui::window::CNewUIManager::CompareLayerDepthReverse(INewUIBase* pObj1, INewUIBase* pObj2)
+bool mu::ui::window::CManager::CompareLayerDepthReverse(IObject* pObj1, IObject* pObj2)
 {
     return pObj1->GetLayerDepth() > pObj2->GetLayerDepth();
 }
 
-bool mu::ui::window::CNewUIManager::CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase* pObj2)
+bool mu::ui::window::CManager::CompareKeyEventOrder(IObject* pObj1, IObject* pObj2)
 {
     return pObj1->GetKeyEventOrder() > pObj2->GetKeyEventOrder();
 }
 
 #ifdef PBG_MOD_STAMINA_UI
-int mu::ui::window::CNewUIManager::GetShowUICnt()
+int mu::ui::window::CManager::GetShowUICnt()
 {
     int m_nShowUICnt = 0;
     // How many of certain interfaces are open

@@ -316,7 +316,7 @@ void CLoginWin::SetPosition(int x, int y)
 
 void CLoginWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -548,7 +548,7 @@ bool CLoginWin::Render()
     // login.rml's own panel would otherwise always paint over it regardless of which was opened
     // more recently, the same "RmlUi always wins" gap CCharInfoBalloonMng's own shouldHide check
     // exists to work around. This is a PERMANENT gap, not one this class's own migration onto
-    // CNewUIObj retires: GetLayerDepth()'s sort only orders this manager's own dispatch, not
+    // CObject retires: GetLayerDepth()'s sort only orders this manager's own dispatch, not
     // RmlUi's separate, always-last compositor pass, so no depth choice can substitute for this
     // toggle (docs/newui-legacy-merger.md). Toggled every frame here (not just on Show()), same
     // idempotent pattern as that check, since credits can open/close at any time while this
@@ -583,7 +583,7 @@ void CLoginWin::RenderTextOnTop()
 {
     // Force identity so this agrees with SetPosition()'s now-real-pixel values regardless of
     // which context runs this call (Render()'s own call above, under whatever transform
-    // CNewUIManager::Render() applies for this window's LayoutMode::Legacy, or Winmain.cpp's
+    // CManager::Render() applies for this window's LayoutMode::Legacy, or Winmain.cpp's
     // completely unscoped post-RmlUi callback) -- same fix as CMsgWin's resident-password gotcha
     // (docs/newui-legacy-merger.md).
     const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);

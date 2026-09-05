@@ -8,23 +8,23 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
-CNewUIGroup::CNewUIGroup()
+CGroup::CGroup()
 {
     m_vecUI.clear();
 }
 
-CNewUIGroup::~CNewUIGroup()
+CGroup::~CGroup()
 {
     // cppcheck-suppress virtualCallInConstructor
     Release();
 }
 
-void CNewUIGroup::AddUIObj(CNewUIObj* pUIObj)
+void CGroup::AddUIObj(CObject* pUIObj)
 {
     m_vecUI.push_back(pUIObj);
 }
 
-bool CNewUIGroup::Render()
+bool CGroup::Render()
 {
     if (IsVisible() == false)
         return false;
@@ -41,7 +41,7 @@ bool CNewUIGroup::Render()
     return true;
 }
 
-bool CNewUIGroup::Update()
+bool CGroup::Update()
 {
     if (IsEnabled() == false)
         return false;
@@ -61,7 +61,7 @@ bool CNewUIGroup::Update()
     return true;
 }
 
-bool CNewUIGroup::UpdateMouseEvent()
+bool CGroup::UpdateMouseEvent()
 {
     auto vi = m_vecUI.begin();
 
@@ -69,7 +69,7 @@ bool CNewUIGroup::UpdateMouseEvent()
     {
         if ((*vi)->IsVisible())
         {
-            CNewUIObj* pUIObj = (*vi);
+            CObject* pUIObj = (*vi);
             pUIObj->UpdateMouseEvent();
             // 			if( pUIObj->UpdateMouseEvent() == true )
             // 				break;
@@ -79,7 +79,7 @@ bool CNewUIGroup::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGroup::UpdateKeyEvent()
+bool CGroup::UpdateKeyEvent()
 {
     auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
@@ -94,7 +94,7 @@ bool CNewUIGroup::UpdateKeyEvent()
 
         if ((*vi)->IsEnabled() && hWnd == hRelatedWnd)
         {
-            CNewUIObj* pUIObj = (*vi);
+            CObject* pUIObj = (*vi);
             pUIObj->UpdateKeyEvent();
             // 			if( pUIObj->UpdateKeyEvent() == true )
             // 				break;
@@ -104,12 +104,12 @@ bool CNewUIGroup::UpdateKeyEvent()
     return true;
 }
 
-void CNewUIGroup::Release()
+void CGroup::Release()
 {
     auto vi = m_vecUI.begin();
     for (; vi != m_vecUI.end(); vi++)
     {
-        CNewUIObj* pUIObj = (*vi);
+        CObject* pUIObj = (*vi);
         SAFE_DELETE(pUIObj);
     }
 
@@ -118,7 +118,7 @@ void CNewUIGroup::Release()
     vi = m_vecUI.begin();
     for (; vi < m_vecUI.end(); ++vi)
     {
-        CNewUIObj* pUIObj = (*vi);
+        CObject* pUIObj = (*vi);
         if (pUIObj != NULL)
         {
             __TraceF(TEXT("vecUI \n"), iCount);

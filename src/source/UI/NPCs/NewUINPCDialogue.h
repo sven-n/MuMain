@@ -14,21 +14,21 @@
 
 namespace mu::ui::window
 {
-    class CNewUINPCDialogue : public CNewUIObj
+    class CNPCDialogue : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_ND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_ND_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
-            IMAGE_ND_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_ND_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_ND_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
+            IMAGE_ND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
+            IMAGE_ND_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
+            IMAGE_ND_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
+            IMAGE_ND_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
+            IMAGE_ND_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
 
-            IMAGE_ND_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_ND_BTN_L = CNewUIQuestProgress::IMAGE_QP_BTN_L,				// Quest_bt_L.tga	(17,36)
-            IMAGE_ND_BTN_R = CNewUIQuestProgress::IMAGE_QP_BTN_R,				// Quest_bt_R.tga	(17,36)
-            IMAGE_ND_BTN_CLOSE = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_ND_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
+            IMAGE_ND_BTN_L = CQuestProgress::IMAGE_QP_BTN_L,				// Quest_bt_L.tga	(17,36)
+            IMAGE_ND_BTN_R = CQuestProgress::IMAGE_QP_BTN_R,				// Quest_bt_R.tga	(17,36)
+            IMAGE_ND_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
 
 #ifdef ASG_ADD_GENS_SYSTEM
             IMAGE_ND_CONTRIBUTE_BG = BITMAP_INTERFACE_NPC_DIALOGUE_BEGIN,
@@ -42,14 +42,14 @@ namespace mu::ui::window
             ND_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT				m_Pos;
 
-        CNewUIButton		m_btnProgressL;
-        CNewUIButton		m_btnProgressR;
-        CNewUIButton		m_btnSelTextL;
-        CNewUIButton		m_btnSelTextR;
-        CNewUIButton		m_btnClose;
+        CButton		m_btnProgressL;
+        CButton		m_btnProgressR;
+        CButton		m_btnSelTextL;
+        CButton		m_btnSelTextR;
+        CButton		m_btnClose;
 
         wchar_t	m_aszNPCWords[ND_NPC_LINE_MAX][ND_WORDS_ROW_MAX];
         int		m_nSelNPCPage;
@@ -79,10 +79,10 @@ namespace mu::ui::window
         DWORD	m_dwContributePoint;
 
     public:
-        CNewUINPCDialogue();
-        virtual ~CNewUINPCDialogue();
+        CNPCDialogue();
+        virtual ~CNPCDialogue();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

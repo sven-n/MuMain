@@ -25,7 +25,7 @@ constexpr int kInvHeight = 433;
 constexpr int kAttachValue = 1000000;
 constexpr int kDetachUnitValue = 50000;
 
-mu::ui::window::CNewUIInventoryCtrl* GetInventoryCtrl()
+mu::ui::window::CInventoryCtrl* GetInventoryCtrl()
 {
     return (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
 }
@@ -276,7 +276,7 @@ int COMGEM::CalcItemValue(const ITEM* p)
 
 int COMGEM::CalcEmptyInv()
 {
-    mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
     return (pNewInventoryCtrl != nullptr) ? pNewInventoryCtrl->GetEmptySlotCount() : 0;
 }
 

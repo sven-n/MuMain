@@ -1,4 +1,4 @@
-﻿// NewUICursedTempleSystem.cpp: implementation of the CNewUICursedTempleSystem class.
+﻿// NewUICursedTempleSystem.cpp: implementation of the CCursedTempleSystem class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -237,7 +237,7 @@ namespace
     }
 };
 
-bool mu::ui::window::CNewUICursedTempleSystem::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCursedTempleSystem::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -254,24 +254,24 @@ bool mu::ui::window::CNewUICursedTempleSystem::Create(CNewUIManager* pNewUIMng, 
     return true;
 }
 
-mu::ui::window::CNewUICursedTempleSystem::CNewUICursedTempleSystem() : m_pNewUIMng(NULL)
+mu::ui::window::CCursedTempleSystem::CCursedTempleSystem() : m_pNewUIMng(NULL)
 {
     Initialize();
 }
 
-mu::ui::window::CNewUICursedTempleSystem::~CNewUICursedTempleSystem()
+mu::ui::window::CCursedTempleSystem::~CCursedTempleSystem()
 {
     Destroy();
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::Initialize()
+void mu::ui::window::CCursedTempleSystem::Initialize()
 {
     LoadImages();
 
     ResetCursedTempleSystemInfo();
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::Destroy()
+void mu::ui::window::CCursedTempleSystem::Destroy()
 {
     UnloadImages();
 
@@ -282,7 +282,7 @@ void mu::ui::window::CNewUICursedTempleSystem::Destroy()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::LoadImages()
+void mu::ui::window::CCursedTempleSystem::LoadImages()
 {
     //minimap
     LoadBitmap(L"Interface\\newui_ctminmapframe.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME, GL_LINEAR);
@@ -338,7 +338,7 @@ void mu::ui::window::CNewUICursedTempleSystem::LoadImages()
     LoadBitmap(L"Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::UnloadImages()
+void mu::ui::window::CCursedTempleSystem::UnloadImages()
 {
     //prorogress, npctalk
     DeleteBitmap(IMAGE_CURSEDTEMPLESYSTEM_BTN);
@@ -391,7 +391,7 @@ void mu::ui::window::CNewUICursedTempleSystem::UnloadImages()
     DeleteBitmap(IMAGE_NON_SKILL2);
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::ResetCursedTempleSystemInfo()
+void mu::ui::window::CCursedTempleSystem::ResetCursedTempleSystemInfo()
 {
     m_EventMapTime = 0;
     m_HolyItemPlayerIndex = 0xffff;
@@ -419,7 +419,7 @@ void mu::ui::window::CNewUICursedTempleSystem::ResetCursedTempleSystemInfo()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::StartScoreEffect()
+void mu::ui::window::CCursedTempleSystem::StartScoreEffect()
 {
     m_StartScoreEffectTime = 0;
     m_ScoreEffectAlph = 0.0f;
@@ -427,7 +427,7 @@ void mu::ui::window::CNewUICursedTempleSystem::StartScoreEffect()
     m_IsScoreEffect = true;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::EndScoreEffect()
+void mu::ui::window::CCursedTempleSystem::EndScoreEffect()
 {
     m_StartScoreEffectTime = 0;
     m_ScoreEffectAlph = 0.0f;
@@ -435,26 +435,26 @@ void mu::ui::window::CNewUICursedTempleSystem::EndScoreEffect()
     m_IsScoreEffect = false;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::StartTutorialStep()
+void mu::ui::window::CCursedTempleSystem::StartTutorialStep()
 {
     m_IsTutorialStep = true;
     m_TutorialStepState = 0;
     m_TutorialStepTime = timeGetTime();
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::EndTutorialStep()
+void mu::ui::window::CCursedTempleSystem::EndTutorialStep()
 {
     m_IsTutorialStep = false;
     m_TutorialStepState = 0;
     m_TutorialStepTime = 0;
 }
 
-SEASON3A::eCursedTempleTeam mu::ui::window::CNewUICursedTempleSystem::GetMyTeam()
+SEASON3A::eCursedTempleTeam mu::ui::window::CCursedTempleSystem::GetMyTeam()
 {
     return m_MyTeam;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::SetButtonInfo()
+void mu::ui::window::CCursedTempleSystem::SetButtonInfo()
 {
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonImgState(true, IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, true);
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonInfo(513, 238, 38, 24);
@@ -466,9 +466,9 @@ void mu::ui::window::CNewUICursedTempleSystem::SetButtonInfo()
     m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeButtonInfo(0, 0, 15, 13);
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
+bool mu::ui::window::CCursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
 {
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
     if (pPickedItem)
     {
@@ -510,7 +510,7 @@ bool mu::ui::window::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER*
     return false;
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DWORD npckey)
+bool mu::ui::window::CCursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DWORD npckey)
 {
     std::list<DWORD>				progressnpcindexlist;
     progressnpcindexlist.push_back(HolyItemNpc);
@@ -580,7 +580,7 @@ bool mu::ui::window::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcind
     return false;
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::CheckHeroSkillType(int operatortype)
+bool mu::ui::window::CCursedTempleSystem::CheckHeroSkillType(int operatortype)
 {
     if (operatortype == 0)
     {
@@ -594,7 +594,7 @@ bool mu::ui::window::CNewUICursedTempleSystem::CheckHeroSkillType(int operatorty
     }
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::CheckDragonRender()
+bool mu::ui::window::CCursedTempleSystem::CheckDragonRender()
 {
     if (IsVisible())
     {
@@ -606,14 +606,14 @@ bool mu::ui::window::CNewUICursedTempleSystem::CheckDragonRender()
     }
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcharacterindex)
+bool mu::ui::window::CCursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcharacterindex)
 {
     if (Hero->m_CursedTempleCurSkillPacket) return false;
 
     return mu::ui::window::IsRepeat(VK_SHIFT);
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::UpdateMouseEvent()
+bool mu::ui::window::CCursedTempleSystem::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLERESULT_ALPH].UpdateMouseEvent())
     {
@@ -661,12 +661,12 @@ bool mu::ui::window::CNewUICursedTempleSystem::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::UpdateKeyEvent()
+bool mu::ui::window::CCursedTempleSystem::UpdateKeyEvent()
 {
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::UpdateScore()
+void mu::ui::window::CCursedTempleSystem::UpdateScore()
 {
     if (!m_IsScoreEffect) return;
 
@@ -704,7 +704,7 @@ void mu::ui::window::CNewUICursedTempleSystem::UpdateScore()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::UpdateTutorialStep()
+void mu::ui::window::CCursedTempleSystem::UpdateTutorialStep()
 {
     if (!m_IsTutorialStep) return;
 
@@ -721,7 +721,7 @@ void mu::ui::window::CNewUICursedTempleSystem::UpdateTutorialStep()
     }
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::Update()
+bool mu::ui::window::CCursedTempleSystem::Update()
 {
     UpdateScore();
     UpdateTutorialStep();
@@ -729,7 +729,7 @@ bool mu::ui::window::CNewUICursedTempleSystem::Update()
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::RenderSkill()
+void mu::ui::window::CCursedTempleSystem::RenderSkill()
 {
     EnableAlphaTest();
 
@@ -834,7 +834,7 @@ void mu::ui::window::CNewUICursedTempleSystem::RenderSkill()
     DisableAlphaBlend();
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::RenderGameTime()
+void mu::ui::window::CCursedTempleSystem::RenderGameTime()
 {
     float x, y, Width, Height;
 
@@ -860,7 +860,7 @@ void mu::ui::window::CNewUICursedTempleSystem::RenderGameTime()
     DisableAlphaBlend();
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::RenderMiniMap()
+void mu::ui::window::CCursedTempleSystem::RenderMiniMap()
 {
     float x, y, Width, Height;
 
@@ -965,7 +965,7 @@ void mu::ui::window::CNewUICursedTempleSystem::RenderMiniMap()
 #endif //_DEBUG
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::RenderScore()
+void mu::ui::window::CCursedTempleSystem::RenderScore()
 {
     if (!m_IsScoreEffect) return;
 
@@ -1013,7 +1013,7 @@ void mu::ui::window::CNewUICursedTempleSystem::RenderScore()
     ::DisableAlphaBlend();
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::RenderTutorialStep()
+void mu::ui::window::CCursedTempleSystem::RenderTutorialStep()
 {
     if (!m_IsTutorialStep) return;
 
@@ -1072,7 +1072,7 @@ void mu::ui::window::CNewUICursedTempleSystem::RenderTutorialStep()
     ::DisableAlphaBlend();
 }
 
-bool mu::ui::window::CNewUICursedTempleSystem::Render()
+bool mu::ui::window::CCursedTempleSystem::Render()
 {
     // 환영사원 이벤트 도중 비정상적으로 맵 이동 됐을 경우를 위한 예외 처리
     if (gMapManager.IsCursedTemple() == false)
@@ -1100,7 +1100,7 @@ bool mu::ui::window::CNewUICursedTempleSystem::Render()
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex)
+void mu::ui::window::CCursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex)
 {
     if (Hero->m_CursedTempleCurSkillPacket)
     {
@@ -1202,7 +1202,7 @@ void mu::ui::window::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
 
@@ -1288,7 +1288,7 @@ void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(co
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
 
@@ -1328,7 +1328,7 @@ void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
 
@@ -1403,7 +1403,7 @@ void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYT
     }
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
 
@@ -1418,7 +1418,7 @@ void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const
     m_SkillPoint = data->btSkillPoint;
 }
 
-void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
 }

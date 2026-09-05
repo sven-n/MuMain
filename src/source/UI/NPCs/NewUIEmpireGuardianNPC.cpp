@@ -1,4 +1,4 @@
-﻿// CNewUIEmpireGuardianNPC.cpp: implementation of the CNewUIEmpireGuardianNPC class.
+﻿// CEmpireGuardianNPC.cpp: implementation of the CEmpireGuardianNPC class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -13,19 +13,19 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIEmpireGuardianNPC::CNewUIEmpireGuardianNPC()
+CEmpireGuardianNPC::CEmpireGuardianNPC()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_bCanClick = true;
 }
 
-CNewUIEmpireGuardianNPC::~CNewUIEmpireGuardianNPC()
+CEmpireGuardianNPC::~CEmpireGuardianNPC()
 {
     Release();
 }
 
-bool CNewUIEmpireGuardianNPC::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -48,7 +48,7 @@ bool CNewUIEmpireGuardianNPC::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng
     return true;
 }
 
-void CNewUIEmpireGuardianNPC::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CEmpireGuardianNPC::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -58,7 +58,7 @@ void CNewUIEmpireGuardianNPC::InitButton(CNewUIButton* pNewUIButton, int iPos_x,
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIEmpireGuardianNPC::Release()
+void CEmpireGuardianNPC::Release()
 {
     UnloadImages();
 
@@ -69,13 +69,13 @@ void CNewUIEmpireGuardianNPC::Release()
     }
 }
 
-void CNewUIEmpireGuardianNPC::SetPos(int x, int y)
+void CEmpireGuardianNPC::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIEmpireGuardianNPC::UpdateMouseEvent()
+bool CEmpireGuardianNPC::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -86,7 +86,7 @@ bool CNewUIEmpireGuardianNPC::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIEmpireGuardianNPC::UpdateKeyEvent()
+bool CEmpireGuardianNPC::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC) == true)
     {
@@ -100,7 +100,7 @@ bool CNewUIEmpireGuardianNPC::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIEmpireGuardianNPC::Update()
+bool CEmpireGuardianNPC::Update()
 {
     if (!IsVisible())
         return true;
@@ -108,12 +108,12 @@ bool CNewUIEmpireGuardianNPC::Update()
     return true;
 }
 
-bool CNewUIEmpireGuardianNPC::IsVisible() const
+bool CEmpireGuardianNPC::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-bool CNewUIEmpireGuardianNPC::Render()
+bool CEmpireGuardianNPC::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -156,7 +156,7 @@ bool CNewUIEmpireGuardianNPC::Render()
     return true;
 }
 
-bool CNewUIEmpireGuardianNPC::BtnProcess()
+bool CEmpireGuardianNPC::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
@@ -177,20 +177,20 @@ bool CNewUIEmpireGuardianNPC::BtnProcess()
     return false;
 }
 
-float CNewUIEmpireGuardianNPC::GetLayerDepth()
+float CEmpireGuardianNPC::GetLayerDepth()
 {
     return 1.2f;
 }
 
-void CNewUIEmpireGuardianNPC::OpenningProcess()
+void CEmpireGuardianNPC::OpenningProcess()
 {
 }
 
-void CNewUIEmpireGuardianNPC::ClosingProcess()
+void CEmpireGuardianNPC::ClosingProcess()
 {
 }
 
-void CNewUIEmpireGuardianNPC::LoadImages()
+void CEmpireGuardianNPC::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_EMPIREGUARDIAN_NPC_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_EMPIREGUARDIAN_NPC_TOP, GL_LINEAR);
@@ -205,7 +205,7 @@ void CNewUIEmpireGuardianNPC::LoadImages()
     LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_EMPIREGUARDIAN_NPC_LINE, GL_LINEAR);
 }
 
-void CNewUIEmpireGuardianNPC::UnloadImages()
+void CEmpireGuardianNPC::UnloadImages()
 {
     DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_TOP);
     DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_LEFT);
@@ -216,7 +216,7 @@ void CNewUIEmpireGuardianNPC::UnloadImages()
     DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_LINE);
 }
 
-void CNewUIEmpireGuardianNPC::RenderFrame()
+void CEmpireGuardianNPC::RenderFrame()
 {
     RenderImage(IMAGE_EMPIREGUARDIAN_NPC_BACK, m_Pos.x, m_Pos.y, float(NPC_WINDOW_WIDTH), float(NPC_WINDOW_HEIGHT));
     RenderImage(IMAGE_EMPIREGUARDIAN_NPC_TOP, m_Pos.x, m_Pos.y, float(NPC_WINDOW_WIDTH), 64.f);
@@ -230,12 +230,12 @@ void CNewUIEmpireGuardianNPC::RenderFrame()
     g_pRenderText->RenderText(m_Pos.x + (NPC_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, I18N::Game::JerintTheAssistant, 110, 0, RT3_SORT_CENTER);
 }
 
-void CNewUIEmpireGuardianNPC::Render3D()
+void CEmpireGuardianNPC::Render3D()
 {
     RenderItem3D();
 }
 
-void CNewUIEmpireGuardianNPC::RenderItem3D()
+void CEmpireGuardianNPC::RenderItem3D()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
 

@@ -1,7 +1,7 @@
-# The `CNewUIObj`-Tier Adapter Pattern
+# The `mu::ui::window` Tier Adapter Pattern
 
-How to port an in-game HUD/`CNewUIObj`-tier window to RmlUi. This is a *different* tier from every
-other document in `rmlui-ui-system/` — `CNewUIObj`/`CNewUIManager`, not `CWin`/`CUIMng` — with its
+How to port an in-game HUD/`mu::ui::window::CObject`-tier window to RmlUi. This is a *different* tier from every
+other document in `rmlui-ui-system/` — `mu::ui::window::CObject`/`mu::ui::window::CManager`, not `CWin`/`CUIMng` — with its
 own base class, its own lifecycle, and its own input-gating mechanism. Read this before touching
 any window on that tier (as of `docs/newui-legacy-merger.md`'s directory restructure, these live
 in topic folders directly under `UI/` — `UI/HUD/`, `UI/Inventory/`, etc. — not one `UI/NewUI/`
@@ -14,7 +14,7 @@ Proven on two pilots so far: `CMuHelperBar` (`UI/HUD/MuHelperBar.h/.cpp` →
 and `CBuffStrip` (`UI/HUD/BuffStrip.h/.cpp` → `Data/Interface/RmlUi/buff_strip.rml`, renamed
 from `CNewUIBuffWindow` — the active-buff icon strip, and the first `data-for`/dynamic-array pilot
 at this tier). This doc is the pattern extracted from both; expect it to keep firming up as more
-`CNewUIObj` windows are ported.
+`mu::ui::window::CObject` windows are ported.
 
 ## Why this tier needed its own pass
 
@@ -27,14 +27,14 @@ existed" as "already reliable"**: `CursorInWin()`'s rect going stale is the mech
 separate confirmed bugs in this same `CWin` tier (`STATUS.md`'s "three parallel input-tracking
 systems" finding) — the comparison here (this tier needed a new flag, `CWin`-tier didn't) still
 holds, but staying in sync is a real, unresolved reliability problem, not a solved detail.
-The `CNewUIObj` tier has none of that: a different base class (`CNewUIObj`, not `CWin`), a different manager
-(`CNewUIManager`, not `CUIMng`), and — critically — it's the tier that renders during `MAIN_SCENE`
+The `mu::ui::window::CObject` tier has none of that: a different base class (`mu::ui::window::CObject`, not `CWin`), a different manager
+(`mu::ui::window::CManager`, not `CUIMng`), and — critically — it's the tier that renders during `MAIN_SCENE`
 (actual gameplay), which had never run any RmlUi content through its input-gating path before this
 pilot (see "The `MAIN_SCENE` prerequisites" below).
 
 ## The adapter shape
 
-`CNewUIObj`'s real interface is small (`UI/Core/NewUIBase.h`, 64 lines):
+`mu::ui::window::CObject`'s real interface is small (`UI/Core/NewUIBase.h`, 64 lines):
 `Render()`/`Update()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`/`GetLayerDepth()`/`IsVisible()`/
 `IsEnabled()`, plus non-virtual per-subclass `Create()`/`Release()` (signature varies per window)
 and `Show()`/`Enable()` (already implemented on the base, not overridden). Porting a window means:
@@ -44,9 +44,9 @@ and `Show()`/`Enable()` (already implemented on the base, not overridden). Porti
 - **`UpdateMouseEvent()`/`UpdateKeyEvent()` → always return `true`** (RmlUi's own
   "not consumed" convention here, matching `RmlUiRuntime::ProcessSdlEvent()`'s contract).
   RmlUi's context does hit-testing now; this method existing at all is only to satisfy
-  `CNewUIManager`'s consume-and-stop loop over every registered object.
+  `mu::ui::window::CManager`'s consume-and-stop loop over every registered object.
 - **`Create()`/`Release()`/`GetLayerDepth()`/`Show()`/`Enable()`/`IsVisible()` stay real.**
-  `CNewUIManager` still owns z-order (`GetLayerDepth()`-sorted render loop),
+  `mu::ui::window::CManager` still owns z-order (`GetLayerDepth()`-sorted render loop),
   registration/lookup (`AddUIObj(INTERFACE_KEY, this)`, keyed by the window's `INTERFACE_*` id),
   and visibility toggling through these exactly as before — nothing about *that* bookkeeping
   changes. `Update()` keeps doing whatever real per-frame work it did before (reading live game
@@ -58,7 +58,7 @@ and `Show()`/`Enable()` (already implemented on the base, not overridden). Porti
 - **Remove dead legacy widget objects — don't keep them "for redundancy."** The `CWin` tier keeps
   a legacy `CButton` alive alongside its RmlUi replacement for redundant hit-testing (see
   `layout-and-scaling.md`). That doesn't transfer here: once `UpdateMouseEvent()` is a permanent
-  "not consumed," a legacy `CNewUIButton`/`SetButtonInfo()`/tooltip-position helper can never
+  "not consumed," a legacy `mu::ui::window::CButton`/`SetButtonInfo()`/tooltip-position helper can never
   detect a click or do anything else again, regardless of its own internal state. Keeping it
   around is dead weight, not real redundancy — delete it. (`CNewUIHeroPositionInfo` had
   `m_BtnConfig`/`m_BtnStart`/`m_BtnStop` plus their `SetButtonInfo()`/`MoveTextTipPos()`/
@@ -66,7 +66,7 @@ and `Show()`/`Enable()` (already implemented on the base, not overridden). Porti
 
 ## The `MAIN_SCENE` prerequisites (already fixed, applies to every future port here)
 
-Three things must work before *any* `CNewUIObj`-tier RmlUi content behaves correctly — all three
+Three things must work before *any* `mu::ui::window::CObject`-tier RmlUi content behaves correctly — all three
 matter beyond just this tier's own pilots, since `CSysMenuWin`/`COptionWin` (`CWin`-tier RmlUi) are
 also reachable from gameplay via the in-game ESC menu:
 
@@ -84,7 +84,7 @@ also reachable from gameplay via the in-game ESC menu:
    know about RmlUi. Fixed by adding `RmlUiRuntime::IsMouseOverUI()` (wraps
    `Rml::Context::IsMouseInteracting()` — the method already existed, already correctly named and
    commented for exactly this, just was never called anywhere) as a 4th flag in both gates. Any
-   new `CNewUIObj`-tier RmlUi window is automatically covered by this — nothing per-window to add.
+   new `mu::ui::window::CObject`-tier RmlUi window is automatically covered by this — nothing per-window to add.
 
 If a future port finds a *third* `MAIN_SCENE` call site gating on the same
 `MouseOnWindow`/`mouseOnHud`/`CheckMouseUse()` trio without `IsMouseOverUI()`, add it there too —
@@ -92,24 +92,24 @@ these two were the only ones found by an explicit grep-based audit at the time, 
 system could plausibly add another.
 
 3. **A persistent RmlUi document needs its own scene-visibility gate — `IsVisible()`/`Show()`
-   alone doesn't provide one at this tier.** `CNewUISystem` (the `CNewUIObj`-tier manager) is a
+   alone doesn't provide one at this tier.** `CNewUISystem` (the `mu::ui::window::CObject`-tier manager) is a
    single app-lifetime singleton, created once at startup and never released until the process
    exits — unlike `CWin`-tier windows, which are explicitly `Show()`/`Hide()`'d by app logic at
    real scene-transition points (`CUIMng::ShowWin()`/`HideWin()`). Its `Update()`/`Render()` are
-   themselves only ever *called* during `MAIN_SCENE` (`MainScene.cpp`) — before any `CNewUIObj`
+   themselves only ever *called* during `MAIN_SCENE` (`MainScene.cpp`) — before any `mu::ui::window::CObject`
    window owned an RmlUi document, that call-site gate was already a complete visibility gate on
    its own, since nothing drew otherwise. It stops being one the moment a window's visuals move to
    a persistent RmlUi document: that document, once shown, keeps rendering every frame regardless
    of scene (`RmlUiRuntime::RenderFrame()` is a true per-frame choke point, scene-agnostic by
    design) — found via `CMuHelperBar`/`CBuffStrip` rendering on the login/character-select
-   screens. `CNewUIObj::Show(bool)` (`NewUIBase.h`) only toggles a `m_bRender` flag consumed by the
+   screens. `mu::ui::window::CObject::Show(bool)` (`NewUIBase.h`) only toggles a `m_bRender` flag consumed by the
    now-dead `Render()`; it was never wired to the RmlUi document at all. Fixed generically, not
    per-window: each pilot exposes `SyncDocVisibility(bool sceneAllowsShow)` (computes
    `IsVisible() && sceneAllowsShow`, calls `m_pRmlDoc->Show()`/`Hide()`), and
    `CNewUISystem::SyncMainSceneHudVisibility()` calls it on every such window every frame,
    regardless of scene — wired into `Winmain.cpp`'s `SetPostRmlUiCallback` lambda (already the
    per-frame, scene-agnostic call site above), outside its own `SceneFlag ==` gate so it isn't
-   itself scene-restricted. **Any new `CNewUIObj`-tier window whose visuals move to a persistent
+   itself scene-restricted. **Any new `mu::ui::window::CObject`-tier window whose visuals move to a persistent
    RmlUi document needs the same `SyncDocVisibility()` method added to
    `SyncMainSceneHudVisibility()`** — this doesn't happen automatically the way the click-gating
    fix above does.
@@ -123,7 +123,7 @@ generic "show my coordinates" HUD element. The RmlUi-facing assets are named `mu
 actually presents as, don't force the RmlUi assets to inherit the mismatch just because the C++
 identifiers do — and, per the next paragraph, don't leave the C++ identifiers mismatched either.
 
-Ported as **one** RmlUi component matching the legacy class's own boundary (one `CNewUIObj`, one
+Ported as **one** RmlUi component matching the legacy class's own boundary (one `mu::ui::window::CObject`, one
 window, one screen position, one `INTERFACE_*` registration) rather than split along a
 conceptual line (position display vs. bot control) that doesn't correspond to any real seam in
 the code. Split only if the legacy code already has two independent lifecycles to split along —
@@ -134,8 +134,8 @@ don't invent a new ownership boundary as part of a straight RmlUi port.
 member/accessor/macro that referenced it, updated to match (`INTERFACE_MU_HELPER_BAR`,
 `GetUI_MuHelperBar()`, `g_pMuHelperBar`, etc.) — required by
 [`architecture-principles.md`](architecture-principles.md)'s §12. **What's still deferred**: the
-`CNewUIObj` base class/tier boundary itself — that's structural (touches the ~88 other
-still-unported `CNewUIObj` windows' shared machinery), not a per-class naming choice, and stays
+`mu::ui::window::CObject` base class/tier boundary itself — that's structural (touches the ~88 other
+still-unported `mu::ui::window::CObject` windows' shared machinery), not a per-class naming choice, and stays
 premature with only 2 pilots. (The physical file location piece of this deferral was resolved
 separately by the `UI/` directory restructure — `docs/newui-legacy-merger.md`, 2026-09-05 — these
 windows now live in `UI/HUD/` etc., not `UI/NewUI/HUD/`.) See [`STATUS.md`](STATUS.md)'s "Tracked
@@ -216,7 +216,7 @@ at port time, no exception.
 
 | Subsystem | Key files |
 |---|---|
-| `CNewUIObj` base / manager | [`UI/Core/NewUIBase.h`](../../src/source/UI/Core/NewUIBase.h), [`UI/Core/NewUIManager.h/.cpp`](../../src/source/UI/Core/NewUIManager.h) |
+| `mu::ui::window::CObject` base / manager | [`UI/Core/NewUIBase.h`](../../src/source/UI/Core/NewUIBase.h), [`UI/Core/NewUIManager.h/.cpp`](../../src/source/UI/Core/NewUIManager.h) |
 | Mouse-gating extension | [`Render/RmlUi/RmlUiRuntime.h`](../../src/source/Render/RmlUi/RmlUiRuntime.h) (`IsMouseOverUI()`), [`Input/Selection.cpp`](../../src/source/Input/Selection.cpp), [`Engine/Object/ZzzInterface.cpp`](../../src/source/Engine/Object/ZzzInterface.cpp) (`Attack()`) |
 | Cursor-on-top seam | [`App/Platform/Windows/Winmain.cpp`](../../src/source/App/Platform/Windows/Winmain.cpp) (`SetPostRmlUiCallback`), [`Scenes/MainScene.cpp`](../../src/source/Scenes/MainScene.cpp) |
 | Pilots | [`UI/HUD/MuHelperBar.h/.cpp`](../../src/source/UI/HUD/MuHelperBar.h), `Data/Interface/RmlUi/mu_helper_bar.rml` + `themes/{legacy,modern}/mu_helper_bar.rcss`; [`UI/HUD/BuffStrip.h/.cpp`](../../src/source/UI/HUD/BuffStrip.h), `Data/Interface/RmlUi/buff_strip.rml` + `themes/{legacy,modern}/buff_strip.rcss` |

@@ -13,7 +13,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIEnterDevilSquare::CNewUIEnterDevilSquare()
+CEnterDevilSquare::CEnterDevilSquare()
 {
     m_pNewUIMng = NULL;
     memset(&m_Pos, 0, sizeof(POINT));
@@ -41,12 +41,12 @@ CNewUIEnterDevilSquare::CNewUIEnterDevilSquare()
     m_iDevilSquareLimitLevel[13][0] = 0; m_iDevilSquareLimitLevel[13][1] = 0;
 }
 
-CNewUIEnterDevilSquare::~CNewUIEnterDevilSquare()
+CEnterDevilSquare::~CEnterDevilSquare()
 {
     Release();
 }
 
-bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CEnterDevilSquare::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -77,7 +77,7 @@ bool CNewUIEnterDevilSquare::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIEnterDevilSquare::Release()
+void CEnterDevilSquare::Release()
 {
     UnloadImages();
 
@@ -88,7 +88,7 @@ void CNewUIEnterDevilSquare::Release()
     }
 }
 
-void CNewUIEnterDevilSquare::SetPos(int x, int y)
+void CEnterDevilSquare::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -106,13 +106,13 @@ void CNewUIEnterDevilSquare::SetPos(int x, int y)
     }
 }
 
-void CNewUIEnterDevilSquare::SetBtnPos(int x, int y)
+void CEnterDevilSquare::SetBtnPos(int x, int y)
 {
     m_BtnEnterStartPos.x = x;
     m_BtnEnterStartPos.y = y;
 }
 
-bool CNewUIEnterDevilSquare::UpdateMouseEvent()
+bool CEnterDevilSquare::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -123,7 +123,7 @@ bool CNewUIEnterDevilSquare::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIEnterDevilSquare::UpdateKeyEvent()
+bool CEnterDevilSquare::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DEVILSQUARE) == true)
     {
@@ -138,7 +138,7 @@ bool CNewUIEnterDevilSquare::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIEnterDevilSquare::Update()
+bool CEnterDevilSquare::Update()
 {
     if (!IsVisible())
         return true;
@@ -146,7 +146,7 @@ bool CNewUIEnterDevilSquare::Update()
     return true;
 }
 
-bool CNewUIEnterDevilSquare::Render()
+bool CEnterDevilSquare::Render()
 {
     EnableAlphaTest();
 
@@ -183,7 +183,7 @@ bool CNewUIEnterDevilSquare::Render()
 
 //---------------------------------------------------------------------------------------------
 // BtnProcess
-bool CNewUIEnterDevilSquare::BtnProcess()
+bool CEnterDevilSquare::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DEVILSQUARE))
@@ -204,12 +204,12 @@ bool CNewUIEnterDevilSquare::BtnProcess()
     return false;
 }
 
-float CNewUIEnterDevilSquare::GetLayerDepth()
+float CEnterDevilSquare::GetLayerDepth()
 {
     return 4.0f;
 }
 
-int CNewUIEnterDevilSquare::CheckLimitLV(int iIndex)
+int CEnterDevilSquare::CheckLimitLV(int iIndex)
 {
     int	iVal = 0;
     int iRet = 0;
@@ -244,7 +244,7 @@ int CNewUIEnterDevilSquare::CheckLimitLV(int iIndex)
     return iRet;
 }
 
-void CNewUIEnterDevilSquare::OpenningProcess()
+void CEnterDevilSquare::OpenningProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -282,12 +282,12 @@ void CNewUIEnterDevilSquare::OpenningProcess()
     m_BtnEnter[MAX_ENTER_GRADE - 1].ChangeText(sztext);
 }
 
-void CNewUIEnterDevilSquare::ClosingProcess()
+void CEnterDevilSquare::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-void CNewUIEnterDevilSquare::LoadImages()
+void CEnterDevilSquare::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ENTERDS_BASE_WINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_ENTERDS_BASE_WINDOW_TOP, GL_LINEAR);
@@ -300,7 +300,7 @@ void CNewUIEnterDevilSquare::LoadImages()
 
 //---------------------------------------------------------------------------------------------
 // UnloadImages
-void CNewUIEnterDevilSquare::UnloadImages()
+void CEnterDevilSquare::UnloadImages()
 {
     DeleteBitmap(IMAGE_ENTERDS_BASE_WINDOW_BACK);
     DeleteBitmap(IMAGE_ENTERDS_BASE_WINDOW_TOP);

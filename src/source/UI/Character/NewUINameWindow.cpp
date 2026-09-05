@@ -1,4 +1,4 @@
-// NewUINameWindow.cpp: implementation of the CNewUINameWindow class.
+// NewUINameWindow.cpp: implementation of the CNameWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -81,7 +81,7 @@ void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUINameWindow::CNewUINameWindow()
+mu::ui::window::CNameWindow::CNameWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -90,12 +90,12 @@ mu::ui::window::CNewUINameWindow::CNewUINameWindow()
     m_bShowMonsterHealthBar = false;
 }
 
-mu::ui::window::CNewUINameWindow::~CNewUINameWindow()
+mu::ui::window::CNameWindow::~CNameWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUINameWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNameWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -110,7 +110,7 @@ bool mu::ui::window::CNewUINameWindow::Create(CNewUIManager* pNewUIMng, int x, i
     return true;
 }
 
-void mu::ui::window::CNewUINameWindow::Release()
+void mu::ui::window::CNameWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -119,18 +119,18 @@ void mu::ui::window::CNewUINameWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUINameWindow::SetPos(int x, int y)
+void mu::ui::window::CNameWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUINameWindow::UpdateMouseEvent()
+bool mu::ui::window::CNameWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUINameWindow::UpdateKeyEvent()
+bool mu::ui::window::CNameWindow::UpdateKeyEvent()
 {
     if (mu::ui::window::IsPress(VK_MENU) == true)
     {
@@ -145,12 +145,12 @@ bool mu::ui::window::CNewUINameWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUINameWindow::Update()
+bool mu::ui::window::CNameWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUINameWindow::Render()
+bool mu::ui::window::CNameWindow::Render()
 {
     EnableAlphaTest();
     RenderName();
@@ -164,7 +164,7 @@ bool mu::ui::window::CNewUINameWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUINameWindow::RenderName()
+void mu::ui::window::CNameWindow::RenderName()
 {
     if (g_bGMObservation == true)
     {
@@ -261,7 +261,7 @@ void mu::ui::window::CNewUINameWindow::RenderName()
     }
 }
 
-void mu::ui::window::CNewUINameWindow::RenderMonsterHealthBars()
+void mu::ui::window::CNameWindow::RenderMonsterHealthBars()
 {
     if (!m_bShowMonsterHealthBar)
         return;
@@ -296,7 +296,7 @@ void mu::ui::window::CNewUINameWindow::RenderMonsterHealthBars()
     }
 }
 
-float mu::ui::window::CNewUINameWindow::GetLayerDepth()
+float mu::ui::window::CNameWindow::GetLayerDepth()
 {
     return 1.0f;
 }

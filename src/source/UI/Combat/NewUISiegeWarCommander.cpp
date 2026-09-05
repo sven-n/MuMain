@@ -1,4 +1,4 @@
-﻿// NewUISiegeWarCommander.cpp: implementation of the CNewUISiegeWarCommander class.
+﻿// NewUISiegeWarCommander.cpp: implementation of the CSiegeWarCommander class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,7 +11,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUISiegeWarCommander::CNewUISiegeWarCommander()
+mu::ui::window::CSiegeWarCommander::CSiegeWarCommander()
 {
     memset(&m_BtnCommandGroupPos, 0, sizeof(POINT));
     memset(&m_BtnCommandPos, 0, sizeof(POINT));
@@ -23,26 +23,26 @@ mu::ui::window::CNewUISiegeWarCommander::CNewUISiegeWarCommander()
     m_vGuildMemberLocationBuffer.reserve(1600);
 }
 
-mu::ui::window::CNewUISiegeWarCommander::~CNewUISiegeWarCommander() {}
+mu::ui::window::CSiegeWarCommander::~CSiegeWarCommander() {}
 
-bool mu::ui::window::CNewUISiegeWarCommander::OnCreate(int x, int y)
+bool mu::ui::window::CSiegeWarCommander::OnCreate(int x, int y)
 {
     InitCmdGroupBtn();
     InitCmdBtn();
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::OnRelease()
+void mu::ui::window::CSiegeWarCommander::OnRelease()
 {
     ClearGuildMemberLocation();
 }
 
-bool mu::ui::window::CNewUISiegeWarCommander::OnUpdate()
+bool mu::ui::window::CSiegeWarCommander::OnUpdate()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarCommander::OnRender()
+bool mu::ui::window::CSiegeWarCommander::OnRender()
 {
     EnableAlphaTest();
     g_pRenderText->SetFont(g_hFontBold);
@@ -71,7 +71,7 @@ bool mu::ui::window::CNewUISiegeWarCommander::OnRender()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarCommander::OnUpdateMouseEvent()
+bool mu::ui::window::CSiegeWarCommander::OnUpdateMouseEvent()
 {
     if (OnBtnProcess())
         return false;
@@ -106,12 +106,12 @@ bool mu::ui::window::CNewUISiegeWarCommander::OnUpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarCommander::OnUpdateKeyEvent()
+bool mu::ui::window::CSiegeWarCommander::OnUpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarCommander::OnBtnProcess()
+bool mu::ui::window::CSiegeWarCommander::OnBtnProcess()
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
@@ -155,13 +155,13 @@ bool mu::ui::window::CNewUISiegeWarCommander::OnBtnProcess()
     return false;
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::OnSetPos(int x, int y)
+void mu::ui::window::CSiegeWarCommander::OnSetPos(int x, int y)
 {
     m_BtnCommandGroupPos.x = x;
     m_BtnCommandGroupPos.y = y + 5;
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::InitCmdGroupBtn()
+void mu::ui::window::CSiegeWarCommander::InitCmdGroupBtn()
 {
     int iVal = 0;
     wchar_t sztext[255] = {
@@ -179,7 +179,7 @@ void mu::ui::window::CNewUISiegeWarCommander::InitCmdGroupBtn()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::InitCmdBtn()
+void mu::ui::window::CSiegeWarCommander::InitCmdBtn()
 {
     for (int i = 0; i < MINIMAP_CMD_MAX; i++)
     {
@@ -187,7 +187,7 @@ void mu::ui::window::CNewUISiegeWarCommander::InitCmdBtn()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
+void mu::ui::window::CSiegeWarCommander::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
 
@@ -220,7 +220,7 @@ void mu::ui::window::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
+void mu::ui::window::CSiegeWarCommander::RenderGuildMemberPosInMiniMap()
 {
     std::vector<VisibleUnitLocation>::iterator UnitIterator;
     POINT Pos;
@@ -253,7 +253,7 @@ void mu::ui::window::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
+void mu::ui::window::CSiegeWarCommander::RenderCmdIconAtMouse()
 {
     int iWidth, iHeight;
     wchar_t szText[256] = {
@@ -281,7 +281,7 @@ void mu::ui::window::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
     RenderImage(IMAGE_COMMAND_ATTACK + m_iCurSelectBtnCommand, MouseX - 8, MouseY - 8, iWidth, iHeight);
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::RenderCmdGroupBtn()
+void mu::ui::window::CSiegeWarCommander::RenderCmdGroupBtn()
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
@@ -291,7 +291,7 @@ void mu::ui::window::CNewUISiegeWarCommander::RenderCmdGroupBtn()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::RenderCmdBtn()
+void mu::ui::window::CSiegeWarCommander::RenderCmdBtn()
 {
     if (m_iCurSelectBtnGroup < 5)
     {
@@ -340,7 +340,7 @@ void mu::ui::window::CNewUISiegeWarCommander::RenderCmdBtn()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bStateDown)
+void mu::ui::window::CSiegeWarCommander::SetBtnState(int iBtnType, bool bStateDown)
 {
     if (bStateDown)
     {
@@ -360,25 +360,25 @@ void mu::ui::window::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bSt
     }
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::ClearGuildMemberLocation(void)
+void mu::ui::window::CSiegeWarCommander::ClearGuildMemberLocation(void)
 {
     m_vGuildMemberLocationBuffer.clear();
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::SetGuildMemberLocation(BYTE type, int x, int y)
+void mu::ui::window::CSiegeWarCommander::SetGuildMemberLocation(BYTE type, int x, int y)
 {
     VisibleUnitLocation vLocation = {type, (BYTE)x, (BYTE)y};
 
     m_vGuildMemberLocationBuffer.push_back(vLocation);
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::OnLoadImages()
+void mu::ui::window::CSiegeWarCommander::OnLoadImages()
 {
     LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_group.tga", IMAGE_MINIMAP_BTN_GROUP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_Command.tga", IMAGE_MINIMAP_BTN_COMMAND, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUISiegeWarCommander::OnUnloadImages()
+void mu::ui::window::CSiegeWarCommander::OnUnloadImages()
 {
     DeleteBitmap(IMAGE_MINIMAP_BTN_GROUP);
     DeleteBitmap(IMAGE_MINIMAP_BTN_COMMAND);

@@ -1,4 +1,4 @@
-// NewUIQuickCommandWindow.h: interface for the CNewUIQuickCommandWindow class.
+// NewUIQuickCommandWindow.h: interface for the CQuickCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIQUICKCOMMANDWINDOW_H__3A1D6614_8C41_4066_A831_2954B3C461D5__INCLUDED_)
@@ -13,24 +13,24 @@
 
 namespace mu::ui::window
 {
-    class CNewUIQuickCommandWindow : public CNewUIObj
+    class CQuickCommandWindow : public CObject
     {
         enum IMAGE_LIST
         {
-            IMAGE_QUICKCOMMAND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_QUICKCOMMAND_FRAME_MIDDLE = CNewUIWindowMenu::IMAGE_WINDOW_MENU_FRAME_MIDDLE,
-            IMAGE_QUICKCOMMAND_FRAME_DOWN = CNewUIWindowMenu::IMAGE_WINDOW_MENU_FRAME_DOWN,
-            IMAGE_QUICKCOMMAND_LINE = CNewUIWindowMenu::IMAGE_WINDOW_MENU_LINE,
-            IMAGE_QUICKCOMMAND_ARROWL = CNewUIWindowMenu::IMAGE_WINDOW_MENU_ARROWL,
-            IMAGE_QUICKCOMMAND_ARROWR = CNewUIWindowMenu::IMAGE_WINDOW_MENU_ARROWR,
+            IMAGE_QUICKCOMMAND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_QUICKCOMMAND_FRAME_MIDDLE = CWindowMenu::IMAGE_WINDOW_MENU_FRAME_MIDDLE,
+            IMAGE_QUICKCOMMAND_FRAME_DOWN = CWindowMenu::IMAGE_WINDOW_MENU_FRAME_DOWN,
+            IMAGE_QUICKCOMMAND_LINE = CWindowMenu::IMAGE_WINDOW_MENU_LINE,
+            IMAGE_QUICKCOMMAND_ARROWL = CWindowMenu::IMAGE_WINDOW_MENU_ARROWL,
+            IMAGE_QUICKCOMMAND_ARROWR = CWindowMenu::IMAGE_WINDOW_MENU_ARROWR,
             IMAGE_QUICKCOMMAND_FRAME_UP = BITMAP_QUICKCOMMAND_BEGIN,
         };
 
     public:
-        CNewUIQuickCommandWindow();
-        virtual ~CNewUIQuickCommandWindow();
+        CQuickCommandWindow();
+        virtual ~CQuickCommandWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -59,7 +59,7 @@ namespace mu::ui::window
         void RenderArrow();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT			m_Pos;
 
         int m_iSelectedIndex;

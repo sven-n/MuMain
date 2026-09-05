@@ -8,23 +8,23 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
-CNewUIInventoryExtension::CNewUIInventoryExtension()
+CInventoryExtension::CInventoryExtension()
 {
     Init();
 }
 
-CNewUIInventoryExtension::~CNewUIInventoryExtension()
+CInventoryExtension::~CInventoryExtension()
 {
     Release();
 }
 
-void CNewUIInventoryExtension::Init()
+void CInventoryExtension::Init()
 {
     m_pNewUIMng = nullptr;
     m_Pos.x = m_Pos.y = 0;
 }
 
-bool CNewUIInventoryExtension::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
 {
     if (nullptr == pNewUIMng || nullptr == g_pNewItemMng)
         return false;
@@ -37,7 +37,7 @@ bool CNewUIInventoryExtension::Create(CNewUIManager* pNewUIMng, int x, int y)
     int i = 0;
     for (auto& m_extension : m_extensions)
     {
-        m_extension = new CNewUIInventoryCtrl();
+        m_extension = new CInventoryCtrl();
 
         const int indexOffset = MAX_MY_INVENTORY_INDEX + i * MAX_INVENTORY_EXT_ONE;
         if (false == m_extension->Create(STORAGE_TYPE::INVENTORY, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15,
@@ -63,7 +63,7 @@ bool CNewUIInventoryExtension::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIInventoryExtension::Release()
+void CInventoryExtension::Release()
 {
     UnloadImages();
 
@@ -82,14 +82,14 @@ void CNewUIInventoryExtension::Release()
     }
 }
 
-void CNewUIInventoryExtension::SetPos(int x, int y)
+void CInventoryExtension::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
 }
 
-bool CNewUIInventoryExtension::UpdateMouseEvent()
+bool CInventoryExtension::UpdateMouseEvent()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY_EXT))
@@ -136,7 +136,7 @@ bool CNewUIInventoryExtension::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIInventoryExtension::InventoryProcess()
+bool CInventoryExtension::InventoryProcess()
 {
     if (!CheckMouseIn(m_Pos.x, m_Pos.y, WIDTH, HEIGHT))
     {
@@ -154,7 +154,7 @@ bool CNewUIInventoryExtension::InventoryProcess()
     return false;
 }
 
-bool CNewUIInventoryExtension::UpdateKeyEvent()
+bool CInventoryExtension::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT) == false)
     {
@@ -164,7 +164,7 @@ bool CNewUIInventoryExtension::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIInventoryExtension::Update()
+bool CInventoryExtension::Update()
 {
     for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
@@ -180,7 +180,7 @@ bool CNewUIInventoryExtension::Update()
     return true;
 }
 
-bool CNewUIInventoryExtension::Render()
+bool CInventoryExtension::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -200,7 +200,7 @@ bool CNewUIInventoryExtension::Render()
     return true;
 }
 
-void CNewUIInventoryExtension::RenderFrame() const
+void CInventoryExtension::RenderFrame() const
 {
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
@@ -219,7 +219,7 @@ void CNewUIInventoryExtension::RenderFrame() const
     }
 }
 
-void CNewUIInventoryExtension::RenderTexts() const
+void CInventoryExtension::RenderTexts() const
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -228,18 +228,18 @@ void CNewUIInventoryExtension::RenderTexts() const
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::ExpandedInventory, WIDTH, 0, RT3_SORT_CENTER);
 }
 
-float CNewUIInventoryExtension::GetLayerDepth()
+float CInventoryExtension::GetLayerDepth()
 {
     return 4.55;
 }
 
-void CNewUIInventoryExtension::SetButtonInfo()
+void CInventoryExtension::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 }
 
-void CNewUIInventoryExtension::LoadImages()
+void CInventoryExtension::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
@@ -255,7 +255,7 @@ void CNewUIInventoryExtension::LoadImages()
     LoadBitmap(L"Interface\\newui_item_add_marking_no04.tga", IMAGE_EXTENSION_NO4, GL_LINEAR);
 }
 
-void CNewUIInventoryExtension::UnloadImages()
+void CInventoryExtension::UnloadImages()
 {
     DeleteBitmap(IMAGE_NPCSHOP_BACK);
     DeleteBitmap(IMAGE_NPCSHOP_TOP);
@@ -271,7 +271,7 @@ void CNewUIInventoryExtension::UnloadImages()
     DeleteBitmap(IMAGE_EXTENSION_NO4);
 }
 
-CNewUIInventoryCtrl* CNewUIInventoryExtension::TryGetExtensionByInventoryIndex(int iIndex) const
+CInventoryCtrl* CInventoryExtension::TryGetExtensionByInventoryIndex(int iIndex) const
 {
     const auto index = iIndex - MAX_MY_INVENTORY_INDEX;
     const auto extensionIndex = index / MAX_INVENTORY_EXT_ONE;
@@ -283,7 +283,7 @@ CNewUIInventoryCtrl* CNewUIInventoryExtension::TryGetExtensionByInventoryIndex(i
     return nullptr;
 }
 
-ITEM* CNewUIInventoryExtension::FindItem(int iIndex) const
+ITEM* CInventoryExtension::FindItem(int iIndex) const
 {
     if (const auto& extension = TryGetExtensionByInventoryIndex(iIndex))
     {
@@ -292,7 +292,7 @@ ITEM* CNewUIInventoryExtension::FindItem(int iIndex) const
     return nullptr;
 }
 
-bool CNewUIInventoryExtension::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
+bool CInventoryExtension::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (const auto& extension = TryGetExtensionByInventoryIndex(iIndex))
     {
@@ -302,7 +302,7 @@ bool CNewUIInventoryExtension::InsertItem(int iIndex, std::span<const BYTE> pbyI
     return false;
 }
 
-void CNewUIInventoryExtension::DeleteItem(int iIndex) const
+void CInventoryExtension::DeleteItem(int iIndex) const
 {
     if (const auto& extension = TryGetExtensionByInventoryIndex(iIndex))
     {
@@ -311,17 +311,17 @@ void CNewUIInventoryExtension::DeleteItem(int iIndex) const
             return;
         }
 
-        if (const auto pPickedItem = CNewUIInventoryCtrl::GetPickedItem())
+        if (const auto pPickedItem = CInventoryCtrl::GetPickedItem())
         {
             if (GetOwnerOf(pPickedItem) && pPickedItem->GetSourceLinealPos() == iIndex)
             {
-                CNewUIInventoryCtrl::DeletePickedItem();
+                CInventoryCtrl::DeletePickedItem();
             }
         }
     }
 }
 
-void CNewUIInventoryExtension::DeleteAllItems() const
+void CInventoryExtension::DeleteAllItems() const
 {
     for (auto* extension : m_extensions)
     {
@@ -332,7 +332,7 @@ void CNewUIInventoryExtension::DeleteAllItems() const
     }
 }
 
-int CNewUIInventoryExtension::FindEmptySlot(int cx, int cy, const CNewUIInventoryCtrl* excluded) const
+int CInventoryExtension::FindEmptySlot(int cx, int cy, const CInventoryCtrl* excluded) const
 {
     if (CharacterAttribute == nullptr)
     {
@@ -355,7 +355,7 @@ int CNewUIInventoryExtension::FindEmptySlot(int cx, int cy, const CNewUIInventor
     return -1;
 }
 
-CNewUIInventoryCtrl* CNewUIInventoryExtension::GetOwnerOf(const CNewUIPickedItem* pPickedItem) const
+CInventoryCtrl* CInventoryExtension::GetOwnerOf(const CPickedItem* pPickedItem) const
 {
     if (!pPickedItem)
     {

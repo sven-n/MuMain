@@ -1,4 +1,4 @@
-// NewUIOptionWindow.h: interface for the CNewUIOptionWindow class.
+// NewUIOptionWindow.h: interface for the COptionWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -26,16 +26,16 @@ int FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& reso
 
 namespace mu::ui::window
 {
-    class CNewUIOptionWindow : public CNewUIObj
+    class COptionWindow : public CObject
     {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     public:
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
         enum IMAGE_LIST
         {
-            IMAGE_OPTION_FRAME_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_OPTION_BTN_CLOSE = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CLOSE,
-            IMAGE_OPTION_FRAME_DOWN = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_OPTION_FRAME_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_OPTION_BTN_CLOSE = CMessageBoxMng::IMAGE_MSGBOX_BTN_CLOSE,
+            IMAGE_OPTION_FRAME_DOWN = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
 
             IMAGE_OPTION_FRAME_UP = BITMAP_OPTION_BEGIN,
             IMAGE_OPTION_FRAME_LEFT,
@@ -50,10 +50,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUIOptionWindow();
-        virtual ~CNewUIOptionWindow();
+        COptionWindow();
+        virtual ~COptionWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -100,10 +100,10 @@ namespace mu::ui::window
         void HandleRenderLevelSlider();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
-        CNewUIButton m_BtnClose;
+        CButton m_BtnClose;
 
         bool m_bAutoAttack;
         bool m_bWhisperSound;
@@ -125,9 +125,9 @@ namespace mu::ui::window
         // so the release can't fall through to the Close button (see UpdateMouseEvent).
         bool m_bSwallowClickHold = false;
 
-        CNewUIComboBox m_ResolutionCombo;
-        CNewUIComboBox m_LanguageCombo;
-        CNewUIComboBox m_FontCombo;
+        CComboBox m_ResolutionCombo;
+        CComboBox m_LanguageCombo;
+        CComboBox m_FontCombo;
 
         void ApplyResolution();
         int FindCurrentResolutionIndex();

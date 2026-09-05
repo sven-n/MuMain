@@ -1,4 +1,4 @@
-// NewUIPetInformation.cpp: imp0lementation of the CNewUIPetInfoWindow class.
+// NewUIPetInformation.cpp: imp0lementation of the CPetInfoWindow class.
 ////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,7 +14,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIPetInfoWindow::CNewUIPetInfoWindow()
+CPetInfoWindow::CPetInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -23,12 +23,12 @@ CNewUIPetInfoWindow::CNewUIPetInfoWindow()
     m_EventState = EVENT_NONE;
 }
 
-CNewUIPetInfoWindow::~CNewUIPetInfoWindow()
+CPetInfoWindow::~CPetInfoWindow()
 {
     Release();
 }
 
-bool CNewUIPetInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CPetInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -47,7 +47,7 @@ bool CNewUIPetInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIPetInfoWindow::Release()
+void CPetInfoWindow::Release()
 {
     UnloadImages();
 
@@ -58,7 +58,7 @@ void CNewUIPetInfoWindow::Release()
     }
 }
 
-void CNewUIPetInfoWindow::InitButtons()
+void CPetInfoWindow::InitButtons()
 {
     std::list<const wchar_t* const*> ltext;
 
@@ -77,7 +77,7 @@ void CNewUIPetInfoWindow::InitButtons()
     m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);	// 1002 "�ݱ�"
 }
 
-void CNewUIPetInfoWindow::SetPos(int x, int y)
+void CPetInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -85,7 +85,7 @@ void CNewUIPetInfoWindow::SetPos(int x, int y)
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
 }
 
-bool CNewUIPetInfoWindow::UpdateMouseEvent()
+bool CPetInfoWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -96,12 +96,12 @@ bool CNewUIPetInfoWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIPetInfoWindow::UpdateKeyEvent()
+bool CPetInfoWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIPetInfoWindow::Update()
+bool CPetInfoWindow::Update()
 {
     if (IsVisible() == false)
         return true;
@@ -116,7 +116,7 @@ bool CNewUIPetInfoWindow::Update()
     return true;
 }
 
-bool CNewUIPetInfoWindow::Render()
+bool CPetInfoWindow::Render()
 {
     EnableAlphaTest();
 
@@ -182,7 +182,7 @@ bool CNewUIPetInfoWindow::Render()
     return true;
 }
 
-bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
+bool CPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
 {
     wchar_t szText[256] = { 0, };
 
@@ -218,7 +218,7 @@ bool CNewUIPetInfoWindow::RenderDarkHorseInfo(PET_INFO* pPetInfo)
     return true;
 }
 
-bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
+bool CPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
 {
     wchar_t szText[256] = { 0, };
 
@@ -277,7 +277,7 @@ bool CNewUIPetInfoWindow::RenderDarkSpiritInfo(PET_INFO* pPetInfo)
     return true;
 }
 
-void CNewUIPetInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth/* =60 */, int iTitleHeight/* =20  */)
+void CPetInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth/* =60 */, int iTitleHeight/* =20  */)
 {
     EnableAlphaTest();
 
@@ -302,12 +302,12 @@ void CNewUIPetInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int i
     RenderImage(IMAGE_PETINFO_TABLE_LEFT_PIXEL, iPosX, iPosY + 6, 14, iHeight - 14);
 }
 
-float CNewUIPetInfoWindow::GetLayerDepth()
+float CPetInfoWindow::GetLayerDepth()
 {
     return 2.3f;
 }
 
-bool CNewUIPetInfoWindow::BtnProcess()
+bool CPetInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PET))
@@ -322,7 +322,7 @@ bool CNewUIPetInfoWindow::BtnProcess()
     return false;
 }
 
-void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
+void CPetInfoWindow::CalcDamage(int iNumTapButton)
 {
     PET_INFO* pPetInfo = NULL;
 
@@ -333,7 +333,7 @@ void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
         int iSkillDamage[2];
         int master_boost = 0;
         gCharacterManager.GetSkillDamage(AT_SKILL_EARTHSHAKE, &iSkillDamage[0], &iSkillDamage[1]);
-        auto masterLevelUi = mu::ui::window::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+        auto masterLevelUi = mu::ui::window::CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
         if (masterLevelUi != nullptr)
         {
             master_boost = static_cast<int>(CharacterAttribute->MasterSkillInfo[AT_SKILL_EARTHSHAKE_STR].GetSkillValue());
@@ -365,7 +365,7 @@ void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
     }
 }
 
-void CNewUIPetInfoWindow::LoadImages()
+void CPetInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_PETINFO_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_PETINFO_TOP, GL_LINEAR);
@@ -393,7 +393,7 @@ void CNewUIPetInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_pet_lifebar02.jpg", IMAGE_PETINFO_LIFE, GL_LINEAR);
 }
 
-void CNewUIPetInfoWindow::UnloadImages()
+void CPetInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_PETINFO_BACK);
     DeleteBitmap(IMAGE_PETINFO_TOP);
@@ -422,11 +422,11 @@ void CNewUIPetInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_PETINFO_LIFE);
 }
 
-void CNewUIPetInfoWindow::OpenningProcess()
+void CPetInfoWindow::OpenningProcess()
 {
     CalcDamage(m_iNumCurOpenTab);
 }
 
-void CNewUIPetInfoWindow::ClosingProcess()
+void CPetInfoWindow::ClosingProcess()
 {
 }

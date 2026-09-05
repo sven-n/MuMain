@@ -15,7 +15,7 @@ audits status against. See `STATUS.md` for how this fits the rest of the tracked
 Two structural patterns, not one unified `Window` component (`README.md`'s "Coexistence
 patterns" section has the full detail):
 
-- **`CNewUIObj`-tier window keeping legacy sprite widgets + RmlUi overlay** — these windows no
+- **`mu::ui::window::CObject`-tier window keeping legacy sprite widgets + RmlUi overlay** — these windows no
   longer derive from or hold a `CWin`/`CWinEx` instance at all (that base class has zero live
   subclasses left anywhere in the tree); what they kept from their pre-migration `CWin` days is
   just their sprite-widget *members* (`CButton`, `CGaugeBar`, `CWinEx` as a plain composed member
@@ -41,7 +41,7 @@ Real shared contract across both themes already — `.btn`/`.btn-ok`/`.btn-cance
 same class names, same state model, each theme's own `base.rcss`. `.btn-ok` gets each theme's
 "primary/hero" treatment (see `modern-theme-visual-direction.md`'s Accent colors section); plain
 `.btn` stays neutral. This is the RCSS-layer contract only — the C++ side has three unrelated
-button classes of its own (`CButton`, `CUIButton`, `CNewUIButton`); see
+button classes of its own (`CButton`, `CUIButton`, `mu::ui::window::CButton`); see
 `docs/rmlui-ui-system/building-new-ui.md` for which one to use and why they aren't duplicates of
 each other.
 

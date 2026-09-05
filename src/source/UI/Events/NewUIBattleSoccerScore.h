@@ -1,7 +1,7 @@
 //*****************************************************************************
 // File: NewUIBattleSoccerScore.h
 //
-// Desc: interface for the CNewUIBattleSoccerScore class.
+// Desc: interface for the CBattleSoccerScore class.
 //		 전투축구 점수 UI 클래스.
 //
 // producer: Ahn Sang-Kyu
@@ -17,7 +17,7 @@
 
 namespace mu::ui::window
 {
-class CNewUIBattleSoccerScore : public CNewUIObj
+class CBattleSoccerScore : public CObject
 {
 public:
     enum IMAGE_LIST
@@ -32,14 +32,14 @@ private:
         BSS_HEIGHT = 70,
     };
 
-    CNewUIManager* m_pNewUIMng; // UI 매니저.
+    CManager* m_pNewUIMng; // UI 매니저.
     POINT m_Pos;                // 창의 위치.
 
 public:
-    CNewUIBattleSoccerScore();
-    virtual ~CNewUIBattleSoccerScore();
+    CBattleSoccerScore();
+    virtual ~CBattleSoccerScore();
 
-    bool Create(CNewUIManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
     void Release();
 
     void SetPos(int x, int y);

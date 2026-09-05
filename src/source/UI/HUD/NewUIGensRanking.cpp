@@ -1,4 +1,4 @@
-// NewUIGensRanking.cpp: implementation of the CNewUIGensRanking class.
+// NewUIGensRanking.cpp: implementation of the CGensRanking class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "I18N/All.h"
@@ -13,12 +13,12 @@ using namespace mu::ui::window;
 
 #define TEMP_MAX_TEXT_LENGTH 1024
 
-CNewUIGensRanking::CNewUIGensRanking() : m_fBooleanSize(0.8f)
+CGensRanking::CGensRanking() : m_fBooleanSize(0.8f)
 {
     Init();
 }
 
-CNewUIGensRanking::~CNewUIGensRanking()
+CGensRanking::~CGensRanking()
 {
     if (m_pScrollBar)
         m_pScrollBar->Release();
@@ -32,7 +32,7 @@ CNewUIGensRanking::~CNewUIGensRanking()
     Destroy();
 }
 
-void CNewUIGensRanking::Init()
+void CGensRanking::Init()
 {
     m_nContribution = 0;
     memset(m_szRanking, 0, sizeof(char) * TEAMNAME_LENTH);
@@ -52,7 +52,7 @@ void CNewUIGensRanking::Init()
     SetTitleName();
 }
 
-void CNewUIGensRanking::Destroy()
+void CGensRanking::Destroy()
 {
     UnloadImages();
 
@@ -63,7 +63,7 @@ void CNewUIGensRanking::Destroy()
     }
 }
 
-bool CNewUIGensRanking::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGensRanking::Create(CManager* pNewUIMng, int x, int y)
 {
     if (pNewUIMng == NULL)
         return false;
@@ -71,10 +71,10 @@ bool CNewUIGensRanking::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_GENSRANKING, this);
 
-    m_pScrollBar = new CNewUIScrollBar();
+    m_pScrollBar = new CScrollBar();
     m_pScrollBar->Create(x, y, 110);
 
-    m_pTextBox = new CNewUITextBox();
+    m_pTextBox = new CTextBox();
     m_pTextBox->Create(x, y, 200, 110);
 
     SetPos(x, y);
@@ -86,7 +86,7 @@ bool CNewUIGensRanking::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGensRanking::SetPos(int x, int y)
+void CGensRanking::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -97,7 +97,7 @@ void CNewUIGensRanking::SetPos(int x, int y)
         m_pTextBox->SetPos(x + 20, y + 280, 150, 110);
 }
 
-bool CNewUIGensRanking::Render()
+bool CGensRanking::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -113,7 +113,7 @@ bool CNewUIGensRanking::Render()
     return true;
 }
 
-void CNewUIGensRanking::RenderFrame()
+void CGensRanking::RenderFrame()
 {
     RenderImage(IMAGE_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -129,7 +129,7 @@ void CNewUIGensRanking::RenderFrame()
     RenderImage(IMAGE_RANKBACK_TEXTBOX, m_Pos.x + 13, m_Pos.y + GENSRANKBACK_HEIGHT + GENSRANKTEXTBACK_HEIGHT + 60 + 6, GENSRANKTEXTBACK_WIDTH, GENSRANKTEXTBACK_HEIGHT);
 }
 
-void CNewUIGensRanking::RenderInfoFrame(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth, int iTitleHeight)
+void CGensRanking::RenderInfoFrame(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth, int iTitleHeight)
 {
     EnableAlphaTest();
     constexpr unsigned int InfoBackdropColor = 0x99000000u;
@@ -152,7 +152,7 @@ void CNewUIGensRanking::RenderInfoFrame(int iPosX, int iPosY, int iWidth, int iH
     RenderImage(IMAGE_GENSINFO_LEFT_PIXEL, iPosX, iPosY + 6, 14, iHeight - 14);
 }
 
-void CNewUIGensRanking::RenderTexts()
+void CGensRanking::RenderTexts()
 {
     wchar_t szText[TEMP_MAX_TEXT_LENGTH];
     float _x = GetPos().x;
@@ -228,17 +228,17 @@ void CNewUIGensRanking::RenderTexts()
     g_pRenderText->SetFont(g_hFont);
 }
 
-void CNewUIGensRanking::RenderButtons()
+void CGensRanking::RenderButtons()
 {
     m_BtnExit.Render();
 }
 
-void CNewUIGensRanking::RenderMark(int _x, int _y, GENS_TYPE gensType)
+void CGensRanking::RenderMark(int _x, int _y, GENS_TYPE gensType)
 {
     RanderMark(_x, _y, gensType, Hero->GensRanking);
 }
 
-bool CNewUIGensRanking::Update()
+bool CGensRanking::Update()
 {
     if (!IsVisible())
         return true;
@@ -273,7 +273,7 @@ bool CNewUIGensRanking::Update()
     return true;
 }
 
-bool CNewUIGensRanking::UpdateMouseEvent()
+bool CGensRanking::UpdateMouseEvent()
 {
     if (!g_pNewUISystem->IsVisible(INTERFACE_GENSRANKING))
         return true;
@@ -299,7 +299,7 @@ bool CNewUIGensRanking::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGensRanking::UpdateKeyEvent()
+bool CGensRanking::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_GENSRANKING))
     {
@@ -312,7 +312,7 @@ bool CNewUIGensRanking::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGensRanking::BtnProcess()
+bool CGensRanking::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), INTERFACE_GENSRANKING))
@@ -331,34 +331,34 @@ bool CNewUIGensRanking::BtnProcess()
     return false;
 }
 
-void CNewUIGensRanking::SetBtnInfo(float _PosX, float _PosY)
+void CGensRanking::SetBtnInfo(float _PosX, float _PosY)
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_GENS_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(13 + _PosX, 392 + _PosY, 36, 29);
     m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
 }
 
-void CNewUIGensRanking::OpenningProcess()
+void CGensRanking::OpenningProcess()
 {
     SocketClient->ToGameServer()->SendGensRankingRequest();
 }
 
-void CNewUIGensRanking::ClosingProcess()
+void CGensRanking::ClosingProcess()
 {
     //n/a
 }
 
-void CNewUIGensRanking::LoadImages()
+void CGensRanking::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_gens_rankback.tga", IMAGE_RANKBACK);
 }
 
-void CNewUIGensRanking::UnloadImages()
+void CGensRanking::UnloadImages()
 {
     DeleteBitmap(IMAGE_RANKBACK);
 }
 
-void CNewUIGensRanking::SetContribution(int _Contribution)
+void CGensRanking::SetContribution(int _Contribution)
 {
     if (_Contribution < 0)
     {
@@ -369,7 +369,7 @@ void CNewUIGensRanking::SetContribution(int _Contribution)
     m_nContribution = _Contribution;
 }
 
-int CNewUIGensRanking::GetContribution()
+int CGensRanking::GetContribution()
 {
     if (m_nContribution <= 0)
         return 0;
@@ -377,7 +377,7 @@ int CNewUIGensRanking::GetContribution()
     return m_nContribution;
 }
 
-bool CNewUIGensRanking::SetRanking(int _Ranking)
+bool CGensRanking::SetRanking(int _Ranking)
 {
     if (_Ranking <= 0)
     {
@@ -389,12 +389,12 @@ bool CNewUIGensRanking::SetRanking(int _Ranking)
     return true;
 }
 
-wchar_t* CNewUIGensRanking::GetRanking()
+wchar_t* CGensRanking::GetRanking()
 {
     return m_szRanking;
 }
 
-void CNewUIGensRanking::SetNextContribution(int _NextContribution)
+void CGensRanking::SetNextContribution(int _NextContribution)
 {
     if (_NextContribution < 0)
     {
@@ -404,12 +404,12 @@ void CNewUIGensRanking::SetNextContribution(int _NextContribution)
     m_nNextContribution = _NextContribution;
 }
 
-int CNewUIGensRanking::GetNextContribution()
+int CGensRanking::GetNextContribution()
 {
     return m_nNextContribution;
 }
 
-bool CNewUIGensRanking::SetGensInfo()
+bool CGensRanking::SetGensInfo()
 {
     m_byGensInfluence = (GENS_TYPE)Hero->m_byGensInfluence;
 
@@ -431,7 +431,7 @@ bool CNewUIGensRanking::SetGensInfo()
     return false;
 }
 
-bool CNewUIGensRanking::SetGensTeamName(const wchar_t* _pTeamName)
+bool CGensRanking::SetGensTeamName(const wchar_t* _pTeamName)
 {
     if (_pTeamName)
     {
@@ -441,19 +441,19 @@ bool CNewUIGensRanking::SetGensTeamName(const wchar_t* _pTeamName)
     return false;
 }
 
-wchar_t* CNewUIGensRanking::GetGensTeamName()
+wchar_t* CGensRanking::GetGensTeamName()
 {
     return m_szGensTeam;
 }
 
-void CNewUIGensRanking::SetTitleName()
+void CGensRanking::SetTitleName()
 {
     wchar_t _szTempText[256] = { 0, };
     mu_swprintf(_szTempText, I18N::Game::GrandDukeDukeMarquisCountViscount);
     ::DivideStringByPixel(&m_szTitleName[0][0], TITLENAME_END, MAX_TITLELENGTH, _szTempText, 240, true, '#');
 }
 
-wchar_t* CNewUIGensRanking::GetTitleName(BYTE _index)
+wchar_t* CGensRanking::GetTitleName(BYTE _index)
 {
     if (TITLENAME_START <= _index && TITLENAME_END >= _index)
         return m_szTitleName[_index - 1];
@@ -461,7 +461,7 @@ wchar_t* CNewUIGensRanking::GetTitleName(BYTE _index)
         return m_szTitleName[TITLENAME_END - 1];
 }
 
-void CNewUIGensRanking::RanderMark(float x, float y, GENS_TYPE gensType, BYTE rankIndex, IMAGE_AREA imageArea, float yOffset)
+void CGensRanking::RanderMark(float x, float y, GENS_TYPE gensType, BYTE rankIndex, IMAGE_AREA imageArea, float yOffset)
 {
     if (gensType == GENSTYPE_NONE)
     {
@@ -495,7 +495,7 @@ void CNewUIGensRanking::RanderMark(float x, float y, GENS_TYPE gensType, BYTE ra
     RenderBitmap(imageType, x, y, _width, _height, u, v, _width / imageWidth, _height / imageHeight);
 }
 
-int CNewUIGensRanking::GetImageIndex(BYTE rankIndex)
+int CGensRanking::GetImageIndex(BYTE rankIndex)
 {
     if (rankIndex < TITLENAME_START || rankIndex > TITLENAME_END)
     {

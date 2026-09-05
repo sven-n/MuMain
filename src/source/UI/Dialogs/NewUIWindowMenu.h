@@ -1,4 +1,4 @@
-// NewUIWindowMenu.h: interface for the CNewUIWindowMenu class.
+// NewUIWindowMenu.h: interface for the CWindowMenu class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -12,12 +12,12 @@
 
 namespace mu::ui::window
 {
-    class CNewUIWindowMenu : public CNewUIObj
+    class CWindowMenu : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_WINDOW_MENU_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_WINDOW_MENU_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
             IMAGE_WINDOW_MENU_FRAME_UP = BITMAP_WINDOW_MENU_BEGIN,
             IMAGE_WINDOW_MENU_FRAME_MIDDLE,
             IMAGE_WINDOW_MENU_FRAME_DOWN,
@@ -35,10 +35,10 @@ namespace mu::ui::window
         };
 #endif //PBG_ADD_GENSRANKING
     public:
-        CNewUIWindowMenu();
-        virtual ~CNewUIWindowMenu();
+        CWindowMenu();
+        virtual ~CWindowMenu();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -63,7 +63,7 @@ namespace mu::ui::window
         void RenderArrow();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
         int m_iSelectedIndex;

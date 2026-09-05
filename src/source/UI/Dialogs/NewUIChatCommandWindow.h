@@ -1,4 +1,4 @@
-// NewUIChatCommandWindow.h: interface for the CNewUIChatCommandWindow class.
+// NewUIChatCommandWindow.h: interface for the CChatCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -24,19 +24,19 @@ namespace mu::ui::window
 // commands, the parameters of the command which was picked, or the saved
 // templates. A command without parameters is sent right away, everything
 // else leads to the parameter page first.
-class CNewUIChatCommandWindow : public CNewUIObj
+class CChatCommandWindow : public CObject
 {
     // The frame is the one of the command window, which is drawn for a width
     // of 190 - a wider window would stretch and distort it.
     enum eIMAGE_LIST
     {
-        IMAGE_CHATCOMMAND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-        IMAGE_CHATCOMMAND_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-        IMAGE_CHATCOMMAND_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-        IMAGE_CHATCOMMAND_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-        IMAGE_CHATCOMMAND_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-        IMAGE_CHATCOMMAND_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-        IMAGE_CHATCOMMAND_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
+        IMAGE_CHATCOMMAND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+        IMAGE_CHATCOMMAND_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+        IMAGE_CHATCOMMAND_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+        IMAGE_CHATCOMMAND_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+        IMAGE_CHATCOMMAND_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+        IMAGE_CHATCOMMAND_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+        IMAGE_CHATCOMMAND_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
     };
 
     enum eWINDOW_SIZE
@@ -88,10 +88,10 @@ public:
     static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
     static constexpr int WindowHeight = UI::Scaling::DockLogicalBottom;
 
-    CNewUIChatCommandWindow();
-    ~CNewUIChatCommandWindow() override;
+    CChatCommandWindow();
+    ~CChatCommandWindow() override;
 
-    bool Create(CNewUIManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
     void Release();
 
     void SetPos(int x, int y);
@@ -165,7 +165,7 @@ private:
     void RenderTemplatePage();
 
 private:
-    CNewUIManager* m_pNewUIMng;
+    CManager* m_pNewUIMng;
     POINT m_Pos;
 
     ePAGE m_page;
@@ -182,8 +182,8 @@ private:
 
     std::vector<GameLogic::Commands::ChatCommandTemplate> m_templates;
 
-    CNewUIButton m_BtnExit;
-    CNewUIButton m_BtnLeft;
-    CNewUIButton m_BtnRight;
+    CButton m_BtnExit;
+    CButton m_BtnLeft;
+    CButton m_BtnRight;
 };
 } // namespace mu::ui::window

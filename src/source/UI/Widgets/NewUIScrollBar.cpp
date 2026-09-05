@@ -8,7 +8,7 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
-CNewUIScrollBar::CNewUIScrollBar()
+CScrollBar::CScrollBar()
 {
     memset(&m_ptPos, 0, sizeof(POINT));
     memset(&m_ptScrollBtnStartPos, 0, sizeof(POINT));
@@ -31,12 +31,12 @@ CNewUIScrollBar::CNewUIScrollBar()
     m_iMaxPos = 1;
 }
 
-CNewUIScrollBar::~CNewUIScrollBar()
+CScrollBar::~CScrollBar()
 {
     Release();
 }
 
-bool CNewUIScrollBar::Create(int iX, int iY, int iHeight)
+bool CScrollBar::Create(int iX, int iY, int iHeight)
 {
     m_iHeight = iHeight;
     SetPos(iX, iY);
@@ -48,17 +48,17 @@ bool CNewUIScrollBar::Create(int iX, int iY, int iHeight)
     return true;
 }
 
-void CNewUIScrollBar::Release()
+void CScrollBar::Release()
 {
     UnloadImages();
 }
 
-float CNewUIScrollBar::GetLayerDepth()
+float CScrollBar::GetLayerDepth()
 {
     return 4.4f;
 }
 
-void CNewUIScrollBar::LoadImages()
+void CScrollBar::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_SCROLL_MIDDLE, GL_LINEAR);
@@ -67,7 +67,7 @@ void CNewUIScrollBar::LoadImages()
     LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_SCROLLBAR_OFF, GL_LINEAR);
 }
 
-void CNewUIScrollBar::UnloadImages()
+void CScrollBar::UnloadImages()
 {
     DeleteBitmap(IMAGE_SCROLL_TOP);
     DeleteBitmap(IMAGE_SCROLL_MIDDLE);
@@ -76,7 +76,7 @@ void CNewUIScrollBar::UnloadImages()
     DeleteBitmap(IMAGE_SCROLLBAR_OFF);
 }
 
-void CNewUIScrollBar::SetPos(int x, int y)
+void CScrollBar::SetPos(int x, int y)
 {
     m_ptPos.x = x;
     m_ptPos.y = y;
@@ -97,7 +97,7 @@ void CNewUIScrollBar::SetPos(int x, int y)
     m_iScrollBarMiddleRemainderPixel = (m_iScrollBarHeightPixel - (SCROLLBAR_TOP_HEIGHT * 2)) % SCROLLBAR_MIDDLE_HEIGHT;
 }
 
-bool CNewUIScrollBar::UpdateBtnEvent()
+bool CScrollBar::UpdateBtnEvent()
 {
     if (IsRelease(VK_LBUTTON))
     {
@@ -129,7 +129,7 @@ bool CNewUIScrollBar::UpdateBtnEvent()
     return true;
 }
 
-bool CNewUIScrollBar::UpdateMouseEvent()
+bool CScrollBar::UpdateMouseEvent()
 {
     if (UpdateBtnEvent() == true)
         return false;
@@ -137,7 +137,7 @@ bool CNewUIScrollBar::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIScrollBar::UpdateKeyEvent()
+bool CScrollBar::UpdateKeyEvent()
 {
     if (!IsVisible())
     {
@@ -146,7 +146,7 @@ bool CNewUIScrollBar::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIScrollBar::Update()
+bool CScrollBar::Update()
 {
     if (m_iScrollBtnMouseEvent == SCROLLBAR_MOUSEBTN_CLICKED)
     {
@@ -157,7 +157,7 @@ bool CNewUIScrollBar::Update()
     return true;
 }
 
-bool CNewUIScrollBar::Render()
+bool CScrollBar::Render()
 {
     EnableAlphaTest();
     RenderImage(IMAGE_SCROLL_TOP, m_ptPos.x, m_ptPos.y, SCROLLBAR_TOP_WIDTH, SCROLLBAR_TOP_HEIGHT);
@@ -193,22 +193,22 @@ bool CNewUIScrollBar::Render()
     return true;
 }
 
-void CNewUIScrollBar::UpdateScrolling()
+void CScrollBar::UpdateScrolling()
 {
     m_ptScrollBtnPos.y = m_ptScrollBtnStartPos.y + m_fPercentOfSize * m_iScrollBarMovePixel;
 }
 
-void CNewUIScrollBar::ScrollUp(int iMoveValue)
+void CScrollBar::ScrollUp(int iMoveValue)
 {
     SetCurPos(m_iCurPos + iMoveValue);
 }
 
-void CNewUIScrollBar::ScrollDown(int iMoveValue)
+void CScrollBar::ScrollDown(int iMoveValue)
 {
     SetCurPos(m_iCurPos - iMoveValue);
 }
 
-void CNewUIScrollBar::SetPercent(float fPercent)
+void CScrollBar::SetPercent(float fPercent)
 {
     if (fPercent <= 0.0f)
         m_fPercentOfSize = 0.0f;
@@ -221,7 +221,7 @@ void CNewUIScrollBar::SetPercent(float fPercent)
     UpdateScrolling();
 }
 
-void CNewUIScrollBar::SetMaxPos(int iMaxPos)
+void CScrollBar::SetMaxPos(int iMaxPos)
 {
     if (iMaxPos < 1)
         iMaxPos = 1;
@@ -229,7 +229,7 @@ void CNewUIScrollBar::SetMaxPos(int iMaxPos)
     m_iMaxPos = iMaxPos;
 }
 
-void CNewUIScrollBar::SetCurPos(int iPosValue)
+void CScrollBar::SetCurPos(int iPosValue)
 {
     if (m_iBeginPos >= iPosValue)
         m_iCurPos = m_iBeginPos;

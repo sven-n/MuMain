@@ -1,5 +1,5 @@
 ﻿//////////////////////////////////////////////////////////////////////
-// NewUIMoveCommandWindow.cpp: implementation of the CNewUIMoveCommandWindow class.
+// NewUIMoveCommandWindow.cpp: implementation of the CMoveCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -53,7 +53,7 @@ namespace
     }
 };
 
-CNewUIMoveCommandWindow::CNewUIMoveCommandWindow()
+CMoveCommandWindow::CMoveCommandWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -71,12 +71,12 @@ CNewUIMoveCommandWindow::CNewUIMoveCommandWindow()
     m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
 }
 
-CNewUIMoveCommandWindow::~CNewUIMoveCommandWindow()
+CMoveCommandWindow::~CMoveCommandWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMoveCommandWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -93,7 +93,7 @@ bool mu::ui::window::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::Release()
+void mu::ui::window::CMoveCommandWindow::Release()
 {
     UnloadImages();
 
@@ -104,7 +104,7 @@ void mu::ui::window::CNewUIMoveCommandWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::SetPos(int x, int y)
+void mu::ui::window::CMoveCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -112,7 +112,7 @@ void mu::ui::window::CNewUIMoveCommandWindow::SetPos(int x, int y)
     RefreshDataAndLayout();
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::RefreshDataAndLayout()
+void mu::ui::window::CMoveCommandWindow::RefreshDataAndLayout()
 {
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
     g_pRenderText->SetFont(g_hFont);
@@ -137,17 +137,17 @@ void mu::ui::window::CNewUIMoveCommandWindow::RefreshDataAndLayout()
     SetScrollOffset(m_scrollOffset);
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::SetScrollOffset(int offset)
+void mu::ui::window::CMoveCommandWindow::SetScrollOffset(int offset)
 {
     m_scrollOffset = UI::MoveCommand::ClampScrollOffset(offset, m_listMoveInfoData.size(), m_layout.visibleRows);
 }
 
-int mu::ui::window::CNewUIMoveCommandWindow::VisibleEndIndex() const
+int mu::ui::window::CMoveCommandWindow::VisibleEndIndex() const
 {
     return std::min(m_scrollOffset + m_layout.visibleRows, static_cast<int>(m_listMoveInfoData.size()));
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::IsLuckySealBuff()
+bool mu::ui::window::CMoveCommandWindow::IsLuckySealBuff()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_Seal1)
         || g_isCharacterBuff((&Hero->Object), eBuff_Seal2)
@@ -166,7 +166,7 @@ bool mu::ui::window::CNewUIMoveCommandWindow::IsLuckySealBuff()
     return false;
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
+bool mu::ui::window::CMoveCommandWindow::IsMapMove(const std::wstring& src)
 {
     if (Hero->Object.Kind == KIND_PLAYER
         && Hero->Object.Type == MODEL_PLAYER
@@ -225,19 +225,19 @@ bool mu::ui::window::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
     return true;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::SetMoveCommandKey(DWORD dwKey)
+void mu::ui::window::CMoveCommandWindow::SetMoveCommandKey(DWORD dwKey)
 {
     m_dwMoveCommandKey = dwKey;
 }
 
-DWORD mu::ui::window::CNewUIMoveCommandWindow::GetMoveCommandKey()
+DWORD mu::ui::window::CMoveCommandWindow::GetMoveCommandKey()
 {
     m_dwMoveCommandKey = g_KeyGenerator.GenerateKeyValue(m_dwMoveCommandKey);
 
     return m_dwMoveCommandKey;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::SetStrifeMap()
+void mu::ui::window::CMoveCommandWindow::SetStrifeMap()
 {
     std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
 
@@ -265,7 +265,7 @@ void mu::ui::window::CNewUIMoveCommandWindow::SetStrifeMap()
     }
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::SettingCanMoveMap()
+void mu::ui::window::CMoveCommandWindow::SettingCanMoveMap()
 {
     int a = gMapManager.WorldActive;
 
@@ -346,7 +346,7 @@ void mu::ui::window::CNewUIMoveCommandWindow::SettingCanMoveMap()
     }
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::BtnProcess()
+bool mu::ui::window::CMoveCommandWindow::BtnProcess()
 {
     const int maximumOffset = UI::MoveCommand::MaximumScrollOffset(m_listMoveInfoData.size(), m_layout.visibleRows);
     const int scrollBarX = m_Pos.x + m_layout.windowWidth - kScrollBarOffsetX;
@@ -385,7 +385,7 @@ bool mu::ui::window::CNewUIMoveCommandWindow::BtnProcess()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y) && IsPress(VK_LBUTTON))
     {
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 
     SettingCanMoveMap();
@@ -439,7 +439,7 @@ bool mu::ui::window::CNewUIMoveCommandWindow::BtnProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CMoveCommandWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -453,7 +453,7 @@ bool mu::ui::window::CNewUIMoveCommandWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CMoveCommandWindow::UpdateKeyEvent()
 {
     if (IsVisible())
     {
@@ -467,12 +467,12 @@ bool mu::ui::window::CNewUIMoveCommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::Update()
+bool mu::ui::window::CMoveCommandWindow::Update()
 {
     return true;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::RenderFrame()
+void mu::ui::window::CMoveCommandWindow::RenderFrame()
 {
     EnableAlphaTest();
 
@@ -526,7 +526,7 @@ void mu::ui::window::CNewUIMoveCommandWindow::RenderFrame()
     g_pRenderText->RenderText(m_ReqZenPos.x, m_StartUISubjectName.y + 20, I18N::Game::Cost, 0, 0, RT3_WRITE_CENTER);
 }
 
-bool mu::ui::window::CNewUIMoveCommandWindow::Render()
+bool mu::ui::window::CMoveCommandWindow::Render()
 {
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -615,7 +615,7 @@ bool mu::ui::window::CNewUIMoveCommandWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::OpenningProcess()
+void mu::ui::window::CMoveCommandWindow::OpenningProcess()
 {
     RefreshDataAndLayout();
     SetScrollOffset(0);
@@ -627,16 +627,16 @@ void mu::ui::window::CNewUIMoveCommandWindow::OpenningProcess()
     m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::ClosingProcess()
+void mu::ui::window::CMoveCommandWindow::ClosingProcess()
 {
 }
 
-float mu::ui::window::CNewUIMoveCommandWindow::GetLayerDepth()
+float mu::ui::window::CMoveCommandWindow::GetLayerDepth()
 {
     return 8.3f;
 }
 
-void mu::ui::window::CNewUIMoveCommandWindow::LoadImages()
+void mu::ui::window::CMoveCommandWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_MOVECOMMAND_SCROLL_TOP);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_MOVECOMMAND_SCROLL_MIDDLE, GL_LINEAR);
@@ -645,7 +645,7 @@ void mu::ui::window::CNewUIMoveCommandWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_MOVECOMMAND_SCROLLBAR_OFF, GL_LINEAR);
 }
 
-void CNewUIMoveCommandWindow::UnloadImages()
+void CMoveCommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_MOVECOMMAND_SCROLL_TOP);
     DeleteBitmap(IMAGE_MOVECOMMAND_SCROLL_MIDDLE);
@@ -654,7 +654,7 @@ void CNewUIMoveCommandWindow::UnloadImages()
     DeleteBitmap(IMAGE_MOVECOMMAND_SCROLLBAR_OFF);
 }
 
-BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
+BOOL CMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex, const int iToMapIndex) const
 {
     BOOL bInOtherServer = FALSE;
 
@@ -681,7 +681,7 @@ BOOL CNewUIMoveCommandWindow::IsTheMapInDifferentServer(const int iFromMapIndex,
     return bInOtherServer;
 }
 
-int CNewUIMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
+int CMoveCommandWindow::GetMapIndexFromMovereq(const wchar_t* pszMapName)
 {
     if (pszMapName == NULL)
         return -1;

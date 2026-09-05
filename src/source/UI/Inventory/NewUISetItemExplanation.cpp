@@ -1,4 +1,4 @@
-// NewUISetItemExplanation.cpp: implementation of the CNewUISetItemExplanation class.
+// NewUISetItemExplanation.cpp: implementation of the CSetItemExplanation class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -16,19 +16,19 @@ using namespace mu::ui::window;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUISetItemExplanation::CNewUISetItemExplanation()
+mu::ui::window::CSetItemExplanation::CSetItemExplanation()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
     m_Pos.y = 0;
 }
 
-mu::ui::window::CNewUISetItemExplanation::~CNewUISetItemExplanation()
+mu::ui::window::CSetItemExplanation::~CSetItemExplanation()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUISetItemExplanation::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CSetItemExplanation::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -43,7 +43,7 @@ bool mu::ui::window::CNewUISetItemExplanation::Create(CNewUIManager* pNewUIMng, 
     return true;
 }
 
-void mu::ui::window::CNewUISetItemExplanation::Release()
+void mu::ui::window::CSetItemExplanation::Release()
 {
     if (m_pNewUIMng)
     {
@@ -52,18 +52,18 @@ void mu::ui::window::CNewUISetItemExplanation::Release()
     }
 }
 
-void mu::ui::window::CNewUISetItemExplanation::SetPos(int x, int y)
+void mu::ui::window::CSetItemExplanation::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUISetItemExplanation::UpdateMouseEvent()
+bool mu::ui::window::CSetItemExplanation::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISetItemExplanation::UpdateKeyEvent()
+bool mu::ui::window::CSetItemExplanation::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SETITEM_EXPLANATION))
     {
@@ -79,12 +79,12 @@ bool mu::ui::window::CNewUISetItemExplanation::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISetItemExplanation::Update()
+bool mu::ui::window::CSetItemExplanation::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISetItemExplanation::Render()
+bool mu::ui::window::CSetItemExplanation::Render()
 {
     EnableAlphaTest();
 
@@ -95,16 +95,16 @@ bool mu::ui::window::CNewUISetItemExplanation::Render()
     return true;
 }
 
-float mu::ui::window::CNewUISetItemExplanation::GetLayerDepth()
+float mu::ui::window::CSetItemExplanation::GetLayerDepth()
 {
     return 6.6f;
 }
 
-float mu::ui::window::CNewUISetItemExplanation::GetKeyEventOrder()
+float mu::ui::window::CSetItemExplanation::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void mu::ui::window::CNewUISetItemExplanation::OpenningProcess() {}
+void mu::ui::window::CSetItemExplanation::OpenningProcess() {}
 
-void mu::ui::window::CNewUISetItemExplanation::ClosingProcess() {}
+void mu::ui::window::CSetItemExplanation::ClosingProcess() {}

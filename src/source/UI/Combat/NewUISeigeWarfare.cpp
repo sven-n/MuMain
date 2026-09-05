@@ -1,4 +1,4 @@
-// CNewUISiegeWarfare.cpp: implementation of the CNewUISiegeWarfare class.
+// CSiegeWarfare.cpp: implementation of the CSiegeWarfare class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,7 +14,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUISiegeWarfare::CNewUISiegeWarfare()
+mu::ui::window::CSiegeWarfare::CSiegeWarfare()
 {
     m_pNewUIMng = NULL;
     m_pSiegeWarUI = NULL;
@@ -32,12 +32,12 @@ mu::ui::window::CNewUISiegeWarfare::CNewUISiegeWarfare()
     memset(&m_Pos, 0, sizeof(POINT));
 }
 
-mu::ui::window::CNewUISiegeWarfare::~CNewUISiegeWarfare()
+mu::ui::window::CSiegeWarfare::~CSiegeWarfare()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUISiegeWarfare::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CSiegeWarfare::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -52,7 +52,7 @@ bool mu::ui::window::CNewUISiegeWarfare::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarfare::Release()
+void mu::ui::window::CSiegeWarfare::Release()
 {
     if (m_pSiegeWarUI)
     {
@@ -68,13 +68,13 @@ void mu::ui::window::CNewUISiegeWarfare::Release()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarfare::SetPos(int x, int y)
+void mu::ui::window::CSiegeWarfare::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUISiegeWarfare::UpdateMouseEvent()
+bool mu::ui::window::CSiegeWarfare::UpdateMouseEvent()
 {
     if (m_pSiegeWarUI)
     {
@@ -85,7 +85,7 @@ bool mu::ui::window::CNewUISiegeWarfare::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarfare::UpdateKeyEvent()
+bool mu::ui::window::CSiegeWarfare::UpdateKeyEvent()
 {
     if (m_pSiegeWarUI)
     {
@@ -96,7 +96,7 @@ bool mu::ui::window::CNewUISiegeWarfare::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarfare::Update()
+bool mu::ui::window::CSiegeWarfare::Update()
 {
     if (IsVisible() == false)
         return true;
@@ -140,7 +140,7 @@ bool mu::ui::window::CNewUISiegeWarfare::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarfare::Render()
+bool mu::ui::window::CSiegeWarfare::Render()
 {
     if (m_pSiegeWarUI == NULL || gMapManager.InBattleCastle() == false)
     {
@@ -152,26 +152,26 @@ bool mu::ui::window::CNewUISiegeWarfare::Render()
     return true;
 }
 
-float mu::ui::window::CNewUISiegeWarfare::GetLayerDepth()
+float mu::ui::window::CSiegeWarfare::GetLayerDepth()
 {
     return 1.6f;
 }
 
-void mu::ui::window::CNewUISiegeWarfare::OpenningProcess()
+void mu::ui::window::CSiegeWarfare::OpenningProcess()
 {
 }
 
-void mu::ui::window::CNewUISiegeWarfare::ClosingProcess()
+void mu::ui::window::CSiegeWarfare::ClosingProcess()
 {
 }
 
-void mu::ui::window::CNewUISiegeWarfare::SetGuildData(const CHARACTER* pCharacter)
+void mu::ui::window::CSiegeWarfare::SetGuildData(const CHARACTER* pCharacter)
 {
     m_sGuildMarkIndex = pCharacter->GuildMarkIndex;
     m_byGuildStatus = pCharacter->GuildStatus;
 }
 
-bool mu::ui::window::CNewUISiegeWarfare::CreateMiniMapUI()
+bool mu::ui::window::CSiegeWarfare::CreateMiniMapUI()
 {
     if (m_pSiegeWarUI != NULL)
     {
@@ -191,7 +191,7 @@ bool mu::ui::window::CNewUISiegeWarfare::CreateMiniMapUI()
     {
     case G_NONE:
     {
-        m_pSiegeWarUI = new CNewUISiegeWarObserver;		// Observer
+        m_pSiegeWarUI = new CSiegeWarObserver;		// Observer
         m_iCurSiegeWarType = SIEGEWAR_TYPE_OBSERVER;
         m_bCreated = false;
     }break;
@@ -200,19 +200,19 @@ bool mu::ui::window::CNewUISiegeWarfare::CreateMiniMapUI()
         if (wcscmp(GuildMark[m_sGuildMarkIndex].UnionName, L"") == 0
             || wcscmp(GuildMark[m_sGuildMarkIndex].GuildName, GuildMark[m_sGuildMarkIndex].UnionName) == 0)
         {
-            m_pSiegeWarUI = new CNewUISiegeWarCommander;	// Commander
+            m_pSiegeWarUI = new CSiegeWarCommander;	// Commander
             m_iCurSiegeWarType = SIEGEWAR_TYPE_COMMANDER;
         }
         else
         {
-            m_pSiegeWarUI = new CNewUISiegeWarSoldier;	// Soldier
+            m_pSiegeWarUI = new CSiegeWarSoldier;	// Soldier
             m_iCurSiegeWarType = SIEGEWAR_TYPE_SOLDIER;
         }
         m_bCreated = true;
     }break;
     default:
     {
-        m_pSiegeWarUI = new CNewUISiegeWarSoldier;	// Soldier
+        m_pSiegeWarUI = new CSiegeWarSoldier;	// Soldier
         m_iCurSiegeWarType = SIEGEWAR_TYPE_SOLDIER;
         m_bCreated = true;
     }break;
@@ -225,23 +225,23 @@ bool mu::ui::window::CNewUISiegeWarfare::CreateMiniMapUI()
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarfare::ClearGuildMemberLocation(void)
+void mu::ui::window::CSiegeWarfare::ClearGuildMemberLocation(void)
 {
     if (m_iCurSiegeWarType == SIEGEWAR_TYPE_COMMANDER)
     {
-        ((CNewUISiegeWarCommander*)m_pSiegeWarUI)->ClearGuildMemberLocation();
+        ((CSiegeWarCommander*)m_pSiegeWarUI)->ClearGuildMemberLocation();
     }
 }
 
-void mu::ui::window::CNewUISiegeWarfare::SetGuildMemberLocation(BYTE type, int x, int y)
+void mu::ui::window::CSiegeWarfare::SetGuildMemberLocation(BYTE type, int x, int y)
 {
     if (m_iCurSiegeWarType == SIEGEWAR_TYPE_COMMANDER)
     {
-        ((CNewUISiegeWarCommander*)m_pSiegeWarUI)->SetGuildMemberLocation(type, x, y);
+        ((CSiegeWarCommander*)m_pSiegeWarUI)->SetGuildMemberLocation(type, x, y);
     }
 }
 
-void mu::ui::window::CNewUISiegeWarfare::InitMiniMapUI()
+void mu::ui::window::CSiegeWarfare::InitMiniMapUI()
 {
     if (m_pSiegeWarUI == NULL)
     {
@@ -258,7 +258,7 @@ void mu::ui::window::CNewUISiegeWarfare::InitMiniMapUI()
     m_sGuildMarkIndex = -1;
 }
 
-void  mu::ui::window::CNewUISiegeWarfare::SetTime(BYTE byHour, BYTE byMinute)
+void  mu::ui::window::CSiegeWarfare::SetTime(BYTE byHour, BYTE byMinute)
 {
     m_iHour = (int)byHour;
     m_iMinute = (int)byMinute;
@@ -266,7 +266,7 @@ void  mu::ui::window::CNewUISiegeWarfare::SetTime(BYTE byHour, BYTE byMinute)
     m_dwSyncTime = GetTickCount();
 }
 
-void mu::ui::window::CNewUISiegeWarfare::SetMapInfo(GuildCommander& data)
+void mu::ui::window::CSiegeWarfare::SetMapInfo(GuildCommander& data)
 {
     if (m_pSiegeWarUI == NULL)
     {
@@ -276,7 +276,7 @@ void mu::ui::window::CNewUISiegeWarfare::SetMapInfo(GuildCommander& data)
     m_pSiegeWarUI->SetMapInfo(data);
 }
 
-void mu::ui::window::CNewUISiegeWarfare::InitSkillUI()
+void mu::ui::window::CSiegeWarfare::InitSkillUI()
 {
     if (m_pSiegeWarUI == NULL)
     {
@@ -286,7 +286,7 @@ void mu::ui::window::CNewUISiegeWarfare::InitSkillUI()
     m_pSiegeWarUI->InitBattleSkill();
 }
 
-void mu::ui::window::CNewUISiegeWarfare::ReleaseSkillUI()
+void mu::ui::window::CSiegeWarfare::ReleaseSkillUI()
 {
     if (m_pSiegeWarUI == NULL)
     {

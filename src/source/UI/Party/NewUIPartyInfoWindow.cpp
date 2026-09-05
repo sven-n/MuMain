@@ -14,19 +14,19 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIPartyInfoWindow::CNewUIPartyInfoWindow()
+CPartyInfoWindow::CPartyInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_bParty = false;
 }
 
-CNewUIPartyInfoWindow::~CNewUIPartyInfoWindow()
+CPartyInfoWindow::~CPartyInfoWindow()
 {
     Release();
 }
 
-bool CNewUIPartyInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -45,7 +45,7 @@ bool CNewUIPartyInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIPartyInfoWindow::Release()
+void CPartyInfoWindow::Release()
 {
     UnloadImages();
 
@@ -56,7 +56,7 @@ void CNewUIPartyInfoWindow::Release()
     }
 }
 
-void CNewUIPartyInfoWindow::InitButtons()
+void CPartyInfoWindow::InitButtons()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_PARTY_BASE_WINDOW_BTN_EXIT);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -70,16 +70,16 @@ void CNewUIPartyInfoWindow::InitButtons()
     }
 }
 
-void CNewUIPartyInfoWindow::OpenningProcess()
+void CPartyInfoWindow::OpenningProcess()
 {
     SocketClient->ToGameServer()->SendPartyListRequest();
 }
 
-void CNewUIPartyInfoWindow::ClosingProcess()
+void CPartyInfoWindow::ClosingProcess()
 {
 }
 
-bool CNewUIPartyInfoWindow::BtnProcess()
+bool CPartyInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PARTY))
@@ -109,7 +109,7 @@ bool CNewUIPartyInfoWindow::BtnProcess()
     return false;
 }
 
-bool CNewUIPartyInfoWindow::UpdateMouseEvent()
+bool CPartyInfoWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -120,7 +120,7 @@ bool CNewUIPartyInfoWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIPartyInfoWindow::UpdateKeyEvent()
+bool CPartyInfoWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY) == true)
     {
@@ -136,7 +136,7 @@ bool CNewUIPartyInfoWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIPartyInfoWindow::Update()
+bool CPartyInfoWindow::Update()
 {
     if (IsVisible())
     {
@@ -149,7 +149,7 @@ bool CNewUIPartyInfoWindow::Update()
     return true;
 }
 
-bool CNewUIPartyInfoWindow::Render()
+bool CPartyInfoWindow::Render()
 {
     EnableAlphaTest();
 
@@ -206,7 +206,7 @@ bool CNewUIPartyInfoWindow::Render()
     return true;
 }
 
-void CNewUIPartyInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth/* =60 */, int iTitleHeight/* =20  */)
+void CPartyInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth/* =60 */, int iTitleHeight/* =20  */)
 {
     EnableAlphaTest();
 
@@ -231,7 +231,7 @@ void CNewUIPartyInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int
     RenderImage(IMAGE_PARTY_TABLE_LEFT_PIXEL, iPosX, iPosY + 6, 14, iHeight - 14);
 }
 
-void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, bool bExitBtnRender /*= false*/)
+void CPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, bool bExitBtnRender /*= false*/)
 {
     wchar_t szText[256] = { 0, };
 
@@ -277,7 +277,7 @@ void CNewUIPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, boo
     }
 }
 
-bool CNewUIPartyInfoWindow::LeaveParty(const int iIndex)
+bool CPartyInfoWindow::LeaveParty(const int iIndex)
 {
     if (!gMapManager.IsCursedTemple())
     {
@@ -290,7 +290,7 @@ bool CNewUIPartyInfoWindow::LeaveParty(const int iIndex)
     return true;
 }
 
-void CNewUIPartyInfoWindow::SetPos(int x, int y)
+void CPartyInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -304,17 +304,17 @@ void CNewUIPartyInfoWindow::SetPos(int x, int y)
     }
 }
 
-void CNewUIPartyInfoWindow::SetParty(bool bParty)
+void CPartyInfoWindow::SetParty(bool bParty)
 {
     m_bParty = bParty;
 }
 
-float CNewUIPartyInfoWindow::GetLayerDepth()
+float CPartyInfoWindow::GetLayerDepth()
 {
     return 2.4f;
 }
 
-void CNewUIPartyInfoWindow::LoadImages()
+void CPartyInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_PARTY_BASE_WINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_PARTY_BASE_WINDOW_TOP, GL_LINEAR);
@@ -338,7 +338,7 @@ void CNewUIPartyInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_party_x.tga", IMAGE_PARTY_EXIT, GL_LINEAR);
 }
 
-void CNewUIPartyInfoWindow::UnloadImages()
+void CPartyInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_BACK);
     DeleteBitmap(IMAGE_PARTY_BASE_WINDOW_TOP);

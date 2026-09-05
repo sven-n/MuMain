@@ -534,7 +534,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2)
 
 bool CheckAttack_Fenrir(CHARACTER* c)
 {
-    if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -695,7 +695,7 @@ bool CheckAttack_Fenrir(CHARACTER* c)
 
 bool CheckAttack()
 {
-    if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -934,7 +934,7 @@ bool CheckAttack()
 
 int	getTargetCharacterKey(CHARACTER* c, int selected)
 {
-    if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return -1;
     }
@@ -1161,7 +1161,7 @@ void ReloadArrow()
 
         bool Success = false;
 
-        if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF && mu::ui::window::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+        if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF && mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
         {
             rp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
             lp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -1173,7 +1173,7 @@ void ReloadArrow()
             if ((gCharacterManager.GetEquipedBowType(lp) == BOWTYPE_BOW) && (rp->Type == -1))
             {
                 ITEM* pItem = g_pMyInventory->FindItem(Index);
-                mu::ui::window::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
+                mu::ui::window::CInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
                 if (pItem)
                 {
                     SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_RIGHT);
@@ -1185,7 +1185,7 @@ void ReloadArrow()
                 if ((gCharacterManager.GetEquipedBowType(rp) == BOWTYPE_CROSSBOW) && (lp->Type == -1))
                 {
                     ITEM* pItem = g_pMyInventory->FindItem(Index);
-                    mu::ui::window::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
+                    mu::ui::window::CInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
                     if (pItem)
                     {
                         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_LEFT);
@@ -2601,7 +2601,7 @@ void Attack(CHARACTER* c)
                 Hero->Object.m_bySkillCount = 0;
                 Skill = AT_SKILL_NOVA_BEGIN;
             }
-            mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             MouseRButtonPush = false;
             Success = true;
         }
@@ -3094,7 +3094,7 @@ void MoveHero()
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-            mu::ui::window::CNewUIPickedItem* pPickedItem = mu::ui::window::CNewUIInventoryCtrl::GetPickedItem();
+            mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
 
             if (!pPickedItem && RightType == -1 &&
                 ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
@@ -4030,7 +4030,7 @@ void RenderCursor()
     else if (((g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT))
         && g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON)
         || (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
-            && g_pNPCShop->GetShopState() == mu::ui::window::CNewUINPCShop::SHOP_STATE_REPAIR)
+            && g_pNPCShop->GetShopState() == mu::ui::window::CNPCShop::SHOP_STATE_REPAIR)
         )
     {
         if (MouseLButton == false)

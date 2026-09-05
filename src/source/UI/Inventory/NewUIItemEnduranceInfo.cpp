@@ -1,4 +1,4 @@
-﻿// NewUIItemEnduranceInfo.cpp: implementation of the CNewUIItemEnduranceInfo class.
+﻿// NewUIItemEnduranceInfo.cpp: implementation of the CItemEnduranceInfo class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -18,7 +18,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIItemEnduranceInfo::CNewUIItemEnduranceInfo()
+CItemEnduranceInfo::CItemEnduranceInfo()
 {
     memset(&m_UIStartPos, 0, sizeof(POINT));
     memset(&m_ItemDurUIStartPos, 0, sizeof(POINT));
@@ -27,12 +27,12 @@ CNewUIItemEnduranceInfo::CNewUIItemEnduranceInfo()
     m_iTooltipIndex = -1;
 }
 
-CNewUIItemEnduranceInfo::~CNewUIItemEnduranceInfo()
+CItemEnduranceInfo::~CItemEnduranceInfo()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CItemEnduranceInfo::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -47,7 +47,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::Release()
+void mu::ui::window::CItemEnduranceInfo::Release()
 {
     UnloadImages();
 
@@ -58,7 +58,7 @@ void mu::ui::window::CNewUIItemEnduranceInfo::Release()
     }
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::SetPos(int x, int y)
+void mu::ui::window::CItemEnduranceInfo::SetPos(int x, int y)
 {
     m_UIStartPos.x = x;
     m_UIStartPos.y = y;
@@ -69,13 +69,13 @@ void mu::ui::window::CNewUIItemEnduranceInfo::SetPos(int x, int y)
     m_iTextEndPosX = m_UIStartPos.x + PETHP_FRAME_WIDTH;
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::SetPos(int x)
+void mu::ui::window::CItemEnduranceInfo::SetPos(int x)
 {
     m_ItemDurUIStartPos.x = x - ITEM_DUR_WIDTH - 2;
     m_ItemDurUIStartPos.y = 140;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::UpdateMouseEvent()
+bool mu::ui::window::CItemEnduranceInfo::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -216,12 +216,12 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::UpdateKeyEvent()
+bool mu::ui::window::CItemEnduranceInfo::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::Update()
+bool mu::ui::window::CItemEnduranceInfo::Update()
 {
     if (!IsVisible())
         return true;
@@ -245,7 +245,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::Render()
+bool mu::ui::window::CItemEnduranceInfo::Render()
 {
     EnableAlphaTest();
     g_pRenderText->SetFont(g_hFont);
@@ -259,7 +259,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::Render()
 
 //---------------------------------------------------------------------------------------------
 
-void mu::ui::window::CNewUIItemEnduranceInfo::RenderLeft()
+void mu::ui::window::CItemEnduranceInfo::RenderLeft()
 {
     UI::Scaling::ScopedActiveTransform layout(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
 
@@ -296,30 +296,30 @@ void mu::ui::window::CNewUIItemEnduranceInfo::RenderLeft()
     }
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::RenderRight()
+void mu::ui::window::CItemEnduranceInfo::RenderRight()
 {
     RenderItemEndurance(m_ItemDurUIStartPos.x, m_ItemDurUIStartPos.y);
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::BtnProcess()
+bool mu::ui::window::CItemEnduranceInfo::BtnProcess()
 {
     return false;
 }
 
-float mu::ui::window::CNewUIItemEnduranceInfo::GetLayerDepth()
+float mu::ui::window::CItemEnduranceInfo::GetLayerDepth()
 {
     return 3.5f;
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::OpenningProcess()
+void mu::ui::window::CItemEnduranceInfo::OpenningProcess()
 {
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::ClosingProcess()
+void mu::ui::window::CItemEnduranceInfo::ClosingProcess()
 {
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::InitImageIndex()
+void mu::ui::window::CItemEnduranceInfo::InitImageIndex()
 {
     m_iItemDurImageIndex[EQUIPMENT_WEAPON_RIGHT] = IMAGE_ITEM_DUR_WEAPON;
     m_iItemDurImageIndex[EQUIPMENT_WEAPON_LEFT] = IMAGE_ITEM_DUR_SHIELD;
@@ -335,7 +335,7 @@ void mu::ui::window::CNewUIItemEnduranceInfo::InitImageIndex()
     m_iItemDurImageIndex[EQUIPMENT_RING_LEFT] = IMAGE_ITEM_DUR_RING;
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/)
+void mu::ui::window::CItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/)
 {
     EnableAlphaTest();
 
@@ -357,7 +357,7 @@ void mu::ui::window::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t
     DisableAlphaBlend();
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor)
+void mu::ui::window::CItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor)
 {
     ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];
     int iLevel = pItem->Level;
@@ -378,7 +378,7 @@ void mu::ui::window::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, cons
     g_pRenderText->RenderText(iX, iY, szText, 0, 0, RT3_WRITE_CENTER);
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
+bool mu::ui::window::CItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
 {
     if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
         || Hero->Helper.Type == MODEL_DEMON
@@ -466,7 +466,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, in
     return false;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
+bool mu::ui::window::CItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
 {
     if (Hero->m_pPet == NULL)
         return false;
@@ -480,7 +480,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int i
     return true;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
+bool mu::ui::window::CItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
 {
     if (SummonLife <= 0)
         return false;
@@ -493,7 +493,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, in
     return true;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
+bool mu::ui::window::CItemEnduranceInfo::RenderNumArrow(int iX, int iY)
 {
     if (m_iCurArrowType == ARROWTYPE_NONE)
         return false;
@@ -538,7 +538,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
     return true;
 }
 
-bool mu::ui::window::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
+bool mu::ui::window::CItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
         return false;
@@ -694,7 +694,7 @@ bool mu::ui::window::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY
     return true;
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::LoadImages()
+void mu::ui::window::CItemEnduranceInfo::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Pet_Back.tga", IMAGE_PETHP_FRAME, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_Pet_HpBar.jpg", IMAGE_PETHP_BAR, GL_LINEAR);
@@ -710,7 +710,7 @@ void mu::ui::window::CNewUIItemEnduranceInfo::LoadImages()
     LoadBitmap(L"Interface\\newui_durable_wing.tga", IMAGE_ITEM_DUR_WING, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIItemEnduranceInfo::UnloadImages()
+void mu::ui::window::CItemEnduranceInfo::UnloadImages()
 {
     DeleteBitmap(IMAGE_PETHP_FRAME);
     DeleteBitmap(IMAGE_PETHP_BAR);

@@ -1,4 +1,4 @@
-// NewUI3DRenderMng.h: interface for the CNewUI3DRenderMng class.
+// NewUI3DRenderMng.h: interface for the C3DRenderMng class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -32,19 +32,19 @@ namespace mu::ui::window
     } UI_2DEFFECT_INFO;
 #pragma pack(pop)
 
-    class CNewUIManager;
+    class CManager;
 
-    class INewUI3DRenderObj
+    class I3DRenderObj
     {
     public:
         virtual void Render3D() = 0;
         virtual bool IsVisible() const = 0;
-        virtual CNewUIObj* GetLayoutOwner() const { return nullptr; }
+        virtual CObject* GetLayoutOwner() const { return nullptr; }
     };
 
-    class CNewUI3DCamera : public CNewUIObj
+    class C3DCamera : public CObject
     {
-        typedef std::list<INewUI3DRenderObj*> type_list_3dobj;
+        typedef std::list<I3DRenderObj*> type_list_3dobj;
         typedef std::deque<UI_2DEFFECT_INFO> type_deque_2deffect;
 
         type_list_3dobj	m_list3DObjs;
@@ -55,8 +55,8 @@ namespace mu::ui::window
         int		m_iCameraIndex;
 
     public:
-        CNewUI3DCamera();
-        virtual ~CNewUI3DCamera();
+        C3DCamera();
+        virtual ~C3DCamera();
 
         bool Create(int iCameraIndex, UINT uiWidth, UINT uiHeight, float fZOrder);
         void Release();
@@ -64,8 +64,8 @@ namespace mu::ui::window
 
         bool IsEmpty();
 
-        void Add3DRenderObj(INewUI3DRenderObj* pObj);
-        void Remove3DRenderObj(INewUI3DRenderObj* pObj);
+        void Add3DRenderObj(I3DRenderObj* pObj);
+        void Remove3DRenderObj(I3DRenderObj* pObj);
         void RemoveAll3DRenderObjs();
 
         void RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
@@ -83,30 +83,30 @@ namespace mu::ui::window
         void Render3D();
     };
 
-    class CNewUI3DRenderMng
+    class C3DRenderMng
     {
-        typedef std::list<CNewUI3DCamera*>	type_list_camera;
+        typedef std::list<C3DCamera*>	type_list_camera;
         type_list_camera	m_listCamera;
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
 
     public:
-        CNewUI3DRenderMng();
-        virtual ~CNewUI3DRenderMng();
+        C3DRenderMng();
+        virtual ~C3DRenderMng();
 
-        bool Create(CNewUIManager* pNewUIMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
         void UpdateAllCameraDimensions(UINT uiWidth, UINT uiHeight);
 
-        void Add3DRenderObj(INewUI3DRenderObj* pObj, float fZOrder = INFORMATION_CAMERA_Z_ORDER);
-        void Remove3DRenderObj(INewUI3DRenderObj* pObj);
+        void Add3DRenderObj(I3DRenderObj* pObj, float fZOrder = INFORMATION_CAMERA_Z_ORDER);
+        void Remove3DRenderObj(I3DRenderObj* pObj);
         void RemoveAll3DRenderObjs();
 
         void RenderUI2DEffect(float fZOrder, UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
         void DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc);
 
     protected:
-        CNewUI3DCamera* FindCamera(float fZOrder);
+        C3DCamera* FindCamera(float fZOrder);
         int FindAvailableCameraIndex();
     };
 }

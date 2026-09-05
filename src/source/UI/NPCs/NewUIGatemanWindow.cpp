@@ -23,18 +23,18 @@ extern CUIGateKeeper* g_pUIGateKeeper;
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIGatemanWindow::CNewUIGatemanWindow()
+CGatemanWindow::CGatemanWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-CNewUIGatemanWindow::~CNewUIGatemanWindow()
+CGatemanWindow::~CGatemanWindow()
 {
     Release();
 }
 
-bool CNewUIGatemanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGatemanWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -63,7 +63,7 @@ bool CNewUIGatemanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGatemanWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CGatemanWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -73,7 +73,7 @@ void CNewUIGatemanWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIGatemanWindow::Release()
+void CGatemanWindow::Release()
 {
     UnloadImages();
 
@@ -84,13 +84,13 @@ void CNewUIGatemanWindow::Release()
     }
 }
 
-void CNewUIGatemanWindow::SetPos(int x, int y)
+void CGatemanWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIGatemanWindow::UpdateMouseEvent()
+bool CGatemanWindow::UpdateMouseEvent()
 {
     switch (g_pUIGateKeeper->GetType())
     {
@@ -114,7 +114,7 @@ bool CNewUIGatemanWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGatemanWindow::UpdateKeyEvent()
+bool CGatemanWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATEKEEPER) == true)
     {
@@ -128,14 +128,14 @@ bool CNewUIGatemanWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGatemanWindow::Update()
+bool CGatemanWindow::Update()
 {
     if (IsVisible())
     {
     }
     return true;
 }
-bool CNewUIGatemanWindow::Render()
+bool CGatemanWindow::Render()
 {
     EnableAlphaTest();
 
@@ -161,21 +161,21 @@ bool CNewUIGatemanWindow::Render()
     return true;
 }
 
-void CNewUIGatemanWindow::OpeningProcess()
+void CGatemanWindow::OpeningProcess()
 {
 }
 
-void CNewUIGatemanWindow::ClosingProcess()
+void CGatemanWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float CNewUIGatemanWindow::GetLayerDepth()
+float CGatemanWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIGatemanWindow::LoadImages()
+void CGatemanWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GATEMANWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GATEMANWINDOW_TOP, GL_LINEAR);
@@ -187,7 +187,7 @@ void CNewUIGatemanWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_Bt_scroll_up.jpg", IMAGE_GATEMANWINDOW_SCROLL_UP_BTN, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_Bt_scroll_dn.jpg", IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
 }
-void CNewUIGatemanWindow::UnloadImages()
+void CGatemanWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GATEMANWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_GATEMANWINDOW_RIGHT);
@@ -200,7 +200,7 @@ void CNewUIGatemanWindow::UnloadImages()
     DeleteBitmap(IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN);
 }
 
-void CNewUIGatemanWindow::RenderFrame()
+void CGatemanWindow::RenderFrame()
 {
     RenderImage(IMAGE_GATEMANWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_GATEMANWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -220,7 +220,7 @@ void CNewUIGatemanWindow::RenderFrame()
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUIGatemanWindow::BtnProcess()
+bool CGatemanWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GATEKEEPER);
@@ -234,7 +234,7 @@ bool CNewUIGatemanWindow::BtnProcess()
     return false;
 }
 
-void CNewUIGatemanWindow::UpdateGuildMasterMode()
+void CGatemanWindow::UpdateGuildMasterMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
 
@@ -261,7 +261,7 @@ void CNewUIGatemanWindow::UpdateGuildMasterMode()
     }
 }
 
-void CNewUIGatemanWindow::UpdateGuildMemeberMode()
+void CGatemanWindow::UpdateGuildMemeberMode()
 {
     if (m_BtnEnter.UpdateMouseEvent() == true)
     {
@@ -270,7 +270,7 @@ void CNewUIGatemanWindow::UpdateGuildMemeberMode()
     }
 }
 
-void CNewUIGatemanWindow::UpdateGuestMode()
+void CGatemanWindow::UpdateGuestMode()
 {
     if (m_BtnEnter.UpdateMouseEvent() == true)
     {
@@ -286,7 +286,7 @@ void CNewUIGatemanWindow::UpdateGuestMode()
     }
 }
 
-void CNewUIGatemanWindow::RenderGuildMasterMode()
+void CGatemanWindow::RenderGuildMasterMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
     g_pRenderText->SetFont(g_hFontBold);
@@ -353,7 +353,7 @@ void CNewUIGatemanWindow::RenderGuildMasterMode()
     m_BtnEnter.Render();
 }
 
-void CNewUIGatemanWindow::RenderGuildMemeberMode()
+void CGatemanWindow::RenderGuildMemeberMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, I18N::Game::WouldYouLikeToEnter, 190, 0, RT3_SORT_CENTER);
@@ -363,7 +363,7 @@ void CNewUIGatemanWindow::RenderGuildMemeberMode()
     m_BtnEnter.Render();
 }
 
-void CNewUIGatemanWindow::RenderGuestMode()
+void CGatemanWindow::RenderGuestMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
     if (g_pUIGateKeeper->IsPublic())

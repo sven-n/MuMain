@@ -1,4 +1,4 @@
-// NewUIRegistrationLuckyCoin.cpp: implementation of the CNewUIRegistrationLuckyCoin class.
+// NewUIRegistrationLuckyCoin.cpp: implementation of the CRegistrationLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,7 +11,7 @@
 
 namespace mu::ui::window
 {
-    CNewUIRegistrationLuckyCoin::CNewUIRegistrationLuckyCoin()
+    CRegistrationLuckyCoin::CRegistrationLuckyCoin()
     {
         m_width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
         m_height = MSGBOX_BTN_EMPTY_HEIGHT;
@@ -20,12 +20,12 @@ namespace mu::ui::window
         m_ItemAngle = false;
     }
 
-    CNewUIRegistrationLuckyCoin::~CNewUIRegistrationLuckyCoin()
+    CRegistrationLuckyCoin::~CRegistrationLuckyCoin()
     {
         Release();
     }
 
-    bool CNewUIRegistrationLuckyCoin::Create(CNewUIManager* pNewUIMng, int x, int y)
+    bool CRegistrationLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
     {
         if (pNewUIMng == NULL)
             return false;
@@ -40,13 +40,13 @@ namespace mu::ui::window
         return true;
     }
 
-    void CNewUIRegistrationLuckyCoin::SetPos(int x, int y)
+    void CRegistrationLuckyCoin::SetPos(int x, int y)
     {
         m_Pos.x = x;
         m_Pos.y = y;
     }
 
-    bool CNewUIRegistrationLuckyCoin::Render()
+    bool CRegistrationLuckyCoin::Render()
     {
         EnableAlphaTest();
         RenderFrame();
@@ -57,7 +57,7 @@ namespace mu::ui::window
         return true;
     }
 
-    void CNewUIRegistrationLuckyCoin::RenderFrame()
+    void CRegistrationLuckyCoin::RenderFrame()
     {
         RenderImage(IMAGE_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
         RenderImage(IMAGE_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -66,7 +66,7 @@ namespace mu::ui::window
         RenderImage(IMAGE_BOTTOM, m_Pos.x, m_Pos.y + LUCKYCOIN_REG_HEIGHT - 45, 190.f, 45.f);
     }
 
-    void CNewUIRegistrationLuckyCoin::RenderTexts()
+    void CRegistrationLuckyCoin::RenderTexts()
     {
         wchar_t szText[256] = { 0, };
         float _x = GetPos().x;
@@ -100,7 +100,7 @@ namespace mu::ui::window
     // DXP-07d increment 5, stage 1+2 (implemented together, on trust — see task doc/2026-08-01 note:
     // this panel, like increment 4, is unreachable via normal play until the server implements the
     // corresponding NPC/event, so no runtime soak was possible before this swap). Own copies of the
-    // compare/log helpers. Identical shape to increment 4 (CNewUIGoldBowmanLena::Render3D): EndBitmap()
+    // compare/log helpers. Identical shape to increment 4 (CGoldBowmanLena::Render3D): EndBitmap()
     // at entry, restore mirror runs BEFORE BeginBitmap() at the end (own pre-panel snapshot needed).
     // The only per-item call is RenderItem3D() (line 138 below) — same shared path increments 0-4
     // already proved carries no GL model transform; SetItemRotation() (lines 137/139) is a plain
@@ -109,7 +109,7 @@ namespace mu::ui::window
     static float s_PreLuckyCoinProj[16];
     static float s_PreLuckyCoinView[16];
 
-    void CNewUIRegistrationLuckyCoin::RenderLuckyCoin()
+    void CRegistrationLuckyCoin::RenderLuckyCoin()
     {
         float x, y, width, height;
 
@@ -149,13 +149,13 @@ namespace mu::ui::window
         BeginBitmap();
     }
 
-    void CNewUIRegistrationLuckyCoin::RenderButtons()
+    void CRegistrationLuckyCoin::RenderButtons()
     {
         m_CloseButton.Render();
         m_RegistButton.Render();
     }
 
-    bool CNewUIRegistrationLuckyCoin::BtnProcess()
+    bool CRegistrationLuckyCoin::BtnProcess()
     {
         // Top-right corner close "X" (shared frame): hides + swallows the click.
         if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION))
@@ -173,7 +173,7 @@ namespace mu::ui::window
 
         if (m_RegistButton.UpdateMouseEvent() == true)
         {
-            mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             SocketClient->ToGameServer()->SendLuckyCoinRegistrationRequest();
             LockLuckyCoinRegBtn();
             return true;
@@ -181,7 +181,7 @@ namespace mu::ui::window
         return false;
     }
 
-    void CNewUIRegistrationLuckyCoin::SetBtnInfo()
+    void CRegistrationLuckyCoin::SetBtnInfo()
     {
         float _x = GetPos().x + LUCKYCOIN_REG_WIDTH / 2.0f - MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.0f;
         float _y = GetPos().y + LUCKYCOIN_REG_HEIGHT - 220;
@@ -196,12 +196,12 @@ namespace mu::ui::window
         m_CloseButton.ChangeText(&I18N::Game::Close388);
     }
 
-    bool CNewUIRegistrationLuckyCoin::Update()
+    bool CRegistrationLuckyCoin::Update()
     {
         return true;
     }
 
-    bool CNewUIRegistrationLuckyCoin::UpdateMouseEvent()
+    bool CRegistrationLuckyCoin::UpdateMouseEvent()
     {
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION) == false)
         {
@@ -231,7 +231,7 @@ namespace mu::ui::window
         return true;
     }
 
-    bool CNewUIRegistrationLuckyCoin::UpdateKeyEvent()
+    bool CRegistrationLuckyCoin::UpdateKeyEvent()
     {
         if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
         {
@@ -244,7 +244,7 @@ namespace mu::ui::window
         return true;
     }
 
-    void CNewUIRegistrationLuckyCoin::OpeningProcess()
+    void CRegistrationLuckyCoin::OpeningProcess()
     {
         g_pMyInventory->GetInventoryCtrl()->LockInventory();
 
@@ -264,14 +264,14 @@ namespace mu::ui::window
         m_CoinItem->AncientDiscriminator = 0;
     }
 
-    void CNewUIRegistrationLuckyCoin::ClosingProcess()
+    void CRegistrationLuckyCoin::ClosingProcess()
     {
         SAFE_DELETE(m_CoinItem);
         g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
         SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
     }
 
-    void CNewUIRegistrationLuckyCoin::LoadImages()
+    void CRegistrationLuckyCoin::LoadImages()
     {
         LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_BACK, GL_LINEAR);
         LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_TOP, GL_LINEAR);
@@ -281,7 +281,7 @@ namespace mu::ui::window
         LoadBitmap(L"Interface\\newui_btn_empty_small.tga", IMAGE_CLOSE_REGIST, GL_LINEAR);
     }
 
-    void CNewUIRegistrationLuckyCoin::UnloadImages()
+    void CRegistrationLuckyCoin::UnloadImages()
     {
         DeleteBitmap(IMAGE_CLOSE_REGIST);
         DeleteBitmap(IMAGE_BOTTOM);
@@ -291,7 +291,7 @@ namespace mu::ui::window
         DeleteBitmap(IMAGE_BACK);
     }
 
-    void CNewUIRegistrationLuckyCoin::Release()
+    void CRegistrationLuckyCoin::Release()
     {
         UnloadImages();
 
@@ -302,13 +302,13 @@ namespace mu::ui::window
         }
     }
 
-    void CNewUIRegistrationLuckyCoin::LockLuckyCoinRegBtn()
+    void CRegistrationLuckyCoin::LockLuckyCoinRegBtn()
     {
         m_RegistButton.Lock();
         m_RegistButton.ChangeTextColor(0xff808080);
     }
 
-    void CNewUIRegistrationLuckyCoin::UnLockLuckyCoinRegBtn()
+    void CRegistrationLuckyCoin::UnLockLuckyCoinRegBtn()
     {
         m_RegistButton.UnLock();
         m_RegistButton.ChangeTextColor(0xffffffff);

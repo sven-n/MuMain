@@ -430,28 +430,53 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   `SceneFlag`'s exact set-before-read ordering across all three scene files' per-frame dispatch,
   which nothing in this phase's research nailed down precisely enough to act on — a real
   simplification opportunity for whoever picks it up next, not attempted here.
-- **Phase 5 (rename cleanup)** — not started; now unblocked, Phases 1-4 all complete and the split
-  fully retired. Drop the "New"/`NewUI*` naming (`CNewUIObj`, `CNewUIManager`, `NewUIBase.h`, the
-  `INTERFACE_*` prefix, etc.) — it only ever meant "new relative to `CUIMng`", which stopped being
-  a meaningful distinction once `CUIMng` was deleted in Phase 4. Also sweep code comments (this
-  doc's own included) that reference the old "New UI"/"Legacy UI" framing now that it's no longer
-  accurate.
-  **Target scheme, decided during the directory-restructure follow-up research
-  (`docs/rmlui-ui-system/building-new-ui.md` has the full widget-toolkit map this comes from), not
-  yet executed**: real namespaces instead of prefix soup, since a blind `New*` strip collides with
-  existing classes outside this tier — `CNewUIButton` → `CButton` collides with
-  `UI/Widgets/Button.h`'s already-existing `CButton`, and `CNewUIRadioButton` → `CRadioButton`
-  collides with `UIControls.h`'s already-existing `CRadioButton`. Resolve by namespace, not by
-  inventing a disambiguating name: `namespace SEASON3B` (itself a literal historical-version name,
-  which `architecture-principles.md` already says not to organize around) becomes `UI::Window`
-  (`CNewUIObj`→`CObject`, `CNewUIManager`→`CManager`, `CNewUIButton`→`CButton`, etc.); the sprite
-  widget set (`Button.h`/`GaugeBar.h`/`Win.h`/`WinEx.h`, closed, `CWin`-heritage) moves into
-  `UI::Sprite`; the `UIControls.h` family moves into `UI::Controls` (matching its own file name).
-  Three unqualified `CButton`s in three different namespaces need no awkward compound name at all
-  — the namespace itself disambiguates. This also aligns with the domain-first `<Layer>::<Concern>`
-  namespace convention `docs/CODING_RULES.md` already established for new free-function
-  extractions, extended one level up to the toolkit/generation identity these whole class
-  hierarchies belong to.
+- **Phase 5 (rename cleanup) — done, 2026-09-05.** Dropped the "New"/`NewUI*` naming (`CNewUIObj`,
+  `CNewUIManager`, `NewUIBase.h`, the `INTERFACE_*` prefix, etc.) — it only ever meant "new relative
+  to `CUIMng`", which stopped being a meaningful distinction once `CUIMng` was deleted in Phase 4.
+  Landed as two independently-rebuilt passes (`docs/rmlui-ui-system/building-new-ui.md` has the
+  full widget-toolkit map this came from):
+  1. **Namespace extraction.** A blind `New*` strip isn't safe — `CNewUIButton`→`CButton` collides
+     with `UI/Widgets/Button.h`'s already-existing `CButton`, `CNewUIRadioButton`→`CRadioButton`
+     collides with `UIControls.h`'s already-existing `CRadioButton`, and `CNewUIMuHelper`→`CMuHelper`
+     would have collided with the actual bot-logic engine class (`MUHelper::CMuHelper`) the window
+     displays/controls. Fixed by giving the `CNewUIObj` tier a real namespace instead of relying on
+     a name prefix. That also meant retiring `namespace SEASON3B` for this tier — research found
+     `SEASON3B` wasn't UI-scoped at all: besides the ~90 `CNewUIObj`-tier UI classes, it also wrapped
+     almost the entire contents of `Core/Globals/_enum.h`/`_struct.h` (core game-data vocabulary —
+     `CLASS_TYPE`, `PET_TYPE`, `MATCH_TYPE`, the `CRYWOLF_*`/`KANTURU_*` event-state enums, etc.)
+     plus 6 standalone non-UI classes (`CNewBloodCastleSystem`, `CNewChaosCastleSystem`,
+     `CPartyManager`, `IInventoryActionContext`, `MoveCommandData`, `GMNewTown`) — renaming that has
+     no payoff and stayed in `SEASON3B` untouched. Moved only the actual UI-tier subset (100 files
+     that open the namespace directly, ~470 distinct identifiers once every message-box-layout
+     class without the `CNewUI` prefix is counted, not just the `CNewUI*`/`INewUI*` ones) into a new
+     namespace — keyed on the specific in-scope identifier list throughout, never a blanket
+     `SEASON3B`/`SEASON3B::` text substitution, which would have wrongly renamed the out-of-scope
+     content and corrupted prose mentioning the bare word "SEASON3B" narratively.
+     **The namespace is `mu::ui::window`, not `UI::Window`** — a real compile error surfaced mid-work:
+     OpenSSL's own `UI` struct (`openssl/types.h`) collides with a bare `namespace UI` in any
+     translation unit that has both open, confirmed via `Core/Platform/PlatformCrypto.cpp` (includes
+     both `stdafx.h`, which transitively opened the tier's namespace via `UI/Core/NewUICommon.h`,
+     and OpenSSL headers). `mu::` is this project's own already-established top-level namespace
+     (`mu::platform`, `mu::log`, `mu::sdlttf` — `Core/Platform/`, `Core/Utilities/Log/`,
+     `Render/Text/`), so `mu::ui::window` matches existing convention instead of introducing a new
+     top-level name or a same-namespace-but-different-case footgun (`MU::` vs `mu::`).
+  2. **Prefix drop.** Now that the namespace disambiguates, stripped `New`/`NewUI` off all ~114
+     `CNewUI*`/`INewUI*` names: `CNewUIObj`→`CObject`, `INewUIBase`→`IObject` (paired deliberately,
+     not the literal-strip `CObj`/`IBase` — chose the fuller name over
+     `IWindow`/`CWindow`, which would have read as a near-miss of the unrelated `CWin`/`CWinEx`),
+     `CNewUIManager`→`CManager`, `CNewUIButton`→`CButton`, `CNewUIRadioButton`→`CRadioButton`, and so
+     on for the rest. One deliberate exception: `CNewUIMuHelper`→`CUIMuHelper`, not `CMuHelper` —
+     keeps the collision with `MUHelper::CMuHelper` (the real bot-logic engine, not a duplicate)
+     avoided by name, not just by namespace, since both are legitimately reachable from similar
+     contexts. Surfaced two more real ambiguity errors beyond the two already known: `UIControls.h`'s
+     own internal `CRadioButton` members needed explicit `::CRadioButton` qualification (a `using
+     namespace mu::ui::window;` elsewhere in the same translation unit made its own class ambiguous
+     against the newly-renamed one), and `NewUIButton.cpp`'s own method *definitions* for the
+     renamed `CButton`/`CRadioButton` (written unqualified, relying on the file's own `using
+     namespace` directive) needed explicit `mu::ui::window::` qualification for the same reason —
+     both fixed at the source rather than patched per-caller. Verified with a full rebuild (all
+     targets, including tests) after each pass; `_enum.h`/`_struct.h`'s vocabulary and the 6 stray
+     classes were left in `SEASON3B`, untouched, exactly as scoped.
 - **Directory restructure (done, 2026-09-05)** — `src/source/UI/Legacy/` and `src/source/UI/NewUI/`
   no longer exist. Neither folder name meant anything real anymore: `Legacy/` was a grab-bag (a
   widget toolkit, five unrelated base-less game-feature state classes, a second self-contained
@@ -475,13 +500,13 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   the five thematic merges, then `Party`, then cleanup), each verified by a full rebuild plus
   running the `tests/ui/` binaries whose hardcoded source paths this touched. One naming collision
   flagged but deliberately not resolved here: `UI/Widgets/Button.h`'s `CButton` and the former
-  `NewUIButton.h`'s `CNewUIButton` family are unrelated implementations that will collide if Phase
-  5 mechanically strips `New*` off the latter — left for Phase 5 to resolve per-case, not decided
-  speculatively now.
+  `NewUIButton.h`'s `CNewUIButton` family are unrelated implementations that would collide if Phase
+  5 mechanically stripped `New*` off the latter — resolved by Phase 5 itself (see below) via a real
+  namespace instead of a disambiguating name.
 
 ## Gotchas worth knowing before the next migration
 
-- **`CNewUIManager::AddUIObj(dwKey, obj)` silently overwrites the object's `LayoutMode` the first
+- **`mu::ui::window::CManager::AddUIObj(dwKey, obj)` silently overwrites the object's `LayoutMode` the first
   time it registers** — it calls `obj->SetLayoutMode(UI::Layout::ForInterface(dwKey))`
   unconditionally on first insertion, clobbering whatever the window's own constructor set.
   **`UI::Layout::ForInterface()`'s policy table (`UILayoutPolicy.cpp`), not the migrated window's
@@ -495,7 +520,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   transform. Every other `LayoutMode` rescales against `UI::Scaling`'s own 640x480 reference
   resolution via `TransformForLayout()`. This matters for two independent reasons, both real bugs
   found on `CCreditWin`:
-  - `CNewUIManager::UpdateMouseEvent()`'s per-object dispatch wraps the call in
+  - `mu::ui::window::CManager::UpdateMouseEvent()`'s per-object dispatch wraps the call in
     `ScopedActiveTransform(transform, transformMouse=true)`, which remaps the *global*
     `MouseX`/`MouseY` through whatever transform is active for that object — a window whose own
     click hit-testing (e.g. `CButton::IsClick()`) expects real, untransformed mouse coordinates
@@ -567,7 +592,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   transform, true unconditionally back when this only ever ran unscoped (`CWin` days). After
   migration, the call chain that sets this position
   (`ManageOKClick()`→`PopUp()`→`SetMsg()`→`SetCtrlPosition()`) can now run *inside*
-  `CMsgWin::Update()`, which `CNewUIManager::Update()` wraps in a `LayoutMode::Legacy` (identity)
+  `CMsgWin::Update()`, which `mu::ui::window::CManager::Update()` wraps in a `LayoutMode::Legacy` (identity)
   `ScopedActiveTransform` — dividing by identity is a no-op, so a real-pixel value got stored
   un-descaled, then `RenderTextOnTop()` (still unscoped, ambient non-identity transform) multiplied
   it back up a *second* time, landing it far off from the actual dialog. Fixed by breaking the
@@ -578,7 +603,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   **Any future migrated window driving a `CUIControl`-family widget (`CUITextInputBox` and
   siblings, `UIControls.h`) needs this same "identity at both ends" treatment** — it's a different
   hazard from the `CSprite`-based `LayoutMode::Legacy` gotcha above, not a duplicate of it.
-- **A window using `CNewUIObj`'s shown/active split should compute `SetActive()` from *every*
+- **A window using `mu::ui::window::CObject`'s shown/active split should compute `SetActive()` from *every*
   condition that ought to suspend its "active" handling, not just whatever originally motivated
   adding the split.** `CLoginWin` (Phase 3, the first real user of this split) needed it purely for
   its own "Remember Password" sub-dialog, but its `UpdateWhileActive()` also independently polled
@@ -587,7 +612,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   stop a lower window's own `Update()`" gap `CCharSelMainWin`/`CCharMakeWin` needed an explicit
   `modalOpen` check for in Phase 2. Rather than adding a second, separate check, both conditions
   fold into the same `SetActive(...)` call at the top of `UpdateWhileShown()` (`!(g_CreditWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible() || RememberPasswordChoiceState() == Pending)`)
-  — `CNewUIObj::Update()`'s own dispatch then gates `UpdateWhileActive()` on the result
+  — `mu::ui::window::CObject::Update()`'s own dispatch then gates `UpdateWhileActive()` on the result
   automatically, so there's exactly one place this logic lives instead of one check embedded in
   the split and a second, separately-invented one for modal coexistence. Also worth noting since it
   generalizes beyond the split itself: setting `SetActive()` (or any per-frame gating flag) from
@@ -595,4 +620,4 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   (here, `UpdateWhileShown()` computing `SetActive()` before calling `UI::Login::Tick()`, which can
   resolve a Pending prompt) reproduces a "snapshot before it changes" ordering for free, without a
   dedicated snapshot member — `CLoginWin` dropped its old `m_bRememberPasswordPromptWasPending`
-  field this way once it moved onto `CNewUIObj`.
+  field this way once it moved onto `mu::ui::window::CObject`.

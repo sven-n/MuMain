@@ -5548,7 +5548,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     {
         bool bThisisEquippedItem = false;
 
-        mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         ITEM* pFindItem = pNewInventoryCtrl->FindItemByKey(ip->Key);
         (pFindItem == NULL) ? bThisisEquippedItem = true : bThisisEquippedItem = false;
 

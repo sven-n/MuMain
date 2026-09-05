@@ -1,4 +1,4 @@
-// NewUIButton.cpp: implementation of the CNewUIButton class.
+// NewUIButton.cpp: implementation of the CButton class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -41,30 +41,30 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
-// CNewUIBaseButton
+// CBaseButton
 //////////////////////////////////////////////////////////////////////
 
-CNewUIBaseButton::CNewUIBaseButton() : m_Lock(false), m_EventState(BUTTON_STATE_UP)
+CBaseButton::CBaseButton() : m_Lock(false), m_EventState(BUTTON_STATE_UP)
 {
     PointSet(m_Pos, 0, 0);
     PointSet(m_Size, 0, 0);
 }
 
-CNewUIBaseButton::~CNewUIBaseButton()
+CBaseButton::~CBaseButton()
 {
 }
 
-void CNewUIBaseButton::SetPos(int x, int y)
+void CBaseButton::SetPos(int x, int y)
 {
     PointSet(m_Pos, x, y);
 }
 
-void CNewUIBaseButton::SetSize(int sx, int sy)
+void CBaseButton::SetSize(int sx, int sy)
 {
     PointSet(m_Size, sx, sy);
 }
 
-bool CNewUIBaseButton::RadioProcess()
+bool CBaseButton::RadioProcess()
 {
     bool isMousein = CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y);
 
@@ -110,7 +110,7 @@ bool CNewUIBaseButton::RadioProcess()
     return false;
 }
 
-bool CNewUIBaseButton::Process()
+bool CBaseButton::Process()
 {
     bool isMousein = CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y);
 
@@ -136,9 +136,9 @@ bool CNewUIBaseButton::Process()
 }
 
 //////////////////////////////////////////////////////////////////////
-// CNewUIButton
+// CButton
 //////////////////////////////////////////////////////////////////////
-CNewUIButton::CNewUIButton() : CNewUIBaseButton(), m_CurImgIndex(0),
+mu::ui::window::CButton::CButton() : CBaseButton(), m_CurImgIndex(0),
 m_CurImgState(0), m_ImgWidth(0), m_ImgHeight(0),
 m_NameColor(0xFFFFFFFF), m_NameBackColor(0x00000000),
 m_CurImgColor(0xFFFFFFFF), m_TooltipTextColor(0xFFFFFFFF), m_IsTopPos(false),
@@ -150,12 +150,12 @@ m_fAlpha(1.0f)
     Initialize();
 }
 
-CNewUIButton::~CNewUIButton()
+mu::ui::window::CButton::~CButton()
 {
     Destroy();
 }
 
-void mu::ui::window::CNewUIButton::Initialize()
+void mu::ui::window::CButton::Initialize()
 {
     m_hTextFont = g_hFont;
     m_hToolTipFont = g_hFont;
@@ -168,11 +168,11 @@ void mu::ui::window::CNewUIButton::Initialize()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void mu::ui::window::CNewUIButton::Destroy()
+void mu::ui::window::CButton::Destroy()
 {
     if (m_LocaleObserverRegistered)
     {
-        I18N::UnregisterLocaleObserver(&CNewUIButton::OnLocaleChanged, this);
+        I18N::UnregisterLocaleObserver(&mu::ui::window::CButton::OnLocaleChanged, this);
         m_LocaleObserverRegistered = false;
     }
 
@@ -181,14 +181,14 @@ void mu::ui::window::CNewUIButton::Destroy()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void mu::ui::window::CNewUIButton::ChangeText(const wchar_t* const* nameSlot)
+void mu::ui::window::CButton::ChangeText(const wchar_t* const* nameSlot)
 {
     m_pNameSlot = nameSlot;
     m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
     EnsureLocaleObserver();
 }
 
-void mu::ui::window::CNewUIButton::ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos)
+void mu::ui::window::CButton::ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos)
 {
     m_pTooltipSlot = tooltipSlot;
     m_TooltipText = (tooltipSlot != nullptr && *tooltipSlot != nullptr) ? *tooltipSlot : L"";
@@ -196,16 +196,16 @@ void mu::ui::window::CNewUIButton::ChangeToolTipText(const wchar_t* const* toolt
     EnsureLocaleObserver();
 }
 
-void mu::ui::window::CNewUIButton::EnsureLocaleObserver()
+void mu::ui::window::CButton::EnsureLocaleObserver()
 {
     if (m_LocaleObserverRegistered) return;
-    I18N::RegisterLocaleObserver(&CNewUIButton::OnLocaleChanged, this);
+    I18N::RegisterLocaleObserver(&mu::ui::window::CButton::OnLocaleChanged, this);
     m_LocaleObserverRegistered = true;
 }
 
-void mu::ui::window::CNewUIButton::OnLocaleChanged(void* ctx) noexcept
+void mu::ui::window::CButton::OnLocaleChanged(void* ctx) noexcept
 {
-    auto* self = static_cast<CNewUIButton*>(ctx);
+    auto* self = static_cast<CButton*>(ctx);
     if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
     {
         self->m_Name = *self->m_pNameSlot;
@@ -217,7 +217,7 @@ void mu::ui::window::CNewUIButton::OnLocaleChanged(void* ctx) noexcept
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg /* = false */,
+void mu::ui::window::CButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg /* = false */,
     bool bLockImage /* = false */, bool bClickEffect /* = false  */)
 {
     m_bClickEffect = bClickEffect;
@@ -251,9 +251,9 @@ void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int im
 }
 #else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth, bool bClickEffect)
+void mu::ui::window::CButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth, bool bClickEffect)
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth)
+void mu::ui::window::CButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -280,13 +280,13 @@ void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int im
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
-void mu::ui::window::CNewUIButton::ChangeButtonInfo(int x, int y, int sx, int sy)
+void mu::ui::window::CButton::ChangeButtonInfo(int x, int y, int sx, int sy)
 {
     SetPos(x, y);
     SetSize(sx, sy);
 }
 
-void mu::ui::window::CNewUIButton::RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate)
+void mu::ui::window::CButton::RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate)
 {
     ButtonInfo btinfo;
     btinfo.s_ImgIndex = imgindex;
@@ -295,12 +295,12 @@ void mu::ui::window::CNewUIButton::RegisterButtonState(BUTTON_STATE eventstate, 
     m_ButtonInfo.insert(std::make_pair(eventstate, btinfo));
 }
 
-void mu::ui::window::CNewUIButton::UnRegisterButtonState()
+void mu::ui::window::CButton::UnRegisterButtonState()
 {
     m_ButtonInfo.clear();
 }
 
-void mu::ui::window::CNewUIButton::ChangeImgIndex(int imgindex, int curimgstate)
+void mu::ui::window::CButton::ChangeImgIndex(int imgindex, int curimgstate)
 {
     m_CurImgIndex = imgindex;
     m_CurImgState = curimgstate;
@@ -315,7 +315,7 @@ void mu::ui::window::CNewUIButton::ChangeImgIndex(int imgindex, int curimgstate)
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void mu::ui::window::CNewUIButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
+void mu::ui::window::CButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
 {
     if (m_ButtonInfo.size() != 0)
     {
@@ -329,20 +329,20 @@ void mu::ui::window::CNewUIButton::ChangeButtonState(BUTTON_STATE eventstate, in
     }
 }
 
-void mu::ui::window::CNewUIButton::MoveTextPos(int iX, int iY)
+void mu::ui::window::CButton::MoveTextPos(int iX, int iY)
 {
     m_iMoveTextPosX = iX;
     m_iMoveTextPosY = iY;
 }
 
-void mu::ui::window::CNewUIButton::MoveTextTipPos(int iX, int iY)
+void mu::ui::window::CButton::MoveTextTipPos(int iX, int iY)
 {
     m_iMoveTextTipPosX = iX;
     m_iMoveTextTipPosY = iY;
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-void CNewUIButton::ChangeAlpha(unsigned char fAlpha, bool isfontalph)
+void mu::ui::window::CButton::ChangeAlpha(unsigned char fAlpha, bool isfontalph)
 {
     m_CurImgColor &= ~(0xff << 24);
     m_CurImgColor |= (fAlpha << 24);
@@ -354,7 +354,7 @@ void CNewUIButton::ChangeAlpha(unsigned char fAlpha, bool isfontalph)
     }
 }
 
-void CNewUIButton::ChangeAlpha(float fAlpha, bool isfontalph)
+void mu::ui::window::CButton::ChangeAlpha(float fAlpha, bool isfontalph)
 {
     m_CurImgColor &= ~(0xff << 24);
     m_CurImgColor |= (static_cast<unsigned char>((float)(0xff) * fAlpha) << 24);
@@ -366,7 +366,7 @@ void CNewUIButton::ChangeAlpha(float fAlpha, bool isfontalph)
     }
 }
 
-void mu::ui::window::CNewUIButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int color)
+void mu::ui::window::CButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int color)
 {
     if (m_ButtonInfo.size() != 0)
     {
@@ -384,7 +384,7 @@ void mu::ui::window::CNewUIButton::ChangeImgColor(BUTTON_STATE eventstate, unsig
     }
 }
 
-void mu::ui::window::CNewUIButton::ChangeFrame()
+void mu::ui::window::CButton::ChangeFrame()
 {
     if (m_ButtonInfo.size() != 0)
     {
@@ -401,7 +401,7 @@ void mu::ui::window::CNewUIButton::ChangeFrame()
     }
 }
 
-bool mu::ui::window::CNewUIButton::UpdateMouseEvent()
+bool mu::ui::window::CButton::UpdateMouseEvent()
 {
     if (IsLock())
     {
@@ -421,20 +421,20 @@ bool mu::ui::window::CNewUIButton::UpdateMouseEvent()
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void mu::ui::window::CNewUIButton::Lock()
+void mu::ui::window::CButton::Lock()
 {
-    CNewUIBaseButton::Lock();
+    CBaseButton::Lock();
     ChangeFrame();
 }
 
-void mu::ui::window::CNewUIButton::UnLock()
+void mu::ui::window::CButton::UnLock()
 {
-    CNewUIBaseButton::UnLock();
+    CBaseButton::UnLock();
     ChangeFrame();
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
-bool mu::ui::window::CNewUIButton::Render(bool RendOption)
+bool mu::ui::window::CButton::Render(bool RendOption)
 {
     if (!m_ButtonInfo.empty())
     {
@@ -501,18 +501,18 @@ bool mu::ui::window::CNewUIButton::Render(bool RendOption)
     return true;
 }
 
-CNewUIRadioButton::CNewUIRadioButton() : m_NameColor(0xffB5B5B5), m_NameBackColor(0x00000000),
+mu::ui::window::CRadioButton::CRadioButton() : m_NameColor(0xffB5B5B5), m_NameBackColor(0x00000000),
 m_CurImgIndex(0), m_CurImgState(0), m_ImgWidth(0), m_ImgHeight(0), m_CurImgColor(0xffffffff)
 {
     Initialize();
 }
 
-CNewUIRadioButton::~CNewUIRadioButton()
+mu::ui::window::CRadioButton::~CRadioButton()
 {
     Destroy();
 }
 
-void CNewUIRadioButton::Initialize()
+void mu::ui::window::CRadioButton::Initialize()
 {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     m_hTextFont = g_hFont;
@@ -520,11 +520,11 @@ void CNewUIRadioButton::Initialize()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void CNewUIRadioButton::Destroy()
+void mu::ui::window::CRadioButton::Destroy()
 {
     if (m_LocaleObserverRegistered)
     {
-        I18N::UnregisterLocaleObserver(&CNewUIRadioButton::OnLocaleChanged, this);
+        I18N::UnregisterLocaleObserver(&mu::ui::window::CRadioButton::OnLocaleChanged, this);
         m_LocaleObserverRegistered = false;
     }
 
@@ -533,23 +533,23 @@ void CNewUIRadioButton::Destroy()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void CNewUIRadioButton::ChangeText(const wchar_t* const* nameSlot)
+void mu::ui::window::CRadioButton::ChangeText(const wchar_t* const* nameSlot)
 {
     m_pNameSlot = nameSlot;
     m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
     EnsureLocaleObserver();
 }
 
-void CNewUIRadioButton::EnsureLocaleObserver()
+void mu::ui::window::CRadioButton::EnsureLocaleObserver()
 {
     if (m_LocaleObserverRegistered) return;
-    I18N::RegisterLocaleObserver(&CNewUIRadioButton::OnLocaleChanged, this);
+    I18N::RegisterLocaleObserver(&mu::ui::window::CRadioButton::OnLocaleChanged, this);
     m_LocaleObserverRegistered = true;
 }
 
-void CNewUIRadioButton::OnLocaleChanged(void* ctx) noexcept
+void mu::ui::window::CRadioButton::OnLocaleChanged(void* ctx) noexcept
 {
-    auto* self = static_cast<CNewUIRadioButton*>(ctx);
+    auto* self = static_cast<CRadioButton*>(ctx);
     if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
     {
         self->m_Name = *self->m_pNameSlot;
@@ -558,7 +558,7 @@ void CNewUIRadioButton::OnLocaleChanged(void* ctx) noexcept
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void CNewUIRadioButton::ChangeRadioButtonImgState(int imgindex, bool bMouseOnImage, bool bLockImage, bool bClickEffect)
+void mu::ui::window::CRadioButton::ChangeRadioButtonImgState(int imgindex, bool bMouseOnImage, bool bLockImage, bool bClickEffect)
 {
     int btState = 0;
 
@@ -580,7 +580,7 @@ void CNewUIRadioButton::ChangeRadioButtonImgState(int imgindex, bool bMouseOnIma
     }
 }
 #else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void CNewUIRadioButton::ChangeRadioButtonImgState(int imgindex, bool isDown, bool bClickEffect)
+void mu::ui::window::CRadioButton::ChangeRadioButtonImgState(int imgindex, bool isDown, bool bClickEffect)
 {
     m_bClickEffect = bClickEffect;
     RegisterButtonState(BUTTON_STATE_UP, imgindex, 0);
@@ -593,7 +593,7 @@ void CNewUIRadioButton::ChangeRadioButtonImgState(int imgindex, bool isDown, boo
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-void CNewUIRadioButton::ChangeRadioButtonImgState(int imgindex, bool isDown)
+void mu::ui::window::CRadioButton::ChangeRadioButtonImgState(int imgindex, bool isDown)
 {
     RegisterButtonState(BUTTON_STATE_UP, imgindex, 0);
     RegisterButtonState(BUTTON_STATE_DOWN, imgindex, 1);
@@ -605,13 +605,13 @@ void CNewUIRadioButton::ChangeRadioButtonImgState(int imgindex, bool isDown)
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-void CNewUIRadioButton::ChangeRadioButtonInfo(int x, int y, int sx, int sy)
+void mu::ui::window::CRadioButton::ChangeRadioButtonInfo(int x, int y, int sx, int sy)
 {
     SetPos(x, y);
     SetSize(sx, sy);
 }
 
-void CNewUIRadioButton::RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate)
+void mu::ui::window::CRadioButton::RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate)
 {
     ButtonInfo btinfo;
     btinfo.s_ImgIndex = imgindex;
@@ -620,12 +620,12 @@ void CNewUIRadioButton::RegisterButtonState(BUTTON_STATE eventstate, int imginde
     m_RadioButtonInfo.insert(std::make_pair(eventstate, btinfo));
 }
 
-void CNewUIRadioButton::UnRegisterButtonState()
+void mu::ui::window::CRadioButton::UnRegisterButtonState()
 {
     m_RadioButtonInfo.clear();
 }
 
-void CNewUIRadioButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int color)
+void mu::ui::window::CRadioButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int color)
 {
     if (m_RadioButtonInfo.size() != 0)
     {
@@ -643,7 +643,7 @@ void CNewUIRadioButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int col
     }
 }
 
-void CNewUIRadioButton::ChangeImgIndex(int imgindex, int curimgstate)
+void mu::ui::window::CRadioButton::ChangeImgIndex(int imgindex, int curimgstate)
 {
     m_CurImgIndex = imgindex;
     m_CurImgState = curimgstate;
@@ -661,7 +661,7 @@ void CNewUIRadioButton::ChangeImgIndex(int imgindex, int curimgstate)
     }
 }
 
-void CNewUIRadioButton::ChangeFrame(BUTTON_STATE eventstate)
+void mu::ui::window::CRadioButton::ChangeFrame(BUTTON_STATE eventstate)
 {
     m_EventState = eventstate;
 
@@ -688,7 +688,7 @@ void CNewUIRadioButton::ChangeFrame(BUTTON_STATE eventstate)
     }
 }
 
-void CNewUIRadioButton::ChangeFrame()
+void mu::ui::window::CRadioButton::ChangeFrame()
 {
     if (m_RadioButtonInfo.size() != 0)
     {
@@ -714,7 +714,7 @@ void CNewUIRadioButton::ChangeFrame()
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void CNewUIRadioButton::ChangeButtonState(int iImgIndex, BUTTON_STATE eventstate, int iButtonState)
+void mu::ui::window::CRadioButton::ChangeButtonState(int iImgIndex, BUTTON_STATE eventstate, int iButtonState)
 {
     if (m_RadioButtonInfo.size() != 0)
     {
@@ -729,7 +729,7 @@ void CNewUIRadioButton::ChangeButtonState(int iImgIndex, BUTTON_STATE eventstate
     }
 }
 
-void CNewUIRadioButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
+void mu::ui::window::CRadioButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
 {
     if (m_RadioButtonInfo.size() != 0)
     {
@@ -744,7 +744,7 @@ void CNewUIRadioButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonSt
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-bool CNewUIRadioButton::UpdateMouseEvent(bool isGroupevent)
+bool mu::ui::window::CRadioButton::UpdateMouseEvent(bool isGroupevent)
 {
     if (IsLock())
     {
@@ -778,7 +778,7 @@ bool CNewUIRadioButton::UpdateMouseEvent(bool isGroupevent)
     return result;
 }
 
-bool CNewUIRadioButton::Render()
+bool mu::ui::window::CRadioButton::Render()
 {
     if (m_RadioButtonInfo.size() != 0)
     {
@@ -830,39 +830,39 @@ bool CNewUIRadioButton::Render()
 }
 
 //////////////////////////////////////////////////////////////////////
-// CNewUIRadioGroupButton
+// CRadioGroupButton
 //////////////////////////////////////////////////////////////////////
 
-CNewUIRadioGroupButton::CNewUIRadioGroupButton()
+CRadioGroupButton::CRadioGroupButton()
 {
     Initialize();
 }
 
-CNewUIRadioGroupButton::~CNewUIRadioGroupButton()
+CRadioGroupButton::~CRadioGroupButton()
 {
     Destroy();
 }
 
-void CNewUIRadioGroupButton::Initialize()
+void CRadioGroupButton::Initialize()
 {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     m_iButtonDistance = 1;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void CNewUIRadioGroupButton::Destroy()
+void CRadioGroupButton::Destroy()
 {
     UnRegisterRadioButton();
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void CNewUIRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex, bool bFirstIndexBtnDown /* = true */,
+void CRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex, bool bFirstIndexBtnDown /* = true */,
     bool bMouseOnImage /* = false */, bool bLockImage, bool bClickEffect /* = false  */)
 {
     for (int i = 0; i < radiocount; ++i)
     {
-        CNewUIRadioButton* button = new CNewUIRadioButton();
+        CRadioButton* button = new CRadioButton();
 
         button->ChangeRadioButtonImgState(imgindex, bMouseOnImage, bLockImage, bClickEffect);
         button->ChangeRadioButtonInfo(0, 0, 0, 0);
@@ -880,11 +880,11 @@ void CNewUIRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex, bool
     SetCurButtonIndex(iCurIndex);
 }
 #else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void CNewUIRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex, bool bClickEffect)
+void CRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex, bool bClickEffect)
 {
     for (int i = 0; i < radiocount; ++i)
     {
-        auto* button = new CNewUIRadioButton();
+        auto* button = new CRadioButton();
 
         button->ChangeRadioButtonImgState(imgindex, ((i == 0) ? true : false), bClickEffect);
         button->ChangeRadioButtonInfo(0, 0, 0, 0);
@@ -895,11 +895,11 @@ void CNewUIRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex, bool
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-void CNewUIRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex)
+void CRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex)
 {
     for (int i = 0; i < radiocount; ++i)
     {
-        CNewUIRadioButton* button = new CNewUIRadioButton();
+        CRadioButton* button = new CRadioButton();
         button->ChangeRadioButtonImgState(imgindex, ((i == 0) ? true : false));
         button->ChangeRadioButtonInfo(0, 0, 0, 0);
         RegisterRadioButton(button);
@@ -910,7 +910,7 @@ void CNewUIRadioGroupButton::CreateRadioGroup(int radiocount, int imgindex)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy, int iDistance/* = 1*/)
+void CRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy, int iDistance/* = 1*/)
 {
     int i = 0;
 
@@ -920,7 +920,7 @@ void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, i
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (button)
         {
@@ -933,14 +933,14 @@ void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, i
     }
 }
 
-void CNewUIRadioGroupButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
+void CRadioGroupButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
 {
     int i = 0;
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         button->ChangeButtonState(eventstate, iButtonState);
 
@@ -948,14 +948,14 @@ void CNewUIRadioGroupButton::ChangeButtonState(BUTTON_STATE eventstate, int iBut
     }
 }
 
-void CNewUIRadioGroupButton::ChangeButtonState(int iBtnIndex, int iImgIndex, BUTTON_STATE eventstate, int iButtonState)
+void CRadioGroupButton::ChangeButtonState(int iBtnIndex, int iImgIndex, BUTTON_STATE eventstate, int iButtonState)
 {
     int i = 0;
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (i == iBtnIndex)
         {
@@ -968,7 +968,7 @@ void CNewUIRadioGroupButton::ChangeButtonState(int iBtnIndex, int iImgIndex, BUT
 }
 
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy)
+void CRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy)
 {
     int i = 0;
 
@@ -976,7 +976,7 @@ void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, i
     {
         RadioButtonList::iterator curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (button)
         {
@@ -990,7 +990,7 @@ void CNewUIRadioGroupButton::ChangeRadioButtonInfo(bool iswidth, int x, int y, i
 }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-void CNewUIRadioGroupButton::ChangeRadioText(std::list<std::wstring>& textlist)
+void CRadioGroupButton::ChangeRadioText(std::list<std::wstring>& textlist)
 {
     auto textiter = textlist.begin();
 
@@ -998,7 +998,7 @@ void CNewUIRadioGroupButton::ChangeRadioText(std::list<std::wstring>& textlist)
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         auto curtextiter = textiter;
         ++textiter;
@@ -1010,7 +1010,7 @@ void CNewUIRadioGroupButton::ChangeRadioText(std::list<std::wstring>& textlist)
     }
 }
 
-void CNewUIRadioGroupButton::ChangeRadioText(std::list<const wchar_t* const*>& slotList)
+void CRadioGroupButton::ChangeRadioText(std::list<const wchar_t* const*>& slotList)
 {
     auto slotIter = slotList.begin();
 
@@ -1018,21 +1018,21 @@ void CNewUIRadioGroupButton::ChangeRadioText(std::list<const wchar_t* const*>& s
     {
         if (slotIter == slotList.end()) break;
 
-        CNewUIRadioButton* button = *iter;
+        CRadioButton* button = *iter;
         if (button != nullptr) button->ChangeText(*slotIter);
 
         ++slotIter;
     }
 }
 
-void CNewUIRadioGroupButton::ChangeFrame(int buttonIndex)
+void CRadioGroupButton::ChangeFrame(int buttonIndex)
 {
     int i = 0;
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (i != buttonIndex)
         {
@@ -1048,14 +1048,14 @@ void CNewUIRadioGroupButton::ChangeFrame(int buttonIndex)
 }
 
 // �߰� : Pruarin(07.09.03)
-void CNewUIRadioGroupButton::LockButtonindex(int buttonIndex)
+void CRadioGroupButton::LockButtonindex(int buttonIndex)
 {
     int i = 0;
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (i == buttonIndex)
         {
@@ -1068,14 +1068,14 @@ void CNewUIRadioGroupButton::LockButtonindex(int buttonIndex)
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void CNewUIRadioGroupButton::UnLockButtonIndex(int buttonIndex)
+void CRadioGroupButton::UnLockButtonIndex(int buttonIndex)
 {
     int i = 0;
     for (RadioButtonList::iterator iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         RadioButtonList::iterator curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (i == buttonIndex)
         {
@@ -1088,18 +1088,18 @@ void CNewUIRadioGroupButton::UnLockButtonIndex(int buttonIndex)
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
-void CNewUIRadioGroupButton::RegisterRadioButton(CNewUIRadioButton* button)
+void CRadioGroupButton::RegisterRadioButton(CRadioButton* button)
 {
     m_RadioList.push_back(button);
 }
 
-void CNewUIRadioGroupButton::UnRegisterRadioButton()
+void CRadioGroupButton::UnRegisterRadioButton()
 {
     for (auto iter = m_RadioList.rbegin(); iter != m_RadioList.rend(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         SAFE_DELETE(button);
     }
@@ -1107,7 +1107,7 @@ void CNewUIRadioGroupButton::UnRegisterRadioButton()
     m_RadioList.clear();
 }
 
-int CNewUIRadioGroupButton::UpdateMouseEvent()
+int CRadioGroupButton::UpdateMouseEvent()
 {
     int i = 0;
 
@@ -1115,7 +1115,7 @@ int CNewUIRadioGroupButton::UpdateMouseEvent()
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (button->UpdateMouseEvent(true))
         {
@@ -1130,26 +1130,26 @@ int CNewUIRadioGroupButton::UpdateMouseEvent()
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void CNewUIRadioGroupButton::SetFont(HFONT hFont)
+void CRadioGroupButton::SetFont(HFONT hFont)
 {
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         button->SetFont(hFont);
     }
 }
 
-void CNewUIRadioGroupButton::SetFont(HFONT hFont, int iButtonIndex)
+void CRadioGroupButton::SetFont(HFONT hFont, int iButtonIndex)
 {
     int i = 0;
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (i == iButtonIndex)
         {
@@ -1161,14 +1161,14 @@ void CNewUIRadioGroupButton::SetFont(HFONT hFont, int iButtonIndex)
     }
 }
 
-POINT CNewUIRadioGroupButton::GetPos(int iButtonIndex)
+POINT CRadioGroupButton::GetPos(int iButtonIndex)
 {
     int i = 0;
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         if (i == iButtonIndex)
         {
@@ -1186,13 +1186,13 @@ POINT CNewUIRadioGroupButton::GetPos(int iButtonIndex)
 
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-bool CNewUIRadioGroupButton::Render()
+bool CRadioGroupButton::Render()
 {
     for (auto iter = m_RadioList.begin(); iter != m_RadioList.end(); )
     {
         auto curiter = iter;
         ++iter;
-        CNewUIRadioButton* button = (*curiter);
+        CRadioButton* button = (*curiter);
 
         button->Render();
     }
@@ -1200,7 +1200,7 @@ bool CNewUIRadioGroupButton::Render()
     return true;
 }
 
-mu::ui::window::CNewUICheckBox::CNewUICheckBox()
+mu::ui::window::CCheckBox::CCheckBox()
 {
     s_ImgIndex = -1;
     m_Pos.x = 0; m_Pos.y = 0;
@@ -1214,66 +1214,66 @@ mu::ui::window::CNewUICheckBox::CNewUICheckBox()
     State = 0;
 }
 
-mu::ui::window::CNewUICheckBox::~CNewUICheckBox()
+mu::ui::window::CCheckBox::~CCheckBox()
 {
     if (m_LocaleObserverRegistered)
     {
-        I18N::UnregisterLocaleObserver(&CNewUICheckBox::OnLocaleChanged, this);
+        I18N::UnregisterLocaleObserver(&CCheckBox::OnLocaleChanged, this);
         m_LocaleObserverRegistered = false;
     }
 }
 
-void mu::ui::window::CNewUICheckBox::CheckBoxImgState(int imgindex)
+void mu::ui::window::CCheckBox::CheckBoxImgState(int imgindex)
 {
     s_ImgIndex = imgindex;
 }
 
-void mu::ui::window::CNewUICheckBox::RegisterBoxState(bool eventstate)
+void mu::ui::window::CCheckBox::RegisterBoxState(bool eventstate)
 {
     State = eventstate;
 }
 
-void mu::ui::window::CNewUICheckBox::ChangeText(std::wstring btname)
+void mu::ui::window::CCheckBox::ChangeText(std::wstring btname)
 {
     m_pNameSlot = nullptr;
     m_Name = btname;
 }
 
-void mu::ui::window::CNewUICheckBox::ChangeText(const wchar_t* const* nameSlot)
+void mu::ui::window::CCheckBox::ChangeText(const wchar_t* const* nameSlot)
 {
     m_pNameSlot = nameSlot;
     m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
     EnsureLocaleObserver();
 }
 
-void mu::ui::window::CNewUICheckBox::EnsureLocaleObserver()
+void mu::ui::window::CCheckBox::EnsureLocaleObserver()
 {
     if (m_LocaleObserverRegistered) return;
-    I18N::RegisterLocaleObserver(&CNewUICheckBox::OnLocaleChanged, this);
+    I18N::RegisterLocaleObserver(&CCheckBox::OnLocaleChanged, this);
     m_LocaleObserverRegistered = true;
 }
 
-void mu::ui::window::CNewUICheckBox::OnLocaleChanged(void* ctx) noexcept
+void mu::ui::window::CCheckBox::OnLocaleChanged(void* ctx) noexcept
 {
-    auto* self = static_cast<CNewUICheckBox*>(ctx);
+    auto* self = static_cast<CCheckBox*>(ctx);
     if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
     {
         self->m_Name = *self->m_pNameSlot;
     }
 }
 
-void mu::ui::window::CNewUICheckBox::CheckBoxInfo(int x, int y, int sx, int sy)
+void mu::ui::window::CCheckBox::CheckBoxInfo(int x, int y, int sx, int sy)
 {
     m_Pos.x = x; m_Pos.y = y;
     m_Size.x = sx; m_Size.y = sy;
 }
 
-bool mu::ui::window::CNewUICheckBox::GetBoxState()
+bool mu::ui::window::CCheckBox::GetBoxState()
 {
     return State;
 }
 
-void mu::ui::window::CNewUICheckBox::Render()
+void mu::ui::window::CCheckBox::Render()
 {
     EnableAlphaTest();
 
@@ -1294,7 +1294,7 @@ void mu::ui::window::CNewUICheckBox::Render()
     g_pRenderText->RenderText(m_Pos.x + m_Size.x + 1, m_Pos.y + 4, m_Name.c_str(), 0, 0);
 }
 
-bool mu::ui::window::CNewUICheckBox::UpdateMouseEvent()
+bool mu::ui::window::CCheckBox::UpdateMouseEvent()
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y))
     {

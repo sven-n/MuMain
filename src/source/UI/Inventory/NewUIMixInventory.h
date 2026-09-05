@@ -1,4 +1,4 @@
-// NewUIMixInventory.h: interface for the CNewUIMixInventory class.
+// NewUIMixInventory.h: interface for the CMixInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -11,16 +11,16 @@
 
 namespace mu::ui::window
 {
-    class CNewUIMixInventory : public CNewUIObj
+    class CMixInventory : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_MIXINVENTORY_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_MIXINVENTORY_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_MIXINVENTORY_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_MIXINVENTORY_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_MIXINVENTORY_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_MIXINVENTORY_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_MIXINVENTORY_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
+            IMAGE_MIXINVENTORY_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_MIXINVENTORY_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_MIXINVENTORY_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
             IMAGE_MIXINVENTORY_MIXBTN = BITMAP_INTERFACE_NEW_MIXINVENTORY_BEGIN
         };
         enum MIX_STATE
@@ -34,11 +34,11 @@ namespace mu::ui::window
         static constexpr float INVENTORY_WIDTH = 190.0f;
         static constexpr float INVENTORY_HEIGHT = 429.0f;
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        CManager* m_pNewUIMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
         POINT m_Pos;
 
-        CNewUIButton m_BtnMix;
+        CButton m_BtnMix;
 
         int m_iMixState;
         int m_iMixEffectTimer;
@@ -48,14 +48,14 @@ namespace mu::ui::window
         CUISocketListBox m_SocketListBox;
 
     public:
-        CNewUIMixInventory();
-        virtual ~CNewUIMixInventory();
+        CMixInventory();
+        virtual ~CMixInventory();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         bool InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket);
-        bool ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl = nullptr);
+        bool ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl = nullptr);
         bool ProcessMixItemAutoMoveToInventory();
         void DeleteItem(int iIndex);
         void DeleteAllItems();
@@ -77,7 +77,7 @@ namespace mu::ui::window
 
         float GetLayerDepth();	//. 3.4f
 
-        CNewUIInventoryCtrl* GetInventoryCtrl() const;
+        CInventoryCtrl* GetInventoryCtrl() const;
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
@@ -89,8 +89,8 @@ namespace mu::ui::window
         bool InventoryProcess();
         bool BtnProcess();
 
-        bool AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
-            CNewUIInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);
+        bool AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
+            CInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource);
 
         void RenderMixDescriptions(float fPos_x, float fPos_y);
 

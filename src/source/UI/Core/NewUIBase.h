@@ -8,7 +8,7 @@
  
 namespace mu::ui::window
 {
-    class INewUIBase
+    class IObject
     {
     public:
         virtual bool Render() = 0;
@@ -23,19 +23,19 @@ namespace mu::ui::window
         virtual bool IsEnabled() const = 0;
     };
 
-    class CNewUIObj : public INewUIBase
+    class CObject : public IObject
     {
         HWND m_hRelatedWnd;
         bool m_bRender, m_bUpdate;
         bool m_bActive;
         UI::Scaling::LayoutMode m_layoutMode;
     public:
-        CNewUIObj()
+        CObject()
             : m_hRelatedWnd(nullptr), m_bRender(true), m_bUpdate(true), m_bActive(true),
               m_layoutMode(UI::Scaling::LayoutMode::Dialog)
         {
         }
-        virtual ~CNewUIObj() {}
+        virtual ~CObject() {}
 
         void SetRelatedWnd(HWND hWnd = g_hWnd)
         {
@@ -48,7 +48,7 @@ namespace mu::ui::window
         // Virtual (CUIMng/CNewUIManager merger) -- a window that must do more than flip a flag on
         // show/hide (e.g. CCreditWin toggling its own sprites' visibility, matching CWin::Show()'s
         // equivalent override contract) needs this to actually run when called through a base
-        // CNewUIObj*/INewUIBase* pointer, e.g. CNewUIManager::ShowInterface()'s generic dispatch.
+        // CObject*/IObject* pointer, e.g. CManager::ShowInterface()'s generic dispatch.
         virtual void Show(bool bShow)
         {
             m_bRender = bShow;
@@ -66,10 +66,10 @@ namespace mu::ui::window
         // UpdateWhileShow()/UpdateWhileActive() split (Win.h) has no equivalent here today.
         // Mirrors that shape (not its exact signature -- CWin's hooks take a dDeltaTick nothing
         // in this tier's Update() loop threads through; a migrated window reads whatever timing
-        // source it already uses internally, same as every other CNewUIObj window does) so a
+        // source it already uses internally, same as every other CObject window does) so a
         // window's existing shown/active logic ports over directly instead of needing a redesign.
         // Default IsActive()==true, and the base Update() below only ever runs for a subclass
-        // that does NOT override Update() itself -- every existing CNewUIObj subclass already
+        // that does NOT override Update() itself -- every existing CObject subclass already
         // does, so this is inert for all of them; it only activates for a future subclass that
         // overrides UpdateWhileShown()/UpdateWhileActive() instead.
         virtual bool IsActive() const { return m_bActive; }
@@ -77,7 +77,7 @@ namespace mu::ui::window
         // floating-dialog behavior (SetActiveWin() moving the clicked window to the head of
         // CUIMng's own list) overrides this to also bump its own GetLayerDepth() baseline on
         // becoming active. Needs no other base-class support: GetLayerDepth() is already each
-        // subclass's own responsibility, and CNewUIManager already re-sorts by it every frame.
+        // subclass's own responsibility, and CManager already re-sorts by it every frame.
         virtual void SetActive(bool bActive) { m_bActive = bActive; }
 
         bool Update() override

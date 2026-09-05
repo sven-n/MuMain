@@ -13,7 +13,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIManager;
+    class CManager;
 
     enum MESSAGE_TYPE
     {
@@ -70,7 +70,7 @@ namespace mu::ui::window
 
     typedef TMessageText<wchar_t> CMessageText;
 
-    class CNewUIChatLogWindow : public CNewUIObj
+    class CChatLogWindow : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -86,7 +86,7 @@ namespace mu::ui::window
     private:
         static constexpr int MAX_CHAT_BUFFER_SIZE = 60;
         static constexpr int MAX_NUMBER_OF_LINES = 200;
-        static constexpr float WND_WIDTH = CNewUIChatInputBox::CHATBOX_WIDTH;
+        static constexpr float WND_WIDTH = CChatInputBox::CHATBOX_WIDTH;
         static constexpr float FONT_LEADING = 4.0f;
         static constexpr float WND_TOP_BOTTOM_EDGE = 2.0f;
         static constexpr float WND_LEFT_RIGHT_EDGE = 4.0f;
@@ -112,7 +112,7 @@ namespace mu::ui::window
         typedef std::vector<CMessageText*>	type_vector_msgs;
         typedef std::vector<type_string>	type_vector_filters;
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
 
         type_vector_msgs	m_vecAllMsgs;
         type_vector_msgs	m_VecChatMsgs;
@@ -151,10 +151,10 @@ namespace mu::ui::window
         bool RenderFrame();
 
     public:
-        CNewUIChatLogWindow();
-        ~CNewUIChatLogWindow() override;
+        CChatLogWindow();
+        ~CChatLogWindow() override;
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y, int nShowingLines = 6);
+        bool Create(CManager* pNewUIMng, int x, int y, int nShowingLines = 6);
         void Release();
 
         void SetPosition(int x, int y);
@@ -210,14 +210,14 @@ namespace mu::ui::window
         void AddFilterWord(const type_string& strWord);
     };
 
-    class CNewUISystemLogWindow : public CNewUIObj
+    class CSystemLogWindow : public CObject
     {
     private:
         enum
         {
             MAX_MSG_BUFFER_SIZE = 6,
             MAX_NUMBER_OF_LINES = 6,
-            WND_WIDTH = CNewUIChatInputBox::CHATBOX_WIDTH,
+            WND_WIDTH = CChatInputBox::CHATBOX_WIDTH,
             FONT_LEADING = 4,
             WND_TOP_BOTTOM_EDGE = 2,
             WND_LEFT_RIGHT_EDGE = 4,
@@ -228,7 +228,7 @@ namespace mu::ui::window
         typedef std::wstring type_string;
         typedef std::vector<CMessageText*>	type_vector_msgs;
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
 
         type_vector_msgs	m_vecAllMsgs;
 
@@ -248,10 +248,10 @@ namespace mu::ui::window
         int GetCurrentRenderEndLine() const;
 
     public:
-        CNewUISystemLogWindow();
-        ~CNewUISystemLogWindow() override;
+        CSystemLogWindow();
+        ~CSystemLogWindow() override;
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPosition(int x, int y);

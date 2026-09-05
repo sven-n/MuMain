@@ -1,4 +1,4 @@
-﻿// NewUICursedTempleEnter.cpp: implementation of the CNewUICursedTempleEnter class.
+﻿// NewUICursedTempleEnter.cpp: implementation of the CCursedTempleEnter class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -56,7 +56,7 @@ namespace
     }
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCursedTempleEnter::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -73,21 +73,21 @@ bool mu::ui::window::CNewUICursedTempleEnter::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-mu::ui::window::CNewUICursedTempleEnter::CNewUICursedTempleEnter() : m_pNewUIMng(NULL), m_EnterTime(0), m_EnterCount(0)
+mu::ui::window::CCursedTempleEnter::CCursedTempleEnter() : m_pNewUIMng(NULL), m_EnterTime(0), m_EnterCount(0)
 {
     Initialize();
 }
 
-mu::ui::window::CNewUICursedTempleEnter::~CNewUICursedTempleEnter()
+mu::ui::window::CCursedTempleEnter::~CCursedTempleEnter()
 {
     Destroy();
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::Initialize()
+void mu::ui::window::CCursedTempleEnter::Initialize()
 {
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::Destroy()
+void mu::ui::window::CCursedTempleEnter::Destroy()
 {
     if (m_pNewUIMng)
     {
@@ -96,11 +96,11 @@ void mu::ui::window::CNewUICursedTempleEnter::Destroy()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::SetButtonInfo()
+void mu::ui::window::CCursedTempleEnter::SetButtonInfo()
 {
     float x;
     x = m_Pos.x + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
-    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonImgState(true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
+    m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonImgState(true, CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
 
     m_Button[CURSEDTEMPLEENTER_OPEN].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
 
@@ -108,14 +108,14 @@ void mu::ui::window::CNewUICursedTempleEnter::SetButtonInfo()
     m_Button[CURSEDTEMPLEENTER_OPEN].ChangeText(&I18N::Game::Enter);
 
     x = m_Pos.x + (CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
-    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonImgState(true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
+    m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonImgState(true, CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
 
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeButtonInfo(x, m_Pos.y + 203, 54, 23);
     // 1002 "닫기"
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(&I18N::Game::Close388);
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
+bool mu::ui::window::CCursedTempleEnter::CheckEnterLevel(int& enterlevel)
 {
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -137,7 +137,7 @@ bool mu::ui::window::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
     return false;
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
+bool mu::ui::window::CCursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
 {
     if (p->Type == ITEM_HELPER + 61)
     {
@@ -159,7 +159,7 @@ bool mu::ui::window::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterl
     return true;
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int enterlevel)
+bool mu::ui::window::CCursedTempleEnter::CheckInventory(BYTE& itempos, int enterlevel)
 {
     int pos = 0;
 
@@ -181,7 +181,7 @@ bool mu::ui::window::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int 
     return false;
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::UpdateMouseEvent()
+bool mu::ui::window::CCursedTempleEnter::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLEENTER_OPEN].UpdateMouseEvent())
     {
@@ -217,7 +217,7 @@ bool mu::ui::window::CNewUICursedTempleEnter::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::UpdateKeyEvent()
+bool mu::ui::window::CCursedTempleEnter::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC) == true)
     {
@@ -231,12 +231,12 @@ bool mu::ui::window::CNewUICursedTempleEnter::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::Update()
+bool mu::ui::window::CCursedTempleEnter::Update()
 {
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::RenderText()
+void mu::ui::window::CCursedTempleEnter::RenderText()
 {
     wchar_t Text[100];
 
@@ -293,31 +293,31 @@ void mu::ui::window::CNewUICursedTempleEnter::RenderText()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::RenderFrame()
+void mu::ui::window::CCursedTempleEnter::RenderFrame()
 {
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = CURSEDTEMPLE_ENTER_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = CURSEDTEMPLE_ENTER_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < 9; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y + CURSEDTEMPLE_ENTER_WINDOW_HEIGHT - 77; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
 
-bool mu::ui::window::CNewUICursedTempleEnter::Render()
+bool mu::ui::window::CCursedTempleEnter::Render()
 {
     EnableAlphaTest();
 
@@ -330,7 +330,7 @@ bool mu::ui::window::CNewUICursedTempleEnter::Render()
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::RenderButtons()
+void mu::ui::window::CCursedTempleEnter::RenderButtons()
 {
     for (int i = 0; i < CURSEDTEMPLEENTER_MAXBUTTONCOUNT; ++i)
     {
@@ -340,13 +340,13 @@ void mu::ui::window::CNewUICursedTempleEnter::RenderButtons()
 }
 
 //ServerMessage
-void mu::ui::window::CNewUICursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo)
+void mu::ui::window::CCursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo)
 {
     m_EnterTime = static_cast<int>(cursedtempleinfo[0]);
     m_EnterCount = static_cast<int>(cursedtempleinfo[1]);
 }
 
-void mu::ui::window::CNewUICursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
 

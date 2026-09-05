@@ -1,4 +1,4 @@
-// NewUISiegeWarObserver.cpp: implementation of the CNewUISiegeWarObserver class.
+// NewUISiegeWarObserver.cpp: implementation of the CSiegeWarObserver class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,23 +11,23 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUISiegeWarObserver::CNewUISiegeWarObserver() {}
+CSiegeWarObserver::CSiegeWarObserver() {}
 
-CNewUISiegeWarObserver::~CNewUISiegeWarObserver() {}
+CSiegeWarObserver::~CSiegeWarObserver() {}
 
-bool mu::ui::window::CNewUISiegeWarObserver::OnCreate(int x, int y)
+bool mu::ui::window::CSiegeWarObserver::OnCreate(int x, int y)
 {
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarObserver::OnRelease() {}
+void mu::ui::window::CSiegeWarObserver::OnRelease() {}
 
-bool mu::ui::window::CNewUISiegeWarObserver::OnUpdate()
+bool mu::ui::window::CSiegeWarObserver::OnUpdate()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarObserver::OnRender()
+bool mu::ui::window::CSiegeWarObserver::OnRender()
 {
     EnableAlphaTest();
     g_pRenderText->SetFont(g_hFont);
@@ -38,9 +38,9 @@ bool mu::ui::window::CNewUISiegeWarObserver::OnRender()
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarObserver::OnSetPos(int x, int y) {}
+void mu::ui::window::CSiegeWarObserver::OnSetPos(int x, int y) {}
 
-void mu::ui::window::CNewUISiegeWarObserver::RenderCharPosInMiniMap()
+void mu::ui::window::CSiegeWarObserver::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
 
@@ -57,7 +57,7 @@ void mu::ui::window::CNewUISiegeWarObserver::RenderCharPosInMiniMap()
     }
 }
 
-bool mu::ui::window::CNewUISiegeWarObserver::OnUpdateMouseEvent()
+bool mu::ui::window::CSiegeWarObserver::OnUpdateMouseEvent()
 {
     if (OnBtnProcess())
         return false;
@@ -65,16 +65,16 @@ bool mu::ui::window::CNewUISiegeWarObserver::OnUpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarObserver::OnUpdateKeyEvent()
+bool mu::ui::window::CSiegeWarObserver::OnUpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarObserver::OnBtnProcess()
+bool mu::ui::window::CSiegeWarObserver::OnBtnProcess()
 {
     return false;
 }
 
-void mu::ui::window::CNewUISiegeWarObserver::OnLoadImages() {}
+void mu::ui::window::CSiegeWarObserver::OnLoadImages() {}
 
-void mu::ui::window::CNewUISiegeWarObserver::OnUnloadImages() {}
+void mu::ui::window::CSiegeWarObserver::OnUnloadImages() {}

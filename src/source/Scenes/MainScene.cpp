@@ -676,7 +676,7 @@ bool RenderMainScene()
     }
 
     // World is ready this frame -- close the loading wallpaper now, before it (or the mainframe
-    // HUD it was gating alongside, see CNewUISystem::SyncMainSceneHudVisibility) would otherwise
+    // HUD it was gating alongside, see CSystem::SyncMainSceneHudVisibility) would otherwise
     // sit on top of the real scene about to render below.
     HideLoadingSceneOverlay();
 

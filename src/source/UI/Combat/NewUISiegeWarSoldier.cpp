@@ -16,31 +16,31 @@ using namespace mu::ui::window;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CNewUISiegeWarSoldier::CNewUISiegeWarSoldier() {}
+CSiegeWarSoldier::CSiegeWarSoldier() {}
 
-CNewUISiegeWarSoldier::~CNewUISiegeWarSoldier() {}
+CSiegeWarSoldier::~CSiegeWarSoldier() {}
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
-bool mu::ui::window::CNewUISiegeWarSoldier::OnCreate(int x, int y)
+bool mu::ui::window::CSiegeWarSoldier::OnCreate(int x, int y)
 {
     return true;
 }
 
 //---------------------------------------------------------------------------------------------
 // OnRelease
-void mu::ui::window::CNewUISiegeWarSoldier::OnRelease() {}
+void mu::ui::window::CSiegeWarSoldier::OnRelease() {}
 
 //---------------------------------------------------------------------------------------------
 // OnUpdate
-bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdate()
+bool mu::ui::window::CSiegeWarSoldier::OnUpdate()
 {
     return true;
 }
 
 //---------------------------------------------------------------------------------------------
 // OnRender
-bool mu::ui::window::CNewUISiegeWarSoldier::OnRender()
+bool mu::ui::window::CSiegeWarSoldier::OnRender()
 {
     EnableAlphaTest();
 
@@ -65,12 +65,12 @@ bool mu::ui::window::CNewUISiegeWarSoldier::OnRender()
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
-void mu::ui::window::CNewUISiegeWarSoldier::OnSetPos(int x, int y) {}
+void mu::ui::window::CSiegeWarSoldier::OnSetPos(int x, int y) {}
 
 //---------------------------------------------------------------------------------------------
 // RenderCharPosInMiniMap
 // 미니맵에 모든 캐릭터를 렌더
-void mu::ui::window::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
+void mu::ui::window::CSiegeWarSoldier::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
 
@@ -105,7 +105,7 @@ void mu::ui::window::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
 
 //---------------------------------------------------------------------------------------------
 // OnUpdateMouseEvent
-bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdateMouseEvent()
+bool mu::ui::window::CSiegeWarSoldier::OnUpdateMouseEvent()
 {
     if (OnBtnProcess())
         return false;
@@ -115,21 +115,21 @@ bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdateMouseEvent()
 
 //---------------------------------------------------------------------------------------------
 // OnUpdateKeyEvent
-bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdateKeyEvent()
+bool mu::ui::window::CSiegeWarSoldier::OnUpdateKeyEvent()
 {
     return true;
 }
 //---------------------------------------------------------------------------------------------
 // OnBtnProcess
-bool mu::ui::window::CNewUISiegeWarSoldier::OnBtnProcess()
+bool mu::ui::window::CSiegeWarSoldier::OnBtnProcess()
 {
     return false;
 }
 
 //---------------------------------------------------------------------------------------------
 // OnLoadImages
-void mu::ui::window::CNewUISiegeWarSoldier::OnLoadImages() {}
+void mu::ui::window::CSiegeWarSoldier::OnLoadImages() {}
 
 //---------------------------------------------------------------------------------------------
 // OnUnloadImages
-void mu::ui::window::CNewUISiegeWarSoldier::OnUnloadImages() {}
+void mu::ui::window::CSiegeWarSoldier::OnUnloadImages() {}

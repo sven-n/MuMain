@@ -1,4 +1,4 @@
-// NewUICursedTempleResult.cpp: implementation of the CNewUICursedTempleResult class.
+// NewUICursedTempleResult.cpp: implementation of the CCursedTempleResult class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -48,7 +48,7 @@ namespace
     }
 };
 
-bool mu::ui::window::CNewUICursedTempleResult::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCursedTempleResult::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -65,22 +65,22 @@ bool mu::ui::window::CNewUICursedTempleResult::Create(CNewUIManager* pNewUIMng, 
     return true;
 }
 
-mu::ui::window::CNewUICursedTempleResult::CNewUICursedTempleResult() : m_pNewUIMng(NULL), m_ResultEffectAlph(0.f), m_WinState(0)
+mu::ui::window::CCursedTempleResult::CCursedTempleResult() : m_pNewUIMng(NULL), m_ResultEffectAlph(0.f), m_WinState(0)
 {
     Initialize();
 }
 
-mu::ui::window::CNewUICursedTempleResult::~CNewUICursedTempleResult()
+mu::ui::window::CCursedTempleResult::~CCursedTempleResult()
 {
     Destroy();
 }
 
-void mu::ui::window::CNewUICursedTempleResult::Initialize()
+void mu::ui::window::CCursedTempleResult::Initialize()
 {
     LoadImages();
 }
 
-void mu::ui::window::CNewUICursedTempleResult::Destroy()
+void mu::ui::window::CCursedTempleResult::Destroy()
 {
     UnloadImages();
 
@@ -91,29 +91,29 @@ void mu::ui::window::CNewUICursedTempleResult::Destroy()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleResult::LoadImages()
+void mu::ui::window::CCursedTempleResult::LoadImages()
 {
     LoadBitmap(L"Interface\\illusion_success.tga", IMAGE_CURSEDTEMPLERESULT_SUCCESS, GL_LINEAR);
     LoadBitmap(L"Interface\\illusion_failure.tga", IMAGE_CURSEDTEMPLERESULT_FAILURE, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUICursedTempleResult::UnloadImages()
+void mu::ui::window::CCursedTempleResult::UnloadImages()
 {
     DeleteBitmap(IMAGE_CURSEDTEMPLERESULT_FAILURE);
     DeleteBitmap(IMAGE_CURSEDTEMPLERESULT_SUCCESS);
 }
 
-void mu::ui::window::CNewUICursedTempleResult::SetButtonInfo()
+void mu::ui::window::CCursedTempleResult::SetButtonInfo()
 {
     float x;
     x = m_Pos.x + (CURSEDTEMPLE_RESULT_WINDOW_WIDTH / 2) - (54 / 2);
 
-    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonImgState(true, CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
+    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonImgState(true, CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
     m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonInfo(x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 37, 54, 23);
     m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeText(&I18N::Game::Close388);
 }
 
-void mu::ui::window::CNewUICursedTempleResult::ResetGameResultInfo()
+void mu::ui::window::CCursedTempleResult::ResetGameResultInfo()
 {
     m_WinState = 0;
 
@@ -128,7 +128,7 @@ void mu::ui::window::CNewUICursedTempleResult::ResetGameResultInfo()
         m_IllusionTeamGameResult.clear();
 }
 
-void mu::ui::window::CNewUICursedTempleResult::UpdateResult()
+void mu::ui::window::CCursedTempleResult::UpdateResult()
 {
     if (m_WinState == 0)
         return;
@@ -140,17 +140,17 @@ void mu::ui::window::CNewUICursedTempleResult::UpdateResult()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleResult::OpenningProcess()
+void mu::ui::window::CCursedTempleResult::OpenningProcess()
 {
 }
 
-void mu::ui::window::CNewUICursedTempleResult::ClosingProcess()
+void mu::ui::window::CCursedTempleResult::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendIllusionTempleRewardRequest();
     ResetGameResultInfo();
 }
 
-bool mu::ui::window::CNewUICursedTempleResult::UpdateMouseEvent()
+bool mu::ui::window::CCursedTempleResult::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLERESULT_CLOSE].UpdateMouseEvent())
     {
@@ -166,7 +166,7 @@ bool mu::ui::window::CNewUICursedTempleResult::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICursedTempleResult::UpdateKeyEvent()
+bool mu::ui::window::CCursedTempleResult::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT) == true)
     {
@@ -180,14 +180,14 @@ bool mu::ui::window::CNewUICursedTempleResult::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICursedTempleResult::Update()
+bool mu::ui::window::CCursedTempleResult::Update()
 {
     UpdateResult();
 
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleResult::RenderResultPanel()
+void mu::ui::window::CCursedTempleResult::RenderResultPanel()
 {
     if (m_WinState == 0)
         return;
@@ -207,38 +207,38 @@ void mu::ui::window::CNewUICursedTempleResult::RenderResultPanel()
     }
 }
 
-void mu::ui::window::CNewUICursedTempleResult::RenderFrame()
+void mu::ui::window::CCursedTempleResult::RenderFrame()
 {
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = CURSEDTEMPLE_RESULT_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < 11; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 77; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
     y = GetPos().y + 45;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
 
-void mu::ui::window::CNewUICursedTempleResult::RenderButtons()
+void mu::ui::window::CCursedTempleResult::RenderButtons()
 {
     m_Button[CURSEDTEMPLERESULT_CLOSE].Render();
 }
 
-void mu::ui::window::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor)
+void mu::ui::window::CCursedTempleResult::RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor)
 {
     wchar_t Text[200];
 
@@ -270,7 +270,7 @@ void mu::ui::window::CNewUICursedTempleResult::RenderTextLine(const CursedTemple
     DrawText(Text, x + 190, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 }
 
-void mu::ui::window::CNewUICursedTempleResult::RenderText()
+void mu::ui::window::CCursedTempleResult::RenderText()
 {
     wchar_t Text[200];
 
@@ -319,7 +319,7 @@ void mu::ui::window::CNewUICursedTempleResult::RenderText()
     DrawText(Text, m_Pos.x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 55, 0xFF0000FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 }
 
-bool mu::ui::window::CNewUICursedTempleResult::Render()
+bool mu::ui::window::CCursedTempleResult::Render()
 {
     EnableAlphaTest();
 
@@ -333,7 +333,7 @@ bool mu::ui::window::CNewUICursedTempleResult::Render()
     return true;
 }
 
-void mu::ui::window::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
+void mu::ui::window::CCursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
 

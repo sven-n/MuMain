@@ -325,14 +325,14 @@ void SelectObjects()
     // reachable from gameplay via the ESC menu, plus any RmlUi-migrated NewUI-tier HUD
     // element). Routes to whichever UI framework is registered as the active input consumer
     // (UiInputRouter.h -- RmlUiRuntime today), so it stays correct regardless of how any
-    // individual migrated element's legacy CNewUIObj bookkeeping is positioned -- see
+    // individual migrated element's legacy CObject bookkeeping is positioned -- see
     // docs/rmlui-ui-system/layout-and-scaling.md's CalculateFixedAnchorLayout() section for why
     // "authoritative state, not a shadow rect" matters here.
     if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {
-            if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+            if (mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
                 SelectedItem = SelectItem();
 
             if (SelectedItem == -1)
@@ -402,7 +402,7 @@ void SelectObjects()
                         SelectedNpc = SelectCharacter(KIND_NPC);
                         if (SelectedNpc == -1)
                         {
-                            if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+                            if (mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
                             {
                                 SelectedItem = SelectItem();
                             }

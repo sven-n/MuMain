@@ -1,4 +1,4 @@
-// NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.cpp: implementation of the CGuildInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -21,17 +21,17 @@ extern BYTE m_OccupationState;
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIMiniMap::CNewUIMiniMap()
+mu::ui::window::CMiniMap::CMiniMap()
 {
     m_pNewUIMng = NULL;
 }
 
-mu::ui::window::CNewUIMiniMap::~CNewUIMiniMap()
+mu::ui::window::CMiniMap::~CMiniMap()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMiniMap::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -69,21 +69,21 @@ bool mu::ui::window::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int 
     return true;
 }
 
-void mu::ui::window::CNewUIMiniMap::ClosingProcess()
+void mu::ui::window::CMiniMap::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float mu::ui::window::CNewUIMiniMap::GetLayerDepth()
+float mu::ui::window::CMiniMap::GetLayerDepth()
 {
     return 8.1f;
 }
 
-void mu::ui::window::CNewUIMiniMap::OpenningProcess()
+void mu::ui::window::CMiniMap::OpenningProcess()
 {
 }
 
-void mu::ui::window::CNewUIMiniMap::Release()
+void mu::ui::window::CMiniMap::Release()
 {
     UnloadImages();
 
@@ -99,12 +99,12 @@ void mu::ui::window::CNewUIMiniMap::Release()
     }
 }
 
-void mu::ui::window::CNewUIMiniMap::SetPos(int x, int y)
+void mu::ui::window::CMiniMap::SetPos(int x, int y)
 {
     m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 27, 3, 30, 25);
 }
 
-void mu::ui::window::CNewUIMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)
+void mu::ui::window::CMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)
 {
     m_Btn_Loc[Num][0] = x;
     m_Btn_Loc[Num][1] = y;
@@ -112,7 +112,7 @@ void mu::ui::window::CNewUIMiniMap::SetBtnPos(int Num, float x, float y, float n
     m_Btn_Loc[Num][3] = ny;
 }
 
-bool mu::ui::window::CNewUIMiniMap::UpdateKeyEvent()
+bool mu::ui::window::CMiniMap::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MINI_MAP))
     {
@@ -126,7 +126,7 @@ bool mu::ui::window::CNewUIMiniMap::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMiniMap::Render()
+bool mu::ui::window::CMiniMap::Render()
 {
     float Rot = 45.f;
 
@@ -201,12 +201,12 @@ bool mu::ui::window::CNewUIMiniMap::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUIMiniMap::Update()
+bool mu::ui::window::CMiniMap::Update()
 {
     return true;
 }
 
-void mu::ui::window::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
+void mu::ui::window::CMiniMap::LoadImages(const wchar_t* Filename)
 {
     wchar_t Fname[300];
     int i = 0;
@@ -279,12 +279,12 @@ void mu::ui::window::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
     }
 }
 
-void mu::ui::window::CNewUIMiniMap::UnloadImages()
+void mu::ui::window::CMiniMap::UnloadImages()
 {
     DeleteBitmap(IMAGE_MINIMAP_INTERFACE);
 }
 
-bool mu::ui::window::CNewUIMiniMap::UpdateMouseEvent()
+bool mu::ui::window::CMiniMap::UpdateMouseEvent()
 {
     bool ret = true;
 
@@ -311,12 +311,12 @@ bool mu::ui::window::CNewUIMiniMap::UpdateMouseEvent()
     return ret;
 }
 
-bool mu::ui::window::CNewUIMiniMap::Check_Mouse(int mx, int my)
+bool mu::ui::window::CMiniMap::Check_Mouse(int mx, int my)
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIMiniMap::Check_Btn(int mx, int my)
+bool mu::ui::window::CMiniMap::Check_Btn(int mx, int my)
 {
     int i = 0;
     for (i = 0; i < MAX_MINI_MAP_DATA; i++)

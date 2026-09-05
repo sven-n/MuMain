@@ -27,16 +27,16 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIHotKey::CNewUIHotKey() : m_pNewUIMng(NULL), m_bStateGameOver(false)
+mu::ui::window::CHotKey::CHotKey() : m_pNewUIMng(NULL), m_bStateGameOver(false)
 {
 }
 
-mu::ui::window::CNewUIHotKey::~CNewUIHotKey()
+mu::ui::window::CHotKey::~CHotKey()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIHotKey::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CHotKey::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -47,7 +47,7 @@ bool mu::ui::window::CNewUIHotKey::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void mu::ui::window::CNewUIHotKey::Release()
+void mu::ui::window::CHotKey::Release()
 {
     if (m_pNewUIMng)
     {
@@ -56,7 +56,7 @@ void mu::ui::window::CNewUIHotKey::Release()
     }
 }
 
-bool mu::ui::window::CNewUIHotKey::UpdateMouseEvent()
+bool mu::ui::window::CHotKey::UpdateMouseEvent()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
     {
@@ -116,7 +116,7 @@ bool mu::ui::window::CNewUIHotKey::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIHotKey::UpdateKeyEvent()
+bool mu::ui::window::CHotKey::UpdateKeyEvent()
 {
     if (mu::ui::window::IsPress(VK_ESCAPE) == true)
     {
@@ -306,7 +306,7 @@ bool mu::ui::window::CNewUIHotKey::UpdateKeyEvent()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     else if (mu::ui::window::IsPress('X') == true)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CHotKey.UpdateKeyEvent()");
         if (g_pInGameShop->IsInGameShopOpen() == false)
             return false;
 
@@ -369,17 +369,17 @@ bool mu::ui::window::CNewUIHotKey::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIHotKey::Update()
+bool mu::ui::window::CHotKey::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIHotKey::Render()
+bool mu::ui::window::CHotKey::Render()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
+bool mu::ui::window::CHotKey::CanUpdateKeyEventRelatedMyInventory()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY)
         || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE)
@@ -395,7 +395,7 @@ bool mu::ui::window::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
     return false;
 }
 
-bool mu::ui::window::CNewUIHotKey::CanUpdateKeyEvent()
+bool mu::ui::window::CHotKey::CanUpdateKeyEvent()
 {
     if (CUITextInputBox::IsAnyInputBoxFocused())
     {
@@ -433,30 +433,30 @@ bool mu::ui::window::CNewUIHotKey::CanUpdateKeyEvent()
     return true;
 }
 
-float mu::ui::window::CNewUIHotKey::GetLayerDepth()
+float mu::ui::window::CHotKey::GetLayerDepth()
 {
     return 1.0f;
 }
 
-float mu::ui::window::CNewUIHotKey::GetKeyEventOrder()
+float mu::ui::window::CHotKey::GetKeyEventOrder()
 {
     return 1.0f;
 }
 
-void mu::ui::window::CNewUIHotKey::SetStateGameOver(bool bGameOver)
+void mu::ui::window::CHotKey::SetStateGameOver(bool bGameOver)
 {
     m_bStateGameOver = bGameOver;
 }
 
-bool mu::ui::window::CNewUIHotKey::IsStateGameOver()
+bool mu::ui::window::CHotKey::IsStateGameOver()
 {
     return m_bStateGameOver;
 }
 
-bool mu::ui::window::CNewUIHotKey::AutoGetItem()
+bool mu::ui::window::CHotKey::AutoGetItem()
 {
     if (
-        CNewUIInventoryCtrl::GetPickedItem() == NULL
+        CInventoryCtrl::GetPickedItem() == NULL
         && mu::ui::window::IsPress(VK_SPACE)
         && g_pChatInputBox->HaveFocus() == false
         && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,

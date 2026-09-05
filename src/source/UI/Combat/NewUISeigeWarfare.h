@@ -1,4 +1,4 @@
-// CNewUISiegeWarfare.h: interface for the CNewUISiegeWarfare class.
+// CSiegeWarfare.h: interface for the CSiegeWarfare class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUISiegeWarfare : public CNewUIObj
+    class CSiegeWarfare : public CObject
     {
     public:
         enum SIEGEWAR_TYPE
@@ -26,10 +26,10 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
-        CNewUISiegeWarBase* m_pSiegeWarUI;
+        CSiegeWarBase* m_pSiegeWarUI;
         short						m_sGuildMarkIndex;
         BYTE						m_byGuildStatus;
         int							m_iCurSiegeWarType;
@@ -42,10 +42,10 @@ namespace mu::ui::window
         bool						m_bCreated;
 
     public:
-        CNewUISiegeWarfare();
-        virtual ~CNewUISiegeWarfare();
+        CSiegeWarfare();
+        virtual ~CSiegeWarfare();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         bool CreateMiniMapUI();
         void InitMiniMapUI();
         void SetGuildData(const CHARACTER* pCharacter);
@@ -72,7 +72,7 @@ namespace mu::ui::window
         void SetMapInfo(GuildCommander& data);
 
     public:
-        inline CNewUISiegeWarBase* GetBase()
+        inline CSiegeWarBase* GetBase()
         {
             if (!m_pSiegeWarUI)
                 return NULL;

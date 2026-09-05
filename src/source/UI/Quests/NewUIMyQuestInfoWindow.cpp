@@ -1,4 +1,4 @@
-// NewUIMyQuestInfoWindow.cpp: implementation of the CNewUIMyQuestInfoWindow class.
+// NewUIMyQuestInfoWindow.cpp: implementation of the CMyQuestInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -17,18 +17,18 @@ extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
 extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 
-mu::ui::window::CNewUIMyQuestInfoWindow::CNewUIMyQuestInfoWindow()
+mu::ui::window::CMyQuestInfoWindow::CMyQuestInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-mu::ui::window::CNewUIMyQuestInfoWindow::~CNewUIMyQuestInfoWindow()
+mu::ui::window::CMyQuestInfoWindow::~CMyQuestInfoWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIMyQuestInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -45,7 +45,7 @@ bool mu::ui::window::CNewUIMyQuestInfoWindow::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::Release()
+void mu::ui::window::CMyQuestInfoWindow::Release()
 {
     UnloadImages();
 
@@ -56,7 +56,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CMyQuestInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -69,7 +69,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::SetPos(int x, int y)
     m_QuestContentsListBox.SetPosition(m_Pos.x + 9, m_Pos.y + 390);
 }
 
-bool mu::ui::window::CNewUIMyQuestInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CMyQuestInfoWindow::UpdateMouseEvent()
 {
     if (m_eTabBtnIndex == TAB_QUEST)
     {
@@ -90,7 +90,7 @@ bool mu::ui::window::CNewUIMyQuestInfoWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMyQuestInfoWindow::BtnProcess()
+bool mu::ui::window::CMyQuestInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYQUEST))
@@ -150,7 +150,7 @@ bool mu::ui::window::CNewUIMyQuestInfoWindow::BtnProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUIMyQuestInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CMyQuestInfoWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST) == true)
     {
@@ -164,12 +164,12 @@ bool mu::ui::window::CNewUIMyQuestInfoWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMyQuestInfoWindow::Update()
+bool mu::ui::window::CMyQuestInfoWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIMyQuestInfoWindow::Render()
+bool mu::ui::window::CMyQuestInfoWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -199,12 +199,12 @@ bool mu::ui::window::CNewUIMyQuestInfoWindow::Render()
     return true;
 }
 
-float mu::ui::window::CNewUIMyQuestInfoWindow::GetLayerDepth()
+float mu::ui::window::CMyQuestInfoWindow::GetLayerDepth()
 {
     return 3.3f;
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::LoadImages()
+void mu::ui::window::CMyQuestInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MYQUEST_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_MYQUEST_TOP, GL_LINEAR);
@@ -221,7 +221,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\Quest_tab03.tga", IMAGE_MYQUEST_TAB_BIG, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::UnloadImages()
+void mu::ui::window::CMyQuestInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_MYQUEST_TAB_BIG);
     DeleteBitmap(IMAGE_MYQUEST_TAB_SMALL);
@@ -237,7 +237,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_MYQUEST_BACK);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderFrame()
+void mu::ui::window::CMyQuestInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_MYQUEST_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_MYQUEST_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -246,7 +246,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderFrame()
     RenderImage(IMAGE_MYQUEST_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderSubjectTexts()
+void mu::ui::window::CMyQuestInfoWindow::RenderSubjectTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
@@ -254,7 +254,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderSubjectTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, L"Quest", 190, 0, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderQuestInfo()
+void mu::ui::window::CMyQuestInfoWindow::RenderQuestInfo()
 {
     RenderImage(IMAGE_MYQUEST_LINE, m_Pos.x, m_Pos.y + 160, 188.f, 21.f);
 
@@ -277,7 +277,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderQuestInfo()
     m_QuestContentsListBox.Render();
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderJobChangeContents()
+void mu::ui::window::CMyQuestInfoWindow::RenderJobChangeContents()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(36, 242, 252, 255);
@@ -295,7 +295,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderJobChangeContents()
     }
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderJobChangeState()
+void mu::ui::window::CMyQuestInfoWindow::RenderJobChangeState()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -314,7 +314,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderJobChangeState()
         g_pRenderText->RenderText(m_Pos.x + 23, m_Pos.y + 283 + 18 * i, m_aszMsg[i], 0, 0, RT3_SORT_LEFT);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderCastleInfo()
+void mu::ui::window::CMyQuestInfoWindow::RenderCastleInfo()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -334,7 +334,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderCastleInfo()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 145, strText, 190, 0, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::RenderTempleInfo()
+void mu::ui::window::CMyQuestInfoWindow::RenderTempleInfo()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -354,19 +354,19 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::RenderTempleInfo()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 325, strText, 190, 0, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::OpenningProcess()
+void mu::ui::window::CMyQuestInfoWindow::OpenningProcess()
 {
     g_csQuest.ShowQuestPreviewWindow(-1);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::ClosingProcess()
+void mu::ui::window::CMyQuestInfoWindow::ClosingProcess()
 {
     UnselectQuestList();
     SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CNewUIMyQuestInfoWindow::SetButtonInfo()
+void mu::ui::window::CMyQuestInfoWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -381,7 +381,7 @@ void mu::ui::window::CNewUIMyQuestInfoWindow::SetButtonInfo()
     m_btnQuestGiveUp.ChangeToolTipText(&I18N::Game::GiveUpQuest, true);
 }
 
-CNewUIMyQuestInfoWindow::TAB_BUTTON_INDEX CNewUIMyQuestInfoWindow::UpdateTabBtn()
+CMyQuestInfoWindow::TAB_BUTTON_INDEX CMyQuestInfoWindow::UpdateTabBtn()
 {
     if (!(mu::ui::window::IsPress(VK_LBUTTON)))
         return TAB_NON;
@@ -401,7 +401,7 @@ CNewUIMyQuestInfoWindow::TAB_BUTTON_INDEX CNewUIMyQuestInfoWindow::UpdateTabBtn(
     return m_eTabBtnIndex;
 }
 
-void CNewUIMyQuestInfoWindow::RenderTabBtn()
+void CMyQuestInfoWindow::RenderTabBtn()
 {
     RenderImage(IMAGE_MYQUEST_TAB_BACK, m_Pos.x + 10, m_Pos.y + 27, 166.f, 22.f);
 
@@ -437,7 +437,7 @@ void CNewUIMyQuestInfoWindow::RenderTabBtn()
     }
 }
 
-void CNewUIMyQuestInfoWindow::UnselectQuestList()
+void CMyQuestInfoWindow::UnselectQuestList()
 {
     m_CurQuestListBox.SLSetSelectLine(0);
     m_QuestContentsListBox.Clear();
@@ -445,7 +445,7 @@ void CNewUIMyQuestInfoWindow::UnselectQuestList()
     QuestGiveUpBtnEnable(false);
 }
 
-void CNewUIMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
+void CMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
 {
     m_CurQuestListBox.Clear();
 
@@ -470,7 +470,7 @@ void CNewUIMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
     QuestGiveUpBtnEnable(false);
 }
 
-void CNewUIMyQuestInfoWindow::SetSelQuestSummary()
+void CMyQuestInfoWindow::SetSelQuestSummary()
 {
     m_QuestContentsListBox.Clear();
 
@@ -491,7 +491,7 @@ void CNewUIMyQuestInfoWindow::SetSelQuestSummary()
         m_QuestContentsListBox.AddText(g_hFont, 0xffd2e6ff, RT3_SORT_LEFT, aszSummary[i]);
 }
 
-void CNewUIMyQuestInfoWindow::SetSelQuestRequestReward()
+void CMyQuestInfoWindow::SetSelQuestRequestReward()
 {
     DWORD dwSelQuestIndex = GetSelQuestIndex();
 
@@ -535,7 +535,7 @@ void CNewUIMyQuestInfoWindow::SetSelQuestRequestReward()
     }
 }
 
-void CNewUIMyQuestInfoWindow::QuestOpenBtnEnable(bool bEnable)
+void CMyQuestInfoWindow::QuestOpenBtnEnable(bool bEnable)
 {
     if (bEnable)
     {
@@ -549,7 +549,7 @@ void CNewUIMyQuestInfoWindow::QuestOpenBtnEnable(bool bEnable)
     }
 }
 
-void CNewUIMyQuestInfoWindow::QuestGiveUpBtnEnable(bool bEnable)
+void CMyQuestInfoWindow::QuestGiveUpBtnEnable(bool bEnable)
 {
     if (bEnable)
     {
@@ -563,7 +563,7 @@ void CNewUIMyQuestInfoWindow::QuestGiveUpBtnEnable(bool bEnable)
     }
 }
 
-DWORD CNewUIMyQuestInfoWindow::GetSelQuestIndex()
+DWORD CMyQuestInfoWindow::GetSelQuestIndex()
 {
     SCurQuestItem* pCurQuestItem = m_CurQuestListBox.GetSelectedText();
     if (NULL == pCurQuestItem)
@@ -572,7 +572,7 @@ DWORD CNewUIMyQuestInfoWindow::GetSelQuestIndex()
     return pCurQuestItem->m_dwIndex;
 }
 
-void CNewUIMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
+void CMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
 {
     memset(m_aszMsg, 0, sizeof m_aszMsg);
     g_pRenderText->SetFont(g_hFontBold);

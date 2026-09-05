@@ -1,4 +1,4 @@
-// CNewUIEmpireGuardianTimer.h: interface for the CNewUIEmpireGuardianTimer class.
+// CEmpireGuardianTimer.h: interface for the CEmpireGuardianTimer class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -7,7 +7,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIEmpireGuardianTimer : public CNewUIObj
+    class CEmpireGuardianTimer : public CObject
     {
     public:
         enum EG_DAY_MAP_LIST
@@ -33,14 +33,14 @@ namespace mu::ui::window
             TIMER_WINDOW_HEIGHT = 81,
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
     public:
-        CNewUIEmpireGuardianTimer();
-        virtual ~CNewUIEmpireGuardianTimer();
+        CEmpireGuardianTimer();
+        virtual ~CEmpireGuardianTimer();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

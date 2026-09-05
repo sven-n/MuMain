@@ -1,4 +1,4 @@
-// NewUIItemExplanationWindow.h: interface for the CNewUIItemExplanationWindow class.
+// NewUIItemExplanationWindow.h: interface for the CItemExplanationWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -11,13 +11,13 @@
 
 namespace mu::ui::window
 {
-class CNewUIItemExplanationWindow : public CNewUIObj
+class CItemExplanationWindow : public CObject
 {
 public:
-    CNewUIItemExplanationWindow();
-    virtual ~CNewUIItemExplanationWindow();
+    CItemExplanationWindow();
+    virtual ~CItemExplanationWindow();
 
-    bool Create(CNewUIManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
     void Release();
 
     void SetPos(int x, int y);
@@ -34,7 +34,7 @@ public:
     void ClosingProcess();
 
 private:
-    CNewUIManager* m_pNewUIMng;
+    CManager* m_pNewUIMng;
     POINT m_Pos;
 };
 } // namespace mu::ui::window

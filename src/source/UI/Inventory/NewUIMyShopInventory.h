@@ -1,4 +1,4 @@
-// NewUIMyShopInventory.h: interface for the CNewUIMyShopInventory class.
+// NewUIMyShopInventory.h: interface for the CMyShopInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIMYSHOPINVENTORY_H__A0C3DD4A_C4D5_4CF2_9702_DF54540DB6FD__INCLUDED_)
@@ -15,17 +15,17 @@
 
 namespace mu::ui::window
 {
-    class CNewUIMyShopInventory : public CNewUIObj
+    class CMyShopInventory : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_MYSHOPINVENTORY_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_MYSHOPINVENTORY_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_MYSHOPINVENTORY_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_MYSHOPINVENTORY_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_MYSHOPINVENTORY_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_MYSHOPINVENTORY_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_MYSHOPINVENTORY_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_MYSHOPINVENTORY_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_MYSHOPINVENTORY_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_MYSHOPINVENTORY_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_MYSHOPINVENTORY_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_MYSHOPINVENTORY_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
 
             IMAGE_MYSHOPINVENTORY_EDIT = BITMAP_MYSHOPINTERFACE_NEW_PERSONALINVENTORY_BEGIN,
             IMAGE_MYSHOPINVENTORY_OPEN,
@@ -53,14 +53,14 @@ namespace mu::ui::window
             MYSHOPINVENTORY_MAXBUTTONCOUNT,
         };
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        CManager* m_pNewUIMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
         POINT m_Pos;
 
     public:
-        CNewUIMyShopInventory();
-        virtual ~CNewUIMyShopInventory();
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        CMyShopInventory();
+        virtual ~CMyShopInventory();
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
         void SetPos(int x, int y);
         bool UpdateMouseEvent();
@@ -70,7 +70,7 @@ namespace mu::ui::window
         void ClosingProcess();
         float GetLayerDepth();	//. 3.2f
 
-        CNewUIInventoryCtrl* GetInventoryCtrl() const;
+        CInventoryCtrl* GetInventoryCtrl() const;
 
     public:
         void ChangeSourceIndex(int sindex);
@@ -115,48 +115,48 @@ namespace mu::ui::window
         bool				m_EnablePersonalShop;
         bool				m_bIsEnableInputValueTextBox;
 
-        CNewUIButton* m_Button;
+        CButton* m_Button;
         CUITextInputBox* m_EditBox;
     };
 
     inline
-        void CNewUIMyShopInventory::ChangeTitle(wchar_t* titletext)
+        void CMyShopInventory::ChangeTitle(wchar_t* titletext)
     {
         m_EditBox->SetText(titletext);
     }
 
     inline
-        void CNewUIMyShopInventory::ChangeSourceIndex(int sindex)
+        void CMyShopInventory::ChangeSourceIndex(int sindex)
     {
         m_SourceIndex = sindex;
     }
 
     inline
-        void CNewUIMyShopInventory::ChangeTargetIndex(int tindex)
+        void CMyShopInventory::ChangeTargetIndex(int tindex)
     {
         m_TargetIndex = tindex;
     }
 
     inline
-        float CNewUIMyShopInventory::GetLayerDepth()
+        float CMyShopInventory::GetLayerDepth()
     {
         return 3.2f;
     }
 
     inline
-        CNewUIInventoryCtrl* CNewUIMyShopInventory::GetInventoryCtrl() const
+        CInventoryCtrl* CMyShopInventory::GetInventoryCtrl() const
     {
         return m_pNewInventoryCtrl;
     }
 
     inline
-        const int CNewUIMyShopInventory::GetSourceIndex()
+        const int CMyShopInventory::GetSourceIndex()
     {
         return m_SourceIndex;
     }
 
     inline
-        const int CNewUIMyShopInventory::GetTargetIndex()
+        const int CMyShopInventory::GetTargetIndex()
     {
         return m_TargetIndex;
     }

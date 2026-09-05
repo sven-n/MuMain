@@ -18,18 +18,18 @@ using namespace mu::ui::window;
 #define QP_TEXT_GAP					15
 #define QP_LIST_BOX_LINE_NUM		12
 
-CNewUIQuestProgress::CNewUIQuestProgress()
+CQuestProgress::CQuestProgress()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-CNewUIQuestProgress::~CNewUIQuestProgress()
+CQuestProgress::~CQuestProgress()
 {
     Release();
 }
 
-bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CQuestProgress::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -62,7 +62,7 @@ bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIQuestProgress::Release()
+void CQuestProgress::Release()
 {
     UnloadImages();
 
@@ -73,7 +73,7 @@ void CNewUIQuestProgress::Release()
     }
 }
 
-void CNewUIQuestProgress::SetPos(int x, int y)
+void CQuestProgress::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -81,7 +81,7 @@ void CNewUIQuestProgress::SetPos(int x, int y)
     m_RequestRewardListBox.SetPosition(m_Pos.x + 9, m_Pos.y + 360);
 }
 
-bool CNewUIQuestProgress::UpdateMouseEvent()
+bool CQuestProgress::UpdateMouseEvent()
 {
     if (REQUEST_REWARD_MODE == m_eLowerView)
         m_RequestRewardListBox.DoAction();
@@ -98,7 +98,7 @@ bool CNewUIQuestProgress::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIQuestProgress::ProcessBtns()
+bool CQuestProgress::ProcessBtns()
 {
     if (m_btnClose.UpdateMouseEvent())
     {
@@ -153,7 +153,7 @@ bool CNewUIQuestProgress::ProcessBtns()
     return false;
 }
 
-bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
+bool CQuestProgress::UpdateSelTextMouseEvent()
 {
     if (PLAYER_WORDS_MODE != m_eLowerView || !m_bCanClick)
         return false;
@@ -190,7 +190,7 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
     return false;
 }
 
-bool CNewUIQuestProgress::UpdateKeyEvent()
+bool CQuestProgress::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
     {
@@ -204,12 +204,12 @@ bool CNewUIQuestProgress::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIQuestProgress::Update()
+bool CQuestProgress::Update()
 {
     return true;
 }
 
-bool CNewUIQuestProgress::Render()
+bool CQuestProgress::Render()
 {
     ::EnableAlphaTest();
 
@@ -237,7 +237,7 @@ bool CNewUIQuestProgress::Render()
     return true;
 }
 
-void CNewUIQuestProgress::RenderBackImage()
+void CQuestProgress::RenderBackImage()
 {
     RenderImage(IMAGE_QP_BACK, m_Pos.x, m_Pos.y, float(QP_WIDTH), float(QP_HEIGHT));
     RenderImage(IMAGE_QP_TOP, m_Pos.x, m_Pos.y, float(QP_WIDTH), 64.f);
@@ -247,7 +247,7 @@ void CNewUIQuestProgress::RenderBackImage()
     RenderImage(IMAGE_QP_LINE, m_Pos.x + 1, m_Pos.y + 181, 188.f, 21.f);
 }
 
-void CNewUIQuestProgress::RenderSelTextBlock()
+void CQuestProgress::RenderSelTextBlock()
 {
     if (PLAYER_WORDS_MODE != m_eLowerView)
         return;
@@ -266,7 +266,7 @@ void CNewUIQuestProgress::RenderSelTextBlock()
         QP_TEXT_GAP * m_anAnswerLine[answerIndex], SelectionColor);
 }
 
-void CNewUIQuestProgress::RenderText()
+void CQuestProgress::RenderText()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -306,17 +306,17 @@ void CNewUIQuestProgress::RenderText()
     }
 }
 
-bool CNewUIQuestProgress::IsVisible() const
+bool CQuestProgress::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-float CNewUIQuestProgress::GetLayerDepth()
+float CQuestProgress::GetLayerDepth()
 {
     return 3.1f;
 }
 
-void CNewUIQuestProgress::LoadImages()
+void CQuestProgress::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_QP_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_QP_TOP, GL_LINEAR);
@@ -330,7 +330,7 @@ void CNewUIQuestProgress::LoadImages()
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_QP_BTN_CLOSE, GL_LINEAR);
 }
 
-void CNewUIQuestProgress::UnloadImages()
+void CQuestProgress::UnloadImages()
 {
     DeleteBitmap(IMAGE_QP_BTN_CLOSE);
     DeleteBitmap(IMAGE_QP_BTN_COMPLETE);
@@ -344,12 +344,12 @@ void CNewUIQuestProgress::UnloadImages()
     DeleteBitmap(IMAGE_QP_BACK);
 }
 
-void CNewUIQuestProgress::ProcessOpening()
+void CQuestProgress::ProcessOpening()
 {
     ::PlayBuffer(SOUND_INTERFACE01);
 }
 
-bool CNewUIQuestProgress::ProcessClosing()
+bool CQuestProgress::ProcessClosing()
 {
     m_dwCurQuestIndex = 0;
     SocketClient->ToGameServer()->SendCloseNpcRequest();
@@ -357,7 +357,7 @@ bool CNewUIQuestProgress::ProcessClosing()
     return true;
 }
 
-void CNewUIQuestProgress::SetContents(DWORD dwQuestIndex)
+void CQuestProgress::SetContents(DWORD dwQuestIndex)
 {
     if (0 == dwQuestIndex)
         return;
@@ -389,7 +389,7 @@ void CNewUIQuestProgress::SetContents(DWORD dwQuestIndex)
     }
 }
 
-void CNewUIQuestProgress::SetCurNPCWords()
+void CQuestProgress::SetCurNPCWords()
 {
     if (0 == m_dwCurQuestIndex)
         return;
@@ -407,7 +407,7 @@ void CNewUIQuestProgress::SetCurNPCWords()
     m_nSelNPCPage = 0;
 }
 
-void CNewUIQuestProgress::SetCurPlayerWords()
+void CQuestProgress::SetCurPlayerWords()
 {
     if (0 == m_dwCurQuestIndex)
         return;
@@ -439,7 +439,7 @@ void CNewUIQuestProgress::SetCurPlayerWords()
     }
 }
 
-void CNewUIQuestProgress::SetCurRequestReward()
+void CQuestProgress::SetCurRequestReward()
 {
     if (0 == m_dwCurQuestIndex)
         return;
@@ -482,7 +482,7 @@ void CNewUIQuestProgress::SetCurRequestReward()
     EnableCompleteBtn(m_bRequestComplete);
 }
 
-void CNewUIQuestProgress::EnableCompleteBtn(bool bEnable)
+void CQuestProgress::EnableCompleteBtn(bool bEnable)
 {
     if (bEnable)
     {

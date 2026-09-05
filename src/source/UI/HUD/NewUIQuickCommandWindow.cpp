@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIQuickCommandWindow.cpp: implementation of the CNewUIQuickCommandWindow class.
+// NewUIQuickCommandWindow.cpp: implementation of the CQuickCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -12,7 +12,7 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
-mu::ui::window::CNewUIQuickCommandWindow::CNewUIQuickCommandWindow()
+mu::ui::window::CQuickCommandWindow::CQuickCommandWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -22,12 +22,12 @@ mu::ui::window::CNewUIQuickCommandWindow::CNewUIQuickCommandWindow()
     m_iSelectedCharacterIndex = -1;
 }
 
-mu::ui::window::CNewUIQuickCommandWindow::~CNewUIQuickCommandWindow()
+mu::ui::window::CQuickCommandWindow::~CQuickCommandWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIQuickCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CQuickCommandWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -44,7 +44,7 @@ bool mu::ui::window::CNewUIQuickCommandWindow::Create(CNewUIManager* pNewUIMng, 
     return true;
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::Release()
+void mu::ui::window::CQuickCommandWindow::Release()
 {
     UnloadImages();
 
@@ -55,13 +55,13 @@ void mu::ui::window::CNewUIQuickCommandWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::SetPos(int x, int y)
+void mu::ui::window::CQuickCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIQuickCommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CQuickCommandWindow::UpdateMouseEvent()
 {
     if (m_iSelectedCharacterIndex < 0)
     {
@@ -151,7 +151,7 @@ bool mu::ui::window::CNewUIQuickCommandWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIQuickCommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CQuickCommandWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUICK_COMMAND) == true)
     {
@@ -167,7 +167,7 @@ bool mu::ui::window::CNewUIQuickCommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIQuickCommandWindow::Update()
+bool mu::ui::window::CQuickCommandWindow::Update()
 {
     if (m_iSelectedCharacterIndex >= 0)
     {
@@ -195,7 +195,7 @@ bool mu::ui::window::CNewUIQuickCommandWindow::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIQuickCommandWindow::Render()
+bool mu::ui::window::CQuickCommandWindow::Render()
 {
     EnableAlphaTest();
 
@@ -213,7 +213,7 @@ bool mu::ui::window::CNewUIQuickCommandWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::RenderFrame()
+void mu::ui::window::CQuickCommandWindow::RenderFrame()
 {
     float x, y, width, height;
 
@@ -248,7 +248,7 @@ void mu::ui::window::CNewUIQuickCommandWindow::RenderFrame()
     }
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::RenderContents()
+void mu::ui::window::CQuickCommandWindow::RenderContents()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 255, 0, 255);
@@ -277,7 +277,7 @@ void mu::ui::window::CNewUIQuickCommandWindow::RenderContents()
     }
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::RenderArrow()
+void mu::ui::window::CQuickCommandWindow::RenderArrow()
 {
     if (m_iSelectedIndex < 0)
     {
@@ -292,29 +292,29 @@ void mu::ui::window::CNewUIQuickCommandWindow::RenderArrow()
     RenderImage(IMAGE_QUICKCOMMAND_ARROWR, x, y, 6.f, 9.f);
 }
 
-float mu::ui::window::CNewUIQuickCommandWindow::GetLayerDepth()
+float mu::ui::window::CQuickCommandWindow::GetLayerDepth()
 {
     return 2.0f;
 }
 
-float mu::ui::window::CNewUIQuickCommandWindow::GetKeyEventOrder()
+float mu::ui::window::CQuickCommandWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::OpenningProcess()
+void mu::ui::window::CQuickCommandWindow::OpenningProcess()
 {
     m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::ClosingProcess()
+void mu::ui::window::CQuickCommandWindow::ClosingProcess()
 {
     m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::LoadImages()
+void mu::ui::window::CQuickCommandWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_QUICKCOMMAND_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_commamd04.tga", IMAGE_QUICKCOMMAND_FRAME_UP, GL_LINEAR);
@@ -325,7 +325,7 @@ void mu::ui::window::CNewUIQuickCommandWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_QUICKCOMMAND_ARROWR, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::UnloadImages()
+void mu::ui::window::CQuickCommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_QUICKCOMMAND_BACK);
     DeleteBitmap(IMAGE_QUICKCOMMAND_FRAME_UP);
@@ -336,7 +336,7 @@ void mu::ui::window::CNewUIQuickCommandWindow::UnloadImages()
     DeleteBitmap(IMAGE_QUICKCOMMAND_ARROWR);
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y)
+void mu::ui::window::CQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y)
 {
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUICK_COMMAND);
 
@@ -345,7 +345,7 @@ void mu::ui::window::CNewUIQuickCommandWindow::OpenQuickCommand(const wchar_t* s
     SetPos(x, y);
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::CloseQuickCommand()
+void mu::ui::window::CQuickCommandWindow::CloseQuickCommand()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUICK_COMMAND) == true)
     {
@@ -353,12 +353,12 @@ void mu::ui::window::CNewUIQuickCommandWindow::CloseQuickCommand()
     }
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::SetID(const wchar_t* strID)
+void mu::ui::window::CQuickCommandWindow::SetID(const wchar_t* strID)
 {
     wcscpy(m_strID, strID);
 }
 
-void mu::ui::window::CNewUIQuickCommandWindow::SetSelectedCharacterIndex(int iIndex)
+void mu::ui::window::CQuickCommandWindow::SetSelectedCharacterIndex(int iIndex)
 {
     m_iSelectedCharacterIndex = iIndex;
 }

@@ -82,7 +82,7 @@ void CSceneUICoordinator::CreateLoginScene()
     // A drift between this function's source of screen size and each window's own internal one
     // could close that gap into an overlap, but that's no longer a starvation risk either way
     // (docs/newui-legacy-merger.md, Phase 3): both windows' dispatch now goes through the same
-    // depth-sorted CNewUIManager claim, not a first-checked-wins list walk.
+    // depth-sorted CManager claim, not a first-checked-wins list walk.
     g_MsgWin.Create();
     g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
@@ -222,9 +222,9 @@ void CSceneUICoordinator::Update(double dDeltaTick)
     if (UIM_SCENE_NONE == m_nScene)
         return;
 
-    // New-style (CNewUIObj-tier) windows (docs/newui-legacy-merger.md) -- the only dispatch this
+    // New-style (CObject-tier) windows (docs/newui-legacy-merger.md) -- the only dispatch this
     // class still drives; every window it used to own via a CWin list has migrated onto
-    // mu::ui::window::CNewUIObj/CNewUIManager. m_bCursorOnUI folds in whatever this claimed, so a
+    // mu::ui::window::CObject/CManager. m_bCursorOnUI folds in whatever this claimed, so a
     // migrated modal like CMsgWin still blocks CharacterScene.cpp's world-click/rotation gating
     // the same way its old full-screen CWin::CursorInWin(WA_ALL) rect used to.
     m_NewStyleMng.UpdateMouseEvent();

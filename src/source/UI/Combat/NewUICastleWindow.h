@@ -1,4 +1,4 @@
-// NewUICastleWindow.h: interface for the CNewUICastleWindow class.
+// NewUICastleWindow.h: interface for the CCastleWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -17,29 +17,29 @@
 
 namespace mu::ui::window
 {
-    class CNewUICastleWindow : public CNewUIObj
+    class CCastleWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_CASTLEWINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_CASTLEWINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_CASTLEWINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_CASTLEWINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_CASTLEWINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_CASTLEWINDOW_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_CASTLEWINDOW_TAB_BTN = CNewUIGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,
-            IMAGE_CASTLEWINDOW_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_CASTLEWINDOW_BUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
-            IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
-            IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
-            IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
-            IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
-            IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,			//. newui_item_table03(up).tga (1, 14)
-            IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
-            IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
-            IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
-            IMAGE_CASTLEWINDOW_MONEY = CNewUINPCShop::IMAGE_NPCSHOP_REPAIR_MONEY,
+            IMAGE_CASTLEWINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_CASTLEWINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_CASTLEWINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_CASTLEWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_CASTLEWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_CASTLEWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_CASTLEWINDOW_TAB_BTN = CGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,
+            IMAGE_CASTLEWINDOW_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
+            IMAGE_CASTLEWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_CASTLEWINDOW_TABLE_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
+            IMAGE_CASTLEWINDOW_TABLE_TOP_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
+            IMAGE_CASTLEWINDOW_TABLE_BOTTOM_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
+            IMAGE_CASTLEWINDOW_TABLE_BOTTOM_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
+            IMAGE_CASTLEWINDOW_TABLE_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,			//. newui_item_table03(up).tga (1, 14)
+            IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
+            IMAGE_CASTLEWINDOW_TABLE_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
+            IMAGE_CASTLEWINDOW_TABLE_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
+            IMAGE_CASTLEWINDOW_MONEY = CNPCShop::IMAGE_NPCSHOP_REPAIR_MONEY,
             IMAGE_CASTLEWINDOW_SCROLL_UP_BTN = BITMAP_INTERFACE_NEW_CASTLE_WINDOW_BEGIN,
             IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN,
         };
@@ -72,31 +72,31 @@ namespace mu::ui::window
             TAB_CASTLE_MIX
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIRadioGroupButton	m_TabBtn;
+        CRadioGroupButton	m_TabBtn;
         int						m_iNumCurOpenTab;
         int						m_iCurrMsgBoxRequest;
 
-        CNewUIButton m_BtnExit;
+        CButton m_BtnExit;
 
-        CNewUIButton m_BtnBuy;
-        CNewUIButton m_BtnRepair;
-        CNewUIButton m_BtnUpgradeHP;
-        CNewUIButton m_BtnUpgradeDefense;
-        CNewUIButton m_BtnUpgradeRecover;
-        CNewUIButton m_BtnApplyTax;
-        CNewUIButton m_BtnWithdraw;
-        CNewUIButton m_BtnChaosTaxUp;
-        CNewUIButton m_BtnChaosTaxDn;
-        CNewUIButton m_BtnNPCTaxUp;
-        CNewUIButton m_BtnNPCTaxDn;
+        CButton m_BtnBuy;
+        CButton m_BtnRepair;
+        CButton m_BtnUpgradeHP;
+        CButton m_BtnUpgradeDefense;
+        CButton m_BtnUpgradeRecover;
+        CButton m_BtnApplyTax;
+        CButton m_BtnWithdraw;
+        CButton m_BtnChaosTaxUp;
+        CButton m_BtnChaosTaxDn;
+        CButton m_BtnNPCTaxUp;
+        CButton m_BtnNPCTaxDn;
     public:
-        CNewUICastleWindow();
-        virtual ~CNewUICastleWindow();
+        CCastleWindow();
+        virtual ~CCastleWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -132,7 +132,7 @@ namespace mu::ui::window
         void RenderTaxManagingTab();
 
         void RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo);
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
+        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         void RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight);
         void RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight);

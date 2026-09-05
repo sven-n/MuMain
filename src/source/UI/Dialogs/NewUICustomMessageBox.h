@@ -28,7 +28,7 @@ namespace mu::ui::window
     static constexpr float INPUTBOX_HEIGHT = 12.0f;
     static constexpr int INPUTBOX_TEXTLIMIT = 8;
 
-    class CNewUITextInputMsgBox : public CNewUIMessageBoxBase
+    class CTextInputMsgBox : public CMessageBoxBase
     {
         static constexpr float INPUTBOX_TOP_BLANK = 10.0f;
 
@@ -50,13 +50,13 @@ namespace mu::ui::window
         typedef std::wstring type_string;
 
     public:
-        CNewUITextInputMsgBox();
-        virtual ~CNewUITextInputMsgBox();
+        CTextInputMsgBox();
+        virtual ~CTextInputMsgBox();
 
         bool Create(DWORD dwMsgBoxType, DWORD dwInputType, int iInputBoxWidth = 100, int iInputBoxHeight = 14, int iLimitText = 256, bool bIsPassword = false);
         void Release();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
 
@@ -83,8 +83,8 @@ namespace mu::ui::window
         CUITextInputBox* m_pInputBox;
         type_vector_msgdata m_MsgTextList;
 
-        CNewUIMessageBoxButton m_BtnOk;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnCancel;
 
     public:
         void SetPassword(WORD password) { m_password = password; }
@@ -94,19 +94,19 @@ namespace mu::ui::window
         WORD m_password;
     };
 
-    class CNewUIKeyPadButton : public CNewUIMessageBoxButton
+    class CKeyPadButton : public CMessageBoxButton
     {
     public:
         void Render();
     };
 
-    class CNewUIDeleteKeyPadButton : public CNewUIMessageBoxButton
+    class CDeleteKeyPadButton : public CMessageBoxButton
     {
     public:
         void Render();
     };
 
-    class CNewUIKeyPadMsgBox : public CNewUIMessageBoxBase
+    class CKeyPadMsgBox : public CMessageBoxBase
     {
         static constexpr int MSGBOX_MIDDLE_FRAME_NUM = 9;
         static constexpr int KEYPAD_INPUT_NUM = 2;
@@ -131,8 +131,8 @@ namespace mu::ui::window
         typedef std::wstring type_string;
 
     public:
-        CNewUIKeyPadMsgBox();
-        virtual ~CNewUIKeyPadMsgBox();
+        CKeyPadMsgBox();
+        virtual ~CKeyPadMsgBox();
 
         bool Create(DWORD dwType, int iInputLImit = 4);
         void Release();
@@ -153,10 +153,10 @@ namespace mu::ui::window
         void SetStoragePassword(WORD wPassword);
         WORD GetStoragePassword();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DeleteBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT KeyPadBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT DeleteBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT KeyPadBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT Close(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetButtonInfo();
@@ -178,13 +178,13 @@ namespace mu::ui::window
 
         WORD m_wStoragePassword;
         type_vector_msgdata m_MsgTextList;
-        CNewUIKeyPadButton m_BtnKeyPad[MAX_KEYPADINPUT];
-        CNewUIDeleteKeyPadButton m_BtnDeleteKeyPad;
-        CNewUIMessageBoxButton m_BtnOk;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CKeyPadButton m_BtnKeyPad[MAX_KEYPADINPUT];
+        CDeleteKeyPadButton m_BtnDeleteKeyPad;
+        CMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CUseFruitCheckMsgBox : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+    class CUseFruitCheckMsgBox : public CMessageBoxBase, public I3DRenderObj
     {
         static constexpr float MSGBOX_TEXT_MAXWIDTH_3DITEM = 120.0f;
         static constexpr float MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60.0f;
@@ -205,10 +205,10 @@ namespace mu::ui::window
 
         bool IsVisible() const;
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AddBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT MinusBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT AddBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT MinusBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
@@ -224,12 +224,12 @@ namespace mu::ui::window
         type_vector_msgdata m_MsgDataList;
 
         // button
-        CNewUIMessageBoxButton m_BtnAdd;
-        CNewUIMessageBoxButton m_BtnMinus;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnAdd;
+        CMessageBoxButton m_BtnMinus;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CGemIntegrationMsgBox : public CNewUIMessageBoxBase
+    class CGemIntegrationMsgBox : public CMessageBoxBase
     {
         static constexpr float MIDDLE_COUNT = 5.0f;
         static constexpr float BTN_TOP_BLANK = 60.0f;
@@ -244,10 +244,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT UnityBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT UnityBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
@@ -261,12 +261,12 @@ namespace mu::ui::window
         // texts
         type_vector_msgdata m_MsgDataList;
         // button
-        CNewUIMessageBoxButton m_BtnUnity;
-        CNewUIMessageBoxButton m_BtnDisjoint;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnUnity;
+        CMessageBoxButton m_BtnDisjoint;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CGemIntegrationUnityMsgBox : public CNewUIMessageBoxBase
+    class CGemIntegrationUnityMsgBox : public CMessageBoxBase
     {
         enum
         {
@@ -284,14 +284,14 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT TenBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT TwentyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ThirtyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT TenBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT TwentyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ThirtyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT SelectMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     private:
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
         void SetAddCallbackFunc();
@@ -307,19 +307,19 @@ namespace mu::ui::window
 
         void SetText(void);
         void ResetWndSize(int _nType);
-        std::vector<CNewUIMessageBoxButton>	m_cJewelButton;
-        std::vector<CNewUIMessageBoxButton>	m_cMixButton;
+        std::vector<CMessageBoxButton>	m_cJewelButton;
+        std::vector<CMessageBoxButton>	m_cMixButton;
         int									m_nMiddleCount;
 
-        CNewUIMessageBoxButton m_BtnBlessing;
-        CNewUIMessageBoxButton m_BtnSoul;
-        CNewUIMessageBoxButton m_BtnTen;
-        CNewUIMessageBoxButton m_BtnTwenty;
-        CNewUIMessageBoxButton m_BtnThirty;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnBlessing;
+        CMessageBoxButton m_BtnSoul;
+        CMessageBoxButton m_BtnTen;
+        CMessageBoxButton m_BtnTwenty;
+        CMessageBoxButton m_BtnThirty;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CGemIntegrationDisjointMsgBox : public CNewUIMessageBoxBase
+    class CGemIntegrationDisjointMsgBox : public CMessageBoxBase
     {
     public:
         CGemIntegrationDisjointMsgBox();
@@ -331,11 +331,11 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
@@ -354,13 +354,13 @@ namespace mu::ui::window
         // texts
         type_vector_msgdata m_MsgDataList;
         // button
-        CNewUIMessageBoxButton m_BtnBlessing;
-        CNewUIMessageBoxButton m_BtnSoul;
-        CNewUIMessageBoxButton m_BtnDisjoint;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnBlessing;
+        CMessageBoxButton m_BtnSoul;
+        CMessageBoxButton m_BtnDisjoint;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CSystemMenuMsgBox : public CNewUIMessageBoxBase
+    class CSystemMenuMsgBox : public CMessageBoxBase
     {
     public:
         CSystemMenuMsgBox();
@@ -371,12 +371,12 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT GameOverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ChooseServerBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ChooseCharacterBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OptionBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT GameOverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ChooseServerBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ChooseCharacterBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OptionBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -385,14 +385,14 @@ namespace mu::ui::window
         void RenderButtons();
 
         // button
-        CNewUIMessageBoxButton m_BtnGameOver;
-        CNewUIMessageBoxButton m_BtnChooseServer;
-        CNewUIMessageBoxButton m_BtnChooseCharacter;
-        CNewUIMessageBoxButton m_BtnOption;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnGameOver;
+        CMessageBoxButton m_BtnChooseServer;
+        CMessageBoxButton m_BtnChooseCharacter;
+        CMessageBoxButton m_BtnOption;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CBloodCastleResultMsgBox : public CNewUIMessageBoxBase
+    class CBloodCastleResultMsgBox : public CMessageBoxBase
     {
         static constexpr float MIDDLE_COUNT = 6.0f;
     public:
@@ -404,16 +404,16 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void RenderFrame();
 
-        CNewUIMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnOk;
     };
 
-    class CDevilSquareRankMsgBox : public CNewUIMessageBoxBase
+    class CDevilSquareRankMsgBox : public CMessageBoxBase
     {
         static constexpr float MIDDLE_COUNT1 = 11.0f;
         static constexpr float MIDDLE_COUNT2 = 3.0f;
@@ -426,16 +426,16 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void RenderFrame();
 
-        CNewUIMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnOk;
     };
 
-    class CChaosCastleResultMsgBox : public CNewUIMessageBoxBase
+    class CChaosCastleResultMsgBox : public CMessageBoxBase
     {
         static constexpr float MIDDLE_COUNT = 6.0f;
     public:
@@ -447,16 +447,16 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void RenderFrame();
 
-        CNewUIMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnOk;
     };
 
-    class CChaosMixMenuMsgBox : public CNewUIMessageBoxBase
+    class CChaosMixMenuMsgBox : public CMessageBoxBase
     {
         static constexpr float MIDDLE_COUNT = 13.0f;
     public:
@@ -469,11 +469,11 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT GeneralMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ChaosMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Mix380BtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT GeneralMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ChaosMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT Mix380BtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -484,13 +484,13 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnGeneralMix;
-        CNewUIMessageBoxButton m_BtnChaosMix;
-        CNewUIMessageBoxButton m_BtnMix380;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnGeneralMix;
+        CMessageBoxButton m_BtnChaosMix;
+        CMessageBoxButton m_BtnMix380;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CTrainerMenuMsgBox : public CNewUIMessageBoxBase
+    class CTrainerMenuMsgBox : public CMessageBoxBase
     {
     public:
         CTrainerMenuMsgBox();
@@ -502,10 +502,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RecoverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ReviveBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT RecoverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReviveBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -516,14 +516,14 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnRecover;
-        CNewUIMessageBoxButton m_BtnRevive;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnRecover;
+        CMessageBoxButton m_BtnRevive;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CTrainerRecoverMsgBox : public CNewUIMessageBoxBase
+    class CTrainerRecoverMsgBox : public CMessageBoxBase
     {
     public:
         CTrainerRecoverMsgBox();
@@ -535,10 +535,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RecoverDarkSpiritrBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RecoverDarkHorseBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT RecoverDarkSpiritrBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT RecoverDarkHorseBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -549,14 +549,14 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnRecoverDarkSpirit;
-        CNewUIMessageBoxButton m_BtnRecoverDarkHorse;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnRecoverDarkSpirit;
+        CMessageBoxButton m_BtnRecoverDarkHorse;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CElpisMsgBox : public CNewUIMessageBoxBase
+    class CElpisMsgBox : public CMessageBoxBase
     {
     public:
         CElpisMsgBox();
@@ -568,11 +568,11 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AboutRefinaryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AboutJewelOfHarmonyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RefineBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT AboutRefinaryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT AboutJewelOfHarmonyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT RefineBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
         void SetMessageType(int iMessageType) { m_iMessageType = iMessageType; }
 
@@ -585,16 +585,16 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnAboutRefinary;
-        CNewUIMessageBoxButton m_BtnAboutJewelOfHarmony;
-        CNewUIMessageBoxButton m_BtnRefine;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnAboutRefinary;
+        CMessageBoxButton m_BtnAboutJewelOfHarmony;
+        CMessageBoxButton m_BtnRefine;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
         int m_iMessageType;
     };
 
-    class CDialogMsgBox : public CNewUIMessageBoxBase
+    class CDialogMsgBox : public CMessageBoxBase
     {
     public:
         CDialogMsgBox();
@@ -605,8 +605,8 @@ namespace mu::ui::window
 
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT EndBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT EndBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
         bool Update();
         bool Render();
@@ -625,10 +625,10 @@ namespace mu::ui::window
         // text
         type_vector_msgdata m_MsgDataList;
         // button
-        CNewUIMessageBoxButton m_BtnEnd;
+        CMessageBoxButton m_BtnEnd;
     };
 
-    class CProgressMsgBox : public CNewUIMessageBoxBase
+    class CProgressMsgBox : public CMessageBoxBase
     {
     public:
         CProgressMsgBox();
@@ -643,7 +643,7 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -661,7 +661,7 @@ namespace mu::ui::window
         DWORD m_dwElapseTime;
     };
 
-    class CCursedTempleProgressMsgBox : public CNewUIMessageBoxBase
+    class CCursedTempleProgressMsgBox : public CMessageBoxBase
     {
     public:
         CCursedTempleProgressMsgBox();
@@ -678,8 +678,8 @@ namespace mu::ui::window
         void SetNpcIndex(DWORD dwIndex);
         DWORD GetNpcIndex();
 
-        static CALLBACK_RESULT ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CompleteProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CompleteProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -701,7 +701,7 @@ namespace mu::ui::window
         DWORD m_dwNpcIndex;
     };
 
-    class CDuelMsgBox : public CNewUIMessageBoxBase
+    class CDuelMsgBox : public CMessageBoxBase
     {
     public:
         CDuelMsgBox();
@@ -713,9 +713,9 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -726,11 +726,11 @@ namespace mu::ui::window
         void RenderButton();
 
         // button
-        CNewUIMessageBoxButton m_BtnOk;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CDuelResultMsgBox : public CNewUIMessageBoxBase
+    class CDuelResultMsgBox : public CMessageBoxBase
     {
     public:
         CDuelResultMsgBox();
@@ -742,8 +742,8 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
         void SetIDs(wchar_t* pszWinnerID, wchar_t* pszLoserID);
 
@@ -756,12 +756,12 @@ namespace mu::ui::window
         void RenderButton();
 
         // button
-        CNewUIMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnOk;
         wchar_t m_szWinnerID[24];
         wchar_t m_szLoserID[24];
     };
 
-    class CGuild_ToPerson_Position : public CNewUIMessageBoxBase
+    class CGuild_ToPerson_Position : public CMessageBoxBase
     {
         enum
         {
@@ -788,11 +788,11 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
@@ -806,13 +806,13 @@ namespace mu::ui::window
         // texts
         type_vector_msgdata m_MsgDataList;
         // button
-        CNewUIMessageBoxButton m_BtnBlessing;
-        CNewUIMessageBoxButton m_BtnSoul;
-        CNewUIMessageBoxButton m_BtnOk;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnBlessing;
+        CMessageBoxButton m_BtnSoul;
+        CMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CCherryBlossomMsgBox : public CNewUIMessageBoxBase
+    class CCherryBlossomMsgBox : public CMessageBoxBase
     {
     public:
         CCherryBlossomMsgBox();
@@ -824,11 +824,11 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT WhiteCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RedCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT GodCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT WhiteCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT RedCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT GodCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -839,15 +839,15 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnWhiteCB;
-        CNewUIMessageBoxButton m_BtnRedCB;
-        CNewUIMessageBoxButton m_BtnGoldCB;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnWhiteCB;
+        CMessageBoxButton m_BtnRedCB;
+        CMessageBoxButton m_BtnGoldCB;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CLuckyTradeMenuMsgBox : public CNewUIMessageBoxBase
+    class CLuckyTradeMenuMsgBox : public CMessageBoxBase
     {
     public:
         CLuckyTradeMenuMsgBox();
@@ -859,10 +859,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT LuckyItemTradeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT LuckyItemRefineryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LuckyItemTradeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LuckyItemRefineryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -873,14 +873,14 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnTrade;
-        CNewUIMessageBoxButton m_BtnRefinery;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnTrade;
+        CMessageBoxButton m_BtnRefinery;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CSeedMasterMenuMsgBox : public CNewUIMessageBoxBase
+    class CSeedMasterMenuMsgBox : public CMessageBoxBase
     {
     public:
         CSeedMasterMenuMsgBox();
@@ -892,10 +892,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExtractSeedBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SeedSphereBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExtractSeedBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT SeedSphereBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -906,14 +906,14 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnExtractSeed;
-        CNewUIMessageBoxButton m_BtnSeedSphere;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnExtractSeed;
+        CMessageBoxButton m_BtnSeedSphere;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CSeedInvestigatorMenuMsgBox : public CNewUIMessageBoxBase
+    class CSeedInvestigatorMenuMsgBox : public CMessageBoxBase
     {
     public:
         CSeedInvestigatorMenuMsgBox();
@@ -925,10 +925,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AttachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DetachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT AttachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT DetachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -939,14 +939,14 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnAttachSocket;
-        CNewUIMessageBoxButton m_BtnDetachSocket;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnAttachSocket;
+        CMessageBoxButton m_BtnDetachSocket;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CResetCharacterPointMsgBox : public CNewUIMessageBoxBase
+    class CResetCharacterPointMsgBox : public CMessageBoxBase
     {
     public:
         CResetCharacterPointMsgBox();
@@ -958,9 +958,9 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ResetCharacterPointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ResetCharacterPointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetButtonInfo();
@@ -972,12 +972,12 @@ namespace mu::ui::window
         void RenderButtons();
 
     private:
-        CNewUIMessageBoxButton m_ResetCharacterPointBtn;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_ResetCharacterPointBtn;
+        CMessageBoxButton m_BtnExit;
         int m_iMiddleCount;
     };
 
-    class CDelgardoMainMenuMsgBox : public CNewUIMessageBoxBase
+    class CDelgardoMainMenuMsgBox : public CMessageBoxBase
     {
     public:
         CDelgardoMainMenuMsgBox();
@@ -989,10 +989,10 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RegBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExchangeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT RegBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExchangeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
         void SetAddCallbackFunc();
@@ -1003,139 +1003,139 @@ namespace mu::ui::window
         void RenderButtons();
 
         // buttons
-        CNewUIMessageBoxButton m_BtnReg;
-        CNewUIMessageBoxButton m_BtnExchange;
-        CNewUIMessageBoxButton m_BtnExit;
+        CMessageBoxButton m_BtnReg;
+        CMessageBoxButton m_BtnExchange;
+        CMessageBoxButton m_BtnExit;
 
         int m_iMiddleCount;
     };
 
-    class CTradeZenMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CTradeZenMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner);
     };
 
-    class CZenReceiptMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CZenReceiptMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     private:
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CZenPaymentMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CZenPaymentMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     private:
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPersonalShopItemValueMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CPersonalShopItemValueMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     private:
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPersonalShopNameMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CPersonalShopNameMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
         static constexpr float INPUT_WIDTH = 130.0f;
         static constexpr float INPUT_HEIGHT = 12.0f;
         static constexpr int INPUT_TEXTLIMIT = 28;
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCastleWithdrawMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CCastleWithdrawMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CStorageLockMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CStorageLockMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CStorageUnlockMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CStorageUnlockMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPasswordKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
+    class CPasswordKeyPadMsgBoxLayout : public TMsgBoxLayout<CKeyPadMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CStorageLockKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
+    class CStorageLockKeyPadMsgBoxLayout : public TMsgBoxLayout<CKeyPadMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CStorageLockCheckKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
+    class CStorageLockCheckKeyPadMsgBoxLayout : public TMsgBoxLayout<CKeyPadMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CStorageLockFinalKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
+    class CStorageLockFinalKeyPadMsgBoxLayout : public TMsgBoxLayout<CKeyPadMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CStorageUnlockKeyPadMsgBoxLayout : public TMsgBoxLayout<CNewUIKeyPadMsgBox>
+    class CStorageUnlockKeyPadMsgBoxLayout : public TMsgBoxLayout<CKeyPadMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
     class CUseFruitCheckMsgBoxLayout : public TMsgBoxLayout<CUseFruitCheckMsgBox>
@@ -1288,16 +1288,16 @@ namespace mu::ui::window
         bool SetLayout();
     };
 
-    class CGuildBreakPasswordMsgBoxLayout : public TMsgBoxLayout<CNewUITextInputMsgBox>
+    class CGuildBreakPasswordMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
     private:
-        static CALLBACK_RESULT ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
     class CGuild_ToPerson_PositionLayout : public TMsgBoxLayout<CGuild_ToPerson_Position>

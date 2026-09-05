@@ -1,4 +1,4 @@
-// NewUIPersonalInventory.h: interface for the CNewUIMyInventory class.
+// NewUIPersonalInventory.h: interface for the CMyInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIMYINVENTORY_H__74DA6D7A_CF5A_46E9_8C72_9D38F0DC95EC__INCLUDED_)
@@ -18,9 +18,9 @@
 
 namespace mu::ui::window
 {
-    class CNewUIMyInventory
-        : public CNewUIObj
-        , public INewUI3DRenderObj
+    class CMyInventory
+        : public CObject
+        , public I3DRenderObj
         , public SEASON3B::IInventoryActionContext
     {
     public:
@@ -28,7 +28,7 @@ namespace mu::ui::window
         {
             IMAGE_INVENTORY_MYSHOP_OPEN_BTN = BITMAP_MYSHOPINTERFACE_NEW_PERSONALINVENTORY_BEGIN + 1,
             IMAGE_INVENTORY_MYSHOP_CLOSE_BTN = BITMAP_MYSHOPINTERFACE_NEW_PERSONALINVENTORY_BEGIN + 2,
-            IMAGE_INVENTORY_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_INVENTORY_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
             IMAGE_INVENTORY_BACK_TOP = BITMAP_INTERFACE_NEW_PERSONALINVENTORY_BEGIN,	//"newui_item_back01.tga"
             IMAGE_INVENTORY_BACK_TOP2,	//"newui_item_back04.tga"
             IMAGE_INVENTORY_BACK_LEFT,	//"newui_item_back02-L.tga"
@@ -74,19 +74,19 @@ namespace mu::ui::window
             DWORD dwBgImage;
         } EQUIPMENT_ITEM;
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
-        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
-        CNewUIInventoryActionController m_ActionController;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
+        CInventoryActionController m_ActionController;
         POINT m_Pos;
 
         EQUIPMENT_ITEM m_EquipmentSlots[MAX_EQUIPMENT_INDEX];
         int	m_iPointedSlot;
 
-        CNewUIButton m_BtnRepair;
-        CNewUIButton m_BtnExit;
-        CNewUIButton m_BtnMyShop;
-        CNewUIButton m_BtnExpand;
+        CButton m_BtnRepair;
+        CButton m_BtnExit;
+        CButton m_BtnMyShop;
+        CButton m_BtnExpand;
 
         MYSHOP_MODE m_MyShopMode;
         SEASON3B::REPAIR_MODE m_RepairMode;
@@ -96,10 +96,10 @@ namespace mu::ui::window
         bool m_bMyShopOpen;
 
     public:
-        CNewUIMyInventory();
-        virtual ~CNewUIMyInventory();
+        CMyInventory();
+        virtual ~CMyInventory();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
         void Release();
 
         bool EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket);
@@ -139,7 +139,7 @@ namespace mu::ui::window
 
         float GetLayerDepth();
 
-        CNewUIInventoryCtrl* GetInventoryCtrl() const;
+        CInventoryCtrl* GetInventoryCtrl() const;
 
         ITEM* FindItem(int iLinealPos) const;
         ITEM* FindItemByKey(DWORD dwKey) const;
@@ -173,7 +173,7 @@ namespace mu::ui::window
         void CreateEquippingEffect(ITEM* pItem);
 
         static bool CanRegisterItemHotKey(int iType);
-        static bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl);
+        static bool HandleInventoryActions(CInventoryCtrl* targetControl);
 
         // Public to allow refresh when resolution changes
         void SetEquipmentSlotInfo();

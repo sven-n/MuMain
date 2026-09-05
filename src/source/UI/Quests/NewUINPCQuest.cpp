@@ -22,20 +22,20 @@ extern int g_iCurrentDialogScript;
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUINPCQuest::CNewUINPCQuest()
+CNPCQuest::CNPCQuest()
 {
     m_pNewUIMng = NULL;
     m_pNewUI3DRenderMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-CNewUINPCQuest::~CNewUINPCQuest()
+CNPCQuest::~CNPCQuest()
 {
     Release();
 }
 
-bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
-    CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CNPCQuest::Create(CManager* pNewUIMng,
+    C3DRenderMng* pNewUI3DRenderMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng
         || NULL == g_pNewItemMng)
@@ -64,7 +64,7 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
     return true;
 }
 
-void CNewUINPCQuest::Release()
+void CNPCQuest::Release()
 {
     UnloadImages();
 
@@ -81,13 +81,13 @@ void CNewUINPCQuest::Release()
     }
 }
 
-void CNewUINPCQuest::SetPos(int x, int y)
+void CNPCQuest::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUINPCQuest::UpdateMouseEvent()
+bool CNPCQuest::UpdateMouseEvent()
 {
     if (ProcessBtns())
         return false;
@@ -101,7 +101,7 @@ bool CNewUINPCQuest::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUINPCQuest::UpdateSelTextMouseEvent()
+bool CNPCQuest::UpdateSelTextMouseEvent()
 {
     BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
@@ -153,7 +153,7 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
     return false;
 }
 
-bool CNewUINPCQuest::UpdateKeyEvent()
+bool CNPCQuest::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST) == true)
     {
@@ -169,12 +169,12 @@ bool CNewUINPCQuest::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUINPCQuest::Update()
+bool CNPCQuest::Update()
 {
     return true;
 }
 
-bool CNewUINPCQuest::Render()
+bool CNPCQuest::Render()
 {
     ::EnableAlphaTest();
 
@@ -229,7 +229,7 @@ bool CNewUINPCQuest::Render()
     return true;
 }
 
-void CNewUINPCQuest::RenderBackImage()
+void CNPCQuest::RenderBackImage()
 {
     RenderImage(IMAGE_NPCQUEST_BACK,
         m_Pos.x, m_Pos.y, float(NPCQUEST_WIDTH), float(NPCQUEST_HEIGHT));
@@ -245,7 +245,7 @@ void CNewUINPCQuest::RenderBackImage()
     RenderImage(IMAGE_NPCQUEST_LINE, m_Pos.x + 1, m_Pos.y + 220, 188.f, 21.f);
 }
 
-void CNewUINPCQuest::RenderText()
+void CNPCQuest::RenderText()
 {
     BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
@@ -310,7 +310,7 @@ void CNewUINPCQuest::RenderText()
     }
 }
 
-bool CNewUINPCQuest::RenderItemMobText()
+bool CNPCQuest::RenderItemMobText()
 {
     bool bCompletion = true;
 
@@ -382,7 +382,7 @@ bool CNewUINPCQuest::RenderItemMobText()
     return bCompletion;
 }
 
-void CNewUINPCQuest::RenderItem3D()
+void CNPCQuest::RenderItem3D()
 {
     BYTE byCurQuestIndex = g_csQuest.GetCurrQuestIndex();
     BYTE byCurQuestState = g_csQuest.getQuestState2(int(byCurQuestIndex));
@@ -416,22 +416,22 @@ void CNewUINPCQuest::RenderItem3D()
     }
 }
 
-void CNewUINPCQuest::Render3D()
+void CNPCQuest::Render3D()
 {
     RenderItem3D();
 }
 
-bool CNewUINPCQuest::IsVisible() const
+bool CNPCQuest::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-float CNewUINPCQuest::GetLayerDepth()
+float CNPCQuest::GetLayerDepth()
 {
     return 3.1f;
 }
 
-void CNewUINPCQuest::LoadImages()
+void CNPCQuest::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCQUEST_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCQUEST_TOP, GL_LINEAR);
@@ -445,7 +445,7 @@ void CNewUINPCQuest::LoadImages()
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_NPCQUEST_BTN_CLOSE, GL_LINEAR);
 }
 
-void CNewUINPCQuest::UnloadImages()
+void CNPCQuest::UnloadImages()
 {
     DeleteBitmap(IMAGE_NPCQUEST_BTN_CLOSE);
     DeleteBitmap(IMAGE_NPCQUEST_BTN_COMPLETE);
@@ -459,18 +459,18 @@ void CNewUINPCQuest::UnloadImages()
     DeleteBitmap(IMAGE_NPCQUEST_BACK);
 }
 
-void CNewUINPCQuest::ProcessOpening()
+void CNPCQuest::ProcessOpening()
 {
     g_csQuest.ShowQuestNpcWindow();
 }
 
-bool CNewUINPCQuest::ProcessClosing()
+bool CNPCQuest::ProcessClosing()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
     return true;
 }
 
-bool CNewUINPCQuest::ProcessBtns()
+bool CNPCQuest::ProcessBtns()
 {
     if (m_btnClose.UpdateMouseEvent())
     {

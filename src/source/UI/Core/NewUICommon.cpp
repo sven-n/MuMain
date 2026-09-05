@@ -25,7 +25,7 @@ extern bool g_bWndActive;
 
 bool mu::ui::window::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, float fPriority)
 {
-    CNewUICommonMessageBox* pMsgBox = g_MessageBox->NewMessageBox(MSGBOX_CLASS(CNewUICommonMessageBox));
+    CCommonMessageBox* pMsgBox = g_MessageBox->NewMessageBox(MSGBOX_CLASS(CCommonMessageBox));
     if (pMsgBox)
     {
         return pMsgBox->Create(MSGBOX_COMMON_TYPE_OK, strMsg, dwColor);

@@ -39,7 +39,7 @@ bool CMsgBoxIGSBuyConfirm::Create(float fPriority)
 {
     LoadImages();
     SetAddCallbackFunc();
-    CNewUIMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2), (IMAGE_IGS_WINDOW_HEIGHT / 2) - (IMAGE_IGS_FRAME_HEIGHT / 2), IMAGE_IGS_FRAME_WIDTH, IMAGE_IGS_FRAME_HEIGHT, fPriority);
+    CMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2), (IMAGE_IGS_WINDOW_HEIGHT / 2) - (IMAGE_IGS_FRAME_HEIGHT / 2), IMAGE_IGS_FRAME_WIDTH, IMAGE_IGS_FRAME_HEIGHT, fPriority);
     SetButtonInfo();
     SetMsgBackOpacity();
     return true;
@@ -63,7 +63,7 @@ void CMsgBoxIGSBuyConfirm::Initialize(WORD wItemCode, int iPackageSeq, int iDisp
 
 void CMsgBoxIGSBuyConfirm::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     UnloadImages();
 }
@@ -97,7 +97,7 @@ void CMsgBoxIGSBuyConfirm::SetAddCallbackFunc()
     AddCallbackFunc(CMsgBoxIGSBuyConfirm::CancelButtonDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT CMsgBoxIGSBuyConfirm::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSBuyConfirm::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSBuyConfirm*>(pOwner);
     if (pOwnMsgBox)
@@ -118,7 +118,7 @@ CALLBACK_RESULT CMsgBoxIGSBuyConfirm::LButtonUp(class CNewUIMessageBoxBase* pOwn
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT CMsgBoxIGSBuyConfirm::OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSBuyConfirm::OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSBuyConfirm*>(pOwner);
     SocketClient->ToGameServer()->SendCashShopItemBuyRequest(pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, pOwnMsgBox->m_iPriceSeq, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_iCashType, 0);
@@ -127,7 +127,7 @@ CALLBACK_RESULT CMsgBoxIGSBuyConfirm::OKButtonDown(class CNewUIMessageBoxBase* p
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT CMsgBoxIGSBuyConfirm::CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSBuyConfirm::CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -136,10 +136,10 @@ CALLBACK_RESULT CMsgBoxIGSBuyConfirm::CancelButtonDown(class CNewUIMessageBoxBas
 
 void CMsgBoxIGSBuyConfirm::SetButtonInfo()
 {
-    m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
+    m_BtnOk.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnOk.MoveTextPos(0, -1);
     m_BtnOk.SetText(I18N::Game::OK);
-    m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
+    m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y, IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
     m_BtnCancel.SetText(I18N::Game::Cancel);
 }

@@ -32,7 +32,7 @@ CMuHelperBar::~CMuHelperBar()
 
 //---------------------------------------------------------------------------------------------
 // Create
-bool CMuHelperBar::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CMuHelperBar::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -66,7 +66,7 @@ bool CMuHelperBar::Create(CNewUIManager* pNewUIMng, int x, int y)
         // Deliberately NOT Show()n here -- see NewUIMainFrameWindow.cpp's identical comment.
         // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
         // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
-        // shows it the first time CNewUISystem::SyncMainSceneHudVisibility()'s gate allows it.
+        // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.
     }
 
     Show(true);

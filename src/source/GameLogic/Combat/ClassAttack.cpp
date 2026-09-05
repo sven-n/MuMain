@@ -1415,7 +1415,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
                 if (!g_pPartyManager->IsPartyMember(SelectedCharacter))
                     return;
 
-                if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem())
+                if (mu::ui::window::CInventoryCtrl::GetPickedItem())
                 {
                     return;
                 }
@@ -1481,7 +1481,7 @@ void AttackWizard(CHARACTER* c, int Skill, float Distance)
 
         case AT_SKILL_TELEPORT:
         {
-            if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem()
+            if (mu::ui::window::CInventoryCtrl::GetPickedItem()
                 || g_isCharacterBuff(o, eDeBuff_Stun)
                 || g_isCharacterBuff(o, eDeBuff_Sleep)
                 )

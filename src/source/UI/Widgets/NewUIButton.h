@@ -1,4 +1,4 @@
-// NewUIButton.h: interface for the CNewUIButton class.
+// NewUIButton.h: interface for the CButton class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_)
@@ -30,11 +30,11 @@ namespace mu::ui::window
 
     typedef std::map<int, ButtonInfo>  ButtonStateMap;
 
-    class CNewUIBaseButton
+    class CBaseButton
     {
     public:
-        CNewUIBaseButton();
-        virtual ~CNewUIBaseButton();
+        CBaseButton();
+        virtual ~CBaseButton();
 
     public:
         void SetPos(const POINT& pos);
@@ -64,60 +64,60 @@ namespace mu::ui::window
     };
 
     inline
-        void CNewUIBaseButton::SetPos(const POINT& pos)
+        void CBaseButton::SetPos(const POINT& pos)
     {
         m_Pos = pos;
     }
 
     inline
-        void CNewUIBaseButton::SetSize(const POINT& size)
+        void CBaseButton::SetSize(const POINT& size)
     {
         m_Size = size;
     }
 
     inline
-        const POINT& CNewUIBaseButton::GetPos()
+        const POINT& CBaseButton::GetPos()
     {
         return m_Pos;
     }
 
     inline
-        const POINT& CNewUIBaseButton::GetSize()
+        const POINT& CBaseButton::GetSize()
     {
         return m_Size;
     }
 
     inline
-        const BUTTON_STATE CNewUIBaseButton::GetBTState()
+        const BUTTON_STATE CBaseButton::GetBTState()
     {
         return m_EventState;
     }
 
 #ifndef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE			// #ifndef
     inline
-        void CNewUIBaseButton::Lock()
+        void CBaseButton::Lock()
     {
         m_Lock = true;
     }
 
     inline
-        void CNewUIBaseButton::UnLock()
+        void CBaseButton::UnLock()
     {
         m_Lock = false;
     }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
     inline
-        bool CNewUIBaseButton::IsLock()
+        bool CBaseButton::IsLock()
     {
         return m_Lock;
     }
 
-    class CNewUIButton : public CNewUIBaseButton
+    class CButton : public CBaseButton
     {
     public:
-        CNewUIButton();
-        virtual ~CNewUIButton();
+        CButton();
+        virtual ~CButton();
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         void ChangeButtonImgState(bool imgregister, int imgindex, bool overflg = false, bool isimgwidth = false, bool bClickEffect = false);
 
@@ -219,12 +219,12 @@ namespace mu::ui::window
         static void OnLocaleChanged(void* ctx) noexcept;
     };
 
-    inline void CNewUIButton::ChangeImgWidth(bool isimgwidth)
+    inline void CButton::ChangeImgWidth(bool isimgwidth)
     {
         m_IsImgWidth = isimgwidth;
     }
 
-    inline void CNewUIButton::ChangeText(std::wstring btname)
+    inline void CButton::ChangeText(std::wstring btname)
     {
         // Caller is overriding any prior I18N slot binding with a literal
         // string; drop the slot so the locale observer won't clobber it.
@@ -233,25 +233,25 @@ namespace mu::ui::window
     }
 
     inline
-        void CNewUIButton::SetFont(HFONT hFont)
+        void CButton::SetFont(HFONT hFont)
     {
         m_hTextFont = hFont;
     }
 
     inline
-        void CNewUIButton::ChangeTextBackColor(const DWORD bcolor)
+        void CButton::ChangeTextBackColor(const DWORD bcolor)
     {
         m_NameBackColor = bcolor;
     }
 
     inline
-        void CNewUIButton::ChangeTextColor(const DWORD color)
+        void CButton::ChangeTextColor(const DWORD color)
     {
         m_NameColor = color;
     }
 
     inline
-        void CNewUIButton::ChangeToolTipText(std::wstring tooltiptext, bool istoppos)
+        void CButton::ChangeToolTipText(std::wstring tooltiptext, bool istoppos)
     {
         // See ChangeText(std::wstring): literal overrides drop the slot.
         m_pTooltipSlot = nullptr;
@@ -261,22 +261,22 @@ namespace mu::ui::window
     }
 
     inline
-        void CNewUIButton::SetToolTipFont(HFONT hFont)
+        void CButton::SetToolTipFont(HFONT hFont)
     {
         m_hToolTipFont = hFont;
     }
 
     inline
-        void CNewUIButton::ChangeToolTipTextColor(const DWORD color)
+        void CButton::ChangeToolTipTextColor(const DWORD color)
     {
         m_TooltipTextColor = color;
     }
 
-    class CNewUIRadioButton : public CNewUIBaseButton
+    class CRadioButton : public CBaseButton
     {
     public:
-        CNewUIRadioButton();
-        virtual ~CNewUIRadioButton();
+        CRadioButton();
+        virtual ~CRadioButton();
 
     public:
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -290,7 +290,7 @@ namespace mu::ui::window
     public:
         void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
         void ChangeText(std::wstring btname);
-        // Slot overload — see CNewUIButton::ChangeText(const wchar_t* const*).
+        // Slot overload — see CButton::ChangeText(const wchar_t* const*).
         void ChangeText(const wchar_t* const* nameSlot);
         void ChangeTextBackColor(const DWORD bcolor);
         void ChangeTextColor(const DWORD color);
@@ -319,7 +319,7 @@ namespace mu::ui::window
     private:
         ButtonStateMap           m_RadioButtonInfo;
        std::wstring		 m_Name;
-       // See CNewUIButton::m_pNameSlot — same purpose for radio buttons.
+       // See CButton::m_pNameSlot — same purpose for radio buttons.
        const wchar_t* const* m_pNameSlot = nullptr;
        bool                  m_LocaleObserverRegistered = false;
 
@@ -344,37 +344,37 @@ namespace mu::ui::window
     };
 
     inline
-        void CNewUIRadioButton::ChangeText(std::wstring btname)
+        void CRadioButton::ChangeText(std::wstring btname)
     {
         m_pNameSlot = nullptr;
         m_Name = btname;
     }
 
     inline
-        void CNewUIRadioButton::ChangeTextBackColor(const DWORD bcolor)
+        void CRadioButton::ChangeTextBackColor(const DWORD bcolor)
     {
         m_NameBackColor = bcolor;
     }
 
     inline
-        void CNewUIRadioButton::ChangeTextColor(const DWORD color)
+        void CRadioButton::ChangeTextColor(const DWORD color)
     {
         m_NameColor = color;
     }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     inline
-        void CNewUIRadioButton::SetFont(HFONT hFont)
+        void CRadioButton::SetFont(HFONT hFont)
     {
         m_hTextFont = hFont;
     }
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-    class CNewUIRadioGroupButton
+    class CRadioGroupButton
     {
     public:
-        CNewUIRadioGroupButton();
-        virtual ~CNewUIRadioGroupButton();
+        CRadioGroupButton();
+        virtual ~CRadioGroupButton();
 
     public:
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -403,7 +403,7 @@ namespace mu::ui::window
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     public:
-        void RegisterRadioButton(CNewUIRadioButton* button);
+        void RegisterRadioButton(CRadioButton* button);
         void UnRegisterRadioButton();
 
     public:
@@ -421,7 +421,7 @@ namespace mu::ui::window
         void Destroy();
 
     private:
-        typedef std::list<CNewUIRadioButton*>      RadioButtonList;
+        typedef std::list<CRadioButton*>      RadioButtonList;
 
     private:
         RadioButtonList				m_RadioList;
@@ -432,26 +432,26 @@ namespace mu::ui::window
     };
 
     inline
-        void CNewUIRadioGroupButton::SetCurButtonIndex(int index)
+        void CRadioGroupButton::SetCurButtonIndex(int index)
     {
         m_CurButtonIndex = index;
     }
 
     inline
-        const int CNewUIRadioGroupButton::GetCurButtonIndex()
+        const int CRadioGroupButton::GetCurButtonIndex()
     {
         return m_CurButtonIndex;
     }
 
-    class CNewUICheckBox
+    class CCheckBox
     {
     public:
-        CNewUICheckBox();
-        virtual ~CNewUICheckBox();
+        CCheckBox();
+        virtual ~CCheckBox();
         void CheckBoxImgState(int imgindex);
         void RegisterBoxState(bool eventstate);
         void ChangeText(std::wstring btname);
-        // Slot overload — see CNewUIButton::ChangeText(const wchar_t* const*).
+        // Slot overload — see CButton::ChangeText(const wchar_t* const*).
         void ChangeText(const wchar_t* const* nameSlot);
         void CheckBoxInfo(int x, int y, int sx, int sy);
         bool GetBoxState();

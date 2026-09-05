@@ -1,4 +1,4 @@
-// NewUIMixInventory.cpp: implementation of the CNewUIMixInventory class.
+// NewUIMixInventory.cpp: implementation of the CMixInventory class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -22,7 +22,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIMixInventory::CNewUIMixInventory()
+CMixInventory::CMixInventory()
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
@@ -30,9 +30,9 @@ CNewUIMixInventory::CNewUIMixInventory()
     m_iMixState = MIX_READY;
     m_iMixEffectTimer = 0;
 }
-CNewUIMixInventory::~CNewUIMixInventory() { Release(); }
+CMixInventory::~CMixInventory() { Release(); }
 
-bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -40,7 +40,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MIXINVENTORY, this);
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::CHAOS_MIX, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
@@ -67,7 +67,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     return true;
 }
-void CNewUIMixInventory::Release()
+void CMixInventory::Release()
 {
     UnloadImages();
 
@@ -82,7 +82,7 @@ void CNewUIMixInventory::Release()
         g_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
 }
 
-void CNewUIMixInventory::SetMixState(int iMixState)
+void CMixInventory::SetMixState(int iMixState)
 {
     m_iMixState = iMixState;
 
@@ -101,14 +101,14 @@ void CNewUIMixInventory::SetMixState(int iMixState)
     }
 }
 
-bool CNewUIMixInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool CMixInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);
     return false;
 }
 
-void CNewUIMixInventory::DeleteItem(int iIndex)
+void CMixInventory::DeleteItem(int iIndex)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -118,18 +118,18 @@ void CNewUIMixInventory::DeleteItem(int iIndex)
     }
 }
 
-void CNewUIMixInventory::DeleteAllItems()
+void CMixInventory::DeleteAllItems()
 {
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->RemoveAllItems();
 }
 
-void CNewUIMixInventory::OpeningProcess()
+void CMixInventory::OpeningProcess()
 {
     g_MixRecipeMgr.SetPlusChaosRate(0);
     SocketClient->ToGameServer()->SendCrywolfChaosRateBenefitRequest();
 
-    SetMixState(mu::ui::window::CNewUIMixInventory::MIX_READY);
+    SetMixState(mu::ui::window::CMixInventory::MIX_READY);
 
     if (g_MixRecipeMgr.GetMixInventoryType() == SEASON3A::MIXTYPE_GOBLIN_NORMAL)
     {
@@ -137,9 +137,9 @@ void CNewUIMixInventory::OpeningProcess()
     }
 }
 
-bool CNewUIMixInventory::ClosingProcess()
+bool CMixInventory::ClosingProcess()
 {
-    if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
+    if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CInventoryCtrl::GetPickedItem() != NULL)
     {
         g_pSystemLogBox->AddText(I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
@@ -176,7 +176,7 @@ bool CNewUIMixInventory::ClosingProcess()
     return true;
 }
 
-void CNewUIMixInventory::SetPos(int x, int y)
+void CMixInventory::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -184,7 +184,7 @@ void CNewUIMixInventory::SetPos(int x, int y)
     m_pNewInventoryCtrl->SetPos(x + 15, y + 110);
 }
 
-bool CNewUIMixInventory::UpdateMouseEvent()
+bool CMixInventory::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
@@ -216,11 +216,11 @@ bool CNewUIMixInventory::UpdateMouseEvent()
 
     return true;
 }
-bool CNewUIMixInventory::UpdateKeyEvent()
+bool CMixInventory::UpdateKeyEvent()
 {
     return true;
 }
-bool CNewUIMixInventory::Update()
+bool CMixInventory::Update()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
@@ -267,7 +267,7 @@ bool CNewUIMixInventory::Update()
 
     return true;
 }
-bool CNewUIMixInventory::Render()
+bool CMixInventory::Render()
 {
     EnableAlphaTest();
 
@@ -284,26 +284,26 @@ bool CNewUIMixInventory::Render()
     return true;
 }
 
-float CNewUIMixInventory::GetLayerDepth()
+float CMixInventory::GetLayerDepth()
 {
     return 3.4f;
 }
 
-CNewUIInventoryCtrl* CNewUIMixInventory::GetInventoryCtrl() const
+CInventoryCtrl* CMixInventory::GetInventoryCtrl() const
 {
     return m_pNewInventoryCtrl;
 }
 
-void CNewUIMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
-        auto* pMixInventory = (CNewUIMixInventory*)pClass;
+        auto* pMixInventory = (CMixInventory*)pClass;
         pMixInventory->RenderMixEffect();
     }
 }
 
-void CNewUIMixInventory::LoadImages()
+void CMixInventory::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MIXINVENTORY_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_MIXINVENTORY_TOP, GL_LINEAR);
@@ -312,13 +312,13 @@ void CNewUIMixInventory::LoadImages()
     LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_MIXINVENTORY_BOTTOM, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_bt_mix.tga", IMAGE_MIXINVENTORY_MIXBTN, GL_LINEAR);
 
-    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
-    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
-    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
-    LoadBitmap(L"Interface\\newui_scroll_on.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_scroll_off.tga", CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scrollbar_up.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
+    LoadBitmap(L"Interface\\newui_scrollbar_m.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
+    LoadBitmap(L"Interface\\newui_scrollbar_down.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
+    LoadBitmap(L"Interface\\newui_scroll_on.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_scroll_off.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
 }
-void CNewUIMixInventory::UnloadImages()
+void CMixInventory::UnloadImages()
 {
     DeleteBitmap(IMAGE_MIXINVENTORY_BOTTOM);
     DeleteBitmap(IMAGE_MIXINVENTORY_RIGHT);
@@ -327,14 +327,14 @@ void CNewUIMixInventory::UnloadImages()
     DeleteBitmap(IMAGE_MIXINVENTORY_BACK);
     DeleteBitmap(IMAGE_MIXINVENTORY_MIXBTN);
 
-    DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
-    DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
-    DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
-    DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON);
-    DeleteBitmap(CNewUIGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
+    DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
+    DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
+    DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
+    DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_ON);
+    DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
 }
 
-void CNewUIMixInventory::RenderFrame()
+void CMixInventory::RenderFrame()
 {
     RenderImage(IMAGE_MIXINVENTORY_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_MIXINVENTORY_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -650,7 +650,7 @@ void CNewUIMixInventory::RenderFrame()
     m_BtnMix.Render();
 }
 
-bool CNewUIMixInventory::BtnProcess()
+bool CMixInventory::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -669,7 +669,7 @@ bool CNewUIMixInventory::BtnProcess()
     return false;
 }
 
-void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
+void CMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
 {
     wchar_t szText[256] = { 0, };
     switch (g_MixRecipeMgr.GetMixInventoryType())
@@ -794,13 +794,13 @@ void CNewUIMixInventory::RenderMixDescriptions(float fPos_x, float fPos_y)
     }
 }
 
-int CNewUIMixInventory::Rtn_MixRequireZen(int _nMixZen, int _nTax)
+int CMixInventory::Rtn_MixRequireZen(int _nMixZen, int _nTax)
 {
     if (_nTax)		_nMixZen += ((LONGLONG)_nMixZen * g_nChaosTaxRate) / 100;
     return _nMixZen;
 }
 
-bool CNewUIMixInventory::Mix()
+bool CMixInventory::Mix()
 {
     PlayBuffer(SOUND_CLICK01);
 
@@ -898,7 +898,7 @@ bool CNewUIMixInventory::Mix()
     }
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 
-    if (CNewUIInventoryCtrl::GetPickedItem() == NULL)
+    if (CInventoryCtrl::GetPickedItem() == NULL)
     {
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMixCheckMsgBoxLayout));
         return true;
@@ -907,9 +907,9 @@ bool CNewUIMixInventory::Mix()
     return false;
 }
 
-bool CNewUIMixInventory::InventoryProcess()
+bool CMixInventory::InventoryProcess()
 {
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
     if (m_pNewInventoryCtrl && pPickedItem)
     {
@@ -978,10 +978,10 @@ bool CNewUIMixInventory::InventoryProcess()
 // Direction-agnostic core of the right-click moves: pick the item under the
 // cursor in srcCtrl, reserve a slot in dstCtrl, and send the same move that
 // drag & drop sends.
-bool CNewUIMixInventory::AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
-    CNewUIInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource)
+bool CMixInventory::AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
+    CInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource)
 {
-    if (CNewUIInventoryCtrl::GetPickedItem())
+    if (CInventoryCtrl::GetPickedItem())
         return false;
 
     if (srcCtrl == nullptr || dstCtrl == nullptr || GetMixState() != MIX_READY)
@@ -999,10 +999,10 @@ bool CNewUIMixInventory::AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE
     if (iTargetIndex < 0 || !dstCtrl->CanMove(iTargetIndex, pItemObj))
         return false;
 
-    if (!CNewUIInventoryCtrl::CreatePickedItem(srcCtrl, pItemObj))
+    if (!CInventoryCtrl::CreatePickedItem(srcCtrl, pItemObj))
         return false;
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
         return false;
 
@@ -1011,7 +1011,7 @@ bool CNewUIMixInventory::AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE
 
     if (!SendRequestEquipmentItem(srcType, pPickedItem->GetSourceLinealPos(), pItemObj, dstType, iTargetIndex))
     {
-        CNewUIInventoryCtrl::BackupPickedItem();
+        CInventoryCtrl::BackupPickedItem();
         return false;
     }
 
@@ -1019,7 +1019,7 @@ bool CNewUIMixInventory::AutoMoveItem(CNewUIInventoryCtrl* srcCtrl, STORAGE_TYPE
     return true;
 }
 
-bool CNewUIMixInventory::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl)
+bool CMixInventory::ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl)
 {
     if (sourceCtrl == nullptr)
         sourceCtrl = g_pMyInventory ? g_pMyInventory->GetInventoryCtrl() : nullptr;
@@ -1032,15 +1032,15 @@ bool CNewUIMixInventory::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceC
         /*requireMixSource*/ true);
 }
 
-bool CNewUIMixInventory::ProcessMixItemAutoMoveToInventory()
+bool CMixInventory::ProcessMixItemAutoMoveToInventory()
 {
-    CNewUIInventoryCtrl* dstCtrl = g_pMyInventory ? g_pMyInventory->GetInventoryCtrl() : nullptr;
+    CInventoryCtrl* dstCtrl = g_pMyInventory ? g_pMyInventory->GetInventoryCtrl() : nullptr;
     return AutoMoveItem(m_pNewInventoryCtrl, g_MixRecipeMgr.GetMixInventoryEquipmentIndex(),
         dstCtrl, STORAGE_TYPE::INVENTORY,
         /*requireMixSource*/ false);
 }
 
-void CNewUIMixInventory::CheckMixInventory()
+void CMixInventory::CheckMixInventory()
 {
     g_MixRecipeMgr.ResetMixItemInventory();
     ITEM* pItem = NULL;
@@ -1052,7 +1052,7 @@ void CNewUIMixInventory::CheckMixInventory()
     g_MixRecipeMgr.CheckMixInventory();
 }
 
-void CNewUIMixInventory::RenderMixEffect()
+void CMixInventory::RenderMixEffect()
 {
     if (m_iMixEffectTimer <= 0)
     {
@@ -1096,7 +1096,7 @@ void CNewUIMixInventory::RenderMixEffect()
     DisableAlphaBlend();
 }
 
-int mu::ui::window::CNewUIMixInventory::GetPointedItemIndex()
+int mu::ui::window::CMixInventory::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }

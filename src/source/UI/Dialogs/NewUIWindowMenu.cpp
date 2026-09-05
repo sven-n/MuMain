@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIWindowMenu.cpp: implementation of the CNewUIWindowMenu class.
+// NewUIWindowMenu.cpp: implementation of the CWindowMenu class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,19 +14,19 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIWindowMenu::CNewUIWindowMenu()
+mu::ui::window::CWindowMenu::CWindowMenu()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iSelectedIndex = -1;
 }
 
-mu::ui::window::CNewUIWindowMenu::~CNewUIWindowMenu()
+mu::ui::window::CWindowMenu::~CWindowMenu()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIWindowMenu::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CWindowMenu::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -43,7 +43,7 @@ bool mu::ui::window::CNewUIWindowMenu::Create(CNewUIManager* pNewUIMng, int x, i
     return true;
 }
 
-void mu::ui::window::CNewUIWindowMenu::Release()
+void mu::ui::window::CWindowMenu::Release()
 {
     UnloadImages();
 
@@ -54,13 +54,13 @@ void mu::ui::window::CNewUIWindowMenu::Release()
     }
 }
 
-void mu::ui::window::CNewUIWindowMenu::SetPos(int x, int y)
+void mu::ui::window::CWindowMenu::SetPos(int x, int y)
 {
     m_Pos.x = STANDARD_POS_X;
     m_Pos.y = STANDARD_POS_Y - (20 * (MENU_MAX_INDEX - 4));
 }
 
-bool mu::ui::window::CNewUIWindowMenu::UpdateMouseEvent()
+bool mu::ui::window::CWindowMenu::UpdateMouseEvent()
 {
     POINT pt = {m_Pos.x, m_Pos.y + 20};
 
@@ -147,7 +147,7 @@ bool mu::ui::window::CNewUIWindowMenu::UpdateMouseEvent()
     return false;
 }
 
-bool mu::ui::window::CNewUIWindowMenu::UpdateKeyEvent()
+bool mu::ui::window::CWindowMenu::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_WINDOW_MENU) == true)
     {
@@ -163,12 +163,12 @@ bool mu::ui::window::CNewUIWindowMenu::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIWindowMenu::Update()
+bool mu::ui::window::CWindowMenu::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIWindowMenu::Render()
+bool mu::ui::window::CWindowMenu::Render()
 {
     EnableAlphaTest();
 
@@ -181,7 +181,7 @@ bool mu::ui::window::CNewUIWindowMenu::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIWindowMenu::RenderFrame()
+void mu::ui::window::CWindowMenu::RenderFrame()
 {
     float x, y, width, height;
 
@@ -217,7 +217,7 @@ void mu::ui::window::CNewUIWindowMenu::RenderFrame()
     }
 }
 
-void mu::ui::window::CNewUIWindowMenu::RenderTexts()
+void mu::ui::window::CWindowMenu::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
@@ -240,7 +240,7 @@ void mu::ui::window::CNewUIWindowMenu::RenderTexts()
     }
 }
 
-void mu::ui::window::CNewUIWindowMenu::RenderArrow()
+void mu::ui::window::CWindowMenu::RenderArrow()
 {
     if (m_iSelectedIndex < 0)
     {
@@ -256,24 +256,24 @@ void mu::ui::window::CNewUIWindowMenu::RenderArrow()
     RenderImage(IMAGE_WINDOW_MENU_ARROWR, x, y, 6.f, 9.f);
 }
 
-float mu::ui::window::CNewUIWindowMenu::GetLayerDepth()
+float mu::ui::window::CWindowMenu::GetLayerDepth()
 {
     return 10.4f;
 }
 
-float mu::ui::window::CNewUIWindowMenu::GetKeyEventOrder()
+float mu::ui::window::CWindowMenu::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void mu::ui::window::CNewUIWindowMenu::OpenningProcess()
+void mu::ui::window::CWindowMenu::OpenningProcess()
 {
     m_iSelectedIndex = -1;
 }
 
-void mu::ui::window::CNewUIWindowMenu::ClosingProcess() {}
+void mu::ui::window::CWindowMenu::ClosingProcess() {}
 
-void mu::ui::window::CNewUIWindowMenu::LoadImages()
+void mu::ui::window::CWindowMenu::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_WINDOW_MENU_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_commamd01.tga", IMAGE_WINDOW_MENU_FRAME_UP, GL_LINEAR);
@@ -284,7 +284,7 @@ void mu::ui::window::CNewUIWindowMenu::LoadImages()
     LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_WINDOW_MENU_ARROWR, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIWindowMenu::UnloadImages()
+void mu::ui::window::CWindowMenu::UnloadImages()
 {
     DeleteBitmap(IMAGE_WINDOW_MENU_BACK);
     DeleteBitmap(IMAGE_WINDOW_MENU_FRAME_UP);

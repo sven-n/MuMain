@@ -1,4 +1,4 @@
-// NewUIChaosCastleTime.h: interface for the CNewUIChaosCastleTime class.
+// NewUIChaosCastleTime.h: interface for the CChaosCastleTime class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -12,12 +12,12 @@
 
 namespace mu::ui::window
 {
-    class CNewUIChaosCastleTime : public CNewUIObj
+    class CChaosCastleTime : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_CHAOSCASTLE_TIME_WINDOW = CNewUIBloodCastle::IMAGE_BLOODCASTLE_TIME_WINDOW	// newui_Figure_blood.tga (124, 81)
+            IMAGE_CHAOSCASTLE_TIME_WINDOW = CBloodCastle::IMAGE_BLOODCASTLE_TIME_WINDOW	// newui_Figure_blood.tga (124, 81)
         };
 
     private:
@@ -39,7 +39,7 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
         wchar_t				m_szTime[256];		// 시간
@@ -49,10 +49,10 @@ namespace mu::ui::window
         int							m_iKilledMonster;	// 현재 죽인 몬스터숫자
 
     public:
-        CNewUIChaosCastleTime();
-        virtual ~CNewUIChaosCastleTime();
+        CChaosCastleTime();
+        virtual ~CChaosCastleTime();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

@@ -13,7 +13,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
+CEnterBloodCastle::CEnterBloodCastle()
 {
     m_pNewUIMng = NULL;
     memset(&m_Pos, 0, sizeof(POINT));
@@ -43,14 +43,14 @@ CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
     m_iBloodCastleLimitLevel[15][0] = 0;   m_iBloodCastleLimitLevel[15][1] = 0;
 }
 
-CNewUIEnterBloodCastle::~CNewUIEnterBloodCastle()
+CEnterBloodCastle::~CEnterBloodCastle()
 {
     Release();
 }
 
 //---------------------------------------------------------------------------------------------
 // Create
-bool CNewUIEnterBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CEnterBloodCastle::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -83,7 +83,7 @@ bool CNewUIEnterBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
 
 //---------------------------------------------------------------------------------------------
 // Release
-void CNewUIEnterBloodCastle::Release()
+void CEnterBloodCastle::Release()
 {
     UnloadImages();
 
@@ -96,7 +96,7 @@ void CNewUIEnterBloodCastle::Release()
 
 //---------------------------------------------------------------------------------------------
 // SetPos
-void CNewUIEnterBloodCastle::SetPos(int x, int y)
+void CEnterBloodCastle::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -116,7 +116,7 @@ void CNewUIEnterBloodCastle::SetPos(int x, int y)
 
 //---------------------------------------------------------------------------------------------
 // SetBtnPos
-void CNewUIEnterBloodCastle::SetBtnPos(int x, int y)
+void CEnterBloodCastle::SetBtnPos(int x, int y)
 {
     m_BtnEnterStartPos.x = x;
     m_BtnEnterStartPos.y = y;
@@ -124,7 +124,7 @@ void CNewUIEnterBloodCastle::SetBtnPos(int x, int y)
 
 //---------------------------------------------------------------------------------------------
 // UpdateMouseEvent
-bool CNewUIEnterBloodCastle::UpdateMouseEvent()
+bool CEnterBloodCastle::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -137,7 +137,7 @@ bool CNewUIEnterBloodCastle::UpdateMouseEvent()
 
 //---------------------------------------------------------------------------------------------
 // UpdateKeyEvent
-bool CNewUIEnterBloodCastle::UpdateKeyEvent()
+bool CEnterBloodCastle::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE) == true)
     {
@@ -152,7 +152,7 @@ bool CNewUIEnterBloodCastle::UpdateKeyEvent()
     return true;
 }
 
-int CNewUIEnterBloodCastle::CheckLimitLV(int iIndex)
+int CEnterBloodCastle::CheckLimitLV(int iIndex)
 {
     int	iVal = 0;
     int iRet = 0;
@@ -182,7 +182,7 @@ int CNewUIEnterBloodCastle::CheckLimitLV(int iIndex)
     return iRet;
 }
 
-bool CNewUIEnterBloodCastle::Update()
+bool CEnterBloodCastle::Update()
 {
     if (!IsVisible())
         return true;
@@ -190,7 +190,7 @@ bool CNewUIEnterBloodCastle::Update()
     return true;
 }
 
-bool CNewUIEnterBloodCastle::Render()
+bool CEnterBloodCastle::Render()
 {
     EnableAlphaTest();
 
@@ -226,7 +226,7 @@ bool CNewUIEnterBloodCastle::Render()
     return true;
 }
 
-bool CNewUIEnterBloodCastle::BtnProcess()
+bool CEnterBloodCastle::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_BLOODCASTLE))
@@ -247,12 +247,12 @@ bool CNewUIEnterBloodCastle::BtnProcess()
     return false;
 }
 
-float CNewUIEnterBloodCastle::GetLayerDepth()
+float CEnterBloodCastle::GetLayerDepth()
 {
     return 4.1f;
 }
 
-void CNewUIEnterBloodCastle::OpenningProcess()
+void CEnterBloodCastle::OpenningProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -291,12 +291,12 @@ void CNewUIEnterBloodCastle::OpenningProcess()
     m_BtnEnter[MAX_ENTER_GRADE - 1].ChangeText(sztext);
 }
 
-void CNewUIEnterBloodCastle::ClosingProcess()
+void CEnterBloodCastle::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-void CNewUIEnterBloodCastle::LoadImages()
+void CEnterBloodCastle::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ENTERBC_BASE_WINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_ENTERBC_BASE_WINDOW_TOP, GL_LINEAR);
@@ -307,7 +307,7 @@ void CNewUIEnterBloodCastle::LoadImages()
     LoadBitmap(L"Interface\\newui_btn_empty_big.tga", IMAGE_ENTERBC_BASE_WINDOW_BTN_ENTER, GL_LINEAR);		// Enter Button
 }
 
-void CNewUIEnterBloodCastle::UnloadImages()
+void CEnterBloodCastle::UnloadImages()
 {
     DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_BACK);
     DeleteBitmap(IMAGE_ENTERBC_BASE_WINDOW_TOP);

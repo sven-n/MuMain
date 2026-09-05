@@ -70,7 +70,7 @@ namespace mu::ui::window
     typedef std::vector<MSGBOX_TEXTDATA*> type_vector_msgdata;
     typedef std::wstring type_string;
 
-    class CNewUIMessageBoxButton
+    class CMessageBoxButton
     {
     public:
         enum EVENT_STATE
@@ -89,8 +89,8 @@ namespace mu::ui::window
             MSGBOX_BTN_SIZE_EMPTY_BIG,
         };
 
-        CNewUIMessageBoxButton();
-        ~CNewUIMessageBoxButton();
+        CMessageBoxButton();
+        ~CMessageBoxButton();
 
         bool IsMouseIn();
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -135,11 +135,11 @@ namespace mu::ui::window
         EVENT_STATE m_EventState;
     };
 
-    class CNewUICommonMessageBox : public CNewUIMessageBoxBase
+    class CCommonMessageBox : public CMessageBoxBase
     {
     public:
-        CNewUICommonMessageBox();
-        ~CNewUICommonMessageBox();
+        CCommonMessageBox();
+        ~CCommonMessageBox();
 
         DWORD GetType();
 
@@ -150,8 +150,8 @@ namespace mu::ui::window
 
         void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT Close(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
         bool Update();
         bool Render();
@@ -182,21 +182,21 @@ namespace mu::ui::window
         type_vector_msgdata m_MsgDataList;
 
         // button
-        CNewUIMessageBoxButton m_BtnOk;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnCancel;
     };
 
     //////////////////////////////////////////////////////////////////////////
 
-    class CNewUI3DItemCommonMsgBox : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+    class C3DItemCommonMsgBox : public CMessageBoxBase, public I3DRenderObj
     {
         static constexpr float MSGBOX_TEXT_MAXWIDTH_3DITEM = 120.0f;
         static constexpr float MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60.0f;
         static constexpr float MSGBOX_3DITEM_WIDTH = 40.0f;
         static constexpr float MSGBOX_3DITEM_HEIGHT = 40.0f;
     public:
-        CNewUI3DItemCommonMsgBox();
-        ~CNewUI3DItemCommonMsgBox();
+        C3DItemCommonMsgBox();
+        ~C3DItemCommonMsgBox();
 
         DWORD GetType();
 
@@ -210,8 +210,8 @@ namespace mu::ui::window
         void SetItemValue(int iValue);
         int GetItemValue();
 
-        static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT Close(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
         bool Update();
         bool Render();
@@ -237,11 +237,11 @@ namespace mu::ui::window
         type_vector_msgdata m_MsgDataList;
 
         // button
-        CNewUIMessageBoxButton m_BtnOk;
-        CNewUIMessageBoxButton m_BtnCancel;
+        CMessageBoxButton m_BtnOk;
+        CMessageBoxButton m_BtnCancel;
     };
 
-    class CFenrirRepairMsgBox : public CNewUICommonMessageBox
+    class CFenrirRepairMsgBox : public CCommonMessageBox
     {
     public:
         void SetSourceIndex(int iIndex);
@@ -254,537 +254,537 @@ namespace mu::ui::window
         int m_iTargetIndex;
     };
 
-    class CServerLostMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CServerLostMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildRequestMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildRequestMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildFireMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildFireMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CMapEnterWerwolfMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CMapEnterWerwolfMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CMapEnterGateKeeperMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CMapEnterGateKeeperMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPartyMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CPartyMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CTradeMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CTradeMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CTradeAlertMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CTradeAlertMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildWarMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildWarMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CBattleSoccerMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CBattleSoccerMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CServerImmigrationErrorMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CServerImmigrationErrorMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPersonalshopCreateMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CPersonalshopCreateMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
     class CFenrirRepairMsgBoxLayout : public TMsgBoxLayout<CFenrirRepairMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CInfinityArrowCancelMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CInfinityArrowCancelMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CBuffSwellOfMPCancelMsgBoxLayOut : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CBuffSwellOfMPCancelMsgBoxLayOut : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGemIntegrationUnityCheckMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGemIntegrationUnityCheckMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGemIntegrationUnityResultMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGemIntegrationUnityResultMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGemIntegrationDisjointCheckMsgBoxLayout :public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGemIntegrationDisjointCheckMsgBoxLayout :public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGemIntegrationDisjointResultMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGemIntegrationDisjointResultMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CChaosCastleTimeCheckMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CChaosCastleTimeCheckMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CHarvestEventLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CHarvestEventLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CWhiteAngelEventLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CWhiteAngelEventLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCanNotUseWordMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCanNotUseWordMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
     };
 
-    class CMixCheckMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CMixCheckMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUseReviveCharmMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUseReviveCharmMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUsePortalCharmMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUsePortalCharmMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
-    class CReturnPortalCharmMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CReturnPortalCharmMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CDuelCreateErrorMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CDuelWatchErrorMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CDuelCreateErrorMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CDoppelGangerMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CDuelWatchErrorMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildRelationShipMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CDoppelGangerMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCastleMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildRelationShipMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CSiegeLevelMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCastleMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-    class CSiegeGiveUpMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-    class CGatemanMoneyMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-    class CGatemanFailMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CQuestGiveUpMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CSiegeLevelMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    };
+    class CSiegeGiveUpMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
+    {
+    public:
+        bool SetLayout();
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    };
+    class CGatemanMoneyMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
+    {
+    public:
+        bool SetLayout();
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    };
+    class CGatemanFailMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
+    {
+    public:
+        bool SetLayout();
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    };
+
+    class CQuestGiveUpMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
+    {
+    public:
+        bool SetLayout();
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
-    class CQuestCountLimitMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CQuestCountLimitMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-    class CHighValueItemCheckMsgBoxLayout : public TMsgBoxLayout<CNewUI3DItemCommonMsgBox>
+    class CHighValueItemCheckMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUseFruitMsgBoxLayout : public TMsgBoxLayout<CNewUI3DItemCommonMsgBox>
+    class CUseFruitMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUsePartChargeFruitMsgBoxLayout : public TMsgBoxLayout<CNewUI3DItemCommonMsgBox>
+    class CUsePartChargeFruitMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class COsbourneMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class COsbourneMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPersonalShopItemValueCheckMsgBoxLayout : public TMsgBoxLayout<CNewUI3DItemCommonMsgBox>
+    class CPersonalShopItemValueCheckMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CPersonalShopItemBuyMsgBoxLayout : public TMsgBoxLayout<CNewUI3DItemCommonMsgBox>
+    class CPersonalShopItemBuyMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildOutPerson : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildOutPerson : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildBreakMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildBreakMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildPerson_Get_Out : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildPerson_Get_Out : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGuildPerson_Cancel_Position_MsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CGuildPerson_Cancel_Position_MsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUnionGuild_Break_MsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUnionGuild_Break_MsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUnionGuild_Out_MsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUnionGuild_Out_MsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CMaster_Level_Interface : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CMaster_Level_Interface : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Get_Temple : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Get_Temple : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Set_Temple : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Set_Temple : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Set_Temple1 : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Set_Temple1 : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Dont_Set_Temple : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Dont_Set_Temple : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Dont_Set_Temple1 : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Dont_Set_Temple1 : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Wat_Set_Temple1 : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Wat_Set_Temple1 : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Destroy_Set_Temple : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Destroy_Set_Temple : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Ing_Set_Temple : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Ing_Set_Temple : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CCry_Wolf_Result_Set_Temple : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CCry_Wolf_Result_Set_Temple : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUseSantaInvitationMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUseSantaInvitationMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CSantaTownLeaveMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CSantaTownLeaveMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CSantaTownSantaMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CSantaTownSantaMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUseRegistLuckyCoinMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUseRegistLuckyCoinMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CRegistOverLuckyCoinMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CRegistOverLuckyCoinMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CExchangeLuckyCoinMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CExchangeLuckyCoinMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CExchangeLuckyCoinInvenErrMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CExchangeLuckyCoinInvenErrMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CGambleBuyMsgBoxLayout : public TMsgBoxLayout<CNewUI3DItemCommonMsgBox>
+    class CGambleBuyMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CEmpireGuardianMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CEmpireGuardianMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CUnitedMarketPlaceMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CUnitedMarketPlaceMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
-    class CLuckyItemMsgBoxLayout : public TMsgBoxLayout<CNewUICommonMessageBox>
+    class CLuckyItemMsgBoxLayout : public TMsgBoxLayout<CCommonMessageBox>
     {
     public:
         bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 }
 

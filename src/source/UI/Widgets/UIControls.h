@@ -1544,7 +1544,7 @@ struct IGS_PackBuyList
     BOOL m_bIsSelected;
     wchar_t m_pszItemName[32];
     wchar_t m_nItemInfo[32];
-    CRadioButton m_CheckBtn;
+    ::CRadioButton m_CheckBtn;
 };
 
 typedef struct
@@ -1561,7 +1561,7 @@ typedef struct
     wchar_t m_szItemPeriod[MAX_TEXT_LENGTH];
     wchar_t m_szAttribute[MAX_TEXT_LENGTH];
 
-    CRadioButton m_RadioBtn;
+    ::CRadioButton m_RadioBtn;
 } IGS_SelectBuyItem;
 
 class CUIPackCheckBuyingListBox : public CUITextListBox<IGS_SelectBuyItem>

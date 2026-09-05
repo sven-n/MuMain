@@ -70,7 +70,7 @@ struct _MASTER_SKILL_TOOLTIP_FILE
 namespace mu::ui::window
 {
     //size = 404
-    class CNewUIMasterLevel : public CNewUIObj
+    class CMasterLevel : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -78,12 +78,12 @@ namespace mu::ui::window
             IMAGE_MASTER_INTERFACE = BITMAP_INTERFACE_MASTER_BEGIN,
         };
 
-        CNewUIMasterLevel();
-        ~CNewUIMasterLevel() override;
+        CMasterLevel();
+        ~CMasterLevel() override;
 
         BYTE GetConsumePoint() const;
         int GetCurSkillID() const;
-        bool Create(CNewUIManager* pNewUIMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
         
         void OpenMasterSkillTreeData(const wchar_t* path);
@@ -108,7 +108,7 @@ namespace mu::ui::window
 
         DWORD ButtonX[MAX_MASTER_SKILL_CATEGORY];
         DWORD ButtonY[MAX_MASTER_SKILL_CATEGORY];
-        CNewUIButton m_CloseBT;
+        CButton m_CloseBT;
         int CategoryPoint[MAX_MASTER_SKILL_CATEGORY];
         int skillPoint[MAX_MASTER_SKILL_CATEGORY][MAX_MASTER_TREE_RANK];
         BYTE ConsumePoint;
@@ -121,7 +121,7 @@ namespace mu::ui::window
         std::map<ActionSkillType, _MASTER_SKILL_TOOLTIP> map_masterSkillToolTip;
         std::map<BYTE, _MASTER_SKILLTREE_DATA> map_masterData;
         
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
 
         void SetPos();
         int SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent);

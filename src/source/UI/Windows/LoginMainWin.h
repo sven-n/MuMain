@@ -24,7 +24,7 @@ namespace Rml { class ElementDocument; }
 // harmless detection path); RmlUi renders 100% of this bar's visuals in every theme.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CNewUIObj. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
+// mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
 // (CServerSelWin's established pattern), matching this bar's small footprint. This migration also
 // permanently retired the last live consequence of the g_LoginWin/g_LoginMainWin hit-test-overlap
 // bug CreateLoginScene()'s own comment documents (RmlClickMenu()/RmlClickCredit() already bypassed
@@ -32,13 +32,13 @@ namespace Rml { class ElementDocument; }
 // list-order priority once this window's dispatch started running before any legacy m_WinList walk
 // at all, regardless of overlap) -- moot now that CLoginWin itself has since migrated too (Phase 3)
 // and there's no m_WinList walk left to race against.
-class CLoginMainWin : public mu::ui::window::CNewUIObj
+class CLoginMainWin : public mu::ui::window::CObject
 {
 protected:
     CButton m_aBtn[LMW_BTN_MAX];
 
-    // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CNewUIObj side (matching
-    // every pre-existing CNewUIObj window), so this window keeps its own bounding box, same as
+    // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CObject side (matching
+    // every pre-existing CObject window), so this window keeps its own bounding box, same as
     // CServerSelWin's established pattern.
     POINT m_ptPos;
     SIZE m_Size;
@@ -73,7 +73,7 @@ public:
     void RmlClickMenu() { OpenSysMenu(); }
     void RmlClickCredit() { OpenCredits(); }
 
-    // mu::ui::window::INewUIBase
+    // mu::ui::window::IObject
     bool Render() override
     {
         return true;

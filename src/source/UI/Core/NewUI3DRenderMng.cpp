@@ -1,4 +1,4 @@
-// NewUI3DRenderMng.cpp: implementation of the CNewUI3DRenderMng class.
+// NewUI3DRenderMng.cpp: implementation of the C3DRenderMng class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -13,9 +13,9 @@ using namespace mu::ui::window;
 
 namespace
 {
-UI::Scaling::Transform TransformForOwner(INewUI3DRenderObj* object)
+UI::Scaling::Transform TransformForOwner(I3DRenderObj* object)
 {
-    CNewUIObj* owner = dynamic_cast<CNewUIObj*>(object);
+    CObject* owner = dynamic_cast<CObject*>(object);
     if (!owner)
         owner = object->GetLayoutOwner();
     if (!owner)
@@ -23,7 +23,7 @@ UI::Scaling::Transform TransformForOwner(INewUI3DRenderObj* object)
     return UI::Scaling::TransformForLayout(owner->GetLayoutMode(), WindowWidth, WindowHeight);
 }
 
-void RenderWithOwnerLayout(INewUI3DRenderObj* object)
+void RenderWithOwnerLayout(I3DRenderObj* object)
 {
     UI::Scaling::ScopedActiveTransform layout(TransformForOwner(object), true);
     object->Render3D();
@@ -34,16 +34,16 @@ void RenderWithOwnerLayout(INewUI3DRenderObj* object)
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUI3DCamera::CNewUI3DCamera()
+mu::ui::window::C3DCamera::C3DCamera()
 {
 }
 
-mu::ui::window::CNewUI3DCamera::~CNewUI3DCamera()
+mu::ui::window::C3DCamera::~C3DCamera()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUI3DCamera::Create(int iCameraIndex, UINT uiWidth, UINT uiHeight, float fZOrder)
+bool mu::ui::window::C3DCamera::Create(int iCameraIndex, UINT uiWidth, UINT uiHeight, float fZOrder)
 {
     Release();
 
@@ -55,24 +55,24 @@ bool mu::ui::window::CNewUI3DCamera::Create(int iCameraIndex, UINT uiWidth, UINT
     return true;
 }
 
-void mu::ui::window::CNewUI3DCamera::Release()
+void mu::ui::window::C3DCamera::Release()
 {
     RemoveAll3DRenderObjs();
     m_deque2DEffects.clear();
 }
 
-void mu::ui::window::CNewUI3DCamera::UpdateDimensions(UINT uiWidth, UINT uiHeight)
+void mu::ui::window::C3DCamera::UpdateDimensions(UINT uiWidth, UINT uiHeight)
 {
     m_uiWidth = uiWidth;
     m_uiHeight = uiHeight;
 }
 
-bool mu::ui::window::CNewUI3DCamera::IsEmpty()
+bool mu::ui::window::C3DCamera::IsEmpty()
 {
     return m_list3DObjs.empty();
 }
 
-void mu::ui::window::CNewUI3DCamera::Add3DRenderObj(INewUI3DRenderObj* pObj)
+void mu::ui::window::C3DCamera::Add3DRenderObj(I3DRenderObj* pObj)
 {
     if (std::find(m_list3DObjs.begin(), m_list3DObjs.end(), pObj) == m_list3DObjs.end())
     {
@@ -80,7 +80,7 @@ void mu::ui::window::CNewUI3DCamera::Add3DRenderObj(INewUI3DRenderObj* pObj)
     }
 }
 
-void mu::ui::window::CNewUI3DCamera::Remove3DRenderObj(INewUI3DRenderObj* pObj)
+void mu::ui::window::C3DCamera::Remove3DRenderObj(I3DRenderObj* pObj)
 {
     auto vi = std::find(m_list3DObjs.begin(), m_list3DObjs.end(), pObj);
     if (vi != m_list3DObjs.end())
@@ -89,12 +89,12 @@ void mu::ui::window::CNewUI3DCamera::Remove3DRenderObj(INewUI3DRenderObj* pObj)
     }
 }
 
-void mu::ui::window::CNewUI3DCamera::RemoveAll3DRenderObjs()
+void mu::ui::window::C3DCamera::RemoveAll3DRenderObjs()
 {
     m_list3DObjs.clear();
 }
 
-void mu::ui::window::CNewUI3DCamera::RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void mu::ui::window::C3DCamera::RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     UI_2DEFFECT_INFO UI2DEffectInfo;
     UI2DEffectInfo.pCallbackFunc = pCallbackFunc;
@@ -106,7 +106,7 @@ void mu::ui::window::CNewUI3DCamera::RenderUI2DEffect(UI_2DEFFECT_CALLBACK pCall
     m_deque2DEffects.push_back(UI2DEffectInfo);
 }
 
-void mu::ui::window::CNewUI3DCamera::DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc)
+void mu::ui::window::C3DCamera::DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc)
 {
     auto di = m_deque2DEffects.begin();
     for (; di != m_deque2DEffects.end(); di++)
@@ -119,12 +119,12 @@ void mu::ui::window::CNewUI3DCamera::DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK
     }
 }
 
-int mu::ui::window::CNewUI3DCamera::GetCameraIndex() const
+int mu::ui::window::C3DCamera::GetCameraIndex() const
 {
     return m_iCameraIndex;
 }
 
-float mu::ui::window::CNewUI3DCamera::GetLayerDepth()
+float mu::ui::window::C3DCamera::GetLayerDepth()
 {
     //. fZOrder == fLayerDepth
     return m_fZOrder;
@@ -134,15 +134,15 @@ float mu::ui::window::CNewUI3DCamera::GetLayerDepth()
 // camera's projection formula across multiple soaks; DXP-08a deleted the diagnostic and the FFP
 // matrix-stack calls it was validating once GlobalUBO was confirmed the only consumer
 // — see Render()'s own comments below. Pre-implementation read of every
-// INewUI3DRenderObj::Render3D() implementer registered with this camera (12 call sites across
+// I3DRenderObj::Render3D() implementer registered with this camera (12 call sites across
 // NewUIMyInventory, NewUIInventoryCtrl, NewUIEmpireGuardianNPC, NewUINPCQuest,
 // NewUIDoppelGangerWindow, NewUICustomMessageBox, NewUICommonMessageBox, and 4 GameShop MsgBoxIGS*
 // dialogs) found none touch the GL matrix stack — they all just call RenderItem3D(), which carries no
 // GL model transform. (NewUIGoldBowmanLena/NewUIRegistrationLuckyCoin's own Render3D() methods are
 // NOT reached through this camera — they call EndBitmap()/gluPerspective2 directly themselves,
-// independent of CNewUI3DCamera.)
+// independent of C3DCamera.)
 
-void mu::ui::window::CNewUI3DCamera::Render3D()
+void mu::ui::window::C3DCamera::Render3D()
 {
     for (auto* object : m_list3DObjs)
     {
@@ -153,7 +153,7 @@ void mu::ui::window::CNewUI3DCamera::Render3D()
     }
 }
 
-bool mu::ui::window::CNewUI3DCamera::Render()
+bool mu::ui::window::C3DCamera::Render()
 {
     if (m_list3DObjs.empty())
         return true;
@@ -195,45 +195,45 @@ bool mu::ui::window::CNewUI3DCamera::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUI3DCamera::Update()
+bool mu::ui::window::C3DCamera::Update()
 {
     //. DOING NOTHING
     return true;
 }
 
-bool mu::ui::window::CNewUI3DCamera::UpdateMouseEvent()
+bool mu::ui::window::C3DCamera::UpdateMouseEvent()
 {
     //. DOING NOTHING
     return true;
 }
 
-bool mu::ui::window::CNewUI3DCamera::UpdateKeyEvent()
+bool mu::ui::window::C3DCamera::UpdateKeyEvent()
 {
     //. DOING NOTHING
     return true;
 }
 
-mu::ui::window::CNewUI3DRenderMng::CNewUI3DRenderMng()
+mu::ui::window::C3DRenderMng::C3DRenderMng()
 {
 }
 
-mu::ui::window::CNewUI3DRenderMng::~CNewUI3DRenderMng()
+mu::ui::window::C3DRenderMng::~C3DRenderMng()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUI3DRenderMng::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::C3DRenderMng::Create(CManager* pNewUIMng)
 {
     m_pNewUIMng = pNewUIMng;
     return true;
 }
 
-void mu::ui::window::CNewUI3DRenderMng::Release()
+void mu::ui::window::C3DRenderMng::Release()
 {
     RemoveAll3DRenderObjs();
 }
 
-void mu::ui::window::CNewUI3DRenderMng::UpdateAllCameraDimensions(UINT uiWidth, UINT uiHeight)
+void mu::ui::window::C3DRenderMng::UpdateAllCameraDimensions(UINT uiWidth, UINT uiHeight)
 {
     for (auto it = m_listCamera.begin(); it != m_listCamera.end(); ++it)
     {
@@ -244,15 +244,15 @@ void mu::ui::window::CNewUI3DRenderMng::UpdateAllCameraDimensions(UINT uiWidth, 
     }
 }
 
-void mu::ui::window::CNewUI3DRenderMng::Add3DRenderObj(INewUI3DRenderObj* pObj, float fZOrder/* = INFORMATION_CAMERA_Z_ORDER*/)
+void mu::ui::window::C3DRenderMng::Add3DRenderObj(I3DRenderObj* pObj, float fZOrder/* = INFORMATION_CAMERA_Z_ORDER*/)
 {
-    CNewUI3DCamera* pCamera = FindCamera(fZOrder);
+    C3DCamera* pCamera = FindCamera(fZOrder);
     if (NULL == pCamera)
     {
         int iAvailableCameraIndex = FindAvailableCameraIndex();
         if (-1 != iAvailableCameraIndex)
         {
-            pCamera = new CNewUI3DCamera;
+            pCamera = new C3DCamera;
             pCamera->Create(iAvailableCameraIndex, WindowWidth, WindowHeight, fZOrder);
             pCamera->Add3DRenderObj(pObj);
             m_pNewUIMng->AddUIObj(iAvailableCameraIndex, pCamera);
@@ -270,7 +270,7 @@ void mu::ui::window::CNewUI3DRenderMng::Add3DRenderObj(INewUI3DRenderObj* pObj, 
         pCamera->Add3DRenderObj(pObj);
     }
 }
-void mu::ui::window::CNewUI3DRenderMng::Remove3DRenderObj(INewUI3DRenderObj* pObj)
+void mu::ui::window::C3DRenderMng::Remove3DRenderObj(I3DRenderObj* pObj)
 {
     auto li = m_listCamera.begin();
     for (; li != m_listCamera.end(); li++)
@@ -286,7 +286,7 @@ void mu::ui::window::CNewUI3DRenderMng::Remove3DRenderObj(INewUI3DRenderObj* pOb
     }
 }
 
-void mu::ui::window::CNewUI3DRenderMng::RemoveAll3DRenderObjs()
+void mu::ui::window::C3DRenderMng::RemoveAll3DRenderObjs()
 {
     auto li = m_listCamera.begin();
     for (; li != m_listCamera.end(); li++)
@@ -297,21 +297,21 @@ void mu::ui::window::CNewUI3DRenderMng::RemoveAll3DRenderObjs()
     m_listCamera.clear();
 }
 
-void mu::ui::window::CNewUI3DRenderMng::RenderUI2DEffect(float fZOrder, UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void mu::ui::window::C3DRenderMng::RenderUI2DEffect(float fZOrder, UI_2DEFFECT_CALLBACK pCallbackFunc, LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
-    CNewUI3DCamera* pCamera = FindCamera(fZOrder);
+    C3DCamera* pCamera = FindCamera(fZOrder);
     if (pCamera)
         pCamera->RenderUI2DEffect(pCallbackFunc, pClass, dwParamA, dwParamB);
 }
 
-void mu::ui::window::CNewUI3DRenderMng::DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc)
+void mu::ui::window::C3DRenderMng::DeleteUI2DEffectObject(UI_2DEFFECT_CALLBACK pCallbackFunc)
 {
     auto li = m_listCamera.begin();
     for (; li != m_listCamera.end(); li++)
         (*li)->DeleteUI2DEffectObject(pCallbackFunc);
 }
 
-CNewUI3DCamera* mu::ui::window::CNewUI3DRenderMng::FindCamera(float fZOrder)
+C3DCamera* mu::ui::window::C3DRenderMng::FindCamera(float fZOrder)
 {
     auto li = m_listCamera.begin();
     for (; li != m_listCamera.end(); li++)
@@ -320,7 +320,7 @@ CNewUI3DCamera* mu::ui::window::CNewUI3DRenderMng::FindCamera(float fZOrder)
     return NULL;
 }
 
-int mu::ui::window::CNewUI3DRenderMng::FindAvailableCameraIndex()
+int mu::ui::window::C3DRenderMng::FindAvailableCameraIndex()
 {
     for (int iIndex = INTERFACE_3DRENDERING_CAMERA_BEGIN; iIndex < INTERFACE_3DRENDERING_CAMERA_END; iIndex++)
     {

@@ -1,7 +1,7 @@
 //*****************************************************************************
 // File: NewUITrade.h
 //
-// Desc: interface for the CNewUITrade class.
+// Desc: interface for the CTrade class.
 //       Trade Window class.
 //
 // producer: Ahn Sang-Kyu
@@ -20,25 +20,25 @@
 
 namespace mu::ui::window
 {
-    class CNewUITrade : public CNewUIObj
+    class CTrade : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_TRADE_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_TRADE_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_TRADE_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_TRADE_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_TRADE_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_TRADE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_TRADE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_TRADE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_TRADE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_TRADE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
 
-            IMAGE_TRADE_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
+            IMAGE_TRADE_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
             IMAGE_TRADE_NICK_BACK = BITMAP_INTERFACE_NEW_TRADE_BEGIN,
-            IMAGE_TRADE_MONEY = CNewUIMyInventory::IMAGE_INVENTORY_MONEY,
+            IMAGE_TRADE_MONEY = CMyInventory::IMAGE_INVENTORY_MONEY,
             IMAGE_TRADE_CONFIRM = BITMAP_INTERFACE_NEW_TRADE_BEGIN + 1,
             IMAGE_TRADE_WARNING_ARROW = BITMAP_CURSOR + 7,
 
-            IMAGE_TRADE_BTN_CLOSE = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_TRADE_BTN_ZEN_INPUT = CNewUIStorageInventory::IMAGE_STORAGE_BTN_INSERT_ZEN,
+            IMAGE_TRADE_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_TRADE_BTN_ZEN_INPUT = CStorageInventory::IMAGE_STORAGE_BTN_INSERT_ZEN,
         };
 
     private:
@@ -60,12 +60,12 @@ namespace mu::ui::window
             MAX_BTN
         };
 
-        CNewUIManager* m_pNewUIMng;            // UI Manager
+        CManager* m_pNewUIMng;            // UI Manager
         POINT          m_Pos;                  // Window position
-        CNewUIButton   m_abtn[MAX_BTN];        // Buttons
+        CButton   m_abtn[MAX_BTN];        // Buttons
         POINT          m_posMyConfirm;         // My confirmation button position
-        CNewUIInventoryCtrl* m_pYourInvenCtrl; // Other player's item control
-        CNewUIInventoryCtrl* m_pMyInvenCtrl;   // My item control
+        CInventoryCtrl* m_pYourInvenCtrl; // Other player's item control
+        CInventoryCtrl* m_pMyInvenCtrl;   // My item control
         ITEM           m_aYourInvenBackUp[MAX_TRADE_INVEN]; // Other player's item backup
 
         wchar_t        m_szYourID[MAX_USERNAME_SIZE + 1]; // Other player's ID
@@ -80,10 +80,10 @@ namespace mu::ui::window
         bool           m_bTradeAlert;          // Trade warning alert
 
     public:
-        CNewUITrade();
-        virtual ~CNewUITrade();
+        CTrade();
+        virtual ~CTrade();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -98,12 +98,12 @@ namespace mu::ui::window
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
         // Returns the other player's (grid-based) trade inventory control.
-        CNewUIInventoryCtrl* GetYourInvenCtrl() const
+        CInventoryCtrl* GetYourInvenCtrl() const
         {
             return m_pYourInvenCtrl;
         }
         // Returns the local player's (grid-based) trade inventory control.
-        CNewUIInventoryCtrl* GetMyInvenCtrl() const
+        CInventoryCtrl* GetMyInvenCtrl() const
         {
             return m_pMyInvenCtrl;
         }

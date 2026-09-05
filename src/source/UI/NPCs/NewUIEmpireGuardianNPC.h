@@ -1,4 +1,4 @@
-// CNewUIEmpireGuardianNPC.h: interface for the CNewUIEmpireGuardianNPC class.
+// CEmpireGuardianNPC.h: interface for the CEmpireGuardianNPC class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -10,18 +10,18 @@
 
 namespace mu::ui::window
 {
-    class CNewUIEmpireGuardianNPC : public CNewUIObj, public INewUI3DRenderObj
+    class CEmpireGuardianNPC : public CObject, public I3DRenderObj
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_EMPIREGUARDIAN_NPC_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_EMPIREGUARDIAN_NPC_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_EMPIREGUARDIAN_NPC_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_EMPIREGUARDIAN_NPC_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_EMPIREGUARDIAN_NPC_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_EMPIREGUARDIAN_NPC_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_EMPIREGUARDIAN_NPC_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_EMPIREGUARDIAN_NPC_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_EMPIREGUARDIAN_NPC_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_EMPIREGUARDIAN_NPC_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_EMPIREGUARDIAN_NPC_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_EMPIREGUARDIAN_NPC_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_EMPIREGUARDIAN_NPC_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
+            IMAGE_EMPIREGUARDIAN_NPC_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
         };
 
     private:
@@ -31,19 +31,19 @@ namespace mu::ui::window
             NPC_WINDOW_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
 
         POINT				m_Pos;
-        CNewUIButton		m_btPositive;
-        CNewUIButton		m_btNegative;
+        CButton		m_btPositive;
+        CButton		m_btNegative;
         bool				m_bCanClick;
 
     public:
-        CNewUIEmpireGuardianNPC();
-        virtual ~CNewUIEmpireGuardianNPC();
+        CEmpireGuardianNPC();
+        virtual ~CEmpireGuardianNPC();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -62,7 +62,7 @@ namespace mu::ui::window
         void ClosingProcess();
 
     private:
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
+        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
         void LoadImages();
         void UnloadImages();
 

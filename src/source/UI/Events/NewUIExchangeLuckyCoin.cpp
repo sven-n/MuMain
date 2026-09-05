@@ -1,4 +1,4 @@
-// NewUIExchangeLuckyCoin.cpp: implementation of the CNewUIExchangeLuckyCoin class.
+// NewUIExchangeLuckyCoin.cpp: implementation of the CExchangeLuckyCoin class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIExchangeLuckyCoin::CNewUIExchangeLuckyCoin()
+CExchangeLuckyCoin::CExchangeLuckyCoin()
 {
     m_pNewUIMng = NULL;
     memset(&m_Pos, 0, sizeof(POINT));
@@ -22,12 +22,12 @@ CNewUIExchangeLuckyCoin::CNewUIExchangeLuckyCoin()
     memset(&m_FirstBtnPos, 0, sizeof(POINT));
 }
 
-CNewUIExchangeLuckyCoin::~CNewUIExchangeLuckyCoin()
+CExchangeLuckyCoin::~CExchangeLuckyCoin()
 {
     Release();
 }
 
-bool CNewUIExchangeLuckyCoin::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CExchangeLuckyCoin::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -63,7 +63,7 @@ bool CNewUIExchangeLuckyCoin::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIExchangeLuckyCoin::Release()
+void CExchangeLuckyCoin::Release()
 {
     UnloadImages();
 
@@ -74,7 +74,7 @@ void CNewUIExchangeLuckyCoin::Release()
     }
 }
 
-void CNewUIExchangeLuckyCoin::SetPos(int x, int y)
+void CExchangeLuckyCoin::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -92,13 +92,13 @@ void CNewUIExchangeLuckyCoin::SetPos(int x, int y)
     }
 }
 
-void CNewUIExchangeLuckyCoin::SetBtnPos(int x, int y)
+void CExchangeLuckyCoin::SetBtnPos(int x, int y)
 {
     m_FirstBtnPos.x = x;
     m_FirstBtnPos.y = y;
 }
 
-bool CNewUIExchangeLuckyCoin::UpdateMouseEvent()
+bool CExchangeLuckyCoin::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -109,7 +109,7 @@ bool CNewUIExchangeLuckyCoin::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIExchangeLuckyCoin::UpdateKeyEvent()
+bool CExchangeLuckyCoin::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN) == true)
     {
@@ -123,7 +123,7 @@ bool CNewUIExchangeLuckyCoin::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIExchangeLuckyCoin::Update()
+bool CExchangeLuckyCoin::Update()
 {
     if (!IsVisible())
         return true;
@@ -131,7 +131,7 @@ bool CNewUIExchangeLuckyCoin::Update()
     return true;
 }
 
-bool CNewUIExchangeLuckyCoin::Render()
+bool CExchangeLuckyCoin::Render()
 {
     EnableAlphaTest();
 
@@ -144,7 +144,7 @@ bool CNewUIExchangeLuckyCoin::Render()
     return true;
 }
 
-void CNewUIExchangeLuckyCoin::RenderFrame()
+void CExchangeLuckyCoin::RenderFrame()
 {
     RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK, m_Pos.x, m_Pos.y, float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH), float(EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT));
     RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP, m_Pos.x, m_Pos.y, float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH), 64.f);
@@ -153,7 +153,7 @@ void CNewUIExchangeLuckyCoin::RenderFrame()
     RenderImage(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT) - 45.f, float(EXCHANGE_LUCKYCOIN_WINDOW_WIDTH), 45.f);
 }
 
-void CNewUIExchangeLuckyCoin::RenderTexts()
+void CExchangeLuckyCoin::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -174,7 +174,7 @@ void CNewUIExchangeLuckyCoin::RenderTexts()
     g_pRenderText->RenderText(m_TextPos.x, iTextPosy, I18N::Game::WillNotBeReturned, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, 0, RT3_SORT_CENTER);
 }
 
-void CNewUIExchangeLuckyCoin::RenderBtn()
+void CExchangeLuckyCoin::RenderBtn()
 {
     for (int i = 0; i < MAX_EXCHANGE_BTN; i++)
     {
@@ -183,7 +183,7 @@ void CNewUIExchangeLuckyCoin::RenderBtn()
     m_BtnExit.Render();
 }
 
-bool CNewUIExchangeLuckyCoin::BtnProcess()
+bool CExchangeLuckyCoin::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN))
@@ -216,12 +216,12 @@ bool CNewUIExchangeLuckyCoin::BtnProcess()
     return false;
 }
 
-float CNewUIExchangeLuckyCoin::GetLayerDepth()
+float CExchangeLuckyCoin::GetLayerDepth()
 {
     return 4.2f;
 }
 
-void CNewUIExchangeLuckyCoin::OpenningProcess()
+void CExchangeLuckyCoin::OpenningProcess()
 {
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_INVENTORY);
     UnLockExchangeBtn();
@@ -229,14 +229,14 @@ void CNewUIExchangeLuckyCoin::OpenningProcess()
     PlayBuffer(SOUND_CLICK01);
 }
 
-void CNewUIExchangeLuckyCoin::ClosingProcess()
+void CExchangeLuckyCoin::ClosingProcess()
 {
     PlayBuffer(SOUND_CLICK01);
     g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 }
 
-void CNewUIExchangeLuckyCoin::LockExchangeBtn()
+void CExchangeLuckyCoin::LockExchangeBtn()
 {
     for (int i = 0; i < 3; i++)
     {
@@ -245,7 +245,7 @@ void CNewUIExchangeLuckyCoin::LockExchangeBtn()
     }
 }
 
-void CNewUIExchangeLuckyCoin::UnLockExchangeBtn()
+void CExchangeLuckyCoin::UnLockExchangeBtn()
 {
     for (int i = 0; i < 3; i++)
     {
@@ -254,7 +254,7 @@ void CNewUIExchangeLuckyCoin::UnLockExchangeBtn()
     }
 }
 
-void CNewUIExchangeLuckyCoin::LoadImages()
+void CExchangeLuckyCoin::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP, GL_LINEAR);
@@ -265,7 +265,7 @@ void CNewUIExchangeLuckyCoin::LoadImages()
     LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN, GL_LINEAR);				// Exchange Button
 }
 
-void CNewUIExchangeLuckyCoin::UnloadImages()
+void CExchangeLuckyCoin::UnloadImages()
 {
     DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK);
     DeleteBitmap(IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP);

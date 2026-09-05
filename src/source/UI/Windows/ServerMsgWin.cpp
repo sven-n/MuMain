@@ -95,7 +95,7 @@ int CServerMsgWin::SetLine(int nLine)
 
 void CServerMsgWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
     for (auto& sprite : m_aSprBg)
         sprite.Show(bShow);
 }

@@ -1,4 +1,4 @@
-// NewUIChatCommandWindow.cpp: implementation of the CNewUIChatCommandWindow class.
+// NewUIChatCommandWindow.cpp: implementation of the CChatCommandWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -79,7 +79,7 @@ void RenderValueBackground(int x, int y, int width, int height)
 }
 } // namespace
 
-mu::ui::window::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
+mu::ui::window::CChatCommandWindow::CChatCommandWindow()
 {
     m_pNewUIMng = nullptr;
     m_Pos.x = 0;
@@ -90,12 +90,12 @@ mu::ui::window::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
     m_editedParameter = -1;
 }
 
-mu::ui::window::CNewUIChatCommandWindow::~CNewUIChatCommandWindow()
+mu::ui::window::CChatCommandWindow::~CChatCommandWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CChatCommandWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (pNewUIMng == nullptr)
     {
@@ -121,7 +121,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::Release()
+void mu::ui::window::CChatCommandWindow::Release()
 {
     UnloadImages();
     m_pValueInput.reset();
@@ -133,7 +133,7 @@ void mu::ui::window::CNewUIChatCommandWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::SetPos(int x, int y)
+void mu::ui::window::CChatCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -144,7 +144,7 @@ void mu::ui::window::CNewUIChatCommandWindow::SetPos(int x, int y)
                                 BUTTON_WIDTH, BUTTON_HEIGHT);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::InitButtons()
+void mu::ui::window::CChatCommandWindow::InitButtons()
 {
     wchar_t closeText[256] = {};
     mu_swprintf_s(closeText, I18N::Game::CloseS, L"J");
@@ -156,17 +156,17 @@ void mu::ui::window::CNewUIChatCommandWindow::InitButtons()
     m_BtnRight.ChangeButtonImgState(true, IMAGE_CHATCOMMAND_BTN, true);
 }
 
-float mu::ui::window::CNewUIChatCommandWindow::GetLayerDepth()
+float mu::ui::window::CChatCommandWindow::GetLayerDepth()
 {
     return LayerDepth;
 }
 
-float mu::ui::window::CNewUIChatCommandWindow::GetKeyEventOrder()
+float mu::ui::window::CChatCommandWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::OpenningProcess()
+void mu::ui::window::CChatCommandWindow::OpenningProcess()
 {
     // The player may have gained or lost commands since the last time, so the
     // window always starts at the top of a freshly ordered list.
@@ -175,12 +175,12 @@ void mu::ui::window::CNewUIChatCommandWindow::OpenningProcess()
     ShowPage(PAGE_COMMANDS);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::ClosingProcess()
+void mu::ui::window::CChatCommandWindow::ClosingProcess()
 {
     StopEditing();
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RebuildCommandOrder()
+void mu::ui::window::CChatCommandWindow::RebuildCommandOrder()
 {
     const auto& commands = Catalog().GetCommands();
     m_commandOrder.clear();
@@ -196,7 +196,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RebuildCommandOrder()
                           { return GameLogic::Commands::Favourites::Contains(commands[index].Command); });
 }
 
-const ChatCommand* mu::ui::window::CNewUIChatCommandWindow::GetCommandAt(int row) const
+const ChatCommand* mu::ui::window::CChatCommandWindow::GetCommandAt(int row) const
 {
     if (row < 0 || static_cast<size_t>(row) >= m_commandOrder.size())
     {
@@ -213,12 +213,12 @@ const ChatCommand* mu::ui::window::CNewUIChatCommandWindow::GetCommandAt(int row
     return &commands[index];
 }
 
-const ChatCommand* mu::ui::window::CNewUIChatCommandWindow::GetSelectedCommand() const
+const ChatCommand* mu::ui::window::CChatCommandWindow::GetSelectedCommand() const
 {
     return GetCommandAt(m_selectedRow);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::ShowPage(ePAGE page)
+void mu::ui::window::CChatCommandWindow::ShowPage(ePAGE page)
 {
     StopEditing();
     m_page = page;
@@ -243,7 +243,7 @@ void mu::ui::window::CNewUIChatCommandWindow::ShowPage(ePAGE page)
     }
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::PickCommand(int row)
+void mu::ui::window::CChatCommandWindow::PickCommand(int row)
 {
     m_selectedRow = row;
     m_parameterValues.clear();
@@ -268,7 +268,7 @@ void mu::ui::window::CNewUIChatCommandWindow::PickCommand(int row)
     ShowPage(PAGE_PARAMETERS);
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::AreRequiredValuesSet() const
+bool mu::ui::window::CChatCommandWindow::AreRequiredValuesSet() const
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -287,7 +287,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::AreRequiredValuesSet() const
     return true;
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::ExecuteSelectedCommand()
+void mu::ui::window::CChatCommandWindow::ExecuteSelectedCommand()
 {
     CommitEditedValue();
 
@@ -310,7 +310,7 @@ void mu::ui::window::CNewUIChatCommandWindow::ExecuteSelectedCommand()
     g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND_LIST);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::ExecuteTemplate(size_t index)
+void mu::ui::window::CChatCommandWindow::ExecuteTemplate(size_t index)
 {
     if (index >= m_templates.size())
     {
@@ -336,7 +336,7 @@ void mu::ui::window::CNewUIChatCommandWindow::ExecuteTemplate(size_t index)
     g_pSystemLogBox->AddText(I18N::Game::ChatCommandsUnknownCommand, mu::ui::window::TYPE_ERROR_MESSAGE);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
+void mu::ui::window::CChatCommandWindow::SaveSelectedAsTemplate()
 {
     CommitEditedValue();
 
@@ -354,7 +354,7 @@ void mu::ui::window::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
+void mu::ui::window::CChatCommandWindow::ToggleFavouriteOfSelected()
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -379,7 +379,7 @@ void mu::ui::window::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
     }
 }
 
-std::vector<std::wstring> mu::ui::window::CNewUIChatCommandWindow::SplitValidValues(const std::wstring& validValues)
+std::vector<std::wstring> mu::ui::window::CChatCommandWindow::SplitValidValues(const std::wstring& validValues)
 {
     std::vector<std::wstring> values;
     size_t start = 0;
@@ -397,14 +397,14 @@ std::vector<std::wstring> mu::ui::window::CNewUIChatCommandWindow::SplitValidVal
     }
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::IsPickedFromList(const ChatCommandParameter& parameter)
+bool mu::ui::window::CChatCommandWindow::IsPickedFromList(const ChatCommandParameter& parameter)
 {
     // The server sends the accepted values for everything which only takes a
     // known set of them, booleans included.
     return !parameter.ValidValues.empty();
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterIndex)
+void mu::ui::window::CChatCommandWindow::CycleParameterValue(size_t parameterIndex)
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr || parameterIndex >= command->Parameters.size())
@@ -435,7 +435,7 @@ void mu::ui::window::CNewUIChatCommandWindow::CycleParameterValue(size_t paramet
     m_parameterValues[parameterIndex] = (next >= values.size()) ? std::wstring() : values[next];
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
+void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
 {
     CommitEditedValue();
 
@@ -463,7 +463,7 @@ void mu::ui::window::CNewUIChatCommandWindow::BeginEditingParameter(size_t param
     SetRelatedWnd(m_pValueInput->GetHandle());
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::CommitEditedValue()
+void mu::ui::window::CChatCommandWindow::CommitEditedValue()
 {
     if (m_editedParameter < 0 || m_pValueInput == nullptr ||
         static_cast<size_t>(m_editedParameter) >= m_parameterValues.size())
@@ -476,7 +476,7 @@ void mu::ui::window::CNewUIChatCommandWindow::CommitEditedValue()
     m_parameterValues[m_editedParameter] = text;
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::StopEditing()
+void mu::ui::window::CChatCommandWindow::StopEditing()
 {
     CommitEditedValue();
     m_editedParameter = -1;
@@ -489,7 +489,7 @@ void mu::ui::window::CNewUIChatCommandWindow::StopEditing()
     SetRelatedWnd(g_hWnd);
 }
 
-int mu::ui::window::CNewUIChatCommandWindow::GetScrollableRowCount() const
+int mu::ui::window::CChatCommandWindow::GetScrollableRowCount() const
 {
     if (m_page == PAGE_TEMPLATES)
     {
@@ -499,7 +499,7 @@ int mu::ui::window::CNewUIChatCommandWindow::GetScrollableRowCount() const
     return static_cast<int>(m_commandOrder.size());
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
+void mu::ui::window::CChatCommandWindow::WrapDescriptionOfSelected()
 {
     m_descriptionLines.clear();
 
@@ -513,7 +513,7 @@ void mu::ui::window::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
     m_descriptionLines = WrapTextToWidth(command->Description, CONTENT_WIDTH, MeasureInReferenceUnits);
 }
 
-int mu::ui::window::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() const
+int mu::ui::window::CChatCommandWindow::GetVisibleDescriptionLineCount() const
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -529,19 +529,19 @@ int mu::ui::window::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() co
     return std::min(fitting, static_cast<int>(m_descriptionLines.size()));
 }
 
-int mu::ui::window::CNewUIChatCommandWindow::GetParameterTop() const
+int mu::ui::window::CChatCommandWindow::GetParameterTop() const
 {
     return m_Pos.y + CONTENT_TOP + (GetVisibleDescriptionLineCount() + 1) * ROW_HEIGHT;
 }
 
-int mu::ui::window::CNewUIChatCommandWindow::GetActionTop() const
+int mu::ui::window::CChatCommandWindow::GetActionTop() const
 {
     const auto* command = GetSelectedCommand();
     const auto parameterCount = (command == nullptr) ? 0 : static_cast<int>(command->Parameters.size());
     return GetParameterTop() + parameterCount * PARAMETER_HEIGHT + ROW_HEIGHT;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
 {
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND_LIST))
     {
@@ -603,7 +603,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::UpdateMouseEvent()
     return false;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
+bool mu::ui::window::CChatCommandWindow::UpdateCommandPageMouseEvent()
 {
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
@@ -625,7 +625,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
     return false;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
+bool mu::ui::window::CChatCommandWindow::UpdateParameterPageMouseEvent()
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -672,7 +672,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
     return false;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::UpdateTemplatePageMouseEvent()
+bool mu::ui::window::CChatCommandWindow::UpdateTemplatePageMouseEvent()
 {
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
@@ -706,7 +706,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::UpdateTemplatePageMouseEvent()
     return false;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CChatCommandWindow::UpdateKeyEvent()
 {
     if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND_LIST))
     {
@@ -762,12 +762,12 @@ bool mu::ui::window::CNewUIChatCommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::Update()
+bool mu::ui::window::CChatCommandWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIChatCommandWindow::Render()
+bool mu::ui::window::CChatCommandWindow::Render()
 {
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -810,7 +810,7 @@ bool mu::ui::window::CNewUIChatCommandWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RenderBaseWindow()
+void mu::ui::window::CChatCommandWindow::RenderBaseWindow()
 {
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
@@ -833,7 +833,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RenderBaseWindow()
                 float(FRAME_BOTTOM_HEIGHT));
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RenderTitle()
+void mu::ui::window::CChatCommandWindow::RenderTitle()
 {
     const wchar_t* title = I18N::Game::ChatCommandsTitle;
     if (m_page == PAGE_TEMPLATES)
@@ -851,7 +851,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RenderTitle()
     g_pRenderText->SetFont(g_hFont);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RenderCommandPage()
+void mu::ui::window::CChatCommandWindow::RenderCommandPage()
 {
     if (m_commandOrder.empty())
     {
@@ -885,7 +885,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RenderCommandPage()
     }
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RenderParameterPage()
+void mu::ui::window::CChatCommandWindow::RenderParameterPage()
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -920,7 +920,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RenderParameterPage()
     RenderLine(m_Pos.x + CONTENT_LEFT, actionTop + ROW_HEIGHT, I18N::Game::ChatCommandsSaveTemplate, CONTENT_WIDTH);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, int y)
+void mu::ui::window::CChatCommandWindow::RenderParameter(size_t parameterIndex, int y)
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr || parameterIndex >= command->Parameters.size())
@@ -957,7 +957,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RenderParameter(size_t parameterIn
     RenderLine(m_Pos.x + CONTENT_LEFT + 2, y + ROW_HEIGHT + 1, shown, CONTENT_WIDTH - 4);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::RenderTemplatePage()
+void mu::ui::window::CChatCommandWindow::RenderTemplatePage()
 {
     if (m_templates.empty())
     {
@@ -983,7 +983,7 @@ void mu::ui::window::CNewUIChatCommandWindow::RenderTemplatePage()
     }
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::LoadImages()
+void mu::ui::window::CChatCommandWindow::LoadImages()
 {
     // The ids are shared with the other windows, but every window loads what it
     // draws - relying on another one having done it means an empty frame when
@@ -997,7 +997,7 @@ void mu::ui::window::CNewUIChatCommandWindow::LoadImages()
     LoadBitmap(L"Interface/newui_btn_empty_small.tga", IMAGE_CHATCOMMAND_BTN, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIChatCommandWindow::UnloadImages()
+void mu::ui::window::CChatCommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CHATCOMMAND_BACK);
     DeleteBitmap(IMAGE_CHATCOMMAND_TOP);

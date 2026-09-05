@@ -1,4 +1,4 @@
-// NewUIDuelWatchUserListWindow.h: interface for the CNewUIDuelWatchUserListWindow class.
+// NewUIDuelWatchUserListWindow.h: interface for the CDuelWatchUserListWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -8,7 +8,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIDuelWatchUserListWindow : public CNewUIObj
+    class CDuelWatchUserListWindow : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -16,14 +16,14 @@ namespace mu::ui::window
             IMAGE_DUELWATCH_USERLIST_BOX = BITMAP_BUFFWATCH_USERLIST_BEGIN,
         };
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
     public:
-        CNewUIDuelWatchUserListWindow();
-        virtual ~CNewUIDuelWatchUserListWindow();
+        CDuelWatchUserListWindow();
+        virtual ~CDuelWatchUserListWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

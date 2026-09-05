@@ -1,4 +1,4 @@
-// NewUIInventoryCtrl.h: interface for the CNewUIInventoryCtrl class.
+// NewUIInventoryCtrl.h: interface for the CInventoryCtrl class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIINVENTORYCTRL_H__3A635AF1_3FFA_44B5_9BF6_3DFE0F061927__INCLUDED_)
@@ -28,8 +28,8 @@ namespace UI::Items::Grid
 
 namespace mu::ui::window
 {
-    class CNewUIItemMng;
-    class CNewUIInventoryCtrl;
+    class CItemMng;
+    class CInventoryCtrl;
 
     enum
     {
@@ -52,10 +52,10 @@ namespace mu::ui::window
         COLOR_STATE_WARNING,
     };
 
-    class CNewUIPickedItem : public INewUI3DRenderObj
+    class CPickedItem : public I3DRenderObj
     {
-        CNewUIItemMng* m_pNewItemMng;
-        CNewUIInventoryCtrl* m_pSrcInventory;
+        CItemMng* m_pNewItemMng;
+        CInventoryCtrl* m_pSrcInventory;
         ITEM* m_pPickedItem;
 
         bool m_bShow;
@@ -64,14 +64,14 @@ namespace mu::ui::window
         POINT m_PickupOffset;
 
     public:
-        CNewUIPickedItem();
-        virtual ~CNewUIPickedItem();
+        CPickedItem();
+        virtual ~CPickedItem();
 
-        bool Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem,
+        bool Create(CItemMng* pNewItemMng, CInventoryCtrl* pSrc, ITEM* pItem,
                     bool preservePickupAnchor);
         void Release();
 
-        CNewUIInventoryCtrl* GetOwnerInventory() const;
+        CInventoryCtrl* GetOwnerInventory() const;
         STORAGE_TYPE GetSourceStorageType() const;
         ITEM* GetItem() const;
 
@@ -81,18 +81,18 @@ namespace mu::ui::window
         void GetRect(RECT& rcBox);
 
         int GetSourceLinealPos();
-        bool GetTargetPos(CNewUIInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY);
-        int GetTargetLinealPos(CNewUIInventoryCtrl* pDest);
+        bool GetTargetPos(CInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY);
+        int GetTargetLinealPos(CInventoryCtrl* pDest);
 
         bool IsVisible() const;
-        CNewUIObj* GetLayoutOwner() const override;
+        CObject* GetLayoutOwner() const override;
         void ShowPickedItem();
         void HidePickedItem();
 
         void Render3D();
     };
 
-    class CNewUIInventoryCtrl : public INewUI3DRenderObj
+    class CInventoryCtrl : public I3DRenderObj
     {
     public:
         enum EVENT_STATE
@@ -136,11 +136,11 @@ namespace mu::ui::window
 
         typedef std::vector<ITEM*>	type_vec_item;
 
-        static CNewUIPickedItem* ms_pPickedItem;
+        static CPickedItem* ms_pPickedItem;
 
-        CNewUI3DRenderMng* m_pNew3DRenderMng;
-        CNewUIItemMng* m_pNewItemMng;
-        CNewUIObj* m_pOwner;
+        C3DRenderMng* m_pNew3DRenderMng;
+        CItemMng* m_pNewItemMng;
+        CObject* m_pOwner;
 
         type_vec_item	m_vecItem;
         POINT	m_Pos;
@@ -183,10 +183,10 @@ namespace mu::ui::window
         bool CheckSlot(int startIndex, int width, int height);
         bool CheckSlot(int iColumnX, int iRowY, int width, int height);
     public:
-        CNewUIInventoryCtrl();
-        virtual ~CNewUIInventoryCtrl();
+        CInventoryCtrl();
+        virtual ~CInventoryCtrl();
 
-        bool Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng, CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
+        bool Create(STORAGE_TYPE storageType, C3DRenderMng* pNew3DRenderMng, CItemMng* pNewItemMng, CObject* pOwner, int x, int y, int nColumn, int nRow, int nIndexOffset = 0);
         void Release();
 
         bool AddItem(int iLinealPos, std::span<const BYTE> pbyItemPacket);
@@ -247,8 +247,8 @@ namespace mu::ui::window
 
         EVENT_STATE GetEventState();
 
-        CNewUIObj* GetOwner() const;
-        CNewUIObj* GetLayoutOwner() const override;
+        CObject* GetOwner() const;
+        CObject* GetLayoutOwner() const override;
         bool IsVisible() const;
         void ShowInventory();
         void HideInventory();
@@ -284,8 +284,8 @@ namespace mu::ui::window
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
         //. PickedItem Control Functions
-        static CNewUIPickedItem* GetPickedItem();
-        static bool CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem, bool preservePickupAnchor = false);
+        static CPickedItem* GetPickedItem();
+        static bool CreatePickedItem(CInventoryCtrl* pSrc, ITEM* pItem, bool preservePickupAnchor = false);
         static void DeletePickedItem();
         static void BackupPickedItem();
 
@@ -296,6 +296,6 @@ namespace mu::ui::window
     };
 }
 
-#define g_pPickedItem mu::ui::window::CNewUIInventoryCtrl::GetPickedItem()
+#define g_pPickedItem mu::ui::window::CInventoryCtrl::GetPickedItem()
 
 #endif // !defined(AFX_NEWUIINVENTORYCTRL_H__3A635AF1_3FFA_44B5_9BF6_3DFE0F061927__INCLUDED_)

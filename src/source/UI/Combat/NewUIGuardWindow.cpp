@@ -1,4 +1,4 @@
-// NewUIGuardWindow.cpp: implementation of the CNewUIGuardWindow class.
+// NewUIGuardWindow.cpp: implementation of the CGuardWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -23,19 +23,19 @@ using namespace mu::ui::window;
 
 extern DWORD g_dwActiveUIID;
 
-CNewUIGuardWindow::CNewUIGuardWindow()
+CGuardWindow::CGuardWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iNumCurOpenTab = TAB_SIEGE_INFO;
 }
 
-CNewUIGuardWindow::~CNewUIGuardWindow()
+CGuardWindow::~CGuardWindow()
 {
     Release();
 }
 
-bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGuardWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -70,7 +70,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGuardWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* const* pCaptionSlot)
+void CGuardWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* const* pCaptionSlot)
 {
     pNewUIButton->ChangeText(pCaptionSlot);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -80,7 +80,7 @@ void CNewUIGuardWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int i
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIGuardWindow::Release()
+void CGuardWindow::Release()
 {
     UnloadImages();
 
@@ -91,13 +91,13 @@ void CNewUIGuardWindow::Release()
     }
 }
 
-void CNewUIGuardWindow::SetPos(int x, int y)
+void CGuardWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIGuardWindow::UpdateMouseEvent()
+bool CGuardWindow::UpdateMouseEvent()
 {
     switch (m_iNumCurOpenTab)
     {
@@ -121,7 +121,7 @@ bool CNewUIGuardWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGuardWindow::UpdateKeyEvent()
+bool CGuardWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUARDSMAN) == true)
     {
@@ -136,7 +136,7 @@ bool CNewUIGuardWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGuardWindow::Update()
+bool CGuardWindow::Update()
 {
     if (IsVisible())
     {
@@ -161,7 +161,7 @@ bool CNewUIGuardWindow::Update()
     }
     return true;
 }
-bool CNewUIGuardWindow::Render()
+bool CGuardWindow::Render()
 {
     EnableAlphaTest();
 
@@ -203,7 +203,7 @@ bool CNewUIGuardWindow::Render()
     return true;
 }
 
-void CNewUIGuardWindow::OpeningProcess()
+void CGuardWindow::OpeningProcess()
 {
     m_iNumCurOpenTab = TAB_SIEGE_INFO;
     m_TabBtn.ChangeFrame(TAB_SIEGE_INFO);
@@ -211,7 +211,7 @@ void CNewUIGuardWindow::OpeningProcess()
     SocketClient->ToGameServer()->SendCastleSiegeRegistrationStateRequest();
 }
 
-void CNewUIGuardWindow::ClosingProcess()
+void CGuardWindow::ClosingProcess()
 {
     m_DeclareGuildListBox.Clear();
     m_GuildListBox.Clear();
@@ -219,12 +219,12 @@ void CNewUIGuardWindow::ClosingProcess()
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float CNewUIGuardWindow::GetLayerDepth()
+float CGuardWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIGuardWindow::LoadImages()
+void CGuardWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUARDWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUARDWINDOW_TOP, GL_LINEAR);
@@ -246,7 +246,7 @@ void CNewUIGuardWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_scroll_on.tga", IMAGE_GUARDWINDOW_SCROLLBAR_ON, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_scroll_off.tga", IMAGE_GUARDWINDOW_SCROLLBAR_OFF, GL_LINEAR);
 }
-void CNewUIGuardWindow::UnloadImages()
+void CGuardWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GUARDWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_GUARDWINDOW_RIGHT);
@@ -269,7 +269,7 @@ void CNewUIGuardWindow::UnloadImages()
     DeleteBitmap(IMAGE_GUARDWINDOW_SCROLLBAR_OFF);
 }
 
-void CNewUIGuardWindow::RenderFrame()
+void CGuardWindow::RenderFrame()
 {
     RenderImage(IMAGE_GUARDWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_GUARDWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -314,7 +314,7 @@ void CNewUIGuardWindow::RenderFrame()
     g_pRenderText->RenderText(ptOrigin.x, ptOrigin.y, szText, 190, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUIGuardWindow::BtnProcess()
+bool CGuardWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GUARDSMAN);
@@ -328,11 +328,11 @@ bool CNewUIGuardWindow::BtnProcess()
     return false;
 }
 
-void CNewUIGuardWindow::UpdateSeigeInfoTab()
+void CGuardWindow::UpdateSeigeInfoTab()
 {
 }
 
-void CNewUIGuardWindow::UpdateRegisterTab()
+void CGuardWindow::UpdateRegisterTab()
 {
     switch (m_eTimeType)
     {
@@ -362,7 +362,7 @@ void CNewUIGuardWindow::UpdateRegisterTab()
     }
 }
 
-void CNewUIGuardWindow::UpdateRegisterInfoTab()
+void CGuardWindow::UpdateRegisterInfoTab()
 {
     if (m_eTimeType == CASTLESIEGE_STATE_REGSIEGE || m_eTimeType == CASTLESIEGE_STATE_REGMARK)
     {
@@ -396,7 +396,7 @@ void CNewUIGuardWindow::UpdateRegisterInfoTab()
     }
 }
 
-void CNewUIGuardWindow::RenderSeigeInfoTab()
+void CGuardWindow::RenderSeigeInfoTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
     wchar_t szTemp[256];
@@ -460,7 +460,7 @@ void CNewUIGuardWindow::RenderSeigeInfoTab()
     }
 }
 
-void CNewUIGuardWindow::RenderRegisterTab()
+void CGuardWindow::RenderRegisterTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
     g_pRenderText->SetFont(g_hFont);
@@ -565,7 +565,7 @@ void CNewUIGuardWindow::RenderRegisterTab()
     }
 }
 
-void CNewUIGuardWindow::RenderRegisterInfoTab()
+void CGuardWindow::RenderRegisterInfoTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 125 };
     g_pRenderText->SetFont(g_hFontBold);
@@ -618,7 +618,7 @@ void CNewUIGuardWindow::RenderRegisterInfoTab()
     }
 }
 
-void CNewUIGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
+void CGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
 {
     if (!Info)	return;
 
@@ -648,32 +648,32 @@ void CNewUIGuardWindow::SetData(LPPMSG_ANS_CASTLESIEGESTATE Info)
     //m_dwStateLeftSec = Info->btStateLeftSec1<<24 | Info->btStateLeftSec2<<16 | Info->btStateLeftSec3<<8 | Info->btStateLeftSec4;
 }
 
-void CNewUIGuardWindow::AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum)
+void CGuardWindow::AddDeclareGuildList(wchar_t* szGuildName, int nMarkCount, BYTE byIsGiveUP, BYTE bySeqNum)
 {
     m_DeclareGuildListBox.AddText(szGuildName, nMarkCount, byIsGiveUP, bySeqNum);
 }
 
-void CNewUIGuardWindow::ClearDeclareGuildList()
+void CGuardWindow::ClearDeclareGuildList()
 {
     m_DeclareGuildListBox.Clear();
 }
 
-void CNewUIGuardWindow::SortDeclareGuildList()
+void CGuardWindow::SortDeclareGuildList()
 {
     m_DeclareGuildListBox.Sort();
 }
 
-void CNewUIGuardWindow::AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore)
+void CGuardWindow::AddGuildList(wchar_t* szGuildName, BYTE byCsJoinSide, BYTE byGuildInvolved, int iGuildScore)
 {
     m_GuildListBox.AddText(szGuildName, byCsJoinSide, byGuildInvolved, iGuildScore);
 }
 
-void CNewUIGuardWindow::ClearGuildList()
+void CGuardWindow::ClearGuildList()
 {
     m_GuildListBox.Clear();
 }
 
-void CNewUIGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight)
+void CGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight)
 {
     RenderImage(IMAGE_GUARDWINDOW_SCROLL_TOP, iPos_x, iPos_y, 7, 3);
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
@@ -694,7 +694,7 @@ void CNewUIGuardWindow::RenderScrollBarFrame(int iPos_x, int iPos_y, int iHeight
     RenderImage(IMAGE_GUARDWINDOW_SCROLL_BOTTOM, iPos_x, iPos_y + iHeight - 3, 7, 3);
 }
 
-void CNewUIGuardWindow::RenderScrollBar(int iPos_x, int iPos_y, BOOL bIsClicked)
+void CGuardWindow::RenderScrollBar(int iPos_x, int iPos_y, BOOL bIsClicked)
 {
     const DWORD scrollBarColor = bIsClicked
         ? RGBA(200, 200, 200, 255)

@@ -13,7 +13,7 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`, `CCharInfoBalloonMng`, `CMsgWin`.
   `COptionWin` ported but deliberately not wired up (confirmed unreachable in live play — see
   `README.md`'s Coexistence patterns). Built and verified against a real server, both themes.
-- **In-game HUD (`CNewUIObj` tier)** — `CMuHelperBar` (map/position readout + MU Helper bot
+- **In-game HUD (`mu::ui::window::CObject` tier)** — `CMuHelperBar` (map/position readout + MU Helper bot
   control bar) and `CBuffStrip` (active-buff icon strip, the `data-for`/dynamic-array pilot at
   this tier) are fully done. `CNewUIMainFrameWindow`'s 3-phase HUD-frame port is **2 of 3 phases
   done**: Phase 1 (HP/MP/AG/SD/EXP bars + 5 corner buttons) and Phase 2 (`CNewUISkillList` —
@@ -23,7 +23,7 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   Phase 2 scope cut — see the pilots-to-revisit table below. Phase 3 (`CNewUIItemHotKey` — potion
   slots, 3D-camera-composited icons, no RmlUi pattern proven for that yet) is not started. All
   landed pilots built and verified against a real server, both themes. The rest of this tier —
-  ~88 other `CNewUIObj` windows, drag-and-drop, and 3D-camera-space rendering generally — is not
+  ~88 other `mu::ui::window::CObject` windows, drag-and-drop, and 3D-camera-space rendering generally — is not
   yet migrated.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
@@ -61,7 +61,7 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
 Empirical facts about *this specific codebase/engine build*, not general policy — kept here rather
 than in `architecture-principles.md` for that reason. Most are RmlUi-build-specific engine quirks;
 a couple are about the legacy `CWin`/`CUIMng` C++ architecture surrounding RmlUi instead. Tier
--specific findings (`CNewUIObj`-tier) live in `newui-tier-adapter.md`'s "Proven by CBuffStrip"
+-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adapter.md`'s "Proven by CBuffStrip"
 section in full detail; summarized here for visibility.
 
 - **This RmlUi build silently fails to inherit `font-family` into most subtrees** — a descendant
@@ -91,7 +91,7 @@ section in full detail; summarized here for visibility.
   explicit `width`** — left to shrink-to-fit, this build's width computation undersizes to the
   longest *word*, not the longest *line*.
 - **A persistent RmlUi document needs its own scene-visibility gate.** `CNewUISystem` (the
-  `CNewUIObj`-tier manager) is a persistent app-lifetime singleton whose `Update()`/`Render()`
+  `mu::ui::window::CObject`-tier manager) is a persistent app-lifetime singleton whose `Update()`/`Render()`
   are only ever *called* during `MAIN_SCENE` — that alone isn't a visibility gate once a window's
   visuals move to a persistent RmlUi document, which renders every frame regardless of scene. See
   `newui-tier-adapter.md`'s third `MAIN_SCENE` prerequisite.
@@ -187,7 +187,7 @@ section in full detail; summarized here for visibility.
     aren't touched either — hybrid windows' real clicks already bypass `m_bActive`/activation
     entirely via `RmlClickX()` (the fix above this one), so that staleness has no confirmed live
     consequence today. Three parallel, not-always-agreeing input-tracking systems are still the
-    root cause worth remembering for the next symptom: `CInput`/`SEASON3B::CNewKeyInput`'s
+    root cause worth remembering for the next symptom: `CInput`/`mu::ui::window::CNewKeyInput`'s
     VK-polling (drives `CUIMng`'s activation/hit-test loop), `Winmain.cpp`'s own event-driven
     `MouseLButton`/`Push`/`Pop` globals (`HandleMouseButton`/`HandleMouseMotion`, legacy 2D world
     input — `Core/Platform/sdl3/SDLEventLoop.cpp` looked like the source of this but was actually
@@ -291,7 +291,7 @@ for "the full architecture is in place":
       visually against a real server, modern theme, 2026-09-04**: potions and skill icons still
       render and animate correctly on top of the now-RmlUi-authored background, no regression.
   - **Not yet done (Phase 2, deliberately deferred)**: generalizing the one proven call site into
-    a single insertion point inside `CNewUIManager::Render()`'s own z-sorted loop (gated on
+    a single insertion point inside `mu::ui::window::CManager::Render()`'s own z-sorted loop (gated on
     crossing `INVENTORY_CAMERA_Z_ORDER`, 5.5 — every `CNewUI3DCamera` z-order, unlike every
     2D-chrome window's, not yet audited project-wide) so every window on `CNewUI3DRenderMng`
     benefits automatically instead of each one wiring its own `RenderBackgroundLayer()` call.
@@ -331,7 +331,7 @@ for "the full architecture is in place":
   `ProgressBar`, a unified `Tooltip`, `Dialog`, etc.) — a documentation deliverable, not new code;
   the underlying gaps it records are still open, just now named and tracked in one place instead
   of undiscoverable.
-- **No rollout/phasing plan sequences the remaining ~88 still-`CNewUIObj`-tier windows against the
+- **No rollout/phasing plan sequences the remaining ~88 still-`mu::ui::window::CObject`-tier windows against the
   full checklist above.** Work has been pilot-by-pilot, each individually verified. This document is a
   first step toward tracking that, not a substitute for an actual sequenced plan if one is
   wanted.
@@ -362,7 +362,7 @@ one of the trigger initiatives on the right.
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|
 | `CMuHelperBar`, `CBuffStrip` (`mu_helper_bar.rcss`, `buff_strip.rcss`) | Repeat their own `font-family`/`font-size`/color literals inline instead of referencing shared tokens (§21) | A design-token/shared-variable layer is built — retrofit these two RCSS files to use it as the worked examples, don't leave them as the last two still on literals. |
-| `CMuHelperBar`, `CBuffStrip` and every `CWin`-tier window | Base class/tier boundary (`CNewUIObj`/`CWin`) unchanged (§12, "Tracked deferral" below) — file location itself was resolved by the `UI/` directory restructure (`docs/newui-legacy-merger.md`, 2026-09-05): `UI/NewUI/HUD/` is now `UI/HUD/` | A base-class/tier restructuring pass is undertaken — not before enough windows exist to know the real target shape (this is the existing tracked deferral, not new). |
+| `CMuHelperBar`, `CBuffStrip` and every `CWin`-tier window | Base class/tier boundary (`mu::ui::window::CObject`/`CWin`) unchanged (§12, "Tracked deferral" below) — file location itself was resolved by the `UI/` directory restructure (`docs/newui-legacy-merger.md`, 2026-09-05): `UI/NewUI/HUD/` is now `UI/HUD/` | A base-class/tier restructuring pass is undertaken — not before enough windows exist to know the real target shape (this is the existing tracked deferral, not new). |
 | All `CWin`-tier windows, `CMuHelperBar`, `CBuffStrip` | No resolution × UI-scale × theme × drag-state validation matrix has been run against any of them (§25) — verification so far has been ad hoc per window | A validation-matrix/test-plan artifact is built — run it retroactively against every already-migrated window, not just new ones going forward. |
 | All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | The drag/preference-integration audit (itself an unstarted gap, above) happens — check these windows specifically, don't just audit the mechanism in the abstract. |
 | `CBuffStrip` | Right-click-to-cancel not reproduced; tooltip is plain-text instead of the original's per-line-colored rich tooltip (both already documented as deliberate scope cuts in `newui-tier-adapter.md`, not silent gaps) | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding, or the three non-unified tooltip mechanisms (§12) get consolidated — whichever comes first. |
@@ -371,17 +371,17 @@ one of the trigger initiatives on the right.
 | `main_frame.rml` (both themes) | Two independently-maintained RML files, not the one-shared-RML-per-window pattern every other migrated window uses — `theming-and-modding.md`'s "Forking a theme's RML" section documents why and the criteria for when this is legitimate. The two files' shared ids/classes/bindings require hand-sync, called out in each file's own header comment — see "Known gaps" for the drift-check tooling this still doesn't have. | Either a cleaner RCSS-only structural fix is found and one file retires, or this is accepted long-term and the same criteria get applied consistently if another window ever needs it — not before a second real case shows up. |
 | `CNewUIMainFrameWindow` (`main_frame.rcss`, both themes — HP/MP/AG/SD/EXP bars + 5 corner buttons) | `UI::Scaling::BottomHudScale()`/`CappedUniformScale()` (`UITransform.cpp`) fold `GameConfig::GetUIScalePercent()` in as a post-clamp multiplier, applied in the shared function itself so every caller codebase-wide (RmlUi bars/buttons/exp via `bars_scale`, the still-legacy chrome render, 3D potion-icon placement, and potion/skill click hit-testing) moves together automatically. Also folds `UI::Scaling::GetWindowContentScale()` (OS display-scale/pixel-density factor) into RmlUi's own `dp` ratio (`RmlUiRuntime.cpp`'s `ApplyUIScale()`) — **not yet verified on real mismatched-density hardware** (see that function's own comment and `layout-and-scaling.md`). `main_frame.rcss` still deliberately uses `px`, not `dp`, throughout, tracking `bars_scale` exactly instead of being scaled a second time. | The `UIScalePercent` half needs verifying by actually using a potion/skill at more than one `UIScalePercent` value *and* resolution, not just a visual check. The `WindowContentScale`-into-`dp` half needs a real scaled display or a debug `SetWindowContentScale()` override to confirm it doesn't double-scale against whatever `RenderInterface_SDL_GPU`'s viewport already does with `Rml::Context`'s window-coordinate-sized canvas. Phase 3 (item hotkeys → real RmlUi) landing, plus a follow-up icon-atlas port for the Phase 2 skill grid/pet row's still-legacy icon art (see the two rows above), still eventually retires `BottomHudScale` from this window entirely in favor of the branch's normal fixed-`dp`/`UIScalePercent` policy. |
 
-## Tracked deferral: C++ adapter classes still on the `CNewUIObj` tier
+## Tracked deferral: C++ adapter classes still on the `mu::ui::window::CObject` tier
 
-Both `CNewUIObj`-tier pilots (`CMuHelperBar`, `CBuffStrip`) were renamed at port time — class
+Both `mu::ui::window::CObject`-tier pilots (`CMuHelperBar`, `CBuffStrip`) were renamed at port time — class
 name and every `INTERFACE_*`/`CNewUISystem` member/accessor/macro referencing them — dropping
-their legacy-tier names (§12). What's still deferred: the `CNewUIObj` base class/tier boundary
+their legacy-tier names (§12). What's still deferred: the `mu::ui::window::CObject` base class/tier boundary
 itself, and collapsing the `INTERFACE_*`-keyed lookup + `g_p*` macro pattern into something that
 doesn't require a per-window case in a shared table. (The physical file location half of this —
 `UI/NewUI/HUD/` — was resolved separately by the `UI/` directory restructure,
 `docs/newui-legacy-merger.md`, 2026-09-05: that folder no longer exists, its contents are now
 `UI/HUD/`, a pure move with no base-class/tier change.) The base-class/tier boundary and
-`INTERFACE_*` pattern are structural — they touch the other ~88 still-unported `CNewUIObj`
+`INTERFACE_*` pattern are structural — they touch the other ~88 still-unported `mu::ui::window::CObject`
 windows' shared machinery, not just the pilots so far — and stay premature with only 2 data
 points. Revisit once more of those windows are ported to RmlUi and the real shape of a unified
 base class is visible from real examples.

@@ -11,7 +11,7 @@ class CHARACTER;
 
 namespace mu::ui::window
 {
-    class CNewUIItemMng;
+    class CItemMng;
 }
 
 #define MAX_MONSTERSKILL_NUM	10
@@ -226,7 +226,7 @@ typedef struct tagITEM
     long	lExpireTime;
 
 private:
-    friend class mu::ui::window::CNewUIItemMng;
+    friend class mu::ui::window::CItemMng;
     int   RefCount;
 } ITEM;
 #pragma pack(pop)

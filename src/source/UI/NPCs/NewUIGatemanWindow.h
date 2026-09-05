@@ -15,21 +15,21 @@
 
 namespace mu::ui::window
 {
-    class CNewUIGatemanWindow : public CNewUIObj
+    class CGatemanWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GATEMANWINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_GATEMANWINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GATEMANWINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GATEMANWINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GATEMANWINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GATEMANWINDOW_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GATEMANWINDOW_BUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_GATEMANWINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_GATEMANWINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_GATEMANWINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_GATEMANWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_GATEMANWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_GATEMANWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_GATEMANWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
 
-            IMAGE_GATEMANWINDOW_SCROLL_UP_BTN = CNewUICastleWindow::IMAGE_CASTLEWINDOW_SCROLL_UP_BTN,
-            IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN = CNewUICastleWindow::IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN,
+            IMAGE_GATEMANWINDOW_SCROLL_UP_BTN = CCastleWindow::IMAGE_CASTLEWINDOW_SCROLL_UP_BTN,
+            IMAGE_GATEMANWINDOW_SCROLL_DOWN_BTN = CCastleWindow::IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN,
         };
 
     private:
@@ -39,21 +39,21 @@ namespace mu::ui::window
             INVENTORY_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIButton m_BtnExit;
+        CButton m_BtnExit;
 
-        CNewUIButton m_BtnEnter;			// 입장 버튼
-        CNewUIButton m_BtnSet;				// 입장료 설정 버튼
-        CNewUIButton m_BtnFeeUp;			// 입장료 up
-        CNewUIButton m_BtnFeeDn;			// 입장료 down
+        CButton m_BtnEnter;			// 입장 버튼
+        CButton m_BtnSet;				// 입장료 설정 버튼
+        CButton m_BtnFeeUp;			// 입장료 up
+        CButton m_BtnFeeDn;			// 입장료 down
 
     public:
-        CNewUIGatemanWindow();
-        virtual ~CNewUIGatemanWindow();
+        CGatemanWindow();
+        virtual ~CGatemanWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -75,7 +75,7 @@ namespace mu::ui::window
         void RenderFrame();
         bool BtnProcess();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
+        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         void UpdateGuildMasterMode();
         void UpdateGuildMemeberMode();

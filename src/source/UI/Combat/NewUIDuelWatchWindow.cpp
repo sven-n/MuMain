@@ -1,4 +1,4 @@
-// NewUIDuelWatchWindow.cpp: implementation of the CNewUIDuelWatchWindow class.
+// NewUIDuelWatchWindow.cpp: implementation of the CDuelWatchWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -20,18 +20,18 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIDuelWatchWindow::CNewUIDuelWatchWindow()
+CDuelWatchWindow::CDuelWatchWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-CNewUIDuelWatchWindow::~CNewUIDuelWatchWindow()
+CDuelWatchWindow::~CDuelWatchWindow()
 {
     Release();
 }
 
-bool CNewUIDuelWatchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CDuelWatchWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -54,7 +54,7 @@ bool CNewUIDuelWatchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIDuelWatchWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CDuelWatchWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -64,7 +64,7 @@ void CNewUIDuelWatchWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, i
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIDuelWatchWindow::Release()
+void CDuelWatchWindow::Release()
 {
     UnloadImages();
 
@@ -75,13 +75,13 @@ void CNewUIDuelWatchWindow::Release()
     }
 }
 
-void CNewUIDuelWatchWindow::SetPos(int x, int y)
+void CDuelWatchWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIDuelWatchWindow::UpdateMouseEvent()
+bool CDuelWatchWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -92,7 +92,7 @@ bool CNewUIDuelWatchWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIDuelWatchWindow::UpdateKeyEvent()
+bool CDuelWatchWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DUELWATCH) == true)
     {
@@ -106,7 +106,7 @@ bool CNewUIDuelWatchWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIDuelWatchWindow::Update()
+bool CDuelWatchWindow::Update()
 {
     if (IsVisible())
     {
@@ -134,7 +134,7 @@ bool CNewUIDuelWatchWindow::Update()
     return true;
 }
 
-bool CNewUIDuelWatchWindow::Render()
+bool CDuelWatchWindow::Render()
 {
     EnableAlphaTest();
 
@@ -192,21 +192,21 @@ bool CNewUIDuelWatchWindow::Render()
     return true;
 }
 
-void CNewUIDuelWatchWindow::OpeningProcess()
+void CDuelWatchWindow::OpeningProcess()
 {
 }
 
-void CNewUIDuelWatchWindow::ClosingProcess()
+void CDuelWatchWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float CNewUIDuelWatchWindow::GetLayerDepth()
+float CDuelWatchWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIDuelWatchWindow::LoadImages()
+void CDuelWatchWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_DUELWATCHWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_DUELWATCHWINDOW_TOP, GL_LINEAR);
@@ -217,7 +217,7 @@ void CNewUIDuelWatchWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_DUELWATCHWINDOW_LINE, GL_LINEAR);
 }
 
-void CNewUIDuelWatchWindow::UnloadImages()
+void CDuelWatchWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_DUELWATCHWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_DUELWATCHWINDOW_RIGHT);
@@ -228,7 +228,7 @@ void CNewUIDuelWatchWindow::UnloadImages()
     DeleteBitmap(IMAGE_DUELWATCHWINDOW_LINE);
 }
 
-void CNewUIDuelWatchWindow::RenderFrame()
+void CDuelWatchWindow::RenderFrame()
 {
     RenderImage(IMAGE_DUELWATCHWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_DUELWATCHWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -248,7 +248,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUIDuelWatchWindow::BtnProcess()
+bool CDuelWatchWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DUELWATCH);

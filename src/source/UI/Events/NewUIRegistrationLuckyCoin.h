@@ -1,4 +1,4 @@
-// NewUIRegistrationLuckyCoin.h: interface for the CNewUIRegistrationLuckyCoin class.
+// NewUIRegistrationLuckyCoin.h: interface for the CRegistrationLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -12,17 +12,17 @@
 
 namespace mu::ui::window
 {
-    class CNewUIRegistrationLuckyCoin : public CNewUIObj
+    class CRegistrationLuckyCoin : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_CLOSE_REGIST = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
+            IMAGE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
+            IMAGE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_CLOSE_REGIST = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
         };
 
     private:
@@ -30,10 +30,10 @@ namespace mu::ui::window
         static constexpr float LUCKYCOIN_REG_HEIGHT = 429.0f;
 
     public:
-        CNewUIRegistrationLuckyCoin();
-        virtual ~CNewUIRegistrationLuckyCoin();
+        CRegistrationLuckyCoin();
+        virtual ~CRegistrationLuckyCoin();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
 
         void SetPos(int x, int y);
         const POINT& GetPos() { return m_Pos; }
@@ -75,13 +75,13 @@ namespace mu::ui::window
         void RenderLuckyCoin();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
         ITEM* m_CoinItem;
         bool m_ItemAngle;
         float m_width, m_height;
         int m_RegistCount;
-        CNewUIButton m_CloseButton;
-        CNewUIButton m_RegistButton;
+        CButton m_CloseButton;
+        CButton m_RegistButton;
     };
 }

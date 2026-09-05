@@ -1,4 +1,4 @@
-﻿// NewUILuckyItemWnd.cpp: implementation of the CNewUILuckyItemWnd class.
+﻿// NewUILuckyItemWnd.cpp: implementation of the CLuckyItemWnd class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -20,21 +20,21 @@
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
-CNewUILuckyItemWnd::CNewUILuckyItemWnd()
+CLuckyItemWnd::CLuckyItemWnd()
 {
     memset(m_szSubject, 0, 255);
     m_eType = eLuckyItemType_None;
     m_nMixEffectTimer = 0;
 }
 
-CNewUILuckyItemWnd::~CNewUILuckyItemWnd()
+CLuckyItemWnd::~CLuckyItemWnd()
 {
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
     Release();
 #endif // LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
 }
 
-void CNewUILuckyItemWnd::SetFrame(void)
+void CLuckyItemWnd::SetFrame(void)
 {
     float	fLineY = m_ptPos.y + m_sImgList[eFrame_T].s_fHgt;
     float	fBottomY = fLineY + m_sImgList[eFrame_L].s_fHgt;
@@ -58,7 +58,7 @@ void CNewUILuckyItemWnd::SetFrame(void)
     m_sFrame[eFrame_B].s_ptPos.y = fBottomY;
 }
 
-int CNewUILuckyItemWnd::GetLuckyItemRate(int _nType)
+int CLuckyItemWnd::GetLuckyItemRate(int _nType)
 {
     if (_nType == eLuckyItemType_Trade)		return 100;
     if (_nType == eLuckyItemType_Refinery)	return 50;
@@ -66,7 +66,7 @@ int CNewUILuckyItemWnd::GetLuckyItemRate(int _nType)
     return 0;
 }
 
-void CNewUILuckyItemWnd::Render_Frame(void)
+void CLuckyItemWnd::Render_Frame(void)
 {
     int	i = 0;
 
@@ -101,7 +101,7 @@ void CNewUILuckyItemWnd::Render_Frame(void)
     }
 }
 
-STORAGE_TYPE CNewUILuckyItemWnd::SetMoveAction()
+STORAGE_TYPE CLuckyItemWnd::SetMoveAction()
 {
     m_eWndAction = eLuckyItem_Move;
     switch (m_eType)
@@ -115,7 +115,7 @@ STORAGE_TYPE CNewUILuckyItemWnd::SetMoveAction()
     return STORAGE_TYPE::UNDEFINED;
 }
 
-int CNewUILuckyItemWnd::SetActAction()
+int CLuckyItemWnd::SetActAction()
 {
     m_eWndAction = eLuckyItem_Act;
     switch (m_eType)
@@ -129,16 +129,16 @@ int CNewUILuckyItemWnd::SetActAction()
     }
 }
 
-void CNewUILuckyItemWnd::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CLuckyItemWnd::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
-        CNewUILuckyItemWnd* pInventory = (CNewUILuckyItemWnd*)pClass;
+        CLuckyItemWnd* pInventory = (CLuckyItemWnd*)pClass;
         pInventory->RenderMixEffect();
     }
 }
 
-void CNewUILuckyItemWnd::RenderMixEffect()
+void CLuckyItemWnd::RenderMixEffect()
 {
     if (m_nMixEffectTimer <= 0)
     {
@@ -182,7 +182,7 @@ void CNewUILuckyItemWnd::RenderMixEffect()
     DisableAlphaBlend();
 }
 
-void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket)
+void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE> pbyItemPacket)
 {
     int		nDefault = -1;
     int		nMessage = nDefault;
@@ -190,7 +190,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const 
     int		nAddInven = -1;
     bool	bInitInven = false;
 
-    mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+    mu::ui::window::CInventoryCtrl::DeletePickedItem();
 
     switch (m_eWndAction)
     {
@@ -231,7 +231,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const 
     m_eWndAction = eLuckyItem_None;
 }
 
-void CNewUILuckyItemWnd::LoadImg(void)
+void CLuckyItemWnd::LoadImg(void)
 {
     float	fSizeX = m_fSizeX;
     float	fSizeY = m_fSizeY;
@@ -248,11 +248,11 @@ void CNewUILuckyItemWnd::LoadImg(void)
                              L"Interface\\newui_bt_mix.tga",
     };
 
-    m_sImgList[eFrame_BG].Set(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, fSizeX, fSizeY);
-    m_sImgList[eFrame_T].Set(CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2, fSizeX, fTop);
-    m_sImgList[eFrame_L].Set(CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT, fLineX, fLineY);
-    m_sImgList[eFrame_R].Set(CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT, fLineX, fLineY);
-    m_sImgList[eFrame_B].Set(CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM, fSizeX, fBottom);
+    m_sImgList[eFrame_BG].Set(CMessageBoxMng::IMAGE_MSGBOX_BACK, fSizeX, fSizeY);
+    m_sImgList[eFrame_T].Set(CMyInventory::IMAGE_INVENTORY_BACK_TOP2, fSizeX, fTop);
+    m_sImgList[eFrame_L].Set(CMyInventory::IMAGE_INVENTORY_BACK_LEFT, fLineX, fLineY);
+    m_sImgList[eFrame_R].Set(CMyInventory::IMAGE_INVENTORY_BACK_RIGHT, fLineX, fLineY);
+    m_sImgList[eFrame_B].Set(CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM, fSizeX, fBottom);
     m_sImgList[eImgList_MixBtn].Set(BITMAP_INTERFACE_NEW_MIXINVENTORY_BEGIN, 44.0f, 35.0f);
 
     for (int i = 0; i < eImgList_END; i++)
@@ -261,7 +261,7 @@ void CNewUILuckyItemWnd::LoadImg(void)
     }
 }
 
-bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -269,7 +269,7 @@ bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYITEMWND, this);
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
@@ -303,7 +303,7 @@ bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUILuckyItemWnd::Release()
+void CLuckyItemWnd::Release()
 {
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
     SAFE_DELETE(m_pNewInventoryCtrl);
@@ -315,7 +315,7 @@ void CNewUILuckyItemWnd::Release()
     }
 }
 
-void CNewUILuckyItemWnd::OpeningProcess(void)
+void CLuckyItemWnd::OpeningProcess(void)
 {
     for (int i = 0; i < LUCKYITEMMAXLINE; i++)
     {
@@ -347,7 +347,7 @@ void CNewUILuckyItemWnd::OpeningProcess(void)
     }
 }
 
-void CNewUILuckyItemWnd::SetFrame_Text(eLUCKYITEM _eType)
+void CLuckyItemWnd::SetFrame_Text(eLUCKYITEM _eType)
 {
     switch (_eType)
     {
@@ -366,7 +366,7 @@ void CNewUILuckyItemWnd::SetFrame_Text(eLUCKYITEM _eType)
     }
 }
 
-void CNewUILuckyItemWnd::AddText(int _nGlobalTextIndex, DWORD _dwColor, int _nLine)
+void CLuckyItemWnd::AddText(int _nGlobalTextIndex, DWORD _dwColor, int _nLine)
 {
     if (m_nTextMaxLine >= LUCKYITEMMAXLINE)	return;
     m_sText[m_nTextMaxLine].s_nTextIndex = _nGlobalTextIndex;
@@ -375,9 +375,9 @@ void CNewUILuckyItemWnd::AddText(int _nGlobalTextIndex, DWORD _dwColor, int _nLi
     m_nTextMaxLine++;
 }
 
-bool CNewUILuckyItemWnd::ClosingProcess(void)
+bool CLuckyItemWnd::ClosingProcess(void)
 {
-    if (GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
+    if (GetInventoryCtrl()->GetNumberOfItems() > 0 || CInventoryCtrl::GetPickedItem() != NULL)
     {
         g_pChatListBox->AddText(L"", I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
@@ -388,14 +388,14 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
     return true;
 }
 
-bool CNewUILuckyItemWnd::Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool CLuckyItemWnd::Process_InventoryCtrl_InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);
     return false;
 }
 
-void CNewUILuckyItemWnd::Process_InventoryCtrl_DeleteItem(int iIndex)
+void CLuckyItemWnd::Process_InventoryCtrl_DeleteItem(int iIndex)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -410,13 +410,13 @@ void CNewUILuckyItemWnd::Process_InventoryCtrl_DeleteItem(int iIndex)
     }
 }
 
-bool CNewUILuckyItemWnd::Check_LuckyItem_InWnd(void)
+bool CLuckyItemWnd::Check_LuckyItem_InWnd(void)
 {
     if (GetInventoryCtrl()->GetNumberOfItems() > 0)	return true;
     return false;
 }
 
-bool CNewUILuckyItemWnd::Check_LuckyItem(ITEM* _pItem)
+bool CLuckyItemWnd::Check_LuckyItem(ITEM* _pItem)
 {
     switch (m_eType)
     {
@@ -431,14 +431,14 @@ bool CNewUILuckyItemWnd::Check_LuckyItem(ITEM* _pItem)
     return false;
 }
 
-bool CNewUILuckyItemWnd::Check_LuckyItem_Trade(ITEM* _pItem)
+bool CLuckyItemWnd::Check_LuckyItem_Trade(ITEM* _pItem)
 {
     if (_pItem->Type >= ITEM_HELPER + 135 && _pItem->Type <= ITEM_HELPER + 145)		return true;
 
     return false;
 }
 
-bool CNewUILuckyItemWnd::Check_LuckyItem_Refinery(ITEM* _pItem)
+bool CLuckyItemWnd::Check_LuckyItem_Refinery(ITEM* _pItem)
 {
     if (_pItem->Type >= ITEM_ARMOR + 62 && _pItem->Type <= ITEM_ARMOR + 72)		return true;
     else if (_pItem->Type >= ITEM_HELM + 62 && _pItem->Type <= ITEM_HELM + 72)		return true;
@@ -449,9 +449,9 @@ bool CNewUILuckyItemWnd::Check_LuckyItem_Refinery(ITEM* _pItem)
     return false;
 }
 
-bool CNewUILuckyItemWnd::Process_InventoryCtrl(void)
+bool CLuckyItemWnd::Process_InventoryCtrl(void)
 {
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (!m_pNewInventoryCtrl)	return false;
     if (!pPickedItem)			return false;
 
@@ -500,12 +500,12 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl(void)
     return false;
 }
 
-CNewUIInventoryCtrl* CNewUILuckyItemWnd::GetInventoryCtrl() const
+CInventoryCtrl* CLuckyItemWnd::GetInventoryCtrl() const
 {
     return m_pNewInventoryCtrl;
 }
 
-bool CNewUILuckyItemWnd::Process_BTN_Action(void)
+bool CLuckyItemWnd::Process_BTN_Action(void)
 {
     if (!m_BtnMix.UpdateMouseEvent())
         return false;
@@ -513,7 +513,7 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
     if (m_eEnd == eLuckyItem_End)
         return false;
 
-    if (CNewUIInventoryCtrl::GetPickedItem())
+    if (CInventoryCtrl::GetPickedItem())
         return false;
 
     if (!Check_LuckyItem_InWnd())
@@ -540,7 +540,7 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
     return true;
 }
 
-bool CNewUILuckyItemWnd::UpdateMouseEvent(void)
+bool CLuckyItemWnd::UpdateMouseEvent(void)
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
@@ -570,12 +570,12 @@ bool CNewUILuckyItemWnd::UpdateMouseEvent(void)
     return true;
 }
 
-bool CNewUILuckyItemWnd::UpdateKeyEvent(void)
+bool CLuckyItemWnd::UpdateKeyEvent(void)
 {
     return true;
 }
 
-bool CNewUILuckyItemWnd::Update(void)
+bool CLuckyItemWnd::Update(void)
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
@@ -583,7 +583,7 @@ bool CNewUILuckyItemWnd::Update(void)
     return true;
 }
 
-bool CNewUILuckyItemWnd::Render(void)
+bool CLuckyItemWnd::Render(void)
 {
     EnableAlphaTest();
 
@@ -597,7 +597,7 @@ bool CNewUILuckyItemWnd::Render(void)
     return true;
 }
 
-float CNewUILuckyItemWnd::GetLayerDepth(void)
+float CLuckyItemWnd::GetLayerDepth(void)
 {
     return 3.4f;
 }

@@ -1,4 +1,4 @@
-// NewUIGateSwitchWindow.cpp: implementation of the CNewUIGateSwitchWindow class.
+// NewUIGateSwitchWindow.cpp: implementation of the CGateSwitchWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -13,18 +13,18 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIGateSwitchWindow::CNewUIGateSwitchWindow()
+CGateSwitchWindow::CGateSwitchWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-CNewUIGateSwitchWindow::~CNewUIGateSwitchWindow()
+CGateSwitchWindow::~CGateSwitchWindow()
 {
     Release();
 }
 
-bool CNewUIGateSwitchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGateSwitchWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -47,7 +47,7 @@ bool CNewUIGateSwitchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGateSwitchWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CGateSwitchWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -57,7 +57,7 @@ void CNewUIGateSwitchWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, 
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIGateSwitchWindow::Release()
+void CGateSwitchWindow::Release()
 {
     UnloadImages();
 
@@ -68,13 +68,13 @@ void CNewUIGateSwitchWindow::Release()
     }
 }
 
-void CNewUIGateSwitchWindow::SetPos(int x, int y)
+void CGateSwitchWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIGateSwitchWindow::UpdateMouseEvent()
+bool CGateSwitchWindow::UpdateMouseEvent()
 {
     if (m_BtnOpen.UpdateMouseEvent() == true)
     {
@@ -91,7 +91,7 @@ bool CNewUIGateSwitchWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGateSwitchWindow::UpdateKeyEvent()
+bool CGateSwitchWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATESWITCH) == true)
     {
@@ -105,12 +105,12 @@ bool CNewUIGateSwitchWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGateSwitchWindow::Update()
+bool CGateSwitchWindow::Update()
 {
     return true;
 }
 
-bool CNewUIGateSwitchWindow::Render()
+bool CGateSwitchWindow::Render()
 {
     EnableAlphaTest();
 
@@ -144,21 +144,21 @@ bool CNewUIGateSwitchWindow::Render()
     return true;
 }
 
-void CNewUIGateSwitchWindow::OpeningProcess()
+void CGateSwitchWindow::OpeningProcess()
 {
 }
 
-void CNewUIGateSwitchWindow::ClosingProcess()
+void CGateSwitchWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float CNewUIGateSwitchWindow::GetLayerDepth()
+float CGateSwitchWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIGateSwitchWindow::LoadImages()
+void CGateSwitchWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GATESWITCHWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GATESWITCHWINDOW_TOP, GL_LINEAR);
@@ -177,7 +177,7 @@ void CNewUIGateSwitchWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_GATESWITCHWINDOW_TABLE_LEFT_PIXEL);
     LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_GATESWITCHWINDOW_TABLE_RIGHT_PIXEL);
 }
-void CNewUIGateSwitchWindow::UnloadImages()
+void CGateSwitchWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GATESWITCHWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_GATESWITCHWINDOW_RIGHT);
@@ -196,7 +196,7 @@ void CNewUIGateSwitchWindow::UnloadImages()
     DeleteBitmap(IMAGE_GATESWITCHWINDOW_TABLE_TOP_LEFT);
 }
 
-void CNewUIGateSwitchWindow::RenderFrame()
+void CGateSwitchWindow::RenderFrame()
 {
     RenderImage(IMAGE_GATESWITCHWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_GATESWITCHWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -216,7 +216,7 @@ void CNewUIGateSwitchWindow::RenderFrame()
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUIGateSwitchWindow::BtnProcess()
+bool CGateSwitchWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GATESWITCH);
@@ -230,7 +230,7 @@ bool CNewUIGateSwitchWindow::BtnProcess()
     return false;
 }
 
-void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void CGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -240,7 +240,7 @@ void CNewUIGateSwitchWindow::RenderOutlineUpper(float fPos_x, float fPos_y, floa
     RenderImage(IMAGE_GATESWITCHWINDOW_TABLE_TOP_PIXEL, ptOrigin.x + 25, ptOrigin.y - 4, fBoxWidth - 21, 14);
 }
 
-void CNewUIGateSwitchWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void CGateSwitchWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;

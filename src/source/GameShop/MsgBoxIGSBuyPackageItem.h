@@ -17,7 +17,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-class CMsgBoxIGSBuyPackageItem : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+class CMsgBoxIGSBuyPackageItem : public CMessageBoxBase, public I3DRenderObj
 {
 public:
     enum IMAGE_IGS_BUY_PACKAGE_ITEM
@@ -73,10 +73,10 @@ public:
 
     void Initialize(CShopPackage* pPackage);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT BuyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT PresentBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT BuyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT PresentBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -98,9 +98,9 @@ private:
     void UnloadImages();
 
 private:
-    CNewUIMessageBoxButton m_BtnBuy;
-    CNewUIMessageBoxButton m_BtnPresent;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnBuy;
+    CMessageBoxButton m_BtnPresent;
+    CMessageBoxButton m_BtnCancel;
     CUIBuyingListBox m_PackageInfo;
 
     int m_iPackageSeq;

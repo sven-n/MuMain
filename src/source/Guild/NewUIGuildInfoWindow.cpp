@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.cpp: implementation of the CGuildInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -43,7 +43,7 @@ void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD 
     g_pRenderText->SetBgColor(backuptextbackcolor);
 }
 
-int mu::ui::window::CNewUIGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
+int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
 {
     for (int i = 0; i < g_nGuildMemberCount; ++i)
     {
@@ -54,7 +54,7 @@ int mu::ui::window::CNewUIGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
     return -1;
 }
 
-mu::ui::window::CNewUIGuildInfoWindow::CNewUIGuildInfoWindow() : m_Button(NULL)
+mu::ui::window::CGuildInfoWindow::CGuildInfoWindow() : m_Button(NULL)
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -70,12 +70,12 @@ mu::ui::window::CNewUIGuildInfoWindow::CNewUIGuildInfoWindow() : m_Button(NULL)
     m_bRequestUnionList = false;
 }
 
-mu::ui::window::CNewUIGuildInfoWindow::~CNewUIGuildInfoWindow()
+mu::ui::window::CGuildInfoWindow::~CGuildInfoWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CGuildInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -86,7 +86,7 @@ bool mu::ui::window::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int
     SetPos(x, y);
 
     LoadImages();
-    m_Button = new CNewUIButton[BUTTON_END];
+    m_Button = new CButton[BUTTON_END];
     for (int i = 0; i < BUTTON_END; ++i)
     {
         m_Button[i].ChangeButtonImgState(true, IMAGE_GUILDINFO_BUTTON, true);
@@ -108,19 +108,19 @@ bool mu::ui::window::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int
     return true;
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::OpenningProcess()
+void mu::ui::window::CGuildInfoWindow::OpenningProcess()
 {
     m_nCurrentTab = static_cast<int>(GuildConstants::GuildTab::MEMBERS);
 
     SocketClient->ToGameServer()->SendGuildListRequest();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::ClosingProcess()
+void mu::ui::window::CGuildInfoWindow::ClosingProcess()
 {
     m_bRequestUnionList = false;
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::Release()
+void mu::ui::window::CGuildInfoWindow::Release()
 {
     UnloadImages();
 
@@ -133,13 +133,13 @@ void mu::ui::window::CNewUIGuildInfoWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CGuildInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIGuildInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
 {
     bool ret = true;
 
@@ -188,7 +188,7 @@ bool mu::ui::window::CNewUIGuildInfoWindow::UpdateMouseEvent()
     return ret;
 }
 
-bool mu::ui::window::CNewUIGuildInfoWindow::Check_Btn()
+bool mu::ui::window::CGuildInfoWindow::Check_Btn()
 {
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
@@ -279,7 +279,7 @@ bool mu::ui::window::CNewUIGuildInfoWindow::Check_Btn()
                     {
                         AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
                         DeleteIndex = GetGuildMemberIndex(pText->m_szID);
-                        CNewUICommonMessageBox* pMsgBox = NULL;
+                        CCommonMessageBox* pMsgBox = NULL;
                         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildPerson_Cancel_Position_MsgBoxLayout), &pMsgBox);
                         if (pMsgBox != NULL)
                         {
@@ -328,7 +328,7 @@ bool mu::ui::window::CNewUIGuildInfoWindow::Check_Btn()
     return true;
 }
 
-bool mu::ui::window::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
+bool mu::ui::window::CGuildInfoWindow::Check_Mouse(int mx, int my)
 {
     if (mx > m_Pos.x && mx < (m_Pos.x + GUILDINFO_WIDTH) && my > m_Pos.y && my < (m_Pos.y + GUILDINFO_HEIGHT))
     {
@@ -393,7 +393,7 @@ bool mu::ui::window::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
     return true;
 }
 
-bool mu::ui::window::CNewUIGuildInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CGuildInfoWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO) == true)
     {
@@ -407,12 +407,12 @@ bool mu::ui::window::CNewUIGuildInfoWindow::UpdateKeyEvent()
 
     return true;
 }
-bool mu::ui::window::CNewUIGuildInfoWindow::Update()
+bool mu::ui::window::CGuildInfoWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIGuildInfoWindow::Render()
+bool mu::ui::window::CGuildInfoWindow::Render()
 {
     EnableAlphaTest();
 
@@ -449,7 +449,7 @@ bool mu::ui::window::CNewUIGuildInfoWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::RenderFrame()
+void mu::ui::window::CGuildInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_GUILDINFO_BACK, m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT);
     RenderImage(IMAGE_GUILDINFO_TOP, m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, 64.f);
@@ -458,7 +458,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::RenderFrame()
     RenderImage(IMAGE_GUILDINFO_BOTTOM, m_Pos.x, m_Pos.y + GUILDINFO_HEIGHT - 45, GUILDINFO_WIDTH, 45.f);
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::RenderNoneGuild()
+void mu::ui::window::CGuildInfoWindow::RenderNoneGuild()
 {
     POINT ptOrigin = { m_Pos.x + 15, m_Pos.y + 38 };
     ptOrigin.x += 10;
@@ -482,7 +482,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::RenderNoneGuild()
     m_BtnExit.Render();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::RenderTabButton()
+void mu::ui::window::CGuildInfoWindow::RenderTabButton()
 {
     RenderImage(IMAGE_GUILDINFO_TAB_LIST, m_Pos.x + GuildConstants::UILayout::TAB_START_X,
         m_Pos.y + GuildConstants::UILayout::TAB_START_Y, 166.f, GuildConstants::UILayout::TAB_HEIGHT);
@@ -492,7 +492,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::RenderTabButton()
         static_cast<float>(GuildConstants::UILayout::TAB_HEIGHT));
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::Render_Text()
+void mu::ui::window::CGuildInfoWindow::Render_Text()
 {
     wchar_t Text[300];
     POINT ptOrigin;
@@ -598,7 +598,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::Render_Text()
         }
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::Render_Guild_History()
+void mu::ui::window::CGuildInfoWindow::Render_Guild_History()
 {
     for (int x = m_Pos.x + 73; x < m_Pos.x + 73 + 42; x++)
     {
@@ -694,7 +694,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::Render_Guild_History()
     m_Button[BUTTON_GUILD_OUT].Render();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::RenderScrollBar()
+void mu::ui::window::CGuildInfoWindow::RenderScrollBar()
 {
 
     RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x + 170, 125, 7, 3);
@@ -729,7 +729,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::RenderScrollBar()
     m_GuildMember.Scrolling(Line);
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::Render_Guild_Info()
+void mu::ui::window::CGuildInfoWindow::Render_Guild_Info()
 {
     POINT ptOrigin = { m_Pos.x + 15, m_Pos.y + 98 };
 
@@ -801,7 +801,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::Render_Guild_Info()
     }
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::Render_Guild_Enum()
+void mu::ui::window::CGuildInfoWindow::Render_Guild_Enum()
 {
     RenderColorQuadARGB(m_Pos.x + 12, m_Pos.y + 12 + 113, 165, 232, 0x96151515u);
     RenderColorQuadARGB(m_Pos.x + 12, m_Pos.y + 12 + 93, 165, 20, 0x963B3B3Bu);
@@ -831,12 +831,12 @@ void mu::ui::window::CNewUIGuildInfoWindow::Render_Guild_Enum()
     }
 }
 
-float mu::ui::window::CNewUIGuildInfoWindow::GetLayerDepth()
+float mu::ui::window::CGuildInfoWindow::GetLayerDepth()
 {
     return 4.5f;
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::LoadImages()
+void mu::ui::window::CGuildInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUILDINFO_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUILDINFO_TOP, GL_LINEAR);
@@ -862,7 +862,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_scrollbar_stretch.jpg", IMAGE_GUILDINFO_DRAG_BTN, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::UnloadImages()
+void mu::ui::window::CGuildInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GUILDINFO_BOTTOM);
     DeleteBitmap(IMAGE_GUILDINFO_RIGHT);
@@ -890,7 +890,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_GUILDINFO_DRAG_BTN);
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::AddGuildNotice(wchar_t* szText)
+void mu::ui::window::CGuildInfoWindow::AddGuildNotice(wchar_t* szText)
 {
     wchar_t szTemp[GuildConstants::UILayout::TEXT_MAX_LINES][MAX_TEXT_LENGTH + 1] = { {0}, {0}, {0}, {0}, {0} };
     CutText3(szText, szTemp[0], GuildConstants::UILayout::TEXT_SPLIT_WIDTH, GuildConstants::UILayout::TEXT_MAX_LINES, MAX_TEXT_LENGTH + 1);
@@ -906,45 +906,45 @@ void mu::ui::window::CNewUIGuildInfoWindow::AddGuildNotice(wchar_t* szText)
     m_GuildNotice.Scrolling(m_GuildNotice.GetLineNum() - m_GuildNotice.GetBoxSize());
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
+void mu::ui::window::CGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
 {
     m_GuildMember.AddText(pInfo->Name, pInfo->Number, pInfo->Server, pInfo->GuildStatus);
     m_GuildMember.Scrolling(-m_GuildMember.GetBoxSize());
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::GuildClear()
+void mu::ui::window::CGuildInfoWindow::GuildClear()
 {
     m_GuildMember.Clear();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::UnionGuildClear()
+void mu::ui::window::CGuildInfoWindow::UnionGuildClear()
 {
     m_UnionListBox.Clear();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::NoticeClear()
+void mu::ui::window::CGuildInfoWindow::NoticeClear()
 {
     m_GuildNotice.Clear();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::SetRivalGuildName(wchar_t* szName)
+void mu::ui::window::CGuildInfoWindow::SetRivalGuildName(wchar_t* szName)
 {
     wcsncpy(m_RivalGuildName, szName, MAX_GUILDNAME);
     m_RivalGuildName[MAX_GUILDNAME] = 0;
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount)
+void mu::ui::window::CGuildInfoWindow::AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount)
 {
     m_UnionListBox.AddText(pGuildMark, szGuildName, nMemberCount);
     m_bRequestUnionList = false;
 }
 
-int mu::ui::window::CNewUIGuildInfoWindow::GetUnionCount()
+int mu::ui::window::CGuildInfoWindow::GetUnionCount()
 {
     return m_UnionListBox.GetTextCount();
 }
 
-void mu::ui::window::CNewUIGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
+void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
     BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
 {
     if (!g_MessageBox->IsEmpty())
@@ -1002,7 +1002,7 @@ void mu::ui::window::CNewUIGuildInfoWindow::ReceiveGuildRelationShip(GuildRelati
             }
         }
 
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildRelationShipMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {

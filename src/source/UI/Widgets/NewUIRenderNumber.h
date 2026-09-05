@@ -1,4 +1,4 @@
-// NewUIRenderNumber.h: interface for the CNewUIRenderNumber class.
+// NewUIRenderNumber.h: interface for the CRenderNumber class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -11,7 +11,7 @@
 
 namespace mu::ui::window
 {
-class CNewUIRenderNumber
+class CRenderNumber
 {
 public:
     enum IMAGE_LIST
@@ -19,19 +19,19 @@ public:
         IMAGE_NUMBER1 = BITMAP_INTERFACE_NEW_NUMBER_BEGIN, // newui_number1.tga
     };
 
-    virtual ~CNewUIRenderNumber();
-    static CNewUIRenderNumber* GetInstance();
+    virtual ~CRenderNumber();
+    static CRenderNumber* GetInstance();
 
     float RenderNumber(float x, float y, int iNum, float fScale = 1.0f);
 
 private:
-    CNewUIRenderNumber();
+    CRenderNumber();
 
     void LoadImage();
     void ReleaseImage();
 };
 } // namespace mu::ui::window
 
-#define g_RenderNumber CNewUIRenderNumber::GetInstance()
+#define g_RenderNumber CRenderNumber::GetInstance()
 
 #endif // !defined(AFX_NEWUIRENDERNUMBER_H__A97FE76D_3AC4_4835_B4B2_61103E6AF831__INCLUDED_)

@@ -1,4 +1,4 @@
-// NewUIOptionWindow.cpp: implementation of the CNewUIOptionWindow class.
+// NewUIOptionWindow.cpp: implementation of the COptionWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -82,7 +82,7 @@ int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayReso
 
 // I18N locale codes (ASCII) paired with the language's display name in that
 // language. The set mirrors what ResxGen emits and what I18N::GetAvailableLocales()
-// returns at runtime; held here as wide strings so the CNewUIComboBox can show
+// returns at runtime; held here as wide strings so the CComboBox can show
 // them without per-frame UTF-8 -> wide conversions.
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
@@ -192,7 +192,7 @@ namespace
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUIOptionWindow::CNewUIOptionWindow()
+mu::ui::window::COptionWindow::COptionWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -211,12 +211,12 @@ mu::ui::window::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iFontIndex = FindCurrentFontIndex();
 }
 
-mu::ui::window::CNewUIOptionWindow::~CNewUIOptionWindow()
+mu::ui::window::COptionWindow::~COptionWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -233,7 +233,7 @@ bool mu::ui::window::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-void mu::ui::window::CNewUIOptionWindow::InitResolutionCombo()
+void mu::ui::window::COptionWindow::InitResolutionCombo()
 {
     m_resolutions = UI::Options::NormalizeDisplayResolutions(MuGetSupportedDisplayResolutions());
     if (m_resolutions.empty())
@@ -270,7 +270,7 @@ void mu::ui::window::CNewUIOptionWindow::InitResolutionCombo()
         RES_COMBO_MAX_VISIBLE);
 }
 
-void mu::ui::window::CNewUIOptionWindow::InitLanguageCombo()
+void mu::ui::window::COptionWindow::InitLanguageCombo()
 {
     m_LanguageCombo.Setup(
         m_Pos.x + LANG_COMBO_X_LOCAL,
@@ -283,7 +283,7 @@ void mu::ui::window::CNewUIOptionWindow::InitLanguageCombo()
         LANG_COMBO_MAX_VISIBLE);
 }
 
-void mu::ui::window::CNewUIOptionWindow::InitFontCombo()
+void mu::ui::window::COptionWindow::InitFontCombo()
 {
     m_FontCombo.Setup(
         m_Pos.x + FONT_COMBO_X_LOCAL,
@@ -296,7 +296,7 @@ void mu::ui::window::CNewUIOptionWindow::InitFontCombo()
         FONT_COMBO_MAX_VISIBLE);
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetButtonInfo()
+void mu::ui::window::COptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
@@ -305,7 +305,7 @@ void mu::ui::window::CNewUIOptionWindow::SetButtonInfo()
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void mu::ui::window::CNewUIOptionWindow::Release()
+void mu::ui::window::COptionWindow::Release()
 {
     UnloadImages();
 
@@ -316,7 +316,7 @@ void mu::ui::window::CNewUIOptionWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetPos(int x, int y)
+void mu::ui::window::COptionWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -325,7 +325,7 @@ void mu::ui::window::CNewUIOptionWindow::SetPos(int x, int y)
     m_FontCombo.SetPos(m_Pos.x + FONT_COMBO_X_LOCAL, m_Pos.y + FONT_COMBO_Y_LOCAL);
 }
 
-bool mu::ui::window::CNewUIOptionWindow::UpdateMouseEvent()
+bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 {
     // A combo selects on mouse-PRESS and closes its dropdown there and then; the
     // mouse is still held. The Close button fires on RELEASE-over-button, so a
@@ -353,11 +353,11 @@ bool mu::ui::window::CNewUIOptionWindow::UpdateMouseEvent()
     // closed combo underneath grab the click and open instead. Selecting an item
     // also sets m_bSwallowClickHold so the still-held press's release can't fall
     // through to the Close button or a checkbox behind the dropdown.
-    struct ComboSlot { CNewUIComboBox* combo; int* index; void (CNewUIOptionWindow::*apply)(); };
+    struct ComboSlot { CComboBox* combo; int* index; void (COptionWindow::*apply)(); };
     const ComboSlot slots[] = {
-        { &m_ResolutionCombo, &m_iResolutionIndex, &CNewUIOptionWindow::ApplyResolution },
-        { &m_LanguageCombo,   &m_iLanguageIndex,   &CNewUIOptionWindow::ApplyLanguage   },
-        { &m_FontCombo,       &m_iFontIndex,       &CNewUIOptionWindow::ApplyFont        },
+        { &m_ResolutionCombo, &m_iResolutionIndex, &COptionWindow::ApplyResolution },
+        { &m_LanguageCombo,   &m_iLanguageIndex,   &COptionWindow::ApplyLanguage   },
+        { &m_FontCombo,       &m_iFontIndex,       &COptionWindow::ApplyFont        },
     };
     for (int pass = 0; pass < 2; ++pass)   // pass 0 = open combo (on top), pass 1 = closed
     {
@@ -415,7 +415,7 @@ bool mu::ui::window::CNewUIOptionWindow::UpdateMouseEvent()
     return true;
 }
 
-void mu::ui::window::CNewUIOptionWindow::HandleCheckboxInputs()
+void mu::ui::window::COptionWindow::HandleCheckboxInputs()
 {
     struct Checkbox { int yLocal; bool* target; };
     const Checkbox boxes[] = {
@@ -441,7 +441,7 @@ void mu::ui::window::CNewUIOptionWindow::HandleCheckboxInputs()
 
 // Handles wheel + drag input on a volume slider track.
 // Returns true if the level changed this frame.
-bool mu::ui::window::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
+bool mu::ui::window::COptionWindow::HandleVolumeSlider(int& level, int yOffset)
 {
     if (!CheckMouseIn(m_Pos.x + SLIDER_X_LOCAL - SLIDER_HIT_PADDING,
                       m_Pos.y + yOffset,
@@ -479,7 +479,7 @@ bool mu::ui::window::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOff
     return (level != oldValue);
 }
 
-void mu::ui::window::CNewUIOptionWindow::OnSoundVolumeChanged()
+void mu::ui::window::COptionWindow::OnSoundVolumeChanged()
 {
     m_SoundOnOff = (m_iVolumeLevel > 0) ? 1 : 0;
     SetEffectVolumeLevel(m_iVolumeLevel);
@@ -487,7 +487,7 @@ void mu::ui::window::CNewUIOptionWindow::OnSoundVolumeChanged()
     GameConfig::GetInstance().Save();
 }
 
-void mu::ui::window::CNewUIOptionWindow::OnMusicVolumeChanged()
+void mu::ui::window::COptionWindow::OnMusicVolumeChanged()
 {
     // Mute via volume only — do not stop the stream.  Once stopped, the
     // current track is gone and raising the slider back up leaves silence
@@ -502,7 +502,7 @@ void mu::ui::window::CNewUIOptionWindow::OnMusicVolumeChanged()
     GameConfig::GetInstance().Save();
 }
 
-void mu::ui::window::CNewUIOptionWindow::HandleRenderLevelSlider()
+void mu::ui::window::COptionWindow::HandleRenderLevelSlider()
 {
     if (!CheckMouseIn(m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
                       RENDER_SLIDER_WIDTH, RENDER_SLIDER_HEIGHT))
@@ -516,7 +516,7 @@ void mu::ui::window::CNewUIOptionWindow::HandleRenderLevelSlider()
 }
 
 
-bool mu::ui::window::CNewUIOptionWindow::UpdateKeyEvent()
+bool mu::ui::window::COptionWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION) == true)
     {
@@ -531,12 +531,12 @@ bool mu::ui::window::CNewUIOptionWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIOptionWindow::Update()
+bool mu::ui::window::COptionWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIOptionWindow::Render()
+bool mu::ui::window::COptionWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -546,17 +546,17 @@ bool mu::ui::window::CNewUIOptionWindow::Render()
     return true;
 }
 
-float mu::ui::window::CNewUIOptionWindow::GetLayerDepth()	//. 10.5f
+float mu::ui::window::COptionWindow::GetLayerDepth()	//. 10.5f
 {
     return 10.5f;
 }
 
-float mu::ui::window::CNewUIOptionWindow::GetKeyEventOrder()	// 10.f;
+float mu::ui::window::COptionWindow::GetKeyEventOrder()	// 10.f;
 {
     return 10.0f;
 }
 
-void mu::ui::window::CNewUIOptionWindow::OpenningProcess()
+void mu::ui::window::COptionWindow::OpenningProcess()
 {
     // Resync state that may have been changed externally while the window was hidden.
     m_bSwallowClickHold = false;   // drop any stale combo click-swallow latch
@@ -570,14 +570,14 @@ void mu::ui::window::CNewUIOptionWindow::OpenningProcess()
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
-void mu::ui::window::CNewUIOptionWindow::ClosingProcess()
+void mu::ui::window::COptionWindow::ClosingProcess()
 {
     m_ResolutionCombo.Close();
     m_LanguageCombo.Close();
     m_FontCombo.Close();
 }
 
-void mu::ui::window::CNewUIOptionWindow::LoadImages()
+void mu::ui::window::COptionWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_button_close.tga", IMAGE_OPTION_BTN_CLOSE, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_OPTION_FRAME_BACK, GL_LINEAR);
@@ -594,7 +594,7 @@ void mu::ui::window::CNewUIOptionWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_option_volume02.tga", IMAGE_OPTION_VOLUME_COLOR, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIOptionWindow::UnloadImages()
+void mu::ui::window::COptionWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_OPTION_BTN_CLOSE);
     DeleteBitmap(IMAGE_OPTION_FRAME_BACK);
@@ -611,7 +611,7 @@ void mu::ui::window::CNewUIOptionWindow::UnloadImages()
     DeleteBitmap(IMAGE_OPTION_VOLUME_COLOR);
 }
 
-void mu::ui::window::CNewUIOptionWindow::RenderFrame()
+void mu::ui::window::COptionWindow::RenderFrame()
 {
     float x, y;
     x = m_Pos.x;
@@ -650,7 +650,7 @@ void mu::ui::window::CNewUIOptionWindow::RenderFrame()
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render full effects
 }
 
-void mu::ui::window::CNewUIOptionWindow::RenderContents()
+void mu::ui::window::COptionWindow::RenderContents()
 {
     float x, y;
     x = m_Pos.x + 20.f;
@@ -698,7 +698,7 @@ void mu::ui::window::CNewUIOptionWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
 }
 
-void mu::ui::window::CNewUIOptionWindow::RenderButtons()
+void mu::ui::window::COptionWindow::RenderButtons()
 {
     m_BtnClose.Render();
 
@@ -779,78 +779,78 @@ void mu::ui::window::CNewUIOptionWindow::RenderButtons()
     // physically below an open one would draw its closed field on top of
     // that open dropdown's list (since they overlap in screen space when
     // the upper one expands downward).
-    CNewUIComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo };
+    CComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo };
     for (auto* c : combos) if (!c->IsOpen()) c->Render();
     for (auto* c : combos) if (c->IsOpen())  c->Render();
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetAutoAttack(bool bAuto)
+void mu::ui::window::COptionWindow::SetAutoAttack(bool bAuto)
 {
     m_bAutoAttack = bAuto;
 }
 
-bool mu::ui::window::CNewUIOptionWindow::IsAutoAttack()
+bool mu::ui::window::COptionWindow::IsAutoAttack()
 {
     return m_bAutoAttack;
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetWhisperSound(bool bSound)
+void mu::ui::window::COptionWindow::SetWhisperSound(bool bSound)
 {
     m_bWhisperSound = bSound;
 }
 
-bool mu::ui::window::CNewUIOptionWindow::IsWhisperSound()
+bool mu::ui::window::COptionWindow::IsWhisperSound()
 {
     return m_bWhisperSound;
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetSlideHelp(bool bHelp)
+void mu::ui::window::COptionWindow::SetSlideHelp(bool bHelp)
 {
     m_bSlideHelp = bHelp;
 }
 
-bool mu::ui::window::CNewUIOptionWindow::IsSlideHelp()
+bool mu::ui::window::COptionWindow::IsSlideHelp()
 {
     return m_bSlideHelp;
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetVolumeLevel(int iVolume)
+void mu::ui::window::COptionWindow::SetVolumeLevel(int iVolume)
 {
     m_iVolumeLevel = iVolume;
 }
 
-int mu::ui::window::CNewUIOptionWindow::GetVolumeLevel()
+int mu::ui::window::COptionWindow::GetVolumeLevel()
 {
     return m_iVolumeLevel;
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetRenderLevel(int iRender)
+void mu::ui::window::COptionWindow::SetRenderLevel(int iRender)
 {
     m_iRenderLevel = iRender;
 }
 
-int mu::ui::window::CNewUIOptionWindow::GetRenderLevel()
+int mu::ui::window::COptionWindow::GetRenderLevel()
 {
     return m_iRenderLevel;
 }
 
-void mu::ui::window::CNewUIOptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
+void mu::ui::window::COptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
 {
     m_bRenderAllEffects = bRenderAllEffects;
 }
 
-bool mu::ui::window::CNewUIOptionWindow::GetRenderAllEffects()
+bool mu::ui::window::COptionWindow::GetRenderAllEffects()
 {
     return m_bRenderAllEffects;
 }
 
-int mu::ui::window::CNewUIOptionWindow::FindCurrentResolutionIndex()
+int mu::ui::window::COptionWindow::FindCurrentResolutionIndex()
 {
     return UI::Options::FindClosestDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
                                                           static_cast<int>(WindowHeight));
 }
 
-int mu::ui::window::CNewUIOptionWindow::FindCurrentLanguageIndex()
+int mu::ui::window::COptionWindow::FindCurrentLanguageIndex()
 {
     const char* current = I18N::GetCurrentLocale();
     if (current == nullptr) return 0;
@@ -862,7 +862,7 @@ int mu::ui::window::CNewUIOptionWindow::FindCurrentLanguageIndex()
     return 0;  // default to English
 }
 
-void mu::ui::window::CNewUIOptionWindow::ApplyLanguage()
+void mu::ui::window::COptionWindow::ApplyLanguage()
 {
     const char* code = s_Languages[m_iLanguageIndex].code;
 
@@ -879,7 +879,7 @@ void mu::ui::window::CNewUIOptionWindow::ApplyLanguage()
     GameConfig::GetInstance().Save();
 }
 
-int mu::ui::window::CNewUIOptionWindow::FindCurrentFontIndex()
+int mu::ui::window::COptionWindow::FindCurrentFontIndex()
 {
     const std::wstring current = GameConfig::GetInstance().GetFontSelection();
     for (int i = 0; i < s_NumFonts; ++i)
@@ -890,7 +890,7 @@ int mu::ui::window::CNewUIOptionWindow::FindCurrentFontIndex()
     return 0;  // default ("")
 }
 
-void mu::ui::window::CNewUIOptionWindow::ApplyFont()
+void mu::ui::window::COptionWindow::ApplyFont()
 {
     // Re-selecting the active font is a no-op; skip the font rebuild and disk write.
     if (GameConfig::GetInstance().GetFontSelection() == s_Fonts[m_iFontIndex].name)
@@ -902,7 +902,7 @@ void mu::ui::window::CNewUIOptionWindow::ApplyFont()
     GameConfig::GetInstance().Save();
 }
 
-void mu::ui::window::CNewUIOptionWindow::ApplyResolution()
+void mu::ui::window::COptionWindow::ApplyResolution()
 {
     if (m_iResolutionIndex < 0 || m_iResolutionIndex >= static_cast<int>(m_resolutions.size()))
     {
@@ -934,7 +934,7 @@ void mu::ui::window::CNewUIOptionWindow::ApplyResolution()
 // Point the resolution combo at the mode the window really has. If the actual
 // size is not a listed mode, keep the current selection - config still
 // records the real size.
-void mu::ui::window::CNewUIOptionWindow::SyncResolutionComboToWindow()
+void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
 {
     const int listed = UI::Options::FindExactDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
                                                                     static_cast<int>(WindowHeight));
@@ -949,7 +949,7 @@ void mu::ui::window::CNewUIOptionWindow::SyncResolutionComboToWindow()
 // rather than driving the OS directly: the old Win32 ChangeDisplaySettings /
 // SetWindowLongPtr path fought SDL and left its state inconsistent with a
 // later resolution change. Keeps the current size and applies the new mode.
-void mu::ui::window::CNewUIOptionWindow::ApplyWindowModeToggle()
+void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
 {
     g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
     GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);

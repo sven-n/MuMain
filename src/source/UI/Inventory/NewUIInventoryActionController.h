@@ -12,42 +12,42 @@
 namespace mu::ui::window
 {
 
-class CNewUIInventoryActionController
+class CInventoryActionController
 {
 public:
-    CNewUIInventoryActionController();
-    ~CNewUIInventoryActionController() = default;
+    CInventoryActionController();
+    ~CInventoryActionController() = default;
 
     void SetContext(SEASON3B::IInventoryActionContext* pContext);
-    bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const;
+    bool HandleInventoryActions(CInventoryCtrl* targetControl) const;
 
 private:
-    bool HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl) const;
-    bool TryApplyJewel(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem,
+    bool HandlePickedItemPlacement(CInventoryCtrl* targetControl) const;
+    bool TryApplyJewel(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
                        int iSourceIndex, int iTargetIndex) const;
-    bool TryStackItem(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
-    bool TryMoveItem(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem,
+    bool TryStackItem(CInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
+    bool TryMoveItem(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
                      int iSourceIndex, int iTargetIndex) const;
 
-    bool HandleRepairClick(CNewUIInventoryCtrl* targetControl) const;
+    bool HandleRepairClick(CInventoryCtrl* targetControl) const;
 
-    bool HandleRightClick(CNewUIInventoryCtrl* targetControl) const;
-    bool HandleStorageAutoMove(CNewUIInventoryCtrl* targetControl) const;
-    bool HandleMixAutoMove(CNewUIInventoryCtrl* targetControl) const;
-    bool HandleSellToNPC(CNewUIInventoryCtrl* targetControl) const;
-    bool HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl) const;
-    bool TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const;
-    bool TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const;
+    bool HandleRightClick(CInventoryCtrl* targetControl) const;
+    bool HandleStorageAutoMove(CInventoryCtrl* targetControl) const;
+    bool HandleMixAutoMove(CInventoryCtrl* targetControl) const;
+    bool HandleSellToNPC(CInventoryCtrl* targetControl) const;
+    bool HandleInventoryRightClickActions(CInventoryCtrl* targetControl) const;
+    bool TryEquipItem(CInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const;
+    bool TryDropItem(CInventoryCtrl* targetControl, ITEM* pItem) const;
 
     int FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const;
     bool IsSlotOccupied(int nSlot) const;
 
-    bool ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem, ITEM* pPickItem,
+    bool ApplyJewels(CInventoryCtrl* targetControl, CPickedItem* pPickedItem, ITEM* pPickItem,
                      int iSourceIndex, int iTargetIndex) const;
-    bool TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
-    bool RepairItemAtMousePoint(CNewUIInventoryCtrl* targetControl) const;
-    bool TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const;
-    bool TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl) const;
+    bool TryStackItems(CInventoryCtrl* targetControl, ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const;
+    bool RepairItemAtMousePoint(CInventoryCtrl* targetControl) const;
+    bool TryConsumeItem(CInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const;
+    bool TryTransferBetweenInventorySections(CInventoryCtrl* sourceControl) const;
 
     SEASON3B::IInventoryActionContext* m_pContext;
 };

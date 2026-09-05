@@ -10,13 +10,13 @@
 
 namespace mu::ui::window
 {
-    class CNewUIMuHelper : public CNewUIObj
+    class CUIMuHelper : public CObject
     {
     public:
-        CNewUIMuHelper();
-        ~CNewUIMuHelper();
+        CUIMuHelper();
+        ~CUIMuHelper();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void Show(bool bShow);
@@ -97,14 +97,14 @@ namespace mu::ui::window
         {
             int iNumTab;
             BYTE class_character[MAX_CLASS];
-            CNewUIButton* btn;
+            CButton* btn;
         } CButtonTap;
 
         typedef struct
         {
             int iNumTab;
             BYTE class_character[MAX_CLASS];
-            CNewUICheckBox* box;
+            CCheckBox* box;
         } CheckBoxTap;
 
         typedef struct
@@ -186,7 +186,7 @@ namespace mu::ui::window
         void RemoveExtraItem();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         CUITextInputBox m_DistanceTimeInput;
         CUITextInputBox m_Skill2DelayInput;
         CUITextInputBox m_Skill3DelayInput;
@@ -195,7 +195,7 @@ namespace mu::ui::window
 
         POINT m_Pos;
         POINT m_SubPos;
-        CNewUIRadioGroupButton m_TabBtn;
+        CRadioGroupButton m_TabBtn;
         int m_iCurrentOpenTab;
         int m_iCurrentOpenSubWin;
         bool m_bSubWinOpen;
@@ -207,14 +207,14 @@ namespace mu::ui::window
         std::array<int, MAX_SKILLS_SLOT> m_aiSelectedSkills;
     };
 
-    class CNewUIMuHelperSkillList : public CNewUIObj
+    class CMuHelperSkillList : public CObject
     {
 
     public:
-        CNewUIMuHelperSkillList();
-        ~CNewUIMuHelperSkillList();
+        CMuHelperSkillList();
+        ~CMuHelperSkillList();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
         void Release();
 
         bool UpdateMouseEvent();
@@ -278,8 +278,8 @@ namespace mu::ui::window
     private:
         std::map<int, cSkillIcon> m_skillIconMap;
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
 
         bool m_bFilterByAttackSkills;
         bool m_bFilterByBuffSkills;
@@ -292,13 +292,13 @@ namespace mu::ui::window
         EVENT_STATE m_EventState;
     };
 
-    class CNewUIMuHelperExt : public CNewUIObj
+    class CMuHelperExt : public CObject
     {
     public:
-        CNewUIMuHelperExt();
-        ~CNewUIMuHelperExt();
+        CMuHelperExt();
+        ~CMuHelperExt();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         bool Render();
@@ -368,24 +368,24 @@ namespace mu::ui::window
         void UnloadImages();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
 
         POINT m_Pos;
-        CNewUICheckBox m_BtnPreConHuntRange;
-        CNewUICheckBox m_BtnPreConAttacking;
+        CCheckBox m_BtnPreConHuntRange;
+        CCheckBox m_BtnPreConAttacking;
 
-        CNewUICheckBox m_BtnSubConMoreThanTwo;
-        CNewUICheckBox m_BtnSubConMoreThanThree;
-        CNewUICheckBox m_BtnSubConMoreThanFour;
-        CNewUICheckBox m_BtnSubConMoreThanFive;
+        CCheckBox m_BtnSubConMoreThanTwo;
+        CCheckBox m_BtnSubConMoreThanThree;
+        CCheckBox m_BtnSubConMoreThanFour;
+        CCheckBox m_BtnSubConMoreThanFive;
 
-        CNewUICheckBox m_BtnPartyHeal;
-        CNewUICheckBox m_BtnPartyDuration;
+        CCheckBox m_BtnPartyHeal;
+        CCheckBox m_BtnPartyDuration;
         CUITextInputBox m_BuffTimeInput;
 
-        CNewUIButton m_BtnSave;
-        CNewUIButton m_BtnReset;
-        CNewUIButton m_BtnClose;
+        CButton m_BtnSave;
+        CButton m_BtnReset;
+        CButton m_BtnClose;
 
     private:
         int m_iCurrentPage;

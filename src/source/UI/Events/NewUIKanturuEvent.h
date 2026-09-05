@@ -1,4 +1,4 @@
-// NewUIKanturu2ndEnterNpc.h: interface for the CNewUIKanturu2ndEnterNpc class.
+// NewUIKanturu2ndEnterNpc.h: interface for the CKanturu2ndEnterNpc class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUIKANTURU2NDENTERNPC_H__4CDE30B6_3570_47BA_9401_0EA282BA1949__INCLUDED_)
@@ -13,16 +13,16 @@
 
 namespace mu::ui::window
 {
-    class CNewUIKanturu2ndEnterNpc : public CNewUIObj
+    class CKanturu2ndEnterNpc : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_KANTURU2ND_TOP = CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP,
-            IMAGE_KANTURU2ND_MIDDLE = CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
-            IMAGE_KANTURU2ND_BOTTOM = CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
-            IMAGE_KANTURU2ND_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_KANTURU2ND_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_KANTURU2ND_TOP = CMessageBoxMng::IMAGE_MSGBOX_TOP,
+            IMAGE_KANTURU2ND_MIDDLE = CMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
+            IMAGE_KANTURU2ND_BOTTOM = CMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
+            IMAGE_KANTURU2ND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_KANTURU2ND_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
         };
 
         static constexpr float KANTURU2ND_ENTER_WINDOW_WIDTH = 230.0f;
@@ -41,10 +41,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUIKanturu2ndEnterNpc();
-        virtual ~CNewUIKanturu2ndEnterNpc();
+        CKanturu2ndEnterNpc();
+        virtual ~CKanturu2ndEnterNpc();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -83,7 +83,7 @@ namespace mu::ui::window
         void RenderTexts();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
         BYTE m_byState;
@@ -100,12 +100,12 @@ namespace mu::ui::window
         wchar_t m_strStateText[KANTURU2ND_STATETEXT_MAX][MAX_GLOBAL_TEXT_STRING];
         int	m_iStateTextNum;
 
-        CNewUIButton m_BtnEnter;
-        CNewUIButton m_BtnRefresh;
-        CNewUIButton m_BtnClose;
+        CButton m_BtnEnter;
+        CButton m_BtnRefresh;
+        CButton m_BtnClose;
     };
 
-    class CNewUIKanturuInfoWindow : public CNewUIObj
+    class CKanturuInfoWindow : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -118,10 +118,10 @@ namespace mu::ui::window
             KANTURUINFO_WINDOW_HEIGHT = 78,
         };
     public:
-        CNewUIKanturuInfoWindow();
-        virtual ~CNewUIKanturuInfoWindow();
+        CKanturuInfoWindow();
+        virtual ~CKanturuInfoWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -144,7 +144,7 @@ namespace mu::ui::window
         void RenderInfo();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
         int m_iMinute;

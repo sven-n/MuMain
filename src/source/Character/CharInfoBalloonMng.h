@@ -28,7 +28,7 @@ namespace Rml { class ElementDocument; }
 // fixed-position panel ported before this), so this uses RmlUi's array/data-for binding (a first
 // for this migration) instead of one scalar field per balloon: one Rml::DataModel array of 5
 // structs, re-synced every frame from the 5 CCharInfoBalloon members' own per-frame projection.
-// Composites correctly over the character models' own 3D rendering because CNewUIManager::Render()
+// Composites correctly over the character models' own 3D rendering because CManager::Render()
 // (and therefore this class's per-frame sync) runs during the normal legacy-2D-content recording
 // phase, strictly before RmlUiRuntime's SetPreSubmitCallback fires later the same frame -- see
 // docs/rmlui-ui-system/README.md's frame-lifecycle section.
@@ -37,10 +37,10 @@ namespace Rml { class ElementDocument; }
 // since renamed to CSceneUICoordinator in Phase 4, drove it via a direct, hardcoded call rather
 // than through any list), but registers with CSceneUICoordinator::GetNewStyleMng() the same way
 // every migrated CWin does, so CSceneUICoordinator has zero hardcoded per-window calls left. Most
-// of the INewUIBase surface below is thin/inert
+// of the IObject surface below is thin/inert
 // for this class -- it has no interaction and no shown-vs-active distinction to make (see each
 // override's own comment) -- registering it is about uniformity for Phase 4, not new behavior.
-class CCharInfoBalloonMng : public mu::ui::window::CNewUIObj
+class CCharInfoBalloonMng : public mu::ui::window::CObject
 {
 protected:
     static constexpr std::size_t kBalloonCount = 5;
@@ -55,7 +55,7 @@ public:
     void Create();
     void UpdateDisplay();
 
-    // mu::ui::window::INewUIBase
+    // mu::ui::window::IObject
     bool Render() override;
     // No interaction of any kind -- never consumes.
     bool UpdateMouseEvent() override
@@ -68,13 +68,13 @@ public:
     }
     // Nothing drives a per-frame update distinct from UpdateDisplay()'s event-driven refresh, and
     // this class has no shown-vs-active distinction to make (unlike CLoginWin, the one window in
-    // this phase that actually needs CNewUIObj's shown/active split).
+    // this phase that actually needs CObject's shown/active split).
     bool Update() override
     {
         return true;
     }
     // m_isInitialized (Create()/Release()'s own gate every method already checks), not the base
-    // CNewUIObj::m_bRender flag -- nothing meaningfully toggles "shown" for this manager beyond
+    // CObject::m_bRender flag -- nothing meaningfully toggles "shown" for this manager beyond
     // init/release; the per-balloon and whole-document visibility is decided inside Render()
     // itself (see its own shouldHide comment).
     bool IsVisible() const override

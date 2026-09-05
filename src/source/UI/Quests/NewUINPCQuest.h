@@ -16,22 +16,22 @@
 
 namespace mu::ui::window
 {
-    class CNewUINPCQuest : public CNewUIObj, public INewUI3DRenderObj
+    class CNPCQuest : public CObject, public I3DRenderObj
     {
     public:
         enum IMAGE_LIST
         {
             // 기본창
-            IMAGE_NPCQUEST_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_NPCQUEST_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
-            IMAGE_NPCQUEST_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_NPCQUEST_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_NPCQUEST_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
+            IMAGE_NPCQUEST_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
+            IMAGE_NPCQUEST_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,		// newui_item_back04.tga	(190,64)
+            IMAGE_NPCQUEST_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
+            IMAGE_NPCQUEST_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
+            IMAGE_NPCQUEST_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
 
-            IMAGE_NPCQUEST_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_NPCQUEST_ZEN = CNewUINPCShop::IMAGE_NPCSHOP_REPAIR_MONEY,
-            IMAGE_NPCQUEST_BTN_COMPLETE = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_NPCQUEST_BTN_CLOSE = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_NPCQUEST_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
+            IMAGE_NPCQUEST_ZEN = CNPCShop::IMAGE_NPCSHOP_REPAIR_MONEY,
+            IMAGE_NPCQUEST_BTN_COMPLETE = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
+            IMAGE_NPCQUEST_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
         };
 
     private:
@@ -41,18 +41,18 @@ namespace mu::ui::window
             NPCQUEST_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
         POINT					m_Pos;
 
-        CNewUIButton			m_btnComplete;
-        CNewUIButton			m_btnClose;
+        CButton			m_btnComplete;
+        CButton			m_btnClose;
 
     public:
-        CNewUINPCQuest();
-        virtual ~CNewUINPCQuest();
+        CNPCQuest();
+        virtual ~CNPCQuest();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

@@ -104,7 +104,7 @@ CCreditWin::CCreditWin()
     , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
-	// Not SetLayoutMode() here -- CNewUIManager::AddUIObj() (called from Create(), below)
+	// Not SetLayoutMode() here -- CManager::AddUIObj() (called from Create(), below)
 	// overwrites it unconditionally on first registration via UI::Layout::ForInterface(), which
 	// is the actual authority; see that policy table's own INTERFACE_CREDITS entry
 	// (UILayoutPolicy.cpp) for why this window needs LayoutMode::Legacy specifically.
@@ -197,7 +197,7 @@ void CCreditWin::SetPosition()
 
 void CCreditWin::Show(bool bShow)
 {
-	mu::ui::window::CNewUIObj::Show(bShow);
+	mu::ui::window::CObject::Show(bShow);
 
 	m_sprBg.Show(bShow);
 	for (int i = 0; i < CRW_SPR_MAX; ++i)

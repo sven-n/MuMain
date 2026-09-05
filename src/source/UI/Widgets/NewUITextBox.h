@@ -6,7 +6,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUITextBox : public CNewUIObj
+    class CTextBox : public CObject
     {
         typedef std::vector<std::wstring>		type_vector_textbase;
         type_vector_textbase	m_vecText;
@@ -24,8 +24,8 @@ namespace mu::ui::window
         int							m_iCurLine;
 
     public:
-        CNewUITextBox();
-        virtual ~CNewUITextBox();
+        CTextBox();
+        virtual ~CTextBox();
 
         bool Create(int iX, int iY, int iWidth, int iHeight);
         void SetPos(int iX, int iY, int iWidth, int iHeight);

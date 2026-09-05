@@ -302,7 +302,7 @@ void CServerSelWin::UpdateDisplay()
 
 void CServerSelWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 }
 
 void CServerSelWin::ShowServerGBtns()

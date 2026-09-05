@@ -20,17 +20,17 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIChatInputBox::CNewUIChatInputBox()
+mu::ui::window::CChatInputBox::CChatInputBox()
 {
     Init();
 }
 
-mu::ui::window::CNewUIChatInputBox::~CNewUIChatInputBox()
+mu::ui::window::CChatInputBox::~CChatInputBox()
 {
     Release();
 }
 
-void mu::ui::window::CNewUIChatInputBox::Init()
+void mu::ui::window::CChatInputBox::Init()
 {
     m_pNewUIMng = nullptr;
     m_pNewUIChatLogWnd = nullptr;
@@ -54,7 +54,7 @@ void mu::ui::window::CNewUIChatInputBox::Init()
     m_bShowMessageElseNormal = false;
 }
 
-void mu::ui::window::CNewUIChatInputBox::LoadImages()
+void mu::ui::window::CChatInputBox::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_chat_back.jpg", IMAGE_INPUTBOX_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_chat_normal_on.jpg", IMAGE_INPUTBOX_NORMAL_ON, GL_LINEAR);
@@ -69,7 +69,7 @@ void mu::ui::window::CNewUIChatInputBox::LoadImages()
     LoadBitmap(L"Interface\\newui_chat_btn_alpha.jpg", IMAGE_INPUTBOX_BTN_TRANSPARENCY, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIChatInputBox::UnloadImages()
+void mu::ui::window::CChatInputBox::UnloadImages()
 {
     DeleteBitmap(IMAGE_INPUTBOX_BTN_TRANSPARENCY);
     DeleteBitmap(IMAGE_INPUTBOX_BTN_SIZE);
@@ -84,10 +84,10 @@ void mu::ui::window::CNewUIChatInputBox::UnloadImages()
     DeleteBitmap(IMAGE_INPUTBOX_BACK);
 }
 
-bool mu::ui::window::CNewUIChatInputBox::Create(
-    CNewUIManager* pNewUIMng,
-    CNewUIChatLogWindow* pNewUIChatLogWnd,
-    CNewUISystemLogWindow* pNewUISystemLogWnd,
+bool mu::ui::window::CChatInputBox::Create(
+    CManager* pNewUIMng,
+    CChatLogWindow* pNewUIChatLogWnd,
+    CSystemLogWindow* pNewUISystemLogWnd,
     int x,
     int y)
 {
@@ -134,7 +134,7 @@ bool mu::ui::window::CNewUIChatInputBox::Create(
     return true;
 }
 
-void mu::ui::window::CNewUIChatInputBox::Release()
+void mu::ui::window::CChatInputBox::Release()
 {
     UnloadImages();
 
@@ -153,7 +153,7 @@ void mu::ui::window::CNewUIChatInputBox::Release()
     Init();
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetButtonInfo()
+void mu::ui::window::CChatInputBox::SetButtonInfo()
 {
     m_BtnSize.ChangeButtonImgState(true, IMAGE_INPUTBOX_BTN_SIZE, false);
     m_BtnSize.ChangeButtonInfo(m_WndPos.x + FRAME_RESIZE_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -162,7 +162,7 @@ void mu::ui::window::CNewUIChatInputBox::SetButtonInfo()
     m_BtnTransparency.ChangeButtonInfo(m_WndPos.x + TRANSPARENCY_START_X, m_WndPos.y, BUTTON_WIDTH, BUTTON_HEIGHT);
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetWndPos(int x, int y)
+void mu::ui::window::CChatInputBox::SetWndPos(int x, int y)
 {
     m_WndPos.x = x; m_WndPos.y = y;
     m_WndSize.cx = CHATBOX_WIDTH; m_WndSize.cy = CHATBOX_HEIGHT;
@@ -174,28 +174,28 @@ void mu::ui::window::CNewUIChatInputBox::SetWndPos(int x, int y)
     }
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetInputMsgType(int iInputMsgType)
+void mu::ui::window::CChatInputBox::SetInputMsgType(int iInputMsgType)
 {
     m_iInputMsgType = iInputMsgType;
 }
 
-int mu::ui::window::CNewUIChatInputBox::GetInputMsgType() const
+int mu::ui::window::CChatInputBox::GetInputMsgType() const
 {
     return m_iInputMsgType;
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetFont(HFONT hFont)
+void mu::ui::window::CChatInputBox::SetFont(HFONT hFont)
 {
     m_pChatInputBox->SetFont(hFont);
     m_pWhsprIDInputBox->SetFont(hFont);
 }
 
-bool mu::ui::window::CNewUIChatInputBox::HaveFocus()
+bool mu::ui::window::CChatInputBox::HaveFocus()
 {
     return (m_pChatInputBox->HaveFocus() || m_pWhsprIDInputBox->HaveFocus());
 }
 
-void mu::ui::window::CNewUIChatInputBox::AddChatHistory(const type_string& strText)
+void mu::ui::window::CChatInputBox::AddChatHistory(const type_string& strText)
 {
     auto vi = std::find(m_vecChatHistory.begin(), m_vecChatHistory.end(), strText);
     if (vi != m_vecChatHistory.end())
@@ -205,18 +205,18 @@ void mu::ui::window::CNewUIChatInputBox::AddChatHistory(const type_string& strTe
     m_vecChatHistory.push_back(strText);
 }
 
-void mu::ui::window::CNewUIChatInputBox::RemoveChatHistory(int index)
+void mu::ui::window::CChatInputBox::RemoveChatHistory(int index)
 {
     if (index >= 0 && index < (int)m_vecChatHistory.size())
         m_vecChatHistory.erase(m_vecChatHistory.begin() + index);
 }
 
-void mu::ui::window::CNewUIChatInputBox::RemoveAllChatHIstory()
+void mu::ui::window::CChatInputBox::RemoveAllChatHIstory()
 {
     m_vecChatHistory.clear();
 }
 
-void mu::ui::window::CNewUIChatInputBox::AddWhsprIDHistory(const type_string& strWhsprID)
+void mu::ui::window::CChatInputBox::AddWhsprIDHistory(const type_string& strWhsprID)
 {
     auto vi = std::find(m_vecWhsprIDHistory.begin(), m_vecWhsprIDHistory.end(), strWhsprID);
     if (vi != m_vecWhsprIDHistory.end())
@@ -226,7 +226,7 @@ void mu::ui::window::CNewUIChatInputBox::AddWhsprIDHistory(const type_string& st
     m_vecWhsprIDHistory.push_back(strWhsprID);
 }
 
-void mu::ui::window::CNewUIChatInputBox::RemoveWhsprIDHistory(int index)
+void mu::ui::window::CChatInputBox::RemoveWhsprIDHistory(int index)
 {
     if (index >= 0 && index < (int)m_vecWhsprIDHistory.size())
     {
@@ -234,22 +234,22 @@ void mu::ui::window::CNewUIChatInputBox::RemoveWhsprIDHistory(int index)
     }
 }
 
-void mu::ui::window::CNewUIChatInputBox::RemoveAllWhsprIDHIstory()
+void mu::ui::window::CChatInputBox::RemoveAllWhsprIDHIstory()
 {
     m_vecWhsprIDHistory.clear();
 }
 
-bool mu::ui::window::CNewUIChatInputBox::IsBlockWhisper()
+bool mu::ui::window::CChatInputBox::IsBlockWhisper()
 {
     return m_bBlockWhisper;
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetBlockWhisper(bool bBlockWhisper)
+void mu::ui::window::CChatInputBox::SetBlockWhisper(bool bBlockWhisper)
 {
     m_bBlockWhisper = bBlockWhisper;
 }
 
-bool mu::ui::window::CNewUIChatInputBox::UpdateMouseEvent()
+bool mu::ui::window::CChatInputBox::UpdateMouseEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHATINPUTBOX) == false)
     {
@@ -384,7 +384,7 @@ bool mu::ui::window::CNewUIChatInputBox::UpdateMouseEvent()
     return !CheckMouseIn(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy);
 }
 
-bool mu::ui::window::CNewUIChatInputBox::UpdateKeyEvent()
+bool mu::ui::window::CChatInputBox::UpdateKeyEvent()
 {
     if (mu::ui::window::IsPress(VK_F2))
     {
@@ -640,7 +640,7 @@ bool mu::ui::window::CNewUIChatInputBox::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatInputBox::Update()
+bool mu::ui::window::CChatInputBox::Update()
 {
     if (m_pChatInputBox->HaveFocus() && GetRelatedWnd() != m_pChatInputBox->GetHandle())
     {
@@ -677,7 +677,7 @@ bool mu::ui::window::CNewUIChatInputBox::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatInputBox::Render()
+bool mu::ui::window::CChatInputBox::Render()
 {
     EnableAlphaTest();
 
@@ -704,14 +704,14 @@ bool mu::ui::window::CNewUIChatInputBox::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatInputBox::RenderFrame()
+bool mu::ui::window::CChatInputBox::RenderFrame()
 {
     RenderImage(IMAGE_INPUTBOX_BACK, m_WndPos.x, m_WndPos.y, CHATBOX_WIDTH, CHATBOX_HEIGHT);
 
     return true;
 }
 
-void mu::ui::window::CNewUIChatInputBox::RenderButtons()
+void mu::ui::window::CChatInputBox::RenderButtons()
 {
     auto windowX = static_cast<float>(m_WndPos.x);
     auto windowY = static_cast<float>(m_WndPos.y);
@@ -742,7 +742,7 @@ void mu::ui::window::CNewUIChatInputBox::RenderButtons()
     }
 }
 
-void mu::ui::window::CNewUIChatInputBox::RenderTooltip()
+void mu::ui::window::CChatInputBox::RenderTooltip()
 {
     if (m_iTooltipType == INPUT_TOOLTIP_NOTHING)
     {
@@ -776,17 +776,17 @@ void mu::ui::window::CNewUIChatInputBox::RenderTooltip()
     g_pRenderText->RenderText(x, y, strTooltip, fontsize.cx + 6, 0, RT3_SORT_CENTER);
 }
 
-float mu::ui::window::CNewUIChatInputBox::GetLayerDepth()
+float mu::ui::window::CChatInputBox::GetLayerDepth()
 {
     return 6.2f;
 }
 
-float mu::ui::window::CNewUIChatInputBox::GetKeyEventOrder()
+float mu::ui::window::CChatInputBox::GetKeyEventOrder()
 {
     return 9.0f;
 }
 
-void mu::ui::window::CNewUIChatInputBox::OpenningProcess()
+void mu::ui::window::CChatInputBox::OpenningProcess()
 {
     // Set the state before focusing: a portable field ignores GiveFocus() while
     // still hidden, so focusing after showing lets Enter-to-open type right away.
@@ -804,7 +804,7 @@ void mu::ui::window::CNewUIChatInputBox::OpenningProcess()
     }
 }
 
-void mu::ui::window::CNewUIChatInputBox::ClosingProcess()
+void mu::ui::window::CChatInputBox::ClosingProcess()
 {
     m_pNewUIChatLogWnd->HideFrame();
 
@@ -814,25 +814,25 @@ void mu::ui::window::CNewUIChatInputBox::ClosingProcess()
     SetFocus(g_hWnd);
 }
 
-void mu::ui::window::CNewUIChatInputBox::GetChatText(type_string& strText)
+void mu::ui::window::CChatInputBox::GetChatText(type_string& strText)
 {
     wchar_t szChatText[256];
     m_pChatInputBox->GetText(szChatText, 256);
     strText = szChatText;
 }
-void mu::ui::window::CNewUIChatInputBox::GetWhsprID(type_string& strWhsprID)
+void mu::ui::window::CChatInputBox::GetWhsprID(type_string& strWhsprID)
 {
     wchar_t szWhisperID[32];
     m_pWhsprIDInputBox->GetText(szWhisperID, 32);
     strWhsprID = szWhisperID;
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetWhsprID(const wchar_t* strWhsprID)
+void mu::ui::window::CChatInputBox::SetWhsprID(const wchar_t* strWhsprID)
 {
     m_pWhsprIDInputBox->SetText(strWhsprID);
 }
 
-void mu::ui::window::CNewUIChatInputBox::UpdateWhisperTargetFromRightClick()
+void mu::ui::window::CChatInputBox::UpdateWhisperTargetFromRightClick()
 {
     if (SelectedCharacter < 0 || !mu::ui::window::IsRelease(VK_RBUTTON))
     {
@@ -860,12 +860,12 @@ void mu::ui::window::CNewUIChatInputBox::UpdateWhisperTargetFromRightClick()
     SetWhsprID(character->ID);
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetTextPosition(int x, int y)
+void mu::ui::window::CChatInputBox::SetTextPosition(int x, int y)
 {
     m_pChatInputBox->SetPosition(x, y);
 }
 
-void mu::ui::window::CNewUIChatInputBox::SetBuddyPosition(int x, int y)
+void mu::ui::window::CChatInputBox::SetBuddyPosition(int x, int y)
 {
     m_pWhsprIDInputBox->SetPosition(x, y);
 }

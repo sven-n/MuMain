@@ -1,4 +1,4 @@
-// NewUIGensRanking.h: interface for the CNewUIGensRanking class.
+// NewUIGensRanking.h: interface for the CGensRanking class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 #include "Core/Globals/_TextureIndex.h"
@@ -16,28 +16,28 @@
 
 namespace mu::ui::window
 {
-    class CNewUIGensRanking : public CNewUIObj
+    class CGensRanking : public CObject
     {
         enum IMAGE_LIST
         {
-            IMAGE_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_CLOSE_REGIST = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
-            IMAGE_GENS_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
+            IMAGE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_CLOSE_REGIST = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
+            IMAGE_GENS_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
             IMAGE_NEWMARK_DUPRIAN = BITMAP_GENS_MARK_DUPRIAN,
             IMAGE_NEWMARK_BARNERT = BITMAP_GENS_MARK_BARNERT,
 
-            IMAGE_GENSINFO_TOP_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,
-            IMAGE_GENSINFO_TOP_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,
-            IMAGE_GENSINFO_BOTTOM_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,
-            IMAGE_GENSINFO_BOTTOM_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,
-            IMAGE_GENSINFO_TOP_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,
-            IMAGE_GENSINFO_BOTTOM_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,
-            IMAGE_GENSINFO_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,
-            IMAGE_GENSINFO_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,
+            IMAGE_GENSINFO_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,
+            IMAGE_GENSINFO_TOP_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,
+            IMAGE_GENSINFO_BOTTOM_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,
+            IMAGE_GENSINFO_BOTTOM_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,
+            IMAGE_GENSINFO_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,
+            IMAGE_GENSINFO_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,
+            IMAGE_GENSINFO_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,
+            IMAGE_GENSINFO_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,
 
             IMAGE_RANKBACK = BITMAP_GENS_RANKBACK,
             IMAGE_RANKBACK_TEXTBOX = BITMAP_INTERFACE_NEW_CHAINFO_WINDOW_BEGIN,
@@ -92,20 +92,20 @@ namespace mu::ui::window
         GENS_TYPE m_byGensInfluence;
         POINT m_ptRenderMarkPos;
 
-        CNewUIButton m_BtnExit;
+        CButton m_BtnExit;
 
         wchar_t m_szTitleName[TITLENAME_END][MAX_TITLELENGTH];
 
         int m_nNextContribution;
 
     public:
-        CNewUIManager* m_pNewUIMng;
-        CNewUIScrollBar* m_pScrollBar;
-        CNewUITextBox* m_pTextBox;
-        CNewUIGensRanking();
-        virtual ~CNewUIGensRanking();
+        CManager* m_pNewUIMng;
+        CScrollBar* m_pScrollBar;
+        CTextBox* m_pTextBox;
+        CGensRanking();
+        virtual ~CGensRanking();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void SetPos(int x, int y);
         const POINT& GetPos() { return m_Pos; }
 

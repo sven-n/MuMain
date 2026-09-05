@@ -12,7 +12,7 @@ using namespace mu::ui::window;
 const int iMAX_TEXT_LINE = 512;
 const int iLINE_INTERVAL = 2;
 
-CNewUITextBox::CNewUITextBox()
+CTextBox::CTextBox()
 {
     m_iWidth = 0;
     m_iHeight = 0;
@@ -26,12 +26,12 @@ CNewUITextBox::CNewUITextBox()
     m_iCurLine = 0;
 }
 
-CNewUITextBox::~CNewUITextBox()
+CTextBox::~CTextBox()
 {
     Release();
 }
 
-bool CNewUITextBox::Create(int iX, int iY, int iWidth, int iHeight)
+bool CTextBox::Create(int iX, int iY, int iWidth, int iHeight)
 {
     SetPos(iX, iY, iWidth, iHeight);
     Show(true);
@@ -39,7 +39,7 @@ bool CNewUITextBox::Create(int iX, int iY, int iWidth, int iHeight)
     return true;
 }
 
-void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
+void CTextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
 {
     m_ptPos.x = iX;
     m_ptPos.y = iY;
@@ -60,29 +60,29 @@ void CNewUITextBox::SetPos(int iX, int iY, int iWidth, int iHeight)
     m_iCurLine = 0;
 }
 
-void CNewUITextBox::Release() {}
+void CTextBox::Release() {}
 
-float CNewUITextBox::GetLayerDepth()
+float CTextBox::GetLayerDepth()
 {
     return 4.4f;
 }
 
-bool CNewUITextBox::UpdateMouseEvent()
+bool CTextBox::UpdateMouseEvent()
 {
     return true;
 }
 
-bool CNewUITextBox::UpdateKeyEvent()
+bool CTextBox::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUITextBox::Update()
+bool CTextBox::Update()
 {
     return true;
 }
 
-bool CNewUITextBox::Render()
+bool CTextBox::Render()
 {
 
     for (int iIndex = 0; iIndex < m_iLimitLine; iIndex++)
@@ -102,7 +102,7 @@ bool CNewUITextBox::Render()
     return true;
 }
 
-void CNewUITextBox::AddText(wchar_t* strText)
+void CTextBox::AddText(wchar_t* strText)
 {
     wchar_t strTemp[iMAX_TEXT_LINE][iMAX_TEXT_LINE];
     ::memset(strTemp[0], 0, sizeof(wchar_t) * iMAX_TEXT_LINE * iMAX_TEXT_LINE);
@@ -115,7 +115,7 @@ void CNewUITextBox::AddText(wchar_t* strText)
     }
 }
 
-void CNewUITextBox::AddText(const wchar_t* strText)
+void CTextBox::AddText(const wchar_t* strText)
 {
     wchar_t strTempText[iMAX_TEXT_LINE] = {
         0,
@@ -125,7 +125,7 @@ void CNewUITextBox::AddText(const wchar_t* strText)
     AddText(strTempText);
 }
 
-std::wstring CNewUITextBox::GetFullText()
+std::wstring CTextBox::GetFullText()
 {
     std::wstring strTemp;
 
@@ -138,7 +138,7 @@ std::wstring CNewUITextBox::GetFullText()
     return strTemp;
 }
 
-std::wstring CNewUITextBox::GetLineText(int iLineIndex)
+std::wstring CTextBox::GetLineText(int iLineIndex)
 {
     if (0 > iLineIndex || (int)m_vecText.size() <= iLineIndex)
         return L"";
@@ -146,7 +146,7 @@ std::wstring CNewUITextBox::GetLineText(int iLineIndex)
     return m_vecText[iLineIndex];
 }
 
-int CNewUITextBox::GetMoveableLine()
+int CTextBox::GetMoveableLine()
 {
     int iMoveableLine = m_vecText.size() - m_iLimitLine;
     if (iMoveableLine <= 0)

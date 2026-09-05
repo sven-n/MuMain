@@ -1,5 +1,5 @@
 ﻿//////////////////////////////////////////////////////////////////////
-// NewUIInventoryCtrl.cpp: implementation of the CNewUIInventoryCtrl class.
+// NewUIInventoryCtrl.cpp: implementation of the CInventoryCtrl class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -69,7 +69,7 @@ bool UI::Items::Grid::Fits(int startIndex, int itemWidth, int itemHeight, int co
     return startColumn + itemWidth <= columnCount && startRow + itemHeight <= rowCount;
 }
 
-mu::ui::window::CNewUIPickedItem::CNewUIPickedItem()
+mu::ui::window::CPickedItem::CPickedItem()
 {
     m_pNewItemMng = nullptr;
     m_pSrcInventory = nullptr;
@@ -80,12 +80,12 @@ mu::ui::window::CNewUIPickedItem::CNewUIPickedItem()
     m_PickupOffset.x = m_PickupOffset.y = 0;
 }
 
-mu::ui::window::CNewUIPickedItem::~CNewUIPickedItem()
+mu::ui::window::CPickedItem::~CPickedItem()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUIInventoryCtrl* pSrc, ITEM* pItem,
+bool mu::ui::window::CPickedItem::Create(CItemMng* pNewItemMng, CInventoryCtrl* pSrc, ITEM* pItem,
                                        bool preservePickupAnchor)
 {
     if (g_pNewUI3DRenderMng == nullptr || pNewItemMng == nullptr || pItem == nullptr)
@@ -113,7 +113,7 @@ bool mu::ui::window::CNewUIPickedItem::Create(CNewUIItemMng* pNewItemMng, CNewUI
     return true;
 }
 
-void mu::ui::window::CNewUIPickedItem::Release()
+void mu::ui::window::CPickedItem::Release()
 {
     g_pNewUI3DRenderMng->Remove3DRenderObj(this);
     m_pNewItemMng->DeleteDuplicatedItem(m_pPickedItem);
@@ -124,12 +124,12 @@ void mu::ui::window::CNewUIPickedItem::Release()
     m_PickupOffset.x = m_PickupOffset.y = 0;
 }
 
-CNewUIInventoryCtrl* mu::ui::window::CNewUIPickedItem::GetOwnerInventory() const
+CInventoryCtrl* mu::ui::window::CPickedItem::GetOwnerInventory() const
 {
     return m_pSrcInventory;
 }
 
-STORAGE_TYPE CNewUIPickedItem::GetSourceStorageType() const
+STORAGE_TYPE CPickedItem::GetSourceStorageType() const
 {
     if (m_pSrcInventory)
     {
@@ -150,27 +150,27 @@ STORAGE_TYPE CNewUIPickedItem::GetSourceStorageType() const
     return STORAGE_TYPE::UNDEFINED;
 }
 
-ITEM* mu::ui::window::CNewUIPickedItem::GetItem() const
+ITEM* mu::ui::window::CPickedItem::GetItem() const
 {
     return m_pPickedItem;
 }
 
-const POINT& mu::ui::window::CNewUIPickedItem::GetPos() const
+const POINT& mu::ui::window::CPickedItem::GetPos() const
 {
     return m_Pos;
 }
 
-const SIZE& mu::ui::window::CNewUIPickedItem::GetSize() const
+const SIZE& mu::ui::window::CPickedItem::GetSize() const
 {
     return m_Size;
 }
 
-const POINT& mu::ui::window::CNewUIPickedItem::GetPickupOffset() const
+const POINT& mu::ui::window::CPickedItem::GetPickupOffset() const
 {
     return m_PickupOffset;
 }
 
-void mu::ui::window::CNewUIPickedItem::GetRect(RECT& rcBox)
+void mu::ui::window::CPickedItem::GetRect(RECT& rcBox)
 {
     rcBox.left = m_Pos.x;
     rcBox.top = m_Pos.y;
@@ -178,7 +178,7 @@ void mu::ui::window::CNewUIPickedItem::GetRect(RECT& rcBox)
     rcBox.bottom = rcBox.top + m_Size.cy;
 }
 
-int mu::ui::window::CNewUIPickedItem::GetSourceLinealPos()
+int mu::ui::window::CPickedItem::GetSourceLinealPos()
 {
     if (m_pSrcInventory)
     {
@@ -192,7 +192,7 @@ int mu::ui::window::CNewUIPickedItem::GetSourceLinealPos()
     return -1;
 }
 
-bool mu::ui::window::CNewUIPickedItem::GetTargetPos(CNewUIInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY)
+bool mu::ui::window::CPickedItem::GetTargetPos(CInventoryCtrl* pDest, int& iTargetColumnX, int& iTargetRowY)
 {
     if (pDest != nullptr)
     {
@@ -203,7 +203,7 @@ bool mu::ui::window::CNewUIPickedItem::GetTargetPos(CNewUIInventoryCtrl* pDest, 
     return false;
 }
 
-int mu::ui::window::CNewUIPickedItem::GetTargetLinealPos(CNewUIInventoryCtrl* pDest)
+int mu::ui::window::CPickedItem::GetTargetLinealPos(CInventoryCtrl* pDest)
 {
     int iTargetColumnX, iTargetRowY;
     if (GetTargetPos(pDest, iTargetColumnX, iTargetRowY))
@@ -213,27 +213,27 @@ int mu::ui::window::CNewUIPickedItem::GetTargetLinealPos(CNewUIInventoryCtrl* pD
     return -1;
 }
 
-bool mu::ui::window::CNewUIPickedItem::IsVisible() const
+bool mu::ui::window::CPickedItem::IsVisible() const
 {
     return m_bShow;
 }
 
-CNewUIObj* mu::ui::window::CNewUIPickedItem::GetLayoutOwner() const
+CObject* mu::ui::window::CPickedItem::GetLayoutOwner() const
 {
     return m_pSrcInventory ? m_pSrcInventory->GetOwner() : nullptr;
 }
 
-void mu::ui::window::CNewUIPickedItem::ShowPickedItem()
+void mu::ui::window::CPickedItem::ShowPickedItem()
 {
     m_bShow = true;
 }
 
-void mu::ui::window::CNewUIPickedItem::HidePickedItem()
+void mu::ui::window::CPickedItem::HidePickedItem()
 {
     m_bShow = false;
 }
 
-void mu::ui::window::CNewUIPickedItem::Render3D()
+void mu::ui::window::CPickedItem::Render3D()
 {
     if (m_pPickedItem && m_pPickedItem->Type >= 0)
     {
@@ -246,20 +246,20 @@ void mu::ui::window::CNewUIPickedItem::Render3D()
     }
 }
 
-CNewUIPickedItem* mu::ui::window::CNewUIInventoryCtrl::ms_pPickedItem = nullptr;
+CPickedItem* mu::ui::window::CInventoryCtrl::ms_pPickedItem = nullptr;
 
 // cppcheck-suppress uninitMemberVar
-mu::ui::window::CNewUIInventoryCtrl::CNewUIInventoryCtrl()
+mu::ui::window::CInventoryCtrl::CInventoryCtrl()
 {
     Init();
 }
 
-mu::ui::window::CNewUIInventoryCtrl::~CNewUIInventoryCtrl()
+mu::ui::window::CInventoryCtrl::~CInventoryCtrl()
 {
     Release();
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::Init()
+void mu::ui::window::CInventoryCtrl::Init()
 {
     m_pNew3DRenderMng = nullptr;
     m_pNewItemMng = nullptr;
@@ -280,7 +280,7 @@ void mu::ui::window::CNewUIInventoryCtrl::Init()
     Vector(1.f, 0.2f, 0.2f, m_afColorStateWarning);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::LoadImages()
+void mu::ui::window::CInventoryCtrl::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_item_box.tga", IMAGE_ITEM_SQUARE);
     LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_ITEM_TABLE_TOP_LEFT);
@@ -299,7 +299,7 @@ void mu::ui::window::CNewUIInventoryCtrl::LoadImages()
 #endif // LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::UnloadImages()
+void mu::ui::window::CInventoryCtrl::UnloadImages()
 {
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
     DeleteBitmap(IMAGE_ITEM_SQUARE_BOTTOM_RECT);
@@ -318,7 +318,7 @@ void mu::ui::window::CNewUIInventoryCtrl::UnloadImages()
     DeleteBitmap(IMAGE_ITEM_SQUARE);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
+void mu::ui::window::CInventoryCtrl::SetItemColorState(ITEM* pItem)
 {
     if (pItem == nullptr)
     {
@@ -356,7 +356,7 @@ void mu::ui::window::CNewUIInventoryCtrl::SetItemColorState(ITEM* pItem)
     }
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
+bool mu::ui::window::CInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
 {
     if (pItem == nullptr)
     {
@@ -414,8 +414,8 @@ bool mu::ui::window::CNewUIInventoryCtrl::CanChangeItemColorState(ITEM* pItem)
     return false;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::Create(STORAGE_TYPE storageType, CNewUI3DRenderMng* pNew3DRenderMng,
-                                           CNewUIItemMng* pNewItemMng, CNewUIObj* pOwner, int x, int y, int nColumn,
+bool mu::ui::window::CInventoryCtrl::Create(STORAGE_TYPE storageType, C3DRenderMng* pNew3DRenderMng,
+                                           CItemMng* pNewItemMng, CObject* pOwner, int x, int y, int nColumn,
                                            int nRow, int nIndexOffset)
 {
     m_StorageType = storageType;
@@ -448,7 +448,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::Create(STORAGE_TYPE storageType, CNewU
 
     return true;
 }
-void mu::ui::window::CNewUIInventoryCtrl::Release()
+void mu::ui::window::CInventoryCtrl::Release()
 {
     if (m_pNew3DRenderMng)
         m_pNew3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
@@ -464,7 +464,7 @@ void mu::ui::window::CNewUIInventoryCtrl::Release()
     Init();
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iLinealPos, std::span<const BYTE> itemData)
+bool mu::ui::window::CInventoryCtrl::AddItem(int iLinealPos, std::span<const BYTE> itemData)
 {
     iLinealPos -= m_nIndexOffset;
     if (iLinealPos < 0 || iLinealPos >= m_nColumn * m_nRow)
@@ -476,7 +476,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iLinealPos, std::span<cons
     return AddItem(iColumnX, iRowY, itemData);
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, std::span<const BYTE> itemData)
+bool mu::ui::window::CInventoryCtrl::AddItem(int iColumnX, int iRowY, std::span<const BYTE> itemData)
 {
     if (iColumnX < 0 || iRowY < 0 || iColumnX >= m_nColumn || iRowY >= m_nRow)
     {
@@ -510,7 +510,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, std::
     return true;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM* pItem)
+bool mu::ui::window::CInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM* pItem)
 {
     if (iColumnX < 0 || iRowY < 0 || iColumnX >= m_nColumn || iRowY >= m_nRow)
         return false;
@@ -541,7 +541,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, ITEM*
     return true;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel,
+bool mu::ui::window::CInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE byType, BYTE bySubType, BYTE byLevel,
                                             BYTE byDurability, BYTE byOption1, BYTE byOptionEx, BYTE byOption380,
                                             BYTE byOptionHarmony)
 {
@@ -575,7 +575,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::AddItem(int iColumnX, int iRowY, BYTE 
     return true;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::RemoveItem(ITEM* pItem)
+void mu::ui::window::CInventoryCtrl::RemoveItem(ITEM* pItem)
 {
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
@@ -599,7 +599,7 @@ void mu::ui::window::CNewUIInventoryCtrl::RemoveItem(ITEM* pItem)
     }
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::RemoveItemAt(int iLinealPos)
+bool mu::ui::window::CInventoryCtrl::RemoveItemAt(int iLinealPos)
 {
     iLinealPos -= m_nIndexOffset;
     ITEM* pItem = this->FindItemFromSlotIndex(iLinealPos, true);
@@ -612,7 +612,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::RemoveItemAt(int iLinealPos)
     return true;
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemFromSlotIndex(const int slotIndex, const bool recoverIfMissing)
+ITEM* mu::ui::window::CInventoryCtrl::FindItemFromSlotIndex(const int slotIndex, const bool recoverIfMissing)
 {
     if (slotIndex < 0 || slotIndex >= m_nColumn * m_nRow)
     {
@@ -640,7 +640,7 @@ ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemFromSlotIndex(const int slotI
     return nullptr;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::ClearSlotKey(const DWORD key)
+void mu::ui::window::CInventoryCtrl::ClearSlotKey(const DWORD key)
 {
     if (key == 0)
     {
@@ -656,7 +656,7 @@ void mu::ui::window::CNewUIInventoryCtrl::ClearSlotKey(const DWORD key)
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::RequestInventoryRefresh() const
+void mu::ui::window::CInventoryCtrl::RequestInventoryRefresh() const
 {
     static DWORD lastRefreshRequestTick = 0;
     const DWORD currentTick = GetTickCount();
@@ -673,7 +673,7 @@ void mu::ui::window::CNewUIInventoryCtrl::RequestInventoryRefresh() const
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::RemoveAllItems()
+void mu::ui::window::CInventoryCtrl::RemoveAllItems()
 {
     memset(m_pdwItemCheckBox, 0, sizeof(DWORD) * m_nColumn * m_nRow);
 
@@ -687,50 +687,50 @@ void mu::ui::window::CNewUIInventoryCtrl::RemoveAllItems()
     m_vecItem.clear();
 }
 
-size_t mu::ui::window::CNewUIInventoryCtrl::GetNumberOfItems()
+size_t mu::ui::window::CInventoryCtrl::GetNumberOfItems()
 {
     return m_vecItem.size();
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::GetItem(int iIndex)
+ITEM* mu::ui::window::CInventoryCtrl::GetItem(int iIndex)
 {
     if (iIndex < 0 || iIndex >= static_cast<int>(m_vecItem.size()))
         return nullptr;
     return m_vecItem[iIndex];
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetSquareColorNormal(float fRed, float fGreen, float fBlue)
+void mu::ui::window::CInventoryCtrl::SetSquareColorNormal(float fRed, float fGreen, float fBlue)
 {
     Vector(fRed, fGreen, fBlue, m_afColorStateNormal);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::GetSquareColorNormal(float* pfParams) const
+void mu::ui::window::CInventoryCtrl::GetSquareColorNormal(float* pfParams) const
 {
     Vector(m_afColorStateNormal[0], m_afColorStateNormal[1], m_afColorStateNormal[2], pfParams);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetSquareColorWarning(float fRed, float fGreen, float fBlue)
+void mu::ui::window::CInventoryCtrl::SetSquareColorWarning(float fRed, float fGreen, float fBlue)
 {
     Vector(fRed, fGreen, fBlue, m_afColorStateWarning);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::GetSquareColorWarning(float* pfParams) const
+void mu::ui::window::CInventoryCtrl::GetSquareColorWarning(float* pfParams) const
 {
     Vector(m_afColorStateWarning[0], m_afColorStateWarning[1], m_afColorStateWarning[2], pfParams);
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItem(int iLinealPos)
+ITEM* mu::ui::window::CInventoryCtrl::FindItem(int iLinealPos)
 {
     iLinealPos -= m_nIndexOffset;
     return this->FindItemFromSlotIndex(iLinealPos, true);
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItem(int iColumnX, int iRowY)
+ITEM* mu::ui::window::CInventoryCtrl::FindItem(int iColumnX, int iRowY)
 {
     return FindItem(iRowY * m_nColumn + iColumnX + m_nIndexOffset);
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemByKey(DWORD dwKey)
+ITEM* mu::ui::window::CInventoryCtrl::FindItemByKey(DWORD dwKey)
 {
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
@@ -739,7 +739,7 @@ ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemByKey(DWORD dwKey)
     return nullptr;
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindTypeItem(short int siType)
+ITEM* mu::ui::window::CInventoryCtrl::FindTypeItem(short int siType)
 {
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
@@ -748,7 +748,7 @@ ITEM* mu::ui::window::CNewUIInventoryCtrl::FindTypeItem(short int siType)
     return nullptr;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::IsItem(short int siType)
+bool mu::ui::window::CInventoryCtrl::IsItem(short int siType)
 {
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
@@ -757,7 +757,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::IsItem(short int siType)
     return false;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetItemCount(short int siType, int iLevel)
+int mu::ui::window::CInventoryCtrl::GetItemCount(short int siType, int iLevel)
 {
     int count = 0;
     auto li = m_vecItem.begin();
@@ -774,7 +774,7 @@ int mu::ui::window::CNewUIInventoryCtrl::GetItemCount(short int siType, int iLev
     return count;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::FindItemIndex(short int siType, int iLevel)
+int mu::ui::window::CInventoryCtrl::FindItemIndex(short int siType, int iLevel)
 {
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
@@ -791,7 +791,7 @@ int mu::ui::window::CNewUIInventoryCtrl::FindItemIndex(short int siType, int iLe
     return -1;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
+int mu::ui::window::CInventoryCtrl::FindItemReverseIndex(short sType, int iLevel)
 {
     for (int x = m_nColumn - 1; x >= 0; x--)
     {
@@ -815,7 +815,7 @@ int mu::ui::window::CNewUIInventoryCtrl::FindItemReverseIndex(short sType, int i
     return -1;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetIndexByItem(ITEM* pItem)
+int mu::ui::window::CInventoryCtrl::GetIndexByItem(ITEM* pItem)
 {
     if (pItem == nullptr)
     {
@@ -825,7 +825,7 @@ int mu::ui::window::CNewUIInventoryCtrl::GetIndexByItem(ITEM* pItem)
     return this->GetIndex(pItem->x, pItem->y);
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemPointedSquareIndex()
+ITEM* mu::ui::window::CInventoryCtrl::FindItemPointedSquareIndex()
 {
     if (m_iPointedSquareIndex != -1)
     {
@@ -837,18 +837,18 @@ ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemPointedSquareIndex()
     return nullptr;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetPointedSquareIndex()
+int mu::ui::window::CInventoryCtrl::GetPointedSquareIndex()
 {
     return m_iPointedSquareIndex;
 }
 
-ITEM* mu::ui::window::CNewUIInventoryCtrl::FindItemAtPt(int x, int y)
+ITEM* mu::ui::window::CInventoryCtrl::FindItemAtPt(int x, int y)
 {
     const int iIndex = GetIndexAtPt(x, y);
     return FindItem(iIndex);
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
+int mu::ui::window::CInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
 {
     for (int i = 0; i < m_nColumn * m_nRow; i++)
     {
@@ -860,7 +860,7 @@ int mu::ui::window::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy)
 
     return -1;
 }
-bool mu::ui::window::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy, OUT int& iColumnX, OUT int& iColumnY)
+bool mu::ui::window::CInventoryCtrl::FindEmptySlot(IN int cx, IN int cy, OUT int& iColumnX, OUT int& iColumnY)
 {
     for (int y = 0; y < m_nRow; y++)
     {
@@ -877,7 +877,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::FindEmptySlot(IN int cx, IN int cy, OU
     return false;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetNumItemByKey(DWORD dwItemKey)
+int mu::ui::window::CInventoryCtrl::GetNumItemByKey(DWORD dwItemKey)
 {
     int iCntItem = 0;
     for (int y = 0; y < m_nRow; y++)
@@ -899,7 +899,7 @@ int mu::ui::window::CNewUIInventoryCtrl::GetNumItemByKey(DWORD dwItemKey)
     return iCntItem;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetNumItemByType(short sItemType)
+int mu::ui::window::CInventoryCtrl::GetNumItemByType(short sItemType)
 {
     int iCntItem = 0;
     for (int y = 0; y < m_nRow; y++)
@@ -921,7 +921,7 @@ int mu::ui::window::CNewUIInventoryCtrl::GetNumItemByType(short sItemType)
     return iCntItem;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetEmptySlotCount()
+int mu::ui::window::CInventoryCtrl::GetEmptySlotCount()
 {
     int iResult = 0;
     for (int y = 0; y < m_nRow; y++)
@@ -938,7 +938,7 @@ int mu::ui::window::CNewUIInventoryCtrl::GetEmptySlotCount()
     return iResult;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::UpdateMouseEvent()
+bool mu::ui::window::CInventoryCtrl::UpdateMouseEvent()
 {
     if (m_EventState == EVENT_NONE && mu::ui::window::IsNone(VK_LBUTTON) && m_iPointedSquareIndex != -1)
     {
@@ -980,7 +980,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::Update()
+bool mu::ui::window::CInventoryCtrl::Update()
 {
     if (IsVisible())
     {
@@ -989,7 +989,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::Update()
     return true;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::UpdateProcess()
+void mu::ui::window::CInventoryCtrl::UpdateProcess()
 {
     const int iCurSquareIndex = GetIndexAtPt(MouseX, MouseY);
     if (iCurSquareIndex != m_iPointedSquareIndex)
@@ -1012,7 +1012,7 @@ void mu::ui::window::CNewUIInventoryCtrl::UpdateProcess()
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::Render()
+void mu::ui::window::CInventoryCtrl::Render()
 {
     int x, y;
     for (y = 0; y < m_nRow; y++)
@@ -1296,28 +1296,28 @@ void mu::ui::window::CNewUIInventoryCtrl::Render()
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetPos(int x, int y)
+void mu::ui::window::CInventoryCtrl::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-const POINT& mu::ui::window::CNewUIInventoryCtrl::GetPos() const
+const POINT& mu::ui::window::CInventoryCtrl::GetPos() const
 {
     return m_Pos;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetNumberOfColumn() const
+int mu::ui::window::CInventoryCtrl::GetNumberOfColumn() const
 {
     return m_nColumn;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetNumberOfRow() const
+int mu::ui::window::CInventoryCtrl::GetNumberOfRow() const
 {
     return m_nRow;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::GetRect(RECT& rcBox)
+void mu::ui::window::CInventoryCtrl::GetRect(RECT& rcBox)
 {
     rcBox.left = m_Pos.x;
     rcBox.top = m_Pos.y;
@@ -1325,54 +1325,54 @@ void mu::ui::window::CNewUIInventoryCtrl::GetRect(RECT& rcBox)
     rcBox.bottom = rcBox.top + m_Size.cy;
 }
 
-CNewUIInventoryCtrl::EVENT_STATE mu::ui::window::CNewUIInventoryCtrl::GetEventState()
+CInventoryCtrl::EVENT_STATE mu::ui::window::CInventoryCtrl::GetEventState()
 {
     return m_EventState;
 }
 
-CNewUIObj* mu::ui::window::CNewUIInventoryCtrl::GetOwner() const
+CObject* mu::ui::window::CInventoryCtrl::GetOwner() const
 {
     return m_pOwner;
 }
 
-CNewUIObj* mu::ui::window::CNewUIInventoryCtrl::GetLayoutOwner() const
+CObject* mu::ui::window::CInventoryCtrl::GetLayoutOwner() const
 {
     return m_pOwner;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::IsVisible() const
+bool mu::ui::window::CInventoryCtrl::IsVisible() const
 {
     if (m_pOwner)
         return (m_pOwner->IsVisible() && m_bShow);
     return m_bShow;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::ShowInventory()
+void mu::ui::window::CInventoryCtrl::ShowInventory()
 {
     m_bShow = true;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::HideInventory()
+void mu::ui::window::CInventoryCtrl::HideInventory()
 {
     m_bShow = false;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::IsLocked() const
+bool mu::ui::window::CInventoryCtrl::IsLocked() const
 {
     return m_bLock;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::LockInventory()
+void mu::ui::window::CInventoryCtrl::LockInventory()
 {
     m_bLock = true;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::UnlockInventory()
+void mu::ui::window::CInventoryCtrl::UnlockInventory()
 {
     m_bLock = false;
 }
 
-int mu::ui::window::CNewUIInventoryCtrl::GetIndexAtPt(int x, int y)
+int mu::ui::window::CInventoryCtrl::GetIndexAtPt(int x, int y)
 {
     int iColumnX, iRowY;
     if (GetSquarePosAtPt(x, y, iColumnX, iRowY))
@@ -1380,7 +1380,7 @@ int mu::ui::window::CNewUIInventoryCtrl::GetIndexAtPt(int x, int y)
     return -1;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iColumnX, int& iRowY)
+bool mu::ui::window::CInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iColumnX, int& iRowY)
 {
     RECT rcBox;
     GetRect(rcBox);
@@ -1394,7 +1394,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::GetSquarePosAtPt(int x, int y, int& iC
     return true;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CheckSlot(int startIndex, int width, int height)
+bool mu::ui::window::CInventoryCtrl::CheckSlot(int startIndex, int width, int height)
 {
     if (!UI::Items::Grid::Fits(startIndex, width, height, m_nColumn, m_nRow))
     {
@@ -1429,18 +1429,18 @@ bool mu::ui::window::CNewUIInventoryCtrl::CheckSlot(int startIndex, int width, i
     return true;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CheckSlot(int iColumnX, int iRowY, int width, int height)
+bool mu::ui::window::CInventoryCtrl::CheckSlot(int iColumnX, int iRowY, int width, int height)
 {
     const int iIndex = iRowY * m_nColumn + iColumnX;
     return CheckSlot(iIndex, width, height);
 }
 
-int CNewUIInventoryCtrl::GetIndex(int column, int row)
+int CInventoryCtrl::GetIndex(int column, int row)
 {
     return column + row * m_nColumn + m_nIndexOffset;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CheckPtInRect(int x, int y)
+bool mu::ui::window::CInventoryCtrl::CheckPtInRect(int x, int y)
 {
     RECT rcSquare;
     GetRect(rcSquare);
@@ -1450,7 +1450,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::CheckPtInRect(int x, int y)
     return true;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CheckRectInRect(const RECT& rcBox)
+bool mu::ui::window::CInventoryCtrl::CheckRectInRect(const RECT& rcBox)
 {
     RECT rcSquare;
     GetRect(rcSquare);
@@ -1461,7 +1461,7 @@ bool mu::ui::window::CNewUIInventoryCtrl::CheckRectInRect(const RECT& rcBox)
     return false;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CanMove(int iLinealPos, ITEM* pItem)
+bool mu::ui::window::CInventoryCtrl::CanMove(int iLinealPos, ITEM* pItem)
 {
     const auto startIndex = iLinealPos - m_nIndexOffset;
     if (startIndex < 0 || startIndex >= m_nColumn * m_nRow)
@@ -1473,13 +1473,13 @@ bool mu::ui::window::CNewUIInventoryCtrl::CanMove(int iLinealPos, ITEM* pItem)
     return CheckSlot(startIndex, pItemAttr->Width, pItemAttr->Height);
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CanMove(int iColumnX, int iRowY, ITEM* pItem)
+bool mu::ui::window::CInventoryCtrl::CanMove(int iColumnX, int iRowY, ITEM* pItem)
 {
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     return CheckSlot(iColumnX, iRowY, pItemAttr->Width, pItemAttr->Height);
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CanMoveToPt(int x, int y, ITEM* pItem)
+bool mu::ui::window::CInventoryCtrl::CanMoveToPt(int x, int y, ITEM* pItem)
 {
     int iColumnX, iRowY;
     if (GetSquarePosAtPt(x, y, iColumnX, iRowY))
@@ -1487,12 +1487,12 @@ bool mu::ui::window::CNewUIInventoryCtrl::CanMoveToPt(int x, int y, ITEM* pItem)
     return false;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetToolTipType(TOOLTIP_TYPE ToolTipType)
+void mu::ui::window::CInventoryCtrl::SetToolTipType(TOOLTIP_TYPE ToolTipType)
 {
     m_ToolTipType = ToolTipType;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::CreateItemToolTip(ITEM* pItem)
+void mu::ui::window::CInventoryCtrl::CreateItemToolTip(ITEM* pItem)
 {
     if (m_pToolTipItem)
         DeleteItemToolTip();
@@ -1501,7 +1501,7 @@ void mu::ui::window::CNewUIInventoryCtrl::CreateItemToolTip(ITEM* pItem)
         m_pToolTipItem = g_pNewItemMng->CreateItem(pItem);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::DeleteItemToolTip()
+void mu::ui::window::CInventoryCtrl::DeleteItemToolTip()
 {
     if (m_pToolTipItem && g_pNewItemMng)
     {
@@ -1510,7 +1510,7 @@ void mu::ui::window::CNewUIInventoryCtrl::DeleteItemToolTip()
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetRepairMode(bool bRepair)
+void mu::ui::window::CInventoryCtrl::SetRepairMode(bool bRepair)
 {
     m_bRepairMode = bRepair;
 
@@ -1524,12 +1524,12 @@ void mu::ui::window::CNewUIInventoryCtrl::SetRepairMode(bool bRepair)
     }
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::IsRepairMode()
+bool mu::ui::window::CInventoryCtrl::IsRepairMode()
 {
     return m_bRepairMode;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::RenderNumberOfItem()
+void mu::ui::window::CInventoryCtrl::RenderNumberOfItem()
 {
     EnableAlphaTest();
     auto li = m_vecItem.begin();
@@ -1586,7 +1586,7 @@ void mu::ui::window::CNewUIInventoryCtrl::RenderNumberOfItem()
     DisableAlphaBlend();
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::RenderItemToolTip()
+void mu::ui::window::CInventoryCtrl::RenderItemToolTip()
 {
     if (m_pToolTipItem)
     {
@@ -1623,11 +1623,11 @@ void mu::ui::window::CNewUIInventoryCtrl::RenderItemToolTip()
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void mu::ui::window::CInventoryCtrl::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
-        auto* pInventoryCtrl = static_cast<CNewUIInventoryCtrl*>(pClass);
+        auto* pInventoryCtrl = static_cast<CInventoryCtrl*>(pClass);
         if (dwParamA == RENDER_NUMBER_OF_ITEM)
             pInventoryCtrl->RenderNumberOfItem();
         else if (dwParamA == RENDER_ITEM_TOOLTIP)
@@ -1635,41 +1635,41 @@ void mu::ui::window::CNewUIInventoryCtrl::UI2DEffectCallback(LPVOID pClass, DWOR
     }
 }
 
-CNewUIPickedItem* mu::ui::window::CNewUIInventoryCtrl::GetPickedItem()
+CPickedItem* mu::ui::window::CInventoryCtrl::GetPickedItem()
 {
     return ms_pPickedItem;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CreatePickedItem(CNewUIInventoryCtrl* pSrc, ITEM* pItem,
+bool mu::ui::window::CInventoryCtrl::CreatePickedItem(CInventoryCtrl* pSrc, ITEM* pItem,
                                                      bool preservePickupAnchor)
 {
     if (g_pNewItemMng)
     {
-        ms_pPickedItem = new CNewUIPickedItem;
+        ms_pPickedItem = new CPickedItem;
         return ms_pPickedItem->Create(g_pNewItemMng, pSrc, pItem, preservePickupAnchor);
     }
     return false;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem()
+void mu::ui::window::CInventoryCtrl::DeletePickedItem()
 {
     if (ms_pPickedItem)
     {
-        CNewUIInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
+        CInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
         if (pOwner)
         {
-            pOwner->SetEventState(CNewUIInventoryCtrl::EVENT_NONE);
+            pOwner->SetEventState(CInventoryCtrl::EVENT_NONE);
         }
     }
 
     SAFE_DELETE(ms_pPickedItem);
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem()
+void mu::ui::window::CInventoryCtrl::BackupPickedItem()
 {
     if (ms_pPickedItem && EquipmentItem == false)
     {
-        CNewUIInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
+        CInventoryCtrl* pOwner = ms_pPickedItem->GetOwnerInventory();
         ITEM* pItemObj = ms_pPickedItem->GetItem();
         if (pOwner)
         {
@@ -1700,12 +1700,12 @@ void mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem()
     }
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::SetEventState(EVENT_STATE es)
+void mu::ui::window::CInventoryCtrl::SetEventState(EVENT_STATE es)
 {
     m_EventState = es;
 }
 
-void mu::ui::window::CNewUIInventoryCtrl::Render3D()
+void mu::ui::window::CInventoryCtrl::Render3D()
 {
     auto li = m_vecItem.begin();
     for (; li != m_vecItem.end(); ++li)
@@ -1723,7 +1723,7 @@ void mu::ui::window::CNewUIInventoryCtrl::Render3D()
     }
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* pTargetItem)
+bool mu::ui::window::CInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, ITEM* pTargetItem)
 {
     if (pSourceItem == nullptr || pTargetItem == nullptr)
     {
@@ -1888,12 +1888,12 @@ bool mu::ui::window::CNewUIInventoryCtrl::AreItemsStackable(ITEM* pSourceItem, I
     return false;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CanPushItem()
+bool mu::ui::window::CInventoryCtrl::CanPushItem()
 {
     return m_bCanPushItem;
 }
 
-bool mu::ui::window::CNewUIInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem)
+bool mu::ui::window::CInventoryCtrl::CanUpgradeItem(ITEM* pSourceItem, ITEM* pTargetItem)
 {
     const int iTargetLevel = pTargetItem->Level;
 

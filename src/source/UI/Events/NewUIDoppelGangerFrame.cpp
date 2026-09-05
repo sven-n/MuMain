@@ -1,4 +1,4 @@
-// NewUIDoppelGangerFrame.cpp: implementation of the CNewUIDoppelGangerFrame class.
+// NewUIDoppelGangerFrame.cpp: implementation of the CDoppelGangerFrame class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -9,7 +9,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIDoppelGangerFrame::CNewUIDoppelGangerFrame()
+CDoppelGangerFrame::CDoppelGangerFrame()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -24,12 +24,12 @@ CNewUIDoppelGangerFrame::CNewUIDoppelGangerFrame()
     m_fIceWalkerPosition = 0.0f;
 }
 
-CNewUIDoppelGangerFrame::~CNewUIDoppelGangerFrame()
+CDoppelGangerFrame::~CDoppelGangerFrame()
 {
     Release();
 }
 
-bool CNewUIDoppelGangerFrame::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CDoppelGangerFrame::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -46,7 +46,7 @@ bool CNewUIDoppelGangerFrame::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIDoppelGangerFrame::Release()
+void CDoppelGangerFrame::Release()
 {
     UnloadImages();
 
@@ -57,25 +57,25 @@ void CNewUIDoppelGangerFrame::Release()
     }
 }
 
-void CNewUIDoppelGangerFrame::SetPos(int x, int y)
+void CDoppelGangerFrame::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIDoppelGangerFrame::UpdateMouseEvent()
+bool CDoppelGangerFrame::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
     return true;
 }
 
-bool CNewUIDoppelGangerFrame::UpdateKeyEvent()
+bool CDoppelGangerFrame::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIDoppelGangerFrame::Update()
+bool CDoppelGangerFrame::Update()
 {
     if (!IsVisible())
         return true;
@@ -83,7 +83,7 @@ bool CNewUIDoppelGangerFrame::Update()
     return true;
 }
 
-bool CNewUIDoppelGangerFrame::Render()
+bool CDoppelGangerFrame::Render()
 {
     EnableAlphaTest();
 
@@ -208,17 +208,17 @@ bool CNewUIDoppelGangerFrame::Render()
     return true;
 }
 
-bool CNewUIDoppelGangerFrame::BtnProcess()
+bool CDoppelGangerFrame::BtnProcess()
 {
     return false;
 }
 
-float CNewUIDoppelGangerFrame::GetLayerDepth()
+float CDoppelGangerFrame::GetLayerDepth()
 {
     return 1.2f;
 }
 
-void CNewUIDoppelGangerFrame::OpenningProcess()
+void CDoppelGangerFrame::OpenningProcess()
 {
     m_iEnteredMonsters = 0;
     m_iMaxMonsters = 0;
@@ -234,12 +234,12 @@ void CNewUIDoppelGangerFrame::OpenningProcess()
     EnabledDoppelGangerEvent(TRUE);
 }
 
-void CNewUIDoppelGangerFrame::ClosingProcess()
+void CDoppelGangerFrame::ClosingProcess()
 {
     EnabledDoppelGangerEvent(FALSE);
 }
 
-void CNewUIDoppelGangerFrame::LoadImages()
+void CDoppelGangerFrame::LoadImages()
 {
     LoadBitmap(L"Interface\\Double_back.tga", IMAGE_DOPPELGANGER_FRAME_WINDOW, GL_LINEAR);
     LoadBitmap(L"Interface\\Double_bar(R).jpg", IMAGE_DOPPELGANGER_GUAGE_RED, GL_LINEAR);
@@ -250,32 +250,32 @@ void CNewUIDoppelGangerFrame::LoadImages()
     LoadBitmap(L"Interface\\Double_Micon01.tga", IMAGE_DOPPELGANGER_GUAGE_ICEWALKER, GL_LINEAR);
 }
 
-void CNewUIDoppelGangerFrame::UnloadImages()
+void CDoppelGangerFrame::UnloadImages()
 {
     DeleteBitmap(IMAGE_DOPPELGANGER_FRAME_WINDOW);
 }
 
-void CNewUIDoppelGangerFrame::SetMonsterGauge(float fValue)
+void CDoppelGangerFrame::SetMonsterGauge(float fValue)
 {
     m_fMonsterGaugeRcvd = fValue;
 }
 
-void CNewUIDoppelGangerFrame::SetRemainTime(int iSeconds)
+void CDoppelGangerFrame::SetRemainTime(int iSeconds)
 {
     m_iTime = iSeconds;
 }
 
-void CNewUIDoppelGangerFrame::StopTimer(BOOL bFlag)
+void CDoppelGangerFrame::StopTimer(BOOL bFlag)
 {
     m_bStopTimer = bFlag;
 }
 
-void CNewUIDoppelGangerFrame::ResetPartyMemberInfo()
+void CDoppelGangerFrame::ResetPartyMemberInfo()
 {
     m_PartyPositionMap.clear();
 }
 
-void CNewUIDoppelGangerFrame::SetPartyMemberRcvd()
+void CDoppelGangerFrame::SetPartyMemberRcvd()
 {
     for (std::map<WORD, PARTY_POSITION>::iterator iter = m_PartyPositionMap.begin(); iter != m_PartyPositionMap.end(); ++iter)
     {
@@ -283,7 +283,7 @@ void CNewUIDoppelGangerFrame::SetPartyMemberRcvd()
     }
 }
 
-void CNewUIDoppelGangerFrame::SetPartyMemberInfo(WORD wIndex, float fPosition)
+void CDoppelGangerFrame::SetPartyMemberInfo(WORD wIndex, float fPosition)
 {
     auto iter = m_PartyPositionMap.find(wIndex);
     if (iter == m_PartyPositionMap.end())
@@ -299,7 +299,7 @@ void CNewUIDoppelGangerFrame::SetPartyMemberInfo(WORD wIndex, float fPosition)
     }
 }
 
-void CNewUIDoppelGangerFrame::SetIceWalkerMap(BOOL bEnable, float fPosition)
+void CDoppelGangerFrame::SetIceWalkerMap(BOOL bEnable, float fPosition)
 {
     if (bEnable == TRUE)
     {

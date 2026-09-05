@@ -1,4 +1,4 @@
-// NewUICommandWindow.h: interface for the CNewUICommandWindow class.
+// NewUICommandWindow.h: interface for the CCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_NEWUICOMMANDWINDOW_H__6C0AA8A8_EF69_45F3_BCE4_F957F08310C5__INCLUDED_)
@@ -17,7 +17,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUICommandWindow : public CNewUIObj
+    class CCommandWindow : public CObject
     {
     public:
         static constexpr float LayerDepth = UI::Layout::ForegroundPanelLayerDepth;
@@ -25,13 +25,13 @@ namespace mu::ui::window
         enum eIMAGE_LIST
         {
             // Base Window (Reference)
-            IMAGE_COMMAND_BASE_WINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,				//. newui_msgbox_back.jpg
-            IMAGE_COMMAND_BASE_WINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,			//. newui_item_back01.tga	(190,64)
-            IMAGE_COMMAND_BASE_WINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,			//. newui_item_back02-l.tga	(21,320)
-            IMAGE_COMMAND_BASE_WINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,		//. newui_item_back02-r.tga	(21,320)
-            IMAGE_COMMAND_BASE_WINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,		//. newui_item_back03.tga	(190,45)
-            IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,		//. newui_exit_00.tga
-            IMAGE_COMMAND_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,						//. newui_btn_empty.tga
+            IMAGE_COMMAND_BASE_WINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,				//. newui_msgbox_back.jpg
+            IMAGE_COMMAND_BASE_WINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,			//. newui_item_back01.tga	(190,64)
+            IMAGE_COMMAND_BASE_WINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,			//. newui_item_back02-l.tga	(21,320)
+            IMAGE_COMMAND_BASE_WINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,		//. newui_item_back02-r.tga	(21,320)
+            IMAGE_COMMAND_BASE_WINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,		//. newui_item_back03.tga	(190,45)
+            IMAGE_COMMAND_BASE_WINDOW_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,		//. newui_exit_00.tga
+            IMAGE_COMMAND_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,						//. newui_btn_empty.tga
             IMAGE_COMMAND_SELECTID_BG = BITMAP_COMMAND_WINDOW_BEGIN,								//. newUI_cursorid_wnd.jpg	(128,32)
         };
 
@@ -44,23 +44,23 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
         // RadioGroupButton
-        CNewUIButton				m_BtnCommand[MAX_COMMAND_BTN];
+        CButton				m_BtnCommand[MAX_COMMAND_BTN];
         // Exit Button
-        CNewUIButton				m_BtnExit;
+        CButton				m_BtnExit;
         int							m_iCurSelectCommand;
         int							m_iCurMouseCursor;
         bool						m_bSelectedChar;
         bool						m_bCanCommand;
 
     public:
-        CNewUICommandWindow();
-        virtual ~CNewUICommandWindow();
+        CCommandWindow();
+        virtual ~CCommandWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

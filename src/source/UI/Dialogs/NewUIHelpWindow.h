@@ -1,4 +1,4 @@
-// NewUIHelpWindow.h: interface for the CNewUIHelpWindow class.
+// NewUIHelpWindow.h: interface for the CHelpWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -11,13 +11,13 @@
 
 namespace mu::ui::window
 {
-class CNewUIHelpWindow : public CNewUIObj
+class CHelpWindow : public CObject
 {
 public:
-    CNewUIHelpWindow();
-    virtual ~CNewUIHelpWindow();
+    CHelpWindow();
+    virtual ~CHelpWindow();
 
-    bool Create(CNewUIManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
     void Release();
 
     void SetPos(int x, int y);
@@ -36,7 +36,7 @@ public:
     void AutoUpdateIndex();
 
 private:
-    CNewUIManager* m_pNewUIMng;
+    CManager* m_pNewUIMng;
     POINT m_Pos;
 
     int m_iIndex;

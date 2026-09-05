@@ -1,4 +1,4 @@
-﻿// NewUIMyInventory.cpp: implementation of the CNewUIMyInventory class.
+﻿// NewUIMyInventory.cpp: implementation of the CMyInventory class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -39,7 +39,7 @@ extern bool SelectFlag;
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIMyInventory::CNewUIMyInventory()
+CMyInventory::CMyInventory()
 {
     m_pNewUIMng = nullptr;
     m_pNewUI3DRenderMng = nullptr;
@@ -57,12 +57,12 @@ CNewUIMyInventory::CNewUIMyInventory()
     m_bMyShopOpen = false;
 }
 
-CNewUIMyInventory::~CNewUIMyInventory()
+CMyInventory::~CMyInventory()
 {
     Release();
 }
 
-bool CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
 {
     if (nullptr == pNewUIMng || nullptr == pNewUI3DRenderMng || nullptr == g_pNewItemMng)
         return false;
@@ -73,7 +73,7 @@ bool CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNew
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
     m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::INVENTORY, m_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 200, 8, 8, MAX_EQUIPMENT))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
@@ -90,7 +90,7 @@ bool CNewUIMyInventory::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNew
     return true;
 }
 
-void CNewUIMyInventory::Release()
+void CMyInventory::Release()
 {
     if (m_pNewUI3DRenderMng)
         m_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
@@ -114,7 +114,7 @@ void CNewUIMyInventory::Release()
     }
 }
 
-bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool CMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (iIndex < 0 || iIndex >= MAX_EQUIPMENT_INDEX || !g_pNewItemMng || !CharacterMachine)
     {
@@ -155,7 +155,7 @@ bool CNewUIMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacke
     return true;
 }
 
-void CNewUIMyInventory::UnequipItem(int iIndex)
+void CMyInventory::UnequipItem(int iIndex)
 {
     if (iIndex >= 0 && iIndex < MAX_EQUIPMENT_INDEX && g_pNewItemMng && CharacterMachine)
     {
@@ -195,7 +195,7 @@ void CNewUIMyInventory::UnequipItem(int iIndex)
     }
 }
 
-void CNewUIMyInventory::UnequipAllItems()
+void CMyInventory::UnequipAllItems()
 {
     if (CharacterMachine)
     {
@@ -206,7 +206,7 @@ void CNewUIMyInventory::UnequipAllItems()
     }
 }
 
-bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
+bool CMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
 {
     if (pItem == nullptr)
         return false;
@@ -373,7 +373,7 @@ bool CNewUIMyInventory::IsEquipable(int iIndex, ITEM* pItem) const
     return bEquipable;
 }
 
-bool CNewUIMyInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
+bool CMyInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (m_pNewInventoryCtrl)
     {
@@ -383,7 +383,7 @@ bool CNewUIMyInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPack
     return false;
 }
 
-void CNewUIMyInventory::DeleteItem(int iIndex) const
+void CMyInventory::DeleteItem(int iIndex) const
 {
     if (m_pNewInventoryCtrl)
     {
@@ -392,27 +392,27 @@ void CNewUIMyInventory::DeleteItem(int iIndex) const
             return;
         }
 
-        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
         if (pPickedItem)
         {
             if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
             {
                 if (pPickedItem->GetSourceLinealPos() == iIndex)
                 {
-                    CNewUIInventoryCtrl::DeletePickedItem();
+                    CInventoryCtrl::DeletePickedItem();
                 }
             }
         }
     }
 }
 
-void CNewUIMyInventory::DeleteAllItems() const
+void CMyInventory::DeleteAllItems() const
 {
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->RemoveAllItems();
 }
 
-void CNewUIMyInventory::SetPos(int x, int y)
+void CMyInventory::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -426,17 +426,17 @@ void CNewUIMyInventory::SetPos(int x, int y)
     m_BtnExpand.SetPos(m_Pos.x + 87 + 37, m_Pos.y + 391);
 }
 
-const POINT& CNewUIMyInventory::GetPos() const
+const POINT& CMyInventory::GetPos() const
 {
     return m_Pos;
 }
 
-SEASON3B::REPAIR_MODE CNewUIMyInventory::GetRepairMode() const
+SEASON3B::REPAIR_MODE CMyInventory::GetRepairMode() const
 {
     return m_RepairMode;
 }
 
-void CNewUIMyInventory::SetRepairMode(bool bRepair)
+void CMyInventory::SetRepairMode(bool bRepair)
 {
     if (bRepair)
     {
@@ -456,7 +456,7 @@ void CNewUIMyInventory::SetRepairMode(bool bRepair)
     }
 }
 
-bool CNewUIMyInventory::UpdateMouseEvent()
+bool CMyInventory::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && !m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
@@ -469,7 +469,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem && IsPress(VK_LBUTTON)
         && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
                                                        g_fWindowMouseX, g_fWindowMouseY))
@@ -499,7 +499,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         if (pItemObj && IsHighValueItem(pItemObj) == true)
         {
             g_pSystemLogBox->AddText(I18N::Game::YouAreNotAllowedToDropThisExpensiveItem, TYPE_ERROR_MESSAGE);
-            CNewUIInventoryCtrl::BackupPickedItem();
+            CInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
             return false;
@@ -507,7 +507,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
         if (pItemObj && IsDropBan(pItemObj))
         {
             g_pSystemLogBox->AddText(I18N::Game::ThisItemCannotBeDropped, TYPE_ERROR_MESSAGE);
-            CNewUIInventoryCtrl::BackupPickedItem();
+            CInventoryCtrl::BackupPickedItem();
 
             ResetMouseLButton();
             return false;
@@ -568,7 +568,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIMyInventory::UpdateKeyEvent()
+bool CMyInventory::UpdateKeyEvent()
 {
     if (!g_pNewUISystem->IsVisible(INTERFACE_INVENTORY))
     {
@@ -669,7 +669,7 @@ bool CNewUIMyInventory::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIMyInventory::Update()
+bool CMyInventory::Update()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
     {
@@ -692,7 +692,7 @@ bool CNewUIMyInventory::Update()
     return true;
 }
 
-bool CNewUIMyInventory::Render()
+bool CMyInventory::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -709,7 +709,7 @@ bool CNewUIMyInventory::Render()
     return true;
 }
 
-void CNewUIMyInventory::RenderSetOption()
+void CMyInventory::RenderSetOption()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -732,7 +732,7 @@ void CNewUIMyInventory::RenderSetOption()
     }
 }
 
-void CNewUIMyInventory::RenderSocketOption()
+void CMyInventory::RenderSocketOption()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -756,7 +756,7 @@ void CNewUIMyInventory::RenderSocketOption()
     }
 }
 
-void CNewUIMyInventory::Render3D()
+void CMyInventory::Render3D()
 {
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; i++)
     {
@@ -787,12 +787,12 @@ void CNewUIMyInventory::Render3D()
     }
 }
 
-bool CNewUIMyInventory::IsVisible() const
+bool CMyInventory::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-void CNewUIMyInventory::OpenningProcess()
+void CMyInventory::OpenningProcess()
 {
     SetRepairMode(false);
 
@@ -829,45 +829,45 @@ void CNewUIMyInventory::OpenningProcess()
     }
 }
 
-void CNewUIMyInventory::ClosingProcess()
+void CMyInventory::ClosingProcess()
 {
     m_pNewInventoryCtrl->BackupPickedItem();
     RepairEnable = 0;
     SetRepairMode(false);
 }
 
-float CNewUIMyInventory::GetLayerDepth()
+float CMyInventory::GetLayerDepth()
 {
     return 4.2f;
 }
 
-CNewUIInventoryCtrl* CNewUIMyInventory::GetInventoryCtrl() const
+CInventoryCtrl* CMyInventory::GetInventoryCtrl() const
 {
     return m_pNewInventoryCtrl;
 }
 
-ITEM* CNewUIMyInventory::FindItem(int iLinealPos) const
+ITEM* CMyInventory::FindItem(int iLinealPos) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItem(iLinealPos);
     return nullptr;
 }
 
-ITEM* CNewUIMyInventory::FindItemByKey(DWORD dwKey) const
+ITEM* CMyInventory::FindItemByKey(DWORD dwKey) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItemByKey(dwKey);
     return nullptr;
 }
 
-int CNewUIMyInventory::FindItemIndex(short int siType, int iLevel) const
+int CMyInventory::FindItemIndex(short int siType, int iLevel) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItemIndex(siType, iLevel);
     return -1;
 }
 
-int CNewUIMyInventory::FindItemReverseIndex(short sType, int iLevel) const
+int CMyInventory::FindItemReverseIndex(short sType, int iLevel) const
 {
     if (m_pNewInventoryCtrl)
     {
@@ -877,14 +877,14 @@ int CNewUIMyInventory::FindItemReverseIndex(short sType, int iLevel) const
     return -1;
 }
 
-int CNewUIMyInventory::FindEmptySlot(IN int cx, IN int cy) const
+int CMyInventory::FindEmptySlot(IN int cx, IN int cy) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindEmptySlot(cx, cy);
     return -1;
 }
 
-int CNewUIMyInventory::FindEmptySlot(ITEM* pItem) const
+int CMyInventory::FindEmptySlot(ITEM* pItem) const
 {
     if (pItem == nullptr)
     {
@@ -900,7 +900,7 @@ int CNewUIMyInventory::FindEmptySlot(ITEM* pItem) const
     return -1;
 }
 
-int CNewUIMyInventory::FindEmptySlotIncludingExtensions(IN int cx, IN int cy) const
+int CMyInventory::FindEmptySlotIncludingExtensions(IN int cx, IN int cy) const
 {
     const int baseInventorySlot = FindEmptySlot(cx, cy);
     if (baseInventorySlot != -1)
@@ -916,7 +916,7 @@ int CNewUIMyInventory::FindEmptySlotIncludingExtensions(IN int cx, IN int cy) co
     return -1;
 }
 
-int CNewUIMyInventory::FindEmptySlotIncludingExtensions(ITEM* pItem) const
+int CMyInventory::FindEmptySlotIncludingExtensions(ITEM* pItem) const
 {
     if (pItem == nullptr)
     {
@@ -927,11 +927,11 @@ int CNewUIMyInventory::FindEmptySlotIncludingExtensions(ITEM* pItem) const
     return FindEmptySlotIncludingExtensions(pItemAttr->Width, pItemAttr->Height);
 }
 
-void CNewUIMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
-        auto* pMyInventory = (CNewUIMyInventory*)(pClass);
+        auto* pMyInventory = (CMyInventory*)(pClass);
 
         if (dwParamB == ITEM_SET_OPTION)
         {
@@ -948,17 +948,17 @@ void CNewUIMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD 
     }
 }
 
-void CNewUIMyInventory::SetStandbyItemKey(DWORD dwItemKey)
+void CMyInventory::SetStandbyItemKey(DWORD dwItemKey)
 {
     m_dwStandbyItemKey = dwItemKey;
 }
 
-DWORD CNewUIMyInventory::GetStandbyItemKey() const
+DWORD CMyInventory::GetStandbyItemKey() const
 {
     return m_dwStandbyItemKey;
 }
 
-int CNewUIMyInventory::GetStandbyItemIndex() const
+int CMyInventory::GetStandbyItemIndex() const
 {
     if (ITEM* pItem = GetStandbyItem())
     {
@@ -967,14 +967,14 @@ int CNewUIMyInventory::GetStandbyItemIndex() const
     return -1;
 }
 
-ITEM* CNewUIMyInventory::GetStandbyItem() const
+ITEM* CMyInventory::GetStandbyItem() const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItemByKey(m_dwStandbyItemKey);
     return nullptr;
 }
 
-void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
+void CMyInventory::CreateEquippingEffect(ITEM* pItem)
 {
     SetCharacterClass(Hero);
     OBJECT* pHeroObject = &Hero->Object;
@@ -1062,7 +1062,7 @@ void CNewUIMyInventory::CreateEquippingEffect(ITEM* pItem)
     }
 }
 
-void CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
+void CMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
 {
     if (ThePetProcess().IsPet(pItem->Type) == true)
     {
@@ -1088,7 +1088,7 @@ void CNewUIMyInventory::DeleteEquippingEffectBug(ITEM* pItem)
     }
 }
 
-void CNewUIMyInventory::DeleteEquippingEffect()
+void CMyInventory::DeleteEquippingEffect()
 {
     if (Hero->EtcPart < PARTS_ATTACK_TEAM_MARK)
     {
@@ -1102,7 +1102,7 @@ void CNewUIMyInventory::DeleteEquippingEffect()
     SetCharacterClass(Hero);
 }
 
-void CNewUIMyInventory::SetEquipmentSlotInfo()
+void CMyInventory::SetEquipmentSlotInfo()
 {
     m_EquipmentSlots[EQUIPMENT_HELPER].x = m_Pos.x + 15;
     m_EquipmentSlots[EQUIPMENT_HELPER].y = m_Pos.y + 44;
@@ -1177,7 +1177,7 @@ void CNewUIMyInventory::SetEquipmentSlotInfo()
     m_EquipmentSlots[EQUIPMENT_RING_RIGHT].dwBgImage = IMAGE_INVENTORY_ITEM_RING;
 }
 
-void CNewUIMyInventory::SetButtonInfo()
+void CMyInventory::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
@@ -1196,7 +1196,7 @@ void CNewUIMyInventory::SetButtonInfo()
     m_BtnExpand.ChangeToolTipText(&I18N::Game::OpenExpandedInventoryK, true);
 }
 
-void CNewUIMyInventory::LoadImages() const
+void CMyInventory::LoadImages() const
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_INVENTORY_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
@@ -1223,7 +1223,7 @@ void CNewUIMyInventory::LoadImages() const
     LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, GL_LINEAR);
 }
 
-void CNewUIMyInventory::UnloadImages()
+void CMyInventory::UnloadImages()
 {
     DeleteBitmap(IMAGE_INVENTORY_MYSHOP_CLOSE_BTN);
     DeleteBitmap(IMAGE_INVENTORY_MYSHOP_OPEN_BTN);
@@ -1250,7 +1250,7 @@ void CNewUIMyInventory::UnloadImages()
     DeleteBitmap(IMAGE_INVENTORY_EXPAND_BTN);
 }
 
-void CNewUIMyInventory::RenderFrame() const
+void CMyInventory::RenderFrame() const
 {
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
@@ -1262,7 +1262,7 @@ void CNewUIMyInventory::RenderFrame() const
     RenderImage(IMAGE_INVENTORY_BACK_BOTTOM, x, y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 }
 
-void CNewUIMyInventory::RenderEquippedItem()
+void CMyInventory::RenderEquippedItem()
 {
     for (int i = 0; i < MAX_EQUIPMENT_INDEX; i++)
     {
@@ -1323,9 +1323,9 @@ void CNewUIMyInventory::RenderEquippedItem()
         }
     }
 
-    if (CNewUIInventoryCtrl::GetPickedItem() && m_iPointedSlot != -1)
+    if (CInventoryCtrl::GetPickedItem() && m_iPointedSlot != -1)
     {
-        ITEM* pItemObj = CNewUIInventoryCtrl::GetPickedItem()->GetItem();
+        ITEM* pItemObj = CInventoryCtrl::GetPickedItem()->GetItem();
         const ITEM* pEquipmentItemSlot = &CharacterMachine->Equipment[m_iPointedSlot];
         if (pItemObj && (pEquipmentItemSlot->Type != -1 || false == IsEquipable(m_iPointedSlot, pItemObj))
             && !((gCharacterManager.GetBaseClass(Hero->Class) == CLASS_RAGEFIGHTER) && (m_iPointedSlot == EQUIPMENT_GLOVES)))
@@ -1343,7 +1343,7 @@ void CNewUIMyInventory::RenderEquippedItem()
     }
 }
 
-void CNewUIMyInventory::RenderButtons()
+void CMyInventory::RenderButtons()
 {
     EnableAlphaTest();
 
@@ -1370,7 +1370,7 @@ void CNewUIMyInventory::RenderButtons()
     DisableAlphaBlend();
 }
 
-void CNewUIMyInventory::RenderInventoryDetails() const
+void CMyInventory::RenderInventoryDetails() const
 {
     EnableAlphaTest();
 
@@ -1394,11 +1394,11 @@ void CNewUIMyInventory::RenderInventoryDetails() const
     DisableAlphaBlend();
 }
 
-bool CNewUIMyInventory::EquipmentWindowProcess()
+bool CMyInventory::EquipmentWindowProcess()
 {
     if (m_iPointedSlot != -1 && IsRelease(VK_LBUTTON))
     {
-        if (CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem())
+        if (CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem())
         {
             ITEM* pItemObj = pPickedItem->GetItem();
             const int iSourceIndex = pPickedItem->GetSourceLinealPos();
@@ -1406,7 +1406,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
             if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
             {
                 g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, mu::ui::window::TYPE_ERROR_MESSAGE);
-                CNewUIInventoryCtrl::BackupPickedItem();
+                CInventoryCtrl::BackupPickedItem();
 
                 ResetMouseLButton();
                 return false;
@@ -1426,7 +1426,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                 if (g_ChangeRingMgr->CheckChangeRing(pItemRingLeft->Type) || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
                 {
                     g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, TYPE_ERROR_MESSAGE);
-                    CNewUIInventoryCtrl::BackupPickedItem();
+                    CInventoryCtrl::BackupPickedItem();
 
                     ResetMouseLButton();
                     return false;
@@ -1439,7 +1439,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                 if (sourceType == STORAGE_TYPE::INVENTORY && iSourceIndex == iTargetIndex)
                 {
-                    CNewUIInventoryCtrl::BackupPickedItem();
+                    CInventoryCtrl::BackupPickedItem();
                 }
                 else
                 {
@@ -1499,7 +1499,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
                     if (bPicked == true)
                     {
-                        if (CNewUIInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
+                        if (CInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
                         {
                             UnequipItem(m_iPointedSlot);
                         }
@@ -1507,7 +1507,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                 }
                 else
                 {
-                    if (CNewUIInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
+                    if (CInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
                     {
                         UnequipItem(m_iPointedSlot);
                     }
@@ -1518,7 +1518,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
     if (IsRelease(VK_RBUTTON))
     {
-        const CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        const CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
         const int iSourceIndex = m_iPointedSlot;
         if (GetRepairMode() != SEASON3B::REPAIR_MODE_ON && EquipmentItem == false
@@ -1538,9 +1538,9 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
                 {
                     // This code looks tricky... it simulates a pick up and click on the inventory slot.
                     // God knows what happens, when this request to the server goes wrong.
-                    if (CNewUIInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
+                    if (CInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
                     {
-                        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+                        CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
                         UnequipItem(iSourceIndex);
                         pPickedItem->HidePickedItem();
                     }
@@ -1554,7 +1554,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
 
     return false;
 }
-bool CNewUIMyInventory::InventoryProcess() const
+bool CMyInventory::InventoryProcess() const
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
     {
@@ -1569,7 +1569,7 @@ bool CNewUIMyInventory::InventoryProcess() const
     return m_ActionController.HandleInventoryActions(m_pNewInventoryCtrl);
 }
 
-bool CNewUIMyInventory::WindowProcess()
+bool CMyInventory::WindowProcess()
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
     {
@@ -1584,7 +1584,7 @@ bool CNewUIMyInventory::WindowProcess()
     return true;
 }
 
-bool CNewUIMyInventory::BtnProcess()
+bool CMyInventory::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY))
@@ -1640,7 +1640,7 @@ bool CNewUIMyInventory::BtnProcess()
     return false;
 }
 
-void CNewUIMyInventory::RenderItemToolTip(int iSlotIndex) const
+void CMyInventory::RenderItemToolTip(int iSlotIndex) const
 {
     if (m_iPointedSlot != -1)
     {
@@ -1664,7 +1664,7 @@ void CNewUIMyInventory::RenderItemToolTip(int iSlotIndex) const
     }
 }
 
-bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
+bool CMyInventory::CanRegisterItemHotKey(int iType)
 {
     switch (iType)
     {
@@ -1709,7 +1709,7 @@ bool CNewUIMyInventory::CanRegisterItemHotKey(int iType)
     return false;
 }
 
-bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetControl)
+bool CMyInventory::HandleInventoryActions(CInventoryCtrl* targetControl)
 {
     if (g_pMyInventory)
     {
@@ -1718,7 +1718,7 @@ bool CNewUIMyInventory::HandleInventoryActions(CNewUIInventoryCtrl* targetContro
     return false;
 }
 
-bool CNewUIMyInventory::CanOpenMyShopInterface()
+bool CMyInventory::CanOpenMyShopInterface()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
         || g_pNewUISystem->IsVisible(INTERFACE_STORAGE)
@@ -1733,17 +1733,17 @@ bool CNewUIMyInventory::CanOpenMyShopInterface()
     return true;
 }
 
-bool CNewUIMyInventory::IsRepairEnableLevel() const
+bool CMyInventory::IsRepairEnableLevel() const
 {
     return m_bRepairEnableLevel;
 }
 
-void CNewUIMyInventory::SetRepairEnableLevel(bool bOver)
+void CMyInventory::SetRepairEnableLevel(bool bOver)
 {
     m_bRepairEnableLevel = bOver;
 }
 
-void CNewUIMyInventory::ChangeMyShopButtonStateOpen()
+void CMyInventory::ChangeMyShopButtonStateOpen()
 {
     m_MyShopMode = MYSHOP_MODE_OPEN;
     m_BtnMyShop.UnRegisterButtonState();
@@ -1753,7 +1753,7 @@ void CNewUIMyInventory::ChangeMyShopButtonStateOpen()
     m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
-void CNewUIMyInventory::ChangeMyShopButtonStateClose()
+void CMyInventory::ChangeMyShopButtonStateClose()
 {
     m_MyShopMode = MYSHOP_MODE_CLOSE;
     m_BtnMyShop.UnRegisterButtonState();
@@ -1763,7 +1763,7 @@ void CNewUIMyInventory::ChangeMyShopButtonStateClose()
     m_BtnMyShop.ChangeToolTipText(&I18N::Game::ClosePersonalStoreS, true);
 }
 
-void CNewUIMyInventory::LockMyShopButtonOpen()
+void CMyInventory::LockMyShopButtonOpen()
 {
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
@@ -1771,7 +1771,7 @@ void CNewUIMyInventory::LockMyShopButtonOpen()
     m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
-void CNewUIMyInventory::UnlockMyShopButtonOpen()
+void CMyInventory::UnlockMyShopButtonOpen()
 {
     m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
     m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
@@ -1779,7 +1779,7 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
     m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
-void CNewUIMyInventory::ToggleRepairMode()
+void CMyInventory::ToggleRepairMode()
 {
     if (m_RepairMode == SEASON3B::REPAIR_MODE_OFF)
     {
@@ -1791,11 +1791,11 @@ void CNewUIMyInventory::ToggleRepairMode()
     }
 }
 
-bool CNewUIMyInventory::IsItem(short int siType, bool bcheckPick) const
+bool CMyInventory::IsItem(short int siType, bool bcheckPick) const
 {
     if (bcheckPick == true)
     {
-        const CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        const CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
         if (pPickedItem)
         {
@@ -1812,17 +1812,17 @@ bool CNewUIMyInventory::IsItem(short int siType, bool bcheckPick) const
     return false;
 }
 
-int CNewUIMyInventory::GetNumItemByKey(DWORD dwItemKey) const
+int CMyInventory::GetNumItemByKey(DWORD dwItemKey) const
 {
     return m_pNewInventoryCtrl->GetNumItemByKey(dwItemKey);
 }
 
-int CNewUIMyInventory::GetNumItemByType(short sItemType) const
+int CMyInventory::GetNumItemByType(short sItemType) const
 {
     return m_pNewInventoryCtrl->GetNumItemByType(sItemType);
 }
 
-BYTE CNewUIMyInventory::GetDurabilityPointedItem() const
+BYTE CMyInventory::GetDurabilityPointedItem() const
 {
     const ITEM* pItem = nullptr;
 
@@ -1844,7 +1844,7 @@ BYTE CNewUIMyInventory::GetDurabilityPointedItem() const
     return 0;
 }
 
-int CNewUIMyInventory::GetPointedItemIndex() const
+int CMyInventory::GetPointedItemIndex() const
 {
     if (m_iPointedSlot != -1)
     {
@@ -1854,7 +1854,7 @@ int CNewUIMyInventory::GetPointedItemIndex() const
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
-int CNewUIMyInventory::FindManaItemIndex() const
+int CMyInventory::FindManaItemIndex() const
 {
     for (int i = ITEM_LARGE_MANA_POTION; i >= ITEM_SMALL_MANA_POTION; i--)
     {
@@ -1868,7 +1868,7 @@ int CNewUIMyInventory::FindManaItemIndex() const
     return -1;
 }
 
-int CNewUIMyInventory::FindHealingItemIndex() const
+int CMyInventory::FindHealingItemIndex() const
 {
     for (int i = ITEM_LARGE_HEALING_POTION; i >= ITEM_APPLE; i--)
     {
@@ -1882,14 +1882,14 @@ int CNewUIMyInventory::FindHealingItemIndex() const
     return -1;
 }
 
-void CNewUIMyInventory::ResetMouseLButton()
+void CMyInventory::ResetMouseLButton()
 {
     MouseLButton = false;
     MouseLButtonPop = false;
     MouseLButtonPush = false;
 }
 
-void CNewUIMyInventory::ResetMouseRButton()
+void CMyInventory::ResetMouseRButton()
 {
     MouseRButton = false;
     MouseRButtonPop = false;
@@ -1897,7 +1897,7 @@ void CNewUIMyInventory::ResetMouseRButton()
 }
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-BOOL mu::ui::window::CNewUIMyInventory::IsInvenItem(const short sType)
+BOOL mu::ui::window::CMyInventory::IsInvenItem(const short sType)
 {
     BOOL bInvenItem = FALSE;
 

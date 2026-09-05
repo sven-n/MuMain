@@ -159,7 +159,7 @@ void CSysMenuWin::SetPosition(int nXCoord, int nYCoord)
 
 void CSysMenuWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     m_winBack.Show(bShow);
     for (int i = 0; i < SMW_BTN_MAX; ++i)

@@ -1,4 +1,4 @@
-// NewUIItemMng.h: interface for the CNewUIItemMng class.
+// NewUIItemMng.h: interface for the CItemMng class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -50,7 +50,7 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData);
 
 namespace mu::ui::window
 {
-    class CNewUIItemMng
+    class CItemMng
     {
         typedef std::list<ITEM*>	type_list_item;
 
@@ -59,8 +59,8 @@ namespace mu::ui::window
         CTimer2 m_UpdateTimer;
 
     public:
-        CNewUIItemMng();
-        virtual ~CNewUIItemMng();
+        CItemMng();
+        virtual ~CItemMng();
 
         ITEM* CreateItem(std::span<const BYTE> itemData);
         ITEM* CreateItemOld(std::span<const BYTE> pbyItemPacket);

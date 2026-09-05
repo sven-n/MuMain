@@ -39,11 +39,11 @@
 #define	CRW_INDEX_MAX			6
 
 // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) Phase 1 pilot: the first CUIMng window
-// migrated off CWin onto mu::ui::window::CNewUIObj/CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity
+// migrated off CWin onto mu::ui::window::CObject/CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity
 // real case (still fully legacy-2D, no RmlUi entanglement, no shown-vs-active split needed),
 // chosen to prove the registry/dispatch mechanics before touching anything RmlUi-coupled. See
 // g_CreditWin's own comment below for the ownership/registration shape.
-class CCreditWin : public mu::ui::window::CNewUIObj
+class CCreditWin : public mu::ui::window::CObject
 {
 	enum SHOW_STATE { HIDE, FADEIN, SHOW, FADEOUT };
 
@@ -88,7 +88,7 @@ public:
 	void SetPosition();
 	void Show(bool bShow) override;
 
-	// mu::ui::window::INewUIBase
+	// mu::ui::window::IObject
 	bool Render() override;
 	bool Update() override;
 	// Full-screen exclusive overlay: consumes every click while shown, matching the old
@@ -96,7 +96,7 @@ public:
 	bool UpdateMouseEvent() override { return false; }
 	// No focus-based key routing needed -- ESC is polled directly in Update(), same as before.
 	bool UpdateKeyEvent() override { return true; }
-	// Intentionally above every known CNewUIObj depth (5.5-11.0 range) -- full-screen exclusive
+	// Intentionally above every known CObject depth (5.5-11.0 range) -- full-screen exclusive
 	// overlay, always on top of anything else registered with the same manager while shown.
 	float GetLayerDepth() override { return 100.0f; }
 
@@ -116,7 +116,7 @@ protected:
 // g_pNewUIMng that MAIN_SCENE's windows use (CCreditWin only ever exists during LOG_IN_SCENE).
 // External access (Winmain.cpp's RenderTextOnTop-style late pass, WSclient.cpp/LoginScene.cpp's
 // IsVisible() checks, LoginMainWin.cpp's OpenCredits) goes through this global directly, same
-// convention g_pSkillList already uses for the CNewUIObj tier.
+// convention g_pSkillList already uses for the CObject tier.
 extern CCreditWin g_CreditWin;
 
 #endif // !defined(AFX_CREDITWIN_H__9D392798_811A_46FE_918B_7753E6BA35D0__INCLUDED_)

@@ -27,9 +27,9 @@ namespace Rml { class ElementDocument; }
 // system this session can't test is a real regression risk not worth taking for this pass.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md), Phase 3 -- the last CWin subclass to
-// migrate, and the first window in the whole series that actually needs CNewUIObj's shown-vs-
+// migrate, and the first window in the whole series that actually needs CObject's shown-vs-
 // active split (UpdateWhileShown()/UpdateWhileActive(), added in Phase 0 but unused until now).
-class CLoginWin : public mu::ui::window::CNewUIObj
+class CLoginWin : public mu::ui::window::CObject
 {
 protected:
     CButton m_aBtn[2];
@@ -43,8 +43,8 @@ protected:
     wchar_t m_prevUsername[MAX_USERNAME_SIZE + 1] = {};
     wchar_t m_prevPassword[MAX_PASSWORD_SIZE + 1] = {};
 
-    // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CNewUIObj side (matching
-    // every pre-existing CNewUIObj window), so this window keeps its own bounding box, same as
+    // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CObject side (matching
+    // every pre-existing CObject window), so this window keeps its own bounding box, same as
     // CServerSelWin/CLoginMainWin's established pattern.
     POINT m_ptPos = {};
     SIZE m_Size = {};
@@ -103,7 +103,7 @@ public:
     void RmlToggleRememberMe();
     void RmlToggleSavePassword();
 
-    // mu::ui::window::INewUIBase
+    // mu::ui::window::IObject
     bool Render() override;
     // Was CWin::CursorInWin(WA_ALL) -- claims (consumes) any click within its own bounding box,
     // same template CServerSelWin/CLoginMainWin already established. Not modal: this floating
@@ -122,14 +122,14 @@ public:
     }
 
 protected:
-    // The shown-vs-active split (CNewUIObj/NewUIBase.h, added in Phase 0 -- first real use here).
+    // The shown-vs-active split (CObject/NewUIBase.h, added in Phase 0 -- first real use here).
     // UpdateWhileShown() always runs while shown: keeps ticking text-input state and the
     // Remember-Password sub-dialog even while something else has taken over input. Its first
     // statement computes and pushes this frame's IsActive() via SetActive() -- true unless
     // CCreditWin/CMsgWin/CSysMenuWin is currently covering this dialog (same "a higher-depth
     // modal claiming UpdateMouseEvent() doesn't stop a lower window's own Update()" gap already
     // fixed once for CCharSelMainWin/CCharMakeWin) or the Remember-Password prompt is pending --
-    // read BEFORE Tick() (below) can resolve it, so UpdateWhileActive() (which CNewUIObj::Update()
+    // read BEFORE Tick() (below) can resolve it, so UpdateWhileActive() (which CObject::Update()
     // only calls if this frame's IsActive() came back true) sees the same "was pending this frame"
     // snapshot the prompt needs, without a separate member to hold it.
     bool UpdateWhileShown() override;

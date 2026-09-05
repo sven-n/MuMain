@@ -38,7 +38,7 @@ DWORD CUIGuardsMan::GetMyMarkCount()
 {
     DWORD dwResult = 0;
 
-    mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
     ITEM* pItem = NULL;
 
     for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)
@@ -56,7 +56,7 @@ DWORD CUIGuardsMan::GetMyMarkCount()
 
 int CUIGuardsMan::GetMyMarkSlotIndex()
 {
-    mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
     ITEM* pItem = NULL;
 
     for (int i = 0; i < (int)pNewInventoryCtrl->GetNumberOfItems(); ++i)

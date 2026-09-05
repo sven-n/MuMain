@@ -1,4 +1,4 @@
-// NewUIGuildInfoWindow.h: interface for the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.h: interface for the CGuildInfoWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -12,7 +12,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUICryWolf : public CNewUIObj
+    class CCryWolf : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -21,7 +21,7 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT					m_Pos;
         int						m_iHour;
         int						m_iMinute;
@@ -31,10 +31,10 @@ namespace mu::ui::window
         bool					m_bTimeStart;
 
     public:
-        CNewUICryWolf();
-        virtual ~CNewUICryWolf();
+        CCryWolf();
+        virtual ~CCryWolf();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

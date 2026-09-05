@@ -8,9 +8,9 @@
 
 namespace mu::ui::window
 {
-    class CNewUIGroup : public CNewUIObj
+    class CGroup : public CObject
     {
-        typedef std::vector<CNewUIObj*>		type_vector_uibase;
+        typedef std::vector<CObject*>		type_vector_uibase;
         type_vector_uibase	m_vecUI;		//. for rendering and updating
 
     private:
@@ -18,10 +18,10 @@ namespace mu::ui::window
         float m_fKeyEventOrder;
 
     public:
-        CNewUIGroup();
-        virtual ~CNewUIGroup();
+        CGroup();
+        virtual ~CGroup();
 
-        void AddUIObj(CNewUIObj* pUIObj);
+        void AddUIObj(CObject* pUIObj);
 
         virtual bool Render();
         virtual bool Update();

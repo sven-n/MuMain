@@ -1,4 +1,4 @@
-// NewUIDuelWindow.cpp: implementation of the CNewUIDuelWindow class.
+// NewUIDuelWindow.cpp: implementation of the CDuelWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -13,18 +13,18 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIDuelWindow::CNewUIDuelWindow()
+mu::ui::window::CDuelWindow::CDuelWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-mu::ui::window::CNewUIDuelWindow::~CNewUIDuelWindow()
+mu::ui::window::CDuelWindow::~CDuelWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIDuelWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CDuelWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -41,7 +41,7 @@ bool mu::ui::window::CNewUIDuelWindow::Create(CNewUIManager* pNewUIMng, int x, i
     return true;
 }
 
-void mu::ui::window::CNewUIDuelWindow::Release()
+void mu::ui::window::CDuelWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -50,28 +50,28 @@ void mu::ui::window::CNewUIDuelWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIDuelWindow::SetPos(int x, int y)
+void mu::ui::window::CDuelWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIDuelWindow::UpdateMouseEvent()
+bool mu::ui::window::CDuelWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIDuelWindow::UpdateKeyEvent()
+bool mu::ui::window::CDuelWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIDuelWindow::Update()
+bool mu::ui::window::CDuelWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIDuelWindow::Render()
+bool mu::ui::window::CDuelWindow::Render()
 {
     EnableAlphaTest();
 
@@ -83,12 +83,12 @@ bool mu::ui::window::CNewUIDuelWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIDuelWindow::RenderFrame()
+void mu::ui::window::CDuelWindow::RenderFrame()
 {
     RenderImage(IMAGE_DUEL_BACK, m_Pos.x, m_Pos.y, 131, 70);
 }
 
-void mu::ui::window::CNewUIDuelWindow::RenderContents()
+void mu::ui::window::CDuelWindow::RenderContents()
 {
     wchar_t strMyScore[12];
     wchar_t strDuelScore[12];
@@ -106,17 +106,17 @@ void mu::ui::window::CNewUIDuelWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 31, m_Pos.y + 56, strDuelScore);
 }
 
-float mu::ui::window::CNewUIDuelWindow::GetLayerDepth()
+float mu::ui::window::CDuelWindow::GetLayerDepth()
 {
     return 1.1f;
 }
 
-void mu::ui::window::CNewUIDuelWindow::LoadImages()
+void mu::ui::window::CDuelWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_DUEL_BACK, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIDuelWindow::UnloadImages()
+void mu::ui::window::CDuelWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_DUEL_BACK);
 }

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIMainFrameWindow.cpp: implementation of the CNewUIMainFrameWindow class.
+// NewUIMainFrameWindow.cpp: implementation of the CMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -58,7 +58,7 @@ namespace
     constexpr float kMenu3CenterWidth = 104.0f;
 }
 
-mu::ui::window::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
+mu::ui::window::CMainFrameWindow::CMainFrameWindow()
 {
     m_bExpEffect = false;
     m_dwExpEffectTime = 0;
@@ -67,12 +67,12 @@ mu::ui::window::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
     m_bButtonBlink = false;
 }
 
-mu::ui::window::CNewUIMainFrameWindow::~CNewUIMainFrameWindow()
+mu::ui::window::CMainFrameWindow::~CMainFrameWindow()
 {
     Release();
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::LoadImages()
+void mu::ui::window::CMainFrameWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_menu01.jpg", IMAGE_MENU_1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
@@ -80,7 +80,7 @@ void mu::ui::window::CNewUIMainFrameWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::UnloadImages()
+void mu::ui::window::CMainFrameWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_MENU_1);
     DeleteBitmap(IMAGE_MENU_2);
@@ -88,7 +88,7 @@ void mu::ui::window::CNewUIMainFrameWindow::UnloadImages()
     DeleteBitmap(IMAGE_MENU_2_1);
 }
 
-bool mu::ui::window::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng)
         return false;
@@ -196,8 +196,8 @@ bool mu::ui::window::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNe
                 c.Bind("skill_tooltip_top", &model.skillTooltipTop);
                 c.Bind("skill_tooltip_lines", &model.skillTooltipLines);
 
-                // Phase 2 click/hover bindings -- route straight into CNewUISkillList (this
-                // document's model is owned by CNewUIMainFrameWindow, but g_pSkillList has no
+                // Phase 2 click/hover bindings -- route straight into CSkillList (this
+                // document's model is owned by CMainFrameWindow, but g_pSkillList has no
                 // RmlUi document of its own, same established split as GetHotKeySlotNumber() etc,
                 // see NewUIMainFrameWindow.h's own comment on that). Args are literal ints in the
                 // RML expression itself (e.g. data-event-click="skill_hotkey_click(0)"), or the
@@ -283,7 +283,7 @@ bool mu::ui::window::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNe
     return true;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::Release()
+void mu::ui::window::CMainFrameWindow::Release()
 {
     UnloadImages();
 
@@ -311,7 +311,7 @@ void mu::ui::window::CNewUIMainFrameWindow::Release()
         m_pRmlBgDoc->Hide();
 }
 
-bool mu::ui::window::CNewUIMainFrameWindow::Render()
+bool mu::ui::window::CMainFrameWindow::Render()
 {
     // Thin passthrough, not a full no-op -- see this class's header comment. Only the two chrome
     // bands/content calls that still host legacy content (item hotkeys' left band, skill list's
@@ -374,7 +374,7 @@ bool mu::ui::window::CNewUIMainFrameWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::Render3D()
+void mu::ui::window::CMainFrameWindow::Render3D()
 {
     // centerTransform, not BottomHudLeftTransform -- see Render()'s header comment (2026-09-01,
     // item-hotkey band now anchors next to the HP bar instead of the window's left edge).
@@ -401,22 +401,22 @@ void mu::ui::window::CNewUIMainFrameWindow::Render3D()
     m_ItemHotKey.RenderItems();
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void mu::ui::window::CMainFrameWindow::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     g_pMainFrame->RenderHotKeyItemCount();
 }
 
-bool mu::ui::window::CNewUIMainFrameWindow::IsVisible() const
+bool mu::ui::window::CMainFrameWindow::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::RenderLeftRegion()
+void mu::ui::window::CMainFrameWindow::RenderLeftRegion()
 {
     m_pNewUI3DRenderMng->RenderUI2DEffect(ITEMHOTKEYNUMBER_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::RenderCenterRegion()
+void mu::ui::window::CMainFrameWindow::RenderCenterRegion()
 {
     // HP/MP/AG/SD bars moved to RmlUi (SyncRmlModel()/main_frame.rcss) -- the skill row/current-
     // skill icon stays legacy, out of scope for this pilot (see this class's header comment).
@@ -438,7 +438,7 @@ void mu::ui::window::CNewUIMainFrameWindow::RenderCenterRegion()
 // same frame, the same ordering the legacy quad relied on, except the panel is now real RmlUi
 // content (main_frame_bg.rml/.rcss) instead of a C++-authored color. General mechanism, not a
 // one-off: the same RenderBackgroundLayer() call is what Inventory's own still-legacy 3D item
-// icons (and every other window sharing CNewUI3DRenderMng) would use whenever their own port's
+// icons (and every other window sharing C3DRenderMng) would use whenever their own port's
 // turn comes.
 //
 // main_frame_bg.rcss's colors still match main_frame.rcss's .slot-fill/.slot-frame tokens exactly
@@ -450,7 +450,7 @@ void mu::ui::window::CNewUIMainFrameWindow::RenderCenterRegion()
 // (Render()'s leftTransform is centerTransform's own alias) -- #bg_left/#bg_center inside it stay
 // two separate elements (no visible seam, same flat color) rather than merging into one, mirroring
 // each function's own still-separate responsibility (its own band) for legacy theme.
-void mu::ui::window::CNewUIMainFrameWindow::RenderLeftFrame()
+void mu::ui::window::CMainFrameWindow::RenderLeftFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
@@ -470,7 +470,7 @@ void mu::ui::window::CNewUIMainFrameWindow::RenderLeftFrame()
                        0.0f, 0.0f, kLeftBandWidth, kHudContentHeight);
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::RenderCenterFrame()
+void mu::ui::window::CMainFrameWindow::RenderCenterFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
@@ -524,7 +524,7 @@ void mu::ui::window::CNewUIMainFrameWindow::RenderCenterFrame()
 // comment for why these bands, but not the left/center bands, could move (no remaining legacy
 // content occupies the same pixels).
 
-void mu::ui::window::CNewUIMainFrameWindow::RenderHotKeyItemCount()
+void mu::ui::window::CMainFrameWindow::RenderHotKeyItemCount()
 {
     m_ItemHotKey.RenderItemCount();
 }
@@ -533,14 +533,14 @@ void mu::ui::window::CNewUIMainFrameWindow::RenderHotKeyItemCount()
 // BtnProcess() removed -- the 5 corner buttons moved to RmlUi (data-event-click bindings, see
 // Create()); RmlUi's own Context now does hit-testing for them, so this never has legacy button
 // objects left to check.
-bool mu::ui::window::CNewUIMainFrameWindow::UpdateMouseEvent()
+bool mu::ui::window::CMainFrameWindow::UpdateMouseEvent()
 {
     // RmlUi's own context does hit-testing now (see this class's header comment) -- never
     // consumes the legacy mouse event.
     return true;
 }
 
-bool mu::ui::window::CNewUIMainFrameWindow::UpdateKeyEvent()
+bool mu::ui::window::CMainFrameWindow::UpdateKeyEvent()
 {
     if (m_ItemHotKey.UpdateKeyEvent() == false)
     {
@@ -549,7 +549,7 @@ bool mu::ui::window::CNewUIMainFrameWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMainFrameWindow::Update()
+bool mu::ui::window::CMainFrameWindow::Update()
 {
     if (m_bExpEffect == true)
     {
@@ -563,7 +563,7 @@ bool mu::ui::window::CNewUIMainFrameWindow::Update()
 
     // Button clicks -- polled-and-cleared exactly like every other migrated window's RmlClickX()
     // pattern (see CMuHelperBar::Update()). Logic ported verbatim from the legacy BtnProcess(),
-    // minus the CNewUIButton hit-test wrapper (RmlUi's data-event-click already tells us the click
+    // minus the CButton hit-test wrapper (RmlUi's data-event-click already tells us the click
     // landed).
     if (m_bRmlMyInvenClicked)
     {
@@ -655,7 +655,7 @@ bool mu::ui::window::CNewUIMainFrameWindow::Update()
     return true;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
+void mu::ui::window::CMainFrameWindow::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
@@ -707,7 +707,7 @@ void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
         // 2026-09-02: item-hotkey/skill-hotkey band offsets -- read from #item_hotkey_anchor/
         // #skill_list_anchor's real screen position (Element::GetAbsoluteOffset()) and turned
         // into a delta from centerTransform's own unshifted offsetX. The still-legacy Render()/
-        // Render3D()/UseHotKeyItemRButton() (item hotkey) and CNewUISkillList's own Render()/
+        // Render3D()/UseHotKeyItemRButton() (item hotkey) and CSkillList's own Render()/
         // UpdateMouseEvent() (skill hotkey) each apply this delta to whichever transform they use,
         // keeping render AND click hit-testing in sync automatically -- see
         // GetItemHotkeyOffsetX()'s own header comment (NewUIMainFrameWindow.h) for why this reads
@@ -934,7 +934,7 @@ void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
     syncBool(&MainFrameRmlModel::friendAlert, "friend_alert", friendAlert);
 
     // Skill-hotkey row selection highlight (modern theme only, see MainFrameRmlModel::
-    // skillSlot0Selected's own comment and CNewUISkillList::IsHotKeySlotCurrentSkill()) -- read
+    // skillSlot0Selected's own comment and CSkillList::IsHotKeySlotCurrentSkill()) -- read
     // every frame like everything else above; g_pSkillList itself is still fully legacy (Phase 2),
     // this just also mirrors its per-slot selected state into this pilot's own model.
     syncBool(&MainFrameRmlModel::skillSlot0Selected, "skill_slot_0_selected", g_pSkillList->IsHotKeySlotCurrentSkill(0));
@@ -944,7 +944,7 @@ void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
     syncBool(&MainFrameRmlModel::skillSlot4Selected, "skill_slot_4_selected", g_pSkillList->IsHotKeySlotCurrentSkill(4));
 
     // Skill-hotkey number labels (modern theme only -- see MainFrameRmlModel::skillSlot0Hotkey's
-    // own comment and CNewUISkillList::GetHotKeySlotNumber()). -1 (empty slot) becomes an empty
+    // own comment and CSkillList::GetHotKeySlotNumber()). -1 (empty slot) becomes an empty
     // string, same "draw nothing" behavior the legacy digit-sprite path already has for that case.
     auto hotkeyText = [](int hotkey) { return hotkey >= 0 ? std::to_string(hotkey) : Rml::String(); };
     syncText(&MainFrameRmlModel::skillSlot0Hotkey, "skill_slot_0_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(0)));
@@ -963,7 +963,7 @@ void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
 
     syncBool(&MainFrameRmlModel::skillGridOpen, "skill_grid_open", g_pSkillList->IsSkillGridOpen());
 
-    // Dynamic-count lists -- SkillCellEntry is shared verbatim between CNewUISkillList's own
+    // Dynamic-count lists -- SkillCellEntry is shared verbatim between CSkillList's own
     // snapshot and this model (no per-field conversion needed). Unconditional copy+MarkDirty every
     // frame while the grid is open, matching CBuffStrip's own proven "unconditional MarkDirty()
     // correctly re-renders the list" approach (newui-tier-adapter.md) -- cooldown fractions change
@@ -977,7 +977,7 @@ void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
     }
 
     // Shared skill tooltip -- one hover target queued at a time (QueueTooltip()/OnUnhover(),
-    // CNewUISkillList). BuildModelForSlot() is the same content resolution (pet-command dispatch,
+    // CSkillList). BuildModelForSlot() is the same content resolution (pet-command dispatch,
     // BuildModel()) SkillTooltip.cpp's own Render() uses for this pilot's still-legacy siblings
     // (NewUIMuHelper.cpp, NewUISiegeWarBase.cpp) -- only the destination (RmlUi vs. legacy
     // TextList) differs.
@@ -1017,32 +1017,32 @@ void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
     }
 }
 
-float mu::ui::window::CNewUIMainFrameWindow::GetLayerDepth()
+float mu::ui::window::CMainFrameWindow::GetLayerDepth()
 {
     return 10.6f;
 }
 
-float mu::ui::window::CNewUIMainFrameWindow::GetKeyEventOrder()
+float mu::ui::window::CMainFrameWindow::GetKeyEventOrder()
 {
     return 2.9f;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SetItemHotKey(int iHotKey, int iItemType, int iItemLevel)
+void mu::ui::window::CMainFrameWindow::SetItemHotKey(int iHotKey, int iItemType, int iItemLevel)
 {
     m_ItemHotKey.SetHotKey(iHotKey, iItemType, iItemLevel);
 }
 
-int mu::ui::window::CNewUIMainFrameWindow::GetItemHotKey(int iHotKey)
+int mu::ui::window::CMainFrameWindow::GetItemHotKey(int iHotKey)
 {
     return m_ItemHotKey.GetHotKey(iHotKey);
 }
 
-int mu::ui::window::CNewUIMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
+int mu::ui::window::CMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
 {
     return m_ItemHotKey.GetHotKeyLevel(iHotKey);
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::UseHotKeyItemRButton()
+void mu::ui::window::CMainFrameWindow::UseHotKeyItemRButton()
 {
     // centerTransform, not BottomHudLeftTransform, += GetItemHotkeyOffsetX() * scaleX -- must
     // match Render3D()'s (and Render()'s leftTransform) exactly, or right-click hit-testing lands
@@ -1053,32 +1053,32 @@ void mu::ui::window::CNewUIMainFrameWindow::UseHotKeyItemRButton()
     m_ItemHotKey.UseItemRButton();
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::UpdateItemHotKey()
+void mu::ui::window::CMainFrameWindow::UpdateItemHotKey()
 {
     m_ItemHotKey.UpdateKeyEvent();
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::ResetSkillHotKey()
+void mu::ui::window::CMainFrameWindow::ResetSkillHotKey()
 {
     g_pSkillList->Reset();
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SetSkillHotKey(int iHotKey, int iSkillType)
+void mu::ui::window::CMainFrameWindow::SetSkillHotKey(int iHotKey, int iSkillType)
 {
     g_pSkillList->SetHotKey(iHotKey, iSkillType);
 }
 
-int mu::ui::window::CNewUIMainFrameWindow::GetSkillHotKey(int iHotKey)
+int mu::ui::window::CMainFrameWindow::GetSkillHotKey(int iHotKey)
 {
     return g_pSkillList->GetHotKey(iHotKey);
 }
 
-int mu::ui::window::CNewUIMainFrameWindow::GetSkillHotKeyIndex(int iSkillType)
+int mu::ui::window::CMainFrameWindow::GetSkillHotKeyIndex(int iSkillType)
 {
     return g_pSkillList->GetSkillIndex(iSkillType);
 }
 
-mu::ui::window::CNewUIItemHotKey::CNewUIItemHotKey()
+mu::ui::window::CItemHotKey::CItemHotKey()
 {
     for (int i = 0; i < HOTKEY_COUNT; ++i)
     {
@@ -1087,11 +1087,11 @@ mu::ui::window::CNewUIItemHotKey::CNewUIItemHotKey()
     }
 }
 
-mu::ui::window::CNewUIItemHotKey::~CNewUIItemHotKey()
+mu::ui::window::CItemHotKey::~CItemHotKey()
 {
 }
 
-bool mu::ui::window::CNewUIItemHotKey::UpdateKeyEvent()
+bool mu::ui::window::CItemHotKey::UpdateKeyEvent()
 {
     int iIndex = -1;
 
@@ -1143,7 +1143,7 @@ bool mu::ui::window::CNewUIItemHotKey::UpdateKeyEvent()
     return true;
 }
 
-int mu::ui::window::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
+int mu::ui::window::CItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 {
     int iStartItemType = 0, iEndItemType = 0;
     int i, j;
@@ -1282,7 +1282,7 @@ int mu::ui::window::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCo
     return -1;
 }
 
-bool mu::ui::window::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd)
+bool mu::ui::window::CItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd)
 {
     switch (m_iHotKeyItemType[iHotKey])
     {
@@ -1330,14 +1330,14 @@ bool mu::ui::window::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT i
     return false;
 }
 
-int mu::ui::window::CNewUIItemHotKey::GetHotKeyItemCount(int iType)
+int mu::ui::window::CItemHotKey::GetHotKeyItemCount(int iType)
 {
     return 0;
 }
 
-void mu::ui::window::CNewUIItemHotKey::SetHotKey(int iHotKey, int iItemType, int iItemLevel)
+void mu::ui::window::CItemHotKey::SetHotKey(int iHotKey, int iItemType, int iItemLevel)
 {
-    if (iHotKey != -1 && CNewUIMyInventory::CanRegisterItemHotKey(iItemType) == true
+    if (iHotKey != -1 && CMyInventory::CanRegisterItemHotKey(iItemType) == true
         )
     {
         m_iHotKeyItemType[iHotKey] = iItemType;
@@ -1350,7 +1350,7 @@ void mu::ui::window::CNewUIItemHotKey::SetHotKey(int iHotKey, int iItemType, int
     }
 }
 
-int mu::ui::window::CNewUIItemHotKey::GetHotKey(int iHotKey)
+int mu::ui::window::CItemHotKey::GetHotKey(int iHotKey)
 {
     if (iHotKey != -1)
     {
@@ -1360,7 +1360,7 @@ int mu::ui::window::CNewUIItemHotKey::GetHotKey(int iHotKey)
     return -1;
 }
 
-int mu::ui::window::CNewUIItemHotKey::GetHotKeyLevel(int iHotKey)
+int mu::ui::window::CItemHotKey::GetHotKeyLevel(int iHotKey)
 {
     if (iHotKey != -1)
     {
@@ -1370,7 +1370,7 @@ int mu::ui::window::CNewUIItemHotKey::GetHotKeyLevel(int iHotKey)
     return 0;
 }
 
-void mu::ui::window::CNewUIItemHotKey::RenderItems()
+void mu::ui::window::CItemHotKey::RenderItems()
 {
     float x, y, width, height;
 
@@ -1389,7 +1389,7 @@ void mu::ui::window::CNewUIItemHotKey::RenderItems()
     }
 }
 
-void mu::ui::window::CNewUIItemHotKey::RenderItemCount()
+void mu::ui::window::CItemHotKey::RenderItemCount()
 {
     float x, y, width, height;
 
@@ -1404,7 +1404,7 @@ void mu::ui::window::CNewUIItemHotKey::RenderItemCount()
     }
 }
 
-void mu::ui::window::CNewUIItemHotKey::UseItemRButton()
+void mu::ui::window::CItemHotKey::UseItemRButton()
 {
     int x, y, width, height;
 
@@ -1427,18 +1427,18 @@ void mu::ui::window::CNewUIItemHotKey::UseItemRButton()
     }
 }
 
-mu::ui::window::CNewUISkillList::CNewUISkillList()
+mu::ui::window::CSkillList::CSkillList()
 {
     m_pNewUIMng = NULL;
     Reset();
 }
 
-mu::ui::window::CNewUISkillList::~CNewUISkillList()
+mu::ui::window::CSkillList::~CSkillList()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUISkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool mu::ui::window::CSkillList::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -1455,11 +1455,11 @@ bool mu::ui::window::CNewUISkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DR
     return true;
 }
 
-void mu::ui::window::CNewUISkillList::Release()
+void mu::ui::window::CSkillList::Release()
 {
     // 2026-09-02, Phase 2: the UI2DEffectObject registration/DeleteUI2DEffectObject() call here
     // is removed along with UI2DEffectCallback/RenderSkillInfo() -- the tooltip no longer queues
-    // through CNewUI3DRenderMng's 2D-effect-in-3D-pass mechanism at all now that it's a plain
+    // through C3DRenderMng's 2D-effect-in-3D-pass mechanism at all now that it's a plain
     // RmlUi element (which always composites last in the frame regardless -- see README.md's
     // Frame Lifecycle section), so there's nothing registered on this object to unregister.
     UnloadImages();
@@ -1471,7 +1471,7 @@ void mu::ui::window::CNewUISkillList::Release()
     }
 }
 
-void mu::ui::window::CNewUISkillList::Reset()
+void mu::ui::window::CSkillList::Reset()
 {
     m_bSkillList = false;
     m_bHotKeySkillListUp = false;
@@ -1492,7 +1492,7 @@ void mu::ui::window::CNewUISkillList::Reset()
     m_iHoveredGridSkillIndex = -1;
 }
 
-void mu::ui::window::CNewUISkillList::LoadImages()
+void mu::ui::window::CSkillList::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
@@ -1506,7 +1506,7 @@ void mu::ui::window::CNewUISkillList::LoadImages()
     LoadBitmap(L"Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUISkillList::UnloadImages()
+void mu::ui::window::CSkillList::UnloadImages()
 {
     DeleteBitmap(IMAGE_SKILL1);
     DeleteBitmap(IMAGE_SKILL2);
@@ -1520,19 +1520,19 @@ void mu::ui::window::CNewUISkillList::UnloadImages()
     DeleteBitmap(IMAGE_NON_SKILL3);
 }
 
-bool mu::ui::window::CNewUISkillList::UpdateMouseEvent()
+bool mu::ui::window::CSkillList::UpdateMouseEvent()
 {
     // RmlUi migration, Phase 2 (see docs/rmlui-ui-system's Phase 2 plan) -- the old hand-rolled
     // EVENT_STATE hover/down/release machine for the current-skill icon, compact hotkey row, and
     // expanded grid/pet row is retired entirely. RmlUi's own Context now does hit-testing for all
     // of them (data-event-click/mouseover/mouseout, main_frame.rml -- see OnHotkeySlotClick()/
     // OnCurrentSkillClick()/OnGridCellClick()/OnPetCellClick() and their *Hover() counterparts),
-    // same "always not consumed" convention every other fully-ported CNewUIObj-tier widget uses
+    // same "always not consumed" convention every other fully-ported CObject-tier widget uses
     // (newui-tier-adapter.md).
     return true;
 }
 
-bool mu::ui::window::CNewUISkillList::UpdateKeyEvent()
+bool mu::ui::window::CSkillList::UpdateKeyEvent()
 {
     for (int i = 0; i < 9; ++i)
     {
@@ -1589,7 +1589,7 @@ bool mu::ui::window::CNewUISkillList::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISkillList::IsArrayUp(BYTE bySkill)
+bool mu::ui::window::CSkillList::IsArrayUp(BYTE bySkill)
 {
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
@@ -1609,7 +1609,7 @@ bool mu::ui::window::CNewUISkillList::IsArrayUp(BYTE bySkill)
     return false;
 }
 
-bool mu::ui::window::CNewUISkillList::IsArrayIn(BYTE bySkill)
+bool mu::ui::window::CSkillList::IsArrayIn(BYTE bySkill)
 {
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
@@ -1622,7 +1622,7 @@ bool mu::ui::window::CNewUISkillList::IsArrayIn(BYTE bySkill)
     return false;
 }
 
-void mu::ui::window::CNewUISkillList::SetHotKey(int iHotKey, int iSkillType)
+void mu::ui::window::CSkillList::SetHotKey(int iHotKey, int iSkillType)
 {
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
@@ -1636,12 +1636,12 @@ void mu::ui::window::CNewUISkillList::SetHotKey(int iHotKey, int iSkillType)
     m_iHotKeySkillType[iHotKey] = iSkillType;
 }
 
-int mu::ui::window::CNewUISkillList::GetHotKey(int iHotKey)
+int mu::ui::window::CSkillList::GetHotKey(int iHotKey)
 {
     return m_iHotKeySkillType[iHotKey];
 }
 
-int mu::ui::window::CNewUISkillList::GetSkillIndex(int iSkillType)
+int mu::ui::window::CSkillList::GetSkillIndex(int iSkillType)
 {
     // special handling for skills with different skill id for the trigger
     if (iSkillType == AT_SKILL_NOVA_BEGIN)
@@ -1662,7 +1662,7 @@ int mu::ui::window::CNewUISkillList::GetSkillIndex(int iSkillType)
     return iReturn;
 }
 
-void mu::ui::window::CNewUISkillList::UseHotKey(int iHotKey)
+void mu::ui::window::CSkillList::UseHotKey(int iHotKey)
 {
     if (m_iHotKeySkillType[iHotKey] != -1)
     {
@@ -1699,7 +1699,7 @@ void mu::ui::window::CNewUISkillList::UseHotKey(int iHotKey)
     }
 }
 
-bool mu::ui::window::CNewUISkillList::Update()
+bool mu::ui::window::CSkillList::Update()
 {
     if (IsArrayIn(Hero->CurrentSkill) == true)
     {
@@ -1732,7 +1732,7 @@ bool mu::ui::window::CNewUISkillList::Update()
     return true;
 }
 
-void mu::ui::window::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
+void mu::ui::window::CSkillList::RenderCurrentSkillAndHotSkillList()
 {
     int i;
     float x, y, width, height;
@@ -1804,7 +1804,7 @@ void mu::ui::window::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
                 // an RmlUi @spritesheet for legacy theme's own .selected rule (theming-and-
                 // modding.md's asset-reuse pattern) so legacy no longer needs this C++ draw call
                 // at all -- real work, not a quick fix, and belongs with the rest of Phase 2
-                // (CNewUISkillList -> RmlUi, STATUS.md's "What's migrated") rather than bundled
+                // (CSkillList -> RmlUi, STATUS.md's "What's migrated") rather than bundled
                 // into an unrelated cleanup pass.
                 if (!UI::RmlBridge::ThemeProvidesOwnIconChrome())
                     mu::ui::window::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
@@ -1817,7 +1817,7 @@ void mu::ui::window::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
     }
 }
 
-bool mu::ui::window::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
+bool mu::ui::window::CSkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
 {
     // Mirrors RenderCurrentSkillAndHotSkillList()'s own loop exactly (iStartSkillIndex/iIndex
     // wraparound, the -1 "empty slot" check, the pet-command "no pet -> treat as empty" check) --
@@ -1845,7 +1845,7 @@ bool mu::ui::window::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
     return Hero->CurrentSkill == m_iHotKeySkillType[iIndex];
 }
 
-int mu::ui::window::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
+int mu::ui::window::CSkillList::GetHotKeySlotNumber(int iSlotIndex)
 {
     // Mirrors RenderCurrentSkillAndHotSkillList()'s own loop exactly (iStartSkillIndex/iIndex
     // wraparound, the -1 "empty slot" check, the pet-command "no pet -> treat as empty" check) --
@@ -1876,16 +1876,16 @@ int mu::ui::window::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
     return iIndex;
 }
 
-bool mu::ui::window::CNewUISkillList::Render()
+bool mu::ui::window::CSkillList::Render()
 {
     BYTE bySkillNumber = CharacterAttribute->SkillNumber;
 
     // 2026-09-02: same missing-transform bug UpdateMouseEvent() used to have (see git history) --
-    // this is the expanded skill grid, ALSO registered directly with CNewUIManager and called by
+    // this is the expanded skill grid, ALSO registered directly with CManager and called by
     // its generic, untransformed Render() dispatch, so it was rendering under the global
     // LegacyUiTransform baseline instead of the centerTransform (+GetSkillListOffsetX()) the
     // compact hotkey row it expands from actually uses (RenderCurrentSkillAndHotSkillList(), via
-    // CNewUIMainFrameWindow::RenderCenterRegion()) -- meaning the expanded grid would visually
+    // CMainFrameWindow::RenderCenterRegion()) -- meaning the expanded grid would visually
     // misalign from that row at any non-4:3 resolution. Scoped to the WHOLE function (single,
     // unconditional block) since this simpler function has no early returns to worry about.
     // `* transform.scaleX` -- see Render()'s own comment on this bug.
@@ -1926,22 +1926,22 @@ bool mu::ui::window::CNewUISkillList::Render()
     return true;
 }
 
-float mu::ui::window::CNewUISkillList::GetLayerDepth()
+float mu::ui::window::CSkillList::GetLayerDepth()
 {
     return 5.2f;
 }
 
-WORD mu::ui::window::CNewUISkillList::GetHeroPriorSkill()
+WORD mu::ui::window::CSkillList::GetHeroPriorSkill()
 {
     return m_wHeroPriorSkill;
 }
 
-void mu::ui::window::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
+void mu::ui::window::CSkillList::SetHeroPriorSkill(BYTE bySkill)
 {
     m_wHeroPriorSkill = bySkill;
 }
 
-void mu::ui::window::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
+void mu::ui::window::CSkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
 {
     auto bySkillType = CharacterAttribute->Skill[iIndex];
 
@@ -2341,7 +2341,7 @@ void mu::ui::window::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float
     // 2026-09-02: the hotkey-number subscript this used to draw here (RenderNumber(x+20, y+20,
     // ...), a search through m_iHotKeySkillType[] for this icon's own slot) is retired -- both
     // themes now show it through RmlUi instead (#skill_slot_0..4's .skill-hotkey-label,
-    // main_frame.rml/.rcss, bound from CNewUISkillList::GetHotKeySlotNumber() every frame),
+    // main_frame.rml/.rcss, bound from CSkillList::GetHotKeySlotNumber() every frame),
     // matching feedback ("move the legacy subscripts from C++ code to RmlUi scope too ... the
     // legacy theme will rely on rml instead of hardcoded behavior") -- no theme check needed here
     // at all now since neither theme's C++ path draws it any more.
@@ -2411,7 +2411,7 @@ namespace
     }
 }
 
-void mu::ui::window::CNewUISkillList::RebuildGridSnapshot()
+void mu::ui::window::CSkillList::RebuildGridSnapshot()
 {
     // 2026-09-02, Phase 2: same iteration/filter/zig-zag-position math the legacy grid-drawing
     // loop always used (see git history's old Render()), now producing data instead of drawing.
@@ -2489,7 +2489,7 @@ void mu::ui::window::CNewUISkillList::RebuildGridSnapshot()
     }
 }
 
-void mu::ui::window::CNewUISkillList::QueueTooltip(int iSkillIndex, float x, float y)
+void mu::ui::window::CSkillList::QueueTooltip(int iSkillIndex, float x, float y)
 {
     m_bTooltipPending = true;
     m_iTooltipSkillIndex = iSkillIndex;
@@ -2497,7 +2497,7 @@ void mu::ui::window::CNewUISkillList::QueueTooltip(int iSkillIndex, float x, flo
     m_fTooltipAnchorY = y;
 }
 
-float mu::ui::window::CNewUISkillList::GetHotKeySlotCooldownFraction(int iSlotIndex)
+float mu::ui::window::CSkillList::GetHotKeySlotCooldownFraction(int iSlotIndex)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return 0.f;
@@ -2521,16 +2521,16 @@ float mu::ui::window::CNewUISkillList::GetHotKeySlotCooldownFraction(int iSlotIn
     return ComputeSkillCooldownFraction(m_iHotKeySkillType[iIndex]);
 }
 
-float mu::ui::window::CNewUISkillList::GetCurrentSkillCooldownFraction()
+float mu::ui::window::CSkillList::GetCurrentSkillCooldownFraction()
 {
     return ComputeSkillCooldownFraction(Hero->CurrentSkill);
 }
 
 // 2026-09-02, Phase 2: click/hover entry points bound from main_frame.rml's data-event-click/
-// mouseover/mouseout (Create(), CNewUIMainFrameWindow.cpp) -- see each one's own comment for the
+// mouseover/mouseout (Create(), CMainFrameWindow.cpp) -- see each one's own comment for the
 // exact legacy mouse-click/hover behavior preserved (traced from the retired EVENT_STATE machine,
 // see git history's old UpdateMouseEvent()).
-void mu::ui::window::CNewUISkillList::OnHotkeySlotClick(int iSlotIndex)
+void mu::ui::window::CSkillList::OnHotkeySlotClick(int iSlotIndex)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return;
@@ -2561,7 +2561,7 @@ void mu::ui::window::CNewUISkillList::OnHotkeySlotClick(int iSlotIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CNewUISkillList::OnHotkeySlotHover(int iSlotIndex)
+void mu::ui::window::CSkillList::OnHotkeySlotHover(int iSlotIndex)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return;
@@ -2587,18 +2587,18 @@ void mu::ui::window::CNewUISkillList::OnHotkeySlotHover(int iSlotIndex)
     QueueTooltip(m_iHotKeySkillType[iIndex], 190.f + (iSlotIndex + 1) * 32.f, 431.f);
 }
 
-void mu::ui::window::CNewUISkillList::OnCurrentSkillClick()
+void mu::ui::window::CSkillList::OnCurrentSkillClick()
 {
     m_bSkillList = !m_bSkillList;
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CNewUISkillList::OnCurrentSkillHover()
+void mu::ui::window::CSkillList::OnCurrentSkillHover()
 {
     QueueTooltip(Hero->CurrentSkill, 392.f, 437.f);
 }
 
-void mu::ui::window::CNewUISkillList::OnGridCellClick(int iSkillIndex)
+void mu::ui::window::CSkillList::OnGridCellClick(int iSkillIndex)
 {
     m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
     Hero->CurrentSkill = iSkillIndex;
@@ -2606,7 +2606,7 @@ void mu::ui::window::CNewUISkillList::OnGridCellClick(int iSkillIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CNewUISkillList::OnGridCellHover(int iSkillIndex)
+void mu::ui::window::CSkillList::OnGridCellHover(int iSkillIndex)
 {
     m_iHoveredGridSkillIndex = iSkillIndex;
     for (const SkillCellEntry& entry : m_GridSnapshot)
@@ -2619,7 +2619,7 @@ void mu::ui::window::CNewUISkillList::OnGridCellHover(int iSkillIndex)
     }
 }
 
-void mu::ui::window::CNewUISkillList::OnPetCellClick(int iSkillIndex)
+void mu::ui::window::CSkillList::OnPetCellClick(int iSkillIndex)
 {
     m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
     Hero->CurrentSkill = iSkillIndex;
@@ -2627,7 +2627,7 @@ void mu::ui::window::CNewUISkillList::OnPetCellClick(int iSkillIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::CNewUISkillList::OnPetCellHover(int iSkillIndex)
+void mu::ui::window::CSkillList::OnPetCellHover(int iSkillIndex)
 {
     // 2026-09-02: pet-row entries arm Ctrl+digit assignment the same way grid entries do -- the
     // legacy code's own m_EventState machine never distinguished the two loops for this purpose
@@ -2644,31 +2644,31 @@ void mu::ui::window::CNewUISkillList::OnPetCellHover(int iSkillIndex)
     }
 }
 
-void mu::ui::window::CNewUISkillList::OnUnhover()
+void mu::ui::window::CSkillList::OnUnhover()
 {
     m_bTooltipPending = false;
     m_iTooltipSkillIndex = -1;
     m_iHoveredGridSkillIndex = -1;
 }
 
-bool mu::ui::window::CNewUISkillList::IsSkillListUp()
+bool mu::ui::window::CSkillList::IsSkillListUp()
 {
     return m_bHotKeySkillListUp;
 }
 
-void mu::ui::window::CNewUISkillList::ResetMouseLButton()
+void mu::ui::window::CSkillList::ResetMouseLButton()
 {
     MouseLButton = false;
     MouseLButtonPop = false;
     MouseLButtonPush = false;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)
+void mu::ui::window::CMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)
 {
     m_loPreExp = dwPreExp;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
+void mu::ui::window::CMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
 {
     m_loGetExp = dwGetExp;
 
@@ -2679,12 +2679,12 @@ void mu::ui::window::CNewUIMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
     }
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SetPreExp(__int64 dwPreExp)
+void mu::ui::window::CMainFrameWindow::SetPreExp(__int64 dwPreExp)
 {
     m_dwPreExp = dwPreExp;
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
+void mu::ui::window::CMainFrameWindow::SetGetExp(__int64 dwGetExp)
 {
     m_dwGetExp = dwGetExp;
 
@@ -2696,9 +2696,9 @@ void mu::ui::window::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
 }
 
 
-void mu::ui::window::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
+void mu::ui::window::CMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
-    // Sets a bound "open" model boolean instead of swapping legacy CNewUIButton sprite frames --
+    // Sets a bound "open" model boolean instead of swapping legacy CButton sprite frames --
     // see this class's header comment. main_frame.rcss selects the "panel open" sprite rect when
     // the corresponding *_open field is true.
     if (!m_pRmlDoc) return;
@@ -2745,7 +2745,7 @@ void mu::ui::window::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStat
     }
 }
 
-void mu::ui::window::CNewUIMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
+void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
 {
     if (!m_pRmlDoc) return;
 

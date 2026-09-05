@@ -11,10 +11,10 @@ namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
-    // RmlUi migration (2026-08-31) -- first pilot of the CNewUIObj-tier adapter pattern
+    // RmlUi migration (2026-08-31) -- first pilot of the CObject-tier adapter pattern
     // (docs/rmlui-ui-system/newui-tier-adapter.md; see .ai-os/memory/tasks/rmlui-sdl-gpu-port.md
     // for the full session history). Chosen as the pilot for being small, self-contained (no
-    // drag-drop, no INewUI3DRenderObj/3D-camera rendering), and having genuine interaction (two
+    // drag-drop, no I3DRenderObj/3D-camera rendering), and having genuine interaction (two
     // real button clicks, live per-frame text) to prove the pattern against.
     //
     // This widget's own tooltips (I18N::Game::OfficialMUHelperSetting/StartOfficialMUHelper/
@@ -26,7 +26,7 @@ namespace mu::ui::window
     //
     // 2026-08-31, renamed from CNewUIHeroPositionInfo (a name that reflected the position readout
     // only, not what the widget actually is): the original class name, along with
-    // INTERFACE_HERO_POSITION_INFO, CNewUISystem::m_pNewHeroPositionInfo/
+    // INTERFACE_HERO_POSITION_INFO, CSystem::m_pNewHeroPositionInfo/
     // GetUI_NewHeroPositionInfo()/g_pHeroPositionInfo, and the Sync/Update/ShouldHide*Visibility
     // helper methods, all renamed to match at the same time -- see
     // .ai-os/memory/tasks/rmlui-ui-architecture-amendment.md's "Tracked deferral" section for why
@@ -38,28 +38,28 @@ namespace mu::ui::window
     // -- RmlUi's own context does hit-testing now (Rml::Context::IsMouseInteracting(), wired into
     // Input/Selection.cpp's and ZzzInterface.cpp's world-click gates via
     // RmlUiRuntime::IsMouseOverUI()). Create()/Release()/GetLayerDepth()/Show()/Enable()/
-    // IsVisible() stay real -- CNewUIManager still owns z-order/registration/visibility-toggling
-    // (mu::ui::window::CNewUISystem::SyncMuHelperBarVisibility() etc.) through them exactly as before.
+    // IsVisible() stay real -- CManager still owns z-order/registration/visibility-toggling
+    // (mu::ui::window::CSystem::SyncMuHelperBarVisibility() etc.) through them exactly as before.
     // Update() still reads Hero's live position every frame, now to feed the RmlUi model instead
     // of a member later read by the (now dead) Render().
     //
-    // The legacy CNewUIButton members/SetButtonInfo()/MoveTextTipPos()/BtnProcess()/LoadImages()/
+    // The legacy CButton members/SetButtonInfo()/MoveTextTipPos()/BtnProcess()/LoadImages()/
     // UnloadImages() machinery is removed rather than kept-but-unused: unlike the CWin-tier
     // pattern (where a legacy CButton stays alive for redundant hit-testing bookkeeping),
     // UpdateMouseEvent() being a permanent "not consumed" here means those objects could never
     // detect a click again regardless of their own state -- keeping them would just be dead
     // weight, not real redundancy.
-    class CMuHelperBar : public CNewUIObj
+    class CMuHelperBar : public CObject
     {
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_CurHeroPosition;
 
     public:
         CMuHelperBar();
         virtual ~CMuHelperBar();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         // Vestigial (RmlUi/CSS owns this widget's screen position now, via base.rcss's
@@ -78,7 +78,7 @@ namespace mu::ui::window
         void ClosingProcess();
 
         // Re-derives the RmlUi document's actual Show()/Hide() state from IsVisible() (the
-        // layout-driven flag CNewUIObj::Show() already sets -- panel docking etc., see
+        // layout-driven flag CObject::Show() already sets -- panel docking etc., see
         // NewUISystem.cpp's Hide/Show(INTERFACE_MU_HELPER_BAR) call sites) ANDed with
         // sceneAllowsShow. Needed because this widget's Update() (the only place that used to
         // touch the RmlUi doc) only ever runs while SceneFlag == MAIN_SCENE (MainScene.cpp) --
@@ -86,7 +86,7 @@ namespace mu::ui::window
         // a complete visibility gate, since nothing drew otherwise. Now that a persistent RmlUi
         // document owns the visuals, it needs a real gate of its own -- called every frame
         // regardless of scene from Winmain.cpp's SetPostRmlUiCallback via
-        // CNewUISystem::SyncMainSceneHudVisibility(), so leaving MAIN_SCENE is caught even though
+        // CSystem::SyncMainSceneHudVisibility(), so leaving MAIN_SCENE is caught even though
         // Update() itself stops running.
         void SyncDocVisibility(bool sceneAllowsShow);
 

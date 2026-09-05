@@ -25,21 +25,21 @@
 namespace mu::ui::window
 {
 
-CNewUIInventoryActionController::CNewUIInventoryActionController() : m_pContext(nullptr) {}
+CInventoryActionController::CInventoryActionController() : m_pContext(nullptr) {}
 
-void CNewUIInventoryActionController::SetContext(SEASON3B::IInventoryActionContext* pContext)
+void CInventoryActionController::SetContext(SEASON3B::IInventoryActionContext* pContext)
 {
     m_pContext = pContext;
 }
 
-bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleInventoryActions(CInventoryCtrl* targetControl) const
 {
     if (m_pContext == nullptr || targetControl == nullptr)
     {
         return false;
     }
 
-    const bool hasPickedItem = CNewUIInventoryCtrl::GetPickedItem() != nullptr;
+    const bool hasPickedItem = CInventoryCtrl::GetPickedItem() != nullptr;
     if (UI::Items::Drag::ShouldConsumePanelPress(hasPickedItem, IsPress(VK_LBUTTON)))
     {
         return true;
@@ -63,9 +63,9 @@ bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl
     return false;
 }
 
-bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandlePickedItemPlacement(CInventoryCtrl* targetControl) const
 {
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
     {
         return false;
@@ -105,19 +105,19 @@ bool CNewUIInventoryActionController::HandlePickedItemPlacement(CNewUIInventoryC
     return false;
 }
 
-bool CNewUIInventoryActionController::TryApplyJewel(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
+bool CInventoryActionController::TryApplyJewel(CInventoryCtrl* targetControl, CPickedItem* pPickedItem,
                                                     ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     return ApplyJewels(targetControl, pPickedItem, pPickItem, iSourceIndex, iTargetIndex);
 }
 
-bool CNewUIInventoryActionController::TryStackItem(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem,
+bool CInventoryActionController::TryStackItem(CInventoryCtrl* targetControl, ITEM* pPickItem,
                                                    int iSourceIndex, int iTargetIndex) const
 {
     return TryStackItems(targetControl, pPickItem, iSourceIndex, iTargetIndex);
 }
 
-bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
+bool CInventoryActionController::TryMoveItem(CInventoryCtrl* targetControl, CPickedItem* pPickedItem,
                                                   ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     if (iTargetIndex < 0 || !targetControl->CanMove(iTargetIndex, pPickItem))
@@ -133,16 +133,16 @@ bool CNewUIInventoryActionController::TryMoveItem(CNewUIInventoryCtrl* targetCon
         return SendRequestEquipmentItem(sourceStorageType, iSourceIndex, pPickItem, targetStorageType, iTargetIndex);
     }
 
-    CNewUIInventoryCtrl::BackupPickedItem();
+    CInventoryCtrl::BackupPickedItem();
     return false;
 }
 
-bool CNewUIInventoryActionController::HandleRepairClick(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleRepairClick(CInventoryCtrl* targetControl) const
 {
     return RepairItemAtMousePoint(targetControl);
 }
 
-bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleRightClick(CInventoryCtrl* targetControl) const
 {
     m_pContext->ResetMouseRButton();
 
@@ -176,7 +176,7 @@ bool CNewUIInventoryActionController::HandleRightClick(CNewUIInventoryCtrl* targ
     return false;
 }
 
-bool CNewUIInventoryActionController::HandleStorageAutoMove(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleStorageAutoMove(CInventoryCtrl* targetControl) const
 {
     if (g_pStorageInventory->ProcessMyInvenItemAutoMove(targetControl))
     {
@@ -191,16 +191,16 @@ bool CNewUIInventoryActionController::HandleStorageAutoMove(CNewUIInventoryCtrl*
     return false;
 }
 
-bool CNewUIInventoryActionController::HandleMixAutoMove(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleMixAutoMove(CInventoryCtrl* targetControl) const
 {
     // All crafting NPC dialogs (Chaos Machine, Seed Master, Elphis, Osbourne, ...) share the
     // single mix window, so routing the right-click here covers every crafting NPC at once.
     return g_pMixInventory->ProcessMyInvenItemAutoMove(targetControl);
 }
 
-bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleSellToNPC(CInventoryCtrl* targetControl) const
 {
-    if (CNewUIInventoryCtrl::GetPickedItem())
+    if (CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -238,12 +238,12 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
         return false;
     }
 
-    if (!CNewUIInventoryCtrl::CreatePickedItem(targetControl, pItem))
+    if (!CInventoryCtrl::CreatePickedItem(targetControl, pItem))
     {
         return false;
     }
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
     {
         return false;
@@ -255,7 +255,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
     const int sourceIndex = pPickedItem->GetSourceLinealPos();
     if (sourceIndex < MAX_EQUIPMENT_INDEX || sourceIndex >= MAX_MY_INVENTORY_EX_INDEX)
     {
-        CNewUIInventoryCtrl::BackupPickedItem();
+        CInventoryCtrl::BackupPickedItem();
         return false;
     }
 
@@ -270,7 +270,7 @@ bool CNewUIInventoryActionController::HandleSellToNPC(CNewUIInventoryCtrl* targe
     return true;
 }
 
-bool CNewUIInventoryActionController::HandleInventoryRightClickActions(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::HandleInventoryRightClickActions(CInventoryCtrl* targetControl) const
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_INVENTORY_EXT))
     {
@@ -327,7 +327,7 @@ bool CNewUIInventoryActionController::HandleInventoryRightClickActions(CNewUIInv
     return false;
 }
 
-int CNewUIInventoryActionController::FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const
+int CInventoryActionController::FindAlternateEquipSlot(int nOriginalSlot, ITEM* pItem) const
 {
     if (nOriginalSlot == EQUIPMENT_WEAPON_RIGHT)
     {
@@ -349,7 +349,7 @@ int CNewUIInventoryActionController::FindAlternateEquipSlot(int nOriginalSlot, I
     return -1;
 }
 
-bool CNewUIInventoryActionController::IsSlotOccupied(int nSlot) const
+bool CInventoryActionController::IsSlotOccupied(int nSlot) const
 {
     if (nSlot < 0 || nSlot >= MAX_EQUIPMENT_INDEX)
     {
@@ -360,7 +360,7 @@ bool CNewUIInventoryActionController::IsSlotOccupied(int nSlot) const
     return (pEquipment->Type != -1);
 }
 
-bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const
+bool CInventoryActionController::TryEquipItem(CInventoryCtrl* targetControl, ITEM* pItem, int iSrcIndex) const
 {
     const ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[pItem->Type];
     int nDstIndex = pItemAttr->m_byItemSlot;
@@ -394,12 +394,12 @@ bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetCo
         return true;
     }
 
-    if (!CNewUIInventoryCtrl::CreatePickedItem(nullptr, pItem))
+    if (!CInventoryCtrl::CreatePickedItem(nullptr, pItem))
     {
         return false;
     }
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
     {
         return false;
@@ -412,7 +412,7 @@ bool CNewUIInventoryActionController::TryEquipItem(CNewUIInventoryCtrl* targetCo
     return true;
 }
 
-bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem) const
+bool CInventoryActionController::TryDropItem(CInventoryCtrl* targetControl, ITEM* pItem) const
 {
     if (Hero->Dead != 0)
     {
@@ -431,12 +431,12 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
         return true;
     }
 
-    if (!CNewUIInventoryCtrl::CreatePickedItem(targetControl, pItem))
+    if (!CInventoryCtrl::CreatePickedItem(targetControl, pItem))
     {
         return false;
     }
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr)
     {
         return false;
@@ -455,7 +455,7 @@ bool CNewUIInventoryActionController::TryDropItem(CNewUIInventoryCtrl* targetCon
     return true;
 }
 
-bool CNewUIInventoryActionController::RepairItemAtMousePoint(CNewUIInventoryCtrl* targetControl) const
+bool CInventoryActionController::RepairItemAtMousePoint(CInventoryCtrl* targetControl) const
 {
     ITEM* pItem = targetControl->FindItemAtPt(MouseX, MouseY);
     if (pItem == nullptr)
@@ -482,7 +482,7 @@ bool CNewUIInventoryActionController::RepairItemAtMousePoint(CNewUIInventoryCtrl
     return true;
 }
 
-bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetControl, CNewUIPickedItem* pPickedItem,
+bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPickedItem* pPickedItem,
                                                   ITEM* pPickItem, int iSourceIndex, int iTargetIndex) const
 {
     const bool bIsJewelType = pPickItem->Type == ITEM_JEWEL_OF_BLESS || pPickItem->Type == ITEM_JEWEL_OF_SOUL ||
@@ -599,7 +599,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
     return false;
 }
 
-bool CNewUIInventoryActionController::TryStackItems(CNewUIInventoryCtrl* targetControl, ITEM* pPickItem,
+bool CInventoryActionController::TryStackItems(CInventoryCtrl* targetControl, ITEM* pPickItem,
                                                     int iSourceIndex, int iTargetIndex) const
 {
     if (ITEM* pItem = targetControl->FindItem(iTargetIndex))
@@ -615,7 +615,7 @@ bool CNewUIInventoryActionController::TryStackItems(CNewUIInventoryCtrl* targetC
     return false;
 }
 
-bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const
+bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const
 {
     if (pItem == nullptr)
     {
@@ -970,7 +970,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     return false;
 }
 
-bool CNewUIInventoryActionController::TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl) const
+bool CInventoryActionController::TryTransferBetweenInventorySections(CInventoryCtrl* sourceControl) const
 {
     if (sourceControl == nullptr || g_pMyInventoryExt == nullptr)
     {
@@ -1006,17 +1006,17 @@ bool CNewUIInventoryActionController::TryTransferBetweenInventorySections(CNewUI
         return true;
     }
 
-    if (!CNewUIInventoryCtrl::CreatePickedItem(sourceControl, pItem))
+    if (!CInventoryCtrl::CreatePickedItem(sourceControl, pItem))
     {
         return false;
     }
 
     sourceControl->RemoveItem(pItem);
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     if (pPickedItem == nullptr || pPickedItem->GetItem() == nullptr)
     {
-        CNewUIInventoryCtrl::BackupPickedItem();
+        CInventoryCtrl::BackupPickedItem();
         return false;
     }
 
@@ -1025,7 +1025,7 @@ bool CNewUIInventoryActionController::TryTransferBetweenInventorySections(CNewUI
     if (!SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, sourceIndex, pPickedItem->GetItem(), STORAGE_TYPE::INVENTORY,
                                   destinationIndex))
     {
-        CNewUIInventoryCtrl::BackupPickedItem();
+        CInventoryCtrl::BackupPickedItem();
         return false;
     }
 

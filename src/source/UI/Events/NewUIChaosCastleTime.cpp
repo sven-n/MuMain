@@ -1,4 +1,4 @@
-// NewUIChaosCastleTime.cpp: implementation of the CNewUIChaosCastleTime class.
+// NewUIChaosCastleTime.cpp: implementation of the CChaosCastleTime class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,7 +11,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIChaosCastleTime::CNewUIChaosCastleTime()
+CChaosCastleTime::CChaosCastleTime()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -21,12 +21,12 @@ CNewUIChaosCastleTime::CNewUIChaosCastleTime()
     m_iKilledMonster = 0;
 }
 
-CNewUIChaosCastleTime::~CNewUIChaosCastleTime()
+CChaosCastleTime::~CChaosCastleTime()
 {
     Release();
 }
 
-bool CNewUIChaosCastleTime::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CChaosCastleTime::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -43,7 +43,7 @@ bool CNewUIChaosCastleTime::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIChaosCastleTime::Release()
+void CChaosCastleTime::Release()
 {
     UnloadImages();
 
@@ -54,13 +54,13 @@ void CNewUIChaosCastleTime::Release()
     }
 }
 
-void CNewUIChaosCastleTime::SetPos(int x, int y)
+void CChaosCastleTime::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIChaosCastleTime::UpdateMouseEvent()
+bool CChaosCastleTime::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -71,12 +71,12 @@ bool CNewUIChaosCastleTime::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIChaosCastleTime::UpdateKeyEvent()
+bool CChaosCastleTime::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIChaosCastleTime::Update()
+bool CChaosCastleTime::Update()
 {
     if (!IsVisible())
         return true;
@@ -89,7 +89,7 @@ bool CNewUIChaosCastleTime::Update()
     return true;
 }
 
-bool CNewUIChaosCastleTime::Render()
+bool CChaosCastleTime::Render()
 {
     EnableAlphaTest();
 
@@ -121,35 +121,35 @@ bool CNewUIChaosCastleTime::Render()
     return true;
 }
 
-bool CNewUIChaosCastleTime::BtnProcess()
+bool CChaosCastleTime::BtnProcess()
 {
     return false;
 }
 
-float CNewUIChaosCastleTime::GetLayerDepth()
+float CChaosCastleTime::GetLayerDepth()
 {
     return 1.3f;
 }
 
-void CNewUIChaosCastleTime::OpenningProcess()
+void CChaosCastleTime::OpenningProcess()
 {
 }
 
-void CNewUIChaosCastleTime::ClosingProcess()
+void CChaosCastleTime::ClosingProcess()
 {
 }
 
-void CNewUIChaosCastleTime::LoadImages()
+void CChaosCastleTime::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_CHAOSCASTLE_TIME_WINDOW, GL_LINEAR);
 }
 
-void CNewUIChaosCastleTime::UnloadImages()
+void CChaosCastleTime::UnloadImages()
 {
     DeleteBitmap(IMAGE_CHAOSCASTLE_TIME_WINDOW);
 }
 
-void CNewUIChaosCastleTime::SetTime(int iTime)
+void CChaosCastleTime::SetTime(int iTime)
 {
     m_iTime = iTime;
 
@@ -166,7 +166,7 @@ void CNewUIChaosCastleTime::SetTime(int iTime)
     }
 }
 
-void CNewUIChaosCastleTime::SetKillMonsterStatue(int iKilled, int iMaxKill)
+void CChaosCastleTime::SetKillMonsterStatue(int iKilled, int iMaxKill)
 {
     m_iKilledMonster = iKilled;
     m_iMaxKillMonster = iMaxKill;

@@ -1,4 +1,4 @@
-// NewUIDuelWindow.h: interface for the CNewUIDuelWindow class.
+// NewUIDuelWindow.h: interface for the CDuelWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -11,7 +11,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIDuelWindow : public CNewUIObj
+    class CDuelWindow : public CObject
     {
     private:
         enum IMAGE_LIST
@@ -24,10 +24,10 @@ namespace mu::ui::window
             DUEL_WND_HEIGHT = 70,
         };
     public:
-        CNewUIDuelWindow();
-        virtual ~CNewUIDuelWindow();
+        CDuelWindow();
+        virtual ~CDuelWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -46,7 +46,7 @@ namespace mu::ui::window
         void RenderFrame();
         void RenderContents();
 
-        CNewUIManager* m_pNewUIMng;		// UI 매니저.
+        CManager* m_pNewUIMng;		// UI 매니저.
         POINT m_Pos;					// 창의 위치.
     };
 }

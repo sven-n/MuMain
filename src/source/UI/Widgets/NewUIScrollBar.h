@@ -8,15 +8,15 @@
 
 namespace mu::ui::window
 {
-    class CNewUIScrollBar : public CNewUIObj
+    class CScrollBar : public CObject
     {
         enum KEnumTypeIMAGE_LIST
         {
-            IMAGE_SCROLL_TOP = CNewUIChatLogWindow::IMAGE_SCROLL_TOP,			// newui_scrollbar_up.tga (7,3)
-            IMAGE_SCROLL_MIDDLE = CNewUIChatLogWindow::IMAGE_SCROLL_MIDDLE,			// newui_scrollbar_m.tga (7,15)
-            IMAGE_SCROLL_BOTTOM = CNewUIChatLogWindow::IMAGE_SCROLL_BOTTOM,			// newui_scrollbar_down.tga (7,3)
-            IMAGE_SCROLLBAR_ON = CNewUIChatLogWindow::IMAGE_SCROLLBAR_ON,			// newui_scroll_On.tga (15,30)
-            IMAGE_SCROLLBAR_OFF = CNewUIChatLogWindow::IMAGE_SCROLLBAR_OFF,			// newui_scroll_Off.tga (15,30)
+            IMAGE_SCROLL_TOP = CChatLogWindow::IMAGE_SCROLL_TOP,			// newui_scrollbar_up.tga (7,3)
+            IMAGE_SCROLL_MIDDLE = CChatLogWindow::IMAGE_SCROLL_MIDDLE,			// newui_scrollbar_m.tga (7,15)
+            IMAGE_SCROLL_BOTTOM = CChatLogWindow::IMAGE_SCROLL_BOTTOM,			// newui_scrollbar_down.tga (7,3)
+            IMAGE_SCROLLBAR_ON = CChatLogWindow::IMAGE_SCROLLBAR_ON,			// newui_scroll_On.tga (15,30)
+            IMAGE_SCROLLBAR_OFF = CChatLogWindow::IMAGE_SCROLLBAR_OFF,			// newui_scroll_Off.tga (15,30)
         };
 
         enum KEnumTypeSCROLLBTN
@@ -64,8 +64,8 @@ namespace mu::ui::window
         int							m_iMaxPos;
 
     public:
-        CNewUIScrollBar();
-        virtual ~CNewUIScrollBar();
+        CScrollBar();
+        virtual ~CScrollBar();
 
         bool Create(int iX, int iY, int iHeight);
         void Release();

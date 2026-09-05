@@ -13,17 +13,17 @@ using namespace mu::ui::window;
 
 
 
-mu::ui::window::CNewUIChatLogWindow::CNewUIChatLogWindow()
+mu::ui::window::CChatLogWindow::CChatLogWindow()
 {
     Init();
 }
 
-mu::ui::window::CNewUIChatLogWindow::~CNewUIChatLogWindow()
+mu::ui::window::CChatLogWindow::~CChatLogWindow()
 {
     Release();
 }
 
-void mu::ui::window::CNewUIChatLogWindow::Init()
+void mu::ui::window::CChatLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
     m_WndPos.x = m_WndPos.y = 0;
@@ -44,7 +44,7 @@ void mu::ui::window::CNewUIChatLogWindow::Init()
     m_iPointedMessageIndex = 0;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::LoadImages()
+void mu::ui::window::CChatLogWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_SCROLL_MIDDLE, GL_LINEAR);
@@ -54,7 +54,7 @@ void mu::ui::window::CNewUIChatLogWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_scrollbar_stretch.jpg", IMAGE_DRAG_BTN, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIChatLogWindow::UnloadImages()
+void mu::ui::window::CChatLogWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_SCROLL_TOP);
     DeleteBitmap(IMAGE_SCROLL_MIDDLE);
@@ -64,7 +64,7 @@ void mu::ui::window::CNewUIChatLogWindow::UnloadImages()
     DeleteBitmap(IMAGE_DRAG_BTN);
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::RenderBackground()
+bool mu::ui::window::CChatLogWindow::RenderBackground()
 {
     if (m_bShowFrame)
     {
@@ -79,7 +79,7 @@ bool mu::ui::window::CNewUIChatLogWindow::RenderBackground()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::RenderMessages()
+bool mu::ui::window::CChatLogWindow::RenderMessages()
 {
     float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
 
@@ -193,7 +193,7 @@ bool mu::ui::window::CNewUIChatLogWindow::RenderMessages()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::RenderFrame()
+bool mu::ui::window::CChatLogWindow::RenderFrame()
 {
     if (m_bShowFrame)
     {
@@ -231,7 +231,7 @@ bool mu::ui::window::CNewUIChatLogWindow::RenderFrame()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y, int nShowingLines /* = 6 */)
+bool mu::ui::window::CChatLogWindow::Create(CManager* pNewUIMng, int x, int y, int nShowingLines /* = 6 */)
 {
     Release();
 
@@ -246,7 +246,7 @@ bool mu::ui::window::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x
     return true;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::Release()
+void mu::ui::window::CChatLogWindow::Release()
 {
     UnloadImages();
     ResetFilter();
@@ -261,13 +261,13 @@ void mu::ui::window::CNewUIChatLogWindow::Release()
     Init();
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SetPosition(int x, int y)
+void mu::ui::window::CChatLogWindow::SetPosition(int x, int y)
 {
     m_WndPos.x = x;
     m_WndPos.y = y;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
+void mu::ui::window::CChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
 {
     if (strID.empty() && strText.empty())
     {
@@ -306,7 +306,7 @@ void mu::ui::window::CNewUIChatLogWindow::AddText(const type_string& strID, cons
     }
 }
 
-void mu::ui::window::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
+void mu::ui::window::CChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
@@ -462,7 +462,7 @@ void mu::ui::window::CNewUIChatLogWindow::ProcessAddText(const type_string& strI
         m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
+void mu::ui::window::CChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 
@@ -485,12 +485,12 @@ void mu::ui::window::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
     }
 }
 
-void mu::ui::window::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
+void mu::ui::window::CChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
     {
-        assert(!"Empty Message CNewUIChatLogWindow");
+        assert(!"Empty Message CChatLogWindow");
         return;
     }
 
@@ -505,7 +505,7 @@ void mu::ui::window::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
     }
 }
 
-size_t mu::ui::window::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
+size_t mu::ui::window::CChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
@@ -516,12 +516,12 @@ size_t mu::ui::window::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgTyp
     return pvecMsgs->size();
 }
 
-int mu::ui::window::CNewUIChatLogWindow::GetCurrentRenderEndLine() const
+int mu::ui::window::CChatLogWindow::GetCurrentRenderEndLine() const
 {
     return m_iCurrentRenderEndLine;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
+void mu::ui::window::CChatLogWindow::Scrolling(int nRenderEndLine)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(m_CurrentRenderMsgType);
     if (pvecMsgs == nullptr)
@@ -546,7 +546,7 @@ void mu::ui::window::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
     }
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterText)
+void mu::ui::window::CChatLogWindow::SetFilterText(const type_string& strFilterText)
 {
     bool bPrevFilter = false;
 
@@ -585,17 +585,17 @@ void mu::ui::window::CNewUIChatLogWindow::SetFilterText(const type_string& strFi
     }
 }
 
-void mu::ui::window::CNewUIChatLogWindow::ResetFilter()
+void mu::ui::window::CChatLogWindow::ResetFilter()
 {
     m_vecFilters.clear();
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SetSizeAuto()
+void mu::ui::window::CChatLogWindow::SetSizeAuto()
 {
     SetNumberOfShowingLines(GetNumberOfShowingLines() + 3);
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize/* = nullptr*/)
+void mu::ui::window::CChatLogWindow::SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize/* = nullptr*/)
 {
     m_nShowingLines = (int)(nShowingLines / 3) * 3;
     if (m_nShowingLines < 3)
@@ -615,12 +615,12 @@ void mu::ui::window::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLi
         lpBoxSize->cy = (SCROLL_MIDDLE_PART_HEIGHT * GetNumberOfShowingLines()) + (SCROLL_TOP_BOTTOM_PART_HEIGHT * 2) + (WND_TOP_BOTTOM_EDGE * 2);
     }
 }
-size_t mu::ui::window::CNewUIChatLogWindow::GetNumberOfShowingLines() const
+size_t mu::ui::window::CChatLogWindow::GetNumberOfShowingLines() const
 {
     return m_nShowingLines;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SetBackAlphaAuto()
+void mu::ui::window::CChatLogWindow::SetBackAlphaAuto()
 {
     m_fBackAlpha += 0.2f;
 
@@ -630,7 +630,7 @@ void mu::ui::window::CNewUIChatLogWindow::SetBackAlphaAuto()
     }
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SetBackAlpha(float fAlpha)
+void mu::ui::window::CChatLogWindow::SetBackAlpha(float fAlpha)
 {
     if (fAlpha < 0.f)
         m_fBackAlpha = 0.f;
@@ -640,27 +640,27 @@ void mu::ui::window::CNewUIChatLogWindow::SetBackAlpha(float fAlpha)
         m_fBackAlpha = fAlpha;
 }
 
-float mu::ui::window::CNewUIChatLogWindow::GetBackAlpha() const
+float mu::ui::window::CChatLogWindow::GetBackAlpha() const
 {
     return m_fBackAlpha;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::ShowFrame()
+void mu::ui::window::CChatLogWindow::ShowFrame()
 {
     m_bShowFrame = true;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::HideFrame()
+void mu::ui::window::CChatLogWindow::HideFrame()
 {
     m_bShowFrame = false;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::IsShowFrame()
+bool mu::ui::window::CChatLogWindow::IsShowFrame()
 {
     return m_bShowFrame;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::UpdateMouseEvent()
+bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
 {
     
 
@@ -848,18 +848,18 @@ bool mu::ui::window::CNewUIChatLogWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::UpdateKeyEvent()
+bool mu::ui::window::CChatLogWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::Update()
+bool mu::ui::window::CChatLogWindow::Update()
 {
     UpdateScrollPos();
 
     return true;
 }
-bool mu::ui::window::CNewUIChatLogWindow::Render()
+bool mu::ui::window::CChatLogWindow::Render()
 {
     if (RenderBackground() == false)
     {
@@ -882,17 +882,17 @@ bool mu::ui::window::CNewUIChatLogWindow::Render()
     return true;
 }
 
-float mu::ui::window::CNewUIChatLogWindow::GetLayerDepth()
+float mu::ui::window::CChatLogWindow::GetLayerDepth()
 {
     return 6.1f;
 }
 
-float mu::ui::window::CNewUIChatLogWindow::GetKeyEventOrder()
+float mu::ui::window::CChatLogWindow::GetKeyEventOrder()
 {
     return 8.0f;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
+void mu::ui::window::CChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
                                                  MESSAGE_TYPE MsgType, OUT type_string& strText1,
                                                  OUT type_string& strText2)
 {
@@ -933,7 +933,7 @@ void mu::ui::window::CNewUIChatLogWindow::SeparateText(IN const type_string& str
     strText2 = strText.substr(iLocToken, strText.length() - iLocToken);
 }
 
-bool mu::ui::window::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
+bool mu::ui::window::CChatLogWindow::CheckFilterText(const type_string& strTestText)
 {
     auto vi_filters = m_vecFilters.begin();
     for (; vi_filters != m_vecFilters.end(); vi_filters++)
@@ -947,13 +947,13 @@ bool mu::ui::window::CNewUIChatLogWindow::CheckFilterText(const type_string& str
     return false;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::UpdateWndSize()
+void mu::ui::window::CChatLogWindow::UpdateWndSize()
 {
     m_WndSize.cx = WND_WIDTH;
     m_WndSize.cy = (SCROLL_MIDDLE_PART_HEIGHT * GetNumberOfShowingLines()) + (SCROLL_TOP_BOTTOM_PART_HEIGHT * 2) + (WND_TOP_BOTTOM_EDGE * 2);
 }
 
-void mu::ui::window::CNewUIChatLogWindow::UpdateScrollPos()
+void mu::ui::window::CChatLogWindow::UpdateScrollPos()
 {
     float fPosRate = 1.f;
 
@@ -975,7 +975,7 @@ void mu::ui::window::CNewUIChatLogWindow::UpdateScrollPos()
     }
 }
 
-void mu::ui::window::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
+void mu::ui::window::CChatLogWindow::AddFilterWord(const type_string& strWord)
 {
     if (m_vecFilters.size() > 5)
         return;
@@ -992,7 +992,7 @@ void mu::ui::window::CNewUIChatLogWindow::AddFilterWord(const type_string& strWo
     m_vecFilters.push_back(strWord);
 }
 
-void mu::ui::window::CNewUIChatLogWindow::ClearAll()
+void mu::ui::window::CChatLogWindow::ClearAll()
 {
     for (int i = TYPE_ALL_MESSAGE; i < NUMBER_OF_TYPES; i++)
     {
@@ -1002,7 +1002,7 @@ void mu::ui::window::CNewUIChatLogWindow::ClearAll()
     m_iCurrentRenderEndLine = -1;
 }
 
-mu::ui::window::CNewUIChatLogWindow::type_vector_msgs* mu::ui::window::CNewUIChatLogWindow::GetMsgs(MESSAGE_TYPE MsgType)
+mu::ui::window::CChatLogWindow::type_vector_msgs* mu::ui::window::CChatLogWindow::GetMsgs(MESSAGE_TYPE MsgType)
 {
     switch (MsgType)
     {
@@ -1031,7 +1031,7 @@ mu::ui::window::CNewUIChatLogWindow::type_vector_msgs* mu::ui::window::CNewUICha
     return nullptr;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
+void mu::ui::window::CChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 {
     m_CurrentRenderMsgType = MsgType;
 
@@ -1044,12 +1044,12 @@ void mu::ui::window::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-mu::ui::window::MESSAGE_TYPE mu::ui::window::CNewUIChatLogWindow::GetCurrentMsgType() const
+mu::ui::window::MESSAGE_TYPE mu::ui::window::CChatLogWindow::GetCurrentMsgType() const
 {
     return m_CurrentRenderMsgType;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::ShowChatLog()
+void mu::ui::window::CChatLogWindow::ShowChatLog()
 {
     m_bShowChatLog = true;
 
@@ -1062,22 +1062,22 @@ void mu::ui::window::CNewUIChatLogWindow::ShowChatLog()
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-void mu::ui::window::CNewUIChatLogWindow::HideChatLog()
+void mu::ui::window::CChatLogWindow::HideChatLog()
 {
     m_bShowChatLog = false;
 }
 
-mu::ui::window::CNewUISystemLogWindow::CNewUISystemLogWindow()
+mu::ui::window::CSystemLogWindow::CSystemLogWindow()
 {
     Init();
 }
 
-mu::ui::window::CNewUISystemLogWindow::~CNewUISystemLogWindow()
+mu::ui::window::CSystemLogWindow::~CSystemLogWindow()
 {
     Release();
 }
 
-void mu::ui::window::CNewUISystemLogWindow::Init()
+void mu::ui::window::CSystemLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
     m_WndPos.x = m_WndPos.y = 0;
@@ -1089,7 +1089,7 @@ void mu::ui::window::CNewUISystemLogWindow::Init()
 }
 
 
-bool mu::ui::window::CNewUISystemLogWindow::RenderMessages()
+bool mu::ui::window::CSystemLogWindow::RenderMessages()
 {
     if (!m_bShowMessages)
     {
@@ -1142,7 +1142,7 @@ bool mu::ui::window::CNewUISystemLogWindow::RenderMessages()
     return true;
 }
 
-bool mu::ui::window::CNewUISystemLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CSystemLogWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     Release();
 
@@ -1156,7 +1156,7 @@ bool mu::ui::window::CNewUISystemLogWindow::Create(CNewUIManager* pNewUIMng, int
     return true;
 }
 
-void mu::ui::window::CNewUISystemLogWindow::Release()
+void mu::ui::window::CSystemLogWindow::Release()
 {
     ClearAll();
 
@@ -1169,13 +1169,13 @@ void mu::ui::window::CNewUISystemLogWindow::Release()
     Init();
 }
 
-void mu::ui::window::CNewUISystemLogWindow::SetPosition(int x, int y)
+void mu::ui::window::CSystemLogWindow::SetPosition(int x, int y)
 {
     m_WndPos.x = x;
     m_WndPos.y = y;
 }
 
-void mu::ui::window::CNewUISystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)
+void mu::ui::window::CSystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)
 {
     if (strText.empty())
     {
@@ -1206,7 +1206,7 @@ void mu::ui::window::CNewUISystemLogWindow::AddText(const type_string& strText, 
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-void mu::ui::window::CNewUISystemLogWindow::RemoveFrontLine()
+void mu::ui::window::CSystemLogWindow::RemoveFrontLine()
 {
     auto vi = m_vecAllMsgs.begin();
     if (vi != m_vecAllMsgs.end())
@@ -1216,41 +1216,41 @@ void mu::ui::window::CNewUISystemLogWindow::RemoveFrontLine()
     }
 }
 
-int mu::ui::window::CNewUISystemLogWindow::GetCurrentRenderEndLine() const
+int mu::ui::window::CSystemLogWindow::GetCurrentRenderEndLine() const
 {
     return m_iCurrentRenderEndLine;
 }
 
-bool mu::ui::window::CNewUISystemLogWindow::UpdateMouseEvent()
+bool mu::ui::window::CSystemLogWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISystemLogWindow::UpdateKeyEvent()
+bool mu::ui::window::CSystemLogWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUISystemLogWindow::Update()
+bool mu::ui::window::CSystemLogWindow::Update()
 {
     return true;
 }
-bool mu::ui::window::CNewUISystemLogWindow::Render()
+bool mu::ui::window::CSystemLogWindow::Render()
 {
     return RenderMessages();
 }
 
-float mu::ui::window::CNewUISystemLogWindow::GetLayerDepth()
+float mu::ui::window::CSystemLogWindow::GetLayerDepth()
 {
     return 6.05f;
 }
 
-float mu::ui::window::CNewUISystemLogWindow::GetKeyEventOrder()
+float mu::ui::window::CSystemLogWindow::GetKeyEventOrder()
 {
     return 8.0f;
 }
 
-void mu::ui::window::CNewUISystemLogWindow::ClearAll()
+void mu::ui::window::CSystemLogWindow::ClearAll()
 {
     auto vi_msg = m_vecAllMsgs.begin();
     for (; vi_msg != m_vecAllMsgs.end(); vi_msg++)
@@ -1260,7 +1260,7 @@ void mu::ui::window::CNewUISystemLogWindow::ClearAll()
     m_iCurrentRenderEndLine = -1;
 }
 
-bool mu::ui::window::CNewUISystemLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
+bool mu::ui::window::CSystemLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
 {
     if (m_vecAllMsgs.empty()) return false;
     auto vri_msgs = m_vecAllMsgs.rbegin();

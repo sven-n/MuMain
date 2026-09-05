@@ -1,4 +1,4 @@
-// NewUICatapultWindow.h: interface for the CNewUICatapultWindow class.
+// NewUICatapultWindow.h: interface for the CCatapultWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -13,7 +13,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUICatapultWindow : public CNewUIObj
+    class CCatapultWindow : public CObject
     {
     private:
 
@@ -33,7 +33,7 @@ namespace mu::ui::window
             void AllUnLock();
             void BtnSelected(int iIndex);
 
-            CNewUIButton* m_pButton;
+            CButton* m_pButton;
 
             int m_iBtnNum;
             int m_iType;
@@ -44,25 +44,25 @@ namespace mu::ui::window
         enum IMAGE_LIST
         {
             // 기본창
-            IMAGE_CATAPULT_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_CATAPULT_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,		// newui_item_back01.tga	(190,64)
-            IMAGE_CATAPULT_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_CATAPULT_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_CATAPULT_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
-            IMAGE_CATAPULT_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,	//. newui_exit_00.tga
+            IMAGE_CATAPULT_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
+            IMAGE_CATAPULT_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,		// newui_item_back01.tga	(190,64)
+            IMAGE_CATAPULT_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
+            IMAGE_CATAPULT_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
+            IMAGE_CATAPULT_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
+            IMAGE_CATAPULT_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,	//. newui_exit_00.tga
 
             // 테이블
-            IMAGE_CATAPULT_TABLE_TOP_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
-            IMAGE_CATAPULT_TABLE_TOP_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
-            IMAGE_CATAPULT_TABLE_BOTTOM_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
-            IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
-            IMAGE_CATAPULT_TABLE_TOP_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,			//. newui_item_table03(up).tga (1, 14)
-            IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
-            IMAGE_CATAPULT_TABLE_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
-            IMAGE_CATAPULT_TABLE_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
+            IMAGE_CATAPULT_TABLE_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
+            IMAGE_CATAPULT_TABLE_TOP_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
+            IMAGE_CATAPULT_TABLE_BOTTOM_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
+            IMAGE_CATAPULT_TABLE_BOTTOM_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
+            IMAGE_CATAPULT_TABLE_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,			//. newui_item_table03(up).tga (1, 14)
+            IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
+            IMAGE_CATAPULT_TABLE_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
+            IMAGE_CATAPULT_TABLE_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
 
             // 버튼
-            IMAGE_CATAPULT_BTN_FIRE = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
+            IMAGE_CATAPULT_BTN_FIRE = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
 
             IMAGE_CATAPULT_BTN_SMALL = BITMAP_CATAPULT_BEGIN,
             IMAGE_CATAPULT_BTN_BIG,
@@ -74,10 +74,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUICatapultWindow();
-        virtual ~CNewUICatapultWindow();
+        CCatapultWindow();
+        virtual ~CCatapultWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -114,12 +114,12 @@ namespace mu::ui::window
         void RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight);
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIButton m_BtnExit;
+        CButton m_BtnExit;
         CCatapultGroupButton m_BtnChoiceArea;	// 지역선택
-        CNewUIButton m_BtnFire;	// 발사버튼
+        CButton m_BtnFire;	// 발사버튼
 
         int m_iType;
         int m_iNpcKey;

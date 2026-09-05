@@ -1,4 +1,4 @@
-// NewUICursedTempleSystem.h: interface for the CNewUICursedTempleSystem class.
+// NewUICursedTempleSystem.h: interface for the CCursedTempleSystem class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -16,16 +16,16 @@
 
 namespace mu::ui::window
 {
-    class CNewUICursedTempleSystem : public CNewUIObj
+    class CCursedTempleSystem : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_CURSEDTEMPLESYSTEM_TOP = CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP,
-            IMAGE_CURSEDTEMPLESYSTEM_MIDDLE = CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
-            IMAGE_CURSEDTEMPLESYSTEM_BOTTOM = CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
-            IMAGE_CURSEDTEMPLESYSTEM_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_CURSEDTEMPLESYSTEM_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_CURSEDTEMPLESYSTEM_TOP = CMessageBoxMng::IMAGE_MSGBOX_TOP,
+            IMAGE_CURSEDTEMPLESYSTEM_MIDDLE = CMessageBoxMng::IMAGE_MSGBOX_MIDDLE,
+            IMAGE_CURSEDTEMPLESYSTEM_BOTTOM = CMessageBoxMng::IMAGE_MSGBOX_BOTTOM,
+            IMAGE_CURSEDTEMPLESYSTEM_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_CURSEDTEMPLESYSTEM_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
 
             IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME = BITMAP_CURSEDTEMPLE_BEGIN + 2,
             IMAGE_CURSEDTEMPLESYSTEM_MINIMAP,
@@ -50,8 +50,8 @@ namespace mu::ui::window
             IMAGE_CURSEDTEMPLESYSTEM_SCORE_ILLUSION_GAAIL,
             IMAGE_CURSEDTEMPLESYSTEM_SCORE_LEFT,
             IMAGE_CURSEDTEMPLESYSTEM_SCORE_RIGHT,
-            IMAGE_SKILL2 = CNewUISkillList::IMAGE_SKILL2,
-            IMAGE_NON_SKILL2 = CNewUISkillList::IMAGE_NON_SKILL2,
+            IMAGE_SKILL2 = CSkillList::IMAGE_SKILL2,
+            IMAGE_NON_SKILL2 = CSkillList::IMAGE_NON_SKILL2,
         };
 
         enum
@@ -63,10 +63,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUICursedTempleSystem();
-        virtual ~CNewUICursedTempleSystem();
+        CCursedTempleSystem();
+        virtual ~CCursedTempleSystem();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
 
     private:
         void LoadImages();
@@ -126,9 +126,9 @@ namespace mu::ui::window
         void Destroy();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT					m_Pos;
-        CNewUIButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
+        CButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
         //EventTime
         DWORD				m_EventMapTime;             // Total event time
         //MiniMap
@@ -162,19 +162,19 @@ namespace mu::ui::window
     };
 
     inline
-        const POINT& CNewUICursedTempleSystem::GetPos() const
+        const POINT& CCursedTempleSystem::GetPos() const
     {
         return m_Pos;
     }
 
     inline
-        float CNewUICursedTempleSystem::GetLayerDepth()	//. 1.5f
+        float CCursedTempleSystem::GetLayerDepth()	//. 1.5f
     {
         return 1.5f;
     }
 
     inline
-        void CNewUICursedTempleSystem::SetPos(int x, int y)
+        void CCursedTempleSystem::SetPos(int x, int y)
     {
         m_Pos.x = x; m_Pos.y = y;
     }

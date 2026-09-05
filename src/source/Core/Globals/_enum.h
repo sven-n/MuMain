@@ -116,7 +116,7 @@ enum INTERFACE_LIST
     INTERFACE_SYSTEMLOGWINDOW,
     INTERFACE_COMMAND_LIST,
     // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- CCreditWin is the Phase 1 pilot for
-    // migrating CUIMng's CWin-derived windows onto CNewUIManager's registry. Inserted just before
+    // migrating CUIMng's CWin-derived windows onto CManager's registry. Inserted just before
     // INTERFACE_END so every other entry's numeric value is unaffected.
     INTERFACE_CREDITS,
     // Phase 2: CServerMsgWin, same reasoning as INTERFACE_CREDITS above.
@@ -124,7 +124,7 @@ enum INTERFACE_LIST
     // Phase 2: CServerSelWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SERVER_SELECT,
     // Phase 2: CMsgWin (distinct from INTERFACE_MESSAGEBOX, the unrelated MAIN_SCENE-tier
-    // CNewUIMessageBoxBase key) -- same reasoning as INTERFACE_CREDITS above.
+    // CMessageBoxBase key) -- same reasoning as INTERFACE_CREDITS above.
     INTERFACE_MSG_WINDOW,
     // Phase 2: CSysMenuWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SYS_MENU,

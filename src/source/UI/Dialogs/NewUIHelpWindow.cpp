@@ -1,4 +1,4 @@
-// NewUIHelpWindow.cpp: implementation of the CNewUIHelpWindow class.
+// NewUIHelpWindow.cpp: implementation of the CHelpWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,7 +11,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIHelpWindow::CNewUIHelpWindow()
+mu::ui::window::CHelpWindow::CHelpWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -20,12 +20,12 @@ mu::ui::window::CNewUIHelpWindow::CNewUIHelpWindow()
     m_iIndex = 0;
 }
 
-mu::ui::window::CNewUIHelpWindow::~CNewUIHelpWindow()
+mu::ui::window::CHelpWindow::~CHelpWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIHelpWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CHelpWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -40,7 +40,7 @@ bool mu::ui::window::CNewUIHelpWindow::Create(CNewUIManager* pNewUIMng, int x, i
     return true;
 }
 
-void mu::ui::window::CNewUIHelpWindow::Release()
+void mu::ui::window::CHelpWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -49,18 +49,18 @@ void mu::ui::window::CNewUIHelpWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIHelpWindow::SetPos(int x, int y)
+void mu::ui::window::CHelpWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIHelpWindow::UpdateMouseEvent()
+bool mu::ui::window::CHelpWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIHelpWindow::UpdateKeyEvent()
+bool mu::ui::window::CHelpWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_HELP))
     {
@@ -87,12 +87,12 @@ bool mu::ui::window::CNewUIHelpWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIHelpWindow::Update()
+bool mu::ui::window::CHelpWindow::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIHelpWindow::Render()
+bool mu::ui::window::CHelpWindow::Render()
 {
     EnableAlphaTest();
 
@@ -249,24 +249,24 @@ bool mu::ui::window::CNewUIHelpWindow::Render()
     return true;
 }
 
-float mu::ui::window::CNewUIHelpWindow::GetLayerDepth()
+float mu::ui::window::CHelpWindow::GetLayerDepth()
 {
     return 8.3f;
 }
 
-float mu::ui::window::CNewUIHelpWindow::GetKeyEventOrder()
+float mu::ui::window::CHelpWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void mu::ui::window::CNewUIHelpWindow::OpenningProcess()
+void mu::ui::window::CHelpWindow::OpenningProcess()
 {
     m_iIndex = 0;
 }
 
-void mu::ui::window::CNewUIHelpWindow::ClosingProcess() {}
+void mu::ui::window::CHelpWindow::ClosingProcess() {}
 
-void mu::ui::window::CNewUIHelpWindow::AutoUpdateIndex()
+void mu::ui::window::CHelpWindow::AutoUpdateIndex()
 {
     if (++m_iIndex > 1)
     {

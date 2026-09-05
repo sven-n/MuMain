@@ -18,7 +18,7 @@ namespace
 }
 
 
-mu::ui::window::CNewUIMasterLevel::CNewUIMasterLevel()
+mu::ui::window::CMasterLevel::CMasterLevel()
 {
     m_pNewUIMng = nullptr;
     this->ConsumePoint = 0;
@@ -33,22 +33,22 @@ mu::ui::window::CNewUIMasterLevel::CNewUIMasterLevel()
     this->ClearSkillTooltipData();
 }
 
-mu::ui::window::CNewUIMasterLevel::~CNewUIMasterLevel()
+mu::ui::window::CMasterLevel::~CMasterLevel()
 {
     this->Release();
 }
 
-BYTE mu::ui::window::CNewUIMasterLevel::GetConsumePoint() const
+BYTE mu::ui::window::CMasterLevel::GetConsumePoint() const
 {
     return this->ConsumePoint;
 }
 
-int mu::ui::window::CNewUIMasterLevel::GetCurSkillID() const
+int mu::ui::window::CMasterLevel::GetCurSkillID() const
 {
     return this->CurSkillID;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CMasterLevel::Create(CManager* pNewUIMng)
 {
     if (nullptr == pNewUIMng)
         return false;
@@ -76,7 +76,7 @@ bool mu::ui::window::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void mu::ui::window::CNewUIMasterLevel::Release()
+void mu::ui::window::CMasterLevel::Release()
 {
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
@@ -87,7 +87,7 @@ void mu::ui::window::CNewUIMasterLevel::Release()
     }
 }
 
-void mu::ui::window::CNewUIMasterLevel::SetPos()
+void mu::ui::window::CMasterLevel::SetPos()
 {
     this->PosX = 0;
     this->PosY = 0;
@@ -95,7 +95,7 @@ void mu::ui::window::CNewUIMasterLevel::SetPos()
     this->height = 428;
 }
 
-void mu::ui::window::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
+void mu::ui::window::CMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 {
     memset(m_stMasterSkillTreeData, 0, sizeof(m_stMasterSkillTreeData));
 
@@ -152,7 +152,7 @@ void mu::ui::window::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* p
     delete[] Buffer;
 }
 
-void mu::ui::window::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
+void mu::ui::window::CMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 {
     memset(m_stMasterSkillTooltip, 0, sizeof(m_stMasterSkillTooltip));
 
@@ -206,7 +206,7 @@ void mu::ui::window::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* pa
     delete[] file_buffer;
 }
 
-void mu::ui::window::CNewUIMasterLevel::InitMasterSkillPoint()
+void mu::ui::window::CMasterLevel::InitMasterSkillPoint()
 {
     for (int i = 0; i < 3; i++)
     {
@@ -218,7 +218,7 @@ void mu::ui::window::CNewUIMasterLevel::InitMasterSkillPoint()
     }
 }
 
-void mu::ui::window::CNewUIMasterLevel::SetMasterType(CLASS_TYPE Class)
+void mu::ui::window::CMasterLevel::SetMasterType(CLASS_TYPE Class)
 {
     switch (Class)
     {
@@ -297,7 +297,7 @@ void mu::ui::window::CNewUIMasterLevel::SetMasterType(CLASS_TYPE Class)
     }
 }
 
-void mu::ui::window::CNewUIMasterLevel::SetMasterSkillTreeData()
+void mu::ui::window::CMasterLevel::SetMasterSkillTreeData()
 {
     this->ClearSkillTreeData();
 
@@ -320,7 +320,7 @@ void mu::ui::window::CNewUIMasterLevel::SetMasterSkillTreeData()
     }
 }
 
-void mu::ui::window::CNewUIMasterLevel::SetMasterSkillToolTipData()
+void mu::ui::window::CMasterLevel::SetMasterSkillToolTipData()
 {
     this->ClearSkillTooltipData();
 
@@ -343,7 +343,7 @@ void mu::ui::window::CNewUIMasterLevel::SetMasterSkillToolTipData()
     }
 }
 
-bool mu::ui::window::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, BYTE skillLevel, float value, float nextvalue)
+bool mu::ui::window::CMasterLevel::SetMasterSkillTreeInfo(int index, BYTE skillLevel, float value, float nextvalue)
 {
     const auto it = this->map_masterData.find(index);
 
@@ -360,7 +360,7 @@ bool mu::ui::window::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, BYTE s
     return true;
 }
 
-int mu::ui::window::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent)
+int mu::ui::window::CMasterLevel::SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent)
 {
     if (text == nullptr)
     {
@@ -404,7 +404,7 @@ int mu::ui::window::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItem
     return TextNum;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::Render()
+bool mu::ui::window::CMasterLevel::Render()
 {
     EnableAlphaTest();
     RenderImage(IMAGE_MASTER_INTERFACE, this->PosX, this->PosY, Bitmaps[IMAGE_MASTER_INTERFACE].Width, Bitmaps[IMAGE_MASTER_INTERFACE].Height);
@@ -417,12 +417,12 @@ bool mu::ui::window::CNewUIMasterLevel::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::Update()
+bool mu::ui::window::CMasterLevel::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::UpdateMouseEvent()
+bool mu::ui::window::CMasterLevel::UpdateMouseEvent()
 {
     if (this->m_CloseBT.UpdateMouseEvent() == true)
     {
@@ -463,7 +463,7 @@ bool mu::ui::window::CNewUIMasterLevel::UpdateMouseEvent()
     return result;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::UpdateKeyEvent()
+bool mu::ui::window::CMasterLevel::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MASTER_LEVEL) == false || mu::ui::window::IsPress(VK_ESCAPE) == false && mu::ui::window::IsPress('A') == false)
     {
@@ -477,12 +477,12 @@ bool mu::ui::window::CNewUIMasterLevel::UpdateKeyEvent()
     return false;
 }
 
-float mu::ui::window::CNewUIMasterLevel::GetLayerDepth()
+float mu::ui::window::CMasterLevel::GetLayerDepth()
 {
     return 10.1000004;
 }
 
-void mu::ui::window::CNewUIMasterLevel::LoadImages()
+void mu::ui::window::CMasterLevel::LoadImages()
 {
     LoadBitmap(L"Interface\\new_Master_back01.jpg", IMAGE_MASTER_INTERFACE, GL_LINEAR, GL_REPEAT, true, false);
     LoadBitmap(L"Interface\\new_Master_back02.jpg", IMAGE_MASTER_INTERFACE + 1, GL_LINEAR, GL_REPEAT, true, false);
@@ -500,7 +500,7 @@ void mu::ui::window::CNewUIMasterLevel::LoadImages()
     LoadBitmap(L"Interface\\new_Master_arrow08.tga", IMAGE_MASTER_INTERFACE + 13, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIMasterLevel::UnloadImages()
+void mu::ui::window::CMasterLevel::UnloadImages()
 {
     for (int i = 0; i < 14; i++)
     {
@@ -508,7 +508,7 @@ void mu::ui::window::CNewUIMasterLevel::UnloadImages()
     }
 }
 
-void mu::ui::window::CNewUIMasterLevel::RenderText() const
+void mu::ui::window::CMasterLevel::RenderText() const
 {
     g_pRenderText->SetFont(g_hFont);
 
@@ -590,7 +590,7 @@ void mu::ui::window::CNewUIMasterLevel::RenderText() const
     g_pRenderText->RenderText(513, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 }
 
-void mu::ui::window::CNewUIMasterLevel::RenderIcon()
+void mu::ui::window::CMasterLevel::RenderIcon()
 {
     constexpr int SKILL_ICON_WIDTH = 20;
     constexpr int SKILL_ICON_HEIGHT = 28;
@@ -655,7 +655,7 @@ void mu::ui::window::CNewUIMasterLevel::RenderIcon()
     this->RenderToolTip();
 }
 
-void mu::ui::window::CNewUIMasterLevel::RenderToolTip()
+void mu::ui::window::CMasterLevel::RenderToolTip()
 {
     for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
     {
@@ -804,7 +804,7 @@ void mu::ui::window::CNewUIMasterLevel::RenderToolTip()
     }
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckMouse(int posx, int posy)
+bool mu::ui::window::CMasterLevel::CheckMouse(int posx, int posy)
 {
     constexpr POINT position[3] = { {185,65},{385,65},{585,65} };
 
@@ -821,7 +821,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckMouse(int posx, int posy)
     return true;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckBtn()
+bool mu::ui::window::CMasterLevel::CheckBtn()
 {
     constexpr int posX = 220;
 
@@ -865,7 +865,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckBtn()
     return true;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA& skillData)
+bool mu::ui::window::CMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA& skillData)
 {
     if (skillData.Group < 0 || skillData.Group >= 3)
     {
@@ -929,7 +929,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTR
     return true;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA& skillData, BYTE skillLevel)
+bool mu::ui::window::CMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA& skillData, BYTE skillLevel)
 {
 
     if (skillLevel >= skillData.MaxLevel)
@@ -952,7 +952,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, cons
     return false;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE_DATA& masterSkill)
+bool mu::ui::window::CMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE_DATA& masterSkill)
 {
     for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
     {
@@ -977,7 +977,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE
     return true;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE skillLevel)
+bool mu::ui::window::CMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE skillLevel)
 {
     if (this->skillPoint[group][rank] < skillLevel)
     {
@@ -992,7 +992,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BY
     return this->skillPoint[group][rank - 1] >= 10;
 }
 
-bool mu::ui::window::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE skillLevel)
+bool mu::ui::window::CMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE skillLevel)
 {
     if (skillLevel != 0)
     {
@@ -1029,7 +1029,7 @@ bool mu::ui::window::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, 
     return false;
 }
 
-void mu::ui::window::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float value, float nextValue)
+void mu::ui::window::CMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float value, float nextValue)
 {
     const auto it = this->map_masterData.find(index);
     if (it == this->map_masterData.end())
@@ -1048,13 +1048,13 @@ void mu::ui::window::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel,
     this->CategoryPoint[it->second.Group] += addedPoints;
 }
 
-void mu::ui::window::CNewUIMasterLevel::ClearSkillTreeData()
+void mu::ui::window::CMasterLevel::ClearSkillTreeData()
 {
     if (!map_masterSkillToolTip.empty())
         this->map_masterData.clear();
 }
 
-void mu::ui::window::CNewUIMasterLevel::ClearSkillTooltipData()
+void mu::ui::window::CMasterLevel::ClearSkillTooltipData()
 {
     if (!map_masterSkillToolTip.empty())
         this->map_masterSkillToolTip.clear();

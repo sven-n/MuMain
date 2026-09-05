@@ -25,11 +25,11 @@ namespace mu::ui::window
      * The combo does NOT take ownership of the label array -- the caller
      * must keep it alive for the combo's lifetime.
      */
-    class CNewUIComboBox
+    class CComboBox
     {
     public:
-        CNewUIComboBox() = default;
-        ~CNewUIComboBox() = default;
+        CComboBox() = default;
+        ~CComboBox() = default;
 
         /**
          * @brief Configures the combo. Call once after the owning window is placed.

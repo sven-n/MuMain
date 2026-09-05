@@ -14,14 +14,14 @@
 
 namespace mu::ui::window
 {
-    class CNewUIPartyListWindow : public CNewUIObj
+    class CPartyListWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
             // 기타 이미지
-            IMAGE_PARTY_LIST_FLAG = CNewUIPartyInfoWindow::IMAGE_PARTY_FLAG,		// newui_party_flag.tga			(9, 10)
-            IMAGE_PARTY_LIST_EXIT = CNewUIPartyInfoWindow::IMAGE_PARTY_EXIT,		// newui_party_x.tga			(11, 11)
+            IMAGE_PARTY_LIST_FLAG = CPartyInfoWindow::IMAGE_PARTY_FLAG,		// newui_party_flag.tga			(9, 10)
+            IMAGE_PARTY_LIST_EXIT = CPartyInfoWindow::IMAGE_PARTY_EXIT,		// newui_party_x.tga			(11, 11)
 
             // 파티미니창
             IMAGE_PARTY_LIST_BACK = BITMAP_PARTY_MINILIST_BEGIN,					// newui_party_back.tga			(77, 23)
@@ -44,10 +44,10 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
-        CNewUIButton				m_BtnPartyExit[MAX_PARTYS];				// 파티탈퇴 버튼
+        CButton				m_BtnPartyExit[MAX_PARTYS];				// 파티탈퇴 버튼
         int							m_iPartyListBGColor[MAX_PARTYS];		// 파티리스트 배경칼라
         bool						m_bPartyMemberoutofSight[MAX_PARTYS];	// 파티원이 내 캐릭터의 시야 밖에 있는가
 
@@ -58,10 +58,10 @@ namespace mu::ui::window
         int							m_iLimitUserIDHeight[2];
 
     public:
-        CNewUIPartyListWindow();
-        virtual ~CNewUIPartyListWindow();
+        CPartyListWindow();
+        virtual ~CPartyListWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

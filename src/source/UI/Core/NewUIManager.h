@@ -13,39 +13,39 @@
 
 namespace mu::ui::window
 {
-    class CNewUIManager
+    class CManager
     {
-        typedef std::vector<CNewUIObj*> type_vector_uibase;
-        typedef std::map<DWORD, CNewUIObj*> type_map_uibase;
+        typedef std::vector<CObject*> type_vector_uibase;
+        typedef std::map<DWORD, CObject*> type_map_uibase;
 
         type_vector_uibase	m_vecUI;		//. for rendering and updating
         type_map_uibase		m_mapUI;		//. for managing
 
-        CNewUIObj* m_pActiveMouseUIObj, * m_pActiveKeyUIObj;
+        CObject* m_pActiveMouseUIObj, * m_pActiveKeyUIObj;
 #ifdef PBG_MOD_STAMINA_UI
         int m_nShowUICnt;
 #endif //PBG_MOD_STAMINA_UI
     public:
-        CNewUIManager();
-        ~CNewUIManager();
+        CManager();
+        ~CManager();
 
-        void AddUIObj(DWORD dwKey, CNewUIObj* pUIObj);
+        void AddUIObj(DWORD dwKey, CObject* pUIObj);
         void RemoveUIObj(DWORD dwKey);
-        void RemoveUIObj(CNewUIObj* pUIObj);
+        void RemoveUIObj(CObject* pUIObj);
         void RemoveAllUIObjs();
 
         void ReleaseAllUIObj();
 
-        CNewUIObj* FindUIObj(DWORD dwKey);
-        CNewUIObj* FindUIObjByRelatedWnd(HWND hWnd) const;
+        CObject* FindUIObj(DWORD dwKey);
+        CObject* FindUIObjByRelatedWnd(HWND hWnd) const;
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
 
-        CNewUIObj* GetActiveMouseUIObj();
-        CNewUIObj* GetActiveKeyUIObj();
+        CObject* GetActiveMouseUIObj();
+        CObject* GetActiveKeyUIObj();
         void ResetActiveUIObj();
 
         bool IsInterfaceVisible(DWORD dwKey);
@@ -62,9 +62,9 @@ namespace mu::ui::window
 #endif //PBG_MOD_STAMINA_UI
 
     protected:
-        static bool CompareLayerDepth(INewUIBase* pObj1, INewUIBase* pObj2);
-        static bool CompareLayerDepthReverse(INewUIBase* pObj1, INewUIBase* pObj2);
-        static bool CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase* pObj2);
+        static bool CompareLayerDepth(IObject* pObj1, IObject* pObj2);
+        static bool CompareLayerDepthReverse(IObject* pObj1, IObject* pObj2);
+        static bool CompareKeyEventOrder(IObject* pObj1, IObject* pObj2);
     };
 }
 

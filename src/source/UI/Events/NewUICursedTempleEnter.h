@@ -1,4 +1,4 @@
-// NewUICursedTempleEnter.h: interface for the CNewUICursedTempleEnter class.
+// NewUICursedTempleEnter.h: interface for the CCursedTempleEnter class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUICursedTempleEnter : public CNewUIObj
+    class CCursedTempleEnter : public CObject
     {
     public:
 
@@ -29,10 +29,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUICursedTempleEnter();
-        virtual ~CNewUICursedTempleEnter();
+        CCursedTempleEnter();
+        virtual ~CCursedTempleEnter();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
 
     private:
         void SetButtonInfo();
@@ -71,27 +71,27 @@ namespace mu::ui::window
         void Destroy();
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT					m_Pos;
-        CNewUIButton			m_Button[CURSEDTEMPLEENTER_MAXBUTTONCOUNT];
+        CButton			m_Button[CURSEDTEMPLEENTER_MAXBUTTONCOUNT];
         int						m_EnterTime;
         int						m_EnterCount;
     };
 
     inline
-        float CNewUICursedTempleEnter::GetLayerDepth()
+        float CCursedTempleEnter::GetLayerDepth()
     {
         return 10.3;
     }
 
     inline
-        void CNewUICursedTempleEnter::SetPos(int x, int y)
+        void CCursedTempleEnter::SetPos(int x, int y)
     {
         m_Pos.x = x; m_Pos.y = y;
     }
 
     inline
-        const POINT& CNewUICursedTempleEnter::GetPos() const
+        const POINT& CCursedTempleEnter::GetPos() const
     {
         return m_Pos;
     }

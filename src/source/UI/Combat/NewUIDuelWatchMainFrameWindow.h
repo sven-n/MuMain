@@ -1,4 +1,4 @@
-// NewUIDuelWatchMainFrameWindow.h: interface for the CNewUIDuelWatchMainFrameWindow class.
+// NewUIDuelWatchMainFrameWindow.h: interface for the CDuelWatchMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -10,7 +10,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIDuelWatchMainFrameWindow : public CNewUIObj, public INewUI3DRenderObj
+    class CDuelWatchMainFrameWindow : public CObject, public I3DRenderObj
     {
     public:
         enum IMAGE_LIST
@@ -23,13 +23,13 @@ namespace mu::ui::window
             IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE,
             IMAGE_DUELWATCH_MAINFRAME_HP_GAUGE_FX,
             IMAGE_DUELWATCH_MAINFRAME_SD_GAUGE_FX,
-            IMAGE_INVENTORY_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_INVENTORY_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
         };
     private:
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
 
-        CNewUIButton m_BtnExit;			// 닫기 버튼
+        CButton m_BtnExit;			// 닫기 버튼
 
         BOOL m_bHasHPReceived;	// HP 초기상태인가
         float m_fPrevHPRate1;
@@ -46,10 +46,10 @@ namespace mu::ui::window
         float m_fReceivedSDRate2;
 
     public:
-        CNewUIDuelWatchMainFrameWindow();
-        virtual ~CNewUIDuelWatchMainFrameWindow();
+        CDuelWatchMainFrameWindow();
+        virtual ~CDuelWatchMainFrameWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
         void Release();
 
         void SetPos(int x, int y);

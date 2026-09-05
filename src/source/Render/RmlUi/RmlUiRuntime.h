@@ -69,7 +69,7 @@ public:
     // convention) and legacy handling should proceed as before.
     //
     // Ordering caveat (RmlUi migration plan Open Decision #4, not solved here): this always
-    // offers the event to RmlUi first, regardless of whether a legacy CNewUIObj/CWin window is
+    // offers the event to RmlUi first, regardless of whether a legacy CObject/CWin window is
     // actually on top of the RmlUi content at that screen position -- correct as long as
     // migrated-window content and still-legacy windows occupy disjoint z-order bands (Phase
     // 0.8's "one contiguous band" approach), wrong if a legacy window ever needs to sit visually

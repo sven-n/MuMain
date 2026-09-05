@@ -14,7 +14,7 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
-// RmlUi migration, Batch 2: previously built on the shared mu::ui::window::CNewUICommonMessageBox /
+// RmlUi migration, Batch 2: previously built on the shared mu::ui::window::CCommonMessageBox /
 // g_MessageBox engine (~80 other unrelated dialogs also ride that singleton stack -- confirmed by
 // exhaustive grep before this rewrite). Bypassing it here for this one dialog is safe (none of
 // the other consumers reference this dialog or its state) and removes two couplings: the login

@@ -1,4 +1,4 @@
-// NewUIMyQuestInfoWindow.h: interface for the CNewUIMyQuestInfoWindow class.
+// NewUIMyQuestInfoWindow.h: interface for the CMyQuestInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -14,17 +14,17 @@ typedef std::list<DWORD> DWordList;
 
 namespace mu::ui::window
 {
-    class CNewUIMyQuestInfoWindow : public CNewUIObj
+    class CMyQuestInfoWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_MYQUEST_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
-            IMAGE_MYQUEST_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,		//. newui_item_back01.tga	(190,64)
-            IMAGE_MYQUEST_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
-            IMAGE_MYQUEST_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
-            IMAGE_MYQUEST_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
-            IMAGE_MYQUEST_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,	//. newui_exit_00.tga
+            IMAGE_MYQUEST_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			// newui_msgbox_back.jpg
+            IMAGE_MYQUEST_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,		//. newui_item_back01.tga	(190,64)
+            IMAGE_MYQUEST_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		// newui_item_back02-l.tga	(21,320)
+            IMAGE_MYQUEST_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	// newui_item_back02-r.tga	(21,320)
+            IMAGE_MYQUEST_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	// newui_item_back03.tga	(190,45)
+            IMAGE_MYQUEST_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,	//. newui_exit_00.tga
 
             IMAGE_MYQUEST_LINE = BITMAP_INTERFACE_MYQUEST_WINDOW_BEGIN,
             IMAGE_MYQUEST_BTN_OPEN = BITMAP_INTERFACE_MYQUEST_WINDOW_BEGIN + 1,
@@ -48,10 +48,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUIMyQuestInfoWindow();
-        virtual ~CNewUIMyQuestInfoWindow();
+        CMyQuestInfoWindow();
+        virtual ~CMyQuestInfoWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -98,12 +98,12 @@ namespace mu::ui::window
         void SetMessage(int nGlobalTextIndex);
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIButton m_BtnExit;
-        CNewUIButton	m_btnQuestOpen;
-        CNewUIButton	m_btnQuestGiveUp;
+        CButton m_BtnExit;
+        CButton	m_btnQuestOpen;
+        CButton	m_btnQuestGiveUp;
 
         TAB_BUTTON_INDEX m_eTabBtnIndex;
 

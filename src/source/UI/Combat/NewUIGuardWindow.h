@@ -1,4 +1,4 @@
-// NewUIGuardWindow.h: interface for the CNewUIGuardWindow class.
+// NewUIGuardWindow.h: interface for the CGuardWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -15,30 +15,30 @@
 
 namespace mu::ui::window
 {
-    class CNewUIGuardWindow : public CNewUIObj
+    class CGuardWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GUARDWINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_GUARDWINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GUARDWINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GUARDWINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GUARDWINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GUARDWINDOW_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GUARDWINDOW_TAB_BTN = CNewUIGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,
-            IMAGE_GUARDWINDOW_BUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_GUARDWINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_GUARDWINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_GUARDWINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_GUARDWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_GUARDWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_GUARDWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_GUARDWINDOW_TAB_BTN = CGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,
+            IMAGE_GUARDWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
 
-            IMAGE_GUARDWINDOW_TOP_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,
-            IMAGE_GUARDWINDOW_BOTTOM_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,
-            IMAGE_GUARDWINDOW_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,
-            IMAGE_GUARDWINDOW_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,
+            IMAGE_GUARDWINDOW_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,
+            IMAGE_GUARDWINDOW_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,
+            IMAGE_GUARDWINDOW_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,
+            IMAGE_GUARDWINDOW_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,
 
-            IMAGE_GUARDWINDOW_SCROLL_TOP = CNewUIChatLogWindow::IMAGE_SCROLL_TOP,
-            IMAGE_GUARDWINDOW_SCROLL_MIDDLE = CNewUIChatLogWindow::IMAGE_SCROLL_MIDDLE,
-            IMAGE_GUARDWINDOW_SCROLL_BOTTOM = CNewUIChatLogWindow::IMAGE_SCROLL_BOTTOM,
-            IMAGE_GUARDWINDOW_SCROLLBAR_ON = CNewUIChatLogWindow::IMAGE_SCROLLBAR_ON,
-            IMAGE_GUARDWINDOW_SCROLLBAR_OFF = CNewUIChatLogWindow::IMAGE_SCROLLBAR_OFF,
+            IMAGE_GUARDWINDOW_SCROLL_TOP = CChatLogWindow::IMAGE_SCROLL_TOP,
+            IMAGE_GUARDWINDOW_SCROLL_MIDDLE = CChatLogWindow::IMAGE_SCROLL_MIDDLE,
+            IMAGE_GUARDWINDOW_SCROLL_BOTTOM = CChatLogWindow::IMAGE_SCROLL_BOTTOM,
+            IMAGE_GUARDWINDOW_SCROLLBAR_ON = CChatLogWindow::IMAGE_SCROLLBAR_ON,
+            IMAGE_GUARDWINDOW_SCROLLBAR_OFF = CChatLogWindow::IMAGE_SCROLLBAR_OFF,
         };
 
     private:
@@ -54,17 +54,17 @@ namespace mu::ui::window
             TAB_REGISTER_INFO
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIRadioGroupButton	m_TabBtn;
+        CRadioGroupButton	m_TabBtn;
         int						m_iNumCurOpenTab;		// ���� �����ִ� �ǹ�ư��ȣ
 
-        CNewUIButton m_BtnExit;
+        CButton m_BtnExit;
 
-        CNewUIButton m_BtnProclaim;			// ���� ���� ��ư
-        CNewUIButton m_BtnRegister;			// ǥ�� ��� ��ư
-        CNewUIButton m_BtnGiveUp;			// ���� ���� ��ư
+        CButton m_BtnProclaim;			// ���� ���� ��ư
+        CButton m_BtnRegister;			// ǥ�� ��� ��ư
+        CButton m_BtnGiveUp;			// ���� ���� ��ư
 
         // ������ ��� ����Ʈ
         CUIBCDeclareGuildListBox	m_DeclareGuildListBox;
@@ -95,10 +95,10 @@ namespace mu::ui::window
         DWORD		m_dwStateLeftSec;
 
     public:
-        CNewUIGuardWindow();
-        virtual ~CNewUIGuardWindow();
+        CGuardWindow();
+        virtual ~CGuardWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -131,7 +131,7 @@ namespace mu::ui::window
         void RenderFrame();
         bool BtnProcess();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* const* pCaptionSlot);
+        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* const* pCaptionSlot);
 
         void UpdateSeigeInfoTab();
         void UpdateRegisterTab();

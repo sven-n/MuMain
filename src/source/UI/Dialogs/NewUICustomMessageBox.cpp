@@ -54,22 +54,22 @@ int AppendWrappedMessageLines(const std::wstring& text, BYTE fontType, int maxWi
 }
 } // namespace
 
-mu::ui::window::CNewUITextInputMsgBox::CNewUITextInputMsgBox()
+mu::ui::window::CTextInputMsgBox::CTextInputMsgBox()
 {
     m_pInputBox = NULL;
 }
 
-mu::ui::window::CNewUITextInputMsgBox::~CNewUITextInputMsgBox()
+mu::ui::window::CTextInputMsgBox::~CTextInputMsgBox()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputType, int iInputBoxWidth, int iInputBoxHeight, int iTextLimit, bool bIsPassword)
+bool mu::ui::window::CTextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputType, int iInputBoxWidth, int iInputBoxHeight, int iTextLimit, bool bIsPassword)
 {
     m_dwMsgBoxType = dwMsgBoxType;
     m_dwInputType = dwInputType;
 
-    AddCallbackFunc(mu::ui::window::CNewUITextInputMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CTextInputMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
 
     int x, y, width, height;
 
@@ -77,7 +77,7 @@ bool mu::ui::window::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwI
     y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_MIDDLE_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
-    if (CNewUIMessageBoxBase::Create(x, y, width, height) == false)
+    if (CMessageBoxBase::Create(x, y, width, height) == false)
     {
         return false;
     }
@@ -102,9 +102,9 @@ bool mu::ui::window::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwI
     return true;
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::Release()
+void mu::ui::window::CTextInputMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     auto vi = m_MsgTextList.begin();
     for (; vi != m_MsgTextList.end(); vi++)
@@ -119,7 +119,7 @@ void mu::ui::window::CNewUITextInputMsgBox::Release()
     SetFocus(g_hWnd);
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::SetButtonInfo()
+void mu::ui::window::CTextInputMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -131,9 +131,9 @@ void mu::ui::window::CNewUITextInputMsgBox::SetButtonInfo()
         width = MSGBOX_BTN_WIDTH;
         height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+        m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+        m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
         break;
     case MSGBOX_COMMON_TYPE_OKCANCEL:
@@ -142,9 +142,9 @@ void mu::ui::window::CNewUITextInputMsgBox::SetButtonInfo()
         width = MSGBOX_BTN_WIDTH;
         height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+        m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+        m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
         x = GetPos().x + (GetSize().cx / 2) + (((GetSize().cx / 2) - MSGBOX_BTN_WIDTH) / 2);
@@ -152,17 +152,17 @@ void mu::ui::window::CNewUITextInputMsgBox::SetButtonInfo()
         width = MSGBOX_BTN_WIDTH;
         height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+        m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height);
+        m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
         break;
     }
 }
 
-CALLBACK_RESULT mu::ui::window::CNewUITextInputMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTextInputMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     if (pMsgBox)
     {
         switch (pMsgBox->GetMsgBoxType())
@@ -192,7 +192,7 @@ CALLBACK_RESULT mu::ui::window::CNewUITextInputMsgBox::LButtonUp(class CNewUIMes
     return CALLBACK_CONTINUE;
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CTextInputMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgTextList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -218,7 +218,7 @@ void mu::ui::window::CNewUITextInputMsgBox::AddMsg(const type_string& strMsg, DW
     }
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
+void mu::ui::window::CTextInputMsgBox::AddButtonBlank(int iAddLine)
 {
     switch (m_dwMsgBoxType)
     {
@@ -232,7 +232,7 @@ void mu::ui::window::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
     }
 }
 
-int mu::ui::window::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+int mu::ui::window::CTextInputMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
         [&](const std::wstring& line)
@@ -245,12 +245,12 @@ int mu::ui::window::CNewUITextInputMsgBox::SeparateText(const type_string& strMs
         });
 }
 
-DWORD mu::ui::window::CNewUITextInputMsgBox::GetMsgBoxType()
+DWORD mu::ui::window::CTextInputMsgBox::GetMsgBoxType()
 {
     return m_dwMsgBoxType;
 }
 
-bool mu::ui::window::CNewUITextInputMsgBox::Update()
+bool mu::ui::window::CTextInputMsgBox::Update()
 {
     switch (m_dwMsgBoxType)
     {
@@ -280,28 +280,28 @@ bool mu::ui::window::CNewUITextInputMsgBox::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUITextInputMsgBox::Render()
+bool mu::ui::window::CTextInputMsgBox::Render()
 {
     float x, y, width, height;
 
     EnableAlphaTest();
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     int iCount = m_MsgTextList.size();
     for (int i = 0; i < iCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
     RenderTexts();
 
@@ -316,7 +316,7 @@ bool mu::ui::window::CNewUITextInputMsgBox::Render()
     return true;
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::RenderTexts()
+void mu::ui::window::CTextInputMsgBox::RenderTexts()
 {
     
     
@@ -349,7 +349,7 @@ void mu::ui::window::CNewUITextInputMsgBox::RenderTexts()
     }
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::RenderButtons()
+void mu::ui::window::CTextInputMsgBox::RenderButtons()
 {
     switch (m_dwMsgBoxType)
     {
@@ -363,7 +363,7 @@ void mu::ui::window::CNewUITextInputMsgBox::RenderButtons()
     }
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::GetInputBoxText(wchar_t* strText)
+void mu::ui::window::CTextInputMsgBox::GetInputBoxText(wchar_t* strText)
 {
     if (m_pInputBox)
     {
@@ -371,7 +371,7 @@ void mu::ui::window::CNewUITextInputMsgBox::GetInputBoxText(wchar_t* strText)
     }
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxOption(int iOption)
+void mu::ui::window::CTextInputMsgBox::SetInputBoxOption(int iOption)
 {
     if (m_pInputBox)
     {
@@ -379,7 +379,7 @@ void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxOption(int iOption)
     }
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxPosition(int x, int y)
+void mu::ui::window::CTextInputMsgBox::SetInputBoxPosition(int x, int y)
 {
     if (m_pInputBox)
     {
@@ -387,7 +387,7 @@ void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxPosition(int x, int y)
     }
 }
 
-void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxSize(int width, int height)
+void mu::ui::window::CTextInputMsgBox::SetInputBoxSize(int width, int height)
 {
     if (m_pInputBox)
     {
@@ -395,7 +395,7 @@ void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxSize(int width, int heigh
     }
 }
 
-void mu::ui::window::CNewUIKeyPadButton::Render()
+void mu::ui::window::CKeyPadButton::Render()
 {
     if (GetEventState() == EVENT_BTN_HOVER)
     {
@@ -411,7 +411,7 @@ void mu::ui::window::CNewUIKeyPadButton::Render()
     }
 }
 
-void mu::ui::window::CNewUIDeleteKeyPadButton::Render()
+void mu::ui::window::CDeleteKeyPadButton::Render()
 {
     if (GetEventState() == EVENT_BTN_HOVER)
     {
@@ -429,7 +429,7 @@ void mu::ui::window::CNewUIDeleteKeyPadButton::Render()
 
 //////////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUIKeyPadMsgBox::CNewUIKeyPadMsgBox()
+mu::ui::window::CKeyPadMsgBox::CKeyPadMsgBox()
 {
     ClearInput();
 
@@ -438,17 +438,17 @@ mu::ui::window::CNewUIKeyPadMsgBox::CNewUIKeyPadMsgBox()
     m_iInputLimit = 0;
 }
 
-mu::ui::window::CNewUIKeyPadMsgBox::~CNewUIKeyPadMsgBox()
+mu::ui::window::CKeyPadMsgBox::~CKeyPadMsgBox()
 {
 }
 
-bool mu::ui::window::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
+bool mu::ui::window::CKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
 {
     m_iInputLimit = iInputLimit;
 
-    AddCallbackFunc(mu::ui::window::CNewUIKeyPadMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CNewUIKeyPadMsgBox::KeyPadBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_INPUT);
-    AddCallbackFunc(mu::ui::window::CNewUIKeyPadMsgBox::DeleteBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_DELETE);
+    AddCallbackFunc(mu::ui::window::CKeyPadMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CKeyPadMsgBox::KeyPadBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_INPUT);
+    AddCallbackFunc(mu::ui::window::CKeyPadMsgBox::DeleteBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_DELETE);
 
     int x, y, width, height;
 
@@ -456,7 +456,7 @@ bool mu::ui::window::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
     y = 100;
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_MIDDLE_HEIGHT * MSGBOX_MIDDLE_FRAME_NUM + MSGBOX_BOTTOM_HEIGHT;
-    if (CNewUIMessageBoxBase::Create(x, y, width, height) == false)
+    if (CMessageBoxBase::Create(x, y, width, height) == false)
     {
         return false;
     }
@@ -485,9 +485,9 @@ bool mu::ui::window::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
     return true;
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::Release()
+void mu::ui::window::CKeyPadMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     auto vi = m_MsgTextList.begin();
     for (; vi != m_MsgTextList.end(); vi++)
@@ -497,9 +497,9 @@ void mu::ui::window::CNewUIKeyPadMsgBox::Release()
     m_MsgTextList.clear();
 }
 
-CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CKeyPadMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
     if (pMsgBox)
     {
         for (int i = 0; i < MAX_KEYPADINPUT; ++i)
@@ -536,9 +536,9 @@ CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessag
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::KeyPadBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CKeyPadMsgBox::KeyPadBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox)
     {
@@ -552,9 +552,9 @@ CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::KeyPadBtnDown(class CNewUIMe
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::DeleteBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CKeyPadMsgBox::DeleteBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox)
     {
@@ -564,12 +564,12 @@ CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::DeleteBtnDown(class CNewUIMe
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CKeyPadMsgBox::Close(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return CALLBACK_CONTINUE;
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CKeyPadMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -578,47 +578,47 @@ void mu::ui::window::CNewUIKeyPadMsgBox::AddMsg(const type_string& strMsg, DWORD
     m_MsgTextList.push_back(pMsg);
 }
 
-int mu::ui::window::CNewUIKeyPadMsgBox::GetInputLimit()
+int mu::ui::window::CKeyPadMsgBox::GetInputLimit()
 {
     return m_iInputLimit;
 }
 
-int mu::ui::window::CNewUIKeyPadMsgBox::GetInputSize()
+int mu::ui::window::CKeyPadMsgBox::GetInputSize()
 {
     return wcslen(m_strKeyPadInput);
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::ClearInput()
+void mu::ui::window::CKeyPadMsgBox::ClearInput()
 {
     ZeroMemory(m_strKeyPadInput, sizeof(m_strKeyPadInput));
 }
 
-const wchar_t* mu::ui::window::CNewUIKeyPadMsgBox::GetInputText()
+const wchar_t* mu::ui::window::CKeyPadMsgBox::GetInputText()
 {
     return m_strKeyPadInput;
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::SetCheckInputText(const wchar_t* strInput)
+void mu::ui::window::CKeyPadMsgBox::SetCheckInputText(const wchar_t* strInput)
 {
     memcpy(m_strCheckKeyPadInput, strInput, m_iInputLimit);
 }
 
-bool mu::ui::window::CNewUIKeyPadMsgBox::IsCheckInput()
+bool mu::ui::window::CKeyPadMsgBox::IsCheckInput()
 {
     return (0 == memcmp(m_strCheckKeyPadInput, m_strKeyPadInput, m_iInputLimit));
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::SetStoragePassword(WORD wPassword)
+void mu::ui::window::CKeyPadMsgBox::SetStoragePassword(WORD wPassword)
 {
     m_wStoragePassword = wPassword;
 }
 
-WORD mu::ui::window::CNewUIKeyPadMsgBox::GetStoragePassword()
+WORD mu::ui::window::CKeyPadMsgBox::GetStoragePassword()
 {
     return m_wStoragePassword;
 }
 
-bool mu::ui::window::CNewUIKeyPadMsgBox::IsAllSameNumber()
+bool mu::ui::window::CKeyPadMsgBox::IsAllSameNumber()
 {
     for (int i = 0; i < m_iInputLimit - 1; ++i)
     {
@@ -631,14 +631,14 @@ bool mu::ui::window::CNewUIKeyPadMsgBox::IsAllSameNumber()
     return true;
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::KeyPadInput(int iInput)
+void mu::ui::window::CKeyPadMsgBox::KeyPadInput(int iInput)
 {
     wchar_t strInput[4] = { 0, };
     mu_swprintf(strInput, L"%d", iInput);
     wcscat(m_strKeyPadInput, strInput);
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::DeleteKeyPadInput()
+void mu::ui::window::CKeyPadMsgBox::DeleteKeyPadInput()
 {
     int iSize = wcslen(m_strKeyPadInput);
     if (iSize > 0)
@@ -647,7 +647,7 @@ void mu::ui::window::CNewUIKeyPadMsgBox::DeleteKeyPadInput()
     }
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::SetButtonInfo()
+void mu::ui::window::CKeyPadMsgBox::SetButtonInfo()
 {
     int x, y, width, height;
 
@@ -660,7 +660,7 @@ void mu::ui::window::CNewUIKeyPadMsgBox::SetButtonInfo()
         int yPos = i / 5;
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        m_BtnKeyPad[i].SetInfo(0, x + ((width + 5) * xPos), y + ((height + 5) * yPos), width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+        m_BtnKeyPad[i].SetInfo(0, x + ((width + 5) * xPos), y + ((height + 5) * yPos), width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
         m_BtnKeyPad[i].SetInfo(0, x + ((width + 5) * xPos), y + ((height + 5) * yPos), width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -669,7 +669,7 @@ void mu::ui::window::CNewUIKeyPadMsgBox::SetButtonInfo()
     y += (height + 5) * 2;
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnDeleteKeyPad.SetInfo(0, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnDeleteKeyPad.SetInfo(0, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
     m_BtnDeleteKeyPad.SetInfo(0, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -679,9 +679,9 @@ void mu::ui::window::CNewUIKeyPadMsgBox::SetButtonInfo()
     x = GetPos().x + (((GetSize().cx / 2) - width) / 2);
     y = GetPos().y + GetSize().cy - (height + MSGBOX_BTN_BOTTOM_BLANK);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     width = MSGBOX_BTN_WIDTH;
@@ -689,13 +689,13 @@ void mu::ui::window::CNewUIKeyPadMsgBox::SetButtonInfo()
     x = GetPos().x + (GetSize().cx / 2) + (((GetSize().cx / 2) - width) / 2);
     y = GetPos().y + GetSize().cy - (height + MSGBOX_BTN_BOTTOM_BLANK);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-bool mu::ui::window::CNewUIKeyPadMsgBox::Update()
+bool mu::ui::window::CKeyPadMsgBox::Update()
 {
     for (int i = 0; i < MAX_KEYPADINPUT; ++i)
     {
@@ -711,7 +711,7 @@ bool mu::ui::window::CNewUIKeyPadMsgBox::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIKeyPadMsgBox::Render()
+bool mu::ui::window::CKeyPadMsgBox::Render()
 {
     EnableAlphaTest();
 
@@ -724,28 +724,28 @@ bool mu::ui::window::CNewUIKeyPadMsgBox::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::RenderFrame()
+void mu::ui::window::CKeyPadMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < MSGBOX_MIDDLE_FRAME_NUM; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::RenderKeyPadInput()
+void mu::ui::window::CKeyPadMsgBox::RenderKeyPadInput()
 {
     float x, y, width, height;
     width = 10.f * m_iInputLimit + 12.f;
@@ -768,7 +768,7 @@ void mu::ui::window::CNewUIKeyPadMsgBox::RenderKeyPadInput()
     g_pRenderText->RenderText(x, y, strInput.c_str());
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::RenderTexts()
+void mu::ui::window::CKeyPadMsgBox::RenderTexts()
 {
     
     
@@ -801,7 +801,7 @@ void mu::ui::window::CNewUIKeyPadMsgBox::RenderTexts()
     }
 }
 
-void mu::ui::window::CNewUIKeyPadMsgBox::RenderButtons()
+void mu::ui::window::CKeyPadMsgBox::RenderButtons()
 {
     for (int i = 0; i < MAX_KEYPADINPUT; ++i)
     {
@@ -837,7 +837,7 @@ bool mu::ui::window::CUseFruitCheckMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_MIDDLE_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -887,7 +887,7 @@ bool mu::ui::window::CUseFruitCheckMsgBox::Create(float fPriority)
 
 void mu::ui::window::CUseFruitCheckMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->Remove3DRenderObj(this);
@@ -960,7 +960,7 @@ bool mu::ui::window::CUseFruitCheckMsgBox::IsVisible() const
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CUseFruitCheckMsgBox*>(pOwner);
     if (pMsgBox)
@@ -985,7 +985,7 @@ CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::AddBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(byIndex, 0, true);
@@ -996,7 +996,7 @@ CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::MinusBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::MinusBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(byIndex, 0, false);
@@ -1007,7 +1007,7 @@ CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::MinusBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1034,15 +1034,15 @@ void mu::ui::window::CUseFruitCheckMsgBox::SetButtonInfo()
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     height = MSGBOX_BTN_EMPTY_HEIGHT;
-    m_BtnAdd.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnAdd.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnAdd.SetText(I18N::Game::Create);
 
     x = GetPos().x + triwidth + (triwidth / 2) - btnhalf;
-    m_BtnMinus.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnMinus.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnMinus.SetText(I18N::Game::Decrease);
 
     x = GetPos().x + (triwidth * 2) + (triwidth / 2) - btnhalf;
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
@@ -1051,20 +1051,20 @@ void mu::ui::window::CUseFruitCheckMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < 1; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CUseFruitCheckMsgBox::RenderTexts()
@@ -1130,7 +1130,7 @@ bool mu::ui::window::CGemIntegrationMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 
@@ -1144,7 +1144,7 @@ bool mu::ui::window::CGemIntegrationMsgBox::Create(float fPriority)
 
 void mu::ui::window::CGemIntegrationMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -1190,7 +1190,7 @@ void mu::ui::window::CGemIntegrationMsgBox::SetAddCallbackFunc()
     AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationMsgBox*>(pOwner);
     if (pMsgBox)
@@ -1215,7 +1215,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::LButtonUp(class CNewUIMes
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetMode(COMGEM::ATTACH);
 
@@ -1227,7 +1227,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetMode(COMGEM::DETACH);
 
@@ -1245,7 +1245,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -1266,13 +1266,13 @@ void mu::ui::window::CGemIntegrationMsgBox::SetButtonInfo()
     y = GetPos().y + BTN_TOP_BLANK;
     width = MSGBOX_BTN_EMPTY_WIDTH;
     height = MSGBOX_BTN_EMPTY_HEIGHT;
-    m_BtnUnity.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnUnity.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
 
     m_BtnUnity.SetText(I18N::Game::JewelCombination);
 
     x = GetPos().x + msgboxhalfwidth - btnhalf;
     y += BTN_GAP;
-    m_BtnDisjoint.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnDisjoint.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
 
     m_BtnDisjoint.SetText(I18N::Game::DismantleJewel);
 
@@ -1280,7 +1280,7 @@ void mu::ui::window::CGemIntegrationMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalf;
     y += BTN_GAP;
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
 
     m_BtnCancel.SetText(I18N::Game::Close388);
 }
@@ -1290,20 +1290,20 @@ void mu::ui::window::CGemIntegrationMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < MIDDLE_COUNT; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CGemIntegrationMsgBox::RenderTexts()
@@ -1367,7 +1367,7 @@ bool mu::ui::window::CGemIntegrationUnityMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
     SetText();
@@ -1393,7 +1393,7 @@ void mu::ui::window::CGemIntegrationUnityMsgBox::SetText(void)
 
 void mu::ui::window::CGemIntegrationUnityMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -1489,19 +1489,19 @@ void mu::ui::window::CGemIntegrationUnityMsgBox::SetButtonInfo()
     int	  nNum = 0;
     int	  nBtnIndex[COMGEM::eGEMTYPE_END] = { 1806, 1807, 3312, 3313, 3314, 2081, 3315, 3316, 3317, 3318 };
     wchar_t szTemp[256] = { 0, };
-    CNewUIMessageBoxButton	cButton;
+    CMessageBoxButton	cButton;
     x = GetPos().x;
     y = GetPos().y + 50;
     for (int i = 0; i < (int)COMGEM::eGEMTYPE_END; i++)
     {
-        cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x + 20.0f + (i % 2) * (20 + width), y + (height + 5.0f) * int(i / 2), width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+        cButton.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x + 20.0f + (i % 2) * (20 + width), y + (height + 5.0f) * int(i / 2), width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
         cButton.SetText(I18N::Game::Lookup(nBtnIndex[i]));
         m_cJewelButton.push_back(cButton);
     }
 
     for (int k = 0; k < (int)COMGEM::eCOMTYPE_END; k++)
     {
-        cButton.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x + 50.0f, y + (height + 10.0f) * k, MSGBOX_BTN_EMPTY_WIDTH + 20, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+        cButton.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x + 50.0f, y + (height + 10.0f) * k, MSGBOX_BTN_EMPTY_WIDTH + 20, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
         // 1808 "%d개 조합(%d젠 소요)"
         mu_swprintf(szTemp, I18N::Game::CombineDDZenIsRequired, 10 * (k + 1), 500000 * (k + 1));
         cButton.SetText(szTemp);
@@ -1512,7 +1512,7 @@ void mu::ui::window::CGemIntegrationUnityMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y += 15.0f + (height + 10.0f) * (int)COMGEM::eCOMTYPE_END;
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnCancel.SetText(I18N::Game::Close388);
 
     ResetWndSize(0);
@@ -1523,21 +1523,21 @@ void mu::ui::window::CGemIntegrationUnityMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 
     for (int i = 0; i < m_nMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CGemIntegrationUnityMsgBox::RenderTexts()
@@ -1591,7 +1591,7 @@ void mu::ui::window::CGemIntegrationUnityMsgBox::RenderButtons()
     m_BtnCancel.Render();
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
     if (pMsgBox)
@@ -1631,28 +1631,28 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp(class CNew
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::CELE);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::SOUL);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     if (!COMGEM::CheckInv())
     {
         return CALLBACK_BREAK;
     }
 
-    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
     if (pMsgBox)
     {
@@ -1670,13 +1670,13 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown(cla
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetComType(COMGEM::FIRST);
 
     if (COMGEM::CheckInv())
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
@@ -1710,13 +1710,13 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetComType(COMGEM::SECOND);
 
     if (COMGEM::CheckInv())
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
@@ -1750,13 +1750,13 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetComType(COMGEM::THIRD);
 
     if (COMGEM::CheckInv())
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
@@ -1790,7 +1790,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -1822,7 +1822,7 @@ bool mu::ui::window::CGemIntegrationDisjointMsgBox::Create(float fPriority)
     m_iMiddleFrameCount = 1;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleFrameCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     AddMsg(I18N::Game::DismantleJewel, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
     SetButtonInfo();
@@ -1835,7 +1835,7 @@ bool mu::ui::window::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 
 void mu::ui::window::CGemIntegrationDisjointMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -1921,7 +1921,7 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SetAddCallbackFunc()
     AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
     if (pMsgBox)
@@ -1951,7 +1951,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp(class C
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -1978,7 +1978,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(c
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -2005,7 +2005,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
     if (pUT)
@@ -2018,7 +2018,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(c
 
         COMGEM::SelectFromList(pUT->m_iInvenIdx, pUT->m_cLevel);
 
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointCheckMsgBoxLayout), &pMsgBox);
 
         if (pMsgBox)
@@ -2041,7 +2041,7 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(c
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -2065,12 +2065,12 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 40;
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnCancel.SetText(I18N::Game::Close388);
 
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    m_BtnDisjoint.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnDisjoint.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnDisjoint.SetText(I18N::Game::Disband);
     m_BtnDisjoint.SetEnable(false);
 }
@@ -2080,20 +2080,20 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleFrameCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderTexts()
@@ -2173,7 +2173,7 @@ bool mu::ui::window::CSystemMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (5 * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -2182,7 +2182,7 @@ bool mu::ui::window::CSystemMenuMsgBox::Create(float fPriority)
 
 void mu::ui::window::CSystemMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CSystemMenuMsgBox::Update()
@@ -2209,20 +2209,20 @@ void mu::ui::window::CSystemMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < 5; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CSystemMenuMsgBox::RenderButtons()
@@ -2257,27 +2257,27 @@ void mu::ui::window::CSystemMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 23;
-    m_BtnGameOver.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnGameOver.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnGameOver.SetText(I18N::Game::ExitGame);
 
     y += 30.f;
-    m_BtnChooseServer.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnChooseServer.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnChooseServer.SetText(I18N::Game::SelectServer);
 
     y += 30.f;
-    m_BtnChooseCharacter.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnChooseCharacter.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnChooseCharacter.SetText(I18N::Game::SwitchCharacter);
 
     y += 30.f;
-    m_BtnOption.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnOption.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnOption.SetText(I18N::Game::Option385);
 
     y += 30.f;
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CSystemMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2327,7 +2327,7 @@ CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::LButtonUp(class CNewUIMessage
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_ErrorReport.Write(L"> Menu - Exit game. ");
     g_ErrorReport.WriteCurrentTime();
@@ -2354,7 +2354,7 @@ CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     View_End_Result = false;
     Suc_Or_Fail = -1;
@@ -2385,7 +2385,7 @@ CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     View_End_Result = false;
     Suc_Or_Fail = -1;
@@ -2416,7 +2416,7 @@ CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::OptionBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::OptionBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_OPTION);
 
@@ -2426,7 +2426,7 @@ CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::OptionBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2454,16 +2454,16 @@ bool mu::ui::window::CBloodCastleResultMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     x = GetPos().x + (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_WIDTH;
     height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     return true;
@@ -2492,23 +2492,23 @@ void mu::ui::window::CBloodCastleResultMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < MIDDLE_COUNT; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CBloodCastleResultMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2523,7 +2523,7 @@ CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::LButtonUp(class CNewUI
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2552,13 +2552,13 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Create(float fPriority)
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT1 * MSGBOX_MIDDLE_HEIGHT)
         + (MIDDLE_COUNT2 * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_LINE_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     x = GetPos().x + (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_WIDTH;
     height = MSGBOX_BTN_HEIGHT;
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 
     return true;
 }
@@ -2583,7 +2583,7 @@ bool mu::ui::window::CDevilSquareRankMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDevilSquareRankMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2598,7 +2598,7 @@ CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::LButtonUp(class CNewUIMe
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2611,44 +2611,44 @@ void mu::ui::window::CDevilSquareRankMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < MIDDLE_COUNT1; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
     y += height;
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
 
     for (int i = 0; i < MIDDLE_COUNT2; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
     x = GetPos().x + 13; y = GetPos().y + 75; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 
     x = GetPos().x + 13; y = GetPos().y + 93; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 
     x = GetPos().x + 13; y = GetPos().y + 255; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 
     x = GetPos().x + 13; y = GetPos().y + 273; width = MSGBOX_SEPARATE_LINE_WIDTH; height = MSGBOX_SEPARATE_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 }
 
 mu::ui::window::CChaosCastleResultMsgBox::CChaosCastleResultMsgBox()
@@ -2671,16 +2671,16 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     x = GetPos().x + (GetSize().cx / 2) - (MSGBOX_BTN_WIDTH / 2);
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
     width = MSGBOX_BTN_WIDTH;
     height = MSGBOX_BTN_HEIGHT;
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     return true;
@@ -2704,7 +2704,7 @@ bool mu::ui::window::CChaosCastleResultMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CChaosCastleResultMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2719,7 +2719,7 @@ CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::LButtonUp(class CNewUI
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2731,20 +2731,20 @@ void mu::ui::window::CChaosCastleResultMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < MIDDLE_COUNT; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -2769,7 +2769,7 @@ bool mu::ui::window::CChaosMixMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -2778,7 +2778,7 @@ bool mu::ui::window::CChaosMixMenuMsgBox::Create(float fPriority)
 
 void mu::ui::window::CChaosMixMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CChaosMixMenuMsgBox::Update()
@@ -2801,7 +2801,7 @@ bool mu::ui::window::CChaosMixMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CChaosMixMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2831,7 +2831,7 @@ CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::LButtonUp(class CNewUIMessa
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(0);
 
@@ -2841,7 +2841,7 @@ CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(1);
 
@@ -2851,7 +2851,7 @@ CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(2);
 
@@ -2861,7 +2861,7 @@ CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.ClearCheckRecipeResult();
     g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -2893,22 +2893,22 @@ void mu::ui::window::CChaosMixMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
-    m_BtnGeneralMix.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnGeneralMix.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnGeneralMix.SetText(I18N::Game::RegularCombination);
 
     y = GetPos().y + 155;
-    m_BtnChaosMix.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnChaosMix.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnChaosMix.SetText(I18N::Game::ChaosWeaponCombination);
 
     y = GetPos().y + 225;
-    m_BtnMix380.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnMix380.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnMix380.SetText(I18N::Game::ItemOptionCombination);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
@@ -2917,20 +2917,20 @@ void mu::ui::window::CChaosMixMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < MIDDLE_COUNT; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CChaosMixMenuMsgBox::RenderTexts()
@@ -2995,7 +2995,7 @@ bool mu::ui::window::CDialogMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -3033,7 +3033,7 @@ void mu::ui::window::CDialogMsgBox::AddMsg(const type_string& strMsg, DWORD dwCo
     }
 }
 
-CALLBACK_RESULT mu::ui::window::CDialogMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDialogMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDialogMsgBox*>(pOwner);
     if (pMsgBox)
@@ -3048,7 +3048,7 @@ CALLBACK_RESULT mu::ui::window::CDialogMsgBox::LButtonUp(class CNewUIMessageBoxB
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CDialogMsgBox::EndBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDialogMsgBox::EndBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3104,7 +3104,7 @@ void mu::ui::window::CDialogMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnEnd.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnEnd.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnEnd.SetText(I18N::Game::ConversationIsOver);
 }
 
@@ -3118,10 +3118,10 @@ void mu::ui::window::CDialogMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     if (m_MsgDataList.size() > 2)
@@ -3129,13 +3129,13 @@ void mu::ui::window::CDialogMsgBox::RenderFrame()
         int iCount = m_MsgDataList.size() - 2;
         for (int i = 0; i < iCount; ++i)
         {
-            RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+            RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
             y += height;
         }
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CDialogMsgBox::RenderTexts()
@@ -3199,7 +3199,7 @@ bool mu::ui::window::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetAddCallbackFunc();
 
@@ -3292,10 +3292,10 @@ void mu::ui::window::CProgressMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     if (m_MsgDataList.size() > 2)
@@ -3303,13 +3303,13 @@ void mu::ui::window::CProgressMsgBox::RenderFrame()
         int iCount = m_MsgDataList.size() - 2;
         for (int i = 0; i < iCount; ++i)
         {
-            RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+            RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
             y += height;
         }
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CProgressMsgBox::RenderTexts()
@@ -3353,13 +3353,13 @@ void mu::ui::window::CProgressMsgBox::RenderProgress()
     float x, y;
     x = GetPos().x + MSGBOX_WIDTH / 2 - 160.f / 2;
     y = GetPos().y + GetSize().cy - 50.f;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BG, x, y, 160.f, 18.f);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BG, x, y, 160.f, 18.f);
     x += 5.f;
     y += 5.f;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
 }
 
-CALLBACK_RESULT mu::ui::window::CProgressMsgBox::ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CProgressMsgBox::ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3388,7 +3388,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, flo
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetAddCallbackFunc();
 
@@ -3472,7 +3472,7 @@ DWORD mu::ui::window::CCursedTempleProgressMsgBox::GetNpcIndex()
     return m_dwNpcIndex;
 }
 
-CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::ClosingProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3480,7 +3480,7 @@ CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::ClosingProcess(clas
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::CompleteProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::CompleteProcess(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CCursedTempleProgressMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -3511,10 +3511,10 @@ void mu::ui::window::CCursedTempleProgressMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     if (m_MsgDataList.size() > 2)
@@ -3522,13 +3522,13 @@ void mu::ui::window::CCursedTempleProgressMsgBox::RenderFrame()
         int iCount = m_MsgDataList.size() - 2;
         for (int i = 0; i < iCount; ++i)
         {
-            RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+            RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
             y += height;
         }
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CCursedTempleProgressMsgBox::RenderTexts()
@@ -3572,10 +3572,10 @@ void mu::ui::window::CCursedTempleProgressMsgBox::RenderProgress()
     float x, y;
     x = GetPos().x + MSGBOX_WIDTH / 2 - 160.f / 2;
     y = GetPos().y + GetSize().cy - 50.f;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BG, x, y, 160.f, 18.f);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BG, x, y, 160.f, 18.f);
     x += 5.f;
     y += 5.f;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
 }
 
 bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()
@@ -3629,7 +3629,7 @@ bool mu::ui::window::CDuelMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_MIDDLE_HEIGHT * 7 + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -3653,17 +3653,17 @@ void mu::ui::window::CDuelMsgBox::SetButtonInfo()
     x = GetPos().x + (((GetSize().cx / 2) - MSGBOX_BTN_WIDTH) / 2);
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
     x = GetPos().x + (GetSize().cx / 2) + (((GetSize().cx / 2) - MSGBOX_BTN_WIDTH) / 2);
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_CANCEL, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
@@ -3694,26 +3694,26 @@ void mu::ui::window::CDuelMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x + (GetSize().cx / 2) - 74;
     y = GetPos().y + 15;
     width = 148;
     height = 138;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_DUEL_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_DUEL_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < 7; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CDuelMsgBox::RenderTexts()
@@ -3738,7 +3738,7 @@ void mu::ui::window::CDuelMsgBox::RenderButton()
     m_BtnCancel.Render();
 }
 
-CALLBACK_RESULT mu::ui::window::CDuelMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDuelMsgBox*>(pOwner);
     if (pMsgBox)
@@ -3758,7 +3758,7 @@ CALLBACK_RESULT mu::ui::window::CDuelMsgBox::LButtonUp(class CNewUIMessageBoxBas
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3766,7 +3766,7 @@ CALLBACK_RESULT mu::ui::window::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBas
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3795,7 +3795,7 @@ bool mu::ui::window::CDuelResultMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + MSGBOX_MIDDLE_HEIGHT * 7 + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -3818,9 +3818,9 @@ void mu::ui::window::CDuelResultMsgBox::SetButtonInfo()
     x = GetPos().x + (GetSize().cx / 2) - MSGBOX_BTN_WIDTH / 2;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_OK);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_OK);
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_OK, x, y, width, height);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
@@ -3850,26 +3850,26 @@ void mu::ui::window::CDuelResultMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x + (GetSize().cx / 2) - 74;
     y = GetPos().y + 15;
     width = 148;
     height = 138;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_DUEL_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_DUEL_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < 7; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CDuelResultMsgBox::RenderTexts()
@@ -3895,7 +3895,7 @@ void mu::ui::window::CDuelResultMsgBox::RenderButton()
     m_BtnOk.Render();
 }
 
-CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDuelResultMsgBox*>(pOwner);
     if (pMsgBox)
@@ -3910,7 +3910,7 @@ CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::LButtonUp(class CNewUIMessage
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     // 	SendRequestDuelOk(1, g_iDuelPlayerIndex, g_szDuelPlayerID);
 
@@ -3948,7 +3948,7 @@ bool CCherryBlossomMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -3957,7 +3957,7 @@ bool CCherryBlossomMsgBox::Create(float fPriority)
 
 void CCherryBlossomMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool CCherryBlossomMsgBox::Update()
@@ -3980,7 +3980,7 @@ bool CCherryBlossomMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT CCherryBlossomMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CCherryBlossomMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CCherryBlossomMsgBox*>(pOwner);
     if (pMsgBox)
@@ -4010,7 +4010,7 @@ CALLBACK_RESULT CCherryBlossomMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwn
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
     //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_WHITE);
@@ -4021,7 +4021,7 @@ CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CNewUIMessageBoxBase*
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
     //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_RED);
@@ -4032,7 +4032,7 @@ CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CNewUIMessageBoxBase* p
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
     //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_GOLD);
@@ -4043,7 +4043,7 @@ CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CNewUIMessageBoxBase* p
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT CCherryBlossomMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CCherryBlossomMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     //	SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
     PlayBuffer(SOUND_CLICK01);
@@ -4072,22 +4072,22 @@ void CCherryBlossomMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 50;
-    m_BtnWhiteCB.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnWhiteCB.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnWhiteCB.SetText(I18N::Game::Lookup(2542));
 
     y = GetPos().y + 100;
-    m_BtnRedCB.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRedCB.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRedCB.SetText(I18N::Game::Lookup(2543));
 
     y = GetPos().y + 150;
-    m_BtnGoldCB.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnGoldCB.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnGoldCB.SetText(I18N::Game::GoldenCherryBlossomsBranches);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     // 1002 "닫기"
     m_BtnExit.SetText(I18N::Game::Close388);
 }
@@ -4097,20 +4097,20 @@ void CCherryBlossomMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void CCherryBlossomMsgBox::RenderTexts()
@@ -4142,7 +4142,7 @@ void CCherryBlossomMsgBox::RenderButtons()
 
 bool mu::ui::window::CTradeZenMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4159,9 +4159,9 @@ bool mu::ui::window::CTradeZenMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
@@ -4179,17 +4179,17 @@ CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ProcessOk(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner);
 }
 
-CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner);
 }
 
-CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4199,7 +4199,7 @@ CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::CancelBtnDown(class CNewU
 
 bool mu::ui::window::CZenReceiptMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4216,19 +4216,19 @@ bool mu::ui::window::CZenReceiptMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
@@ -4257,7 +4257,7 @@ CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4267,7 +4267,7 @@ CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNe
 
 bool mu::ui::window::CZenPaymentMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4284,19 +4284,19 @@ bool mu::ui::window::CZenPaymentMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
@@ -4338,7 +4338,7 @@ CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4348,7 +4348,7 @@ CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNe
 
 bool mu::ui::window::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4365,9 +4365,9 @@ bool mu::ui::window::CPersonalShopItemValueMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
 
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
@@ -4384,7 +4384,7 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(cl
         return CALLBACK_CONTINUE;
     }
 
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
     ITEM* pItem = NULL;
     if (pPickedItem)
     {
@@ -4409,7 +4409,7 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(cl
 
     if (bResult == true)
     {
-        mu::ui::window::CNewUI3DItemCommonMsgBox* lpMsgBox = NULL;
+        mu::ui::window::C3DItemCommonMsgBox* lpMsgBox = NULL;
 
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
         if (lpMsgBox)
@@ -4428,7 +4428,7 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(cl
             SocketClient->ToGameServer()->SendPlayerShopClose();
         }
 
-        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
         int iSourceIndex = -1, iTargetIndex = -1;
         int shopWndType = 0;
@@ -4474,19 +4474,19 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(cl
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
     g_pMyShopInventory->SetInputValueTextBox(false);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4495,7 +4495,7 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::CancelBtnDow
 
 bool mu::ui::window::CPersonalShopNameMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4512,9 +4512,9 @@ bool mu::ui::window::CPersonalShopNameMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
@@ -4537,17 +4537,17 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ProcessOk(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4557,7 +4557,7 @@ CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::CancelBtnDown(cla
 
 bool mu::ui::window::CCastleWithdrawMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4577,9 +4577,9 @@ bool mu::ui::window::CCastleWithdrawMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
@@ -4601,9 +4601,9 @@ CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::ReturnDown(class CN
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
     pMsgBox->GetInputBoxText(strText);
     if (wcslen(strText) == 0)
@@ -4625,7 +4625,7 @@ CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::OkBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4635,7 +4635,7 @@ CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class
 
 bool mu::ui::window::CPasswordKeyPadMsgBoxLayout::SetLayout()
 {
-    CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
+    CKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4650,9 +4650,9 @@ bool mu::ui::window::CPasswordKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -4675,7 +4675,7 @@ CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     if (g_pPickedItem)
@@ -4691,7 +4691,7 @@ CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class
 
 bool mu::ui::window::CStorageLockKeyPadMsgBoxLayout::SetLayout()
 {
-    CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
+    CKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4705,9 +4705,9 @@ bool mu::ui::window::CStorageLockKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -4726,7 +4726,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class 
             return CALLBACK_BREAK;
         }
 
-        CNewUIKeyPadMsgBox* pKeyPadMsgBox = NULL;
+        CKeyPadMsgBox* pKeyPadMsgBox = NULL;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout), &pKeyPadMsgBox);
         if (pKeyPadMsgBox)
         {
@@ -4739,7 +4739,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4749,7 +4749,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(cl
 
 bool mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
 {
-    CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
+    CKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4763,9 +4763,9 @@ bool mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -4788,7 +4788,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(c
         {
             WORD wInputNumber = (WORD)_wtoi(pMsgBox->GetInputText());
 
-            CNewUITextInputMsgBox* pPassword = NULL;
+            CTextInputMsgBox* pPassword = NULL;
             mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockMsgBoxLayout), &pPassword);
             if (pPassword)
             {
@@ -4810,7 +4810,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(c
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4820,7 +4820,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDo
 
 bool mu::ui::window::CStorageLockMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox) return false;
 
     int _temp = (g_iLengthAuthorityCode / 10) <= 0 ? 1 : (g_iLengthAuthorityCode / 10);
@@ -4840,19 +4840,19 @@ bool mu::ui::window::CStorageLockMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -4882,7 +4882,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ProcessOk(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4892,7 +4892,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::CancelBtnDown(class CN
 
 bool mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
 {
-    CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
+    CKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -4907,9 +4907,9 @@ bool mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -4932,7 +4932,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(c
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4941,7 +4941,7 @@ CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDo
 
 bool mu::ui::window::CStorageUnlockMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox) return false;
 
     int _temp = (g_iLengthAuthorityCode / 10) <= 0 ? 1 : (g_iLengthAuthorityCode / 10);
@@ -4964,9 +4964,9 @@ bool mu::ui::window::CStorageUnlockMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -4996,7 +4996,7 @@ CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNew
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5006,7 +5006,7 @@ CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::CancelBtnDown(class 
 
 bool mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 {
-    CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
+    CKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
     if (false == pMsgBox->Create(KEYPAD_TYPE_UNLOCK, g_iLengthAuthorityCode))
@@ -5021,9 +5021,9 @@ bool mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CKeyPadMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -5045,7 +5045,7 @@ CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(clas
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5479,7 +5479,7 @@ mu::ui::window::CLuckyTradeMenuMsgBox::~CLuckyTradeMenuMsgBox()
 
 void mu::ui::window::CLuckyTradeMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CLuckyTradeMenuMsgBox::Update()
@@ -5501,7 +5501,7 @@ bool mu::ui::window::CLuckyTradeMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -5517,7 +5517,7 @@ bool mu::ui::window::CLuckyTradeMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     CLuckyTradeMenuMsgBox* pMsgBox = dynamic_cast<CLuckyTradeMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -5542,7 +5542,7 @@ CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp(class CNewUIMes
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pLuckyItemWnd->SetAct(eLuckyItemType_Trade);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND);
@@ -5554,7 +5554,7 @@ CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(cla
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pLuckyItemWnd->SetAct(eLuckyItemType_Refinery);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND);
@@ -5565,7 +5565,7 @@ CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -5595,18 +5595,18 @@ void mu::ui::window::CLuckyTradeMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
-    m_BtnTrade.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnTrade.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnTrade.SetText(L"럭키아이템 교환");	// "GlobalText"
 
     y = GetPos().y + 120;
-    m_BtnRefinery.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRefinery.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRefinery.SetText(L"럭키아이템 제련");	// "GlobalText"
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -5615,20 +5615,20 @@ void mu::ui::window::CLuckyTradeMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CLuckyTradeMenuMsgBox::RenderTexts()
@@ -5678,7 +5678,7 @@ bool mu::ui::window::CTrainerMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -5686,7 +5686,7 @@ bool mu::ui::window::CTrainerMenuMsgBox::Create(float fPriority)
 
 void mu::ui::window::CTrainerMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CTrainerMenuMsgBox::Update()
@@ -5708,7 +5708,7 @@ bool mu::ui::window::CTrainerMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CTrainerMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -5733,7 +5733,7 @@ CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::LButtonUp(class CNewUIMessag
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTrainerRecoverMsgBoxLayout));
 
@@ -5743,7 +5743,7 @@ CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_TRAINER);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -5754,7 +5754,7 @@ CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -5784,18 +5784,18 @@ void mu::ui::window::CTrainerMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
-    m_BtnRecover.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRecover.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRecover.SetText(I18N::Game::RestoreLifeDurability);
 
     y = GetPos().y + 120;
-    m_BtnRevive.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRevive.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRevive.SetText(I18N::Game::ResurrectSpirit);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -5804,20 +5804,20 @@ void mu::ui::window::CTrainerMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CTrainerMenuMsgBox::RenderTexts()
@@ -5867,7 +5867,7 @@ bool mu::ui::window::CTrainerRecoverMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -5875,7 +5875,7 @@ bool mu::ui::window::CTrainerRecoverMsgBox::Create(float fPriority)
 
 void mu::ui::window::CTrainerRecoverMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CTrainerRecoverMsgBox::Update()
@@ -5897,7 +5897,7 @@ bool mu::ui::window::CTrainerRecoverMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CTrainerRecoverMsgBox*>(pOwner);
     if (pMsgBox)
@@ -5922,7 +5922,7 @@ CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::LButtonUp(class CNewUIMes
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT);
     SocketClient->ToGameServer()->SendCloseNpcRequest();
@@ -5933,7 +5933,7 @@ CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     npcBreeder::RecoverPet(REVIVAL_DARKHORSE);
     SocketClient->ToGameServer()->SendCloseNpcRequest();
@@ -5944,7 +5944,7 @@ CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(c
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -5975,11 +5975,11 @@ void mu::ui::window::CTrainerRecoverMsgBox::SetButtonInfo()
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
 
     y = GetPos().y + 65;
-    m_BtnRecoverDarkHorse.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRecoverDarkHorse.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRecoverDarkHorse.SetText(I18N::Game::DarkHorse);
 
     y = GetPos().y + 115;
-    m_BtnRecoverDarkSpirit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRecoverDarkSpirit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRecoverDarkSpirit.SetText(I18N::Game::DarkRaven);
 
     btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
@@ -5987,7 +5987,7 @@ void mu::ui::window::CTrainerRecoverMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -5996,20 +5996,20 @@ void mu::ui::window::CTrainerRecoverMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CTrainerRecoverMsgBox::RenderTexts()
@@ -6064,7 +6064,7 @@ bool mu::ui::window::CElpisMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -6072,7 +6072,7 @@ bool mu::ui::window::CElpisMsgBox::Create(float fPriority)
 
 void mu::ui::window::CElpisMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CElpisMsgBox::Update()
@@ -6095,7 +6095,7 @@ bool mu::ui::window::CElpisMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6125,7 +6125,7 @@ CALLBACK_RESULT mu::ui::window::CElpisMsgBox::LButtonUp(class CNewUIMessageBoxBa
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6138,7 +6138,7 @@ CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6151,7 +6151,7 @@ CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::RefineBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::RefineBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ELPIS);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -6162,7 +6162,7 @@ CALLBACK_RESULT mu::ui::window::CElpisMsgBox::RefineBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -6193,22 +6193,22 @@ void mu::ui::window::CElpisMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 145;
-    m_BtnAboutRefinary.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnAboutRefinary.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnAboutRefinary.SetText(I18N::Game::AboutRefinery);
 
     y = GetPos().y + 175;
-    m_BtnAboutJewelOfHarmony.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnAboutJewelOfHarmony.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnAboutJewelOfHarmony.SetText(I18N::Game::JewelOfHarmony);
 
     y = GetPos().y + 205;
-    m_BtnRefine.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnRefine.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnRefine.SetText(I18N::Game::RefineGemstone);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -6217,23 +6217,23 @@ void mu::ui::window::CElpisMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y + 120, width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
 
 void mu::ui::window::CElpisMsgBox::RenderTexts()
@@ -6310,7 +6310,7 @@ bool mu::ui::window::CSeedMasterMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -6318,7 +6318,7 @@ bool mu::ui::window::CSeedMasterMenuMsgBox::Create(float fPriority)
 
 void mu::ui::window::CSeedMasterMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CSeedMasterMenuMsgBox::Update()
@@ -6340,7 +6340,7 @@ bool mu::ui::window::CSeedMasterMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CSeedMasterMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6365,7 +6365,7 @@ CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp(class CNewUIMes
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_EXTRACT_SEED);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -6376,7 +6376,7 @@ CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_SEED_SPHERE);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -6387,7 +6387,7 @@ CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -6417,18 +6417,18 @@ void mu::ui::window::CSeedMasterMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
-    m_BtnExtractSeed.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnExtractSeed.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnExtractSeed.SetText(I18N::Game::SeedExtraction);
 
     y = GetPos().y + 120;
-    m_BtnSeedSphere.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnSeedSphere.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnSeedSphere.SetText(I18N::Game::SeedSphereAssembly);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -6437,20 +6437,20 @@ void mu::ui::window::CSeedMasterMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CSeedMasterMenuMsgBox::RenderTexts()
@@ -6500,7 +6500,7 @@ bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -6508,7 +6508,7 @@ bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Create(float fPriority)
 
 void mu::ui::window::CSeedInvestigatorMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Update()
@@ -6530,7 +6530,7 @@ bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CSeedInvestigatorMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6555,7 +6555,7 @@ CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp(class CNe
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ATTACH_SOCKET);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -6566,7 +6566,7 @@ CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_DETACH_SOCKET);
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
@@ -6577,7 +6577,7 @@ CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -6607,18 +6607,18 @@ void mu::ui::window::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
-    m_BtnAttachSocket.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnAttachSocket.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnAttachSocket.SetText(I18N::Game::SeedSphereApplication);
 
     y = GetPos().y + 120;
-    m_BtnDetachSocket.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnDetachSocket.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnDetachSocket.SetText(I18N::Game::SeedSphereDestruction);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -6627,20 +6627,20 @@ void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderTexts()
@@ -6691,7 +6691,7 @@ bool mu::ui::window::CResetCharacterPointMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
     return true;
 }
@@ -6708,20 +6708,20 @@ void mu::ui::window::CResetCharacterPointMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 105;
-    m_ResetCharacterPointBtn.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_ResetCharacterPointBtn.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_ResetCharacterPointBtn.SetText(I18N::Game::StatReInitialization); // "스탯 초기화"
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
 void mu::ui::window::CResetCharacterPointMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 void mu::ui::window::CResetCharacterPointMsgBox::SetAddCallbackFunc()
@@ -6731,7 +6731,7 @@ void mu::ui::window::CResetCharacterPointMsgBox::SetAddCallbackFunc()
     AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CResetCharacterPointMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6774,20 +6774,20 @@ void mu::ui::window::CResetCharacterPointMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CResetCharacterPointMsgBox::RenderTexts()
@@ -6824,7 +6824,7 @@ bool mu::ui::window::CResetCharacterPointMsgBox::isCharacterEquipmentItem()
     return false;
 }
 
-CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
 
@@ -6843,7 +6843,7 @@ CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6852,7 +6852,7 @@ CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown(class CN
 
 bool mu::ui::window::CGuildBreakPasswordMsgBoxLayout::SetLayout()
 {
-    CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
+    CTextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -6873,19 +6873,19 @@ bool mu::ui::window::CGuildBreakPasswordMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
+    auto* pMsgBox = dynamic_cast<CTextInputMsgBox*>(pOwner);
 
     if (pMsgBox == nullptr)
     {
@@ -6915,7 +6915,7 @@ CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6945,7 +6945,7 @@ bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
 
     SetButtonInfo();
 
@@ -6954,7 +6954,7 @@ bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
 
 void mu::ui::window::CGuild_ToPerson_Position::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -7014,24 +7014,24 @@ void mu::ui::window::CGuild_ToPerson_Position::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + 57;//(GetPos().x + (msgboxhalfwidth / 2) - btnhalfwidth) + 60;
     y = GetPos().y + 30;
-    m_BtnBlessing.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnBlessing.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnBlessing.SetText(I18N::Game::AppointAsAssistantGuildMaster);
 
     y += 27;
-    m_BtnSoul.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnSoul.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnSoul.SetText(I18N::Game::AppointAsABattleMaster);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x -= 9;
     y += 70;
-    m_BtnOk.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnOk.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnOk.SetText(I18N::Game::OK);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x += 64;
-    m_BtnCancel.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
@@ -7043,21 +7043,21 @@ void mu::ui::window::CGuild_ToPerson_Position::RenderFrame()
     y = GetPos().y + 2.f;
     width = (GetSize().cx - MSGBOX_BACK_BLANK_WIDTH);
     height = (GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT) - 75;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     int iCount = 5;
     for (int i = 0; i < iCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CGuild_ToPerson_Position::RenderTexts()
@@ -7134,7 +7134,7 @@ void mu::ui::window::CGuild_ToPerson_Position::RenderButtons()
     AddMsg(I18N::Game::DoYouWantToAppoint, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 }
 
-CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGuild_ToPerson_Position*>(pOwner);
     if (pMsgBox)
@@ -7164,21 +7164,21 @@ CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::LButtonUp(class CNewUI
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::CELE);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::SOUL);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
     SocketClient->ToGameServer()->SendGuildRoleAssignRequest(
@@ -7194,7 +7194,7 @@ CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::OkBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -7236,7 +7236,7 @@ bool mu::ui::window::CDelgardoMainMenuMsgBox::Create(float fPriority)
     width = MSGBOX_WIDTH;
     height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
 
-    CNewUIMessageBoxBase::Create(x, y, width, height, fPriority);
+    CMessageBoxBase::Create(x, y, width, height, fPriority);
     SetButtonInfo();
 
     return true;
@@ -7244,7 +7244,7 @@ bool mu::ui::window::CDelgardoMainMenuMsgBox::Create(float fPriority)
 
 void mu::ui::window::CDelgardoMainMenuMsgBox::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 }
 
 bool mu::ui::window::CDelgardoMainMenuMsgBox::Update()
@@ -7266,7 +7266,7 @@ bool mu::ui::window::CDelgardoMainMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDelgardoMainMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -7291,7 +7291,7 @@ CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp(class CNewUIM
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
 
@@ -7301,7 +7301,7 @@ CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
@@ -7310,7 +7310,7 @@ CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -7340,18 +7340,18 @@ void mu::ui::window::CDelgardoMainMenuMsgBox::SetButtonInfo()
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + 85;
-    m_BtnReg.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnReg.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnReg.SetText(I18N::Game::LuckyCoinRegistration);
 
     y = GetPos().y + 120;
-    m_BtnExchange.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
+    m_BtnExchange.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
     m_BtnExchange.SetText(I18N::Game::LuckyCoinExchange);
 
     width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
     btnhalfwidth = width / 2.f;
     x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
     y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CNewUIMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
+    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
@@ -7360,20 +7360,20 @@ void mu::ui::window::CDelgardoMainMenuMsgBox::RenderFrame()
     float x, y, width, height;
 
     x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
 
     x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
 
     x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
     for (int i = 0; i < m_iMiddleCount; ++i)
     {
-        RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
         y += height;
     }
 
     x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
 void mu::ui::window::CDelgardoMainMenuMsgBox::RenderTexts()

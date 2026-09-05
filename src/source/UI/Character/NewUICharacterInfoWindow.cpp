@@ -1,4 +1,4 @@
-﻿// NewUICharacterInfoWindow.cpp: implementation of the CNewUICharacterInfoWindow class.
+﻿// NewUICharacterInfoWindow.cpp: implementation of the CCharacterInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -63,18 +63,18 @@ namespace
     }
 }
 
-mu::ui::window::CNewUICharacterInfoWindow::CNewUICharacterInfoWindow()
+mu::ui::window::CCharacterInfoWindow::CCharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-mu::ui::window::CNewUICharacterInfoWindow::~CNewUICharacterInfoWindow()
+mu::ui::window::CCharacterInfoWindow::~CCharacterInfoWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUICharacterInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -93,7 +93,7 @@ bool mu::ui::window::CNewUICharacterInfoWindow::Create(CNewUIManager* pNewUIMng,
     return true;
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::SetButtonInfo()
+void mu::ui::window::CCharacterInfoWindow::SetButtonInfo()
 {
     wchar_t strText[256];
 
@@ -129,7 +129,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::SetButtonInfo()
     m_BtnMasterLevel.ChangeToolTipText(&I18N::Game::MasterSkillTreeA, true);
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::Release()
+void mu::ui::window::CCharacterInfoWindow::Release()
 {
     UnloadImages();
 
@@ -140,13 +140,13 @@ void mu::ui::window::CNewUICharacterInfoWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CCharacterInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUICharacterInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
     {
@@ -161,7 +161,7 @@ bool mu::ui::window::CNewUICharacterInfoWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICharacterInfoWindow::BtnProcess()
+bool mu::ui::window::CCharacterInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CHARACTER))
@@ -218,7 +218,7 @@ bool mu::ui::window::CNewUICharacterInfoWindow::BtnProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUICharacterInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CCharacterInfoWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER) == true)
     {
@@ -234,12 +234,12 @@ bool mu::ui::window::CNewUICharacterInfoWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICharacterInfoWindow::Update()
+bool mu::ui::window::CCharacterInfoWindow::Update()
 {
     return true;
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::RenderFrame()
+void mu::ui::window::CCharacterInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_CHAINFO_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_CHAINFO_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -281,7 +281,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::RenderFrame()
     }
 }
 
-bool mu::ui::window::CNewUICharacterInfoWindow::Render()
+bool mu::ui::window::CCharacterInfoWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -291,14 +291,14 @@ bool mu::ui::window::CNewUICharacterInfoWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::RenderTexts()
+void mu::ui::window::CCharacterInfoWindow::RenderTexts()
 {
     RenderSubjectTexts();
     RenderTableTexts();
     RenderAttribute();
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::RenderSubjectTexts()
+void mu::ui::window::CCharacterInfoWindow::RenderSubjectTexts()
 {
     wchar_t strID[256];
     mu_swprintf(strID, L"%ls", CharacterAttribute->Name);
@@ -324,7 +324,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::RenderSubjectTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strServerName, 190, 0, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::RenderTableTexts()
+void mu::ui::window::CCharacterInfoWindow::RenderTableTexts()
 {
     wchar_t strLevel[128];
     wchar_t strExp[128];
@@ -455,7 +455,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::RenderTableTexts()
     g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + 101, strPoint);
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::RenderAttribute()
+void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
 {
     g_pRenderText->SetFont(g_hFontBold);
 
@@ -1526,7 +1526,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::RenderAttribute()
     }
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::RenderButtons()
+void mu::ui::window::CCharacterInfoWindow::RenderButtons()
 {
     int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
     int iCount = 0;
@@ -1553,12 +1553,12 @@ void mu::ui::window::CNewUICharacterInfoWindow::RenderButtons()
     m_BtnMasterLevel.Render();
 }
 
-float mu::ui::window::CNewUICharacterInfoWindow::GetLayerDepth()
+float mu::ui::window::CCharacterInfoWindow::GetLayerDepth()
 {
     return 5.1f;
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::LoadImages()
+void mu::ui::window::CCharacterInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CHAINFO_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_CHAINFO_TOP, GL_LINEAR);
@@ -1584,7 +1584,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_chainfo_btn_master.tga", IMAGE_CHAINFO_BTN_MASTERLEVEL, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::UnloadImages()
+void mu::ui::window::CCharacterInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CHAINFO_BTN_MASTERLEVEL);
     DeleteBitmap(IMAGE_CHAINFO_BTN_PET);
@@ -1610,7 +1610,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_LEFT);
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::OpenningProcess()
+void mu::ui::window::CCharacterInfoWindow::OpenningProcess()
 {
     ResetEquipmentLevel();
 
@@ -1645,7 +1645,7 @@ void mu::ui::window::CNewUICharacterInfoWindow::OpenningProcess()
     }
 }
 
-void mu::ui::window::CNewUICharacterInfoWindow::ResetEquipmentLevel()
+void mu::ui::window::CCharacterInfoWindow::ResetEquipmentLevel()
 {
     ITEM* pItem = CharacterMachine->Equipment;
     Hero->Weapon[0].Level = pItem[EQUIPMENT_WEAPON_RIGHT].Level;

@@ -137,7 +137,7 @@ bool CCharInfoBalloonMng::Render()
     // painting behind the balloon) -- this check needs the same treatment for every future
     // CHARACTER_SCENE-relevant migration too, same as the IsCursorOnUI() fold-in
     // (docs/newui-legacy-merger.md). This registered adapter's own GetLayerDepth() can't replace
-    // this check even now that every window involved is a CNewUIObj: that depth-sort only orders
+    // this check even now that every window involved is a CObject: that depth-sort only orders
     // *this manager's own* dispatch, not RmlUi's separate, always-last compositor pass, so a
     // permanent explicit toggle is still the only fix (same reasoning as CLoginWin's own
     // credits/sysmenu render-side gates -- see its Render()'s comment).

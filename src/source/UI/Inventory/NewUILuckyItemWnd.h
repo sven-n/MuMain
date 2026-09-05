@@ -1,4 +1,4 @@
-// NewUILuckyItemWnd.h: interface for the CNewUILuckyItemWnd class.
+// NewUILuckyItemWnd.h: interface for the CLuckyItemWnd class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -44,12 +44,12 @@ namespace mu::ui::window
         int		s_nLine;		// 텍스트 정렬
     };
 
-    class CNewUILuckyItemWnd : public CNewUIObj
+    class CLuckyItemWnd : public CObject
     {
     private:
-        CNewUIManager* m_pNewUIMng;
-        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
-        CNewUIButton			m_BtnMix;
+        CManager* m_pNewUIMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
+        CButton			m_BtnMix;
         float					m_fInvenClr[3];
         float					m_fInvenClrWarning[3];
         sImgList				m_sImgList[eImgList_END];
@@ -83,7 +83,7 @@ namespace mu::ui::window
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
     public:
-        CNewUIInventoryCtrl* GetInventoryCtrl() const;
+        CInventoryCtrl* GetInventoryCtrl() const;
 
         int		SetActAction();
         STORAGE_TYPE SetMoveAction();
@@ -95,7 +95,7 @@ namespace mu::ui::window
         bool	Check_LuckyItem_InWnd(void);
 
         //-Virtual Function [lem_2010.9.1]
-        bool	Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool	Create(CManager* pNewUIMng, int x, int y);
         void	Release(void);
         void	OpeningProcess(void);
         bool	ClosingProcess(void);
@@ -111,8 +111,8 @@ namespace mu::ui::window
         __inline void	SetSize(float _fX, float _fY) { m_fSizeX = _fX, m_fSizeY = _fY; }
 
         __inline eLUCKYITEMTYPE	GetAct(void) { return m_eType; }
-        CNewUILuckyItemWnd();
-        virtual ~CNewUILuckyItemWnd();
+        CLuckyItemWnd();
+        virtual ~CLuckyItemWnd();
     };
 }
 #endif // !defined(AFX_NEWUILUCKYITEMWND_H__F57DF84F_0A44_444A_838D_78CBC35544EB__INCLUDED_)

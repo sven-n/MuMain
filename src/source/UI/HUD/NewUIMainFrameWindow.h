@@ -1,4 +1,4 @@
-// NewUIMainFrameWindow.h: interface for the CNewUIMainFrameWindow class.
+// NewUIMainFrameWindow.h: interface for the CMainFrameWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -46,11 +46,11 @@ namespace mu::ui::window
         KOS_SKILL3,
     };
 
-    class CNewUIItemHotKey
+    class CItemHotKey
     {
     public:
-        CNewUIItemHotKey();
-        virtual ~CNewUIItemHotKey();
+        CItemHotKey();
+        virtual ~CItemHotKey();
 
         bool UpdateKeyEvent();
 
@@ -70,10 +70,10 @@ namespace mu::ui::window
         int m_iHotKeyItemLevel[HOTKEY_COUNT];
     };
 
-    // RmlUi migration, Phase 2 of 3 of the CNewUIMainFrameWindow pilot (see
+    // RmlUi migration, Phase 2 of 3 of the CMainFrameWindow pilot (see
     // docs/rmlui-ui-system/STATUS.md). One interactive overlay cell in the expanded skill grid or
     // pet-command row -- position/eligibility/cooldown computed fresh in
-    // CNewUISkillList::Update() every frame the grid is open. Icon/box-frame ART IS NOT PART OF
+    // CSkillList::Update() every frame the grid is open. Icon/box-frame ART IS NOT PART OF
     // THIS STRUCT and stays a legacy 2D draw at the same position (mid-implementation scope
     // adjustment, see the Phase 2 plan: RenderSkillIcon()'s atlas lookup is too irregular -- mixed
     // 8/12-column addressing, a separate master-level atlas -- to port blind without a way to
@@ -89,7 +89,7 @@ namespace mu::ui::window
                                         // AT_PET_COMMAND_* enum value (pet row) -- passed back
                                         // verbatim to the click handler, matching the legacy click
                                         // branches' own `Hero->CurrentSkill = i` (see
-                                        // CNewUISkillList::OnGridCellClick()'s comment for why this
+                                        // CSkillList::OnGridCellClick()'s comment for why this
                                         // does NOT go through UseHotKey())
         bool isPet = false;            // true for pet-row entries -- click routes to the pet path
         bool isCurrent = false;        // Hero->CurrentSkill == skillIndex
@@ -99,7 +99,7 @@ namespace mu::ui::window
     };
 
     // One line of a skill tooltip. Field-for-field mirror of UI::Skills::Tooltip::Line
-    // (SkillTooltipModel.h) so CNewUIMainFrameWindow::SyncRmlModel() can copy directly -- kept as
+    // (SkillTooltipModel.h) so CMainFrameWindow::SyncRmlModel() can copy directly -- kept as
     // its own RmlUi-facing type rather than reusing Line itself since Rml::DataModelConstructor
     // needs a bindable Rml::String, not Line's fixed wchar_t[] buffer.
     struct SkillTooltipLineEntry
@@ -117,7 +117,7 @@ namespace mu::ui::window
         bool bold = false;
     };
 
-    class CNewUISkillList : public CNewUIObj
+    class CSkillList : public CObject
     {
         enum
         {
@@ -139,10 +139,10 @@ namespace mu::ui::window
             IMAGE_NON_SKILL3,
         };
 
-        CNewUISkillList();
-        virtual ~CNewUISkillList();
+        CSkillList();
+        virtual ~CSkillList();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
         void Release();
 
         bool UpdateMouseEvent();
@@ -162,7 +162,7 @@ namespace mu::ui::window
         void RenderCurrentSkillAndHotSkillList();
 
         // 2026-09-01: exposes RenderCurrentSkillAndHotSkillList()'s own "is this hotkey-row slot
-        // (0-4) currently showing the equipped/active skill" check to CNewUIMainFrameWindow's
+        // (0-4) currently showing the equipped/active skill" check to CMainFrameWindow's
         // SyncRmlModel() (main_frame.rml's #skill_slot_0..4), so modern theme can highlight the
         // selection with a bound CSS class instead of the legacy IMAGE_SKILLBOX_USE sprite
         // (feedback: "the selected skill indicator ... seems to use the legacy sprite outline ...
@@ -174,7 +174,7 @@ namespace mu::ui::window
         // 2026-09-02: exposes the same hotkey-number RenderSkillIcon()'s own RenderNumber(x+20,
         // y+20, iHotKey) call already computes (search m_iHotKeySkillType[] for this slot's own
         // index -- reduces to iIndex itself barring duplicate assignments) to
-        // CNewUIMainFrameWindow::SyncRmlModel(), so modern theme can show it as a
+        // CMainFrameWindow::SyncRmlModel(), so modern theme can show it as a
         // .slot-hotkey-label span (upper-left corner, main_frame.rml/.rcss) instead of the legacy
         // digit-sprite subscript in RenderSkillIcon() (feedback: "move the assigned number
         // shortcut ... to the upper left corner too, same as Q W E R"). Returns -1 for an empty
@@ -207,7 +207,7 @@ namespace mu::ui::window
         bool IsSkillGridOpen() const { return m_bSkillList; }
 
         // 2026-09-02, Phase 2: click/hover entry points bound from main_frame.rml's
-        // data-event-click/mouseover/mouseout (Create(), CNewUIMainFrameWindow.cpp) -- replace the
+        // data-event-click/mouseover/mouseout (Create(), CMainFrameWindow.cpp) -- replace the
         // old EVENT_STATE hover/down/release machine entirely (RmlUi's own Context now does
         // hit-testing). Each pair mirrors one of the 3 widgets UpdateMouseEvent() used to gate
         // sequentially; see each .cpp definition's own comment for the exact legacy behavior
@@ -224,7 +224,7 @@ namespace mu::ui::window
         void OnPetCellHover(int iSkillIndex);
         void OnUnhover();
 
-        // 2026-09-02, Phase 2: the two dynamic-count overlay lists CNewUIMainFrameWindow::
+        // 2026-09-02, Phase 2: the two dynamic-count overlay lists CMainFrameWindow::
         // SyncRmlModel() copies into the shared main_frame RmlUi model's skill_grid_cells/
         // pet_skill_cells arrays every frame. Populated by Update() (while the grid is open) from
         // the exact same position/filter logic Render()'s still-legacy icon/box draw uses for the
@@ -271,8 +271,8 @@ namespace mu::ui::window
         void ResetMouseLButton();
 
     private:
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
 
         bool m_bHotKeySkillListUp;
         int m_iHotKeySkillType[SKILLHOTKEY_COUNT];
@@ -297,13 +297,13 @@ namespace mu::ui::window
         int m_iHoveredGridSkillIndex = -1;
     };
 
-    // RmlUi migration (2026-09-01) -- Phase 1 of 3 of the third CNewUIObj-tier pilot (see
+    // RmlUi migration (2026-09-01) -- Phase 1 of 3 of the third CObject-tier pilot (see
     // docs/rmlui-ui-system/STATUS.md's "What's migrated"). This legacy file actually welds three
     // classes together: this one (frame chrome + HP/MP/AG/SD/EXP bars + 5 corner buttons -- the
-    // part this pilot ports), CNewUISkillList (skill hotkey row/grid/pet commands, still fully
-    // legacy, Phase 2), and CNewUIItemHotKey (QWER item slots, still fully legacy -- its icons are
-    // 3D-rendered meshes composited via a separate Render3D()/INewUI3DRenderObj camera pass with
-    // no RmlUi equivalent, Phase 3). See the "Third CNewUIObj pilot" plan for the full rationale.
+    // part this pilot ports), CSkillList (skill hotkey row/grid/pet commands, still fully
+    // legacy, Phase 2), and CItemHotKey (QWER item slots, still fully legacy -- its icons are
+    // 3D-rendered meshes composited via a separate Render3D()/I3DRenderObj camera pass with
+    // no RmlUi equivalent, Phase 3). See the "Third CObject pilot" plan for the full rationale.
     //
     // Render() is now a *thin passthrough*, not a full no-op like CMuHelperBar/CBuffStrip -- this
     // window is the first case where out-of-scope legacy content (the skill hotkey row/current-
@@ -322,7 +322,7 @@ namespace mu::ui::window
     // UpdateMouseEvent()/UpdateKeyEvent() stay real where they still gate legacy behavior:
     // UpdateMouseEvent() drops its BtnProcess() call entirely (RmlUi's own Context now does hit-
     // testing for the 5 corner buttons -- see RmlUiRuntime::IsMouseOverUI()) and always reports
-    // "not consumed"; UpdateKeyEvent() is UNCHANGED (still gates the legacy CNewUIItemHotKey's
+    // "not consumed"; UpdateKeyEvent() is UNCHANGED (still gates the legacy CItemHotKey's
     // Q/W/E/R key handling, out of scope). Create()/Release()/GetLayerDepth()/GetKeyEventOrder()/
     // Render3D()/IsVisible() stay real. Update() still does real work every frame (gauge
     // fractions/colors, EXP digit/fraction, button open-state/alert-blink booleans) and pushes it
@@ -337,7 +337,7 @@ namespace mu::ui::window
     // absolutely-positioned children in this RmlUi build); the 5 corner buttons reproduce only the
     // legacy sprite sheet's "normal" and "panel-open" frames (2 of the real 4: hover/pressed-hover
     // frame-swaps are replaced by a plain CSS brightness filter on :hover).
-    class CNewUIMainFrameWindow : public CNewUIObj, public INewUI3DRenderObj
+    class CMainFrameWindow : public CObject, public I3DRenderObj
     {
     public:
         enum IMAGE_LIST
@@ -345,17 +345,17 @@ namespace mu::ui::window
             // Gauge/button textures (IMAGE_GAUGE_*, IMAGE_MENU_BTN_*) are no longer loaded via
             // this legacy CGlobalBitmap-backed enum -- RmlUi loads the same source art files
             // directly through its own render interface (see main_frame.rcss's @spritesheet
-            // blocks), same split already established by every prior CNewUIObj-tier port.
+            // blocks), same split already established by every prior CObject-tier port.
             IMAGE_MENU_1 = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN,	// newui_menu01.jpg
             IMAGE_MENU_2,		// newui_menu02.jpg
             IMAGE_MENU_3,		// newui_menu03.jpg
             IMAGE_MENU_2_1,
         };
 
-        CNewUIMainFrameWindow();
-        virtual ~CNewUIMainFrameWindow();
+        CMainFrameWindow();
+        virtual ~CMainFrameWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng);
+        bool Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng);
         void Release();
 
         bool UpdateMouseEvent();
@@ -389,7 +389,7 @@ namespace mu::ui::window
 
         // buttons -- called externally (NewUISystem.cpp) whenever a button's target panel opens/
         // closes, to sync the button's "open" visual state. Now sets a bound model boolean instead
-        // of swapping CNewUIButton sprite frames -- see this class's header comment.
+        // of swapping CButton sprite frames -- see this class's header comment.
         void SetBtnState(int iBtnType, bool bStateDown);
 
         static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
@@ -406,7 +406,7 @@ namespace mu::ui::window
         // #skill_list_anchor .layout-anchor markers (SyncRmlModel()) -- lets the still-legacy
         // item-hotkey (potion) and skill-hotkey bands' render AND click-hit-testing follow
         // wherever the active theme's own RCSS positions those markers, generically, with no
-        // per-theme C++ branch (architecture-principles.md §16/§18/§19/§23). CNewUISkillList
+        // per-theme C++ branch (architecture-principles.md §16/§18/§19/§23). CSkillList
         // reads GetSkillListOffsetX() via the g_pMainFrame global since it owns no RmlUi document
         // of its own to query directly.
         float GetItemHotkeyOffsetX() const { return m_fItemHotkeyOffsetX; }
@@ -429,10 +429,10 @@ namespace mu::ui::window
         __int64	m_loGetExp;
 
     private:
-        CNewUIManager* m_pNewUIMng;
-        CNewUI3DRenderMng* m_pNewUI3DRenderMng;
+        CManager* m_pNewUIMng;
+        C3DRenderMng* m_pNewUI3DRenderMng;
 
-        CNewUIItemHotKey m_ItemHotKey;
+        CItemHotKey m_ItemHotKey;
 
         bool m_bExpEffect;
         DWORD m_dwExpEffectTime;
@@ -451,7 +451,7 @@ namespace mu::ui::window
         struct MainFrameRmlModel
         {
             // #bars/#buttons/#exp are ONE shared transform group (2026-09-01, after several
-            // rounds of feedback converged here): all three sit inside CNewUISkillList's still-
+            // rounds of feedback converged here): all three sit inside CSkillList's still-
             // legacy center-band chrome and item-hotkey band (kept legacy -- see this class's own
             // header comment), which scale with window size via UI::Scaling::BottomHudScale
             // (clamped 1x-2x), a completely different system from this branch's standard
@@ -537,7 +537,7 @@ namespace mu::ui::window
 
             // 2026-09-01: which of the still-legacy skill-hotkey row's 5 slots (#skill_slot_0..4,
             // main_frame.rml) currently shows the equipped/active skill -- see
-            // CNewUISkillList::IsHotKeySlotCurrentSkill()'s own comment. Modern theme binds this to
+            // CSkillList::IsHotKeySlotCurrentSkill()'s own comment. Modern theme binds this to
             // a CSS highlight class instead of the legacy IMAGE_SKILLBOX_USE sprite that function
             // used to always draw; legacy theme keeps that real sprite (own established look,
             // unaffected by this). 5 separate named fields, not an array -- c.Bind() (RmlUi's
@@ -547,20 +547,20 @@ namespace mu::ui::window
                  skillSlot3Selected = false, skillSlot4Selected = false;
 
             // 2026-09-02: the hotkey number (1-9,0) each of #skill_slot_0..4 is bound to -- see
-            // CNewUISkillList::GetHotKeySlotNumber()'s own comment. Empty string for an unbound
+            // CSkillList::GetHotKeySlotNumber()'s own comment. Empty string for an unbound
             // slot (RmlUi's {{ }} interpolation of an empty string renders nothing, same "draw
             // nothing" behavior the legacy digit-sprite path already has for that case).
             Rml::String skillSlot0Hotkey, skillSlot1Hotkey, skillSlot2Hotkey, skillSlot3Hotkey, skillSlot4Hotkey;
 
             // Phase 2 (skill list) additions -- see docs/rmlui-ui-system's Phase 2 plan and
-            // CNewUISkillList's own new members/methods (NewUIMainFrameWindow.h, right above this
+            // CSkillList's own new members/methods (NewUIMainFrameWindow.h, right above this
             // class). Cooldown wipe for the compact row + current-skill slot: same "5 separate
             // fields" convention as skillSlot0..4Hotkey above, plus one for #current_skill_slot.
             float skillSlot0Cooldown = 0.f, skillSlot1Cooldown = 0.f, skillSlot2Cooldown = 0.f,
                   skillSlot3Cooldown = 0.f, skillSlot4Cooldown = 0.f;
             float currentSkillCooldown = 0.f;
 
-            // Expanded skill grid + pet-command row -- mirrors CNewUISkillList::IsSkillGridOpen()
+            // Expanded skill grid + pet-command row -- mirrors CSkillList::IsSkillGridOpen()
             // (NOT the similarly-named IsSkillListUp(), a legacy naming trap -- see that method's
             // own comment; binding this to it instead was a real 2026-09-02 bug, fixed). Gates
             // #skill_grid/#pet_skill_row visibility in RCSS. Cell arrays are dynamic-count
@@ -621,7 +621,7 @@ namespace mu::ui::window
 
     public:
         // Re-derives the RmlUi document's Show()/Hide() state from IsVisible() && sceneAllowsShow
-        // -- the third MAIN_SCENE prerequisite every CNewUIObj-tier pilot needs, same as
+        // -- the third MAIN_SCENE prerequisite every CObject-tier pilot needs, same as
         // CMuHelperBar/CBuffStrip (see those classes' header comments for the full rationale).
         void SyncDocVisibility(bool sceneAllowsShow);
     };

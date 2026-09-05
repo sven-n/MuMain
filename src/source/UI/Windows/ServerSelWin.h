@@ -23,7 +23,7 @@ class CServerGroup;
 // not just passive display), but still fully self-contained real-pixel 2D rendering, no RmlUi
 // entanglement. Its own CWinEx member (m_winDescription) is untouched -- CWinEx itself isn't
 // retiring, only CServerSelWin's own CWin base class is.
-class CServerSelWin : public mu::ui::window::CNewUIObj
+class CServerSelWin : public mu::ui::window::CObject
 {
 private:
     enum SERVER_SELECT_WIN
@@ -42,8 +42,8 @@ protected:
     CSprite m_aArrowDeco[2];
     CWinEx m_winDescription;
 
-    // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CNewUIObj side (matching
-    // every pre-existing CNewUIObj window), so this window keeps its own bounding box, same as
+    // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CObject side (matching
+    // every pre-existing CObject window), so this window keeps its own bounding box, same as
     // CWin::CursorInWin(WA_ALL) used for hit-testing (ported into UpdateMouseEvent() below).
     POINT m_ptPos;
     SIZE m_Size;
@@ -77,7 +77,7 @@ public:
         return m_Size.cy;
     }
 
-    // mu::ui::window::INewUIBase
+    // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
     // Was CWin::CursorInWin(WA_ALL) -- claims (consumes) any click within its own bounding box,

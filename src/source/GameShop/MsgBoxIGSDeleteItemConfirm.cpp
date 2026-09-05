@@ -44,7 +44,7 @@ bool CMsgBoxIGSDeleteItemConfirm::Create(float fPriority)
 
     SetAddCallbackFunc();
 
-    CNewUIMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2),
+    CMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2),
         (IMAGE_IGS_WINDOW_HEIGHT / 2) - (IMAGE_IGS_FRAME_HEIGHT / 2),
         IMAGE_IGS_FRAME_WIDTH, IMAGE_IGS_FRAME_HEIGHT, fPriority);
 
@@ -70,7 +70,7 @@ void CMsgBoxIGSDeleteItemConfirm::Initialize(int iStorageSeq, int iStorageItemSe
 // Release
 void CMsgBoxIGSDeleteItemConfirm::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     UnloadImages();
 }
@@ -102,7 +102,7 @@ bool CMsgBoxIGSDeleteItemConfirm::Render()
 
 //--------------------------------------------
 // LButtonUp
-CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSDeleteItemConfirm*>(pOwner);
 
@@ -126,7 +126,7 @@ CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::LButtonUp(class CNewUIMessageBoxBas
 
 //--------------------------------------------
 // OKButtonDown
-CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSDeleteItemConfirm*>(pOwner);
 
@@ -140,7 +140,7 @@ CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::OKButtonDown(class CNewUIMessageBox
 
 //--------------------------------------------
 // CancelButtonDown
-CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSDeleteItemConfirm::CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

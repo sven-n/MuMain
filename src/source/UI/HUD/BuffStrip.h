@@ -12,7 +12,7 @@ namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
-    // RmlUi migration (2026-08-31) -- second CNewUIObj-tier pilot, same adapter shape as
+    // RmlUi migration (2026-08-31) -- second CObject-tier pilot, same adapter shape as
     // CMuHelperBar (MuHelperBar.h; see docs/rmlui-ui-system/newui-tier-adapter.md for the shape
     // itself, not repeated here). What's new here: a genuinely variable-length list -- the
     // active-buff count changes every frame, unlike the fixed-size job-button array the CWin tier
@@ -35,13 +35,13 @@ namespace mu::ui::window
     //   bold-blue-header/white-body/purple-duration per-line coloring -- rich structured tooltip
     //   content is a separate thing to prove from what this pilot actually tests (dynamic array
     //   size).
-    class CBuffStrip : public CNewUIObj
+    class CBuffStrip : public CObject
     {
     public:
         CBuffStrip();
         virtual ~CBuffStrip();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         // Vestigial (RmlUi/CSS owns this widget's screen position now -- base.rcss's .center-x,
@@ -68,7 +68,7 @@ namespace mu::ui::window
 
         // See CMuHelperBar::SyncDocVisibility()'s identical comment (MuHelperBar.h) -- same
         // MAIN_SCENE-only Update() gate, same fix (called every frame from
-        // CNewUISystem::SyncMainSceneHudVisibility(), regardless of scene).
+        // CSystem::SyncMainSceneHudVisibility(), regardless of scene).
         void SyncDocVisibility(bool sceneAllowsShow);
 
     private:
@@ -105,7 +105,7 @@ namespace mu::ui::window
         RmlModelBinder<BuffStripRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
 
-        CNewUIManager* m_pNewUIMng = nullptr;
+        CManager* m_pNewUIMng = nullptr;
 
         void SyncRmlModel();
     };

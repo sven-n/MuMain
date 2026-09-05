@@ -14,7 +14,7 @@ detail.
 ## Why this exists
 
 The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
-widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `CNewUIObj` tier,
+widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `mu::ui::window::CObject` tier,
 all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc. —
 see `docs/newui-legacy-merger.md` for the folder history) — with no layout engine, retained scene
 graph, or data-binding layer between them. RmlUi is being adopted as the long-term replacement per
@@ -24,15 +24,15 @@ migrated so far. `COptionWin` was ported but deliberately not wired up — see [
 patterns](#coexistence-patterns) below.
 
 See also: **[Building New UI](building-new-ui.md)** — which of the three overlapping C++ widget
-toolkits (sprite widgets, `CUIControl`, `CNewUIObj`) to use for a new window, dialog, HUD panel,
+toolkits (sprite widgets, `CUIControl`, `mu::ui::window::CObject`) to use for a new window, dialog, HUD panel,
 or widget, the folder-by-domain convention, and the known near-identical-name collisions to avoid
-(`CButton`/`CUIButton`/`CNewUIButton`, `CRadioButton`/`CNewUIRadioButton`). Read this before
+(`CButton`/`CUIButton`/`mu::ui::window::CButton`, `CRadioButton`/`mu::ui::window::CRadioButton`). Read this before
 starting anything new under `UI/`. **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
 positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
 UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
 and a worked example of retrofitting an already-migrated window. **[NewUI-Tier Adapter
-Pattern](newui-tier-adapter.md)** — the `CNewUIObj`/`CNewUIManager` tier (in-game HUD, distinct
+Pattern](newui-tier-adapter.md)** — the `mu::ui::window::CObject`/`mu::ui::window::CManager` tier (in-game HUD, distinct
 from `CWin`/`CUIMng`): the adapter shape, the `MAIN_SCENE` input-gating prerequisites, and what's
 still unproven there. **[Legacy Theme Modernization Policy](legacy-theme-modernization.md)** —
 when legacy-theme C++ behavior should move into RML/RCSS versus genuinely stay in C++, and how to
@@ -203,7 +203,7 @@ open on purpose.
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
 | Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h) |
-| Migrated windows (`CNewUIObj` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/HUD/NewUIMainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
+| Migrated windows (`mu::ui::window::CObject` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/HUD/NewUIMainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status

@@ -254,7 +254,7 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
 
 void CCharSelMainWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     for (auto& sprite : m_asprBack)
         sprite.Show(bShow);

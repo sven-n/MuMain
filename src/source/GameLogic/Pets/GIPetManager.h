@@ -38,7 +38,7 @@ namespace giPetManager
     void    SetAttack(CHARACTER* c, int Key, int attackType);
     bool    RenderPetCmdInfo(int sx, int sy, int Type);
 
-    // 2026-09-02, CNewUIMainFrameWindow pilot Phase 2: same Dark-Lord-only pet-command dispatch/
+    // 2026-09-02, CMainFrameWindow pilot Phase 2: same Dark-Lord-only pet-command dispatch/
     // content RenderPetCmdInfo() itself performs, with no drawing -- lets
     // UI::Skills::Tooltip::BuildModelForSlot() (SkillTooltip.cpp) fold this into the same RmlUi-
     // bindable Model the regular skill tooltip uses, rather than this staying a separate hand-

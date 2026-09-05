@@ -1,4 +1,4 @@
-// NewUICursedTempleResult.h: interface for the CNewUICursedTempleResult class.
+// NewUICursedTempleResult.h: interface for the CCursedTempleResult class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,7 +14,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUICursedTempleResult : public CNewUIObj
+    class CCursedTempleResult : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -48,10 +48,10 @@ namespace mu::ui::window
         };
 
     public:
-        CNewUICursedTempleResult();
-        virtual ~CNewUICursedTempleResult();
+        CCursedTempleResult();
+        virtual ~CCursedTempleResult();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
 
     private:
         void LoadImages();
@@ -104,8 +104,8 @@ namespace mu::ui::window
         CT_GameResult_list		m_IllusionTeamGameResult;
 
     private:
-        CNewUIManager* m_pNewUIMng;
-        CNewUIButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
+        CManager* m_pNewUIMng;
+        CButton			m_Button[CURSEDTEMPLERESULT_MAXBUTTONCOUNT];
         POINT					m_Pos;
 
         std::wstring				m_infoText;
@@ -116,25 +116,25 @@ namespace mu::ui::window
     };
 
     inline
-        void CNewUICursedTempleResult::SetPos(int x, int y)
+        void CCursedTempleResult::SetPos(int x, int y)
     {
         m_Pos.x = x; m_Pos.y = y;
     }
 
     inline
-        void CNewUICursedTempleResult::SetMyTeam(SEASON3A::eCursedTempleTeam myteam)
+        void CCursedTempleResult::SetMyTeam(SEASON3A::eCursedTempleTeam myteam)
     {
         m_MyTeam = myteam;
     }
 
     inline
-        const POINT& CNewUICursedTempleResult::GetPos() const
+        const POINT& CCursedTempleResult::GetPos() const
     {
         return m_Pos;
     }
 
     inline
-        float CNewUICursedTempleResult::GetLayerDepth()	//. 5.0f
+        float CCursedTempleResult::GetLayerDepth()	//. 5.0f
     {
         return 10.2f;
     }

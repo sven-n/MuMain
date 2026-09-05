@@ -18,7 +18,7 @@ using namespace mu::ui::window;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 // cppcheck-suppress uninitMemberVar
-CNewUIStorageInventoryExt::CNewUIStorageInventoryExt()
+CStorageInventoryExt::CStorageInventoryExt()
 {
     m_pNewUIMng = nullptr;
     m_pNewInventoryCtrl = nullptr;
@@ -26,12 +26,12 @@ CNewUIStorageInventoryExt::CNewUIStorageInventoryExt()
     m_nBackupSourceInvenIndex = -1;
 }
 
-CNewUIStorageInventoryExt::~CNewUIStorageInventoryExt()
+CStorageInventoryExt::~CStorageInventoryExt()
 {
     Release();
 }
 
-bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
 {
     if (nullptr == pNewUIMng || nullptr == g_pNewUI3DRenderMng || nullptr == g_pNewItemMng)
     {
@@ -41,7 +41,7 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_STORAGE_EXT, this);
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::VAULT, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15,
                                              y + 36, 8, 15, MAX_SHOP_INVENTORY))
     {
@@ -60,7 +60,7 @@ bool CNewUIStorageInventoryExt::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIStorageInventoryExt::Release()
+void CStorageInventoryExt::Release()
 {
     UnloadImages();
 
@@ -73,14 +73,14 @@ void CNewUIStorageInventoryExt::Release()
     }
 }
 
-void CNewUIStorageInventoryExt::SetPos(int x, int y)
+void CStorageInventoryExt::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
 }
 
-bool CNewUIStorageInventoryExt::UpdateMouseEvent()
+bool CStorageInventoryExt::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
@@ -115,7 +115,7 @@ bool CNewUIStorageInventoryExt::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIStorageInventoryExt::UpdateKeyEvent()
+bool CStorageInventoryExt::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == true)
     {
@@ -129,7 +129,7 @@ bool CNewUIStorageInventoryExt::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIStorageInventoryExt::Update()
+bool CStorageInventoryExt::Update()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
@@ -137,7 +137,7 @@ bool CNewUIStorageInventoryExt::Update()
     return true;
 }
 
-bool CNewUIStorageInventoryExt::Render()
+bool CStorageInventoryExt::Render()
 {
     EnableAlphaTest();
 
@@ -156,7 +156,7 @@ bool CNewUIStorageInventoryExt::Render()
     return true;
 }
 
-void CNewUIStorageInventoryExt::RenderBackImage() const
+void CStorageInventoryExt::RenderBackImage() const
 {
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
@@ -167,24 +167,24 @@ void CNewUIStorageInventoryExt::RenderBackImage() const
     RenderImage(IMAGE_STORAGE_BOTTOM, x, y + STORAGE_HEIGHT - 45, STORAGE_WIDTH, 45.f);
 }
 
-void CNewUIStorageInventoryExt::RenderText() const
+void CStorageInventoryExt::RenderText() const
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 11, I18N::Game::ExpandedVault, STORAGE_WIDTH, 0, RT3_SORT_CENTER);
 }
 
-float CNewUIStorageInventoryExt::GetLayerDepth()
+float CStorageInventoryExt::GetLayerDepth()
 {
     return 2.2f;
 }
 
-CNewUIInventoryCtrl* CNewUIStorageInventoryExt::GetInventoryCtrl() const
+CInventoryCtrl* CStorageInventoryExt::GetInventoryCtrl() const
 {
     return m_pNewInventoryCtrl;
 }
 
-void CNewUIStorageInventoryExt::LoadImages() const
+void CStorageInventoryExt::LoadImages() const
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_STORAGE_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_STORAGE_TOP, GL_LINEAR);
@@ -194,7 +194,7 @@ void CNewUIStorageInventoryExt::LoadImages() const
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
 }
 
-void CNewUIStorageInventoryExt::UnloadImages()
+void CStorageInventoryExt::UnloadImages()
 {
     DeleteBitmap(IMAGE_INVENTORY_EXIT_BTN);
     DeleteBitmap(IMAGE_STORAGE_BOTTOM);
@@ -204,18 +204,18 @@ void CNewUIStorageInventoryExt::UnloadImages()
     DeleteBitmap(IMAGE_STORAGE_BACK);
 }
 
-bool CNewUIStorageInventoryExt::ProcessClosing() const
+bool CStorageInventoryExt::ProcessClosing() const
 {
     if (EquipmentItem)
         return false;
 
-    CNewUIInventoryCtrl::BackupPickedItem();
+    CInventoryCtrl::BackupPickedItem();
     DeleteAllItems();
     SocketClient->ToGameServer()->SendVaultClosed();
     return true;
 }
 
-bool CNewUIStorageInventoryExt::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
+bool CStorageInventoryExt::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket) const
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->AddItem(iIndex, pbyItemPacket);
@@ -223,20 +223,20 @@ bool CNewUIStorageInventoryExt::InsertItem(int iIndex, std::span<const BYTE> pby
     return false;
 }
 
-void CNewUIStorageInventoryExt::DeleteAllItems() const
+void CStorageInventoryExt::DeleteAllItems() const
 {
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->RemoveAllItems();
 }
 
-void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
+void CStorageInventoryExt::ProcessInventoryCtrl()
 {
     if (nullptr == m_pNewInventoryCtrl)
     {
         return;
     }
 
-    if (const auto pPickedItem = CNewUIInventoryCtrl::GetPickedItem())
+    if (const auto pPickedItem = CInventoryCtrl::GetPickedItem())
     {
         ITEM* pItemObj = pPickedItem->GetItem();
         if (pItemObj == nullptr)
@@ -274,7 +274,7 @@ void CNewUIStorageInventoryExt::ProcessInventoryCtrl()
     }
 }
 
-void CNewUIStorageInventoryExt::ProcessStorageItemAutoMove()
+void CStorageInventoryExt::ProcessStorageItemAutoMove()
 {
     if (g_pPickedItem)
         if (g_pPickedItem->GetItem())
@@ -298,7 +298,7 @@ void CNewUIStorageInventoryExt::ProcessStorageItemAutoMove()
     }
 }
 
-bool CNewUIStorageInventoryExt::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* sourceCtrl)
+bool CStorageInventoryExt::ProcessMyInvenItemAutoMove(CInventoryCtrl* sourceCtrl)
 {
     if (g_pPickedItem && g_pPickedItem->GetItem())
     {
@@ -344,7 +344,7 @@ bool CNewUIStorageInventoryExt::ProcessMyInvenItemAutoMove(CNewUIInventoryCtrl* 
     return false;
 }
 
-bool CNewUIStorageInventoryExt::ProcessBtns() const
+bool CStorageInventoryExt::ProcessBtns() const
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_STORAGE))
@@ -353,7 +353,7 @@ bool CNewUIStorageInventoryExt::ProcessBtns() const
     return false;
 }
 
-void CNewUIStorageInventoryExt::SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex)
+void CStorageInventoryExt::SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex)
 {
     m_bItemAutoMove = bItemAutoMove;
 
@@ -370,7 +370,7 @@ void CNewUIStorageInventoryExt::SetItemAutoMove(bool bItemAutoMove, int nSourceI
     }
 }
 
-int CNewUIStorageInventoryExt::FindEmptySlot(const ITEM* pItemObj) const
+int CStorageInventoryExt::FindEmptySlot(const ITEM* pItemObj) const
 {
     if (pItemObj == nullptr)
         return -1;
@@ -383,9 +383,9 @@ int CNewUIStorageInventoryExt::FindEmptySlot(const ITEM* pItemObj) const
     return -1;
 }
 
-void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket)
+void CStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
-    CNewUIInventoryCtrl::DeletePickedItem();
+    CInventoryCtrl::DeletePickedItem();
 
     if (IsItemAutoMove())
     {
@@ -400,7 +400,7 @@ void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::sp
         }
         else
         {
-            CNewUIInventoryCtrl* pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+            CInventoryCtrl* pMyInvenCtrl = g_pMyInventory->GetInventoryCtrl();
             ITEM* pItemObj = pMyInvenCtrl->FindItemAtPt(m_nBackupMouseX, m_nBackupMouseY);
             g_pMyInventory->GetInventoryCtrl()->RemoveItem(pItemObj);
         }
@@ -411,7 +411,7 @@ void CNewUIStorageInventoryExt::ProcessToReceiveStorageItems(int nIndex, std::sp
     InsertItem(nIndex, pbyItemPacket);
 }
 
-void CNewUIStorageInventoryExt::ProcessStorageItemAutoMoveSuccess()
+void CStorageInventoryExt::ProcessStorageItemAutoMoveSuccess()
 {
     if (!IsVisible())
         return;
@@ -425,7 +425,7 @@ void CNewUIStorageInventoryExt::ProcessStorageItemAutoMoveSuccess()
     }
 }
 
-void CNewUIStorageInventoryExt::ProcessStorageItemAutoMoveFailure()
+void CStorageInventoryExt::ProcessStorageItemAutoMoveFailure()
 {
     if (!IsVisible())
         return;
@@ -433,7 +433,7 @@ void CNewUIStorageInventoryExt::ProcessStorageItemAutoMoveFailure()
     SetItemAutoMove(false);
 }
 
-int CNewUIStorageInventoryExt::GetPointedItemIndex() const
+int CStorageInventoryExt::GetPointedItemIndex() const
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }

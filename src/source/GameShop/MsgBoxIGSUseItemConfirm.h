@@ -19,17 +19,17 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-class CMsgBoxIGSUseItemConfirm : public CNewUIMessageBoxBase
+class CMsgBoxIGSUseItemConfirm : public CMessageBoxBase
 {
 public:
     enum IMAGE_IGS_USEITEM_CONFIRM
     {
         IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON, // 인게임샵 버튼
-        IMAGE_IGS_BACK = CNewUIOptionWindow::IMAGE_OPTION_FRAME_BACK,
-        IMAGE_IGS_UP = CNewUIOptionWindow::IMAGE_OPTION_FRAME_UP,
-        IMAGE_IGS_DOWN = CNewUIOptionWindow::IMAGE_OPTION_FRAME_DOWN,
-        IMAGE_IGS_LEFTLINE = CNewUIOptionWindow::IMAGE_OPTION_FRAME_LEFT,
-        IMAGE_IGS_RIGHTLINE = CNewUIOptionWindow::IMAGE_OPTION_FRAME_RIGHT,
+        IMAGE_IGS_BACK = COptionWindow::IMAGE_OPTION_FRAME_BACK,
+        IMAGE_IGS_UP = COptionWindow::IMAGE_OPTION_FRAME_UP,
+        IMAGE_IGS_DOWN = COptionWindow::IMAGE_OPTION_FRAME_DOWN,
+        IMAGE_IGS_LEFTLINE = COptionWindow::IMAGE_OPTION_FRAME_LEFT,
+        IMAGE_IGS_RIGHTLINE = COptionWindow::IMAGE_OPTION_FRAME_RIGHT,
     };
 
     enum IMAGE_IGS_USEITEM_CONFIRM_SIZE
@@ -72,9 +72,9 @@ public:
 
     void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType, wchar_t* pszItemName);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -89,8 +89,8 @@ private:
 
 private:
     // buttons
-    CNewUIMessageBoxButton m_BtnOk;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnOk;
+    CMessageBoxButton m_BtnCancel;
 
     int m_iMiddleCount;
 

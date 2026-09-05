@@ -1,4 +1,4 @@
-// NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.cpp: implementation of the CGuildInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -52,7 +52,7 @@ extern int m_StatueHP;
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUICryWolf::CNewUICryWolf()
+mu::ui::window::CCryWolf::CCryWolf()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -65,12 +65,12 @@ mu::ui::window::CNewUICryWolf::CNewUICryWolf()
     m_bTimeStart = false;
 }
 
-mu::ui::window::CNewUICryWolf::~CNewUICryWolf()
+mu::ui::window::CCryWolf::~CCryWolf()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUICryWolf::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCryWolf::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -84,17 +84,17 @@ bool mu::ui::window::CNewUICryWolf::Create(CNewUIManager* pNewUIMng, int x, int 
     return true;
 }
 
-void mu::ui::window::CNewUICryWolf::ClosingProcess()
+void mu::ui::window::CCryWolf::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float mu::ui::window::CNewUICryWolf::GetLayerDepth()
+float mu::ui::window::CCryWolf::GetLayerDepth()
 {
     return 10.0f;
 }
 
-void mu::ui::window::CNewUICryWolf::OpenningProcess()
+void mu::ui::window::CCryWolf::OpenningProcess()
 {
     m_iHour = 0;
     m_iMinute = 0;
@@ -104,7 +104,7 @@ void mu::ui::window::CNewUICryWolf::OpenningProcess()
     m_bTimeStart = false;
 }
 
-void mu::ui::window::CNewUICryWolf::Release()
+void mu::ui::window::CCryWolf::Release()
 {
     UnloadImages();
 
@@ -115,22 +115,22 @@ void mu::ui::window::CNewUICryWolf::Release()
     }
 }
 
-void mu::ui::window::CNewUICryWolf::SetPos(int x, int y)
+void mu::ui::window::CCryWolf::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUICryWolf::UpdateMouseEvent()
+bool mu::ui::window::CCryWolf::UpdateMouseEvent()
 {
     return true;
 }
-bool mu::ui::window::CNewUICryWolf::UpdateKeyEvent()
+bool mu::ui::window::CCryWolf::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUICryWolf::Render()
+bool mu::ui::window::CCryWolf::Render()
 {
     if (M34CryWolf1st::IsCyrWolf1st() == false)
         return true;
@@ -471,22 +471,22 @@ bool mu::ui::window::CNewUICryWolf::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUICryWolf::Update()
+bool mu::ui::window::CCryWolf::Update()
 {
     return true;
 }
 
-float mu::ui::window::CNewUICryWolf::ConvertX(float x)
+float mu::ui::window::CCryWolf::ConvertX(float x)
 {
     return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
 }
 
-float mu::ui::window::CNewUICryWolf::ConvertY(float y)
+float mu::ui::window::CCryWolf::ConvertY(float y)
 {
     return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 }
 
-bool mu::ui::window::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)
+bool mu::ui::window::CCryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)
 {
     const BYTE alpha = static_cast<BYTE>(std::clamp(Alpha, 0.f, 1.f) * 255.f);
     RenderImage(IMAGE_MVP_INTERFACE + Index, Posx, Posy, nPosx, nPosy, u, v, su, sv,
@@ -495,7 +495,7 @@ bool mu::ui::window::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nP
     return true;
 }
 
-void mu::ui::window::CNewUICryWolf::SetTime(int iHour, int iMinute)
+void mu::ui::window::CCryWolf::SetTime(int iHour, int iMinute)
 {
     m_iHour = iHour;
     if (m_iMinute != iMinute)
@@ -517,12 +517,12 @@ void mu::ui::window::CNewUICryWolf::SetTime(int iHour, int iMinute)
     m_iMinute = iMinute;
 }
 
-void mu::ui::window::CNewUICryWolf::InitTime()
+void mu::ui::window::CCryWolf::InitTime()
 {
     m_dwSyncTime = GetTickCount();
 }
 
-void mu::ui::window::CNewUICryWolf::LoadImages()
+void mu::ui::window::CCryWolf::LoadImages()
 {
     LoadBitmap(L"Interface\\in_bar.tga", IMAGE_MVP_INTERFACE, GL_LINEAR);
     LoadBitmap(L"Interface\\in_bar2.jpg", IMAGE_MVP_INTERFACE + 1, GL_LINEAR);
@@ -571,7 +571,7 @@ void mu::ui::window::CNewUICryWolf::LoadImages()
     LoadBitmap(L"Interface\\m_main_rank.tga", IMAGE_MVP_INTERFACE + 44, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUICryWolf::UnloadImages()
+void mu::ui::window::CCryWolf::UnloadImages()
 {
     DeleteBitmap(IMAGE_MVP_INTERFACE);
     DeleteBitmap(IMAGE_MVP_INTERFACE + 1);

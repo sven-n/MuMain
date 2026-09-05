@@ -147,7 +147,7 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
 
 void CLoginMainWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     for (int i = 0; i < LMW_BTN_MAX; ++i)
         m_aBtn[i].Show(bShow);

@@ -45,7 +45,7 @@ bool CMsgBoxIGSGiftStorageItemInfo::Create(float fPriority)
     LoadImages();
     SetAddCallbackFunc();
 
-    CNewUIMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2),
+    CMessageBoxBase::Create((IMAGE_IGS_WINDOW_WIDTH / 2) - (IMAGE_IGS_FRAME_WIDTH / 2),
         (IMAGE_IGS_WINDOW_HEIGHT / 2) - (IMAGE_IGS_FRAME_HEIGHT / 2),
         IMAGE_IGS_FRAME_WIDTH, IMAGE_IGS_FRAME_HEIGHT, fPriority);
 
@@ -111,7 +111,7 @@ void CMsgBoxIGSGiftStorageItemInfo::Initialize(int iStorageSeq, int iStorageItem
 // Release
 void CMsgBoxIGSGiftStorageItemInfo::Release()
 {
-    CNewUIMessageBoxBase::Release();
+    CMessageBoxBase::Release();
 
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->Remove3DRenderObj(this);
@@ -169,7 +169,7 @@ void CMsgBoxIGSGiftStorageItemInfo::SetAddCallbackFunc()
 
 //--------------------------------------------
 // LButtonUp
-CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSGiftStorageItemInfo*>(pOwner);
 
@@ -193,7 +193,7 @@ CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::LButtonUp(class CNewUIMessageBoxB
 
 //--------------------------------------------
 // OKButtonDown
-CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSGiftStorageItemInfo*>(pOwner);
 
@@ -211,7 +211,7 @@ CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::OKButtonDown(class CNewUIMessageB
 
 //--------------------------------------------
 // CancelButtonDown
-CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT CMsgBoxIGSGiftStorageItemInfo::CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -225,13 +225,13 @@ void CMsgBoxIGSGiftStorageItemInfo::SetButtonInfo()
 {
     // Ȯ�� ��ư
     m_BtnUse.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_OK_POS_X, GetPos().y + IGS_BTN_POS_Y + 102,
-        IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
+        IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnUse.MoveTextPos(0, -1);
     m_BtnUse.SetText(I18N::Game::OK);
 
     // ��� ��ư
     m_BtnCancel.SetInfo(IMAGE_IGS_BUTTON, GetPos().x + IGS_BTN_CANCEL_POS_X, GetPos().y + IGS_BTN_POS_Y + 102,
-        IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CNewUIMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
+        IMAGE_IGS_BTN_WIDTH, IMAGE_IGS_BTN_HEIGHT, CMessageBoxButton::MSGBOX_BTN_CUSTOM, true);
     m_BtnCancel.MoveTextPos(0, -1);
     m_BtnCancel.SetText(I18N::Game::Cancel);
 }

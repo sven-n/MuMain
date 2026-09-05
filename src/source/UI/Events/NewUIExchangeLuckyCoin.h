@@ -1,4 +1,4 @@
-// NewUIExchangeLuckyCoin.h: interface for the CNewUIExchangeLuckyCoin class.
+// NewUIExchangeLuckyCoin.h: interface for the CExchangeLuckyCoin class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -10,20 +10,20 @@
 
 namespace mu::ui::window
 {
-    class CNewUIExchangeLuckyCoin : public CNewUIObj
+    class CExchangeLuckyCoin : public CObject
     {
     public:
         enum IMAGE_LIST
         {
             // Base Window (Reference)
-            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,				//. newui_msgbox_back.jpg
-            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,			//. newui_item_back01.tga	(190,64)
-            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,		//. newui_item_back02-l.tga	(21,320)
-            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,		//. newui_item_back02-r.tga	(21,320)
-            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	//. newui_item_back03.tga	(190,45)
-            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,	//. newui_btn_empty.tga (64, 87)
+            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,				//. newui_msgbox_back.jpg
+            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,			//. newui_item_back01.tga	(190,64)
+            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		//. newui_item_back02-l.tga	(21,320)
+            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,		//. newui_item_back02-r.tga	(21,320)
+            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	//. newui_item_back03.tga	(190,45)
+            IMAGE_EXCHANGE_LUCKYCOIN_WINDOW_BTN_EXIT = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,	//. newui_btn_empty.tga (64, 87)
 
-            IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY			//. newui_btn_empty.tga	(108, 87)
+            IMAGE_EXCHANGE_LUCKYCOIN_EXCHANGE_BTN = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY			//. newui_btn_empty.tga	(108, 87)
         };
 
     private:
@@ -42,19 +42,19 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
         POINT						m_TextPos;
         POINT						m_FirstBtnPos;
 
-        CNewUIButton				m_BtnExchange[MAX_EXCHANGE_BTN];
-        CNewUIButton				m_BtnExit;
+        CButton				m_BtnExchange[MAX_EXCHANGE_BTN];
+        CButton				m_BtnExit;
 
     public:
-        CNewUIExchangeLuckyCoin();
-        virtual ~CNewUIExchangeLuckyCoin();
+        CExchangeLuckyCoin();
+        virtual ~CExchangeLuckyCoin();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

@@ -1,37 +1,37 @@
-// NewUIRenderNumber.cpp: implementation of the CNewUIRenderNumber class.
+// NewUIRenderNumber.cpp: implementation of the CRenderNumber class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 
 #include "UI/Widgets/NewUIRenderNumber.h"	// self
 
-mu::ui::window::CNewUIRenderNumber* mu::ui::window::CNewUIRenderNumber::GetInstance()
+mu::ui::window::CRenderNumber* mu::ui::window::CRenderNumber::GetInstance()
 {
-    static CNewUIRenderNumber s_NewUIRenderNumber;
+    static CRenderNumber s_NewUIRenderNumber;
     return &s_NewUIRenderNumber;
 }
 
-mu::ui::window::CNewUIRenderNumber::CNewUIRenderNumber()
+mu::ui::window::CRenderNumber::CRenderNumber()
 {
     LoadImage();
 }
 
-mu::ui::window::CNewUIRenderNumber::~CNewUIRenderNumber()
+mu::ui::window::CRenderNumber::~CRenderNumber()
 {
     ReleaseImage();
 }
 
-void mu::ui::window::CNewUIRenderNumber::LoadImage()
+void mu::ui::window::CRenderNumber::LoadImage()
 {
     LoadBitmap(L"Interface\\newui_number1.tga", IMAGE_NUMBER1, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIRenderNumber::ReleaseImage()
+void mu::ui::window::CRenderNumber::ReleaseImage()
 {
     DeleteBitmap(IMAGE_NUMBER1);
 }
 
-float mu::ui::window::CNewUIRenderNumber::RenderNumber(float x, float y, int iNum, float fScale)
+float mu::ui::window::CRenderNumber::RenderNumber(float x, float y, int iNum, float fScale)
 {
     EnableAlphaTest();
 

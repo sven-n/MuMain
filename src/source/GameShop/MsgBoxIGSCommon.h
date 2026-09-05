@@ -16,17 +16,17 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-class CMsgBoxIGSCommon : public CNewUIMessageBoxBase
+class CMsgBoxIGSCommon : public CMessageBoxBase
 {
 public:
     enum IMAGE_IGS_COMMON
     {
         IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
-        IMAGE_IGS_BACK = CNewUIOptionWindow::IMAGE_OPTION_FRAME_BACK,
-        IMAGE_IGS_UP = CNewUIOptionWindow::IMAGE_OPTION_FRAME_UP,
-        IMAGE_IGS_DOWN = CNewUIOptionWindow::IMAGE_OPTION_FRAME_DOWN,
-        IMAGE_IGS_LEFTLINE = CNewUIOptionWindow::IMAGE_OPTION_FRAME_LEFT,
-        IMAGE_IGS_RIGHTLINE = CNewUIOptionWindow::IMAGE_OPTION_FRAME_RIGHT,
+        IMAGE_IGS_BACK = COptionWindow::IMAGE_OPTION_FRAME_BACK,
+        IMAGE_IGS_UP = COptionWindow::IMAGE_OPTION_FRAME_UP,
+        IMAGE_IGS_DOWN = COptionWindow::IMAGE_OPTION_FRAME_DOWN,
+        IMAGE_IGS_LEFTLINE = COptionWindow::IMAGE_OPTION_FRAME_LEFT,
+        IMAGE_IGS_RIGHTLINE = COptionWindow::IMAGE_OPTION_FRAME_RIGHT,
     };
 
     enum IMAGESIZE_IGS_COMMON
@@ -69,9 +69,9 @@ public:
 
     void Initialize(const wchar_t* pszTitle, const wchar_t* pszText);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -85,7 +85,7 @@ private:
     void UnloadImages();
 
 private:
-    CNewUIMessageBoxButton m_BtnOk;
+    CMessageBoxButton m_BtnOk;
 
     wchar_t m_szTitle[MAX_TEXT_LENGTH];
     wchar_t m_szText[NUM_LINE_CMB][MAX_TEXT_LENGTH];

@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIGuildInfoWindow.h: interface for the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.h: interface for the CGuildInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -12,7 +12,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIMiniMap : public CNewUIObj
+    class CMiniMap : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -41,22 +41,22 @@ namespace mu::ui::window
         HFONT					m_hToolTipFont;
         DWORD					m_TooltipTextColor;
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT					m_Pos;
         POINT					m_Width;
         POINT					m_MiniWidth;
         POINT					m_Lenth[6];
         int						m_MiniPos;
-        CNewUIButton			m_BtnExit;
+        CButton			m_BtnExit;
         MINI_MAP				m_Mini_Map_Data[MAX_MINI_MAP_DATA];
         float					m_Btn_Loc[MAX_MINI_MAP_DATA][4];
 
     public:
         bool					m_bSuccess;
-        CNewUIMiniMap();
-        virtual ~CNewUIMiniMap();
+        CMiniMap();
+        virtual ~CMiniMap();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -72,7 +72,7 @@ namespace mu::ui::window
         void OpenningProcess();
         void ClosingProcess();
         void OpenMasterLevel(const wchar_t* filename);
-        CNewUIButton m_BtnToolTip;
+        CButton m_BtnToolTip;
         void LoadImages(const wchar_t* Filename);
         void UnloadImages();
 

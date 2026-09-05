@@ -11,11 +11,11 @@
 
 namespace mu::ui::window
 {
-class CNewUISiegeWarSoldier : public CNewUISiegeWarBase
+class CSiegeWarSoldier : public CSiegeWarBase
 {
 public:
-    CNewUISiegeWarSoldier();
-    virtual ~CNewUISiegeWarSoldier();
+    CSiegeWarSoldier();
+    virtual ~CSiegeWarSoldier();
 
 private:
     virtual bool OnCreate(int x, int y);

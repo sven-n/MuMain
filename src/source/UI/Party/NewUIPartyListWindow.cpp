@@ -16,7 +16,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIPartyListWindow::CNewUIPartyListWindow()
+CPartyListWindow::CPartyListWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -33,12 +33,12 @@ CNewUIPartyListWindow::CNewUIPartyListWindow()
     }
 }
 
-CNewUIPartyListWindow::~CNewUIPartyListWindow()
+CPartyListWindow::~CPartyListWindow()
 {
     Release();
 }
 
-bool CNewUIPartyListWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CPartyListWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -63,7 +63,7 @@ bool CNewUIPartyListWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIPartyListWindow::Release()
+void CPartyListWindow::Release()
 {
     UnloadImages();
 
@@ -74,7 +74,7 @@ void CNewUIPartyListWindow::Release()
     }
 }
 
-void CNewUIPartyListWindow::SetPos(int x, int y)
+void CPartyListWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -86,12 +86,12 @@ void CNewUIPartyListWindow::SetPos(int x, int y)
     }
 }
 
-void CNewUIPartyListWindow::SetPos(int x)
+void CPartyListWindow::SetPos(int x)
 {
     SetPos(x - (PARTY_LIST_WINDOW_WIDTH + 2), m_Pos.y);
 }
 
-int CNewUIPartyListWindow::GetSelectedCharacter()
+int CPartyListWindow::GetSelectedCharacter()
 {
     if (m_iSelectedCharacter == -1)
         return -1;
@@ -99,7 +99,7 @@ int CNewUIPartyListWindow::GetSelectedCharacter()
     return Party[m_iSelectedCharacter].index;
 }
 
-void CNewUIPartyListWindow::SetListBGColor()
+void CPartyListWindow::SetListBGColor()
 {
     for (int i = 0; i < PartyNumber; i++)
     {
@@ -117,7 +117,7 @@ void CNewUIPartyListWindow::SetListBGColor()
     }
 }
 
-bool CNewUIPartyListWindow::BtnProcess()
+bool CPartyListWindow::BtnProcess()
 {
     m_iSelectedCharacter = -1;
 
@@ -155,7 +155,7 @@ bool CNewUIPartyListWindow::BtnProcess()
     return false;
 }
 
-bool CNewUIPartyListWindow::UpdateMouseEvent()
+bool CPartyListWindow::UpdateMouseEvent()
 {
     if (!m_bActive)
         return true;
@@ -175,12 +175,12 @@ bool CNewUIPartyListWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIPartyListWindow::UpdateKeyEvent()
+bool CPartyListWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIPartyListWindow::Update()
+bool CPartyListWindow::Update()
 {
     if (PartyNumber <= 0)
     {
@@ -198,7 +198,7 @@ bool CNewUIPartyListWindow::Update()
     return true;
 }
 
-bool CNewUIPartyListWindow::Render()
+bool CPartyListWindow::Render()
 {
     if (!m_bActive)
         return true;
@@ -289,7 +289,7 @@ bool CNewUIPartyListWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIPartyListWindow::RenderPartyHPOnHead()
+void mu::ui::window::CPartyListWindow::RenderPartyHPOnHead()
 {
     if (PartyNumber <= 0)
         return;
@@ -342,20 +342,20 @@ void mu::ui::window::CNewUIPartyListWindow::RenderPartyHPOnHead()
     DisableAlphaBlend();
 }
 
-float CNewUIPartyListWindow::GetLayerDepth()
+float CPartyListWindow::GetLayerDepth()
 {
     return 5.4f;
 }
 
-void CNewUIPartyListWindow::OpenningProcess()
+void CPartyListWindow::OpenningProcess()
 {
 }
 
-void CNewUIPartyListWindow::ClosingProcess()
+void CPartyListWindow::ClosingProcess()
 {
 }
 
-bool CNewUIPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
+bool CPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
 {
     auto HeroClass = gCharacterManager.GetBaseClass(Hero->Class);
 
@@ -390,7 +390,7 @@ bool CNewUIPartyListWindow::SelectCharacterInPartyList(PARTY_t* pMember)
     return false;
 }
 
-void CNewUIPartyListWindow::LoadImages()
+void CPartyListWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_party_flag.tga", IMAGE_PARTY_LIST_FLAG, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_party_x.tga", IMAGE_PARTY_LIST_EXIT, GL_LINEAR);
@@ -398,7 +398,7 @@ void CNewUIPartyListWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_party_hpbar.jpg", IMAGE_PARTY_LIST_HPBAR, GL_LINEAR);
 }
 
-void CNewUIPartyListWindow::UnloadImages()
+void CPartyListWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_PARTY_LIST_FLAG);
     DeleteBitmap(IMAGE_PARTY_LIST_EXIT);

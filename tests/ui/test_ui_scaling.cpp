@@ -24,14 +24,14 @@
 #include "UI/Widgets/Button.h"
 
 using UI::Scaling::FontRole;
-using mu::ui::window::CNewUICommandWindow;
+using mu::ui::window::CCommandWindow;
 
 namespace
 {
-class Recording3DObject final : public mu::ui::window::INewUI3DRenderObj
+class Recording3DObject final : public mu::ui::window::I3DRenderObj
 {
 public:
-    explicit Recording3DObject(mu::ui::window::CNewUIObj* owner)
+    explicit Recording3DObject(mu::ui::window::CObject* owner)
         : m_owner(owner)
     {
     }
@@ -43,22 +43,22 @@ public:
     }
 
     bool IsVisible() const override { return true; }
-    mu::ui::window::CNewUIObj* GetLayoutOwner() const override { return m_owner; }
+    mu::ui::window::CObject* GetLayoutOwner() const override { return m_owner; }
 
     int mouseX = -1;
     int mouseY = -1;
 
 private:
-    mu::ui::window::CNewUIObj* m_owner;
+    mu::ui::window::CObject* m_owner;
 };
 
-class Test3DCamera final : public mu::ui::window::CNewUI3DCamera
+class Test3DCamera final : public mu::ui::window::C3DCamera
 {
 public:
-    using CNewUI3DCamera::Render3D;
+    using C3DCamera::Render3D;
 };
 
-class RecordingUIObject final : public mu::ui::window::CNewUIObj
+class RecordingUIObject final : public mu::ui::window::CObject
 {
 public:
     bool Render() override
@@ -325,7 +325,7 @@ TEST_CASE("store window consumes passive hover before world selection [ui][store
     MouseY = 200;
 
     {
-        mu::ui::window::CNewUINPCShop shop;
+        mu::ui::window::CNPCShop shop;
         shop.SetSellingItem(true);
         CHECK_FALSE(shop.UpdateMouseEvent());
     }
@@ -366,20 +366,20 @@ TEST_CASE("docked command window ends at the bottom HUD top [ui][scaling]")
 {
     CHECK(UI::Scaling::PositionY(
         UI::Scaling::DockRightTransform(1280, 1024),
-        CNewUICommandWindow::COMMAND_WINDOW_HEIGHT) == doctest::Approx(922.0f));
+        CCommandWindow::COMMAND_WINDOW_HEIGHT) == doctest::Approx(922.0f));
 }
 
 TEST_CASE("dockable command windows share the HUD boundary [ui][scaling]")
 {
     CHECK(UI::Scaling::DockLogicalBottom == 432);
-    CHECK(CNewUICommandWindow::COMMAND_WINDOW_HEIGHT == UI::Scaling::DockLogicalBottom);
-    CHECK(mu::ui::window::CNewUIChatCommandWindow::WindowHeight == UI::Scaling::DockLogicalBottom);
+    CHECK(CCommandWindow::COMMAND_WINDOW_HEIGHT == UI::Scaling::DockLogicalBottom);
+    CHECK(mu::ui::window::CChatCommandWindow::WindowHeight == UI::Scaling::DockLogicalBottom);
 }
 
 TEST_CASE("command windows render between HUD and modal layers [ui][scaling]")
 {
-    CNewUICommandWindow commandWindow;
-    mu::ui::window::CNewUIChatCommandWindow commandListWindow;
+    CCommandWindow commandWindow;
+    mu::ui::window::CChatCommandWindow commandListWindow;
 
     CHECK(UI::Layout::ForegroundPanelLayerDepth > 10.6f);
     CHECK(UI::Layout::ForegroundPanelLayerDepth < 10.7f);
@@ -494,7 +494,7 @@ TEST_CASE("3D item rendering uses its owner layout for hover input [ui][scaling]
     MouseX = 546;
     MouseY = 228;
 
-    CNewUICommandWindow owner;
+    CCommandWindow owner;
     owner.SetLayoutMode(UI::Scaling::LayoutMode::DockRight);
     Recording3DObject object(&owner);
     Test3DCamera camera;
@@ -537,7 +537,7 @@ TEST_CASE("managed rendering uses its layout mouse coordinates [ui][scaling]")
     MouseY = 202;
 
     RecordingUIObject object;
-    mu::ui::window::CNewUIManager manager;
+    mu::ui::window::CManager manager;
     manager.AddUIObj(mu::ui::window::INTERFACE_INVENTORY, &object);
 
     manager.Render();

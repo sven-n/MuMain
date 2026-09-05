@@ -1,4 +1,4 @@
-// NewUIEmpireGuardianTimer.cpp: implementation of the CNewUIEmpireGuardianTimer class.
+// NewUIEmpireGuardianTimer.cpp: implementation of the CEmpireGuardianTimer class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Core/NewUISystem.h"
@@ -8,7 +8,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIEmpireGuardianTimer::CNewUIEmpireGuardianTimer()
+CEmpireGuardianTimer::CEmpireGuardianTimer()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -19,12 +19,12 @@ CNewUIEmpireGuardianTimer::CNewUIEmpireGuardianTimer()
     m_iMonsterCount = 0;
 }
 
-CNewUIEmpireGuardianTimer::~CNewUIEmpireGuardianTimer()
+CEmpireGuardianTimer::~CEmpireGuardianTimer()
 {
     Release();
 }
 
-bool CNewUIEmpireGuardianTimer::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CEmpireGuardianTimer::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -41,7 +41,7 @@ bool CNewUIEmpireGuardianTimer::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIEmpireGuardianTimer::Release()
+void CEmpireGuardianTimer::Release()
 {
     UnloadImages();
 
@@ -52,25 +52,25 @@ void CNewUIEmpireGuardianTimer::Release()
     }
 }
 
-void CNewUIEmpireGuardianTimer::SetPos(int x, int y)
+void CEmpireGuardianTimer::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIEmpireGuardianTimer::UpdateMouseEvent()
+bool CEmpireGuardianTimer::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
     return true;
 }
 
-bool CNewUIEmpireGuardianTimer::UpdateKeyEvent()
+bool CEmpireGuardianTimer::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIEmpireGuardianTimer::Update()
+bool CEmpireGuardianTimer::Update()
 {
     if (!IsVisible())
         return true;
@@ -78,7 +78,7 @@ bool CNewUIEmpireGuardianTimer::Update()
     return true;
 }
 
-bool CNewUIEmpireGuardianTimer::Render()
+bool CEmpireGuardianTimer::Render()
 {
     EnableAlphaTest();
 
@@ -130,30 +130,30 @@ bool CNewUIEmpireGuardianTimer::Render()
     return true;
 }
 
-bool CNewUIEmpireGuardianTimer::BtnProcess()
+bool CEmpireGuardianTimer::BtnProcess()
 {
     return false;
 }
 
-float CNewUIEmpireGuardianTimer::GetLayerDepth()
+float CEmpireGuardianTimer::GetLayerDepth()
 {
     return 1.2f;
 }
 
-void CNewUIEmpireGuardianTimer::OpenningProcess()
+void CEmpireGuardianTimer::OpenningProcess()
 {
 }
 
-void CNewUIEmpireGuardianTimer::ClosingProcess()
+void CEmpireGuardianTimer::ClosingProcess()
 {
 }
 
-void CNewUIEmpireGuardianTimer::LoadImages()
+void CEmpireGuardianTimer::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_blood.tga", IMAGE_EMPIREGUARDIAN_TIMER_WINDOW, GL_LINEAR);
 }
 
-void CNewUIEmpireGuardianTimer::UnloadImages()
+void CEmpireGuardianTimer::UnloadImages()
 {
     DeleteBitmap(IMAGE_EMPIREGUARDIAN_TIMER_WINDOW);
 }

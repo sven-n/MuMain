@@ -42,7 +42,7 @@ namespace Rml { class ElementDocument; }
 // to render after RmlUi's own input-frame background regardless of theme.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CNewUIObj. Unlike CMsgWin/CSysMenuWin (which pass nTexID=-2 and rely entirely on
+// mu::ui::window::CObject. Unlike CMsgWin/CSysMenuWin (which pass nTexID=-2 and rely entirely on
 // RmlUi's own #backdrop for dimming), this window's own base-class CWin::Create() call used the
 // *default* nTexID=-1 -- a real, visible full-screen semi-transparent black CWin::m_psprBg dimming
 // overlay, genuinely rendered every frame (unlike m_winBack's own -2). Ported as an explicit
@@ -51,7 +51,7 @@ namespace Rml { class ElementDocument; }
 // its dimmed background), not a redundant-bookkeeping cleanup like CMsgWin/CSysMenuWin's case.
 // UpdateMouseEvent() unconditionally claims the click while shown, matching that genuine full-
 // screen-modal intent.
-class CCharMakeWin : public mu::ui::window::CNewUIObj
+class CCharMakeWin : public mu::ui::window::CObject
 {
 protected:
     // Replaces CWin::m_psprBg -- see this class's own header comment above for why (unlike
@@ -95,7 +95,7 @@ public:
     // CLoginWin::RenderTextOnTop().
     void RenderTextOnTop();
 
-    // mu::ui::window::INewUIBase
+    // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
     // Was CWin::Create()'s (default nTexID=-1, real full-screen dimming) bounding rect +

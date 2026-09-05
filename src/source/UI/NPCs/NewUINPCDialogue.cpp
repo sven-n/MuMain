@@ -17,19 +17,19 @@ using namespace mu::ui::window;
 #define ND_SEL_TEXT_MAX_LINE_PER_PAGE	11
 #define ND_TEXT_GAP						15
 
-CNewUINPCDialogue::CNewUINPCDialogue()
+CNPCDialogue::CNPCDialogue()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_dwContributePoint = 0;
 }
 
-CNewUINPCDialogue::~CNewUINPCDialogue()
+CNPCDialogue::~CNPCDialogue()
 {
     Release();
 }
 
-bool CNewUINPCDialogue::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CNPCDialogue::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -62,7 +62,7 @@ bool CNewUINPCDialogue::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUINPCDialogue::Release()
+void CNPCDialogue::Release()
 {
     UnloadImages();
 
@@ -73,7 +73,7 @@ void CNewUINPCDialogue::Release()
     }
 }
 
-void CNewUINPCDialogue::SetPos(int x, int y)
+void CNPCDialogue::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -85,7 +85,7 @@ void CNewUINPCDialogue::SetPos(int x, int y)
     m_btnClose.SetPos(x + 13, y + 392);
 }
 
-bool CNewUINPCDialogue::UpdateMouseEvent()
+bool CNPCDialogue::UpdateMouseEvent()
 {
     if (ProcessBtns())
         return false;
@@ -99,7 +99,7 @@ bool CNewUINPCDialogue::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUINPCDialogue::ProcessBtns()
+bool CNPCDialogue::ProcessBtns()
 {
     if (m_btnClose.UpdateMouseEvent())
     {
@@ -165,7 +165,7 @@ bool CNewUINPCDialogue::ProcessBtns()
     return false;
 }
 
-bool CNewUINPCDialogue::UpdateSelTextMouseEvent()
+bool CNPCDialogue::UpdateSelTextMouseEvent()
 {
     if (SEL_TEXTS_MODE != m_eLowerView || !m_bCanClick)
         return false;
@@ -206,7 +206,7 @@ bool CNewUINPCDialogue::UpdateSelTextMouseEvent()
     return false;
 }
 
-bool CNewUINPCDialogue::UpdateKeyEvent()
+bool CNPCDialogue::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
     {
@@ -220,12 +220,12 @@ bool CNewUINPCDialogue::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUINPCDialogue::Update()
+bool CNPCDialogue::Update()
 {
     return true;
 }
 
-bool CNewUINPCDialogue::Render()
+bool CNPCDialogue::Render()
 {
     ::EnableAlphaTest();
 
@@ -251,7 +251,7 @@ bool CNewUINPCDialogue::Render()
     return true;
 }
 
-void CNewUINPCDialogue::RenderBackImage()
+void CNPCDialogue::RenderBackImage()
 {
     RenderImage(IMAGE_ND_BACK, m_Pos.x, m_Pos.y, float(ND_WIDTH), float(ND_HEIGHT));
     RenderImage(IMAGE_ND_TOP, m_Pos.x, m_Pos.y, float(ND_WIDTH), 64.f);
@@ -262,7 +262,7 @@ void CNewUINPCDialogue::RenderBackImage()
     RenderImage(IMAGE_ND_LINE, m_Pos.x + 1, m_Pos.y + 181, 188.f, 21.f);
 }
 
-void CNewUINPCDialogue::RenderSelTextBlock()
+void CNPCDialogue::RenderSelTextBlock()
 {
     if (SEL_TEXTS_MODE != m_eLowerView)
         return;
@@ -286,7 +286,7 @@ void CNewUINPCDialogue::RenderSelTextBlock()
         ND_TEXT_GAP * m_anSelTextLine[m_nSelSelText - 1], SelectionColor);
 }
 
-void CNewUINPCDialogue::RenderText()
+void CNPCDialogue::RenderText()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -316,7 +316,7 @@ void CNewUINPCDialogue::RenderText()
     }
 }
 
-void CNewUINPCDialogue::RenderContributePoint()
+void CNPCDialogue::RenderContributePoint()
 {
     if ((543 == g_QuestMng.GetNPCIndex() && 1 == Hero->m_byGensInfluence)
         || (544 == g_QuestMng.GetNPCIndex() && 2 == Hero->m_byGensInfluence))
@@ -330,17 +330,17 @@ void CNewUINPCDialogue::RenderContributePoint()
     }
 }
 
-bool CNewUINPCDialogue::IsVisible() const
+bool CNPCDialogue::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-float CNewUINPCDialogue::GetLayerDepth()
+float CNPCDialogue::GetLayerDepth()
 {
     return 3.1f;
 }
 
-void CNewUINPCDialogue::LoadImages()
+void CNPCDialogue::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_ND_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_ND_TOP, GL_LINEAR);
@@ -355,7 +355,7 @@ void CNewUINPCDialogue::LoadImages()
     LoadBitmap(L"Interface\\Gens_point.tga", IMAGE_ND_CONTRIBUTE_BG, GL_LINEAR);
 }
 
-void CNewUINPCDialogue::UnloadImages()
+void CNPCDialogue::UnloadImages()
 {
     DeleteBitmap(IMAGE_ND_CONTRIBUTE_BG);
     DeleteBitmap(IMAGE_ND_BTN_CLOSE);
@@ -370,14 +370,14 @@ void CNewUINPCDialogue::UnloadImages()
     DeleteBitmap(IMAGE_ND_BACK);
 }
 
-void CNewUINPCDialogue::ProcessOpening()
+void CNPCDialogue::ProcessOpening()
 {
     m_bQuestListMode = false;
     SetContents(0);
     ::PlayBuffer(SOUND_INTERFACE01);
 }
 
-bool CNewUINPCDialogue::ProcessClosing()
+bool CNPCDialogue::ProcessClosing()
 {
     m_dwCurDlgIndex = 0;
     m_dwContributePoint = 0;
@@ -387,7 +387,7 @@ bool CNewUINPCDialogue::ProcessClosing()
     return true;
 }
 
-void CNewUINPCDialogue::SetContents(DWORD dwDlgIndex)
+void CNPCDialogue::SetContents(DWORD dwDlgIndex)
 {
     m_dwCurDlgIndex = dwDlgIndex;
     SetCurNPCWords();
@@ -398,7 +398,7 @@ void CNewUINPCDialogue::SetContents(DWORD dwDlgIndex)
     m_nSelSelText = 0;
 }
 
-void CNewUINPCDialogue::SetCurNPCWords(int nQuestListCount)
+void CNPCDialogue::SetCurNPCWords(int nQuestListCount)
 {
     memset(m_aszNPCWords[0], 0, sizeof(wchar_t) * ND_NPC_LINE_MAX * ND_WORDS_ROW_MAX);
 
@@ -430,7 +430,7 @@ void CNewUINPCDialogue::SetCurNPCWords(int nQuestListCount)
     m_nSelNPCPage = 0;
 }
 
-void CNewUINPCDialogue::SetCurSelTexts()
+void CNPCDialogue::SetCurSelTexts()
 {
     ::memset(m_aszSelTexts[0], 0, sizeof(wchar_t) * ND_SEL_TEXT_LINE_MAX * ND_WORDS_ROW_MAX);
     ::memset(m_anSelTextLine, 0, sizeof(int) * (ND_QUEST_INDEX_MAX_COUNT + 1));
@@ -462,7 +462,7 @@ void CNewUINPCDialogue::SetCurSelTexts()
     CalculateSelTextMaxPage(i);
 }
 
-void CNewUINPCDialogue::CalculateSelTextMaxPage(int nSelTextCount)
+void CNPCDialogue::CalculateSelTextMaxPage(int nSelTextCount)
 {
     m_nSelSelTextPage = 0;
     m_nMaxSelTextPage = 0;
@@ -492,7 +492,7 @@ void CNewUINPCDialogue::CalculateSelTextMaxPage(int nSelTextCount)
         m_btnSelTextR.Lock();
 }
 
-void CNewUINPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
+void CNPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCount)
 {
     _ASSERT(0 <= nIndexCount && nIndexCount <= ND_QUEST_INDEX_MAX_COUNT);
 
@@ -538,13 +538,13 @@ void CNewUINPCDialogue::SetQuestListText(DWORD* adwSrcQuestIndex, int nIndexCoun
     CalculateSelTextMaxPage(i);
 }
 
-void CNewUINPCDialogue::SetContributePoint(DWORD dwContributePoint)
+void CNPCDialogue::SetContributePoint(DWORD dwContributePoint)
 {
     if (543 == g_QuestMng.GetNPCIndex() || 544 == g_QuestMng.GetNPCIndex())
         m_dwContributePoint = dwContributePoint;
 }
 
-void CNewUINPCDialogue::ProcessSelTextResult()
+void CNPCDialogue::ProcessSelTextResult()
 {
     if (m_bQuestListMode)
     {
@@ -603,7 +603,7 @@ void CNewUINPCDialogue::ProcessSelTextResult()
     }
 }
 
-void CNewUINPCDialogue::ProcessQuestListReceive(DWORD* adwSrcQuestIndex, int nIndexCount)
+void CNPCDialogue::ProcessQuestListReceive(DWORD* adwSrcQuestIndex, int nIndexCount)
 {
     m_bQuestListMode = true;
     SetCurNPCWords(nIndexCount);
@@ -626,7 +626,7 @@ enum GENS_JOINING_ERR_CODE
     GJEC_GUILD_UNION_MASTER
 };
 
-void CNewUINPCDialogue::ProcessGensJoiningReceive(BYTE byResult, BYTE byInfluence)
+void CNPCDialogue::ProcessGensJoiningReceive(BYTE byResult, BYTE byInfluence)
 {
     switch (byResult)
     {
@@ -677,7 +677,7 @@ enum GENS_REWARD_ERR_CODE
     GENS_REWARD_NOT_REG,
 };
 
-void CNewUINPCDialogue::ProcessGensSecessionReceive(BYTE byResult)
+void CNPCDialogue::ProcessGensSecessionReceive(BYTE byResult)
 {
     switch (byResult)
     {
@@ -697,7 +697,7 @@ void CNewUINPCDialogue::ProcessGensSecessionReceive(BYTE byResult)
     }
 }
 
-void CNewUINPCDialogue::ProcessGensRewardReceive(BYTE byResult)
+void CNPCDialogue::ProcessGensRewardReceive(BYTE byResult)
 {
     switch (byResult)
     {

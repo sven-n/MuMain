@@ -1,5 +1,5 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIItemMng.cpp: implementation of the CNewUIItemMng class.
+// NewUIItemMng.cpp: implementation of the CItemMng class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -70,19 +70,19 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
     return params;
 }
 
-mu::ui::window::CNewUIItemMng::CNewUIItemMng()
+mu::ui::window::CItemMng::CItemMng()
 {
     m_dwAlternate = 0;
     m_dwAvailableKeyStream = 0x80000000;
     m_UpdateTimer.SetTimer(1000);
 }
 
-mu::ui::window::CNewUIItemMng::~CNewUIItemMng()
+mu::ui::window::CItemMng::~CItemMng()
 {
     DeleteAllItems();
 }
 
-ITEM* mu::ui::window::CNewUIItemMng::CreateItem(std::span<const BYTE> itemData)
+ITEM* mu::ui::window::CItemMng::CreateItem(std::span<const BYTE> itemData)
 {
 
     return CreateItemExtended(itemData);
@@ -116,17 +116,17 @@ ITEM* mu::ui::window::CNewUIItemMng::CreateItem(std::span<const BYTE> itemData)
 ///
 ///  Total: 5 ~ 15 bytes.
 /// </summary>
-ITEM* mu::ui::window::CNewUIItemMng::CreateItemExtended(std::span<const BYTE> itemData)
+ITEM* mu::ui::window::CItemMng::CreateItemExtended(std::span<const BYTE> itemData)
 {
     if (itemData.size() < 5)
         return nullptr;
 
     ItemCreationParams params = ParseItemData(itemData);
-    auto item = CNewUIItemMng::CreateItemByParameters(&params);
+    auto item = CItemMng::CreateItemByParameters(&params);
     return item;
 }
 
-ITEM* mu::ui::window::CNewUIItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacket)
+ITEM* mu::ui::window::CItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacket)
 {
     WORD wType = ExtractItemType(pbyItemPacket);
     BYTE byOption380 = 0, byOptionHarmony = 0;
@@ -137,11 +137,11 @@ ITEM* mu::ui::window::CNewUIItemMng::CreateItemOld(std::span<const BYTE> pbyItem
     BYTE bySocketOption[5] = {pbyItemPacket[7], pbyItemPacket[8], pbyItemPacket[9], pbyItemPacket[10],
                               pbyItemPacket[11]};
 
-    return CNewUIItemMng::CreateItem(wType / MAX_ITEM_INDEX, wType % MAX_ITEM_INDEX, pbyItemPacket[1], pbyItemPacket[2],
+    return CItemMng::CreateItem(wType / MAX_ITEM_INDEX, wType % MAX_ITEM_INDEX, pbyItemPacket[1], pbyItemPacket[2],
                                      pbyItemPacket[3], pbyItemPacket[4], byOption380, byOptionHarmony, bySocketOption);
 }
 
-ITEM* mu::ui::window::CNewUIItemMng::CreateItemByParameters(const ItemCreationParams* parameters)
+ITEM* mu::ui::window::CItemMng::CreateItemByParameters(const ItemCreationParams* parameters)
 {
     if (parameters == nullptr)
     {
@@ -193,7 +193,7 @@ ITEM* mu::ui::window::CNewUIItemMng::CreateItemByParameters(const ItemCreationPa
     return pNewItem;
 }
 
-ITEM* mu::ui::window::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */,
+ITEM* mu::ui::window::CItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */,
                                           BYTE byDurability /* = 255 */, BYTE byOption1 /* = 0 */,
                                           BYTE ancientByte /* = 0 */, BYTE byOption380 /* = 0 */,
                                           BYTE byOptionHarmony /* = 0 */, BYTE* pbySocketOptions /*= NULL*/)
@@ -287,13 +287,13 @@ ITEM* mu::ui::window::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYT
     return pNewItem;
 }
 
-ITEM* mu::ui::window::CNewUIItemMng::CreateItem(ITEM* pItem)
+ITEM* mu::ui::window::CItemMng::CreateItem(ITEM* pItem)
 {
     pItem->RefCount++;
     return pItem;
 }
 
-ITEM* mu::ui::window::CNewUIItemMng::DuplicateItem(ITEM* pItem)
+ITEM* mu::ui::window::CItemMng::DuplicateItem(ITEM* pItem)
 {
     ITEM* pNewItem = new ITEM;
     memcpy(pNewItem, pItem, sizeof(ITEM));
@@ -303,7 +303,7 @@ ITEM* mu::ui::window::CNewUIItemMng::DuplicateItem(ITEM* pItem)
     return pNewItem;
 }
 
-void mu::ui::window::CNewUIItemMng::DeleteItem(ITEM* pItem)
+void mu::ui::window::CItemMng::DeleteItem(ITEM* pItem)
 {
     if (pItem == NULL)
         return;
@@ -323,7 +323,7 @@ void mu::ui::window::CNewUIItemMng::DeleteItem(ITEM* pItem)
     }
 }
 
-void mu::ui::window::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
+void mu::ui::window::CItemMng::DeleteDuplicatedItem(ITEM* pItem)
 {
     if (pItem == NULL)
         return;
@@ -334,7 +334,7 @@ void mu::ui::window::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
     }
 }
 
-void mu::ui::window::CNewUIItemMng::DeleteAllItems()
+void mu::ui::window::CItemMng::DeleteAllItems()
 {
     auto li = m_listItem.begin();
     for (; li != m_listItem.end(); li++)
@@ -347,12 +347,12 @@ void mu::ui::window::CNewUIItemMng::DeleteAllItems()
     m_dwAvailableKeyStream = 0x80000000;
 }
 
-bool mu::ui::window::CNewUIItemMng::IsEmpty()
+bool mu::ui::window::CItemMng::IsEmpty()
 {
     return m_listItem.empty();
 }
 
-void mu::ui::window::CNewUIItemMng::Update()
+void mu::ui::window::CItemMng::Update()
 {
     m_UpdateTimer.UpdateTime();
     if (m_UpdateTimer.IsTime())
@@ -371,7 +371,7 @@ void mu::ui::window::CNewUIItemMng::Update()
     }
 }
 
-DWORD mu::ui::window::CNewUIItemMng::GenerateItemKey()
+DWORD mu::ui::window::CItemMng::GenerateItemKey()
 {
     DWORD dwAvailableItemKey = FindAvailableKeyIndex(m_dwAvailableKeyStream);
     if (dwAvailableItemKey >= 0x8F000000)
@@ -383,7 +383,7 @@ DWORD mu::ui::window::CNewUIItemMng::GenerateItemKey()
     return m_dwAvailableKeyStream = dwAvailableItemKey;
 }
 
-DWORD mu::ui::window::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
+DWORD mu::ui::window::CItemMng::FindAvailableKeyIndex(DWORD dwSeed)
 {
     if (m_dwAlternate > 0)
     {
@@ -398,7 +398,7 @@ DWORD mu::ui::window::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
     return dwSeed + 1;
 }
 
-WORD mu::ui::window::CNewUIItemMng::ExtractItemType(std::span<const BYTE> pbyItemPacket)
+WORD mu::ui::window::CItemMng::ExtractItemType(std::span<const BYTE> pbyItemPacket)
 {
     return pbyItemPacket[0] + (pbyItemPacket[3] & 128) * 2 + (pbyItemPacket[5] & 240) * 32;
 }

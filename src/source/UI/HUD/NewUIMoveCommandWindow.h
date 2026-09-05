@@ -1,4 +1,4 @@
-// NewUIMoveCommandWindow.h: interface for the CNewUIMoveCommandWindow class.
+// NewUIMoveCommandWindow.h: interface for the CMoveCommandWindow class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -102,16 +102,16 @@ namespace UI::MoveCommand
 
 namespace mu::ui::window
 {
-    class CNewUIMoveCommandWindow : public CNewUIObj
+    class CMoveCommandWindow : public CObject
     {
         enum IMAGE_LIST
         {
-            IMAGE_MOVECOMMAND_SCROLL_TOP = CNewUIChatLogWindow::IMAGE_SCROLL_TOP,			// newui_scrollbar_up.tga (7,3)
-            IMAGE_MOVECOMMAND_SCROLL_MIDDLE = CNewUIChatLogWindow::IMAGE_SCROLL_MIDDLE,			// newui_scrollbar_m.tga (7,15)
-            IMAGE_MOVECOMMAND_SCROLL_BOTTOM = CNewUIChatLogWindow::IMAGE_SCROLL_BOTTOM,			// newui_scrollbar_down.tga (7,3)
-            IMAGE_MOVECOMMAND_SCROLLBAR_ON = CNewUIChatLogWindow::IMAGE_SCROLLBAR_ON,			// newui_scroll_On.tga (15,30)
-            IMAGE_MOVECOMMAND_SCROLLBAR_OFF = CNewUIChatLogWindow::IMAGE_SCROLLBAR_OFF,			// newui_scroll_Off.tga (15,30)
-            //IMAGE_MOVECOMMAND_DRAG_BTN		= CNewUIChatLogWindow::IMAGE_DRAG_BTN
+            IMAGE_MOVECOMMAND_SCROLL_TOP = CChatLogWindow::IMAGE_SCROLL_TOP,			// newui_scrollbar_up.tga (7,3)
+            IMAGE_MOVECOMMAND_SCROLL_MIDDLE = CChatLogWindow::IMAGE_SCROLL_MIDDLE,			// newui_scrollbar_m.tga (7,15)
+            IMAGE_MOVECOMMAND_SCROLL_BOTTOM = CChatLogWindow::IMAGE_SCROLL_BOTTOM,			// newui_scrollbar_down.tga (7,3)
+            IMAGE_MOVECOMMAND_SCROLLBAR_ON = CChatLogWindow::IMAGE_SCROLLBAR_ON,			// newui_scroll_On.tga (15,30)
+            IMAGE_MOVECOMMAND_SCROLLBAR_OFF = CChatLogWindow::IMAGE_SCROLLBAR_OFF,			// newui_scroll_Off.tga (15,30)
+            //IMAGE_MOVECOMMAND_DRAG_BTN		= CChatLogWindow::IMAGE_DRAG_BTN
         };
 
         enum
@@ -133,7 +133,7 @@ namespace mu::ui::window
     private:
 
         //$$AUTO_BUILD_LINE_ SHUFFLE_BEGIN
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
         int							m_iRealFontHeight;
         std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
@@ -153,10 +153,10 @@ namespace mu::ui::window
         DWORD						m_dwMoveCommandKey;
 
     public:
-        CNewUIMoveCommandWindow();
-        virtual ~CNewUIMoveCommandWindow();
+        CMoveCommandWindow();
+        virtual ~CMoveCommandWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

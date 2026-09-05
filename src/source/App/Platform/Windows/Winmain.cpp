@@ -1373,7 +1373,7 @@ MSG MainLoop()
                 break;
             case SDL_EVENT_MOUSE_MOTION:
                 // Always forwarded and always still applied to legacy position tracking --
-                // motion isn't an "action" to arbitrate, and legacy hit-testing (CNewUIManager
+                // motion isn't an "action" to arbitrate, and legacy hit-testing (CManager
                 // etc.) needs MouseX/MouseY current regardless of what's hovered. RmlUi still
                 // needs this call to drive its own :hover state/hit-testing.
                 Core::Input::RouteToUi(event, g_sdlWindow);
@@ -1500,9 +1500,9 @@ MSG MainLoop()
             if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
             {
                 auto transform = UI::Scaling::PanelTransform(WindowWidth, WindowHeight);
-                mu::ui::window::CNewUIManager* manager =
+                mu::ui::window::CManager* manager =
                     g_pNewUISystem != nullptr ? g_pNewUISystem->GetNewUIManager() : nullptr;
-                mu::ui::window::CNewUIObj* owner =
+                mu::ui::window::CObject* owner =
                     manager != nullptr ? manager->FindUIObjByRelatedWnd(reinterpret_cast<HWND>(focusedField)) : nullptr;
                 if (owner != nullptr)
                 {
@@ -2145,10 +2145,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         {
             extern EGameScene SceneFlag;
 
-            // CNewUISystem's own RmlUi-backed HUD (MU Helper bar, buff strip -- 2026-08-31
+            // CSystem's own RmlUi-backed HUD (MU Helper bar, buff strip -- 2026-08-31
             // pilots) needs a real per-scene visibility gate of its own now, unlike
             // LoginWin/CharMakeWin/MsgWin below: those are explicitly Show()/Hide()'d by app
-            // logic at their own scene's enter/exit points, but CNewUISystem is a single
+            // logic at their own scene's enter/exit points, but CSystem is a single
             // app-lifetime singleton whose Update()/Render() only ever run while
             // SceneFlag == MAIN_SCENE (MainScene.cpp) -- previously a complete visibility gate on
             // its own (nothing drew otherwise), now insufficient since a persistent RmlUi

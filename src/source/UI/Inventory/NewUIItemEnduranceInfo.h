@@ -1,4 +1,4 @@
-// NewUIItemEnduranceInfo.h: interface for the CNewUIItemEnduranceInfo class.
+// NewUIItemEnduranceInfo.h: interface for the CItemEnduranceInfo class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -12,7 +12,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIItemEnduranceInfo : public CNewUIObj
+    class CItemEnduranceInfo : public CObject
     {
     protected:
         enum IMAGE_LIST
@@ -55,7 +55,7 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_UIStartPos;
         int							m_iTextEndPosX;
         POINT						m_ItemDurUIStartPos;
@@ -65,10 +65,10 @@ namespace mu::ui::window
         int							m_iTooltipIndex;
 
     public:
-        CNewUIItemEnduranceInfo();
-        virtual ~CNewUIItemEnduranceInfo();
+        CItemEnduranceInfo();
+        virtual ~CItemEnduranceInfo();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

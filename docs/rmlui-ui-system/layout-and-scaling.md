@@ -32,7 +32,7 @@ that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
 A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
 auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
 `FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. It drives still-legacy
-`CWin`/`CNewUIObj` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
+`CWin`/`mu::ui::window::CObject` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
 (`NewUIMainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
 that one window uses this system instead of `dp`). Two axes exist, and both systems now respect
 both:
@@ -166,10 +166,10 @@ flows post-retrofit at more than one resolution, not just eyeballing a screensho
 
 - A formal multi-resolution automated visual-regression test matrix. No test harness exists for
   this today; keep doing manual spot-checks at a couple of resolutions/UI-scale values per window.
-- Consolidating legacy duplicate component classes (`CButton`/`CUIButton`/`CNewUIButton` etc.) —
+- Consolidating legacy duplicate component classes (`CButton`/`CUIButton`/`mu::ui::window::CButton` etc.) —
   those are legacy C++ duplications predating RmlUi; migrating a window to RmlUi already retires
   its legacy duplicate, so consolidating the *remaining* legacy classes is a separate effort
   against code that's being phased out anyway. (Directory reorganization itself — dropping the
   `UI/Legacy`/`UI/NewUI` folder split in favor of topic folders directly under `UI/` — is done, see
   `docs/newui-legacy-merger.md`; the class-name collision this surfaced, `CButton` vs. the former
-  `CNewUIButton`, is exactly this still-deferred class-consolidation item.)
+  `mu::ui::window::CButton`, is exactly this still-deferred class-consolidation item.)

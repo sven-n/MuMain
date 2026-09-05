@@ -1,4 +1,4 @@
-// NewUINPCShop.cpp: implementation of the CNewUINPCShop class.
+// NewUINPCShop.cpp: implementation of the CNPCShop class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -17,17 +17,17 @@ using namespace mu::ui::window;
 
 extern int BuyCost;
 
-mu::ui::window::CNewUINPCShop::CNewUINPCShop()
+mu::ui::window::CNPCShop::CNPCShop()
 {
     Init();
 }
 
-mu::ui::window::CNewUINPCShop::~CNewUINPCShop()
+mu::ui::window::CNPCShop::~CNPCShop()
 {
     Release();
 }
 
-void mu::ui::window::CNewUINPCShop::Init()
+void mu::ui::window::CNPCShop::Init()
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
@@ -40,7 +40,7 @@ void mu::ui::window::CNewUINPCShop::Init()
     m_bSellingItem = false;
 }
 
-bool mu::ui::window::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
@@ -48,7 +48,7 @@ bool mu::ui::window::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCSHOP, this);
 
-    m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
+    m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 50, 8, 15))
     {
         SAFE_DELETE(m_pNewInventoryCtrl);
@@ -71,7 +71,7 @@ bool mu::ui::window::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int 
     return true;
 }
 
-void mu::ui::window::CNewUINPCShop::Release()
+void mu::ui::window::CNPCShop::Release()
 {
     UnloadImages();
 
@@ -84,7 +84,7 @@ void mu::ui::window::CNewUINPCShop::Release()
     }
 }
 
-void mu::ui::window::CNewUINPCShop::SetPos(int x, int y)
+void mu::ui::window::CNPCShop::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -92,7 +92,7 @@ void mu::ui::window::CNewUINPCShop::SetPos(int x, int y)
     m_pNewInventoryCtrl->SetPos(x + 15, y + 50);
 }
 
-bool mu::ui::window::CNewUINPCShop::UpdateMouseEvent()
+bool mu::ui::window::CNPCShop::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl)
     {
@@ -156,12 +156,12 @@ bool mu::ui::window::CNewUINPCShop::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUINPCShop::WindowProcess()
+bool mu::ui::window::CNPCShop::WindowProcess()
 {
     return CheckMouseIn(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT);
 }
 
-bool mu::ui::window::CNewUINPCShop::UpdateKeyEvent()
+bool mu::ui::window::CNPCShop::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) == false)
     {
@@ -175,7 +175,7 @@ bool mu::ui::window::CNewUINPCShop::UpdateKeyEvent()
     }
     if (mu::ui::window::IsPress('L'))
     {
-        if (m_bRepairShop && CNewUIInventoryCtrl::GetPickedItem() == NULL)
+        if (m_bRepairShop && CInventoryCtrl::GetPickedItem() == NULL)
         {
             ToggleState();
             return false;
@@ -194,7 +194,7 @@ bool mu::ui::window::CNewUINPCShop::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUINPCShop::Update()
+bool mu::ui::window::CNPCShop::Update()
 {
     if (m_bRepairShop)
     {
@@ -207,7 +207,7 @@ bool mu::ui::window::CNewUINPCShop::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUINPCShop::Render()
+bool mu::ui::window::CNPCShop::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -224,7 +224,7 @@ bool mu::ui::window::CNewUINPCShop::Render()
     return true;
 }
 
-void mu::ui::window::CNewUINPCShop::RenderFrame()
+void mu::ui::window::CNPCShop::RenderFrame()
 {
     RenderImage(IMAGE_NPCSHOP_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_NPCSHOP_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -233,7 +233,7 @@ void mu::ui::window::CNewUINPCShop::RenderFrame()
     RenderImage(IMAGE_NPCSHOP_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 }
 
-void mu::ui::window::CNewUINPCShop::RenderTexts()
+void mu::ui::window::CNPCShop::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -246,7 +246,7 @@ void mu::ui::window::CNewUINPCShop::RenderTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 }
 
-void mu::ui::window::CNewUINPCShop::RenderButton()
+void mu::ui::window::CNPCShop::RenderButton()
 {
     if (m_bRepairShop)
     {
@@ -255,7 +255,7 @@ void mu::ui::window::CNewUINPCShop::RenderButton()
     }
 }
 
-void mu::ui::window::CNewUINPCShop::RenderRepairMoney()
+void mu::ui::window::CNPCShop::RenderRepairMoney()
 {
     if (m_bRepairShop)
     {
@@ -271,12 +271,12 @@ void mu::ui::window::CNewUINPCShop::RenderRepairMoney()
     }
 }
 
-float mu::ui::window::CNewUINPCShop::GetLayerDepth()
+float mu::ui::window::CNPCShop::GetLayerDepth()
 {
     return 4.55;
 }
 
-void mu::ui::window::CNewUINPCShop::LoadImages()
+void mu::ui::window::CNPCShop::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
@@ -287,7 +287,7 @@ void mu::ui::window::CNewUINPCShop::LoadImages()
     LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_NPCSHOP_REPAIR_MONEY, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUINPCShop::UnloadImages()
+void mu::ui::window::CNPCShop::UnloadImages()
 {
     DeleteBitmap(IMAGE_NPCSHOP_BACK);
     DeleteBitmap(IMAGE_NPCSHOP_TOP);
@@ -298,17 +298,17 @@ void mu::ui::window::CNewUINPCShop::UnloadImages()
     DeleteBitmap(IMAGE_NPCSHOP_REPAIR_MONEY);
 }
 
-void mu::ui::window::CNewUINPCShop::SetTaxRate(int iTaxRate)
+void mu::ui::window::CNPCShop::SetTaxRate(int iTaxRate)
 {
     m_iTaxRate = iTaxRate;
 }
 
-int mu::ui::window::CNewUINPCShop::GetTaxRate()
+int mu::ui::window::CNPCShop::GetTaxRate()
 {
     return m_iTaxRate;
 }
 
-bool mu::ui::window::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool mu::ui::window::CNPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -318,9 +318,9 @@ bool mu::ui::window::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE>
     return false;
 }
 
-bool mu::ui::window::CNewUINPCShop::InventoryProcess()
+bool mu::ui::window::CNPCShop::InventoryProcess()
 {
-    CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+    CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
 
     if (!m_pNewInventoryCtrl)	return false;
     if (!pPickedItem)			return false;
@@ -374,7 +374,7 @@ bool mu::ui::window::CNewUINPCShop::InventoryProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUINPCShop::BtnProcess()
+bool mu::ui::window::CNPCShop::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (m_bSellingItem == false && g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCSHOP))
@@ -401,13 +401,13 @@ bool mu::ui::window::CNewUINPCShop::BtnProcess()
     return false;
 }
 
-void mu::ui::window::CNewUINPCShop::DeleteAllItems()
+void mu::ui::window::CNPCShop::DeleteAllItems()
 {
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->RemoveAllItems();
 }
 
-void mu::ui::window::CNewUINPCShop::OpenningProcess()
+void mu::ui::window::CNPCShop::OpenningProcess()
 {
     if (mu::ui::window::IsRepeat(VK_LBUTTON))
     {
@@ -419,7 +419,7 @@ void mu::ui::window::CNewUINPCShop::OpenningProcess()
     }
 }
 
-void mu::ui::window::CNewUINPCShop::ClosingProcess()
+void mu::ui::window::CNPCShop::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -439,7 +439,7 @@ void mu::ui::window::CNewUINPCShop::ClosingProcess()
     m_bSellingItem = false;
 }
 
-void mu::ui::window::CNewUINPCShop::SetButtonInfo()
+void mu::ui::window::CNPCShop::SetButtonInfo()
 {
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
     m_BtnRepair.ChangeButtonInfo(m_Pos.x + 54, m_Pos.y + 390, 36, 29);
@@ -450,17 +450,17 @@ void mu::ui::window::CNewUINPCShop::SetButtonInfo()
     m_BtnRepairAll.ChangeToolTipText(&I18N::Game::RepairAllA, true);
 }
 
-void mu::ui::window::CNewUINPCShop::SetRepairShop(bool bRepair)
+void mu::ui::window::CNPCShop::SetRepairShop(bool bRepair)
 {
     m_bRepairShop = bRepair;
 }
 
-bool mu::ui::window::CNewUINPCShop::IsRepairShop()
+bool mu::ui::window::CNPCShop::IsRepairShop()
 {
     return m_bRepairShop;
 }
 
-void mu::ui::window::CNewUINPCShop::ToggleState()
+void mu::ui::window::CNPCShop::ToggleState()
 {
     if (m_dwShopState == SHOP_STATE_BUYNSELL)
     {
@@ -475,27 +475,27 @@ void mu::ui::window::CNewUINPCShop::ToggleState()
     }
 }
 
-DWORD mu::ui::window::CNewUINPCShop::GetShopState()
+DWORD mu::ui::window::CNPCShop::GetShopState()
 {
     return m_dwShopState;
 }
 
-int mu::ui::window::CNewUINPCShop::GetPointedItemIndex()
+int mu::ui::window::CNPCShop::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
-void mu::ui::window::CNewUINPCShop::SetStandbyItemKey(DWORD dwItemKey)
+void mu::ui::window::CNPCShop::SetStandbyItemKey(DWORD dwItemKey)
 {
     m_dwStandbyItemKey = dwItemKey;
 }
 
-DWORD mu::ui::window::CNewUINPCShop::GetStandbyItemKey() const
+DWORD mu::ui::window::CNPCShop::GetStandbyItemKey() const
 {
     return m_dwStandbyItemKey;
 }
 
-int mu::ui::window::CNewUINPCShop::GetStandbyItemIndex()
+int mu::ui::window::CNPCShop::GetStandbyItemIndex()
 {
     ITEM* pItem = GetStandbyItem();
     if (pItem)
@@ -503,19 +503,19 @@ int mu::ui::window::CNewUINPCShop::GetStandbyItemIndex()
     return -1;
 }
 
-ITEM* mu::ui::window::CNewUINPCShop::GetStandbyItem()
+ITEM* mu::ui::window::CNPCShop::GetStandbyItem()
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItemByKey(m_dwStandbyItemKey);
     return NULL;
 }
 
-void mu::ui::window::CNewUINPCShop::SetSellingItem(bool bFlag)
+void mu::ui::window::CNPCShop::SetSellingItem(bool bFlag)
 {
     m_bSellingItem = bFlag;
 }
 
-bool mu::ui::window::CNewUINPCShop::IsSellingItem()
+bool mu::ui::window::CNPCShop::IsSellingItem()
 {
     return m_bSellingItem;
 }

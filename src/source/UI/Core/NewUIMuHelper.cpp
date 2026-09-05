@@ -108,7 +108,7 @@ using namespace mu::ui::window;
 
 ConfigData _TempConfig;
 
-CNewUIMuHelper::CNewUIMuHelper()
+CUIMuHelper::CUIMuHelper()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -120,12 +120,12 @@ CNewUIMuHelper::CNewUIMuHelper()
     m_aiSelectedSkills.fill(-1);
 }
 
-CNewUIMuHelper::~CNewUIMuHelper()
+CUIMuHelper::~CUIMuHelper()
 {
     Release();
 }
 
-bool CNewUIMuHelper::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CUIMuHelper::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -152,7 +152,7 @@ bool CNewUIMuHelper::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIMuHelper::Release()
+void CUIMuHelper::Release()
 {
     UnloadImages();
 
@@ -163,13 +163,13 @@ void CNewUIMuHelper::Release()
     }
 }
 
-void CNewUIMuHelper::SetPos(int x, int y)
+void CUIMuHelper::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-void CNewUIMuHelper::InitButtons()
+void CUIMuHelper::InitButtons()
 {
     std::list<const wchar_t* const*> ltext;
     ltext.push_back(&I18N::Game::Hunting);
@@ -233,7 +233,7 @@ void CNewUIMuHelper::InitButtons()
     RegisterBtnCharacter(Summoner, BUTTON_ID_POTION_CONFIG_SUMMY);
 }
 
-void CNewUIMuHelper::InitCheckBox()
+void CUIMuHelper::InitCheckBox()
 {
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 79, m_Pos.y + 80, 15, 15, 0, &I18N::Game::Potion, CHECKBOX_ID_POTION, 0);
     InsertCheckBox(IMAGE_CHECKBOX_BTN, m_Pos.x + 18, m_Pos.y + 122, 15, 15, 0, &I18N::Game::LongDistanceCounterAttack, CHECKBOX_ID_LONG_DISTANCE, 0);
@@ -319,7 +319,7 @@ void CNewUIMuHelper::InitCheckBox()
     RegisterBoxCharacter(Rage_Fighter, CHECKBOX_ID_SKILL3_CONDITION);
 }
 
-void CNewUIMuHelper::InitImage()
+void CUIMuHelper::InitImage()
 {
     InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 17, m_Pos.y + 171, 32, 38, SKILL_SLOT_SKILL1, 0);
     InsertIcon(BITMAP_INTERFACE_NEW_SKILLICON_BEGIN + 4, m_Pos.x + 61, m_Pos.y + 171, 32, 38, SKILL_SLOT_SKILL2, 0);
@@ -356,7 +356,7 @@ void CNewUIMuHelper::InitImage()
     RegisterIconCharacter(Rage_Fighter, TEXTBOX_IMG_SKILL2_TIME);
 }
 
-void CNewUIMuHelper::InitText()
+void CUIMuHelper::InitText()
 {
     InsertText(m_Pos.x + 18, m_Pos.y + 78, I18N::Game::Range, 1, 0); // Range
     InsertText(m_Pos.x + 18, m_Pos.y + 83, L"________", 2, 0);
@@ -399,7 +399,7 @@ void CNewUIMuHelper::InitText()
     RegisterTextCharacter(Rage_Fighter, 10);
 }
 
-void CNewUIMuHelper::InitTextboxInput()
+void CUIMuHelper::InitTextboxInput()
 {
     wchar_t wsInitText[MAX_NUMBER_DIGITS + 1];
 
@@ -444,7 +444,7 @@ void CNewUIMuHelper::InitTextboxInput()
     m_ItemFilter.SetPosition(m_Pos.x + 20, m_Pos.y + 238 + m_ItemFilter.GetHeight());
 }
 
-bool CNewUIMuHelper::Update()
+bool CUIMuHelper::Update()
 {
     if (IsVisible())
     {
@@ -473,7 +473,7 @@ bool CNewUIMuHelper::Update()
     return true;
 }
 
-bool CNewUIMuHelper::UpdateMouseEvent()
+bool CUIMuHelper::UpdateMouseEvent()
 {
     // Ignore events outside MU Helper window
     if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -727,7 +727,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
     return false;
 }
 
-bool CNewUIMuHelper::UpdateKeyEvent()
+bool CUIMuHelper::UpdateKeyEvent()
 {
     if (IsVisible())
     {
@@ -745,7 +745,7 @@ bool CNewUIMuHelper::UpdateKeyEvent()
     return true;
 }
 
-void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
+void CUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
 {
     switch (iCheckboxId) {
     case CHECKBOX_ID_POTION:
@@ -904,7 +904,7 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
     }
 }
 
-void CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
+void CUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
 {
     if (iSlot < 3)
     {
@@ -916,7 +916,7 @@ void CNewUIMuHelper::ApplyConfigFromSkillSlot(int iSlot, int iSkill)
     }
 }
 
-void CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
+void CUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
 {
     _TempConfig.iHuntingRange += iDelta;
     if (_TempConfig.iHuntingRange < 0)
@@ -929,7 +929,7 @@ void CNewUIMuHelper::ApplyHuntRangeUpdate(int iDelta)
     }
 }
 
-void CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
+void CUIMuHelper::ApplyLootRangeUpdate(int iDelta)
 {
     _TempConfig.iObtainingRange += iDelta;
     if (_TempConfig.iObtainingRange < 1)
@@ -942,7 +942,7 @@ void CNewUIMuHelper::ApplyLootRangeUpdate(int iDelta)
     }
 }
 
-void CNewUIMuHelper::SaveExtraItem()
+void CUIMuHelper::SaveExtraItem()
 {
     wchar_t wsExtraItem[MAX_ITEM_NAME + 1] = { 0 };
 
@@ -967,7 +967,7 @@ void CNewUIMuHelper::SaveExtraItem()
     CUITextInputBox::ReleaseFocus();
 }
 
-void CNewUIMuHelper::RemoveExtraItem()
+void CUIMuHelper::RemoveExtraItem()
 {
     FILTERLIST_TEXT* pText = m_ItemFilter.GetSelectedText();
     if (pText)
@@ -977,7 +977,7 @@ void CNewUIMuHelper::RemoveExtraItem()
     }
 }
 
-int CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
+int CUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
 {
     wchar_t* end;
 
@@ -991,7 +991,7 @@ int CNewUIMuHelper::GetIntFromTextInput(wchar_t* pwsInput)
     return value;
 }
 
-void CNewUIMuHelper::Reset()
+void CUIMuHelper::Reset()
 {
     _TempConfig.iHuntingRange = 6;
 
@@ -1038,13 +1038,13 @@ void CNewUIMuHelper::Reset()
     ApplyConfig();
 }
 
-void CNewUIMuHelper::LoadSavedConfig(const ConfigData& config)
+void CUIMuHelper::LoadSavedConfig(const ConfigData& config)
 {
     _TempConfig = config;
     ApplyConfig();
 }
 
-void CNewUIMuHelper::ApplyConfig()
+void CUIMuHelper::ApplyConfig()
 {
     g_MuHelper.Load(_TempConfig);
 
@@ -1114,14 +1114,14 @@ void CNewUIMuHelper::ApplyConfig()
     }
 }
 
-void CNewUIMuHelper::InitConfig()
+void CUIMuHelper::InitConfig()
 {
     Reset();
 
     g_pNewUIMuHelperExt->InitConfig();
 }
 
-void CNewUIMuHelper::SaveConfig()
+void CUIMuHelper::SaveConfig()
 {
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
@@ -1144,19 +1144,19 @@ void CNewUIMuHelper::SaveConfig()
     g_MuHelper.Save(_TempConfig);
 }
 
-float CNewUIMuHelper::GetLayerDepth()
+float CUIMuHelper::GetLayerDepth()
 {
     return 3.4;
 }
 
-float CNewUIMuHelper::GetKeyEventOrder()
+float CUIMuHelper::GetKeyEventOrder()
 {
     return 3.4;
 }
 
-void CNewUIMuHelper::Show(bool bShow)
+void CUIMuHelper::Show(bool bShow)
 {
-    CNewUIObj::Show(bShow);
+    CObject::Show(bShow);
 
     if (bShow == false)
     {
@@ -1171,7 +1171,7 @@ void CNewUIMuHelper::Show(bool bShow)
     CUITextInputBox::ReleaseFocus();
 }
 
-bool CNewUIMuHelper::Render()
+bool CUIMuHelper::Render()
 {
     EnableAlphaTest();
 
@@ -1259,7 +1259,7 @@ bool CNewUIMuHelper::Render()
     return true;
 }
 
-void CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
+void CUIMuHelper::RenderBack(int x, int y, int width, int height)
 {
     EnableAlphaTest();
     constexpr unsigned int BackdropColor = 0x66000000u;
@@ -1275,7 +1275,7 @@ void CNewUIMuHelper::RenderBack(int x, int y, int width, int height)
     RenderImage(IMAGE_TABLE_LEFT_PIXEL, x, (y + 6.f), 14.0, (height - 14.f));
 }
 
-void CNewUIMuHelper::LoadImages()
+void CUIMuHelper::LoadImages()
 {
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_RangeMinus.tga", IMAGE_MACROUI_HELPER_RAGEMINUS, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
@@ -1285,7 +1285,7 @@ void CNewUIMuHelper::LoadImages()
     LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
 }
 
-void CNewUIMuHelper::UnloadImages()
+void CUIMuHelper::UnloadImages()
 {
     DeleteBitmap(IMAGE_MACROUI_HELPER_RAGEMINUS);
     DeleteBitmap(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
@@ -1298,12 +1298,12 @@ void CNewUIMuHelper::UnloadImages()
 //===============================================================================================================
 //===============================================================================================================
 
-void CNewUIMuHelper::RegisterButton(int Identifier, CButtonTap button)
+void CUIMuHelper::RegisterButton(int Identifier, CButtonTap button)
 {
     m_ButtonList.insert(std::pair<int, CButtonTap>(Identifier, button));
 }
 
-void CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
+void CUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_ButtonList.find(Identifier);
 
@@ -1321,10 +1321,10 @@ void CNewUIMuHelper::RegisterBtnCharacter(BYTE class_character, int Identifier)
     }
 }
 
-void CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, const wchar_t* const* btnameSlot, const wchar_t* const* tooltipSlot, int Identifier, int iNumTab)
+void CUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bool overflg, bool isimgwidth, bool bClickEffect, bool MoveTxt, const wchar_t* const* btnameSlot, const wchar_t* const* tooltipSlot, int Identifier, int iNumTab)
 {
     CButtonTap cBTN;
-    auto* button = new CNewUIButton();
+    auto* button = new CButton();
 
     button->ChangeButtonImgState(1, imgindex, overflg, isimgwidth, bClickEffect);
     button->ChangeButtonInfo(x, y, sx, sy);
@@ -1344,7 +1344,7 @@ void CNewUIMuHelper::InsertButton(int imgindex, int x, int y, int sx, int sy, bo
     RegisterButton(Identifier, cBTN);
 }
 
-void CNewUIMuHelper::RenderBtnList()
+void CUIMuHelper::RenderBtnList()
 {
     auto li = m_ButtonList.begin();
 
@@ -1359,7 +1359,7 @@ void CNewUIMuHelper::RenderBtnList()
     }
 }
 
-int CNewUIMuHelper::UpdateMouseBtnList()
+int CUIMuHelper::UpdateMouseBtnList()
 {
     auto li = m_ButtonList.begin();
 
@@ -1381,7 +1381,7 @@ int CNewUIMuHelper::UpdateMouseBtnList()
 //===============================================================================================================
 //===============================================================================================================
 
-void CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
+void CUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_CheckBoxList.find(Identifier);
 
@@ -1400,16 +1400,16 @@ void CNewUIMuHelper::RegisterBoxCharacter(BYTE class_character, int Identifier)
     }
 }
 
-void CNewUIMuHelper::RegisterCheckBox(int Identifier, CheckBoxTap button)
+void CUIMuHelper::RegisterCheckBox(int Identifier, CheckBoxTap button)
 {
     m_CheckBoxList.insert(std::pair<int, CheckBoxTap>(Identifier, button));
 }
 
-void CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, const wchar_t* const* btnameSlot, int Identifier, int iNumTab)
+void CUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, bool overflg, const wchar_t* const* btnameSlot, int Identifier, int iNumTab)
 {
     CheckBoxTap cBOX;
 
-    auto* cbox = new CNewUICheckBox;
+    auto* cbox = new CCheckBox;
 
     cbox->CheckBoxImgState(imgindex);
     cbox->CheckBoxInfo(x, y, sx, sy);
@@ -1424,7 +1424,7 @@ void CNewUIMuHelper::InsertCheckBox(int imgindex, int x, int y, int sx, int sy, 
     RegisterCheckBox(Identifier, cBOX);
 }
 
-void CNewUIMuHelper::RenderBoxList()
+void CUIMuHelper::RenderBoxList()
 {
     auto li = m_CheckBoxList.begin();
 
@@ -1439,7 +1439,7 @@ void CNewUIMuHelper::RenderBoxList()
     }
 }
 
-int CNewUIMuHelper::UpdateMouseBoxList()
+int CUIMuHelper::UpdateMouseBoxList()
 {
     auto li = m_CheckBoxList.begin();
 
@@ -1461,7 +1461,7 @@ int CNewUIMuHelper::UpdateMouseBoxList()
 //===============================================================================================================
 //===============================================================================================================
 
-void CNewUIMuHelper::RenderIconList()
+void CUIMuHelper::RenderIconList()
 {
     auto li = m_IconList.begin();
 
@@ -1484,7 +1484,7 @@ void CNewUIMuHelper::RenderIconList()
     }
 }
 
-int CNewUIMuHelper::UpdateMouseIconList()
+int CUIMuHelper::UpdateMouseIconList()
 {
     auto li = m_IconList.begin();
 
@@ -1504,7 +1504,7 @@ int CNewUIMuHelper::UpdateMouseIconList()
     return -1;
 }
 
-void CNewUIMuHelper::RegisterIconCharacter(BYTE class_character, int Identifier)
+void CUIMuHelper::RegisterIconCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_IconList.find(Identifier);
 
@@ -1523,12 +1523,12 @@ void CNewUIMuHelper::RegisterIconCharacter(BYTE class_character, int Identifier)
     }
 }
 
-void CNewUIMuHelper::RegisterIcon(int Identifier, cTexture button)
+void CUIMuHelper::RegisterIcon(int Identifier, cTexture button)
 {
     m_IconList.insert(std::pair<int, cTexture>(Identifier, button));
 }
 
-void CNewUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
+void CUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int Identifier, int iNumTab)
 {
     cTexture cImage;
 
@@ -1547,7 +1547,7 @@ void CNewUIMuHelper::InsertIcon(int imgindex, int x, int y, int sx, int sy, int 
 //===============================================================================================================
 //===============================================================================================================
 
-void CNewUIMuHelper::RenderTextList()
+void CUIMuHelper::RenderTextList()
 {
     auto li = m_TextNameList.begin();
 
@@ -1562,7 +1562,7 @@ void CNewUIMuHelper::RenderTextList()
     }
 }
 
-void CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identifier)
+void CUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identifier)
 {
     auto li = m_TextNameList.find(Identifier);
 
@@ -1581,12 +1581,12 @@ void CNewUIMuHelper::RegisterTextCharacter(BYTE class_character, int Identifier)
     }
 }
 
-void CNewUIMuHelper::RegisterText(int Identifier, cTextName button)
+void CUIMuHelper::RegisterText(int Identifier, cTextName button)
 {
     m_TextNameList.insert(std::pair<int, cTextName>(Identifier, button));
 }
 
-void CNewUIMuHelper::InsertText(int x, int y, std::wstring Name, int Identifier, int iNumTab)
+void CUIMuHelper::InsertText(int x, int y, std::wstring Name, int Identifier, int iNumTab)
 {
     cTextName cText;
 
@@ -1599,7 +1599,7 @@ void CNewUIMuHelper::InsertText(int x, int y, std::wstring Name, int Identifier,
     RegisterText(Identifier, cText);
 }
 
-void CNewUIMuHelper::AssignSkill(int iSkill)
+void CUIMuHelper::AssignSkill(int iSkill)
 {
     if (m_iSelectedSkillSlot != -1 && m_iSelectedSkillSlot < MAX_SKILLS_SLOT)
     {
@@ -1626,12 +1626,12 @@ void CNewUIMuHelper::AssignSkill(int iSkill)
     }
 }
 
-bool CNewUIMuHelper::IsSkillAssigned(int iSkill)
+bool CUIMuHelper::IsSkillAssigned(int iSkill)
 {
     return std::find(m_aiSelectedSkills.begin(), m_aiSelectedSkills.end(), iSkill) != m_aiSelectedSkills.end();
 }
 
-int CNewUIMuHelper::GetSkillIndex(int iSkill)
+int CUIMuHelper::GetSkillIndex(int iSkill)
 {
     auto it = std::find(m_aiSelectedSkills.begin(), m_aiSelectedSkills.end(), iSkill);
 
@@ -1642,7 +1642,7 @@ int CNewUIMuHelper::GetSkillIndex(int iSkill)
     return -1;
 }
 
-void CNewUIMuHelper::RenderSkillIcon(int skill, float x, float y, float width, float height)
+void CUIMuHelper::RenderSkillIcon(int skill, float x, float y, float width, float height)
 {
     float fU, fV;
     int iKindofSkill = 0;
@@ -1810,19 +1810,19 @@ void CNewUIMuHelper::RenderSkillIcon(int skill, float x, float y, float width, f
     }
 }
 
-CNewUIMuHelperSkillList::CNewUIMuHelperSkillList()
+CMuHelperSkillList::CMuHelperSkillList()
 {
     m_pNewUIMng = NULL;
     Reset();
 }
 
-CNewUIMuHelperSkillList::~CNewUIMuHelperSkillList()
+CMuHelperSkillList::~CMuHelperSkillList()
 {
     Release();
 }
 
 
-bool CNewUIMuHelperSkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool CMuHelperSkillList::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -1839,7 +1839,7 @@ bool CNewUIMuHelperSkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng
     return true;
 }
 
-void CNewUIMuHelperSkillList::Release()
+void CMuHelperSkillList::Release()
 {
     if (m_pNewUI3DRenderMng)
     {
@@ -1855,7 +1855,7 @@ void CNewUIMuHelperSkillList::Release()
     }
 }
 
-void CNewUIMuHelperSkillList::Reset()
+void CMuHelperSkillList::Reset()
 {
     m_bRenderSkillInfo = false;
     m_iRenderSkillInfoType = 0;
@@ -1865,7 +1865,7 @@ void CNewUIMuHelperSkillList::Reset()
     m_EventState = EVENT_NONE;
 }
 
-void CNewUIMuHelperSkillList::LoadImages()
+void CMuHelperSkillList::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
@@ -1879,7 +1879,7 @@ void CNewUIMuHelperSkillList::LoadImages()
     LoadBitmap(L"Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
 }
 
-void CNewUIMuHelperSkillList::UnloadImages()
+void CMuHelperSkillList::UnloadImages()
 {
     DeleteBitmap(IMAGE_SKILL1);
     DeleteBitmap(IMAGE_SKILL2);
@@ -1893,7 +1893,7 @@ void CNewUIMuHelperSkillList::UnloadImages()
     DeleteBitmap(IMAGE_NON_SKILL3);
 }
 
-bool CNewUIMuHelperSkillList::UpdateMouseEvent()
+bool CMuHelperSkillList::UpdateMouseEvent()
 {
     if (IsRelease(VK_LBUTTON))
     {
@@ -1912,7 +1912,7 @@ bool CNewUIMuHelperSkillList::UpdateMouseEvent()
     return false;
 }
 
-bool CNewUIMuHelperSkillList::UpdateKeyEvent()
+bool CMuHelperSkillList::UpdateKeyEvent()
 {
     if (IsVisible())
     {
@@ -1929,7 +1929,7 @@ bool CNewUIMuHelperSkillList::UpdateKeyEvent()
     return true;
 }
 
-void CNewUIMuHelperSkillList::PrepareSkillsToRender()
+void CMuHelperSkillList::PrepareSkillsToRender()
 {
     m_aiSkillsToRender.clear();
     m_skillIconMap.clear();
@@ -1960,12 +1960,12 @@ void CNewUIMuHelperSkillList::PrepareSkillsToRender()
     }
 }
 
-bool CNewUIMuHelperSkillList::Update()
+bool CMuHelperSkillList::Update()
 {
     return true;
 }
 
-bool CNewUIMuHelperSkillList::Render()
+bool CMuHelperSkillList::Render()
 {
     float scale = 1.0f; // 
     float boxWidth = 32.f * scale;
@@ -2016,17 +2016,17 @@ bool CNewUIMuHelperSkillList::Render()
     return true;
 }
 
-void CNewUIMuHelperSkillList::RenderSkillInfo()
+void CMuHelperSkillList::RenderSkillInfo()
 {
     UI::Skills::Tooltip::Render(m_iRenderSkillInfoPosX + 15, m_iRenderSkillInfoPosY - 10, m_iRenderSkillInfoType);
 }
 
-float CNewUIMuHelperSkillList::GetLayerDepth()
+float CMuHelperSkillList::GetLayerDepth()
 {
     return 5.2f;
 }
 
-void CNewUIMuHelperSkillList::RenderSkillIcon(int iSkillType, float x, float y, float width, float height)
+void CMuHelperSkillList::RenderSkillIcon(int iSkillType, float x, float y, float width, float height)
 {
     float fU, fV;
     int iKindofSkill = 0;
@@ -2194,7 +2194,7 @@ void CNewUIMuHelperSkillList::RenderSkillIcon(int iSkillType, float x, float y, 
     }
 }
 
-bool CNewUIMuHelperSkillList::IsAttackSkill(int iSkillType)
+bool CMuHelperSkillList::IsAttackSkill(int iSkillType)
 {
     if (IsBuffSkill(iSkillType))
     {
@@ -2214,7 +2214,7 @@ bool CNewUIMuHelperSkillList::IsAttackSkill(int iSkillType)
     return true;
 }
 
-bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
+bool CMuHelperSkillList::IsBuffSkill(int iSkillType)
 {
     // To-do: Complete list of buffs
 
@@ -2267,7 +2267,7 @@ bool CNewUIMuHelperSkillList::IsBuffSkill(int iSkillType)
     return false;
 }
 
-bool CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
+bool CMuHelperSkillList::IsHealingSkill(int iSkillType)
 {
     // To-do: Complete list of healing skills
 
@@ -2284,7 +2284,7 @@ bool CNewUIMuHelperSkillList::IsHealingSkill(int iSkillType)
     return false;
 }
 
-bool CNewUIMuHelperSkillList::IsDefenseSkill(int iSkillType)
+bool CMuHelperSkillList::IsDefenseSkill(int iSkillType)
 {
     switch (iSkillType)
     {
@@ -2296,7 +2296,7 @@ bool CNewUIMuHelperSkillList::IsDefenseSkill(int iSkillType)
     return false;
 }
 
-void CNewUIMuHelperSkillList::FilterByAttackSkills()
+void CMuHelperSkillList::FilterByAttackSkills()
 {
     m_bFilterByAttackSkills = true;
     m_bFilterByBuffSkills = false;
@@ -2304,7 +2304,7 @@ void CNewUIMuHelperSkillList::FilterByAttackSkills()
     PrepareSkillsToRender();
 }
 
-void CNewUIMuHelperSkillList::FilterByBuffSkills()
+void CMuHelperSkillList::FilterByBuffSkills()
 {
     m_bFilterByBuffSkills = true;
     m_bFilterByAttackSkills = false;
@@ -2312,16 +2312,16 @@ void CNewUIMuHelperSkillList::FilterByBuffSkills()
     PrepareSkillsToRender();
 }
 
-void CNewUIMuHelperSkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CMuHelperSkillList::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
-        auto* pSkillList = (CNewUIMuHelperSkillList*)(pClass);
+        auto* pSkillList = (CMuHelperSkillList*)(pClass);
         pSkillList->RenderSkillInfo();
     }
 }
 
-int CNewUIMuHelperSkillList::UpdateMouseSkillList()
+int CMuHelperSkillList::UpdateMouseSkillList()
 {
     auto li = m_skillIconMap.begin();
 
@@ -2338,7 +2338,7 @@ int CNewUIMuHelperSkillList::UpdateMouseSkillList()
     return -1;
 }
 
-CNewUIMuHelperExt::CNewUIMuHelperExt()
+CMuHelperExt::CMuHelperExt()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -2346,12 +2346,12 @@ CNewUIMuHelperExt::CNewUIMuHelperExt()
     m_iCurrentPage = -1;
 }
 
-CNewUIMuHelperExt::~CNewUIMuHelperExt()
+CMuHelperExt::~CMuHelperExt()
 {
     Release();
 }
 
-bool CNewUIMuHelperExt::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CMuHelperExt::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -2378,7 +2378,7 @@ bool CNewUIMuHelperExt::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIMuHelperExt::Release()
+void CMuHelperExt::Release()
 {
     UnloadImages();
 
@@ -2389,13 +2389,13 @@ void CNewUIMuHelperExt::Release()
     }
 }
 
-void CNewUIMuHelperExt::SetPos(int x, int y)
+void CMuHelperExt::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-void CNewUIMuHelperExt::InitText()
+void CMuHelperExt::InitText()
 {
     m_BuffTimeInput.Init(g_hWnd, 17, 15, MAX_NUMBER_DIGITS, false);
     m_BuffTimeInput.SetTextColor(255, 0, 0, 0);
@@ -2405,12 +2405,12 @@ void CNewUIMuHelperExt::InitText()
     m_BuffTimeInput.SetOption(UIOPTION_NUMBERONLY);
 }
 
-void CNewUIMuHelperExt::InitImage()
+void CMuHelperExt::InitImage()
 {
 
 }
 
-void CNewUIMuHelperExt::InitButtons()
+void CMuHelperExt::InitButtons()
 {
     m_BtnPreConHuntRange.CheckBoxImgState(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
     m_BtnPreConHuntRange.CheckBoxInfo(m_Pos.x + 17, m_Pos.y + 78, 15, 15);
@@ -2462,12 +2462,12 @@ void CNewUIMuHelperExt::InitButtons()
     m_BtnClose.ChangeToolTipText(&I18N::Game::Close388, TRUE); // "Close"
 }
 
-void CNewUIMuHelperExt::InitCheckBox()
+void CMuHelperExt::InitCheckBox()
 {
 
 }
 
-bool CNewUIMuHelperExt::Render()
+bool CMuHelperExt::Render()
 {
     EnableAlphaTest();
 
@@ -2561,7 +2561,7 @@ bool CNewUIMuHelperExt::Render()
     return true;
 }
 
-void CNewUIMuHelperExt::RenderHpLevel(int x, int y, int width, int height, int level, const wchar_t* pszLabel)
+void CMuHelperExt::RenderHpLevel(int x, int y, int width, int height, int level, const wchar_t* pszLabel)
 {
     RenderImage(IMAGE_OPTION_VOLUME_BACK, x, y, 124.f, 16.f);
     if (level > 0)
@@ -2571,7 +2571,7 @@ void CNewUIMuHelperExt::RenderHpLevel(int x, int y, int width, int height, int l
     g_pRenderText->RenderText(x, y + 18, pszLabel, width, 0, RT3_SORT_CENTER);
 }
 
-void CNewUIMuHelperExt::RenderBackPane(int x, int y, int width, int height, const wchar_t* pszHeader)
+void CMuHelperExt::RenderBackPane(int x, int y, int width, int height, const wchar_t* pszHeader)
 {
     DWORD TextColor = g_pRenderText->GetTextColor();
     int headerWidth = 65;
@@ -2604,7 +2604,7 @@ void CNewUIMuHelperExt::RenderBackPane(int x, int y, int width, int height, cons
     g_pRenderText->RenderText(x + 10.f, y + 6.f, pszHeader, headerWidth, 0, RT3_SORT_LEFT);
 }
 
-void CNewUIMuHelperExt::LoadImages()
+void CMuHelperExt::LoadImages()
 {
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_RangeMinus.tga", IMAGE_MACROUI_HELPER_RAGEMINUS, GL_LINEAR, GL_CLAMP, 1, 0);
     LoadBitmap(L"Interface\\MacroUI\\MacroUI_OptionButton.tga", IMAGE_MACROUI_HELPER_OPTIONBUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
@@ -2614,7 +2614,7 @@ void CNewUIMuHelperExt::LoadImages()
     LoadBitmap(L"Interface\\InGameShop\\Ingame_Bt03.tga", IMAGE_IGS_BUTTON, GL_LINEAR, GL_CLAMP, 1, 0);
 }
 
-void CNewUIMuHelperExt::UnloadImages()
+void CMuHelperExt::UnloadImages()
 {
     DeleteBitmap(IMAGE_MACROUI_HELPER_RAGEMINUS);
     DeleteBitmap(IMAGE_MACROUI_HELPER_OPTIONBUTTON);
@@ -2624,7 +2624,7 @@ void CNewUIMuHelperExt::UnloadImages()
     DeleteBitmap(IMAGE_IGS_BUTTON);
 }
 
-bool CNewUIMuHelperExt::Update()
+bool CMuHelperExt::Update()
 {
     if (IsVisible())
     {
@@ -2735,7 +2735,7 @@ bool CNewUIMuHelperExt::Update()
     return true;
 }
 
-bool CNewUIMuHelperExt::UpdateMouseEvent()
+bool CMuHelperExt::UpdateMouseEvent()
 {
     // Ignore events outside MU Helper window
     if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
@@ -2877,7 +2877,7 @@ bool CNewUIMuHelperExt::UpdateMouseEvent()
     return false;
 }
 
-bool CNewUIMuHelperExt::UpdateKeyEvent()
+bool CMuHelperExt::UpdateKeyEvent()
 {
     if (IsVisible())
     {
@@ -2892,17 +2892,17 @@ bool CNewUIMuHelperExt::UpdateKeyEvent()
     return true;
 }
 
-float CNewUIMuHelperExt::GetLayerDepth()
+float CMuHelperExt::GetLayerDepth()
 {
     return 3.4;
 }
 
-float CNewUIMuHelperExt::GetKeyEventOrder()
+float CMuHelperExt::GetKeyEventOrder()
 {
     return 3.4;
 }
 
-void CNewUIMuHelperExt::Toggle(int iPageId)
+void CMuHelperExt::Toggle(int iPageId)
 {
     int iPrevPage = m_iCurrentPage;
     m_iCurrentPage = iPageId;
@@ -2957,19 +2957,19 @@ void CNewUIMuHelperExt::Toggle(int iPageId)
     this->Show(true);
 }
 
-void CNewUIMuHelperExt::Save()
+void CMuHelperExt::Save()
 {
     wchar_t wsNumberInput[MAX_NUMBER_DIGITS + 1]{};
 
     m_BuffTimeInput.GetText(wsNumberInput, std::size(wsNumberInput));
-    _TempConfig.iBuffCastInterval = CNewUIMuHelper::GetIntFromTextInput(wsNumberInput);
+    _TempConfig.iBuffCastInterval = CUIMuHelper::GetIntFromTextInput(wsNumberInput);
 
     _TempConfig.iPotionThreshold = m_iCurrentPotionThreshold * 10;
     _TempConfig.iHealThreshold = m_iCurrentHealThreshold * 10;
     _TempConfig.iHealPartyThreshold = m_iCurrentPartyHealThreshold * 10;
 }
 
-void CNewUIMuHelperExt::ApplySavedConfig()
+void CMuHelperExt::ApplySavedConfig()
 {
     m_iCurrentPotionThreshold = _TempConfig.iPotionThreshold / 10;
     m_iCurrentHealThreshold = _TempConfig.iHealThreshold / 10;
@@ -2977,7 +2977,7 @@ void CNewUIMuHelperExt::ApplySavedConfig()
 }
 
 // Called by the "Initialization" button from the main page
-void CNewUIMuHelperExt::InitConfig()
+void CMuHelperExt::InitConfig()
 {
     _TempConfig.iPotionThreshold = 40;
     _TempConfig.iHealThreshold = 60;
@@ -2988,7 +2988,7 @@ void CNewUIMuHelperExt::InitConfig()
 }
 
 // Called by the "Initialization" button from the sub page
-void CNewUIMuHelperExt::Reset()
+void CMuHelperExt::Reset()
 {
     if (m_iCurrentPage == SUB_PAGE_SKILL2_CONFIG 
         || m_iCurrentPage == SUB_PAGE_SKILL3_CONFIG)

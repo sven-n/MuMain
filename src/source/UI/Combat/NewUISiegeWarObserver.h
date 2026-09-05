@@ -1,4 +1,4 @@
-// NewUISiegeWarObserver.h: interface for the CNewUISiegeWarObserver class.
+// NewUISiegeWarObserver.h: interface for the CSiegeWarObserver class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -11,11 +11,11 @@
 
 namespace mu::ui::window
 {
-class CNewUISiegeWarObserver : public CNewUISiegeWarBase
+class CSiegeWarObserver : public CSiegeWarBase
 {
 public:
-    CNewUISiegeWarObserver();
-    virtual ~CNewUISiegeWarObserver();
+    CSiegeWarObserver();
+    virtual ~CSiegeWarObserver();
 
 private:
     virtual bool OnCreate(int x, int y);

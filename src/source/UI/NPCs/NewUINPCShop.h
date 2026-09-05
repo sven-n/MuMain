@@ -1,4 +1,4 @@
-// NewUINPCShop.h: interface for the CNewUINPCShop class.
+// NewUINPCShop.h: interface for the CNPCShop class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -15,17 +15,17 @@
 
 namespace mu::ui::window
 {
-    class CNewUINPCShop : public CNewUIObj
+    class CNPCShop : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_NPCSHOP_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_NPCSHOP_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_NPCSHOP_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_NPCSHOP_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_NPCSHOP_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_NPCSHOP_BTN_REPAIR = CNewUIMyInventory::IMAGE_INVENTORY_REPAIR_BTN,
+            IMAGE_NPCSHOP_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_NPCSHOP_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
+            IMAGE_NPCSHOP_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_NPCSHOP_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_NPCSHOP_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_NPCSHOP_BTN_REPAIR = CMyInventory::IMAGE_INVENTORY_REPAIR_BTN,
             IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
         };
 
@@ -44,8 +44,8 @@ namespace mu::ui::window
             NPCSHOP_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUIInventoryCtrl* m_pNewInventoryCtrl;
+        CManager* m_pNewUIMng;
+        CInventoryCtrl* m_pNewInventoryCtrl;
         POINT m_Pos;
 
         DWORD m_dwShopState;
@@ -53,18 +53,18 @@ namespace mu::ui::window
         bool m_bRepairShop;
         bool m_bIsNPCShopOpen;
 
-        CNewUIButton m_BtnRepair;
-        CNewUIButton m_BtnRepairAll;
+        CButton m_BtnRepair;
+        CButton m_BtnRepairAll;
 
         DWORD m_dwStandbyItemKey;
 
         bool m_bSellingItem;
 
     public:
-        CNewUINPCShop();
-        virtual ~CNewUINPCShop();
+        CNPCShop();
+        virtual ~CNPCShop();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

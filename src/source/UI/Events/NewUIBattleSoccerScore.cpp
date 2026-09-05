@@ -14,18 +14,18 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUIBattleSoccerScore::CNewUIBattleSoccerScore()
+mu::ui::window::CBattleSoccerScore::CBattleSoccerScore()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-mu::ui::window::CNewUIBattleSoccerScore::~CNewUIBattleSoccerScore()
+mu::ui::window::CBattleSoccerScore::~CBattleSoccerScore()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CBattleSoccerScore::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -42,7 +42,7 @@ bool mu::ui::window::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-void mu::ui::window::CNewUIBattleSoccerScore::Release()
+void mu::ui::window::CBattleSoccerScore::Release()
 {
     UnloadImages();
 
@@ -53,28 +53,28 @@ void mu::ui::window::CNewUIBattleSoccerScore::Release()
     }
 }
 
-void mu::ui::window::CNewUIBattleSoccerScore::SetPos(int x, int y)
+void mu::ui::window::CBattleSoccerScore::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIBattleSoccerScore::UpdateMouseEvent()
+bool mu::ui::window::CBattleSoccerScore::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIBattleSoccerScore::UpdateKeyEvent()
+bool mu::ui::window::CBattleSoccerScore::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIBattleSoccerScore::Update()
+bool mu::ui::window::CBattleSoccerScore::Update()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIBattleSoccerScore::Render()
+bool mu::ui::window::CBattleSoccerScore::Render()
 {
     ::EnableAlphaTest();
 
@@ -86,12 +86,12 @@ bool mu::ui::window::CNewUIBattleSoccerScore::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIBattleSoccerScore::RenderBackImage()
+void mu::ui::window::CBattleSoccerScore::RenderBackImage()
 {
     RenderImage(IMAGE_BSS_BACK, m_Pos.x, m_Pos.y, float(BSS_WIDTH), float(BSS_HEIGHT));
 }
 
-void mu::ui::window::CNewUIBattleSoccerScore::RenderContents()
+void mu::ui::window::CBattleSoccerScore::RenderContents()
 {
     wchar_t szTemp[128];
     int nX = m_Pos.x + 30;
@@ -142,7 +142,7 @@ void mu::ui::window::CNewUIBattleSoccerScore::RenderContents()
     }
 }
 
-int mu::ui::window::CNewUIBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)
+int mu::ui::window::CBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)
 {
     for (int i = 0; i < MARK_EDIT; ++i)
     {
@@ -155,17 +155,17 @@ int mu::ui::window::CNewUIBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName
     return 0;
 }
 
-float mu::ui::window::CNewUIBattleSoccerScore::GetLayerDepth()
+float mu::ui::window::CBattleSoccerScore::GetLayerDepth()
 {
     return 1.8f;
 }
 
-void mu::ui::window::CNewUIBattleSoccerScore::LoadImages()
+void mu::ui::window::CBattleSoccerScore::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_BSS_BACK, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIBattleSoccerScore::UnloadImages()
+void mu::ui::window::CBattleSoccerScore::UnloadImages()
 {
     DeleteBitmap(IMAGE_BSS_BACK);
 }

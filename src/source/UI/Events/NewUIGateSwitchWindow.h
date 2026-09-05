@@ -1,4 +1,4 @@
-// NewUIGateSwitchWindow.h: interface for the CNewUIGateSwitchWindow class.
+// NewUIGateSwitchWindow.h: interface for the CGateSwitchWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,27 +14,27 @@
 
 namespace mu::ui::window
 {
-    class CNewUIGateSwitchWindow : public CNewUIObj
+    class CGateSwitchWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GATESWITCHWINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_GATESWITCHWINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GATESWITCHWINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GATESWITCHWINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GATESWITCHWINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GATESWITCHWINDOW_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_GATESWITCHWINDOW_BUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
+            IMAGE_GATESWITCHWINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_GATESWITCHWINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_GATESWITCHWINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_GATESWITCHWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_GATESWITCHWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_GATESWITCHWINDOW_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_GATESWITCHWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
 
-            IMAGE_GATESWITCHWINDOW_TABLE_TOP_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
-            IMAGE_GATESWITCHWINDOW_TABLE_TOP_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
-            IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
-            IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
-            IMAGE_GATESWITCHWINDOW_TABLE_TOP_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,			//. newui_item_table03(up).tga (1, 14)
-            IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
-            IMAGE_GATESWITCHWINDOW_TABLE_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
-            IMAGE_GATESWITCHWINDOW_TABLE_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
+            IMAGE_GATESWITCHWINDOW_TABLE_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
+            IMAGE_GATESWITCHWINDOW_TABLE_TOP_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
+            IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
+            IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
+            IMAGE_GATESWITCHWINDOW_TABLE_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,			//. newui_item_table03(up).tga (1, 14)
+            IMAGE_GATESWITCHWINDOW_TABLE_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
+            IMAGE_GATESWITCHWINDOW_TABLE_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
+            IMAGE_GATESWITCHWINDOW_TABLE_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
         };
 
     private:
@@ -44,17 +44,17 @@ namespace mu::ui::window
             INVENTORY_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIButton m_BtnExit;
-        CNewUIButton m_BtnOpen;			// 열기 버튼
+        CButton m_BtnExit;
+        CButton m_BtnOpen;			// 열기 버튼
 
     public:
-        CNewUIGateSwitchWindow();
-        virtual ~CNewUIGateSwitchWindow();
+        CGateSwitchWindow();
+        virtual ~CGateSwitchWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -76,7 +76,7 @@ namespace mu::ui::window
         void RenderFrame();
         bool BtnProcess();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
+        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
 
         void RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight);
         void RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight);

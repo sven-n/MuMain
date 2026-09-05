@@ -13,20 +13,20 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
-// CNewUIMessageBoxBase
+// CMessageBoxBase
 //////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CNewUIMessageBoxBase::CNewUIMessageBoxBase()
+mu::ui::window::CMessageBoxBase::CMessageBoxBase()
 {
     Release();
 }
 
-mu::ui::window::CNewUIMessageBoxBase::~CNewUIMessageBoxBase()
+mu::ui::window::CMessageBoxBase::~CMessageBoxBase()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIMessageBoxBase::Create(int x, int y, int width, int height, float fPriority/* = 3.f*/)
+bool mu::ui::window::CMessageBoxBase::Create(int x, int y, int width, int height, float fPriority/* = 3.f*/)
 {
     SetPos(x, y);
     SetSize(width, height);
@@ -36,7 +36,7 @@ bool mu::ui::window::CNewUIMessageBoxBase::Create(int x, int y, int width, int h
     return true;
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::Release()
+void mu::ui::window::CMessageBoxBase::Release()
 {
     m_Pos.x = m_Pos.y = 0;
     m_Size.cx = m_Size.cy = 0;
@@ -46,44 +46,44 @@ void mu::ui::window::CNewUIMessageBoxBase::Release()
     RemoveAllCallbackFuncs();
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SetPos(int x, int y)
+void mu::ui::window::CMessageBoxBase::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SetSize(int width, int height)
+void mu::ui::window::CMessageBoxBase::SetSize(int width, int height)
 {
     m_Size.cx = width;
     m_Size.cy = height;
 }
 
-const POINT& mu::ui::window::CNewUIMessageBoxBase::GetPos()
+const POINT& mu::ui::window::CMessageBoxBase::GetPos()
 {
     return m_Pos;
 }
 
-const SIZE& mu::ui::window::CNewUIMessageBoxBase::GetSize()
+const SIZE& mu::ui::window::CMessageBoxBase::GetSize()
 {
     return m_Size;
 }
 
-float mu::ui::window::CNewUIMessageBoxBase::GetPriority() const
+float mu::ui::window::CMessageBoxBase::GetPriority() const
 {
     return 8.f;
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SetCanMove(bool bCanMove)
+void mu::ui::window::CMessageBoxBase::SetCanMove(bool bCanMove)
 {
     m_bCanMove = bCanMove;
 }
 
-bool mu::ui::window::CNewUIMessageBoxBase::CanMove()
+bool mu::ui::window::CMessageBoxBase::CanMove()
 {
     return m_bCanMove;
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD dwEvent)
+void mu::ui::window::CMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD dwEvent)
 {
     auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
@@ -91,19 +91,19 @@ void mu::ui::window::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc,
     m_mapCallbacks.insert(type_map_callback::value_type(dwEvent, pFunc));
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::RemoveCallbackFunc(DWORD dwEvent)
+void mu::ui::window::CMessageBoxBase::RemoveCallbackFunc(DWORD dwEvent)
 {
     auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
         m_mapCallbacks.erase(mi);
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::RemoveAllCallbackFuncs()
+void mu::ui::window::CMessageBoxBase::RemoveAllCallbackFuncs()
 {
     m_mapCallbacks.clear();
 }
 
-EVENT_CALLBACK mu::ui::window::CNewUIMessageBoxBase::GetCallbackFunc(DWORD dwEvent)
+EVENT_CALLBACK mu::ui::window::CMessageBoxBase::GetCallbackFunc(DWORD dwEvent)
 {
     auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
@@ -111,17 +111,17 @@ EVENT_CALLBACK mu::ui::window::CNewUIMessageBoxBase::GetCallbackFunc(DWORD dwEve
     return NULL;
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
+void mu::ui::window::CMessageBoxBase::SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent)
 {
-    CNewUIMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent);
+    CMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent);
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
+void mu::ui::window::CMessageBoxBase::SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
 {
-    CNewUIMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent, xParam);
+    CMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent, xParam);
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
+void mu::ui::window::CMessageBoxBase::RenderMsgBackColor(bool _bRender)
 {
     if (_bRender)
     {
@@ -144,12 +144,12 @@ void mu::ui::window::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
     }
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SetMsgBackOpacity(float _fAlpha)
+void mu::ui::window::CMessageBoxBase::SetMsgBackOpacity(float _fAlpha)
 {
     m_fOpacityAlpha = _fAlpha;
 }
 
-void mu::ui::window::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
+void mu::ui::window::CMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
 {
     if (!_vColor)
     {
@@ -161,16 +161,16 @@ void mu::ui::window::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
     }
 }
 
-mu::ui::window::CNewUIMessageBoxMng::CNewUIMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL)
+mu::ui::window::CMessageBoxMng::CMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL)
 {
 }
 
-mu::ui::window::CNewUIMessageBoxMng::~CNewUIMessageBoxMng()
+mu::ui::window::CMessageBoxMng::~CMessageBoxMng()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CMessageBoxMng::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -178,14 +178,14 @@ bool mu::ui::window::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MESSAGEBOX, this);
 
-    m_pMsgBoxFactory = new CNewUIMessageBoxFactory;
+    m_pMsgBoxFactory = new CMessageBoxFactory;
 
     LoadImages();
 
     return true;
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::Release()
+void mu::ui::window::CMessageBoxMng::Release()
 {
     if (m_pNewUIMng == nullptr && m_pMsgBoxFactory == nullptr)
     {
@@ -206,14 +206,14 @@ void mu::ui::window::CNewUIMessageBoxMng::Release()
     }
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::UpdateMouseEvent()
+bool mu::ui::window::CMessageBoxMng::UpdateMouseEvent()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
     auto vi = m_vecMsgBoxes.begin();
     if (vi == m_vecMsgBoxes.end())
         return true;
 
-    CNewUIMessageBoxBase* pCurMsgBox = (*vi);
+    CMessageBoxBase* pCurMsgBox = (*vi);
 
     if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
         mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
@@ -285,14 +285,14 @@ bool mu::ui::window::CNewUIMessageBoxMng::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::UpdateKeyEvent()
+bool mu::ui::window::CMessageBoxMng::UpdateKeyEvent()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
     auto vi = m_vecMsgBoxes.begin();
     if (vi == m_vecMsgBoxes.end())
         return true;
 
-    CNewUIMessageBoxBase* pCurMsgBox = (*vi);
+    CMessageBoxBase* pCurMsgBox = (*vi);
     if (mu::ui::window::IsPress(VK_ESCAPE))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_PRESSKEY_ESC);
@@ -310,7 +310,7 @@ bool mu::ui::window::CNewUIMessageBoxMng::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::Update()
+bool mu::ui::window::CMessageBoxMng::Update()
 {
     //. Update
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
@@ -319,13 +319,13 @@ bool mu::ui::window::CNewUIMessageBoxMng::Update()
     {
         return true;
     }
-    CNewUIMessageBoxBase* pCurMsgBox = (*vi);
+    CMessageBoxBase* pCurMsgBox = (*vi);
     bool bResult = pCurMsgBox->Update();
 
     //. Event Processing
     while (!m_queueEvents.empty())
     {
-        CNewUIEvent* pEvent = m_queueEvents.front();
+        CEvent* pEvent = m_queueEvents.front();
         if (pEvent->GetOwner() == pCurMsgBox)
         {
             //. function call
@@ -354,7 +354,7 @@ bool mu::ui::window::CNewUIMessageBoxMng::Update()
     return bResult;
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::Render()
+bool mu::ui::window::CMessageBoxMng::Render()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
     auto vi = m_vecMsgBoxes.begin();
@@ -365,28 +365,28 @@ bool mu::ui::window::CNewUIMessageBoxMng::Render()
     return (*vi)->Render();
 }
 
-float mu::ui::window::CNewUIMessageBoxMng::GetLayerDepth()
+float mu::ui::window::CMessageBoxMng::GetLayerDepth()
 {
     return 10.7f;
 }
 
-float mu::ui::window::CNewUIMessageBoxMng::GetKeyEventOrder()
+float mu::ui::window::CMessageBoxMng::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-CNewUIMessageBoxMng* mu::ui::window::CNewUIMessageBoxMng::GetInstance()
+CMessageBoxMng* mu::ui::window::CMessageBoxMng::GetInstance()
 {
-    static CNewUIMessageBoxMng s_Instance;
+    static CMessageBoxMng s_Instance;
     return &s_Instance;
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::ComparePriority(CNewUIMessageBoxBase* pObj1, CNewUIMessageBoxBase* pObj2)
+bool mu::ui::window::CMessageBoxMng::ComparePriority(CMessageBoxBase* pObj1, CMessageBoxBase* pObj2)
 {
     return pObj1->GetPriority() < pObj2->GetPriority();
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::DeleteMessageBox(const CNewUIMessageBoxBase* pObj)
+void mu::ui::window::CMessageBoxMng::DeleteMessageBox(const CMessageBoxBase* pObj)
 {
     if (m_pMsgBoxFactory)
         m_pMsgBoxFactory->DeleteMessageBox(pObj);
@@ -401,7 +401,7 @@ void mu::ui::window::CNewUIMessageBoxMng::DeleteMessageBox(const CNewUIMessageBo
     }
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::PopMessageBox()
+void mu::ui::window::CMessageBoxMng::PopMessageBox()
 {
     if (m_vecMsgBoxes.empty() == false)
     {
@@ -412,30 +412,30 @@ void mu::ui::window::CNewUIMessageBoxMng::PopMessageBox()
     }
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::PopAllMessageBoxes()
+void mu::ui::window::CMessageBoxMng::PopAllMessageBoxes()
 {
     m_pMsgBoxFactory->DeleteAllMessageBoxes();
     m_vecMsgBoxes.clear();
 }
 
-bool mu::ui::window::CNewUIMessageBoxMng::IsEmpty()
+bool mu::ui::window::CMessageBoxMng::IsEmpty()
 {
     return m_vecMsgBoxes.empty();
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
+void mu::ui::window::CMessageBoxMng::SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent)
 {
-    auto* pEvent = new CNewUIEvent(pOwner, dwEvent);
+    auto* pEvent = new CEvent(pOwner, dwEvent);
     m_queueEvents.push(pEvent);
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
+void mu::ui::window::CMessageBoxMng::SendEvent(CMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
 {
-    auto* pEvent = new CNewUIEvent(pOwner, dwEvent, xParam);
+    auto* pEvent = new CEvent(pOwner, dwEvent, xParam);
     m_queueEvents.push(pEvent);
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::PopEvent()
+void mu::ui::window::CMessageBoxMng::PopEvent()
 {
     if (!m_queueEvents.empty())
     {
@@ -444,7 +444,7 @@ void mu::ui::window::CNewUIMessageBoxMng::PopEvent()
     }
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::PopAllEvents()
+void mu::ui::window::CMessageBoxMng::PopAllEvents()
 {
     while (!m_queueEvents.empty())
     {
@@ -453,7 +453,7 @@ void mu::ui::window::CNewUIMessageBoxMng::PopAllEvents()
     }
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::LoadImages()
+void mu::ui::window::CMessageBoxMng::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_MSGBOX_TOP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_MSGBOX_MIDDLE, GL_LINEAR);
@@ -476,7 +476,7 @@ void mu::ui::window::CNewUIMessageBoxMng::LoadImages()
     LoadBitmap(L"Interface\\newui_DuelWindow.tga", IMAGE_MSGBOX_DUEL_BACK, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIMessageBoxMng::UnloadImages()
+void mu::ui::window::CMessageBoxMng::UnloadImages()
 {
     DeleteBitmap(IMAGE_MSGBOX_DUEL_BACK);
 

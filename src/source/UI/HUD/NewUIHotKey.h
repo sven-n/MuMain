@@ -7,18 +7,18 @@
 
 namespace mu::ui::window
 {
-    class CNewUIManager;
+    class CManager;
 
-    class CNewUIHotKey : public CNewUIObj
+    class CHotKey : public CObject
     {
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         bool			m_bStateGameOver;
 
     public:
-        CNewUIHotKey();
-        virtual ~CNewUIHotKey();
+        CHotKey();
+        virtual ~CHotKey();
 
-        bool Create(CNewUIManager* pNewUIMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool UpdateMouseEvent();

@@ -41,7 +41,7 @@ namespace
     }
 }
 
-CNewUISystem::CNewUISystem()
+CSystem::CSystem()
 {
     m_pNewUIMng = nullptr;
     m_pNewUIHotKey = nullptr;
@@ -122,34 +122,34 @@ CNewUISystem::CNewUISystem()
     m_pNewUnitedMarketPlaceWindow = nullptr;
 }
 
-CNewUISystem::~CNewUISystem()
+CSystem::~CSystem()
 {
     Release();
 }
 
-bool CNewUISystem::Create()
+bool CSystem::Create()
 {
-    m_pNewUIMng = new CNewUIManager;
+    m_pNewUIMng = new CManager;
 
-    m_pNewUI3DRenderMng = new CNewUI3DRenderMng;
+    m_pNewUI3DRenderMng = new C3DRenderMng;
     if (false == m_pNewUI3DRenderMng->Create(m_pNewUIMng))
         return false;
 
-    m_pNewChatLogWindow = new CNewUIChatLogWindow;
+    m_pNewChatLogWindow = new CChatLogWindow;
     if (false == m_pNewChatLogWindow->Create(m_pNewUIMng, 0, 480 - 50 - 47, 6))
         return false;
 
-    m_pNewSystemLogWindow = new CNewUISystemLogWindow;
+    m_pNewSystemLogWindow = new CSystemLogWindow;
     if (false == m_pNewSystemLogWindow->Create(m_pNewUIMng, 0, 80))
         return false;
 
-    m_pNewOptionWindow = new CNewUIOptionWindow;
+    m_pNewOptionWindow = new COptionWindow;
     if (m_pNewOptionWindow->Create(m_pNewUIMng, (640 / 2) - (190 / 2), 5) == false)
     {
         return false;
     }
 
-    m_pNewSlideWindow = new CNewUISlideWindow;
+    m_pNewSlideWindow = new CSlideWindow;
     if (m_pNewSlideWindow->Create(m_pNewUIMng) == false)
     {
         return false;
@@ -161,7 +161,7 @@ bool CNewUISystem::Create()
     return true;
 }
 
-void CNewUISystem::Release()
+void CSystem::Release()
 {
     if (m_pNewUIMng == nullptr)
     {
@@ -182,9 +182,9 @@ void CNewUISystem::Release()
     SAFE_DELETE(m_pNewUIMng);
 }
 
-bool CNewUISystem::CreateChatCommandWindow()
+bool CSystem::CreateChatCommandWindow()
 {
-    m_pNewChatCommandWindow = new CNewUIChatCommandWindow;
+    m_pNewChatCommandWindow = new CChatCommandWindow;
     if (m_pNewChatCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0))
     {
         return true;
@@ -194,16 +194,16 @@ bool CNewUISystem::CreateChatCommandWindow()
     return false;
 }
 
-bool CNewUISystem::LoadMainSceneInterface()
+bool CSystem::LoadMainSceneInterface()
 {
     g_MessageBox->Show(true);
     m_pNewChatLogWindow->Show(true);
     m_pNewSystemLogWindow->Show(true);
     m_pNewSlideWindow->Show(true);
 
-    m_pNewItemMng = new CNewUIItemMng;
+    m_pNewItemMng = new CItemMng;
 
-    m_pNewChatInputBox = new CNewUIChatInputBox;
+    m_pNewChatInputBox = new CChatInputBox;
 
     if (false == m_pNewChatInputBox->Create(m_pNewUIMng, m_pNewChatLogWindow, m_pNewSystemLogWindow, 0, 480 - 51 - 47))
     {
@@ -212,151 +212,151 @@ bool CNewUISystem::LoadMainSceneInterface()
 
     SetFocus(g_hWnd);
 
-    m_pNewUIHotKey = new CNewUIHotKey;
+    m_pNewUIHotKey = new CHotKey;
     if (false == m_pNewUIHotKey->Create(m_pNewUIMng))
         return false;
 
-    m_pNewMainFrameWindow = new CNewUIMainFrameWindow;
+    m_pNewMainFrameWindow = new CMainFrameWindow;
     if (m_pNewMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
         return false;
 
-    m_pNewSkillList = new CNewUISkillList;
+    m_pNewSkillList = new CSkillList;
     if (m_pNewSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
         return false;
 
-    m_pNewFriendWindow = new CNewUIFriendWindow;
+    m_pNewFriendWindow = new CFriendWindow;
     if (m_pNewFriendWindow->Create(m_pNewUIMng) == false)
         return false;
 
-    m_pNewMyInventory = new CNewUIMyInventory;
+    m_pNewMyInventory = new CMyInventory;
     if (false == m_pNewMyInventory->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0))
         return false;
 
-    m_pNewMyInventoryExt = new CNewUIInventoryExtension;
+    m_pNewMyInventoryExt = new CInventoryExtension;
     if (false == m_pNewMyInventoryExt->Create(m_pNewUIMng, PanelColumnX(2), 0))
         return false;
 
-    m_pNewNPCShop = new CNewUINPCShop;
-    if (false == m_pNewNPCShop->Create(m_pNewUIMng, CNewUINPCShop::NPCSHOP_POS_X, CNewUINPCShop::NPCSHOP_POS_Y))
+    m_pNewNPCShop = new CNPCShop;
+    if (false == m_pNewNPCShop->Create(m_pNewUIMng, CNPCShop::NPCSHOP_POS_X, CNPCShop::NPCSHOP_POS_Y))
         return false;
 
-    m_pNewPetInfoWindow = new CNewUIPetInfoWindow;
+    m_pNewPetInfoWindow = new CPetInfoWindow;
     if (false == m_pNewPetInfoWindow->Create(m_pNewUIMng, PanelColumnX(2), 0))
         return false;
 
-    m_pNewMixInventory = new CNewUIMixInventory;
+    m_pNewMixInventory = new CMixInventory;
     if (m_pNewMixInventory->Create(m_pNewUIMng, 260, 0) == false)
         return false;
 
-    m_pNewCastleWindow = new CNewUICastleWindow;
+    m_pNewCastleWindow = new CCastleWindow;
     if (m_pNewCastleWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewGuardWindow = new CNewUIGuardWindow;
+    m_pNewGuardWindow = new CGuardWindow;
     if (m_pNewGuardWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewGatemanWindow = new CNewUIGatemanWindow;
+    m_pNewGatemanWindow = new CGatemanWindow;
     if (m_pNewGatemanWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewGateSwitchWindow = new CNewUIGateSwitchWindow;
+    m_pNewGateSwitchWindow = new CGateSwitchWindow;
     if (m_pNewGateSwitchWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewStorageInventory = new CNewUIStorageInventory;
+    m_pNewStorageInventory = new CStorageInventory;
     if (m_pNewStorageInventory->Create(m_pNewUIMng, 260, 0) == false)
         return false;
 
-    m_pNewStorageInventoryExt = new CNewUIStorageInventoryExt;
+    m_pNewStorageInventoryExt = new CStorageInventoryExt;
     if (m_pNewStorageInventoryExt->Create(m_pNewUIMng, 260 - 190, 0) == false)
         return false;
 
-    m_pNewGuildInfoWindow = new CNewUIGuildInfoWindow;
+    m_pNewGuildInfoWindow = new CGuildInfoWindow;
     if (m_pNewGuildInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewGuildMakeWindow = new CNewUIGuildMakeWindow;
+    m_pNewGuildMakeWindow = new CGuildMakeWindow;
     if (m_pNewGuildMakeWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
     CreatePersonalItemTable();
 
-    m_pNewMyShopInventory = new CNewUIMyShopInventory;
+    m_pNewMyShopInventory = new CMyShopInventory;
     if (m_pNewMyShopInventory->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
-    m_pNewPurchaseShopInventory = new CNewUIPurchaseShopInventory;
+    m_pNewPurchaseShopInventory = new CPurchaseShopInventory;
     if (m_pNewPurchaseShopInventory->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
-    m_pNewCharacterInfoWindow = new CNewUICharacterInfoWindow;
+    m_pNewCharacterInfoWindow = new CCharacterInfoWindow;
     if (m_pNewCharacterInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewMyQuestInfoWindow = new CNewUIMyQuestInfoWindow;
+    m_pNewMyQuestInfoWindow = new CMyQuestInfoWindow;
     if (m_pNewMyQuestInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewPartyInfoWindow = new CNewUIPartyInfoWindow;
+    m_pNewPartyInfoWindow = new CPartyInfoWindow;
     if (m_pNewPartyInfoWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewPartyListWindow = new CNewUIPartyListWindow;
+    m_pNewPartyListWindow = new CPartyListWindow;
     if (m_pNewPartyListWindow->Create(m_pNewUIMng, 640 - 79, 14) == false)
         return false;
 
-    m_pNewNPCQuest = new CNewUINPCQuest;
+    m_pNewNPCQuest = new CNPCQuest;
     if (m_pNewNPCQuest->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewEnterBloodCastle = new CNewUIEnterBloodCastle;
+    m_pNewEnterBloodCastle = new CEnterBloodCastle;
     if (m_pNewEnterBloodCastle->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewEnterDevilSquare = new CNewUIEnterDevilSquare;
+    m_pNewEnterDevilSquare = new CEnterDevilSquare;
     if (m_pNewEnterDevilSquare->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewBloodCastle = new CNewUIBloodCastle;
+    m_pNewBloodCastle = new CBloodCastle;
     if (m_pNewBloodCastle->Create(m_pNewUIMng, 640 - 127, 480 - 132) == false)
         return false;
 
-    m_pNewTrade = new CNewUITrade;
+    m_pNewTrade = new CTrade;
     if (m_pNewTrade->Create(m_pNewUIMng, 260, 0) == false)
         return false;
 
-    m_pNewKanturu2ndEnterNpc = new CNewUIKanturu2ndEnterNpc;
+    m_pNewKanturu2ndEnterNpc = new CKanturu2ndEnterNpc;
     if (m_pNewKanturu2ndEnterNpc->Create(m_pNewUIMng, (640 / 2) - (230 / 2), 20) == false)
     {
         return false;
     }
 
-    m_pNewKanturuInfoWindow = new CNewUIKanturuInfoWindow;
+    m_pNewKanturuInfoWindow = new CKanturuInfoWindow;
     if (m_pNewKanturuInfoWindow->Create(m_pNewUIMng, 541, 351) == false)
     {
         return false;
     }
 
-    m_pNewChaosCastleTime = new CNewUIChaosCastleTime;
+    m_pNewChaosCastleTime = new CChaosCastleTime;
     if (m_pNewChaosCastleTime->Create(m_pNewUIMng, 640 - 127, 480 - 132) == false)
         return false;
 
-    m_pNewBattleSoccerScore = new CNewUIBattleSoccerScore;
+    m_pNewBattleSoccerScore = new CBattleSoccerScore;
     if (m_pNewBattleSoccerScore->Create(m_pNewUIMng, 509, 359) == false)
         return false;
 
-    m_pNewCommandWindow = new CNewUICommandWindow;
+    m_pNewCommandWindow = new CCommandWindow;
     if (m_pNewCommandWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewCatapultWindow = new CNewUICatapultWindow;
+    m_pNewCatapultWindow = new CCatapultWindow;
     if (m_pNewCatapultWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
     {
         return false;
     }
 
-    m_pNewWindowMenu = new CNewUIWindowMenu;
+    m_pNewWindowMenu = new CWindowMenu;
     if (m_pNewWindowMenu->Create(m_pNewUIMng, 640 - 112, 480 - 171) == false)
     {
         return false;
@@ -373,52 +373,52 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
-    m_pNewHelpWindow = new CNewUIHelpWindow;
+    m_pNewHelpWindow = new CHelpWindow;
     if (m_pNewHelpWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
 
-    m_pNewItemExplanationWindow = new CNewUIItemExplanationWindow;
+    m_pNewItemExplanationWindow = new CItemExplanationWindow;
     if (m_pNewItemExplanationWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
 
-    m_pNewSetItemExplanation = new CNewUISetItemExplanation;
+    m_pNewSetItemExplanation = new CSetItemExplanation;
     if (m_pNewSetItemExplanation->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
 
-    m_pNewQuickCommandWindow = new CNewUIQuickCommandWindow;
+    m_pNewQuickCommandWindow = new CQuickCommandWindow;
     if (m_pNewQuickCommandWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
 
-    m_pNewMoveCommandWindow = new CNewUIMoveCommandWindow;
+    m_pNewMoveCommandWindow = new CMoveCommandWindow;
 
     if (m_pNewMoveCommandWindow->Create(m_pNewUIMng, 1, 1) == false)
         return false;
 
-    m_pNewDuelWindow = new CNewUIDuelWindow;
+    m_pNewDuelWindow = new CDuelWindow;
     if (m_pNewDuelWindow->Create(m_pNewUIMng, 509, 359) == false)
     {
         return false;
     }
 
-    m_pNewNameWindow = new CNewUINameWindow;
+    m_pNewNameWindow = new CNameWindow;
     if (m_pNewNameWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
 
-    m_pNewSiegeWarfare = new CNewUISiegeWarfare;
+    m_pNewSiegeWarfare = new CSiegeWarfare;
     if (m_pNewSiegeWarfare->Create(m_pNewUIMng, 486, 234) == false)
         return false;
 
-    m_pNewItemEnduranceInfo = new CNewUIItemEnduranceInfo;
+    m_pNewItemEnduranceInfo = new CItemEnduranceInfo;
     if (m_pNewItemEnduranceInfo->Create(m_pNewUIMng, 2, 26) == false)
     {
         return false;
@@ -430,93 +430,93 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
     }
 
-    m_pNewCursedTempleEnterWindow = new CNewUICursedTempleEnter;
+    m_pNewCursedTempleEnterWindow = new CCursedTempleEnter;
     if (m_pNewCursedTempleEnterWindow->Create(m_pNewUIMng, 640 / 2 - 230 / 2, 80) == false)
     {
         return false;
     }
-    m_pNewCursedTempleWindow = new CNewUICursedTempleSystem;
+    m_pNewCursedTempleWindow = new CCursedTempleSystem;
     if (m_pNewCursedTempleWindow->Create(m_pNewUIMng, 0, 0) == false)
     {
         return false;
     }
-    m_pNewCursedTempleResultWindow = new CNewUICursedTempleResult;
+    m_pNewCursedTempleResultWindow = new CCursedTempleResult;
     if (m_pNewCursedTempleResultWindow->Create(m_pNewUIMng, 640 / 2 - 230 / 2, 120) == false)
     {
         return false;
     }
 
-    m_pNewCryWolfInterface = new CNewUICryWolf;
+    m_pNewCryWolfInterface = new CCryWolf;
     if (m_pNewCryWolfInterface->Create(m_pNewUIMng, 0, 0) == false)
         return false;
 
-    m_pNewMaster_Level_Interface = new CNewUIMasterLevel;
+    m_pNewMaster_Level_Interface = new CMasterLevel;
     if (m_pNewMaster_Level_Interface->Create(m_pNewUIMng) == false)
         return false;
 
-    m_pNewMiniMap = new CNewUIMiniMap;
+    m_pNewMiniMap = new CMiniMap;
     if (m_pNewMiniMap->Create(m_pNewUIMng, 0, 0) == false)
         return false;
 
-    m_pNewGoldBowman = new CNewUIGoldBowmanWindow;
+    m_pNewGoldBowman = new CGoldBowmanWindow;
     if (m_pNewGoldBowman->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewGoldBowmanLena = new CNewUIGoldBowmanLena;
+    m_pNewGoldBowmanLena = new CGoldBowmanLena;
     if (m_pNewGoldBowmanLena->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewLuckyCoinRegistration = new CNewUIRegistrationLuckyCoin;
+    m_pNewLuckyCoinRegistration = new CRegistrationLuckyCoin;
     if (m_pNewLuckyCoinRegistration->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
-    m_pNewExchangeLuckyCoinWindow = new CNewUIExchangeLuckyCoin;
+    m_pNewExchangeLuckyCoinWindow = new CExchangeLuckyCoin;
     if (m_pNewExchangeLuckyCoinWindow->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
-    m_pNewDuelWatchWindow = new CNewUIDuelWatchWindow;
+    m_pNewDuelWatchWindow = new CDuelWatchWindow;
     if (m_pNewDuelWatchWindow->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewDuelWatchMainFrameWindow = new CNewUIDuelWatchMainFrameWindow;
+    m_pNewDuelWatchMainFrameWindow = new CDuelWatchMainFrameWindow;
     if (m_pNewDuelWatchMainFrameWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
         return false;
 
-    m_pNewDuelWatchUserListWindow = new CNewUIDuelWatchUserListWindow;
+    m_pNewDuelWatchUserListWindow = new CDuelWatchUserListWindow;
     if (m_pNewDuelWatchUserListWindow->Create(m_pNewUIMng, 640 - 57, 480 - 51) == false)
         return false;
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    m_pNewInGameShop = new CNewUIInGameShop;
+    m_pNewInGameShop = new CInGameShop;
     if (m_pNewInGameShop->Create(m_pNewUIMng, 0, 0) == false)
         return false;
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-    m_pNewDoppelGangerWindow = new CNewUIDoppelGangerWindow;
+    m_pNewDoppelGangerWindow = new CDoppelGangerWindow;
     if (m_pNewDoppelGangerWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewDoppelGangerFrame = new CNewUIDoppelGangerFrame;
+    m_pNewDoppelGangerFrame = new CDoppelGangerFrame;
     if (m_pNewDoppelGangerFrame->Create(m_pNewUIMng, 640 - 227, 480 - 51 - 87) == false)
         return false;
 
-    m_pNewNPCDialogue = new CNewUINPCDialogue;
+    m_pNewNPCDialogue = new CNPCDialogue;
     if (m_pNewNPCDialogue->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewQuestProgress = new CNewUIQuestProgress;
+    m_pNewQuestProgress = new CQuestProgress;
     if (m_pNewQuestProgress->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewQuestProgressByEtc = new CNewUIQuestProgressByEtc;
+    m_pNewQuestProgressByEtc = new CQuestProgressByEtc;
     if (m_pNewQuestProgressByEtc->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewEmpireGuardianNPC = new CNewUIEmpireGuardianNPC;
+    m_pNewEmpireGuardianNPC = new CEmpireGuardianNPC;
     if (m_pNewEmpireGuardianNPC->Create(m_pNewUIMng, m_pNewUI3DRenderMng, 450, 0) == false)
         return false;
 
-    m_pNewEmpireGuardianTimer = new CNewUIEmpireGuardianTimer;
+    m_pNewEmpireGuardianTimer = new CEmpireGuardianTimer;
     if (m_pNewEmpireGuardianTimer->Create(m_pNewUIMng, 507, 342) == false)
         return false;
 
@@ -526,34 +526,34 @@ bool CNewUISystem::LoadMainSceneInterface()
         return false;
 #endif //PBG_MOD_STAMINA_UI
 
-    m_pNewGensRanking = new CNewUIGensRanking;
+    m_pNewGensRanking = new CGensRanking;
     if (m_pNewGensRanking->Create(m_pNewUIMng, 640, 480) == false)
         return false;
 
-    m_pNewUnitedMarketPlaceWindow = new CNewUIUnitedMarketPlaceWindow;
+    m_pNewUnitedMarketPlaceWindow = new CUnitedMarketPlaceWindow;
     if (m_pNewUnitedMarketPlaceWindow->Create(m_pNewUIMng, m_pNewUI3DRenderMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewUILuckyItemWnd = new CNewUILuckyItemWnd;
+    m_pNewUILuckyItemWnd = new CLuckyItemWnd;
     if (m_pNewUILuckyItemWnd->Create(m_pNewUIMng, 260, 0) == false)
         return false;
 
-    m_pNewUIMuHelper = new CNewUIMuHelper;
+    m_pNewUIMuHelper = new CUIMuHelper;
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
 
-    m_pNewUIMuHelperExt = new CNewUIMuHelperExt;
+    m_pNewUIMuHelperExt = new CMuHelperExt;
     if (m_pNewUIMuHelperExt->Create(m_pNewUIMng, PanelColumnX(2), 0) == false)
         return false;
 
-    m_pNewUIMuHelperSkillList = new CNewUIMuHelperSkillList;
+    m_pNewUIMuHelperSkillList = new CMuHelperSkillList;
     if (m_pNewUIMuHelperSkillList->Create(m_pNewUIMng, m_pNewUI3DRenderMng) == false)
         return false;
 
     return true;
 }
 
-void CNewUISystem::UnloadMainSceneInterface()
+void CSystem::UnloadMainSceneInterface()
 {
     if (g_pNewUIMng)
     {
@@ -642,7 +642,7 @@ void CNewUISystem::UnloadMainSceneInterface()
     ReleasePersonalItemTable();
 }
 
-bool CNewUISystem::IsVisible(DWORD dwKey)
+bool CSystem::IsVisible(DWORD dwKey)
 {
     if (m_pNewUIMng)
     {
@@ -652,12 +652,12 @@ bool CNewUISystem::IsVisible(DWORD dwKey)
     return false;
 }
 
-//bool SortUiObj(const INewUIBase& lhs, const INewUIBase& rhs)
+//bool SortUiObj(const IObject& lhs, const IObject& rhs)
 //{
 //	return lhs.GetDisplayOrder() > rhs.GetDisplayOrder();
 //}
 
-void CNewUISystem::Show(DWORD dwKey)
+void CSystem::Show(DWORD dwKey)
 {
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
     if (g_pInGameShop->IsInGameShop())
@@ -669,7 +669,7 @@ void CNewUISystem::Show(DWORD dwKey)
     }
 
     /*
-    std::list<INewUIBase*> visiblePages = {};
+    std::list<IObject*> visiblePages = {};
 
     for (int i = INTERFACE_LIST::INTERFACE_BEGIN; i < INTERFACE_LIST::INTERFACE_END; i++)
     {
@@ -1087,7 +1087,7 @@ void CNewUISystem::Show(DWORD dwKey)
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
     else if (dwKey == INTERFACE_INGAMESHOP)
     {
-        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUISystem.Show()\r\n");
+        g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CSystem.Show()\r\n");
         HideAll();
         g_pInGameShop->OpeningProcess();
 #ifndef KJH_MOD_SHOP_SCRIPT_DOWNLOAD
@@ -1169,7 +1169,7 @@ void CNewUISystem::Show(DWORD dwKey)
     m_pNewPartyListWindow->SetPos(iScreenWidth);
 }
 
-void CNewUISystem::Hide(DWORD dwKey)
+void CSystem::Hide(DWORD dwKey)
 {
     if (!m_pNewUIMng)
     {
@@ -1601,12 +1601,12 @@ void CNewUISystem::Hide(DWORD dwKey)
     m_pNewPartyListWindow->SetPos(iScreenWidth);
 }
 
-void CNewUISystem::Toggle(DWORD dwKey)
+void CSystem::Toggle(DWORD dwKey)
 {
     IsVisible(dwKey) ? Hide(dwKey) : Show(dwKey);
 }
 
-void CNewUISystem::HideAll()
+void CSystem::HideAll()
 {
     if (m_pNewUIMng)
     {
@@ -1623,7 +1623,7 @@ void CNewUISystem::HideAll()
     }
 }
 
-void CNewUISystem::HideAllGroupA()
+void CSystem::HideAllGroupA()
 {
     Hide(INTERFACE_INVENTORY);
     Hide(INTERFACE_CHARACTER);
@@ -1683,7 +1683,7 @@ void CNewUISystem::HideAllGroupA()
     }
 }
 
-void CNewUISystem::HideAllGroupB()
+void CSystem::HideAllGroupB()
 {
     Hide(INTERFACE_FRIEND);
     Hide(INTERFACE_INVENTORY);
@@ -1742,7 +1742,7 @@ void CNewUISystem::HideAllGroupB()
         }
     }
 }
-void CNewUISystem::HideGroupBeforeOpenInterface()
+void CSystem::HideGroupBeforeOpenInterface()
 {
     DWORD dwGroupC[] = {
         INTERFACE_PARTY,
@@ -1767,7 +1767,7 @@ void CNewUISystem::HideGroupBeforeOpenInterface()
     }
 }
 
-void CNewUISystem::SyncMainSceneHudVisibility()
+void CSystem::SyncMainSceneHudVisibility()
 {
     extern EGameScene SceneFlag;
     // LoadingWorld < 30, not just SceneFlag == MAIN_SCENE: SceneFlag flips to MAIN_SCENE the
@@ -1789,7 +1789,7 @@ void CNewUISystem::SyncMainSceneHudVisibility()
         m_pNewMainFrameWindow->SyncDocVisibility(sceneAllowsShow);
 }
 
-void CNewUISystem::UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey)
+void CSystem::UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey)
 {
     if (IsHeroPositionLayoutInterface(dwKey))
     {
@@ -1797,7 +1797,7 @@ void CNewUISystem::UpdateMuHelperBarVisibilityForLayoutChange(DWORD dwKey)
     }
 }
 
-void CNewUISystem::SyncMuHelperBarVisibility()
+void CSystem::SyncMuHelperBarVisibility()
 {
     if (!m_pNewUIMng)
     {
@@ -1807,7 +1807,7 @@ void CNewUISystem::SyncMuHelperBarVisibility()
     m_pNewUIMng->ShowInterface(INTERFACE_MU_HELPER_BAR, !ShouldHideMuHelperBar());
 }
 
-bool CNewUISystem::ShouldHideMuHelperBar()
+bool CSystem::ShouldHideMuHelperBar()
 {
     if (!m_pNewUIMng)
     {
@@ -1832,7 +1832,7 @@ bool CNewUISystem::ShouldHideMuHelperBar()
         || IsVisible(INTERFACE_TRADE);
 }
 
-void CNewUISystem::Enable(DWORD dwKey)
+void CSystem::Enable(DWORD dwKey)
 {
     if (m_pNewUIMng)
     {
@@ -1840,7 +1840,7 @@ void CNewUISystem::Enable(DWORD dwKey)
     }
 }
 
-void CNewUISystem::Disable(DWORD dwKey)
+void CSystem::Disable(DWORD dwKey)
 {
     if (m_pNewUIMng)
     {
@@ -1848,7 +1848,7 @@ void CNewUISystem::Disable(DWORD dwKey)
     }
 }
 
-bool CNewUISystem::CheckMouseUse()
+bool CSystem::CheckMouseUse()
 {
     if (m_mouseInputCaptured)
     {
@@ -1863,7 +1863,7 @@ bool CNewUISystem::CheckMouseUse()
     return false;
 }
 
-bool CNewUISystem::CheckKeyUse()
+bool CSystem::CheckKeyUse()
 {
     if (m_pNewUIMng)
     {
@@ -1873,7 +1873,7 @@ bool CNewUISystem::CheckKeyUse()
     return false;
 }
 
-bool CNewUISystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
+bool CSystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
 {
     // Box of the corner glyph in the shared 190-wide frame. Matches the MU Helper
     // close "X" exactly (13x12 anchored at +169,+7) — the same hit-box the
@@ -1896,7 +1896,7 @@ bool CNewUISystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
     return false;
 }
 
-bool CNewUISystem::Update()
+bool CSystem::Update()
 {
     if (m_pNewItemMng)
     {
@@ -1929,7 +1929,7 @@ bool CNewUISystem::Update()
     return result;
 }
 
-bool CNewUISystem::Render()
+bool CSystem::Render()
 {
     bool bResult = false;
 
@@ -1941,22 +1941,22 @@ bool CNewUISystem::Render()
     return bResult;
 }
 
-CNewUIManager* CNewUISystem::GetNewUIManager() const
+CManager* CSystem::GetNewUIManager() const
 {
     return m_pNewUIMng;
 }
 
-CNewUI3DRenderMng* CNewUISystem::GetNewUI3DRenderMng() const
+C3DRenderMng* CSystem::GetNewUI3DRenderMng() const
 {
     return m_pNewUI3DRenderMng;
 }
 
-CNewUIHotKey* CNewUISystem::GetNewUIHotKey() const
+CHotKey* CSystem::GetNewUIHotKey() const
 {
     return m_pNewUIHotKey;
 }
 
-bool CNewUISystem::IsImpossibleSendMoveInterface()
+bool CSystem::IsImpossibleSendMoveInterface()
 {
     if (IsVisible(INTERFACE_MIXINVENTORY)
         || IsVisible(INTERFACE_KANTURU2ND_ENTERNPC)
@@ -1969,25 +1969,7 @@ bool CNewUISystem::IsImpossibleSendMoveInterface()
     return false;
 }
 
-bool CNewUISystem::IsImpossibleTradeInterface()
-{
-    if (IsVisible(INTERFACE_MIXINVENTORY)
-        || IsVisible(INTERFACE_KANTURU2ND_ENTERNPC)
-        || IsVisible(INTERFACE_STORAGE)
-        || IsVisible(INTERFACE_INGAMESHOP)
-#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-        || IsVisible(INTERFACE_INGAMESHOP)
-#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-        || IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
-        )
-    {
-        return true;
-    }
-
-    return false;
-}
-
-bool CNewUISystem::IsImpossibleDuelInterface()
+bool CSystem::IsImpossibleTradeInterface()
 {
     if (IsVisible(INTERFACE_MIXINVENTORY)
         || IsVisible(INTERFACE_KANTURU2ND_ENTERNPC)
@@ -2005,7 +1987,25 @@ bool CNewUISystem::IsImpossibleDuelInterface()
     return false;
 }
 
-bool CNewUISystem::IsImpossibleHideInterface(DWORD dwKey)
+bool CSystem::IsImpossibleDuelInterface()
+{
+    if (IsVisible(INTERFACE_MIXINVENTORY)
+        || IsVisible(INTERFACE_KANTURU2ND_ENTERNPC)
+        || IsVisible(INTERFACE_STORAGE)
+        || IsVisible(INTERFACE_INGAMESHOP)
+#ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
+        || IsVisible(INTERFACE_INGAMESHOP)
+#endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
+        || IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
+        )
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool CSystem::IsImpossibleHideInterface(DWORD dwKey)
 {
     if (dwKey == INTERFACE_MAINFRAME
         || dwKey == INTERFACE_SKILL_LIST
@@ -2045,7 +2045,7 @@ bool CNewUISystem::IsImpossibleHideInterface(DWORD dwKey)
 
 //---------------------------------------------------------------------------------------------
 
-void CNewUISystem::UpdateSendMoveInterface()
+void CSystem::UpdateSendMoveInterface()
 {
     if (IsVisible(INTERFACE_TRADE))
     {
@@ -2143,409 +2143,409 @@ void CNewUISystem::UpdateSendMoveInterface()
 }
 
 // GetInstance()
-CNewUISystem* CNewUISystem::GetInstance()
+CSystem* CSystem::GetInstance()
 {
-    static CNewUISystem s_NewUISystem;
+    static CSystem s_NewUISystem;
     return &s_NewUISystem;
 }
 
-CNewUIChatLogWindow* CNewUISystem::GetUI_NewChatLogWindow() const
+CChatLogWindow* CSystem::GetUI_NewChatLogWindow() const
 {
     return m_pNewChatLogWindow;
 }
 
-CNewUISystemLogWindow* CNewUISystem::GetUI_NewSystemLogWindow() const
+CSystemLogWindow* CSystem::GetUI_NewSystemLogWindow() const
 {
     return m_pNewSystemLogWindow;
 }
 
-CNewUISlideWindow* CNewUISystem::GetUI_NewSlideWindow() const
+CSlideWindow* CSystem::GetUI_NewSlideWindow() const
 {
     return m_pNewSlideWindow;
 }
 
-CNewUIFriendWindow* CNewUISystem::GetUI_NewFriendWindow() const
+CFriendWindow* CSystem::GetUI_NewFriendWindow() const
 {
     return m_pNewFriendWindow;
 }
 
-CNewUIMainFrameWindow* CNewUISystem::GetUI_NewMainFrameWindow() const
+CMainFrameWindow* CSystem::GetUI_NewMainFrameWindow() const
 {
     return m_pNewMainFrameWindow;
 }
 
-CNewUISkillList* CNewUISystem::GetUI_NewSkillList() const
+CSkillList* CSystem::GetUI_NewSkillList() const
 {
     return m_pNewSkillList;
 }
 
-CNewUIChatInputBox* CNewUISystem::GetUI_NewChatInputBox() const
+CChatInputBox* CSystem::GetUI_NewChatInputBox() const
 {
     return m_pNewChatInputBox;
 }
 
-CNewUIItemMng* CNewUISystem::GetUI_NewItemMng() const
+CItemMng* CSystem::GetUI_NewItemMng() const
 {
     return m_pNewItemMng;
 }
 
-CNewUIMyInventory* CNewUISystem::GetUI_NewMyInventory() const
+CMyInventory* CSystem::GetUI_NewMyInventory() const
 {
     return m_pNewMyInventory;
 }
 
-CNewUIInventoryExtension* CNewUISystem::GetUI_NewMyInventoryExt() const
+CInventoryExtension* CSystem::GetUI_NewMyInventoryExt() const
 {
     return m_pNewMyInventoryExt;
 }
 
-CNewUINPCShop* CNewUISystem::GetUI_NewNpcShop() const
+CNPCShop* CSystem::GetUI_NewNpcShop() const
 {
     return m_pNewNPCShop;
 }
 
-CNewUIPetInfoWindow* CNewUISystem::GetUI_NewPetInfoWindow() const
+CPetInfoWindow* CSystem::GetUI_NewPetInfoWindow() const
 {
     return m_pNewPetInfoWindow;
 }
 
-CNewUIMixInventory* CNewUISystem::GetUI_NewMixInventory() const
+CMixInventory* CSystem::GetUI_NewMixInventory() const
 {
     return m_pNewMixInventory;
 }
 
-CNewUICastleWindow* CNewUISystem::GetUI_NewCastleWindow() const
+CCastleWindow* CSystem::GetUI_NewCastleWindow() const
 {
     return m_pNewCastleWindow;
 }
 
-CNewUIGuardWindow* CNewUISystem::GetUI_NewGuardWindow() const
+CGuardWindow* CSystem::GetUI_NewGuardWindow() const
 {
     return m_pNewGuardWindow;
 }
 
-CNewUIGatemanWindow* CNewUISystem::GetUI_NewGatemanWindow() const
+CGatemanWindow* CSystem::GetUI_NewGatemanWindow() const
 {
     return m_pNewGatemanWindow;
 }
 
-CNewUIGateSwitchWindow* CNewUISystem::GetUI_NewGateSwitchWindow() const
+CGateSwitchWindow* CSystem::GetUI_NewGateSwitchWindow() const
 {
     return m_pNewGateSwitchWindow;
 }
 
-CNewUIStorageInventory* CNewUISystem::GetUI_NewStorageInventory() const
+CStorageInventory* CSystem::GetUI_NewStorageInventory() const
 {
     return m_pNewStorageInventory;
 }
 
-CNewUIStorageInventoryExt* CNewUISystem::GetUI_NewStorageInventoryExt() const
+CStorageInventoryExt* CSystem::GetUI_NewStorageInventoryExt() const
 {
     return m_pNewStorageInventoryExt;
 }
 
-CNewUIGuildMakeWindow* CNewUISystem::GetUI_NewGuildMakeWindow() const
+CGuildMakeWindow* CSystem::GetUI_NewGuildMakeWindow() const
 {
     return m_pNewGuildMakeWindow;
 }
 
-CNewUIGuildInfoWindow* CNewUISystem::GetUI_NewGuildInfoWindow() const
+CGuildInfoWindow* CSystem::GetUI_NewGuildInfoWindow() const
 {
     return m_pNewGuildInfoWindow;
 }
 
-CNewUICryWolf* CNewUISystem::GetUI_NewCryWolfInterface() const
+CCryWolf* CSystem::GetUI_NewCryWolfInterface() const
 {
     return m_pNewCryWolfInterface;
 }
 
-CNewUIMasterLevel* CNewUISystem::GetUI_NewMasterLevelInterface() const
+CMasterLevel* CSystem::GetUI_NewMasterLevelInterface() const
 {
     return m_pNewMaster_Level_Interface;
 }
 
-CNewUIMyShopInventory* CNewUISystem::GetUI_NewMyShopInventory() const
+CMyShopInventory* CSystem::GetUI_NewMyShopInventory() const
 {
     return m_pNewMyShopInventory;
 }
 
-CNewUIPurchaseShopInventory* CNewUISystem::GetUI_NewPurchaseShopInventory() const
+CPurchaseShopInventory* CSystem::GetUI_NewPurchaseShopInventory() const
 {
     return m_pNewPurchaseShopInventory;
 }
 
-CNewUICharacterInfoWindow* CNewUISystem::GetUI_NewCharacterInfoWindow() const
+CCharacterInfoWindow* CSystem::GetUI_NewCharacterInfoWindow() const
 {
     return m_pNewCharacterInfoWindow;
 }
 
-CNewUIMyQuestInfoWindow* CNewUISystem::GetUI_NewMyQuestInfoWindow() const
+CMyQuestInfoWindow* CSystem::GetUI_NewMyQuestInfoWindow() const
 {
     return m_pNewMyQuestInfoWindow;
 }
 
-CNewUIPartyInfoWindow* CNewUISystem::GetUI_NewPartyInfoWindow() const
+CPartyInfoWindow* CSystem::GetUI_NewPartyInfoWindow() const
 {
     return m_pNewPartyInfoWindow;
 }
 
-CNewUIPartyListWindow* CNewUISystem::GetUI_NewPartyListWindow() const
+CPartyListWindow* CSystem::GetUI_NewPartyListWindow() const
 {
     return m_pNewPartyListWindow;
 }
 
-CNewUINPCQuest* CNewUISystem::GetUI_NewNPCQuest() const
+CNPCQuest* CSystem::GetUI_NewNPCQuest() const
 {
     return m_pNewNPCQuest;
 }
 
-CNewUIEnterBloodCastle* CNewUISystem::GetUI_NewEnterBloodCastle() const
+CEnterBloodCastle* CSystem::GetUI_NewEnterBloodCastle() const
 {
     return m_pNewEnterBloodCastle;
 }
 
-CNewUIEnterDevilSquare* CNewUISystem::GetUI_NewEnterDevilSquare() const
+CEnterDevilSquare* CSystem::GetUI_NewEnterDevilSquare() const
 {
     return m_pNewEnterDevilSquare;
 }
 
-CNewUIBloodCastle* CNewUISystem::GetUI_NewBloodCastle() const
+CBloodCastle* CSystem::GetUI_NewBloodCastle() const
 {
     return m_pNewBloodCastle;
 }
 
-CNewUITrade* CNewUISystem::GetUI_NewTrade() const
+CTrade* CSystem::GetUI_NewTrade() const
 {
     return m_pNewTrade;
 }
 
-CNewUIKanturu2ndEnterNpc* CNewUISystem::GetUI_NewKanturu2ndEnterNpc() const
+CKanturu2ndEnterNpc* CSystem::GetUI_NewKanturu2ndEnterNpc() const
 {
     return m_pNewKanturu2ndEnterNpc;
 }
 
-CNewUIKanturuInfoWindow* CNewUISystem::GetUI_NewKanturuInfoWindow() const
+CKanturuInfoWindow* CSystem::GetUI_NewKanturuInfoWindow() const
 {
     return m_pNewKanturuInfoWindow;
 }
 
-CNewUICatapultWindow* CNewUISystem::GetUI_NewCatapultWindow() const
+CCatapultWindow* CSystem::GetUI_NewCatapultWindow() const
 {
     return m_pNewCatapultWindow;
 }
 
-CNewUIChaosCastleTime* CNewUISystem::GetUI_NewChaosCastleTime() const
+CChaosCastleTime* CSystem::GetUI_NewChaosCastleTime() const
 {
     return m_pNewChaosCastleTime;
 }
 
-CNewUICommandWindow* CNewUISystem::GetUI_NewCommandWindow() const
+CCommandWindow* CSystem::GetUI_NewCommandWindow() const
 {
     return m_pNewCommandWindow;
 }
 
-CNewUIWindowMenu* CNewUISystem::GetUI_NewWindowMenu() const
+CWindowMenu* CSystem::GetUI_NewWindowMenu() const
 {
     return m_pNewWindowMenu;
 }
 
-CNewUIOptionWindow* CNewUISystem::GetUI_NewOptionWindow() const
+COptionWindow* CSystem::GetUI_NewOptionWindow() const
 {
     return m_pNewOptionWindow;
 }
 
-CMuHelperBar* CNewUISystem::GetUI_MuHelperBar() const
+CMuHelperBar* CSystem::GetUI_MuHelperBar() const
 {
     return m_pMuHelperBar;
 }
 
-CNewUIHelpWindow* CNewUISystem::GetUI_NewHelpWindow() const
+CHelpWindow* CSystem::GetUI_NewHelpWindow() const
 {
     return m_pNewHelpWindow;
 }
 
-CNewUIChatCommandWindow* CNewUISystem::GetUI_NewChatCommandWindow() const
+CChatCommandWindow* CSystem::GetUI_NewChatCommandWindow() const
 {
     return m_pNewChatCommandWindow;
 }
 
-CNewUIItemExplanationWindow* CNewUISystem::GetUI_NewItemExplanationWindow() const
+CItemExplanationWindow* CSystem::GetUI_NewItemExplanationWindow() const
 {
     return m_pNewItemExplanationWindow;
 }
 
-CNewUISetItemExplanation* CNewUISystem::GetUI_NewSetItemExplanation() const
+CSetItemExplanation* CSystem::GetUI_NewSetItemExplanation() const
 {
     return m_pNewSetItemExplanation;
 }
 
-CNewUIQuickCommandWindow* CNewUISystem::GetUI_NewQuickCommandWindow() const
+CQuickCommandWindow* CSystem::GetUI_NewQuickCommandWindow() const
 {
     return m_pNewQuickCommandWindow;
 }
 
-CNewUIMoveCommandWindow* CNewUISystem::GetUI_NewMoveCommandWindow() const
+CMoveCommandWindow* CSystem::GetUI_NewMoveCommandWindow() const
 {
     return m_pNewMoveCommandWindow;
 }
 
-CNewUIBattleSoccerScore* CNewUISystem::GetUI_NewBattleSoccerScore() const
+CBattleSoccerScore* CSystem::GetUI_NewBattleSoccerScore() const
 {
     return m_pNewBattleSoccerScore;
 }
 
-CNewUIDuelWindow* CNewUISystem::GetUI_NewDuelWindow() const
+CDuelWindow* CSystem::GetUI_NewDuelWindow() const
 {
     return m_pNewDuelWindow;
 }
 
-CNewUISiegeWarfare* CNewUISystem::GetUI_NewSiegeWarfare() const
+CSiegeWarfare* CSystem::GetUI_NewSiegeWarfare() const
 {
     return m_pNewSiegeWarfare;
 }
 
-CNewUIItemEnduranceInfo* CNewUISystem::GetUI_NewItemEnduranceInfo() const
+CItemEnduranceInfo* CSystem::GetUI_NewItemEnduranceInfo() const
 {
     return m_pNewItemEnduranceInfo;
 }
 
-CBuffStrip* CNewUISystem::GetUI_BuffStrip() const
+CBuffStrip* CSystem::GetUI_BuffStrip() const
 {
     return m_pBuffStrip;
 }
 
-CNewUICursedTempleEnter* CNewUISystem::GetUI_NewCursedTempleEnterWindow() const
+CCursedTempleEnter* CSystem::GetUI_NewCursedTempleEnterWindow() const
 {
     return m_pNewCursedTempleEnterWindow;
 }
 
-CNewUICursedTempleSystem* CNewUISystem::GetUI_NewCursedTempleWindow() const
+CCursedTempleSystem* CSystem::GetUI_NewCursedTempleWindow() const
 {
     return m_pNewCursedTempleWindow;
 }
 
-CNewUICursedTempleResult* CNewUISystem::GetUI_NewCursedTempleResultWindow() const
+CCursedTempleResult* CSystem::GetUI_NewCursedTempleResultWindow() const
 {
     return m_pNewCursedTempleResultWindow;
 }
 
-CNewUIGoldBowmanWindow* CNewUISystem::GetUI_pNewGoldBowman() const
+CGoldBowmanWindow* CSystem::GetUI_pNewGoldBowman() const
 {
     return m_pNewGoldBowman;
 }
 
-CNewUIGoldBowmanLena* CNewUISystem::GetUI_pNewGoldBowmanLena() const
+CGoldBowmanLena* CSystem::GetUI_pNewGoldBowmanLena() const
 {
     return m_pNewGoldBowmanLena;
 }
 
-CNewUIRegistrationLuckyCoin* CNewUISystem::GetUI_pNewLuckyCoinRegistration() const
+CRegistrationLuckyCoin* CSystem::GetUI_pNewLuckyCoinRegistration() const
 {
     return m_pNewLuckyCoinRegistration;
 }
 
-CNewUIExchangeLuckyCoin* CNewUISystem::GetUI_pNewExchangeLuckyCoin() const
+CExchangeLuckyCoin* CSystem::GetUI_pNewExchangeLuckyCoin() const
 {
     return m_pNewExchangeLuckyCoinWindow;
 }
 
-CNewUIMiniMap* CNewUISystem::GetUI_pNewUIMiniMap() const
+CMiniMap* CSystem::GetUI_pNewUIMiniMap() const
 {
     return m_pNewMiniMap;
 }
 
-CNewUIDuelWatchWindow* CNewUISystem::GetUI_pNewDuelWatch() const
+CDuelWatchWindow* CSystem::GetUI_pNewDuelWatch() const
 {
     return m_pNewDuelWatchWindow;
 }
 
-CNewUIDuelWatchMainFrameWindow* CNewUISystem::GetUI_pNewDuelWatchMainFrame() const
+CDuelWatchMainFrameWindow* CSystem::GetUI_pNewDuelWatchMainFrame() const
 {
     return m_pNewDuelWatchMainFrameWindow;
 }
 
-CNewUIDuelWatchUserListWindow* CNewUISystem::GetUI_pNewDuelWatchUserList() const
+CDuelWatchUserListWindow* CSystem::GetUI_pNewDuelWatchUserList() const
 {
     return m_pNewDuelWatchUserListWindow;
 }
 
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-CNewUIInGameShop* CNewUISystem::GetUI_pNewInGameShop() const
+CInGameShop* CSystem::GetUI_pNewInGameShop() const
 {
     return m_pNewInGameShop;
 }
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
 
-CNewUIDoppelGangerWindow* CNewUISystem::GetUI_pNewDoppelGangerWindow() const
+CDoppelGangerWindow* CSystem::GetUI_pNewDoppelGangerWindow() const
 {
     return m_pNewDoppelGangerWindow;
 }
 
-CNewUIDoppelGangerFrame* CNewUISystem::GetUI_pNewDoppelGangerFrame() const
+CDoppelGangerFrame* CSystem::GetUI_pNewDoppelGangerFrame() const
 {
     return m_pNewDoppelGangerFrame;
 }
 
-CNewUINPCDialogue* CNewUISystem::GetUI_NewNPCDialogue() const
+CNPCDialogue* CSystem::GetUI_NewNPCDialogue() const
 {
     return m_pNewNPCDialogue;
 }
 
-CNewUIQuestProgress* CNewUISystem::GetUI_NewQuestProgress() const
+CQuestProgress* CSystem::GetUI_NewQuestProgress() const
 {
     return m_pNewQuestProgress;
 }
 
-CNewUIQuestProgressByEtc* CNewUISystem::GetUI_NewQuestProgressByEtc() const
+CQuestProgressByEtc* CSystem::GetUI_NewQuestProgressByEtc() const
 {
     return m_pNewQuestProgressByEtc;
 }
 
-CNewUIEmpireGuardianNPC* CNewUISystem::GetUI_pNewEmpireGuardianNPC() const
+CEmpireGuardianNPC* CSystem::GetUI_pNewEmpireGuardianNPC() const
 {
     return m_pNewEmpireGuardianNPC;
 }
 
-CNewUIEmpireGuardianTimer* CNewUISystem::GetUI_pNewEmpireGuardianTimer() const
+CEmpireGuardianTimer* CSystem::GetUI_pNewEmpireGuardianTimer() const
 {
     return m_pNewEmpireGuardianTimer;
 }
 
 #ifdef PBG_MOD_STAMINA_UI
-CNewUIStamina* mu::ui::window::CNewUISystem::GetUI_pNewUIStamina() const
+CNewUIStamina* mu::ui::window::CSystem::GetUI_pNewUIStamina() const
 {
     return m_pNewUIStamina;
 }
 #endif //PBG_MOD_STAMINA_UI
 
 #ifdef PBG_ADD_GENSRANKING
-CNewUIGensRanking* CNewUISystem::GetUI_NewGensRanking() const
+CGensRanking* CSystem::GetUI_NewGensRanking() const
 {
     return m_pNewGensRanking;
 }
 #endif //PBG_ADD_GENSRANKING
 
-CNewUIUnitedMarketPlaceWindow* CNewUISystem::GetUI_pNewUnitedMarketPlaceWindow() const
+CUnitedMarketPlaceWindow* CSystem::GetUI_pNewUnitedMarketPlaceWindow() const
 {
     return m_pNewUnitedMarketPlaceWindow;
 }
 
-CNewUILuckyItemWnd* mu::ui::window::CNewUISystem::Get_pNewUILuckyItemWnd() const
+CLuckyItemWnd* mu::ui::window::CSystem::Get_pNewUILuckyItemWnd() const
 {
     return m_pNewUILuckyItemWnd;
 }
 
-CNewUIMuHelper* CNewUISystem::Get_pNewUIMuHelper() const
+CUIMuHelper* CSystem::Get_pNewUIMuHelper() const
 {
     return m_pNewUIMuHelper;
 }
 
-CNewUIMuHelperExt* CNewUISystem::Get_pNewUIMuHelperExt() const
+CMuHelperExt* CSystem::Get_pNewUIMuHelperExt() const
 {
     return m_pNewUIMuHelperExt;
 }
 
-CNewUIMuHelperSkillList* CNewUISystem::Get_pNewUIMuHelperSkillList() const
+CMuHelperSkillList* CSystem::Get_pNewUIMuHelperSkillList() const
 {
     return m_pNewUIMuHelperSkillList;
 }

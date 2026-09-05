@@ -1,4 +1,4 @@
-// NewUIDuelWatchUserListWindow.cpp: implementation of the CNewUIDuelWatchUserListWindow class.
+// NewUIDuelWatchUserListWindow.cpp: implementation of the CDuelWatchUserListWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -10,14 +10,14 @@ using namespace SEASON3B;
 using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
-CNewUIDuelWatchUserListWindow::CNewUIDuelWatchUserListWindow() {}
+CDuelWatchUserListWindow::CDuelWatchUserListWindow() {}
 
-CNewUIDuelWatchUserListWindow::~CNewUIDuelWatchUserListWindow()
+CDuelWatchUserListWindow::~CDuelWatchUserListWindow()
 {
     Release();
 }
 
-bool CNewUIDuelWatchUserListWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CDuelWatchUserListWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -34,7 +34,7 @@ bool CNewUIDuelWatchUserListWindow::Create(CNewUIManager* pNewUIMng, int x, int 
     return true;
 }
 
-void CNewUIDuelWatchUserListWindow::Release()
+void CDuelWatchUserListWindow::Release()
 {
     UnloadImages();
 
@@ -45,13 +45,13 @@ void CNewUIDuelWatchUserListWindow::Release()
     }
 }
 
-void CNewUIDuelWatchUserListWindow::SetPos(int x, int y)
+void CDuelWatchUserListWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIDuelWatchUserListWindow::UpdateMouseEvent()
+bool CDuelWatchUserListWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -65,12 +65,12 @@ bool CNewUIDuelWatchUserListWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIDuelWatchUserListWindow::UpdateKeyEvent()
+bool CDuelWatchUserListWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIDuelWatchUserListWindow::Update()
+bool CDuelWatchUserListWindow::Update()
 {
     // 	if(IsVisible())
     // 	{
@@ -78,7 +78,7 @@ bool CNewUIDuelWatchUserListWindow::Update()
     return true;
 }
 
-bool CNewUIDuelWatchUserListWindow::Render()
+bool CDuelWatchUserListWindow::Render()
 {
     EnableAlphaTest();
 
@@ -105,26 +105,26 @@ bool CNewUIDuelWatchUserListWindow::Render()
     return true;
 }
 
-void CNewUIDuelWatchUserListWindow::OpeningProcess() {}
+void CDuelWatchUserListWindow::OpeningProcess() {}
 
-void CNewUIDuelWatchUserListWindow::ClosingProcess() {}
+void CDuelWatchUserListWindow::ClosingProcess() {}
 
-float CNewUIDuelWatchUserListWindow::GetLayerDepth()
+float CDuelWatchUserListWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIDuelWatchUserListWindow::LoadImages()
+void CDuelWatchUserListWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\Pk_box.tga", IMAGE_DUELWATCH_USERLIST_BOX, GL_LINEAR);
 }
 
-void CNewUIDuelWatchUserListWindow::UnloadImages()
+void CDuelWatchUserListWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_DUELWATCH_USERLIST_BOX);
 }
 
-void CNewUIDuelWatchUserListWindow::RenderFrame()
+void CDuelWatchUserListWindow::RenderFrame()
 {
     POINT ptSize = {57, 17};
 
@@ -141,7 +141,7 @@ void CNewUIDuelWatchUserListWindow::RenderFrame()
     }
 }
 
-bool CNewUIDuelWatchUserListWindow::BtnProcess()
+bool CDuelWatchUserListWindow::BtnProcess()
 {
     return false;
 }

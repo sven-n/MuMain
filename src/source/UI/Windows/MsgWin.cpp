@@ -153,7 +153,7 @@ void CMsgWin::SetCtrlPosition()
                 // here relied on that ambient transform being the same one active when this ran --
                 // true when this only ever ran unscoped (CWin days), but this call chain now
                 // reaches here through ManageOKClick()->PopUp()->SetMsg(), inside CMsgWin::Update()
-                // itself, which CNewUIManager::Update() wraps in a LayoutMode::Legacy (identity)
+                // itself, which CManager::Update() wraps in a LayoutMode::Legacy (identity)
                 // ScopedActiveTransform -- dividing by that identity is a no-op, so the position
                 // got stored as real pixels while still being *labeled* reference-space, then
                 // rescaled a second time by RenderTextOnTop()'s own (correctly ambient,
@@ -167,7 +167,7 @@ void CMsgWin::SetCtrlPosition()
 
 void CMsgWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     m_sprBack.Show(bShow);
 
@@ -223,7 +223,7 @@ bool CMsgWin::Update()
     CInput& rInput = CInput::Instance();
 
     // dDeltaTick previously threaded through from CWin::UpdateWhileActive(double); this window's
-    // migrated Update() takes no parameters, same as every other CNewUIObj window -- read the
+    // migrated Update() takes no parameters, same as every other CObject window -- read the
     // same clamped expression CSceneUICoordinator::Update(dDeltaTick) itself resolves to in steady state (see
     // docs/newui-legacy-merger.md's g_pTimer gotcha).
     extern float FPS_ANIMATION_FACTOR;

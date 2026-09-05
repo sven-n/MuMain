@@ -221,10 +221,10 @@ void RenderBoolean(int x, int y, CHAT* c)
             switch (c->Owner->m_byGensInfluence)
             {
             case 1:
-                g_pNewUIGensRanking->RanderMark(tempX, y, (mu::ui::window::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+                g_pNewUIGensRanking->RanderMark(tempX, y, (mu::ui::window::CGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
                 return;
             case 2:
-                g_pNewUIGensRanking->RanderMark(tempX, y, (mu::ui::window::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+                g_pNewUIGensRanking->RanderMark(tempX, y, (mu::ui::window::CGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
                 return;
             default:
                 break;
@@ -351,9 +351,9 @@ void RenderBoolean(int x, int y, CHAT* c)
             RenderPos.y -= iLineHeight;
 
         if (1 == c->Owner->m_byGensInfluence)
-            g_pNewUIGensRanking->RanderMark(x, y, (mu::ui::window::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+            g_pNewUIGensRanking->RanderMark(x, y, (mu::ui::window::CGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
         else if (2 == c->Owner->m_byGensInfluence)
-            g_pNewUIGensRanking->RanderMark(x, y, (mu::ui::window::CNewUIGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CNewUIGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
+            g_pNewUIGensRanking->RanderMark(x, y, (mu::ui::window::CGensRanking::GENS_TYPE)c->Owner->m_byGensInfluence, c->Owner->GensRanking, mu::ui::window::CGensRanking::MARK_BOOLEAN, (float)RenderPos.y);
     }
 }
 void AddChat(CHAT* c, const wchar_t* chat_text, int flag)

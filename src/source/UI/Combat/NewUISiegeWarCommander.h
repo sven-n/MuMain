@@ -1,4 +1,4 @@
-// NewUISiegeWarCommander.h: interface for the CNewUISiegeWarCommander class.
+// NewUISiegeWarCommander.h: interface for the CSiegeWarCommander class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -11,12 +11,12 @@
 
 namespace mu::ui::window
 {
-    class CNewUISiegeWarCommander : public CNewUISiegeWarBase
+    class CSiegeWarCommander : public CSiegeWarBase
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_MINIMAP_BTN_GROUP = CNewUISiegeWarBase::IMAGE_SIEGEWAR_BASE_FRAME_END,	// newui_SW_Minimap_Bt_group.tga	(26, 22)
+            IMAGE_MINIMAP_BTN_GROUP = CSiegeWarBase::IMAGE_SIEGEWAR_BASE_FRAME_END,	// newui_SW_Minimap_Bt_group.tga	(26, 22)
             IMAGE_MINIMAP_BTN_COMMAND,														// newui_SW_Minimap_Bt_Command.tga	(30, 22)
         };
 
@@ -40,8 +40,8 @@ namespace mu::ui::window
         POINT			m_BtnCommandGroupPos;
         POINT			m_BtnCommandPos;
 
-        CNewUIButton	m_BtnCommandGroup[MAX_COMMANDGROUP];
-        CNewUIButton	m_BtnCommand[MINIMAP_CMD_MAX];
+        CButton	m_BtnCommandGroup[MAX_COMMANDGROUP];
+        CButton	m_BtnCommand[MINIMAP_CMD_MAX];
 
         int				m_iCurSelectBtnGroup;
         int				m_iCurSelectBtnCommand;
@@ -50,8 +50,8 @@ namespace mu::ui::window
         std::vector<VisibleUnitLocation>  m_vGuildMemberLocationBuffer;
 
     public:
-        CNewUISiegeWarCommander();
-        virtual ~CNewUISiegeWarCommander();
+        CSiegeWarCommander();
+        virtual ~CSiegeWarCommander();
 
     private:
         virtual bool OnCreate(int x, int y);

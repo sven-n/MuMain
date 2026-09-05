@@ -1,4 +1,4 @@
-// NewUIUnitedMarketPlaceWindow.cpp: implementation of the CNewUIUnitedMarketPlaceWindow class.
+// NewUIUnitedMarketPlaceWindow.cpp: implementation of the CUnitedMarketPlaceWindow class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Inventory/NewUIUnitedMarketPlaceWindow.h"
@@ -19,7 +19,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIUnitedMarketPlaceWindow::CNewUIUnitedMarketPlaceWindow()
+CUnitedMarketPlaceWindow::CUnitedMarketPlaceWindow()
 {
     m_pNewUIMng = NULL;
     m_pNewUI3DRenderMng = NULL;
@@ -28,12 +28,12 @@ CNewUIUnitedMarketPlaceWindow::CNewUIUnitedMarketPlaceWindow()
     m_bIsEnterButtonLocked = FALSE;
 }
 
-CNewUIUnitedMarketPlaceWindow::~CNewUIUnitedMarketPlaceWindow()
+CUnitedMarketPlaceWindow::~CUnitedMarketPlaceWindow()
 {
     Release();
 }
 
-bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng, int x, int y)
+bool CUnitedMarketPlaceWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
@@ -59,7 +59,7 @@ bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRen
     return true;
 }
 
-void CNewUIUnitedMarketPlaceWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CUnitedMarketPlaceWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -69,7 +69,7 @@ void CNewUIUnitedMarketPlaceWindow::InitButton(CNewUIButton* pNewUIButton, int i
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUIUnitedMarketPlaceWindow::Release()
+void CUnitedMarketPlaceWindow::Release()
 {
     UnloadImages();
 
@@ -86,13 +86,13 @@ void CNewUIUnitedMarketPlaceWindow::Release()
     }
 }
 
-void CNewUIUnitedMarketPlaceWindow::SetPos(int x, int y)
+void CUnitedMarketPlaceWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIUnitedMarketPlaceWindow::UpdateMouseEvent()
+bool CUnitedMarketPlaceWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -103,7 +103,7 @@ bool CNewUIUnitedMarketPlaceWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIUnitedMarketPlaceWindow::UpdateKeyEvent()
+bool CUnitedMarketPlaceWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA) == true)
     {
@@ -117,7 +117,7 @@ bool CNewUIUnitedMarketPlaceWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIUnitedMarketPlaceWindow::Update()
+bool CUnitedMarketPlaceWindow::Update()
 {
     if (IsVisible())
     {
@@ -146,12 +146,12 @@ bool CNewUIUnitedMarketPlaceWindow::Update()
     return true;
 }
 
-bool CNewUIUnitedMarketPlaceWindow::IsVisible() const
+bool CUnitedMarketPlaceWindow::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-bool CNewUIUnitedMarketPlaceWindow::Render()
+bool CUnitedMarketPlaceWindow::Render()
 {
     EnableAlphaTest();
 
@@ -204,12 +204,12 @@ bool CNewUIUnitedMarketPlaceWindow::Render()
     return true;
 }
 
-void CNewUIUnitedMarketPlaceWindow::Render3D()
+void CUnitedMarketPlaceWindow::Render3D()
 {
     //RenderItem3D();
 }
 
-void CNewUIUnitedMarketPlaceWindow::RenderItem3D()
+void CUnitedMarketPlaceWindow::RenderItem3D()
 {
     // 	POINT ptOrigin = { m_Pos.x, m_Pos.y+50 };
     //
@@ -219,22 +219,22 @@ void CNewUIUnitedMarketPlaceWindow::RenderItem3D()
     // 	::RenderItem3D(ptOrigin.x+(190-20)/2, ptOrigin.y+75, 20.f, 27, nItemType, nItemLevel<<3, 0, 0, false);
 }
 
-void CNewUIUnitedMarketPlaceWindow::OpeningProcess()
+void CUnitedMarketPlaceWindow::OpeningProcess()
 {
     LockEnterButton(FALSE);
 }
 
-void CNewUIUnitedMarketPlaceWindow::ClosingProcess()
+void CUnitedMarketPlaceWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float CNewUIUnitedMarketPlaceWindow::GetLayerDepth()
+float CUnitedMarketPlaceWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIUnitedMarketPlaceWindow::LoadImages()
+void CUnitedMarketPlaceWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_UNITEDMARKETPLACEWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_UNITEDMARKETPLACEWINDOW_TOP, GL_LINEAR);
@@ -246,7 +246,7 @@ void CNewUIUnitedMarketPlaceWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_UNITEDMARKETPLACEWINDOW_BTN_CLOSE, GL_LINEAR);
 }
 
-void CNewUIUnitedMarketPlaceWindow::UnloadImages()
+void CUnitedMarketPlaceWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_RIGHT);
@@ -257,7 +257,7 @@ void CNewUIUnitedMarketPlaceWindow::UnloadImages()
     DeleteBitmap(IMAGE_UNITEDMARKETPLACEWINDOW_LINE);
 }
 
-void CNewUIUnitedMarketPlaceWindow::RenderFrame()
+void CUnitedMarketPlaceWindow::RenderFrame()
 {
     RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_UNITEDMARKETPLACEWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -277,7 +277,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
+bool CUnitedMarketPlaceWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
@@ -300,7 +300,7 @@ bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
     return false;
 }
 
-void CNewUIUnitedMarketPlaceWindow::SetRemainTime(int iTime)
+void CUnitedMarketPlaceWindow::SetRemainTime(int iTime)
 {
     m_iRemainTime = iTime;
     if (iTime != 0)
@@ -309,7 +309,7 @@ void CNewUIUnitedMarketPlaceWindow::SetRemainTime(int iTime)
     }
 }
 
-void CNewUIUnitedMarketPlaceWindow::LockEnterButton(BOOL bLock)
+void CUnitedMarketPlaceWindow::LockEnterButton(BOOL bLock)
 {
     m_bIsEnterButtonLocked = bLock;
 }

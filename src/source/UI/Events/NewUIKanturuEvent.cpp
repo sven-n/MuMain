@@ -1,5 +1,5 @@
 ﻿//////////////////////////////////////////////////////////////////////
-// NewUIKanturu2ndEnterNpc.cpp: implementation of the CNewUIKanturu2ndEnterNpc class.
+// NewUIKanturu2ndEnterNpc.cpp: implementation of the CKanturu2ndEnterNpc class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -14,7 +14,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 
-mu::ui::window::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
+mu::ui::window::CKanturu2ndEnterNpc::CKanturu2ndEnterNpc()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -25,12 +25,12 @@ mu::ui::window::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
     Initialize();
 }
 
-mu::ui::window::CNewUIKanturu2ndEnterNpc::~CNewUIKanturu2ndEnterNpc()
+mu::ui::window::CKanturu2ndEnterNpc::~CKanturu2ndEnterNpc()
 {
     Release();
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::Initialize()
+void mu::ui::window::CKanturu2ndEnterNpc::Initialize()
 {
     m_bNpcAnimation = false;
     m_bEnterRequest = false;
@@ -43,7 +43,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::Initialize()
     }
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CKanturu2ndEnterNpc::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -62,7 +62,7 @@ bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Create(CNewUIManager* pNewUIMng, 
     return true;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::Release()
+void mu::ui::window::CKanturu2ndEnterNpc::Release()
 {
     UnloadImages();
 
@@ -73,13 +73,13 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::Release()
     }
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetPos(int x, int y)
+void mu::ui::window::CKanturu2ndEnterNpc::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::UpdateMouseEvent()
+bool mu::ui::window::CKanturu2ndEnterNpc::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
     {
@@ -94,7 +94,7 @@ bool mu::ui::window::CNewUIKanturu2ndEnterNpc::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::UpdateKeyEvent()
+bool mu::ui::window::CKanturu2ndEnterNpc::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == true)
     {
@@ -109,7 +109,7 @@ bool mu::ui::window::CNewUIKanturu2ndEnterNpc::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Update()
+bool mu::ui::window::CKanturu2ndEnterNpc::Update()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == true)
     {
@@ -122,7 +122,7 @@ bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Render()
+bool mu::ui::window::CKanturu2ndEnterNpc::Render()
 {
     EnableAlphaTest();
 
@@ -135,37 +135,37 @@ bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Render()
     return true;
 }
 
-float mu::ui::window::CNewUIKanturu2ndEnterNpc::GetLayerDepth()
+float mu::ui::window::CKanturu2ndEnterNpc::GetLayerDepth()
 {
     return 10.1f;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetNpcObject(OBJECT* pObj)
+void mu::ui::window::CKanturu2ndEnterNpc::SetNpcObject(OBJECT* pObj)
 {
     m_pNpcObject = pObj;
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::IsNpcAnimation()
+bool mu::ui::window::CKanturu2ndEnterNpc::IsNpcAnimation()
 {
     return m_bNpcAnimation;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetNpcAnimation(bool bValue)
+void mu::ui::window::CKanturu2ndEnterNpc::SetNpcAnimation(bool bValue)
 {
     m_bNpcAnimation = bValue;
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::IsEnterRequest()
+bool mu::ui::window::CKanturu2ndEnterNpc::IsEnterRequest()
 {
     return m_bEnterRequest;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetEnterRequest(bool bValue)
+void mu::ui::window::CKanturu2ndEnterNpc::SetEnterRequest(bool bValue)
 {
     m_bEnterRequest = bValue;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
+void mu::ui::window::CKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
 {
     wchar_t strMessage[256];
     if (btResult == POPUP_FAILED || btResult == POPUP_FAILED2)
@@ -192,7 +192,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
     mu::ui::window::CreateOkMessageBox(strMessage);
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime)
+void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime)
 {
     if (m_pNpcObject && m_pNpcObject->CurrentAction == KANTURU2ND_NPC_ANI_ROT)
     {
@@ -370,7 +370,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btStat
     }
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
+void mu::ui::window::CKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
 {
     m_bEnterRequest = false;
     CreateMessageBox(btResult);
@@ -384,19 +384,19 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btRes
     g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
+void mu::ui::window::CKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
 {
     SocketClient->ToGameServer()->SendKanturuInfoRequest();
     m_dwRefreshTime = timeGetTime();
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
+void mu::ui::window::CKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
 {
     SocketClient->ToGameServer()->SendKanturuEnterRequest();
     m_bEnterRequest = true;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::LoadImages()
+void mu::ui::window::CKanturu2ndEnterNpc::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_KANTURU2ND_TOP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_KANTURU2ND_MIDDLE, GL_LINEAR);
@@ -405,7 +405,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::LoadImages()
     LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_KANTURU2ND_BTN, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::UnloadImages()
+void mu::ui::window::CKanturu2ndEnterNpc::UnloadImages()
 {
     DeleteBitmap(IMAGE_KANTURU2ND_TOP);
     DeleteBitmap(IMAGE_KANTURU2ND_MIDDLE);
@@ -414,7 +414,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::UnloadImages()
     DeleteBitmap(IMAGE_KANTURU2ND_BTN);
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
+void mu::ui::window::CKanturu2ndEnterNpc::SetButtonInfo()
 {
     m_BtnRefresh.ChangeText(&I18N::Game::Refresh);
     m_BtnRefresh.ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -438,7 +438,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-bool mu::ui::window::CNewUIKanturu2ndEnterNpc::BtnProcess()
+bool mu::ui::window::CKanturu2ndEnterNpc::BtnProcess()
 {
     if (m_BtnRefresh.IsLock() == true)
     {
@@ -531,7 +531,7 @@ bool mu::ui::window::CNewUIKanturu2ndEnterNpc::BtnProcess()
     return false;
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderFrame()
+void mu::ui::window::CKanturu2ndEnterNpc::RenderFrame()
 {
     float x, y, width, height;
 
@@ -552,14 +552,14 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderFrame()
     RenderImage(IMAGE_KANTURU2ND_BOTTOM, x, y, width, height);
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderButtons()
+void mu::ui::window::CKanturu2ndEnterNpc::RenderButtons()
 {
     m_BtnEnter.Render();
     m_BtnRefresh.Render();
     m_BtnClose.Render();
 }
 
-void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderTexts()
+void mu::ui::window::CKanturu2ndEnterNpc::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0xFF49B0FF);
@@ -598,7 +598,7 @@ void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderTexts()
     }
 }
 
-mu::ui::window::CNewUIKanturuInfoWindow::CNewUIKanturuInfoWindow()
+mu::ui::window::CKanturuInfoWindow::CKanturuInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -608,12 +608,12 @@ mu::ui::window::CNewUIKanturuInfoWindow::CNewUIKanturuInfoWindow()
     m_dwSyncTime = 0;
 }
 
-mu::ui::window::CNewUIKanturuInfoWindow::~CNewUIKanturuInfoWindow()
+mu::ui::window::CKanturuInfoWindow::~CKanturuInfoWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUIKanturuInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CKanturuInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -630,7 +630,7 @@ bool mu::ui::window::CNewUIKanturuInfoWindow::Create(CNewUIManager* pNewUIMng, i
     return true;
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::Release()
+void mu::ui::window::CKanturuInfoWindow::Release()
 {
     UnloadImages();
 
@@ -641,23 +641,23 @@ void mu::ui::window::CNewUIKanturuInfoWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CKanturuInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CNewUIKanturuInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CKanturuInfoWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIKanturuInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CKanturuInfoWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool mu::ui::window::CNewUIKanturuInfoWindow::Update()
+bool mu::ui::window::CKanturuInfoWindow::Update()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO))
     {
@@ -670,7 +670,7 @@ bool mu::ui::window::CNewUIKanturuInfoWindow::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUIKanturuInfoWindow::Render()
+bool mu::ui::window::CKanturuInfoWindow::Render()
 {
     EnableAlphaTest();
 
@@ -681,12 +681,12 @@ bool mu::ui::window::CNewUIKanturuInfoWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::RenderFrame()
+void mu::ui::window::CKanturuInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_KANTURUINFO_WINDOW, m_Pos.x, m_Pos.y, 99.f, 78.f);
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::RenderInfo()
+void mu::ui::window::CKanturuInfoWindow::RenderInfo()
 {
     g_pRenderText->SetFont(g_hFontBold);
 
@@ -740,27 +740,27 @@ void mu::ui::window::CNewUIKanturuInfoWindow::RenderInfo()
     mu::ui::window::RenderNumber(m_Pos.x + 65, m_Pos.y + 55, iSecond, 1.f);
 }
 
-float mu::ui::window::CNewUIKanturuInfoWindow::GetLayerDepth()
+float mu::ui::window::CKanturuInfoWindow::GetLayerDepth()
 {
     return 1.92f;
 }
 
-float mu::ui::window::CNewUIKanturuInfoWindow::GetKeyEventOrder()
+float mu::ui::window::CKanturuInfoWindow::GetKeyEventOrder()
 {
     return 9.1f;
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::LoadImages()
+void mu::ui::window::CKanturuInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_kantru.tga", IMAGE_KANTURUINFO_WINDOW, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::UnloadImages()
+void mu::ui::window::CKanturuInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_KANTURUINFO_WINDOW);
 }
 
-void mu::ui::window::CNewUIKanturuInfoWindow::SetTime(int iTimeLimit)
+void mu::ui::window::CKanturuInfoWindow::SetTime(int iTimeLimit)
 {
     m_iMinute = 0;
     m_iSecond = iTimeLimit / 1000;

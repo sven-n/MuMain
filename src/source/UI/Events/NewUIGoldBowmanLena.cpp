@@ -31,16 +31,16 @@ namespace
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIGoldBowmanLena::CNewUIGoldBowmanLena()
+CGoldBowmanLena::CGoldBowmanLena()
 {
 }
 
-CNewUIGoldBowmanLena::~CNewUIGoldBowmanLena()
+CGoldBowmanLena::~CGoldBowmanLena()
 {
     Release();
 }
 
-bool CNewUIGoldBowmanLena::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGoldBowmanLena::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng) {
         return false;
@@ -69,12 +69,12 @@ bool CNewUIGoldBowmanLena::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGoldBowmanLena::Release()
+void CGoldBowmanLena::Release()
 {
     UnloadImages();
 }
 
-void CNewUIGoldBowmanLena::LoadImages()
+void CGoldBowmanLena::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GBL_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_GBL_TOP, GL_LINEAR);
@@ -86,7 +86,7 @@ void CNewUIGoldBowmanLena::LoadImages()
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_GBL_BTN_EXIT, GL_LINEAR);
 }
 
-void CNewUIGoldBowmanLena::UnloadImages()
+void CGoldBowmanLena::UnloadImages()
 {
     DeleteBitmap(IMAGE_GBL_BTN_EXIT);
     DeleteBitmap(IMAGE_GBL_BTN_SERIAL);
@@ -98,18 +98,18 @@ void CNewUIGoldBowmanLena::UnloadImages()
     DeleteBitmap(IMAGE_GBL_BACK);
 }
 
-void CNewUIGoldBowmanLena::OpeningProcess()
+void CGoldBowmanLena::OpeningProcess()
 {
 }
 
-void CNewUIGoldBowmanLena::ClosingProcess()
+void CGoldBowmanLena::ClosingProcess()
 {
     g_bEventChipDialogEnable = 0;
     g_shEventChipCount = 0;
     SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
 
-bool CNewUIGoldBowmanLena::UpdateMouseEvent()
+bool CGoldBowmanLena::UpdateMouseEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA) == false) {
         return true;
@@ -162,7 +162,7 @@ bool CNewUIGoldBowmanLena::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGoldBowmanLena::UpdateKeyEvent()
+bool CGoldBowmanLena::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA) == false) {
         return true;
@@ -176,12 +176,12 @@ bool CNewUIGoldBowmanLena::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGoldBowmanLena::Update()
+bool CGoldBowmanLena::Update()
 {
     return true;
 }
 
-bool CNewUIGoldBowmanLena::Render()
+bool CGoldBowmanLena::Render()
 {
     EnableAlphaTest();
 
@@ -198,7 +198,7 @@ bool CNewUIGoldBowmanLena::Render()
     return true;
 }
 
-void CNewUIGoldBowmanLena::RenderFrame()
+void CGoldBowmanLena::RenderFrame()
 {
     // frame
     RenderImage(IMAGE_GBL_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
@@ -208,7 +208,7 @@ void CNewUIGoldBowmanLena::RenderFrame()
     RenderImage(IMAGE_GBL_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 }
 
-void CNewUIGoldBowmanLena::RenderTexts()
+void CGoldBowmanLena::RenderTexts()
 {
     const wchar_t* name = getMonsterName(236);
     RenderText(name, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFFFFFFFF, 0x00000000, RT3_SORT_CENTER);
@@ -246,13 +246,13 @@ void CNewUIGoldBowmanLena::RenderTexts()
     }
 }
 
-void CNewUIGoldBowmanLena::RendeerButton()
+void CGoldBowmanLena::RendeerButton()
 {
     m_BtnRegister.Render();
     m_BtnExit.Render();
 }
 
-float CNewUIGoldBowmanLena::GetLayerDepth()	// 3.4f
+float CGoldBowmanLena::GetLayerDepth()	// 3.4f
 {
     return 3.4f;
 }
@@ -264,7 +264,7 @@ float CNewUIGoldBowmanLena::GetLayerDepth()	// 3.4f
 static float s_PreGBLProj[16];
 static float s_PreGBLView[16];
 
-void CNewUIGoldBowmanLena::Render3D()
+void CGoldBowmanLena::Render3D()
 {
     EndBitmap();
 

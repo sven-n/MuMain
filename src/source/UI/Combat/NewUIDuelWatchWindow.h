@@ -1,4 +1,4 @@
-// NewUIDuelWatchWindow.h: interface for the CNewUIDuelWatchWindow class.
+// NewUIDuelWatchWindow.h: interface for the CDuelWatchWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #pragma once
@@ -11,18 +11,18 @@
 
 namespace mu::ui::window
 {
-    class CNewUIDuelWatchWindow : public CNewUIObj
+    class CDuelWatchWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_DUELWATCHWINDOW_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_DUELWATCHWINDOW_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_DUELWATCHWINDOW_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_DUELWATCHWINDOW_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_DUELWATCHWINDOW_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_DUELWATCHWINDOW_BUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
-            IMAGE_DUELWATCHWINDOW_LINE = CNewUIMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
+            IMAGE_DUELWATCHWINDOW_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_DUELWATCHWINDOW_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_DUELWATCHWINDOW_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_DUELWATCHWINDOW_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_DUELWATCHWINDOW_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_DUELWATCHWINDOW_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL,
+            IMAGE_DUELWATCHWINDOW_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
         };
     private:
         enum
@@ -31,16 +31,16 @@ namespace mu::ui::window
             INVENTORY_HEIGHT = 429,
         };
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT m_Pos;
 
-        CNewUIButton m_BtnChannel[4];
+        CButton m_BtnChannel[4];
         BOOL m_bChannelEnable[4];
     public:
-        CNewUIDuelWatchWindow();
-        virtual ~CNewUIDuelWatchWindow();
+        CDuelWatchWindow();
+        virtual ~CDuelWatchWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -62,6 +62,6 @@ namespace mu::ui::window
         void RenderFrame();
         bool BtnProcess();
 
-        void InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
+        void InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption);
     };
 }

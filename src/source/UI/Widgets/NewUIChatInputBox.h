@@ -14,11 +14,11 @@ class CUITextInputBox;
 
 namespace mu::ui::window
 {
-    class CNewUIManager;
-    class CNewUIChatLogWindow;
-    class CNewUISystemLogWindow;
+    class CManager;
+    class CChatLogWindow;
+    class CSystemLogWindow;
 
-    class CNewUIChatInputBox : public CNewUIObj
+    class CChatInputBox : public CObject
     {
     public:
         // It's also the size of the graphics IMAGE_INPUTBOX_BACK.
@@ -98,9 +98,9 @@ namespace mu::ui::window
         const uint64_t ChatCooldownMs = 1000; // 1 Second
         uint64_t  m_lastChatTime = 0;
 
-        CNewUIManager* m_pNewUIMng;
-        CNewUIChatLogWindow* m_pNewUIChatLogWnd;
-        CNewUISystemLogWindow* m_pNewUISystemLogWnd;
+        CManager* m_pNewUIMng;
+        CChatLogWindow* m_pNewUIChatLogWnd;
+        CSystemLogWindow* m_pNewUISystemLogWnd;
         POINT	m_WndPos{};
         SIZE	m_WndSize{};
 
@@ -117,8 +117,8 @@ namespace mu::ui::window
         bool m_bWhisperSend;
         bool m_bShowMessageElseNormal;
 
-        CNewUIButton m_BtnSize;
-        CNewUIButton m_BtnTransparency;
+        CButton m_BtnSize;
+        CButton m_BtnTransparency;
 
         void Init();
 
@@ -134,12 +134,12 @@ namespace mu::ui::window
         void RenderTooltip();
 
     public:
-        CNewUIChatInputBox();
-        virtual ~CNewUIChatInputBox();
+        CChatInputBox();
+        virtual ~CChatInputBox();
 
-        bool Create(CNewUIManager* pNewUIMng,
-            CNewUIChatLogWindow* pNewUIChatLogWnd,
-            CNewUISystemLogWindow* pNewUISystemLogWnd,
+        bool Create(CManager* pNewUIMng,
+            CChatLogWindow* pNewUIChatLogWnd,
+            CSystemLogWindow* pNewUISystemLogWnd,
             int x,
             int y);
         void Release();

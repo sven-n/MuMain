@@ -1,4 +1,4 @@
-// NewUIFriendWindow.h: interface for the CNewUIFriendWindow class.
+// NewUIFriendWindow.h: interface for the CFriendWindow class.
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
@@ -7,18 +7,18 @@
 
 namespace mu::ui::window
 {
-    class CNewUIManager;
+    class CManager;
 
-    class CNewUIFriendWindow : public CNewUIObj
+    class CFriendWindow : public CObject
     {
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         CUIWindowMgr* m_pFriendWindowMgr;
 
     public:
-        CNewUIFriendWindow();
-        virtual ~CNewUIFriendWindow();
+        CFriendWindow();
+        virtual ~CFriendWindow();
 
-        bool Create(CNewUIManager* pNewUIMng);
+        bool Create(CManager* pNewUIMng);
         void Release();
 
         bool UpdateMouseEvent();
@@ -79,6 +79,6 @@ namespace mu::ui::window
     };
 }
 
-#define g_pFriendList mu::ui::window::CNewUIFriendWindow::GetFriendList()
-#define g_pLetterList mu::ui::window::CNewUIFriendWindow::GetLetterList()
-#define g_pFriendMenu mu::ui::window::CNewUIFriendWindow::GetFriendMenu()
+#define g_pFriendList mu::ui::window::CFriendWindow::GetFriendList()
+#define g_pLetterList mu::ui::window::CFriendWindow::GetLetterList()
+#define g_pFriendMenu mu::ui::window::CFriendWindow::GetFriendMenu()

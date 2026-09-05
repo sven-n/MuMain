@@ -973,7 +973,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         StopMusic();
         AllStopSound();
 
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
 
         ReleaseMainData();
         CryWolfMVPInit();
@@ -992,7 +992,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
             CryWolfMVPInit();
             StopMusic();
             AllStopSound();
-            mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             ReleaseMainData();
         }
 
@@ -1036,7 +1036,7 @@ void ResetClientToLoginScene()
     CryWolfMVPInit();
     StopMusic();
     AllStopSound();
-    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
     ReleaseMainData();
 
     g_GuildCache.Reset();
@@ -1543,7 +1543,7 @@ void ReceiveMagicList(const BYTE* ReceiveBuffer)
 
 void Receive_Master_SetSkillList(PMSG_MASTER_SKILL_LIST_SEND* lpMsg)
 {
-    auto interface = CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+    auto interface = CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
     interface->SetMasterType(Hero->Class);
     interface->InitMasterSkillPoint();
 
@@ -1708,7 +1708,7 @@ BOOL ReceiveInventoryExtended(std::span<const BYTE> ReceiveBuffer)
             return false;
         }
 
-        mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
         int itemindex = itemStartData->Index;
         Offset++;
 
@@ -1754,7 +1754,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
 
     if (Data->SubCode == 3)
     {
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
         g_pMixInventory->DeleteAllItems();
@@ -1764,7 +1764,7 @@ void ReceiveTradeInventoryExtended(std::span<const BYTE> ReceiveBuffer)
         g_pSystemLogBox->AddText(I18N::Game::ResurrectionFailed, mu::ui::window::TYPE_ERROR_MESSAGE);
         PlayBuffer(SOUND_MIX01);
         PlayBuffer(SOUND_BREAK01);
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         g_pMixInventory->DeleteAllItems();
     }
     else
@@ -2161,7 +2161,7 @@ extern int EnableEvent;
 
 BOOL ReceiveTeleport(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 {
-    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
 
     auto Data = (LPPRECEIVE_TELEPORT_POSITION)ReceiveBuffer;
     Hero->PositionX = Data->PositionX;
@@ -6213,11 +6213,11 @@ void ReceiveDropItem(const BYTE* ReceiveBuffer)
             g_pMyInventory->DeleteItem(Data->KeyL);
         }
 
-        mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
     }
     else
     {
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 
     SendDropItem = -1;
@@ -6246,7 +6246,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     if (Data->SubCode != 255)
     {
         const auto storageType = static_cast<STORAGE_TYPE>(Data->SubCode);
-        mu::ui::window::CNewUIPickedItem* pPickedItem = mu::ui::window::CNewUIInventoryCtrl::GetPickedItem();
+        mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
         int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
         if (pPickedItem)
         {
@@ -6268,7 +6268,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
 
         if (storageType == STORAGE_TYPE::INVENTORY)
         {
-            mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+            mu::ui::window::CInventoryCtrl::DeletePickedItem();
 
             int itemindex = Data->Index;
             bool shouldResyncInventory = false;
@@ -6317,7 +6317,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
         if (storageType == STORAGE_TYPE::CHAOS_MIX ||
             (storageType >= STORAGE_TYPE::TRAINER_MIX && storageType <= STORAGE_TYPE::DETACH_SOCKET_MIX))
         {
-            mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+            mu::ui::window::CInventoryCtrl::DeletePickedItem();
             if (Data->Index >= 0 && Data->Index < MAX_MIX_INVENTORY)
                 g_pMixInventory->InsertItem(Data->Index, itemData);
         }
@@ -6330,7 +6330,7 @@ BOOL ReceiveEquipmentItemExtended(std::span<const BYTE> ReceiveBuffer)
     }
     else
     {
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
         if (g_pStorageInventory->IsItemAutoMove())
         {
             g_pStorageInventory->ProcessStorageItemAutoMoveFailure();
@@ -6367,9 +6367,9 @@ void ReceiveModifyItemExtended(std::span<const BYTE> ReceiveBuffer)
     int length = CalcItemLength(itemData);
     itemData = itemData.subspan(0, length);
 
-    if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
-        mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+        mu::ui::window::CInventoryCtrl::DeletePickedItem();
     }
 
     int itemindex = Data->Index;
@@ -6704,7 +6704,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             g_pLuckyItemWnd->GetResult(0, Data->Index, empty);
             break;
         }
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         wchar_t szText[256] = {
             0,
         };
@@ -6752,7 +6752,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
             g_pLuckyItemWnd->GetResult(1, 0, itemData);
             break;
         }
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         wchar_t szText[256] = {
             0,
         };
@@ -6802,22 +6802,22 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     case 2:
     case 0x0B:
     {
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_READY);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_READY);
         g_pSystemLogBox->AddText(I18N::Game::NotEnoughZenToCombineItems, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     break;
     case 4:
         mu::ui::window::CreateOkMessageBox(I18N::Game::MustBeOverLevel10ToCombineTheInvitationToDevilSquare);
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         break;
 
     case 9:
         mu::ui::window::CreateOkMessageBox(I18N::Game::MustBeOverLevel15ToCombineACloakOfInvisibility);
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         break;
 
     case 100:
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         g_pMixInventory->DeleteAllItems();
         g_pMixInventory->InsertItem(0, itemData);
         break;
@@ -6833,7 +6833,7 @@ void ReceiveMixExtended(std::span<const BYTE> ReceiveBuffer)
     case 8:
     case 0x0A:
     default:
-        g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_FINISHED);
+        g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_FINISHED);
         break;
     }
 
@@ -6847,7 +6847,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
     {
         if (Data->Flag == 0xff)
         {
-            mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
 
             g_pChatListBox->AddText(Hero->ID, I18N::Game::CannotBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
@@ -6859,7 +6859,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
         }
         else
         {
-            mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+            mu::ui::window::CInventoryCtrl::DeletePickedItem();
 
             CharacterMachine->Gold = Data->Gold;
 
@@ -6870,7 +6870,7 @@ void ReceiveSell(const BYTE* ReceiveBuffer)
     }
     else
     {
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 
     g_pNPCShop->SetSellingItem(false);
@@ -7492,7 +7492,7 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     GuildPlayerKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
-    mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+    mu::ui::window::CCommonMessageBox* pMsgBox;
     mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildRequestMsgBoxLayout), &pMsgBox);
     pMsgBox->AddMsg(CharactersClient[FindCharacterIndex(GuildPlayerKey)].ID);
     pMsgBox->AddMsg(I18N::Game::YouHaveReceivedAnOfferToJoinAGuild);
@@ -8347,7 +8347,7 @@ void Receive_Master_LevelGetSkill(const BYTE* ReceiveBuffer)
             }
         }
 
-        auto interface = CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+        auto interface = CSystem::GetInstance()->GetUI_NewMasterLevelInterface();
 
         interface->SkillUpgrade(Data->SkillIndex, Data->SkillLevel, Data->DisplayValue, Data->DisplayValueOfNextLevel);
     }
@@ -8457,7 +8457,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     break;
     case 16:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox = nullptr;
+        mu::ui::window::CCommonMessageBox* pMsgBox = nullptr;
 
         switch (Data->Cmd2)
         {
@@ -8834,7 +8834,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(szOpenTime1, I18N::Game::YouCanEnterSNow, I18N::Game::ChaosCastle);
             mu_swprintf(szOpenTime2, I18N::Game::InSCurrentlyDDEntered, I18N::Game::ChaosCastle, Data->KeyM, 100);
 
-            mu::ui::window::CNewUICommonMessageBox* pMsgBox = nullptr;
+            mu::ui::window::CCommonMessageBox* pMsgBox = nullptr;
             mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
@@ -8856,7 +8856,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(Text, I18N::Game::AfterDMinutesYouMayEnterS, Mini, I18N::Game::ChaosCastle);
             wcscat(szOpenTime, Text);
 
-            mu::ui::window::CNewUICommonMessageBox* pMsgBox = nullptr;
+            mu::ui::window::CCommonMessageBox* pMsgBox = nullptr;
             mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
             if (pMsgBox)
             {
@@ -9299,9 +9299,9 @@ void ReceiveSetPriceResult(const BYTE* ReceiveBuffer)
     if (Header->byResult != 0x01 && g_IsPurchaseShop == PSHOPWNDTYPE_SALE)
     {
         // Header->byResult == 0x06
-        if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem())
+        if (mu::ui::window::CInventoryCtrl::GetPickedItem())
         {
-            mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+            mu::ui::window::CInventoryCtrl::DeletePickedItem();
         }
 
         RemovePersonalItemPrice(g_pMyShopInventory->GetTargetIndex(), PSHOPWNDTYPE_SALE);
@@ -9586,7 +9586,7 @@ void ReceivePurchaseItem(std::span<const BYTE> ReceiveBuffer)
         default:
             g_ErrorReport.Write(L"@ [Fault] ReceivePurchaseItem (result : %d)\n", Header->Result);
         }
-        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 }
 
@@ -12513,7 +12513,7 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
     {
         g_pNewUISystem->Show(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
 
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::_3MonstersReachingTheMagicCircle, RGBA(255, 255, 255, 255),
                         mu::ui::window::MSGBOX_FONT_NORMAL);
@@ -12579,7 +12579,7 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
     {
         g_pDoppelGangerFrame->SetRemainTime(0);
 
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::Congratulations, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
@@ -12594,14 +12594,14 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::DoppelgangerDefenseFailed, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
     }
     break;
     case 2:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::YouFailedToFendOffMonstersAnd, RGBA(255, 255, 255, 255),
                         mu::ui::window::MSGBOX_FONT_NORMAL);
@@ -12678,7 +12678,7 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::EntryTime2798, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(L" ");
@@ -12689,21 +12689,21 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
     break;
     case 2:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::QuestItemMissing, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
     }
     break;
     case 3:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::CapacityExceeded, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
     }
     break;
     case 4:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::ThereIsStillTimeRemainingInThisZone, RGBA(255, 255, 255, 255),
                         mu::ui::window::MSGBOX_FONT_NORMAL);
@@ -12711,7 +12711,7 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
     break;
     case 5:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, RGBA(255, 255, 255, 255),
                         mu::ui::window::MSGBOX_FONT_NORMAL);
@@ -12749,7 +12749,7 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::YouHaveFailedToConquerThe, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
         pMsgBox->AddMsg(I18N::Game::FortressOfEmpireGuardians, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
@@ -12759,7 +12759,7 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     {
         int day = g_pEmpireGuardianTimer->GetDay();
         int zone = g_pEmpireGuardianTimer->GetZone();
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         wchar_t szText[256] = {};
         mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
@@ -12771,7 +12771,7 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     case 2:
     {
         int day = g_pEmpireGuardianTimer->GetDay();
-        mu::ui::window::CNewUICommonMessageBox* pMsgBox;
+        mu::ui::window::CCommonMessageBox* pMsgBox;
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         wchar_t szText[256] = {};
         mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);

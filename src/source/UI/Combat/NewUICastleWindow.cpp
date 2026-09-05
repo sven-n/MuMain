@@ -1,4 +1,4 @@
-// NewUICastleWindow.cpp: implementation of the CNewUICastleWindow class.
+// NewUICastleWindow.cpp: implementation of the CCastleWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -27,16 +27,16 @@ using namespace mu::ui::window;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CNewUICastleWindow::CNewUICastleWindow()
+CCastleWindow::CCastleWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iNumCurOpenTab = TAB_GATE_MANAGING;
     m_iCurrMsgBoxRequest = CASTLE_MSGREQ_NULL;
 }
-CNewUICastleWindow::~CNewUICastleWindow() { Release(); }
+CCastleWindow::~CCastleWindow() { Release(); }
 
-bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CCastleWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -85,7 +85,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUICastleWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+void CCastleWindow::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
 {
     pNewUIButton->ChangeText(pCaption);
     pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -95,7 +95,7 @@ void CNewUICastleWindow::InitButton(CNewUIButton* pNewUIButton, int iPos_x, int 
     pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void CNewUICastleWindow::Release()
+void CCastleWindow::Release()
 {
     UnloadImages();
 
@@ -106,13 +106,13 @@ void CNewUICastleWindow::Release()
     }
 }
 
-void CNewUICastleWindow::SetPos(int x, int y)
+void CCastleWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUICastleWindow::UpdateMouseEvent()
+bool CCastleWindow::UpdateMouseEvent()
 {
     switch (m_iNumCurOpenTab)
     {
@@ -136,7 +136,7 @@ bool CNewUICastleWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUICastleWindow::UpdateKeyEvent()
+bool CCastleWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SENATUS) == true)
     {
@@ -151,7 +151,7 @@ bool CNewUICastleWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUICastleWindow::Update()
+bool CCastleWindow::Update()
 {
     if (IsVisible())
     {
@@ -171,7 +171,7 @@ bool CNewUICastleWindow::Update()
     }
     return true;
 }
-bool CNewUICastleWindow::Render()
+bool CCastleWindow::Render()
 {
     EnableAlphaTest();
 
@@ -199,7 +199,7 @@ bool CNewUICastleWindow::Render()
     return true;
 }
 
-void CNewUICastleWindow::OpeningProcess()
+void CCastleWindow::OpeningProcess()
 {
     m_iNumCurOpenTab = TAB_GATE_MANAGING;
     m_TabBtn.ChangeFrame(TAB_GATE_MANAGING);
@@ -212,17 +212,17 @@ void CNewUICastleWindow::OpeningProcess()
     SocketClient->ToGameServer()->SendCastleSiegeTaxInfoRequest();
 }
 
-void CNewUICastleWindow::ClosingProcess()
+void CCastleWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 }
 
-float CNewUICastleWindow::GetLayerDepth()
+float CCastleWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUICastleWindow::LoadImages()
+void CCastleWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CASTLEWINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CASTLEWINDOW_TOP, GL_LINEAR);
@@ -247,7 +247,7 @@ void CNewUICastleWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_Bt_scroll_up.jpg", IMAGE_CASTLEWINDOW_SCROLL_UP_BTN, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_Bt_scroll_dn.jpg", IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN, GL_LINEAR);
 }
-void CNewUICastleWindow::UnloadImages()
+void CCastleWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CASTLEWINDOW_BOTTOM);
     DeleteBitmap(IMAGE_CASTLEWINDOW_RIGHT);
@@ -271,7 +271,7 @@ void CNewUICastleWindow::UnloadImages()
     DeleteBitmap(IMAGE_CASTLEWINDOW_SCROLL_DOWN_BTN);
 }
 
-void CNewUICastleWindow::RenderFrame()
+void CCastleWindow::RenderFrame()
 {
     RenderImage(IMAGE_CASTLEWINDOW_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_CASTLEWINDOW_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -291,7 +291,7 @@ void CNewUICastleWindow::RenderFrame()
     g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
 }
 
-bool CNewUICastleWindow::BtnProcess()
+bool CCastleWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_SENATUS);
@@ -305,7 +305,7 @@ bool CNewUICastleWindow::BtnProcess()
     return false;
 }
 
-void CNewUICastleWindow::UpdateGateManagingTab()
+void CCastleWindow::UpdateGateManagingTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 + 6 + 12 };
 
@@ -328,7 +328,7 @@ void CNewUICastleWindow::UpdateGateManagingTab()
         }
     }
 
-    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
@@ -383,7 +383,7 @@ void CNewUICastleWindow::UpdateGateManagingTab()
     }
 }
 
-void CNewUICastleWindow::UpdateStatueManagingTab()
+void CCastleWindow::UpdateStatueManagingTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 + 6 + 12 };
 
@@ -402,7 +402,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
         }
     }
 
-    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
@@ -474,9 +474,9 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     }
 }
 
-void CNewUICastleWindow::UpdateTaxManagingTab()
+void CCastleWindow::UpdateTaxManagingTab()
 {
-    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnApplyTax.UpdateMouseEvent() == true)
     {
@@ -511,7 +511,7 @@ void CNewUICastleWindow::UpdateTaxManagingTab()
     }
 }
 
-void CNewUICastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void CCastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -522,7 +522,7 @@ void CNewUICastleWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fW
     RenderColorQuadARGB(ptOrigin.x + 15, ptOrigin.y - 3, fBoxWidth - 2, 15, 0x4D000000u);
 }
 
-void CNewUICastleWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void CCastleWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -536,7 +536,7 @@ void CNewUICastleWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fW
     RenderImage(IMAGE_CASTLEWINDOW_TABLE_BOTTOM_PIXEL, ptOrigin.x + 25, ptOrigin.y + fBoxHeight + 3, fBoxWidth - 21, 14);
 }
 
-void CNewUICastleWindow::RenderGateManagingTab()
+void CCastleWindow::RenderGateManagingTab()
 {
     LPPMSG_NPCDBLIST pNPCInfo = &g_SenatusInfo.GetCurrGateInfo();
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 };
@@ -638,7 +638,7 @@ void CNewUICastleWindow::RenderGateManagingTab()
     }
 }
 
-void CNewUICastleWindow::RenderStatueManagingTab()
+void CCastleWindow::RenderStatueManagingTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 };
     LPPMSG_NPCDBLIST pNPCInfo = &g_SenatusInfo.GetCurrStatueInfo();
@@ -757,7 +757,7 @@ void CNewUICastleWindow::RenderStatueManagingTab()
     }
 }
 
-void CNewUICastleWindow::RenderTaxManagingTab()
+void CCastleWindow::RenderTaxManagingTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 };
     g_pRenderText->SetTextColor(0xFFFFFFFF);
@@ -854,7 +854,7 @@ void CNewUICastleWindow::RenderTaxManagingTab()
     g_pRenderText->RenderText(ptOrigin.x + 15, ptOrigin.y, I18N::Game::ToOperateTheCastle, 160, 0, RT3_SORT_CENTER);
 }
 
-void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo)
+void CCastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST pInfo)
 {
     const int nHPBlockSize = 24 / (g_SenatusInfo.GetMaxHPLevel() + 1);
     const int nDefenseBlockSize = 24 / (g_SenatusInfo.GetMaxDefenseLevel() + 1);
@@ -912,7 +912,7 @@ void CNewUICastleWindow::RenderCastleItem(int nPosX, int nPosY, LPPMSG_NPCDBLIST
     EnableAlphaTest();
 }
 
-void CNewUICastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
+void CCastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
 {
     wchar_t szNumber[32];
     mu_swprintf(szNumber, L"%d", dwNumber);
@@ -928,7 +928,7 @@ void CNewUICastleWindow::InsertComma(wchar_t* pszText, DWORD dwNumber)
     mu_swprintf(pszText, L"%ls%ls%ls", pszTextBegin, szNumber, pszTextNext);
 }
 
-void CNewUICastleWindow::InsertComma64(wchar_t* pszText, __int64 iNumber)
+void CCastleWindow::InsertComma64(wchar_t* pszText, __int64 iNumber)
 {
     wchar_t szNumber[32];
     mu_swprintf(szNumber, L"%I64d", iNumber);

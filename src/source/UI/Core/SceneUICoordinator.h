@@ -15,9 +15,9 @@
 
 // Was CUIMng (docs/newui-legacy-merger.md, Phase 4) -- that class used to own a CWin-derived
 // window list of its own; every one of those windows has since migrated onto
-// mu::ui::window::CNewUIObj/CNewUIManager (Phases 1-3), so all that remained of it was this class's
+// mu::ui::window::CObject/CManager (Phases 1-3), so all that remained of it was this class's
 // actual, still-needed job: creating/releasing/positioning the login- and character-scene g_*Win
-// globals per scene transition, and forwarding Update()/Render() to its own CNewUIManager instance.
+// globals per scene transition, and forwarding Update()/Render() to its own CManager instance.
 // Renamed to describe that job directly, not a "CWin manager" that no longer manages any CWin.
 class CSceneUICoordinator
 {
@@ -33,15 +33,15 @@ protected:
     // could react to the very same keypress a second time.
     bool m_bSysMenuToggledByEscThisFrame = false;
 
-    // A scene-scoped CNewUIManager instance (own object, not the shared g_pNewUIMng that
-    // MAIN_SCENE's ~79 windows use): CNewUIManager's dispatch is only ever driven from
+    // A scene-scoped CManager instance (own object, not the shared g_pNewUIMng that
+    // MAIN_SCENE's ~79 windows use): CManager's dispatch is only ever driven from
     // MainScene.cpp today, so a window that only exists during login/character scenes (like
     // CCreditWin) would never update/render if registered with the shared instance instead.
     // Update()/Render() below (already called unconditionally every frame, regardless of scene)
-    // forward to this one, giving every login/character-scene window the same INewUIBase
-    // interface and dispatch semantics as the MAIN_SCENE-tier CNewUIObj windows, without touching
+    // forward to this one, giving every login/character-scene window the same IObject
+    // interface and dispatch semantics as the MAIN_SCENE-tier CObject windows, without touching
     // the shared manager at all.
-    mu::ui::window::CNewUIManager m_NewStyleMng;
+    mu::ui::window::CManager m_NewStyleMng;
 
 public:
     virtual ~CSceneUICoordinator();
@@ -61,7 +61,7 @@ public:
      *
      * Only affects the login/character-scene windows this class itself drives
      * (g_CreditWin, g_LoginWin, g_MsgWin, etc. -- see docs/newui-legacy-merger.md);
-     * the MAIN_SCENE-only CNewUI* windows are driven by g_pNewUISystem separately.
+     * the MAIN_SCENE-only mu::ui::window windows are driven by g_pNewUISystem separately.
      */
     void RepositionSceneUI();
 
@@ -86,7 +86,7 @@ public:
 
     // See m_NewStyleMng's own comment -- windows migrating off CWin register here instead of the
     // shared g_pNewUIMng.
-    mu::ui::window::CNewUIManager& GetNewStyleMng()
+    mu::ui::window::CManager& GetNewStyleMng()
     {
         return m_NewStyleMng;
     }

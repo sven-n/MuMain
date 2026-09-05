@@ -1,4 +1,4 @@
-// NewUISiegeWarBase.h: interface for the CNewUISiegeWarBase class.
+// NewUISiegeWarBase.h: interface for the CSiegeWarBase class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -14,13 +14,13 @@
 
 namespace mu::ui::window
 {
-    class CNewUISiegeWarBase
+    class CSiegeWarBase
     {
     public:
         enum IMAGE_LIST
         {
             // MiniMap
-            IMAGE_SKILL_ICON = CNewUISkillList::IMAGE_SKILL2,	// newui_skill2.jpg
+            IMAGE_SKILL_ICON = CSkillList::IMAGE_SKILL2,	// newui_skill2.jpg
             IMAGE_MINIMAP_FRAME = BITMAP_SIEGEWAR_BEGIN,		// newui_SW_Minimap_Frame.tga		(154, 162)
             IMAGE_TIME_FRAME,									// newui_SW_Time_Frame.tga			(134, 37)
             IMAGE_MINIMAP,										// map1.tga							(256, 256)
@@ -93,15 +93,15 @@ namespace mu::ui::window
         DWORD		m_dwBuffState;
 
         GuildCommander	m_CmdBuffer[MAX_COMMANDGROUP];
-        CNewUIButton	m_BtnSkillScroll[2];
-        CNewUIButton	m_BtnAlpha;
+        CButton	m_BtnSkillScroll[2];
+        CButton	m_BtnAlpha;
 
         std::list<int>				m_listBattleSkill;
         std::list<int>::iterator		m_iterCurBattleSkill;
 
     public:
-        CNewUISiegeWarBase();
-        virtual ~CNewUISiegeWarBase();
+        CSiegeWarBase();
+        virtual ~CSiegeWarBase();
 
     protected:
         virtual bool OnCreate(int x, int y) = 0;

@@ -352,7 +352,7 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 
 void CCharMakeWin::Show(bool bShow)
 {
-    mu::ui::window::CNewUIObj::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 
     m_sprBg.Show(bShow);
 

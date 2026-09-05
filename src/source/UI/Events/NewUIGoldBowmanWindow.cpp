@@ -1,4 +1,4 @@
-// NewUIGoldBowmanWindow.cpp: implementation of the CNewUIGoldBowmanWindow class.
+// NewUIGoldBowmanWindow.cpp: implementation of the CGoldBowmanWindow class.
 //////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "UI/Events/NewUIGoldBowmanWindow.h"
@@ -30,19 +30,19 @@ namespace
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIGoldBowmanWindow::CNewUIGoldBowmanWindow()
+CGoldBowmanWindow::CGoldBowmanWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
 }
 
-CNewUIGoldBowmanWindow::~CNewUIGoldBowmanWindow()
+CGoldBowmanWindow::~CGoldBowmanWindow()
 {
     Release();
 }
 
-bool CNewUIGoldBowmanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGoldBowmanWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -78,7 +78,7 @@ bool CNewUIGoldBowmanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGoldBowmanWindow::Release()
+void CGoldBowmanWindow::Release()
 {
     UnloadImages();
 
@@ -90,20 +90,20 @@ void CNewUIGoldBowmanWindow::Release()
     SAFE_DELETE(m_EditBox);
 }
 
-void CNewUIGoldBowmanWindow::OpeningProcess()
+void CGoldBowmanWindow::OpeningProcess()
 {
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
     ChangeEditBox(UISTATE_NORMAL);
 }
 
-void CNewUIGoldBowmanWindow::ClosingProcess()
+void CGoldBowmanWindow::ClosingProcess()
 {
     ZeroMemory(g_strGiftName, sizeof(g_strGiftName));
     ChangeEditBox(UISTATE_HIDE);
     SocketClient->ToGameServer()->SendEventChipExitDialog();
 }
 
-void CNewUIGoldBowmanWindow::ChangeEditBox(const UISTATES type)
+void CGoldBowmanWindow::ChangeEditBox(const UISTATES type)
 {
     m_EditBox->SetState(type);
 
@@ -115,7 +115,7 @@ void CNewUIGoldBowmanWindow::ChangeEditBox(const UISTATES type)
     m_EditBox->SetText(NULL);
 }
 
-bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
+bool CGoldBowmanWindow::UpdateMouseEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN) == false) {
         return true;
@@ -139,7 +139,7 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 
     if (m_EditBox && m_BtnSerial.UpdateMouseEvent())
     {
-        mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+        mu::ui::window::CInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         if (pNewInventoryCtrl->FindEmptySlot(2, 4) == -1)
         {
             mu::ui::window::CreateOkMessageBox(I18N::Game::LeaveAtLeastOneEmptySlotInYourInventory);
@@ -188,7 +188,7 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGoldBowmanWindow::UpdateKeyEvent()
+bool CGoldBowmanWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN) == false) {
         return true;
@@ -203,7 +203,7 @@ bool CNewUIGoldBowmanWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGoldBowmanWindow::Update()
+bool CGoldBowmanWindow::Update()
 {
     if (!IsVisible())
         return true;
@@ -222,7 +222,7 @@ bool CNewUIGoldBowmanWindow::Update()
     return true;
 }
 
-void CNewUIGoldBowmanWindow::RenderFrame()
+void CGoldBowmanWindow::RenderFrame()
 {
     // frame
     RenderImage(IMAGE_GB_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
@@ -235,7 +235,7 @@ void CNewUIGoldBowmanWindow::RenderFrame()
     RenderImage(IMAGE_GB_EDITBOX, m_Pos.x + 45, m_Pos.y + 255, 108.f, 23.f);
 }
 
-void CNewUIGoldBowmanWindow::RenderTexts()
+void CGoldBowmanWindow::RenderTexts()
 {
     wchar_t Text[100];
 
@@ -286,14 +286,14 @@ void CNewUIGoldBowmanWindow::RenderTexts()
     }
 }
 
-void CNewUIGoldBowmanWindow::RendeerButton()
+void CGoldBowmanWindow::RendeerButton()
 {
     m_BtnSerial.Render();
 
     m_BtnExit.Render();
 }
 
-bool CNewUIGoldBowmanWindow::Render()
+bool CGoldBowmanWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -303,12 +303,12 @@ bool CNewUIGoldBowmanWindow::Render()
     return true;
 }
 
-float CNewUIGoldBowmanWindow::GetLayerDepth()
+float CGoldBowmanWindow::GetLayerDepth()
 {
     return 3.4f;
 }
 
-void CNewUIGoldBowmanWindow::LoadImages()
+void CGoldBowmanWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GB_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_GB_TOP, GL_LINEAR);
@@ -321,7 +321,7 @@ void CNewUIGoldBowmanWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_guildmakeeditbox.tga", IMAGE_GB_EDITBOX, GL_LINEAR);
 }
 
-void CNewUIGoldBowmanWindow::UnloadImages()
+void CGoldBowmanWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GB_EDITBOX);
     DeleteBitmap(IMAGE_GB_BTN_EXIT);

@@ -12,7 +12,7 @@
 
 namespace mu::ui::window
 {
-    class CNewUIBloodCastle : public CNewUIObj
+    class CBloodCastle : public CObject
     {
     public:
         enum IMAGE_LIST
@@ -39,7 +39,7 @@ namespace mu::ui::window
         };
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT						m_Pos;
 
         wchar_t				m_szTime[256];		// 시간
@@ -49,10 +49,10 @@ namespace mu::ui::window
         int							m_iKilledMonster;	// 현재 죽인 몬스터숫자
 
     public:
-        CNewUIBloodCastle();
-        virtual ~CNewUIBloodCastle();
+        CBloodCastle();
+        virtual ~CBloodCastle();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);

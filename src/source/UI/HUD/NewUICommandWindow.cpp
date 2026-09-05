@@ -1,4 +1,4 @@
-// NewUICommandWindow.cpp: implementation of the CNewUICommandWindow class.
+// NewUICommandWindow.cpp: implementation of the CCommandWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -20,7 +20,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-mu::ui::window::CNewUICommandWindow::CNewUICommandWindow()
+mu::ui::window::CCommandWindow::CCommandWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -30,12 +30,12 @@ mu::ui::window::CNewUICommandWindow::CNewUICommandWindow()
     m_bCanCommand = false;
 }
 
-mu::ui::window::CNewUICommandWindow::~CNewUICommandWindow()
+mu::ui::window::CCommandWindow::~CCommandWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUICommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CCommandWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -54,7 +54,7 @@ bool mu::ui::window::CNewUICommandWindow::Create(CNewUIManager* pNewUIMng, int x
     return true;
 }
 
-void mu::ui::window::CNewUICommandWindow::Release()
+void mu::ui::window::CCommandWindow::Release()
 {
     UnloadImages();
 
@@ -65,7 +65,7 @@ void mu::ui::window::CNewUICommandWindow::Release()
     }
 }
 
-void mu::ui::window::CNewUICommandWindow::InitButtons()
+void mu::ui::window::CCommandWindow::InitButtons()
 {
     wchar_t szText[256] = {};
     mu_swprintf(szText, I18N::Game::CloseS, L"D");
@@ -94,7 +94,7 @@ void mu::ui::window::CNewUICommandWindow::InitButtons()
     m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
 }
 
-void mu::ui::window::CNewUICommandWindow::OpenningProcess()
+void mu::ui::window::CCommandWindow::OpenningProcess()
 {
     if (m_iCurSelectCommand != COMMAND_NONE)
         SetBtnState(m_iCurSelectCommand, false);
@@ -103,7 +103,7 @@ void mu::ui::window::CNewUICommandWindow::OpenningProcess()
     m_iCurMouseCursor = CURSOR_NORMAL;
 }
 
-void mu::ui::window::CNewUICommandWindow::ClosingProcess()
+void mu::ui::window::CCommandWindow::ClosingProcess()
 {
     if (m_iCurSelectCommand != COMMAND_NONE)
         SetBtnState(m_iCurSelectCommand, false);
@@ -112,7 +112,7 @@ void mu::ui::window::CNewUICommandWindow::ClosingProcess()
     m_iCurMouseCursor = CURSOR_NORMAL;
 }
 
-bool mu::ui::window::CNewUICommandWindow::BtnProcess()
+bool mu::ui::window::CCommandWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND))
@@ -156,7 +156,7 @@ bool mu::ui::window::CNewUICommandWindow::BtnProcess()
     return false;
 }
 
-bool mu::ui::window::CNewUICommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CCommandWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -175,7 +175,7 @@ bool mu::ui::window::CNewUICommandWindow::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CCommandWindow::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND) == true)
     {
@@ -189,7 +189,7 @@ bool mu::ui::window::CNewUICommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::Update()
+bool mu::ui::window::CCommandWindow::Update()
 {
     if (IsVisible())
     {
@@ -200,7 +200,7 @@ bool mu::ui::window::CNewUICommandWindow::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::Render()
+bool mu::ui::window::CCommandWindow::Render()
 {
     EnableAlphaTest();
 
@@ -254,7 +254,7 @@ bool mu::ui::window::CNewUICommandWindow::Render()
     return true;
 }
 
-void mu::ui::window::CNewUICommandWindow::RenderBaseWindow()
+void mu::ui::window::CCommandWindow::RenderBaseWindow()
 {
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), float(COMMAND_WINDOW_HEIGHT));
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), 64.f);
@@ -272,7 +272,7 @@ void mu::ui::window::CNewUICommandWindow::RenderBaseWindow()
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(COMMAND_WINDOW_HEIGHT) - 45.f, float(COMMAND_WINDOW_WIDTH), 45.f);
 }
 
-void mu::ui::window::CNewUICommandWindow::SetPos(int x, int y)
+void mu::ui::window::CCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -284,12 +284,12 @@ void mu::ui::window::CNewUICommandWindow::SetPos(int x, int y)
     }
 }
 
-float mu::ui::window::CNewUICommandWindow::GetLayerDepth()
+float mu::ui::window::CCommandWindow::GetLayerDepth()
 {
     return LayerDepth;
 }
 
-void mu::ui::window::CNewUICommandWindow::RunCommand()
+void mu::ui::window::CCommandWindow::RunCommand()
 {
     if (MouseLButtonPush && m_iCurMouseCursor != CURSOR_IDSELECT)
         SetMouseCursor(CURSOR_PUSH);
@@ -395,7 +395,7 @@ void mu::ui::window::CNewUICommandWindow::RunCommand()
     }
 }
 
-void mu::ui::window::CNewUICommandWindow::SetBtnState(int iBtnType, bool bStateDown)
+void mu::ui::window::CCommandWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
     if (bStateDown)
     {
@@ -415,26 +415,26 @@ void mu::ui::window::CNewUICommandWindow::SetBtnState(int iBtnType, bool bStateD
     }
 }
 
-void mu::ui::window::CNewUICommandWindow::SelectCommand()
+void mu::ui::window::CCommandWindow::SelectCommand()
 {
 }
 
-int mu::ui::window::CNewUICommandWindow::GetCurCommandType()
+int mu::ui::window::CCommandWindow::GetCurCommandType()
 {
     return m_iCurSelectCommand;
 }
 
-void mu::ui::window::CNewUICommandWindow::SetMouseCursor(int iCursorType)
+void mu::ui::window::CCommandWindow::SetMouseCursor(int iCursorType)
 {
     m_iCurMouseCursor = iCursorType;
 }
 
-int mu::ui::window::CNewUICommandWindow::GetMouseCursor()
+int mu::ui::window::CCommandWindow::GetMouseCursor()
 {
     return m_iCurMouseCursor;
 }
 
-void mu::ui::window::CNewUICommandWindow::LoadImages()
+void mu::ui::window::CCommandWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_COMMAND_BASE_WINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_COMMAND_BASE_WINDOW_TOP, GL_LINEAR);
@@ -446,7 +446,7 @@ void mu::ui::window::CNewUICommandWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_cursorid_wnd.jpg", IMAGE_COMMAND_SELECTID_BG, GL_LINEAR);
 }
 
-void mu::ui::window::CNewUICommandWindow::UnloadImages()
+void mu::ui::window::CCommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_BACK);
     DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_TOP);
@@ -458,7 +458,7 @@ void mu::ui::window::CNewUICommandWindow::UnloadImages()
     DeleteBitmap(IMAGE_COMMAND_SELECTID_BG);
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandTrade(CHARACTER* pSelectedCha)
 {
     if (pSelectedCha == NULL)
         return false;
@@ -481,7 +481,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
 {
     if (pSelectedCha == nullptr)
         return false;
@@ -491,7 +491,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCh
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandParty(SHORT iChaKey)
+bool mu::ui::window::CCommandWindow::CommandParty(SHORT iChaKey)
 {
     if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != 0)
     {
@@ -504,14 +504,14 @@ bool mu::ui::window::CNewUICommandWindow::CommandParty(SHORT iChaKey)
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandWhisper(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandWhisper(CHARACTER* pSelectedCha)
 {
     g_pChatInputBox->SetWhsprID(pSelectedCha->ID);
 
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
+bool mu::ui::window::CCommandWindow::CommandGuild(CHARACTER* pSelectedChar)
 {
     if (Hero->GuildStatus != G_NONE)
     {
@@ -529,7 +529,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
@@ -555,7 +555,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelected
     return false;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
@@ -574,7 +574,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelected
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandCancelGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
@@ -593,7 +593,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSe
     return true;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
+bool mu::ui::window::CCommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
 {
     if (g_pWindowMgr->IsServerEnable() == TRUE && pSelectedCha != nullptr)
     {
@@ -604,7 +604,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedC
     return false;
 }
 
-bool mu::ui::window::CNewUICommandWindow::CommandFollow(int iSelectedChaIndex)
+bool mu::ui::window::CCommandWindow::CommandFollow(int iSelectedChaIndex)
 {
     if (iSelectedChaIndex < 0)
     {
@@ -616,7 +616,7 @@ bool mu::ui::window::CNewUICommandWindow::CommandFollow(int iSelectedChaIndex)
     return true;
 }
 
-int mu::ui::window::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
+int mu::ui::window::CCommandWindow::CommandDual(CHARACTER* pSelectedCha)
 {
     int iLevel = CharacterAttribute->Level;
     if (iLevel < 30)

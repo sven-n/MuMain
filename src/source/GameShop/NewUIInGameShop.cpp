@@ -21,17 +21,17 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIInGameShop::CNewUIInGameShop()
+CInGameShop::CInGameShop()
 {
     Init();
 }
 
-CNewUIInGameShop::~CNewUIInGameShop()
+CInGameShop::~CInGameShop()
 {
     Release();
 }
 
-void CNewUIInGameShop::Init()
+void CInGameShop::Init()
 {
     m_ItemAngle = false;
     m_bLoadBanner = false;
@@ -45,7 +45,7 @@ void CNewUIInGameShop::Init()
     m_bRequestCurrentPage = false;
 }
 
-void CNewUIInGameShop::Release()
+void CInGameShop::Release()
 {
     UnloadImages();
 
@@ -60,7 +60,7 @@ void CNewUIInGameShop::Release()
     ClearAllStorageItem();
 }
 
-bool CNewUIInGameShop::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CInGameShop::Create(CManager* pNewUIMng, int x, int y)
 {
     if (pNewUIMng == NULL)
         return false;
@@ -76,13 +76,13 @@ bool CNewUIInGameShop::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIInGameShop::SetPos(int x, int y)
+void CInGameShop::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool CNewUIInGameShop::Render()
+bool CInGameShop::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -95,7 +95,7 @@ bool CNewUIInGameShop::Render()
     return true;
 }
 
-void CNewUIInGameShop::RenderFrame()
+void CInGameShop::RenderFrame()
 {
     RenderImage(IMAGE_IGS_BACK, m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT);
 
@@ -126,7 +126,7 @@ void CNewUIInGameShop::RenderFrame()
     RenderImage(IMAGE_IGS_STORAGE_PAGE, m_Pos.x + IMAGE_IGS_STORAGE_PAGE_POS_X, m_Pos.y + IMAGE_IGS_STORAGE_PAGE_POS_Y, IMGAE_IGS_STORAGE_PAGE_WIDTH, IMGAE_IGS_STORAGE_PAGE_HEIGHT);
 }
 
-void CNewUIInGameShop::RenderTexts()
+void CInGameShop::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     wchar_t szValue[256] = { 0, };
@@ -211,7 +211,7 @@ void CNewUIInGameShop::RenderTexts()
 #endif //KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 }
 
-void CNewUIInGameShop::RenderButtons()
+void CInGameShop::RenderButtons()
 {
     m_ZoneButton.Render();
     m_CategoryButton.Render();
@@ -233,12 +233,12 @@ void CNewUIInGameShop::RenderButtons()
     m_CloseButton.Render();
 }
 
-void CNewUIInGameShop::RenderListBox()
+void CInGameShop::RenderListBox()
 {
     m_StorageItemListBox.Render();
 }
 
-bool CNewUIInGameShop::IsInGameShopRect(float _x, float _y)
+bool CInGameShop::IsInGameShopRect(float _x, float _y)
 {
     if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP))
         return false;
@@ -258,7 +258,7 @@ bool CNewUIInGameShop::IsInGameShopRect(float _x, float _y)
     return false;
 }
 
-void CNewUIInGameShop::SetConvertInvenCoord(WORD _ItemType, float _Width, float _Height)
+void CInGameShop::SetConvertInvenCoord(WORD _ItemType, float _Width, float _Height)
 {
     ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[_ItemType];
     float _TempWidth = pItemAttr->Width * 20.0f;
@@ -280,7 +280,7 @@ void CNewUIInGameShop::SetConvertInvenCoord(WORD _ItemType, float _Width, float 
     m_fReSize.x = _TempWidth;
     m_fReSize.y = _TempHeight;
 }
-void CNewUIInGameShop::SetRateScale(int _ItemType)
+void CInGameShop::SetRateScale(int _ItemType)
 {
     const float _fRate_Value = 0.703f;
     ITEM_ATTRIBUTE* pItemAttr = &ItemAttribute[_ItemType];
@@ -311,13 +311,13 @@ void CNewUIInGameShop::SetRateScale(int _ItemType)
 // form and post-pop restore across multiple soaks; DXP-08a deleted the diagnostic and the FFP
 // matrix-stack calls it was validating (see RenderDisplayItems()'s own comments below). Its per-item
 // loop only calls RenderItem3D(), which carries no GL model transform. The restore mirror runs
-// BEFORE BeginBitmap() is called again (unlike CNewUI3DCamera::Render(), where it runs after) — a
+// BEFORE BeginBitmap() is called again (unlike C3DCamera::Render(), where it runs after) — a
 // genuine save/restore of whatever context was active at entry, not a BeginBitmap()-delegated
 // restore, hence its own pre-panel snapshot below.
 static float s_PreShopProj[16];
 static float s_PreShopView[16];
 
-void CNewUIInGameShop::RenderDisplayItems()
+void CInGameShop::RenderDisplayItems()
 {
     EndBitmap();
 
@@ -352,7 +352,7 @@ void CNewUIInGameShop::RenderDisplayItems()
     BeginBitmap();
 }
 
-bool CNewUIInGameShop::BtnProcess()
+bool CInGameShop::BtnProcess()
 {
     if (g_InGameShopSystem->IsRequestEventPackge() == true)
     {
@@ -501,7 +501,7 @@ bool CNewUIInGameShop::BtnProcess()
     return false;
 }
 
-void CNewUIInGameShop::SetBtnInfo()
+void CInGameShop::SetBtnInfo()
 {
     m_CloseButton.ChangeButtonImgState(true, IMAGE_IGS_EXIT_BTN, false);
     m_CloseButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_EXIT_BTN_POS_X, m_Pos.y + IMAGE_IGS_EXIT_BTN_POS_Y, IMAGE_IGS_EXIT_BTN_WIDTH, IMAGE_IGS_EXIT_BTN_HEIGHT);
@@ -563,7 +563,7 @@ void CNewUIInGameShop::SetBtnInfo()
     m_StorageNextButton.ChangeButtonInfo(m_Pos.x + IMAGE_IGS_STORAGE_PAGE_RIGHT_POS_X + 10, m_Pos.y + IMAGE_IGS_STORAGE_PAGE_BTN_POS_Y - 3, IMGAE_IGS_STORAGE_PAGE_BTN_WIDTH, IMGAE_IGS_STORAGE_PAGE_BTN_HEIGHT);
 }
 
-bool CNewUIInGameShop::Update()
+bool CInGameShop::Update()
 {
     if (IsVisible() == false)
         return true;
@@ -571,7 +571,7 @@ bool CNewUIInGameShop::Update()
     return true;
 }
 
-bool CNewUIInGameShop::UpdateMouseEvent()
+bool CInGameShop::UpdateMouseEvent()
 {
     if (IsVisible() == false)
         return true;
@@ -605,7 +605,7 @@ bool CNewUIInGameShop::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIInGameShop::UpdateKeyEvent()
+bool CInGameShop::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
     {
@@ -620,9 +620,9 @@ bool CNewUIInGameShop::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIInGameShop::IsInGameShopOpen()
+bool CInGameShop::IsInGameShopOpen()
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIInGameShop::IsInGameShopOpen()");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CInGameShop::IsInGameShopOpen()");
     if (Hero->Movement)
         return false;
 
@@ -647,7 +647,7 @@ bool CNewUIInGameShop::IsInGameShopOpen()
     return true;
 }
 
-bool CNewUIInGameShop::IsInGameShop()
+bool CInGameShop::IsInGameShop()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP))
         return true;
@@ -655,7 +655,7 @@ bool CNewUIInGameShop::IsInGameShop()
         return false;
 }
 
-void CNewUIInGameShop::InitBanner(wchar_t* pszFileName, wchar_t* pszBannerURL)
+void CInGameShop::InitBanner(wchar_t* pszFileName, wchar_t* pszBannerURL)
 {
     ReleaseBanner();
 
@@ -678,7 +678,7 @@ void CNewUIInGameShop::InitBanner(wchar_t* pszFileName, wchar_t* pszBannerURL)
     }
 }
 
-void CNewUIInGameShop::RenderBanner()
+void CInGameShop::RenderBanner()
 {
     if (m_bLoadBanner == false)
         return;
@@ -686,7 +686,7 @@ void CNewUIInGameShop::RenderBanner()
     RenderImage(IMAGE_IGS_BANNER, IMAGE_IGS_BANNER_POS_X, IMAGE_IGS_BANNER_POS_Y, IMAGE_IGS_BANNER_WIDTH, IMAGE_IGS_BANNER_HEIGHT);
 }
 
-bool CNewUIInGameShop::UpdateBanner()
+bool CInGameShop::UpdateBanner()
 {
     if (m_bLoadBanner == false || m_bBannerLink == false)
         return false;
@@ -700,7 +700,7 @@ bool CNewUIInGameShop::UpdateBanner()
     return false;
 }
 
-void CNewUIInGameShop::ReleaseBanner()
+void CInGameShop::ReleaseBanner()
 {
     if (m_bLoadBanner == false)
         return;
@@ -710,9 +710,9 @@ void CNewUIInGameShop::ReleaseBanner()
     m_bLoadBanner = false;
 }
 
-void CNewUIInGameShop::OpeningProcess()
+void CInGameShop::OpeningProcess()
 {
-    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIInGameShop::OpeningProcess()");
+    g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CInGameShop::OpeningProcess()");
     PlayBuffer(SOUND_CLICK01);
     g_InGameShopSystem->Initalize();
     g_InGameShopSystem->SelectZone(0);
@@ -722,14 +722,14 @@ void CNewUIInGameShop::OpeningProcess()
     g_InGameShopSystem->SetRequestEventPackge();
 }
 
-void CNewUIInGameShop::ClosingProcess()
+void CInGameShop::ClosingProcess()
 {
     PlayBuffer(SOUND_CLICK01);
     m_ListBoxTabButton.ChangeFrame(IGS_SAFEKEEPING_LISTBOX);
     ClearAllStorageItem();
 }
 
-void CNewUIInGameShop::InitZoneBtn()
+void CInGameShop::InitZoneBtn()
 {
     m_ZoneButton.UnRegisterRadioButton();
 
@@ -744,7 +744,7 @@ void CNewUIInGameShop::InitZoneBtn()
     m_ZoneButton.ChangeFrame(0);
 }
 
-void CNewUIInGameShop::InitCategoryBtn()
+void CInGameShop::InitCategoryBtn()
 {
     m_CategoryButton.UnRegisterRadioButton();
 
@@ -760,7 +760,7 @@ void CNewUIInGameShop::InitCategoryBtn()
     m_CategoryButton.ChangeFrame(0);
 }
 
-void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint, wchar_t chItemType, wchar_t* pszUserName /* = NULL */, wchar_t* pszMessage /* = NULL */)
+void CInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int iStorageGroupCode, int iProductSeq, int iPriceSeq, int iCashPoint, wchar_t chItemType, wchar_t* pszUserName /* = NULL */, wchar_t* pszMessage /* = NULL */)
 {
     int iValue = -1;
     wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
@@ -898,7 +898,7 @@ void CNewUIInGameShop::AddStorageItem(int iStorageSeq, int iStorageItemSeq, int 
     }
 }
 
-void CNewUIInGameShop::ClearAllStorageItem()
+void CInGameShop::ClearAllStorageItem()
 {
     m_iStorageTotalItemCnt = 0;
     m_iStorageCurrentPageItemCnt = 0;
@@ -908,7 +908,7 @@ void CNewUIInGameShop::ClearAllStorageItem()
     m_StorageItemListBox.Clear();
 }
 
-void CNewUIInGameShop::InitStorage(int iTotalItemCnt, int iCurrentPageItemCnt, int iTotalPage, int iCurrentPage)
+void CInGameShop::InitStorage(int iTotalItemCnt, int iCurrentPageItemCnt, int iTotalPage, int iCurrentPage)
 {
     ClearAllStorageItem();
 
@@ -933,7 +933,7 @@ void CNewUIInGameShop::InitStorage(int iTotalItemCnt, int iCurrentPageItemCnt, i
     m_bRequestCurrentPage = false;
 }
 
-char CNewUIInGameShop::GetCurrentStorageCode()
+char CInGameShop::GetCurrentStorageCode()
 {
     char szCode;
     switch (m_ListBoxTabButton.GetCurButtonIndex())
@@ -951,7 +951,7 @@ char CNewUIInGameShop::GetCurrentStorageCode()
     return szCode;
 }
 
-void CNewUIInGameShop::StoragePrevPage()
+void CInGameShop::StoragePrevPage()
 {
     if (m_iStorageCurrentPage > 1)
     {
@@ -962,7 +962,7 @@ void CNewUIInGameShop::StoragePrevPage()
     }
 }
 
-void CNewUIInGameShop::StorageNextPage()
+void CInGameShop::StorageNextPage()
 {
     if (m_iStorageCurrentPage < m_iStorageTotalPage)
     {
@@ -973,7 +973,7 @@ void CNewUIInGameShop::StorageNextPage()
     }
 }
 
-void CNewUIInGameShop::UpdateStorageItemList()
+void CInGameShop::UpdateStorageItemList()
 {
     char szCode = GetCurrentStorageCode();
     int iSelectLineIndex = m_StorageItemListBox.SLGetSelectLineNum();
@@ -1001,7 +1001,7 @@ void CNewUIInGameShop::UpdateStorageItemList()
     }
 }
 
-void CNewUIInGameShop::LoadImages()
+void CInGameShop::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_IGS_EXIT_BTN, GL_LINEAR);
     LoadBitmap(L"Interface\\InGameShop\\Ingame_shopback.jpg", IMAGE_IGS_BACK, GL_LINEAR);
@@ -1023,7 +1023,7 @@ void CNewUIInGameShop::LoadImages()
     LoadBitmap(L"Interface\\InGameShop\\IGS_Storage_Page_Right.tga", IMAGE_IGS_STORAGE_PAGE_RIGHT, GL_LINEAR);
 }
 
-void CNewUIInGameShop::UnloadImages()
+void CInGameShop::UnloadImages()
 {
     DeleteBitmap(IMAGE_IGS_EXIT_BTN);
     DeleteBitmap(IMAGE_IGS_BACK);

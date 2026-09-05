@@ -1,4 +1,4 @@
-// NewUISiegeWarBase.cpp: implementation of the CNewUISiegeWarBase class.
+// NewUISiegeWarBase.cpp: implementation of the CSiegeWarBase class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -27,7 +27,7 @@ DWORD MakeRgba(float red, float green, float blue, float alpha)
 }
 }
 
-mu::ui::window::CNewUISiegeWarBase::CNewUISiegeWarBase()
+mu::ui::window::CSiegeWarBase::CSiegeWarBase()
 {
     m_iMiniMapScale = 1;
     m_fMiniMapAlpha = 1.f;
@@ -56,11 +56,11 @@ mu::ui::window::CNewUISiegeWarBase::CNewUISiegeWarBase()
     memset(&m_MiniMapScaleOffset, 0, sizeof(POINT));
 }
 
-mu::ui::window::CNewUISiegeWarBase::~CNewUISiegeWarBase()
+mu::ui::window::CSiegeWarBase::~CSiegeWarBase()
 {
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::Create(int x, int y)
+bool mu::ui::window::CSiegeWarBase::Create(int x, int y)
 {
     SetPos(x, y);
 
@@ -90,14 +90,14 @@ bool mu::ui::window::CNewUISiegeWarBase::Create(int x, int y)
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::Release()
+void mu::ui::window::CSiegeWarBase::Release()
 {
     ReleaseBattleSkill();
 
     OnRelease();
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::Update()
+bool mu::ui::window::CSiegeWarBase::Update()
 {
     UpdateBuffState();
     UpdateHeroPos();
@@ -107,7 +107,7 @@ bool mu::ui::window::CNewUISiegeWarBase::Update()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::Render()
+bool mu::ui::window::CSiegeWarBase::Render()
 {
     wchar_t szText[256] = { 0, };
     const BYTE miniMapAlpha = ToColorByte(m_fMiniMapAlpha);
@@ -194,7 +194,7 @@ bool mu::ui::window::CNewUISiegeWarBase::Render()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::InitBattleSkill()
+bool mu::ui::window::CSiegeWarBase::InitBattleSkill()
 {
     ReleaseBattleSkill();
 
@@ -246,14 +246,14 @@ bool mu::ui::window::CNewUISiegeWarBase::InitBattleSkill()
     return true;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::ReleaseBattleSkill()
+void mu::ui::window::CSiegeWarBase::ReleaseBattleSkill()
 {
     m_listBattleSkill.clear();
 
     m_bRenderSkillUI = false;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::SetSkillScrollUp()
+void mu::ui::window::CSiegeWarBase::SetSkillScrollUp()
 {
     if (m_listBattleSkill.begin() == m_iterCurBattleSkill)
         return;
@@ -263,7 +263,7 @@ void mu::ui::window::CNewUISiegeWarBase::SetSkillScrollUp()
     Hero->GuildSkill = (*m_iterCurBattleSkill);
 }
 
-void mu::ui::window::CNewUISiegeWarBase::SetSkillScrollDn()
+void mu::ui::window::CSiegeWarBase::SetSkillScrollDn()
 {
     if (m_listBattleSkill.end() == ++m_iterCurBattleSkill)
     {
@@ -274,7 +274,7 @@ void mu::ui::window::CNewUISiegeWarBase::SetSkillScrollDn()
     Hero->GuildSkill = (*m_iterCurBattleSkill);
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::UpdateMouseEvent()
+bool mu::ui::window::CSiegeWarBase::UpdateMouseEvent()
 {
     if (!OnUpdateMouseEvent())
         return false;
@@ -305,7 +305,7 @@ bool mu::ui::window::CNewUISiegeWarBase::UpdateMouseEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::UpdateKeyEvent()
+bool mu::ui::window::CSiegeWarBase::UpdateKeyEvent()
 {
     if (!OnUpdateKeyEvent())
         return false;
@@ -313,7 +313,7 @@ bool mu::ui::window::CNewUISiegeWarBase::UpdateKeyEvent()
     return true;
 }
 
-bool mu::ui::window::CNewUISiegeWarBase::BtnProcess()
+bool mu::ui::window::CSiegeWarBase::BtnProcess()
 {
     POINT ptScaleBtn = { m_MiniMapFramePos.x + 134, m_MiniMapFramePos.y + 7 };
 
@@ -376,7 +376,7 @@ bool mu::ui::window::CNewUISiegeWarBase::BtnProcess()
     return false;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::UpdateBuffState()
+void mu::ui::window::CSiegeWarBase::UpdateBuffState()
 {
     DWORD m_dwBuffState = -1;
 
@@ -400,7 +400,7 @@ void mu::ui::window::CNewUISiegeWarBase::UpdateBuffState()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarBase::UpdateHeroPos()
+void mu::ui::window::CSiegeWarBase::UpdateHeroPos()
 {
     m_HeroPosInWorld.x = (Hero->PositionX) / m_iMiniMapScale;
     m_HeroPosInWorld.y = (256 - (Hero->PositionY)) / m_iMiniMapScale;
@@ -415,7 +415,7 @@ void mu::ui::window::CNewUISiegeWarBase::UpdateHeroPos()
     m_fMiniMapTexV = (float)(m_MiniMapScaleOffset.y) / (256.f / (float)m_iMiniMapScale);
 }
 
-void mu::ui::window::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
+void mu::ui::window::CSiegeWarBase::RenderCmdIconInMiniMap()
 {
     int iWidth, iHeight;
     wchar_t szText[256] = { 0, };
@@ -463,7 +463,7 @@ void mu::ui::window::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
     }
 }
 
-void mu::ui::window::CNewUISiegeWarBase::RenderSkillIcon()
+void mu::ui::window::CSiegeWarBase::RenderSkillIcon()
 {
     int iUseSkillDestKill;
     int iSelectSkill;
@@ -502,7 +502,7 @@ void mu::ui::window::CNewUISiegeWarBase::RenderSkillIcon()
 
 //---------------------------------------------------------------------------------------------
 // SetPos
-void mu::ui::window::CNewUISiegeWarBase::SetPos(int x, int y)
+void mu::ui::window::CSiegeWarBase::SetPos(int x, int y)
 {
     m_MiniMapFramePos.x = x;
     m_MiniMapFramePos.y = y;
@@ -531,13 +531,13 @@ void mu::ui::window::CNewUISiegeWarBase::SetPos(int x, int y)
     OnSetPos(x, y);
 }
 
-void  mu::ui::window::CNewUISiegeWarBase::SetTime(int iHour, int iMinute)
+void  mu::ui::window::CSiegeWarBase::SetTime(int iHour, int iMinute)
 {
     m_iHour = iHour;
     m_iMinute = iMinute;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::SetMapInfo(GuildCommander& data)
+void mu::ui::window::CSiegeWarBase::SetMapInfo(GuildCommander& data)
 {
     m_CmdBuffer[data.byTeam].byCmd = data.byCmd;
     m_CmdBuffer[data.byTeam].byTeam = data.byTeam;
@@ -546,12 +546,12 @@ void mu::ui::window::CNewUISiegeWarBase::SetMapInfo(GuildCommander& data)
     m_CmdBuffer[data.byTeam].byLifeTime = 100;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::SetRenderSkillUI(bool bRenderSkillUI)
+void mu::ui::window::CSiegeWarBase::SetRenderSkillUI(bool bRenderSkillUI)
 {
     m_bRenderSkillUI = bRenderSkillUI;
 }
 
-void mu::ui::window::CNewUISiegeWarBase::LoadImages()
+void mu::ui::window::CSiegeWarBase::LoadImages()
 {
     LoadBitmap(L"World31\\Map1.jpg", IMAGE_MINIMAP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_SW_Minimap_Frame.tga", IMAGE_MINIMAP_FRAME, GL_LINEAR);
@@ -568,7 +568,7 @@ void mu::ui::window::CNewUISiegeWarBase::LoadImages()
     OnLoadImages();
 }
 
-void mu::ui::window::CNewUISiegeWarBase::UnLoadImages()
+void mu::ui::window::CSiegeWarBase::UnLoadImages()
 {
     DeleteBitmap(IMAGE_MINIMAP);
     DeleteBitmap(IMAGE_MINIMAP_FRAME);

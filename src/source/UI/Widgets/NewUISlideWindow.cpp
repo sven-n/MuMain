@@ -1,4 +1,4 @@
-// NewUISlideWindow.cpp: implementation of the CNewUISlideWindow class.
+// NewUISlideWindow.cpp: implementation of the CSlideWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -6,18 +6,18 @@
 #include "UI/Widgets/NewUISlideWindow.h"
 #include "UI/Core/NewUIManager.h"
 
-mu::ui::window::CNewUISlideWindow::CNewUISlideWindow()
+mu::ui::window::CSlideWindow::CSlideWindow()
 {
     m_pNewUIMng = NULL;
     m_pSlideMgr = NULL;
 }
 
-mu::ui::window::CNewUISlideWindow::~CNewUISlideWindow()
+mu::ui::window::CSlideWindow::~CSlideWindow()
 {
     Release();
 }
 
-bool mu::ui::window::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CSlideWindow::Create(CManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
@@ -31,7 +31,7 @@ bool mu::ui::window::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void mu::ui::window::CNewUISlideWindow::Release()
+void mu::ui::window::CSlideWindow::Release()
 {
     SAFE_DELETE(m_pSlideMgr);
 
@@ -42,28 +42,28 @@ void mu::ui::window::CNewUISlideWindow::Release()
     }
 }
 
-bool mu::ui::window::CNewUISlideWindow::UpdateMouseEvent()
+bool mu::ui::window::CSlideWindow::UpdateMouseEvent()
 {
     return true;
 }
-bool mu::ui::window::CNewUISlideWindow::UpdateKeyEvent()
+bool mu::ui::window::CSlideWindow::UpdateKeyEvent()
 {
     return true;
 }
-bool mu::ui::window::CNewUISlideWindow::Update()
+bool mu::ui::window::CSlideWindow::Update()
 {
     m_pSlideMgr->ManageSlide();
 
     return true;
 }
-bool mu::ui::window::CNewUISlideWindow::Render()
+bool mu::ui::window::CSlideWindow::Render()
 {
     m_pSlideMgr->Render();
 
     return true;
 }
 
-float mu::ui::window::CNewUISlideWindow::GetLayerDepth()
+float mu::ui::window::CSlideWindow::GetLayerDepth()
 {
     return 1.91f;
 }

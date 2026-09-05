@@ -1,5 +1,5 @@
 ﻿//*****************************************************************************
-// Desc: implementation of the CNewUITrade class.
+// Desc: implementation of the CTrade class.
 //*****************************************************************************
 
 #include "stdafx.h"
@@ -15,19 +15,19 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUITrade::CNewUITrade()
+CTrade::CTrade()
 {
     m_pNewUIMng = NULL;
     m_pYourInvenCtrl = m_pMyInvenCtrl = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-CNewUITrade::~CNewUITrade()
+CTrade::~CTrade()
 {
     Release();
 }
 
-bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CTrade::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng
         || NULL == g_pNewItemMng)
@@ -36,7 +36,7 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_TRADE, this);
 
-    m_pYourInvenCtrl = new CNewUIInventoryCtrl;
+    m_pYourInvenCtrl = new CInventoryCtrl;
     if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng,
         this, x + 16, y + 68, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
     {
@@ -44,7 +44,7 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
     }
 
-    m_pMyInvenCtrl = new CNewUIInventoryCtrl;
+    m_pMyInvenCtrl = new CInventoryCtrl;
     if (false == m_pMyInvenCtrl->Create(STORAGE_TYPE::TRADE, g_pNewUI3DRenderMng, g_pNewItemMng,
         this, x + 16, y + 274, COLUMN_TRADE_INVEN, ROW_TRADE_INVEN))
     {
@@ -75,7 +75,7 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUITrade::InitTradeInfo()
+void CTrade::InitTradeInfo()
 {
     m_nYourLevel = 0;
     m_nYourGuildType = -1;
@@ -85,13 +85,13 @@ void CNewUITrade::InitTradeInfo()
     m_bYourConfirm = m_bMyConfirm = false;
 }
 
-void CNewUITrade::InitYourInvenBackUp()
+void CTrade::InitYourInvenBackUp()
 {
     for (int i = 0; i < MAX_TRADE_INVEN; ++i)
         m_aYourInvenBackUp[i].Type = -1;
 }
 
-void CNewUITrade::Release()
+void CTrade::Release()
 {
     UnloadImages();
 
@@ -108,7 +108,7 @@ void CNewUITrade::Release()
         g_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
 }
 
-void CNewUITrade::SetPos(int x, int y)
+void CTrade::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -117,13 +117,13 @@ void CNewUITrade::SetPos(int x, int y)
     m_posMyConfirm.y = m_Pos.y + 390;
 }
 
-bool CNewUITrade::UpdateMouseEvent()
+bool CTrade::UpdateMouseEvent()
 {
     if ((m_pYourInvenCtrl && false == m_pYourInvenCtrl->UpdateMouseEvent())
         || (m_pMyInvenCtrl && false == m_pMyInvenCtrl->UpdateMouseEvent()))
     {
         if (mu::ui::window::IsPress(VK_LBUTTON)
-            && CNewUIInventoryCtrl::GetPickedItem()->GetOwnerInventory() == m_pMyInvenCtrl
+            && CInventoryCtrl::GetPickedItem()->GetOwnerInventory() == m_pMyInvenCtrl
             && m_bMyConfirm)
         {
             m_bMyConfirm = false;
@@ -157,7 +157,7 @@ bool CNewUITrade::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUITrade::UpdateKeyEvent()
+bool CTrade::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE) == true)
     {
@@ -173,7 +173,7 @@ bool CNewUITrade::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUITrade::Update()
+bool CTrade::Update()
 {
     if ((m_pYourInvenCtrl && false == m_pYourInvenCtrl->Update())
         || (m_pMyInvenCtrl && false == m_pMyInvenCtrl->Update()))
@@ -182,7 +182,7 @@ bool CNewUITrade::Update()
     return true;
 }
 
-bool CNewUITrade::Render()
+bool CTrade::Render()
 {
     ::EnableAlphaTest();
 
@@ -206,16 +206,16 @@ bool CNewUITrade::Render()
     return true;
 }
 
-void CNewUITrade::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CTrade::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     if (pClass)
     {
-        auto* pNewUITrade = (CNewUITrade*)pClass;
+        auto* pNewUITrade = (CTrade*)pClass;
         pNewUITrade->RenderWarningArrow();
     }
 }
 
-void CNewUITrade::RenderBackImage()
+void CTrade::RenderBackImage()
 {
     RenderImage(IMAGE_TRADE_BACK,
         m_Pos.x, m_Pos.y, float(TRADE_WIDTH), float(TRADE_HEIGHT));
@@ -242,7 +242,7 @@ void CNewUITrade::RenderBackImage()
     RenderImage(IMAGE_TRADE_CONFIRM, m_Pos.x + 144, m_Pos.y + 390, CONFIRM_WIDTH, CONFIRM_HEIGHT, 0.f, fSrcY, dwColor);
 }
 
-void CNewUITrade::RenderText()
+void CTrade::RenderText()
 {
     wchar_t szTemp[128];
 
@@ -308,7 +308,7 @@ void CNewUITrade::RenderText()
     g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 215, I18N::Game::AndTheItemsBeforeTrading);
 }
 
-void CNewUITrade::RenderWarningArrow()
+void CTrade::RenderWarningArrow()
 {
     ::EnableAlphaTest();
 
@@ -346,7 +346,7 @@ void CNewUITrade::RenderWarningArrow()
     ::DisableAlphaBlend();
 }
 
-void CNewUITrade::ConvertYourLevel(int& rnLevel, DWORD& rdwColor)
+void CTrade::ConvertYourLevel(int& rnLevel, DWORD& rdwColor)
 {
     if (m_nYourLevel >= 400)
     {
@@ -380,12 +380,12 @@ void CNewUITrade::ConvertYourLevel(int& rnLevel, DWORD& rdwColor)
     }
 }
 
-float CNewUITrade::GetLayerDepth()
+float CTrade::GetLayerDepth()
 {
     return 2.1f;
 }
 
-void CNewUITrade::LoadImages()
+void CTrade::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_TRADE_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_TRADE_TOP, GL_LINEAR);
@@ -401,7 +401,7 @@ void CNewUITrade::LoadImages()
     LoadBitmap(L"Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
 }
 
-void CNewUITrade::UnloadImages()
+void CTrade::UnloadImages()
 {
     DeleteBitmap(IMAGE_TRADE_BTN_ZEN_INPUT);
     DeleteBitmap(IMAGE_TRADE_BTN_CLOSE);
@@ -417,7 +417,7 @@ void CNewUITrade::UnloadImages()
     DeleteBitmap(IMAGE_TRADE_BACK);
 }
 
-void CNewUITrade::ProcessClosing()
+void CTrade::ProcessClosing()
 {
     m_pYourInvenCtrl->RemoveAllItems();
     m_pMyInvenCtrl->RemoveAllItems();
@@ -426,14 +426,14 @@ void CNewUITrade::ProcessClosing()
         InitYourInvenBackUp();
 }
 
-void CNewUITrade::ProcessMyInvenCtrl()
+void CTrade::ProcessMyInvenCtrl()
 {
     if (NULL == m_pMyInvenCtrl)
         return;
 
     if (mu::ui::window::IsPress(VK_LBUTTON))
     {
-        CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
+        CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
         if (NULL == pPickedItem)
             return;
 
@@ -464,7 +464,7 @@ void CNewUITrade::ProcessMyInvenCtrl()
     }
 }
 
-void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
+void CTrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
     int nTradeIndex)
 {
     if (::IsTradeBan(pItemObj))
@@ -481,7 +481,7 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
     }
 }
 
-void CNewUITrade::SendRequestItemToMyInven(ITEM* pItemObj, int nTradeIndex, int nInvenIndex)
+void CTrade::SendRequestItemToMyInven(ITEM* pItemObj, int nTradeIndex, int nInvenIndex)
 {
     SendRequestEquipmentItem(STORAGE_TYPE::TRADE, nTradeIndex, pItemObj, STORAGE_TYPE::INVENTORY, nInvenIndex);
 
@@ -492,7 +492,7 @@ void CNewUITrade::SendRequestItemToMyInven(ITEM* pItemObj, int nTradeIndex, int 
     m_nMyTradeWait = 150;
 }
 
-void CNewUITrade::SendRequestMyGoldInput(int nInputGold)
+void CTrade::SendRequestMyGoldInput(int nInputGold)
 {
     if (nInputGold <= (int)CharacterMachine->Gold + m_nMyTradeGold)
     {
@@ -514,16 +514,16 @@ void CNewUITrade::SendRequestMyGoldInput(int nInputGold)
     }
 }
 
-void CNewUITrade::ProcessCloseBtn()
+void CTrade::ProcessCloseBtn()
 {
-    if (CNewUIInventoryCtrl::GetPickedItem() == NULL)
+    if (CInventoryCtrl::GetPickedItem() == NULL)
     {
         m_bTradeAlert = false;
         SocketClient->ToGameServer()->SendTradeCancel();
     }
 }
 
-bool CNewUITrade::ProcessBtns()
+bool CTrade::ProcessBtns()
 {
     if (m_nMyTradeWait > 0)
         --m_nMyTradeWait;
@@ -551,7 +551,7 @@ bool CNewUITrade::ProcessBtns()
     else if (mu::ui::window::IsRelease(VK_LBUTTON)
         && CheckMouseIn(m_posMyConfirm.x, m_posMyConfirm.y, CONFIRM_WIDTH, CONFIRM_HEIGHT))
     {
-        if (0 == m_nMyTradeWait && CNewUIInventoryCtrl::GetPickedItem() == NULL)
+        if (0 == m_nMyTradeWait && CInventoryCtrl::GetPickedItem() == NULL)
         {
             ::PlayBuffer(SOUND_CLICK01);
 
@@ -571,7 +571,7 @@ bool CNewUITrade::ProcessBtns()
     return false;
 }
 
-void CNewUITrade::AlertTrade()
+void CTrade::AlertTrade()
 {
     m_bMyConfirm = !m_bMyConfirm;
 
@@ -579,12 +579,12 @@ void CNewUITrade::AlertTrade()
     SocketClient->ToGameServer()->SendTradeButtonStateChange(m_bMyConfirm ? TradeButtonState::Checked : TradeButtonState::Unchecked);
 }
 
-void CNewUITrade::GetYourID(wchar_t* pszYourID)
+void CTrade::GetYourID(wchar_t* pszYourID)
 {
     ::wcscpy(pszYourID, m_szYourID);
 }
 
-void CNewUITrade::ProcessToReceiveTradeRequest(char* pbyYourID)
+void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 {
     if (g_pNewUISystem->IsImpossibleTradeInterface())
     {
@@ -596,10 +596,10 @@ void CNewUITrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 
     mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeMsgBoxLayout));
 
-    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CInventoryCtrl::BackupPickedItem();
 }
 
-void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
+void CTrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
 {
     switch (pTradeData->SubCode)
     {
@@ -633,7 +633,7 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
     }
 }
 
-void CNewUITrade::ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex)
+void CTrade::ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex)
 {
     BackUpYourInven(int(byYourInvenIndex));
     ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(int(byYourInvenIndex));
@@ -642,13 +642,13 @@ void CNewUITrade::ProcessToReceiveYourItemDelete(BYTE byYourInvenIndex)
     ::PlayBuffer(SOUND_GET_ITEM01);
 }
 
-void CNewUITrade::BackUpYourInven(int nYourInvenIndex)
+void CTrade::BackUpYourInven(int nYourInvenIndex)
 {
     ITEM* pYourItemObj = m_pYourInvenCtrl->FindItem(nYourInvenIndex);
     BackUpYourInven(pYourItemObj);
 }
 
-void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
+void CTrade::BackUpYourInven(ITEM* pYourItemObj)
 {
     if ((pYourItemObj->Type >= ITEM_HELPER && pYourItemObj->Type <= ITEM_DARK_HORSE_ITEM)
         || (pYourItemObj->Type == ITEM_JEWEL_OF_BLESS || pYourItemObj->Type == ITEM_JEWEL_OF_SOUL || pYourItemObj->Type == ITEM_JEWEL_OF_LIFE)
@@ -701,14 +701,14 @@ void CNewUITrade::BackUpYourInven(ITEM* pYourItemObj)
     }
 }
 
-void CNewUITrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket)
+void CTrade::ProcessToReceiveYourItemAdd(BYTE byYourInvenIndex, std::span<const BYTE> pbyItemPacket)
 {
     m_pYourInvenCtrl->AddItem(byYourInvenIndex, pbyItemPacket);
     AlertYourTradeInven();
     ::PlayBuffer(SOUND_GET_ITEM01);
 }
 
-void CNewUITrade::AlertYourTradeInven()
+void CTrade::AlertYourTradeInven()
 {
     int nCount = 0;
     int nCompareItemType[10];
@@ -759,12 +759,12 @@ void CNewUITrade::AlertYourTradeInven()
     }
 }
 
-void CNewUITrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
+void CTrade::ProcessToReceiveMyTradeGold(BYTE bySuccess)
 {
     m_nMyTradeGold = bySuccess ? m_nTempMyTradeGold : 0;
 }
 
-void CNewUITrade::ProcessToReceiveYourConfirm(BYTE byState)
+void CTrade::ProcessToReceiveYourConfirm(BYTE byState)
 {
     switch (byState)
     {
@@ -786,7 +786,7 @@ void CNewUITrade::ProcessToReceiveYourConfirm(BYTE byState)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
+void CTrade::ProcessToReceiveTradeExit(BYTE byState)
 {
     switch (byState)
     {
@@ -815,28 +815,28 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
         break;
     }
 
-    mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+    mu::ui::window::CInventoryCtrl::DeletePickedItem();
 
     g_MessageBox->PopMessageBox();
 
     g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
 }
 
-void CNewUITrade::ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket)
+void CTrade::ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
-    mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
+    mu::ui::window::CInventoryCtrl::DeletePickedItem();
 
     if (nIndex >= 0 && nIndex < (m_pMyInvenCtrl->GetNumberOfColumn()
         * m_pMyInvenCtrl->GetNumberOfRow()))
         m_pMyInvenCtrl->AddItem(nIndex, pbyItemPacket);
 }
 
-int mu::ui::window::CNewUITrade::GetPointedItemIndexMyInven()
+int mu::ui::window::CTrade::GetPointedItemIndexMyInven()
 {
     return m_pMyInvenCtrl->GetPointedSquareIndex();
 }
 
-int mu::ui::window::CNewUITrade::GetPointedItemIndexYourInven()
+int mu::ui::window::CTrade::GetPointedItemIndexYourInven()
 {
     return m_pYourInvenCtrl->GetPointedSquareIndex();
 }

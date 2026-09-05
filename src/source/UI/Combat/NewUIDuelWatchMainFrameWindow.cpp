@@ -1,4 +1,4 @@
-// NewUIDuelWatchMainFrameWindow.cpp: implementation of the CNewUIDuelWatchMainFrameWindow class.
+// NewUIDuelWatchMainFrameWindow.cpp: implementation of the CDuelWatchMainFrameWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
@@ -11,7 +11,7 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
-CNewUIDuelWatchMainFrameWindow::CNewUIDuelWatchMainFrameWindow()
+CDuelWatchMainFrameWindow::CDuelWatchMainFrameWindow()
 {
     m_pNewUIMng = NULL;
 
@@ -30,12 +30,12 @@ CNewUIDuelWatchMainFrameWindow::CNewUIDuelWatchMainFrameWindow()
     m_fReceivedSDRate2 = 0;
 }
 
-CNewUIDuelWatchMainFrameWindow::~CNewUIDuelWatchMainFrameWindow()
+CDuelWatchMainFrameWindow::~CDuelWatchMainFrameWindow()
 {
     Release();
 }
 
-bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool CDuelWatchMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng)
         return false;
@@ -58,7 +58,7 @@ bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRe
     return true;
 }
 
-void CNewUIDuelWatchMainFrameWindow::Release()
+void CDuelWatchMainFrameWindow::Release()
 {
     UnloadImages();
 
@@ -75,24 +75,24 @@ void CNewUIDuelWatchMainFrameWindow::Release()
     }
 }
 
-bool CNewUIDuelWatchMainFrameWindow::UpdateMouseEvent()
+bool CDuelWatchMainFrameWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
     return true;
 }
 
-bool CNewUIDuelWatchMainFrameWindow::UpdateKeyEvent()
+bool CDuelWatchMainFrameWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool CNewUIDuelWatchMainFrameWindow::Update()
+bool CDuelWatchMainFrameWindow::Update()
 {
     return true;
 }
 
-bool CNewUIDuelWatchMainFrameWindow::Render()
+bool CDuelWatchMainFrameWindow::Render()
 {
     EnableAlphaTest();
 
@@ -234,31 +234,31 @@ bool CNewUIDuelWatchMainFrameWindow::Render()
     return true;
 }
 
-void CNewUIDuelWatchMainFrameWindow::Render3D()
+void CDuelWatchMainFrameWindow::Render3D()
 {
 }
 
-bool CNewUIDuelWatchMainFrameWindow::IsVisible() const
+bool CDuelWatchMainFrameWindow::IsVisible() const
 {
-    return CNewUIObj::IsVisible();
+    return CObject::IsVisible();
 }
 
-void CNewUIDuelWatchMainFrameWindow::OpeningProcess()
-{
-    m_bHasHPReceived = FALSE;
-}
-
-void CNewUIDuelWatchMainFrameWindow::ClosingProcess()
+void CDuelWatchMainFrameWindow::OpeningProcess()
 {
     m_bHasHPReceived = FALSE;
 }
 
-float CNewUIDuelWatchMainFrameWindow::GetLayerDepth()
+void CDuelWatchMainFrameWindow::ClosingProcess()
+{
+    m_bHasHPReceived = FALSE;
+}
+
+float CDuelWatchMainFrameWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void CNewUIDuelWatchMainFrameWindow::LoadImages()
+void CDuelWatchMainFrameWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\menu_pk_01.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK1, GL_LINEAR);
     LoadBitmap(L"Interface\\menu_pk_02.jpg", IMAGE_DUELWATCH_MAINFRAME_BACK2, GL_LINEAR);
@@ -271,7 +271,7 @@ void CNewUIDuelWatchMainFrameWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
 }
 
-void CNewUIDuelWatchMainFrameWindow::UnloadImages()
+void CDuelWatchMainFrameWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_DUELWATCH_MAINFRAME_BACK1);
     DeleteBitmap(IMAGE_DUELWATCH_MAINFRAME_BACK2);
@@ -284,7 +284,7 @@ void CNewUIDuelWatchMainFrameWindow::UnloadImages()
     DeleteBitmap(IMAGE_INVENTORY_EXIT_BTN);
 }
 
-void CNewUIDuelWatchMainFrameWindow::RenderFrame()
+void CDuelWatchMainFrameWindow::RenderFrame()
 {
     float width, height;
     float x, y;
@@ -300,7 +300,7 @@ void CNewUIDuelWatchMainFrameWindow::RenderFrame()
     mu::ui::window::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK3, x, y, width, height);
 }
 
-bool CNewUIDuelWatchMainFrameWindow::BtnProcess()
+bool CDuelWatchMainFrameWindow::BtnProcess()
 {
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
