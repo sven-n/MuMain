@@ -187,7 +187,7 @@ namespace I18N {
 ## Locale switching at runtime
 
 The active locale is selected through the Option window's language dropdown
-(see `src/source/UI/NewUI/Options/NewUIOptionWindow.cpp`). It calls
+(see `src/source/UI/Options/NewUIOptionWindow.cpp`). It calls
 `I18N::SetLocale(code)` and persists the choice via `GameConfig.UILocale`
 (the single source of truth for the active locale; on startup
 `GameLogic/Config/GameConfig` re-applies it).

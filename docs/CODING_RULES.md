@@ -81,7 +81,7 @@ as they are; they would be migrated as part of a future broader modernization,
 not piecemeal. Anonymous namespaces for file-private helpers remain unchanged.
 
 The first file using this convention is
-`src/source/UI/NewUI/HUD/Skills/SkillTooltip.cpp` (`namespace
+`src/source/UI/HUD/Skills/SkillTooltip.cpp` (`namespace
 UI::Skills::Tooltip`). Subsequent extractions should follow the same shape so
 the pattern accretes consistently.
 

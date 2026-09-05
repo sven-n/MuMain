@@ -1,4 +1,4 @@
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 
 typedef std::pair<int, BYTE> INTBYTEPAIR;
 

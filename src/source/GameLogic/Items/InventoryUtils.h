@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 inline bool IsMainInventorySlot(const int slot)
 {

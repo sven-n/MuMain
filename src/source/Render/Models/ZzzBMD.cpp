@@ -23,7 +23,7 @@
 
 #include "Camera/CameraMove.h"
 #include "Engine/Physics/PhysicsManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Render/Models/GpuSkinningPath.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Renderer/RenderUtils.h"

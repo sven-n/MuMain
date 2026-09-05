@@ -3,8 +3,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Party/UIWindows.h"
+#include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"

@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/NewUI/NewUIBase.h"
+#include "UI/Core/NewUIBase.h"
 #include "Render/Sprites/Sprite.h"
 
 #define SMW_MSG_LINE_MAX 5

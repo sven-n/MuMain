@@ -7,7 +7,7 @@
 #include "Core/Utilities/UsefulDef.h"
 #include "Core/Time/Timer.h"
 
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 
 extern CTimer* g_pTimer;
 

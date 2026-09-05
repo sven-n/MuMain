@@ -9,8 +9,8 @@
 
 #include "GameLogic/Items/InventoryUtils.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Core/NewUISystem.h"
 
 extern DWORD g_dwActiveUIID;
 extern int InventoryStartX;

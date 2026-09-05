@@ -20,7 +20,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Core/Utilities/Random.h"
 
 #include <cmath>

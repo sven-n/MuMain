@@ -10,7 +10,7 @@
 
 #include "Core/Platform/CrtDbg.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Core/Utilities/UsefulDef.h"
 
 #define	QM_NPCDIALOGUE_FILE			L"Data\\Local\\NPCDialogue.bmd"

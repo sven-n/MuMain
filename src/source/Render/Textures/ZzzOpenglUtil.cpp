@@ -10,7 +10,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include <SDL3/SDL.h>
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 #include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)

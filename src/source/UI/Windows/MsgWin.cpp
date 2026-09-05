@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "UI/Windows/MsgWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/ServerSelWin.h"
 #include "UI/Windows/LoginWin.h"
 #include "Character/CharMakeWin.h"
@@ -22,7 +22,7 @@
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Scenes/SceneCommon.h"
 #include "Core/Utilities/Log/ErrorReport.h"

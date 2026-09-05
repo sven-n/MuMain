@@ -406,8 +406,8 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
      (`WebzenScene.cpp`, `ZzzOpenData.cpp`'s `OpenBasicData()`), too small a surface for a singleton
      class of its own.
   3. Renamed what was left — `CUIMng` → `CSceneUICoordinator`, `UIMng.h`/`.cpp` →
-     `SceneUICoordinator.h`/`.cpp` (same `UI/Legacy/` folder; a further move to a more fitting home
-     is a Phase-5-adjacent cosmetic follow-up, not required here) — a pure rename, not a redesign:
+     `SceneUICoordinator.h`/`.cpp` (same `UI/Legacy/` folder at the time; that folder itself no
+     longer exists as of the directory restructure below) — a pure rename, not a redesign:
      every method name/signature/body unchanged, so all ~50 call sites across ~30 files changed
      only their type name (`CUIMng::Instance()` → `CSceneUICoordinator::Instance()`), verified by a
      full rebuild (the real check for a rename this size — anything missed would be a compile
@@ -436,6 +436,32 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   a meaningful distinction once `CUIMng` was deleted in Phase 4. Also sweep code comments (this
   doc's own included) that reference the old "New UI"/"Legacy UI" framing now that it's no longer
   accurate.
+- **Directory restructure (done, 2026-09-05)** — `src/source/UI/Legacy/` and `src/source/UI/NewUI/`
+  no longer exist. Neither folder name meant anything real anymore: `Legacy/` was a grab-bag (a
+  widget toolkit, five unrelated base-less game-feature state classes, a second self-contained
+  mini window-manager) and `NewUI/` was just "everything else," 193 files deep, already split into
+  sensible per-feature subfolders that happened to duplicate names top-level folders already used
+  (`UI/Combat/`, `UI/Chat/` predate the whole split). Moved everything to topic-based folders
+  directly under `UI/`: a new `UI/Core/` holds the base-class/orchestration layer (`NewUIBase.h`,
+  `NewUIManager`, `NewUIGroup`, `NewUISystem`, `NewUICommon`, `NewUI3DRenderMng`, `UILayoutPolicy`,
+  `UIManager`, `SceneUICoordinator`); `UI/Widgets/` absorbed the old `UIControls`/`TextSearch`
+  toolkit and all of `NewUI/Widgets/`; `UI/Character/`, `UI/HUD/`, `UI/Options/`, `UI/Quests/` are
+  straight promotions of their `NewUI/` counterparts (`HUD/` also picked up the stray `UIMapName`);
+  `UI/Combat/`, `UI/Dialogs/`, `UI/Events/`, `UI/Inventory/`, `UI/NPCs/` are each their `NewUI/`
+  counterpart merged with one `Legacy/` game-feature class that matched it thematically
+  (`UISenatus`, `UIPopup`, `UIGuardsMan`, `UIJewelHarmony`, `UIGateKeeper` respectively); `UI/Party/`
+  is `NewUI/Party/` plus `UIWindows.h/.cpp` (the friend/mail/chat-room mini window-manager —
+  confirmed still live, not dead, moved as-is; whether it's superseded by `NewUIFriendWindow` is a
+  separate, not-yet-done follow-up). `UIDefaultBase.h/.cpp` deleted outright (fully inert,
+  `#ifdef UIDEFAULTBASE`-gated, the guard macro was never defined anywhere). Pure file-move +
+  include-path rewrite, no class renamed and no logic touched — done in independently-built chunks
+  (`Core` first, since it has the widest fan-in, then `Widgets`, then the no-merge promotions, then
+  the five thematic merges, then `Party`, then cleanup), each verified by a full rebuild plus
+  running the `tests/ui/` binaries whose hardcoded source paths this touched. One naming collision
+  flagged but deliberately not resolved here: `UI/Widgets/Button.h`'s `CButton` and the former
+  `NewUIButton.h`'s `CNewUIButton` family are unrelated implementations that will collide if Phase
+  5 mechanically strips `New*` off the latter — left for Phase 5 to resolve per-case, not decided
+  speculatively now.
 
 ## Gotchas worth knowing before the next migration
 

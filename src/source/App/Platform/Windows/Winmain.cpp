@@ -20,8 +20,8 @@
 #include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
-#include "UI/Legacy/UIWindows.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Party/UIWindows.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -52,7 +52,7 @@
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
-#include "UI/Legacy/UIMapName.h" // rozy
+#include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
 
 #include "MUHelper/MuHelper.h"
@@ -72,7 +72,7 @@
 #endif
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "Character/CharMakeWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
@@ -82,7 +82,7 @@
 
 #include "GameLogic/Pets/w_PetProcess.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"

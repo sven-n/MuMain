@@ -14,7 +14,7 @@
 #ifdef _WIN32
 #include <eh.h>
 #endif
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Guild/GuildCache.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
@@ -126,7 +126,7 @@ namespace
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Social/MonkSystem.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 CHARACTER* CharactersClient;
 CHARACTER CharacterView;

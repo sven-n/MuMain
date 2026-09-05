@@ -8,7 +8,7 @@
 #include <array>
 #include <cmath>
 
-#include "UI/NewUI/NewUIBase.h"
+#include "UI/Core/NewUIBase.h"
 #include "UI/Widgets/Button.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 

@@ -2,7 +2,7 @@
 //  npcGateSwitch.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Engine/AI/ZzzAI.h"

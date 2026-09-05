@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "CharSelMainWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "Character/CharMakeWin.h"
 #include "Render/Models/ZzzBMD.h"

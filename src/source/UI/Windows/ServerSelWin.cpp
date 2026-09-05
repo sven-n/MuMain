@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "ServerSelWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "App/Platform/Windows/Local.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -13,9 +13,9 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Network/Server/ServerListManager.h"
 #include "Core/Globals/_enum.h"
 

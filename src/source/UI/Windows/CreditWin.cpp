@@ -8,7 +8,7 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
 #include "Core/Globals/_enum.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -20,7 +20,7 @@
 #include "I18N/All.h"
 #include "Core/Platform/PathResolve.h"
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 
 #include <algorithm>
 #include <chrono>

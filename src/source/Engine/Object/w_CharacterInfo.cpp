@@ -5,7 +5,7 @@
 #include "Engine/Object/w_CharacterInfo.h"
 #include "GameLogic/Skills/SkillManager.h"
 
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/NewUIGensRanking.h"
 
 // cppcheck-suppress uninitMemberVar
 CHARACTER::CHARACTER()

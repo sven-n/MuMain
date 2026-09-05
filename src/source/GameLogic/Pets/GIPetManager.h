@@ -9,7 +9,7 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "CSPetSystem.h"
-#include "UI/NewUI/HUD/Skills/SkillTooltipModel.h"
+#include "UI/HUD/Skills/SkillTooltipModel.h"
 
 namespace giPetManager
 {

@@ -38,20 +38,20 @@ bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 // Scene Common Utilities
 //=============================================================================
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/NewUI/HUD/Notices.h"
+#include "UI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
 extern wchar_t AbuseFilter[][20];

@@ -16,7 +16,7 @@
 #include <vector>
 
 #include "CharInfoBalloon.h"
-#include "UI/NewUI/NewUIBase.h"
+#include "UI/Core/NewUIBase.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 namespace Rml { class ElementDocument; }

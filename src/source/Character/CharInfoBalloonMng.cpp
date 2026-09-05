@@ -14,7 +14,7 @@
 #include "Core/Utilities/StringUtils.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "CharMakeWin.h"
 #include <RmlUi/Core/ElementDocument.h>

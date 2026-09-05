@@ -13,9 +13,11 @@ detail.
 
 ## Why this exists
 
-The client's game UI is spread across three legacy widget frameworks (`UI/Widgets`,
-`UI/Legacy/UIControls`, `UI/NewUI`) with no layout engine, retained scene graph, or data-binding
-layer between them. RmlUi is being adopted as the long-term replacement per
+The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
+widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `CNewUIObj` tier,
+all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc. —
+see `docs/newui-legacy-merger.md` for the folder history) — with no layout engine, retained scene
+graph, or data-binding layer between them. RmlUi is being adopted as the long-term replacement per
 [`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
 new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.md) for what's
 migrated so far. `COptionWin` was ported but deliberately not wired up — see [Coexistence
@@ -197,7 +199,7 @@ open on purpose.
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
 | Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h) |
-| Migrated windows (`CNewUIObj` tier) | [`CMuHelperBar`](../../src/source/UI/NewUI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/NewUI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/NewUI/HUD/NewUIMainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
+| Migrated windows (`CNewUIObj` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/HUD/NewUIMainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status

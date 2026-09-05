@@ -166,7 +166,10 @@ flows post-retrofit at more than one resolution, not just eyeballing a screensho
 
 - A formal multi-resolution automated visual-regression test matrix. No test harness exists for
   this today; keep doing manual spot-checks at a couple of resolutions/UI-scale values per window.
-- Directory reorganization of `UI/NewUI` or consolidating legacy duplicate component classes
-  (`CButton`/`CUIButton`/`CNewUIButton` etc.) — those are legacy C++ duplications predating RmlUi;
-  migrating a window to RmlUi already retires its legacy duplicate, so consolidating the
-  *remaining* legacy classes is a separate effort against code that's being phased out anyway.
+- Consolidating legacy duplicate component classes (`CButton`/`CUIButton`/`CNewUIButton` etc.) —
+  those are legacy C++ duplications predating RmlUi; migrating a window to RmlUi already retires
+  its legacy duplicate, so consolidating the *remaining* legacy classes is a separate effort
+  against code that's being phased out anyway. (Directory reorganization itself — dropping the
+  `UI/Legacy`/`UI/NewUI` folder split in favor of topic folders directly under `UI/` — is done, see
+  `docs/newui-legacy-merger.md`; the class-name collision this surfaced, `CButton` vs. the former
+  `CNewUIButton`, is exactly this still-deferred class-consolidation item.)

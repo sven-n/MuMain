@@ -16,7 +16,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Engine/AI/GOBoid.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 CGMKarutan1::CGMKarutan1() {}
 

@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "UI/Windows/LoginWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/MsgWin.h"
@@ -16,13 +16,13 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Network/Reconnect/ReconnectManager.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "Scenes/SceneCore.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
+#include "UI/Core/NewUISystem.h"
+#include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 
 

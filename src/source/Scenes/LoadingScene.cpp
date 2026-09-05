@@ -13,7 +13,7 @@
 #include "SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "SceneCommon.h"
-#include "UI/NewUI/Dialogs/ReconnectDialog.h"
+#include "UI/Dialogs/ReconnectDialog.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include <RmlUi/Core/ElementDocument.h>
 

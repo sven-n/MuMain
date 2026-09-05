@@ -7,14 +7,14 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "UIGuildMaster.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "App/Platform/Windows/Local.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 
 extern int				g_iChatInputType;

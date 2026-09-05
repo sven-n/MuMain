@@ -1,15 +1,17 @@
 # The `CNewUIObj`-Tier Adapter Pattern
 
-How to port an in-game HUD/`UI/NewUI` window to RmlUi. This is a *different* tier from every
+How to port an in-game HUD/`CNewUIObj`-tier window to RmlUi. This is a *different* tier from every
 other document in `rmlui-ui-system/` — `CNewUIObj`/`CNewUIManager`, not `CWin`/`CUIMng` — with its
 own base class, its own lifecycle, and its own input-gating mechanism. Read this before touching
-anything under `UI/NewUI/`; the `CWin`-tier docs (`README.md`, `theming-and-modding.md`,
+any window on that tier (as of `docs/newui-legacy-merger.md`'s directory restructure, these live
+in topic folders directly under `UI/` — `UI/HUD/`, `UI/Inventory/`, etc. — not one `UI/NewUI/`
+folder); the `CWin`-tier docs (`README.md`, `theming-and-modding.md`,
 `layout-and-scaling.md`) still apply for RML/RCSS content itself, just not for how the C++ side
 plugs in.
 
-Proven on two pilots so far: `CMuHelperBar` (`UI/NewUI/HUD/MuHelperBar.h/.cpp` →
+Proven on two pilots so far: `CMuHelperBar` (`UI/HUD/MuHelperBar.h/.cpp` →
 `Data/Interface/RmlUi/mu_helper_bar.rml`, renamed at port time from the legacy `CNewUIHeroPositionInfo`)
-and `CBuffStrip` (`UI/NewUI/HUD/BuffStrip.h/.cpp` → `Data/Interface/RmlUi/buff_strip.rml`, renamed
+and `CBuffStrip` (`UI/HUD/BuffStrip.h/.cpp` → `Data/Interface/RmlUi/buff_strip.rml`, renamed
 from `CNewUIBuffWindow` — the active-buff icon strip, and the first `data-for`/dynamic-array pilot
 at this tier). This doc is the pattern extracted from both; expect it to keep firming up as more
 `CNewUIObj` windows are ported.
@@ -25,14 +27,14 @@ existed" as "already reliable"**: `CursorInWin()`'s rect going stale is the mech
 separate confirmed bugs in this same `CWin` tier (`STATUS.md`'s "three parallel input-tracking
 systems" finding) — the comparison here (this tier needed a new flag, `CWin`-tier didn't) still
 holds, but staying in sync is a real, unresolved reliability problem, not a solved detail.
-`UI/NewUI` has none of that: a different base class (`CNewUIObj`, not `CWin`), a different manager
+The `CNewUIObj` tier has none of that: a different base class (`CNewUIObj`, not `CWin`), a different manager
 (`CNewUIManager`, not `CUIMng`), and — critically — it's the tier that renders during `MAIN_SCENE`
 (actual gameplay), which had never run any RmlUi content through its input-gating path before this
 pilot (see "The `MAIN_SCENE` prerequisites" below).
 
 ## The adapter shape
 
-`CNewUIObj`'s real interface is small (`UI/NewUI/NewUIBase.h`, 64 lines):
+`CNewUIObj`'s real interface is small (`UI/Core/NewUIBase.h`, 64 lines):
 `Render()`/`Update()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`/`GetLayerDepth()`/`IsVisible()`/
 `IsEnabled()`, plus non-virtual per-subclass `Create()`/`Release()` (signature varies per window)
 and `Show()`/`Enable()` (already implemented on the base, not overridden). Porting a window means:
@@ -132,11 +134,12 @@ don't invent a new ownership boundary as part of a straight RmlUi port.
 member/accessor/macro that referenced it, updated to match (`INTERFACE_MU_HELPER_BAR`,
 `GetUI_MuHelperBar()`, `g_pMuHelperBar`, etc.) — required by
 [`architecture-principles.md`](architecture-principles.md)'s §12. **What's still deferred**: the
-physical file location (`UI/NewUI/HUD/`) and the `CNewUIObj` base class/tier boundary itself —
-that's structural (touches the ~88 other still-unported `CNewUIObj` windows' shared machinery),
-not a per-class naming choice, and stays premature with only 2 pilots. See
-[`STATUS.md`](STATUS.md)'s "Tracked deferral" section for the full reasoning and the actual
-condition for revisiting the file-location piece.
+`CNewUIObj` base class/tier boundary itself — that's structural (touches the ~88 other
+still-unported `CNewUIObj` windows' shared machinery), not a per-class naming choice, and stays
+premature with only 2 pilots. (The physical file location piece of this deferral was resolved
+separately by the `UI/` directory restructure — `docs/newui-legacy-merger.md`, 2026-09-05 — these
+windows now live in `UI/HUD/` etc., not `UI/NewUI/HUD/`.) See [`STATUS.md`](STATUS.md)'s "Tracked
+deferral" section for the full reasoning on the base-class/tier piece that remains.
 
 **One exception to "rename at port time"**: when a legacy file welds multiple classes together and
 a single pass only ports some of them, renaming just the ported one
@@ -213,10 +216,10 @@ at port time, no exception.
 
 | Subsystem | Key files |
 |---|---|
-| `CNewUIObj` base / manager | [`UI/NewUI/NewUIBase.h`](../../src/source/UI/NewUI/NewUIBase.h), [`UI/NewUI/NewUIManager.h/.cpp`](../../src/source/UI/NewUI/NewUIManager.h) |
+| `CNewUIObj` base / manager | [`UI/Core/NewUIBase.h`](../../src/source/UI/Core/NewUIBase.h), [`UI/Core/NewUIManager.h/.cpp`](../../src/source/UI/Core/NewUIManager.h) |
 | Mouse-gating extension | [`Render/RmlUi/RmlUiRuntime.h`](../../src/source/Render/RmlUi/RmlUiRuntime.h) (`IsMouseOverUI()`), [`Input/Selection.cpp`](../../src/source/Input/Selection.cpp), [`Engine/Object/ZzzInterface.cpp`](../../src/source/Engine/Object/ZzzInterface.cpp) (`Attack()`) |
 | Cursor-on-top seam | [`App/Platform/Windows/Winmain.cpp`](../../src/source/App/Platform/Windows/Winmain.cpp) (`SetPostRmlUiCallback`), [`Scenes/MainScene.cpp`](../../src/source/Scenes/MainScene.cpp) |
-| Pilots | [`UI/NewUI/HUD/MuHelperBar.h/.cpp`](../../src/source/UI/NewUI/HUD/MuHelperBar.h), `Data/Interface/RmlUi/mu_helper_bar.rml` + `themes/{legacy,modern}/mu_helper_bar.rcss`; [`UI/NewUI/HUD/BuffStrip.h/.cpp`](../../src/source/UI/NewUI/HUD/BuffStrip.h), `Data/Interface/RmlUi/buff_strip.rml` + `themes/{legacy,modern}/buff_strip.rcss` |
+| Pilots | [`UI/HUD/MuHelperBar.h/.cpp`](../../src/source/UI/HUD/MuHelperBar.h), `Data/Interface/RmlUi/mu_helper_bar.rml` + `themes/{legacy,modern}/mu_helper_bar.rcss`; [`UI/HUD/BuffStrip.h/.cpp`](../../src/source/UI/HUD/BuffStrip.h), `Data/Interface/RmlUi/buff_strip.rml` + `themes/{legacy,modern}/buff_strip.rcss` |
 
 Everything else this tier reuses from the `CWin`-tier docs unchanged: `RmlModelBinder<T>`
 (`UI/RmlBridge/RmlModelBinder.h`), the theme mechanism (`UI/RmlBridge/RmlTheme.h/.cpp`), the

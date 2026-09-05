@@ -4,8 +4,8 @@
 
 #include "stdafx.h"
 #include "ServerMsgWin.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/UsefulDef.h"
 

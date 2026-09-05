@@ -1,5 +1,5 @@
 ﻿#include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
@@ -15,7 +15,7 @@
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "I18N/All.h"
 #include "UI/Scaling/UITransform.h"
@@ -27,7 +27,7 @@ extern bool LogOut;
 
 BYTE m_AltarState[5] = { 2,2,2,2,2 };
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 
 
 bool	View_Bal = false;

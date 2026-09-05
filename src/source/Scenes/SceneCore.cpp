@@ -16,13 +16,13 @@
 #include "Engine/Physics/PhysicsManager.h"
 
 #include "GameLogic/Quests/CSQuest.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/Widgets/UIControls.h"
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "Core/Time/Timer.h"
 #include "LoadingScene.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include <chrono>
 #include <thread>
 

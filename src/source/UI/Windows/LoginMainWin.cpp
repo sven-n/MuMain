@@ -6,7 +6,7 @@
 #include "UI/Windows/LoginMainWin.h"
 
 #include "Core/Input/Input.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/CreditWin.h"
 #include "Network/Server/WSclient.h"

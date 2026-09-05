@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "UI/NewUI/NewUIBase.h"
+#include "UI/Core/NewUIBase.h"
 #include "UI/Widgets/Button.h"
 
 #define LMW_BTN_MENU 0

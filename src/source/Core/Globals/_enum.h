@@ -76,7 +76,7 @@ enum INTERFACE_LIST
     INTERFACE_BATTLE_SOCCER_SCORE,
     INTERFACE_SLIDEWINDOW,
     INTERFACE_MU_HELPER_BAR, // renamed 2026-08-31 from INTERFACE_HERO_POSITION_INFO -- see
-                             // CMuHelperBar (UI/NewUI/HUD/MuHelperBar.h)'s own header comment
+                             // CMuHelperBar (UI/HUD/MuHelperBar.h)'s own header comment
     INTERFACE_MESSAGEBOX,
     INTERFACE_DUEL_WINDOW,
     INTERFACE_CRYWOLF,

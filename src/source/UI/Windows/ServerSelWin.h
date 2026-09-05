@@ -3,7 +3,7 @@
 //*****************************************************************************
 #pragma once
 
-#include "UI/NewUI/NewUIBase.h"
+#include "UI/Core/NewUIBase.h"
 #include "UI/Widgets/Button.h"
 #include "UI/Widgets/GaugeBar.h"
 #include "UI/Widgets/WinEx.h"

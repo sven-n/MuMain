@@ -7,8 +7,8 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Core/NewUISystem.h"
 #include "Camera/CameraProjection.h"
 
 namespace

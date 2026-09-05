@@ -6,7 +6,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "WSclient.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "Character/CharacterManager.h"
 
 using namespace SEASON4A;

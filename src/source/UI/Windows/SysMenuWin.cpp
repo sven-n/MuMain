@@ -7,13 +7,13 @@
 #include "I18N/All.h"
 
 #include "Core/Input/Input.h"
-#include "UI/Legacy/SceneUICoordinator.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "Character/CharSelMainWin.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Scenes/SceneCore.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/ErrorReport.h"

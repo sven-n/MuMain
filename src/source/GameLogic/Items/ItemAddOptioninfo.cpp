@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/ItemAddOptioninfo.h"

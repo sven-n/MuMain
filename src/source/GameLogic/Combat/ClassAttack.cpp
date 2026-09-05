@@ -7,7 +7,7 @@
 
 // Includes mirror ZzzInterface.cpp, the unit these functions were extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -33,21 +33,21 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/NewUIGensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).

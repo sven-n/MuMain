@@ -5,7 +5,7 @@
 #ifdef _WIN32
 #include <process.h>
 #endif
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzCharacter.h"
@@ -15,7 +15,7 @@
 
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 extern  int SrcInventoryIndex;
 

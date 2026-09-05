@@ -2,7 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Models/ZzzBMD.h"
@@ -36,13 +36,13 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/MixMgr.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
 #include "World/MapInfra/PortalMgr.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Network/Server/ServerListManager.h"
 #include <algorithm>
 #include <time.h>
