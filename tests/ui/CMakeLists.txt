@@ -21,7 +21,7 @@ add_test(
 add_test(
     NAME inventory_window_captures_hover
     COMMAND ${CMAKE_COMMAND}
-        -DMU_INVENTORY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/NewUIMyInventory.cpp
+        -DMU_INVENTORY_SOURCE=${CMAKE_SOURCE_DIR}/src/source/UI/Inventory/MyInventory.cpp
         -P ${CMAKE_CURRENT_SOURCE_DIR}/test_inventory_mouse_capture.cmake
 )
 

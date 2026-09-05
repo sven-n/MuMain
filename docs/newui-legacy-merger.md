@@ -20,7 +20,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
 - Reused as-is: `CNewUIManager`'s dynamic registry (`AddUIObj`/`FindUIObj`), its single
   consume-and-stop mouse/key dispatch pass, `GetLayerDepth()`/`GetKeyEventOrder()` as independent
   sortable axes.
-- Added to `CNewUIObj` (`NewUIBase.h`): a shown-vs-active split (`IsActive()`/virtual
+- Added to `CNewUIObj` (`WindowObject.h`): a shown-vs-active split (`IsActive()`/virtual
   `SetActive()`, `UpdateWhileShown()`/`UpdateWhileActive()` hooks mirroring `CWin`'s own three-state
   lifecycle) and a virtual `Show()` — both purely additive, inert for every pre-existing
   `CNewUIObj` subclass (none override `Update()` via the new hooks, none override `Show()`).
@@ -39,7 +39,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
 
 ## Status
 
-- **Phase 0 (base-class additions)** — done. `NewUIBase.h`'s shown/active split, virtual `Show()`.
+- **Phase 0 (base-class additions)** — done. `WindowObject.h`'s shown/active split, virtual `Show()`.
 - **Phase 1 pilot: `CCreditWin`** — done, verified across multiple resolutions (640x480, 800x600,
   1024x768) against a real server. First window fully off `CWin`, onto `CNewUIObj`/`CUIMng`'s new
   scene-scoped manager instance. `g_CreditWin` replaces `CUIMng::m_CreditWin` (same convention as
@@ -412,7 +412,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
      only their type name (`CUIMng::Instance()` → `CSceneUICoordinator::Instance()`), verified by a
      full rebuild (the real check for a rename this size — anything missed would be a compile
      error, not a silent bug). Three dead transitive `#include "UI/Legacy/UIMng.h"` lines
-     (`ZzzBMD.cpp`, `LoadingScene.cpp`, `SceneCore.cpp`) dropped outright; `NewUIHotKey.cpp`'s real
+     (`ZzzBMD.cpp`, `LoadingScene.cpp`, `SceneCore.cpp`) dropped outright; `HotKey.cpp`'s real
      but transitive `CNewUIManager` dependency given its own direct include.
 
   **`CUIMng` no longer exists as a class or a file.** `CWin` itself (the base class every migrated
@@ -431,7 +431,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   which nothing in this phase's research nailed down precisely enough to act on — a real
   simplification opportunity for whoever picks it up next, not attempted here.
 - **Phase 5 (rename cleanup) — done, 2026-09-05.** Dropped the "New"/`NewUI*` naming (`CNewUIObj`,
-  `CNewUIManager`, `NewUIBase.h`, the `INTERFACE_*` prefix, etc.) — it only ever meant "new relative
+  `CNewUIManager`, `WindowObject.h`, the `INTERFACE_*` prefix, etc.) — it only ever meant "new relative
   to `CUIMng`", which stopped being a meaningful distinction once `CUIMng` was deleted in Phase 4.
   Landed as two independently-rebuilt passes (`docs/rmlui-ui-system/building-new-ui.md` has the
   full widget-toolkit map this came from):
@@ -455,7 +455,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
      **The namespace is `mu::ui::window`, not `UI::Window`** — a real compile error surfaced mid-work:
      OpenSSL's own `UI` struct (`openssl/types.h`) collides with a bare `namespace UI` in any
      translation unit that has both open, confirmed via `Core/Platform/PlatformCrypto.cpp` (includes
-     both `stdafx.h`, which transitively opened the tier's namespace via `UI/Core/NewUICommon.h`,
+     both `stdafx.h`, which transitively opened the tier's namespace via `UI/Core/WindowCommon.h`,
      and OpenSSL headers). `mu::` is this project's own already-established top-level namespace
      (`mu::platform`, `mu::log`, `mu::sdlttf` — `Core/Platform/`, `Core/Utilities/Log/`,
      `Render/Text/`), so `mu::ui::window` matches existing convention instead of introducing a new
@@ -471,19 +471,55 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
      contexts. Surfaced two more real ambiguity errors beyond the two already known: `UIControls.h`'s
      own internal `CRadioButton` members needed explicit `::CRadioButton` qualification (a `using
      namespace mu::ui::window;` elsewhere in the same translation unit made its own class ambiguous
-     against the newly-renamed one), and `NewUIButton.cpp`'s own method *definitions* for the
+     against the newly-renamed one), and `Window/Button.cpp`'s own method *definitions* for the
      renamed `CButton`/`CRadioButton` (written unqualified, relying on the file's own `using
      namespace` directive) needed explicit `mu::ui::window::` qualification for the same reason —
      both fixed at the source rather than patched per-caller. Verified with a full rebuild (all
      targets, including tests) after each pass; `_enum.h`/`_struct.h`'s vocabulary and the 6 stray
      classes were left in `SEASON3B`, untouched, exactly as scoped.
+- **Phase 6 (file renames) — done, 2026-09-05.** Phase 5 dropped `New`/`NewUI` from every class but
+  never touched file names, so e.g. `UI/Core/NewUIManager.h` still declared
+  `mu::ui::window::CManager` — a real mismatch between a file's name and what's inside it. Renamed
+  all 185 `NewUI*`-named files, checking each for a filesystem collision first (the file-level
+  equivalent of Phase 5's class-collision check — a folder can't hold two same-named files any more
+  than a namespace can hold two same-named classes unqualified):
+  - **172 files** (every concrete window class, plus the 3 Guild/GameShop-homed ones) — dropped
+    `NewUI` to match the class already inside, zero collisions. Fixed one pre-existing typo along
+    the way: `NewUISeigeWarfare.h` (misspelled "Seige") → `SiegeWarfare.h`, matching its own
+    correctly-spelled class `CSiegeWarfare` and its siblings `SiegeWarBase/Commander/Observer/Soldier`.
+  - **7 files in `UI/Widgets/`** (the tier's widget family) — `NewUIButton.{h,cpp}` →
+    `Button.{h,cpp}` collides with the sprite toolkit's own file in the same folder. Fixed by
+    moving all 7 into a new `UI/Widgets/Window/` subfolder — the same namespace-split idea Phase 5
+    used for classes, applied to paths: `UI/Widgets/Button.h` (sprite) and
+    `UI/Widgets/Window/Button.h` (this tier) now coexist without either needing a disambiguating
+    name.
+  - **7 files in `UI/Core/`** (the framework layer) — no exact collisions, but a blind strip gives
+    dangerously generic names (`Base.h`, `Common.h`, `Manager.h`, `System.h`, `Group.h`) right next
+    to the already-existing, unrelated `UIManager.h` in the same folder. Kept a `Window` qualifier
+    matching the namespace instead: `NewUIBase.h`→`WindowObject.h`, `NewUIManager.h/.cpp`→
+    `WindowManager.h/.cpp`, `NewUISystem.h/.cpp`→`WindowSystem.h/.cpp`, `NewUIGroup.h/.cpp`→
+    `WindowGroup.h/.cpp`, `NewUICommon.h/.cpp`→`WindowCommon.h/.cpp`,
+    `NewUI3DRenderMng.h/.cpp`→`Window3DRenderMng.h/.cpp`, `NewUIMuHelper.h/.cpp`→
+    `WindowMuHelper.h/.cpp`.
+
+  Pure file move + include-path rewrite, no class/logic touched. Landed as 3 independently-rebuilt
+  chunks (`Core` first for its wide fan-in, then `Widgets`, then the 172-file bulk rename in one
+  mechanical pass — matching Phase 5's "one pass per kind of change, not per file count"
+  reasoning), plus a cleanup pass for hardcoded references outside `src/source`
+  (`tests/ui/CMakeLists.txt`'s `MU_INVENTORY_SOURCE` path, `tools/check_rml_rcss_drift.py`'s prose,
+  `src/MuEditor/`'s own includes/comments, and every doc under `docs/`). A full clean rebuild
+  during this phase also surfaced two things unrelated to the renames themselves: a stale
+  incremental-build artifact (`LNK1163` COMDAT errors, fixed by the clean) and a pre-existing
+  environment gap (the .NET AOT toolchain's native-codegen step needs `vswhere.exe` on PATH, not
+  there by default in this shell). Verified with full rebuilds (clean, then incremental) after each
+  chunk, zero errors, plus a live-server smoke test at the end.
 - **Directory restructure (done, 2026-09-05)** — `src/source/UI/Legacy/` and `src/source/UI/NewUI/`
   no longer exist. Neither folder name meant anything real anymore: `Legacy/` was a grab-bag (a
   widget toolkit, five unrelated base-less game-feature state classes, a second self-contained
   mini window-manager) and `NewUI/` was just "everything else," 193 files deep, already split into
   sensible per-feature subfolders that happened to duplicate names top-level folders already used
   (`UI/Combat/`, `UI/Chat/` predate the whole split). Moved everything to topic-based folders
-  directly under `UI/`: a new `UI/Core/` holds the base-class/orchestration layer (`NewUIBase.h`,
+  directly under `UI/`: a new `UI/Core/` holds the base-class/orchestration layer (`WindowObject.h`,
   `NewUIManager`, `NewUIGroup`, `NewUISystem`, `NewUICommon`, `NewUI3DRenderMng`, `UILayoutPolicy`,
   `UIManager`, `SceneUICoordinator`); `UI/Widgets/` absorbed the old `UIControls`/`TextSearch`
   toolkit and all of `NewUI/Widgets/`; `UI/Character/`, `UI/HUD/`, `UI/Options/`, `UI/Quests/` are
@@ -500,7 +536,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   the five thematic merges, then `Party`, then cleanup), each verified by a full rebuild plus
   running the `tests/ui/` binaries whose hardcoded source paths this touched. One naming collision
   flagged but deliberately not resolved here: `UI/Widgets/Button.h`'s `CButton` and the former
-  `NewUIButton.h`'s `CNewUIButton` family are unrelated implementations that would collide if Phase
+  `Window/Button.h`'s `CNewUIButton` family are unrelated implementations that would collide if Phase
   5 mechanically stripped `New*` off the latter — resolved by Phase 5 itself (see below) via a real
   namespace instead of a disambiguating name.
 

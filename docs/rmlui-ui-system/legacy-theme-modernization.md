@@ -333,7 +333,7 @@ technique that originally produced it.**
 ---
 
 **Worked example on this branch**: `CNewUIMainFrameWindow`'s skill-hotkey number readout
-(`RenderSkillIcon()`, `NewUIMainFrameWindow.cpp`) used to draw a legacy digit-sprite subscript in
+(`RenderSkillIcon()`, `MainFrameWindow.cpp`) used to draw a legacy digit-sprite subscript in
 C++, unconditionally for both themes. Retired entirely — `CNewUISkillList::GetHotKeySlotNumber()`
 now just returns the assigned number (pure data, theme-agnostic), `SyncRmlModel()` binds it into
 the shared model, and each theme's own `main_frame.rml`/`.rcss` decides where and how to show it

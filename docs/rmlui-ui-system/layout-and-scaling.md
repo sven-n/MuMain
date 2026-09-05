@@ -33,7 +33,7 @@ A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a
 auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
 `FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. It drives still-legacy
 `CWin`/`mu::ui::window::CObject` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
-(`NewUIMainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
+(`MainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
 that one window uses this system instead of `dp`). Two axes exist, and both systems now respect
 both:
 

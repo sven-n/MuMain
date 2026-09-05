@@ -44,16 +44,16 @@ C++ object layer specifically (`component-catalog.md` covers the parallel RmlUi/
 
 | Need | Use | Header | Don't confuse with |
 |---|---|---|---|
-| Button | `mu::ui::window::CButton` | `UI/Widgets/NewUIButton.h` | `::CButton` (sprite toolkit, closed), `CUIButton` (`CUIControl` family) — three unrelated classes, same bare name, disambiguated only by namespace |
-| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/NewUIButton.h` | `::CRadioButton` (`UIControls.h`, no base, unrelated) — same situation as `CButton` |
-| Checkbox | `mu::ui::window::CCheckBox` | `UI/Widgets/NewUIButton.h` | — |
-| Dropdown | `mu::ui::window::CComboBox` | `UI/Widgets/NewUIComboBox.h` | Deliberately base-less by design (see its own header comment) — don't force it onto `CObject` |
-| Scroll bar | `mu::ui::window::CScrollBar` | `UI/Widgets/NewUIScrollBar.h` | — |
-| Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/NewUITextBox.h` | — |
-| Chat input | `mu::ui::window::CChatInputBox` | `UI/Widgets/NewUIChatInputBox.h` | Internally still uses `CUITextInputBox` for the actual entry field — that's expected, not a bug |
+| Button | `mu::ui::window::CButton` | `UI/Widgets/Window/Button.h` | `::CButton` (sprite toolkit, closed), `CUIButton` (`CUIControl` family) — three unrelated classes, same bare name, disambiguated only by namespace |
+| Radio button | `mu::ui::window::CRadioButton` (+ `CRadioGroupButton` to coordinate a set) | `UI/Widgets/Window/Button.h` | `::CRadioButton` (`UIControls.h`, no base, unrelated) — same situation as `CButton` |
+| Checkbox | `mu::ui::window::CCheckBox` | `UI/Widgets/Window/Button.h` | — |
+| Dropdown | `mu::ui::window::CComboBox` | `UI/Widgets/Window/ComboBox.h` | Deliberately base-less by design (see its own header comment) — don't force it onto `CObject` |
+| Scroll bar | `mu::ui::window::CScrollBar` | `UI/Widgets/Window/ScrollBar.h` | — |
+| Multi-line read-only text | `mu::ui::window::CTextBox` | `UI/Widgets/Window/TextBox.h` | — |
+| Chat input | `mu::ui::window::CChatInputBox` | `UI/Widgets/Window/ChatInputBox.h` | Internally still uses `CUITextInputBox` for the actual entry field — that's expected, not a bug |
 | Single-line text entry | `CUITextInputBox` | `UI/Widgets/UIControls.h` | Sanctioned exception — no equivalent exists yet in the `mu::ui::window` tier |
 | Progress/gauge bar | *(none yet — `CGaugeBar` is sprite-toolkit-only, closed)* | — | Check `component-catalog.md`'s "doesn't exist yet" list before inventing one |
-| MU Helper bot-engine window | `mu::ui::window::CUIMuHelper` | `UI/Core/NewUIMuHelper.h` | Deliberately kept its `UI` — the plain-stripped `CMuHelper` would collide with `MUHelper::CMuHelper`, the actual bot-logic engine this window displays/controls (a real, unrelated class, not a duplicate) |
+| MU Helper bot-engine window | `mu::ui::window::CUIMuHelper` | `UI/Core/WindowMuHelper.h` | Deliberately kept its `UI` — the plain-stripped `CMuHelper` would collide with `MUHelper::CMuHelper`, the actual bot-logic engine this window displays/controls (a real, unrelated class, not a duplicate) |
 
 ## Resolved name collisions (Phase 5, 2026-09-05)
 
@@ -84,7 +84,7 @@ if it also transitively includes `UIControls.h`, because that makes both `::CRad
 `mu::ui::window::CRadioButton` visible unqualified in the same translation unit. Fix by explicit
 qualification at the actual use site (`::CRadioButton` if you mean the `UIControls.h` one,
 `mu::ui::window::CRadioButton::` on a method *definition* if you mean this tier's one) — this bit
-`UIControls.h`'s own internal members and `NewUIButton.cpp`'s own method definitions during Phase
+`UIControls.h`'s own internal members and `Window/Button.cpp`'s own method definitions during Phase
 5 itself, both fixed at the source rather than by removing the `using namespace`.
 
 ## Confirmed dead — don't resurrect these as a pattern

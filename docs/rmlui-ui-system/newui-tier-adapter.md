@@ -34,7 +34,7 @@ pilot (see "The `MAIN_SCENE` prerequisites" below).
 
 ## The adapter shape
 
-`mu::ui::window::CObject`'s real interface is small (`UI/Core/NewUIBase.h`, 64 lines):
+`mu::ui::window::CObject`'s real interface is small (`UI/Core/WindowObject.h`, 64 lines):
 `Render()`/`Update()`/`UpdateMouseEvent()`/`UpdateKeyEvent()`/`GetLayerDepth()`/`IsVisible()`/
 `IsEnabled()`, plus non-virtual per-subclass `Create()`/`Release()` (signature varies per window)
 and `Show()`/`Enable()` (already implemented on the base, not overridden). Porting a window means:
@@ -102,7 +102,7 @@ system could plausibly add another.
    a persistent RmlUi document: that document, once shown, keeps rendering every frame regardless
    of scene (`RmlUiRuntime::RenderFrame()` is a true per-frame choke point, scene-agnostic by
    design) — found via `CMuHelperBar`/`CBuffStrip` rendering on the login/character-select
-   screens. `mu::ui::window::CObject::Show(bool)` (`NewUIBase.h`) only toggles a `m_bRender` flag consumed by the
+   screens. `mu::ui::window::CObject::Show(bool)` (`WindowObject.h`) only toggles a `m_bRender` flag consumed by the
    now-dead `Render()`; it was never wired to the RmlUi document at all. Fixed generically, not
    per-window: each pilot exposes `SyncDocVisibility(bool sceneAllowsShow)` (computes
    `IsVisible() && sceneAllowsShow`, calls `m_pRmlDoc->Show()`/`Hide()`), and
@@ -216,7 +216,7 @@ at port time, no exception.
 
 | Subsystem | Key files |
 |---|---|
-| `mu::ui::window::CObject` base / manager | [`UI/Core/NewUIBase.h`](../../src/source/UI/Core/NewUIBase.h), [`UI/Core/NewUIManager.h/.cpp`](../../src/source/UI/Core/NewUIManager.h) |
+| `mu::ui::window::CObject` base / manager | [`UI/Core/WindowObject.h`](../../src/source/UI/Core/WindowObject.h), [`UI/Core/WindowManager.h/.cpp`](../../src/source/UI/Core/WindowManager.h) |
 | Mouse-gating extension | [`Render/RmlUi/RmlUiRuntime.h`](../../src/source/Render/RmlUi/RmlUiRuntime.h) (`IsMouseOverUI()`), [`Input/Selection.cpp`](../../src/source/Input/Selection.cpp), [`Engine/Object/ZzzInterface.cpp`](../../src/source/Engine/Object/ZzzInterface.cpp) (`Attack()`) |
 | Cursor-on-top seam | [`App/Platform/Windows/Winmain.cpp`](../../src/source/App/Platform/Windows/Winmain.cpp) (`SetPostRmlUiCallback`), [`Scenes/MainScene.cpp`](../../src/source/Scenes/MainScene.cpp) |
 | Pilots | [`UI/HUD/MuHelperBar.h/.cpp`](../../src/source/UI/HUD/MuHelperBar.h), `Data/Interface/RmlUi/mu_helper_bar.rml` + `themes/{legacy,modern}/mu_helper_bar.rcss`; [`UI/HUD/BuffStrip.h/.cpp`](../../src/source/UI/HUD/BuffStrip.h), `Data/Interface/RmlUi/buff_strip.rml` + `themes/{legacy,modern}/buff_strip.rcss` |

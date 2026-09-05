@@ -70,7 +70,7 @@ from exactly one fixed pre-submit callback (below) — this is how the integrati
 a proven RmlUi requirement; nobody's investigated whether interleaving with legacy content is
 possible instead (multiple contexts, or a callback hook legacy content renders through at the
 right point in RmlUi's own z-order). See `STATUS.md` for that open question and the two C++ call
-sites (`NewUIMainFrameWindow.cpp`) that currently work around today's ordering by picking between
+sites (`MainFrameWindow.cpp`) that currently work around today's ordering by picking between
 an RmlUi fill and a legacy one. Until that's resolved, treat today's ordering as real: get it
 wrong and an opaque RmlUi panel covers legacy content (cursor, text) that's supposed to stay
 visible on top of it. Two callbacks on `IMuRenderer`, registered once in `Winmain.cpp`, make it
@@ -203,7 +203,7 @@ open on purpose.
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
 | Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`OptionWin`](../../src/source/UI/Windows/OptionWin.h) (ported, not wired up), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h) |
-| Migrated windows (`mu::ui::window::CObject` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/HUD/NewUIMainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
+| Migrated windows (`mu::ui::window::CObject` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CNewUIMainFrameWindow`](../../src/source/UI/HUD/MainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CNewUISkillList`/`CNewUIItemHotKey`), not yet ported. |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status

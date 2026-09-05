@@ -34,7 +34,7 @@ Checked against the UNION of every theme copy's text, not each copy individually
 confirmed necessary by running this against main_frame, the one pre-existing forked
 window, before trusting it: C++ deliberately computes multiple, non-overlapping
 display-text fields for the same value (e.g. `hp_text` "935 / 935" vs legacy's own
-`hp_current_text` "935" -- see NewUIMainFrameWindow.cpp and STATUS.md's worked
+`hp_current_text` "935" -- see MainFrameWindow.cpp and STATUS.md's worked
 example), and each theme's own markup binds only the one it wants. A per-copy
 requirement flags that legitimate pattern as drift; a union requirement still
 catches the actual failure mode this script exists for (C++ references a name no
@@ -64,7 +64,7 @@ def find_document_windows(source_root: pathlib.Path) -> dict[str, set[str]]:
     """Maps each RML document name (e.g. "login") to the union of ids/bound field
     names/event-callback names its owning .cpp file(s) reference.
 
-    A .cpp file may own more than one themed document (e.g. NewUIMainFrameWindow.cpp's
+    A .cpp file may own more than one themed document (e.g. MainFrameWindow.cpp's
     "main_frame" and its background-layer companion "main_frame_bg", 2026-09-04) --
     .Bind()/.BindEventCallback() calls are scoped to whichever RmlModelBinder::Create()
     call's model-name string ("main_frame", "main_frame_bg", ...) textually precedes them

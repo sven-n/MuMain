@@ -486,7 +486,7 @@ void CMuEditorCore::Update()
         // Process input blocking for editor UI (keyboard)
         g_MuInputBlockerCore.ProcessInputBlocking();
 
-        // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in NewUICommon.cpp
+        // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in WindowCommon.cpp
         // It prevents the game from scanning keyboard state when ImGui wants to capture it
     }
 }

@@ -239,7 +239,7 @@ coordinate into `dp`.
   established pattern, not new design work — this list will keep growing and isn't worth
   maintaining exhaustively; grep `LoadThemedDocument(` for the live count.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Fixed
-  2026-09-04: `NewUIMainFrameWindow.cpp`'s background-fill and skill-highlight logic used to key
+  2026-09-04: `MainFrameWindow.cpp`'s background-fill and skill-highlight logic used to key
   on `GetActiveThemeName() == "modern"`; both now key on `UI::RmlBridge::ThemeProvidesOwnIconChrome()`,
   a declared capability (`themes/modern/theme.ini`) — see `STATUS.md` for the real render-ordering
   constraint that makes the conditional itself legitimate (only the name-check was the violation),
