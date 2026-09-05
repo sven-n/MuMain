@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Dialogs/MessageBox.h"
 #include "UI/Scaling/UITransform.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"

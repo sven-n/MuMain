@@ -4,7 +4,7 @@
 #pragma once
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
-#include "UI/HUD/NewUIChatLogWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
 
 namespace mu::ui::window
 {

@@ -4,7 +4,7 @@
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
-#include "UI/HUD/NewUIChatLogWindow.h"
+#include "UI/HUD/ChatLogWindow.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzOpenData.h"

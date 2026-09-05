@@ -17,7 +17,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "World/MapInfra/MapManager.h"
 #include "I18N/All.h"
 

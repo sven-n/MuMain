@@ -11,7 +11,7 @@
 #include "CSEventMatch.h"
 #include "I18N/All.h"
 
-#include "UI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Core/WindowSystem.h"
 
 #include <algorithm>

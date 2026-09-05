@@ -22,7 +22,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Dialogs/MessageBox.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 
 

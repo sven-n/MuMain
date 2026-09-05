@@ -8,7 +8,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Widgets/Window/RenderNumber.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 

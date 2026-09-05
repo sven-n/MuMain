@@ -25,7 +25,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/NewUIHelpWindow.h"
+#include "UI/Dialogs/HelpWindow.h"
 #include "Camera/CameraMove.h"
 #include "GameLogic/Quests/QuestMng.h"
 #include "Network/Server/ServerListManager.h"

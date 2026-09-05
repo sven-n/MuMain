@@ -44,13 +44,13 @@
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/GensRanking.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern MovementSkill g_MovementSkill;

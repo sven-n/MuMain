@@ -1,5 +1,5 @@
 #pragma once
-#include "UI/Inventory/NewUIItemMng.h"
+#include "UI/Inventory/ItemMng.h"
 
 extern OBJECT_BLOCK ObjectBlock[256];
 extern OBJECT Mounts[];

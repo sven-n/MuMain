@@ -21,7 +21,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "GameLogic/Items/CComGem.h"
-#include "UI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "Network/Server/SocketSystem.h"
 #include "UI/Core/WindowSystem.h"
 #include "Character/CharacterManager.h"

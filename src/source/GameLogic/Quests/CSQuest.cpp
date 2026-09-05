@@ -29,7 +29,7 @@
 #include "CSQuest.h"
 #include "GameLogic/Quests/DialogStructure.h"
 #include "Core/Utilities/UsefulDef.h"
-#include "UI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "Character/CharacterManager.h"
 #include "UI/Core/WindowSystem.h"
 

@@ -14,8 +14,8 @@
 #include "GameLogic/Items/CComGem.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
-#include "UI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NPCs/NewUINPCShop.h"
+#include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/NPCs/NPCShop.h"
 
 extern int g_iKeyPadEnable;
 extern int g_iChatInputType;

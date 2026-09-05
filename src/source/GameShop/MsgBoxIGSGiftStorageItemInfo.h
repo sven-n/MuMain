@@ -9,8 +9,8 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #include "UI/Widgets/UIControls.h"
-#include "UI/Dialogs/NewUIMessageBox.h"
-#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;

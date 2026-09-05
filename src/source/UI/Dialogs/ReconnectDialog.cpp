@@ -7,7 +7,7 @@
 #include "Render/Sprites/GlobalBitmap.h"     // Bitmaps (texture-loaded check)
 #include "UI/Widgets/UIControls.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
 #include "UI/Core/WindowCommon.h"            // mu::ui::window::RenderImage
-#include "UI/Dialogs/NewUIMessageBox.h"// CMessageBoxMng::IMAGE_MSGBOX_*
+#include "UI/Dialogs/MessageBox.h"// CMessageBoxMng::IMAGE_MSGBOX_*
 #include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
 #include "I18N/All.h"
 #include "Render/Renderer/MuRenderer.h"

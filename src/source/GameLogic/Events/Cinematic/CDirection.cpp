@@ -10,7 +10,7 @@
 #include "Audio/DSPlaySound.h"
 
 #include "World/MapInfra/MapManager.h"
-#include "UI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Core/WindowSystem.h"
 
 #include <algorithm>

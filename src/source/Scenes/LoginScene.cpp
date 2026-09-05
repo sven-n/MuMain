@@ -30,7 +30,7 @@
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Scaling/UITransform.h"
 
 // External declarations

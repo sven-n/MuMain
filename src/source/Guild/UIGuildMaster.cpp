@@ -12,7 +12,7 @@
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
-#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
 #include "App/Platform/Windows/Local.h"
 #include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"

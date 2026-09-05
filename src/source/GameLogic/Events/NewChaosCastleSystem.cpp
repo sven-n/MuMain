@@ -14,7 +14,7 @@ using namespace mu::ui::window;
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Scenes/SceneCore.h"
-#include "UI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Dialogs/CustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"

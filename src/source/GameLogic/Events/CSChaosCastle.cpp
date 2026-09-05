@@ -14,7 +14,7 @@
 #include "UI/Core/UIManager.h"
 #include "CSChaosCastle.h"
 
-#include "UI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Dialogs/CustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
