@@ -18,12 +18,16 @@
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/w_PetProcess.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Windows/SysMenuWin.h"
+#include "Character/CharSelMainWin.h"
+#include "Character/CharMakeWin.h"
 #include "Core/Input/Input.h"
+#include "Core/Input/UiInputRouter.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Server/CSMapServer.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Winmain.h"
 #include "SceneCommon.h"
@@ -67,7 +71,7 @@ void StartGame()
         }
 
         if (CTLCODE_01BLOCKCHAR & CharactersClient[SelectedHero].CtlCode)
-            CUIMng::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
+            CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_BLOCKED_CHARACTER);
         else
         {
             CharacterAttribute->Level = CharactersClient[SelectedHero].Level;
@@ -101,7 +105,7 @@ void CreateCharacterScene()
     CharacterView.Object.Kind = 0;
 
     SelectedHero = -1;
-    CUIMng::Instance().CreateCharacterScene();
+    CSceneUICoordinator::Instance().CreateCharacterScene();
 
     ClearInventory();
     CharacterAttribute->SkillNumber = 0;
@@ -126,7 +130,7 @@ void CreateCharacterScene()
 
     for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(L"", L"", mu::ui::window::TYPE_WHISPER_MESSAGE);
     }
 
     HIMC hIMC = ImmGetContext(g_hWnd);
@@ -188,12 +192,12 @@ void NewMoveCharacterScene()
 #endif
 
     CInput& rInput = CInput::Instance();
-    CUIMng& rUIMng = CUIMng::Instance();
+    CSceneUICoordinator& rUIMng = CSceneUICoordinator::Instance();
 
     if (rInput.IsKeyDown(VK_RETURN))
     {
-        if (!(rUIMng.m_MsgWin.IsShow() || rUIMng.m_CharMakeWin.IsShow()
-            || rUIMng.m_SysMenuWin.IsShow() || rUIMng.m_OptionWin.IsShow())
+        if (!(g_MsgWin.IsVisible() || g_CharMakeWin.IsVisible()
+            || g_SysMenuWin.IsVisible())
             && SelectedHero > -1 && SelectedHero < MAX_CHARACTERS_PER_ACCOUNT)
         {
             ::PlayBuffer(SOUND_CLICK01);
@@ -204,14 +208,22 @@ void NewMoveCharacterScene()
             ::StartGame();
         }
     }
-    // ESC menu toggle is handled by CUIMng::Update()
+    // ESC menu toggle is handled by CSceneUICoordinator::Update()
 
-    if (rUIMng.IsCursorOnUI())
+    // Core::Input::IsMouseOverUI() added as a 2nd gate (2026-09-04, STATUS.md's "three parallel
+    // input-tracking systems" finding) -- IsCursorOnUI() alone runs on CCharSelMainWin's own
+    // UpdateMouseEvent() rect (CalculateFixedAnchorLayout()'s hand-duplicated math), which has
+    // already gone stale relative to the real RmlUi-rendered buttons once (see that function's
+    // own comment on the Delete-button no-op bug). RmlUi's own hit-test is authoritative here
+    // without any new per-window bounding-box query: char_sel_main.rml's #panel spans the full
+    // screen but is pointer-events:none, so IsMouseOverUI() only reports true over the real
+    // interactive children.
+    if (rUIMng.IsCursorOnUI() || Core::Input::IsMouseOverUI())
     {
         return;
     }
 
-    if (rInput.IsLBtnDbl() && rUIMng.m_CharSelMainWin.IsShow())
+    if (rInput.IsLBtnDbl() && g_CharSelMainWin.IsVisible())
     {
         if (SelectedCharacter < 0 || SelectedCharacter >= MAX_CHARACTERS_PER_ACCOUNT)
         {
@@ -227,7 +239,7 @@ void NewMoveCharacterScene()
             SelectedHero = -1;
         else
             SelectedHero = SelectedCharacter;
-        rUIMng.m_CharSelMainWin.UpdateDisplay();
+        g_CharSelMainWin.UpdateDisplay();
     }
 
     g_ConsoleDebug->UpdateMainScene();
@@ -305,7 +317,9 @@ static void RenderCharacterScene3D()
     RenderCharactersClient();
     RenderMount();
 
-    if (!CUIMng::Instance().IsCursorOnUI())
+    // Core::Input::IsMouseOverUI() added as a 2nd gate here too (2026-09-04) -- same rationale as
+    // the check in Update() above.
+    if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();
 
     RenderBlurs();
@@ -419,7 +433,7 @@ bool NewRenderCharacterScene(HDC hDC)
     RenderCharacterSceneUI();
 
     // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION))
     {
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();

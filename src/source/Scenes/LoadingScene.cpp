@@ -7,14 +7,15 @@
 #include "LoadingScene.h"
 
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "SceneCore.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "SceneCommon.h"
-#include "UI/NewUI/Dialogs/ReconnectDialog.h"
+#include "UI/Dialogs/ReconnectDialog.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 
 #ifdef _EDITOR
@@ -67,35 +68,70 @@ extern int LoadingWorld;
 extern bool FogEnable;
 extern EGameScene SceneFlag;
 
+namespace
+{
+    // Owns the RmlUi loading-screen wallpaper document across the whole "entering the world"
+    // gap, not just LoadingScene()'s own one-frame flash -- see HideLoadingSceneOverlay()'s
+    // comment for why it now outlives this function.
+    Rml::ElementDocument* s_rmlLoadingDoc = nullptr;
+}
+
+void HideLoadingSceneOverlay()
+{
+    if (s_rmlLoadingDoc)
+    {
+        s_rmlLoadingDoc->Close();
+        s_rmlLoadingDoc = nullptr;
+    }
+}
+
 void LoadingScene(HDC hDC)
 {
     g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
 
-    CUIMng& rUIMng = CUIMng::Instance();
+    // RmlUi migration plan Phase 1 pilot: replaces CLoadingScene's 4-tile CSprite rendering
+    // (the class above is left completely untouched -- not deleted, per the plan's retirement
+    // criteria: don't remove legacy code until parity is confirmed against a real build) with an
+    // equivalent RmlUi document, Data/Interface/RmlUi/loading.rml + loading.rcss. No explicit
+    // RmlUiRuntime::Update()/Render() call needed here, unlike the RHI-based port this was ported
+    // from -- this branch's IMuRenderer::SetPreSubmitCallback (see RmlUiRuntime::Create()) already
+    // fires automatically once per frame, for every scene, right before EndOpengl()'s underlying
+    // SDL_GPU submit -- so simply Show()-ing the document is enough for it to keep rendering.
+    //
+    // The document is NOT closed at the end of this function (it used to be, matching this
+    // function's own one-shot-per-flash lifecycle -- SceneFlag flips to MAIN_SCENE below, right
+    // after this single call). SceneFlag reaching MAIN_SCENE does not mean the world is actually
+    // ready: LoadingWorld stays >= 30 until the server's placement data comes back, during which
+    // RenderMainScene() (MainScene.cpp) draws nothing else -- closing the wallpaper here left
+    // that whole gap with nothing on screen but stale swapchain content, seen as flicker between
+    // black and this flash's one frame. Instead it stays open and keeps rendering (like any other
+    // persistent RmlUi document) until HideLoadingSceneOverlay() closes it once
+    // RenderMainScene() sees LoadingWorld actually drop below 30.
     if (!InitLoading)
     {
         LoadingWorld = 9999999;
-
         InitLoading = true;
-        LoadBitmap(L"Interface\\LSBg01.JPG", BITMAP_TITLE, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg02.JPG", BITMAP_TITLE + 1, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg03.JPG", BITMAP_TITLE + 2, GL_LINEAR);
-        LoadBitmap(L"Interface\\LSBg04.JPG", BITMAP_TITLE + 3, GL_LINEAR);
 
         ::StopMp3(MUSIC_LOGIN_THEME);
 
-        rUIMng.m_pLoadingScene = new CLoadingScene;
-        rUIMng.m_pLoadingScene->Create();
+        // Guard against a leftover instance from a previous "entering the world" cycle -- should
+        // already be closed by HideLoadingSceneOverlay() once that cycle's world became ready,
+        // but re-entering loading before that happened (e.g. a fast reconnect) must not load a
+        // second copy on top of it.
+        HideLoadingSceneOverlay();
+
+        if (RmlUiRuntime::Instance().IsCreated())
+        {
+            s_rmlLoadingDoc = RmlUiRuntime::Instance().GetContext()->LoadDocument("Data/Interface/RmlUi/loading.rml");
+            if (s_rmlLoadingDoc)
+                s_rmlLoadingDoc->Show();
+        }
     }
 
     FogEnable = false;
     ::BeginOpengl();
     mu::GetRenderer().ClearScreen();
-    ::BeginBitmap();
 
-    rUIMng.m_pLoadingScene->Render();
-
-    ::EndBitmap();
     ::EndOpengl();
 #ifdef _EDITOR
     // Always render ImGui (shows "Open Editor" button when closed, or full UI when open)
@@ -112,11 +148,10 @@ void LoadingScene(HDC hDC)
 #endif
     UI::Reconnect::RenderDialog();
 
-    SAFE_DELETE(rUIMng.m_pLoadingScene);
+    // s_rmlLoadingDoc deliberately stays open here -- see this function's own header comment and
+    // HideLoadingSceneOverlay().
 
     SceneFlag = MAIN_SCENE;
-    for (int i = 0; i < 4; ++i)
-        ::DeleteBitmap(BITMAP_TITLE + i);
 
     ::ClearInput();
 

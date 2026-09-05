@@ -5,7 +5,7 @@
 
 // Includes mirror ZzzInterface.cpp, the unit this was extracted from.
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -32,22 +32,23 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/NewUIGensRanking.h"
+#include "Core/Input/UiInputRouter.h"
 
 // File-scope state still owned by ZzzInterface.cpp (no shared header yet).
 extern int SelectedCharacter, SelectedNpc, SelectedItem, SelectedOperate;
@@ -184,7 +185,7 @@ int SelectCharacter(BYTE Kind)
                     vec3_t vSub;
                     VectorSubtract(o->Position, g_Camera.Position, vSub);
 
-                    float fNewDist = DotProduct(vSub, vSub);
+                    float fNewDist = VectorDotProduct(vSub, vSub);
 
                     if (fNewDist < fNearestDist)
                     {
@@ -319,11 +320,19 @@ void SelectObjects()
 
     const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
         WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
-    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse())
+    // Core::Input::IsMouseOverUI() added as a 4th gate (2026-08-31, NewUI/HUD RmlUi pilot) --
+    // none of the other three flags know about RmlUi-rendered content (CSysMenuWin, already
+    // reachable from gameplay via the ESC menu, plus any RmlUi-migrated NewUI-tier HUD
+    // element). Routes to whichever UI framework is registered as the active input consumer
+    // (UiInputRouter.h -- RmlUiRuntime today), so it stays correct regardless of how any
+    // individual migrated element's legacy CObject bookkeeping is positioned -- see
+    // docs/rmlui-ui-system/layout-and-scaling.md's CalculateFixedAnchorLayout() section for why
+    // "authoritative state, not a shadow rect" matters here.
+    if (!MouseOnWindow && !mouseOnHud && !g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {
-            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+            if (mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
                 SelectedItem = SelectItem();
 
             if (SelectedItem == -1)
@@ -393,7 +402,7 @@ void SelectObjects()
                         SelectedNpc = SelectCharacter(KIND_NPC);
                         if (SelectedNpc == -1)
                         {
-                            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+                            if (mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
                             {
                                 SelectedItem = SelectItem();
                             }

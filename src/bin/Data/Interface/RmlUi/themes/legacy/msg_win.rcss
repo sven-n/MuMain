@@ -1,0 +1,112 @@
+/* Legacy theme for the generic message/confirm dialog (CMsgWin). Reuses the same OK/Cancel art as
+   CLoginWin. #panel centers via base.rcss's .center-both with a fixed dp size; the four mode-*
+   classes mirror CMsgWin's own MSG_WIN_TYPE and drive OK/Cancel visibility + per-mode offset. */
+
+@spritesheet msgwin-back-sheet
+{
+	src: "../../../message_back.tga";
+	msgwin-back-image: 0px 0px 352px 113px;
+}
+@spritesheet msgwin-input-sheet
+{
+	src: "../../../delete_secret_number.tga";
+	msgwin-input-image: 0px 0px 171px 23px;
+}
+@spritesheet msgwin-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	msgwin-ok-idle:   0px  0px 54px 30px;
+	msgwin-ok-hover:  0px 30px 54px 30px;
+	msgwin-ok-active: 0px 60px 54px 30px;
+}
+@spritesheet msgwin-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	msgwin-cancel-idle:   0px  0px 54px 30px;
+	msgwin-cancel-hover:  0px 30px 54px 30px;
+	msgwin-cancel-active: 0px 60px 54px 30px;
+}
+
+#panel {
+	position: absolute;
+	width: 352dp;
+	height: 113dp;
+	font-family: "Liberation Sans";
+	font-size: 12dp;
+	decorator: image(msgwin-back-image);
+}
+
+/* Single-line messages center across the full width; two-line messages left-align both lines. */
+#msg_line1 {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 38dp;
+	text-align: center;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.no-buttons #msg_line1 { top: 54dp; }
+#msg_line1.multi-line {
+	left: 25dp;
+	right: auto;
+	text-align: left;
+	top: 32dp;
+}
+.no-buttons #msg_line1.multi-line { top: 44dp; }
+
+#msg_line2 {
+	position: absolute;
+	left: 25dp;
+	top: 51dp;
+	text-align: left;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.no-buttons #msg_line2 { top: 66dp; }
+
+/* Background art only for the resident-password re-entry step; live text drawn on top by legacy code. */
+#input_frame {
+	display: none;
+	position: absolute;
+	left: 32dp;
+	top: 76dp;
+	width: 171dp;
+	height: 23dp;
+	decorator: image(msgwin-input-image);
+	pointer-events: none;
+}
+.mode-input #input_frame { display: block; }
+
+.btn {
+	display: none;
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	top: 72dp;
+	cursor: pointer;
+	pointer-events: auto;
+	color: transparent;
+}
+
+#btn_ok {
+	left: 149dp;
+	decorator: image(msgwin-ok-idle);
+}
+#btn_ok:hover { decorator: image(msgwin-ok-hover); }
+#btn_ok:active { decorator: image(msgwin-ok-active); }
+.mode-ok-only #btn_ok, .mode-both #btn_ok, .mode-input #btn_ok { display: block; }
+.mode-both #btn_ok { left: 98dp; }
+.mode-input #btn_ok { left: 209dp; }
+
+#btn_cancel {
+	left: 149dp;
+	decorator: image(msgwin-cancel-idle);
+}
+#btn_cancel:hover { decorator: image(msgwin-cancel-hover); }
+#btn_cancel:active { decorator: image(msgwin-cancel-active); }
+.mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
+.mode-both #btn_cancel { left: 200dp; }
+.mode-input #btn_cancel { left: 264dp; }

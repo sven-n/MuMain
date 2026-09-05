@@ -1,0 +1,196 @@
+/* Shared, cross-window RCSS for the legacy theme: generic (non-positional) rules reused by more
+   than one migrated window (SysMenuWin/OptionWin's shared button/checkbox/panel-chrome art, plus
+   the anchor/center/stretch layout utility classes every window uses). Every migrated window's
+   <head> links this file first, then its own per-window positional .rcss. */
+
+@spritesheet legacy-btn-sheet
+{
+	src: "../../../op1_b_all.tga";
+	legacy-btn-idle:   0px  0px 108px 30px;
+	legacy-btn-hover:  0px 30px 108px 30px;
+	legacy-btn-active: 0px 60px 108px 30px;
+}
+
+@spritesheet legacy-checkbox-sheet
+{
+	src: "../../../op2_ch.tga";
+	legacy-checkbox-unchecked: 0px  0px 16px 16px;
+	legacy-checkbox-checked:   0px 16px 16px 16px;
+}
+
+/* Panel chrome for SysMenuWin/OptionWin's CWinEx backing, reproduced as three stacked elements
+   (.panel-cap-top/.panel-middle/.panel-cap-bottom) rather than RmlUi's tiled-vertical decorator,
+   which doesn't support REPEAT fit mode in this build. */
+@spritesheet legacy-panel-bottom-sheet
+{
+	src: "../../../op1_back2.tga";
+	legacy-panel-bottom: 0px 0px 213px 43px;
+}
+@spritesheet legacy-panel-center-sheet
+{
+	src: "../../../op1_stone.jpg";
+	legacy-panel-center: 0px 0px 128px 128px;
+}
+
+.panel-cap-top {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+}
+.panel-cap-bottom {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	height: 43dp;
+	decorator: image(legacy-panel-bottom);
+}
+/* Spans nearly the full panel (3dp inset each side), matching CWinEx's real WE_BG_CENTER --
+   painted first so it shows through the caps' own transparent negative space. */
+.panel-middle {
+	position: absolute;
+	left: 3dp;
+	top: 3dp;
+	right: 3dp;
+	bottom: 3dp;
+	decorator: image(legacy-panel-center);
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
+#backdrop {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 128);
+	pointer-events: auto;
+}
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-box {
+	display: inline-block;
+	width: 16dp;
+	height: 16dp;
+	decorator: image(legacy-checkbox-unchecked);
+}
+.checkbox-box.checked {
+	decorator: image(legacy-checkbox-checked);
+}
+.checkbox-label {
+	position: absolute;
+	left: 21dp;
+	top: 1dp;
+	white-space: nowrap;
+}
+
+.btn {
+	position: absolute;
+	width: 108dp;
+	height: 30dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	decorator: image(legacy-btn-idle);
+	pointer-events: auto;
+}
+.btn:hover {
+	decorator: image(legacy-btn-hover);
+}
+.btn:active {
+	decorator: image(legacy-btn-active);
+}
+.btn.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+}
+
+.hidden {
+	display: none;
+}
+
+/* Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- pure layout, no visual
+   styling, identical in both themes. Apply one to an element to express its intended responsive
+   behavior declaratively; give it its own size (dp if it should respect UI scale) alongside it. */
+
+.anchor-top-left {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.anchor-top-right {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.anchor-bottom-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.anchor-bottom-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+.center-x {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+.center-both {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.stretch-x {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+.stretch-y {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.stretch-both {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset() -- lets a theme's RCSS express a
+   real-screen anchor point for content that's still legacy-rendered and can't be positioned by
+   RCSS directly (main_frame.rml's #item_hotkey_anchor/#skill_list_anchor). visibility:hidden, not
+   display:none, so it still gets a real layout pass to read a position from. */
+.layout-anchor {
+	position: absolute;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}

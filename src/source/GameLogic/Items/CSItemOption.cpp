@@ -11,8 +11,8 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Core/NewUISystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "I18N/All.h"
@@ -976,9 +976,9 @@ void CSItemOption::CheckRenderOptionHelper(const wchar_t* FilterName)
             m_byRenderOptionList = 0;
             if (wcsncmp(FilterName, Name, Length1) == 0 && wcsncmp(FilterName, Name, Length2) == 0)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_SETITEM_EXPLANATION);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_SETITEM_EXPLANATION);
 
                 m_byRenderOptionList = static_cast<std::uint8_t>(i + 1);
                 return;

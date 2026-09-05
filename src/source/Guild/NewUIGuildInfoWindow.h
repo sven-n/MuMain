@@ -1,4 +1,4 @@
-// NewUIGuildInfoWindow.h: interface for the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.h: interface for the CGuildInfoWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -7,16 +7,16 @@
 
 #pragma once
 
-#include "UI/NewUI/NewUIBase.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIMyInventory.h"
-#include "UI/NewUI/HUD/NewUIChatLogWindow.h"
+#include "UI/Core/NewUIBase.h"
+#include "UI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Inventory/NewUIMyInventory.h"
+#include "UI/HUD/NewUIChatLogWindow.h"
 #include "NewUIGuildMakeWindow.h"
-#include "UI/NewUI/Widgets/NewUIButton.h"
+#include "UI/Widgets/NewUIButton.h"
 #include "GuildConstants.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     struct ServerMessageInfo
     {
@@ -29,37 +29,37 @@ namespace SEASON3B
             s_byTargetUserIndexH(0), s_byTargetUserIndexL(0) {}
     };
 
-    class CNewUIGuildInfoWindow : public CNewUIObj
+    class CGuildInfoWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GUILDINFO_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
+            IMAGE_GUILDINFO_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
 
-            IMAGE_GUILDINFO_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GUILDINFO_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GUILDINFO_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GUILDINFO_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GUILDINFO_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_GUILDINFO_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_GUILDINFO_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_GUILDINFO_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_GUILDINFO_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_GUILDINFO_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
 
-            IMAGE_GUILDINFO_TOP_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,
-            IMAGE_GUILDINFO_BOTTOM_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,
-            IMAGE_GUILDINFO_LEFT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,
-            IMAGE_GUILDINFO_RIGHT_PIXEL = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,
+            IMAGE_GUILDINFO_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,
+            IMAGE_GUILDINFO_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,
+            IMAGE_GUILDINFO_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,
+            IMAGE_GUILDINFO_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,
 
-            IMAGE_GUILDINFO_TOP_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
-            IMAGE_GUILDINFO_TOP_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
-            IMAGE_GUILDINFO_BOTTOM_LEFT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
-            IMAGE_GUILDINFO_BOTTOM_RIGHT = CNewUIInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
+            IMAGE_GUILDINFO_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,	//. newui_item_table01(L).tga (14,14)
+            IMAGE_GUILDINFO_TOP_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,	//. newui_item_table01(R).tga (14,14)
+            IMAGE_GUILDINFO_BOTTOM_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
+            IMAGE_GUILDINFO_BOTTOM_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
 
-            IMAGE_GUILDINFO_SCROLL_TOP = CNewUIChatLogWindow::IMAGE_SCROLL_TOP,
-            IMAGE_GUILDINFO_SCROLL_MIDDLE = CNewUIChatLogWindow::IMAGE_SCROLL_MIDDLE,
-            IMAGE_GUILDINFO_SCROLL_BOTTOM = CNewUIChatLogWindow::IMAGE_SCROLL_BOTTOM,
-            IMAGE_GUILDINFO_SCROLLBAR_ON = CNewUIChatLogWindow::IMAGE_SCROLLBAR_ON,
-            IMAGE_GUILDINFO_SCROLLBAR_OFF = CNewUIChatLogWindow::IMAGE_SCROLLBAR_OFF,
-            IMAGE_GUILDINFO_DRAG_BTN = CNewUIChatLogWindow::IMAGE_DRAG_BTN,
+            IMAGE_GUILDINFO_SCROLL_TOP = CChatLogWindow::IMAGE_SCROLL_TOP,
+            IMAGE_GUILDINFO_SCROLL_MIDDLE = CChatLogWindow::IMAGE_SCROLL_MIDDLE,
+            IMAGE_GUILDINFO_SCROLL_BOTTOM = CChatLogWindow::IMAGE_SCROLL_BOTTOM,
+            IMAGE_GUILDINFO_SCROLLBAR_ON = CChatLogWindow::IMAGE_SCROLLBAR_ON,
+            IMAGE_GUILDINFO_SCROLLBAR_OFF = CChatLogWindow::IMAGE_SCROLLBAR_OFF,
+            IMAGE_GUILDINFO_DRAG_BTN = CChatLogWindow::IMAGE_DRAG_BTN,
 
-            IMAGE_GUILDINFO_BUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
+            IMAGE_GUILDINFO_BUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
 
             IMAGE_GUILDINFO_TAB_BUTTON = BITMAP_GUILDINFO_BEGIN,
             IMAGE_GUILDINFO_TAB_LIST,
@@ -91,7 +91,7 @@ namespace SEASON3B
         };
         EVENT_STATE				m_EventState;
 
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
         POINT					m_Pos;
         int						m_nCurrentTab;
         int						m_Loc;
@@ -101,8 +101,8 @@ namespace SEASON3B
         int						m_Tot_Notice;
         DWORD					m_dwPopupID;
 
-        CNewUIButton* m_Button;
-        CNewUIButton			m_BtnExit;
+        CButton* m_Button;
+        CButton			m_BtnExit;
 
         CUIGuildNoticeListBox		m_GuildNotice;
         CUINewGuildMemberListBox	m_GuildMember;
@@ -114,10 +114,10 @@ namespace SEASON3B
         wchar_t m_RivalGuildName[MAX_GUILDNAME + 1];
 
     public:
-        CNewUIGuildInfoWindow();
-        virtual ~CNewUIGuildInfoWindow();
+        CGuildInfoWindow();
+        virtual ~CGuildInfoWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void SetPos(int x, int y);
@@ -129,7 +129,7 @@ namespace SEASON3B
 
         float GetLayerDepth();	//. 4.5f
 
-        CNewUIGuildInfoWindow* GetGuildInfo() const;
+        CGuildInfoWindow* GetGuildInfo() const;
 
         void OpenningProcess();
         void ClosingProcess();
@@ -171,7 +171,7 @@ namespace SEASON3B
     };
 
     inline
-        const ServerMessageInfo& CNewUIGuildInfoWindow::GetServerMessage()
+        const ServerMessageInfo& CGuildInfoWindow::GetServerMessage()
     {
         return m_MessageInfo;
     }

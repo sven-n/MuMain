@@ -18,18 +18,19 @@
 #include "Engine/AI/GOBoid.h"
 #include "GameLogic/Pets/w_PetProcess.h"
 #include "World/MapInfra/MapManager.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Windows/CreditWin.h"
 #include "Core/Input/Input.h"
 #include "Network/Server/WSclient.h"
 #include "Core/Utilities/Log/muConsoleDebug.h"
 #include "I18N/All.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "SceneCommon.h"
 #include "Core/Utilities/FrameProfiler.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/NewUI/NewUISystem.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Core/NewUISystem.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/Scaling/UITransform.h"
 
 // External declarations
@@ -282,7 +283,7 @@ void CreateLogInScene()
 
     OpenLogoSceneData();
 
-    CUIMng::Instance().CreateLoginScene();
+    CSceneUICoordinator::Instance().CreateLoginScene();
 
     CurrentProtocolState = REQUEST_JOIN_SERVER;
     CreateSocket(szServerIpAddress, g_ServerPort);
@@ -327,7 +328,7 @@ void NewMoveLogInScene()
         CreateLogInScene();
     }
 
-    if (!CUIMng::Instance().m_CreditWin.IsShow())
+    if (!g_CreditWin.IsVisible())
     {
         InitTerrainLight();
         MoveObjects();
@@ -347,7 +348,7 @@ void NewMoveLogInScene()
         ThePetProcess().UpdatePets();
     }
 
-    // ESC menu toggle is handled by CUIMng::Update()
+    // ESC menu toggle is handled by CSceneUICoordinator::Update()
     if (RECEIVE_LOG_IN_SUCCESS == CurrentProtocolState)
     {
         g_ErrorReport.Write(L"> Request Character list\r\n");
@@ -403,7 +404,7 @@ bool NewRenderLogInScene(HDC hDC)
     // don't restrict the render loop.
     ResetFrustrumBoundsFullTerrain();
 
-    if (!CUIMng::Instance().m_CreditWin.IsShow())
+    if (!g_CreditWin.IsVisible())
     {
         { FRAME_PROFILE(Terrain); RenderTerrain(false); }
         { FRAME_PROFILE(Characters); RenderCharactersClient(); }
@@ -483,23 +484,18 @@ bool NewRenderLogInScene(HDC hDC)
 #endif
 
     // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION))
     {
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();
         g_pOption->Render();
     }
 
-    // Drive the NewUI message box here too (same reason as the option window):
-    // the login scene skips the full NewUI update, so a confirmation dialog such
-    // as the "Remember Password" prompt would otherwise never update or draw.
-    if (!g_MessageBox->IsEmpty())
-    {
-        g_MessageBox->UpdateMouseEvent();
-        g_MessageBox->UpdateKeyEvent();
-        g_MessageBox->Update();
-        g_MessageBox->Render();
-    }
+    // The "Remember Password" prompt (the one dialog that used to need a manual g_MessageBox
+    // pump here, since the login scene skips the full NewUI update) is now its own RmlUi
+    // document -- see UI/Windows/RememberPasswordPrompt.cpp. It's already driven by
+    // RmlUiRuntime's own pre-submit callback, fired unconditionally every frame regardless of
+    // scene, so no equivalent manual pump is needed for it here.
 
     EndBitmap();
 

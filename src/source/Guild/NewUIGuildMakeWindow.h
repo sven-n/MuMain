@@ -1,4 +1,4 @@
-// NewUIGuildMakeWindow.h: interface for the CNewUIGuildMakeWindow class.
+// NewUIGuildMakeWindow.h: interface for the CGuildMakeWindow class.
 //
 //////////////////////////////////////////////////////////////////////
 
@@ -7,28 +7,28 @@
 
 #pragma once
 
-#include "UI/NewUI/NewUIBase.h"
+#include "UI/Core/NewUIBase.h"
 #include "UIGuildMaster.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIMyInventory.h"
-#include "UI/NewUI/Widgets/NewUIButton.h"
+#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Inventory/NewUIMyInventory.h"
+#include "UI/Widgets/NewUIButton.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
-    class CNewUIManager;
-    class CNewUIGuildMakeWindow : public CNewUIObj
+    class CManager;
+    class CGuildMakeWindow : public CObject
     {
     public:
         enum IMAGE_LIST
         {
-            IMAGE_GUILDMAKE_BACK = CNewUIMessageBoxMng::IMAGE_MSGBOX_BACK,
-            IMAGE_GUILDMAKE_MAKEBUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
-            IMAGE_GUILDMAKE_NEXTBUTTON = CNewUIMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
-            IMAGE_GUILDMAKE_BACK_TOP = CNewUIMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_GUILDMAKE_BACK_LEFT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_GUILDMAKE_BACK_RIGHT = CNewUIMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_GUILDMAKE_BACK_BOTTOM = CNewUIMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_GUILDMAKE_BTN_EXIT = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN,
+            IMAGE_GUILDMAKE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
+            IMAGE_GUILDMAKE_MAKEBUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY,
+            IMAGE_GUILDMAKE_NEXTBUTTON = CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL,
+            IMAGE_GUILDMAKE_BACK_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
+            IMAGE_GUILDMAKE_BACK_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
+            IMAGE_GUILDMAKE_BACK_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
+            IMAGE_GUILDMAKE_BACK_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
+            IMAGE_GUILDMAKE_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
             IMAGE_GUILDMAKE_EDITBOX = BITMAP_GUILDMAKE_BEGIN,
         };
 
@@ -64,10 +64,10 @@ namespace SEASON3B
         };
 
     public:
-        CNewUIGuildMakeWindow();
-        virtual ~CNewUIGuildMakeWindow();
+        CGuildMakeWindow();
+        virtual ~CGuildMakeWindow();
 
-        bool Create(CNewUIManager* pNewUIMng, int x, int y);
+        bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
         void ClosingProcess();
@@ -105,24 +105,24 @@ namespace SEASON3B
         void ChangeEditBox(const UISTATES type);
 
     private:
-        CNewUIManager* m_pNewUIMng;
+        CManager* m_pNewUIMng;
 
         POINT					m_Pos;
         GUILDMAKE_STATE			m_GuildMakeState;
 
         CUITextInputBox* m_EditBox;
-        CNewUIButton* m_Button;
-        CNewUIButton			m_BtnExit;
+        CButton* m_Button;
+        CButton			m_BtnExit;
     };
 
     inline
-        void CNewUIGuildMakeWindow::SetPos(int x, int y)
+        void CGuildMakeWindow::SetPos(int x, int y)
     {
         m_Pos.x = x; m_Pos.y = y;
     }
 
     inline
-        const POINT& CNewUIGuildMakeWindow::GetPos()
+        const POINT& CGuildMakeWindow::GetPos()
     {
         return m_Pos;
     }

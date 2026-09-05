@@ -7,13 +7,14 @@
 #pragma once
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "GameShop/ShopListManager/ShopPackage.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-class CMsgBoxIGSBuySelectItem : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+class CMsgBoxIGSBuySelectItem : public CMessageBoxBase, public I3DRenderObj
 {
 public:
     CMsgBoxIGSBuySelectItem();
@@ -71,10 +72,10 @@ public:
     void Render3D();
     bool IsVisible() const;
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT BuyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT PresentBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT BuyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT PresentBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -92,9 +93,9 @@ private:
                  int iCashType);
 
 private:
-    CNewUIMessageBoxButton m_BtnBuy;
-    CNewUIMessageBoxButton m_BtnPresent;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnBuy;
+    CMessageBoxButton m_BtnPresent;
+    CMessageBoxButton m_BtnCancel;
     CUIPackCheckBuyingListBox m_SelectBuyListBox;
 
     int m_iPackageSeq;

@@ -79,6 +79,8 @@ void GameConfig::Load()
 
     m_uiLocale = ReadString(CfgSectionUI, CfgKeyUILocale, CfgDefaultUILocale);
     m_fontSelection = ReadString(CfgSectionUI, CfgKeyFont, CfgDefaultFont);
+    m_rmlTheme = ReadString(CfgSectionUI, CfgKeyRmlTheme, CfgDefaultRmlTheme);
+    m_uiScalePercent = ReadInt(CfgSectionUI, CfgKeyUIScalePercent, CfgDefaultUIScalePercent);
 
     m_zoom = ReadInt(CfgSectionCamera, CfgKeyZoom, CfgDefaultZoom);
     m_sortParticleDraws = ReadBool(CfgSectionRender, CfgKeySortParticleDraws, CfgDefaultSortParticleDraws);
@@ -124,6 +126,8 @@ void GameConfig::Save()
 
     WriteString(CfgSectionUI, CfgKeyUILocale, m_uiLocale);
     WriteString(CfgSectionUI, CfgKeyFont, m_fontSelection);
+    WriteString(CfgSectionUI, CfgKeyRmlTheme, m_rmlTheme);
+    WriteInt(CfgSectionUI, CfgKeyUIScalePercent, m_uiScalePercent);
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
@@ -224,6 +228,16 @@ void GameConfig::SetUILocale(const std::wstring& locale)
 void GameConfig::SetFontSelection(const std::wstring& font)
 {
     m_fontSelection = font;
+}
+
+void GameConfig::SetRmlTheme(const std::wstring& theme)
+{
+    m_rmlTheme = theme;
+}
+
+void GameConfig::SetUIScalePercent(int percent)
+{
+    m_uiScalePercent = percent;
 }
 
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)

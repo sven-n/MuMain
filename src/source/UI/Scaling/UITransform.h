@@ -3,6 +3,10 @@
 namespace UI::Scaling
 {
     inline constexpr int DockLogicalBottom = 432;
+    // Shared ceiling for "general" (non-HUD-band, non-dock) uniform auto-fit -- PanelTransform's
+    // own cap, and RmlUiRuntime.cpp's dp-ratio auto-fit reuses the same number (single source of
+    // truth: docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section).
+    inline constexpr float MaximumPanelScale = 2.0f;
 
     struct Transform
     {
@@ -47,6 +51,16 @@ namespace UI::Scaling
         FloatingWorkspace,
         Dialog,
         WorldOverlay,
+        // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) -- for a migrated window whose own
+        // rendering (CSprite-based sprites, raw g_pRenderText calls) already computes real screen
+        // pixels itself (its own fScaleX/fScaleY against whatever resolution it assumes, e.g.
+        // CCreditWin's 800x600) rather than reference-space coordinates meant to be rescaled by
+        // this transform system. Every other LayoutMode rescales against kReferenceWidth/Height
+        // (640x480) -- applying any of them to this kind of window doubly (and wrongly) rescales
+        // it, and (via CManager's UpdateMouseEvent() -- transformMouse=true) remaps the
+        // global MouseX/MouseY into that same wrong reference space, breaking click hit-testing
+        // too. TransformForLayout() maps this to a genuine identity transform instead.
+        Legacy,
     };
 
     class ScopedActiveTransform
@@ -68,6 +82,8 @@ namespace UI::Scaling
     Viewport FullReferenceViewport();
     Transform LegacyUiTransform(int windowWidth, int windowHeight);
     Transform PanelTransform(int windowWidth, int windowHeight);
+    float ViewportFitScale(int windowWidth, int windowHeight, float maximumScale);
+    float CompanionRatio(int windowWidth, int windowHeight);
     float BottomHudScale(int windowWidth, int windowHeight);
     Transform BottomHudLeftTransform(int windowWidth, int windowHeight);
     Transform BottomHudCenterTransform(int windowWidth, int windowHeight);

@@ -3,7 +3,7 @@
 
 #include "Core/Platform/Imm.h"
 #include "App/Platform/Windows/Winmain.h"   // g_hWnd, WindowWidth/Height
-#include "UI/Legacy/UIControls.h"       // g_pRenderText
+#include "UI/Widgets/UIControls.h"       // g_pRenderText
 #include "Engine/Object/ZzzInterface.h" // LockInputStatus
 
 // Defined in Winmain.cpp; declared per-TU across the codebase (no header).

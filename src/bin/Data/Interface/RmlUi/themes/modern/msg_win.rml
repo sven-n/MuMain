@@ -1,0 +1,31 @@
+<rml>
+<head>
+	<title>Message Box</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="msg_win.rcss"/>
+</head>
+<body data-model="msg_win">
+	<!-- Modern theme's own copy of the generic message/confirm dialog. Per-theme file
+	     (UI::RmlBridge::LoadThemedDocument) because modern-frame/modern-frame-crimson is genuinely
+	     modern-specific structure, not just style -- the shared ../../msg_win.rml is legacy's own
+	     theme-neutral copy and carries neither class (architecture-principles.md §15: a "shared"
+	     file must not bake in one theme's vocabulary). mode-* classes select which of CMsgWin's
+	     five MSG_WIN_TYPE variants is active -- keep this file's ids/data-model names in sync with
+	     ../../msg_win.rml, MsgWin.cpp binds against both by the same names. -->
+	<div id="panel" class="center-both modern-frame modern-frame-crimson"
+	     data-class-no-buttons="no_buttons"
+	     data-class-mode-cancel-only="mode_cancel_only"
+	     data-class-mode-ok-only="mode_ok_only"
+	     data-class-mode-both="mode_both"
+	     data-class-mode-input="mode_input">
+		<div id="msg_line1" class="msg-line" data-class-multi-line="!line2_hidden">{{line1}}</div>
+		<div id="msg_line2" class="msg-line" data-class-hidden="line2_hidden">{{line2}}</div>
+
+		<!-- Background art only for the resident-password re-entry step; live text drawn on top by legacy code. -->
+		<div id="input_frame"></div>
+
+		<div id="btn_ok" class="btn btn-ok" data-event-click="msgwin_ok_click">{{ok_label}}</div>
+		<div id="btn_cancel" class="btn btn-cancel" data-event-click="msgwin_cancel_click">{{cancel_label}}</div>
+	</div>
+</body>
+</rml>

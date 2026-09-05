@@ -1,0 +1,146 @@
+/* Modern theme for the character-creation dialog -- flat programmatic chrome, no legacy sprite
+   art. Stat/description panels share the identical treatment as legacy (already flat fills in
+   the original). */
+
+/* 2026-09-03: width/height and every child's left/top below are now static RCSS instead of
+   C++-pushed -- CharMakeWin.cpp's SetPosition() still pushes #panel's own left/top (a genuine
+   screen-placement value, same carve-out as every other migrated window), but stopped pushing
+   these, since they're constants that never actually varied at runtime (CCharMakeWin.h's own
+   comment already called out the job buttons -- the one genuinely per-instance-positioned
+   piece -- as "not recomputed per frame... mirrors the legacy per-class layout math exactly").
+   Deliberately `px`, not `dp`, and NOT part of the global auto-fit other migrated dialogs joined
+   this same pass: m_winBack (CharMakeWin.cpp) is a fixed-size CWin whose real screen position
+   also drives the live 3D character-preview viewport (BeginOpengl() call in
+   RenderCreateCharacter(), a completely separate, untested-here scale mechanism already reading
+   m_winBack's real unscaled pixel bounds) -- growing #panel via dp without also correctly scaling
+   that viewport would visibly desync the 2D chrome from the 3D preview it's meant to frame. Left
+   as a documented non-scaling exception, same class as main_frame's still-legacy HUD band and
+   char_info_balloon's live-projected position (layout-and-scaling.md's Fixed-vs-fluid table). */
+#panel {
+	position: absolute;
+	width: 454px;
+	height: 406px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-body);
+}
+
+#stat_panel  { left: 346px; top: 24px;  }
+#desc_panel  { left: 0px;   top: 355px; }
+#input_frame { left: 0px;   top: 317px; }
+#btn_ok      { left: 346px; top: 325px; }
+#btn_cancel  { left: 400px; top: 325px; }
+
+.job-btn {
+	position: absolute;
+	width: 108px;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-3);
+	border: 1px token(border-metal);
+	border-radius: token(radius-md)px;
+	color: token(text-body);
+	font-family: "token(font-body)";
+}
+.job-btn:hover {
+	background-color: token(accent-steel);
+	border: 1px token(accent-steel);
+}
+.job-btn.checked {
+	background-color: token(accent-steel);
+	border: 1px token(accent-steel);
+	color: token(text-title);
+}
+.job-btn.disabled {
+	pointer-events: none;
+	color: token(semantic-neutral);
+	cursor: default;
+	background-color: token(surface-3);
+	border: 1px token(border-metal);
+}
+
+.stat-panel, .desc-panel {
+	position: absolute;
+}
+.stat-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 108px;
+	height: 80px;
+	background-color: rgba(0, 0, 0, 143);
+}
+.stat-bg.tall {
+	height: 96px;
+}
+.desc-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 454px;
+	height: 51px;
+	background-color: rgba(0, 0, 0, 143);
+}
+
+.stat-row {
+	position: absolute;
+	left: 22px;
+}
+.stat-label {
+	color: token(text-body);
+	font-family: "token(font-body)";
+}
+.stat-value {
+	position: absolute;
+	left: 54px;
+	color: token(accent-gold);
+	font-family: "token(font-body)";
+}
+
+.desc-line {
+	position: absolute;
+	left: 10px;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+}
+
+.input-frame {
+	position: absolute;
+	width: 346px;
+	height: 38px;
+	background-color: rgba(0, 0, 0, 110);
+	border: 1px token(border-metal);
+	border-radius: token(radius-sm)px;
+	pointer-events: none;
+}
+
+/* 2026-09-03: background-color/border/border-radius removed -- only width genuinely needs to
+   differ from base.rcss's own .btn (54px here vs. base's 108px default) here. The removed
+   `border` shorthand was silently stomping .btn-ok's crimson border-color/border-top-color back
+   to gray border-metal on #btn_ok (same specificity, this file linked after base.rcss, tie always
+   went to this rule) -- the fill still showed crimson (decorator, untouched) but with a
+   mismatched gray border instead of a clean crimson one, same bug independently present in
+   msg_win.rcss (see that file's own comment on the identical fix).
+
+   2026-09-03, second fix: height/line-height/text-align/vertical-align now explicit here too, not
+   left to inherit from base.rcss's own .btn -- that shared rule is dp now (this session's global
+   auto-fit retrofit), but #panel here deliberately stays fixed px (see this file's own #panel
+   comment, the 3D-viewport-coupling exception). Inheriting a dp line-height/height into a
+   px-positioned, px-widthed button meant the box grew taller than its fixed width/position
+   intended at any ratio other than 1.0 -- a real, screenshot-reported bug ("OK/Cancel text
+   position not properly scaled"). Every property this button needs must be self-contained px now,
+   matching the rest of this file's deliberate non-scaling design. */
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+}

@@ -239,6 +239,16 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 static SDL_GPUDevice* s_device = nullptr;
 static SDL_Window* s_window = nullptr;
 
+// RmlUi port: see SetPreSubmitCallback's own comment (MuRenderer.h) for what this is and why.
+static std::function<void()> s_preSubmitCallback;
+
+// RmlUi port: see SetPostRmlUiCallback's own comment (MuRenderer.h). Fires after RmlUi's own
+// render pass has closed, for content that must sit visually on top of RmlUi (the game cursor,
+// legacy CUITextInputBox text) -- see EndFrame()'s own comment at the call site for why this
+// needs its own small render pass rather than just calling RenderQuad2D-style functions from
+// inside s_preSubmitCallback itself.
+static std::function<void()> s_postRmlUiCallback;
+
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
 static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
@@ -692,6 +702,15 @@ static Render::DrawCommandHistory s_previousDrawCommands;
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
 // during the collection phase (render pass is only opened in EndFrame now).
 static bool s_frameActive = false;
+
+// RmlUi-behind-3D-icons seam (FlushRenderCommands): lets a caller open a real render pass
+// mid-recording instead of waiting for EndFrame's single one. s_replayedCmdCount is how far
+// into s_renderCmds the swapchain/depth targets already reflect; s_mainColorPassOpenedThisFrame
+// is whether any such pass (a flush, or EndFrame's own) has opened yet this frame -- the first
+// one CLEARs, every one after LOADs. Both reset only in BeginFrame, so multiple flushes (and
+// EndFrame's own final one) each pick up exactly the range recorded since the last one.
+static std::size_t s_replayedCmdCount = 0u;
+static bool s_mainColorPassOpenedThisFrame = false;
 #ifdef _EDITOR
 void QueueEditorRenderCommand()
 {
@@ -1640,6 +1659,8 @@ public:
         s_vtxOffset = 0u;
         s_renderCmds.clear();
         s_previousDrawCommands.fill(kNoDrawCommand);
+        s_replayedCmdCount = 0u;
+        s_mainColorPassOpenedThisFrame = false;
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -1712,25 +1733,18 @@ public:
     // accumulated vertex data to the GPU vertex buffer. The next frame's
     // render pass will read from the updated GPU buffer.
     // -----------------------------------------------------------------------
-    void EndFrame() override
+    // Stages this frame's accumulated CPU-side vertex/bone/strip-index/texture-update scratch
+    // buffers to the GPU via one copy pass. Safe to call more than once per frame --
+    // FlushRenderCommands (mid-recording) and EndFrame's own final stage both call this. Each
+    // call re-uploads the buffers' current full contents from offset 0, not just what's new since
+    // the last call: harmless (offsets already used stay unchanged, only the tail is new data),
+    // same "just redo the whole thing" precedent the pre-existing post-RmlUi pass already
+    // established below. Returns whether bone data is ready, for ReplayCommandRange to pass into
+    // ReplayDrawCommand.
+    bool StageDeferredGpuData()
     {
-        if (!s_frameActive)
-        {
-            // Frame was not started (minimized window or error).
-            if (s_cmdBuf)
-            {
-                SDL_CancelGPUCommandBuffer(s_cmdBuf);
-                s_cmdBuf = nullptr;
-            }
-            FailPendingFrameReadback();
-            return;
-        }
-        s_frameActive = false;
-
         // ---------------------------------------------------------------
-        // Phase 1: Grow GPU buffers if needed, then stage recorded CPU vertices.
-        // ---------------------------------------------------------------
-        // ---------------------------------------------------------------
+        // Grow GPU buffers if needed, then stage recorded CPU vertices.
         // This happens BEFORE the render pass so the GPU reads current-
         // frame data, eliminating the 1-frame vertex delay that caused
         // streak artifacts when vertex counts varied between frames.
@@ -1906,6 +1920,164 @@ public:
         }
         s_textureUpdates.clear();
 
+        return boneDataReady;
+    }
+
+    // Replays s_renderCmds[startIdx, endIdx) into the currently-open s_renderPass. Every render
+    // pass boundary (the main pass, the post-RmlUi pass, and FlushRenderCommands' own pass) starts
+    // its own range with a fresh default full-window viewport/scissor and its own
+    // SdlGpuReplayState -- consistent with how the pre-existing post-RmlUi pass boundary has
+    // always worked, not a new limitation introduced here: a SetViewport/SetScissor command
+    // mid-range still applies correctly: it's only *implicit* state carried over from before the
+    // range (never re-declared) that resets to full-window at each new pass, same as it always has
+    // at the one pre-existing pass boundary.
+    void ReplayCommandRange(std::size_t startIdx, std::size_t endIdx, bool boneDataReady)
+    {
+        SDL_GPUViewport currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH), 0.0f,
+                                         1.0f};
+        SDL_Rect currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
+        Render::SdlGpuReplayState replayState;
+
+        for (std::size_t i = startIdx; i < endIdx; ++i)
+        {
+            const RenderCmd& cmd = s_renderCmds[i];
+            if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
+            {
+                continue;
+            }
+            ++s_dbgRenderCmdsReplayedThisFrame;
+
+            switch (cmd.type)
+            {
+            case RenderCmdType::SetViewport:
+            {
+                currentViewport = cmd.viewport;
+                if (replayState.SelectViewport(currentViewport))
+                    SDL_SetGPUViewport(s_renderPass, &currentViewport);
+                break;
+            }
+
+            case RenderCmdType::SetScissor:
+            {
+                currentScissor = cmd.scissor;
+                if (replayState.SelectScissor(currentScissor))
+                    SDL_SetGPUScissor(s_renderPass, &currentScissor);
+                break;
+            }
+
+#ifdef _EDITOR
+            case RenderCmdType::EditorOverlay:
+            {
+                g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
+                replayState.Invalidate();
+                if (replayState.SelectViewport(currentViewport))
+                    SDL_SetGPUViewport(s_renderPass, &currentViewport);
+                if (replayState.SelectScissor(currentScissor))
+                    SDL_SetGPUScissor(s_renderPass, &currentScissor);
+                break;
+            }
+#endif
+
+            case RenderCmdType::DrawTriangles:
+            case RenderCmdType::DrawSkinnedTriangles:
+            case RenderCmdType::DrawIndexedQuads:
+            case RenderCmdType::DrawIndexedStrip:
+            case RenderCmdType::DrawTriangles2D:
+            {
+                ReplayDrawCommand(cmd, boneDataReady, currentScissor, replayState);
+                break;
+            }
+            } // switch
+        } // for
+    }
+
+    // RmlUi-behind-3D-icons seam: opens a real render pass NOW, mid-recording, instead of waiting
+    // for EndFrame's single one -- the seam docs/rmlui-ui-system/STATUS.md's "RmlUi renders last"
+    // finding calls for. CLEARs on the first flush of the frame, LOADs on every one after
+    // (including EndFrame's own final one, see its own call to ReplayCommandRange below) --
+    // s_mainColorPassOpenedThisFrame/s_replayedCmdCount track that across calls, reset only in
+    // BeginFrame. A caller (e.g. a second Rml::Context's Render(), or any other content that must
+    // sit behind whatever legacy drawing happens right after this call returns) should follow this
+    // with its own draw calls before the frame's recording continues.
+    //
+    // Same characterization as the pre-existing pre-submit callback's own comment: on a frame that
+    // took the screenshot/readback branch, this always targets s_swapchainTexture directly, not
+    // the substituted readback/capture texture -- content flushed here on such a frame won't
+    // appear in the captured image. Accepted, matching that already-established precedent, not a
+    // new limitation.
+    void FlushRenderCommands() override
+    {
+        if (!s_frameActive || !s_cmdBuf || !s_swapchainTexture)
+        {
+            return; // no frame in progress (minimized window, or called outside Begin/EndFrame)
+        }
+        if (s_renderCmds.size() <= s_replayedCmdCount)
+        {
+            return; // nothing recorded since the last flush -- avoid an empty pass
+        }
+
+        const bool boneDataReady = StageDeferredGpuData();
+
+        SDL_GPUColorTargetInfo colorTarget{};
+        colorTarget.texture = s_swapchainTexture;
+        colorTarget.load_op = s_mainColorPassOpenedThisFrame ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
+        if (!s_mainColorPassOpenedThisFrame)
+        {
+            colorTarget.clear_color = s_clearColor;
+        }
+        colorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+        SDL_GPUDepthStencilTargetInfo depthTarget{};
+        depthTarget.texture = s_depthTexture;
+        depthTarget.load_op = s_mainColorPassOpenedThisFrame ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
+        if (!s_mainColorPassOpenedThisFrame)
+        {
+            depthTarget.clear_depth = 1.0f;
+        }
+        depthTarget.store_op = SDL_GPU_STOREOP_STORE;
+        depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+        depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+
+        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
+        if (s_renderPass)
+        {
+            ReplayCommandRange(s_replayedCmdCount, s_renderCmds.size(), boneDataReady);
+            SDL_EndGPURenderPass(s_renderPass);
+            s_renderPass = nullptr;
+        }
+
+        s_mainColorPassOpenedThisFrame = true;
+        s_replayedCmdCount = s_renderCmds.size();
+
+        // Commands recorded after this point must not merge backward into a command from the
+        // pass that just closed -- same reasoning as the post-RmlUi callback's identical reset
+        // below (MergeAdjacentQuadCommand/MergeAdjacentTriangleCommand would otherwise grow an
+        // already-replayed, already-closed command instead of appending a new one).
+        s_previousDrawCommands.fill(kNoDrawCommand);
+    }
+
+    void EndFrame() override
+    {
+        if (!s_frameActive)
+        {
+            // Frame was not started (minimized window or error).
+            if (s_cmdBuf)
+            {
+                SDL_CancelGPUCommandBuffer(s_cmdBuf);
+                s_cmdBuf = nullptr;
+            }
+            FailPendingFrameReadback();
+            return;
+        }
+        s_frameActive = false;
+
+        // ---------------------------------------------------------------
+        // Phase 1: stage this frame's remaining accumulated vertex/bone/strip/texture data
+        // (StageDeferredGpuData is safe to call again even if FlushRenderCommands already
+        // called it earlier this same frame -- see its own comment).
+        // ---------------------------------------------------------------
+        const bool boneDataReady = StageDeferredGpuData();
+
         // ---------------------------------------------------------------
         // Phase 3: Render pass — replay all recorded draw commands.
         // The GPU vertex/index buffers now contain current-frame data.
@@ -1936,6 +2108,18 @@ public:
         SDL_GPUTexture* const frameColorTexture = s_frameReadbackTexture    ? s_frameReadbackTexture
                                                   : reconnectCaptureTexture ? reconnectCaptureTexture
                                                                             : s_swapchainTexture;
+
+        // FlushRenderCommands (if it ran earlier this frame) only ever writes to s_swapchainTexture
+        // directly -- a readback/capture frame's substituted frameColorTexture never received that
+        // content, so it must always be treated as fresh (CLEAR, full replay) regardless of
+        // s_mainColorPassOpenedThisFrame; re-replaying already-flushed commands here is harmless
+        // (a different render target, not double-visible) and is how this rare frame recovers the
+        // otherwise-flushed content for its capture. The common case (frameColorTexture is the
+        // swapchain) honors whatever FlushRenderCommands already established.
+        const bool targetingSwapchain = frameColorTexture == s_swapchainTexture;
+        const bool clearThisPass = !targetingSwapchain || !s_mainColorPassOpenedThisFrame;
+        const std::size_t replayStart = targetingSwapchain ? s_replayedCmdCount : 0u;
+
         bool renderPassCompleted = false;
         if (IsFrameTimingEnabled())
         {
@@ -1947,87 +2131,41 @@ public:
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
-            colorTarget.clear_color = s_clearColor;
-            colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+            colorTarget.load_op = clearThisPass ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+            if (clearThisPass)
+            {
+                colorTarget.clear_color = s_clearColor;
+            }
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
             SDL_GPUDepthStencilTargetInfo depthTarget{};
             depthTarget.texture = s_depthTexture;
-            depthTarget.clear_depth = 1.0f;
-            depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+            depthTarget.load_op = clearThisPass ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+            if (clearThisPass)
+            {
+                depthTarget.clear_depth = 1.0f;
+            }
             depthTarget.store_op = SDL_GPU_STOREOP_STORE;
             depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
             depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
-            depthTarget.cycle = true;
+            depthTarget.cycle = clearThisPass;
 
             s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
         }
 
         if (s_renderPass)
         {
-            // Track explicit state. Pipeline changes re-apply the active scissor because
-            // SDL GPU backends may discard it while binding a new pipeline.
-            SDL_GPUViewport s_currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH),
-                                              0.0f, 1.0f};
-            SDL_Rect s_currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
-
-            // Replay state and editor commands after texture invalidation, but skip
-            // game draws because their deferred texture pointers may be dangling.
-            Render::SdlGpuReplayState replayState;
-            for (const auto& cmd : s_renderCmds)
-            {
-                if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
-                {
-                    continue;
-                }
-                ++s_dbgRenderCmdsReplayedThisFrame;
-
-                switch (cmd.type)
-                {
-                case RenderCmdType::SetViewport:
-                {
-                    s_currentViewport = cmd.viewport;
-                    if (replayState.SelectViewport(s_currentViewport))
-                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
-                    break;
-                }
-
-                case RenderCmdType::SetScissor:
-                {
-                    s_currentScissor = cmd.scissor;
-                    if (replayState.SelectScissor(s_currentScissor))
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    break;
-                }
-
-#ifdef _EDITOR
-                case RenderCmdType::EditorOverlay:
-                {
-                    g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
-                    replayState.Invalidate();
-                    if (replayState.SelectViewport(s_currentViewport))
-                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
-                    if (replayState.SelectScissor(s_currentScissor))
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    break;
-                }
-#endif
-
-                case RenderCmdType::DrawTriangles:
-                case RenderCmdType::DrawSkinnedTriangles:
-                case RenderCmdType::DrawIndexedQuads:
-                case RenderCmdType::DrawIndexedStrip:
-                case RenderCmdType::DrawTriangles2D:
-                {
-                    ReplayDrawCommand(cmd, boneDataReady, s_currentScissor, replayState);
-                    break;
-                }
-                } // switch
-            } // for
+            ReplayCommandRange(replayStart, s_renderCmds.size(), boneDataReady);
 
             SDL_EndGPURenderPass(s_renderPass);
             s_renderPass = nullptr;
             renderPassCompleted = true;
+
+            if (targetingSwapchain)
+            {
+                s_mainColorPassOpenedThisFrame = true;
+                s_replayedCmdCount = s_renderCmds.size();
+            }
         }
 
         if (reconnectCaptureTexture && frameColorTexture != reconnectCaptureTexture)
@@ -2064,6 +2202,133 @@ public:
                     s_cmdBuf = nullptr;
                 }
                 ReleaseFrameReadbackTexture();
+            }
+        }
+
+        // RmlUi port: fires after this frame's own game content is fully recorded onto s_cmdBuf
+        // (the blit-to-swapchain above) but before it's submitted -- see SetPreSubmitCallback's
+        // own comment (MuRenderer.h) for why this exact spot is the only correct one. Skipped on
+        // a frame that took the readback branch above and already submitted+nulled s_cmdBuf
+        // early (screenshot capture); RmlUi simply doesn't render that one frame, matching this
+        // path's existing "screenshots don't include the frame that happened to overlap them"
+        // character rather than adding new complexity to cover it.
+        if (s_cmdBuf && s_preSubmitCallback)
+        {
+            s_preSubmitCallback();
+        }
+
+        // RmlUi port: content that must sit visually on top of RmlUi (the game cursor, legacy
+        // CUITextInputBox text -- see SetPostRmlUiCallback's own comment, MuRenderer.h). Fires
+        // after RmlUi's own render pass (opened/closed inside s_preSubmitCallback above) has
+        // closed, so this needs its OWN render pass rather than reusing the main one above: the
+        // main pass's replay loop (and the s_renderCmds it consumes) already ran and closed
+        // before s_preSubmitCallback fired, so anything the callback below pushes via the normal
+        // RenderQuad2D-style functions lands at the *tail* of s_renderCmds, past what that loop
+        // already replayed -- it would otherwise sit unreplayed until next frame's BeginFrame()
+        // clears it away unseen (dropped, not delayed). LOAD_OP_LOAD (not CLEAR) on both targets
+        // so this stacks on top of the main pass's content and RmlUi's, rather than erasing them.
+        if (s_cmdBuf && s_postRmlUiCallback)
+        {
+            const std::size_t postUiCmdStart = s_renderCmds.size();
+
+            // RenderQuad2D/RenderTriangles/etc. all early-return on !s_frameActive, which was
+            // set false at the very top of this function -- correct for the normal "recording"
+            // window (BeginFrame..EndFrame's own replay), but this callback runs deep inside
+            // EndFrame, after that window closed. Without this, every draw call the callback
+            // makes (RenderCursor, CLoginWin::RenderTextOnTop) is silently dropped -- no warning,
+            // no crash, just nothing on screen. Restored to false right after: nothing past this
+            // point should still be recording new frame content.
+            // Also reset the per-family "previous draw command" merge tracking (normally only
+            // reset once per frame, in BeginFrame): it's a persistent index into s_renderCmds
+            // that survives across this whole function, unaware of postUiCmdStart above. Without
+            // this, MergeAdjacentQuadCommand/MergeAdjacentTriangleCommand happily merge the
+            // callback's draws (RenderCursor's quad, say) backward into the LAST matching
+            // command from the main pass -- one that was already replayed and closed several
+            // lines up -- growing its vtxCount/idxCount instead of appending a new command here.
+            // That command is never replayed again, so the merged-in geometry silently never
+            // renders: s_renderCmds.size() doesn't even grow, so postUiCmdStart's own "were any
+            // commands pushed" check below sees nothing happened, no crash, no warning.
+            s_previousDrawCommands.fill(kNoDrawCommand);
+
+            s_frameActive = true;
+            s_postRmlUiCallback();
+            s_frameActive = false;
+
+            // Re-stage vertex data: UploadVertices() (RenderQuad2D etc., called by the callback
+            // above) only appends to the CPU-side s_vtxScratch and advances s_vtxOffset -- it does
+            // NOT touch the GPU. The actual transfer-buffer map+memcpy and the copy-pass that
+            // moves it into s_vtxGpuBuf (what ReplayDrawCommand's SDL_BindGPUVertexBuffers
+            // actually reads) already ran once, early in this function ("Phase 1"), using
+            // whatever s_vtxOffset was BEFORE this callback grew it further. Without redoing both
+            // steps here, every draw command the callback just pushed references a byte range in
+            // s_vtxGpuBuf that was never written this frame (stale/uninitialized GPU memory) --
+            // explains why the draw calls "succeed" (valid buffer/offsets, no validation error)
+            // yet nothing recognizable ever appears on screen. Re-copying the whole scratch
+            // buffer (not just the delta) is simplest and correct: offsets already used by the
+            // main pass are unchanged, only the tail is new.
+            if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset))
+            {
+                void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, true);
+                if (mapped)
+                {
+                    std::memcpy(mapped, s_vtxScratch.data(), s_vtxOffset);
+                    SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
+
+                    SDL_GPUCopyPass* postUiCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
+                    if (postUiCopyPass)
+                    {
+                        SDL_GPUTransferBufferLocation vtxSrc{};
+                        vtxSrc.transfer_buffer = s_vtxTransferBuf;
+                        vtxSrc.offset = 0;
+
+                        SDL_GPUBufferRegion vtxDst{};
+                        vtxDst.buffer = s_vtxGpuBuf;
+                        vtxDst.offset = 0;
+                        vtxDst.size = s_vtxOffset;
+
+                        SDL_UploadToGPUBuffer(postUiCopyPass, &vtxSrc, &vtxDst, true);
+                        SDL_EndGPUCopyPass(postUiCopyPass);
+                    }
+                }
+                else
+                {
+                    mu::log::Get("render")->warn(
+                        "SDL_gpu -- failed to map vertex transfer buffer for post-RmlUi re-stage: {}",
+                        SDL_GetError());
+                }
+            }
+
+            if (s_renderCmds.size() > postUiCmdStart)
+            {
+                SDL_GPUColorTargetInfo postUiColorTarget{};
+                postUiColorTarget.texture = s_swapchainTexture;
+                postUiColorTarget.load_op = SDL_GPU_LOADOP_LOAD;
+                postUiColorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+                SDL_GPUDepthStencilTargetInfo postUiDepthTarget{};
+                postUiDepthTarget.texture = s_depthTexture;
+                postUiDepthTarget.load_op = SDL_GPU_LOADOP_LOAD;
+                postUiDepthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+                postUiDepthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+                postUiDepthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+
+                // ReplayDrawCommand/BindReplayPipeline (inside ReplayCommandRange) bind against
+                // the global s_renderPass directly, not a parameter -- assign it here (matching
+                // the main pass's own SDL_BeginGPURenderPass call above, which does the same), not
+                // just a local. Assigning only a local here left every SDL_Bind*/SDL_Draw* call
+                // inside them targeting the *already-nulled* s_renderPass from the main pass's own
+                // close (a few lines up) -- SDL_GPU silently no-ops a null render pass rather
+                // than crashing, which is why this had no visible symptom beyond "nothing drawn".
+                s_renderPass = SDL_BeginGPURenderPass(
+                    s_cmdBuf, &postUiColorTarget, 1, s_depthTexture ? &postUiDepthTarget : nullptr);
+                if (s_renderPass)
+                {
+                    ReplayCommandRange(postUiCmdStart, s_renderCmds.size(), boneDataReady);
+                    s_replayedCmdCount = s_renderCmds.size();
+
+                    SDL_EndGPURenderPass(s_renderPass);
+                    s_renderPass = nullptr;
+                }
             }
         }
 
@@ -2449,6 +2714,41 @@ public:
             mu::log::Get("render")->warn("SDL_gpu -- GetDevice() called before Init() or after Shutdown()");
         }
         return s_device;
+    }
+
+    // RmlUi port: SDL_Window* accessor, mirrors GetDevice() above.
+    [[nodiscard]] SDL_Window* GetWindow() override
+    {
+        return s_window;
+    }
+
+    // RmlUi port: current frame's command buffer + swapchain texture, for
+    // RenderInterface_SDL_GPU::BeginFrame(). Null/zero outside BeginFrame()/EndFrame() --
+    // s_cmdBuf and s_swapchainTexture are reset at the top of BeginFrame() and s_cmdBuf is
+    // cleared to nullptr once submitted in EndFrame(), so this naturally reflects that window
+    // without extra bookkeeping here.
+    [[nodiscard]] FrameGpuContext GetFrameGpuContext() override
+    {
+        return FrameGpuContext{s_cmdBuf, s_swapchainTexture, s_swapW, s_swapH};
+    }
+
+    // RmlUi port: looks up s_textureMap directly rather than going through ResolveTextureId(),
+    // since RmlUi needs the actual SDL_GPUTexture* to hand to its own vendored backend, not a
+    // resolved logical id.
+    [[nodiscard]] void* GetRawTexture(std::uint32_t textureId) override
+    {
+        auto it = s_textureMap.find(textureId);
+        return it != s_textureMap.end() ? it->second : nullptr;
+    }
+
+    void SetPreSubmitCallback(std::function<void()> callback) override
+    {
+        s_preSubmitCallback = std::move(callback);
+    }
+
+    void SetPostRmlUiCallback(std::function<void()> callback) override
+    {
+        s_postRmlUiCallback = std::move(callback);
     }
 
     // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.

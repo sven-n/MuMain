@@ -37,6 +37,14 @@ namespace CfgKeys
     // UI
     inline constexpr wchar_t CfgKeyUILocale[] = L"Locale";
     inline constexpr wchar_t CfgKeyFont[]     = L"Font";
+    // Active RmlUi theme name ("legacy"/"modern"), Data/Interface/RmlUi/themes/<name>/. Not yet
+    // a full runtime hot-swap -- read once at startup. See UI::RmlBridge::RmlTheme.
+    inline constexpr wchar_t CfgKeyRmlTheme[] = L"RmlTheme";
+    // Global RmlUi UI scale, as a percentage (100 = normal). Drives
+    // Rml::Context::SetDensityIndependentPixelRatio() -- see UI/RmlBridge/RmlTheme's sibling
+    // doc, docs/rmlui-ui-system/layout-and-scaling.md. Only RCSS authored in `dp` units responds
+    // to this; existing `px`-authored windows are unaffected until retrofitted.
+    inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
@@ -75,6 +83,14 @@ namespace CfgDefaults
     // Windows, fontconfig "sans-serif" on Linux), so the look is unchanged until
     // the user picks a font. Any value is passed through as the GDI face name.
     inline constexpr wchar_t CfgDefaultFont[] = L"";
+
+    // "legacy" reproduces the pre-RmlUi look with programmatic RCSS and no sprite dependency.
+    // Defaults to legacy so nothing changes for existing players until they opt in.
+    inline constexpr wchar_t CfgDefaultRmlTheme[] = L"legacy";
+
+    // 100% = unscaled. {75, 100, 125, 150} is the initially-supported set (see the in-game
+    // options UI, once one exists) -- the underlying mechanism accepts any positive value.
+    inline constexpr int CfgDefaultUIScalePercent = 100;
 
     // Legacy config compatibility only. SDL GPU ignores this key and default.
     inline constexpr bool CfgDefaultCoreProfile = true;

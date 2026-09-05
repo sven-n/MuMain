@@ -1,0 +1,25 @@
+<rml>
+<head>
+	<title>Character Select Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="char_sel_main.rcss"/>
+</head>
+<body data-model="char_sel_main">
+	<!-- Character-select button bar. #panel spans the whole screen as a pure positioning
+	     container (pointer-events:none); every child anchors to a screen edge/corner via
+	     base.rcss's anchor-* classes with a fixed dp size. -->
+	<div id="panel">
+		<div id="deco" class="deco anchor-bottom-right"></div>
+		<div id="info_bar" class="info-bar stretch-x"></div>
+		<div id="btn_create" class="btn-icon anchor-bottom-left" data-class-disabled="create_disabled" data-event-click="charsel_create_click"><span class="btn-icon-label">+</span></div>
+		<div id="btn_menu" class="btn-icon anchor-bottom-left" data-event-click="charsel_menu_click"><span class="btn-icon-label">M</span></div>
+		<div id="btn_connect" class="btn-icon anchor-bottom-right" data-class-disabled="connect_disabled" data-event-click="charsel_connect_click"><span class="btn-icon-label">GO</span></div>
+		<div id="btn_delete" class="btn-icon anchor-bottom-right" data-class-disabled="delete_disabled" data-event-click="charsel_delete_click"><span class="btn-icon-label">X</span></div>
+	</div>
+	<!-- Rarely shown (account has an item-blocked character); fixed, centered position independent of #panel. -->
+	<div id="account_block_message" data-class-hidden="account_block_hidden">
+		<div class="line-row"><span class="line">{{account_block_line1}}</span></div>
+		<div class="line-row"><span class="line">{{account_block_line2}}</span></div>
+	</div>
+</body>
+</rml>

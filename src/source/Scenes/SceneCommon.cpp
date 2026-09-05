@@ -38,20 +38,20 @@ bool& EnableMainRender = g_sceneInit.LegacyRefEnableMainRender();
 // Scene Common Utilities
 //=============================================================================
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/NewUI/HUD/Notices.h"
+#include "UI/HUD/Notices.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Audio/DSPlaySound.h"
 #include "App/Platform/Windows/Local.h"
 #include "I18N/All.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
 
 // External variable declarations (defined in ZzzScene.cpp or other files)
 extern wchar_t AbuseFilter[][20];
@@ -278,12 +278,12 @@ void RenderInfomation()
 {
     UI::Notices::Render();
 
-    CUIMng::Instance().Render();
+    CSceneUICoordinator::Instance().Render();
 
-    if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE)
-    {
-        RenderCursor();
-    }
+    // The login/character-scene cursor render that used to happen here moved to
+    // Winmain.cpp's SetPostRmlUiCallback registration, which fires after RmlUi's own render
+    // pass -- RmlUi always renders after this point in the frame, so drawing the cursor here
+    // (before it) let an opaque RmlUi panel visually cover it.
 
     RenderInfomation3D();
 }

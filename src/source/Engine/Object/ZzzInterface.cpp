@@ -4,9 +4,10 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
 #include "Core/Platform/Imm.h"
-#include "UI/Legacy/UIManager.h"
-#include "UI/Legacy/TextSearch.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Widgets/TextSearch.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Core/Input/UiInputRouter.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -38,23 +39,23 @@
 #include "GameLogic/NPCs/npcBreeder.h"
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CSParts.h"
-#include "UI/Legacy/UIMapName.h"	// rozy
+#include "UI/HUD/UIMapName.h"	// rozy
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Events/Event.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "GameLogic/Events/w_CursedTemple.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Scaling/UITransform.h"
 #include "World/MapInfra/w_MapHeaders.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Items/ChangeRingManager.h"
-#include "UI/NewUI/HUD/NewUIGensRanking.h"
+#include "UI/HUD/NewUIGensRanking.h"
 #include "GameLogic/Social/MonkSystem.h"
 #include "Character/CharacterManager.h"
 #include "MUHelper/MuHelper.h"
@@ -533,7 +534,7 @@ bool CheckWall(int sx1, int sy1, int sx2, int sy2)
 
 bool CheckAttack_Fenrir(CHARACTER* c)
 {
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -694,7 +695,7 @@ bool CheckAttack_Fenrir(CHARACTER* c)
 
 bool CheckAttack()
 {
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return false;
     }
@@ -933,7 +934,7 @@ bool CheckAttack()
 
 int	getTargetCharacterKey(CHARACTER* c, int selected)
 {
-    if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem())
+    if (mu::ui::window::CInventoryCtrl::GetPickedItem())
     {
         return -1;
     }
@@ -1160,7 +1161,7 @@ void ReloadArrow()
 
         bool Success = false;
 
-        if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF && SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+        if (gCharacterManager.GetBaseClass(CharacterAttribute->Class) == CLASS_ELF && mu::ui::window::CInventoryCtrl::GetPickedItem() == NULL)
         {
             rp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT];
             lp = &CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT];
@@ -1172,25 +1173,25 @@ void ReloadArrow()
             if ((gCharacterManager.GetEquipedBowType(lp) == BOWTYPE_BOW) && (rp->Type == -1))
             {
                 ITEM* pItem = g_pMyInventory->FindItem(Index);
-                SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
+                mu::ui::window::CInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
                 if (pItem)
                 {
                     SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_RIGHT);
                 }
                 g_pMyInventory->DeleteItem(Index);
-                g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             else
                 if ((gCharacterManager.GetEquipedBowType(rp) == BOWTYPE_CROSSBOW) && (lp->Type == -1))
                 {
                     ITEM* pItem = g_pMyInventory->FindItem(Index);
-                    SEASON3B::CNewUIInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
+                    mu::ui::window::CInventoryCtrl::CreatePickedItem(g_pMyInventory->GetInventoryCtrl(), pItem);
                     if (pItem)
                     {
                         SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, Index, pItem, STORAGE_TYPE::INVENTORY, EQUIPMENT_WEAPON_LEFT);
                     }
                     g_pMyInventory->DeleteItem(Index);
-                    g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::ArrowsReloaded, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
         }
     }
@@ -1198,7 +1199,7 @@ void ReloadArrow()
     {
         if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::NoMoreArrows) == FALSE)
         {
-            g_pSystemLogBox->AddText(I18N::Game::NoMoreArrows, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::NoMoreArrows, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
     }
 }
@@ -1514,7 +1515,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
             wchar_t Text[256];
             mu_swprintf(Text, I18N::Game::InventoryIsFull);
 
-            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
             OBJECT* pItem = &(Items[ItemKey].Object);
             pItem->Position[2] = RequestTerrainHeight(pItem->Position[0], pItem->Position[1]) + 3.f;
@@ -1552,7 +1553,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				{
 					wchar_t text[100];
 					mu_swprintf(text, I18N::Game::OnlyLevelAboveDCanDoTheChaosCombination, CHAOS_MIX_LEVEL);
-					g_pSystemLogBox->AddText(text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+					g_pSystemLogBox->AddText(text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 					break;
 				}
 
@@ -1566,8 +1567,8 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 
 				g_pNPCShop->SetRepairShop(isRepairNpc);
 
-				if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST))
-					g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
+				if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST))
+					g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
 
 				if (g_csQuest.IsInit())
 					SocketClient->ToGameServer()->SendLegacyQuestStateRequest();
@@ -1586,13 +1587,13 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 						if (isElf && !altarActive)
 						{
 							if (state > 0)
-								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Get_Temple));
+								mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Get_Temple));
 							else
-								SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Destroy_Set_Temple));
+								mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Destroy_Set_Temple));
 						}
 						else if (isElf && altarActive)
 						{
-							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Ing_Set_Temple));
+							mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Ing_Set_Temple));
 						}
 						else
 						{
@@ -1609,7 +1610,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (!(objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5))
 					{
 						if (objectType == MODEL_NPC_QUARREL)
-							SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterWerwolfMsgBoxLayout));
+							mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMapEnterWerwolfMsgBoxLayout));
 
 						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 					}
@@ -1617,7 +1618,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
 				{
 					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-					SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMapEnterGateKeeperMsgBoxLayout));
+					mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMapEnterGateKeeperMsgBoxLayout));
 				}
 				else if (monsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && monsterIndex <= MONSTER_LITTLE_SANTA_PINK)
 				{
@@ -1629,7 +1630,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					else if (monsterIndex == MONSTER_LITTLE_SANTA_BLUE)
 						mu_swprintf(temp, I18N::Game::ManaHasBeenRecoveredOf100, 100);
 
-					g_pSystemLogBox->AddText(temp, SEASON3B::TYPE_SYSTEM_MESSAGE);
+					g_pSystemLogBox->AddText(temp, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 				}
 				else if (monsterIndex == MONSTER_DELGADO || monsterIndex == MONSTER_LUGARD ||
 					monsterIndex == MONSTER_MARKET_UNION_MEMBER_JULIA || monsterIndex == MONSTER_DAVID)
@@ -1958,20 +1959,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         }
         Name[iTextSize] = 0;
 
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE))
         {
             if (wcscmp(Name, I18N::Game::Exchange) == 0 || wcscmp(Name, I18N::Game::Trade259) == 0 || wcsicmp(Text, L"/trade") == 0)
             {
                 if (gMapManager.InChaosCastle() == true)
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
                     return false;
                 }
 
                 if (::IsStrifeMap(gMapManager.WorldActive))
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                     return false;
                 }
 
@@ -1979,7 +1980,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 
                 if (level < TRADELIMITLEVEL)
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                     return true;
                 }
 
@@ -1998,14 +1999,14 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_ERROR_MESSAGE);
                             return true;
                         }
 
                         SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                         wchar_t message[100]{};
                         mu_swprintf(message, I18N::Game::YouHaveRequestedSToTrade, c->ID);
-                        g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                     }
                 }
                 else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2019,7 +2020,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     {
                         if (IsShopInViewport(c))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                             return true;
                         }
 
@@ -2029,7 +2030,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                             SocketClient->ToGameServer()->SendTradeRequest(c->Key);
                             wchar_t message[100]{};
                             mu_swprintf(message, I18N::Game::YouHaveRequestedSToTrade, c->ID);
-                            g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                            g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                             break;
                         }
                     }
@@ -2047,20 +2048,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             int level = CharacterAttribute->Level;
             if (level >= 6)
             {
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
             }
             else
             {
                 wchar_t szError[48] = L"";
                 mu_swprintf(szError, I18N::Game::OnlyAboveLevelDCanUse, 6);
-                g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(szError, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
             return true;
         }
@@ -2068,25 +2069,25 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             if (::IsStrifeMap(gMapManager.WorldActive))
             {
-                g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CannotApplyInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 
             if (
-                g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+                g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
                 )
             {
-                g_pSystemLogBox->AddText(I18N::Game::StoreCanTBeOpened, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::StoreCanTBeOpened, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             wchar_t szCmd[24];
@@ -2137,20 +2138,20 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         if (wcscmp(Text, I18N::Game::ViewStoreOn) == 0)
         {
             ShowShopTitles();
-            g_pSystemLogBox->AddText(I18N::Game::CanViewPersonalStoreWindow, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CanViewPersonalStoreWindow, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
 
         if (wcscmp(Text, I18N::Game::ViewStoreOff) == 0)
         {
             HideShopTitles();
-            g_pSystemLogBox->AddText(I18N::Game::CannotViewPersonalStoreWindow, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CannotViewPersonalStoreWindow, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         if (wcscmp(Text, I18N::Game::DuelChallenge) == 0 || wcsicmp(Text, L"/duelstart") == 0)
         {
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// UILD_WAR_EVENT
@@ -2161,7 +2162,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                 {
                     wchar_t szError[48] = L"";
                     mu_swprintf(szError, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
-                    g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(szError, mu::ui::window::TYPE_ERROR_MESSAGE);
                     return 3;
                 }
                 else
@@ -2196,7 +2197,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             }
             else
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
         }
         if (wcscmp(Text, I18N::Game::DuelCancel) == 0 || wcsicmp(Text, L"/duelend") == 0)
@@ -2204,7 +2205,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
 #ifndef GUILD_WAR_EVENT
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
 #endif// GUILD_WAR_EVENT
@@ -2217,12 +2218,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus != G_NONE)
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -2238,7 +2239,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                     wchar_t Text[100];
                     mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourGuild, c->ID);
-                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2258,7 +2259,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         SocketClient->ToGameServer()->SendGuildJoinRequest(c->Key);
                         wchar_t Text[100];
                         mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourGuild, c->ID);
-                        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -2271,12 +2272,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (Hero->GuildStatus == G_NONE)
             {
-                g_pSystemLogBox->AddText(I18N::Game::DoNotBelongToTheGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::DoNotBelongToTheGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -2346,12 +2347,12 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
         {
             if (gMapManager.InChaosCastle() == true)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTBeInChaosCastle, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return false;
             }
             if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != 0)
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 return true;
             }
 
@@ -2365,7 +2366,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                     SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                     wchar_t Text[100];
                     mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourParty, c->ID);
-                    g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
@@ -2382,7 +2383,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
                         SocketClient->ToGameServer()->SendPartyInviteRequest(c->Key);
                         wchar_t Text[100];
                         mu_swprintf(Text, I18N::Game::YouHaveRequestedSToJoinYourParty, c->ID);
-                        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                         break;
                     }
                 }
@@ -2471,7 +2472,7 @@ bool CheckCommand(wchar_t* Text, bool bMacroText)
             {
                 g_csItemOption.ClearOptionHelper();
 
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_ITEM_EXPLANATION);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
 
                 ItemHelp = i;
                 PlayBuffer(SOUND_CLICK01);
@@ -2536,7 +2537,9 @@ void Attack(CHARACTER* c)
 {
     const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
         WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
-    if ((MouseOnWindow || mouseOnHud) && MouseLButtonPush)
+    // Core::Input::IsMouseOverUI() added as a 4th gate here too (2026-08-31) -- same rationale as
+    // the duplicate check in Input/Selection.cpp's SelectObjects(), kept in sync with it.
+    if ((MouseOnWindow || mouseOnHud || Core::Input::IsMouseOverUI()) && MouseLButtonPush)
     {
         MouseRButtonPop = false;
         MouseRButtonPush = false;
@@ -2598,7 +2601,7 @@ void Attack(CHARACTER* c)
                 Hero->Object.m_bySkillCount = 0;
                 Skill = AT_SKILL_NOVA_BEGIN;
             }
-            SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             MouseRButtonPush = false;
             Success = true;
         }
@@ -2699,7 +2702,7 @@ void CheckGate()
                         if (((i >= 45 && i <= 49) || (i >= 55 && i <= 56)) &&
                             ((CharacterMachine->Equipment[EQUIPMENT_HELPER].Type >= ITEM_HORN_OF_UNIRIA && CharacterMachine->Equipment[EQUIPMENT_HELPER].Type <= ITEM_HORN_OF_DINORANT)))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_ERROR_MESSAGE);
                         }
                         else if ((62 <= i && i <= 65) &&
                             !((CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_WING && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_WINGS_OF_DARKNESS
@@ -2712,26 +2715,26 @@ void CheckGate()
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type >= ITEM_CAPE_OF_FIGHTER && CharacterMachine->Equipment[EQUIPMENT_WING].Type <= ITEM_CAPE_OF_OVERRULE)
                                 || (CharacterMachine->Equipment[EQUIPMENT_WING].Type == ITEM_WING + 135)))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_ERROR_MESSAGE);
 
                             if (CharacterAttribute->Level < Level)
                             {
                                 wchar_t Text[100];
                                 mu_swprintf(Text, I18N::Game::OnlyCharactersOverLevelDCanEnter, Level);
-                                g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
+                                g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_ERROR_MESSAGE);
                             }
                         }
 
                         else if ((62 <= i && i <= 65) && (CharacterMachine->Equipment[EQUIPMENT_HELPER].Type == ITEM_HORN_OF_UNIRIA))
                         {
-                            g_pSystemLogBox->AddText(I18N::Game::YouCannotWarpWhileRidingOnAUnicorn, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(I18N::Game::YouCannotWarpWhileRidingOnAUnicorn, mu::ui::window::TYPE_ERROR_MESSAGE);
                         }
                         else if (CharacterAttribute->Level < Level)
                         {
                             LoadingWorld = 50;
                             wchar_t Text[100];
                             mu_swprintf(Text, I18N::Game::OnlyCharactersOverLevelDCanEnter, Level);
-                            g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
+                            g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_ERROR_MESSAGE);
                             //							return;
                         }
                         else
@@ -3091,7 +3094,7 @@ void MoveHero()
             int RightType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].Type;
             int LeftType = CharacterMachine->Equipment[EQUIPMENT_WEAPON_LEFT].Type;
 
-            SEASON3B::CNewUIPickedItem* pPickedItem = SEASON3B::CNewUIInventoryCtrl::GetPickedItem();
+            mu::ui::window::CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
 
             if (!pPickedItem && RightType == -1 &&
                 ((LeftType >= ITEM_SWORD && LeftType < ITEM_MACE + MAX_ITEM_INDEX)
@@ -3187,8 +3190,8 @@ void MoveHero()
                     }
             }
             else if (SelectedNpc != -1
-                && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-                && !g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
+                && !g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+                && !g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
                 )
             {
                 // Talking to an NPC opens a window (dialogue/quest/shop). The physical button is
@@ -4009,7 +4012,7 @@ void RenderCursor()
         else
             RenderBitmap(BITMAP_CURSOR, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
     }
-    else if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND))
+    else if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND))
     {
         if (g_pCommandWindow->GetMouseCursor() == CURSOR_IDSELECT)
         {
@@ -4024,10 +4027,10 @@ void RenderCursor()
             RenderBitmap(BITMAP_CURSOR + 1, (float)MouseX - 2.f, (float)MouseY - 2.f, 24.f, 24.f);
         }
     }
-    else if (((g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INVENTORY_EXT))
+    else if (((g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY) || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INVENTORY_EXT))
         && g_pMyInventory->GetRepairMode() == SEASON3B::REPAIR_MODE_ON)
-        || (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-            && g_pNPCShop->GetShopState() == SEASON3B::CNewUINPCShop::SHOP_STATE_REPAIR)
+        || (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+            && g_pNPCShop->GetShopState() == mu::ui::window::CNPCShop::SHOP_STATE_REPAIR)
         )
     {
         if (MouseLButton == false)
@@ -4245,13 +4248,13 @@ bool IsIllegalMovementByUsingMsg(const wchar_t* szChatText)
 
     if (bCantSwim && bMoveAtlans)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotGoToAtlansWhileRidingAUnicorn, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 
     if ((bCantFly || bEquipChangeRing) && bMoveIcarus)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanEnterIcarusOnlyWithWingsDinorantFenrirr, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return true;
     }
 

@@ -1,0 +1,82 @@
+/* Modern theme for the character-select scene's button bar -- flat programmatic icon buttons, no
+   legacy sprite art. Icon-only buttons get a short plain-ASCII label (.btn-icon-label) instead of
+   real art. Positioning matches legacy's anchor-*/dp retrofit exactly. */
+
+#panel {
+	position: absolute;
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	bottom: 11dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-3);
+	border: 1dp token(border-metal);
+	border-radius: token(radius-md)dp;
+	text-align: center;
+	line-height: 30dp;
+}
+#btn_create { left: 22dp; }
+#btn_menu   { left: 77dp; }
+#btn_connect { right: 77dp; }
+#btn_delete  { right: 22dp; }
+
+/* font-family/size redeclared directly here (not inherited from #panel) -- this document's
+   data-model bindings make inheritance silently fail for this text in this RmlUi build. */
+.btn-icon-label {
+	color: token(text-body);
+	font-weight: bold;
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}
+
+.btn-icon:hover {
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
+}
+.btn-icon.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+	background-color: token(surface-3);
+	border: 1dp token(border-metal);
+}
+
+.deco {
+	display: none;
+}
+
+.info-bar {
+	position: absolute;
+	left: 133dp;
+	right: 133dp;
+	bottom: 15dp;
+	height: 21dp;
+	background-color: rgba(0, 0, 0, 143);
+	pointer-events: none;
+}
+
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330dp;
+	width: 640dp;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18dp;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: token(text-title);
+	background-color: token(semantic-danger);
+	white-space: nowrap;
+	padding: 0 2dp;
+	font-family: "token(font-body)";
+}

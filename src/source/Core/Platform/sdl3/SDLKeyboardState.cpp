@@ -1,25 +1,17 @@
-// Story 2.2.1: SDL3 Keyboard Input Migration [VS1-SDL-INPUT-KEYBOARD]
-// Story 2.2.3: SDL3 Text Input Migration [VS1-SDL-INPUT-TEXT]
-// Defines the g_sdl3KeyboardState array (indexed by SDL_Scancode, size 512),
-// the g_szSDLTextInput / g_bSDLTextInputReady
-// globals, and MuStartTextInput() / MuStopTextInput() lifecycle functions.
+// Story 2.2.1/2.2.3's original keyboard-state array, text-input buffer, and
+// MuStartTextInput()/MuStopTextInput() lifecycle functions were deleted 2026-09-04 -- confirmed
+// zero readers/callers anywhere (their only writer, Core::Platform::SDLEventLoop, was itself dead:
+// zero call sites; the live input loop is Winmain.cpp::MainLoop()'s own inline SDL_PollEvent loop,
+// which already calls SDL_StartTextInput()/SDL_StopTextInput() directly rather than through these
+// functions). See docs/rmlui-ui-system/STATUS.md's "three parallel input-tracking systems" finding
+// for the broader context this was found in.
 //
 // Separated from PlatformCompat.h to keep logging implementation details
 // out of every translation unit that includes PlatformCompat.h.
 // Compiled with the project PCH (stdafx.h) via MUPlatform REUSE_FROM MUCore.
 
-
 #include "Core/Platform/WinCompat.h"
-#include "Core/Platform/MuPlatform.h"
-#include "Core/Platform/IPlatformWindow.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#include <SDL3/SDL.h>
-
-// Keyboard state array: true when the key at that SDL_Scancode index is held.
-// Populated by SDLEventLoop::PollEvents() on KEY_DOWN / KEY_UP events.
-// Cleared in HandleFocusLoss() to prevent stuck keys on Alt-Tab.
-// Size matches SDL_NUM_SCANCODES (512 in SDL3 release-3.2.8).
-bool g_sdl3KeyboardState[512] = {};
 
 // Logs a cursor warp failure via the post-mortem error log.
 // Called by the SetCursorPos() shim in PlatformCompat.h.
@@ -27,43 +19,4 @@ bool g_sdl3KeyboardState[512] = {};
 void MuPlatformLogMouseWarpFailed(const char* sdlError)
 {
     mu::log::Get("platform")->error("MU_ERR_MOUSE_WARP_FAILED [VS1-SDL-INPUT-MOUSE]: cursor warp failed: {}", sdlError);
-}
-
-// SDL text input buffer — populated by SDL_EVENT_TEXT_INPUT in SDLEventLoop::PollEvents().
-// Up to SDL_TEXTINPUTEVENT_TEXT_SIZE (32) UTF-8 bytes per event.
-// Declared extern in PlatformCompat.h for access by CUITextInputBox::DoActionSub().
-// [VS1-SDL-INPUT-TEXT]
-char g_szSDLTextInput[32] = {};
-bool g_bSDLTextInputReady = false;
-
-// MuStartTextInput — activate SDL3 text input for the current window.
-// Called by CUITextInputBox::GiveFocus() when a text field gains focus.
-// SDL3: SDL_StartTextInput(SDL_Window*) requires the window pointer (changed from SDL2).
-// [VS1-SDL-INPUT-TEXT]
-void MuStartTextInput()
-{
-    SDL_Window* pWnd = static_cast<SDL_Window*>(
-        mu::MuPlatform::GetWindow() ? mu::MuPlatform::GetWindow()->GetNativeHandle() : nullptr);
-    if (pWnd != nullptr)
-    {
-        SDL_StartTextInput(pWnd);
-        mu::log::Get("platform")->debug("[VS1-SDL-INPUT-TEXT] SDL_StartTextInput activated");
-    }
-    else
-    {
-        mu::log::Get("platform")->error("MU_ERR_TEXT_START_FAILED [VS1-SDL-INPUT-TEXT]: no SDL window available");
-    }
-}
-
-// MuStopTextInput — deactivate SDL3 text input for the current window.
-// Called by CUITextInputBox::SetState(UISTATE_HIDE) when a text field loses focus/hides.
-// [VS1-SDL-INPUT-TEXT]
-void MuStopTextInput()
-{
-    SDL_Window* pWnd = static_cast<SDL_Window*>(
-        mu::MuPlatform::GetWindow() ? mu::MuPlatform::GetWindow()->GetNativeHandle() : nullptr);
-    if (pWnd != nullptr)
-    {
-        SDL_StopTextInput(pWnd);
-    }
 }

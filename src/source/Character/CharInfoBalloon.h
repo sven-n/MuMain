@@ -14,6 +14,14 @@
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
 
+// RmlUi migration: this class stays a CSprite purely for its geometry (GetWidth/GetHeight, the
+// anchor-offset semantics CSprite::Create's trailing args establish) -- Render() no longer draws
+// anything itself. It still does the per-frame CameraProjection::WorldToScreen() + SetPosition()
+// math every call (matching the original exactly, since this position must track the character's
+// live 3D position/camera every frame, not just once), so CCharInfoBalloonMng can read the result
+// back via GetXPos()/GetYPos() and push it into the shared RmlUi balloon-array model. See
+// docs/rmlui-ui-system/README.md for how a real-pixel-positioned overlay composites correctly
+// over 3D content in this renderer.
 class CCharInfoBalloon : public CSprite
 {
 protected:
@@ -32,6 +40,14 @@ public:
     void Render();
 
     void SetInfo();
+
+    // Read-only accessors for CCharInfoBalloonMng::SyncRmlModel() -- the cached text/color fields
+    // SetInfo() computes, unchanged in shape from before, just no longer consumed by a direct
+    // g_pRenderText call inside this class.
+    const wchar_t* GetName() const { return m_szName; }
+    const wchar_t* GetGuildText() const { return m_szGuild; }
+    const wchar_t* GetClassText() const { return m_szClass; }
+    DWORD GetNameColor() const { return m_dwNameColor; }
 
 private:
     // Re-runs SetInfo() on locale change so the cached guild / class

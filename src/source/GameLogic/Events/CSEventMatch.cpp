@@ -2,7 +2,7 @@
 //  CSEventMatch.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
@@ -11,8 +11,8 @@
 #include "CSEventMatch.h"
 #include "I18N/All.h"
 
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Core/NewUISystem.h"
 
 #include <algorithm>
 #include <chrono>
@@ -205,8 +205,8 @@ void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRa
 
     memcpy(m_MatchResult, pMatchResult, m_iNumResult * sizeof(MatchResult));
 
-    SEASON3B::TMsgBoxLayoutContainer<SEASON3B::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
-    SEASON3B::CreateMessageBox(msgBoxLayout);
+    mu::ui::window::TMsgBoxLayoutContainer<mu::ui::window::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
+    mu::ui::window::CreateMessageBox(msgBoxLayout);
 }
 
 void CSDevilSquareMatch::RenderMatchTimes(void)

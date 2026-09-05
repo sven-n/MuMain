@@ -21,4 +21,12 @@ namespace UI::Login
     // The current answer. The caller applies it and then clears it.
     RememberPasswordChoice RememberPasswordChoiceState();
     void ClearRememberPasswordChoice();
+
+    // Polls Enter/Esc while the dialog is Pending, resolving it the same way its OK/Cancel
+    // buttons do. Call once per frame from a caller that's still ticking while the dialog owns
+    // input (CLoginWin::UpdateWhileShow() does this today) -- RmlUi's own Keydown routing to an
+    // unfocused document (this dialog has no naturally-focused element) is unverified in this
+    // engine's integration, so this reuses the polling idiom CLoginWin's own OK/Cancel already
+    // uses rather than introducing that as a new, unverified event path.
+    void Tick();
 }

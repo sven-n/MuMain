@@ -1,0 +1,241 @@
+/* Modern theme for the active-buff icon strip -- shares the identical icon atlas as legacy (real
+   buff icons, nothing to simplify away); only a cosmetic border/radius per icon plus the tooltip
+   box styling differ. */
+
+#panel {
+	top: 15dp;
+	width: 200dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	pointer-events: none;
+}
+
+.buff-slot {
+	position: absolute;
+	width: 20dp;
+	height: 28dp;
+}
+
+.buff-icon-art {
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 20dp;
+	height: 28dp;
+	pointer-events: auto;
+	border: 1dp token(border-metal);
+	border-radius: 2dp;
+	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
+}
+
+/* @spritesheet declarations are per-stylesheet, duplicated identically from
+   themes/legacy/buff_strip.rcss (same source art). */
+@spritesheet buff-atlas-1
+{
+	src: "../../../newui_statusicon.jpg";
+	atlas1-0: 0px 0px 20px 28px;
+	atlas1-1: 20px 0px 20px 28px;
+	atlas1-2: 40px 0px 20px 28px;
+	atlas1-3: 60px 0px 20px 28px;
+	atlas1-4: 80px 0px 20px 28px;
+	atlas1-5: 100px 0px 20px 28px;
+	atlas1-6: 120px 0px 20px 28px;
+	atlas1-7: 140px 0px 20px 28px;
+	atlas1-8: 160px 0px 20px 28px;
+	atlas1-9: 180px 0px 20px 28px;
+	atlas1-10: 0px 28px 20px 28px;
+	atlas1-11: 20px 28px 20px 28px;
+	atlas1-12: 40px 28px 20px 28px;
+	atlas1-13: 60px 28px 20px 28px;
+	atlas1-14: 80px 28px 20px 28px;
+	atlas1-15: 100px 28px 20px 28px;
+	atlas1-16: 120px 28px 20px 28px;
+	atlas1-17: 140px 28px 20px 28px;
+	atlas1-18: 160px 28px 20px 28px;
+	atlas1-19: 180px 28px 20px 28px;
+	atlas1-20: 0px 56px 20px 28px;
+	atlas1-21: 20px 56px 20px 28px;
+	atlas1-22: 40px 56px 20px 28px;
+	atlas1-23: 60px 56px 20px 28px;
+	atlas1-24: 80px 56px 20px 28px;
+	atlas1-25: 100px 56px 20px 28px;
+	atlas1-26: 120px 56px 20px 28px;
+	atlas1-27: 140px 56px 20px 28px;
+	atlas1-28: 160px 56px 20px 28px;
+	atlas1-29: 180px 56px 20px 28px;
+	atlas1-30: 0px 84px 20px 28px;
+	atlas1-31: 20px 84px 20px 28px;
+	atlas1-32: 40px 84px 20px 28px;
+	atlas1-33: 60px 84px 20px 28px;
+	atlas1-34: 80px 84px 20px 28px;
+	atlas1-35: 100px 84px 20px 28px;
+	atlas1-36: 120px 84px 20px 28px;
+	atlas1-37: 140px 84px 20px 28px;
+	atlas1-38: 160px 84px 20px 28px;
+	atlas1-39: 180px 84px 20px 28px;
+	atlas1-40: 0px 112px 20px 28px;
+	atlas1-41: 20px 112px 20px 28px;
+	atlas1-42: 40px 112px 20px 28px;
+	atlas1-43: 60px 112px 20px 28px;
+	atlas1-44: 80px 112px 20px 28px;
+	atlas1-45: 100px 112px 20px 28px;
+	atlas1-46: 120px 112px 20px 28px;
+	atlas1-47: 140px 112px 20px 28px;
+	atlas1-48: 160px 112px 20px 28px;
+	atlas1-49: 180px 112px 20px 28px;
+	atlas1-50: 0px 140px 20px 28px;
+	atlas1-51: 20px 140px 20px 28px;
+	atlas1-52: 40px 140px 20px 28px;
+	atlas1-53: 60px 140px 20px 28px;
+	atlas1-54: 80px 140px 20px 28px;
+	atlas1-55: 100px 140px 20px 28px;
+	atlas1-56: 120px 140px 20px 28px;
+	atlas1-57: 140px 140px 20px 28px;
+	atlas1-58: 160px 140px 20px 28px;
+	atlas1-59: 180px 140px 20px 28px;
+	atlas1-60: 0px 168px 20px 28px;
+	atlas1-61: 20px 168px 20px 28px;
+	atlas1-62: 40px 168px 20px 28px;
+	atlas1-63: 60px 168px 20px 28px;
+	atlas1-64: 80px 168px 20px 28px;
+	atlas1-65: 100px 168px 20px 28px;
+	atlas1-66: 120px 168px 20px 28px;
+	atlas1-67: 140px 168px 20px 28px;
+	atlas1-68: 160px 168px 20px 28px;
+	atlas1-69: 180px 168px 20px 28px;
+	atlas1-70: 0px 196px 20px 28px;
+	atlas1-71: 20px 196px 20px 28px;
+	atlas1-72: 40px 196px 20px 28px;
+	atlas1-73: 60px 196px 20px 28px;
+	atlas1-74: 80px 196px 20px 28px;
+	atlas1-75: 100px 196px 20px 28px;
+	atlas1-76: 120px 196px 20px 28px;
+	atlas1-77: 140px 196px 20px 28px;
+	atlas1-78: 160px 196px 20px 28px;
+	atlas1-79: 180px 196px 20px 28px;
+	atlas1-80: 0px 224px 20px 28px;
+	atlas1-81: 20px 224px 20px 28px;
+	atlas1-82: 40px 224px 20px 28px;
+	atlas1-83: 60px 224px 20px 28px;
+	atlas1-84: 80px 224px 20px 28px;
+	atlas1-85: 100px 224px 20px 28px;
+	atlas1-86: 120px 224px 20px 28px;
+	atlas1-87: 140px 224px 20px 28px;
+	atlas1-88: 160px 224px 20px 28px;
+	atlas1-89: 180px 224px 20px 28px;
+}
+
+@spritesheet buff-atlas-2
+{
+	src: "../../../newui_statusicon2.jpg";
+	atlas2-0: 0px 0px 20px 28px;
+	atlas2-1: 20px 0px 20px 28px;
+	atlas2-2: 40px 0px 20px 28px;
+	atlas2-3: 60px 0px 20px 28px;
+	atlas2-4: 80px 0px 20px 28px;
+	atlas2-5: 100px 0px 20px 28px;
+	atlas2-6: 120px 0px 20px 28px;
+	atlas2-7: 140px 0px 20px 28px;
+	atlas2-8: 160px 0px 20px 28px;
+	atlas2-9: 180px 0px 20px 28px;
+	atlas2-10: 0px 28px 20px 28px;
+	atlas2-11: 20px 28px 20px 28px;
+	atlas2-12: 40px 28px 20px 28px;
+	atlas2-13: 60px 28px 20px 28px;
+	atlas2-14: 80px 28px 20px 28px;
+	atlas2-15: 100px 28px 20px 28px;
+	atlas2-16: 120px 28px 20px 28px;
+	atlas2-17: 140px 28px 20px 28px;
+	atlas2-18: 160px 28px 20px 28px;
+	atlas2-19: 180px 28px 20px 28px;
+	atlas2-20: 0px 56px 20px 28px;
+	atlas2-21: 20px 56px 20px 28px;
+	atlas2-22: 40px 56px 20px 28px;
+	atlas2-23: 60px 56px 20px 28px;
+	atlas2-24: 80px 56px 20px 28px;
+	atlas2-25: 100px 56px 20px 28px;
+	atlas2-26: 120px 56px 20px 28px;
+	atlas2-27: 140px 56px 20px 28px;
+	atlas2-28: 160px 56px 20px 28px;
+	atlas2-29: 180px 56px 20px 28px;
+	atlas2-30: 0px 84px 20px 28px;
+	atlas2-31: 20px 84px 20px 28px;
+	atlas2-32: 40px 84px 20px 28px;
+	atlas2-33: 60px 84px 20px 28px;
+	atlas2-34: 80px 84px 20px 28px;
+	atlas2-35: 100px 84px 20px 28px;
+	atlas2-36: 120px 84px 20px 28px;
+	atlas2-37: 140px 84px 20px 28px;
+	atlas2-38: 160px 84px 20px 28px;
+	atlas2-39: 180px 84px 20px 28px;
+	atlas2-40: 0px 112px 20px 28px;
+	atlas2-41: 20px 112px 20px 28px;
+	atlas2-42: 40px 112px 20px 28px;
+	atlas2-43: 60px 112px 20px 28px;
+	atlas2-44: 80px 112px 20px 28px;
+	atlas2-45: 100px 112px 20px 28px;
+	atlas2-46: 120px 112px 20px 28px;
+	atlas2-47: 140px 112px 20px 28px;
+	atlas2-48: 160px 112px 20px 28px;
+	atlas2-49: 180px 112px 20px 28px;
+	atlas2-50: 0px 140px 20px 28px;
+	atlas2-51: 20px 140px 20px 28px;
+	atlas2-52: 40px 140px 20px 28px;
+	atlas2-53: 60px 140px 20px 28px;
+	atlas2-54: 80px 140px 20px 28px;
+	atlas2-55: 100px 140px 20px 28px;
+	atlas2-56: 120px 140px 20px 28px;
+	atlas2-57: 140px 140px 20px 28px;
+	atlas2-58: 160px 140px 20px 28px;
+	atlas2-59: 180px 140px 20px 28px;
+	atlas2-60: 0px 168px 20px 28px;
+	atlas2-61: 20px 168px 20px 28px;
+	atlas2-62: 40px 168px 20px 28px;
+	atlas2-63: 60px 168px 20px 28px;
+	atlas2-64: 80px 168px 20px 28px;
+	atlas2-65: 100px 168px 20px 28px;
+	atlas2-66: 120px 168px 20px 28px;
+	atlas2-67: 140px 168px 20px 28px;
+	atlas2-68: 160px 168px 20px 28px;
+	atlas2-69: 180px 168px 20px 28px;
+	atlas2-70: 0px 196px 20px 28px;
+	atlas2-71: 20px 196px 20px 28px;
+	atlas2-72: 40px 196px 20px 28px;
+	atlas2-73: 60px 196px 20px 28px;
+	atlas2-74: 80px 196px 20px 28px;
+	atlas2-75: 100px 196px 20px 28px;
+	atlas2-76: 120px 196px 20px 28px;
+	atlas2-77: 140px 196px 20px 28px;
+	atlas2-78: 160px 196px 20px 28px;
+	atlas2-79: 180px 196px 20px 28px;
+	atlas2-80: 0px 224px 20px 28px;
+	atlas2-81: 20px 224px 20px 28px;
+	atlas2-82: 40px 224px 20px 28px;
+	atlas2-83: 60px 224px 20px 28px;
+	atlas2-84: 80px 224px 20px 28px;
+	atlas2-85: 100px 224px 20px 28px;
+	atlas2-86: 120px 224px 20px 28px;
+	atlas2-87: 140px 224px 20px 28px;
+	atlas2-88: 160px 224px 20px 28px;
+	atlas2-89: 180px 224px 20px 28px;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 32dp;
+	left: 0dp;
+	width: 160dp;
+	white-space: pre-line;
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-metal);
+	color: #ffffff;
+	padding: 3dp 5dp;
+	border-radius: token(radius-sm)dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	pointer-events: none;
+}
+.buff-slot:hover .tooltip {
+	display: block;
+}

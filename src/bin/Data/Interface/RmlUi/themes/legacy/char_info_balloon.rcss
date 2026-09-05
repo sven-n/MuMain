@@ -1,0 +1,46 @@
+/* Legacy theme for the character-select scene's per-character name/guild/level tags
+   (CCharInfoBalloonMng). Source art: character_ex.tga (118x54, single frame). */
+
+@spritesheet charballoon-bg-sheet
+{
+	src: "../../../character_ex.tga";
+	charballoon-bg-image: 0px 0px 118px 54px;
+}
+
+.balloon {
+	position: absolute;
+	width: 118px;
+	height: 54px;
+	pointer-events: none;
+	font-family: "Liberation Sans";
+	color: white;
+}
+.balloon-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 118px;
+	height: 54px;
+	decorator: image(charballoon-bg-image);
+}
+
+.balloon-name, .balloon-guild, .balloon-class {
+	position: absolute;
+	left: 0;
+	width: 118px;
+	text-align: center;
+	white-space: nowrap;
+	font-size: 12px;
+}
+.balloon-name {
+	top: 6px;
+	/* color pushed per-instance (data-style-color). */
+}
+.balloon-guild {
+	top: 22px;
+	color: #ffffff;
+}
+.balloon-class {
+	top: 38px;
+	color: #ffd927;
+}

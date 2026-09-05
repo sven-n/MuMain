@@ -1,0 +1,322 @@
+/* Shared, cross-window RCSS for the modern theme: generic (non-positional) rules reused by more
+   than one migrated window, plus the anchor/center/stretch layout utility classes every window
+   uses. Every migrated window's <head> links this file first, then its own per-window positional
+   .rcss.
+
+   Colors/borders/shadows below are named against the token table in
+   docs/rmlui-ui-system/modern-theme-visual-direction.md -- keep the trailing token-name comment
+   next to each value; that table is the source of truth, this file is its first application.
+
+   Depth primitives (.modern-frame/.modern-panel/.modern-inset, .btn/.checkbox-box below) simulate
+   raised/recessed physical surfaces without box-shadow, which this engine's RenderInterface can't
+   composite (confirmed broken -- see the token doc). The substitute is per-side border-color
+   bevels (RmlUi supports border-top/right/bottom/left-color as independent properties) plus
+   `decorator: linear-gradient(...)`, which IS a real working decorator here (proven by
+   main_frame.rcss's gauge fills before this). Light source is fixed upper-left throughout: a
+   RAISED surface gets a lighter top/left border and a lighter gradient corner there, darker
+   bottom/right; a RECESSED surface inverts both. Never mix the two directions on one element. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
+#backdrop {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: token(surface-0);
+	pointer-events: auto;
+}
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* 2026-09-03: matches login.rcss's own checkbox exactly (that file can't reference this rule --
+   it doesn't link base.rcss, see login.rcss's own note -- so the values are duplicated by hand;
+   keep the two in sync if either changes). A real gradient + bevel border, not the flat
+   bevel-only version this used before -- nothing else currently uses .checkbox-box (grepped, only
+   login.rml does, and it has its own copy), so this had no visible effect on anything else. */
+.checkbox-box {
+	display: inline-block;
+	width: 16dp;
+	height: 16dp;
+	background-color: #0b0907;
+	decorator: linear-gradient(to bottom, #211b15, #0b0907);
+	border-width: 1dp;
+	border-color: #725b39;
+	border-top-color: rgba(0, 0, 0, 180);
+	border-radius: token(radius-sm)dp;
+}
+.checkbox-box.checked {
+	background-color: #604319;
+	decorator: linear-gradient(to bottom, #a47732, #604319); /* accent-gold family */
+	border-color: token(accent-gold);
+}
+.checkbox-label {
+	position: absolute;
+	left: 21dp;
+	top: 1dp;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+}
+
+/* Flat (per feedback -- no gradient fill/bevel), but the border carries a faint steel tint at rest
+   that brightens into a real steel glow on hover. Gray surface stays the base material; steel is
+   the accent, not the structure -- gold is reserved for text emphasis/item-skill highlights, not
+   general chrome (see modern-theme-visual-direction.md). */
+.btn {
+	position: absolute;
+	width: 108dp;
+	height: 30dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	color: token(text-body);
+	font-family: "token(font-body)";
+	background-color: #34373a;
+	border: 1dp rgba(176, 186, 196, 90); /* faint accent-steel */
+	border-radius: token(radius-md)dp;
+	pointer-events: auto;
+}
+.btn:hover {
+	background-color: #454950;
+	border-color: token(accent-steel-bright);
+}
+.btn:active {
+	/* Native :active pseudo-class, unverified against this branch's own mouse-input routing
+	   (RmlUi's default SDL translation is bypassed here for unrelated reasons -- see README.md's
+	   Gotchas). Degrades gracefully if it never fires. */
+	background-color: #222426;
+	border-color: rgba(190, 160, 110, 130);
+}
+.btn.disabled {
+	pointer-events: none;
+	background-color: #2a2c2e;
+	color: token(semantic-neutral);
+	border-color: rgba(140, 146, 152, 60); /* stays neutral when disabled, no gold */
+	opacity: 0.55;
+	cursor: default;
+}
+
+/* 2026-09-03: opt-in primary/hero variant -- apply alongside .btn (class="btn btn-ok") for a
+   window's one confirm-style action; plain .btn above stays flat/neutral, unaffected, still the
+   right choice for a list of equal-weight actions (sys_menu.rcss's four stacked menu buttons).
+   Exact same accent-crimson gradient/bevel as login.rcss's own .btn (that file has its own copy,
+   same reason as .checkbox-box above -- it doesn't link base.rcss). Overrides only color
+   properties, not layout -- .btn's own position/size/border-width apply underneath. Must stay
+   textually after .btn/.btn:hover/.btn:active above (equal specificity once combined with .btn on
+   the same element, source order decides). */
+.btn-ok {
+	background-color: #35100e;
+	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e); /* accent-crimson family */
+	border-color: #0a0706;
+	border-top-color: rgba(213, 143, 106, 115);
+}
+.btn-ok:hover {
+	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
+	border-color: #9a6841;
+}
+.btn-ok:active {
+	border-top-color: rgba(180, 92, 68, 65);
+	border-bottom-color: rgba(0, 0, 0, 200);
+}
+.btn-ok.disabled {
+	/* .btn.disabled's own flat neutral background-color/border-color/opacity already apply
+	   (two-class selector, same specificity as this rule, doesn't touch decorator either way).
+	   This rule's own job is just resetting decorator to none -- two classes here beats .btn-ok's
+	   one-class decorator declaration on specificity alone, not source order. Without it, the
+	   crimson gradient decorator paints over/hides the disabled neutral fill entirely, since
+	   decorators composite on top of background-color. */
+	decorator: none;
+}
+
+/* Reusable window-layering primitives. Intended usage: apply .modern-frame to the outer
+   positioned panel element itself (it keeps that element's own position/size), then add ONE
+   decorative child div with .modern-panel, inset a few px on all sides, as the FIRST child (so it
+   paints behind real content, same convention as .layout-anchor/.panel-header) -- the small
+   reveal between the frame's inner edge and the panel's own border is deliberate, it's the
+   frame's own material showing as a third visual band. Real content stays direct children of the
+   .modern-frame element at their original positions -- do NOT nest content inside .modern-panel,
+   its inset would shift every child's effective position.
+
+   These are documented as "reusable" since 2026-09-02 but were unused by every window, login.rcss
+   included, until 2026-09-03 -- there's no CSS variable mechanism on this engine (confirmed, see
+   modern-theme-visual-direction.md), so a shared class can only carry *structural* properties
+   (border-width, the bevel/gradient mechanism) portably; a window's own specific palette (login's
+   warm bronze/crimson, say) still has to come from somewhere. The pattern that actually closes
+   that gap, proven by .btn/.btn-ok above: keep .modern-frame/.modern-panel as generic gray
+   defaults, and add a *named palette variant* modifier class per distinct look a window
+   contributes (e.g. .modern-frame-crimson below, extracted from login.rcss's own #panel) instead
+   of leaving every window to hand-roll its own copy of the whole bevel mechanism from scratch.
+   Apply both classes together (class="modern-frame modern-frame-crimson"); the variant only
+   overrides color/decorator properties, .modern-frame's own border-width/mechanism still applies
+   underneath. Window-specific structural values (width, height, border-radius, the exact inset
+   used for a "leaves room for a header above" child panel) stay the consuming window's own
+   responsibility either way -- these classes were never meant to carry position/size, see the
+   original usage note above. */
+.modern-frame {
+	background-color: rgba(38, 40, 42, 190);
+	decorator: linear-gradient(to bottom, rgba(58, 62, 66, 190) 0%, rgba(38, 40, 42, 190) 40%, rgba(20, 21, 22, 190) 100%);
+	border-width: 2dp;
+	border-top-color: rgba(200, 205, 210, 160); /* bevel-light: brighter than the fill for a real edge-catch */
+	border-left-color: rgba(200, 205, 210, 160);
+	border-bottom-color: rgba(0, 0, 0, 190); /* bevel-dark */
+	border-right-color: rgba(0, 0, 0, 190);
+}
+.modern-panel {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
+	pointer-events: none;
+	background-color: token(surface-1);
+	decorator: linear-gradient(to bottom, rgba(28, 29, 30, 180) 0%, rgba(16, 17, 18, 180) 100%);
+	border-width: 1dp;
+	border-top-color: rgba(0, 0, 0, 140); /* bevel-dark-inset: recessed relative to the frame */
+	border-left-color: rgba(0, 0, 0, 140);
+	border-bottom-color: rgba(255, 255, 255, 20); /* bevel-light-inset */
+	border-right-color: rgba(255, 255, 255, 20);
+	border-radius: 8dp;
+}
+
+/* Cool gray/metallic near-black palette variant -- extracted from login.rcss's own
+   #panel/.login-content, the first real consumer of these primitives. Apply alongside
+   .modern-frame/.modern-panel (class="modern-frame modern-frame-crimson"), not instead of them.
+   Despite the name this isn't crimson itself (that's accent-crimson, reserved for a primary
+   button/banner, see modern-theme-visual-direction.md's Accent colors) -- it's the dark neutral
+   *base* those accent colors and the dialog's own warm text sit on top of, kept under its
+   original "-crimson" name for now even though the frame material itself is no longer warm --
+   text (title/body) and the checkbox stay their original warm/gold treatment deliberately;
+   only the frame/panel material itself goes cool gray/metallic. */
+.modern-frame-crimson {
+	background-color: #19191b;
+	decorator: linear-gradient(to bottom, #26262a, #19191b 28%, #141416);
+	border-top-color: rgba(190, 196, 204, 90); /* cool steel highlight catching the top edge */
+	border-left-color: rgba(0, 0, 0, 160);
+	border-right-color: rgba(0, 0, 0, 160);
+	border-bottom-color: rgba(0, 0, 0, 220);
+}
+.modern-panel-crimson {
+	background-color: #121214;
+	decorator: linear-gradient(to bottom, #1a1a1d, #121214 55%, #0d0d0f);
+	border-top-color: rgba(176, 186, 196, 45);
+	border-bottom-color: rgba(0, 0, 0, 240);
+	border-left-color: #08080a;
+	border-right-color: #08080a;
+}
+
+/* Thin accent line just inside .modern-frame -- border only, no fill, so the frame's own gradient
+   still shows through it. Extracted from login.rcss's .frame-accent (2026-09-03); apply as a
+   direct child of .modern-frame, inset a few px more than .modern-panel so .modern-panel's own
+   position/size stays exactly as documented above -- this is a fourth visual band, not a
+   replacement for the frame/panel pair. Position/size (left/right/top/bottom/border-radius) stay
+   the consuming window's own responsibility, same as .modern-frame/.modern-panel themselves. */
+.modern-frame-accent {
+	position: absolute;
+	pointer-events: none;
+	border-width: 1dp;
+}
+.modern-frame-accent-crimson {
+	border-color: rgba(140, 146, 152, 166); /* cool steel, was warm bronze */
+	border-top-color: token(accent-steel-bright);
+	border-bottom-color: rgba(0, 0, 0, 200);
+}
+
+/* Border-only recessed bevel, no fill -- for an element with legacy-drawn content painted
+   underneath it (RmlUi always composites last, so any fill here would hide that content; see
+   login.rcss's .input-frame comment for a concrete example). Gives the "sunk into the panel"
+   read from the border bevel alone. */
+.modern-inset {
+	border-width: 1dp;
+	border-top-color: rgba(0, 0, 0, 190); /* bevel-dark-inset */
+	border-left-color: rgba(0, 0, 0, 190);
+	border-bottom-color: rgba(255, 255, 255, 35); /* bevel-light-inset */
+	border-right-color: rgba(255, 255, 255, 35);
+}
+.modern-inset.focused {
+	border-top-color: token(accent-steel);
+	border-left-color: rgba(176, 186, 196, 170);
+}
+
+.hidden {
+	display: none;
+}
+
+/* Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- identical to
+   themes/legacy/base.rcss's copy; pure layout, nothing theme-specific to vary. */
+
+.anchor-top-left {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.anchor-top-right {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.anchor-bottom-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.anchor-bottom-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+.center-x {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+.center-both {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.stretch-x {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+.stretch-y {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.stretch-both {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset() -- see themes/legacy/base.rcss's
+   identical comment for the full mechanism. */
+.layout-anchor {
+	position: absolute;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}

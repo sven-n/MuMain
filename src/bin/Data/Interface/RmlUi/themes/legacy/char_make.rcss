@@ -1,0 +1,141 @@
+/* Legacy theme for the character-creation dialog (CCharMakeWin). Only idle/checked button frames
+   are reproduced. Stat/description panels were always flat CSprite fills in the original, so
+   they're plain background-color here too. */
+
+@spritesheet charmake-input-sheet
+{
+	src: "../../../cha_id.tga";
+	charmake-input-image: 0px 0px 346px 38px;
+}
+@spritesheet charmake-job-sheet
+{
+	src: "../../../cha_bt.tga";
+	charmake-job-unchecked: 0px 0px 108px 26px;
+	charmake-job-checked:   0px 78px 108px 26px;
+}
+@spritesheet charmake-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	charmake-ok-idle: 0px 0px 54px 30px;
+}
+@spritesheet charmake-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	charmake-cancel-idle: 0px 0px 54px 30px;
+}
+
+/* 2026-09-03: see themes/modern/char_make.rcss's own comment -- width/height and every child's
+   left/top below are now static RCSS instead of C++-pushed, except #panel's own left/top itself
+   (still pushed, genuine screen placement) and the job buttons (genuinely per-instance data via
+   data-for/data-style-*, unaffected either way). Deliberately stays px, not dp -- this panel's
+   real screen position also drives the live 3D character-preview viewport, a separate scale
+   mechanism not touched here; see the modern theme's comment for the full reasoning. */
+#panel {
+	position: absolute;
+	width: 454px;
+	height: 406px;
+	font-family: "Liberation Sans";
+	font-size: 12px;
+	color: white;
+}
+
+#stat_panel  { left: 346px; top: 24px;  }
+#desc_panel  { left: 0px;   top: 355px; }
+#input_frame { left: 0px;   top: 317px; }
+#btn_ok      { left: 346px; top: 325px; }
+#btn_cancel  { left: 400px; top: 325px; }
+
+.job-btn {
+	position: absolute;
+	width: 108px;
+	height: 26px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(charmake-job-unchecked);
+	color: #e2e2e2;
+}
+.job-btn.checked {
+	decorator: image(charmake-job-checked);
+	color: #ffffff;
+}
+.job-btn.disabled {
+	pointer-events: none;
+	color: #777777;
+	cursor: default;
+}
+
+.stat-panel, .desc-panel {
+	position: absolute;
+}
+.stat-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 108px;
+	height: 80px;
+	background-color: rgba(0, 0, 0, 143);
+}
+.stat-bg.tall {
+	height: 96px;
+}
+.desc-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 454px;
+	height: 51px;
+	background-color: rgba(0, 0, 0, 143);
+}
+
+.stat-row {
+	position: absolute;
+	left: 22px;
+}
+.stat-label {
+	color: #ffffff;
+}
+.stat-value {
+	position: absolute;
+	left: 54px;
+	color: #ffb400;
+}
+
+.desc-line {
+	position: absolute;
+	left: 10px;
+	white-space: nowrap;
+}
+
+.input-frame {
+	position: absolute;
+	width: 346px;
+	height: 38px;
+	decorator: image(charmake-input-image);
+	pointer-events: none;
+}
+
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it.
+	   line-height/text-align/vertical-align above are declared explicitly for the same reason as
+	   the modern theme's identical fix (2026-09-03) even though color:transparent hides any
+	   visible effect today -- height already was fixed px here, but this rule shouldn't rely on
+	   inheriting anything from base.rcss's now-dp .btn regardless. */
+	color: transparent;
+}
+.btn-ok {
+	decorator: image(charmake-ok-idle);
+}
+.btn-cancel {
+	decorator: image(charmake-cancel-idle);
+}

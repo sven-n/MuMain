@@ -1,0 +1,107 @@
+/* Modern theme for the MU Helper mini control bar + hero position readout -- flat programmatic
+   chrome, no legacy sprite art. Same layout as themes/legacy/mu_helper_bar.rcss. */
+
+#panel {
+	position: absolute;
+	width: 207dp;
+	height: 25dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	background-color: rgba(20, 20, 20, 180);
+	border: 1dp token(border-metal);
+	border-radius: token(radius-sm)dp;
+}
+
+/* No legacy seam art -- the three segments collapse into #panel's own flat fill; elements stay in
+   the document (data bindings target them by id) but render nothing of their own. */
+#seg_a, #seg_b, #seg_c {
+	display: none;
+}
+
+#text {
+	position: absolute;
+	left: 10dp;
+	top: 5dp;
+	width: 132dp;
+	height: 9dp;
+	text-align: center;
+	color: token(text-body);
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.mu-btn {
+	position: absolute;
+	top: 2dp;
+	width: 18dp;
+	height: 13dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-3);
+	border: 1dp token(border-metal);
+	border-radius: 2dp;
+}
+.mu-btn:hover {
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
+}
+#btn_config { left: 153dp; }
+#btn_start  { left: 171dp; }
+#btn_stop   { left: 171dp; }
+
+/* Plain colored dot per button (no icon art) -- config: neutral, start: success, stop: danger. */
+.dot {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 6dp;
+	height: 6dp;
+	transform: translate(-50%, -50%);
+	border-radius: 3dp;
+	pointer-events: none;
+}
+#btn_config .dot { background-color: #9a958c; } /* semantic-neutral */
+#btn_start .dot  { background-color: #6fae6f; } /* semantic-success */
+#btn_stop .dot   { background-color: #b2394a; } /* semantic-danger */
+
+/* Siblings of .mu-btn (mu_helper_bar.rml), not nested children -- this build's shrink-to-fit
+   width hard-clamps to the containing block (main_frame.rcss's own tooltip comment documents the
+   same finding), so a tooltip nested inside an 18dp-wide button was clamped to ~18dp regardless of
+   its own text length -- the reported "background fill is the same size as the button" bug. As a
+   sibling of #panel (207dp wide) instead, shrink-to-fit has real room to work with.
+
+   2026-09-03: given an explicit width (100dp) rather than left to shrink-to-fit, and positioned
+   via a precomputed static `left` (button center minus half that width) instead of
+   translateX(-50%) -- main_frame.rcss's own tooltips used that same combination and it produced a
+   real bug there (hover rendered with no visible background, floating at the wrong position; read
+   TransformUtilities.cpp -- `%` in a transform resolves against the element's own
+   already-computed border-box, which isn't reliably available yet exactly when `display` flips
+   from none to block on :hover). Fixed proactively here the same way rather than waiting for a
+   report against this file specifically -- same suspect combination, same fix. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 18dp;
+	width: 100dp;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-metal);
+	color: #ffffff;
+	padding: 2dp 4dp;
+	border-radius: token(radius-sm)dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	pointer-events: none;
+}
+/* left = button center (button's own left + half its 18dp width) minus half this tooltip's 100dp
+   width. */
+.tooltip-config { left: 112dp; } /* button center 162dp */
+.tooltip-start,
+.tooltip-stop   { left: 130dp; } /* button center 180dp */
+#btn_config:hover ~ .tooltip-config,
+#btn_start:hover ~ .tooltip-start,
+#btn_stop:hover ~ .tooltip-stop {
+	display: block;
+	z-index: 1;
+}

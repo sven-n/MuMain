@@ -1,0 +1,43 @@
+/* Modern theme for the character-select scene's per-character name/guild/level tags -- flat,
+   semi-transparent rounded backing instead of legacy sprite art. */
+
+.balloon {
+	position: absolute;
+	width: 118px;
+	height: 54px;
+	pointer-events: none;
+	font-family: "token(font-body)";
+	color: token(text-body);
+}
+.balloon-bg {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 118px;
+	height: 54px;
+	background-color: rgba(0, 0, 0, 110);
+	border: 1px token(border-metal);
+	border-radius: 6px;
+}
+
+.balloon-name, .balloon-guild, .balloon-class {
+	position: absolute;
+	left: 0;
+	width: 118px;
+	text-align: center;
+	white-space: nowrap;
+	font-size: 12px;
+	font-family: "token(font-body)";
+}
+.balloon-name {
+	top: 6px;
+	font-weight: bold;
+}
+.balloon-guild {
+	top: 22px;
+	color: token(text-body);
+}
+.balloon-class {
+	top: 38px;
+	color: token(accent-gold);
+}

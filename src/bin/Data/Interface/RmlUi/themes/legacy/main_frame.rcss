@@ -1,0 +1,342 @@
+/* Legacy theme for CNewUIMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. #bars binds
+   left/top/scale live from C++ (tracks the still-legacy center-band chrome's own window-size
+   scale); #buttons/#exp nest inside #bars in main_frame.rml to inherit that transform, so their
+   own coordinates below are plain reference pixels (px, not dp -- an ancestor scale already
+   covers UI-scale-equivalent behavior; dp here would double-scale). Gauge fills reuse the real
+   legacy gauge textures via named sprites, stretched to the fill div's live height. Numeric
+   readouts use plain text instead of the legacy digit-sprite atlas. Buttons reproduce only the
+   idle/panel-open sprite frames, hover is a brightness filter. */
+
+#bars {
+	position: absolute;
+	transform-origin: left top;
+	font-family: "Liberation Sans";
+	font-size: 9px;
+	width: 640px;
+	height: 39px;
+}
+#item_hotkey_anchor, #skill_list_anchor { left: 0px; top: 0px; }
+/* 2026-09-03: pointer-events:auto added -- these never opted back into pointer-events from
+   body's inherited `none` (base.rcss's documented pointer-events trap), so #bar_hp:hover ~
+   .tooltip-hp etc. below could never actually fire; the HP/MP/AG/SD tooltips were never once
+   shown since this HUD shipped, in either theme (found the same bug in modern's own copy of this
+   file, fixed there too). */
+.gauge-slot {
+	position: absolute;
+	pointer-events: auto;
+}
+#bar_hp   { left: 158px; top: 432px; width: 45px; height: 39px; }
+#bar_sd   { left: 204px; top: 431px; width: 16px; height: 39px; }
+#bar_ag   { left: 420px; top: 431px; width: 16px; height: 39px; }
+#bar_mp   { left: 437px; top: 432px; width: 45px; height: 39px; }
+
+/* Fills bottom-up (height = filled fraction). Real gauge art via named sprites (top 39px of each
+   source, the only portion the legacy UV math ever sampled). */
+@spritesheet mainframe-gauge-hp-sheet { src: "../../../newui_menu_red.jpg";   mainframe-gauge-hp:   0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-hpp-sheet { src: "../../../newui_menu_green.jpg"; mainframe-gauge-hp-poisoned: 0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-mp-sheet { src: "../../../newui_menu_blue.jpg";  mainframe-gauge-mp:   0px 0px 45px 39px; }
+@spritesheet mainframe-gauge-ag-sheet { src: "../../../newui_menu_ag.jpg";    mainframe-gauge-ag:   0px 0px 16px 39px; }
+@spritesheet mainframe-gauge-sd-sheet { src: "../../../newui_menu_sd.jpg";    mainframe-gauge-sd:   0px 0px 16px 39px; }
+
+.gauge-fill {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+}
+.gauge-fill-horizontal { display: none; }
+.gauge-fill-hp { decorator: image(mainframe-gauge-hp); }
+.gauge-fill-hp.poisoned { decorator: image(mainframe-gauge-hp-poisoned); }
+.gauge-fill-mp { decorator: image(mainframe-gauge-mp); }
+.gauge-fill-ag { decorator: image(mainframe-gauge-ag); }
+.gauge-fill-sd { decorator: image(mainframe-gauge-sd); }
+
+.gauge-num {
+	position: absolute;
+	left: 0;
+	bottom: 2px;
+	width: 100%;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Tooltips are siblings of their trigger (not nested descendants) so their containing block is
+   the wide #bars/#buttons group, not the narrow trigger itself -- this build's shrink-to-fit
+   width hard-clamps to the containing block, so a nested tooltip could never grow past its
+   trigger's own width. Each needs its own explicit `left` (no shared 50%) and a z-index bump so a
+   later sibling's opaque background doesn't paint over it.
+
+   2026-09-03: explicit width added -- being a sibling of the wide #bars group wasn't enough on
+   its own in modern's identical setup (reported: "background does not fully fill the text");
+   fixed the same way there, applying the same fix here proactively since the structure (and
+   presumably the bug) is identical. Sidesteps shrink-to-fit entirely rather than the exact
+   remaining mechanism.
+
+   2026-09-03 (second fix, same day): also dropped `transform: translateX(-50%)` -- once the box
+   got a real width, modern's identical setup rendered hover text with no visible background,
+   floating near the top of the screen. Root cause (see modern's own main_frame.rcss comment on
+   this same fix): `%` in a transform resolves against the element's own already-computed
+   border-box (TransformUtilities.cpp), which isn't reliably available yet for an element that's
+   `display:none` until the exact moment it flips to `:hover`. Every `left` below is now a
+   precomputed static value (original anchor minus half the fixed 160px width) instead of relying
+   on the transform to center it -- applies to every tooltip in this file, not just HP/MP/AG/SD,
+   since they all share this one base .tooltip rule (#buttons -- unlike modern's separate,
+   unscaled #top_right_row -- nests inside #bars here too, per this file's own header comment, so
+   .tooltip-cshop etc. below are equally exposed). */
+.tooltip {
+	display: none;
+	position: absolute;
+	width: 160px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+}
+.tooltip-hp { left: 100.5px; } /* anchor 180.5px */
+.tooltip-sd { left: 132px;   } /* anchor 212px */
+.tooltip-ag { left: 348px;   } /* anchor 428px */
+.tooltip-mp { left: 379.5px; } /* anchor 459.5px */
+#bar_hp:hover ~ .tooltip-hp,
+#bar_sd:hover ~ .tooltip-sd,
+#bar_ag:hover ~ .tooltip-ag,
+#bar_mp:hover ~ .tooltip-mp,
+#exp:hover .tooltip {
+	display: block;
+	z-index: 1;
+}
+#bars .tooltip { bottom: 44px; }
+
+/* Buttons: nested inside #bars, plain reference-pixel position next to the mana bar. */
+@spritesheet mainframe-btn-cshop-sheet   { src: "../../../partCharge1/newui_menu_Bt05.jpg"; mainframe-btn-cshop-normal: 0px 0px 30px 41px; mainframe-btn-cshop-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-chainfo-sheet { src: "../../../partCharge1/newui_menu_Bt01.jpg"; mainframe-btn-chainfo-normal: 0px 0px 30px 41px; mainframe-btn-chainfo-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-myinven-sheet { src: "../../../partCharge1/newui_menu_Bt02.jpg"; mainframe-btn-myinven-normal: 0px 0px 30px 41px; mainframe-btn-myinven-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-friend-sheet  { src: "../../../partCharge1/newui_menu_Bt03.jpg"; mainframe-btn-friend-normal: 0px 0px 30px 41px; mainframe-btn-friend-open: 0px 82px 30px 41px; }
+@spritesheet mainframe-btn-window-sheet  { src: "../../../partCharge1/newui_menu_Bt04.jpg"; mainframe-btn-window-normal: 0px 0px 30px 41px; mainframe-btn-window-open: 0px 82px 30px 41px; }
+
+#buttons {
+	position: absolute;
+	left: 488px;
+	top: 429px;
+	width: 300px;
+	height: 41px;
+}
+.frame-btn {
+	position: absolute;
+	top: 0px;
+	width: 30px;
+	height: 41px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.frame-btn:hover { filter: brightness(1.25); }
+
+.btn-icon-label { display: none; }
+/* #item_slots stays fully hidden -- Q/W/E/R are baked into the real IMAGE_MENU_1 sprite art
+   (.slot-hotkey-label below). #skill_slots is NOT hidden (2026-09-02): its own outline/highlight
+   classes (.slot-frame, .selected) are still unstyled here so they stay invisible on their own,
+   but .skill-hotkey-label needs it visible now that the assigned hotkey number moved here from
+   the legacy digit-sprite subscript RenderSkillIcon() used to draw (feedback: "move the legacy
+   subscripts from C++ code to RmlUi scope too ... the legacy theme will rely on rml instead of
+   hardcoded behavior"). */
+#item_slots { display: none; }
+#buttons_top { display: none; }
+#gauge_bg_left, #gauge_bg_right { display: none; }
+.slot-hotkey-label { display: none; }
+
+/* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
+   (NewUIMainFrameWindow.cpp) -- #skill_list_anchor sits at the origin for legacy (own main_frame.rcss,
+   zero shift), so these need no offset the way modern's shifted copy does. Purely a positioning
+   context for .skill-hotkey-label below; #skill_slot_0..4/#current_skill_slot paint nothing of
+   their own here (.slot-frame/.selected are unstyled in this theme). */
+#skill_slots { position: absolute; left: 0; top: 0; }
+#skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_3 { position: absolute; left: 318px; top: 431px; width: 32px; height: 38px; }
+#skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
+#current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
+
+/* Phase 2 (skill list): #skill_slot_0..4/#current_skill_slot are now real click/hover targets
+   (main_frame.rml) -- opt back into pointer-events (inherited `none` from body). */
+#skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
+#current_skill_slot {
+	pointer-events: auto;
+	cursor: pointer;
+}
+
+/* Expanded grid + pet-command row + shared tooltip -- zero shift, same as #skill_slots above
+   (#skill_list_anchor sits at the origin for legacy, see that rule's own comment). SkillCellEntry
+   left/top and the tooltip's own left/top are raw reference-space values straight from
+   CNewUISkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly what the still-legacy
+   icon draw uses for the same cell. Containers stay non-interactive; only .skill-cell opts back
+   into pointer-events, same "container inert, children interactive" pattern as #skill_slots. */
+#skill_grid, #pet_skill_row, #skill_tooltip {
+	position: absolute;
+	left: 0;
+	top: 0;
+	pointer-events: none;
+}
+
+/* No border here (unlike themes/modern/main_frame.rcss's own .skill-cell) -- legacy always draws
+   the real IMAGE_SKILLBOX/IMAGE_SKILLBOX_USE box-frame sprite underneath (NewUIMainFrameWindow.cpp's
+   Render(), unaffected by the modern-only suppression added there 2026-09-02), so an RmlUi border
+   here would double up. */
+.skill-cell {
+	position: absolute;
+	width: 32px;
+	height: 38px;
+	pointer-events: auto;
+	cursor: pointer;
+}
+/* .selected deliberately left unstyled here, same as #skill_slots' own .selected -- legacy keeps
+   the real still-legacy IMAGE_SKILLBOX_USE sprite as its current-skill highlight (see that C++
+   call site's own comment, NewUIMainFrameWindow.cpp); an RmlUi outline here would double it up. */
+
+/* Bottom-anchored translucent wipe -- shrinks from the top down as cooldown counts down, matching
+   the retired RenderSkillDelay()'s own ARGB-quad direction exactly (0x80FF8080, alpha ~50%). */
+.cooldown-wipe {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+	width: 100%;
+	background-color: rgba(255, 128, 128, 128);
+	pointer-events: none;
+}
+
+/* Shared skill tooltip -- see themes/modern/main_frame.rcss's identical block for the positioning
+   rationale (C++-pushed left/top, flipped to grow upward via translateY(-100%)). Legacy's own flat
+   black tooltip styling, matching .tooltip above rather than modern's bordered-panel look. */
+#skill_tooltip {
+	transform: translateY(-100%);
+	width: 220px;
+	background-color: rgba(0, 0, 0, 200);
+	border-radius: 3px;
+	padding: 4px 6px;
+	font-family: "Liberation Sans";
+	font-size: 10px;
+	z-index: 2;
+}
+/* display:block required -- see themes/modern/main_frame.rcss's identical rule for the full
+   explanation (RmlUi's own default `display` is `inline`, not `block`, for every element
+   including <div>). */
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: normal;
+	min-height: 1.2em;
+	line-height: 1.2em;
+}
+.tt-line.tt-blue { color: #6fa8ff; }
+.tt-line.tt-red { color: #ff6060; }
+.tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
+.tt-line.bold { font-weight: bold; }
+
+/* Bottom-right, matching where RenderNumber(x+20, y+20, ...) used to draw the same subscript
+   (NewUIMainFrameWindow.cpp, retired) -- plain text instead of the legacy digit-sprite atlas, same
+   simplification already established for this window's HP/MP/AG/SD/EXP numbers (.gauge-num). */
+.skill-hotkey-label {
+	position: absolute;
+	right: 2px;
+	bottom: 1px;
+	color: #ffffff;
+	font-family: "Liberation Sans";
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 9px;
+	line-height: 9px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+#btn_cshop    { left: 1px;   decorator: image(mainframe-btn-cshop-normal); }
+#btn_cshop.open    { decorator: image(mainframe-btn-cshop-open); }
+#btn_chainfo  { left: 31px;  decorator: image(mainframe-btn-chainfo-normal); }
+#btn_chainfo.open  { decorator: image(mainframe-btn-chainfo-open); }
+#btn_myinven  { left: 61px;  decorator: image(mainframe-btn-myinven-normal); }
+#btn_myinven.open  { decorator: image(mainframe-btn-myinven-open); }
+#btn_friend   { left: 91px;  decorator: image(mainframe-btn-friend-normal); }
+#btn_friend.open   { decorator: image(mainframe-btn-friend-open); }
+#btn_window   { left: 121px; decorator: image(mainframe-btn-window-normal); }
+#btn_window.open   { decorator: image(mainframe-btn-window-open); }
+
+.tooltip-cshop    { left: -64px; } /* anchor 16px */
+.tooltip-chainfo  { left: -34px; } /* anchor 46px */
+.tooltip-myinven  { left: -4px;  } /* anchor 76px */
+.tooltip-friend   { left: 26px;  } /* anchor 106px */
+.tooltip-window   { left: 56px;  } /* anchor 136px */
+#btn_cshop:hover ~ .tooltip-cshop,
+#btn_chainfo:hover ~ .tooltip-chainfo,
+#btn_myinven:hover ~ .tooltip-myinven,
+#btn_friend:hover ~ .tooltip-friend,
+#btn_window:hover ~ .tooltip-window {
+	display: block;
+	z-index: 1;
+}
+
+/* Char-info quest-alert / friend mail-chat-alert blink dot. */
+.alert-dot {
+	position: absolute;
+	top: -2px;
+	right: -2px;
+	width: 8px;
+	height: 8px;
+	border-radius: 4px;
+	background-color: #ffd700;
+	pointer-events: none;
+}
+
+/* EXP: nested inside #bars, spans reference x=0-640 (item-hotkey band start to button group end).
+   pointer-events:auto for the same reason as .gauge-slot above -- #exp:hover .tooltip below never
+   fired without it. */
+#exp {
+	position: absolute;
+	left: 0px;
+	top: 470px;
+	width: 640px;
+	height: 10px;
+	pointer-events: auto;
+}
+#exp_track {
+	position: absolute;
+	left: 2px;
+	right: 1px;
+	top: 0;
+	bottom: 0;
+	background-color: rgba(0, 0, 0, 160);
+	border: 1px rgba(0, 0, 0, 200);
+}
+/* Real gauge art (legacy only) -- 6x4 rect matches the real decoded source pixels. */
+@spritesheet mainframe-gauge-exp-sheet { src: "../../../newui_exbar.jpg"; mainframe-gauge-exp: 0px 0px 6px 4px; }
+#exp_fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	height: 100%;
+	decorator: image(mainframe-gauge-exp);
+}
+#exp_digit {
+	position: absolute;
+	right: 4px;
+	top: 50%;
+	transform: translateY(-50%);
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-family: "Liberation Sans";
+	font-size: 9px;
+	pointer-events: none;
+}
+/* left is a precomputed centered value (#exp's own 640px width, minus half .tooltip's 160px), not
+   left:50%+transform:translateX(-50%) -- same fix and same reason as .tooltip-hp etc. above. */
+#exp_tooltip {
+	bottom: 12px;
+	left: 240px;
+}

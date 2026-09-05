@@ -1,0 +1,302 @@
+// NewUINameWindow.cpp: implementation of the CNameWindow class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "UI/Chat/Chat.h"
+#include "UI/Character/NewUINameWindow.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "UI/Widgets/UIControls.h"
+#include "GameLogic/Events/CSChaosCastle.h"
+#include "GameLogic/Items/PersonalShopTitleImp.h"
+#include "GameLogic/Events/MatchEvent.h"
+#include "World/MapInfra/MapManager.h"
+#include "Camera/CameraProjection.h"
+#include "Camera/CameraState.h"
+#include "UI/Combat/MonsterHealthBar.h"
+
+// DevEditor forward declarations (must be at global scope)
+#ifdef _EDITOR
+extern "C" bool DevEditor_ShouldRenderItemLabels();
+#endif
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+namespace
+{
+
+// Draws a segmented monster HP bar, horizontally centered on centerX with its
+// top edge at topY. `steps` is the segment count (HP granularity); `scale`
+// horizontally compresses the bar (1.0 == original width).
+void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
+{
+    const float borderHeight = 2.f;                  // vertical inset (unscaled)
+    const float borderWidth = 2.f * scale;           // horizontal inset
+    const float stepSeparatorWidth = 1.f * scale;    // gap between segments
+    const float segmentSpan = 80.f * scale;          // total span of the segment track
+    const float widthPerStep = segmentSpan / steps;  // derived: fewer steps -> wider segments
+    const float stepsWidth = segmentSpan - 2.f * stepSeparatorWidth;
+    const float totalWidth = stepsWidth + borderWidth * 2.f;
+
+    const int x = centerX - (int)(totalWidth / 2);
+    const int y = topY;
+
+    // Drop shadow.
+    EnableAlphaTest();
+    RenderColorQuadARGB((float)(x + 1), (float)(y + 1), totalWidth, 5.f, 0x80000000u);
+
+    // Dark backing.
+    EnableAlphaBlend();
+    RenderColorQuadARGB((float)x, (float)y, totalWidth, 5.f, 0xFF330000u);
+
+    // Inner track.
+    RenderColorQuadARGB((float)(x + borderWidth), (float)(y + borderHeight), stepsWidth, 1.f,
+        0xFF320A00u);
+
+    // HealthStatus < 0 is the "HP unknown" sentinel (server sends 0xFF -> -1, and
+    // the field is initialized to -1), so render a full bar instead of an empty one.
+    const float clampedHealth = (health < 0.f) ? 1.f : health;
+    const int stepHP = (int)(clampedHealth * steps);
+
+    // Filled health segments.
+    for (int k = 0; k < stepHP; ++k)
+    {
+        RenderColorQuadARGB(
+            (float)(x + borderWidth + (k * widthPerStep)),
+            (float)(y + borderHeight),
+            widthPerStep - stepSeparatorWidth,
+            2.f,
+            0xFFFA0A00u);
+    }
+    DisableAlphaBlend();
+}
+}
+
+//////////////////////////////////////////////////////////////////////
+// Construction/Destruction
+//////////////////////////////////////////////////////////////////////
+
+mu::ui::window::CNameWindow::CNameWindow()
+{
+    m_pNewUIMng = NULL;
+    m_Pos.x = m_Pos.y = 0;
+
+    m_bShowItemName = false;
+    m_bShowMonsterHealthBar = false;
+}
+
+mu::ui::window::CNameWindow::~CNameWindow()
+{
+    Release();
+}
+
+bool mu::ui::window::CNameWindow::Create(CManager* pNewUIMng, int x, int y)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NAME_WINDOW, this);
+
+    SetPos(x, y);
+
+    Show(true);
+
+    return true;
+}
+
+void mu::ui::window::CNameWindow::Release()
+{
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void mu::ui::window::CNameWindow::SetPos(int x, int y)
+{
+    m_Pos.x = x;
+    m_Pos.y = y;
+}
+
+bool mu::ui::window::CNameWindow::UpdateMouseEvent()
+{
+    return true;
+}
+
+bool mu::ui::window::CNameWindow::UpdateKeyEvent()
+{
+    if (mu::ui::window::IsPress(VK_MENU) == true)
+    {
+        m_bShowItemName = !m_bShowItemName;
+    }
+
+    if (mu::ui::window::IsPress(VK_F8) == true)
+    {
+        m_bShowMonsterHealthBar = !m_bShowMonsterHealthBar;
+    }
+
+    return true;
+}
+
+bool mu::ui::window::CNameWindow::Update()
+{
+    return true;
+}
+
+bool mu::ui::window::CNameWindow::Render()
+{
+    EnableAlphaTest();
+    RenderName();
+    RenderTimes();
+    matchEvent::RenderMatchTimes();
+    UI::Chat::RenderBooleans();
+    RenderMonsterHealthBars();
+    DrawPersonalShopTitleImp();
+    DisableAlphaBlend();
+
+    return true;
+}
+
+void mu::ui::window::CNameWindow::RenderName()
+{
+    if (g_bGMObservation == true)
+    {
+        for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+        {
+            CHARACTER* c = &CharactersClient[i];
+            OBJECT* o = &c->Object;
+            if (o->Live && o->Kind == KIND_PLAYER)
+            {
+                if (IsShopTitleVisible(c) == false)
+                {
+                    UI::Chat::CreateChat(c->ID, L"", c);
+                }
+            }
+        }
+    }
+
+#ifndef GUILD_WAR_EVENT
+    if (gMapManager.InChaosCastle() == true && (SelectedNpc != -1 || SelectedCharacter != -1))
+    {
+        return;
+    }
+#endif//GUILD_WAR_EVENT
+
+    if (SelectedItem != -1 || SelectedNpc != -1 || SelectedCharacter != -1)
+    {
+        if (SelectedNpc != -1)
+        {
+            CHARACTER* c = &CharactersClient[SelectedNpc];
+            OBJECT* o = &c->Object;
+            UI::Chat::CreateChat(c->ID, L"", c);
+        }
+        else if (SelectedCharacter != -1)
+        {
+            CHARACTER* c = &CharactersClient[SelectedCharacter];
+
+            OBJECT* o = &c->Object;
+            if (o->Kind == KIND_MONSTER)
+            {
+                g_pRenderText->SetTextColor(255, 230, 200, 255);
+                g_pRenderText->SetBgColor(100, 0, 0, 255);
+                g_pRenderText->RenderText(320, 2, c->ID, 0, 0, RT3_WRITE_CENTER);
+
+                if (UI::Combat::HealthBar::ShouldRenderSelected(c->HealthStatus))
+                {
+                    // Full-width bar centered under the selected monster's name.
+                    DrawHealthBar(320, 15, c->HealthStatus, 20, 1.f);
+                }
+            }
+            else
+#ifdef ASG_ADD_GENS_SYSTEM
+#ifndef PBG_MOD_STRIFE_GENSMARKRENDER
+                if (!::IsStrifeMap(World) || Hero->m_byGensInfluence == c->m_byGensInfluence)
+#endif //PBG_MOD_STRIFE_GENSMARKRENDER
+#endif	// ASG_ADD_GENS_SYSTEM
+                {
+                    if (IsShopTitleVisible(c) == false)
+                    {
+                        UI::Chat::CreateChat(c->ID, L"", c);
+                    }
+                }
+        }
+        else if (SelectedItem != -1)
+        {
+#ifdef _EDITOR
+            if (DevEditor_ShouldRenderItemLabels())
+#endif
+                RenderItemName(SelectedItem, &Items[SelectedItem].Object, &Items[SelectedItem].Item, false);
+        }
+    }
+
+    if (m_bShowItemName || mu::ui::window::IsRepeat(VK_MENU))
+    {
+#ifdef _EDITOR
+        bool renderLabels = DevEditor_ShouldRenderItemLabels();
+#else
+        bool renderLabels = true;
+#endif
+
+        if (renderLabels)
+        {
+            for (int i = 0; i < MAX_ITEMS; i++)
+            {
+                OBJECT* o = &Items[i].Object;
+                if (o->Live)
+                {
+                    if (o->Visible && i != SelectedItem)
+                    {
+                        RenderItemName(i, o, &Items[i].Item, true);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void mu::ui::window::CNameWindow::RenderMonsterHealthBars()
+{
+    if (!m_bShowMonsterHealthBar)
+        return;
+
+    for (int i = 0; i < MAX_CHARACTERS_CLIENT; i++)
+    {
+        CHARACTER* c = &CharactersClient[i];
+        OBJECT* o = &c->Object;
+
+        if (!o->Live || !o->Visible || o->Alpha <= 0.f || c->Dead > 0 || o->Kind != KIND_MONSTER)
+            continue;
+
+        vec3_t Position;
+        Vector(o->Position[0], o->Position[1], o->Position[2] + o->BoundingBoxMax[2] + 60.f, Position);
+
+        int ScreenX, ScreenY;
+        vec3_t transformPos;
+        VectorTransform(Position, g_Camera.Matrix, transformPos);
+        if (transformPos[2] >= 0)
+            continue;
+
+        CameraProjection::WorldToScreen(g_Camera, Position, &ScreenX, &ScreenY);
+
+        if (ScreenX < -100 || ScreenY < -100
+            || ScreenX > (REFERENCE_WIDTH + 100)
+            || ScreenY > (REFERENCE_HEIGHT + 100))
+            continue;
+
+        // Bar fixed at ~3/7 of the original width, with 8 segments so each one
+        // stays close to the original thickness (see DrawHealthBar for geometry).
+        DrawHealthBar(ScreenX, ScreenY, c->HealthStatus, 8, 3.f / 7.f);
+    }
+}
+
+float mu::ui::window::CNameWindow::GetLayerDepth()
+{
+    return 1.0f;
+}

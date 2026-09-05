@@ -36,15 +36,15 @@ FrameTimingState g_frameTiming;
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
-#include "UI/NewUI/Dialogs/ReconnectDialog.h"
+#include "UI/Dialogs/ReconnectDialog.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/NewUI/HUD/Notices.h"
+#include "UI/HUD/Notices.h"
 #include "I18N/All.h"
 #include "Engine/AI/ZzzAI.h"
 #include "App/Platform/Windows/Winmain.h"
@@ -273,7 +273,7 @@ static void ConsumeScreenshot()
                                  pixels.rgb.data(), 100);
     if (saved)
     {
-        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     GrabScreen++;
@@ -364,7 +364,7 @@ static void UpdateLoginAndCharacterScenes()
     dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
 
     CInput::Instance().Update();
-    CUIMng::Instance().Update(dDeltaTick);
+    CSceneUICoordinator::Instance().Update(dDeltaTick);
 }
 
 /**
@@ -868,7 +868,7 @@ static void CheckServerConnection()
         g_ErrorReport.Write(L"> Connection closed. ");
         g_ErrorReport.WriteCurrentTime();
         g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
     }
 }
 

@@ -1,0 +1,271 @@
+/* Modern theme for the login dialog -- fully programmatic, flat colors/vector shapes instead of
+   legacy art. Same class names/structure as legacy throughout. Originally styled against a real
+   MU Online reference screenshot's dark warm-bronze/crimson RPG dialog look; the frame/panel
+   material itself was later cooled to gray/metallic (steel highlights instead of warm-bronze
+   ones) -- text (title/body), the checkbox, the header glow, and the primary button's crimson
+   fill deliberately stayed warm/gold/crimson, only the structural frame material went cool. No
+   ::before/::after or box-shadow to substitute for here -- every effect below is a primitive this
+   engine's render interface actually implements: per-side border-*-color bevels for depth, real
+   extra <div>s (.frame-accent/.login-content/.header-glow/.separator, added to login.rml) for
+   decorative elements, font-effect:outline for text-shadow (unregistered on this engine),
+   decorator:linear-gradient/radial-gradient (both need RenderInterface_SDL_GPU's
+   CompileShader/RenderShader) for fills and glows. Outer drop-shadow (blur outside the box) and
+   box-shadow/filter/backdrop-filter have no substitute at all and are simply not reproduced --
+   this engine leaves layer/filter compositing unimplemented.
+
+   Color roles: the title header has a yellow-to-red radial glow behind the title (.header-glow,
+   no separate flanking-line elements -- tried and removed, the glow alone read better). The
+   primary button (.btn, OK) shares that same crimson family for its own base fill (a vertical
+   linear-gradient, bright top to dark maroon bottom, no glow layer of its own -- tried, didn't
+   read well, removed) -- so the glow/button/text stay one warm/crimson family, sitting on top of
+   the now-cool gray/metallic frame material rather than being part of it. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* Outer frame -- position/size/font/border-width/radius stay local (window-specific structural
+   values, never carried by the shared class per its own doc comment); the gradient fill and
+   per-side border-color bevel come from base.rcss's .modern-frame-crimson (applied in login.rml
+   alongside .modern-frame itself) instead of being redeclared here -- 2026-09-03, this file's
+   first real use of a class from base.rcss (now linked; previously fully self-contained, see this
+   file's own history in git blame if curious why that was a hard NOTE below for so long). */
+#panel {
+	position: absolute;
+	width: 329dp;
+	height: 245dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: #d9d0c0;
+	border-width: 1dp;
+	border-radius: 7dp;
+}
+
+/* Thin accent line just inside the frame -- structure/position local, palette from base.rcss's
+   .modern-frame-accent-crimson (applied in login.rml). Spans the whole panel, behind the header
+   text/lines AND .login-content below. */
+.frame-accent {
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
+	border-radius: 5dp;
+}
+
+/* Recessed content surface -- starts below the (unboxed) header, not full-inset like
+   .modern-panel's own documented default (top:4dp on all sides) -- overridden locally, exactly
+   the "leaves room for a header above" case base.rcss's own comment on .modern-panel anticipates.
+   Palette from .modern-panel-crimson (applied in login.rml). */
+.login-content {
+	left: 10dp;
+	right: 10dp;
+	top: 44dp;
+	bottom: 10dp;
+	border-radius: 4dp;
+}
+
+.modern-inset {
+	border-width: 1dp;
+	border-color: #4a4e54; /* cool steel-gray frame border, was warm bronze */
+	border-top-color: rgba(0, 0, 0, 170); /* recessed: dark top/left */
+	border-left-color: rgba(0, 0, 0, 170);
+}
+.modern-inset.focused {
+	border-color: token(accent-steel);
+}
+
+.label {
+	position: absolute;
+	font-family: "token(font-body)";
+}
+.label-server {
+	left: 111dp;
+	top: 14dp;
+	color: #e2d7c5;
+	font-weight: bold;
+	letter-spacing: 1.5px;
+	font-effect: outline(1px #000000);
+}
+.label-account { left: 30dp; top: 73dp; }
+.label-password{ left: 30dp; top: 106dp; }
+
+/* Soft ambient glow behind the title -- yellow at the center, cooling to red further out (fading
+   to transparent at the very edge so it still reads as a glow, not a hard-edged shape), a true
+   radial falloff now that RenderInterface_SDL_GPU implements CompileShader/RenderShader for the
+   gradient family (STATUS.md's Findings, 2026-09-02). This engine still has no filter:blur()/
+   text-shadow/box-shadow (all confirmed unregistered or non-rendering), so this is the only
+   ambient-glow technique available. Sits behind .label-server (declared first, base.rcss/
+   login.rcss paint-order convention: earlier siblings paint first). Center stop kept low-alpha
+   (130) and pushed further out before fading (90%) so the gold core stays soft -- a first pass at
+   full opacity there read as a bold solid patch instead of an ambient glow. The red ring is deeper
+   and more saturated instead (darker rgb, higher alpha) so the red hue itself stays clearly
+   visible without needing to brighten it. */
+.header-glow {
+	position: absolute;
+	left: 40dp;
+	right: 40dp;
+	top: 8dp;
+	height: 26dp;
+	pointer-events: none;
+	decorator: radial-gradient(ellipse, rgba(255, 222, 150, 130), rgba(140, 25, 20, 140) 55%, transparent 90%);
+}
+
+/* Border-only outline standing in for the legacy input-box frame -- no background, so it never
+   covers the legacy input text drawn underneath (border-COLOR comes from .modern-inset, applied
+   alongside this class in login.rml -- deliberately no background here for the same reason).
+   LoginWin.cpp::SetPosition() positions the real CUITextInputBox text a fixed few px below/right
+   of this frame's own top/left (72/105 vs this rule's 66/99 -- text padding within the frame, a
+   pre-existing relationship, not a typo) and now scales that offset by the same ratio this file's
+   dp values respond to -- keep the two in sync if either changes (see that function's own
+   comment). */
+.input-frame {
+	position: absolute;
+	width: 156dp;
+	height: 23dp;
+	border-radius: token(radius-md)dp;
+	pointer-events: none;
+}
+.input-account  { left: 109dp; top: 66dp; }
+.input-password { left: 109dp; top: 99dp; }
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-remember-me  { left: 109dp; top: 134dp; }
+.checkbox-save-password{ left: 109dp; top: 158dp; }
+
+/* NOTE 2026-09-03: login.rml now links base.rcss too (see the frame/panel/accent rules above),
+   but .checkbox-box/.btn below are deliberately left as their own full, self-contained copies
+   rather than deduped against base.rcss's now-identical .checkbox-box/.checkbox-box.checked and
+   .btn+.btn-ok -- this pass stayed scoped to the frame primitives specifically. They're provably
+   the same values today (base.rcss's copies were retrofitted from these exact ones), so deduping
+   is safe whenever it's actually worth doing, just not bundled into this pass. */
+.checkbox-box {
+	display: inline-block;
+	position: relative;
+	width: 16dp;
+	height: 16dp;
+	background-color: #0b0907;
+	decorator: linear-gradient(to bottom, #211b15, #0b0907);
+	border-width: 1dp;
+	border-color: #725b39;
+	border-top-color: rgba(0, 0, 0, 180);
+	border-radius: 3dp;
+}
+.checkbox-box.checked {
+	background-color: #604319;
+	decorator: linear-gradient(to bottom, #a47732, #604319);
+	border-color: #c0934c;
+}
+
+/* No CSS transform rotation support in this build -- checkmark built from 5 small axis-aligned
+   "pixels" stair-stepping into a blocky tick shape. */
+.tick-px {
+	position: absolute;
+	width: 2dp;
+	height: 2dp;
+	background-color: #16100a;
+}
+.tick-px-1 { left: 3dp;  top: 7dp; }
+.tick-px-2 { left: 5dp;  top: 9dp; }
+.tick-px-3 { left: 7dp;  top: 7dp; }
+.tick-px-4 { left: 9dp;  top: 5dp; }
+.tick-px-5 { left: 11dp; top: 3dp; }
+
+.checkbox-tick {
+	display: none;
+	position: absolute;
+	left: 0; top: 0; width: 16dp; height: 16dp;
+}
+.checkbox-box.checked .checkbox-tick {
+	display: block;
+}
+
+.checkbox-label {
+	position: absolute;
+	left: 21dp;
+	top: 1dp;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+}
+
+/* Gradient-to-transparent divider above the button row (mockup's .separator). */
+.separator {
+	position: absolute;
+	left: 20dp;
+	right: 20dp;
+	top: 186dp;
+	height: 1dp;
+	pointer-events: none;
+	decorator: linear-gradient(to right, transparent, #5d472c 15%, #81633a 50%, #5d472c 85%, transparent);
+}
+
+/* Crimson "primary action" button (OK) -- reuses the exact same 4-stop vertical gradient as the
+   title banner's own linear-gradient (bright top, dark maroon bottom), for the same color instead
+   of a separate bronze/gold fill. .btn-cancel below overrides this to the mockup's own neutral
+   secondary treatment. No glow layer (tried a radial-gradient sheen here, both a circle and a thin
+   ellipse -- didn't read well, removed; the flat gradient fill plus the bright border-top-color
+   bevel below is the whole effect). */
+.btn {
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	color: #f0e0bc;
+	font-family: "token(font-body)";
+	font-effect: outline(1px #000000);
+	background-color: #35100e;
+	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e);
+	border-width: 1dp;
+	border-color: #0a0706;
+	border-top-color: rgba(213, 143, 106, 115);
+	border-radius: 5dp;
+	pointer-events: auto;
+}
+.btn:hover {
+	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
+	border-color: #9a6841;
+}
+.btn:active {
+	/* Shifts down 2dp to read as physically pressed -- both .btn-ok/.btn-cancel share the same
+	   top:196dp below, so one absolute value covers both. Native :active pseudo-class, unverified
+	   against this branch's own mouse-input routing (RmlUi's default SDL translation is bypassed
+	   here for unrelated reasons -- see README.md's Gotchas). Degrades gracefully if it never
+	   fires -- worst case the button just doesn't visibly depress. */
+	top: 198dp;
+	border-top-color: rgba(180, 92, 68, 65);
+	border-bottom-color: rgba(0, 0, 0, 200);
+}
+.btn-ok { left: 150dp; top: 196dp; }
+
+/* Neutral secondary button (Cancel) -- overrides .btn's crimson fill/border, single flat-gray
+   decorator instead, keeps its bevel/hover/active mechanics. Must stay textually after
+   .btn/.btn:hover/.btn:active above (same specificity, source order decides). */
+.btn-cancel {
+	left: 211dp;
+	top: 196dp;
+	background-color: #17130f;
+	decorator: linear-gradient(to bottom, #37302a, #28221c 40%, #17130f 75%, #0d0b09);
+	border-color: #665237;
+}
+.btn-cancel:hover {
+	decorator: linear-gradient(to bottom, #51463a, #382e25 40%, #211a14 75%, #100d0a);
+	border-color: #91734b;
+}
+
+.trust-warning {
+	position: absolute;
+	left: 30dp;
+	top: 252dp;
+	width: 280dp;
+	color: token(semantic-warning);
+	font-family: "token(font-body)";
+}

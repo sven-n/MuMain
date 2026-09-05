@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "App/stdafx.h"
+#include "Data/GameConfig/GameConfig.h"
 
 namespace
 {
@@ -16,15 +17,23 @@ constexpr float kLeftBandEnd = 152.0f;
 constexpr float kCenterBandStart = 152.0f;
 constexpr float kCenterBandEnd = 488.0f;
 constexpr float kRightBandStart = 488.0f;
-constexpr float kMinimumHudScale = 1.0f;
 // ponytail: 2x HUD ceiling; raise only if native screenshots show unreadable controls.
 constexpr float kMaximumHudScale = 2.0f;
-constexpr float kMinimumPanelScale = 1.0f;
-// ponytail: 2x ceiling; raise only if native screenshots still show unreadable UI.
-constexpr float kMaximumPanelScale = 2.0f;
+// ponytail: 2x ceiling; raise only if native screenshots still show unreadable UI. Public copy of
+// this value lives at UI::Scaling::MaximumPanelScale (UITransform.h) -- RmlUiRuntime.cpp's dp-ratio
+// auto-fit reuses it, so it can't stay anonymous-namespace-only anymore.
 // ponytail: 2.25x dock ceiling; adjust only from rebuilt native screenshots.
 constexpr float kMaximumDockScale = 2.25f;
 constexpr float kMaximumTypographyScale = 2.25f;
+// ponytail: 2.0 = quadratic damping (a resolution halfway between reference and the ceiling scales
+// up about 1/4 as far as a linear fit would, same endpoints preserved either way). Raise toward 1.0
+// for less damping (1.0 = no damping, the original linear behavior), or above 2.0 for more, only
+// from rebuilt native screenshots at a few real resolutions -- 2026-09-03, added after user feedback
+// that a modest ~1024x768 window made every ViewportFitScale-driven dialog/HUD look noticeably
+// larger than its authored size, not just "a little scaled." Deliberately doesn't touch
+// kReferenceWidth/Height or any of the ceilings above -- same "no scaling" and "fully capped"
+// endpoints as before, only the ramp in between changes.
+constexpr float kFitDampingExponent = 2.0f;
 constexpr int kNormalFontPointSize = 11;
 constexpr int kMaximumNormalFontPointSize = 16;
 constexpr int kBigFontPointSize = 22;
@@ -33,6 +42,18 @@ constexpr int kFixedFontPointSize = 13;
 constexpr int kMaximumFixedFontPointSize = 18;
 // ponytail: one gameplay window; move scale into a window context if multi-window rendering is added.
 float g_windowContentScale = 1.0f;
+
+// GameConfig::GetUIScalePercent() is an in-memory singleton read (no disk I/O per call, unlike
+// the SDL queries GetWindowContentScale() caches), so this reads it directly rather than adding a
+// second cached global -- docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section.
+// Applied post-clamp everywhere it's used (see BottomHudScale/CappedUniformScale below), unlike
+// GetWindowContentScale()'s clamp-bound fold: a direct user dial needs a proportional, visible
+// effect at every window size, including ones where the auto-scale already sits at its ceiling --
+// folding it into the clamp bounds instead would silently defeat the setting there.
+float UIScalePercentMultiplier()
+{
+    return static_cast<float>(GameConfig::GetInstance().GetUIScalePercent()) / 100.0f;
+}
 
 struct FontPointRange
 {
@@ -72,11 +93,7 @@ int RoundedBottomHudTop(int windowWidth, int windowHeight)
 
 float CappedUniformScale(int windowWidth, int windowHeight, float maximumScale)
 {
-    const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
-    const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
-    const float contentScale = UI::Scaling::GetWindowContentScale();
-    return std::clamp(std::min(widthScale, heightScale), kMinimumPanelScale * contentScale,
-                      maximumScale * contentScale);
+    return UI::Scaling::ViewportFitScale(windowWidth, windowHeight, maximumScale) * UIScalePercentMultiplier();
 }
 
 UI::Scaling::Transform DockTransform(int windowWidth, int windowHeight)
@@ -114,7 +131,7 @@ UI::Scaling::Transform UI::Scaling::LegacyUiTransform(int windowWidth, int windo
 
 UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHeight)
 {
-    const float scale = CappedUniformScale(windowWidth, windowHeight, kMaximumPanelScale);
+    const float scale = CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);
     return {
         scale,
         scale,
@@ -124,13 +141,56 @@ UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHe
     };
 }
 
-float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
+// Pure geometry + WindowContentScale, deliberately NOT including UIScalePercent -- every caller
+// that needs the user's preference multiplies UIScalePercentMultiplier() in itself, once, so it's
+// never double-counted (docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section).
+// The one shared "fit the reference size to the real window, clamped" core, now used by both the
+// legacy UI::Scaling transforms (via CappedUniformScale/BottomHudScale below) and RmlUiRuntime.cpp's
+// dp-ratio auto-fit -- previously two near-identical private copies of this same formula.
+float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float maximumScale)
 {
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
     const float contentScale = GetWindowContentScale();
-    return std::clamp(std::min(widthScale, heightScale), kMinimumHudScale * contentScale,
-                      kMaximumHudScale * contentScale);
+    const float minBound = 1.0f * contentScale;
+    const float maxBound = maximumScale * contentScale;
+    const float raw = std::clamp(std::min(widthScale, heightScale), minBound, maxBound);
+
+    // Dampen the ramp between the two endpoints (2026-09-03) -- raw itself already IS the answer
+    // at the reference resolution (minBound, t=0) and at/past the ceiling (maxBound, t=1); only
+    // resolutions strictly between the two get pulled down toward minBound, by kFitDampingExponent
+    // (see its own comment). Reduces the reference/ceiling gap to a fraction [0,1] first
+    // (`range` guards the degenerate case where they're equal, e.g. contentScale collapses both to
+    // the same value), applies the curve, then remaps back -- so this stays purely a reshaping of
+    // the existing formula's output, not a second independent scale factor.
+    const float range = maxBound - minBound;
+    if (range <= 0.0f)
+        return raw;
+    const float t = (raw - minBound) / range;
+    return minBound + std::pow(t, kFitDampingExponent) * range;
+}
+
+// Combined ratio every legacy "Type-2 companion" object -- a real, functional non-RmlUi widget
+// (a CUITextInputBox, or a CButton scaled to match a dp-sized RmlUi sibling) kept in sync with a
+// migrated window's now-RCSS-owned layout -- must scale its own fixed reference-pixel offsets by,
+// to stay pixel-for-pixel aligned with the RmlUi element it's shadowing. Same composition
+// RmlUiRuntime.cpp's ApplyUIScale() uses for RmlUi's own dp ratio (UIScalePercent x
+// ViewportFitScale(MaximumPanelScale)) -- extracted 2026-09-03 as the single shared implementation
+// of a formula that had been hand-copied per window (CharSelMainWin.cpp's GetUIScaleRatio(),
+// LoginMainWin.cpp's inline version, LoginWin.cpp's LoginUIScaleRatio()); the same staleness bug
+// (reading CInput::Instance().GetScreenWidth()/GetScreenHeight() instead of the WindowWidth/
+// WindowHeight globals RmlUiRuntime::OnResize() actually uses) got independently reintroduced and
+// re-fixed in more than one of those copies before this existed. Callers must pass
+// WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not a separate copy of the screen size --
+// see docs/rmlui-ui-system/layout-and-scaling.md's "2026-09-03" section.
+float UI::Scaling::CompanionRatio(int windowWidth, int windowHeight)
+{
+    return CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);
+}
+
+float UI::Scaling::BottomHudScale(int windowWidth, int windowHeight)
+{
+    return ViewportFitScale(windowWidth, windowHeight, kMaximumHudScale) * UIScalePercentMultiplier();
 }
 
 UI::Scaling::Transform UI::Scaling::BottomHudLeftTransform(int windowWidth, int windowHeight)
@@ -242,6 +302,8 @@ bool UI::Scaling::BottomHudContainsWindowPoint(int windowWidth, int windowHeight
 
 UI::Scaling::Transform UI::Scaling::TransformForLayout(LayoutMode mode, int windowWidth, int windowHeight)
 {
+    if (mode == LayoutMode::Legacy)
+        return {1.0f, 1.0f, 0.0f, 0.0f, 1.0f};
     if (mode == LayoutMode::Hud || mode == LayoutMode::WorldOverlay)
         return ScreenOverlayTransform(windowWidth, windowHeight);
     if (mode == LayoutMode::HudLeft)
@@ -328,7 +390,7 @@ int UI::Scaling::FontPointSize(FontRole role, const Transform& transform)
     const FontPointRange range = GetFontPointRange(role);
     const float typographyScale = transform.typographyScale / GetWindowContentScale();
     const float growth =
-        std::clamp((typographyScale - kMinimumPanelScale) / (kMaximumTypographyScale - kMinimumPanelScale), 0.0f, 1.0f);
+        std::clamp((typographyScale - 1.0f) / (kMaximumTypographyScale - 1.0f), 0.0f, 1.0f);
     const float pointSize = static_cast<float>(range.minimum) +
                             static_cast<float>(range.maximum - range.minimum) * growth;
     return static_cast<int>(std::lround(pointSize));

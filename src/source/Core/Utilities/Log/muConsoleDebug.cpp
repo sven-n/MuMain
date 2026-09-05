@@ -20,7 +20,7 @@
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -72,7 +72,7 @@ void CmuConsoleDebug::UpdateMainScene()
 #ifdef CSK_LH_DEBUG_CONSOLE
     if (m_bInit)
     {
-        if (SEASON3B::IsPress(VK_SHIFT) == TRUE)
+        if (mu::ui::window::IsPress(VK_SHIFT) == TRUE)
         {
             if (PressKey(VK_F7))
             {

@@ -21,11 +21,11 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "CameraDebugLog.h"
 
 // External variable declarations

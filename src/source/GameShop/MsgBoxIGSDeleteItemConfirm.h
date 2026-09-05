@@ -8,24 +8,25 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/NewUI/Options/NewUIOptionWindow.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Options/NewUIOptionWindow.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-class CMsgBoxIGSDeleteItemConfirm : public CNewUIMessageBoxBase
+class CMsgBoxIGSDeleteItemConfirm : public CMessageBoxBase
 {
 public:
     enum IMAGE_IGS_DEL_ITEM_CONFIRM
     {
         IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
-        IMAGE_IGS_BACK = CNewUIOptionWindow::IMAGE_OPTION_FRAME_BACK,
-        IMAGE_IGS_UP = CNewUIOptionWindow::IMAGE_OPTION_FRAME_UP,
-        IMAGE_IGS_DOWN = CNewUIOptionWindow::IMAGE_OPTION_FRAME_DOWN,
-        IMAGE_IGS_LEFTLINE = CNewUIOptionWindow::IMAGE_OPTION_FRAME_LEFT,
-        IMAGE_IGS_RIGHTLINE = CNewUIOptionWindow::IMAGE_OPTION_FRAME_RIGHT,
+        IMAGE_IGS_BACK = COptionWindow::IMAGE_OPTION_FRAME_BACK,
+        IMAGE_IGS_UP = COptionWindow::IMAGE_OPTION_FRAME_UP,
+        IMAGE_IGS_DOWN = COptionWindow::IMAGE_OPTION_FRAME_DOWN,
+        IMAGE_IGS_LEFTLINE = COptionWindow::IMAGE_OPTION_FRAME_LEFT,
+        IMAGE_IGS_RIGHTLINE = COptionWindow::IMAGE_OPTION_FRAME_RIGHT,
     };
 
     enum IMAGESIZE_IGS_DEL_ITEM_CONFIRM
@@ -63,9 +64,9 @@ public:
     bool Update();
     bool Render();
     void Initialize(int iStorageSeq, int iStorageItemSeq, wchar_t szItemType);
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -77,8 +78,8 @@ private:
     void UnloadImages();
 
 private:
-    CNewUIMessageBoxButton m_BtnDelete;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnDelete;
+    CMessageBoxButton m_BtnCancel;
     int m_iMiddleCount;
     int m_iStorageSeq;
     int m_iStorageItemSeq;

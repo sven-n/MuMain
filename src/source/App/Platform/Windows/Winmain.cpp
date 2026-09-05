@@ -2,6 +2,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/UiInputRouter.h"
 #include "App/Platform/DiagnosticFrameCaptureSchedule.h"
 #include "App/Platform/DiagnosticFrameCaptureWriter.h"
 
@@ -19,11 +20,12 @@
 #include <vector>
 #include "Core/Platform/WinIni.h" // private-profile (.ini) API
 #include "Data/GameConfig/GameConfig.h"
-#include "UI/Legacy/UIWindows.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Party/UIWindows.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
@@ -50,7 +52,7 @@
 #include "App/Platform/Windows/Local.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
-#include "UI/Legacy/UIMapName.h" // rozy
+#include "UI/HUD/UIMapName.h" // rozy
 #include "Core/Utilities/CpuUsage.h"
 
 #include "MUHelper/MuHelper.h"
@@ -65,15 +67,22 @@
 #include "Core/Input/Input.h"
 #include "Core/Platform/IPlatformAudio.h"
 #include "Core/Platform/Audio/MiniAudioBackend.h"
+#ifndef _WIN32
+#include "Core/Platform/posix/PosixSignalHandlers.h"
+#endif
 #include "Core/Time/Timer.h"
 #include "Core/Utilities/Log/MuLogger.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "Character/CharMakeWin.h"
+#include "UI/Windows/CreditWin.h"
+#include "UI/Windows/SysMenuWin.h"
+#include "UI/Windows/LoginWin.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
 #include "GameLogic/Pets/w_PetProcess.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "Camera/CameraConfig.h"
 #include "Camera/CameraProjection.h"
@@ -178,6 +187,12 @@ static void ShutdownRendererWindow()
         ReleaseDC(g_hWnd, g_hDC);
         g_hDC = nullptr;
     }
+
+    // Must run before ShutdownSDLGpuRenderer() -- Rml::Shutdown() (inside Destroy()) releases
+    // every outstanding compiled-geometry/texture handle via RmlUiRenderInterface, which needs
+    // a live SDL_GPUDevice while that happens. No-ops safely if Create() never ran (the
+    // InitSDLGpuRenderer failure path above also calls this function).
+    RmlUiRuntime::Instance().Destroy();
 
     mu::ShutdownSDLGpuRenderer();
     g_hRC = nullptr;
@@ -489,7 +504,7 @@ void DestroyWindow()
     g_pNewUISystem->Release();
     g_pRenderText->Release();
 
-    CUIMng::Instance().Release();
+    CSceneUICoordinator::Instance().Release();
 
     //. release font handle
     if (g_hFont)
@@ -1054,6 +1069,7 @@ void HandleWindowResize(int width, int height)
     UI::Scaling::SetActiveTransform(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
     OpenglWindowWidth = WindowWidth;
     OpenglWindowHeight = WindowHeight;
+    RmlUiRuntime::Instance().OnResize(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
     UpdateResolutionDependentSystems();
     UpdateCursorClip();
 }
@@ -1356,16 +1372,28 @@ MSG MainLoop()
                 Destroy = true;
                 break;
             case SDL_EVENT_MOUSE_MOTION:
+                // Always forwarded and always still applied to legacy position tracking --
+                // motion isn't an "action" to arbitrate, and legacy hit-testing (CManager
+                // etc.) needs MouseX/MouseY current regardless of what's hovered. RmlUi still
+                // needs this call to drive its own :hover state/hit-testing.
+                Core::Input::RouteToUi(event, g_sdlWindow);
                 HandleMouseMotion(event.motion.x, event.motion.y);
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                HandleMouseButton(event);
+                // RmlUi migration plan Phase 0.8: first consumer wins. If an RmlUi element
+                // claimed this click (returns false -- "no longer propagating"), don't also let
+                // it reach legacy button-state tracking/click-to-move.
+                if (Core::Input::RouteToUi(event, g_sdlWindow))
+                    HandleMouseButton(event);
                 break;
             case SDL_EVENT_MOUSE_WHEEL:
-                // SDL does not pre-correct flipped (natural) scrolling; invert.
-                MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
-                                                                               : static_cast<int>(event.wheel.y);
+                if (Core::Input::RouteToUi(event, g_sdlWindow))
+                {
+                    // SDL does not pre-correct flipped (natural) scrolling; invert.
+                    MouseWheel = (event.wheel.direction == SDL_MOUSEWHEEL_FLIPPED) ? -static_cast<int>(event.wheel.y)
+                                                                                   : static_cast<int>(event.wheel.y);
+                }
                 break;
             case SDL_EVENT_WINDOW_RESIZED:
                 HandleWindowResize(event.window.data1, event.window.data2);
@@ -1389,15 +1417,30 @@ MSG MainLoop()
                 HandleFocusChange(false);
                 break;
             case SDL_EVENT_TEXT_INPUT:
-                // Committed characters for the focused portable text field (#447).
-                FeedPortableTextInput(event.text.text);
+                // Committed characters for the focused portable text field (#447). Gated the
+                // same way as key-down below -- if an RmlUi text input has focus and consumed
+                // this, don't also feed it into a legacy portable text field.
+                if (Core::Input::RouteToUi(event, g_sdlWindow))
+                    FeedPortableTextInput(event.text.text);
                 break;
             case SDL_EVENT_TEXT_EDITING:
                 // IME composition preview for the focused portable field (#447).
                 if (auto* box = CUITextInputBox::GetFocusedPortable())
                     box->OnTextEditing(Utf8ToWide(event.edit.text).c_str());
                 break;
+            case SDL_EVENT_KEY_UP:
+                // Legacy input has no key-up consumer, but RmlUi needs both halves of a
+                // press/release pair for correct modifier-key and held-key state tracking.
+                Core::Input::RouteToUi(event, g_sdlWindow);
+                break;
             case SDL_EVENT_KEY_DOWN:
+            {
+                // RmlUi migration plan Phase 0.8: only the final portable-field delivery below
+                // is gated on this -- the F10/Enter system-hotkey handling right after stays
+                // unconditional (camera zoom lock and the Enter-press latch are not text-editing
+                // concerns, and gating them risks breaking behavior those comments already
+                // carefully explain).
+                const bool rmlUiConsumed = !Core::Input::RouteToUi(event, g_sdlWindow);
 #ifndef _WIN32
                 // These mirror what WndProc does from Win32 messages, for the
                 // SDL-only input path. On Windows WndProc is still driven (via
@@ -1421,8 +1464,10 @@ MSG MainLoop()
                 }
 #endif
                 // Navigation/erase/clipboard for the focused portable field (#447).
-                FeedPortableKey(event.key);
+                if (!rmlUiConsumed)
+                    FeedPortableKey(event.key);
                 break;
+            }
             default:
                 break;
             }
@@ -1455,9 +1500,9 @@ MSG MainLoop()
             if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
             {
                 auto transform = UI::Scaling::PanelTransform(WindowWidth, WindowHeight);
-                SEASON3B::CNewUIManager* manager =
+                mu::ui::window::CManager* manager =
                     g_pNewUISystem != nullptr ? g_pNewUISystem->GetNewUIManager() : nullptr;
-                SEASON3B::CNewUIObj* owner =
+                mu::ui::window::CObject* owner =
                     manager != nullptr ? manager->FindUIObjByRelatedWnd(reinterpret_cast<HWND>(focusedField)) : nullptr;
                 if (owner != nullptr)
                 {
@@ -1781,7 +1826,7 @@ void UpdateResolutionDependentSystems()
     // Reposition old-style CWin-based UI for the current scene. Without this,
     // login/character-scene info boxes stay anchored to the old screen size
     // until the player re-enters the scene.
-    CUIMng::Instance().RepositionSceneUI();
+    CSceneUICoordinator::Instance().RepositionSceneUI();
 }
 
 static void ShutdownRuntime(std::thread& cpuUsageRecorder)
@@ -1987,6 +2032,13 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         return 0;
     }
 
+#ifndef _WIN32
+    // Story 7.1.2: install POSIX crash-diagnostic signal handlers. After SDL_Init (R8
+    // mitigation) and after mu::log::Init() (InitializeWorkingDirectoryAndLog(), above).
+    // [VS0-QUAL-SIGNAL-HANDLERS]
+    mu::platform::InstallSignalHandlers();
+#endif
+
 #if defined(__APPLE__)
     SetWorkingDirectoryToBasePath();
 #endif
@@ -2061,6 +2113,71 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     g_ErrorReport.AddSeparator();
     g_ErrorReport.Write(L"GPU driver\t: %hs\r\n", mu::GetRenderer().GetGPUDriverName());
     g_ErrorReport.AddSeparator();
+
+    // Must run after InitSDLGpuRenderer() -- RmlUiRuntime::Create() needs a live
+    // SDL_GPUDevice/SDL_Window from mu::GetRenderer() (GetDevice()/GetWindow()).
+    RmlUiRuntime::Instance().Create(WindowWidth, WindowHeight);
+
+    // Content that must always sit visually on top of RmlUi, regardless of theme: the game
+    // cursor, and (login/character scenes specifically) CLoginWin's, CCharMakeWin's, and
+    // CMsgWin's legacy name/password-input text. All would otherwise render earlier in the frame,
+    // as part of the normal legacy 2D pass --
+    // RmlUi always renders last (see SetPreSubmitCallback's own comment), so a theme whose
+    // #panel/.input-frame paints real pixels there (the "legacy" theme's login panel included --
+    // it reproduces the original opaque sprite art) would otherwise visually cover both.
+    // Registered here, not inside RmlUiRuntime.cpp, so that library stays scene-agnostic --
+    // this composition of game-specific overlay content belongs at the app tier, the same
+    // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
+    //
+    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin is reachable from
+    // gameplay via the in-game ESC menu (SceneCommon.cpp's RenderInfomation() calls
+    // CSceneUICoordinator::Instance().Render() unconditionally every MAIN_SCENE frame), so RmlUi
+    // content was already live during gameplay before this
+    // change -- the cursor just wasn't being pulled back on top of it, because this callback
+    // used to skip MAIN_SCENE entirely while MainScene.cpp's own inline RenderCursor() call ran
+    // too early (before RmlUi's frame-final pass). That inline call is removed in favor of this
+    // one now covering MAIN_SCENE too -- see MainScene.cpp's RenderMainSceneUI() comment.
+    // LoginWin/CharMakeWin/MsgWin's own IsShow() guards make it safe to leave their calls
+    // unconditional across every scene this callback now covers -- those windows are never shown
+    // outside LOG_IN_SCENE/CHARACTER_SCENE regardless.
+    mu::GetRenderer().SetPostRmlUiCallback(
+        []()
+        {
+            extern EGameScene SceneFlag;
+
+            // CSystem's own RmlUi-backed HUD (MU Helper bar, buff strip -- 2026-08-31
+            // pilots) needs a real per-scene visibility gate of its own now, unlike
+            // LoginWin/CharMakeWin/MsgWin below: those are explicitly Show()/Hide()'d by app
+            // logic at their own scene's enter/exit points, but CSystem is a single
+            // app-lifetime singleton whose Update()/Render() only ever run while
+            // SceneFlag == MAIN_SCENE (MainScene.cpp) -- previously a complete visibility gate on
+            // its own (nothing drew otherwise), now insufficient since a persistent RmlUi
+            // document keeps rendering regardless of whether Update() is still being called.
+            // Placed outside the scene-restricted block below (unconditional every frame) so
+            // leaving MAIN_SCENE for ANY scene -- not just the two this callback already
+            // special-cases -- correctly hides them.
+            if (g_pNewUISystem)
+                g_pNewUISystem->SyncMainSceneHudVisibility();
+
+            if (SceneFlag == LOG_IN_SCENE || SceneFlag == CHARACTER_SCENE || SceneFlag == MAIN_SCENE)
+            {
+                BeginBitmap();
+                // Also gated on !g_CreditWin.IsVisible()/!g_SysMenuWin.IsVisible() -- these are
+                // raw CUITextInputBox pixels drawn directly, not RmlUi content, so they'd
+                // otherwise paint over both regardless of which one is currently covering the
+                // login dialog (found via user testing; see CLoginWin::Render()'s own,
+                // more detailed comment on this same condition).
+                if (g_LoginWin.IsVisible() && !g_CreditWin.IsVisible() && !g_SysMenuWin.IsVisible())
+                    g_LoginWin.RenderTextOnTop();
+                if (g_CharMakeWin.IsVisible())
+                    g_CharMakeWin.RenderTextOnTop();
+                if (g_MsgWin.IsVisible())
+                    g_MsgWin.RenderTextOnTop();
+                RenderCursor();
+                EndBitmap();
+            }
+        });
+
     g_ErrorReport.WriteSoundCardInfo();
 
     // SDL_CreateWindow already shows the window.
@@ -2194,7 +2311,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     g_petProcess = PetProcess::Make();
 
-    CUIMng::Instance().Create();
+    CSceneUICoordinator::Instance().Create();
 
     if (g_iChatInputType == 1)
     {

@@ -1,0 +1,246 @@
+﻿// CEmpireGuardianNPC.cpp: implementation of the CEmpireGuardianNPC class.
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "UI/Core/NewUISystem.h"
+#include "UI/Core/NewUICommon.h"
+#include "UI/NPCs/NewUIEmpireGuardianNPC.h"
+#include "I18N/All.h"
+
+#include "Audio/DSPlaySound.h"
+#include "UI/Widgets/UIControls.h"
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+CEmpireGuardianNPC::CEmpireGuardianNPC()
+{
+    m_pNewUIMng = NULL;
+    m_Pos.x = m_Pos.y = 0;
+    m_bCanClick = true;
+}
+
+CEmpireGuardianNPC::~CEmpireGuardianNPC()
+{
+    Release();
+}
+
+bool CEmpireGuardianNPC::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, int x, int y)
+{
+    if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng || NULL == g_pNewItemMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC, this);
+
+    m_pNewUI3DRenderMng = pNewUI3DRenderMng;
+    m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
+
+    SetPos(x, y);
+
+    LoadImages();
+
+    InitButton(&m_btPositive, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 190, I18N::Game::Enter);
+    InitButton(&m_btNegative, x + (NPC_WINDOW_WIDTH / 2) - 27, y + 380, I18N::Game::Close388);
+
+    Show(false);
+
+    return true;
+}
+
+void CEmpireGuardianNPC::InitButton(CButton* pNewUIButton, int iPos_x, int iPos_y, const wchar_t* pCaption)
+{
+    pNewUIButton->ChangeText(pCaption);
+    pNewUIButton->ChangeTextBackColor(RGBA(255, 255, 255, 0));
+    pNewUIButton->ChangeButtonImgState(true, IMAGE_EMPIREGUARDIAN_NPC_BTN, true);
+    pNewUIButton->ChangeButtonInfo(iPos_x, iPos_y, 53, 23);
+    pNewUIButton->ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
+    pNewUIButton->ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
+}
+
+void CEmpireGuardianNPC::Release()
+{
+    UnloadImages();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void CEmpireGuardianNPC::SetPos(int x, int y)
+{
+    m_Pos.x = x;
+    m_Pos.y = y;
+}
+
+bool CEmpireGuardianNPC::UpdateMouseEvent()
+{
+    if (true == BtnProcess())
+        return false;
+
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, NPC_WINDOW_WIDTH, NPC_WINDOW_HEIGHT))
+        return false;
+
+    return true;
+}
+
+bool CEmpireGuardianNPC::UpdateKeyEvent()
+{
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC) == true)
+    {
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+            PlayBuffer(SOUND_CLICK01);
+            return false;
+        }
+    }
+    return true;
+}
+
+bool CEmpireGuardianNPC::Update()
+{
+    if (!IsVisible())
+        return true;
+
+    return true;
+}
+
+bool CEmpireGuardianNPC::IsVisible() const
+{
+    return CObject::IsVisible();
+}
+
+bool CEmpireGuardianNPC::Render()
+{
+    EnableAlphaTest();
+    RenderFrame();
+
+    POINT Position = { m_Pos.x + (NPC_WINDOW_WIDTH / 2), m_Pos.y };
+
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetBgColor(0, 0, 0, 0);
+    g_pRenderText->SetTextColor(220, 220, 220, 255);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 50, I18N::Game::WithoutGaionSOrder, 190, 0, RT3_SORT_CENTER);
+    wchar_t szTextOut[2][300];
+    CutStr(I18N::Game::YouCannotEnterTheFortressOfEmpireGuardians, szTextOut[0], 150, 2, 300);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 70, szTextOut[0], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 90, szTextOut[1], 190, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 110, I18N::Game::WillYouShowMeTheOrder, 190, 0, RT3_SORT_CENTER);
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(255, 240, 0, 255);
+    g_pRenderText->RenderText(Position.x - 55, Position.y + 170, I18N::Game::GaionSOrder, 110, 0, RT3_SORT_CENTER);
+
+    m_btPositive.Render();
+
+    RenderImage(IMAGE_EMPIREGUARDIAN_NPC_LINE, m_Pos.x + 1, m_Pos.y + 220, 188.f, 21.f);
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(255, 0, 0, 255);
+    g_pRenderText->RenderText(Position.x - 55, Position.y + 260, I18N::Game::Warning2223, 110, 0, RT3_SORT_CENTER);
+
+    g_pRenderText->SetFont(g_hFont);
+    g_pRenderText->SetTextColor(220, 220, 220, 255);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 280, I18N::Game::TheRound7MapSundayCanOnly, 200, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 300, I18N::Game::BeAccessedIfYouHaveA, 200, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(Position.x - 100, Position.y + 320, I18N::Game::CompleteSecromicon2837, 200, 0, RT3_SORT_CENTER);
+    CutStr(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, szTextOut[0], 155, 2, 300);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 340, szTextOut[0], 200, 0, RT3_SORT_CENTER);
+    g_pRenderText->RenderText(m_Pos.x, Position.y + 360, szTextOut[1], 200, 0, RT3_SORT_CENTER);
+
+    m_btNegative.Render();
+    DisableAlphaBlend();
+    return true;
+}
+
+bool CEmpireGuardianNPC::BtnProcess()
+{
+    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+
+    if (m_btNegative.UpdateMouseEvent())
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
+    }
+
+    if (m_btPositive.UpdateMouseEvent())
+    {
+        SocketClient->ToGameServer()->SendEnterEmpireGuardianEvent();
+        ::PlayBuffer(SOUND_INTERFACE01);
+        m_bCanClick = false;
+        return true;
+    }
+
+    return false;
+}
+
+float CEmpireGuardianNPC::GetLayerDepth()
+{
+    return 1.2f;
+}
+
+void CEmpireGuardianNPC::OpenningProcess()
+{
+}
+
+void CEmpireGuardianNPC::ClosingProcess()
+{
+}
+
+void CEmpireGuardianNPC::LoadImages()
+{
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_EMPIREGUARDIAN_NPC_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_EMPIREGUARDIAN_NPC_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_EMPIREGUARDIAN_NPC_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_EMPIREGUARDIAN_NPC_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_EMPIREGUARDIAN_NPC_BOTTOM, GL_LINEAR);
+
+    //btn
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_EMPIREGUARDIAN_NPC_BTN, GL_LINEAR);
+
+    //line
+    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_EMPIREGUARDIAN_NPC_LINE, GL_LINEAR);
+}
+
+void CEmpireGuardianNPC::UnloadImages()
+{
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_TOP);
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_LEFT);
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_RIGHT);
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_BOTTOM);
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_BACK);
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_BTN);
+    DeleteBitmap(IMAGE_EMPIREGUARDIAN_NPC_LINE);
+}
+
+void CEmpireGuardianNPC::RenderFrame()
+{
+    RenderImage(IMAGE_EMPIREGUARDIAN_NPC_BACK, m_Pos.x, m_Pos.y, float(NPC_WINDOW_WIDTH), float(NPC_WINDOW_HEIGHT));
+    RenderImage(IMAGE_EMPIREGUARDIAN_NPC_TOP, m_Pos.x, m_Pos.y, float(NPC_WINDOW_WIDTH), 64.f);
+    RenderImage(IMAGE_EMPIREGUARDIAN_NPC_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
+    RenderImage(IMAGE_EMPIREGUARDIAN_NPC_RIGHT, m_Pos.x + NPC_WINDOW_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
+    RenderImage(IMAGE_EMPIREGUARDIAN_NPC_BOTTOM, m_Pos.x, m_Pos.y + NPC_WINDOW_HEIGHT - 45, float(NPC_WINDOW_WIDTH), 45.f);
+
+    g_pRenderText->SetFont(g_hFontBold);
+    g_pRenderText->SetTextColor(220, 220, 220, 255);
+    g_pRenderText->SetBgColor(0, 0, 0, 0);
+    g_pRenderText->RenderText(m_Pos.x + (NPC_WINDOW_WIDTH / 2) - 55, m_Pos.y + 13, I18N::Game::JerintTheAssistant, 110, 0, RT3_SORT_CENTER);
+}
+
+void CEmpireGuardianNPC::Render3D()
+{
+    RenderItem3D();
+}
+
+void CEmpireGuardianNPC::RenderItem3D()
+{
+    POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
+
+    int nItemType = ITEM_GAIONS_ORDER;
+    int nItemLevel = 0;
+
+    ::RenderItem3D(ptOrigin.x + (190 - 20) / 2, ptOrigin.y + 70, 20.0f, 27.0f, nItemType, nItemLevel, 0, 0, false);
+}

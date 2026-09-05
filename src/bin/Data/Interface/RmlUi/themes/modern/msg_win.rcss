@@ -1,0 +1,95 @@
+/* Modern theme for the generic message/confirm dialog -- flat programmatic chrome, no legacy
+   sprite art. OK/Cancel show real localized text instead of art.
+
+   2026-09-03: #panel now consumes base.rcss's .modern-frame-crimson (applied in msg_win.rml)
+   instead of its own bespoke gray background/border -- reasonable here since most of this
+   dialog's modes show a real crimson .btn-ok primary action (see .btn below). Position/size/font/
+   border-width/radius stay local/structural (.modern-frame itself sets no border-radius at all,
+   so this still needs its own value or corners go square). */
+#panel {
+	position: absolute;
+	width: 352dp;
+	height: 113dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-body);
+	border-width: 1dp;
+	border-radius: token(radius-md)dp;
+}
+
+#msg_line1 {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 38dp;
+	text-align: center;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+.no-buttons #msg_line1 { top: 54dp; }
+#msg_line1.multi-line {
+	left: 25dp;
+	right: auto;
+	text-align: left;
+	top: 32dp;
+}
+.no-buttons #msg_line1.multi-line { top: 44dp; }
+
+#msg_line2 {
+	position: absolute;
+	left: 25dp;
+	top: 51dp;
+	text-align: left;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+.no-buttons #msg_line2 { top: 66dp; }
+
+#input_frame {
+	display: none;
+	position: absolute;
+	left: 32dp;
+	top: 76dp;
+	width: 171dp;
+	height: 23dp;
+	background-color: rgba(0, 0, 0, 110);
+	border: 1dp token(border-metal);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+.mode-input #input_frame { display: block; }
+
+/* 2026-09-03: background-color/border/border-radius removed -- this rule used to fully redefine
+   them (in dp, vs. base.rcss's own px), which doesn't just diverge cosmetically: `border` is a
+   shorthand that resets border-color on all four sides, so it was silently stomping .btn-ok's
+   crimson border-color/border-top-color back to gray border-metal every time (same specificity,
+   this file linked after base.rcss, so this rule always won the tie) -- the OK button's fill
+   still showed crimson (decorator, a different property, was never touched) but with a mismatched
+   gray border instead of a clean crimson one. Only what's genuinely local/dp-specific stays here:
+   the mode-gated default-hidden state, this window's own top offset, and its dp-based size
+   (deliberately dp, unlike base.rcss's px .btn -- not part of this fix, a pre-existing choice for
+   this window). */
+.btn {
+	display: none;
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	top: 72dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+}
+
+#btn_ok { left: 149dp; }
+.mode-ok-only #btn_ok, .mode-both #btn_ok, .mode-input #btn_ok { display: block; }
+.mode-both #btn_ok { left: 98dp; }
+.mode-input #btn_ok { left: 209dp; }
+
+#btn_cancel { left: 149dp; }
+.mode-cancel-only #btn_cancel, .mode-both #btn_cancel, .mode-input #btn_cancel { display: block; }
+.mode-both #btn_cancel { left: 200dp; }
+.mode-input #btn_cancel { left: 264dp; }

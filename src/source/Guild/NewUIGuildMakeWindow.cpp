@@ -1,17 +1,17 @@
-// NewUIGuildMakeWindow.cpp: implementation of the CNewUIGuildMakeWindow class.
+// NewUIGuildMakeWindow.cpp: implementation of the CGuildMakeWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "NewUIGuildMakeWindow.h"
-#include "UI/NewUI/NewUIManager.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Core/NewUIManager.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "App/Platform/Windows/Local.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 extern MARK_t		GuildMark[MAX_MARKS];
 extern int			SelectMarkColor;
@@ -143,25 +143,26 @@ namespace
 };
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-CNewUIGuildMakeWindow::CNewUIGuildMakeWindow() : m_pNewUIMng(NULL), m_EditBox(NULL), m_Button(NULL),
+CGuildMakeWindow::CGuildMakeWindow() : m_pNewUIMng(NULL), m_EditBox(NULL), m_Button(NULL),
 m_GuildMakeState(GUILDMAKE_INFO)
 {
 }
 
-CNewUIGuildMakeWindow::~CNewUIGuildMakeWindow()
+CGuildMakeWindow::~CGuildMakeWindow()
 {
     Release();
 }
 
-bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool CGuildMakeWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     LoadImages();
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCGUILDMASTER, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCGUILDMASTER, this);
     SetPos(x, y);
 
     m_EditBox = new CUITextInputBox;
@@ -172,7 +173,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     m_EditBox->SetFont(g_hFont);
     m_EditBox->SetState(UISTATE_NORMAL);
     m_EditBox->SetOption(UIOPTION_NOLOCALIZEDCHARACTERS);
-    m_Button = new CNewUIButton[GUILDMAKEBUTTON_COUNT];
+    m_Button = new CButton[GUILDMAKEBUTTON_COUNT];
 
     for (int i = 0; i < GUILDMAKEBUTTON_COUNT; ++i)
     {
@@ -198,7 +199,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void CNewUIGuildMakeWindow::Release()
+void CGuildMakeWindow::Release()
 {
     SAFE_DELETE_ARRAY(m_Button);
     SAFE_DELETE(m_EditBox);
@@ -212,7 +213,7 @@ void CNewUIGuildMakeWindow::Release()
     UnloadImages();
 }
 
-void CNewUIGuildMakeWindow::LoadImages()
+void CGuildMakeWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUILDMAKE_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_btn_empty.tga", IMAGE_GUILDMAKE_MAKEBUTTON, GL_LINEAR);
@@ -225,7 +226,7 @@ void CNewUIGuildMakeWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_guildmakeeditbox.tga", IMAGE_GUILDMAKE_EDITBOX, GL_LINEAR);
 }
 
-void CNewUIGuildMakeWindow::UnloadImages()
+void CGuildMakeWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GUILDMAKE_EDITBOX);
     DeleteBitmap(IMAGE_GUILDMAKE_BTN_EXIT);
@@ -238,12 +239,12 @@ void CNewUIGuildMakeWindow::UnloadImages()
     DeleteBitmap(IMAGE_GUILDMAKE_BACK);
 }
 
-float CNewUIGuildMakeWindow::GetLayerDepth()
+float CGuildMakeWindow::GetLayerDepth()
 {
     return 4.3f;
 }
 
-void CNewUIGuildMakeWindow::ClosingProcess()
+void CGuildMakeWindow::ClosingProcess()
 {
     // Save any text in the editbox before closing
     if (m_GuildMakeState == GUILDMAKE_MARK && m_EditBox->GetState() == UISTATE_NORMAL)
@@ -269,12 +270,12 @@ void CNewUIGuildMakeWindow::ClosingProcess()
     SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
 }
 
-void CNewUIGuildMakeWindow::ChangeWindowState(const GUILDMAKE_STATE state)
+void CGuildMakeWindow::ChangeWindowState(const GUILDMAKE_STATE state)
 {
     m_GuildMakeState = state;
 }
 
-void CNewUIGuildMakeWindow::ChangeEditBox(const UISTATES type)
+void CGuildMakeWindow::ChangeEditBox(const UISTATES type)
 {
     if (type == UISTATE_NORMAL)
     {
@@ -297,7 +298,7 @@ void CNewUIGuildMakeWindow::ChangeEditBox(const UISTATES type)
     }
 }
 
-bool CNewUIGuildMakeWindow::UpdateGMInfo()
+bool CGuildMakeWindow::UpdateGMInfo()
 {
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].SetPos(m_Pos.x + ((190 / 2) - (108 / 2)), m_Pos.y + 100);
     m_Button[GUILDMAKEBUTTON_INFO_MAKE].ChangeText(&I18N::Game::CreateGuild);
@@ -312,14 +313,14 @@ bool CNewUIGuildMakeWindow::UpdateGMInfo()
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
         return true;
     }
 
     return false;
 }
 
-bool CNewUIGuildMakeWindow::UpdateGMMark()
+bool CGuildMakeWindow::UpdateGMMark()
 {
     m_EditBox->DoAction();
 
@@ -363,7 +364,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
         if (CheckSpecialText(tempText) == true)
         {
-            SEASON3B::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
         }
         else if (IsGuildName(tempText) == FALSE)
         {
@@ -392,7 +393,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
     return false;
 }
 
-bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
+bool CGuildMakeWindow::UpdateGMResultInfo()
 {
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].SetPos(m_Pos.x + 15, m_Pos.y + 379);
     m_Button[GUILDMAKEBUTTON_RESULTINFO_LNEXT].ChangeText(&I18N::Game::Back);
@@ -419,14 +420,14 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
         }
 
         SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark, sizeof Mark);
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
         return true;
     }
 
     return false;
 }
 
-void CNewUIGuildMakeWindow::RenderGMInfo()
+void CGuildMakeWindow::RenderGMInfo()
 {
     wchar_t Text[100];
 
@@ -439,7 +440,7 @@ void CNewUIGuildMakeWindow::RenderGMInfo()
     m_BtnExit.Render();
 }
 
-void CNewUIGuildMakeWindow::RenderGMMark()
+void CGuildMakeWindow::RenderGMMark()
 {
     //edit box
     wchar_t Text[100];
@@ -458,7 +459,7 @@ void CNewUIGuildMakeWindow::RenderGMMark()
     m_Button[GUILDMAKEBUTTON_MARK_RNEXT].Render();
 }
 
-void CNewUIGuildMakeWindow::RenderGMResultInfo()
+void CGuildMakeWindow::RenderGMResultInfo()
 {
     RenderGoldRect(m_Pos.x + 72, m_Pos.y + 70, 53.f, 53.f);
     CreateGuildMark(MARK_EDIT);
@@ -473,7 +474,7 @@ void CNewUIGuildMakeWindow::RenderGMResultInfo()
     m_Button[GUILDMAKEBUTTON_RESULTINFO_RNEXT].Render();
 }
 
-void CNewUIGuildMakeWindow::RenderFrame()
+void CGuildMakeWindow::RenderFrame()
 {
     RenderImage(IMAGE_GUILDMAKE_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_GUILDMAKE_BACK_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -487,13 +488,13 @@ void CNewUIGuildMakeWindow::RenderFrame()
     RenderText(Text, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
 }
 
-bool CNewUIGuildMakeWindow::UpdateKeyEvent()
+bool CGuildMakeWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -502,20 +503,20 @@ bool CNewUIGuildMakeWindow::UpdateKeyEvent()
     return true;
 }
 
-bool CNewUIGuildMakeWindow::Update()
+bool CGuildMakeWindow::Update()
 {
     return true;
 }
 
-bool CNewUIGuildMakeWindow::UpdateMouseEvent()
+bool CGuildMakeWindow::UpdateMouseEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER) == false)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER) == false)
     {
         return true;
     }
 
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_NPCGUILDMASTER))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCGUILDMASTER))
     {
         return false;
     }
@@ -539,7 +540,7 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
@@ -552,7 +553,7 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
     return true;
 }
 
-bool CNewUIGuildMakeWindow::Render()
+bool CGuildMakeWindow::Render()
 {
     EnableAlphaTest();
 

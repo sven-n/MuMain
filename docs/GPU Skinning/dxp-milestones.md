@@ -51,11 +51,11 @@ Upstream documented a six-increment shadow comparison across item-preview
 cameras. Downstream retains one validation marker in each active path:
 
 - `Scenes/SceneCommon.cpp`;
-- `UI/NewUI/NewUI3DRenderMng.cpp`;
+- `UI/Core/NewUI3DRenderMng.cpp`;
 - `GameShop/NewUIInGameShop.cpp`;
-- `UI/NewUI/Events/NewUIGoldBowmanLena.cpp`;
-- `UI/NewUI/Events/NewUIRegistrationLuckyCoin.cpp`;
-- `UI/Legacy/UIWindows.cpp`.
+- `UI/Events/NewUIGoldBowmanLena.cpp`;
+- `UI/Events/NewUIRegistrationLuckyCoin.cpp`;
+- `UI/Party/UIWindows.cpp`.
 
 The upstream audit counted 17 occurrences across nine files before the SDL GPU
 port. The downstream count is six occurrences across six files because the

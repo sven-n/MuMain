@@ -1,0 +1,20 @@
+<rml>
+<head>
+	<title>Login Main Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="login_main.rcss"/>
+</head>
+<body>
+	<!-- Login-scene menu/credit button bar. -->
+	<div id="panel">
+		<div id="btn_menu" class="btn-icon btn-icon-menu">
+			<span class="btn-icon-label">M</span>
+		</div>
+		<div id="btn_credit" class="btn-icon btn-icon-credit">
+			<div class="btn-credit-deco"></div>
+			<div class="btn-credit-icon"></div>
+			<span class="btn-icon-label">C</span>
+		</div>
+	</div>
+</body>
+</rml>

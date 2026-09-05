@@ -8,18 +8,18 @@
 
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 
-#include "UI/NewUI/NewUIBase.h"
-#include "UI/NewUI/NewUIManager.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Inventory/NewUIMyInventory.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Core/NewUIBase.h"
+#include "UI/Core/NewUIManager.h"
+#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Inventory/NewUIMyInventory.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
-class CNewUIInGameShop : public CNewUIObj
+class CInGameShop : public CObject
 {
 public:
     enum LISTBOX_INDEX
@@ -31,7 +31,7 @@ public:
 
     enum IMAGE_LIST
     {
-        IMAGE_IGS_EXIT_BTN = CNewUIMyInventory::IMAGE_INVENTORY_EXIT_BTN, // newui_exit_00.tga (36, 58) - 2BtState
+        IMAGE_IGS_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN, // newui_exit_00.tga (36, 58) - 2BtState
         IMAGE_IGS_BACK = BITMAP_INGAMESHOP_FRAME,                         // Ingame_shopback.jpg (640, 429)
         IMAGE_IGS_CATEGORY_BTN,                                           // Ingame_Bt01.tga (73, 81) - 3BtState
         IMAGE_IGS_CATEGORY_DECO_MIDDLE,                                   // Ingame_Deco_Center.tga (6, 8)
@@ -163,10 +163,10 @@ private:
     };
 
 public:
-    CNewUIInGameShop();
-    virtual ~CNewUIInGameShop();
+    CInGameShop();
+    virtual ~CInGameShop();
 
-    bool Create(CNewUIManager* pNewUIMng, int x, int y);
+    bool Create(CManager* pNewUIMng, int x, int y);
 
     void SetPos(int x, int y);
     const POINT& GetPos()
@@ -255,23 +255,23 @@ private:
     bool UpdateBanner();
 
 private:
-    CNewUIManager* m_pNewUIMng;
+    CManager* m_pNewUIMng;
     POINT m_Pos;
     bool m_ItemAngle;
 
-    CNewUIRadioGroupButton m_ZoneButton;
-    CNewUIRadioGroupButton m_CategoryButton;
-    CNewUIRadioGroupButton m_ListBoxTabButton;
-    CNewUIButton m_ViewDetailButton[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
-    CNewUIButton m_CashGiftButton;
-    CNewUIButton m_CashChargeButton;
-    CNewUIButton m_CashRefreshButton;
-    CNewUIButton m_UseButton;
-    CNewUIButton m_PrevButton;
-    CNewUIButton m_NextButton;
-    CNewUIButton m_CloseButton;
-    CNewUIButton m_StoragePrevButton;
-    CNewUIButton m_StorageNextButton;
+    CRadioGroupButton m_ZoneButton;
+    CRadioGroupButton m_CategoryButton;
+    CRadioGroupButton m_ListBoxTabButton;
+    CButton m_ViewDetailButton[INGAMESHOP_DISPLAY_ITEMLIST_SIZE];
+    CButton m_CashGiftButton;
+    CButton m_CashChargeButton;
+    CButton m_CashRefreshButton;
+    CButton m_UseButton;
+    CButton m_PrevButton;
+    CButton m_NextButton;
+    CButton m_CloseButton;
+    CButton m_StoragePrevButton;
+    CButton m_StorageNextButton;
 
     bool m_bLoadBanner;
     bool m_bBannerLink;
@@ -288,7 +288,7 @@ private:
 
     CUIInGameShopListBox m_StorageItemListBox;
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #endif // !defined(AFX_NEWUIINGAMESHOP_H__AE3CE531_70BE_4CBB_9938_0D80B26F21A8__INCLUDED_)

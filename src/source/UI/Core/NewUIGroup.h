@@ -1,0 +1,39 @@
+//=============================================================================
+//	NewUIGroup.h
+//=============================================================================
+
+#pragma once
+#include "UI/Core/NewUIBase.h"
+#include <vector>
+
+namespace mu::ui::window
+{
+    class CGroup : public CObject
+    {
+        typedef std::vector<CObject*>		type_vector_uibase;
+        type_vector_uibase	m_vecUI;		//. for rendering and updating
+
+    private:
+        float m_fLayerDepth;
+        float m_fKeyEventOrder;
+
+    public:
+        CGroup();
+        virtual ~CGroup();
+
+        void AddUIObj(CObject* pUIObj);
+
+        virtual bool Render();
+        virtual bool Update();
+        virtual bool UpdateMouseEvent();
+        virtual bool UpdateKeyEvent();
+
+        virtual void Release();
+
+        void SetKeyEventOrder(float fOrder) { m_fKeyEventOrder = fOrder; }
+        float GetKeyEventOrder() { return m_fKeyEventOrder; }
+
+        void SetLayerDepth(float fDepth) { m_fLayerDepth = fDepth; }
+        float GetLayerDepth() { return  m_fLayerDepth; }
+    };
+}

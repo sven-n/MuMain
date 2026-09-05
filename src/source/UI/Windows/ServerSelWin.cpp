@@ -5,7 +5,7 @@
 #include "stdafx.h"
 #include "ServerSelWin.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "App/Platform/Windows/Local.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Models/ZzzBMD.h"
@@ -13,20 +13,20 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Network/Server/ServerListManager.h"
+#include "Core/Globals/_enum.h"
 
 #define	SSW_GAP_WIDTH	28
 #define	SSW_GAP_HEIGHT	5
 #define	SSW_GB_POS_X	16
 #define	SSW_GB_POS_Y	19
 
-
-
-
 using namespace SEASON3A;
+
+CServerSelWin g_ServerSelWin;
 
 CServerSelWin::CServerSelWin()
 {
@@ -34,11 +34,15 @@ CServerSelWin::CServerSelWin()
 
 CServerSelWin::~CServerSelWin()
 {
+    Release();
 }
 
 void CServerSelWin::Create()
 {
-    CWin::Create(0, 0, -2);
+    Release();
+
+    m_ptPos.x = m_ptPos.y = 0;
+    m_Size.cx = m_Size.cy = 0;
 
     m_iSelectServerBtnIndex = -1;
 
@@ -47,13 +51,11 @@ void CServerSelWin::Create()
     for (i = 0; i < SSW_SERVER_G_MAX; ++i)
     {
         m_aServerGroupBtn[i].Create(SERVER_GROUP_BTN_WIDTH, SERVER_GROUP_BTN_HEIGHT, BITMAP_LOG_IN, 4, 2, 1, -1, 3);
-        CWin::RegisterButton(&m_aServerGroupBtn[i]);
     }
 
     for (i = 0; i < SSW_SERVER_MAX; ++i)
     {
         m_aServerBtn[i].Create(SERVER_BTN_WIDTH, SERVER_BTN_HEIGHT, BITMAP_LOG_IN + 1, 3, 2, 1);
-        CWin::RegisterButton(&m_aServerBtn[i]);
         m_aServerGauge[i].Create(160, 4, BITMAP_LOG_IN + 2);
     }
 
@@ -84,15 +86,26 @@ void CServerSelWin::Create()
     m_winDescription.Create(aiiDescBg, 1, 10);
     m_winDescription.SetLine(10);
 
-    CWin::SetSize((SERVER_GROUP_BTN_WIDTH + SSW_GAP_WIDTH) * 2 + SERVER_BTN_WIDTH, SERVER_BTN_HEIGHT * SSW_SERVER_MAX + SSW_GAP_HEIGHT * 2 + SERVER_GROUP_BTN_HEIGHT + m_winDescription.GetHeight());
+    m_Size.cx = (SERVER_GROUP_BTN_WIDTH + SSW_GAP_WIDTH) * 2 + SERVER_BTN_WIDTH;
+    m_Size.cy = SERVER_BTN_HEIGHT * SSW_SERVER_MAX + SSW_GAP_HEIGHT * 2 + SERVER_GROUP_BTN_HEIGHT +
+                m_winDescription.GetHeight();
+
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
+    Show(false);
+
+    UpdateDisplay();
 }
 
-void CServerSelWin::PreRelease()
+void CServerSelWin::Release()
 {
     int i;
 
+    for (i = 0; i < SSW_SERVER_G_MAX; ++i)
+        m_aServerGroupBtn[i].Release();
+
     for (i = 0; i < SSW_SERVER_MAX; ++i)
     {
+        m_aServerBtn[i].Release();
         m_aServerGauge[i].Release();
     }
 
@@ -107,7 +120,8 @@ void CServerSelWin::PreRelease()
 
 void CServerSelWin::SetPosition(int nXCoord, int nYCoord)
 {
-    CWin::SetPosition(nXCoord, nYCoord);
+    m_ptPos.x = nXCoord;
+    m_ptPos.y = nYCoord;
 
     int nServerGBtnWidth = m_aServerGroupBtn[0].GetWidth();
     int nServerGBtnHeight = m_aServerGroupBtn[0].GetHeight();
@@ -117,11 +131,12 @@ void CServerSelWin::SetPosition(int nXCoord, int nYCoord)
     int nBtnPosY;
     int i;
 
-    int nServerGBtnBasePosY = nYCoord + CWin::GetHeight() - (nServerGBtnHeight * 11 + SSW_GAP_HEIGHT * 2 + nDescGgHeight);
+    int nServerGBtnBasePosY = nYCoord + m_Size.cy - (nServerGBtnHeight * 11 + SSW_GAP_HEIGHT * 2 + nDescGgHeight);
     int nRServerGBtnPosX = nXCoord + nServerGBtnWidth + nServerBtnWidth + (SSW_GAP_WIDTH * 2);
 
     int icntServreGroup = 0;
-    m_aServerGroupBtn[icntServreGroup++].SetPosition(nXCoord + (CWin::GetWidth() - nServerGBtnWidth) / 2, nYCoord + CWin::GetHeight() - nServerGBtnHeight - SSW_GAP_HEIGHT - nDescGgHeight);
+    m_aServerGroupBtn[icntServreGroup++].SetPosition(nXCoord + (m_Size.cx - nServerGBtnWidth) / 2,
+                                                      nYCoord + m_Size.cy - nServerGBtnHeight - SSW_GAP_HEIGHT - nDescGgHeight);
 
     for (i = 0; i < SSW_LEFT_SERVER_G_MAX; i++)
     {
@@ -135,12 +150,12 @@ void CServerSelWin::SetPosition(int nXCoord, int nYCoord)
         m_aServerGroupBtn[icntServreGroup++].SetPosition(nRServerGBtnPosX, nBtnPosY);
     }
 
-    m_winDescription.SetPosition(nXCoord - ((m_winDescription.GetWidth() - CWin::GetWidth()) / 2), nYCoord + CWin::GetHeight() - m_winDescription.GetHeight());
+    m_winDescription.SetPosition(nXCoord - ((m_winDescription.GetWidth() - m_Size.cx) / 2),
+                                  nYCoord + m_Size.cy - m_winDescription.GetHeight());
 
     m_aBtnDeco[0].SetPosition(m_aServerGroupBtn[1].GetXPos(), m_aServerGroupBtn[1].GetYPos());
-    m_aBtnDeco[1].SetPosition(m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetXPos() + SERVER_GROUP_BTN_WIDTH, m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetYPos());
-
-    int a = m_aServerGroupBtn[1].GetXPos();
+    m_aBtnDeco[1].SetPosition(m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetXPos() + SERVER_GROUP_BTN_WIDTH,
+                               m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetYPos());
 }
 
 void CServerSelWin::SetServerBtnPosition()
@@ -287,7 +302,7 @@ void CServerSelWin::UpdateDisplay()
 
 void CServerSelWin::Show(bool bShow)
 {
-    CWin::Show(bShow);
+    mu::ui::window::CObject::Show(bShow);
 }
 
 void CServerSelWin::ShowServerGBtns()
@@ -296,7 +311,7 @@ void CServerSelWin::ShowServerGBtns()
 
     if (m_bTestServerBtn == true)
     {
-        m_aServerGroupBtn[0].Show(CWin::m_bShow);
+        m_aServerGroupBtn[0].Show(IsVisible());
     }
     else
     {
@@ -305,7 +320,7 @@ void CServerSelWin::ShowServerGBtns()
 
     for (i = 1; i < m_icntLeftServerGroup + 1; i++)
     {
-        m_aServerGroupBtn[i].Show(CWin::m_bShow);
+        m_aServerGroupBtn[i].Show(IsVisible());
     }
     for (; i < SSW_LEFT_SERVER_G_MAX; ++i)
     {
@@ -314,7 +329,7 @@ void CServerSelWin::ShowServerGBtns()
 
     for (i = SSW_LEFT_SERVER_G_MAX + 1; i < SSW_RIGHT_SERVER_G_MAX + 1 + m_icntRightServerGroup; i++)
     {
-        m_aServerGroupBtn[i].Show(CWin::m_bShow);
+        m_aServerGroupBtn[i].Show(IsVisible());
     }
     for (; i < SSW_SERVER_G_MAX; i++)
     {
@@ -326,7 +341,7 @@ void CServerSelWin::ShowDecoSprite()
 {
     if (m_icntLeftServerGroup > 0)
     {
-        m_aBtnDeco[0].Show(CWin::m_bShow);
+        m_aBtnDeco[0].Show(IsVisible());
     }
     else
     {
@@ -335,7 +350,7 @@ void CServerSelWin::ShowDecoSprite()
 
     if (m_icntRightServerGroup > 0)
     {
-        m_aBtnDeco[1].Show(CWin::m_bShow);
+        m_aBtnDeco[1].Show(IsVisible());
     }
     else
     {
@@ -347,13 +362,13 @@ void CServerSelWin::ShowArrowSprite()
 {
     if ((m_iSelectServerBtnIndex >= 0) && (m_iSelectServerBtnIndex <= SSW_LEFT_SERVER_G_MAX))
     {
-        m_aArrowDeco[0].Show(CWin::m_bShow);
+        m_aArrowDeco[0].Show(IsVisible());
         m_aArrowDeco[1].Show(false);
     }
     else if ((m_iSelectServerBtnIndex > SSW_LEFT_SERVER_G_MAX) && (m_iSelectServerBtnIndex < SSW_SERVER_G_MAX))
     {
         m_aArrowDeco[0].Show(false);
-        m_aArrowDeco[1].Show(CWin::m_bShow);
+        m_aArrowDeco[1].Show(IsVisible());
     }
     else
     {
@@ -373,8 +388,8 @@ void CServerSelWin::ShowServerBtns()
     int i;
     for (i = 0; i < m_icntServer; i++)
     {
-        m_aServerBtn[i].Show(CWin::m_bShow);
-        m_aServerGauge[i].Show(CWin::m_bShow);
+        m_aServerBtn[i].Show(IsVisible());
+        m_aServerGauge[i].Show(IsVisible());
     }
     for (; i < SSW_SERVER_MAX; i++)
     {
@@ -382,26 +397,34 @@ void CServerSelWin::ShowServerBtns()
         m_aServerGauge[i].Show(false);
     }
 
-    m_winDescription.Show(CWin::m_bShow);
+    m_winDescription.Show(IsVisible());
 }
 
-bool CServerSelWin::CursorInWin(int nArea)
+bool CServerSelWin::UpdateMouseEvent()
 {
-    if (!CWin::m_bShow)
+    if (!IsVisible())
+        return true;
+
+    // Was CWin::CursorInWin(WA_ALL) -- ported directly (see this method's own header comment).
+    RECT rc;
+    ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+    if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
         return false;
 
-    switch (nArea)
-    {
-    case WA_MOVE:
-        return false;
-    }
-
-    return CWin::CursorInWin(nArea);
+    return true;
 }
 
-void CServerSelWin::UpdateWhileActive(double dDeltaTick)
+bool CServerSelWin::Update()
 {
+    if (!IsVisible())
+        return true;
+
     int i;
+
+    for (i = 0; i < SSW_SERVER_G_MAX; i++)
+        m_aServerGroupBtn[i].Update();
+    for (i = 0; i < SSW_SERVER_MAX; i++)
+        m_aServerBtn[i].Update();
 
     for (i = 0; i < SSW_SERVER_G_MAX; i++)
     {
@@ -420,7 +443,7 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
     }
 
     if (m_pSelectServerGroup == NULL)
-        return;
+        return true;
 
     CServerInfo* pServerInfo = NULL;
     for (i = 0; i < m_icntServer; i++)
@@ -430,20 +453,15 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
             pServerInfo = m_pSelectServerGroup->GetServerInfo(i);
 
             if (pServerInfo == NULL)
-                return;
+                return true;
 
             if (pServerInfo->m_iPercent < 100)
             {
-                CUIMng::Instance().HideWin(this);
+                Show(false);
 
                 SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-                g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
-
-                //if (m_pSelectServerGroup->m_iSequence == 0)
-                //{
-                //    bTestServer = true;
-                //}
+                g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
                 g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
 
@@ -451,13 +469,15 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
             }
             else if (pServerInfo->m_iPercent < 128)
             {
-                CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
+                CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
             }
         }
     }
+
+    return true;
 }
 
-void CServerSelWin::RenderControls()
+bool CServerSelWin::Render()
 {
     int i = 0;
 
@@ -465,7 +485,14 @@ void CServerSelWin::RenderControls()
     g_pRenderText->SetTextColor(CLRDW_WHITE);
     g_pRenderText->SetBgColor(0);
 
-    CWin::RenderButtons();
+    // NOTE: m_aBtnDeco/m_aArrowDeco/m_winDescription are positioned and have their Show() flags
+    // toggled (SetPosition(), Show*() below) but were never actually rendered here in the
+    // original CWin-based RenderControls() either -- ported as-is (parity, not a fix) rather than
+    // silently drawing content that wasn't drawn before. Flagged in docs/newui-legacy-merger.md.
+    for (i = 0; i < SSW_SERVER_G_MAX; i++)
+        m_aServerGroupBtn[i].Render();
+    for (i = 0; i < SSW_SERVER_MAX; i++)
+        m_aServerBtn[i].Render();
 
     if (m_pSelectServerGroup != NULL)
     {
@@ -482,4 +509,6 @@ void CServerSelWin::RenderControls()
             g_pRenderText->RenderText(90, 164 - 30, I18N::Game::WeRecommendThatYouUseOtherServers);
         }
     }
+
+    return true;
 }

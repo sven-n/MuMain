@@ -2,7 +2,7 @@
 //  GMHellas.cpp
 //////////////////////////////////////////////////////////////////////////
 #include "stdafx.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzTexture.h"
@@ -16,7 +16,7 @@
 #include "Engine/Physics/PhysicsManager.h"
 #include "Render/Terrain/CSWaterTerrain.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Skills/SkillManager.h"
@@ -183,7 +183,7 @@ bool GetUseLostMap(bool bDrawAlert)
 
     if (bDrawAlert && Hero->SafeZone)
     {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeUsedInTheSafeZone, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeUsedInTheSafeZone, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -196,7 +196,7 @@ bool GetUseLostMap(bool bDrawAlert)
     {
         wchar_t Text[100];
         mu_swprintf(Text, I18N::Game::OnlyAboveLevelDCanUse, g_iKalimaLevel[startIndex][0]);
-        g_pSystemLogBox->AddText(Text, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(Text, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
 
     return false;

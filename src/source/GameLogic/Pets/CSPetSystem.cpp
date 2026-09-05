@@ -13,7 +13,7 @@
 #include "CSPetSystem.h"
 #include "World/MapInfra/MapManager.h"
 #include "GameLogic/Combat/DuelMgr.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"

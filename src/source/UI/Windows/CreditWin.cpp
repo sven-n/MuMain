@@ -7,7 +7,9 @@
 #include "UI/Windows/CreditWin.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "Core/Globals/_enum.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
@@ -18,7 +20,7 @@
 #include "I18N/All.h"
 #include "Core/Platform/PathResolve.h"
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 
 #include <algorithm>
 #include <chrono>
@@ -87,6 +89,9 @@ namespace
 
 
 
+// See this global's own header comment (CreditWin.h).
+CCreditWin g_CreditWin;
+
 CCreditWin::CCreditWin()
     : m_eIllustState(HIDE)
     , m_illustElapsed(DurationMs::zero())
@@ -99,6 +104,10 @@ CCreditWin::CCreditWin()
     , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
+	// Not SetLayoutMode() here -- CManager::AddUIObj() (called from Create(), below)
+	// overwrites it unconditionally on first registration via UI::Layout::ForInterface(), which
+	// is the actual authority; see that policy table's own INTERFACE_CREDITS entry
+	// (UILayoutPolicy.cpp) for why this window needs LayoutMode::Legacy specifically.
 }
 
 CCreditWin::~CCreditWin()
@@ -108,10 +117,15 @@ CCreditWin::~CCreditWin()
 
 void CCreditWin::Create()
 {
+	// Mirrors CWin::Create()'s own internal Release()-then-rebuild pattern -- avoids leaking the
+	// sprites/font on a second Create() call (RepositionSceneUI()'s resolution-change path).
+	Release();
+
 	CInput rInput = CInput::Instance();
 
-	CWin::Create(rInput.GetScreenWidth(), rInput.GetScreenHeight());
-	CWin::SetBgAlpha(255);
+	m_sprBg.Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -1, 0, NULL, 0, 0, false);
+	m_sprBg.SetAlpha(255);
+	m_sprBg.SetColor(0, 0, 0);
 
 	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
 	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
@@ -128,7 +142,6 @@ void CCreditWin::Create()
 	}
 
 	m_btnClose.Create(54, 30, BITMAP_BUTTON + 2, 3, 2, 1);
-	CWin::RegisterButton(&m_btnClose);
 
 	int nFontSize = 10;
 	switch (rInput.GetScreenWidth())
@@ -142,10 +155,22 @@ void CCreditWin::Create()
 
 	LoadText();
 	SetPosition();
+
+	// docs/rmlui-ui-system's CUIMng/CNewUIManager merger -- registers with CSceneUICoordinator's
+	// own scene-scoped manager instance, not the shared g_pNewUIMng (this window only ever exists
+	// during LOG_IN_SCENE; see CSceneUICoordinator::GetNewStyleMng()'s own comment for why).
+	// AddUIObj() is already idempotent (no-ops if already registered), so this is safe to call
+	// again on every RepositionSceneUI()-triggered recreate.
+	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CREDITS, this);
+
+	// Matches CWin::Create()'s own unconditional m_bShow=false reset -- RepositionSceneUI()
+	// snapshots visibility before calling this and restores it right after.
+	Show(false);
 }
 
-void CCreditWin::PreRelease()
+void CCreditWin::Release()
 {
+	m_sprBg.Release();
 	for (int i = 0; i < CRW_SPR_MAX; ++i)
 		m_aSpr[i].Release();
 	m_font.reset();
@@ -172,8 +197,9 @@ void CCreditWin::SetPosition()
 
 void CCreditWin::Show(bool bShow)
 {
-	CWin::Show(bShow);
+	mu::ui::window::CObject::Show(bShow);
 
+	m_sprBg.Show(bShow);
 	for (int i = 0; i < CRW_SPR_MAX; ++i)
 		m_aSpr[i].Show(bShow);
 
@@ -185,23 +211,20 @@ void CCreditWin::Show(bool bShow)
 		m_eIllustState = HIDE;
 }
 
-bool CCreditWin::CursorInWin(int nArea)
+bool CCreditWin::Update()
 {
-	if (!CWin::m_bShow)
-		return false;
+	// g_pTimer is never reset, so GetTimeElapsed() is total process uptime, not a per-frame delta.
+	// SceneManager.cpp's own dDeltaTick (what CWin::Update() used to pass this window as its
+	// deltaMilliseconds parameter) only behaves like a delta because it's clamped to
+	// 200.0 * FPS_ANIMATION_FACTOR, a ceiling the raw uptime value exceeds almost immediately and
+	// forever after -- in steady state it reduces to exactly that clamped constant, so this reads
+	// the same effective value directly instead of going through g_pTimer at all.
+	extern float FPS_ANIMATION_FACTOR;
+	const DurationMs deltaTime{ 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR) };
 
-	switch (nArea)
-	{
-	case WA_MOVE:
-		return false;
-	}
-
-	return CWin::CursorInWin(nArea);
-}
-
-void CCreditWin::UpdateWhileActive(double deltaMilliseconds)
-{
-	const DurationMs deltaTime{ deltaMilliseconds };
+	// m_btnClose.Update() used to run automatically inside CWin::Update()'s own button-list step
+	// (RegisterButton()) -- called explicitly now.
+	m_btnClose.Update();
 
 	if (m_btnClose.IsClick())
 		CloseWin();
@@ -209,16 +232,19 @@ void CCreditWin::UpdateWhileActive(double deltaMilliseconds)
 	{
 		::PlayBuffer(SOUND_CLICK01);
 		CloseWin();
-		CUIMng::Instance().SetSysMenuWinShow(false);
 	}
 
 	for (int i = 0; i <= CRW_INDEX_NAME; ++i)
 		AnimationText(i, deltaTime);
 	AnimationIllust(deltaTime);
+
+	return true;
 }
 
-void CCreditWin::RenderControls()
+bool CCreditWin::Render()
 {
+	m_sprBg.Render();
+
 	mu::GetRenderer().SetAlphaTest(false);
 
 	for (int i = 0; i <= CRW_SPR_LOGO; ++i)
@@ -275,12 +301,14 @@ void CCreditWin::RenderControls()
 
 	mu::GetRenderer().SetAlphaTest(true);
 
-	CWin::RenderButtons();
+	m_btnClose.Render();
+
+	return true;
 }
 
 void CCreditWin::CloseWin()
 {
-	CUIMng::Instance().HideWin(this);
+	Show(false);
 
 	SocketClient->ToConnectServer()->SendServerListRequest();
 

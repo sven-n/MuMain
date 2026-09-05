@@ -1,0 +1,49 @@
+/* Modern theme for the login-scene menu/credit button bar -- flat programmatic icon buttons, no
+   legacy sprite art. Plain single-letter monograms (M/C) stand in for icon art. */
+
+#panel {
+	position: absolute;
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-3);
+	border: 1dp token(border-metal);
+	border-radius: token(radius-md)dp;
+	text-align: center;
+	line-height: 30dp;
+}
+.btn-icon:hover {
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
+}
+.btn-icon-label {
+	color: token(text-body);
+	font-weight: bold;
+	font-family: "token(font-body)";
+}
+.btn-icon-menu {
+	left: 0;
+	top: 0;
+}
+/* 2026-09-03: right:0dp replaces a C++-pushed `left` (LoginMainWin.cpp) -- anchors to #panel's own
+   right edge instead of a computed real-pixel offset, so it tracks .btn-icon's now-dp width
+   automatically instead of needing a matching C++ recompute on every resize. */
+.btn-icon-credit {
+	top: 0;
+	right: 0dp;
+}
+
+.btn-credit-deco {
+	display: none;
+}
+
+.btn-credit-icon {
+	display: none;
+}

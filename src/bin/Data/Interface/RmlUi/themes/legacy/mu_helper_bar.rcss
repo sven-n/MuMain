@@ -1,0 +1,147 @@
+/* Legacy theme for the "Official MU Helper" mini control bar + hero position readout
+   (CMuHelperBar). Fixed dp layout, anchored top-left via base.rcss's .anchor-top-left -- 207dp
+   total width x 25dp tall, no longer auto-widening by resolution. */
+
+@spritesheet muhelper-seg-a-sheet
+{
+	src: "../../../Minimap_positionA.tga";
+	muhelper-seg-a-image: 0px 0px 22px 25px;
+}
+@spritesheet muhelper-seg-b-sheet
+{
+	src: "../../../Minimap_positionB.tga";
+	muhelper-seg-b-image: 3px 0px 19px 25px;
+}
+@spritesheet muhelper-seg-c-sheet
+{
+	src: "../../../MacroUI/Minimap_positionC.tga";
+	muhelper-seg-c-image: 0px 0px 73px 20px;
+}
+@spritesheet muhelper-config-sheet
+{
+	src: "../../../MacroUI/MacroUI_Setup.tga";
+	muhelper-config-image: 0px 0px 18px 13px;
+}
+@spritesheet muhelper-start-sheet
+{
+	src: "../../../MacroUI/MacroUI_Start.tga";
+	muhelper-start-image: 0px 0px 18px 13px;
+}
+@spritesheet muhelper-stop-sheet
+{
+	src: "../../../MacroUI/MacroUI_Stop.tga";
+	muhelper-stop-image: 0px 0px 18px 13px;
+}
+
+#panel {
+	position: absolute;
+	width: 207dp;
+	height: 25dp;
+	font-family: "Liberation Sans";
+	font-size: 11dp;
+}
+
+#seg_a {
+	position: absolute;
+	left: 0dp;
+	top: 0dp;
+	width: 22dp;
+	height: 25dp;
+	decorator: image(muhelper-seg-a-image);
+	pointer-events: none;
+}
+#seg_b {
+	position: absolute;
+	left: 22dp;
+	top: 0dp;
+	width: 112dp;
+	height: 25dp;
+	decorator: image(muhelper-seg-b-image);
+	pointer-events: none;
+}
+#seg_c {
+	position: absolute;
+	left: 134dp;
+	top: 0dp;
+	width: 73dp;
+	height: 20dp;
+	decorator: image(muhelper-seg-c-image);
+	pointer-events: none;
+}
+
+#text {
+	position: absolute;
+	left: 10dp;
+	top: 5dp;
+	width: 132dp;
+	height: 9dp;
+	text-align: center;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.mu-btn {
+	position: absolute;
+	top: 0dp;
+	width: 18dp;
+	height: 13dp;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#btn_config {
+	left: 153dp;
+	decorator: image(muhelper-config-image);
+}
+#btn_start {
+	left: 171dp;
+	decorator: image(muhelper-start-image);
+}
+#btn_stop {
+	left: 171dp;
+	decorator: image(muhelper-stop-image);
+}
+
+.dot {
+	display: none;
+}
+
+/* Below rather than above the button -- this widget is pinned to the top of the screen, so a
+   tooltip above it would render off the top edge.
+
+   2026-09-03: .tooltip-* are now siblings of their trigger button (mu_helper_bar.rml), not nested
+   children -- required to follow modern theme's own fix for the same file (this build's
+   shrink-to-fit width hard-clamps to the containing block, so a tooltip nested inside an
+   18dp-wide button was clamped to ~18dp regardless of its own text length; see modern's
+   mu_helper_bar.rcss for the full explanation). Legacy had the identical bug, just never
+   reported against this theme -- fixed the same way, own bespoke color kept unchanged.
+
+   2026-09-03 (second fix, same day): explicit width (100dp) instead of shrink-to-fit, and a
+   precomputed static `left` instead of translateX(-50%) -- same second bug modern's own
+   mu_helper_bar.rcss and main_frame.rcss hit (see either for the full TransformUtilities.cpp
+   explanation), fixed proactively here too rather than waiting for a report against legacy. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 16dp;
+	width: 100dp;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2dp 4dp;
+	border-radius: 3dp;
+	font-family: "Liberation Sans";
+	font-size: 11dp;
+	pointer-events: none;
+}
+/* left = button center (button's own left + half its 18dp width) minus half this tooltip's 100dp
+   width. */
+.tooltip-config { left: 112dp; } /* button center 162dp */
+.tooltip-start,
+.tooltip-stop   { left: 130dp; } /* button center 180dp */
+#btn_config:hover ~ .tooltip-config,
+#btn_start:hover ~ .tooltip-start,
+#btn_stop:hover ~ .tooltip-stop {
+	display: block;
+	z-index: 1;
+}

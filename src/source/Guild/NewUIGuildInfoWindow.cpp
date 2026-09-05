@@ -1,16 +1,16 @@
 //////////////////////////////////////////////////////////////////////
-// NewUIGuildInfoWindow.cpp: implementation of the CNewUIGuildInfoWindow class.
+// NewUIGuildInfoWindow.cpp: implementation of the CGuildInfoWindow class.
 //////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "NewUIGuildInfoWindow.h"
-#include "UI/NewUI/NewUISystem.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Core/NewUISystem.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "Audio/DSPlaySound.h"
 #include "UIGuildInfo.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/Legacy/UIPopup.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/UIPopup.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -26,6 +26,7 @@ extern CUIPopup* g_pUIPopup;
 extern MARK_t GuildMark[MAX_MARKS];
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
 {
@@ -42,7 +43,7 @@ void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD 
     g_pRenderText->SetBgColor(backuptextbackcolor);
 }
 
-int SEASON3B::CNewUIGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
+int mu::ui::window::CGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
 {
     for (int i = 0; i < g_nGuildMemberCount; ++i)
     {
@@ -53,7 +54,7 @@ int SEASON3B::CNewUIGuildInfoWindow::GetGuildMemberIndex(wchar_t* szName)
     return -1;
 }
 
-SEASON3B::CNewUIGuildInfoWindow::CNewUIGuildInfoWindow() : m_Button(NULL)
+mu::ui::window::CGuildInfoWindow::CGuildInfoWindow() : m_Button(NULL)
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -69,23 +70,23 @@ SEASON3B::CNewUIGuildInfoWindow::CNewUIGuildInfoWindow() : m_Button(NULL)
     m_bRequestUnionList = false;
 }
 
-SEASON3B::CNewUIGuildInfoWindow::~CNewUIGuildInfoWindow()
+mu::ui::window::CGuildInfoWindow::~CGuildInfoWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CGuildInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_GUILDINFO, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GUILDINFO, this);
 
     SetPos(x, y);
 
     LoadImages();
-    m_Button = new CNewUIButton[BUTTON_END];
+    m_Button = new CButton[BUTTON_END];
     for (int i = 0; i < BUTTON_END; ++i)
     {
         m_Button[i].ChangeButtonImgState(true, IMAGE_GUILDINFO_BUTTON, true);
@@ -107,19 +108,19 @@ bool SEASON3B::CNewUIGuildInfoWindow::Create(CNewUIManager* pNewUIMng, int x, in
     return true;
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::OpenningProcess()
+void mu::ui::window::CGuildInfoWindow::OpenningProcess()
 {
     m_nCurrentTab = static_cast<int>(GuildConstants::GuildTab::MEMBERS);
 
     SocketClient->ToGameServer()->SendGuildListRequest();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::ClosingProcess()
+void mu::ui::window::CGuildInfoWindow::ClosingProcess()
 {
     m_bRequestUnionList = false;
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::Release()
+void mu::ui::window::CGuildInfoWindow::Release()
 {
     UnloadImages();
 
@@ -132,17 +133,17 @@ void SEASON3B::CNewUIGuildInfoWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CGuildInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIGuildInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
 {
     bool ret = true;
 
-    if (SEASON3B::IsPress(VK_LBUTTON))
+    if (mu::ui::window::IsPress(VK_LBUTTON))
     {
         ret = Check_Mouse(MouseX, MouseY);
         if (ret == false)
@@ -153,11 +154,11 @@ bool SEASON3B::CNewUIGuildInfoWindow::UpdateMouseEvent()
 
     if (m_EventState == EVENT_SCROLL_BTN_DOWN)
     {
-        if (SEASON3B::IsRepeat(VK_LBUTTON))
+        if (mu::ui::window::IsRepeat(VK_LBUTTON))
         {
             return false;
         }
-        if (SEASON3B::IsRelease(VK_LBUTTON))
+        if (mu::ui::window::IsRelease(VK_LBUTTON))
         {
             m_EventState = EVENT_NONE;
             return true;
@@ -187,22 +188,22 @@ bool SEASON3B::CNewUIGuildInfoWindow::UpdateMouseEvent()
     return ret;
 }
 
-bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
+bool mu::ui::window::CGuildInfoWindow::Check_Btn()
 {
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUILDINFO);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUILDINFO);
         m_EventState = EVENT_NONE;
         return false;
     }
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_GUILDINFO))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GUILDINFO))
     {
         m_EventState = EVENT_NONE;
         return false;
     }
 
-    if (m_EventState == EVENT_SCROLL_BTN_DOWN && SEASON3B::IsRelease(VK_LBUTTON))
+    if (m_EventState == EVENT_SCROLL_BTN_DOWN && mu::ui::window::IsRelease(VK_LBUTTON))
     {
         m_EventState = EVENT_NONE;
         return false;
@@ -216,18 +217,18 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
             {
                 if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
                 {
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildOutPerson));
+                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildOutPerson));
                 }
                 else
                 {
                     DeleteIndex = GetGuildMemberIndex(Hero->ID);
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildBreakMsgBoxLayout));
+                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakMsgBoxLayout));
                 }
             }
             else
             {
                 DeleteIndex = GetGuildMemberIndex(Hero->ID);
-                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildBreakPasswordMsgBoxLayout));
+                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
             }
         }
     }
@@ -244,7 +245,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
                         if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
                         {
                             DeleteIndex = GetGuildMemberIndex(pText->m_szID);
-                            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildPerson_Get_Out));
+                            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildPerson_Get_Out));
                         }
                     }
                 }
@@ -262,7 +263,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
                         {
                             AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
                             DeleteIndex = GetGuildMemberIndex(pText->m_szID);
-                            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuild_ToPerson_PositionLayout));
+                            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuild_ToPerson_PositionLayout));
                         }
                     }
                 }
@@ -278,8 +279,8 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
                     {
                         AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
                         DeleteIndex = GetGuildMemberIndex(pText->m_szID);
-                        CNewUICommonMessageBox* pMsgBox = NULL;
-                        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildPerson_Cancel_Position_MsgBoxLayout), &pMsgBox);
+                        CCommonMessageBox* pMsgBox = NULL;
+                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildPerson_Cancel_Position_MsgBoxLayout), &pMsgBox);
                         if (pMsgBox != NULL)
                         {
                             wchar_t strText[256];
@@ -303,7 +304,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
                     if (wcscmp(pText->szName, GuildMark[Hero->GuildMarkIndex].GuildName))
                     {
                         wcscpy(DeleteID, pText->szName);
-                        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Break_MsgBoxLayout));
+                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Break_MsgBoxLayout));
                     }
                 }
             }
@@ -315,7 +316,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
                 const bool isUnionMaster = wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName) == 0;
                 if (isUnionMaster)
                 {
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Out_MsgBoxLayout));
+                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Out_MsgBoxLayout));
                 }
                 else
                 {
@@ -327,7 +328,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Btn()
     return true;
 }
 
-bool SEASON3B::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
+bool mu::ui::window::CGuildInfoWindow::Check_Mouse(int mx, int my)
 {
     if (mx > m_Pos.x && mx < (m_Pos.x + GUILDINFO_WIDTH) && my > m_Pos.y && my < (m_Pos.y + GUILDINFO_HEIGHT))
     {
@@ -369,7 +370,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
     }
     if (m_nCurrentTab == 0)
     {
-        if (SEASON3B::CheckMouseIn(m_Pos.x + 163, m_Pos.y + 262 + m_Loc, 18, 33 + m_Loc) == true && m_EventState == EVENT_NONE)
+        if (mu::ui::window::CheckMouseIn(m_Pos.x + 163, m_Pos.y + 262 + m_Loc, 18, 33 + m_Loc) == true && m_EventState == EVENT_NONE)
         {
             m_EventState = EVENT_SCROLL_BTN_DOWN;
             if (m_BackUp == 0)
@@ -392,13 +393,13 @@ bool SEASON3B::CNewUIGuildInfoWindow::Check_Mouse(int mx, int my)
     return true;
 }
 
-bool SEASON3B::CNewUIGuildInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CGuildInfoWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUILDINFO) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUILDINFO) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUILDINFO);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUILDINFO);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -406,12 +407,12 @@ bool SEASON3B::CNewUIGuildInfoWindow::UpdateKeyEvent()
 
     return true;
 }
-bool SEASON3B::CNewUIGuildInfoWindow::Update()
+bool mu::ui::window::CGuildInfoWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIGuildInfoWindow::Render()
+bool mu::ui::window::CGuildInfoWindow::Render()
 {
     EnableAlphaTest();
 
@@ -448,7 +449,7 @@ bool SEASON3B::CNewUIGuildInfoWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::RenderFrame()
+void mu::ui::window::CGuildInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_GUILDINFO_BACK, m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT);
     RenderImage(IMAGE_GUILDINFO_TOP, m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, 64.f);
@@ -457,7 +458,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderFrame()
     RenderImage(IMAGE_GUILDINFO_BOTTOM, m_Pos.x, m_Pos.y + GUILDINFO_HEIGHT - 45, GUILDINFO_WIDTH, 45.f);
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
+void mu::ui::window::CGuildInfoWindow::RenderNoneGuild()
 {
     POINT ptOrigin = { m_Pos.x + 15, m_Pos.y + 38 };
     ptOrigin.x += 10;
@@ -481,7 +482,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderNoneGuild()
     m_BtnExit.Render();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::RenderTabButton()
+void mu::ui::window::CGuildInfoWindow::RenderTabButton()
 {
     RenderImage(IMAGE_GUILDINFO_TAB_LIST, m_Pos.x + GuildConstants::UILayout::TAB_START_X,
         m_Pos.y + GuildConstants::UILayout::TAB_START_Y, 166.f, GuildConstants::UILayout::TAB_HEIGHT);
@@ -491,7 +492,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderTabButton()
         static_cast<float>(GuildConstants::UILayout::TAB_HEIGHT));
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
+void mu::ui::window::CGuildInfoWindow::Render_Text()
 {
     wchar_t Text[300];
     POINT ptOrigin;
@@ -597,7 +598,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Text()
         }
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
+void mu::ui::window::CGuildInfoWindow::Render_Guild_History()
 {
     for (int x = m_Pos.x + 73; x < m_Pos.x + 73 + 42; x++)
     {
@@ -693,7 +694,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_History()
     m_Button[BUTTON_GUILD_OUT].Render();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
+void mu::ui::window::CGuildInfoWindow::RenderScrollBar()
 {
 
     RenderImage(IMAGE_GUILDINFO_SCROLL_TOP, m_Pos.x + 170, 125, 7, 3);
@@ -728,7 +729,7 @@ void SEASON3B::CNewUIGuildInfoWindow::RenderScrollBar()
     m_GuildMember.Scrolling(Line);
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()
+void mu::ui::window::CGuildInfoWindow::Render_Guild_Info()
 {
     POINT ptOrigin = { m_Pos.x + 15, m_Pos.y + 98 };
 
@@ -800,7 +801,7 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Info()
     }
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Enum()
+void mu::ui::window::CGuildInfoWindow::Render_Guild_Enum()
 {
     RenderColorQuadARGB(m_Pos.x + 12, m_Pos.y + 12 + 113, 165, 232, 0x96151515u);
     RenderColorQuadARGB(m_Pos.x + 12, m_Pos.y + 12 + 93, 165, 20, 0x963B3B3Bu);
@@ -830,12 +831,12 @@ void SEASON3B::CNewUIGuildInfoWindow::Render_Guild_Enum()
     }
 }
 
-float SEASON3B::CNewUIGuildInfoWindow::GetLayerDepth()
+float mu::ui::window::CGuildInfoWindow::GetLayerDepth()
 {
     return 4.5f;
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::LoadImages()
+void mu::ui::window::CGuildInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_GUILDINFO_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_GUILDINFO_TOP, GL_LINEAR);
@@ -861,7 +862,7 @@ void SEASON3B::CNewUIGuildInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_scrollbar_stretch.jpg", IMAGE_GUILDINFO_DRAG_BTN, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::UnloadImages()
+void mu::ui::window::CGuildInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_GUILDINFO_BOTTOM);
     DeleteBitmap(IMAGE_GUILDINFO_RIGHT);
@@ -889,7 +890,7 @@ void SEASON3B::CNewUIGuildInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_GUILDINFO_DRAG_BTN);
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::AddGuildNotice(wchar_t* szText)
+void mu::ui::window::CGuildInfoWindow::AddGuildNotice(wchar_t* szText)
 {
     wchar_t szTemp[GuildConstants::UILayout::TEXT_MAX_LINES][MAX_TEXT_LENGTH + 1] = { {0}, {0}, {0}, {0}, {0} };
     CutText3(szText, szTemp[0], GuildConstants::UILayout::TEXT_SPLIT_WIDTH, GuildConstants::UILayout::TEXT_MAX_LINES, MAX_TEXT_LENGTH + 1);
@@ -905,45 +906,45 @@ void SEASON3B::CNewUIGuildInfoWindow::AddGuildNotice(wchar_t* szText)
     m_GuildNotice.Scrolling(m_GuildNotice.GetLineNum() - m_GuildNotice.GetBoxSize());
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
+void mu::ui::window::CGuildInfoWindow::AddGuildMember(GUILD_LIST_t* pInfo)
 {
     m_GuildMember.AddText(pInfo->Name, pInfo->Number, pInfo->Server, pInfo->GuildStatus);
     m_GuildMember.Scrolling(-m_GuildMember.GetBoxSize());
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::GuildClear()
+void mu::ui::window::CGuildInfoWindow::GuildClear()
 {
     m_GuildMember.Clear();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::UnionGuildClear()
+void mu::ui::window::CGuildInfoWindow::UnionGuildClear()
 {
     m_UnionListBox.Clear();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::NoticeClear()
+void mu::ui::window::CGuildInfoWindow::NoticeClear()
 {
     m_GuildNotice.Clear();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::SetRivalGuildName(wchar_t* szName)
+void mu::ui::window::CGuildInfoWindow::SetRivalGuildName(wchar_t* szName)
 {
     wcsncpy(m_RivalGuildName, szName, MAX_GUILDNAME);
     m_RivalGuildName[MAX_GUILDNAME] = 0;
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount)
+void mu::ui::window::CGuildInfoWindow::AddUnionList(BYTE* pGuildMark, wchar_t* szGuildName, int nMemberCount)
 {
     m_UnionListBox.AddText(pGuildMark, szGuildName, nMemberCount);
     m_bRequestUnionList = false;
 }
 
-int SEASON3B::CNewUIGuildInfoWindow::GetUnionCount()
+int mu::ui::window::CGuildInfoWindow::GetUnionCount()
 {
     return m_UnionListBox.GetTextCount();
 }
 
-void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
+void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
     BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
 {
     if (!g_MessageBox->IsEmpty())
@@ -1001,8 +1002,8 @@ void SEASON3B::CNewUIGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationship
             }
         }
 
-        SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildRelationShipMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildRelationShipMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
             pMsgBox->AddMsg(szText[0]);

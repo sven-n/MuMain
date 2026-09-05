@@ -1,0 +1,391 @@
+// NewUICursedTempleResult.cpp: implementation of the CCursedTempleResult class.
+//////////////////////////////////////////////////////////////////////
+
+#include "stdafx.h"
+#include "UI/Events/NewUICursedTempleResult.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Widgets/UIBaseDef.h"
+#include "Audio/DSPlaySound.h"
+#include "Engine/Object/ZzzInfomation.h"
+#include "Render/Models/ZzzBMD.h"
+#include "Engine/Object/ZzzObject.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Engine/Object/ZzzInterface.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "I18N/All.h"
+
+#include "GameLogic/Items/CSItemOption.h"
+#include "GameLogic/Events/CSChaosCastle.h"
+#include "UI/Widgets/UIControls.h"
+#include "GameLogic/Skills/SkillManager.h"
+#include "Character/CharacterManager.h"
+#include "UI/Core/NewUISystem.h"
+
+using namespace SEASON3B;
+using namespace mu::ui::window;
+
+namespace
+{
+    void DrawText(const wchar_t* text, int textposx, int textposy, DWORD textcolor, DWORD textbackcolor, int textsort, float fontboxwidth, bool isbold)
+    {
+        if (isbold)
+        {
+            g_pRenderText->SetFont(g_hFontBold);
+        }
+        else
+        {
+            g_pRenderText->SetFont(g_hFont);
+        }
+
+        DWORD backuptextcolor = g_pRenderText->GetTextColor();
+        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
+
+        g_pRenderText->SetTextColor(textcolor);
+        g_pRenderText->SetBgColor(textbackcolor);
+        g_pRenderText->RenderText(textposx, textposy, text, fontboxwidth, 0, textsort);
+        g_pRenderText->SetTextColor(backuptextcolor);
+        g_pRenderText->SetBgColor(backuptextbackcolor);
+    }
+};
+
+bool mu::ui::window::CCursedTempleResult::Create(CManager* pNewUIMng, int x, int y)
+{
+    if (NULL == pNewUIMng)
+        return false;
+
+    m_pNewUIMng = pNewUIMng;
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT, this);
+
+    SetPos(x, y);
+
+    SetButtonInfo();
+
+    Show(false);
+
+    return true;
+}
+
+mu::ui::window::CCursedTempleResult::CCursedTempleResult() : m_pNewUIMng(NULL), m_ResultEffectAlph(0.f), m_WinState(0)
+{
+    Initialize();
+}
+
+mu::ui::window::CCursedTempleResult::~CCursedTempleResult()
+{
+    Destroy();
+}
+
+void mu::ui::window::CCursedTempleResult::Initialize()
+{
+    LoadImages();
+}
+
+void mu::ui::window::CCursedTempleResult::Destroy()
+{
+    UnloadImages();
+
+    if (m_pNewUIMng)
+    {
+        m_pNewUIMng->RemoveUIObj(this);
+        m_pNewUIMng = NULL;
+    }
+}
+
+void mu::ui::window::CCursedTempleResult::LoadImages()
+{
+    LoadBitmap(L"Interface\\illusion_success.tga", IMAGE_CURSEDTEMPLERESULT_SUCCESS, GL_LINEAR);
+    LoadBitmap(L"Interface\\illusion_failure.tga", IMAGE_CURSEDTEMPLERESULT_FAILURE, GL_LINEAR);
+}
+
+void mu::ui::window::CCursedTempleResult::UnloadImages()
+{
+    DeleteBitmap(IMAGE_CURSEDTEMPLERESULT_FAILURE);
+    DeleteBitmap(IMAGE_CURSEDTEMPLERESULT_SUCCESS);
+}
+
+void mu::ui::window::CCursedTempleResult::SetButtonInfo()
+{
+    float x;
+    x = m_Pos.x + (CURSEDTEMPLE_RESULT_WINDOW_WIDTH / 2) - (54 / 2);
+
+    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonImgState(true, CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_VERY_SMALL, true);
+    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeButtonInfo(x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 37, 54, 23);
+    m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeText(&I18N::Game::Close388);
+}
+
+void mu::ui::window::CCursedTempleResult::ResetGameResultInfo()
+{
+    m_WinState = 0;
+
+    m_ResultEffectAlph = 0.f;
+
+    m_MyTeam = SEASON3A::eTeam_Count;
+
+    if (m_AlliedTeamGameResult.size() != 0)
+        m_AlliedTeamGameResult.clear();
+
+    if (m_IllusionTeamGameResult.size() != 0)
+        m_IllusionTeamGameResult.clear();
+}
+
+void mu::ui::window::CCursedTempleResult::UpdateResult()
+{
+    if (m_WinState == 0)
+        return;
+
+    m_ResultEffectAlph += 0.015f;
+    if (1.0f < m_ResultEffectAlph)
+    {
+        m_ResultEffectAlph = 1.0f;
+    }
+}
+
+void mu::ui::window::CCursedTempleResult::OpenningProcess()
+{
+}
+
+void mu::ui::window::CCursedTempleResult::ClosingProcess()
+{
+    SocketClient->ToGameServer()->SendIllusionTempleRewardRequest();
+    ResetGameResultInfo();
+}
+
+bool mu::ui::window::CCursedTempleResult::UpdateMouseEvent()
+{
+    if (m_Button[CURSEDTEMPLERESULT_CLOSE].UpdateMouseEvent())
+    {
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
+        return false;
+    }
+
+    if (CheckMouseIn(m_Pos.x, m_Pos.y, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, CURSEDTEMPLE_RESULT_WINDOW_HEIGHT))
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool mu::ui::window::CCursedTempleResult::UpdateKeyEvent()
+{
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT) == true)
+    {
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
+        {
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool mu::ui::window::CCursedTempleResult::Update()
+{
+    UpdateResult();
+
+    return true;
+}
+
+void mu::ui::window::CCursedTempleResult::RenderResultPanel()
+{
+    if (m_WinState == 0)
+        return;
+
+    const BYTE resultAlpha = static_cast<BYTE>(std::clamp(m_ResultEffectAlph, 0.f, 1.f) * 255.f);
+    const DWORD resultColor = RGBA(255, 255, 255, resultAlpha);
+
+    if (m_WinState == 1)
+    {
+        RenderImage(IMAGE_CURSEDTEMPLERESULT_SUCCESS, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110,
+            351.f, 115.f, 0.f, 0.f, resultColor);
+    }
+    else
+    {
+        RenderImage(IMAGE_CURSEDTEMPLERESULT_FAILURE, (REFERENCE_WIDTH - 360) / 2, m_Pos.y - 110,
+            351.f, 115.f, 0.f, 0.f, resultColor);
+    }
+}
+
+void mu::ui::window::CCursedTempleResult::RenderFrame()
+{
+    float x, y, width, height;
+
+    x = GetPos().x; y = GetPos().y + 2.f, width = CURSEDTEMPLE_RESULT_WINDOW_WIDTH - MSGBOX_BACK_BLANK_WIDTH; height = CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - MSGBOX_BACK_BLANK_HEIGHT;
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
+
+    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
+
+    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
+    for (int i = 0; i < 11; ++i)
+    {
+        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
+        y += height;
+    }
+
+    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+
+    x = GetPos().x; y = GetPos().y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 77; width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+    y = GetPos().y + 45;
+    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
+}
+
+void mu::ui::window::CCursedTempleResult::RenderButtons()
+{
+    m_Button[CURSEDTEMPLERESULT_CLOSE].Render();
+}
+
+void mu::ui::window::CCursedTempleResult::RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor)
+{
+    wchar_t Text[200];
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    if (SEASON3A::eTeam_Allied == resultinfo.s_team)
+    {
+        mu_swprintf(Text, I18N::Game::MUAlliance);
+    }
+    else
+    {
+        mu_swprintf(Text, I18N::Game::IllusionSorcery);
+    }
+    DrawText(Text, x + 5, y, color, backcolor, RT3_SORT_LEFT, 0, false);
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, resultinfo.s_characterId);
+    DrawText(Text, x + 56, y, color, backcolor, RT3_SORT_LEFT, 0, false);
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, gCharacterManager.GetCharacterClassText(resultinfo.s_class));
+    DrawText(Text, x + 106, y, color, backcolor, RT3_SORT_LEFT, 0, false);
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, L"%d", resultinfo.s_addexp);
+    DrawText(Text, x + 150, y, color, backcolor, RT3_SORT_LEFT, 0, false);
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, L"%d", resultinfo.s_point);
+    DrawText(Text, x + 190, y, color, backcolor, RT3_SORT_LEFT, 0, false);
+}
+
+void mu::ui::window::CCursedTempleResult::RenderText()
+{
+    wchar_t Text[200];
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, I18N::Game::HeroList);
+    DrawText(Text, m_Pos.x, m_Pos.y + 13, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, L"  %ls           %ls        %ls     %ls    %ls", I18N::Game::Camp, I18N::Game::Character, I18N::Game::Class, I18N::Game::EXP, I18N::Game::Point);
+    DrawText(Text, m_Pos.x, m_Pos.y + 38, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
+
+    int i = 0;
+    for (auto iter = m_AlliedTeamGameResult.begin(); iter != m_AlliedTeamGameResult.end(); )
+    {
+        auto curiter = iter;
+        ++iter;
+        CursedTempleGameResult& info = *curiter;
+
+        if (wcscmp(info.s_characterId, Hero->ID) == 0)
+        {
+            DrawText(L" ", m_Pos.x + 2, m_Pos.y + 65 + (i * 15), 0xFFFBB264, 0xff0000ff, RT3_SORT_LEFT, 220.f, false);
+        }
+
+        RenderTextLine(info, m_Pos.x, m_Pos.y + 65 + (i * 15), 0xFFFBB264, 0x00000000);
+        ++i;
+    }
+
+    i = 0;
+    for (auto emiter = m_IllusionTeamGameResult.begin(); emiter != m_IllusionTeamGameResult.end(); )
+    {
+        auto curiter = emiter;
+        ++emiter;
+        CursedTempleGameResult& info = *curiter;
+
+        if (wcscmp(info.s_characterId, Hero->ID) == 0)
+        {
+            DrawText(L" ", m_Pos.x + 2, m_Pos.y + 140 + (i * 15), 0xFF37d6fe, 0xff0000ff, RT3_SORT_LEFT, 220.f, false);
+        }
+
+        RenderTextLine(info, m_Pos.x, m_Pos.y + 140 + (i * 15), 0xFF37d6fe, 0x00000000);
+        ++i;
+    }
+
+    memset(&Text, 0, sizeof(wchar_t) * 200);
+    mu_swprintf(Text, I18N::Game::YouMayBeCompensatedByClickingOnTheCloseButton);
+    DrawText(Text, m_Pos.x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 55, 0xFF0000FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
+}
+
+bool mu::ui::window::CCursedTempleResult::Render()
+{
+    EnableAlphaTest();
+
+    RenderFrame();
+    RenderResultPanel();
+    RenderText();
+    RenderButtons();
+
+    DisableAlphaBlend();
+
+    return true;
+}
+
+void mu::ui::window::CCursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
+{
+    auto data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
+
+    int	alliedPoint = data->btAlliedPoint;
+    int	illusionPoint = data->btIllusionPoint;
+    int userCount = data->btUserCount;
+
+    if (m_MyTeam == SEASON3A::eTeam_Allied)
+    {
+        if (illusionPoint < alliedPoint)
+            m_WinState = 1;
+        else
+            m_WinState = 2;
+
+        if (2 > alliedPoint) m_WinState = 2;
+    }
+    else
+    {
+        if (alliedPoint < illusionPoint)
+            m_WinState = 1;
+        else
+            m_WinState = 2;
+
+        if (2 > illusionPoint) m_WinState = 2;
+    }
+
+    int Offset = sizeof(PMSG_CURSED_TEMPLE_RESULT);
+
+    for (int i = 0; i < userCount; i++)
+    {
+        auto data2 = (LPPMSG_CURSED_TEMPLE_USER_ADD_EXP)(ReceiveBuffer + Offset);
+
+        CursedTempleGameResult TempData{};
+        CMultiLanguage::ConvertFromUtf8(TempData.s_characterId, data2->GameId, MAX_USERNAME_SIZE);
+
+        TempData.s_mapnumber = (short)data2->byMapNumber;
+
+        TempData.s_team = static_cast<SEASON3A::eCursedTempleTeam>(data2->btTeam);
+        TempData.s_class = gCharacterManager.ChangeServerClassTypeToClientClassType(data2->btClass);
+        TempData.s_addexp = data2->nAddExp;
+
+        if (TempData.s_team == SEASON3A::eTeam_Allied)
+        {
+            TempData.s_point = alliedPoint;
+            m_AlliedTeamGameResult.push_back(TempData);
+        }
+        else
+        {
+            TempData.s_point = illusionPoint;
+            m_IllusionTeamGameResult.push_back(TempData);
+        }
+
+        Offset += sizeof(PMSG_CURSED_TEMPLE_USER_ADD_EXP);
+    }
+}

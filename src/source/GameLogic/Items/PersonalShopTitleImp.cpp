@@ -7,8 +7,8 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
 
-#include "UI/Legacy/UIManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/UIManager.h"
+#include "UI/Core/NewUISystem.h"
 #include "Camera/CameraProjection.h"
 
 namespace
@@ -281,7 +281,7 @@ void CPersonalShopTitleImp::Draw()
             CShopTitleDrawObj* pDrawObj = mi->second;
             if (SelectedCharacter != -1
                 && isHighlightTime
-                && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
+                && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND)
                 && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE)
             {
                 CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];

@@ -1,0 +1,39 @@
+#pragma once
+
+#include "UI/Core/NewUIBase.h"
+#include "UI/Widgets/UIControls.h"
+
+namespace mu::ui::window
+{
+    class CManager;
+
+    class CSlideWindow : public CObject
+    {
+        CManager* m_pNewUIMng;
+    public:
+        CSlideWindow();
+        virtual ~CSlideWindow();
+
+        bool Create(CManager* pNewUIMng);
+        void Release();
+
+        bool UpdateMouseEvent();
+        bool UpdateKeyEvent();
+        bool Update();
+        bool Render();
+
+        float GetLayerDepth();		// 1.91f
+
+        // wrapping
+        void Init() { m_pSlideMgr->Init(); }
+        void CreateSlideText() { m_pSlideMgr->CreateSlideText(); }
+        void AddSlide(int iLoopCount, int iLoopDelay, const wchar_t* strText, int iType, float fSpeed, DWORD dwTextColor = (255 << 24) + (200 << 16) + (220 << 8) + (230))
+        {
+            m_pSlideMgr->AddSlide(iLoopCount, iLoopDelay, strText, iType, fSpeed, dwTextColor);
+        }
+
+    private:
+        CSlideHelpMgr* m_pSlideMgr;
+    };
+}
+

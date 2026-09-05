@@ -5,20 +5,20 @@
 #include "stdafx.h"
 
 #include "Core/Utilities/Random.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "CSChaosCastle.h"
 
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Dialogs/NewUICustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 #include <algorithm>
 #include <array>

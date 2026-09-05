@@ -1,0 +1,111 @@
+/* Legacy theme for the character-select scene's button bar (CCharSelMainWin). Only the idle frame
+   of each button is reproduced. Every element anchors to a screen edge/corner via base.rcss's
+   anchor-*/stretch-x utility classes with a fixed dp size (docs/rmlui-ui-system/
+   layout-and-scaling.md) -- CCharSelMainWin::ApplyLayout() still computes the legacy
+   CButton/CSprite hit-test rects separately, unrelated to these visuals. */
+
+@spritesheet charsel-create-sheet
+{
+	src: "../../../b_create.tga";
+	charsel-create-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-menu-sheet
+{
+	src: "../../../server_menu_b_all.tga";
+	charsel-menu-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-connect-sheet
+{
+	src: "../../../b_connect.tga";
+	charsel-connect-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-delete-sheet
+{
+	src: "../../../b_delete.tga";
+	charsel-delete-icon: 0px 0px 54px 30px;
+}
+@spritesheet charsel-deco-sheet
+{
+	src: "../../../deco.tga";
+	charsel-deco-image: 0px 0px 189px 103px;
+}
+
+/* Full-screen positioning container, not a bar-shaped box -- every child anchors directly to a
+   screen edge/corner. */
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+}
+
+.btn-icon {
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	bottom: 11dp;
+	cursor: pointer;
+	pointer-events: auto;
+}
+#btn_create { left: 22dp; }
+#btn_menu   { left: 77dp; }
+#btn_connect { right: 77dp; }
+#btn_delete  { right: 22dp; }
+
+.btn-icon.disabled {
+	pointer-events: none;
+	opacity: 0.5;
+	cursor: default;
+}
+#btn_create { decorator: image(charsel-create-icon); }
+#btn_menu { decorator: image(charsel-menu-icon); }
+#btn_connect { decorator: image(charsel-connect-icon); }
+#btn_delete { decorator: image(charsel-delete-icon); }
+.btn-icon-label {
+	display: none;
+}
+
+/* Flat, semi-transparent backing strip behind the (rarely shown) account-block message. */
+.info-bar {
+	position: absolute;
+	left: 133dp;
+	right: 133dp;
+	bottom: 15dp;
+	height: 21dp;
+	background-color: rgba(0, 0, 0, 143);
+	pointer-events: none;
+}
+
+/* Decorative flourish overlapping the Connect/Delete buttons' top-right corner -- paints behind
+   them (declared first in char_sel_main.rml). */
+.deco {
+	position: absolute;
+	width: 189dp;
+	height: 103dp;
+	right: 0dp;
+	bottom: -3dp;
+	pointer-events: none;
+	decorator: image(charsel-deco-image);
+}
+
+/* Centered around a fixed screen X unrelated to this window's own position. */
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330dp;
+	width: 640dp;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18dp;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: #000000;
+	background-color: rgba(255, 255, 0, 128);
+	white-space: nowrap;
+	padding: 0 2dp;
+}

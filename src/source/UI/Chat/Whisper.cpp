@@ -2,9 +2,9 @@
 #include "UI/Chat/Whisper.h"
 
 #include "Engine/Object/ZzzInfomation.h"     // CharacterAttribute
-#include "UI/NewUI/NewUISystem.h"            // g_pSystemLogBox
-#include "UI/NewUI/HUD/NewUIChatLogWindow.h" // SEASON3B::TYPE_SYSTEM_MESSAGE
-#include "UI/Legacy/UIControls.h"            // g_pRenderText
+#include "UI/Core/NewUISystem.h"            // g_pSystemLogBox
+#include "UI/HUD/NewUIChatLogWindow.h" // mu::ui::window::TYPE_SYSTEM_MESSAGE
+#include "UI/Widgets/UIControls.h"            // g_pRenderText
 #include "I18N/All.h"
 
 namespace
@@ -32,7 +32,7 @@ namespace UI::Chat::Whisper
             }
         }
 
-        g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheWhisperCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheWhisperCommandAtCharacterLevel6, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
         return false;
     }

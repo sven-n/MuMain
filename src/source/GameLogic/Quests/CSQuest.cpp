@@ -15,7 +15,7 @@
 #include <iterator>
 #include <vector>
 
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "Render/Models/ZzzBMD.h"
@@ -29,9 +29,9 @@
 #include "CSQuest.h"
 #include "GameLogic/Quests/DialogStructure.h"
 #include "Core/Utilities/UsefulDef.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "Character/CharacterManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 
 bool bCheckNPC = false;
 extern  int  g_iMessageTextStart;
@@ -701,7 +701,7 @@ bool CSQuest::BeQuestItem(void)
 
 int CSQuest::FindQuestItemsInInven(int nType, int nCount, int nLevel)
 {
-    SEASON3B::CNewUIInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
+    mu::ui::window::CInventoryCtrl* pInvenCtrl = g_pMyInventory->GetInventoryCtrl();
 
     int nItemsInInven = pInvenCtrl->GetNumberOfItems();
     ITEM* pItem = nullptr;

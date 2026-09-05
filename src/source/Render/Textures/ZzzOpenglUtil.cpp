@@ -10,7 +10,7 @@
 #include "Engine/Object/ZzzInfomation.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Engine/Object/ZzzCharacter.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include <SDL3/SDL.h>
 #ifdef LDS_ADD_MULTISAMPLEANTIALIASING
 #include "wglext.h"  // legacy WGL multisample pixel-format path (disabled by default)
@@ -1569,9 +1569,9 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 {
     vec3_t Direction;
     VectorSubtract(Target, Position, Direction);
-    float a = DotProduct(Direction, Normal);
+    float a = VectorDotProduct(Direction, Normal);
     if (a >= 0.f) return false;
-    float b = DotProduct(Position, Normal) - DotProduct(v1, Normal);
+    float b = VectorDotProduct(Position, Normal) - VectorDotProduct(v1, Normal);
     float t = -b / a;
     if (t >= 0.f && t <= Distance)
     {
@@ -1622,16 +1622,16 @@ bool CollisionDetectLineToFace(vec3_t Position, vec3_t Target, int Polygon, floa
 
 bool ProjectLineBox(vec3_t ax, vec3_t p1, vec3_t p2, OBB_t obb)
 {
-    float P1 = DotProduct(ax, p1);
-    float P2 = DotProduct(ax, p2);
+    float P1 = VectorDotProduct(ax, p1);
+    float P2 = VectorDotProduct(ax, p2);
 
     float mx1 = maxf(P1, P2);
     float mn1 = minf(P1, P2);
 
-    float ST = DotProduct(ax, obb.StartPos);
-    float Q1 = DotProduct(ax, obb.XAxis);
-    float Q2 = DotProduct(ax, obb.YAxis);
-    float Q3 = DotProduct(ax, obb.ZAxis);
+    float ST = VectorDotProduct(ax, obb.StartPos);
+    float Q1 = VectorDotProduct(ax, obb.XAxis);
+    float Q2 = VectorDotProduct(ax, obb.YAxis);
+    float Q3 = VectorDotProduct(ax, obb.ZAxis);
 
     float mx2 = ST;
     float mn2 = ST;

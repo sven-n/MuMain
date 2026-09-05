@@ -1,0 +1,157 @@
+/* Legacy theme for the login dialog. CWin draws nothing for this window; this theme reproduces
+   the original look by pointing decorators at the same art files the old CWin sprites used
+   (login_back.tga, login_me.tga). #panel's left/top are set from C++ to track the window's real
+   pixel origin; children below use fixed-pixel offsets relative to it. */
+
+@spritesheet login-back-sheet
+{
+	src: "../../../login_back.tga";
+	login-back-image: 0px 0px 329px 245px;
+}
+
+@spritesheet login-input-frame-sheet
+{
+	src: "../../../login_me.tga";
+	login-input-frame-image: 0px 0px 156px 23px;
+}
+
+@spritesheet login-checkbox-sheet
+{
+	src: "../../../op2_ch.tga";
+	login-checkbox-unchecked: 0px  0px 16px 16px;
+	login-checkbox-checked:   0px 16px 16px 16px;
+}
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	/* body spans the whole real window, so this stays "none" -- specific elements opt back in --
+	   or every click on screen would register as hitting UI, blocking legacy input. */
+	pointer-events: none;
+}
+
+#panel {
+	position: absolute;
+	width: 329dp;
+	height: 245dp;
+	font-family: "Liberation Sans";
+	font-size: 12dp;
+	color: white;
+	decorator: image(login-back-image);
+}
+
+/* modern-only decorative elements (login.rml, shared markup) -- legacy's #panel/.input-frame
+   already supply their whole look via real sprite art (login-back-image/login-input-frame-image
+   above), so these get no rule at all beyond explicitly hiding them; .modern-inset just sets
+   border-color with no border-width anywhere in this file, so it's a no-op here already. */
+.frame-accent, .login-content, .header-glow, .separator {
+	display: none;
+}
+
+.label {
+	position: absolute;
+}
+.label-server  { left: 111dp; top: 80dp; }
+.label-account { left: 30dp; top: 113dp; }
+.label-password{ left: 30dp; top: 139dp; }
+
+/* LoginWin.cpp::SetPosition() positions the real CUITextInputBox text a fixed few px below/right
+   of this frame's own top/left (112/137 vs this rule's 106/131 -- text padding within the frame,
+   a pre-existing relationship, not a typo) and now scales that offset by the same ratio this
+   file's dp values respond to -- keep the two in sync if either changes (see that function's own
+   comment). */
+.input-frame {
+	position: absolute;
+	width: 156dp;
+	height: 23dp;
+	decorator: image(login-input-frame-image);
+	pointer-events: none;
+}
+.input-account  { left: 109dp; top: 106dp; }
+.input-password { left: 109dp; top: 131dp; }
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.checkbox-remember-me  { left: 109dp; top: 156dp; }
+.checkbox-save-password{ left: 109dp; top: 176dp; }
+
+.checkbox-box {
+	display: inline-block;
+	width: 16dp;
+	height: 16dp;
+	decorator: image(login-checkbox-unchecked);
+}
+.checkbox-box.checked {
+	decorator: image(login-checkbox-checked);
+}
+
+/* Tick is baked into the checked-state art -- .checkbox-tick only matters for modern. */
+.checkbox-tick {
+	display: none;
+}
+
+.checkbox-label {
+	position: absolute;
+	left: 21dp;
+	top: 1dp;
+	white-space: nowrap;
+}
+
+@spritesheet login-ok-sheet
+{
+	src: "../../../message_ok_b_all.tga";
+	login-ok-idle:   0px  0px 54px 30px;
+	login-ok-hover:  0px 30px 54px 30px;
+	login-ok-active: 0px 60px 54px 30px;
+}
+@spritesheet login-cancel-sheet
+{
+	src: "../../../loding_cancel_b_all.tga";
+	login-cancel-idle:   0px  0px 54px 30px;
+	login-cancel-hover:  0px 30px 54px 30px;
+	login-cancel-active: 0px 60px 54px 30px;
+}
+
+.btn {
+	position: absolute;
+	width: 54px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	color: transparent;
+	pointer-events: auto;
+}
+.btn-ok {
+	left: 150px; top: 200px;
+	decorator: image(login-ok-idle);
+}
+.btn-ok:hover {
+	decorator: image(login-ok-hover);
+}
+.btn-ok:active {
+	decorator: image(login-ok-active);
+}
+.btn-cancel {
+	left: 211px; top: 200px;
+	decorator: image(login-cancel-idle);
+}
+.btn-cancel:hover {
+	decorator: image(login-cancel-hover);
+}
+.btn-cancel:active {
+	decorator: image(login-cancel-active);
+}
+
+.trust-warning {
+	position: absolute;
+	left: 30px;
+	top: 252px;
+	width: 280px;
+	color: #ffd23c;
+}

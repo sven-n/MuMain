@@ -4,7 +4,7 @@
 
 #include "stdafx.h"
 #include "Core/Utilities/ReadScript.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "GameLogic/Items/ItemAddOptioninfo.h"
 #include "w_BuffScriptLoader.h"
 #include "Core/Platform/WinCompat.h"

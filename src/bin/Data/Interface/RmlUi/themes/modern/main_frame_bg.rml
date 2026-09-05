@@ -1,0 +1,25 @@
+<rml>
+<head>
+	<title>Main Frame Background</title>
+	<link type="text/rcss" href="main_frame_bg.rcss"/>
+</head>
+<body data-model="main_frame_bg">
+	<!-- Loaded into RmlUiRuntime's background context (GetBackgroundContext()), not the "main"
+	     one main_frame.rml uses -- CNewUIMainFrameWindow::RenderLeftFrame()'s own header comment
+	     explains why: this panel must sit BEHIND the legacy 3D-composited item/skill icons, which
+	     the "main" context's single fixed render pass can never do. root_x/root_y/root_scale
+	     mirror main_frame.rml's own #bars left/top/scale exactly (same C++ source values,
+	     CNewUIMainFrameWindow::SyncRmlModel()); left_offset_x/center_offset_x are the same
+	     item-hotkey/skill-hotkey anchor deltas #bars's own children read indirectly via that
+	     shared transform. Reference-space (152/214/424/429/41 etc.) coordinates below are
+	     identical to the legacy RenderColorQuadARGB() calls this panel replaces
+	     (RenderLeftFrame()/RenderCenterFrame()) -- kept in sync by inspection, not by a shared
+	     constant, same as every other reference-space RmlUi/C++ pair in this file's sibling
+	     main_frame.rml. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div id="bg_left" data-style-left="left_offset_x + 'px'"></div>
+		<div id="bg_center" data-style-left="center_offset_x + 214 + 'px'"></div>
+	</div>
+</body>
+</rml>

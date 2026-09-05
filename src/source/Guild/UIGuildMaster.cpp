@@ -7,14 +7,14 @@
 #include "Engine/Object/ZzzInventory.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "UIGuildMaster.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "App/Platform/Windows/Local.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/NewUISystem.h"
 #include "Engine/Object/ZzzInterface.h"
 
 extern int				g_iChatInputType;
@@ -255,11 +255,11 @@ void CUIGuildMaster::DoCreateGuildAction()
         }
         if (CheckName())
         {
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCanNotUseWordMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCanNotUseWordMsgBoxLayout));
         }
         else if (CheckSpecialText(InputText[0]))
         {
-            SEASON3B::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
         }
         else
         {
@@ -280,12 +280,12 @@ void CUIGuildMaster::DoCreateGuildAction()
                 }
                 else
                 {
-                    SEASON3B::CreateOkMessageBox(I18N::Game::PleaseDrawYourGuildEmblem);
+                    mu::ui::window::CreateOkMessageBox(I18N::Game::PleaseDrawYourGuildEmblem);
                 }
             }
             else
             {
-                SEASON3B::CreateOkMessageBox(I18N::Game::TypeMoreThan4Letters);
+                mu::ui::window::CreateOkMessageBox(I18N::Game::TypeMoreThan4Letters);
             }
         }
         if (g_iChatInputType == 1)
@@ -373,7 +373,7 @@ void CUIGuildMaster::DoCreateInfoAction()
         SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
         Close();
 
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
     }
 
     if (m_PreviousButton.DoMouseAction())
@@ -418,7 +418,7 @@ void CUIGuildMaster::DoEditGuildMarkAction()
         }
         else
         {
-            SEASON3B::CreateOkMessageBox(I18N::Game::PleaseDrawYourGuildEmblem);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::PleaseDrawYourGuildEmblem);
         }
     }
 
@@ -479,8 +479,8 @@ void CUIGuildMaster::DoGuildMasterMainAction()
         SocketClient->ToGameServer()->SendGuildMasterAnswer(false);
         PlayBuffer(SOUND_CLICK01);
         Close();
-        g_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_NPCGUILDMASTER, false);
-        g_pNewUIMng->EnableInterface(SEASON3B::INTERFACE_NPCGUILDMASTER, false);
+        g_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_NPCGUILDMASTER, false);
+        g_pNewUIMng->EnableInterface(mu::ui::window::INTERFACE_NPCGUILDMASTER, false);
     }
 }
 

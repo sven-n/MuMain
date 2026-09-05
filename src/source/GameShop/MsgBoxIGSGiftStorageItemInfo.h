@@ -8,13 +8,14 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/NewUIMessageBox.h"
+#include "UI/Dialogs/NewUICommonMessageBox.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-class CMsgBoxIGSGiftStorageItemInfo : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+class CMsgBoxIGSGiftStorageItemInfo : public CMessageBoxBase, public I3DRenderObj
 {
 public:
     enum IMAGE_IGS_GIFT_STORAGE_ITEM_INFO
@@ -66,9 +67,9 @@ public:
     void Render3D();
     void Initialize(int iStorageSeq, int iStorageItemSeq, WORD wItemCode, wchar_t szItemType, wchar_t* pszID,
                     wchar_t* pszMessage, wchar_t* pszName, wchar_t* pszNum, wchar_t* pszPeriod);
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -80,8 +81,8 @@ private:
     void UnloadImages();
 
 private:
-    CNewUIMessageBoxButton m_BtnUse;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnUse;
+    CMessageBoxButton m_BtnCancel;
     CUITextInputBox m_MessageInputBox;
 
     int m_iStorageSeq;

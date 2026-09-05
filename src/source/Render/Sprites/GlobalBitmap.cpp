@@ -527,6 +527,16 @@ GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, G
     }
     return BITMAP_UNKNOWN;
 }
+GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
+{
+    GLuint uiNewTextureIndex = GenerateTextureIndex();
+    if (true == LoadImage(uiNewTextureIndex, filename, uiFilter, uiWrapMode))
+    {
+        m_listNonamedIndex.push_back(uiNewTextureIndex);
+        return uiNewTextureIndex;
+    }
+    return BITMAP_UNKNOWN;
+}
 bool CGlobalBitmap::LoadImage(GLuint uiBitmapIndex, const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
 {
     unsigned int UICLAMP = GL_CLAMP_TO_EDGE;

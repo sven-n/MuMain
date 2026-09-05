@@ -1,0 +1,33 @@
+<rml>
+<head>
+	<title>MU Helper Bar</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="mu_helper_bar.rcss"/>
+</head>
+<body data-model="mu_helper_bar">
+	<!-- MU Helper mini control bar + hero position readout. Fixed dp size, anchored top-left. -->
+	<div id="panel" class="anchor-top-left">
+		<div id="seg_a"></div>
+		<div id="seg_b"></div>
+		<div id="seg_c"></div>
+		<div id="text">{{position_text}}</div>
+
+		<!-- .tooltip-* are siblings of their trigger button, not nested children -- see
+		     mu_helper_bar.rcss's own comment on .tooltip for why (shrink-to-fit containing-block
+		     clamping, same bug main_frame.rcss's tooltips already document/avoid this way). -->
+		<div id="btn_config" class="mu-btn" data-event-click="mu_helper_config_click">
+			<div class="dot"></div>
+		</div>
+		<span class="tooltip tooltip-config">{{config_tooltip}}</span>
+		<!-- Start/Stop share one screen position, mutually exclusive by mu_helper_active. -->
+		<div id="btn_start" class="mu-btn" data-class-hidden="mu_helper_active" data-event-click="mu_helper_toggle_click">
+			<div class="dot"></div>
+		</div>
+		<span class="tooltip tooltip-start">{{start_tooltip}}</span>
+		<div id="btn_stop" class="mu-btn" data-class-hidden="!mu_helper_active" data-event-click="mu_helper_toggle_click">
+			<div class="dot"></div>
+		</div>
+		<span class="tooltip tooltip-stop">{{stop_tooltip}}</span>
+	</div>
+</body>
+</rml>
