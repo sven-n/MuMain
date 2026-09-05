@@ -115,7 +115,7 @@ bool CMsgBoxIGSSendGift::Update()
     if (m_MessageInputBox.HaveFocus() == TRUE)
         m_MessageInputBox.GetText(m_szMessage, MAX_GIFT_MESSAGE_SIZE);
 
-    if (SEASON3B::IsPress(VK_TAB) == true)
+    if (mu::ui::window::IsPress(VK_TAB) == true)
     {
         ChangeInputBoxFocus();
     }

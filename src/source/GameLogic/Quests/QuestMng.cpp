@@ -269,12 +269,12 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
 
     if (LOWORD(dwQuestIndex) == 0x00FF)
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS);
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
 
-        g_pSystemLogBox->AddText(I18N::Game::YouVeSuccessfullyCompletedTheQuest, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouVeSuccessfullyCompletedTheQuest, mu::ui::window::TYPE_ERROR_MESSAGE);
 
         return;
     }
@@ -291,14 +291,14 @@ void CQuestMng::SetCurQuestProgress(DWORD dwQuestIndex)
     if (0 == iter->second.m_byUIType)
     {
         g_pQuestProgress->SetContents(dwQuestIndex);
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS);
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS);
     }
     else
     {
         g_pQuestProgressByEtc->SetContents(dwQuestIndex);
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC))
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC))
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
     }
 }
 

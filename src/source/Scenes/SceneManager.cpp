@@ -273,7 +273,7 @@ static void ConsumeScreenshot()
                                  pixels.rgb.data(), 100);
     if (saved)
     {
-        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     GrabScreen++;

@@ -11,25 +11,26 @@
 #include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIDuelWindow::CNewUIDuelWindow()
+mu::ui::window::CNewUIDuelWindow::CNewUIDuelWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-SEASON3B::CNewUIDuelWindow::~CNewUIDuelWindow()
+mu::ui::window::CNewUIDuelWindow::~CNewUIDuelWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIDuelWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIDuelWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_DUEL_WINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUEL_WINDOW, this);
 
     SetPos(x, y);
 
@@ -40,7 +41,7 @@ bool SEASON3B::CNewUIDuelWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUIDuelWindow::Release()
+void mu::ui::window::CNewUIDuelWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -49,28 +50,28 @@ void SEASON3B::CNewUIDuelWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIDuelWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIDuelWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIDuelWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIDuelWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIDuelWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIDuelWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIDuelWindow::Update()
+bool mu::ui::window::CNewUIDuelWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIDuelWindow::Render()
+bool mu::ui::window::CNewUIDuelWindow::Render()
 {
     EnableAlphaTest();
 
@@ -82,12 +83,12 @@ bool SEASON3B::CNewUIDuelWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIDuelWindow::RenderFrame()
+void mu::ui::window::CNewUIDuelWindow::RenderFrame()
 {
     RenderImage(IMAGE_DUEL_BACK, m_Pos.x, m_Pos.y, 131, 70);
 }
 
-void SEASON3B::CNewUIDuelWindow::RenderContents()
+void mu::ui::window::CNewUIDuelWindow::RenderContents()
 {
     wchar_t strMyScore[12];
     wchar_t strDuelScore[12];
@@ -105,17 +106,17 @@ void SEASON3B::CNewUIDuelWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 31, m_Pos.y + 56, strDuelScore);
 }
 
-float SEASON3B::CNewUIDuelWindow::GetLayerDepth()
+float mu::ui::window::CNewUIDuelWindow::GetLayerDepth()
 {
     return 1.1f;
 }
 
-void SEASON3B::CNewUIDuelWindow::LoadImages()
+void mu::ui::window::CNewUIDuelWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_DUEL_BACK, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIDuelWindow::UnloadImages()
+void mu::ui::window::CNewUIDuelWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_DUEL_BACK);
 }

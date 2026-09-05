@@ -161,7 +161,7 @@ void CCreditWin::Create()
 	// during LOG_IN_SCENE; see CSceneUICoordinator::GetNewStyleMng()'s own comment for why).
 	// AddUIObj() is already idempotent (no-ops if already registered), so this is safe to call
 	// again on every RepositionSceneUI()-triggered recreate.
-	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CREDITS, this);
+	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CREDITS, this);
 
 	// Matches CWin::Create()'s own unconditional m_bShow=false reset -- RepositionSceneUI()
 	// snapshots visibility before calling this and restores it right after.
@@ -197,7 +197,7 @@ void CCreditWin::SetPosition()
 
 void CCreditWin::Show(bool bShow)
 {
-	SEASON3B::CNewUIObj::Show(bShow);
+	mu::ui::window::CNewUIObj::Show(bShow);
 
 	m_sprBg.Show(bShow);
 	for (int i = 0; i < CRW_SPR_MAX; ++i)

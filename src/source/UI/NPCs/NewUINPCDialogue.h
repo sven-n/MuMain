@@ -12,7 +12,7 @@
 #define ND_SEL_TEXT_LINE_MAX		((ND_QUEST_INDEX_MAX_COUNT+1)*2)
 #define ND_SEL_TEXT_PAGE_LIMIT		4
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUINPCDialogue : public CNewUIObj
     {

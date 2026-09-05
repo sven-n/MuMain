@@ -6,7 +6,7 @@
 #include "UI/Scaling/UITransform.h"
 
  
-namespace SEASON3B
+namespace mu::ui::window
 {
     class INewUIBase
     {

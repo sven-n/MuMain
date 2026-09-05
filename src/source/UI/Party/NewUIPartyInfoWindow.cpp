@@ -12,6 +12,7 @@
 #include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIPartyInfoWindow::CNewUIPartyInfoWindow()
 {
@@ -31,7 +32,7 @@ bool CNewUIPartyInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_PARTY, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PARTY, this);
 
     SetPos(x, y);
 
@@ -81,12 +82,12 @@ void CNewUIPartyInfoWindow::ClosingProcess()
 bool CNewUIPartyInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_PARTY))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PARTY))
         return true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_PARTY);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PARTY);
         return true;
     }
 
@@ -121,11 +122,11 @@ bool CNewUIPartyInfoWindow::UpdateMouseEvent()
 
 bool CNewUIPartyInfoWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PARTY) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PARTY) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_PARTY);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PARTY);
             PlayBuffer(SOUND_CLICK01);
 
             return false;

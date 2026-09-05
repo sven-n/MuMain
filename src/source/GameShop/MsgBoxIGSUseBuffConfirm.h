@@ -9,6 +9,7 @@
 #include "UI/Options/NewUIOptionWindow.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 class CMsgBoxIGSUseBuffConfirm : public CNewUIMessageBoxBase
 {

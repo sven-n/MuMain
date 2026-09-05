@@ -10,7 +10,7 @@
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Core/NewUI3DRenderMng.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     enum
     {

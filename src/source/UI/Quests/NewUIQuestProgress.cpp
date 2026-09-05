@@ -12,6 +12,7 @@
 #include "Core/Utilities/UsefulDef.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #define QP_NPC_MAX_LINE_PER_PAGE	7
 #define QP_TEXT_GAP					15
@@ -34,7 +35,7 @@ bool CNewUIQuestProgress::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_QUEST_PROGRESS, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_QUEST_PROGRESS, this);
 
     SetPos(x, y);
     LoadImages();
@@ -101,11 +102,11 @@ bool CNewUIQuestProgress::ProcessBtns()
 {
     if (m_btnClose.UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS);
         return true;
     }
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_QUEST_PROGRESS))
+    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_QUEST_PROGRESS))
         return true;
     else if (m_btnProgressR.UpdateMouseEvent())
     {
@@ -173,7 +174,7 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
         if (nTopY <= MouseY && MouseY < nBottomY)
         {
             m_nSelAnswer = static_cast<QuestProceedAction>(i + 1);
-            if (SEASON3B::IsRelease(VK_LBUTTON))
+            if (mu::ui::window::IsRelease(VK_LBUTTON))
             {
                 const auto questNumber = static_cast<uint16_t>(LOWORD(m_dwCurQuestIndex));
                 const auto questGroup = static_cast<uint16_t>(HIWORD(m_dwCurQuestIndex));
@@ -191,11 +192,11 @@ bool CNewUIQuestProgress::UpdateSelTextMouseEvent()
 
 bool CNewUIQuestProgress::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS))
     {
-        if (SEASON3B::IsPress(VK_ESCAPE))
+        if (mu::ui::window::IsPress(VK_ESCAPE))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUEST_PROGRESS);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUEST_PROGRESS);
             return false;
         }
     }

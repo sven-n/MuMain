@@ -9,7 +9,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Widgets/UIControls.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMixInventory : public CNewUIObj
     {

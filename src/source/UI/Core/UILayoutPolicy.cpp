@@ -5,7 +5,7 @@
 
 UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
 {
-    using namespace SEASON3B;
+    using namespace mu::ui::window;
     using Scaling::LayoutMode;
 
     switch (interfaceKey)

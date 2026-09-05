@@ -224,7 +224,7 @@ void CSceneUICoordinator::Update(double dDeltaTick)
 
     // New-style (CNewUIObj-tier) windows (docs/newui-legacy-merger.md) -- the only dispatch this
     // class still drives; every window it used to own via a CWin list has migrated onto
-    // SEASON3B::CNewUIObj/CNewUIManager. m_bCursorOnUI folds in whatever this claimed, so a
+    // mu::ui::window::CNewUIObj/CNewUIManager. m_bCursorOnUI folds in whatever this claimed, so a
     // migrated modal like CMsgWin still blocks CharacterScene.cpp's world-click/rotation gating
     // the same way its old full-screen CWin::CursorInWin(WA_ALL) rect used to.
     m_NewStyleMng.UpdateMouseEvent();

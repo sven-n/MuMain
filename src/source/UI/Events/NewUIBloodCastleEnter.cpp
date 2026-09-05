@@ -11,6 +11,7 @@
 #include "Audio/DSPlaySound.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIEnterBloodCastle::CNewUIEnterBloodCastle()
 {
@@ -55,7 +56,7 @@ bool CNewUIEnterBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_BLOODCASTLE, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BLOODCASTLE, this);
 
     SetPos(x, y);
 
@@ -138,11 +139,11 @@ bool CNewUIEnterBloodCastle::UpdateMouseEvent()
 // UpdateKeyEvent
 bool CNewUIEnterBloodCastle::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_BLOODCASTLE);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -228,19 +229,19 @@ bool CNewUIEnterBloodCastle::Render()
 bool CNewUIEnterBloodCastle::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_BLOODCASTLE))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_BLOODCASTLE))
         return true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_BLOODCASTLE);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
         return true;
     }
 
     if ((m_iNumActiveBtn != -1) && (m_BtnEnter[m_iNumActiveBtn].UpdateMouseEvent() == true))
     {
         SocketClient->ToGameServer()->SendBloodCastleEnterRequest(m_iNumActiveBtn + 1, 0xFF);
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_BLOODCASTLE);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_BLOODCASTLE);
     }
 
     return false;

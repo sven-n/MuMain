@@ -11,6 +11,7 @@
 #include "UI/Core/NewUISystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #define ND_NPC_MAX_LINE_PER_PAGE		7
 #define ND_SEL_TEXT_MAX_LINE_PER_PAGE	11
@@ -34,7 +35,7 @@ bool CNewUINPCDialogue::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPC_DIALOGUE, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPC_DIALOGUE, this);
 
     SetPos(x, y);
     LoadImages();
@@ -102,11 +103,11 @@ bool CNewUINPCDialogue::ProcessBtns()
 {
     if (m_btnClose.UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPC_DIALOGUE);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPC_DIALOGUE);
         return true;
     }
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_NPC_DIALOGUE))
+    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPC_DIALOGUE))
         return true;
     else if (m_btnProgressR.UpdateMouseEvent())
     {
@@ -191,7 +192,7 @@ bool CNewUINPCDialogue::UpdateSelTextMouseEvent()
         if (nTopY <= MouseY && MouseY < nBottomY)
         {
             m_nSelSelText = i + 1;
-            if (SEASON3B::IsRelease(VK_LBUTTON))
+            if (mu::ui::window::IsRelease(VK_LBUTTON))
             {
                 m_bCanClick = false;
                 ProcessSelTextResult();
@@ -207,11 +208,11 @@ bool CNewUINPCDialogue::UpdateSelTextMouseEvent()
 
 bool CNewUINPCDialogue::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE))
     {
-        if (SEASON3B::IsPress(VK_ESCAPE))
+        if (mu::ui::window::IsPress(VK_ESCAPE))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPC_DIALOGUE);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPC_DIALOGUE);
             return false;
         }
     }
@@ -577,7 +578,7 @@ void CNewUINPCDialogue::ProcessSelTextResult()
 
             case 902:
                 SocketClient->ToGameServer()->SendNpcBuffRequest();
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPC_DIALOGUE);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPC_DIALOGUE);
                 break;
             case 903:
                 SocketClient->ToGameServer()->SendGensJoinRequest(GensType::Duprian);

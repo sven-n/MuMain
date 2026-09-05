@@ -19,6 +19,7 @@
 #include "UI/Events/UIGuardsMan.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 extern DWORD g_dwActiveUIID;
 
@@ -40,7 +41,7 @@ bool CNewUIGuardWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_GUARDSMAN, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GUARDSMAN, this);
 
     SetPos(x, y);
 
@@ -122,11 +123,11 @@ bool CNewUIGuardWindow::UpdateMouseEvent()
 
 bool CNewUIGuardWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUARDSMAN) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUARDSMAN) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUARDSMAN);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUARDSMAN);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -316,11 +317,11 @@ void CNewUIGuardWindow::RenderFrame()
 bool CNewUIGuardWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_GUARDSMAN);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GUARDSMAN);
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GUARDSMAN);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GUARDSMAN);
         return true;
     }
 
@@ -344,7 +345,7 @@ void CNewUIGuardWindow::UpdateRegisterTab()
             }
             else
             {
-                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSiegeLevelMsgBoxLayout));
+                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSiegeLevelMsgBoxLayout));
             }
         }
         break;
@@ -390,7 +391,7 @@ void CNewUIGuardWindow::UpdateRegisterInfoTab()
     {
         if (m_BtnGiveUp.UpdateMouseEvent() == true)
         {
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSiegeGiveUpMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSiegeGiveUpMsgBoxLayout));
         }
     }
 }

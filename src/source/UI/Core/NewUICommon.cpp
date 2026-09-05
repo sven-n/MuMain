@@ -23,7 +23,7 @@ extern int MouseX, MouseY;
 extern bool g_bWndActive;
 #endif // ASG_FIX_ACTIVATE_APP_INPUT
 
-bool SEASON3B::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, float fPriority)
+bool mu::ui::window::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, float fPriority)
 {
     CNewUICommonMessageBox* pMsgBox = g_MessageBox->NewMessageBox(MSGBOX_CLASS(CNewUICommonMessageBox));
     if (pMsgBox)
@@ -33,7 +33,7 @@ bool SEASON3B::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, flo
     return false;
 }
 
-int SEASON3B::IsPurchaseShop()
+int mu::ui::window::IsPurchaseShop()
 {
     if (g_pMyShopInventory->IsVisible())
     {
@@ -47,14 +47,14 @@ int SEASON3B::IsPurchaseShop()
     return -1;
 }
 
-bool SEASON3B::CheckMouseIn(int x, int y, int width, int height)
+bool mu::ui::window::CheckMouseIn(int x, int y, int width, int height)
 {
     if (MouseX >= x && MouseX < x + width && MouseY >= y && MouseY < y + height)
         return true;
     return false;
 }
 
-void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height)
+void mu::ui::window::RenderImage(GLuint uiImageType, float x, float y, float width, float height)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];
 
@@ -68,13 +68,13 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
     RenderBitmap(uiImageType, x, y, width, height, u, v, uw - u, vh - v);
 }
 
-void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,
+void mu::ui::window::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,
                            float uw, float vh, DWORD color)
 {
     RenderColorBitmap(uiImageType, x, y, width, height, su, sv, uw, vh, color);
 }
 
-void SEASON3B::RenderImageStretch(GLuint uiImageType, float x, float y, float width, float height,
+void mu::ui::window::RenderImageStretch(GLuint uiImageType, float x, float y, float width, float height,
                                   float sx, float sy, float sw, float sh, DWORD color)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];
@@ -89,7 +89,7 @@ void SEASON3B::RenderImageStretch(GLuint uiImageType, float x, float y, float wi
     RenderColorBitmap(uiImageType, x, y, width, height, u, v, uw, vh, color);
 }
 
-void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv)
+void mu::ui::window::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];
 
@@ -102,7 +102,7 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
     RenderBitmap(uiImageType, x, y, width, height, u, v, uw, vh);
 }
 
-void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,
+void mu::ui::window::RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv,
                            DWORD color)
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];
@@ -116,50 +116,50 @@ void SEASON3B::RenderImage(GLuint uiImageType, float x, float y, float width, fl
     RenderColorBitmap(uiImageType, x, y, width, height, u, v, uw, vh, color);
 }
 
-float SEASON3B::RenderNumber(float x, float y, int iNum, float fScale)
+float mu::ui::window::RenderNumber(float x, float y, int iNum, float fScale)
 {
     return g_RenderNumber->RenderNumber(x, y, iNum, fScale);
 }
 
-bool SEASON3B::IsNone(int iVirtKey)
+bool mu::ui::window::IsNone(int iVirtKey)
 {
     return g_pNewKeyInput->IsNone(iVirtKey);
 }
 
-bool SEASON3B::IsRelease(int iVirtKey)
+bool mu::ui::window::IsRelease(int iVirtKey)
 {
     return g_pNewKeyInput->IsRelease(iVirtKey);
 }
 
-bool SEASON3B::IsPress(int iVirtKey)
+bool mu::ui::window::IsPress(int iVirtKey)
 {
     return g_pNewKeyInput->IsPress(iVirtKey);
 }
 
-bool SEASON3B::IsRepeat(int iVirtKey)
+bool mu::ui::window::IsRepeat(int iVirtKey)
 {
     return g_pNewKeyInput->IsRepeat(iVirtKey);
 }
 
-SEASON3B::CNewKeyInput::CNewKeyInput()
+mu::ui::window::CNewKeyInput::CNewKeyInput()
 {
     Init();
 }
 
-SEASON3B::CNewKeyInput::~CNewKeyInput() {}
+mu::ui::window::CNewKeyInput::~CNewKeyInput() {}
 
-void SEASON3B::CNewKeyInput::Init()
+void mu::ui::window::CNewKeyInput::Init()
 {
     memset(&m_pInputInfo, 0, sizeof(INPUTSTATEINFO) * 256);
 }
 
-SEASON3B::CNewKeyInput* SEASON3B::CNewKeyInput::GetInstance()
+mu::ui::window::CNewKeyInput* mu::ui::window::CNewKeyInput::GetInstance()
 {
-    static SEASON3B::CNewKeyInput s_Instance;
+    static mu::ui::window::CNewKeyInput s_Instance;
     return &s_Instance;
 }
 
-void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
+void mu::ui::window::CNewKeyInput::ScanAsyncKeyState()
 {
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
@@ -238,7 +238,7 @@ void SEASON3B::CNewKeyInput::ScanAsyncKeyState()
 #endif
 }
 
-bool SEASON3B::CNewKeyInput::IsNone(int iVirtKey)
+bool mu::ui::window::CNewKeyInput::IsNone(int iVirtKey)
 {
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
@@ -247,7 +247,7 @@ bool SEASON3B::CNewKeyInput::IsNone(int iVirtKey)
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_NONE) ? true : false;
 }
 
-bool SEASON3B::CNewKeyInput::IsRelease(int iVirtKey)
+bool mu::ui::window::CNewKeyInput::IsRelease(int iVirtKey)
 {
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
@@ -256,7 +256,7 @@ bool SEASON3B::CNewKeyInput::IsRelease(int iVirtKey)
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_RELEASE) ? true : false;
 }
 
-bool SEASON3B::CNewKeyInput::IsPress(int iVirtKey)
+bool mu::ui::window::CNewKeyInput::IsPress(int iVirtKey)
 {
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
@@ -265,7 +265,7 @@ bool SEASON3B::CNewKeyInput::IsPress(int iVirtKey)
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_PRESS) ? true : false;
 }
 
-bool SEASON3B::CNewKeyInput::IsRepeat(int iVirtKey)
+bool mu::ui::window::CNewKeyInput::IsRepeat(int iVirtKey)
 {
 #ifdef ASG_FIX_ACTIVATE_APP_INPUT
     if (!g_bWndActive)
@@ -274,7 +274,7 @@ bool SEASON3B::CNewKeyInput::IsRepeat(int iVirtKey)
     return (m_pInputInfo[iVirtKey].byKeyState == KEY_REPEAT) ? true : false;
 }
 
-void SEASON3B::CNewKeyInput::SetKeyState(int iVirtKey, KEY_STATE KeyState)
+void mu::ui::window::CNewKeyInput::SetKeyState(int iVirtKey, KEY_STATE KeyState)
 {
     m_pInputInfo[iVirtKey].byKeyState = KeyState;
 }

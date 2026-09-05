@@ -15,7 +15,7 @@
 #include "UI/NPCs/NewUINPCShop.h"
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUICastleWindow : public CNewUIObj
     {

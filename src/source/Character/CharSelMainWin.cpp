@@ -176,7 +176,7 @@ void CCharSelMainWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_SEL_MAIN, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_SEL_MAIN, this);
 
     ApplyLayout(layout);
     m_bAccountBlockItem = HasAccountBlockedCharacter();
@@ -254,7 +254,7 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
 
 void CCharSelMainWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
 
     for (auto& sprite : m_asprBack)
         sprite.Show(bShow);

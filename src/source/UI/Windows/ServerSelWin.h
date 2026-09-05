@@ -23,7 +23,7 @@ class CServerGroup;
 // not just passive display), but still fully self-contained real-pixel 2D rendering, no RmlUi
 // entanglement. Its own CWinEx member (m_winDescription) is untouched -- CWinEx itself isn't
 // retiring, only CServerSelWin's own CWin base class is.
-class CServerSelWin : public SEASON3B::CNewUIObj
+class CServerSelWin : public mu::ui::window::CNewUIObj
 {
 private:
     enum SERVER_SELECT_WIN
@@ -77,7 +77,7 @@ public:
         return m_Size.cy;
     }
 
-    // SEASON3B::INewUIBase
+    // mu::ui::window::INewUIBase
     bool Render() override;
     bool Update() override;
     // Was CWin::CursorInWin(WA_ALL) -- claims (consumes) any click within its own bounding box,

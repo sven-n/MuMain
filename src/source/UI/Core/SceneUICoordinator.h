@@ -15,7 +15,7 @@
 
 // Was CUIMng (docs/newui-legacy-merger.md, Phase 4) -- that class used to own a CWin-derived
 // window list of its own; every one of those windows has since migrated onto
-// SEASON3B::CNewUIObj/CNewUIManager (Phases 1-3), so all that remained of it was this class's
+// mu::ui::window::CNewUIObj/CNewUIManager (Phases 1-3), so all that remained of it was this class's
 // actual, still-needed job: creating/releasing/positioning the login- and character-scene g_*Win
 // globals per scene transition, and forwarding Update()/Render() to its own CNewUIManager instance.
 // Renamed to describe that job directly, not a "CWin manager" that no longer manages any CWin.
@@ -41,7 +41,7 @@ protected:
     // forward to this one, giving every login/character-scene window the same INewUIBase
     // interface and dispatch semantics as the MAIN_SCENE-tier CNewUIObj windows, without touching
     // the shared manager at all.
-    SEASON3B::CNewUIManager m_NewStyleMng;
+    mu::ui::window::CNewUIManager m_NewStyleMng;
 
 public:
     virtual ~CSceneUICoordinator();
@@ -86,7 +86,7 @@ public:
 
     // See m_NewStyleMng's own comment -- windows migrating off CWin register here instead of the
     // shared g_pNewUIMng.
-    SEASON3B::CNewUIManager& GetNewStyleMng()
+    mu::ui::window::CNewUIManager& GetNewStyleMng()
     {
         return m_NewStyleMng;
     }

@@ -30,7 +30,7 @@ extern int g_iCancelSkillTarget;
 extern int TextNum;
 extern int g_iItemInfo[16][17];
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 	int& MouseY = ::MouseY;
 	int& g_iCancelSkillTarget = ::g_iCancelSkillTarget;

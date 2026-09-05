@@ -10,30 +10,31 @@
 #include "Audio/DSPlaySound.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUISetItemExplanation::CNewUISetItemExplanation()
+mu::ui::window::CNewUISetItemExplanation::CNewUISetItemExplanation()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
     m_Pos.y = 0;
 }
 
-SEASON3B::CNewUISetItemExplanation::~CNewUISetItemExplanation()
+mu::ui::window::CNewUISetItemExplanation::~CNewUISetItemExplanation()
 {
     Release();
 }
 
-bool SEASON3B::CNewUISetItemExplanation::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUISetItemExplanation::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SETITEM_EXPLANATION, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SETITEM_EXPLANATION, this);
 
     SetPos(x, y);
 
@@ -42,7 +43,7 @@ bool SEASON3B::CNewUISetItemExplanation::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-void SEASON3B::CNewUISetItemExplanation::Release()
+void mu::ui::window::CNewUISetItemExplanation::Release()
 {
     if (m_pNewUIMng)
     {
@@ -51,24 +52,24 @@ void SEASON3B::CNewUISetItemExplanation::Release()
     }
 }
 
-void SEASON3B::CNewUISetItemExplanation::SetPos(int x, int y)
+void mu::ui::window::CNewUISetItemExplanation::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUISetItemExplanation::UpdateMouseEvent()
+bool mu::ui::window::CNewUISetItemExplanation::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISetItemExplanation::UpdateKeyEvent()
+bool mu::ui::window::CNewUISetItemExplanation::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SETITEM_EXPLANATION))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SETITEM_EXPLANATION))
     {
         if (IsPress(VK_ESCAPE) == true || IsPress(VK_F1) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_SETITEM_EXPLANATION);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SETITEM_EXPLANATION);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -78,12 +79,12 @@ bool SEASON3B::CNewUISetItemExplanation::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISetItemExplanation::Update()
+bool mu::ui::window::CNewUISetItemExplanation::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISetItemExplanation::Render()
+bool mu::ui::window::CNewUISetItemExplanation::Render()
 {
     EnableAlphaTest();
 
@@ -94,16 +95,16 @@ bool SEASON3B::CNewUISetItemExplanation::Render()
     return true;
 }
 
-float SEASON3B::CNewUISetItemExplanation::GetLayerDepth()
+float mu::ui::window::CNewUISetItemExplanation::GetLayerDepth()
 {
     return 6.6f;
 }
 
-float SEASON3B::CNewUISetItemExplanation::GetKeyEventOrder()
+float mu::ui::window::CNewUISetItemExplanation::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void SEASON3B::CNewUISetItemExplanation::OpenningProcess() {}
+void mu::ui::window::CNewUISetItemExplanation::OpenningProcess() {}
 
-void SEASON3B::CNewUISetItemExplanation::ClosingProcess() {}
+void mu::ui::window::CNewUISetItemExplanation::ClosingProcess() {}

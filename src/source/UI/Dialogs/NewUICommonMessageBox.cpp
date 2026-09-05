@@ -27,6 +27,7 @@
 #include "Core/Text/TextLineWrap.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 extern int DoBreakUpGuildAction_New(POPUP_RESULT Result);
 
@@ -81,7 +82,7 @@ int AppendWrappedText(type_vector_msgdata& messages, const type_string& text, DW
 }
 } // namespace
 
-SEASON3B::CNewUIMessageBoxButton::CNewUIMessageBoxButton()
+mu::ui::window::CNewUIMessageBoxButton::CNewUIMessageBoxButton()
 {
     m_bEnable = true;
 
@@ -98,28 +99,28 @@ SEASON3B::CNewUIMessageBoxButton::CNewUIMessageBoxButton()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-SEASON3B::CNewUIMessageBoxButton::~CNewUIMessageBoxButton()
+mu::ui::window::CNewUIMessageBoxButton::~CNewUIMessageBoxButton()
 {
 }
 
-bool SEASON3B::CNewUIMessageBoxButton::IsMouseIn()
+bool mu::ui::window::CNewUIMessageBoxButton::IsMouseIn()
 {
     if (m_bEnable == false)
         return false;
 
-    return SEASON3B::CheckMouseIn(m_x, m_y, m_width, m_height);
+    return mu::ui::window::CheckMouseIn(m_x, m_y, m_width, m_height);
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void SEASON3B::CNewUIMessageBoxButton::MoveTextPos(int iX, int iY)
+void mu::ui::window::CNewUIMessageBoxButton::MoveTextPos(int iX, int iY)
 {
     m_iMoveTextPosX = iX;
     m_iMoveTextPosY = iY;
 }
 
-void SEASON3B::CNewUIMessageBoxButton::SetInfo(DWORD dwTexType, float x, float y, float width, float height, DWORD dwSizeType, bool bClickEffect)
+void mu::ui::window::CNewUIMessageBoxButton::SetInfo(DWORD dwTexType, float x, float y, float width, float height, DWORD dwSizeType, bool bClickEffect)
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-void SEASON3B::CNewUIMessageBoxButton::SetInfo(DWORD dwTexType, float x, float y, float width, float height, DWORD dwSizeType)
+void mu::ui::window::CNewUIMessageBoxButton::SetInfo(DWORD dwTexType, float x, float y, float width, float height, DWORD dwSizeType)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
     m_dwTexType = dwTexType;
@@ -156,7 +157,7 @@ void SEASON3B::CNewUIMessageBoxButton::SetInfo(DWORD dwTexType, float x, float y
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void SEASON3B::CNewUIMessageBoxButton::SetText(const wchar_t* strText)
+void mu::ui::window::CNewUIMessageBoxButton::SetText(const wchar_t* strText)
 {
     if (wcslen(strText) > 0)
     {
@@ -164,12 +165,12 @@ void SEASON3B::CNewUIMessageBoxButton::SetText(const wchar_t* strText)
     }
 }
 
-void SEASON3B::CNewUIMessageBoxButton::AddBlank(int iAddBlank)
+void mu::ui::window::CNewUIMessageBoxButton::AddBlank(int iAddBlank)
 {
     m_y += iAddBlank;
 }
 
-void SEASON3B::CNewUIMessageBoxButton::Update()
+void mu::ui::window::CNewUIMessageBoxButton::Update()
 {
     if (m_bEnable == false)
         return;
@@ -202,7 +203,7 @@ void SEASON3B::CNewUIMessageBoxButton::Update()
     }
 }
 
-void SEASON3B::CNewUIMessageBoxButton::Render()
+void mu::ui::window::CNewUIMessageBoxButton::Render()
 {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
     const DWORD buttonColor = m_bEnable
@@ -320,11 +321,11 @@ void SEASON3B::CNewUIMessageBoxButton::Render()
     }
 }
 
-SEASON3B::CNewUICommonMessageBox::CNewUICommonMessageBox()
+mu::ui::window::CNewUICommonMessageBox::CNewUICommonMessageBox()
 {
 }
 
-SEASON3B::CNewUICommonMessageBox::~CNewUICommonMessageBox()
+mu::ui::window::CNewUICommonMessageBox::~CNewUICommonMessageBox()
 {
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -334,12 +335,12 @@ SEASON3B::CNewUICommonMessageBox::~CNewUICommonMessageBox()
     m_MsgDataList.clear();
 }
 
-DWORD SEASON3B::CNewUICommonMessageBox::GetType()
+DWORD mu::ui::window::CNewUICommonMessageBox::GetType()
 {
     return m_dwType;
 }
 
-bool SEASON3B::CNewUICommonMessageBox::Create(DWORD dwType, float fPriority)
+bool mu::ui::window::CNewUICommonMessageBox::Create(DWORD dwType, float fPriority)
 {
     m_dwType = dwType;
 
@@ -358,7 +359,7 @@ bool SEASON3B::CNewUICommonMessageBox::Create(DWORD dwType, float fPriority)
     return true;
 }
 
-bool SEASON3B::CNewUICommonMessageBox::Create(DWORD dwType, const type_string& strMsg, DWORD dwColor, BYTE byFontType, float fPriority)
+bool mu::ui::window::CNewUICommonMessageBox::Create(DWORD dwType, const type_string& strMsg, DWORD dwColor, BYTE byFontType, float fPriority)
 {
     int x, y, width, height;
 
@@ -380,7 +381,7 @@ bool SEASON3B::CNewUICommonMessageBox::Create(DWORD dwType, const type_string& s
     return true;
 }
 
-void SEASON3B::CNewUICommonMessageBox::SetPos(int x, int y)
+void mu::ui::window::CNewUICommonMessageBox::SetPos(int x, int y)
 {
     CNewUIMessageBoxBase::SetPos(x, y);
 
@@ -393,27 +394,27 @@ void SEASON3B::CNewUICommonMessageBox::SetPos(int x, int y)
     m_BtnCancel.SetPos(fx, fy);
 }
 
-void SEASON3B::CNewUICommonMessageBox::SetAddCallbackFunc()
+void mu::ui::window::CNewUICommonMessageBox::SetAddCallbackFunc()
 {
     switch (m_dwType)
     {
     case MSGBOX_COMMON_TYPE_OK:
-        AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-        AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
-        AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
-        //AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
+        AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+        AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
+        AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
+        //AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
         break;
     case MSGBOX_COMMON_TYPE_OKCANCEL:
-        AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-        AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
-        AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_USER_COMMON_CANCEL);
-        //AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
-        //AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
+        AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+        AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
+        AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_USER_COMMON_CANCEL);
+        //AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
+        //AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
         break;
     }
 }
 
-void SEASON3B::CNewUICommonMessageBox::SetButtonInfo()
+void mu::ui::window::CNewUICommonMessageBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -454,7 +455,7 @@ void SEASON3B::CNewUICommonMessageBox::SetButtonInfo()
     }
 }
 
-void SEASON3B::CNewUICommonMessageBox::AddButtonBlank(int iAddLine)
+void mu::ui::window::CNewUICommonMessageBox::AddButtonBlank(int iAddLine)
 {
     switch (m_dwType)
     {
@@ -468,7 +469,7 @@ void SEASON3B::CNewUICommonMessageBox::AddButtonBlank(int iAddLine)
     }
 }
 
-void SEASON3B::CNewUICommonMessageBox::AddButtonBlank(int iAddLine, int _iImgSize)
+void mu::ui::window::CNewUICommonMessageBox::AddButtonBlank(int iAddLine, int _iImgSize)
 {
     switch (m_dwType)
     {
@@ -482,7 +483,7 @@ void SEASON3B::CNewUICommonMessageBox::AddButtonBlank(int iAddLine, int _iImgSiz
     }
 }
 
-void SEASON3B::CNewUICommonMessageBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CNewUICommonMessageBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgDataList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -503,12 +504,12 @@ void SEASON3B::CNewUICommonMessageBox::AddMsg(const type_string& strMsg, DWORD d
     }
 }
 
-int SEASON3B::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType, int _TextSize)
+int mu::ui::window::CNewUICommonMessageBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType, int _TextSize)
 {
     return AppendWrappedText(m_MsgDataList, strMsg, dwColor, byFontType, _TextSize);
 }
 
-bool SEASON3B::CNewUICommonMessageBox::Update()
+bool mu::ui::window::CNewUICommonMessageBox::Update()
 {
     switch (m_dwType)
     {
@@ -524,7 +525,7 @@ bool SEASON3B::CNewUICommonMessageBox::Update()
     return true;
 }
 
-bool SEASON3B::CNewUICommonMessageBox::Render()
+bool mu::ui::window::CNewUICommonMessageBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -534,7 +535,7 @@ bool SEASON3B::CNewUICommonMessageBox::Render()
     return true;
 }
 
-void SEASON3B::CNewUICommonMessageBox::RenderFrame()
+void mu::ui::window::CNewUICommonMessageBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -559,7 +560,7 @@ void SEASON3B::CNewUICommonMessageBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CNewUICommonMessageBox::RenderTexts()
+void mu::ui::window::CNewUICommonMessageBox::RenderTexts()
 {
     float x, y;
 
@@ -590,7 +591,7 @@ void SEASON3B::CNewUICommonMessageBox::RenderTexts()
     }
 }
 
-void SEASON3B::CNewUICommonMessageBox::RenderButtons()
+void mu::ui::window::CNewUICommonMessageBox::RenderButtons()
 {
     switch (m_dwType)
     {
@@ -604,12 +605,12 @@ void SEASON3B::CNewUICommonMessageBox::RenderButtons()
     }
 }
 
-void SEASON3B::CNewUICommonMessageBox::LockOkButton()
+void mu::ui::window::CNewUICommonMessageBox::LockOkButton()
 {
     m_BtnOk.SetEnable(false);
 }
 
-CALLBACK_RESULT SEASON3B::CNewUICommonMessageBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUICommonMessageBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUICommonMessageBox*>(pOwner);
     if (pMsgBox)
@@ -641,7 +642,7 @@ CALLBACK_RESULT SEASON3B::CNewUICommonMessageBox::LButtonUp(class CNewUIMessageB
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CNewUICommonMessageBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUICommonMessageBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -649,23 +650,23 @@ CALLBACK_RESULT SEASON3B::CNewUICommonMessageBox::Close(class CNewUIMessageBoxBa
     return CALLBACK_BREAK;
 }
 
-SEASON3B::CNewUI3DItemCommonMsgBox::CNewUI3DItemCommonMsgBox()
+mu::ui::window::CNewUI3DItemCommonMsgBox::CNewUI3DItemCommonMsgBox()
 {
     ZeroMemory(&m_Item, sizeof(m_Item));
     m_iItemValue = 0;
 }
 
-SEASON3B::CNewUI3DItemCommonMsgBox::~CNewUI3DItemCommonMsgBox()
+mu::ui::window::CNewUI3DItemCommonMsgBox::~CNewUI3DItemCommonMsgBox()
 {
     Release();
 }
 
-DWORD SEASON3B::CNewUI3DItemCommonMsgBox::GetType()
+DWORD mu::ui::window::CNewUI3DItemCommonMsgBox::GetType()
 {
     return m_dwType;
 }
 
-bool SEASON3B::CNewUI3DItemCommonMsgBox::Create(DWORD dwType, float fPriority)
+bool mu::ui::window::CNewUI3DItemCommonMsgBox::Create(DWORD dwType, float fPriority)
 {
     int x, y, width, height;
 
@@ -690,7 +691,7 @@ bool SEASON3B::CNewUI3DItemCommonMsgBox::Create(DWORD dwType, float fPriority)
     return true;
 }
 
-bool SEASON3B::CNewUI3DItemCommonMsgBox::Create(DWORD dwType, const type_string& strMsg, DWORD dwColor, BYTE byFontType, float fPriority)
+bool mu::ui::window::CNewUI3DItemCommonMsgBox::Create(DWORD dwType, const type_string& strMsg, DWORD dwColor, BYTE byFontType, float fPriority)
 {
     int x, y, width, height;
 
@@ -713,7 +714,7 @@ bool SEASON3B::CNewUI3DItemCommonMsgBox::Create(DWORD dwType, const type_string&
 
     return true;
 }
-void SEASON3B::CNewUI3DItemCommonMsgBox::Release()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -728,7 +729,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::Release()
     m_MsgDataList.clear();
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::Set3DItem(ITEM* pItem)
+void mu::ui::window::CNewUI3DItemCommonMsgBox::Set3DItem(ITEM* pItem)
 {
     if (pItem)
     {
@@ -736,17 +737,17 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::Set3DItem(ITEM* pItem)
     }
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::SetItemValue(int iValue)
+void mu::ui::window::CNewUI3DItemCommonMsgBox::SetItemValue(int iValue)
 {
     m_iItemValue = iValue;
 }
 
-int SEASON3B::CNewUI3DItemCommonMsgBox::GetItemValue()
+int mu::ui::window::CNewUI3DItemCommonMsgBox::GetItemValue()
 {
     return m_iItemValue;
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CNewUI3DItemCommonMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgDataList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -767,7 +768,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddMsg(const type_string& strMsg, DWORD
     }
 }
 
-CALLBACK_RESULT SEASON3B::CNewUI3DItemCommonMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUI3DItemCommonMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
     if (pMsgBox)
@@ -799,7 +800,7 @@ CALLBACK_RESULT SEASON3B::CNewUI3DItemCommonMsgBox::LButtonUp(class CNewUIMessag
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CNewUI3DItemCommonMsgBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUI3DItemCommonMsgBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -807,7 +808,7 @@ CALLBACK_RESULT SEASON3B::CNewUI3DItemCommonMsgBox::Close(class CNewUIMessageBox
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CNewUI3DItemCommonMsgBox::Update()
+bool mu::ui::window::CNewUI3DItemCommonMsgBox::Update()
 {
     switch (m_dwType)
     {
@@ -823,33 +824,33 @@ bool SEASON3B::CNewUI3DItemCommonMsgBox::Update()
     return true;
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::SetAddCallbackFunc()
 {
     switch (m_dwType)
     {
     case MSGBOX_COMMON_TYPE_OK:
-        AddCallbackFunc(SEASON3B::CNewUI3DItemCommonMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-        AddCallbackFunc(SEASON3B::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
-        AddCallbackFunc(SEASON3B::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
-        //AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
+        AddCallbackFunc(mu::ui::window::CNewUI3DItemCommonMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+        AddCallbackFunc(mu::ui::window::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
+        AddCallbackFunc(mu::ui::window::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
+        //AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
         break;
     case MSGBOX_COMMON_TYPE_OKCANCEL:
-        AddCallbackFunc(SEASON3B::CNewUI3DItemCommonMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-        AddCallbackFunc(SEASON3B::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
-        AddCallbackFunc(SEASON3B::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_USER_COMMON_CANCEL);
-        //AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
-        //AddCallbackFunc(SEASON3B::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
+        AddCallbackFunc(mu::ui::window::CNewUI3DItemCommonMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+        AddCallbackFunc(mu::ui::window::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_USER_COMMON_OK);
+        AddCallbackFunc(mu::ui::window::CNewUI3DItemCommonMsgBox::Close, MSGBOX_EVENT_USER_COMMON_CANCEL);
+        //AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_ESC);
+        //AddCallbackFunc(mu::ui::window::CNewUICommonMessageBox::Close, MSGBOX_EVENT_PRESSKEY_RETURN);
         break;
     }
 }
 
-int SEASON3B::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+int mu::ui::window::CNewUI3DItemCommonMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     return AppendWrappedText(
         m_MsgDataList, strMsg, dwColor, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH_3DITEM));
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::SetButtonInfo()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -890,7 +891,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::SetButtonInfo()
     }
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
+void mu::ui::window::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
 {
     switch (m_dwType)
     {
@@ -904,7 +905,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::AddButtonBlank(int iAddLine)
     }
 }
 
-bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
+bool mu::ui::window::CNewUI3DItemCommonMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -914,7 +915,7 @@ bool SEASON3B::CNewUI3DItemCommonMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::Render3D()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::Render3D()
 {
     float x, y, width, height;
 
@@ -926,12 +927,12 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::Render3D()
     RenderItem3D(x, y, width, height, m_Item.Type, m_Item.Level, m_Item.ExcellentFlags, m_Item.AncientDiscriminator, true);		// PickUp
 }
 
-bool SEASON3B::CNewUI3DItemCommonMsgBox::IsVisible() const
+bool mu::ui::window::CNewUI3DItemCommonMsgBox::IsVisible() const
 {
     return true;
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::RenderFrame()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -958,7 +959,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::RenderTexts()
 {
     float x, y;
 
@@ -989,7 +990,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CNewUI3DItemCommonMsgBox::RenderButtons()
+void mu::ui::window::CNewUI3DItemCommonMsgBox::RenderButtons()
 {
     switch (m_dwType)
     {
@@ -1003,7 +1004,7 @@ void SEASON3B::CNewUI3DItemCommonMsgBox::RenderButtons()
     }
 }
 
-bool SEASON3B::CServerLostMsgBoxLayout::SetLayout()
+bool mu::ui::window::CServerLostMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1018,7 +1019,7 @@ bool SEASON3B::CServerLostMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CServerLostMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CServerLostMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SendMessage(g_hWnd, WM_DESTROY, 0, 0);
 
@@ -1028,7 +1029,7 @@ CALLBACK_RESULT SEASON3B::CServerLostMsgBoxLayout::OkBtnDown(class CNewUIMessage
     return CALLBACK_POP_ALL_EVENTS;
 }
 
-bool SEASON3B::CGuildRequestMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildRequestMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1045,7 +1046,7 @@ bool SEASON3B::CGuildRequestMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildJoinResponse(true, GuildPlayerKey);
 
@@ -1055,7 +1056,7 @@ CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::OkBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildRequestMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildJoinResponse(false, GuildPlayerKey);
 
@@ -1065,7 +1066,7 @@ CALLBACK_RESULT SEASON3B::CGuildRequestMsgBoxLayout::CancelBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildFireMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildFireMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1081,14 +1082,14 @@ bool SEASON3B::CGuildFireMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildFireMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildFireMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     DeleteGuildIndex = s_nTargetFireMemberIndex;
     PlayBuffer(SOUND_CLICK01);
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CMapEnterWerwolfMsgBoxLayout::SetLayout()
+bool mu::ui::window::CMapEnterWerwolfMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1119,7 +1120,7 @@ bool SEASON3B::CMapEnterWerwolfMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CMapEnterWerwolfMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CMapEnterWerwolfMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     DWORD dwGold = CharacterMachine->Gold;
 
@@ -1129,7 +1130,7 @@ CALLBACK_RESULT SEASON3B::CMapEnterWerwolfMsgBoxLayout::OkBtnDown(class CNewUIMe
     }
     else
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -1176,7 +1177,7 @@ CALLBACK_RESULT CMapEnterGateKeeperMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPartyMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPartyMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1193,7 +1194,7 @@ bool SEASON3B::CPartyMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey);
     PlayBuffer(SOUND_CLICK01);
@@ -1202,7 +1203,7 @@ CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBa
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPartyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey);
     PlayBuffer(SOUND_CLICK01);
@@ -1211,7 +1212,7 @@ CALLBACK_RESULT SEASON3B::CPartyMsgBoxLayout::CancelBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
+bool mu::ui::window::CTradeMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1230,7 +1231,7 @@ bool SEASON3B::CTradeMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendTradeRequestResponse(true);
     PlayBuffer(SOUND_CLICK01);
@@ -1239,7 +1240,7 @@ CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBa
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendTradeRequestResponse(false);
     PlayBuffer(SOUND_CLICK01);
@@ -1248,7 +1249,7 @@ CALLBACK_RESULT SEASON3B::CTradeMsgBoxLayout::CancelBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CTradeAlertMsgBoxLayout::SetLayout()
+bool mu::ui::window::CTradeAlertMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1273,7 +1274,7 @@ bool SEASON3B::CTradeAlertMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CTradeAlertMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeAlertMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pTrade->AlertTrade();
     PlayBuffer(SOUND_CLICK01);
@@ -1282,7 +1283,7 @@ CALLBACK_RESULT SEASON3B::CTradeAlertMsgBoxLayout::OkBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTradeAlertMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeAlertMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1290,7 +1291,7 @@ CALLBACK_RESULT SEASON3B::CTradeAlertMsgBoxLayout::CancelBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildWarMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1311,7 +1312,7 @@ bool SEASON3B::CGuildWarMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildWarResponse(true);
     PlayBuffer(SOUND_CLICK01);
@@ -1320,7 +1321,7 @@ CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildWarMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildWarResponse(false);
     InitGuildWar();
@@ -1330,7 +1331,7 @@ CALLBACK_RESULT SEASON3B::CGuildWarMsgBoxLayout::CancelBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
+bool mu::ui::window::CBattleSoccerMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1351,7 +1352,7 @@ bool SEASON3B::CBattleSoccerMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildWarResponse(true);
 
@@ -1361,7 +1362,7 @@ CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::OkBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBattleSoccerMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildWarResponse(false);
     InitGuildWar();
@@ -1371,7 +1372,7 @@ CALLBACK_RESULT SEASON3B::CBattleSoccerMsgBoxLayout::CancelBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CServerImmigrationErrorMsgBoxLayout::SetLayout()
+bool mu::ui::window::CServerImmigrationErrorMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1386,7 +1387,7 @@ bool SEASON3B::CServerImmigrationErrorMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CServerImmigrationErrorMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CServerImmigrationErrorMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1394,7 +1395,7 @@ CALLBACK_RESULT SEASON3B::CServerImmigrationErrorMsgBoxLayout::OkBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPersonalshopCreateMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPersonalshopCreateMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1412,15 +1413,15 @@ bool SEASON3B::CPersonalshopCreateMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     wchar_t shopTitle[MAX_SHOPTITLE]{};
     g_pMyShopInventory->GetTitle(shopTitle);
     wcscpy(g_szPersonalShopTitle, shopTitle);
     SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
 
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYSHOP_INVENTORY);
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_INVENTORY);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1428,7 +1429,7 @@ CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::OkBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalshopCreateMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1436,7 +1437,7 @@ CALLBACK_RESULT SEASON3B::CPersonalshopCreateMsgBoxLayout::CancelBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CFenrirRepairMsgBoxLayout::SetLayout()
+bool mu::ui::window::CFenrirRepairMsgBoxLayout::SetLayout()
 {
     CFenrirRepairMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1454,7 +1455,7 @@ bool SEASON3B::CFenrirRepairMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CFenrirRepairMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CFenrirRepairMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CFenrirRepairMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -1471,7 +1472,7 @@ CALLBACK_RESULT SEASON3B::CFenrirRepairMsgBoxLayout::OkBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CFenrirRepairMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CFenrirRepairMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     CNewUIInventoryCtrl::BackupPickedItem();
     PlayBuffer(SOUND_CLICK01);
@@ -1480,27 +1481,27 @@ CALLBACK_RESULT SEASON3B::CFenrirRepairMsgBoxLayout::CancelBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CFenrirRepairMsgBox::SetSourceIndex(int iIndex)
+void mu::ui::window::CFenrirRepairMsgBox::SetSourceIndex(int iIndex)
 {
     m_iSourceIndex = iIndex;
 }
 
-void SEASON3B::CFenrirRepairMsgBox::SetTargetIndex(int iIndex)
+void mu::ui::window::CFenrirRepairMsgBox::SetTargetIndex(int iIndex)
 {
     m_iTargetIndex = iIndex;
 }
 
-int SEASON3B::CFenrirRepairMsgBox::GetSourceIndex()
+int mu::ui::window::CFenrirRepairMsgBox::GetSourceIndex()
 {
     return m_iSourceIndex;
 }
 
-int SEASON3B::CFenrirRepairMsgBox::GetTargetIndex()
+int mu::ui::window::CFenrirRepairMsgBox::GetTargetIndex()
 {
     return m_iTargetIndex;
 }
 
-bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
+bool mu::ui::window::CInfinityArrowCancelMsgBoxLayout::SetLayout()
 {
     extern int g_iCancelSkillTarget;
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -1521,7 +1522,7 @@ bool SEASON3B::CInfinityArrowCancelMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CInfinityArrowCancelMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
     SocketClient->ToGameServer()->SendMagicEffectCancelRequest(g_iCancelSkillTarget, HeroKey);
@@ -1533,7 +1534,7 @@ CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::OkBtnDown(class CNew
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CInfinityArrowCancelMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
     g_iCancelSkillTarget = 0;
@@ -1544,7 +1545,7 @@ CALLBACK_RESULT SEASON3B::CInfinityArrowCancelMsgBoxLayout::CancelBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
+bool mu::ui::window::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
 {
     extern int g_iCancelSkillTarget;
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
@@ -1567,7 +1568,7 @@ bool SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBuffSwellOfMPCancelMsgBoxLayOut::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
     SocketClient->ToGameServer()->SendMagicEffectCancelRequest(g_iCancelSkillTarget, HeroKey);
@@ -1579,7 +1580,7 @@ CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::OkBtnDown(class CNew
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBuffSwellOfMPCancelMsgBoxLayOut::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     extern int g_iCancelSkillTarget;
     g_iCancelSkillTarget = 0;
@@ -1590,7 +1591,7 @@ CALLBACK_RESULT SEASON3B::CBuffSwellOfMPCancelMsgBoxLayOut::CancelBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1606,7 +1607,7 @@ bool SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::ProcessCSAction();
 
@@ -1618,11 +1619,11 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::OkBtnDown(class
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::GetBack();
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationUnityMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationUnityMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1630,7 +1631,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout::CancelBtnDown(c
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1646,7 +1647,7 @@ bool SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -1656,7 +1657,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityResultMsgBoxLayout::OkBtnDown(clas
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationDisjointCheckMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1672,7 +1673,7 @@ bool SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::ProcessCSAction();
 
@@ -1684,11 +1685,11 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::OkBtnDown(cl
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::GetBack();
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationDisjointMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationDisjointMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1696,7 +1697,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout::CancelBtnDow
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1711,7 +1712,7 @@ bool SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -1721,7 +1722,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointResultMsgBoxLayout::OkBtnDown(c
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::SetLayout()
+bool mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1737,7 +1738,7 @@ bool SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     ITEM* pItem = g_pMyInventory->GetStandbyItem();
     if (pItem)
@@ -1752,7 +1753,7 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::OkBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1760,7 +1761,7 @@ CALLBACK_RESULT SEASON3B::CChaosCastleTimeCheckMsgBoxLayout::CancelBtnDown(class
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CHarvestEventLayout::SetLayout()
+bool mu::ui::window::CHarvestEventLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1776,7 +1777,7 @@ bool SEASON3B::CHarvestEventLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CHarvestEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CHarvestEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendLeoHelperItemRequest();
 
@@ -1786,7 +1787,7 @@ CALLBACK_RESULT SEASON3B::CHarvestEventLayout::OkBtnDown(class CNewUIMessageBoxB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CHarvestEventLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CHarvestEventLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1794,7 +1795,7 @@ CALLBACK_RESULT SEASON3B::CHarvestEventLayout::CancelBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CWhiteAngelEventLayout::SetLayout()
+bool mu::ui::window::CWhiteAngelEventLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1812,7 +1813,7 @@ bool SEASON3B::CWhiteAngelEventLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CWhiteAngelEventLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendWhiteAngelItemRequest();
 
@@ -1822,7 +1823,7 @@ CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::OkBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CWhiteAngelEventLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1830,7 +1831,7 @@ CALLBACK_RESULT SEASON3B::CWhiteAngelEventLayout::CancelBtnDown(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
+bool  mu::ui::window::CLuckyItemMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1875,7 +1876,7 @@ bool  SEASON3B::CLuckyItemMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyItemMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendChaosMachineMixRequest(static_cast<ChaosMachineMixType>(g_pLuckyItemWnd->SetActAction()), 0);
     PlayBuffer(SOUND_CLICK01);
@@ -1884,7 +1885,7 @@ CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::OkBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyItemMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1892,7 +1893,7 @@ CALLBACK_RESULT SEASON3B::CLuckyItemMsgBoxLayout::CancelBtnDown(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
+bool  mu::ui::window::CMixCheckMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1927,9 +1928,9 @@ bool  SEASON3B::CMixCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CMixCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    g_pMixInventory->SetMixState(SEASON3B::CNewUIMixInventory::MIX_REQUESTED);
+    g_pMixInventory->SetMixState(mu::ui::window::CNewUIMixInventory::MIX_REQUESTED);
     SocketClient->ToGameServer()->SendChaosMachineMixRequest(
         static_cast<ChaosMachineMixType>(g_MixRecipeMgr.GetCurMixID()),
         g_MixRecipeMgr.GetMixSubType());
@@ -1940,7 +1941,7 @@ CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CMixCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1948,7 +1949,7 @@ CALLBACK_RESULT SEASON3B::CMixCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUseReviveCharmMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUseReviveCharmMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1964,7 +1965,7 @@ bool SEASON3B::CUseReviveCharmMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUseReviveCharmMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseReviveCharmMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(srcIndex, 0);
@@ -1974,7 +1975,7 @@ CALLBACK_RESULT SEASON3B::CUseReviveCharmMsgBoxLayout::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUseReviveCharmMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseReviveCharmMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1982,7 +1983,7 @@ CALLBACK_RESULT SEASON3B::CUseReviveCharmMsgBoxLayout::CancelBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUsePortalCharmMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUsePortalCharmMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -1998,7 +1999,7 @@ bool SEASON3B::CUsePortalCharmMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUsePortalCharmMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUsePortalCharmMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_PortalMgr.SavePortalPosition();
     BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
@@ -2009,7 +2010,7 @@ CALLBACK_RESULT SEASON3B::CUsePortalCharmMsgBoxLayout::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUsePortalCharmMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUsePortalCharmMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2017,7 +2018,7 @@ CALLBACK_RESULT SEASON3B::CUsePortalCharmMsgBoxLayout::CancelBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CReturnPortalCharmMsgBoxLayout::SetLayout()
+bool mu::ui::window::CReturnPortalCharmMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2033,7 +2034,7 @@ bool SEASON3B::CReturnPortalCharmMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CReturnPortalCharmMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CReturnPortalCharmMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(srcIndex, 0);
@@ -2043,7 +2044,7 @@ CALLBACK_RESULT SEASON3B::CReturnPortalCharmMsgBoxLayout::OkBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CReturnPortalCharmMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CReturnPortalCharmMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2051,7 +2052,7 @@ CALLBACK_RESULT SEASON3B::CReturnPortalCharmMsgBoxLayout::CancelBtnDown(class CN
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CDuelCreateErrorMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDuelCreateErrorMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2068,7 +2069,7 @@ bool SEASON3B::CDuelCreateErrorMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CDuelCreateErrorMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelCreateErrorMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2076,7 +2077,7 @@ CALLBACK_RESULT SEASON3B::CDuelCreateErrorMsgBoxLayout::OkBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CDuelWatchErrorMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDuelWatchErrorMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2094,7 +2095,7 @@ bool SEASON3B::CDuelWatchErrorMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CDuelWatchErrorMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelWatchErrorMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2102,7 +2103,7 @@ CALLBACK_RESULT SEASON3B::CDuelWatchErrorMsgBoxLayout::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CDoppelGangerMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDoppelGangerMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2116,7 +2117,7 @@ bool SEASON3B::CDoppelGangerMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CDoppelGangerMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDoppelGangerMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2124,7 +2125,7 @@ CALLBACK_RESULT SEASON3B::CDoppelGangerMsgBoxLayout::OkBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildRelationShipMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildRelationShipMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2141,9 +2142,9 @@ bool SEASON3B::CGuildRelationShipMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildRelationShipMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    const SEASON3B::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
+    const mu::ui::window::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
 
     SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
         info.s_byRelationShipType,
@@ -2157,9 +2158,9 @@ CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::OkBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildRelationShipMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    const SEASON3B::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
+    const mu::ui::window::ServerMessageInfo info = g_pGuildInfoWindow->GetServerMessage();
 
     SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
         info.s_byRelationShipType,
@@ -2173,7 +2174,7 @@ CALLBACK_RESULT SEASON3B::CGuildRelationShipMsgBoxLayout::CancelBtnDown(class CN
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCastleMsgBoxLayout::SetLayout()
+bool mu::ui::window::CCastleMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2190,38 +2191,38 @@ bool SEASON3B::CCastleMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCastleMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     switch (g_pCastleWindow->GetCurrMsgBoxRequest())
     {
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_BUY_GATE:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_BUY_GATE:
         g_SenatusInfo.DoGateRepairAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_REPAIR_GATE:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_REPAIR_GATE:
         g_SenatusInfo.DoGateRepairAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_GATE_HP:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_GATE_HP:
         g_SenatusInfo.DoGateUpgradeHPAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE:
         g_SenatusInfo.DoGateUpgradeDefenseAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_BUY_STATUE:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_BUY_STATUE:
         g_SenatusInfo.DoStatueRepairAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_REPAIR_STATUE:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_REPAIR_STATUE:
         g_SenatusInfo.DoStatueRepairAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_HP:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_HP:
         g_SenatusInfo.DoStatueUpgradeHPAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE:
         g_SenatusInfo.DoStatueUpgradeDefenseAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER:
         g_SenatusInfo.DoStatueUpgradeRecoverAction();
         break;
-    case SEASON3B::CNewUICastleWindow::CASTLE_MSGREQ_APPLY_TAX:
+    case mu::ui::window::CNewUICastleWindow::CASTLE_MSGREQ_APPLY_TAX:
         g_SenatusInfo.DoApplyTaxAction();
         break;
     default:
@@ -2234,7 +2235,7 @@ CALLBACK_RESULT SEASON3B::CCastleMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CCastleMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2242,7 +2243,7 @@ CALLBACK_RESULT SEASON3B::CCastleMsgBoxLayout::CancelBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CSiegeLevelMsgBoxLayout::SetLayout()
+bool mu::ui::window::CSiegeLevelMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2259,7 +2260,7 @@ bool SEASON3B::CSiegeLevelMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CSiegeLevelMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSiegeLevelMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2267,7 +2268,7 @@ CALLBACK_RESULT SEASON3B::CSiegeLevelMsgBoxLayout::OkBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CSiegeGiveUpMsgBoxLayout::SetLayout()
+bool mu::ui::window::CSiegeGiveUpMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2286,7 +2287,7 @@ bool SEASON3B::CSiegeGiveUpMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CSiegeGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSiegeGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest();
 
@@ -2296,7 +2297,7 @@ CALLBACK_RESULT SEASON3B::CSiegeGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSiegeGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSiegeGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2304,7 +2305,7 @@ CALLBACK_RESULT SEASON3B::CSiegeGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGatemanMoneyMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGatemanMoneyMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2321,14 +2322,14 @@ bool SEASON3B::CGatemanMoneyMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGatemanMoneyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGatemanMoneyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
     return CALLBACK_BREAK;
 }
-bool SEASON3B::CGatemanFailMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGatemanFailMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
 
@@ -2344,7 +2345,7 @@ bool SEASON3B::CGatemanFailMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGatemanFailMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGatemanFailMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2352,7 +2353,7 @@ CALLBACK_RESULT SEASON3B::CGatemanFailMsgBoxLayout::OkBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CQuestGiveUpMsgBoxLayout::SetLayout()
+bool mu::ui::window::CQuestGiveUpMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2370,7 +2371,7 @@ bool SEASON3B::CQuestGiveUpMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CQuestGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     const DWORD dwSelectedQuest = g_pMyQuestInfoWindow->GetSelQuestIndex();
     const auto questNumber = static_cast<uint16_t>(LOWORD(dwSelectedQuest));
@@ -2383,7 +2384,7 @@ CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::OkBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CQuestGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2392,7 +2393,7 @@ CALLBACK_RESULT SEASON3B::CQuestGiveUpMsgBoxLayout::CancelBtnDown(class CNewUIMe
 }
 
 #ifdef ASG_ADD_TIME_LIMIT_QUEST
-bool SEASON3B::CQuestCountLimitMsgBoxLayout::SetLayout()
+bool mu::ui::window::CQuestCountLimitMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2411,7 +2412,7 @@ bool SEASON3B::CQuestCountLimitMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CQuestCountLimitMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CQuestCountLimitMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2420,7 +2421,7 @@ CALLBACK_RESULT SEASON3B::CQuestCountLimitMsgBoxLayout::OkBtnDown(class CNewUIMe
 }
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-bool SEASON3B::CCanNotUseWordMsgBoxLayout::SetLayout()
+bool mu::ui::window::CCanNotUseWordMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2434,7 +2435,7 @@ bool SEASON3B::CCanNotUseWordMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CHighValueItemCheckMsgBoxLayout::SetLayout()
+bool mu::ui::window::CHighValueItemCheckMsgBoxLayout::SetLayout()
 {
     CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2465,7 +2466,7 @@ bool SEASON3B::CHighValueItemCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
@@ -2501,7 +2502,7 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::OkBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CHighValueItemCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     CNewUIInventoryCtrl::BackupPickedItem();
 
@@ -2511,7 +2512,7 @@ CALLBACK_RESULT SEASON3B::CHighValueItemCheckMsgBoxLayout::CancelBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUseFruitMsgBoxLayout::SetLayout()
 {
     CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2559,9 +2560,9 @@ bool SEASON3B::CUseFruitMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUseFruitMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseFruitCheckMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseFruitCheckMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2569,7 +2570,7 @@ CALLBACK_RESULT SEASON3B::CUseFruitMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUseFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2577,7 +2578,7 @@ CALLBACK_RESULT SEASON3B::CUseFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUsePartChargeFruitMsgBoxLayout::SetLayout()
 {
     CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2626,7 +2627,7 @@ bool SEASON3B::CUsePartChargeFruitMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUsePartChargeFruitMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUsePartChargeFruitMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(srcIndex, 0);
@@ -2635,14 +2636,14 @@ CALLBACK_RESULT SEASON3B::CUsePartChargeFruitMsgBoxLayout::OkBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUsePartChargeFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUsePartChargeFruitMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
 {
     CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2678,7 +2679,7 @@ bool SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUI3DItemCommonMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -2747,9 +2748,9 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::OkBtnDown(cla
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueCheckMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2757,7 +2758,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout::CancelBtnDown
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPersonalShopItemBuyMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPersonalShopItemBuyMsgBoxLayout::SetLayout()
 {
     CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2779,7 +2780,7 @@ bool SEASON3B::CPersonalShopItemBuyMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     ITEM* pItem = g_pPurchaseShopInventory->FindItem(g_pPurchaseShopInventory->GetSourceIndex());
     CHARACTER* pCha = &CharactersClient[g_pPurchaseShopInventory->GetShopCharacterIndex()];
@@ -2799,7 +2800,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::OkBtnDown(class CNew
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemBuyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2807,7 +2808,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemBuyMsgBoxLayout::CancelBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::COsbourneMsgBoxLayout::SetLayout()
+bool mu::ui::window::COsbourneMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2825,10 +2826,10 @@ bool SEASON3B::COsbourneMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::COsbourneMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::COsbourneMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_OSBOURNE);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2836,7 +2837,7 @@ CALLBACK_RESULT SEASON3B::COsbourneMsgBoxLayout::OkBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildOutPerson::SetLayout()
+bool mu::ui::window::CGuildOutPerson::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2852,7 +2853,7 @@ bool SEASON3B::CGuildOutPerson::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildOutPerson::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildOutPerson::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2860,7 +2861,7 @@ CALLBACK_RESULT SEASON3B::CGuildOutPerson::OkBtnDown(class CNewUIMessageBoxBase*
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildBreakMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildBreakMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2880,9 +2881,9 @@ bool SEASON3B::CGuildBreakMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildBreakMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildBreakPasswordMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2890,7 +2891,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakMsgBoxLayout::OkBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildBreakMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2898,7 +2899,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakMsgBoxLayout::CancelBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildPerson_Get_Out::SetLayout()
+bool mu::ui::window::CGuildPerson_Get_Out::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2917,9 +2918,9 @@ bool SEASON3B::CGuildPerson_Get_Out::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildPerson_Get_Out::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildPerson_Get_Out::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGuildBreakPasswordMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2927,14 +2928,14 @@ CALLBACK_RESULT SEASON3B::CGuildPerson_Get_Out::OkBtnDown(class CNewUIMessageBox
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildPerson_Get_Out::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildPerson_Get_Out::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -2949,7 +2950,7 @@ bool SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(GuildList[DeleteIndex].Name), 0x03);
 
@@ -2959,7 +2960,7 @@ CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::OkBtnDown(c
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildPerson_Cancel_Position_MsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2967,7 +2968,7 @@ CALLBACK_RESULT SEASON3B::CGuildPerson_Cancel_Position_MsgBoxLayout::CancelBtnDo
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
+bool mu::ui::window::CCry_Wolf_Result_Set_Temple::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3017,7 +3018,7 @@ bool SEASON3B::CCry_Wolf_Result_Set_Temple::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Result_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Result_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3025,7 +3026,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Result_Set_Temple::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Ing_Set_Temple::SetLayout()
+bool mu::ui::window::CCry_Wolf_Ing_Set_Temple::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3040,7 +3041,7 @@ bool SEASON3B::CCry_Wolf_Ing_Set_Temple::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Ing_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Ing_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3048,7 +3049,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Ing_Set_Temple::OkBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Destroy_Set_Temple::SetLayout()
+bool mu::ui::window::CCry_Wolf_Destroy_Set_Temple::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3063,7 +3064,7 @@ bool SEASON3B::CCry_Wolf_Destroy_Set_Temple::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Destroy_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Destroy_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3071,7 +3072,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Destroy_Set_Temple::OkBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Wat_Set_Temple1::SetLayout()
+bool mu::ui::window::CCry_Wolf_Wat_Set_Temple1::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3086,7 +3087,7 @@ bool SEASON3B::CCry_Wolf_Wat_Set_Temple1::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Wat_Set_Temple1::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Wat_Set_Temple1::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3094,7 +3095,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Wat_Set_Temple1::OkBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Dont_Set_Temple1::SetLayout()
+bool mu::ui::window::CCry_Wolf_Dont_Set_Temple1::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3110,7 +3111,7 @@ bool SEASON3B::CCry_Wolf_Dont_Set_Temple1::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Dont_Set_Temple1::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Dont_Set_Temple1::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3118,7 +3119,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Dont_Set_Temple1::OkBtnDown(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Dont_Set_Temple::SetLayout()
+bool mu::ui::window::CCry_Wolf_Dont_Set_Temple::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3133,7 +3134,7 @@ bool SEASON3B::CCry_Wolf_Dont_Set_Temple::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Dont_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Dont_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3141,7 +3142,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Dont_Set_Temple::OkBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Set_Temple1::SetLayout()
+bool mu::ui::window::CCry_Wolf_Set_Temple1::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3156,7 +3157,7 @@ bool SEASON3B::CCry_Wolf_Set_Temple1::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Set_Temple1::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Set_Temple1::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3164,7 +3165,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Set_Temple1::OkBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Set_Temple::SetLayout()
+bool mu::ui::window::CCry_Wolf_Set_Temple::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3181,7 +3182,7 @@ bool SEASON3B::CCry_Wolf_Set_Temple::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Set_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3189,7 +3190,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Set_Temple::OkBtnDown(class CNewUIMessageBox
     return CALLBACK_BREAK;
 }
 //CMaster_Level_Interface
-bool SEASON3B::CMaster_Level_Interface::SetLayout()
+bool mu::ui::window::CMaster_Level_Interface::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3211,7 +3212,7 @@ bool SEASON3B::CMaster_Level_Interface::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CMaster_Level_Interface::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3222,7 +3223,7 @@ CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::CancelBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CMaster_Level_Interface::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto In_Skill = g_pMasterLevelInterface->GetCurSkillID();
     SocketClient->ToGameServer()->SendAddMasterSkillPoint(In_Skill);
@@ -3235,7 +3236,7 @@ CALLBACK_RESULT SEASON3B::CMaster_Level_Interface::OkBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCry_Wolf_Get_Temple::SetLayout()
+bool mu::ui::window::CCry_Wolf_Get_Temple::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3258,21 +3259,21 @@ bool SEASON3B::CCry_Wolf_Get_Temple::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Get_Temple::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     Button_Down = 1;
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Set_Temple1));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Set_Temple1));
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
     {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Dont_Set_Temple));
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Dont_Set_Temple));
     }
     else
     {
@@ -3286,7 +3287,7 @@ CALLBACK_RESULT SEASON3B::CCry_Wolf_Get_Temple::OkBtnDown(class CNewUIMessageBox
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUnionGuild_Break_MsgBoxLayout::SetLayout()
+bool mu::ui::window::CUnionGuild_Break_MsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3306,7 +3307,7 @@ bool SEASON3B::CUnionGuild_Break_MsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3314,7 +3315,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::CancelBtnDown(class CN
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(DeleteID));
 
@@ -3324,7 +3325,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Break_MsgBoxLayout::OkBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUnionGuild_Out_MsgBoxLayout::SetLayout()
+bool mu::ui::window::CUnionGuild_Out_MsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3338,7 +3339,7 @@ bool SEASON3B::CUnionGuild_Out_MsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUnionGuild_Out_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUnionGuild_Out_MsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3346,7 +3347,7 @@ CALLBACK_RESULT SEASON3B::CUnionGuild_Out_MsgBoxLayout::OkBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUseSantaInvitationMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUseSantaInvitationMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3362,7 +3363,7 @@ bool SEASON3B::CUseSantaInvitationMsgBoxLayout::SetLayout()
     return TRUE;
 }
 
-CALLBACK_RESULT SEASON3B::CUseSantaInvitationMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseSantaInvitationMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     ITEM* pItem = g_pMyInventory->GetStandbyItem();
 
@@ -3382,7 +3383,7 @@ CALLBACK_RESULT SEASON3B::CUseSantaInvitationMsgBoxLayout::OkBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUseSantaInvitationMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseSantaInvitationMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3457,7 +3458,7 @@ CALLBACK_RESULT CSantaTownSantaMsgBoxLayout::CancelBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3472,7 +3473,7 @@ bool SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::SetLayout()
     return TRUE;
 }
 
-CALLBACK_RESULT SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3480,7 +3481,7 @@ CALLBACK_RESULT SEASON3B::CUseRegistLuckyCoinMsgBoxLayout::OkBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::SetLayout()
+bool mu::ui::window::CRegistOverLuckyCoinMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3494,7 +3495,7 @@ bool SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::SetLayout()
 
     return TRUE;
 }
-CALLBACK_RESULT SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CRegistOverLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3502,7 +3503,7 @@ CALLBACK_RESULT SEASON3B::CRegistOverLuckyCoinMsgBoxLayout::OkBtnDown(class CNew
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
+bool mu::ui::window::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3519,7 +3520,7 @@ bool SEASON3B::CExchangeLuckyCoinMsgBoxLayout::SetLayout()
     return TRUE;
 }
 
-CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CExchangeLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3527,7 +3528,7 @@ CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinMsgBoxLayout::OkBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::SetLayout()
+bool mu::ui::window::CExchangeLuckyCoinInvenErrMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3542,7 +3543,7 @@ bool SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::SetLayout()
     return TRUE;
 }
 
-CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CExchangeLuckyCoinInvenErrMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3550,7 +3551,7 @@ CALLBACK_RESULT SEASON3B::CExchangeLuckyCoinInvenErrMsgBoxLayout::OkBtnDown(clas
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGambleBuyMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGambleBuyMsgBoxLayout::SetLayout()
 {
     CNewUI3DItemCommonMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3572,7 +3573,7 @@ bool SEASON3B::CGambleBuyMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     GambleSystem& gambleSys = GambleSystem::Instance();
     if (gambleSys.IsGambleShop() && BuyCost != 0)
@@ -3588,7 +3589,7 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::OkBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGambleBuyMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3596,7 +3597,7 @@ CALLBACK_RESULT SEASON3B::CGambleBuyMsgBoxLayout::CancelBtnDown(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CEmpireGuardianMsgBoxLayout::SetLayout()
+bool mu::ui::window::CEmpireGuardianMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3609,7 +3610,7 @@ bool SEASON3B::CEmpireGuardianMsgBoxLayout::SetLayout()
     return TRUE;
 }
 
-CALLBACK_RESULT SEASON3B::CEmpireGuardianMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CEmpireGuardianMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3617,7 +3618,7 @@ CALLBACK_RESULT SEASON3B::CEmpireGuardianMsgBoxLayout::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUnitedMarketPlaceMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUnitedMarketPlaceMsgBoxLayout::SetLayout()
 {
     CNewUICommonMessageBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -3629,7 +3630,7 @@ bool SEASON3B::CUnitedMarketPlaceMsgBoxLayout::SetLayout()
 
     return TRUE;
 }
-CALLBACK_RESULT SEASON3B::CUnitedMarketPlaceMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUnitedMarketPlaceMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

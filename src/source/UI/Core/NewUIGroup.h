@@ -6,7 +6,7 @@
 #include "UI/Core/NewUIBase.h"
 #include <vector>
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIGroup : public CNewUIObj
     {

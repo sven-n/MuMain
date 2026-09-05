@@ -5,33 +5,33 @@
 
 #include "UI/Widgets/NewUIRenderNumber.h"	// self
 
-SEASON3B::CNewUIRenderNumber* SEASON3B::CNewUIRenderNumber::GetInstance()
+mu::ui::window::CNewUIRenderNumber* mu::ui::window::CNewUIRenderNumber::GetInstance()
 {
     static CNewUIRenderNumber s_NewUIRenderNumber;
     return &s_NewUIRenderNumber;
 }
 
-SEASON3B::CNewUIRenderNumber::CNewUIRenderNumber()
+mu::ui::window::CNewUIRenderNumber::CNewUIRenderNumber()
 {
     LoadImage();
 }
 
-SEASON3B::CNewUIRenderNumber::~CNewUIRenderNumber()
+mu::ui::window::CNewUIRenderNumber::~CNewUIRenderNumber()
 {
     ReleaseImage();
 }
 
-void SEASON3B::CNewUIRenderNumber::LoadImage()
+void mu::ui::window::CNewUIRenderNumber::LoadImage()
 {
     LoadBitmap(L"Interface\\newui_number1.tga", IMAGE_NUMBER1, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIRenderNumber::ReleaseImage()
+void mu::ui::window::CNewUIRenderNumber::ReleaseImage()
 {
     DeleteBitmap(IMAGE_NUMBER1);
 }
 
-float SEASON3B::CNewUIRenderNumber::RenderNumber(float x, float y, int iNum, float fScale)
+float mu::ui::window::CNewUIRenderNumber::RenderNumber(float x, float y, int iNum, float fScale)
 {
     EnableAlphaTest();
 

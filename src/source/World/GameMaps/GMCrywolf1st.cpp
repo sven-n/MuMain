@@ -114,7 +114,7 @@ void M34CryWolf1st::CheckCryWolf1stMVP(BYTE btOccupationState, BYTE btCrywolfSta
 
     if (m_CrywolfState >= CRYWOLF_STATE_READY && m_CrywolfState < CRYWOLF_STATE_ENDCYCLE)
     {
-        g_pNewUISystem->Show(SEASON3B::INTERFACE_CRYWOLF);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_CRYWOLF);
     }
 
     if (m_CrywolfState == CRYWOLF_STATE_START)

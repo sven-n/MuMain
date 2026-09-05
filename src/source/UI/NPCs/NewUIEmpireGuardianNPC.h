@@ -8,7 +8,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIEmpireGuardianNPC : public CNewUIObj, public INewUI3DRenderObj
     {

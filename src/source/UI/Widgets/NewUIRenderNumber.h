@@ -9,7 +9,7 @@
 
 #include "Render/Textures/ZzzTexture.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 class CNewUIRenderNumber
 {
@@ -30,7 +30,7 @@ private:
     void LoadImage();
     void ReleaseImage();
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #define g_RenderNumber CNewUIRenderNumber::GetInstance()
 

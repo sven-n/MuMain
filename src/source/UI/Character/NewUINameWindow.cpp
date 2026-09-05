@@ -25,6 +25,7 @@ extern "C" bool DevEditor_ShouldRenderItemLabels();
 #endif
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -80,7 +81,7 @@ void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUINameWindow::CNewUINameWindow()
+mu::ui::window::CNewUINameWindow::CNewUINameWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -89,18 +90,18 @@ SEASON3B::CNewUINameWindow::CNewUINameWindow()
     m_bShowMonsterHealthBar = false;
 }
 
-SEASON3B::CNewUINameWindow::~CNewUINameWindow()
+mu::ui::window::CNewUINameWindow::~CNewUINameWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUINameWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUINameWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NAME_WINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NAME_WINDOW, this);
 
     SetPos(x, y);
 
@@ -109,7 +110,7 @@ bool SEASON3B::CNewUINameWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUINameWindow::Release()
+void mu::ui::window::CNewUINameWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -118,25 +119,25 @@ void SEASON3B::CNewUINameWindow::Release()
     }
 }
 
-void SEASON3B::CNewUINameWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUINameWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUINameWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUINameWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUINameWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUINameWindow::UpdateKeyEvent()
 {
-    if (SEASON3B::IsPress(VK_MENU) == true)
+    if (mu::ui::window::IsPress(VK_MENU) == true)
     {
         m_bShowItemName = !m_bShowItemName;
     }
 
-    if (SEASON3B::IsPress(VK_F8) == true)
+    if (mu::ui::window::IsPress(VK_F8) == true)
     {
         m_bShowMonsterHealthBar = !m_bShowMonsterHealthBar;
     }
@@ -144,12 +145,12 @@ bool SEASON3B::CNewUINameWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUINameWindow::Update()
+bool mu::ui::window::CNewUINameWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUINameWindow::Render()
+bool mu::ui::window::CNewUINameWindow::Render()
 {
     EnableAlphaTest();
     RenderName();
@@ -163,7 +164,7 @@ bool SEASON3B::CNewUINameWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUINameWindow::RenderName()
+void mu::ui::window::CNewUINameWindow::RenderName()
 {
     if (g_bGMObservation == true)
     {
@@ -235,7 +236,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
         }
     }
 
-    if (m_bShowItemName || SEASON3B::IsRepeat(VK_MENU))
+    if (m_bShowItemName || mu::ui::window::IsRepeat(VK_MENU))
     {
 #ifdef _EDITOR
         bool renderLabels = DevEditor_ShouldRenderItemLabels();
@@ -260,7 +261,7 @@ void SEASON3B::CNewUINameWindow::RenderName()
     }
 }
 
-void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
+void mu::ui::window::CNewUINameWindow::RenderMonsterHealthBars()
 {
     if (!m_bShowMonsterHealthBar)
         return;
@@ -295,7 +296,7 @@ void SEASON3B::CNewUINameWindow::RenderMonsterHealthBars()
     }
 }
 
-float SEASON3B::CNewUINameWindow::GetLayerDepth()
+float mu::ui::window::CNewUINameWindow::GetLayerDepth()
 {
     return 1.0f;
 }

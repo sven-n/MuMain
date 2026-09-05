@@ -6,7 +6,7 @@
 
 #pragma once
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     enum BUTTON_STATE
     {

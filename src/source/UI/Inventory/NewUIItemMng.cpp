@@ -10,6 +10,7 @@
 #include "Network/Server/SocketSystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
 {
@@ -69,19 +70,19 @@ ItemCreationParams ParseItemData(std::span<const BYTE> itemData)
     return params;
 }
 
-SEASON3B::CNewUIItemMng::CNewUIItemMng()
+mu::ui::window::CNewUIItemMng::CNewUIItemMng()
 {
     m_dwAlternate = 0;
     m_dwAvailableKeyStream = 0x80000000;
     m_UpdateTimer.SetTimer(1000);
 }
 
-SEASON3B::CNewUIItemMng::~CNewUIItemMng()
+mu::ui::window::CNewUIItemMng::~CNewUIItemMng()
 {
     DeleteAllItems();
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItem(std::span<const BYTE> itemData)
+ITEM* mu::ui::window::CNewUIItemMng::CreateItem(std::span<const BYTE> itemData)
 {
 
     return CreateItemExtended(itemData);
@@ -115,7 +116,7 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(std::span<const BYTE> itemData)
 ///
 ///  Total: 5 ~ 15 bytes.
 /// </summary>
-ITEM* SEASON3B::CNewUIItemMng::CreateItemExtended(std::span<const BYTE> itemData)
+ITEM* mu::ui::window::CNewUIItemMng::CreateItemExtended(std::span<const BYTE> itemData)
 {
     if (itemData.size() < 5)
         return nullptr;
@@ -125,7 +126,7 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItemExtended(std::span<const BYTE> itemData
     return item;
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacket)
+ITEM* mu::ui::window::CNewUIItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacket)
 {
     WORD wType = ExtractItemType(pbyItemPacket);
     BYTE byOption380 = 0, byOptionHarmony = 0;
@@ -140,7 +141,7 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItemOld(std::span<const BYTE> pbyItemPacket
                                      pbyItemPacket[3], pbyItemPacket[4], byOption380, byOptionHarmony, bySocketOption);
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItemByParameters(const ItemCreationParams* parameters)
+ITEM* mu::ui::window::CNewUIItemMng::CreateItemByParameters(const ItemCreationParams* parameters)
 {
     if (parameters == nullptr)
     {
@@ -192,7 +193,7 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItemByParameters(const ItemCreationParams* 
     return pNewItem;
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */,
+ITEM* mu::ui::window::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLevel /* = 0 */,
                                           BYTE byDurability /* = 255 */, BYTE byOption1 /* = 0 */,
                                           BYTE ancientByte /* = 0 */, BYTE byOption380 /* = 0 */,
                                           BYTE byOptionHarmony /* = 0 */, BYTE* pbySocketOptions /*= NULL*/)
@@ -286,13 +287,13 @@ ITEM* SEASON3B::CNewUIItemMng::CreateItem(BYTE byType, BYTE bySubType, BYTE byLe
     return pNewItem;
 }
 
-ITEM* SEASON3B::CNewUIItemMng::CreateItem(ITEM* pItem)
+ITEM* mu::ui::window::CNewUIItemMng::CreateItem(ITEM* pItem)
 {
     pItem->RefCount++;
     return pItem;
 }
 
-ITEM* SEASON3B::CNewUIItemMng::DuplicateItem(ITEM* pItem)
+ITEM* mu::ui::window::CNewUIItemMng::DuplicateItem(ITEM* pItem)
 {
     ITEM* pNewItem = new ITEM;
     memcpy(pNewItem, pItem, sizeof(ITEM));
@@ -302,7 +303,7 @@ ITEM* SEASON3B::CNewUIItemMng::DuplicateItem(ITEM* pItem)
     return pNewItem;
 }
 
-void SEASON3B::CNewUIItemMng::DeleteItem(ITEM* pItem)
+void mu::ui::window::CNewUIItemMng::DeleteItem(ITEM* pItem)
 {
     if (pItem == NULL)
         return;
@@ -322,7 +323,7 @@ void SEASON3B::CNewUIItemMng::DeleteItem(ITEM* pItem)
     }
 }
 
-void SEASON3B::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
+void mu::ui::window::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
 {
     if (pItem == NULL)
         return;
@@ -333,7 +334,7 @@ void SEASON3B::CNewUIItemMng::DeleteDuplicatedItem(ITEM* pItem)
     }
 }
 
-void SEASON3B::CNewUIItemMng::DeleteAllItems()
+void mu::ui::window::CNewUIItemMng::DeleteAllItems()
 {
     auto li = m_listItem.begin();
     for (; li != m_listItem.end(); li++)
@@ -346,12 +347,12 @@ void SEASON3B::CNewUIItemMng::DeleteAllItems()
     m_dwAvailableKeyStream = 0x80000000;
 }
 
-bool SEASON3B::CNewUIItemMng::IsEmpty()
+bool mu::ui::window::CNewUIItemMng::IsEmpty()
 {
     return m_listItem.empty();
 }
 
-void SEASON3B::CNewUIItemMng::Update()
+void mu::ui::window::CNewUIItemMng::Update()
 {
     m_UpdateTimer.UpdateTime();
     if (m_UpdateTimer.IsTime())
@@ -370,7 +371,7 @@ void SEASON3B::CNewUIItemMng::Update()
     }
 }
 
-DWORD SEASON3B::CNewUIItemMng::GenerateItemKey()
+DWORD mu::ui::window::CNewUIItemMng::GenerateItemKey()
 {
     DWORD dwAvailableItemKey = FindAvailableKeyIndex(m_dwAvailableKeyStream);
     if (dwAvailableItemKey >= 0x8F000000)
@@ -382,7 +383,7 @@ DWORD SEASON3B::CNewUIItemMng::GenerateItemKey()
     return m_dwAvailableKeyStream = dwAvailableItemKey;
 }
 
-DWORD SEASON3B::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
+DWORD mu::ui::window::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
 {
     if (m_dwAlternate > 0)
     {
@@ -397,7 +398,7 @@ DWORD SEASON3B::CNewUIItemMng::FindAvailableKeyIndex(DWORD dwSeed)
     return dwSeed + 1;
 }
 
-WORD SEASON3B::CNewUIItemMng::ExtractItemType(std::span<const BYTE> pbyItemPacket)
+WORD mu::ui::window::CNewUIItemMng::ExtractItemType(std::span<const BYTE> pbyItemPacket)
 {
     return pbyItemPacket[0] + (pbyItemPacket[3] & 128) * 2 + (pbyItemPacket[5] & 240) * 32;
 }

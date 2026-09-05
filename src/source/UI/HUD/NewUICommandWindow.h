@@ -15,7 +15,7 @@
 
 #define COMMAND_BTN_INTERVAL_SIZE	(1)
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUICommandWindow : public CNewUIObj
     {

@@ -14,6 +14,7 @@ extern unsigned int WindowWidth, WindowHeight;
 extern int MouseWheel;
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -165,7 +166,7 @@ bool CNewUIComboBox::UpdateMouseEvent()
         MouseWheel = 0;
     }
 
-    if (!SEASON3B::IsPress(VK_LBUTTON))
+    if (!mu::ui::window::IsPress(VK_LBUTTON))
         return false;
 
     const bool clickedClosedField = CheckMouseIn(m_X, m_Y, m_Width, m_ItemHeight);

@@ -18,7 +18,7 @@ namespace
 }
 
 
-SEASON3B::CNewUIMasterLevel::CNewUIMasterLevel()
+mu::ui::window::CNewUIMasterLevel::CNewUIMasterLevel()
 {
     m_pNewUIMng = nullptr;
     this->ConsumePoint = 0;
@@ -33,28 +33,28 @@ SEASON3B::CNewUIMasterLevel::CNewUIMasterLevel()
     this->ClearSkillTooltipData();
 }
 
-SEASON3B::CNewUIMasterLevel::~CNewUIMasterLevel()
+mu::ui::window::CNewUIMasterLevel::~CNewUIMasterLevel()
 {
     this->Release();
 }
 
-BYTE SEASON3B::CNewUIMasterLevel::GetConsumePoint() const
+BYTE mu::ui::window::CNewUIMasterLevel::GetConsumePoint() const
 {
     return this->ConsumePoint;
 }
 
-int SEASON3B::CNewUIMasterLevel::GetCurSkillID() const
+int mu::ui::window::CNewUIMasterLevel::GetCurSkillID() const
 {
     return this->CurSkillID;
 }
 
-bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
 {
     if (nullptr == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MASTER_LEVEL, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MASTER_LEVEL, this);
 
     this->SetPos();
 
@@ -76,7 +76,7 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void SEASON3B::CNewUIMasterLevel::Release()
+void mu::ui::window::CNewUIMasterLevel::Release()
 {
     this->ClearSkillTreeData();
     this->ClearSkillTooltipData();
@@ -87,7 +87,7 @@ void SEASON3B::CNewUIMasterLevel::Release()
     }
 }
 
-void SEASON3B::CNewUIMasterLevel::SetPos()
+void mu::ui::window::CNewUIMasterLevel::SetPos()
 {
     this->PosX = 0;
     this->PosY = 0;
@@ -95,7 +95,7 @@ void SEASON3B::CNewUIMasterLevel::SetPos()
     this->height = 428;
 }
 
-void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
+void mu::ui::window::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
 {
     memset(m_stMasterSkillTreeData, 0, sizeof(m_stMasterSkillTreeData));
 
@@ -152,7 +152,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTreeData(const wchar_t* path)
     delete[] Buffer;
 }
 
-void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
+void mu::ui::window::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
 {
     memset(m_stMasterSkillTooltip, 0, sizeof(m_stMasterSkillTooltip));
 
@@ -206,7 +206,7 @@ void SEASON3B::CNewUIMasterLevel::OpenMasterSkillTooltip(const wchar_t* path)
     delete[] file_buffer;
 }
 
-void SEASON3B::CNewUIMasterLevel::InitMasterSkillPoint()
+void mu::ui::window::CNewUIMasterLevel::InitMasterSkillPoint()
 {
     for (int i = 0; i < 3; i++)
     {
@@ -218,7 +218,7 @@ void SEASON3B::CNewUIMasterLevel::InitMasterSkillPoint()
     }
 }
 
-void SEASON3B::CNewUIMasterLevel::SetMasterType(CLASS_TYPE Class)
+void mu::ui::window::CNewUIMasterLevel::SetMasterType(CLASS_TYPE Class)
 {
     switch (Class)
     {
@@ -297,7 +297,7 @@ void SEASON3B::CNewUIMasterLevel::SetMasterType(CLASS_TYPE Class)
     }
 }
 
-void SEASON3B::CNewUIMasterLevel::SetMasterSkillTreeData()
+void mu::ui::window::CNewUIMasterLevel::SetMasterSkillTreeData()
 {
     this->ClearSkillTreeData();
 
@@ -320,7 +320,7 @@ void SEASON3B::CNewUIMasterLevel::SetMasterSkillTreeData()
     }
 }
 
-void SEASON3B::CNewUIMasterLevel::SetMasterSkillToolTipData()
+void mu::ui::window::CNewUIMasterLevel::SetMasterSkillToolTipData()
 {
     this->ClearSkillTooltipData();
 
@@ -343,7 +343,7 @@ void SEASON3B::CNewUIMasterLevel::SetMasterSkillToolTipData()
     }
 }
 
-bool SEASON3B::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, BYTE skillLevel, float value, float nextvalue)
+bool mu::ui::window::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, BYTE skillLevel, float value, float nextvalue)
 {
     const auto it = this->map_masterData.find(index);
 
@@ -360,7 +360,7 @@ bool SEASON3B::CNewUIMasterLevel::SetMasterSkillTreeInfo(int index, BYTE skillLe
     return true;
 }
 
-int SEASON3B::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent)
+int mu::ui::window::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTip, int TextNum, int iTextColor, int iTextBold, bool isPercent)
 {
     if (text == nullptr)
     {
@@ -404,7 +404,7 @@ int SEASON3B::CNewUIMasterLevel::SetDivideString(wchar_t* text, int isItemTollTi
     return TextNum;
 }
 
-bool SEASON3B::CNewUIMasterLevel::Render()
+bool mu::ui::window::CNewUIMasterLevel::Render()
 {
     EnableAlphaTest();
     RenderImage(IMAGE_MASTER_INTERFACE, this->PosX, this->PosY, Bitmaps[IMAGE_MASTER_INTERFACE].Width, Bitmaps[IMAGE_MASTER_INTERFACE].Height);
@@ -417,23 +417,23 @@ bool SEASON3B::CNewUIMasterLevel::Render()
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::Update()
+bool mu::ui::window::CNewUIMasterLevel::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::UpdateMouseEvent()
+bool mu::ui::window::CNewUIMasterLevel::UpdateMouseEvent()
 {
     if (this->m_CloseBT.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_MASTER_LEVEL);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL);
 
         return true;
     }
 
     bool result = true;
 
-    if (SEASON3B::IsPress(VK_LBUTTON) == true)
+    if (mu::ui::window::IsPress(VK_LBUTTON) == true)
     {
         result = this->CheckMouse(MouseX, MouseY);
 
@@ -445,7 +445,7 @@ bool SEASON3B::CNewUIMasterLevel::UpdateMouseEvent()
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
-        if (this->ButtonX[i] == 1 && SEASON3B::IsPress(VK_LBUTTON) == true)
+        if (this->ButtonX[i] == 1 && mu::ui::window::IsPress(VK_LBUTTON) == true)
         {
             this->ButtonX[i] = 0;
 
@@ -455,7 +455,7 @@ bool SEASON3B::CNewUIMasterLevel::UpdateMouseEvent()
 
     this->CheckBtn();
 
-    if (SEASON3B::CheckMouseIn(this->PosX, this->PosY, this->width, this->height) == true)
+    if (mu::ui::window::CheckMouseIn(this->PosX, this->PosY, this->width, this->height) == true)
     {
         return false;
     }
@@ -463,26 +463,26 @@ bool SEASON3B::CNewUIMasterLevel::UpdateMouseEvent()
     return result;
 }
 
-bool SEASON3B::CNewUIMasterLevel::UpdateKeyEvent()
+bool mu::ui::window::CNewUIMasterLevel::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MASTER_LEVEL) == false || SEASON3B::IsPress(VK_ESCAPE) == false && SEASON3B::IsPress('A') == false)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MASTER_LEVEL) == false || mu::ui::window::IsPress(VK_ESCAPE) == false && mu::ui::window::IsPress('A') == false)
     {
         return true;
     }
 
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_MASTER_LEVEL);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MASTER_LEVEL);
 
     PlayBuffer(SOUND_CLICK01);
 
     return false;
 }
 
-float SEASON3B::CNewUIMasterLevel::GetLayerDepth()
+float mu::ui::window::CNewUIMasterLevel::GetLayerDepth()
 {
     return 10.1000004;
 }
 
-void SEASON3B::CNewUIMasterLevel::LoadImages()
+void mu::ui::window::CNewUIMasterLevel::LoadImages()
 {
     LoadBitmap(L"Interface\\new_Master_back01.jpg", IMAGE_MASTER_INTERFACE, GL_LINEAR, GL_REPEAT, true, false);
     LoadBitmap(L"Interface\\new_Master_back02.jpg", IMAGE_MASTER_INTERFACE + 1, GL_LINEAR, GL_REPEAT, true, false);
@@ -500,7 +500,7 @@ void SEASON3B::CNewUIMasterLevel::LoadImages()
     LoadBitmap(L"Interface\\new_Master_arrow08.tga", IMAGE_MASTER_INTERFACE + 13, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIMasterLevel::UnloadImages()
+void mu::ui::window::CNewUIMasterLevel::UnloadImages()
 {
     for (int i = 0; i < 14; i++)
     {
@@ -508,11 +508,11 @@ void SEASON3B::CNewUIMasterLevel::UnloadImages()
     }
 }
 
-void SEASON3B::CNewUIMasterLevel::RenderText() const
+void mu::ui::window::CNewUIMasterLevel::RenderText() const
 {
     g_pRenderText->SetFont(g_hFont);
 
-    if (SEASON3B::IsPress(VK_LBUTTON) == false && SEASON3B::CheckMouseIn(458, 11, 81, 10) == true)
+    if (mu::ui::window::IsPress(VK_LBUTTON) == false && mu::ui::window::CheckMouseIn(458, 11, 81, 10) == true)
     {
         TextList[0][0] = 0;
         TextBold[0] = 0;
@@ -590,7 +590,7 @@ void SEASON3B::CNewUIMasterLevel::RenderText() const
     g_pRenderText->RenderText(513, 40, Buffer, 0, 0, RT3_SORT_CENTER, 0);
 }
 
-void SEASON3B::CNewUIMasterLevel::RenderIcon()
+void mu::ui::window::CNewUIMasterLevel::RenderIcon()
 {
     constexpr int SKILL_ICON_WIDTH = 20;
     constexpr int SKILL_ICON_HEIGHT = 28;
@@ -655,7 +655,7 @@ void SEASON3B::CNewUIMasterLevel::RenderIcon()
     this->RenderToolTip();
 }
 
-void SEASON3B::CNewUIMasterLevel::RenderToolTip()
+void mu::ui::window::CNewUIMasterLevel::RenderToolTip()
 {
     for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
     {
@@ -676,7 +676,7 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
 
         const int CalcY = (int)(this->categoryPos[group].y + (p->SkillRank - 1) * 41.0f);
 
-        if (SEASON3B::IsPress(VK_LBUTTON) == true || SEASON3B::CheckMouseIn(CalcX + 8, CalcY + 5, 20, 28) == false)
+        if (mu::ui::window::IsPress(VK_LBUTTON) == true || mu::ui::window::CheckMouseIn(CalcX + 8, CalcY + 5, 20, 28) == false)
         {
             continue;
         }
@@ -804,13 +804,13 @@ void SEASON3B::CNewUIMasterLevel::RenderToolTip()
     }
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckMouse(int posx, int posy)
+bool mu::ui::window::CNewUIMasterLevel::CheckMouse(int posx, int posy)
 {
     constexpr POINT position[3] = { {185,65},{385,65},{585,65} };
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
-        if (SEASON3B::CheckMouseIn(position[i].x + this->PosX, this->ButtonY[i] + position[i].y + this->PosY, 15, 30) == true && this->ButtonX[i] == 0)
+        if (mu::ui::window::CheckMouseIn(position[i].x + this->PosX, this->ButtonY[i] + position[i].y + this->PosY, 15, 30) == true && this->ButtonX[i] == 0)
         {
             this->ButtonY[i] = 1;
 
@@ -821,13 +821,13 @@ bool SEASON3B::CNewUIMasterLevel::CheckMouse(int posx, int posy)
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckBtn()
+bool mu::ui::window::CNewUIMasterLevel::CheckBtn()
 {
     constexpr int posX = 220;
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
-        if (this->ButtonX[i] == 1 && SEASON3B::IsRelease(VK_LBUTTON))
+        if (this->ButtonX[i] == 1 && mu::ui::window::IsRelease(VK_LBUTTON))
         {
             this->ButtonX[i] = 0;
             return false;
@@ -865,7 +865,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckBtn()
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA& skillData)
+bool mu::ui::window::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DATA& skillData)
 {
     if (skillData.Group < 0 || skillData.Group >= 3)
     {
@@ -885,7 +885,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
 
     const int posY = (int)((double)this->categoryPos[skillData.Group].y + (lpskill->SkillRank - 1) * 41.0);
 
-    if (!SEASON3B::IsPress(VK_LBUTTON) || SEASON3B::CheckMouseIn(posX + 8, posY + 5, 20, 28) == false)
+    if (!mu::ui::window::IsPress(VK_LBUTTON) || mu::ui::window::CheckMouseIn(posX + 8, posY + 5, 20, 28) == false)
     {
         return true;
     }
@@ -901,7 +901,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
 
     if (!g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(skillData.Skill))
     {
-        SEASON3B::CreateOkMessageBox(I18N::Game::YouNeedToWearTheRequiredEquipmentToLevelUpThisSkill);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouNeedToWearTheRequiredEquipmentToLevelUpThisSkill);
         return true;
     }
 
@@ -909,7 +909,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
         || !this->CheckRankPoint(skillData.Group, lpskill->SkillRank, skillPoint)
         || !this->CheckBeforeSkill(skillData.Skill, skillPoint))
     {
-        SEASON3B::CreateOkMessageBox(I18N::Game::YouMustMeetAllSkillRequirements);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouMustMeetAllSkillRequirements);
 
         return true;
     }
@@ -918,7 +918,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
     
     this->CurSkillID = skillData.Skill;
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMaster_Level_Interface));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMaster_Level_Interface));
 
     MouseLButton = false;
 
@@ -929,12 +929,12 @@ bool SEASON3B::CNewUIMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DAT
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA& skillData, BYTE skillLevel)
+bool mu::ui::window::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MASTER_SKILLTREE_DATA& skillData, BYTE skillLevel)
 {
 
     if (skillLevel >= skillData.MaxLevel)
     {
-        SEASON3B::CreateOkMessageBox(I18N::Game::YouCanTRaiseAnyMoreLevels);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouCanTRaiseAnyMoreLevels);
         return false;
     }
 
@@ -947,12 +947,12 @@ bool SEASON3B::CNewUIMasterLevel::CheckSkillPoint(WORD mLevelUpPoint, const _MAS
 
     mu_swprintf(Buffer, I18N::Game::YouCanTRaiseAnyMoreLevels, skillData.RequiredPoints - mLevelUpPoint);
 
-    SEASON3B::CreateOkMessageBox(Buffer);
+    mu::ui::window::CreateOkMessageBox(Buffer);
 
     return false;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE_DATA& masterSkill)
+bool mu::ui::window::CNewUIMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE_DATA& masterSkill)
 {
     for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
     {
@@ -977,7 +977,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckParentSkill(const _MASTER_SKILLTREE_DATA&
     return true;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE skillLevel)
+bool mu::ui::window::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE skillLevel)
 {
     if (this->skillPoint[group][rank] < skillLevel)
     {
@@ -992,7 +992,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckRankPoint(BYTE group, BYTE rank, BYTE ski
     return this->skillPoint[group][rank - 1] >= 10;
 }
 
-bool SEASON3B::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE skillLevel)
+bool mu::ui::window::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE skillLevel)
 {
     if (skillLevel != 0)
     {
@@ -1029,7 +1029,7 @@ bool SEASON3B::CNewUIMasterLevel::CheckBeforeSkill(ActionSkillType skill, BYTE s
     return false;
 }
 
-void SEASON3B::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float value, float nextValue)
+void mu::ui::window::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float value, float nextValue)
 {
     const auto it = this->map_masterData.find(index);
     if (it == this->map_masterData.end())
@@ -1048,13 +1048,13 @@ void SEASON3B::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float
     this->CategoryPoint[it->second.Group] += addedPoints;
 }
 
-void SEASON3B::CNewUIMasterLevel::ClearSkillTreeData()
+void mu::ui::window::CNewUIMasterLevel::ClearSkillTreeData()
 {
     if (!map_masterSkillToolTip.empty())
         this->map_masterData.clear();
 }
 
-void SEASON3B::CNewUIMasterLevel::ClearSkillTooltipData()
+void mu::ui::window::CNewUIMasterLevel::ClearSkillTooltipData()
 {
     if (!map_masterSkillToolTip.empty())
         this->map_masterSkillToolTip.clear();

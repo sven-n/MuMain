@@ -13,24 +13,25 @@
 
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::CCatapultGroupButton()
+mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::CCatapultGroupButton()
 {
     m_pButton = NULL;
 
     Initialize();
 }
 
-SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::~CCatapultGroupButton()
+mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::~CCatapultGroupButton()
 {
     SAFE_DELETE_ARRAY(m_pButton);
 }
 
-void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Initialize()
+void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Initialize()
 {
     SAFE_DELETE_ARRAY(m_pButton);
 
@@ -38,7 +39,7 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Initialize()
     m_iIndex = -1;
 }
 
-void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POINT ptWindow)
+void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POINT ptWindow)
 {
     Initialize();
 
@@ -98,7 +99,7 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Create(int iType, POI
     }
 }
 
-void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::AllUnLock()
+void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::AllUnLock()
 {
     for (int i = 0; i < m_iBtnNum; ++i)
     {
@@ -108,7 +109,7 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::AllUnLock()
     }
 }
 
-void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::BtnSelected(int iIndex)
+void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::BtnSelected(int iIndex)
 {
     if (iIndex < 0 || iIndex > m_iBtnNum)
     {
@@ -122,12 +123,12 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::BtnSelected(int iInde
     m_pButton[iIndex].Lock();
 }
 
-int SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::GetIndex()
+int mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::GetIndex()
 {
     return m_iIndex;
 }
 
-int SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::UpdateMouseEvent()
+int mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::UpdateMouseEvent()
 {
     int iResult = -1;
 
@@ -145,7 +146,7 @@ int SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::UpdateMouseEvent()
     return iResult;
 }
 
-void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Render()
+void mu::ui::window::CNewUICatapultWindow::CCatapultGroupButton::Render()
 {
     int iCount = 0;
 
@@ -164,7 +165,7 @@ void SEASON3B::CNewUICatapultWindow::CCatapultGroupButton::Render()
     }
 }
 
-SEASON3B::CNewUICatapultWindow::CNewUICatapultWindow()
+mu::ui::window::CNewUICatapultWindow::CNewUICatapultWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -172,18 +173,18 @@ SEASON3B::CNewUICatapultWindow::CNewUICatapultWindow()
     OpenningProcess();
 }
 
-SEASON3B::CNewUICatapultWindow::~CNewUICatapultWindow()
+mu::ui::window::CNewUICatapultWindow::~CNewUICatapultWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUICatapultWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICatapultWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CATAPULT, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CATAPULT, this);
 
     SetPos(x, y);
 
@@ -196,7 +197,7 @@ bool SEASON3B::CNewUICatapultWindow::Create(CNewUIManager* pNewUIMng, int x, int
     return true;
 }
 
-void SEASON3B::CNewUICatapultWindow::Release()
+void mu::ui::window::CNewUICatapultWindow::Release()
 {
     UnloadImages();
 
@@ -207,7 +208,7 @@ void SEASON3B::CNewUICatapultWindow::Release()
     }
 }
 
-void SEASON3B::CNewUICatapultWindow::SetButtonInfo()
+void mu::ui::window::CNewUICatapultWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_CATAPULT_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -220,7 +221,7 @@ void SEASON3B::CNewUICatapultWindow::SetButtonInfo()
     m_BtnFire.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void SEASON3B::CNewUICatapultWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUICatapultWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -229,7 +230,7 @@ void SEASON3B::CNewUICatapultWindow::SetPos(int x, int y)
     m_BtnFire.ChangeButtonInfo(m_Pos.x + 41, m_Pos.y + 250, 108, 29);
 }
 
-bool SEASON3B::CNewUICatapultWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUICatapultWindow::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
     {
@@ -239,13 +240,13 @@ bool SEASON3B::CNewUICatapultWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICatapultWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUICatapultWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CATAPULT) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CATAPULT);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -254,12 +255,12 @@ bool SEASON3B::CNewUICatapultWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICatapultWindow::Update()
+bool mu::ui::window::CNewUICatapultWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUICatapultWindow::Render()
+bool mu::ui::window::CNewUICatapultWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -271,7 +272,7 @@ bool SEASON3B::CNewUICatapultWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUICatapultWindow::RenderFrame()
+void mu::ui::window::CNewUICatapultWindow::RenderFrame()
 {
     RenderImage(IMAGE_CATAPULT_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_CATAPULT_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -280,7 +281,7 @@ void SEASON3B::CNewUICatapultWindow::RenderFrame()
     RenderImage(IMAGE_CATAPULT_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 }
 
-void SEASON3B::CNewUICatapultWindow::RenderTexts()
+void mu::ui::window::CNewUICatapultWindow::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(220, 220, 220, 255);
@@ -302,7 +303,7 @@ void SEASON3B::CNewUICatapultWindow::RenderTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + fLine, I18N::Game::ToShoot, 190, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CNewUICatapultWindow::RenderButtons()
+void mu::ui::window::CNewUICatapultWindow::RenderButtons()
 {
     m_BtnExit.Render();
     m_BtnFire.Render();
@@ -310,7 +311,7 @@ void SEASON3B::CNewUICatapultWindow::RenderButtons()
     m_BtnChoiceArea.Render();
 }
 
-void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void mu::ui::window::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -320,7 +321,7 @@ void SEASON3B::CNewUICatapultWindow::RenderOutlineUpper(float fPos_x, float fPos
     RenderImage(IMAGE_CATAPULT_TABLE_TOP_PIXEL, ptOrigin.x + 25, ptOrigin.y - 4, fBoxWidth - 21, 14);
 }
 
-void SEASON3B::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
+void mu::ui::window::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos_y, float fWidth, float fHeight)
 {
     POINT ptOrigin = { static_cast<LONG>(fPos_x), static_cast<LONG>(fPos_y) };
     float fBoxWidth = fWidth;
@@ -333,12 +334,12 @@ void SEASON3B::CNewUICatapultWindow::RenderOutlineLower(float fPos_x, float fPos
     RenderImage(IMAGE_CATAPULT_TABLE_BOTTOM_PIXEL, ptOrigin.x + 25, ptOrigin.y + fBoxHeight + 3, fBoxWidth - 21, 14);
 }
 
-float SEASON3B::CNewUICatapultWindow::GetLayerDepth()
+float mu::ui::window::CNewUICatapultWindow::GetLayerDepth()
 {
     return 5.0f;
 }
 
-void SEASON3B::CNewUICatapultWindow::OpenningProcess()
+void mu::ui::window::CNewUICatapultWindow::OpenningProcess()
 {
     m_iType = 0;
     m_iNpcKey = 0;
@@ -349,12 +350,12 @@ void SEASON3B::CNewUICatapultWindow::OpenningProcess()
     m_BtnFire.ChangeTextColor(RGBA(100, 100, 100, 255));
 }
 
-void SEASON3B::CNewUICatapultWindow::ClosingProcess()
+void mu::ui::window::CNewUICatapultWindow::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-void SEASON3B::CNewUICatapultWindow::Init(int iKey, int iType)
+void mu::ui::window::CNewUICatapultWindow::Init(int iKey, int iType)
 {
     m_iNpcKey = iKey;
     m_iType = iType;
@@ -369,7 +370,7 @@ void SEASON3B::CNewUICatapultWindow::Init(int iKey, int iType)
     }
 }
 
-void SEASON3B::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iType, int iPositionX, int iPositionY)
+void mu::ui::window::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iType, int iPositionX, int iPositionY)
 {
     int iIndex = FindCharacterIndex(iKey);
     CHARACTER* c = &CharactersClient[iIndex];
@@ -408,7 +409,7 @@ void SEASON3B::CNewUICatapultWindow::DoFire(int iKey, int iResult, int iType, in
     PlayBuffer(SOUND_BC_CATAPULT_ATTACK);
 }
 
-void SEASON3B::CNewUICatapultWindow::DoFireFixStartPosition(int iType, int iPositionX, int iPositionY)
+void mu::ui::window::CNewUICatapultWindow::DoFireFixStartPosition(int iType, int iPositionX, int iPositionY)
 {
     vec3_t vPos, vTargetPos;
 
@@ -433,12 +434,12 @@ void SEASON3B::CNewUICatapultWindow::DoFireFixStartPosition(int iType, int iPosi
     PlayBuffer(SOUND_BC_CATAPULT_ATTACK);
 }
 
-void SEASON3B::CNewUICatapultWindow::SetCameraPos(float x, float y, float z)
+void mu::ui::window::CNewUICatapultWindow::SetCameraPos(float x, float y, float z)
 {
     Vector(x, y, z, m_vCameraPos);
 }
 
-void SEASON3B::CNewUICatapultWindow::GetCameraPos(vec3_t& vPos)
+void mu::ui::window::CNewUICatapultWindow::GetCameraPos(vec3_t& vPos)
 {
     if (m_vCameraPos[0] != 0.f || m_vCameraPos[1] != 0.f || m_vCameraPos[2] != 0.f)
     {
@@ -450,7 +451,7 @@ void SEASON3B::CNewUICatapultWindow::GetCameraPos(vec3_t& vPos)
     }
 }
 
-void SEASON3B::CNewUICatapultWindow::LoadImages()
+void mu::ui::window::CNewUICatapultWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CATAPULT_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_CATAPULT_TOP, GL_LINEAR);
@@ -474,7 +475,7 @@ void SEASON3B::CNewUICatapultWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CATAPULT_TABLE_RIGHT_PIXEL);
 }
 
-void SEASON3B::CNewUICatapultWindow::UnloadImages()
+void mu::ui::window::CNewUICatapultWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CATAPULT_BTN_BIG);
     DeleteBitmap(IMAGE_CATAPULT_BTN_SMALL);
@@ -497,15 +498,15 @@ void SEASON3B::CNewUICatapultWindow::UnloadImages()
     DeleteBitmap(IMAGE_CATAPULT_BACK);
 }
 
-bool SEASON3B::CNewUICatapultWindow::BtnProcess()
+bool mu::ui::window::CNewUICatapultWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_CATAPULT))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CATAPULT))
         return true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_CATAPULT);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
         return true;
     }
 
@@ -524,7 +525,7 @@ bool SEASON3B::CNewUICatapultWindow::BtnProcess()
     if (iIndex > -1 && m_BtnFire.UpdateMouseEvent() == true)
     {
         SocketClient->ToGameServer()->SendFireCatapultRequest(m_iNpcKey, iIndex + 1);
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_CATAPULT);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CATAPULT);
     }
 
     return false;

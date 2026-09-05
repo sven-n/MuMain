@@ -104,6 +104,7 @@ enum ESkillSlot
 };
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 ConfigData _TempConfig;
 
@@ -696,7 +697,7 @@ bool CNewUIMuHelper::UpdateMouseEvent()
         POINT ptExitBtn = { m_Pos.x + 169, m_Pos.y + 7 };
         if (CheckMouseIn(ptExitBtn.x, ptExitBtn.y, 13, 12))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MUHELPER);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MUHELPER);
         }
     }
     if (IsRelease(VK_RBUTTON))
@@ -795,7 +796,7 @@ void CNewUIMuHelper::ApplyConfigFromCheckbox(int iCheckboxId, bool bState)
 		{
 			if (m_aiSelectedSkills[0] <= 0 || m_aiSelectedSkills[1] <= 0 || m_aiSelectedSkills[2] <= 0)
 			{
-				g_pSystemLogBox->AddText(I18N::Game::InOrderToUseComboSkill, SEASON3B::TYPE_ERROR_MESSAGE);
+				g_pSystemLogBox->AddText(I18N::Game::InOrderToUseComboSkill, mu::ui::window::TYPE_ERROR_MESSAGE);
 				cboxCombo.box->RegisterBoxState(false);
 			}
 		}

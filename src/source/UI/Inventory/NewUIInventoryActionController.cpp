@@ -22,12 +22,12 @@
 #include "GameLogic/Quests/CSQuest.h"
 #include "I18N/All.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 
 CNewUIInventoryActionController::CNewUIInventoryActionController() : m_pContext(nullptr) {}
 
-void CNewUIInventoryActionController::SetContext(IInventoryActionContext* pContext)
+void CNewUIInventoryActionController::SetContext(SEASON3B::IInventoryActionContext* pContext)
 {
     m_pContext = pContext;
 }
@@ -50,12 +50,12 @@ bool CNewUIInventoryActionController::HandleInventoryActions(CNewUIInventoryCtrl
         return HandlePickedItemPlacement(targetControl);
     }
 
-    if (m_pContext->GetRepairMode() == REPAIR_MODE_OFF && IsPress(VK_RBUTTON))
+    if (m_pContext->GetRepairMode() == SEASON3B::REPAIR_MODE_OFF && IsPress(VK_RBUTTON))
     {
         return HandleRightClick(targetControl);
     }
 
-    if (m_pContext->GetRepairMode() == REPAIR_MODE_ON && IsPress(VK_LBUTTON))
+    if (m_pContext->GetRepairMode() == SEASON3B::REPAIR_MODE_ON && IsPress(VK_LBUTTON))
     {
         return HandleRepairClick(targetControl);
     }
@@ -530,7 +530,7 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
     if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
     {
         CFenrirRepairMsgBox* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CFenrirRepairMsgBoxLayout), &pMsgBox);
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CFenrirRepairMsgBoxLayout), &pMsgBox);
         pMsgBox->SetSourceIndex(iSourceIndex);
 
         const int iIndex = targetControl->GetIndex(pItem->x, pItem->y);
@@ -698,7 +698,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         if (point[attributeType] < (pItem->Durability * 10))
         {
             g_pMyInventory->SetStandbyItemKey(pItem->Key);
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUsePartChargeFruitMsgBoxLayout));
+            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUsePartChargeFruitMsgBoxLayout));
             return false;
         }
 
@@ -886,7 +886,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         }
 
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseFruitMsgBoxLayout));
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseFruitMsgBoxLayout));
         return true;
     }
 
@@ -920,7 +920,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
             if (g_PortalMgr.IsPortalUsable())
             {
                 g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseReviveCharmMsgBoxLayout));
+                CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseReviveCharmMsgBoxLayout));
             }
             else
             {
@@ -944,13 +944,13 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
                 else
                 {
                     g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                    CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUsePortalCharmMsgBoxLayout));
+                    CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUsePortalCharmMsgBoxLayout));
                 }
             }
             else if (pItem->Durability == 1)
             {
                 g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CReturnPortalCharmMsgBoxLayout));
+                CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CReturnPortalCharmMsgBoxLayout));
             }
         }
         else
@@ -964,7 +964,7 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
     if (pItem->Type == ITEM_HELPER + 66)
     {
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CUseSantaInvitationMsgBoxLayout));
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseSantaInvitationMsgBoxLayout));
     }
 
     return false;
@@ -1032,4 +1032,4 @@ bool CNewUIInventoryActionController::TryTransferBetweenInventorySections(CNewUI
     return true;
 }
 
-} // namespace SEASON3B
+} // namespace mu::ui::window

@@ -91,7 +91,7 @@ namespace UI::Notices
     void Render()
     {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
             return;
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 

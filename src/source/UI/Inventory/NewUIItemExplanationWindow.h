@@ -9,7 +9,7 @@
 
 #include "UI/Core/NewUIManager.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 class CNewUIItemExplanationWindow : public CNewUIObj
 {
@@ -37,6 +37,6 @@ private:
     CNewUIManager* m_pNewUIMng;
     POINT m_Pos;
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUIITEMEXPLANATIONWINDOW_H__4029DCB0_6E92_4032_A68B_CE62B878F615__INCLUDED_)

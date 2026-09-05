@@ -5,7 +5,7 @@
 #include "UI/Core/NewUIBase.h"
 #include "UI/Party/UIWindows.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIManager;
 
@@ -79,6 +79,6 @@ namespace SEASON3B
     };
 }
 
-#define g_pFriendList SEASON3B::CNewUIFriendWindow::GetFriendList()
-#define g_pLetterList SEASON3B::CNewUIFriendWindow::GetLetterList()
-#define g_pFriendMenu SEASON3B::CNewUIFriendWindow::GetFriendMenu()
+#define g_pFriendList mu::ui::window::CNewUIFriendWindow::GetFriendList()
+#define g_pLetterList mu::ui::window::CNewUIFriendWindow::GetLetterList()
+#define g_pFriendMenu mu::ui::window::CNewUIFriendWindow::GetFriendMenu()

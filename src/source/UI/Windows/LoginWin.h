@@ -29,7 +29,7 @@ namespace Rml { class ElementDocument; }
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md), Phase 3 -- the last CWin subclass to
 // migrate, and the first window in the whole series that actually needs CNewUIObj's shown-vs-
 // active split (UpdateWhileShown()/UpdateWhileActive(), added in Phase 0 but unused until now).
-class CLoginWin : public SEASON3B::CNewUIObj
+class CLoginWin : public mu::ui::window::CNewUIObj
 {
 protected:
     CButton m_aBtn[2];
@@ -103,7 +103,7 @@ public:
     void RmlToggleRememberMe();
     void RmlToggleSavePassword();
 
-    // SEASON3B::INewUIBase
+    // mu::ui::window::INewUIBase
     bool Render() override;
     // Was CWin::CursorInWin(WA_ALL) -- claims (consumes) any click within its own bounding box,
     // same template CServerSelWin/CLoginMainWin already established. Not modal: this floating

@@ -9,6 +9,7 @@
 
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIDuelWatchMainFrameWindow::CNewUIDuelWatchMainFrameWindow()
 {
@@ -40,7 +41,7 @@ bool CNewUIDuelWatchMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRe
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_DUELWATCH_MAINFRAME, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH_MAINFRAME, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
     m_pNewUI3DRenderMng->Add3DRenderObj(this, ITEMHOTKEYNUMBER_CAMERA_Z_ORDER);
@@ -290,13 +291,13 @@ void CNewUIDuelWatchMainFrameWindow::RenderFrame()
 
     width = 256.f; height = 51.f;
     x = 0.f; y = (float)REFERENCE_HEIGHT - height;
-    SEASON3B::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK1, x, y, width, height);
+    mu::ui::window::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK1, x, y, width, height);
     width = 128.f;
     x = 256.f;
-    SEASON3B::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK2, x, y, width, height);
+    mu::ui::window::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK2, x, y, width, height);
     width = 256.f;
     x = 256.f + 128.f;
-    SEASON3B::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK3, x, y, width, height);
+    mu::ui::window::RenderImage(IMAGE_DUELWATCH_MAINFRAME_BACK3, x, y, width, height);
 }
 
 bool CNewUIDuelWatchMainFrameWindow::BtnProcess()

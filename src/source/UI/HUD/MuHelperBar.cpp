@@ -17,6 +17,7 @@
 #include <RmlUi/Core/Event.h>
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CMuHelperBar::CMuHelperBar()
 {
@@ -37,7 +38,7 @@ bool CMuHelperBar::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MU_HELPER_BAR, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MU_HELPER_BAR, this);
 
     // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
     // window's Create() (re-run on resolution change), so the document/model are created once,
@@ -104,7 +105,7 @@ bool CMuHelperBar::Update()
     if (m_bRmlConfigClicked)
     {
         m_bRmlConfigClicked = false;
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MUHELPER);
         PlayBuffer(SOUND_CLICK01);
     }
     else if (m_bRmlToggleClicked)

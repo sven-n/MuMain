@@ -100,7 +100,7 @@ namespace UI::MoveCommand
     }
 }
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMoveCommandWindow : public CNewUIObj
     {
@@ -136,7 +136,7 @@ namespace SEASON3B
         CNewUIManager* m_pNewUIMng;
         POINT						m_Pos;
         int							m_iRealFontHeight;
-        std::list<CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
+        std::list<SEASON3B::CMoveCommandData::MOVEINFODATA*>	m_listMoveInfoData;
         POINT						m_StartUISubjectName;
         POINT						m_StartMapNamePos;
         POINT						m_MapNameUISize;

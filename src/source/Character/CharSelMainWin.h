@@ -190,7 +190,7 @@ namespace Rml { class ElementDocument; }
 // user-visible bug (Delete silently no-op'ing) and not just a style inconsistency.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// SEASON3B::CNewUIObj. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
+// mu::ui::window::CNewUIObj. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
 // (CServerSelWin's established pattern), not the whole screen, since the world behind this bar
 // must stay clickable/rotatable. Its own Update() additionally skips all button-click processing
 // while CCharMakeWin/CMsgWin/CSysMenuWin is shown (see their own GetLayerDepth() comments) --
@@ -198,7 +198,7 @@ namespace Rml { class ElementDocument; }
 // rely on for that exact purpose doesn't reliably deactivate on a timely basis (same class of
 // issue CLoginMainWin/CSysMenuWin's own "act immediately" RmlClick*() methods already document),
 // letting the Menu button fire while CCharMakeWin was still open.
-class CCharSelMainWin : public SEASON3B::CNewUIObj
+class CCharSelMainWin : public mu::ui::window::CNewUIObj
 {
 protected:
     CSprite m_asprBack[CSMW_SPR_MAX];
@@ -231,7 +231,7 @@ public:
     void RmlClickConnect() { if (m_bConnectEnabled) m_bRmlConnectClicked = true; }
     void RmlClickDelete() { if (m_bDeleteEnabled) m_bRmlDeleteClicked = true; }
 
-    // SEASON3B::INewUIBase
+    // mu::ui::window::INewUIBase
     bool Render() override;
     bool Update() override;
     // Was CWin::CursorInWin(WA_ALL) -- claims any click within its own bounding box, ported from

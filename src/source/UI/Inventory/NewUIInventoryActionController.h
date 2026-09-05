@@ -9,7 +9,7 @@
 #include "UI/Inventory/NewUIInventoryCtrl.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 
 class CNewUIInventoryActionController
@@ -18,7 +18,7 @@ public:
     CNewUIInventoryActionController();
     ~CNewUIInventoryActionController() = default;
 
-    void SetContext(IInventoryActionContext* pContext);
+    void SetContext(SEASON3B::IInventoryActionContext* pContext);
     bool HandleInventoryActions(CNewUIInventoryCtrl* targetControl) const;
 
 private:
@@ -49,9 +49,9 @@ private:
     bool TryConsumeItem(CNewUIInventoryCtrl* targetControl, ITEM* pItem, int iIndex) const;
     bool TryTransferBetweenInventorySections(CNewUIInventoryCtrl* sourceControl) const;
 
-    IInventoryActionContext* m_pContext;
+    SEASON3B::IInventoryActionContext* m_pContext;
 };
 
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUIINVENTORYACTIONCONTROLLER_H__INCLUDED_)

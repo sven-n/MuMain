@@ -22,6 +22,7 @@
 #include "UI/Core/NewUISystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -47,13 +48,13 @@ namespace
     }
 };
 
-bool SEASON3B::CNewUICursedTempleResult::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICursedTempleResult::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CURSEDTEMPLE_RESULT, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT, this);
 
     SetPos(x, y);
 
@@ -64,22 +65,22 @@ bool SEASON3B::CNewUICursedTempleResult::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-SEASON3B::CNewUICursedTempleResult::CNewUICursedTempleResult() : m_pNewUIMng(NULL), m_ResultEffectAlph(0.f), m_WinState(0)
+mu::ui::window::CNewUICursedTempleResult::CNewUICursedTempleResult() : m_pNewUIMng(NULL), m_ResultEffectAlph(0.f), m_WinState(0)
 {
     Initialize();
 }
 
-SEASON3B::CNewUICursedTempleResult::~CNewUICursedTempleResult()
+mu::ui::window::CNewUICursedTempleResult::~CNewUICursedTempleResult()
 {
     Destroy();
 }
 
-void SEASON3B::CNewUICursedTempleResult::Initialize()
+void mu::ui::window::CNewUICursedTempleResult::Initialize()
 {
     LoadImages();
 }
 
-void SEASON3B::CNewUICursedTempleResult::Destroy()
+void mu::ui::window::CNewUICursedTempleResult::Destroy()
 {
     UnloadImages();
 
@@ -90,19 +91,19 @@ void SEASON3B::CNewUICursedTempleResult::Destroy()
     }
 }
 
-void SEASON3B::CNewUICursedTempleResult::LoadImages()
+void mu::ui::window::CNewUICursedTempleResult::LoadImages()
 {
     LoadBitmap(L"Interface\\illusion_success.tga", IMAGE_CURSEDTEMPLERESULT_SUCCESS, GL_LINEAR);
     LoadBitmap(L"Interface\\illusion_failure.tga", IMAGE_CURSEDTEMPLERESULT_FAILURE, GL_LINEAR);
 }
 
-void SEASON3B::CNewUICursedTempleResult::UnloadImages()
+void mu::ui::window::CNewUICursedTempleResult::UnloadImages()
 {
     DeleteBitmap(IMAGE_CURSEDTEMPLERESULT_FAILURE);
     DeleteBitmap(IMAGE_CURSEDTEMPLERESULT_SUCCESS);
 }
 
-void SEASON3B::CNewUICursedTempleResult::SetButtonInfo()
+void mu::ui::window::CNewUICursedTempleResult::SetButtonInfo()
 {
     float x;
     x = m_Pos.x + (CURSEDTEMPLE_RESULT_WINDOW_WIDTH / 2) - (54 / 2);
@@ -112,7 +113,7 @@ void SEASON3B::CNewUICursedTempleResult::SetButtonInfo()
     m_Button[CURSEDTEMPLERESULT_CLOSE].ChangeText(&I18N::Game::Close388);
 }
 
-void SEASON3B::CNewUICursedTempleResult::ResetGameResultInfo()
+void mu::ui::window::CNewUICursedTempleResult::ResetGameResultInfo()
 {
     m_WinState = 0;
 
@@ -127,7 +128,7 @@ void SEASON3B::CNewUICursedTempleResult::ResetGameResultInfo()
         m_IllusionTeamGameResult.clear();
 }
 
-void SEASON3B::CNewUICursedTempleResult::UpdateResult()
+void mu::ui::window::CNewUICursedTempleResult::UpdateResult()
 {
     if (m_WinState == 0)
         return;
@@ -139,21 +140,21 @@ void SEASON3B::CNewUICursedTempleResult::UpdateResult()
     }
 }
 
-void SEASON3B::CNewUICursedTempleResult::OpenningProcess()
+void mu::ui::window::CNewUICursedTempleResult::OpenningProcess()
 {
 }
 
-void SEASON3B::CNewUICursedTempleResult::ClosingProcess()
+void mu::ui::window::CNewUICursedTempleResult::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendIllusionTempleRewardRequest();
     ResetGameResultInfo();
 }
 
-bool SEASON3B::CNewUICursedTempleResult::UpdateMouseEvent()
+bool mu::ui::window::CNewUICursedTempleResult::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLERESULT_CLOSE].UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_RESULT);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
         return false;
     }
 
@@ -165,13 +166,13 @@ bool SEASON3B::CNewUICursedTempleResult::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICursedTempleResult::UpdateKeyEvent()
+bool mu::ui::window::CNewUICursedTempleResult::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_RESULT) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_RESULT);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT);
             return false;
         }
     }
@@ -179,14 +180,14 @@ bool SEASON3B::CNewUICursedTempleResult::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICursedTempleResult::Update()
+bool mu::ui::window::CNewUICursedTempleResult::Update()
 {
     UpdateResult();
 
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleResult::RenderResultPanel()
+void mu::ui::window::CNewUICursedTempleResult::RenderResultPanel()
 {
     if (m_WinState == 0)
         return;
@@ -206,7 +207,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderResultPanel()
     }
 }
 
-void SEASON3B::CNewUICursedTempleResult::RenderFrame()
+void mu::ui::window::CNewUICursedTempleResult::RenderFrame()
 {
     float x, y, width, height;
 
@@ -232,12 +233,12 @@ void SEASON3B::CNewUICursedTempleResult::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
 
-void SEASON3B::CNewUICursedTempleResult::RenderButtons()
+void mu::ui::window::CNewUICursedTempleResult::RenderButtons()
 {
     m_Button[CURSEDTEMPLERESULT_CLOSE].Render();
 }
 
-void SEASON3B::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor)
+void mu::ui::window::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameResult& resultinfo, int x, int y, DWORD color, DWORD backcolor)
 {
     wchar_t Text[200];
 
@@ -269,7 +270,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderTextLine(const CursedTempleGameRe
     DrawText(Text, x + 190, y, color, backcolor, RT3_SORT_LEFT, 0, false);
 }
 
-void SEASON3B::CNewUICursedTempleResult::RenderText()
+void mu::ui::window::CNewUICursedTempleResult::RenderText()
 {
     wchar_t Text[200];
 
@@ -318,7 +319,7 @@ void SEASON3B::CNewUICursedTempleResult::RenderText()
     DrawText(Text, m_Pos.x, m_Pos.y + CURSEDTEMPLE_RESULT_WINDOW_HEIGHT - 55, 0xFF0000FF, 0x00000000, RT3_SORT_CENTER, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, false);
 }
 
-bool SEASON3B::CNewUICursedTempleResult::Render()
+bool mu::ui::window::CNewUICursedTempleResult::Render()
 {
     EnableAlphaTest();
 
@@ -332,7 +333,7 @@ bool SEASON3B::CNewUICursedTempleResult::Render()
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleResult::ReceiveCursedTempleGameResult(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_RESULT)ReceiveBuffer;
 

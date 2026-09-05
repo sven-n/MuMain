@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIManager;
 

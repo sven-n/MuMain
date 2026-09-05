@@ -8,7 +8,7 @@
 #include "UI/Widgets/NewUIButton.h"
 #include "MUHelper/MuHelper.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMuHelper : public CNewUIObj
     {

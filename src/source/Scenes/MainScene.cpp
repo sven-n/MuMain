@@ -158,7 +158,7 @@ static void InitializeMainScene()
     InputNumber = 2;
     for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(L"", L"", mu::ui::window::TYPE_WHISPER_MESSAGE);
     }
 
     g_GuildNotice[0][0] = '\0';
@@ -234,7 +234,7 @@ static void UpdateUIAndInput()
     if (MouseLButton == true &&
         false == g_pNewUISystem->CheckMouseUse() &&
         g_dwMouseUseUIID == 0 &&
-        g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHATINPUTBOX) == false)
+        g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHATINPUTBOX) == false)
     {
         g_pWindowMgr->SetWindowsEnable(FALSE);
         g_pFriendMenu->HideMenu();

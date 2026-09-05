@@ -22,7 +22,7 @@ enum eCursedTempleTeam
 };
 }; // namespace SEASON3A
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 enum INTERFACE_LIST
 {

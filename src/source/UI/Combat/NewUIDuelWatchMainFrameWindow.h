@@ -8,7 +8,7 @@
 #include "UI/Core/NewUI3DRenderMng.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIDuelWatchMainFrameWindow : public CNewUIObj, public INewUI3DRenderObj
     {

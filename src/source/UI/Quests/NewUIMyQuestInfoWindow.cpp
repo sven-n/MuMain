@@ -11,29 +11,30 @@
 #include "UI/Core/NewUISystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
 extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 
-SEASON3B::CNewUIMyQuestInfoWindow::CNewUIMyQuestInfoWindow()
+mu::ui::window::CNewUIMyQuestInfoWindow::CNewUIMyQuestInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-SEASON3B::CNewUIMyQuestInfoWindow::~CNewUIMyQuestInfoWindow()
+mu::ui::window::CNewUIMyQuestInfoWindow::~CNewUIMyQuestInfoWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIMyQuestInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIMyQuestInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MYQUEST, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MYQUEST, this);
 
     SetPos(x, y);
     LoadImages();
@@ -44,7 +45,7 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::Release()
+void mu::ui::window::CNewUIMyQuestInfoWindow::Release()
 {
     UnloadImages();
 
@@ -55,7 +56,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIMyQuestInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -68,7 +69,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::SetPos(int x, int y)
     m_QuestContentsListBox.SetPosition(m_Pos.x + 9, m_Pos.y + 390);
 }
 
-bool SEASON3B::CNewUIMyQuestInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIMyQuestInfoWindow::UpdateMouseEvent()
 {
     if (m_eTabBtnIndex == TAB_QUEST)
     {
@@ -89,15 +90,15 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
+bool mu::ui::window::CNewUIMyQuestInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_MYQUEST))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYQUEST))
         return true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
         return true;
     }
 
@@ -135,27 +136,27 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::BtnProcess()
         {
             ::PlayBuffer(SOUND_CLICK01);
             g_pQuestProgressByEtc->SetContents(GetSelQuestIndex());
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC);
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
             return true;
         }
 
         if (m_btnQuestGiveUp.UpdateMouseEvent())
         {
             ::PlayBuffer(SOUND_CLICK01);
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CQuestGiveUpMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CQuestGiveUpMsgBoxLayout));
             return true;
         }
     }
     return false;
 }
 
-bool SEASON3B::CNewUIMyQuestInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIMyQuestInfoWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYQUEST) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYQUEST) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MYQUEST);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
             return false;
         }
     }
@@ -163,12 +164,12 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMyQuestInfoWindow::Update()
+bool mu::ui::window::CNewUIMyQuestInfoWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIMyQuestInfoWindow::Render()
+bool mu::ui::window::CNewUIMyQuestInfoWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -198,12 +199,12 @@ bool SEASON3B::CNewUIMyQuestInfoWindow::Render()
     return true;
 }
 
-float SEASON3B::CNewUIMyQuestInfoWindow::GetLayerDepth()
+float mu::ui::window::CNewUIMyQuestInfoWindow::GetLayerDepth()
 {
     return 3.3f;
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::LoadImages()
+void mu::ui::window::CNewUIMyQuestInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MYQUEST_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_MYQUEST_TOP, GL_LINEAR);
@@ -220,7 +221,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\Quest_tab03.tga", IMAGE_MYQUEST_TAB_BIG, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::UnloadImages()
+void mu::ui::window::CNewUIMyQuestInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_MYQUEST_TAB_BIG);
     DeleteBitmap(IMAGE_MYQUEST_TAB_SMALL);
@@ -236,7 +237,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_MYQUEST_BACK);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderFrame()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_MYQUEST_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_MYQUEST_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -245,7 +246,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderFrame()
     RenderImage(IMAGE_MYQUEST_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderSubjectTexts()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderSubjectTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(230, 230, 230, 255);
@@ -253,7 +254,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderSubjectTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, L"Quest", 190, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderQuestInfo()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderQuestInfo()
 {
     RenderImage(IMAGE_MYQUEST_LINE, m_Pos.x, m_Pos.y + 160, 188.f, 21.f);
 
@@ -276,7 +277,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderQuestInfo()
     m_QuestContentsListBox.Render();
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderJobChangeContents()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderJobChangeContents()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(36, 242, 252, 255);
@@ -294,7 +295,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderJobChangeContents()
     }
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderJobChangeState()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderJobChangeState()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -313,7 +314,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderJobChangeState()
         g_pRenderText->RenderText(m_Pos.x + 23, m_Pos.y + 283 + 18 * i, m_aszMsg[i], 0, 0, RT3_SORT_LEFT);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderCastleInfo()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderCastleInfo()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -333,7 +334,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderCastleInfo()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 145, strText, 190, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::RenderTempleInfo()
+void mu::ui::window::CNewUIMyQuestInfoWindow::RenderTempleInfo()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(255, 255, 0, 255);
@@ -353,19 +354,19 @@ void SEASON3B::CNewUIMyQuestInfoWindow::RenderTempleInfo()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 325, strText, 190, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::OpenningProcess()
+void mu::ui::window::CNewUIMyQuestInfoWindow::OpenningProcess()
 {
     g_csQuest.ShowQuestPreviewWindow(-1);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::ClosingProcess()
+void mu::ui::window::CNewUIMyQuestInfoWindow::ClosingProcess()
 {
     UnselectQuestList();
     SocketClient->ToGameServer()->SendCloseNpcRequest();
     ::PlayBuffer(SOUND_CLICK01);
 }
 
-void SEASON3B::CNewUIMyQuestInfoWindow::SetButtonInfo()
+void mu::ui::window::CNewUIMyQuestInfoWindow::SetButtonInfo()
 {
     m_BtnExit.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_EXIT, false);
     m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
@@ -382,7 +383,7 @@ void SEASON3B::CNewUIMyQuestInfoWindow::SetButtonInfo()
 
 CNewUIMyQuestInfoWindow::TAB_BUTTON_INDEX CNewUIMyQuestInfoWindow::UpdateTabBtn()
 {
-    if (!(SEASON3B::IsPress(VK_LBUTTON)))
+    if (!(mu::ui::window::IsPress(VK_LBUTTON)))
         return TAB_NON;
 
     if (!CheckMouseIn(m_Pos.x + 10, m_Pos.y + 27, 166, 22))

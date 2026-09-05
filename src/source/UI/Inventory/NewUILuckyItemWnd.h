@@ -12,7 +12,7 @@
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 #define	LUCKYITEMMAXLINE	20
     enum eNEWUIFRAME { eFrame_BG, eFrame_T, eFrame_L, eFrame_R, eFrame_B, eFrame_END };

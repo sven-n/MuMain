@@ -12,25 +12,26 @@
 #include "Render/Textures/ZzzTexture.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIBattleSoccerScore::CNewUIBattleSoccerScore()
+mu::ui::window::CNewUIBattleSoccerScore::CNewUIBattleSoccerScore()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-SEASON3B::CNewUIBattleSoccerScore::~CNewUIBattleSoccerScore()
+mu::ui::window::CNewUIBattleSoccerScore::~CNewUIBattleSoccerScore()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_BATTLE_SOCCER_SCORE, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BATTLE_SOCCER_SCORE, this);
 
     SetPos(x, y);
 
@@ -41,7 +42,7 @@ bool SEASON3B::CNewUIBattleSoccerScore::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-void SEASON3B::CNewUIBattleSoccerScore::Release()
+void mu::ui::window::CNewUIBattleSoccerScore::Release()
 {
     UnloadImages();
 
@@ -52,28 +53,28 @@ void SEASON3B::CNewUIBattleSoccerScore::Release()
     }
 }
 
-void SEASON3B::CNewUIBattleSoccerScore::SetPos(int x, int y)
+void mu::ui::window::CNewUIBattleSoccerScore::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIBattleSoccerScore::UpdateMouseEvent()
+bool mu::ui::window::CNewUIBattleSoccerScore::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIBattleSoccerScore::UpdateKeyEvent()
+bool mu::ui::window::CNewUIBattleSoccerScore::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIBattleSoccerScore::Update()
+bool mu::ui::window::CNewUIBattleSoccerScore::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIBattleSoccerScore::Render()
+bool mu::ui::window::CNewUIBattleSoccerScore::Render()
 {
     ::EnableAlphaTest();
 
@@ -85,12 +86,12 @@ bool SEASON3B::CNewUIBattleSoccerScore::Render()
     return true;
 }
 
-void SEASON3B::CNewUIBattleSoccerScore::RenderBackImage()
+void mu::ui::window::CNewUIBattleSoccerScore::RenderBackImage()
 {
     RenderImage(IMAGE_BSS_BACK, m_Pos.x, m_Pos.y, float(BSS_WIDTH), float(BSS_HEIGHT));
 }
 
-void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
+void mu::ui::window::CNewUIBattleSoccerScore::RenderContents()
 {
     wchar_t szTemp[128];
     int nX = m_Pos.x + 30;
@@ -141,7 +142,7 @@ void SEASON3B::CNewUIBattleSoccerScore::RenderContents()
     }
 }
 
-int SEASON3B::CNewUIBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)
+int mu::ui::window::CNewUIBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)
 {
     for (int i = 0; i < MARK_EDIT; ++i)
     {
@@ -154,17 +155,17 @@ int SEASON3B::CNewUIBattleSoccerScore::FindGuildMark(wchar_t* pszGuildName)
     return 0;
 }
 
-float SEASON3B::CNewUIBattleSoccerScore::GetLayerDepth()
+float mu::ui::window::CNewUIBattleSoccerScore::GetLayerDepth()
 {
     return 1.8f;
 }
 
-void SEASON3B::CNewUIBattleSoccerScore::LoadImages()
+void mu::ui::window::CNewUIBattleSoccerScore::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_ground.tga", IMAGE_BSS_BACK, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIBattleSoccerScore::UnloadImages()
+void mu::ui::window::CNewUIBattleSoccerScore::UnloadImages()
 {
     DeleteBitmap(IMAGE_BSS_BACK);
 }

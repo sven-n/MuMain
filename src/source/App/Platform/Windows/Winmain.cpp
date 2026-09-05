@@ -1500,9 +1500,9 @@ MSG MainLoop()
             if (wantTextInput && g_sdlWindow != nullptr && focusedField->GetCaretArea(cx, cy, cw, ch))
             {
                 auto transform = UI::Scaling::PanelTransform(WindowWidth, WindowHeight);
-                SEASON3B::CNewUIManager* manager =
+                mu::ui::window::CNewUIManager* manager =
                     g_pNewUISystem != nullptr ? g_pNewUISystem->GetNewUIManager() : nullptr;
-                SEASON3B::CNewUIObj* owner =
+                mu::ui::window::CNewUIObj* owner =
                     manager != nullptr ? manager->FindUIObjByRelatedWnd(reinterpret_cast<HWND>(focusedField)) : nullptr;
                 if (owner != nullptr)
                 {

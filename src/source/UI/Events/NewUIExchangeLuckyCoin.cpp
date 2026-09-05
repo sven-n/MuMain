@@ -12,6 +12,7 @@
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIExchangeLuckyCoin::CNewUIExchangeLuckyCoin()
 {
@@ -32,7 +33,7 @@ bool CNewUIExchangeLuckyCoin::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN, this);
 
     SetPos(x, y);
 
@@ -102,7 +103,7 @@ bool CNewUIExchangeLuckyCoin::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (SEASON3B::CheckMouseIn(m_Pos.x, m_Pos.y, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT))
+    if (mu::ui::window::CheckMouseIn(m_Pos.x, m_Pos.y, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT))
         return false;
 
     return true;
@@ -110,11 +111,11 @@ bool CNewUIExchangeLuckyCoin::UpdateMouseEvent()
 
 bool CNewUIExchangeLuckyCoin::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
             return false;
         }
     }
@@ -185,12 +186,12 @@ void CNewUIExchangeLuckyCoin::RenderBtn()
 bool CNewUIExchangeLuckyCoin::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN))
         return true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
         return true;
     }
 
@@ -222,7 +223,7 @@ float CNewUIExchangeLuckyCoin::GetLayerDepth()
 
 void CNewUIExchangeLuckyCoin::OpenningProcess()
 {
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_INVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_INVENTORY);
     UnLockExchangeBtn();
     g_pMyInventory->GetInventoryCtrl()->LockInventory();
     PlayBuffer(SOUND_CLICK01);

@@ -14,7 +14,7 @@
 #include "UI/Widgets/NewUITextBox.h"
 #define MAX_TITLELENGTH		32
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIGensRanking : public CNewUIObj
     {

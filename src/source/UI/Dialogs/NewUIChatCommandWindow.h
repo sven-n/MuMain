@@ -15,7 +15,7 @@
 #include <memory>
 #include <vector>
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 // Offers the chat commands which the server told us about, so that nobody
 // has to know or type a command.
@@ -186,4 +186,4 @@ private:
     CNewUIButton m_BtnLeft;
     CNewUIButton m_BtnRight;
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window

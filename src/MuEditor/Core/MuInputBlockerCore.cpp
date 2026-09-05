@@ -43,8 +43,8 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     // Block Enter key when hovering UI or when keyboard input is wanted
     // This prevents chat from opening when pressing Enter in input fields
     // We need to set EnterPressed flag to true to prevent ScanAsyncKeyState from clearing it
-    SEASON3B::CNewKeyInput* pKeyInput = SEASON3B::CNewKeyInput::GetInstance();
-    pKeyInput->SetKeyState(VK_RETURN, SEASON3B::CNewKeyInput::KEY_NONE);
+    mu::ui::window::CNewKeyInput* pKeyInput = mu::ui::window::CNewKeyInput::GetInstance();
+    pKeyInput->SetKeyState(VK_RETURN, mu::ui::window::CNewKeyInput::KEY_NONE);
     SetEnterPressed(true); // Prevent ScanAsyncKeyState from clearing VK_RETURN state
 
     // Only clear all keyboard input when ImGui wants to capture it (text fields, etc.)
@@ -53,7 +53,7 @@ void CMuInputBlockerCore::ProcessInputBlocking()
     {
         for (int key = 0; key < 256; key++)
         {
-            pKeyInput->SetKeyState(key, SEASON3B::CNewKeyInput::KEY_NONE);
+            pKeyInput->SetKeyState(key, mu::ui::window::CNewKeyInput::KEY_NONE);
         }
     }
 }

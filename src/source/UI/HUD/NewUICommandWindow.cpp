@@ -18,8 +18,9 @@
 #include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUICommandWindow::CNewUICommandWindow()
+mu::ui::window::CNewUICommandWindow::CNewUICommandWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -29,18 +30,18 @@ SEASON3B::CNewUICommandWindow::CNewUICommandWindow()
     m_bCanCommand = false;
 }
 
-SEASON3B::CNewUICommandWindow::~CNewUICommandWindow()
+mu::ui::window::CNewUICommandWindow::~CNewUICommandWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUICommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_COMMAND, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_COMMAND, this);
 
     SetPos(x, y);
 
@@ -53,7 +54,7 @@ bool SEASON3B::CNewUICommandWindow::Create(CNewUIManager* pNewUIMng, int x, int 
     return true;
 }
 
-void SEASON3B::CNewUICommandWindow::Release()
+void mu::ui::window::CNewUICommandWindow::Release()
 {
     UnloadImages();
 
@@ -64,7 +65,7 @@ void SEASON3B::CNewUICommandWindow::Release()
     }
 }
 
-void SEASON3B::CNewUICommandWindow::InitButtons()
+void mu::ui::window::CNewUICommandWindow::InitButtons()
 {
     wchar_t szText[256] = {};
     mu_swprintf(szText, I18N::Game::CloseS, L"D");
@@ -93,7 +94,7 @@ void SEASON3B::CNewUICommandWindow::InitButtons()
     m_BtnCommand[COMMAND_BATTLE].ChangeText(&I18N::Game::Duel);
 }
 
-void SEASON3B::CNewUICommandWindow::OpenningProcess()
+void mu::ui::window::CNewUICommandWindow::OpenningProcess()
 {
     if (m_iCurSelectCommand != COMMAND_NONE)
         SetBtnState(m_iCurSelectCommand, false);
@@ -102,7 +103,7 @@ void SEASON3B::CNewUICommandWindow::OpenningProcess()
     m_iCurMouseCursor = CURSOR_NORMAL;
 }
 
-void SEASON3B::CNewUICommandWindow::ClosingProcess()
+void mu::ui::window::CNewUICommandWindow::ClosingProcess()
 {
     if (m_iCurSelectCommand != COMMAND_NONE)
         SetBtnState(m_iCurSelectCommand, false);
@@ -111,10 +112,10 @@ void SEASON3B::CNewUICommandWindow::ClosingProcess()
     m_iCurMouseCursor = CURSOR_NORMAL;
 }
 
-bool SEASON3B::CNewUICommandWindow::BtnProcess()
+bool mu::ui::window::CNewUICommandWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_COMMAND))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND))
     {
         PlayBuffer(SOUND_CLICK01);
         return true;
@@ -122,7 +123,7 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
         PlayBuffer(SOUND_CLICK01);
         return true;
     }
@@ -135,8 +136,8 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
             // their own list instead.
             if (i == COMMAND_SPECIAL)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND);
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_COMMAND_LIST);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_COMMAND_LIST);
                 PlayBuffer(SOUND_CLICK01);
                 return true;
             }
@@ -144,7 +145,7 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
             if (m_iCurSelectCommand != COMMAND_NONE)
                 SetBtnState(m_iCurSelectCommand, false);
 
-            if (g_CursedTemple->GetInterfaceState(static_cast<int>(SEASON3B::INTERFACE_COMMAND), i))
+            if (g_CursedTemple->GetInterfaceState(static_cast<int>(mu::ui::window::INTERFACE_COMMAND), i))
             {
                 m_iCurSelectCommand = i;
                 SetBtnState(m_iCurSelectCommand, true);
@@ -155,7 +156,7 @@ bool SEASON3B::CNewUICommandWindow::BtnProcess()
     return false;
 }
 
-bool SEASON3B::CNewUICommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUICommandWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -174,13 +175,13 @@ bool SEASON3B::CNewUICommandWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUICommandWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -188,7 +189,7 @@ bool SEASON3B::CNewUICommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::Update()
+bool mu::ui::window::CNewUICommandWindow::Update()
 {
     if (IsVisible())
     {
@@ -199,7 +200,7 @@ bool SEASON3B::CNewUICommandWindow::Update()
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::Render()
+bool mu::ui::window::CNewUICommandWindow::Render()
 {
     EnableAlphaTest();
 
@@ -253,7 +254,7 @@ bool SEASON3B::CNewUICommandWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUICommandWindow::RenderBaseWindow()
+void mu::ui::window::CNewUICommandWindow::RenderBaseWindow()
 {
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), float(COMMAND_WINDOW_HEIGHT));
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(COMMAND_WINDOW_WIDTH), 64.f);
@@ -271,7 +272,7 @@ void SEASON3B::CNewUICommandWindow::RenderBaseWindow()
     RenderImage(IMAGE_COMMAND_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(COMMAND_WINDOW_HEIGHT) - 45.f, float(COMMAND_WINDOW_WIDTH), 45.f);
 }
 
-void SEASON3B::CNewUICommandWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUICommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -283,12 +284,12 @@ void SEASON3B::CNewUICommandWindow::SetPos(int x, int y)
     }
 }
 
-float SEASON3B::CNewUICommandWindow::GetLayerDepth()
+float mu::ui::window::CNewUICommandWindow::GetLayerDepth()
 {
     return LayerDepth;
 }
 
-void SEASON3B::CNewUICommandWindow::RunCommand()
+void mu::ui::window::CNewUICommandWindow::RunCommand()
 {
     if (MouseLButtonPush && m_iCurMouseCursor != CURSOR_IDSELECT)
         SetMouseCursor(CURSOR_PUSH);
@@ -394,7 +395,7 @@ void SEASON3B::CNewUICommandWindow::RunCommand()
     }
 }
 
-void SEASON3B::CNewUICommandWindow::SetBtnState(int iBtnType, bool bStateDown)
+void mu::ui::window::CNewUICommandWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
     if (bStateDown)
     {
@@ -414,26 +415,26 @@ void SEASON3B::CNewUICommandWindow::SetBtnState(int iBtnType, bool bStateDown)
     }
 }
 
-void SEASON3B::CNewUICommandWindow::SelectCommand()
+void mu::ui::window::CNewUICommandWindow::SelectCommand()
 {
 }
 
-int SEASON3B::CNewUICommandWindow::GetCurCommandType()
+int mu::ui::window::CNewUICommandWindow::GetCurCommandType()
 {
     return m_iCurSelectCommand;
 }
 
-void SEASON3B::CNewUICommandWindow::SetMouseCursor(int iCursorType)
+void mu::ui::window::CNewUICommandWindow::SetMouseCursor(int iCursorType)
 {
     m_iCurMouseCursor = iCursorType;
 }
 
-int SEASON3B::CNewUICommandWindow::GetMouseCursor()
+int mu::ui::window::CNewUICommandWindow::GetMouseCursor()
 {
     return m_iCurMouseCursor;
 }
 
-void SEASON3B::CNewUICommandWindow::LoadImages()
+void mu::ui::window::CNewUICommandWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_COMMAND_BASE_WINDOW_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_COMMAND_BASE_WINDOW_TOP, GL_LINEAR);
@@ -445,7 +446,7 @@ void SEASON3B::CNewUICommandWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_cursorid_wnd.jpg", IMAGE_COMMAND_SELECTID_BG, GL_LINEAR);
 }
 
-void SEASON3B::CNewUICommandWindow::UnloadImages()
+void mu::ui::window::CNewUICommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_BACK);
     DeleteBitmap(IMAGE_COMMAND_BASE_WINDOW_TOP);
@@ -457,7 +458,7 @@ void SEASON3B::CNewUICommandWindow::UnloadImages()
     DeleteBitmap(IMAGE_COMMAND_SELECTID_BG);
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
 {
     if (pSelectedCha == NULL)
         return false;
@@ -466,12 +467,12 @@ bool SEASON3B::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
 
     if (level < TRADELIMITLEVEL)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanUseTheTradeCommandAtCharacterLevel6, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (IsShopInViewport(pSelectedCha))
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -480,7 +481,7 @@ bool SEASON3B::CNewUICommandWindow::CommandTrade(CHARACTER* pSelectedCha)
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
 {
     if (pSelectedCha == nullptr)
         return false;
@@ -490,11 +491,11 @@ bool SEASON3B::CNewUICommandWindow::CommandPurchase(CHARACTER* pSelectedCha)
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandParty(SHORT iChaKey)
+bool mu::ui::window::CNewUICommandWindow::CommandParty(SHORT iChaKey)
 {
     if (PartyNumber > 0 && wcscmp(Party[0].Name, Hero->ID) != 0)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAParty, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -503,23 +504,23 @@ bool SEASON3B::CNewUICommandWindow::CommandParty(SHORT iChaKey)
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandWhisper(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandWhisper(CHARACTER* pSelectedCha)
 {
     g_pChatInputBox->SetWhsprID(pSelectedCha->ID);
 
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
+bool mu::ui::window::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
 {
     if (Hero->GuildStatus != G_NONE)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouAreAlreadyInAGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if ((pSelectedChar->GuildMarkIndex < 0) || (pSelectedChar->GuildStatus != G_MASTER))
     {
-        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -528,21 +529,21 @@ bool SEASON3B::CNewUICommandWindow::CommandGuild(CHARACTER* pSelectedChar)
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_NONE)
     {
-        g_pSystemLogBox->AddText(I18N::Game::ThisDoesNotBelongToTheGuild, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThisDoesNotBelongToTheGuild, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus == G_MASTER)
@@ -554,17 +555,17 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildUnion(CHARACTER* pSelectedCha)
     return false;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -573,16 +574,16 @@ bool SEASON3B::CNewUICommandWindow::CommandGuildRival(CHARACTER* pSelectedCha)
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelectedCha)
 {
     if (Hero->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     if (pSelectedCha->GuildStatus != G_MASTER)
     {
-        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheUserIsNotAGuildMaster, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
 
@@ -592,7 +593,7 @@ bool SEASON3B::CNewUICommandWindow::CommandCancelGuildRival(CHARACTER* pSelected
     return true;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
+bool mu::ui::window::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
 {
     if (g_pWindowMgr->IsServerEnable() == TRUE && pSelectedCha != nullptr)
     {
@@ -603,7 +604,7 @@ bool SEASON3B::CNewUICommandWindow::CommandAddFriend(CHARACTER* pSelectedCha)
     return false;
 }
 
-bool SEASON3B::CNewUICommandWindow::CommandFollow(int iSelectedChaIndex)
+bool mu::ui::window::CNewUICommandWindow::CommandFollow(int iSelectedChaIndex)
 {
     if (iSelectedChaIndex < 0)
     {
@@ -615,24 +616,24 @@ bool SEASON3B::CNewUICommandWindow::CommandFollow(int iSelectedChaIndex)
     return true;
 }
 
-int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
+int mu::ui::window::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
 {
     int iLevel = CharacterAttribute->Level;
     if (iLevel < 30)
     {
         wchar_t szError[48] = L"";
         mu_swprintf(szError, I18N::Game::OpenOnlyForLevelDOrHigher, 30);
-        g_pSystemLogBox->AddText(szError, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szError, mu::ui::window::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive >= WD_65DOPPLEGANGER1 && gMapManager.WorldActive <= WD_68DOPPLEGANGER4)
     {
-        g_pSystemLogBox->AddText(I18N::Game::DuelingIsNotPossibleInThisArea, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::DuelingIsNotPossibleInThisArea, mu::ui::window::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (gMapManager.WorldActive == WD_79UNITEDMARKETPLACE)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotEngageInDuelsWhileInLorenMarket, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotEngageInDuelsWhileInLorenMarket, mu::ui::window::TYPE_ERROR_MESSAGE);
         return 3;
     }
     else if (!g_DuelMgr.IsDuelEnabled())
@@ -647,7 +648,7 @@ int SEASON3B::CNewUICommandWindow::CommandDual(CHARACTER* pSelectedCha)
     }
     else
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotChallengePlayerIsAlreadyInADuel, mu::ui::window::TYPE_ERROR_MESSAGE);
         return 3;
     }
     return 0;

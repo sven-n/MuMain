@@ -10,7 +10,7 @@
 #include "UI/HUD/NewUIChatLogWindow.h"
 #include "UI/Inventory/NewUIMyInventory.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMiniMap : public CNewUIObj
     {

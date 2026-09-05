@@ -249,7 +249,7 @@ void CCharMakeWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_MAKE, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_MAKE, this);
 
     UpdateDisplay();
     Show(false);
@@ -352,7 +352,7 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
 
 void CCharMakeWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
 
     m_sprBg.Show(bShow);
 

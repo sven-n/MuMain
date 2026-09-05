@@ -15,20 +15,20 @@
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUIFriendWindow::CNewUIFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL) {}
+mu::ui::window::CNewUIFriendWindow::CNewUIFriendWindow() : m_pNewUIMng(NULL), m_pFriendWindowMgr(NULL) {}
 
-SEASON3B::CNewUIFriendWindow::~CNewUIFriendWindow()
+mu::ui::window::CNewUIFriendWindow::~CNewUIFriendWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIFriendWindow::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CNewUIFriendWindow::Create(CNewUIManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_FRIEND, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_FRIEND, this);
 
     m_pFriendWindowMgr = new CUIWindowMgr;
     m_pFriendWindowMgr->Reset();
@@ -42,7 +42,7 @@ bool SEASON3B::CNewUIFriendWindow::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void SEASON3B::CNewUIFriendWindow::Reset()
+void mu::ui::window::CNewUIFriendWindow::Reset()
 {
     m_pFriendWindowMgr->Reset();
 
@@ -51,7 +51,7 @@ void SEASON3B::CNewUIFriendWindow::Reset()
     GetFriendMenu()->Reset();
 }
 
-void SEASON3B::CNewUIFriendWindow::Release()
+void mu::ui::window::CNewUIFriendWindow::Release()
 {
     SAFE_DELETE(m_pFriendWindowMgr);
     if (m_pNewUIMng)
@@ -61,7 +61,7 @@ void SEASON3B::CNewUIFriendWindow::Release()
     }
 }
 
-bool SEASON3B::CNewUIFriendWindow::Render()
+bool mu::ui::window::CNewUIFriendWindow::Render()
 {
     if (m_pFriendWindowMgr)
     {
@@ -72,7 +72,7 @@ bool SEASON3B::CNewUIFriendWindow::Render()
     return true;
 }
 
-bool SEASON3B::CNewUIFriendWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIFriendWindow::UpdateMouseEvent()
 {
     if (m_pFriendWindowMgr)
     {
@@ -109,13 +109,13 @@ bool SEASON3B::CNewUIFriendWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIFriendWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIFriendWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_FRIEND) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_FRIEND) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_FRIEND);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_FRIEND);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -123,27 +123,27 @@ bool SEASON3B::CNewUIFriendWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIFriendWindow::Update()
+bool mu::ui::window::CNewUIFriendWindow::Update()
 {
     return true;
 }
 
-float SEASON3B::CNewUIFriendWindow::GetLayerDepth()
+float mu::ui::window::CNewUIFriendWindow::GetLayerDepth()
 {
     return 6.f;
 }
 
-CFriendList* SEASON3B::CNewUIFriendWindow::GetFriendList()
+CFriendList* mu::ui::window::CNewUIFriendWindow::GetFriendList()
 {
     static CFriendList s_FriendList;
     return &s_FriendList;
 }
-CLetterList* SEASON3B::CNewUIFriendWindow::GetLetterList()
+CLetterList* mu::ui::window::CNewUIFriendWindow::GetLetterList()
 {
     static CLetterList s_LetterList;
     return &s_LetterList;
 }
-CUIFriendMenu* SEASON3B::CNewUIFriendWindow::GetFriendMenu()
+CUIFriendMenu* mu::ui::window::CNewUIFriendWindow::GetFriendMenu()
 {
     static CUIFriendMenu s_FriendMenu;
     return &s_FriendMenu;

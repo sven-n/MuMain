@@ -39,11 +39,11 @@
 #define	CRW_INDEX_MAX			6
 
 // CUIMng/CNewUIManager merger (docs/rmlui-ui-system) Phase 1 pilot: the first CUIMng window
-// migrated off CWin onto SEASON3B::CNewUIObj/CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity
+// migrated off CWin onto mu::ui::window::CNewUIObj/CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity
 // real case (still fully legacy-2D, no RmlUi entanglement, no shown-vs-active split needed),
 // chosen to prove the registry/dispatch mechanics before touching anything RmlUi-coupled. See
 // g_CreditWin's own comment below for the ownership/registration shape.
-class CCreditWin : public SEASON3B::CNewUIObj
+class CCreditWin : public mu::ui::window::CNewUIObj
 {
 	enum SHOW_STATE { HIDE, FADEIN, SHOW, FADEOUT };
 
@@ -88,7 +88,7 @@ public:
 	void SetPosition();
 	void Show(bool bShow) override;
 
-	// SEASON3B::INewUIBase
+	// mu::ui::window::INewUIBase
 	bool Render() override;
 	bool Update() override;
 	// Full-screen exclusive overlay: consumes every click while shown, matching the old

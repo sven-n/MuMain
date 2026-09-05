@@ -16,7 +16,7 @@
 #include "UI/Widgets/NewUIButton.h"
 #include "GuildConstants.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     struct ServerMessageInfo
     {

@@ -47,7 +47,7 @@ void CServerMsgWin::Create()
     ::memset(m_aszMsg, 0, sizeof(wchar_t) * SMW_MSG_LINE_MAX * SMW_MSG_ROW_MAX);
     m_nMsgLine = 0;
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SERVER_MESSAGE, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_MESSAGE, this);
     Show(false);
 }
 
@@ -95,7 +95,7 @@ int CServerMsgWin::SetLine(int nLine)
 
 void CServerMsgWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
     for (auto& sprite : m_aSprBg)
         sprite.Show(bShow);
 }

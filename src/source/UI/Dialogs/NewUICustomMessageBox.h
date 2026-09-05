@@ -7,7 +7,7 @@
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "UI/Widgets/UIControls.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     enum
     {

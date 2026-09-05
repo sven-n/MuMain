@@ -9,20 +9,21 @@
 #include "Engine/Object/ZzzInterface.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 
 
-SEASON3B::CNewUIChatLogWindow::CNewUIChatLogWindow()
+mu::ui::window::CNewUIChatLogWindow::CNewUIChatLogWindow()
 {
     Init();
 }
 
-SEASON3B::CNewUIChatLogWindow::~CNewUIChatLogWindow()
+mu::ui::window::CNewUIChatLogWindow::~CNewUIChatLogWindow()
 {
     Release();
 }
 
-void SEASON3B::CNewUIChatLogWindow::Init()
+void mu::ui::window::CNewUIChatLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
     m_WndPos.x = m_WndPos.y = 0;
@@ -43,7 +44,7 @@ void SEASON3B::CNewUIChatLogWindow::Init()
     m_iPointedMessageIndex = 0;
 }
 
-void SEASON3B::CNewUIChatLogWindow::LoadImages()
+void mu::ui::window::CNewUIChatLogWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_SCROLL_TOP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_SCROLL_MIDDLE, GL_LINEAR);
@@ -53,7 +54,7 @@ void SEASON3B::CNewUIChatLogWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_scrollbar_stretch.jpg", IMAGE_DRAG_BTN, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIChatLogWindow::UnloadImages()
+void mu::ui::window::CNewUIChatLogWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_SCROLL_TOP);
     DeleteBitmap(IMAGE_SCROLL_MIDDLE);
@@ -63,7 +64,7 @@ void SEASON3B::CNewUIChatLogWindow::UnloadImages()
     DeleteBitmap(IMAGE_DRAG_BTN);
 }
 
-bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
+bool mu::ui::window::CNewUIChatLogWindow::RenderBackground()
 {
     if (m_bShowFrame)
     {
@@ -78,7 +79,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderBackground()
     return true;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
+bool mu::ui::window::CNewUIChatLogWindow::RenderMessages()
 {
     float fRenderPosX = m_WndPos.x, fRenderPosY = m_WndPos.y - m_WndSize.cy + SCROLL_TOP_BOTTOM_PART_HEIGHT;
 
@@ -192,7 +193,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderMessages()
     return true;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
+bool mu::ui::window::CNewUIChatLogWindow::RenderFrame()
 {
     if (m_bShowFrame)
     {
@@ -230,7 +231,7 @@ bool SEASON3B::CNewUIChatLogWindow::RenderFrame()
     return true;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y, int nShowingLines /* = 6 */)
+bool mu::ui::window::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y, int nShowingLines /* = 6 */)
 {
     Release();
 
@@ -238,14 +239,14 @@ bool SEASON3B::CNewUIChatLogWindow::Create(CNewUIManager* pNewUIMng, int x, int 
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CHATLOGWINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHATLOGWINDOW, this);
     m_WndPos.x = x; m_WndPos.y = y;
     SetNumberOfShowingLines(nShowingLines);
     LoadImages();
     return true;
 }
 
-void SEASON3B::CNewUIChatLogWindow::Release()
+void mu::ui::window::CNewUIChatLogWindow::Release()
 {
     UnloadImages();
     ResetFilter();
@@ -260,13 +261,13 @@ void SEASON3B::CNewUIChatLogWindow::Release()
     Init();
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetPosition(int x, int y)
+void mu::ui::window::CNewUIChatLogWindow::SetPosition(int x, int y)
 {
     m_WndPos.x = x;
     m_WndPos.y = y;
 }
 
-void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
+void mu::ui::window::CNewUIChatLogWindow::AddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType /*= TYPE_ALL_MESSAGE*/)
 {
     if (strID.empty() && strText.empty())
     {
@@ -305,7 +306,7 @@ void SEASON3B::CNewUIChatLogWindow::AddText(const type_string& strID, const type
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
+void mu::ui::window::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, const type_string& strText, MESSAGE_TYPE MsgType, MESSAGE_TYPE ErrMsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
@@ -461,7 +462,7 @@ void SEASON3B::CNewUIChatLogWindow::ProcessAddText(const type_string& strID, con
         m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
+void mu::ui::window::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
 
@@ -484,7 +485,7 @@ void SEASON3B::CNewUIChatLogWindow::RemoveFrontLine(MESSAGE_TYPE MsgType)
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
+void mu::ui::window::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
@@ -504,7 +505,7 @@ void SEASON3B::CNewUIChatLogWindow::Clear(MESSAGE_TYPE MsgType)
     }
 }
 
-size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
+size_t mu::ui::window::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(MsgType);
     if (pvecMsgs == nullptr)
@@ -515,12 +516,12 @@ size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfLines(MESSAGE_TYPE MsgType)
     return pvecMsgs->size();
 }
 
-int SEASON3B::CNewUIChatLogWindow::GetCurrentRenderEndLine() const
+int mu::ui::window::CNewUIChatLogWindow::GetCurrentRenderEndLine() const
 {
     return m_iCurrentRenderEndLine;
 }
 
-void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
+void mu::ui::window::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
 {
     type_vector_msgs* pvecMsgs = GetMsgs(m_CurrentRenderMsgType);
     if (pvecMsgs == nullptr)
@@ -545,7 +546,7 @@ void SEASON3B::CNewUIChatLogWindow::Scrolling(int nRenderEndLine)
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterText)
+void mu::ui::window::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterText)
 {
     bool bPrevFilter = false;
 
@@ -584,17 +585,17 @@ void SEASON3B::CNewUIChatLogWindow::SetFilterText(const type_string& strFilterTe
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::ResetFilter()
+void mu::ui::window::CNewUIChatLogWindow::ResetFilter()
 {
     m_vecFilters.clear();
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetSizeAuto()
+void mu::ui::window::CNewUIChatLogWindow::SetSizeAuto()
 {
     SetNumberOfShowingLines(GetNumberOfShowingLines() + 3);
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize/* = nullptr*/)
+void mu::ui::window::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, OUT LPSIZE lpBoxSize/* = nullptr*/)
 {
     m_nShowingLines = (int)(nShowingLines / 3) * 3;
     if (m_nShowingLines < 3)
@@ -614,12 +615,12 @@ void SEASON3B::CNewUIChatLogWindow::SetNumberOfShowingLines(int nShowingLines, O
         lpBoxSize->cy = (SCROLL_MIDDLE_PART_HEIGHT * GetNumberOfShowingLines()) + (SCROLL_TOP_BOTTOM_PART_HEIGHT * 2) + (WND_TOP_BOTTOM_EDGE * 2);
     }
 }
-size_t SEASON3B::CNewUIChatLogWindow::GetNumberOfShowingLines() const
+size_t mu::ui::window::CNewUIChatLogWindow::GetNumberOfShowingLines() const
 {
     return m_nShowingLines;
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetBackAlphaAuto()
+void mu::ui::window::CNewUIChatLogWindow::SetBackAlphaAuto()
 {
     m_fBackAlpha += 0.2f;
 
@@ -629,7 +630,7 @@ void SEASON3B::CNewUIChatLogWindow::SetBackAlphaAuto()
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::SetBackAlpha(float fAlpha)
+void mu::ui::window::CNewUIChatLogWindow::SetBackAlpha(float fAlpha)
 {
     if (fAlpha < 0.f)
         m_fBackAlpha = 0.f;
@@ -639,38 +640,38 @@ void SEASON3B::CNewUIChatLogWindow::SetBackAlpha(float fAlpha)
         m_fBackAlpha = fAlpha;
 }
 
-float SEASON3B::CNewUIChatLogWindow::GetBackAlpha() const
+float mu::ui::window::CNewUIChatLogWindow::GetBackAlpha() const
 {
     return m_fBackAlpha;
 }
 
-void SEASON3B::CNewUIChatLogWindow::ShowFrame()
+void mu::ui::window::CNewUIChatLogWindow::ShowFrame()
 {
     m_bShowFrame = true;
 }
 
-void SEASON3B::CNewUIChatLogWindow::HideFrame()
+void mu::ui::window::CNewUIChatLogWindow::HideFrame()
 {
     m_bShowFrame = false;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::IsShowFrame()
+bool mu::ui::window::CNewUIChatLogWindow::IsShowFrame()
 {
     return m_bShowFrame;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIChatLogWindow::UpdateMouseEvent()
 {
     
 
     if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-        SEASON3B::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
+        mu::ui::window::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
     {
         m_EventState = EVENT_CLIENT_WND_HOVER;
         return false;
     }
     if (false == MouseLButtonPush && m_EventState == EVENT_CLIENT_WND_HOVER &&
-        false == SEASON3B::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
+        false == mu::ui::window::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
     {
         m_EventState = EVENT_NONE;
         return true;
@@ -687,7 +688,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
     }
 
     m_bPointedMessage = false;
-    if (SEASON3B::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
+    if (mu::ui::window::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
     {
         int iRenderStartLine = 0;
         if (GetCurrentRenderEndLine() >= m_nShowingLines)
@@ -723,13 +724,13 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                 ptRenderPos.x = fRenderPosX + WND_LEFT_RIGHT_EDGE;
                 ptRenderPos.y = fRenderPosY + FONT_LEADING + (SCROLL_MIDDLE_PART_HEIGHT * s);
 
-                if (SEASON3B::CheckMouseIn(ptRenderPos.x, ptRenderPos.y, WND_WIDTH, SCROLL_MIDDLE_PART_HEIGHT))
+                if (mu::ui::window::CheckMouseIn(ptRenderPos.x, ptRenderPos.y, WND_WIDTH, SCROLL_MIDDLE_PART_HEIGHT))
                 {
                     m_bPointedMessage = true;
                     m_iPointedMessageIndex = i;
 
                     std::wstring strID = pMsgText->GetID();
-                    if (SEASON3B::IsPress(VK_RBUTTON) && strID.empty() == false)
+                    if (mu::ui::window::IsPress(VK_RBUTTON) && strID.empty() == false)
                     {
                         g_pChatInputBox->SetWhsprID(strID.c_str());
                     }
@@ -741,7 +742,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
     if (m_bShowFrame)
     {
         if (m_EventState == EVENT_CLIENT_WND_HOVER && MouseLButtonPush &&
-            SEASON3B::CheckMouseIn(m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT))
+            mu::ui::window::CheckMouseIn(m_ScrollBtnPos.x, m_ScrollBtnPos.y, SCROLL_BTN_WIDTH, SCROLL_BTN_HEIGHT))
         {
             extern int MouseY;
 
@@ -751,7 +752,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
         }
         if (m_EventState == EVENT_SCROLL_BTN_DOWN)
         {
-            if (SEASON3B::IsRepeat(VK_LBUTTON))
+            if (mu::ui::window::IsRepeat(VK_LBUTTON))
             {
                 if (GetNumberOfLines(GetCurrentMsgType()) > GetNumberOfShowingLines())
                 {
@@ -776,7 +777,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                 }
                 return false;
             }
-            if (SEASON3B::IsRelease(VK_LBUTTON))
+            if (mu::ui::window::IsRelease(VK_LBUTTON))
             {
                 m_EventState = EVENT_NONE;
                 return true;
@@ -785,19 +786,19 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
 
         POINT ptResizingBtn = { m_WndPos.x, (LONG)(m_WndPos.y - m_WndSize.cy - RESIZING_BTN_HEIGHT) };
         if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-            SEASON3B::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
+            mu::ui::window::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
         {
             m_EventState = EVENT_RESIZING_BTN_HOVER;
             return false;
         }
         if (false == MouseLButtonPush && m_EventState == EVENT_RESIZING_BTN_HOVER &&
-            false == SEASON3B::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
+            false == mu::ui::window::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
         {
             m_EventState = EVENT_NONE;
             return true;
         }
         if (m_EventState == EVENT_RESIZING_BTN_HOVER && MouseLButtonPush &&
-            SEASON3B::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
+            mu::ui::window::CheckMouseIn(ptResizingBtn.x, ptResizingBtn.y, RESIZING_BTN_WIDTH, RESIZING_BTN_HEIGHT))
         {
             m_EventState = EVENT_RESIZING_BTN_DOWN;
             return false;
@@ -810,7 +811,7 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                 int nBottomSections = (GetNumberOfShowingLines() - 3) / 3;
                 for (int i = 0; i < nTopSections; i++)
                 {
-                    if (SEASON3B::CheckMouseIn(0, ptResizingBtn.y - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
+                    if (mu::ui::window::CheckMouseIn(0, ptResizingBtn.y - RESIZING_BTN_HEIGHT - ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3 * 2),
                         REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + RESIZING_BTN_HEIGHT))
                     {
                         SetNumberOfShowingLines(GetNumberOfShowingLines() + (i + 1) * 3);
@@ -819,18 +820,18 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
                 }
                 for (int i = 0; i < nBottomSections; i++)
                 {
-                    if (SEASON3B::CheckMouseIn(0, ptResizingBtn.y + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
+                    if (mu::ui::window::CheckMouseIn(0, ptResizingBtn.y + RESIZING_BTN_HEIGHT + ((i + 1) * SCROLL_MIDDLE_PART_HEIGHT * 3),
                         REFERENCE_WIDTH, RESIZING_BTN_HEIGHT + SCROLL_MIDDLE_PART_HEIGHT * 3))
                     {
                         SetNumberOfShowingLines(GetNumberOfShowingLines() - (i + 1) * 3);
                         return false;
                     }
                 }
-                if (SEASON3B::CheckMouseIn(0, 0, REFERENCE_WIDTH, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
+                if (mu::ui::window::CheckMouseIn(0, 0, REFERENCE_WIDTH, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 15 + RESIZING_BTN_HEIGHT + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2)))
                 {
                     SetNumberOfShowingLines(15);
                 }
-                if (SEASON3B::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
+                if (mu::ui::window::CheckMouseIn(0, m_WndPos.y - (SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2),
                     REFERENCE_WIDTH, SCROLL_MIDDLE_PART_HEIGHT * 3 + SCROLL_TOP_BOTTOM_PART_HEIGHT * 2))
                 {
                     SetNumberOfShowingLines(3);
@@ -847,18 +848,18 @@ bool SEASON3B::CNewUIChatLogWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIChatLogWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIChatLogWindow::Update()
+bool mu::ui::window::CNewUIChatLogWindow::Update()
 {
     UpdateScrollPos();
 
     return true;
 }
-bool SEASON3B::CNewUIChatLogWindow::Render()
+bool mu::ui::window::CNewUIChatLogWindow::Render()
 {
     if (RenderBackground() == false)
     {
@@ -881,17 +882,17 @@ bool SEASON3B::CNewUIChatLogWindow::Render()
     return true;
 }
 
-float SEASON3B::CNewUIChatLogWindow::GetLayerDepth()
+float mu::ui::window::CNewUIChatLogWindow::GetLayerDepth()
 {
     return 6.1f;
 }
 
-float SEASON3B::CNewUIChatLogWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIChatLogWindow::GetKeyEventOrder()
 {
     return 8.0f;
 }
 
-void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
+void mu::ui::window::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN const type_string& strText,
                                                  MESSAGE_TYPE MsgType, OUT type_string& strText1,
                                                  OUT type_string& strText2)
 {
@@ -932,7 +933,7 @@ void SEASON3B::CNewUIChatLogWindow::SeparateText(IN const type_string& strID, IN
     strText2 = strText.substr(iLocToken, strText.length() - iLocToken);
 }
 
-bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
+bool mu::ui::window::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestText)
 {
     auto vi_filters = m_vecFilters.begin();
     for (; vi_filters != m_vecFilters.end(); vi_filters++)
@@ -946,13 +947,13 @@ bool SEASON3B::CNewUIChatLogWindow::CheckFilterText(const type_string& strTestTe
     return false;
 }
 
-void SEASON3B::CNewUIChatLogWindow::UpdateWndSize()
+void mu::ui::window::CNewUIChatLogWindow::UpdateWndSize()
 {
     m_WndSize.cx = WND_WIDTH;
     m_WndSize.cy = (SCROLL_MIDDLE_PART_HEIGHT * GetNumberOfShowingLines()) + (SCROLL_TOP_BOTTOM_PART_HEIGHT * 2) + (WND_TOP_BOTTOM_EDGE * 2);
 }
 
-void SEASON3B::CNewUIChatLogWindow::UpdateScrollPos()
+void mu::ui::window::CNewUIChatLogWindow::UpdateScrollPos()
 {
     float fPosRate = 1.f;
 
@@ -974,7 +975,7 @@ void SEASON3B::CNewUIChatLogWindow::UpdateScrollPos()
     }
 }
 
-void SEASON3B::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
+void mu::ui::window::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
 {
     if (m_vecFilters.size() > 5)
         return;
@@ -991,7 +992,7 @@ void SEASON3B::CNewUIChatLogWindow::AddFilterWord(const type_string& strWord)
     m_vecFilters.push_back(strWord);
 }
 
-void SEASON3B::CNewUIChatLogWindow::ClearAll()
+void mu::ui::window::CNewUIChatLogWindow::ClearAll()
 {
     for (int i = TYPE_ALL_MESSAGE; i < NUMBER_OF_TYPES; i++)
     {
@@ -1001,7 +1002,7 @@ void SEASON3B::CNewUIChatLogWindow::ClearAll()
     m_iCurrentRenderEndLine = -1;
 }
 
-SEASON3B::CNewUIChatLogWindow::type_vector_msgs* SEASON3B::CNewUIChatLogWindow::GetMsgs(MESSAGE_TYPE MsgType)
+mu::ui::window::CNewUIChatLogWindow::type_vector_msgs* mu::ui::window::CNewUIChatLogWindow::GetMsgs(MESSAGE_TYPE MsgType)
 {
     switch (MsgType)
     {
@@ -1030,7 +1031,7 @@ SEASON3B::CNewUIChatLogWindow::type_vector_msgs* SEASON3B::CNewUIChatLogWindow::
     return nullptr;
 }
 
-void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
+void mu::ui::window::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
 {
     m_CurrentRenderMsgType = MsgType;
 
@@ -1043,12 +1044,12 @@ void SEASON3B::CNewUIChatLogWindow::ChangeMessage(MESSAGE_TYPE MsgType)
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-SEASON3B::MESSAGE_TYPE SEASON3B::CNewUIChatLogWindow::GetCurrentMsgType() const
+mu::ui::window::MESSAGE_TYPE mu::ui::window::CNewUIChatLogWindow::GetCurrentMsgType() const
 {
     return m_CurrentRenderMsgType;
 }
 
-void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
+void mu::ui::window::CNewUIChatLogWindow::ShowChatLog()
 {
     m_bShowChatLog = true;
 
@@ -1061,22 +1062,22 @@ void SEASON3B::CNewUIChatLogWindow::ShowChatLog()
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-void SEASON3B::CNewUIChatLogWindow::HideChatLog()
+void mu::ui::window::CNewUIChatLogWindow::HideChatLog()
 {
     m_bShowChatLog = false;
 }
 
-SEASON3B::CNewUISystemLogWindow::CNewUISystemLogWindow()
+mu::ui::window::CNewUISystemLogWindow::CNewUISystemLogWindow()
 {
     Init();
 }
 
-SEASON3B::CNewUISystemLogWindow::~CNewUISystemLogWindow()
+mu::ui::window::CNewUISystemLogWindow::~CNewUISystemLogWindow()
 {
     Release();
 }
 
-void SEASON3B::CNewUISystemLogWindow::Init()
+void mu::ui::window::CNewUISystemLogWindow::Init()
 {
     m_pNewUIMng = nullptr;
     m_WndPos.x = m_WndPos.y = 0;
@@ -1088,7 +1089,7 @@ void SEASON3B::CNewUISystemLogWindow::Init()
 }
 
 
-bool SEASON3B::CNewUISystemLogWindow::RenderMessages()
+bool mu::ui::window::CNewUISystemLogWindow::RenderMessages()
 {
     if (!m_bShowMessages)
     {
@@ -1141,7 +1142,7 @@ bool SEASON3B::CNewUISystemLogWindow::RenderMessages()
     return true;
 }
 
-bool SEASON3B::CNewUISystemLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUISystemLogWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     Release();
 
@@ -1149,13 +1150,13 @@ bool SEASON3B::CNewUISystemLogWindow::Create(CNewUIManager* pNewUIMng, int x, in
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SYSTEMLOGWINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SYSTEMLOGWINDOW, this);
     m_WndPos.x = x;
     m_WndPos.y = y;
     return true;
 }
 
-void SEASON3B::CNewUISystemLogWindow::Release()
+void mu::ui::window::CNewUISystemLogWindow::Release()
 {
     ClearAll();
 
@@ -1168,13 +1169,13 @@ void SEASON3B::CNewUISystemLogWindow::Release()
     Init();
 }
 
-void SEASON3B::CNewUISystemLogWindow::SetPosition(int x, int y)
+void mu::ui::window::CNewUISystemLogWindow::SetPosition(int x, int y)
 {
     m_WndPos.x = x;
     m_WndPos.y = y;
 }
 
-void SEASON3B::CNewUISystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)
+void mu::ui::window::CNewUISystemLogWindow::AddText(const type_string& strText, MESSAGE_TYPE MsgType)
 {
     if (strText.empty())
     {
@@ -1205,7 +1206,7 @@ void SEASON3B::CNewUISystemLogWindow::AddText(const type_string& strText, MESSAG
     m_iCurrentRenderEndLine = pvecMsgs->size() - 1;
 }
 
-void SEASON3B::CNewUISystemLogWindow::RemoveFrontLine()
+void mu::ui::window::CNewUISystemLogWindow::RemoveFrontLine()
 {
     auto vi = m_vecAllMsgs.begin();
     if (vi != m_vecAllMsgs.end())
@@ -1215,41 +1216,41 @@ void SEASON3B::CNewUISystemLogWindow::RemoveFrontLine()
     }
 }
 
-int SEASON3B::CNewUISystemLogWindow::GetCurrentRenderEndLine() const
+int mu::ui::window::CNewUISystemLogWindow::GetCurrentRenderEndLine() const
 {
     return m_iCurrentRenderEndLine;
 }
 
-bool SEASON3B::CNewUISystemLogWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUISystemLogWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISystemLogWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUISystemLogWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISystemLogWindow::Update()
+bool mu::ui::window::CNewUISystemLogWindow::Update()
 {
     return true;
 }
-bool SEASON3B::CNewUISystemLogWindow::Render()
+bool mu::ui::window::CNewUISystemLogWindow::Render()
 {
     return RenderMessages();
 }
 
-float SEASON3B::CNewUISystemLogWindow::GetLayerDepth()
+float mu::ui::window::CNewUISystemLogWindow::GetLayerDepth()
 {
     return 6.05f;
 }
 
-float SEASON3B::CNewUISystemLogWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUISystemLogWindow::GetKeyEventOrder()
 {
     return 8.0f;
 }
 
-void SEASON3B::CNewUISystemLogWindow::ClearAll()
+void mu::ui::window::CNewUISystemLogWindow::ClearAll()
 {
     auto vi_msg = m_vecAllMsgs.begin();
     for (; vi_msg != m_vecAllMsgs.end(); vi_msg++)
@@ -1259,7 +1260,7 @@ void SEASON3B::CNewUISystemLogWindow::ClearAll()
     m_iCurrentRenderEndLine = -1;
 }
 
-bool SEASON3B::CNewUISystemLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
+bool mu::ui::window::CNewUISystemLogWindow::CheckChatRedundancy(const type_string& strText, int iSearchLine/* = 1*/)
 {
     if (m_vecAllMsgs.empty()) return false;
     auto vri_msgs = m_vecAllMsgs.rbegin();

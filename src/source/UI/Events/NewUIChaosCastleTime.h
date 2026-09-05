@@ -10,7 +10,7 @@
 #include "UI/Core/NewUIBase.h"
 #include "UI/Events/NewUIBloodCastleTime.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIChaosCastleTime : public CNewUIObj
     {

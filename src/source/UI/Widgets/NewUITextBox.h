@@ -4,7 +4,7 @@
 #pragma once
 #include "UI/Core/NewUIBase.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUITextBox : public CNewUIObj
     {

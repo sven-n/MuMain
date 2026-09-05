@@ -12,7 +12,7 @@
 #include <string>
 #include <queue>
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     enum CALLBACK_RESULT
     {
@@ -407,6 +407,6 @@ namespace SEASON3B
     }
 }
 
-#define MSGBOX_LAYOUT_CLASS(x) SEASON3B::TMsgBoxLayoutContainer<x>()
-#define MSGBOX_CLASS(x) SEASON3B::CNewUIMessageBoxFactory::TContainer<x>()
-#define g_MessageBox SEASON3B::CNewUIMessageBoxMng::GetInstance()
+#define MSGBOX_LAYOUT_CLASS(x) mu::ui::window::TMsgBoxLayoutContainer<x>()
+#define MSGBOX_CLASS(x) mu::ui::window::CNewUIMessageBoxFactory::TContainer<x>()
+#define g_MessageBox mu::ui::window::CNewUIMessageBoxMng::GetInstance()

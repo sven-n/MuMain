@@ -233,7 +233,7 @@ void CLoginWin::Create()
         // meant to stay static.
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN, this);
     Show(false);
 }
 
@@ -316,7 +316,7 @@ void CLoginWin::SetPosition(int x, int y)
 
 void CLoginWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
 
     for (int i = 0; i < 2; ++i)
     {
@@ -703,8 +703,8 @@ void CLoginWin::RequestLogin()
             // without prompting after an in-game disconnect.
             ReconnectManager::Instance().CacheCredentials(m_Username, m_Password);
 
-            g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
     }
 }

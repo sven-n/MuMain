@@ -16,6 +16,7 @@
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -452,7 +453,7 @@ void CNewUIStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStora
             g_pPickedItem->HidePickedItem();
 
         CreateMessageBox(
-            MSGBOX_LAYOUT_CLASS(SEASON3B::CPasswordKeyPadMsgBoxLayout));
+            MSGBOX_LAYOUT_CLASS(mu::ui::window::CPasswordKeyPadMsgBoxLayout));
     }
 }
 
@@ -490,13 +491,13 @@ bool CNewUIStorageInventory::ProcessBtns()
 
     if (m_abtn[BTN_INSERT_ZEN].UpdateMouseEvent())
     {
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CZenReceiptMsgBoxLayout));
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenReceiptMsgBoxLayout));
         return true;
     }
 
     if (m_abtn[BTN_TAKE_ZEN].UpdateMouseEvent())
     {
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CZenPaymentMsgBoxLayout));
+        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenPaymentMsgBoxLayout));
         return true;
     }
 
@@ -504,11 +505,11 @@ bool CNewUIStorageInventory::ProcessBtns()
     {
         if (m_bLock)
         {
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageUnlockMsgBoxLayout));
+            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageUnlockMsgBoxLayout));
         }
         else
         {
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockKeyPadMsgBoxLayout));
+            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockKeyPadMsgBoxLayout));
         }
         return true;
     }

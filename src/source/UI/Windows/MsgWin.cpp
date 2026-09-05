@@ -100,7 +100,7 @@ void CMsgWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_MSG_WINDOW, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_MSG_WINDOW, this);
     Show(false);
 }
 
@@ -167,7 +167,7 @@ void CMsgWin::SetCtrlPosition()
 
 void CMsgWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
 
     m_sprBack.Show(bShow);
 

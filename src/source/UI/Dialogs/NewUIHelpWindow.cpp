@@ -9,8 +9,9 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIHelpWindow::CNewUIHelpWindow()
+mu::ui::window::CNewUIHelpWindow::CNewUIHelpWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -19,18 +20,18 @@ SEASON3B::CNewUIHelpWindow::CNewUIHelpWindow()
     m_iIndex = 0;
 }
 
-SEASON3B::CNewUIHelpWindow::~CNewUIHelpWindow()
+mu::ui::window::CNewUIHelpWindow::~CNewUIHelpWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIHelpWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIHelpWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_HELP, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_HELP, this);
 
     SetPos(x, y);
 
@@ -39,7 +40,7 @@ bool SEASON3B::CNewUIHelpWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUIHelpWindow::Release()
+void mu::ui::window::CNewUIHelpWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -48,26 +49,26 @@ void SEASON3B::CNewUIHelpWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIHelpWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIHelpWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIHelpWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIHelpWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIHelpWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIHelpWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_HELP))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_HELP))
     {
         if (IsPress(VK_F1) == true)
         {
             if (++m_iIndex > 1)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
                 PlayBuffer(SOUND_CLICK01);
             }
 
@@ -76,7 +77,7 @@ bool SEASON3B::CNewUIHelpWindow::UpdateKeyEvent()
 
         if (IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -86,19 +87,19 @@ bool SEASON3B::CNewUIHelpWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIHelpWindow::Update()
+bool mu::ui::window::CNewUIHelpWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIHelpWindow::Render()
+bool mu::ui::window::CNewUIHelpWindow::Render()
 {
     EnableAlphaTest();
 
     // Reference-bind to the global arrays in ZzzInventory.cpp. A naive
     // `extern wchar_t TextList[50][100];` here would resolve to
-    // SEASON3B::TextList (the reference defined in UIManager.cpp) because
-    // this function is in the SEASON3B namespace -- and the linker stores
+    // mu::ui::window::TextList (the reference defined in UIManager.cpp) because
+    // this function is in the mu::ui::window namespace -- and the linker stores
     // that reference as a 4-byte read-only pointer, so writing to it crashes.
     wchar_t (&TextList)[50][100] = ::TextList;
     int (&TextListColor)[50] = ::TextListColor;
@@ -248,27 +249,27 @@ bool SEASON3B::CNewUIHelpWindow::Render()
     return true;
 }
 
-float SEASON3B::CNewUIHelpWindow::GetLayerDepth()
+float mu::ui::window::CNewUIHelpWindow::GetLayerDepth()
 {
     return 8.3f;
 }
 
-float SEASON3B::CNewUIHelpWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIHelpWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void SEASON3B::CNewUIHelpWindow::OpenningProcess()
+void mu::ui::window::CNewUIHelpWindow::OpenningProcess()
 {
     m_iIndex = 0;
 }
 
-void SEASON3B::CNewUIHelpWindow::ClosingProcess() {}
+void mu::ui::window::CNewUIHelpWindow::ClosingProcess() {}
 
-void SEASON3B::CNewUIHelpWindow::AutoUpdateIndex()
+void mu::ui::window::CNewUIHelpWindow::AutoUpdateIndex()
 {
     if (++m_iIndex > 1)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_HELP);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_HELP);
     }
 }

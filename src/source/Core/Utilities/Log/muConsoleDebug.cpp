@@ -72,7 +72,7 @@ void CmuConsoleDebug::UpdateMainScene()
 #ifdef CSK_LH_DEBUG_CONSOLE
     if (m_bInit)
     {
-        if (SEASON3B::IsPress(VK_SHIFT) == TRUE)
+        if (mu::ui::window::IsPress(VK_SHIFT) == TRUE)
         {
             if (PressKey(VK_F7))
             {

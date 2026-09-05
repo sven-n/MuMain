@@ -10,7 +10,7 @@
 
 namespace Rml { class ElementDocument; }
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     // RmlUi migration (2026-08-31) -- second CNewUIObj-tier pilot, same adapter shape as
     // CMuHelperBar (MuHelperBar.h; see docs/rmlui-ui-system/newui-tier-adapter.md for the shape
@@ -28,7 +28,7 @@ namespace SEASON3B
     // the same proven mechanism every other migrated window's icons use -- see BuffEntry::
     // decorator's comment, BuffStrip.h, for why.)
     // - Right-click-to-cancel (Infinity Arrow / Swell of Magic Power only, the original
-    //   UpdateMouseEvent()'s SEASON3B::IsRelease(VK_RBUTTON) branch) is NOT reproduced -- no
+    //   UpdateMouseEvent()'s mu::ui::window::IsRelease(VK_RBUTTON) branch) is NOT reproduced -- no
     //   RmlUi content in this codebase has ever distinguished right-click from left-click in a
     //   data-event-click binding. Deferred until that's proven generally.
     // - Tooltip text is one plain newline-joined block (BuildTooltipText()), not the original's

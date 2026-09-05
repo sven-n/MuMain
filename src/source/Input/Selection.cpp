@@ -332,7 +332,7 @@ void SelectObjects()
     {
         if (Core::Input::IsKeyDown(VK_MENU))
         {
-            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+            if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem() == NULL)
                 SelectedItem = SelectItem();
 
             if (SelectedItem == -1)
@@ -402,7 +402,7 @@ void SelectObjects()
                         SelectedNpc = SelectCharacter(KIND_NPC);
                         if (SelectedNpc == -1)
                         {
-                            if (SEASON3B::CNewUIInventoryCtrl::GetPickedItem() == NULL)
+                            if (mu::ui::window::CNewUIInventoryCtrl::GetPickedItem() == NULL)
                             {
                                 SelectedItem = SelectItem();
                             }

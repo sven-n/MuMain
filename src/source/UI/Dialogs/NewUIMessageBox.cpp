@@ -10,22 +10,23 @@
 #include "Render/Textures/ZzzOpenglUtil.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // CNewUIMessageBoxBase
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUIMessageBoxBase::CNewUIMessageBoxBase()
+mu::ui::window::CNewUIMessageBoxBase::CNewUIMessageBoxBase()
 {
     Release();
 }
 
-SEASON3B::CNewUIMessageBoxBase::~CNewUIMessageBoxBase()
+mu::ui::window::CNewUIMessageBoxBase::~CNewUIMessageBoxBase()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIMessageBoxBase::Create(int x, int y, int width, int height, float fPriority/* = 3.f*/)
+bool mu::ui::window::CNewUIMessageBoxBase::Create(int x, int y, int width, int height, float fPriority/* = 3.f*/)
 {
     SetPos(x, y);
     SetSize(width, height);
@@ -35,7 +36,7 @@ bool SEASON3B::CNewUIMessageBoxBase::Create(int x, int y, int width, int height,
     return true;
 }
 
-void SEASON3B::CNewUIMessageBoxBase::Release()
+void mu::ui::window::CNewUIMessageBoxBase::Release()
 {
     m_Pos.x = m_Pos.y = 0;
     m_Size.cx = m_Size.cy = 0;
@@ -45,44 +46,44 @@ void SEASON3B::CNewUIMessageBoxBase::Release()
     RemoveAllCallbackFuncs();
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SetPos(int x, int y)
+void mu::ui::window::CNewUIMessageBoxBase::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SetSize(int width, int height)
+void mu::ui::window::CNewUIMessageBoxBase::SetSize(int width, int height)
 {
     m_Size.cx = width;
     m_Size.cy = height;
 }
 
-const POINT& SEASON3B::CNewUIMessageBoxBase::GetPos()
+const POINT& mu::ui::window::CNewUIMessageBoxBase::GetPos()
 {
     return m_Pos;
 }
 
-const SIZE& SEASON3B::CNewUIMessageBoxBase::GetSize()
+const SIZE& mu::ui::window::CNewUIMessageBoxBase::GetSize()
 {
     return m_Size;
 }
 
-float SEASON3B::CNewUIMessageBoxBase::GetPriority() const
+float mu::ui::window::CNewUIMessageBoxBase::GetPriority() const
 {
     return 8.f;
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SetCanMove(bool bCanMove)
+void mu::ui::window::CNewUIMessageBoxBase::SetCanMove(bool bCanMove)
 {
     m_bCanMove = bCanMove;
 }
 
-bool SEASON3B::CNewUIMessageBoxBase::CanMove()
+bool mu::ui::window::CNewUIMessageBoxBase::CanMove()
 {
     return m_bCanMove;
 }
 
-void SEASON3B::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD dwEvent)
+void mu::ui::window::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD dwEvent)
 {
     auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
@@ -90,19 +91,19 @@ void SEASON3B::CNewUIMessageBoxBase::AddCallbackFunc(EVENT_CALLBACK pFunc, DWORD
     m_mapCallbacks.insert(type_map_callback::value_type(dwEvent, pFunc));
 }
 
-void SEASON3B::CNewUIMessageBoxBase::RemoveCallbackFunc(DWORD dwEvent)
+void mu::ui::window::CNewUIMessageBoxBase::RemoveCallbackFunc(DWORD dwEvent)
 {
     auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
         m_mapCallbacks.erase(mi);
 }
 
-void SEASON3B::CNewUIMessageBoxBase::RemoveAllCallbackFuncs()
+void mu::ui::window::CNewUIMessageBoxBase::RemoveAllCallbackFuncs()
 {
     m_mapCallbacks.clear();
 }
 
-EVENT_CALLBACK SEASON3B::CNewUIMessageBoxBase::GetCallbackFunc(DWORD dwEvent)
+EVENT_CALLBACK mu::ui::window::CNewUIMessageBoxBase::GetCallbackFunc(DWORD dwEvent)
 {
     auto mi = m_mapCallbacks.find(dwEvent);
     if (mi != m_mapCallbacks.end())
@@ -110,17 +111,17 @@ EVENT_CALLBACK SEASON3B::CNewUIMessageBoxBase::GetCallbackFunc(DWORD dwEvent)
     return NULL;
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
+void mu::ui::window::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
 {
     CNewUIMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent);
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
+void mu::ui::window::CNewUIMessageBoxBase::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
 {
     CNewUIMessageBoxMng::GetInstance()->SendEvent(pOwner, dwEvent, xParam);
 }
 
-void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
+void mu::ui::window::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
 {
     if (_bRender)
     {
@@ -143,12 +144,12 @@ void SEASON3B::CNewUIMessageBoxBase::RenderMsgBackColor(bool _bRender)
     }
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SetMsgBackOpacity(float _fAlpha)
+void mu::ui::window::CNewUIMessageBoxBase::SetMsgBackOpacity(float _fAlpha)
 {
     m_fOpacityAlpha = _fAlpha;
 }
 
-void SEASON3B::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
+void mu::ui::window::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
 {
     if (!_vColor)
     {
@@ -160,22 +161,22 @@ void SEASON3B::CNewUIMessageBoxBase::SetMsgBackColor(vec3_t _vColor)
     }
 }
 
-SEASON3B::CNewUIMessageBoxMng::CNewUIMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL)
+mu::ui::window::CNewUIMessageBoxMng::CNewUIMessageBoxMng() : m_pNewUIMng(NULL), m_pMsgBoxFactory(NULL)
 {
 }
 
-SEASON3B::CNewUIMessageBoxMng::~CNewUIMessageBoxMng()
+mu::ui::window::CNewUIMessageBoxMng::~CNewUIMessageBoxMng()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MESSAGEBOX, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MESSAGEBOX, this);
 
     m_pMsgBoxFactory = new CNewUIMessageBoxFactory;
 
@@ -184,7 +185,7 @@ bool SEASON3B::CNewUIMessageBoxMng::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void SEASON3B::CNewUIMessageBoxMng::Release()
+void mu::ui::window::CNewUIMessageBoxMng::Release()
 {
     if (m_pNewUIMng == nullptr && m_pMsgBoxFactory == nullptr)
     {
@@ -205,7 +206,7 @@ void SEASON3B::CNewUIMessageBoxMng::Release()
     }
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
+bool mu::ui::window::CNewUIMessageBoxMng::UpdateMouseEvent()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
     auto vi = m_vecMsgBoxes.begin();
@@ -215,20 +216,20 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
     CNewUIMessageBoxBase* pCurMsgBox = (*vi);
 
     if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-        SEASON3B::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+        mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
             pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_HOVER);
         m_EventState = EVENT_WND_MOUSE_HOVER;
     }
     else if (m_EventState == EVENT_WND_MOUSE_HOVER && false == MouseLButtonPush &&
-        false == SEASON3B::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+        false == mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
             pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
     {
         m_EventState = EVENT_NONE;
     }
     else if (m_EventState == EVENT_WND_MOUSE_HOVER && MouseLButtonPush &&
-        SEASON3B::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+        mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
             pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_LBUTTON_DOWN);
@@ -238,7 +239,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
     }
     else if (m_EventState == EVENT_WND_MOUSE_LBUTTON_DOWN)
     {
-        if (false == MouseLButtonPush && SEASON3B::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+        if (false == MouseLButtonPush && mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
             pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
         {
             SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
@@ -252,7 +253,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
         }
     }
     else if (m_EventState == EVENT_WND_MOUSE_HOVER && MouseRButtonPush &&
-        SEASON3B::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+        mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
             pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_RBUTTON_DOWN);
@@ -262,7 +263,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
     }
     else if (m_EventState == EVENT_WND_MOUSE_RBUTTON_DOWN)
     {
-        if (false == MouseRButtonPush && SEASON3B::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+        if (false == MouseRButtonPush && mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
             pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
         {
             SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_RBUTTON_UP);
@@ -284,7 +285,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::UpdateKeyEvent()
+bool mu::ui::window::CNewUIMessageBoxMng::UpdateKeyEvent()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
     auto vi = m_vecMsgBoxes.begin();
@@ -292,11 +293,11 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateKeyEvent()
         return true;
 
     CNewUIMessageBoxBase* pCurMsgBox = (*vi);
-    if (SEASON3B::IsPress(VK_ESCAPE))
+    if (mu::ui::window::IsPress(VK_ESCAPE))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_PRESSKEY_ESC);
     }
-    if (SEASON3B::IsPress(VK_RETURN))
+    if (mu::ui::window::IsPress(VK_RETURN))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_PRESSKEY_RETURN);
     }
@@ -309,7 +310,7 @@ bool SEASON3B::CNewUIMessageBoxMng::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::Update()
+bool mu::ui::window::CNewUIMessageBoxMng::Update()
 {
     //. Update
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
@@ -353,7 +354,7 @@ bool SEASON3B::CNewUIMessageBoxMng::Update()
     return bResult;
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::Render()
+bool mu::ui::window::CNewUIMessageBoxMng::Render()
 {
     std::sort(m_vecMsgBoxes.begin(), m_vecMsgBoxes.end(), ComparePriority);
     auto vi = m_vecMsgBoxes.begin();
@@ -364,28 +365,28 @@ bool SEASON3B::CNewUIMessageBoxMng::Render()
     return (*vi)->Render();
 }
 
-float SEASON3B::CNewUIMessageBoxMng::GetLayerDepth()
+float mu::ui::window::CNewUIMessageBoxMng::GetLayerDepth()
 {
     return 10.7f;
 }
 
-float SEASON3B::CNewUIMessageBoxMng::GetKeyEventOrder()
+float mu::ui::window::CNewUIMessageBoxMng::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-CNewUIMessageBoxMng* SEASON3B::CNewUIMessageBoxMng::GetInstance()
+CNewUIMessageBoxMng* mu::ui::window::CNewUIMessageBoxMng::GetInstance()
 {
     static CNewUIMessageBoxMng s_Instance;
     return &s_Instance;
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::ComparePriority(CNewUIMessageBoxBase* pObj1, CNewUIMessageBoxBase* pObj2)
+bool mu::ui::window::CNewUIMessageBoxMng::ComparePriority(CNewUIMessageBoxBase* pObj1, CNewUIMessageBoxBase* pObj2)
 {
     return pObj1->GetPriority() < pObj2->GetPriority();
 }
 
-void SEASON3B::CNewUIMessageBoxMng::DeleteMessageBox(const CNewUIMessageBoxBase* pObj)
+void mu::ui::window::CNewUIMessageBoxMng::DeleteMessageBox(const CNewUIMessageBoxBase* pObj)
 {
     if (m_pMsgBoxFactory)
         m_pMsgBoxFactory->DeleteMessageBox(pObj);
@@ -400,7 +401,7 @@ void SEASON3B::CNewUIMessageBoxMng::DeleteMessageBox(const CNewUIMessageBoxBase*
     }
 }
 
-void SEASON3B::CNewUIMessageBoxMng::PopMessageBox()
+void mu::ui::window::CNewUIMessageBoxMng::PopMessageBox()
 {
     if (m_vecMsgBoxes.empty() == false)
     {
@@ -411,30 +412,30 @@ void SEASON3B::CNewUIMessageBoxMng::PopMessageBox()
     }
 }
 
-void SEASON3B::CNewUIMessageBoxMng::PopAllMessageBoxes()
+void mu::ui::window::CNewUIMessageBoxMng::PopAllMessageBoxes()
 {
     m_pMsgBoxFactory->DeleteAllMessageBoxes();
     m_vecMsgBoxes.clear();
 }
 
-bool SEASON3B::CNewUIMessageBoxMng::IsEmpty()
+bool mu::ui::window::CNewUIMessageBoxMng::IsEmpty()
 {
     return m_vecMsgBoxes.empty();
 }
 
-void SEASON3B::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
+void mu::ui::window::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent)
 {
     auto* pEvent = new CNewUIEvent(pOwner, dwEvent);
     m_queueEvents.push(pEvent);
 }
 
-void SEASON3B::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
+void mu::ui::window::CNewUIMessageBoxMng::SendEvent(CNewUIMessageBoxBase* pOwner, DWORD dwEvent, const leaf::xstreambuf& xParam)
 {
     auto* pEvent = new CNewUIEvent(pOwner, dwEvent, xParam);
     m_queueEvents.push(pEvent);
 }
 
-void SEASON3B::CNewUIMessageBoxMng::PopEvent()
+void mu::ui::window::CNewUIMessageBoxMng::PopEvent()
 {
     if (!m_queueEvents.empty())
     {
@@ -443,7 +444,7 @@ void SEASON3B::CNewUIMessageBoxMng::PopEvent()
     }
 }
 
-void SEASON3B::CNewUIMessageBoxMng::PopAllEvents()
+void mu::ui::window::CNewUIMessageBoxMng::PopAllEvents()
 {
     while (!m_queueEvents.empty())
     {
@@ -452,7 +453,7 @@ void SEASON3B::CNewUIMessageBoxMng::PopAllEvents()
     }
 }
 
-void SEASON3B::CNewUIMessageBoxMng::LoadImages()
+void mu::ui::window::CNewUIMessageBoxMng::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_MSGBOX_TOP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_MSGBOX_MIDDLE, GL_LINEAR);
@@ -475,7 +476,7 @@ void SEASON3B::CNewUIMessageBoxMng::LoadImages()
     LoadBitmap(L"Interface\\newui_DuelWindow.tga", IMAGE_MSGBOX_DUEL_BACK, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIMessageBoxMng::UnloadImages()
+void mu::ui::window::CNewUIMessageBoxMng::UnloadImages()
 {
     DeleteBitmap(IMAGE_MSGBOX_DUEL_BACK);
 

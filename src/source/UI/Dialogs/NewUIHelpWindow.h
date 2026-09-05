@@ -9,7 +9,7 @@
 
 #include "UI/Core/NewUIManager.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 class CNewUIHelpWindow : public CNewUIObj
 {
@@ -41,6 +41,6 @@ private:
 
     int m_iIndex;
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUIHELPWINDOW_H__9A918DE0_7707_456C_9E5B_89503F1936D1__INCLUDED_)

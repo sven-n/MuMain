@@ -50,8 +50,9 @@ extern BYTE m_CrywolfState;
 extern int m_StatueHP;
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUICryWolf::CNewUICryWolf()
+mu::ui::window::CNewUICryWolf::CNewUICryWolf()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -64,18 +65,18 @@ SEASON3B::CNewUICryWolf::CNewUICryWolf()
     m_bTimeStart = false;
 }
 
-SEASON3B::CNewUICryWolf::~CNewUICryWolf()
+mu::ui::window::CNewUICryWolf::~CNewUICryWolf()
 {
     Release();
 }
 
-bool SEASON3B::CNewUICryWolf::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICryWolf::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CRYWOLF, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CRYWOLF, this);
 
     SetPos(x, y);
 
@@ -83,17 +84,17 @@ bool SEASON3B::CNewUICryWolf::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUICryWolf::ClosingProcess()
+void mu::ui::window::CNewUICryWolf::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float SEASON3B::CNewUICryWolf::GetLayerDepth()
+float mu::ui::window::CNewUICryWolf::GetLayerDepth()
 {
     return 10.0f;
 }
 
-void SEASON3B::CNewUICryWolf::OpenningProcess()
+void mu::ui::window::CNewUICryWolf::OpenningProcess()
 {
     m_iHour = 0;
     m_iMinute = 0;
@@ -103,7 +104,7 @@ void SEASON3B::CNewUICryWolf::OpenningProcess()
     m_bTimeStart = false;
 }
 
-void SEASON3B::CNewUICryWolf::Release()
+void mu::ui::window::CNewUICryWolf::Release()
 {
     UnloadImages();
 
@@ -114,22 +115,22 @@ void SEASON3B::CNewUICryWolf::Release()
     }
 }
 
-void SEASON3B::CNewUICryWolf::SetPos(int x, int y)
+void mu::ui::window::CNewUICryWolf::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUICryWolf::UpdateMouseEvent()
+bool mu::ui::window::CNewUICryWolf::UpdateMouseEvent()
 {
     return true;
 }
-bool SEASON3B::CNewUICryWolf::UpdateKeyEvent()
+bool mu::ui::window::CNewUICryWolf::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUICryWolf::Render()
+bool mu::ui::window::CNewUICryWolf::Render()
 {
     if (M34CryWolf1st::IsCyrWolf1st() == false)
         return true;
@@ -189,7 +190,7 @@ bool SEASON3B::CNewUICryWolf::Render()
 
                 Delay_Add_inter = 390;
                 View_End_Result = true;
-                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCry_Wolf_Result_Set_Temple));
+                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Result_Set_Temple));
             }
         }
         else
@@ -470,22 +471,22 @@ bool SEASON3B::CNewUICryWolf::Render()
     return true;
 }
 
-bool SEASON3B::CNewUICryWolf::Update()
+bool mu::ui::window::CNewUICryWolf::Update()
 {
     return true;
 }
 
-float SEASON3B::CNewUICryWolf::ConvertX(float x)
+float mu::ui::window::CNewUICryWolf::ConvertX(float x)
 {
     return x * (float)WindowWidth / (float)REFERENCE_WIDTH;
 }
 
-float SEASON3B::CNewUICryWolf::ConvertY(float y)
+float mu::ui::window::CNewUICryWolf::ConvertY(float y)
 {
     return y * (float)WindowHeight / (float)REFERENCE_HEIGHT;
 }
 
-bool SEASON3B::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)
+bool mu::ui::window::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, float u, float v, float su, float sv, int Index, bool Scale, bool StartScale, float Alpha)
 {
     const BYTE alpha = static_cast<BYTE>(std::clamp(Alpha, 0.f, 1.f) * 255.f);
     RenderImage(IMAGE_MVP_INTERFACE + Index, Posx, Posy, nPosx, nPosy, u, v, su, sv,
@@ -494,7 +495,7 @@ bool SEASON3B::CNewUICryWolf::Render(int Posx, int Posy, int nPosx, int nPosy, f
     return true;
 }
 
-void SEASON3B::CNewUICryWolf::SetTime(int iHour, int iMinute)
+void mu::ui::window::CNewUICryWolf::SetTime(int iHour, int iMinute)
 {
     m_iHour = iHour;
     if (m_iMinute != iMinute)
@@ -516,12 +517,12 @@ void SEASON3B::CNewUICryWolf::SetTime(int iHour, int iMinute)
     m_iMinute = iMinute;
 }
 
-void SEASON3B::CNewUICryWolf::InitTime()
+void mu::ui::window::CNewUICryWolf::InitTime()
 {
     m_dwSyncTime = GetTickCount();
 }
 
-void SEASON3B::CNewUICryWolf::LoadImages()
+void mu::ui::window::CNewUICryWolf::LoadImages()
 {
     LoadBitmap(L"Interface\\in_bar.tga", IMAGE_MVP_INTERFACE, GL_LINEAR);
     LoadBitmap(L"Interface\\in_bar2.jpg", IMAGE_MVP_INTERFACE + 1, GL_LINEAR);
@@ -570,7 +571,7 @@ void SEASON3B::CNewUICryWolf::LoadImages()
     LoadBitmap(L"Interface\\m_main_rank.tga", IMAGE_MVP_INTERFACE + 44, GL_LINEAR);
 }
 
-void SEASON3B::CNewUICryWolf::UnloadImages()
+void mu::ui::window::CNewUICryWolf::UnloadImages()
 {
     DeleteBitmap(IMAGE_MVP_INTERFACE);
     DeleteBitmap(IMAGE_MVP_INTERFACE + 1);

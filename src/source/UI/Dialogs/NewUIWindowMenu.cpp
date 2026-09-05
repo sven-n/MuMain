@@ -12,26 +12,27 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIWindowMenu::CNewUIWindowMenu()
+mu::ui::window::CNewUIWindowMenu::CNewUIWindowMenu()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_iSelectedIndex = -1;
 }
 
-SEASON3B::CNewUIWindowMenu::~CNewUIWindowMenu()
+mu::ui::window::CNewUIWindowMenu::~CNewUIWindowMenu()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIWindowMenu::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIWindowMenu::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_WINDOW_MENU, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_WINDOW_MENU, this);
 
     SetPos(x, y);
 
@@ -42,7 +43,7 @@ bool SEASON3B::CNewUIWindowMenu::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUIWindowMenu::Release()
+void mu::ui::window::CNewUIWindowMenu::Release()
 {
     UnloadImages();
 
@@ -53,13 +54,13 @@ void SEASON3B::CNewUIWindowMenu::Release()
     }
 }
 
-void SEASON3B::CNewUIWindowMenu::SetPos(int x, int y)
+void mu::ui::window::CNewUIWindowMenu::SetPos(int x, int y)
 {
     m_Pos.x = STANDARD_POS_X;
     m_Pos.y = STANDARD_POS_Y - (20 * (MENU_MAX_INDEX - 4));
 }
 
-bool SEASON3B::CNewUIWindowMenu::UpdateMouseEvent()
+bool mu::ui::window::CNewUIWindowMenu::UpdateMouseEvent()
 {
     POINT pt = {m_Pos.x, m_Pos.y + 20};
 
@@ -74,52 +75,52 @@ bool SEASON3B::CNewUIWindowMenu::UpdateMouseEvent()
         pt.y += 20.f;
     }
 
-    if (m_iSelectedIndex > -1 && SEASON3B::IsRelease(VK_LBUTTON))
+    if (m_iSelectedIndex > -1 && mu::ui::window::IsRelease(VK_LBUTTON))
     {
         switch (m_iSelectedIndex)
         {
         case 0:
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_WINDOW_MENU);
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSystemMenuMsgBoxLayout));
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSystemMenuMsgBoxLayout));
             return false;
         }
         break;
         case 1:
         {
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_HELP))
+            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_HELP))
             {
                 g_pHelp->AutoUpdateIndex();
             }
             else
             {
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_HELP);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_HELP);
             }
             return false;
         }
         break;
         case 2:
         {
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_GUILDINFO);
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_WINDOW_MENU);
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_GUILDINFO);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
             return false;
         }
         break;
         case 3:
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MOVEMAP);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MOVEMAP);
             return false;
         }
         break;
         case 4:
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_WINDOW_MENU);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
             if (g_pNewUIMiniMap->m_bSuccess == false)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_MINI_MAP);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
             }
             else
-                g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MINI_MAP);
+                g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MINI_MAP);
             return false;
         }
         break;
@@ -127,8 +128,8 @@ bool SEASON3B::CNewUIWindowMenu::UpdateMouseEvent()
         {
             if (g_pNewUIGensRanking->SetGensInfo())
             {
-                g_pNewUISystem->Show(SEASON3B::INTERFACE_GENSRANKING);
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_WINDOW_MENU);
+                g_pNewUISystem->Show(mu::ui::window::INTERFACE_GENSRANKING);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
             }
             return false;
         }
@@ -146,13 +147,13 @@ bool SEASON3B::CNewUIWindowMenu::UpdateMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIWindowMenu::UpdateKeyEvent()
+bool mu::ui::window::CNewUIWindowMenu::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_WINDOW_MENU) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_WINDOW_MENU) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_WINDOW_MENU);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -162,12 +163,12 @@ bool SEASON3B::CNewUIWindowMenu::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIWindowMenu::Update()
+bool mu::ui::window::CNewUIWindowMenu::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIWindowMenu::Render()
+bool mu::ui::window::CNewUIWindowMenu::Render()
 {
     EnableAlphaTest();
 
@@ -180,7 +181,7 @@ bool SEASON3B::CNewUIWindowMenu::Render()
     return true;
 }
 
-void SEASON3B::CNewUIWindowMenu::RenderFrame()
+void mu::ui::window::CNewUIWindowMenu::RenderFrame()
 {
     float x, y, width, height;
 
@@ -216,7 +217,7 @@ void SEASON3B::CNewUIWindowMenu::RenderFrame()
     }
 }
 
-void SEASON3B::CNewUIWindowMenu::RenderTexts()
+void mu::ui::window::CNewUIWindowMenu::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetBgColor(0);
@@ -239,7 +240,7 @@ void SEASON3B::CNewUIWindowMenu::RenderTexts()
     }
 }
 
-void SEASON3B::CNewUIWindowMenu::RenderArrow()
+void mu::ui::window::CNewUIWindowMenu::RenderArrow()
 {
     if (m_iSelectedIndex < 0)
     {
@@ -255,24 +256,24 @@ void SEASON3B::CNewUIWindowMenu::RenderArrow()
     RenderImage(IMAGE_WINDOW_MENU_ARROWR, x, y, 6.f, 9.f);
 }
 
-float SEASON3B::CNewUIWindowMenu::GetLayerDepth()
+float mu::ui::window::CNewUIWindowMenu::GetLayerDepth()
 {
     return 10.4f;
 }
 
-float SEASON3B::CNewUIWindowMenu::GetKeyEventOrder()
+float mu::ui::window::CNewUIWindowMenu::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void SEASON3B::CNewUIWindowMenu::OpenningProcess()
+void mu::ui::window::CNewUIWindowMenu::OpenningProcess()
 {
     m_iSelectedIndex = -1;
 }
 
-void SEASON3B::CNewUIWindowMenu::ClosingProcess() {}
+void mu::ui::window::CNewUIWindowMenu::ClosingProcess() {}
 
-void SEASON3B::CNewUIWindowMenu::LoadImages()
+void mu::ui::window::CNewUIWindowMenu::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_WINDOW_MENU_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_commamd01.tga", IMAGE_WINDOW_MENU_FRAME_UP, GL_LINEAR);
@@ -283,7 +284,7 @@ void SEASON3B::CNewUIWindowMenu::LoadImages()
     LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_WINDOW_MENU_ARROWR, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIWindowMenu::UnloadImages()
+void mu::ui::window::CNewUIWindowMenu::UnloadImages()
 {
     DeleteBitmap(IMAGE_WINDOW_MENU_BACK);
     DeleteBitmap(IMAGE_WINDOW_MENU_FRAME_UP);

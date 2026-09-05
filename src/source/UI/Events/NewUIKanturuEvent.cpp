@@ -14,7 +14,7 @@
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "Audio/DSPlaySound.h"
 
-SEASON3B::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
+mu::ui::window::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -25,12 +25,12 @@ SEASON3B::CNewUIKanturu2ndEnterNpc::CNewUIKanturu2ndEnterNpc()
     Initialize();
 }
 
-SEASON3B::CNewUIKanturu2ndEnterNpc::~CNewUIKanturu2ndEnterNpc()
+mu::ui::window::CNewUIKanturu2ndEnterNpc::~CNewUIKanturu2ndEnterNpc()
 {
     Release();
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::Initialize()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::Initialize()
 {
     m_bNpcAnimation = false;
     m_bEnterRequest = false;
@@ -43,13 +43,13 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::Initialize()
     }
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC, this);
 
     SetPos(x, y);
 
@@ -62,7 +62,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::Release()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::Release()
 {
     UnloadImages();
 
@@ -73,13 +73,13 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::Release()
     }
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SetPos(int x, int y)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::UpdateMouseEvent()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
     {
@@ -94,13 +94,13 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::UpdateKeyEvent()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -109,9 +109,9 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::Update()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Update()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == true)
     {
         if (timeGetTime() - m_dwRefreshTime > KANTURU2ND_REFRESH_GAPTIME)
         {
@@ -122,7 +122,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::Update()
     return true;
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::Render()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::Render()
 {
     EnableAlphaTest();
 
@@ -135,37 +135,37 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::Render()
     return true;
 }
 
-float SEASON3B::CNewUIKanturu2ndEnterNpc::GetLayerDepth()
+float mu::ui::window::CNewUIKanturu2ndEnterNpc::GetLayerDepth()
 {
     return 10.1f;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SetNpcObject(OBJECT* pObj)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetNpcObject(OBJECT* pObj)
 {
     m_pNpcObject = pObj;
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::IsNpcAnimation()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::IsNpcAnimation()
 {
     return m_bNpcAnimation;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SetNpcAnimation(bool bValue)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetNpcAnimation(bool bValue)
 {
     m_bNpcAnimation = bValue;
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::IsEnterRequest()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::IsEnterRequest()
 {
     return m_bEnterRequest;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SetEnterRequest(bool bValue)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetEnterRequest(bool bValue)
 {
     m_bEnterRequest = bValue;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
 {
     wchar_t strMessage[256];
     if (btResult == POPUP_FAILED || btResult == POPUP_FAILED2)
@@ -189,10 +189,10 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::CreateMessageBox(BYTE btResult)
         wcscpy(strMessage, I18N::Game::Lookup(2170 + btResult));
     }
 
-    SEASON3B::CreateOkMessageBox(strMessage);
+    mu::ui::window::CreateOkMessageBox(strMessage);
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYTE btDetailState, BYTE btEnter, BYTE btUserCount, int iRemainTime)
 {
     if (m_pNpcObject && m_pNpcObject->CurrentAction == KANTURU2ND_NPC_ANI_ROT)
     {
@@ -364,13 +364,13 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdInfo(BYTE btState, BYT
         wcscpy(m_strSubject, I18N::Game::FailedToEnter);
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC) == false)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC) == false)
     {
-        g_pNewUISystem->Show(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
     }
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
 {
     m_bEnterRequest = false;
     CreateMessageBox(btResult);
@@ -381,22 +381,22 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
 
     DeleteJoint(BITMAP_JOINT_ENERGY, NULL);
 
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
 {
     SocketClient->ToGameServer()->SendKanturuInfoRequest();
     m_dwRefreshTime = timeGetTime();
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
 {
     SocketClient->ToGameServer()->SendKanturuEnterRequest();
     m_bEnterRequest = true;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::LoadImages()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_KANTURU2ND_TOP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_msgbox_middle.tga", IMAGE_KANTURU2ND_MIDDLE, GL_LINEAR);
@@ -405,7 +405,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::LoadImages()
     LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_KANTURU2ND_BTN, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::UnloadImages()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::UnloadImages()
 {
     DeleteBitmap(IMAGE_KANTURU2ND_TOP);
     DeleteBitmap(IMAGE_KANTURU2ND_MIDDLE);
@@ -414,7 +414,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::UnloadImages()
     DeleteBitmap(IMAGE_KANTURU2ND_BTN);
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
 {
     m_BtnRefresh.ChangeText(&I18N::Game::Refresh);
     m_BtnRefresh.ChangeTextBackColor(RGBA(255, 255, 255, 0));
@@ -438,7 +438,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SetButtonInfo()
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
+bool mu::ui::window::CNewUIKanturu2ndEnterNpc::BtnProcess()
 {
     if (m_BtnRefresh.IsLock() == true)
     {
@@ -465,7 +465,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
     {
         if (m_pNpcObject)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
 
             if (m_byState == KANTURU_STATE_TOWER)
             {
@@ -524,14 +524,14 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
 
     if (m_BtnClose.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC);
 
         return true;
     }
     return false;
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderFrame()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderFrame()
 {
     float x, y, width, height;
 
@@ -552,14 +552,14 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderFrame()
     RenderImage(IMAGE_KANTURU2ND_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderButtons()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderButtons()
 {
     m_BtnEnter.Render();
     m_BtnRefresh.Render();
     m_BtnClose.Render();
 }
 
-void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderTexts()
+void mu::ui::window::CNewUIKanturu2ndEnterNpc::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0xFF49B0FF);
@@ -598,7 +598,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::RenderTexts()
     }
 }
 
-SEASON3B::CNewUIKanturuInfoWindow::CNewUIKanturuInfoWindow()
+mu::ui::window::CNewUIKanturuInfoWindow::CNewUIKanturuInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
@@ -608,18 +608,18 @@ SEASON3B::CNewUIKanturuInfoWindow::CNewUIKanturuInfoWindow()
     m_dwSyncTime = 0;
 }
 
-SEASON3B::CNewUIKanturuInfoWindow::~CNewUIKanturuInfoWindow()
+mu::ui::window::CNewUIKanturuInfoWindow::~CNewUIKanturuInfoWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIKanturuInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIKanturuInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_KANTURU_INFO, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_KANTURU_INFO, this);
 
     SetPos(x, y);
 
@@ -630,7 +630,7 @@ bool SEASON3B::CNewUIKanturuInfoWindow::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::Release()
+void mu::ui::window::CNewUIKanturuInfoWindow::Release()
 {
     UnloadImages();
 
@@ -641,36 +641,36 @@ void SEASON3B::CNewUIKanturuInfoWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIKanturuInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIKanturuInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIKanturuInfoWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIKanturuInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIKanturuInfoWindow::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIKanturuInfoWindow::Update()
+bool mu::ui::window::CNewUIKanturuInfoWindow::Update()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU_INFO))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU_INFO))
     {
         if (M39Kanturu3rd::IsInKanturu3rd() == false)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU_INFO);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_KANTURU_INFO);
         }
     }
 
     return true;
 }
 
-bool SEASON3B::CNewUIKanturuInfoWindow::Render()
+bool mu::ui::window::CNewUIKanturuInfoWindow::Render()
 {
     EnableAlphaTest();
 
@@ -681,12 +681,12 @@ bool SEASON3B::CNewUIKanturuInfoWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::RenderFrame()
+void mu::ui::window::CNewUIKanturuInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_KANTURUINFO_WINDOW, m_Pos.x, m_Pos.y, 99.f, 78.f);
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::RenderInfo()
+void mu::ui::window::CNewUIKanturuInfoWindow::RenderInfo()
 {
     g_pRenderText->SetFont(g_hFontBold);
 
@@ -736,31 +736,31 @@ void SEASON3B::CNewUIKanturuInfoWindow::RenderInfo()
         g_pRenderText->RenderText(m_Pos.x + 48, m_Pos.y + 57, L":");
     }
 
-    SEASON3B::RenderNumber(m_Pos.x + 35, m_Pos.y + 55, m_iMinute, 1.f);
-    SEASON3B::RenderNumber(m_Pos.x + 65, m_Pos.y + 55, iSecond, 1.f);
+    mu::ui::window::RenderNumber(m_Pos.x + 35, m_Pos.y + 55, m_iMinute, 1.f);
+    mu::ui::window::RenderNumber(m_Pos.x + 65, m_Pos.y + 55, iSecond, 1.f);
 }
 
-float SEASON3B::CNewUIKanturuInfoWindow::GetLayerDepth()
+float mu::ui::window::CNewUIKanturuInfoWindow::GetLayerDepth()
 {
     return 1.92f;
 }
 
-float SEASON3B::CNewUIKanturuInfoWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIKanturuInfoWindow::GetKeyEventOrder()
 {
     return 9.1f;
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::LoadImages()
+void mu::ui::window::CNewUIKanturuInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Figure_kantru.tga", IMAGE_KANTURUINFO_WINDOW, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::UnloadImages()
+void mu::ui::window::CNewUIKanturuInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_KANTURUINFO_WINDOW);
 }
 
-void SEASON3B::CNewUIKanturuInfoWindow::SetTime(int iTimeLimit)
+void mu::ui::window::CNewUIKanturuInfoWindow::SetTime(int iTimeLimit)
 {
     m_iMinute = 0;
     m_iSecond = iTimeLimit / 1000;

@@ -11,7 +11,7 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIQuickCommandWindow : public CNewUIObj
     {

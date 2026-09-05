@@ -24,14 +24,14 @@
 #include "UI/Widgets/Button.h"
 
 using UI::Scaling::FontRole;
-using SEASON3B::CNewUICommandWindow;
+using mu::ui::window::CNewUICommandWindow;
 
 namespace
 {
-class Recording3DObject final : public SEASON3B::INewUI3DRenderObj
+class Recording3DObject final : public mu::ui::window::INewUI3DRenderObj
 {
 public:
-    explicit Recording3DObject(SEASON3B::CNewUIObj* owner)
+    explicit Recording3DObject(mu::ui::window::CNewUIObj* owner)
         : m_owner(owner)
     {
     }
@@ -43,22 +43,22 @@ public:
     }
 
     bool IsVisible() const override { return true; }
-    SEASON3B::CNewUIObj* GetLayoutOwner() const override { return m_owner; }
+    mu::ui::window::CNewUIObj* GetLayoutOwner() const override { return m_owner; }
 
     int mouseX = -1;
     int mouseY = -1;
 
 private:
-    SEASON3B::CNewUIObj* m_owner;
+    mu::ui::window::CNewUIObj* m_owner;
 };
 
-class Test3DCamera final : public SEASON3B::CNewUI3DCamera
+class Test3DCamera final : public mu::ui::window::CNewUI3DCamera
 {
 public:
     using CNewUI3DCamera::Render3D;
 };
 
-class RecordingUIObject final : public SEASON3B::CNewUIObj
+class RecordingUIObject final : public mu::ui::window::CNewUIObj
 {
 public:
     bool Render() override
@@ -267,17 +267,17 @@ TEST_CASE("inventory drag keeps border drops in their original slots [ui][invent
     const POINT leftTopLeft = UI::Items::Drag::ItemTopLeft(101, 201, leftOffset);
     CHECK(leftTopLeft.x == gridLeft);
     CHECK(leftTopLeft.y == gridTop);
-    CHECK((leftTopLeft.x - gridLeft) / SEASON3B::INVENTORY_SQUARE_WIDTH == 0);
-    CHECK((leftTopLeft.y - gridTop) / SEASON3B::INVENTORY_SQUARE_HEIGHT == 0);
+    CHECK((leftTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 0);
+    CHECK((leftTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
 
-    constexpr int rightItemLeft = gridLeft + 6 * SEASON3B::INVENTORY_SQUARE_WIDTH;
+    constexpr int rightItemLeft = gridLeft + 6 * mu::ui::window::INVENTORY_SQUARE_WIDTH;
     const POINT rightOffset = UI::Items::Drag::PickupOffset(rightItemLeft, gridTop, 40, 40,
                                                             rightItemLeft + 39, gridTop + 39, true);
     const POINT rightTopLeft = UI::Items::Drag::ItemTopLeft(rightItemLeft + 39, gridTop + 39, rightOffset);
     CHECK(rightTopLeft.x == rightItemLeft);
     CHECK(rightTopLeft.y == gridTop);
-    CHECK((rightTopLeft.x - gridLeft) / SEASON3B::INVENTORY_SQUARE_WIDTH == 6);
-    CHECK((rightTopLeft.y - gridTop) / SEASON3B::INVENTORY_SQUARE_HEIGHT == 0);
+    CHECK((rightTopLeft.x - gridLeft) / mu::ui::window::INVENTORY_SQUARE_WIDTH == 6);
+    CHECK((rightTopLeft.y - gridTop) / mu::ui::window::INVENTORY_SQUARE_HEIGHT == 0);
 }
 
 TEST_CASE("inventory drag anchor survives dock scaling [ui][inventory]")
@@ -325,7 +325,7 @@ TEST_CASE("store window consumes passive hover before world selection [ui][store
     MouseY = 200;
 
     {
-        SEASON3B::CNewUINPCShop shop;
+        mu::ui::window::CNewUINPCShop shop;
         shop.SetSellingItem(true);
         CHECK_FALSE(shop.UpdateMouseEvent());
     }
@@ -345,7 +345,7 @@ TEST_CASE("right dock anchors existing panel columns to the viewport edge [ui][s
 TEST_CASE("right-side status overlays stay adjacent to right-docked panels [ui][scaling]")
 {
     using UI::Scaling::LayoutMode;
-    for (const auto interfaceKey : {SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, SEASON3B::INTERFACE_PARTY_INFO_WINDOW})
+    for (const auto interfaceKey : {mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO, mu::ui::window::INTERFACE_PARTY_INFO_WINDOW})
     {
         const auto overlayMode = UI::Layout::ForInterface(interfaceKey);
         CHECK(overlayMode == LayoutMode::DockRight);
@@ -373,13 +373,13 @@ TEST_CASE("dockable command windows share the HUD boundary [ui][scaling]")
 {
     CHECK(UI::Scaling::DockLogicalBottom == 432);
     CHECK(CNewUICommandWindow::COMMAND_WINDOW_HEIGHT == UI::Scaling::DockLogicalBottom);
-    CHECK(SEASON3B::CNewUIChatCommandWindow::WindowHeight == UI::Scaling::DockLogicalBottom);
+    CHECK(mu::ui::window::CNewUIChatCommandWindow::WindowHeight == UI::Scaling::DockLogicalBottom);
 }
 
 TEST_CASE("command windows render between HUD and modal layers [ui][scaling]")
 {
     CNewUICommandWindow commandWindow;
-    SEASON3B::CNewUIChatCommandWindow commandListWindow;
+    mu::ui::window::CNewUIChatCommandWindow commandListWindow;
 
     CHECK(UI::Layout::ForegroundPanelLayerDepth > 10.6f);
     CHECK(UI::Layout::ForegroundPanelLayerDepth < 10.7f);
@@ -537,8 +537,8 @@ TEST_CASE("managed rendering uses its layout mouse coordinates [ui][scaling]")
     MouseY = 202;
 
     RecordingUIObject object;
-    SEASON3B::CNewUIManager manager;
-    manager.AddUIObj(SEASON3B::INTERFACE_INVENTORY, &object);
+    mu::ui::window::CNewUIManager manager;
+    manager.AddUIObj(mu::ui::window::INTERFACE_INVENTORY, &object);
 
     manager.Render();
 
@@ -725,16 +725,16 @@ TEST_CASE("legacy UI preserves logical input and world-overlay coordinates [ui][
 TEST_CASE("interface policy selects viewport dock and dialog layouts [ui][scaling]")
 {
     using UI::Scaling::LayoutMode;
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MAINFRAME) == LayoutMode::Hud);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_HOTKEY) == LayoutMode::Hud);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_INVENTORY) == LayoutMode::DockRight);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
-    CHECK(UI::Layout::ForInterface(SEASON3B::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MAINFRAME) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_SKILL_LIST) == LayoutMode::HudCenter);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_HOTKEY) == LayoutMode::Hud);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_INVENTORY) == LayoutMode::DockRight);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MOVEMAP) == LayoutMode::DockLeft);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_FRIEND) == LayoutMode::FloatingWorkspace);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_MESSAGEBOX) == LayoutMode::Dialog);
+    CHECK(UI::Layout::ForInterface(mu::ui::window::INTERFACE_NAME_WINDOW) == LayoutMode::WorldOverlay);
 }
 
 TEST_CASE("floating windows keep uniform scale across the full viewport [ui][scaling]")

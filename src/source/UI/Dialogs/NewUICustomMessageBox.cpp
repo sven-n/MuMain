@@ -29,6 +29,7 @@ char AppointType;
 #define BATTLEMASTER	32
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -53,22 +54,22 @@ int AppendWrappedMessageLines(const std::wstring& text, BYTE fontType, int maxWi
 }
 } // namespace
 
-SEASON3B::CNewUITextInputMsgBox::CNewUITextInputMsgBox()
+mu::ui::window::CNewUITextInputMsgBox::CNewUITextInputMsgBox()
 {
     m_pInputBox = NULL;
 }
 
-SEASON3B::CNewUITextInputMsgBox::~CNewUITextInputMsgBox()
+mu::ui::window::CNewUITextInputMsgBox::~CNewUITextInputMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputType, int iInputBoxWidth, int iInputBoxHeight, int iTextLimit, bool bIsPassword)
+bool mu::ui::window::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputType, int iInputBoxWidth, int iInputBoxHeight, int iTextLimit, bool bIsPassword)
 {
     m_dwMsgBoxType = dwMsgBoxType;
     m_dwInputType = dwInputType;
 
-    AddCallbackFunc(SEASON3B::CNewUITextInputMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CNewUITextInputMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
 
     int x, y, width, height;
 
@@ -101,7 +102,7 @@ bool SEASON3B::CNewUITextInputMsgBox::Create(DWORD dwMsgBoxType, DWORD dwInputTy
     return true;
 }
 
-void SEASON3B::CNewUITextInputMsgBox::Release()
+void mu::ui::window::CNewUITextInputMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -118,7 +119,7 @@ void SEASON3B::CNewUITextInputMsgBox::Release()
     SetFocus(g_hWnd);
 }
 
-void SEASON3B::CNewUITextInputMsgBox::SetButtonInfo()
+void mu::ui::window::CNewUITextInputMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -159,7 +160,7 @@ void SEASON3B::CNewUITextInputMsgBox::SetButtonInfo()
     }
 }
 
-CALLBACK_RESULT SEASON3B::CNewUITextInputMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUITextInputMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     if (pMsgBox)
@@ -191,7 +192,7 @@ CALLBACK_RESULT SEASON3B::CNewUITextInputMsgBox::LButtonUp(class CNewUIMessageBo
     return CALLBACK_CONTINUE;
 }
 
-void SEASON3B::CNewUITextInputMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CNewUITextInputMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgTextList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -217,7 +218,7 @@ void SEASON3B::CNewUITextInputMsgBox::AddMsg(const type_string& strMsg, DWORD dw
     }
 }
 
-void SEASON3B::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
+void mu::ui::window::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
 {
     switch (m_dwMsgBoxType)
     {
@@ -231,7 +232,7 @@ void SEASON3B::CNewUITextInputMsgBox::AddButtonBlank(int iAddLine)
     }
 }
 
-int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+int mu::ui::window::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
         [&](const std::wstring& line)
@@ -244,12 +245,12 @@ int SEASON3B::CNewUITextInputMsgBox::SeparateText(const type_string& strMsg, DWO
         });
 }
 
-DWORD SEASON3B::CNewUITextInputMsgBox::GetMsgBoxType()
+DWORD mu::ui::window::CNewUITextInputMsgBox::GetMsgBoxType()
 {
     return m_dwMsgBoxType;
 }
 
-bool SEASON3B::CNewUITextInputMsgBox::Update()
+bool mu::ui::window::CNewUITextInputMsgBox::Update()
 {
     switch (m_dwMsgBoxType)
     {
@@ -279,7 +280,7 @@ bool SEASON3B::CNewUITextInputMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CNewUITextInputMsgBox::Render()
+bool mu::ui::window::CNewUITextInputMsgBox::Render()
 {
     float x, y, width, height;
 
@@ -315,7 +316,7 @@ bool SEASON3B::CNewUITextInputMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CNewUITextInputMsgBox::RenderTexts()
+void mu::ui::window::CNewUITextInputMsgBox::RenderTexts()
 {
     
     
@@ -348,7 +349,7 @@ void SEASON3B::CNewUITextInputMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CNewUITextInputMsgBox::RenderButtons()
+void mu::ui::window::CNewUITextInputMsgBox::RenderButtons()
 {
     switch (m_dwMsgBoxType)
     {
@@ -362,7 +363,7 @@ void SEASON3B::CNewUITextInputMsgBox::RenderButtons()
     }
 }
 
-void SEASON3B::CNewUITextInputMsgBox::GetInputBoxText(wchar_t* strText)
+void mu::ui::window::CNewUITextInputMsgBox::GetInputBoxText(wchar_t* strText)
 {
     if (m_pInputBox)
     {
@@ -370,7 +371,7 @@ void SEASON3B::CNewUITextInputMsgBox::GetInputBoxText(wchar_t* strText)
     }
 }
 
-void SEASON3B::CNewUITextInputMsgBox::SetInputBoxOption(int iOption)
+void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxOption(int iOption)
 {
     if (m_pInputBox)
     {
@@ -378,7 +379,7 @@ void SEASON3B::CNewUITextInputMsgBox::SetInputBoxOption(int iOption)
     }
 }
 
-void SEASON3B::CNewUITextInputMsgBox::SetInputBoxPosition(int x, int y)
+void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxPosition(int x, int y)
 {
     if (m_pInputBox)
     {
@@ -386,7 +387,7 @@ void SEASON3B::CNewUITextInputMsgBox::SetInputBoxPosition(int x, int y)
     }
 }
 
-void SEASON3B::CNewUITextInputMsgBox::SetInputBoxSize(int width, int height)
+void mu::ui::window::CNewUITextInputMsgBox::SetInputBoxSize(int width, int height)
 {
     if (m_pInputBox)
     {
@@ -394,7 +395,7 @@ void SEASON3B::CNewUITextInputMsgBox::SetInputBoxSize(int width, int height)
     }
 }
 
-void SEASON3B::CNewUIKeyPadButton::Render()
+void mu::ui::window::CNewUIKeyPadButton::Render()
 {
     if (GetEventState() == EVENT_BTN_HOVER)
     {
@@ -410,7 +411,7 @@ void SEASON3B::CNewUIKeyPadButton::Render()
     }
 }
 
-void SEASON3B::CNewUIDeleteKeyPadButton::Render()
+void mu::ui::window::CNewUIDeleteKeyPadButton::Render()
 {
     if (GetEventState() == EVENT_BTN_HOVER)
     {
@@ -428,7 +429,7 @@ void SEASON3B::CNewUIDeleteKeyPadButton::Render()
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUIKeyPadMsgBox::CNewUIKeyPadMsgBox()
+mu::ui::window::CNewUIKeyPadMsgBox::CNewUIKeyPadMsgBox()
 {
     ClearInput();
 
@@ -437,17 +438,17 @@ SEASON3B::CNewUIKeyPadMsgBox::CNewUIKeyPadMsgBox()
     m_iInputLimit = 0;
 }
 
-SEASON3B::CNewUIKeyPadMsgBox::~CNewUIKeyPadMsgBox()
+mu::ui::window::CNewUIKeyPadMsgBox::~CNewUIKeyPadMsgBox()
 {
 }
 
-bool SEASON3B::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
+bool mu::ui::window::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
 {
     m_iInputLimit = iInputLimit;
 
-    AddCallbackFunc(SEASON3B::CNewUIKeyPadMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CNewUIKeyPadMsgBox::KeyPadBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_INPUT);
-    AddCallbackFunc(SEASON3B::CNewUIKeyPadMsgBox::DeleteBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_DELETE);
+    AddCallbackFunc(mu::ui::window::CNewUIKeyPadMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CNewUIKeyPadMsgBox::KeyPadBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_INPUT);
+    AddCallbackFunc(mu::ui::window::CNewUIKeyPadMsgBox::DeleteBtnDown, MSGBOX_EVENT_USER_CUSTOM_KEYPAD_DELETE);
 
     int x, y, width, height;
 
@@ -484,7 +485,7 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Create(DWORD dwType, int iInputLimit)
     return true;
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::Release()
+void mu::ui::window::CNewUIKeyPadMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -496,7 +497,7 @@ void SEASON3B::CNewUIKeyPadMsgBox::Release()
     m_MsgTextList.clear();
 }
 
-CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
     if (pMsgBox)
@@ -535,7 +536,7 @@ CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::LButtonUp(class CNewUIMessageBoxBa
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::KeyPadBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::KeyPadBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -551,7 +552,7 @@ CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::KeyPadBtnDown(class CNewUIMessageB
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::DeleteBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::DeleteBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -563,12 +564,12 @@ CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::DeleteBtnDown(class CNewUIMessageB
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CNewUIKeyPadMsgBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CNewUIKeyPadMsgBox::Close(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return CALLBACK_CONTINUE;
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CNewUIKeyPadMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -577,47 +578,47 @@ void SEASON3B::CNewUIKeyPadMsgBox::AddMsg(const type_string& strMsg, DWORD dwCol
     m_MsgTextList.push_back(pMsg);
 }
 
-int SEASON3B::CNewUIKeyPadMsgBox::GetInputLimit()
+int mu::ui::window::CNewUIKeyPadMsgBox::GetInputLimit()
 {
     return m_iInputLimit;
 }
 
-int SEASON3B::CNewUIKeyPadMsgBox::GetInputSize()
+int mu::ui::window::CNewUIKeyPadMsgBox::GetInputSize()
 {
     return wcslen(m_strKeyPadInput);
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::ClearInput()
+void mu::ui::window::CNewUIKeyPadMsgBox::ClearInput()
 {
     ZeroMemory(m_strKeyPadInput, sizeof(m_strKeyPadInput));
 }
 
-const wchar_t* SEASON3B::CNewUIKeyPadMsgBox::GetInputText()
+const wchar_t* mu::ui::window::CNewUIKeyPadMsgBox::GetInputText()
 {
     return m_strKeyPadInput;
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::SetCheckInputText(const wchar_t* strInput)
+void mu::ui::window::CNewUIKeyPadMsgBox::SetCheckInputText(const wchar_t* strInput)
 {
     memcpy(m_strCheckKeyPadInput, strInput, m_iInputLimit);
 }
 
-bool SEASON3B::CNewUIKeyPadMsgBox::IsCheckInput()
+bool mu::ui::window::CNewUIKeyPadMsgBox::IsCheckInput()
 {
     return (0 == memcmp(m_strCheckKeyPadInput, m_strKeyPadInput, m_iInputLimit));
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::SetStoragePassword(WORD wPassword)
+void mu::ui::window::CNewUIKeyPadMsgBox::SetStoragePassword(WORD wPassword)
 {
     m_wStoragePassword = wPassword;
 }
 
-WORD SEASON3B::CNewUIKeyPadMsgBox::GetStoragePassword()
+WORD mu::ui::window::CNewUIKeyPadMsgBox::GetStoragePassword()
 {
     return m_wStoragePassword;
 }
 
-bool SEASON3B::CNewUIKeyPadMsgBox::IsAllSameNumber()
+bool mu::ui::window::CNewUIKeyPadMsgBox::IsAllSameNumber()
 {
     for (int i = 0; i < m_iInputLimit - 1; ++i)
     {
@@ -630,14 +631,14 @@ bool SEASON3B::CNewUIKeyPadMsgBox::IsAllSameNumber()
     return true;
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::KeyPadInput(int iInput)
+void mu::ui::window::CNewUIKeyPadMsgBox::KeyPadInput(int iInput)
 {
     wchar_t strInput[4] = { 0, };
     mu_swprintf(strInput, L"%d", iInput);
     wcscat(m_strKeyPadInput, strInput);
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::DeleteKeyPadInput()
+void mu::ui::window::CNewUIKeyPadMsgBox::DeleteKeyPadInput()
 {
     int iSize = wcslen(m_strKeyPadInput);
     if (iSize > 0)
@@ -646,7 +647,7 @@ void SEASON3B::CNewUIKeyPadMsgBox::DeleteKeyPadInput()
     }
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::SetButtonInfo()
+void mu::ui::window::CNewUIKeyPadMsgBox::SetButtonInfo()
 {
     int x, y, width, height;
 
@@ -694,7 +695,7 @@ void SEASON3B::CNewUIKeyPadMsgBox::SetButtonInfo()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-bool SEASON3B::CNewUIKeyPadMsgBox::Update()
+bool mu::ui::window::CNewUIKeyPadMsgBox::Update()
 {
     for (int i = 0; i < MAX_KEYPADINPUT; ++i)
     {
@@ -710,7 +711,7 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CNewUIKeyPadMsgBox::Render()
+bool mu::ui::window::CNewUIKeyPadMsgBox::Render()
 {
     EnableAlphaTest();
 
@@ -723,7 +724,7 @@ bool SEASON3B::CNewUIKeyPadMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::RenderFrame()
+void mu::ui::window::CNewUIKeyPadMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -744,7 +745,7 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::RenderKeyPadInput()
+void mu::ui::window::CNewUIKeyPadMsgBox::RenderKeyPadInput()
 {
     float x, y, width, height;
     width = 10.f * m_iInputLimit + 12.f;
@@ -767,7 +768,7 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderKeyPadInput()
     g_pRenderText->RenderText(x, y, strInput.c_str());
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::RenderTexts()
+void mu::ui::window::CNewUIKeyPadMsgBox::RenderTexts()
 {
     
     
@@ -800,12 +801,12 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CNewUIKeyPadMsgBox::RenderButtons()
+void mu::ui::window::CNewUIKeyPadMsgBox::RenderButtons()
 {
     for (int i = 0; i < MAX_KEYPADINPUT; ++i)
     {
         m_BtnKeyPad[i].Render();
-        SEASON3B::RenderNumber(m_BtnKeyPad[i].GetPosX() + 15, m_BtnKeyPad[i].GetPosY() + 5, m_iKeyPadMapping[i], 1.5f);
+        mu::ui::window::RenderNumber(m_BtnKeyPad[i].GetPosX() + 15, m_BtnKeyPad[i].GetPosY() + 5, m_iKeyPadMapping[i], 1.5f);
     }
 
     m_BtnDeleteKeyPad.Render();
@@ -815,17 +816,17 @@ void SEASON3B::CNewUIKeyPadMsgBox::RenderButtons()
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CUseFruitCheckMsgBox::CUseFruitCheckMsgBox()
+mu::ui::window::CUseFruitCheckMsgBox::CUseFruitCheckMsgBox()
 {
     ZeroMemory(&m_Item, sizeof(m_Item));
 }
 
-SEASON3B::CUseFruitCheckMsgBox::~CUseFruitCheckMsgBox()
+mu::ui::window::CUseFruitCheckMsgBox::~CUseFruitCheckMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
+bool mu::ui::window::CUseFruitCheckMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -884,7 +885,7 @@ bool SEASON3B::CUseFruitCheckMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::Release()
+void mu::ui::window::CUseFruitCheckMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -899,7 +900,7 @@ void SEASON3B::CUseFruitCheckMsgBox::Release()
     m_MsgDataList.clear();
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CUseFruitCheckMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -908,7 +909,7 @@ void SEASON3B::CUseFruitCheckMsgBox::AddMsg(const type_string& strMsg, DWORD dwC
     m_MsgDataList.push_back(pMsg);
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::Set3DItem(ITEM* pItem)
+void mu::ui::window::CUseFruitCheckMsgBox::Set3DItem(ITEM* pItem)
 {
     if (pItem)
     {
@@ -916,7 +917,7 @@ void SEASON3B::CUseFruitCheckMsgBox::Set3DItem(ITEM* pItem)
     }
 }
 
-bool SEASON3B::CUseFruitCheckMsgBox::Update()
+bool mu::ui::window::CUseFruitCheckMsgBox::Update()
 {
     m_BtnAdd.Update();
     m_BtnMinus.Update();
@@ -925,7 +926,7 @@ bool SEASON3B::CUseFruitCheckMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CUseFruitCheckMsgBox::Render()
+bool mu::ui::window::CUseFruitCheckMsgBox::Render()
 {
     EnableAlphaTest();
 
@@ -937,7 +938,7 @@ bool SEASON3B::CUseFruitCheckMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::Render3D()
+void mu::ui::window::CUseFruitCheckMsgBox::Render3D()
 {
     float x, y, width, height;
 
@@ -954,12 +955,12 @@ void SEASON3B::CUseFruitCheckMsgBox::Render3D()
         true);		// PickUp
 }
 
-bool SEASON3B::CUseFruitCheckMsgBox::IsVisible() const
+bool mu::ui::window::CUseFruitCheckMsgBox::IsVisible() const
 {
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CUseFruitCheckMsgBox*>(pOwner);
     if (pMsgBox)
@@ -984,7 +985,7 @@ CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::LButtonUp(class CNewUIMessageBox
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(byIndex, 0, true);
@@ -995,7 +996,7 @@ CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::AddBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::MinusBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::MinusBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
     SendRequestUse(byIndex, 0, false);
@@ -1006,7 +1007,7 @@ CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::MinusBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CUseFruitCheckMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1014,15 +1015,15 @@ CALLBACK_RESULT SEASON3B::CUseFruitCheckMsgBox::CancelBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CUseFruitCheckMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CUseFruitCheckMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CUseFruitCheckMsgBox::AddBtnDown, MSGBOX_EVENT_USER_CUSTOM_USE_FRUIT_ADD);
-    AddCallbackFunc(SEASON3B::CUseFruitCheckMsgBox::MinusBtnDown, MSGBOX_EVENT_USER_CUSTOM_USE_FRUIT_MINUS);
-    AddCallbackFunc(SEASON3B::CUseFruitCheckMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CUseFruitCheckMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CUseFruitCheckMsgBox::AddBtnDown, MSGBOX_EVENT_USER_CUSTOM_USE_FRUIT_ADD);
+    AddCallbackFunc(mu::ui::window::CUseFruitCheckMsgBox::MinusBtnDown, MSGBOX_EVENT_USER_CUSTOM_USE_FRUIT_MINUS);
+    AddCallbackFunc(mu::ui::window::CUseFruitCheckMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::SetButtonInfo()
+void mu::ui::window::CUseFruitCheckMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -1045,7 +1046,7 @@ void SEASON3B::CUseFruitCheckMsgBox::SetButtonInfo()
     m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::RenderFrame()
+void mu::ui::window::CUseFruitCheckMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -1066,7 +1067,7 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::RenderTexts()
+void mu::ui::window::CUseFruitCheckMsgBox::RenderTexts()
 {
     
     
@@ -1100,7 +1101,7 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CUseFruitCheckMsgBox::RenderButtons()
+void mu::ui::window::CUseFruitCheckMsgBox::RenderButtons()
 {
     m_BtnAdd.Render();
     m_BtnMinus.Render();
@@ -1109,16 +1110,16 @@ void SEASON3B::CUseFruitCheckMsgBox::RenderButtons()
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CGemIntegrationMsgBox::CGemIntegrationMsgBox()
+mu::ui::window::CGemIntegrationMsgBox::CGemIntegrationMsgBox()
 {
 };
 
-SEASON3B::CGemIntegrationMsgBox::~CGemIntegrationMsgBox()
+mu::ui::window::CGemIntegrationMsgBox::~CGemIntegrationMsgBox()
 {
     Release();
 };
 
-bool SEASON3B::CGemIntegrationMsgBox::Create(float fPriority)
+bool mu::ui::window::CGemIntegrationMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -1141,7 +1142,7 @@ bool SEASON3B::CGemIntegrationMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CGemIntegrationMsgBox::Release()
+void mu::ui::window::CGemIntegrationMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -1153,7 +1154,7 @@ void SEASON3B::CGemIntegrationMsgBox::Release()
     m_MsgDataList.clear();
 }
 
-bool SEASON3B::CGemIntegrationMsgBox::Update()
+bool mu::ui::window::CGemIntegrationMsgBox::Update()
 {
     m_BtnUnity.Update();
     m_BtnDisjoint.Update();
@@ -1162,7 +1163,7 @@ bool SEASON3B::CGemIntegrationMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CGemIntegrationMsgBox::Render()
+bool mu::ui::window::CGemIntegrationMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -1172,7 +1173,7 @@ bool SEASON3B::CGemIntegrationMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CGemIntegrationMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CGemIntegrationMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -1181,15 +1182,15 @@ void SEASON3B::CGemIntegrationMsgBox::AddMsg(const type_string& strMsg, DWORD dw
     m_MsgDataList.push_back(pMsg);
 }
 
-void SEASON3B::CGemIntegrationMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CGemIntegrationMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CGemIntegrationMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CGemIntegrationMsgBox::UnityBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY);
-    AddCallbackFunc(SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT);
-    AddCallbackFunc(SEASON3B::CGemIntegrationMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationMsgBox*>(pOwner);
     if (pMsgBox)
@@ -1214,11 +1215,11 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::LButtonUp(class CNewUIMessageBo
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::UnityBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetMode(COMGEM::ATTACH);
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationUnityMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationUnityMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1226,17 +1227,17 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::UnityBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetMode(COMGEM::DETACH);
 
     if (!COMGEM::FindWantedList())
     {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
         return CALLBACK_BREAK;
     }
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationDisjointMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationDisjointMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1244,7 +1245,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::DisjointBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -1254,7 +1255,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationMsgBox::CancelBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
+void mu::ui::window::CGemIntegrationMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -1284,7 +1285,7 @@ void SEASON3B::CGemIntegrationMsgBox::SetButtonInfo()
     m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
+void mu::ui::window::CGemIntegrationMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -1305,7 +1306,7 @@ void SEASON3B::CGemIntegrationMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CGemIntegrationMsgBox::RenderTexts()
+void mu::ui::window::CGemIntegrationMsgBox::RenderTexts()
 {
     
     
@@ -1339,23 +1340,23 @@ void SEASON3B::CGemIntegrationMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CGemIntegrationMsgBox::RenderButtons()
+void mu::ui::window::CGemIntegrationMsgBox::RenderButtons()
 {
     m_BtnUnity.Render();
     m_BtnDisjoint.Render();
     m_BtnCancel.Render();
 }
 
-SEASON3B::CGemIntegrationUnityMsgBox::CGemIntegrationUnityMsgBox()
+mu::ui::window::CGemIntegrationUnityMsgBox::CGemIntegrationUnityMsgBox()
 {
 }
 
-SEASON3B::CGemIntegrationUnityMsgBox::~CGemIntegrationUnityMsgBox()
+mu::ui::window::CGemIntegrationUnityMsgBox::~CGemIntegrationUnityMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CGemIntegrationUnityMsgBox::Create(float fPriority)
+bool mu::ui::window::CGemIntegrationUnityMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -1375,7 +1376,7 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::SetText(void)
+void mu::ui::window::CGemIntegrationUnityMsgBox::SetText(void)
 {
     m_MsgDataList.clear();
     if (COMGEM::m_cGemType == COMGEM::NOGEM)
@@ -1390,7 +1391,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetText(void)
     }
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::Release()
+void mu::ui::window::CGemIntegrationUnityMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -1402,7 +1403,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::Release()
     m_MsgDataList.clear();
 }
 
-bool SEASON3B::CGemIntegrationUnityMsgBox::Update()
+bool mu::ui::window::CGemIntegrationUnityMsgBox::Update()
 {
     int i;
     switch (COMGEM::m_cGemType)
@@ -1421,7 +1422,7 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CGemIntegrationUnityMsgBox::Render()
+bool mu::ui::window::CGemIntegrationUnityMsgBox::Render()
 {
     EnableAlphaTest();
 
@@ -1435,7 +1436,7 @@ bool SEASON3B::CGemIntegrationUnityMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CGemIntegrationUnityMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -1444,19 +1445,19 @@ void SEASON3B::CGemIntegrationUnityMsgBox::AddMsg(const type_string& strMsg, DWO
     m_MsgDataList.push_back(pMsg);
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CGemIntegrationUnityMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TEN);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TWENTY);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_THIRTY);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-    AddCallbackFunc(SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_SELECTMIX);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TEN);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TWENTY);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_THIRTY);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_SELECTMIX);
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::ResetWndSize(int _nType)
+void mu::ui::window::CGemIntegrationUnityMsgBox::ResetWndSize(int _nType)
 {
     int	height;
 
@@ -1474,7 +1475,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::ResetWndSize(int _nType)
     m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), GetPos().y + GetSize().cy - 50);
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
+void mu::ui::window::CGemIntegrationUnityMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -1517,7 +1518,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::SetButtonInfo()
     ResetWndSize(0);
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
+void mu::ui::window::CGemIntegrationUnityMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -1539,7 +1540,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
+void mu::ui::window::CGemIntegrationUnityMsgBox::RenderTexts()
 {
     
     
@@ -1573,7 +1574,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CGemIntegrationUnityMsgBox::RenderButtons()
+void mu::ui::window::CGemIntegrationUnityMsgBox::RenderButtons()
 {
     int i;
     switch (COMGEM::m_cGemType)
@@ -1590,7 +1591,7 @@ void SEASON3B::CGemIntegrationUnityMsgBox::RenderButtons()
     m_BtnCancel.Render();
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
     if (pMsgBox)
@@ -1630,29 +1631,29 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::LButtonUp(class CNewUIMess
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::CELE);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::SOUL);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     if (!COMGEM::CheckInv())
     {
         return CALLBACK_BREAK;
     }
 
-    SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
+    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
     if (pMsgBox)
     {
         wchar_t strText[256] = { 0, };
@@ -1669,14 +1670,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetComType(COMGEM::FIRST);
 
     if (COMGEM::CheckInv())
     {
-        SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
             wchar_t strText[256] = { 0, };
@@ -1709,14 +1710,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TenBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetComType(COMGEM::SECOND);
 
     if (COMGEM::CheckInv())
     {
-        SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
             wchar_t strText[256] = { 0, };
@@ -1749,14 +1750,14 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetComType(COMGEM::THIRD);
 
     if (COMGEM::CheckInv())
     {
-        SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
         if (pMsgBox)
         {
             wchar_t strText[256] = { 0, };
@@ -1789,7 +1790,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -1799,17 +1800,17 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationUnityMsgBox::CancelBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-SEASON3B::CGemIntegrationDisjointMsgBox::CGemIntegrationDisjointMsgBox()
+mu::ui::window::CGemIntegrationDisjointMsgBox::CGemIntegrationDisjointMsgBox()
 {
     m_iMiddleFrameCount = 0;
 }
 
-SEASON3B::CGemIntegrationDisjointMsgBox::~CGemIntegrationDisjointMsgBox()
+mu::ui::window::CGemIntegrationDisjointMsgBox::~CGemIntegrationDisjointMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CGemIntegrationDisjointMsgBox::Create(float fPriority)
+bool mu::ui::window::CGemIntegrationDisjointMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -1832,7 +1833,7 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::Release()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -1844,7 +1845,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::Release()
     m_MsgDataList.clear();
 }
 
-bool SEASON3B::CGemIntegrationDisjointMsgBox::Update()
+bool mu::ui::window::CGemIntegrationDisjointMsgBox::Update()
 {
     m_BtnCancel.Update();
 
@@ -1863,7 +1864,7 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CGemIntegrationDisjointMsgBox::Render()
+bool mu::ui::window::CGemIntegrationDisjointMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -1874,7 +1875,7 @@ bool SEASON3B::CGemIntegrationDisjointMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameSmall()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameSmall()
 {
     int height = 0;
 
@@ -1888,7 +1889,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameSmall()
     m_BtnDisjoint.SetEnable(false);
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameBig()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameBig()
 {
     int height = 0;
 
@@ -1902,7 +1903,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::ChangeMiddleFrameBig()
     m_BtnDisjoint.SetPos(m_BtnDisjoint.GetPosX(), GetPos().y + GetSize().cy - 85);
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CGemIntegrationDisjointMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -1911,16 +1912,16 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::AddMsg(const type_string& strMsg, 
     m_MsgDataList.push_back(pMsg);
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CGemIntegrationDisjointMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_BLESSING);
-    AddCallbackFunc(SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_SOUL);
-    AddCallbackFunc(SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT);
-    AddCallbackFunc(SEASON3B::CGemIntegrationDisjointMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_BLESSING);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_SOUL);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT_DISJOINT);
+    AddCallbackFunc(mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
     if (pMsgBox)
@@ -1950,7 +1951,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::LButtonUp(class CNewUIM
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -1965,7 +1966,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class C
 
     if (COMGEM::m_UnmixTarList.IsEmpty() == true)
     {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
         pMsgBox->ChangeMiddleFrameSmall();
     }
@@ -1977,7 +1978,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::BlessingBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGemIntegrationDisjointMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -1992,7 +1993,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewU
 
     if (COMGEM::m_UnmixTarList.IsEmpty() == true)
     {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
         COMGEM::GetBack();
         pMsgBox->ChangeMiddleFrameSmall();
     }
@@ -2004,7 +2005,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::SoulBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     UNMIX_TEXT* pUT = COMGEM::m_UnmixTarList.GetSelectedText();
     if (pUT)
@@ -2017,8 +2018,8 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
 
         COMGEM::SelectFromList(pUT->m_iInvenIdx, pUT->m_cLevel);
 
-        SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGemIntegrationDisjointCheckMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointCheckMsgBoxLayout), &pMsgBox);
 
         if (pMsgBox)
         {
@@ -2040,7 +2041,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::DisjointBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -2050,7 +2051,7 @@ CALLBACK_RESULT SEASON3B::CGemIntegrationDisjointMsgBox::CancelBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
     float msgboxhalfwidth = (GetSize().cx / 2.f);
@@ -2074,7 +2075,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::SetButtonInfo()
     m_BtnDisjoint.SetEnable(false);
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::RenderFrame()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -2095,7 +2096,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderTexts()
 {
     
     
@@ -2129,7 +2130,7 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::RenderGemList()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderGemList()
 {
     
     
@@ -2145,23 +2146,23 @@ void SEASON3B::CGemIntegrationDisjointMsgBox::RenderGemList()
     COMGEM::RenderUnMixList();
 }
 
-void SEASON3B::CGemIntegrationDisjointMsgBox::RenderButtons()
+void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderButtons()
 {
     m_BtnCancel.Render();
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CSystemMenuMsgBox::CSystemMenuMsgBox()
+mu::ui::window::CSystemMenuMsgBox::CSystemMenuMsgBox()
 {
 }
 
-SEASON3B::CSystemMenuMsgBox::~CSystemMenuMsgBox()
+mu::ui::window::CSystemMenuMsgBox::~CSystemMenuMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CSystemMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CSystemMenuMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -2179,12 +2180,12 @@ bool SEASON3B::CSystemMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CSystemMenuMsgBox::Release()
+void mu::ui::window::CSystemMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CSystemMenuMsgBox::Update()
+bool mu::ui::window::CSystemMenuMsgBox::Update()
 {
     m_BtnGameOver.Update();
     m_BtnChooseServer.Update();
@@ -2194,7 +2195,7 @@ bool SEASON3B::CSystemMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CSystemMenuMsgBox::Render()
+bool mu::ui::window::CSystemMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -2203,7 +2204,7 @@ bool SEASON3B::CSystemMenuMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CSystemMenuMsgBox::RenderFrame()
+void mu::ui::window::CSystemMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -2224,7 +2225,7 @@ void SEASON3B::CSystemMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CSystemMenuMsgBox::RenderButtons()
+void mu::ui::window::CSystemMenuMsgBox::RenderButtons()
 {
     m_BtnGameOver.Render();
     m_BtnChooseServer.Render();
@@ -2233,18 +2234,18 @@ void SEASON3B::CSystemMenuMsgBox::RenderButtons()
     m_BtnCancel.Render();
 }
 
-void SEASON3B::CSystemMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CSystemMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::GameOverBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER);
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER);
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER);
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::OptionBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_OPTION);
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-    AddCallbackFunc(SEASON3B::CSystemMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::OptionBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_OPTION);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
 }
 
-void SEASON3B::CSystemMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CSystemMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -2276,7 +2277,7 @@ void SEASON3B::CSystemMenuMsgBox::SetButtonInfo()
     m_BtnCancel.SetText(I18N::Game::Cancel);
 }
 
-CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CSystemMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2326,7 +2327,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::LButtonUp(class CNewUIMessageBoxBas
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_ErrorReport.Write(L"> Menu - Exit game. ");
     g_ErrorReport.WriteCurrentTime();
@@ -2334,9 +2335,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
     SaveOptions();
     SaveMacro(L"Data\\Macro.txt");
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
     {
-        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -2353,7 +2354,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::GameOverBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     View_End_Result = false;
     Suc_Or_Fail = -1;
@@ -2365,9 +2366,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
     SaveOptions();
     SaveMacro(L"Data\\Macro.txt");
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
     {
-        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -2384,7 +2385,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseServerBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     View_End_Result = false;
     Suc_Or_Fail = -1;
@@ -2397,9 +2398,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
     SaveOptions();
     SaveMacro(L"Data\\Macro.txt");
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
     {
-        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
     else
     {
@@ -2415,9 +2416,9 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::OptionBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::OptionBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_OPTION);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_OPTION);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2425,7 +2426,7 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::OptionBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2433,20 +2434,20 @@ CALLBACK_RESULT SEASON3B::CSystemMenuMsgBox::CancelBtnDown(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-SEASON3B::CBloodCastleResultMsgBox::CBloodCastleResultMsgBox()
+mu::ui::window::CBloodCastleResultMsgBox::CBloodCastleResultMsgBox()
 {
 }
 
-SEASON3B::CBloodCastleResultMsgBox::~CBloodCastleResultMsgBox()
+mu::ui::window::CBloodCastleResultMsgBox::~CBloodCastleResultMsgBox()
 {
 }
 
-bool SEASON3B::CBloodCastleResultMsgBox::Create(float fPriority)
+bool mu::ui::window::CBloodCastleResultMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
-    AddCallbackFunc(SEASON3B::CBloodCastleResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CBloodCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
+    AddCallbackFunc(mu::ui::window::CBloodCastleResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
     y = 100;
@@ -2468,14 +2469,14 @@ bool SEASON3B::CBloodCastleResultMsgBox::Create(float fPriority)
     return true;
 }
 
-bool SEASON3B::CBloodCastleResultMsgBox::Update()
+bool mu::ui::window::CBloodCastleResultMsgBox::Update()
 {
     m_BtnOk.Update();
 
     return true;
 }
 
-bool SEASON3B::CBloodCastleResultMsgBox::Render()
+bool mu::ui::window::CBloodCastleResultMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -2486,7 +2487,7 @@ bool SEASON3B::CBloodCastleResultMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CBloodCastleResultMsgBox::RenderFrame()
+void mu::ui::window::CBloodCastleResultMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -2507,7 +2508,7 @@ void SEASON3B::CBloodCastleResultMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-CALLBACK_RESULT SEASON3B::CBloodCastleResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CBloodCastleResultMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2522,7 +2523,7 @@ CALLBACK_RESULT SEASON3B::CBloodCastleResultMsgBox::LButtonUp(class CNewUIMessag
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CBloodCastleResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CBloodCastleResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2530,20 +2531,20 @@ CALLBACK_RESULT SEASON3B::CBloodCastleResultMsgBox::OkBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-SEASON3B::CDevilSquareRankMsgBox::CDevilSquareRankMsgBox()
+mu::ui::window::CDevilSquareRankMsgBox::CDevilSquareRankMsgBox()
 {
 }
 
-SEASON3B::CDevilSquareRankMsgBox::~CDevilSquareRankMsgBox()
+mu::ui::window::CDevilSquareRankMsgBox::~CDevilSquareRankMsgBox()
 {
 }
 
-bool SEASON3B::CDevilSquareRankMsgBox::Create(float fPriority)
+bool mu::ui::window::CDevilSquareRankMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
-    AddCallbackFunc(SEASON3B::CDevilSquareRankMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CDevilSquareRankMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
+    AddCallbackFunc(mu::ui::window::CDevilSquareRankMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
     y = 60;
@@ -2562,7 +2563,7 @@ bool SEASON3B::CDevilSquareRankMsgBox::Create(float fPriority)
     return true;
 }
 
-bool SEASON3B::CDevilSquareRankMsgBox::Update()
+bool mu::ui::window::CDevilSquareRankMsgBox::Update()
 {
     m_BtnOk.Update();
     matchEvent::SetPosition(GetPos().x, GetPos().y);
@@ -2570,7 +2571,7 @@ bool SEASON3B::CDevilSquareRankMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CDevilSquareRankMsgBox::Render()
+bool mu::ui::window::CDevilSquareRankMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -2582,7 +2583,7 @@ bool SEASON3B::CDevilSquareRankMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CDevilSquareRankMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDevilSquareRankMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2597,7 +2598,7 @@ CALLBACK_RESULT SEASON3B::CDevilSquareRankMsgBox::LButtonUp(class CNewUIMessageB
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CDevilSquareRankMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDevilSquareRankMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2605,7 +2606,7 @@ CALLBACK_RESULT SEASON3B::CDevilSquareRankMsgBox::OkBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CDevilSquareRankMsgBox::RenderFrame()
+void mu::ui::window::CDevilSquareRankMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -2650,20 +2651,20 @@ void SEASON3B::CDevilSquareRankMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_SEPARATE_LINE, x, y, width, height);
 }
 
-SEASON3B::CChaosCastleResultMsgBox::CChaosCastleResultMsgBox()
+mu::ui::window::CChaosCastleResultMsgBox::CChaosCastleResultMsgBox()
 {
 }
 
-SEASON3B::CChaosCastleResultMsgBox::~CChaosCastleResultMsgBox()
+mu::ui::window::CChaosCastleResultMsgBox::~CChaosCastleResultMsgBox()
 {
 }
 
-bool SEASON3B::CChaosCastleResultMsgBox::Create(float fPriority)
+bool mu::ui::window::CChaosCastleResultMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
-    AddCallbackFunc(SEASON3B::CChaosCastleResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CChaosCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
+    AddCallbackFunc(mu::ui::window::CChaosCastleResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
 
     x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
     y = 100;
@@ -2685,14 +2686,14 @@ bool SEASON3B::CChaosCastleResultMsgBox::Create(float fPriority)
     return true;
 }
 
-bool SEASON3B::CChaosCastleResultMsgBox::Update()
+bool mu::ui::window::CChaosCastleResultMsgBox::Update()
 {
     m_BtnOk.Update();
 
     return true;
 }
 
-bool SEASON3B::CChaosCastleResultMsgBox::Render()
+bool mu::ui::window::CChaosCastleResultMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -2703,7 +2704,7 @@ bool SEASON3B::CChaosCastleResultMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosCastleResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CChaosCastleResultMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2718,14 +2719,14 @@ CALLBACK_RESULT SEASON3B::CChaosCastleResultMsgBox::LButtonUp(class CNewUIMessag
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosCastleResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosCastleResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CChaosCastleResultMsgBox::RenderFrame()
+void mu::ui::window::CChaosCastleResultMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -2748,16 +2749,16 @@ void SEASON3B::CChaosCastleResultMsgBox::RenderFrame()
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CChaosMixMenuMsgBox::CChaosMixMenuMsgBox()
+mu::ui::window::CChaosMixMenuMsgBox::CChaosMixMenuMsgBox()
 {
 }
 
-SEASON3B::CChaosMixMenuMsgBox::~CChaosMixMenuMsgBox()
+mu::ui::window::CChaosMixMenuMsgBox::~CChaosMixMenuMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CChaosMixMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CChaosMixMenuMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -2775,12 +2776,12 @@ bool SEASON3B::CChaosMixMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CChaosMixMenuMsgBox::Release()
+void mu::ui::window::CChaosMixMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CChaosMixMenuMsgBox::Update()
+bool mu::ui::window::CChaosMixMenuMsgBox::Update()
 {
     m_BtnGeneralMix.Update();
     m_BtnChaosMix.Update();
@@ -2790,7 +2791,7 @@ bool SEASON3B::CChaosMixMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CChaosMixMenuMsgBox::Render()
+bool mu::ui::window::CChaosMixMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -2800,7 +2801,7 @@ bool SEASON3B::CChaosMixMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CChaosMixMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -2830,7 +2831,7 @@ CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::LButtonUp(class CNewUIMessageBoxB
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(0);
 
@@ -2840,7 +2841,7 @@ CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(1);
 
@@ -2850,7 +2851,7 @@ CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::Mix380BtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(2);
 
@@ -2860,10 +2861,10 @@ CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::Mix380BtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.ClearCheckRecipeResult();
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2871,16 +2872,16 @@ CALLBACK_RESULT SEASON3B::CChaosMixMenuMsgBox::CancelBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CChaosMixMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CChaosMixMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CChaosMixMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CChaosMixMenuMsgBox::GeneralMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_GENERALMIX);
-    AddCallbackFunc(SEASON3B::CChaosMixMenuMsgBox::ChaosMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_CHAOSMIX);
-    AddCallbackFunc(SEASON3B::CChaosMixMenuMsgBox::Mix380BtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_MIX380);
-    AddCallbackFunc(SEASON3B::CChaosMixMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_GENERALMIX);
+    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_CHAOSMIX);
+    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_MIX380);
+    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CChaosMixMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CChaosMixMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -2911,7 +2912,7 @@ void SEASON3B::CChaosMixMenuMsgBox::SetButtonInfo()
     m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CChaosMixMenuMsgBox::RenderFrame()
+void mu::ui::window::CChaosMixMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -2932,7 +2933,7 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CChaosMixMenuMsgBox::RenderTexts()
+void mu::ui::window::CChaosMixMenuMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -2966,7 +2967,7 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CChaosMixMenuMsgBox::RenderButtons()
+void mu::ui::window::CChaosMixMenuMsgBox::RenderButtons()
 {
     m_BtnGeneralMix.Render();
     m_BtnChaosMix.Render();
@@ -2974,16 +2975,16 @@ void SEASON3B::CChaosMixMenuMsgBox::RenderButtons()
     m_BtnCancel.Render();
 }
 
-SEASON3B::CDialogMsgBox::CDialogMsgBox()
+mu::ui::window::CDialogMsgBox::CDialogMsgBox()
 {
 }
 
-SEASON3B::CDialogMsgBox::~CDialogMsgBox()
+mu::ui::window::CDialogMsgBox::~CDialogMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CDialogMsgBox::Create(float fPriority)
+bool mu::ui::window::CDialogMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -3001,7 +3002,7 @@ bool SEASON3B::CDialogMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CDialogMsgBox::Release()
+void mu::ui::window::CDialogMsgBox::Release()
 {
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -3011,7 +3012,7 @@ void SEASON3B::CDialogMsgBox::Release()
     m_MsgDataList.clear();
 }
 
-void SEASON3B::CDialogMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CDialogMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgDataList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -3032,7 +3033,7 @@ void SEASON3B::CDialogMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, B
     }
 }
 
-CALLBACK_RESULT SEASON3B::CDialogMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDialogMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDialogMsgBox*>(pOwner);
     if (pMsgBox)
@@ -3047,7 +3048,7 @@ CALLBACK_RESULT SEASON3B::CDialogMsgBox::LButtonUp(class CNewUIMessageBoxBase* p
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CDialogMsgBox::EndBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDialogMsgBox::EndBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3055,14 +3056,14 @@ CALLBACK_RESULT SEASON3B::CDialogMsgBox::EndBtnDown(class CNewUIMessageBoxBase* 
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CDialogMsgBox::Update()
+bool mu::ui::window::CDialogMsgBox::Update()
 {
     m_BtnEnd.Update();
 
     return true;
 }
 
-bool SEASON3B::CDialogMsgBox::Render()
+bool mu::ui::window::CDialogMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -3072,13 +3073,13 @@ bool SEASON3B::CDialogMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CDialogMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CDialogMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CDialogMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CDialogMsgBox::EndBtnDown, MSGBOX_EVENT_USER_CUSTOM_DIALOG_END);
+    AddCallbackFunc(mu::ui::window::CDialogMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CDialogMsgBox::EndBtnDown, MSGBOX_EVENT_USER_CUSTOM_DIALOG_END);
 }
 
-int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+int mu::ui::window::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
         [&](const std::wstring& line)
@@ -3091,7 +3092,7 @@ int SEASON3B::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwCol
         });
 }
 
-void SEASON3B::CDialogMsgBox::SetButtonInfo()
+void mu::ui::window::CDialogMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -3107,12 +3108,12 @@ void SEASON3B::CDialogMsgBox::SetButtonInfo()
     m_BtnEnd.SetText(I18N::Game::ConversationIsOver);
 }
 
-void SEASON3B::CDialogMsgBox::AddButtonBlank(int iAddLine)
+void mu::ui::window::CDialogMsgBox::AddButtonBlank(int iAddLine)
 {
     m_BtnEnd.AddBlank(iAddLine * MSGBOX_MIDDLE_HEIGHT);
 }
 
-void SEASON3B::CDialogMsgBox::RenderFrame()
+void mu::ui::window::CDialogMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -3137,7 +3138,7 @@ void SEASON3B::CDialogMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CDialogMsgBox::RenderTexts()
+void mu::ui::window::CDialogMsgBox::RenderTexts()
 {
     
 
@@ -3170,26 +3171,26 @@ void SEASON3B::CDialogMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CDialogMsgBox::RenderButtons()
+void mu::ui::window::CDialogMsgBox::RenderButtons()
 {
     m_BtnEnd.Render();
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CProgressMsgBox::CProgressMsgBox()
+mu::ui::window::CProgressMsgBox::CProgressMsgBox()
 {
     m_dwStartTime = 0;
     m_dwEndTime = 0;
     m_dwElapseTime = 0;
 }
 
-SEASON3B::CProgressMsgBox::~CProgressMsgBox()
+mu::ui::window::CProgressMsgBox::~CProgressMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
+bool mu::ui::window::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
 {
     int x, y, width, height;
 
@@ -3211,16 +3212,16 @@ bool SEASON3B::CProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
     return true;
 }
 
-void SEASON3B::CProgressMsgBox::Release()
+void mu::ui::window::CProgressMsgBox::Release()
 {
 }
 
-void SEASON3B::CProgressMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CProgressMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CProgressMsgBox::ClosingProcess, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS);
+    AddCallbackFunc(mu::ui::window::CProgressMsgBox::ClosingProcess, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS);
 }
 
-void SEASON3B::CProgressMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CProgressMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgDataList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -3240,14 +3241,14 @@ void SEASON3B::CProgressMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor,
     }
 }
 
-void SEASON3B::CProgressMsgBox::SetElapseTime(DWORD dwElapseTime)
+void mu::ui::window::CProgressMsgBox::SetElapseTime(DWORD dwElapseTime)
 {
     m_dwElapseTime = dwElapseTime;
     m_dwStartTime = timeGetTime();
     m_dwEndTime = m_dwStartTime + m_dwElapseTime;
 }
 
-int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+int mu::ui::window::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
         [&](const std::wstring& line)
@@ -3260,7 +3261,7 @@ int SEASON3B::CProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwC
         });
 }
 
-bool SEASON3B::CProgressMsgBox::Update()
+bool mu::ui::window::CProgressMsgBox::Update()
 {
     g_pMainFrame->UpdateItemHotKey();
 
@@ -3273,7 +3274,7 @@ bool SEASON3B::CProgressMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CProgressMsgBox::Render()
+bool mu::ui::window::CProgressMsgBox::Render()
 {
     EnableAlphaTest();
 
@@ -3286,7 +3287,7 @@ bool SEASON3B::CProgressMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CProgressMsgBox::RenderFrame()
+void mu::ui::window::CProgressMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -3311,7 +3312,7 @@ void SEASON3B::CProgressMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CProgressMsgBox::RenderTexts()
+void mu::ui::window::CProgressMsgBox::RenderTexts()
 {
     
 
@@ -3344,7 +3345,7 @@ void SEASON3B::CProgressMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CProgressMsgBox::RenderProgress()
+void mu::ui::window::CProgressMsgBox::RenderProgress()
 {
     DWORD dwTime = timeGetTime();
     float fProgress = (float)(dwTime - m_dwStartTime) / m_dwElapseTime;
@@ -3358,7 +3359,7 @@ void SEASON3B::CProgressMsgBox::RenderProgress()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
 }
 
-CALLBACK_RESULT SEASON3B::CProgressMsgBox::ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CProgressMsgBox::ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3366,19 +3367,19 @@ CALLBACK_RESULT SEASON3B::CProgressMsgBox::ClosingProcess(class CNewUIMessageBox
     return CALLBACK_CONTINUE;
 }
 
-SEASON3B::CCursedTempleProgressMsgBox::CCursedTempleProgressMsgBox()
+mu::ui::window::CCursedTempleProgressMsgBox::CCursedTempleProgressMsgBox()
 {
     m_dwStartTime = 0;
     m_dwEndTime = 0;
     m_dwElapseTime = 0;
 }
 
-SEASON3B::CCursedTempleProgressMsgBox::~CCursedTempleProgressMsgBox()
+mu::ui::window::CCursedTempleProgressMsgBox::~CCursedTempleProgressMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
+bool mu::ui::window::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, float fPriority)
 {
     int x, y, width, height;
 
@@ -3400,17 +3401,17 @@ bool SEASON3B::CCursedTempleProgressMsgBox::Create(DWORD dwElapseTime, float fPr
     return true;
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::Release()
+void mu::ui::window::CCursedTempleProgressMsgBox::Release()
 {
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CCursedTempleProgressMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CCursedTempleProgressMsgBox::ClosingProcess, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS);
-    AddCallbackFunc(SEASON3B::CCursedTempleProgressMsgBox::CompleteProcess, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_COMPLETEPROCESS);
+    AddCallbackFunc(mu::ui::window::CCursedTempleProgressMsgBox::ClosingProcess, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS);
+    AddCallbackFunc(mu::ui::window::CCursedTempleProgressMsgBox::CompleteProcess, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_COMPLETEPROCESS);
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CCursedTempleProgressMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     int iOrigSize = m_MsgDataList.size();
     int iLine = SeparateText(strMsg, dwColor, byFontType);
@@ -3430,7 +3431,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::AddMsg(const type_string& strMsg, DW
     }
 }
 
-int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+int mu::ui::window::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
         [&](const std::wstring& line)
@@ -3443,7 +3444,7 @@ int SEASON3B::CCursedTempleProgressMsgBox::SeparateText(const type_string& strMs
         });
 }
 
-bool SEASON3B::CCursedTempleProgressMsgBox::Update()
+bool mu::ui::window::CCursedTempleProgressMsgBox::Update()
 {
     g_pMainFrame->UpdateItemHotKey();
 
@@ -3453,7 +3454,7 @@ bool SEASON3B::CCursedTempleProgressMsgBox::Update()
         g_MessageBox->SendEvent(this, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_COMPLETEPROCESS);
     }
 
-    if (CheckHeroAction() == false || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_GAMESYSTEM) == false)
+    if (CheckHeroAction() == false || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM) == false)
     {
         g_MessageBox->SendEvent(this, MSGBOX_EVENT_USER_CUSTOM_PROGRESS_CLOSINGPROCESS);
     }
@@ -3461,17 +3462,17 @@ bool SEASON3B::CCursedTempleProgressMsgBox::Update()
     return true;
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::SetNpcIndex(DWORD dwIndex)
+void mu::ui::window::CCursedTempleProgressMsgBox::SetNpcIndex(DWORD dwIndex)
 {
     m_dwNpcIndex = dwIndex;
 }
 
-DWORD SEASON3B::CCursedTempleProgressMsgBox::GetNpcIndex()
+DWORD mu::ui::window::CCursedTempleProgressMsgBox::GetNpcIndex()
 {
     return m_dwNpcIndex;
 }
 
-CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::ClosingProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3479,7 +3480,7 @@ CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::ClosingProcess(class CNew
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::CompleteProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCursedTempleProgressMsgBox::CompleteProcess(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CCursedTempleProgressMsgBox*>(pOwner);
     if (pMsgBox == nullptr)
@@ -3495,7 +3496,7 @@ CALLBACK_RESULT SEASON3B::CCursedTempleProgressMsgBox::CompleteProcess(class CNe
     return CALLBACK_CONTINUE;
 }
 
-bool SEASON3B::CCursedTempleProgressMsgBox::Render()
+bool mu::ui::window::CCursedTempleProgressMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -3505,7 +3506,7 @@ bool SEASON3B::CCursedTempleProgressMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::RenderFrame()
+void mu::ui::window::CCursedTempleProgressMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -3530,7 +3531,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::RenderTexts()
+void mu::ui::window::CCursedTempleProgressMsgBox::RenderTexts()
 {
     
 
@@ -3563,7 +3564,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CCursedTempleProgressMsgBox::RenderProgress()
+void mu::ui::window::CCursedTempleProgressMsgBox::RenderProgress()
 {
     DWORD dwTime = timeGetTime();
     float fProgress = (float)(dwTime - m_dwStartTime) / m_dwElapseTime;
@@ -3577,7 +3578,7 @@ void SEASON3B::CCursedTempleProgressMsgBox::RenderProgress()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_PROGRESS_BAR, x, y, 150.f * fProgress, 8.f);
 }
 
-bool SEASON3B::CCursedTempleProgressMsgBox::CheckHeroAction()
+bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()
 {
     if (g_isCharacterBuff((&Hero->Object), eDeBuff_Harden)
         || g_isCharacterBuff((&Hero->Object), eDeBuff_Stun)
@@ -3609,15 +3610,15 @@ bool SEASON3B::CCursedTempleProgressMsgBox::CheckHeroAction()
     return true;
 }
 
-SEASON3B::CDuelMsgBox::CDuelMsgBox()
+mu::ui::window::CDuelMsgBox::CDuelMsgBox()
 {
 }
 
-SEASON3B::CDuelMsgBox::~CDuelMsgBox()
+mu::ui::window::CDuelMsgBox::~CDuelMsgBox()
 {
 }
 
-bool SEASON3B::CDuelMsgBox::Create(float fPriority)
+bool mu::ui::window::CDuelMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -3635,15 +3636,15 @@ bool SEASON3B::CDuelMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CDuelMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CDuelMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CDuelMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CDuelMsgBox::OkBtnDown, MSGBOX_EVENT_USER_CUSTOM_DUEL_OK);
-    AddCallbackFunc(SEASON3B::CDuelMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_CUSTOM_DUEL_CANCEL);
-    AddCallbackFunc(SEASON3B::CDuelMsgBox::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
+    AddCallbackFunc(mu::ui::window::CDuelMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CDuelMsgBox::OkBtnDown, MSGBOX_EVENT_USER_CUSTOM_DUEL_OK);
+    AddCallbackFunc(mu::ui::window::CDuelMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_CUSTOM_DUEL_CANCEL);
+    AddCallbackFunc(mu::ui::window::CDuelMsgBox::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
 }
 
-void SEASON3B::CDuelMsgBox::SetButtonInfo()
+void mu::ui::window::CDuelMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
     width = MSGBOX_BTN_WIDTH;
@@ -3666,11 +3667,11 @@ void SEASON3B::CDuelMsgBox::SetButtonInfo()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void SEASON3B::CDuelMsgBox::Release()
+void mu::ui::window::CDuelMsgBox::Release()
 {
 }
 
-bool SEASON3B::CDuelMsgBox::Update()
+bool mu::ui::window::CDuelMsgBox::Update()
 {
     m_BtnOk.Update();
     m_BtnCancel.Update();
@@ -3678,7 +3679,7 @@ bool SEASON3B::CDuelMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CDuelMsgBox::Render()
+bool mu::ui::window::CDuelMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -3688,7 +3689,7 @@ bool SEASON3B::CDuelMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CDuelMsgBox::RenderFrame()
+void mu::ui::window::CDuelMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -3715,7 +3716,7 @@ void SEASON3B::CDuelMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CDuelMsgBox::RenderTexts()
+void mu::ui::window::CDuelMsgBox::RenderTexts()
 {
     wchar_t strDuelID[256];
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -3731,13 +3732,13 @@ void SEASON3B::CDuelMsgBox::RenderTexts()
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, I18N::Game::WouldYouLikeToAcceptTheChallenge, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CDuelMsgBox::RenderButton()
+void mu::ui::window::CDuelMsgBox::RenderButton()
 {
     m_BtnOk.Render();
     m_BtnCancel.Render();
 }
 
-CALLBACK_RESULT SEASON3B::CDuelMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDuelMsgBox*>(pOwner);
     if (pMsgBox)
@@ -3757,7 +3758,7 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOw
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3765,7 +3766,7 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOw
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -3773,17 +3774,17 @@ CALLBACK_RESULT SEASON3B::CDuelMsgBox::CancelBtnDown(class CNewUIMessageBoxBase*
     return CALLBACK_CONTINUE;
 }
 
-SEASON3B::CDuelResultMsgBox::CDuelResultMsgBox()
+mu::ui::window::CDuelResultMsgBox::CDuelResultMsgBox()
 {
     m_szWinnerID[0] = '\0';
     m_szLoserID[0] = '\0';
 }
 
-SEASON3B::CDuelResultMsgBox::~CDuelResultMsgBox()
+mu::ui::window::CDuelResultMsgBox::~CDuelResultMsgBox()
 {
 }
 
-bool SEASON3B::CDuelResultMsgBox::Create(float fPriority)
+bool mu::ui::window::CDuelResultMsgBox::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -3801,14 +3802,14 @@ bool SEASON3B::CDuelResultMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CDuelResultMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CDuelResultMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CDuelResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CDuelResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_CUSTOM_DUEL_OK);
-    AddCallbackFunc(SEASON3B::CDuelResultMsgBox::OkBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
+    AddCallbackFunc(mu::ui::window::CDuelResultMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CDuelResultMsgBox::OkBtnDown, MSGBOX_EVENT_USER_CUSTOM_DUEL_OK);
+    AddCallbackFunc(mu::ui::window::CDuelResultMsgBox::OkBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
 }
 
-void SEASON3B::CDuelResultMsgBox::SetButtonInfo()
+void mu::ui::window::CDuelResultMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
     width = MSGBOX_BTN_WIDTH;
@@ -3823,18 +3824,18 @@ void SEASON3B::CDuelResultMsgBox::SetButtonInfo()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void SEASON3B::CDuelResultMsgBox::Release()
+void mu::ui::window::CDuelResultMsgBox::Release()
 {
 }
 
-bool SEASON3B::CDuelResultMsgBox::Update()
+bool mu::ui::window::CDuelResultMsgBox::Update()
 {
     m_BtnOk.Update();
 
     return true;
 }
 
-bool SEASON3B::CDuelResultMsgBox::Render()
+bool mu::ui::window::CDuelResultMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -3844,7 +3845,7 @@ bool SEASON3B::CDuelResultMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CDuelResultMsgBox::RenderFrame()
+void mu::ui::window::CDuelResultMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -3871,7 +3872,7 @@ void SEASON3B::CDuelResultMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CDuelResultMsgBox::RenderTexts()
+void mu::ui::window::CDuelResultMsgBox::RenderTexts()
 {
     wchar_t strDuelID[256];
     g_pRenderText->SetBgColor(0, 0, 0, 0);
@@ -3889,12 +3890,12 @@ void SEASON3B::CDuelResultMsgBox::RenderTexts()
     g_pRenderText->RenderText(GetPos().x, GetPos().y + 151, I18N::Game::Lookup(2697), MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CDuelResultMsgBox::RenderButton()
+void mu::ui::window::CDuelResultMsgBox::RenderButton()
 {
     m_BtnOk.Render();
 }
 
-CALLBACK_RESULT SEASON3B::CDuelResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDuelResultMsgBox*>(pOwner);
     if (pMsgBox)
@@ -3909,7 +3910,7 @@ CALLBACK_RESULT SEASON3B::CDuelResultMsgBox::LButtonUp(class CNewUIMessageBoxBas
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CDuelResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDuelResultMsgBox::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     // 	SendRequestDuelOk(1, g_iDuelPlayerIndex, g_szDuelPlayerID);
 
@@ -4011,8 +4012,8 @@ CALLBACK_RESULT CCherryBlossomMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwn
 
 CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	g_pNewUISystem->Show(SEASON3B::INTERFACE_CHERRYBLOSSOM_WINDOW);
-    //	g_pCherryBlossom->SetType(SEASON3B::CNewUICherryBlossom::CB_WHITE);
+    //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
+    //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_WHITE);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4022,8 +4023,8 @@ CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CNewUIMessageBoxBase*
 
 CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	g_pNewUISystem->Show(SEASON3B::INTERFACE_CHERRYBLOSSOM_WINDOW);
-    //	g_pCherryBlossom->SetType(SEASON3B::CNewUICherryBlossom::CB_RED);
+    //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
+    //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_RED);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4033,8 +4034,8 @@ CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CNewUIMessageBoxBase* p
 
 CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    //	g_pNewUISystem->Show(SEASON3B::INTERFACE_CHERRYBLOSSOM_WINDOW);
-    //	g_pCherryBlossom->SetType(SEASON3B::CNewUICherryBlossom::CB_GOLD);
+    //	g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHERRYBLOSSOM_WINDOW);
+    //	g_pCherryBlossom->SetType(mu::ui::window::CNewUICherryBlossom::CB_GOLD);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4052,11 +4053,11 @@ CALLBACK_RESULT CCherryBlossomMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pO
 
 void CCherryBlossomMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CCherryBlossomMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CCherryBlossomMsgBox::WhiteCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_WHITE);
-    AddCallbackFunc(SEASON3B::CCherryBlossomMsgBox::RedCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_RED);
-    AddCallbackFunc(SEASON3B::CCherryBlossomMsgBox::GodCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_GOLD);
-    AddCallbackFunc(SEASON3B::CCherryBlossomMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::WhiteCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_WHITE);
+    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::RedCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_RED);
+    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::GodCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_GOLD);
+    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
 void CCherryBlossomMsgBox::SetButtonInfo()
@@ -4139,7 +4140,7 @@ void CCherryBlossomMsgBox::RenderButtons()
     m_BtnExit.Render();
 }
 
-bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
+bool mu::ui::window::CTradeZenMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4158,7 +4159,7 @@ bool SEASON3B::CTradeZenMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
@@ -4178,17 +4179,17 @@ CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::ProcessOk(class CNewUIMessageBo
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner);
 }
 
-CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner);
 }
 
-CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTradeZenMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4196,7 +4197,7 @@ CALLBACK_RESULT SEASON3B::CTradeZenMsgBoxLayout::CancelBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CZenReceiptMsgBoxLayout::SetLayout()
+bool mu::ui::window::CZenReceiptMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4215,17 +4216,17 @@ bool SEASON3B::CZenReceiptMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
@@ -4247,7 +4248,7 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessage
     }
     else
     {
-        SEASON3B::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -4256,7 +4257,7 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::ProcessOk(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4264,7 +4265,7 @@ CALLBACK_RESULT SEASON3B::CZenReceiptMsgBoxLayout::CancelBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
+bool mu::ui::window::CZenPaymentMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4283,17 +4284,17 @@ bool SEASON3B::CZenPaymentMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
@@ -4320,7 +4321,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessage
         else
         {
             g_pStorageInventory->SetBackupTakeZen(iInputZen);
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPasswordKeyPadMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPasswordKeyPadMsgBoxLayout));
         }
     }
     else if (CharacterMachine->Gold + iInputZen > 2000000000)
@@ -4328,7 +4329,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessage
     }
     else
     {
-        SEASON3B::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -4337,7 +4338,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::ProcessOk(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4345,7 +4346,7 @@ CALLBACK_RESULT SEASON3B::CZenPaymentMsgBoxLayout::CancelBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPersonalShopItemValueMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4364,7 +4365,7 @@ bool SEASON3B::CPersonalShopItemValueMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
@@ -4408,9 +4409,9 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
 
     if (bResult == true)
     {
-        SEASON3B::CNewUI3DItemCommonMsgBox* lpMsgBox = NULL;
+        mu::ui::window::CNewUI3DItemCommonMsgBox* lpMsgBox = NULL;
 
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
         if (lpMsgBox)
         {
             wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
@@ -4473,26 +4474,26 @@ CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ProcessOk(class CN
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopItemValueMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopItemValueMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
     g_pMyShopInventory->SetInputValueTextBox(false);
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPersonalShopNameMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4511,7 +4512,7 @@ bool SEASON3B::CPersonalShopNameMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
@@ -4527,7 +4528,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIM
     }
     else
     {
-        g_pSystemLogBox->AddText(I18N::Game::WrongStoreName, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::WrongStoreName, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -4536,17 +4537,17 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ProcessOk(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4554,7 +4555,7 @@ CALLBACK_RESULT SEASON3B::CPersonalShopNameMsgBoxLayout::CancelBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
+bool mu::ui::window::CCastleWithdrawMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4576,7 +4577,7 @@ bool SEASON3B::CCastleWithdrawMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
@@ -4600,7 +4601,7 @@ CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::ReturnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
@@ -4624,7 +4625,7 @@ CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4632,7 +4633,7 @@ CALLBACK_RESULT SEASON3B::CCastleWithdrawMsgBoxLayout::CancelBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CPasswordKeyPadMsgBoxLayout::SetLayout()
+bool mu::ui::window::CPasswordKeyPadMsgBoxLayout::SetLayout()
 {
     CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4649,7 +4650,7 @@ bool SEASON3B::CPasswordKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -4674,13 +4675,13 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMes
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     if (g_pPickedItem)
         g_pPickedItem->ShowPickedItem();
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE))
         g_pStorageInventory->SetItemAutoMove(false);
 
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4688,7 +4689,7 @@ CALLBACK_RESULT SEASON3B::CPasswordKeyPadMsgBoxLayout::CancelBtnDown(class CNewU
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CStorageLockKeyPadMsgBoxLayout::SetLayout()
+bool mu::ui::window::CStorageLockKeyPadMsgBoxLayout::SetLayout()
 {
     CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4704,7 +4705,7 @@ bool SEASON3B::CStorageLockKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -4721,12 +4722,12 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUI
         {
             pMsgBox->ClearInput();
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            SEASON3B::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
             return CALLBACK_BREAK;
         }
 
         CNewUIKeyPadMsgBox* pKeyPadMsgBox = NULL;
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout), &pKeyPadMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout), &pKeyPadMsgBox);
         if (pKeyPadMsgBox)
         {
             pKeyPadMsgBox->SetCheckInputText(pMsgBox->GetInputText());
@@ -4738,7 +4739,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::OkBtnDown(class CNewUI
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4746,7 +4747,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockKeyPadMsgBoxLayout::CancelBtnDown(class CN
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
+bool mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
 {
     CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4762,7 +4763,7 @@ bool SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -4779,7 +4780,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
         {
             pMsgBox->ClearInput();
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            SEASON3B::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
             return CALLBACK_BREAK;
         }
 
@@ -4788,7 +4789,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
             WORD wInputNumber = (WORD)_wtoi(pMsgBox->GetInputText());
 
             CNewUITextInputMsgBox* pPassword = NULL;
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CStorageLockMsgBoxLayout), &pPassword);
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockMsgBoxLayout), &pPassword);
             if (pPassword)
             {
                 pPassword->SetPassword(wInputNumber);
@@ -4801,7 +4802,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
         {
             pMsgBox->ClearInput();
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            SEASON3B::CreateOkMessageBox(I18N::Game::PasswordIsIncorrect);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::PasswordIsIncorrect);
             return CALLBACK_BREAK;
         }
     }
@@ -4809,7 +4810,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown(class C
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4817,7 +4818,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockCheckKeyPadMsgBoxLayout::CancelBtnDown(cla
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
+bool mu::ui::window::CStorageLockMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox) return false;
@@ -4832,24 +4833,24 @@ bool SEASON3B::CStorageLockMsgBoxLayout::SetLayout()
     pMsgBox->SetInputBoxOption(UIOPTION_PAINTBACK);
     pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword);
     pMsgBox->AddMsg(I18N::Game::EnterYourWEBZENCOMPassword697);
-    pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
-    pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
-    pMsgBox->AddCallbackFunc(SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    pMsgBox->AddCallbackFunc(mu::ui::window::CStorageLockMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
+    pMsgBox->AddCallbackFunc(mu::ui::window::CStorageLockMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
+    pMsgBox->AddCallbackFunc(mu::ui::window::CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
     pMsgBox->AddCallbackFunc(CStorageLockMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
@@ -4881,7 +4882,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::ProcessOk(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -4889,7 +4890,7 @@ CALLBACK_RESULT SEASON3B::CStorageLockMsgBoxLayout::CancelBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
+bool mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
 {
     CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -4906,7 +4907,7 @@ bool SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -4931,14 +4932,14 @@ CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::OkBtnDown(class C
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageLockFinalKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
+bool mu::ui::window::CStorageUnlockMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox) return false;
@@ -4963,7 +4964,7 @@ bool SEASON3B::CStorageUnlockMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
@@ -4995,7 +4996,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::OkBtnDown(class CNewUIMess
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5003,7 +5004,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockMsgBoxLayout::CancelBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
+bool mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
 {
     CNewUIKeyPadMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5020,7 +5021,7 @@ bool SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::SetLayout()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUIKeyPadMsgBox*>(pOwner);
 
@@ -5044,7 +5045,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::OkBtnDown(class CNew
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5052,7 +5053,7 @@ CALLBACK_RESULT SEASON3B::CStorageUnlockKeyPadMsgBoxLayout::CancelBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CUseFruitCheckMsgBoxLayout::SetLayout()
+bool mu::ui::window::CUseFruitCheckMsgBoxLayout::SetLayout()
 {
     CUseFruitCheckMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5064,7 +5065,7 @@ bool SEASON3B::CUseFruitCheckMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CGemIntegrationMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationMsgBoxLayout::SetLayout()
 {
     CGemIntegrationMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5076,7 +5077,7 @@ bool SEASON3B::CGemIntegrationMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CGemIntegrationUnityMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationUnityMsgBoxLayout::SetLayout()
 {
     CGemIntegrationUnityMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5088,7 +5089,7 @@ bool SEASON3B::CGemIntegrationUnityMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CGemIntegrationDisjointMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGemIntegrationDisjointMsgBoxLayout::SetLayout()
 {
     CGemIntegrationDisjointMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5100,7 +5101,7 @@ bool SEASON3B::CGemIntegrationDisjointMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CBloodCastleResultMsgBoxLayout::SetLayout()
+bool mu::ui::window::CBloodCastleResultMsgBoxLayout::SetLayout()
 {
     CBloodCastleResultMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5112,7 +5113,7 @@ bool SEASON3B::CBloodCastleResultMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CDevilSquareRankMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDevilSquareRankMsgBoxLayout::SetLayout()
 {
     CDevilSquareRankMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5124,7 +5125,7 @@ bool SEASON3B::CDevilSquareRankMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CChaosCastleResultMsgBoxLayout::SetLayout()
+bool mu::ui::window::CChaosCastleResultMsgBoxLayout::SetLayout()
 {
     CChaosCastleResultMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5136,7 +5137,7 @@ bool SEASON3B::CChaosCastleResultMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CChaosMixMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CChaosMixMenuMsgBoxLayout::SetLayout()
 {
     CChaosMixMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5148,7 +5149,7 @@ bool SEASON3B::CChaosMixMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CDialogMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDialogMsgBoxLayout::SetLayout()
 {
     CDialogMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5160,7 +5161,7 @@ bool SEASON3B::CDialogMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCrownSwitchPopLayout::SetLayout()
+bool mu::ui::window::CCrownSwitchPopLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5174,7 +5175,7 @@ bool SEASON3B::CCrownSwitchPopLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCrownSwitchPushLayout::SetLayout()
+bool mu::ui::window::CCrownSwitchPushLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5188,7 +5189,7 @@ bool SEASON3B::CCrownSwitchPushLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCrownSwitchOtherPushLayout::SetLayout()
+bool mu::ui::window::CCrownSwitchOtherPushLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5200,7 +5201,7 @@ bool SEASON3B::CCrownSwitchOtherPushLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSealRegisterStartLayout::SetLayout()
+bool mu::ui::window::CSealRegisterStartLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5212,7 +5213,7 @@ bool SEASON3B::CSealRegisterStartLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSealRegisterSuccessLayout::SetLayout()
+bool mu::ui::window::CSealRegisterSuccessLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5226,7 +5227,7 @@ bool SEASON3B::CSealRegisterSuccessLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSealRegisterFailLayout::SetLayout()
+bool mu::ui::window::CSealRegisterFailLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5238,7 +5239,7 @@ bool SEASON3B::CSealRegisterFailLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSealRegisterOtherLayout::SetLayout()
+bool mu::ui::window::CSealRegisterOtherLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5252,7 +5253,7 @@ bool SEASON3B::CSealRegisterOtherLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSealRegisterOtherCampLayout::SetLayout()
+bool mu::ui::window::CSealRegisterOtherCampLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5266,7 +5267,7 @@ bool SEASON3B::CSealRegisterOtherCampLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCrownDefenseRemoveLayout::SetLayout()
+bool mu::ui::window::CCrownDefenseRemoveLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5280,7 +5281,7 @@ bool SEASON3B::CCrownDefenseRemoveLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCrownDefenseCreateLayout::SetLayout()
+bool mu::ui::window::CCrownDefenseCreateLayout::SetLayout()
 {
     CProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5294,7 +5295,7 @@ bool SEASON3B::CCrownDefenseCreateLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCursedTempleHolicItemGetLayout::SetLayout()
+bool mu::ui::window::CCursedTempleHolicItemGetLayout::SetLayout()
 {
     CCursedTempleProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5308,7 +5309,7 @@ bool SEASON3B::CCursedTempleHolicItemGetLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CCursedTempleHolicItemSaveLayout::SetLayout()
+bool mu::ui::window::CCursedTempleHolicItemSaveLayout::SetLayout()
 {
     CCursedTempleProgressMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5322,7 +5323,7 @@ bool SEASON3B::CCursedTempleHolicItemSaveLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CTrainerMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CTrainerMenuMsgBoxLayout::SetLayout()
 {
     CTrainerMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5334,7 +5335,7 @@ bool SEASON3B::CTrainerMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CTrainerRecoverMsgBoxLayout::SetLayout()
+bool mu::ui::window::CTrainerRecoverMsgBoxLayout::SetLayout()
 {
     CTrainerRecoverMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5346,7 +5347,7 @@ bool SEASON3B::CTrainerRecoverMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CElpisMsgBoxLayout::SetLayout()
+bool mu::ui::window::CElpisMsgBoxLayout::SetLayout()
 {
     CElpisMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5358,7 +5359,7 @@ bool SEASON3B::CElpisMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSystemMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CSystemMenuMsgBoxLayout::SetLayout()
 {
     CSystemMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5370,7 +5371,7 @@ bool SEASON3B::CSystemMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDuelMsgBoxLayout::SetLayout()
 {
     CDuelMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5382,7 +5383,7 @@ bool SEASON3B::CDuelMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CDuelResultMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDuelResultMsgBoxLayout::SetLayout()
 {
     CDuelResultMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5406,7 +5407,7 @@ bool CCherryBlossomMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSeedMasterMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CSeedMasterMenuMsgBoxLayout::SetLayout()
 {
     CSeedMasterMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5418,7 +5419,7 @@ bool SEASON3B::CSeedMasterMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
 {
     CSeedInvestigatorMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5430,7 +5431,7 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
+bool mu::ui::window::CResetCharacterPointMsgBoxLayout::SetLayout()
 {
     CResetCharacterPointMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5442,7 +5443,7 @@ bool SEASON3B::CResetCharacterPointMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CDelgardoMainMenuMsgBoxLayout::SetLayout()
 {
     CDelgardoMainMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5454,7 +5455,7 @@ bool SEASON3B::CDelgardoMainMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool SEASON3B::CLuckyTradeMenuMsgBoxLayout::SetLayout()
+bool mu::ui::window::CLuckyTradeMenuMsgBoxLayout::SetLayout()
 {
     CLuckyTradeMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -5466,22 +5467,22 @@ bool SEASON3B::CLuckyTradeMenuMsgBoxLayout::SetLayout()
     return true;
 }
 
-SEASON3B::CLuckyTradeMenuMsgBox::CLuckyTradeMenuMsgBox()
+mu::ui::window::CLuckyTradeMenuMsgBox::CLuckyTradeMenuMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CLuckyTradeMenuMsgBox::~CLuckyTradeMenuMsgBox()
+mu::ui::window::CLuckyTradeMenuMsgBox::~CLuckyTradeMenuMsgBox()
 {
     Release();
 }
 
-void SEASON3B::CLuckyTradeMenuMsgBox::Release()
+void mu::ui::window::CLuckyTradeMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CLuckyTradeMenuMsgBox::Update()
+bool mu::ui::window::CLuckyTradeMenuMsgBox::Update()
 {
     m_BtnTrade.Update();
     m_BtnRefinery.Update();
@@ -5490,7 +5491,7 @@ bool SEASON3B::CLuckyTradeMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CLuckyTradeMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CLuckyTradeMenuMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -5506,7 +5507,7 @@ bool SEASON3B::CLuckyTradeMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-bool SEASON3B::CLuckyTradeMenuMsgBox::Render()
+bool mu::ui::window::CLuckyTradeMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -5516,7 +5517,7 @@ bool SEASON3B::CLuckyTradeMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     CLuckyTradeMenuMsgBox* pMsgBox = dynamic_cast<CLuckyTradeMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -5541,11 +5542,11 @@ CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LButtonUp(class CNewUIMessageBo
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pLuckyItemWnd->SetAct(eLuckyItemType_Trade);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_LUCKYITEMWND);
-    //g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND);
+    //g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5553,10 +5554,10 @@ CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(class CNe
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_pLuckyItemWnd->SetAct(eLuckyItemType_Refinery);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_LUCKYITEMWND);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5564,7 +5565,7 @@ CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -5574,15 +5575,15 @@ CALLBACK_RESULT SEASON3B::CLuckyTradeMenuMsgBox::ExitBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CLuckyTradeMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CLuckyTradeMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CLuckyTradeMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_TRADE);
-    AddCallbackFunc(SEASON3B::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_REFINERY);
-    AddCallbackFunc(SEASON3B::CLuckyTradeMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_TRADE);
+    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_REFINERY);
+    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CLuckyTradeMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CLuckyTradeMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -5609,7 +5610,7 @@ void SEASON3B::CLuckyTradeMenuMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CLuckyTradeMenuMsgBox::RenderFrame()
+void mu::ui::window::CLuckyTradeMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -5630,7 +5631,7 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CLuckyTradeMenuMsgBox::RenderTexts()
+void mu::ui::window::CLuckyTradeMenuMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -5648,7 +5649,7 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CLuckyTradeMenuMsgBox::RenderButtons()
+void mu::ui::window::CLuckyTradeMenuMsgBox::RenderButtons()
 {
     m_BtnTrade.Render();
     m_BtnRefinery.Render();
@@ -5657,17 +5658,17 @@ void SEASON3B::CLuckyTradeMenuMsgBox::RenderButtons()
 
 //////////////////////////////////////////////////////////////////////////
 
-SEASON3B::CTrainerMenuMsgBox::CTrainerMenuMsgBox()
+mu::ui::window::CTrainerMenuMsgBox::CTrainerMenuMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CTrainerMenuMsgBox::~CTrainerMenuMsgBox()
+mu::ui::window::CTrainerMenuMsgBox::~CTrainerMenuMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CTrainerMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CTrainerMenuMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -5683,12 +5684,12 @@ bool SEASON3B::CTrainerMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CTrainerMenuMsgBox::Release()
+void mu::ui::window::CTrainerMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CTrainerMenuMsgBox::Update()
+bool mu::ui::window::CTrainerMenuMsgBox::Update()
 {
     m_BtnRecover.Update();
     m_BtnRevive.Update();
@@ -5697,7 +5698,7 @@ bool SEASON3B::CTrainerMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CTrainerMenuMsgBox::Render()
+bool mu::ui::window::CTrainerMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -5707,7 +5708,7 @@ bool SEASON3B::CTrainerMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CTrainerMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -5732,9 +5733,9 @@ CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::LButtonUp(class CNewUIMessageBoxBa
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::RecoverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CTrainerRecoverMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTrainerRecoverMsgBoxLayout));
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5742,10 +5743,10 @@ CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::RecoverBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::ReviveBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_TRAINER);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -5753,7 +5754,7 @@ CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::ReviveBtnDown(class CNewUIMessageB
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -5763,15 +5764,15 @@ CALLBACK_RESULT SEASON3B::CTrainerMenuMsgBox::ExitBtnDown(class CNewUIMessageBox
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CTrainerMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CTrainerMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CTrainerMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CTrainerMenuMsgBox::RecoverBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER);
-    AddCallbackFunc(SEASON3B::CTrainerMenuMsgBox::ReviveBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_REVIVE);
-    AddCallbackFunc(SEASON3B::CTrainerMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER);
+    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_REVIVE);
+    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CTrainerMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CTrainerMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -5798,7 +5799,7 @@ void SEASON3B::CTrainerMenuMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CTrainerMenuMsgBox::RenderFrame()
+void mu::ui::window::CTrainerMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -5819,7 +5820,7 @@ void SEASON3B::CTrainerMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CTrainerMenuMsgBox::RenderTexts()
+void mu::ui::window::CTrainerMenuMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -5839,24 +5840,24 @@ void SEASON3B::CTrainerMenuMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CTrainerMenuMsgBox::RenderButtons()
+void mu::ui::window::CTrainerMenuMsgBox::RenderButtons()
 {
     m_BtnRecover.Render();
     m_BtnRevive.Render();
     m_BtnExit.Render();
 }
 
-SEASON3B::CTrainerRecoverMsgBox::CTrainerRecoverMsgBox()
+mu::ui::window::CTrainerRecoverMsgBox::CTrainerRecoverMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CTrainerRecoverMsgBox::~CTrainerRecoverMsgBox()
+mu::ui::window::CTrainerRecoverMsgBox::~CTrainerRecoverMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CTrainerRecoverMsgBox::Create(float fPriority)
+bool mu::ui::window::CTrainerRecoverMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -5872,12 +5873,12 @@ bool SEASON3B::CTrainerRecoverMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CTrainerRecoverMsgBox::Release()
+void mu::ui::window::CTrainerRecoverMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CTrainerRecoverMsgBox::Update()
+bool mu::ui::window::CTrainerRecoverMsgBox::Update()
 {
     m_BtnRecoverDarkSpirit.Update();
     m_BtnRecoverDarkHorse.Update();
@@ -5886,7 +5887,7 @@ bool SEASON3B::CTrainerRecoverMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CTrainerRecoverMsgBox::Render()
+bool mu::ui::window::CTrainerRecoverMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -5896,7 +5897,7 @@ bool SEASON3B::CTrainerRecoverMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CTrainerRecoverMsgBox*>(pOwner);
     if (pMsgBox)
@@ -5921,7 +5922,7 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::LButtonUp(class CNewUIMessageBo
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT);
     SocketClient->ToGameServer()->SendCloseNpcRequest();
@@ -5932,7 +5933,7 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     npcBreeder::RecoverPet(REVIVAL_DARKHORSE);
     SocketClient->ToGameServer()->SendCloseNpcRequest();
@@ -5943,7 +5944,7 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -5953,15 +5954,15 @@ CALLBACK_RESULT SEASON3B::CTrainerRecoverMsgBox::ExitBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CTrainerRecoverMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CTrainerRecoverMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CTrainerRecoverMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKSPRIT);
-    AddCallbackFunc(SEASON3B::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKHORSE);
-    AddCallbackFunc(SEASON3B::CTrainerRecoverMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKSPRIT);
+    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKHORSE);
+    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CTrainerRecoverMsgBox::SetButtonInfo()
+void mu::ui::window::CTrainerRecoverMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -5990,7 +5991,7 @@ void SEASON3B::CTrainerRecoverMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CTrainerRecoverMsgBox::RenderFrame()
+void mu::ui::window::CTrainerRecoverMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -6011,7 +6012,7 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CTrainerRecoverMsgBox::RenderTexts()
+void mu::ui::window::CTrainerRecoverMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -6035,25 +6036,25 @@ void SEASON3B::CTrainerRecoverMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 125, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CTrainerRecoverMsgBox::RenderButtons()
+void mu::ui::window::CTrainerRecoverMsgBox::RenderButtons()
 {
     m_BtnRecoverDarkSpirit.Render();
     m_BtnRecoverDarkHorse.Render();
     m_BtnExit.Render();
 }
 
-SEASON3B::CElpisMsgBox::CElpisMsgBox()
+mu::ui::window::CElpisMsgBox::CElpisMsgBox()
 {
     m_iMiddleCount = 12;
     m_iMessageType = 0;
 }
 
-SEASON3B::CElpisMsgBox::~CElpisMsgBox()
+mu::ui::window::CElpisMsgBox::~CElpisMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CElpisMsgBox::Create(float fPriority)
+bool mu::ui::window::CElpisMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -6069,12 +6070,12 @@ bool SEASON3B::CElpisMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CElpisMsgBox::Release()
+void mu::ui::window::CElpisMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CElpisMsgBox::Update()
+bool mu::ui::window::CElpisMsgBox::Update()
 {
     m_BtnAboutRefinary.Update();
     m_BtnAboutJewelOfHarmony.Update();
@@ -6084,7 +6085,7 @@ bool SEASON3B::CElpisMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CElpisMsgBox::Render()
+bool mu::ui::window::CElpisMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -6094,7 +6095,7 @@ bool SEASON3B::CElpisMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CElpisMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6124,7 +6125,7 @@ CALLBACK_RESULT SEASON3B::CElpisMsgBox::LButtonUp(class CNewUIMessageBoxBase* pO
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CElpisMsgBox::AboutRefinaryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6137,7 +6138,7 @@ CALLBACK_RESULT SEASON3B::CElpisMsgBox::AboutRefinaryBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6150,10 +6151,10 @@ CALLBACK_RESULT SEASON3B::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CElpisMsgBox::RefineBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::RefineBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ELPIS);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6161,7 +6162,7 @@ CALLBACK_RESULT SEASON3B::CElpisMsgBox::RefineBtnDown(class CNewUIMessageBoxBase
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CElpisMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CElpisMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -6171,16 +6172,16 @@ CALLBACK_RESULT SEASON3B::CElpisMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* 
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CElpisMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CElpisMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CElpisMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CElpisMsgBox::AboutRefinaryBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY);
-    AddCallbackFunc(SEASON3B::CElpisMsgBox::AboutJewelOfHarmonyBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY);
-    AddCallbackFunc(SEASON3B::CElpisMsgBox::RefineBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_REFINE);
-    AddCallbackFunc(SEASON3B::CElpisMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CElpisMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY);
+    AddCallbackFunc(mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY);
+    AddCallbackFunc(mu::ui::window::CElpisMsgBox::RefineBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_REFINE);
+    AddCallbackFunc(mu::ui::window::CElpisMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CElpisMsgBox::SetButtonInfo()
+void mu::ui::window::CElpisMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -6211,7 +6212,7 @@ void SEASON3B::CElpisMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CElpisMsgBox::RenderFrame()
+void mu::ui::window::CElpisMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -6235,7 +6236,7 @@ void SEASON3B::CElpisMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
 
-void SEASON3B::CElpisMsgBox::RenderTexts()
+void mu::ui::window::CElpisMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -6281,7 +6282,7 @@ void SEASON3B::CElpisMsgBox::RenderTexts()
     }
 }
 
-void SEASON3B::CElpisMsgBox::RenderButtons()
+void mu::ui::window::CElpisMsgBox::RenderButtons()
 {
     m_BtnAboutRefinary.Render();
     m_BtnAboutJewelOfHarmony.Render();
@@ -6289,17 +6290,17 @@ void SEASON3B::CElpisMsgBox::RenderButtons()
     m_BtnExit.Render();
 }
 
-SEASON3B::CSeedMasterMenuMsgBox::CSeedMasterMenuMsgBox()
+mu::ui::window::CSeedMasterMenuMsgBox::CSeedMasterMenuMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CSeedMasterMenuMsgBox::~CSeedMasterMenuMsgBox()
+mu::ui::window::CSeedMasterMenuMsgBox::~CSeedMasterMenuMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CSeedMasterMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CSeedMasterMenuMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -6315,12 +6316,12 @@ bool SEASON3B::CSeedMasterMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CSeedMasterMenuMsgBox::Release()
+void mu::ui::window::CSeedMasterMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CSeedMasterMenuMsgBox::Update()
+bool mu::ui::window::CSeedMasterMenuMsgBox::Update()
 {
     m_BtnExtractSeed.Update();
     m_BtnSeedSphere.Update();
@@ -6329,7 +6330,7 @@ bool SEASON3B::CSeedMasterMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CSeedMasterMenuMsgBox::Render()
+bool mu::ui::window::CSeedMasterMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -6339,7 +6340,7 @@ bool SEASON3B::CSeedMasterMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CSeedMasterMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6364,10 +6365,10 @@ CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::LButtonUp(class CNewUIMessageBo
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_EXTRACT_SEED);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6375,10 +6376,10 @@ CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class CNewUI
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_SEED_SPHERE);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6386,7 +6387,7 @@ CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -6396,15 +6397,15 @@ CALLBACK_RESULT SEASON3B::CSeedMasterMenuMsgBox::ExitBtnDown(class CNewUIMessage
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CSeedMasterMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CSeedMasterMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CSeedMasterMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CSeedMasterMenuMsgBox::ExtractSeedBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_EXTRACT_SEED);
-    AddCallbackFunc(SEASON3B::CSeedMasterMenuMsgBox::SeedSphereBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_SEED_SPHERE);
-    AddCallbackFunc(SEASON3B::CSeedMasterMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_EXTRACT_SEED);
+    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_SEED_SPHERE);
+    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CSeedMasterMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CSeedMasterMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -6431,7 +6432,7 @@ void SEASON3B::CSeedMasterMenuMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CSeedMasterMenuMsgBox::RenderFrame()
+void mu::ui::window::CSeedMasterMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -6452,7 +6453,7 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CSeedMasterMenuMsgBox::RenderTexts()
+void mu::ui::window::CSeedMasterMenuMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -6472,24 +6473,24 @@ void SEASON3B::CSeedMasterMenuMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CSeedMasterMenuMsgBox::RenderButtons()
+void mu::ui::window::CSeedMasterMenuMsgBox::RenderButtons()
 {
     m_BtnExtractSeed.Render();
     m_BtnSeedSphere.Render();
     m_BtnExit.Render();
 }
 
-SEASON3B::CSeedInvestigatorMenuMsgBox::CSeedInvestigatorMenuMsgBox()
+mu::ui::window::CSeedInvestigatorMenuMsgBox::CSeedInvestigatorMenuMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CSeedInvestigatorMenuMsgBox::~CSeedInvestigatorMenuMsgBox()
+mu::ui::window::CSeedInvestigatorMenuMsgBox::~CSeedInvestigatorMenuMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CSeedInvestigatorMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -6505,12 +6506,12 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CSeedInvestigatorMenuMsgBox::Release()
+void mu::ui::window::CSeedInvestigatorMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CSeedInvestigatorMenuMsgBox::Update()
+bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Update()
 {
     m_BtnAttachSocket.Update();
     m_BtnDetachSocket.Update();
@@ -6519,7 +6520,7 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CSeedInvestigatorMenuMsgBox::Render()
+bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -6529,7 +6530,7 @@ bool SEASON3B::CSeedInvestigatorMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CSeedInvestigatorMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6554,10 +6555,10 @@ CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::LButtonUp(class CNewUIMes
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ATTACH_SOCKET);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6565,10 +6566,10 @@ CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown(class
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_DETACH_SOCKET);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6576,7 +6577,7 @@ CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -6586,15 +6587,15 @@ CALLBACK_RESULT SEASON3B::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CNewUIM
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CSeedInvestigatorMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CSeedInvestigatorMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CSeedInvestigatorMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_ATTACH_SOCKET);
-    AddCallbackFunc(SEASON3B::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_DETACH_SOCKET);
-    AddCallbackFunc(SEASON3B::CSeedInvestigatorMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_ATTACH_SOCKET);
+    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_DETACH_SOCKET);
+    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -6621,7 +6622,7 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderFrame()
+void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -6642,7 +6643,7 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderTexts()
+void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -6662,24 +6663,24 @@ void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CSeedInvestigatorMenuMsgBox::RenderButtons()
+void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderButtons()
 {
     m_BtnAttachSocket.Render();
     m_BtnDetachSocket.Render();
     m_BtnExit.Render();
 }
 
-SEASON3B::CResetCharacterPointMsgBox::CResetCharacterPointMsgBox()
+mu::ui::window::CResetCharacterPointMsgBox::CResetCharacterPointMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CResetCharacterPointMsgBox::~CResetCharacterPointMsgBox()
+mu::ui::window::CResetCharacterPointMsgBox::~CResetCharacterPointMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CResetCharacterPointMsgBox::Create(float fPriority)
+bool mu::ui::window::CResetCharacterPointMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -6695,7 +6696,7 @@ bool SEASON3B::CResetCharacterPointMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CResetCharacterPointMsgBox::SetButtonInfo()
+void mu::ui::window::CResetCharacterPointMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -6718,19 +6719,19 @@ void SEASON3B::CResetCharacterPointMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CResetCharacterPointMsgBox::Release()
+void mu::ui::window::CResetCharacterPointMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-void SEASON3B::CResetCharacterPointMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CResetCharacterPointMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CResetCharacterPointMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown, MSGBOX_EVENT_USER_CUSTOM_RESET_CHARACTER_POINT);
-    AddCallbackFunc(SEASON3B::CResetCharacterPointMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown, MSGBOX_EVENT_USER_CUSTOM_RESET_CHARACTER_POINT);
+    AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CResetCharacterPointMsgBox*>(pOwner);
     if (pMsgBox)
@@ -6750,7 +6751,7 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::LButtonUp(class CNewUIMess
     return CALLBACK_CONTINUE;
 }
 
-bool SEASON3B::CResetCharacterPointMsgBox::Update()
+bool mu::ui::window::CResetCharacterPointMsgBox::Update()
 {
     m_ResetCharacterPointBtn.Update();
     m_BtnExit.Update();
@@ -6758,7 +6759,7 @@ bool SEASON3B::CResetCharacterPointMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CResetCharacterPointMsgBox::Render()
+bool mu::ui::window::CResetCharacterPointMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -6768,7 +6769,7 @@ bool SEASON3B::CResetCharacterPointMsgBox::Render()
     return true;
 }
 
-void SEASON3B::CResetCharacterPointMsgBox::RenderFrame()
+void mu::ui::window::CResetCharacterPointMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -6789,7 +6790,7 @@ void SEASON3B::CResetCharacterPointMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CResetCharacterPointMsgBox::RenderTexts()
+void mu::ui::window::CResetCharacterPointMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -6807,13 +6808,13 @@ void SEASON3B::CResetCharacterPointMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CResetCharacterPointMsgBox::RenderButtons()
+void mu::ui::window::CResetCharacterPointMsgBox::RenderButtons()
 {
     m_ResetCharacterPointBtn.Render();
     m_BtnExit.Render();
 }
 
-bool SEASON3B::CResetCharacterPointMsgBox::isCharacterEquipmentItem()
+bool mu::ui::window::CResetCharacterPointMsgBox::isCharacterEquipmentItem()
 {
     for (int i = 0; i < MAX_EQUIPMENT; i++) {
         if (CharacterMachine->Equipment[i].Type != -1) {
@@ -6823,14 +6824,14 @@ bool SEASON3B::CResetCharacterPointMsgBox::isCharacterEquipmentItem()
     return false;
 }
 
-CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
 
     for (int i = 0; i < MAX_EQUIPMENT; i++) {
         if (CharacterMachine->Equipment[i].Type != -1)
         {
-            g_pSystemLogBox->AddText(I18N::Game::TheAppliedEquipmentsCannotBeReset, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheAppliedEquipmentsCannotBeReset, mu::ui::window::TYPE_ERROR_MESSAGE);
             g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
             return CALLBACK_BREAK;
         }
@@ -6842,14 +6843,14 @@ CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CResetCharacterPointMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
+bool mu::ui::window::CGuildBreakPasswordMsgBoxLayout::SetLayout()
 {
     CNewUITextInputMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -6864,25 +6865,25 @@ bool SEASON3B::CGuildBreakPasswordMsgBoxLayout::SetLayout()
     pMsgBox->AddMsg(I18N::Game::IfYouWantToLeaveYourGuild);
     pMsgBox->AddMsg(I18N::Game::PleaseEnterYourWEBZENCOMPassword);
 
-    pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
-    pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
-    pMsgBox->AddCallbackFunc(SEASON3B::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    pMsgBox->AddCallbackFunc(mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ReturnDown, MSGBOX_EVENT_PRESSKEY_RETURN);
+    pMsgBox->AddCallbackFunc(mu::ui::window::CGuildBreakPasswordMsgBoxLayout::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
+    pMsgBox->AddCallbackFunc(mu::ui::window::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 
     pMsgBox->AddCallbackFunc(CGuildBreakPasswordMsgBoxLayout::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ReturnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     return ProcessOk(pOwner, xParam);
 }
 
-CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CNewUITextInputMsgBox*>(pOwner);
 
@@ -6905,7 +6906,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
     }
     else
     {
-        g_pSystemLogBox->AddText(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -6914,7 +6915,7 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class CNewU
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -6922,18 +6923,18 @@ CALLBACK_RESULT SEASON3B::CGuildBreakPasswordMsgBoxLayout::CancelBtnDown(class C
     return CALLBACK_BREAK;
 }
 
-SEASON3B::CGuild_ToPerson_Position::CGuild_ToPerson_Position()
+mu::ui::window::CGuild_ToPerson_Position::CGuild_ToPerson_Position()
 {
     COMGEM::m_cGemType = COMGEM::CELE;
     AppointType = SUBGUILDMASTER;
 }
 
-SEASON3B::CGuild_ToPerson_Position::~CGuild_ToPerson_Position()
+mu::ui::window::CGuild_ToPerson_Position::~CGuild_ToPerson_Position()
 {
     Release();
 }
 
-bool SEASON3B::CGuild_ToPerson_Position::Create(float fPriority)
+bool mu::ui::window::CGuild_ToPerson_Position::Create(float fPriority)
 {
     int x, y, width, height;
 
@@ -6951,7 +6952,7 @@ bool SEASON3B::CGuild_ToPerson_Position::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CGuild_ToPerson_Position::Release()
+void mu::ui::window::CGuild_ToPerson_Position::Release()
 {
     CNewUIMessageBoxBase::Release();
 
@@ -6963,7 +6964,7 @@ void SEASON3B::CGuild_ToPerson_Position::Release()
     m_MsgDataList.clear();
 }
 
-bool SEASON3B::CGuild_ToPerson_Position::Update()
+bool mu::ui::window::CGuild_ToPerson_Position::Update()
 {
     m_BtnBlessing.Update();
     m_BtnSoul.Update();
@@ -6973,7 +6974,7 @@ bool SEASON3B::CGuild_ToPerson_Position::Update()
     return true;
 }
 
-bool SEASON3B::CGuild_ToPerson_Position::Render()
+bool mu::ui::window::CGuild_ToPerson_Position::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -6983,7 +6984,7 @@ bool SEASON3B::CGuild_ToPerson_Position::Render()
     return true;
 }
 
-void SEASON3B::CGuild_ToPerson_Position::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
+void mu::ui::window::CGuild_ToPerson_Position::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
 {
     auto* pMsg = new MSGBOX_TEXTDATA;
     pMsg->strMsg = strMsg;
@@ -6992,16 +6993,16 @@ void SEASON3B::CGuild_ToPerson_Position::AddMsg(const type_string& strMsg, DWORD
     m_MsgDataList.push_back(pMsg);
 }
 
-void SEASON3B::CGuild_ToPerson_Position::SetAddCallbackFunc()
+void mu::ui::window::CGuild_ToPerson_Position::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CGuild_ToPerson_Position::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CGuild_ToPerson_Position::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
-    AddCallbackFunc(SEASON3B::CGuild_ToPerson_Position::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
-    AddCallbackFunc(SEASON3B::CGuild_ToPerson_Position::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
-    AddCallbackFunc(SEASON3B::CGuild_ToPerson_Position::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
+    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
+    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::OkBtnDown, MSGBOX_EVENT_USER_COMMON_OK);
+    AddCallbackFunc(mu::ui::window::CGuild_ToPerson_Position::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
+void mu::ui::window::CGuild_ToPerson_Position::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -7034,7 +7035,7 @@ void SEASON3B::CGuild_ToPerson_Position::SetButtonInfo()
     m_BtnCancel.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
+void mu::ui::window::CGuild_ToPerson_Position::RenderFrame()
 {
     float x, y, width, height;
 
@@ -7059,7 +7060,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CGuild_ToPerson_Position::RenderTexts()
+void mu::ui::window::CGuild_ToPerson_Position::RenderTexts()
 {
     
     
@@ -7094,7 +7095,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderTexts()
     }
 }
 
-void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
+void mu::ui::window::CGuild_ToPerson_Position::RenderButtons()
 {
     auto vi = m_MsgDataList.begin();
     for (; vi != m_MsgDataList.end(); vi++)
@@ -7133,7 +7134,7 @@ void SEASON3B::CGuild_ToPerson_Position::RenderButtons()
     AddMsg(I18N::Game::DoYouWantToAppoint, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
 }
 
-CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CGuild_ToPerson_Position*>(pOwner);
     if (pMsgBox)
@@ -7163,21 +7164,21 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::LButtonUp(class CNewUIMessag
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::BlessingBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::CELE);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::SoulBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::SetGem(COMGEM::SOUL);
 
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
     SocketClient->ToGameServer()->SendGuildRoleAssignRequest(
@@ -7193,7 +7194,7 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::OkBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CGuild_ToPerson_Position::CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     COMGEM::Exit();
 
@@ -7203,7 +7204,7 @@ CALLBACK_RESULT SEASON3B::CGuild_ToPerson_Position::CancelBtnDown(class CNewUIMe
     return CALLBACK_BREAK;
 }
 
-bool SEASON3B::CGuild_ToPerson_PositionLayout::SetLayout()
+bool mu::ui::window::CGuild_ToPerson_PositionLayout::SetLayout()
 {
     CGuild_ToPerson_Position* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
@@ -7215,17 +7216,17 @@ bool SEASON3B::CGuild_ToPerson_PositionLayout::SetLayout()
     return true;
 }
 
-SEASON3B::CDelgardoMainMenuMsgBox::CDelgardoMainMenuMsgBox()
+mu::ui::window::CDelgardoMainMenuMsgBox::CDelgardoMainMenuMsgBox()
 {
     m_iMiddleCount = 7;
 }
 
-SEASON3B::CDelgardoMainMenuMsgBox::~CDelgardoMainMenuMsgBox()
+mu::ui::window::CDelgardoMainMenuMsgBox::~CDelgardoMainMenuMsgBox()
 {
     Release();
 }
 
-bool SEASON3B::CDelgardoMainMenuMsgBox::Create(float fPriority)
+bool mu::ui::window::CDelgardoMainMenuMsgBox::Create(float fPriority)
 {
     SetAddCallbackFunc();
 
@@ -7241,12 +7242,12 @@ bool SEASON3B::CDelgardoMainMenuMsgBox::Create(float fPriority)
     return true;
 }
 
-void SEASON3B::CDelgardoMainMenuMsgBox::Release()
+void mu::ui::window::CDelgardoMainMenuMsgBox::Release()
 {
     CNewUIMessageBoxBase::Release();
 }
 
-bool SEASON3B::CDelgardoMainMenuMsgBox::Update()
+bool mu::ui::window::CDelgardoMainMenuMsgBox::Update()
 {
     m_BtnReg.Update();
     m_BtnExchange.Update();
@@ -7255,7 +7256,7 @@ bool SEASON3B::CDelgardoMainMenuMsgBox::Update()
     return true;
 }
 
-bool SEASON3B::CDelgardoMainMenuMsgBox::Render()
+bool mu::ui::window::CDelgardoMainMenuMsgBox::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -7265,7 +7266,7 @@ bool SEASON3B::CDelgardoMainMenuMsgBox::Render()
     return true;
 }
 
-CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pMsgBox = dynamic_cast<CDelgardoMainMenuMsgBox*>(pOwner);
     if (pMsgBox)
@@ -7290,9 +7291,9 @@ CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::LButtonUp(class CNewUIMessage
     return CALLBACK_CONTINUE;
 }
 
-CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::RegBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -7300,16 +7301,16 @@ CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::RegBtnDown(class CNewUIMessag
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
 
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
 
     return CALLBACK_BREAK;
 }
 
-CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExitBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
 
@@ -7319,15 +7320,15 @@ CALLBACK_RESULT SEASON3B::CDelgardoMainMenuMsgBox::ExitBtnDown(class CNewUIMessa
     return CALLBACK_BREAK;
 }
 
-void SEASON3B::CDelgardoMainMenuMsgBox::SetAddCallbackFunc()
+void mu::ui::window::CDelgardoMainMenuMsgBox::SetAddCallbackFunc()
 {
-    AddCallbackFunc(SEASON3B::CDelgardoMainMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(SEASON3B::CDelgardoMainMenuMsgBox::RegBtnDown, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_REGISTRATION_LUCKY_COIN);
-    AddCallbackFunc(SEASON3B::CDelgardoMainMenuMsgBox::ExchangeBtnDown, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_EXCHANGE_LUCKY_COIN);
-    AddCallbackFunc(SEASON3B::CDelgardoMainMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
+    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
+    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_REGISTRATION_LUCKY_COIN);
+    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_EXCHANGE_LUCKY_COIN);
+    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
 }
 
-void SEASON3B::CDelgardoMainMenuMsgBox::SetButtonInfo()
+void mu::ui::window::CDelgardoMainMenuMsgBox::SetButtonInfo()
 {
     float x, y, width, height;
 
@@ -7354,7 +7355,7 @@ void SEASON3B::CDelgardoMainMenuMsgBox::SetButtonInfo()
     m_BtnExit.SetText(I18N::Game::Close388);
 }
 
-void SEASON3B::CDelgardoMainMenuMsgBox::RenderFrame()
+void mu::ui::window::CDelgardoMainMenuMsgBox::RenderFrame()
 {
     float x, y, width, height;
 
@@ -7375,7 +7376,7 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
 }
 
-void SEASON3B::CDelgardoMainMenuMsgBox::RenderTexts()
+void mu::ui::window::CDelgardoMainMenuMsgBox::RenderTexts()
 {
     wchar_t szText[256] = { 0, };
     float fPos_x = GetPos().x + 10;
@@ -7397,7 +7398,7 @@ void SEASON3B::CDelgardoMainMenuMsgBox::RenderTexts()
     g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CDelgardoMainMenuMsgBox::RenderButtons()
+void mu::ui::window::CDelgardoMainMenuMsgBox::RenderButtons()
 {
     m_BtnReg.Render();
     m_BtnExchange.Render();

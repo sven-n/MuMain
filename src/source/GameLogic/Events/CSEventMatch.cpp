@@ -205,8 +205,8 @@ void CSDevilSquareMatch::SetMatchResult(const int iNumDevilRank, const int iMyRa
 
     memcpy(m_MatchResult, pMatchResult, m_iNumResult * sizeof(MatchResult));
 
-    SEASON3B::TMsgBoxLayoutContainer<SEASON3B::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
-    SEASON3B::CreateMessageBox(msgBoxLayout);
+    mu::ui::window::TMsgBoxLayoutContainer<mu::ui::window::CDevilSquareRankMsgBoxLayout> msgBoxLayout;
+    mu::ui::window::CreateMessageBox(msgBoxLayout);
 }
 
 void CSDevilSquareMatch::RenderMatchTimes(void)

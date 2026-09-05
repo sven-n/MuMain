@@ -20,6 +20,7 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -62,24 +63,24 @@ namespace
     }
 }
 
-SEASON3B::CNewUICharacterInfoWindow::CNewUICharacterInfoWindow()
+mu::ui::window::CNewUICharacterInfoWindow::CNewUICharacterInfoWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
 }
 
-SEASON3B::CNewUICharacterInfoWindow::~CNewUICharacterInfoWindow()
+mu::ui::window::CNewUICharacterInfoWindow::~CNewUICharacterInfoWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUICharacterInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICharacterInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CHARACTER, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHARACTER, this);
 
     SetPos(x, y);
 
@@ -92,7 +93,7 @@ bool SEASON3B::CNewUICharacterInfoWindow::Create(CNewUIManager* pNewUIMng, int x
     return true;
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
+void mu::ui::window::CNewUICharacterInfoWindow::SetButtonInfo()
 {
     wchar_t strText[256];
 
@@ -128,7 +129,7 @@ void SEASON3B::CNewUICharacterInfoWindow::SetButtonInfo()
     m_BtnMasterLevel.ChangeToolTipText(&I18N::Game::MasterSkillTreeA, true);
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::Release()
+void mu::ui::window::CNewUICharacterInfoWindow::Release()
 {
     UnloadImages();
 
@@ -139,13 +140,13 @@ void SEASON3B::CNewUICharacterInfoWindow::Release()
     }
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUICharacterInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUICharacterInfoWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUICharacterInfoWindow::UpdateMouseEvent()
 {
     if (BtnProcess() == true)
     {
@@ -160,10 +161,10 @@ bool SEASON3B::CNewUICharacterInfoWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
+bool mu::ui::window::CNewUICharacterInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_CHARACTER))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CHARACTER))
         return true;
 
     if (CharacterAttribute->LevelUpPoint > 0)
@@ -191,19 +192,19 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHARACTER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHARACTER);
         return true;
     }
 
     if (m_BtnQuest.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MYQUEST);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MYQUEST);
         return true;
     }
 
     if (m_BtnPet.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_PET);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_PET);
         return true;
     }
 
@@ -211,19 +212,19 @@ bool SEASON3B::CNewUICharacterInfoWindow::BtnProcess()
     {
         if (gCharacterManager.IsMasterLevel(Hero->Class)
             && Hero->Class != CLASS_TEMPLENIGHT)
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
         return true;
     }
     return false;
 }
 
-bool SEASON3B::CNewUICharacterInfoWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUICharacterInfoWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHARACTER);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHARACTER);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -233,12 +234,12 @@ bool SEASON3B::CNewUICharacterInfoWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICharacterInfoWindow::Update()
+bool mu::ui::window::CNewUICharacterInfoWindow::Update()
 {
     return true;
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
+void mu::ui::window::CNewUICharacterInfoWindow::RenderFrame()
 {
     RenderImage(IMAGE_CHAINFO_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_CHAINFO_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -280,7 +281,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderFrame()
     }
 }
 
-bool SEASON3B::CNewUICharacterInfoWindow::Render()
+bool mu::ui::window::CNewUICharacterInfoWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -290,14 +291,14 @@ bool SEASON3B::CNewUICharacterInfoWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::RenderTexts()
+void mu::ui::window::CNewUICharacterInfoWindow::RenderTexts()
 {
     RenderSubjectTexts();
     RenderTableTexts();
     RenderAttribute();
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
+void mu::ui::window::CNewUICharacterInfoWindow::RenderSubjectTexts()
 {
     wchar_t strID[256];
     mu_swprintf(strID, L"%ls", CharacterAttribute->Name);
@@ -323,7 +324,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderSubjectTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strServerName, 190, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
+void mu::ui::window::CNewUICharacterInfoWindow::RenderTableTexts()
 {
     wchar_t strLevel[128];
     wchar_t strExp[128];
@@ -454,7 +455,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderTableTexts()
     g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + 101, strPoint);
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
+void mu::ui::window::CNewUICharacterInfoWindow::RenderAttribute()
 {
     g_pRenderText->SetFont(g_hFontBold);
 
@@ -1525,7 +1526,7 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderAttribute()
     }
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::RenderButtons()
+void mu::ui::window::CNewUICharacterInfoWindow::RenderButtons()
 {
     int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
     int iCount = 0;
@@ -1552,12 +1553,12 @@ void SEASON3B::CNewUICharacterInfoWindow::RenderButtons()
     m_BtnMasterLevel.Render();
 }
 
-float SEASON3B::CNewUICharacterInfoWindow::GetLayerDepth()
+float mu::ui::window::CNewUICharacterInfoWindow::GetLayerDepth()
 {
     return 5.1f;
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::LoadImages()
+void mu::ui::window::CNewUICharacterInfoWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CHAINFO_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_CHAINFO_TOP, GL_LINEAR);
@@ -1583,7 +1584,7 @@ void SEASON3B::CNewUICharacterInfoWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_chainfo_btn_master.tga", IMAGE_CHAINFO_BTN_MASTERLEVEL, GL_LINEAR);
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::UnloadImages()
+void mu::ui::window::CNewUICharacterInfoWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CHAINFO_BTN_MASTERLEVEL);
     DeleteBitmap(IMAGE_CHAINFO_BTN_PET);
@@ -1609,7 +1610,7 @@ void SEASON3B::CNewUICharacterInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_LEFT);
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
+void mu::ui::window::CNewUICharacterInfoWindow::OpenningProcess()
 {
     ResetEquipmentLevel();
 
@@ -1644,7 +1645,7 @@ void SEASON3B::CNewUICharacterInfoWindow::OpenningProcess()
     }
 }
 
-void SEASON3B::CNewUICharacterInfoWindow::ResetEquipmentLevel()
+void mu::ui::window::CNewUICharacterInfoWindow::ResetEquipmentLevel()
 {
     ITEM* pItem = CharacterMachine->Equipment;
     Hero->Weapon[0].Level = pItem[EQUIPMENT_WEAPON_RIGHT].Level;

@@ -15,6 +15,7 @@
 #include "GameShop/ShopListManager/ShopPackage.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 class CMsgBoxIGSBuyPackageItem : public CNewUIMessageBoxBase, public INewUI3DRenderObj
 {

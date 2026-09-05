@@ -20,6 +20,7 @@ extern wchar_t g_lpszDialogAnswer[MAX_ANSWER_FOR_DIALOG][NUM_LINE_DA][MAX_LENGTH
 extern int g_iCurrentDialogScript;
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUINPCQuest::CNewUINPCQuest()
 {
@@ -41,7 +42,7 @@ bool CNewUINPCQuest::Create(CNewUIManager* pNewUIMng,
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCQUEST, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCQUEST, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
     m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
@@ -117,7 +118,7 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
         yPos = m_Pos.y + 250;
     }
 
-    if (SEASON3B::IsRelease(VK_LBUTTON))
+    if (mu::ui::window::IsRelease(VK_LBUTTON))
     {
         if (MouseY >= 0 && (MouseY - yPos) < (18 * g_iNumAnswer)
             && abs(m_Pos.x + NPCQUEST_WIDTH / 2 - MouseX) <= (NPCQUEST_WIDTH / 2))
@@ -134,7 +135,7 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
                 if (1 == nAnswer)
                     bErrorMessage = g_csQuest.ProcessNextProgress();
                 else if (2 == nAnswer)
-                    g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCQUEST);
+                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
                 else if (3 == nAnswer)
                     SocketClient->ToGameServer()->SendLegacyQuestStateSetRequest(byCurQuestIndex, LegacyQuestState::Active);
 
@@ -154,11 +155,11 @@ bool CNewUINPCQuest::UpdateSelTextMouseEvent()
 
 bool CNewUINPCQuest::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCQUEST);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -473,11 +474,11 @@ bool CNewUINPCQuest::ProcessBtns()
 {
     if (m_btnClose.UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCQUEST);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCQUEST);
         return true;
     }
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_NPCQUEST))
+    else if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCQUEST))
         return true;
     else if (g_csQuest.BeQuestItem())
     {

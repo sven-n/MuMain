@@ -18,7 +18,7 @@
 // Purely passive/non-interactive (its old CWinEx::CursorInWin(WA_ALL) override always returned
 // false, so it could never become CUIMng's "active" window -- confirmed no drag/resize behavior
 // was ever reachable in practice), so unlike CCreditWin it doesn't need to consume clicks at all.
-class CServerMsgWin : public SEASON3B::CNewUIObj
+class CServerMsgWin : public mu::ui::window::CNewUIObj
 {
     // Was CWinEx's WE_BG_* (WinEx.h) -- kept private here instead of reusing those shared macros
     // since this window no longer goes through CWinEx (still used by other not-yet-migrated
@@ -45,7 +45,7 @@ public:
     void AddMsg(wchar_t* pszMsg);
     void Show(bool bShow) override;
 
-    // SEASON3B::INewUIBase
+    // mu::ui::window::INewUIBase
     bool Render() override;
     // Never consumes -- purely passive message log, never intercepted clicks even as a CWin.
     bool UpdateMouseEvent() override { return true; }

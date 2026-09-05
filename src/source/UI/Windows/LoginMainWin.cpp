@@ -80,7 +80,7 @@ void CLoginMainWin::Create()
         }
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_LOGIN_MAIN, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN_MAIN, this);
     Show(false);
 }
 
@@ -147,7 +147,7 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
 
 void CLoginMainWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
 
     for (int i = 0; i < LMW_BTN_MAX; ++i)
         m_aBtn[i].Show(bShow);

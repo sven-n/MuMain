@@ -26,6 +26,7 @@
 //////////////////////////////////////////////////////////////////////
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -55,13 +56,13 @@ namespace
     }
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICursedTempleEnter::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC, this);
 
     SetPos(x, y);
 
@@ -72,21 +73,21 @@ bool SEASON3B::CNewUICursedTempleEnter::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-SEASON3B::CNewUICursedTempleEnter::CNewUICursedTempleEnter() : m_pNewUIMng(NULL), m_EnterTime(0), m_EnterCount(0)
+mu::ui::window::CNewUICursedTempleEnter::CNewUICursedTempleEnter() : m_pNewUIMng(NULL), m_EnterTime(0), m_EnterCount(0)
 {
     Initialize();
 }
 
-SEASON3B::CNewUICursedTempleEnter::~CNewUICursedTempleEnter()
+mu::ui::window::CNewUICursedTempleEnter::~CNewUICursedTempleEnter()
 {
     Destroy();
 }
 
-void SEASON3B::CNewUICursedTempleEnter::Initialize()
+void mu::ui::window::CNewUICursedTempleEnter::Initialize()
 {
 }
 
-void SEASON3B::CNewUICursedTempleEnter::Destroy()
+void mu::ui::window::CNewUICursedTempleEnter::Destroy()
 {
     if (m_pNewUIMng)
     {
@@ -95,7 +96,7 @@ void SEASON3B::CNewUICursedTempleEnter::Destroy()
     }
 }
 
-void SEASON3B::CNewUICursedTempleEnter::SetButtonInfo()
+void mu::ui::window::CNewUICursedTempleEnter::SetButtonInfo()
 {
     float x;
     x = m_Pos.x + (((CURSEDTEMPLE_ENTER_WINDOW_WIDTH / 2) - MSGBOX_BTN_WIDTH) / 2);
@@ -114,7 +115,7 @@ void SEASON3B::CNewUICursedTempleEnter::SetButtonInfo()
     m_Button[CURSEDTEMPLEENTER_EXIT].ChangeText(&I18N::Game::Close388);
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
+bool mu::ui::window::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
 {
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -136,7 +137,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckEnterLevel(int& enterlevel)
     return false;
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
+bool mu::ui::window::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
 {
     if (p->Type == ITEM_HELPER + 61)
     {
@@ -158,7 +159,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckEnterItem(ITEM* p, int enterlevel)
     return true;
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int enterlevel)
+bool mu::ui::window::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int enterlevel)
 {
     int pos = 0;
 
@@ -180,7 +181,7 @@ bool SEASON3B::CNewUICursedTempleEnter::CheckInventory(BYTE& itempos, int enterl
     return false;
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
+bool mu::ui::window::CNewUICursedTempleEnter::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLEENTER_OPEN].UpdateMouseEvent())
     {
@@ -196,7 +197,7 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
         }
         else
         {
-            g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
 
         return false;
@@ -204,7 +205,7 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
 
     if (m_Button[CURSEDTEMPLEENTER_EXIT].UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
         return false;
     }
 
@@ -216,13 +217,13 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::UpdateKeyEvent()
+bool mu::ui::window::CNewUICursedTempleEnter::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC);
             return false;
         }
     }
@@ -230,12 +231,12 @@ bool SEASON3B::CNewUICursedTempleEnter::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::Update()
+bool mu::ui::window::CNewUICursedTempleEnter::Update()
 {
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleEnter::RenderText()
+void mu::ui::window::CNewUICursedTempleEnter::RenderText()
 {
     wchar_t Text[100];
 
@@ -292,7 +293,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderText()
     }
 }
 
-void SEASON3B::CNewUICursedTempleEnter::RenderFrame()
+void mu::ui::window::CNewUICursedTempleEnter::RenderFrame()
 {
     float x, y, width, height;
 
@@ -316,7 +317,7 @@ void SEASON3B::CNewUICursedTempleEnter::RenderFrame()
     RenderImage(CNewUIMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
 }
 
-bool SEASON3B::CNewUICursedTempleEnter::Render()
+bool mu::ui::window::CNewUICursedTempleEnter::Render()
 {
     EnableAlphaTest();
 
@@ -329,7 +330,7 @@ bool SEASON3B::CNewUICursedTempleEnter::Render()
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleEnter::RenderButtons()
+void mu::ui::window::CNewUICursedTempleEnter::RenderButtons()
 {
     for (int i = 0; i < CURSEDTEMPLEENTER_MAXBUTTONCOUNT; ++i)
     {
@@ -339,13 +340,13 @@ void SEASON3B::CNewUICursedTempleEnter::RenderButtons()
 }
 
 //ServerMessage
-void SEASON3B::CNewUICursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo)
+void mu::ui::window::CNewUICursedTempleEnter::SetCursedTempleEnterInfo(const BYTE* cursedtempleinfo)
 {
     m_EnterTime = static_cast<int>(cursedtempleinfo[0]);
     m_EnterCount = static_cast<int>(cursedtempleinfo[1]);
 }
 
-void SEASON3B::CNewUICursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleEnter::ReceiveCursedTempleEnterInfo(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_USER_COUNT)ReceiveBuffer;
 

@@ -4,7 +4,7 @@
 
 #pragma once
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     /**
      * @brief Minimal click-to-open dropdown combo box.

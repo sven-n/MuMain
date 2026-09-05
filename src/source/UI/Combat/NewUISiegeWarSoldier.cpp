@@ -10,6 +10,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -21,25 +22,25 @@ CNewUISiegeWarSoldier::~CNewUISiegeWarSoldier() {}
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
-bool SEASON3B::CNewUISiegeWarSoldier::OnCreate(int x, int y)
+bool mu::ui::window::CNewUISiegeWarSoldier::OnCreate(int x, int y)
 {
     return true;
 }
 
 //---------------------------------------------------------------------------------------------
 // OnRelease
-void SEASON3B::CNewUISiegeWarSoldier::OnRelease() {}
+void mu::ui::window::CNewUISiegeWarSoldier::OnRelease() {}
 
 //---------------------------------------------------------------------------------------------
 // OnUpdate
-bool SEASON3B::CNewUISiegeWarSoldier::OnUpdate()
+bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdate()
 {
     return true;
 }
 
 //---------------------------------------------------------------------------------------------
 // OnRender
-bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
+bool mu::ui::window::CNewUISiegeWarSoldier::OnRender()
 {
     EnableAlphaTest();
 
@@ -64,12 +65,12 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnRender()
 
 //---------------------------------------------------------------------------------------------
 // OnCreate
-void SEASON3B::CNewUISiegeWarSoldier::OnSetPos(int x, int y) {}
+void mu::ui::window::CNewUISiegeWarSoldier::OnSetPos(int x, int y) {}
 
 //---------------------------------------------------------------------------------------------
 // RenderCharPosInMiniMap
 // 미니맵에 모든 캐릭터를 렌더
-void SEASON3B::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
+void mu::ui::window::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
 
@@ -104,7 +105,7 @@ void SEASON3B::CNewUISiegeWarSoldier::RenderCharPosInMiniMap()
 
 //---------------------------------------------------------------------------------------------
 // OnUpdateMouseEvent
-bool SEASON3B::CNewUISiegeWarSoldier::OnUpdateMouseEvent()
+bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdateMouseEvent()
 {
     if (OnBtnProcess())
         return false;
@@ -114,21 +115,21 @@ bool SEASON3B::CNewUISiegeWarSoldier::OnUpdateMouseEvent()
 
 //---------------------------------------------------------------------------------------------
 // OnUpdateKeyEvent
-bool SEASON3B::CNewUISiegeWarSoldier::OnUpdateKeyEvent()
+bool mu::ui::window::CNewUISiegeWarSoldier::OnUpdateKeyEvent()
 {
     return true;
 }
 //---------------------------------------------------------------------------------------------
 // OnBtnProcess
-bool SEASON3B::CNewUISiegeWarSoldier::OnBtnProcess()
+bool mu::ui::window::CNewUISiegeWarSoldier::OnBtnProcess()
 {
     return false;
 }
 
 //---------------------------------------------------------------------------------------------
 // OnLoadImages
-void SEASON3B::CNewUISiegeWarSoldier::OnLoadImages() {}
+void mu::ui::window::CNewUISiegeWarSoldier::OnLoadImages() {}
 
 //---------------------------------------------------------------------------------------------
 // OnUnloadImages
-void SEASON3B::CNewUISiegeWarSoldier::OnUnloadImages() {}
+void mu::ui::window::CNewUISiegeWarSoldier::OnUnloadImages() {}

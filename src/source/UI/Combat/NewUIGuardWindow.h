@@ -13,7 +13,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "Guild/NewUIGuildInfoWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIGuardWindow : public CNewUIObj
     {

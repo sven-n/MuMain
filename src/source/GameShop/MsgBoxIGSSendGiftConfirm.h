@@ -8,6 +8,7 @@
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 class CMsgBoxIGSSendGiftConfirm : public CNewUIMessageBoxBase
 {

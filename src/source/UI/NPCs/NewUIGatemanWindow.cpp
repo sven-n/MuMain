@@ -21,6 +21,7 @@
 extern CUIGateKeeper* g_pUIGateKeeper;
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIGatemanWindow::CNewUIGatemanWindow()
 {
@@ -39,7 +40,7 @@ bool CNewUIGatemanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_GATEKEEPER, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GATEKEEPER, this);
 
     SetPos(x, y);
 
@@ -115,11 +116,11 @@ bool CNewUIGatemanWindow::UpdateMouseEvent()
 
 bool CNewUIGatemanWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATEKEEPER) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATEKEEPER) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATEKEEPER);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATEKEEPER);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -222,11 +223,11 @@ void CNewUIGatemanWindow::RenderFrame()
 bool CNewUIGatemanWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_GATEKEEPER);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GATEKEEPER);
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATEKEEPER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATEKEEPER);
         return true;
     }
 
@@ -237,7 +238,7 @@ void CNewUIGatemanWindow::UpdateGuildMasterMode()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 50 };
 
-    if (SEASON3B::IsPress(VK_LBUTTON) && SEASON3B::CheckMouseIn(ptOrigin.x + 35, ptOrigin.y + 60, 100, 16))
+    if (mu::ui::window::IsPress(VK_LBUTTON) && mu::ui::window::CheckMouseIn(ptOrigin.x + 35, ptOrigin.y + 60, 100, 16))
     {
         g_pUIGateKeeper->SendPublicSetting();
     }
@@ -256,7 +257,7 @@ void CNewUIGatemanWindow::UpdateGuildMasterMode()
     else if (m_BtnEnter.UpdateMouseEvent() == true)
     {
         g_pUIGateKeeper->SendEnter();
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATEKEEPER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATEKEEPER);
     }
 }
 
@@ -265,7 +266,7 @@ void CNewUIGatemanWindow::UpdateGuildMemeberMode()
     if (m_BtnEnter.UpdateMouseEvent() == true)
     {
         g_pUIGateKeeper->SendEnter();
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATEKEEPER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATEKEEPER);
     }
 }
 
@@ -276,11 +277,11 @@ void CNewUIGatemanWindow::UpdateGuestMode()
         if (g_pUIGateKeeper->IsPublic() && (int)CharacterMachine->Gold >= g_pUIGateKeeper->GetEnteranceFee())
         {
             g_pUIGateKeeper->SendEnter();
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATEKEEPER);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATEKEEPER);
         }
         else if ((int)CharacterMachine->Gold < g_pUIGateKeeper->GetEnteranceFee())
         {
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGatemanMoneyMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGatemanMoneyMsgBoxLayout));
         }
     }
 }

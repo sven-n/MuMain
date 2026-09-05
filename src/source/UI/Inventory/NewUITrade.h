@@ -18,7 +18,7 @@
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"
 #include "UI/Inventory/NewUIStorageInventory.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUITrade : public CNewUIObj
     {

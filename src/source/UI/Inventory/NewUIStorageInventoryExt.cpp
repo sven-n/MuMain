@@ -12,6 +12,7 @@
 #include "Engine/Object/ZzzInventory.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction

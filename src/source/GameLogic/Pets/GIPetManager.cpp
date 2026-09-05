@@ -673,7 +673,7 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_WHITE, false, true, L"\n");
         };
 
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP))
         {
             wchar_t textBuffer[kTooltipBufferCapacity] {};
             std::uint32_t gold = GetPetItemValue(&giPetManager::gs_PetInfo) / 3u;
@@ -683,7 +683,7 @@ static std::uint8_t g_tabBar = 0;
             appendLine(TEXT_COLOR_WHITE, true, false, priceFormat.c_str(), textBuffer);
             appendEmptyLine();
         }
-        else if ((iInvenType == SEASON3B::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == SEASON3B::TOOLTIP_TYPE_PURCHASE_SHOP))
+        else if ((iInvenType == mu::ui::window::TOOLTIP_TYPE_MY_SHOP) || (iInvenType == mu::ui::window::TOOLTIP_TYPE_PURCHASE_SHOP))
         {
             int price = 0;
             const int indexInv = g_pMyShopInventory->GetInventoryCtrl()->GetIndexByItem(pItem);

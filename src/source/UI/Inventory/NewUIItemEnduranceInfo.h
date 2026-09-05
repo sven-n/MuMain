@@ -10,7 +10,7 @@
 #include "UI/Core/NewUIBase.h"
 #include "UI/Core/NewUIManager.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIItemEnduranceInfo : public CNewUIObj
     {

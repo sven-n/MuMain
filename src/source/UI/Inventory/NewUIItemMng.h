@@ -48,7 +48,7 @@ struct ItemCreationParams
 
 ItemCreationParams ParseItemData(std::span<const BYTE> itemData);
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIItemMng
     {

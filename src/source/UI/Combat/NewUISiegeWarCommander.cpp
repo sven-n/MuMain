@@ -9,8 +9,9 @@
 #include "Engine/Object/ZzzCharacter.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUISiegeWarCommander::CNewUISiegeWarCommander()
+mu::ui::window::CNewUISiegeWarCommander::CNewUISiegeWarCommander()
 {
     memset(&m_BtnCommandGroupPos, 0, sizeof(POINT));
     memset(&m_BtnCommandPos, 0, sizeof(POINT));
@@ -22,26 +23,26 @@ SEASON3B::CNewUISiegeWarCommander::CNewUISiegeWarCommander()
     m_vGuildMemberLocationBuffer.reserve(1600);
 }
 
-SEASON3B::CNewUISiegeWarCommander::~CNewUISiegeWarCommander() {}
+mu::ui::window::CNewUISiegeWarCommander::~CNewUISiegeWarCommander() {}
 
-bool SEASON3B::CNewUISiegeWarCommander::OnCreate(int x, int y)
+bool mu::ui::window::CNewUISiegeWarCommander::OnCreate(int x, int y)
 {
     InitCmdGroupBtn();
     InitCmdBtn();
     return true;
 }
 
-void SEASON3B::CNewUISiegeWarCommander::OnRelease()
+void mu::ui::window::CNewUISiegeWarCommander::OnRelease()
 {
     ClearGuildMemberLocation();
 }
 
-bool SEASON3B::CNewUISiegeWarCommander::OnUpdate()
+bool mu::ui::window::CNewUISiegeWarCommander::OnUpdate()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarCommander::OnRender()
+bool mu::ui::window::CNewUISiegeWarCommander::OnRender()
 {
     EnableAlphaTest();
     g_pRenderText->SetFont(g_hFontBold);
@@ -70,14 +71,14 @@ bool SEASON3B::CNewUISiegeWarCommander::OnRender()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
+bool mu::ui::window::CNewUISiegeWarCommander::OnUpdateMouseEvent()
 {
     if (OnBtnProcess())
         return false;
 
     if (CheckMouseIn(m_MiniMapPos.x, m_MiniMapPos.y, 128, 128))
     {
-        if (SEASON3B::IsPress(VK_LBUTTON) && m_iCurSelectBtnCommand != -1)
+        if (mu::ui::window::IsPress(VK_LBUTTON) && m_iCurSelectBtnCommand != -1)
         {
             GuildCommander SelectCmd;
             memset(&SelectCmd, 0, sizeof(GuildCommander));
@@ -105,12 +106,12 @@ bool SEASON3B::CNewUISiegeWarCommander::OnUpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarCommander::OnUpdateKeyEvent()
+bool mu::ui::window::CNewUISiegeWarCommander::OnUpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarCommander::OnBtnProcess()
+bool mu::ui::window::CNewUISiegeWarCommander::OnBtnProcess()
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
@@ -154,13 +155,13 @@ bool SEASON3B::CNewUISiegeWarCommander::OnBtnProcess()
     return false;
 }
 
-void SEASON3B::CNewUISiegeWarCommander::OnSetPos(int x, int y)
+void mu::ui::window::CNewUISiegeWarCommander::OnSetPos(int x, int y)
 {
     m_BtnCommandGroupPos.x = x;
     m_BtnCommandGroupPos.y = y + 5;
 }
 
-void SEASON3B::CNewUISiegeWarCommander::InitCmdGroupBtn()
+void mu::ui::window::CNewUISiegeWarCommander::InitCmdGroupBtn()
 {
     int iVal = 0;
     wchar_t sztext[255] = {
@@ -178,7 +179,7 @@ void SEASON3B::CNewUISiegeWarCommander::InitCmdGroupBtn()
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::InitCmdBtn()
+void mu::ui::window::CNewUISiegeWarCommander::InitCmdBtn()
 {
     for (int i = 0; i < MINIMAP_CMD_MAX; i++)
     {
@@ -186,7 +187,7 @@ void SEASON3B::CNewUISiegeWarCommander::InitCmdBtn()
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
+void mu::ui::window::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
 
@@ -219,7 +220,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCharPosInMiniMap()
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
+void mu::ui::window::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
 {
     std::vector<VisibleUnitLocation>::iterator UnitIterator;
     POINT Pos;
@@ -252,7 +253,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderGuildMemberPosInMiniMap()
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
+void mu::ui::window::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
 {
     int iWidth, iHeight;
     wchar_t szText[256] = {
@@ -280,7 +281,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdIconAtMouse()
     RenderImage(IMAGE_COMMAND_ATTACK + m_iCurSelectBtnCommand, MouseX - 8, MouseY - 8, iWidth, iHeight);
 }
 
-void SEASON3B::CNewUISiegeWarCommander::RenderCmdGroupBtn()
+void mu::ui::window::CNewUISiegeWarCommander::RenderCmdGroupBtn()
 {
     for (int i = 0; i < MAX_COMMANDGROUP; i++)
     {
@@ -290,7 +291,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdGroupBtn()
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::RenderCmdBtn()
+void mu::ui::window::CNewUISiegeWarCommander::RenderCmdBtn()
 {
     if (m_iCurSelectBtnGroup < 5)
     {
@@ -339,7 +340,7 @@ void SEASON3B::CNewUISiegeWarCommander::RenderCmdBtn()
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bStateDown)
+void mu::ui::window::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bStateDown)
 {
     if (bStateDown)
     {
@@ -359,25 +360,25 @@ void SEASON3B::CNewUISiegeWarCommander::SetBtnState(int iBtnType, bool bStateDow
     }
 }
 
-void SEASON3B::CNewUISiegeWarCommander::ClearGuildMemberLocation(void)
+void mu::ui::window::CNewUISiegeWarCommander::ClearGuildMemberLocation(void)
 {
     m_vGuildMemberLocationBuffer.clear();
 }
 
-void SEASON3B::CNewUISiegeWarCommander::SetGuildMemberLocation(BYTE type, int x, int y)
+void mu::ui::window::CNewUISiegeWarCommander::SetGuildMemberLocation(BYTE type, int x, int y)
 {
     VisibleUnitLocation vLocation = {type, (BYTE)x, (BYTE)y};
 
     m_vGuildMemberLocationBuffer.push_back(vLocation);
 }
 
-void SEASON3B::CNewUISiegeWarCommander::OnLoadImages()
+void mu::ui::window::CNewUISiegeWarCommander::OnLoadImages()
 {
     LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_group.tga", IMAGE_MINIMAP_BTN_GROUP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_SW_Minimap_Bt_Command.tga", IMAGE_MINIMAP_BTN_COMMAND, GL_LINEAR);
 }
 
-void SEASON3B::CNewUISiegeWarCommander::OnUnloadImages()
+void mu::ui::window::CNewUISiegeWarCommander::OnUnloadImages()
 {
     DeleteBitmap(IMAGE_MINIMAP_BTN_GROUP);
     DeleteBitmap(IMAGE_MINIMAP_BTN_COMMAND);

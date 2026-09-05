@@ -11,7 +11,7 @@
 #include "UI/Dialogs/NewUIMessageBox.h"
 #include "UI/Widgets/NewUIButton.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIKanturu2ndEnterNpc : public CNewUIObj
     {

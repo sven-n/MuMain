@@ -102,7 +102,7 @@ void CCharInfoBalloonMng::Create()
         }
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_CHAR_INFO_BALLOON, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_INFO_BALLOON, this);
 }
 
 //*****************************************************************************

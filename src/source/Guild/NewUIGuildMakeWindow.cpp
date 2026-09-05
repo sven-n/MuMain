@@ -143,6 +143,7 @@ namespace
 };
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIGuildMakeWindow::CNewUIGuildMakeWindow() : m_pNewUIMng(NULL), m_EditBox(NULL), m_Button(NULL),
 m_GuildMakeState(GUILDMAKE_INFO)
@@ -161,7 +162,7 @@ bool CNewUIGuildMakeWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 
     LoadImages();
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCGUILDMASTER, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCGUILDMASTER, this);
     SetPos(x, y);
 
     m_EditBox = new CUITextInputBox;
@@ -312,7 +313,7 @@ bool CNewUIGuildMakeWindow::UpdateGMInfo()
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
         return true;
     }
 
@@ -363,7 +364,7 @@ bool CNewUIGuildMakeWindow::UpdateGMMark()
 
         if (CheckSpecialText(tempText) == true)
         {
-            SEASON3B::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::CannotUseSymbols);
         }
         else if (IsGuildName(tempText) == FALSE)
         {
@@ -419,7 +420,7 @@ bool CNewUIGuildMakeWindow::UpdateGMResultInfo()
         }
 
         SocketClient->ToGameServer()->SendGuildCreateRequest(MU_C16(GuildMark[MARK_EDIT].GuildName), Mark, sizeof Mark);
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
         return true;
     }
 
@@ -489,11 +490,11 @@ void CNewUIGuildMakeWindow::RenderFrame()
 
 bool CNewUIGuildMakeWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCGUILDMASTER);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCGUILDMASTER);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -509,13 +510,13 @@ bool CNewUIGuildMakeWindow::Update()
 
 bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER) == false)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER) == false)
     {
         return true;
     }
 
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_NPCGUILDMASTER))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCGUILDMASTER))
     {
         return false;
     }
@@ -539,7 +540,7 @@ bool CNewUIGuildMakeWindow::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;

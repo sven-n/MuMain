@@ -9,7 +9,7 @@
 
 #include "UI/Combat/NewUISiegeWarBase.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUISiegeWarCommander : public CNewUISiegeWarBase
     {

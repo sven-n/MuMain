@@ -12,7 +12,7 @@
 
 typedef std::list<DWORD> DWordList;
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMyQuestInfoWindow : public CNewUIObj
     {

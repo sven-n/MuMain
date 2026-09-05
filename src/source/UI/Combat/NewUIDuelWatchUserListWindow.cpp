@@ -7,6 +7,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
 CNewUIDuelWatchUserListWindow::CNewUIDuelWatchUserListWindow() {}
@@ -22,7 +23,7 @@ bool CNewUIDuelWatchUserListWindow::Create(CNewUIManager* pNewUIMng, int x, int 
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_DUELWATCH_USERLIST, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH_USERLIST, this);
 
     SetPos(x, y);
 

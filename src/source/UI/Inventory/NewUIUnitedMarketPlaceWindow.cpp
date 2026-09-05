@@ -17,6 +17,7 @@
 #include "World/MapInfra/MapManager.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIUnitedMarketPlaceWindow::CNewUIUnitedMarketPlaceWindow()
 {
@@ -38,7 +39,7 @@ bool CNewUIUnitedMarketPlaceWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRen
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
     m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
@@ -104,11 +105,11 @@ bool CNewUIUnitedMarketPlaceWindow::UpdateMouseEvent()
 
 bool CNewUIUnitedMarketPlaceWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -279,7 +280,7 @@ void CNewUIUnitedMarketPlaceWindow::RenderFrame()
 bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
 
     if (m_BtnEnter.UpdateMouseEvent() == true)
     {
@@ -293,7 +294,7 @@ bool CNewUIUnitedMarketPlaceWindow::BtnProcess()
 
     if (m_BtnClose.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA);
     }
 
     return false;

@@ -8,6 +8,7 @@
 
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -1147,11 +1148,11 @@ void CNewUISystem::Show(DWORD dwKey)
     {
         m_pNewUnitedMarketPlaceWindow->OpeningProcess();
     }
-    else if (dwKey == SEASON3B::INTERFACE_LUCKYITEMWND)
+    else if (dwKey == mu::ui::window::INTERFACE_LUCKYITEMWND)
     {
         HideAllGroupA();
         g_pLuckyItemWnd->OpeningProcess();
-        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY);
+        m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_INVENTORY);
     }
     else if (dwKey == INTERFACE_MUHELPER)
     {
@@ -1245,11 +1246,11 @@ void CNewUISystem::Hide(DWORD dwKey)
                 return;
             m_pNewUIMng->ShowInterface(INTERFACE_MIXINVENTORY, false);
         }
-        if (IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND))
+        if (IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND))
         {
             if (g_pLuckyItemWnd->ClosingProcess() == false)
                 return;
-            m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_LUCKYITEMWND, false);
+            m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_LUCKYITEMWND, false);
         }
         if (IsVisible(INTERFACE_NPCSHOP))
         {
@@ -1291,10 +1292,10 @@ void CNewUISystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(INTERFACE_EXCHANGE_LUCKYCOIN, false);
         }
 
-        if (IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND))
+        if (IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND))
         {
             m_pNewUILuckyItemWnd->ClosingProcess();
-            m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_LUCKYITEMWND, false);
+            m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_LUCKYITEMWND, false);
         }
 
         g_pMyInventory->SetPos(PanelColumnX(1), 0);
@@ -1574,20 +1575,20 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         m_pNewUnitedMarketPlaceWindow->ClosingProcess();
     }
-    else if (dwKey == SEASON3B::INTERFACE_LUCKYITEMWND)
+    else if (dwKey == mu::ui::window::INTERFACE_LUCKYITEMWND)
     {
         if (g_pLuckyItemWnd->ClosingProcess() == false)
             return;
-        if (IsVisible(SEASON3B::INTERFACE_INVENTORY))
+        if (IsVisible(mu::ui::window::INTERFACE_INVENTORY))
         {
             m_pNewMyInventory->ClosingProcess();
-            m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_INVENTORY, false);
+            m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_INVENTORY, false);
         }
     }
     else if (dwKey == INTERFACE_MUHELPER)
     {
-        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_SKILL_LIST, false);
-        m_pNewUIMng->ShowInterface(SEASON3B::INTERFACE_MUHELPER_EXT, false);
+        m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_MUHELPER_SKILL_LIST, false);
+        m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_MUHELPER_EXT, false);
     }
 
     m_pNewUIMng->ShowInterface(dwKey, false);
@@ -1628,9 +1629,9 @@ void CNewUISystem::HideAllGroupA()
     Hide(INTERFACE_CHARACTER);
 
     DWORD dwGroupA[] = {
-        // SEASON3B::INTERFACE_INVENTORY,
-        // SEASON3B::INTERFACE_CHARACTER,
-        // SEASON3B::INTERFACE_WINDOW_MENU,
+        // mu::ui::window::INTERFACE_INVENTORY,
+        // mu::ui::window::INTERFACE_CHARACTER,
+        // mu::ui::window::INTERFACE_WINDOW_MENU,
         INTERFACE_MUHELPER,
         INTERFACE_MUHELPER_EXT,
         INTERFACE_MUHELPER_SKILL_LIST,
@@ -1651,9 +1652,9 @@ void CNewUISystem::HideAllGroupA()
         INTERFACE_KANTURU2ND_ENTERNPC,
         INTERFACE_DUELWATCH,
         INTERFACE_DOPPELGANGER_NPC,
-        // SEASON3B::INTERFACE_HELP,
-        // SEASON3B::INTERFACE_ITEM_EXPLANATION,
-        // SEASON3B::INTERFACE_SETITEM_EXPLANATION,
+        // mu::ui::window::INTERFACE_HELP,
+        // mu::ui::window::INTERFACE_ITEM_EXPLANATION,
+        // mu::ui::window::INTERFACE_SETITEM_EXPLANATION,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_NPC_DIALOGUE,
@@ -1661,14 +1662,14 @@ void CNewUISystem::HideAllGroupA()
         INTERFACE_QUEST_PROGRESS_ETC,
         INTERFACE_EMPIREGUARDIAN_NPC,
 #ifdef PBG_MOD_STAMINA_UI
-        SEASON3B::INTERFACE_STAMINA_GAUGE,
+        mu::ui::window::INTERFACE_STAMINA_GAUGE,
 #endif //PBG_MOD_STAMINA_UI
 #ifdef PBG_ADD_GENSRANKING
         INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
         INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
 
-        SEASON3B::INTERFACE_LUCKYITEMWND,
+        mu::ui::window::INTERFACE_LUCKYITEMWND,
 
         0,
     };
@@ -1689,10 +1690,10 @@ void CNewUISystem::HideAllGroupB()
     Hide(INTERFACE_CHARACTER);
 
     DWORD dwGroupB[] = {
-        // SEASON3B::INTERFACE_FRIEND,
-        // SEASON3B::INTERFACE_INVENTORY,
-        // SEASON3B::INTERFACE_CHARACTER,
-        // SEASON3B::INTERFACE_WINDOW_MENU,
+        // mu::ui::window::INTERFACE_FRIEND,
+        // mu::ui::window::INTERFACE_INVENTORY,
+        // mu::ui::window::INTERFACE_CHARACTER,
+        // mu::ui::window::INTERFACE_WINDOW_MENU,
 
         INTERFACE_MIXINVENTORY,
         INTERFACE_STORAGE,
@@ -1712,9 +1713,9 @@ void CNewUISystem::HideAllGroupB()
         INTERFACE_CURSEDTEMPLE_NPC,
         INTERFACE_DUELWATCH,
         INTERFACE_DOPPELGANGER_NPC,
-        // SEASON3B::INTERFACE_HELP,
-        // SEASON3B::INTERFACE_ITEM_EXPLANATION,
-        // SEASON3B::INTERFACE_SETITEM_EXPLANATION,
+        // mu::ui::window::INTERFACE_HELP,
+        // mu::ui::window::INTERFACE_ITEM_EXPLANATION,
+        // mu::ui::window::INTERFACE_SETITEM_EXPLANATION,
         INTERFACE_GOLD_BOWMAN,
         INTERFACE_GOLD_BOWMAN_LENA,
         INTERFACE_NPC_DIALOGUE,
@@ -1722,13 +1723,13 @@ void CNewUISystem::HideAllGroupB()
         INTERFACE_QUEST_PROGRESS_ETC,
         INTERFACE_EMPIREGUARDIAN_NPC,
 #ifdef PBG_MOD_STAMINA_UI
-        SEASON3B::INTERFACE_STAMINA_GAUGE,
+        mu::ui::window::INTERFACE_STAMINA_GAUGE,
 #endif //PBG_MOD_STAMINA_UI
 #ifdef PBG_ADD_GENSRANKING
         INTERFACE_GENSRANKING,
 #endif //PBG_ADD_GENSRANKING
         INTERFACE_UNITEDMARKETPLACE_NPC_JULIA,
-        SEASON3B::INTERFACE_LUCKYITEMWND,
+        mu::ui::window::INTERFACE_LUCKYITEMWND,
 
         0,
     };
@@ -1959,7 +1960,7 @@ bool CNewUISystem::IsImpossibleSendMoveInterface()
 {
     if (IsVisible(INTERFACE_MIXINVENTORY)
         || IsVisible(INTERFACE_KANTURU2ND_ENTERNPC)
-        || IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+        || IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
         )
     {
         return true;
@@ -1977,7 +1978,7 @@ bool CNewUISystem::IsImpossibleTradeInterface()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
         || IsVisible(INTERFACE_INGAMESHOP)
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-        || IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+        || IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
         )
     {
         return true;
@@ -1995,7 +1996,7 @@ bool CNewUISystem::IsImpossibleDuelInterface()
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
         || IsVisible(INTERFACE_INGAMESHOP)
 #endif //PBG_ADD_INGAMESHOP_UI_MAINFRAME
-        || IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+        || IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
         )
     {
         return true;
@@ -2511,7 +2512,7 @@ CNewUIEmpireGuardianTimer* CNewUISystem::GetUI_pNewEmpireGuardianTimer() const
 }
 
 #ifdef PBG_MOD_STAMINA_UI
-CNewUIStamina* SEASON3B::CNewUISystem::GetUI_pNewUIStamina() const
+CNewUIStamina* mu::ui::window::CNewUISystem::GetUI_pNewUIStamina() const
 {
     return m_pNewUIStamina;
 }
@@ -2529,7 +2530,7 @@ CNewUIUnitedMarketPlaceWindow* CNewUISystem::GetUI_pNewUnitedMarketPlaceWindow()
     return m_pNewUnitedMarketPlaceWindow;
 }
 
-CNewUILuckyItemWnd* SEASON3B::CNewUISystem::Get_pNewUILuckyItemWnd() const
+CNewUILuckyItemWnd* mu::ui::window::CNewUISystem::Get_pNewUILuckyItemWnd() const
 {
     return m_pNewUILuckyItemWnd;
 }

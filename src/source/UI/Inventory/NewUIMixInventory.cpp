@@ -20,6 +20,7 @@
 #include "Network/Server/SocketSystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIMixInventory::CNewUIMixInventory()
 {
@@ -37,7 +38,7 @@ bool CNewUIMixInventory::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MIXINVENTORY, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MIXINVENTORY, this);
 
     m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::CHAOS_MIX, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
@@ -128,11 +129,11 @@ void CNewUIMixInventory::OpeningProcess()
     g_MixRecipeMgr.SetPlusChaosRate(0);
     SocketClient->ToGameServer()->SendCrywolfChaosRateBenefitRequest();
 
-    SetMixState(SEASON3B::CNewUIMixInventory::MIX_READY);
+    SetMixState(mu::ui::window::CNewUIMixInventory::MIX_READY);
 
     if (g_MixRecipeMgr.GetMixInventoryType() == SEASON3A::MIXTYPE_GOBLIN_NORMAL)
     {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosMixMenuMsgBoxLayout));
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosMixMenuMsgBoxLayout));
     }
 }
 
@@ -140,7 +141,7 @@ bool CNewUIMixInventory::ClosingProcess()
 {
     if (g_pMixInventory->GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pSystemLogBox->AddText(I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -196,7 +197,7 @@ bool CNewUIMixInventory::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             // Right-click on a craft-box item sends it back to the inventory (mirror of the
             // inventory -> craft-box right-click move).
@@ -207,7 +208,7 @@ bool CNewUIMixInventory::UpdateMouseEvent()
             return false;
         }
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
         {
             return false;
         }
@@ -652,7 +653,7 @@ void CNewUIMixInventory::RenderFrame()
 bool CNewUIMixInventory::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_MIXINVENTORY);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MIXINVENTORY);
 
     if (GetMixState() == MIX_FINISHED)
     {
@@ -810,7 +811,7 @@ bool CNewUIMixInventory::Mix()
 
     if (nMixZen > (int)dwGold)
     {
-        g_pSystemLogBox->AddText(I18N::Game::NotEnoughZenToCombineItems, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NotEnoughZenToCombineItems, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -818,7 +819,7 @@ bool CNewUIMixInventory::Mix()
     {
         wchar_t szText[100];
         mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Combining);
-        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -829,14 +830,14 @@ bool CNewUIMixInventory::Mix()
         wchar_t szText2[100];
         g_MixRecipeMgr.GetCurRecipeName(szText2, 1);
         mu_swprintf(szText, I18N::Game::FromAboveTheLevelDSEnabledAndOn, g_MixRecipeMgr.GetCurRecipe()->m_iRequiredLevel, szText2);
-        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
     if (g_MixRecipeMgr.GetCurRecipe()->m_iWidth != -1 &&
         g_pMyInventory->FindEmptySlot(g_MixRecipeMgr.GetCurRecipe()->m_iWidth, g_MixRecipeMgr.GetCurRecipe()->m_iHeight) == -1)
     {
-        g_pSystemLogBox->AddText(I18N::Game::CombineItemsAfterOrganizingYourInventory, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::CombineItemsAfterOrganizingYourInventory, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -852,7 +853,7 @@ bool CNewUIMixInventory::Mix()
                 BYTE bySeedSphereID = g_MixRecipeMgr.GetSeedSphereID(0);
                 if (bySocketSeedID == bySeedSphereID)
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::YouCannotApplyTheSameTypeOfSphere, SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouCannotApplyTheSameTypeOfSphere, mu::ui::window::TYPE_ERROR_MESSAGE);
                     return false;
                 }
             }
@@ -860,13 +861,13 @@ bool CNewUIMixInventory::Mix()
 
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pSystemLogBox->AddText(I18N::Game::YouMustSelectTheSocket, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustSelectTheSocket, mu::ui::window::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) != SOCKET_EMPTY)
         {
-            g_pSystemLogBox->AddText(I18N::Game::ItSAlreadyAppliedOnTheCharacter, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ItSAlreadyAppliedOnTheCharacter, mu::ui::window::TYPE_ERROR_MESSAGE);
             return false;
         }
 
@@ -877,13 +878,13 @@ bool CNewUIMixInventory::Mix()
         int iSelectedLine = m_SocketListBox.GetLineNum() - m_SocketListBox.SLGetSelectLineNum();
         if (m_SocketListBox.SLGetSelectLineNum() == 0)
         {
-            g_pSystemLogBox->AddText(I18N::Game::YouMustSelectTheDestructibleSocket, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustSelectTheDestructibleSocket, mu::ui::window::TYPE_ERROR_MESSAGE);
             return false;
         }
         else if (iSelectedLine > g_MixRecipeMgr.GetFirstItemSocketCount()
             || g_MixRecipeMgr.GetFirstItemSocketSeedID(iSelectedLine) == SOCKET_EMPTY)
         {
-            g_pSystemLogBox->AddText(I18N::Game::ThereAreNoDestructibleSeedSpheres, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ThereAreNoDestructibleSeedSpheres, mu::ui::window::TYPE_ERROR_MESSAGE);
             return false;
         }
         g_MixRecipeMgr.SetMixSubType(iSelectedLine);
@@ -892,14 +893,14 @@ bool CNewUIMixInventory::Mix()
 #ifdef LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
     if (g_MixRecipeMgr.GetTotalChaosCharmCount() > 0 && g_MixRecipeMgr.GetTotalCharmCount() > 0)
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseTheTalismanOf, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotUseTheTalismanOf, mu::ui::window::TYPE_ERROR_MESSAGE);
         return FALSE;
     }
 #endif //LJH_MOD_CANNOT_USE_CHARMITEM_AND_CHAOSCHARMITEM_SIMULTANEOUSLY
 
     if (CNewUIInventoryCtrl::GetPickedItem() == NULL)
     {
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CMixCheckMsgBoxLayout));
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMixCheckMsgBoxLayout));
         return true;
     }
 
@@ -919,7 +920,7 @@ bool CNewUIMixInventory::InventoryProcess()
             pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
         {
             m_pNewInventoryCtrl->SetSquareColorNormal(m_fInventoryColor[0], m_fInventoryColor[1], m_fInventoryColor[2]);
-            if (SEASON3B::IsPress(VK_LBUTTON))
+            if (mu::ui::window::IsPress(VK_LBUTTON))
             {
                 int iSourceIndex = pPickedItem->GetSourceLinealPos();
                 int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
@@ -936,7 +937,7 @@ bool CNewUIMixInventory::InventoryProcess()
         else if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
         {
             m_pNewInventoryCtrl->SetSquareColorNormal(m_fInventoryColor[0], m_fInventoryColor[1], m_fInventoryColor[2]);
-            if (SEASON3B::IsPress(VK_LBUTTON))
+            if (mu::ui::window::IsPress(VK_LBUTTON))
             {
                 int iSourceIndex = pPickedItem->GetSourceLinealPos();
                 int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
@@ -954,7 +955,7 @@ bool CNewUIMixInventory::InventoryProcess()
             pItemObj->ex_src_type == ITEM_EX_SRC_EQUIPMENT)
         {
             m_pNewInventoryCtrl->SetSquareColorNormal(m_fInventoryColor[0], m_fInventoryColor[1], m_fInventoryColor[2]);
-            if (SEASON3B::IsPress(VK_LBUTTON))
+            if (mu::ui::window::IsPress(VK_LBUTTON))
             {
                 int iSourceIndex = pPickedItem->GetSourceLinealPos();
                 int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
@@ -1095,7 +1096,7 @@ void CNewUIMixInventory::RenderMixEffect()
     DisableAlphaBlend();
 }
 
-int SEASON3B::CNewUIMixInventory::GetPointedItemIndex()
+int mu::ui::window::CNewUIMixInventory::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }

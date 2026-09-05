@@ -9,7 +9,7 @@
 
 #include "UI/Core/NewUIManager.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIDuelWindow : public CNewUIObj
     {

@@ -12,6 +12,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIPetInfoWindow::CNewUIPetInfoWindow()
 {
@@ -33,7 +34,7 @@ bool CNewUIPetInfoWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_PET, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PET, this);
 
     SetPos(x, y);
 
@@ -309,12 +310,12 @@ float CNewUIPetInfoWindow::GetLayerDepth()
 bool CNewUIPetInfoWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_PET))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PET))
         return true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_PET);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PET);
         return true;
     }
 
@@ -332,7 +333,7 @@ void CNewUIPetInfoWindow::CalcDamage(int iNumTapButton)
         int iSkillDamage[2];
         int master_boost = 0;
         gCharacterManager.GetSkillDamage(AT_SKILL_EARTHSHAKE, &iSkillDamage[0], &iSkillDamage[1]);
-        auto masterLevelUi = SEASON3B::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
+        auto masterLevelUi = mu::ui::window::CNewUISystem::GetInstance()->GetUI_NewMasterLevelInterface();
         if (masterLevelUi != nullptr)
         {
             master_boost = static_cast<int>(CharacterAttribute->MasterSkillInfo[AT_SKILL_EARTHSHAKE_STR].GetSkillValue());

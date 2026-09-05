@@ -25,6 +25,7 @@ float ConvertX(float x);
 float ConvertY(float y);
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 std::vector<UI::Options::DisplayResolution>
 UI::Options::NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions)
@@ -191,7 +192,7 @@ namespace
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
+mu::ui::window::CNewUIOptionWindow::CNewUIOptionWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -210,18 +211,18 @@ SEASON3B::CNewUIOptionWindow::CNewUIOptionWindow()
     m_iFontIndex = FindCurrentFontIndex();
 }
 
-SEASON3B::CNewUIOptionWindow::~CNewUIOptionWindow()
+mu::ui::window::CNewUIOptionWindow::~CNewUIOptionWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_OPTION, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_OPTION, this);
     SetPos(x, y);
     LoadImages();
     SetButtonInfo();
@@ -232,7 +233,7 @@ bool SEASON3B::CNewUIOptionWindow::Create(CNewUIManager* pNewUIMng, int x, int y
     return true;
 }
 
-void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
+void mu::ui::window::CNewUIOptionWindow::InitResolutionCombo()
 {
     m_resolutions = UI::Options::NormalizeDisplayResolutions(MuGetSupportedDisplayResolutions());
     if (m_resolutions.empty())
@@ -269,7 +270,7 @@ void SEASON3B::CNewUIOptionWindow::InitResolutionCombo()
         RES_COMBO_MAX_VISIBLE);
 }
 
-void SEASON3B::CNewUIOptionWindow::InitLanguageCombo()
+void mu::ui::window::CNewUIOptionWindow::InitLanguageCombo()
 {
     m_LanguageCombo.Setup(
         m_Pos.x + LANG_COMBO_X_LOCAL,
@@ -282,7 +283,7 @@ void SEASON3B::CNewUIOptionWindow::InitLanguageCombo()
         LANG_COMBO_MAX_VISIBLE);
 }
 
-void SEASON3B::CNewUIOptionWindow::InitFontCombo()
+void mu::ui::window::CNewUIOptionWindow::InitFontCombo()
 {
     m_FontCombo.Setup(
         m_Pos.x + FONT_COMBO_X_LOCAL,
@@ -295,7 +296,7 @@ void SEASON3B::CNewUIOptionWindow::InitFontCombo()
         FONT_COMBO_MAX_VISIBLE);
 }
 
-void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
+void mu::ui::window::CNewUIOptionWindow::SetButtonInfo()
 {
     m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
     m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
@@ -304,7 +305,7 @@ void SEASON3B::CNewUIOptionWindow::SetButtonInfo()
     m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
 }
 
-void SEASON3B::CNewUIOptionWindow::Release()
+void mu::ui::window::CNewUIOptionWindow::Release()
 {
     UnloadImages();
 
@@ -315,7 +316,7 @@ void SEASON3B::CNewUIOptionWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIOptionWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIOptionWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -324,7 +325,7 @@ void SEASON3B::CNewUIOptionWindow::SetPos(int x, int y)
     m_FontCombo.SetPos(m_Pos.x + FONT_COMBO_X_LOCAL, m_Pos.y + FONT_COMBO_Y_LOCAL);
 }
 
-bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIOptionWindow::UpdateMouseEvent()
 {
     // A combo selects on mouse-PRESS and closes its dropdown there and then; the
     // mouse is still held. The Close button fires on RELEASE-over-button, so a
@@ -334,7 +335,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     // button comes up, so the release can't fall through to Close.
     if (m_bSwallowClickHold)
     {
-        if (!SEASON3B::IsRepeat(VK_LBUTTON))   // button released → hold is over
+        if (!mu::ui::window::IsRepeat(VK_LBUTTON))   // button released → hold is over
             m_bSwallowClickHold = false;
         return false;
     }
@@ -376,7 +377,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
                 return false;
             // A press elsewhere closed this open dropdown (clicked outside, or
             // re-picked the current item): consume it and swallow the hold too.
-            if (wasOpen && !s.combo->IsOpen() && SEASON3B::IsPress(VK_LBUTTON))
+            if (wasOpen && !s.combo->IsOpen() && mu::ui::window::IsPress(VK_LBUTTON))
             {
                 m_bSwallowClickHold = true;
                 return false;
@@ -388,7 +389,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     // click instead of closing the window.
     if (m_BtnClose.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_OPTION);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_OPTION);
         return false;
     }
 
@@ -414,7 +415,7 @@ bool SEASON3B::CNewUIOptionWindow::UpdateMouseEvent()
     return true;
 }
 
-void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
+void mu::ui::window::CNewUIOptionWindow::HandleCheckboxInputs()
 {
     struct Checkbox { int yLocal; bool* target; };
     const Checkbox boxes[] = {
@@ -428,7 +429,7 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
     constexpr int CHECKBOX_X_LOCAL = 150;
     constexpr int CHECKBOX_SIZE = 15;
 
-    if (!SEASON3B::IsPress(VK_LBUTTON))
+    if (!mu::ui::window::IsPress(VK_LBUTTON))
         return;
 
     for (const auto& cb : boxes)
@@ -440,7 +441,7 @@ void SEASON3B::CNewUIOptionWindow::HandleCheckboxInputs()
 
 // Handles wheel + drag input on a volume slider track.
 // Returns true if the level changed this frame.
-bool SEASON3B::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
+bool mu::ui::window::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
 {
     if (!CheckMouseIn(m_Pos.x + SLIDER_X_LOCAL - SLIDER_HIT_PADDING,
                       m_Pos.y + yOffset,
@@ -463,7 +464,7 @@ bool SEASON3B::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
         level--;
     }
 
-    if (SEASON3B::IsRepeat(VK_LBUTTON))
+    if (mu::ui::window::IsRepeat(VK_LBUTTON))
     {
         int x = MouseX - (m_Pos.x + SLIDER_X_LOCAL);
         if (x < 0)
@@ -478,7 +479,7 @@ bool SEASON3B::CNewUIOptionWindow::HandleVolumeSlider(int& level, int yOffset)
     return (level != oldValue);
 }
 
-void SEASON3B::CNewUIOptionWindow::OnSoundVolumeChanged()
+void mu::ui::window::CNewUIOptionWindow::OnSoundVolumeChanged()
 {
     m_SoundOnOff = (m_iVolumeLevel > 0) ? 1 : 0;
     SetEffectVolumeLevel(m_iVolumeLevel);
@@ -486,7 +487,7 @@ void SEASON3B::CNewUIOptionWindow::OnSoundVolumeChanged()
     GameConfig::GetInstance().Save();
 }
 
-void SEASON3B::CNewUIOptionWindow::OnMusicVolumeChanged()
+void mu::ui::window::CNewUIOptionWindow::OnMusicVolumeChanged()
 {
     // Mute via volume only — do not stop the stream.  Once stopped, the
     // current track is gone and raising the slider back up leaves silence
@@ -501,13 +502,13 @@ void SEASON3B::CNewUIOptionWindow::OnMusicVolumeChanged()
     GameConfig::GetInstance().Save();
 }
 
-void SEASON3B::CNewUIOptionWindow::HandleRenderLevelSlider()
+void mu::ui::window::CNewUIOptionWindow::HandleRenderLevelSlider()
 {
     if (!CheckMouseIn(m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
                       RENDER_SLIDER_WIDTH, RENDER_SLIDER_HEIGHT))
         return;
 
-    if (!SEASON3B::IsRepeat(VK_LBUTTON))
+    if (!mu::ui::window::IsRepeat(VK_LBUTTON))
         return;
 
     int x = MouseX - (m_Pos.x + RENDER_SLIDER_X_LOCAL);
@@ -515,13 +516,13 @@ void SEASON3B::CNewUIOptionWindow::HandleRenderLevelSlider()
 }
 
 
-bool SEASON3B::CNewUIOptionWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIOptionWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_OPTION);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_OPTION);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -530,12 +531,12 @@ bool SEASON3B::CNewUIOptionWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIOptionWindow::Update()
+bool mu::ui::window::CNewUIOptionWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIOptionWindow::Render()
+bool mu::ui::window::CNewUIOptionWindow::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -545,17 +546,17 @@ bool SEASON3B::CNewUIOptionWindow::Render()
     return true;
 }
 
-float SEASON3B::CNewUIOptionWindow::GetLayerDepth()	//. 10.5f
+float mu::ui::window::CNewUIOptionWindow::GetLayerDepth()	//. 10.5f
 {
     return 10.5f;
 }
 
-float SEASON3B::CNewUIOptionWindow::GetKeyEventOrder()	// 10.f;
+float mu::ui::window::CNewUIOptionWindow::GetKeyEventOrder()	// 10.f;
 {
     return 10.0f;
 }
 
-void SEASON3B::CNewUIOptionWindow::OpenningProcess()
+void mu::ui::window::CNewUIOptionWindow::OpenningProcess()
 {
     // Resync state that may have been changed externally while the window was hidden.
     m_bSwallowClickHold = false;   // drop any stale combo click-swallow latch
@@ -569,14 +570,14 @@ void SEASON3B::CNewUIOptionWindow::OpenningProcess()
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
 }
 
-void SEASON3B::CNewUIOptionWindow::ClosingProcess()
+void mu::ui::window::CNewUIOptionWindow::ClosingProcess()
 {
     m_ResolutionCombo.Close();
     m_LanguageCombo.Close();
     m_FontCombo.Close();
 }
 
-void SEASON3B::CNewUIOptionWindow::LoadImages()
+void mu::ui::window::CNewUIOptionWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_button_close.tga", IMAGE_OPTION_BTN_CLOSE, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_OPTION_FRAME_BACK, GL_LINEAR);
@@ -593,7 +594,7 @@ void SEASON3B::CNewUIOptionWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_option_volume02.tga", IMAGE_OPTION_VOLUME_COLOR, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIOptionWindow::UnloadImages()
+void mu::ui::window::CNewUIOptionWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_OPTION_BTN_CLOSE);
     DeleteBitmap(IMAGE_OPTION_FRAME_BACK);
@@ -610,7 +611,7 @@ void SEASON3B::CNewUIOptionWindow::UnloadImages()
     DeleteBitmap(IMAGE_OPTION_VOLUME_COLOR);
 }
 
-void SEASON3B::CNewUIOptionWindow::RenderFrame()
+void mu::ui::window::CNewUIOptionWindow::RenderFrame()
 {
     float x, y;
     x = m_Pos.x;
@@ -649,7 +650,7 @@ void SEASON3B::CNewUIOptionWindow::RenderFrame()
     RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render full effects
 }
 
-void SEASON3B::CNewUIOptionWindow::RenderContents()
+void mu::ui::window::CNewUIOptionWindow::RenderContents()
 {
     float x, y;
     x = m_Pos.x + 20.f;
@@ -697,7 +698,7 @@ void SEASON3B::CNewUIOptionWindow::RenderContents()
     g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
 }
 
-void SEASON3B::CNewUIOptionWindow::RenderButtons()
+void mu::ui::window::CNewUIOptionWindow::RenderButtons()
 {
     m_BtnClose.Render();
 
@@ -783,73 +784,73 @@ void SEASON3B::CNewUIOptionWindow::RenderButtons()
     for (auto* c : combos) if (c->IsOpen())  c->Render();
 }
 
-void SEASON3B::CNewUIOptionWindow::SetAutoAttack(bool bAuto)
+void mu::ui::window::CNewUIOptionWindow::SetAutoAttack(bool bAuto)
 {
     m_bAutoAttack = bAuto;
 }
 
-bool SEASON3B::CNewUIOptionWindow::IsAutoAttack()
+bool mu::ui::window::CNewUIOptionWindow::IsAutoAttack()
 {
     return m_bAutoAttack;
 }
 
-void SEASON3B::CNewUIOptionWindow::SetWhisperSound(bool bSound)
+void mu::ui::window::CNewUIOptionWindow::SetWhisperSound(bool bSound)
 {
     m_bWhisperSound = bSound;
 }
 
-bool SEASON3B::CNewUIOptionWindow::IsWhisperSound()
+bool mu::ui::window::CNewUIOptionWindow::IsWhisperSound()
 {
     return m_bWhisperSound;
 }
 
-void SEASON3B::CNewUIOptionWindow::SetSlideHelp(bool bHelp)
+void mu::ui::window::CNewUIOptionWindow::SetSlideHelp(bool bHelp)
 {
     m_bSlideHelp = bHelp;
 }
 
-bool SEASON3B::CNewUIOptionWindow::IsSlideHelp()
+bool mu::ui::window::CNewUIOptionWindow::IsSlideHelp()
 {
     return m_bSlideHelp;
 }
 
-void SEASON3B::CNewUIOptionWindow::SetVolumeLevel(int iVolume)
+void mu::ui::window::CNewUIOptionWindow::SetVolumeLevel(int iVolume)
 {
     m_iVolumeLevel = iVolume;
 }
 
-int SEASON3B::CNewUIOptionWindow::GetVolumeLevel()
+int mu::ui::window::CNewUIOptionWindow::GetVolumeLevel()
 {
     return m_iVolumeLevel;
 }
 
-void SEASON3B::CNewUIOptionWindow::SetRenderLevel(int iRender)
+void mu::ui::window::CNewUIOptionWindow::SetRenderLevel(int iRender)
 {
     m_iRenderLevel = iRender;
 }
 
-int SEASON3B::CNewUIOptionWindow::GetRenderLevel()
+int mu::ui::window::CNewUIOptionWindow::GetRenderLevel()
 {
     return m_iRenderLevel;
 }
 
-void SEASON3B::CNewUIOptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
+void mu::ui::window::CNewUIOptionWindow::SetRenderAllEffects(bool bRenderAllEffects)
 {
     m_bRenderAllEffects = bRenderAllEffects;
 }
 
-bool SEASON3B::CNewUIOptionWindow::GetRenderAllEffects()
+bool mu::ui::window::CNewUIOptionWindow::GetRenderAllEffects()
 {
     return m_bRenderAllEffects;
 }
 
-int SEASON3B::CNewUIOptionWindow::FindCurrentResolutionIndex()
+int mu::ui::window::CNewUIOptionWindow::FindCurrentResolutionIndex()
 {
     return UI::Options::FindClosestDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
                                                           static_cast<int>(WindowHeight));
 }
 
-int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
+int mu::ui::window::CNewUIOptionWindow::FindCurrentLanguageIndex()
 {
     const char* current = I18N::GetCurrentLocale();
     if (current == nullptr) return 0;
@@ -861,7 +862,7 @@ int SEASON3B::CNewUIOptionWindow::FindCurrentLanguageIndex()
     return 0;  // default to English
 }
 
-void SEASON3B::CNewUIOptionWindow::ApplyLanguage()
+void mu::ui::window::CNewUIOptionWindow::ApplyLanguage()
 {
     const char* code = s_Languages[m_iLanguageIndex].code;
 
@@ -878,7 +879,7 @@ void SEASON3B::CNewUIOptionWindow::ApplyLanguage()
     GameConfig::GetInstance().Save();
 }
 
-int SEASON3B::CNewUIOptionWindow::FindCurrentFontIndex()
+int mu::ui::window::CNewUIOptionWindow::FindCurrentFontIndex()
 {
     const std::wstring current = GameConfig::GetInstance().GetFontSelection();
     for (int i = 0; i < s_NumFonts; ++i)
@@ -889,7 +890,7 @@ int SEASON3B::CNewUIOptionWindow::FindCurrentFontIndex()
     return 0;  // default ("")
 }
 
-void SEASON3B::CNewUIOptionWindow::ApplyFont()
+void mu::ui::window::CNewUIOptionWindow::ApplyFont()
 {
     // Re-selecting the active font is a no-op; skip the font rebuild and disk write.
     if (GameConfig::GetInstance().GetFontSelection() == s_Fonts[m_iFontIndex].name)
@@ -901,7 +902,7 @@ void SEASON3B::CNewUIOptionWindow::ApplyFont()
     GameConfig::GetInstance().Save();
 }
 
-void SEASON3B::CNewUIOptionWindow::ApplyResolution()
+void mu::ui::window::CNewUIOptionWindow::ApplyResolution()
 {
     if (m_iResolutionIndex < 0 || m_iResolutionIndex >= static_cast<int>(m_resolutions.size()))
     {
@@ -933,7 +934,7 @@ void SEASON3B::CNewUIOptionWindow::ApplyResolution()
 // Point the resolution combo at the mode the window really has. If the actual
 // size is not a listed mode, keep the current selection - config still
 // records the real size.
-void SEASON3B::CNewUIOptionWindow::SyncResolutionComboToWindow()
+void mu::ui::window::CNewUIOptionWindow::SyncResolutionComboToWindow()
 {
     const int listed = UI::Options::FindExactDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
                                                                     static_cast<int>(WindowHeight));
@@ -948,7 +949,7 @@ void SEASON3B::CNewUIOptionWindow::SyncResolutionComboToWindow()
 // rather than driving the OS directly: the old Win32 ChangeDisplaySettings /
 // SetWindowLongPtr path fought SDL and left its state inconsistent with a
 // later resolution change. Keeps the current size and applies the new mode.
-void SEASON3B::CNewUIOptionWindow::ApplyWindowModeToggle()
+void mu::ui::window::CNewUIOptionWindow::ApplyWindowModeToggle()
 {
     g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
     GameConfig::GetInstance().SetWindowMode(m_bWindowedMode);
@@ -964,5 +965,5 @@ void SEASON3B::CNewUIOptionWindow::ApplyWindowModeToggle()
 
     // Consume the in-flight VK_LBUTTON press so the same click doesn't
     // toggle again next frame; the user must release and click again.
-    g_pNewKeyInput->SetKeyState(VK_LBUTTON, SEASON3B::CNewKeyInput::KEY_NONE);
+    g_pNewKeyInput->SetKeyState(VK_LBUTTON, mu::ui::window::CNewKeyInput::KEY_NONE);
 }

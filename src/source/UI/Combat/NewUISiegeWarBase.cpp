@@ -4,6 +4,7 @@
 #include "stdafx.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #include "UI/Combat/NewUISiegeWarBase.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -26,7 +27,7 @@ DWORD MakeRgba(float red, float green, float blue, float alpha)
 }
 }
 
-SEASON3B::CNewUISiegeWarBase::CNewUISiegeWarBase()
+mu::ui::window::CNewUISiegeWarBase::CNewUISiegeWarBase()
 {
     m_iMiniMapScale = 1;
     m_fMiniMapAlpha = 1.f;
@@ -55,11 +56,11 @@ SEASON3B::CNewUISiegeWarBase::CNewUISiegeWarBase()
     memset(&m_MiniMapScaleOffset, 0, sizeof(POINT));
 }
 
-SEASON3B::CNewUISiegeWarBase::~CNewUISiegeWarBase()
+mu::ui::window::CNewUISiegeWarBase::~CNewUISiegeWarBase()
 {
 }
 
-bool SEASON3B::CNewUISiegeWarBase::Create(int x, int y)
+bool mu::ui::window::CNewUISiegeWarBase::Create(int x, int y)
 {
     SetPos(x, y);
 
@@ -89,14 +90,14 @@ bool SEASON3B::CNewUISiegeWarBase::Create(int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUISiegeWarBase::Release()
+void mu::ui::window::CNewUISiegeWarBase::Release()
 {
     ReleaseBattleSkill();
 
     OnRelease();
 }
 
-bool SEASON3B::CNewUISiegeWarBase::Update()
+bool mu::ui::window::CNewUISiegeWarBase::Update()
 {
     UpdateBuffState();
     UpdateHeroPos();
@@ -106,7 +107,7 @@ bool SEASON3B::CNewUISiegeWarBase::Update()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarBase::Render()
+bool mu::ui::window::CNewUISiegeWarBase::Render()
 {
     wchar_t szText[256] = { 0, };
     const BYTE miniMapAlpha = ToColorByte(m_fMiniMapAlpha);
@@ -193,7 +194,7 @@ bool SEASON3B::CNewUISiegeWarBase::Render()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarBase::InitBattleSkill()
+bool mu::ui::window::CNewUISiegeWarBase::InitBattleSkill()
 {
     ReleaseBattleSkill();
 
@@ -245,14 +246,14 @@ bool SEASON3B::CNewUISiegeWarBase::InitBattleSkill()
     return true;
 }
 
-void SEASON3B::CNewUISiegeWarBase::ReleaseBattleSkill()
+void mu::ui::window::CNewUISiegeWarBase::ReleaseBattleSkill()
 {
     m_listBattleSkill.clear();
 
     m_bRenderSkillUI = false;
 }
 
-void SEASON3B::CNewUISiegeWarBase::SetSkillScrollUp()
+void mu::ui::window::CNewUISiegeWarBase::SetSkillScrollUp()
 {
     if (m_listBattleSkill.begin() == m_iterCurBattleSkill)
         return;
@@ -262,7 +263,7 @@ void SEASON3B::CNewUISiegeWarBase::SetSkillScrollUp()
     Hero->GuildSkill = (*m_iterCurBattleSkill);
 }
 
-void SEASON3B::CNewUISiegeWarBase::SetSkillScrollDn()
+void mu::ui::window::CNewUISiegeWarBase::SetSkillScrollDn()
 {
     if (m_listBattleSkill.end() == ++m_iterCurBattleSkill)
     {
@@ -273,7 +274,7 @@ void SEASON3B::CNewUISiegeWarBase::SetSkillScrollDn()
     Hero->GuildSkill = (*m_iterCurBattleSkill);
 }
 
-bool SEASON3B::CNewUISiegeWarBase::UpdateMouseEvent()
+bool mu::ui::window::CNewUISiegeWarBase::UpdateMouseEvent()
 {
     if (!OnUpdateMouseEvent())
         return false;
@@ -304,7 +305,7 @@ bool SEASON3B::CNewUISiegeWarBase::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarBase::UpdateKeyEvent()
+bool mu::ui::window::CNewUISiegeWarBase::UpdateKeyEvent()
 {
     if (!OnUpdateKeyEvent())
         return false;
@@ -312,7 +313,7 @@ bool SEASON3B::CNewUISiegeWarBase::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarBase::BtnProcess()
+bool mu::ui::window::CNewUISiegeWarBase::BtnProcess()
 {
     POINT ptScaleBtn = { m_MiniMapFramePos.x + 134, m_MiniMapFramePos.y + 7 };
 
@@ -335,7 +336,7 @@ bool SEASON3B::CNewUISiegeWarBase::BtnProcess()
         return true;
     }
 
-    if (SEASON3B::IsPress(VK_LBUTTON) && CheckMouseIn(ptScaleBtn.x, ptScaleBtn.y, 13, 12))
+    if (mu::ui::window::IsPress(VK_LBUTTON) && CheckMouseIn(ptScaleBtn.x, ptScaleBtn.y, 13, 12))
     {
         if (m_iMiniMapScale == 1)
             m_iMiniMapScale = 2;
@@ -375,7 +376,7 @@ bool SEASON3B::CNewUISiegeWarBase::BtnProcess()
     return false;
 }
 
-void SEASON3B::CNewUISiegeWarBase::UpdateBuffState()
+void mu::ui::window::CNewUISiegeWarBase::UpdateBuffState()
 {
     DWORD m_dwBuffState = -1;
 
@@ -399,7 +400,7 @@ void SEASON3B::CNewUISiegeWarBase::UpdateBuffState()
     }
 }
 
-void SEASON3B::CNewUISiegeWarBase::UpdateHeroPos()
+void mu::ui::window::CNewUISiegeWarBase::UpdateHeroPos()
 {
     m_HeroPosInWorld.x = (Hero->PositionX) / m_iMiniMapScale;
     m_HeroPosInWorld.y = (256 - (Hero->PositionY)) / m_iMiniMapScale;
@@ -414,7 +415,7 @@ void SEASON3B::CNewUISiegeWarBase::UpdateHeroPos()
     m_fMiniMapTexV = (float)(m_MiniMapScaleOffset.y) / (256.f / (float)m_iMiniMapScale);
 }
 
-void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
+void mu::ui::window::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
 {
     int iWidth, iHeight;
     wchar_t szText[256] = { 0, };
@@ -462,7 +463,7 @@ void SEASON3B::CNewUISiegeWarBase::RenderCmdIconInMiniMap()
     }
 }
 
-void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
+void mu::ui::window::CNewUISiegeWarBase::RenderSkillIcon()
 {
     int iUseSkillDestKill;
     int iSelectSkill;
@@ -501,7 +502,7 @@ void SEASON3B::CNewUISiegeWarBase::RenderSkillIcon()
 
 //---------------------------------------------------------------------------------------------
 // SetPos
-void SEASON3B::CNewUISiegeWarBase::SetPos(int x, int y)
+void mu::ui::window::CNewUISiegeWarBase::SetPos(int x, int y)
 {
     m_MiniMapFramePos.x = x;
     m_MiniMapFramePos.y = y;
@@ -530,13 +531,13 @@ void SEASON3B::CNewUISiegeWarBase::SetPos(int x, int y)
     OnSetPos(x, y);
 }
 
-void  SEASON3B::CNewUISiegeWarBase::SetTime(int iHour, int iMinute)
+void  mu::ui::window::CNewUISiegeWarBase::SetTime(int iHour, int iMinute)
 {
     m_iHour = iHour;
     m_iMinute = iMinute;
 }
 
-void SEASON3B::CNewUISiegeWarBase::SetMapInfo(GuildCommander& data)
+void mu::ui::window::CNewUISiegeWarBase::SetMapInfo(GuildCommander& data)
 {
     m_CmdBuffer[data.byTeam].byCmd = data.byCmd;
     m_CmdBuffer[data.byTeam].byTeam = data.byTeam;
@@ -545,12 +546,12 @@ void SEASON3B::CNewUISiegeWarBase::SetMapInfo(GuildCommander& data)
     m_CmdBuffer[data.byTeam].byLifeTime = 100;
 }
 
-void SEASON3B::CNewUISiegeWarBase::SetRenderSkillUI(bool bRenderSkillUI)
+void mu::ui::window::CNewUISiegeWarBase::SetRenderSkillUI(bool bRenderSkillUI)
 {
     m_bRenderSkillUI = bRenderSkillUI;
 }
 
-void SEASON3B::CNewUISiegeWarBase::LoadImages()
+void mu::ui::window::CNewUISiegeWarBase::LoadImages()
 {
     LoadBitmap(L"World31\\Map1.jpg", IMAGE_MINIMAP, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_SW_Minimap_Frame.tga", IMAGE_MINIMAP_FRAME, GL_LINEAR);
@@ -567,7 +568,7 @@ void SEASON3B::CNewUISiegeWarBase::LoadImages()
     OnLoadImages();
 }
 
-void SEASON3B::CNewUISiegeWarBase::UnLoadImages()
+void mu::ui::window::CNewUISiegeWarBase::UnLoadImages()
 {
     DeleteBitmap(IMAGE_MINIMAP);
     DeleteBitmap(IMAGE_MINIMAP_FRAME);

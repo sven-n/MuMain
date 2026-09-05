@@ -62,7 +62,7 @@ DWORD CUIPopup::SetPopup(const wchar_t* pszText, int nLineCount, int nBufferSize
     if (m_dwPopupID != 0)
     {
         __TraceF(TEXT("CUIPopup::SetPopup\n"));
-        g_pSystemLogBox->AddText(L"SetPopup", SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(L"SetPopup", mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return 0;
     }
 

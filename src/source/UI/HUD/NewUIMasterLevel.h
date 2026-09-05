@@ -67,7 +67,7 @@ struct _MASTER_SKILL_TOOLTIP_FILE
     char Info7[64];
 };
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     //size = 404
     class CNewUIMasterLevel : public CNewUIObj

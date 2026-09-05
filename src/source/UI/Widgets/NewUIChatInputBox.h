@@ -12,7 +12,7 @@
 
 class CUITextInputBox;
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIManager;
     class CNewUIChatLogWindow;

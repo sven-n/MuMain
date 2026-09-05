@@ -24,7 +24,7 @@ int FindExactDisplayResolutionIndex(const std::vector<DisplayResolution>& resolu
 int FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
 } // namespace UI::Options
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIOptionWindow : public CNewUIObj
     {

@@ -15,7 +15,7 @@
 #include "UI/Core/NewUIBase.h"
 #include "UI/Core/NewUIManager.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 class CNewUIBattleSoccerScore : public CNewUIObj
 {
@@ -60,6 +60,6 @@ private:
 
     int FindGuildMark(wchar_t* pszGuildName);
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUIBATTLESOCCERSCORE_H__68E768E4_5FB7_4D33_A604_54315C1D26C6__INCLUDED_)

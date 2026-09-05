@@ -14,7 +14,7 @@
 #define QP_PLAYER_LINE_MAX	9
 #define QP_WORDS_ROW_MAX	64
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIQuestProgress : public CNewUIObj
     {

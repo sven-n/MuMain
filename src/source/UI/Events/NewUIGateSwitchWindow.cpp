@@ -11,6 +11,7 @@
 #include "GameLogic/NPCs/npcGateSwitch.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIGateSwitchWindow::CNewUIGateSwitchWindow()
 {
@@ -29,7 +30,7 @@ bool CNewUIGateSwitchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_GATESWITCH, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GATESWITCH, this);
 
     SetPos(x, y);
 
@@ -78,7 +79,7 @@ bool CNewUIGateSwitchWindow::UpdateMouseEvent()
     if (m_BtnOpen.UpdateMouseEvent() == true)
     {
         npcGateSwitch::SendToggleGate();
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATESWITCH);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATESWITCH);
     }
 
     if (true == BtnProcess())
@@ -92,11 +93,11 @@ bool CNewUIGateSwitchWindow::UpdateMouseEvent()
 
 bool CNewUIGateSwitchWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATESWITCH) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATESWITCH) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATESWITCH);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATESWITCH);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -218,11 +219,11 @@ void CNewUIGateSwitchWindow::RenderFrame()
 bool CNewUIGateSwitchWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_GATESWITCH);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GATESWITCH);
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GATESWITCH);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GATESWITCH);
         return true;
     }
 

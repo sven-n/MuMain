@@ -11,30 +11,31 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-SEASON3B::CNewUIItemExplanationWindow::CNewUIItemExplanationWindow()
+mu::ui::window::CNewUIItemExplanationWindow::CNewUIItemExplanationWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
     m_Pos.y = 0;
 }
 
-SEASON3B::CNewUIItemExplanationWindow::~CNewUIItemExplanationWindow()
+mu::ui::window::CNewUIItemExplanationWindow::~CNewUIItemExplanationWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIItemExplanationWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIItemExplanationWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_ITEM_EXPLANATION, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_ITEM_EXPLANATION, this);
 
     SetPos(x, y);
 
@@ -43,7 +44,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Create(CNewUIManager* pNewUIMng, int
     return true;
 }
 
-void SEASON3B::CNewUIItemExplanationWindow::Release()
+void mu::ui::window::CNewUIItemExplanationWindow::Release()
 {
     if (m_pNewUIMng)
     {
@@ -52,24 +53,24 @@ void SEASON3B::CNewUIItemExplanationWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIItemExplanationWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIItemExplanationWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIItemExplanationWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIItemExplanationWindow::UpdateMouseEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIItemExplanationWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIItemExplanationWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_ITEM_EXPLANATION))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_ITEM_EXPLANATION))
     {
         if (IsPress(VK_ESCAPE) == true || IsPress(VK_F1) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -79,12 +80,12 @@ bool SEASON3B::CNewUIItemExplanationWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIItemExplanationWindow::Update()
+bool mu::ui::window::CNewUIItemExplanationWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIItemExplanationWindow::Render()
+bool mu::ui::window::CNewUIItemExplanationWindow::Render()
 {
     EnableAlphaTest();
 
@@ -128,7 +129,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
 
     if (ItemHelp == ITEM_BOLT || ItemHelp == ITEM_ARROWS)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
         return true;
     }
     else if (ItemHelp >= ITEM_SWORD && ItemHelp < ITEM_BOW + MAX_ITEM_INDEX)
@@ -162,7 +163,7 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     }
     else
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_ITEM_EXPLANATION);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_ITEM_EXPLANATION);
         return true;
     }
 
@@ -382,20 +383,20 @@ bool SEASON3B::CNewUIItemExplanationWindow::Render()
     return true;
 }
 
-float SEASON3B::CNewUIItemExplanationWindow::GetLayerDepth()
+float mu::ui::window::CNewUIItemExplanationWindow::GetLayerDepth()
 {
     return 6.5f;
 }
 
-float SEASON3B::CNewUIItemExplanationWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIItemExplanationWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void SEASON3B::CNewUIItemExplanationWindow::OpenningProcess()
+void mu::ui::window::CNewUIItemExplanationWindow::OpenningProcess()
 {
 }
 
-void SEASON3B::CNewUIItemExplanationWindow::ClosingProcess()
+void mu::ui::window::CNewUIItemExplanationWindow::ClosingProcess()
 {
 }

@@ -8,7 +8,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "Guild/NewUIGuildMakeWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIGoldBowmanLena : public CNewUIObj
     {

@@ -9,7 +9,7 @@
 
 namespace Rml { class ElementDocument; }
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     // RmlUi migration (2026-08-31) -- first pilot of the CNewUIObj-tier adapter pattern
     // (docs/rmlui-ui-system/newui-tier-adapter.md; see .ai-os/memory/tasks/rmlui-sdl-gpu-port.md
@@ -39,7 +39,7 @@ namespace SEASON3B
     // Input/Selection.cpp's and ZzzInterface.cpp's world-click gates via
     // RmlUiRuntime::IsMouseOverUI()). Create()/Release()/GetLayerDepth()/Show()/Enable()/
     // IsVisible() stay real -- CNewUIManager still owns z-order/registration/visibility-toggling
-    // (SEASON3B::CNewUISystem::SyncMuHelperBarVisibility() etc.) through them exactly as before.
+    // (mu::ui::window::CNewUISystem::SyncMuHelperBarVisibility() etc.) through them exactly as before.
     // Update() still reads Hero's live position every frame, now to feed the RmlUi model instead
     // of a member later read by the (now dead) Render().
     //

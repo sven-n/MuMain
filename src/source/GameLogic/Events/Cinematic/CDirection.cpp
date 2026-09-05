@@ -81,7 +81,7 @@ void CDirection::Init()
 
 void CDirection::CloseAllWindows()
 {
-    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
     g_pNewUISystem->HideAll();
 }
 

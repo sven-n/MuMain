@@ -40,7 +40,7 @@ namespace Rml { class ElementDocument; }
 // of the INewUIBase surface below is thin/inert
 // for this class -- it has no interaction and no shown-vs-active distinction to make (see each
 // override's own comment) -- registering it is about uniformity for Phase 4, not new behavior.
-class CCharInfoBalloonMng : public SEASON3B::CNewUIObj
+class CCharInfoBalloonMng : public mu::ui::window::CNewUIObj
 {
 protected:
     static constexpr std::size_t kBalloonCount = 5;
@@ -55,7 +55,7 @@ public:
     void Create();
     void UpdateDisplay();
 
-    // SEASON3B::INewUIBase
+    // mu::ui::window::INewUIBase
     bool Render() override;
     // No interaction of any kind -- never consumes.
     bool UpdateMouseEvent() override

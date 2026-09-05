@@ -13,7 +13,7 @@
 #include "UI/Widgets/NewUIButton.h"
 #include "UI/Dialogs/NewUIMessageBox.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIEnterBloodCastle : public CNewUIObj
     {

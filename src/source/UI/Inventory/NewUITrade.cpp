@@ -13,6 +13,7 @@
 #include "Audio/DSPlaySound.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUITrade::CNewUITrade()
 {
@@ -33,7 +34,7 @@ bool CNewUITrade::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_TRADE, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_TRADE, this);
 
     m_pYourInvenCtrl = new CNewUIInventoryCtrl;
     if (false == m_pYourInvenCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng,
@@ -121,7 +122,7 @@ bool CNewUITrade::UpdateMouseEvent()
     if ((m_pYourInvenCtrl && false == m_pYourInvenCtrl->UpdateMouseEvent())
         || (m_pMyInvenCtrl && false == m_pMyInvenCtrl->UpdateMouseEvent()))
     {
-        if (SEASON3B::IsPress(VK_LBUTTON)
+        if (mu::ui::window::IsPress(VK_LBUTTON)
             && CNewUIInventoryCtrl::GetPickedItem()->GetOwnerInventory() == m_pMyInvenCtrl
             && m_bMyConfirm)
         {
@@ -139,7 +140,7 @@ bool CNewUITrade::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, TRADE_WIDTH, TRADE_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
@@ -147,7 +148,7 @@ bool CNewUITrade::UpdateMouseEvent()
             return false;
         }
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
         {
             return false;
         }
@@ -158,12 +159,12 @@ bool CNewUITrade::UpdateMouseEvent()
 
 bool CNewUITrade::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
             SocketClient->ToGameServer()->SendTradeCancel();
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_TRADE);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -430,7 +431,7 @@ void CNewUITrade::ProcessMyInvenCtrl()
     if (NULL == m_pMyInvenCtrl)
         return;
 
-    if (SEASON3B::IsPress(VK_LBUTTON))
+    if (mu::ui::window::IsPress(VK_LBUTTON))
     {
         CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
         if (NULL == pPickedItem)
@@ -468,7 +469,7 @@ void CNewUITrade::SendRequestItemToTrade(ITEM* pItemObj, int nInvenIndex,
 {
     if (::IsTradeBan(pItemObj))
     {
-        g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
     }
     else
     {
@@ -509,7 +510,7 @@ void CNewUITrade::SendRequestMyGoldInput(int nInputGold)
     }
     else
     {
-        SEASON3B::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+        mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
     }
 }
 
@@ -533,7 +534,7 @@ bool CNewUITrade::ProcessBtns()
         ProcessCloseBtn();
         return true;
     }
-    else if (SEASON3B::IsPress(VK_LBUTTON)
+    else if (mu::ui::window::IsPress(VK_LBUTTON)
         && CheckMouseIn(m_Pos.x + 169, m_Pos.y + 7, 13, 12))
     {
         ::PlayBuffer(SOUND_CLICK01);
@@ -542,12 +543,12 @@ bool CNewUITrade::ProcessBtns()
     }
     else if (m_abtn[BTN_ZEN_INPUT].UpdateMouseEvent())
     {
-        SEASON3B::CreateMessageBox(
-            MSGBOX_LAYOUT_CLASS(SEASON3B::CTradeZenMsgBoxLayout));
+        mu::ui::window::CreateMessageBox(
+            MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeZenMsgBoxLayout));
         ::PlayBuffer(SOUND_CLICK01);
         return true;
     }
-    else if (SEASON3B::IsRelease(VK_LBUTTON)
+    else if (mu::ui::window::IsRelease(VK_LBUTTON)
         && CheckMouseIn(m_posMyConfirm.x, m_posMyConfirm.y, CONFIRM_WIDTH, CONFIRM_HEIGHT))
     {
         if (0 == m_nMyTradeWait && CNewUIInventoryCtrl::GetPickedItem() == NULL)
@@ -556,8 +557,8 @@ bool CNewUITrade::ProcessBtns()
 
             if (m_bTradeAlert && !m_bMyConfirm)
             {
-                SEASON3B::CreateMessageBox(
-                    MSGBOX_LAYOUT_CLASS(SEASON3B::CTradeAlertMsgBoxLayout));
+                mu::ui::window::CreateMessageBox(
+                    MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeAlertMsgBoxLayout));
             }
             else
             {
@@ -593,9 +594,9 @@ void CNewUITrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 
     CMultiLanguage::ConvertFromUtf8(m_szYourID, pbyYourID);
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CTradeMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeMsgBoxLayout));
 
-    SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
 }
 
 void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
@@ -603,15 +604,15 @@ void CNewUITrade::ProcessToReceiveTradeResult(LPPTRADE pTradeData)
     switch (pTradeData->SubCode)
     {
     case 0:
-        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotTradeRightNow, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 1:
-        g_pNewUISystem->Show(SEASON3B::INTERFACE_TRADE);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_TRADE);
 
         InitTradeInfo();
 
@@ -791,7 +792,7 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     {
     case 0:
     {
-        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
 
         m_bTradeAlert = false;
 
@@ -802,40 +803,40 @@ void CNewUITrade::ProcessToReceiveTradeExit(BYTE byState)
     break;
 
     case 2:
-        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceledBecauseYourInventoryIsFull, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YourTradeHasBeenCanceledBecauseYourInventoryIsFull, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::TradeRequestIsCanceled, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TradeRequestIsCanceled, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
 
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
 
-    SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
 
     g_MessageBox->PopMessageBox();
 
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_TRADE);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_TRADE);
 }
 
 void CNewUITrade::ProcessToReceiveTradeItems(int nIndex, std::span<const BYTE> pbyItemPacket)
 {
-    SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
 
     if (nIndex >= 0 && nIndex < (m_pMyInvenCtrl->GetNumberOfColumn()
         * m_pMyInvenCtrl->GetNumberOfRow()))
         m_pMyInvenCtrl->AddItem(nIndex, pbyItemPacket);
 }
 
-int SEASON3B::CNewUITrade::GetPointedItemIndexMyInven()
+int mu::ui::window::CNewUITrade::GetPointedItemIndexMyInven()
 {
     return m_pMyInvenCtrl->GetPointedSquareIndex();
 }
 
-int SEASON3B::CNewUITrade::GetPointedItemIndexYourInven()
+int mu::ui::window::CNewUITrade::GetPointedItemIndexYourInven()
 {
     return m_pYourInvenCtrl->GetPointedSquareIndex();
 }

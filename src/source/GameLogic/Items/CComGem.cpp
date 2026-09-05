@@ -25,7 +25,7 @@ constexpr int kInvHeight = 433;
 constexpr int kAttachValue = 1000000;
 constexpr int kDetachUnitValue = 50000;
 
-SEASON3B::CNewUIInventoryCtrl* GetInventoryCtrl()
+mu::ui::window::CNewUIInventoryCtrl* GetInventoryCtrl()
 {
     return (g_pMyInventory != nullptr) ? g_pMyInventory->GetInventoryCtrl() : nullptr;
 }
@@ -147,10 +147,10 @@ bool COMGEM::CheckInv()
         switch (GetError())
         {
         case COMERROR_NOTALLOWED:
-            g_pSystemLogBox->AddText(I18N::Game::ItemsForCombinationSystemIsLacking, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ItemsForCombinationSystemIsLacking, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         case DEERROR_NOTALLOWED:
-            g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
             break;
         }
         GetBack();
@@ -276,7 +276,7 @@ int COMGEM::CalcItemValue(const ITEM* p)
 
 int COMGEM::CalcEmptyInv()
 {
-    SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
+    mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = GetInventoryCtrl();
     return (pNewInventoryCtrl != nullptr) ? pNewInventoryCtrl->GetEmptySlotCount() : 0;
 }
 

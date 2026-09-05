@@ -13,6 +13,7 @@
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 class CMsgBoxIGSGiftStorageItemInfo : public CNewUIMessageBoxBase, public INewUI3DRenderObj
 {

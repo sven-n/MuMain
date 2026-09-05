@@ -15,6 +15,7 @@
 #include <algorithm>
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 using GameLogic::Commands::Catalog;
 using GameLogic::Commands::ChatCommand;
 using GameLogic::Commands::ChatCommandCatalog;
@@ -78,7 +79,7 @@ void RenderValueBackground(int x, int y, int width, int height)
 }
 } // namespace
 
-SEASON3B::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
+mu::ui::window::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
 {
     m_pNewUIMng = nullptr;
     m_Pos.x = 0;
@@ -89,12 +90,12 @@ SEASON3B::CNewUIChatCommandWindow::CNewUIChatCommandWindow()
     m_editedParameter = -1;
 }
 
-SEASON3B::CNewUIChatCommandWindow::~CNewUIChatCommandWindow()
+mu::ui::window::CNewUIChatCommandWindow::~CNewUIChatCommandWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (pNewUIMng == nullptr)
     {
@@ -102,7 +103,7 @@ bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
     }
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_COMMAND_LIST, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_COMMAND_LIST, this);
 
     LoadImages();
 
@@ -120,7 +121,7 @@ bool SEASON3B::CNewUIChatCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-void SEASON3B::CNewUIChatCommandWindow::Release()
+void mu::ui::window::CNewUIChatCommandWindow::Release()
 {
     UnloadImages();
     m_pValueInput.reset();
@@ -132,7 +133,7 @@ void SEASON3B::CNewUIChatCommandWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIChatCommandWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIChatCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -143,7 +144,7 @@ void SEASON3B::CNewUIChatCommandWindow::SetPos(int x, int y)
                                 BUTTON_WIDTH, BUTTON_HEIGHT);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::InitButtons()
+void mu::ui::window::CNewUIChatCommandWindow::InitButtons()
 {
     wchar_t closeText[256] = {};
     mu_swprintf_s(closeText, I18N::Game::CloseS, L"J");
@@ -155,17 +156,17 @@ void SEASON3B::CNewUIChatCommandWindow::InitButtons()
     m_BtnRight.ChangeButtonImgState(true, IMAGE_CHATCOMMAND_BTN, true);
 }
 
-float SEASON3B::CNewUIChatCommandWindow::GetLayerDepth()
+float mu::ui::window::CNewUIChatCommandWindow::GetLayerDepth()
 {
     return LayerDepth;
 }
 
-float SEASON3B::CNewUIChatCommandWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIChatCommandWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void SEASON3B::CNewUIChatCommandWindow::OpenningProcess()
+void mu::ui::window::CNewUIChatCommandWindow::OpenningProcess()
 {
     // The player may have gained or lost commands since the last time, so the
     // window always starts at the top of a freshly ordered list.
@@ -174,12 +175,12 @@ void SEASON3B::CNewUIChatCommandWindow::OpenningProcess()
     ShowPage(PAGE_COMMANDS);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::ClosingProcess()
+void mu::ui::window::CNewUIChatCommandWindow::ClosingProcess()
 {
     StopEditing();
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RebuildCommandOrder()
+void mu::ui::window::CNewUIChatCommandWindow::RebuildCommandOrder()
 {
     const auto& commands = Catalog().GetCommands();
     m_commandOrder.clear();
@@ -195,7 +196,7 @@ void SEASON3B::CNewUIChatCommandWindow::RebuildCommandOrder()
                           { return GameLogic::Commands::Favourites::Contains(commands[index].Command); });
 }
 
-const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetCommandAt(int row) const
+const ChatCommand* mu::ui::window::CNewUIChatCommandWindow::GetCommandAt(int row) const
 {
     if (row < 0 || static_cast<size_t>(row) >= m_commandOrder.size())
     {
@@ -212,12 +213,12 @@ const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetCommandAt(int row) cons
     return &commands[index];
 }
 
-const ChatCommand* SEASON3B::CNewUIChatCommandWindow::GetSelectedCommand() const
+const ChatCommand* mu::ui::window::CNewUIChatCommandWindow::GetSelectedCommand() const
 {
     return GetCommandAt(m_selectedRow);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::ShowPage(ePAGE page)
+void mu::ui::window::CNewUIChatCommandWindow::ShowPage(ePAGE page)
 {
     StopEditing();
     m_page = page;
@@ -242,7 +243,7 @@ void SEASON3B::CNewUIChatCommandWindow::ShowPage(ePAGE page)
     }
 }
 
-void SEASON3B::CNewUIChatCommandWindow::PickCommand(int row)
+void mu::ui::window::CNewUIChatCommandWindow::PickCommand(int row)
 {
     m_selectedRow = row;
     m_parameterValues.clear();
@@ -259,7 +260,7 @@ void SEASON3B::CNewUIChatCommandWindow::PickCommand(int row)
     {
         ChatCommandCatalog::Execute(command->Command);
         PlayBuffer(SOUND_CLICK01);
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND_LIST);
         return;
     }
 
@@ -267,7 +268,7 @@ void SEASON3B::CNewUIChatCommandWindow::PickCommand(int row)
     ShowPage(PAGE_PARAMETERS);
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::AreRequiredValuesSet() const
+bool mu::ui::window::CNewUIChatCommandWindow::AreRequiredValuesSet() const
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -286,7 +287,7 @@ bool SEASON3B::CNewUIChatCommandWindow::AreRequiredValuesSet() const
     return true;
 }
 
-void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
+void mu::ui::window::CNewUIChatCommandWindow::ExecuteSelectedCommand()
 {
     CommitEditedValue();
 
@@ -300,16 +301,16 @@ void SEASON3B::CNewUIChatCommandWindow::ExecuteSelectedCommand()
     // server, so point at the parameter instead of sending anything.
     if (!AreRequiredValuesSet())
     {
-        g_pSystemLogBox->AddText(I18N::Game::ChatCommandsFillRequired, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::ChatCommandsFillRequired, mu::ui::window::TYPE_ERROR_MESSAGE);
         return;
     }
 
     ChatCommandCatalog::Execute(ChatCommandCatalog::BuildCommandLine(*command, m_parameterValues));
     PlayBuffer(SOUND_CLICK01);
-    g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND_LIST);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::ExecuteTemplate(size_t index)
+void mu::ui::window::CNewUIChatCommandWindow::ExecuteTemplate(size_t index)
 {
     if (index >= m_templates.size())
     {
@@ -326,16 +327,16 @@ void SEASON3B::CNewUIChatCommandWindow::ExecuteTemplate(size_t index)
 
         ChatCommandCatalog::Execute(ChatCommandCatalog::BuildCommandLine(command, entry.Values));
         PlayBuffer(SOUND_CLICK01);
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND_LIST);
         return;
     }
 
     // The command is gone, e.g. because the plugin was deactivated on the
     // server. Sending it anyway would only produce an error message.
-    g_pSystemLogBox->AddText(I18N::Game::ChatCommandsUnknownCommand, SEASON3B::TYPE_ERROR_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::ChatCommandsUnknownCommand, mu::ui::window::TYPE_ERROR_MESSAGE);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
+void mu::ui::window::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
 {
     CommitEditedValue();
 
@@ -353,7 +354,7 @@ void SEASON3B::CNewUIChatCommandWindow::SaveSelectedAsTemplate()
     PlayBuffer(SOUND_CLICK01);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
+void mu::ui::window::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -378,7 +379,7 @@ void SEASON3B::CNewUIChatCommandWindow::ToggleFavouriteOfSelected()
     }
 }
 
-std::vector<std::wstring> SEASON3B::CNewUIChatCommandWindow::SplitValidValues(const std::wstring& validValues)
+std::vector<std::wstring> mu::ui::window::CNewUIChatCommandWindow::SplitValidValues(const std::wstring& validValues)
 {
     std::vector<std::wstring> values;
     size_t start = 0;
@@ -396,14 +397,14 @@ std::vector<std::wstring> SEASON3B::CNewUIChatCommandWindow::SplitValidValues(co
     }
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::IsPickedFromList(const ChatCommandParameter& parameter)
+bool mu::ui::window::CNewUIChatCommandWindow::IsPickedFromList(const ChatCommandParameter& parameter)
 {
     // The server sends the accepted values for everything which only takes a
     // known set of them, booleans included.
     return !parameter.ValidValues.empty();
 }
 
-void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterIndex)
+void mu::ui::window::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterIndex)
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr || parameterIndex >= command->Parameters.size())
@@ -434,7 +435,7 @@ void SEASON3B::CNewUIChatCommandWindow::CycleParameterValue(size_t parameterInde
     m_parameterValues[parameterIndex] = (next >= values.size()) ? std::wstring() : values[next];
 }
 
-void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
+void mu::ui::window::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIndex)
 {
     CommitEditedValue();
 
@@ -462,7 +463,7 @@ void SEASON3B::CNewUIChatCommandWindow::BeginEditingParameter(size_t parameterIn
     SetRelatedWnd(m_pValueInput->GetHandle());
 }
 
-void SEASON3B::CNewUIChatCommandWindow::CommitEditedValue()
+void mu::ui::window::CNewUIChatCommandWindow::CommitEditedValue()
 {
     if (m_editedParameter < 0 || m_pValueInput == nullptr ||
         static_cast<size_t>(m_editedParameter) >= m_parameterValues.size())
@@ -475,7 +476,7 @@ void SEASON3B::CNewUIChatCommandWindow::CommitEditedValue()
     m_parameterValues[m_editedParameter] = text;
 }
 
-void SEASON3B::CNewUIChatCommandWindow::StopEditing()
+void mu::ui::window::CNewUIChatCommandWindow::StopEditing()
 {
     CommitEditedValue();
     m_editedParameter = -1;
@@ -488,7 +489,7 @@ void SEASON3B::CNewUIChatCommandWindow::StopEditing()
     SetRelatedWnd(g_hWnd);
 }
 
-int SEASON3B::CNewUIChatCommandWindow::GetScrollableRowCount() const
+int mu::ui::window::CNewUIChatCommandWindow::GetScrollableRowCount() const
 {
     if (m_page == PAGE_TEMPLATES)
     {
@@ -498,7 +499,7 @@ int SEASON3B::CNewUIChatCommandWindow::GetScrollableRowCount() const
     return static_cast<int>(m_commandOrder.size());
 }
 
-void SEASON3B::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
+void mu::ui::window::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
 {
     m_descriptionLines.clear();
 
@@ -512,7 +513,7 @@ void SEASON3B::CNewUIChatCommandWindow::WrapDescriptionOfSelected()
     m_descriptionLines = WrapTextToWidth(command->Description, CONTENT_WIDTH, MeasureInReferenceUnits);
 }
 
-int SEASON3B::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() const
+int mu::ui::window::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() const
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -528,21 +529,21 @@ int SEASON3B::CNewUIChatCommandWindow::GetVisibleDescriptionLineCount() const
     return std::min(fitting, static_cast<int>(m_descriptionLines.size()));
 }
 
-int SEASON3B::CNewUIChatCommandWindow::GetParameterTop() const
+int mu::ui::window::CNewUIChatCommandWindow::GetParameterTop() const
 {
     return m_Pos.y + CONTENT_TOP + (GetVisibleDescriptionLineCount() + 1) * ROW_HEIGHT;
 }
 
-int SEASON3B::CNewUIChatCommandWindow::GetActionTop() const
+int mu::ui::window::CNewUIChatCommandWindow::GetActionTop() const
 {
     const auto* command = GetSelectedCommand();
     const auto parameterCount = (command == nullptr) ? 0 : static_cast<int>(command->Parameters.size());
     return GetParameterTop() + parameterCount * PARAMETER_HEIGHT + ROW_HEIGHT;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIChatCommandWindow::UpdateMouseEvent()
 {
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_COMMAND_LIST))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_COMMAND_LIST))
     {
         PlayBuffer(SOUND_CLICK01);
         return false;
@@ -550,7 +551,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
 
     if (m_BtnExit.UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND_LIST);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
@@ -602,7 +603,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
+bool mu::ui::window::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
 {
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
@@ -624,7 +625,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateCommandPageMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
+bool mu::ui::window::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -671,7 +672,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateParameterPageMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::UpdateTemplatePageMouseEvent()
+bool mu::ui::window::CNewUIChatCommandWindow::UpdateTemplatePageMouseEvent()
 {
     for (int row = 0; row < VISIBLE_ROWS; ++row)
     {
@@ -705,9 +706,9 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateTemplatePageMouseEvent()
     return false;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIChatCommandWindow::UpdateKeyEvent()
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND_LIST))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND_LIST))
     {
         return true;
     }
@@ -726,7 +727,7 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateKeyEvent()
         }
         else
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_COMMAND_LIST);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_COMMAND_LIST);
         }
 
         PlayBuffer(SOUND_CLICK01);
@@ -761,12 +762,12 @@ bool SEASON3B::CNewUIChatCommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::Update()
+bool mu::ui::window::CNewUIChatCommandWindow::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIChatCommandWindow::Render()
+bool mu::ui::window::CNewUIChatCommandWindow::Render()
 {
     EnableAlphaTest();
     glColor4f(1.f, 1.f, 1.f, 1.f);
@@ -809,7 +810,7 @@ bool SEASON3B::CNewUIChatCommandWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RenderBaseWindow()
+void mu::ui::window::CNewUIChatCommandWindow::RenderBaseWindow()
 {
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
@@ -832,7 +833,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderBaseWindow()
                 float(FRAME_BOTTOM_HEIGHT));
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RenderTitle()
+void mu::ui::window::CNewUIChatCommandWindow::RenderTitle()
 {
     const wchar_t* title = I18N::Game::ChatCommandsTitle;
     if (m_page == PAGE_TEMPLATES)
@@ -850,7 +851,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderTitle()
     g_pRenderText->SetFont(g_hFont);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RenderCommandPage()
+void mu::ui::window::CNewUIChatCommandWindow::RenderCommandPage()
 {
     if (m_commandOrder.empty())
     {
@@ -884,7 +885,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderCommandPage()
     }
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RenderParameterPage()
+void mu::ui::window::CNewUIChatCommandWindow::RenderParameterPage()
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr)
@@ -919,7 +920,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameterPage()
     RenderLine(m_Pos.x + CONTENT_LEFT, actionTop + ROW_HEIGHT, I18N::Game::ChatCommandsSaveTemplate, CONTENT_WIDTH);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, int y)
+void mu::ui::window::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, int y)
 {
     const auto* command = GetSelectedCommand();
     if (command == nullptr || parameterIndex >= command->Parameters.size())
@@ -956,7 +957,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderParameter(size_t parameterIndex, i
     RenderLine(m_Pos.x + CONTENT_LEFT + 2, y + ROW_HEIGHT + 1, shown, CONTENT_WIDTH - 4);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::RenderTemplatePage()
+void mu::ui::window::CNewUIChatCommandWindow::RenderTemplatePage()
 {
     if (m_templates.empty())
     {
@@ -982,7 +983,7 @@ void SEASON3B::CNewUIChatCommandWindow::RenderTemplatePage()
     }
 }
 
-void SEASON3B::CNewUIChatCommandWindow::LoadImages()
+void mu::ui::window::CNewUIChatCommandWindow::LoadImages()
 {
     // The ids are shared with the other windows, but every window loads what it
     // draws - relying on another one having done it means an empty frame when
@@ -996,7 +997,7 @@ void SEASON3B::CNewUIChatCommandWindow::LoadImages()
     LoadBitmap(L"Interface/newui_btn_empty_small.tga", IMAGE_CHATCOMMAND_BTN, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIChatCommandWindow::UnloadImages()
+void mu::ui::window::CNewUIChatCommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_CHATCOMMAND_BACK);
     DeleteBitmap(IMAGE_CHATCOMMAND_TOP);

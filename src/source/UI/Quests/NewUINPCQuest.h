@@ -14,7 +14,7 @@
 #include "UI/NPCs/NewUINPCShop.h"
 #include "UI/Widgets/NewUIButton.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUINPCQuest : public CNewUIObj, public INewUI3DRenderObj
     {

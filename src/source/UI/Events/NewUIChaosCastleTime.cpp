@@ -9,6 +9,7 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIChaosCastleTime::CNewUIChaosCastleTime()
 {
@@ -31,7 +32,7 @@ bool CNewUIChaosCastleTime::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CHAOSCASTLE_TIME, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME, this);
 
     SetPos(x, y);
 

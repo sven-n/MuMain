@@ -19,6 +19,7 @@
 #include "Render/Renderer/MuRenderer.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIInGameShop::CNewUIInGameShop()
 {
@@ -65,7 +66,7 @@ bool CNewUIInGameShop::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_INGAMESHOP, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_INGAMESHOP, this);
 
     SetPos(x, y);
     LoadImages();
@@ -239,7 +240,7 @@ void CNewUIInGameShop::RenderListBox()
 
 bool CNewUIInGameShop::IsInGameShopRect(float _x, float _y)
 {
-    if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP))
+    if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP))
         return false;
 
     RECT _TempRT;
@@ -487,10 +488,10 @@ bool CNewUIInGameShop::BtnProcess()
 
     if (m_CloseButton.UpdateMouseEvent() == true)
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
         {
             SocketClient->ToGameServer()->SendCashShopOpenState(1);
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
 
             return true;
         }
@@ -507,10 +508,10 @@ void CNewUIInGameShop::SetBtnInfo()
     m_CloseButton.ChangeToolTipText(&I18N::Game::Close388, true);
     m_ListBoxTabButton.CreateRadioGroup(IGS_TOTAL_LISTBOX, IMAGE_IGS_LEFT_TAB);
     m_ListBoxTabButton.ChangeRadioButtonInfo(true, m_Pos.x + IMAGE_IGS_TAB_BTN_POS_X, m_Pos.y + IMAGE_IGS_TAB_BTN_POS_Y, IMAGE_IGS_TAB_BTN_WIDTH, IMAGE_IGS_TAB_BTN_HEIGHT, IMAGE_IGS_TAB_BTN_DISTANCE);
-    m_ListBoxTabButton.ChangeButtonState(SEASON3B::BUTTON_STATE_DOWN, 0);
-    m_ListBoxTabButton.ChangeButtonState(IGS_SAFEKEEPING_LISTBOX, BITMAP_UNKNOWN, SEASON3B::BUTTON_STATE_UP, 0);
-    m_ListBoxTabButton.ChangeButtonState(IGS_PRESENTBOX_LISTBOX, BITMAP_UNKNOWN, SEASON3B::BUTTON_STATE_UP, 0);
-    m_ListBoxTabButton.ChangeButtonState(IGS_PRESENTBOX_LISTBOX, IMAGE_IGS_RIGHT_TAB, SEASON3B::BUTTON_STATE_DOWN, 0);
+    m_ListBoxTabButton.ChangeButtonState(mu::ui::window::BUTTON_STATE_DOWN, 0);
+    m_ListBoxTabButton.ChangeButtonState(IGS_SAFEKEEPING_LISTBOX, BITMAP_UNKNOWN, mu::ui::window::BUTTON_STATE_UP, 0);
+    m_ListBoxTabButton.ChangeButtonState(IGS_PRESENTBOX_LISTBOX, BITMAP_UNKNOWN, mu::ui::window::BUTTON_STATE_UP, 0);
+    m_ListBoxTabButton.ChangeButtonState(IGS_PRESENTBOX_LISTBOX, IMAGE_IGS_RIGHT_TAB, mu::ui::window::BUTTON_STATE_DOWN, 0);
 
    std::wstring strText;
     std::list<std::wstring> TextList;
@@ -581,11 +582,11 @@ bool CNewUIInGameShop::UpdateMouseEvent()
     if (UpdateBanner())
         return false;
 
-    if (SEASON3B::CheckMouseIn(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT))
+    if (mu::ui::window::CheckMouseIn(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT))
     {
         m_StorageItemListBox.DoAction();
 
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
@@ -593,7 +594,7 @@ bool CNewUIInGameShop::UpdateMouseEvent()
             return false;
         }
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
         {
             return false;
         }
@@ -606,12 +607,12 @@ bool CNewUIInGameShop::UpdateMouseEvent()
 
 bool CNewUIInGameShop::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
             SocketClient->ToGameServer()->SendCashShopOpenState(1);
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
 
             return false;
         }
@@ -648,7 +649,7 @@ bool CNewUIInGameShop::IsInGameShopOpen()
 
 bool CNewUIInGameShop::IsInGameShop()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP))
         return true;
     else
         return false;
@@ -690,8 +691,8 @@ bool CNewUIInGameShop::UpdateBanner()
     if (m_bLoadBanner == false || m_bBannerLink == false)
         return false;
 
-    if ((SEASON3B::IsPress(VK_LBUTTON))
-        && (SEASON3B::CheckMouseIn(IMAGE_IGS_BANNER_POS_X, IMAGE_IGS_BANNER_POS_Y, IMAGE_IGS_BANNER_WIDTH, IMAGE_IGS_BANNER_HEIGHT)))
+    if ((mu::ui::window::IsPress(VK_LBUTTON))
+        && (mu::ui::window::CheckMouseIn(IMAGE_IGS_BANNER_POS_X, IMAGE_IGS_BANNER_POS_Y, IMAGE_IGS_BANNER_WIDTH, IMAGE_IGS_BANNER_HEIGHT)))
     {
         leaf::OpenExplorer(m_szBannerURL);
         return true;
@@ -753,7 +754,7 @@ void CNewUIInGameShop::InitCategoryBtn()
     m_CategoryButton.UnRegisterRadioButton();
     m_CategoryButton.CreateRadioGroup(g_InGameShopSystem->GetSizeCategoriesAsSelectedZone(), IMAGE_IGS_CATEGORY_BTN, true);
     m_CategoryButton.ChangeRadioButtonInfo(false, m_Pos.x + IMAGE_IGS_CATEGORY_BTN_POS_X, m_Pos.y + IMAGE_IGS_CATEGORY_BTN_POS_Y, IMAGE_IGS_CATEGORY_BTN_WIDTH, IMAGE_IGS_CATEGORY_BTN_HEIGHT, IMAGE_IGS_CATEGORY_BTN_DISTANCE);
-    m_CategoryButton.ChangeButtonState(SEASON3B::BUTTON_STATE_DOWN, 2);
+    m_CategoryButton.ChangeButtonState(mu::ui::window::BUTTON_STATE_DOWN, 2);
     m_CategoryButton.SetFont(g_hFontBold);
     m_CategoryButton.ChangeRadioText(g_InGameShopSystem->GetCategoryName());
     m_CategoryButton.ChangeFrame(0);

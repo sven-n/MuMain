@@ -12,7 +12,7 @@
 #define QPE_PLAYER_LINE_MAX	10
 #define QPE_WORDS_ROW_MAX	64
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIQuestProgressByEtc : public CNewUIObj
     {

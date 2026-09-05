@@ -6,7 +6,7 @@
 #include "UI/Core/NewUIManager.h"
 #include "UI/HUD/NewUIChatLogWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIScrollBar : public CNewUIObj
     {

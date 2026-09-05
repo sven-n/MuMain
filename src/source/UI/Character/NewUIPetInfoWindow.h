@@ -14,7 +14,7 @@
 #include "Guild/NewUIGuildInfoWindow.h"
 #include "UI/HUD/NewUIMainFrameWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIPetInfoWindow : public CNewUIObj
     {

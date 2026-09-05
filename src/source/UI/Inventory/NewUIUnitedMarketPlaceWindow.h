@@ -8,7 +8,7 @@
 #include "UI/Inventory/NewUIMyInventory.h"
 #include "UI/Quests/NewUIMyQuestInfoWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIUnitedMarketPlaceWindow : public CNewUIObj, public INewUI3DRenderObj
     {

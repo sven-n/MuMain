@@ -6,6 +6,7 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #include "NewChaosCastleSystem.h"
 #include "UI/Party/UIWindows.h"
@@ -53,7 +54,7 @@ void CNewChaosCastleSystem::SetMatchResult(const int iNumDevilRank, const int iM
 
     memcpy(m_MatchResult, pMatchResult, sizeof(MatchResult));
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CChaosCastleResultMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosCastleResultMsgBoxLayout));
 }
 
 void CNewChaosCastleSystem::SetMatchGameCommand(const LPPRECEIVE_MATCH_GAME_STATE data)
@@ -133,10 +134,10 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
         case 8:
             if (m_iMatchTime > 0)
             {
-                if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME))
+                if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME))
                 {
                     g_pNewUISystem->HideAll();
-                    g_pNewUISystem->Show(SEASON3B::INTERFACE_CHAOSCASTLE_TIME);
+                    g_pNewUISystem->Show(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME);
                 }
 
                 g_pChaosCastleTime->SetTime(m_iMatchTime);
@@ -163,9 +164,9 @@ void CNewChaosCastleSystem::RenderMatchTimes(void)
     }
     else
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHAOSCASTLE_TIME))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CHAOSCASTLE_TIME);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHAOSCASTLE_TIME);
         }
     }
 }

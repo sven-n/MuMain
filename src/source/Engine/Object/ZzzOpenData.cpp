@@ -5041,21 +5041,21 @@ void SaveOptions()
         options[20] |= SLIDE_HELP_OFF;
     }
 
-    options[21] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_Q) - ITEM_POTION) & 0xFF);
-    options[22] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_W) - ITEM_POTION) & 0xFF);
-    options[23] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_E) - ITEM_POTION) & 0xFF);
+    options[21] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_Q) - ITEM_POTION) & 0xFF);
+    options[22] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_W) - ITEM_POTION) & 0xFF);
+    options[23] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_E) - ITEM_POTION) & 0xFF);
 
     BYTE wChatListBoxSize = g_pChatListBox->GetNumberOfLines(g_pChatListBox->GetCurrentMsgType()) / 3;
     if (g_bUseChatListBox == FALSE)
         wChatListBoxSize = 0;
     BYTE wChatListBoxBackAlpha = g_pChatListBox->GetBackAlpha() * 10;
     options[24] = (((wChatListBoxSize << 4) & 0xF0) | (wChatListBoxBackAlpha & 0x0F)) & 0xFF;
-    options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(SEASON3B::HOTKEY_R) - ITEM_POTION) & 0xFF);
+    options[25] = static_cast<BYTE>((g_pMainFrame->GetItemHotKey(mu::ui::window::HOTKEY_R) - ITEM_POTION) & 0xFF);
 
-    options[26] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_Q);
-    options[27] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_W);
-    options[28] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_E);
-    options[29] = g_pMainFrame->GetItemHotKeyLevel(SEASON3B::HOTKEY_R);
+    options[26] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_Q);
+    options[27] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_W);
+    options[28] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_E);
+    options[29] = g_pMainFrame->GetItemHotKeyLevel(mu::ui::window::HOTKEY_R);
 
     SocketClient->ToGameServer()->SendSaveKeyConfiguration(options, sizeof options);
 }

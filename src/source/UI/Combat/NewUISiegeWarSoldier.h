@@ -9,7 +9,7 @@
 
 #include "UI/Combat/NewUISiegeWarBase.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 class CNewUISiegeWarSoldier : public CNewUISiegeWarBase
 {
@@ -33,6 +33,6 @@ private:
 
     void RenderCharPosInMiniMap();
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUISIEGEWARSOLDIER_H__6316C0AE_6E09_4BBE_9308_9DC81353DD59__INCLUDED_)

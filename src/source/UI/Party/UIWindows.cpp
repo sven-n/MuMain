@@ -249,7 +249,7 @@ void CUIWindowMgr::RemoveWindow(DWORD dwUIID)
 {
     if (m_dwMainWindowUIID == dwUIID)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_FRIEND);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_FRIEND);
 
         if (g_dwTopWindow != 0)
         {
@@ -657,7 +657,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     if (g_iChatInputType == 0)
     {
         if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouCannotUseTheMyFriend, 2) == FALSE)
-            g_pSystemLogBox->AddText(I18N::Game::YouCannotUseTheMyFriend, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouCannotUseTheMyFriend, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return;
     }
     int iLevel = CharacterAttribute->Level;
@@ -665,7 +665,7 @@ void CUIWindowMgr::OpenMainWnd(int iPos_x, int iPos_y)
     if (iLevel < 6)
     {
         if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
-            g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return;
     }
 
@@ -3852,7 +3852,7 @@ void ReceiveChatRoomChatText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
     if (pChatWindow->GetState() == UISTATE_READY)
     {
         g_pFriendMenu->SetNewChatAlert(dwWindowUIID);
-        g_pSystemLogBox->AddText(I18N::Game::NewMessageHasArrived, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::NewMessageHasArrived, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         pChatWindow->SetState(UISTATE_HIDE);
         if (g_pWindowMgr->GetFriendMainWindow() != NULL)
         {
@@ -3877,7 +3877,7 @@ void ReceiveChatRoomNoticeText(DWORD dwWindowUIID, const BYTE* ReceiveBuffer)
 
     wchar_t message[sizeof Data->Msg]{};
     CMultiLanguage::ConvertFromUtf8(message, Data->Msg, sizeof Data->Msg);
-    g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 }
 
 void TranslateChattingProtocol(DWORD dwWindowUIID, const BYTE* ReceiveBuffer, int Size)

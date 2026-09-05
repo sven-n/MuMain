@@ -5,6 +5,7 @@
 #include "UI/Widgets/NewUIScrollBar.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
 CNewUIScrollBar::CNewUIScrollBar()

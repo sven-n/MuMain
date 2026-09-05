@@ -9,6 +9,7 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 using namespace matchEvent;
 
 CNewUIBloodCastle::CNewUIBloodCastle()
@@ -32,7 +33,7 @@ bool CNewUIBloodCastle::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_BLOODCASTLE_TIME, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BLOODCASTLE_TIME, this);
 
     SetPos(x, y);
 

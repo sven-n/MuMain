@@ -16,12 +16,12 @@
 #include <span>
 #include "Core/Globals/_enum.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMyInventory
         : public CNewUIObj
         , public INewUI3DRenderObj
-        , public IInventoryActionContext
+        , public SEASON3B::IInventoryActionContext
     {
     public:
         enum IMAGE_LIST
@@ -204,6 +204,6 @@ namespace SEASON3B
         void ToggleRepairMode();
     };
 
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // !defined(AFX_NEWUIMYINVENTORY_H__74DA6D7A_CF5A_46E9_8C72_9D38F0DC95EC__INCLUDED_)

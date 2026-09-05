@@ -18,6 +18,7 @@
 #include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIDuelWatchWindow::CNewUIDuelWatchWindow()
 {
@@ -36,7 +37,7 @@ bool CNewUIDuelWatchWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_DUELWATCH, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DUELWATCH, this);
 
     SetPos(x, y);
 
@@ -93,11 +94,11 @@ bool CNewUIDuelWatchWindow::UpdateMouseEvent()
 
 bool CNewUIDuelWatchWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DUELWATCH) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_DUELWATCH);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_DUELWATCH);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -250,7 +251,7 @@ void CNewUIDuelWatchWindow::RenderFrame()
 bool CNewUIDuelWatchWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_DUELWATCH);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_DUELWATCH);
 
     for (BYTE i = 0; i < 4; ++i)
     {

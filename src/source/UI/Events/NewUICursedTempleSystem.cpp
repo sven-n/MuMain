@@ -31,6 +31,7 @@ extern wchar_t TextList[50][100];
 extern int  TextListColor[50];
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -236,13 +237,13 @@ namespace
     }
 };
 
-bool SEASON3B::CNewUICursedTempleSystem::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUICursedTempleSystem::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_CURSEDTEMPLE_GAMESYSTEM, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM, this);
 
     SetPos(x, y);
 
@@ -253,24 +254,24 @@ bool SEASON3B::CNewUICursedTempleSystem::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-SEASON3B::CNewUICursedTempleSystem::CNewUICursedTempleSystem() : m_pNewUIMng(NULL)
+mu::ui::window::CNewUICursedTempleSystem::CNewUICursedTempleSystem() : m_pNewUIMng(NULL)
 {
     Initialize();
 }
 
-SEASON3B::CNewUICursedTempleSystem::~CNewUICursedTempleSystem()
+mu::ui::window::CNewUICursedTempleSystem::~CNewUICursedTempleSystem()
 {
     Destroy();
 }
 
-void SEASON3B::CNewUICursedTempleSystem::Initialize()
+void mu::ui::window::CNewUICursedTempleSystem::Initialize()
 {
     LoadImages();
 
     ResetCursedTempleSystemInfo();
 }
 
-void SEASON3B::CNewUICursedTempleSystem::Destroy()
+void mu::ui::window::CNewUICursedTempleSystem::Destroy()
 {
     UnloadImages();
 
@@ -281,7 +282,7 @@ void SEASON3B::CNewUICursedTempleSystem::Destroy()
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::LoadImages()
+void mu::ui::window::CNewUICursedTempleSystem::LoadImages()
 {
     //minimap
     LoadBitmap(L"Interface\\newui_ctminmapframe.tga", IMAGE_CURSEDTEMPLESYSTEM_MINIMAPFRAME, GL_LINEAR);
@@ -337,7 +338,7 @@ void SEASON3B::CNewUICursedTempleSystem::LoadImages()
     LoadBitmap(L"Interface\\newui_non_skill2.jpg", IMAGE_NON_SKILL2, GL_LINEAR);
 }
 
-void SEASON3B::CNewUICursedTempleSystem::UnloadImages()
+void mu::ui::window::CNewUICursedTempleSystem::UnloadImages()
 {
     //prorogress, npctalk
     DeleteBitmap(IMAGE_CURSEDTEMPLESYSTEM_BTN);
@@ -390,7 +391,7 @@ void SEASON3B::CNewUICursedTempleSystem::UnloadImages()
     DeleteBitmap(IMAGE_NON_SKILL2);
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ResetCursedTempleSystemInfo()
+void mu::ui::window::CNewUICursedTempleSystem::ResetCursedTempleSystemInfo()
 {
     m_EventMapTime = 0;
     m_HolyItemPlayerIndex = 0xffff;
@@ -418,7 +419,7 @@ void SEASON3B::CNewUICursedTempleSystem::ResetCursedTempleSystemInfo()
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::StartScoreEffect()
+void mu::ui::window::CNewUICursedTempleSystem::StartScoreEffect()
 {
     m_StartScoreEffectTime = 0;
     m_ScoreEffectAlph = 0.0f;
@@ -426,7 +427,7 @@ void SEASON3B::CNewUICursedTempleSystem::StartScoreEffect()
     m_IsScoreEffect = true;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::EndScoreEffect()
+void mu::ui::window::CNewUICursedTempleSystem::EndScoreEffect()
 {
     m_StartScoreEffectTime = 0;
     m_ScoreEffectAlph = 0.0f;
@@ -434,26 +435,26 @@ void SEASON3B::CNewUICursedTempleSystem::EndScoreEffect()
     m_IsScoreEffect = false;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::StartTutorialStep()
+void mu::ui::window::CNewUICursedTempleSystem::StartTutorialStep()
 {
     m_IsTutorialStep = true;
     m_TutorialStepState = 0;
     m_TutorialStepTime = timeGetTime();
 }
 
-void SEASON3B::CNewUICursedTempleSystem::EndTutorialStep()
+void mu::ui::window::CNewUICursedTempleSystem::EndTutorialStep()
 {
     m_IsTutorialStep = false;
     m_TutorialStepState = 0;
     m_TutorialStepTime = 0;
 }
 
-SEASON3A::eCursedTempleTeam SEASON3B::CNewUICursedTempleSystem::GetMyTeam()
+SEASON3A::eCursedTempleTeam mu::ui::window::CNewUICursedTempleSystem::GetMyTeam()
 {
     return m_MyTeam;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::SetButtonInfo()
+void mu::ui::window::CNewUICursedTempleSystem::SetButtonInfo()
 {
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonImgState(true, IMAGE_CURSEDTEMPLESYSTEM_MINIMAPALPBTN, true);
     m_Button[CURSEDTEMPLERESULT_ALPH].ChangeButtonInfo(513, 238, 38, 24);
@@ -465,7 +466,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetButtonInfo()
     m_Button[CURSEDTEMPLERESULT_SKILLDOWN].ChangeButtonInfo(0, 0, 15, 13);
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
+bool mu::ui::window::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
 {
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
@@ -509,7 +510,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckInventoryHolyItem(CHARACTER* c)
     return false;
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DWORD npckey)
+bool mu::ui::window::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DWORD npckey)
 {
     std::list<DWORD>				progressnpcindexlist;
     progressnpcindexlist.push_back(HolyItemNpc);
@@ -535,8 +536,8 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
 
                 if (CheckInventoryHolyItem(Hero))
                 {
-                    SEASON3B::CCursedTempleProgressMsgBox* pMsgBox = NULL;
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCursedTempleHolicItemSaveLayout), &pMsgBox);
+                    mu::ui::window::CCursedTempleProgressMsgBox* pMsgBox = NULL;
+                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCursedTempleHolicItemSaveLayout), &pMsgBox);
                     if (pMsgBox)
                     {
                         pMsgBox->SetNpcIndex(npckey);
@@ -544,13 +545,13 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
                 }
                 else
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::NoItem, SEASON3B::TYPE_ERROR_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::NoItem, mu::ui::window::TYPE_ERROR_MESSAGE);
                 }
             }
             else
             {
-                SEASON3B::CCursedTempleProgressMsgBox* pMsgBox = NULL;
-                SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCursedTempleHolicItemGetLayout), &pMsgBox);
+                mu::ui::window::CCursedTempleProgressMsgBox* pMsgBox = NULL;
+                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCursedTempleHolicItemGetLayout), &pMsgBox);
                 if (pMsgBox)
                 {
                     pMsgBox->SetNpcIndex(npckey);
@@ -566,10 +567,10 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
         if (g_MessageBox->IsEmpty())
         {
             if (npcindex == AlliedNpc)
-                SEASON3B::CreateOkMessageBox(I18N::Game::WeHaveEnteredTheHeartOf);
+                mu::ui::window::CreateOkMessageBox(I18N::Game::WeHaveEnteredTheHeartOf);
 
             if (npcindex == IllusionNpc)
-                SEASON3B::CreateOkMessageBox(I18N::Game::ListenToThisTheAlliesHave);
+                mu::ui::window::CreateOkMessageBox(I18N::Game::ListenToThisTheAlliesHave);
         }
 
         return true;
@@ -579,7 +580,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckTalkProgressNpc(DWORD npcindex, DW
     return false;
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::CheckHeroSkillType(int operatortype)
+bool mu::ui::window::CNewUICursedTempleSystem::CheckHeroSkillType(int operatortype)
 {
     if (operatortype == 0)
     {
@@ -593,7 +594,7 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckHeroSkillType(int operatortype)
     }
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::CheckDragonRender()
+bool mu::ui::window::CNewUICursedTempleSystem::CheckDragonRender()
 {
     if (IsVisible())
     {
@@ -605,14 +606,14 @@ bool SEASON3B::CNewUICursedTempleSystem::CheckDragonRender()
     }
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcharacterindex)
+bool mu::ui::window::CNewUICursedTempleSystem::IsCursedTempleSkillKey(DWORD selectcharacterindex)
 {
     if (Hero->m_CursedTempleCurSkillPacket) return false;
 
-    return SEASON3B::IsRepeat(VK_SHIFT);
+    return mu::ui::window::IsRepeat(VK_SHIFT);
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::UpdateMouseEvent()
+bool mu::ui::window::CNewUICursedTempleSystem::UpdateMouseEvent()
 {
     if (m_Button[CURSEDTEMPLERESULT_ALPH].UpdateMouseEvent())
     {
@@ -660,12 +661,12 @@ bool SEASON3B::CNewUICursedTempleSystem::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::UpdateKeyEvent()
+bool mu::ui::window::CNewUICursedTempleSystem::UpdateKeyEvent()
 {
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::UpdateScore()
+void mu::ui::window::CNewUICursedTempleSystem::UpdateScore()
 {
     if (!m_IsScoreEffect) return;
 
@@ -703,7 +704,7 @@ void SEASON3B::CNewUICursedTempleSystem::UpdateScore()
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::UpdateTutorialStep()
+void mu::ui::window::CNewUICursedTempleSystem::UpdateTutorialStep()
 {
     if (!m_IsTutorialStep) return;
 
@@ -720,7 +721,7 @@ void SEASON3B::CNewUICursedTempleSystem::UpdateTutorialStep()
     }
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::Update()
+bool mu::ui::window::CNewUICursedTempleSystem::Update()
 {
     UpdateScore();
     UpdateTutorialStep();
@@ -728,7 +729,7 @@ bool SEASON3B::CNewUICursedTempleSystem::Update()
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
+void mu::ui::window::CNewUICursedTempleSystem::RenderSkill()
 {
     EnableAlphaTest();
 
@@ -833,7 +834,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderSkill()
     DisableAlphaBlend();
 }
 
-void SEASON3B::CNewUICursedTempleSystem::RenderGameTime()
+void mu::ui::window::CNewUICursedTempleSystem::RenderGameTime()
 {
     float x, y, Width, Height;
 
@@ -859,7 +860,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderGameTime()
     DisableAlphaBlend();
 }
 
-void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
+void mu::ui::window::CNewUICursedTempleSystem::RenderMiniMap()
 {
     float x, y, Width, Height;
 
@@ -964,7 +965,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderMiniMap()
 #endif //_DEBUG
 }
 
-void SEASON3B::CNewUICursedTempleSystem::RenderScore()
+void mu::ui::window::CNewUICursedTempleSystem::RenderScore()
 {
     if (!m_IsScoreEffect) return;
 
@@ -1012,7 +1013,7 @@ void SEASON3B::CNewUICursedTempleSystem::RenderScore()
     ::DisableAlphaBlend();
 }
 
-void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
+void mu::ui::window::CNewUICursedTempleSystem::RenderTutorialStep()
 {
     if (!m_IsTutorialStep) return;
 
@@ -1071,14 +1072,14 @@ void SEASON3B::CNewUICursedTempleSystem::RenderTutorialStep()
     ::DisableAlphaBlend();
 }
 
-bool SEASON3B::CNewUICursedTempleSystem::Render()
+bool mu::ui::window::CNewUICursedTempleSystem::Render()
 {
     // 환영사원 이벤트 도중 비정상적으로 맵 이동 됐을 경우를 위한 예외 처리
     if (gMapManager.IsCursedTemple() == false)
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_GAMESYSTEM) == true)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CURSEDTEMPLE_GAMESYSTEM);
         }
 
         return true;
@@ -1099,7 +1100,7 @@ bool SEASON3B::CNewUICursedTempleSystem::Render()
     return true;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex)
+void mu::ui::window::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJECT* o, DWORD selectcharacterindex)
 {
     if (Hero->m_CursedTempleCurSkillPacket)
     {
@@ -1114,7 +1115,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
 
     if (m_SkillPoint < MaxKillCount)
     {
-        g_pSystemLogBox->AddText(I18N::Game::KillPointIsnTSufficient, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::KillPointIsnTSufficient, mu::ui::window::TYPE_ERROR_MESSAGE);
         MouseRButtonPush = false;
         return;
     }
@@ -1201,7 +1202,7 @@ void SEASON3B::CNewUICursedTempleSystem::SetCursedTempleSkill(CHARACTER* c, OBJE
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_USE_MAGIC_RESULT)ReceiveBuffer;
 
@@ -1287,7 +1288,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempRegisterSkill(const BY
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_SKILL_END)ReceiveBuffer;
 
@@ -1327,7 +1328,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempUnRegisterSkill(const 
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TAMPLE_STATE)ReceiveBuffer;
 
@@ -1352,13 +1353,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(I18N::Game::TheAlliesAreAdvancingOnWeAreNotFarFromTheVictoryChargeOn, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheAlliesAreAdvancingOnWeAreNotFarFromTheVictoryChargeOn, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         else if (m_IllusionPoint != data->btIllusionPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(I18N::Game::AlthoughWeHaveLostThisBattle, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::AlthoughWeHaveLostThisBattle, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
     }
     else
@@ -1367,13 +1368,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(I18N::Game::HoorayForTheIllusionSorceryWe, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::HoorayForTheIllusionSorceryWe, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
         else if (m_AlliedPoint != data->btAlliedPoint)
         {
             PlayBuffer(SOUND_CURSEDTEMPLE_GAMESYSTEM4);
             StartScoreEffect();
-            g_pSystemLogBox->AddText(I18N::Game::YouMustNotLoseTheTemple, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::YouMustNotLoseTheTemple, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
     }
 
@@ -1402,7 +1403,7 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleInfo(const BYTE* Rec
     }
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_CURSED_TEMPLE_SKILL_POINT)ReceiveBuffer;
 
@@ -1411,13 +1412,13 @@ void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempSkillPoint(const BYTE*
         wchar_t message[100];
         memset(&message, 0, sizeof(char));
         mu_swprintf(message, I18N::Game::KillPointDAchieved, data->btSkillPoint - m_SkillPoint);
-        g_pSystemLogBox->AddText(message, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(message, mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     m_SkillPoint = data->btSkillPoint;
 }
 
-void SEASON3B::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
+void mu::ui::window::CNewUICursedTempleSystem::ReceiveCursedTempleHolyItemRelics(const BYTE* ReceiveBuffer)
 {
     auto data = (LPPMSG_RELICS_GET_USER)ReceiveBuffer;
 }

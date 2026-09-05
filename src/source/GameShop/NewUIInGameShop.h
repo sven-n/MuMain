@@ -17,7 +17,7 @@
 #include "Render/Sprites/Sprite.h"
 #include "InGameShopSystem.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
 class CNewUIInGameShop : public CNewUIObj
 {
@@ -288,7 +288,7 @@ private:
 
     CUIInGameShopListBox m_StorageItemListBox;
 };
-} // namespace SEASON3B
+} // namespace mu::ui::window
 
 #endif // PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #endif // !defined(AFX_NEWUIINGAMESHOP_H__AE3CE531_70BE_4CBB_9938_0D80B26F21A8__INCLUDED_)

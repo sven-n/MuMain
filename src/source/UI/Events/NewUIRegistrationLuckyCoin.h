@@ -10,7 +10,7 @@
 #include "UI/Dialogs/NewUICommonMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIRegistrationLuckyCoin : public CNewUIObj
     {

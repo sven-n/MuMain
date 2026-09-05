@@ -9,6 +9,7 @@
 
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 #define TEMP_MAX_TEXT_LENGTH 1024
 
@@ -285,14 +286,14 @@ bool CNewUIGensRanking::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, GENSRANKING_WIDTH, GENSRANKING_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
             MouseRButtonPush = false;
             return false;
         }
-        if (!SEASON3B::IsNone(VK_LBUTTON))
+        if (!mu::ui::window::IsNone(VK_LBUTTON))
             return false;
     }
     return true;
@@ -302,7 +303,7 @@ bool CNewUIGensRanking::UpdateKeyEvent()
 {
     if (g_pNewUISystem->IsVisible(INTERFACE_GENSRANKING))
     {
-        if (SEASON3B::IsPress(VK_ESCAPE))
+        if (mu::ui::window::IsPress(VK_ESCAPE))
         {
             g_pNewUISystem->Hide(INTERFACE_GENSRANKING);
             return false;
@@ -319,9 +320,9 @@ bool CNewUIGensRanking::BtnProcess()
 
     if (m_BtnExit.UpdateMouseEvent())
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GENSRANKING))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GENSRANKING))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_GENSRANKING);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GENSRANKING);
             return true;
         }
         return false;
@@ -424,7 +425,7 @@ bool CNewUIGensRanking::SetGensInfo()
     }
     else
     {
-        g_pSystemLogBox->AddText(I18N::Game::YouHaveNotJoinedAGens, SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouHaveNotJoinedAGens, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         return false;
     }
     return false;

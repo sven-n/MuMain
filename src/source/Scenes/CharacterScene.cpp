@@ -130,7 +130,7 @@ void CreateCharacterScene()
 
     for (int i = 0; i < MAX_WHISPER; i++)
     {
-        g_pChatListBox->AddText(L"", L"", SEASON3B::TYPE_WHISPER_MESSAGE);
+        g_pChatListBox->AddText(L"", L"", mu::ui::window::TYPE_WHISPER_MESSAGE);
     }
 
     HIMC hIMC = ImmGetContext(g_hWnd);
@@ -433,7 +433,7 @@ bool NewRenderCharacterScene(HDC hDC)
     RenderCharacterSceneUI();
 
     // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION))
     {
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();

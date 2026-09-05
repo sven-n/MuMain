@@ -26,7 +26,7 @@ namespace UI::Items::Grid
     bool Fits(int startIndex, int itemWidth, int itemHeight, int columnCount, int rowCount);
 }
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIItemMng;
     class CNewUIInventoryCtrl;
@@ -296,6 +296,6 @@ namespace SEASON3B
     };
 }
 
-#define g_pPickedItem SEASON3B::CNewUIInventoryCtrl::GetPickedItem()
+#define g_pPickedItem mu::ui::window::CNewUIInventoryCtrl::GetPickedItem()
 
 #endif // !defined(AFX_NEWUIINVENTORYCTRL_H__3A635AF1_3FFA_44B5_9BF6_3DFE0F061927__INCLUDED_)

@@ -7,6 +7,7 @@
 #include "Core/Utilities/UsefulDef.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 const int iMAX_TEXT_LINE = 512;
 const int iLINE_INTERVAL = 2;

@@ -13,20 +13,21 @@
 #include "GameLogic/Social/GambleSystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 extern int BuyCost;
 
-SEASON3B::CNewUINPCShop::CNewUINPCShop()
+mu::ui::window::CNewUINPCShop::CNewUINPCShop()
 {
     Init();
 }
 
-SEASON3B::CNewUINPCShop::~CNewUINPCShop()
+mu::ui::window::CNewUINPCShop::~CNewUINPCShop()
 {
     Release();
 }
 
-void SEASON3B::CNewUINPCShop::Init()
+void mu::ui::window::CNewUINPCShop::Init()
 {
     m_pNewUIMng = NULL;
     m_pNewInventoryCtrl = NULL;
@@ -39,13 +40,13 @@ void SEASON3B::CNewUINPCShop::Init()
     m_bSellingItem = false;
 }
 
-bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewItemMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_NPCSHOP, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_NPCSHOP, this);
 
     m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::UNDEFINED, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 50, 8, 15))
@@ -70,7 +71,7 @@ bool SEASON3B::CNewUINPCShop::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUINPCShop::Release()
+void mu::ui::window::CNewUINPCShop::Release()
 {
     UnloadImages();
 
@@ -83,7 +84,7 @@ void SEASON3B::CNewUINPCShop::Release()
     }
 }
 
-void SEASON3B::CNewUINPCShop::SetPos(int x, int y)
+void mu::ui::window::CNewUINPCShop::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -91,7 +92,7 @@ void SEASON3B::CNewUINPCShop::SetPos(int x, int y)
     m_pNewInventoryCtrl->SetPos(x + 15, y + 50);
 }
 
-bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
+bool mu::ui::window::CNewUINPCShop::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl)
     {
@@ -109,7 +110,7 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
         {
             ITEM* pItem = m_pNewInventoryCtrl->FindItemAtPt(MouseX, MouseY);
 
-            if ((m_bIsNPCShopOpen == true) && (pItem) && (SEASON3B::IsRelease(VK_LBUTTON)))
+            if ((m_bIsNPCShopOpen == true) && (pItem) && (mu::ui::window::IsRelease(VK_LBUTTON)))
             {
                 int iIndex = (pItem->y * m_pNewInventoryCtrl->GetNumberOfColumn()) + pItem->x;
                 GambleSystem& _gambleSys = GambleSystem::Instance();
@@ -119,7 +120,7 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
                     _gambleSys.SetBuyItemInfo(iIndex, ItemValue(pItem, 0));
                     g_pNPCShop->SetStandbyItemKey(pItem->Key);
 
-                    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CGambleBuyMsgBoxLayout));
+                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGambleBuyMsgBoxLayout));
 
                     return false;
                 }
@@ -132,12 +133,12 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
 
                 return false;
             }
-            if (SEASON3B::IsRelease(VK_LBUTTON))
+            if (mu::ui::window::IsRelease(VK_LBUTTON))
             {
                 m_bIsNPCShopOpen = true;
                 return false;
             }
-            if (SEASON3B::IsPress(VK_LBUTTON))
+            if (mu::ui::window::IsPress(VK_LBUTTON))
             {
                 return false;
             }
@@ -155,24 +156,24 @@ bool SEASON3B::CNewUINPCShop::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUINPCShop::WindowProcess()
+bool mu::ui::window::CNewUINPCShop::WindowProcess()
 {
     return CheckMouseIn(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT);
 }
 
-bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
+bool mu::ui::window::CNewUINPCShop::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == false)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) == false)
     {
         return true;
     }
 
-    if (SEASON3B::IsRepeat(VK_SHIFT) && SEASON3B::IsPress('L'))
+    if (mu::ui::window::IsRepeat(VK_SHIFT) && mu::ui::window::IsPress('L'))
     {
         SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
         return false;
     }
-    if (SEASON3B::IsPress('L'))
+    if (mu::ui::window::IsPress('L'))
     {
         if (m_bRepairShop && CNewUIInventoryCtrl::GetPickedItem() == NULL)
         {
@@ -181,11 +182,11 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
         }
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true && m_bSellingItem == false)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true && m_bSellingItem == false)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_NPCSHOP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_NPCSHOP);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -193,7 +194,7 @@ bool SEASON3B::CNewUINPCShop::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUINPCShop::Update()
+bool mu::ui::window::CNewUINPCShop::Update()
 {
     if (m_bRepairShop)
     {
@@ -206,7 +207,7 @@ bool SEASON3B::CNewUINPCShop::Update()
     return true;
 }
 
-bool SEASON3B::CNewUINPCShop::Render()
+bool mu::ui::window::CNewUINPCShop::Render()
 {
     EnableAlphaTest();
     RenderFrame();
@@ -223,7 +224,7 @@ bool SEASON3B::CNewUINPCShop::Render()
     return true;
 }
 
-void SEASON3B::CNewUINPCShop::RenderFrame()
+void mu::ui::window::CNewUINPCShop::RenderFrame()
 {
     RenderImage(IMAGE_NPCSHOP_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
     RenderImage(IMAGE_NPCSHOP_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
@@ -232,7 +233,7 @@ void SEASON3B::CNewUINPCShop::RenderFrame()
     RenderImage(IMAGE_NPCSHOP_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
 }
 
-void SEASON3B::CNewUINPCShop::RenderTexts()
+void mu::ui::window::CNewUINPCShop::RenderTexts()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetBgColor(0);
@@ -245,7 +246,7 @@ void SEASON3B::CNewUINPCShop::RenderTexts()
     g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
 }
 
-void SEASON3B::CNewUINPCShop::RenderButton()
+void mu::ui::window::CNewUINPCShop::RenderButton()
 {
     if (m_bRepairShop)
     {
@@ -254,7 +255,7 @@ void SEASON3B::CNewUINPCShop::RenderButton()
     }
 }
 
-void SEASON3B::CNewUINPCShop::RenderRepairMoney()
+void mu::ui::window::CNewUINPCShop::RenderRepairMoney()
 {
     if (m_bRepairShop)
     {
@@ -270,12 +271,12 @@ void SEASON3B::CNewUINPCShop::RenderRepairMoney()
     }
 }
 
-float SEASON3B::CNewUINPCShop::GetLayerDepth()
+float mu::ui::window::CNewUINPCShop::GetLayerDepth()
 {
     return 4.55;
 }
 
-void SEASON3B::CNewUINPCShop::LoadImages()
+void mu::ui::window::CNewUINPCShop::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
@@ -286,7 +287,7 @@ void SEASON3B::CNewUINPCShop::LoadImages()
     LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_NPCSHOP_REPAIR_MONEY, GL_LINEAR);
 }
 
-void SEASON3B::CNewUINPCShop::UnloadImages()
+void mu::ui::window::CNewUINPCShop::UnloadImages()
 {
     DeleteBitmap(IMAGE_NPCSHOP_BACK);
     DeleteBitmap(IMAGE_NPCSHOP_TOP);
@@ -297,17 +298,17 @@ void SEASON3B::CNewUINPCShop::UnloadImages()
     DeleteBitmap(IMAGE_NPCSHOP_REPAIR_MONEY);
 }
 
-void SEASON3B::CNewUINPCShop::SetTaxRate(int iTaxRate)
+void mu::ui::window::CNewUINPCShop::SetTaxRate(int iTaxRate)
 {
     m_iTaxRate = iTaxRate;
 }
 
-int SEASON3B::CNewUINPCShop::GetTaxRate()
+int mu::ui::window::CNewUINPCShop::GetTaxRate()
 {
     return m_iTaxRate;
 }
 
-bool SEASON3B::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
+bool mu::ui::window::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
 {
     if (m_pNewInventoryCtrl)
     {
@@ -317,7 +318,7 @@ bool SEASON3B::CNewUINPCShop::InsertItem(int iIndex, std::span<const BYTE> pbyIt
     return false;
 }
 
-bool SEASON3B::CNewUINPCShop::InventoryProcess()
+bool mu::ui::window::CNewUINPCShop::InventoryProcess()
 {
     CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
@@ -328,31 +329,31 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     if (IsSellingBan(pItem))	m_pNewInventoryCtrl->SetSquareColorNormal(1.0f, 0.0f, 0.0f);
     else	m_pNewInventoryCtrl->SetSquareColorNormal(0.1f, 0.4f, 0.8f);
 
-    if (SEASON3B::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true && m_bSellingItem == false)
+    if (mu::ui::window::IsRelease(VK_LBUTTON) == true && m_pNewInventoryCtrl->CheckPtInRect(MouseX, MouseY) == true && m_bSellingItem == false)
     {
         if (CharacterMachine->Gold + ItemValue(pItem) > 2000000000)
         {
-            g_pSystemLogBox->AddText(I18N::Game::ExceededMaximumAmountOfZenYouCanPossess, SEASON3B::TYPE_SYSTEM_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ExceededMaximumAmountOfZenYouCanPossess, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
             return true;
         }
 
         if (pItem && pItem->Jewel_Of_Harmony_Option != 0)
         {
-            g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeSold, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::ReinforcedItemCanTBeSold, mu::ui::window::TYPE_ERROR_MESSAGE);
 
             return true;
         }
         if (pItem && IsSellingBan(pItem) == true)
         {
-            g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, SEASON3B::TYPE_ERROR_MESSAGE);
+            g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeTraded, mu::ui::window::TYPE_ERROR_MESSAGE);
             m_pNewInventoryCtrl->BackupPickedItem();
 
             return true;
         }
         if (pItem && IsHighValueItem(pItem) == true)
         {
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CHighValueItemCheckMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CHighValueItemCheckMsgBoxLayout));
             pPickedItem->HidePickedItem();
 
             return true;
@@ -373,10 +374,10 @@ bool SEASON3B::CNewUINPCShop::InventoryProcess()
     return false;
 }
 
-bool SEASON3B::CNewUINPCShop::BtnProcess()
+bool mu::ui::window::CNewUINPCShop::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (m_bSellingItem == false && g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_NPCSHOP))
+    if (m_bSellingItem == false && g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCSHOP))
     {
         return true;
     }
@@ -400,15 +401,15 @@ bool SEASON3B::CNewUINPCShop::BtnProcess()
     return false;
 }
 
-void SEASON3B::CNewUINPCShop::DeleteAllItems()
+void mu::ui::window::CNewUINPCShop::DeleteAllItems()
 {
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->RemoveAllItems();
 }
 
-void SEASON3B::CNewUINPCShop::OpenningProcess()
+void mu::ui::window::CNewUINPCShop::OpenningProcess()
 {
-    if (SEASON3B::IsRepeat(VK_LBUTTON))
+    if (mu::ui::window::IsRepeat(VK_LBUTTON))
     {
         m_bIsNPCShopOpen = false;
     }
@@ -418,7 +419,7 @@ void SEASON3B::CNewUINPCShop::OpenningProcess()
     }
 }
 
-void SEASON3B::CNewUINPCShop::ClosingProcess()
+void mu::ui::window::CNewUINPCShop::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 
@@ -438,7 +439,7 @@ void SEASON3B::CNewUINPCShop::ClosingProcess()
     m_bSellingItem = false;
 }
 
-void SEASON3B::CNewUINPCShop::SetButtonInfo()
+void mu::ui::window::CNewUINPCShop::SetButtonInfo()
 {
     m_BtnRepair.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
     m_BtnRepair.ChangeButtonInfo(m_Pos.x + 54, m_Pos.y + 390, 36, 29);
@@ -449,17 +450,17 @@ void SEASON3B::CNewUINPCShop::SetButtonInfo()
     m_BtnRepairAll.ChangeToolTipText(&I18N::Game::RepairAllA, true);
 }
 
-void SEASON3B::CNewUINPCShop::SetRepairShop(bool bRepair)
+void mu::ui::window::CNewUINPCShop::SetRepairShop(bool bRepair)
 {
     m_bRepairShop = bRepair;
 }
 
-bool SEASON3B::CNewUINPCShop::IsRepairShop()
+bool mu::ui::window::CNewUINPCShop::IsRepairShop()
 {
     return m_bRepairShop;
 }
 
-void SEASON3B::CNewUINPCShop::ToggleState()
+void mu::ui::window::CNewUINPCShop::ToggleState()
 {
     if (m_dwShopState == SHOP_STATE_BUYNSELL)
     {
@@ -474,27 +475,27 @@ void SEASON3B::CNewUINPCShop::ToggleState()
     }
 }
 
-DWORD SEASON3B::CNewUINPCShop::GetShopState()
+DWORD mu::ui::window::CNewUINPCShop::GetShopState()
 {
     return m_dwShopState;
 }
 
-int SEASON3B::CNewUINPCShop::GetPointedItemIndex()
+int mu::ui::window::CNewUINPCShop::GetPointedItemIndex()
 {
     return m_pNewInventoryCtrl->GetPointedSquareIndex();
 }
 
-void SEASON3B::CNewUINPCShop::SetStandbyItemKey(DWORD dwItemKey)
+void mu::ui::window::CNewUINPCShop::SetStandbyItemKey(DWORD dwItemKey)
 {
     m_dwStandbyItemKey = dwItemKey;
 }
 
-DWORD SEASON3B::CNewUINPCShop::GetStandbyItemKey() const
+DWORD mu::ui::window::CNewUINPCShop::GetStandbyItemKey() const
 {
     return m_dwStandbyItemKey;
 }
 
-int SEASON3B::CNewUINPCShop::GetStandbyItemIndex()
+int mu::ui::window::CNewUINPCShop::GetStandbyItemIndex()
 {
     ITEM* pItem = GetStandbyItem();
     if (pItem)
@@ -502,19 +503,19 @@ int SEASON3B::CNewUINPCShop::GetStandbyItemIndex()
     return -1;
 }
 
-ITEM* SEASON3B::CNewUINPCShop::GetStandbyItem()
+ITEM* mu::ui::window::CNewUINPCShop::GetStandbyItem()
 {
     if (m_pNewInventoryCtrl)
         return m_pNewInventoryCtrl->FindItemByKey(m_dwStandbyItemKey);
     return NULL;
 }
 
-void SEASON3B::CNewUINPCShop::SetSellingItem(bool bFlag)
+void mu::ui::window::CNewUINPCShop::SetSellingItem(bool bFlag)
 {
     m_bSellingItem = bFlag;
 }
 
-bool SEASON3B::CNewUINPCShop::IsSellingItem()
+bool mu::ui::window::CNewUINPCShop::IsSellingItem()
 {
     return m_bSellingItem;
 }

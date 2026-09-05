@@ -7,12 +7,12 @@
 
 #pragma once
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     bool CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor = 0xffffffff, float fPriority = 3.f);
 
     int IsPurchaseShop();
-#define g_IsPurchaseShop SEASON3B::IsPurchaseShop()
+#define g_IsPurchaseShop mu::ui::window::IsPurchaseShop()
 
     bool CheckMouseIn(int x, int y, int width, int height);
 
@@ -73,6 +73,6 @@ namespace SEASON3B
     };
 }
 
-#define g_pNewKeyInput	SEASON3B::CNewKeyInput::GetInstance()
+#define g_pNewKeyInput	mu::ui::window::CNewKeyInput::GetInstance()
 
 #endif // !defined(AFX_NEWUICOMMON_H__0668BCBC_7537_454B_82FD_9D6BBBBDBA84__INCLUDED_)

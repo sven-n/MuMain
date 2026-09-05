@@ -11,6 +11,7 @@
 #include "UI/Widgets/UIControls.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIEmpireGuardianNPC::CNewUIEmpireGuardianNPC()
 {
@@ -30,7 +31,7 @@ bool CNewUIEmpireGuardianNPC::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
     m_pNewUI3DRenderMng->Add3DRenderObj(this, INVENTORY_CAMERA_Z_ORDER);
@@ -87,11 +88,11 @@ bool CNewUIEmpireGuardianNPC::UpdateMouseEvent()
 
 bool CNewUIEmpireGuardianNPC::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -158,11 +159,11 @@ bool CNewUIEmpireGuardianNPC::Render()
 bool CNewUIEmpireGuardianNPC::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
 
     if (m_btNegative.UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC);
     }
 
     if (m_btPositive.UpdateMouseEvent())

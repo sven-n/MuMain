@@ -19,6 +19,7 @@
 #include "GameLogic/Items/MixMgr.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 CNewUILuckyItemWnd::CNewUILuckyItemWnd()
 {
     memset(m_szSubject, 0, 255);
@@ -189,7 +190,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const 
     int		nAddInven = -1;
     bool	bInitInven = false;
 
-    SEASON3B::CNewUIInventoryCtrl::DeletePickedItem();
+    mu::ui::window::CNewUIInventoryCtrl::DeletePickedItem();
 
     switch (m_eWndAction)
     {
@@ -222,7 +223,7 @@ void CNewUILuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const 
         break;
     }
 
-    if (nMessage > nDefault)	g_pChatListBox->AddText(L"", I18N::Game::Lookup(nMessage), SEASON3B::TYPE_ERROR_MESSAGE);
+    if (nMessage > nDefault)	g_pChatListBox->AddText(L"", I18N::Game::Lookup(nMessage), mu::ui::window::TYPE_ERROR_MESSAGE);
     if (nPlaySound > nDefault)	PlayBuffer(static_cast<ESound>(nPlaySound));
     if (bInitInven)			g_pLuckyItemWnd->Process_InventoryCtrl_DeleteItem(-1);
     if (nAddInven > nDefault)	Process_InventoryCtrl_InsertItem(nAddInven, pbyItemPacket);
@@ -266,7 +267,7 @@ bool CNewUILuckyItemWnd::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_LUCKYITEMWND, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYITEMWND, this);
 
     m_pNewInventoryCtrl = new CNewUIInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::LUCKYITEM_TRADE, g_pNewUI3DRenderMng, g_pNewItemMng, this, x + 15, y + 110, 8, 4))
@@ -378,7 +379,7 @@ bool CNewUILuckyItemWnd::ClosingProcess(void)
 {
     if (GetInventoryCtrl()->GetNumberOfItems() > 0 || CNewUIInventoryCtrl::GetPickedItem() != NULL)
     {
-        g_pChatListBox->AddText(L"", I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::CloseInventoryAfterMovingYourItemsInTheInventory, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
@@ -465,7 +466,7 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl(void)
 
     if (pPickedItem->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
     {
-        if (SEASON3B::IsPress(VK_LBUTTON))
+        if (mu::ui::window::IsPress(VK_LBUTTON))
         {
             int iSourceIndex = pPickedItem->GetSourceLinealPos();
             int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
@@ -479,7 +480,7 @@ bool CNewUILuckyItemWnd::Process_InventoryCtrl(void)
     }
     else if (pPickedItem->GetOwnerInventory() == m_pNewInventoryCtrl)
     {
-        if (SEASON3B::IsPress(VK_LBUTTON))
+        if (mu::ui::window::IsPress(VK_LBUTTON))
         {
             int iSourceIndex = pPickedItem->GetSourceLinealPos();
             int iTargetIndex = pPickedItem->GetTargetLinealPos(m_pNewInventoryCtrl);
@@ -517,12 +518,12 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
 
     if (!Check_LuckyItem_InWnd())
     {
-        g_pChatListBox->AddText(L"", I18N::Game::ItemsForCombinationSystemIsLacking, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::ItemsForCombinationSystemIsLacking, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
     if (!Check_LuckyItem(m_pNewInventoryCtrl->GetItem(0)))
     {
-        g_pChatListBox->AddText(L"", I18N::Game::CorrespondingItemIsInappropriate, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::CorrespondingItemIsInappropriate, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 #ifdef LEM_FIX_LUCKYITEM_SLOTCHECK
@@ -531,11 +532,11 @@ bool CNewUILuckyItemWnd::Process_BTN_Action(void)
     if (g_pMyInventory->GetInventoryCtrl()->FindEmptySlot(4, 4) == -1)
 #endif // LEM_FIX_LUCKYITEM_SLOTCHECK
     {
-        g_pChatListBox->AddText(L"", I18N::Game::InventorySpaceIsInsufficient, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pChatListBox->AddText(L"", I18N::Game::InventorySpaceIsInsufficient, mu::ui::window::TYPE_ERROR_MESSAGE);
         return false;
     }
 
-    SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CLuckyItemMsgBoxLayout));
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CLuckyItemMsgBoxLayout));
     return true;
 }
 
@@ -546,13 +547,13 @@ bool CNewUILuckyItemWnd::UpdateMouseEvent(void)
     Process_InventoryCtrl();
 
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_ptPos, SEASON3B::INTERFACE_LUCKYITEMWND);
+    g_pNewUISystem->HandleFrameCornerClose(m_ptPos, mu::ui::window::INTERFACE_LUCKYITEMWND);
 
     Process_BTN_Action();
 
     if (CheckMouseIn(m_ptPos.x, m_ptPos.y, m_fSizeX, m_fSizeY))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
@@ -560,7 +561,7 @@ bool CNewUILuckyItemWnd::UpdateMouseEvent(void)
             return false;
         }
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
         {
             return false;
         }

@@ -19,24 +19,25 @@
 extern BYTE m_OccupationState;
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIMiniMap::CNewUIMiniMap()
+mu::ui::window::CNewUIMiniMap::CNewUIMiniMap()
 {
     m_pNewUIMng = NULL;
 }
 
-SEASON3B::CNewUIMiniMap::~CNewUIMiniMap()
+mu::ui::window::CNewUIMiniMap::~CNewUIMiniMap()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MINI_MAP, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MINI_MAP, this);
 
     LoadBitmap(L"Interface\\mini_map_ui_corner.tga", IMAGE_MINIMAP_INTERFACE + 1, GL_LINEAR);
     LoadBitmap(L"Interface\\mini_map_ui_line.jpg", IMAGE_MINIMAP_INTERFACE + 2, GL_LINEAR);
@@ -68,21 +69,21 @@ bool SEASON3B::CNewUIMiniMap::Create(CNewUIManager* pNewUIMng, int x, int y)
     return true;
 }
 
-void SEASON3B::CNewUIMiniMap::ClosingProcess()
+void mu::ui::window::CNewUIMiniMap::ClosingProcess()
 {
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
-float SEASON3B::CNewUIMiniMap::GetLayerDepth()
+float mu::ui::window::CNewUIMiniMap::GetLayerDepth()
 {
     return 8.1f;
 }
 
-void SEASON3B::CNewUIMiniMap::OpenningProcess()
+void mu::ui::window::CNewUIMiniMap::OpenningProcess()
 {
 }
 
-void SEASON3B::CNewUIMiniMap::Release()
+void mu::ui::window::CNewUIMiniMap::Release()
 {
     UnloadImages();
 
@@ -98,12 +99,12 @@ void SEASON3B::CNewUIMiniMap::Release()
     }
 }
 
-void SEASON3B::CNewUIMiniMap::SetPos(int x, int y)
+void mu::ui::window::CNewUIMiniMap::SetPos(int x, int y)
 {
     m_BtnExit.ChangeButtonInfo(REFERENCE_WIDTH - 27, 3, 30, 25);
 }
 
-void SEASON3B::CNewUIMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)
+void mu::ui::window::CNewUIMiniMap::SetBtnPos(int Num, float x, float y, float nx, float ny)
 {
     m_Btn_Loc[Num][0] = x;
     m_Btn_Loc[Num][1] = y;
@@ -111,13 +112,13 @@ void SEASON3B::CNewUIMiniMap::SetBtnPos(int Num, float x, float y, float nx, flo
     m_Btn_Loc[Num][3] = ny;
 }
 
-bool SEASON3B::CNewUIMiniMap::UpdateKeyEvent()
+bool mu::ui::window::CNewUIMiniMap::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MINI_MAP))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MINI_MAP))
     {
         if (IsPress(VK_ESCAPE) == true || IsPress(VK_TAB) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MINI_MAP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -125,7 +126,7 @@ bool SEASON3B::CNewUIMiniMap::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMiniMap::Render()
+bool mu::ui::window::CNewUIMiniMap::Render()
 {
     float Rot = 45.f;
 
@@ -200,12 +201,12 @@ bool SEASON3B::CNewUIMiniMap::Render()
     return true;
 }
 
-bool SEASON3B::CNewUIMiniMap::Update()
+bool mu::ui::window::CNewUIMiniMap::Update()
 {
     return true;
 }
 
-void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
+void mu::ui::window::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
 {
     wchar_t Fname[300];
     int i = 0;
@@ -278,18 +279,18 @@ void SEASON3B::CNewUIMiniMap::LoadImages(const wchar_t* Filename)
     }
 }
 
-void SEASON3B::CNewUIMiniMap::UnloadImages()
+void mu::ui::window::CNewUIMiniMap::UnloadImages()
 {
     DeleteBitmap(IMAGE_MINIMAP_INTERFACE);
 }
 
-bool SEASON3B::CNewUIMiniMap::UpdateMouseEvent()
+bool mu::ui::window::CNewUIMiniMap::UpdateMouseEvent()
 {
     bool ret = true;
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_MINI_MAP);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
         return true;
     }
 
@@ -310,12 +311,12 @@ bool SEASON3B::CNewUIMiniMap::UpdateMouseEvent()
     return ret;
 }
 
-bool SEASON3B::CNewUIMiniMap::Check_Mouse(int mx, int my)
+bool mu::ui::window::CNewUIMiniMap::Check_Mouse(int mx, int my)
 {
     return true;
 }
 
-bool SEASON3B::CNewUIMiniMap::Check_Btn(int mx, int my)
+bool mu::ui::window::CNewUIMiniMap::Check_Btn(int mx, int my)
 {
     int i = 0;
     for (i = 0; i < MAX_MINI_MAP_DATA; i++)

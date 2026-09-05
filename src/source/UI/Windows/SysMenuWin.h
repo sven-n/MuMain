@@ -21,13 +21,13 @@ namespace Rml { class ElementDocument; }
 // detection path) alongside Rml*Click*() methods mirroring CLoginWin's pattern.
 //
 // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// SEASON3B::CNewUIObj, same pattern as CMsgWin (its own header comment covers the shared
+// mu::ui::window::CNewUIObj, same pattern as CMsgWin (its own header comment covers the shared
 // reasoning -- full-screen click-swallow via UpdateMouseEvent(), LayoutMode::Legacy for the
 // legacy CWinEx/CButton real-pixel geometry). ESC is NOT handled here at all (never was --
 // UpdateWhileActive()'s own ESC branch below was already a no-op): CSceneUICoordinator::Update()'s dedicated
 // ESC-toggle block owns opening/closing this window directly, so this migration doesn't touch
 // that logic or its ordering.
-class CSysMenuWin : public SEASON3B::CNewUIObj
+class CSysMenuWin : public mu::ui::window::CNewUIObj
 {
 protected:
     CWinEx m_winBack;
@@ -56,7 +56,7 @@ public:
     void RmlClickOption() { OpenOptions(); }
     void RmlClickClose() { Close(); }
 
-    // SEASON3B::INewUIBase
+    // mu::ui::window::INewUIBase
     bool Render() override;
     bool Update() override;
     // Was CWin::Create()'s full-screen bounding rect + CWin::CursorInWin(WA_ALL) -- same

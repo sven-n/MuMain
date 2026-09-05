@@ -16,7 +16,7 @@
 
 namespace Rml { class ElementDocument; }
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     enum
     {

@@ -9,24 +9,25 @@
 #include "Engine/Object/ZzzCharacter.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUISiegeWarObserver::CNewUISiegeWarObserver() {}
 
 CNewUISiegeWarObserver::~CNewUISiegeWarObserver() {}
 
-bool SEASON3B::CNewUISiegeWarObserver::OnCreate(int x, int y)
+bool mu::ui::window::CNewUISiegeWarObserver::OnCreate(int x, int y)
 {
     return true;
 }
 
-void SEASON3B::CNewUISiegeWarObserver::OnRelease() {}
+void mu::ui::window::CNewUISiegeWarObserver::OnRelease() {}
 
-bool SEASON3B::CNewUISiegeWarObserver::OnUpdate()
+bool mu::ui::window::CNewUISiegeWarObserver::OnUpdate()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarObserver::OnRender()
+bool mu::ui::window::CNewUISiegeWarObserver::OnRender()
 {
     EnableAlphaTest();
     g_pRenderText->SetFont(g_hFont);
@@ -37,9 +38,9 @@ bool SEASON3B::CNewUISiegeWarObserver::OnRender()
     return true;
 }
 
-void SEASON3B::CNewUISiegeWarObserver::OnSetPos(int x, int y) {}
+void mu::ui::window::CNewUISiegeWarObserver::OnSetPos(int x, int y) {}
 
-void SEASON3B::CNewUISiegeWarObserver::RenderCharPosInMiniMap()
+void mu::ui::window::CNewUISiegeWarObserver::RenderCharPosInMiniMap()
 {
     float fPosX, fPosY;
 
@@ -56,7 +57,7 @@ void SEASON3B::CNewUISiegeWarObserver::RenderCharPosInMiniMap()
     }
 }
 
-bool SEASON3B::CNewUISiegeWarObserver::OnUpdateMouseEvent()
+bool mu::ui::window::CNewUISiegeWarObserver::OnUpdateMouseEvent()
 {
     if (OnBtnProcess())
         return false;
@@ -64,16 +65,16 @@ bool SEASON3B::CNewUISiegeWarObserver::OnUpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarObserver::OnUpdateKeyEvent()
+bool mu::ui::window::CNewUISiegeWarObserver::OnUpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUISiegeWarObserver::OnBtnProcess()
+bool mu::ui::window::CNewUISiegeWarObserver::OnBtnProcess()
 {
     return false;
 }
 
-void SEASON3B::CNewUISiegeWarObserver::OnLoadImages() {}
+void mu::ui::window::CNewUISiegeWarObserver::OnLoadImages() {}
 
-void SEASON3B::CNewUISiegeWarObserver::OnUnloadImages() {}
+void mu::ui::window::CNewUISiegeWarObserver::OnUnloadImages() {}

@@ -18,7 +18,7 @@
 #define ITEMHOTKEYNUMBER_CAMERA_Z_ORDER 11.f
 #define TOOLTIP_CAMERA_Z_ORDER			5.6f
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     typedef void (*UI_2DEFFECT_CALLBACK)(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 

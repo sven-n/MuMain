@@ -28,6 +28,7 @@ namespace
 };
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIGoldBowmanWindow::CNewUIGoldBowmanWindow()
 {
@@ -47,7 +48,7 @@ bool CNewUIGoldBowmanWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_GOLD_BOWMAN, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_GOLD_BOWMAN, this);
 
     SetPos(x, y);
 
@@ -116,7 +117,7 @@ void CNewUIGoldBowmanWindow::ChangeEditBox(const UISTATES type)
 
 bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN) == false) {
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN) == false) {
         return true;
     }
 
@@ -125,23 +126,23 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
     }
 
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_GOLD_BOWMAN))
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_GOLD_BOWMAN))
     {
         return false;
     }
 
     if (m_BtnExit.UpdateMouseEvent())
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GOLD_BOWMAN);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GOLD_BOWMAN);
         return false;
     }
 
     if (m_EditBox && m_BtnSerial.UpdateMouseEvent())
     {
-        SEASON3B::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
+        mu::ui::window::CNewUIInventoryCtrl* pNewInventoryCtrl = g_pMyInventory->GetInventoryCtrl();
         if (pNewInventoryCtrl->FindEmptySlot(2, 4) == -1)
         {
-            SEASON3B::CreateOkMessageBox(I18N::Game::LeaveAtLeastOneEmptySlotInYourInventory);
+            mu::ui::window::CreateOkMessageBox(I18N::Game::LeaveAtLeastOneEmptySlotInYourInventory);
         }
         else
         {
@@ -163,7 +164,7 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
     {
-        if (SEASON3B::IsPress(VK_RBUTTON))
+        if (mu::ui::window::IsPress(VK_RBUTTON))
         {
             MouseRButton = false;
             MouseRButtonPop = false;
@@ -171,14 +172,14 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
             return false;
         }
 
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
         {
             return false;
         }
     }
     else
     {
-        if (SEASON3B::IsNone(VK_LBUTTON) == false)
+        if (mu::ui::window::IsNone(VK_LBUTTON) == false)
         {
             return false;
         }
@@ -189,13 +190,13 @@ bool CNewUIGoldBowmanWindow::UpdateMouseEvent()
 
 bool CNewUIGoldBowmanWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN) == false) {
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN) == false) {
         return true;
     }
 
-    if (SEASON3B::IsPress(VK_ESCAPE) == true)
+    if (mu::ui::window::IsPress(VK_ESCAPE) == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_GOLD_BOWMAN);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_GOLD_BOWMAN);
         return false;
     }
 

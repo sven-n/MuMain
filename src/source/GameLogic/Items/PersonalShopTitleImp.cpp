@@ -281,7 +281,7 @@ void CPersonalShopTitleImp::Draw()
             CShopTitleDrawObj* pDrawObj = mi->second;
             if (SelectedCharacter != -1
                 && isHighlightTime
-                && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_COMMAND)
+                && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_COMMAND)
                 && g_pCommandWindow->GetCurCommandType() == COMMAND_PURCHASE)
             {
                 CHARACTER* selectedPlayer = &CharactersClient[SelectedCharacter];

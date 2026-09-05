@@ -5,8 +5,9 @@
 #include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIManager::CNewUIManager()
+mu::ui::window::CNewUIManager::CNewUIManager()
 {
     m_pActiveMouseUIObj = NULL;
     m_pActiveKeyUIObj = NULL;
@@ -15,12 +16,12 @@ SEASON3B::CNewUIManager::CNewUIManager()
 #endif // PBG_MOD_STAMINA_UI
 }
 
-SEASON3B::CNewUIManager::~CNewUIManager()
+mu::ui::window::CNewUIManager::~CNewUIManager()
 {
     RemoveAllUIObjs();
 }
 
-void SEASON3B::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
+void mu::ui::window::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
 {
     auto mi = m_mapUI.find(dwKey);
     if (mi == m_mapUI.end())
@@ -31,7 +32,7 @@ void SEASON3B::CNewUIManager::AddUIObj(DWORD dwKey, CNewUIObj* pUIObj)
     }
 }
 
-void SEASON3B::CNewUIManager::RemoveUIObj(DWORD dwKey)
+void mu::ui::window::CNewUIManager::RemoveUIObj(DWORD dwKey)
 {
     auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
@@ -45,7 +46,7 @@ void SEASON3B::CNewUIManager::RemoveUIObj(DWORD dwKey)
     }
 }
 
-void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
+void mu::ui::window::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
 {
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
@@ -64,7 +65,7 @@ void SEASON3B::CNewUIManager::RemoveUIObj(CNewUIObj* pUIObj)
     }
 }
 
-void SEASON3B::CNewUIManager::RemoveAllUIObjs()
+void mu::ui::window::CNewUIManager::RemoveAllUIObjs()
 {
 #if defined(_DEBUG)
 
@@ -98,7 +99,7 @@ void SEASON3B::CNewUIManager::RemoveAllUIObjs()
     m_mapUI.clear();
 }
 
-CNewUIObj* SEASON3B::CNewUIManager::FindUIObj(DWORD dwKey)
+CNewUIObj* mu::ui::window::CNewUIManager::FindUIObj(DWORD dwKey)
 {
     auto mi = m_mapUI.find(dwKey);
     if (mi != m_mapUI.end())
@@ -106,14 +107,14 @@ CNewUIObj* SEASON3B::CNewUIManager::FindUIObj(DWORD dwKey)
     return NULL;
 }
 
-CNewUIObj* SEASON3B::CNewUIManager::FindUIObjByRelatedWnd(HWND hWnd) const
+CNewUIObj* mu::ui::window::CNewUIManager::FindUIObjByRelatedWnd(HWND hWnd) const
 {
     const auto result = std::find_if(m_vecUI.begin(), m_vecUI.end(),
                                      [hWnd](const CNewUIObj* object) { return object->GetRelatedWnd() == hWnd; });
     return result != m_vecUI.end() ? *result : nullptr;
 }
 
-bool SEASON3B::CNewUIManager::UpdateMouseEvent()
+bool mu::ui::window::CNewUIManager::UpdateMouseEvent()
 {
     m_pActiveMouseUIObj = NULL;
 
@@ -156,7 +157,7 @@ bool SEASON3B::CNewUIManager::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIManager::UpdateKeyEvent()
+bool mu::ui::window::CNewUIManager::UpdateKeyEvent()
 {
     m_pActiveKeyUIObj = NULL;
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareKeyEventOrder);
@@ -201,7 +202,7 @@ bool SEASON3B::CNewUIManager::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIManager::Update()
+bool mu::ui::window::CNewUIManager::Update()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
 
@@ -227,7 +228,7 @@ bool SEASON3B::CNewUIManager::Update()
     return true;
 }
 
-bool SEASON3B::CNewUIManager::Render()
+bool mu::ui::window::CNewUIManager::Render()
 {
     std::sort(m_vecUI.begin(), m_vecUI.end(), CompareLayerDepth);
     auto vecUI = m_vecUI;
@@ -246,23 +247,23 @@ bool SEASON3B::CNewUIManager::Render()
     return true;
 }
 
-CNewUIObj* SEASON3B::CNewUIManager::GetActiveMouseUIObj()
+CNewUIObj* mu::ui::window::CNewUIManager::GetActiveMouseUIObj()
 {
     return m_pActiveMouseUIObj;
 }
 
-CNewUIObj* SEASON3B::CNewUIManager::GetActiveKeyUIObj()
+CNewUIObj* mu::ui::window::CNewUIManager::GetActiveKeyUIObj()
 {
     return m_pActiveKeyUIObj;
 }
 
-void SEASON3B::CNewUIManager::ResetActiveUIObj()
+void mu::ui::window::CNewUIManager::ResetActiveUIObj()
 {
     m_pActiveMouseUIObj = NULL;
     m_pActiveKeyUIObj = NULL;
 }
 
-bool SEASON3B::CNewUIManager::IsInterfaceVisible(DWORD dwKey)
+bool mu::ui::window::CNewUIManager::IsInterfaceVisible(DWORD dwKey)
 {
     CNewUIObj* pObj = FindUIObj(dwKey);
     if (NULL == pObj)
@@ -272,7 +273,7 @@ bool SEASON3B::CNewUIManager::IsInterfaceVisible(DWORD dwKey)
     return pObj->IsVisible();
 }
 
-bool SEASON3B::CNewUIManager::IsInterfaceEnabled(DWORD dwKey)
+bool mu::ui::window::CNewUIManager::IsInterfaceEnabled(DWORD dwKey)
 {
     CNewUIObj* pObj = FindUIObj(dwKey);
     if (NULL == pObj)
@@ -280,51 +281,51 @@ bool SEASON3B::CNewUIManager::IsInterfaceEnabled(DWORD dwKey)
     return pObj->IsEnabled();
 }
 
-void SEASON3B::CNewUIManager::ShowInterface(DWORD dwKey, bool bShow /* = true*/)
+void mu::ui::window::CNewUIManager::ShowInterface(DWORD dwKey, bool bShow /* = true*/)
 {
     CNewUIObj* pObj = FindUIObj(dwKey);
     if (NULL != pObj)
         pObj->Show(bShow);
 }
 
-void SEASON3B::CNewUIManager::EnableInterface(DWORD dwKey, bool bEnable /* = true*/)
+void mu::ui::window::CNewUIManager::EnableInterface(DWORD dwKey, bool bEnable /* = true*/)
 {
     CNewUIObj* pObj = FindUIObj(dwKey);
     if (NULL != pObj)
         pObj->Enable(bEnable);
 }
 
-void SEASON3B::CNewUIManager::ShowAllInterfaces(bool bShow /* = true*/)
+void mu::ui::window::CNewUIManager::ShowAllInterfaces(bool bShow /* = true*/)
 {
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bShow);
 }
 
-void SEASON3B::CNewUIManager::EnableAllInterfaces(bool bEnable /* = true*/)
+void mu::ui::window::CNewUIManager::EnableAllInterfaces(bool bEnable /* = true*/)
 {
     auto mi = m_mapUI.begin();
     for (; mi != m_mapUI.end(); mi++)
         (*mi).second->Show(bEnable);
 }
 
-bool SEASON3B::CNewUIManager::CompareLayerDepth(INewUIBase* pObj1, INewUIBase* pObj2)
+bool mu::ui::window::CNewUIManager::CompareLayerDepth(INewUIBase* pObj1, INewUIBase* pObj2)
 {
     return pObj1->GetLayerDepth() < pObj2->GetLayerDepth();
 }
 
-bool SEASON3B::CNewUIManager::CompareLayerDepthReverse(INewUIBase* pObj1, INewUIBase* pObj2)
+bool mu::ui::window::CNewUIManager::CompareLayerDepthReverse(INewUIBase* pObj1, INewUIBase* pObj2)
 {
     return pObj1->GetLayerDepth() > pObj2->GetLayerDepth();
 }
 
-bool SEASON3B::CNewUIManager::CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase* pObj2)
+bool mu::ui::window::CNewUIManager::CompareKeyEventOrder(INewUIBase* pObj1, INewUIBase* pObj2)
 {
     return pObj1->GetKeyEventOrder() > pObj2->GetKeyEventOrder();
 }
 
 #ifdef PBG_MOD_STAMINA_UI
-int SEASON3B::CNewUIManager::GetShowUICnt()
+int mu::ui::window::CNewUIManager::GetShowUICnt()
 {
     int m_nShowUICnt = 0;
     // How many of certain interfaces are open

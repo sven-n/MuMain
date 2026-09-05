@@ -12,7 +12,7 @@
 #include "UI/Widgets/NewUIButton.h"
 #include "UI/HUD/NewUIMainFrameWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUISiegeWarBase
     {

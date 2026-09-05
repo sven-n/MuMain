@@ -25,6 +25,7 @@
 #include "World/MapInfra/w_MapHeaders.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 bool GMNewTown::m_bCharacterSceneCheckMouse = false;
 

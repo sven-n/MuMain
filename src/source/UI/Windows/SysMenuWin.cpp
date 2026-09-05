@@ -107,7 +107,7 @@ void CSysMenuWin::Create()
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/sys_menu.rml");
     }
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(SEASON3B::INTERFACE_SYS_MENU, this);
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SYS_MENU, this);
 
     CInput rInput = CInput::Instance();
     SetPosition((rInput.GetScreenWidth() - m_winBack.GetWidth()) / 2,
@@ -159,7 +159,7 @@ void CSysMenuWin::SetPosition(int nXCoord, int nYCoord)
 
 void CSysMenuWin::Show(bool bShow)
 {
-    SEASON3B::CNewUIObj::Show(bShow);
+    mu::ui::window::CNewUIObj::Show(bShow);
 
     m_winBack.Show(bShow);
     for (int i = 0; i < SMW_BTN_MAX; ++i)
@@ -214,7 +214,7 @@ void CSysMenuWin::SelectServer()
 void CSysMenuWin::OpenOptions()
 {
     Show(false);
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_OPTION);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_OPTION);
 }
 
 void CSysMenuWin::Close()

@@ -58,7 +58,7 @@ namespace
     constexpr float kMenu3CenterWidth = 104.0f;
 }
 
-SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
+mu::ui::window::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
 {
     m_bExpEffect = false;
     m_dwExpEffectTime = 0;
@@ -67,12 +67,12 @@ SEASON3B::CNewUIMainFrameWindow::CNewUIMainFrameWindow()
     m_bButtonBlink = false;
 }
 
-SEASON3B::CNewUIMainFrameWindow::~CNewUIMainFrameWindow()
+mu::ui::window::CNewUIMainFrameWindow::~CNewUIMainFrameWindow()
 {
     Release();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::LoadImages()
+void mu::ui::window::CNewUIMainFrameWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_menu01.jpg", IMAGE_MENU_1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_menu02.jpg", IMAGE_MENU_2, GL_LINEAR);
@@ -80,7 +80,7 @@ void SEASON3B::CNewUIMainFrameWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_menu02-03.jpg", IMAGE_MENU_2_1, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIMainFrameWindow::UnloadImages()
+void mu::ui::window::CNewUIMainFrameWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_MENU_1);
     DeleteBitmap(IMAGE_MENU_2);
@@ -88,13 +88,13 @@ void SEASON3B::CNewUIMainFrameWindow::UnloadImages()
     DeleteBitmap(IMAGE_MENU_2_1);
 }
 
-bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool mu::ui::window::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng || NULL == pNewUI3DRenderMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MAINFRAME, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MAINFRAME, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
     m_pNewUI3DRenderMng->Add3DRenderObj(this, ITEMHOTKEYNUMBER_CAMERA_Z_ORDER);
@@ -283,7 +283,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Create(CNewUIManager* pNewUIMng, CNewUI3DR
     return true;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::Release()
+void mu::ui::window::CNewUIMainFrameWindow::Release()
 {
     UnloadImages();
 
@@ -311,7 +311,7 @@ void SEASON3B::CNewUIMainFrameWindow::Release()
         m_pRmlBgDoc->Hide();
 }
 
-bool SEASON3B::CNewUIMainFrameWindow::Render()
+bool mu::ui::window::CNewUIMainFrameWindow::Render()
 {
     // Thin passthrough, not a full no-op -- see this class's header comment. Only the two chrome
     // bands/content calls that still host legacy content (item hotkeys' left band, skill list's
@@ -374,7 +374,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::Render3D()
+void mu::ui::window::CNewUIMainFrameWindow::Render3D()
 {
     // centerTransform, not BottomHudLeftTransform -- see Render()'s header comment (2026-09-01,
     // item-hotkey band now anchors next to the HP bar instead of the window's left edge).
@@ -401,22 +401,22 @@ void SEASON3B::CNewUIMainFrameWindow::Render3D()
     m_ItemHotKey.RenderItems();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void mu::ui::window::CNewUIMainFrameWindow::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
 {
     g_pMainFrame->RenderHotKeyItemCount();
 }
 
-bool SEASON3B::CNewUIMainFrameWindow::IsVisible() const
+bool mu::ui::window::CNewUIMainFrameWindow::IsVisible() const
 {
     return CNewUIObj::IsVisible();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderLeftRegion()
+void mu::ui::window::CNewUIMainFrameWindow::RenderLeftRegion()
 {
     m_pNewUI3DRenderMng->RenderUI2DEffect(ITEMHOTKEYNUMBER_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderCenterRegion()
+void mu::ui::window::CNewUIMainFrameWindow::RenderCenterRegion()
 {
     // HP/MP/AG/SD bars moved to RmlUi (SyncRmlModel()/main_frame.rcss) -- the skill row/current-
     // skill icon stays legacy, out of scope for this pilot (see this class's header comment).
@@ -450,7 +450,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterRegion()
 // (Render()'s leftTransform is centerTransform's own alias) -- #bg_left/#bg_center inside it stay
 // two separate elements (no visible seam, same flat color) rather than merging into one, mirroring
 // each function's own still-separate responsibility (its own band) for legacy theme.
-void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
+void mu::ui::window::CNewUIMainFrameWindow::RenderLeftFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
@@ -470,7 +470,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderLeftFrame()
                        0.0f, 0.0f, kLeftBandWidth, kHudContentHeight);
 }
 
-void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
+void mu::ui::window::CNewUIMainFrameWindow::RenderCenterFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
@@ -524,7 +524,7 @@ void SEASON3B::CNewUIMainFrameWindow::RenderCenterFrame()
 // comment for why these bands, but not the left/center bands, could move (no remaining legacy
 // content occupies the same pixels).
 
-void SEASON3B::CNewUIMainFrameWindow::RenderHotKeyItemCount()
+void mu::ui::window::CNewUIMainFrameWindow::RenderHotKeyItemCount()
 {
     m_ItemHotKey.RenderItemCount();
 }
@@ -533,14 +533,14 @@ void SEASON3B::CNewUIMainFrameWindow::RenderHotKeyItemCount()
 // BtnProcess() removed -- the 5 corner buttons moved to RmlUi (data-event-click bindings, see
 // Create()); RmlUi's own Context now does hit-testing for them, so this never has legacy button
 // objects left to check.
-bool SEASON3B::CNewUIMainFrameWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIMainFrameWindow::UpdateMouseEvent()
 {
     // RmlUi's own context does hit-testing now (see this class's header comment) -- never
     // consumes the legacy mouse event.
     return true;
 }
 
-bool SEASON3B::CNewUIMainFrameWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIMainFrameWindow::UpdateKeyEvent()
 {
     if (m_ItemHotKey.UpdateKeyEvent() == false)
     {
@@ -549,7 +549,7 @@ bool SEASON3B::CNewUIMainFrameWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMainFrameWindow::Update()
+bool mu::ui::window::CNewUIMainFrameWindow::Update()
 {
     if (m_bExpEffect == true)
     {
@@ -568,15 +568,15 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
     if (m_bRmlMyInvenClicked)
     {
         m_bRmlMyInvenClicked = false;
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_INVENTORY);
         PlayBuffer(SOUND_CLICK01);
     }
     if (m_bRmlChaInfoClicked)
     {
         m_bRmlChaInfoClicked = false;
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_CHARACTER);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_CHARACTER);
         PlayBuffer(SOUND_CLICK01);
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER))
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER))
             g_QuestMng.SendQuestIndexByEtcSelection();
     }
     if (m_bRmlFriendClicked)
@@ -593,12 +593,12 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
             {
                 if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
                 {
-                    g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                    g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, mu::ui::window::TYPE_SYSTEM_MESSAGE);
                 }
             }
             else
             {
-                g_pNewUISystem->Toggle(SEASON3B::INTERFACE_FRIEND);
+                g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_FRIEND);
             }
             PlayBuffer(SOUND_CLICK01);
         }
@@ -606,7 +606,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
     if (m_bRmlWindowClicked)
     {
         m_bRmlWindowClicked = false;
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_WINDOW_MENU);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_WINDOW_MENU);
         PlayBuffer(SOUND_CLICK01);
     }
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
@@ -630,7 +630,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
                 g_InGameShopSystem->BannerDownload();
             }
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
+            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == false)
             {
                 if (g_InGameShopSystem->GetIsRequestShopOpenning() == false)
                 {
@@ -644,7 +644,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
             else
             {
                 SocketClient->ToGameServer()->SendCashShopOpenState(1);
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
             }
         }
     }
@@ -655,7 +655,7 @@ bool SEASON3B::CNewUIMainFrameWindow::Update()
     return true;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
+void mu::ui::window::CNewUIMainFrameWindow::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
@@ -904,8 +904,8 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
         if (g_Time.GetTimeCheck(5, 500))
             m_bButtonBlink = !m_bButtonBlink;
         chaInfoAlert = m_bButtonBlink
-            && !(g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-                || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CHARACTER));
+            && !(g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC)
+                || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CHARACTER));
     }
     syncBool(&MainFrameRmlModel::chaInfoAlert, "chainfo_alert", chaInfoAlert);
 
@@ -1017,32 +1017,32 @@ void SEASON3B::CNewUIMainFrameWindow::SyncRmlModel()
     }
 }
 
-float SEASON3B::CNewUIMainFrameWindow::GetLayerDepth()
+float mu::ui::window::CNewUIMainFrameWindow::GetLayerDepth()
 {
     return 10.6f;
 }
 
-float SEASON3B::CNewUIMainFrameWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIMainFrameWindow::GetKeyEventOrder()
 {
     return 2.9f;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetItemHotKey(int iHotKey, int iItemType, int iItemLevel)
+void mu::ui::window::CNewUIMainFrameWindow::SetItemHotKey(int iHotKey, int iItemType, int iItemLevel)
 {
     m_ItemHotKey.SetHotKey(iHotKey, iItemType, iItemLevel);
 }
 
-int SEASON3B::CNewUIMainFrameWindow::GetItemHotKey(int iHotKey)
+int mu::ui::window::CNewUIMainFrameWindow::GetItemHotKey(int iHotKey)
 {
     return m_ItemHotKey.GetHotKey(iHotKey);
 }
 
-int SEASON3B::CNewUIMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
+int mu::ui::window::CNewUIMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
 {
     return m_ItemHotKey.GetHotKeyLevel(iHotKey);
 }
 
-void SEASON3B::CNewUIMainFrameWindow::UseHotKeyItemRButton()
+void mu::ui::window::CNewUIMainFrameWindow::UseHotKeyItemRButton()
 {
     // centerTransform, not BottomHudLeftTransform, += GetItemHotkeyOffsetX() * scaleX -- must
     // match Render3D()'s (and Render()'s leftTransform) exactly, or right-click hit-testing lands
@@ -1053,32 +1053,32 @@ void SEASON3B::CNewUIMainFrameWindow::UseHotKeyItemRButton()
     m_ItemHotKey.UseItemRButton();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::UpdateItemHotKey()
+void mu::ui::window::CNewUIMainFrameWindow::UpdateItemHotKey()
 {
     m_ItemHotKey.UpdateKeyEvent();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::ResetSkillHotKey()
+void mu::ui::window::CNewUIMainFrameWindow::ResetSkillHotKey()
 {
     g_pSkillList->Reset();
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetSkillHotKey(int iHotKey, int iSkillType)
+void mu::ui::window::CNewUIMainFrameWindow::SetSkillHotKey(int iHotKey, int iSkillType)
 {
     g_pSkillList->SetHotKey(iHotKey, iSkillType);
 }
 
-int SEASON3B::CNewUIMainFrameWindow::GetSkillHotKey(int iHotKey)
+int mu::ui::window::CNewUIMainFrameWindow::GetSkillHotKey(int iHotKey)
 {
     return g_pSkillList->GetHotKey(iHotKey);
 }
 
-int SEASON3B::CNewUIMainFrameWindow::GetSkillHotKeyIndex(int iSkillType)
+int mu::ui::window::CNewUIMainFrameWindow::GetSkillHotKeyIndex(int iSkillType)
 {
     return g_pSkillList->GetSkillIndex(iSkillType);
 }
 
-SEASON3B::CNewUIItemHotKey::CNewUIItemHotKey()
+mu::ui::window::CNewUIItemHotKey::CNewUIItemHotKey()
 {
     for (int i = 0; i < HOTKEY_COUNT; ++i)
     {
@@ -1087,27 +1087,27 @@ SEASON3B::CNewUIItemHotKey::CNewUIItemHotKey()
     }
 }
 
-SEASON3B::CNewUIItemHotKey::~CNewUIItemHotKey()
+mu::ui::window::CNewUIItemHotKey::~CNewUIItemHotKey()
 {
 }
 
-bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
+bool mu::ui::window::CNewUIItemHotKey::UpdateKeyEvent()
 {
     int iIndex = -1;
 
-    if (SEASON3B::IsPress('Q') == true)
+    if (mu::ui::window::IsPress('Q') == true)
     {
         iIndex = GetHotKeyItemIndex(HOTKEY_Q);
     }
-    else if (SEASON3B::IsPress('W') == true)
+    else if (mu::ui::window::IsPress('W') == true)
     {
         iIndex = GetHotKeyItemIndex(HOTKEY_W);
     }
-    else if (SEASON3B::IsPress('E') == true)
+    else if (mu::ui::window::IsPress('E') == true)
     {
         iIndex = GetHotKeyItemIndex(HOTKEY_E);
     }
-    else if (SEASON3B::IsPress('R') == true)
+    else if (mu::ui::window::IsPress('R') == true)
     {
         iIndex = GetHotKeyItemIndex(HOTKEY_R);
     }
@@ -1126,7 +1126,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
             secretPotionbufflist.push_back(eBuff_SecretPotion5);
 
             if (g_isCharacterBufflist((&Hero->Object), secretPotionbufflist) != eBuffNone) {
-                SEASON3B::CreateOkMessageBox(I18N::Game::YouCannotUseThisItemWhileThePotionEffectsRemainActive, RGBA(255, 30, 0, 255));
+                mu::ui::window::CreateOkMessageBox(I18N::Game::YouCannotUseThisItemWhileThePotionEffectsRemainActive, RGBA(255, 30, 0, 255));
             }
             else {
                 SendRequestUse(iIndex, 0);
@@ -1143,7 +1143,7 @@ bool SEASON3B::CNewUIItemHotKey::UpdateKeyEvent()
     return true;
 }
 
-int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
+int mu::ui::window::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
 {
     int iStartItemType = 0, iEndItemType = 0;
     int i, j;
@@ -1282,7 +1282,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyItemIndex(int iType, bool bItemCount)
     return -1;
 }
 
-bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd)
+bool mu::ui::window::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iStart, OUT int& iEnd)
 {
     switch (m_iHotKeyItemType[iHotKey])
     {
@@ -1330,12 +1330,12 @@ bool SEASON3B::CNewUIItemHotKey::GetHotKeyCommonItem(IN int iHotKey, OUT int& iS
     return false;
 }
 
-int SEASON3B::CNewUIItemHotKey::GetHotKeyItemCount(int iType)
+int mu::ui::window::CNewUIItemHotKey::GetHotKeyItemCount(int iType)
 {
     return 0;
 }
 
-void SEASON3B::CNewUIItemHotKey::SetHotKey(int iHotKey, int iItemType, int iItemLevel)
+void mu::ui::window::CNewUIItemHotKey::SetHotKey(int iHotKey, int iItemType, int iItemLevel)
 {
     if (iHotKey != -1 && CNewUIMyInventory::CanRegisterItemHotKey(iItemType) == true
         )
@@ -1350,7 +1350,7 @@ void SEASON3B::CNewUIItemHotKey::SetHotKey(int iHotKey, int iItemType, int iItem
     }
 }
 
-int SEASON3B::CNewUIItemHotKey::GetHotKey(int iHotKey)
+int mu::ui::window::CNewUIItemHotKey::GetHotKey(int iHotKey)
 {
     if (iHotKey != -1)
     {
@@ -1360,7 +1360,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKey(int iHotKey)
     return -1;
 }
 
-int SEASON3B::CNewUIItemHotKey::GetHotKeyLevel(int iHotKey)
+int mu::ui::window::CNewUIItemHotKey::GetHotKeyLevel(int iHotKey)
 {
     if (iHotKey != -1)
     {
@@ -1370,7 +1370,7 @@ int SEASON3B::CNewUIItemHotKey::GetHotKeyLevel(int iHotKey)
     return 0;
 }
 
-void SEASON3B::CNewUIItemHotKey::RenderItems()
+void mu::ui::window::CNewUIItemHotKey::RenderItems()
 {
     float x, y, width, height;
 
@@ -1389,7 +1389,7 @@ void SEASON3B::CNewUIItemHotKey::RenderItems()
     }
 }
 
-void SEASON3B::CNewUIItemHotKey::RenderItemCount()
+void mu::ui::window::CNewUIItemHotKey::RenderItemCount()
 {
     float x, y, width, height;
 
@@ -1399,19 +1399,19 @@ void SEASON3B::CNewUIItemHotKey::RenderItemCount()
         if (iCount > 0)
         {
             x = 30 + (i * 38); y = 457; width = 8; height = 9;
-            SEASON3B::RenderNumber(x, y, iCount);
+            mu::ui::window::RenderNumber(x, y, iCount);
         }
     }
 }
 
-void SEASON3B::CNewUIItemHotKey::UseItemRButton()
+void mu::ui::window::CNewUIItemHotKey::UseItemRButton()
 {
     int x, y, width, height;
 
     for (int i = 0; i < HOTKEY_COUNT; ++i)
     {
         x = 10 + (i * 38); y = 445; width = 20; height = 20;
-        if (SEASON3B::CheckMouseIn(x, y, width, height) == true)
+        if (mu::ui::window::CheckMouseIn(x, y, width, height) == true)
         {
             if (MouseRButtonPush)
             {
@@ -1427,24 +1427,24 @@ void SEASON3B::CNewUIItemHotKey::UseItemRButton()
     }
 }
 
-SEASON3B::CNewUISkillList::CNewUISkillList()
+mu::ui::window::CNewUISkillList::CNewUISkillList()
 {
     m_pNewUIMng = NULL;
     Reset();
 }
 
-SEASON3B::CNewUISkillList::~CNewUISkillList()
+mu::ui::window::CNewUISkillList::~CNewUISkillList()
 {
     Release();
 }
 
-bool SEASON3B::CNewUISkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
+bool mu::ui::window::CNewUISkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderMng* pNewUI3DRenderMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SKILL_LIST, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SKILL_LIST, this);
 
     m_pNewUI3DRenderMng = pNewUI3DRenderMng;
 
@@ -1455,7 +1455,7 @@ bool SEASON3B::CNewUISkillList::Create(CNewUIManager* pNewUIMng, CNewUI3DRenderM
     return true;
 }
 
-void SEASON3B::CNewUISkillList::Release()
+void mu::ui::window::CNewUISkillList::Release()
 {
     // 2026-09-02, Phase 2: the UI2DEffectObject registration/DeleteUI2DEffectObject() call here
     // is removed along with UI2DEffectCallback/RenderSkillInfo() -- the tooltip no longer queues
@@ -1471,7 +1471,7 @@ void SEASON3B::CNewUISkillList::Release()
     }
 }
 
-void SEASON3B::CNewUISkillList::Reset()
+void mu::ui::window::CNewUISkillList::Reset()
 {
     m_bSkillList = false;
     m_bHotKeySkillListUp = false;
@@ -1492,7 +1492,7 @@ void SEASON3B::CNewUISkillList::Reset()
     m_iHoveredGridSkillIndex = -1;
 }
 
-void SEASON3B::CNewUISkillList::LoadImages()
+void mu::ui::window::CNewUISkillList::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_skill.jpg", IMAGE_SKILL1, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_skill2.jpg", IMAGE_SKILL2, GL_LINEAR);
@@ -1506,7 +1506,7 @@ void SEASON3B::CNewUISkillList::LoadImages()
     LoadBitmap(L"Interface\\newui_non_skill3.jpg", IMAGE_NON_SKILL3, GL_LINEAR);
 }
 
-void SEASON3B::CNewUISkillList::UnloadImages()
+void mu::ui::window::CNewUISkillList::UnloadImages()
 {
     DeleteBitmap(IMAGE_SKILL1);
     DeleteBitmap(IMAGE_SKILL2);
@@ -1520,7 +1520,7 @@ void SEASON3B::CNewUISkillList::UnloadImages()
     DeleteBitmap(IMAGE_NON_SKILL3);
 }
 
-bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
+bool mu::ui::window::CNewUISkillList::UpdateMouseEvent()
 {
     // RmlUi migration, Phase 2 (see docs/rmlui-ui-system's Phase 2 plan) -- the old hand-rolled
     // EVENT_STATE hover/down/release machine for the current-skill icon, compact hotkey row, and
@@ -1532,17 +1532,17 @@ bool SEASON3B::CNewUISkillList::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
+bool mu::ui::window::CNewUISkillList::UpdateKeyEvent()
 {
     for (int i = 0; i < 9; ++i)
     {
-        if (SEASON3B::IsPress('1' + i))
+        if (mu::ui::window::IsPress('1' + i))
         {
             UseHotKey(i + 1);
         }
     }
 
-    if (SEASON3B::IsPress('0'))
+    if (mu::ui::window::IsPress('0'))
     {
         UseHotKey(0);
     }
@@ -1553,11 +1553,11 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
     // before, unaffected by the EVENT_STATE removal.
     if (m_iHoveredGridSkillIndex != -1)
     {
-        if (SEASON3B::IsRepeat(VK_CONTROL))
+        if (mu::ui::window::IsRepeat(VK_CONTROL))
         {
             for (int i = 0; i < 9; ++i)
             {
-                if (SEASON3B::IsPress('1' + i))
+                if (mu::ui::window::IsPress('1' + i))
                 {
                     SetHotKey(i + 1, m_iHoveredGridSkillIndex);
 
@@ -1565,7 +1565,7 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
                 }
             }
 
-            if (SEASON3B::IsPress('0'))
+            if (mu::ui::window::IsPress('0'))
             {
                 SetHotKey(0, m_iHoveredGridSkillIndex);
 
@@ -1574,11 +1574,11 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
         }
     }
 
-    if (SEASON3B::IsRepeat(VK_SHIFT))
+    if (mu::ui::window::IsRepeat(VK_SHIFT))
     {
         for (int i = 0; i < 4; ++i)
         {
-            if (SEASON3B::IsPress('1' + i))
+            if (mu::ui::window::IsPress('1' + i))
             {
                 Hero->CurrentSkill = AT_PET_COMMAND_DEFAULT + i;
                 return false;
@@ -1589,7 +1589,7 @@ bool SEASON3B::CNewUISkillList::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUISkillList::IsArrayUp(BYTE bySkill)
+bool mu::ui::window::CNewUISkillList::IsArrayUp(BYTE bySkill)
 {
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
@@ -1609,7 +1609,7 @@ bool SEASON3B::CNewUISkillList::IsArrayUp(BYTE bySkill)
     return false;
 }
 
-bool SEASON3B::CNewUISkillList::IsArrayIn(BYTE bySkill)
+bool mu::ui::window::CNewUISkillList::IsArrayIn(BYTE bySkill)
 {
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
@@ -1622,7 +1622,7 @@ bool SEASON3B::CNewUISkillList::IsArrayIn(BYTE bySkill)
     return false;
 }
 
-void SEASON3B::CNewUISkillList::SetHotKey(int iHotKey, int iSkillType)
+void mu::ui::window::CNewUISkillList::SetHotKey(int iHotKey, int iSkillType)
 {
     for (int i = 0; i < SKILLHOTKEY_COUNT; ++i)
     {
@@ -1636,12 +1636,12 @@ void SEASON3B::CNewUISkillList::SetHotKey(int iHotKey, int iSkillType)
     m_iHotKeySkillType[iHotKey] = iSkillType;
 }
 
-int SEASON3B::CNewUISkillList::GetHotKey(int iHotKey)
+int mu::ui::window::CNewUISkillList::GetHotKey(int iHotKey)
 {
     return m_iHotKeySkillType[iHotKey];
 }
 
-int SEASON3B::CNewUISkillList::GetSkillIndex(int iSkillType)
+int mu::ui::window::CNewUISkillList::GetSkillIndex(int iSkillType)
 {
     // special handling for skills with different skill id for the trigger
     if (iSkillType == AT_SKILL_NOVA_BEGIN)
@@ -1662,7 +1662,7 @@ int SEASON3B::CNewUISkillList::GetSkillIndex(int iSkillType)
     return iReturn;
 }
 
-void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
+void mu::ui::window::CNewUISkillList::UseHotKey(int iHotKey)
 {
     if (m_iHotKeySkillType[iHotKey] != -1)
     {
@@ -1699,7 +1699,7 @@ void SEASON3B::CNewUISkillList::UseHotKey(int iHotKey)
     }
 }
 
-bool SEASON3B::CNewUISkillList::Update()
+bool mu::ui::window::CNewUISkillList::Update()
 {
     if (IsArrayIn(Hero->CurrentSkill) == true)
     {
@@ -1732,7 +1732,7 @@ bool SEASON3B::CNewUISkillList::Update()
     return true;
 }
 
-void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
+void mu::ui::window::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
 {
     int i;
     float x, y, width, height;
@@ -1807,7 +1807,7 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
                 // (CNewUISkillList -> RmlUi, STATUS.md's "What's migrated") rather than bundled
                 // into an unrelated cleanup pass.
                 if (!UI::RmlBridge::ThemeProvidesOwnIconChrome())
-                    SEASON3B::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
+                    mu::ui::window::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
             }
             RenderSkillIcon(m_iHotKeySkillType[iIndex], x + 6, y + 6, 20, 28);
         }
@@ -1817,7 +1817,7 @@ void SEASON3B::CNewUISkillList::RenderCurrentSkillAndHotSkillList()
     }
 }
 
-bool SEASON3B::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
+bool mu::ui::window::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
 {
     // Mirrors RenderCurrentSkillAndHotSkillList()'s own loop exactly (iStartSkillIndex/iIndex
     // wraparound, the -1 "empty slot" check, the pet-command "no pet -> treat as empty" check) --
@@ -1845,7 +1845,7 @@ bool SEASON3B::CNewUISkillList::IsHotKeySlotCurrentSkill(int iSlotIndex)
     return Hero->CurrentSkill == m_iHotKeySkillType[iIndex];
 }
 
-int SEASON3B::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
+int mu::ui::window::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
 {
     // Mirrors RenderCurrentSkillAndHotSkillList()'s own loop exactly (iStartSkillIndex/iIndex
     // wraparound, the -1 "empty slot" check, the pet-command "no pet -> treat as empty" check) --
@@ -1876,7 +1876,7 @@ int SEASON3B::CNewUISkillList::GetHotKeySlotNumber(int iSlotIndex)
     return iIndex;
 }
 
-bool SEASON3B::CNewUISkillList::Render()
+bool mu::ui::window::CNewUISkillList::Render()
 {
     BYTE bySkillNumber = CharacterAttribute->SkillNumber;
 
@@ -1912,13 +1912,13 @@ bool SEASON3B::CNewUISkillList::Render()
         for (const SkillCellEntry& entry : m_GridSnapshot)
         {
             if (bDrawBoxSprite)
-                SEASON3B::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
+                mu::ui::window::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
             RenderSkillIcon(entry.skillIndex, entry.left + 6.f, entry.top + 6.f, 20.f, 28.f);
         }
         for (const SkillCellEntry& entry : m_PetSnapshot)
         {
             if (bDrawBoxSprite)
-                SEASON3B::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
+                mu::ui::window::RenderImage(entry.isCurrent ? IMAGE_SKILLBOX_USE : IMAGE_SKILLBOX, entry.left, entry.top, 32.f, 38.f);
             RenderSkillIcon(entry.skillIndex, entry.left + 6.f, entry.top + 6.f, 20.f, 28.f);
         }
     }
@@ -1926,22 +1926,22 @@ bool SEASON3B::CNewUISkillList::Render()
     return true;
 }
 
-float SEASON3B::CNewUISkillList::GetLayerDepth()
+float mu::ui::window::CNewUISkillList::GetLayerDepth()
 {
     return 5.2f;
 }
 
-WORD SEASON3B::CNewUISkillList::GetHeroPriorSkill()
+WORD mu::ui::window::CNewUISkillList::GetHeroPriorSkill()
 {
     return m_wHeroPriorSkill;
 }
 
-void SEASON3B::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
+void mu::ui::window::CNewUISkillList::SetHeroPriorSkill(BYTE bySkill)
 {
     m_wHeroPriorSkill = bySkill;
 }
 
-void SEASON3B::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
+void mu::ui::window::CNewUISkillList::RenderSkillIcon(int iIndex, float x, float y, float width, float height)
 {
     auto bySkillType = CharacterAttribute->Skill[iIndex];
 
@@ -2411,7 +2411,7 @@ namespace
     }
 }
 
-void SEASON3B::CNewUISkillList::RebuildGridSnapshot()
+void mu::ui::window::CNewUISkillList::RebuildGridSnapshot()
 {
     // 2026-09-02, Phase 2: same iteration/filter/zig-zag-position math the legacy grid-drawing
     // loop always used (see git history's old Render()), now producing data instead of drawing.
@@ -2489,7 +2489,7 @@ void SEASON3B::CNewUISkillList::RebuildGridSnapshot()
     }
 }
 
-void SEASON3B::CNewUISkillList::QueueTooltip(int iSkillIndex, float x, float y)
+void mu::ui::window::CNewUISkillList::QueueTooltip(int iSkillIndex, float x, float y)
 {
     m_bTooltipPending = true;
     m_iTooltipSkillIndex = iSkillIndex;
@@ -2497,7 +2497,7 @@ void SEASON3B::CNewUISkillList::QueueTooltip(int iSkillIndex, float x, float y)
     m_fTooltipAnchorY = y;
 }
 
-float SEASON3B::CNewUISkillList::GetHotKeySlotCooldownFraction(int iSlotIndex)
+float mu::ui::window::CNewUISkillList::GetHotKeySlotCooldownFraction(int iSlotIndex)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return 0.f;
@@ -2521,7 +2521,7 @@ float SEASON3B::CNewUISkillList::GetHotKeySlotCooldownFraction(int iSlotIndex)
     return ComputeSkillCooldownFraction(m_iHotKeySkillType[iIndex]);
 }
 
-float SEASON3B::CNewUISkillList::GetCurrentSkillCooldownFraction()
+float mu::ui::window::CNewUISkillList::GetCurrentSkillCooldownFraction()
 {
     return ComputeSkillCooldownFraction(Hero->CurrentSkill);
 }
@@ -2530,7 +2530,7 @@ float SEASON3B::CNewUISkillList::GetCurrentSkillCooldownFraction()
 // mouseover/mouseout (Create(), CNewUIMainFrameWindow.cpp) -- see each one's own comment for the
 // exact legacy mouse-click/hover behavior preserved (traced from the retired EVENT_STATE machine,
 // see git history's old UpdateMouseEvent()).
-void SEASON3B::CNewUISkillList::OnHotkeySlotClick(int iSlotIndex)
+void mu::ui::window::CNewUISkillList::OnHotkeySlotClick(int iSlotIndex)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return;
@@ -2561,7 +2561,7 @@ void SEASON3B::CNewUISkillList::OnHotkeySlotClick(int iSlotIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void SEASON3B::CNewUISkillList::OnHotkeySlotHover(int iSlotIndex)
+void mu::ui::window::CNewUISkillList::OnHotkeySlotHover(int iSlotIndex)
 {
     if (iSlotIndex < 0 || iSlotIndex >= 5)
         return;
@@ -2587,18 +2587,18 @@ void SEASON3B::CNewUISkillList::OnHotkeySlotHover(int iSlotIndex)
     QueueTooltip(m_iHotKeySkillType[iIndex], 190.f + (iSlotIndex + 1) * 32.f, 431.f);
 }
 
-void SEASON3B::CNewUISkillList::OnCurrentSkillClick()
+void mu::ui::window::CNewUISkillList::OnCurrentSkillClick()
 {
     m_bSkillList = !m_bSkillList;
     PlayBuffer(SOUND_CLICK01);
 }
 
-void SEASON3B::CNewUISkillList::OnCurrentSkillHover()
+void mu::ui::window::CNewUISkillList::OnCurrentSkillHover()
 {
     QueueTooltip(Hero->CurrentSkill, 392.f, 437.f);
 }
 
-void SEASON3B::CNewUISkillList::OnGridCellClick(int iSkillIndex)
+void mu::ui::window::CNewUISkillList::OnGridCellClick(int iSkillIndex)
 {
     m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
     Hero->CurrentSkill = iSkillIndex;
@@ -2606,7 +2606,7 @@ void SEASON3B::CNewUISkillList::OnGridCellClick(int iSkillIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void SEASON3B::CNewUISkillList::OnGridCellHover(int iSkillIndex)
+void mu::ui::window::CNewUISkillList::OnGridCellHover(int iSkillIndex)
 {
     m_iHoveredGridSkillIndex = iSkillIndex;
     for (const SkillCellEntry& entry : m_GridSnapshot)
@@ -2619,7 +2619,7 @@ void SEASON3B::CNewUISkillList::OnGridCellHover(int iSkillIndex)
     }
 }
 
-void SEASON3B::CNewUISkillList::OnPetCellClick(int iSkillIndex)
+void mu::ui::window::CNewUISkillList::OnPetCellClick(int iSkillIndex)
 {
     m_wHeroPriorSkill = CharacterAttribute->Skill[Hero->CurrentSkill];
     Hero->CurrentSkill = iSkillIndex;
@@ -2627,7 +2627,7 @@ void SEASON3B::CNewUISkillList::OnPetCellClick(int iSkillIndex)
     PlayBuffer(SOUND_CLICK01);
 }
 
-void SEASON3B::CNewUISkillList::OnPetCellHover(int iSkillIndex)
+void mu::ui::window::CNewUISkillList::OnPetCellHover(int iSkillIndex)
 {
     // 2026-09-02: pet-row entries arm Ctrl+digit assignment the same way grid entries do -- the
     // legacy code's own m_EventState machine never distinguished the two loops for this purpose
@@ -2644,31 +2644,31 @@ void SEASON3B::CNewUISkillList::OnPetCellHover(int iSkillIndex)
     }
 }
 
-void SEASON3B::CNewUISkillList::OnUnhover()
+void mu::ui::window::CNewUISkillList::OnUnhover()
 {
     m_bTooltipPending = false;
     m_iTooltipSkillIndex = -1;
     m_iHoveredGridSkillIndex = -1;
 }
 
-bool SEASON3B::CNewUISkillList::IsSkillListUp()
+bool mu::ui::window::CNewUISkillList::IsSkillListUp()
 {
     return m_bHotKeySkillListUp;
 }
 
-void SEASON3B::CNewUISkillList::ResetMouseLButton()
+void mu::ui::window::CNewUISkillList::ResetMouseLButton()
 {
     MouseLButton = false;
     MouseLButtonPop = false;
     MouseLButtonPush = false;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)
+void mu::ui::window::CNewUIMainFrameWindow::SetPreExp_Wide(__int64 dwPreExp)
 {
     m_loPreExp = dwPreExp;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
+void mu::ui::window::CNewUIMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
 {
     m_loGetExp = dwGetExp;
 
@@ -2679,12 +2679,12 @@ void SEASON3B::CNewUIMainFrameWindow::SetGetExp_Wide(__int64 dwGetExp)
     }
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetPreExp(__int64 dwPreExp)
+void mu::ui::window::CNewUIMainFrameWindow::SetPreExp(__int64 dwPreExp)
 {
     m_dwPreExp = dwPreExp;
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
+void mu::ui::window::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
 {
     m_dwGetExp = dwGetExp;
 
@@ -2696,7 +2696,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetGetExp(__int64 dwGetExp)
 }
 
 
-void SEASON3B::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
+void mu::ui::window::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
 {
     // Sets a bound "open" model boolean instead of swapping legacy CNewUIButton sprite frames --
     // see this class's header comment. main_frame.rcss selects the "panel open" sprite rect when
@@ -2745,7 +2745,7 @@ void SEASON3B::CNewUIMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown)
     }
 }
 
-void SEASON3B::CNewUIMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
+void mu::ui::window::CNewUIMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
 {
     if (!m_pRmlDoc) return;
 

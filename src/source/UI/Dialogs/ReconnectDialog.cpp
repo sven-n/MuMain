@@ -6,7 +6,7 @@
 #include <vector>
 #include "Render/Sprites/GlobalBitmap.h"     // Bitmaps (texture-loaded check)
 #include "UI/Widgets/UIControls.h"            // g_pRenderText, CheckMouseIn, RT3_SORT_CENTER
-#include "UI/Core/NewUICommon.h"            // SEASON3B::RenderImage
+#include "UI/Core/NewUICommon.h"            // mu::ui::window::RenderImage
 #include "UI/Dialogs/NewUIMessageBox.h"// CNewUIMessageBoxMng::IMAGE_MSGBOX_*
 #include "App/Platform/Windows/Winmain.h"        // g_hFont, g_hFontBold
 #include "I18N/All.h"
@@ -16,7 +16,7 @@ namespace UI::Reconnect
 {
 namespace
 {
-    using MsgBox = SEASON3B::CNewUIMessageBoxMng;
+    using MsgBox = mu::ui::window::CNewUIMessageBoxMng;
 
     // Frozen game frame captured at disconnect, shown during the re-login phase.
     std::uint32_t s_backgroundTex = 0;
@@ -177,27 +177,27 @@ namespace
     void DrawNative(bool cancelHovered)
     {
         // Inner background, then the top/middle*n/bottom border frame on top.
-        SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_BACK, PANEL_X, PANEL_Y + 2.0f,
+        mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_BACK, PANEL_X, PANEL_Y + 2.0f,
             MSGBOX_WIDTH - BACK_BLANK_W, PANEL_H - BACK_BLANK_H);
 
-        SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_TOP, PANEL_X, PANEL_Y, MSGBOX_WIDTH, TOP_H);
-        SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_MIDDLE, PANEL_X, PANEL_Y + TOP_H, MSGBOX_WIDTH,
+        mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_TOP, PANEL_X, PANEL_Y, MSGBOX_WIDTH, TOP_H);
+        mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_MIDDLE, PANEL_X, PANEL_Y + TOP_H, MSGBOX_WIDTH,
             MIDDLE_FILL_H, 0.0f, 0.0f, 1.0f, 1.0f);  // stretched to fill
-        SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_BOTTOM, PANEL_X, PANEL_Y + TOP_H + MIDDLE_FILL_H,
+        mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_BOTTOM, PANEL_X, PANEL_Y + TOP_H + MIDDLE_FILL_H,
             MSGBOX_WIDTH, BOTTOM_H);
 
         // Progress bar (native two-texture gauge), fill inset into the trough.
-        SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_PROGRESS_BG, PROG_X, PROG_Y, PROG_W, PROG_H);
+        mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_PROGRESS_BG, PROG_X, PROG_Y, PROG_W, PROG_H);
         const float fraction = Progress();
         if (fraction > 0.0f)
         {
-            SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_PROGRESS_BAR, PROG_BAR_X, PROG_BAR_Y,
+            mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_PROGRESS_BAR, PROG_BAR_X, PROG_BAR_Y,
                 PROG_BAR_MAX_W * fraction, PROG_BAR_H);
         }
 
         // Cancel button: pick the normal / hover row from the button sheet.
         const float sv = cancelHovered ? (CANCEL_H / BTN_SHEET_H) : 0.0f;
-        SEASON3B::RenderImage(MsgBox::IMAGE_MSGBOX_BTN_CANCEL, CANCEL_X, CANCEL_Y, CANCEL_W, CANCEL_H,
+        mu::ui::window::RenderImage(MsgBox::IMAGE_MSGBOX_BTN_CANCEL, CANCEL_X, CANCEL_Y, CANCEL_W, CANCEL_H,
             0.0f, sv, CANCEL_W / BTN_SHEET_W, CANCEL_H / BTN_SHEET_H);
 
         DrawStatusTexts();

@@ -6,24 +6,24 @@
 #include "UI/Widgets/NewUISlideWindow.h"
 #include "UI/Core/NewUIManager.h"
 
-SEASON3B::CNewUISlideWindow::CNewUISlideWindow()
+mu::ui::window::CNewUISlideWindow::CNewUISlideWindow()
 {
     m_pNewUIMng = NULL;
     m_pSlideMgr = NULL;
 }
 
-SEASON3B::CNewUISlideWindow::~CNewUISlideWindow()
+mu::ui::window::CNewUISlideWindow::~CNewUISlideWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SLIDEWINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SLIDEWINDOW, this);
     m_pSlideMgr = new CSlideHelpMgr;
     std::wstring strFileName = L"Data\\Local\\" + g_strSelectedML + L"\\Slide_" + g_strSelectedML + L".bmd";
     m_pSlideMgr->OpenSlideTextFile(strFileName.c_str());
@@ -31,7 +31,7 @@ bool SEASON3B::CNewUISlideWindow::Create(CNewUIManager* pNewUIMng)
     return true;
 }
 
-void SEASON3B::CNewUISlideWindow::Release()
+void mu::ui::window::CNewUISlideWindow::Release()
 {
     SAFE_DELETE(m_pSlideMgr);
 
@@ -42,28 +42,28 @@ void SEASON3B::CNewUISlideWindow::Release()
     }
 }
 
-bool SEASON3B::CNewUISlideWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUISlideWindow::UpdateMouseEvent()
 {
     return true;
 }
-bool SEASON3B::CNewUISlideWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUISlideWindow::UpdateKeyEvent()
 {
     return true;
 }
-bool SEASON3B::CNewUISlideWindow::Update()
+bool mu::ui::window::CNewUISlideWindow::Update()
 {
     m_pSlideMgr->ManageSlide();
 
     return true;
 }
-bool SEASON3B::CNewUISlideWindow::Render()
+bool mu::ui::window::CNewUISlideWindow::Render()
 {
     m_pSlideMgr->Render();
 
     return true;
 }
 
-float SEASON3B::CNewUISlideWindow::GetLayerDepth()
+float mu::ui::window::CNewUISlideWindow::GetLayerDepth()
 {
     return 1.91f;
 }

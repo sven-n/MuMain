@@ -16,6 +16,7 @@
 #include <algorithm>
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -206,7 +207,7 @@ bool CBuffStrip::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_BUFF_WINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BUFF_WINDOW, this);
 
     // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
     // window's Create() (re-run on resolution change), so the document/model are created once,

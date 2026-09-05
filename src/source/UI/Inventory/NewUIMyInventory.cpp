@@ -37,6 +37,7 @@ extern bool SelectFlag;
 #include "UI/Scaling/UITransform.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIMyInventory::CNewUIMyInventory()
 {
@@ -49,7 +50,7 @@ CNewUIMyInventory::CNewUIMyInventory()
     m_iPointedSlot = -1;
 
     m_MyShopMode = MYSHOP_MODE_OPEN;
-    m_RepairMode = REPAIR_MODE_OFF;
+    m_RepairMode = SEASON3B::REPAIR_MODE_OFF;
     m_dwStandbyItemKey = 0;
 
     m_bRepairEnableLevel = false;
@@ -439,7 +440,7 @@ void CNewUIMyInventory::SetRepairMode(bool bRepair)
 {
     if (bRepair)
     {
-        m_RepairMode = REPAIR_MODE_ON;
+        m_RepairMode = SEASON3B::REPAIR_MODE_ON;
         if (m_pNewInventoryCtrl)
         {
             m_pNewInventoryCtrl->SetRepairMode(true);
@@ -447,7 +448,7 @@ void CNewUIMyInventory::SetRepairMode(bool bRepair)
     }
     else
     {
-        m_RepairMode = REPAIR_MODE_OFF;
+        m_RepairMode = SEASON3B::REPAIR_MODE_OFF;
         if (m_pNewInventoryCtrl)
         {
             m_pNewInventoryCtrl->SetRepairMode(false);
@@ -480,7 +481,7 @@ bool CNewUIMyInventory::UpdateMouseEvent()
             || g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == true
             || g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == true
             || g_pNewUISystem->IsVisible(INTERFACE_MYSHOP_INVENTORY) == true
-            || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == true
+            || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == true
             || g_pNewUISystem->IsVisible(INTERFACE_PURCHASESHOP_INVENTORY) == true)
         {
             ResetMouseLButton();
@@ -588,7 +589,7 @@ bool CNewUIMyInventory::UpdateKeyEvent()
     {
         if (m_bRepairEnableLevel == true && g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == false
             && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-            && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
+            && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == false
             )
         {
             ToggleRepairMode();
@@ -1351,7 +1352,7 @@ void CNewUIMyInventory::RenderButtons()
         && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
+        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == false
         && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false)
     {
         if (m_bRepairEnableLevel == true)
@@ -1404,7 +1405,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
             const int iTargetIndex = m_iPointedSlot;
             if (pItemObj->bPeriodItem && pItemObj->bExpiredPeriod)
             {
-                g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::CanTWearItem, mu::ui::window::TYPE_ERROR_MESSAGE);
                 CNewUIInventoryCtrl::BackupPickedItem();
 
                 ResetMouseLButton();
@@ -1449,7 +1450,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
         }
         else // pPickedItem == NULL
         {
-            if (GetRepairMode() == REPAIR_MODE_ON)
+            if (GetRepairMode() == SEASON3B::REPAIR_MODE_ON)
             {
                 ITEM* pEquippedItem = &CharacterMachine->Equipment[m_iPointedSlot];
 
@@ -1520,7 +1521,7 @@ bool CNewUIMyInventory::EquipmentWindowProcess()
         const CNewUIPickedItem* pPickedItem = CNewUIInventoryCtrl::GetPickedItem();
 
         const int iSourceIndex = m_iPointedSlot;
-        if (GetRepairMode() != REPAIR_MODE_ON && EquipmentItem == false
+        if (GetRepairMode() != SEASON3B::REPAIR_MODE_ON && EquipmentItem == false
             && pPickedItem == nullptr
             && iSourceIndex != -1
             && !g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP))  // Don't unequip when NPC shop is open
@@ -1608,7 +1609,7 @@ bool CNewUIMyInventory::BtnProcess()
         && g_pNewUISystem->IsVisible(INTERFACE_TRADE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
         && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
-        && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND) == false
+        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == false
         && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
         && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false)
     {
@@ -1651,7 +1652,7 @@ void CNewUIMyInventory::RenderItemToolTip(int iSlotIndex) const
 
             pEquipmentItemSlot->bySelectedSlotIndex = iSlotIndex;
 
-            if (m_RepairMode == REPAIR_MODE_OFF)
+            if (m_RepairMode == SEASON3B::REPAIR_MODE_OFF)
             {
                 RenderItemInfo(iTargetX, iTargetY, pEquipmentItemSlot, false);
             }
@@ -1722,7 +1723,7 @@ bool CNewUIMyInventory::CanOpenMyShopInterface()
     if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
         || g_pNewUISystem->IsVisible(INTERFACE_STORAGE)
         || g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
         || g_pNewUISystem->IsVisible(INTERFACE_TRADE)
         || gMapManager.IsCursedTemple()
         )
@@ -1780,11 +1781,11 @@ void CNewUIMyInventory::UnlockMyShopButtonOpen()
 
 void CNewUIMyInventory::ToggleRepairMode()
 {
-    if (m_RepairMode == REPAIR_MODE_OFF)
+    if (m_RepairMode == SEASON3B::REPAIR_MODE_OFF)
     {
         SetRepairMode(true);
     }
-    else if (m_RepairMode == REPAIR_MODE_ON)
+    else if (m_RepairMode == SEASON3B::REPAIR_MODE_ON)
     {
         SetRepairMode(false);
     }
@@ -1896,7 +1897,7 @@ void CNewUIMyInventory::ResetMouseRButton()
 }
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY
-BOOL SEASON3B::CNewUIMyInventory::IsInvenItem(const short sType)
+BOOL mu::ui::window::CNewUIMyInventory::IsInvenItem(const short sType)
 {
     BOOL bInvenItem = FALSE;
 

@@ -13,7 +13,7 @@
 #include "UI/Widgets/NewUIButton.h"
 #include "UI/Widgets/UIControls.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIMyShopInventory : public CNewUIObj
     {

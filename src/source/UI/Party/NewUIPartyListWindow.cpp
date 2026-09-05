@@ -14,6 +14,7 @@
 #include "Camera/CameraProjection.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIPartyListWindow::CNewUIPartyListWindow()
 {
@@ -43,7 +44,7 @@ bool CNewUIPartyListWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_PARTY_INFO_WINDOW, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_PARTY_INFO_WINDOW, this);
 
     SetPos(x, y);
 
@@ -288,7 +289,7 @@ bool CNewUIPartyListWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIPartyListWindow::RenderPartyHPOnHead()
+void mu::ui::window::CNewUIPartyListWindow::RenderPartyHPOnHead()
 {
     if (PartyNumber <= 0)
         return;

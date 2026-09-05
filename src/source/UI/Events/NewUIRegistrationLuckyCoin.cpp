@@ -9,7 +9,7 @@
 #include "I18N/All.h"
 
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     CNewUIRegistrationLuckyCoin::CNewUIRegistrationLuckyCoin()
     {
@@ -31,7 +31,7 @@ namespace SEASON3B
             return false;
 
         m_pNewUIMng = pNewUIMng;
-        m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION, this);
+        m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION, this);
 
         SetPos(x, y);
         LoadImages();
@@ -158,14 +158,14 @@ namespace SEASON3B
     bool CNewUIRegistrationLuckyCoin::BtnProcess()
     {
         // Top-right corner close "X" (shared frame): hides + swallows the click.
-        if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION))
+        if (g_pNewUISystem->HandleFrameCornerClose(GetPos(), mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION))
             return false;
 
         if (m_CloseButton.UpdateMouseEvent() == true)
         {
-            if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
+            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
                 return true;
             }
             return false;
@@ -173,7 +173,7 @@ namespace SEASON3B
 
         if (m_RegistButton.UpdateMouseEvent() == true)
         {
-            SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
             SocketClient->ToGameServer()->SendLuckyCoinRegistrationRequest();
             LockLuckyCoinRegBtn();
             return true;
@@ -203,7 +203,7 @@ namespace SEASON3B
 
     bool CNewUIRegistrationLuckyCoin::UpdateMouseEvent()
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION) == false)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION) == false)
         {
             return true;
         }
@@ -215,7 +215,7 @@ namespace SEASON3B
 
         if (CheckMouseIn(m_Pos.x, m_Pos.y, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT))
         {
-            if (SEASON3B::IsPress(VK_RBUTTON))
+            if (mu::ui::window::IsPress(VK_RBUTTON))
             {
                 MouseRButton = false;
                 MouseRButtonPop = false;
@@ -223,7 +223,7 @@ namespace SEASON3B
                 return false;
             }
 
-            if (SEASON3B::IsNone(VK_LBUTTON) == false)
+            if (mu::ui::window::IsNone(VK_LBUTTON) == false)
             {
                 return false;
             }
@@ -233,11 +233,11 @@ namespace SEASON3B
 
     bool CNewUIRegistrationLuckyCoin::UpdateKeyEvent()
     {
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION) == true)
         {
-            if (SEASON3B::IsPress(VK_ESCAPE) == true)
+            if (mu::ui::window::IsPress(VK_ESCAPE) == true)
             {
-                g_pNewUISystem->Hide(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION);
+                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
                 return false;
             }
         }

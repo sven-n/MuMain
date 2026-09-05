@@ -6224,19 +6224,19 @@ bool CRadioButton::UpdateMouseAction()
 {
     bool _Temp = IsRadioBtn(m_rtCheckBtn);
 
-    if (SEASON3B::IsPress(VK_LBUTTON) && _Temp)
+    if (mu::ui::window::IsPress(VK_LBUTTON) && _Temp)
     {
         m_byMouseState = LBTN_DOWN;
         return true;
     }
-    else if (SEASON3B::IsRelease(VK_LBUTTON) && _Temp)
+    else if (mu::ui::window::IsRelease(VK_LBUTTON) && _Temp)
     {
         m_bCheckState ^= 1;
         m_byMouseState = LBTN_UP;
         m_nIterIndex = m_nRadioBtnEnable;
         return true;
     }
-    else if (SEASON3B::IsRepeat(VK_LBUTTON) && _Temp)
+    else if (mu::ui::window::IsRepeat(VK_LBUTTON) && _Temp)
     {
         m_byMouseState = LBTN_DOWN;
         return true;

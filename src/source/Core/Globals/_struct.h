@@ -9,7 +9,7 @@ class OBJECT;
 class CHARACTER;
 #include "Guild/GuildConstants.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIItemMng;
 }
@@ -226,7 +226,7 @@ typedef struct tagITEM
     long	lExpireTime;
 
 private:
-    friend class SEASON3B::CNewUIItemMng;
+    friend class mu::ui::window::CNewUIItemMng;
     int   RefCount;
 } ITEM;
 #pragma pack(pop)

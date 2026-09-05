@@ -38,6 +38,7 @@ namespace
 };
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // CNewUIBaseButton
@@ -75,7 +76,7 @@ bool CNewUIBaseButton::RadioProcess()
             m_EventState = BUTTON_STATE_OVER;
         }
 
-        if (SEASON3B::IsPress(VK_LBUTTON))
+        if (mu::ui::window::IsPress(VK_LBUTTON))
         {
             if (m_EventState == BUTTON_STATE_OVER)
             {
@@ -92,7 +93,7 @@ bool CNewUIBaseButton::RadioProcess()
         }
     }
 #else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-    if (SEASON3B::IsPress(VK_LBUTTON) && isMousein)
+    if (mu::ui::window::IsPress(VK_LBUTTON) && isMousein)
     {
         if (m_EventState == BUTTON_STATE_UP)
         {
@@ -113,15 +114,15 @@ bool CNewUIBaseButton::Process()
 {
     bool isMousein = CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y);
 
-    if (SEASON3B::IsNone(VK_LBUTTON) && isMousein)
+    if (mu::ui::window::IsNone(VK_LBUTTON) && isMousein)
     {
         m_EventState = BUTTON_STATE_OVER;
     }
-    else if ((SEASON3B::IsRepeat(VK_LBUTTON) || SEASON3B::IsPress(VK_LBUTTON)) && isMousein)
+    else if ((mu::ui::window::IsRepeat(VK_LBUTTON) || mu::ui::window::IsPress(VK_LBUTTON)) && isMousein)
     {
         m_EventState = BUTTON_STATE_DOWN;
     }
-    else if (SEASON3B::IsRelease(VK_LBUTTON) && isMousein)
+    else if (mu::ui::window::IsRelease(VK_LBUTTON) && isMousein)
     {
         m_EventState = BUTTON_STATE_UP;
         return true;
@@ -154,7 +155,7 @@ CNewUIButton::~CNewUIButton()
     Destroy();
 }
 
-void SEASON3B::CNewUIButton::Initialize()
+void mu::ui::window::CNewUIButton::Initialize()
 {
     m_hTextFont = g_hFont;
     m_hToolTipFont = g_hFont;
@@ -167,7 +168,7 @@ void SEASON3B::CNewUIButton::Initialize()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void SEASON3B::CNewUIButton::Destroy()
+void mu::ui::window::CNewUIButton::Destroy()
 {
     if (m_LocaleObserverRegistered)
     {
@@ -180,14 +181,14 @@ void SEASON3B::CNewUIButton::Destroy()
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 }
 
-void SEASON3B::CNewUIButton::ChangeText(const wchar_t* const* nameSlot)
+void mu::ui::window::CNewUIButton::ChangeText(const wchar_t* const* nameSlot)
 {
     m_pNameSlot = nameSlot;
     m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
     EnsureLocaleObserver();
 }
 
-void SEASON3B::CNewUIButton::ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos)
+void mu::ui::window::CNewUIButton::ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos)
 {
     m_pTooltipSlot = tooltipSlot;
     m_TooltipText = (tooltipSlot != nullptr && *tooltipSlot != nullptr) ? *tooltipSlot : L"";
@@ -195,14 +196,14 @@ void SEASON3B::CNewUIButton::ChangeToolTipText(const wchar_t* const* tooltipSlot
     EnsureLocaleObserver();
 }
 
-void SEASON3B::CNewUIButton::EnsureLocaleObserver()
+void mu::ui::window::CNewUIButton::EnsureLocaleObserver()
 {
     if (m_LocaleObserverRegistered) return;
     I18N::RegisterLocaleObserver(&CNewUIButton::OnLocaleChanged, this);
     m_LocaleObserverRegistered = true;
 }
 
-void SEASON3B::CNewUIButton::OnLocaleChanged(void* ctx) noexcept
+void mu::ui::window::CNewUIButton::OnLocaleChanged(void* ctx) noexcept
 {
     auto* self = static_cast<CNewUIButton*>(ctx);
     if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
@@ -216,7 +217,7 @@ void SEASON3B::CNewUIButton::OnLocaleChanged(void* ctx) noexcept
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void SEASON3B::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg /* = false */,
+void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg /* = false */,
     bool bLockImage /* = false */, bool bClickEffect /* = false  */)
 {
     m_bClickEffect = bClickEffect;
@@ -250,9 +251,9 @@ void SEASON3B::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex
 }
 #else // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void SEASON3B::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth, bool bClickEffect)
+void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth, bool bClickEffect)
 #else // KJH_ADD_INGAMESHOP_UI_SYSTEM
-void SEASON3B::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth)
+void mu::ui::window::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex, bool overflg, bool isimgwidth)
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 {
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
@@ -279,13 +280,13 @@ void SEASON3B::CNewUIButton::ChangeButtonImgState(bool imgregister, int imgindex
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
-void SEASON3B::CNewUIButton::ChangeButtonInfo(int x, int y, int sx, int sy)
+void mu::ui::window::CNewUIButton::ChangeButtonInfo(int x, int y, int sx, int sy)
 {
     SetPos(x, y);
     SetSize(sx, sy);
 }
 
-void SEASON3B::CNewUIButton::RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate)
+void mu::ui::window::CNewUIButton::RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate)
 {
     ButtonInfo btinfo;
     btinfo.s_ImgIndex = imgindex;
@@ -294,12 +295,12 @@ void SEASON3B::CNewUIButton::RegisterButtonState(BUTTON_STATE eventstate, int im
     m_ButtonInfo.insert(std::make_pair(eventstate, btinfo));
 }
 
-void SEASON3B::CNewUIButton::UnRegisterButtonState()
+void mu::ui::window::CNewUIButton::UnRegisterButtonState()
 {
     m_ButtonInfo.clear();
 }
 
-void SEASON3B::CNewUIButton::ChangeImgIndex(int imgindex, int curimgstate)
+void mu::ui::window::CNewUIButton::ChangeImgIndex(int imgindex, int curimgstate)
 {
     m_CurImgIndex = imgindex;
     m_CurImgState = curimgstate;
@@ -314,7 +315,7 @@ void SEASON3B::CNewUIButton::ChangeImgIndex(int imgindex, int curimgstate)
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-void SEASON3B::CNewUIButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
+void mu::ui::window::CNewUIButton::ChangeButtonState(BUTTON_STATE eventstate, int iButtonState)
 {
     if (m_ButtonInfo.size() != 0)
     {
@@ -328,13 +329,13 @@ void SEASON3B::CNewUIButton::ChangeButtonState(BUTTON_STATE eventstate, int iBut
     }
 }
 
-void SEASON3B::CNewUIButton::MoveTextPos(int iX, int iY)
+void mu::ui::window::CNewUIButton::MoveTextPos(int iX, int iY)
 {
     m_iMoveTextPosX = iX;
     m_iMoveTextPosY = iY;
 }
 
-void SEASON3B::CNewUIButton::MoveTextTipPos(int iX, int iY)
+void mu::ui::window::CNewUIButton::MoveTextTipPos(int iX, int iY)
 {
     m_iMoveTextTipPosX = iX;
     m_iMoveTextTipPosY = iY;
@@ -365,7 +366,7 @@ void CNewUIButton::ChangeAlpha(float fAlpha, bool isfontalph)
     }
 }
 
-void SEASON3B::CNewUIButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int color)
+void mu::ui::window::CNewUIButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned int color)
 {
     if (m_ButtonInfo.size() != 0)
     {
@@ -383,7 +384,7 @@ void SEASON3B::CNewUIButton::ChangeImgColor(BUTTON_STATE eventstate, unsigned in
     }
 }
 
-void SEASON3B::CNewUIButton::ChangeFrame()
+void mu::ui::window::CNewUIButton::ChangeFrame()
 {
     if (m_ButtonInfo.size() != 0)
     {
@@ -400,7 +401,7 @@ void SEASON3B::CNewUIButton::ChangeFrame()
     }
 }
 
-bool SEASON3B::CNewUIButton::UpdateMouseEvent()
+bool mu::ui::window::CNewUIButton::UpdateMouseEvent()
 {
     if (IsLock())
     {
@@ -420,20 +421,20 @@ bool SEASON3B::CNewUIButton::UpdateMouseEvent()
 }
 
 #ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
-void SEASON3B::CNewUIButton::Lock()
+void mu::ui::window::CNewUIButton::Lock()
 {
     CNewUIBaseButton::Lock();
     ChangeFrame();
 }
 
-void SEASON3B::CNewUIButton::UnLock()
+void mu::ui::window::CNewUIButton::UnLock()
 {
     CNewUIBaseButton::UnLock();
     ChangeFrame();
 }
 #endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
 
-bool SEASON3B::CNewUIButton::Render(bool RendOption)
+bool mu::ui::window::CNewUIButton::Render(bool RendOption)
 {
     if (!m_ButtonInfo.empty())
     {
@@ -1199,7 +1200,7 @@ bool CNewUIRadioGroupButton::Render()
     return true;
 }
 
-SEASON3B::CNewUICheckBox::CNewUICheckBox()
+mu::ui::window::CNewUICheckBox::CNewUICheckBox()
 {
     s_ImgIndex = -1;
     m_Pos.x = 0; m_Pos.y = 0;
@@ -1213,7 +1214,7 @@ SEASON3B::CNewUICheckBox::CNewUICheckBox()
     State = 0;
 }
 
-SEASON3B::CNewUICheckBox::~CNewUICheckBox()
+mu::ui::window::CNewUICheckBox::~CNewUICheckBox()
 {
     if (m_LocaleObserverRegistered)
     {
@@ -1222,37 +1223,37 @@ SEASON3B::CNewUICheckBox::~CNewUICheckBox()
     }
 }
 
-void SEASON3B::CNewUICheckBox::CheckBoxImgState(int imgindex)
+void mu::ui::window::CNewUICheckBox::CheckBoxImgState(int imgindex)
 {
     s_ImgIndex = imgindex;
 }
 
-void SEASON3B::CNewUICheckBox::RegisterBoxState(bool eventstate)
+void mu::ui::window::CNewUICheckBox::RegisterBoxState(bool eventstate)
 {
     State = eventstate;
 }
 
-void SEASON3B::CNewUICheckBox::ChangeText(std::wstring btname)
+void mu::ui::window::CNewUICheckBox::ChangeText(std::wstring btname)
 {
     m_pNameSlot = nullptr;
     m_Name = btname;
 }
 
-void SEASON3B::CNewUICheckBox::ChangeText(const wchar_t* const* nameSlot)
+void mu::ui::window::CNewUICheckBox::ChangeText(const wchar_t* const* nameSlot)
 {
     m_pNameSlot = nameSlot;
     m_Name = (nameSlot != nullptr && *nameSlot != nullptr) ? *nameSlot : L"";
     EnsureLocaleObserver();
 }
 
-void SEASON3B::CNewUICheckBox::EnsureLocaleObserver()
+void mu::ui::window::CNewUICheckBox::EnsureLocaleObserver()
 {
     if (m_LocaleObserverRegistered) return;
     I18N::RegisterLocaleObserver(&CNewUICheckBox::OnLocaleChanged, this);
     m_LocaleObserverRegistered = true;
 }
 
-void SEASON3B::CNewUICheckBox::OnLocaleChanged(void* ctx) noexcept
+void mu::ui::window::CNewUICheckBox::OnLocaleChanged(void* ctx) noexcept
 {
     auto* self = static_cast<CNewUICheckBox*>(ctx);
     if (self->m_pNameSlot != nullptr && *self->m_pNameSlot != nullptr)
@@ -1261,18 +1262,18 @@ void SEASON3B::CNewUICheckBox::OnLocaleChanged(void* ctx) noexcept
     }
 }
 
-void SEASON3B::CNewUICheckBox::CheckBoxInfo(int x, int y, int sx, int sy)
+void mu::ui::window::CNewUICheckBox::CheckBoxInfo(int x, int y, int sx, int sy)
 {
     m_Pos.x = x; m_Pos.y = y;
     m_Size.x = sx; m_Size.y = sy;
 }
 
-bool SEASON3B::CNewUICheckBox::GetBoxState()
+bool mu::ui::window::CNewUICheckBox::GetBoxState()
 {
     return State;
 }
 
-void SEASON3B::CNewUICheckBox::Render()
+void mu::ui::window::CNewUICheckBox::Render()
 {
     EnableAlphaTest();
 
@@ -1293,7 +1294,7 @@ void SEASON3B::CNewUICheckBox::Render()
     g_pRenderText->RenderText(m_Pos.x + m_Size.x + 1, m_Pos.y + 4, m_Name.c_str(), 0, 0);
 }
 
-bool SEASON3B::CNewUICheckBox::UpdateMouseEvent()
+bool mu::ui::window::CNewUICheckBox::UpdateMouseEvent()
 {
     if (CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y))
     {

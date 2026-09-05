@@ -484,7 +484,7 @@ bool NewRenderLogInScene(HDC hDC)
 #endif
 
     // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_OPTION))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION))
     {
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();

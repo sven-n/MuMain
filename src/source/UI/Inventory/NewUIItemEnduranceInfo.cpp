@@ -16,6 +16,7 @@
 
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIItemEnduranceInfo::CNewUIItemEnduranceInfo()
 {
@@ -31,13 +32,13 @@ CNewUIItemEnduranceInfo::~CNewUIItemEnduranceInfo()
     Release();
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIItemEnduranceInfo::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_ITEM_ENDURANCE_INFO, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_ITEM_ENDURANCE_INFO, this);
 
     SetPos(x, y);
     LoadImages();
@@ -46,7 +47,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::Release()
+void mu::ui::window::CNewUIItemEnduranceInfo::Release()
 {
     UnloadImages();
 
@@ -57,7 +58,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::Release()
     }
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::SetPos(int x, int y)
+void mu::ui::window::CNewUIItemEnduranceInfo::SetPos(int x, int y)
 {
     m_UIStartPos.x = x;
     m_UIStartPos.y = y;
@@ -68,13 +69,13 @@ void SEASON3B::CNewUIItemEnduranceInfo::SetPos(int x, int y)
     m_iTextEndPosX = m_UIStartPos.x + PETHP_FRAME_WIDTH;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::SetPos(int x)
+void mu::ui::window::CNewUIItemEnduranceInfo::SetPos(int x)
 {
     m_ItemDurUIStartPos.x = x - ITEM_DUR_WIDTH - 2;
     m_ItemDurUIStartPos.y = 140;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
+bool mu::ui::window::CNewUIItemEnduranceInfo::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -215,12 +216,12 @@ bool SEASON3B::CNewUIItemEnduranceInfo::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::UpdateKeyEvent()
+bool mu::ui::window::CNewUIItemEnduranceInfo::UpdateKeyEvent()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::Update()
+bool mu::ui::window::CNewUIItemEnduranceInfo::Update()
 {
     if (!IsVisible())
         return true;
@@ -244,7 +245,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Update()
     return true;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::Render()
+bool mu::ui::window::CNewUIItemEnduranceInfo::Render()
 {
     EnableAlphaTest();
     g_pRenderText->SetFont(g_hFont);
@@ -258,7 +259,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::Render()
 
 //---------------------------------------------------------------------------------------------
 
-void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
+void mu::ui::window::CNewUIItemEnduranceInfo::RenderLeft()
 {
     UI::Scaling::ScopedActiveTransform layout(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
 
@@ -295,30 +296,30 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderLeft()
     }
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::RenderRight()
+void mu::ui::window::CNewUIItemEnduranceInfo::RenderRight()
 {
     RenderItemEndurance(m_ItemDurUIStartPos.x, m_ItemDurUIStartPos.y);
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::BtnProcess()
+bool mu::ui::window::CNewUIItemEnduranceInfo::BtnProcess()
 {
     return false;
 }
 
-float SEASON3B::CNewUIItemEnduranceInfo::GetLayerDepth()
+float mu::ui::window::CNewUIItemEnduranceInfo::GetLayerDepth()
 {
     return 3.5f;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::OpenningProcess()
+void mu::ui::window::CNewUIItemEnduranceInfo::OpenningProcess()
 {
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::ClosingProcess()
+void mu::ui::window::CNewUIItemEnduranceInfo::ClosingProcess()
 {
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::InitImageIndex()
+void mu::ui::window::CNewUIItemEnduranceInfo::InitImageIndex()
 {
     m_iItemDurImageIndex[EQUIPMENT_WEAPON_RIGHT] = IMAGE_ITEM_DUR_WEAPON;
     m_iItemDurImageIndex[EQUIPMENT_WEAPON_LEFT] = IMAGE_ITEM_DUR_SHIELD;
@@ -334,7 +335,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::InitImageIndex()
     m_iItemDurImageIndex[EQUIPMENT_RING_LEFT] = IMAGE_ITEM_DUR_RING;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/)
+void mu::ui::window::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszName, int iLife, int iMaxLife/*=255*/, bool bWarning/*=false*/)
 {
     EnableAlphaTest();
 
@@ -356,7 +357,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderHPUI(int iX, int iY, wchar_t* pszN
     DisableAlphaBlend();
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor)
+void mu::ui::window::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM* pItem, const DWORD& dwTextColor)
 {
     ITEM_ATTRIBUTE* pItemAtt = &ItemAttribute[pItem->Type];
     int iLevel = pItem->Level;
@@ -377,7 +378,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::RenderTooltip(int iX, int iY, const ITEM
     g_pRenderText->RenderText(iX, iY, szText, 0, 0, RT3_WRITE_CENTER);
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
+bool mu::ui::window::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
 {
     if (Hero->Helper.Type >= MODEL_HELPER && Hero->Helper.Type <= MODEL_DARK_HORSE_ITEM
         || Hero->Helper.Type == MODEL_DEMON
@@ -465,7 +466,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedHelperLife(int iX, int iY)
     return false;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
+bool mu::ui::window::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
 {
     if (Hero->m_pPet == NULL)
         return false;
@@ -479,7 +480,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderEquipedPetLife(int iX, int iY)
     return true;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
+bool mu::ui::window::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
 {
     if (SummonLife <= 0)
         return false;
@@ -492,7 +493,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderSummonMonsterLife(int iX, int iY)
     return true;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
+bool mu::ui::window::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
 {
     if (m_iCurArrowType == ARROWTYPE_NONE)
         return false;
@@ -537,9 +538,9 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderNumArrow(int iX, int iY)
     return true;
 }
 
-bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
+bool mu::ui::window::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE))
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE))
         return false;
 
     auto ItemDurPos = POINT(m_ItemDurUIStartPos);
@@ -693,7 +694,7 @@ bool SEASON3B::CNewUIItemEnduranceInfo::RenderItemEndurance(int ix, int iY)
     return true;
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::LoadImages()
+void mu::ui::window::CNewUIItemEnduranceInfo::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_Pet_Back.tga", IMAGE_PETHP_FRAME, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_Pet_HpBar.jpg", IMAGE_PETHP_BAR, GL_LINEAR);
@@ -709,7 +710,7 @@ void SEASON3B::CNewUIItemEnduranceInfo::LoadImages()
     LoadBitmap(L"Interface\\newui_durable_wing.tga", IMAGE_ITEM_DUR_WING, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIItemEnduranceInfo::UnloadImages()
+void mu::ui::window::CNewUIItemEnduranceInfo::UnloadImages()
 {
     DeleteBitmap(IMAGE_PETHP_FRAME);
     DeleteBitmap(IMAGE_PETHP_BAR);

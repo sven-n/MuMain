@@ -7,6 +7,7 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 CNewUIDoppelGangerFrame::CNewUIDoppelGangerFrame()
 {
@@ -34,7 +35,7 @@ bool CNewUIDoppelGangerFrame::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_DOPPELGANGER_FRAME, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME, this);
 
     SetPos(x, y);
 

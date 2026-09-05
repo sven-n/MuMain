@@ -25,28 +25,29 @@
 #include "MUHelper/MuHelper.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-SEASON3B::CNewUIHotKey::CNewUIHotKey() : m_pNewUIMng(NULL), m_bStateGameOver(false)
+mu::ui::window::CNewUIHotKey::CNewUIHotKey() : m_pNewUIMng(NULL), m_bStateGameOver(false)
 {
 }
 
-SEASON3B::CNewUIHotKey::~CNewUIHotKey()
+mu::ui::window::CNewUIHotKey::~CNewUIHotKey()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIHotKey::Create(CNewUIManager* pNewUIMng)
+bool mu::ui::window::CNewUIHotKey::Create(CNewUIManager* pNewUIMng)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_HOTKEY, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_HOTKEY, this);
     Show(true);
     return true;
 }
 
-void SEASON3B::CNewUIHotKey::Release()
+void mu::ui::window::CNewUIHotKey::Release()
 {
     if (m_pNewUIMng)
     {
@@ -55,7 +56,7 @@ void SEASON3B::CNewUIHotKey::Release()
     }
 }
 
-bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
+bool mu::ui::window::CNewUIHotKey::UpdateMouseEvent()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
     {
@@ -64,7 +65,7 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
 
     if (SelectedCharacter >= 0)
     {
-        if (SEASON3B::IsRepeat(VK_MENU) && SEASON3B::IsRelease(VK_RBUTTON)
+        if (mu::ui::window::IsRepeat(VK_MENU) && mu::ui::window::IsRelease(VK_RBUTTON)
             && gMapManager.InChaosCastle() == false
             && gMapManager.IsCursedTemple() == false
             )
@@ -104,7 +105,7 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
             }
             else
             {
-                g_pSystemLogBox->AddText(I18N::Game::ItCannotBeUsedDueToTheDistance, SEASON3B::TYPE_ERROR_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::ItCannotBeUsedDueToTheDistance, mu::ui::window::TYPE_ERROR_MESSAGE);
                 g_pQuickCommand->CloseQuickCommand();
             }
 
@@ -115,13 +116,13 @@ bool SEASON3B::CNewUIHotKey::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
+bool mu::ui::window::CNewUIHotKey::UpdateKeyEvent()
 {
-    if (SEASON3B::IsPress(VK_ESCAPE) == true)
+    if (mu::ui::window::IsPress(VK_ESCAPE) == true)
     {
         if (g_MessageBox->IsEmpty())
         {
-            SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CSystemMenuMsgBoxLayout));
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSystemMenuMsgBoxLayout));
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -132,16 +133,16 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         return false;
     }
 
-    if (SEASON3B::IsPress(VK_TAB) == false && g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MINI_MAP) == true)
+    if (mu::ui::window::IsPress(VK_TAB) == false && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MINI_MAP) == true)
     {
         return false;
     }
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_DuelWatch))
     {
-        if (SEASON3B::IsPress('M') == true)
+        if (mu::ui::window::IsPress('M') == true)
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MOVEMAP);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MOVEMAP);
             PlayBuffer(SOUND_CLICK01);
         }
         return false;
@@ -154,11 +155,11 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
 
     if (CanUpdateKeyEventRelatedMyInventory() == true)
     {
-        if (SEASON3B::IsPress('I') || SEASON3B::IsPress('V'))
+        if (mu::ui::window::IsPress('I') || mu::ui::window::IsPress('V'))
         {
             if (g_pNPCShop->IsSellingItem() == false)
             {
-                g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
+                g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_INVENTORY);
                 PlayBuffer(SOUND_CLICK01);
                 return false;
             }
@@ -171,7 +172,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         return true;
     }
 
-    if (SEASON3B::IsPress('F'))
+    if (mu::ui::window::IsPress('F'))
     {
         if (gMapManager.InChaosCastle() == true)
         {
@@ -184,126 +185,126 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         {
             if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction) == FALSE)
             {
-                g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::YouMustBeAtLeastLevel6ToUseTheMyFriendFunction, mu::ui::window::TYPE_SYSTEM_MESSAGE);
             }
         }
         else
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_FRIEND);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_FRIEND);
         }
 
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('I') || SEASON3B::IsPress('V'))
+    else if (mu::ui::window::IsPress('I') || mu::ui::window::IsPress('V'))
     {
         if (g_pNPCShop->IsSellingItem() == false)
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_INVENTORY);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_INVENTORY);
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
     }
-    else if (SEASON3B::IsPress('C'))
+    else if (mu::ui::window::IsPress('C'))
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_CHARACTER);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_CHARACTER);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('T'))
+    else if (mu::ui::window::IsPress('T'))
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MYQUEST);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MYQUEST);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('P'))
+    else if (mu::ui::window::IsPress('P'))
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_PARTY);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_PARTY);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('G'))
+    else if (mu::ui::window::IsPress('G'))
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_GUILDINFO);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_GUILDINFO);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('A'))
+    else if (mu::ui::window::IsPress('A'))
     {
         if (gCharacterManager.IsMasterLevel(Hero->Class) == true
             && Hero->Class != CLASS_TEMPLENIGHT)
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MASTER_LEVEL);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
         }
 
         PlayBuffer(SOUND_CLICK01);
 
         return false;
     }
-    else if (SEASON3B::IsPress('U'))
+    else if (mu::ui::window::IsPress('U'))
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_WINDOW_MENU);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_WINDOW_MENU);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (gMapManager.InChaosCastle() == false && SEASON3B::IsPress('D'))
+    else if (gMapManager.InChaosCastle() == false && mu::ui::window::IsPress('D'))
     {
         if (::IsStrifeMap(gMapManager.WorldActive))
         {
             if (g_pSystemLogBox->CheckChatRedundancy(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone) == FALSE)
-                g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone, SEASON3B::TYPE_SYSTEM_MESSAGE);
+                g_pSystemLogBox->AddText(I18N::Game::TheCommandWindowCannotBeActivatedInBattleZone, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
         else
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_COMMAND);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_COMMAND);
             PlayBuffer(SOUND_CLICK01);
         }
 
         return false;
     }
-    else if (SEASON3B::IsPress(VK_F1) == true)
+    else if (mu::ui::window::IsPress(VK_F1) == true)
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_HELP);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_HELP);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('J') == true)
+    else if (mu::ui::window::IsPress('J') == true)
     {
         // Only servers which offer their chat commands have something to show.
         if (GameLogic::Commands::Catalog().IsAvailable())
         {
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_COMMAND_LIST);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_COMMAND_LIST);
             PlayBuffer(SOUND_CLICK01);
         }
 
         return false;
     }
-    else if (SEASON3B::IsPress('M') == true)
+    else if (mu::ui::window::IsPress('M') == true)
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MOVEMAP);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MOVEMAP);
         PlayBuffer(SOUND_CLICK01);
 
         return false;
     }
-    else if (SEASON3B::IsPress(VK_TAB) == true && gMapManager.InBattleCastle() == true)
+    else if (mu::ui::window::IsPress(VK_TAB) == true && gMapManager.InBattleCastle() == true)
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_SIEGEWARFARE);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_SIEGEWARFARE);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress(VK_TAB) == true)
+    else if (mu::ui::window::IsPress(VK_TAB) == true)
     {
         if (g_pNewUIMiniMap->m_bSuccess == false)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MINI_MAP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MINI_MAP);
         }
         else
-            g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MINI_MAP);
+            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MINI_MAP);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
 #ifdef PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    else if (SEASON3B::IsPress('X') == true)
+    else if (mu::ui::window::IsPress('X') == true)
     {
         g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt CallStack - CNewUIHotKey.UpdateKeyEvent()");
         if (g_pInGameShop->IsInGameShopOpen() == false)
@@ -324,7 +325,7 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         }
 #endif // KJH_MOD_SHOP_SCRIPT_DOWNLOAD
 
-        if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_INGAMESHOP) == false)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_INGAMESHOP) == false)
         {
             if (g_InGameShopSystem->GetIsRequestShopOpenning() == false)
             {
@@ -338,55 +339,55 @@ bool SEASON3B::CNewUIHotKey::UpdateKeyEvent()
         else
         {
             SocketClient->ToGameServer()->SendCashShopOpenState(1);
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_INGAMESHOP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INGAMESHOP);
         }
 
         return false;
     }
 #endif // PBG_ADD_INGAMESHOP_UI_MAINFRAME
-    else if (SEASON3B::IsPress('B'))
+    else if (mu::ui::window::IsPress('B'))
     {
         if (!g_pNewUIGensRanking->SetGensInfo())
             return false;
 
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_GENSRANKING);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_GENSRANKING);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress(VK_HOME) && !g_pChatInputBox->HaveFocus())
+    else if (mu::ui::window::IsPress(VK_HOME) && !g_pChatInputBox->HaveFocus())
     {
         MUHelper::g_MuHelper.Toggle();
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
-    else if (SEASON3B::IsPress('Z'))
+    else if (mu::ui::window::IsPress('Z'))
     {
-        g_pNewUISystem->Toggle(SEASON3B::INTERFACE_MUHELPER);
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MUHELPER);
         PlayBuffer(SOUND_CLICK01);
         return false;
     }
     return true;
 }
 
-bool SEASON3B::CNewUIHotKey::Update()
+bool mu::ui::window::CNewUIHotKey::Update()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIHotKey::Render()
+bool mu::ui::window::CNewUIHotKey::Render()
 {
     return true;
 }
 
-bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
+bool mu::ui::window::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MIXINVENTORY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_TRADE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_STORAGE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCSHOP)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MYSHOP_INVENTORY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_PURCHASESHOP_INVENTORY)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYITEMWND)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_TRADE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCSHOP)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MYSHOP_INVENTORY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
         )
     {
         return true;
@@ -394,36 +395,36 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEventRelatedMyInventory()
     return false;
 }
 
-bool SEASON3B::CNewUIHotKey::CanUpdateKeyEvent()
+bool mu::ui::window::CNewUIHotKey::CanUpdateKeyEvent()
 {
     if (CUITextInputBox::IsAnyInputBoxFocused())
     {
         return false;
     }
 
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CATAPULT)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCQUEST)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SENATUS)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATEKEEPER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GUARDSMAN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GATESWITCH)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPCGUILDMASTER)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_BLOODCASTLE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DEVILSQUARE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_MASTER_LEVEL)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DUELWATCH)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_DOPPELGANGER_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_NPC_DIALOGUE)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUEST_PROGRESS_ETC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_GOLD_BOWMAN_LENA)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_LUCKYCOIN_REGISTRATION)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EXCHANGE_LUCKYCOIN)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_EMPIREGUARDIAN_NPC)
-        || g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_KANTURU2ND_ENTERNPC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CATAPULT)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCQUEST)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SENATUS)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATEKEEPER)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GUARDSMAN)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GATESWITCH)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPCGUILDMASTER)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_BLOODCASTLE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DEVILSQUARE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_NPC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MASTER_LEVEL)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DUELWATCH)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_DOPPELGANGER_NPC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_NPC_DIALOGUE)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_GOLD_BOWMAN_LENA)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_EMPIREGUARDIAN_NPC)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_UNITEDMARKETPLACE_NPC_JULIA)
         )
     {
         return false;
@@ -432,31 +433,31 @@ bool SEASON3B::CNewUIHotKey::CanUpdateKeyEvent()
     return true;
 }
 
-float SEASON3B::CNewUIHotKey::GetLayerDepth()
+float mu::ui::window::CNewUIHotKey::GetLayerDepth()
 {
     return 1.0f;
 }
 
-float SEASON3B::CNewUIHotKey::GetKeyEventOrder()
+float mu::ui::window::CNewUIHotKey::GetKeyEventOrder()
 {
     return 1.0f;
 }
 
-void SEASON3B::CNewUIHotKey::SetStateGameOver(bool bGameOver)
+void mu::ui::window::CNewUIHotKey::SetStateGameOver(bool bGameOver)
 {
     m_bStateGameOver = bGameOver;
 }
 
-bool SEASON3B::CNewUIHotKey::IsStateGameOver()
+bool mu::ui::window::CNewUIHotKey::IsStateGameOver()
 {
     return m_bStateGameOver;
 }
 
-bool SEASON3B::CNewUIHotKey::AutoGetItem()
+bool mu::ui::window::CNewUIHotKey::AutoGetItem()
 {
     if (
         CNewUIInventoryCtrl::GetPickedItem() == NULL
-        && SEASON3B::IsPress(VK_SPACE)
+        && mu::ui::window::IsPress(VK_SPACE)
         && g_pChatInputBox->HaveFocus() == false
         && !UI::Scaling::BottomHudContainsWindowPoint(WindowWidth, WindowHeight,
                                                        g_fWindowMouseX, g_fWindowMouseY)

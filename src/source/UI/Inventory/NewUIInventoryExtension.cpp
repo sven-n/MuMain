@@ -5,6 +5,7 @@
 #include "UI/Core/NewUISystem.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
 CNewUIInventoryExtension::CNewUIInventoryExtension()

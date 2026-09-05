@@ -12,7 +12,7 @@
 #include "UI/Widgets/NewUIButton.h"
 #include "UI/Party/NewUIPartyInfoWindow.h"
 
-namespace SEASON3B
+namespace mu::ui::window
 {
     class CNewUIPartyListWindow : public CNewUIObj
     {

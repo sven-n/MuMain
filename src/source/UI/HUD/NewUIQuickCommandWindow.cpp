@@ -9,9 +9,10 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 // cppcheck-suppress uninitMemberVar
-SEASON3B::CNewUIQuickCommandWindow::CNewUIQuickCommandWindow()
+mu::ui::window::CNewUIQuickCommandWindow::CNewUIQuickCommandWindow()
 {
     m_pNewUIMng = NULL;
     m_Pos.x = 0;
@@ -21,18 +22,18 @@ SEASON3B::CNewUIQuickCommandWindow::CNewUIQuickCommandWindow()
     m_iSelectedCharacterIndex = -1;
 }
 
-SEASON3B::CNewUIQuickCommandWindow::~CNewUIQuickCommandWindow()
+mu::ui::window::CNewUIQuickCommandWindow::~CNewUIQuickCommandWindow()
 {
     Release();
 }
 
-bool SEASON3B::CNewUIQuickCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIQuickCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_QUICK_COMMAND, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_QUICK_COMMAND, this);
 
     LoadImages();
 
@@ -43,7 +44,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::Create(CNewUIManager* pNewUIMng, int x,
     return true;
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::Release()
+void mu::ui::window::CNewUIQuickCommandWindow::Release()
 {
     UnloadImages();
 
@@ -54,13 +55,13 @@ void SEASON3B::CNewUIQuickCommandWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIQuickCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
 }
 
-bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIQuickCommandWindow::UpdateMouseEvent()
 {
     if (m_iSelectedCharacterIndex < 0)
     {
@@ -80,7 +81,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
         pt.y += 20.f;
     }
 
-    if (m_iSelectedIndex > -1 && SEASON3B::IsRelease(VK_LBUTTON))
+    if (m_iSelectedIndex > -1 && mu::ui::window::IsRelease(VK_LBUTTON))
     {
         switch (m_iSelectedIndex)
         {
@@ -135,7 +136,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
     {
         m_iSelectedIndex = -1;
 
-        if (SEASON3B::IsRelease(VK_LBUTTON))
+        if (mu::ui::window::IsRelease(VK_LBUTTON))
         {
             CloseQuickCommand();
             return false;
@@ -150,11 +151,11 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIQuickCommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIQuickCommandWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUICK_COMMAND) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUICK_COMMAND) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
             CloseQuickCommand();
             PlayBuffer(SOUND_CLICK01);
@@ -166,7 +167,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIQuickCommandWindow::Update()
+bool mu::ui::window::CNewUIQuickCommandWindow::Update()
 {
     if (m_iSelectedCharacterIndex >= 0)
     {
@@ -194,7 +195,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::Update()
     return true;
 }
 
-bool SEASON3B::CNewUIQuickCommandWindow::Render()
+bool mu::ui::window::CNewUIQuickCommandWindow::Render()
 {
     EnableAlphaTest();
 
@@ -212,7 +213,7 @@ bool SEASON3B::CNewUIQuickCommandWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::RenderFrame()
+void mu::ui::window::CNewUIQuickCommandWindow::RenderFrame()
 {
     float x, y, width, height;
 
@@ -247,7 +248,7 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderFrame()
     }
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::RenderContents()
+void mu::ui::window::CNewUIQuickCommandWindow::RenderContents()
 {
     g_pRenderText->SetFont(g_hFontBold);
     g_pRenderText->SetTextColor(0, 255, 0, 255);
@@ -276,7 +277,7 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderContents()
     }
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::RenderArrow()
+void mu::ui::window::CNewUIQuickCommandWindow::RenderArrow()
 {
     if (m_iSelectedIndex < 0)
     {
@@ -291,29 +292,29 @@ void SEASON3B::CNewUIQuickCommandWindow::RenderArrow()
     RenderImage(IMAGE_QUICKCOMMAND_ARROWR, x, y, 6.f, 9.f);
 }
 
-float SEASON3B::CNewUIQuickCommandWindow::GetLayerDepth()
+float mu::ui::window::CNewUIQuickCommandWindow::GetLayerDepth()
 {
     return 2.0f;
 }
 
-float SEASON3B::CNewUIQuickCommandWindow::GetKeyEventOrder()
+float mu::ui::window::CNewUIQuickCommandWindow::GetKeyEventOrder()
 {
     return 10.f;
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::OpenningProcess()
+void mu::ui::window::CNewUIQuickCommandWindow::OpenningProcess()
 {
     m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::ClosingProcess()
+void mu::ui::window::CNewUIQuickCommandWindow::ClosingProcess()
 {
     m_iSelectedIndex = -1;
     m_iSelectedCharacterIndex = -1;
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::LoadImages()
+void mu::ui::window::CNewUIQuickCommandWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_QUICKCOMMAND_BACK, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_commamd04.tga", IMAGE_QUICKCOMMAND_FRAME_UP, GL_LINEAR);
@@ -324,7 +325,7 @@ void SEASON3B::CNewUIQuickCommandWindow::LoadImages()
     LoadBitmap(L"Interface\\newui_arrow(R).tga", IMAGE_QUICKCOMMAND_ARROWR, GL_LINEAR);
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::UnloadImages()
+void mu::ui::window::CNewUIQuickCommandWindow::UnloadImages()
 {
     DeleteBitmap(IMAGE_QUICKCOMMAND_BACK);
     DeleteBitmap(IMAGE_QUICKCOMMAND_FRAME_UP);
@@ -335,29 +336,29 @@ void SEASON3B::CNewUIQuickCommandWindow::UnloadImages()
     DeleteBitmap(IMAGE_QUICKCOMMAND_ARROWR);
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y)
+void mu::ui::window::CNewUIQuickCommandWindow::OpenQuickCommand(const wchar_t* strID, int iIndex, int x, int y)
 {
-    g_pNewUISystem->Show(SEASON3B::INTERFACE_QUICK_COMMAND);
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUICK_COMMAND);
 
     SetID(strID);
     SetSelectedCharacterIndex(iIndex);
     SetPos(x, y);
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::CloseQuickCommand()
+void mu::ui::window::CNewUIQuickCommandWindow::CloseQuickCommand()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_QUICK_COMMAND) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_QUICK_COMMAND) == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_QUICK_COMMAND);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_QUICK_COMMAND);
     }
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::SetID(const wchar_t* strID)
+void mu::ui::window::CNewUIQuickCommandWindow::SetID(const wchar_t* strID)
 {
     wcscpy(m_strID, strID);
 }
 
-void SEASON3B::CNewUIQuickCommandWindow::SetSelectedCharacterIndex(int iIndex)
+void mu::ui::window::CNewUIQuickCommandWindow::SetSelectedCharacterIndex(int iIndex)
 {
     m_iSelectedCharacterIndex = iIndex;
 }

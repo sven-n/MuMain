@@ -16,6 +16,7 @@
 #include "I18N/All.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 namespace
 {
@@ -75,13 +76,13 @@ CNewUIMoveCommandWindow::~CNewUIMoveCommandWindow()
     Release();
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
+bool mu::ui::window::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_MOVEMAP, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MOVEMAP, this);
 
     SetPos(x, y);
 
@@ -92,7 +93,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Create(CNewUIManager* pNewUIMng, int x, 
     return true;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::Release()
+void mu::ui::window::CNewUIMoveCommandWindow::Release()
 {
     UnloadImages();
 
@@ -103,7 +104,7 @@ void SEASON3B::CNewUIMoveCommandWindow::Release()
     }
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
+void mu::ui::window::CNewUIMoveCommandWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
@@ -111,7 +112,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetPos(int x, int y)
     RefreshDataAndLayout();
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::RefreshDataAndLayout()
+void mu::ui::window::CNewUIMoveCommandWindow::RefreshDataAndLayout()
 {
     m_listMoveInfoData = CMoveCommandData::GetInstance()->GetMoveCommandDatalist();
     g_pRenderText->SetFont(g_hFont);
@@ -136,17 +137,17 @@ void SEASON3B::CNewUIMoveCommandWindow::RefreshDataAndLayout()
     SetScrollOffset(m_scrollOffset);
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::SetScrollOffset(int offset)
+void mu::ui::window::CNewUIMoveCommandWindow::SetScrollOffset(int offset)
 {
     m_scrollOffset = UI::MoveCommand::ClampScrollOffset(offset, m_listMoveInfoData.size(), m_layout.visibleRows);
 }
 
-int SEASON3B::CNewUIMoveCommandWindow::VisibleEndIndex() const
+int mu::ui::window::CNewUIMoveCommandWindow::VisibleEndIndex() const
 {
     return std::min(m_scrollOffset + m_layout.visibleRows, static_cast<int>(m_listMoveInfoData.size()));
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::IsLuckySealBuff()
+bool mu::ui::window::CNewUIMoveCommandWindow::IsLuckySealBuff()
 {
     if (g_isCharacterBuff((&Hero->Object), eBuff_Seal1)
         || g_isCharacterBuff((&Hero->Object), eBuff_Seal2)
@@ -165,7 +166,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsLuckySealBuff()
     return false;
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
+bool mu::ui::window::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
 {
     if (Hero->Object.Kind == KIND_PLAYER
         && Hero->Object.Type == MODEL_PLAYER
@@ -224,19 +225,19 @@ bool SEASON3B::CNewUIMoveCommandWindow::IsMapMove(const std::wstring& src)
     return true;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::SetMoveCommandKey(DWORD dwKey)
+void mu::ui::window::CNewUIMoveCommandWindow::SetMoveCommandKey(DWORD dwKey)
 {
     m_dwMoveCommandKey = dwKey;
 }
 
-DWORD SEASON3B::CNewUIMoveCommandWindow::GetMoveCommandKey()
+DWORD mu::ui::window::CNewUIMoveCommandWindow::GetMoveCommandKey()
 {
     m_dwMoveCommandKey = g_KeyGenerator.GenerateKeyValue(m_dwMoveCommandKey);
 
     return m_dwMoveCommandKey;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
+void mu::ui::window::CNewUIMoveCommandWindow::SetStrifeMap()
 {
     std::list<CMoveCommandData::MOVEINFODATA*>::iterator li;
 
@@ -264,7 +265,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SetStrifeMap()
     }
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
+void mu::ui::window::CNewUIMoveCommandWindow::SettingCanMoveMap()
 {
     int a = gMapManager.WorldActive;
 
@@ -345,7 +346,7 @@ void SEASON3B::CNewUIMoveCommandWindow::SettingCanMoveMap()
     }
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
+bool mu::ui::window::CNewUIMoveCommandWindow::BtnProcess()
 {
     const int maximumOffset = UI::MoveCommand::MaximumScrollOffset(m_listMoveInfoData.size(), m_layout.visibleRows);
     const int scrollBarX = m_Pos.x + m_layout.windowWidth - kScrollBarOffsetX;
@@ -384,7 +385,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 
     if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y) && IsPress(VK_LBUTTON))
     {
-        SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CNewUIInventoryCtrl::BackupPickedItem();
     }
 
     SettingCanMoveMap();
@@ -409,7 +410,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
                 {
                     (*li)->_bSelected = true;
 
-                    if (SEASON3B::IsRelease(VK_LBUTTON))
+                    if (mu::ui::window::IsRelease(VK_LBUTTON))
                     {
                         if (IsTheMapInDifferentServer(gMapManager.WorldActive, (*li)->_ReqInfo.index))
                         {
@@ -418,7 +419,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
 
                         SocketClient->ToGameServer()->SendWarpCommandRequest(g_pMoveCommandWindow->GetMoveCommandKey(), (*li)->_ReqInfo.index);
 
-                        g_pNewUISystem->Hide(SEASON3B::INTERFACE_MOVEMAP);
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MOVEMAP);
                         return true;
                     }
                 }
@@ -428,17 +429,17 @@ bool SEASON3B::CNewUIMoveCommandWindow::BtnProcess()
             ++visibleIndex;
         }
 
-        if (SEASON3B::IsRelease(VK_LBUTTON)
+        if (mu::ui::window::IsRelease(VK_LBUTTON)
             && CheckMouseIn(m_Pos.x + m_layout.closeLeft, m_layout.closeTop, m_layout.closeWidth, m_iRealFontHeight))
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_MOVEMAP);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MOVEMAP);
             return true;
         }
     }
     return false;
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::UpdateMouseEvent()
+bool mu::ui::window::CNewUIMoveCommandWindow::UpdateMouseEvent()
 {
     if (true == BtnProcess())
         return false;
@@ -452,11 +453,11 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateMouseEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
+bool mu::ui::window::CNewUIMoveCommandWindow::UpdateKeyEvent()
 {
     if (IsVisible())
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
             Show(false);
             PlayBuffer(SOUND_CLICK01);
@@ -466,12 +467,12 @@ bool SEASON3B::CNewUIMoveCommandWindow::UpdateKeyEvent()
     return true;
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::Update()
+bool mu::ui::window::CNewUIMoveCommandWindow::Update()
 {
     return true;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
+void mu::ui::window::CNewUIMoveCommandWindow::RenderFrame()
 {
     EnableAlphaTest();
 
@@ -525,7 +526,7 @@ void SEASON3B::CNewUIMoveCommandWindow::RenderFrame()
     g_pRenderText->RenderText(m_ReqZenPos.x, m_StartUISubjectName.y + 20, I18N::Game::Cost, 0, 0, RT3_WRITE_CENTER);
 }
 
-bool SEASON3B::CNewUIMoveCommandWindow::Render()
+bool mu::ui::window::CNewUIMoveCommandWindow::Render()
 {
     g_pRenderText->SetFont(g_hFont);
     g_pRenderText->SetTextColor(255, 255, 255, 255);
@@ -614,7 +615,7 @@ bool SEASON3B::CNewUIMoveCommandWindow::Render()
     return true;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
+void mu::ui::window::CNewUIMoveCommandWindow::OpenningProcess()
 {
     RefreshDataAndLayout();
     SetScrollOffset(0);
@@ -626,16 +627,16 @@ void SEASON3B::CNewUIMoveCommandWindow::OpenningProcess()
     m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::ClosingProcess()
+void mu::ui::window::CNewUIMoveCommandWindow::ClosingProcess()
 {
 }
 
-float SEASON3B::CNewUIMoveCommandWindow::GetLayerDepth()
+float mu::ui::window::CNewUIMoveCommandWindow::GetLayerDepth()
 {
     return 8.3f;
 }
 
-void SEASON3B::CNewUIMoveCommandWindow::LoadImages()
+void mu::ui::window::CNewUIMoveCommandWindow::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", IMAGE_MOVECOMMAND_SCROLL_TOP);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", IMAGE_MOVECOMMAND_SCROLL_MIDDLE, GL_LINEAR);

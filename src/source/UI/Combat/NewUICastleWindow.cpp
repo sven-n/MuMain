@@ -21,6 +21,7 @@
 #include "UI/Combat/UISenatus.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -41,7 +42,7 @@ bool CNewUICastleWindow::Create(CNewUIManager* pNewUIMng, int x, int y)
         return false;
 
     m_pNewUIMng = pNewUIMng;
-    m_pNewUIMng->AddUIObj(SEASON3B::INTERFACE_SENATUS, this);
+    m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_SENATUS, this);
 
     SetPos(x, y);
 
@@ -137,11 +138,11 @@ bool CNewUICastleWindow::UpdateMouseEvent()
 
 bool CNewUICastleWindow::UpdateKeyEvent()
 {
-    if (g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_SENATUS) == true)
+    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_SENATUS) == true)
     {
-        if (SEASON3B::IsPress(VK_ESCAPE) == true)
+        if (mu::ui::window::IsPress(VK_ESCAPE) == true)
         {
-            g_pNewUISystem->Hide(SEASON3B::INTERFACE_SENATUS);
+            g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
             PlayBuffer(SOUND_CLICK01);
 
             return false;
@@ -164,8 +165,8 @@ bool CNewUICastleWindow::Update()
         if (iNumCurOpenTab == TAB_CASTLE_MIX)
         {
             g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_CASTLE_SENIOR);
-            //	 		g_pNewUISystem->Hide(SEASON3B::INTERFACE_SENATUS);
-            g_pNewUISystem->Show(SEASON3B::INTERFACE_MIXINVENTORY);
+            //	 		g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
         }
     }
     return true;
@@ -293,11 +294,11 @@ void CNewUICastleWindow::RenderFrame()
 bool CNewUICastleWindow::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
-    g_pNewUISystem->HandleFrameCornerClose(m_Pos, SEASON3B::INTERFACE_SENATUS);
+    g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_SENATUS);
 
     if (m_BtnExit.UpdateMouseEvent() == true)
     {
-        g_pNewUISystem->Hide(SEASON3B::INTERFACE_SENATUS);
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_SENATUS);
         return true;
     }
 
@@ -327,12 +328,12 @@ void CNewUICastleWindow::UpdateGateManagingTab()
         }
     }
 
-    SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::ToPurchaseSelectedCastleGate);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
@@ -342,7 +343,7 @@ void CNewUICastleWindow::UpdateGateManagingTab()
     else if (m_BtnRepair.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::ToRepairSelectedCastleGate);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
@@ -352,7 +353,7 @@ void CNewUICastleWindow::UpdateGateManagingTab()
     else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_HP);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::UpgradingTheDurabilityOfSelectedCastleGate);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
@@ -368,7 +369,7 @@ void CNewUICastleWindow::UpdateGateManagingTab()
     else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::UpgradingTheDefensivePowerOfSelectedCastleGate);
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 2, 3000000);
@@ -401,12 +402,12 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
         }
     }
 
-    SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_STATUE);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::ToPurchaseSelectedStatue);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
@@ -416,7 +417,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     else if (m_BtnRepair.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_STATUE);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::ToRepairSelectedStatue);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
@@ -426,7 +427,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_HP);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::UpgradingDurabilityOfSelectedCastleGate);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
@@ -442,7 +443,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::UpgradingDefensivePowerOfSelectedStatue);
 
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
@@ -458,7 +459,7 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
     else if (m_BtnUpgradeRecover.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         pMsgBox->AddMsg(I18N::Game::UpgradingRecoveryPowerOfSelectedStatue);
 
         if (g_SenatusInfo.GetRecoverLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
@@ -475,12 +476,12 @@ void CNewUICastleWindow::UpdateStatueManagingTab()
 
 void CNewUICastleWindow::UpdateTaxManagingTab()
 {
-    SEASON3B::CNewUICommonMessageBox* pMsgBox = NULL;
+    mu::ui::window::CNewUICommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnApplyTax.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_APPLY_TAX);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
         mu_swprintf(szText, I18N::Game::ChaosCombinationGoblinTaxRateD, g_SenatusInfo.GetChaosTaxRate());
         pMsgBox->AddMsg(szText);
         mu_swprintf(szText, I18N::Game::VariousNPCTaxRateD, g_SenatusInfo.GetNormalTaxRate());
@@ -490,7 +491,7 @@ void CNewUICastleWindow::UpdateTaxManagingTab()
     else if (m_BtnWithdraw.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_WITHDRAW);
-        SEASON3B::CreateMessageBox(MSGBOX_LAYOUT_CLASS(SEASON3B::CCastleWithdrawMsgBoxLayout), &pMsgBox);
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleWithdrawMsgBoxLayout), &pMsgBox);
     }
     else if (m_BtnChaosTaxUp.UpdateMouseEvent() == true)
     {
