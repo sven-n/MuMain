@@ -24,6 +24,18 @@ Section E for the reasoning. As with the first correction: **where this document
 `architecture-principles.md` ever disagree, that governing doc wins** (it says the same of every
 other file in its own directory); this document is a proposal built on top of it, not a peer.
 
+**Correction, 2026-09-06 (third pass)**: Section C originally cited `CMyInventory` alongside
+`CCharInfoBalloonMng` as an example of a `CObject` subclass with no static 2D rect, projected via
+`WorldToScreen()` each frame. Tracing the actual code found that's wrong: `CMyInventory` owns a
+plain static `m_Pos` set via `SetPos()`, used with ordinary fixed offsets for its child controls —
+an entirely normal, portable window rect. Its `I3DRenderObj` inheritance
+(`UI/Core/Window3DRenderMng.h`) has nothing to do with world-space position; it's a pure render-
+Z-order registration so its item-slot icons interleave correctly with 3D-camera render passes
+mid-frame — the same mechanism already covering `MainFrameWindow`'s still-legacy skill/pet icons
+(Section E, item 3's "2D sprite-atlas icon rendering," temporary and portable, not item 2's
+permanent world-anchor case). Section C below is corrected to drop `CMyInventory` from that
+example list; `CCharInfoBalloonMng` remains a genuine one.
+
 ## A. Architecture Verdict
 
 **The prior assessment's diagnosis is correct and, if anything, understated.** Independently
@@ -126,11 +138,12 @@ container abstraction is a real, named gap (Section D), not an existing layer to
 ## C. Canonical Architecture
 
 **Keep `CObject` thin — do not add geometry/rendering/input/styling fields to it.** The
-investigation confirms this would be wrong for a concrete reason, not just taste: several
-`CObject` subclasses (`CMyInventory` via `I3DRenderObj`, `CCharInfoBalloonMng`) have no static 2D
-rect at all — their position is a per-frame `WorldToScreen()` projection. A mandatory geometry
-field on the base class would be meaningless for them and would recreate exactly the "why does my
-window carry fields it never uses" complaint that motivates unifying in the first place.
+investigation confirms this would be wrong for a concrete reason, not just taste: at least one
+`CObject` subclass (`CCharInfoBalloonMng`) has no static 2D rect at all — its position is a
+per-frame `WorldToScreen()` projection. A mandatory geometry field on the base class would be
+meaningless for it and would recreate exactly the "why does my window carry fields it never uses"
+complaint that motivates unifying in the first place. (**Correction, 2026-09-06**: `CMyInventory`
+was previously miscited here too — it has a normal static rect; see the correction note above.)
 
 **Composition, via an opt-in mixin, is the right call — the codebase already validates this
 pattern.** `CObject`'s own shown/active split (`IsActive()`/`SetActive()`/`UpdateWhileShown()`/
