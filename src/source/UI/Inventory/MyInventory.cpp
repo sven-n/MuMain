@@ -35,6 +35,13 @@ extern bool SelectFlag;
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
 
+// RmlUi migration -- see this class's header comment (Stage 1, H7).
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -79,12 +86,98 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
         return false;
     }
 
-    m_ActionController.SetContext(this); 
+    m_ActionController.SetContext(this);
 
     SetPos(x, y);
     LoadImages();
     SetEquipmentSlotInfo();
-    SetButtonInfo();
+
+    // RmlUi migration (Stage 1, H7) -- guarded like every other hybrid window's Create() (re-run
+    // on resolution change), so the document/model are created once, ever.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_inventory",
+            [this](Rml::DataModelConstructor& c, MyInventoryRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("title", &model.title);
+                c.Bind("gold_text", &model.goldText);
+                c.Bind("gold_color", &model.goldColor);
+
+                c.Bind("repair_visible", &model.repairVisible);
+                c.Bind("repair_tooltip", &model.repairTooltip);
+
+                c.Bind("myshop_visible", &model.myShopVisible);
+                c.Bind("myshop_mode_open", &model.myShopModeOpen);
+                c.Bind("myshop_locked", &model.myShopLocked);
+                c.Bind("myshop_tooltip", &model.myShopTooltip);
+
+                c.Bind("exit_tooltip", &model.exitTooltip);
+                c.Bind("expand_tooltip", &model.expandTooltip);
+
+                c.BindEventCallback("my_inventory_exit_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        if (g_pNewUISystem->IsVisible(INTERFACE_MYSHOP_INVENTORY))
+                            g_pNewUISystem->Hide(INTERFACE_MYSHOP_INVENTORY);
+                        g_pNewUISystem->Hide(INTERFACE_INVENTORY);
+                    });
+                c.BindEventCallback("my_inventory_repair_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ToggleRepairMode(); });
+                c.BindEventCallback("my_inventory_myshop_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        if (m_bMyShopLocked) return;
+                        if (m_MyShopMode == MYSHOP_MODE_OPEN)
+                        {
+                            ChangeMyShopButtonStateClose();
+                            g_pNewUISystem->Show(INTERFACE_MYSHOP_INVENTORY);
+                        }
+                        else if (m_MyShopMode == MYSHOP_MODE_CLOSE)
+                        {
+                            ChangeMyShopButtonStateOpen();
+                            g_pNewUISystem->Hide(INTERFACE_MYSHOP_INVENTORY);
+                            g_pNewUISystem->Hide(INTERFACE_PURCHASESHOP_INVENTORY);
+                        }
+                    });
+                c.BindEventCallback("my_inventory_expand_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pNewUISystem->Toggle(INTERFACE_INVENTORY_EXT); });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_inventory.rml");
+
+        // Frame background panel -- see MyInventoryBgRmlModel's own header comment (MyInventory.h)
+        // for why this needs the background context instead of the main one.
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "my_inventory_bg",
+                [](Rml::DataModelConstructor& c, MyInventoryBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                m_pRmlBgDoc = UI::RmlBridge::LoadThemedDocument(bgContext, "Data/Interface/RmlUi/my_inventory_bg.rml");
+                // Shown immediately, unlike m_pRmlDoc below -- RenderBackgroundLayer() is only ever
+                // called from Render(), itself only reached while this window's own Show()/
+                // visibility already gates it (CManager skips Update()/Render() for hidden
+                // objects), so there's no separate "wrong scene" case to guard against here.
+                if (m_pRmlBgDoc)
+                    m_pRmlBgDoc->Show();
+            }
+        }
+
+        // Not Show()n here -- this window starts hidden (Show(false) below) like every other
+        // closable inventory-family window; m_pRmlDoc's visibility follows this object's own
+        // Show()/Hide() via SyncRmlModel(), not an eager Show() at Create() time.
+    }
+
     Show(false);
     return true;
 }
@@ -111,6 +204,13 @@ void CMyInventory::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = nullptr;
     }
+
+    // See CMuHelperBar::Release()'s identical rationale -- this object's own release has no other
+    // way to hide these once created.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
 }
 
 bool CMyInventory::EquipItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -419,10 +519,6 @@ void CMyInventory::SetPos(int x, int y)
     SetEquipmentSlotInfo();
 
     m_pNewInventoryCtrl->SetPos(x + 15, y + 200);
-    m_BtnExit.SetPos(m_Pos.x + 13, m_Pos.y + 391);
-    m_BtnRepair.SetPos(m_Pos.x + 50, m_Pos.y + 391);
-    m_BtnMyShop.SetPos(m_Pos.x + 87, m_Pos.y + 391);
-    m_BtnExpand.SetPos(m_Pos.x + 87 + 37, m_Pos.y + 391);
 }
 
 const POINT& CMyInventory::GetPos() const
@@ -465,7 +561,10 @@ bool CMyInventory::UpdateMouseEvent()
     if (true == InventoryProcess())
         return false;
 
-    if (true == BtnProcess())
+    // Frame corner-close "X" -- a shared frame mechanism unrelated to the retired button family
+    // (BtnProcess() removed, Stage 1 H7); RmlUi's own Context now handles the 4 real buttons via
+    // data-event-click (see Create()).
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY))
         return false;
 
     CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
@@ -688,17 +787,123 @@ bool CMyInventory::Update()
             }
         }
     }
+
+    SyncRmlModel();
     return true;
+}
+
+void CMyInventory::SyncRmlModel()
+{
+    // Shared transform group -- see MyInventoryRmlModel::rootX's own header comment. Read here
+    // (inside Update(), already running within this window's own CManager-pushed
+    // ScopedActiveTransform) rather than a HUD-specific helper, since this window is positioned
+    // via ordinary SetPos()/m_Pos, not a fixed HUD anchor.
+    //
+    // m_Pos is a REFERENCE-space coordinate, not a real screen pixel -- every other reference-
+    // space value in this codebase (e.g. MainFrameWindow.cpp's bars_left/top) is resolved via
+    // screenPos = refPos*scale + offset before being hand to RmlUi's data-style-left/top (which
+    // takes literal 'px', not reference pixels). Binding raw m_Pos here (an earlier version of
+    // this port did) leaves the panel at the wrong screen position at any non-1:1 offset --
+    // exactly the double-offset-shaped bug Section H item 6's CSprite fix already hit once.
+    const auto transform = UI::Scaling::GetActiveTransform();
+    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
+    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
+
+    if (m_pRmlBgDoc)
+    {
+        auto& bg = m_BgRmlBinder.GetModel();
+        bg.rootX = rootX;
+        bg.rootY = rootY;
+        bg.rootScale = transform.scaleX;
+        m_BgRmlBinder.MarkDirty("root_x");
+        m_BgRmlBinder.MarkDirty("root_y");
+        m_BgRmlBinder.MarkDirty("root_scale");
+
+        // A closable window needs its own visibility gate, same reasoning as every persistent
+        // HUD pilot's SyncDocVisibility() -- RenderBackgroundLayer() renders whatever's currently
+        // shown in the shared background context regardless of which window called it, so
+        // Hide()/Show() here is what actually keeps this one invisible while the inventory window
+        // itself is closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    {
+        auto& model = m_RmlBinder.GetModel();
+        model.rootX = rootX;
+        model.rootY = rootY;
+        model.rootScale = transform.scaleX;
+        m_RmlBinder.MarkDirty("root_x");
+        m_RmlBinder.MarkDirty("root_y");
+        m_RmlBinder.MarkDirty("root_scale");
+    }
+
+    auto syncBool = [this](bool MyInventoryRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncText = [this](Rml::String MyInventoryRmlModel::* field, const char* boundName, const Rml::String& value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncWide = [&](Rml::String MyInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        syncText(field, boundName, StringUtils::WideToNarrow(text));
+    };
+
+    syncWide(&MyInventoryRmlModel::title, "title", I18N::Game::Inventory);
+
+    const DWORD dwZen = CharacterMachine->Gold;
+    wchar_t goldBuf[256] = { 0, };
+    ConvertGold(dwZen, goldBuf);
+    syncWide(&MyInventoryRmlModel::goldText, "gold_text", goldBuf);
+
+    // getGoldColor() packs (A<<24)+(R<<16)+(G<<8)+B -- unpack into an rgba() CSS string.
+    const unsigned int goldArgb = getGoldColor(dwZen);
+    char goldColorBuf[32];
+    snprintf(goldColorBuf, sizeof(goldColorBuf), "rgba(%u,%u,%u,%u)",
+        (goldArgb >> 16) & 0xFF, (goldArgb >> 8) & 0xFF, goldArgb & 0xFF, (goldArgb >> 24) & 0xFF);
+    syncText(&MyInventoryRmlModel::goldColor, "gold_color", Rml::String(goldColorBuf));
+
+    // Same 7-window gate RenderButtons()/BtnProcess() used to duplicate separately for
+    // visibility vs. interactivity -- RmlUi's data-class-hidden means one flag now covers both.
+    const bool otherWindowOpen = g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
+        || g_pNewUISystem->IsVisible(INTERFACE_TRADE)
+        || g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE)
+        || g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE)
+        || g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY)
+        || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND)
+        || g_pNewUISystem->IsVisible(INTERFACE_STORAGE);
+
+    syncBool(&MyInventoryRmlModel::repairVisible, "repair_visible", m_bRepairEnableLevel && !otherWindowOpen);
+    syncWide(&MyInventoryRmlModel::repairTooltip, "repair_tooltip", I18N::Game::RepairL);
+
+    syncBool(&MyInventoryRmlModel::myShopVisible, "myshop_visible", m_bMyShopOpen && !otherWindowOpen);
+    syncBool(&MyInventoryRmlModel::myShopModeOpen, "myshop_mode_open", m_MyShopMode == MYSHOP_MODE_OPEN);
+    syncBool(&MyInventoryRmlModel::myShopLocked, "myshop_locked", m_bMyShopLocked);
+    syncWide(&MyInventoryRmlModel::myShopTooltip, "myshop_tooltip",
+        m_MyShopMode == MYSHOP_MODE_OPEN ? I18N::Game::OpenPersonalStoreS : I18N::Game::ClosePersonalStoreS);
+
+    syncWide(&MyInventoryRmlModel::exitTooltip, "exit_tooltip", I18N::Game::CloseIV);
+    syncWide(&MyInventoryRmlModel::expandTooltip, "expand_tooltip", I18N::Game::OpenExpandedInventoryK);
 }
 
 bool CMyInventory::Render()
 {
     EnableAlphaTest();
-    RenderFrame();
-    RenderInventoryDetails();
+
+    // Frame background panel moved to RmlUi (Stage 1, H7) -- see MyInventoryBgRmlModel's own
+    // header comment (MyInventory.h) for why this goes through the background context. Must run
+    // before RenderEquippedItem()/m_pNewInventoryCtrl->Render() below only in the sense that
+    // both of those are 2D overlays on top of this frame -- the actual ordering constraint (this
+    // panel painting behind the *3D* icons) is enforced by RenderBackgroundLayer() itself running
+    // earlier in the frame than Render3D()'s C3DRenderMng pass, not by this call's position here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
+
     RenderSetOption();
     RenderSocketOption();
-    RenderButtons();
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
@@ -1176,33 +1381,8 @@ void CMyInventory::SetEquipmentSlotInfo()
     m_EquipmentSlots[EQUIPMENT_RING_RIGHT].dwBgImage = IMAGE_INVENTORY_ITEM_RING;
 }
 
-void CMyInventory::SetButtonInfo()
-{
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::CloseIV, true);
-
-    m_BtnRepair.ChangeButtonImgState(true, IMAGE_INVENTORY_REPAIR_BTN, false);
-    m_BtnRepair.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 391, 36, 29);
-    m_BtnRepair.ChangeToolTipText(&I18N::Game::RepairL, true);
-
-    m_BtnMyShop.ChangeButtonImgState(true, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, false);
-    m_BtnMyShop.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 391, 36, 29);
-    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
-
-    m_BtnExpand.ChangeButtonImgState(true, IMAGE_INVENTORY_EXPAND_BTN, false);
-    m_BtnExpand.ChangeButtonInfo(m_Pos.x + 87 + 37, m_Pos.y + 391, 36, 29);
-    m_BtnExpand.ChangeToolTipText(&I18N::Game::OpenExpandedInventoryK, true);
-}
-
 void CMyInventory::LoadImages() const
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_INVENTORY_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_INVENTORY_BACK_TOP2, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_boots.tga", IMAGE_INVENTORY_ITEM_BOOT, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_cap.tga", IMAGE_INVENTORY_ITEM_HELM, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_fairy.tga", IMAGE_INVENTORY_ITEM_FAIRY, GL_LINEAR);
@@ -1214,21 +1394,10 @@ void CMyInventory::LoadImages() const
     LoadBitmap(L"Interface\\newui_item_lower.tga", IMAGE_INVENTORY_ITEM_PANTS, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_ring.tga", IMAGE_INVENTORY_ITEM_RING, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_necklace.tga", IMAGE_INVENTORY_ITEM_NECKLACE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_money.tga", IMAGE_INVENTORY_MONEY, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_repair_00.tga", IMAGE_INVENTORY_REPAIR_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_expansion_btn.tga", IMAGE_INVENTORY_EXPAND_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_openshop.tga", IMAGE_INVENTORY_MYSHOP_OPEN_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, GL_LINEAR);
 }
 
 void CMyInventory::UnloadImages()
 {
-    DeleteBitmap(IMAGE_INVENTORY_MYSHOP_CLOSE_BTN);
-    DeleteBitmap(IMAGE_INVENTORY_MYSHOP_OPEN_BTN);
-    DeleteBitmap(IMAGE_INVENTORY_REPAIR_BTN);
-    DeleteBitmap(IMAGE_INVENTORY_EXIT_BTN);
-    DeleteBitmap(IMAGE_INVENTORY_MONEY);
     DeleteBitmap(IMAGE_INVENTORY_ITEM_NECKLACE);
     DeleteBitmap(IMAGE_INVENTORY_ITEM_RING);
     DeleteBitmap(IMAGE_INVENTORY_ITEM_PANTS);
@@ -1240,25 +1409,6 @@ void CMyInventory::UnloadImages()
     DeleteBitmap(IMAGE_INVENTORY_ITEM_FAIRY);
     DeleteBitmap(IMAGE_INVENTORY_ITEM_HELM);
     DeleteBitmap(IMAGE_INVENTORY_ITEM_BOOT);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_BOTTOM);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_RIGHT);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_LEFT);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_TOP2);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_TOP);
-    DeleteBitmap(IMAGE_INVENTORY_BACK);
-    DeleteBitmap(IMAGE_INVENTORY_EXPAND_BTN);
-}
-
-void CMyInventory::RenderFrame() const
-{
-    const auto x = static_cast<float>(m_Pos.x);
-    const auto y = static_cast<float>(m_Pos.y);
-
-    RenderImage(IMAGE_INVENTORY_BACK, x, y, INVENTORY_WIDTH, INVENTORY_HEIGHT);
-    RenderImage(IMAGE_INVENTORY_BACK_TOP2, x, y, 190.f, 64.f);
-    RenderImage(IMAGE_INVENTORY_BACK_LEFT, x, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_INVENTORY_BACK_RIGHT, x + INVENTORY_WIDTH - 21, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_INVENTORY_BACK_BOTTOM, x, y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
 }
 
 void CMyInventory::RenderEquippedItem()
@@ -1340,57 +1490,6 @@ void CMyInventory::RenderEquippedItem()
     {
         m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, m_iPointedSlot, 0);
     }
-}
-
-void CMyInventory::RenderButtons()
-{
-    EnableAlphaTest();
-
-    if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_TRADE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false)
-    {
-        if (m_bRepairEnableLevel == true)
-        {
-            m_BtnRepair.Render();
-        }
-        if (m_bMyShopOpen == true)
-        {
-            m_BtnMyShop.Render();
-        }
-    }
-    m_BtnExit.Render();
-    m_BtnExpand.Render();
-
-    DisableAlphaBlend();
-}
-
-void CMyInventory::RenderInventoryDetails() const
-{
-    EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::Inventory, INVENTORY_WIDTH, 0, RT3_SORT_CENTER);
-
-    RenderImage(IMAGE_INVENTORY_MONEY, m_Pos.x + 11, m_Pos.y + 364, 170.f, 26.f);
-
-    const DWORD dwZen = CharacterMachine->Gold;
-
-    wchar_t Text[256] = { 0, };
-    ConvertGold(dwZen, Text);
-
-    g_pRenderText->SetTextColor(getGoldColor(dwZen));
-    g_pRenderText->RenderText((int)m_Pos.x + 50, (int)m_Pos.y + 371, Text);
-
-    g_pRenderText->SetFont(g_hFont);
-
-    DisableAlphaBlend();
 }
 
 bool CMyInventory::EquipmentWindowProcess()
@@ -1583,62 +1682,6 @@ bool CMyInventory::WindowProcess()
     return true;
 }
 
-bool CMyInventory::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY))
-        return true;
-    if (m_BtnExit.UpdateMouseEvent())
-    {
-        if (g_pNewUISystem->IsVisible(INTERFACE_MYSHOP_INVENTORY))
-        {
-            g_pNewUISystem->Hide(INTERFACE_MYSHOP_INVENTORY);
-        }
-        g_pNewUISystem->Hide(INTERFACE_INVENTORY);
-        return true;
-    }
-
-    if (m_BtnExpand.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Toggle(INTERFACE_INVENTORY_EXT);
-        return true;
-    }
-
-    if (g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_TRADE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_BLOODCASTLE) == false
-        && g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_MIXINVENTORY) == false
-        && g_pNewUISystem->IsVisible(INTERFACE_STORAGE) == false)
-    {
-        if (m_bRepairEnableLevel == true && m_BtnRepair.UpdateMouseEvent() == true)
-        {
-            ToggleRepairMode();
-            return true;
-        }
-
-        if (m_bMyShopOpen == true && m_BtnMyShop.UpdateMouseEvent() == true)
-        {
-            if (m_MyShopMode == MYSHOP_MODE_OPEN)
-            {
-                ChangeMyShopButtonStateClose();
-                g_pNewUISystem->Show(INTERFACE_MYSHOP_INVENTORY);
-            }
-            else if (m_MyShopMode == MYSHOP_MODE_CLOSE)
-            {
-                ChangeMyShopButtonStateOpen();
-                g_pNewUISystem->Hide(INTERFACE_MYSHOP_INVENTORY);
-                g_pNewUISystem->Hide(INTERFACE_PURCHASESHOP_INVENTORY);
-            }
-
-            return true;
-        }
-    }
-
-    return false;
-}
-
 void CMyInventory::RenderItemToolTip(int iSlotIndex) const
 {
     if (m_iPointedSlot != -1)
@@ -1745,37 +1788,21 @@ void CMyInventory::SetRepairEnableLevel(bool bOver)
 void CMyInventory::ChangeMyShopButtonStateOpen()
 {
     m_MyShopMode = MYSHOP_MODE_OPEN;
-    m_BtnMyShop.UnRegisterButtonState();
-    m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
-    m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 1);
-    m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_OPEN_BTN, 0);
-    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
 }
 
 void CMyInventory::ChangeMyShopButtonStateClose()
 {
     m_MyShopMode = MYSHOP_MODE_CLOSE;
-    m_BtnMyShop.UnRegisterButtonState();
-    m_BtnMyShop.RegisterButtonState(BUTTON_STATE_UP, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
-    m_BtnMyShop.RegisterButtonState(BUTTON_STATE_DOWN, IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 1);
-    m_BtnMyShop.ChangeImgIndex(IMAGE_INVENTORY_MYSHOP_CLOSE_BTN, 0);
-    m_BtnMyShop.ChangeToolTipText(&I18N::Game::ClosePersonalStoreS, true);
 }
 
 void CMyInventory::LockMyShopButtonOpen()
 {
-    m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-    m_BtnMyShop.ChangeTextColor(RGBA(100, 100, 100, 255));
-    m_BtnMyShop.Lock();
-    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
+    m_bMyShopLocked = true;
 }
 
 void CMyInventory::UnlockMyShopButtonOpen()
 {
-    m_BtnMyShop.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnMyShop.ChangeTextColor(RGBA(255, 255, 255, 255));
-    m_BtnMyShop.UnLock();
-    m_BtnMyShop.ChangeToolTipText(&I18N::Game::OpenPersonalStoreS, true);
+    m_bMyShopLocked = false;
 }
 
 void CMyInventory::ToggleRepairMode()

@@ -1,0 +1,37 @@
+<rml>
+<head>
+	<title>My Inventory</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="my_inventory.rcss"/>
+</head>
+<body data-model="my_inventory">
+	<!-- Stage 1 (H7): window frame/title/gold/buttons. Equipment paperdoll and the inventory
+	     grid stay fully native this stage -- see MyInventory.h's own header comment. Panel
+	     background lives in the separate my_inventory_bg.rml (background context) instead of
+	     here, since it must paint behind the still-native 3D icons; this document only ever
+	     draws content that never overlaps them (title/gold bands sit above/below the grid,
+	     buttons sit below it). -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<div id="gold_bg"></div>
+		<span id="gold_text" data-style-color="gold_color">{{gold_text}}</span>
+
+		<div id="btn_exit" class="inv-btn inv-btn-exit" data-event-click="my_inventory_exit_click"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+
+		<div id="btn_repair" class="inv-btn inv-btn-repair" data-class-hidden="!repair_visible"
+		     data-event-click="my_inventory_repair_click"></div>
+		<span class="tooltip tooltip-repair">{{repair_tooltip}}</span>
+
+		<div id="btn_myshop" class="inv-btn inv-btn-myshop" data-class-hidden="!myshop_visible"
+		     data-class-close-mode="!myshop_mode_open" data-class-locked="myshop_locked"
+		     data-event-click="my_inventory_myshop_click"></div>
+		<span class="tooltip tooltip-myshop">{{myshop_tooltip}}</span>
+
+		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click"></div>
+		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
+	</div>
+</body>
+</rml>

@@ -8,11 +8,13 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Core/Window3DRenderMng.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Inventory/InventoryActionController.h"
 #include "GameLogic/Items/IInventoryActionContext.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
 #include <span>
 #include "Core/Globals/_enum.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
@@ -81,17 +83,62 @@ namespace mu::ui::window
         EQUIPMENT_ITEM m_EquipmentSlots[MAX_EQUIPMENT_INDEX];
         int	m_iPointedSlot;
 
-        CButton m_BtnRepair;
-        CButton m_BtnExit;
-        CButton m_BtnMyShop;
-        CButton m_BtnExpand;
-
         MYSHOP_MODE m_MyShopMode;
         SEASON3B::REPAIR_MODE m_RepairMode;
         DWORD m_dwStandbyItemKey;
 
         bool m_bRepairEnableLevel;
         bool m_bMyShopOpen;
+        bool m_bMyShopLocked = false;
+
+        // Stage 1 (H7): window frame/title/gold/buttons -- see docs/ui-target-architecture.md
+        // Section H item 7. Equipment paperdoll and the inventory grid stay fully native this
+        // stage (their icons are live 3D model renders, RenderItem3D()/Render3D() -- permanently
+        // native, Section E -- and their chrome is deferred to a later stage).
+        struct MyInventoryRmlModel
+        {
+            // Shared transform group for every element in this document -- this window is
+            // movable (SetPos()), not HUD-anchored, so this is sourced from
+            // UI::Scaling::GetActiveTransform() (read in Update(), inside this window's own
+            // CManager-pushed ScopedActiveTransform) rather than a HUD transform helper. Same
+            // "one shared group, not a per-element binding" shape as
+            // MainFrameRmlModel::barsLeft (MainFrameWindow.h).
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            Rml::String title;
+            Rml::String goldText;
+            Rml::String goldColor; // "rgba(r,g,b,a)" -- mirrors getGoldColor()'s amount-tier color
+
+            bool repairVisible = false;
+            Rml::String repairTooltip;
+
+            bool myShopVisible = false;
+            bool myShopModeOpen = true;
+            bool myShopLocked = false;
+            Rml::String myShopTooltip;
+
+            Rml::String exitTooltip;
+            Rml::String expandTooltip;
+        };
+        RmlModelBinder<MyInventoryRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // RmlUi-behind-3D-icons -- the frame background panel sits underneath the paperdoll's and
+        // the inventory grid's live 3D icons (Render3D(), CInventoryCtrl::Render3D()), both of
+        // which keep rendering via the C3DRenderMng/I3DRenderObj interleave. RmlUi's "main"
+        // context always renders last in the frame, so the panel goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (the same mechanism
+        // CMainFrameWindow::RenderLeftFrame() already proved) -- called from Render(), which
+        // already runs before either Render3D() call this same frame. Separate document/model from
+        // m_pRmlDoc's own -- RmlUi data models are per-context.
+        struct MyInventoryBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<MyInventoryBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
 
     public:
         CMyInventory();
@@ -179,22 +226,17 @@ namespace mu::ui::window
     protected:
         void DeleteEquippingEffect();
         void DeleteEquippingEffectBug(ITEM* pItem);
-        void SetButtonInfo();
 
     private:
         void LoadImages() const;
         void UnloadImages();
 
-        void RenderFrame() const;
         void RenderSetOption();
         void RenderSocketOption();
         void RenderEquippedItem();
-        void RenderButtons();
-        void RenderInventoryDetails() const;
 
         bool EquipmentWindowProcess();
         bool InventoryProcess() const;
-        bool BtnProcess();
         bool WindowProcess();
 
         void RenderItemToolTip(int iSlotIndex) const;

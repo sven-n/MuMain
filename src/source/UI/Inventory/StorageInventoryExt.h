@@ -8,6 +8,7 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
+#include "UI/Widgets/Window/Button.h"
 
 namespace mu::ui::window
 {

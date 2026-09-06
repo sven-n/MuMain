@@ -1,0 +1,108 @@
+/* Legacy theme for CMyInventory's Stage 1 chrome (frame/title/gold/buttons) -- see
+   my_inventory.rml's own header comment. #panel's own left/top/scale come live from C++
+   (SyncRmlModel()), so every coordinate below is a plain reference pixel (px, not dp -- the
+   ancestor scale already covers UI-scale-equivalent behavior, same reasoning as main_frame.rcss's
+   own header). Button icons/positions match CMyInventory::SetButtonInfo()'s former constants
+   exactly.
+
+   Known, deliberately deferred limitation: .inv-btn (RmlUi's main context, always renders last in
+   the frame) can end up on top of CInventoryCtrl's native item tooltip when a bottom-row item's
+   tooltip extends into this button strip -- before Stage 1 both were native, ordinary same-frame
+   paint order put the tooltip on top. Real fix needs either rerouting the tooltip through the
+   post-RmlUi seam (shared infra, also used by Trade/Storage/Shop -- too broad for this window
+   alone) or the grid's own future chrome pass making the tooltip an RmlUi element too (resolves it
+   for free via DOM order). Not fixed here -- confirmed cosmetic, not functional. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+
+@spritesheet inv-money-sheet { src: "../../../newui_item_money.tga"; inv-money: 0px 0px 170px 26px; }
+#gold_bg {
+	position: absolute;
+	left: 11px;
+	top: 364px;
+	width: 170px;
+	height: 26px;
+	decorator: image(inv-money);
+	pointer-events: none;
+}
+#gold_text {
+	position: absolute;
+	left: 50px;
+	top: 371px;
+	font-weight: bold;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Buttons: same 36x29 reference-pixel boxes SetButtonInfo() used to place them at. */
+@spritesheet inv-btn-exit-sheet    { src: "../../../newui_exit_00.tga";        inv-btn-exit:    0px 0px 36px 29px; }
+@spritesheet inv-btn-repair-sheet  { src: "../../../newui_repair_00.tga";      inv-btn-repair:  0px 0px 36px 29px; }
+@spritesheet inv-btn-expand-sheet  { src: "../../../newui_expansion_btn.tga";  inv-btn-expand:  0px 0px 36px 29px; }
+@spritesheet inv-btn-myshop-open-sheet  { src: "../../../newui_Bt_openshop.tga";  inv-btn-myshop-open:  0px 0px 36px 29px; }
+@spritesheet inv-btn-myshop-close-sheet { src: "../../../newui_Bt_closeshop.tga"; inv-btn-myshop-close: 0px 0px 36px 29px; }
+
+.inv-btn {
+	position: absolute;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.inv-btn:hover { filter: brightness(1.25); }
+.inv-btn.hidden { display: none; }
+.inv-btn.locked { pointer-events: none; filter: brightness(0.6); }
+
+.inv-btn-exit    { left: 13px;      decorator: image(inv-btn-exit); }
+.inv-btn-repair  { left: 50px;      decorator: image(inv-btn-repair); }
+.inv-btn-myshop  { left: 87px;      decorator: image(inv-btn-myshop-open); }
+.inv-btn-myshop.close-mode { decorator: image(inv-btn-myshop-close); }
+.inv-btn-expand  { left: 124px;     decorator: image(inv-btn-expand); }
+
+/* Tooltips: siblings of their trigger, same reasoning as main_frame.rcss's own (shrink-to-fit
+   width can't grow past a narrow nested trigger in this RmlUi build). */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit   { left: -30px; }
+.tooltip-repair { left: 7px; }
+.tooltip-myshop { left: 44px; }
+.tooltip-expand { left: 60px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_repair:hover ~ .tooltip-repair,
+#btn_myshop:hover ~ .tooltip-myshop,
+#btn_expand:hover ~ .tooltip-expand {
+	display: block;
+}

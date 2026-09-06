@@ -6,6 +6,7 @@
 #include "UI/HUD/MainFrameWindow.h"
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Inventory/MyInventory.h"
+#include "UI/Widgets/Window/Button.h"
 
 namespace mu::ui::window
 {

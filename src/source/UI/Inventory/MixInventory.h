@@ -5,6 +5,7 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/UIControls.h"
 
 namespace mu::ui::window

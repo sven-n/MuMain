@@ -5,6 +5,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
+#include "UI/Widgets/Window/Button.h"
 #include "Guild/GuildInfoWindow.h"
 #include "UI/Widgets/UIControls.h"
 

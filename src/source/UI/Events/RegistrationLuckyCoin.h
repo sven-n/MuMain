@@ -5,6 +5,7 @@
 #include "UI/Core/WindowManager.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
+#include "UI/Widgets/Window/Button.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 

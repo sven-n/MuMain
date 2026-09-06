@@ -1,0 +1,16 @@
+<rml>
+<head>
+	<title>My Inventory Background</title>
+	<link type="text/rcss" href="my_inventory_bg.rcss"/>
+</head>
+<body data-model="my_inventory_bg">
+	<!-- Background-context document (Stage 1, H7) -- see themes/legacy/my_inventory_bg.rml's own
+	     header comment for the full mechanism. Panel fill duplicates base.rcss's .modern-frame
+	     literal rather than linking base.rcss here -- same "fully independent" choice
+	     main_frame_bg.rcss already made for this context. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-panel"></div>
+	</div>
+</body>
+</rml>
