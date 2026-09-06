@@ -13,6 +13,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstring>
+#include <utility>
 
 // S_OK, S_FALSE are now provided by PlatformTypes.h (via PCH)
 #ifndef E_INVALIDARG
@@ -42,6 +43,31 @@ std::string AudioPathToUtf8(const wchar_t* text)
 #else
     return mu_wchar_to_utf8(text);
 #endif
+}
+
+// Asset paths (SFX filenames, MUSIC_* constants) use Windows-style backslashes.
+void NormalizeSeparators(std::string& path)
+{
+    std::replace(path.begin(), path.end(), '\\', '/');
+}
+
+// Same-track guard shared by PlayMusic()/StopMusic(). m_currentMusicName holds
+// the separators-normalized track name, NOT the filesystem-resolved path: the
+// guard runs every frame for many tracks from ManageBackgroundMusic(), so it
+// compares against the raw name with the same normalization applied on the fly,
+// without allocating or touching the filesystem.
+bool IsSameMusicTrack(const std::string& identity, const char* name)
+{
+    size_t i = 0;
+    for (; name[i] != '\0'; ++i)
+    {
+        const char c = (name[i] == '\\') ? '/' : name[i];
+        if (i >= identity.size() || identity[i] != c)
+        {
+            return false;
+        }
+    }
+    return i == identity.size();
 }
 } // namespace
 
@@ -175,8 +201,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     // SFX file paths use Windows backslashes (e.g., L"Data\\Sound\\nBlackSmith.wav").
     // mu_wchar_to_utf8() preserves them; replace before passing to ma_sound_init_from_file().
     // On Windows, forward slashes work identically to backslashes for file paths.
-    // Mirrors the PlayMusic() normalization pattern from Story 5.2.1.
-    std::replace(utf8Path.begin(), utf8Path.end(), '\\', '/');
+    NormalizeSeparators(utf8Path);
 #ifndef _WIN32
     utf8Path = MuResolvePath(utf8Path.c_str());
 #endif
@@ -510,9 +535,9 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 //
 // Story 5.2.1: Path normalization — MUSIC_* constants in mu_enum.h use Windows
 // backslash separators (e.g., "data\\music\\Pub.mp3"). On Linux/macOS miniaudio
-// requires forward slashes. Replace '\\' with '/' via std::replace before passing
-// to ma_sound_init_from_file(). No new Win32 calls — pure std::string manipulation.
-// m_currentMusicName stores the normalized path for the same-track guard.
+// requires forward slashes, and the on-disk asset may differ in case, so the
+// path is resolved via MuResolvePath() before ma_sound_init_from_file().
+// The same-track guard uses the unresolved name — see IsSameMusicTrack().
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 {
@@ -521,15 +546,8 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
         return;
     }
 
-    // Normalize path separators: MUSIC_* constants use Windows-style backslashes
-    std::string normalizedName(name);
-    std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
-#ifndef _WIN32
-    normalizedName = MuResolvePath(normalizedName.c_str());
-#endif
-
     // If not enforced and same track is already playing, do nothing
-    if (!enforce && !m_currentMusicName.empty() && m_currentMusicName == normalizedName)
+    if (!enforce && !m_currentMusicName.empty() && IsSameMusicTrack(m_currentMusicName, name))
     {
         return;
     }
@@ -552,12 +570,19 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     // (common in server-hosted MU setups) due to file open + ID3 header parse + decoder init
     // on the calling thread. Acceptable for BGM at scene transitions on SSD; known limitation
     // for HDD/network installs. Deferred to 5.2.x if a non-blocking init path is needed.
-    ma_result result = ma_sound_init_from_file(&m_engine, normalizedName.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
+    std::string identity(name);
+    NormalizeSeparators(identity);
+#ifdef _WIN32
+    const std::string& filePath = identity;
+#else
+    const std::string filePath = MuResolvePath(name);
+#endif
+    ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
                                                nullptr, &m_musicSound);
 
     if (result != MA_SUCCESS)
     {
-        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})", name,
+        mu::log::Get("audio")->error("AUDIO: MiniAudioBackend::PlayMusic -- failed to init stream '{}' ({})", filePath,
                                      static_cast<int>(result));
         return;
     }
@@ -568,7 +593,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     ma_sound_start(&m_musicSound);
 
     m_musicLoaded = true;
-    m_currentMusicName = normalizedName;
+    m_currentMusicName = std::move(identity);
 }
 
 // ---------------------------------------------------------------------------
@@ -604,12 +629,10 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 
     // If not enforced, only stop if the name matches the current track.
     // nullptr name means "stop current track regardless of name" (unconditional soft stop).
-    // Normalize the name for comparison — m_currentMusicName stores normalized paths.
+    // Same comparison as PlayMusic()'s guard — see IsSameMusicTrack().
     if (!enforce && name != nullptr && !m_currentMusicName.empty())
     {
-        std::string normalizedName(name);
-        std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
-        if (m_currentMusicName != normalizedName)
+        if (!IsSameMusicTrack(m_currentMusicName, name))
         {
             return;
         }
