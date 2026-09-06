@@ -7,6 +7,7 @@
 #include "GameLogic/Quests/QuestMng.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -80,7 +81,7 @@ bool mu::ui::window::CMyQuestInfoWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, MYQUESTINFO_WINDOW_WIDTH, MYQUESTINFO_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, MYQUESTINFO_WINDOW_WIDTH, MYQUESTINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Combat/GuardWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -113,7 +114,7 @@ bool CGuardWindow::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

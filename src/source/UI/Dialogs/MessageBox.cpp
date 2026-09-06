@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Dialogs/MessageBox.h"	// self
 #include "UI/Core/WindowManager.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Scaling/UITransform.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -213,21 +214,21 @@ bool mu::ui::window::CMessageBoxMng::UpdateMouseEvent()
     CMessageBoxBase* pCurMsgBox = (*vi);
 
     if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-        mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
+        mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_HOVER);
         m_EventState = EVENT_WND_MOUSE_HOVER;
     }
     else if (m_EventState == EVENT_WND_MOUSE_HOVER && false == MouseLButtonPush &&
-        false == mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
+        false == mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
     {
         m_EventState = EVENT_NONE;
     }
     else if (m_EventState == EVENT_WND_MOUSE_HOVER && MouseLButtonPush &&
-        mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
+        mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_LBUTTON_DOWN);
         m_EventState = EVENT_WND_MOUSE_LBUTTON_DOWN;
@@ -236,8 +237,8 @@ bool mu::ui::window::CMessageBoxMng::UpdateMouseEvent()
     }
     else if (m_EventState == EVENT_WND_MOUSE_LBUTTON_DOWN)
     {
-        if (false == MouseLButtonPush && mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
+        if (false == MouseLButtonPush && mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
         {
             SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
             m_EventState = EVENT_NONE;
@@ -250,8 +251,8 @@ bool mu::ui::window::CMessageBoxMng::UpdateMouseEvent()
         }
     }
     else if (m_EventState == EVENT_WND_MOUSE_HOVER && MouseRButtonPush &&
-        mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
+        mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
     {
         SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_RBUTTON_DOWN);
         m_EventState = EVENT_WND_MOUSE_RBUTTON_DOWN;
@@ -260,8 +261,8 @@ bool mu::ui::window::CMessageBoxMng::UpdateMouseEvent()
     }
     else if (m_EventState == EVENT_WND_MOUSE_RBUTTON_DOWN)
     {
-        if (false == MouseRButtonPush && mu::ui::window::CheckMouseIn(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
-            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy))
+        if (false == MouseRButtonPush && mu::ui::window::WindowGeometry(pCurMsgBox->GetPos().x, pCurMsgBox->GetPos().y,
+            pCurMsgBox->GetSize().cx, pCurMsgBox->GetSize().cy).Contains(MouseX, MouseY))
         {
             SendEvent(pCurMsgBox, MSGBOX_EVENT_MOUSE_RBUTTON_UP);
             m_EventState = EVENT_NONE;

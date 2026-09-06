@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowCommon.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/NPCs/EmpireGuardianNPC.h"
 #include "I18N/All.h"
 
@@ -78,7 +79,7 @@ bool CEmpireGuardianNPC::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, NPC_WINDOW_WIDTH, NPC_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPC_WINDOW_WIDTH, NPC_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

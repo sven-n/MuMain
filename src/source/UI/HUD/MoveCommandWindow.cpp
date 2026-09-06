@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/HUD/MoveCommandWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "Core/Utilities/KeyGenerator.h"
@@ -380,14 +381,14 @@ bool mu::ui::window::CMoveCommandWindow::BtnProcess()
         m_iScrollBtnMouseEvent = MOVECOMMAND_MOUSEBTN_NORMAL;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y) && IsPress(VK_LBUTTON))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y).Contains(MouseX, MouseY) && IsPress(VK_LBUTTON))
     {
         mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 
     SettingCanMoveMap();
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y).Contains(MouseX, MouseY))
     {
         if (MouseWheel != 0)
             SetScrollOffset(m_scrollOffset - MouseWheel);
@@ -444,7 +445,7 @@ bool mu::ui::window::CMoveCommandWindow::UpdateMouseEvent()
     if (m_iScrollBtnMouseEvent == MOVECOMMAND_MOUSEBTN_CLICKED)
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, m_MapNameUISize.x, m_MapNameUISize.y).Contains(MouseX, MouseY))
         return false;
 
     return true;

@@ -3,6 +3,7 @@
 #include "World/MapInfra/MapManager.h"
 #include "UI/Events/ChaosCastleTime.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Events/MatchEvent.h"
 #include "I18N/All.h"
 
@@ -63,7 +64,7 @@ bool CChaosCastleTime::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, CHAOSCASTLE_TIME_WINDOW_WIDTH, CHAOSCASTLE_TIME_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CHAOSCASTLE_TIME_WINDOW_WIDTH, CHAOSCASTLE_TIME_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

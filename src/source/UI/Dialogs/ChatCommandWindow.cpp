@@ -8,6 +8,7 @@
 #include "Core/Text/TextLineWrap.h"
 #include "GameLogic/Commands/ChatCommandFavourites.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 #include <algorithm>
 
@@ -584,7 +585,7 @@ bool mu::ui::window::CChatCommandWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WindowHeight))
+    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WindowHeight).Contains(MouseX, MouseY))
     {
         return true;
     }

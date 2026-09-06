@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/HUD/QuickCommandWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
 
@@ -140,7 +141,7 @@ bool mu::ui::window::CQuickCommandWindow::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 112, 140))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, 112, 140).Contains(MouseX, MouseY))
     {
         return false;
     }

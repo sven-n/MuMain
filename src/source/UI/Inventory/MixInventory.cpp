@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Inventory/MixInventory.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "Render/Models/ZzzBMD.h"
@@ -192,7 +193,7 @@ bool CMixInventory::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

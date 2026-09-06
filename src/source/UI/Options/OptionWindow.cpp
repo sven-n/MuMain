@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Options/OptionWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Audio/DSPlaySound.h"
 #include "Data/GameConfig/GameConfig.h"
@@ -406,7 +407,7 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 
     // Combo box already processed at the top. Just consume clicks inside the
     // option window itself so they don't fall through to the world.
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, 190, 419))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, 190, 419).Contains(MouseX, MouseY))
         return false;
 
     return true;

@@ -4,6 +4,7 @@
 
 #include "UI/Events/BloodCastleEnter.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
@@ -127,7 +128,7 @@ bool CEnterBloodCastle::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, ENTERBC_BASE_WINDOW_WIDTH, ENTERBC_BASE_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, ENTERBC_BASE_WINDOW_WIDTH, ENTERBC_BASE_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

@@ -8,6 +8,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 #include "Core/Utilities/UsefulDef.h"
 
@@ -92,7 +93,7 @@ bool CQuestProgress::UpdateMouseEvent()
     if (UpdateSelTextMouseEvent())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, QP_WIDTH, QP_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, QP_WIDTH, QP_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

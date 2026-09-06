@@ -1368,7 +1368,7 @@ void mu::ui::window::CCheckBox::Render()
 
 bool mu::ui::window::CCheckBox::UpdateMouseEvent()
 {
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, m_Size.x, m_Size.y).Contains(MouseX, MouseY))
     {
         if (IsRelease(VK_LBUTTON))
         {

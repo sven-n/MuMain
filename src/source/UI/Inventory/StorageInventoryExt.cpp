@@ -8,6 +8,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 
@@ -96,7 +97,7 @@ bool CStorageInventoryExt::UpdateMouseEvent()
     if (ProcessBtns())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, STORAGE_WIDTH, STORAGE_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, STORAGE_WIDTH, STORAGE_HEIGHT).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_RBUTTON))
         {

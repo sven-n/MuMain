@@ -5,6 +5,7 @@
 #ifdef PBG_ADD_INGAMESHOP_UI_ITEMSHOP
 #include "App/Platform/Windows/iexplorer.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "InGameShop.h"
 #include "MsgBoxIGSBuyPackageItem.h"
 #include "MsgBoxIGSBuySelectItem.h"
@@ -580,7 +581,7 @@ bool CInGameShop::UpdateMouseEvent()
     if (UpdateBanner())
         return false;
 
-    if (mu::ui::window::CheckMouseIn(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, IMAGE_IGS_BACK_WIDTH, IMAGE_IGS_BACK_HEIGHT).Contains(MouseX, MouseY))
     {
         m_StorageItemListBox.DoAction();
 

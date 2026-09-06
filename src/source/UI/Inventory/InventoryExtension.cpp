@@ -3,6 +3,7 @@
 #include "I18N/All.h"
 
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -117,7 +118,7 @@ bool CInventoryExtension::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, WIDTH, HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WIDTH, HEIGHT).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_RBUTTON))
         {
@@ -138,7 +139,7 @@ bool CInventoryExtension::UpdateMouseEvent()
 
 bool CInventoryExtension::InventoryProcess()
 {
-    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WIDTH, HEIGHT))
+    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WIDTH, HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

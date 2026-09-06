@@ -3,6 +3,7 @@
 #include "UI/Chat/Chat.h"
 #include "UI/Character/CharacterInfoWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Character/CharacterManager.h"
 #include "GameLogic/Items/CSItemOption.h"
 #include "Audio/DSPlaySound.h"
@@ -151,7 +152,7 @@ bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, CHAINFO_WINDOW_WIDTH, CHAINFO_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CHAINFO_WINDOW_WIDTH, CHAINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

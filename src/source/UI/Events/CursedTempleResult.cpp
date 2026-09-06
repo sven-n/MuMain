@@ -18,6 +18,7 @@
 #include "GameLogic/Skills/SkillManager.h"
 #include "Character/CharacterManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -156,7 +157,7 @@ bool mu::ui::window::CCursedTempleResult::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, CURSEDTEMPLE_RESULT_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CURSEDTEMPLE_RESULT_WINDOW_WIDTH, CURSEDTEMPLE_RESULT_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

@@ -4,6 +4,7 @@
 
 #include "UI/Inventory/LuckyItemWnd.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -549,7 +550,7 @@ bool CLuckyItemWnd::UpdateMouseEvent(void)
 
     Process_BTN_Action();
 
-    if (CheckMouseIn(m_ptPos.x, m_ptPos.y, m_fSizeX, m_fSizeY))
+    if (mu::ui::window::WindowGeometry(static_cast<int>(m_ptPos.x), static_cast<int>(m_ptPos.y), static_cast<int>(m_fSizeX), static_cast<int>(m_fSizeY)).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

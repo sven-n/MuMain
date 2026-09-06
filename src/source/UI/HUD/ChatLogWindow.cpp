@@ -4,6 +4,7 @@
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -665,13 +666,13 @@ bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
     
 
     if (m_EventState == EVENT_NONE && false == MouseLButtonPush &&
-        mu::ui::window::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
+        mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY))
     {
         m_EventState = EVENT_CLIENT_WND_HOVER;
         return false;
     }
     if (false == MouseLButtonPush && m_EventState == EVENT_CLIENT_WND_HOVER &&
-        false == mu::ui::window::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
+        false == mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY))
     {
         m_EventState = EVENT_NONE;
         return true;
@@ -688,7 +689,7 @@ bool mu::ui::window::CChatLogWindow::UpdateMouseEvent()
     }
 
     m_bPointedMessage = false;
-    if (mu::ui::window::CheckMouseIn(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy))
+    if (mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y - m_WndSize.cy, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY))
     {
         int iRenderStartLine = 0;
         if (GetCurrentRenderEndLine() >= m_nShowingLines)

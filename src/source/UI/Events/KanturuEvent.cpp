@@ -3,6 +3,7 @@
 #include "UI/Events/KanturuEvent.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "I18N/All.h"
@@ -83,7 +84,7 @@ bool mu::ui::window::CKanturu2ndEnterNpc::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, KANTURU2ND_ENTER_WINDOW_WIDTH, KANTURU2ND_ENTER_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, KANTURU2ND_ENTER_WINDOW_WIDTH, KANTURU2ND_ENTER_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "UI/Quests/NPCQuest.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Quests/CSQuest.h"
 #include "GameLogic/Quests/DialogStructure.h"
 #include "I18N/All.h"
@@ -95,7 +96,7 @@ bool CNPCQuest::UpdateMouseEvent()
     if (UpdateSelTextMouseEvent())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, NPCQUEST_WIDTH, NPCQUEST_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPCQUEST_WIDTH, NPCQUEST_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

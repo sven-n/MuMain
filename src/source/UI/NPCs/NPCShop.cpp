@@ -5,6 +5,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
 
@@ -156,7 +157,7 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
 
 bool mu::ui::window::CNPCShop::WindowProcess()
 {
-    return CheckMouseIn(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT);
+    return mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, NPCSHOP_WIDTH, NPCSHOP_HEIGHT).Contains(MouseX, MouseY);
 }
 
 bool mu::ui::window::CNPCShop::UpdateKeyEvent()

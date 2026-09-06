@@ -16,6 +16,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Widgets/UIControls.h"
 
 //////////////////////////////////////////////////////////////////////
@@ -206,7 +207,7 @@ bool mu::ui::window::CCursedTempleEnter::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, CURSEDTEMPLE_ENTER_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CURSEDTEMPLE_ENTER_WINDOW_WIDTH, CURSEDTEMPLE_ENTER_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

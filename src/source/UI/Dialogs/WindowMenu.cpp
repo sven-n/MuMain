@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Dialogs/WindowMenu.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Widgets/UIControls.h"
@@ -134,7 +135,7 @@ bool mu::ui::window::CWindowMenu::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y + 20, 112, 95 + 20 * (MENU_MAX_INDEX - 5)) == false)
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y + 20, 112, 95 + 20 * (MENU_MAX_INDEX - 5)).Contains(MouseX, MouseY) == false)
     {
         m_iSelectedIndex = -1;
     }

@@ -6,6 +6,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowCommon.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 
 using namespace SEASON3B;
@@ -100,7 +101,7 @@ bool CExchangeLuckyCoin::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (mu::ui::window::CheckMouseIn(m_Pos.x, m_Pos.y, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, EXCHANGE_LUCKYCOIN_WINDOW_WIDTH, EXCHANGE_LUCKYCOIN_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

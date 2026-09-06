@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "GuildInfoWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Audio/DSPlaySound.h"
@@ -177,7 +178,7 @@ bool mu::ui::window::CGuildInfoWindow::UpdateMouseEvent()
         m_UnionListBox.DoAction();
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GUILDINFO_WIDTH, GUILDINFO_HEIGHT).Contains(MouseX, MouseY))
     {
         return false;
     }

@@ -19,6 +19,7 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Inventory/LuckyItemWnd.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "I18N/All.h"
@@ -106,7 +107,7 @@ bool mu::ui::window::CMessageBoxButton::IsMouseIn()
     if (m_bEnable == false)
         return false;
 
-    return mu::ui::window::CheckMouseIn(m_x, m_y, m_width, m_height);
+    return mu::ui::window::WindowGeometry(m_x, m_y, m_width, m_height).Contains(MouseX, MouseY);
 }
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM

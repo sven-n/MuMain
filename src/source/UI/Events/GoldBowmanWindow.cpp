@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "UI/Events/GoldBowmanWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/MixMgr.h"
@@ -160,7 +161,7 @@ bool CGoldBowmanWindow::UpdateMouseEvent()
         }
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

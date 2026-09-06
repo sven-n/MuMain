@@ -4,6 +4,7 @@
 
 #include "UI/Character/PetInfoWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 #include "GameLogic/Pets/GIPetManager.h"
 #include "Character/CharacterManager.h"
@@ -88,7 +89,7 @@ bool CPetInfoWindow::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, PETINFOWINDOW_WIDTH, PETINFOWINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, PETINFOWINDOW_WIDTH, PETINFOWINDOW_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

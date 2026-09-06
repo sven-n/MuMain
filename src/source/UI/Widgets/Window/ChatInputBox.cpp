@@ -7,6 +7,7 @@
 #include "UI/HUD/ChatLogWindow.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "World/MapInfra/MapManager.h"
 #include "Engine/Object/ZzzInterface.h"
@@ -381,7 +382,7 @@ bool mu::ui::window::CChatInputBox::UpdateMouseEvent()
         }
     }
 
-    return !CheckMouseIn(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy);
+    return !mu::ui::window::WindowGeometry(m_WndPos.x, m_WndPos.y, m_WndSize.cx, m_WndSize.cy).Contains(MouseX, MouseY);
 }
 
 bool mu::ui::window::CChatInputBox::UpdateKeyEvent()

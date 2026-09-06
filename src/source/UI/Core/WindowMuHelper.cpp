@@ -9,6 +9,7 @@
 #include "UI/HUD/Skills/SkillTooltip.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowMuHelper.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Character/CharacterManager.h"
 #include "MUHelper/MuHelper.h"
 
@@ -470,7 +471,7 @@ bool CUIMuHelper::Update()
 bool CUIMuHelper::UpdateMouseEvent()
 {
     // Ignore events outside MU Helper window
-    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return true;
     }
@@ -2713,7 +2714,7 @@ bool CMuHelperExt::Update()
 bool CMuHelperExt::UpdateMouseEvent()
 {
     // Ignore events outside MU Helper window
-    if (!CheckMouseIn(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT))
+    if (!mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WINDOW_WIDTH, WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         return true;
     }

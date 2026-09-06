@@ -4,6 +4,7 @@
 
 #include "UI/Party/PartyListWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 #include "Engine/Object/ZzzInventory.h"
 #include "Character/CharacterManager.h"
@@ -132,7 +133,7 @@ bool CPartyListWindow::BtnProcess()
             }
         }
 
-        if (CheckMouseIn(m_Pos.x, m_Pos.y + iVal, PARTY_LIST_WINDOW_WIDTH, PARTY_LIST_WINDOW_HEIGHT))
+        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y + iVal, PARTY_LIST_WINDOW_WIDTH, PARTY_LIST_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         {
             m_iSelectedCharacter = i;
 
@@ -164,7 +165,7 @@ bool CPartyListWindow::UpdateMouseEvent()
     if (PartyNumber > 0)
     {
         int iHeight = (PARTY_LIST_WINDOW_HEIGHT * PartyNumber) + (4 * (PartyNumber - 1));
-        if (CheckMouseIn(m_Pos.x, m_Pos.y, PARTY_LIST_WINDOW_WIDTH, iHeight))
+        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, PARTY_LIST_WINDOW_WIDTH, iHeight).Contains(MouseX, MouseY))
         {
             return false;
         }

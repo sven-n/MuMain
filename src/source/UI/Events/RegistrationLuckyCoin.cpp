@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Events/RegistrationLuckyCoin.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "I18N/All.h"
@@ -211,7 +212,7 @@ namespace mu::ui::window
             return false;
         }
 
-        if (CheckMouseIn(m_Pos.x, m_Pos.y, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT))
+        if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, LUCKYCOIN_REG_WIDTH, LUCKYCOIN_REG_HEIGHT).Contains(MouseX, MouseY))
         {
             if (mu::ui::window::IsPress(VK_RBUTTON))
             {

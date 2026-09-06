@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "GuildMakeWindow.h"
 #include "UI/Core/WindowManager.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "Audio/DSPlaySound.h"
 #include "I18N/All.h"
@@ -536,7 +537,7 @@ bool CGuildMakeWindow::UpdateMouseEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GUILDMAKE_WIDTH, GUILDMAKE_HEIGHT).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Combat/DuelWatchUserListWindow.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "GameLogic/Combat/DuelMgr.h"
 
 using namespace SEASON3B;
@@ -57,7 +58,7 @@ bool CDuelWatchUserListWindow::UpdateMouseEvent()
     POINT ptSize = {57, 17};
     POINT ptOrigin = {m_Pos.x, m_Pos.y - (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount()};
 
-    if (CheckMouseIn(ptOrigin.x, ptOrigin.y, ptSize.x, (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount() + 10))
+    if (mu::ui::window::WindowGeometry(ptOrigin.x, ptOrigin.y, ptSize.x, (ptSize.y + 1) * g_DuelMgr.GetDuelWatchUserCount() + 10).Contains(MouseX, MouseY))
         return false;
 
     return true;

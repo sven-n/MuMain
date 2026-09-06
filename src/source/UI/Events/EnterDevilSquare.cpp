@@ -4,6 +4,7 @@
 
 #include "UI/Events/EnterDevilSquare.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
@@ -115,7 +116,7 @@ bool CEnterDevilSquare::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, ENTERDS_BASE_WINDOW_WIDTH, ENTERDS_BASE_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, ENTERDS_BASE_WINDOW_WIDTH, ENTERDS_BASE_WINDOW_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

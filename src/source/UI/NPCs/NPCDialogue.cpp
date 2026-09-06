@@ -9,6 +9,7 @@
 #include "Core/Platform/CrtDbg.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -93,7 +94,7 @@ bool CNPCDialogue::UpdateMouseEvent()
     if (UpdateSelTextMouseEvent())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, ND_WIDTH, ND_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, ND_WIDTH, ND_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

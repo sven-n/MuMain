@@ -4,6 +4,7 @@
 #include "GameLogic/Items/CSItemOption.h"
 #include "UI/Widgets/UIControls.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/HUD/MasterLevel.h"
 #include "I18N/All.h"
 
@@ -455,7 +456,7 @@ bool mu::ui::window::CMasterLevel::UpdateMouseEvent()
 
     this->CheckBtn();
 
-    if (mu::ui::window::CheckMouseIn(this->PosX, this->PosY, this->width, this->height) == true)
+    if (mu::ui::window::WindowGeometry(this->PosX, this->PosY, this->width, this->height).Contains(MouseX, MouseY) == true)
     {
         return false;
     }

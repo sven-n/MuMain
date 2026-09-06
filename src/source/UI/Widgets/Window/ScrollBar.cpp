@@ -3,6 +3,7 @@
 //=============================================================================
 #include "stdafx.h"
 #include "UI/Widgets/Window/ScrollBar.h"
+#include "UI/Core/WindowGeometry.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -116,7 +117,7 @@ bool CScrollBar::UpdateBtnEvent()
         }
     }
 
-    if (CheckMouseIn(m_ptPos.x, m_ptPos.y, SCROLLBAR_TOP_WIDTH, m_iScrollBarHeightPixel))
+    if (mu::ui::window::WindowGeometry(m_ptPos.x, m_ptPos.y, SCROLLBAR_TOP_WIDTH, m_iScrollBarHeightPixel).Contains(MouseX, MouseY))
     {
         if (IsPress(VK_LBUTTON) && m_bScrollBtnActive == true)
         {

@@ -5,6 +5,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Engine/Object/ZzzInfomation.h"
 #include "GameLogic/NPCs/npcGateSwitch.h"
 
@@ -83,7 +84,7 @@ bool CGateSwitchWindow::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY))
         return false;
 
     return true;

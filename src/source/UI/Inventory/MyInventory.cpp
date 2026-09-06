@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Inventory/MyInventory.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "I18N/All.h"
 extern bool SelectFlag;
 #ifdef _EDITOR
@@ -622,7 +623,7 @@ bool CMyInventory::UpdateKeyEvent()
         return false;
     }
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY) == false)
     {
         return true;
     }
@@ -1554,7 +1555,7 @@ bool CMyInventory::EquipmentWindowProcess()
 }
 bool CMyInventory::InventoryProcess() const
 {
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY) == false)
     {
         return false;
     }
@@ -1569,7 +1570,7 @@ bool CMyInventory::InventoryProcess() const
 
 bool CMyInventory::WindowProcess()
 {
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY) == false)
     {
         return false;
     }

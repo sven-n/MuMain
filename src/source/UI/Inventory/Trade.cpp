@@ -4,6 +4,7 @@
 
 #include "UI/Inventory/Trade.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 
 #include "GameLogic/Items/CComGem.h"
@@ -135,7 +136,7 @@ bool CTrade::UpdateMouseEvent()
     if (ProcessBtns())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, TRADE_WIDTH, TRADE_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, TRADE_WIDTH, TRADE_HEIGHT).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

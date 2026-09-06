@@ -6,6 +6,7 @@
 
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "GameLogic/Combat/DuelMgr.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -158,7 +159,7 @@ bool mu::ui::window::CCommandWindow::UpdateMouseEvent()
     if (true == BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, COMMAND_WINDOW_WIDTH, COMMAND_WINDOW_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, COMMAND_WINDOW_WIDTH, COMMAND_WINDOW_HEIGHT).Contains(MouseX, MouseY))
     {
         SetMouseCursor(CURSOR_NORMAL);
         return false;

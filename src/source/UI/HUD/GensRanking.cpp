@@ -4,6 +4,7 @@
 #ifdef PBG_ADD_GENSRANKING
 #include "UI/HUD/GensRanking.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 
 
 using namespace SEASON3B;
@@ -282,7 +283,7 @@ bool CGensRanking::UpdateMouseEvent()
     if (BtnProcess())
         return false;
 
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, GENSRANKING_WIDTH, GENSRANKING_HEIGHT))
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, GENSRANKING_WIDTH, GENSRANKING_HEIGHT).Contains(MouseX, MouseY))
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "UI/Inventory/PurchaseShopInventory.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "I18N/All.h"
 
@@ -184,7 +185,7 @@ bool mu::ui::window::CPurchaseShopInventory::UpdateMouseEvent()
 
 bool mu::ui::window::CPurchaseShopInventory::WindowProcess()
 {
-    if (CheckMouseIn(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT) == false)
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT).Contains(MouseX, MouseY) == false)
     {
         return false;
     }
