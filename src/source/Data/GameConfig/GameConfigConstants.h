@@ -45,6 +45,11 @@ namespace CfgKeys
     // doc, docs/rmlui-ui-system/layout-and-scaling.md. Only RCSS authored in `dp` units responds
     // to this; existing `px`-authored windows are unaffected until retrofitted.
     inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
+    // Per-window user-dragged position (GameConfig::GetWindowPosition/SetWindowPosition) --
+    // "WindowPos.<id>.X"/".Y"/".HasOverride", <id> a short caller-chosen identifier (e.g.
+    // "my_inventory"), not a display name. See GameConfig.h's own comment for why these bypass
+    // the Load()/Save() member-field pattern every other CfgKeys* entry uses.
+    inline constexpr wchar_t CfgKeyWindowPositionPrefix[] = L"WindowPos.";
 
     // Camera
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";

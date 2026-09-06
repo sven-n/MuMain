@@ -505,7 +505,10 @@
 	line-height: 1.2em;
 	font-family: "token(font-body)";
 }
-.tt-line.tt-blue { color: #6f9bc4; } /* accent-blue */
+/* #80b3ff -- the legacy engine's actual TEXT_COLOR_BLUE RGB (ZzzInventory.cpp), same value
+   CMyInventory's item-option tooltip uses (ItemOptionTooltipModel.h) -- these are semantic
+   (option category), not theme aesthetic, so both tooltip features share one canonical value. */
+.tt-line.tt-blue { color: #80b3ff; }
 .tt-line.tt-red { color: #ff6060; }
 .tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }
 .tt-line.bold { font-weight: bold; }

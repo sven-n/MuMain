@@ -102,11 +102,17 @@ per-window, or entirely unbuilt:
 - **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s HP/MP/AG/SD/EXP
   gauge-fill rules (`#hp_fill` etc.) are ad hoc per-window CSS, not an abstracted, reusable bar
   component another window could reference.
-- **Tooltip** — actively **three non-unified mechanisms** exist side by side (flagged in
-  `newui-tier-adapter.md`'s pilots-to-revisit table): the skill-hotkey tooltip, `CBuffStrip`'s
+- **Tooltip** — actively **four non-unified mechanisms** exist side by side (flagged in
+  `newui-tier-adapter.md`'s pilots-to-revisit table): the skill-hotkey tooltip
+  (`UI::Skills::Tooltip`, `SkillTooltipModel.h`), `CMyInventory`'s Set/Socket option tooltip
+  (`UI::Inventory::Tooltip`, `ItemOptionTooltipModel.h` — added Stage 3, H7), `CBuffStrip`'s
   plain-text tooltip (a deliberate scope cut from the original's per-line-colored rich tooltip),
-  and whatever the still-fully-legacy windows use. Consolidating these is its own future item, not
-  bundled here.
+  and whatever the still-fully-legacy windows use. The first two already share the same shape
+  (a fixed-buffer `Model`/`Line{text, color, isBold}` built with no drawing by a `BuildModel`-style
+  function, consumed either by the legacy `TextList`/`RenderTipTextList` path or bound into RmlUi)
+  — only the `color` enum's members differ (skill: White/Blue/Red/DarkRed; item-option:
+  White/Blue/Yellow/Green/Purple), making them the natural starting point if/when this list is
+  consolidated. Not bundled here — check this entry before adding a *fifth*.
 - **Dialog** (as distinct from Window/Panel above) — every dialog window today (`CMsgWin`,
   `RememberPasswordPrompt`) is its own hand-built RML/RCSS pair; no shared "Dialog" scaffold
   (title/body/button-row layout contract) exists for a new one to reference.

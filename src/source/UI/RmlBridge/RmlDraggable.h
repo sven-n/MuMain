@@ -15,15 +15,21 @@ namespace Rml
 // migrated panel that wants to be draggable should just call MakeDraggable() once -- no
 // per-window state machine, no CWin involvement at all.
 //
-// Currently has zero live call sites. Two things to get right before the first real caller:
+// First real caller: CMyInventory (drag-by-title-bar, docs/rmlui-ui-system/STATUS.md). Two things
+// that had to be right for it, and now are:
 //   - The dragged position is written as `dp` (divided by the panel's own
 //     Context::GetDensityIndependentPixelRatio()), matching every other dp-authored sibling --
 //     see layout-and-scaling.md's dp-vs-px rule. Do not write a raw `px` inline style; it would
-//     read wrong at any UIScalePercent other than the one it was dragged at.
-//   - Nothing persists the result anywhere. There is no GameConfig position-storage mechanism for
-//     RmlUi panels yet, so a dragged position is lost on every restart. Deliberately not built
-//     speculatively -- resolve the right shape (likely an anchor-relative `dp` offset keyed per
-//     window, not a raw pixel pair) once a real caller needs it.
+//     read wrong at any UIScalePercent other than the one it was dragged at. This round-trips
+//     correctly even for a `px`-authored (not `dp`-authored) panel like CMyInventory's, as long as
+//     `onMove`/`onDragEnd` feed the result back through the panel's own position-binding mechanism
+//     (there, C++'s `m_Pos` -> `SyncRmlModel()`) rather than leaving RmlUi's direct property write
+//     as the only source of truth -- see MyInventory.cpp's Create() comment for the full reasoning.
+//   - Persistence: use `onDragEnd` (below) to call `GameConfig::GetWindowPosition()`/
+//     `SetWindowPosition()` (per-window-id key, immediate disk write, no caching) -- resolved as
+//     an anchor-relative logical position (the caller's own reference-space coordinate, e.g.
+//     CMyInventory's `m_Pos`), not a raw device-pixel pair, so it stays correct across resolution/
+//     UI-scale changes the same way every other position in this codebase does.
 //
 // A window with a real Type-2 companion object (a functional CUITextInputBox, not just a
 // redundant click-detection CButton -- docs/rmlui-ui-system/layout-and-scaling.md's "C++ pushes
@@ -46,6 +52,12 @@ namespace UI::RmlBridge
     // and can omit this entirely.
     using OnPanelMoved = std::function<void(float newLeft, float newTop)>;
 
+    // Fired once when the drag completes (RmlUi's Dragend event) -- the natural hook for "persist
+    // the position now" (e.g. GameConfig::SetWindowPosition()) rather than writing to disk on
+    // every OnPanelMoved tick. Takes no position argument: by the time this fires, the caller
+    // already has the latest value from its own last OnPanelMoved call.
+    using OnDragEnd = std::function<void()>;
+
     // `handle` is the element the player grabs -- a dedicated drag handle (a title-bar element,
     // or in this pilot's test, a label positioned outside the panel's own box), not usually
     // `panel` itself. Using the whole panel as its own handle only works if the panel's
@@ -67,5 +79,6 @@ namespace UI::RmlBridge
     // carry the current mouse position as event parameters, no manual mousedown/mousemove/
     // mouseup tracking needed) that repositions `panel` by directly setting its `left`/`top`
     // properties as the drag proceeds, then calls `onMove` (if supplied) with the new position.
-    void MakeDraggable(Rml::Element* handle, Rml::Element* panel, OnPanelMoved onMove = nullptr);
+    void MakeDraggable(Rml::Element* handle, Rml::Element* panel, OnPanelMoved onMove = nullptr,
+        OnDragEnd onDragEnd = nullptr);
 }

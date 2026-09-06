@@ -78,6 +78,20 @@ public:
     int GetUIScalePercent() const { return m_uiScalePercent; }
     void SetUIScalePercent(int percent);
 
+    // Per-window user-dragged position (UI::RmlBridge::MakeDraggable's onDragEnd hook is the
+    // intended writer) -- windowId is a short stable identifier the caller picks (e.g.
+    // "my_inventory"), not the interface's display name or a localized string. Unlike every other
+    // setting in this class, these write immediately (WritePrivateProfileStringW, same as every
+    // ReadInt/WriteInt call) rather than caching into a member field for the next Save() --
+    // dragging happens at an arbitrary time with no "Apply" button, so deferring to the general
+    // save lifecycle would lose the position on a crash or an ordinary Alt+F4. No in-memory cache
+    // is kept here for the same reason every other per-window value in this codebase isn't
+    // duplicated in GameConfig -- callers query it once, at their own Create() time.
+    // GetWindowPosition returns false (outX/outY untouched) if no position was ever saved for
+    // this windowId.
+    bool GetWindowPosition(const std::wstring& windowId, int& outX, int& outY) const;
+    void SetWindowPosition(const std::wstring& windowId, int x, int y);
+
     // Chat commands - the favourites and the named templates of the command
     // window. They belong to the installation, not to a character.
     // A template is stored as "name|command|value|value|...".
@@ -144,10 +158,10 @@ private:
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
 
-    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
+    int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
 
-    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue);
+    bool ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const;
     void WriteBool(const wchar_t* section, const wchar_t* key, bool value);
 
     std::vector<std::wstring> ReadStringList(const wchar_t* section, const wchar_t* keyPrefix);

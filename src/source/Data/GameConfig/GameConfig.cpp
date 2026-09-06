@@ -240,6 +240,31 @@ void GameConfig::SetUIScalePercent(int percent)
     m_uiScalePercent = percent;
 }
 
+bool GameConfig::GetWindowPosition(const std::wstring& windowId, int& outX, int& outY) const
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
+    const std::wstring prefix = CfgKeyWindowPositionPrefix + windowId + L".";
+    if (!ReadBool(CfgSectionUI, (prefix + L"HasOverride").c_str(), false))
+        return false;
+
+    outX = ReadInt(CfgSectionUI, (prefix + L"X").c_str(), 0);
+    outY = ReadInt(CfgSectionUI, (prefix + L"Y").c_str(), 0);
+    return true;
+}
+
+void GameConfig::SetWindowPosition(const std::wstring& windowId, int x, int y)
+{
+    using namespace CfgSections;
+    using namespace CfgKeys;
+
+    const std::wstring prefix = CfgKeyWindowPositionPrefix + windowId + L".";
+    WriteInt(CfgSectionUI, (prefix + L"X").c_str(), x);
+    WriteInt(CfgSectionUI, (prefix + L"Y").c_str(), y);
+    WriteBool(CfgSectionUI, (prefix + L"HasOverride").c_str(), true);
+}
+
 void GameConfig::SetEncryptedUsername(const std::wstring& encryptedUsername)
 {
     m_encryptedUsername = encryptedUsername;
@@ -337,7 +362,7 @@ void GameConfig::DecryptCredentials(wchar_t* outUser, wchar_t* outPass, size_t u
 }
 
 // Helper functions using Windows INI API
-int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue)
+int GameConfig::ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue, m_configPath.wstring().c_str());
 }
@@ -350,7 +375,7 @@ void GameConfig::WriteInt(const wchar_t* section, const wchar_t* key, int value)
     WritePrivateProfileStringW(section, key, buffer, m_configPath.wstring().c_str());
 }
 
-bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue)
+bool GameConfig::ReadBool(const wchar_t* section, const wchar_t* key, bool defaultValue) const
 {
     return GetPrivateProfileIntW(section, key, defaultValue ? 1 : 0, m_configPath.wstring().c_str()) != 0;
 }

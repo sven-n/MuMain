@@ -11,6 +11,8 @@
 	font-family: "token(font-body)";
 }
 
+/* Drag handle -- see MyInventory.cpp's Create() comment. pointer-events/drag are force-set in
+   C++ by UI::RmlBridge::MakeDraggable(); cursor here is purely cosmetic (discoverability). */
 #title {
 	position: absolute;
 	left: 0;
@@ -20,7 +22,7 @@
 	color: token(text-title);
 	font-weight: bold;
 	font-size: 12px;
-	pointer-events: none;
+	cursor: move;
 }
 
 @spritesheet inv-money-sheet { src: "../../../newui_item_money.tga"; inv-money: 0px 0px 170px 26px; }

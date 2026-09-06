@@ -188,6 +188,16 @@ namespace mu::ui::window
         void SetPos(int x, int y);
         const POINT& GetPos() const;
 
+        // Replaces a bare SetPos(defaultX, defaultY) at the "return to idle position" call sites
+        // (WindowSystem.cpp) -- restores the user's dragged position instead, if one was ever
+        // saved (GameConfig::GetWindowPosition(), written by this window's own drag-end handler),
+        // so a user customization survives Character-info/etc. temporarily shifting this window
+        // sideways to avoid overlap and then closing again. Those sideways collision-avoidance
+        // shifts themselves are unrelated and stay unconditional -- see this window's own
+        // architecture-principles.md §10/§11 reassessment (STATUS.md) for why the two are not the
+        // same kind of position write.
+        void RestoreDefaultOrUserPosition(int defaultX, int defaultY);
+
         void SetRepairMode(bool bRepair);
 
 #ifdef LJH_ADD_SYSTEM_OF_EQUIPPING_ITEM_FROM_INVENTORY

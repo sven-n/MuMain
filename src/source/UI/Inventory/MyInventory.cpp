@@ -38,10 +38,13 @@ extern bool SelectFlag;
 // RmlUi migration -- see this class's header comment (Stage 1, H7).
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlDraggable.h"
 #include "UI/Inventory/ItemOptionTooltipModel.h"
+#include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
+#include <cmath>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -73,6 +76,11 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
 {
     if (nullptr == pNewUIMng || nullptr == pNewUI3DRenderMng || nullptr == g_pNewItemMng)
         return false;
+
+    // A user-dragged position (this window's own drag-end handler below) overrides the caller's
+    // default column/layout position -- before anything else uses x/y, so the equipment grid
+    // (created just below) and the panel both start at the same, possibly-overridden spot.
+    GameConfig::GetInstance().GetWindowPosition(L"my_inventory", x, y);
 
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_INVENTORY, this);
@@ -187,6 +195,43 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
 
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_inventory.rml");
+
+        // Drag-by-title-bar -- first real caller of UI::RmlBridge::MakeDraggable() (RmlDraggable.h
+        // -- previously wired up nowhere). #title becomes the drag handle; MakeDraggable itself
+        // force-sets drag/pointer-events on it, no RCSS changes needed for the mechanism to fire.
+        //
+        // onMove independently recomputes DockRightTransform (this window's own LayoutMode, set at
+        // AddUIObj() time) rather than reading UI::Scaling::GetActiveTransform() -- this callback
+        // fires from RmlUi's own event processing, not from inside this window's own
+        // ScopedActiveTransform-wrapped Update()/Render() (WindowManager.cpp), so the ambient
+        // active transform isn't guaranteed to be this window's. SetPos() (not a raw m_Pos write)
+        // keeps the native equipment paperdoll/grid -- this window's real Type-2 companion -- in
+        // sync automatically. Feeding the resulting m_Pos back through the same SyncRmlModel()
+        // path every frame is what keeps this drag write from fighting root_x/root_y's own live
+        // data-model binding (see this window's own scoping notes for the full round-trip
+        // reasoning).
+        if (m_pRmlDoc)
+        {
+            Rml::Element* panelEl = m_pRmlDoc->GetElementById("panel");
+            Rml::Element* titleEl = m_pRmlDoc->GetElementById("title");
+            if (panelEl && titleEl)
+            {
+                UI::RmlBridge::MakeDraggable(titleEl, panelEl,
+                    [this](float newLeftPx, float newTopPx)
+                    {
+                        const auto transform = UI::Scaling::DockRightTransform(WindowWidth, WindowHeight);
+                        const int newX = static_cast<int>(std::lround(UI::Scaling::LogicalX(transform, newLeftPx)));
+                        const int newY = static_cast<int>(std::lround(UI::Scaling::LogicalY(transform, newTopPx)));
+                        SetPos(newX, newY);
+                    },
+                    [this]()
+                    {
+                        // Persist immediately (architecture-principles.md §10/§11) -- m_Pos is
+                        // already the drag's final resolved position from the onMove above.
+                        GameConfig::GetInstance().SetWindowPosition(L"my_inventory", m_Pos.x, m_Pos.y);
+                    });
+            }
+        }
 
         // Frame background panel -- see MyInventoryBgRmlModel's own header comment (MyInventory.h)
         // for why this needs the background context instead of the main one.
@@ -557,6 +602,14 @@ void CMyInventory::SetPos(int x, int y)
     SetEquipmentSlotInfo();
 
     m_pNewInventoryCtrl->SetPos(x + 15, y + 200);
+}
+
+void CMyInventory::RestoreDefaultOrUserPosition(int defaultX, int defaultY)
+{
+    int x = defaultX;
+    int y = defaultY;
+    GameConfig::GetInstance().GetWindowPosition(L"my_inventory", x, y); // no-op (x/y stay at the defaults) if nothing was ever saved
+    SetPos(x, y);
 }
 
 const POINT& CMyInventory::GetPos() const

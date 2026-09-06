@@ -19,7 +19,8 @@ namespace UI::RmlBridge
         class DragMoveListener : public Rml::EventListener
         {
         public:
-            DragMoveListener(Rml::Element* panel, OnPanelMoved onMove) : m_Panel(panel), m_OnMove(std::move(onMove)) {}
+            DragMoveListener(Rml::Element* panel, OnPanelMoved onMove, OnDragEnd onDragEnd)
+                : m_Panel(panel), m_OnMove(std::move(onMove)), m_OnDragEnd(std::move(onDragEnd)) {}
 
             void ProcessEvent(Rml::Event& event) override
             {
@@ -65,6 +66,11 @@ namespace UI::RmlBridge
                     break;
                 }
 
+                case Rml::EventId::Dragend:
+                    if (m_OnDragEnd)
+                        m_OnDragEnd();
+                    break;
+
                 default:
                     break;
                 }
@@ -75,6 +81,7 @@ namespace UI::RmlBridge
         private:
             Rml::Element* m_Panel;
             OnPanelMoved m_OnMove;
+            OnDragEnd m_OnDragEnd;
             int m_DragStartMouseX = 0;
             int m_DragStartMouseY = 0;
             float m_DragStartPanelLeft = 0.0f;
@@ -82,7 +89,7 @@ namespace UI::RmlBridge
         };
     }
 
-    void MakeDraggable(Rml::Element* handle, Rml::Element* panel, OnPanelMoved onMove)
+    void MakeDraggable(Rml::Element* handle, Rml::Element* panel, OnPanelMoved onMove, OnDragEnd onDragEnd)
     {
         // RmlUi only generates dragstart/drag events for an element whose computed `drag` style
         // is anything but `none` (Context.cpp's ProcessMouseButtonDown walks up from the hover
@@ -100,8 +107,9 @@ namespace UI::RmlBridge
         // works regardless of what pointer-events state it inherited from its document.
         handle->SetProperty("pointer-events", "auto");
 
-        DragMoveListener* listener = new DragMoveListener(panel, std::move(onMove));
+        DragMoveListener* listener = new DragMoveListener(panel, std::move(onMove), std::move(onDragEnd));
         handle->AddEventListener(Rml::EventId::Dragstart, listener);
         handle->AddEventListener(Rml::EventId::Drag, listener);
+        handle->AddEventListener(Rml::EventId::Dragend, listener);
     }
 }

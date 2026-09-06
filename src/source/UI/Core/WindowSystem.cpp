@@ -1170,7 +1170,7 @@ void CSystem::Hide(DWORD dwKey)
         }
         if (IsVisible((INTERFACE_INVENTORY)))
         {
-            g_pMyInventory->SetPos(PanelColumnX(1), 0);
+            g_pMyInventory->RestoreDefaultOrUserPosition(PanelColumnX(1), 0);
         }
         if (IsVisible((INTERFACE_PET)))
         {
@@ -1278,7 +1278,7 @@ void CSystem::Hide(DWORD dwKey)
             m_pNewUIMng->ShowInterface(mu::ui::window::INTERFACE_LUCKYITEMWND, false);
         }
 
-        g_pMyInventory->SetPos(PanelColumnX(1), 0);
+        g_pMyInventory->RestoreDefaultOrUserPosition(PanelColumnX(1), 0);
         g_pMyInventory->ClosingProcess();
     }
     else if (dwKey == INTERFACE_MIXINVENTORY)
@@ -1312,7 +1312,7 @@ void CSystem::Hide(DWORD dwKey)
         {
             g_pPurchaseShopInventory->ClosingProcess();
         }
-        g_pMyInventory->SetPos(PanelColumnX(1), 0);
+        g_pMyInventory->RestoreDefaultOrUserPosition(PanelColumnX(1), 0);
         Show(INTERFACE_MU_HELPER_BAR);
     }
     else if (dwKey == INTERFACE_STORAGE)

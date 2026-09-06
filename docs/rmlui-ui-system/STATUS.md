@@ -51,7 +51,11 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   bugs during Stage 1 (position-transform, once-per-frame double-render) for no functional gain —
   see the pilots-to-revisit table below. The equipment grid (`CInventoryCtrl`) and both paperdoll/
   grid live-3D icons stay permanently native either way (Section E, same category as
-  `CItemHotKey`'s potion icon).
+  `CItemHotKey`'s potion icon). **Drag-by-title-bar** (`#title`, `UI::RmlBridge::MakeDraggable()`'s
+  first real caller) with a **persisted, override-aware position** (`GameConfig::GetWindowPosition`/
+  `SetWindowPosition`, `RestoreDefaultOrUserPosition()`) is also done — see the "Known gaps" entry
+  below for the full mechanism, built generically so the next draggable window reuses the same two
+  pieces rather than inventing its own.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -350,17 +354,30 @@ for "the full architecture is in place":
   Verification so far has been ad hoc per window. No test plan artifact exists that a future
   session could run through mechanically.
 - **The existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has not
-  been explicitly audited** — does a dragged position survive a UI-scale change sensibly? A theme
-  change? Not examined.
-- **`UI::RmlBridge::MakeDraggable()` (`RmlDraggable.h/.cpp`) has zero live call sites and still has
-  one open §10-11 gap.** ~~It writes the dragged position as an absolute `px` inline style, which
-  never scales with `UIScalePercent`~~ — **fixed 2026-09-04**: it now divides by the panel's own
-  `Context::GetDensityIndependentPixelRatio()` and writes `dp`, matching every other dp-authored
-  sibling. **Still open**: nothing persists the result anywhere — no `GameConfig` position-storage
-  mechanism exists yet for any RmlUi panel. Not a live bug (nothing depends on it today), and
-  deliberately not built speculatively (no real caller yet to confirm the right shape). See the
-  header comment on `RmlDraggable.h` for the full note; resolve before, not after, the first real
-  caller.
+  been explicitly audited for windows other than `CMyInventory` (below)** — does a dragged position
+  survive a UI-scale change sensibly on other windows once they gain dragging? A theme change?
+  Not examined beyond the one pilot.
+- ~~`UI::RmlBridge::MakeDraggable()` (`RmlDraggable.h/.cpp`) has zero live call sites and still has
+  one open §10-11 gap.~~ **Fixed 2026-09-07 — first real caller landed (`CMyInventory`, drag-by-
+  title-bar) and both remaining gaps closed as part of it, generically, not as a one-off:**
+  - **Persistence**: `GameConfig::GetWindowPosition()`/`SetWindowPosition(windowId, x, y)`
+    (`GameConfig.h`/`.cpp`) — an immediate disk write (bypasses the usual member-field+`Save()`
+    batching every other setting uses, deliberately: a drag has no "Apply" button, so deferring to
+    the general save lifecycle would lose it on a crash or an ordinary Alt+F4), keyed by a short
+    caller-chosen `windowId`, reusable by any future draggable window with one call each way.
+  - **Theme-default-layout conflict**: `MakeDraggable()` gained an `OnDragEnd` callback (RmlUi's
+    `Dragend` event — previously only `Dragstart`/`Drag` were wired) as the "persist now" hook.
+    `CMyInventory::RestoreDefaultOrUserPosition()` replaces the 3 `WindowSystem.cpp` call sites that
+    reset this window to its idle default column — restores the saved user position instead, if
+    one exists. The **other** 3 call sites that shift this window sideways because Character-
+    info/Inventory-Ext is *currently* also visible (real collision avoidance, not a "default reset")
+    were deliberately left unconditional — skipping those would let a dragged Inventory panel
+    visually overlap Character info, trading one real bug for another.
+  - Still open, same as before: no audit yet of how a persisted position behaves across a
+    resolution/UI-scale/theme change (see the item above) — `CMyInventory` stores it as its own
+    reference-space `m_Pos` (the same logical coordinate every other position in this codebase
+    scales from), which should behave correctly by construction, but hasn't been tested against a
+    real resolution/scale change post-drag yet.
 - ~~No reusable-component catalog exists as such~~ (§20) — **addressed 2026-09-04**:
   [`component-catalog.md`](component-catalog.md) inventories what already functions as a reusable
   primitive (`RmlModelBinder<T>`, `UI::RmlBridge` helpers, the anchor/center/stretch RCSS classes,
