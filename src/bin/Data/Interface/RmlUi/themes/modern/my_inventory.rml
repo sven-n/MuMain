@@ -30,6 +30,23 @@
 
 		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click"></div>
 		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
+
+		<!-- Stage 3 (H7): Set/Socket option header labels. Each spans half of #panel's width,
+		     matching the former native hover-rect split exactly -- see MyInventory.cpp's
+		     SyncRmlModel() header comment. -->
+		<div id="set_option_label" class="option-label option-label-set" data-class-active="set_option_active"
+		     data-event-mouseover="my_inventory_set_option_hover" data-event-mouseout="my_inventory_set_option_unhover">{{set_option_label}}</div>
+		<div id="socket_option_label" class="option-label option-label-socket" data-class-active="socket_option_active"
+		     data-event-mouseover="my_inventory_socket_option_hover" data-event-mouseout="my_inventory_socket_option_unhover">{{socket_option_label}}</div>
+
+		<!-- Shared tooltip for both labels above (mutually exclusive hover targets) -- same
+		     convention as main_frame.rml's #skill_tooltip. -->
+		<div id="item_option_tooltip" data-class-hidden="!item_option_tooltip_visible">
+			<div class="tt-line" data-for="line : item_option_tooltip_lines"
+			     data-class-tt-blue="line.color_blue" data-class-tt-yellow="line.color_yellow"
+			     data-class-tt-green="line.color_green" data-class-tt-purple="line.color_purple"
+			     data-class-bold="line.bold">{{line.text}}</div>
+		</div>
 	</div>
 </body>
 </rml>

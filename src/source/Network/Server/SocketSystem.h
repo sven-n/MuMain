@@ -1,5 +1,7 @@
 #pragma once
 
+#include "UI/Inventory/ItemOptionTooltipModel.h"
+
 namespace SEASON4A
 {
     enum _SOCKET_OPTION_TYPE
@@ -141,7 +143,12 @@ namespace SEASON4A
 
         void CheckSocketSetOption();
         BOOL IsSocketSetOptionEnabled();
-        void RenderToolTipForSocketSetOption(int iPos_x, int iPos_y);
+
+        // RmlUi port (CMyInventory Stage 3) of the former RenderToolTipForSocketSetOption -- same
+        // content resolution (m_EquipSetBonusList line-by-line), no drawing. Returns false (and
+        // leaves outModel untouched) when !IsSocketSetOptionEnabled(). CMyInventory::SyncRmlModel()
+        // is the only caller.
+        bool BuildSocketOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel);
 
         void CreateSocketOptionText(wchar_t* pszOptionText, int iSeedID, int iSphereLv);
 

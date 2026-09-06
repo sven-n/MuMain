@@ -38,6 +38,7 @@ extern bool SelectFlag;
 // RmlUi migration -- see this class's header comment (Stage 1, H7).
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Inventory/ItemOptionTooltipModel.h"
 #include "Core/Utilities/StringUtils.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
@@ -117,6 +118,43 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
 
                 c.Bind("exit_tooltip", &model.exitTooltip);
                 c.Bind("expand_tooltip", &model.expandTooltip);
+
+                c.Bind("set_option_label", &model.setOptionLabel);
+                c.Bind("socket_option_label", &model.socketOptionLabel);
+                c.Bind("set_option_active", &model.setOptionActive);
+                c.Bind("socket_option_active", &model.socketOptionActive);
+
+                c.Bind("item_option_tooltip_visible", &model.itemOptionTooltipVisible);
+                auto tooltipLine = c.RegisterStruct<ItemOptionTooltipLineEntry>();
+                tooltipLine.RegisterMember("text", &ItemOptionTooltipLineEntry::text);
+                tooltipLine.RegisterMember("color_blue", &ItemOptionTooltipLineEntry::colorBlue);
+                tooltipLine.RegisterMember("color_yellow", &ItemOptionTooltipLineEntry::colorYellow);
+                tooltipLine.RegisterMember("color_green", &ItemOptionTooltipLineEntry::colorGreen);
+                tooltipLine.RegisterMember("color_purple", &ItemOptionTooltipLineEntry::colorPurple);
+                tooltipLine.RegisterMember("bold", &ItemOptionTooltipLineEntry::bold);
+                c.RegisterArray<std::vector<ItemOptionTooltipLineEntry>>();
+                c.Bind("item_option_tooltip_lines", &model.itemOptionTooltipLines);
+
+                c.BindEventCallback("my_inventory_set_option_hover",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        m_RmlBinder.GetModel().setOptionHovered = true;
+                    });
+                c.BindEventCallback("my_inventory_set_option_unhover",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        m_RmlBinder.GetModel().setOptionHovered = false;
+                    });
+                c.BindEventCallback("my_inventory_socket_option_hover",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        m_RmlBinder.GetModel().socketOptionHovered = true;
+                    });
+                c.BindEventCallback("my_inventory_socket_option_unhover",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        m_RmlBinder.GetModel().socketOptionHovered = false;
+                    });
 
                 c.BindEventCallback("my_inventory_exit_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
@@ -653,13 +691,6 @@ bool CMyInventory::UpdateMouseEvent()
         }
     }
 
-    g_csItemOption.SetViewOptionList(false);
-
-    if (CheckMouseIn(m_Pos.x, m_Pos.y + 20, INVENTORY_WIDTH * 0.5f, 15) == true)
-    {
-        g_csItemOption.SetViewOptionList(true);
-    }
-
     if (WindowProcess())
         return false;
 
@@ -888,6 +919,58 @@ void CMyInventory::SyncRmlModel()
 
     syncWide(&MyInventoryRmlModel::exitTooltip, "exit_tooltip", I18N::Game::CloseIV);
     syncWide(&MyInventoryRmlModel::expandTooltip, "expand_tooltip", I18N::Game::OpenExpandedInventoryK);
+
+    // Stage 3 (H7): Set/Socket option header labels + shared hover tooltip -- see
+    // ItemOptionTooltipLineEntry's own comment (MyInventory.h). Label text is static per-language,
+    // but still routed through syncWide (change-checked) rather than bound once at Create() time,
+    // matching every other I18N-sourced field in this model.
+    wchar_t setOptionLabelBuf[128];
+    mu_swprintf(setOptionLabelBuf, L"[%ls]", I18N::Game::SetOption);
+    syncWide(&MyInventoryRmlModel::setOptionLabel, "set_option_label", setOptionLabelBuf);
+    syncBool(&MyInventoryRmlModel::setOptionActive, "set_option_active", g_csItemOption.IsAncientSetEquipped());
+
+    wchar_t socketOptionLabelBuf[128];
+    mu_swprintf(socketOptionLabelBuf, L"[%ls]", I18N::Game::SocketOption);
+    syncWide(&MyInventoryRmlModel::socketOptionLabel, "socket_option_label", socketOptionLabelBuf);
+    syncBool(&MyInventoryRmlModel::socketOptionActive, "socket_option_active", g_SocketItemMgr.IsSocketSetOptionEnabled());
+
+    // Shared tooltip -- one hover target at a time (setOptionHovered/socketOptionHovered are set
+    // by the RmlUi hover event callbacks below, mutually exclusive same as the legacy left/right
+    // header-strip halves were). BuildXxxTooltipModel() is the same content resolution
+    // (RenderSetOptionList()/RenderToolTipForSocketSetOption()'s own former native-drawing bodies
+    // used) with no drawing -- only the destination (RmlUi vs. legacy TextList) differs, same
+    // convention as MainFrameWindow.cpp's skill tooltip (UI::Skills::Tooltip::BuildModelForSlot).
+    auto& model = m_RmlBinder.GetModel();
+    bool tooltipBuilt = false;
+    UI::Inventory::Tooltip::Model tooltipModel;
+    if (model.setOptionHovered)
+        tooltipBuilt = g_csItemOption.BuildSetOptionTooltipModel(tooltipModel);
+    else if (model.socketOptionHovered)
+        tooltipBuilt = g_SocketItemMgr.BuildSocketOptionTooltipModel(tooltipModel);
+
+    if (tooltipBuilt)
+    {
+        model.itemOptionTooltipLines.clear();
+        for (int i = 0; i < tooltipModel.count; ++i)
+        {
+            const UI::Inventory::Tooltip::Line& src = tooltipModel.lines[i];
+            ItemOptionTooltipLineEntry line;
+            line.text = StringUtils::WideToNarrow(src.text);
+            line.colorBlue = (src.color == UI::Inventory::Tooltip::LineColor::Blue);
+            line.colorYellow = (src.color == UI::Inventory::Tooltip::LineColor::Yellow);
+            line.colorGreen = (src.color == UI::Inventory::Tooltip::LineColor::Green);
+            line.colorPurple = (src.color == UI::Inventory::Tooltip::LineColor::Purple);
+            line.bold = src.isBold;
+            model.itemOptionTooltipLines.push_back(line);
+        }
+        model.itemOptionTooltipVisible = true;
+        m_RmlBinder.MarkDirty("item_option_tooltip_lines");
+        m_RmlBinder.MarkDirty("item_option_tooltip_visible");
+    }
+    else
+    {
+        syncBool(&MyInventoryRmlModel::itemOptionTooltipVisible, "item_option_tooltip_visible", false);
+    }
 }
 
 bool CMyInventory::Render()
@@ -902,62 +985,12 @@ bool CMyInventory::Render()
     // earlier in the frame than Render3D()'s C3DRenderMng pass, not by this call's position here.
     RmlUiRuntime::Instance().RenderBackgroundLayer();
 
-    RenderSetOption();
-    RenderSocketOption();
-
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
 
     RenderEquippedItem();
     DisableAlphaBlend();
     return true;
-}
-
-void CMyInventory::RenderSetOption()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    if (g_csItemOption.IsAncientSetEquipped())
-    {
-        g_pRenderText->SetTextColor(255, 204, 25, 255);
-    }
-    else
-    {
-        g_pRenderText->SetTextColor(100, 100, 100, 255);
-    }
-
-    wchar_t strText[128];
-    mu_swprintf(strText, L"[%ls]", I18N::Game::SetOption);
-    g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.2f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
-
-    if (g_csItemOption.IsViewOptionList() == true)
-    {
-        m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, -1, ITEM_SET_OPTION);
-    }
-}
-
-void CMyInventory::RenderSocketOption()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    if (g_SocketItemMgr.IsSocketSetOptionEnabled())
-    {
-        g_pRenderText->SetTextColor(255, 204, 25, 255);
-    }
-    else
-    {
-        g_pRenderText->SetTextColor(100, 100, 100, 255);
-    }
-
-    wchar_t strText[128];
-    mu_swprintf(strText, L"[%ls]", I18N::Game::SocketOption);
-    g_pRenderText->RenderText(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 25, strText, INVENTORY_WIDTH * 0.3f, 0, RT3_SORT_CENTER);
-
-    if (CheckMouseIn(m_Pos.x + INVENTORY_WIDTH * 0.5f, m_Pos.y + 20, INVENTORY_WIDTH * 0.5f, 15) == true)
-    {
-        m_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, -1, ITEM_SOCKET_SET_OPTION);
-    }
 }
 
 void CMyInventory::Render3D()
@@ -1131,24 +1164,12 @@ int CMyInventory::FindEmptySlotIncludingExtensions(ITEM* pItem) const
     return FindEmptySlotIncludingExtensions(pItemAttr->Width, pItemAttr->Height);
 }
 
-void CMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
+void CMyInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD /*dwParamB*/)
 {
     if (pClass)
     {
         auto* pMyInventory = (CMyInventory*)(pClass);
-
-        if (dwParamB == ITEM_SET_OPTION)
-        {
-            g_csItemOption.RenderSetOptionList(pMyInventory->GetPos().x, pMyInventory->GetPos().y);
-        }
-        else if (dwParamB == ITEM_SOCKET_SET_OPTION)
-        {
-            g_SocketItemMgr.RenderToolTipForSocketSetOption(pMyInventory->GetPos().x, pMyInventory->GetPos().y);
-        }
-        else
-        {
-            pMyInventory->RenderItemToolTip(dwParamA);
-        }
+        pMyInventory->RenderItemToolTip(dwParamA);
     }
 }
 

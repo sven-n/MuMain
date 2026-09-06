@@ -12,6 +12,7 @@
 #include "GameLogic/Items/IInventoryActionContext.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 #include <span>
+#include <vector>
 #include "Core/Globals/_enum.h"
 
 namespace Rml { class ElementDocument; }
@@ -58,12 +59,6 @@ namespace mu::ui::window
         };
 
     private:
-        enum ITEM_OPTION
-        {
-            ITEM_SET_OPTION = 1,
-            ITEM_SOCKET_SET_OPTION = 2,
-        };
-
         static constexpr float INVENTORY_WIDTH  = 190.0f;
         static constexpr float INVENTORY_HEIGHT = 429.0f;
 
@@ -90,6 +85,22 @@ namespace mu::ui::window
         bool m_bRepairEnableLevel;
         bool m_bMyShopOpen;
         bool m_bMyShopLocked = false;
+
+        // Stage 3: one shared hover tooltip for both the Set Option and Socket Option header
+        // labels (mutually exclusive within this window, same "one shared tooltip element for
+        // multiple hover targets" convention as MainFrameRmlModel::skillTooltipLines). Converted
+        // from UI::Inventory::Tooltip::Model (ItemOptionTooltipModel.h) the same way
+        // MainFrameWindow.cpp converts UI::Skills::Tooltip::Model -- see SyncRmlModel()'s own
+        // comment.
+        struct ItemOptionTooltipLineEntry
+        {
+            Rml::String text;
+            bool colorBlue = false;
+            bool colorYellow = false;
+            bool colorGreen = false;
+            bool colorPurple = false;
+            bool bold = false;
+        };
 
         // Stage 1 (H7): window frame/title/gold/buttons -- see docs/ui-target-architecture.md
         // Section H item 7. Equipment paperdoll and the inventory grid stay fully native this
@@ -119,6 +130,18 @@ namespace mu::ui::window
 
             Rml::String exitTooltip;
             Rml::String expandTooltip;
+
+            // Stage 3 (H7): Set/Socket option header labels + shared hover tooltip -- see
+            // ItemOptionTooltipLineEntry's own comment above and SyncRmlModel()'s.
+            Rml::String setOptionLabel;
+            Rml::String socketOptionLabel;
+            bool setOptionActive = false;    // IsAncientSetEquipped() -- label color
+            bool socketOptionActive = false; // IsSocketSetOptionEnabled() -- label color
+            bool setOptionHovered = false;
+            bool socketOptionHovered = false;
+
+            bool itemOptionTooltipVisible = false;
+            std::vector<ItemOptionTooltipLineEntry> itemOptionTooltipLines;
         };
         RmlModelBinder<MyInventoryRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -231,8 +254,6 @@ namespace mu::ui::window
         void LoadImages() const;
         void UnloadImages();
 
-        void RenderSetOption();
-        void RenderSocketOption();
         void RenderEquippedItem();
 
         bool EquipmentWindowProcess();

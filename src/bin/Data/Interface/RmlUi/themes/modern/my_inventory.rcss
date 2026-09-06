@@ -94,3 +94,57 @@
 #btn_expand:hover ~ .tooltip-expand {
 	display: block;
 }
+
+/* Set/Socket option header labels -- see themes/legacy/my_inventory.rcss's identical block for
+   the full rationale (hover-rect split, color meaning). Same gray/yellow as legacy -- these are
+   semantic (active vs. inactive), not part of modern's chrome palette. */
+.option-label {
+	position: absolute;
+	top: 20px;
+	width: 95px;
+	height: 15px;
+	text-align: center;
+	font-family: "token(font-body)";
+	font-weight: bold;
+	font-size: 12px;
+	color: #666666;
+	pointer-events: auto;
+	cursor: default;
+}
+.option-label.active { color: #ffcc1a; }
+.option-label-set { left: 0; }
+.option-label-socket { left: 95px; }
+
+/* Shared tooltip for both labels above -- see themes/legacy/my_inventory.rcss's identical comment
+   for why this uses a precomputed static `left` instead of `transform: translateX(-50%)` (found
+   live: that resolves against a stale/zero box for a `display:none`-until-shown element). Modern's
+   own bordered-panel look, matching this document's own .tooltip above rather than legacy's flat
+   black box; tt-line colors stay identical to legacy -- they carry meaning (option category), not
+   theme styling. */
+#item_option_tooltip {
+	position: absolute;
+	left: 25px;
+	top: 40px;
+	width: 140px;
+	text-align: center;
+	background-color: rgba(20, 21, 22, 230);
+	border: 1px token(accent-steel-bright);
+	border-radius: token(radius-sm)px;
+	padding: 4px 6px;
+	font-family: "token(font-body)";
+	font-size: 10px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: normal;
+	min-height: 1.2em;
+	line-height: 1.2em;
+}
+.tt-line.tt-blue { color: #80b3ff; }
+.tt-line.tt-yellow { color: #ffcc1a; }
+.tt-line.tt-green { color: #1aff80; }
+.tt-line.tt-purple { color: #ff1aff; }
+.tt-line.bold { font-weight: bold; }
