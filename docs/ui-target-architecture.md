@@ -342,8 +342,17 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
    needed.** `CInput` is already built on `CNewKeyInput`'s free functions; the only action item is
    documenting `CInput`'s scope (Rule 5) so no future `MAIN_SCENE` or non-UI code reaches for its
    stale-outside-login/char-select mouse/cursor state.
-4. Extract the Tooltip primitive out of `mu::ui::window::CButton::ChangeToolTipText`'s existing
-   logic into a standalone, attachable component.
+4. ~~Extract the Tooltip primitive out of `mu::ui::window::CButton::ChangeToolTipText`'s existing
+   logic into a standalone, attachable component.~~ — **done, commit `b9b667b9`.** Landed as
+   `mu::ui::window::CTooltip` (`UI/Widgets/Window/Tooltip.h`/`.cpp`): owns no position of its own,
+   takes the anchor rect fresh on each `Render()` call the same way `CButton`'s inline version did.
+   `CButton` owns one as a member and forwards `ChangeToolTipText()`/etc. into it; every pre-existing
+   call site is unchanged. `CRadioButton`/`CCheckBox` never had tooltip logic to begin with, so
+   there was nothing to migrate there for this item. Adoption elsewhere (the other ~3 tooltip
+   mechanisms this document's Tooltips row counts — `RenderTipTextList()`'s many multi-line call
+   sites, `CItemEnduranceInfo::RenderTooltip()`'s one-off hand-rolled version, and the RmlUi
+   `.tooltip` convention currently duplicated per-theme-file rather than centralized in
+   `base.rcss`) is real follow-up value but a separate, unscoped effort — not part of this item.
 5. Build the opt-in `WindowGeometry` component (Section C) and start using it in any window
    touched for other reasons.
 
