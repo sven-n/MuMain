@@ -211,11 +211,18 @@ void RmlUiRuntime::RenderFrame()
 {
     Update();
     Render();
+
+    // Arms the RenderBackgroundLayer() once-per-frame guard for the next frame -- see
+    // m_backgroundLayerRenderedThisFrame's own header comment (RmlUiRuntime.h) for why this,
+    // not BeginFrame(), is the correct reset point.
+    m_backgroundLayerRenderedThisFrame = false;
 }
 
 void RmlUiRuntime::RenderBackgroundLayer()
 {
     if (!m_BackgroundContext) return;
+    if (m_backgroundLayerRenderedThisFrame) return;
+    m_backgroundLayerRenderedThisFrame = true;
 
     // Opens a real render pass now, replaying whatever the caller's own legacy content has
     // recorded so far this frame -- see FlushRenderCommands()'s own comment (MuRenderer.h) for

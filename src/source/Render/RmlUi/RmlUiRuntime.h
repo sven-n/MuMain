@@ -101,4 +101,22 @@ private:
     // or the single-slot SetPreSubmitCallback m_Context itself uses. Also owned by Rml::Core,
     // released by the same Rml::Shutdown() call in Destroy().
     Rml::Context* m_BackgroundContext = nullptr;
+
+    // RenderBackgroundLayer() replays the ENTIRE shared background context -- every document
+    // currently Show()n in it, not just whichever window's own document prompted the call (there's
+    // no per-caller scoping, see that method's own comment). Once a second window
+    // (CMyInventory, H7 Stage 1) started calling it independently of CMainFrameWindow, a window
+    // whose own Render() runs at a *later* GetLayerDepth() than another window's 3D-icon camera
+    // (both are ordinary CObjects interleaved by CManager::Render()'s one z-sorted pass, see
+    // docs/ui-target-architecture.md Section A) would re-replay -- and thus re-paint over -- that
+    // earlier window's already-drawn 3D icons. This guard makes only the FIRST call in a frame
+    // actually render; every later call this same frame is a cheap no-op. Safe: the first call in
+    // z-order is guaranteed to precede every camera later in the same sorted pass (that's the
+    // existing "wire your own call before your own icons" contract every caller already follows),
+    // so one replay per frame, positioned at the earliest caller, still correctly precedes all of
+    // them. Reset in RenderFrame() (the one guaranteed-once-per-frame choke point), not
+    // BeginFrame(), since RenderFrame() fires late (SetPreSubmitCallback) -- after every
+    // RenderBackgroundLayer() call this frame already happened, so resetting there arms the guard
+    // correctly for the *next* frame's first caller.
+    bool m_backgroundLayerRenderedThisFrame = false;
 };
