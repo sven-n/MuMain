@@ -86,9 +86,19 @@ first real caller.
 Recorded here so a future session doesn't assume otherwise — each of these is still ad hoc,
 per-window, or entirely unbuilt:
 
-- **ItemSlot / ItemGrid** — still 100% legacy 2D rendering (`STATUS.md`: "no RmlUi pattern proven
-  yet"). `CItemHotKey` (potion slots, 3D-camera-composited icons) is the next real candidate
-  to prove a pattern against, once it's scoped.
+- **ItemSlot / ItemGrid** — the slot *chrome* (border/hover highlight/count/cooldown overlay) has
+  no reusable RmlUi component yet, but the pattern to build one isn't unproven: it's the same
+  RmlUi-overlay-plus-native-icon split `CSkillList` (Phase 2) already validated for skill icons.
+  **Correction, 2026-09-06**: this entry previously called `CItemHotKey`'s icons "3D-camera-
+  composited" and framed the whole slot as "still 100% legacy 2D rendering... the next real
+  candidate to prove a pattern against" — wrong on both counts. Traced to source
+  (`CItemHotKey::RenderItems()` → `RenderItem3D()`/`ZzzInventory.cpp` →
+  `RenderObjectScreen(MODEL_...)`), the icon is a genuine **live 3D model render**, the same
+  technique `CCharMakeWin`'s character-preview panel uses — Section E of
+  [`ui-target-architecture.md`](../ui-target-architecture.md) puts that in the *permanent*,
+  no-RmlUi-equivalent bucket, not the temporary sprite-atlas one. So only the slot chrome around
+  the icon is a real "prove the pattern" candidate; the icon itself stays native permanently, same
+  as `CCharMakeWin`'s preview.
 - **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s HP/MP/AG/SD/EXP
   gauge-fill rules (`#hp_fill` etc.) are ad hoc per-window CSS, not an abstracted, reusable bar
   component another window could reference.
