@@ -353,8 +353,15 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
    sites, `CItemEnduranceInfo::RenderTooltip()`'s one-off hand-rolled version, and the RmlUi
    `.tooltip` convention currently duplicated per-theme-file rather than centralized in
    `base.rcss`) is real follow-up value but a separate, unscoped effort — not part of this item.
-5. Build the opt-in `WindowGeometry` component (Section C) and start using it in any window
-   touched for other reasons.
+5. ~~Build the opt-in `WindowGeometry` component (Section C) and start using it in any window
+   touched for other reasons.~~ — **done.** The component landed first (commit `e7b91353`), then
+   adopted by `CBaseButton::IsMouseIn()` (H6). Broadened to every other new-tier own-top-level-rect
+   `mu::ui::window::CheckMouseIn()` call site — 73 call sites across 57 files (commit `cecd25eb`).
+   Deliberately left untouched: the legacy `CUIControl`/`CWin` family's differently-named
+   `::CheckMouseIn(x, y, w, h, CoordType)` (a different, older component tier with a
+   bottom-anchored mode `WindowGeometry` has no equivalent for), and inline sub-rect checks inside
+   a window body (per-tab/per-row/per-icon/scrollbar-thumb regions) — `WindowGeometry`'s own scope
+   is a widget's own top-level rect, not every ad hoc hit-test a window performs internally.
 
 **Can wait (real value, not blocking):**
 
