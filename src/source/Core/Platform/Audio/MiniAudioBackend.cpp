@@ -43,6 +43,19 @@ std::string AudioPathToUtf8(const wchar_t* text)
     return mu_wchar_to_utf8(text);
 #endif
 }
+
+// Logical identity of a music track for the same-track guard: the MUSIC_*
+// constants use Windows-style backslashes, so normalize them to forward
+// slashes. This is intentionally NOT filesystem-resolved (see MuResolvePath):
+// the identity has to be recomputed every frame by StopMusic() for many tracks,
+// so it must stay allocation-cheap and syscall-free, and PlayMusic()/StopMusic()
+// must derive it the same way or the guard never matches.
+std::string NormalizeMusicIdentity(const char* name)
+{
+    std::string identity(name);
+    std::replace(identity.begin(), identity.end(), '\\', '/');
+    return identity;
+}
 } // namespace
 
 // ---------------------------------------------------------------------------
@@ -510,9 +523,11 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 //
 // Story 5.2.1: Path normalization — MUSIC_* constants in mu_enum.h use Windows
 // backslash separators (e.g., "data\\music\\Pub.mp3"). On Linux/macOS miniaudio
-// requires forward slashes. Replace '\\' with '/' via std::replace before passing
-// to ma_sound_init_from_file(). No new Win32 calls — pure std::string manipulation.
-// m_currentMusicName stores the normalized path for the same-track guard.
+// requires forward slashes, and the on-disk asset may differ in case, so the
+// path is resolved via MuResolvePath() before ma_sound_init_from_file().
+// m_currentMusicName stores the separators-only identity (NOT the resolved
+// path) for the same-track guard, so StopMusic() can match it cheaply — see
+// NormalizeMusicIdentity().
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 {
@@ -521,15 +536,11 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
         return;
     }
 
-    // Normalize path separators: MUSIC_* constants use Windows-style backslashes
-    std::string normalizedName(name);
-    std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
-#ifndef _WIN32
-    normalizedName = MuResolvePath(normalizedName.c_str());
-#endif
+    // Logical track identity for the same-track guard (cheap, not resolved).
+    const std::string identity = NormalizeMusicIdentity(name);
 
     // If not enforced and same track is already playing, do nothing
-    if (!enforce && !m_currentMusicName.empty() && m_currentMusicName == normalizedName)
+    if (!enforce && !m_currentMusicName.empty() && m_currentMusicName == identity)
     {
         return;
     }
@@ -552,7 +563,14 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     // (common in server-hosted MU setups) due to file open + ID3 header parse + decoder init
     // on the calling thread. Acceptable for BGM at scene transitions on SSD; known limitation
     // for HDD/network installs. Deferred to 5.2.x if a non-blocking init path is needed.
-    ma_result result = ma_sound_init_from_file(&m_engine, normalizedName.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
+    // Resolve to the real on-disk path only here, for the one-shot stream init:
+    // on Linux/macOS the asset's spelling/case may differ from the MUSIC_*
+    // constant. The resolve (filesystem syscalls) stays off the per-frame guard.
+    std::string filePath = identity;
+#ifndef _WIN32
+    filePath = MuResolvePath(identity.c_str());
+#endif
+    ma_result result = ma_sound_init_from_file(&m_engine, filePath.c_str(), MA_SOUND_FLAG_STREAM, nullptr,
                                                nullptr, &m_musicSound);
 
     if (result != MA_SUCCESS)
@@ -568,7 +586,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     ma_sound_start(&m_musicSound);
 
     m_musicLoaded = true;
-    m_currentMusicName = normalizedName;
+    m_currentMusicName = identity;
 }
 
 // ---------------------------------------------------------------------------
@@ -604,12 +622,18 @@ void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 
     // If not enforced, only stop if the name matches the current track.
     // nullptr name means "stop current track regardless of name" (unconditional soft stop).
-    // Normalize the name for comparison — m_currentMusicName stores normalized paths.
+    // Compare against the same logical identity PlayMusic() stored. Using the
+    // identity (separators only) rather than the filesystem-resolved path is what
+    // makes this match on Linux/macOS: PlayMusic() resolves the path for the
+    // stream but stores the identity, so the guard must too. Resolving here
+    // instead would never match, silently no-op the stop, and leave the previous
+    // track playing after warping to a map that starts no track of its own
+    // (e.g. Lorencia BGM continuing on the Arena) — maps that do start their own
+    // track only masked the bug because PlayMusic() tears down the old stream
+    // unconditionally. It also keeps filesystem syscalls off this per-frame path.
     if (!enforce && name != nullptr && !m_currentMusicName.empty())
     {
-        std::string normalizedName(name);
-        std::replace(normalizedName.begin(), normalizedName.end(), '\\', '/');
-        if (m_currentMusicName != normalizedName)
+        if (m_currentMusicName != NormalizeMusicIdentity(name))
         {
             return;
         }
