@@ -54,9 +54,22 @@ namespace mu::ui::window
         void SetHotKey(int iHotKey, int iItemType, int iItemLevel);
         int GetHotKey(int iHotKey);
         int GetHotKeyLevel(int iHotKey);
-        void UseItemRButton();
         void RenderItems();
-        void RenderItemCount();
+
+        // Phase 3 (item hotkey chrome, main_frame.rml's #item_slots): replaces the old
+        // UseItemRButton()/CheckMouseIn()/MouseRButtonPush poll and RenderItemCount()'s native
+        // digit-sprite draw entirely -- RmlUi now does hit-testing and stack-count text for these
+        // 4 slots (icon art itself stays native -- see this class's header comment). Same "hover
+        // callback sets a member,
+        // SyncRmlModel() reads it next frame" shape as CSkillList::OnHotkeySlotHover()/OnUnhover().
+        void OnHotkeySlotHover(int iSlotIndex) { m_iHoveredSlot = iSlotIndex; }
+        void OnUnhover() { m_iHoveredSlot = -1; }
+        int GetHoveredSlot() const { return m_iHoveredSlot; }
+        void OnHotkeySlotRightClick(int iSlotIndex);
+
+        // Stack count for the item bound to this slot (0/empty if unbound or a non-stacking
+        // item) -- used by SyncRmlModel() for #item_slots' .item-stack-label binding.
+        int GetSlotItemCount(int iSlotIndex);
 
     private:
         int GetHotKeyItemIndex(int iType, bool bItemCount = false);
@@ -65,6 +78,10 @@ namespace mu::ui::window
 
         int m_iHotKeyItemType[HOTKEY_COUNT];
         int m_iHotKeyItemLevel[HOTKEY_COUNT];
+
+        // -1 == nothing hovered right now. Set by OnHotkeySlotHover()/cleared by OnUnhover() --
+        // mirrors CSkillList::m_iHoveredGridSkillIndex exactly.
+        int m_iHoveredSlot = -1;
     };
 
     // Phase 2 of 3 of the CMainFrameWindow pilot (see docs/rmlui-ui-system/STATUS.md). One
@@ -291,18 +308,22 @@ namespace mu::ui::window
     // This legacy file actually welds three classes together: this one (frame chrome +
     // HP/MP/AG/SD/EXP bars + 5 corner buttons -- the part this pilot ports), CSkillList (skill
     // hotkey row/grid/pet commands, still fully legacy, Phase 2), and CItemHotKey (QWER item
-    // slots, still fully legacy -- its icons are 3D-rendered meshes composited via a separate
-    // Render3D()/I3DRenderObj camera pass with no RmlUi equivalent, Phase 3).
+    // slots, Phase 3). Phase 3's own icon art is a genuine live 3D model render
+    // (RenderItem3D()/RenderObjectScreen(), ZzzInventory.cpp) -- permanently native, no RmlUi
+    // equivalent (ui-target-architecture.md Section E), same bucket as CCharMakeWin's preview
+    // panel. What Phase 3 actually moved to RmlUi is #item_slots' chrome (hover-highlight border,
+    // stack-count text, right-click-to-use) -- the same overlay-around-a-still-native-icon split
+    // Phase 2 already proved for skill icons.
     //
     // Render() is a *thin passthrough*, not a full no-op like CMuHelperBar/CBuffStrip -- this
     // window is the first case where out-of-scope legacy content (the skill hotkey row/current-
-    // skill icon, and the item-hotkey stack-count text) shares the exact same screen region as
-    // content this pilot ports. RmlUi always paints last in the frame (SetPreSubmitCallback), so
-    // moving the *shared* center-band background chrome to RmlUi would draw it on top of (occlude)
-    // the still-legacy skill row painted earlier in the same frame. Render() therefore keeps
-    // calling RenderLeftFrame()/RenderCenterFrame() (background chrome for the two regions that
-    // still host legacy content) and RenderLeftRegion()/g_pSkillList->RenderCurrentSkillAndHot-
-    // SkillList() (the legacy content itself) exactly as before -- only RenderRightFrame()/
+    // skill icon) shares the exact same screen region as content this pilot ports. RmlUi always
+    // paints last in the frame (SetPreSubmitCallback), so moving the *shared* center-band
+    // background chrome to RmlUi would draw it on top of (occlude) the still-legacy skill row
+    // painted earlier in the same frame. Render() therefore keeps calling
+    // RenderLeftFrame()/RenderCenterFrame() (background chrome for the two regions that still host
+    // legacy content) and g_pSkillList->RenderCurrentSkillAndHotSkillList() (the legacy content
+    // itself) exactly as before -- only RenderRightFrame()/
     // RenderExperienceBackground() (chrome for regions with NO remaining legacy content) and
     // RenderButtons()/RenderLifeMana()/RenderGuageAG()/RenderGuageSD()/RenderExperience() (the
     // parts this pilot actually ports) are removed, their C++ implementations deleted rather than
@@ -361,7 +382,6 @@ namespace mu::ui::window
         void SetItemHotKey(int iHotKey, int iItemType, int iItemLevel);
         int GetItemHotKey(int iHotKey);
         int GetItemHotKeyLevel(int iHotKey);
-        void UseHotKeyItemRButton();
         //void RenderHotKeyItems();
         void UpdateItemHotKey();
 
@@ -380,8 +400,6 @@ namespace mu::ui::window
         // closes, to sync the button's "open" visual state. Sets a bound model boolean instead of
         // swapping CButton sprite frames -- see this class's header comment.
         void SetBtnState(int iBtnType, bool bStateDown);
-
-        static void UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB);
 
         // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
         // cleared exactly like every other migrated window's RmlClickX() pattern.
@@ -405,11 +423,9 @@ namespace mu::ui::window
         void LoadImages();
         void UnloadImages();
 
-        void RenderLeftRegion();
         void RenderCenterRegion();
         void RenderLeftFrame();
         void RenderCenterFrame();
-        void RenderHotKeyItemCount();
 
         void SyncRmlModel();
 
@@ -460,11 +476,12 @@ namespace mu::ui::window
             // UI::Scaling::BottomHudScale() folds in GameConfig::GetUIScalePercent() as a
             // post-clamp multiplier (UITransform.cpp), so barsScale picks it up automatically
             // here, and so does every other caller of BottomHudScale/BottomHudCenterTransform
-            // codebase-wide -- in particular Render()/Render3D()/UseHotKeyItemRButton()'s own
-            // BottomHudCenterTransform() calls (still real UI::Scaling C++, used for the
-            // still-legacy item-hotkey band's hit-testing and 3D icon placement) -- for free, from
-            // the one shared function, with no separate wiring needed here; the two call sites
-            // can't drift out of sync the way CCharSelMainWin's independent calculators once did
+            // codebase-wide -- in particular Render()/Render3D()'s own BottomHudCenterTransform()
+            // calls (still real UI::Scaling C++, used for the still-legacy item-hotkey band's 3D
+            // icon placement; right-click hit-testing moved to RmlUi in Phase 3, no longer a
+            // caller here) -- for free, from the one shared function, with no separate wiring
+            // needed here; the remaining call sites can't drift out of sync the way
+            // CCharSelMainWin's independent calculators once did
             // (layout-and-scaling.md). Every RmlUi-authored length in main_frame.rcss is still
             // `px`, not `dp`, so it continues to track bars_scale exactly instead of being scaled
             // a second time by RmlUiRuntime's context-wide density-independent-pixel ratio (see
@@ -549,6 +566,14 @@ namespace mu::ui::window
             bool skillTooltipVisible = false;
             float skillTooltipLeft = 0.f, skillTooltipTop = 0.f;
             std::vector<SkillTooltipLineEntry> skillTooltipLines;
+
+            // Phase 3 (item hotkey, #item_slots): hover-highlight border + stack-count text for
+            // the 4 Q/W/E/R potion slots. 4 separate named fields, not an array -- same
+            // "c.Bind() takes a pointer-to-member of a scalar field" convention as the skill-slot
+            // fields above. The 3D-rendered potion icon itself is untouched by this pilot
+            // (permanent native content, see CItemHotKey's own header comment).
+            bool itemSlot0Hovered = false, itemSlot1Hovered = false, itemSlot2Hovered = false, itemSlot3Hovered = false;
+            Rml::String itemSlot0Count, itemSlot1Count, itemSlot2Count, itemSlot3Count;
         };
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

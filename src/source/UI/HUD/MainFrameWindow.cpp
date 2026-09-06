@@ -219,6 +219,34 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
                 c.BindEventCallback("skill_unhover",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnUnhover(); });
 
+                // Phase 3 (item hotkey) -- #item_slots' hover-highlight + stack-count chrome and
+                // right-click-to-use. Unlike CSkillList (a global), m_ItemHotKey is a plain member
+                // of this class, so these lambdas capture [this] and forward directly rather than
+                // through a global pointer.
+                c.Bind("item_slot_0_hovered", &model.itemSlot0Hovered);
+                c.Bind("item_slot_1_hovered", &model.itemSlot1Hovered);
+                c.Bind("item_slot_2_hovered", &model.itemSlot2Hovered);
+                c.Bind("item_slot_3_hovered", &model.itemSlot3Hovered);
+                c.Bind("item_slot_0_count", &model.itemSlot0Count);
+                c.Bind("item_slot_1_count", &model.itemSlot1Count);
+                c.Bind("item_slot_2_count", &model.itemSlot2Count);
+                c.Bind("item_slot_3_count", &model.itemSlot3Count);
+
+                c.BindEventCallback("item_hotkey_hover",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args) { m_ItemHotKey.OnHotkeySlotHover(args.empty() ? 0 : args[0].Get<int>()); });
+                c.BindEventCallback("item_hotkey_unhover",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_ItemHotKey.OnUnhover(); });
+                // First right-click RmlUi binding in the codebase (data-event-mouseup, not
+                // data-event-click -- RmlUi's Context only ever dispatches Click for the left
+                // button; Mouseup fires for any button and carries a "button" parameter, 1 ==
+                // right -- see RmlUi/Source/Core/Context.cpp's ProcessMouseButtonUp()).
+                c.BindEventCallback("item_hotkey_rightclick",
+                    [this](Rml::DataModelHandle, Rml::Event& event, const Rml::VariantList& args)
+                    {
+                        if (event.GetParameter<int>("button", -1) != 1) return;
+                        m_ItemHotKey.OnHotkeySlotRightClick(args.empty() ? 0 : args[0].Get<int>());
+                    });
+
                 c.BindEventCallback("mainframe_cshop_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCShop(); });
                 c.BindEventCallback("mainframe_chainfo_click",
@@ -358,10 +386,6 @@ bool mu::ui::window::CMainFrameWindow::Render()
     }
 
     {
-        UI::Scaling::ScopedActiveTransform layout(leftTransform, true);
-        RenderLeftRegion();
-    }
-    {
         UI::Scaling::ScopedActiveTransform layout(centerTransform, true);
         RenderCenterRegion();
     }
@@ -382,13 +406,15 @@ void mu::ui::window::CMainFrameWindow::Render3D()
     // while the rect is reference-space, so the hover test only lines up when centerTransform
     // happens to be identity scale/offset -- at any other window size the real cursor has to sit
     // well left of the actual on-screen icon before the raw numbers happen to satisfy the box
-    // test. UseHotKeyItemRButton() right below already passes true for exactly this reason --
-    // Render3D()'s hover path was the one call site that didn't match.
+    // test. This native hover check is independent of (and slightly redundant with) #item_slots'
+    // own RmlUi mouseover/mouseout hover-highlight (Phase 3) -- deliberately left alone rather than
+    // unified, since RenderItem3D() is a shared free function used by other callers too (equipment
+    // slots, inventory grid) that this pilot must not touch.
     //
     // += GetItemHotkeyOffsetX() * scaleX -- must match Render()'s own leftTransform exactly, or
-    // the 3D icons render in a different place than where RenderLeftFrame()'s chrome and the
-    // click hit-test (UseHotKeyItemRButton()) expect them. `* scaleX` is required, not optional --
-    // see Render()'s own comment on this same bug (GetItemHotkeyOffsetX() is an unscaled
+    // the 3D icons render in a different place than where RenderLeftFrame()'s chrome and
+    // #item_slots' RmlUi hit-testing expect them. `* scaleX` is required, not optional -- see
+    // Render()'s own comment on this same bug (GetItemHotkeyOffsetX() is an unscaled
     // reference-pixel delta, Transform::offsetX is real screen pixels).
     auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
     transform.offsetX += GetItemHotkeyOffsetX() * transform.scaleX;
@@ -396,19 +422,9 @@ void mu::ui::window::CMainFrameWindow::Render3D()
     m_ItemHotKey.RenderItems();
 }
 
-void mu::ui::window::CMainFrameWindow::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
-{
-    g_pMainFrame->RenderHotKeyItemCount();
-}
-
 bool mu::ui::window::CMainFrameWindow::IsVisible() const
 {
     return CObject::IsVisible();
-}
-
-void mu::ui::window::CMainFrameWindow::RenderLeftRegion()
-{
-    m_pNewUI3DRenderMng->RenderUI2DEffect(ITEMHOTKEYNUMBER_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
 }
 
 void mu::ui::window::CMainFrameWindow::RenderCenterRegion()
@@ -420,7 +436,7 @@ void mu::ui::window::CMainFrameWindow::RenderCenterRegion()
 
 // Theme-aware background fill behind the still-legacy 3D-composited item/skill icons. RmlUiRuntime's
 // single "main" Rml::Context always renders once, after everything else in the frame (world,
-// legacy 2D chrome, AND the 3D-composited item/skill icons -- see Render3D()/RenderLeftRegion()),
+// legacy 2D chrome, AND the 3D-composited item/skill icons -- see Render3D()),
 // so an RmlUi-drawn background through that context could never sit behind those icons, only ever
 // cover them. RmlUiRuntime::RenderBackgroundLayer() (docs/rmlui-ui-system/STATUS.md's "RmlUi
 // renders last" finding) is the fix: it drives a second, background-only Rml::Context that this
@@ -504,11 +520,6 @@ void mu::ui::window::CMainFrameWindow::RenderCenterFrame()
 // see SyncRmlModel()) removed -- moved to RmlUi (main_frame.rml/.rcss). See this class's header
 // comment for why these bands, but not the left/center bands, could move (no remaining legacy
 // content occupies the same pixels).
-
-void mu::ui::window::CMainFrameWindow::RenderHotKeyItemCount()
-{
-    m_ItemHotKey.RenderItemCount();
-}
 
 // RenderButtons()/RenderCharInfoButton()/RenderFriendButton()/RenderFriendButtonState() and
 // BtnProcess() removed -- the 5 corner buttons moved to RmlUi (data-event-click bindings, see
@@ -687,10 +698,10 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
 
         // Item-hotkey/skill-hotkey band offsets -- read from #item_hotkey_anchor/
         // #skill_list_anchor's real screen position (Element::GetAbsoluteOffset()) and turned
-        // into a delta from centerTransform's own unshifted offsetX. The still-legacy Render()/
-        // Render3D()/UseHotKeyItemRButton() (item hotkey) and CSkillList's own Render()/
-        // UpdateMouseEvent() (skill hotkey) each apply this delta to whichever transform they use,
-        // keeping render AND click hit-testing in sync automatically -- see
+        // into a delta from centerTransform's own unshifted offsetX. The still-legacy Render3D()
+        // (item hotkey icon) and CSkillList's own Render()/UpdateMouseEvent() (skill hotkey) each
+        // apply this delta to whichever transform they use, keeping render AND (for the skill row)
+        // click hit-testing in sync automatically -- see
         // GetItemHotkeyOffsetX()'s own header comment (MainFrameWindow.h) for why this reads
         // an RmlUi element instead of a per-theme C++ branch. One frame of lag is possible here
         // (this runs before this frame's own RmlUi Update(), so the marker reflects last frame's
@@ -939,6 +950,18 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     syncFloat(&MainFrameRmlModel::skillSlot2Cooldown, "skill_slot_2_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(2));
     syncFloat(&MainFrameRmlModel::skillSlot3Cooldown, "skill_slot_3_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(3));
     syncFloat(&MainFrameRmlModel::skillSlot4Cooldown, "skill_slot_4_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(4));
+
+    // Phase 3 (item hotkey) -- #item_slots' hover-highlight border + stack-count text.
+    // m_ItemHotKey is this class's own member (unlike g_pSkillList), read directly.
+    auto stackCountText = [](int count) { return count > 0 ? std::to_string(count) : Rml::String(); };
+    syncBool(&MainFrameRmlModel::itemSlot0Hovered, "item_slot_0_hovered", m_ItemHotKey.GetHoveredSlot() == 0);
+    syncBool(&MainFrameRmlModel::itemSlot1Hovered, "item_slot_1_hovered", m_ItemHotKey.GetHoveredSlot() == 1);
+    syncBool(&MainFrameRmlModel::itemSlot2Hovered, "item_slot_2_hovered", m_ItemHotKey.GetHoveredSlot() == 2);
+    syncBool(&MainFrameRmlModel::itemSlot3Hovered, "item_slot_3_hovered", m_ItemHotKey.GetHoveredSlot() == 3);
+    syncText(&MainFrameRmlModel::itemSlot0Count, "item_slot_0_count", stackCountText(m_ItemHotKey.GetSlotItemCount(0)));
+    syncText(&MainFrameRmlModel::itemSlot1Count, "item_slot_1_count", stackCountText(m_ItemHotKey.GetSlotItemCount(1)));
+    syncText(&MainFrameRmlModel::itemSlot2Count, "item_slot_2_count", stackCountText(m_ItemHotKey.GetSlotItemCount(2)));
+    syncText(&MainFrameRmlModel::itemSlot3Count, "item_slot_3_count", stackCountText(m_ItemHotKey.GetSlotItemCount(3)));
     syncFloat(&MainFrameRmlModel::currentSkillCooldown, "current_skill_cooldown", g_pSkillList->GetCurrentSkillCooldownFraction());
 
     syncBool(&MainFrameRmlModel::skillGridOpen, "skill_grid_open", g_pSkillList->IsSkillGridOpen());
@@ -1020,17 +1043,6 @@ int mu::ui::window::CMainFrameWindow::GetItemHotKey(int iHotKey)
 int mu::ui::window::CMainFrameWindow::GetItemHotKeyLevel(int iHotKey)
 {
     return m_ItemHotKey.GetHotKeyLevel(iHotKey);
-}
-
-void mu::ui::window::CMainFrameWindow::UseHotKeyItemRButton()
-{
-    // centerTransform, not BottomHudLeftTransform, += GetItemHotkeyOffsetX() * scaleX -- must
-    // match Render3D()'s (and Render()'s leftTransform) exactly, or right-click hit-testing lands
-    // on the wrong screen position. `* scaleX` -- see Render()'s own comment on this bug.
-    auto transform = UI::Scaling::BottomHudCenterTransform(WindowWidth, WindowHeight);
-    transform.offsetX += GetItemHotkeyOffsetX() * transform.scaleX;
-    UI::Scaling::ScopedActiveTransform layout(transform, true);
-    m_ItemHotKey.UseItemRButton();
 }
 
 void mu::ui::window::CMainFrameWindow::UpdateItemHotKey()
@@ -1369,42 +1381,28 @@ void mu::ui::window::CItemHotKey::RenderItems()
     }
 }
 
-void mu::ui::window::CItemHotKey::RenderItemCount()
+void mu::ui::window::CItemHotKey::OnHotkeySlotRightClick(int iSlotIndex)
 {
-    float x, y, width, height;
-
-    for (int i = 0; i < HOTKEY_COUNT; ++i)
+    // Replaces the old CheckMouseIn()/MouseRButtonPush poll entirely -- RmlUi's own Context now
+    // does hit-testing for these 4 slots (main_frame.rml's data-event-mouseup), first right-click
+    // RmlUi binding in the codebase (docs/rmlui-ui-system/newui-tier-adapter.md's "still unproven"
+    // list). Same direct-action shape as CSkillList::OnHotkeySlotClick() -- no polled flag needed
+    // at this tier. `Hero->Dead == 0` reproduces the old call site's own guard
+    // (ZzzInterface.cpp), which only reached CheckMouseIn()/SendRequestUse() while alive.
+    if (Hero->Dead != 0)
     {
-        int iCount = GetHotKeyItemIndex(i, true);
-        if (iCount > 0)
-        {
-            x = 30 + (i * 38); y = 457; width = 8; height = 9;
-            mu::ui::window::RenderNumber(x, y, iCount);
-        }
+        return;
+    }
+    int iIndex = GetHotKeyItemIndex(iSlotIndex);
+    if (iIndex != -1)
+    {
+        SendRequestUse(iIndex, 0);
     }
 }
 
-void mu::ui::window::CItemHotKey::UseItemRButton()
+int mu::ui::window::CItemHotKey::GetSlotItemCount(int iSlotIndex)
 {
-    int x, y, width, height;
-
-    for (int i = 0; i < HOTKEY_COUNT; ++i)
-    {
-        x = 10 + (i * 38); y = 445; width = 20; height = 20;
-        if (mu::ui::window::CheckMouseIn(x, y, width, height) == true)
-        {
-            if (MouseRButtonPush)
-            {
-                MouseRButtonPush = false;
-                int iIndex = GetHotKeyItemIndex(i);
-                if (iIndex != -1)
-                {
-                    SendRequestUse(iIndex, 0);
-                    break;
-                }
-            }
-        }
-    }
+    return GetHotKeyItemIndex(iSlotIndex, true);
 }
 
 mu::ui::window::CSkillList::CSkillList()

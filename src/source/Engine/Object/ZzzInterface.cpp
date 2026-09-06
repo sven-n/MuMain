@@ -3403,11 +3403,6 @@ void MoveInterface()
         }
     }
 
-    if (Hero->Dead == 0)
-    {
-        g_pMainFrame->UseHotKeyItemRButton();
-    }
-
     if (g_pUIManager->IsInputEnable())
     {
         int x, y, Width, Height;

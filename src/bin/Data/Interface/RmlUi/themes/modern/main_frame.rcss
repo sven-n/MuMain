@@ -339,9 +339,10 @@
 	border: none;
 }
 
-/* Phase 2 (skill list): #skill_slot_0..4/#current_skill_slot are now real click/hover targets
+/* Phase 2 (skill list) / Phase 3 (item hotkey): these are now real hover/click targets
    (main_frame.rml) -- opt back into pointer-events (inherited `none` from body, base.rcss's
    pointer-events trap) same as every other interactive element in this document. */
+#item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
 #skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
 #current_skill_slot {
 	pointer-events: auto;
@@ -362,6 +363,23 @@
 	position: absolute;
 	left: 2px;
 	top: 2px;
+	color: #ffffff;
+	font-weight: bold;
+	font-family: "token(font-body)";
+	font-effect: outline(1px #000000);
+	font-size: 8px;
+	line-height: 8px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Stack count for a bound potion -- bottom-right corner, matching the native
+   CItemHotKey::RenderItemCount()'s own offset relative to its icon. Empty string (0 or unbound)
+   renders nothing, same convention as .skill-hotkey-label's empty-slot case. */
+.item-stack-label {
+	position: absolute;
+	right: 2px;
+	bottom: 2px;
 	color: #ffffff;
 	font-weight: bold;
 	font-family: "token(font-body)";
@@ -400,7 +418,8 @@
 #skill_slot_0 { border-radius: 3px 0 0 3px; }
 #skill_slot_1, #skill_slot_2, #skill_slot_3 { border-radius: 0; }
 #skill_slot_4 { border-radius: 0 3px 3px 0; }
-#skill_slots .selected {
+/* Same hover-highlight look for either slot family -- one rule, not duplicated per group. */
+#item_slots .selected, #skill_slots .selected {
 	border: 1px token(accent-gold-bright);
 	background-color: rgba(176, 182, 188, 25);
 }

@@ -209,8 +209,11 @@ port still renames at port time, no exception.
 - **Drag-and-drop** (`UI::Items::Drag`, `CPickedItem`) — used throughout `Inventory/*`, not
   touched by any pilot yet. No RmlUi pattern exists for this in this codebase at all.
 - **`I3DRenderObj`/3D-camera-space rendering** — a second, parallel compositing path
-  (`mu::ui::window::C3DRenderMng`) used for item icons, the dragged-item ghost, and some tooltips. Also
-  untouched.
+  (`mu::ui::window::C3DRenderMng`) used for item icons (permanently native, see
+  `ui-target-architecture.md` Section E), the dragged-item ghost, and some tooltips. The icons
+  themselves stay untouched; `CItemHotKey`'s own slot chrome (hover-highlight border, stack-count
+  text) now sits in front of them as an RmlUi overlay, same split as `CSkillList`'s Phase 2 skill
+  icons (Phase 3, below).
 - **The three separate, non-unified tooltip mechanisms** found in the initial `UI/NewUI` audit
   (generic button tooltip, item tooltip, skill tooltip) — `CMuHelperBar`/`CBuffStrip` each added a
   *fourth*, simple CSS-only hover-tooltip pattern rather than trying to unify with any of them
@@ -218,10 +221,14 @@ port still renames at port time, no exception.
   separate, deliberately deferred simplification). Consolidating is explicitly deferred
   ([`architecture-principles.md`](architecture-principles.md) §12) until more of the tier is
   actually ported.
-- **Right-click-distinct-from-left-click in a `data-event-click` binding** — the original
-  `CNewUIBuffWindow` had a right-click-to-cancel special case (Infinity Arrow / Swell of Magic
-  Power) that `CBuffStrip` does not reproduce; no RmlUi content in this codebase has ever
-  distinguished the two mouse buttons in an event binding.
+- ~~Right-click-distinct-from-left-click in a `data-event-click` binding~~ **Proven**
+  (`CMainFrameWindow`'s Phase 3, `CItemHotKey`'s `#item_slots`): RmlUi's `Context` only ever
+  dispatches `EventId::Click` for the left mouse button, but `ProcessMouseButtonUp()`
+  (`RmlUi/Source/Core/Context.cpp`) dispatches `EventId::Mouseup` for any button, carrying a
+  `"button"` event parameter (`1` == right) — bound via `data-event-mouseup`, not
+  `data-event-click`. The original `CNewUIBuffWindow`'s right-click-to-cancel special case
+  (Infinity Arrow / Swell of Magic Power) still isn't reproduced by `CBuffStrip` — that's a
+  separate, still-open simplification, not blocked by this any more.
 
 ## Source map
 

@@ -17,15 +17,25 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `mu::ui::window::COptionWindow` instead. Built and verified against a real server, both themes.
 - **In-game HUD (`mu::ui::window::CObject` tier)** — `CMuHelperBar` (map/position readout + MU Helper bot
   control bar) and `CBuffStrip` (active-buff icon strip, the `data-for`/dynamic-array pilot at
-  this tier) are fully done. `CMainFrameWindow`'s 3-phase HUD-frame port is **2 of 3 phases
-  done**: Phase 1 (HP/MP/AG/SD/EXP bars + 5 corner buttons) and Phase 2 (`CSkillList` —
-  compact hotkey row click/hover/cooldown, expanded skill grid, pet-command row, and skill
-  tooltips for both themes, replacing the old hand-rolled `EVENT_STATE` hover/click machine
-  entirely). **Icon/box-frame art for the skill grid and pet row stays legacy 2D**, a deliberate
-  Phase 2 scope cut — see the pilots-to-revisit table below. Phase 3 (`CItemHotKey` — potion
-  slots, 3D-camera-composited icons, no RmlUi pattern proven for that yet) is not started. All
-  landed pilots built and verified against a real server, both themes. The rest of this tier —
-  ~88 other `mu::ui::window::CObject` windows, drag-and-drop, and 3D-camera-space rendering generally — is not
+  this tier) are fully done. `CMainFrameWindow`'s 3-phase HUD-frame port is **done**: Phase 1
+  (HP/MP/AG/SD/EXP bars + 5 corner buttons), Phase 2 (`CSkillList` — compact hotkey row
+  click/hover/cooldown, expanded skill grid, pet-command row, and skill tooltips for both themes,
+  replacing the old hand-rolled `EVENT_STATE` hover/click machine entirely), and Phase 3
+  (`CItemHotKey` — potion-slot hover-highlight border, stack-count text, and right-click-to-use,
+  all via RmlUi; the potion icon itself stays native — see the correction below). **Icon/box-frame
+  art for the skill grid and pet row stays legacy 2D**, a deliberate Phase 2 scope cut — see the
+  pilots-to-revisit table below. **Correction, 2026-09-06**: Phase 3's icons are not a sprite-atlas
+  porting gap — traced to `RenderItem3D()`/`RenderObjectScreen(MODEL_...)`
+  (`ZzzInventory.cpp`), they're genuine live 3D model renders, the same permanent, no-RmlUi-
+  equivalent category as `CCharMakeWin`'s character-preview panel (`ui-target-architecture.md`
+  Section E) — no future pattern will port the icon itself. Phase 3 accordingly only moved the
+  slot chrome (hover-highlight border, stack-count text, right-click-to-use — the last of these the
+  first `data-event-mouseup`/right-click RmlUi binding in the codebase, see
+  `newui-tier-adapter.md`'s own former "still unproven" entry) to RmlUi as an overlay around the
+  still-native icon, the same split Phase 2 already proved for skill icons, not a new pattern. All
+  landed pilots (including Phase 3) built and verified against a real server, both themes. The rest
+  of this tier — ~88 other `mu::ui::window::CObject` windows, drag-and-drop, and 3D-camera-space
+  rendering generally — is not
   yet migrated.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)

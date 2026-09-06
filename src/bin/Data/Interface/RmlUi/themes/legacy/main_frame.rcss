@@ -135,15 +135,31 @@
 .frame-btn:hover { filter: brightness(1.25); }
 
 .btn-icon-label { display: none; }
-/* #item_slots stays fully hidden -- Q/W/E/R are baked into the real IMAGE_MENU_1 sprite art
-   (.slot-hotkey-label below). #skill_slots is NOT hidden: its own outline/highlight classes
-   (.slot-frame, .selected) are still unstyled here so they stay invisible on their own, but
-   .skill-hotkey-label needs it visible to show the assigned hotkey number (retired from the legacy
-   digit-sprite subscript RenderSkillIcon() used to draw). */
-#item_slots { display: none; }
+/* Phase 3 (item hotkey): #item_slots is no longer hidden outright -- same treatment as
+   #skill_slots below, hit-test/stack-count only. Q/W/E/R letters stay baked into the real
+   IMAGE_MENU_1 sprite art (.slot-hotkey-label stays hidden, unlike .item-stack-label below, which
+   has no baked-in equivalent and needs a real style). .slot-frame/.selected stay unstyled here
+   (no visible border) -- this theme's own sprite art already frames the slots visually. */
 #buttons_top { display: none; }
 #gauge_bg_left, #gauge_bg_right { display: none; }
 .slot-hotkey-label { display: none; }
+
+/* Stack count for a bound potion -- no baked-in sprite equivalent (unlike the Q/W/E/R letters
+   above), so this needs a real style here, unlike .slot-hotkey-label. Bottom-right corner of the
+   icon, matching CItemHotKey::RenderItemCount()'s own offset. Empty string (0 or unbound) renders
+   nothing. */
+.item-stack-label {
+	position: absolute;
+	right: 1px;
+	bottom: 1px;
+	color: #ffffff;
+	font-weight: bold;
+	font-effect: outline(1px #000000);
+	font-size: 8px;
+	line-height: 8px;
+	white-space: nowrap;
+	pointer-events: none;
+}
 
 /* Same reference-pixel positions RenderCurrentSkillAndHotSkillList() draws each icon at
    (MainFrameWindow.cpp) -- #skill_list_anchor sits at the origin for legacy (own main_frame.rcss,
@@ -158,8 +174,22 @@
 #skill_slot_4 { position: absolute; left: 350px; top: 431px; width: 32px; height: 38px; }
 #current_skill_slot { position: absolute; left: 392px; top: 437px; width: 20px; height: 28px; }
 
-/* Phase 2 (skill list): #skill_slot_0..4/#current_skill_slot are now real click/hover targets
+/* Zero-shift wrapper, same as #skill_slots above (#item_hotkey_anchor sits at the origin for
+   legacy too -- see this file's own header, #item_hotkey_anchor { left:0; top:0 }). Each slot's
+   own rect matches CItemHotKey::RenderItems()'s exact native icon draw position/size
+   (x = 10 + i*38, y = 443, 20x20, ZzzInventory.cpp/MainFrameWindow.cpp) -- not modern theme's own
+   redesigned band geometry, which is unrelated (modern shifts the native icon itself via
+   GetItemHotkeyOffsetX(); legacy applies no shift, so this must match the un-shifted formula
+   directly). */
+#item_slots { position: absolute; left: 0; top: 0; }
+#item_slot_0 { position: absolute; left: 10px;  top: 443px; width: 20px; height: 20px; }
+#item_slot_1 { position: absolute; left: 48px;  top: 443px; width: 20px; height: 20px; }
+#item_slot_2 { position: absolute; left: 86px;  top: 443px; width: 20px; height: 20px; }
+#item_slot_3 { position: absolute; left: 124px; top: 443px; width: 20px; height: 20px; }
+
+/* Phase 2 (skill list) / Phase 3 (item hotkey): these are now real hover/click targets
    (main_frame.rml) -- opt back into pointer-events (inherited `none` from body). */
+#item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
 #skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
 #current_skill_slot {
 	pointer-events: auto;

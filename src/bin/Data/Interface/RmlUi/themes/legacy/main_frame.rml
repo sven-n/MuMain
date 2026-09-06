@@ -82,14 +82,19 @@
 			<span class="tooltip" id="exp_tooltip">{{exp_tooltip}}</span>
 		</div>
 
-		<!-- Decorative slot outlines for the still-legacy item-hotkey/skill icons -- modern theme
-		     only; legacy hides these (#item_slots/#skill_slots), its own sprite chrome already
-		     frames the slots. -->
+		<!-- Phase 3 (item hotkey): interactive overlay -- hover highlight, stack count, and
+		     right-click-to-use (data-event-mouseup, first right-click RmlUi binding in the
+		     codebase -- see CItemHotKey::OnHotkeySlotRightClick()'s comment). Icon art stays a live
+		     3D model render underneath (RenderItem3D()/RenderObjectScreen(), no RmlUi equivalent,
+		     permanent -- see ui-target-architecture.md Section E). Legacy leaves .slot-frame/
+		     .selected unstyled (no visible border), same precedent as #skill_slots below: this
+		     theme's own sprite chrome already frames the slots, only hit-testing and the
+		     stack-count text need to be real. -->
 		<div id="item_slots">
-			<div id="item_slot_0" class="slot-frame"><span class="slot-hotkey-label">Q</span></div>
-			<div id="item_slot_1" class="slot-frame"><span class="slot-hotkey-label">W</span></div>
-			<div id="item_slot_2" class="slot-frame"><span class="slot-hotkey-label">E</span></div>
-			<div id="item_slot_3" class="slot-frame"><span class="slot-hotkey-label">R</span></div>
+			<div id="item_slot_0" class="slot-frame" data-class-selected="item_slot_0_hovered" data-event-mouseover="item_hotkey_hover(0)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(0)"><span class="slot-hotkey-label">Q</span><span class="item-stack-label">{{item_slot_0_count}}</span></div>
+			<div id="item_slot_1" class="slot-frame" data-class-selected="item_slot_1_hovered" data-event-mouseover="item_hotkey_hover(1)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(1)"><span class="slot-hotkey-label">W</span><span class="item-stack-label">{{item_slot_1_count}}</span></div>
+			<div id="item_slot_2" class="slot-frame" data-class-selected="item_slot_2_hovered" data-event-mouseover="item_hotkey_hover(2)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(2)"><span class="slot-hotkey-label">E</span><span class="item-stack-label">{{item_slot_2_count}}</span></div>
+			<div id="item_slot_3" class="slot-frame" data-class-selected="item_slot_3_hovered" data-event-mouseover="item_hotkey_hover(3)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(3)"><span class="slot-hotkey-label">R</span><span class="item-stack-label">{{item_slot_3_count}}</span></div>
 		</div>
 		<!-- data-class-selected mirrors which hotkey slot currently shows the equipped skill.
 		     skill-hotkey-label shows the assigned hotkey number -- the legacy digit-sprite
