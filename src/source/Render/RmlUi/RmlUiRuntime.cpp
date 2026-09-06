@@ -20,15 +20,13 @@ namespace
     //     already folds in UI::Scaling::GetWindowContentScale() (OS display-scale/pixel-density)
     //     internally -- do NOT also multiply GetWindowContentScale() here, it would double-count.
     //
-    // NOT yet verified on real mismatched-density hardware -- Rml::Context's dimensions are set
-    // from SDL's window-coordinate size (RmlUiRuntime::OnResize, see its own comment), not
-    // SDL_GetWindowSizeInPixels(), and the SDL window requests SDL_WINDOW_HIGH_PIXEL_DENSITY
-    // (SDLWindowFlags.h). Whether RenderInterface_SDL_GPU's viewport already stretches that
-    // window-coordinate-sized canvas across the full pixel framebuffer (in which case the
-    // content-scale term folded into ViewportFitScale would double-scale) or renders it 1:1 (in
-    // which case it's the missing piece) needs a real scaled display or a
-    // UI::Scaling::SetWindowContentScale() debug override to confirm directly -- see
-    // docs/rmlui-ui-system/layout-and-scaling.md.
+    // Confirmed live on a 125%-scaled (non-high-DPI-pixel-density) display: contentScale folded
+    // into ViewportFitScale's UPPER bound only (see that function's own comment -- it used to also
+    // raise the lower bound, which overflowed every reference-pixel layout at/near the reference
+    // resolution). No double-scaling seen at the reference size after that fix. Whether a genuine
+    // high-pixel-density panel (SDL_GetWindowPixelDensity() > 1, not just an OS scale preference)
+    // needs anything different here is still unconfirmed -- see docs/rmlui-ui-system/
+    // layout-and-scaling.md.
     //
     // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
     // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and

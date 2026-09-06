@@ -53,19 +53,23 @@ fold would mean changing the percent does nothing, silently defeating the settin
 is folded into the **clamp bounds** instead, since its job is widening legitimate high-DPI headroom,
 not acting as a 1:1 user dial.
 
-**`WindowContentScale`-into-`dp` is not yet verified on real mismatched-density hardware.**
-`Rml::Context`'s dimensions are set from SDL's window-coordinate size (`RmlUiRuntime::OnResize`),
-not `SDL_GetWindowSizeInPixels()`, and the SDL window requests `SDL_WINDOW_HIGH_PIXEL_DENSITY`
-(`SDLWindowFlags.h`) — so window-coordinate size and real pixel size can genuinely diverge on a
-scaled display. Whether `RenderInterface_SDL_GPU`'s viewport already stretches that
-window-coordinate-sized canvas across the full pixel framebuffer (in which case the `dp`-ratio
-multiply would double-scale) or renders it 1:1 (in which case the multiply is the missing piece)
-wasn't resolved by reading code alone — confirm on real scaled-display hardware, or with a debug
-`UI::Scaling::SetWindowContentScale()` override, before trusting it in play. In the common case
-where `SDL_GetWindowDisplayScale()` and `SDL_GetWindowPixelDensity()` already agree, `contentScale`
-is 1.0 and this multiply is a no-op either way — the mismatch only shows up on the edge cases
-`WindowContentScale` exists for (Wayland fractional scaling, a window dragged to a different-DPI
-monitor), so a mistake here won't necessarily surface on typical hardware.
+**Confirmed live, 2026-09-07, on a 125%-scaled Windows display (`AppliedDPI=120`, no genuine
+high-pixel-density panel — `SDL_GetWindowPixelDensity()` presumably 1.0, `SDL_GetWindowDisplayScale()`
+1.25):** `contentScale` folding into `ViewportFitScale`'s clamp **lower** bound (not just the upper
+one) forced scale above 1.0 even exactly at the 640×480 reference resolution, overflowing every
+reference-pixel layout that assumes unity there with zero margin — reported as `CMyInventory`'s
+panel and `CMainFrameWindow`'s HUD bars both clipping at the bottom edge at 640×480. Fixed in
+`UI::Scaling::ViewportFitScale` (`UITransform.cpp`) by only folding `contentScale` into the upper
+bound (widening headroom, the original stated intent) — the lower bound now stays a fixed `1.0f`
+regardless of `contentScale`. `RmlUiRuntime.cpp`'s `dp`-ratio auto-fit reuses the same function, so
+it inherited the fix for free; no double-scaling observed at the reference size afterward.
+
+Still open: whether a genuine high-pixel-density panel (where `SDL_GetWindowPixelDensity() > 1`,
+not just an OS scale preference) needs different handling for the `dp`-ratio path specifically —
+`Rml::Context`'s dimensions come from SDL's window-coordinate size (`RmlUiRuntime::OnResize`), not
+`SDL_GetWindowSizeInPixels()`, so window-coordinate size and real pixel size can still genuinely
+diverge there. Confirm on real high-DPI hardware (not just OS-scaled hardware, now confirmed above)
+before trusting that path in play.
 
 **Known RmlUi quirk**: in at least one document (`char_sel_main.rml`, which has a `data-model` and
 several `data-event-click` bindings), a `font-family`/`font-size` declared on an ancestor

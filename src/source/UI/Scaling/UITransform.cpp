@@ -150,17 +150,23 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
     const float heightScale = static_cast<float>(windowHeight) / kReferenceHeight;
     const float contentScale = GetWindowContentScale();
-    const float minBound = 1.0f * contentScale;
+    // contentScale only widens headroom above the reference size -- it must NOT raise the floor
+    // below it. Folding it into minBound too forces scale above 1.0 even exactly AT the reference
+    // resolution whenever contentScale > 1 (any OS display-scale preference, e.g. Windows set to
+    // 125%, not just genuine high-DPI pixel density), which overflows every reference-pixel layout
+    // that assumes unity scale there with zero margin (found live: HUD + CMyInventory panel both
+    // clipped at 640x480 on a 125%-scaled display).
+    const float minBound = 1.0f;
     const float maxBound = maximumScale * contentScale;
     const float raw = std::clamp(std::min(widthScale, heightScale), minBound, maxBound);
 
     // Dampen the ramp between the two endpoints -- raw itself already IS the answer
     // at the reference resolution (minBound, t=0) and at/past the ceiling (maxBound, t=1); only
     // resolutions strictly between the two get pulled down toward minBound, by kFitDampingExponent
-    // (see its own comment). Reduces the reference/ceiling gap to a fraction [0,1] first
-    // (`range` guards the degenerate case where they're equal, e.g. contentScale collapses both to
-    // the same value), applies the curve, then remaps back -- so this stays purely a reshaping of
-    // the existing formula's output, not a second independent scale factor.
+    // (see its own comment). Reduces the reference/ceiling gap to a fraction [0,1] first (`range`
+    // guards the degenerate case where they're equal or inverted), applies the curve, then remaps
+    // back -- so this stays purely a reshaping of the existing formula's output, not a second
+    // independent scale factor.
     const float range = maxBound - minBound;
     if (range <= 0.0f)
         return raw;
