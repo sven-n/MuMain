@@ -4,7 +4,7 @@
 	<link type="text/rcss" href="my_inventory_bg.rcss"/>
 </head>
 <body data-model="my_inventory_bg">
-	<!-- Background-context document (Stage 1, H7) -- see themes/legacy/my_inventory_bg.rml's own
+	<!-- Background-context document -- see themes/legacy/my_inventory_bg.rml's own
 	     header comment for the full mechanism. Panel fill duplicates base.rcss's .modern-frame
 	     literal rather than linking base.rcss here -- same "fully independent" choice
 	     main_frame_bg.rcss already made for this context. -->

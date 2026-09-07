@@ -50,8 +50,8 @@ namespace UI::RmlBridge
             return (lastSlash == std::string::npos) ? std::string() : path.substr(0, lastSlash + 1);
         }
 
-        // Reads themes/<theme>/tokens.ini's [Tokens] section (modern-theme-visual-direction.md's
-        // token table) via the same private-profile API theme.ini's capability reader uses.
+        // Reads themes/<theme>/tokens.ini's [Tokens] section via the same private-profile API
+        // theme.ini's capability reader uses.
         // Missing file/theme/key all resolve to an empty string -- an RCSS rule referencing an
         // undefined token renders visibly wrong (empty value), which is enough: this is an
         // authoring-time mistake to catch in review, not a runtime condition worth handling more
@@ -86,7 +86,7 @@ namespace UI::RmlBridge
             return out;
         }
 
-        // Design-token substitution (modern-theme-visual-direction.md) -- this vendored RmlUi has
+        // Design-token substitution -- this vendored RmlUi has
         // no var()/custom-property mechanism, so a themed .rcss authored with token(name) markers
         // needs its tokens resolved before RmlUi ever sees the text. RmlUi's XMLNodeHandlerHead
         // treats an inline <style> block in <head> identically to an external
@@ -94,8 +94,8 @@ namespace UI::RmlBridge
         // RML's <head> (a document typically links two: base.rcss, then its own <name>.rcss) and
         // substitutes each stylesheet independently, in place, preserving order.
         //
-        // Content-driven, not theme-name-driven (architecture-principles.md §30, same reasoning
-        // as ThemeProvidesOwnIconChrome() above): a stylesheet with no token(...) marker leaves
+        // Content-driven, not theme-name-driven (same reasoning as ThemeProvidesOwnIconChrome()
+        // above): a stylesheet with no token(...) marker leaves
         // its own <link> untouched, so `legacy` never enters the substitution branch at all.
         std::string InlineTokenizedStylesheet(const std::string& rmlText, const std::string& resolvedRmlPath)
         {

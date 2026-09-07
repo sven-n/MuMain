@@ -16,21 +16,21 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     // overwriting whatever SetLayoutMode() a window's own constructor called -- this table entry,
     // not the constructor, is what actually governs a registered window's layout mode.
     case INTERFACE_CREDITS:
-    // CServerMsgWin/CServerSelWin (Phase 2) compute real screen pixels themselves too (position
+    // CServerMsgWin/CServerSelWin compute real screen pixels themselves too (position
     // derived from real WindowWidth/Height in CSceneUICoordinator::CreateLoginScene()/CreateCharacterScene()),
     // same reasoning as INTERFACE_CREDITS.
     case INTERFACE_SERVER_MESSAGE:
     case INTERFACE_SERVER_SELECT:
-    // CMsgWin (Phase 2) renders 100% via RmlUi's own #panel now, but its legacy CButtons still
+    // CMsgWin renders 100% via RmlUi's own #panel now, but its legacy CButtons still
     // do real click-detection bookkeeping (CursorInObject() against real, untransformed mouse
     // coordinates) against real-pixel positions computed from a real-pixel-positioned CSprite --
     // same reasoning as INTERFACE_CREDITS above.
-    // CSysMenuWin (Phase 2) keeps its legacy CWinEx/CButton geometry as real-pixel click-
+    // CSysMenuWin keeps its legacy CWinEx/CButton geometry as real-pixel click-
     // detection redundancy behind RmlUi's own primary click bindings -- same reasoning.
-    // CCharSelMainWin/CCharMakeWin (Phase 2): same reasoning -- both compute real screen pixels
+    // CCharSelMainWin/CCharMakeWin: same reasoning -- both compute real screen pixels
     // themselves (CalculateFixedAnchorLayout(), the live 3D character-preview viewport's
     // BeginOpengl() call) rather than reference-space coordinates meant to be rescaled here.
-    // CLoginWin (Phase 3): same reasoning -- its own SetPosition() computes real screen pixels
+    // CLoginWin: same reasoning -- its own SetPosition() computes real screen pixels
     // from WindowWidth/WindowHeight, and its legacy CUITextInputBox pair does real click-detection
     // and text rendering against real, untransformed mouse/screen coordinates.
     case INTERFACE_MSG_WINDOW:
@@ -43,7 +43,7 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
 
     case INTERFACE_NAME_WINDOW:
     case INTERFACE_ITEM_TOOLTIP:
-    // CCharInfoBalloonMng's adapter (Phase 3) -- unlike every window above, this one's own
+    // CCharInfoBalloonMng's adapter -- unlike every window above, this one's own
     // CCharInfoBalloon::Render() computes its screen position via CameraProjection::WorldToScreen()
     // then `nPosX * g_fScreenRate_x` (CharInfoBalloon.cpp), the exact "multiply by whatever
     // transform is ambient when this runs" contract INTERFACE_NAME_WINDOW/INTERFACE_ITEM_TOOLTIP

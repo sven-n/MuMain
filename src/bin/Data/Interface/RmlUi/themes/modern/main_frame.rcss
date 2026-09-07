@@ -339,7 +339,7 @@
 	border: none;
 }
 
-/* Phase 2 (skill list) / Phase 3 (item hotkey): these are now real hover/click targets
+/* Skill list / item hotkey chrome: these are now real hover/click targets
    (main_frame.rml) -- opt back into pointer-events (inherited `none` from body, base.rcss's
    pointer-events trap) same as every other interactive element in this document. */
 #item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
@@ -475,8 +475,8 @@
    grow upward from that point via translateY(-100%) -- reproduces the legacy renderer's own
    "sy -= Height" auto-flip without porting that height math into C++ (a plain data-for list of
    lines has no fixed height to precompute up front the way the legacy fixed-buffer model did).
-   Explicit width (not shrink-to-fit) per this build's own known quirk (layout-and-scaling.md /
-   newui-tier-adapter.md: an absolutely-positioned multi-line box undersizes without one). */
+   Explicit width (not shrink-to-fit) per this build's own known quirk: an absolutely-positioned
+   multi-line box undersizes without one. */
 #skill_tooltip {
 	transform: translateY(-100%);
 	width: 220px;

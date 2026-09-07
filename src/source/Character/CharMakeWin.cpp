@@ -475,8 +475,7 @@ bool CCharMakeWin::Update()
 
     // A CMsgWin validation-error dialog (name too short/invalid/special) can be shown on top of
     // this one without hiding it first (see GetLayerDepth()'s own comment) -- skip this window's
-    // own click/key consequences while that's up, same reasoning as CCharSelMainWin's modal gate
-    // (docs/newui-legacy-merger.md).
+    // own click/key consequences while that's up, same reasoning as CCharSelMainWin's modal gate.
     if (!g_MsgWin.IsVisible())
     {
         for (int classIndex = 0; classIndex < MAX_CLASS; ++classIndex)
@@ -659,7 +658,7 @@ void CCharMakeWin::RenderCreateCharacter()
 
     // Real pixels, not divided by g_fScreenRate_x/y -- BeginOpengl() rescales its arguments by
     // *whatever transform is active when it runs* (ConvertPositionX/Y, ZzzOpenglUtil.cpp), same
-    // hazard as CMsgWin's resident-password gotcha (docs/newui-legacy-merger.md). Render() (below)
+    // hazard as CMsgWin's resident-password gotcha. Render() (below)
     // runs under this window's own LayoutMode::Legacy (identity) ScopedActiveTransform, so passing
     // real pixels directly here is what keeps the viewport aligned with m_winBack's actual
     // position -- dividing here (as the pre-migration CWin-era code did, correctly, when this ran

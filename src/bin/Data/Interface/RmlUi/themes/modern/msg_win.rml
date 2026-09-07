@@ -8,8 +8,8 @@
 	<!-- Modern theme's own copy of the generic message/confirm dialog. Per-theme file
 	     (UI::RmlBridge::LoadThemedDocument) because modern-frame/modern-frame-crimson is genuinely
 	     modern-specific structure, not just style -- the shared ../../msg_win.rml is legacy's own
-	     theme-neutral copy and carries neither class (architecture-principles.md §15: a "shared"
-	     file must not bake in one theme's vocabulary). mode-* classes select which of CMsgWin's
+	     theme-neutral copy and carries neither class (a "shared" file must not bake in one theme's
+	     vocabulary). mode-* classes select which of CMsgWin's
 	     five MSG_WIN_TYPE variants is active -- keep this file's ids/data-model names in sync with
 	     ../../msg_win.rml, MsgWin.cpp binds against both by the same names. -->
 	<div id="panel" class="center-both modern-frame modern-frame-crimson"

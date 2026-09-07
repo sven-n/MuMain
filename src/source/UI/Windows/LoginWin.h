@@ -24,11 +24,11 @@ namespace Rml { class ElementDocument; }
 // than moving to native RmlUi <input> elements -- external code (WSclient.cpp, MsgWin.cpp) calls
 // GetUsernameInputBox()/GetPasswordInputBox()->GiveFocus() directly for error-recovery focus
 // redirection, and duplicating credential-entry/focus logic into a second, independent text-input
-// system this session can't test is a real regression risk not worth taking for this pass.
+// system is a real regression risk not worth taking.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md), Phase 3 -- the last CWin subclass to
-// migrate, and the first window in the whole series that actually needs CObject's shown-vs-
-// active split (UpdateWhileShown()/UpdateWhileActive(), added in Phase 0 but unused until now).
+// Migrated off CWin onto mu::ui::window::CObject -- the last CWin subclass to migrate, and the
+// first window that actually needs CObject's shown-vs-active split
+// (UpdateWhileShown()/UpdateWhileActive()).
 class CLoginWin : public mu::ui::window::CObject
 {
 protected:
@@ -86,7 +86,7 @@ public:
     void RenderTextOnTop();
 
     // Called from the RmlUi login document's data-event-click callbacks (see Create()'s
-    // DataModelConstructor::BindEventCallback registrations). 2026-09-03: act immediately here
+    // DataModelConstructor::BindEventCallback registrations). Act immediately here
     // instead of setting a flag for UpdateWhileActive() to consume later -- see
     // CLoginMainWin::RmlClickMenu()'s header comment for why: UpdateWhileActive() is gated behind
     // IsActive(), which this class now computes dynamically every frame (see UpdateWhileShown()'s
@@ -122,7 +122,7 @@ public:
     }
 
 protected:
-    // The shown-vs-active split (CObject/WindowObject.h, added in Phase 0 -- first real use here).
+    // The shown-vs-active split (CObject/WindowObject.h) -- first real use here.
     // UpdateWhileShown() always runs while shown: keeps ticking text-input state and the
     // Remember-Password sub-dialog even while something else has taken over input. Its first
     // statement computes and pushes this frame's IsActive() via SetActive() -- true unless

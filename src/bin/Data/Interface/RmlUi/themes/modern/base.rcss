@@ -3,9 +3,9 @@
    uses. Every migrated window's <head> links this file first, then its own per-window positional
    .rcss.
 
-   Colors/borders/shadows below are named against the token table in
-   docs/rmlui-ui-system/modern-theme-visual-direction.md -- keep the trailing token-name comment
-   next to each value; that table is the source of truth, this file is its first application.
+   Colors/borders/shadows below are named against this theme's design-token table -- keep the
+   trailing token-name comment next to each value; that table is the source of truth, this file is
+   its first application.
 
    Depth primitives (.modern-frame/.modern-panel/.modern-inset, .btn/.checkbox-box below) simulate
    raised/recessed physical surfaces without box-shadow, which this engine's RenderInterface can't
@@ -69,7 +69,7 @@ body {
 /* Flat -- no gradient fill/bevel -- but the border carries a faint steel tint at rest
    that brightens into a real steel glow on hover. Gray surface stays the base material; steel is
    the accent, not the structure -- gold is reserved for text emphasis/item-skill highlights, not
-   general chrome (see modern-theme-visual-direction.md). */
+   general chrome. */
 .btn {
 	position: absolute;
 	width: 108dp;
@@ -91,8 +91,8 @@ body {
 }
 .btn:active {
 	/* Native :active pseudo-class, unverified against this branch's own mouse-input routing
-	   (RmlUi's default SDL translation is bypassed here for unrelated reasons -- see README.md's
-	   Gotchas). Degrades gracefully if it never fires. */
+	   (RmlUi's default SDL translation is bypassed here for unrelated reasons). Degrades
+	   gracefully if it never fires. */
 	background-color: #222426;
 	border-color: rgba(190, 160, 110, 130);
 }
@@ -146,8 +146,8 @@ body {
    .modern-frame element at their original positions -- do NOT nest content inside .modern-panel,
    its inset would shift every child's effective position.
 
-   There's no CSS variable mechanism on this engine (confirmed, see
-   modern-theme-visual-direction.md), so a shared class can only carry *structural* properties
+   There's no CSS variable mechanism on this engine (confirmed), so a shared class can only carry
+   *structural* properties
    (border-width, the bevel/gradient mechanism) portably; a window's own specific palette (login's
    warm bronze/crimson, say) still has to come from somewhere. The pattern that actually closes
    that gap, proven by .btn/.btn-ok above: keep .modern-frame/.modern-panel as generic gray
@@ -190,7 +190,7 @@ body {
    #panel/.login-content, the first real consumer of these primitives. Apply alongside
    .modern-frame/.modern-panel (class="modern-frame modern-frame-crimson"), not instead of them.
    Despite the name this isn't crimson itself (that's accent-crimson, reserved for a primary
-   button/banner, see modern-theme-visual-direction.md's Accent colors) -- it's the dark neutral
+   button/banner) -- it's the dark neutral
    *base* those accent colors and the dialog's own warm text sit on top of, kept under its
    original "-crimson" name for now even though the frame material itself is no longer warm --
    text (title/body) and the checkbox stay their original warm/gold treatment deliberately;
@@ -249,7 +249,7 @@ body {
 	display: none;
 }
 
-/* Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- identical to
+/* Layout primitives -- identical to
    themes/legacy/base.rcss's copy; pure layout, nothing theme-specific to vary. */
 
 .anchor-top-left {

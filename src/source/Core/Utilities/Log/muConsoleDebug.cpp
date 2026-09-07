@@ -133,7 +133,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
     }
     else if (strCommand.compare(L"$effects off") == 0)
     {
-        // DXP-23 diagnostic: force-disable both effect surfaces to test whether effects
+        // Force-disable both effect surfaces to test whether effects
         // overdraw/volume contributes to the GPU-stall (Present) cost or the HUD blink -- owner
         // observed the blink timing tracking nearby enemies' skill casts (beam knights/Tantalos).
         // SetDisableEffects() covers RenderEffectShadows/RenderBoids/RenderEffects/RenderBlurs
@@ -154,7 +154,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
             g_pOption->SetRenderAllEffects(true);
         return true;
     }
-    // DXP-23 diagnostic, finer-grained bisection of the effect-rendering GPU cost `$effects off`
+    // Finer-grained bisection of the effect-rendering GPU cost `$effects off`
     // already confirmed. Each isolates one of the distinct object systems that can be populated
     // independently of the others (see MainScene.h doc comments for what each one covers).
     else if (strCommand.compare(L"$effects sprites off") == 0)
@@ -197,7 +197,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableBoids(false);
         return true;
     }
-    // DXP-23 diagnostic: owner found unequipping Wings of Ruin alone took FPS 120->180. This skips
+    // Owner found unequipping Wings of Ruin alone took FPS 120->180. This skips
     // just the EXTRA b->RenderBodyShadow() call RenderLinkObject() (ZzzCharacter.cpp) makes for every
     // visible wing/cape-wearing character, while leaving the wing model itself equipped and visible --
     // isolates whether the shadow draw specifically is the cost, keep the wing on for this test.
@@ -211,7 +211,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableWingShadow(false);
         return true;
     }
-    // DXP-23 diagnostic: RenderJoints() (beam/tail-trail effects -- Wing of Ruin's growing tail
+    // RenderJoints() (beam/tail-trail effects -- Wing of Ruin's growing tail
     // light, Beam Knight's lightning beam) was never gated by g_pOption->GetRenderAllEffects() at
     // all, so $effects off never covered it. Isolates it directly.
     else if (strCommand.compare(L"$effects joints off") == 0)
@@ -224,7 +224,7 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         SetDisableJoints(false);
         return true;
     }
-    // DXP-23 diagnostic: MODEL_WING_OF_RUIN draws its mesh 3x per frame (base + 2 glow-layer passes,
+    // MODEL_WING_OF_RUIN draws its mesh 3x per frame (base + 2 glow-layer passes,
     // ZzzObject.cpp ~7001-7007). Skips the 2 extra passes to test if triple mesh-draw is the cost.
     // Visibly changes the wing's look (removes glow layers) while active -- measurement tool only.
     else if (strCommand.compare(L"$effects wingextralayers off") == 0)

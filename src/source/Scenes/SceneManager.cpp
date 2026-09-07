@@ -634,10 +634,10 @@ static void RenderDebugInfo()
                 FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
                 FrameProfiler::AccumulatorMs(FP::Effects),
                 FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost
-                                                          // only now (Present split out below, DXP-23)
+                                                          // only now (Present split out below)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
+    // UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
     // FRAME_PROFILE scope) -- this frame's own value, RenderCurrentScene() already ran above.
     // Present = PlatformSwapBuffers() self-time, split out of Other so a large reading
     // unambiguously points at GPU-stall wait rather than HUD render cost -- 1-frame-lagged like
@@ -655,7 +655,7 @@ static void RenderDebugInfo()
              FrameProfiler::AccumulatorMs(FP::MoveParticles));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // DXP-20 baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
+    // Baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
     // summed across every body transformed this frame (subset of the Objects/Chars/Items passes
     // above, not additive with them). Judge the whole GPU-skinning task against this number.
     mu_swprintf(szLine, L"Skinning ms  Transform:%5.2f", FrameProfiler::AccumulatorMs(FP::Skinning));

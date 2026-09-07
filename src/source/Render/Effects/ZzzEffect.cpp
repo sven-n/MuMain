@@ -8706,7 +8706,7 @@ void RenderEffects(bool bRenderBlendMesh)
         }
         else
         {
-            if (IsSkillEffectModelsDisabledDebug()) // DXP-23 diagnostic
+            if (IsSkillEffectModelsDisabledDebug())
             {
                 continue;
             }

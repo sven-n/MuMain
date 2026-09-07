@@ -5,7 +5,7 @@ namespace UI::Scaling
     inline constexpr int DockLogicalBottom = 432;
     // Shared ceiling for "general" (non-HUD-band, non-dock) uniform auto-fit -- PanelTransform's
     // own cap, and RmlUiRuntime.cpp's dp-ratio auto-fit reuses the same number (single source of
-    // truth: docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section).
+    // truth).
     inline constexpr float MaximumPanelScale = 2.0f;
 
     struct Transform
@@ -51,7 +51,7 @@ namespace UI::Scaling
         FloatingWorkspace,
         Dialog,
         WorldOverlay,
-        // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) -- for a migrated window whose own
+        // For a migrated window whose own
         // rendering (CSprite-based sprites, raw g_pRenderText calls) already computes real screen
         // pixels itself (its own fScaleX/fScaleY against whatever resolution it assumes, e.g.
         // CCreditWin's 800x600) rather than reference-space coordinates meant to be rescaled by

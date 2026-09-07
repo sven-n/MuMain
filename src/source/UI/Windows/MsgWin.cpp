@@ -224,8 +224,8 @@ bool CMsgWin::Update()
 
     // dDeltaTick previously threaded through from CWin::UpdateWhileActive(double); this window's
     // migrated Update() takes no parameters, same as every other CObject window -- read the
-    // same clamped expression CSceneUICoordinator::Update(dDeltaTick) itself resolves to in steady state (see
-    // docs/newui-legacy-merger.md's g_pTimer gotcha).
+    // same clamped expression CSceneUICoordinator::Update(dDeltaTick) itself resolves to in steady
+    // state.
     extern float FPS_ANIMATION_FACTOR;
     const double dDeltaTick = 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR);
 

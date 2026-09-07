@@ -1381,7 +1381,7 @@ MSG MainLoop()
                 break;
             case SDL_EVENT_MOUSE_BUTTON_DOWN:
             case SDL_EVENT_MOUSE_BUTTON_UP:
-                // RmlUi migration plan Phase 0.8: first consumer wins. If an RmlUi element
+                // First consumer wins. If an RmlUi element
                 // claimed this click (returns false -- "no longer propagating"), don't also let
                 // it reach legacy button-state tracking/click-to-move.
                 if (Core::Input::RouteToUi(event, g_sdlWindow))
@@ -1435,7 +1435,7 @@ MSG MainLoop()
                 break;
             case SDL_EVENT_KEY_DOWN:
             {
-                // RmlUi migration plan Phase 0.8: only the final portable-field delivery below
+                // Only the final portable-field delivery below
                 // is gated on this -- the F10/Enter system-hotkey handling right after stays
                 // unconditional (camera zoom lock and the Enter-press latch are not text-editing
                 // concerns, and gating them risks breaking behavior those comments already
@@ -2033,9 +2033,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     }
 
 #ifndef _WIN32
-    // Story 7.1.2: install POSIX crash-diagnostic signal handlers. After SDL_Init (R8
+    // Install POSIX crash-diagnostic signal handlers. After SDL_Init (R8
     // mitigation) and after mu::log::Init() (InitializeWorkingDirectoryAndLog(), above).
-    // [VS0-QUAL-SIGNAL-HANDLERS]
     mu::platform::InstallSignalHandlers();
 #endif
 
@@ -2129,7 +2128,7 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     // this composition of game-specific overlay content belongs at the app tier, the same
     // reasoning that already put the SDL input-event wiring here instead of in RmlUiRuntime.
     //
-    // MAIN_SCENE included as of the NewUI/HUD pilot (2026-08-31): CSysMenuWin is reachable from
+    // MAIN_SCENE included: CSysMenuWin is reachable from
     // gameplay via the in-game ESC menu (SceneCommon.cpp's RenderInfomation() calls
     // CSceneUICoordinator::Instance().Render() unconditionally every MAIN_SCENE frame), so RmlUi
     // content was already live during gameplay before this
@@ -2145,8 +2144,8 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
         {
             extern EGameScene SceneFlag;
 
-            // CSystem's own RmlUi-backed HUD (MU Helper bar, buff strip -- 2026-08-31
-            // pilots) needs a real per-scene visibility gate of its own now, unlike
+            // CSystem's own RmlUi-backed HUD (MU Helper bar, buff strip) needs a real per-scene
+            // visibility gate of its own now, unlike
             // LoginWin/CharMakeWin/MsgWin below: those are explicitly Show()/Hide()'d by app
             // logic at their own scene's enter/exit points, but CSystem is a single
             // app-lifetime singleton whose Update()/Render() only ever run while

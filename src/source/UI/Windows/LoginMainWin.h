@@ -22,15 +22,10 @@ namespace Rml { class ElementDocument; }
 // already uses for its own self-owning listener. The legacy CButtons stay registered (redundant,
 // harmless detection path); RmlUi renders 100% of this bar's visuals in every theme.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
-// (CServerSelWin's established pattern), matching this bar's small footprint. This migration also
-// permanently retired the last live consequence of the g_LoginWin/g_LoginMainWin hit-test-overlap
-// bug CreateLoginScene()'s own comment documents (RmlClickMenu()/RmlClickCredit() already bypassed
-// it; the legacy CButton companion's click path could no longer be starved by the old m_LoginWin's
-// list-order priority once this window's dispatch started running before any legacy m_WinList walk
-// at all, regardless of overlap) -- moot now that CLoginWin itself has since migrated too (Phase 3)
-// and there's no m_WinList walk left to race against.
+// Migrated off CWin onto mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only
+// within its own bounding rect (CServerSelWin's established pattern), matching this bar's small
+// footprint. See CreateLoginScene()'s own comment for the g_LoginWin/g_LoginMainWin
+// hit-test-overlap bug this migration closed out.
 class CLoginMainWin : public mu::ui::window::CObject
 {
 protected:
@@ -61,14 +56,11 @@ public:
     }
 
     // Invoked from the RmlUi document's click listeners (see Create()) -- act immediately rather
-    // than deferring to Update() via a polled-and-cleared flag (the shape this used to mirror,
-    // same as CLoginWin::RmlClickOk()). 2026-09-03: found, via a real reproduction (a
-    // credit-button click that visibly did nothing, followed later by an unrelated click on the
-    // menu button that opened the *credits* window instead of the menu -- proof the credit click
-    // itself had registered and just sat unconsumed), that UpdateWhileActive() (this window's own
-    // Update() override now) can go many frames without running at all under the legacy
-    // activation system this window has since migrated off of. This listener already firing IS
-    // proof the click happened, with no need to wait for anything else to agree.
+    // than deferring to Update() via a polled-and-cleared flag (same as CLoginWin::RmlClickOk()):
+    // UpdateWhileActive() (this window's own Update() override now) can go many frames without
+    // running at all under the legacy activation system this window has since migrated off of, so
+    // a polled flag could sit unconsumed indefinitely. This listener firing IS proof the click
+    // happened, with no need to wait for anything else to agree.
     void RmlClickMenu() { OpenSysMenu(); }
     void RmlClickCredit() { OpenCredits(); }
 

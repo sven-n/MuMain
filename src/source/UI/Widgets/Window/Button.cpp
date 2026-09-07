@@ -1321,7 +1321,7 @@ void mu::ui::window::CCheckBox::Render()
 {
     EnableAlphaTest();
 
-    // Own small parallel version of CBaseButton::RenderStateImage's pattern (H item 6) -- see
+    // Own small parallel version of CBaseButton::RenderStateImage's pattern -- see
     // Button.h's m_sprite comment for why this isn't shared code. Two vertically-stacked frames:
     // checked = frame 0 (top), unchecked = frame 1 (bottom) -- matches the two RenderImage() calls
     // this replaces, which drew the same one frame twice (both offsets were identical:

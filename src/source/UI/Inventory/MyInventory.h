@@ -86,12 +86,11 @@ namespace mu::ui::window
         bool m_bMyShopOpen;
         bool m_bMyShopLocked = false;
 
-        // Stage 3: one shared hover tooltip for both the Set Option and Socket Option header
-        // labels (mutually exclusive within this window, same "one shared tooltip element for
-        // multiple hover targets" convention as MainFrameRmlModel::skillTooltipLines). Converted
-        // from UI::Inventory::Tooltip::Model (ItemOptionTooltipModel.h) the same way
-        // MainFrameWindow.cpp converts UI::Skills::Tooltip::Model -- see SyncRmlModel()'s own
-        // comment.
+        // One shared hover tooltip for both the Set Option and Socket Option header labels
+        // (mutually exclusive within this window, same "one shared tooltip element for multiple
+        // hover targets" convention as MainFrameRmlModel::skillTooltipLines). Converted from
+        // UI::Inventory::Tooltip::Model (ItemOptionTooltipModel.h) the same way MainFrameWindow.cpp
+        // converts UI::Skills::Tooltip::Model -- see SyncRmlModel()'s own comment.
         struct ItemOptionTooltipLineEntry
         {
             Rml::String text;
@@ -102,10 +101,10 @@ namespace mu::ui::window
             bool bold = false;
         };
 
-        // Stage 1 (H7): window frame/title/gold/buttons -- see docs/ui-target-architecture.md
-        // Section H item 7. Equipment paperdoll and the inventory grid stay fully native this
-        // stage (their icons are live 3D model renders, RenderItem3D()/Render3D() -- permanently
-        // native, Section E -- and their chrome is deferred to a later stage).
+        // Window frame/title/gold/buttons are RmlUi. The equipment paperdoll and inventory grid
+        // stay fully native: their icons are live 3D model renders (RenderItem3D()/Render3D()),
+        // permanently native (the permanent live-3D-content boundary), and their surrounding
+        // chrome isn't ported yet.
         struct MyInventoryRmlModel
         {
             // Shared transform group for every element in this document -- this window is
@@ -131,7 +130,7 @@ namespace mu::ui::window
             Rml::String exitTooltip;
             Rml::String expandTooltip;
 
-            // Stage 3 (H7): Set/Socket option header labels + shared hover tooltip -- see
+            // Set/Socket option header labels + shared hover tooltip -- see
             // ItemOptionTooltipLineEntry's own comment above and SyncRmlModel()'s.
             Rml::String setOptionLabel;
             Rml::String socketOptionLabel;
@@ -194,8 +193,7 @@ namespace mu::ui::window
         // so a user customization survives Character-info/etc. temporarily shifting this window
         // sideways to avoid overlap and then closing again. Those sideways collision-avoidance
         // shifts themselves are unrelated and stay unconditional -- see this window's own
-        // architecture-principles.md §10/§11 reassessment (STATUS.md) for why the two are not the
-        // same kind of position write.
+        // own reassessment for why the two are not the same kind of position write.
         void RestoreDefaultOrUserPosition(int defaultX, int defaultY);
 
         void SetRepairMode(bool bRepair);

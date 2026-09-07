@@ -29,9 +29,9 @@ namespace UI::RmlBridge
     // modder-supplied folder name -- not a closed set).
     const std::string& GetActiveThemeName();
 
-    // A declared theme capability (architecture-principles.md §30: C++ must never branch on a
-    // theme's NAME -- a theme wanting non-default behavior states that want itself, via an
-    // optional themes/<name>/theme.ini, [Capabilities] section, key "ProvidesOwnIconChrome").
+    // A declared theme capability (C++ must never branch on a theme's NAME -- a theme wanting
+    // non-default behavior states that want itself, via an optional themes/<name>/theme.ini,
+    // [Capabilities] section, key "ProvidesOwnIconChrome").
     // True means the active theme supplies its own RmlUi border/fill/highlight treatment for the
     // still-legacy-2D-rendered skill/potion icon chrome (MainFrameWindow.cpp), so C++ should
     // skip drawing the legacy sprite fill/highlight there. Missing file or missing key both

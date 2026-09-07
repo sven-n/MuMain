@@ -35,7 +35,7 @@ extern bool SelectFlag;
 #include "Engine/Object/ZzzInterface.h"
 #include "UI/Scaling/UITransform.h"
 
-// RmlUi migration -- see this class's header comment (Stage 1, H7).
+// RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDraggable.h"
@@ -101,8 +101,8 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
     LoadImages();
     SetEquipmentSlotInfo();
 
-    // RmlUi migration (Stage 1, H7) -- guarded like every other hybrid window's Create() (re-run
-    // on resolution change), so the document/model are created once, ever.
+    // Guarded like every other hybrid window's Create() (re-run on resolution change), so the
+    // document/model are created once, ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
         const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_inventory",
@@ -226,7 +226,7 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
                     },
                     [this]()
                     {
-                        // Persist immediately (architecture-principles.md §10/§11) -- m_Pos is
+                        // Persist immediately -- m_Pos is
                         // already the drag's final resolved position from the onMove above.
                         GameConfig::GetInstance().SetWindowPosition(L"my_inventory", m_Pos.x, m_Pos.y);
                     });
@@ -652,8 +652,8 @@ bool CMyInventory::UpdateMouseEvent()
     if (true == InventoryProcess())
         return false;
 
-    // Frame corner-close "X" -- a shared frame mechanism unrelated to the retired button family
-    // (BtnProcess() removed, Stage 1 H7); RmlUi's own Context now handles the 4 real buttons via
+    // Frame corner-close "X" -- a shared frame mechanism unrelated to the retired CButton family
+    // (BtnProcess() removed); RmlUi's own Context now handles the 4 real buttons via
     // data-event-click (see Create()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY))
         return false;
@@ -885,10 +885,10 @@ void CMyInventory::SyncRmlModel()
     //
     // m_Pos is a REFERENCE-space coordinate, not a real screen pixel -- every other reference-
     // space value in this codebase (e.g. MainFrameWindow.cpp's bars_left/top) is resolved via
-    // screenPos = refPos*scale + offset before being hand to RmlUi's data-style-left/top (which
-    // takes literal 'px', not reference pixels). Binding raw m_Pos here (an earlier version of
-    // this port did) leaves the panel at the wrong screen position at any non-1:1 offset --
-    // exactly the double-offset-shaped bug Section H item 6's CSprite fix already hit once.
+    // screenPos = refPos*scale + offset before being handed to RmlUi's data-style-left/top (which
+    // takes literal 'px', not reference pixels). Binding raw m_Pos here leaves the panel at the
+    // wrong screen position at any non-1:1 offset -- the same double-offset-shaped bug class the
+    // CSprite/WindowGeometry retrofit hit elsewhere in this tier.
     const auto transform = UI::Scaling::GetActiveTransform();
     const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
     const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
@@ -973,7 +973,7 @@ void CMyInventory::SyncRmlModel()
     syncWide(&MyInventoryRmlModel::exitTooltip, "exit_tooltip", I18N::Game::CloseIV);
     syncWide(&MyInventoryRmlModel::expandTooltip, "expand_tooltip", I18N::Game::OpenExpandedInventoryK);
 
-    // Stage 3 (H7): Set/Socket option header labels + shared hover tooltip -- see
+    // Set/Socket option header labels + shared hover tooltip -- see
     // ItemOptionTooltipLineEntry's own comment (MyInventory.h). Label text is static per-language,
     // but still routed through syncWide (change-checked) rather than bound once at Create() time,
     // matching every other I18N-sourced field in this model.
@@ -1030,8 +1030,8 @@ bool CMyInventory::Render()
 {
     EnableAlphaTest();
 
-    // Frame background panel moved to RmlUi (Stage 1, H7) -- see MyInventoryBgRmlModel's own
-    // header comment (MyInventory.h) for why this goes through the background context. Must run
+    // Frame background panel moved to RmlUi -- see MyInventoryBgRmlModel's own header comment
+    // (MyInventory.h) for why this goes through the background context. Must run
     // before RenderEquippedItem()/m_pNewInventoryCtrl->Render() below only in the sense that
     // both of those are 2D overlays on top of this frame -- the actual ordering constraint (this
     // panel painting behind the *3D* icons) is enforced by RenderBackgroundLayer() itself running

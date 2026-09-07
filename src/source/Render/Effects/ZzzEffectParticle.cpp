@@ -8960,7 +8960,7 @@ void RenderParticles(BYTE byRenderOneMore)
     {
         return;
     }
-    if (IsParticlesDisabledDebug()) // DXP-23 diagnostic
+    if (IsParticlesDisabledDebug())
     {
         return;
     }

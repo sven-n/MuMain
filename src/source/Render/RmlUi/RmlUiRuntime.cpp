@@ -11,8 +11,8 @@
 
 namespace
 {
-    // Global UI scale (docs/rmlui-ui-system/layout-and-scaling.md) -- the one RmlUi-native call
-    // site every `dp`-authored RCSS dimension responds to. Two multipliers, composed the same way
+    // Global UI scale -- the one RmlUi-native call site every `dp`-authored RCSS dimension
+    // responds to. Two multipliers, composed the same way
     // UI::Scaling's own legacy transforms compose them (UITransform.cpp):
     //   - GameConfig::GetUIScalePercent() -- the user's own preference dial.
     //   - UI::Scaling::ViewportFitScale() -- auto-fit-to-window-size (the same formula the still-
@@ -25,8 +25,7 @@ namespace
     // raise the lower bound, which overflowed every reference-pixel layout at/near the reference
     // resolution). No double-scaling seen at the reference size after that fix. Whether a genuine
     // high-pixel-density panel (SDL_GetWindowPixelDensity() > 1, not just an OS scale preference)
-    // needs anything different here is still unconfirmed -- see docs/rmlui-ui-system/
-    // layout-and-scaling.md.
+    // needs anything different here is still unconfirmed.
     //
     // Re-applied on resize too: SetDensityIndependentPixelRatio() sets an absolute ratio, not a
     // relative one, so it doesn't drift on its own, but re-asserting it here costs nothing and

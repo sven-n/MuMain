@@ -1766,14 +1766,14 @@ extern int gix, giy;
 extern void MoveCharacter(CHARACTER* c, OBJECT* o);
 extern void MoveCharacterVisual(CHARACTER* c, OBJECT* o);
 
-// DXP-07d increment 6's shadow-compare diagnostic validated RenderPhotoCharacter()'s full camera
+// A shadow-compare diagnostic validated RenderPhotoCharacter()'s full camera
 // transform (proj + the glRotatef/glRotatef/glTranslatef/glTranslatef sequence that builds this
 // panel's hand-rolled "photo camera") against a CPU closed form across multiple soaks — the matrix
-// formulas (MakeRotationX/Z, MakeTranslation, Mat4Multiply) are copied verbatim from DXP-07b's
+// formulas (MakeRotationX/Z, MakeTranslation, Mat4Multiply) are copied verbatim from ZzzOpenglUtil.cpp's
 // already-validated versions, not re-derived, since a sign/order error here reproduces exactly the
-// "mirrored/upside-down character" failure mode this panel is flagged for. DXP-08a deleted the
-// diagnostic and the real glMatrixMode/glPushMatrix/glLoadIdentity/glRotatef/glTranslatef/glPopMatrix
-// calls it was validating (see RenderPhotoCharacter()'s own comments below) — this is the one panel
+// "mirrored/upside-down character" failure mode this panel is flagged for. The diagnostic and the real
+// glMatrixMode/glPushMatrix/glLoadIdentity/glRotatef/glTranslatef/glPopMatrix
+// calls it was validating were since deleted (see RenderPhotoCharacter()'s own comments below) — this is the one panel
 // of the "6 UI item-preview panels" population with a real (non-identity) camera, and the one
 // without a BeginBitmap()-delegated or EndBitmap()-preceded restore, hence its own pre-panel
 // snapshot below instead of a fresh GL read.
@@ -1781,7 +1781,7 @@ static float s_PrePhotoProj[16];
 static float s_PrePhotoView[16];
 
 // Column-major float[16], matching glGetFloatv layout. out = a * b (GL right-multiply composition,
-// applying b first, then a) — same formulas as ZzzOpenglUtil.cpp's DXP-07b helpers, copied verbatim.
+// applying b first, then a) — same formulas as ZzzOpenglUtil.cpp's helpers, copied verbatim.
 static void PhotoMat4Multiply(float* out, const float* a, const float* b)
 {
     float result[16];

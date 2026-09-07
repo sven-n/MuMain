@@ -19,9 +19,9 @@
 // anything itself. It still does the per-frame CameraProjection::WorldToScreen() + SetPosition()
 // math every call (matching the original exactly, since this position must track the character's
 // live 3D position/camera every frame, not just once), so CCharInfoBalloonMng can read the result
-// back via GetXPos()/GetYPos() and push it into the shared RmlUi balloon-array model. See
-// docs/rmlui-ui-system/README.md for how a real-pixel-positioned overlay composites correctly
-// over 3D content in this renderer.
+// back via GetXPos()/GetYPos() and push it into the shared RmlUi balloon-array model. A real-
+// pixel-positioned overlay composites correctly over 3D content here because this all runs before
+// RmlUi's own frame-final render pass.
 class CCharInfoBalloon : public CSprite
 {
 protected:

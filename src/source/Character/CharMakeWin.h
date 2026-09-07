@@ -29,8 +29,8 @@ namespace Rml { class ElementDocument; }
 // BeginOpengl()/RenderCharacter()/EndOpengl() directly, the same mechanism the login screen's 3D
 // tour camera and the character-select scene's own character rendering already use). That call
 // stays exactly where it is, in RenderControls(), during the normal per-frame legacy-2D-content-
-// recording phase -- RmlUi renders last in the frame regardless (see
-// docs/rmlui-ui-system/README.md), so as long as the RmlUi panel has no opaque background over
+// recording phase -- RmlUi renders last in the frame regardless, so as long as the RmlUi panel has
+// no opaque background over
 // the 410x335 preview viewport, the 3D content composites correctly underneath the RmlUi chrome
 // around it, the same proven trick the login screen's tour camera already relies on. Only the 2D
 // chrome (job buttons, stat/description panels, the name-input frame, OK/Cancel) moves to RmlUi;
@@ -41,8 +41,7 @@ namespace Rml { class ElementDocument; }
 // Winmain.cpp's SetPostRmlUiCallback (already registered for CHARACTER_SCENE) so it's guaranteed
 // to render after RmlUi's own input-frame background regardless of theme.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CObject. Unlike CMsgWin/CSysMenuWin (which pass nTexID=-2 and rely entirely on
+// Migrated off CWin onto mu::ui::window::CObject. Unlike CMsgWin/CSysMenuWin (which pass nTexID=-2 and rely entirely on
 // RmlUi's own #backdrop for dimming), this window's own base-class CWin::Create() call used the
 // *default* nTexID=-1 -- a real, visible full-screen semi-transparent black CWin::m_psprBg dimming
 // overlay, genuinely rendered every frame (unlike m_winBack's own -2). Ported as an explicit
@@ -77,9 +76,9 @@ public:
     void Show(bool bShow) override;
     void UpdateDisplay();
 
-    // Invoked from the RmlUi document's data-event-click bindings (see Create()). 2026-09-03: act
+    // Invoked from the RmlUi document's data-event-click bindings (see Create()). Act
     // immediately here instead of setting a flag for UpdateWhileActive() to consume later -- see
-    // CLoginMainWin::RmlClickMenu()'s header comment (STATUS.md's "Findings worth knowing") for
+    // CLoginMainWin::RmlClickMenu()'s header comment for
     // why: UpdateWhileActive() is gated behind CWin::m_bActive, which the legacy CUIMng
     // activation system doesn't reliably grant on a timely basis. Confirmed safe to call straight
     // into the action here for the same reason as CLoginMainWin's fix: this fires from

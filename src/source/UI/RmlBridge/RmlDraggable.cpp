@@ -45,8 +45,7 @@ namespace UI::RmlBridge
                     const float newLeftPx = m_DragStartPanelLeft + static_cast<float>(mouseX - m_DragStartMouseX);
                     const float newTopPx = m_DragStartPanelTop + static_cast<float>(mouseY - m_DragStartMouseY);
 
-                    // Write in dp, not raw px (architecture-principles.md §10-11;
-                    // layout-and-scaling.md's dp-vs-px rule) -- `px` never scales with
+                    // Write in dp, not raw px -- `px` never scales with
                     // UIScalePercent, so a dragged position would silently drift out of step with
                     // every dp-authored sibling the moment UI scale changes. Divide by the same
                     // density-independent-pixel ratio RmlUiRuntime::ApplyUIScale() sets on the
@@ -97,8 +96,8 @@ namespace UI::RmlBridge
         // to remember a matching RCSS rule just to make this actually fire.
         handle->SetProperty("drag", "drag");
 
-        // pointer-events is inherited (see README.md's Gotchas section's pointer-events entry)
-        // -- any full-window document following that same fix sets
+        // pointer-events is inherited -- any full-window document following the pointer-events
+        // fix sets
         // `body { pointer-events: none; }` with only specific interactive elements opting back
         // in via `auto`. A handle that inherited `none` is invisible to RmlUi's own hit-testing
         // (GetElementAtPoint explicitly skips pointer-events:none elements), so it would never

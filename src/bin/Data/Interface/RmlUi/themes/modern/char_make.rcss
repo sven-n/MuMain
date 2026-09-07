@@ -15,7 +15,7 @@
    m_winBack's real unscaled pixel bounds) -- growing #panel via dp without also correctly scaling
    that viewport would visibly desync the 2D chrome from the 3D preview it's meant to frame. Left
    as a documented non-scaling exception, same class as main_frame's still-legacy HUD band and
-   char_info_balloon's live-projected position (layout-and-scaling.md's Fixed-vs-fluid table). */
+   char_info_balloon's live-projected position. */
 #panel {
 	position: absolute;
 	width: 454px;

@@ -555,7 +555,7 @@ void CMuEditorCore::Render()
     }
 #endif
 
-    // Finalize draw data. Task 4.2 uploads and renders it inside the engine's
+    // Finalize draw data. A later step uploads and renders it inside the engine's
     // existing SDL GPU pass; starting another pass here would break ownership.
     ImGui::Render();
     m_bDrawDataReady = true;

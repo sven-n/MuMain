@@ -19,7 +19,7 @@ extern CUIManager* g_pUIManager;
 // mu::ui::window::INTERFACE_LIST enum (Core/Globals/_enum.h) -- that one keys CManager's window
 // registry; this one is purely CUIManager's own open/close mutual-exclusion policy for the
 // inventory-family panels below. Same rough subject (which panels are open), different enums,
-// different purposes -- see docs/ui-architecture-assessment.md.
+// different purposes.
 enum
 {
     MUTEX_NONE = 0,

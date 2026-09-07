@@ -18,12 +18,10 @@ namespace Rml { class ElementDocument; }
 // CreateMainScene() never does -- a pre-existing characteristic, not something this port changes
 // or needs to cover).
 //
-// 2026-08-31, built under docs/rmlui-ui-system/layout-and-scaling.md from day one: the panel is
-// centered via base.rcss's `.center-both` utility class with a fixed `dp` size, not a C++-pushed
-// rect.
+// The panel is centered via base.rcss's `.center-both` utility class with a fixed `dp` size, not
+// a C++-pushed rect.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CObject. Previously, CWin::Create() spanning the full screen was what made
+// Migrated off CWin onto mu::ui::window::CObject. Previously, CWin::Create() spanning the full screen was what made
 // CUIMng::IsCursorOnUI() report true for any cursor position while this dialog was shown --
 // UpdateMouseEvent() below now does that job directly (unconditionally claims the click while
 // shown, no rect check needed), and CSceneUICoordinator::Update() folds new-style claims into m_bCursorOnUI
@@ -111,8 +109,8 @@ private:
         bool noButtons = true;
         // Mutually exclusive -- mirror MSG_WIN_TYPE 1:1 (MWT_NON needs none of these set). Drive
         // both button visibility and their per-mode left offset in msg_win.rcss; kept as discrete
-        // C++-reported state flags rather than a computed pixel position, consistent with
-        // docs/rmlui-ui-system/layout-and-scaling.md's "C++ manages state, RCSS manages layout".
+        // C++-reported state flags rather than a computed pixel position, consistent with the
+        // "C++ manages state, RCSS manages layout" convention used throughout this branch.
         bool modeCancelOnly = false;
         bool modeOkOnly = false;
         bool modeBoth = false;

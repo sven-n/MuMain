@@ -38,8 +38,8 @@ public:
     // free function (a lambda) rather than a member, and doesn't need any further access.
     void RenderFrame();
 
-    // The RmlUi-behind-3D-icons seam (docs/rmlui-ui-system/STATUS.md's "RmlUi renders last"
-    // finding): a second, background-only Rml::Context (m_BackgroundContext) that a caller drives
+    // The RmlUi-behind-3D-icons seam: a second, background-only Rml::Context (m_BackgroundContext)
+    // that a caller drives
     // explicitly, mid-frame, instead of waiting for RenderFrame()'s single fixed pre-submit slot.
     // Flushes whatever legacy content has been recorded so far (mu::GetRenderer().
     // FlushRenderCommands(), MuRenderer.h) so it's actually on screen, then renders this context
@@ -105,10 +105,10 @@ private:
     // RenderBackgroundLayer() replays the ENTIRE shared background context -- every document
     // currently Show()n in it, not just whichever window's own document prompted the call (there's
     // no per-caller scoping, see that method's own comment). Once a second window
-    // (CMyInventory, H7 Stage 1) started calling it independently of CMainFrameWindow, a window
+    // (CMyInventory) started calling it independently of CMainFrameWindow, a window
     // whose own Render() runs at a *later* GetLayerDepth() than another window's 3D-icon camera
-    // (both are ordinary CObjects interleaved by CManager::Render()'s one z-sorted pass, see
-    // docs/ui-target-architecture.md Section A) would re-replay -- and thus re-paint over -- that
+    // (both are ordinary CObjects interleaved by CManager::Render()'s one z-sorted pass) would
+    // re-replay -- and thus re-paint over -- that
     // earlier window's already-drawn 3D icons. This guard makes only the FIRST call in a frame
     // actually render; every later call this same frame is a cheap no-op. Safe: the first call in
     // z-order is guaranteed to precede every camera later in the same sorted pass (that's the

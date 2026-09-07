@@ -7,19 +7,18 @@ namespace Rml
     class Element;
 }
 
-// Makes an RmlUi panel draggable-by-mouse, with zero legacy CWin dependency -- see
-// docs/rmlui-ui-system/architecture-principles.md for why this exists: CWin's own dragging
+// Makes an RmlUi panel draggable-by-mouse, with zero legacy CWin dependency: CWin's own dragging
 // (CWin::Update()'s WS_MOVE state machine, gated by CursorInWin(WA_MOVE)) only works for windows
 // still tied to that legacy positioning system, and re-implementing an equivalent per migrated
 // window would be exactly the kind of duplicated logic Coding Rule #4 warns against. A future
 // migrated panel that wants to be draggable should just call MakeDraggable() once -- no
 // per-window state machine, no CWin involvement at all.
 //
-// First real caller: CMyInventory (drag-by-title-bar, docs/rmlui-ui-system/STATUS.md). Two things
+// First real caller: CMyInventory (drag-by-title-bar). Two things
 // that had to be right for it, and now are:
 //   - The dragged position is written as `dp` (divided by the panel's own
-//     Context::GetDensityIndependentPixelRatio()), matching every other dp-authored sibling --
-//     see layout-and-scaling.md's dp-vs-px rule. Do not write a raw `px` inline style; it would
+//     Context::GetDensityIndependentPixelRatio()), matching every other dp-authored sibling.
+//     Do not write a raw `px` inline style; it would
 //     read wrong at any UIScalePercent other than the one it was dragged at. This round-trips
 //     correctly even for a `px`-authored (not `dp`-authored) panel like CMyInventory's, as long as
 //     `onMove`/`onDragEnd` feed the result back through the panel's own position-binding mechanism
@@ -32,8 +31,7 @@ namespace Rml
 //     UI-scale changes the same way every other position in this codebase does.
 //
 // A window with a real Type-2 companion object (a functional CUITextInputBox, not just a
-// redundant click-detection CButton -- docs/rmlui-ui-system/layout-and-scaling.md's "C++ pushes
-// real pixels" note has the full distinction) needs OnPanelMoved below to keep that companion in
+// redundant click-detection CButton) needs OnPanelMoved below to keep that companion in
 // sync: scale by the same combined ratio (GameConfig::GetUIScalePercent() x
 // UI::Scaling::ViewportFitScale()) RmlUi's own dp ratio uses -- LoginWin.cpp's
 // LoginUIScaleRatio() is the reference implementation -- not just a raw position sync, or the
@@ -61,15 +59,14 @@ namespace UI::RmlBridge
     // `handle` is the element the player grabs -- a dedicated drag handle (a title-bar element,
     // or in this pilot's test, a label positioned outside the panel's own box), not usually
     // `panel` itself. Using the whole panel as its own handle only works if the panel's
-    // `pointer-events` is `auto` -- a full-window document following the pointer-events fix
-    // (README.md's Gotchas section) sets its panel to inherit `none` from `body` by default,
+    // `pointer-events` is `auto` -- a full-window document following the pointer-events fix sets
+    // its panel to inherit `none` from `body` by default,
     // specifically so clicks pass through to whatever's underneath, which is exactly why a
     // dedicated handle is the correct pattern here, not a workaround for a limitation.
     //
     // `panel` is the element that actually moves -- must be `position: absolute` with `left`/
-    // `top` already resolved to fixed `px` values (true of every window built so far, see
-    // docs/rmlui-ui-system/theming-and-modding.md's "Coordinates, scaling, and positioning"
-    // section -- a panel positioned in `%`/`vw`/`vh` isn't supported by this helper yet).
+    // `top` already resolved to fixed `px` values (true of every window built so far -- a panel
+    // positioned in `%`/`vw`/`vh` isn't supported by this helper yet).
     //
     // Sets `drag: drag` and `pointer-events: auto` on `handle` itself (the latter confirmed
     // necessary by a real test -- a handle that inherited `pointer-events: none` never became

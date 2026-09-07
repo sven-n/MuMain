@@ -72,8 +72,7 @@ public:
     std::wstring GetRmlTheme() const { return m_rmlTheme; }
     void SetRmlTheme(const std::wstring& theme);
 
-    // Global RmlUi UI scale, as a percentage (100 = normal) -- see
-    // docs/rmlui-ui-system/layout-and-scaling.md. Drives RmlUiRuntime's
+    // Global RmlUi UI scale, as a percentage (100 = normal). Drives RmlUiRuntime's
     // Context::SetDensityIndependentPixelRatio() call; only RCSS authored in `dp` responds.
     int GetUIScalePercent() const { return m_uiScalePercent; }
     void SetUIScalePercent(int percent);

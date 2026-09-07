@@ -89,9 +89,8 @@ void LoadingScene(HDC hDC)
 {
     g_ConsoleDebug->Write(MCD_NORMAL, L"LoadingScene_Start");
 
-    // RmlUi migration plan Phase 1 pilot: replaces CLoadingScene's 4-tile CSprite rendering
-    // (the class above is left completely untouched -- not deleted, per the plan's retirement
-    // criteria: don't remove legacy code until parity is confirmed against a real build) with an
+    // RmlUi replaces CLoadingScene's 4-tile CSprite rendering (the class above is left completely
+    // untouched -- not deleted until parity is confirmed against a real build) with an
     // equivalent RmlUi document, Data/Interface/RmlUi/loading.rml + loading.rcss. No explicit
     // RmlUiRuntime::Update()/Render() call needed here, unlike the RHI-based port this was ported
     // from -- this branch's IMuRenderer::SetPreSubmitCallback (see RmlUiRuntime::Create()) already

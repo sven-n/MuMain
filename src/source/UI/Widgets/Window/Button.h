@@ -59,21 +59,19 @@ namespace mu::ui::window
 
     protected:
         // Shared CSprite-driven rendering for the state-indexed, single-texture,
-        // vertically-stacked-frame image both CButton and CRadioButton draw (H item 6,
-        // docs/ui-target-architecture.md Section H) -- lives once here rather than duplicated in
+        // vertically-stacked-frame image both CButton and CRadioButton draw -- lives once here
+        // rather than duplicated in
         // each subclass, since both classes' RenderImage() shapes already matched this pattern.
         // CSprite takes LOGICAL (reference-resolution) position/size and applies the active
         // transform's scale plus the live screen offset itself, inside Render() -- it just bakes
         // the scale (and its Y-flip's WindowHeight basis) in at Create() time rather than
         // resolving it fresh per call like RenderImage() did, so the sprite is rebuilt whenever
-        // those go stale. See docs/ui-target-architecture.md Section A for why CButton consulting
-        // UI::Scaling at all matters.
+        // those go stale.
         void RenderStateImage(int imgIndex, int frame, int frameCount, unsigned int color);
 
     private:
         // Hit-test via the opt-in WindowGeometry component (UI/Core/WindowGeometry.h) instead of
-        // hand-rolling the rect compare inline at each call site -- see
-        // docs/ui-target-architecture.md Section C/Rule 7. Built fresh from m_Pos/m_Size on each
+        // hand-rolling the rect compare inline at each call site. Built fresh from m_Pos/m_Size on each
         // call rather than kept as a persistent member: those two fields (and the public
         // GetPos()/GetSize() built around them) are already this class's source of truth, so a
         // second persistent copy would just be state to keep in sync for no benefit.
@@ -501,10 +499,10 @@ namespace mu::ui::window
         float					m_ImgHeight;
         bool					State;
 
-        // Own, small, parallel version of CBaseButton::RenderStateImage's pattern (H item 6) --
+        // Own, small, parallel version of CBaseButton::RenderStateImage's pattern --
         // not shared code, since CCheckBox isn't part of the CBaseButton hierarchy and only ever
         // needs a 2-frame (on/off) table; forcing it into CBaseButton would be a new abstraction
-        // the target document doesn't ask for (docs/ui-target-architecture.md Section C).
+        // the target shape doesn't ask for.
         CSprite m_sprite;
         int     m_spriteImgIndex = -1;
         POINT   m_spriteFrameSize{ 0, 0 };

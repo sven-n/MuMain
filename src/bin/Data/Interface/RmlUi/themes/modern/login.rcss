@@ -95,7 +95,7 @@ body {
 /* Soft ambient glow behind the title -- yellow at the center, cooling to red further out (fading
    to transparent at the very edge so it still reads as a glow, not a hard-edged shape), a true
    radial falloff now that RenderInterface_SDL_GPU implements CompileShader/RenderShader for the
-   gradient family (STATUS.md's Findings). This engine still has no filter:blur()/
+   gradient family. This engine still has no filter:blur()/
    text-shadow/box-shadow (all confirmed unregistered or non-rendering), so this is the only
    ambient-glow technique available. Sits behind .label-server (declared first, base.rcss/
    login.rcss paint-order convention: earlier siblings paint first). Center stop kept low-alpha
@@ -238,7 +238,7 @@ body {
 	/* Shifts down 2dp to read as physically pressed -- both .btn-ok/.btn-cancel share the same
 	   top:196dp below, so one absolute value covers both. Native :active pseudo-class, unverified
 	   against this branch's own mouse-input routing (RmlUi's default SDL translation is bypassed
-	   here for unrelated reasons -- see README.md's Gotchas). Degrades gracefully if it never
+	   here for unrelated reasons). Degrades gracefully if it never
 	   fires -- worst case the button just doesn't visibly depress. */
 	top: 198dp;
 	border-top-color: rgba(180, 92, 68, 65);

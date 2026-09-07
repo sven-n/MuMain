@@ -256,8 +256,8 @@ float CGoldBowmanLena::GetLayerDepth()	// 3.4f
     return 3.4f;
 }
 
-// DXP-07d increment 4's shadow-compare diagnostic validated Render3D()'s proj/view closed form and
-// post-pop restore; DXP-08a deleted the diagnostic and the FFP matrix-stack calls it was validating
+// A shadow-compare diagnostic validated Render3D()'s proj/view closed form and
+// post-pop restore; the diagnostic and the FFP matrix-stack calls it was validating were since deleted
 // (see Render3D()'s own comments below). Identical shape to RenderDisplayItems(): EndBitmap() at
 // entry, restore mirror runs before BeginBitmap() at the end, hence its own pre-panel snapshot.
 static float s_PreGBLProj[16];

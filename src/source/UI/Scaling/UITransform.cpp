@@ -43,7 +43,7 @@ float g_windowContentScale = 1.0f;
 
 // GameConfig::GetUIScalePercent() is an in-memory singleton read (no disk I/O per call, unlike
 // the SDL queries GetWindowContentScale() caches), so this reads it directly rather than adding a
-// second cached global -- docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section.
+// second cached global.
 // Applied post-clamp everywhere it's used (see BottomHudScale/CappedUniformScale below), unlike
 // GetWindowContentScale()'s clamp-bound fold: a direct user dial needs a proportional, visible
 // effect at every window size, including ones where the auto-scale already sits at its ceiling --
@@ -141,7 +141,7 @@ UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHe
 
 // Pure geometry + WindowContentScale, deliberately NOT including UIScalePercent -- every caller
 // that needs the user's preference multiplies UIScalePercentMultiplier() in itself, once, so it's
-// never double-counted (docs/rmlui-ui-system/layout-and-scaling.md's "Global UI scale" section).
+// never double-counted.
 // The one shared "fit the reference size to the real window, clamped" core, now used by both the
 // legacy UI::Scaling transforms (via CappedUniformScale/BottomHudScale below) and RmlUiRuntime.cpp's
 // dp-ratio auto-fit -- previously two near-identical private copies of this same formula.
@@ -184,8 +184,7 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
 // version, LoginWin.cpp's LoginUIScaleRatio()); each hand-copy risks independently reintroducing
 // the same staleness bug (reading CInput::Instance().GetScreenWidth()/GetScreenHeight() instead of
 // the WindowWidth/WindowHeight globals RmlUiRuntime::OnResize() actually uses). Callers must pass
-// WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not a separate copy of the screen size -- see
-// docs/rmlui-ui-system/layout-and-scaling.md's "C++ pushes real pixels into RmlUi" section.
+// WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not a separate copy of the screen size.
 float UI::Scaling::CompanionRatio(int windowWidth, int windowHeight)
 {
     return CappedUniformScale(windowWidth, windowHeight, MaximumPanelScale);

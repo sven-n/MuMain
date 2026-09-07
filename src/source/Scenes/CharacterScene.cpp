@@ -210,8 +210,7 @@ void NewMoveCharacterScene()
     }
     // ESC menu toggle is handled by CSceneUICoordinator::Update()
 
-    // Core::Input::IsMouseOverUI() added as a 2nd gate (2026-09-04, STATUS.md's "three parallel
-    // input-tracking systems" finding) -- IsCursorOnUI() alone runs on CCharSelMainWin's own
+    // Core::Input::IsMouseOverUI() added as a 2nd gate -- IsCursorOnUI() alone runs on CCharSelMainWin's own
     // UpdateMouseEvent() rect (CalculateFixedAnchorLayout()'s hand-duplicated math), which has
     // already gone stale relative to the real RmlUi-rendered buttons once (see that function's
     // own comment on the Delete-button no-op bug). RmlUi's own hit-test is authoritative here
@@ -309,15 +308,14 @@ static void ApplySelectedCharacterLighting()
  */
 static void RenderCharacterScene3D()
 {
-    // DXP-16 increment 1: terrain has a real D3D11 path now -- call unconditionally.
-    // DXP-16 increment 2: RenderObjects() (BMD static world meshes) joins it.
-    // DXP-16 increment 3: RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
+    // Terrain has a real D3D11 path now -- call unconditionally. RenderObjects() (BMD static world
+    // meshes) joins it. RenderCharactersClient()/RenderMount() join it too (see LoginScene.cpp's
     RenderTerrain(false);
     RenderObjects();
     RenderCharactersClient();
     RenderMount();
 
-    // Core::Input::IsMouseOverUI() added as a 2nd gate here too (2026-09-04) -- same rationale as
+    // Core::Input::IsMouseOverUI() added as a 2nd gate here too -- same rationale as
     // the check in Update() above.
     if (!CSceneUICoordinator::Instance().IsCursorOnUI() && !Core::Input::IsMouseOverUI())
         Input::Selection::SelectObjects();

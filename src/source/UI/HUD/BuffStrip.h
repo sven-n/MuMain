@@ -10,12 +10,10 @@ namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
-    // Second CObject-tier pilot, same adapter shape as CMuHelperBar (MuHelperBar.h; see
-    // docs/rmlui-ui-system/newui-tier-adapter.md for the shape itself, not repeated here). What's
+    // Second CObject-tier pilot, same adapter shape as CMuHelperBar (MuHelperBar.h). What's
     // new here: a genuinely variable-length list -- the active-buff count changes every frame,
     // unlike the fixed-size job-button array the CWin tier already proved (CCharMakeWin). Renamed
-    // from the legacy CNewUIBuffWindow at port time (not a later pass) -- see STATUS.md's "Tracked
-    // deferral" section for the naming policy this follows.
+    // from the legacy CNewUIBuffWindow at port time (not a later pass).
     //
     // Two deliberate simplifications from the original (each a scoped-out follow-up, not a
     // silent behavior drop). (A third -- the icon atlas -- was originally meant to be a fidelity
@@ -46,8 +44,7 @@ namespace mu::ui::window
         // original's iScreenWidth overload horizontally centered this window within the
         // available "clear" screen width, shrinking as inventory-style side panels docked and ate
         // into it (Engine/Object/ZzzInventory.cpp's GetScreenWidth()) -- the panel-reactive
-        // shrinking isn't reproduced (fixed-anchor policy,
-        // docs/rmlui-ui-system/layout-and-scaling.md), but the underlying centering intent is,
+        // shrinking isn't reproduced (fixed-anchor policy), but the underlying centering intent is,
         // via .center-x, which stays correct at any resolution.
         void SetPos(int x, int y) {}
         void SetPos(int iScreenWidth) {}

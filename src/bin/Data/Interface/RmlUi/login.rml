@@ -6,8 +6,8 @@
 </head>
 <body>
 	<!-- Legacy theme's canonical login panel: labels, input-box frames, remember-me/save-password
-	     checkboxes, OK/Cancel. This is the theme-neutral reference file (architecture-
-	     principles.md §15) -- themes/modern/login.rml forks it to add modern's own decorative
+	     checkboxes, OK/Cancel. This is the theme-neutral reference file -- themes/modern/login.rml
+	     forks it to add modern's own decorative
 	     layering (modern-frame/modern-panel/modern-frame-accent primitives, plus the -crimson
 	     palette variant); keep both files' ids/data-model/event-callback names in sync, LoginWin.cpp
 	     binds against both by the same names. -->

@@ -123,7 +123,7 @@ body {
 	display: none;
 }
 
-/* Layout primitives (docs/rmlui-ui-system/layout-and-scaling.md) -- pure layout, no visual
+/* Layout primitives -- pure layout, no visual
    styling, identical in both themes. Apply one to an element to express its intended responsive
    behavior declaratively; give it its own size (dp if it should respect UI scale) alongside it. */
 

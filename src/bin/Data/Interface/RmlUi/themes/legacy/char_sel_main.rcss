@@ -1,7 +1,7 @@
 /* Legacy theme for the character-select scene's button bar (CCharSelMainWin). Only the idle frame
    of each button is reproduced. Every element anchors to a screen edge/corner via base.rcss's
-   anchor-*/stretch-x utility classes with a fixed dp size (docs/rmlui-ui-system/
-   layout-and-scaling.md) -- CCharSelMainWin::ApplyLayout() still computes the legacy
+   anchor-*/stretch-x utility classes with a fixed dp size -- CCharSelMainWin::ApplyLayout() still
+   computes the legacy
    CButton/CSprite hit-test rects separately, unrelated to these visuals. */
 
 @spritesheet charsel-create-sheet

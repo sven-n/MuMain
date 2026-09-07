@@ -6,8 +6,8 @@
 </head>
 <body data-model="main_frame">
 	<!-- Modern theme's own copy of CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner
-	     buttons (Phase 1 of 3 of the CNewUIObj-tier pilot; skill list / item hotkeys are out of
-	     scope, still fully legacy-rendered). Per-theme file (UI::RmlBridge::LoadThemedDocument)
+	     buttons (skill list / item hotkeys are out of scope here, still fully legacy-rendered).
+	     Per-theme file (UI::RmlBridge::LoadThemedDocument)
 	     because the bottom-HUD button row is genuinely absent here (moved to #top_right_row
 	     below), not just hidden via CSS -- CSS-only hiding proved unreliable for this element, and
 	     a C++ theme-awareness flag was tried and rejected as inconsistent with this branch's
@@ -65,11 +65,11 @@
 			<span class="tooltip" id="exp_tooltip">{{exp_tooltip}}</span>
 		</div>
 
-		<!-- Phase 3 (item hotkey): interactive overlay -- hover highlight, stack count, and
+		<!-- Item hotkey chrome: interactive overlay -- hover highlight, stack count, and
 		     right-click-to-use (data-event-mouseup, first right-click RmlUi binding in the
 		     codebase -- see CItemHotKey::OnHotkeySlotRightClick()'s comment). Icon art stays a live
 		     3D model render underneath (RenderItem3D()/RenderObjectScreen(), no RmlUi equivalent,
-		     permanent -- see ui-target-architecture.md Section E). -->
+		     permanent). -->
 		<div id="item_slots">
 			<div id="item_slot_0" class="slot-frame" data-class-selected="item_slot_0_hovered" data-event-mouseover="item_hotkey_hover(0)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(0)"><span class="slot-hotkey-label">Q</span><span class="item-stack-label">{{item_slot_0_count}}</span></div>
 			<div id="item_slot_1" class="slot-frame" data-class-selected="item_slot_1_hovered" data-event-mouseover="item_hotkey_hover(1)" data-event-mouseout="item_hotkey_unhover" data-event-mouseup="item_hotkey_rightclick(1)"><span class="slot-hotkey-label">W</span><span class="item-stack-label">{{item_slot_1_count}}</span></div>
@@ -90,7 +90,7 @@
 			<div id="current_skill_slot" class="slot-frame" data-event-click="skill_current_click" data-event-mouseover="skill_current_hover" data-event-mouseout="skill_unhover"><div class="cooldown-wipe" data-style-height="current_skill_cooldown * 100 + '%'"></div></div>
 		</div>
 
-		<!-- Phase 2 (skill list): expanded grid + pet-command row. Interactive overlay ONLY (hit
+		<!-- Skill list: expanded grid + pet-command row. Interactive overlay ONLY (hit
 		     target, cooldown wipe, current-skill highlight) -- icon/box-frame art stays legacy 2D
 		     underneath (MainFrameWindow.h's SkillCellEntry comment explains why: the atlas
 		     lookup is too irregular to port blind). Fully data-driven (data-for) since the cell

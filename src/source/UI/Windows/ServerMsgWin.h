@@ -13,8 +13,7 @@
 #define SMW_MSG_LINE_MAX 5
 #define SMW_MSG_ROW_MAX 83
 
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: the first of the remaining
-// still-legacy-2D CUIMng windows migrated off CWin/CWinEx, following CCreditWin's pattern.
+// Migrated off CWin/CWinEx onto mu::ui::window::CObject, following CCreditWin's pattern.
 // Purely passive/non-interactive (its old CWinEx::CursorInWin(WA_ALL) override always returned
 // false, so it could never become CUIMng's "active" window -- confirmed no drag/resize behavior
 // was ever reachable in practice), so unlike CCreditWin it doesn't need to consume clicks at all.

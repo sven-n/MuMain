@@ -6,8 +6,8 @@
 </head>
 <body data-model="msg_win">
 	<!-- Legacy theme's canonical generic message/confirm dialog, centered via .center-both. This
-	     is the theme-neutral reference file (architecture-principles.md §15) -- themes/modern/
-	     msg_win.rml forks it to add modern's own modern-frame/modern-frame-crimson decoration;
+	     is the theme-neutral reference file -- themes/modern/msg_win.rml forks it to add modern's
+	     own modern-frame/modern-frame-crimson decoration;
 	     keep both files' ids/data-model names in sync, MsgWin.cpp binds against both by the same
 	     names. mode-* classes select which of CMsgWin's five MSG_WIN_TYPE variants is active. -->
 	<div id="panel" class="center-both"

@@ -144,7 +144,7 @@ namespace SEASON4A
         void CheckSocketSetOption();
         BOOL IsSocketSetOptionEnabled();
 
-        // RmlUi port (CMyInventory Stage 3) of the former RenderToolTipForSocketSetOption -- same
+        // RmlUi port (CMyInventory) of the former RenderToolTipForSocketSetOption -- same
         // content resolution (m_EquipSetBonusList line-by-line), no drawing. Returns false (and
         // leaves outModel untouched) when !IsSocketSetOptionEnabled(). CMyInventory::SyncRmlModel()
         // is the only caller.

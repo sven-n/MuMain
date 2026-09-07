@@ -1,6 +1,6 @@
 #include "stdafx.h"
 
-// Story 5.1.1: MuAudio Abstraction Layer [VS1-AUDIO-ABSTRACT-CORE]
+// MuAudio Abstraction Layer
 // Implementation of MiniAudioBackend — miniaudio-based platform audio backend.
 // See IPlatformAudio.h for the interface contract.
 
@@ -8,7 +8,7 @@
 #include "Core/Platform/PathResolve.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "Core/Platform/WinCompat.h"
-#include "Core/Globals/_struct.h" // OBJECT forward decl — needed for void* → OBJECT* casts (Story 7.8.1)
+#include "Core/Globals/_struct.h" // OBJECT forward decl — needed for void* → OBJECT* casts
 
 #include <algorithm>
 #include <cmath>
@@ -46,10 +46,8 @@ std::string AudioPathToUtf8(const wchar_t* text)
 } // namespace
 
 // ---------------------------------------------------------------------------
-// Global backend pointer — nullptr until the game initialises audio.
-// Story 5.1.1: defined here (nullptr). Story 5.2.1: set to new mu::MiniAudioBackend()
-// and Initialize() called during game startup (MuMain.cpp). Story 5.2.2 will
-// extend SFX delegation via this pointer.
+// Global backend pointer — nullptr until the game initialises audio, then set to
+// new mu::MiniAudioBackend() and Initialize() called during game startup (MuMain.cpp).
 // ---------------------------------------------------------------------------
 mu::IPlatformAudio* g_platformAudio = nullptr;
 
@@ -105,7 +103,7 @@ void MiniAudioBackend::Shutdown()
     {
         if (m_soundLoaded[buf])
         {
-            // CRITICAL-1 fix: uninit only the channels actually initialised by LoadSound().
+            // Uninit only the channels actually initialised by LoadSound().
             for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
             {
                 ma_sound_uninit(&m_sounds[buf][ch]);
@@ -113,7 +111,7 @@ void MiniAudioBackend::Shutdown()
             m_soundLoaded[buf] = false;
             m_loadedChannels[buf] = 0;
         }
-        // Story 5.2.2 (Task 1.3): Clear per-slot OBJECT* tracking to prevent dangling
+        // Clear per-slot OBJECT* tracking to prevent dangling
         // pointers if the backend is restarted. Safe even if slot was never loaded.
         m_soundObjects[buf] = nullptr;
     }
@@ -149,9 +147,9 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
         return;
     }
 
-    // MEDIUM-4 (code-review-finalize 2026-03-19): Reset slot state unconditionally
-    // before the unload block so that a failed load of the same slot (partial channels)
-    // leaves the slot in a consistent clean state rather than holding stale values.
+    // Reset slot state unconditionally before the unload block so that a failed load of the same
+    // slot (partial channels) leaves the slot in a consistent clean state rather than holding
+    // stale values.
     m_activeChannel[bufIdx] = 0;
     m_sound3DEnabled[bufIdx] = false;
 
@@ -163,7 +161,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
             ma_sound_uninit(&m_sounds[bufIdx][ch]);
         }
         m_soundLoaded[bufIdx] = false;
-        // HIGH-2 fix: clear stale object pointer on reload so Set3DSoundPosition()
+        // Clear stale object pointer on reload so Set3DSoundPosition()
         // cannot dereference a pointer that belonged to the previous load lifetime.
         m_soundObjects[bufIdx] = nullptr;
     }
@@ -171,11 +169,11 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     // Convert wchar_t filename to UTF-8 for miniaudio (which uses narrow char*)
     std::string utf8Path = AudioPathToUtf8(filename);
 
-    // Story 5.2.2 (Task 5.1): Normalize path separators for Linux/macOS.
+    // Normalize path separators for Linux/macOS.
     // SFX file paths use Windows backslashes (e.g., L"Data\\Sound\\nBlackSmith.wav").
     // mu_wchar_to_utf8() preserves them; replace before passing to ma_sound_init_from_file().
     // On Windows, forward slashes work identically to backslashes for file paths.
-    // Mirrors the PlayMusic() normalization pattern from Story 5.2.1.
+    // Mirrors the same normalization pattern PlayMusic() uses.
     std::replace(utf8Path.begin(), utf8Path.end(), '\\', '/');
 #ifndef _WIN32
     utf8Path = MuResolvePath(utf8Path.c_str());
@@ -214,7 +212,7 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
     m_soundLoaded[bufIdx] = true;
     m_sound3DEnabled[bufIdx] = enable3D;
     m_activeChannel[bufIdx] = 0;
-    // CRITICAL-1 fix: record how many slots were actually initialised so that
+    // Record how many slots were actually initialised so that
     // PlaySound/StopSound/AllStopSound never touch uninitialized ma_sound handles.
     m_loadedChannels[bufIdx] = numChannels;
 }
@@ -222,19 +220,13 @@ void MiniAudioBackend::LoadSound(ESound buffer, const wchar_t* filename, int cha
 // ---------------------------------------------------------------------------
 // PlaySound — start playback of a sound effect using round-robin channel selection
 // Mirrors DSPlaySound.h PlayBuffer() signature exactly.
-// MEDIUM-2 (code-review-finalize 2026-03-19): Returns S_FALSE (not S_OK) when
-// !m_initialized to signal a no-op to callers, matching !m_soundLoaded behaviour.
-// HIGH-1 (code-review-finalize 2026-03-19): Apply the 3D world position from
-// pObject BEFORE calling ma_sound_start() so the first mix tick on the audio
-// thread already sees the correct spatial position (not silently at origin).
-// NEW-HIGH-1 (code-review-finalize 2026-03-19): Ordering fix — set_position must
-// come before start() to avoid the audio-thread race where the first mix tick
-// renders at (0,0,0). Correct miniaudio pattern: configure all properties first,
-// then start.
-// NEW-LOW-1 (code-review-finalize 2026-03-19): Call ma_sound_stop() before
-// ma_sound_seek_to_pcm_frame() to prevent seeking a currently-playing channel
-// (round-robin reuse of looping SFX slots). Avoids the pop/click artifact caused
-// by seeking while the audio thread is actively mixing the channel.
+// Returns S_FALSE (not S_OK) when !m_initialized to signal a no-op to callers, matching
+// !m_soundLoaded behaviour. Applies the 3D world position from pObject BEFORE calling
+// ma_sound_start(), configuring all properties before starting per the correct miniaudio
+// pattern -- otherwise the first mix tick on the audio thread renders at the default origin
+// (0,0,0) instead of the correct spatial position. Also stops the channel with ma_sound_stop()
+// before ma_sound_seek_to_pcm_frame() to prevent seeking a currently-playing channel (round-robin
+// reuse of looping SFX slots), avoiding a pop/click artifact from seeking mid-mix.
 // ---------------------------------------------------------------------------
 bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped)
 {
@@ -277,14 +269,14 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
         }
     }
 
-    // Round-robin channel selection — clamp to loaded channel count (CRITICAL-1 fix).
+    // Round-robin channel selection — clamp to loaded channel count.
     // m_loadedChannels[bufIdx] >= 1 is guaranteed by the m_soundLoaded guard above.
     const int ch = m_activeChannel[bufIdx];
     m_activeChannel[bufIdx] = (ch + 1) % m_loadedChannels[bufIdx];
 
     ma_sound* pSound = &m_sounds[bufIdx][ch];
 
-    // NEW-LOW-1: Stop the channel before seeking to avoid a seek-during-play race.
+    // Stop the channel before seeking to avoid a seek-during-play race.
     // When all MAX_CHANNEL slots are busy (e.g. looping SFX), the oldest channel
     // is reused. Stopping first prevents a pop/click from seeking mid-mix.
     ma_sound_stop(pSound);
@@ -297,25 +289,25 @@ bool MiniAudioBackend::PlaySound(ESound buffer, const void* pObject, bool looped
     // start() is subject to a data race on the first mix tick.
     ma_sound_set_looping(pSound, looped ? MA_TRUE : MA_FALSE);
 
-    // NEW-HIGH-1 / HIGH-1: Set 3D position BEFORE start() so the audio thread
+    // Set 3D position BEFORE start() so the audio thread
     // never renders at the default origin (0,0,0) for even one mix tick.
     // OBJECT::Position is vec3_t (float[3]): [0]=X, [1]=Y, [2]=Z.
-    // Story 7.8.1: pObject is void* — cast to OBJECT* for position access.
+    // pObject is void* — cast to OBJECT* for position access.
     if (m_sound3DEnabled[bufIdx] && pObject != nullptr)
     {
         const auto* pObj = static_cast<const OBJECT*>(pObject);
         ma_sound_set_position(pSound, pObj->Position[0], pObj->Position[1], pObj->Position[2]);
     }
 
-    // Story 5.2.2 (Task 1.2): Store the object pointer for per-frame position updates
-    // in Set3DSoundPosition(). Only track for 3D-enabled slots — mono/stereo SFX do not
-    // need per-frame position updates. pObject may be nullptr (checked in Set3DSoundPosition).
+    // Store the object pointer for per-frame position updates in Set3DSoundPosition(). Only
+    // track for 3D-enabled slots — mono/stereo SFX do not need per-frame position updates.
+    // pObject may be nullptr (checked in Set3DSoundPosition).
     if (m_sound3DEnabled[bufIdx])
     {
         m_soundObjects[bufIdx] = pObject;
     }
 
-    // Story 5.4.1: Apply stored SFX volume to newly-started effect
+    // Apply stored SFX volume to newly-started effect
     ma_sound_set_volume(pSound, m_sfxVolume);
 
     ma_sound_start(pSound);
@@ -344,7 +336,7 @@ void MiniAudioBackend::StopSound(ESound buffer, bool resetPosition)
         return;
     }
 
-    // CRITICAL-1 / MEDIUM-2 fix: iterate only the channels actually initialised.
+    // Iterate only the channels actually initialised.
     for (int ch = 0; ch < m_loadedChannels[bufIdx]; ++ch)
     {
         ma_sound_stop(&m_sounds[bufIdx][ch]);
@@ -354,7 +346,7 @@ void MiniAudioBackend::StopSound(ESound buffer, bool resetPosition)
         }
     }
 
-    // LOW-2 fix: clear stale object pointer after stopping so Set3DSoundPosition() cannot
+    // Clear stale object pointer after stopping so Set3DSoundPosition() cannot
     // dereference a pointer to an object that has since been deleted (e.g. NPC despawn).
     // The slot remains loaded — m_soundLoaded stays true — so the next PlaySound()
     // call can reuse the slot without reloading. Per-frame position updates simply
@@ -376,7 +368,7 @@ void MiniAudioBackend::AllStopSound()
     {
         if (m_soundLoaded[buf])
         {
-            // CRITICAL-1 fix: iterate only the channels actually initialised.
+            // Iterate only the channels actually initialised.
             for (int ch = 0; ch < m_loadedChannels[buf]; ++ch)
             {
                 ma_sound_stop(&m_sounds[buf][ch]);
@@ -388,7 +380,7 @@ void MiniAudioBackend::AllStopSound()
 // ---------------------------------------------------------------------------
 // ReleaseSound — unload a previously loaded sound from all its polyphonic slots.
 // Called by game code (e.g., ZzzOpenData.cpp) when switching maps to free NPC/monster sounds.
-// Story 7-9-4: Added to IPlatformAudio to replace legacy DirectSoundManager::ReleaseBuffer().
+// Added to IPlatformAudio to replace legacy DirectSoundManager::ReleaseBuffer().
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::ReleaseSound(ESound buffer)
 {
@@ -420,7 +412,7 @@ void MiniAudioBackend::ReleaseSound(ESound buffer)
 // Mirrors DSplaysound.cpp Set3DSoundPosition() behaviour.
 // Called each frame from the game loop for sounds that have an attached game object.
 //
-// Story 5.2.2 (Tasks 2.1/2.2): Full implementation using per-slot m_soundObjects[].
+// Full implementation using per-slot m_soundObjects[].
 // PlaySound() stores the OBJECT* in m_soundObjects[bufIdx] for 3D-enabled slots.
 // This loop reads that pointer each frame and calls ma_sound_set_position() for
 // every actively-playing channel in the slot.
@@ -453,7 +445,7 @@ void MiniAudioBackend::Set3DSoundPosition()
 
             // Update 3D position from the stored object pointer set in PlaySound().
             // m_soundObjects[buf] is non-null (checked above); Position is vec3_t float[3].
-            // Story 7.8.1: m_soundObjects is const void* — cast to OBJECT* for position access.
+            // m_soundObjects is const void* — cast to OBJECT* for position access.
             const auto* pObj = static_cast<const OBJECT*>(m_soundObjects[buf]);
             ma_sound_set_position(&m_sounds[buf][ch], pObj->Position[0], pObj->Position[1], pObj->Position[2]);
         }
@@ -508,7 +500,7 @@ void MiniAudioBackend::SetMasterVolume(long vol)
 // If enforce=false and the same track is already playing, returns early (no restart).
 // Matches wzAudioPlay() + Mp3FileName guard logic from MuMain.cpp.
 //
-// Story 5.2.1: Path normalization — MUSIC_* constants in mu_enum.h use Windows
+// Path normalization — MUSIC_* constants in mu_enum.h use Windows
 // backslash separators (e.g., "data\\music\\Pub.mp3"). On Linux/macOS miniaudio
 // requires forward slashes. Replace '\\' with '/' via std::replace before passing
 // to ma_sound_init_from_file(). No new Win32 calls — pure std::string manipulation.
@@ -547,7 +539,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     // MA_SOUND_FLAG_ASYNC is intentionally NOT used: async init causes ma_sound_is_playing()
     // to return MA_FALSE for several frames after ma_sound_start(), making IsEndMusic()
     // return true spuriously. BGM is triggered on scene load (infrequent), so synchronous
-    // stream init cost is acceptable. (HIGH-1 fix, code-review-finalize 2026-03-19)
+    // stream init cost is acceptable.
     // NOTE: Synchronous init may stall the game loop 10–100ms on HDDs or network shares
     // (common in server-hosted MU setups) due to file open + ID3 header parse + decoder init
     // on the calling thread. Acceptable for BGM at scene transitions on SSD; known limitation
@@ -563,7 +555,7 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
     }
 
     ma_sound_set_looping(&m_musicSound, MA_TRUE);
-    // Story 5.4.1: Apply stored BGM volume to new track before starting
+    // Apply stored BGM volume to new track before starting
     ma_sound_set_volume(&m_musicSound, m_bgmVolume);
     ma_sound_start(&m_musicSound);
 
@@ -573,8 +565,6 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 
 // ---------------------------------------------------------------------------
 // StopMusic — stop the current music stream
-// MEDIUM-3 (code-review-finalize 2026-03-19): Documents pause vs stop semantics.
-// LOW-3 (code-review-finalize 2026-03-19): Documents nullptr name behaviour.
 //
 // enforce=true:  Hard stop — calls ma_sound_uninit(), releases file handle and
 //                decoder. Current track name is cleared. Matches wzAudioStop().
@@ -587,13 +577,13 @@ void MiniAudioBackend::PlayMusic(const char* name, bool enforce)
 //   nullptr       + enforce=false: stop the current track regardless of name.
 //   name is ignored when enforce=true (always stops regardless).
 //
-// KNOWN LIMITATION (LOW-NEW-2): After StopMusic(nullptr, FALSE) (soft pause),
+// Known limitation: after StopMusic(nullptr, FALSE) (soft pause),
 // m_musicLoaded=true and m_currentMusicName is unchanged. The next PlayMusic() call
 // with the same track name hits the same-track guard and returns early — the music
 // stays paused with no way to resume from the current position. IPlatformAudio has
 // no ResumeMusic() method. In practice, all game call sites use enforce=TRUE (hard
 // stop via the StopMusic() free function in MuMain.cpp), so this dead-end path is
-// not reachable from current gameplay. A ResumeMusic() API may be added in 5.2.2.
+// not reachable from current gameplay.
 // ---------------------------------------------------------------------------
 void MiniAudioBackend::StopMusic(const char* name, bool enforce)
 {
@@ -646,7 +636,7 @@ bool MiniAudioBackend::IsEndMusic()
 // Mirrors wzAudioGetStreamOffsetRange() return value from MuMain.cpp.
 // Returns 0 when not initialized or no music loaded.
 //
-// HIGH-2 (code-review-finalize 2026-03-19): Music is loaded with
+// Music is loaded with
 // MA_SOUND_FLAG_STREAM | MA_SOUND_FLAG_ASYNC. For streaming sounds,
 // ma_sound_get_length_in_pcm_frames() returns MA_RESULT indicating the length
 // is unavailable while the stream is still opening — totalFrames stays 0.
@@ -689,7 +679,7 @@ int MiniAudioBackend::GetMusicPosition()
 // DirectSound volume: -10000 (DSBVOLUME_MIN, silent) to 0 (full volume)
 // Each unit = 1/100th of a dB, so vol / 2000.0f = dB / 20.0f (standard dB-to-linear)
 //
-// NEW-MEDIUM-1 (code-review-finalize 2026-03-19): Clamp dsVol to <= 0 before
+// Clamp dsVol to <= 0 before
 // conversion. The valid DirectSound range is DSBVOLUME_MIN (-10000) to 0.
 // A positive dsVol would produce gain > 1.0, causing over-amplified distorted
 // audio because miniaudio does not hard-clamp the volume internally.
@@ -704,7 +694,7 @@ float MiniAudioBackend::DbToLinear(long dsVol)
 }
 
 // ---------------------------------------------------------------------------
-// SetBGMVolume — set BGM volume (linear 0.0 to 1.0), clamped. Story 5.4.1.
+// SetBGMVolume — set BGM volume (linear 0.0 to 1.0), clamped.
 // Stores the value unconditionally; applies to the active music sound only
 // when the engine is initialized and music is loaded.
 // ---------------------------------------------------------------------------
@@ -718,7 +708,7 @@ void MiniAudioBackend::SetBGMVolume(float level)
 }
 
 // ---------------------------------------------------------------------------
-// SetSFXVolume — set SFX volume (linear 0.0 to 1.0), clamped. Story 5.4.1.
+// SetSFXVolume — set SFX volume (linear 0.0 to 1.0), clamped.
 // Applies per-slot ma_sound_set_volume to all loaded SFX channels.
 // Does NOT use ma_engine_set_volume (would also affect BGM).
 // ---------------------------------------------------------------------------
@@ -744,7 +734,7 @@ void MiniAudioBackend::SetSFXVolume(float level)
 }
 
 // ---------------------------------------------------------------------------
-// GetBGMVolume / GetSFXVolume — return stored volume level. Story 5.4.1.
+// GetBGMVolume / GetSFXVolume — return stored volume level.
 // ---------------------------------------------------------------------------
 float MiniAudioBackend::GetBGMVolume() const
 {
@@ -758,7 +748,7 @@ float MiniAudioBackend::GetSFXVolume() const
 
 // ---------------------------------------------------------------------------
 // GetAudioDeviceNames — enumerate playback devices for error reporting.
-// [Story 7-6-7: AC-6] Isolated here to keep miniaudio.h out of ErrorReport.cpp.
+// Isolated here to keep miniaudio.h out of ErrorReport.cpp.
 // ---------------------------------------------------------------------------
 std::vector<std::string> GetAudioDeviceNames()
 {

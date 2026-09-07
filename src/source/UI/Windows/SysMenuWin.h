@@ -20,8 +20,7 @@ namespace Rml { class ElementDocument; }
 // window's visuals in every theme; the legacy CButtons stay registered (redundant, harmless
 // detection path) alongside Rml*Click*() methods mirroring CLoginWin's pattern.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CObject, same pattern as CMsgWin (its own header comment covers the shared
+// Migrated off CWin onto mu::ui::window::CObject, same pattern as CMsgWin (its own header comment covers the shared
 // reasoning -- full-screen click-swallow via UpdateMouseEvent(), LayoutMode::Legacy for the
 // legacy CWinEx/CButton real-pixel geometry). ESC is NOT handled here at all (never was --
 // UpdateWhileActive()'s own ESC branch below was already a no-op): CSceneUICoordinator::Update()'s dedicated
@@ -43,9 +42,9 @@ public:
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow) override;
 
-    // 2026-09-03: act immediately here instead of setting a flag for UpdateWhileActive() to
-    // consume later -- see CLoginMainWin::RmlClickMenu()'s header comment (STATUS.md's "Findings
-    // worth knowing") for why: UpdateWhileActive() is gated behind CWin::m_bActive, which the
+    // Act immediately here instead of setting a flag for UpdateWhileActive() to
+    // consume later -- see CLoginMainWin::RmlClickMenu()'s header comment for why:
+    // UpdateWhileActive() is gated behind CWin::m_bActive, which the
     // legacy CUIMng activation system doesn't reliably grant on a timely basis, and this file's
     // old flag-consumed-in-an-if/else-if-chain shape is exactly the pattern that let a stale flag
     // win over a fresh one there. Confirmed safe to call straight into CUIMng methods here for the

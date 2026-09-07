@@ -9,8 +9,8 @@
 	     because modern's decorative layering (modern-frame/modern-panel/modern-frame-accent, plus
 	     the -crimson palette variant) is genuinely modern-specific structure, not just style --
 	     the shared ../../login.rml is legacy's own theme-neutral copy and carries none of these
-	     classes (architecture-principles.md §15: a "shared" file must not bake in one theme's
-	     vocabulary). Keep this file's ids/data-model/event-callback names in sync with
+	     classes (a "shared" file must not bake in one theme's vocabulary). Keep this file's
+	     ids/data-model/event-callback names in sync with
 	     ../../login.rml -- LoginWin.cpp binds against both by the same names. -->
 	<div id="panel" class="modern-frame modern-frame-crimson" data-model="login">
 		<div class="modern-frame-accent modern-frame-accent-crimson frame-accent"></div>

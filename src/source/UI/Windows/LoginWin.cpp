@@ -284,8 +284,8 @@ void CLoginWin::SetPosition(int x, int y)
 		// out -- true unconditionally only as long as this ran unscoped (CWin days); once this
 		// window's own dispatch can run inside a ScopedActiveTransform(LayoutMode::Legacy) scope,
 		// dividing by the ambient rate here while the identity scope is active would silently
-		// store an un-descaled value. Same fix as CMsgWin's resident-password gotcha
-		// (docs/newui-legacy-merger.md) -- store real pixels on both ends instead.
+		// store an un-descaled value. Same fix as CMsgWin's resident-password gotcha -- store
+		// real pixels on both ends instead.
 		const int boxX = x + ScaledOffset(115, uiScale);
 		m_pUsernameInputBox->SetPosition(boxX, y + usernameY);
 		m_pPasswordInputBox->SetPosition(boxX, y + passwordY);
@@ -542,15 +542,14 @@ bool CLoginWin::Render()
         FirstLoad = 0;
     }
 
-    // g_CreditWin's own visuals are plain CSprite/g_pRenderText content (CUIMng/CNewUIManager
-    // merger, docs/newui-legacy-merger.md), drawn in a C++ pass strictly *before* RmlUi's own
-    // frame-final document render (docs/rmlui-ui-system/README.md's "RmlUi renders last") --
+    // g_CreditWin's own visuals are plain CSprite/g_pRenderText content, drawn in a C++ pass
+    // strictly *before* RmlUi's own frame-final document render ("RmlUi renders last") --
     // login.rml's own panel would otherwise always paint over it regardless of which was opened
     // more recently, the same "RmlUi always wins" gap CCharInfoBalloonMng's own shouldHide check
     // exists to work around. This is a PERMANENT gap, not one this class's own migration onto
     // CObject retires: GetLayerDepth()'s sort only orders this manager's own dispatch, not
     // RmlUi's separate, always-last compositor pass, so no depth choice can substitute for this
-    // toggle (docs/newui-legacy-merger.md). Toggled every frame here (not just on Show()), same
+    // toggle. Toggled every frame here (not just on Show()), same
     // idempotent pattern as that check, since credits can open/close at any time while this
     // dialog is already showing.
     const bool coveredByCredits = g_CreditWin.IsVisible();
@@ -584,8 +583,7 @@ void CLoginWin::RenderTextOnTop()
     // Force identity so this agrees with SetPosition()'s now-real-pixel values regardless of
     // which context runs this call (Render()'s own call above, under whatever transform
     // CManager::Render() applies for this window's LayoutMode::Legacy, or Winmain.cpp's
-    // completely unscoped post-RmlUi callback) -- same fix as CMsgWin's resident-password gotcha
-    // (docs/newui-legacy-merger.md).
+    // completely unscoped post-RmlUi callback) -- same fix as CMsgWin's resident-password gotcha.
     const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
     UI::Scaling::ScopedActiveTransform identity(transform);
     m_pUsernameInputBox->Render();

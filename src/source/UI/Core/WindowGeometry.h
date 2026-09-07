@@ -1,7 +1,6 @@
 //////////////////////////////////////////////////////////////////////
 // WindowGeometry.h: opt-in, composed 2D rect + hit-test for mu::ui::window
-// widgets that have a real screen-space position (docs/ui-target-architecture.md
-// Section C). Not a CObject base-class field -- a window that has a
+// widgets that have a real screen-space position. Not a CObject base-class field -- a window that has a
 // meaningful rect owns one of these and forwards to it; a window whose
 // position is a per-frame WorldToScreen() projection (CMyInventory's
 // 3D-anchored slots, CCharInfoBalloonMng) never creates one.

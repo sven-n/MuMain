@@ -16,7 +16,7 @@
 // Creates/releases/positions the login- and character-scene g_*Win globals per scene transition,
 // and forwards Update()/Render() to its own CManager instance (m_NewStyleMng below). No
 // CWin-derived window list of its own -- every window that formerly needed one has migrated onto
-// mu::ui::window::CObject/CManager (see docs/newui-legacy-merger.md).
+// mu::ui::window::CObject/CManager.
 class CSceneUICoordinator
 {
 protected:
@@ -58,7 +58,7 @@ public:
      * etc. don't end up anchored to the old screen size.
      *
      * Only affects the login/character-scene windows this class itself drives
-     * (g_CreditWin, g_LoginWin, g_MsgWin, etc. -- see docs/newui-legacy-merger.md);
+     * (g_CreditWin, g_LoginWin, g_MsgWin, etc.);
      * the MAIN_SCENE-only mu::ui::window windows are driven by g_pNewUISystem separately.
      */
     void RepositionSceneUI();

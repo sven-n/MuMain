@@ -2537,7 +2537,7 @@ void Attack(CHARACTER* c)
 {
     const bool mouseOnHud = UI::Scaling::BottomHudContainsWindowPoint(
         WindowWidth, WindowHeight, g_fWindowMouseX, g_fWindowMouseY);
-    // Core::Input::IsMouseOverUI() added as a 4th gate here too (2026-08-31) -- same rationale as
+    // Core::Input::IsMouseOverUI() added as a 4th gate here too -- same rationale as
     // the duplicate check in Input/Selection.cpp's SelectObjects(), kept in sync with it.
     if ((MouseOnWindow || mouseOnHud || Core::Input::IsMouseOverUI()) && MouseLButtonPush)
     {

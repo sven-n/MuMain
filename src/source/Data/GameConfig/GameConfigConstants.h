@@ -41,8 +41,7 @@ namespace CfgKeys
     // a full runtime hot-swap -- read once at startup. See UI::RmlBridge::RmlTheme.
     inline constexpr wchar_t CfgKeyRmlTheme[] = L"RmlTheme";
     // Global RmlUi UI scale, as a percentage (100 = normal). Drives
-    // Rml::Context::SetDensityIndependentPixelRatio() -- see UI/RmlBridge/RmlTheme's sibling
-    // doc, docs/rmlui-ui-system/layout-and-scaling.md. Only RCSS authored in `dp` units responds
+    // Rml::Context::SetDensityIndependentPixelRatio(). Only RCSS authored in `dp` units responds
     // to this; existing `px`-authored windows are unaffected until retrofitted.
     inline constexpr wchar_t CfgKeyUIScalePercent[] = L"UIScalePercent";
     // Per-window user-dragged position (GameConfig::GetWindowPosition/SetWindowPosition) --
@@ -55,7 +54,7 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyZoom[] = L"Zoom";
 
     // Render
-    // DXP-08: Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
+    // Core Profile GL context flip. 0 = compatibility (rollback), 1 = core.
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";

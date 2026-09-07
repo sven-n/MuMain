@@ -135,7 +135,7 @@
 .frame-btn:hover { filter: brightness(1.25); }
 
 .btn-icon-label { display: none; }
-/* Phase 3 (item hotkey): #item_slots is no longer hidden outright -- same treatment as
+/* Item hotkey chrome: #item_slots is no longer hidden outright -- same treatment as
    #skill_slots below, hit-test/stack-count only. Q/W/E/R letters stay baked into the real
    IMAGE_MENU_1 sprite art (.slot-hotkey-label stays hidden, unlike .item-stack-label below, which
    has no baked-in equivalent and needs a real style). .slot-frame/.selected stay unstyled here
@@ -187,7 +187,7 @@
 #item_slot_2 { position: absolute; left: 86px;  top: 443px; width: 20px; height: 20px; }
 #item_slot_3 { position: absolute; left: 124px; top: 443px; width: 20px; height: 20px; }
 
-/* Phase 2 (skill list) / Phase 3 (item hotkey): these are now real hover/click targets
+/* Skill list / item hotkey chrome: these are now real hover/click targets
    (main_frame.rml) -- opt back into pointer-events (inherited `none` from body). */
 #item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
 #skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,

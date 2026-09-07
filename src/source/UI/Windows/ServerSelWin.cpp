@@ -485,7 +485,7 @@ bool CServerSelWin::Render()
     // NOTE: m_aBtnDeco/m_aArrowDeco/m_winDescription are positioned and have their Show() flags
     // toggled (SetPosition(), Show*() below) but were never actually rendered here in the
     // original CWin-based RenderControls() either -- ported as-is (parity, not a fix) rather than
-    // silently drawing content that wasn't drawn before. Flagged in docs/newui-legacy-merger.md.
+    // silently drawing content that wasn't drawn before.
     for (i = 0; i < SSW_SERVER_G_MAX; i++)
         m_aServerGroupBtn[i].Render();
     for (i = 0; i < SSW_SERVER_MAX; i++)

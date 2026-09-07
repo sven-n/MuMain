@@ -1,6 +1,4 @@
 // MuRendererSDLGpu.cpp: SDL_gpu backend implementation of IMuRenderer.
-// Story 4.3.1 — Flow Code: VS1-RENDER-SDLGPU-BACKEND
-// Story 4.3.2 — Flow Code: VS1-RENDER-SHADERS (shader loading, fog UBO, pipeline fixes)
 //
 // MuRendererSDLGpu replaces the OpenGL immediate-mode backend (MuRendererGL)
 // with SDL_gpu — selecting Metal on macOS, Vulkan on Linux, D3D12 on Windows.
@@ -13,12 +11,12 @@
 //   - BeginFrame() / EndFrame() are instance methods called from MuMain.cpp game loop.
 //   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
 //   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
-//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D (AC-8 fix).
+//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D.
 //   - Deferred draw command recording: vertices collected during frame, copied to GPU
-//     in EndFrame() BEFORE the render pass, then draw commands replayed (AC-7 fix).
+//     in EndFrame() BEFORE the render pass, then draw commands replayed.
 //
 // GUARD STRUCTURE:
-//   Story 7.9.3: SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
+//   SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
 
 // Include SDL3 GPU header only in this file — not exposed to game logic.
 // SDL3 is a required project dependency, so these includes are unconditional.
@@ -85,7 +83,7 @@ constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
 constexpr int k_PipelineDisabled = 8;
 
-// Story 7.9.7 (AC-7): Vertex uniform layout matching cbuffer Transform in HLSL.
+// Vertex uniform layout matching cbuffer Transform in HLSL.
 // Contains MVP matrix + fog params, pushed per-draw via SDL_PushGPUVertexUniformData.
 struct VertexUniforms
 {
@@ -116,7 +114,7 @@ namespace mu
 {
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-10): Fog uniform buffer struct — in mu:: namespace so that
+// Fog uniform buffer struct — in mu:: namespace so that
 // test_shaderprograms.cpp can forward-declare and verify layout via static_assert.
 // Mirrors the FogUniforms cbuffer declared in basic_textured.frag.hlsl (std140).
 // HLSL cbuffer layout: uint4 register, float2 + padding register, float4 register.
@@ -145,7 +143,6 @@ static_assert(offsetof(FogUniform, fogColor) == 32, "FogUniform HLSL float4 regi
 static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuffer)");
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-6): GetShaderBlobPath
 // Returns the absolute path to a compiled shader blob given GPU driver name,
 // shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
 // driver: "vulkan" | "direct3d12" | "metal"
@@ -184,7 +181,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 }
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-6): GetShaderFormat
 // Returns the SDL_GPUShaderFormat constant name for the given driver.
 // Only used internally — returns the correct enum value for SDL_CreateGPUShader.
 // ---------------------------------------------------------------------------
@@ -202,7 +198,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 }
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-6): LoadShaderBlob
 // Loads a compiled shader blob from disk into a byte vector.
 // Returns empty vector on failure (caller logs via mu::log).
 // ---------------------------------------------------------------------------
@@ -490,8 +485,8 @@ static void ConfigureD3D12Diagnostics(const char* driverName)
     }
 }
 
-// Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
-// Story 7.9.7: Added DepthReadOnly variants (depth test ON, depth write OFF) for particles.
+// Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
+// DepthReadOnly variants (depth test ON, depth write OFF) support particles.
 // s_pipelines2D: depth ON (test+write), Vertex2D layout (pitch=20).
 // s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
 // s_pipelines3D: depth ON (test+write), Vertex3D layout (pitch=40).
@@ -509,7 +504,7 @@ static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedNoCull[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthReadOnly[k_PipelineCount] = {};
 
-// Story 4.3.2 (AC-7): Single pre-frame vertex upload.
+// Single pre-frame vertex upload.
 // Draws accumulate in growable CPU memory before one GPU upload.
 static SDL_GPUTransferBuffer* s_vtxTransferBuf = nullptr;
 static SDL_GPUBuffer* s_vtxGpuBuf = nullptr;
@@ -554,7 +549,7 @@ enum class RenderCmdType : uint8_t
     DrawSkinnedTriangles,
     DrawIndexedQuads, // indexed 2D or 3D with static quad index buffer
     DrawIndexedStrip, // indexed 3D with per-frame strip indices (Vertex3D)
-    DrawTriangles2D,  // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
+    DrawTriangles2D,  // non-indexed 2D triangles (Vertex2D) for text atlas
 };
 
 struct RenderCmd
@@ -861,19 +856,19 @@ static SDL_GPUShader* s_fragShaderCol = nullptr;     // basic_colored.frag
 static SDL_GPUShader* s_vertShaderShadow = nullptr;  // shadow_volume.vert
 static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 
-// Story 7.9.7 (AC-3): Depth buffer texture for correct 3D depth testing.
+// Depth buffer texture for correct 3D depth testing.
 // Created in Init() at swapchain dimensions, recreated on window resize.
 static SDL_GPUTexture* s_depthTexture = nullptr;
 static Uint32 s_depthW = 0u;
 static Uint32 s_depthH = 0u;
 static SDL_FColor s_clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
-// Story 4.3.2 (AC-10): Fog uniform buffer and transfer buffer.
+// Fog uniform buffer and transfer buffer.
 static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
 static SDL_GPUTransferBuffer* s_fogTransferBuf = nullptr;
 static bool s_fogDirty = true; // upload on first draw if SetFog not called
 
-// Story 7.9.8 (AC-2): SDL_ttf GPU text engine and font variants.
+// SDL_ttf GPU text engine and font variants.
 // s_textEngine: atlas-based text engine created after SDL_GPUDevice.
 // s_ttfFont*: pre-loaded fonts for UI text rendering (normal, bold, big, fixed).
 static TTF_TextEngine* s_textEngine = nullptr;
@@ -1238,7 +1233,7 @@ void ClearTextureRegistry()
 }
 
 // ---------------------------------------------------------------------------
-// Story 4.4.1 (AC-4, Task 6): SamplerRegistry — parallel to TextureRegistry.
+// SamplerRegistry — parallel to TextureRegistry.
 // Maps caller-provided uint32_t ids to SDL_GPUSampler* (stored as void* for test linkage).
 // RegisterSampler / LookupSampler / UnregisterSampler follow the same pattern as the texture registry.
 // Sampler binding in draw calls uses LookupSampler(textureId) instead of the hardcoded s_defaultSampler.
@@ -1385,7 +1380,7 @@ public:
             return false;
         }
 
-        // Story 4.3.2: Load real HLSL shader blobs from MU_SHADER_DIR.
+        // Load real HLSL shader blobs from MU_SHADER_DIR.
         // Driver name used to select the correct blob format (SPIR-V/DXIL/MSL).
         if (!LoadShaders(driverName))
         {
@@ -1473,7 +1468,7 @@ public:
             return false;
         }
 
-        // Story 4.3.2 (AC-10): Create fog uniform GPU buffer and transfer buffer.
+        // Create fog uniform GPU buffer and transfer buffer.
         if (!CreateFogUniformBuffers())
         {
             mu::log::Get("render")->error("SDL_gpu -- fog uniform buffer creation failed");
@@ -1493,7 +1488,7 @@ public:
             return false;
         }
 
-        // Story 7.9.7 (AC-3): Create initial depth texture at window size.
+        // Create initial depth texture at window size.
         // BeginFrame() will recreate it if the swapchain dimensions differ.
         {
             int winW = 0;
@@ -1548,7 +1543,7 @@ public:
         s_frameReadbackState.Reset();
 
 #if MU_HAS_SDL_TTF
-        // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
+        // Destroy SDL_ttf resources before the GPU device.
         // Close font variants first, then default font, then engine.
         CloseTtfFont(s_ttfFontFixed);
         CloseTtfFont(s_ttfFontBig);
@@ -1583,7 +1578,7 @@ public:
             s_defaultSampler = nullptr;
         }
 
-        // Story 7.9.7 (AC-3): Release depth texture.
+        // Release depth texture.
         if (s_depthTexture)
         {
             SDL_ReleaseGPUTexture(s_device, s_depthTexture);
@@ -1592,7 +1587,7 @@ public:
             s_depthH = 0u;
         }
 
-        // Story 4.3.2 (AC-10): Release fog uniform buffers.
+        // Release fog uniform buffers.
         if (s_fogUniformBuf)
         {
             SDL_ReleaseGPUBuffer(s_device, s_fogUniformBuf);
@@ -1710,10 +1705,10 @@ public:
             return;
         }
 
-        // Story 7.9.7: Fog/alpha uniform is now pushed per-draw-call via
+        // Fog/alpha uniform is now pushed per-draw-call via
         // SDL_PushGPUFragmentUniformData — no copy pass needed here.
 
-        // Story 7.9.7 (AC-3): Ensure depth texture matches swapchain dimensions.
+        // Ensure depth texture matches swapchain dimensions.
         // Recreates on first frame or when window is resized.
         CreateOrResizeDepthTexture(s_swapW, s_swapH);
 
@@ -1728,7 +1723,7 @@ public:
     // Called once per frame after all draw calls.
     // Replaces SDL_GL_SwapWindow / SwapBuffers in the game loop.
     //
-    // Story 4.3.2 (AC-7): After ending the render pass, unmap the vertex
+    // After ending the render pass, unmap the vertex
     // transfer buffer and issue a single copy pass to flush the frame's
     // accumulated vertex data to the GPU vertex buffer. The next frame's
     // render pass will read from the updated GPU buffer.
@@ -1992,8 +1987,8 @@ public:
     }
 
     // RmlUi-behind-3D-icons seam: opens a real render pass NOW, mid-recording, instead of waiting
-    // for EndFrame's single one -- the seam docs/rmlui-ui-system/STATUS.md's "RmlUi renders last"
-    // finding calls for. CLEARs on the first flush of the frame, LOADs on every one after
+    // for EndFrame's single one -- lets a caller paint behind a live 3D render despite RmlUi's
+    // main context always compositing last. CLEARs on the first flush of the frame, LOADs on every one after
     // (including EndFrame's own final one, see its own call to ReplayCommandRange below) --
     // s_mainColorPassOpenedThisFrame/s_replayedCmdCount track that across calls, reset only in
     // BeginFrame. A caller (e.g. a second Rml::Context's Render(), or any other content that must
@@ -2072,14 +2067,14 @@ public:
         s_frameActive = false;
 
         // ---------------------------------------------------------------
-        // Phase 1: stage this frame's remaining accumulated vertex/bone/strip/texture data
+        // Stage this frame's remaining accumulated vertex/bone/strip/texture data
         // (StageDeferredGpuData is safe to call again even if FlushRenderCommands already
         // called it earlier this same frame -- see its own comment).
         // ---------------------------------------------------------------
         const bool boneDataReady = StageDeferredGpuData();
 
         // ---------------------------------------------------------------
-        // Phase 3: Render pass — replay all recorded draw commands.
+        // Render pass — replay all recorded draw commands.
         // The GPU vertex/index buffers now contain current-frame data.
         // ---------------------------------------------------------------
         SDL_GPUTextureFormat frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
@@ -2258,7 +2253,8 @@ public:
             // above) only appends to the CPU-side s_vtxScratch and advances s_vtxOffset -- it does
             // NOT touch the GPU. The actual transfer-buffer map+memcpy and the copy-pass that
             // moves it into s_vtxGpuBuf (what ReplayDrawCommand's SDL_BindGPUVertexBuffers
-            // actually reads) already ran once, early in this function ("Phase 1"), using
+            // actually reads) already ran once, early in this function (the deferred-data staging
+            // step above), using
             // whatever s_vtxOffset was BEFORE this callback grew it further. Without redoing both
             // steps here, every draw command the callback just pushed references a byte range in
             // s_vtxGpuBuf that was never written this frame (stale/uninitialized GPU memory) --
@@ -2414,7 +2410,7 @@ public:
 
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-1): BeginScene — 3D viewport and projection setup.
+    // BeginScene — 3D viewport and projection setup.
     // SDL_gpu backend: sets viewport on the render pass. Projection/camera
     // transforms are handled via uniform buffers (not immediate-mode matrices).
     // -----------------------------------------------------------------------
@@ -2441,7 +2437,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-1): EndScene — restore state after 3D pass.
+    // EndScene — restore state after 3D pass.
     // SDL_gpu backend: reset viewport to full window.
     // -----------------------------------------------------------------------
     void EndScene() override
@@ -2534,7 +2530,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-2): Begin2DPass — mark 2D mode for pipeline selection.
+    // Begin2DPass — mark 2D mode for pipeline selection.
     // SDL_gpu uses separate 2D pipelines (Vertex2D layout, depth OFF).
     // -----------------------------------------------------------------------
     void Begin2DPass() override
@@ -2560,7 +2556,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-2): End2DPass — restore 3D mode.
+    // End2DPass — restore 3D mode.
     // -----------------------------------------------------------------------
     void End2DPass() override
     {
@@ -2569,7 +2565,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-7): ClearScreen — no-op on SDL_gpu.
+    // ClearScreen — no-op on SDL_gpu.
     // SDL_gpu clears the swapchain texture at BeginFrame (LOADOP_CLEAR).
     // -----------------------------------------------------------------------
     void ClearScreen() override
@@ -2583,7 +2579,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-5): RenderLines — line primitive rendering.
+    // RenderLines — line primitive rendering.
     // SDL_gpu backend: emit line primitives using existing 3D pipeline.
     // For now, renders as thin triangles (SDL_gpu line support varies).
     // -----------------------------------------------------------------------
@@ -2666,7 +2662,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-6): IsFrameActive — frame lifecycle query.
+    // IsFrameActive — frame lifecycle query.
     // Returns true when a render pass is open (between BeginFrame/EndFrame).
     // -----------------------------------------------------------------------
     [[nodiscard]] bool IsFrameActive() const override
@@ -2702,7 +2698,7 @@ public:
         return true;
     }
 
-    // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
+    // GetDevice override — returns s_device.
     // Allows GlobalBitmap.cpp to obtain the SDL_GPUDevice* via mu::GetRenderer().GetDevice()
     // without a direct dependency on MuRendererSDLGpu.cpp internals.
     // Logs a warning via mu::log if s_device is nullptr (renderer not initialized).
@@ -2751,13 +2747,13 @@ public:
         s_postRmlUiCallback = std::move(callback);
     }
 
-    // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.
+    // SDL_ttf text engine accessor.
     [[nodiscard]] TTF_TextEngine* GetTextEngine() override
     {
         return s_textEngine;
     }
 
-    // Story 7.9.8 (AC-2): Default TTF font accessor.
+    // Default TTF font accessor.
     [[nodiscard]] TTF_Font* GetTtfFont() override
     {
         return s_ttfFont;
@@ -2797,7 +2793,7 @@ public:
         return s_cachedWinH;
     }
 
-    // Story 7.9.8 (AC-6): Submit text atlas triangles as deferred draw commands.
+    // Submit text atlas triangles as deferred draw commands.
     void SubmitTextTriangles(std::span<const Vertex2D> vertices, void* atlasTexture, void* sampler = nullptr) override
     {
         if (vertices.empty() || !s_frameActive || !atlasTexture)
@@ -3022,7 +3018,7 @@ public:
         return LookupTexture(textureId) != nullptr;
     }
 
-    // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
+    // GPU backend driver name for error reporting.
     [[nodiscard]] const char* GetGPUDriverName() const override
     {
         return s_device ? SDL_GetGPUDeviceDriver(s_device) : "unknown";
@@ -3064,7 +3060,7 @@ public:
             return;
         }
 
-        // Story 4.3.2 (AC-8): RenderQuad2D uses the 2D pipeline set (Vertex2D layout).
+        // RenderQuad2D uses the 2D pipeline set (Vertex2D layout).
         // Always disable depth test for 2D sprites — they must render on top of 3D
         // geometry regardless of depth buffer state. The 3D pass fills the depth buffer
         // with near values (characters close to camera) that would occlude 2D UI.
@@ -3171,7 +3167,7 @@ public:
             return;
         }
 
-        // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
+        // RenderTriangles uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline = GetActive3DPipeline();
         if (!pipeline)
@@ -3445,7 +3441,7 @@ public:
 
         const Uint32 numIndices = numQuads * 6;
 
-        // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
+        // RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         SDL_GPUGraphicsPipeline* pipeline = GetActive3DPipeline();
         if (!pipeline)
         {
@@ -3527,7 +3523,7 @@ public:
     // -----------------------------------------------------------------------
     // SetFog: Populate FogUniform from FogParams and mark the GPU buffer dirty.
     // The buffer is uploaded in BeginFrame() before the render pass.
-    // Story 4.3.2 (AC-10): Fog uniform buffer support.
+    // Fog uniform buffer support.
     // -----------------------------------------------------------------------
     void SetDepthMask(bool enabled) override
     {
@@ -3537,14 +3533,14 @@ public:
     {
         m_cullFaceEnabled = enabled;
     }
-    // Story 7.9.7: SetColorMask — track color write state.
+    // SetColorMask — track color write state.
     // When all channels are disabled (shadow volume stencil passes), draw calls
     // are skipped entirely since we have no stencil buffer support yet.
     void SetColorMask(bool r, bool g, bool b, bool a) override
     {
         m_colorWriteEnabled = (r || g || b || a);
     }
-    // Story 7.9.7: SetStencilTest — track stencil state.
+    // SetStencilTest — track stencil state.
     // All stencil-dependent rendering (shadow volumes, shadow darkening) is skipped
     // since we have no stencil buffer. Without this, RenderShadowToScreen() draws
     // a full-screen darkening quad that covers the entire scene.
@@ -3555,14 +3551,14 @@ public:
     void SetAlphaTest(bool enabled) override
     {
         m_alphaTestEnabled = enabled;
-        // Story 7.9.7 (AC-5): Propagate alpha test state to the fog uniform
+        // Propagate alpha test state to the fog uniform
         // so the fragment shader's `if (alphaDiscardEnabled && color.a <= alphaThreshold) discard;`
         // actually fires for particle sprites.
         m_fogUniform.alphaDiscardEnabled = enabled ? 1u : 0u;
         s_fogDirty = true;
     }
 
-    // Story 7.9.7 (AC-7): Override SetAlphaFunc to propagate alpha threshold
+    // Override SetAlphaFunc to propagate alpha threshold
     // to the fog uniform. Game code calls SetAlphaFunc(GL_GREATER, 0.25f)
     // via EnableAlphaTest() in ZzzOpenglUtil.cpp.
     void SetAlphaFunc(int /*func*/, float ref) override
@@ -3595,7 +3591,7 @@ public:
         // fogEnabled: true when mode != 0 (mode 0 = no fog / GL_LINEAR from caller).
         // alphaDiscardEnabled / alphaThreshold: not in FogParams; default off.
         m_fogUniform.fogEnabled = m_fogEnabled ? 1u : 0u;
-        // Story 7.9.7: Preserve alpha discard state — SetFog must NOT reset
+        // Preserve alpha discard state — SetFog must NOT reset
         // alphaDiscardEnabled/alphaThreshold set by SetAlphaTest/SetAlphaFunc.
         m_fogUniform.pad0 = 0.0f;
         m_fogUniform.fogStart = params.start;
@@ -3746,7 +3742,7 @@ private:
     bool m_stencilTestEnabled = false;
     int m_boundTextureId = -1;
     FogParams m_fogParams{};
-    // Story 4.3.2 (AC-10): CPU-side fog uniform data, uploaded to GPU when dirty.
+    // CPU-side fog uniform data, uploaded to GPU when dirty.
     FogUniform m_fogUniform{};
 
     // Matrix stack for 3D rendering (replaces OpenGL fixed-function matrix stack).
@@ -3861,7 +3857,6 @@ private:
     // -----------------------------------------------------------------------
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-2, AC-5): LoadShaders
     // Loads all 6 HLSL shader blobs from MU_SHADER_DIR and creates
     // SDL_GPUShader handles for pipeline creation.
     // driverName: SDL_GetGPUDeviceDriver(s_device) result.
@@ -3932,7 +3927,7 @@ private:
 
         // basic_textured.frag — fatal: required for textured 2D draws.
         // Samplers: t0 (texture), s0 (sampler); Uniform buffers: FogUniforms (pushed per-draw)
-        // Story 7.9.7: Changed from numStorageBuffers=1 to numUniformBuffers=1 so fog/alpha
+        // Changed from numStorageBuffers=1 to numUniformBuffers=1 so fog/alpha
         // data can be pushed per-draw-call via SDL_PushGPUFragmentUniformData (not a GPU buffer).
         s_fragShaderTex = createShader("basic_textured", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/true);
         if (!s_fragShaderTex)
@@ -3945,7 +3940,7 @@ private:
         // basic_colored.vert — non-fatal (colored path degrades gracefully).
         // Inputs: pos(TEXCOORD0), color(TEXCOORD1)
         // Uniform buffers: b0, space1 (ScreenSize)
-        // NOTE (HIGH-4): Shader handles below are loaded as pipeline hooks for
+        // NOTE: Shader handles below are loaded as pipeline hooks for
         //   future IMuRenderer::RenderColoredGeometry() and RenderShadowVolume()
         //   methods. No dedicated pipeline sets exist yet — these shaders are not
         //   assigned to any pipeline in this story. Deferred to a follow-up story.
@@ -3974,7 +3969,7 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2: ReleaseShaders — release all 6 shader handles.
+    // ReleaseShaders — release all 6 shader handles.
     // Called after CreatePipelines() and during Shutdown() as a safety net.
     // -----------------------------------------------------------------------
     static void ReleaseShaders()
@@ -4012,7 +4007,6 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-8): BuildBlendPipeline
     // Creates one textured blend/depth/cull variant and captures SDL's immediate
     // error before another pipeline build can overwrite it.
     // -----------------------------------------------------------------------
@@ -4180,7 +4174,7 @@ private:
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
         targetInfo.num_color_targets = 1;
-        // Story 7.9.7 (AC-3): Enable depth-stencil target so pipelines match
+        // Enable depth-stencil target so pipelines match
         // the render pass that now includes a depth buffer.
         targetInfo.has_depth_stencil_target = true;
         targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
@@ -4247,13 +4241,12 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-8): CreatePipelines
     // Builds every blend variant. The selected 3D, 2D depth-off, and skinned sets
     // are required; unused 2D depth-on remains optional.
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
     {
-        // Blend mode table from architecture-rendering.md and story dev notes.
+        // Blend mode table matching this renderer's blend pipeline.
         // Indices match BlendMode enum cast to int; index 8 = disabled.
         //
         // SDL_GPUBlendFactor values (INVALID=0, ZERO=1, ONE=2, SRC_COLOR=3,
@@ -4434,7 +4427,6 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7.9.7 (AC-3): CreateOrResizeDepthTexture
     // Creates (or recreates on resize) an SDL_GPUTexture with depth format
     // matching the current swapchain dimensions. Called from Init() and
     // BeginFrame() when swapchain size changes.
@@ -4484,7 +4476,6 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-10): CreateFogUniformBuffers
     // Creates the GPU buffer (s_fogUniformBuf) used as a storage buffer in
     // the fragment shader, and its companion transfer buffer (s_fogTransferBuf).
     // Size = sizeof(FogUniform) = 48 bytes.
@@ -4900,7 +4891,7 @@ private:
 
 // ---------------------------------------------------------------------------
 // GetRenderer / InitSDLGpuRenderer / ShutdownSDLGpuRenderer:
-// Story 7.9.3: MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
+// MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
 // ---------------------------------------------------------------------------
 
 [[nodiscard]] IMuRenderer& GetRenderer()

@@ -9,8 +9,8 @@
 namespace
 {
     // Real wall-clock time, independent of game pause/tick state -- matches this codebase's own
-    // established pattern for render-frequency timing (std::chrono::steady_clock, see the
-    // FPS_ANIMATION_FACTOR gotchas in docs/GPU Skinning/gotchas-and-patterns.md) rather than
+    // established pattern for render-frequency timing (std::chrono::steady_clock, same as the
+    // FPS_ANIMATION_FACTOR handling elsewhere) rather than
     // reusing a game-simulation time global like WorldTime, which RmlUi's own animations/
     // transitions/double-click detection should not be coupled to.
     const std::chrono::steady_clock::time_point g_StartTime = std::chrono::steady_clock::now();

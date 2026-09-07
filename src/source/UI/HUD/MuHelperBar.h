@@ -9,7 +9,7 @@ namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
-    // First pilot of the CObject-tier adapter pattern (docs/rmlui-ui-system/newui-tier-adapter.md).
+    // First pilot of the CObject-tier adapter pattern.
     // Chosen as the pilot for being small, self-contained (no drag-drop, no I3DRenderObj/3D-camera
     // rendering), and having genuine interaction (two real button clicks, live per-frame text) to
     // prove the pattern against.
@@ -25,8 +25,8 @@ namespace mu::ui::window
     // what the widget actually is): the original class name, along with
     // INTERFACE_HERO_POSITION_INFO, CSystem::m_pNewHeroPositionInfo/
     // GetUI_NewHeroPositionInfo()/g_pHeroPositionInfo, and the Sync/Update/ShouldHide*Visibility
-    // helper methods, all renamed to match at the same time -- see STATUS.md's "Tracked deferral"
-    // section for what's still deferred (the base-class/tier boundary itself, unrelated to this
+    // helper methods, all renamed to match at the same time (the base-class/tier boundary itself
+    // is a separate, still-open question, unrelated to this
     // naming pass).
     //
     // Render() is now a no-op -- RmlUi renders 100% of this widget's visuals via the normal

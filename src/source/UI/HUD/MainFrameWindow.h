@@ -56,12 +56,12 @@ namespace mu::ui::window
         int GetHotKeyLevel(int iHotKey);
         void RenderItems();
 
-        // Phase 3 (item hotkey chrome, main_frame.rml's #item_slots): replaces the old
+        // Item hotkey chrome (main_frame.rml's #item_slots): replaces the old
         // UseItemRButton()/CheckMouseIn()/MouseRButtonPush poll and RenderItemCount()'s native
         // digit-sprite draw entirely -- RmlUi now does hit-testing and stack-count text for these
         // 4 slots (icon art itself stays native -- see this class's header comment). Same "hover
-        // callback sets a member,
-        // SyncRmlModel() reads it next frame" shape as CSkillList::OnHotkeySlotHover()/OnUnhover().
+        // callback sets a member, SyncRmlModel() reads it next frame" shape as
+        // CSkillList::OnHotkeySlotHover()/OnUnhover().
         void OnHotkeySlotHover(int iSlotIndex) { m_iHoveredSlot = iSlotIndex; }
         void OnUnhover() { m_iHoveredSlot = -1; }
         int GetHoveredSlot() const { return m_iHoveredSlot; }
@@ -84,8 +84,7 @@ namespace mu::ui::window
         int m_iHoveredSlot = -1;
     };
 
-    // Phase 2 of 3 of the CMainFrameWindow pilot (see docs/rmlui-ui-system/STATUS.md). One
-    // interactive overlay cell in the expanded skill grid or pet-command row --
+    // One interactive overlay cell in the expanded skill grid or pet-command row --
     // position/eligibility/cooldown computed fresh in CSkillList::Update() every frame the grid
     // is open. Icon/box-frame ART IS NOT PART OF THIS STRUCT and stays a legacy 2D draw at the
     // same position: RenderSkillIcon()'s atlas lookup is too irregular (mixed 8/12-column
@@ -304,16 +303,14 @@ namespace mu::ui::window
         int m_iHoveredGridSkillIndex = -1;
     };
 
-    // The third CObject-tier pilot (see docs/rmlui-ui-system/STATUS.md's "What's migrated").
-    // This legacy file actually welds three classes together: this one (frame chrome +
-    // HP/MP/AG/SD/EXP bars + 5 corner buttons -- the part this pilot ports), CSkillList (skill
-    // hotkey row/grid/pet commands, still fully legacy, Phase 2), and CItemHotKey (QWER item
-    // slots, Phase 3). Phase 3's own icon art is a genuine live 3D model render
-    // (RenderItem3D()/RenderObjectScreen(), ZzzInventory.cpp) -- permanently native, no RmlUi
-    // equivalent (ui-target-architecture.md Section E), same bucket as CCharMakeWin's preview
-    // panel. What Phase 3 actually moved to RmlUi is #item_slots' chrome (hover-highlight border,
+    // This legacy file welds three classes together: this one (frame chrome + HP/MP/AG/SD/EXP
+    // bars + 5 corner buttons, RmlUi), CSkillList (skill hotkey row/grid/pet commands, still fully
+    // legacy), and CItemHotKey (QWER item slots). CItemHotKey's own icon art is a genuine live 3D
+    // model render (RenderItem3D()/RenderObjectScreen(), ZzzInventory.cpp) -- permanently native,
+    // no RmlUi equivalent (the permanent live-3D-content boundary), same bucket as CCharMakeWin's
+    // preview panel. What did move to RmlUi is #item_slots' chrome (hover-highlight border,
     // stack-count text, right-click-to-use) -- the same overlay-around-a-still-native-icon split
-    // Phase 2 already proved for skill icons.
+    // already proven for skill icons.
     //
     // Render() is a *thin passthrough*, not a full no-op like CMuHelperBar/CBuffStrip -- this
     // window is the first case where out-of-scope legacy content (the skill hotkey row/current-
@@ -413,7 +410,7 @@ namespace mu::ui::window
         // #skill_list_anchor .layout-anchor markers (SyncRmlModel()) -- lets the still-legacy
         // item-hotkey (potion) and skill-hotkey bands' render AND click-hit-testing follow
         // wherever the active theme's own RCSS positions those markers, generically, with no
-        // per-theme C++ branch (architecture-principles.md §16/§18/§19/§23). CSkillList
+        // per-theme C++ branch. CSkillList
         // reads GetSkillListOffsetX() via the g_pMainFrame global since it owns no RmlUi document
         // of its own to query directly.
         float GetItemHotkeyOffsetX() const { return m_fItemHotkeyOffsetX; }
@@ -460,7 +457,7 @@ namespace mu::ui::window
             // see this class's own header comment), which scale with window size via
             // UI::Scaling::BottomHudScale (clamped 1x-2x), a completely different system from this
             // branch's standard fixed-dp/UIScalePercent policy. This is the same "genuinely
-            // computed per-frame position" carve-out layout-and-scaling.md already documents for
+            // computed per-frame position" carve-out already used elsewhere for
             // CCharInfoBalloon -- this group binds left/top/scale from
             // UI::Scaling::BottomHudCenterTransform every frame (SyncRmlModel()) so it tracks the
             // legacy chrome exactly.
@@ -478,11 +475,11 @@ namespace mu::ui::window
             // here, and so does every other caller of BottomHudScale/BottomHudCenterTransform
             // codebase-wide -- in particular Render()/Render3D()'s own BottomHudCenterTransform()
             // calls (still real UI::Scaling C++, used for the still-legacy item-hotkey band's 3D
-            // icon placement; right-click hit-testing moved to RmlUi in Phase 3, no longer a
-            // caller here) -- for free, from the one shared function, with no separate wiring
+            // icon placement; right-click hit-testing moved to RmlUi, no longer a caller here) --
+            // for free, from the one shared function, with no separate wiring
             // needed here; the remaining call sites can't drift out of sync the way
-            // CCharSelMainWin's independent calculators once did
-            // (layout-and-scaling.md). Every RmlUi-authored length in main_frame.rcss is still
+            // CCharSelMainWin's independent calculators once did. Every RmlUi-authored length in
+            // main_frame.rcss is still
             // `px`, not `dp`, so it continues to track bars_scale exactly instead of being scaled
             // a second time by RmlUiRuntime's context-wide density-independent-pixel ratio (see
             // that ratio's own ApplyUIScale() comment).
@@ -567,19 +564,19 @@ namespace mu::ui::window
             float skillTooltipLeft = 0.f, skillTooltipTop = 0.f;
             std::vector<SkillTooltipLineEntry> skillTooltipLines;
 
-            // Phase 3 (item hotkey, #item_slots): hover-highlight border + stack-count text for
+            // Item hotkey chrome (#item_slots): hover-highlight border + stack-count text for
             // the 4 Q/W/E/R potion slots. 4 separate named fields, not an array -- same
             // "c.Bind() takes a pointer-to-member of a scalar field" convention as the skill-slot
-            // fields above. The 3D-rendered potion icon itself is untouched by this pilot
-            // (permanent native content, see CItemHotKey's own header comment).
+            // fields above. The 3D-rendered potion icon itself is untouched here (permanent native
+            // content, see CItemHotKey's own header comment).
             bool itemSlot0Hovered = false, itemSlot1Hovered = false, itemSlot2Hovered = false, itemSlot3Hovered = false;
             Rml::String itemSlot0Count, itemSlot1Count, itemSlot2Count, itemSlot3Count;
         };
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
 
-        // RmlUi-behind-3D-icons proof of concept (docs/rmlui-ui-system/STATUS.md's "RmlUi renders
-        // last" finding) -- RenderLeftFrame()'s own header comment explains why this exists: the
+        // RmlUi-behind-3D-icons proof of concept -- RenderLeftFrame()'s own header comment
+        // explains why this exists: the
         // left/center HUD-strip background fill can never be RmlUi-drawn through m_pRmlDoc's own
         // "main" context (it must sit BEHIND the legacy 3D-composited item/skill icons, which
         // always render after everything in that context), so it lives in

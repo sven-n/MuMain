@@ -161,7 +161,7 @@ public:
     void	MoveSetOptionList(const int StartX, const int StartY);
     void	RenderSetOptionButton(const int StartX, const int StartY);
 
-    // RmlUi port (CMyInventory Stage 3) of the former RenderSetOptionList(StartX, StartY) --
+    // RmlUi port (CMyInventory) of the former RenderSetOptionList(StartX, StartY) --
     // same content resolution (per-active-set standard/ext/full option lines via the static
     // RenderSetOptionList(SET_SEARCH_RESULT_OPT&, ...) helper below, unchanged and still shared
     // with RenderSetOptionListInItem's own item-tooltip use), no drawing. Returns false (and

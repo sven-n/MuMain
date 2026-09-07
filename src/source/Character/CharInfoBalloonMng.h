@@ -23,16 +23,14 @@ namespace Rml { class ElementDocument; }
 // structs, re-synced every frame from the 5 CCharInfoBalloon members' own per-frame projection.
 // Composites correctly over the character models' own 3D rendering because CManager::Render()
 // (and therefore this class's per-frame sync) runs during the normal legacy-2D-content recording
-// phase, strictly before RmlUiRuntime's SetPreSubmitCallback fires later the same frame -- see
-// docs/rmlui-ui-system/README.md's frame-lifecycle section.
+// phase, strictly before RmlUiRuntime's SetPreSubmitCallback fires later the same frame.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md), Phase 3 -- was never a CWin (CUIMng,
-// since renamed to CSceneUICoordinator in Phase 4, drove it via a direct, hardcoded call rather
-// than through any list), but registers with CSceneUICoordinator::GetNewStyleMng() the same way
-// every migrated CWin does, so CSceneUICoordinator has zero hardcoded per-window calls left. Most
-// of the IObject surface below is thin/inert
-// for this class -- it has no interaction and no shown-vs-active distinction to make (see each
-// override's own comment) -- registering it is about uniformity for Phase 4, not new behavior.
+// Was never a CWin (CUIMng, since renamed to CSceneUICoordinator, drove it via a direct,
+// hardcoded call rather than through any list), but registers with
+// CSceneUICoordinator::GetNewStyleMng() the same way every migrated CWin does, so
+// CSceneUICoordinator has zero hardcoded per-window calls left. Most of the IObject surface below
+// is thin/inert for this class -- it has no interaction and no shown-vs-active distinction to make
+// (see each override's own comment) -- registering it is about uniformity, not new behavior.
 class CCharInfoBalloonMng : public mu::ui::window::CObject
 {
 protected:

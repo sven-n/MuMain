@@ -8402,7 +8402,7 @@ void RenderLinkObject(float x, float y, float z, CHARACTER* c, PART_t* f, int Ty
     }
 
     if (gMapManager.WorldActive != WD_10HEAVEN && gMapManager.InHellas() == FALSE &&
-        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug()) // DXP-23 diagnostic
+        !g_Direction.m_CKanturu.IsMayaScene() && !IsWingShadowDisabledDebug())
     {
         switch (Type)        // 날개인지 검사
         {

@@ -5,9 +5,8 @@
 namespace mu::ui::window
 {
     // A hover tooltip attachable to any native mu::ui::window widget (or a bare rect) --
-    // extracted from mu::ui::window::CButton's own ChangeToolTipText()/Render() logic
-    // (docs/ui-target-architecture.md Section D/H item 4), the strongest existing
-    // implementation of this idea in the codebase. This is the "native, transitional" side of
+    // extracted from mu::ui::window::CButton's own ChangeToolTipText()/Render() logic --
+    // the strongest existing implementation of this idea in the codebase. This is the "native, transitional" side of
     // that document's Tooltip row -- for anything with an RmlUi presentation, use base.rcss's
     // `.tooltip` convention instead, not this class.
     //

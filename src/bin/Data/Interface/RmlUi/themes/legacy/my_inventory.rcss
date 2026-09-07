@@ -1,4 +1,4 @@
-/* Legacy theme for CMyInventory's Stage 1 chrome (frame/title/gold/buttons) -- see
+/* Legacy theme for CMyInventory's chrome (frame/title/gold/buttons) -- see
    my_inventory.rml's own header comment. #panel's own left/top/scale come live from C++
    (SyncRmlModel()), so every coordinate below is a plain reference pixel (px, not dp -- the
    ancestor scale already covers UI-scale-equivalent behavior, same reasoning as main_frame.rcss's
@@ -7,7 +7,7 @@
 
    Known, deliberately deferred limitation: .inv-btn (RmlUi's main context, always renders last in
    the frame) can end up on top of CInventoryCtrl's native item tooltip when a bottom-row item's
-   tooltip extends into this button strip -- before Stage 1 both were native, ordinary same-frame
+   tooltip extends into this button strip -- both used to be native, where ordinary same-frame
    paint order put the tooltip on top. Real fix needs either rerouting the tooltip through the
    post-RmlUi seam (shared infra, also used by Trade/Storage/Shop -- too broad for this window
    alone) or the grid's own future chrome pass making the tooltip an RmlUi element too (resolves it

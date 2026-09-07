@@ -129,8 +129,8 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     // RmlUi panel: positioned/sized to the same real window-pixel geometry this window's own
     // bookkeeping uses (see CLoginWin::SetPosition's identical comment) -- #panel's own bounding
     // box is a genuinely computed value (tied to screen size and this bar's placement relative to
-    // sibling login-scene elements, layout-and-scaling.md's "genuine live computed result"
-    // carve-out), so it stays C++-pushed. Its CHILDREN don't:
+    // sibling login-scene elements -- a genuine live computed result, not a static value), so it
+    // stays C++-pushed. Its CHILDREN don't:
     // btn_menu/btn_credit position themselves via login_main.rcss's anchor-left/right:0dp rules
     // instead, picking up the same dp auto-fit .btn-icon's own width/height already have.
     if (m_pRmlDoc)

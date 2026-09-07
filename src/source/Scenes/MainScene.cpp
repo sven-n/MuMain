@@ -390,7 +390,7 @@ static void SetupMainSceneViewport(int& outWidth, int& outHeight, BYTE& outByWat
     CameraProjection::ScreenToWorldRay(g_Camera, MouseX, MouseY, MouseTarget);
 }
 
-// DXP-23 diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
+// Diagnostic toggle -- see MainScene.h's SetDisableEffects() doc comment.
 static bool g_bDisableEffectsDebug = false;
 
 void SetDisableEffects(bool disabled)
@@ -398,7 +398,7 @@ void SetDisableEffects(bool disabled)
     g_bDisableEffectsDebug = disabled;
 }
 
-// DXP-23 diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
+// Diagnostic toggles, finer-grained bisection -- see MainScene.h doc comments.
 static bool g_bDisableSpritesDebug = false;
 static bool g_bDisableParticlesDebug = false;
 static bool g_bDisableSkillEffectModelsDebug = false;
@@ -634,10 +634,10 @@ static void RenderMainSceneUI()
 
     // RenderCursor() used to be called here directly, but that runs as part of this function's
     // normal legacy-2D pass -- earlier in the frame than RmlUi's own render pass (RmlUi always
-    // renders last, see docs/rmlui-ui-system/README.md's Frame lifecycle section), so any RmlUi
+    // renders last in the frame), so any RmlUi
     // content on screen during gameplay (the ESC menu, and this scene's own RmlUi HUD pilot)
     // would paint over the cursor. Now drawn from Winmain.cpp's SetPostRmlUiCallback instead,
-    // which fires after RmlUi's pass and (as of 2026-08-31) covers MAIN_SCENE too -- same fix
+    // which fires after RmlUi's pass and covers MAIN_SCENE too -- same fix
     // already applied to LOG_IN_SCENE/CHARACTER_SCENE when their own RmlUi content first shipped.
 }
 

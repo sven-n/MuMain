@@ -5,8 +5,8 @@
 	<link type="text/rcss" href="my_inventory.rcss"/>
 </head>
 <body data-model="my_inventory">
-	<!-- Stage 1 (H7): window frame/title/gold/buttons. Equipment paperdoll and the inventory
-	     grid stay fully native this stage -- see MyInventory.h's own header comment. Panel
+	<!-- Window frame/title/gold/buttons. Equipment paperdoll and the inventory
+	     grid stay fully native -- see MyInventory.h's own header comment. Panel
 	     background lives in the separate my_inventory_bg.rml (background context) instead of
 	     here, since it must paint behind the still-native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
@@ -31,7 +31,7 @@
 		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click"></div>
 		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
 
-		<!-- Stage 3 (H7): Set/Socket option header labels. Each spans half of #panel's width,
+		<!-- Set/Socket option header labels. Each spans half of #panel's width,
 		     matching the former native hover-rect split exactly -- see MyInventory.cpp's
 		     SyncRmlModel() header comment. -->
 		<div id="set_option_label" class="option-label option-label-set" data-class-active="set_option_active"

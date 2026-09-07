@@ -81,7 +81,7 @@ namespace
     }
 
     // The three windows a modal open over CHARACTER_SCENE can be -- see this window's own header
-    // comment and docs/newui-legacy-merger.md for why this window's own Update() must check this.
+    // comment for why this window's own Update() must check this.
     bool IsCharacterSceneModalOpen()
     {
         return g_CharMakeWin.IsVisible() || g_MsgWin.IsVisible() || g_SysMenuWin.IsVisible();
@@ -203,8 +203,7 @@ void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
         m_aBtn[i].SetPosition(button.x, button.y);
     }
 
-    // Deliberately does NOT push anything to the RmlUi elements (see
-    // docs/rmlui-ui-system/layout-and-scaling.md): #panel and
+    // Deliberately does NOT push anything to the RmlUi elements: #panel and
     // every child position themselves via base.rcss's anchor-*/stretch-x utility classes with a
     // fixed `dp` size (char_sel_main.rcss) instead. `layout` above (now
     // CalculateFixedAnchorLayout(), not the old resolution-proportional CalculateLayout() --

@@ -54,12 +54,12 @@ vec3_t NormalTransform[MAX_MESH][MAX_VERTICES];
 float  IntensityTransform[MAX_MESH][MAX_VERTICES];
 vec3_t LightTransform[MAX_MESH][MAX_VERTICES];
 
-// DXP-20 increment 4: lazy CPU-skin materialization. Bumped by every TransformCheap() call;
+// Lazy CPU-skin materialization. Bumped by every TransformCheap() call;
 // a BMD's m_SkinStamp matching this value means it currently owns VertexTransform/NormalTransform/
 // IntensityTransform (last-writer-wins global scratch, same sharing model as before this increment).
 // g_LazyCpuSkin is a kill switch -- false reproduces pre-increment-4 eager behavior exactly.
 static uint32_t g_SkinStampCounter = 0;
-static bool g_LazyCpuSkin = true; // DXP-20 inc4 Step D: gate flipped on -- see DXP-20-inc4-plan.md
+static bool g_LazyCpuSkin = true; // Lazy CPU-skin gate, on by default.
 
 vec3_t RenderArrayVertices[MAX_VERTICES * 3];
 vec4_t RenderArrayColors[MAX_VERTICES * 3];
@@ -221,7 +221,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         const Bone_t* b = &Bones[i];
         if (b->Dummy)
         {
-            // DXP-24 fix (part 2): Dummy bones carry no name/parent/animation data (see Open2's
+            // Dummy bones carry no name/parent/animation data (see Open2's
             // loader -- the !Dummy branch is the only one that reads anything), so this slot was
             // previously left holding whatever the LAST model to animate into this shared buffer
             // wrote there. If that was a differently-positioned character (character-select roster),
@@ -308,7 +308,7 @@ void BMD::Animation(float (*BoneMatrix)[3][4], float AnimationFrame, float Prior
         }
     }
 
-    // DXP-24 fix: this model's own skeleton may have fewer than MAX_BONES real bones, and the loop
+    // This model's own skeleton may have fewer than MAX_BONES real bones, and the loop
     // above only ever writes BoneMatrix[0..NumBones). BoneMatrix is caller-supplied and shared/reused
     // across different models' Animation() calls (not cleared between them), so slots >= NumBones
     // would otherwise keep holding a PREVIOUS, differently-boned model's real (not garbage) transform
@@ -350,7 +350,7 @@ void BMD::ClaimSkinStamp() const
     // Reaching here means some OTHER BMD's TransformCheap() ran since this BMD's own last one --
     // this BMD's slice of the shared scratch arrays was evicted, and we're about to re-derive it
     // from our own stashed skin request (self-heal). This is a pre-existing sharing model (last
-    // Transform() wins), not new to DXP-20 inc4 -- but a consumer reaching this branch means it
+    // Transform() wins), not newly introduced by the lazy-skin change -- but a consumer reaching this branch means it
     // read/wrote the arrays OUTSIDE the Calc/Draw (or equivalent) bracket that owns this BMD's
     // data, which is worth knowing about if the soak turns up anything odd.
     g_ErrorReport.Write(
@@ -371,8 +371,8 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
     m_pCurrentBoneTransform = BoneMatrix;
     SetActiveBoneTransform(BoneMatrix);
     m_LastTranslate = Translate;        // persist for RenderMesh GPU skinning path
-    m_LastSkinScale = _Scale;           // DXP-20 inc4: stashed for EnsureCpuVertices()
-    m_LastBoneScale = BoneScale;        // DXP-20 inc4: snapshot of the global -- callers mutate it right
+    m_LastSkinScale = _Scale;           // stashed for EnsureCpuVertices()
+    m_LastBoneScale = BoneScale;        // snapshot of the global -- callers mutate it right
                                         // after Transform() returns (e.g. monster edge-scale resets),
                                         // so a deferred read of the live global would skin wrong.
     m_SkinStamp = ++g_SkinStampCounter; // this BMD now owns the shared scratch arrays
@@ -402,7 +402,7 @@ void BMD::TransformCheap(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_
         }
 
         AngleMatrix(ShadowAngle, Matrix);
-        VectorIRotate(Position, Matrix, m_LastLightPosition); // DXP-20: for RenderMesh's GPU-skinned in-shader lighting
+        VectorIRotate(Position, Matrix, m_LastLightPosition); // for RenderMesh's GPU-skinned in-shader lighting
     }
 
     // Release/gameplay OBB: from the caller-supplied bounding box args, not a vertex-loop-derived
@@ -430,7 +430,7 @@ void BMD::SkinVertex(int mesh, int vertexIndex, float (*BoneMatrix)[3][4], bool 
 {
     const Vertex_t* v = &Meshs[mesh].Vertices[vertexIndex];
 
-    // DXP-20 inc4: reads the BoneScale snapshotted at TransformCheap() time, not the live global --
+    // Reads the BoneScale snapshotted at TransformCheap() time, not the live global --
     // this makes SkinVertex()/SkinVertices() safe to call from a deferred EnsureCpuVertices(), where
     // the global may already have been reset/reused by a later object. Behavior-identical for the
     // pre-inc4 callers (coin heap, skin-shell effect), which always run immediately after
@@ -533,17 +533,17 @@ void BMD::MarkCpuVerticesExternallyWritten(int mesh) const
 void BMD::Transform(float (*BoneMatrix)[3][4], vec3_t BoundingBoxMin, vec3_t BoundingBoxMax, OBB_t* OBB, bool Translate,
                     float _Scale)
 {
-    FRAME_PROFILE(Skinning); // DXP-20 increment 1 baseline measurement
+    FRAME_PROFILE(Skinning); // baseline measurement
     TransformCheap(BoneMatrix, BoundingBoxMin, BoundingBoxMax, OBB, Translate, _Scale);
 
-    // DXP-20 increment 4: with the lazy-skin gate on, ordinary (EditFlag != 2) bodies defer the
+    // With the lazy-skin gate on, ordinary (EditFlag != 2) bodies defer the
     // vertex/normal loops below to EnsureCpuVertices()/EnsureCpuNormals() at each consumer site
     // instead of running them here unconditionally -- TransformCheap() already stashed everything
     // those need. EditFlag == 2 (map editor) always takes the eager path below: it needs the
     // vertex-loop-derived OBB override further down, which EnsureCpu*() never computes (see
     // TransformCheap()'s header comment -- same restriction that already applied to it in
     // increment 2). fTransformedSize is intentionally left stale on the lazy path in both Debug
-    // and Release builds (see DXP-20-inc4-plan.md) -- its only consumer already floors the result.
+    // and Release builds -- its only consumer already floors the result.
     if (g_LazyCpuSkin && EditFlag != 2)
         return;
 
@@ -1078,7 +1078,7 @@ void SmoothBitmap(int Width, int Height, unsigned char* Buffer)
 
 bool BMD::CollisionDetectLineToMesh(vec3_t Position, vec3_t Target, bool Collision, int Mesh, int Triangle)
 {
-    EnsureCpuVertices(-1); // DXP-20 inc4: mouse-picking/lightmap-bake reader, not in the original spec's consumer list
+    EnsureCpuVertices(-1); // mouse-picking/lightmap-bake reader, not in the original spec's consumer list
     int i, j;
     for (i = 0; i < NumMeshs; i++)
     {
@@ -1104,7 +1104,7 @@ bool BMD::CollisionDetectLineToMesh(vec3_t Position, vec3_t Target, bool Collisi
 
 void BMD::CreateLightMapSurface(Light_t* lp, Mesh_t* m, int i, int j, int MapWidth, int MapHeight, int MapWidthMax, int MapHeightMax, vec3_t BoundingMin, vec3_t BoundingMax, int Axis)
 {
-    EnsureCpuVertices(i); // DXP-20 inc4: lightmap bake reader, not in the original spec's consumer list
+    EnsureCpuVertices(i); // lightmap bake reader, not in the original spec's consumer list
     EnsureCpuNormals(i);
     int k, l;
     Triangle_t* tp = &m->Triangles[j];
@@ -1351,7 +1351,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
     {
         enableLight = false;
     }
-    // DXP-20 inc4 Step C: the LightTransform-materializing loop that used to run right here
+    // The LightTransform-materializing loop that used to run right here
     // unconditionally (even for meshes that end up on the GPU-skinned draw path, which computes
     // lighting in-shader and never reads LightTransform) has moved into the
     // materializeCpuLightingAndChrome() lambda below, called only from the CPU-fallback sub-paths
@@ -1415,7 +1415,7 @@ void BMD::RenderMesh(int meshIndex, int renderFlags, float alpha, int blendMeshI
             finalRenderFlags = RENDER_OIL;
         }
 
-        // DXP-20 inc4 Step C: the g_chrome-writing loop that used to run right here unconditionally
+        // The g_chrome-writing loop that used to run right here unconditionally
         // (even for the plain-RENDER_CHROME case, which IS GPU-eligible and never reads g_chrome on
         // that path) has moved into the materializeCpuLightingAndChrome() lambda below, called only
         // from the CPU-fallback sub-paths that actually read it.
@@ -2156,7 +2156,7 @@ void BMD::RenderMeshEffect(int i, int iType, int iSubType, vec3_t Angle, VOID* o
     Mesh_t* m = &Meshs[i];
     if (m->NumTriangles <= 0) return;
 
-    EnsureCpuVertices(i); // DXP-20 inc4: spawn-position reads below (~20 sites) need mesh i materialized
+    EnsureCpuVertices(i); // spawn-position reads below (~20 sites) need mesh i materialized
 
     vec3_t angle, Light;
     int iEffectCount = 0;

@@ -145,7 +145,7 @@ TEST_CASE("teleport drag release maps, exits, and consumes input [ui][scaling]")
 TEST_CASE("dialogs scale with the viewport and stop at a readable cap [ui][scaling]")
 {
     // 1280x720's raw fit (1.5) sits strictly between the reference (1.0) and the 2x ceiling, so
-    // ViewportFitScale's damping curve (UITransform.cpp, 2026-09-03) pulls it toward 1.25 instead
+    // ViewportFitScale's damping curve (UITransform.cpp) pulls it toward 1.25 instead
     // of the pre-damping 1.5 -- see that function's own comment. 1920x1080/3840x2160 below are
     // already at the ceiling either way, so the damping curve's endpoints leave them unchanged.
     const auto hd = UI::Scaling::PanelTransform(1280, 720);
@@ -579,7 +579,7 @@ TEST_CASE("bottom HUD regions reconstruct at 640x480 and 1024x768 [ui][scaling]"
     CHECK(UI::Scaling::PositionX(referenceCenter, 488.0f) == doctest::Approx(488.0f));
     CHECK(UI::Scaling::PositionX(referenceRight, 488.0f) == doctest::Approx(488.0f));
 
-    // 1024x768's raw fit (1.6) is damped to 1.36 (UITransform.cpp's ViewportFitScale, 2026-09-03).
+    // 1024x768's raw fit (1.6) is damped to 1.36 (UITransform.cpp's ViewportFitScale).
     const auto left = UI::Scaling::BottomHudLeftTransform(1024, 768);
     const auto center = UI::Scaling::BottomHudCenterTransform(1024, 768);
     const auto right = UI::Scaling::BottomHudRightTransform(1024, 768);
@@ -592,8 +592,8 @@ TEST_CASE("bottom HUD regions reconstruct at 640x480 and 1024x768 [ui][scaling]"
 
 TEST_CASE("bottom HUD uses symmetric wide gaps and caps at 2x [ui][scaling]")
 {
-    // 1280x720's raw fit (1.5) is damped to 1.25 (UITransform.cpp's ViewportFitScale,
-    // 2026-09-03) -- 320.0 stays an algebraic invariant regardless (BottomHudCenterTransform's
+    // 1280x720's raw fit (1.5) is damped to 1.25 (UITransform.cpp's ViewportFitScale)
+    // -- 320.0 stays an algebraic invariant regardless (BottomHudCenterTransform's
     // offsetX is defined so the reference center 320 always maps to windowWidth/2, at any scale).
     const auto hdLeft = UI::Scaling::BottomHudLeftTransform(1280, 720);
     const auto hdCenter = UI::Scaling::BottomHudCenterTransform(1280, 720);
@@ -643,7 +643,7 @@ TEST_CASE("world viewport spans the window while docks remain at the rounded HUD
     CHECK(hd.height == 720);
     CHECK(UI::Scaling::WorldViewportAspect(1280, 720, false) == doctest::Approx(1280.0f / 720.0f));
     // RoundedBottomHudTop(1280,720) shifts from 644 to 656 under the damped BottomHudScale
-    // (UITransform.cpp's ViewportFitScale, 2026-09-03) -- DockLeftTransform's own scale doesn't
+    // (UITransform.cpp's ViewportFitScale) -- DockLeftTransform's own scale doesn't
     // matter for this specific check (PositionY at DockLogicalBottom is an algebraic invariant
     // that always equals RoundedBottomHudTop by construction), only the HUD scale it's anchored to.
     const auto hdDock = UI::Scaling::DockLeftTransform(1280, 720);
@@ -686,7 +686,7 @@ TEST_CASE("world viewport clamps zero and tiny dimensions before deriving aspect
 TEST_CASE("bottom HUD hit-region edges block controls and preserve wide gaps [ui][scaling]")
 {
     // Every boundary below shifts with 1280x720's damped scale (1.25 instead of the
-    // pre-damping 1.5 -- UITransform.cpp's ViewportFitScale, 2026-09-03): the content-top edge
+    // pre-damping 1.5 -- UITransform.cpp's ViewportFitScale): the content-top edge
     // moves from y=643.5 to y=656.25, and the left/center/right band x-edges move to
     // 190/430/850/1090 (matching this file's "bottom HUD uses symmetric wide gaps" test above).
     CHECK_FALSE(UI::Scaling::BottomHudContainsWindowPoint(1280, 720, 100.0f, 656.24f));
@@ -893,7 +893,7 @@ TEST_CASE("layout typography grows gradually and fits bounded controls [ui][scal
     CHECK(UI::Scaling::FontPointSize(FontRole::Fixed, reference) == 13);
 
     // PanelTransform(1280,720)'s typographyScale is damped from 1.5 to 1.25 (UITransform.cpp's
-    // ViewportFitScale, 2026-09-03), so its font point size grows less too (13 -> 12). The second
+    // ViewportFitScale), so its font point size grows less too (13 -> 12). The second
     // FontScaleForBounds check stays 11.0f/16.0f either way -- the box-width clamp (100/160=0.625)
     // already pulls it down to the MinimumFontPointSize floor regardless of which typography
     // scale it started from.

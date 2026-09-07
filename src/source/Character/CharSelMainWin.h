@@ -120,7 +120,7 @@ namespace UI::CharacterSelection
     inline constexpr int NativeDecorationBottomOffset = 3;
 
     // Fixed, dp-anchored counterpart to CalculateLayout() above, mirroring char_sel_main.rcss's
-    // 2026-08-31 layout-and-scaling retrofit exactly (docs/rmlui-ui-system/layout-and-scaling.md).
+    // layout-and-scaling retrofit exactly.
     // CalculateLayout() (upstream's auto-scale-to-fit-800x600 system) is no longer used by this
     // window: once the RmlUi visuals switched from mirroring that resolution-proportional rect to
     // fixed-dp/anchor-class CSS positioning, continuing to position the legacy CButton/CSprite
@@ -129,12 +129,12 @@ namespace UI::CharacterSelection
     // bug, not a cosmetic one: this window's own bounding rect (below) must cover every element
     // positioned above, or hovering the info-bar/deco alone would wrongly fall through to the
     // legacy world-click handler (previously via CUIMng::IsCursorOnUI(), now via
-    // UpdateMouseEvent()'s own rect claim -- see CServerSelWin's established pattern
-    // (docs/newui-legacy-merger.md) this window's own migration follows). uiScale must be the same
+    // UpdateMouseEvent()'s own rect claim -- the same established pattern CServerSelWin's own
+    // migration follows). uiScale must be the same
     // combined ratio RmlUi's own `dp` unit uses (Rml::Context::SetDensityIndependentPixelRatio(),
     // RmlUiRuntime.cpp's ApplyUIScale()) -- UI::Scaling::CompanionRatio(screenWidth, screenHeight)
     // (UITransform.cpp) computes it (UIScalePercent times UI::Scaling::ViewportFitScale(), not
-    // UIScalePercent alone since 2026-09-03), so these rects always match the RmlUi buttons
+    // UIScalePercent alone), so these rects always match the RmlUi buttons
     // pixel-for-pixel regardless of screen resolution or UI-scale setting.
     inline Layout CalculateFixedAnchorLayout(int screenWidth, int screenHeight, float uiScale)
     {
@@ -176,10 +176,9 @@ namespace Rml { class ElementDocument; }
 // hybrid pattern. RmlUi renders 100% of this bar's visuals (buttons, the info-bar background, the
 // decorative flourish, and the rare account-block message) in every theme; the legacy
 // CSprites/CButtons stay alive purely as bookkeeping (button click-detection redundancy,
-// UpdateMouseEvent()'s own rect-hit-testing), never rendered. See docs/rmlui-ui-system/README.md
-// for the shared architecture this follows.
+// UpdateMouseEvent()'s own rect-hit-testing), never rendered.
 //
-// 2026-08-31 layout-and-scaling retrofit (docs/rmlui-ui-system/layout-and-scaling.md): the RmlUi
+// Layout-and-scaling retrofit: the RmlUi
 // visuals position themselves via char_sel_main.rcss's fixed-dp/anchor-class rules, NOT via
 // ApplyLayout() pushing a computed rect anymore. ApplyLayout() still runs, but only feeds the
 // legacy CButton/CSprite bookkeeping objects, and does so via
@@ -189,8 +188,7 @@ namespace Rml { class ElementDocument; }
 // CalculateFixedAnchorLayout()'s own comment for why using the mismatched old math was a real,
 // user-visible bug (Delete silently no-op'ing) and not just a style inconsistency.
 //
-// CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) Phase 2: migrated off CWin onto
-// mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
+// Migrated off CWin onto mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only within its own bounding rect
 // (CServerSelWin's established pattern), not the whole screen, since the world behind this bar
 // must stay clickable/rotatable. Its own Update() additionally skips all button-click processing
 // while CCharMakeWin/CMsgWin/CSysMenuWin is shown (see their own GetLayerDepth() comments) --

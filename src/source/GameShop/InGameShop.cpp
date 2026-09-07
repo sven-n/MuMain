@@ -306,9 +306,9 @@ void CInGameShop::SetRateScale(int _ItemType)
     }
 }
 
-// DXP-07d increment 3's shadow-compare diagnostic validated RenderDisplayItems()'s proj/view closed
-// form and post-pop restore across multiple soaks; DXP-08a deleted the diagnostic and the FFP
-// matrix-stack calls it was validating (see RenderDisplayItems()'s own comments below). Its per-item
+// A shadow-compare diagnostic validated RenderDisplayItems()'s proj/view closed
+// form and post-pop restore across multiple soaks; the diagnostic and the FFP
+// matrix-stack calls it was validating were since deleted (see RenderDisplayItems()'s own comments below). Its per-item
 // loop only calls RenderItem3D(), which carries no GL model transform. The restore mirror runs
 // BEFORE BeginBitmap() is called again (unlike C3DCamera::Render(), where it runs after) — a
 // genuine save/restore of whatever context was active at entry, not a BeginBitmap()-delegated

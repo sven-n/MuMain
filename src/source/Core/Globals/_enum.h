@@ -75,7 +75,7 @@ enum INTERFACE_LIST
     INTERFACE_CHAOSCASTLE_TIME,
     INTERFACE_BATTLE_SOCCER_SCORE,
     INTERFACE_SLIDEWINDOW,
-    INTERFACE_MU_HELPER_BAR, // renamed 2026-08-31 from INTERFACE_HERO_POSITION_INFO -- see
+    INTERFACE_MU_HELPER_BAR, // renamed from INTERFACE_HERO_POSITION_INFO -- see
                              // CMuHelperBar (UI/HUD/MuHelperBar.h)'s own header comment
     INTERFACE_MESSAGEBOX,
     INTERFACE_DUEL_WINDOW,
@@ -115,29 +115,29 @@ enum INTERFACE_LIST
     INTERFACE_MUHELPER_SKILL_LIST,
     INTERFACE_SYSTEMLOGWINDOW,
     INTERFACE_COMMAND_LIST,
-    // CUIMng/CNewUIManager merger (docs/newui-legacy-merger.md) -- CCreditWin is the Phase 1 pilot for
-    // migrating CUIMng's CWin-derived windows onto CManager's registry. Inserted just before
-    // INTERFACE_END so every other entry's numeric value is unaffected.
+    // CCreditWin is the pilot for migrating CUIMng's CWin-derived windows onto CManager's
+    // registry. Inserted just before INTERFACE_END so every other entry's numeric value is
+    // unaffected.
     INTERFACE_CREDITS,
-    // Phase 2: CServerMsgWin, same reasoning as INTERFACE_CREDITS above.
+    // CServerMsgWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SERVER_MESSAGE,
-    // Phase 2: CServerSelWin, same reasoning as INTERFACE_CREDITS above.
+    // CServerSelWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SERVER_SELECT,
-    // Phase 2: CMsgWin (distinct from INTERFACE_MESSAGEBOX, the unrelated MAIN_SCENE-tier
+    // CMsgWin (distinct from INTERFACE_MESSAGEBOX, the unrelated MAIN_SCENE-tier
     // CMessageBoxBase key) -- same reasoning as INTERFACE_CREDITS above.
     INTERFACE_MSG_WINDOW,
-    // Phase 2: CSysMenuWin, same reasoning as INTERFACE_CREDITS above.
+    // CSysMenuWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_SYS_MENU,
-    // Phase 2: CCharSelMainWin, same reasoning as INTERFACE_CREDITS above.
+    // CCharSelMainWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_CHAR_SEL_MAIN,
-    // Phase 2: CCharMakeWin, same reasoning as INTERFACE_CREDITS above.
+    // CCharMakeWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_CHAR_MAKE,
-    // Phase 2: CLoginMainWin, same reasoning as INTERFACE_CREDITS above.
+    // CLoginMainWin, same reasoning as INTERFACE_CREDITS above.
     INTERFACE_LOGIN_MAIN,
-    // Phase 3: CLoginWin (distinct from INTERFACE_LOGIN_MAIN, CLoginMainWin's own key), same
+    // CLoginWin (distinct from INTERFACE_LOGIN_MAIN, CLoginMainWin's own key), same
     // reasoning as INTERFACE_CREDITS above.
     INTERFACE_LOGIN,
-    // Phase 3: CCharInfoBalloonMng's thin adapter -- never a CWin, previously driven by direct
+    // CCharInfoBalloonMng's thin adapter -- never a CWin, previously driven by direct
     // CUIMng calls rather than through any list at all; same reasoning as INTERFACE_CREDITS above.
     INTERFACE_CHAR_INFO_BALLOON,
     INTERFACE_END,

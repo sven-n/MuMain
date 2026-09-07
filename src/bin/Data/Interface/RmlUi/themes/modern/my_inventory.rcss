@@ -1,4 +1,4 @@
-/* Modern theme for CMyInventory's Stage 1 chrome (frame/title/gold/buttons) -- see
+/* Modern theme for CMyInventory's chrome (frame/title/gold/buttons) -- see
    my_inventory.rml's own header comment. Same reference-pixel geometry as legacy (the underlying
    native equipment/grid content is theme-agnostic), reusing the same source button/money art;
    only text styling and the tooltip look differ per modern's own design language. */

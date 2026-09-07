@@ -158,8 +158,8 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
                 c.Bind("skill_slot_3_hotkey", &model.skillSlot3Hotkey);
                 c.Bind("skill_slot_4_hotkey", &model.skillSlot4Hotkey);
 
-                // Phase 2 (skill list) -- see docs/rmlui-ui-system's Phase 2 plan and
-                // MainFrameRmlModel::skillGridOpen's own header comment.
+                // Skill list cooldown bindings -- see MainFrameRmlModel::skillGridOpen's own
+                // header comment.
                 c.Bind("skill_slot_0_cooldown", &model.skillSlot0Cooldown);
                 c.Bind("skill_slot_1_cooldown", &model.skillSlot1Cooldown);
                 c.Bind("skill_slot_2_cooldown", &model.skillSlot2Cooldown);
@@ -193,7 +193,7 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
                 c.Bind("skill_tooltip_top", &model.skillTooltipTop);
                 c.Bind("skill_tooltip_lines", &model.skillTooltipLines);
 
-                // Phase 2 click/hover bindings -- route straight into CSkillList (this
+                // Skill list click/hover bindings -- route straight into CSkillList (this
                 // document's model is owned by CMainFrameWindow, but g_pSkillList has no
                 // RmlUi document of its own, same established split as GetHotKeySlotNumber() etc,
                 // see MainFrameWindow.h's own comment on that). Args are literal ints in the
@@ -219,7 +219,7 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
                 c.BindEventCallback("skill_unhover",
                     [](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { g_pSkillList->OnUnhover(); });
 
-                // Phase 3 (item hotkey) -- #item_slots' hover-highlight + stack-count chrome and
+                // Item hotkey chrome (#item_slots' hover-highlight + stack-count) and
                 // right-click-to-use. Unlike CSkillList (a global), m_ItemHotKey is a plain member
                 // of this class, so these lambdas capture [this] and forward directly rather than
                 // through a global pointer.
@@ -407,9 +407,9 @@ void mu::ui::window::CMainFrameWindow::Render3D()
     // happens to be identity scale/offset -- at any other window size the real cursor has to sit
     // well left of the actual on-screen icon before the raw numbers happen to satisfy the box
     // test. This native hover check is independent of (and slightly redundant with) #item_slots'
-    // own RmlUi mouseover/mouseout hover-highlight (Phase 3) -- deliberately left alone rather than
+    // own RmlUi mouseover/mouseout hover-highlight -- deliberately left alone rather than
     // unified, since RenderItem3D() is a shared free function used by other callers too (equipment
-    // slots, inventory grid) that this pilot must not touch.
+    // slots, inventory grid) that must not be touched here.
     //
     // += GetItemHotkeyOffsetX() * scaleX -- must match Render()'s own leftTransform exactly, or
     // the 3D icons render in a different place than where RenderLeftFrame()'s chrome and
@@ -438,8 +438,8 @@ void mu::ui::window::CMainFrameWindow::RenderCenterRegion()
 // single "main" Rml::Context always renders once, after everything else in the frame (world,
 // legacy 2D chrome, AND the 3D-composited item/skill icons -- see Render3D()),
 // so an RmlUi-drawn background through that context could never sit behind those icons, only ever
-// cover them. RmlUiRuntime::RenderBackgroundLayer() (docs/rmlui-ui-system/STATUS.md's "RmlUi
-// renders last" finding) is the fix: it drives a second, background-only Rml::Context that this
+// cover them. RmlUiRuntime::RenderBackgroundLayer() is the fix: it drives a second,
+// background-only Rml::Context that this
 // function (not RenderCenterFrame(), see its own comment) calls explicitly, mid-frame, right here
 // -- still BEFORE Render3D()'s icon compositing runs later this same frame -- so the panel
 // (main_frame_bg.rml/.rcss) paints behind the icons instead of over them. General mechanism, not a
@@ -926,8 +926,8 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
 
     // Skill-hotkey row selection highlight (modern theme only, see MainFrameRmlModel::
     // skillSlot0Selected's own comment and CSkillList::IsHotKeySlotCurrentSkill()) -- read
-    // every frame like everything else above; g_pSkillList itself is still fully legacy (Phase 2),
-    // this just also mirrors its per-slot selected state into this pilot's own model.
+    // every frame like everything else above; g_pSkillList itself is still fully legacy,
+    // this just also mirrors its per-slot selected state into this window's own model.
     syncBool(&MainFrameRmlModel::skillSlot0Selected, "skill_slot_0_selected", g_pSkillList->IsHotKeySlotCurrentSkill(0));
     syncBool(&MainFrameRmlModel::skillSlot1Selected, "skill_slot_1_selected", g_pSkillList->IsHotKeySlotCurrentSkill(1));
     syncBool(&MainFrameRmlModel::skillSlot2Selected, "skill_slot_2_selected", g_pSkillList->IsHotKeySlotCurrentSkill(2));
@@ -944,14 +944,14 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     syncText(&MainFrameRmlModel::skillSlot3Hotkey, "skill_slot_3_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(3)));
     syncText(&MainFrameRmlModel::skillSlot4Hotkey, "skill_slot_4_hotkey", hotkeyText(g_pSkillList->GetHotKeySlotNumber(4)));
 
-    // Phase 2 (skill list) additions -- see docs/rmlui-ui-system's Phase 2 plan.
+    // Skill list cooldown fractions.
     syncFloat(&MainFrameRmlModel::skillSlot0Cooldown, "skill_slot_0_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(0));
     syncFloat(&MainFrameRmlModel::skillSlot1Cooldown, "skill_slot_1_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(1));
     syncFloat(&MainFrameRmlModel::skillSlot2Cooldown, "skill_slot_2_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(2));
     syncFloat(&MainFrameRmlModel::skillSlot3Cooldown, "skill_slot_3_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(3));
     syncFloat(&MainFrameRmlModel::skillSlot4Cooldown, "skill_slot_4_cooldown", g_pSkillList->GetHotKeySlotCooldownFraction(4));
 
-    // Phase 3 (item hotkey) -- #item_slots' hover-highlight border + stack-count text.
+    // Item hotkey chrome -- #item_slots' hover-highlight border + stack-count text.
     // m_ItemHotKey is this class's own member (unlike g_pSkillList), read directly.
     auto stackCountText = [](int count) { return count > 0 ? std::to_string(count) : Rml::String(); };
     syncBool(&MainFrameRmlModel::itemSlot0Hovered, "item_slot_0_hovered", m_ItemHotKey.GetHoveredSlot() == 0);
@@ -969,7 +969,7 @@ void mu::ui::window::CMainFrameWindow::SyncRmlModel()
     // Dynamic-count lists -- SkillCellEntry is shared verbatim between CSkillList's own
     // snapshot and this model (no per-field conversion needed). Unconditional copy+MarkDirty every
     // frame while the grid is open, matching CBuffStrip's own proven "unconditional MarkDirty()
-    // correctly re-renders the list" approach (newui-tier-adapter.md) -- cooldown fractions change
+    // correctly re-renders the list" approach -- cooldown fractions change
     // every frame anyway, so a change-check would rarely save anything.
     if (model.skillGridOpen)
     {
@@ -1385,8 +1385,8 @@ void mu::ui::window::CItemHotKey::OnHotkeySlotRightClick(int iSlotIndex)
 {
     // Replaces the old CheckMouseIn()/MouseRButtonPush poll entirely -- RmlUi's own Context now
     // does hit-testing for these 4 slots (main_frame.rml's data-event-mouseup), first right-click
-    // RmlUi binding in the codebase (docs/rmlui-ui-system/newui-tier-adapter.md's "still unproven"
-    // list). Same direct-action shape as CSkillList::OnHotkeySlotClick() -- no polled flag needed
+    // RmlUi binding in the codebase. Same direct-action shape as CSkillList::OnHotkeySlotClick()
+    // -- no polled flag needed
     // at this tier. `Hero->Dead == 0` reproduces the old call site's own guard
     // (ZzzInterface.cpp), which only reached CheckMouseIn()/SendRequestUse() while alive.
     if (Hero->Dead != 0)
@@ -1436,8 +1436,8 @@ bool mu::ui::window::CSkillList::Create(CManager* pNewUIMng, C3DRenderMng* pNewU
 void mu::ui::window::CSkillList::Release()
 {
     // The tooltip no longer queues through C3DRenderMng's 2D-effect-in-3D-pass mechanism at all
-    // now that it's a plain RmlUi element (which always composites last in the frame regardless --
-    // see README.md's Frame Lifecycle section), so there's nothing registered on this object to
+    // now that it's a plain RmlUi element (which always composites last in the frame regardless),
+    // so there's nothing registered on this object to
     // unregister via UI2DEffectObject/DeleteUI2DEffectObject().
     UnloadImages();
 
@@ -1502,8 +1502,7 @@ bool mu::ui::window::CSkillList::UpdateMouseEvent()
     // does hit-testing for all
     // of them (data-event-click/mouseover/mouseout, main_frame.rml -- see OnHotkeySlotClick()/
     // OnCurrentSkillClick()/OnGridCellClick()/OnPetCellClick() and their *Hover() counterparts),
-    // same "always not consumed" convention every other fully-ported CObject-tier widget uses
-    // (newui-tier-adapter.md).
+    // same "always not consumed" convention every other fully-ported CObject-tier widget uses.
     return true;
 }
 
@@ -1753,7 +1752,7 @@ void mu::ui::window::CSkillList::RenderCurrentSkillAndHotSkillList()
                 // Modern theme: #skill_slot_0..4 (main_frame.rml/.rcss) highlight the selected
                 // slot with a bound CSS class instead, synced every frame from
                 // IsHotKeySlotCurrentSkill() below (same iIndex/pet logic as here). RmlUi always
-                // composites last in the frame (README.md's Frame Lifecycle section), so that
+                // composites last in the frame, so that
                 // outline will paint on top of this sprite regardless -- unconditionally drawing
                 // IMAGE_SKILLBOX_USE for modern would show a doubled highlight (legacy sprite
                 // underneath, RmlUi outline on top). This isn't a paint-order *impossibility*
@@ -1763,16 +1762,16 @@ void mu::ui::window::CSkillList::RenderCurrentSkillAndHotSkillList()
                 // element to gate from RCSS.
                 //
                 // Legacy theme: keeps the real sprite -- its own established look, matching
-                // legacy-theme-modernization.md's "preserve legacy sprites/textures where
-                // appropriate" (this is real pixel-parity art, not reproducible with a plain CSS
+                // this branch's "preserve legacy sprites/textures where appropriate" policy (this
+                // is real pixel-parity art, not reproducible with a plain CSS
                 // outline). main_frame.rml/.rcss (legacy) already bind #skill_slot_N's own
                 // .selected class for symmetry with modern, but deliberately leave it unstyled
                 // (see themes/legacy/main_frame.rcss's own comment) so only this sprite shows,
                 // never a doubled highlight there either.
                 //
                 // Retiring this branch for real means porting IMAGE_SKILLBOX_USE's source art into
-                // an RmlUi @spritesheet for legacy theme's own .selected rule (theming-and-
-                // modding.md's asset-reuse pattern) so legacy no longer needs this C++ draw call
+                // an RmlUi @spritesheet for legacy theme's own .selected rule so legacy no longer
+                // needs this C++ draw call
                 // at all -- real work, not a quick fix.
                 if (!UI::RmlBridge::ThemeProvidesOwnIconChrome())
                     mu::ui::window::RenderImage(IMAGE_SKILLBOX_USE, x, y, width, height);
