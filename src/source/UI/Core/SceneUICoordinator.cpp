@@ -94,8 +94,6 @@ void CSceneUICoordinator::CreateLoginScene()
     g_LoginMainWin.SetPosition(30, nBaseY - g_LoginMainWin.GetHeight() - 11);
 
     g_ServerSelWin.Create();
-    g_ServerSelWin.SetPosition((static_cast<int>(WindowWidth) - g_ServerSelWin.GetWidth()) / 2,
-                               (static_cast<int>(WindowHeight) - g_ServerSelWin.GetHeight()) / 2);
 
     g_LoginWin.Create();
     g_LoginWin.SetPosition((static_cast<int>(WindowWidth) - g_LoginWin.GetWidth()) / 2,
@@ -183,10 +181,9 @@ void CSceneUICoordinator::RepositionSceneUI()
 
         CreateLoginScene();
 
-        // Restore visibility BEFORE re-populating dynamic windows: child
-        // elements like server/group buttons read `CWin::m_bShow` of their
-        // parent when `UpdateDisplay()` decides which sub-elements to show.
-        // If the parent is still hidden at that moment, nothing renders.
+        // Restore visibility before re-populating: CServerSelWin's RmlUi model updates
+        // regardless of document visibility, but restoring shown/hidden state up front keeps
+        // this ordering consistent with every other window here.
         if (wasShown_MsgWin)
             g_MsgWin.Show(true);
         if (wasShown_SysMenuWin)

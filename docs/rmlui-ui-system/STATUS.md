@@ -154,6 +154,37 @@ section in full detail; summarized here for visibility.
   property having a working RCSS parser doesn't mean the render interface actually implements it
   — check for a `CompileShader`/render-interface override, or test the specific decorator in
   isolation, rather than trusting a casual screenshot.
+- **`decorator: image(...)` does not stretch a sprite rect to fill a box sized differently from
+  the sprite's own native dimensions in this RmlUi build.** `legacy-btn-idle`/`-hover`/`-active`
+  (`base.rcss`'s `@spritesheet`) are fixed 108x30 rects; every existing user of them (`.btn`,
+  `.group-btn`) is also exactly 108x30. `server_select.rcss`'s `.server-row` tried the same
+  decorator stretched to 186x30 (the first place in this codebase asking for a non-native size) and
+  most of the box stayed unpainted instead of the sprite scaling to fill it — visually, a normal-
+  looking dark row with no visible button chrome except near the sprite's own native footprint.
+  Reverted to a flat `background-color`/`border` for that row instead (no native size to mismatch).
+  Don't assume this decorator behaves like a CSS `background-size` image at an arbitrary box size —
+  verify at the actual target dimensions, or stick to the sprite's native size.
+- **A bordered/backgrounded element that also has child elements can render an incomplete,
+  non-closed rectangle in this RmlUi build** (`server_select.rcss`'s `.server-row`, three separate
+  attempts: flex children with a `<span>`, absolutely-positioned children, then plain block
+  children -- all three produced a border/background that didn't paint as one closed box). A
+  bordered leaf with **zero** child elements (text content only) renders correctly every time this
+  was tried. The one confirmed-safe way to combine a bordered/painted box with more content next to
+  it: put the border/background on a childless leaf, and make anything else that needs to be
+  visually "with" it a *sibling* under a separate, unstyled (no border/background of its own)
+  wrapper element instead of a child of the bordered element -- `server_select.rcss`'s current
+  `.server-row` (unstyled wrapper) > `.server-name` (bordered, zero children) +
+  `.server-gauge-slot` > `.server-gauge-fill` (unbordered parent, one child, the same shape
+  `main_frame.rcss`'s HP/MP `.gauge-slot`/`.gauge-fill` already used successfully) is the worked
+  example. Don't add a second child element to an already-bordered leaf without testing it visually
+  first.
+- **A plain block element's auto height doesn't reliably sum multiple in-flow block children's
+  boxes in this RmlUi build**, even with no border/background of its own (so this is distinct from
+  the bordered-element finding above). `server_select.rcss`'s `.server-row` wrapper (no border, two
+  block children: a fixed-height name pill, then a gauge bar below it) reported too short a height
+  left on `auto` -- the next row started before the current row's gauge bar had room, visually
+  clipping/overlapping it. Fixed by giving the wrapper an explicit height (sum of its children's own
+  heights/margins) instead of relying on auto to compute it.
 - **`box-shadow` (and `filter`/`backdrop-filter`) parse but don't render on this engine.**
   `PropertyId::BoxShadow` has a working RCSS parser, which reads as "supported" if you only check
   property registration — but `RmlUiRenderInterface` leaves layer/filter compositing

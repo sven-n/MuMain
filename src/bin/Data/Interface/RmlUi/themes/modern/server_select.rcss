@@ -1,0 +1,208 @@
+/* Modern theme for the server-select dialog -- flat programmatic chrome, no legacy sprite art.
+   Same DOM/class structure as the legacy theme (server_select.rml is shared); only the visual
+   treatment differs, same convention as char_make.rcss's modern copy. #panel itself stays
+   invisible here too -- see the legacy theme's own comment for why (matches the real legacy
+   screen, not a modern redesign choice). #panel also deliberately has no explicit height here --
+   see the legacy theme's own comment for why (it must auto-size to #group_row's real footprint,
+   not mirror ServerSelWin.h's oversized native-click-gate rect, or .center-both centers the wrong
+   box). */
+
+/* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
+   left/top/transform centering math, same as sys_menu.rcss/msg_win.rcss's own #panel -- see the
+   legacy theme's own copy of this comment for why this matches that precedent exactly. */
+#panel {
+	width: 500px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-body);
+	padding: 10px;
+}
+
+#group_row {
+	position: relative;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	width: 480px;
+	height: 400px;
+	padding-top: 34px;
+}
+/* #group_row's own height is a fixed worst-case reservation (10 groups per column --
+   ServerSelWin.cpp caps leftGroups/rightGroups at 10 each), not the real button count, so the
+   real buttons must be vertically centered within it (not packed to its top) -- otherwise a
+   typical, mostly-empty column looks pinned near the top of #panel once .center-both centers
+   that oversized row, most visibly at smaller window heights. */
+#left_col, #right_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+}
+#test_server_btn {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+/* Crimson base instead of .server-row's warm charcoal -- the dark charcoal read too close to the
+   dark backdrop/video behind this screen to stand out. Reuses base.rcss's own .btn-ok
+   accent-crimson palette verbatim (same gradient stops and border-color/border-top-color bevel
+   values) rather than inventing a new one-off color. Childless, so there's no border-width+children
+   risk here (unlike .server-row below). .checked has no equivalent state on .server-row (which has
+   no persistent-selection concept) -- it gets a full gold border instead of just the top bevel
+   edge, so the currently-selected group reads as clearly different from a merely-hovered one.
+
+   height is 30px, not literally 32px -- `height` sets content size only, and this rule's own
+   1px+1px border is added on top of it: 30 + 1 + 1 = 32, matching .server-row's own real height
+   below. ServerSelWin.cpp's kGroupBtnRowHeight (36px = that real height + margin-bottom) must stay
+   in sync with it (and with the legacy theme's own copy of this rule, since both themes share that
+   one C++ constant), or the server-list flyout docks at the wrong row for whichever theme doesn't
+   match it. */
+.group-btn {
+	position: relative;
+	width: 108px;
+	height: 30px;
+	margin-bottom: 4px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: #35100e;
+	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e);
+	border-width: 1px;
+	border-color: #0a0706;
+	border-top-color: rgba(213, 143, 106, 115);
+	border-radius: token(radius-sm)px;
+	color: token(text-emphasis);
+	font-family: "token(font-body)";
+}
+.group-btn:hover {
+	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
+	border-color: #9a6841;
+}
+.group-btn.checked {
+	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
+	border-color: token(accent-gold-bright);
+	color: token(text-title);
+}
+
+/* Flyout: absent until a group is clicked, then docks beside that specific button -- see
+   ServerSelRmlModel's own comment (ServerSelWin.h). top is always pushed from C++
+   (data-style-top); dock-left/dock-right/dock-center below only resolve the horizontal side, since
+   an inline data-style-top always wins over any class rule's own top. No background/border/padding
+   of its own -- the .server-row buttons stacked inside it are enough on their own, no enclosing
+   panel needed; width matches .server-row's own border-box size (218px width + 20px padding + 2px
+   border = 240px) directly since there's no padding gutter to size around anymore. */
+#server_list {
+	position: absolute;
+	width: 240px;
+	max-height: 352px;
+	overflow: hidden auto;
+}
+#server_list.dock-left {
+	left: 118px;
+}
+#server_list.dock-right {
+	right: 118px;
+}
+#server_list.dock-center {
+	left: 50%;
+	transform: translateX(-50%);
+}
+
+/* The gauge bar reads as *inside* the same button frame as the name, not a separate bar underneath
+   -- so .server-row carries the border/gradient itself, containing both its own text content and
+   its one child, .server-gauge-slot. Unlike the legacy theme's equivalent (a decorator-only
+   ninepatch, no border-width property at all), this uses a real CSS `border-width` on an element
+   that has a child -- a combination not confirmed safe in this RmlUi build (see STATUS.md's
+   bordered-element-plus-children finding). If the frame ever renders as an incomplete/non-closed
+   rectangle, the border needs to move to a decorator-based construction (e.g. a second, inset
+   decorator layer) instead of border-width/border-*-color.
+
+   Raised-metal look: .modern-frame's own bevel mechanism (base.rcss's header comment) --
+   decorator:linear-gradient fill plus per-side border-color bevel (light top/left, dark
+   bottom/right), standing in for a box-shadow inset highlight that this engine's render interface
+   doesn't composite (see STATUS.md). Same warm charcoal gradient as the legacy theme's own
+   .server-row -- a one-off palette, not token-driven.
+
+   height is 23px, not .group-btn's real 32px -- `height` sets content size only; padding and
+   border-width both add on top of it. 23 + this row's 3px+4px padding + 1px+1px border = 32,
+   matching .group-btn's real on-screen height.
+
+   width is a literal px value (218 = this row's border-box target of 240px, matching #server_list's
+   own width, minus this row's own 10px+10px padding and 1px+1px border). .server-gauge-slot has
+   neither padding nor border, so its width is the direct target (200px), inset by a literal 10px
+   left margin to center it within .server-row's own 218px content width. margin-bottom is 1px, not
+   .group-btn's 4px, for tighter stacking since #server_list no longer has an enclosing panel. */
+.server-row {
+	display: block;
+	position: relative;
+	width: 218px;
+	height: 23px;
+	margin-bottom: 1px;
+	padding: 3px 10px 4px;
+	text-align: center;
+	line-height: 14px;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: #0b0907;
+	decorator: linear-gradient(to bottom, #211d1b, #090909 48%, #120e0c);
+	border-width: 1px;
+	border-top-color: rgba(255, 255, 255, 50);
+	border-left-color: rgba(255, 255, 255, 50);
+	border-bottom-color: rgba(0, 0, 0, 200);
+	border-right-color: rgba(0, 0, 0, 200);
+	border-radius: token(radius-sm)px;
+	color: token(text-emphasis);
+	font-family: "token(font-body)";
+}
+.server-row:hover {
+	decorator: linear-gradient(to bottom, #35302c, #17130f 48%, #201a16);
+	border-top-color: token(accent-steel-bright);
+	border-left-color: token(accent-steel-bright);
+}
+.server-row:active {
+	transform: translateY(1px);
+}
+.server-row.gray {
+	color: token(semantic-neutral);
+}
+.server-row.orange {
+	color: token(semantic-warning);
+}
+
+.server-gauge-slot {
+	display: block;
+	width: 200px;
+	height: 5px;
+	margin: 4px 0 0 9px;
+	background-color: token(surface-0);
+	decorator: repeating-linear-gradient(to right, #030303 0, #030303 17px, #222222 17px, #222222 20px);
+}
+.server-gauge-fill {
+	display: block;
+	height: 100%;
+	background-color: #00bd8b;
+}
+
+#pvp_notice {
+	position: absolute;
+	left: 0;
+	top: 420px;
+	width: 480px;
+	color: token(semantic-warning);
+	font-size: 11px;
+	font-family: "token(font-body)";
+}
+
+#desc_panel {
+	position: absolute;
+	left: 0;
+	top: 470px;
+	width: 480px;
+	color: token(text-body);
+	white-space: normal;
+	font-family: "token(font-body)";
+}

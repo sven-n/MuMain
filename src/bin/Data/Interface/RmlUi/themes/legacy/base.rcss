@@ -9,6 +9,16 @@
 	legacy-btn-idle:   0px  0px 108px 30px;
 	legacy-btn-hover:  0px 30px 108px 30px;
 	legacy-btn-active: 0px 60px 108px 30px;
+
+	/* Inner (stretch-safe) rects for a ninepatch decorator, used by server_select.rcss's
+	   .group-btn/.server-row to stretch this button art beyond its native 108x30 size without
+	   distorting it (the plain image() decorator stretches the whole sprite and distorts it). The
+	   8px inset is a guess at the art's real border thickness -- op1_b_all.tga/.OZT isn't viewable
+	   through normal file tools -- adjust if the stretched middle shows a seam or squashed
+	   corners. */
+	legacy-btn-idle-inner:   8px  8px 92px 14px;
+	legacy-btn-hover-inner:  8px 38px 92px 14px;
+	legacy-btn-active-inner: 8px 68px 92px 14px;
 }
 
 @spritesheet legacy-checkbox-sheet

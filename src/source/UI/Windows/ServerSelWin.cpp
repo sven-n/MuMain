@@ -3,25 +3,40 @@
 #include "ServerSelWin.h"
 #include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
-#include "App/Platform/Windows/Local.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
-#include "Render/Models/ZzzBMD.h"
-#include "Engine/Object/ZzzObject.h"
-#include "Engine/Object/ZzzCharacter.h"
+#include "UI/Core/WindowSystem.h"
 #include "I18N/All.h"
 
-#include "UI/Widgets/UIControls.h"
-
-#include "UI/Core/WindowSystem.h"
 #include "Network/Server/ServerListManager.h"
 #include "Core/Globals/_enum.h"
 
-#define	SSW_GAP_WIDTH	28
-#define	SSW_GAP_HEIGHT	5
-#define	SSW_GB_POS_X	16
-#define	SSW_GB_POS_Y	19
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Render/Textures/ZzzOpenglUtil.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Element.h>
+#include <RmlUi/Core/Event.h>
 
-using namespace SEASON3A;
+namespace
+{
+    // Mirrors server_select.rcss's .group-btn height (32px) + margin-bottom (4px) -- used to align
+    // the server-list flyout's top with whichever group button row was clicked.
+    constexpr float kGroupBtnRowHeight = 36.0f;
+    // Mirrors #group_row's own padding-top (reserves room for the centered test-server button
+    // above the two columns) -- row 0's actual on-screen top, in #panel's coordinate space.
+    constexpr float kGroupRowTopPadding = 34.0f;
+    // Mirrors #group_row's own fixed height -- a worst-case reservation for 10 group buttons per
+    // column, not the real button count. server_select.rcss vertically centers each column's real
+    // buttons within this space (justify-content:center) rather than packing them to the top, so
+    // the flyout's top must add back that same centering offset below, or it docks beside where a
+    // button would sit in a full column instead of where the actual (usually shorter) column put it.
+    constexpr float kGroupColumnReservedHeight = 400.0f;
+    // Fixed top for the rare center/test-server-button flyout, below the whole group row (mirrors
+    // #group_row's authored height + a small gap). CSS can't override this per case since
+    // data-style-top sets an inline style (always wins over a class rule), so every case --
+    // including this one -- is resolved to a concrete value here, not left partly to RCSS.
+    constexpr float kCenterFlyoutTop = 410.0f;
+}
 
 CServerSelWin g_ServerSelWin;
 
@@ -38,56 +53,71 @@ void CServerSelWin::Create()
 {
     Release();
 
-    m_ptPos.x = m_ptPos.y = 0;
-    m_Size.cx = m_Size.cy = 0;
-
-    m_iSelectServerBtnIndex = -1;
-
-    int i;
-
-    for (i = 0; i < SSW_SERVER_G_MAX; ++i)
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
-        m_aServerGroupBtn[i].Create(SERVER_GROUP_BTN_WIDTH, SERVER_GROUP_BTN_HEIGHT, BITMAP_LOG_IN, 4, 2, 1, -1, 3);
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_select",
+            [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model)
+            {
+                auto group = c.RegisterStruct<GroupEntry>();
+                group.RegisterMember("label", &GroupEntry::label);
+                group.RegisterMember("btn_pos", &GroupEntry::btnPos);
+                group.RegisterMember("checked", &GroupEntry::checked);
+                c.RegisterArray<std::vector<GroupEntry>>();
+
+                auto server = c.RegisterStruct<ServerEntry>();
+                server.RegisterMember("label", &ServerEntry::label);
+                server.RegisterMember("index", &ServerEntry::index);
+                server.RegisterMember("load_fraction", &ServerEntry::loadFraction);
+                server.RegisterMember("color_gray", &ServerEntry::colorGray);
+                server.RegisterMember("color_orange", &ServerEntry::colorOrange);
+                c.RegisterArray<std::vector<ServerEntry>>();
+
+                c.Bind("test_server_visible", &model.testServerVisible);
+                c.Bind("test_server_label", &model.testServerLabel);
+                c.Bind("test_server_checked", &model.testServerChecked);
+
+                c.Bind("left_groups", &model.leftGroups);
+                c.Bind("right_groups", &model.rightGroups);
+                c.Bind("servers", &model.servers);
+
+                c.Bind("server_list_visible", &model.serverListVisible);
+                c.Bind("server_list_top", &model.serverListTop);
+                c.Bind("server_list_dock_left", &model.serverListDockLeft);
+                c.Bind("server_list_dock_right", &model.serverListDockRight);
+
+                c.Bind("pvp_notice", &model.pvpNotice);
+                c.Bind("pvp_notice_line0", &model.pvpNoticeLine0);
+                c.Bind("pvp_notice_line1", &model.pvpNoticeLine1);
+                c.Bind("pvp_notice_line2", &model.pvpNoticeLine2);
+
+                c.Bind("description_text", &model.descriptionText);
+
+                c.BindEventCallback("serversel_select_group",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectGroup(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("serversel_select_server",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectServer(arguments[0].Get<int>(-1));
+                    });
+            });
+
+        if (modelCreated)
+        {
+            m_RmlBinder.GetModel().pvpNoticeLine0 = StringUtils::WideToNarrow(I18N::Game::SinceHelheimServer);
+            m_RmlBinder.GetModel().pvpNoticeLine1 = StringUtils::WideToNarrow(I18N::Game::TendsToBeCrowded);
+            m_RmlBinder.GetModel().pvpNoticeLine2 = StringUtils::WideToNarrow(I18N::Game::WeRecommendThatYouUseOtherServers);
+
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_select.rml");
+        }
     }
-
-    for (i = 0; i < SSW_SERVER_MAX; ++i)
-    {
-        m_aServerBtn[i].Create(SERVER_BTN_WIDTH, SERVER_BTN_HEIGHT, BITMAP_LOG_IN + 1, 3, 2, 1);
-        m_aServerGauge[i].Create(160, 4, BITMAP_LOG_IN + 2);
-    }
-
-    SImgInfo aiiDeco[2] =
-    {
-        { BITMAP_LOG_IN + 3, 0, 0, 68, 95 },
-        { BITMAP_LOG_IN + 3, 68, 0, 68, 95 }
-    };
-    m_aBtnDeco[0].Create(&aiiDeco[0], 8, 19);
-    m_aBtnDeco[1].Create(&aiiDeco[1], 60, 19);
-
-    SImgInfo aiiArrow[2] =
-    {
-        { BITMAP_LOG_IN + 3, 136, 0, 23, 29 },
-        { BITMAP_LOG_IN + 3, 136, 30, 23, 29 }
-    };
-    m_aArrowDeco[0].Create(&aiiArrow[0], 1, 2);
-    m_aArrowDeco[1].Create(&aiiArrow[1], 23, 2);
-
-    SImgInfo aiiDescBg[WE_BG_MAX] =
-    {
-        { BITMAP_LOG_IN + 11, 0, 0, 4, 4 },
-        { BITMAP_LOG_IN + 12, 0, 0, 512, 6 },
-        { BITMAP_LOG_IN + 12, 0, 6, 512, 6 },
-        { BITMAP_LOG_IN + 13, 0, 0, 3, 4 },
-        { BITMAP_LOG_IN + 13, 3, 0, 3, 4 }
-    };
-    m_winDescription.Create(aiiDescBg, 1, 10);
-    m_winDescription.SetLine(10);
-
-    m_Size.cx = (SERVER_GROUP_BTN_WIDTH + SSW_GAP_WIDTH) * 2 + SERVER_BTN_WIDTH;
-    m_Size.cy = SERVER_BTN_HEIGHT * SSW_SERVER_MAX + SSW_GAP_HEIGHT * 2 + SERVER_GROUP_BTN_HEIGHT +
-                m_winDescription.GetHeight();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
+
     Show(false);
 
     UpdateDisplay();
@@ -95,306 +125,170 @@ void CServerSelWin::Create()
 
 void CServerSelWin::Release()
 {
-    int i;
-
-    for (i = 0; i < SSW_SERVER_G_MAX; ++i)
-        m_aServerGroupBtn[i].Release();
-
-    for (i = 0; i < SSW_SERVER_MAX; ++i)
-    {
-        m_aServerBtn[i].Release();
-        m_aServerGauge[i].Release();
-    }
-
-    for (i = 0; i < 2; ++i)
-    {
-        m_aBtnDeco[i].Release();
-        m_aArrowDeco[i].Release();
-    }
-
-    m_winDescription.Release();
-}
-
-void CServerSelWin::SetPosition(int nXCoord, int nYCoord)
-{
-    m_ptPos.x = nXCoord;
-    m_ptPos.y = nYCoord;
-
-    int nServerGBtnWidth = m_aServerGroupBtn[0].GetWidth();
-    int nServerGBtnHeight = m_aServerGroupBtn[0].GetHeight();
-    int nServerBtnWidth = m_aServerBtn[0].GetWidth();
-    int nServerBtnHeight = m_aServerBtn[0].GetHeight();
-    int nDescGgHeight = m_winDescription.GetHeight();
-    int nBtnPosY;
-    int i;
-
-    int nServerGBtnBasePosY = nYCoord + m_Size.cy - (nServerGBtnHeight * 11 + SSW_GAP_HEIGHT * 2 + nDescGgHeight);
-    int nRServerGBtnPosX = nXCoord + nServerGBtnWidth + nServerBtnWidth + (SSW_GAP_WIDTH * 2);
-
-    int icntServreGroup = 0;
-    m_aServerGroupBtn[icntServreGroup++].SetPosition(nXCoord + (m_Size.cx - nServerGBtnWidth) / 2,
-                                                      nYCoord + m_Size.cy - nServerGBtnHeight - SSW_GAP_HEIGHT - nDescGgHeight);
-
-    for (i = 0; i < SSW_LEFT_SERVER_G_MAX; i++)
-    {
-        nBtnPosY = nServerGBtnBasePosY + nServerGBtnHeight * i;
-        m_aServerGroupBtn[icntServreGroup++].SetPosition(nXCoord, nBtnPosY);
-    }
-
-    for (i = 0; i < SSW_RIGHT_SERVER_G_MAX; i++)
-    {
-        nBtnPosY = nServerGBtnBasePosY + nServerGBtnHeight * i;
-        m_aServerGroupBtn[icntServreGroup++].SetPosition(nRServerGBtnPosX, nBtnPosY);
-    }
-
-    m_winDescription.SetPosition(nXCoord - ((m_winDescription.GetWidth() - m_Size.cx) / 2),
-                                  nYCoord + m_Size.cy - m_winDescription.GetHeight());
-
-    m_aBtnDeco[0].SetPosition(m_aServerGroupBtn[1].GetXPos(), m_aServerGroupBtn[1].GetYPos());
-    m_aBtnDeco[1].SetPosition(m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetXPos() + SERVER_GROUP_BTN_WIDTH,
-                               m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + 1].GetYPos());
-}
-
-void CServerSelWin::SetServerBtnPosition()
-{
-    if (m_iSelectServerBtnIndex == -1)
-        return;
-
-    int nServerBtnPosX = m_aServerGroupBtn[1].GetXPos() + m_aServerGroupBtn[0].GetWidth() + SSW_GAP_WIDTH;
-
-    int nServerBtnHeight = m_aServerBtn[0].GetHeight();
-
-    int nLServerGBtnHeightSum = m_aServerGroupBtn[1].GetHeight() * 10;
-
-    int nServerBtnHeightSum = nServerBtnHeight * m_icntServer;
-
-    int nLServerGBtnTop = m_aServerGroupBtn[1].GetYPos();
-
-    int nServerBtnBasePosY = nLServerGBtnHeightSum > nServerBtnHeightSum ? nLServerGBtnTop : nLServerGBtnTop - (nServerBtnHeightSum - nLServerGBtnHeightSum);
-
-    for (int i = 0; i < m_pSelectServerGroup->GetServerSize(); i++)
-    {
-        m_aServerBtn[i].SetPosition(nServerBtnPosX, nServerBtnBasePosY + nServerBtnHeight * i);
-        m_aServerGauge[i].SetPosition(m_aServerBtn[i].GetXPos() + SSW_GB_POS_X, m_aServerBtn[i].GetYPos() + SSW_GB_POS_Y);
-    }
-}
-
-void CServerSelWin::SetArrowSpritePosition()
-{
-    if (m_iSelectServerBtnIndex == -1)
-        return;
-
-    if ((m_iSelectServerBtnIndex >= 0) && (m_iSelectServerBtnIndex <= SSW_LEFT_SERVER_G_MAX))
-    {
-        m_aArrowDeco[0].SetPosition(m_aServerGroupBtn[m_iSelectServerBtnIndex].GetXPos() + SERVER_GROUP_BTN_WIDTH, m_aServerGroupBtn[m_iSelectServerBtnIndex].GetYPos());
-    }
-    else if ((m_iSelectServerBtnIndex > SSW_LEFT_SERVER_G_MAX) && (m_iSelectServerBtnIndex < SSW_SERVER_G_MAX))
-    {
-        m_aArrowDeco[1].SetPosition(m_aServerGroupBtn[m_iSelectServerBtnIndex].GetXPos(), m_aServerGroupBtn[m_iSelectServerBtnIndex].GetYPos());
-    }
-}
-
-void CServerSelWin::UpdateDisplay()
-{
-    m_pSelectServerGroup = NULL;
-    m_icntServerGroup = 0;
-    m_icntServer = 0;
-    m_icntLeftServerGroup = 0;
-    m_icntRightServerGroup = 0;
-    m_bTestServerBtn = false;
-
-    DWORD adwServerGBtnClr[BTN_IMG_MAX] =
-    {
-        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0,
-        CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0
-    };
-
-    DWORD adwServerBtnClr[4][4] =
-    {
-        { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 },
-        { CLRDW_YELLOW, CLRDW_YELLOW, CLRDW_BR_YELLOW, 0 },
-        { CLRDW_ORANGE, CLRDW_ORANGE, CLRDW_BR_ORANGE, 0 },
-        { CLRDW_ORANGE, CLRDW_ORANGE, CLRDW_BR_ORANGE, 0 },
-    };
-
-    m_icntServerGroup = g_ServerListManager->GetServerGroupSize();
-
-    if (m_icntServerGroup < 1)
-        return;
-
-    CServerGroup* pServerGroup = NULL;
-
-    g_ServerListManager->SetFirst();
-
-    while (g_ServerListManager->GetNext(pServerGroup))
-    {
-        if (pServerGroup->m_iWidthPos == CServerGroup::SBP_CENTER)
-        {
-            if (m_bTestServerBtn == true)
-                continue;
-
-            m_aServerGroupBtn[0].SetText(pServerGroup->m_szName, adwServerGBtnClr);
-            pServerGroup->m_iBtnPos = 0;
-            m_bTestServerBtn = true;
-        }
-        else if (pServerGroup->m_iWidthPos == CServerGroup::SBP_LEFT)
-        {
-            if (m_icntLeftServerGroup >= SSW_LEFT_SERVER_G_MAX)
-                continue;
-
-            m_aServerGroupBtn[m_icntLeftServerGroup + 1].SetText(pServerGroup->m_szName, adwServerGBtnClr);
-            pServerGroup->m_iBtnPos = m_icntLeftServerGroup + 1;
-
-            m_icntLeftServerGroup++;
-        }
-        else if (pServerGroup->m_iWidthPos == CServerGroup::SBP_RIGHT)
-        {
-            if (m_icntRightServerGroup >= SSW_RIGHT_SERVER_G_MAX)
-                continue;
-
-            m_aServerGroupBtn[SSW_LEFT_SERVER_G_MAX + m_icntRightServerGroup + 1].SetText(pServerGroup->m_szName, adwServerGBtnClr);
-            pServerGroup->m_iBtnPos = SSW_LEFT_SERVER_G_MAX + m_icntRightServerGroup + 1;
-
-            m_icntRightServerGroup++;
-        }
-    }
-
-    ShowServerGBtns();
-    ShowDecoSprite();
-
-    memset(m_szDescription, 0, sizeof(char) * SSW_DESC_LINE_MAX * SSW_DESC_ROW_MAX);
-
-    if (m_iSelectServerBtnIndex != -1)
-    {
-        m_pSelectServerGroup = g_ServerListManager->GetServerGroupByBtnPos(m_iSelectServerBtnIndex);
-    }
-
-    if (m_pSelectServerGroup == NULL)
-        return;
-
-    m_icntServer = m_pSelectServerGroup->GetServerSize();
-
-    if (m_icntServer < 1)
-        return;
-
-    CServerInfo* pServerInfo = NULL;
-
-    m_pSelectServerGroup->SetFirst();
-
-    int icntServer = 0;
-    while (m_pSelectServerGroup->GetNext(pServerInfo))
-    {
-        m_aServerBtn[icntServer].SetText(pServerInfo->m_bName, adwServerBtnClr[pServerInfo->m_byNonPvP]);
-        m_aServerGauge[icntServer].SetValue(pServerInfo->m_iPercent, 100);
-        icntServer++;
-    }
-
-    ::SeparateTextIntoLines(m_pSelectServerGroup->m_szDescription, m_szDescription[0], SSW_DESC_LINE_MAX, SSW_DESC_ROW_MAX);
-
-    SetArrowSpritePosition();
-    SetServerBtnPosition();
-    ShowArrowSprite();
-    ShowServerBtns();
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 void CServerSelWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-}
 
-void CServerSelWin::ShowServerGBtns()
-{
-    int i;
-
-    if (m_bTestServerBtn == true)
+    if (m_pRmlDoc)
     {
-        m_aServerGroupBtn[0].Show(IsVisible());
-    }
-    else
-    {
-        m_aServerGroupBtn[0].Show(false);
-    }
-
-    for (i = 1; i < m_icntLeftServerGroup + 1; i++)
-    {
-        m_aServerGroupBtn[i].Show(IsVisible());
-    }
-    for (; i < SSW_LEFT_SERVER_G_MAX; ++i)
-    {
-        m_aServerGroupBtn[i].Show(false);
-    }
-
-    for (i = SSW_LEFT_SERVER_G_MAX + 1; i < SSW_RIGHT_SERVER_G_MAX + 1 + m_icntRightServerGroup; i++)
-    {
-        m_aServerGroupBtn[i].Show(IsVisible());
-    }
-    for (; i < SSW_SERVER_G_MAX; i++)
-    {
-        m_aServerGroupBtn[i].Show(false);
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        else       m_pRmlDoc->Hide();
     }
 }
 
-void CServerSelWin::ShowDecoSprite()
+void CServerSelWin::UpdateDisplay()
 {
-    if (m_icntLeftServerGroup > 0)
+    auto& model = m_RmlBinder.GetModel();
+
+    model.testServerVisible = false;
+    model.leftGroups.clear();
+    model.rightGroups.clear();
+
+    const int nGroupCount = g_ServerListManager->GetServerGroupSize();
+    if (nGroupCount >= 1)
     {
-        m_aBtnDeco[0].Show(IsVisible());
-    }
-    else
-    {
-        m_aBtnDeco[0].Show(false);
+        CServerGroup* pServerGroup = nullptr;
+        g_ServerListManager->SetFirst();
+
+        bool bTestServerFound = false;
+        while (g_ServerListManager->GetNext(pServerGroup))
+        {
+            const std::string label = StringUtils::WideToNarrow(pServerGroup->m_szName);
+
+            if (pServerGroup->m_iWidthPos == CServerGroup::SBP_CENTER)
+            {
+                if (bTestServerFound)
+                    continue;
+
+                model.testServerLabel = label;
+                pServerGroup->m_iBtnPos = 0;
+                model.testServerVisible = true;
+                bTestServerFound = true;
+            }
+            else if (pServerGroup->m_iWidthPos == CServerGroup::SBP_LEFT)
+            {
+                if (model.leftGroups.size() >= 10)
+                    continue;
+
+                GroupEntry entry;
+                entry.label = label;
+                entry.btnPos = static_cast<int>(model.leftGroups.size()) + 1;
+                pServerGroup->m_iBtnPos = entry.btnPos;
+                model.leftGroups.push_back(entry);
+            }
+            else if (pServerGroup->m_iWidthPos == CServerGroup::SBP_RIGHT)
+            {
+                if (model.rightGroups.size() >= 10)
+                    continue;
+
+                GroupEntry entry;
+                entry.label = label;
+                entry.btnPos = 10 + static_cast<int>(model.rightGroups.size()) + 1;
+                pServerGroup->m_iBtnPos = entry.btnPos;
+                model.rightGroups.push_back(entry);
+            }
+        }
     }
 
-    if (m_icntRightServerGroup > 0)
-    {
-        m_aBtnDeco[1].Show(IsVisible());
-    }
+    model.servers.clear();
+    model.descriptionText.clear();
+    model.pvpNotice = false;
+
+    if (m_iSelectServerBtnIndex != -1)
+        m_pSelectServerGroup = g_ServerListManager->GetServerGroupByBtnPos(m_iSelectServerBtnIndex);
     else
+        m_pSelectServerGroup = nullptr;
+
+    if (m_pSelectServerGroup != nullptr)
     {
-        m_aBtnDeco[1].Show(false);
+        model.descriptionText = StringUtils::WideToNarrow(m_pSelectServerGroup->m_szDescription);
+        model.pvpNotice = m_pSelectServerGroup->m_bPvPServer;
+
+        CServerInfo* pServerInfo = nullptr;
+        m_pSelectServerGroup->SetFirst();
+
+        int nServerIndex = 0;
+        while (m_pSelectServerGroup->GetNext(pServerInfo))
+        {
+            ServerEntry entry;
+            entry.label = StringUtils::WideToNarrow(pServerInfo->m_bName);
+            entry.index = nServerIndex;
+            entry.loadFraction = static_cast<float>(pServerInfo->m_iPercent) / 100.0f;
+            // Matches the legacy adwServerBtnClr[byNonPvP] bucketing (see ServerEntry's own
+            // comment): 0 = gray, 1 = the unflagged default, 2/3 = orange.
+            entry.colorGray = (pServerInfo->m_byNonPvP == 0);
+            entry.colorOrange = (pServerInfo->m_byNonPvP >= 2);
+            model.servers.push_back(entry);
+
+            ++nServerIndex;
+        }
     }
+
+    // Unconditional -- this is a genuine rebuild (clear + repopulate), not a per-frame poll, same
+    // convention as CBuffStrip's "resize + unconditional MarkDirty" (contrast SyncRmlModel() below,
+    // which only marks a field dirty when an existing value actually changes).
+    m_RmlBinder.MarkDirty("test_server_visible");
+    m_RmlBinder.MarkDirty("test_server_label");
+    m_RmlBinder.MarkDirty("left_groups");
+    m_RmlBinder.MarkDirty("right_groups");
+    m_RmlBinder.MarkDirty("servers");
+    m_RmlBinder.MarkDirty("pvp_notice");
+    m_RmlBinder.MarkDirty("description_text");
+
+    SyncRmlModel();
 }
 
-void CServerSelWin::ShowArrowSprite()
+void CServerSelWin::SelectGroup(int nBtnPos)
 {
-    if ((m_iSelectServerBtnIndex >= 0) && (m_iSelectServerBtnIndex <= SSW_LEFT_SERVER_G_MAX))
+    if (m_iSelectServerBtnIndex != -1)
     {
-        m_aArrowDeco[0].Show(IsVisible());
-        m_aArrowDeco[1].Show(false);
+        for (auto& entry : m_RmlBinder.GetModel().leftGroups)
+            if (entry.btnPos == m_iSelectServerBtnIndex) entry.checked = false;
+        for (auto& entry : m_RmlBinder.GetModel().rightGroups)
+            if (entry.btnPos == m_iSelectServerBtnIndex) entry.checked = false;
+        if (m_iSelectServerBtnIndex == 0)
+            m_RmlBinder.GetModel().testServerChecked = false;
     }
-    else if ((m_iSelectServerBtnIndex > SSW_LEFT_SERVER_G_MAX) && (m_iSelectServerBtnIndex < SSW_SERVER_G_MAX))
-    {
-        m_aArrowDeco[0].Show(false);
-        m_aArrowDeco[1].Show(IsVisible());
-    }
-    else
-    {
-        m_aArrowDeco[0].Show(false);
-        m_aArrowDeco[1].Show(false);
-    }
+
+    m_iSelectServerBtnIndex = nBtnPos;
+
+    SyncRmlModel();
+
+    SocketClient->ToConnectServer()->SendServerListRequest();
 }
 
-void CServerSelWin::ShowServerBtns()
+void CServerSelWin::RmlClickSelectGroup(int nBtnPos)
 {
-    if (m_iSelectServerBtnIndex == -1)
-    {
-        m_winDescription.Show(false);
+    SelectGroup(nBtnPos);
+}
+
+void CServerSelWin::RmlClickSelectServer(int nServerIndex)
+{
+    if (m_pSelectServerGroup == nullptr)
         return;
-    }
 
-    int i;
-    for (i = 0; i < m_icntServer; i++)
-    {
-        m_aServerBtn[i].Show(IsVisible());
-        m_aServerGauge[i].Show(IsVisible());
-    }
-    for (; i < SSW_SERVER_MAX; i++)
-    {
-        m_aServerBtn[i].Show(false);
-        m_aServerGauge[i].Show(false);
-    }
+    CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(nServerIndex);
+    if (pServerInfo == nullptr)
+        return;
 
-    m_winDescription.Show(IsVisible());
+    if (pServerInfo->m_iPercent < 100)
+    {
+        Show(false);
+
+        SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
+        g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+
+        g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
+    }
+    else if (pServerInfo->m_iPercent < 128)
+    {
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
+    }
 }
 
 bool CServerSelWin::UpdateMouseEvent()
@@ -402,9 +296,11 @@ bool CServerSelWin::UpdateMouseEvent()
     if (!IsVisible())
         return true;
 
-    // Was CWin::CursorInWin(WA_ALL) -- ported directly (see this method's own header comment).
+    const int nLeft = (static_cast<int>(WindowWidth) - kPanelWidth) / 2;
+    const int nTop = (static_cast<int>(WindowHeight) - kPanelHeight) / 2;
+
     RECT rc;
-    ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
+    ::SetRect(&rc, nLeft, nTop, nLeft + kPanelWidth, nTop + kPanelHeight);
     if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
         return false;
 
@@ -413,99 +309,100 @@ bool CServerSelWin::UpdateMouseEvent()
 
 bool CServerSelWin::Update()
 {
-    if (!IsVisible())
-        return true;
-
-    int i;
-
-    for (i = 0; i < SSW_SERVER_G_MAX; i++)
-        m_aServerGroupBtn[i].Update();
-    for (i = 0; i < SSW_SERVER_MAX; i++)
-        m_aServerBtn[i].Update();
-
-    for (i = 0; i < SSW_SERVER_G_MAX; i++)
-    {
-        if (m_aServerGroupBtn[i].IsClick())
-        {
-            if (m_iSelectServerBtnIndex != -1)
-            {
-                m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
-            }
-
-            m_aServerGroupBtn[i].SetCheck(true);
-            m_iSelectServerBtnIndex = i;
-
-            SocketClient->ToConnectServer()->SendServerListRequest();
-        }
-    }
-
-    if (m_pSelectServerGroup == NULL)
-        return true;
-
-    CServerInfo* pServerInfo = NULL;
-    for (i = 0; i < m_icntServer; i++)
-    {
-        if (m_aServerBtn[i].IsClick())
-        {
-            pServerInfo = m_pSelectServerGroup->GetServerInfo(i);
-
-            if (pServerInfo == NULL)
-                return true;
-
-            if (pServerInfo->m_iPercent < 100)
-            {
-                Show(false);
-
-                SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-                g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-                g_pSystemLogBox->AddText(I18N::Game::PleaseWait, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-
-                g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
-
-                break;
-            }
-            else if (pServerInfo->m_iPercent < 128)
-            {
-                CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_BUSY);
-            }
-        }
-    }
-
     return true;
 }
 
 bool CServerSelWin::Render()
 {
-    int i = 0;
+    return true;
+}
 
-    g_pRenderText->SetFont(g_hFixFont);
-    g_pRenderText->SetTextColor(CLRDW_WHITE);
-    g_pRenderText->SetBgColor(0);
+// Called only at the point of an actual state change (Show(true), UpdateDisplay(), SelectGroup())
+// -- not polled from Render() every frame, unlike CSysMenuWin's SyncRmlModel(). This window's
+// state (m_iSelectServerBtnIndex) only ever changes from its own click handlers, so there's no
+// externally-changing flag to poll for; syncing at the mutation site avoids re-marking every field
+// dirty ~60+ times a second, which was reapplying #server_list's data-style-top inline style
+// continuously even when the flyout hadn't moved -- suspected cause of the flyout's own rows never
+// settling into a stable hit-test box while the fully-static .group-btn elements were unaffected.
+// Each field is compared before MarkDirty for the same reason (matches CSysMenuWin::SyncRmlModel's
+// real pattern -- diff-then-mark, not mark-unconditionally).
+void CServerSelWin::SyncRmlModel()
+{
+    if (!m_pRmlDoc) return;
 
-    // NOTE: m_aBtnDeco/m_aArrowDeco/m_winDescription are positioned and have their Show() flags
-    // toggled (SetPosition(), Show*() below) but were never actually rendered here in the
-    // original CWin-based RenderControls() either -- ported as-is (parity, not a fix) rather than
-    // silently drawing content that wasn't drawn before.
-    for (i = 0; i < SSW_SERVER_G_MAX; i++)
-        m_aServerGroupBtn[i].Render();
-    for (i = 0; i < SSW_SERVER_MAX; i++)
-        m_aServerBtn[i].Render();
+    auto& model = m_RmlBinder.GetModel();
 
-    if (m_pSelectServerGroup != NULL)
+    const bool testServerChecked = (m_iSelectServerBtnIndex == 0);
+    if (model.testServerChecked != testServerChecked)
     {
-        for (i = 0; i < m_icntServer; i++)
-        {
-            m_aServerGauge[i].Render();
-        }
-
-        if (m_pSelectServerGroup->m_bPvPServer == true)
-        {
-            g_pRenderText->SetTextColor(ARGB(255, 255, 255, 255));
-            g_pRenderText->RenderText(90, 164 - 60, I18N::Game::SinceHelheimServer);
-            g_pRenderText->RenderText(90, 164 - 45, I18N::Game::TendsToBeCrowded);
-            g_pRenderText->RenderText(90, 164 - 30, I18N::Game::WeRecommendThatYouUseOtherServers);
-        }
+        model.testServerChecked = testServerChecked;
+        m_RmlBinder.MarkDirty("test_server_checked");
     }
 
-    return true;
+    bool leftChanged = false;
+    for (auto& entry : model.leftGroups)
+    {
+        const bool checked = (entry.btnPos == m_iSelectServerBtnIndex);
+        if (entry.checked != checked) { entry.checked = checked; leftChanged = true; }
+    }
+    if (leftChanged)
+        m_RmlBinder.MarkDirty("left_groups");
+
+    bool rightChanged = false;
+    for (auto& entry : model.rightGroups)
+    {
+        const bool checked = (entry.btnPos == m_iSelectServerBtnIndex);
+        if (entry.checked != checked) { entry.checked = checked; rightChanged = true; }
+    }
+    if (rightChanged)
+        m_RmlBinder.MarkDirty("right_groups");
+
+    // Flyout docking -- see ServerSelRmlModel's own comment. Derived from m_iSelectServerBtnIndex
+    // (the single source of truth, same value UpdateDisplay() already resolves back into
+    // m_pSelectServerGroup) rather than stored separately, so it can never drift out of sync with
+    // which group is actually selected.
+    const bool serverListVisible = (m_pSelectServerGroup != nullptr);
+    bool serverListDockLeft = false;
+    bool serverListDockRight = false;
+    float serverListTop = kCenterFlyoutTop;
+    if (m_iSelectServerBtnIndex >= 1 && m_iSelectServerBtnIndex <= 10)
+    {
+        serverListDockLeft = true;
+        const float columnCenteringOffset = (kGroupColumnReservedHeight
+            - static_cast<float>(model.leftGroups.size()) * kGroupBtnRowHeight) / 2.0f;
+        serverListTop = kGroupRowTopPadding + columnCenteringOffset
+            + static_cast<float>(m_iSelectServerBtnIndex - 1) * kGroupBtnRowHeight;
+    }
+    else if (m_iSelectServerBtnIndex >= 11 && m_iSelectServerBtnIndex <= 20)
+    {
+        serverListDockRight = true;
+        const float columnCenteringOffset = (kGroupColumnReservedHeight
+            - static_cast<float>(model.rightGroups.size()) * kGroupBtnRowHeight) / 2.0f;
+        serverListTop = kGroupRowTopPadding + columnCenteringOffset
+            + static_cast<float>(m_iSelectServerBtnIndex - 11) * kGroupBtnRowHeight;
+    }
+    // m_iSelectServerBtnIndex == 0 (the center/test button) leaves both dock flags false and
+    // serverListTop at kCenterFlyoutTop -- server_select.rcss's .dock-center only handles
+    // horizontal centering for that case.
+
+    if (model.serverListVisible != serverListVisible)
+    {
+        model.serverListVisible = serverListVisible;
+        m_RmlBinder.MarkDirty("server_list_visible");
+    }
+    if (model.serverListDockLeft != serverListDockLeft)
+    {
+        model.serverListDockLeft = serverListDockLeft;
+        m_RmlBinder.MarkDirty("server_list_dock_left");
+    }
+    if (model.serverListDockRight != serverListDockRight)
+    {
+        model.serverListDockRight = serverListDockRight;
+        m_RmlBinder.MarkDirty("server_list_dock_right");
+    }
+    if (model.serverListTop != serverListTop)
+    {
+        model.serverListTop = serverListTop;
+        m_RmlBinder.MarkDirty("server_list_top");
+    }
 }
