@@ -26,21 +26,26 @@ guidance below is unchanged** (`mu::ui::window::CObject`, always) — what chang
 | Toolkit | Base class(es) | Real home | Status |
 |---|---|---|---|
 | Sprite widgets | `CButton : CSprite`, `CGaugeBar` | `UI/Widgets/{Button,GaugeBar}.h` | **Being retired, most of the way there.** `CWin`/`CWinEx` are fully deleted now (`UI/Widgets/{Win,WinEx}.h/.cpp` removed outright) — they'd already reached zero live subclasses and zero remaining composed members anywhere (`CSysMenuWin`/`CCharMakeWin`/`CServerSelWin` were the last three holders; all provably dead — never rendered, any real state moved to a plain struct read by RmlUi's data binding). `CGaugeBar` has exactly one remaining consumer: `TitleSceneUI.cpp`'s splash-screen loading bar. The sprite-tier `CButton` has exactly one remaining consumer: `CCreditWin::m_btnClose` — the credits screen is still fully native 2D, no RmlUi involvement at all, so this isn't a redundant-companion cleanup like the others were, it's a genuine rendering port. (`CMsgWin`/`CLoginMainWin`/`CCharSelMainWin`/`CLoginWin` used to also hold sprite `CButton`s as a deliberate redundant-click-detection companion behind their real RmlUi buttons; that companion path has been dropped from all four — RmlUi is now the sole click path, and `CLoginWin`'s checkbox state moved to plain `bool`s.) Don't add a new consumer of any class in this row. |
-| `CUIControl` family | `CUIControl : CUIMessage`, `CUIButton`, `CUITextListBox<T>`, `CUITextInputBox`, `CUIChatInputBox`, `CUIBaseWindow : CUIControl`, `CUIWindowMgr`, `CRadioButton`, `CUISlideHelp`/`CSlideHelpMgr` | `UI/Widgets/UIControls.h`, `UI/Party/UIWindows.h` | **Fully live, and two parts of it are permanent, not pending retirement.** `CUIBaseWindow`/`CUIWindowMgr`'s only live subsystem — the friend/mail/chat-room feature in `UIWindows.cpp` (see "The `UIWindows.cpp`/`CFriendWindow` pattern" below) — is a permanent, sanctioned exception, same standing as the native-3D boundary; it isn't awaiting a `mu::ui::window` rewrite. `CUITextInputBox` is [`ui-target-architecture.md`](../ui-target-architecture.md) Section E's "Type-2 companion object" — a real interactive widget RmlUi can't yet host (caret/selection, IME composition with candidate-window positioning, multiline wrap, password masking, tab-navigation, focus routing) — so it's the one class here still legitimately reused by brand-new `mu::ui::window::CObject` windows (`NewUIGuildMakeWindow`, `NewUIMyShopInventory`, etc.). Its eventual replacement is RmlUi's own native `<input>`/`<textarea>` form controls, not a new native widget-tier class — building a `mu::ui::window::CTextInput` would be a third kind of native companion, which Section E explicitly warns against. That RmlUi-native-input work is its own separate design effort (IME composition through RmlUi's DOM model is an open question), not a toolkit-retirement task. |
+| `CUIControl` family | `CUIControl : CUIMessage`, `CUIButton`, `CUITextListBox<T>`, `CUITextInputBox`, `CUIChatInputBox`, `CUIBaseWindow : CUIControl`, `CUIWindowMgr`, `CRadioButton`, `CUISlideHelp`/`CSlideHelpMgr` | `UI/Widgets/UIControls.h`, `UI/Party/UIWindows.h` | **Fully live; one part transitional, one part a real-but-narrower permanent exception.** `CUIBaseWindow`/`CUIWindowMgr`'s only live subsystem — the friend/mail/chat-room feature in `UIWindows.cpp` (see "The `UIWindows.cpp`/`CFriendWindow` pattern" below) — is **not** a peer to the native-3D/world-overlay boundary: [`ui-target-architecture.md`](../ui-target-architecture.md) Section H item 15 is explicit that this shape is transitional and shrinking, same Rule 3 standing as the `mu::ui::window` widget family itself. It has no scheduled port today (a real, self-contained legacy subsystem, not dead code, and not worth a speculative rewrite ahead of a concrete reason), but the end state is 3 shapes — RmlUi-only 2D, hybrid RmlUi/native-3D, and world-overlay — not 4, so a future port of this subsystem to RmlUi is in scope, just unscheduled. `CUITextInputBox` is Section E's "Type-2 companion object" — a real interactive widget RmlUi can't yet host (caret/selection, IME composition with candidate-window positioning, multiline wrap, password masking, tab-navigation, focus routing) — so it's the one class here still legitimately reused by brand-new `mu::ui::window::CObject` windows (`NewUIGuildMakeWindow`, `NewUIMyShopInventory`, etc.). Its eventual replacement is RmlUi's own native `<input>`/`<textarea>` form controls, not a new native widget-tier class — building a `mu::ui::window::CTextInput` would be a third kind of native companion, which Section E explicitly warns against. That RmlUi-native-input work is its own separate design effort (IME composition through RmlUi's DOM model is an open question), not a toolkit-retirement task. |
 | `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox`/`CChatInputBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the default base class for all new work** — this is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. Its own **widget family is transitional**, for native-only content only (see the note above) — for anything with an RmlUi presentation, use RmlUi + `base.rcss` instead. |
 
 ## Reference screens — copy these, not an arbitrary neighboring window
 
-`ui-target-architecture.md` Section H, item 15: one named, already-verified example per end-state
-shape. Start from whichever matches what you're building instead of copying the nearest existing
-window, which may predate current conventions:
+`ui-target-architecture.md` Section H, item 15: one named, already-verified example per shape. The
+end state is **3 permanent shapes** — RmlUi owns all ordinary 2D UI, a hybrid RmlUi/native-3D split
+for content with a live 3D-camera-viewport or world-anchored piece, and world-overlay UI for
+per-frame-projected content with no static 2D rect. "Native-only UI" is listed as a fourth row
+below because it has a real reference implementation worth copying *today*, not because it's a
+fourth permanent destination — it's the stopgap shape for a not-yet-ported legacy subsystem, and
+shrinks to zero as that subsystem migrates. Start from whichever matches what you're building
+instead of copying the nearest existing window, which may predate current conventions:
 
 | Shape | Reference | Why |
 |---|---|---|
-| RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`) | Ordinary screen-anchored modal, no `CWin` involvement. `RememberPasswordPrompt` for a free-function variant with no reusable state. |
-| Native-only UI | `CFriendWindow` (`UI/Party/FriendWindow.h`) | Thin `CObject` adapter forwarding into a live legacy subsystem — see "The `UIWindows.cpp`/`CFriendWindow` pattern" below. Transitional shape (Rule 3), not a peer to the other three. |
+| RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`) | Ordinary screen-anchored modal, no `CWin` involvement. `RememberPasswordPrompt` for a free-function variant with no reusable state. This is the default destination for every screen; the other two permanent shapes below are the only carve-outs. |
 | Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/MainFrameWindow.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a genuine live 3D render — the permanent boundary, not a porting gap. |
 | World-overlay UI | `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`) | Per-frame `WorldToScreen()` projection, no static 2D rect. |
+| Native-only UI (stopgap, not a 4th permanent shape) | `CFriendWindow` (`UI/Party/FriendWindow.h`) | Thin `CObject` adapter forwarding into a live legacy subsystem — see "The `UIWindows.cpp`/`CFriendWindow` pattern" below. Transitional shape (Rule 3): copy this only when wrapping an existing native subsystem that isn't being ported to RmlUi in the same pass, not as a template for new 2D UI. |
 
 See `ui-target-architecture.md` Section H item 15 for the full reasoning behind each pick.
 
@@ -127,7 +132,7 @@ qualification at the actual use site (`::CRadioButton` if you mean the `UIContro
 - **`UIDefaultBase`** — deleted during the `UI/` directory restructure (`docs/newui-legacy-merger.md`),
   fully inert (`#ifdef`-gated on a macro that was never defined).
 
-## The `UIWindows.cpp` / `CFriendWindow` pattern — a legitimate exception, not confusion
+## The `UIWindows.cpp` / `CFriendWindow` pattern — a legitimate stopgap, not confusion or a dead end
 
 `UI/Party/UIWindows.h/.cpp` (`CUIBaseWindow`, `CUIWindowMgr`, `CUIFriendWindow`, mail, chat-room
 list) is a fully live, self-contained legacy subsystem — not dead code, not superseded. It's
@@ -136,6 +141,11 @@ reached through exactly one seam: `CFriendWindow : public mu::ui::window::CObjec
 (`CUILetterReadWindow`/`WriteWindow`) and the chat-room list (`CUIChatRoomListTabWindow`) have no
 `mu::ui::window`-native reimplementation anywhere — this file is their only implementation. If you
 ever need to touch the friend/mail/chat-room feature, this is the file; don't build a second one.
+
+This is not a fourth permanent architectural shape alongside RmlUi-only/hybrid-3D/world-overlay —
+see the Reference screens section above. It has no scheduled port (a real subsystem with real
+users, not worth rewriting speculatively), but a future RmlUi port is in scope, not excluded the
+way the native-3D/world-overlay boundary is. Wrap, don't reimplement, until that port happens.
 
 ## Cross-references
 

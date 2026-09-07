@@ -27,9 +27,10 @@ See also: **[Building New UI](building-new-ui.md)** — which of the three overl
 toolkits (sprite widgets, `CUIControl`, `mu::ui::window::CObject`) to use for a new window, dialog, HUD panel,
 or widget, the folder-by-domain convention, the known near-identical-name collisions to avoid
 (`CButton`/`CUIButton`/`mu::ui::window::CButton`, `CRadioButton`/`mu::ui::window::CRadioButton`), and its
-**Reference screens** table — one named, already-verified example window per end-state shape
-(RmlUi-only, native-only, hybrid RmlUi/native-3D, world-overlay) to copy instead of an arbitrary
-neighboring window (`ui-target-architecture.md` Section H item 15). Read this before starting
+**Reference screens** table — one named, already-verified example window per shape: the 3 permanent
+end-state shapes (RmlUi-only 2D, hybrid RmlUi/native-3D, world-overlay) plus native-only as a
+transitional stopgap for legacy subsystems not yet ported, not a 4th permanent destination — to
+copy instead of an arbitrary neighboring window (`ui-target-architecture.md` Section H item 15). Read this before starting
 anything new under `UI/`. **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
 positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
