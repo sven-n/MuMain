@@ -3,26 +3,23 @@
 //*****************************************************************************
 
 #include "stdafx.h"
-#include "Render/Renderer/MuRenderer.h"
 #include "UI/Windows/CreditWin.h"
-#include "Render/Textures/ZzzOpenglUtil.h"
 #include "Core/Input/Input.h"
 #include "Core/Globals/_enum.h"
 #include "UI/Core/SceneUICoordinator.h"
-#include "UI/Scaling/UITransform.h"
 #include "Engine/Object/ZzzInfomation.h"
-#include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzObject.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "Engine/Object/ZzzInterface.h"
 #include "App/Platform/Windows/Local.h"
-#include "I18N/All.h"
 #include "Core/Platform/PathResolve.h"
 
 #include "UI/Widgets/UIControls.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/DataModelHandle.h>
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
@@ -80,14 +77,6 @@ namespace
         std::mbstowcs(destination, source, N);
         destination[N - 1] = L'\0';
     }
-
-    void FontDeleter(HFONT font)
-    {
-        if (font != nullptr)
-        {
-            ::DeleteObject(font);
-        }
-    }
 }
 
 
@@ -101,7 +90,6 @@ CCreditWin::CCreditWin()
     , m_illustElapsed(DurationMs::zero())
     , m_byIllust(0)
     , m_illustPaths(kIllustPaths)
-    , m_font(nullptr, &FontDeleter)
     , m_nNowIndex(0)
     , m_nNameCount(0)
     , m_anTextIndex{}
@@ -122,44 +110,38 @@ CCreditWin::~CCreditWin()
 void CCreditWin::Create()
 {
 	// Mirrors CWin::Create()'s own internal Release()-then-rebuild pattern -- avoids leaking the
-	// sprites/font on a second Create() call (RepositionSceneUI()'s resolution-change path).
+	// sprites on a second Create() call (RepositionSceneUI()'s resolution-change path).
 	Release();
 
-	CInput rInput = CInput::Instance();
-
-	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
-	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
-
-	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
-	{
-		m_aSpr[i].Create(800, 42, -1, 0, NULL, 0, 0, false,
-			SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-		m_aSpr[i].SetColor(0, 0, 0);
-	}
-
-	int nFontSize = 10;
-	switch (rInput.GetScreenWidth())
-	{
-	case 800:	nFontSize = 14;	break;
-	case 1024:	nFontSize = 18;	break;
-	case 1280:	nFontSize = 24;	break;
-	}
-	HFONT fontHandle = CreateFont(nFontSize, 0, 0, 0, FW_BOLD, 0, 0, 0, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, NONANTIALIASED_QUALITY, DEFAULT_PITCH | FF_DONTCARE, I18N::Game::Gulim[0] ? I18N::Game::Gulim : NULL);
-	m_font.reset(fontHandle);
-
 	LoadText();
-	SetPosition();
 
-	// RmlUi migration (Stage 1) -- see this class's header comment. Guarded like every other
-	// hybrid window's Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on
-	// resolution change), so the document/model are created once, ever.
+	// RmlUi migration -- see this class's header comment. Guarded like every other hybrid window's
+	// Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so
+	// the document/model are created once, ever.
 	if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
 	{
 		const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "credit_win",
-			[this](Rml::DataModelConstructor& c, CreditWinRmlModel&)
+			[this](Rml::DataModelConstructor& c, CreditWinRmlModel& model)
 			{
 				c.BindEventCallback("creditwin_close_click",
 					[this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+
+				c.Bind("department", &model.department);
+				c.Bind("team", &model.team);
+				c.Bind("department_opacity", &model.departmentOpacity);
+				c.Bind("team_opacity", &model.teamOpacity);
+				c.Bind("names_opacity", &model.namesOpacity);
+
+				// One credit-name slot -- same RegisterStruct/RegisterArray shape as CBuffStrip's
+				// own data-for list (BuffStrip.cpp).
+				auto name = c.RegisterStruct<CreditNameEntry>();
+				name.RegisterMember("text", &CreditNameEntry::text);
+				c.RegisterArray<std::vector<CreditNameEntry>>();
+				c.Bind("names", &model.names);
+
+				c.Bind("illust_left_decorator", &model.illustLeftDecorator);
+				c.Bind("illust_right_decorator", &model.illustRightDecorator);
+				c.Bind("illust_opacity", &model.illustOpacity);
 			});
 
 		if (modelCreated)
@@ -180,10 +162,6 @@ void CCreditWin::Create()
 
 void CCreditWin::Release()
 {
-	for (int i = 0; i < CRW_SPR_MAX; ++i)
-		m_aSpr[i].Release();
-	m_font.reset();
-
 	// See CLoginWin::PreRelease()'s identical comment -- each migrated window's Release() is
 	// called explicitly at every scene transition, not swept automatically by any shared list, and
 	// this class has no base-class knowledge of m_pRmlDoc.
@@ -191,21 +169,9 @@ void CCreditWin::Release()
 		m_pRmlDoc->Hide();
 }
 
-void CCreditWin::SetPosition()
-{
-	m_aSpr[CRW_SPR_PIC_L].SetPosition(0, 126);
-	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);
-
-	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
-		m_aSpr[i].SetPosition(0, 42 * (i - CRW_SPR_TXT_HIDE0));
-}
-
 void CCreditWin::Show(bool bShow)
 {
 	mu::ui::window::CObject::Show(bShow);
-
-	for (int i = 0; i < CRW_SPR_MAX; ++i)
-		m_aSpr[i].Show(bShow);
 
 	if (m_pRmlDoc)
 	{
@@ -245,69 +211,16 @@ bool CCreditWin::Update()
 		AnimationText(i, deltaTime);
 	AnimationIllust(deltaTime);
 
+	SyncRmlModel();
+
 	return true;
 }
 
 bool CCreditWin::Render()
 {
-	// Background/deco/logo/close button now live in #panel (credit_win.rml) -- see this class's
-	// header comment.
-	mu::GetRenderer().SetAlphaTest(false);
-
-	for (int i = 0; i <= CRW_SPR_PIC_R; ++i)
-		m_aSpr[i].Render();
-
-	long lScreenWidth = CInput::Instance().GetScreenWidth();
-	int nTextBoxWidth;
-
-	g_pRenderText->SetFont(m_font.get());
-	g_pRenderText->SetTextColor(CLRDW_BR_GRAY);
-	g_pRenderText->SetBgColor(0);
-	nTextBoxWidth = lScreenWidth / g_fScreenRate_x;
-
-	auto renderCentered = [&](const SCreditItem& item, int x, int y, int width)
-	{
-		wchar_t buffer[CRW_NAME_MAX]{};
-		CopyNameToWide(item.szName, buffer);
-		g_pRenderText->RenderText(x, y, buffer, width, 0, RT3_SORT_CENTER);
-	};
-
-	renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_DEPARTMENT]], 0, 20, nTextBoxWidth);
-	renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_TEAM]], 0, 46, nTextBoxWidth);
-
-	g_pRenderText->SetTextColor(CLRDW_BR_YELLOW);
-
-	switch (m_nNameCount)
-	{
-	case 1:
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]], 0, 72, nTextBoxWidth);
-		break;
-	case 2:
-		nTextBoxWidth = lScreenWidth / 4 / g_fScreenRate_x;
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]], 160, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]], 320, 72, nTextBoxWidth);
-		break;
-	case 3:
-		nTextBoxWidth = lScreenWidth / 3 / g_fScreenRate_x;
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]], 0, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]], 213, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME2]], 426, 72, nTextBoxWidth);
-		break;
-	case 4:
-		nTextBoxWidth = lScreenWidth / 4 / g_fScreenRate_x;
-
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0]], 0, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME1]], 160, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME2]], 320, 72, nTextBoxWidth);
-		renderCentered(m_aCredit[m_anTextIndex[CRW_INDEX_NAME3]], 480, 72, nTextBoxWidth);
-		break;
-	}
-
-	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
-		m_aSpr[i].Render();
-
-	mu::GetRenderer().SetAlphaTest(true);
-
+	// RmlUi's #panel now owns 100% of this window's visuals -- see this class's header comment.
+	// Nothing left to draw here; SyncRmlModel() (called from Update()) is what keeps the model
+	// current.
 	return true;
 }
 
@@ -326,7 +239,7 @@ void CCreditWin::Init()
 	m_eIllustState = FADEIN;
 	m_illustElapsed = DurationMs::zero();
 	m_byIllust = 0;
-	LoadIllust();
+	m_nIllustAlpha = 0;
 
 	for (int i = 0; i <= CRW_INDEX_NAME; ++i)
 		m_aeTextState[i] = FADEIN;
@@ -336,43 +249,23 @@ void CCreditWin::Init()
 	SetTextIndex();
 }
 
-void CCreditWin::LoadIllust()
-{
-	CInput rInput = CInput::Instance();
-	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
-	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
-
-	for (int i = 0; i < 2; ++i)
-	{
-		const auto& illustPath = m_illustPaths[m_byIllust][i];
-		LoadBitmap(illustPath, BITMAP_TEMP + i, GL_LINEAR);
-
-		m_aSpr[i].Create(400, 400, BITMAP_TEMP + i, 0, NULL, 0, 0,
-			false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
-		m_aSpr[i].SetAlpha(0);
-		m_aSpr[i].Show(true);
-	}
-
-	m_aSpr[CRW_SPR_PIC_L].SetPosition(0, 126);
-	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);
-}
-
-
+// Was CSprite+LoadBitmap/BITMAP_TEMP before Stage 2 -- the two illustration <img>s
+// (credit_win.rml) now load m_illustPaths[m_byIllust][0/1] directly from disk via a C++-swapped
+// data-attr-src, same technique loading.rml's own background tiles already use for static files;
+// SyncRmlModel() pushes the path whenever m_byIllust changes and m_nIllustAlpha (below) every frame
+// while fading. The state machine/timing themselves (kIllustFadeDuration/kIllustShowDuration) are
+// unchanged from before this port.
 void CCreditWin::AnimationIllust(DurationMs deltaTime)
 {
-	short nAlpha;
 	switch (m_eIllustState)
 	{
 	case FADEIN:
-		nAlpha = short(m_aSpr[CRW_SPR_PIC_L].GetAlpha());
-		nAlpha = IncreaseAlpha(nAlpha, deltaTime / kIllustFadeDuration);
-		if (255 <= nAlpha)
+		m_nIllustAlpha = IncreaseAlpha(m_nIllustAlpha, deltaTime / kIllustFadeDuration);
+		if (255 <= m_nIllustAlpha)
 		{
 			m_eIllustState = SHOW;
-			nAlpha = 255;
+			m_nIllustAlpha = 255;
 		}
-		m_aSpr[CRW_SPR_PIC_L].SetAlpha((BYTE)nAlpha);
-		m_aSpr[CRW_SPR_PIC_R].SetAlpha((BYTE)nAlpha);
 		break;
 
 	case SHOW:
@@ -385,18 +278,14 @@ void CCreditWin::AnimationIllust(DurationMs deltaTime)
 		break;
 
 	case FADEOUT:
-		nAlpha = short(m_aSpr[CRW_SPR_PIC_L].GetAlpha());
-		nAlpha = DecreaseAlpha(nAlpha, deltaTime / kIllustFadeDuration);
-		if (0 >= nAlpha)
+		m_nIllustAlpha = DecreaseAlpha(m_nIllustAlpha, deltaTime / kIllustFadeDuration);
+		if (0 >= m_nIllustAlpha)
 		{
 			m_eIllustState = FADEIN;
-			nAlpha = 0;
+			m_nIllustAlpha = 0;
 
 			m_byIllust = ++m_byIllust == CRW_ILLUST_MAX ? 0 : m_byIllust;
-			LoadIllust();
 		}
-		m_aSpr[CRW_SPR_PIC_L].SetAlpha((BYTE)nAlpha);
-		m_aSpr[CRW_SPR_PIC_R].SetAlpha((BYTE)nAlpha);
 		break;
 	}
 }
@@ -470,21 +359,19 @@ void CCreditWin::SetTextIndex()
 void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 {
 	SHOW_STATE* peTextState = &m_aeTextState[nClass];
-	short nAlpha;
-
-	CSprite* psprHide = &m_aSpr[CRW_SPR_TXT_HIDE0 + nClass];
+	short& nAlpha = m_anTextAlpha[nClass];
 
 	switch (*peTextState)
 	{
 	case FADEIN:
-		nAlpha = short(psprHide->GetAlpha());
-		nAlpha = DecreaseAlpha(nAlpha, deltaTime / kTextFadeDuration);
-		if (0 >= nAlpha)
+		// Text-visible alpha rising 0->255 -- was a black hide-overlay sprite's alpha falling
+		// 255->0 before Stage 2; see m_anTextAlpha's own header comment.
+		nAlpha = IncreaseAlpha(nAlpha, deltaTime / kTextFadeDuration);
+		if (255 <= nAlpha)
 		{
 			*peTextState = SHOW;
-			nAlpha = 0;
+			nAlpha = 255;
 		}
-		psprHide->SetAlpha((BYTE)nAlpha);
 		break;
 
 	case SHOW:
@@ -507,17 +394,89 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 		break;
 
 	case FADEOUT:
-		nAlpha = short(psprHide->GetAlpha());
-		nAlpha = IncreaseAlpha(nAlpha, deltaTime / kTextFadeDuration);
-		if (255 <= nAlpha)
+		nAlpha = DecreaseAlpha(nAlpha, deltaTime / kTextFadeDuration);
+		if (0 >= nAlpha)
 		{
 			*peTextState = FADEIN;
-			nAlpha = 255;
+			nAlpha = 0;
 
 			if (nClass == CRW_INDEX_NAME)
 				SetTextIndex();
 		}
-		psprHide->SetAlpha((BYTE)nAlpha);
 		break;
 	}
+}
+
+void CCreditWin::SyncRmlModel()
+{
+	if (!m_pRmlDoc) return;
+
+	auto syncText = [this](Rml::String CreditWinRmlModel::* field, const char* boundName, const wchar_t* text)
+	{
+		const std::string utf8 = StringUtils::WideToNarrow(text);
+		if (m_RmlBinder.GetModel().*field != utf8)
+		{
+			m_RmlBinder.GetModel().*field = utf8;
+			m_RmlBinder.MarkDirty(boundName);
+		}
+	};
+	auto syncFloat = [this](float CreditWinRmlModel::* field, const char* boundName, float value)
+	{
+		if (m_RmlBinder.GetModel().*field != value)
+		{
+			m_RmlBinder.GetModel().*field = value;
+			m_RmlBinder.MarkDirty(boundName);
+		}
+	};
+	// Named-sprite decorator string, e.g. "image(illust-im3-1)" -- matches one of the 16
+	// single-rect @spritesheet blocks in credit_win.rcss (illust-im1-1 .. illust-im8-2, one per
+	// im{N}_{M}.jpg). Deliberately NOT a raw <img data-attr-src> (this class's first attempt):
+	// that route needs its own path convention through two independent, easy-to-get-wrong layers
+	// (RenderManager::LoadTexture()'s JoinPath() call, then RmlUiRenderInterface::LoadTexture()'s
+	// own routing through CGlobalBitmap -- see git history on this file for what that took to get
+	// loading at all) and even once the file loads correctly, the rendered image doesn't fill its
+	// box -- a real, uninvestigated gap between the two illustrations, root cause not found. The
+	// decorator/@spritesheet route reuses the exact mechanism this document's own logo/deco/close-
+	// button decorators already prove works, and CBuffStrip's per-instance data-style-decorator
+	// (BuffStrip.cpp/buff_strip.rml) already proves a decorator string can be swapped from C++ at
+	// runtime the same way.
+	auto illustDecorator = [](std::uint8_t illustIndex, int side)
+	{
+		return "image(illust-im" + std::to_string(illustIndex + 1) + "-" + std::to_string(side + 1) + ")";
+	};
+
+	wchar_t buffer[CRW_NAME_MAX]{};
+	CopyNameToWide(m_aCredit[m_anTextIndex[CRW_INDEX_DEPARTMENT]].szName, buffer);
+	syncText(&CreditWinRmlModel::department, "department", buffer);
+	CopyNameToWide(m_aCredit[m_anTextIndex[CRW_INDEX_TEAM]].szName, buffer);
+	syncText(&CreditWinRmlModel::team, "team", buffer);
+
+	syncFloat(&CreditWinRmlModel::departmentOpacity, "department_opacity", m_anTextAlpha[CRW_INDEX_DEPARTMENT] / 255.0f);
+	syncFloat(&CreditWinRmlModel::teamOpacity, "team_opacity", m_anTextAlpha[CRW_INDEX_TEAM] / 255.0f);
+	syncFloat(&CreditWinRmlModel::namesOpacity, "names_opacity", m_anTextAlpha[CRW_INDEX_NAME] / 255.0f);
+
+	// Small (<=4-entry) list, rebuilt+marked-dirty unconditionally every frame -- same reasoning
+	// CBuffStrip's own SyncRmlModel() documents for its data-for'd buff list.
+	auto& model = m_RmlBinder.GetModel();
+	model.names.clear();
+	for (int i = 0; i < m_nNameCount; ++i)
+	{
+		CopyNameToWide(m_aCredit[m_anTextIndex[CRW_INDEX_NAME0 + i]].szName, buffer);
+		model.names.push_back({ StringUtils::WideToNarrow(buffer) });
+	}
+	m_RmlBinder.MarkDirty("names");
+
+	const std::string illustLeftDecorator = illustDecorator(m_byIllust, 0);
+	if (model.illustLeftDecorator != illustLeftDecorator)
+	{
+		model.illustLeftDecorator = illustLeftDecorator;
+		m_RmlBinder.MarkDirty("illust_left_decorator");
+	}
+	const std::string illustRightDecorator = illustDecorator(m_byIllust, 1);
+	if (model.illustRightDecorator != illustRightDecorator)
+	{
+		model.illustRightDecorator = illustRightDecorator;
+		m_RmlBinder.MarkDirty("illust_right_decorator");
+	}
+	syncFloat(&CreditWinRmlModel::illustOpacity, "illust_opacity", m_nIllustAlpha / 255.0f);
 }

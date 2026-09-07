@@ -11,21 +11,13 @@
 #include <chrono>
 #include <cstdint>
 #include <memory>
+#include <vector>
 
 #include "UI/Core/WindowObject.h"
-#include "Render/Sprites/Sprite.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 namespace Rml { class ElementDocument; }
 
-#define	CRW_SPR_PIC_L			0
-#define	CRW_SPR_PIC_R			1
-#define	CRW_SPR_DECO			2
-#define	CRW_SPR_LOGO			3
-#define CRW_SPR_TXT_HIDE0		4
-#define CRW_SPR_TXT_HIDE1		5
-#define CRW_SPR_TXT_HIDE2		6
-#define	CRW_SPR_MAX				7
 #define CRW_ILLUST_MAX			8
 
 #define	CRW_NAME_MAX			32
@@ -42,13 +34,13 @@ namespace Rml { class ElementDocument; }
 
 // The first CUIMng window migrated off CWin onto mu::ui::window::CObject/
 // CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity real case (no shown-vs-active
-// split needed). Stage 1 of its RmlUi port: the background/deco/logo and close button now live in
-// #panel (credit_win.rml/.rcss). The illustration crossfade (m_aSpr[CRW_SPR_PIC_L/R]) and
-// scrolling credit text (still drawn directly in Render() via g_pRenderText) remain native for now
-// -- porting those needs a continuously-animated bound opacity value (no existing window does
-// that yet) and confirming what character set credit.bmd's names need before picking an RmlUi font
-// face, so they're deliberately left for a follow-up pass. See g_CreditWin's own comment below for
-// the ownership/registration shape.
+// split needed). Fully on RmlUi now (#panel, credit_win.rml/.rcss): Stage 1 moved the background/
+// deco/logo and close button; Stage 2 moved the scrolling credit text (department/team/names,
+// opacity-faded via the model instead of g_pRenderText + a black hide-overlay sprite) and the
+// illustration crossfade (two named-@spritesheet decorators, C++-swapped via a per-instance
+// data-style-decorator the same way CBuffStrip's buff icons already are, plus a model-pushed
+// opacity, instead of CSprite + LoadBitmap/BITMAP_TEMP -- see AnimationIllust()'s own comment).
+// See g_CreditWin's own comment below for the ownership/registration shape.
 class CCreditWin : public mu::ui::window::CObject
 {
 	enum SHOW_STATE { HIDE, FADEIN, SHOW, FADEOUT };
@@ -62,22 +54,24 @@ class CCreditWin : public mu::ui::window::CObject
 	};
 
 protected:
-	// m_aSpr[CRW_SPR_DECO]/[CRW_SPR_LOGO] are unused now (Stage 1 moved them to #panel) but the
-	// array keeps its original indices -- only [CRW_SPR_PIC_L]/[CRW_SPR_PIC_R] (illustration) and
-	// [CRW_SPR_TXT_HIDE0..2] (credit-text fade overlays) are still Create()'d/rendered.
-	CSprite		m_aSpr[CRW_SPR_MAX];
-
 	SHOW_STATE  m_eIllustState;
 	DurationMs  m_illustElapsed;
 	std::uint8_t        m_byIllust;
 	std::array<std::array<const wchar_t*, 2>, CRW_ILLUST_MAX> m_illustPaths;
+	// Illustration-visible alpha (0=hidden, 255=fully shown) -- was CSprite::GetAlpha()/SetAlpha()
+	// on the two illustration sprites before Stage 2; tracked directly now since there's no sprite
+	// to read it back from.
+	short		m_nIllustAlpha{};
 
-	std::unique_ptr<std::remove_pointer_t<HFONT>, void(*)(HFONT)>	m_font;
 	SCreditItem	m_aCredit[CRW_ITEM_MAX];
 	int			m_nNowIndex;
 	int			m_nNameCount;
 	int			m_anTextIndex[CRW_INDEX_MAX];
 	SHOW_STATE	m_aeTextState[CRW_INDEX_NAME + 1];
+	// Text-visible alpha (0=hidden, 255=fully shown) for the DEPARTMENT/TEAM/NAME classes -- was
+	// the complementary value of a black hide-overlay sprite's own alpha before Stage 2; tracked
+	// directly now since there's no overlay sprite to read it back from.
+	short		m_anTextAlpha[CRW_INDEX_NAME + 1]{};
 	DurationMs	m_textElapsed;
 
 public:
@@ -89,7 +83,6 @@ public:
 	                 // automatically) -- called explicitly now, same call sites Create() itself
 	                 // uses to reset state, plus wherever CSceneUICoordinator tears the login
 	                 // scene down.
-	void SetPosition();
 	void Show(bool bShow) override;
 
 	// Invoked from the RmlUi document's data-event-click binding (see Create()). Polled-and-
@@ -111,20 +104,38 @@ public:
 protected:
 	void CloseWin();
 	void Init();
-	void LoadIllust();
 	void AnimationIllust(DurationMs deltaTime);
 	void LoadText();
 	void SetTextIndex();
 	void AnimationText(int nClass, DurationMs deltaTime);
 
 private:
-	// Stage 1 has no dynamic content yet -- this model exists purely to host the close button's
-	// data-event-click binding. Stage 2 (illustration crossfade / credit text) adds real fields.
-	struct CreditWinRmlModel {};
+	// One credit-name slot -- names is a variable-length (1-4) data-for'd list, same shape as
+	// CBuffStrip's own BuffEntry/data-for pattern (BuffStrip.cpp/buff_strip.rml).
+	struct CreditNameEntry { Rml::String text; };
+
+	struct CreditWinRmlModel
+	{
+		Rml::String department, team;
+		// Mirror m_aeTextState/m_anTextAlpha's 3 classes (DEPARTMENT/TEAM/NAME) -- pushed every
+		// frame while fading, same convention as MainFrameWindow's hp_fraction/mp_fraction etc.
+		float departmentOpacity = 0.f, teamOpacity = 0.f, namesOpacity = 0.f;
+		std::vector<CreditNameEntry> names;
+
+		// Illustration crossfade -- decorator swapped whenever m_byIllust advances (a plain "image(
+		// sprite-name)" string, same technique CBuffStrip's own per-instance data-style-decorator
+		// uses, BuffStrip.cpp/buff_strip.rml -- proven working already, unlike a raw <img src>,
+		// which is what this used originally; see credit_win.rcss's own comment for why it
+		// changed), opacity pushed every frame while fading (AnimationIllust()'s own comment).
+		Rml::String illustLeftDecorator, illustRightDecorator;
+		float illustOpacity = 0.f;
+	};
 	RmlModelBinder<CreditWinRmlModel> m_RmlBinder;
 	Rml::ElementDocument* m_pRmlDoc = nullptr;
 
 	bool m_bRmlCloseClicked = false;
+
+	void SyncRmlModel();
 };
 
 // Replaces CUIMng's old `CCreditWin m_CreditWin;` member -- static storage duration matches the

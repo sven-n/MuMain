@@ -85,6 +85,14 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     Rml::LoadFontFace("fonts/LiberationSans-Regular.ttf", true);
     Rml::LoadFontFace("fonts/LiberationSans-Bold.ttf");
 
+    // Second, explicitly-named face (not a fallback_face) -- CCreditWin's scrolling credit text is
+    // the first RmlUi content to need it, matching the font family the legacy GDI path names via
+    // I18N::Game::Gulim ("NanumGothic" is this file's own internal name-table family name, not a
+    // guess -- CCreditWin.rcss's font-family must match it exactly). Broader CJK/Cyrillic RmlUi
+    // text coverage beyond this one face is a separate, pre-existing gap (every other ported
+    // window's legacy theme still hardcodes "Liberation Sans"), not something this addresses.
+    Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf");
+
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
     ApplyUIScale(m_Context, windowWidth, windowHeight);
 

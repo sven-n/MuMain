@@ -1,9 +1,14 @@
-/* Legacy theme for the login-scene credits screen (CCreditWin). Stage 1 of its RmlUi port: full-
-   screen background, the static logo/deco art, and the close button. Positions are the original
-   CCreditWin::SetPosition()/Create() literal 800x600-reference pixel values carried over directly
-   as dp, same convention every other ported window already uses (dp responds to the same UI-scale
-   system that used to be applied manually via fScaleX/fScaleY). Illustration crossfade and
-   scrolling credit text stay native until Stage 2 -- see CreditWin.h's own class comment. */
+/* Legacy theme for the login-scene credits screen (CCreditWin): full-screen background, the
+   crossfading illustration pair, the static logo/deco art, the close button, and the scrolling
+   credit text -- #panel now owns 100% of this window's visuals, nothing left in Render(). Positions
+   are the original CCreditWin::Create()/SetPosition()/LoadIllust() literal 800x600-reference pixel
+   values carried over directly as dp, same convention every other ported window already uses (dp
+   responds to the same UI-scale system that used to be applied manually via fScaleX/fScaleY).
+   Credit-text colors match the original g_pRenderText colors verbatim (CLRDW_BR_GRAY/
+   CLRDW_BR_YELLOW, UIBaseDef.h); font-family is "NanumGothic" (RmlUiRuntime.cpp's own comment has
+   the font-name verification note), not the shared Liberation-Sans-only convention every other
+   ported window's legacy theme uses -- this screen's names are the one piece of RmlUi text so far
+   that isn't guaranteed ASCII. */
 
 @spritesheet creditwin-logo-sheet
 {
@@ -23,6 +28,28 @@
 	creditwin-close-active: 0px 60px 54px 30px;
 }
 
+/* One @spritesheet per illustration file (16 total, im1_1.jpg..im8_2.jpg, all confirmed 400x400)
+   -- each is its own separate file, not slices of a shared sheet, so this is 16 single-rect blocks
+   rather than one real spritesheet. Named illust-im{N}-{M} to match CCreditWin::SyncRmlModel()'s
+   own generated decorator string ("image(illust-imN-M)") -- keep both in sync if this ever
+   changes. */
+@spritesheet illust-im1-1-sheet { src: "../../../im1_1.jpg"; illust-im1-1: 0px 0px 400px 400px; }
+@spritesheet illust-im1-2-sheet { src: "../../../im1_2.jpg"; illust-im1-2: 0px 0px 400px 400px; }
+@spritesheet illust-im2-1-sheet { src: "../../../im2_1.jpg"; illust-im2-1: 0px 0px 400px 400px; }
+@spritesheet illust-im2-2-sheet { src: "../../../im2_2.jpg"; illust-im2-2: 0px 0px 400px 400px; }
+@spritesheet illust-im3-1-sheet { src: "../../../im3_1.jpg"; illust-im3-1: 0px 0px 400px 400px; }
+@spritesheet illust-im3-2-sheet { src: "../../../im3_2.jpg"; illust-im3-2: 0px 0px 400px 400px; }
+@spritesheet illust-im4-1-sheet { src: "../../../im4_1.jpg"; illust-im4-1: 0px 0px 400px 400px; }
+@spritesheet illust-im4-2-sheet { src: "../../../im4_2.jpg"; illust-im4-2: 0px 0px 400px 400px; }
+@spritesheet illust-im5-1-sheet { src: "../../../im5_1.jpg"; illust-im5-1: 0px 0px 400px 400px; }
+@spritesheet illust-im5-2-sheet { src: "../../../im5_2.jpg"; illust-im5-2: 0px 0px 400px 400px; }
+@spritesheet illust-im6-1-sheet { src: "../../../im6_1.jpg"; illust-im6-1: 0px 0px 400px 400px; }
+@spritesheet illust-im6-2-sheet { src: "../../../im6_2.jpg"; illust-im6-2: 0px 0px 400px 400px; }
+@spritesheet illust-im7-1-sheet { src: "../../../im7_1.jpg"; illust-im7-1: 0px 0px 400px 400px; }
+@spritesheet illust-im7-2-sheet { src: "../../../im7_2.jpg"; illust-im7-2: 0px 0px 400px 400px; }
+@spritesheet illust-im8-1-sheet { src: "../../../im8_1.jpg"; illust-im8-1: 0px 0px 400px 400px; }
+@spritesheet illust-im8-2-sheet { src: "../../../im8_2.jpg"; illust-im8-2: 0px 0px 400px 400px; }
+
 #panel {
 	position: absolute;
 	left: 0;
@@ -32,6 +59,20 @@
 	background-color: #000000;
 	pointer-events: none;
 }
+
+/* decorator is swapped by SyncRmlModel() every time m_byIllust advances (data-style-decorator,
+   naming a sprite from one of the 16 @spritesheet blocks above); opacity animates continuously
+   while AnimationIllust() is fading (data-style-opacity). Percentage sizing -- two 50%-wide boxes
+   always sum to exactly 100% of #panel with no gap possible between them. */
+.illust {
+	position: absolute;
+	top: 21%;
+	width: 50%;
+	height: 66.6667%;
+	pointer-events: none;
+}
+.illust-left { left: 0%; }
+.illust-right { left: 50%; }
 
 .logo {
 	position: absolute;
@@ -78,4 +119,42 @@
 /* Real art already reads as a close button -- no visible text needed over it. */
 .btn-close-label {
 	display: none;
+}
+
+.credit-label {
+	position: absolute;
+	left: 0;
+	width: 100%;
+	text-align: center;
+	font-family: "NanumGothic";
+	font-size: 14dp;
+	font-weight: bold;
+	pointer-events: none;
+}
+.credit-department {
+	top: 20dp;
+	color: #e2e2e2;
+}
+.credit-team {
+	top: 46dp;
+	color: #e2e2e2;
+}
+
+.credit-names {
+	position: absolute;
+	left: 0;
+	top: 72dp;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	pointer-events: none;
+}
+.credit-name {
+	font-family: "NanumGothic";
+	font-size: 14dp;
+	font-weight: bold;
+	color: #ffeec1;
+	white-space: nowrap;
+	margin-left: 20dp;
+	margin-right: 20dp;
 }
