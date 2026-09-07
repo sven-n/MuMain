@@ -25,9 +25,12 @@ outright as confirmed-dead code — see [Coexistence patterns](#coexistence-patt
 
 See also: **[Building New UI](building-new-ui.md)** — which of the three overlapping C++ widget
 toolkits (sprite widgets, `CUIControl`, `mu::ui::window::CObject`) to use for a new window, dialog, HUD panel,
-or widget, the folder-by-domain convention, and the known near-identical-name collisions to avoid
-(`CButton`/`CUIButton`/`mu::ui::window::CButton`, `CRadioButton`/`mu::ui::window::CRadioButton`). Read this before
-starting anything new under `UI/`. **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
+or widget, the folder-by-domain convention, the known near-identical-name collisions to avoid
+(`CButton`/`CUIButton`/`mu::ui::window::CButton`, `CRadioButton`/`mu::ui::window::CRadioButton`), and its
+**Reference screens** table — one named, already-verified example window per end-state shape
+(RmlUi-only, native-only, hybrid RmlUi/native-3D, world-overlay) to copy instead of an arbitrary
+neighboring window (`ui-target-architecture.md` Section H item 15). Read this before starting
+anything new under `UI/`. **[Theming & Modding](theming-and-modding.md)** — the full theme mechanism, a
 step-by-step guide for adding a theme, and the modding constraints (image format, scaling,
 positioning ownership). **[Layout, Anchoring & Scaling](layout-and-scaling.md)** — the global
 UI-scale (`dp`) mechanism, the anchor/stretch/center utility classes every new window should use,
@@ -169,15 +172,20 @@ than hand-rolled mouse tracking. Two things worth knowing before using it: `hand
 events never fire at all, not even hover), and it moves **both** axes — a horizontal-only slider
 thumb has to reset `top` back to a fixed value on every drag tick or it visibly drifts.
 
-**Currently has zero live call sites.** Its only caller, `COptionWin`'s two sliders, was deleted
-outright as confirmed-dead code during the CUIMng/CNewUIManager merger
-(`docs/newui-legacy-merger.md`) — not a retirement of this primitive itself. The primitive was
-fixed 2026-09-04 (`STATUS.md`) to write the dragged position as `dp` (divided by the panel's own
-`Context::GetDensityIndependentPixelRatio()`) instead of a raw `px` inline style that never
-scaled with `UIScalePercent`. **Still open**: nothing persists a dragged position anywhere — no
-`GameConfig` storage mechanism exists yet for any RmlUi panel — deliberately not built
-speculatively ahead of a real caller. Resolve that before, not after, the next window actually
-calls this.
+**First real caller landed 2026-09-07: `CMyInventory`'s title bar.** (Its original caller,
+`COptionWin`'s two sliders, was deleted outright as confirmed-dead code during the
+CUIMng/CNewUIManager merger, `docs/newui-legacy-merger.md` — not a retirement of this primitive
+itself.) The primitive was fixed 2026-09-04 to write the dragged position as `dp` (divided by the
+panel's own `Context::GetDensityIndependentPixelRatio()`) instead of a raw `px` inline style that
+never scaled with `UIScalePercent`. Persistence is now built too, generically: `MakeDraggable()`
+gained an optional `OnDragEnd` callback (RmlUi's `Dragend` event) as the "persist now" hook, and
+`GameConfig::GetWindowPosition()`/`SetWindowPosition(windowId, x, y)` (`GameConfig.h`/`.cpp`) gives
+any caller immediate, crash-safe disk persistence keyed by a short window id — bypassing the usual
+member-field+`Save()` batching deliberately, since a drag has no "Apply" button. See
+`STATUS.md`'s "Known gaps" entry (the struck-through `MakeDraggable` one) for the full mechanism,
+including the collision-avoidance-vs-idle-reset nuance `CMyInventory::RestoreDefaultOrUserPosition()`
+handles. **Still open**: no audit yet of how a persisted position behaves across a
+resolution/UI-scale/theme change post-drag.
 
 ## Coexistence patterns
 

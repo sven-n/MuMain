@@ -29,6 +29,21 @@ guidance below is unchanged** (`mu::ui::window::CObject`, always) — what chang
 | `CUIControl` family | `CUIControl : CUIMessage`, `CUIButton`, `CUITextListBox<T>`, `CUITextInputBox`, `CUIChatInputBox`, `CUIBaseWindow : CUIControl`, `CUIWindowMgr`, `CRadioButton`, `CUISlideHelp`/`CSlideHelpMgr` | `UI/Widgets/UIControls.h`, `UI/Party/UIWindows.h` | **Fully live**, but effectively closed to new *window-manager* consumers — `CUIBaseWindow`/`CUIWindowMgr`'s only live subsystem is the friend/mail/chat-room feature in `UIWindows.cpp` (see below). `CUITextInputBox` is the one class here still legitimately reused by brand-new `mu::ui::window::CObject` windows (`NewUIGuildMakeWindow`, `NewUIMyShopInventory`, etc.) — there's no equivalent yet in that tier, so this is a sanctioned exception, not technical debt to avoid. |
 | `mu::ui::window` tier | `CObject : IObject`, `CManager`, `CButton`/`CRadioButton`/`CRadioGroupButton`/`CCheckBox`/`CComboBox`/`CScrollBar`/`CTextBox`/`CChatInputBox` | `UI/Core/{WindowObject,WindowManager}.h`, `UI/Widgets/Window/*.h` | **`CObject`/`CManager` are the default base class for all new work** — this is the toolkit the other ~88 in-game HUD/inventory/combat/event/NPC/option/quest windows already use. Its own **widget family is transitional**, for native-only content only (see the note above) — for anything with an RmlUi presentation, use RmlUi + `base.rcss` instead. |
 
+## Reference screens — copy these, not an arbitrary neighboring window
+
+`ui-target-architecture.md` Section H, item 15: one named, already-verified example per end-state
+shape. Start from whichever matches what you're building instead of copying the nearest existing
+window, which may predate current conventions:
+
+| Shape | Reference | Why |
+|---|---|---|
+| RmlUi-only 2D UI | `CMsgWin` (`UI/Windows/MsgWin.h`) | Ordinary screen-anchored modal, no `CWin` involvement. `RememberPasswordPrompt` for a free-function variant with no reusable state. |
+| Native-only UI | `CFriendWindow` (`UI/Party/FriendWindow.h`) | Thin `CObject` adapter forwarding into a live legacy subsystem — see "The `UIWindows.cpp`/`CFriendWindow` pattern" below. Transitional shape (Rule 3), not a peer to the other three. |
+| Hybrid RmlUi/native 3D UI | `CItemHotKey` (`UI/HUD/MainFrameWindow.h/.cpp`) | RmlUi owns the slot chrome; the item icon stays a genuine live 3D render — the permanent boundary, not a porting gap. |
+| World-overlay UI | `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`) | Per-frame `WorldToScreen()` projection, no static 2D rect. |
+
+See `ui-target-architecture.md` Section H item 15 for the full reasoning behind each pick.
+
 ## Quick decision guide for a new window, dialog, or HUD panel
 
 1. **Base class: `mu::ui::window::CObject`.** Always. Never `CWin`/`CWinEx` — see above, that's a

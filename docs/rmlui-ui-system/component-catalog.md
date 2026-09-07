@@ -12,8 +12,11 @@ audits status against. See `STATUS.md` for how this fits the rest of the tracked
 
 ## Window / Panel
 
-Two structural patterns, not one unified `Window` component (`README.md`'s "Coexistence
-patterns" section has the full detail):
+Three structural patterns exist today, not one unified `Window` component (`README.md`'s
+"Coexistence patterns" section has the full detail on the first two) — but only the first two are
+where things end up; the third is `CMyInventory` mid-migration, not a permanent category
+(`ui-target-architecture.md` Section E's two-shape end state — pure RmlUi, or RmlUi with a native
+live-3D seam — still holds):
 
 - **`mu::ui::window::CObject`-tier window keeping legacy sprite widgets + RmlUi overlay** — these windows no
   longer derive from or hold a `CWin`/`CWinEx` instance at all (that base class has zero live
@@ -25,6 +28,23 @@ patterns" section has the full detail):
   this is a closed, historical set of windows, not a pattern for new ones to follow.
 - **Pure RmlUi** — no legacy widget members at all. Used by `RememberPasswordPrompt`,
   `CMsgWin`, `CCharInfoBalloonMng`.
+- **`C3DRenderMng`-tier window keeping a fully-native frame + partial RmlUi overlay** — the visible
+  panel frame/background is still 100% native sprite art (the theme RCSS's `#panel` rule carries no
+  visual chrome of its own — position/size only); RmlUi overlays only specific interactive pieces
+  (title bar, buttons, gold/text, tooltips) on top. Driven by paint order, not by choice: this
+  window's equipped/held item renders as a live 3D-camera icon (`ui-target-architecture.md`
+  Section E) at a native paint-order depth *behind* where the frame chrome sits, and RmlUi's main
+  context always composites last in the frame — porting the frame chrome today would flip it to
+  render in front of the item icon instead of behind it. Used by `CMyInventory` (Stage 1/3 chrome
+  done; the equipment paperdoll's background/durability-tint/drag-highlight chrome deliberately
+  stays native — Stage 2, skipped for this reason, see `STATUS.md`'s pilots-to-revisit table) and,
+  not yet started, the rest of the still-fully-native `C3DRenderMng` sibling windows sharing the
+  same constraint (`CInventoryExtension`, `CTrade`, vault/storage, chaos machine, market place, NPC
+  shop). Unblocks once `RmlUiRuntime::RenderBackgroundLayer()` — proven so far only for
+  `CMainFrameWindow`'s static, non-data-bound background fill — generalizes into a real insertion
+  point inside `mu::ui::window::CManager::Render()`'s z-sorted loop and is proven under this
+  window's actual per-frame-varying content; see `STATUS.md`'s "Known gaps" entry on that
+  mechanism.
 
 Visual frame primitives are theme-specific, not shared (correct per §15 — presentation is the
 theme's job, not the component's):
@@ -77,9 +97,11 @@ theming layer.
 ## Dragging
 
 `UI::RmlBridge::MakeDraggable()` (`RmlDraggable.h`) — makes an RmlUi panel draggable-by-mouse with
-zero legacy `CWin` dependency. **Zero live call sites today** — read the header's own audit-finding
-comment (dp-vs-px fixed 2026-09-04, persistence still deliberately unbuilt) before wiring up the
-first real caller.
+zero legacy `CWin` dependency. **First real caller landed 2026-09-07**: `CMyInventory`'s title bar,
+paired with a new generic persistence mechanism (`GameConfig::GetWindowPosition`/
+`SetWindowPosition`, an `OnDragEnd` hook on `MakeDraggable` itself) any future draggable window can
+reuse with one call each way — see `STATUS.md`'s "Known gaps" entry for the full mechanism and
+what's still unaudited (behavior across a resolution/UI-scale/theme change post-drag).
 
 ## Does not exist as a reusable primitive yet
 

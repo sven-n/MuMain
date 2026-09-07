@@ -429,16 +429,35 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
     Document the supported primitive for each reusable UI responsibility and
     explicitly mark superseded implementations.
 
-15. Establish reference screens.
+15. ~~Establish reference screens.~~ — **done, 2026-09-07.** One canonical example named per
+    shape, each already built, verified against a real server, and cited elsewhere in this doc set
+    — not new code, a naming/pointing exercise:
 
-    Maintain representative examples for:
-    - RmlUi-only 2D UI
-    - native-only UI
-    - hybrid RmlUi/native 3D UI
-    - world-overlay UI
+    - **RmlUi-only 2D UI** — `CMsgWin` (`UI/Windows/MsgWin.h`), an ordinary screen-anchored modal
+      with no `CWin`/`CSceneUICoordinator` involvement at all (`component-catalog.md`'s "Pure
+      RmlUi" bucket). `RememberPasswordPrompt` (`UI/Windows/RememberPasswordPrompt.h`) is the
+      variant to copy instead for a window with no reusable state worth a class — a free-function
+      module in `namespace UI::Login`.
+    - **Native-only UI** — `CFriendWindow` (`UI/Party/FriendWindow.h`), already called out in
+      `building-new-ui.md` as the template for wrapping a live legacy subsystem
+      (`CUIWindowMgr`/friend/mail/chat-room) behind a thin `mu::ui::window::CObject` adapter whose
+      methods forward one-to-one. Picked over a plain not-yet-touched `CObject` window because it's
+      already been audited as correct, not because native windows without an RmlUi presentation are
+      themselves a pattern to keep building — Rule 3 still applies: this shape is transitional and
+      shrinking, not a peer to the other three.
+    - **Hybrid RmlUi/native 3D UI** — `CItemHotKey` (welded into `UI/HUD/MainFrameWindow.h/.cpp`,
+      Phase 3 of that file's 3-phase port): RmlUi owns the potion-slot hover-highlight border,
+      stack-count text, and right-click-to-use; the potion icon itself stays a genuine live 3D
+      model render (`RenderItem3D()`/`RenderObjectScreen()`), the permanent Section E boundary this
+      whole document is built around. The same split `CSkillList` (Phase 2) already proved for
+      skill icons — not a one-off.
+    - **World-overlay UI** — `CCharInfoBalloonMng` (`Character/CharInfoBalloonMng.h`), already
+      this document's own Section C example of a window with no static 2D rect at all: its position
+      is a per-frame `WorldToScreen()` projection, RmlUi-presented, no legacy widget members.
 
-    New UI should follow these reference implementations rather than copying
-    arbitrary neighboring legacy windows.
+    New UI should follow these reference implementations rather than copying arbitrary neighboring
+    legacy windows — cross-referenced from `building-new-ui.md` and `README.md` so a new session
+    finds this list from either entry point.
 
 16. Enforce deprecation boundaries.
 
