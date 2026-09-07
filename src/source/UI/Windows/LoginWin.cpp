@@ -50,9 +50,9 @@ namespace
     // Same combined ratio RmlUi's own dp unit uses (RmlUiRuntime.cpp's ApplyUIScale(),
     // UIScalePercent x UI::Scaling::ViewportFitScale()) -- every fixed reference-pixel offset
     // this window's C++ still computes (the panel's own legacy bounding-box size, the real
-    // CUITextInputBox placement, the checkbox/OK/Cancel legacy CButton companions) must scale by
-    // this to stay pixel-for-pixel aligned with login.rcss's own now-dp values, the same lockstep
-    // requirement CharSelMainWin.cpp/LoginMainWin.cpp already established for their own windows.
+    // CUITextInputBox placement) must scale by this to stay pixel-for-pixel aligned with
+    // login.rcss's own now-dp values, the same lockstep requirement CharSelMainWin.cpp/
+    // LoginMainWin.cpp already established for their own windows.
     // UI::Scaling::CompanionRatio() (UITransform.cpp) is the single shared implementation of this
     // formula, rather than each window hand-copying it (this function, CharSelMainWin.cpp's
     // GetUIScaleRatio(), and LoginMainWin.cpp's inline version once did) -- keep reading the
@@ -71,9 +71,6 @@ namespace
         return static_cast<int>(std::lround(value * ratio));
     }
 }
-
-#define LIW_OK			0
-#define LIW_CANCEL		1
 
 extern int g_iChatInputType;
 extern int  LogIn;
@@ -125,25 +122,6 @@ void CLoginWin::Create()
     m_Size.cy = ScaledOffset(245, uiScale);
     m_ptPos.x = m_ptPos.y = 0;
 
-    for (int i = 0; i < 2; ++i)
-    {
-        m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-    }
-
-    m_aBtnRememberMe.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
-    m_aBtnSavePassword.Create(16, 16, BITMAP_CHECK_BTN, 2, 0, 0, -1, 1, 1, 1);
-
-    // CButton::Update() auto-toggles m_bCheck on its own input polling whenever HasCheckVisuals()
-    // is true (both are 2-frame check-style art) -- independent of and in addition to
-    // RmlToggleRememberMe()/RmlToggleSavePassword()'s own SetCheck() flip below, since legacy
-    // input polling isn't gated by which UI tier's Context claimed the click. Left enabled, one
-    // click produces two flips (net no change). SetEnable(false) makes these pure state
-    // containers (SetCheck/IsCheck still work for every other call site); only the RmlUi handler
-    // drives them now. Plain action buttons (OK/Cancel) don't need this -- HasCheckVisuals() is
-    // false there, so redundant firing is harmless.
-    m_aBtnRememberMe.SetEnable(false);
-    m_aBtnSavePassword.SetEnable(false);
-
     SAFE_DELETE(m_pUsernameInputBox);
 
     m_pUsernameInputBox = new CUITextInputBox;
@@ -154,7 +132,7 @@ void CLoginWin::Create()
     m_pUsernameInputBox->SetState(UISTATE_NORMAL);
     if (m_RememberMe) {
         m_pUsernameInputBox->SetText(m_Username);
-        m_aBtnRememberMe.SetCheck(true);
+        m_bRememberMeChecked = true;
     }
 
     SAFE_DELETE(m_pPasswordInputBox);
@@ -171,12 +149,12 @@ void CLoginWin::Create()
 
     if (m_RememberMe) {
         m_pPasswordInputBox->SetText(m_Password);
-        m_aBtnRememberMe.SetCheck(true);
+        m_bRememberMeChecked = true;
     }
 
     // The password is only pre-filled and re-saved when the player previously
     // opted in on a trusted machine.
-    m_aBtnSavePassword.SetCheck(m_RememberMe && GameConfig::GetInstance().GetSavePassword());
+    m_bSavePasswordChecked = (m_RememberMe != 0) && GameConfig::GetInstance().GetSavePassword();
 
     // Seed the edit-detection snapshot with what we just loaded so filling the
     // boxes here is not mistaken for the player editing them.
@@ -242,37 +220,23 @@ void CLoginWin::SetPosition(int x, int y)
 	m_ptPos.x = x;
 	m_ptPos.y = y;
 
-	// This class draws the real text/hit-testing for the two input boxes (RmlUi's own
+	// This class draws the real text/hit-testing for the two input boxes -- RmlUi's own
 	// .input-frame divs are border-only overlays with no background, so they never cover what's
-	// typed here) plus the otherwise-inert checkbox/button state objects below (SetEnable(false)
-	// elsewhere in this file; RmlUi owns their real click handling and visuals in both themes, so
-	// these are kept in sync only to avoid a silently-stale coordinate set, not because anything
-	// still renders or hit-tests through them). These offsets must track each theme's own RCSS
-	// positions for the same elements (login.rcss's .input-account/.input-password/
-	// .checkbox-remember-me/.checkbox-save-password/.btn-ok/.btn-cancel) -- legacy's are fixed to
-	// match its real sprite art (login_back.tga/login_me.tga, pixel-faithful, never moves);
-	// modern's are its own, currently more spaced-out layout. This function isn't itself
-	// theme-aware anywhere else, but the two themes' positions genuinely diverge here, so branch
-	// just for these offsets rather than picking one theme's numbers and silently misplacing the
-	// real input text in the other.
+	// typed here. These offsets must track each theme's own RCSS positions for the same elements
+	// (login.rcss's .input-account/.input-password) -- legacy's are fixed to match its real sprite
+	// art (login_back.tga/login_me.tga, pixel-faithful, never moves); modern's are its own,
+	// currently more spaced-out layout. This function isn't itself theme-aware anywhere else, but
+	// the two themes' positions genuinely diverge here, so branch just for these offsets rather
+	// than picking one theme's numbers and silently misplacing the real input text in the other.
 	//
 	// Every offset below is scaled by LoginUIScaleRatio() -- login.rcss's own positions are dp
-	// (grow with UIScalePercent/window size), and without this
-	// these real, functional CUITextInputBox/legacy-CButton placements would silently drift from
-	// the now-auto-fitting RmlUi visuals at any ratio other than 1.0. Highest-stakes instance of
-	// the lockstep requirement this whole migration pass has been applying (CharSelMainWin,
-	// LoginMainWin, sys_menu) -- this window has real, functional text entry, not just redundant
-	// click-detection companions, so a mismatch here is the most consequential.
+	// (grow with UIScalePercent/window size), and without this this real, functional
+	// CUITextInputBox placement would silently drift from the now-auto-fitting RmlUi visuals at
+	// any ratio other than 1.0.
 	const bool bModernTheme = (UI::RmlBridge::GetActiveThemeName() == "modern");
 	const float uiScale = LoginUIScaleRatio();
 	const int usernameY = ScaledOffset(bModernTheme ? 72 : 112, uiScale);
 	const int passwordY = ScaledOffset(bModernTheme ? 105 : 137, uiScale);
-	const int rememberMeY = ScaledOffset(bModernTheme ? 134 : 156, uiScale);
-	const int savePasswordY = ScaledOffset(bModernTheme ? 158 : 176, uiScale);
-	const int buttonRowY = ScaledOffset(bModernTheme ? 196 : 200, uiScale);
-	const int checkboxButtonX = ScaledOffset(109, uiScale);
-	const int okButtonX = ScaledOffset(150, uiScale);
-	const int cancelButtonX = ScaledOffset(211, uiScale);
 
 	if (g_iChatInputType == 1)
 	{
@@ -290,13 +254,6 @@ void CLoginWin::SetPosition(int x, int y)
 		m_pUsernameInputBox->SetPosition(boxX, y + usernameY);
 		m_pPasswordInputBox->SetPosition(boxX, y + passwordY);
 	}
-
-	// "Remember Username" (row 1) and "Remember Password" (row 2) stack vertically; the OK/Cancel
-	// buttons move down to make room.
-	m_aBtnRememberMe.SetPosition(x + checkboxButtonX, y + rememberMeY);
-	m_aBtnSavePassword.SetPosition(x + checkboxButtonX, y + savePasswordY);
-	m_aBtn[LIW_OK].SetPosition(x + okButtonX, y + buttonRowY);
-	m_aBtn[LIW_CANCEL].SetPosition(x + cancelButtonX, y + buttonRowY);
 
 	// RmlUi panel overlay: positioned at the same real window-pixel origin this window's own
 	// bounding box (m_ptPos) uses -- RmlUi's Context operates directly in real window pixels, so
@@ -317,13 +274,6 @@ void CLoginWin::SetPosition(int x, int y)
 void CLoginWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-
-    for (int i = 0; i < 2; ++i)
-    {
-        m_aBtn[i].Show(bShow);
-    }
-    m_aBtnRememberMe.Show(bShow);
-    m_aBtnSavePassword.Show(bShow);
 
     // Drive the text fields' state so a hidden login screen releases keyboard
     // focus (portable fields stop SDL text input when hidden, #447).
@@ -353,40 +303,39 @@ void CLoginWin::RmlClickCancel() { SubmitCancel(); }
 
 void CLoginWin::RmlToggleRememberMe()
 {
-	m_aBtnRememberMe.SetCheck(!m_aBtnRememberMe.IsCheck());
+	m_bRememberMeChecked = !m_bRememberMeChecked;
 	if (UI::Login::RememberPasswordChoiceState() != UI::Login::RememberPasswordChoice::Pending)
 		ApplyRememberMeChange();
 }
 
 void CLoginWin::RmlToggleSavePassword()
 {
-	m_aBtnSavePassword.SetCheck(!m_aBtnSavePassword.IsCheck());
+	m_bSavePasswordChecked = !m_bSavePasswordChecked;
 	if (UI::Login::RememberPasswordChoiceState() != UI::Login::RememberPasswordChoice::Pending)
 		ApplySavePasswordChange();
 }
 
 bool CLoginWin::UpdateWhileActive()
 {
-	if (m_aBtn[LIW_OK].IsClick() || CInput::Instance().IsKeyDown(VK_RETURN))
+	if (CInput::Instance().IsKeyDown(VK_RETURN))
 	{
 		SubmitLogin();
 		return true;
 	}
 
-	if (m_aBtn[LIW_CANCEL].IsClick() || CInput::Instance().IsKeyDown(VK_ESCAPE))
+	if (CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
 		SubmitCancel();
 		return true;
 	}
 
-	UpdateRememberCheckboxes();
 	return true;
 }
 
 // RmlClickOk()/RmlClickCancel() (see LoginWin.h's header comment) call these directly,
-// bypassing the shown/active split entirely -- UpdateWhileActive()'s own CButton::IsClick()/
-// keyboard branches above call the same functions, so there is exactly one place each action's
-// logic lives regardless of which path triggered it. Each re-checks the "remember password"
+// bypassing the shown/active split entirely -- UpdateWhileActive()'s own keyboard branches above
+// call the same functions, so there is exactly one place each action's logic lives regardless of
+// which path triggered it. Each re-checks the "remember password"
 // prompt's live Pending state rather than trusting the caller: cheap, and correct from both call
 // sites (UpdateWhileActive() never even runs while pending, per UpdateWhileShown()'s SetActive()
 // computation; the immediate RmlUi callbacks haven't had a chance to observe that yet without
@@ -407,18 +356,10 @@ void CLoginWin::SubmitCancel()
 	CancelLogin();
 }
 
-void CLoginWin::UpdateRememberCheckboxes()
-{
-	if (m_aBtnRememberMe.IsClick())
-		ApplyRememberMeChange();
-	if (m_aBtnSavePassword.IsClick())
-		ApplySavePasswordChange();
-}
-
 void CLoginWin::ApplyRememberMeChange()
 {
 	GameConfig& config = GameConfig::GetInstance();
-	m_RememberMe = m_aBtnRememberMe.IsCheck();
+	m_RememberMe = m_bRememberMeChecked;
 	config.SetRememberMe(m_RememberMe != 0);
 
 	// Switching off "remember me" revokes everything: drop the stored
@@ -426,7 +367,7 @@ void CLoginWin::ApplyRememberMeChange()
 	// closed before the next login.
 	if (!m_RememberMe)
 	{
-		m_aBtnSavePassword.SetCheck(false);
+		m_bSavePasswordChecked = false;
 		config.ClearCredentials();
 	}
 }
@@ -435,7 +376,7 @@ void CLoginWin::ApplySavePasswordChange()
 {
 	GameConfig& config = GameConfig::GetInstance();
 
-	if (!m_aBtnSavePassword.IsCheck())
+	if (!m_bSavePasswordChecked)
 	{
 		// Player unticked it: drop the stored password from config.ini now.
 		config.SetSavePassword(false);
@@ -447,13 +388,13 @@ void CLoginWin::ApplySavePasswordChange()
 	// Enabling requires confirmation. Revert the tick immediately; it is
 	// re-applied only if the dialog is accepted, so a cancel (however the dialog
 	// closes) always leaves the box unchecked.
-	m_aBtnSavePassword.SetCheck(false);
+	m_bSavePasswordChecked = false;
 
 	// Storing the password implies remembering the account.
 	if (!m_RememberMe)
 	{
 		m_RememberMe = 1;
-		m_aBtnRememberMe.SetCheck(true);
+		m_bRememberMeChecked = true;
 		config.SetRememberMe(true);
 	}
 	UI::Login::OpenRememberPasswordPrompt();
@@ -504,7 +445,7 @@ void CLoginWin::ApplyRememberPasswordChoice()
 
     const bool bAccepted = (choice == UI::Login::RememberPasswordChoice::Ok);
     GameConfig::GetInstance().SetSavePassword(bAccepted);
-    m_aBtnSavePassword.SetCheck(bAccepted);
+    m_bSavePasswordChecked = bAccepted;
 }
 
 void CLoginWin::RevokeSavedCredentialsIfEdited()
@@ -521,12 +462,12 @@ void CLoginWin::RevokeSavedCredentialsIfEdited()
         return;
 
     GameConfig& config = GameConfig::GetInstance();
-    const bool bHadStored = m_aBtnSavePassword.IsCheck()
+    const bool bHadStored = m_bSavePasswordChecked
         || !config.GetEncryptedUsername().empty()
         || !config.GetEncryptedPassword().empty();
     if (bHadStored)
     {
-        m_aBtnSavePassword.SetCheck(false);
+        m_bSavePasswordChecked = false;
         config.ClearCredentials();
     }
 
@@ -594,14 +535,14 @@ void CLoginWin::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
 
-    const bool rememberChecked = m_aBtnRememberMe.IsCheck();
+    const bool rememberChecked = m_bRememberMeChecked;
     if (m_RmlBinder.GetModel().rememberMeChecked != rememberChecked)
     {
         m_RmlBinder.GetModel().rememberMeChecked = rememberChecked;
         m_RmlBinder.MarkDirty("remember_me_checked");
     }
 
-    const bool saveChecked = m_aBtnSavePassword.IsCheck();
+    const bool saveChecked = m_bSavePasswordChecked;
     if (m_RmlBinder.GetModel().savePasswordChecked != saveChecked)
     {
         m_RmlBinder.GetModel().savePasswordChecked = saveChecked;
@@ -667,9 +608,9 @@ void CLoginWin::RequestLogin()
 
     // Handle credentials saving. The username is remembered when "remember me"
     // is set; the password is only stored on top of that with explicit consent.
-    if (m_aBtnRememberMe.IsCheck())
+    if (m_bRememberMeChecked)
     {
-        GameConfig::GetInstance().SetSavePassword(m_aBtnSavePassword.IsCheck());
+        GameConfig::GetInstance().SetSavePassword(m_bSavePasswordChecked);
         GameConfig::GetInstance().EncryptAndSaveCredentials(m_Username, m_Password);
     }
     else

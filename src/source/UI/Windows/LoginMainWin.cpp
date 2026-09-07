@@ -14,18 +14,20 @@
 
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/Scaling/UITransform.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 #include <RmlUi/Core/EventListener.h>
-#include <cmath>
 #include <functional>
 
 extern unsigned int WindowWidth, WindowHeight;
 
 namespace
 {
+    // This bar's own bounding-box height, used only for the click-gate rect below -- RmlUi
+    // positions/sizes the visible buttons itself via login_main.rcss's anchor rules.
+    constexpr int kBtnHeight = 30;
+
     // Mirrors UI::RmlBridge::RmlDraggable.cpp's self-owning listener pattern -- this window has
     // no dynamic state to bind (see this class's header comment), so a plain click->callback
     // listener is simpler than standing up an RmlModelBinder just for two BindEventCallback slots.
@@ -53,16 +55,13 @@ void CLoginMainWin::Create()
 {
     Release();
 
-    for (int i = 0; i <= LMW_BTN_CREDIT; ++i)
-        m_aBtn[i].Create(54, 30, BITMAP_LOG_IN + 4 + i, 3, 2, 1);
-
     // WindowWidth (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth() -- same latent
     // staleness risk as the bug SetPosition()'s own comment documents fixing elsewhere; this call
     // predates that fix and was missed. #panel's width is pushed from this exact value (below),
     // and #btn_credit anchors right:0dp off #panel's own right edge, so a stale width here would
     // misplace/misclick that button specifically.
     m_Size.cx = static_cast<int>(WindowWidth) - 30 * 2;
-    m_Size.cy = m_aBtn[0].GetHeight();
+    m_Size.cy = kBtnHeight;
     m_ptPos.x = m_ptPos.y = 0;
 
     // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
@@ -86,9 +85,6 @@ void CLoginMainWin::Create()
 
 void CLoginMainWin::Release()
 {
-    for (auto& button : m_aBtn)
-        button.Release();
-
     // CUIMng::RemoveWinList() (run on every scene transition) used to call Release() on every
     // window in its list unconditionally, before this window migrated off it -- called explicitly
     // now at the same call sites. CWin's own Release()/PreRelease() had no knowledge of m_pRmlDoc,
@@ -106,25 +102,6 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
 {
     m_ptPos.x = nXCoord;
     m_ptPos.y = nYCoord;
-
-    // Same combined ratio RmlUi's own dp unit uses (RmlUiRuntime.cpp's ApplyUIScale(),
-    // UIScalePercent x UI::Scaling::ViewportFitScale()) -- the legacy credit button's own
-    // click-detection width must track login_main.rcss's now-dp .btn-icon width, or its hit rect
-    // drifts from the RmlUi-rendered button at any UI scale/resolution other than the reference
-    // case. Lower stakes than CharSelMainWin's UpdateMouseEvent() case (this window's click
-    // handling already treats the legacy CButton and RmlUi's own click listener as redundant --
-    // see Update()'s `||`), but the same fix is cheap and correct to apply here too.
-    //
-    // UI::Scaling::CompanionRatio() (UITransform.cpp) is the single shared implementation of this
-    // formula -- pass the WindowWidth/WindowHeight globals (ZzzOpenglUtil.cpp), not
-    // CInput::Instance().GetScreenWidth()/GetScreenHeight(): a real, screenshot-confirmed bug in
-    // LoginWin.cpp traced back to CInput's own copy of the screen size not reliably matching
-    // WindowWidth/WindowHeight (the exact values RmlUiRuntime::OnResize() uses).
-    const float uiScale = UI::Scaling::CompanionRatio(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
-    const int creditWidth = static_cast<int>(std::lround(m_aBtn[LMW_BTN_CREDIT].GetWidth() * uiScale));
-
-    m_aBtn[LMW_BTN_MENU].SetPosition(nXCoord, nYCoord);
-    m_aBtn[LMW_BTN_CREDIT].SetPosition(nXCoord + m_Size.cx - creditWidth, nYCoord);
 
     // RmlUi panel: positioned/sized to the same real window-pixel geometry this window's own
     // bookkeeping uses (see CLoginWin::SetPosition's identical comment) -- #panel's own bounding
@@ -149,9 +126,6 @@ void CLoginMainWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
 
-    for (int i = 0; i < LMW_BTN_MAX; ++i)
-        m_aBtn[i].Show(bShow);
-
     if (m_pRmlDoc)
     {
         if (bShow) m_pRmlDoc->Show();
@@ -169,24 +143,6 @@ bool CLoginMainWin::UpdateMouseEvent()
     ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
     if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))
         return false;
-
-    return true;
-}
-
-bool CLoginMainWin::Update()
-{
-    if (!IsVisible())
-        return true;
-
-    for (auto& button : m_aBtn)
-        button.Update();
-
-    // RmlUi-triggered clicks no longer come through here -- see RmlClickMenu()/RmlClickCredit()'s
-    // header comment. This is now only the legacy CButton companion's own click-detection path.
-    if (m_aBtn[LMW_BTN_MENU].IsClick())
-        OpenSysMenu();
-    else if (m_aBtn[LMW_BTN_CREDIT].IsClick())
-        OpenCredits();
 
     return true;
 }

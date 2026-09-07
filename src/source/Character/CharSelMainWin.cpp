@@ -123,23 +123,6 @@ void CCharSelMainWin::Create()
     m_asprBack[CSMW_SPR_INFO].SetColor(0, 0, 0);
     m_asprBack[CSMW_SPR_INFO].SetAlpha(kWindowAlpha);
 
-    m_aBtn[CSMW_BTN_CREATE].Create(
-        UI::CharacterSelection::NativeButtonWidth,
-        UI::CharacterSelection::NativeButtonHeight,
-        BITMAP_LOG_IN + 3, 4, 2, 1, 3);
-    m_aBtn[CSMW_BTN_MENU].Create(
-        UI::CharacterSelection::NativeButtonWidth,
-        UI::CharacterSelection::NativeButtonHeight,
-        BITMAP_LOG_IN + 4, 3, 2, 1);
-    m_aBtn[CSMW_BTN_CONNECT].Create(
-        UI::CharacterSelection::NativeButtonWidth,
-        UI::CharacterSelection::NativeButtonHeight,
-        BITMAP_LOG_IN + 5, 4, 2, 1, 3);
-    m_aBtn[CSMW_BTN_DELETE].Create(
-        UI::CharacterSelection::NativeButtonWidth,
-        UI::CharacterSelection::NativeButtonHeight,
-        BITMAP_LOG_IN + 6, 4, 2, 1, 3);
-
     m_ptPos.x = m_ptPos.y = 0;
     m_Size.cx = m_Size.cy = 0;
 
@@ -196,20 +179,13 @@ void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)
     m_asprBack[CSMW_SPR_INFO].SetSize(layout.information.width, layout.information.height);
     m_asprBack[CSMW_SPR_INFO].SetPosition(layout.information.x, layout.information.y);
 
-    for (int i = 0; i < CSMW_BTN_MAX; ++i)
-    {
-        const auto& button = layout.buttons[static_cast<std::size_t>(i)];
-        m_aBtn[i].SetSize(button.width, button.height);
-        m_aBtn[i].SetPosition(button.x, button.y);
-    }
-
     // Deliberately does NOT push anything to the RmlUi elements: #panel and
     // every child position themselves via base.rcss's anchor-*/stretch-x utility classes with a
     // fixed `dp` size (char_sel_main.rcss) instead. `layout` above (now
     // CalculateFixedAnchorLayout(), not the old resolution-proportional CalculateLayout() --
     // see that function's own comment for why the switch was necessary, not just stylistic) still
-    // feeds the legacy CSprite/CButton objects, which genuinely still need real screen-pixel rects
-    // for their own hit-testing/UpdateMouseEvent() bookkeeping -- but those rects are now derived
+    // feeds the legacy CSprite objects, which genuinely still need real screen-pixel rects for
+    // their own hit-testing/UpdateMouseEvent() bookkeeping -- but those rects are now derived
     // from the SAME fixed-dp-anchor math as the RmlUi visuals, so the two stay pixel-for-pixel
     // aligned at every resolution and UI-scale setting instead of just at the historical
     // 800x600/100% case.
@@ -219,8 +195,6 @@ void CCharSelMainWin::Release()
 {
     for (auto& sprite : m_asprBack)
         sprite.Release();
-    for (auto& button : m_aBtn)
-        button.Release();
 
     // See CLoginMainWin::PreRelease()'s identical comment -- each migrated window's Release() is
     // called explicitly at every scene transition, not swept automatically by any shared list, and
@@ -240,15 +214,13 @@ void CCharSelMainWin::SetPosition(int nXCoord, int nYCoord)
 
     for (auto& sprite : m_asprBack)
         sprite.SetPosition(sprite.GetXPos() + deltaX, sprite.GetYPos() + deltaY);
-    for (auto& button : m_aBtn)
-        button.SetPosition(button.GetXPos() + deltaX, button.GetYPos() + deltaY);
 
     // No RmlUi push here (an earlier version had one) -- see ApplyLayout()'s comment. #panel is
     // a fixed full-screen container now (char_sel_main.rcss), not something this window's own
     // screen position moves; the RmlUi visuals are positioned independently via anchor classes.
     // No call site actually invokes this method today (CSceneUICoordinator::RepositionSceneUI() re-runs
-    // Create() wholesale instead) -- the legacy CSprite/CButton delta-shift above is kept
-    // correct anyway since it was part of CWin's public contract before this migration.
+    // Create() wholesale instead) -- the legacy CSprite delta-shift above is kept correct anyway
+    // since it was part of CWin's public contract before this migration.
 }
 
 void CCharSelMainWin::Show(bool bShow)
@@ -257,8 +229,6 @@ void CCharSelMainWin::Show(bool bShow)
 
     for (auto& sprite : m_asprBack)
         sprite.Show(bShow);
-    for (auto& button : m_aBtn)
-        button.Show(bShow);
 
     if (m_pRmlDoc)
     {
@@ -270,13 +240,10 @@ void CCharSelMainWin::Show(bool bShow)
 void CCharSelMainWin::UpdateDisplay()
 {
     m_bCreateEnabled = HasEmptyCharacterSlot();
-    m_aBtn[CSMW_BTN_CREATE].SetEnable(m_bCreateEnabled);
 
     const bool hasSelection = (SelectedHero > -1);
     m_bConnectEnabled = hasSelection;
     m_bDeleteEnabled = hasSelection;
-    m_aBtn[CSMW_BTN_CONNECT].SetEnable(m_bConnectEnabled);
-    m_aBtn[CSMW_BTN_DELETE].SetEnable(m_bDeleteEnabled);
 
     if (!HasLiveCharacter())
     {
@@ -303,35 +270,28 @@ bool CCharSelMainWin::Update()
     if (!IsVisible())
         return true;
 
-    // The actual fix for a real, reported bug -- see this class's header comment. Block button
-    // click-state processing entirely while a modal overlay is open, since the legacy
-    // CWin::m_bActive gate this used to rely on for the same purpose doesn't reliably deactivate
-    // on a timely basis. Buttons still Update() below regardless (matching CServerSelWin -- CButton
-    // self-gates on its own Show() flag), just their IsClick()/RmlClick* results go unconsumed.
-    const bool modalOpen = IsCharacterSceneModalOpen();
-
-    for (auto& button : m_aBtn)
-        button.Update();
-
-    if (modalOpen)
+    // The actual fix for a real, reported bug -- see this class's header comment. Block click
+    // processing entirely while a modal overlay is open, since the legacy CWin::m_bActive gate
+    // this used to rely on for the same purpose doesn't reliably deactivate on a timely basis.
+    if (IsCharacterSceneModalOpen())
         return true;
 
-    if (m_aBtn[CSMW_BTN_CONNECT].IsClick() || m_bRmlConnectClicked)
+    if (m_bRmlConnectClicked)
     {
         m_bRmlConnectClicked = false;
         ::StartGame();
     }
-    else if (m_aBtn[CSMW_BTN_MENU].IsClick() || m_bRmlMenuClicked)
+    else if (m_bRmlMenuClicked)
     {
         m_bRmlMenuClicked = false;
         g_SysMenuWin.Show(true);
     }
-    else if (m_aBtn[CSMW_BTN_CREATE].IsClick() || m_bRmlCreateClicked)
+    else if (m_bRmlCreateClicked)
     {
         m_bRmlCreateClicked = false;
         g_CharMakeWin.Show(true);
     }
-    else if (m_aBtn[CSMW_BTN_DELETE].IsClick() || m_bRmlDeleteClicked)
+    else if (m_bRmlDeleteClicked)
     {
         m_bRmlDeleteClicked = false;
         DeleteCharacter();
@@ -344,8 +304,8 @@ bool CCharSelMainWin::Render()
 {
     // RmlUi's #panel now owns 100% of this bar's visuals (buttons, info-bar background, deco
     // flourish, account-block message) in every theme -- see this class's header comment. The
-    // legacy CSprites/CButtons stay alive purely for their geometry/click-detection bookkeeping,
-    // never rendered; SyncRmlModel() is the only thing this override still needs to do.
+    // legacy CSprites stay alive purely for their geometry bookkeeping (UpdateMouseEvent()'s own
+    // rect), never rendered; SyncRmlModel() is the only thing this override still needs to do.
     SyncRmlModel();
     return true;
 }

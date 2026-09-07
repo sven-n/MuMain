@@ -4,7 +4,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Button.h"
+#include "Render/Sprites/Sprite.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 #define MW_MSG_LINE_MAX 2
@@ -25,10 +25,7 @@ namespace Rml { class ElementDocument; }
 // CUIMng::IsCursorOnUI() report true for any cursor position while this dialog was shown --
 // UpdateMouseEvent() below now does that job directly (unconditionally claims the click while
 // shown, no rect check needed), and CSceneUICoordinator::Update() folds new-style claims into m_bCursorOnUI
-// the same way it already folds them into the legacy click-walk skip. A modal message box
-// genuinely swallows every click no matter how imprecisely the legacy CButton bookkeeping below
-// lines up with the RmlUi visuals -- unlike CCharSelMainWin, this window has no legitimate
-// "world click" competing for input that a hit-test mismatch could wrongly let through.
+// the same way it already folds them into the legacy click-walk skip.
 class CMsgWin : public mu::ui::window::CObject
 {
 protected:
@@ -43,7 +40,6 @@ protected:
 
     CSprite m_sprBack;
     CSprite m_sprInput;
-    CButton m_aBtn[2];
     wchar_t m_aszMsg[MW_MSG_LINE_MAX][MW_MSG_ROW_MAX];
     int m_nMsgLine;
     int m_nMsgCode;

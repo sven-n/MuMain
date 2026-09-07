@@ -8,19 +8,14 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Button.h"
-
-#define LMW_BTN_MENU 0
-#define LMW_BTN_CREDIT 1
-#define LMW_BTN_MAX 2
 
 namespace Rml { class ElementDocument; }
 
 // This window's two buttons are pure image buttons with no I18N text and no dynamic state, so unlike
 // CLoginWin/CSysMenuWin it needs no UI::RmlBridge::RmlModelBinder -- click detection is
 // wired directly via Rml::Element::AddEventListener, same idiom UI::RmlBridge::RmlDraggable.cpp
-// already uses for its own self-owning listener. The legacy CButtons stay registered (redundant,
-// harmless detection path); RmlUi renders 100% of this bar's visuals in every theme.
+// already uses for its own self-owning listener. RmlUi renders 100% of this bar's visuals and owns
+// click detection in every theme.
 //
 // Migrated off CWin onto mu::ui::window::CObject. Not modal -- UpdateMouseEvent() claims only
 // within its own bounding rect (CServerSelWin's established pattern), matching this bar's small
@@ -29,8 +24,6 @@ namespace Rml { class ElementDocument; }
 class CLoginMainWin : public mu::ui::window::CObject
 {
 protected:
-    CButton m_aBtn[LMW_BTN_MAX];
-
     // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CObject side (matching
     // every pre-existing CObject window), so this window keeps its own bounding box, same as
     // CServerSelWin's established pattern.
@@ -69,7 +62,10 @@ public:
     {
         return true;
     }
-    bool Update() override;
+    bool Update() override
+    {
+        return true;
+    }
     // Was CWin::CursorInWin(WA_ALL) -- claims any click within its own bounding box, ported from
     // CServerSelWin's established pattern. Not modal.
     bool UpdateMouseEvent() override;
@@ -83,9 +79,6 @@ public:
     }
 
 private:
-    // Shared by the immediate RmlUi callbacks above and Update()'s legacy m_aBtn[...].IsClick()
-    // polling (the redundant CButton companion's own click path -- see this class's header
-    // comment on why the legacy CButtons stay registered).
     void OpenSysMenu();
     void OpenCredits();
 

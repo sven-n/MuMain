@@ -5,7 +5,6 @@
 
 #include "UI/Core/WindowObject.h"
 
-#include "UI/Widgets/Button.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 class CUITextInputBox;
@@ -17,10 +16,12 @@ namespace Rml { class ElementDocument; }
 // frames, checkboxes, buttons, labels, and trust warning as an overlay -- the "legacy" theme
 // reproduces the original look by pointing its RCSS decorators at the same art files
 // (Interface/login_back.tga, Interface/login_me.tga) the old CWin sprites drew, so this is a
-// renderer swap, not a visual change. The legacy CButton objects below remain the actual
-// state-holders (IsCheck/SetCheck) for the checkboxes/OK/Cancel buttons -- nothing about their
-// internal semantics changed, only what draws them. Username/password text entry deliberately
-// stays on the legacy CUITextInputBox objects (m_pUsernameInputBox/m_pPasswordInputBox) rather
+// renderer swap, not a visual change. OK/Cancel are stateless action buttons handled entirely by
+// RmlUi now (RmlClickOk()/RmlClickCancel()); the two checkboxes' checked state lives in
+// m_bRememberMeChecked/m_bSavePasswordChecked below, since it's read back from several places
+// (SyncRmlModel(), RequestLogin(), credential-revocation) independent of whatever last set it.
+// Username/password text entry deliberately stays on the legacy CUITextInputBox objects
+// (m_pUsernameInputBox/m_pPasswordInputBox) rather
 // than moving to native RmlUi <input> elements -- external code (WSclient.cpp, MsgWin.cpp) calls
 // GetUsernameInputBox()/GetPasswordInputBox()->GiveFocus() directly for error-recovery focus
 // redirection, and duplicating credential-entry/focus logic into a second, independent text-input
@@ -32,9 +33,8 @@ namespace Rml { class ElementDocument; }
 class CLoginWin : public mu::ui::window::CObject
 {
 protected:
-    CButton m_aBtn[2];
-    CButton m_aBtnRememberMe;
-    CButton m_aBtnSavePassword;
+    bool m_bRememberMeChecked = false;
+    bool m_bSavePasswordChecked = false;
     CUITextInputBox* m_pUsernameInputBox;
     CUITextInputBox* m_pPasswordInputBox;
 
@@ -140,18 +140,17 @@ protected:
     void CancelLogin();
 
     // "Remember me" credential handling, split out of the update loop.
-    void UpdateRememberCheckboxes();
     void ApplyRememberPasswordChoice();
     void RevokeSavedCredentialsIfEdited();
 
 private:
     int FirstLoad = 0;
 
-    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s legacy polling
-    // (CButton::IsClick(), keyboard). Each re-checks the "remember password" prompt's live Pending
-    // state itself, correct from both call sites since UpdateWhileActive() never even runs while
-    // pending (see UpdateWhileShown()'s comment) and the immediate RmlUi callbacks haven't had a
-    // chance to observe that via the same path.
+    // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s keyboard polling
+    // (Enter/Esc). Each re-checks the "remember password" prompt's live Pending state itself,
+    // correct from both call sites since UpdateWhileActive() never even runs while pending (see
+    // UpdateWhileShown()'s comment) and the immediate RmlUi callbacks haven't had a chance to
+    // observe that via the same path.
     void SubmitLogin();
     void SubmitCancel();
     void ApplyRememberMeChange();

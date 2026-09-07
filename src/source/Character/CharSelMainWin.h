@@ -9,7 +9,7 @@
 #include <cmath>
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Button.h"
+#include "Render/Sprites/Sprite.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 #define CSMW_SPR_DECO 0
@@ -123,9 +123,9 @@ namespace UI::CharacterSelection
     // layout-and-scaling retrofit exactly.
     // CalculateLayout() (upstream's auto-scale-to-fit-800x600 system) is no longer used by this
     // window: once the RmlUi visuals switched from mirroring that resolution-proportional rect to
-    // fixed-dp/anchor-class CSS positioning, continuing to position the legacy CButton/CSprite
-    // hit-test objects via CalculateLayout()'s math left them visually detached from the buttons
-    // actually on screen at any resolution other than a coincidental match -- a real, confirmed
+    // fixed-dp/anchor-class CSS positioning, continuing to position the legacy CSprite hit-test
+    // objects via CalculateLayout()'s math left them visually detached from the buttons actually
+    // on screen at any resolution other than a coincidental match -- a real, confirmed
     // bug, not a cosmetic one: this window's own bounding rect (below) must cover every element
     // positioned above, or hovering the info-bar/deco alone would wrongly fall through to the
     // legacy world-click handler (previously via CUIMng::IsCursorOnUI(), now via
@@ -174,14 +174,14 @@ namespace Rml { class ElementDocument; }
 
 // RmlUi migration: character-select scene, following CLoginMainWin/CSysMenuWin's established
 // hybrid pattern. RmlUi renders 100% of this bar's visuals (buttons, the info-bar background, the
-// decorative flourish, and the rare account-block message) in every theme; the legacy
-// CSprites/CButtons stay alive purely as bookkeeping (button click-detection redundancy,
-// UpdateMouseEvent()'s own rect-hit-testing), never rendered.
+// decorative flourish, and the rare account-block message) and owns click detection in every
+// theme; the legacy CSprites stay alive purely as UpdateMouseEvent()'s own rect-hit-testing
+// bookkeeping, never rendered.
 //
 // Layout-and-scaling retrofit: the RmlUi
 // visuals position themselves via char_sel_main.rcss's fixed-dp/anchor-class rules, NOT via
 // ApplyLayout() pushing a computed rect anymore. ApplyLayout() still runs, but only feeds the
-// legacy CButton/CSprite bookkeeping objects, and does so via
+// legacy CSprite bookkeeping objects, and does so via
 // UI::CharacterSelection::CalculateFixedAnchorLayout() (mirroring the RCSS's own fixed-dp math)
 // rather than the older CalculateLayout() (upstream's auto-scale-to-fit-800x600 system, kept above
 // for reference/potential reuse elsewhere but no longer used by this window) -- see
@@ -200,7 +200,6 @@ class CCharSelMainWin : public mu::ui::window::CObject
 {
 protected:
     CSprite m_asprBack[CSMW_SPR_MAX];
-    CButton m_aBtn[CSMW_BTN_MAX];
     bool m_bAccountBlockItem;
 
     // Replaces CWin::m_ptPos/m_Size -- no shared rect facility on the CObject side (matching
@@ -221,9 +220,8 @@ public:
     void UpdateDisplay();
 
     // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
-    // cleared exactly like the legacy CButton::IsClick() edge triggers they supplement in
-    // Update() -- mirrors CSysMenuWin's RmlClickX() shape, including the same-guard gating for
-    // buttons that can be genuinely disabled (Create/Connect/Delete, not Menu).
+    // cleared in Update() -- mirrors CSysMenuWin's RmlClickX() shape, including the same-guard
+    // gating for buttons that can be genuinely disabled (Create/Connect/Delete, not Menu).
     void RmlClickCreate() { if (m_bCreateEnabled) m_bRmlCreateClicked = true; }
     void RmlClickMenu() { m_bRmlMenuClicked = true; }
     void RmlClickConnect() { if (m_bConnectEnabled) m_bRmlConnectClicked = true; }

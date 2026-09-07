@@ -34,9 +34,6 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Event.h>
 
-#define	MW_OK		0
-#define	MW_CANCEL	1
-
 extern int g_iChatInputType;
 
 CMsgWin g_MsgWin;
@@ -57,11 +54,6 @@ void CMsgWin::Create()
     m_sprBack.Create(352, 113, BITMAP_MESSAGE_WIN);
 
     m_sprInput.Create(171, 23, BITMAP_MSG_WIN_INPUT);
-
-    for (int i = 0; i < 2; ++i)
-    {
-        m_aBtn[i].Create(54, 30, BITMAP_BUTTON + i, 3, 2, 1);
-    }
 
     memset(m_aszMsg[0], 0, sizeof(char) * MW_MSG_LINE_MAX * MW_MSG_ROW_MAX);
 
@@ -106,8 +98,6 @@ void CMsgWin::Create()
 
 void CMsgWin::Release()
 {
-    m_aBtn[0].Release();
-    m_aBtn[1].Release();
     m_sprInput.Release();
     m_sprBack.Release();
 
@@ -126,43 +116,29 @@ void CMsgWin::SetPosition(int nXCoord, int nYCoord)
 
 void CMsgWin::SetCtrlPosition()
 {
+    if (m_eType != MWT_STR_INPUT)
+        return;
+
     int nBaseXPos = m_sprBack.GetXPos();
     int nBtnYPos = m_sprBack.GetYPos() + 72;
 
-    switch (m_eType)
-    {
-    case MWT_BTN_CANCEL:
-        m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 149, nBtnYPos);
-        break;
-    case MWT_BTN_OK:
-        m_aBtn[MW_OK].SetPosition(nBaseXPos + 149, nBtnYPos);
-        break;
-    case MWT_BTN_BOTH:
-        m_aBtn[MW_OK].SetPosition(nBaseXPos + 98, nBtnYPos);
-        m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 200, nBtnYPos);
-        break;
-    case MWT_STR_INPUT:
-        m_sprInput.SetPosition(nBaseXPos + 32, nBtnYPos + 4);
-        m_aBtn[MW_OK].SetPosition(nBaseXPos + 209, nBtnYPos);
-        m_aBtn[MW_CANCEL].SetPosition(nBaseXPos + 264, nBtnYPos);
-        if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
-            if (g_iChatInputType == 1)
-                // Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::SetPosition()
-                // stores this raw and only rescales it at Render() time via ConvertPositionX/Y's
-                // *ambient* active transform (UIControls.cpp/ZzzOpenglUtil.cpp). The old division
-                // here relied on that ambient transform being the same one active when this ran --
-                // true when this only ever ran unscoped (CWin days), but this call chain now
-                // reaches here through ManageOKClick()->PopUp()->SetMsg(), inside CMsgWin::Update()
-                // itself, which CManager::Update() wraps in a LayoutMode::Legacy (identity)
-                // ScopedActiveTransform -- dividing by that identity is a no-op, so the position
-                // got stored as real pixels while still being *labeled* reference-space, then
-                // rescaled a second time by RenderTextOnTop()'s own (correctly ambient,
-                // non-identity) transform at render time. Storing real pixels directly and
-                // forcing identity at the one consuming Render() call (below) instead keeps both
-                // sides consistent regardless of which context triggered this.
-                g_pSinglePasswdInputBox->SetPosition(m_sprInput.GetXPos() + 10, m_sprInput.GetYPos() + 8);
-        break;
-    }
+    m_sprInput.SetPosition(nBaseXPos + 32, nBtnYPos + 4);
+    if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
+        if (g_iChatInputType == 1)
+            // Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::SetPosition()
+            // stores this raw and only rescales it at Render() time via ConvertPositionX/Y's
+            // *ambient* active transform (UIControls.cpp/ZzzOpenglUtil.cpp). The old division
+            // here relied on that ambient transform being the same one active when this ran --
+            // true when this only ever ran unscoped (CWin days), but this call chain now
+            // reaches here through ManageOKClick()->PopUp()->SetMsg(), inside CMsgWin::Update()
+            // itself, which CManager::Update() wraps in a LayoutMode::Legacy (identity)
+            // ScopedActiveTransform -- dividing by that identity is a no-op, so the position
+            // got stored as real pixels while still being *labeled* reference-space, then
+            // rescaled a second time by RenderTextOnTop()'s own (correctly ambient,
+            // non-identity) transform at render time. Storing real pixels directly and
+            // forcing identity at the one consuming Render() call (below) instead keeps both
+            // sides consistent regardless of which context triggered this.
+            g_pSinglePasswdInputBox->SetPosition(m_sprInput.GetXPos() + 10, m_sprInput.GetYPos() + 8);
 }
 
 void CMsgWin::Show(bool bShow)
@@ -170,34 +146,7 @@ void CMsgWin::Show(bool bShow)
     mu::ui::window::CObject::Show(bShow);
 
     m_sprBack.Show(bShow);
-
-    switch (m_eType)
-    {
-    case MWT_BTN_CANCEL:
-        m_aBtn[MW_OK].Show(false);
-        m_aBtn[MW_CANCEL].Show(bShow);
-        m_sprInput.Show(false);
-        break;
-    case MWT_BTN_OK:
-        m_aBtn[MW_OK].Show(bShow);
-        m_aBtn[MW_CANCEL].Show(false);
-        m_sprInput.Show(false);
-        break;
-    case MWT_BTN_BOTH:
-        m_aBtn[MW_OK].Show(bShow);
-        m_aBtn[MW_CANCEL].Show(bShow);
-        m_sprInput.Show(false);
-        break;
-    case MWT_STR_INPUT:
-        m_aBtn[MW_OK].Show(bShow);
-        m_aBtn[MW_CANCEL].Show(bShow);
-        m_sprInput.Show(bShow);
-        break;
-    default:
-        m_aBtn[MW_OK].Show(false);
-        m_aBtn[MW_CANCEL].Show(false);
-        m_sprInput.Show(false);
-    }
+    m_sprInput.Show(bShow && m_eType == MWT_STR_INPUT);
 
     if (m_pRmlDoc)
     {
@@ -210,9 +159,6 @@ bool CMsgWin::Update()
 {
     if (!IsVisible())
         return true;
-
-    m_aBtn[MW_OK].Update();
-    m_aBtn[MW_CANCEL].Update();
 
     if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT && g_iChatInputType == 1 &&
         g_pSinglePasswdInputBox != nullptr && g_pSinglePasswdInputBox->GetState() == UISTATE_NORMAL)
@@ -255,12 +201,12 @@ bool CMsgWin::Update()
             ManageCancelClick();
         }
     }
-    else if (m_aBtn[MW_OK].IsClick() || m_bRmlOkClicked)
+    else if (m_bRmlOkClicked)
     {
         m_bRmlOkClicked = false;
         ManageOKClick();
     }
-    else if (m_aBtn[MW_CANCEL].IsClick() || m_bRmlCancelClicked)
+    else if (m_bRmlCancelClicked)
     {
         m_bRmlCancelClicked = false;
         ManageCancelClick();
@@ -296,10 +242,11 @@ bool CMsgWin::Render()
 {
     // RmlUi's #panel now owns 100% of this dialog's visuals (background frame, message text,
     // OK/Cancel, the resident-password input frame's background) in every theme -- see this
-    // class's header comment. The legacy CSprite/CButton objects stay alive purely as bookkeeping
-    // (redundant click detection), never rendered. SyncRmlModel() is the only thing this override
-    // still needs to do; RenderTextOnTop() (the resident-password live text) is called from
-    // Winmain.cpp's SetPostRmlUiCallback instead of here, so it isn't drawn twice.
+    // class's header comment. m_sprBack/m_sprInput stay alive purely as position bookkeeping for
+    // the still-native resident-password text input (never rendered themselves).
+    // SyncRmlModel() is the only thing this override still needs to do; RenderTextOnTop() (the
+    // resident-password live text) is called from Winmain.cpp's SetPostRmlUiCallback instead of
+    // here, so it isn't drawn twice.
     SyncRmlModel();
     return true;
 }
