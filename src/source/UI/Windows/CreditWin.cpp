@@ -21,6 +21,10 @@
 #include "Core/Platform/PathResolve.h"
 
 #include "UI/Widgets/UIControls.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 #include <algorithm>
 #include <chrono>
@@ -123,16 +127,8 @@ void CCreditWin::Create()
 
 	CInput rInput = CInput::Instance();
 
-	m_sprBg.Create(rInput.GetScreenWidth(), rInput.GetScreenHeight(), -1, 0, NULL, 0, 0, false);
-	m_sprBg.SetAlpha(255);
-	m_sprBg.SetColor(0, 0, 0);
-
 	float fScaleX = (float)rInput.GetScreenWidth() / 800.0f;
 	float fScaleY = (float)rInput.GetScreenHeight() / 600.0f;
-
-	m_aSpr[CRW_SPR_DECO].Create(189, 103, BITMAP_LOG_IN + 6);
-	m_aSpr[CRW_SPR_LOGO].Create(290, 41, BITMAP_LOG_IN + 14, 0, NULL, 0, 0,
-		false, SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
 
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
 	{
@@ -140,8 +136,6 @@ void CCreditWin::Create()
 			SPR_SIZING_DATUMS_LT, fScaleX, fScaleY);
 		m_aSpr[i].SetColor(0, 0, 0);
 	}
-
-	m_btnClose.Create(54, 30, BITMAP_BUTTON + 2, 3, 2, 1);
 
 	int nFontSize = 10;
 	switch (rInput.GetScreenWidth())
@@ -155,6 +149,22 @@ void CCreditWin::Create()
 
 	LoadText();
 	SetPosition();
+
+	// RmlUi migration (Stage 1) -- see this class's header comment. Guarded like every other
+	// hybrid window's Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on
+	// resolution change), so the document/model are created once, ever.
+	if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+	{
+		const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "credit_win",
+			[this](Rml::DataModelConstructor& c, CreditWinRmlModel&)
+			{
+				c.BindEventCallback("creditwin_close_click",
+					[this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+			});
+
+		if (modelCreated)
+			m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/credit_win.rml");
+	}
 
 	// Registers with CSceneUICoordinator's
 	// own scene-scoped manager instance, not the shared g_pNewUIMng (this window only ever exists
@@ -170,40 +180,38 @@ void CCreditWin::Create()
 
 void CCreditWin::Release()
 {
-	m_sprBg.Release();
 	for (int i = 0; i < CRW_SPR_MAX; ++i)
 		m_aSpr[i].Release();
 	m_font.reset();
+
+	// See CLoginWin::PreRelease()'s identical comment -- each migrated window's Release() is
+	// called explicitly at every scene transition, not swept automatically by any shared list, and
+	// this class has no base-class knowledge of m_pRmlDoc.
+	if (m_pRmlDoc)
+		m_pRmlDoc->Hide();
 }
 
 void CCreditWin::SetPosition()
 {
 	m_aSpr[CRW_SPR_PIC_L].SetPosition(0, 126);
 	m_aSpr[CRW_SPR_PIC_R].SetPosition(400, 126);
-	m_aSpr[CRW_SPR_LOGO].SetPosition(241, 549);
-
-
-	CInput rInput = CInput::Instance();
-
-	int nBaseY = int(527.0f / 600.0f * (float)rInput.GetScreenHeight());
-	m_aSpr[CRW_SPR_DECO].SetPosition(rInput.GetScreenWidth() - m_aSpr[CRW_SPR_DECO].GetWidth(), nBaseY - m_aSpr[CRW_SPR_DECO].GetHeight());
 
 	for (int i = CRW_SPR_TXT_HIDE0; i <= CRW_SPR_TXT_HIDE2; ++i)
 		m_aSpr[i].SetPosition(0, 42 * (i - CRW_SPR_TXT_HIDE0));
-
-	m_btnClose.SetPosition(m_aSpr[CRW_SPR_DECO].GetXPos() + 122,
-		m_aSpr[CRW_SPR_DECO].GetYPos() + 63);
 }
 
 void CCreditWin::Show(bool bShow)
 {
 	mu::ui::window::CObject::Show(bShow);
 
-	m_sprBg.Show(bShow);
 	for (int i = 0; i < CRW_SPR_MAX; ++i)
 		m_aSpr[i].Show(bShow);
 
-	m_btnClose.Show(bShow);
+	if (m_pRmlDoc)
+	{
+		if (bShow) m_pRmlDoc->Show();
+		else       m_pRmlDoc->Hide();
+	}
 
 	if (bShow)
 		Init();
@@ -222,12 +230,11 @@ bool CCreditWin::Update()
 	extern float FPS_ANIMATION_FACTOR;
 	const DurationMs deltaTime{ 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR) };
 
-	// m_btnClose.Update() used to run automatically inside CWin::Update()'s own button-list step
-	// (RegisterButton()) -- called explicitly now.
-	m_btnClose.Update();
-
-	if (m_btnClose.IsClick())
+	if (m_bRmlCloseClicked)
+	{
+		m_bRmlCloseClicked = false;
 		CloseWin();
+	}
 	else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
 	{
 		::PlayBuffer(SOUND_CLICK01);
@@ -243,11 +250,11 @@ bool CCreditWin::Update()
 
 bool CCreditWin::Render()
 {
-	m_sprBg.Render();
-
+	// Background/deco/logo/close button now live in #panel (credit_win.rml) -- see this class's
+	// header comment.
 	mu::GetRenderer().SetAlphaTest(false);
 
-	for (int i = 0; i <= CRW_SPR_LOGO; ++i)
+	for (int i = 0; i <= CRW_SPR_PIC_R; ++i)
 		m_aSpr[i].Render();
 
 	long lScreenWidth = CInput::Instance().GetScreenWidth();
@@ -300,8 +307,6 @@ bool CCreditWin::Render()
 		m_aSpr[i].Render();
 
 	mu::GetRenderer().SetAlphaTest(true);
-
-	m_btnClose.Render();
 
 	return true;
 }

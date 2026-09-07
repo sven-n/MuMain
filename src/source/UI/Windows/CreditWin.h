@@ -13,8 +13,10 @@
 #include <memory>
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Button.h"
 #include "Render/Sprites/Sprite.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 #define	CRW_SPR_PIC_L			0
 #define	CRW_SPR_PIC_R			1
@@ -39,8 +41,13 @@
 #define	CRW_INDEX_MAX			6
 
 // The first CUIMng window migrated off CWin onto mu::ui::window::CObject/
-// CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity real case (still fully legacy-2D,
-// no RmlUi entanglement, no shown-vs-active split needed). See g_CreditWin's own comment below for
+// CSceneUICoordinator::GetNewStyleMng() -- the lowest-complexity real case (no shown-vs-active
+// split needed). Stage 1 of its RmlUi port: the background/deco/logo and close button now live in
+// #panel (credit_win.rml/.rcss). The illustration crossfade (m_aSpr[CRW_SPR_PIC_L/R]) and
+// scrolling credit text (still drawn directly in Render() via g_pRenderText) remain native for now
+// -- porting those needs a continuously-animated bound opacity value (no existing window does
+// that yet) and confirming what character set credit.bmd's names need before picking an RmlUi font
+// face, so they're deliberately left for a follow-up pass. See g_CreditWin's own comment below for
 // the ownership/registration shape.
 class CCreditWin : public mu::ui::window::CObject
 {
@@ -55,12 +62,10 @@ class CCreditWin : public mu::ui::window::CObject
 	};
 
 protected:
-	// Replaces CWin::m_psprBg -- CWin::Create(w, h) (default nTexID=-1) created this as a full-
-	// screen solid quad; CCreditWin::Create() immediately raised its alpha to fully opaque
-	// (CWin::SetBgAlpha(255)) instead of the default 128 (semi-transparent).
-	CSprite		m_sprBg;
+	// m_aSpr[CRW_SPR_DECO]/[CRW_SPR_LOGO] are unused now (Stage 1 moved them to #panel) but the
+	// array keeps its original indices -- only [CRW_SPR_PIC_L]/[CRW_SPR_PIC_R] (illustration) and
+	// [CRW_SPR_TXT_HIDE0..2] (credit-text fade overlays) are still Create()'d/rendered.
 	CSprite		m_aSpr[CRW_SPR_MAX];
-	CButton		m_btnClose;
 
 	SHOW_STATE  m_eIllustState;
 	DurationMs  m_illustElapsed;
@@ -87,6 +92,10 @@ public:
 	void SetPosition();
 	void Show(bool bShow) override;
 
+	// Invoked from the RmlUi document's data-event-click binding (see Create()). Polled-and-
+	// cleared exactly like every other migrated window's RmlClickX() pattern.
+	void RmlClickClose() { m_bRmlCloseClicked = true; }
+
 	// mu::ui::window::IObject
 	bool Render() override;
 	bool Update() override;
@@ -107,6 +116,15 @@ protected:
 	void LoadText();
 	void SetTextIndex();
 	void AnimationText(int nClass, DurationMs deltaTime);
+
+private:
+	// Stage 1 has no dynamic content yet -- this model exists purely to host the close button's
+	// data-event-click binding. Stage 2 (illustration crossfade / credit text) adds real fields.
+	struct CreditWinRmlModel {};
+	RmlModelBinder<CreditWinRmlModel> m_RmlBinder;
+	Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+	bool m_bRmlCloseClicked = false;
 };
 
 // Replaces CUIMng's old `CCreditWin m_CreditWin;` member -- static storage duration matches the

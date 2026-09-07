@@ -1,0 +1,50 @@
+/* Modern theme for the login-scene credits screen -- flat programmatic styling, no legacy art.
+   Same #panel/logo/deco/btn-close structure as legacy; positioning matches legacy's dp values
+   exactly (see that file's own comment for where they come from). */
+
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: token(surface-0);
+	font-family: "token(font-body)";
+	pointer-events: none;
+}
+
+/* No flat-art substitute reads well for either -- dropped, same call char_sel_main.rcss's modern
+   theme already made for the same deco.tga art. */
+.logo, .deco {
+	display: none;
+}
+
+.btn-close {
+	position: absolute;
+	right: 13dp;
+	bottom: 83dp;
+	width: 54dp;
+	height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-3);
+	border: 1dp token(border-metal);
+	border-radius: token(radius-md)dp;
+	text-align: center;
+	line-height: 30dp;
+	color: token(text-body);
+	font-weight: bold;
+	font-size: 14dp;
+}
+.btn-close:hover {
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
+}
+
+/* font-family/size redeclared directly here (not inherited from #panel) -- this document's
+   data-model binding makes inheritance silently fail for this text in this RmlUi build, same
+   caveat char_sel_main.rcss's modern theme already notes for its own icon-button labels. */
+.btn-close-label {
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}

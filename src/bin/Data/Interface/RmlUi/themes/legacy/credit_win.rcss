@@ -1,0 +1,81 @@
+/* Legacy theme for the login-scene credits screen (CCreditWin). Stage 1 of its RmlUi port: full-
+   screen background, the static logo/deco art, and the close button. Positions are the original
+   CCreditWin::SetPosition()/Create() literal 800x600-reference pixel values carried over directly
+   as dp, same convention every other ported window already uses (dp responds to the same UI-scale
+   system that used to be applied manually via fScaleX/fScaleY). Illustration crossfade and
+   scrolling credit text stay native until Stage 2 -- see CreditWin.h's own class comment. */
+
+@spritesheet creditwin-logo-sheet
+{
+	src: "../../../cr_mu_lo.tga";
+	creditwin-logo-image: 0px 0px 290px 41px;
+}
+@spritesheet creditwin-deco-sheet
+{
+	src: "../../../deco.tga";
+	creditwin-deco-image: 0px 0px 189px 103px;
+}
+@spritesheet creditwin-close-sheet
+{
+	src: "../../../message_close_b_all.tga";
+	creditwin-close-idle:   0px  0px 54px 30px;
+	creditwin-close-hover:  0px 30px 54px 30px;
+	creditwin-close-active: 0px 60px 54px 30px;
+}
+
+#panel {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: #000000;
+	pointer-events: none;
+}
+
+.logo {
+	position: absolute;
+	left: 241dp;
+	top: 549dp;
+	width: 290dp;
+	height: 41dp;
+	pointer-events: none;
+	decorator: image(creditwin-logo-image);
+}
+
+/* Anchored to the bottom-right corner, same relationship CCreditWin::SetPosition() derives from
+   the screen-height fraction 527/600 -- see this class's own comment above. */
+.deco {
+	position: absolute;
+	right: 0dp;
+	bottom: 73dp;
+	width: 189dp;
+	height: 103dp;
+	pointer-events: none;
+	decorator: image(creditwin-deco-image);
+}
+
+/* Positioned relative to .deco's own corner (deco_pos + 122,63 in the original), expressed here as
+   its own independent corner anchor -- 13dp/83dp is that same offset from the screen edge, not
+   from .deco directly (RmlUi has no way to anchor to a sibling's box). */
+.btn-close {
+	position: absolute;
+	right: 13dp;
+	bottom: 83dp;
+	width: 54dp;
+	height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(creditwin-close-idle);
+}
+.btn-close:hover {
+	decorator: image(creditwin-close-hover);
+}
+.btn-close:active {
+	decorator: image(creditwin-close-active);
+}
+
+/* Real art already reads as a close button -- no visible text needed over it. */
+.btn-close-label {
+	display: none;
+}

@@ -1,0 +1,17 @@
+<rml>
+<head>
+	<title>Credits</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="credit_win.rcss"/>
+</head>
+<body>
+	<!-- Stage 1 of CCreditWin's RmlUi port: full-screen background/deco/logo and the close button
+	     only. The illustration crossfade and scrolling credit text still render natively
+	     (CCreditWin::Render()) until Stage 2 -- see CreditWin.h's own class comment. -->
+	<div id="panel" data-model="credit_win">
+		<div id="logo" class="logo"></div>
+		<div id="deco" class="deco"></div>
+		<div id="btn_close" class="btn-close" data-event-click="creditwin_close_click"><span class="btn-close-label">X</span></div>
+	</div>
+</body>
+</rml>
