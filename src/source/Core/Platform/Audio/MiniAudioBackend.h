@@ -96,6 +96,8 @@ private:
 
     ma_sound m_musicSound{};
     bool m_musicLoaded = false;
+    // Separators-normalized track identity (not the filesystem-resolved path)
+    // used for the same-track guard shared by PlayMusic()/StopMusic().
     std::string m_currentMusicName;
     bool m_initialized = false;
 };
