@@ -1,37 +1,20 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/WinEx.h"
-#include "UI/Widgets/Button.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
-
-#define SMW_BTN_GAME_END 0
-#define SMW_BTN_SERVER_SEL 1
-#define SMW_BTN_OPTION 2
-#define SMW_BTN_CLOSE 3
-#define SMW_BTN_MAX 4
 
 namespace Rml { class ElementDocument; }
 
-// RmlUi migration, Batch 2: CWin::Create() now passes nTexID=-2 (was the default -1, a real
-// full-screen alpha=128 black CWin::m_psprBg) -- the dim backdrop moves to RmlUi (#backdrop in
-// base.rcss), and m_winBack stays alive purely for its quantized-height geometry math
-// (Create()/SetLine()/GetWidth()/GetHeight()), never rendered. RmlUi renders 100% of this
-// window's visuals in every theme; the legacy CButtons stay registered (redundant, harmless
-// detection path) alongside Rml*Click*() methods mirroring CLoginWin's pattern.
+// RmlUi renders 100% of this window's visuals in every theme; RmlClick*() methods below are
+// bound to the RmlUi document's data-event-click callbacks, same pattern as CLoginWin.
 //
 // Migrated off CWin onto mu::ui::window::CObject, same pattern as CMsgWin (its own header comment covers the shared
-// reasoning -- full-screen click-swallow via UpdateMouseEvent(), LayoutMode::Legacy for the
-// legacy CWinEx/CButton real-pixel geometry). ESC is NOT handled here at all (never was --
+// reasoning -- full-screen click-swallow via UpdateMouseEvent()). ESC is NOT handled here at all (never was --
 // UpdateWhileActive()'s own ESC branch below was already a no-op): CSceneUICoordinator::Update()'s dedicated
 // ESC-toggle block owns opening/closing this window directly, so this migration doesn't touch
 // that logic or its ordering.
 class CSysMenuWin : public mu::ui::window::CObject
 {
-protected:
-    CWinEx m_winBack;
-    CButton m_aBtn[SMW_BTN_MAX];
-
 public:
     CSysMenuWin();
     ~CSysMenuWin() override;
@@ -39,7 +22,6 @@ public:
     void Create();
     void Release(); // was CWin::PreRelease() (an override hook CWin::Release() called
                      // automatically) -- called explicitly now, same as CCreditWin's own Release().
-    void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow) override;
 
     // Act immediately here instead of setting a flag for UpdateWhileActive() to
@@ -79,8 +61,6 @@ public:
     }
 
 protected:
-    // Shared by the immediate RmlUi callbacks above and Update()'s legacy CButton::IsClick()
-    // polling.
     void ExitGame();
     void SelectServer();
     void OpenOptions();
@@ -89,10 +69,10 @@ protected:
 private:
     struct SysMenuRmlModel
     {
-        // Login scene: Select Server is fully hidden, not just disabled -- CWinEx's shorter
-        // login-scene panel (SetLine(6)) leaves no real room for a 4th button slot, so a
-        // disabled-but-still-drawn button visibly collided with Option (see .hidden's comment in
-        // base.rcss). Character scene: shown normally.
+        // Login scene: Select Server is fully hidden, not just disabled -- the login-scene panel
+        // is too short for a 4th button slot, so a disabled-but-still-drawn button visibly
+        // collided with Option (see .hidden's comment in base.rcss). Character scene: shown
+        // normally.
         bool selectServerHidden = false;
         Rml::String exitGameLabel;
         Rml::String selectServerLabel;

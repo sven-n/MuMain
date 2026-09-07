@@ -8,8 +8,7 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Win.h"
-#include "UI/Widgets/Button.h"
+#include "Render/Sprites/Sprite.h"
 #include "UI/RmlBridge/RmlModelBinder.h"
 
 #include <vector>
@@ -24,42 +23,39 @@
 
 namespace Rml { class ElementDocument; }
 
-// RmlUi migration: the character-creation dialog. Unlike every other migrated window, this one
-// has a genuine live 3D preview (RenderCreateCharacter() -- untouched, still calls
-// BeginOpengl()/RenderCharacter()/EndOpengl() directly, the same mechanism the login screen's 3D
-// tour camera and the character-select scene's own character rendering already use). That call
-// stays exactly where it is, in RenderControls(), during the normal per-frame legacy-2D-content-
-// recording phase -- RmlUi renders last in the frame regardless, so as long as the RmlUi panel has
-// no opaque background over
-// the 410x335 preview viewport, the 3D content composites correctly underneath the RmlUi chrome
-// around it, the same proven trick the login screen's tour camera already relies on. Only the 2D
-// chrome (job buttons, stat/description panels, the name-input frame, OK/Cancel) moves to RmlUi;
-// m_winBack itself was already nTexID=-2 (drew nothing) even before this migration.
+// The character-creation dialog. Unlike every other migrated window, this one has a genuine live
+// 3D preview (RenderCreateCharacter() -- calls BeginOpengl()/RenderCharacter()/EndOpengl()
+// directly, the same mechanism the login screen's 3D tour camera and the character-select scene's
+// own character rendering already use). That call runs during the normal per-frame legacy-2D-
+// content-recording phase -- RmlUi renders last in the frame regardless, so as long as the RmlUi
+// panel has no opaque background over the 410x335 preview viewport, the 3D content composites
+// correctly underneath the RmlUi chrome around it, the same trick the login screen's tour camera
+// relies on. All 2D chrome (job buttons, stat/description panels, the name-input frame, OK/Cancel)
+// renders via RmlUi; m_aJobState below holds only the checked/enabled state RmlUi's job-list
+// binding reads, no rendering or click-detection of its own.
 //
 // The name input text itself stays on the legacy CUITextInputBox/RenderInputText path (matching
 // CLoginWin's precedent, not RmlUi's native <input>) -- drawn via RenderTextOnTop(), called from
 // Winmain.cpp's SetPostRmlUiCallback (already registered for CHARACTER_SCENE) so it's guaranteed
 // to render after RmlUi's own input-frame background regardless of theme.
 //
-// Migrated off CWin onto mu::ui::window::CObject. Unlike CMsgWin/CSysMenuWin (which pass nTexID=-2 and rely entirely on
-// RmlUi's own #backdrop for dimming), this window's own base-class CWin::Create() call used the
-// *default* nTexID=-1 -- a real, visible full-screen semi-transparent black CWin::m_psprBg dimming
-// overlay, genuinely rendered every frame (unlike m_winBack's own -2). Ported as an explicit
-// m_sprBg member (same convention CCreditWin's own m_sprBg replaced CWin::m_psprBg with), rendered
-// first in Render() -- dropping it would be a real, visible regression (character creation losing
-// its dimmed background), not a redundant-bookkeeping cleanup like CMsgWin/CSysMenuWin's case.
+// m_sprBg is a real, visible full-screen dimming overlay, rendered first in Render() --
 // UpdateMouseEvent() unconditionally claims the click while shown, matching that genuine full-
 // screen-modal intent.
 class CCharMakeWin : public mu::ui::window::CObject
 {
 protected:
-    // Replaces CWin::m_psprBg -- see this class's own header comment above for why (unlike
-    // CMsgWin/CSysMenuWin) this one is real, visible content that still needs rendering.
     CSprite m_sprBg;
-    CWin m_winBack;
     CSprite m_asprBack[CMW_SPR_MAX];
-    CButton m_abtnJob[MAX_CLASS];
-    CButton m_aBtn[2];
+
+    // Checked/enabled state for each job button, read by SyncRmlModel() into RmlUi's "jobs"
+    // binding -- RmlUi owns the buttons' rendering and click detection, this is just the model.
+    struct JobButtonState
+    {
+        bool checked = false;
+        bool enabled = true;
+    };
+    JobButtonState m_aJobState[MAX_CLASS];
 
     CLASS_TYPE m_nSelJob;
     wchar_t m_aszJobDesc[CMW_DESC_LINE_MAX][CMW_DESC_ROW_MAX];
@@ -97,9 +93,8 @@ public:
     // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
-    // Was CWin::Create()'s (default nTexID=-1, real full-screen dimming) bounding rect +
-    // CWin::CursorInWin(WA_ALL) -- genuinely modal (see this class's header comment), same
-    // full-screen click-swallow as CMsgWin/CSysMenuWin.
+    // Genuinely modal (see this class's header comment) -- same full-screen click-swallow as
+    // CMsgWin/CSysMenuWin.
     bool UpdateMouseEvent() override
     {
         return !IsVisible();
@@ -159,8 +154,6 @@ private:
     int m_nOriginX = 0;
     int m_nOriginY = 0;
 
-    // Shared by the immediate RmlUi callbacks above and Update()'s legacy CButton::IsClick()
-    // polling.
     void SelectJob(int classIndex);
     void SubmitCreateCharacter();
     void CloseDialog();

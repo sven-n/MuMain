@@ -6,7 +6,6 @@
 #include "UI/Windows/SysMenuWin.h"
 #include "I18N/All.h"
 
-#include "Core/Input/Input.h"
 #include "UI/Core/SceneUICoordinator.h"
 #include "Character/CharSelMainWin.h"
 #include "Engine/Object/ZzzInfomation.h"
@@ -27,8 +26,6 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
-#define	SMW_BTN_GAP		4
-
 extern EGameScene  SceneFlag;
 extern bool LogOut;
 
@@ -47,37 +44,6 @@ void CSysMenuWin::Create()
 {
     Release();
 
-    SImgInfo aiiBack[WE_BG_MAX] =
-    {
-        { BITMAP_SYS_WIN, 0, 0, 128, 128 },
-        { BITMAP_SYS_WIN + 1, 0, 0, 213, 64 },
-        { BITMAP_SYS_WIN + 2, 0, 0, 213, 43 },
-        { BITMAP_SYS_WIN + 3, 0, 0, 5, 8 },
-        { BITMAP_SYS_WIN + 4, 0, 0, 5, 8 }
-    };
-    m_winBack.Create(aiiBack, 1, 10);
-
-    const wchar_t* apszBtnText[SMW_BTN_MAX] =
-    { I18N::Game::ExitGame, I18N::Game::SelectServer, I18N::Game::Option385, I18N::Game::Close388 };
-    DWORD adwBtnClr[4] =
-    { CLRDW_BR_GRAY, CLRDW_BR_GRAY, CLRDW_WHITE, 0 };
-    for (int i = 0; i < SMW_BTN_MAX; ++i)
-    {
-        m_aBtn[i].Create(108, 30, BITMAP_TEXT_BTN, 4, 2, 1);
-        m_aBtn[i].SetText(apszBtnText[i], adwBtnClr);
-    }
-
-    switch (SceneFlag)
-    {
-    case LOG_IN_SCENE:
-        m_aBtn[SMW_BTN_SERVER_SEL].SetEnable(false);
-        m_winBack.SetLine(6);
-        break;
-    case CHARACTER_SCENE:
-        m_aBtn[SMW_BTN_SERVER_SEL].SetEnable(true);
-        m_winBack.SetLine(10);
-        break;
-    }
     m_bSelectServerEnabled = (SceneFlag == CHARACTER_SCENE);
 
     // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
@@ -109,21 +75,11 @@ void CSysMenuWin::Create()
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SYS_MENU, this);
 
-    CInput rInput = CInput::Instance();
-    SetPosition((rInput.GetScreenWidth() - m_winBack.GetWidth()) / 2,
-        (rInput.GetScreenHeight() - m_winBack.GetHeight()) / 2);
-
     Show(false);
 }
 
 void CSysMenuWin::Release()
 {
-    m_aBtn[0].Release();
-    m_aBtn[1].Release();
-    m_aBtn[2].Release();
-    m_aBtn[3].Release();
-    m_winBack.Release();
-
     // See CLoginMainWin::PreRelease()'s identical comment -- each migrated window's Release() is
     // called explicitly at every scene transition (CSceneUICoordinator's CreateLoginScene()/
     // CreateCharacterScene()/CreateMainScene()/Release()), not swept automatically by any shared
@@ -134,36 +90,9 @@ void CSysMenuWin::Release()
         m_pRmlDoc->Hide();
 }
 
-void CSysMenuWin::SetPosition(int nXCoord, int nYCoord)
-{
-    m_winBack.SetPosition(nXCoord, nYCoord);
-
-    int nBtnPosX = m_winBack.GetXPos() + (m_winBack.GetWidth() - m_aBtn[0].GetWidth()) / 2;
-    int nBtnGap = SMW_BTN_GAP + m_aBtn[0].GetHeight();
-    int nBtnPosBaseTop = m_winBack.GetYPos() + 33;
-    for (int i = 0; i < SMW_BTN_OPTION; ++i)
-        m_aBtn[i].SetPosition(nBtnPosX, nBtnPosBaseTop + i * nBtnGap);
-
-    int nCloseBtnPosY = m_winBack.GetYPos() + m_winBack.GetHeight() - 52;
-    m_aBtn[SMW_BTN_CLOSE].SetPosition(nBtnPosX, nCloseBtnPosY);
-    m_aBtn[SMW_BTN_OPTION].SetPosition(nBtnPosX, nCloseBtnPosY - nBtnGap);
-
-    // This function no longer pushes anything to the RmlUi elements -- #panel centers itself via
-    // base.rcss's .center-both utility class and sizes itself via a fixed dp width/height plus a
-    // .compact modifier for the shorter login-scene variant (sys_menu.rml/.rcss, both themes);
-    // every button is a fixed dp offset from the panel's own edges. See sys_menu.rcss's own
-    // comment for the full derivation from this function's old math. The legacy m_winBack/m_aBtn
-    // positioning above is unchanged -- still real screen-pixel geometry, still needed for their
-    // own click-detection redundancy (Update()'s `||`).
-}
-
 void CSysMenuWin::Show(bool bShow)
 {
     mu::ui::window::CObject::Show(bShow);
-
-    m_winBack.Show(bShow);
-    for (int i = 0; i < SMW_BTN_MAX; ++i)
-        m_aBtn[i].Show(bShow);
 
     if (m_pRmlDoc)
     {
@@ -174,23 +103,7 @@ void CSysMenuWin::Show(bool bShow)
 
 bool CSysMenuWin::Update()
 {
-    if (!IsVisible())
-        return true;
-
-    for (int i = 0; i < SMW_BTN_MAX; ++i)
-        m_aBtn[i].Update();
-
-    if (m_aBtn[SMW_BTN_GAME_END].IsClick())
-        ExitGame();
-    else if (m_aBtn[SMW_BTN_SERVER_SEL].IsClick() && m_bSelectServerEnabled)
-        SelectServer();
-    else if (m_aBtn[SMW_BTN_OPTION].IsClick())
-        OpenOptions();
-    else if (m_aBtn[SMW_BTN_CLOSE].IsClick())
-        Close();
-    // ESC toggle is handled by CSceneUICoordinator::Update() -- no action needed here, same as before
-    // this window migrated off CWin.
-
+    // ESC toggle is handled by CSceneUICoordinator::Update() -- no action needed here.
     return true;
 }
 
@@ -224,9 +137,6 @@ void CSysMenuWin::Close()
 
 bool CSysMenuWin::Render()
 {
-    // m_winBack no longer renders -- RmlUi's #backdrop/#panel own 100% of this window's visuals
-    // (see this class's header comment). The legacy CButtons draw nothing visible either (never
-    // called here); kept updating purely for redundant click detection like CLoginWin's.
     SyncRmlModel();
     return true;
 }
