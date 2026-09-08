@@ -47,8 +47,8 @@ namespace Render::Effects::Behaviors
             o->Timer = 0.0f;
             break;
         }
-        if (o->Timer > o->Angle[1]) o->Angle[1] += 0.5f;
-        if (o->Timer < o->Angle[1]) o->Angle[1] -= 0.5f;
+        if (o->Timer > o->Angle[1]) o->Angle[1] += 0.5f * FPS_ANIMATION_FACTOR;
+        if (o->Timer < o->Angle[1]) o->Angle[1] -= 0.5f * FPS_ANIMATION_FACTOR;
 
         if (fTemp <= 800.0f && fTemp >= -800.0f)
         {
@@ -1030,14 +1030,14 @@ namespace Render::Effects::Behaviors
 
             if (o->Kind == 1)
             {
-                if (o->Alpha > 0.0f) o->Alpha -= 0.03f;
+                if (o->Alpha > 0.0f) o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
                 else DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_SAHAMUTT, o->Owner);
             }
             else
             {
                 if (Hero->SafeZone/* || rand_fps_check(100)*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                     o->Kind = 1;
-                if (o->Alpha < 1.0f) o->Alpha += 0.03f;
+                if (o->Alpha < 1.0f) o->Alpha += 0.03f * FPS_ANIMATION_FACTOR;
             }
 
             if (pObject->Live)
@@ -1088,14 +1088,14 @@ namespace Render::Effects::Behaviors
 
             if (o->Kind == 1)
             {
-                if (o->Alpha > 0.0f) o->Alpha -= 0.03f;
+                if (o->Alpha > 0.0f) o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
                 else DeleteEffect(MODEL_SUMMONER_EQUIP_HEAD_NEIL, o->Owner);
             }
             else
             {
                 if (Hero->SafeZone/* || rand_fps_check(100)*/ || sinf(WorldTime * 0.0004f + o->Skill * 0.024f) < 0.3f)
                     o->Kind = 1;
-                if (o->Alpha < 1.0f) o->Alpha += 0.03f;
+                if (o->Alpha < 1.0f) o->Alpha += 0.03f * FPS_ANIMATION_FACTOR;
             }
 
             if (pObject->Live)
@@ -1133,8 +1133,8 @@ namespace Render::Effects::Behaviors
     bool Move_MODEL_SUMMONER_CASTING_EFFECT1(OBJECT* o, int index, float Luminosity)
     {
     {
-        if (o->LifeTime < 20) o->BlendMeshLight -= 0.03f;
-        else if (o->BlendMeshLight < 0.5f) o->BlendMeshLight += 0.05f;
+        if (o->LifeTime < 20) o->BlendMeshLight -= 0.03f * FPS_ANIMATION_FACTOR;
+        else if (o->BlendMeshLight < 0.5f) o->BlendMeshLight += 0.05f * FPS_ANIMATION_FACTOR;
 
         switch (o->Type)
         {
@@ -1265,8 +1265,8 @@ namespace Render::Effects::Behaviors
     {
         float Matrix[3][4];
     {
-        if (o->LifeTime < 20) o->Alpha -= 0.05f;
-        else if (o->Alpha < 0.7f) o->Alpha += 0.04f;
+        if (o->LifeTime < 20) o->Alpha -= 0.05f * FPS_ANIMATION_FACTOR;
+        else if (o->Alpha < 0.7f) o->Alpha += 0.04f * FPS_ANIMATION_FACTOR;
 
         if (o->AnimationFrame > 8 && o->Skill == 0)
         {
@@ -1373,8 +1373,8 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 9)
         {
-            if (o->LifeTime < 20) o->Alpha -= 0.05f;
-            else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
+            if (o->LifeTime < 20) o->Alpha -= 0.05f * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.05f * FPS_ANIMATION_FACTOR;
 
             o->HeadAngle[0] += (4.0f) * FPS_ANIMATION_FACTOR;
             o->HeadAngle[1] -= (8.0f) * FPS_ANIMATION_FACTOR;
@@ -1382,8 +1382,8 @@ namespace Render::Effects::Behaviors
         }
         else if (o->SubType == 10)
         {
-            if (o->LifeTime < 20) o->Alpha -= 0.03f;
-            else if (o->Alpha < 1.0f) o->Alpha += 0.05f;
+            if (o->LifeTime < 20) o->Alpha -= 0.03f * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.05f * FPS_ANIMATION_FACTOR;
         }
         else if (o->SubType == 11)
         {
@@ -4914,8 +4914,14 @@ namespace Render::Effects::Behaviors
         {
             int iSubType = rand() % 30;
             Vector((rand() % 3) * .3f + .4f, (rand() % 4) * .1f, .0f, Light);
+            // No *FPS_ANIMATION_FACTOR on the loop bound -- CreateParticleFpsChecked() already
+            // gates each call through rand_fps_check(1), whose own spawn chance IS
+            // FPS_ANIMATION_FACTOR (Random.cpp). Scaling the loop bound by it too double-applies
+            // the factor (expected spawns ~80*factor^2 instead of ~80*factor), making the burst
+            // quadratically sparser at high FPS -- the commented-out original (200, no factor) is
+            // the correct shape this was meant to follow.
             //for ( int j = 0; j < 200; ++j)
-            for (int j = 0; j < 80 * FPS_ANIMATION_FACTOR; ++j)
+            for (int j = 0; j < 80; ++j)
             {
                 CreateParticleFpsChecked(BITMAP_FIRECRACKER, o->Position, o->Angle, Light, iSubType);
             }
@@ -7222,7 +7228,10 @@ namespace Render::Effects::Behaviors
             o->LifeTime = 0;
             return true;
         }
-        if (o->Alpha >= 1.0f) o->Angle[2] += 5.0f;
+        // *FPS_ANIMATION_FACTOR below on the spin/fade steps -- none had a time basis, so the
+        // shield icon's steady-state spin rate and fade-in/out both ran N times faster at
+        // high/uncapped FPS than the rate this was tuned against.
+        if (o->Alpha >= 1.0f) o->Angle[2] += 5.0f * FPS_ANIMATION_FACTOR;
         //				o->Alpha = sin((o->LifeTime/130.0f)*3.14f) - 0.1f;
         if (o->LifeTime > 120)
         {
@@ -7235,12 +7244,12 @@ namespace Render::Effects::Behaviors
         else if (o->LifeTime > 95)
         {
             if (o->Alpha > 1.0f) o->Alpha = 1.0f;
-            else o->Alpha += 0.4f;
+            else o->Alpha += 0.4f * FPS_ANIMATION_FACTOR;
         }
         else if (o->LifeTime < 50)
         {
             if (o->Alpha < 0) o->Alpha = 0;
-            else o->Alpha -= 0.1f;
+            else o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
         }
 
         BMD* b = &Models[o->Owner->Type];
@@ -7715,8 +7724,8 @@ namespace Render::Effects::Behaviors
                 EffectDestructor(o);
                 return true;
             }
-            if (o->LifeTime < 20) o->Alpha -= 0.1f;
-            else if (o->Alpha < 1.0f) o->Alpha += 0.1f;
+            if (o->LifeTime < 20) o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
+            else if (o->Alpha < 1.0f) o->Alpha += 0.1f * FPS_ANIMATION_FACTOR;
 
             OBJECT* pObject = o;
             BMD* pModel = &Models[pObject->Type];

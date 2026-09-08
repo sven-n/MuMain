@@ -188,7 +188,10 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
             if (o->Owner->Teleport == TELEPORT_BEGIN || o->Owner->Teleport == TELEPORT)
             {
-                o->Alpha -= 0.1f;
+                // *FPS_ANIMATION_FACTOR -- was a fixed 0.1/call fade with no time basis, so the
+                // teleport fade-out vanished N times faster at high/uncapped FPS than the ~10
+                // frames it was tuned to take.
+                o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->Alpha < 0) o->Alpha = 0.f;
             }
             else
@@ -504,7 +507,10 @@ bool MoveMount(OBJECT* o, bool bForceRender)
 
             if (o->Owner->Teleport == TELEPORT_BEGIN || o->Owner->Teleport == TELEPORT)
             {
-                o->Alpha -= 0.1f;
+                // *FPS_ANIMATION_FACTOR -- was a fixed 0.1/call fade with no time basis, so the
+                // teleport fade-out vanished N times faster at high/uncapped FPS than the ~10
+                // frames it was tuned to take.
+                o->Alpha -= 0.1f * FPS_ANIMATION_FACTOR;
                 if (o->Alpha < 0) o->Alpha = 0.f;
             }
             else
