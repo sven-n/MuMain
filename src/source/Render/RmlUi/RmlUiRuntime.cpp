@@ -227,7 +227,6 @@ void RmlUiRuntime::RenderBackgroundLayer()
 {
     if (!m_BackgroundContext) return;
     if (m_backgroundLayerRenderedThisFrame) return;
-    m_backgroundLayerRenderedThisFrame = true;
 
     // Opens a real render pass now, replaying whatever the caller's own legacy content has
     // recorded so far this frame -- see FlushRenderCommands()'s own comment (MuRenderer.h) for
@@ -239,8 +238,18 @@ void RmlUiRuntime::RenderBackgroundLayer()
 
     // Same seam Render() uses for "main" -- see that method's own comment for why this is only
     // valid here (still inside Begin/EndFrame's command buffer) and needs no state save/restore.
+    // GetFrameGpuContext() can legitimately come back null on a given frame (SDL_GPU swapchain
+    // texture not yet available -- MuRendererSDLGpu.cpp's own BeginFrame(), not just a minimized
+    // window), and the once-per-frame guard below must NOT latch on a frame where that happens:
+    // this call site owns the shared background context's ONLY render for the whole frame (see
+    // m_backgroundLayerRenderedThisFrame's own header comment), so latching here regardless of
+    // whether a render actually happened would silently drop the background panel behind whatever
+    // native 3D icon content still draws unconditionally later this same frame -- exactly the
+    // "background blinks/looks transparent" symptom this comment is here to prevent regressing.
     const mu::FrameGpuContext ctx = mu::GetRenderer().GetFrameGpuContext();
     if (!ctx.commandBuffer || !ctx.swapchainTexture) return;
+
+    m_backgroundLayerRenderedThisFrame = true;
 
     m_BackgroundContext->Update();
     m_RenderInterface->BeginFrame(ctx.commandBuffer, ctx.swapchainTexture, ctx.width, ctx.height);
