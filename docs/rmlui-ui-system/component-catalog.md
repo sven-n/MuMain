@@ -123,7 +123,9 @@ per-window, or entirely unbuilt:
   as `CCharMakeWin`'s preview.
 - **ProgressBar / HealthBar / ManaBar / ExperienceBar** — `main_frame.rcss`'s HP/MP/AG/SD/EXP
   gauge-fill rules (`#hp_fill` etc.) are ad hoc per-window CSS, not an abstracted, reusable bar
-  component another window could reference.
+  component another window could reference. `title_scene.rml`'s loading bar uses RmlUi's own
+  built-in `<progress>` element instead (`SetValue()`/`SetMax()` from C++, no model binding) — a
+  real, proven raw-element option for a future gauge, but still not an abstracted shared component.
 - **Tooltip** — actively **four non-unified mechanisms** exist side by side (flagged in
   `newui-tier-adapter.md`'s pilots-to-revisit table): the skill-hotkey tooltip
   (`UI::Skills::Tooltip`, `SkillTooltipModel.h`), `CMyInventory`'s Set/Socket option tooltip

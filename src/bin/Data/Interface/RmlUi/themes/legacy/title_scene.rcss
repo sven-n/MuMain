@@ -1,0 +1,30 @@
+/* Legacy theme for TitleSceneUI's splash-screen loading bar -- the last CGaugeBar consumer, now
+   RmlUi's own <progress> element. The 13 decorative background sprites TitleSceneUI.cpp still draws
+   around this bar are untouched CSprite art, not part of this port -- which is why left/top/width/
+   height are pushed from C++ instead of set here as dp, same split login_main.rcss's own #panel
+   uses (position stays here, geometry is C++-computed). A static dp value can't reproduce the
+   still-native sprites' own fScaleX/fScaleY (800x600-reference, independent per-axis, unclamped)
+   scaling at arbitrary window sizes: RmlUi's dp unit uses a different formula entirely (640x480-
+   reference, one uniform factor for both axes, floor-clamped at 1.0, damped toward a ceiling --
+   UITransform.cpp's ViewportFitScale()) -- the two formulas only coincide at exactly the 640x480
+   reference size. See TitleSceneUI.cpp's own comment at CreateSceneUI()'s gauge setup. */
+
+/* lo_lo.jpg (real file lo_lo.OZJ, a raw JPEG) is a 4x15px tileable strip the legacy renderer
+   stretched across the whole 656px bar via GL_REPEAT wrap -- fill-image stretching it the same way
+   is not a fidelity concession, it's exactly what main_frame.rcss's own gauge fills already do for
+   their own tiny source textures (e.g. mainframe-gauge-exp, 6x4px). Path convention
+   ("../../../lo_lo.jpg" despite the real file being .OZJ) is the same one credit_win.rcss's own
+   illustration spritesheets already prove out. */
+@spritesheet title-gauge-fill-sheet { src: "../../../lo_lo.jpg"; title-gauge-fill: 0px 0px 4px 15px; }
+
+/* position:absolute is load-bearing here, not just placement -- an unstyled element's `display`
+   defaults to `inline` (RmlUi's own property default, StyleSheetSpecification.cpp), and an inline
+   element ignores width/height. position:absolute forces block-level sizing regardless of
+   `display` (FormattingContext.cpp checks computed.position() == Absolute alongside display), same
+   as every other absolutely-positioned element in this codebase -- a prior version of this file
+   used a plain <div> pair without this on the inner fill div and the bar never rendered visibly. */
+.gauge-fill {
+	position: absolute;
+	/* left/top/width/height pushed from C++ -- see this file's own header comment. */
+	fill-image: title-gauge-fill;
+}

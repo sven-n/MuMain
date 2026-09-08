@@ -7,9 +7,12 @@
 
 #include "Core/Input/Input.h"
 #include "Render/Sprites/Sprite.h"
-#include "UI/Widgets/GaugeBar.h"
 #include "Render/Renderer/MuRenderer.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Elements/ElementProgress.h>
 
 #ifdef _EDITOR
 #include "../MuEditor/Core/MuEditorCore.h"
@@ -32,7 +35,14 @@
 namespace
 {
     CSprite* s_asprTitle = nullptr;
-    CGaugeBar* s_pgbLoding = nullptr;
+
+    // Replaces CGaugeBar (the last consumer of that class -- see this file's own comment at
+    // CreateSceneUI()'s gauge setup) -- free statics, not members, since TitleSceneUI has no
+    // owning class, same shape LoadingScene.cpp's own s_rmlLoadingDoc uses. s_pGaugeFill is cached
+    // once so RenderSceneUI() can call SetValue()/SetMax() directly -- no data-model binding
+    // needed, RmlUi's own <progress> element already owns that state.
+    Rml::ElementDocument* s_rmlDoc = nullptr;
+    Rml::ElementProgress* s_pGaugeFill = nullptr;
 }
 
 void TitleSceneUI::CreateSceneUI()
@@ -92,24 +102,53 @@ void TitleSceneUI::CreateSceneUI()
                                       fScaleY);
     s_asprTitle[UIM_TS_121518].SetPosition(544, 60);
 
-    s_pgbLoding = new CGaugeBar;
+    // Loading bar, RmlUi's own <progress> element now (title_scene.rml/.rcss) -- was CGaugeBar,
+    // the last consumer of that class. IsCreated() guards against RmlUiRuntime not being up yet,
+    // matching LoadingScene.cpp's own guard around its structurally identical sprite->RmlUi port.
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        s_rmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+            "Data/Interface/RmlUi/title_scene.rml");
+        if (s_rmlDoc)
+        {
+            s_rmlDoc->Show();
+            s_pGaugeFill = rmlui_dynamic_cast<Rml::ElementProgress*>(s_rmlDoc->GetElementById("gauge_fill"));
 
-    RECT rc = {0, 0, 656, 15};
-    s_pgbLoding->Create(4, 15, BITMAP_TITLE + 5, &rc, 0, 0, -1, true, fScaleX, fScaleY);
+            // Pushed as real px, not dp -- dp only matches this scene's still-native background
+            // sprites' own fScaleX/fScaleY (800x600-reference, independent per axis, unclamped)
+            // scaling at exactly the 640x480 reference size (RmlUi's dp unit is a different,
+            // uniform/clamped/damped formula against a 640x480 reference -- confirmed live: the
+            // gauge only lined up at 640x480 before this, misplaced everywhere else). Recomputing
+            // the identical fScaleX/fScaleY math CGaugeBar::Create()/SetPosition() used keeps this
+            // pixel-exact with the sprites at any resolution, same reasoning login_main.rcss's own
+            // #panel comment gives for pushing its geometry from C++ instead of static dp.
+            if (s_pGaugeFill)
+            {
+                s_pGaugeFill->SetProperty("left", std::to_string(static_cast<int>(72 * fScaleX)) + "px");
+                s_pGaugeFill->SetProperty("top", std::to_string(static_cast<int>(540 * fScaleY)) + "px");
+                s_pGaugeFill->SetProperty("width", std::to_string(static_cast<int>(656 * fScaleX)) + "px");
+                s_pGaugeFill->SetProperty("height", std::to_string(static_cast<int>(15 * fScaleY)) + "px");
+            }
+        }
+    }
 
-    s_pgbLoding->SetPosition(72, 540);
     for (int i = 0; i < UIM_TS_MAX; ++i)
     {
         s_asprTitle[i].Show();
     }
-    s_pgbLoding->Show();
     s_asprTitle[UIM_TS_121518].Show(false);
 }
 
 void TitleSceneUI::ReleaseSceneUI()
 {
     SAFE_DELETE_ARRAY(s_asprTitle);
-    SAFE_DELETE(s_pgbLoding);
+
+    s_pGaugeFill = nullptr;
+    if (s_rmlDoc)
+    {
+        s_rmlDoc->Close();
+        s_rmlDoc = nullptr;
+    }
 }
 
 void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
@@ -136,8 +175,16 @@ void TitleSceneUI::RenderSceneUI(HDC hDC, DWORD dwNow, DWORD dwTotal)
         s_asprTitle[i].Render();
     }
 
-    s_pgbLoding->SetValue(dwNow, dwTotal);
-    s_pgbLoding->Render();
+    // Not rendered here -- RmlUiRuntime's SetPreSubmitCallback fires automatically before this
+    // function's own EndFrame() submits below, same as every other RmlUi document (see this
+    // file's own comment at CreateSceneUI()'s gauge setup). SetMax()/SetValue() own the
+    // normalization (clamped, divide-by-zero-safe -- ElementProgress::GetMax() floors to 1
+    // internally), no manual fraction math needed.
+    if (s_pGaugeFill)
+    {
+        s_pGaugeFill->SetMax(static_cast<float>(dwTotal));
+        s_pGaugeFill->SetValue(static_cast<float>(dwNow));
+    }
 
     ::EndBitmap();
     ::EndOpengl();
