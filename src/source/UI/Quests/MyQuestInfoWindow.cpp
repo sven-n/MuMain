@@ -8,6 +8,17 @@
 #include "Audio/DSPlaySound.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/Quests/QuestProgressByEtc.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "Engine/Object/ZzzInventory.h"
+#include "Core/Utilities/StringUtils.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -15,6 +26,23 @@ using namespace mu::ui::window;
 extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
 extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
+
+// Replaces the two render paths' former shared m_aszMsg/m_nMsgLine buffer -- computed fresh per
+// call instead of cached in a member, since SyncRmlModel() now reads/builds both the empty-quest
+// message and the job-change state message in the same pass and a shared buffer would let one
+// stomp the other (found during review, not in the original -- its two render paths were always
+// mutually exclusive per frame, so the aliasing was harmless there).
+std::vector<mu::ui::window::CMyQuestInfoWindow::TextLine> mu::ui::window::CMyQuestInfoWindow::BuildTextLines(
+    int nGlobalTextIndex, int nPixelWidth)
+{
+    wchar_t aszMsg[2][64] = {};
+    const int nLine = ::DivideStringByPixel(&aszMsg[0][0], 2, 64, I18N::Game::Lookup(nGlobalTextIndex), nPixelWidth);
+
+    std::vector<TextLine> lines;
+    for (int i = 0; i < nLine; ++i)
+        lines.push_back({ StringUtils::WideToNarrow(aszMsg[i]) });
+    return lines;
+}
 
 mu::ui::window::CMyQuestInfoWindow::CMyQuestInfoWindow()
 {
@@ -37,8 +65,103 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
 
     SetPos(x, y);
     LoadImages();
-    SetButtonInfo();
     m_eTabBtnIndex = TAB_QUEST;
+
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_quest_info",
+            [this](Rml::DataModelConstructor& c, MyQuestInfoRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("active_tab", &model.activeTab);
+                c.Bind("tab_quest_label", &model.tabQuestLabel);
+                c.Bind("tab_jobchange_label", &model.tabJobChangeLabel);
+                c.Bind("tab_castletemple_label", &model.tabCastleTempleLabel);
+
+                c.Bind("quest_list_empty", &model.questListEmpty);
+                c.Bind("open_enabled", &model.openEnabled);
+                c.Bind("giveup_enabled", &model.giveupEnabled);
+
+                c.Bind("open_tooltip", &model.openTooltip);
+                c.Bind("giveup_tooltip", &model.giveupTooltip);
+                c.Bind("exit_tooltip", &model.exitTooltip);
+
+                auto textLine = c.RegisterStruct<TextLine>();
+                textLine.RegisterMember("text", &TextLine::text);
+                c.RegisterArray<std::vector<TextLine>>();
+                c.Bind("empty_quest_lines", &model.emptyQuestLines);
+                c.Bind("jobchange_lines", &model.jobChangeLines);
+                c.Bind("jobchange_state_lines", &model.jobChangeStateLines);
+
+                auto quest = c.RegisterStruct<QuestEntry>();
+                quest.RegisterMember("text", &QuestEntry::text);
+                quest.RegisterMember("index", &QuestEntry::index);
+                quest.RegisterMember("selected", &QuestEntry::selected);
+                c.RegisterArray<std::vector<QuestEntry>>();
+                c.Bind("quests", &model.quests);
+
+                auto content = c.RegisterStruct<ContentEntry>();
+                content.RegisterMember("text", &ContentEntry::text);
+                content.RegisterMember("color", &ContentEntry::color);
+                content.RegisterMember("bold", &ContentEntry::bold);
+                content.RegisterMember("index", &ContentEntry::index);
+                content.RegisterMember("clickable", &ContentEntry::clickable);
+                c.RegisterArray<std::vector<ContentEntry>>();
+                c.Bind("contents", &model.contents);
+
+                c.Bind("jobchange_title", &model.jobChangeTitle);
+                c.Bind("castle_title", &model.castleTitle);
+                c.Bind("castle_line0", &model.castleLine0);
+                c.Bind("castle_line1", &model.castleLine1);
+                c.Bind("temple_title", &model.templeTitle);
+                c.Bind("temple_line0", &model.templeLine0);
+                c.Bind("temple_line1", &model.templeLine1);
+
+                c.BindEventCallback("myquest_select_tab",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectTab(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("myquest_select_quest",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectQuest(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("myquest_select_content",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickSelectContent(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("myquest_click_open",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOpen(); });
+                c.BindEventCallback("myquest_click_giveup",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickGiveUp(); });
+                c.BindEventCallback("myquest_click_exit",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+            });
+
+        if (modelCreated)
+        {
+            auto& model = m_RmlBinder.GetModel();
+            model.tabQuestLabel = StringUtils::WideToNarrow(I18N::Game::Quest);
+            model.tabJobChangeLabel = StringUtils::WideToNarrow(I18N::Game::ChangeClass);
+            model.tabCastleTempleLabel = StringUtils::WideToNarrow(I18N::Game::CastleTemple);
+
+            model.openTooltip = StringUtils::WideToNarrow(I18N::Game::StartQuest);
+            model.giveupTooltip = StringUtils::WideToNarrow(I18N::Game::GiveUpQuest);
+            model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Exit);
+        }
+
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+            "Data/Interface/RmlUi/my_quest_info.rml");
+    }
+
     Show(false);
 
     return true;
@@ -47,6 +170,12 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
 void mu::ui::window::CMyQuestInfoWindow::Release()
 {
     UnloadImages();
+
+    if (m_pRmlDoc)
+    {
+        m_pRmlDoc->Close();
+        m_pRmlDoc = nullptr;
+    }
 
     if (m_pNewUIMng)
     {
@@ -59,94 +188,27 @@ void mu::ui::window::CMyQuestInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+}
 
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_btnQuestOpen.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
-    m_btnQuestGiveUp.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
-
-    m_CurQuestListBox.SetPosition(m_Pos.x + 9, m_Pos.y + 160);
-    m_QuestContentsListBox.SetPosition(m_Pos.x + 9, m_Pos.y + 390);
+void mu::ui::window::CMyQuestInfoWindow::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+    if (m_pRmlDoc)
+    {
+        if (bShow) m_pRmlDoc->Show();
+        else m_pRmlDoc->Hide();
+    }
 }
 
 bool mu::ui::window::CMyQuestInfoWindow::UpdateMouseEvent()
 {
-    if (m_eTabBtnIndex == TAB_QUEST)
-    {
-        m_CurQuestListBox.DoAction();
-        m_QuestContentsListBox.DoAction();
-    }
-
-    if (BtnProcess() == true)
-    {
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYQUEST))
         return false;
-    }
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, MYQUESTINFO_WINDOW_WIDTH, MYQUESTINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
-    {
         return false;
-    }
 
     return true;
-}
-
-bool mu::ui::window::CMyQuestInfoWindow::BtnProcess()
-{
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MYQUEST))
-        return true;
-
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
-        return true;
-    }
-
-    TAB_BUTTON_INDEX eTabBtnIndex = UpdateTabBtn();
-    if (eTabBtnIndex == TAB_QUEST)
-    {
-        if (0 == m_CurQuestListBox.GetLineNum())
-            SetMessage(2825);
-        return true;
-    }
-
-    if (eTabBtnIndex == TAB_JOB_CHANGE)
-    {
-        /*		BYTE byState = g_csQuest.getCurrQuestState();
-                if (byState == QUEST_NONE || byState == QUEST_NO || byState == QUEST_ERROR)
-                    SetMessage(930);
-                else if(byState == QUEST_ING )
-                    SetMessage(931);
-                else if(byState == QUEST_END )
-                    SetMessage(932);
-                */
-        return true;
-    }
-
-    if (eTabBtnIndex == TAB_CASTLE_TEMPLE)
-    {
-        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(MiniGameType::BloodCastle);
-        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(MiniGameType::CursedTemple);
-        return true;
-    }
-
-    if (m_eTabBtnIndex == TAB_QUEST)
-    {
-        if (m_btnQuestOpen.UpdateMouseEvent())
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-            g_pQuestProgressByEtc->SetContents(GetSelQuestIndex());
-            g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
-            return true;
-        }
-
-        if (m_btnQuestGiveUp.UpdateMouseEvent())
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CQuestGiveUpMsgBoxLayout));
-            return true;
-        }
-    }
-    return false;
 }
 
 bool mu::ui::window::CMyQuestInfoWindow::UpdateKeyEvent()
@@ -165,35 +227,23 @@ bool mu::ui::window::CMyQuestInfoWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CMyQuestInfoWindow::Update()
 {
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CMyQuestInfoWindow::Render()
 {
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTabBtn();
-    RenderSubjectTexts();
-    m_BtnExit.Render();
-
-    if (m_eTabBtnIndex == TAB_QUEST)
+    // RmlUi's #panel now owns 100% of this window's chrome/text/list rendering. The one
+    // exception -- a selected reward-item row's live info popup -- stays a direct native call
+    // here, matching CUIQuestContentsListBox::RenderCoveredInterface's original per-frame-while-
+    // selected behavior (see m_pSelectedRewardItem's own header comment).
+    if (m_eTabBtnIndex == TAB_QUEST && m_pSelectedRewardItem)
     {
-        RenderQuestInfo();
+        const auto transform = UI::Scaling::GetActiveTransform();
+        const int nX = static_cast<int>((m_Pos.x + 95) * transform.scaleX + transform.offsetX);
+        const int nY = static_cast<int>((m_Pos.y + 230) * transform.scaleY + transform.offsetY);
+        ::RenderItemInfo(nX, nY, m_pSelectedRewardItem, false, 0, true);
     }
-    else if (m_eTabBtnIndex == TAB_JOB_CHANGE)
-    {
-        RenderImage(IMAGE_MYQUEST_LINE, m_Pos.x, m_Pos.y + 182, 188.f, 21.f);
-        RenderJobChangeContents();
-        RenderJobChangeState();
-    }
-    else if (m_eTabBtnIndex == TAB_CASTLE_TEMPLE)
-    {
-        RenderImage(IMAGE_MYQUEST_LINE, m_Pos.x, m_Pos.y + 210, 188.f, 21.f);
-        RenderCastleInfo();
-        RenderTempleInfo();
-    }
-
-    DisableAlphaBlend();
 
     return true;
 }
@@ -201,6 +251,125 @@ bool mu::ui::window::CMyQuestInfoWindow::Render()
 float mu::ui::window::CMyQuestInfoWindow::GetLayerDepth()
 {
     return 3.3f;
+}
+
+void mu::ui::window::CMyQuestInfoWindow::OpenningProcess()
+{
+    g_csQuest.ShowQuestPreviewWindow(-1);
+}
+
+void mu::ui::window::CMyQuestInfoWindow::ClosingProcess()
+{
+    UnselectQuestList();
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
+    ::PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::CMyQuestInfoWindow::UnselectQuestList()
+{
+    m_dwSelectedQuestIndex = 0;
+    m_ContentRows.clear();
+    m_pSelectedRewardItem = nullptr;
+    QuestOpenBtnEnable(false);
+    QuestGiveUpBtnEnable(false);
+}
+
+void mu::ui::window::CMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
+{
+    m_QuestIndices.assign(pDWordList->begin(), pDWordList->end());
+
+    m_dwSelectedQuestIndex = 0;
+    m_ContentRows.clear();
+    m_pSelectedRewardItem = nullptr;
+    QuestOpenBtnEnable(false);
+    QuestGiveUpBtnEnable(false);
+}
+
+void mu::ui::window::CMyQuestInfoWindow::SetSelQuestSummary()
+{
+    m_ContentRows.clear();
+    m_pSelectedRewardItem = nullptr;
+
+    const DWORD dwSelQuestIndex = GetSelQuestIndex();
+    if (0 == dwSelQuestIndex)
+        return;
+
+    m_ContentRows.push_back({ StringUtils::WideToNarrow(g_QuestMng.GetSubject(dwSelQuestIndex)), 0xff0ab9ff, 0, nullptr });
+
+    wchar_t aszSummary[8][64];
+    const int nLine = ::DivideStringByPixel(&aszSummary[0][0], 8, 64, g_QuestMng.GetSummary(dwSelQuestIndex), 150);
+    for (int i = 0; i < nLine; ++i)
+        m_ContentRows.push_back({ StringUtils::WideToNarrow(aszSummary[i]), 0xffd2e6ff, 0, nullptr });
+}
+
+void mu::ui::window::CMyQuestInfoWindow::SetSelQuestRequestReward()
+{
+    const DWORD dwSelQuestIndex = GetSelQuestIndex();
+    if (0 == dwSelQuestIndex)
+        return;
+
+    if (!g_QuestMng.IsRequestRewardQS(dwSelQuestIndex))
+        return;
+
+    const SQuestRequestReward* pQuestRequestReward = g_QuestMng.GetRequestReward(dwSelQuestIndex);
+    if (NULL == pQuestRequestReward)
+        return;
+
+    SRequestRewardText aRequestRewardText[13];
+    g_QuestMng.GetRequestRewardText(aRequestRewardText, 13, dwSelQuestIndex);
+
+    int i = 0;
+    int j, nLoop;
+    for (j = 0; j < 3; ++j)
+    {
+        if (0 == j)
+        {
+            m_ContentRows.push_back({ " ", 0xffffffff, 0, nullptr });
+            nLoop = 1 + pQuestRequestReward->m_byRequestCount;
+        }
+        else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
+        {
+            m_ContentRows.push_back({ " ", 0xffffffff, 0, nullptr });
+            nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
+        }
+        else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
+        {
+            m_ContentRows.push_back({ " ", 0xffffffff, 0, nullptr });
+            nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
+        }
+        else
+            nLoop = 0;
+
+        for (; i < nLoop; ++i)
+        {
+            m_ContentRows.push_back({ StringUtils::WideToNarrow(aRequestRewardText[i].m_szText),
+                static_cast<DWORD>(aRequestRewardText[i].m_dwColor), aRequestRewardText[i].m_dwType,
+                aRequestRewardText[i].m_pItem });
+        }
+    }
+}
+
+void mu::ui::window::CMyQuestInfoWindow::QuestOpenBtnEnable(bool bEnable)
+{
+    if (m_RmlBinder.GetModel().openEnabled != bEnable)
+    {
+        m_RmlBinder.GetModel().openEnabled = bEnable;
+        m_RmlBinder.MarkDirty("open_enabled");
+    }
+}
+
+void mu::ui::window::CMyQuestInfoWindow::QuestGiveUpBtnEnable(bool bEnable)
+{
+    if (m_RmlBinder.GetModel().giveupEnabled != bEnable)
+    {
+        m_RmlBinder.GetModel().giveupEnabled = bEnable;
+        m_RmlBinder.MarkDirty("giveup_enabled");
+    }
+}
+
+DWORD mu::ui::window::CMyQuestInfoWindow::GetSelQuestIndex()
+{
+    return m_dwSelectedQuestIndex;
 }
 
 void mu::ui::window::CMyQuestInfoWindow::LoadImages()
@@ -236,344 +405,188 @@ void mu::ui::window::CMyQuestInfoWindow::UnloadImages()
     DeleteBitmap(IMAGE_MYQUEST_BACK);
 }
 
-void mu::ui::window::CMyQuestInfoWindow::RenderFrame()
+void mu::ui::window::CMyQuestInfoWindow::RmlClickSelectTab(int nTab)
 {
-    RenderImage(IMAGE_MYQUEST_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_MYQUEST_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_MYQUEST_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_MYQUEST_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_MYQUEST_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
-}
+    if (nTab < TAB_QUEST || nTab > TAB_CASTLE_TEMPLE)
+        return;
 
-void mu::ui::window::CMyQuestInfoWindow::RenderSubjectTexts()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(230, 230, 230, 255);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, L"Quest", 190, 0, RT3_SORT_CENTER);
-}
+    m_eTabBtnIndex = static_cast<TAB_BUTTON_INDEX>(nTab);
+    ::PlayBuffer(SOUND_CLICK01);
 
-void mu::ui::window::CMyQuestInfoWindow::RenderQuestInfo()
-{
-    RenderImage(IMAGE_MYQUEST_LINE, m_Pos.x, m_Pos.y + 160, 188.f, 21.f);
-
-    if (0 == m_CurQuestListBox.GetLineNum())
+    if (m_eTabBtnIndex == TAB_CASTLE_TEMPLE)
     {
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetTextColor(255, 255, 0, 255);
-        g_pRenderText->SetBgColor(0);
-        int i;
-        for (i = 0; i < m_nMsgLine; ++i)
-            g_pRenderText->RenderText(m_Pos.x + 23, m_Pos.y + 96 + 18 * i,
-                m_aszMsg[i], 0, 0, RT3_SORT_LEFT);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(MiniGameType::BloodCastle);
+        SocketClient->ToGameServer()->SendMiniGameEventCountRequest(MiniGameType::CursedTemple);
     }
+}
+
+void mu::ui::window::CMyQuestInfoWindow::RmlClickSelectQuest(int nQuestIndex)
+{
+    const DWORD dwQuestIndex = static_cast<DWORD>(nQuestIndex);
+    if (dwQuestIndex == m_dwSelectedQuestIndex)
+        return;
+
+    ::PlayBuffer(SOUND_CLICK01);
+
+    m_dwSelectedQuestIndex = dwQuestIndex;
+
+    QuestOpenBtnEnable(g_QuestMng.IsQuestByEtc(dwQuestIndex));
+    QuestGiveUpBtnEnable(true);
+    SetSelQuestSummary();
+
+    const auto questNumber = static_cast<uint16_t>(LOWORD(dwQuestIndex));
+    const auto questGroup = static_cast<uint16_t>(HIWORD(dwQuestIndex));
+    SocketClient->ToGameServer()->SendQuestStateRequest(questNumber, questGroup);
+}
+
+void mu::ui::window::CMyQuestInfoWindow::RmlClickSelectContent(int nContentIndex)
+{
+    if (nContentIndex < 0 || static_cast<size_t>(nContentIndex) >= m_ContentRows.size())
+        return;
+
+    const ContentRowData& row = m_ContentRows[nContentIndex];
+    if ((row.dwType == QUEST_REQUEST_ITEM || row.dwType == QUEST_REWARD_ITEM) && row.pItem)
+        m_pSelectedRewardItem = row.pItem;
     else
-        m_CurQuestListBox.Render();
-
-    m_btnQuestOpen.Render();
-    m_btnQuestGiveUp.Render();
-
-    m_QuestContentsListBox.Render();
+        m_pSelectedRewardItem = nullptr;
 }
 
-void mu::ui::window::CMyQuestInfoWindow::RenderJobChangeContents()
+void mu::ui::window::CMyQuestInfoWindow::RmlClickOpen()
 {
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(36, 242, 252, 255);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 58, g_csQuest.getQuestTitleWindow(), 190, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0);
-
-    int iY = m_Pos.y + 76;
-    for (int i = 0; i < g_iNumLineMessageBoxCustom; ++i)
-    {
-        g_pRenderText->RenderText(m_Pos.x, iY, g_lpszMessageBoxCustom[i], 190.f, 0.f, RT3_SORT_CENTER);
-        iY += 16;
-    }
-}
-
-void mu::ui::window::CMyQuestInfoWindow::RenderJobChangeState()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->SetBgColor(0);
-
-    BYTE byState = g_csQuest.getCurrQuestState();
-    if (byState == QUEST_NONE || byState == QUEST_NO || byState == QUEST_ERROR)
-        SetMessage(930);
-    else if (byState == QUEST_ING)
-        SetMessage(931);
-    else if (byState == QUEST_END)
-        SetMessage(932);
-
-    int i;
-    for (i = 0; i < m_nMsgLine; ++i)
-        g_pRenderText->RenderText(m_Pos.x + 23, m_Pos.y + 283 + 18 * i, m_aszMsg[i], 0, 0, RT3_SORT_LEFT);
-}
-
-void mu::ui::window::CMyQuestInfoWindow::RenderCastleInfo()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 105, I18N::Game::BloodCastle, 190, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    wchar_t strText[256];
-    mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(2));
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 125, strText, 190, 0, RT3_SORT_CENTER);
-
-    mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 145, strText, 190, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CMyQuestInfoWindow::RenderTempleInfo()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 285, I18N::Game::IllusionTemple, 190, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    wchar_t strText[256];
-    mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(3));
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 305, strText, 190, 0, RT3_SORT_CENTER);
-
-    mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 325, strText, 190, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CMyQuestInfoWindow::OpenningProcess()
-{
-    g_csQuest.ShowQuestPreviewWindow(-1);
-}
-
-void mu::ui::window::CMyQuestInfoWindow::ClosingProcess()
-{
-    UnselectQuestList();
-    SocketClient->ToGameServer()->SendCloseNpcRequest();
+    if (!m_RmlBinder.GetModel().openEnabled)
+        return;
     ::PlayBuffer(SOUND_CLICK01);
+    g_pQuestProgressByEtc->SetContents(GetSelQuestIndex());
+    g_pNewUISystem->Show(mu::ui::window::INTERFACE_QUEST_PROGRESS_ETC);
 }
 
-void mu::ui::window::CMyQuestInfoWindow::SetButtonInfo()
+void mu::ui::window::CMyQuestInfoWindow::RmlClickGiveUp()
 {
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
-
-    m_btnQuestOpen.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_OPEN, false);
-    m_btnQuestOpen.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
-    m_btnQuestOpen.ChangeToolTipText(&I18N::Game::StartQuest, true);
-
-    m_btnQuestGiveUp.ChangeButtonImgState(true, IMAGE_MYQUEST_BTN_GIVE_UP, false);
-    m_btnQuestGiveUp.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
-    m_btnQuestGiveUp.ChangeToolTipText(&I18N::Game::GiveUpQuest, true);
-}
-
-CMyQuestInfoWindow::TAB_BUTTON_INDEX CMyQuestInfoWindow::UpdateTabBtn()
-{
-    if (!(mu::ui::window::IsPress(VK_LBUTTON)))
-        return TAB_NON;
-
-    if (!CheckMouseIn(m_Pos.x + 10, m_Pos.y + 27, 166, 22))
-        return TAB_NON;
-
-    if (CheckMouseIn(m_Pos.x + 10, m_Pos.y + 27, 48, 22))
-        m_eTabBtnIndex = TAB_QUEST;
-    else if (CheckMouseIn(m_Pos.x + 57, m_Pos.y + 27, 48, 22))
-        m_eTabBtnIndex = TAB_JOB_CHANGE;
-    else if (CheckMouseIn(m_Pos.x + 104, m_Pos.y + 27, 72, 22))
-        m_eTabBtnIndex = TAB_CASTLE_TEMPLE;
-
+    if (!m_RmlBinder.GetModel().giveupEnabled)
+        return;
     ::PlayBuffer(SOUND_CLICK01);
-
-    return m_eTabBtnIndex;
+    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CQuestGiveUpMsgBoxLayout));
 }
 
-void CMyQuestInfoWindow::RenderTabBtn()
+void mu::ui::window::CMyQuestInfoWindow::RmlClickExit()
 {
-    RenderImage(IMAGE_MYQUEST_TAB_BACK, m_Pos.x + 10, m_Pos.y + 27, 166.f, 22.f);
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0);
-
-    if (m_eTabBtnIndex == TAB_QUEST)
-    {
-        RenderImage(IMAGE_MYQUEST_TAB_SMALL, m_Pos.x + 10, m_Pos.y + 27, 48.f, 22.f);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 34, I18N::Game::Quest, 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->SetTextColor(181, 181, 181, 181);
-        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 35, I18N::Game::ChangeClass, 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 35, I18N::Game::CastleTemple, 72, 0, RT3_SORT_CENTER);
-    }
-    else if (m_eTabBtnIndex == TAB_JOB_CHANGE)
-    {
-        RenderImage(IMAGE_MYQUEST_TAB_SMALL, m_Pos.x + 57, m_Pos.y + 27, 48.f, 22.f);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 34, I18N::Game::ChangeClass, 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->SetTextColor(181, 181, 181, 181);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::Quest, 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 35, I18N::Game::CastleTemple, 72, 0, RT3_SORT_CENTER);
-    }
-    else if (m_eTabBtnIndex == TAB_CASTLE_TEMPLE)
-    {
-        RenderImage(IMAGE_MYQUEST_TAB_BIG, m_Pos.x + 104, m_Pos.y + 27, 72.f, 22.f);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(m_Pos.x + 104, m_Pos.y + 34, I18N::Game::CastleTemple, 72, 0, RT3_SORT_CENTER);
-        g_pRenderText->SetTextColor(181, 181, 181, 181);
-        g_pRenderText->RenderText(m_Pos.x + 10, m_Pos.y + 35, I18N::Game::Quest, 48, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 57, m_Pos.y + 35, I18N::Game::ChangeClass, 48, 0, RT3_SORT_CENTER);
-    }
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYQUEST);
 }
 
-void CMyQuestInfoWindow::UnselectQuestList()
+void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
 {
-    m_CurQuestListBox.SLSetSelectLine(0);
-    m_QuestContentsListBox.Clear();
-    QuestOpenBtnEnable(false);
-    QuestGiveUpBtnEnable(false);
-}
+    if (!m_pRmlDoc)
+        return;
 
-void CMyQuestInfoWindow::SetCurQuestList(DWordList* pDWordList)
-{
-    m_CurQuestListBox.Clear();
+    auto& model = m_RmlBinder.GetModel();
 
+    if (model.activeTab != static_cast<int>(m_eTabBtnIndex))
+    {
+        model.activeTab = static_cast<int>(m_eTabBtnIndex);
+        m_RmlBinder.MarkDirty("active_tab");
+    }
+
+    const auto transform = UI::Scaling::GetActiveTransform();
+    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
+    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
+    if (model.rootX != rootX || model.rootY != rootY || model.rootScale != transform.scaleX)
+    {
+        model.rootX = rootX;
+        model.rootY = rootY;
+        model.rootScale = transform.scaleX;
+        m_RmlBinder.MarkDirty("root_x");
+        m_RmlBinder.MarkDirty("root_y");
+        m_RmlBinder.MarkDirty("root_scale");
+    }
+
+    const bool bEmpty = m_QuestIndices.empty();
+    if (model.questListEmpty != bEmpty)
+    {
+        model.questListEmpty = bEmpty;
+        m_RmlBinder.MarkDirty("quest_list_empty");
+    }
+
+    // Small (well under CBuffStrip's own "unconditional rebuild is fine" ceiling) lists, rebuilt
+    // and marked dirty unconditionally each sync -- same reasoning CreditWin.cpp's own names list
+    // and BuffStrip.cpp's buff-icon list already use.
+    model.emptyQuestLines = bEmpty ? BuildTextLines(2825, 140) : std::vector<TextLine>{};
+    m_RmlBinder.MarkDirty("empty_quest_lines");
+
+    model.quests.clear();
     wchar_t szInput[64];
     wchar_t szOutput[64];
-    g_pRenderText->SetFont(g_hFont);
-
-    int i;
-    DWordList::iterator iter;
-    for (iter = pDWordList->begin(), i = 1; iter != pDWordList->end(); advance(iter, 1), ++i)
+    int i = 1;
+    for (DWORD dwQuestIndex : m_QuestIndices)
     {
-        ::mu_swprintf(szInput, L"%d.%ls", i, g_QuestMng.GetSubject(*iter));
+        ::mu_swprintf(szInput, L"%d.%ls", i, g_QuestMng.GetSubject(dwQuestIndex));
         ::ReduceStringByPixel(szOutput, 64, szInput, 150);
-        m_CurQuestListBox.AddText(*iter, szOutput);
+        model.quests.push_back({ StringUtils::WideToNarrow(szOutput), static_cast<int>(dwQuestIndex),
+            dwQuestIndex == m_dwSelectedQuestIndex });
+        ++i;
     }
+    m_RmlBinder.MarkDirty("quests");
 
-    if (m_eTabBtnIndex == TAB_QUEST && 0 == m_CurQuestListBox.GetLineNum())
-        SetMessage(2825);
-
-    m_QuestContentsListBox.Clear();
-    QuestOpenBtnEnable(false);
-    QuestGiveUpBtnEnable(false);
-}
-
-void CMyQuestInfoWindow::SetSelQuestSummary()
-{
-    m_QuestContentsListBox.Clear();
-
-    DWORD dwSelQuestIndex = GetSelQuestIndex();
-
-    if (0 == dwSelQuestIndex)
-        return;
-
-    m_QuestContentsListBox.AddText(
-        g_hFontBold, 0xff0ab9ff, RT3_SORT_CENTER, g_QuestMng.GetSubject(dwSelQuestIndex));
-
-    g_pRenderText->SetFont(g_hFont);
-    wchar_t aszSummary[8][64];
-    int nLine = ::DivideStringByPixel(
-        &aszSummary[0][0], 8, 64, g_QuestMng.GetSummary(dwSelQuestIndex), 150);
-    int i;
-    for (i = 0; i < nLine; ++i)
-        m_QuestContentsListBox.AddText(g_hFont, 0xffd2e6ff, RT3_SORT_LEFT, aszSummary[i]);
-}
-
-void CMyQuestInfoWindow::SetSelQuestRequestReward()
-{
-    DWORD dwSelQuestIndex = GetSelQuestIndex();
-
-    if (0 == dwSelQuestIndex)
-        return;
-
-    if (!g_QuestMng.IsRequestRewardQS(dwSelQuestIndex))
-        return;
-
-    const SQuestRequestReward* pQuestRequestReward = g_QuestMng.GetRequestReward(dwSelQuestIndex);
-    if (NULL == pQuestRequestReward)
-        return;
-
-    SRequestRewardText aRequestRewardText[13];
-    g_QuestMng.GetRequestRewardText(aRequestRewardText, 13, dwSelQuestIndex);
-
-    int i = 0;
-    int j, nLoop;
-    for (j = 0; j < 3; ++j)
+    model.contents.clear();
+    for (size_t rowIndex = 0; rowIndex < m_ContentRows.size(); ++rowIndex)
     {
-        if (0 == j)
-        {
-            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
-            nLoop = 1 + pQuestRequestReward->m_byRequestCount;
-        }
-        else if (1 == j && pQuestRequestReward->m_byGeneralRewardCount)
-        {
-            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
-            nLoop = 1 + pQuestRequestReward->m_byGeneralRewardCount + i;
-        }
-        else if (2 == j && pQuestRequestReward->m_byRandRewardCount)
-        {
-            m_QuestContentsListBox.AddText(g_hFont, 0xffffffff, RT3_SORT_LEFT, L" ");
-            nLoop = 1 + pQuestRequestReward->m_byRandRewardCount + i;
-        }
-        else
-            nLoop = 0;
-
-        for (; i < nLoop; ++i)
-            m_QuestContentsListBox.AddText(&aRequestRewardText[i], RT3_SORT_CENTER);
+        const ContentRowData& row = m_ContentRows[rowIndex];
+        wchar_t colorBuf[32];
+        mu_swprintf(colorBuf, L"rgba(%d,%d,%d,%d)", (row.dwColor >> 16) & 0xff, (row.dwColor >> 8) & 0xff,
+            row.dwColor & 0xff, (row.dwColor >> 24) & 0xff);
+        const bool clickable = row.pItem && (row.dwType == QUEST_REQUEST_ITEM || row.dwType == QUEST_REWARD_ITEM);
+        model.contents.push_back({ row.text, StringUtils::WideToNarrow(colorBuf), false,
+            static_cast<int>(rowIndex), clickable });
     }
-}
+    m_RmlBinder.MarkDirty("contents");
 
-void CMyQuestInfoWindow::QuestOpenBtnEnable(bool bEnable)
-{
-    if (bEnable)
+    model.jobChangeLines.clear();
+    for (int j = 0; j < g_iNumLineMessageBoxCustom; ++j)
+        model.jobChangeLines.push_back({ StringUtils::WideToNarrow(g_lpszMessageBoxCustom[j]) });
+    m_RmlBinder.MarkDirty("jobchange_lines");
+
+    if (model.jobChangeTitle.empty())
     {
-        m_btnQuestOpen.UnLock();
-        m_btnQuestOpen.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
+        model.jobChangeTitle = StringUtils::WideToNarrow(g_csQuest.getQuestTitleWindow());
+        m_RmlBinder.MarkDirty("jobchange_title");
     }
-    else
+
+    if (m_eTabBtnIndex == TAB_JOB_CHANGE)
     {
-        m_btnQuestOpen.Lock();
-        m_btnQuestOpen.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-    }
-}
+        const BYTE byState = g_csQuest.getCurrQuestState();
+        int nStateTextIndex = 930;
+        if (byState == QUEST_ING)
+            nStateTextIndex = 931;
+        else if (byState == QUEST_END)
+            nStateTextIndex = 932;
+        // QUEST_NONE/QUEST_NO/QUEST_ERROR (and any other value) fall through to 930, matching the
+        // original's own if/else-if chain (no final else -- 930 was already the first branch's
+        // condition, not a true default, but every unhandled byState value fell through to
+        // whatever m_aszMsg last held; this makes that fallthrough an explicit default instead).
 
-void CMyQuestInfoWindow::QuestGiveUpBtnEnable(bool bEnable)
-{
-    if (bEnable)
+        model.jobChangeStateLines = BuildTextLines(nStateTextIndex, 140);
+        m_RmlBinder.MarkDirty("jobchange_state_lines");
+    }
+
+    if (m_eTabBtnIndex == TAB_CASTLE_TEMPLE)
     {
-        m_btnQuestGiveUp.UnLock();
-        m_btnQuestGiveUp.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
+        wchar_t strText[256];
+
+        model.castleTitle = StringUtils::WideToNarrow(I18N::Game::BloodCastle);
+        mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(2));
+        model.castleLine0 = StringUtils::WideToNarrow(strText);
+        mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
+        model.castleLine1 = StringUtils::WideToNarrow(strText);
+        m_RmlBinder.MarkDirty("castle_title");
+        m_RmlBinder.MarkDirty("castle_line0");
+        m_RmlBinder.MarkDirty("castle_line1");
+
+        model.templeTitle = StringUtils::WideToNarrow(I18N::Game::IllusionTemple);
+        mu_swprintf(strText, I18N::Game::EntranceIsAllowedForDTimes, g_csQuest.GetEventCount(3));
+        model.templeLine0 = StringUtils::WideToNarrow(strText);
+        mu_swprintf(strText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
+        model.templeLine1 = StringUtils::WideToNarrow(strText);
+        m_RmlBinder.MarkDirty("temple_title");
+        m_RmlBinder.MarkDirty("temple_line0");
+        m_RmlBinder.MarkDirty("temple_line1");
     }
-    else
-    {
-        m_btnQuestGiveUp.Lock();
-        m_btnQuestGiveUp.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-    }
-}
-
-DWORD CMyQuestInfoWindow::GetSelQuestIndex()
-{
-    SCurQuestItem* pCurQuestItem = m_CurQuestListBox.GetSelectedText();
-    if (NULL == pCurQuestItem)
-        return 0;
-
-    return pCurQuestItem->m_dwIndex;
-}
-
-void CMyQuestInfoWindow::SetMessage(int nGlobalTextIndex)
-{
-    memset(m_aszMsg, 0, sizeof m_aszMsg);
-    g_pRenderText->SetFont(g_hFontBold);
-    m_nMsgLine = ::DivideStringByPixel(&m_aszMsg[0][0], 2, 64, I18N::Game::Lookup(nGlobalTextIndex), 140);
 }

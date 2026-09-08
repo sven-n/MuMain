@@ -1,0 +1,259 @@
+/* Legacy theme for CMyQuestInfoWindow -- retires its last CUIControl-family pieces
+   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel's own left/top/scale come
+   live from C++ (SyncRmlModel(), root_x/root_y/root_scale), same convention my_inventory.rcss's
+   own header comment already establishes for a movable, non-HUD-anchored window -- every
+   coordinate below is a plain reference pixel (px), not dp.
+
+   Content-area layout (quest list / divider / contents panel) is a reinterpretation of the
+   original's intent -- list above, selected-quest details below, buttons at the bottom -- not a
+   literal carryover of CUICurQuestListBox/CUIQuestContentsListBox's own internal pixel math
+   (architecture-principles.md's own guidance: distinguish layout intent from legacy
+   implementation artifacts, don't mechanically translate legacy coordinates). Frame/tab-row/
+   button positions ARE carried over exactly (CreateSceneUI()-style literal pixel values), since
+   those come straight from SetPos()/SetButtonInfo()/RenderTabBtn()'s own explicit constants. */
+
+/* Frame: same 5-piece composition my_inventory_bg.rcss's own #bg_root already uses, and largely
+   the same art files (MyQuestInfoWindow.cpp:208-213 loads newui_item_back0{1,2-L,2-R,3}.tga /
+   newui_msgbox_back.jpg -- back/left/right/bottom exactly match my_inventory_bg.rcss's own
+   inv-bg-fill/-left/-right/-bottom; only the top piece differs, newui_item_back01.tga here vs
+   newui_item_back04.tga there). Declared fresh here (not shared across files) -- theme-local
+   duplication is this codebase's own established convention (see credit_win.rcss's own comment). */
+@spritesheet myquest-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   myquest-bg-fill:   0px 0px 190px 429px; }
+@spritesheet myquest-bg-top-sheet    { src: "../../../newui_item_back01.tga";   myquest-bg-top:    0px 0px 190px 64px; }
+@spritesheet myquest-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; myquest-bg-left:   0px 0px 21px 320px; }
+@spritesheet myquest-bg-right-sheet  { src: "../../../newui_item_back02-R.tga"; myquest-bg-right:  0px 0px 21px 320px; }
+@spritesheet myquest-bg-bottom-sheet { src: "../../../newui_item_back03.tga";   myquest-bg-bottom: 0px 0px 190px 45px; }
+
+@spritesheet myquest-line-sheet    { src: "../../../newui_myquest_Line.tga"; myquest-line:    0px 0px 188px 21px; }
+@spritesheet myquest-btn-open-sheet  { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:  0px 0px 36px 29px; }
+@spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
+@spritesheet myquest-tab-back-sheet  { src: "../../../Quest_tab01.tga"; myquest-tab-back:  0px 0px 166px 22px; }
+@spritesheet myquest-tab-small-sheet { src: "../../../Quest_tab02.tga"; myquest-tab-small: 0px 0px 48px 22px; }
+@spritesheet myquest-tab-big-sheet   { src: "../../../Quest_tab03.tga"; myquest-tab-big:   0px 0px 72px 22px; }
+@spritesheet myquest-btn-exit-sheet  { src: "../../../newui_exit_00.tga"; myquest-btn-exit: 0px 0px 36px 29px; }
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	decorator: image(myquest-bg-fill);
+	font-family: "Liberation Sans";
+}
+
+/* Border frame pieces layered on top of #panel's own flat fill decorator -- same 4-piece
+   composition my_inventory_bg.rcss's #bg_root children use, just as ordinary DOM children here
+   (painted in document order, after #panel's own decorator) since this window has no live-3D
+   content needing a separate background-context document. */
+.frame-piece { position: absolute; pointer-events: none; }
+.frame-top    { left: 0;   top: 0;    width: 190px; height: 64px;  decorator: image(myquest-bg-top); }
+.frame-left   { left: 0;   top: 64px; width: 21px;  height: 320px; decorator: image(myquest-bg-left); }
+.frame-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(myquest-bg-right); }
+.frame-bottom { left: 0;   top: 384px; width: 190px; height: 45px; decorator: image(myquest-bg-bottom); }
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: #e6e6e6;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+.tab-row {
+	position: absolute;
+	left: 10px;
+	top: 27px;
+	width: 166px;
+	height: 22px;
+	decorator: image(myquest-tab-back);
+}
+.tab-btn {
+	position: absolute;
+	top: 0;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 12px;
+	color: #b5b5b5;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.tab-btn.active { color: #ffffff; }
+.tab-btn-quest { left: 0; width: 48px; }
+.tab-btn-jobchange { left: 48px; width: 48px; }
+.tab-btn-castletemple { left: 96px; width: 72px; }
+.tab-btn-quest.active { decorator: image(myquest-tab-small); }
+.tab-btn-jobchange.active { decorator: image(myquest-tab-small); }
+.tab-btn-castletemple.active { decorator: image(myquest-tab-big); }
+
+.quest-tab, .jobchange-tab, .castletemple-tab {
+	position: absolute;
+	left: 9px;
+	top: 60px;
+	width: 172px;
+	height: 320px;
+}
+.hidden { display: none; }
+
+/* display:block on every non-absolutely-positioned element below is load-bearing, not
+   decorative -- an unstyled element's `display` defaults to `inline` in this engine
+   (StyleSheetSpecification.cpp), and an inline element ignores width/height and doesn't stack in
+   its own row (found live porting TitleSceneUI's own gauge bar -- see that port's own history for
+   the full root-cause). Only position:absolute elements are exempt (forced block regardless of
+   `display`, FormattingContext.cpp). */
+.quest-empty-msg {
+	position: absolute;
+	left: 14px;
+	top: 30px;
+	width: 140px;
+	color: #ffff00;
+	font-weight: bold;
+	font-size: 12px;
+	text-align: left;
+}
+.quest-empty-msg span { display: block; }
+
+.quest-list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 172px;
+	height: 130px;
+	overflow: auto hidden;
+}
+.quest-row {
+	display: block;
+	width: 100%;
+	height: 18px;
+	line-height: 18px;
+	padding-left: 4px;
+	color: #ffffff;
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+}
+.quest-row:hover { color: #ffee88; }
+.quest-row.selected { color: #ffcc1a; font-weight: bold; }
+
+.quest-divider {
+	position: absolute;
+	left: 0;
+	top: 130px;
+	width: 172px;
+	height: 21px;
+	decorator: image(myquest-line);
+}
+
+.quest-contents {
+	position: absolute;
+	left: 0;
+	top: 151px;
+	width: 172px;
+	height: 169px;
+	overflow: auto hidden;
+}
+.quest-content-row {
+	display: block;
+	width: 100%;
+	padding: 1px 4px;
+	font-size: 12px;
+	color: #d2e6ff;
+}
+.quest-content-row.bold { font-weight: bold; }
+.quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
+.quest-content-row.clickable:hover { color: #ffee88; }
+
+.quest-btn, .quest-btn-exit {
+	position: absolute;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.quest-btn:hover, .quest-btn-exit:hover { filter: brightness(1.25); }
+/* No pointer-events:none here -- Open/Give-up start locked until a quest is selected, and that
+   used to block :hover entirely, which meant the tooltip below could never fire in the (default,
+   until you pick a quest) locked state. RmlClickOpen()/RmlClickGiveUp() (MyQuestInfoWindow.cpp)
+   already independently guard on openEnabled/giveupEnabled before acting, so a locked button's
+   click is already a safe no-op without this -- dimming is enough. */
+.quest-btn.locked { filter: brightness(0.6); }
+.quest-btn-exit { left: 13px; decorator: image(myquest-btn-exit); }
+.quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
+.quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
+
+/* Exit is a common close button (theme's word/glyph choice, see modern theme's own comment on
+   #btn_exit) -- legacy keeps its sprite, which already has its own "X" baked into the art, so the
+   shared RML's text label span is redundant here. */
+.btn-exit-label { display: none; }
+
+/* Tooltips: siblings of their trigger button, shown via a hover-triggered sibling selector --
+   same convention my_inventory.rcss's own #btn_exit/.tooltip-exit already establishes (theme-
+   local duplication, not shared across files, per this codebase's own convention). CButton never
+   had these; a real gap, not a carryover. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 365px;
+	width: 110px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-size: 11px;
+	text-align: center;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit   { left: -24px; }
+.tooltip-open   { left: 13px; }
+.tooltip-giveup { left: 50px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_quest_open:hover ~ .tooltip-open,
+#btn_quest_giveup:hover ~ .tooltip-giveup {
+	display: block;
+}
+
+.jobchange-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: #24f2fc;
+	font-weight: bold;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+.jobchange-contents, .jobchange-state {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: #ffffff;
+	font-size: 12px;
+}
+.jobchange-contents span, .jobchange-state span { display: block; }
+.jobchange-state { color: #ffff00; font-weight: bold; margin-top: 12px; }
+
+.castle-title, .temple-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: #ffff00;
+	font-weight: bold;
+	font-size: 12px;
+	margin-top: 6px;
+}
+.castle-line, .temple-line {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: #ffffff;
+	font-size: 12px;
+}

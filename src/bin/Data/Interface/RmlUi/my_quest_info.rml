@@ -1,0 +1,99 @@
+<rml>
+<head>
+	<title>My Quest Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="my_quest_info.rcss"/>
+</head>
+<body>
+	<!-- Retires CMyQuestInfoWindow's last CUIControl-family pieces (CUICurQuestListBox,
+	     CUIQuestContentsListBox, CButton x3) -- see MyQuestInfoWindow.cpp's own header comment.
+	     Positioned like my_inventory.rml's #panel (movable, non-HUD-anchored window: root_x/
+	     root_y/root_scale come from UI::Scaling::GetActiveTransform(), not RmlUi's own dp auto-fit
+	     -- same reasoning TitleSceneUI's own port needed to work out the hard way). -->
+	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span id="title">Quest</span>
+
+		<div class="tab-row">
+			<div id="tab_quest" class="tab-btn tab-btn-quest" data-class-active="active_tab == 0"
+			     data-event-click="myquest_select_tab(0)">{{tab_quest_label}}</div>
+			<div id="tab_jobchange" class="tab-btn tab-btn-jobchange" data-class-active="active_tab == 1"
+			     data-event-click="myquest_select_tab(1)">{{tab_jobchange_label}}</div>
+			<div id="tab_castletemple" class="tab-btn tab-btn-castletemple" data-class-active="active_tab == 2"
+			     data-event-click="myquest_select_tab(2)">{{tab_castletemple_label}}</div>
+		</div>
+
+		<!-- Quest tab -->
+		<div class="quest-tab" data-class-hidden="active_tab != 0">
+			<div class="quest-empty-msg" data-class-hidden="!quest_list_empty">
+				<span data-for="line : empty_quest_lines">{{line.text}}</span>
+			</div>
+			<div class="quest-list" data-class-hidden="quest_list_empty">
+				<div class="quest-row" data-for="q : quests" data-class-selected="q.selected"
+				     data-event-click="myquest_select_quest(q.index)">{{q.text}}</div>
+			</div>
+
+			<!-- Native size is 188x21 (see RenderQuestInfo()'s own RenderImage(...188.f, 21.f) call
+			     -- always drawn at native size, never stretched). Its own element, not a
+			     decorator on .quest-contents -- fill-stretching a 188x21 sprite across a 162px-tall
+			     box is exactly the vertical warp bug this comment is here to prevent regressing. -->
+			<div class="quest-divider"></div>
+
+			<div class="quest-contents">
+				<span class="quest-content-row" data-for="c : contents" data-class-bold="c.bold"
+				      data-class-clickable="c.clickable" data-style-color="c.color"
+				      data-event-click="myquest_select_content(c.index)">{{c.text}}</span>
+			</div>
+		</div>
+
+		<!-- Siblings of .quest-tab, not children of it -- .quest-tab is itself position:absolute,
+		     so an absolutely-positioned child resolves left/top against ITS box (172x320, starting
+		     at panel-relative 9,60), not #panel's own box. These buttons' top:392px landed at
+		     60+392=452, past the panel's own 429px height -- found live via in-game testing, not
+		     a syntax error the build gates would ever catch. #btn_exit (below) was already correctly
+		     a #panel-level sibling; these two just weren't. -->
+		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
+		     data-class-locked="!open_enabled" data-event-click="myquest_click_open"></div>
+		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
+		<div id="btn_quest_giveup" class="quest-btn quest-btn-giveup" data-class-hidden="active_tab != 0"
+		     data-class-locked="!giveup_enabled" data-event-click="myquest_click_giveup"></div>
+		<span class="tooltip tooltip-giveup">{{giveup_tooltip}}</span>
+
+		<!-- Job-change tab -->
+		<div class="jobchange-tab" data-class-hidden="active_tab != 1">
+			<div class="jobchange-title">{{jobchange_title}}</div>
+			<div class="jobchange-contents">
+				<span data-for="line : jobchange_lines">{{line.text}}</span>
+			</div>
+			<div class="jobchange-state">
+				<span data-for="line : jobchange_state_lines">{{line.text}}</span>
+			</div>
+		</div>
+
+		<!-- Castle/Temple tab -->
+		<div class="castletemple-tab" data-class-hidden="active_tab != 2">
+			<div class="castle-title">{{castle_title}}</div>
+			<div class="castle-line">{{castle_line0}}</div>
+			<div class="castle-line">{{castle_line1}}</div>
+			<div class="temple-title">{{temple_title}}</div>
+			<div class="temple-line">{{temple_line0}}</div>
+			<div class="temple-line">{{temple_line1}}</div>
+		</div>
+
+		<!-- Exit is a common close button, not a quest-specific action -- modern's theme gives it
+		     a word/glyph instead of reusing legacy's sprite (see myquest-btn-exit's own comment
+		     in the legacy theme file for the split rationale). The label span is legacy-hidden,
+		     not omitted from the markup -- one shared #btn_exit for both themes, same convention
+		     as .frame-piece being theme-toggled instead of forked per-theme markup. -->
+		<div id="btn_exit" class="quest-btn quest-btn-exit" data-event-click="myquest_click_exit">
+			<span class="btn-exit-label">×</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>
