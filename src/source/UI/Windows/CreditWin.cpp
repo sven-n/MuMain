@@ -40,29 +40,25 @@ namespace
     constexpr DurationMs kNameShowDuration{2300.0};
     constexpr std::string_view kCreditDataPath = "Data\\Local\\credit.bmd";
 
-    constexpr std::array<std::array<const wchar_t*, 2>, CRW_ILLUST_MAX> kIllustPaths = {{
-        {L"Interface\\im1_1.jpg", L"Interface\\im1_2.jpg"},
-        {L"Interface\\im2_1.jpg", L"Interface\\im2_2.jpg"},
-        {L"Interface\\im3_1.jpg", L"Interface\\im3_2.jpg"},
-        {L"Interface\\im4_1.jpg", L"Interface\\im4_2.jpg"},
-        {L"Interface\\im5_1.jpg", L"Interface\\im5_2.jpg"},
-        {L"Interface\\im6_1.jpg", L"Interface\\im6_2.jpg"},
-        {L"Interface\\im7_1.jpg", L"Interface\\im7_2.jpg"},
-        {L"Interface\\im8_1.jpg", L"Interface\\im8_2.jpg"},
-    }};
-
+    // Alpha is accumulated as float (not rounded to short each call) so a per-call delta under 1.0
+    // still makes progress -- at capped/vsynced FPS the old short-truncating version was fine (each
+    // call's delta was comfortably >1), but under an uncapped-FPS renderer FPS_ANIMATION_FACTOR
+    // collapses toward 0, shrinking delta below 1.0 per call; static_cast<short>(alpha + delta) then
+    // truncated straight back to the same integer every single call, forever -- a real, FPS-
+    // dependent freeze, not a fade that's merely slow (confirmed live: fine under Vulkan's correctly
+    // vsync-capped FPS, stuck under the renderer backend that wasn't capping it).
     template<typename T>
-    short IncreaseAlpha(short alpha, T ratio)
+    float IncreaseAlpha(float alpha, T ratio)
     {
         const double delta = 255.0 * std::clamp(static_cast<double>(ratio), 0.0, 1.0);
-        return static_cast<short>(std::min<double>(255.0, static_cast<double>(alpha) + delta));
+        return static_cast<float>(std::min<double>(255.0, static_cast<double>(alpha) + delta));
     }
 
     template<typename T>
-    short DecreaseAlpha(short alpha, T ratio)
+    float DecreaseAlpha(float alpha, T ratio)
     {
         const double delta = 255.0 * std::clamp(static_cast<double>(ratio), 0.0, 1.0);
-        return static_cast<short>(std::max<double>(0.0, static_cast<double>(alpha) - delta));
+        return static_cast<float>(std::max<double>(0.0, static_cast<double>(alpha) - delta));
     }
 
     template<std::size_t N>
@@ -89,7 +85,6 @@ CCreditWin::CCreditWin()
     : m_eIllustState(HIDE)
     , m_illustElapsed(DurationMs::zero())
     , m_byIllust(0)
-    , m_illustPaths(kIllustPaths)
     , m_nNowIndex(0)
     , m_nNameCount(0)
     , m_anTextIndex{}
@@ -249,12 +244,12 @@ void CCreditWin::Init()
 	SetTextIndex();
 }
 
-// Was CSprite+LoadBitmap/BITMAP_TEMP before Stage 2 -- the two illustration <img>s
-// (credit_win.rml) now load m_illustPaths[m_byIllust][0/1] directly from disk via a C++-swapped
-// data-attr-src, same technique loading.rml's own background tiles already use for static files;
-// SyncRmlModel() pushes the path whenever m_byIllust changes and m_nIllustAlpha (below) every frame
-// while fading. The state machine/timing themselves (kIllustFadeDuration/kIllustShowDuration) are
-// unchanged from before this port.
+// Was CSprite+LoadBitmap/BITMAP_TEMP before Stage 2 -- the two illustration <div>s
+// (credit_win.rml) now show one of 16 named @spritesheet decorators via a C++-swapped
+// data-style-decorator (SyncRmlModel's own comment has why <img data-attr-src> was tried and
+// dropped); SyncRmlModel() pushes the decorator name whenever m_byIllust changes and
+// m_nIllustAlpha (below) every frame while fading. The state machine/timing themselves
+// (kIllustFadeDuration/kIllustShowDuration) are unchanged from before this port.
 void CCreditWin::AnimationIllust(DurationMs deltaTime)
 {
 	switch (m_eIllustState)
@@ -359,7 +354,7 @@ void CCreditWin::SetTextIndex()
 void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 {
 	SHOW_STATE* peTextState = &m_aeTextState[nClass];
-	short& nAlpha = m_anTextAlpha[nClass];
+	float& nAlpha = m_anTextAlpha[nClass];
 
 	switch (*peTextState)
 	{

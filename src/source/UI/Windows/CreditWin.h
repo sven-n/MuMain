@@ -7,10 +7,8 @@
 
 #pragma once
 
-#include <array>
 #include <chrono>
 #include <cstdint>
-#include <memory>
 #include <vector>
 
 #include "UI/Core/WindowObject.h"
@@ -57,11 +55,11 @@ protected:
 	SHOW_STATE  m_eIllustState;
 	DurationMs  m_illustElapsed;
 	std::uint8_t        m_byIllust;
-	std::array<std::array<const wchar_t*, 2>, CRW_ILLUST_MAX> m_illustPaths;
 	// Illustration-visible alpha (0=hidden, 255=fully shown) -- was CSprite::GetAlpha()/SetAlpha()
 	// on the two illustration sprites before Stage 2; tracked directly now since there's no sprite
-	// to read it back from.
-	short		m_nIllustAlpha{};
+	// to read it back from. float, not short/BYTE -- see IncreaseAlpha()/DecreaseAlpha()'s own
+	// comment (CreditWin.cpp) for why an integer accumulator here stalls under uncapped FPS.
+	float		m_nIllustAlpha{};
 
 	SCreditItem	m_aCredit[CRW_ITEM_MAX];
 	int			m_nNowIndex;
@@ -70,8 +68,9 @@ protected:
 	SHOW_STATE	m_aeTextState[CRW_INDEX_NAME + 1];
 	// Text-visible alpha (0=hidden, 255=fully shown) for the DEPARTMENT/TEAM/NAME classes -- was
 	// the complementary value of a black hide-overlay sprite's own alpha before Stage 2; tracked
-	// directly now since there's no overlay sprite to read it back from.
-	short		m_anTextAlpha[CRW_INDEX_NAME + 1]{};
+	// directly now since there's no overlay sprite to read it back from. float for the same reason
+	// m_nIllustAlpha is (see its own comment).
+	float		m_anTextAlpha[CRW_INDEX_NAME + 1]{};
 	DurationMs	m_textElapsed;
 
 public:
