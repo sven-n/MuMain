@@ -8,15 +8,28 @@
 @spritesheet myquest-btn-open-sheet   { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:   0px 0px 36px 29px; }
 @spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
 
+/* #panel now consumes base.rcss's .modern-frame/.modern-frame-crimson (applied in
+   my_quest_info.rml) instead of its own bespoke flat surface-1/border-metal fill -- same reason
+   msg_win.rcss's own #panel comment gives: a real dialog/window frame, matching login's family.
+   .modern-frame itself sets no border-radius at all, so this still needs its own value or corners
+   go square (msg_win.rcss's own comment, identical reasoning). */
 #panel {
 	position: absolute;
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	background-color: token(surface-1);
-	border: 1dp token(border-metal);
 	border-radius: token(radius-md)dp;
 	font-family: "token(font-body)";
+}
+
+/* Fading crimson banner behind the title, same primitive login.rcss's own header banner uses --
+   see base.rcss's .title-glow comment. Sits behind #title (declared first, paint-order
+   convention). */
+.quest-title-glow {
+	left: 20px;
+	right: 20px;
+	top: 4px;
+	height: 22px;
 }
 
 .frame-piece { display: none; }
@@ -183,7 +196,7 @@
 	top: 365px;
 	width: 110px;
 	white-space: nowrap;
-	background-color: rgba(20, 21, 22, 230);
+	background-color: token(surface-tooltip);
 	border: 1px token(accent-steel-bright);
 	color: token(text-body);
 	padding: 2px 4px;

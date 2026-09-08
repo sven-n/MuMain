@@ -15,7 +15,7 @@
 	<div id="panel" class="modern-frame modern-frame-crimson" data-model="login">
 		<div class="modern-frame-accent modern-frame-accent-crimson frame-accent"></div>
 		<div class="modern-panel modern-panel-crimson login-content"></div>
-		<div class="header-glow"></div>
+		<div class="title-glow header-glow"></div>
 		<span class="label label-server">{{server_name}}</span>
 		<span class="label label-account">{{account_label}}</span>
 		<span class="label label-password">{{password_label}}</span>

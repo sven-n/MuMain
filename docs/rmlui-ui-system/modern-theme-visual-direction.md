@@ -15,9 +15,11 @@ dashboard, not a flat web-app aesthetic. Concretely:
   shade rather than heavy borders, to establish hierarchy. A dialog's own decorative frame/panel
   material (the `.modern-frame-crimson`/`.modern-panel-crimson` family — `login`,
   `remember_password_prompt`, `msg_win`) is **also** gray/metallic/near-black now, not warm
-  bronze — see [Borders and frames](#borders-and-frames) below for that specific recolor. **Text
-  (title/body) and the checkbox deliberately stay warm/gold** — only the structural frame/panel
-  material itself went cool; this isn't a blanket "remove all warmth" pass.
+  bronze — see [Borders and frames](#borders-and-frames) below for that specific recolor. **Only
+  title/name/label text (`text-title`) and the checkbox's checked state deliberately stay
+  warm/gold** — general body/description/stat text is cool gray-blue like the structural surfaces
+  (narrowed 2026-09-09, see [Text](#text) below); this isn't a blanket "remove all warmth" pass,
+  warmth is just scoped to titles/emphasis now instead of all text.
 - Three accent families, used for meaning/emphasis, not as a base material for structural
   surfaces — see [Color tokens](#color-tokens): `accent-steel` for general interactive chrome
   (hover/focused borders, bevel highlights, dividers), `accent-crimson` for primary/hero emphasis
@@ -73,11 +75,19 @@ capability — check the render interface, or test the specific decorator in iso
 
 | Token | Value | Use |
 |---|---|---|
-| `surface-0` | `rgba(10, 9, 8, 190)` | Full-screen dim backdrop (`#backdrop`) |
-| `surface-1` | `#1a1b1d` | Base panel background |
-| `surface-2` | `#2c2f32` | Elevated panel / header background |
+| `surface-0` | `rgba(9, 11, 14, 190)` | Full-screen dim backdrop (`#backdrop`) |
+| `surface-1` | `#12151a` | Base panel background |
+| `surface-2` | `#1d232b` | Elevated panel / header background |
 | `surface-3` | `rgba(255, 255, 255, 12)` | Interactive control, resting (neutral white wash over `surface-1`/`surface-2`) |
-| `surface-tooltip` | `rgba(20, 20, 20, 220)` | Tooltip/floating-label background — used by `main_frame.rcss`, `buff_strip.rcss`, `mu_helper_bar.rcss`. Use this for any new tooltip rather than picking a new near-black. |
+| `surface-tooltip` | `rgba(10, 12, 15, 235)` | Tooltip/floating-label background — used by `main_frame.rcss`, `buff_strip.rcss`, `mu_helper_bar.rcss`. Use this for any new tooltip rather than picking a new near-black. |
+
+**Refreshed 2026-09-09** from a reference visual study (an external HTML/CSS mockup exploring the
+same cool-steel/crimson-hero/gold-emphasis direction this document already committed to) — every
+surface/accent/semantic/text/border value in this document and `tokens.ini` was retuned to that
+mockup's palette. No token was renamed and no consumer changed — every existing `token(name)` call
+site picks up the new value automatically. See "Engine-constraint translation guide" below for what
+from that mockup is and isn't portable to this engine, and "Current retrofit status" for what this
+refresh did and didn't touch.
 
 ### Accent colors
 
@@ -110,13 +120,13 @@ reference and comment-naming, not the literal 4-stop gradient itself.
 
 | Token | Value | Use |
 |---|---|---|
-| `accent-steel` | `#b0bac4` | General interactive chrome — hover/checked/focused states, dividers, bevel highlights, a resting button's border glow. Layered on top of the gray surfaces/borders, not the base material itself. |
-| `accent-steel-bright` | `#d4dce4` | Hover-bright state for the same chrome |
-| `accent-crimson` | `#70221f` | Primary/hero accent — a window's one confirm-style button, a title banner. One per window, never a whole list of equal-weight actions. |
-| `accent-crimson-bright` | `#8c2b26` | Hover/bright state for the same primary element |
-| `accent-gold` | `#c0a050` | Semantic highlight — inline text emphasis, item/skill-slot selected/active highlights, the checkbox's checked state. Not general window/dialog chrome. |
-| `accent-gold-bright` | `#e0c060` | Brighter variant of the same semantic highlight (current/active skill-slot state) |
-| `accent-blue` | `#6f9bc4` | Secondary accent — informational, non-primary interactive hints |
+| `accent-steel` | `#76889a` | General interactive chrome — hover/checked/focused states, dividers, bevel highlights, a resting button's border glow. Layered on top of the gray surfaces/borders, not the base material itself. |
+| `accent-steel-bright` | `#aab8c6` | Hover-bright state for the same chrome |
+| `accent-crimson` | `#a52336` | Primary/hero accent — a window's one confirm-style button, a title banner. One per window, never a whole list of equal-weight actions. |
+| `accent-crimson-bright` | `#d34a5e` | Hover/bright state for the same primary element |
+| `accent-gold` | `#d1aa55` | Semantic highlight — inline text emphasis, item/skill-slot selected/active highlights, the checkbox's checked state. Not general window/dialog chrome. |
+| `accent-gold-bright` | `#ecd28a` | Brighter variant of the same semantic highlight (current/active skill-slot state) |
+| `accent-blue` | `#5a8fc0` | Secondary accent — informational, non-primary interactive hints |
 
 ### Semantic colors
 
@@ -125,11 +135,11 @@ meaning (a positive change, a destructive action, a rare item), never as generic
 
 | Token | Value | Meaning |
 |---|---|---|
-| `semantic-success` | `#6fae6f` | Positive / success / healthy |
+| `semantic-success` | `#66956d` | Positive / success / healthy |
 | `semantic-warning` | `#d69a3e` | Warning / caution (kept visually distinct from `accent-gold` so warnings don't read as ordinary emphasis) |
-| `semantic-danger` | `#b2394a` | Danger / destructive / critical |
+| `semantic-danger` | `#cb4855` | Danger / destructive / critical |
 | `semantic-rare` | `#9a6bc0` | Rare / special / high-value |
-| `semantic-neutral` | `#9a958c` | Neutral / disabled / secondary |
+| `semantic-neutral` | `#8a9099` | Neutral / disabled / secondary |
 
 Where the game already has its own established item-rarity colors, preserve those existing
 meanings rather than remapping them to this table — this table covers *UI* semantics (warnings,
@@ -139,10 +149,20 @@ danger prompts, success feedback), not item-quality colors.
 
 | Token | Value | Use |
 |---|---|---|
-| `text-title` | `#efe6d3` | Titles/headers — warm off-white, not pure white |
-| `text-body` | `#d9d3c5` | Default readable body text (replaces bare `#fff`/`white` uses) |
-| `text-muted` | `#8f897c` | Metadata, secondary/subdued text |
-| `text-emphasis` | `accent-gold` (`#c0a050`) | Important inline emphasis within body text |
+**Refreshed 2026-09-09 — warmth narrowed to titles/labels only.** This table used to read "titles
+*and* body text stay warm off-white"; the reference visual study above applies warmth more
+narrowly — only titles/names/labels (`text-title`) and the checkbox's checked state stay warm
+gold-tan, while general body/description/stat text is cool gray-blue, same family as the
+structural surfaces/borders. This makes the warm accent read as a stronger, rarer signal rather
+than a blanket tint. Every window already reads `token(text-body)`/`token(text-title)` by name, so
+this is a value-only change — no `.rcss` file needed editing for this to take effect.
+
+| Token | Value | Use |
+|---|---|---|
+| `text-title` | `#d8bd7a` | Titles/headers/names/labels — warm gold-tan, the one place body copy stays warm |
+| `text-body` | `#a5adb7` | Default readable body text — cool gray-blue, not warm (replaces bare `#fff`/`white` uses) |
+| `text-muted` | `#717a84` | Metadata, secondary/subdued text — cool, one step dimmer than `text-body` |
+| `text-emphasis` | `accent-gold` (`#d1aa55`) | Important inline emphasis within body text |
 
 ### Borders
 
@@ -154,8 +174,8 @@ checked/focused states read as distinctly "activated" against the quieter struct
 | Token | Value | Use |
 |---|---|---|
 | `border-subtle` | `rgba(255, 255, 255, 12)` | Hairline separator/highlight on a dark panel |
-| `border-metal` | `rgba(140, 146, 152, 130)` | Thin metallic edge — small controls, HUD elements |
-| `border-strong` | `rgba(176, 182, 188, 180)` | Heavier metallic frame — major windows/dialogs only |
+| `border-metal` | `rgba(122, 133, 145, 130)` | Thin metallic edge — small controls, HUD elements |
+| `border-strong` | `rgba(150, 161, 172, 180)` | Heavier metallic frame — major windows/dialogs only |
 
 **No shadow/glow tokens as such** — `box-shadow` is confirmed broken on this engine (see above).
 Depth instead comes from per-side `border-*-color` bevels (independently-settable per side, real
@@ -222,6 +242,40 @@ into the color change itself. `login.rcss` also has its own local `.modern-inset
 `.modern-inset.focused` override (the input-box frame border) that went through the identical
 warm→cool treatment for the same reason.
 
+### Default look for every dialog/window: `.modern-frame`/`.modern-frame-crimson` + `.title-glow`
+
+**Added 2026-09-09, by explicit user direction**: unless a window has a specific, documented reason
+not to (see the exceptions below), every real dialog/window should apply `.modern-frame
+modern-frame-crimson` to its outer `#panel` (the shared bevel/gradient frame, [Borders and
+frames](#borders-and-frames) above) and, if it has an actual title/name label, `base.rcss`'s
+`.title-glow` primitive (a soft radial gold-to-crimson glow, extracted from `login.rcss`'s original
+header banner) as a sibling positioned before that title. This is the default now, not an opt-in —
+a new dialog/window should reach for this combination first, and only skip it for a reason as
+concrete as the ones below, not by default. Current adopters: `login`, `msg_win`,
+`remember_password_prompt` (frame only, see below), `my_inventory`, `my_quest_info` (forked
+2026-09-09 specifically to pick this up — it had no per-theme override before and was still on a
+flat `surface-1`/`border-metal` fill with no banner at all), and `sys_menu` (forked the same day,
+frame only, see below).
+
+**Real, documented exceptions — don't copy these as an excuse to skip the default elsewhere:**
+- **`remember_password_prompt`** gets the frame but deliberately no glow: its title color IS the
+  security warning being confirmed (`semantic-warning`, not decorative) — a crimson banner behind a
+  warning-colored title would compete with that meaning. See [Component states](#component-states)
+  below and this file's own `.prompt-title` comment.
+- **`sys_menu`** gets the frame but no glow: it has no title/name label at all (four stacked
+  buttons, nothing to glow behind) — the glow's whole reason for existing (drawing the eye to a
+  title) doesn't apply.
+- **`char_make`, `char_sel_main`, `server_select`, `credit_win`**: `#panel` stays deliberately
+  invisible/backgroundless in all four — `char_make`'s frames a live 3D character-preview viewport
+  behind it, `char_sel_main` is a borderless button bar over the 3D scene, `server_select` sits over
+  a video background (matching the real legacy screen, not a redesign choice, per that file's own
+  comment), and `credit_win`'s `#panel` is a full-screen scrim, not a bordered window. None of these
+  are "windows" in the bordered-dialog sense this convention is for — don't add a frame to any of
+  them without first re-reading why they're transparent today.
+- **HUD overlays** (`main_frame`, `mu_helper_bar`, `buff_strip`) were already excluded from
+  `accent-crimson` entirely (see "Deliberately not tokenized" below) — this convention doesn't
+  change that; a HUD element is not a dialog/window.
+
 ## Component states
 
 Every interactive element should express, through this same token set, whichever of these actually
@@ -256,6 +310,27 @@ glow/blur/shadow effects are currently available at all. Whatever hierarchy/stat
 effect might have supplied have to come from color/border/layering instead. Revisit this section
 only once this engine's render interface actually gains layer/filter compositing.
 
+## Engine-constraint translation guide
+
+Added 2026-09-09 alongside the reference-study refresh above, so a future session adapting an
+external HTML/CSS mockup into this theme doesn't try to port a feature this vendored RmlUi build
+doesn't have and hit a silent failure. Confirmed by reading the vendored engine source
+(`StyleSheetSpecification.cpp`/`StyleSheetFactory.cpp`), not assumed:
+
+| Reference-CSS feature | Status on this engine | Use instead |
+|---|---|---|
+| `display: grid` / `grid-template-columns` | Not a registered `display` keyword (only `none/block/inline/inline-block/flow-root/flex/inline-flex/table*`) | Flexbox (`display: flex`, `flex-direction`, `align-items`, `justify-content` are all real, working properties here) |
+| `::before`/`::after` + `content:` | No `content` property is registered at all; no generated-content pseudo-elements | A real child `<div>`/`<span>` element in the `.rml`, not a CSS-only decoration |
+| `aspect-ratio` | Not a registered property | An explicit `height` (or `width`) alongside the element's own sizing |
+| `text-shadow` | Not a registered property | Color/contrast alone; no glow/outline-via-shadow trick |
+| `repeating-linear-gradient` / `repeating-radial-gradient` | Only plain `linear-gradient`/`radial-gradient`/`conic-gradient` route through the working `CompileShader` shader path (see `STATUS.md`'s existing finding) | A plain (non-repeating) gradient, or a `@spritesheet`-based tileable texture if a repeating pattern is genuinely needed |
+| `box-shadow` / `filter` / `backdrop-filter` | Parse but don't render (already documented above) | Per-side `border-*-color` bevels + `linear-gradient`, the existing `.modern-frame`/`.modern-panel`/`.modern-inset` technique |
+| `:focus-visible` | Not a supported pseudo-class (only `:hover`/`:active`/`:focus` and structural selectors like `nth-child` are) | `:focus`, already used by `.modern-inset.focused` |
+| `var(--custom-property)` | No CSS custom-property mechanism | This project's own `token(name)` marker, resolved against `tokens.ini` (see "Design tokens" above) |
+
+Only a mockup's **token values** (its actual palette) are meant to be adopted directly; its layout
+mechanics need translating through this table first.
+
 ## Current retrofit status
 
 `themes/modern/base.rcss` (`.btn`, `.checkbox-box`, `#backdrop`) and every other already-shipped
@@ -279,6 +354,28 @@ directly rather than picking new ad hoc values.
   their own Panels/HUD guidance above, and a loud crimson accent would fight that. Revisit only if
   a HUD window actually gets a genuine primary-action element that needs the emphasis, not as a
   blanket consistency pass.
+
+**Retrofitted 2026-09-09, same day as the refresh above** (superseding the original plan to defer
+this): `login.rcss`, `credit_win.rcss`, `server_select.rcss`, `mu_helper_bar.rcss`,
+`my_inventory.rcss`, `main_frame.rcss`, `my_inventory_bg.rcss`, and `my_quest_info.rcss` each had
+their own literal hex/rgba colors — either a genuine "own copy" of a `base.rcss` class (these files
+don't link it, or predate the token mechanism, per each file's own header comment) or a one-off
+value with no matching token (a status-dot color, a tooltip background) — brought onto the
+refreshed palette. Every opaque literal that matches a token's exact value now reads
+`token(name)` directly rather than repeating the hex; an alpha-blended derived shade (a gradient
+mid-stop, a bevel highlight at reduced alpha) can't be expressed as a token call (`token(name)` is a
+plain-text substitution, it can't be re-blended with a different alpha at the call site), so those
+stay literal with a comment naming which token they derive from. `credit_win.rcss` and
+`my_quest_info.rcss` needed no color changes (already fully tokenized); `my_quest_info.rcss`'s
+tooltip background was switched from a literal near-black to `token(surface-tooltip)` for the same
+reason. `main_frame_bg.rcss`/`my_inventory_bg.rcss`'s `.bg-panel` (each an intentionally
+independent, theme-context-separate duplicate of `base.rcss`'s `.modern-frame`, per their own header
+comments) were updated to match `.modern-frame`'s new values, keeping that documented duplication in
+sync. **Deliberately still not touched**, each per its own file's explicit comment: gameplay-status
+colors (HP/MP/AG/SD/EXP gauge fills, the cooldown-wipe ARGB value), the skill/item-option tooltip's
+`tt-*` line colors (real game-data meaning), and `my_inventory.rcss`'s `.option-label`/`.tt-line`
+Set/Socket colors (semantic option-category colors matching legacy, not theme chrome) — see
+"Deliberately not tokenized" above for the full list and reasoning.
 
 ## Theme architecture requirement
 

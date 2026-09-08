@@ -61,12 +61,18 @@ drawn by the legacy `CWin`/`CSprite` path underneath it. A "legacy-look" theme r
 original art by pointing its own RCSS decorators at the same image files the old sprites used;
 a "modern" theme uses flat colors/vector shapes instead.
 
-## Forking a theme's RML: the mechanism, and today's one real example
+## Forking a theme's RML: the mechanism, and today's real examples
 
 `UI::RmlBridge::LoadThemedDocument()` ([`RmlTheme.cpp`](../../src/source/UI/RmlBridge/RmlTheme.cpp))
 looks for `themes/<theme>/<name>.rml` first, falling back to the shared `<name>.rml` when no such
-file exists. Every window but `main_frame` has no per-theme override, so this is a no-op for them
-(one extra failed `ifstream` open). `main_frame` has two independently-maintained files —
+file exists. As of this writing, `modern` has its own `.rml` for `login`, `msg_win`,
+`remember_password_prompt`, `my_inventory` (+ its background-context companion
+`my_inventory_bg`), `my_quest_info`, and `main_frame` — every other window has no per-theme
+override, so the lookup is a no-op for them (one extra failed `ifstream` open). Grep
+`themes/modern/*.rml` for the live, current list rather than trusting this paragraph's exact
+file names — it's kept current on a best-effort basis, not mechanically checked. Most of these
+exist so `modern`'s own `.modern-frame`/`.modern-frame-crimson`/`.title-glow` class vocabulary
+doesn't have to live in the shared, theme-neutral file (the Core Principle section above). `main_frame` is the one example forked for a **different** reason — two independently-maintained files —
 [`themes/legacy/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/legacy/main_frame.rml)
 and
 [`themes/modern/main_frame.rml`](../../src/bin/Data/Interface/RmlUi/themes/modern/main_frame.rml)

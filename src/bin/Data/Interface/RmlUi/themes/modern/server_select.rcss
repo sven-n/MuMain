@@ -68,21 +68,21 @@
 	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: #35100e;
-	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e);
+	background-color: #430e17;
+	decorator: linear-gradient(to bottom, token(accent-crimson-bright), token(accent-crimson) 35%, #6c1520 70%, #430e17); /* bright/base stops are real tokens; the two darker stops are derived shades with no token of their own */
 	border-width: 1px;
 	border-color: #0a0706;
-	border-top-color: rgba(213, 143, 106, 115);
+	border-top-color: rgba(211, 74, 94, 115); /* accent-crimson-bright's rgb @ 115 alpha */
 	border-radius: token(radius-sm)px;
 	color: token(text-emphasis);
 	font-family: "token(font-body)";
 }
 .group-btn:hover {
-	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
-	border-color: #9a6841;
+	decorator: linear-gradient(to bottom, #e05f72, token(accent-crimson-bright) 35%, #8c1e2c 70%, #571219); /* #e05f72 is a brighter-than-token hover-only highlight, no token */
+	border-color: #e05f72;
 }
 .group-btn.checked {
-	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
+	decorator: linear-gradient(to bottom, #e05f72, token(accent-crimson-bright) 35%, #8c1e2c 70%, #571219);
 	border-color: token(accent-gold-bright);
 	color: token(text-title);
 }
@@ -147,8 +147,8 @@
 	white-space: nowrap;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: #0b0907;
-	decorator: linear-gradient(to bottom, #211d1b, #090909 48%, #120e0c);
+	background-color: #0a0d10;
+	decorator: linear-gradient(to bottom, #1a2027, #0a0d10 48%, #12151a); /* cool neutral, was warm charcoal -- structural framing goes cool now */
 	border-width: 1px;
 	border-top-color: rgba(255, 255, 255, 50);
 	border-left-color: rgba(255, 255, 255, 50);
@@ -159,7 +159,7 @@
 	font-family: "token(font-body)";
 }
 .server-row:hover {
-	decorator: linear-gradient(to bottom, #35302c, #17130f 48%, #201a16);
+	decorator: linear-gradient(to bottom, #30363c, #171a1e 48%, #20252a);
 	border-top-color: token(accent-steel-bright);
 	border-left-color: token(accent-steel-bright);
 }

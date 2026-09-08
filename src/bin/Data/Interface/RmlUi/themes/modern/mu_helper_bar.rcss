@@ -61,9 +61,9 @@
 	border-radius: 3dp;
 	pointer-events: none;
 }
-#btn_config .dot { background-color: #9a958c; } /* semantic-neutral */
-#btn_start .dot  { background-color: #6fae6f; } /* semantic-success */
-#btn_stop .dot   { background-color: #b2394a; } /* semantic-danger */
+#btn_config .dot { background-color: token(semantic-neutral); }
+#btn_start .dot  { background-color: token(semantic-success); }
+#btn_stop .dot   { background-color: token(semantic-danger); }
 
 /* Siblings of .mu-btn (mu_helper_bar.rml), not nested children -- this build's shrink-to-fit
    width hard-clamps to the containing block (main_frame.rcss's own tooltip comment documents the

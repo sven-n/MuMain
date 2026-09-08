@@ -11,6 +11,16 @@
 	font-family: "token(font-body)";
 }
 
+/* Fading crimson banner behind the title, same primitive login.rcss's own header banner uses --
+   see base.rcss's .title-glow comment. Sits behind #title (declared first, paint-order
+   convention). */
+.inv-title-glow {
+	left: 20px;
+	right: 20px;
+	top: 4px;
+	height: 22px;
+}
+
 /* Drag handle -- see MyInventory.cpp's Create() comment. pointer-events/drag are force-set in
    C++ by UI::RmlBridge::MakeDraggable(); cursor here is purely cosmetic (discoverability). */
 #title {
@@ -75,7 +85,7 @@
 	top: 375px;
 	width: 120px;
 	white-space: nowrap;
-	background-color: rgba(20, 21, 22, 230);
+	background-color: token(surface-tooltip);
 	border: 1px token(accent-steel-bright);
 	color: token(text-body);
 	padding: 2px 4px;
@@ -129,7 +139,7 @@
 	top: 40px;
 	width: 140px;
 	text-align: center;
-	background-color: rgba(20, 21, 22, 230);
+	background-color: token(surface-tooltip);
 	border: 1px token(accent-steel-bright);
 	border-radius: token(radius-sm)px;
 	padding: 4px 6px;

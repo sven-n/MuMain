@@ -11,6 +11,7 @@
 	     here, since it must paint behind the still-native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="title-glow inv-title-glow"></div>
 		<span id="title">{{title}}</span>
 
 		<div id="gold_bg"></div>

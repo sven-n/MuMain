@@ -39,7 +39,7 @@ body {
 	height: 245dp;
 	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: #d9d0c0;
+	color: token(text-body);
 	border-width: 1dp;
 	border-radius: 7dp;
 }
@@ -69,7 +69,7 @@ body {
 
 .modern-inset {
 	border-width: 1dp;
-	border-color: #4a4e54; /* cool steel-gray frame border, was warm bronze */
+	border-color: token(border-metal); /* cool steel-gray frame border, was warm bronze */
 	border-top-color: rgba(0, 0, 0, 170); /* recessed: dark top/left */
 	border-left-color: rgba(0, 0, 0, 170);
 }
@@ -84,7 +84,7 @@ body {
 .label-server {
 	left: 111dp;
 	top: 14dp;
-	color: #e2d7c5;
+	color: token(text-title);
 	font-weight: bold;
 	letter-spacing: 1.5px;
 	font-effect: outline(1px #000000);
@@ -92,25 +92,16 @@ body {
 .label-account { left: 30dp; top: 73dp; }
 .label-password{ left: 30dp; top: 106dp; }
 
-/* Soft ambient glow behind the title -- yellow at the center, cooling to red further out (fading
-   to transparent at the very edge so it still reads as a glow, not a hard-edged shape), a true
-   radial falloff now that RenderInterface_SDL_GPU implements CompileShader/RenderShader for the
-   gradient family. This engine still has no filter:blur()/
-   text-shadow/box-shadow (all confirmed unregistered or non-rendering), so this is the only
-   ambient-glow technique available. Sits behind .label-server (declared first, base.rcss/
-   login.rcss paint-order convention: earlier siblings paint first). Center stop kept low-alpha
-   (130) and pushed further out before fading (90%) so the gold core stays soft -- a first pass at
-   full opacity there read as a bold solid patch instead of an ambient glow. The red ring is deeper
-   and more saturated instead (darker rgb, higher alpha) so the red hue itself stays clearly
-   visible without needing to brighten it. */
+/* Position/size only -- the gradient itself is base.rcss's shared .title-glow now (login.rml
+   applies both classes: class="title-glow header-glow"), the first extraction of this pattern for
+   reuse across every other dialog/window that has a title. Sits behind .label-server (declared
+   first, base.rcss/login.rcss paint-order convention: earlier siblings paint first). See
+   base.rcss's own .title-glow comment for the gradient's tuning rationale. */
 .header-glow {
-	position: absolute;
 	left: 40dp;
 	right: 40dp;
 	top: 8dp;
 	height: 26dp;
-	pointer-events: none;
-	decorator: radial-gradient(ellipse, rgba(255, 222, 150, 130), rgba(140, 25, 20, 140) 55%, transparent 90%);
 }
 
 /* Border-only outline standing in for the legacy input-box frame -- no background, so it never
@@ -150,17 +141,17 @@ body {
 	position: relative;
 	width: 16dp;
 	height: 16dp;
-	background-color: #0b0907;
-	decorator: linear-gradient(to bottom, #211b15, #0b0907);
+	background-color: #0a0d10;
+	decorator: linear-gradient(to bottom, #1a2027, #0a0d10);
 	border-width: 1dp;
-	border-color: #725b39;
+	border-color: token(border-metal);
 	border-top-color: rgba(0, 0, 0, 180);
 	border-radius: 3dp;
 }
 .checkbox-box.checked {
-	background-color: #604319;
-	decorator: linear-gradient(to bottom, #a47732, #604319);
-	border-color: #c0934c;
+	background-color: #6b5220;
+	decorator: linear-gradient(to bottom, token(accent-gold), #6b5220); /* bright stop = accent-gold exactly; dark stop is a derived shade, no token */
+	border-color: token(accent-gold);
 }
 
 /* No CSS transform rotation support in this build -- checkmark built from 5 small axis-aligned
@@ -169,7 +160,7 @@ body {
 	position: absolute;
 	width: 2dp;
 	height: 2dp;
-	background-color: #16100a;
+	background-color: #141a1f;
 }
 .tick-px-1 { left: 3dp;  top: 7dp; }
 .tick-px-2 { left: 5dp;  top: 9dp; }
@@ -202,7 +193,7 @@ body {
 	top: 186dp;
 	height: 1dp;
 	pointer-events: none;
-	decorator: linear-gradient(to right, transparent, #5d472c 15%, #81633a 50%, #5d472c 85%, transparent);
+	decorator: linear-gradient(to right, transparent, token(border-metal) 15%, token(accent-steel) 50%, token(border-metal) 85%, transparent); /* was warm bronze; structural framing goes cool now, matching the frame material */
 }
 
 /* Crimson "primary action" button (OK) -- reuses the exact same 4-stop vertical gradient as the
@@ -222,17 +213,17 @@ body {
 	color: #f0e0bc;
 	font-family: "token(font-body)";
 	font-effect: outline(1px #000000);
-	background-color: #35100e;
-	decorator: linear-gradient(to bottom, #8c2b26, #70221f 35%, #541613 70%, #35100e);
+	background-color: #430e17;
+	decorator: linear-gradient(to bottom, token(accent-crimson-bright), token(accent-crimson) 35%, #6c1520 70%, #430e17); /* bright/base stops are real tokens; the two darker stops are derived shades with no token of their own */
 	border-width: 1dp;
 	border-color: #0a0706;
-	border-top-color: rgba(213, 143, 106, 115);
+	border-top-color: rgba(211, 74, 94, 115); /* accent-crimson-bright's rgb @ 115 alpha */
 	border-radius: 5dp;
 	pointer-events: auto;
 }
 .btn:hover {
-	decorator: linear-gradient(to bottom, #a83832, #8c2b26 35%, #6c1c18 70%, #451510);
-	border-color: #9a6841;
+	decorator: linear-gradient(to bottom, #e05f72, token(accent-crimson-bright) 35%, #8c1e2c 70%, #571219); /* #e05f72 is a brighter-than-token hover-only highlight, no token */
+	border-color: #e05f72;
 }
 .btn:active {
 	/* Shifts down 2dp to read as physically pressed -- both .btn-ok/.btn-cancel share the same
@@ -241,7 +232,7 @@ body {
 	   here for unrelated reasons). Degrades gracefully if it never
 	   fires -- worst case the button just doesn't visibly depress. */
 	top: 198dp;
-	border-top-color: rgba(180, 92, 68, 65);
+	border-top-color: rgba(165, 35, 54, 65); /* accent-crimson's rgb @ 65 alpha */
 	border-bottom-color: rgba(0, 0, 0, 200);
 }
 .btn-ok { left: 150dp; top: 196dp; }
@@ -252,13 +243,13 @@ body {
 .btn-cancel {
 	left: 211dp;
 	top: 196dp;
-	background-color: #17130f;
-	decorator: linear-gradient(to bottom, #37302a, #28221c 40%, #17130f 75%, #0d0b09);
-	border-color: #665237;
+	background-color: #171a1e;
+	decorator: linear-gradient(to bottom, #30363c, #20252a 40%, #171a1e 75%, #0e1013); /* cool neutral, was warm charcoal -- structural framing goes cool now */
+	border-color: token(border-metal);
 }
 .btn-cancel:hover {
-	decorator: linear-gradient(to bottom, #51463a, #382e25 40%, #211a14 75%, #100d0a);
-	border-color: #91734b;
+	decorator: linear-gradient(to bottom, #454d54, #30363c 40%, #20252a 75%, #171a1e);
+	border-color: token(accent-steel);
 }
 
 .trust-warning {

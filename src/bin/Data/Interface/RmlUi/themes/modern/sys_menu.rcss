@@ -1,5 +1,9 @@
-/* Modern theme for the system menu -- flat programmatic panel, matching login.rcss's modern
-   translucent-dark-panel look. Buttons rely entirely on base.rcss's shared .btn.
+/* Modern theme for the system menu -- #panel now consumes base.rcss's .modern-frame/
+   .modern-frame-crimson (applied in sys_menu.rml, this file's own themed fork) instead of its own
+   bespoke flat fill, same family as login/msg_win/my_quest_info's frame. No title-glow banner
+   here -- this dialog has no title text for one to sit behind (just 4 stacked buttons), so it
+   gets the frame material without the glow; that's a real, narrower difference from the other
+   dialogs, not a missed spot. Buttons rely entirely on base.rcss's shared .btn.
 
    #panel is not C++-positioned/sized -- centered via base.rcss's .center-both
    utility class (applied in sys_menu.rml), fixed dp size matching CWinEx's own real geometry
@@ -18,11 +22,9 @@
 #panel {
 	width: 213dp;
 	height: 187dp;
-	font-family: "Liberation Sans";
+	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: white;
-	background-color: rgba(26, 27, 29, 228);
-	border: 1dp rgba(255, 255, 255, 30);
+	color: token(text-body);
 	border-radius: 10dp;
 }
 #panel.compact {

@@ -421,7 +421,7 @@
 /* Same hover-highlight look for either slot family -- one rule, not duplicated per group. */
 #item_slots .selected, #skill_slots .selected {
 	border: 1px token(accent-gold-bright);
-	background-color: rgba(176, 182, 188, 25);
+	background-color: rgba(150, 161, 172, 25); /* border-strong's rgb @ 25 alpha */
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
@@ -456,7 +456,7 @@
 }
 .skill-cell.selected {
 	border: 1px token(accent-gold-bright);
-	background-color: rgba(176, 182, 188, 25);
+	background-color: rgba(150, 161, 172, 25); /* border-strong's rgb @ 25 alpha */
 }
 
 /* Bottom-anchored translucent wipe -- shrinks from the top down as the skill's cooldown counts
