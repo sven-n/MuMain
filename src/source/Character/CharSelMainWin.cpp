@@ -134,30 +134,7 @@ void CCharSelMainWin::Create()
     // briefly did, after rebasing onto upstream's own Create() ordering) left every RmlUi element
     // at its unstyled default position on the window's very first Create() call.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_sel_main",
-            [this](Rml::DataModelConstructor& c, CharSelMainRmlModel& model)
-            {
-                c.Bind("create_disabled", &model.createDisabled);
-                c.Bind("connect_disabled", &model.connectDisabled);
-                c.Bind("delete_disabled", &model.deleteDisabled);
-                c.Bind("account_block_hidden", &model.accountBlockHidden);
-                c.Bind("account_block_line1", &model.accountBlockLine1);
-                c.Bind("account_block_line2", &model.accountBlockLine2);
-
-                c.BindEventCallback("charsel_create_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCreate(); });
-                c.BindEventCallback("charsel_menu_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMenu(); });
-                c.BindEventCallback("charsel_connect_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConnect(); });
-                c.BindEventCallback("charsel_delete_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDelete(); });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
-    }
+        BuildRmlUi();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_SEL_MAIN, this);
 
@@ -165,6 +142,47 @@ void CCharSelMainWin::Create()
     m_bAccountBlockItem = HasAccountBlockedCharacter();
 
     Show(false);
+}
+
+void CCharSelMainWin::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_sel_main",
+        [this](Rml::DataModelConstructor& c, CharSelMainRmlModel& model)
+        {
+            c.Bind("create_disabled", &model.createDisabled);
+            c.Bind("connect_disabled", &model.connectDisabled);
+            c.Bind("delete_disabled", &model.deleteDisabled);
+            c.Bind("account_block_hidden", &model.accountBlockHidden);
+            c.Bind("account_block_line1", &model.accountBlockLine1);
+            c.Bind("account_block_line2", &model.accountBlockLine2);
+
+            c.BindEventCallback("charsel_create_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCreate(); });
+            c.BindEventCallback("charsel_menu_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMenu(); });
+            c.BindEventCallback("charsel_connect_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConnect(); });
+            c.BindEventCallback("charsel_delete_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickDelete(); });
+        });
+
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_sel_main.rml");
+}
+
+void CCharSelMainWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
 void CCharSelMainWin::ApplyLayout(const UI::CharacterSelection::Layout& layout)

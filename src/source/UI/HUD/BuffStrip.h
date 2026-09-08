@@ -65,7 +65,11 @@ namespace mu::ui::window
         // CSystem::SyncMainSceneHudVisibility(), regardless of scene).
         void SyncDocVisibility(bool sceneAllowsShow);
 
+        void ReloadRmlTheme() override;
+
     private:
+        void BuildRmlUi();
+
         struct BuffEntry
         {
             // This icon's own grid slot position, pre-computed in C++ -- same "push already-

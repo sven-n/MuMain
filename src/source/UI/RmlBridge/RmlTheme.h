@@ -19,15 +19,30 @@ namespace Rml
 // image files the old sprites used (e.g. themes/legacy/login.rcss's `decorator: image(...)`) --
 // that's a choice of asset, not a choice of renderer.
 //
-// Read once from GameConfig at startup, not a live in-game hot-swap yet -- switching themes today
-// means editing config.ini's [UI] RmlTheme value and relaunching. A true runtime toggle needs each
-// migrated window to tear down and rebuild its Rml::ElementDocument/DataModel against the new
-// theme's stylesheet path -- a real follow-up, not this increment's scope.
+// Seeded once from GameConfig::GetRmlTheme() at startup, then live-mutable via SetActiveThemeName()
+// (e.g. the `$theme <name>` chat command) -- GameConfig's own value only changes what a *relaunch*
+// picks up; the cache here is the actual "what's on screen right now" source of truth. Changing it
+// alone does nothing visually: a window's Rml::ElementDocument/DataModel was already built against
+// whatever theme was active when LoadThemedDocument() last ran for it, so a caller that wants the
+// change to be visible must also tear down and rebuild every currently-open themed window's
+// document (see IObject::ReloadRmlTheme()) after calling SetActiveThemeName().
 namespace UI::RmlBridge
 {
     // Cached on first call from GameConfig::GetRmlTheme() (e.g. "legacy", "modern", or any
-    // modder-supplied folder name -- not a closed set).
+    // modder-supplied folder name -- not a closed set). Reflects the live cache SetActiveThemeName()
+    // writes to, not necessarily GameConfig's current value.
     const std::string& GetActiveThemeName();
+
+    // Overwrites the live active-theme cache GetActiveThemeName()/ThemeProvidesOwnIconChrome() read
+    // from (lowercased, same normalization GetActiveThemeName() has always applied). Does not touch
+    // GameConfig and does not rebuild any window's document by itself -- see this file's top comment.
+    void SetActiveThemeName(const std::string& themeName);
+
+    // True if themes/<themeName>/base.rcss exists and is readable -- the minimum a folder needs to
+    // be a real theme (every window's document links it first, per theming-and-modding.md). Meant
+    // as a pre-switch validation gate (e.g. for the `$theme` command) so an unknown/misspelled name
+    // is rejected up front instead of silently rendering every window unstyled.
+    bool ThemeExists(const std::string& themeName);
 
     // A declared theme capability (C++ must never branch on a theme's NAME -- a theme wanting
     // non-default behavior states that want itself, via an optional themes/<name>/theme.ini,

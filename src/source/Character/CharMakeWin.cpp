@@ -179,12 +179,28 @@ void CCharMakeWin::Create()
     // RmlUi migration -- guarded the same way every other migrated window's Create() is
     // (re-entrant on resolution change), so the document/model/array size are set up once, ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_make",
-            [this](Rml::DataModelConstructor& c, CharMakeRmlModel& model)
-            {
-                model.jobs.resize(MAX_CLASS);
+        BuildRmlUi();
 
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_MAKE, this);
+
+    UpdateDisplay();
+    Show(false);
+}
+
+void CCharMakeWin::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_make",
+        [this](Rml::DataModelConstructor& c, CharMakeRmlModel& model)
+        {
+            model.jobs.resize(MAX_CLASS);
+
+            // RegisterStruct()/RegisterArray() declare a C++ type to RmlUi's Context-wide data-type
+            // registry (persists for the Context's lifetime); re-declaring an already-registered
+            // type returns a null handle that crashes the next .RegisterMember() call. c.Bind()
+            // below is per-model and must still rerun every time.
+            static bool s_typesRegistered = false;
+            if (!s_typesRegistered)
+            {
                 auto job = c.RegisterStruct<JobButtonEntry>();
                 job.RegisterMember("rel_left", &JobButtonEntry::relLeft);
                 job.RegisterMember("rel_top", &JobButtonEntry::relTop);
@@ -192,43 +208,56 @@ void CCharMakeWin::Create()
                 job.RegisterMember("disabled", &JobButtonEntry::disabled);
                 job.RegisterMember("label", &JobButtonEntry::label);
                 c.RegisterArray<std::vector<JobButtonEntry>>();
+                s_typesRegistered = true;
+            }
 
-                c.Bind("jobs", &model.jobs);
-                c.Bind("dark_lord_extra", &model.darkLordExtra);
-                c.Bind("stat_label0", &model.statLabel0);
-                c.Bind("stat_label1", &model.statLabel1);
-                c.Bind("stat_label2", &model.statLabel2);
-                c.Bind("stat_label3", &model.statLabel3);
-                c.Bind("stat_label4", &model.statLabel4);
-                c.Bind("stat_value0", &model.statValue0);
-                c.Bind("stat_value1", &model.statValue1);
-                c.Bind("stat_value2", &model.statValue2);
-                c.Bind("stat_value3", &model.statValue3);
-                c.Bind("desc_line1", &model.descLine1);
-                c.Bind("desc_line2", &model.descLine2);
-                c.Bind("ok_label", &model.okLabel);
-                c.Bind("cancel_label", &model.cancelLabel);
+            c.Bind("jobs", &model.jobs);
+            c.Bind("dark_lord_extra", &model.darkLordExtra);
+            c.Bind("stat_label0", &model.statLabel0);
+            c.Bind("stat_label1", &model.statLabel1);
+            c.Bind("stat_label2", &model.statLabel2);
+            c.Bind("stat_label3", &model.statLabel3);
+            c.Bind("stat_label4", &model.statLabel4);
+            c.Bind("stat_value0", &model.statValue0);
+            c.Bind("stat_value1", &model.statValue1);
+            c.Bind("stat_value2", &model.statValue2);
+            c.Bind("stat_value3", &model.statValue3);
+            c.Bind("desc_line1", &model.descLine1);
+            c.Bind("desc_line2", &model.descLine2);
+            c.Bind("ok_label", &model.okLabel);
+            c.Bind("cancel_label", &model.cancelLabel);
 
-                c.BindEventCallback("charmake_select_job",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
-                    {
-                        if (arguments.size() == 1)
-                            RmlClickJob(arguments[0].Get<int>(-1));
-                    });
-                c.BindEventCallback("charmake_ok_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
-                c.BindEventCallback("charmake_cancel_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
-            });
+            c.BindEventCallback("charmake_select_job",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                {
+                    if (arguments.size() == 1)
+                        RmlClickJob(arguments[0].Get<int>(-1));
+                });
+            c.BindEventCallback("charmake_ok_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+            c.BindEventCallback("charmake_cancel_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+        });
 
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
-    }
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_make.rml");
+}
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_MAKE, this);
+void CCharMakeWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
 
+    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    SetPosition(m_nOriginX, m_nOriginY);
     UpdateDisplay();
-    Show(false);
+    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
 void CCharMakeWin::Release()

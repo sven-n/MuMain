@@ -373,6 +373,8 @@ namespace mu::ui::window
 
         bool IsVisible() const;
 
+        void ReloadRmlTheme() override;
+
         float GetLayerDepth();		// 10.2f
         float GetKeyEventOrder();	// 7.f
 
@@ -425,6 +427,7 @@ namespace mu::ui::window
         void RenderCenterFrame();
 
         void SyncRmlModel();
+        void BuildRmlUi();
 
     public:
         __int64	m_loPreExp;

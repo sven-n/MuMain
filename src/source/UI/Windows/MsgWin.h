@@ -88,8 +88,10 @@ public:
     {
         return 50.0f;
     }
+    void ReloadRmlTheme() override;
 
 protected:
+    void BuildRmlUi();
     void SetCtrlPosition();
     void SetMsg(MSG_WIN_TYPE eType, std::wstring lpszMsg, std::wstring lpszMsg2 = L"");
     void ManageOKClick();

@@ -309,6 +309,13 @@ void mu::ui::window::CManager::EnableAllInterfaces(bool bEnable /* = true*/)
         (*mi).second->Show(bEnable);
 }
 
+void mu::ui::window::CManager::ReloadAllRmlThemes()
+{
+    auto mi = m_mapUI.begin();
+    for (; mi != m_mapUI.end(); mi++)
+        (*mi).second->ReloadRmlTheme();
+}
+
 bool mu::ui::window::CManager::CompareLayerDepth(IObject* pObj1, IObject* pObj2)
 {
     return pObj1->GetLayerDepth() < pObj2->GetLayerDepth();

@@ -42,34 +42,49 @@ bool CMuHelperBar::Create(CManager* pNewUIMng, int x, int y)
     // window's Create() (re-run on resolution change), so the document/model are created once,
     // ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_bar",
-            [this](Rml::DataModelConstructor& c, MuHelperBarRmlModel& model)
-            {
-                c.Bind("position_text", &model.positionText);
-                c.Bind("mu_helper_active", &model.muHelperActive);
-                c.Bind("config_tooltip", &model.configTooltip);
-                c.Bind("start_tooltip", &model.startTooltip);
-                c.Bind("stop_tooltip", &model.stopTooltip);
-
-                c.BindEventCallback("mu_helper_config_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConfig(); });
-                c.BindEventCallback("mu_helper_toggle_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickToggle(); });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/mu_helper_bar.rml");
-
+        BuildRmlUi();
         // Deliberately NOT Show()n here -- see MainFrameWindow.cpp's identical comment.
         // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
         // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
         // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.
-    }
 
     Show(true);
 
     return true;
+}
+
+void CMuHelperBar::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mu_helper_bar",
+        [this](Rml::DataModelConstructor& c, MuHelperBarRmlModel& model)
+        {
+            c.Bind("position_text", &model.positionText);
+            c.Bind("mu_helper_active", &model.muHelperActive);
+            c.Bind("config_tooltip", &model.configTooltip);
+            c.Bind("start_tooltip", &model.startTooltip);
+            c.Bind("stop_tooltip", &model.stopTooltip);
+
+            c.BindEventCallback("mu_helper_config_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickConfig(); });
+            c.BindEventCallback("mu_helper_toggle_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickToggle(); });
+        });
+
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/mu_helper_bar.rml");
+}
+
+void CMuHelperBar::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility.
 }
 
 void CMuHelperBar::Release()

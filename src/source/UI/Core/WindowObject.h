@@ -21,6 +21,14 @@ namespace mu::ui::window
 
         virtual bool IsVisible() const = 0;
         virtual bool IsEnabled() const = 0;
+
+        // No-op default: only a window built on UI::RmlBridge::LoadThemedDocument() needs to
+        // override this, to tear down its Rml::ElementDocument/DataModel(s) built against the
+        // previously-active theme and rebuild them against whatever UI::RmlBridge::GetActiveThemeName()
+        // now returns (see RmlTheme.h). Exists on the base interface, not each RmlUi window's own
+        // class, so a theme-switch command can call it uniformly through CManager's registry
+        // (CObject*/IObject*) without knowing which concrete windows are RmlUi-themed.
+        virtual void ReloadRmlTheme() {}
     };
 
     class CObject : public IObject

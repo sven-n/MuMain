@@ -49,33 +49,51 @@ void CSysMenuWin::Create()
     // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
     // CLoginWin::Create() is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change).
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "sys_menu",
-            [this](Rml::DataModelConstructor& c, SysMenuRmlModel& model)
-            {
-                c.Bind("select_server_hidden", &model.selectServerHidden);
-                c.Bind("exit_game_label", &model.exitGameLabel);
-                c.Bind("select_server_label", &model.selectServerLabel);
-                c.Bind("option_label", &model.optionLabel);
-                c.Bind("close_label", &model.closeLabel);
-
-                c.BindEventCallback("sysmenu_exit_game_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExitGame(); });
-                c.BindEventCallback("sysmenu_select_server_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickSelectServer(); });
-                c.BindEventCallback("sysmenu_option_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOption(); });
-                c.BindEventCallback("sysmenu_close_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/sys_menu.rml");
-    }
+        BuildRmlUi();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SYS_MENU, this);
 
     Show(false);
+}
+
+void CSysMenuWin::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "sys_menu",
+        [this](Rml::DataModelConstructor& c, SysMenuRmlModel& model)
+        {
+            c.Bind("select_server_hidden", &model.selectServerHidden);
+            c.Bind("exit_game_label", &model.exitGameLabel);
+            c.Bind("select_server_label", &model.selectServerLabel);
+            c.Bind("option_label", &model.optionLabel);
+            c.Bind("close_label", &model.closeLabel);
+
+            c.BindEventCallback("sysmenu_exit_game_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExitGame(); });
+            c.BindEventCallback("sysmenu_select_server_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickSelectServer(); });
+            c.BindEventCallback("sysmenu_option_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOption(); });
+            c.BindEventCallback("sysmenu_close_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+        });
+
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/sys_menu.rml");
+}
+
+void CSysMenuWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
 void CSysMenuWin::Release()

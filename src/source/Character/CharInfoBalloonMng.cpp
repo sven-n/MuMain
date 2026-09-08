@@ -68,12 +68,22 @@ void CCharInfoBalloonMng::Create()
     // RmlUi migration -- guarded the same way every other migrated window's Create() is
     // (re-entrant on resolution change), so the document/model/array size are set up once, ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_info_balloons",
-            [](Rml::DataModelConstructor& c, BalloonListModel& model)
-            {
-                model.balloons.resize(kBalloonCount);
+        BuildRmlUi();
 
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_INFO_BALLOON, this);
+}
+
+void CCharInfoBalloonMng::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "char_info_balloons",
+        [](Rml::DataModelConstructor& c, BalloonListModel& model)
+        {
+            model.balloons.resize(kBalloonCount);
+
+            // See CCharMakeWin::BuildRmlUi()'s comment on why this guard is needed.
+            static bool s_typesRegistered = false;
+            if (!s_typesRegistered)
+            {
                 auto entry = c.RegisterStruct<BalloonEntry>();
                 entry.RegisterMember("hidden", &BalloonEntry::hidden);
                 entry.RegisterMember("screen_x", &BalloonEntry::screenX);
@@ -83,19 +93,37 @@ void CCharInfoBalloonMng::Create()
                 entry.RegisterMember("guild", &BalloonEntry::guild);
                 entry.RegisterMember("klass", &BalloonEntry::klass);
                 c.RegisterArray<std::vector<BalloonEntry>>();
+                s_typesRegistered = true;
+            }
 
-                c.Bind("balloons", &model.balloons);
-            });
+            c.Bind("balloons", &model.balloons);
+        });
 
-        if (modelCreated)
-        {
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_info_balloon.rml");
-            if (m_pRmlDoc)
-                m_pRmlDoc->Show();
-        }
+    if (modelCreated)
+    {
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/char_info_balloon.rml");
+        if (m_pRmlDoc)
+            m_pRmlDoc->Show();
     }
+}
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CHAR_INFO_BALLOON, this);
+void CCharInfoBalloonMng::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    // m_pRmlDoc's own visibility, not m_isInitialized -- Release() hides it directly without
+    // going through m_isInitialized, and Render()'s own shouldHide correction bails out before
+    // reaching that logic whenever !m_isInitialized, so neither can be trusted here.
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi(); // shows unconditionally, same as Create() -- corrected back below if that's wrong
+    if (!wasVisible && m_pRmlDoc)
+        m_pRmlDoc->Hide();
 }
 
 //*****************************************************************************

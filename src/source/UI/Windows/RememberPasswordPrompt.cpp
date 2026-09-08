@@ -130,4 +130,22 @@ void Tick()
     else if (CInput::Instance().IsKeyDown(VK_ESCAPE))
         Resolve(RememberPasswordChoice::Cancel);
 }
+
+void ReloadRmlTheme()
+{
+    if (!g_pDoc) return; // never opened -- EnsureCreated() will pick up the new theme whenever it first is
+
+    const bool wasPending = (g_Choice == RememberPasswordChoice::Pending);
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    g_Binder.Destroy(context);
+    context->UnloadDocument(g_pDoc);
+    g_pDoc = nullptr;
+
+    EnsureCreated();
+    if (g_pDoc && wasPending)
+    {
+        SyncLabels();
+        g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
+    }
+}
 } // namespace UI::Login

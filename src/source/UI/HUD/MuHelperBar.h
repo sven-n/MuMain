@@ -86,6 +86,8 @@ namespace mu::ui::window
         // Update() itself stops running.
         void SyncDocVisibility(bool sceneAllowsShow);
 
+        void ReloadRmlTheme() override;
+
         // Vestigial for the same reason as SetPos() -- Update() reads Hero's position directly,
         // never through this setter (matched the original's own behavior: it never called this
         // either). Grep-confirmed zero external callers.
@@ -110,5 +112,6 @@ namespace mu::ui::window
         bool m_bRmlToggleClicked = false;
 
         void SyncRmlModel();
+        void BuildRmlUi();
     };
 }

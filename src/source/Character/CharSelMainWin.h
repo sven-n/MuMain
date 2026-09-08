@@ -241,12 +241,14 @@ public:
     {
         return 15.0f;
     }
+    void ReloadRmlTheme() override;
 
 protected:
     void DeleteCharacter();
 
 private:
     void ApplyLayout(const UI::CharacterSelection::Layout& layout);
+    void BuildRmlUi();
 
     struct CharSelMainRmlModel
     {

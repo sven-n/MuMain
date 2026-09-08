@@ -134,22 +134,51 @@ namespace UI::RmlBridge
         }
     }
 
+    namespace
+    {
+        // Function-local statics, not namespace-scope globals, purely to sidestep static
+        // initialization order -- both are written after their first read (SetActiveThemeName(),
+        // ThemeExists()'s callers), so "mutable" is the operative word here, not "cached once".
+        std::string& ActiveThemeNameStorage()
+        {
+            static std::string name = ToLower(NarrowAscii(GameConfig::GetInstance().GetRmlTheme()));
+            return name;
+        }
+
+        bool ComputeProvidesOwnIconChrome(const std::string& themeName)
+        {
+            const std::string iniPath = "Data/Interface/RmlUi/themes/" + themeName + "/theme.ini";
+            return GetPrivateProfileIntW(L"Capabilities", L"ProvidesOwnIconChrome", 0, WidenAscii(iniPath).c_str()) != 0;
+        }
+
+        bool& ProvidesOwnIconChromeStorage()
+        {
+            static bool providesOwnIconChrome = ComputeProvidesOwnIconChrome(ActiveThemeNameStorage());
+            return providesOwnIconChrome;
+        }
+    }
+
     const std::string& GetActiveThemeName()
     {
-        static const std::string cached = ToLower(NarrowAscii(GameConfig::GetInstance().GetRmlTheme()));
-        return cached;
+        return ActiveThemeNameStorage();
     }
 
     bool ThemeProvidesOwnIconChrome()
     {
-        // Cached the same way GetActiveThemeName() is -- read once, the active theme is fixed for
-        // the process lifetime (see this file's own theme-hot-swap comment on LoadThemedDocument).
-        static const bool cached = []
-        {
-            const std::string iniPath = "Data/Interface/RmlUi/themes/" + GetActiveThemeName() + "/theme.ini";
-            return GetPrivateProfileIntW(L"Capabilities", L"ProvidesOwnIconChrome", 0, WidenAscii(iniPath).c_str()) != 0;
-        }();
-        return cached;
+        return ProvidesOwnIconChromeStorage();
+    }
+
+    void SetActiveThemeName(const std::string& themeName)
+    {
+        ActiveThemeNameStorage() = ToLower(themeName);
+        ProvidesOwnIconChromeStorage() = ComputeProvidesOwnIconChrome(ActiveThemeNameStorage());
+    }
+
+    bool ThemeExists(const std::string& themeName)
+    {
+        const std::string basePath = "Data/Interface/RmlUi/themes/" + ToLower(themeName) + "/base.rcss";
+        std::ifstream file(basePath, std::ios::binary);
+        return file.good();
     }
 
     std::string ThemedDocumentSourceUrl(const char* documentName, const std::string& themeName)

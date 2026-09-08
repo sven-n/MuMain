@@ -77,10 +77,12 @@ public:
     {
         return 15.0f;
     }
+    void ReloadRmlTheme() override;
 
 private:
     void OpenSysMenu();
     void OpenCredits();
+    void BuildRmlUi();
 
     Rml::ElementDocument* m_pRmlDoc = nullptr;
 };

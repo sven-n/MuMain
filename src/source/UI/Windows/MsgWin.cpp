@@ -67,33 +67,51 @@ void CMsgWin::Create()
     // window's Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so
     // the document/model are created once, ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "msg_win",
-            [this](Rml::DataModelConstructor& c, MsgWinRmlModel& model)
-            {
-                c.Bind("line1", &model.line1);
-                c.Bind("line2", &model.line2);
-                c.Bind("line2_hidden", &model.line2Hidden);
-                c.Bind("no_buttons", &model.noButtons);
-                c.Bind("mode_cancel_only", &model.modeCancelOnly);
-                c.Bind("mode_ok_only", &model.modeOkOnly);
-                c.Bind("mode_both", &model.modeBoth);
-                c.Bind("mode_input", &model.modeInput);
-                c.Bind("ok_label", &model.okLabel);
-                c.Bind("cancel_label", &model.cancelLabel);
-
-                c.BindEventCallback("msgwin_ok_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
-                c.BindEventCallback("msgwin_cancel_click",
-                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
-            });
-
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
-    }
+        BuildRmlUi();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_MSG_WINDOW, this);
     Show(false);
+}
+
+void CMsgWin::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "msg_win",
+        [this](Rml::DataModelConstructor& c, MsgWinRmlModel& model)
+        {
+            c.Bind("line1", &model.line1);
+            c.Bind("line2", &model.line2);
+            c.Bind("line2_hidden", &model.line2Hidden);
+            c.Bind("no_buttons", &model.noButtons);
+            c.Bind("mode_cancel_only", &model.modeCancelOnly);
+            c.Bind("mode_ok_only", &model.modeOkOnly);
+            c.Bind("mode_both", &model.modeBoth);
+            c.Bind("mode_input", &model.modeInput);
+            c.Bind("ok_label", &model.okLabel);
+            c.Bind("cancel_label", &model.cancelLabel);
+
+            c.BindEventCallback("msgwin_ok_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickOk(); });
+            c.BindEventCallback("msgwin_cancel_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickCancel(); });
+        });
+
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/msg_win.rml");
+}
+
+void CMsgWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
 }
 
 void CMsgWin::Release()

@@ -29,4 +29,10 @@ namespace UI::Login
     // engine's integration, so this reuses the polling idiom CLoginWin's own OK/Cancel already
     // uses rather than introducing that as a new, unverified event path.
     void Tick();
+
+    // Tears down and rebuilds this dialog's RmlUi document/model against whatever theme is now
+    // active. Not reachable through mu::ui::window::CManager's registry (this module is plain free
+    // functions, not a CObject) -- the `$theme` command must call this explicitly, unlike every
+    // other themed window. No-op if the dialog was never opened.
+    void ReloadRmlTheme();
 }

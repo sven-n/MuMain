@@ -211,9 +211,25 @@ bool CBuffStrip::Create(CManager* pNewUIMng, int x, int y)
     // window's Create() (re-run on resolution change), so the document/model are created once,
     // ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "buff_strip",
-            [this](Rml::DataModelConstructor& c, BuffStripRmlModel& model)
+        BuildRmlUi();
+        // Deliberately NOT Show()n here -- see MainFrameWindow.cpp's identical comment.
+        // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
+        // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
+        // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.
+
+    Show(true);
+
+    return true;
+}
+
+void CBuffStrip::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "buff_strip",
+        [this](Rml::DataModelConstructor& c, BuffStripRmlModel& model)
+        {
+            // See CCharMakeWin::BuildRmlUi()'s comment on why this guard is needed.
+            static bool s_typesRegistered = false;
+            if (!s_typesRegistered)
             {
                 auto buff = c.RegisterStruct<BuffEntry>();
                 buff.RegisterMember("slot_left", &BuffEntry::slotLeft);
@@ -221,22 +237,27 @@ bool CBuffStrip::Create(CManager* pNewUIMng, int x, int y)
                 buff.RegisterMember("decorator", &BuffEntry::decorator);
                 buff.RegisterMember("tooltip", &BuffEntry::tooltip);
                 c.RegisterArray<std::vector<BuffEntry>>();
+                s_typesRegistered = true;
+            }
 
-                c.Bind("buffs", &model.buffs);
-            });
+            c.Bind("buffs", &model.buffs);
+        });
 
-        if (modelCreated)
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/buff_strip.rml");
+    if (modelCreated)
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/buff_strip.rml");
+}
 
-        // Deliberately NOT Show()n here -- see MainFrameWindow.cpp's identical comment.
-        // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
-        // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
-        // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.
-    }
+void CBuffStrip::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
 
-    Show(true);
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
 
-    return true;
+    BuildRmlUi();
+    // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility.
 }
 
 void CBuffStrip::Release()

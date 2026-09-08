@@ -112,6 +112,7 @@ public:
     {
         return 45.0f;
     }
+    void ReloadRmlTheme() override;
 
 protected:
     void RequestCreateCharacter();
@@ -121,6 +122,8 @@ protected:
     void RenderCreateCharacter();
 
 private:
+    void BuildRmlUi();
+
     struct JobButtonEntry
     {
         // Panel-relative, pushed once from SetPosition() (mirrors the legacy per-class layout

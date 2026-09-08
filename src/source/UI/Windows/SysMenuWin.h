@@ -59,6 +59,7 @@ public:
     {
         return 40.0f;
     }
+    void ReloadRmlTheme() override;
 
 protected:
     void ExitGame();
@@ -67,6 +68,8 @@ protected:
     void Close();
 
 private:
+    void BuildRmlUi();
+
     struct SysMenuRmlModel
     {
         // Login scene: Select Server is fully hidden, not just disabled -- the login-scene panel

@@ -19,6 +19,11 @@
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/Windows/RememberPasswordPrompt.h"
+#include "Data/GameConfig/GameConfig.h"
+#include "Core/Utilities/StringUtils.h"
 
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
@@ -242,6 +247,35 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         auto str_limit = strCommand.substr(8);
         auto message_limit = std::stof(str_limit);
         SetMaxMessagePerCycle(message_limit);
+        return true;
+    }
+    // Runtime RmlUi theme hot-swap, e.g. "$theme modern"/"$theme legacy" -- see
+    // UI::RmlBridge::SetActiveThemeName()'s own comment (RmlTheme.h) for why this alone doesn't
+    // make the switch visible on its own: every currently-open themed window's document/model
+    // must also be rebuilt, which is what the CManager::ReloadAllRmlThemes() sweep plus
+    // RememberPasswordPrompt's own explicit call (it's not a CObject, so the sweep can't reach
+    // it -- see UI::Login::ReloadRmlTheme()'s own comment) accomplish below. Session-only:
+    // doesn't persist to config.ini, so a relaunch still picks up whatever's saved there.
+    else if (strCommand.compare(0, 6, L"$theme") == 0)
+    {
+        if (strCommand.size() > 7)
+        {
+            const std::wstring themeNameW = strCommand.substr(7);
+            const std::string themeName = StringUtils::WideToNarrow(themeNameW.c_str());
+            if (UI::RmlBridge::ThemeExists(themeName))
+            {
+                GameConfig::GetInstance().SetRmlTheme(themeNameW);
+                UI::RmlBridge::SetActiveThemeName(themeName);
+                CSceneUICoordinator::Instance().GetNewStyleMng().ReloadAllRmlThemes();
+                // The MAIN_SCENE HUD (CMainFrameWindow/CMuHelperBar/CBuffStrip) registers with
+                // CSystem's OWN CManager (WindowSystem.cpp's m_pNewUIMng), not
+                // CSceneUICoordinator's -- a second, independent registry the sweep above cannot
+                // reach. Null before CSystem::Create() has run (e.g. still at the login screen).
+                if (mu::ui::window::CManager* newUIMng = g_pNewUIMng)
+                    newUIMng->ReloadAllRmlThemes();
+                UI::Login::ReloadRmlTheme();
+            }
+        }
         return true;
     }
 

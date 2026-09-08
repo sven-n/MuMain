@@ -105,6 +105,11 @@ public:
 
     // mu::ui::window::IObject
     bool Render() override;
+    // Tears down and rebuilds this window's RmlUi document/model against whatever theme is now
+    // active (UI::RmlBridge::GetActiveThemeName()) -- see IObject::ReloadRmlTheme()'s comment.
+    // No-op if this window was never opened (BuildRmlUi() runs the same code either way, next time
+    // Create() is called).
+    void ReloadRmlTheme() override;
     // Was CWin::CursorInWin(WA_ALL) -- claims (consumes) any click within its own bounding box,
     // same template CServerSelWin/CLoginMainWin already established. Not modal: this floating
     // dialog must leave the world/credits/system-menu reachable around it. Depth 20.0f (below
@@ -176,6 +181,10 @@ private:
     Rml::ElementDocument* m_pRmlDoc = nullptr;
 
     void SyncRmlModel();
+    // The "create model, then load document" body Create() runs exactly once (guarded on
+    // !m_pRmlDoc), factored out so ReloadRmlTheme() can re-run it after tearing down the previous
+    // theme's document/model.
+    void BuildRmlUi();
 };
 
 // Replaces CUIMng's old `CLoginWin m_LoginWin;` member, same convention as g_CreditWin.

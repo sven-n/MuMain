@@ -39,8 +39,10 @@ A theme is identified by **folder name**, not a closed C++ enum, specifically so
 drop-a-folder operation.
 
 `config.ini`'s `[UI] RmlTheme=<name>` selects the active theme, read once at startup by
-`GameConfig::GetRmlTheme()` and cached by `UI::RmlBridge::GetActiveThemeName()`. Loading a window
-goes through `UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/login.rml")`:
+`GameConfig::GetRmlTheme()` and cached by `UI::RmlBridge::GetActiveThemeName()`. That cache is
+also live-mutable via `UI::RmlBridge::SetActiveThemeName()` — see
+["Switching themes without relaunching"](#switching-themes-without-relaunching) below. Loading a
+window goes through `UI::RmlBridge::LoadThemedDocument(context, "Data/Interface/RmlUi/login.rml")`:
 
 1. It reads `login.rml`'s raw text once — the same file is shared, never duplicated per theme.
 2. It builds a synthetic source URL, `Data/Interface/RmlUi/themes/<name>/login.rml` — this path
@@ -98,8 +100,36 @@ No source changes, no recompilation.
    `remember_password_prompt.rcss`, ...), styling the same class names the shared `.rml` uses. A
    theme missing one of these still loads (RmlUi doesn't error on a missing stylesheet) — it just
    renders that one window unstyled, not the whole theme.
-4. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`.
-5. Relaunch. No rebuild needed — this is a pure data/config change.
+4. Edit `config.ini`'s `[UI]` section: `RmlTheme=<your-theme-name>`, or preview it live without
+   editing anything — type `$theme <your-theme-name>` in chat (see
+   ["Switching themes without relaunching"](#switching-themes-without-relaunching) below).
+5. Relaunch (if you edited `config.ini`). No rebuild needed either way — this is a pure data/config
+   change.
+
+## Switching themes without relaunching
+
+`$theme <name>` (typed into the chat box, handled locally by `CmuConsoleDebug::CheckCommand` —
+never sent to the server, same bucket as `$fps`/`$vsync`) hot-swaps the active theme for the
+current session: `$theme modern`, `$theme legacy`, or any modder-supplied folder name.
+
+Mechanically: it validates `themes/<name>/base.rcss` exists (`UI::RmlBridge::ThemeExists()`) —
+an unknown name is rejected with no state change, not left to fail silently per-window — then
+calls `UI::RmlBridge::SetActiveThemeName()` to update the live cache and
+`mu::ui::window::CManager::ReloadAllRmlThemes()` to sweep every currently-registered window.
+Each themed window implements this by overriding `IObject::ReloadRmlTheme()`
+(`UI/Core/WindowObject.h`) — a no-op default, so the sweep is safe to call on every window in the
+registry, not just the themed ones — to tear down its `Rml::ElementDocument`/`DataModel`(s) via
+the new `RmlModelBinder<T>::Destroy()` and `Context::UnloadDocument()`, then rebuild them against
+whatever theme is now active, the same `BuildRmlUi()` helper `Create()` itself calls. A window
+that was never opened needs no explicit rebuild — it simply picks up the new theme the first time
+it *is* opened, since `LoadThemedDocument()` always reads the live cache.
+`UI::Login::ReloadRmlTheme()` (`RememberPasswordPrompt.h`) is the one exception called explicitly
+rather than through the registry sweep — that dialog is a free-function module, not a `CObject`,
+so it isn't in `CManager`'s registry.
+
+**Session-only**: this does not write to `config.ini` — `GameConfig::SetRmlTheme()` only updates
+the in-memory value, so a relaunch still picks up whatever `config.ini` says. Use it for quickly
+A/B-ing themes; edit `config.ini` (previous section) for a change that should survive a restart.
 
 **Only two themes are currently built: `legacy` and `modern`.** These two exist to *validate* that
 the architecture actually supports arbitrary themes, not because two is the intended ceiling —
@@ -220,9 +250,15 @@ coordinate into `dp`.
 
 ## Known limitations
 
-- **Not yet a live in-game hot-swap.** Switching themes today means editing `config.ini` and
-  relaunching. A true runtime toggle needs each migrated window to tear down and rebuild its
-  `Rml::ElementDocument`/`DataModel` against the new theme — not built yet.
+- **Live hot-swap is session-only.** `$theme <name>` (see
+  ["Switching themes without relaunching"](#switching-themes-without-relaunching) above) rebuilds
+  every open window's document/model in place, but doesn't persist to `config.ini` — a relaunch
+  still uses whatever's saved there. A window with genuinely live, frequently-changing state
+  (`CMuHelperBar`, `CBuffStrip`, `CCharInfoBalloonMng`, `CMainFrameWindow`) relies on its own
+  normal per-frame resync to repopulate the rebuilt model correctly; a window that doesn't
+  self-resync every frame pushes its current state back explicitly right after rebuilding instead
+  (see each window's own `ReloadRmlTheme()`) — a new themed window should follow whichever of the
+  two patterns matches its own update shape, not assume the sweep alone is enough.
 - **Custom theme images require the engine's proprietary OZT/OZJ format, not plain PNG/JPG** —
   see [Bringing your own images to a theme](#bringing-your-own-images-to-a-theme) above. No
   converter tool exists in this repo today, and a missing/wrong-format image fails silently.
@@ -233,10 +269,11 @@ coordinate into `dp`.
   above).
 - **Eleven windows are routed through `LoadThemedDocument()` today**: `CLoginWin`,
   `CLoginMainWin`, `CSysMenuWin`, `RememberPasswordPrompt`, `CCharSelMainWin`, `CCharMakeWin`,
-  `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`, `CBuffStrip`, and `CMainFrameWindow`. Extending
-  a new window to support theming is the same
-  established pattern, not new design work — this list will keep growing and isn't worth
-  maintaining exhaustively; grep `LoadThemedDocument(` for the live count.
+  `CCharInfoBalloonMng`, `CMsgWin`, `CMuHelperBar`, `CBuffStrip`, and `CMainFrameWindow`. All eleven
+  also implement `ReloadRmlTheme()` (previous section), so `$theme` covers every themed window that
+  exists today. Extending a new window to support theming is the same established pattern for both
+  halves, not new design work — this list will keep growing and isn't worth maintaining
+  exhaustively; grep `LoadThemedDocument(` for the live count.
 - **Theme identity must never drive C++ branching** — `architecture-principles.md` §30. Fixed
   2026-09-04: `MainFrameWindow.cpp`'s background-fill and skill-highlight logic used to key
   on `GetActiveThemeName() == "modern"`; both now key on `UI::RmlBridge::ThemeProvidesOwnIconChrome()`,

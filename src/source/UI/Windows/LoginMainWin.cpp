@@ -68,19 +68,36 @@ void CLoginMainWin::Create()
     // CLoginWin::Create() is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change),
     // so the document is loaded once, ever, and only repositioned/resized afterward.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login_main.rml");
-        if (m_pRmlDoc)
-        {
-            if (Rml::Element* e = m_pRmlDoc->GetElementById("btn_menu"))
-                e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickMenu(); }));
-            if (Rml::Element* e = m_pRmlDoc->GetElementById("btn_credit"))
-                e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickCredit(); }));
-        }
-    }
+        BuildRmlUi();
 
     CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_LOGIN_MAIN, this);
     Show(false);
+}
+
+void CLoginMainWin::BuildRmlUi()
+{
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/login_main.rml");
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* e = m_pRmlDoc->GetElementById("btn_menu"))
+            e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickMenu(); }));
+        if (Rml::Element* e = m_pRmlDoc->GetElementById("btn_credit"))
+            e->AddEventListener(Rml::EventId::Click, new ClickCallbackListener([this] { RmlClickCredit(); }));
+    }
+}
+
+void CLoginMainWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return;
+
+    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    RmlUiRuntime::Instance().GetContext()->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    SetPosition(m_ptPos.x, m_ptPos.y);
+    if (m_pRmlDoc) { if (wasVisible) m_pRmlDoc->Show(); else m_pRmlDoc->Hide(); }
 }
 
 void CLoginMainWin::Release()

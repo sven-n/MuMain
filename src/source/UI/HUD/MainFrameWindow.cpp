@@ -102,8 +102,16 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
     // window's Create() (re-run on resolution change), so the document/model are created once,
     // ever.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
-    {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "main_frame",
+        BuildRmlUi();
+
+    Show(true);
+
+    return true;
+}
+
+void mu::ui::window::CMainFrameWindow::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "main_frame",
             [this](Rml::DataModelConstructor& c, MainFrameRmlModel& model)
             {
                 c.Bind("bars_left", &model.barsLeft);
@@ -167,26 +175,32 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
                 c.Bind("skill_slot_4_cooldown", &model.skillSlot4Cooldown);
                 c.Bind("current_skill_cooldown", &model.currentSkillCooldown);
 
-                auto skillCell = c.RegisterStruct<SkillCellEntry>();
-                skillCell.RegisterMember("left", &SkillCellEntry::left);
-                skillCell.RegisterMember("top", &SkillCellEntry::top);
-                skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
-                skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
-                skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
-                skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
-                c.RegisterArray<std::vector<SkillCellEntry>>();
+                // See CCharMakeWin::BuildRmlUi()'s comment on why this guard is needed.
+                static bool s_typesRegistered = false;
+                if (!s_typesRegistered)
+                {
+                    auto skillCell = c.RegisterStruct<SkillCellEntry>();
+                    skillCell.RegisterMember("left", &SkillCellEntry::left);
+                    skillCell.RegisterMember("top", &SkillCellEntry::top);
+                    skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
+                    skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
+                    skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
+                    skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
+                    c.RegisterArray<std::vector<SkillCellEntry>>();
+
+                    auto tooltipLine = c.RegisterStruct<SkillTooltipLineEntry>();
+                    tooltipLine.RegisterMember("text", &SkillTooltipLineEntry::text);
+                    tooltipLine.RegisterMember("color_blue", &SkillTooltipLineEntry::colorBlue);
+                    tooltipLine.RegisterMember("color_red", &SkillTooltipLineEntry::colorRed);
+                    tooltipLine.RegisterMember("color_dark_red", &SkillTooltipLineEntry::colorDarkRed);
+                    tooltipLine.RegisterMember("bold", &SkillTooltipLineEntry::bold);
+                    c.RegisterArray<std::vector<SkillTooltipLineEntry>>();
+                    s_typesRegistered = true;
+                }
 
                 c.Bind("skill_grid_open", &model.skillGridOpen);
                 c.Bind("skill_grid_cells", &model.skillGridCells);
                 c.Bind("pet_skill_cells", &model.petSkillCells);
-
-                auto tooltipLine = c.RegisterStruct<SkillTooltipLineEntry>();
-                tooltipLine.RegisterMember("text", &SkillTooltipLineEntry::text);
-                tooltipLine.RegisterMember("color_blue", &SkillTooltipLineEntry::colorBlue);
-                tooltipLine.RegisterMember("color_red", &SkillTooltipLineEntry::colorRed);
-                tooltipLine.RegisterMember("color_dark_red", &SkillTooltipLineEntry::colorDarkRed);
-                tooltipLine.RegisterMember("bold", &SkillTooltipLineEntry::bold);
-                c.RegisterArray<std::vector<SkillTooltipLineEntry>>();
 
                 c.Bind("skill_tooltip_visible", &model.skillTooltipVisible);
                 c.Bind("skill_tooltip_left", &model.skillTooltipLeft);
@@ -301,11 +315,29 @@ bool mu::ui::window::CMainFrameWindow::Create(CManager* pNewUIMng, C3DRenderMng*
         // hidden (RmlUi documents start unshown after LoadDocument()); SyncDocVisibility(),
         // called every frame regardless of scene, shows it the first time the gate actually
         // allows it.
+}
+
+void mu::ui::window::CMainFrameWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    if (m_pRmlBgDoc)
+    {
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            m_BgRmlBinder.Destroy(bgContext);
+            bgContext->UnloadDocument(m_pRmlBgDoc);
+        }
+        m_pRmlBgDoc = nullptr;
     }
 
-    Show(true);
-
-    return true;
+    BuildRmlUi();
+    // Next frame's Update()/SyncDocVisibility() self-corrects live state/visibility for both docs.
 }
 
 void mu::ui::window::CMainFrameWindow::Release()
