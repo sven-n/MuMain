@@ -7,8 +7,8 @@
 	height: 25dp;
 	font-family: "token(font-body)";
 	font-size: 11dp;
-	background-color: rgba(20, 20, 20, 180);
-	border: 1dp token(border-metal);
+	background-color: rgba(15, 16, 13, 190);
+	border: 1dp token(border-frame);
 	border-radius: token(radius-sm)dp;
 }
 
@@ -25,7 +25,7 @@
 	width: 132dp;
 	height: 9dp;
 	text-align: center;
-	color: token(text-body);
+	color: token(text-primary);
 	font-family: "token(font-body)";
 	white-space: nowrap;
 	pointer-events: none;
@@ -38,8 +38,8 @@
 	height: 13dp;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
+	background-color: token(surface-control);
+	border: 1dp token(border-frame);
 	border-radius: 2dp;
 }
 .mu-btn:hover {
@@ -86,7 +86,7 @@
 	width: 100dp;
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
-	border: 1dp token(border-metal);
+	border: 1dp token(border-frame);
 	color: #ffffff;
 	padding: 2dp 4dp;
 	border-radius: token(radius-sm)dp;

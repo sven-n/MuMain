@@ -20,6 +20,11 @@
 		<div class="frame-piece frame-right"></div>
 		<div class="frame-piece frame-bottom"></div>
 
+		<div class="modern-header-rivet"></div>
+		<!-- Raised header band -- height matches where .tab-row already starts (top:27px), so the
+		     title + tab row together sit on one distinct raised surface, separate from the
+		     recessed quest-list/contents body below. -->
+		<div class="modern-header quest-header"></div>
 		<div class="title-glow quest-title-glow"></div>
 		<span id="title">Quest</span>
 
@@ -61,6 +66,10 @@
 		     60+392=452, past the panel's own 429px height -- found live via in-game testing, not
 		     a syntax error the build gates would ever catch. #btn_exit (below) was already correctly
 		     a #panel-level sibling; these two just weren't. -->
+		<!-- Footer band -- separates the Open/Give-up/Exit button row from the recessed
+		     quest-list/contents surface above it. -->
+		<div class="modern-footer quest-footer"></div>
+
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
 		     data-class-locked="!open_enabled" data-event-click="myquest_click_open"></div>
 		<span class="tooltip tooltip-open">{{open_tooltip}}</span>

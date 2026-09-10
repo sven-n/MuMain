@@ -12,7 +12,7 @@
 	height: 113dp;
 	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: token(text-body);
+	color: token(text-primary);
 	border-width: 1dp;
 	border-radius: token(radius-md)dp;
 }
@@ -47,6 +47,17 @@
 }
 .no-buttons #msg_line2 { top: 66dp; }
 
+/* Footer band (base.rcss's .modern-footer) -- top offset leaves a few px of clearance above the
+   button row's own top:72dp below, giving the OK/Cancel row a visibly distinct recessed-from-body
+   strip instead of floating on the same surface as the message text above it. border-radius
+   matches #panel's own token(radius-md)dp so the band's bottom-left/bottom-right corners don't
+   square off past the frame's own rounded corners. */
+.modern-footer {
+	top: 68dp;
+	border-bottom-left-radius: token(radius-md)dp;
+	border-bottom-right-radius: token(radius-md)dp;
+}
+
 #input_frame {
 	display: none;
 	position: absolute;
@@ -55,7 +66,7 @@
 	width: 171dp;
 	height: 23dp;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1dp token(border-metal);
+	border: 1dp token(border-frame);
 	border-radius: token(radius-sm)dp;
 	pointer-events: none;
 }

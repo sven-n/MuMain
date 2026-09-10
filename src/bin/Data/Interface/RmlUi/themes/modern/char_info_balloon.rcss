@@ -7,7 +7,7 @@
 	height: 54px;
 	pointer-events: none;
 	font-family: "token(font-body)";
-	color: token(text-body);
+	color: token(text-primary);
 }
 .balloon-bg {
 	position: absolute;
@@ -16,8 +16,8 @@
 	width: 118px;
 	height: 54px;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1px token(border-metal);
-	border-radius: 6px;
+	border: 1px token(border-frame);
+	border-radius: 2px;
 }
 
 .balloon-name, .balloon-guild, .balloon-class {
@@ -35,7 +35,7 @@
 }
 .balloon-guild {
 	top: 22px;
-	color: token(text-body);
+	color: token(text-primary);
 }
 .balloon-class {
 	top: 38px;

@@ -1,5 +1,9 @@
 /* Modern theme for the login-scene menu/credit button bar -- flat programmatic icon buttons, no
-   legacy sprite art. Plain single-letter monograms (M/C) stand in for icon art. */
+   legacy sprite art. Plain single-letter monograms (M/C) stand in for icon art.
+
+   .btn-icon/.btn-icon-label are base.rcss's shared classes now (this file used to carry its own
+   full copy, byte-identical to char_sel_main.rcss's independent copy of the same two classes --
+   consolidated into one definition). Only this window's own positional classes remain below. */
 
 #panel {
 	position: absolute;
@@ -7,27 +11,6 @@
 	font-size: 14dp;
 }
 
-.btn-icon {
-	position: absolute;
-	width: 54dp;
-	height: 30dp;
-	cursor: pointer;
-	pointer-events: auto;
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
-	border-radius: token(radius-md)dp;
-	text-align: center;
-	line-height: 30dp;
-}
-.btn-icon:hover {
-	background-color: token(accent-steel);
-	border: 1dp token(accent-steel);
-}
-.btn-icon-label {
-	color: token(text-body);
-	font-weight: bold;
-	font-family: "token(font-body)";
-}
 .btn-icon-menu {
 	left: 0;
 	top: 0;

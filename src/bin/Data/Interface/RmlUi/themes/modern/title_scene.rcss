@@ -14,6 +14,6 @@
    takes ordinary decorator/background-color rules directly, same as any other element -- no
    display/position override needed on it, ElementProgress positions it manually in C++. */
 .gauge-fill fill {
-	background-color: #e0a030;
-	decorator: linear-gradient(to bottom, #f5cc85, #e0a030 45%, #a06f1f);
+	background-color: token(resource-ag);
+	decorator: linear-gradient(to bottom, #d4a94f, token(resource-ag) 45%, #5c4118);
 }

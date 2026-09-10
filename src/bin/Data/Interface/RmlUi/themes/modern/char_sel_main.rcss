@@ -1,6 +1,12 @@
 /* Modern theme for the character-select scene's button bar -- flat programmatic icon buttons, no
    legacy sprite art. Icon-only buttons get a short plain-ASCII label (.btn-icon-label) instead of
-   real art. Positioning matches legacy's anchor-*/dp retrofit exactly. */
+   real art. Positioning matches legacy's anchor-*/dp retrofit exactly.
+
+   .btn-icon/.btn-icon-label's visual definition is base.rcss's shared version now (this file used
+   to carry its own full copy, byte-identical to login_main.rcss's independent copy of the same
+   two classes -- consolidated into one definition). Only this window's own positional/local
+   overrides remain below: `bottom` (this button row's own placement) and the label's `font-size`
+   (base.rcss's shared .btn-icon-label doesn't set one). */
 
 #panel {
 	position: absolute;
@@ -9,17 +15,7 @@
 }
 
 .btn-icon {
-	position: absolute;
-	width: 54dp;
-	height: 30dp;
 	bottom: 11dp;
-	cursor: pointer;
-	pointer-events: auto;
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
-	border-radius: token(radius-md)dp;
-	text-align: center;
-	line-height: 30dp;
 }
 #btn_create { left: 22dp; }
 #btn_menu   { left: 77dp; }
@@ -29,22 +25,7 @@
 /* font-family/size redeclared directly here (not inherited from #panel) -- this document's
    data-model bindings make inheritance silently fail for this text in this RmlUi build. */
 .btn-icon-label {
-	color: token(text-body);
-	font-weight: bold;
-	font-family: "token(font-body)";
 	font-size: 14dp;
-}
-
-.btn-icon:hover {
-	background-color: token(accent-steel);
-	border: 1dp token(accent-steel);
-}
-.btn-icon.disabled {
-	pointer-events: none;
-	opacity: 0.5;
-	cursor: default;
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
 }
 
 .deco {
@@ -74,7 +55,7 @@
 }
 .line {
 	display: inline-block;
-	color: token(text-title);
+	color: token(text-warm);
 	background-color: token(semantic-danger);
 	white-space: nowrap;
 	padding: 0 2dp;

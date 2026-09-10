@@ -1,19 +1,26 @@
-/* Modern theme for the system menu -- #panel now consumes base.rcss's .modern-frame/
-   .modern-frame-crimson (applied in sys_menu.rml, this file's own themed fork) instead of its own
-   bespoke flat fill, same family as login/msg_win/my_quest_info's frame. No title-glow banner
-   here -- this dialog has no title text for one to sit behind (just 4 stacked buttons), so it
-   gets the frame material without the glow; that's a real, narrower difference from the other
-   dialogs, not a missed spot. Buttons rely entirely on base.rcss's shared .btn.
+/* Modern theme for the system menu -- uses base.rcss's shared forged-dialog shell (also used by
+   Login), with the metal .modern-header-rail/.modern-joint header variant instead of Login's
+   crimson hero-banner (see this file's own sys_menu.rml note). #panel keeps base.rcss's shared
+   .modern-frame for its material fill/gradient (no -crimson variant -- crimson belongs to a
+   hero-banner's own plate, this dialog has none), with background/border/box-shadow overridden
+   here to the same neutral forged-window surface Login's own #panel uses (mirrored rather than
+   shared via .modern-frame itself, so this change doesn't silently affect .modern-frame's other
+   consumers -- msg_win/my_quest_info/remember_password_prompt/my_inventory_bg -- which haven't
+   been revisited yet). No hero-banner glow here -- that's Login's own header style, not this
+   dialog's. Header carries a title (base.rcss's .modern-header-text/-title, bound to
+   SysMenuRmlModel's systemMenuLabel -- I18N::Game::SystemMenu). Buttons rely entirely on
+   base.rcss's shared .btn -- no per-window color override needed or present.
 
-   #panel is not C++-positioned/sized -- centered via base.rcss's .center-both
-   utility class (applied in sys_menu.rml), fixed dp size matching CWinEx's own real geometry
-   exactly (213 = the panel art's sprite width; 187/155 = TOP.height(64) + BOTTOM.height(43) +
-   LEFT.texHeight(8) * 10-or-6 lines, SysMenuWin.cpp's SetLine() math -- 10 lines in the character
-   scene, 6 in the login scene, toggled here via .compact rather than pushed from C++). Every
-   button below is a fixed dp offset from the panel's own edges -- SetPosition()'s old per-button
-   math (SMW_BTN_GAP=4, base offsets 33/height-52) is now baked into these numbers directly, no
-   scene-awareness needed since exit-game/select-server anchor from the top and option/close
-   anchor from the bottom (bottom-anchoring absorbs the .compact height difference for free).
+   #panel is not C++-positioned/sized -- centered via base.rcss's .center-both utility class
+   (applied in sys_menu.rml). width (213dp) is unchanged (CWinEx's own real sprite-width
+   geometry); height grew by 31dp (187->218, compact 155->186) to make room for the real 38dp-tall
+   metal header rail (top:7dp) replacing the old 10dp decorative cap strip -- the previous height
+   was sized for that thin strip, not a real banner. Button positions absorb this the same way
+   they already absorb the .compact height difference: exit-game/select-server anchor from the
+   top and shifted down by the same 31dp the header grew by (33->64, 67->98, preserving the
+   original 4dp gap between them and the 4dp/6dp gaps down to option below in both compact and
+   non-compact mode); option/close anchor from the bottom and need no change at all, since the
+   growth happened entirely at the top.
 
    #btn_option/#btn_close's `bottom` values are the old C++'s "distance from panel bottom to the
    button's TOP" (86/52) minus the button's own 30dp height, not those numbers directly -- CSS
@@ -21,17 +28,26 @@
    bottom-anchored button 30dp higher than intended, overlapping #btn_select_server above it. */
 #panel {
 	width: 213dp;
-	height: 187dp;
+	height: 218dp;
 	font-family: "token(font-body)";
 	font-size: 12dp;
-	color: token(text-body);
-	border-radius: 10dp;
+	color: token(text-primary);
+	border-radius: token(radius-sm)dp;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11dp 30dp rgba(0, 0, 0, 158),
+		0 2dp 5dp rgba(0, 0, 0, 217),
+		inset 0 0 0 1dp #090a08,
+		inset 0 0 0 3dp rgba(120, 115, 90, 190);
 }
 #panel.compact {
-	height: 155dp;
+	height: 186dp;
 }
 
-#btn_exit_game    { left: 52dp; top: 33dp; }
-#btn_select_server{ left: 52dp; top: 67dp; }
+#btn_exit_game    { left: 52dp; top: 64dp; }
+#btn_select_server{ left: 52dp; top: 98dp; }
 #btn_option       { left: 52dp; bottom: 56dp; }
 #btn_close        { left: 52dp; bottom: 22dp; }

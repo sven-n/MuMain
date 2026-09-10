@@ -29,7 +29,7 @@
 	top: 12px;
 	width: 190px;
 	text-align: center;
-	color: token(text-title);
+	color: token(text-warm);
 	font-weight: bold;
 	font-size: 12px;
 	cursor: move;
@@ -86,8 +86,8 @@
 	width: 120px;
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
-	border: 1px token(accent-steel-bright);
-	color: token(text-body);
+	border: 1px token(border-frame);
+	color: token(text-primary);
 	padding: 2px 4px;
 	border-radius: 3px;
 	font-family: "token(font-body)";
@@ -140,7 +140,7 @@
 	width: 140px;
 	text-align: center;
 	background-color: token(surface-tooltip);
-	border: 1px token(accent-steel-bright);
+	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 	padding: 4px 6px;
 	font-family: "token(font-body)";

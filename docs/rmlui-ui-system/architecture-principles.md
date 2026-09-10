@@ -61,6 +61,15 @@ size, stretch, responsive behavior, UI scale, draggable, default position) befor
 the RmlUI version. Values must come from analysis of the existing implementation and intended
 UX, not assumptions.
 
+**This reverse-engineering requirement is scoped to the Legacy Theme** — the theme obligated to
+reproduce the original UI's visual identity (§13), so its RML/RCSS must trace back to documented
+legacy intent. It does not bind the Modern Theme (developed side-by-side with Legacy, not after
+or from it) or any Custom/mod theme: per §15, a theme may define a genuinely different layout, and
+Modern's own layout is an independent design, not a reproduction of what this analysis produced
+for Legacy. What Modern/Custom themes still inherit from this step is the component's behavioral
+contract underneath the presentation (§20-22 — the same data/events/actions, e.g. "this is a
+health bar bound to HP fraction") — never Legacy's specific anchor/size/responsive decisions.
+
 ## 3. Distinguish Layout Intent From Legacy Implementation Details
 
 Treat the existing C++ implementation as **evidence of behavior**, not automatically the

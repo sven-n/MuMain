@@ -1,9 +1,15 @@
 /* Background-layer companion to my_inventory.rcss -- see my_inventory_bg.rml's own header
    comment. Loaded into the background context that renders behind the still-native 3D-composited
    equipment/grid icons, so this file only ever holds the flat panel fill, no interactive
-   elements. .bg-panel duplicates base.rcss's .modern-frame literal (not shared via a second
-   <link>, to keep this context fully independent -- same choice main_frame_bg.rcss already
-   made) -- keep in sync by inspection if that value ever changes. */
+   elements. .bg-panel duplicates the COMBINED result of base.rcss's .modern-frame +
+   .modern-frame-crimson (not shared via a second <link>, to keep this context fully independent
+   -- same choice main_frame_bg.rcss already made) -- this is the same real dialog/window family
+   login.rcss/msg_win.rcss/my_quest_info.rcss apply both classes together for (see
+   modern-theme-visual-direction.md's "Default look for every dialog/window" section), so this
+   panel needs the crimson-overridden values, not modern-frame's own plain ones alone (an earlier
+   version of this file mirrored only .modern-frame and rendered visibly lighter/more translucent
+   than every other dialog as a result). Keep in sync by inspection if either class's values ever
+   change. */
 
 #bg_root {
 	position: absolute;
@@ -20,11 +26,12 @@
 	width: 190px;
 	height: 429px;
 	pointer-events: none;
-	background-color: rgba(29, 35, 43, 190); /* surface-2's rgb @ 190 alpha, kept in sync with base.rcss's .modern-frame */
-	decorator: linear-gradient(to bottom, rgba(45, 53, 63, 190) 0%, rgba(29, 35, 43, 190) 40%, rgba(14, 17, 21, 190) 100%);
+	background-color: #0e0f0c;
+	decorator: linear-gradient(to bottom, #191b15, #0e0f0c 30%, #080907);
 	border-width: 2px;
-	border-top-color: rgba(170, 184, 198, 160); /* accent-steel-bright's rgb @ 160 alpha */
-	border-left-color: rgba(170, 184, 198, 160);
-	border-bottom-color: rgba(0, 0, 0, 190);
-	border-right-color: rgba(0, 0, 0, 190);
+	border-top-color: rgba(107, 96, 69, 90); /* metal-warm-edge's rgb @ 90 alpha */
+	border-left-color: rgba(0, 0, 0, 160);
+	border-right-color: rgba(0, 0, 0, 160);
+	border-bottom-color: rgba(0, 0, 0, 220);
+	border-radius: token(radius-md)dp;
 }

@@ -10,7 +10,7 @@
 	top: 0;
 	width: 100%;
 	height: 100%;
-	background-color: token(surface-0);
+	background-color: token(surface-deep);
 	font-family: "token(font-body)";
 	pointer-events: none;
 }
@@ -63,12 +63,12 @@
 	height: 30dp;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
+	background-color: token(surface-control);
+	border: 1dp token(border-frame);
 	border-radius: token(radius-md)dp;
 	text-align: center;
 	line-height: 30dp;
-	color: token(text-body);
+	color: token(text-primary);
 	font-weight: bold;
 	font-size: 14dp;
 }
@@ -93,7 +93,7 @@
 	font-family: "token(font-body)";
 	font-size: 14dp;
 	font-weight: bold;
-	color: token(text-body);
+	color: token(text-primary);
 	pointer-events: none;
 }
 .credit-department { top: 20dp; }
@@ -112,7 +112,7 @@
 	font-family: "token(font-body)";
 	font-size: 14dp;
 	font-weight: bold;
-	color: token(accent-gold-bright);
+	color: token(accent-gold-hover);
 	white-space: nowrap;
 	margin-left: 20dp;
 	margin-right: 20dp;

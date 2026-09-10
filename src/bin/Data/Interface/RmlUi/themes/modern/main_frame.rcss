@@ -28,7 +28,7 @@
 #skill_list_anchor  { left: 78px;  top: 0px; }
 
 .slot-frame {
-	border: 1px token(border-metal);
+	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 }
 .slot-fill {
@@ -51,8 +51,7 @@
 /* One continuous top edge spanning the full row, giving the whole strip a single unbroken line
    instead of three separately-outlined pieces -- no fill of its own: RmlUi composites its whole
    document AFTER the still-legacy 3D-rendered potion/skill icons in the middle, so a background
-   there would paint over and hide them (confirmed the hard way -- an earlier version filled this
-   whole span solid and did exactly that). #gauge_fill_left/right instead carry the actual
+   here would paint over and hide them. #gauge_fill_left/right instead carry the actual
    translucent-dark background, restricted to the two zones that have no icon content underneath;
    the potions/skills band in between stays genuinely unfilled, same as it always was. Top border
    only -- flush with the exp bar below. */
@@ -62,7 +61,7 @@
 	top: 429px;
 	width: 640px;
 	height: 41px;
-	border-top: 1px token(border-metal);
+	border-top: 1px token(border-frame);
 	pointer-events: none;
 }
 
@@ -101,11 +100,11 @@
 }
 /* background-color is the reliable base color; the gradient decorator layers on top as an
    enhancement (a live-resized decorator rendered solid white once, root cause not isolated). */
-.gauge-fill-hp { background-color: #d64545; decorator: linear-gradient(to bottom, #ff8f8f, #d64545 45%, #922e2e); }
+.gauge-fill-hp { background-color: token(resource-hp); decorator: linear-gradient(to bottom, #d94a3a, token(resource-hp) 45%, #4a0a05); }
 .gauge-fill-hp.poisoned { background-color: #4caf50; decorator: linear-gradient(to bottom, #a0eab0, #4caf50 45%, #2e6e35); }
-.gauge-fill-mp { background-color: #3f8fd6; decorator: linear-gradient(to bottom, #9fd0f5, #3f8fd6 45%, #295f8f); }
-.gauge-fill-ag { background-color: #e0a030; decorator: linear-gradient(to bottom, #f5cc85, #e0a030 45%, #a06f1f); }
-.gauge-fill-sd { background-color: #8fa3b3; decorator: linear-gradient(to bottom, #d3dfe4, #8fa3b3 45%, #5f6f7a); }
+.gauge-fill-mp { background-color: token(resource-mp); decorator: linear-gradient(to bottom, #5588c8, token(resource-mp) 45%, #0f2450); }
+.gauge-fill-ag { background-color: token(resource-ag); decorator: linear-gradient(to bottom, #d4a94f, token(resource-ag) 45%, #5c4118); }
+.gauge-fill-sd { background-color: token(resource-sd); decorator: linear-gradient(to bottom, #e8c073, token(resource-sd) 45%, #6c4c1a); }
 
 .gauge-num {
 	position: absolute;
@@ -150,7 +149,7 @@
 	width: 160px;
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
-	border: 1px token(border-metal);
+	border: 1px token(border-frame);
 	color: #ffffff;
 	padding: 2px 4px;
 	border-radius: token(radius-sm)px;
@@ -194,8 +193,8 @@
 	width: 256dp;
 	height: 24dp;
 	font-family: "token(font-body)";
-	background-color: rgba(20, 20, 20, 180);
-	border: 1dp token(border-metal);
+	background-color: rgba(15, 16, 13, 190);
+	border: 1dp token(border-frame);
 	border-radius: token(radius-sm)dp;
 }
 .frame-btn-top {
@@ -208,8 +207,8 @@
 	text-align: center;
 	line-height: 16dp;
 	font-family: "token(font-body)";
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
+	background-color: token(surface-control);
+	border: 1dp token(border-frame);
 	border-radius: 2dp;
 	color: #ffffff;
 	font-weight: bold;
@@ -255,7 +254,7 @@
 	width: 100dp;
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
-	border: 1dp token(border-metal);
+	border: 1dp token(border-frame);
 	color: #ffffff;
 	padding: 2dp 4dp;
 	border-radius: token(radius-sm)dp;
@@ -420,8 +419,8 @@
 #skill_slot_4 { border-radius: 0 3px 3px 0; }
 /* Same hover-highlight look for either slot family -- one rule, not duplicated per group. */
 #item_slots .selected, #skill_slots .selected {
-	border: 1px token(accent-gold-bright);
-	background-color: rgba(150, 161, 172, 25); /* border-strong's rgb @ 25 alpha */
+	border: 1px token(accent-gold-hover);
+	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
@@ -451,12 +450,12 @@
 	height: 38px;
 	pointer-events: auto;
 	cursor: pointer;
-	border: 1px token(border-metal);
+	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 }
 .skill-cell.selected {
-	border: 1px token(accent-gold-bright);
-	background-color: rgba(150, 161, 172, 25); /* border-strong's rgb @ 25 alpha */
+	border: 1px token(accent-gold-hover);
+	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
 
 /* Bottom-anchored translucent wipe -- shrinks from the top down as the skill's cooldown counts
@@ -481,7 +480,7 @@
 	transform: translateY(-100%);
 	width: 220px;
 	background-color: token(surface-tooltip);
-	border: 1px token(border-metal);
+	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 	padding: 4px 6px;
 	font-family: "token(font-body)";

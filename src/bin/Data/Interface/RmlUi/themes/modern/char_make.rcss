@@ -22,7 +22,7 @@
 	height: 406px;
 	font-family: "token(font-body)";
 	font-size: 12px;
-	color: token(text-body);
+	color: token(text-primary);
 }
 
 #stat_panel  { left: 346px; top: 24px;  }
@@ -40,10 +40,10 @@
 	line-height: 26px;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: token(surface-3);
-	border: 1px token(border-metal);
+	background-color: token(surface-control);
+	border: 1px token(border-frame);
 	border-radius: token(radius-md)px;
-	color: token(text-body);
+	color: token(text-primary);
 	font-family: "token(font-body)";
 }
 .job-btn:hover {
@@ -53,14 +53,14 @@
 .job-btn.checked {
 	background-color: token(accent-steel);
 	border: 1px token(accent-steel);
-	color: token(text-title);
+	color: token(text-warm);
 }
 .job-btn.disabled {
 	pointer-events: none;
 	color: token(semantic-neutral);
 	cursor: default;
-	background-color: token(surface-3);
-	border: 1px token(border-metal);
+	background-color: token(surface-control);
+	border: 1px token(border-frame);
 }
 
 .stat-panel, .desc-panel {
@@ -91,7 +91,7 @@
 	left: 22px;
 }
 .stat-label {
-	color: token(text-body);
+	color: token(text-primary);
 	font-family: "token(font-body)";
 }
 .stat-value {
@@ -113,7 +113,7 @@
 	width: 346px;
 	height: 38px;
 	background-color: rgba(0, 0, 0, 110);
-	border: 1px token(border-metal);
+	border: 1px token(border-frame);
 	border-radius: token(radius-sm)px;
 	pointer-events: none;
 }

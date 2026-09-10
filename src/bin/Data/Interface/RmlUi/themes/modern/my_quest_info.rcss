@@ -34,13 +34,24 @@
 
 .frame-piece { display: none; }
 
+.quest-header {
+	height: 23px; /* 27px minus the 4dp top inset .modern-header's own base rule now starts from */
+	border-top-left-radius: token(radius-md)dp;
+	border-top-right-radius: token(radius-md)dp;
+}
+.quest-footer {
+	top: 388px;
+	border-bottom-left-radius: token(radius-md)dp;
+	border-bottom-right-radius: token(radius-md)dp;
+}
+
 #title {
 	position: absolute;
 	left: 0;
 	top: 12px;
 	width: 190px;
 	text-align: center;
-	color: token(text-title);
+	color: token(text-warm);
 	font-weight: bold;
 	font-size: 12px;
 }
@@ -51,7 +62,7 @@
 	top: 27px;
 	width: 166px;
 	height: 22px;
-	background-color: token(surface-2);
+	background-color: token(surface-panel);
 	border-radius: token(radius-sm)dp;
 }
 .tab-btn {
@@ -61,13 +72,13 @@
 	text-align: center;
 	line-height: 22px;
 	font-size: 12px;
-	color: token(text-muted);
+	color: token(text-secondary);
 	cursor: pointer;
 	pointer-events: auto;
 	white-space: nowrap;
 	overflow: hidden;
 }
-.tab-btn.active { color: token(text-title); background-color: token(accent-steel); border-radius: token(radius-sm)dp; }
+.tab-btn.active { color: token(text-warm); background-color: token(accent-steel); border-radius: token(radius-sm)dp; }
 .tab-btn-quest { left: 0; width: 48px; }
 .tab-btn-jobchange { left: 48px; width: 48px; }
 .tab-btn-castletemple { left: 96px; width: 72px; }
@@ -88,7 +99,7 @@
 	left: 14px;
 	top: 30px;
 	width: 140px;
-	color: token(accent-gold-bright);
+	color: token(accent-gold-hover);
 	font-weight: bold;
 	font-size: 12px;
 	text-align: left;
@@ -109,14 +120,14 @@
 	height: 18px;
 	line-height: 18px;
 	padding-left: 4px;
-	color: token(text-body);
+	color: token(text-primary);
 	font-size: 12px;
 	cursor: pointer;
 	pointer-events: auto;
 	white-space: nowrap;
 }
-.quest-row:hover { color: token(accent-gold-bright); }
-.quest-row.selected { color: token(accent-gold-bright); font-weight: bold; background-color: token(surface-2); }
+.quest-row:hover { color: token(accent-gold-hover); }
+.quest-row.selected { color: token(accent-gold-hover); font-weight: bold; background-color: token(surface-panel); }
 
 .quest-divider {
 	position: absolute;
@@ -124,7 +135,7 @@
 	top: 130px;
 	width: 172px;
 	height: 21px;
-	border-top: 1dp token(border-metal);
+	border-top: 1dp token(border-frame);
 }
 
 .quest-contents {
@@ -133,7 +144,7 @@
 	top: 151px;
 	width: 172px;
 	height: 169px;
-	background-color: token(surface-2);
+	background-color: token(surface-panel);
 	border-radius: token(radius-sm)dp;
 	overflow: auto hidden;
 }
@@ -142,11 +153,11 @@
 	width: 100%;
 	padding: 1px 4px;
 	font-size: 12px;
-	color: token(text-body);
+	color: token(text-primary);
 }
 .quest-content-row.bold { font-weight: bold; }
 .quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
-.quest-content-row.clickable:hover { color: token(accent-gold-bright); }
+.quest-content-row.clickable:hover { color: token(accent-gold-hover); }
 
 .quest-btn, .quest-btn-exit {
 	position: absolute;
@@ -173,8 +184,8 @@
    above. */
 .quest-btn-exit {
 	left: 13px;
-	background-color: token(surface-3);
-	border: 1dp token(border-metal);
+	background-color: token(surface-control);
+	border: 1dp token(border-frame);
 	border-radius: token(radius-sm)dp;
 }
 .btn-exit-label {
@@ -185,7 +196,7 @@
 	line-height: 29px;
 	font-weight: bold;
 	font-size: 14px;
-	color: token(text-body);
+	color: token(text-primary);
 }
 
 /* Tooltips: siblings of their trigger button -- same convention my_inventory.rcss's own
@@ -197,8 +208,8 @@
 	width: 110px;
 	white-space: nowrap;
 	background-color: token(surface-tooltip);
-	border: 1px token(accent-steel-bright);
-	color: token(text-body);
+	border: 1px token(border-frame);
+	color: token(text-primary);
 	padding: 2px 4px;
 	border-radius: 3px;
 	font-family: "token(font-body)";
@@ -221,7 +232,7 @@
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: token(accent-steel-bright);
+	color: token(accent-steel-hover);
 	font-weight: bold;
 	font-size: 12px;
 	margin-bottom: 8px;
@@ -230,17 +241,17 @@
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: token(text-body);
+	color: token(text-primary);
 	font-size: 12px;
 }
 .jobchange-contents span, .jobchange-state span { display: block; }
-.jobchange-state { color: token(accent-gold-bright); font-weight: bold; margin-top: 12px; }
+.jobchange-state { color: token(accent-gold-hover); font-weight: bold; margin-top: 12px; }
 
 .castle-title, .temple-title {
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: token(accent-gold-bright);
+	color: token(accent-gold-hover);
 	font-weight: bold;
 	font-size: 12px;
 	margin-top: 6px;
@@ -249,6 +260,6 @@
 	display: block;
 	text-align: center;
 	width: 172px;
-	color: token(text-body);
+	color: token(text-primary);
 	font-size: 12px;
 }

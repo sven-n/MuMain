@@ -14,7 +14,7 @@
 	width: 500px;
 	font-family: "token(font-body)";
 	font-size: 12px;
-	color: token(text-body);
+	color: token(text-primary);
 	padding: 10px;
 }
 
@@ -68,23 +68,23 @@
 	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: #430e17;
-	decorator: linear-gradient(to bottom, token(accent-crimson-bright), token(accent-crimson) 35%, #6c1520 70%, #430e17); /* bright/base stops are real tokens; the two darker stops are derived shades with no token of their own */
+	background-color: #220706;
+	decorator: linear-gradient(to bottom, token(accent-crimson-hover), token(accent-crimson) 45%, #52100c 75%, #220706); /* bright/base stops are real tokens; the two darker stops are the reference's own crimson-700/crimson-900 shades, no token of their own -- same gradient as base.rcss's .btn-ok */
 	border-width: 1px;
 	border-color: #0a0706;
-	border-top-color: rgba(211, 74, 94, 115); /* accent-crimson-bright's rgb @ 115 alpha */
+	border-top-color: rgba(195, 74, 45, 115); /* accent-crimson-hover's rgb @ 115 alpha */
 	border-radius: token(radius-sm)px;
-	color: token(text-emphasis);
+	color: token(accent-gold);
 	font-family: "token(font-body)";
 }
 .group-btn:hover {
-	decorator: linear-gradient(to bottom, #e05f72, token(accent-crimson-bright) 35%, #8c1e2c 70%, #571219); /* #e05f72 is a brighter-than-token hover-only highlight, no token */
-	border-color: #e05f72;
+	decorator: linear-gradient(to bottom, #d96a48, token(accent-crimson-hover) 45%, #781711 75%, #3a0f0a); /* #d96a48 is a brighter-than-token hover-only highlight, no token */
+	border-color: #d96a48;
 }
 .group-btn.checked {
-	decorator: linear-gradient(to bottom, #e05f72, token(accent-crimson-bright) 35%, #8c1e2c 70%, #571219);
-	border-color: token(accent-gold-bright);
-	color: token(text-title);
+	decorator: linear-gradient(to bottom, #d96a48, token(accent-crimson-hover) 45%, #781711 75%, #3a0f0a);
+	border-color: token(accent-gold-hover);
+	color: token(text-warm);
 }
 
 /* Flyout: absent until a group is clicked, then docks beside that specific button -- see
@@ -147,21 +147,21 @@
 	white-space: nowrap;
 	cursor: pointer;
 	pointer-events: auto;
-	background-color: #0a0d10;
-	decorator: linear-gradient(to bottom, #1a2027, #0a0d10 48%, #12151a); /* cool neutral, was warm charcoal -- structural framing goes cool now */
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom, #262820, #13140f 58%, #0a0b09); /* iron, matching base.rcss's own .btn gradient */
 	border-width: 1px;
-	border-top-color: rgba(255, 255, 255, 50);
-	border-left-color: rgba(255, 255, 255, 50);
+	border-top-color: rgba(255, 255, 255, 30);
+	border-left-color: rgba(255, 255, 255, 30);
 	border-bottom-color: rgba(0, 0, 0, 200);
 	border-right-color: rgba(0, 0, 0, 200);
 	border-radius: token(radius-sm)px;
-	color: token(text-emphasis);
+	color: token(accent-gold);
 	font-family: "token(font-body)";
 }
 .server-row:hover {
-	decorator: linear-gradient(to bottom, #30363c, #171a1e 48%, #20252a);
-	border-top-color: token(accent-steel-bright);
-	border-left-color: token(accent-steel-bright);
+	decorator: linear-gradient(to bottom, #333a30, #1c1e18 58%, #101210);
+	border-top-color: token(accent-steel-hover);
+	border-left-color: token(accent-steel-hover);
 }
 .server-row:active {
 	transform: translateY(1px);
@@ -178,7 +178,7 @@
 	width: 200px;
 	height: 5px;
 	margin: 4px 0 0 9px;
-	background-color: token(surface-0);
+	background-color: token(surface-deep);
 	decorator: repeating-linear-gradient(to right, #030303 0, #030303 17px, #222222 17px, #222222 20px);
 }
 .server-gauge-fill {
@@ -202,7 +202,7 @@
 	left: 0;
 	top: 470px;
 	width: 480px;
-	color: token(text-body);
+	color: token(text-primary);
 	white-space: normal;
 	font-family: "token(font-body)";
 }
