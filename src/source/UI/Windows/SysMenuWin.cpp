@@ -62,6 +62,7 @@ void CSysMenuWin::BuildRmlUi()
         [this](Rml::DataModelConstructor& c, SysMenuRmlModel& model)
         {
             c.Bind("select_server_hidden", &model.selectServerHidden);
+            c.Bind("system_menu_label", &model.systemMenuLabel);
             c.Bind("exit_game_label", &model.exitGameLabel);
             c.Bind("select_server_label", &model.selectServerLabel);
             c.Bind("option_label", &model.optionLabel);
@@ -93,7 +94,7 @@ void CSysMenuWin::ReloadRmlTheme()
     m_pRmlDoc = nullptr;
 
     BuildRmlUi();
-    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) m_pRmlDoc->Show(); }
+    if (wasVisible) { SyncRmlModel(); if (m_pRmlDoc) { m_pRmlDoc->PullToFront(); m_pRmlDoc->Show(); } }
 }
 
 void CSysMenuWin::Release()
@@ -114,7 +115,14 @@ void CSysMenuWin::Show(bool bShow)
 
     if (m_pRmlDoc)
     {
-        if (bShow) { SyncRmlModel(); m_pRmlDoc->Show(); }
+        // PullToFront() is required here: this document is created once at scene setup and only
+        // ever toggled visible/hidden afterward (never recreated), so absent this call it just
+        // stays wherever RmlUi's own document stack put it at that original creation time --
+        // behind g_LoginWin/g_LoginMainWin's own documents, which happen to be created later in
+        // the same scene. GetLayerDepth()'s 40.0f (this class) vs 20.0f/15.0f (theirs) only orders
+        // this legacy manager's own Update()/Render() dispatch, it has no effect on a separate
+        // RmlUi ElementDocument's actual z-order.
+        if (bShow) { SyncRmlModel(); m_pRmlDoc->PullToFront(); m_pRmlDoc->Show(); }
         else       m_pRmlDoc->Hide();
     }
 }
@@ -178,6 +186,7 @@ void CSysMenuWin::SyncRmlModel()
             m_RmlBinder.MarkDirty(boundName);
         }
     };
+    syncLabel(&SysMenuRmlModel::systemMenuLabel, "system_menu_label", I18N::Game::SystemMenu);
     syncLabel(&SysMenuRmlModel::exitGameLabel, "exit_game_label", I18N::Game::ExitGame);
     syncLabel(&SysMenuRmlModel::selectServerLabel, "select_server_label", I18N::Game::SelectServer);
     syncLabel(&SysMenuRmlModel::optionLabel, "option_label", I18N::Game::Option385);

@@ -219,6 +219,14 @@ void CSceneUICoordinator::Update(double dDeltaTick)
     if (UIM_SCENE_NONE == m_nScene)
         return;
 
+    // Runs first, unconditionally, before anything else below -- see
+    // HasPendingConnectionReconnect()'s own comment in LoginWin.h. Pressing ESC/Cancel on the
+    // login dialog hides it immediately and kicks the (blocking) reconnect off on a background
+    // thread; this polls every frame for that thread finishing and, once it has, joins it and
+    // clears the in-flight flag so a later Cancel can start a new one.
+    if (g_LoginWin.HasPendingConnectionReconnect())
+        g_LoginWin.ProcessPendingConnectionReconnect();
+
     // New-style (CObject-tier) windows -- the only dispatch this
     // class still drives; every window it used to own via a CWin list has migrated onto
     // mu::ui::window::CObject/CManager. m_bCursorOnUI folds in whatever this claimed, so a
@@ -230,9 +238,12 @@ void CSceneUICoordinator::Update(double dDeltaTick)
 
     CInput& rInput = CInput::Instance();
 
-    // ESC toggles system menu in login/character scenes. Checked before m_NewStyleMng.Update()
-    // (below) runs -- a migrated window's own ESC handling (e.g. CMsgWin closing itself on ESC)
-    // must not also flip g_MsgWin.IsVisible() to false in time to fool this same frame's check.
+    // ESC toggles system menu in login/character scenes -- including while g_LoginWin's own dialog
+    // is up: pressing ESC there opens the system menu (Exit Game/Select Server/etc.) rather than
+    // cancelling the login form; the Cancel button still cancels it via mouse click. Checked before
+    // m_NewStyleMng.Update() (below) runs -- a migrated window's own ESC handling (e.g. CMsgWin
+    // closing itself on ESC) must not also flip g_MsgWin.IsVisible() to false in time to fool this
+    // same frame's check.
     //
     // Also resets/sets m_bSysMenuToggledByEscThisFrame (own comment): closing the menu here, then
     // letting m_NewStyleMng.Update() (below) run g_LoginWin's own Escape-cancel gate in the same
@@ -240,8 +251,11 @@ void CSceneUICoordinator::Update(double dDeltaTick)
     // it. Unlike CCreditWin (depth 100) and CMsgWin (depth 50), both handled entirely inside
     // m_NewStyleMng's own depth-sorted dispatch (so a lower-depth g_LoginWin's Update() always runs
     // BEFORE theirs, seeing pre-close state for free), g_SysMenuWin's ESC close happens here,
-    // completely outside that dispatch and unconditionally before it -- g_LoginWin has no ordering
-    // protection against it on its own.
+    // completely outside that dispatch and unconditionally before it, so g_LoginWin needs this flag
+    // in addition to the live g_SysMenuWin.IsVisible() check (LoginWin.cpp's SetActive() call) --
+    // IsVisible() alone already covers the OPEN case this same frame (it flips true here before
+    // g_LoginWin's own Update() runs below), but reads false again for the CLOSE case by the time
+    // g_LoginWin's Update() runs, without this flag to remember it happened.
     m_bSysMenuToggledByEscThisFrame = false;
     if (rInput.IsKeyDown(VK_ESCAPE))
     {
@@ -253,8 +267,7 @@ void CSceneUICoordinator::Update(double dDeltaTick)
                 g_SysMenuWin.Show(false);
                 m_bSysMenuToggledByEscThisFrame = true;
             }
-            else if (!g_MsgWin.IsVisible() && !g_LoginWin.IsVisible() && !g_CreditWin.IsVisible() &&
-                     !g_CharMakeWin.IsVisible())
+            else if (!g_MsgWin.IsVisible() && !g_CreditWin.IsVisible() && !g_CharMakeWin.IsVisible())
             {
                 ::PlayBuffer(SOUND_CLICK01);
                 g_SysMenuWin.Show(true);

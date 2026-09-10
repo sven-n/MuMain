@@ -269,6 +269,20 @@ void CCharMakeWin::Release()
     // See CLoginMainWin::PreRelease()'s identical comment.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
+
+    // Base-class visibility reset, NOT the full CCharMakeWin::Show(false) override -- that touches
+    // g_pSingleTextInputBox, which isn't guaranteed constructed yet the first time this runs
+    // (CreateLoginScene() calls Release() on every window up front, including this one, even though
+    // it only ever Create()s/Shows this window later, in CreateCharacterScene()). Every other
+    // window's Create() ends with an unconditional Show(false) (see CCreditWin::Create()'s own
+    // comment on this), which is what normally keeps CObject's IsVisible() correct before the first
+    // real Show(true) -- but this window's Create() never even runs during the login scene, so
+    // without this its CObject-level m_bRender default (true, from the constructor) stood
+    // uncorrected, and IsVisible() reported true. CSceneUICoordinator::Update()'s ESC-opens-
+    // system-menu check reads exactly this window's IsVisible() while on the login scene, so a
+    // fresh process's first ESC press there fell through as if this dialog were covering the
+    // screen, never opening the system menu.
+    mu::ui::window::CObject::Show(false);
 }
 
 void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)

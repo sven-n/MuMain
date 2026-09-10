@@ -89,6 +89,14 @@ CLoginWin::CLoginWin()
 
 CLoginWin::~CLoginWin()
 {
+    // g_LoginWin is a global with static storage duration, so this only runs at process exit --
+    // but std::thread's own destructor calls std::terminate() if it's still joinable, and there's
+    // no guarantee ProcessPendingConnectionReconnect() ran one last time before shutdown. Join
+    // here as a backstop; a connect attempt in flight at process exit blocking exit briefly is a
+    // wildly different (acceptable) situation than the same block happening during gameplay.
+    if (m_ConnectionReconnectThread.joinable())
+        m_ConnectionReconnectThread.join();
+
     SAFE_DELETE(m_pUsernameInputBox);
     SAFE_DELETE(m_pPasswordInputBox);
 }
@@ -670,8 +678,33 @@ void CLoginWin::RequestLogin()
 
 void CLoginWin::CancelLogin()
 {
-    ConnectConnectionServer();
+    // Hide immediately, run the actual (blocking) reconnect on a background thread -- see
+    // HasPendingConnectionReconnect()'s own comment in the header for why a same-thread deferral
+    // wasn't enough. Guard against ESC-spam stacking threads: if one is already in flight, this
+    // press is a no-op (the dialog is already hidden from the first press).
     Show(false);
+
+    if (m_bConnectionReconnectInFlight.load())
+        return;
+
+    if (m_ConnectionReconnectThread.joinable())
+        m_ConnectionReconnectThread.join(); // previous run already finished and was consumed
+
+    m_bConnectionReconnectInFlight.store(true);
+    m_bConnectionReconnectDone.store(false);
+    m_ConnectionReconnectThread = std::thread([this]
+    {
+        ConnectConnectionServer();
+        m_bConnectionReconnectDone.store(true);
+    });
+}
+
+void CLoginWin::ProcessPendingConnectionReconnect()
+{
+    if (m_ConnectionReconnectThread.joinable())
+        m_ConnectionReconnectThread.join();
+    m_bConnectionReconnectDone.store(false);
+    m_bConnectionReconnectInFlight.store(false);
 }
 
 void CLoginWin::ConnectConnectionServer()

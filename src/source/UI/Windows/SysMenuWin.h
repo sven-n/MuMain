@@ -77,6 +77,7 @@ private:
         // collided with Option (see .hidden's comment in base.rcss). Character scene: shown
         // normally.
         bool selectServerHidden = false;
+        Rml::String systemMenuLabel;
         Rml::String exitGameLabel;
         Rml::String selectServerLabel;
         Rml::String optionLabel;

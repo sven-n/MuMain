@@ -7,6 +7,9 @@
 
 #include "UI/RmlBridge/RmlModelBinder.h"
 
+#include <atomic>
+#include <thread>
+
 class CUITextInputBox;
 
 namespace Rml { class ElementDocument; }
@@ -60,6 +63,30 @@ public:
     void Show(bool bShow) override;
 
     void ConnectConnectionServer();
+
+    // CancelLogin() runs ConnectConnectionServer() on a background thread instead of calling it
+    // synchronously -- that call blocks on a real socket connect (WSclient.cpp's CreateSocket()
+    // constructs a Connection and immediately checks IsConnected()), which can take multiple
+    // seconds. Deferring the call to a later frame on the same thread wouldn't help: only the
+    // call's START time would move, not its DURATION, so the app would still freeze for as long as
+    // the connect takes. Running it on its own thread is the only way to keep frames
+    // rendering/presenting while the connect is in flight.
+    // CSceneUICoordinator::Update() polls HasPendingConnectionReconnect() at the very top of its
+    // own per-frame call -- before dispatching to any window -- and once the background thread
+    // finishes, calls ProcessPendingConnectionReconnect() to join it and clear the in-flight flag.
+    // ConnectConnectionServer() only ever writes globals (SocketClient via CreateSocket(), LogIn,
+    // CurrentProtocolState) that the main thread already reads every frame; m_bConnectionReconnectDone
+    // is the synchronization point that makes those writes visible before anything reads them --
+    // std::atomic<bool>'s default operations are sequentially consistent, so the store on the
+    // worker thread happens-before the load that observes it true on the main thread, same
+    // guarantee Network::IncomingPacketQueue's mutex gives its own background-thread-to-main-thread
+    // handoff. Purely a call-site change: WSclient.cpp/Connection/CreateSocket themselves are
+    // untouched, still a real blocking call, just no longer on the main thread.
+    bool HasPendingConnectionReconnect() const
+    {
+        return m_bConnectionReconnectDone.load();
+    }
+    void ProcessPendingConnectionReconnect();
 
     CUITextInputBox* GetUsernameInputBox() const
     {
@@ -150,6 +177,9 @@ protected:
 
 private:
     int FirstLoad = 0;
+    std::atomic<bool> m_bConnectionReconnectInFlight{false};
+    std::atomic<bool> m_bConnectionReconnectDone{false};
+    std::thread m_ConnectionReconnectThread;
 
     // Shared by the immediate RmlUi callbacks above and UpdateWhileActive()'s keyboard polling
     // (Enter/Esc). Each re-checks the "remember password" prompt's live Pending state itself,
