@@ -16,13 +16,15 @@ class CServerGroup;
 // RmlUi owns 100% of this window's rendering and click handling. No panel background/frame --
 // the real legacy screen is fully transparent, just buttons and text floating over the login art.
 //
-// Server-group buttons split into two dynamic-count arrays (leftGroups/rightGroups, one bound
-// field per side) plus one fixed "test server" slot, same shape as CMainFrameWindow's
-// skillGridCells/petSkillCells (dynamic-count data-for, click routed by a bound index field rather
-// than it_index, since the array is compacted and doesn't line up with CServerGroup::m_iBtnPos
-// 1:1). The server list within the selected group behaves like a nested/flyout context menu, not a
-// fixed panel region: it's absent until a group button is clicked, then docks beside that specific
-// button (see ServerSelRmlModel's own comment for the exact fields).
+// Two always-visible columns, laid out entirely by server_select.rcss's own flexbox rules (no
+// C++-computed positions): the left column lists every server group (dynamic-count data-for,
+// click routed by a bound index field rather than it_index, since the array is compacted and
+// doesn't line up with CServerGroup::m_iBtnPos 1:1), the right column lists the individual servers
+// within whichever group is currently selected -- empty/hidden until a group is clicked (see
+// ServerSelRmlModel's own comment). Previously the group buttons were split into two fixed-count
+// columns with the server list as a flyout that C++ docked beside whichever button was clicked
+// (kGroupBtnRowHeight and friends); that positioning math is gone now that both lists are normal
+// RCSS flow instead of absolutely-positioned/C++-pushed boxes.
 //
 // UpdateDisplay() is not one-shot: it re-runs every time the server-list packet arrives, every
 // time a group button is clicked (re-requests the list), and after a resolution change
@@ -77,7 +79,7 @@ private:
     struct GroupEntry
     {
         Rml::String label;
-        int btnPos = 0; // CServerGroup::m_iBtnPos -- passed back to RmlClickSelectGroup
+        int btnPos = 0; // CServerGroup::m_iBtnPos -- passed back to RmlClickSelectGroup; 0 is the rare center/"test server" group
         bool checked = false;
     };
     struct ServerEntry
@@ -95,25 +97,17 @@ private:
     };
     struct ServerSelRmlModel
     {
-        bool testServerVisible = false;
-        Rml::String testServerLabel;
-        bool testServerChecked = false;
-
-        std::vector<GroupEntry> leftGroups;
-        std::vector<GroupEntry> rightGroups;
+        // One merged, order-preserving list -- the old leftGroups/rightGroups split mirrored a
+        // legacy two-column layout that no longer exists; CServerGroup::SBP_LEFT/SBP_RIGHT/
+        // SBP_CENTER now only matter for the one real business rule they carry (dedupe multiple
+        // SBP_CENTER "test server" groups down to the first, see UpdateDisplay()), not for which
+        // UI column an entry lands in.
+        std::vector<GroupEntry> groups;
         std::vector<ServerEntry> servers;
 
-        // The server list is a flyout, not a fixed panel region -- it only exists once a group is
-        // clicked, docked beside that specific button, same as a nested/flyout context menu (the
-        // real legacy behavior; a fixed always-present list area was wrong). serverListTop is a px
-        // offset matching the clicked button's row within its column. Exactly one of
-        // serverListDockLeft/serverListDockRight is true for a left-/right-column click (flyout
-        // docks to the inward side, toward the middle); both false means the rare center/test-
-        // server button was clicked, and the flyout centers below the whole group row instead.
+        // True once a group has been clicked and its server list requested/populated -- the right
+        // column is empty/hidden before that, same as the old flyout being entirely absent.
         bool serverListVisible = false;
-        float serverListTop = 0.f;
-        bool serverListDockLeft = false;
-        bool serverListDockRight = false;
 
         bool pvpNotice = false;
         Rml::String pvpNoticeLine0, pvpNoticeLine1, pvpNoticeLine2;
@@ -129,17 +123,14 @@ private:
     // Fixed, author-chosen footprint (this is a fresh RmlUi layout, not a port of the legacy
     // asset-derived geometry -- see ui-target-architecture.md's note on why CWinEx's real pixel
     // size couldn't safely be preserved). Used only for UpdateMouseEvent()'s own-rect check
-    // (self-centered the same way SceneUICoordinator.cpp centers every other window). Width still
-    // matches server_select.rcss's #panel width, but height deliberately does NOT mirror #panel's
-    // own (auto) height -- kPanelHeight is generously oversized vertically on purpose, since the
-    // server-list flyout can dock as low as the bottom group-button row and still extend a full
-    // 16-row server list below it, well past the two columns' own footprint, and this click-gate
-    // has to cover that worst case or clicks on a low, tall flyout would incorrectly fall through
-    // to whatever's behind this window. #panel itself must NOT share this height, or .center-both
-    // ends up centering a box far taller than the real visible content (see server_select.rcss's
-    // own comment for the centering bug this caused).
-    static constexpr int kPanelWidth = 500;
-    static constexpr int kPanelHeight = 750;
+    // (self-centered the same way SceneUICoordinator.cpp centers every other window). Both the
+    // group and server columns now cap their own height with max-height+overflow:auto
+    // (server_select.rcss) instead of the old flyout's open-ended worst-case extent, so this
+    // click-gate just needs to cover #panel's real max footprint (both columns side by side, plus
+    // the pvp notice/description text below) with some slack -- not a separate oversized
+    // reservation the way the old flyout-docking design needed.
+    static constexpr int kPanelWidth = 420;
+    static constexpr int kPanelHeight = 460;
 };
 
 // Replaces CUIMng's old `CServerSelWin m_ServerSelWin;` member, same convention as g_CreditWin.

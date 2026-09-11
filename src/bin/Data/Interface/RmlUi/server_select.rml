@@ -6,28 +6,24 @@
 </head>
 <body data-model="server_select">
 	<div id="panel" class="center-both">
-		<div id="group_row">
-			<div id="test_server_btn" class="group-btn" data-class-hidden="!test_server_visible" data-class-checked="test_server_checked"
-			     data-event-click="serversel_select_group(0)">{{test_server_label}}</div>
-			<div id="left_col" class="group-col">
-				<div class="group-btn" data-for="g : left_groups" data-class-checked="g.checked"
+		<div id="columns">
+			<!-- Left column: every server group, one merged/order-preserving list -- no more
+			     left/right-column split or a separately-floating center/"test server" button, see
+			     ServerSelWin.h's own header comment. -->
+			<div id="group_col">
+				<div class="group-btn" data-for="g : groups" data-class-checked="g.checked"
 				     data-event-click="serversel_select_group(g.btn_pos)">{{g.label}}</div>
 			</div>
-			<div id="right_col" class="group-col">
-				<div class="group-btn" data-for="g : right_groups" data-class-checked="g.checked"
-				     data-event-click="serversel_select_group(g.btn_pos)">{{g.label}}</div>
-			</div>
-		</div>
 
-		<!-- Flyout, not a fixed panel region -- absent until a group button is clicked, then docks
-		     beside that specific button (server_list_top/dock_left/dock_right), same as a nested
-		     context menu's submenu. See ServerSelRmlModel's own comment (ServerSelWin.h). -->
-		<div id="server_list" data-class-hidden="!server_list_visible" data-class-dock-left="server_list_dock_left"
-		     data-class-dock-right="server_list_dock_right" data-class-dock-center="!server_list_dock_left && !server_list_dock_right"
-		     data-style-top="server_list_top + 'px'">
-			<div class="server-row" data-for="s : servers" data-class-gray="s.color_gray" data-class-orange="s.color_orange"
-			     data-event-click="serversel_select_server(s.index)">{{s.label}}
-				<div class="server-gauge-slot"><div class="server-gauge-fill" data-style-width="s.load_fraction * 100 + '%'"></div></div>
+			<!-- Right column: the individual servers within whichever group is currently selected --
+			     empty/hidden until a group is clicked, same as the old flyout being entirely absent,
+			     just laid out as a normal second column now instead of a docked overlay. -->
+			<div id="server_col" data-class-hidden="!server_list_visible">
+				<div class="server-row" data-for="s : servers" data-class-gray="s.color_gray" data-class-orange="s.color_orange"
+				     data-event-click="serversel_select_server(s.index)">{{s.label}}
+					<div class="server-gauge-slot"><div class="server-gauge-fill" data-style-width="s.load_fraction * 100 + '%'"
+					     data-class-tier-low="s.load_fraction < 0.5" data-class-tier-high="s.load_fraction >= 0.8"></div></div>
+				</div>
 			</div>
 		</div>
 

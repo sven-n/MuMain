@@ -185,12 +185,19 @@ section in full detail; summarized here for visibility.
   left on `auto` -- the next row started before the current row's gauge bar had room, visually
   clipping/overlapping it. Fixed by giving the wrapper an explicit height (sum of its children's own
   heights/margins) instead of relying on auto to compute it.
-- **`box-shadow` (and `filter`/`backdrop-filter`) parse but don't render on this engine.**
-  `PropertyId::BoxShadow` has a working RCSS parser, which reads as "supported" if you only check
-  property registration — but `RmlUiRenderInterface` leaves layer/filter compositing
-  unimplemented, so a blurred `box-shadow` paints as a solid opaque block instead of a blur. Don't
-  parser-check a rendering capability; check the render interface, or grep for prior art first —
-  `login.rcss`'s own `#panel` comment already documents this.
+- **`box-shadow` now genuinely renders on this engine, including blur — this entry is corrected
+  from an earlier, now-stale finding that it parsed but didn't render.** As of the vendored SDL_GPU
+  renderer's PR-989 integration, `RenderManager::PushLayer`/`CompositeLayers`/`CompileFilter`/
+  `RenderBlur` are all genuinely implemented (confirmed by reading `RmlUi_Renderer_SDL_GPU.cpp`
+  directly, not assumed), and `GeometryBoxShadow.cpp` renders through them correctly — inset and
+  outset, real blur, comma-separated multiple shadows. In active, verified use throughout
+  `base.rcss`/`login.rcss`/`sys_menu.rcss`/`server_select.rcss` (window drop-shadows, header/plate
+  cast-shadows + inset highlights, recessed-groove darkness, button press feedback). One conversion
+  gotcha: this engine's `rgba()` parses alpha via a 0-255 integer (`atoi`), NOT a 0-1 CSS float —
+  `rgba(0,0,0,.62)` parses as alpha 0 (invisible) if copied verbatim from a browser reference; every
+  box-shadow color needs pre-converting to the 0-255 form. `filter`/`backdrop-filter` remain
+  unimplemented (`filter: brightness()`/`contrast()` are the one exception, confirmed working
+  separately) — don't assume those follow box-shadow's fix.
 - **RCSS comments don't nest, and a broken one in a shared file silently corrupts every document
   that links it.** `/* ... "/* example */" ... */` closes at the *first* `*/`, not the intended
   one — everything between that premature close and the next real `*/` gets parsed as garbage

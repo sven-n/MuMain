@@ -6,14 +6,17 @@
    real need.
 
    #panel itself is intentionally invisible (no background/border) -- the real legacy screen has
-   no panel chrome at all, just buttons and text floating over the login art. #panel deliberately
-   has no explicit height: only #group_row (in normal flow) contributes to its auto height; the
-   absolutely-positioned #server_list/#pvp_notice/#desc_panel don't, by design. This box is what
-   .center-both actually centers, so it must match the real visible content's footprint, not the
-   flyout's worst-case extent -- ServerSelWin.h's kPanelWidth/kPanelHeight is a separate, oversized
-   rect used only for the native click-gate (UpdateMouseEvent()); giving #panel that same oversized
-   height here previously made .center-both center a box far taller than the window on common
-   resolutions, pinning the real content near the top instead of the middle. */
+   no panel chrome at all, just buttons and text floating over the login art.
+
+   Two always-visible columns laid out by real flexbox (#columns/#group_col/#server_col below),
+   not the old absolutely-positioned flyout that ServerSelWin.cpp used to dock beside whichever
+   group button was clicked via C++-computed pixel offsets (kGroupBtnRowHeight and friends -- see
+   ServerSelWin.h's own header comment). #panel/#pvp_notice/#desc_panel are plain normal-flow block
+   content now too, not position:absolute with hand-picked top offsets -- #panel's height is just
+   whatever its real children need, no separate oversized worst-case reservation to center
+   against. This box is what .center-both actually centers; ServerSelWin.h's kPanelWidth/
+   kPanelHeight is a separate, deliberately generous rect used only for the native click-gate
+   (UpdateMouseEvent()), not this box's own size. */
 
 /* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
    left/top/transform centering math, same as sys_menu.rcss/msg_win.rcss's own #panel. Redeclaring
@@ -21,37 +24,48 @@
    self-centering window here leaves it out, so this matches that precedent exactly rather than
    introducing an unexplained difference. */
 #panel {
-	width: 500px;
+	width: 420px;
 	font-family: "Liberation Sans";
 	font-size: 12px;
 	color: white;
 	padding: 10px;
 }
 
-#group_row {
-	position: relative;
+/* height:300px is fixed, not auto -- #panel uses .center-both, which recenters based on #panel's
+   OWN CURRENT size every time it changes; an auto height here let #columns grow the instant the
+   server column populated after a group click, visibly shifting the whole panel (including the
+   just-clicked group button) up/down as .center-both recentered around the new, taller box. A
+   fixed height means #panel's total size never changes across the empty/populated/hidden states,
+   so nothing ever needs to recenter. Each column below still scrolls internally past this height
+   via its own overflow:auto -- this box just never resizes around them. */
+#columns {
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
-	width: 480px;
-	height: 400px;
-	padding-top: 34px;
+	align-items: flex-start;
+	gap: 18px;
+	height: 300px;
 }
-/* #group_row's own height is a fixed worst-case reservation (10 groups per column --
-   ServerSelWin.cpp caps leftGroups/rightGroups at 10 each), not the real button count, so the
-   real buttons must be vertically centered within it (not packed to its top) -- otherwise a
-   typical, mostly-empty column looks pinned near the top of #panel once .center-both centers
-   that oversized row, most visibly at smaller window heights. */
-#left_col, #right_col {
+
+/* height (not max-height) matches #columns' own fixed height above, for the same reason -- a
+   shorter real group/server list just centers within this fixed box (justify-content:center)
+   rather than shrinking it. overflow:auto still scrolls a list taller than this box. */
+#group_col {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	gap: 6px;
+	width: 140px;
+	height: 300px;
+	overflow: hidden auto;
 }
-#test_server_btn {
-	position: absolute;
-	left: 50%;
-	top: 50%;
-	transform: translate(-50%, -50%);
+#server_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px;
+	width: 220px;
+	height: 300px;
+	overflow: hidden auto;
 }
 
 /* Sprite provides the border/frame (ninepatch, base.rcss), stretched from its native 108x30 rect;
@@ -61,14 +75,12 @@
 
    Height (32px, no padding/border-width to add to it) matches .server-row's real on-screen height
    below (25px declared + its own 3px+4px padding = 32px -- see that rule's comment for why its
-   declared height isn't literally 32 too). ServerSelWin.cpp's kGroupBtnRowHeight (36px = this real
-   height + margin-bottom) must stay in sync with it, since the C++ uses it to compute the
-   server-list flyout's docked top per clicked row. */
+   declared height isn't literally 32 too). width is 140px, not the old two-column layout's 108px
+   -- #group_col is now the only column on its side, so there's no second 108px column to leave
+   room for. No margin-bottom here -- #group_col's own `gap` above handles row spacing now. */
 .group-btn {
-	position: relative;
-	width: 108px;
+	width: 140px;
 	height: 32px;
-	margin-bottom: 4px;
 	text-align: center;
 	vertical-align: middle;
 	line-height: 32px;
@@ -85,37 +97,13 @@
 	color: #ffffff;
 }
 
-/* Flyout: absent until a group is clicked, then docks beside that specific button -- see
-   ServerSelRmlModel's own comment (ServerSelWin.h). top is always pushed from C++
-   (data-style-top); dock-left/dock-right/dock-center below only resolve the horizontal side, since
-   an inline data-style-top always wins over any class rule's own top. No background/border/padding
-   of its own -- the .server-row buttons stacked inside it are enough on their own, no enclosing
-   panel needed; width matches .server-row's own width directly since there's no padding gutter to
-   size around anymore. */
-#server_list {
-	position: absolute;
-	width: 220px;
-	max-height: 352px;
-	overflow: hidden auto;
-}
-#server_list.dock-left {
-	left: 118px;
-}
-#server_list.dock-right {
-	right: 118px;
-}
-#server_list.dock-center {
-	left: 50%;
-	transform: translateX(-50%);
-}
-
 /* Same construction as .group-btn above -- sprite ninepatch for the border/frame, a translucent
    tint decorator layered in front for the glassy body, so both buttons share one look. No CSS
    `border` property here: this element has a child (.server-gauge-slot below), and a border-width
    property on a bordered element with a child does not render as a closed rectangle in this RmlUi
    build. The ninepatch decorator paints via a separate code path and isn't affected.
 
-   Width (200px) isn't the same as .group-btn's 108px -- the label (s.label, e.g.
+   Width (200px) isn't the same as .group-btn's 140px -- the label (s.label, e.g.
    "Valhalla-1(Gold) Connect") needs this much room to fit on one line; ninepatch (unlike the plain
    image() decorator, which only renders cleanly at the sprite's native 108x30 size) stretches to
    this wider box without distortion.
@@ -125,15 +113,14 @@
    height (no border-width here to add on top, since the ninepatch decorator paints its own frame
    without a separate border box).
 
-   width is a literal px value (200 = #server_list's 220px minus this row's own 10px+10px padding).
+   width is a literal px value (200 = #server_col's 220px minus this row's own 10px+10px padding).
    .server-gauge-slot has neither padding nor border, so its width is the direct target (180px),
-   inset by a literal 10px left margin to center it within .server-row's own 200px content width. */
+   inset by a literal 10px left margin to center it within .server-row's own 200px content width.
+   No margin-bottom here -- #server_col's own `gap` handles row spacing now. */
 .server-row {
 	display: block;
-	position: relative;
 	width: 200px;
 	height: 25px;
-	margin-bottom: 1px;
 	padding: 3px 10px 4px;
 	text-align: center;
 	line-height: 14px;
@@ -156,13 +143,16 @@
 	color: #ff9c3c;
 }
 
+/* Plain dark recessed fill, not a `repeating-linear-gradient` tick-mark decorator -- this engine
+   doesn't support repeating gradients (see modern-theme-visual-direction.md's compatibility
+   table), so the old decorator silently rendered as nothing rather than the intended dashed
+   track. */
 .server-gauge-slot {
 	display: block;
 	width: 180px;
 	height: 5px;
 	margin: 4px 0 0 10px;
 	background-color: rgba(0, 0, 0, 160);
-	decorator: repeating-linear-gradient(to right, #030303 0, #030303 17px, #222222 17px, #222222 20px);
 }
 .server-gauge-fill {
 	display: block;
@@ -170,20 +160,17 @@
 	background-color: #00bd8b;
 }
 
+/* Normal block flow below #columns now, not position:absolute with a hand-picked top offset. */
 #pvp_notice {
-	position: absolute;
-	left: 0;
-	top: 420px;
-	width: 480px;
+	margin-top: 16px;
+	width: 100%;
 	color: #ffcc66;
 	font-size: 11px;
 }
 
 #desc_panel {
-	position: absolute;
-	left: 0;
-	top: 470px;
-	width: 480px;
+	margin-top: 10px;
+	width: 100%;
 	color: #d8d8d8;
 	white-space: normal;
 }
