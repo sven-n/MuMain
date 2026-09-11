@@ -115,6 +115,10 @@ public:
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
     void SetVSyncEnabled(bool enabled);
 
+    // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
+    // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
+    std::wstring GetRenderBackend() const { return m_renderBackend; }
+
     // Helpers
     static std::wstring BinaryToHex(const BYTE* data, DWORD size);
     static std::vector<BYTE> HexToBinary(const std::wstring& hex);
@@ -156,6 +160,7 @@ private:
     int m_zoom;
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
+    std::wstring m_renderBackend;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

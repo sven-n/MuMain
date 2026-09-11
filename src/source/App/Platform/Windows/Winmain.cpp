@@ -2074,8 +2074,10 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
     OpenglWindowHeight = WindowHeight;
 
     const std::string selectedFontFamily = WideToUtf8(GameConfig::GetInstance().GetFontSelection());
+    const std::string renderBackend = WideToUtf8(GameConfig::GetInstance().GetRenderBackend());
     const FontSizes initialFontSizes = CalculateFontSizes();
-    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily, static_cast<float>(initialFontSizes.normal),
+    if (!mu::InitSDLGpuRenderer(g_sdlWindow, selectedFontFamily, renderBackend,
+                                static_cast<float>(initialFontSizes.normal),
                                 static_cast<float>(initialFontSizes.big),
                                 static_cast<float>(initialFontSizes.fixed)))
     {

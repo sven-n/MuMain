@@ -1341,7 +1341,8 @@ public:
     // Init: Create GPU device, claim window, initialize pipelines and buffers.
     // Called once after window creation, before the game loop.
     // -----------------------------------------------------------------------
-    [[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+    [[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily,
+                                   std::string_view renderBackend, float normalPointSize,
                                    float bigPointSize, float fixedPointSize)
     {
         s_window = static_cast<SDL_Window*>(pNativeWindow);
@@ -1351,14 +1352,43 @@ public:
             return false;
         }
 
-        // Create GPU device with all supported shader formats.
-        // SDL_gpu selects the platform backend automatically:
-        //   Metal on macOS, Vulkan on Linux, D3D12 on Windows.
-        mu::log::Get("render")->info("SDL_gpu -- validation: {}",
-                                     Render::kGpuValidationEnabled ? "enabled" : "disabled");
+        // "default" (or empty) means this app's own platform-aware pick; Windows prefers Vulkan
+        // (SDL's own default D3D12 pick doesn't vsync-cap FPS correctly -- see the
+        // FPS_ANIMATION_FACTOR/CCreditWin fix commits), other platforms pass straight through to
+        // SDL's own auto-pick. Any other value forces that specific SDL_gpu driver name
+        // ("vulkan"/"direct3d12"/"metal") on any platform. config.ini's [Render] Backend key
+        // (GameConfig::GetRenderBackend()) is the source of this value; GameConfigValidation
+        // already normalized case/whitespace/the "d3d12" alias.
+        std::string requestedBackend(renderBackend);
+        if (requestedBackend.empty() || requestedBackend == "default")
+        {
+#ifdef _WIN32
+            requestedBackend = "vulkan";
+#else
+            requestedBackend.clear();
+#endif
+        }
+        const char* requestedDriverName = requestedBackend.empty() ? nullptr : requestedBackend.c_str();
+
+        // SDL_CreateGPUDevice() with a specific driver name has no built-in fallback (fails
+        // outright if that driver isn't available), so retry with nullptr (SDL's own auto-pick)
+        // if the requested one fails -- still works on a machine without it, just loses whatever
+        // benefit the requested backend had until that's addressed directly.
+        mu::log::Get("render")->info("SDL_gpu -- validation: {}, requested backend: {}",
+                                     Render::kGpuValidationEnabled ? "enabled" : "disabled",
+                                     requestedDriverName ? requestedDriverName : "(SDL auto-pick)");
         s_device =
             SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-                                Render::kGpuValidationEnabled, nullptr);
+                                Render::kGpuValidationEnabled, requestedDriverName);
+
+        if (!s_device && requestedDriverName != nullptr)
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- '{}' device creation failed ({}), falling back to "
+                                         "SDL's own auto-picked driver", requestedDriverName, SDL_GetError());
+            s_device = SDL_CreateGPUDevice(
+                SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+                Render::kGpuValidationEnabled, nullptr);
+        }
 
         if (!s_device)
         {
@@ -4901,10 +4931,12 @@ private:
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
+                                      std::string_view renderBackend, float normalPointSize,
                                       float bigPointSize, float fixedPointSize)
 {
-    return MuRendererSDLGpu::Init(pNativeWindow, fontFamily, normalPointSize, bigPointSize, fixedPointSize);
+    return MuRendererSDLGpu::Init(pNativeWindow, fontFamily, renderBackend, normalPointSize, bigPointSize,
+                                  fixedPointSize);
 }
 
 void WaitForSDLGpuIdle()

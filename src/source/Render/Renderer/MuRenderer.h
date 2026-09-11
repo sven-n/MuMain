@@ -507,7 +507,8 @@ public:
 // Initially returns MuRendererGL; will return MuRendererSDLGPU after 4.3.1.
 // ---------------------------------------------------------------------------
 [[nodiscard]] IMuRenderer& GetRenderer();
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
+                                      std::string_view renderBackend, float normalPointSize,
                                       float bigPointSize, float fixedPointSize);
 void WaitForSDLGpuIdle();
 void ShutdownSDLGpuRenderer();

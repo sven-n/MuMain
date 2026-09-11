@@ -46,7 +46,11 @@ window writes to these sections:
 - `[Window]` - width, height, windowed flag.
 - `[Render]` - the persisted `VSync` preference. `$vsync on` and `$vsync off`
   update it; startup and fullscreen/resolution changes reapply it before the
-  next frame begins.
+  next frame begins. Also `Backend` (`default`/`vulkan`/`direct3d12`/`metal`,
+  case-insensitive, `d3d12` accepted as an alias for `direct3d12`) --
+  manual-edit-only, not exposed in the options window or written by it;
+  forces a specific SDL_gpu GPU backend at startup, falling back to SDL's
+  own auto-pick with a logged warning if the requested one is unavailable.
 - `[Audio]` - volumes.
 - `[Login]` - language, and the remembered-credential keys (`RememberMe`,
   `SavePassword`, `EncryptedUsername`, `EncryptedPassword`); see

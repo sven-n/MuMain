@@ -58,6 +58,7 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeyCoreProfile[] = L"CoreProfile";
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
+    inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
 }
 
 namespace CfgDefaults
@@ -102,4 +103,10 @@ namespace CfgDefaults
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
+    // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:
+    // "vulkan", "direct3d12" (alias "d3d12"), "metal" -- forces that SDL_gpu driver on any
+    // platform, falling back to auto-pick with a warning log if it's unavailable.
+    inline constexpr wchar_t CfgDefaultRenderBackend[] = L"default";
 }
