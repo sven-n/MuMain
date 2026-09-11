@@ -139,9 +139,8 @@ bool CUIManager::IsInputEnable()
 {
     if (InputEnable || GuildInputEnable || (g_pUIPopup->GetPopupID() != 0 && g_pUIPopup->IsInputEnable()))
         return true;
-    // A focused portable text field captures the keyboard (issue #447). It no
-    // longer takes Win32 focus, so GetFocus() stays on the main window; report
-    // "input active" explicitly so callers suppress world/camera keys while typing.
+    // A focused portable text field captures the keyboard without taking Win32 focus,
+    // so report "input active" explicitly to suppress world/camera keys while typing.
     if (CUITextInputBox::GetFocusedPortable() != nullptr)
         return true;
     if (GetFocus() == g_hWnd)

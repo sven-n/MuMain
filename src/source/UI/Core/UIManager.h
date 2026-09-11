@@ -15,11 +15,9 @@ extern ItemAddOptioninfo* g_pItemAddOptioninfo;
 class CUIManager;
 extern CUIManager* g_pUIManager;
 
-// Named MUTEX_* rather than INTERFACE_* to avoid colliding, by name, with the unrelated
-// mu::ui::window::INTERFACE_LIST enum (Core/Globals/_enum.h) -- that one keys CManager's window
-// registry; this one is purely CUIManager's own open/close mutual-exclusion policy for the
-// inventory-family panels below. Same rough subject (which panels are open), different enums,
-// different purposes.
+// Named MUTEX_* (not INTERFACE_*) to avoid colliding with the unrelated
+// mu::ui::window::INTERFACE_LIST enum -- this one is CUIManager's own open/close
+// mutual-exclusion policy.
 enum
 {
     MUTEX_NONE = 0,

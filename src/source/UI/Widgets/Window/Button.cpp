@@ -62,24 +62,13 @@ void CBaseButton::RenderStateImage(int imgIndex, int frame, int frameCount, unsi
         return;
     }
 
-    // CSprite (unlike RenderImage()'s ConvertPositionX/Y, which read g_fScreenRate_x/y and
-    // g_fScreenOffset_x/y fresh on every call) expects LOGICAL/reference-resolution coordinates at
-    // SetPosition()/SetSize() and applies scale *and* the live screen offset itself, once, inside
-    // Render() -- see Sprite.cpp. An earlier version of this port pre-scaled position/size via
-    // UI::Scaling::PositionX/Y() (which already folds the offset in) while keeping the sprite at
-    // identity scale; CSprite's own Render() then added the offset a SECOND time, which only
-    // canceled out at whatever window size made the active offset zero (800x600, apparently) --
-    // see the H[6] report. Feed it raw m_Pos/m_Size instead, and give it the real transform scale
-    // at Create() time.
+    // CSprite expects raw logical m_Pos/m_Size and applies scale + screen offset itself inside
+    // Render() -- pre-scaling the position here (as an earlier version did) double-applies the
+    // offset, which only happens to cancel out at 800x600.
     const UI::Scaling::Transform& transform = UI::Scaling::GetActiveTransform();
 
-    // Rebuild the sprite's texture/frame table when the registered configuration or the frame's
-    // own logical size changed (Create() reallocates the frame-UV table, so this is the expensive
-    // path) -- and also when the window's been resized (CSprite::Create() bakes
-    // m_fScrHeight = WindowHeight/fScaleY in at that moment for its Y-flip math) or the active
-    // transform's scale changed (also baked in at Create() time, with no live setter of its own).
-    // Missing either the first time this port shipped meant the button's screen position went
-    // stale after a resize or simply wrong at any non-800x600 resolution -- see the H[6] report.
+    // Rebuild the sprite's frame table when its config changes, or on a resize/scale change --
+    // CSprite bakes WindowHeight and transform scale in at Create() time with no live setter.
     if (m_spriteImgIndex != imgIndex || m_spriteFrameCount != frameCount ||
         m_spriteFrameSize.x != m_Size.x || m_spriteFrameSize.y != m_Size.y ||
         m_spriteWindowHeight != WindowHeight ||
@@ -88,18 +77,14 @@ void CBaseButton::RenderStateImage(int imgIndex, int frame, int frameCount, unsi
         std::vector<SFrameCoord> frames(frameCount);
         for (int i = 0; i < frameCount; ++i)
         {
-            // Vertically-stacked frames only -- the only orientation CButton/CRadioButton's live
-            // (KJH_ADD_INGAMESHOP_UI_SYSTEM) rendering actually uses; see the H[6] report.
+            // Vertically-stacked frames only -- the only orientation this rendering path uses.
             frames[i].nX = 0;
             frames[i].nY = i * m_Size.y;
         }
 
         m_sprite.Create(m_Size.x, m_Size.y, imgIndex, frameCount, frames.data(),
                          0, 0, false, SPR_SIZING_DATUMS_LT, transform.scaleX, transform.scaleY);
-        // Create() locks the sprite's legal frame range to [0,0] internally (that range exists
-        // for SetAction()'s animation use, which this doesn't use) -- without widening it here,
-        // SetNowFrame() below silently refuses to move off frame 0 for the lifetime of this
-        // sprite. See the H[6] report.
+        // Create() locks the sprite's legal frame range to [0,0]; widen it or SetNowFrame() below can't move off frame 0.
         m_sprite.SetAction(0, frameCount - 1);
 
         m_spriteImgIndex = imgIndex;
@@ -492,10 +477,7 @@ bool mu::ui::window::CButton::Render(bool RendOption)
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
         if (RendOption == true)
         {
-            // Narrow, single-caller special case (MiniMap.cpp's exit button): a hardcoded
-            // 36/64 x 14.5/32 UV sub-rect crop, not a plain per-state frame. CSprite has no
-            // "clip to an explicit UV fraction" primitive, so this one case deliberately keeps
-            // using RenderImage() rather than being forced through CSprite -- see the H[6] report.
+            // Single-caller special case (MiniMap's exit button): a hardcoded UV sub-rect crop that CSprite can't express, so it stays on RenderImage().
             RenderImage(m_CurImgIndex, m_Pos.x, m_Pos.y, m_Size.x, m_Size.y, 0.f, m_CurImgState * m_Size.y, 36.f / 64.f, (29.f / 32.f) / 2.f);
         }
         else
@@ -1321,17 +1303,10 @@ void mu::ui::window::CCheckBox::Render()
 {
     EnableAlphaTest();
 
-    // Own small parallel version of CBaseButton::RenderStateImage's pattern -- see
-    // Button.h's m_sprite comment for why this isn't shared code. Two vertically-stacked frames:
-    // checked = frame 0 (top), unchecked = frame 1 (bottom) -- matches the two RenderImage() calls
-    // this replaces, which drew the same one frame twice (both offsets were identical:
-    // (State) ? 0.0 : m_Size.y).
+    // Two vertically-stacked frames: checked = frame 0 (top), unchecked = frame 1 (bottom).
     if (s_ImgIndex >= 0)
     {
-        // See CBaseButton::RenderStateImage's comment -- CSprite takes LOGICAL coordinates and
-        // applies scale + the live screen offset itself inside Render(); pre-scaling here (as an
-        // earlier version of this port did) double-applied the offset. Rebuilt on a WindowHeight
-        // or active-scale change for the same reason as that comment explains.
+        // See CBaseButton::RenderStateImage -- CSprite applies scale/offset itself, so feed it raw coordinates and rebuild on scale/resolution change.
         const UI::Scaling::Transform& transform = UI::Scaling::GetActiveTransform();
 
         if (m_spriteImgIndex != s_ImgIndex || m_spriteFrameSize.x != m_Size.x || m_spriteFrameSize.y != m_Size.y ||
@@ -1341,8 +1316,7 @@ void mu::ui::window::CCheckBox::Render()
             SFrameCoord frames[2] = { { 0, 0 }, { 0, m_Size.y } };
             m_sprite.Create(m_Size.x, m_Size.y, s_ImgIndex, 2, frames,
                              0, 0, false, SPR_SIZING_DATUMS_LT, transform.scaleX, transform.scaleY);
-            // See CBaseButton::RenderStateImage's comment -- Create() locks the legal frame range
-            // to [0,0]; without this, SetNowFrame(1) below would never actually take effect.
+            // Create() locks the legal frame range to [0,0]; widen it or SetNowFrame(1) below has no effect.
             m_sprite.SetAction(0, 1);
 
             m_spriteImgIndex = s_ImgIndex;

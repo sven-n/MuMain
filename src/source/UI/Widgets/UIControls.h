@@ -1018,11 +1018,7 @@ public:
         m_bPasswordInput = isPassword ? TRUE : FALSE;
     }
 
-    // There is no Win32 EDIT child; GetHandle() returns a stable per-instance
-    // token used only as a focus identity by the NewUI "related window" routing
-    // (compared, never messaged). That lets the routing keep working: a focused
-    // field's owning widget is the only one that receives key events, so game
-    // hotkeys stay quiet while the player is typing.
+    // Stable per-instance token used only as a focus identity for NewUI "related window" routing (never messaged); there is no real Win32 EDIT child.
     HWND GetHandle()
     {
         return reinterpret_cast<HWND>(this);
@@ -1072,9 +1068,7 @@ public:
     }
 #endif // PBG_ADD_INGAMESHOPMSGBOX
 
-    // The single text field that currently owns keyboard input, or nullptr. The
-    // SDL event loop routes text/edit keys to it and starts/stops SDL text input
-    // based on whether one is focused (issue #447).
+    // The single text field currently owning keyboard input, or nullptr; the SDL event loop routes text/edit keys to it.
     static CUITextInputBox* GetFocusedPortable()
     {
         return s_pFocusedPortable;
@@ -1088,8 +1082,7 @@ public:
         return IsAnyInputBoxFocused() && s_pFocusedPortable->GetParentUIID() == parentUIID;
     }
 
-    // Release keyboard focus from the focused portable field (counterpart to
-    // GiveFocus()); the field stays visible. Defined in the .cpp.
+    // Releases keyboard focus from the focused field (counterpart to GiveFocus()); the field stays visible.
     static void ReleaseFocus();
 
     // Input fed from the SDL event loop.
@@ -1100,9 +1093,7 @@ public:
     std::wstring GetSelectedText() const;
     void DeleteSelection();
 
-    // Caret rectangle in reference pixels (screen space), for positioning the IME
-    // candidate window. Returns false when this box isn't the focused field.
-    // Valid after the box has rendered at least once since gaining focus.
+    // Caret rect in reference pixels for positioning the IME candidate window; false if not the focused field or not yet rendered.
     bool GetCaretArea(int& x, int& y, int& w, int& h) const;
 
 protected:
@@ -1118,9 +1109,7 @@ protected:
     void RenderPortable();
     BOOL DoPortableMouse();
     std::wstring BuildDisplay() const; // text with the password mask applied
-    // The render helpers take the string to draw, the caret index within it, and
-    // the IME composition span [compStart, compEnd) to underline (compStart < 0
-    // = none). With composition active the caret/scroll follow the preview text.
+    // Renders display text with the caret and an underlined IME composition span [compStart, compEnd) (compStart < 0 = none).
     void RenderPortableSingleLine(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd);
     void RenderPortableMultiline(const std::wstring& display, int iCaret, int iLineHeight, int compStart, int compEnd);
     void RenderPortableScrollbar(int iTotalLines, int iVisibleLines);
@@ -1165,9 +1154,7 @@ protected:
     int m_iFirstVisible = 0; // first rendered character (single-line horizontal scroll)
     int m_iScrollLine = 0;   // first visible wrapped line (multiline vertical scroll)
     int m_iMaxLength = 0;    // text length limit (0 = unlimited)
-    // Which global font this box draws with. Stored by kind (not by HFONT)
-    // because ReinitializeFonts() deletes and recreates the handles after a
-    // font-family change; CurrentFont() re-resolves the live handle each frame.
+    // Font stored by kind, not HFONT -- ReinitializeFonts() recreates handles on font-family change, so CurrentFont() re-resolves each frame.
     enum class PortableFontKind
     {
         Default,

@@ -77,8 +77,7 @@ void mu::ui::window::RenderImageStretch(GLuint uiImageType, float x, float y, fl
 {
     BITMAP_t* pImage = &Bitmaps[uiImageType];
 
-    // Normalize the source texel region to UV. Extent is independent of the dest
-    // size, so GL scales the (sw x sh) source onto the (width x height) quad.
+    // Normalize source texels to UV; GL scales (sw x sh) onto the (width x height) quad.
     float u  = (sx + 0.5f) / (float)pImage->Width;
     float v  = (sy + 0.5f) / (float)pImage->Height;
     float uw = (sw - 1.0f) / (float)pImage->Width;
@@ -181,18 +180,12 @@ void mu::ui::window::CNewKeyInput::ScanAsyncKeyState()
 #endif // ASG_FIX_ACTIVATE_APP_INPUT
 
 #ifdef _EDITOR
-    // EDITOR KEYBOARD BLOCKING:
-    // When ImGui wants to capture keyboard (user is typing in text fields),
-    // we prevent scanning keyboard state entirely and clear all existing states.
-    // This ensures keyboard input doesn't leak through to the game when typing.
-    // This is the primary keyboard blocking mechanism - it blocks at the source
-    // by preventing GetAsyncKeyState() from being polled.
+    // While ImGui wants keyboard focus, block game keyboard input at the source.
     if (g_MuEditorCore.IsEnabled())
     {
         ImGuiIO& io = ImGui::GetIO();
         if (io.WantCaptureKeyboard)
         {
-            // Clear all key states and return early without scanning
             for (int key = 0; key < 256; key++)
             {
                 m_pInputInfo[key].byKeyState = KEY_NONE;
@@ -231,18 +224,13 @@ void mu::ui::window::CNewKeyInput::ScanAsyncKeyState()
         }
     }
 
-    // Mouse press-edge flag: cleared per-frame in PollEvents(), NOT here.
-    // ScanAsyncKeyState runs BEFORE CInput::Update() in the frame — if we clear
-    // the edge flag here, CInput::Update() misses fast clicks where DOWN+UP
-    // arrive in the same PollEvents batch (MouseLButton=false, edge=false → lost).
+    // Mouse press-edge flag is cleared in PollEvents(), not here -- this runs before
+    // CInput::Update(), so clearing here would drop fast clicks (DOWN+UP in one batch).
 
 #ifdef _EDITOR
-    // Editor input-blocker gate: MuInputBlockerCore sets g_bEnterPressed=true when
-    // it wants to allow Enter through the editor (otherwise it clears VK_RETURN
-    // itself). Without the editor, no code ever sets g_bEnterPressed=true, so this
-    // block would unconditionally clear every Enter press before chat-open logic
-    // could observe it — the bug that prevented Enter from opening the chat window
-    // on non-editor SDL3 builds. Keep the gate inside the editor guard.
+    // Must stay inside the editor guard: outside the editor nothing sets
+    // g_bEnterPressed=true, so this would clear every Enter press before chat-open
+    // logic saw it (previously broke Enter-to-chat on non-editor SDL3 builds).
     if (IsPress(VK_RETURN) && IsEnterPressed() == false)
     {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;

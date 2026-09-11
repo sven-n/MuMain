@@ -7,23 +7,9 @@
 namespace mu::ui::window
 {
     /**
-     * @brief Minimal click-to-open dropdown combo box.
+     * @brief Minimal click-to-open dropdown combo box, drawn with raw GL/RenderText (no ImGui).
      *
-     * Renders using the same raw GL / RenderText primitives as the rest of the
-     * game UI (no ImGui dependency) so it works in release builds. Designed to
-     * be self-contained so the upcoming UI rewrite can drop or replace it
-     * without ripple changes elsewhere.
-     *
-     * Typical usage:
-     *   - Call Setup() once after the owning window is placed.
-     *   - Each frame, call UpdateMouseEvent() -- returns true if a new item
-     *     was selected this frame. Then call Render().
-     *   - Owner should also treat IsMouseOverWidget() as "click consumed" so
-     *     the expanded dropdown (which can overflow the owner's hit box)
-     *     doesn't leak clicks to the game world.
-     *
-     * The combo does NOT take ownership of the label array -- the caller
-     * must keep it alive for the combo's lifetime.
+     * Does NOT take ownership of the label array -- the caller must keep it alive for the combo's lifetime.
      */
     class CComboBox
     {
@@ -33,17 +19,7 @@ namespace mu::ui::window
 
         /**
          * @brief Configures the combo. Call once after the owning window is placed.
-         *
-         * @param x,y              Top-left of the closed combo field (UI coordinates)
-         * @param width            Combo width
-         * @param itemHeight       Row height (used for both the closed field and list items)
-         * @param labels           Array of item labels; caller owns the memory
-         * @param itemCount        Number of labels
-         * @param initialIdx       Initial selected index (clamped to [0, itemCount))
-         * @param maxVisibleItems  Max rows shown in the expanded dropdown at once. When
-         *                         `itemCount` exceeds this, the list becomes scrollable
-         *                         (mouse wheel + scrollbar indicator). Pass 0 (default)
-         *                         to always show the full list.
+         * @param maxVisibleItems Max rows shown before the list becomes scrollable; 0 shows all.
          */
         void Setup(int x, int y, int width, int itemHeight,
                    const wchar_t* const* labels, int itemCount, int initialIdx,
@@ -56,12 +32,7 @@ namespace mu::ui::window
         bool IsOpen() const { return m_bOpen; }
         void Close() { m_bOpen = false; }
 
-        /**
-         * @brief True if the mouse is over the closed combo or (when open) over any
-         * part of the expanded dropdown list. The owner should consume clicks in
-         * this region so the overflowing dropdown doesn't leak to other UI or the
-         * game world.
-         */
+        /** @brief True if the mouse is over the closed combo, or over the expanded dropdown when open. */
         bool IsMouseOverWidget() const;
 
         /**
@@ -70,10 +41,7 @@ namespace mu::ui::window
          */
         bool UpdateMouseEvent();
 
-        /**
-         * @brief Draws the closed field always, and the dropdown list if open.
-         * Call this last in the owner's render flow so the dropdown sits on top.
-         */
+        /** @brief Draws the closed field, and the dropdown list if open. Call last so the dropdown sits on top. */
         void Render();
 
     private:

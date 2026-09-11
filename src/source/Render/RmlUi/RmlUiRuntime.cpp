@@ -93,6 +93,14 @@ void RmlUiRuntime::Create(int windowWidth, int windowHeight)
     // window's legacy theme still hardcodes "Liberation Sans"), not something this addresses.
     Rml::LoadFontFace("fonts/NanumGothic-Regular.ttf");
 
+    // Third, explicitly-named face -- already bundled for the legacy GDI text shim's own font
+    // picker (BundledFonts.h) but never previously registered with RmlUi. Loaded for its Unicode
+    // symbol coverage: the modern theme's login/char-select icon buttons (base.rcss's
+    // .btn-icon-label) use glyphs like U+2261/U+2726/U+2699/U+21C4/U+2715 that Liberation Sans and
+    // NanumGothic mostly don't have, but DejaVu Sans does.
+    Rml::LoadFontFace("fonts/DejaVuSans.ttf");
+    Rml::LoadFontFace("fonts/DejaVuSans-Bold.ttf");
+
     m_Context = Rml::CreateContext("main", Rml::Vector2i(windowWidth, windowHeight));
     ApplyUIScale(m_Context, windowWidth, windowHeight);
 

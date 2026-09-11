@@ -63,9 +63,7 @@ void CMsgWin::Create()
     m_nGameExit = -1;
     m_dDeltaTickSum = 0.0;
 
-    // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
-    // window's Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so
-    // the document/model are created once, ever.
+    // Guarded so the document/model are created once, since Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
         BuildRmlUi();
 
@@ -119,9 +117,7 @@ void CMsgWin::Release()
     m_sprInput.Release();
     m_sprBack.Release();
 
-    // See CLoginWin::PreRelease()'s identical comment -- each migrated window's Release() is called
-    // explicitly at every scene transition, not swept automatically by any shared list, and this
-    // class has no base-class knowledge of m_pRmlDoc.
+    // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -143,19 +139,8 @@ void CMsgWin::SetCtrlPosition()
     m_sprInput.SetPosition(nBaseXPos + 32, nBtnYPos + 4);
     if (m_nMsgCode == MESSAGE_DELETE_CHARACTER_RESIDENT)
         if (g_iChatInputType == 1)
-            // Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::SetPosition()
-            // stores this raw and only rescales it at Render() time via ConvertPositionX/Y's
-            // *ambient* active transform (UIControls.cpp/ZzzOpenglUtil.cpp). The old division
-            // here relied on that ambient transform being the same one active when this ran --
-            // true when this only ever ran unscoped (CWin days), but this call chain now
-            // reaches here through ManageOKClick()->PopUp()->SetMsg(), inside CMsgWin::Update()
-            // itself, which CManager::Update() wraps in a LayoutMode::Legacy (identity)
-            // ScopedActiveTransform -- dividing by that identity is a no-op, so the position
-            // got stored as real pixels while still being *labeled* reference-space, then
-            // rescaled a second time by RenderTextOnTop()'s own (correctly ambient,
-            // non-identity) transform at render time. Storing real pixels directly and
-            // forcing identity at the one consuming Render() call (below) instead keeps both
-            // sides consistent regardless of which context triggered this.
+            // Stores real pixels (not divided by g_fScreenRate_x/y); RenderTextOnTop() forces an
+            // identity transform at render time so the two stay consistent regardless of caller.
             g_pSinglePasswdInputBox->SetPosition(m_sprInput.GetXPos() + 10, m_sprInput.GetYPos() + 8);
 }
 
@@ -186,10 +171,7 @@ bool CMsgWin::Update()
 
     CInput& rInput = CInput::Instance();
 
-    // dDeltaTick previously threaded through from CWin::UpdateWhileActive(double); this window's
-    // migrated Update() takes no parameters, same as every other CObject window -- read the
-    // same clamped expression CSceneUICoordinator::Update(dDeltaTick) itself resolves to in steady
-    // state.
+    // Update() takes no parameters, so reconstruct the per-frame delta tick locally.
     extern float FPS_ANIMATION_FACTOR;
     const double dDeltaTick = 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR);
 
@@ -258,13 +240,8 @@ bool CMsgWin::Update()
 
 bool CMsgWin::Render()
 {
-    // RmlUi's #panel now owns 100% of this dialog's visuals (background frame, message text,
-    // OK/Cancel, the resident-password input frame's background) in every theme -- see this
-    // class's header comment. m_sprBack/m_sprInput stay alive purely as position bookkeeping for
-    // the still-native resident-password text input (never rendered themselves).
-    // SyncRmlModel() is the only thing this override still needs to do; RenderTextOnTop() (the
-    // resident-password live text) is called from Winmain.cpp's SetPostRmlUiCallback instead of
-    // here, so it isn't drawn twice.
+    // RmlUi's #panel owns this dialog's visuals; m_sprBack/m_sprInput only track position for the
+    // still-native resident-password input, drawn separately by RenderTextOnTop().
     SyncRmlModel();
     return true;
 }
@@ -276,9 +253,7 @@ void CMsgWin::RenderTextOnTop()
 
     if (g_iChatInputType == 1)
     {
-        // Force identity to match SetCtrlPosition()'s now-real-pixel SetPosition() call (see its
-        // own comment) -- this runs unscoped (Winmain.cpp's post-RmlUi callback), so without this
-        // it would rescale by whatever the ambient/default transform happens to be instead.
+        // Forces identity transform to match SetCtrlPosition()'s real-pixel coordinates.
         const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
         UI::Scaling::ScopedActiveTransform identity(transform);
         g_pSinglePasswdInputBox->Render();

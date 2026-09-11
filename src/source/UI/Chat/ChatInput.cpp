@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UI/Chat/ChatInput.h"
 
-// Includes mirror ZzzInterface.cpp, the unit this was extracted from.
+// Includes mirror ZzzInterface.cpp.
 #include "Core/Platform/Imm.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

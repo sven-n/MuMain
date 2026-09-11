@@ -164,11 +164,8 @@ bool mu::ui::window::CManager::UpdateKeyEvent()
 
     auto vecUI = m_vecUI;
 
-    // Portable text fields (issue #447) don't take Win32 focus, so GetFocus()
-    // can't tell which widget owns the keyboard. When a field is focused, use
-    // its stable identity (matches the owning widget's GetRelatedWnd(), which it
-    // set to the same handle); otherwise fall back to the window focus. This
-    // keeps game hotkeys from firing while the player is typing.
+    // Portable text fields don't take Win32 focus, so GetFocus() can't identify them;
+    // use the focused field's own identity instead, so hotkeys don't fire while typing.
     CUITextInputBox* pFocusedField = CUITextInputBox::GetFocusedPortable();
     const HWND hFocus = pFocusedField ? reinterpret_cast<HWND>(pFocusedField) : GetFocus();
 

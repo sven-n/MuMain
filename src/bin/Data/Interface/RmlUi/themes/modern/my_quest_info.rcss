@@ -1,18 +1,11 @@
 /* Modern theme for CMyQuestInfoWindow -- flat/token styling for common chrome, but Open/Give-up
-   are quest-specific actions with no generic equivalent (unlike Exit, an ordinary close button),
-   so they reuse legacy's own sprites here rather than inventing a flat placeholder for them --
-   same file/rect legacy's own theme declares (theme-local duplication, this codebase's own
-   convention, see credit_win.rcss's own comment). Same positioning as legacy otherwise (see that
-   file's own header comment for where the values come from and why the content-area layout is a
-   reinterpretation, not a literal legacy-pixel carryover). */
+   are quest-specific actions with no generic equivalent, so they reuse legacy's sprites
+   (theme-local duplication) instead of a flat placeholder. */
 @spritesheet myquest-btn-open-sheet   { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:   0px 0px 36px 29px; }
 @spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
 
-/* #panel now consumes base.rcss's .modern-frame/.modern-frame-crimson (applied in
-   my_quest_info.rml) instead of its own bespoke flat surface-1/border-metal fill -- same reason
-   msg_win.rcss's own #panel comment gives: a real dialog/window frame, matching login's family.
-   .modern-frame itself sets no border-radius at all, so this still needs its own value or corners
-   go square (msg_win.rcss's own comment, identical reasoning). */
+/* #panel consumes base.rcss's .modern-frame/.modern-frame-crimson instead of a bespoke fill.
+   .modern-frame sets no border-radius, so this still needs its own value. */
 #panel {
 	position: absolute;
 	transform-origin: left top;
@@ -22,9 +15,8 @@
 	font-family: "token(font-body)";
 }
 
-/* Fading crimson banner behind the title, same primitive login.rcss's own header banner uses --
-   see base.rcss's .title-glow comment. Sits behind #title (declared first, paint-order
-   convention). */
+/* Fading crimson banner behind the title (base.rcss's .title-glow primitive); declared before
+   #title so it paints behind it. */
 .quest-title-glow {
 	left: 20px;
 	right: 20px;
@@ -92,8 +84,8 @@
 }
 .hidden { display: none; }
 
-/* display:block on every non-absolutely-positioned element below is load-bearing -- see
-   my_quest_info.rcss's (legacy theme) own header comment for why. */
+/* display:block on every non-absolutely-positioned element below is load-bearing (see legacy
+   theme's my_quest_info.rcss for why). */
 .quest-empty-msg {
 	position: absolute;
 	left: 14px;
@@ -167,21 +159,17 @@
 	cursor: pointer;
 	pointer-events: auto;
 }
-/* Same brightness-filter hover this codebase already uses uniformly regardless of whether a
-   button has a sprite decorator or a flat background (my_inventory.rcss's own .inv-btn:hover
-   precedent) -- works identically on top of either. */
+/* Same brightness-filter hover used uniformly on sprite or flat-background buttons. */
 .quest-btn:hover, .quest-btn-exit:hover { filter: brightness(1.25); }
-/* No pointer-events:none here -- see legacy theme's own comment on this same rule for why
-   (locked would otherwise block :hover, and with it the tooltip, for as long as the button
-   starts locked -- the default state until a quest is selected). */
+/* No pointer-events:none here -- that would block :hover (and the tooltip) while locked, which
+   is the default state until a quest is selected. */
 .quest-btn.locked { filter: brightness(0.6); }
 
 .quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
 .quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
 
-/* Exit is a common close button, not a quest-specific one -- flat/token chrome plus a word/glyph
-   (the shared RML's .btn-exit-label span) instead of reusing legacy's sprite, unlike Open/Give-up
-   above. */
+/* Exit is a common close button, not quest-specific -- flat/token chrome with a text label
+   instead of reusing legacy's sprite, unlike Open/Give-up above. */
 .quest-btn-exit {
 	left: 13px;
 	background-color: token(surface-control);
@@ -199,8 +187,7 @@
 	color: token(text-primary);
 }
 
-/* Tooltips: siblings of their trigger button -- same convention my_inventory.rcss's own
-   #btn_exit/.tooltip-exit already establishes. */
+/* Tooltips: siblings of their trigger button, same convention as my_inventory.rcss. */
 .tooltip {
 	display: none;
 	position: absolute;

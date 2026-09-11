@@ -256,10 +256,7 @@ float CGoldBowmanLena::GetLayerDepth()	// 3.4f
     return 3.4f;
 }
 
-// A shadow-compare diagnostic validated Render3D()'s proj/view closed form and
-// post-pop restore; the diagnostic and the FFP matrix-stack calls it was validating were since deleted
-// (see Render3D()'s own comments below). Identical shape to RenderDisplayItems(): EndBitmap() at
-// entry, restore mirror runs before BeginBitmap() at the end, hence its own pre-panel snapshot.
+// Pre-panel proj/view snapshot, restored around Render3D()'s matrix push/pop -- same shape as RenderDisplayItems().
 static float s_PreGBLProj[16];
 static float s_PreGBLView[16];
 

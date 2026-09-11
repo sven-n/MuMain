@@ -33,8 +33,7 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(INTERFACE_INVENTORY_EXT, this);
 
-    // we have to create all 4 boxes here already, and just handle the ones
-    // which are available to the character...
+    // Creates all 4 extension boxes upfront; only the ones unlocked for the character are used.
     int i = 0;
     for (auto& m_extension : m_extensions)
     {

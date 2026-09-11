@@ -32,9 +32,7 @@ bool BuildModelForSlot(int Type, Model& outModel)
 {
     outModel.Reset();
 
-    // Pet command icons get a different UI entirely (delegated to giPetManager). Mirrors Render()'s
-    // own dispatch exactly -- see GIPetManager::BuildPetCmdTooltipModel's own comment for why this
-    // is a parallel new function, not a repurposed RenderPetCmdInfo().
+    // Pet command icons use a separate tooltip UI, delegated to giPetManager.
     if (giPetManager::BuildPetCmdTooltipModel(Type, outModel)) return true;
 
     if (!CharacterAttribute) return false;
@@ -55,10 +53,8 @@ void Render(int sx, int sy, int Type, int /*SkillNum*/, int iRenderPoint /*= STR
     Model model;
     if (!BuildModelForSlot(Type, model)) return;
 
-    // Copy the model into the legacy TextList / Color / Bold buffers that
-    // RenderTipTextList consumes. Pre-allocated globals, no heap. The legacy
-    // TextList row is wchar_t[100] while the model line buffer is wider, so
-    // truncate rather than overflow.
+    // Copy into the legacy TextList/Color/Bold globals RenderTipTextList consumes.
+    // TextList rows are wchar_t[100], narrower than the model's line buffer -- truncate, don't overflow.
     constexpr size_t kLegacyLineCap = 100;
     const int lineCount = (model.count < MAX_TOOLTIP_LINES) ? model.count : MAX_TOOLTIP_LINES;
     for (int i = 0; i < lineCount; ++i)

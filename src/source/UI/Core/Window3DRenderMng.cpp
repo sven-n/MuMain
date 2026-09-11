@@ -123,12 +123,9 @@ float mu::ui::window::C3DCamera::GetLayerDepth()
     return m_fZOrder;
 }
 
-// Every I3DRenderObj::Render3D() implementer registered with this camera calls RenderItem3D(),
-// which carries no GL model transform of its own — none of them touch the GL matrix stack this
-// class sets up in Render() below. CGoldBowmanLena/CRegistrationLuckyCoin are the exception: their
-// own Render3D() methods call EndBitmap()/gluPerspective2 directly themselves and are never
-// reached through this camera at all.
-
+// Registered Render3D() implementers don't touch the GL matrix stack set up in Render() below,
+// except CGoldBowmanLena/CRegistrationLuckyCoin, which manage their own matrix state directly
+// and are never reached through this camera.
 void mu::ui::window::C3DCamera::Render3D()
 {
     for (auto* object : m_list3DObjs)

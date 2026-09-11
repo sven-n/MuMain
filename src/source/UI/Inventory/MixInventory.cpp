@@ -197,8 +197,7 @@ bool CMixInventory::UpdateMouseEvent()
     {
         if (mu::ui::window::IsPress(VK_RBUTTON))
         {
-            // Right-click on a craft-box item sends it back to the inventory (mirror of the
-            // inventory -> craft-box right-click move).
+            // Right-click sends a craft-box item back to the inventory.
             ProcessMixItemAutoMoveToInventory();
             MouseRButton = false;
             MouseRButtonPop = false;
@@ -973,9 +972,7 @@ bool CMixInventory::InventoryProcess()
     return false;
 }
 
-// Direction-agnostic core of the right-click moves: pick the item under the
-// cursor in srcCtrl, reserve a slot in dstCtrl, and send the same move that
-// drag & drop sends.
+// Shared core for right-click moves: picks the item under the cursor in srcCtrl and moves it to an empty slot in dstCtrl.
 bool CMixInventory::AutoMoveItem(CInventoryCtrl* srcCtrl, STORAGE_TYPE srcType,
     CInventoryCtrl* dstCtrl, STORAGE_TYPE dstType, bool requireMixSource)
 {

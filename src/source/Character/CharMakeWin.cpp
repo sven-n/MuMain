@@ -31,6 +31,7 @@
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "Core/Utilities/StringUtils.h"
+#include "UI/Scaling/UITransform.h"
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
@@ -61,9 +62,6 @@ namespace
     constexpr int kJobButtonStartY = 131;
     constexpr int kJobButtonSummonerRow = 3;
     constexpr int kJobButtonRageFighterY = 246;
-    constexpr int kInputSpriteOffsetY = 317;
-    constexpr int kInputTextOffsetX = 78;
-    constexpr int kInputTextOffsetY = 21;
     constexpr int kDescSpriteOffsetY = 355;
     constexpr int kStatSpriteOffsetY = 24;
     constexpr int kDescriptionTextOffsetX = 10;
@@ -157,8 +155,6 @@ void CCharMakeWin::Create()
     m_sprBg.SetAlpha(128);
     m_sprBg.SetColor(0, 0, 0);
 
-    m_asprBack[CMW_SPR_INPUT].Create(346, 38, BITMAP_LOG_IN);
-
     m_asprBack[CMW_SPR_STAT].Create(108, 80);
 
     m_asprBack[CMW_SPR_DESC].Create(454, 51);
@@ -222,6 +218,7 @@ void CCharMakeWin::BuildRmlUi()
             c.Bind("stat_value1", &model.statValue1);
             c.Bind("stat_value2", &model.statValue2);
             c.Bind("stat_value3", &model.statValue3);
+            c.Bind("desc_title", &model.descTitle);
             c.Bind("desc_line1", &model.descLine1);
             c.Bind("desc_line2", &model.descLine2);
             c.Bind("ok_label", &model.okLabel);
@@ -323,15 +320,6 @@ void CCharMakeWin::SetPosition(int nXCoord, int nYCoord)
     }
     if (!jobs.empty())
         m_RmlBinder.MarkDirty("jobs");
-
-    m_asprBack[CMW_SPR_INPUT].SetPosition(nXCoord, nYCoord + kInputSpriteOffsetY);
-
-    if (g_iChatInputType == 1)
-    {
-        g_pSingleTextInputBox->SetPosition(
-            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + kInputTextOffsetX) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + kInputTextOffsetY) / g_fScreenRate_y));
-    }
 
     m_asprBack[CMW_SPR_DESC].SetPosition(nXCoord, nYCoord + kDescSpriteOffsetY);
 
@@ -463,6 +451,47 @@ bool CCharMakeWin::Update()
     if (!IsVisible())
         return true;
 
+    // RmlUi's own resolved position for #input_text_anchor (char_make.rml/.rcss, both themes) is
+    // the single source of truth for where the legacy-drawn name text starts -- same
+    // GetElementById+GetAbsoluteOffset pattern as MainFrameWindow.cpp's item-hotkey/skill-list
+    // anchors, replacing the old kInputSpriteOffsetY/kInputTextOffsetX/kInputTextOffsetY hardcoded
+    // constants and the vestigial m_asprBack[CMW_SPR_INPUT] sprite that only ever existed to hold
+    // that math (it was never rendered).
+    //
+    // Re-read every frame here, NOT once in SetPosition() -- SetPosition() pushes #panel's new
+    // left/top via SetProperty(), but RmlUi doesn't resolve that into a real layout synchronously
+    // (it resolves on this context's next Update() pass); a same-call GetAbsoluteOffset() right
+    // after Create()+SetPosition() (the dialog's very first frame) reads pre-layout garbage, and
+    // since SetPosition() is otherwise only called once more on an explicit resolution change,
+    // that stale reading would otherwise never self-correct (this was a real bug, found via live
+    // testing: the caret rendered in the wrong spot until a resolution change forced a second
+    // SetPosition() call, long after RmlUi had since caught up). Reading here instead means at
+    // worst a one-frame-late position on the very first frame this dialog opens, self-correcting
+    // immediately after -- imperceptible, and this dialog's layout is otherwise static.
+    if (m_pRmlDoc)
+    {
+        if (Rml::Element* pAnchor = m_pRmlDoc->GetElementById("input_text_anchor"))
+        {
+            m_fInputTextX = pAnchor->GetAbsoluteOffset().x;
+            m_fInputTextY = pAnchor->GetAbsoluteOffset().y;
+        }
+    }
+
+    if (g_iChatInputType == 1)
+    {
+        // Real pixels, not divided by g_fScreenRate_x/y -- CUITextInputBox::Render() rescales the
+        // position it's given via ConvertPositionX/Y using *whatever transform is active when
+        // Render() runs* (see RenderTextOnTop()'s own comment), a fundamentally different contract
+        // than CSprite's "store real pixels, ignore the transform entirely". Dividing here relied
+        // on a later multiply landing under the exact same ambient transform to cancel it back
+        // out -- exactly the bug LoginWin.cpp's own SetPosition() already found and fixed for its
+        // m_pUsernameInputBox/m_pPasswordInputBox (same class, same contract). GetAbsoluteOffset()
+        // already returns real pixels (char_make.rcss is plain px, not dp -- RmlUi's
+        // DensityIndependentPixelRatio only touches dp/ppi units, confirmed via
+        // ElementStyle.cpp's ComputeLength), so no conversion at all is needed here.
+        g_pSingleTextInputBox->SetPosition(int(m_fInputTextX), int(m_fInputTextY));
+    }
+
     // A CMsgWin validation-error dialog (name too short/invalid/special) can be shown on top of
     // this one without hiding it first (see GetLayerDepth()'s own comment) -- skip this window's
     // own click/key consequences while that's up, same reasoning as CCharSelMainWin's modal gate.
@@ -537,13 +566,21 @@ bool CCharMakeWin::Render()
 
 void CCharMakeWin::RenderTextOnTop()
 {
+    // Force identity so this agrees with Update()'s now-real-pixel m_fInputTextX/Y regardless of
+    // which context runs this call (this window's own Render(), under whatever transform
+    // CManager::Render() applies for its LayoutMode::Legacy, or Winmain.cpp's completely unscoped
+    // post-RmlUi callback -- see this class's header comment on RenderTextOnTop() for why it's
+    // called from there) -- same fix as CLoginWin::RenderTextOnTop()/CMsgWin's resident-password
+    // gotcha. LayoutMode::Legacy resolves to a genuine identity transform (UITransform.h's own
+    // comment), matching RenderCreateCharacter()'s BeginOpengl() call just above, which relies on
+    // this same identity for the same reason.
+    const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
+    UI::Scaling::ScopedActiveTransform identity(transform);
+
     if (g_iChatInputType == 1)
         g_pSingleTextInputBox->Render();
     else if (g_iChatInputType == 0)
-        ::RenderInputText(
-            int((m_asprBack[CMW_SPR_INPUT].GetXPos() + kInputTextOffsetX) / g_fScreenRate_x),
-            int((m_asprBack[CMW_SPR_INPUT].GetYPos() + kInputTextOffsetY) / g_fScreenRate_y),
-            0);
+        ::RenderInputText(int(m_fInputTextX), int(m_fInputTextY), 0);
 }
 
 void CCharMakeWin::SyncRmlModel()
@@ -598,6 +635,9 @@ void CCharMakeWin::SyncRmlModel()
     // kClassStatTable) -- reproduced as-is, gated by dark_lord_extra above rather than a live
     // 5th table column.
 
+    // Same I18N lookup table used to build jobs[i].label (see the loop above) -- the selected
+    // class's own name, for the modern theme's description-panel title (legacy hides it).
+    syncLabel(&CharMakeRmlModel::descTitle, "desc_title", I18N::Game::Lookup(kClassButtonTextIds[m_nSelJob]));
     syncLabel(&CharMakeRmlModel::descLine1, "desc_line1", m_nDescLine > 0 ? m_aszJobDesc[0] : L"");
     syncLabel(&CharMakeRmlModel::descLine2, "desc_line2", m_nDescLine > 1 ? m_aszJobDesc[1] : L"");
 

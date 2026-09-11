@@ -10,29 +10,13 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
 
     switch (interfaceKey)
     {
-    // CCreditWin computes real screen pixels itself (fScaleX/fScaleY against an assumed 800x600),
-    // not reference-space coordinates meant to be rescaled by this policy table's other entries.
-    // AddUIObj() (WindowManager.cpp) calls this unconditionally on first registration, silently
-    // overwriting whatever SetLayoutMode() a window's own constructor called -- this table entry,
-    // not the constructor, is what actually governs a registered window's layout mode.
+    // Windows below compute real screen pixels themselves rather than reference-space
+    // coordinates meant to be rescaled by this table. Note: AddUIObj() (WindowManager.cpp)
+    // applies this table unconditionally, overriding any SetLayoutMode() the window's own
+    // constructor set.
     case INTERFACE_CREDITS:
-    // CServerMsgWin/CServerSelWin compute real screen pixels themselves too (position
-    // derived from real WindowWidth/Height in CSceneUICoordinator::CreateLoginScene()/CreateCharacterScene()),
-    // same reasoning as INTERFACE_CREDITS.
     case INTERFACE_SERVER_MESSAGE:
     case INTERFACE_SERVER_SELECT:
-    // CMsgWin renders 100% via RmlUi's own #panel now, but its legacy CButtons still
-    // do real click-detection bookkeeping (CursorInObject() against real, untransformed mouse
-    // coordinates) against real-pixel positions computed from a real-pixel-positioned CSprite --
-    // same reasoning as INTERFACE_CREDITS above.
-    // CSysMenuWin keeps its legacy CWinEx/CButton geometry as real-pixel click-
-    // detection redundancy behind RmlUi's own primary click bindings -- same reasoning.
-    // CCharSelMainWin/CCharMakeWin: same reasoning -- both compute real screen pixels
-    // themselves (CalculateFixedAnchorLayout(), the live 3D character-preview viewport's
-    // BeginOpengl() call) rather than reference-space coordinates meant to be rescaled here.
-    // CLoginWin: same reasoning -- its own SetPosition() computes real screen pixels
-    // from WindowWidth/WindowHeight, and its legacy CUITextInputBox pair does real click-detection
-    // and text rendering against real, untransformed mouse/screen coordinates.
     case INTERFACE_MSG_WINDOW:
     case INTERFACE_SYS_MENU:
     case INTERFACE_CHAR_SEL_MAIN:
@@ -43,19 +27,9 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
 
     case INTERFACE_NAME_WINDOW:
     case INTERFACE_ITEM_TOOLTIP:
-    // CCharInfoBalloonMng's adapter -- unlike every window above, this one's own
-    // CCharInfoBalloon::Render() computes its screen position via CameraProjection::WorldToScreen()
-    // then `nPosX * g_fScreenRate_x` (CharInfoBalloon.cpp), the exact "multiply by whatever
-    // transform is ambient when this runs" contract INTERFACE_NAME_WINDOW/INTERFACE_ITEM_TOOLTIP
-    // already use WorldOverlay for -- WorldOverlay resolves to the same
-    // scale-640x480-reference-to-real-window transform CSceneUICoordinator::Render() used to set manually
-    // (UI::Scaling::LegacyUiTransform(WindowWidth, WindowHeight) IS ScreenOverlayTransform(), which
-    // WorldOverlay/Hud both resolve to) before this adapter existed. Originally given
-    // LayoutMode::Legacy (identity) by mistake -- that made g_fScreenRate_x/y always 1.0 regardless
-    // of window size, so the balloons only landed in the right place at exactly 640x480 and drifted
-    // at every other resolution (found via live testing). LayoutMode::Legacy is for windows that
-    // compute real screen pixels themselves (CLoginWin, CSysMenuWin, etc. above) -- this one
-    // deliberately doesn't, so it needs the scaling WorldOverlay provides instead.
+    // Must be WorldOverlay, not Legacy: CCharInfoBalloon::Render() scales its WorldToScreen()
+    // position by g_fScreenRate_x/y, which Legacy leaves at 1.0 -- using Legacy here once made
+    // balloons drift at any resolution other than 640x480 (found via live testing).
     case INTERFACE_CHAR_INFO_BALLOON:
         return LayoutMode::WorldOverlay;
 

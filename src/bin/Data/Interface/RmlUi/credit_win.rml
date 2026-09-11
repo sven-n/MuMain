@@ -5,13 +5,10 @@
 	<link type="text/rcss" href="credit_win.rcss"/>
 </head>
 <body>
-	<!-- Full-screen background, the crossfading illustration pair, deco/logo, close button, and the
-	     scrolling credit text (department/team/names, each independently opacity-faded -- see
-	     CreditWin.h's own class comment). Illustration divs declared first so they paint behind
-	     deco/logo/text/close-button, matching the original CSprite render order. Plain divs with a
-	     per-instance data-style-decorator (matching the 16 named single-image @spritesheet blocks
-	     in credit_win.rcss), not <img data-attr-src> -- see CreditWinRmlModel's own comment
-	     (CreditWin.h) for why. -->
+	<!-- Full-screen credits scene: crossfading illustrations, deco/logo, close button, scrolling
+	     credit text (each independently opacity-faded). Illustrations are declared first so they
+	     paint behind the rest, matching the original CSprite order, and use data-style-decorator
+	     (matching credit_win.rcss's spritesheet blocks) rather than <img> -- see CreditWin.h. -->
 	<div id="panel" data-model="credit_win">
 		<div id="illust_left" class="illust illust-left" data-style-decorator="illust_left_decorator" data-style-opacity="illust_opacity"></div>
 		<div id="illust_right" class="illust illust-right" data-style-decorator="illust_right_decorator" data-style-opacity="illust_opacity"></div>

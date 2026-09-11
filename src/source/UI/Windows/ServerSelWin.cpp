@@ -17,9 +17,7 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
-// Overall group count cap -- was 10 per column (20 total) when groups were split across two fixed
-// columns; kept as a single flat cap now that they're one merged, scrollable list, so a server
-// sending an unreasonable number of groups still can't grow this window's data unboundedly.
+// Caps how many groups a server can grow this window's data to.
 namespace
 {
     constexpr std::size_t kMaxGroups = 20;
@@ -139,9 +137,7 @@ void CServerSelWin::UpdateDisplay()
 
             const std::string label = StringUtils::WideToNarrow(pServerGroup->m_szName);
 
-            // SBP_CENTER is the rare "test/staff server" group -- a server can send more than one,
-            // but only the first is ever shown (the real, pre-existing business rule this preserves).
-            // It gets btn_pos 0 and otherwise renders as an ordinary row in the same merged list.
+            // SBP_CENTER is the rare "test/staff server" group; only the first sent is ever shown.
             if (pServerGroup->m_iWidthPos == CServerGroup::SBP_CENTER)
             {
                 if (bTestServerFound)
@@ -188,8 +184,7 @@ void CServerSelWin::UpdateDisplay()
             entry.label = StringUtils::WideToNarrow(pServerInfo->m_bName);
             entry.index = nServerIndex;
             entry.loadFraction = static_cast<float>(pServerInfo->m_iPercent) / 100.0f;
-            // Matches the legacy adwServerBtnClr[byNonPvP] bucketing (see ServerEntry's own
-            // comment): 0 = gray, 1 = the unflagged default, 2/3 = orange.
+            // 0 = gray, 1 = the unflagged default, 2/3 = orange.
             entry.colorGray = (pServerInfo->m_byNonPvP == 0);
             entry.colorOrange = (pServerInfo->m_byNonPvP >= 2);
             model.servers.push_back(entry);
@@ -198,9 +193,7 @@ void CServerSelWin::UpdateDisplay()
         }
     }
 
-    // Unconditional -- this is a genuine rebuild (clear + repopulate), not a per-frame poll, same
-    // convention as CBuffStrip's "resize + unconditional MarkDirty" (contrast SyncRmlModel() below,
-    // which only marks a field dirty when an existing value actually changes).
+    // Unconditional: this is a genuine rebuild (clear + repopulate), not a per-frame poll.
     m_RmlBinder.MarkDirty("groups");
     m_RmlBinder.MarkDirty("servers");
     m_RmlBinder.MarkDirty("pvp_notice");
@@ -280,12 +273,8 @@ bool CServerSelWin::Render()
     return true;
 }
 
-// Called only at the point of an actual state change (Show(true), UpdateDisplay(), SelectGroup())
-// -- not polled from Render() every frame, unlike CSysMenuWin's SyncRmlModel(). This window's
-// state (m_iSelectServerBtnIndex) only ever changes from its own click handlers, so there's no
-// externally-changing flag to poll for; syncing at the mutation site avoids re-marking dirty ~60+
-// times a second for no reason. Each field is compared before MarkDirty for the same reason
-// (matches CSysMenuWin::SyncRmlModel's real pattern -- diff-then-mark, not mark-unconditionally).
+// Called only at the point of an actual state change, not polled from Render() every frame --
+// this window's state only ever changes from its own click handlers.
 void CServerSelWin::SyncRmlModel()
 {
     if (!m_pRmlDoc) return;
@@ -301,9 +290,7 @@ void CServerSelWin::SyncRmlModel()
     if (groupsChanged)
         m_RmlBinder.MarkDirty("groups");
 
-    // Right column visibility -- derived from m_pSelectServerGroup (the single source of truth,
-    // resolved from m_iSelectServerBtnIndex by UpdateDisplay()) rather than stored separately, so
-    // it can never drift out of sync with which group is actually selected.
+    // Derived from m_pSelectServerGroup rather than stored separately, so it can't drift out of sync.
     const bool serverListVisible = (m_pSelectServerGroup != nullptr);
     if (model.serverListVisible != serverListVisible)
     {

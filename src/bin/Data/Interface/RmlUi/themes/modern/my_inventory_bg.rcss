@@ -1,15 +1,8 @@
-/* Background-layer companion to my_inventory.rcss -- see my_inventory_bg.rml's own header
-   comment. Loaded into the background context that renders behind the still-native 3D-composited
-   equipment/grid icons, so this file only ever holds the flat panel fill, no interactive
-   elements. .bg-panel duplicates the COMBINED result of base.rcss's .modern-frame +
-   .modern-frame-crimson (not shared via a second <link>, to keep this context fully independent
-   -- same choice main_frame_bg.rcss already made) -- this is the same real dialog/window family
-   login.rcss/msg_win.rcss/my_quest_info.rcss apply both classes together for (see
-   modern-theme-visual-direction.md's "Default look for every dialog/window" section), so this
-   panel needs the crimson-overridden values, not modern-frame's own plain ones alone (an earlier
-   version of this file mirrored only .modern-frame and rendered visibly lighter/more translucent
-   than every other dialog as a result). Keep in sync by inspection if either class's values ever
-   change. */
+/* Background-layer companion to my_inventory.rcss -- flat panel fill only, loaded into the
+   background context behind the still-native 3D-composited equipment/grid icons. .bg-panel
+   duplicates the combined result of base.rcss's .modern-frame + .modern-frame-crimson (the look
+   every dialog/window uses) to keep this context independent; keep in sync by inspection if
+   either class changes. */
 
 #bg_root {
 	position: absolute;

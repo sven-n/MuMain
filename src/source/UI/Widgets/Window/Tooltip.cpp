@@ -15,8 +15,7 @@ mu::ui::window::CTooltip::~CTooltip()
 
 void mu::ui::window::CTooltip::SetText(std::wstring text)
 {
-    // Literal text overrides any prior slot binding -- same convention as
-    // CButton::ChangeToolTipText(std::wstring).
+    // Literal text overrides any prior slot binding.
     m_textSlot = nullptr;
     m_text = std::move(text);
 }
@@ -76,8 +75,7 @@ void mu::ui::window::CTooltip::Render(int x, int y, int width, int height, int o
     int tipX = x + ((width / 2) - (fontSize.cx / 2));
     int tipY = y + height + 2;
 
-    // Clamp so the tooltip's own right edge never runs past the reference-resolution screen
-    // width -- same edge-clamp CButton's own inline version used.
+    // Clamp so the tooltip's right edge never runs past the reference-resolution screen width.
     const int rightEdge = tipX + fontSize.cx + 6;
     if (rightEdge > REFERENCE_WIDTH)
     {

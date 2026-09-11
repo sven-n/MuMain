@@ -65,20 +65,11 @@
 #btn_start .dot  { background-color: token(semantic-success); }
 #btn_stop .dot   { background-color: token(semantic-danger); }
 
-/* Siblings of .mu-btn (mu_helper_bar.rml), not nested children -- this build's shrink-to-fit
-   width hard-clamps to the containing block (main_frame.rcss's own tooltip comment documents the
-   same finding), so a tooltip nested inside an 18dp-wide button would clamp to ~18dp regardless of
-   its own text length, the background fill ending up the same size as the button. As a
-   sibling of #panel (207dp wide) instead, shrink-to-fit has real room to work with.
-
-   Given an explicit width (100dp) rather than left to shrink-to-fit, and positioned
-   via a precomputed static `left` (button center minus half that width) instead of
-   translateX(-50%) -- main_frame.rcss's own tooltips used that same combination and it produced a
-   real bug there (hover rendered with no visible background, floating at the wrong position; read
-   TransformUtilities.cpp -- `%` in a transform resolves against the element's own
-   already-computed border-box, which isn't reliably available yet exactly when `display` flips
-   from none to block on :hover). Fixed proactively here the same way rather than waiting for a
-   report against this file specifically -- same suspect combination, same fix. */
+/* Siblings of .mu-btn, not nested children -- this build's shrink-to-fit width hard-clamps to the
+   containing block, so nesting inside an 18dp button would clamp the tooltip to ~18dp regardless
+   of text length. Given an explicit width and a precomputed static `left` instead of
+   `translateX(-50%)`, since `%` in a transform resolves against the element's own border-box,
+   which isn't reliably available right when `display` flips from none to block on :hover. */
 .tooltip {
 	display: none;
 	position: absolute;
@@ -94,8 +85,7 @@
 	font-size: 11dp;
 	pointer-events: none;
 }
-/* left = button center (button's own left + half its 18dp width) minus half this tooltip's 100dp
-   width. */
+/* left = button center minus half the tooltip's width. */
 .tooltip-config { left: 112dp; } /* button center 162dp */
 .tooltip-start,
 .tooltip-stop   { left: 130dp; } /* button center 180dp */

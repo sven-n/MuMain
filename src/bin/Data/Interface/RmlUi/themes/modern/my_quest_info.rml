@@ -5,14 +5,10 @@
 	<link type="text/rcss" href="my_quest_info.rcss"/>
 </head>
 <body>
-	<!-- Modern theme's own copy of CMyQuestInfoWindow's frame -- per-theme file
-	     (UI::RmlBridge::LoadThemedDocument) because modern-frame/modern-frame-crimson plus the
-	     title-glow banner are genuinely modern-specific structure, not just style -- the shared
-	     ../../my_quest_info.rml is legacy's own theme-neutral copy and carries neither (a "shared"
-	     file must not bake in one theme's vocabulary, same reasoning login.rml/msg_win.rml/
-	     remember_password_prompt.rml/my_inventory.rml already forked for). Keep this file's ids/
-	     data-model/event-callback names in sync with ../../my_quest_info.rml --
-	     MyQuestInfoWindow.cpp binds against both by the same names. -->
+	<!-- Modern theme's own copy of CMyQuestInfoWindow's frame -- per-theme file since
+	     modern-frame/modern-frame-crimson plus the title-glow banner are modern-specific
+	     structure, not just style. Keep ids/data-model/event-callback names in sync with
+	     ../../my_quest_info.rml. -->
 	<div id="panel" class="modern-frame modern-frame-crimson" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -21,9 +17,8 @@
 		<div class="frame-piece frame-bottom"></div>
 
 		<div class="modern-header-rivet"></div>
-		<!-- Raised header band -- height matches where .tab-row already starts (top:27px), so the
-		     title + tab row together sit on one distinct raised surface, separate from the
-		     recessed quest-list/contents body below. -->
+		<!-- Raised header band, height matched to .tab-row's start (top:27px) so title + tabs
+		     sit on one raised surface, separate from the recessed body below. -->
 		<div class="modern-header quest-header"></div>
 		<div class="title-glow quest-title-glow"></div>
 		<span id="title">Quest</span>
@@ -47,10 +42,9 @@
 				     data-event-click="myquest_select_quest(q.index)">{{q.text}}</div>
 			</div>
 
-			<!-- Native size is 188x21 (see RenderQuestInfo()'s own RenderImage(...188.f, 21.f) call
-			     -- always drawn at native size, never stretched). Its own element, not a
-			     decorator on .quest-contents -- fill-stretching a 188x21 sprite across a 162px-tall
-			     box is exactly the vertical warp bug this comment is here to prevent regressing. -->
+			<!-- Native size 188x21, always drawn at native size (RenderQuestInfo()) -- its own
+			     element, not a decorator on .quest-contents, to avoid stretching a 188x21 sprite
+			     across the 162px-tall box (a real vertical-warp regression). -->
 			<div class="quest-divider"></div>
 
 			<div class="quest-contents">
@@ -60,14 +54,12 @@
 			</div>
 		</div>
 
-		<!-- Siblings of .quest-tab, not children of it -- .quest-tab is itself position:absolute,
-		     so an absolutely-positioned child resolves left/top against ITS box (172x320, starting
-		     at panel-relative 9,60), not #panel's own box. These buttons' top:392px landed at
-		     60+392=452, past the panel's own 429px height -- found live via in-game testing, not
-		     a syntax error the build gates would ever catch. #btn_exit (below) was already correctly
-		     a #panel-level sibling; these two just weren't. -->
-		<!-- Footer band -- separates the Open/Give-up/Exit button row from the recessed
-		     quest-list/contents surface above it. -->
+		<!-- Siblings of .quest-tab, not children -- .quest-tab is itself position:absolute, so a
+		     child inside it would resolve left/top against ITS box (172x320 @ 9,60), not #panel's.
+		     As children these buttons' top:392px landed past the panel's own 429px height, found
+		     only via in-game testing. -->
+		<!-- Footer band -- separates the Open/Give-up/Exit button row from the recessed body
+		     above. -->
 		<div class="modern-footer quest-footer"></div>
 
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
@@ -98,11 +90,9 @@
 			<div class="temple-line">{{temple_line1}}</div>
 		</div>
 
-		<!-- Exit is a common close button, not a quest-specific action -- modern's theme gives it
-		     a word/glyph instead of reusing legacy's sprite (see myquest-btn-exit's own comment
-		     in the legacy theme file for the split rationale). The label span is legacy-hidden,
-		     not omitted from the markup -- one shared #btn_exit for both themes, same convention
-		     as .frame-piece being theme-toggled instead of forked per-theme markup. -->
+		<!-- Exit is a common close button, not quest-specific -- modern gives it a glyph instead
+		     of legacy's sprite. The label span is CSS-hidden in legacy, not omitted, so #btn_exit
+		     stays shared across both themes. -->
 		<div id="btn_exit" class="quest-btn quest-btn-exit" data-event-click="myquest_click_exit">
 			<span class="btn-exit-label">×</span>
 		</div>

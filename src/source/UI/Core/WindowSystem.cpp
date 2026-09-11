@@ -663,8 +663,7 @@ void CSystem::Show(DWORD dwKey)
         return;
     }
 
-    // TODO: Refactor this whole method. How would be a fixed priority order
-    // for each window. And a maximum of open windows, depending on resolution
+    // TODO: fixed priority order per window, and a max open-window count based on resolution.
 
     if (dwKey == INTERFACE_FRIEND)
     {
@@ -1736,14 +1735,9 @@ void CSystem::HideGroupBeforeOpenInterface()
 void CSystem::SyncMainSceneHudVisibility()
 {
     extern EGameScene SceneFlag;
-    // LoadingWorld < 30, not just SceneFlag == MAIN_SCENE: SceneFlag flips to MAIN_SCENE the
-    // instant LoadingScene()'s one-frame flash ends (LoadingScene.cpp), well before the world/
-    // hero data the server sends back is actually ready -- LoadingWorld stays >= 30 for that
-    // whole gap (set to 9999999 on scene entry, dropped to ~30-50 once the server confirms
-    // placement, then counts down to 0). MainScene.cpp's own UpdateUIAndInput() already treats
-    // LoadingWorld >= 30 as "not really in MAIN_SCENE yet" and skips input/Update() for exactly
-    // this reason; this is the same gate applied to the persistent RmlUi HUD documents' own
-    // Show()/Hide(), which otherwise render every frame regardless of Update() ever running.
+    // Also gate on LoadingWorld < 30: SceneFlag flips to MAIN_SCENE before the server-sent
+    // world/hero data is actually ready, so this mirrors MainScene.cpp's own "not really in
+    // MAIN_SCENE yet" check to avoid showing the HUD documents too early.
     extern int LoadingWorld;
     const bool sceneAllowsShow = (SceneFlag == MAIN_SCENE) && (LoadingWorld < 30);
 
@@ -1841,19 +1835,14 @@ bool CSystem::CheckKeyUse()
 
 bool CSystem::HandleFrameCornerClose(const POINT& winPos, DWORD dwKey)
 {
-    // Box of the corner glyph in the shared 190-wide frame. Matches the MU Helper
-    // close "X" exactly (13x12 anchored at +169,+7) — the same hit-box the
-    // per-window copies used originally, so the click feel is identical across
-    // every window. One place to tune for every window that uses this frame.
+    // Hit-box of the close "X" glyph in the shared 190-wide frame.
     constexpr int X_OFFSET = 169, Y_OFFSET = 7, WIDTH = 13, HEIGHT = 12;
 
     if (IsPress(VK_LBUTTON)
         && CheckMouseIn(winPos.x + X_OFFSET, winPos.y + Y_OFFSET, WIDTH, HEIGHT))
     {
         Hide(dwKey);
-        // Clear the raw button state: world movement reads MouseLButtonPush
-        // directly (not the UI consume result), so without this the click falls
-        // through and walks the character.
+        // World movement reads MouseLButtonPush directly, so clear it or the click walks the character.
         MouseLButton = false;
         MouseLButtonPop = false;
         MouseLButtonPush = false;

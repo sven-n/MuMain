@@ -23,10 +23,8 @@ namespace
     };
 
     int    s_count = 0;
-    // float, not int -- s_time -= FPS_ANIMATION_FACTOR below is a sub-1.0-per-call delta at high
-    // FPS, and int truncation was swallowing the whole delta and substituting a flat -1/call
-    // instead, defeating the FPS compensation FPS_ANIMATION_FACTOR exists to provide (same root
-    // cause as CCreditWin's alpha-fade freeze, opposite symptom: this decays too fast, not frozen).
+    // float, not int -- FPS_ANIMATION_FACTOR is a sub-1.0 delta at high FPS; int truncation would
+    // swallow it (same root cause as CCreditWin's alpha-fade bug).
     float  s_time = NOTICE_LIFETIME;
     float  s_blinkPhase = 0.f;
     Notice s_notices[MAX_NOTICE];

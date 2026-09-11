@@ -5,10 +5,8 @@
 	<link type="text/rcss" href="title_scene.rcss"/>
 </head>
 <body>
-	<!-- Replaces TitleSceneUI.cpp's CGaugeBar (the last CGaugeBar consumer) with RmlUi's own
-	     built-in <progress> element (Factory.cpp registers it in Core, no extra setup needed) --
-	     SetValue()/SetMax() are called directly from C++ on this element, no data-model binding
-	     needed, the same imperative shape CGaugeBar::SetValue() always had. -->
+	<!-- RmlUi's built-in <progress> element, replacing CGaugeBar; C++ calls SetValue()/SetMax()
+	     on it directly, no data-model binding. -->
 	<progress id="gauge_fill" class="gauge-fill" direction="right" value="0" max="1"/>
 </body>
 </rml>

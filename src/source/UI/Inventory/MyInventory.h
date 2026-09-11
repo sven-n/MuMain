@@ -86,11 +86,8 @@ namespace mu::ui::window
         bool m_bMyShopOpen;
         bool m_bMyShopLocked = false;
 
-        // One shared hover tooltip for both the Set Option and Socket Option header labels
-        // (mutually exclusive within this window, same "one shared tooltip element for multiple
-        // hover targets" convention as MainFrameRmlModel::skillTooltipLines). Converted from
-        // UI::Inventory::Tooltip::Model (ItemOptionTooltipModel.h) the same way MainFrameWindow.cpp
-        // converts UI::Skills::Tooltip::Model -- see SyncRmlModel()'s own comment.
+        // One shared hover tooltip for the Set Option and Socket Option header labels (mutually
+        // exclusive). Converted from UI::Inventory::Tooltip::Model; see SyncRmlModel().
         struct ItemOptionTooltipLineEntry
         {
             Rml::String text;
@@ -101,18 +98,12 @@ namespace mu::ui::window
             bool bold = false;
         };
 
-        // Window frame/title/gold/buttons are RmlUi. The equipment paperdoll and inventory grid
-        // stay fully native: their icons are live 3D model renders (RenderItem3D()/Render3D()),
-        // permanently native (the permanent live-3D-content boundary), and their surrounding
-        // chrome isn't ported yet.
+        // Window frame/title/gold/buttons are RmlUi. The paperdoll and inventory grid stay native
+        // since their icons are live 3D model renders (RenderItem3D()/Render3D()).
         struct MyInventoryRmlModel
         {
-            // Shared transform group for every element in this document -- this window is
-            // movable (SetPos()), not HUD-anchored, so this is sourced from
-            // UI::Scaling::GetActiveTransform() (read in Update(), inside this window's own
-            // CManager-pushed ScopedActiveTransform) rather than a HUD transform helper. Same
-            // "one shared group, not a per-element binding" shape as
-            // MainFrameRmlModel::barsLeft (MainFrameWindow.h).
+            // Shared transform group for this document, sourced from UI::Scaling::GetActiveTransform()
+            // since this window is movable (SetPos()), not HUD-anchored.
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
 
             Rml::String title;
@@ -130,8 +121,7 @@ namespace mu::ui::window
             Rml::String exitTooltip;
             Rml::String expandTooltip;
 
-            // Set/Socket option header labels + shared hover tooltip -- see
-            // ItemOptionTooltipLineEntry's own comment above and SyncRmlModel()'s.
+            // Set/Socket option header labels + shared hover tooltip.
             Rml::String setOptionLabel;
             Rml::String socketOptionLabel;
             bool setOptionActive = false;    // IsAncientSetEquipped() -- label color
@@ -145,14 +135,11 @@ namespace mu::ui::window
         RmlModelBinder<MyInventoryRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
 
-        // RmlUi-behind-3D-icons -- the frame background panel sits underneath the paperdoll's and
-        // the inventory grid's live 3D icons (Render3D(), CInventoryCtrl::Render3D()), both of
-        // which keep rendering via the C3DRenderMng/I3DRenderObj interleave. RmlUi's "main"
-        // context always renders last in the frame, so the panel goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (the same mechanism
-        // CMainFrameWindow::RenderLeftFrame() already proved) -- called from Render(), which
-        // already runs before either Render3D() call this same frame. Separate document/model from
-        // m_pRmlDoc's own -- RmlUi data models are per-context.
+        // The frame background panel must render behind the paperdoll's and inventory grid's live
+        // 3D icons, but RmlUi's main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead, from Render() (which
+        // runs before either Render3D() call). Separate document/model from m_pRmlDoc since RmlUi
+        // data models are per-context.
         struct MyInventoryBgRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
@@ -187,13 +174,8 @@ namespace mu::ui::window
         void SetPos(int x, int y);
         const POINT& GetPos() const;
 
-        // Replaces a bare SetPos(defaultX, defaultY) at the "return to idle position" call sites
-        // (WindowSystem.cpp) -- restores the user's dragged position instead, if one was ever
-        // saved (GameConfig::GetWindowPosition(), written by this window's own drag-end handler),
-        // so a user customization survives Character-info/etc. temporarily shifting this window
-        // sideways to avoid overlap and then closing again. Those sideways collision-avoidance
-        // shifts themselves are unrelated and stay unconditional -- see this window's own
-        // own reassessment for why the two are not the same kind of position write.
+        // Restores the user's dragged position (GameConfig::GetWindowPosition()) if one was saved,
+        // instead of resetting to (defaultX, defaultY).
         void RestoreDefaultOrUserPosition(int defaultX, int defaultY);
 
         void SetRepairMode(bool bRepair);

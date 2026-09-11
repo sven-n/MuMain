@@ -1,28 +1,11 @@
-/* Legacy theme for the server-select dialog (CServerSelWin). A fresh RmlUi layout, not a pixel
-   port of the old CWinEx/CButton/CGaugeBar screen -- there's no legacy geometry left to match (see
-   ui-target-architecture.md's note on why CWinEx's asset-derived panel height couldn't safely be
-   preserved when this window's native backdrop was retired). The load gauge is a flat color fill,
-   matching component-catalog.md's guidance not to invent a "reusable primitive" ahead of a second
-   real need.
+/* Legacy theme for the server-select dialog (CServerSelWin) -- a fresh RmlUi layout, not a pixel
+   port of the old CWinEx/CButton/CGaugeBar screen. The load gauge is a flat color fill. #panel is
+   intentionally invisible (no background/border) -- the real legacy screen has no panel chrome,
+   just buttons and text over the login art. Two always-visible columns use real flexbox, not the
+   old absolutely-positioned flyout keyed to whichever group button was clicked. */
 
-   #panel itself is intentionally invisible (no background/border) -- the real legacy screen has
-   no panel chrome at all, just buttons and text floating over the login art.
-
-   Two always-visible columns laid out by real flexbox (#columns/#group_col/#server_col below),
-   not the old absolutely-positioned flyout that ServerSelWin.cpp used to dock beside whichever
-   group button was clicked via C++-computed pixel offsets (kGroupBtnRowHeight and friends -- see
-   ServerSelWin.h's own header comment). #panel/#pvp_notice/#desc_panel are plain normal-flow block
-   content now too, not position:absolute with hand-picked top offsets -- #panel's height is just
-   whatever its real children need, no separate oversized worst-case reservation to center
-   against. This box is what .center-both actually centers; ServerSelWin.h's kPanelWidth/
-   kPanelHeight is a separate, deliberately generous rect used only for the native click-gate
-   (UpdateMouseEvent()), not this box's own size. */
-
-/* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
-   left/top/transform centering math, same as sys_menu.rcss/msg_win.rcss's own #panel. Redeclaring
-   position on this ID rule too is harmless in standard CSS cascade terms, but every other
-   self-centering window here leaves it out, so this matches that precedent exactly rather than
-   introducing an unexplained difference. */
+/* No explicit position -- .center-both (base.rcss) supplies position:absolute plus centering,
+   same as sys_menu.rcss/msg_win.rcss's own #panel. */
 #panel {
 	width: 420px;
 	font-family: "Liberation Sans";
@@ -31,13 +14,9 @@
 	padding: 10px;
 }
 
-/* height:300px is fixed, not auto -- #panel uses .center-both, which recenters based on #panel's
-   OWN CURRENT size every time it changes; an auto height here let #columns grow the instant the
-   server column populated after a group click, visibly shifting the whole panel (including the
-   just-clicked group button) up/down as .center-both recentered around the new, taller box. A
-   fixed height means #panel's total size never changes across the empty/populated/hidden states,
-   so nothing ever needs to recenter. Each column below still scrolls internally past this height
-   via its own overflow:auto -- this box just never resizes around them. */
+/* height is fixed, not auto -- #panel uses .center-both, which recenters on #panel's current size;
+   auto height would visibly shift the whole panel as it grew. Columns still scroll internally via
+   their own overflow:auto. */
 #columns {
 	display: flex;
 	flex-direction: row;
@@ -46,9 +25,8 @@
 	height: 300px;
 }
 
-/* height (not max-height) matches #columns' own fixed height above, for the same reason -- a
-   shorter real group/server list just centers within this fixed box (justify-content:center)
-   rather than shrinking it. overflow:auto still scrolls a list taller than this box. */
+/* height (not max-height) matches #columns' own fixed height for the same reason -- a shorter
+   list just centers via justify-content:center rather than shrinking the box. */
 #group_col {
 	display: flex;
 	flex-direction: column;
@@ -68,16 +46,10 @@
 	overflow: hidden auto;
 }
 
-/* Sprite provides the border/frame (ninepatch, base.rcss), stretched from its native 108x30 rect;
-   a translucent tint decorator layered on top (RmlUi paints the first-listed decorator in a
-   comma-separated list frontmost, later ones behind) gives the glassy body read instead of the
-   sprite's own opaque fill.
-
-   Height (32px, no padding/border-width to add to it) matches .server-row's real on-screen height
-   below (25px declared + its own 3px+4px padding = 32px -- see that rule's comment for why its
-   declared height isn't literally 32 too). width is 140px, not the old two-column layout's 108px
-   -- #group_col is now the only column on its side, so there's no second 108px column to leave
-   room for. No margin-bottom here -- #group_col's own `gap` above handles row spacing now. */
+/* Ninepatch border (base.rcss) stretched from its native 108x30 rect; a translucent tint
+   decorator layered on top (RmlUi paints the first-listed decorator frontmost) gives the glassy
+   body look instead of the sprite's own opaque fill. Height 32px matches .server-row's real
+   on-screen height (25px + its own 3px+4px padding) below. */
 .group-btn {
 	width: 140px;
 	height: 32px;
@@ -97,26 +69,11 @@
 	color: #ffffff;
 }
 
-/* Same construction as .group-btn above -- sprite ninepatch for the border/frame, a translucent
-   tint decorator layered in front for the glassy body, so both buttons share one look. No CSS
-   `border` property here: this element has a child (.server-gauge-slot below), and a border-width
-   property on a bordered element with a child does not render as a closed rectangle in this RmlUi
-   build. The ninepatch decorator paints via a separate code path and isn't affected.
-
-   Width (200px) isn't the same as .group-btn's 140px -- the label (s.label, e.g.
-   "Valhalla-1(Gold) Connect") needs this much room to fit on one line; ninepatch (unlike the plain
-   image() decorator, which only renders cleanly at the sprite's native 108x30 size) stretches to
-   this wider box without distortion.
-
-   height is 25px, not .group-btn's 32px -- `height` sets content size only, and padding is added
-   on top of it. 25 + this row's own 3px+4px padding = 32, matching .group-btn's real on-screen
-   height (no border-width here to add on top, since the ninepatch decorator paints its own frame
-   without a separate border box).
-
-   width is a literal px value (200 = #server_col's 220px minus this row's own 10px+10px padding).
-   .server-gauge-slot has neither padding nor border, so its width is the direct target (180px),
-   inset by a literal 10px left margin to center it within .server-row's own 200px content width.
-   No margin-bottom here -- #server_col's own `gap` handles row spacing now. */
+/* Same ninepatch + tint construction as .group-btn. No CSS `border` here -- a border-width on a
+   bordered element with a child doesn't render as a closed rectangle in this build; the ninepatch
+   decorator paints separately, unaffected. Height: 25px + this row's own 3px+4px padding = 32px,
+   matching .group-btn's on-screen height. Width: 200px = #server_col's 220px minus 10px+10px
+   padding; .server-gauge-slot's 180px is inset 10px left to center it. */
 .server-row {
 	display: block;
 	width: 200px;
@@ -143,10 +100,7 @@
 	color: #ff9c3c;
 }
 
-/* Plain dark recessed fill, not a `repeating-linear-gradient` tick-mark decorator -- this engine
-   doesn't support repeating gradients (see modern-theme-visual-direction.md's compatibility
-   table), so the old decorator silently rendered as nothing rather than the intended dashed
-   track. */
+/* Plain fill, not repeating-linear-gradient -- unsupported here, renders as nothing. */
 .server-gauge-slot {
 	display: block;
 	width: 180px;

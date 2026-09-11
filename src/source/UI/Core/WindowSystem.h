@@ -108,11 +108,8 @@ namespace mu::ui::window
         void Toggle(DWORD dwKey);	//. Show <-> Hide
         void HideAll();
 
-        // Shared handler for the top-right "X" close glyph baked into the common
-        // item-frame (newui_item_back04.tga). Hides `dwKey` when the corner is
-        // left-clicked and swallows the mouse so the click can't fall through to
-        // the world (which would walk the character). Returns true if handled.
-        // Replaces the ptExitBtn1 block that was copy-pasted across the windows.
+        // Shared handler for the item-frame's top-right close glyph: hides dwKey on click and
+        // swallows the mouse so it doesn't fall through to the world.
         bool HandleFrameCornerClose(const POINT& winPos, DWORD dwKey);
 
         void Enable(DWORD dwKey);
@@ -124,14 +121,8 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
-        // Re-syncs the MU Helper bar's and buff strip's RmlUi documents against the current
-        // scene, independent of Update()/Render() above (which -- like everything else in this
-        // class -- only ever run while SceneFlag == MAIN_SCENE, MainScene.cpp). That was already
-        // a complete visibility gate before these two became RmlUi-backed (nothing drew
-        // otherwise); now that a persistent RmlUi document owns their visuals, leaving MAIN_SCENE
-        // needs an explicit hide, from somewhere that keeps ticking after Update() stops -- called
-        // every frame, regardless of scene, from Winmain.cpp's SetPostRmlUiCallback. See
-        // CMuHelperBar::SyncDocVisibility()'s header comment for the full rationale.
+        // Hides the MU Helper bar's and buff strip's RmlUi documents outside MAIN_SCENE; called
+        // every frame regardless of scene since Update()/Render() above don't run outside it.
         void SyncMainSceneHudVisibility();
 
         CManager* GetNewUIManager() const;

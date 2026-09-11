@@ -7,17 +7,15 @@
 <body data-model="server_select">
 	<div id="panel" class="center-both">
 		<div id="columns">
-			<!-- Left column: every server group, one merged/order-preserving list -- no more
-			     left/right-column split or a separately-floating center/"test server" button, see
-			     ServerSelWin.h's own header comment. -->
+			<!-- Left column: all server groups in one merged, order-preserving list (no more
+			     split columns or a floating test-server button) -- see ServerSelWin.h. -->
 			<div id="group_col">
 				<div class="group-btn" data-for="g : groups" data-class-checked="g.checked"
 				     data-event-click="serversel_select_group(g.btn_pos)">{{g.label}}</div>
 			</div>
 
-			<!-- Right column: the individual servers within whichever group is currently selected --
-			     empty/hidden until a group is clicked, same as the old flyout being entirely absent,
-			     just laid out as a normal second column now instead of a docked overlay. -->
+			<!-- Right column: servers in the currently-selected group; hidden until a group is
+			     picked (replaces the old flyout with a plain second column). -->
 			<div id="server_col" data-class-hidden="!server_list_visible">
 				<div class="server-row" data-for="s : servers" data-class-gray="s.color_gray" data-class-orange="s.color_orange"
 				     data-event-click="serversel_select_server(s.index)">{{s.label}}

@@ -14,31 +14,21 @@
 #define UIM_SCENE_MAIN 5
 
 // Creates/releases/positions the login- and character-scene g_*Win globals per scene transition,
-// and forwards Update()/Render() to its own CManager instance (m_NewStyleMng below). No
-// CWin-derived window list of its own -- every window that formerly needed one has migrated onto
-// mu::ui::window::CObject/CManager.
+// and forwards Update()/Render() to its own CManager instance (m_NewStyleMng below).
 class CSceneUICoordinator
 {
 protected:
     bool m_bCursorOnUI;
     int m_nScene;
 
-    // True only during the Update() call in which the ESC-toggle-system-menu block itself opened
-    // or closed g_SysMenuWin -- reset at the top of every Update(). See Update()'s own comment for
-    // the race this exists to prevent: that block runs entirely before m_NewStyleMng's depth-sorted
-    // dispatch (not as part of it), so a migrated window whose own Escape polling depends on
-    // g_SysMenuWin::IsVisible() (CLoginWin) would otherwise see this frame's POST-toggle value and
-    // could react to the very same keypress a second time.
+    // True only during the Update() in which the ESC-toggle-system-menu block itself opened/closed
+    // g_SysMenuWin; reset at the top of every Update(). That block runs before m_NewStyleMng's
+    // dispatch, so without this flag a window polling g_SysMenuWin::IsVisible() on Escape (CLoginWin)
+    // would see this frame's post-toggle value and could react to the same keypress twice.
     bool m_bSysMenuToggledByEscThisFrame = false;
 
-    // A scene-scoped CManager instance (own object, not the shared g_pNewUIMng that
-    // MAIN_SCENE's ~79 windows use): CManager's dispatch is only ever driven from
-    // MainScene.cpp today, so a window that only exists during login/character scenes (like
-    // CCreditWin) would never update/render if registered with the shared instance instead.
-    // Update()/Render() below (already called unconditionally every frame, regardless of scene)
-    // forward to this one, giving every login/character-scene window the same IObject
-    // interface and dispatch semantics as the MAIN_SCENE-tier CObject windows, without touching
-    // the shared manager at all.
+    // Scene-scoped CManager (not the shared g_pNewUIMng used by MAIN_SCENE) -- lets
+    // login/character-scene-only windows (e.g. CCreditWin) update/render outside MAIN_SCENE.
     mu::ui::window::CManager m_NewStyleMng;
 
 public:
@@ -53,13 +43,9 @@ public:
     void CreateMainScene();
 
     /**
-     * @brief Re-layouts the current scene's UI for the current WindowWidth/
-     * Height. Call after a runtime resolution change so info boxes, menus,
-     * etc. don't end up anchored to the old screen size.
-     *
-     * Only affects the login/character-scene windows this class itself drives
-     * (g_CreditWin, g_LoginWin, g_MsgWin, etc.);
-     * the MAIN_SCENE-only mu::ui::window windows are driven by g_pNewUISystem separately.
+     * @brief Re-layouts login/character-scene windows for the current WindowWidth/Height.
+     * Call after a runtime resolution change. MAIN_SCENE windows are handled separately by
+     * g_pNewUISystem.
      */
     void RepositionSceneUI();
 

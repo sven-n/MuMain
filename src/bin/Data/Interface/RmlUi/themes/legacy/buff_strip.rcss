@@ -1,6 +1,5 @@
-/* Legacy theme for the active-buff icon strip (CBuffStrip). Icon atlas: named @spritesheet rects,
-   one per 20x28 tile, 10 columns x 9 rows, generated per atlas (BuildIconDecorator(),
-   BuffStrip.cpp) rather than hand-authored. */
+/* Legacy theme for the active-buff icon strip (CBuffStrip) -- icon atlas is generated per-atlas
+   (BuildIconDecorator(), BuffStrip.cpp), 20x28 tiles, 10x9 grid. */
 
 @spritesheet buff-atlas-1
 {
@@ -192,8 +191,8 @@
 	atlas2-89: 180px 224px 20px 28px;
 }
 
-/* Position (centering + top offset) comes from base.rcss's .center-x, applied in buff_strip.rml.
-   width matches the strip's own full-row content width so the centering is exact. */
+/* Centering/top offset comes from base.rcss's .center-x (buff_strip.rml); width matches the
+   full-row content width for exact centering. */
 #panel {
 	top: 15dp;
 	width: 200dp;
@@ -218,8 +217,8 @@
 	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
 
-/* Below the icon (this strip has room below it, unlike a top-of-screen widget). width is explicit
-   -- this build's shrink-to-fit undersizes a multi-line pre-line box to its longest word. */
+/* Below the icon; width is explicit because this build's shrink-to-fit undersizes a multi-line
+   pre-line box to its longest word. */
 .tooltip {
 	display: none;
 	position: absolute;

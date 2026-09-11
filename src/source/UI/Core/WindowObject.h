@@ -22,12 +22,8 @@ namespace mu::ui::window
         virtual bool IsVisible() const = 0;
         virtual bool IsEnabled() const = 0;
 
-        // No-op default: only a window built on UI::RmlBridge::LoadThemedDocument() needs to
-        // override this, to tear down its Rml::ElementDocument/DataModel(s) built against the
-        // previously-active theme and rebuild them against whatever UI::RmlBridge::GetActiveThemeName()
-        // now returns (see RmlTheme.h). Exists on the base interface, not each RmlUi window's own
-        // class, so a theme-switch command can call it uniformly through CManager's registry
-        // (CObject*/IObject*) without knowing which concrete windows are RmlUi-themed.
+        // No-op default; RmlUi-themed windows override to rebuild their document against the
+        // now-active theme when the theme switches.
         virtual void ReloadRmlTheme() {}
     };
 
@@ -53,10 +49,8 @@ namespace mu::ui::window
         void SetLayoutMode(UI::Scaling::LayoutMode mode) { m_layoutMode = mode; }
         UI::Scaling::LayoutMode GetLayoutMode() const { return m_layoutMode; }
 
-        // Virtual (CUIMng/CNewUIManager merger) -- a window that must do more than flip a flag on
-        // show/hide (e.g. CCreditWin toggling its own sprites' visibility, matching CWin::Show()'s
-        // equivalent override contract) needs this to actually run when called through a base
-        // CObject*/IObject* pointer, e.g. CManager::ShowInterface()'s generic dispatch.
+        // Virtual so a window needing more than a flag flip on show/hide (e.g. toggling its own
+        // sprites) still runs correctly through CManager's generic CObject*/IObject* dispatch.
         virtual void Show(bool bShow)
         {
             m_bRender = bShow;
@@ -69,20 +63,12 @@ namespace mu::ui::window
         bool IsVisible() const override { return m_bRender; }
         bool IsEnabled() const override { return m_bUpdate; }
 
-        // Shown-vs-active split, mirroring CWin's UpdateWhileShow()/UpdateWhileActive() shape
-        // (Win.h) so a migrated window's existing shown/active logic ports over directly instead
-        // of needing a redesign -- not the exact signature (CWin's hooks take a dDeltaTick
-        // nothing in this tier's Update() loop threads through; a migrated window reads whatever
-        // timing source it already uses internally). Default IsActive()==true, and the base
-        // Update() below only ever runs for a subclass that does NOT override Update() itself --
-        // every existing CObject subclass already does, so this is inert for all of them; it only
-        // activates for a future subclass that overrides UpdateWhileShown()/UpdateWhileActive()
-        // instead.
+        // Shown-vs-active split mirrors CWin's UpdateWhileShow()/UpdateWhileActive() shape.
+        // Default IsActive()==true; the base Update() below is inert for any subclass that
+        // already overrides Update() itself (all current ones do).
         virtual bool IsActive() const { return m_bActive; }
-        // Virtual, not just a setter -- a window implementing floating-dialog raise-to-front
-        // behavior on activation can override this to also bump its own GetLayerDepth() baseline.
-        // Needs no other base-class support: GetLayerDepth() is already each subclass's own
-        // responsibility, and CManager already re-sorts by it every frame.
+        // Virtual so a window can also bump its own GetLayerDepth() baseline on activation
+        // (e.g. floating-dialog raise-to-front).
         virtual void SetActive(bool bActive) { m_bActive = bActive; }
 
         bool Update() override

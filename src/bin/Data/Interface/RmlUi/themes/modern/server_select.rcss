@@ -1,19 +1,13 @@
 /* Modern theme for the server-select dialog -- flat programmatic chrome, no legacy sprite art.
    Same DOM/class structure as the legacy theme (server_select.rml is shared); only the visual
-   treatment differs, same convention as char_make.rcss's modern copy. #panel itself stays
-   invisible here too -- see the legacy theme's own comment for why (matches the real legacy
-   screen, not a modern redesign choice).
+   treatment differs. #panel stays invisible, matching the real legacy screen.
 
-   Two always-visible columns laid out by real flexbox (#columns/#group_col/#server_col below),
-   not the old absolutely-positioned flyout that ServerSelWin.cpp used to dock beside whichever
-   group button was clicked via C++-computed pixel offsets (kGroupBtnRowHeight and friends -- see
-   ServerSelWin.h's own header comment). #panel/#pvp_notice/#desc_panel are plain normal-flow block
-   content now too, not position:absolute with hand-picked top offsets -- #panel's height is just
-   whatever its real children need, no separate oversized worst-case reservation to center against. */
+   Two always-visible columns laid out by real flexbox (#columns/#group_col/#server_col), not an
+   absolutely-positioned flyout. #panel/#pvp_notice/#desc_panel are plain normal-flow block
+   content, sized to their real children. */
 
 /* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
-   left/top/transform centering math, same as sys_menu.rcss/msg_win.rcss's own #panel -- see the
-   legacy theme's own copy of this comment for why this matches that precedent exactly. */
+   centering math, same as sys_menu.rcss/msg_win.rcss's #panel. */
 #panel {
 	width: 420px;
 	font-family: "token(font-body)";
@@ -22,13 +16,9 @@
 	padding: 10px;
 }
 
-/* height:300px is fixed, not auto -- #panel uses .center-both, which recenters based on #panel's
-   OWN CURRENT size every time it changes; an auto height here let #columns grow the instant the
-   server column populated after a group click, visibly shifting the whole panel (including the
-   just-clicked group button) up/down as .center-both recentered around the new, taller box. A
-   fixed height means #panel's total size never changes across the empty/populated/hidden states,
-   so nothing ever needs to recenter. Each column below still scrolls internally past this height
-   via its own overflow:auto -- this box just never resizes around them. */
+/* height:300px is fixed, not auto -- #panel uses .center-both, which recenters around #panel's
+   current size on every change, so an auto height here would visibly shift the whole panel as
+   #columns grows/shrinks. Each column scrolls internally via overflow:auto instead. */
 #columns {
 	display: flex;
 	flex-direction: row;
@@ -37,9 +27,8 @@
 	height: 300px;
 }
 
-/* height (not max-height) matches #columns' own fixed height above, for the same reason -- a
-   shorter real group/server list just centers within this fixed box (justify-content:center)
-   rather than shrinking it. overflow:auto still scrolls a list taller than this box. */
+/* height (not max-height) matches #columns' fixed height -- a shorter list centers within this
+   fixed box instead of shrinking it; overflow:auto still scrolls a taller one. */
 #group_col {
 	display: flex;
 	flex-direction: column;
@@ -59,17 +48,10 @@
 	overflow: hidden auto;
 }
 
-/* Neutral iron base -- same recipe as base.rcss's shared .btn (two-layer gradient/border-color/
-   text color, just re-declared here in px instead of dp; this window hasn't migrated to the dp
-   scaling system, see #panel's own comment) -- rather than the crimson-always look this used to
-   have, which read every group button as a "confirm" action regardless of selection. Crimson is
-   reserved for .checked below, matching the reference's own row treatment (a neutral base, with
-   the crimson+gold accent appearing only on the selected row). Childless, so there's no
-   border-width+children risk here (unlike .server-row below).
-
-   width is 140px, not the old two-column layout's 108px -- #group_col is now the only column on
-   its side, so there's no second 108px column to leave room for. No margin-bottom here -- #group_col's
-   own `gap` above handles row spacing, matching .server-row's own gap-based spacing below. */
+/* Neutral iron base -- same recipe as base.rcss's shared .btn, re-declared in px (this window
+   hasn't migrated to the dp scaling system). Crimson is reserved for .checked below, so a group
+   button only reads as "confirm" once selected. Childless, so no border-width+children risk here
+   (unlike .server-row below). Row spacing comes from #group_col's own `gap`. */
 .group-btn {
 	width: 140px;
 	height: 30px;
@@ -102,7 +84,7 @@
 	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 184); /* base.rcss's .btn:active recipe */
 }
 /* Selected state: crimson+gold, base.rcss's .btn-ok recipe -- the one place this row should read
-   as an active/confirmed choice, matching the reference's .is-selected treatment. */
+   as an active/confirmed choice. */
 .group-btn.checked {
 	color: token(text-warm);
 	background-color: #351009;
@@ -124,34 +106,20 @@
 	border-color: #9a4028;
 }
 
-/* The gauge bar reads as *inside* the same button frame as the name, not a separate bar underneath
-   -- so .server-row carries the border/gradient itself, containing both its own text content and
-   its one child, .server-gauge-slot. This is a documented rendering risk in this RmlUi build (see
-   STATUS.md's bordered-element-plus-children finding: a border+background element with a child has
-   failed to render as a closed box in three separate past attempts on this exact element) -- this
-   pass keeps the same DOM shape (no new markup this round) and only changes the border/shadow
-   technique used on it (real box-shadow instead of the old per-side border-color bevel, now that
-   box-shadow itself is confirmed working broadly elsewhere in this theme -- see base.rcss's own
-   header comment), so it carries the same risk level as before, not a new one. Visually verify
-   after any further change here.
+/* The gauge bar reads as *inside* the same button frame as the name, so .server-row carries the
+   border/gradient itself with .server-gauge-slot as its one child. A border+background element
+   with a child has failed to render as a closed box in past attempts on this exact element in
+   this RmlUi build -- real box-shadow (used here) is confirmed safe, unlike border-width, so
+   verify visually after any further change here.
 
-   Neutral iron base -- same recipe as base.rcss's shared .btn/.group-btn above, replacing the old
-   one-off warm-charcoal gradient + per-side bevel-border technique with real box-shadow for depth
-   (reference-accurate: `inset 0 1px 0 rgba(232,215,168,.035), inset 0 -1px 0 rgba(0,0,0,.82), 0 1px
-   2px rgba(0,0,0,.42)`, alphas pre-converted to this engine's 0-255 rgba() form). color stays
-   token(accent-gold) -- a real legacy PvP-category mapping (see .gray/.orange below), untouched by
-   this chrome retint.
+   color stays token(accent-gold) -- a real legacy PvP-category mapping (see .gray/.orange below).
 
-   height is 23px, not .group-btn's real 32px -- `height` sets content size only; padding and
-   border-width both add on top of it. 23 + this row's 3px+4px padding + 1px+1px border = 32,
-   matching .group-btn's real on-screen height.
+   height is 23px, not .group-btn's real 32px -- `height` is content size only; 23 + this row's
+   3px+4px padding + 1px+1px border = 32, matching .group-btn's on-screen height.
 
-   width is a literal px value (218 = this row's border-box target of 240px, matching #server_col's
-   own width, minus this row's own 10px+10px padding and 1px+1px border). .server-gauge-slot has
-   neither padding nor border, so its width is the direct target (200px), inset by a literal 10px
-   left margin to center it within .server-row's own 218px content width. No margin-bottom here --
-   #server_col's own `gap:6px` (matching the reference's own list row gap) handles row spacing now,
-   same as .group-btn's gap-based spacing above. */
+   width 218px = this row's 240px border-box target (matching #server_col) minus its own
+   10px+10px padding and 1px+1px border. .server-gauge-slot's 200px width is inset by a 10px left
+   margin to center it within that 218px. */
 .server-row {
 	display: block;
 	width: 218px;
@@ -182,7 +150,7 @@
 		rgba(255, 255, 255, 13),
 		transparent 45%),
 		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09); /* base.rcss's .btn:hover recipe */
-	border-color: #776646; /* base.rcss's .btn:hover border -- same hover accent, literal since .btn:hover isn't tokenized either */
+	border-color: #776646; /* base.rcss's .btn:hover border, literal since .btn:hover isn't tokenized */
 }
 .server-row:active {
 	transform: translateY(1px);
@@ -196,11 +164,9 @@
 }
 
 /* Recessed groove for the population bar -- box-shadow only, no border-width, since this element
-   also has a child (.server-gauge-fill) and border-width+children is the same documented risk
-   .server-row carries above; box-shadow alone is confirmed safe regardless of children. Was a
-   `repeating-linear-gradient` tick-mark decorator, which this engine doesn't support (see
-   modern-theme-visual-direction.md's compatibility table) -- silently rendered as nothing, not the
-   intended dashed track; replaced with a plain dark recessed fill instead. */
+   has a child (.server-gauge-fill) and border-width+children is the same risk .server-row carries
+   above. `repeating-linear-gradient` isn't supported by this engine (silently renders nothing),
+   so this uses a plain dark recessed fill instead of a tick-mark track. */
 .server-gauge-slot {
 	display: block;
 	width: 200px;
@@ -209,11 +175,9 @@
 	background-color: #050605;
 	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 199);
 }
-/* Population tier by load_fraction (server_select.rml's data-class-tier-low/-high bindings) --
-   medium is the default/untagged case (CSS specificity lets .tier-low/.tier-high above override
-   it), matching the reference's low/medium/high capacity-bar coloring. Dark-stop hexes are the
-   reference's own gradient starts, no token of their own (same convention as .checkbox-box.checked
-   in base.rcss); bright stops are the real semantic-success/-warning/-danger tokens. */
+/* Population tier by load_fraction -- medium is the default/untagged case, overridden by
+   .tier-low/.tier-high. Dark-stop hexes have no token of their own; bright stops are the real
+   semantic-success/-warning/-danger tokens. */
 .server-gauge-fill {
 	display: block;
 	height: 100%;
@@ -227,9 +191,7 @@
 	decorator: linear-gradient(to right, #6d1711, token(semantic-danger));
 }
 
-/* Normal block flow below #columns now, not position:absolute with a hand-picked top offset --
-   #panel's height is just whatever its real children need (see #panel's own comment), so there's
-   no fixed column height left to offset against. */
+/* Normal block flow below #columns, not position:absolute with a hand-picked top offset. */
 #pvp_notice {
 	margin-top: 16px;
 	width: 100%;

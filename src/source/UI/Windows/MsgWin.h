@@ -12,20 +12,8 @@
 
 namespace Rml { class ElementDocument; }
 
-// RmlUi migration: the generic message/confirm dialog, following the same hybrid CWin+RmlUi
-// pattern as CLoginWin/CCharMakeWin/CCharSelMainWin. Shown from both LOG_IN_SCENE and
-// CHARACTER_SCENE (CSceneUICoordinator::CreateLoginScene()/CreateCharacterScene() both Create() it;
-// CreateMainScene() never does -- a pre-existing characteristic, not something this port changes
-// or needs to cover).
-//
-// The panel is centered via base.rcss's `.center-both` utility class with a fixed `dp` size, not
-// a C++-pushed rect.
-//
-// Migrated off CWin onto mu::ui::window::CObject. Previously, CWin::Create() spanning the full screen was what made
-// CUIMng::IsCursorOnUI() report true for any cursor position while this dialog was shown --
-// UpdateMouseEvent() below now does that job directly (unconditionally claims the click while
-// shown, no rect check needed), and CSceneUICoordinator::Update() folds new-style claims into m_bCursorOnUI
-// the same way it already folds them into the legacy click-walk skip.
+// Generic message/confirm dialog (hybrid CWin+RmlUi), shown from the login and character scenes.
+// The panel is centered via base.rcss's `.center-both` utility class, not a C++-pushed rect.
 class CMsgWin : public mu::ui::window::CObject
 {
 protected:
@@ -51,28 +39,23 @@ public:
     CMsgWin();
     ~CMsgWin() override;
     void Create();
-    void Release(); // was CWin::PreRelease() (an override hook CWin::Release() called
-                     // automatically) -- called explicitly now, same as CCreditWin's own Release().
+    void Release(); // Called explicitly at scene transitions.
     void SetPosition(int nXCoord, int nYCoord);
     void Show(bool bShow) override;
     void PopUp(int nMsgCode, wchar_t* pszMsg = nullptr);
 
-    // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
-    // cleared exactly like every other migrated window's RmlClickX() pattern.
+    // Set by RmlUi click bindings; polled and cleared in Update().
     void RmlClickOk() { m_bRmlOkClicked = true; }
     void RmlClickCancel() { m_bRmlCancelClicked = true; }
 
-    // Draws the resident-password (MWT_STR_INPUT) live text on top of RmlUi's input-frame
-    // background -- called from Winmain.cpp's SetPostRmlUiCallback (already registered for
-    // LOG_IN_SCENE/CHARACTER_SCENE), same pattern as CLoginWin::RenderTextOnTop(). A no-op outside
-    // MWT_STR_INPUT.
+    // Draws the resident-password (MWT_STR_INPUT) live text over RmlUi's input-frame background.
+    // No-op outside MWT_STR_INPUT.
     void RenderTextOnTop();
 
     // mu::ui::window::IObject
     bool Render() override;
     bool Update() override;
-    // Was CWin::Create()'s full-screen bounding rect + CWin::CursorInWin(WA_ALL) -- see this
-    // class's header comment. Unconditionally claims while shown; no rect check needed.
+    // Unconditionally claims clicks while shown; no rect check needed.
     bool UpdateMouseEvent() override
     {
         return !IsVisible();
@@ -81,9 +64,7 @@ public:
     {
         return true;
     }
-    // Below CCreditWin's full-screen-exclusive 100.0f -- the two are not known to ever coexist in
-    // practice (CCreditWin is LOG_IN_SCENE-only decorative content; nothing pops a message box
-    // while it's shown), but if they ever did, CCreditWin winning is the safer default.
+    // Below CCreditWin's full-screen-exclusive layer; the two are not expected to coexist.
     float GetLayerDepth() override
     {
         return 50.0f;
@@ -105,10 +86,7 @@ private:
         Rml::String line1, line2;
         bool line2Hidden = true;
         bool noButtons = true;
-        // Mutually exclusive -- mirror MSG_WIN_TYPE 1:1 (MWT_NON needs none of these set). Drive
-        // both button visibility and their per-mode left offset in msg_win.rcss; kept as discrete
-        // C++-reported state flags rather than a computed pixel position, consistent with the
-        // "C++ manages state, RCSS manages layout" convention used throughout this branch.
+        // Mutually exclusive; mirror MSG_WIN_TYPE. Drive button visibility/layout in msg_win.rcss.
         bool modeCancelOnly = false;
         bool modeOkOnly = false;
         bool modeBoth = false;
@@ -124,5 +102,4 @@ private:
     void SyncRmlModel();
 };
 
-// Replaces CUIMng's old `CMsgWin m_MsgWin;` member, same convention as g_CreditWin.
 extern CMsgWin g_MsgWin;

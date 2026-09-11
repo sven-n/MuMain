@@ -40,13 +40,8 @@ namespace
     constexpr DurationMs kNameShowDuration{2300.0};
     constexpr std::string_view kCreditDataPath = "Data\\Local\\credit.bmd";
 
-    // Alpha is accumulated as float (not rounded to short each call) so a per-call delta under 1.0
-    // still makes progress -- at capped/vsynced FPS the old short-truncating version was fine (each
-    // call's delta was comfortably >1), but under an uncapped-FPS renderer FPS_ANIMATION_FACTOR
-    // collapses toward 0, shrinking delta below 1.0 per call; static_cast<short>(alpha + delta) then
-    // truncated straight back to the same integer every single call, forever -- a real, FPS-
-    // dependent freeze, not a fade that's merely slow (confirmed live: fine under Vulkan's correctly
-    // vsync-capped FPS, stuck under the renderer backend that wasn't capping it).
+    // Alpha accumulates as float, not short: under uncapped FPS a per-call delta can drop below
+    // 1.0, and truncating to an integer each call would freeze the fade permanently.
     template<typename T>
     float IncreaseAlpha(float alpha, T ratio)
     {
@@ -77,8 +72,6 @@ namespace
 
 
 
-
-// See this global's own header comment (CreditWin.h).
 CCreditWin g_CreditWin;
 
 CCreditWin::CCreditWin()
@@ -91,10 +84,7 @@ CCreditWin::CCreditWin()
     , m_aeTextState{}
     , m_textElapsed(DurationMs::zero())
 {
-	// Not SetLayoutMode() here -- CManager::AddUIObj() (called from Create(), below)
-	// overwrites it unconditionally on first registration via UI::Layout::ForInterface(), which
-	// is the actual authority; see that policy table's own INTERFACE_CREDITS entry
-	// (UILayoutPolicy.cpp) for why this window needs LayoutMode::Legacy specifically.
+	// Layout mode is set by CManager::AddUIObj() via UI::Layout::ForInterface(), not here.
 }
 
 CCreditWin::~CCreditWin()
@@ -104,15 +94,11 @@ CCreditWin::~CCreditWin()
 
 void CCreditWin::Create()
 {
-	// Mirrors CWin::Create()'s own internal Release()-then-rebuild pattern -- avoids leaking the
-	// sprites on a second Create() call (RepositionSceneUI()'s resolution-change path).
 	Release();
 
 	LoadText();
 
-	// RmlUi migration -- see this class's header comment. Guarded like every other hybrid window's
-	// Create() (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change), so
-	// the document/model are created once, ever.
+	// Guarded so the document/model are created once, since Create() re-runs on resolution change.
 	if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
 	{
 		const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "credit_win",
@@ -127,8 +113,6 @@ void CCreditWin::Create()
 				c.Bind("team_opacity", &model.teamOpacity);
 				c.Bind("names_opacity", &model.namesOpacity);
 
-				// One credit-name slot -- same RegisterStruct/RegisterArray shape as CBuffStrip's
-				// own data-for list (BuffStrip.cpp).
 				auto name = c.RegisterStruct<CreditNameEntry>();
 				name.RegisterMember("text", &CreditNameEntry::text);
 				c.RegisterArray<std::vector<CreditNameEntry>>();
@@ -143,23 +127,15 @@ void CCreditWin::Create()
 			m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/credit_win.rml");
 	}
 
-	// Registers with CSceneUICoordinator's
-	// own scene-scoped manager instance, not the shared g_pNewUIMng (this window only ever exists
-	// during LOG_IN_SCENE; see CSceneUICoordinator::GetNewStyleMng()'s own comment for why).
-	// AddUIObj() is already idempotent (no-ops if already registered), so this is safe to call
-	// again on every RepositionSceneUI()-triggered recreate.
+	// AddUIObj() is idempotent, so this is safe to call again on every recreate.
 	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CREDITS, this);
 
-	// Matches CWin::Create()'s own unconditional m_bShow=false reset -- RepositionSceneUI()
-	// snapshots visibility before calling this and restores it right after.
 	Show(false);
 }
 
 void CCreditWin::Release()
 {
-	// See CLoginWin::PreRelease()'s identical comment -- each migrated window's Release() is
-	// called explicitly at every scene transition, not swept automatically by any shared list, and
-	// this class has no base-class knowledge of m_pRmlDoc.
+	// Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
 	if (m_pRmlDoc)
 		m_pRmlDoc->Hide();
 }
@@ -182,12 +158,7 @@ void CCreditWin::Show(bool bShow)
 
 bool CCreditWin::Update()
 {
-	// g_pTimer is never reset, so GetTimeElapsed() is total process uptime, not a per-frame delta.
-	// SceneManager.cpp's own dDeltaTick (what CWin::Update() used to pass this window as its
-	// deltaMilliseconds parameter) only behaves like a delta because it's clamped to
-	// 200.0 * FPS_ANIMATION_FACTOR, a ceiling the raw uptime value exceeds almost immediately and
-	// forever after -- in steady state it reduces to exactly that clamped constant, so this reads
-	// the same effective value directly instead of going through g_pTimer at all.
+	// Reconstructs the per-frame delta tick directly rather than via g_pTimer (total uptime, not a delta).
 	extern float FPS_ANIMATION_FACTOR;
 	const DurationMs deltaTime{ 200.0 * static_cast<double>(FPS_ANIMATION_FACTOR) };
 
@@ -213,9 +184,7 @@ bool CCreditWin::Update()
 
 bool CCreditWin::Render()
 {
-	// RmlUi's #panel now owns 100% of this window's visuals -- see this class's header comment.
-	// Nothing left to draw here; SyncRmlModel() (called from Update()) is what keeps the model
-	// current.
+	// RmlUi's #panel owns all this window's visuals; SyncRmlModel() (called from Update()) keeps it current.
 	return true;
 }
 
@@ -244,12 +213,8 @@ void CCreditWin::Init()
 	SetTextIndex();
 }
 
-// Was CSprite+LoadBitmap/BITMAP_TEMP before Stage 2 -- the two illustration <div>s
-// (credit_win.rml) now show one of 16 named @spritesheet decorators via a C++-swapped
-// data-style-decorator (SyncRmlModel's own comment has why <img data-attr-src> was tried and
-// dropped); SyncRmlModel() pushes the decorator name whenever m_byIllust changes and
-// m_nIllustAlpha (below) every frame while fading. The state machine/timing themselves
-// (kIllustFadeDuration/kIllustShowDuration) are unchanged from before this port.
+// Drives the illustration crossfade state machine; SyncRmlModel() pushes the resulting decorator
+// name and alpha to RmlUi each frame.
 void CCreditWin::AnimationIllust(DurationMs deltaTime)
 {
 	switch (m_eIllustState)
@@ -359,8 +324,6 @@ void CCreditWin::AnimationText(int nClass, DurationMs deltaTime)
 	switch (*peTextState)
 	{
 	case FADEIN:
-		// Text-visible alpha rising 0->255 -- was a black hide-overlay sprite's alpha falling
-		// 255->0 before Stage 2; see m_anTextAlpha's own header comment.
 		nAlpha = IncreaseAlpha(nAlpha, deltaTime / kTextFadeDuration);
 		if (255 <= nAlpha)
 		{
@@ -423,18 +386,9 @@ void CCreditWin::SyncRmlModel()
 			m_RmlBinder.MarkDirty(boundName);
 		}
 	};
-	// Named-sprite decorator string, e.g. "image(illust-im3-1)" -- matches one of the 16
-	// single-rect @spritesheet blocks in credit_win.rcss (illust-im1-1 .. illust-im8-2, one per
-	// im{N}_{M}.jpg). Deliberately NOT a raw <img data-attr-src> (this class's first attempt):
-	// that route needs its own path convention through two independent, easy-to-get-wrong layers
-	// (RenderManager::LoadTexture()'s JoinPath() call, then RmlUiRenderInterface::LoadTexture()'s
-	// own routing through CGlobalBitmap -- see git history on this file for what that took to get
-	// loading at all) and even once the file loads correctly, the rendered image doesn't fill its
-	// box -- a real, uninvestigated gap between the two illustrations, root cause not found. The
-	// decorator/@spritesheet route reuses the exact mechanism this document's own logo/deco/close-
-	// button decorators already prove works, and CBuffStrip's per-instance data-style-decorator
-	// (BuffStrip.cpp/buff_strip.rml) already proves a decorator string can be swapped from C++ at
-	// runtime the same way.
+	// Named-sprite decorator string, e.g. "image(illust-im3-1)" -- matches one of the 16 single-rect
+	// @spritesheet blocks in credit_win.rcss. Deliberately not a raw <img data-attr-src>: that route
+	// loaded but rendered images that didn't fill their box, for an unknown reason.
 	auto illustDecorator = [](std::uint8_t illustIndex, int side)
 	{
 		return "image(illust-im" + std::to_string(illustIndex + 1) + "-" + std::to_string(side + 1) + ")";
@@ -450,8 +404,7 @@ void CCreditWin::SyncRmlModel()
 	syncFloat(&CreditWinRmlModel::teamOpacity, "team_opacity", m_anTextAlpha[CRW_INDEX_TEAM] / 255.0f);
 	syncFloat(&CreditWinRmlModel::namesOpacity, "names_opacity", m_anTextAlpha[CRW_INDEX_NAME] / 255.0f);
 
-	// Small (<=4-entry) list, rebuilt+marked-dirty unconditionally every frame -- same reasoning
-	// CBuffStrip's own SyncRmlModel() documents for its data-for'd buff list.
+	// Small (<=4-entry) list; rebuilt and marked dirty unconditionally every frame.
 	auto& model = m_RmlBinder.GetModel();
 	model.names.clear();
 	for (int i = 0; i < m_nNameCount; ++i)

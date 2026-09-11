@@ -22,19 +22,15 @@ namespace mu::ui::window
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, DWORD color);
     void RenderImage(GLuint uiImageType, float x, float y, float width, float height, float su, float sv, float uw, float vh, DWORD color = RGBA(255, 255, 255, 255));
 
-    // Scaled sprite blit: maps a source region (sx,sy,sw,sh, in texels) onto the
-    // dest rect (x,y,width,height, in pixels). Unlike RenderImage above — where
-    // width/height also set the sampled texel extent (1:1, so a smaller size just
-    // crops) — this lets a fixed-size sprite be drawn larger or smaller.
+    // Scaled sprite blit: maps source texels (sx,sy,sw,sh) onto dest pixels (x,y,width,height),
+    // unlike RenderImage above which samples 1:1 so a smaller size just crops.
     void RenderImageStretch(GLuint uiImageType, float x, float y, float width, float height,
                             float sx, float sy, float sw, float sh, DWORD color = RGBA(255, 255, 255, 255));
 
     float RenderNumber(float x, float y, int iNum, float fScale = 1.0f);
 
     // Renders text with an explicit color/background, restoring g_pRenderText's previous
-    // color/background afterward so callers don't leak state into whatever renders next.
-    // Shared by CButton and CTooltip (Widgets/Window/{Button,Tooltip}.h) -- both draw a run of
-    // text in a color that differs from whatever the shared renderer was last set to.
+    // state afterward so callers don't leak state into whatever renders next.
     void RenderTextWithColors(const wchar_t* text, int x, int y, int width, int height, HFONT font,
                               DWORD color, DWORD backColor, int sort);
 

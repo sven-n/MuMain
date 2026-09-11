@@ -1,7 +1,6 @@
-/* Shared, cross-window RCSS for the legacy theme: generic (non-positional) rules reused by more
-   than one migrated window (SysMenuWin/OptionWin's shared button/checkbox/panel-chrome art, plus
-   the anchor/center/stretch layout utility classes every window uses). Every migrated window's
-   <head> links this file first, then its own per-window positional .rcss. */
+/* Shared, cross-window RCSS for the legacy theme -- generic rules reused by more than one
+   migrated window (SysMenuWin/OptionWin's button/checkbox/panel-chrome art, plus layout utility
+   classes). Every migrated window links this file first, then its own positional .rcss. */
 
 @spritesheet legacy-btn-sheet
 {
@@ -10,12 +9,9 @@
 	legacy-btn-hover:  0px 30px 108px 30px;
 	legacy-btn-active: 0px 60px 108px 30px;
 
-	/* Inner (stretch-safe) rects for a ninepatch decorator, used by server_select.rcss's
-	   .group-btn/.server-row to stretch this button art beyond its native 108x30 size without
-	   distorting it (the plain image() decorator stretches the whole sprite and distorts it). The
-	   8px inset is a guess at the art's real border thickness -- op1_b_all.tga/.OZT isn't viewable
-	   through normal file tools -- adjust if the stretched middle shows a seam or squashed
-	   corners. */
+	/* Inner (stretch-safe) rects for a ninepatch decorator (used by server_select.rcss) so button
+	   art stretches past its native 108x30 size without distorting. 8px inset is a guess at the
+	   border thickness -- adjust if the stretched middle shows a seam or squashed corners. */
 	legacy-btn-idle-inner:   8px  8px 92px 14px;
 	legacy-btn-hover-inner:  8px 38px 92px 14px;
 	legacy-btn-active-inner: 8px 68px 92px 14px;
@@ -29,8 +25,7 @@
 }
 
 /* Panel chrome for SysMenuWin/OptionWin's CWinEx backing, reproduced as three stacked elements
-   (.panel-cap-top/.panel-middle/.panel-cap-bottom) rather than RmlUi's tiled-vertical decorator,
-   which doesn't support REPEAT fit mode in this build. */
+   rather than a tiled-vertical decorator -- REPEAT fit mode isn't supported in this build. */
 @spritesheet legacy-panel-bottom-sheet
 {
 	src: "../../../op1_back2.tga";
@@ -56,8 +51,8 @@
 	height: 43dp;
 	decorator: image(legacy-panel-bottom);
 }
-/* Spans nearly the full panel (3dp inset each side), matching CWinEx's real WE_BG_CENTER --
-   painted first so it shows through the caps' own transparent negative space. */
+/* Spans nearly the full panel (3dp inset each side), matching CWinEx's real WE_BG_CENTER; painted
+   first so it shows through the caps' transparent negative space. */
 .panel-middle {
 	position: absolute;
 	left: 3dp;
@@ -133,9 +128,9 @@ body {
 	display: none;
 }
 
-/* Layout primitives -- pure layout, no visual
-   styling, identical in both themes. Apply one to an element to express its intended responsive
-   behavior declaratively; give it its own size (dp if it should respect UI scale) alongside it. */
+/* Layout primitives -- pure layout, no visual styling, identical in both themes. Apply one to
+   express an element's responsive behavior; give it its own size (dp if it should respect UI
+   scale). */
 
 .anchor-top-left {
 	position: absolute;
@@ -193,10 +188,10 @@ body {
 	bottom: 0;
 }
 
-/* Invisible marker read by C++ via Element::GetAbsoluteOffset() -- lets a theme's RCSS express a
-   real-screen anchor point for content that's still legacy-rendered and can't be positioned by
-   RCSS directly (main_frame.rml's #item_hotkey_anchor/#skill_list_anchor). visibility:hidden, not
-   display:none, so it still gets a real layout pass to read a position from. */
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset(), letting RCSS express a
+   real-screen anchor for still-legacy-rendered content (main_frame.rml's
+   #item_hotkey_anchor/#skill_list_anchor). visibility:hidden, not display:none, so it still gets
+   a layout pass. */
 .layout-anchor {
 	position: absolute;
 	visibility: hidden;

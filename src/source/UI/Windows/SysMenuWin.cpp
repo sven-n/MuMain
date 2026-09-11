@@ -46,8 +46,7 @@ void CSysMenuWin::Create()
 
     m_bSelectServerEnabled = (SceneFlag == CHARACTER_SCENE);
 
-    // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
-    // CLoginWin::Create() is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change).
+    // Guarded so BuildRmlUi() runs once; Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
         BuildRmlUi();
 
@@ -99,12 +98,7 @@ void CSysMenuWin::ReloadRmlTheme()
 
 void CSysMenuWin::Release()
 {
-    // See CLoginMainWin::PreRelease()'s identical comment -- each migrated window's Release() is
-    // called explicitly at every scene transition (CSceneUICoordinator's CreateLoginScene()/
-    // CreateCharacterScene()/CreateMainScene()/Release()), not swept automatically by any shared
-    // list, and this class has no base-class knowledge of m_pRmlDoc, so without this it can keep
-    // rendering into whatever scene comes next if this window happened to be open at the moment
-    // of transition.
+    // Called explicitly at each scene transition; no base-class auto-release for m_pRmlDoc.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -115,13 +109,9 @@ void CSysMenuWin::Show(bool bShow)
 
     if (m_pRmlDoc)
     {
-        // PullToFront() is required here: this document is created once at scene setup and only
-        // ever toggled visible/hidden afterward (never recreated), so absent this call it just
-        // stays wherever RmlUi's own document stack put it at that original creation time --
-        // behind g_LoginWin/g_LoginMainWin's own documents, which happen to be created later in
-        // the same scene. GetLayerDepth()'s 40.0f (this class) vs 20.0f/15.0f (theirs) only orders
-        // this legacy manager's own Update()/Render() dispatch, it has no effect on a separate
-        // RmlUi ElementDocument's actual z-order.
+        // PullToFront() is required: this document is never recreated after scene setup, so it
+        // otherwise stays at its original creation-time z-order (GetLayerDepth() only orders this
+        // legacy manager's own dispatch, not RmlUi's document stack).
         if (bShow) { SyncRmlModel(); m_pRmlDoc->PullToFront(); m_pRmlDoc->Show(); }
         else       m_pRmlDoc->Hide();
     }

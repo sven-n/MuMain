@@ -1,6 +1,6 @@
-/* Legacy theme for the generic message/confirm dialog (CMsgWin). Reuses the same OK/Cancel art as
-   CLoginWin. #panel centers via base.rcss's .center-both with a fixed dp size; the four mode-*
-   classes mirror CMsgWin's own MSG_WIN_TYPE and drive OK/Cancel visibility + per-mode offset. */
+/* Legacy theme for the generic message/confirm dialog (CMsgWin), reusing CLoginWin's OK/Cancel
+   art. #panel centers via base.rcss's .center-both; the mode-* classes mirror CMsgWin's own
+   MSG_WIN_TYPE to drive button visibility and per-mode offsets. */
 
 @spritesheet msgwin-back-sheet
 {

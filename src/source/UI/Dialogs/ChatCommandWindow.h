@@ -15,17 +15,11 @@
 
 namespace mu::ui::window
 {
-// Offers the chat commands which the server told us about, so that nobody
-// has to know or type a command.
-//
-// It has the width of the command window and shows one thing at a time: the
-// commands, the parameters of the command which was picked, or the saved
-// templates. A command without parameters is sent right away, everything
-// else leads to the parameter page first.
+// Lets the player pick a server-advertised chat command instead of typing it; shows one
+// page at a time (commands, parameters, or saved templates).
 class CChatCommandWindow : public CObject
 {
-    // The frame is the one of the command window, which is drawn for a width
-    // of 190 - a wider window would stretch and distort it.
+    // Frame art is drawn for width 190; a wider window would stretch and distort it.
     enum eIMAGE_LIST
     {
         IMAGE_CHATCOMMAND_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,
@@ -43,9 +37,8 @@ class CChatCommandWindow : public CObject
         FRAME_TOP_HEIGHT = 64,
         FRAME_SIDE_WIDTH = 21,
         FRAME_BOTTOM_HEIGHT = 45,
-        // The side pieces are only this tall. Drawing them for more than
-        // that samples past the texture, which repeats their upper end as
-        // a seam near the bottom of the window.
+        // Side-piece texture is only this tall; drawing it taller samples past the
+        // end, creating a seam near the bottom of the window.
         FRAME_SIDE_TEXTURE_HEIGHT = 320,
     };
 
@@ -65,16 +58,14 @@ class CChatCommandWindow : public CObject
         EXIT_BUTTON_Y = 392,
         EXIT_BUTTON_WIDTH = 36,
         EXIT_BUTTON_HEIGHT = 29,
-        // Where the rows have to end so that they don't run into the
-        // buttons below them.
+        // Where rows must stop to avoid overlapping the buttons below.
         CONTENT_BOTTOM = BUTTON_ROW_Y - ROW_HEIGHT,
         VALUE_HEIGHT = 16,
         // A parameter takes its name, the box with its value, and a gap.
         PARAMETER_HEIGHT = ROW_HEIGHT + VALUE_HEIGHT + 4,
     };
 
-    // What the window shows. There is no scrolling between the pages: the
-    // one which is shown owns the whole content area.
+    // What the window shows; each page owns the whole content area (no scrolling between pages).
     enum ePAGE
     {
         PAGE_COMMANDS,
@@ -106,8 +97,8 @@ public:
     void ClosingProcess();
 
 private:
-    // The commands of the catalog, favourites first. Holds indices, because
-    // a list which arrives while the window is open replaces the commands.
+    // Favourites-first order over the catalog; stores indices since an incoming list
+    // replaces the commands while the window is open.
     void RebuildCommandOrder();
     const GameLogic::Commands::ChatCommand* GetCommandAt(int row) const;
     const GameLogic::Commands::ChatCommand* GetSelectedCommand() const;
@@ -119,8 +110,7 @@ private:
     void SaveSelectedAsTemplate();
     void ToggleFavouriteOfSelected();
 
-    // Steps to the next accepted value of a parameter which only takes a
-    // known set of them, so that nothing has to be typed for it.
+    // Cycles a parameter through its fixed set of accepted values so nothing needs typing.
     void CycleParameterValue(size_t parameterIndex);
     void BeginEditingParameter(size_t parameterIndex);
     void CommitEditedValue();
@@ -134,11 +124,9 @@ private:
     void UnloadImages();
 
     int GetScrollableRowCount() const;
-    // The description is wrapped once when the page is entered, because
-    // measuring it against the font is too much work for every frame.
+    // Wrapped once on page entry; measuring against the font every frame would be wasteful.
     void WrapDescriptionOfSelected();
-    // How many of the wrapped lines are shown. A long description gives way
-    // to the parameters, which are the part the player has to reach.
+    // How many wrapped description lines fit; a long description yields space to the parameters.
     int GetVisibleDescriptionLineCount() const;
     int GetParameterTop() const;
     int GetActionTop() const;

@@ -24,13 +24,10 @@ extern unsigned int WindowWidth, WindowHeight;
 
 namespace
 {
-    // This bar's own bounding-box height, used only for the click-gate rect below -- RmlUi
-    // positions/sizes the visible buttons itself via login_main.rcss's anchor rules.
+    // This bar's own bounding-box height, used only for the click-gate rect below.
     constexpr int kBtnHeight = 30;
 
-    // Mirrors UI::RmlBridge::RmlDraggable.cpp's self-owning listener pattern -- this window has
-    // no dynamic state to bind (see this class's header comment), so a plain click->callback
-    // listener is simpler than standing up an RmlModelBinder just for two BindEventCallback slots.
+    // Self-owning click->callback listener; simpler than an RmlModelBinder for two click slots.
     class ClickCallbackListener : public Rml::EventListener
     {
     public:
@@ -55,18 +52,13 @@ void CLoginMainWin::Create()
 {
     Release();
 
-    // WindowWidth (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth() -- same latent
-    // staleness risk as the bug SetPosition()'s own comment documents fixing elsewhere; this call
-    // predates that fix and was missed. #panel's width is pushed from this exact value (below),
-    // and #btn_credit anchors right:0dp off #panel's own right edge, so a stale width here would
-    // misplace/misclick that button specifically.
+    // Reads WindowWidth, not CInput::Instance().GetScreenWidth() -- the latter can go stale and
+    // misplace #btn_credit, which anchors off #panel's right edge using this exact value.
     m_Size.cx = static_cast<int>(WindowWidth) - 30 * 2;
     m_Size.cy = kBtnHeight;
     m_ptPos.x = m_ptPos.y = 0;
 
-    // RmlUi migration, Batch 2 -- see this class's header comment. Guarded the same way
-    // CLoginWin::Create() is (CSceneUICoordinator::RepositionSceneUI() re-runs Create() on resolution change),
-    // so the document is loaded once, ever, and only repositioned/resized afterward.
+    // Guarded so the document is loaded once, ever, and only repositioned/resized afterward.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
         BuildRmlUi();
 
@@ -90,7 +82,6 @@ void CLoginMainWin::ReloadRmlTheme()
 {
     if (!m_pRmlDoc) return;
 
-    // See CLoginWin::ReloadRmlTheme()'s comment on why this reads m_pRmlDoc directly.
     const bool wasVisible = m_pRmlDoc->IsVisible();
     RmlUiRuntime::Instance().GetContext()->UnloadDocument(m_pRmlDoc);
     m_pRmlDoc = nullptr;
@@ -102,15 +93,8 @@ void CLoginMainWin::ReloadRmlTheme()
 
 void CLoginMainWin::Release()
 {
-    // CUIMng::RemoveWinList() (run on every scene transition) used to call Release() on every
-    // window in its list unconditionally, before this window migrated off it -- called explicitly
-    // now at the same call sites. CWin's own Release()/PreRelease() had no knowledge of m_pRmlDoc,
-    // so without this it silently kept rendering (still Shown, still in the Context) on whatever
-    // scene comes next. Confirmed the hard way: transitioning from the login scene to
-    // character-select left this window's Menu/Credit icons visibly overlapping CharSelMainWin's
-    // own button bar, since nothing had ever told the RmlUi document to hide. Hide(), not unload
-    // -- the document/model are meant to be created once and reused (see Create()'s own guard
-    // comment), matching CLoginWin's precedent.
+    // Called explicitly at each scene transition; without it this bar's icons stay visible and
+    // overlap the next scene's own UI. Hide, not unload -- the document is created once and reused.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
@@ -120,13 +104,8 @@ void CLoginMainWin::SetPosition(int nXCoord, int nYCoord)
     m_ptPos.x = nXCoord;
     m_ptPos.y = nYCoord;
 
-    // RmlUi panel: positioned/sized to the same real window-pixel geometry this window's own
-    // bookkeeping uses (see CLoginWin::SetPosition's identical comment) -- #panel's own bounding
-    // box is a genuinely computed value (tied to screen size and this bar's placement relative to
-    // sibling login-scene elements -- a genuine live computed result, not a static value), so it
-    // stays C++-pushed. Its CHILDREN don't:
-    // btn_menu/btn_credit position themselves via login_main.rcss's anchor-left/right:0dp rules
-    // instead, picking up the same dp auto-fit .btn-icon's own width/height already have.
+    // #panel's bounding box is a genuinely computed value (tied to screen size), so it stays
+    // C++-pushed; its children position themselves via login_main.rcss's anchor rules instead.
     if (m_pRmlDoc)
     {
         if (Rml::Element* panel = m_pRmlDoc->GetElementById("panel"))
@@ -155,7 +134,6 @@ bool CLoginMainWin::UpdateMouseEvent()
     if (!IsVisible())
         return true;
 
-    // Was CWin::CursorInWin(WA_ALL) -- ported directly (see CServerSelWin's identical pattern).
     RECT rc;
     ::SetRect(&rc, m_ptPos.x, m_ptPos.y, m_ptPos.x + m_Size.cx, m_ptPos.y + m_Size.cy);
     if (::PtInRect(&rc, CInput::Instance().GetCursorPos()))

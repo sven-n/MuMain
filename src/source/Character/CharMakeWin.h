@@ -143,6 +143,10 @@ private:
         Rml::String statLabel0, statLabel1, statLabel2, statLabel3, statLabel4;
         Rml::String statValue0, statValue1, statValue2, statValue3;
 
+        // Only matters for the modern theme (legacy hides it -- its description panel never had a
+        // separate title line, just the two body lines below). The selected class's own name,
+        // same I18N lookup table as jobs[i].label -- see SyncRmlModel()'s own comment.
+        Rml::String descTitle;
         Rml::String descLine1;
         Rml::String descLine2;
 
@@ -153,6 +157,17 @@ private:
     };
     RmlModelBinder<CharMakeRmlModel> m_RmlBinder;
     Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    // Resolved from #input_text_anchor (char_make.rml) every frame in Update() -- RmlUi's own
+    // resolved position is the single source of truth for where the legacy-drawn name text
+    // starts, read via GetElementById+GetAbsoluteOffset (same pattern as MainFrameWindow.cpp's
+    // item-hotkey/skill-list anchors), replacing the old hardcoded kInputSpriteOffsetY/
+    // kInputTextOffsetX/kInputTextOffsetY constants. Deliberately NOT resolved once in
+    // SetPosition() -- see Update()'s own comment for why that read pre-layout garbage on this
+    // dialog's very first frame. Consumed by both Update() (g_pSingleTextInputBox) and
+    // RenderTextOnTop() (the IME-fallback ::RenderInputText() path).
+    float m_fInputTextX = 0.f;
+    float m_fInputTextY = 0.f;
 
     int m_nOriginX = 0;
     int m_nOriginY = 0;

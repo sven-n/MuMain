@@ -23,11 +23,9 @@ using GameLogic::Commands::ChatCommandTemplate;
 
 namespace
 {
-// A favourite is marked with a leading character instead of an icon, so
-// that it works with every font the client is started with.
+// A leading character instead of an icon, so it works with any font.
 constexpr const wchar_t* FavouriteMarker = L"* ";
-// What tells the player that a command wants something filled in. The names
-// of the parameters don't fit next to the command at this width.
+// Signals a command takes parameters; their names don't fit at this window width.
 constexpr const wchar_t* ParameterMarker = L" ...";
 
 struct TextColor
@@ -50,9 +48,8 @@ void UseTextColor(const TextColor& color)
     g_pRenderText->SetBgColor(0);
 }
 
-// Renders one line of the window. An empty text has to be skipped: the text
-// renderer measures a placeholder for it and would leave a stray glyph
-// behind whenever a box width is given.
+// Renders one line; empty text must be skipped -- the renderer measures a placeholder
+// for it and leaves a stray glyph when a box width is given.
 void RenderLine(int x, int y, const wchar_t* text, int boxWidth, int boxHeight = 0, int sort = RT3_SORT_LEFT)
 {
     if (text == nullptr || text[0] == L'\0')
@@ -166,8 +163,7 @@ float mu::ui::window::CChatCommandWindow::GetKeyEventOrder()
 
 void mu::ui::window::CChatCommandWindow::OpenningProcess()
 {
-    // The player may have gained or lost commands since the last time, so the
-    // window always starts at the top of a freshly ordered list.
+    // Commands may have changed since last time, so always rebuild and start at the top.
     RebuildCommandOrder();
     m_selectedRow = -1;
     ShowPage(PAGE_COMMANDS);
@@ -252,8 +248,7 @@ void mu::ui::window::CChatCommandWindow::PickCommand(int row)
         return;
     }
 
-    // Nothing to fill in means nothing to show - the command is what the player
-    // wanted, so send it and get out of the way.
+    // No parameters means nothing to show; execute immediately.
     if (command->Parameters.empty())
     {
         ChatCommandCatalog::Execute(command->Command);
@@ -295,8 +290,7 @@ void mu::ui::window::CChatCommandWindow::ExecuteSelectedCommand()
         return;
     }
 
-    // A missing required value would only earn an error message from the
-    // server, so point at the parameter instead of sending anything.
+    // Avoid a round trip for a server error; block locally when required values are missing.
     if (!AreRequiredValuesSet())
     {
         g_pSystemLogBox->AddText(I18N::Game::ChatCommandsFillRequired, mu::ui::window::TYPE_ERROR_MESSAGE);
@@ -329,8 +323,7 @@ void mu::ui::window::CChatCommandWindow::ExecuteTemplate(size_t index)
         return;
     }
 
-    // The command is gone, e.g. because the plugin was deactivated on the
-    // server. Sending it anyway would only produce an error message.
+    // Command no longer exists (e.g. plugin deactivated); sending would just error.
     g_pSystemLogBox->AddText(I18N::Game::ChatCommandsUnknownCommand, mu::ui::window::TYPE_ERROR_MESSAGE);
 }
 
@@ -397,8 +390,7 @@ std::vector<std::wstring> mu::ui::window::CChatCommandWindow::SplitValidValues(c
 
 bool mu::ui::window::CChatCommandWindow::IsPickedFromList(const ChatCommandParameter& parameter)
 {
-    // The server sends the accepted values for everything which only takes a
-    // known set of them, booleans included.
+    // Server sends accepted values for anything with a fixed set, booleans included.
     return !parameter.ValidValues.empty();
 }
 
@@ -428,8 +420,7 @@ void mu::ui::window::CChatCommandWindow::CycleParameterValue(size_t parameterInd
         }
     }
 
-    // One step past the last value clears it again, which is how an optional
-    // parameter is left out.
+    // Cycling past the last value clears it -- how an optional parameter is left blank.
     m_parameterValues[parameterIndex] = (next >= values.size()) ? std::wstring() : values[next];
 }
 
@@ -447,8 +438,7 @@ void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterI
     const auto valueY = GetParameterTop() + static_cast<int>(parameterIndex) * PARAMETER_HEIGHT + ROW_HEIGHT;
     m_pValueInput->SetPosition(m_Pos.x + CONTENT_LEFT + 2, valueY + 1);
 
-    // A number field which accepts letters only leads to a command the server
-    // rejects, so let the field enforce what the parameter takes.
+    // Restrict input to digits when the parameter is numeric, matching what the server accepts.
     m_pValueInput->SetOption(command->Parameters[parameterIndex].Type == ChatCommandParameterType::Number
                                  ? UIOPTION_NUMBERONLY
                                  : UIOPTION_NULL);
@@ -456,8 +446,7 @@ void mu::ui::window::CChatCommandWindow::BeginEditingParameter(size_t parameterI
     m_pValueInput->SetState(UISTATE_NORMAL);
     m_pValueInput->GiveFocus();
 
-    // While a field owns the keyboard, only the window it belongs to gets the
-    // key events - without this, escape wouldn't reach us anymore.
+    // Needed so Escape still reaches this window while the input field has focus.
     SetRelatedWnd(m_pValueInput->GetHandle());
 }
 
@@ -519,8 +508,7 @@ int mu::ui::window::CChatCommandWindow::GetVisibleDescriptionLineCount() const
         return 0;
     }
 
-    // What the parameters and the two actions below them need, plus the gap
-    // which separates them from the description.
+    // Space needed for the parameters, the two actions below them, and the gap before them.
     const auto reserved = static_cast<int>(command->Parameters.size()) * PARAMETER_HEIGHT + 3 * ROW_HEIGHT;
     const auto available = CONTENT_BOTTOM - CONTENT_TOP - reserved;
     const auto fitting = std::max(0, available / ROW_HEIGHT);
@@ -713,8 +701,7 @@ bool mu::ui::window::CChatCommandWindow::UpdateKeyEvent()
 
     if (IsPress(VK_ESCAPE))
     {
-        // The first escape leaves the field, the next one goes back a page and
-        // then closes the window.
+        // Escape backs out one step at a time: field, then page, then close.
         if (m_editedParameter >= 0)
         {
             StopEditing();
@@ -817,10 +804,8 @@ void mu::ui::window::CChatCommandWindow::RenderBaseWindow()
     RenderImage(IMAGE_CHATCOMMAND_BACK, x, y, float(WINDOW_WIDTH), float(WindowHeight));
     RenderImage(IMAGE_CHATCOMMAND_TOP, x, y, float(WINDOW_WIDTH), float(FRAME_TOP_HEIGHT));
 
-    // The side pieces are stretched instead of drawn one to one: the window is
-    // taller than they are, and asking for more of them than they have samples
-    // past their end. They are a plain vertical border, so stretching them
-    // doesn't show.
+    // Side pieces are stretched rather than tiled -- the window is taller than the texture,
+    // and they're a plain vertical border, so stretching doesn't show.
     RenderImageStretch(IMAGE_CHATCOMMAND_LEFT, x, y + float(FRAME_TOP_HEIGHT), float(FRAME_SIDE_WIDTH), middleHeight,
                        0.f, 0.f, float(FRAME_SIDE_WIDTH), float(FRAME_SIDE_TEXTURE_HEIGHT));
     RenderImageStretch(IMAGE_CHATCOMMAND_RIGHT, x + float(WINDOW_WIDTH - FRAME_SIDE_WIDTH), y + float(FRAME_TOP_HEIGHT),
@@ -870,8 +855,7 @@ void mu::ui::window::CChatCommandWindow::RenderCommandPage()
         const bool isFavourite = GameLogic::Commands::Favourites::Contains(command->Command);
         UseTextColor(isFavourite ? FavouriteColor : NormalColor);
 
-        // Only the command itself fits at this width, so the parameters are
-        // announced by three dots instead of being named here.
+        // Only the command name fits at this width; parameters are just flagged with "...".
         std::wstring text = isFavourite ? FavouriteMarker : L"";
         text += command->Command;
         if (!command->Parameters.empty())
@@ -929,8 +913,7 @@ void mu::ui::window::CChatCommandWindow::RenderParameter(size_t parameterIndex, 
     const auto& parameter = command->Parameters[parameterIndex];
     const auto& value = m_parameterValues[parameterIndex];
 
-    // A required parameter without a value is what keeps the command from being
-    // sent, so it's the one to point at.
+    // Highlight required parameters that are still empty -- they're what's blocking send.
     const bool isMissing = parameter.IsRequired && value.empty();
     UseTextColor(isMissing ? MissingValueColor : NormalColor);
 
@@ -983,9 +966,8 @@ void mu::ui::window::CChatCommandWindow::RenderTemplatePage()
 
 void mu::ui::window::CChatCommandWindow::LoadImages()
 {
-    // The ids are shared with the other windows, but every window loads what it
-    // draws - relying on another one having done it means an empty frame when
-    // that window wasn't opened yet.
+    // IDs are shared with other windows, but each window loads its own images --
+    // relying on another window having loaded them first would show an empty frame.
     LoadBitmap(L"Interface/newui_msgbox_back.jpg", IMAGE_CHATCOMMAND_BACK, GL_LINEAR);
     LoadBitmap(L"Interface/newui_item_back01.tga", IMAGE_CHATCOMMAND_TOP, GL_LINEAR);
     LoadBitmap(L"Interface/newui_item_back02-L.tga", IMAGE_CHATCOMMAND_LEFT, GL_LINEAR);

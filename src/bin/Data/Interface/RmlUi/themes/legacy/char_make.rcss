@@ -1,6 +1,6 @@
-/* Legacy theme for the character-creation dialog (CCharMakeWin). Only idle/checked button frames
-   are reproduced. Stat/description panels were always flat CSprite fills in the original, so
-   they're plain background-color here too. */
+/* Legacy theme for the character-creation dialog (CCharMakeWin) -- only idle/checked button
+   frames are reproduced. Stat/description panels were flat CSprite fills originally, so they're
+   plain background-color here too. */
 
 @spritesheet charmake-input-sheet
 {
@@ -24,12 +24,10 @@
 	charmake-cancel-idle: 0px 0px 54px 30px;
 }
 
-/* See themes/modern/char_make.rcss's own comment -- width/height and every child's
-   left/top below are static RCSS instead of C++-pushed, except #panel's own left/top itself
-   (still pushed, genuine screen placement) and the job buttons (genuinely per-instance data via
-   data-for/data-style-*, unaffected either way). Deliberately stays px, not dp -- this panel's
-   real screen position also drives the live 3D character-preview viewport, a separate scale
-   mechanism not touched here; see the modern theme's comment for the full reasoning. */
+/* Static RCSS instead of C++-pushed for width/height and most children (except #panel's own
+   left/top, and job buttons which are per-instance data). Deliberately px, not dp -- this panel's
+   screen position also drives the live 3D character-preview viewport, a separate scale
+   mechanism. */
 #panel {
 	position: absolute;
 	width: 454px;
@@ -103,17 +101,49 @@
 	color: #ffb400;
 }
 
+/* modern-only class-name title above the two description lines -- legacy's description panel
+   never had one. */
+.desc-title {
+	display: none;
+}
 .desc-line {
 	position: absolute;
 	left: 10px;
 	white-space: nowrap;
 }
+/* Exact original inline top:...px values for these two lines, moved to per-line classes so modern
+   can add .desc-title above without shifting legacy's own offsets. */
+.desc-line-1 { top: 12px; }
+.desc-line-2 { top: 31px; }
 
 .input-frame {
 	position: absolute;
 	width: 346px;
 	height: 38px;
 	decorator: image(charmake-input-image);
+	pointer-events: none;
+}
+
+/* Real legacy screen has no separate label element -- cha_id.tga's own baked art already shows
+   one as part of the single wide sprite above. */
+.input-label {
+	display: none;
+}
+
+/* modern-only decorative backdrops/kickers (char_make.rml's own comment) -- real legacy sprite art
+   already gives every element its own visual identity, no artificial backing panel needed. */
+.side-panel, .panel-kicker {
+	display: none;
+}
+
+/* Exactly the old kInputTextOffsetX=78/kInputTextOffsetY=21 (relative to kInputSpriteOffsetY=317),
+   expressed as RCSS instead of a C++ constant; CharMakeWin.cpp now reads this element's resolved
+   position. */
+#input_text_anchor { left: 78px; top: 338px; }
+.input-text-anchor {
+	position: absolute;
+	width: 0;
+	height: 0;
 	pointer-events: none;
 }
 
@@ -126,11 +156,9 @@
 	line-height: 30px;
 	cursor: pointer;
 	pointer-events: auto;
-	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it.
-	   line-height/text-align/vertical-align above are declared explicitly for the same reason as
-	   the modern theme's identical fix even though color:transparent hides any
-	   visible effect today -- height already was fixed px here, but this rule shouldn't rely on
-	   inheriting anything from base.rcss's now-dp .btn regardless. */
+	/* Real sprite art already renders OK/Cancel text -- hide the bound label text behind it
+	   (color:transparent); line-height/text-align/vertical-align set explicitly rather than
+	   relying on inheritance from base.rcss's .btn. */
 	color: transparent;
 }
 .btn-ok {

@@ -5,13 +5,10 @@
 	<link type="text/rcss" href="msg_win.rcss"/>
 </head>
 <body data-model="msg_win">
-	<!-- Modern theme's own copy of the generic message/confirm dialog. Per-theme file
-	     (UI::RmlBridge::LoadThemedDocument) because modern-frame/modern-frame-crimson is genuinely
-	     modern-specific structure, not just style -- the shared ../../msg_win.rml is legacy's own
-	     theme-neutral copy and carries neither class (a "shared" file must not bake in one theme's
-	     vocabulary). mode-* classes select which of CMsgWin's
-	     five MSG_WIN_TYPE variants is active -- keep this file's ids/data-model names in sync with
-	     ../../msg_win.rml, MsgWin.cpp binds against both by the same names. -->
+	<!-- Modern theme's own copy of the generic message/confirm dialog -- per-theme file since
+	     modern-frame/modern-frame-crimson is modern-specific structure, not just style. mode-*
+	     classes select which of CMsgWin's five MSG_WIN_TYPE variants is active; keep ids/
+	     data-model names in sync with ../../msg_win.rml. -->
 	<div id="panel" class="center-both modern-frame modern-frame-crimson"
 	     data-class-no-buttons="no_buttons"
 	     data-class-mode-cancel-only="mode_cancel_only"
@@ -25,11 +22,9 @@
 		<!-- Background art only for the resident-password re-entry step; live text drawn on top by legacy code. -->
 		<div id="input_frame"></div>
 
-		<!-- Raised header/footer bands (base.rcss) -- overlays painted after the frame's own fill,
-		     structural separation only, no repositioning of the text/buttons above/below. This
-		     window has no title text of its own (see msg_win.rcss's own comment), so it gets a
-		     footer band only, not .modern-header -- an empty raised strip above msg_line1 with
-		     nothing in it would read as a mistake, not a deliberate header. -->
+		<!-- Raised footer band (base.rcss) for structural separation only -- no title text here
+		     so it gets a footer, not .modern-header, avoiding an empty raised strip that would
+		     look like a mistake. -->
 		<div class="modern-footer"></div>
 
 		<div id="btn_ok" class="btn btn-ok" data-event-click="msgwin_ok_click">{{ok_label}}</div>

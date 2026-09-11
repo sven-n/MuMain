@@ -1,6 +1,5 @@
-/* Modern theme for the active-buff icon strip -- shares the identical icon atlas as legacy (real
-   buff icons, nothing to simplify away); only a cosmetic border/radius per icon plus the tooltip
-   box styling differ. */
+/* Modern theme for the active-buff icon strip -- same icon atlas as legacy, only the per-icon
+   border/radius and tooltip box styling differ. */
 
 #panel {
 	top: 15dp;
@@ -28,8 +27,7 @@
 	/* decorator set per-instance via data-style-decorator (buff_strip.rml). */
 }
 
-/* @spritesheet declarations are per-stylesheet, duplicated identically from
-   themes/legacy/buff_strip.rcss (same source art). */
+/* Duplicated identically from themes/legacy/buff_strip.rcss (same source art). */
 @spritesheet buff-atlas-1
 {
 	src: "../../../newui_statusicon.jpg";

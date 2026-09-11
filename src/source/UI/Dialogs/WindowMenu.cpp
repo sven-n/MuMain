@@ -140,8 +140,7 @@ bool mu::ui::window::CWindowMenu::UpdateMouseEvent()
         m_iSelectedIndex = -1;
     }
 
-    // System menu is modal. Consume every mouse event while visible so world
-    // movement, attacks, and item interaction cannot fire behind it.
+    // Modal: consumes every mouse event while visible so nothing behind it can fire.
     return false;
 }
 

@@ -28,9 +28,8 @@ namespace
     constexpr float BOTTOM_H = 50.0f;
     constexpr float BACK_BLANK_W = 8.0f;
     constexpr float BACK_BLANK_H = 10.0f;
-    // Layout in the 640x480 reference space the 2D render helpers use. The
-    // frame's top/bottom slices are fixed; the middle slice is stretched to make
-    // up the rest, so the panel height can be set freely.
+    // 640x480 reference-space layout: top/bottom slices are fixed, middle stretches to
+    // fill, so PANEL_H is freely adjustable.
     constexpr float PANEL_W = MSGBOX_WIDTH;
     constexpr float PANEL_H = 122.0f;
     constexpr float PANEL_X = (REFERENCE_WIDTH - PANEL_W) / 2.0f;
@@ -93,9 +92,7 @@ namespace
         }
     }
 
-    // True when the in-game message-box textures are resident (they are while
-    // we're still in the main scene - i.e. the long probing wait). During the
-    // brief re-login the UI is torn down and they may be gone, so we fall back.
+    // True while in the main scene (probing); may be false during re-login once the UI is torn down.
     bool NativeSkinAvailable()
     {
         return Bitmaps[MsgBox::IMAGE_MSGBOX_TOP].TextureNumber != 0
@@ -124,16 +121,14 @@ namespace
 
     void DrawBackdrop()
     {
-        // While probing we're still in the main scene: dim the live game lightly
-        // and let it show through.
+        // While probing, dim the live game lightly so it shows through.
         if (ReconnectManager::Instance().GetPhase() == ReconnectManager::Phase::Probing)
         {
             FillBlack(0.0f, 0.0f, REFERENCE_WIDTH, REFERENCE_HEIGHT, DIM_ALPHA);
             return;
         }
 
-        // Re-login: the world is torn down. Show the frozen disconnect frame so
-        // the player doesn't see a black screen or the login world.
+        // Re-login: world is torn down, show the frozen disconnect frame instead of black/login screen.
         if (s_hasBackground && s_backgroundTex != 0)
         {
             RenderColorBitmap(static_cast<int>(s_backgroundTex), 0.0f, 0.0f,

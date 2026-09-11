@@ -9,42 +9,12 @@ namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
-    // First pilot of the CObject-tier adapter pattern.
-    // Chosen as the pilot for being small, self-contained (no drag-drop, no I3DRenderObj/3D-camera
-    // rendering), and having genuine interaction (two real button clicks, live per-frame text) to
-    // prove the pattern against.
-    //
-    // This widget's own tooltips (I18N::Game::OfficialMUHelperSetting/StartOfficialMUHelper/
-    // StopOfficialMUHelper) identify it as the "Official MU Helper" mini control bar (Config/
-    // Start/Stop for the MUHelper::g_MuHelper bot feature) with the hero's current map/position
-    // readout drawn as part of the same strip -- one legacy class, one window, one screen
-    // position, no existing seam to split the two concerns along. Ported as one component to
-    // match, not split into two.
-    //
-    // Renamed from CNewUIHeroPositionInfo (a name that reflected the position readout only, not
-    // what the widget actually is): the original class name, along with
-    // INTERFACE_HERO_POSITION_INFO, CSystem::m_pNewHeroPositionInfo/
-    // GetUI_NewHeroPositionInfo()/g_pHeroPositionInfo, and the Sync/Update/ShouldHide*Visibility
-    // helper methods, all renamed to match at the same time (the base-class/tier boundary itself
-    // is a separate, still-open question, unrelated to this
-    // naming pass).
-    //
-    // Render() is now a no-op -- RmlUi renders 100% of this widget's visuals via the normal
-    // SetPreSubmitCallback seam. UpdateMouseEvent()/UpdateKeyEvent() always report "not consumed"
-    // -- RmlUi's own context does hit-testing now (Rml::Context::IsMouseInteracting(), wired into
-    // Input/Selection.cpp's and ZzzInterface.cpp's world-click gates via
-    // RmlUiRuntime::IsMouseOverUI()). Create()/Release()/GetLayerDepth()/Show()/Enable()/
-    // IsVisible() stay real -- CManager still owns z-order/registration/visibility-toggling
-    // (mu::ui::window::CSystem::SyncMuHelperBarVisibility() etc.) through them exactly as before.
-    // Update() still reads Hero's live position every frame, now to feed the RmlUi model instead
-    // of a member later read by the (now dead) Render().
-    //
-    // The legacy CButton members/SetButtonInfo()/MoveTextTipPos()/BtnProcess()/LoadImages()/
-    // UnloadImages() machinery is removed rather than kept-but-unused: unlike the CWin-tier
-    // pattern (where a legacy CButton stays alive for redundant hit-testing bookkeeping),
-    // UpdateMouseEvent() being a permanent "not consumed" here means those objects could never
-    // detect a click again regardless of their own state -- keeping them would just be dead
-    // weight, not real redundancy.
+    // RmlUi-backed "Official MU Helper" control bar (Config/Start/Stop for MUHelper::g_MuHelper)
+    // plus the hero's live map/position readout. Render() is a no-op -- RmlUi draws everything via
+    // SetPreSubmitCallback. UpdateMouseEvent()/UpdateKeyEvent() always report "not consumed" --
+    // RmlUi's own context does hit-testing. Create()/Release()/GetLayerDepth()/Show()/Enable()/
+    // IsVisible() still drive CManager's z-order/registration/visibility as before. Update() still
+    // reads Hero's position every frame, now to feed the RmlUi model.
     class CMuHelperBar : public CObject
     {
     private:
@@ -58,9 +28,7 @@ namespace mu::ui::window
         bool Create(CManager* pNewUIMng, int x, int y);
         void Release();
 
-        // Vestigial (RmlUi/CSS owns this widget's screen position now, via base.rcss's
-        // .anchor-top-left utility class -- see mu_helper_bar.rcss). Kept only because it's
-        // public API surface; grep-confirmed zero external callers, safe to no-op.
+        // Vestigial -- RmlUi/CSS owns this widget's position now (mu_helper_bar.rcss). No-op kept for API compatibility.
         void SetPos(int x, int y) {}
 
         bool UpdateMouseEvent();
@@ -73,35 +41,25 @@ namespace mu::ui::window
         void OpenningProcess();
         void ClosingProcess();
 
-        // Re-derives the RmlUi document's actual Show()/Hide() state from IsVisible() (the
-        // layout-driven flag CObject::Show() already sets -- panel docking etc., see
-        // WindowSystem.cpp's Hide/Show(INTERFACE_MU_HELPER_BAR) call sites) ANDed with
-        // sceneAllowsShow. Needed because this widget's Update() (the only place that used to
-        // touch the RmlUi doc) only ever runs while SceneFlag == MAIN_SCENE (MainScene.cpp) --
-        // before this widget became RmlUi-backed, that same MAIN_SCENE-only call site was already
-        // a complete visibility gate, since nothing drew otherwise. Now that a persistent RmlUi
-        // document owns the visuals, it needs a real gate of its own -- called every frame
-        // regardless of scene from Winmain.cpp's SetPostRmlUiCallback via
-        // CSystem::SyncMainSceneHudVisibility(), so leaving MAIN_SCENE is caught even though
-        // Update() itself stops running.
+        // Gates the RmlUi doc's Show()/Hide() on IsVisible() AND sceneAllowsShow. Needed because
+        // Update() (which used to own doc visibility) only runs during MAIN_SCENE; this is called
+        // every frame regardless of scene from CSystem::SyncMainSceneHudVisibility(), so leaving
+        // MAIN_SCENE still hides the doc.
         void SyncDocVisibility(bool sceneAllowsShow);
 
         void ReloadRmlTheme() override;
 
-        // Vestigial for the same reason as SetPos() -- Update() reads Hero's position directly,
-        // never through this setter (matched the original's own behavior: it never called this
-        // either). Grep-confirmed zero external callers.
+        // Vestigial -- Update() reads Hero's position directly, never through this setter.
         void SetCurHeroPosition(int x, int y) {}
 
-        // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
-        // cleared exactly like every other migrated window's RmlClickX() pattern.
+        // Set by the RmlUi document's data-event-click bindings; polled and cleared like other windows' RmlClickX().
         void RmlClickConfig() { m_bRmlConfigClicked = true; }
         void RmlClickToggle() { m_bRmlToggleClicked = true; }
 
     private:
         struct MuHelperBarRmlModel
         {
-            Rml::String positionText;   // "MapName (x, y)" -- matches the original's single RenderText call
+            Rml::String positionText;   // "MapName (x, y)"
             bool muHelperActive = false; // drives which of Start/Stop is shown
             Rml::String configTooltip, startTooltip, stopTooltip;
         };

@@ -58,23 +58,13 @@ namespace mu::ui::window
         bool Process();
 
     protected:
-        // Shared CSprite-driven rendering for the state-indexed, single-texture,
-        // vertically-stacked-frame image both CButton and CRadioButton draw -- lives once here
-        // rather than duplicated in
-        // each subclass, since both classes' RenderImage() shapes already matched this pattern.
-        // CSprite takes LOGICAL (reference-resolution) position/size and applies the active
-        // transform's scale plus the live screen offset itself, inside Render() -- it just bakes
-        // the scale (and its Y-flip's WindowHeight basis) in at Create() time rather than
-        // resolving it fresh per call like RenderImage() did, so the sprite is rebuilt whenever
-        // those go stale.
+        // Shared CSprite-driven rendering for the state-indexed, vertically-stacked-frame image
+        // both CButton and CRadioButton draw. CSprite bakes scale/WindowHeight in at Create()
+        // time, so the sprite must be rebuilt whenever those go stale.
         void RenderStateImage(int imgIndex, int frame, int frameCount, unsigned int color);
 
     private:
-        // Hit-test via the opt-in WindowGeometry component (UI/Core/WindowGeometry.h) instead of
-        // hand-rolling the rect compare inline at each call site. Built fresh from m_Pos/m_Size on each
-        // call rather than kept as a persistent member: those two fields (and the public
-        // GetPos()/GetSize() built around them) are already this class's source of truth, so a
-        // second persistent copy would just be state to keep in sync for no benefit.
+        // Hit-tests via WindowGeometry; built fresh from m_Pos/m_Size each call rather than cached.
         bool IsMouseIn() const;
 
         CSprite m_sprite;
@@ -167,9 +157,7 @@ namespace mu::ui::window
     public:
         void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
         void ChangeText(std::wstring btname);
-        // Slot overload: stores a pointer to an I18N::<Group>::<Identifier>
-        // variable so the cached label is refreshed automatically when the
-        // locale changes. Pass &I18N::Game::SomeKey at the call site.
+        // Slot overload: stores a pointer to an I18N variable so the label refreshes on locale change.
         void ChangeText(const wchar_t* const* nameSlot);
         void SetFont(HFONT hFont);
 
@@ -182,8 +170,7 @@ namespace mu::ui::window
         void ChangeTextBackColor(const DWORD bcolor);
         void ChangeTextColor(const DWORD color);
 
-        // Forward to the owned CTooltip (Widgets/Window/Tooltip.h) -- kept as CButton's own
-        // method names since every existing call site already uses them.
+        // Forwards to the owned CTooltip; kept as CButton's own method names for existing call sites.
         void ChangeToolTipText(std::wstring tooltiptext, bool istoppos = false);
         // Slot overload — see ChangeText(const wchar_t* const*).
         void ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos = false);
@@ -208,17 +195,12 @@ namespace mu::ui::window
 
     private:
        std::wstring		m_Name;
-       // Optional I18N indirection: when non-null, the corresponding cached
-       // string is refreshed from *m_p*Slot on every locale change. Set by
-       // the slot-pointer overload of ChangeText.
+       // When set (by the slot overload of ChangeText), the cached string refreshes on locale change.
        const wchar_t* const* m_pNameSlot = nullptr;
-       // True once we have called I18N::RegisterLocaleObserver for this
-       // instance, so EnsureLocaleObserver is idempotent and the destructor
-       // knows whether an Unregister call is owed.
+       // Whether I18N::RegisterLocaleObserver has been called, so EnsureLocaleObserver is idempotent.
        bool                  m_LocaleObserverRegistered = false;
 
-       // Owned tooltip -- Widgets/Window/Tooltip.h. Manages its own text/font/color/locale
-       // refresh; ChangeToolTipText()/etc. above just forward into it.
+       // Owned tooltip; ChangeToolTipText()/etc. just forward into it.
        CTooltip              m_tooltip;
 
         HFONT					m_hTextFont;
@@ -256,8 +238,7 @@ namespace mu::ui::window
 
     inline void CButton::ChangeText(std::wstring btname)
     {
-        // Caller is overriding any prior I18N slot binding with a literal
-        // string; drop the slot so the locale observer won't clobber it.
+        // Drop any prior I18N slot binding so the locale observer won't clobber this literal string.
         m_pNameSlot = nullptr;
         m_Name = btname;
     }
@@ -413,8 +394,7 @@ namespace mu::ui::window
         void ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy);
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
         void ChangeRadioText(std::list<std::wstring>& textlist);
-        // Slot overload: list entries are pointers to I18N runtime variables
-        // (e.g. &I18N::Game::Hunting). Labels refresh on language change.
+        // Slot overload: entries are pointers to I18N variables; labels refresh on language change.
         void ChangeRadioText(std::list<const wchar_t* const*>& slotList);
         void ChangeFrame(int buttonIndex);
         void LockButtonindex(int buttonIndex);
@@ -499,10 +479,8 @@ namespace mu::ui::window
         float					m_ImgHeight;
         bool					State;
 
-        // Own, small, parallel version of CBaseButton::RenderStateImage's pattern --
-        // not shared code, since CCheckBox isn't part of the CBaseButton hierarchy and only ever
-        // needs a 2-frame (on/off) table; forcing it into CBaseButton would be a new abstraction
-        // the target shape doesn't ask for.
+        // Own small parallel version of CBaseButton::RenderStateImage's pattern -- CCheckBox isn't
+        // part of the CBaseButton hierarchy and only ever needs a 2-frame (on/off) table.
         CSprite m_sprite;
         int     m_spriteImgIndex = -1;
         POINT   m_spriteFrameSize{ 0, 0 };

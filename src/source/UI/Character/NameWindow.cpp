@@ -27,9 +27,7 @@ using namespace mu::ui::window;
 namespace
 {
 
-// Draws a segmented monster HP bar, horizontally centered on centerX with its
-// top edge at topY. `steps` is the segment count (HP granularity); `scale`
-// horizontally compresses the bar (1.0 == original width).
+// Draws a segmented monster HP bar centered on centerX/topY; steps sets segment count, scale compresses width.
 void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
 {
     const float borderHeight = 2.f;                  // vertical inset (unscaled)
@@ -55,8 +53,7 @@ void DrawHealthBar(int centerX, int topY, float health, int steps, float scale)
     RenderColorQuadARGB((float)(x + borderWidth), (float)(y + borderHeight), stepsWidth, 1.f,
         0xFF320A00u);
 
-    // HealthStatus < 0 is the "HP unknown" sentinel (server sends 0xFF -> -1, and
-    // the field is initialized to -1), so render a full bar instead of an empty one.
+    // HealthStatus < 0 is the "unknown HP" sentinel; render a full bar for it instead of empty.
     const float clampedHealth = (health < 0.f) ? 1.f : health;
     const int stepHP = (int)(clampedHealth * steps);
 
@@ -287,8 +284,7 @@ void mu::ui::window::CNameWindow::RenderMonsterHealthBars()
             || ScreenY > (REFERENCE_HEIGHT + 100))
             continue;
 
-        // Bar fixed at ~3/7 of the original width, with 8 segments so each one
-        // stays close to the original thickness (see DrawHealthBar for geometry).
+        // Fixed at ~3/7 width with 8 segments so each stays close to the original thickness.
         DrawHealthBar(ScreenX, ScreenY, c->HealthStatus, 8, 3.f / 7.f);
     }
 }

@@ -1,8 +1,7 @@
-/* Legacy theme for the character-select scene's button bar (CCharSelMainWin). Only the idle frame
-   of each button is reproduced. Every element anchors to a screen edge/corner via base.rcss's
-   anchor-*/stretch-x utility classes with a fixed dp size -- CCharSelMainWin::ApplyLayout() still
-   computes the legacy
-   CButton/CSprite hit-test rects separately, unrelated to these visuals. */
+/* Legacy theme for the character-select scene's button bar (CCharSelMainWin) -- only the idle
+   frame of each button is reproduced. Every element anchors to a screen edge/corner via base.rcss's
+   anchor-*/stretch-x utilities; CCharSelMainWin::ApplyLayout() still computes the legacy hit-test
+   rects separately. */
 
 @spritesheet charsel-create-sheet
 {
@@ -67,6 +66,12 @@
 	display: none;
 }
 
+/* modern-only caption below the button -- legacy has no text label here; left unstyled so it
+   stays a zero-height pass-through. */
+.btn-icon-caption {
+	display: none;
+}
+
 /* Flat, semi-transparent backing strip behind the (rarely shown) account-block message. */
 .info-bar {
 	position: absolute;
@@ -78,8 +83,8 @@
 	pointer-events: none;
 }
 
-/* Decorative flourish overlapping the Connect/Delete buttons' top-right corner -- paints behind
-   them (declared first in char_sel_main.rml). */
+/* Decorative flourish over the Connect/Delete buttons' top-right corner -- paints behind them
+   (declared first in char_sel_main.rml). */
 .deco {
 	position: absolute;
 	width: 189dp;

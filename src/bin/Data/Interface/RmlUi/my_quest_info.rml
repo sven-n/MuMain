@@ -5,11 +5,8 @@
 	<link type="text/rcss" href="my_quest_info.rcss"/>
 </head>
 <body>
-	<!-- Retires CMyQuestInfoWindow's last CUIControl-family pieces (CUICurQuestListBox,
-	     CUIQuestContentsListBox, CButton x3) -- see MyQuestInfoWindow.cpp's own header comment.
-	     Positioned like my_inventory.rml's #panel (movable, non-HUD-anchored window: root_x/
-	     root_y/root_scale come from UI::Scaling::GetActiveTransform(), not RmlUi's own dp auto-fit
-	     -- same reasoning TitleSceneUI's own port needed to work out the hard way). -->
+	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from
+	     UI::Scaling::GetActiveTransform(), not RmlUi's dp auto-fit -- same as my_inventory.rml's #panel. -->
 	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="frame-piece frame-top"></div>
@@ -38,10 +35,8 @@
 				     data-event-click="myquest_select_quest(q.index)">{{q.text}}</div>
 			</div>
 
-			<!-- Native size is 188x21 (see RenderQuestInfo()'s own RenderImage(...188.f, 21.f) call
-			     -- always drawn at native size, never stretched). Its own element, not a
-			     decorator on .quest-contents -- fill-stretching a 188x21 sprite across a 162px-tall
-			     box is exactly the vertical warp bug this comment is here to prevent regressing. -->
+			<!-- Native 188x21 sprite, its own element rather than a .quest-contents decorator --
+			     stretching it to fill would warp it vertically (RenderQuestInfo draws it at fixed size). -->
 			<div class="quest-divider"></div>
 
 			<div class="quest-contents">
@@ -51,12 +46,9 @@
 			</div>
 		</div>
 
-		<!-- Siblings of .quest-tab, not children of it -- .quest-tab is itself position:absolute,
-		     so an absolutely-positioned child resolves left/top against ITS box (172x320, starting
-		     at panel-relative 9,60), not #panel's own box. These buttons' top:392px landed at
-		     60+392=452, past the panel's own 429px height -- found live via in-game testing, not
-		     a syntax error the build gates would ever catch. #btn_exit (below) was already correctly
-		     a #panel-level sibling; these two just weren't. -->
+		<!-- Siblings of .quest-tab, not children -- .quest-tab is itself position:absolute, so a
+		     nested absolute child would resolve against its box, not #panel's, silently shifting
+		     these buttons off-panel. -->
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
 		     data-class-locked="!open_enabled" data-event-click="myquest_click_open"></div>
 		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
@@ -85,11 +77,8 @@
 			<div class="temple-line">{{temple_line1}}</div>
 		</div>
 
-		<!-- Exit is a common close button, not a quest-specific action -- modern's theme gives it
-		     a word/glyph instead of reusing legacy's sprite (see myquest-btn-exit's own comment
-		     in the legacy theme file for the split rationale). The label span is legacy-hidden,
-		     not omitted from the markup -- one shared #btn_exit for both themes, same convention
-		     as .frame-piece being theme-toggled instead of forked per-theme markup. -->
+		<!-- Shared close button for both themes; the label span is legacy-hidden (not omitted) so
+		     one #btn_exit markup serves both, same convention as .frame-piece. -->
 		<div id="btn_exit" class="quest-btn quest-btn-exit" data-event-click="myquest_click_exit">
 			<span class="btn-exit-label">×</span>
 		</div>

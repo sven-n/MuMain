@@ -56,19 +56,14 @@ namespace mu::ui::window
         int GetHotKeyLevel(int iHotKey);
         void RenderItems();
 
-        // Item hotkey chrome (main_frame.rml's #item_slots): replaces the old
-        // UseItemRButton()/CheckMouseIn()/MouseRButtonPush poll and RenderItemCount()'s native
-        // digit-sprite draw entirely -- RmlUi now does hit-testing and stack-count text for these
-        // 4 slots (icon art itself stays native -- see this class's header comment). Same "hover
-        // callback sets a member, SyncRmlModel() reads it next frame" shape as
-        // CSkillList::OnHotkeySlotHover()/OnUnhover().
+        // RmlUi now handles hit-testing/hover for the 4 item-hotkey slots (icon art stays native);
+        // sets a member read by SyncRmlModel() next frame.
         void OnHotkeySlotHover(int iSlotIndex) { m_iHoveredSlot = iSlotIndex; }
         void OnUnhover() { m_iHoveredSlot = -1; }
         int GetHoveredSlot() const { return m_iHoveredSlot; }
         void OnHotkeySlotRightClick(int iSlotIndex);
 
-        // Stack count for the item bound to this slot (0/empty if unbound or a non-stacking
-        // item) -- used by SyncRmlModel() for #item_slots' .item-stack-label binding.
+        // Stack count for the slot's bound item (0 if unbound/non-stacking); feeds #item_slots' stack-label binding.
         int GetSlotItemCount(int iSlotIndex);
 
     private:
@@ -79,50 +74,30 @@ namespace mu::ui::window
         int m_iHotKeyItemType[HOTKEY_COUNT];
         int m_iHotKeyItemLevel[HOTKEY_COUNT];
 
-        // -1 == nothing hovered right now. Set by OnHotkeySlotHover()/cleared by OnUnhover() --
-        // mirrors CSkillList::m_iHoveredGridSkillIndex exactly.
+        // -1 = nothing hovered; set by OnHotkeySlotHover(), cleared by OnUnhover().
         int m_iHoveredSlot = -1;
     };
 
-    // One interactive overlay cell in the expanded skill grid or pet-command row --
-    // position/eligibility/cooldown computed fresh in CSkillList::Update() every frame the grid
-    // is open. Icon/box-frame ART IS NOT PART OF THIS STRUCT and stays a legacy 2D draw at the
-    // same position: RenderSkillIcon()'s atlas lookup is too irregular (mixed 8/12-column
-    // addressing, a separate master-level atlas) to port blind without a way to visually verify
-    // against the real decoded textures. This struct only drives RmlUi's interactive overlay: hit
-    // target (click/hover replacing the old EVENT_STATE machine), cooldown wipe, and (modern
-    // theme) selection highlight.
+    // One interactive overlay cell in the expanded skill grid or pet row, rebuilt every frame
+    // while open. Icon/box art is NOT here -- it stays a legacy 2D draw (RenderSkillIcon()'s atlas
+    // addressing is too irregular to port blind); this struct only drives RmlUi's hit target,
+    // cooldown wipe, and selection highlight.
     struct SkillCellEntry
     {
-        float left = 0.f, top = 0.f;   // px, in #bars's own local reference space -- matches the
-                                        // legacy zig-zag/pet-row position exactly (same values the
-                                        // still-legacy icon/box draw uses for this same cell)
-        int skillIndex = -1;           // CharacterAttribute->Skill[] index (grid) or the raw
-                                        // AT_PET_COMMAND_* enum value (pet row) -- passed back
-                                        // verbatim to the click handler, matching the legacy click
-                                        // branches' own `Hero->CurrentSkill = i` (see
-                                        // CSkillList::OnGridCellClick()'s comment for why this
-                                        // does NOT go through UseHotKey())
+        float left = 0.f, top = 0.f;   // px, in #bars's local space; matches the legacy icon/box position
+        int skillIndex = -1;           // CharacterAttribute->Skill[] index (grid) or AT_PET_COMMAND_* value (pet row)
         bool isPet = false;            // true for pet-row entries -- click routes to the pet path
         bool isCurrent = false;        // Hero->CurrentSkill == skillIndex
-        float cooldownFraction = 0.f;  // 0 = ready; shrinks toward 0 as the skill's delay counts
-                                        // down -- same bottom-anchored-wipe intent as
-                                        // RenderSkillDelay()'s retired ARGB-quad draw
+        float cooldownFraction = 0.f;  // 0 = ready; shrinks toward 0 as the skill's delay counts down
     };
 
-    // One line of a skill tooltip. Field-for-field mirror of UI::Skills::Tooltip::Line
-    // (SkillTooltipModel.h) so CMainFrameWindow::SyncRmlModel() can copy directly -- kept as
-    // its own RmlUi-facing type rather than reusing Line itself since Rml::DataModelConstructor
-    // needs a bindable Rml::String, not Line's fixed wchar_t[] buffer.
+    // Mirrors UI::Skills::Tooltip::Line (SkillTooltipModel.h) field-for-field, but with a bindable
+    // Rml::String instead of Line's fixed wchar_t[] buffer.
     struct SkillTooltipLineEntry
     {
         Rml::String text;
-        // Discrete bool-per-color flags, not a class-name string -- matches this codebase's own
-        // established data-class-* convention (data-class-poisoned/open/selected elsewhere in
-        // this same file) rather than introducing string-equality expressions into RML, which no
-        // other window here has ever needed. White (UI::Skills::Tooltip::LineColor::White) is the
-        // implicit default: no flag true -> themes/{legacy,modern}/main_frame.rcss's plain
-        // .tt-line text color applies.
+        // Discrete bool-per-color flags (matches this file's data-class-* convention). White is
+        // the implicit default when no flag is set.
         bool colorBlue = false;
         bool colorRed = false;
         bool colorDarkRed = false;
@@ -173,56 +148,31 @@ namespace mu::ui::window
         int GetSkillIndex(int iSkillType);
         void RenderCurrentSkillAndHotSkillList();
 
-        // Exposes RenderCurrentSkillAndHotSkillList()'s own "is this hotkey-row slot (0-4)
-        // currently showing the equipped/active skill" check to CMainFrameWindow's
-        // SyncRmlModel() (main_frame.rml's #skill_slot_0..4), so modern theme can highlight the
-        // selection with a bound CSS class instead of the legacy IMAGE_SKILLBOX_USE sprite.
-        // Duplicates that function's own iIndex/pet math rather than refactoring it out --
-        // matches this file's existing style of small near-identical index blocks (see the 3
-        // IMAGE_SKILLBOX_USE call sites).
+        // Whether hotkey-row slot iSlotIndex (0-4) shows the active skill -- feeds
+        // #skill_slot_0..4's selection highlight in SyncRmlModel().
         bool IsHotKeySlotCurrentSkill(int iSlotIndex);
 
-        // Exposes the same hotkey-number RenderSkillIcon()'s own RenderNumber(x+20, y+20,
-        // iHotKey) call already computes (search m_iHotKeySkillType[] for this slot's own
-        // index -- reduces to iIndex itself barring duplicate assignments) to
-        // CMainFrameWindow::SyncRmlModel(), so modern theme can show it as a
-        // .slot-hotkey-label span (upper-left corner, main_frame.rml/.rcss) instead of the legacy
-        // digit-sprite subscript in RenderSkillIcon(). Returns -1 for an empty slot
-        // (m_iHotKeySkillType[iIndex] == -1) -- SyncRmlModel() turns that into an empty label
-        // string, same "nothing bound, draw nothing" behavior RenderCurrentSkillAndHotSkillList()'s
-        // own `continue` already has for the legacy path.
+        // The hotkey number (1-9,0) shown for slot iSlotIndex, for #skill_slot_0..4's label.
+        // Returns -1 for an empty slot.
         int GetHotKeySlotNumber(int iSlotIndex);
 
-        // Per-slot cooldown fraction for the compact hotkey row + current-skill slot (0 == ready).
-        // Mirrors RenderSkillDelay()'s own iSkillDelay/iSkillMaxDelay fraction, computed
-        // independently per slot (same "duplicate rather than refactor" style as the two getters
-        // above) since RenderSkillDelay() itself takes an icon index, not a hotkey-slot index,
-        // and the two don't share a convenient common call shape.
+        // Per-slot cooldown fraction for the compact hotkey row + current-skill slot (0 = ready).
         float GetHotKeySlotCooldownFraction(int iSlotIndex);
         float GetCurrentSkillCooldownFraction();
 
-        // Despite the name, this reports whether the compact hotkey row is scrolled to its "upper"
-        // set (6-9,0 vs 1-5, m_bHotKeySkillListUp) -- a legacy naming trap, NOT whether the
-        // expanded grid popup is open. Only ever correct for RenderCenterFrame()'s own
-        // "IMAGE_MENU_2_1 highlight" trigger (MainFrameWindow.cpp), which predates this pilot
-        // and was never about the grid either. Use IsSkillGridOpen() below for the grid's own
-        // open/closed state -- binding main_frame.rml's #skill_grid/#pet_skill_row to THIS method
-        // instead is the bug to avoid repeating (clicking the current-skill slot would never
-        // visibly open the grid).
+        // Naming trap: despite the name, this is whether the compact hotkey row shows its "upper"
+        // set (6-9,0 vs 1-5), NOT whether the grid popup is open. Use IsSkillGridOpen() for that --
+        // binding grid visibility to this method is the bug to avoid.
         bool IsSkillListUp();
 
-        // The actual "is the expanded skill grid popup open" state (m_bSkillList) -- see
-        // IsSkillListUp()'s own comment for why that similarly-named, pre-existing method is NOT
-        // this.
+        // The actual skill-grid-open state; see IsSkillListUp()'s comment for the similarly-named
+        // method that is NOT this.
         bool IsSkillGridOpen() const { return m_bSkillList; }
 
-        // Click/hover entry points bound from main_frame.rml's data-event-click/mouseover/mouseout
-        // (Create(), CMainFrameWindow.cpp) -- replace the old EVENT_STATE hover/down/release
-        // machine entirely (RmlUi's own Context now does hit-testing). See each .cpp definition's
-        // own comment for the exact legacy behavior preserved (which is NOT always the same as
-        // UseHotKey()'s keyboard-press path -- the original mouse-click branches never called
-        // UseHotKey() and so never applied its pet-check/auto-attack-cancel-on-teleport rule;
-        // preserved faithfully, not "fixed").
+        // Click/hover entry points bound from main_frame.rml's data-event-click/mouseover/mouseout.
+        // Mouse-click behavior mirrors the legacy click branches, which never went through
+        // UseHotKey() (so pet-check/auto-attack-cancel rules don't apply here either -- preserved
+        // faithfully).
         void OnHotkeySlotClick(int iSlotIndex);
         void OnHotkeySlotHover(int iSlotIndex);
         void OnCurrentSkillClick();
@@ -233,18 +183,14 @@ namespace mu::ui::window
         void OnPetCellHover(int iSkillIndex);
         void OnUnhover();
 
-        // The two dynamic-count overlay lists CMainFrameWindow::SyncRmlModel() copies into the
-        // shared main_frame RmlUi model's skill_grid_cells/pet_skill_cells arrays every frame.
-        // Populated by Update() (while the grid is open) from the exact same position/filter logic
-        // Render()'s still-legacy icon/box draw uses for the same cells -- computed once, read by
-        // both, not duplicated (unlike the small getters above, this one's genuinely shared by two
-        // call sites within this same class).
+        // Grid/pet overlay snapshots, rebuilt by Update() while the grid is open; copied into the
+        // RmlUi model's skill_grid_cells/pet_skill_cells by SyncRmlModel() and also read by
+        // Render()'s legacy icon draw.
         const std::vector<SkillCellEntry>& GetGridSnapshot() const { return m_GridSnapshot; }
         const std::vector<SkillCellEntry>& GetPetSnapshot() const { return m_PetSnapshot; }
 
-        // True whenever a hover callback above has a tooltip queued for SyncRmlModel() to copy
-        // this frame -- consumed (not cleared) every frame like every other polled field in this
-        // pilot; cleared only by OnUnhover()/a new hover target replacing it.
+        // True when a hover callback has queued a tooltip for SyncRmlModel(); cleared by
+        // OnUnhover() or a new hover target.
         bool IsTooltipPending() const { return m_bTooltipPending; }
         int GetTooltipSkillIndex() const { return m_iTooltipSkillIndex; }
         float GetTooltipAnchorX() const { return m_fTooltipAnchorX; }
@@ -258,23 +204,15 @@ namespace mu::ui::window
         void UseHotKey(int iHotKey);
 
         void RenderSkillIcon(int iIndex, float x, float y, float width, float height);
-        // RenderSkillDelay()/RenderPetSkill() removed -- cooldown math lives in the free function
-        // ComputeSkillCooldownFraction() now (MainFrameWindow.cpp); pet-row drawing is inlined
-        // into Render() directly. See RebuildGridSnapshot()'s own comment.
+        // Cooldown math now lives in ComputeSkillCooldownFraction() (MainFrameWindow.cpp);
+        // pet-row drawing is inlined into Render().
 
-        // Rebuilds m_GridSnapshot/m_PetSnapshot from the current m_bSkillList/pet state -- same
-        // iteration/filter/zig-zag-position math the legacy grid loop always used
-        // (CharacterAttribute->Skill[] scan, buff-range + MASTERLEVEL skip,
-        // AT_PET_COMMAND_DEFAULT..END for the pet row), called once per frame from Update() while
-        // the grid is open. Render() (still-legacy icon/box art) iterates the resulting snapshot
-        // instead of recomputing positions itself.
+        // Rebuilds m_GridSnapshot/m_PetSnapshot from the grid/pet state each frame while open;
+        // Render() iterates the result instead of recomputing positions.
         void RebuildGridSnapshot();
 
         // Queues a tooltip for the given skill/pet-command index, anchored at (x, y) in #bars's
-        // own local reference space -- shared by all 5 hover entry points above rather than
-        // duplicated per widget, since the actual tooltip content build
-        // (UI::Skills::Tooltip::BuildModel(), pet-command dispatch) is identical regardless of
-        // which widget triggered it.
+        // local space. Shared by all 5 hover entry points.
         void QueueTooltip(int iSkillIndex, float x, float y);
 
         void ResetMouseLButton();
@@ -297,62 +235,38 @@ namespace mu::ui::window
         int m_iTooltipSkillIndex = -1;
         float m_fTooltipAnchorX = 0.f, m_fTooltipAnchorY = 0.f;
 
-        // The "is Ctrl+digit assignment armed" signal for UpdateKeyEvent()'s SetHotKey() path --
-        // set by OnGridCellHover(), cleared by OnUnhover()/a different hover target. -1 == nothing
-        // hovered in the grid right now.
+        // Arms UpdateKeyEvent()'s Ctrl+digit SetHotKey() path; set by OnGridCellHover(), cleared
+        // by OnUnhover(). -1 = nothing hovered.
         int m_iHoveredGridSkillIndex = -1;
     };
 
-    // This legacy file welds three classes together: this one (frame chrome + HP/MP/AG/SD/EXP
-    // bars + 5 corner buttons, RmlUi), CSkillList (skill hotkey row/grid/pet commands, still fully
-    // legacy), and CItemHotKey (QWER item slots). CItemHotKey's own icon art is a genuine live 3D
-    // model render (RenderItem3D()/RenderObjectScreen(), ZzzInventory.cpp) -- permanently native,
-    // no RmlUi equivalent (the permanent live-3D-content boundary), same bucket as CCharMakeWin's
-    // preview panel. What did move to RmlUi is #item_slots' chrome (hover-highlight border,
-    // stack-count text, right-click-to-use) -- the same overlay-around-a-still-native-icon split
-    // already proven for skill icons.
+    // This file welds three classes: this one (frame chrome + HP/MP/AG/SD/EXP bars + 5 corner
+    // buttons, RmlUi), CSkillList (hotkey row/grid/pet commands, still legacy), and CItemHotKey
+    // (QWER item slots, permanently native 3D icon render -- only #item_slots' hover/stack-count
+    // chrome moved to RmlUi).
     //
-    // Render() is a *thin passthrough*, not a full no-op like CMuHelperBar/CBuffStrip -- this
-    // window is the first case where out-of-scope legacy content (the skill hotkey row/current-
-    // skill icon) shares the exact same screen region as content this pilot ports. RmlUi always
-    // paints last in the frame (SetPreSubmitCallback), so moving the *shared* center-band
-    // background chrome to RmlUi would draw it on top of (occlude) the still-legacy skill row
-    // painted earlier in the same frame. Render() therefore keeps calling
-    // RenderLeftFrame()/RenderCenterFrame() (background chrome for the two regions that still host
-    // legacy content) and g_pSkillList->RenderCurrentSkillAndHotSkillList() (the legacy content
-    // itself) exactly as before -- only RenderRightFrame()/
-    // RenderExperienceBackground() (chrome for regions with NO remaining legacy content) and
-    // RenderButtons()/RenderLifeMana()/RenderGuageAG()/RenderGuageSD()/RenderExperience() (the
-    // parts this pilot actually ports) are removed, their C++ implementations deleted rather than
-    // kept-but-unused (matches CMuHelperBar's precedent for dead legacy-button machinery).
+    // Render() is a thin passthrough, not a full no-op: RmlUi always paints last in the frame, so
+    // moving the center-band background chrome to RmlUi would occlude the still-legacy skill row
+    // painted earlier. Render() still calls RenderLeftFrame()/RenderCenterFrame() (chrome for
+    // regions with legacy content) and RenderCurrentSkillAndHotSkillList(); only the chrome/parts
+    // for fully-ported regions (right frame, exp background, buttons, gauges) were removed.
     //
-    // UpdateMouseEvent()/UpdateKeyEvent() stay real where they still gate legacy behavior:
-    // UpdateMouseEvent() drops its BtnProcess() call entirely (RmlUi's own Context now does hit-
-    // testing for the 5 corner buttons -- see RmlUiRuntime::IsMouseOverUI()) and always reports
-    // "not consumed"; UpdateKeyEvent() is UNCHANGED (still gates the legacy CItemHotKey's
-    // Q/W/E/R key handling, out of scope). Create()/Release()/GetLayerDepth()/GetKeyEventOrder()/
-    // Render3D()/IsVisible() stay real. Update() still does real work every frame (gauge
-    // fractions/colors, EXP digit/fraction, button open-state/alert-blink booleans) and pushes it
-    // into the RmlUi model via MarkDirty().
+    // UpdateMouseEvent() drops BtnProcess() (RmlUi now hit-tests the corner buttons) and always
+    // reports "not consumed". UpdateKeyEvent() is unchanged -- still gates legacy CItemHotKey
+    // Q/W/E/R handling.
     //
-    // Deliberate simplifications: "gained EXP" 2s flash overlay not reproduced; HP/MP/AG/SD/EXP
-    // numeric readouts use plain RCSS text instead of the legacy digit-sprite atlas; gauge fill
-    // uses a flat background-color instead of the legacy gauge texture (RmlUi's `image()`
-    // decorator stretches-to-fit, which would visibly distort a texture whose element height
-    // changes every frame -- the "clipped oversized image" alternative is the exact technique
-    // CBuffStrip already proved doesn't clip absolutely-positioned children in this RmlUi build);
-    // the 5 corner buttons reproduce only the legacy sprite sheet's "normal" and "panel-open"
-    // frames (2 of the real 4: hover/pressed-hover frame-swaps are replaced by a plain CSS
-    // brightness filter on :hover).
+    // Known simplifications: no "gained EXP" flash overlay; HP/MP/AG/SD/EXP readouts use plain
+    // RCSS text instead of a digit-sprite atlas; gauge fill is a flat color, not the legacy
+    // texture (a stretched `image()` decorator would visibly distort it, and clipped-oversized-
+    // image doesn't work in this RmlUi build -- see CBuffStrip); corner buttons only reproduce
+    // "normal"/"panel-open" frames, with hover done via a CSS brightness filter.
     class CMainFrameWindow : public CObject, public I3DRenderObj
     {
     public:
         enum IMAGE_LIST
         {
-            // Gauge/button textures (IMAGE_GAUGE_*, IMAGE_MENU_BTN_*) are no longer loaded via
-            // this legacy CGlobalBitmap-backed enum -- RmlUi loads the same source art files
-            // directly through its own render interface (see main_frame.rcss's @spritesheet
-            // blocks), same split already established by every prior CObject-tier port.
+            // Gauge/button textures are no longer loaded here -- RmlUi loads them directly (see
+            // main_frame.rcss's @spritesheet blocks).
             IMAGE_MENU_1 = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN,	// newui_menu01.jpg
             IMAGE_MENU_2,		// newui_menu02.jpg
             IMAGE_MENU_3,		// newui_menu03.jpg
@@ -395,26 +309,19 @@ namespace mu::ui::window
         void SetPreExp(__int64 dwPreExp);
         void SetGetExp(__int64 dwGetExp);
 
-        // buttons -- called externally (WindowSystem.cpp) whenever a button's target panel opens/
-        // closes, to sync the button's "open" visual state. Sets a bound model boolean instead of
-        // swapping CButton sprite frames -- see this class's header comment.
+        // Called externally when a button's target panel opens/closes, to sync its bound "open" model boolean.
         void SetBtnState(int iBtnType, bool bStateDown);
 
-        // Invoked from the RmlUi document's data-event-click bindings (see Create()). Polled-and-
-        // cleared exactly like every other migrated window's RmlClickX() pattern.
+        // Set by the RmlUi document's data-event-click bindings; polled and cleared like other windows' RmlClickX().
         void RmlClickCShop() { m_bRmlCShopClicked = true; }
         void RmlClickChaInfo() { m_bRmlChaInfoClicked = true; }
         void RmlClickMyInven() { m_bRmlMyInvenClicked = true; }
         void RmlClickFriend() { m_bRmlFriendClicked = true; }
         void RmlClickWindow() { m_bRmlWindowClicked = true; }
 
-        // Real-pixel X offset read from main_frame.rml's #item_hotkey_anchor/
-        // #skill_list_anchor .layout-anchor markers (SyncRmlModel()) -- lets the still-legacy
-        // item-hotkey (potion) and skill-hotkey bands' render AND click-hit-testing follow
-        // wherever the active theme's own RCSS positions those markers, generically, with no
-        // per-theme C++ branch. CSkillList
-        // reads GetSkillListOffsetX() via the g_pMainFrame global since it owns no RmlUi document
-        // of its own to query directly.
+        // Pixel X offset read from main_frame.rml's #item_hotkey_anchor/#skill_list_anchor
+        // markers, so the still-legacy item-hotkey/skill-hotkey bands follow wherever the active
+        // theme's RCSS positions them. CSkillList reads GetSkillListOffsetX() via g_pMainFrame.
         float GetItemHotkeyOffsetX() const { return m_fItemHotkeyOffsetX; }
         float GetSkillListOffsetX() const { return m_fSkillListOffsetX; }
 
@@ -445,9 +352,8 @@ namespace mu::ui::window
         __int64 m_dwPreExp;
         __int64 m_dwGetExp;
 
-        // See GetItemHotkeyOffsetX()/GetSkillListOffsetX()'s own comment above. Computed fresh in
-        // SyncRmlModel() every frame from the #item_hotkey_anchor/#skill_list_anchor markers'
-        // current Element::GetAbsoluteOffset(); 0.f (no shift) until the RmlUi document exists.
+        // See GetItemHotkeyOffsetX()/GetSkillListOffsetX() above. Recomputed every frame in
+        // SyncRmlModel(); 0.f until the RmlUi doc exists.
         float m_fItemHotkeyOffsetX = 0.f;
         float m_fSkillListOffsetX = 0.f;
 
@@ -455,151 +361,90 @@ namespace mu::ui::window
 
         struct MainFrameRmlModel
         {
-            // #bars/#buttons/#exp are ONE shared transform group: all three sit inside
-            // CSkillList's still-legacy center-band chrome and item-hotkey band (kept legacy --
-            // see this class's own header comment), which scale with window size via
-            // UI::Scaling::BottomHudScale (clamped 1x-2x), a completely different system from this
-            // branch's standard fixed-dp/UIScalePercent policy. This is the same "genuinely
-            // computed per-frame position" carve-out already used elsewhere for
-            // CCharInfoBalloon -- this group binds left/top/scale from
-            // UI::Scaling::BottomHudCenterTransform every frame (SyncRmlModel()) so it tracks the
-            // legacy chrome exactly.
-            //
-            // Buttons and exp are nested INSIDE #bars in main_frame.rml (not independently
-            // anchored to the window's right edge / full window width, which is how the legacy
-            // renderer positions those two bands) specifically so they inherit this one shared
-            // transform group for free, rather than needing their own redundant bindings of the
-            // same 3 values, and so buttons anchor next to the mana bar with exp spanning the
-            // item-hotkey band's start to the button group's end -- both intentional departures
-            // from the legacy bands' own independent, edge-anchored positioning.
-            //
-            // UI::Scaling::BottomHudScale() folds in GameConfig::GetUIScalePercent() as a
-            // post-clamp multiplier (UITransform.cpp), so barsScale picks it up automatically
-            // here, and so does every other caller of BottomHudScale/BottomHudCenterTransform
-            // codebase-wide -- in particular Render()/Render3D()'s own BottomHudCenterTransform()
-            // calls (still real UI::Scaling C++, used for the still-legacy item-hotkey band's 3D
-            // icon placement; right-click hit-testing moved to RmlUi, no longer a caller here) --
-            // for free, from the one shared function, with no separate wiring
-            // needed here; the remaining call sites can't drift out of sync the way
-            // CCharSelMainWin's independent calculators once did. Every RmlUi-authored length in
-            // main_frame.rcss is still
-            // `px`, not `dp`, so it continues to track bars_scale exactly instead of being scaled
-            // a second time by RmlUiRuntime's context-wide density-independent-pixel ratio (see
-            // that ratio's own ApplyUIScale() comment).
+            // #bars/#buttons/#exp share one transform group, bound every frame from
+            // UI::Scaling::BottomHudCenterTransform() (clamped 1x-2x scale, folds in
+            // GetUIScalePercent()) so it tracks the still-legacy center-band chrome exactly.
+            // Buttons and exp are nested inside #bars in main_frame.rml to inherit this transform
+            // rather than each needing their own binding. Lengths in main_frame.rcss stay `px`
+            // (not `dp`) so they scale via bars_scale only, not a second time via RmlUi's
+            // density-independent-pixel ratio.
             float barsLeft = 0.f, barsTop = 0.f, barsScale = 1.f;
 
             float hpFraction = 0.f, mpFraction = 0.f, agFraction = 0.f, sdFraction = 0.f;
             Rml::String hpText, mpText, agText, sdText;
 
-            // Current-value-only readout ("935", not "935 / 935") -- legacy theme's own gauge
-            // numbers use this instead of hpText/etc. Computed unconditionally alongside
-            // hpText/etc, both themes, same values just formatted differently -- modern's
-            // main_frame.rml still binds hpText/etc; only which field each theme's own markup
-            // references differs, no C++ theme check anywhere.
+            // Current-value-only readout ("935", not "935 / 935") -- legacy theme's gauge numbers
+            // bind this instead of hpText/etc; both computed unconditionally, themes just
+            // reference different fields.
             Rml::String hpCurrentText, mpCurrentText, agCurrentText, sdCurrentText;
             Rml::String hpTooltip, mpTooltip, agTooltip, sdTooltip;
             bool poisoned = false; // true -> HP fill swaps red to green (eDeBuff_Poison)
 
-            // EXP: legacy RenderExperience() resets its visual fill every 10% of the level (see
-            // buildExpSegment() in the .cpp) and shows which decile via a separate digit readout --
-            // expFraction is progress *within* the current decile (0..1), not overall level
-            // progress; expDigit (0-9) is that decile number, rendered as plain text. Width/
-            // position now come from the shared bars_left/top/scale group (see above), spanning
-            // reference x=0 (item-hotkey band's own start) to x=640 (button group's own end) --
-            // no longer the full real window width the legacy EXP band itself used.
+            // expFraction is progress within the current 10%-of-level decile (0..1), not overall
+            // level progress; expDigit (0-9) is that decile number. Position comes from the shared
+            // bars transform group, spanning x=0 to x=640 (not the full window width the legacy
+            // band used).
             float expFraction = 0.f;
             Rml::String expDigit;
             Rml::String expTooltip;
 
-            // Corner buttons. "Open" mirrors SetBtnState()'s bStateDown (true while the button's
-            // target panel is visible); tooltips are static per-button strings pushed once.
+            // Corner buttons: "Open" mirrors SetBtnState()'s bStateDown; tooltips are static strings pushed once.
             bool cShopOpen = false, chaInfoOpen = false, myInvenOpen = false, friendOpen = false, windowOpen = false;
             Rml::String cShopTooltip, chaInfoTooltip, myInvenTooltip, friendTooltip, windowTooltip;
 
-            // Alert-blink dots -- replace the legacy RenderCharInfoButton()/RenderFriendButton()/
-            // RenderFriendButtonState() frame-swap blink with a simple bound boolean + CSS dot
-            // (same convention as every other migrated alert/indicator), computed every frame in
-            // SyncRmlModel() from the same g_Time.GetTimeCheck()/g_pFriendMenu state the legacy
-            // code read.
+            // Alert-blink dots: bound boolean + CSS dot, computed each frame from the same state
+            // the legacy blink read.
             bool chaInfoAlert = false, friendAlert = false;
 
-            // Which of the still-legacy skill-hotkey row's 5 slots (#skill_slot_0..4,
-            // main_frame.rml) currently shows the equipped/active skill -- see
-            // CSkillList::IsHotKeySlotCurrentSkill()'s own comment. Modern theme binds this to
-            // a CSS highlight class instead of the legacy IMAGE_SKILLBOX_USE sprite; legacy theme
-            // keeps that real sprite (own established look, unaffected by this). 5 separate named
-            // fields, not an array -- c.Bind() (RmlUi's DataModelConstructor) takes a
-            // pointer-to-member of a scalar field, same as every other bool in this struct.
+            // Which of #skill_slot_0..4 shows the active skill (see
+            // CSkillList::IsHotKeySlotCurrentSkill()). 5 named fields, not an array -- RmlUi's
+            // DataModelConstructor binds pointer-to-member scalars only.
             bool skillSlot0Selected = false, skillSlot1Selected = false, skillSlot2Selected = false,
                  skillSlot3Selected = false, skillSlot4Selected = false;
 
-            // The hotkey number (1-9,0) each of #skill_slot_0..4 is bound to -- see
-            // CSkillList::GetHotKeySlotNumber()'s own comment. Empty string for an unbound
-            // slot (RmlUi's {{ }} interpolation of an empty string renders nothing, same "draw
-            // nothing" behavior the legacy digit-sprite path already has for that case).
+            // Hotkey number label per slot (see CSkillList::GetHotKeySlotNumber()); empty string
+            // for an unbound slot renders nothing.
             Rml::String skillSlot0Hotkey, skillSlot1Hotkey, skillSlot2Hotkey, skillSlot3Hotkey, skillSlot4Hotkey;
 
-            // Cooldown wipe for the compact row + current-skill slot: same "5 separate fields"
-            // convention as skillSlot0..4Hotkey above, plus one for #current_skill_slot.
+            // Cooldown wipe for the compact row + current-skill slot; same per-field convention as skillSlot0..4Hotkey.
             float skillSlot0Cooldown = 0.f, skillSlot1Cooldown = 0.f, skillSlot2Cooldown = 0.f,
                   skillSlot3Cooldown = 0.f, skillSlot4Cooldown = 0.f;
             float currentSkillCooldown = 0.f;
 
-            // Expanded skill grid + pet-command row -- mirrors CSkillList::IsSkillGridOpen()
-            // (NOT the similarly-named IsSkillListUp(), a legacy naming trap -- see that method's
-            // own comment). Gates #skill_grid/#pet_skill_row visibility in RCSS. Cell arrays are
-            // dynamic-count data-for lists (SkillCellEntry, RegisterStruct'd in Create()), same
-            // shape as CBuffStrip's already-proven buffs array -- rebuilt every frame the grid is
-            // open, left stale (harmless, hidden) while closed.
+            // Mirrors CSkillList::IsSkillGridOpen() (NOT the similarly-named IsSkillListUp() --
+            // see that method's comment). Gates #skill_grid/#pet_skill_row visibility; cell arrays
+            // are rebuilt each frame while open, left stale (harmless, hidden) while closed.
             bool skillGridOpen = false;
             std::vector<SkillCellEntry> skillGridCells;
             std::vector<SkillCellEntry> petSkillCells;
 
-            // Shared skill tooltip -- one RmlUi element reused for the hotkey row, current-skill
-            // slot, grid, and pet row alike (matches the legacy RenderSkillInfo()'s own "one
-            // tooltip object, repositioned/repopulated per hover target" shape). left/top are in
-            // #bars's own local reference space (same as skillGridCells' own left/top) so the
-            // tooltip can simply nest inside #bars too; main_frame.rcss anchors the tooltip's
-            // BOTTOM edge at (top) via `transform: translateY(-100%)` so it grows upward
-            // regardless of line count, reproducing RenderTipTextList()'s own "sy -= Height"
-            // auto-flip without needing that height math ported into C++.
+            // One shared tooltip element reused across hotkey row, current-skill slot, grid, and
+            // pet row. left/top are in #bars's local space; main_frame.rcss anchors the tooltip's
+            // bottom edge via translateY(-100%) so it grows upward regardless of line count.
             bool skillTooltipVisible = false;
             float skillTooltipLeft = 0.f, skillTooltipTop = 0.f;
             std::vector<SkillTooltipLineEntry> skillTooltipLines;
 
-            // Item hotkey chrome (#item_slots): hover-highlight border + stack-count text for
-            // the 4 Q/W/E/R potion slots. 4 separate named fields, not an array -- same
-            // "c.Bind() takes a pointer-to-member of a scalar field" convention as the skill-slot
-            // fields above. The 3D-rendered potion icon itself is untouched here (permanent native
-            // content, see CItemHotKey's own header comment).
+            // Item hotkey chrome (#item_slots): hover border + stack-count for the 4 Q/W/E/R
+            // slots. The 3D-rendered potion icon itself is untouched (permanent native content).
             bool itemSlot0Hovered = false, itemSlot1Hovered = false, itemSlot2Hovered = false, itemSlot3Hovered = false;
             Rml::String itemSlot0Count, itemSlot1Count, itemSlot2Count, itemSlot3Count;
         };
         RmlModelBinder<MainFrameRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
 
-        // RmlUi-behind-3D-icons proof of concept -- RenderLeftFrame()'s own header comment
-        // explains why this exists: the
-        // left/center HUD-strip background fill can never be RmlUi-drawn through m_pRmlDoc's own
-        // "main" context (it must sit BEHIND the legacy 3D-composited item/skill icons, which
-        // always render after everything in that context), so it lives in
-        // RmlUiRuntime::GetBackgroundContext() instead, rendered explicitly via
-        // RmlUiRuntime::RenderBackgroundLayer() from inside RenderLeftFrame(). Separate document/
-        // model/context from m_pRmlDoc's -- RmlUi data models are per-context, and this one only
-        // ever needs the 5 fields below, not main_frame's full model.
+        // The left/center HUD-strip background must render BEHIND the legacy 3D-composited
+        // item/skill icons, which always paint after m_pRmlDoc's "main" context -- so it lives in
+        // a separate RmlUiRuntime::GetBackgroundContext() document/model, rendered via
+        // RenderBackgroundLayer() from RenderLeftFrame().
         struct MainFrameBgRmlModel
         {
-            // Mirrors MainFrameRmlModel::barsLeft/barsTop/barsScale exactly (same
-            // UI::Scaling::BottomHudCenterTransform() values, synced from the same place in
-            // SyncRmlModel()) -- #bg_root (main_frame_bg.rml) uses the identical
-            // data-style-left/top/transform:scale() convention #bars does, so this reference-space
-            // panel scales/tracks the legacy chrome the same way #bars's own children do.
+            // Mirrors MainFrameRmlModel::barsLeft/barsTop/barsScale (#bg_root uses the same
+            // data-style-left/top/scale convention as #bars).
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
 
-            // GetItemHotkeyOffsetX()/GetSkillListOffsetX()'s own values (same members
-            // m_fItemHotkeyOffsetX/m_fSkillListOffsetX Render()'s leftTransform/centerTransform
-            // already add) -- added on top of rootX inside main_frame_bg.rml's own child elements
-            // so the two panels track their real anchors exactly like the legacy quads did.
+            // Same offsets as GetItemHotkeyOffsetX()/GetSkillListOffsetX(), added on top of rootX
+            // in main_frame_bg.rml so the two panels track their real anchors.
             float leftOffsetX = 0.f, centerOffsetX = 0.f;
         };
         RmlModelBinder<MainFrameBgRmlModel> m_BgRmlBinder;
@@ -612,9 +457,7 @@ namespace mu::ui::window
         bool m_bRmlWindowClicked = false;
 
     public:
-        // Re-derives the RmlUi document's Show()/Hide() state from IsVisible() && sceneAllowsShow
-        // -- the third MAIN_SCENE prerequisite every CObject-tier pilot needs, same as
-        // CMuHelperBar/CBuffStrip (see those classes' header comments for the full rationale).
+        // Gates the RmlUi doc's Show()/Hide() on IsVisible() && sceneAllowsShow, same as CMuHelperBar/CBuffStrip.
         void SyncDocVisibility(bool sceneAllowsShow);
     };
 }

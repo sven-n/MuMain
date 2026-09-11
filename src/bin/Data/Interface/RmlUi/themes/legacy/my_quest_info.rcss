@@ -1,23 +1,13 @@
-/* Legacy theme for CMyQuestInfoWindow -- retires its last CUIControl-family pieces
-   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel's own left/top/scale come
-   live from C++ (SyncRmlModel(), root_x/root_y/root_scale), same convention my_inventory.rcss's
-   own header comment already establishes for a movable, non-HUD-anchored window -- every
-   coordinate below is a plain reference pixel (px), not dp.
+/* Legacy theme for CMyQuestInfoWindow, retiring its last CUIControl-family pieces
+   (CUICurQuestListBox, CUIQuestContentsListBox, CButton x3). #panel's left/top/scale come live
+   from C++ (SyncRmlModel()); coordinates below are plain reference px, not dp.
 
-   Content-area layout (quest list / divider / contents panel) is a reinterpretation of the
-   original's intent -- list above, selected-quest details below, buttons at the bottom -- not a
-   literal carryover of CUICurQuestListBox/CUIQuestContentsListBox's own internal pixel math
-   (architecture-principles.md's own guidance: distinguish layout intent from legacy
-   implementation artifacts, don't mechanically translate legacy coordinates). Frame/tab-row/
-   button positions ARE carried over exactly (CreateSceneUI()-style literal pixel values), since
-   those come straight from SetPos()/SetButtonInfo()/RenderTabBtn()'s own explicit constants. */
+   Content-area layout (quest list / divider / contents) reinterprets the original's intent rather
+   than porting CUICurQuestListBox/CUIQuestContentsListBox's own pixel math. Frame/tab-row/button
+   positions are carried over exactly from SetPos()/SetButtonInfo()/RenderTabBtn(). */
 
-/* Frame: same 5-piece composition my_inventory_bg.rcss's own #bg_root already uses, and largely
-   the same art files (MyQuestInfoWindow.cpp:208-213 loads newui_item_back0{1,2-L,2-R,3}.tga /
-   newui_msgbox_back.jpg -- back/left/right/bottom exactly match my_inventory_bg.rcss's own
-   inv-bg-fill/-left/-right/-bottom; only the top piece differs, newui_item_back01.tga here vs
-   newui_item_back04.tga there). Declared fresh here (not shared across files) -- theme-local
-   duplication is this codebase's own established convention (see credit_win.rcss's own comment). */
+/* Frame: same 5-piece composition my_inventory_bg.rcss's #bg_root uses (MyQuestInfoWindow.cpp:
+   208-213); only the top piece differs (newui_item_back01.tga vs newui_item_back04.tga). */
 @spritesheet myquest-bg-fill-sheet   { src: "../../../newui_msgbox_back.jpg";   myquest-bg-fill:   0px 0px 190px 429px; }
 @spritesheet myquest-bg-top-sheet    { src: "../../../newui_item_back01.tga";   myquest-bg-top:    0px 0px 190px 64px; }
 @spritesheet myquest-bg-left-sheet   { src: "../../../newui_item_back02-L.tga"; myquest-bg-left:   0px 0px 21px 320px; }
@@ -41,10 +31,9 @@
 	font-family: "Liberation Sans";
 }
 
-/* Border frame pieces layered on top of #panel's own flat fill decorator -- same 4-piece
-   composition my_inventory_bg.rcss's #bg_root children use, just as ordinary DOM children here
-   (painted in document order, after #panel's own decorator) since this window has no live-3D
-   content needing a separate background-context document. */
+/* Border frame pieces layered on top of #panel's own fill decorator, same 4-piece composition as
+   my_inventory_bg.rcss's #bg_root children -- ordinary DOM children here since this window has no
+   separate background context. */
 .frame-piece { position: absolute; pointer-events: none; }
 .frame-top    { left: 0;   top: 0;    width: 190px; height: 64px;  decorator: image(myquest-bg-top); }
 .frame-left   { left: 0;   top: 64px; width: 21px;  height: 320px; decorator: image(myquest-bg-left); }
@@ -100,12 +89,9 @@
 }
 .hidden { display: none; }
 
-/* display:block on every non-absolutely-positioned element below is load-bearing, not
-   decorative -- an unstyled element's `display` defaults to `inline` in this engine
-   (StyleSheetSpecification.cpp), and an inline element ignores width/height and doesn't stack in
-   its own row (found live porting TitleSceneUI's own gauge bar -- see that port's own history for
-   the full root-cause). Only position:absolute elements are exempt (forced block regardless of
-   `display`, FormattingContext.cpp). */
+/* display:block is load-bearing on every non-absolutely-positioned element below -- unstyled
+   elements default to `display:inline`, which ignores width/height and won't stack in its own
+   row. */
 .quest-empty-msg {
 	position: absolute;
 	left: 14px;
@@ -178,25 +164,20 @@
 	pointer-events: auto;
 }
 .quest-btn:hover, .quest-btn-exit:hover { filter: brightness(1.25); }
-/* No pointer-events:none here -- Open/Give-up start locked until a quest is selected, and that
-   used to block :hover entirely, which meant the tooltip below could never fire in the (default,
-   until you pick a quest) locked state. RmlClickOpen()/RmlClickGiveUp() (MyQuestInfoWindow.cpp)
-   already independently guard on openEnabled/giveupEnabled before acting, so a locked button's
-   click is already a safe no-op without this -- dimming is enough. */
+/* No pointer-events:none -- RmlClickOpen()/RmlClickGiveUp() already guard on
+   openEnabled/giveupEnabled, so a locked click is already a safe no-op; dimming alone is
+   enough. */
 .quest-btn.locked { filter: brightness(0.6); }
 .quest-btn-exit { left: 13px; decorator: image(myquest-btn-exit); }
 .quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
 .quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
 
-/* Exit is a common close button (theme's word/glyph choice, see modern theme's own comment on
-   #btn_exit) -- legacy keeps its sprite, which already has its own "X" baked into the art, so the
-   shared RML's text label span is redundant here. */
+/* Exit is a common close button -- legacy's sprite already has its own "X" baked in, so the
+   shared label span is redundant. */
 .btn-exit-label { display: none; }
 
-/* Tooltips: siblings of their trigger button, shown via a hover-triggered sibling selector --
-   same convention my_inventory.rcss's own #btn_exit/.tooltip-exit already establishes (theme-
-   local duplication, not shared across files, per this codebase's own convention). CButton never
-   had these; a real gap, not a carryover. */
+/* Tooltips: siblings of their trigger button, shown via hover sibling selector. CButton never had
+   these -- a real gap, not a carryover. */
 .tooltip {
 	display: none;
 	position: absolute;

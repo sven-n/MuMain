@@ -1032,11 +1032,8 @@ void mu::ui::window::CInventoryCtrl::Render()
                         SetItemColorState(pItem);
                     }
 
-                    // Durability / trade warning tint for the slot — restored from
-                    // glColor4f() calls stripped in 95b86aae. Without these the
-                    // slot rendered as the RenderColor default (semi-transparent
-                    // black), so yellow/orange/red durability warnings that tell
-                    // the player to repair gear were invisible.
+                    // Durability/trade-warning tint -- without it the slot falls back to
+                    // RenderColor's translucent-black default, hiding the repair warning colors.
                     unsigned int tintARGB = 0x99508080u; // NORMAL: translucent teal
                     if (pItem->byColorState == ITEM_COLOR_DURABILITY_50)
                     {

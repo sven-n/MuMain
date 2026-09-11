@@ -1,31 +1,16 @@
-/* Modern theme for the system menu -- uses base.rcss's shared forged-dialog shell (also used by
-   Login), with the metal .modern-header-rail/.modern-joint header variant instead of Login's
-   crimson hero-banner (see this file's own sys_menu.rml note). #panel keeps base.rcss's shared
-   .modern-frame for its material fill/gradient (no -crimson variant -- crimson belongs to a
-   hero-banner's own plate, this dialog has none), with background/border/box-shadow overridden
-   here to the same neutral forged-window surface Login's own #panel uses (mirrored rather than
-   shared via .modern-frame itself, so this change doesn't silently affect .modern-frame's other
-   consumers -- msg_win/my_quest_info/remember_password_prompt/my_inventory_bg -- which haven't
-   been revisited yet). No hero-banner glow here -- that's Login's own header style, not this
-   dialog's. Header carries a title (base.rcss's .modern-header-text/-title, bound to
-   SysMenuRmlModel's systemMenuLabel -- I18N::Game::SystemMenu). Buttons rely entirely on
-   base.rcss's shared .btn -- no per-window color override needed or present.
+/* Modern theme for the system menu -- uses base.rcss's shared forged-dialog shell, with the
+   metal .modern-header-rail/.modern-joint header variant instead of Login's crimson hero-banner
+   (this dialog has no hero plate). #panel mirrors Login's neutral forged-window surface rather
+   than sharing via .modern-frame directly, so it doesn't affect .modern-frame's other consumers.
+   Buttons rely entirely on base.rcss's shared .btn.
 
-   #panel is not C++-positioned/sized -- centered via base.rcss's .center-both utility class
-   (applied in sys_menu.rml). width (213dp) is unchanged (CWinEx's own real sprite-width
-   geometry); height grew by 31dp (187->218, compact 155->186) to make room for the real 38dp-tall
-   metal header rail (top:7dp) replacing the old 10dp decorative cap strip -- the previous height
-   was sized for that thin strip, not a real banner. Button positions absorb this the same way
-   they already absorb the .compact height difference: exit-game/select-server anchor from the
-   top and shifted down by the same 31dp the header grew by (33->64, 67->98, preserving the
-   original 4dp gap between them and the 4dp/6dp gaps down to option below in both compact and
-   non-compact mode); option/close anchor from the bottom and need no change at all, since the
-   growth happened entirely at the top.
+   #panel is centered via base.rcss's .center-both utility class. Height grew by 31dp over the
+   old sprite geometry to fit the real 38dp metal header rail; top-anchored buttons shift down by
+   the same 31dp, bottom-anchored ones are unaffected since the growth is all at the top.
 
-   #btn_option/#btn_close's `bottom` values are the old C++'s "distance from panel bottom to the
-   button's TOP" (86/52) minus the button's own 30dp height, not those numbers directly -- CSS
-   `bottom` measures to the button's BOTTOM edge, not its top. Using 86/52 as-is would put every
-   bottom-anchored button 30dp higher than intended, overlapping #btn_select_server above it. */
+   #btn_option/#btn_close's `bottom` values are the old "distance from panel bottom to button
+   TOP" (86/52) minus the button's 30dp height -- CSS `bottom` measures to the BOTTOM edge, so
+   using 86/52 directly would overlap #btn_select_server above. */
 #panel {
 	width: 213dp;
 	height: 218dp;

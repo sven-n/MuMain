@@ -18,8 +18,7 @@ using namespace mu::ui::window;
 
 namespace
 {
-    // Visual style for the combo widget. Tweaked to match the option window's
-    // existing arrow-button look (see NewUIOptionWindow::RenderContents).
+    // Visual style tweaked to match NewUIOptionWindow::RenderContents's arrow-button look.
     constexpr float BG_BRIGHTNESS_IDLE     = 0.05f;
     constexpr float BG_BRIGHTNESS_HOVER    = 0.15f;
     constexpr float BG_BRIGHTNESS_OPEN     = 0.10f;  // closed field shade while dropdown is open
@@ -32,7 +31,6 @@ namespace
     constexpr int SCROLLBAR_WIDTH = 6;  // vertical scrollbar width inside the list
 
     // Draws a solid-color axis-aligned rectangle in UI coordinates.
-    // Matches the raw-GL pattern used by NewUIOptionWindow.
     void DrawSolidRect(int x, int y, int w, int h, float brightness)
     {
         mu::GetRenderer().SetTexture2D(false);
@@ -153,13 +151,11 @@ bool CComboBox::IsMouseOverWidget() const
 
 bool CComboBox::UpdateMouseEvent()
 {
-    // Mouse-wheel scrolling inside the open dropdown (consumed so it doesn't
-    // leak to other handlers like the volume sliders).
+    // Mouse-wheel scrolling inside the open dropdown, consumed so it doesn't leak to other handlers.
     if (m_bOpen && IsScrollable() && MouseWheel != 0 &&
         CheckMouseIn(m_X, GetListY(), m_Width, GetListHeight()))
     {
-        // MouseWheel sign convention matches NewUIOptionWindow sliders:
-        // positive = wheel up = scroll toward earlier items.
+        // Positive MouseWheel = wheel up = scroll toward earlier items.
         if (MouseWheel > 0) m_ScrollOffset--;
         else                m_ScrollOffset++;
         ClampScrollOffset();
@@ -187,8 +183,7 @@ bool CComboBox::UpdateMouseEvent()
     const int hitIdx = GetItemIndexAtMouse();
     if (hitIdx < 0)
     {
-        // Click landed outside the list (or on the scrollbar column) -- close
-        // without changing selection.
+        // Click landed outside the list -- close without changing selection.
         m_bOpen = false;
         return false;
     }

@@ -4,24 +4,16 @@
 
 namespace mu::ui::window
 {
-    // A hover tooltip attachable to any native mu::ui::window widget (or a bare rect) --
-    // extracted from mu::ui::window::CButton's own ChangeToolTipText()/Render() logic --
-    // the strongest existing implementation of this idea in the codebase. This is the "native, transitional" side of
-    // that document's Tooltip row -- for anything with an RmlUi presentation, use base.rcss's
-    // `.tooltip` convention instead, not this class.
-    //
-    // Owns no position of its own: Render() takes the anchor rect (the owning widget's own
-    // position/size) each frame and only draws if the mouse is currently within it, matching
-    // CButton's prior inline behavior exactly.
+    // Hover tooltip attachable to any native widget or bare rect; owns no position of its own --
+    // Render() takes the anchor rect each frame and draws only if the mouse is within it.
+    // For anything with an RmlUi presentation, use base.rcss's `.tooltip` convention instead.
     class CTooltip
     {
     public:
         ~CTooltip();
 
         void SetText(std::wstring text);
-        // Slot overload: stores a pointer to an I18N::<Group>::<Identifier> variable so the
-        // cached text refreshes automatically on locale change -- same idiom as
-        // CButton::ChangeText(const wchar_t* const*)/ChangeToolTipText(const wchar_t* const*).
+        // Slot overload: stores a pointer to an I18N string variable so the cached text refreshes on locale change.
         void SetText(const wchar_t* const* textSlot);
         void SetTextColor(unsigned int color);
         void SetFont(HFONT font);
@@ -30,9 +22,7 @@ namespace mu::ui::window
 
         bool HasText() const { return !m_text.empty(); }
 
-        // Renders the tooltip if the mouse is currently within [x, y, width, height] -- the same
-        // anchor rect the owning widget itself hit-tests against. offsetX/offsetY nudge the
-        // final draw position (CButton's own MoveTextTipPos() feature). No-op if empty.
+        // Renders if the mouse is within [x, y, width, height]; offsetX/offsetY nudge the draw position. No-op if empty.
         void Render(int x, int y, int width, int height, int offsetX = 0, int offsetY = 0) const;
 
     private:

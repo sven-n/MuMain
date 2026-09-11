@@ -5,33 +5,26 @@
 	<link type="text/rcss" href="sys_menu.rcss"/>
 </head>
 <body>
-	<!-- Modern theme's own copy of the system menu -- per-theme file (UI::RmlBridge::
-	     LoadThemedDocument) because modern-frame is genuinely modern-specific structure, not just
-	     style -- the shared ../../sys_menu.rml is legacy's own theme-neutral copy and carries none
-	     of it (a "shared" file must not bake in one theme's vocabulary, same reasoning login.rml/
-	     msg_win.rml/remember_password_prompt.rml/my_inventory.rml/my_quest_info.rml already forked
-	     for). .panel-cap-top/.panel-middle/.panel-cap-bottom stay in the markup (SysMenuWin.cpp
-	     binds nothing to them directly) but render as nothing under modern -- this theme's own
-	     base.rcss/sys_menu.rcss declare no matching rule for them, unlike legacy's real
-	     sprite-backed versions. Keep this file's ids/data-model/event-callback names in sync with
-	     ../../sys_menu.rml -- SysMenuWin.cpp binds against both by the same names.
+	<!-- Modern theme's own copy of the system menu -- per-theme file since modern-frame is
+	     modern-specific structure, not just style. .panel-cap-top/.panel-middle/.panel-cap-bottom
+	     stay in the markup but render as nothing here (no matching rule in modern's rcss, unlike
+	     legacy's sprite-backed versions). Keep ids/data-model/event-callback names in sync with
+	     ../../sys_menu.rml.
 
-	     Uses base.rcss's shared forged-dialog shell (also used by login.rml), but with the metal
-	     .modern-header-rail header and a single center .modern-joint rivet, rather than Login's
-	     crimson .modern-title-plate hero-banner -- the two are alternative header styles for
-	     different windows, never combined (see login.rml's own note on this). No -crimson frame
-	     variant either: crimson belongs to a hero-banner's own plate, and this dialog has no
-	     hero-banner. -->
+	     Uses base.rcss's shared dialog shell with the metal .modern-header-rail + single
+	     .modern-joint rivet, not Login's crimson hero-banner -- the two header styles are never
+	     combined, and this dialog has no -crimson variant since crimson belongs to the hero-banner
+	     only. -->
 	<div id="backdrop"></div>
 	<div id="panel" class="center-both modern-frame" data-class-compact="select_server_hidden" data-model="sys_menu">
 		<div id="panel_middle" class="panel-middle"></div>
-		<!-- Exterior blackened-metal silhouette (outer iron edge, -3dp) + inner groove (~4dp
-		     inward) -- same shell as Login's #panel, just applied to a plain (non-crimson) frame. -->
+		<!-- Exterior silhouette + inner groove -- same shell as Login's #panel, applied to a
+		     plain (non-crimson) frame. -->
 		<div class="modern-shell-edge"></div>
 		<div class="modern-groove"></div>
 
-		<!-- Raised iron header rail with its own single center-rivet stud, plus the title text.
-		     No separate "System" eyebrow -- redundant with "System Menu" already saying it. -->
+		<!-- Raised header rail with a single center-rivet stud and the title text -- no separate
+		     "System" eyebrow, redundant with the title. -->
 		<div class="modern-header-rail">
 			<div class="modern-joint"></div>
 			<div class="modern-header-accent"></div>

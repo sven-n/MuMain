@@ -4850,9 +4850,8 @@ CALLBACK_RESULT mu::ui::window::CStorageLockMsgBoxLayout::ProcessOk(class CMessa
         return CALLBACK_CONTINUE;
     }
 
-    // Sized like the other GetInputBoxText callers (MAX_TEXT_LENGTH): GetText
-    // fills up to its default length, so the old [20] buffer overflowed the
-    // stack on Linux when entering the guild security code / break password.
+    // MAX_TEXT_LENGTH sized: GetText fills to its default length, so a smaller
+    // buffer here overflows the stack on Linux.
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
     pMsgBox->GetInputBoxText(strText);
@@ -4964,9 +4963,8 @@ CALLBACK_RESULT mu::ui::window::CStorageUnlockMsgBoxLayout::OkBtnDown(class CMes
         return CALLBACK_CONTINUE;
     }
 
-    // Sized like the other GetInputBoxText callers (MAX_TEXT_LENGTH): GetText
-    // fills up to its default length, so the old [20] buffer overflowed the
-    // stack on Linux when entering the guild security code / break password.
+    // MAX_TEXT_LENGTH sized: GetText fills to its default length, so a smaller
+    // buffer here overflows the stack on Linux.
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
     pMsgBox->GetInputBoxText(strText);
@@ -6883,9 +6881,8 @@ CALLBACK_RESULT mu::ui::window::CGuildBreakPasswordMsgBoxLayout::ProcessOk(class
         return CALLBACK_CONTINUE;
     }
 
-    // Sized like the other GetInputBoxText callers (MAX_TEXT_LENGTH): GetText
-    // fills up to its default length, so the old [20] buffer overflowed the
-    // stack on Linux when entering the guild security code / break password.
+    // MAX_TEXT_LENGTH sized: GetText fills to its default length, so a smaller
+    // buffer here overflows the stack on Linux.
     wchar_t strText[MAX_TEXT_LENGTH] = { 0, };
 
     pMsgBox->GetInputBoxText(strText);

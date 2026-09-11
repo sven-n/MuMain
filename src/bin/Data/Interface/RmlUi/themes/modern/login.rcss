@@ -1,25 +1,13 @@
 /* Modern theme for the login dialog -- fully programmatic, flat colors/vector shapes instead of
-   legacy art.
+   legacy art. Built from explicit RML layers (base.rcss's forged-dialog primitives) plus real
+   box-shadow (inset/outset, blur, multiple shadows are all supported by this renderer) directly
+   on the element it belongs to, so the shell reads as outer iron edge -> window surface -> inner
+   groove.
 
-   Reference construction for a modern-theme dialog, built from explicit RML layers (base.rcss's
-   forged-dialog primitives) PLUS real box-shadow. Real box-shadow (inset and outset, genuine blur,
-   comma-separated multiple shadows) IS supported by this vendored renderer as of the SDL_GPU
-   backend's PR-989 integration -- confirmed by reading the actual source (PropertyParserBoxShadow/
-   GeometryBoxShadow/RmlUi_Renderer_SDL_GPU.cpp), not assumed; see base.rcss's own header comment
-   for the full trace. Shadow/depth is real box-shadow directly on the element it belongs to (no
-   shadow-plane divs), so the shell reads as outer iron edge -> window surface -> inner groove.
-
-   One conversion gotcha carried through every box-shadow value below: this engine's rgba() parses
-   alpha via a 0-255 integer (atoi), NOT a 0-1 CSS float -- the browser reference's
-   `rgba(0,0,0,.62)` would parse as alpha 0 (invisible) if copied verbatim. Every color below is
-   pre-converted to the 0-255 form (e.g. .62 -> 158).
-
-   No ::before/::after, `content:`, or percentage border-radius anywhere. The hero-plate ornaments
-   AND the checkbox checkmark use a real `transform: rotate(45deg)`/`rotate(-45deg)` element --
-   SetTransform is genuinely wired into this renderer's vertex stage (verified against source:
-   RmlUi_Renderer_SDL_GPU.cpp's Matrix4f/vertex-uniform path). The checkmark previously used a
-   5-div pixel-stacked stand-in from before rotate() was confirmed reliable; it's now the
-   reference's own single rotated border-corner technique. */
+   Engine notes: this engine's rgba() parses alpha as a 0-255 integer, not a 0-1 CSS float, so
+   every color below is pre-converted (e.g. .62 -> 158). No ::before/::after, `content:`, or
+   percentage border-radius. `transform: rotate()` is confirmed working and used for the
+   hero-plate ornaments and the checkbox checkmark. */
 
 body {
 	width: 100%;
@@ -28,26 +16,15 @@ body {
 	pointer-events: none;
 }
 
-/* Window surface. Crimson belongs to the hero banner ONLY -- #panel uses plain .modern-frame
-   (no -crimson variant), and background-color/decorator are overridden directly here to the
-   reference's own neutral forged-window fill, replacing .modern-frame's own semi-transparent
-   olive-leaning default. Border is a single flat tone (reference: `1px solid #46463b`), not a
-   bevel -- real box-shadow now carries the surface's entire depth read (broad soft drop shadow,
-   dense contact shadow, a dark inner hairline, a warm inner band) instead of a per-side
-   border-color trick.
+/* Window surface -- crimson belongs to the hero banner only, so #panel uses plain .modern-frame
+   with background-color/decorator overridden to a neutral forged fill. Border is a single flat
+   tone; real box-shadow carries the surface's depth (soft drop shadow, contact shadow, inner
+   hairline, warm inner band).
 
-   This is the visible "frame" strip between the exterior shell-edge (-3dp) and the inner groove
-   (+4dp) -- it needs to read as a distinctly LIGHTER metal band than the recessed content well
-   inside the groove, WITHOUT that light leaking further inward. The reference's own literal
-   top-of-gradient stop (`#11130f`) and box-shadow alpha (`.18` = 46/255) produce that contrast
-   fine in a browser, but rendered over an actual 3D game scene in this engine both read as
-   near-invisible. First attempt brightened the decorator's own top stop -- wrong tool: decorator
-   paints across #panel's ENTIRE box, not just the 4dp ring, and .login-groove/the area around
-   .login-hero-banner have no opaque fill of their own there, so the brightened top-of-gradient
-   showed straight through into the "recessed" interior instead of staying confined to the frame.
-   Reverted the decorator to its original dark values -- the box-shadow inset band below is
-   inherently confined to exactly 3dp from the border (fixed spread, no blur), so THAT'S the right
-   place to push contrast: alpha raised to 190/255 (was 46, then 100) with no decorator change. */
+   The frame strip between the shell-edge and inner groove needs to read lighter than the
+   recessed well without leaking light inward -- brightening the decorator's top stop doesn't
+   work since decorator paints #panel's entire box, not just this ring. The contrast instead comes
+   from the inset box-shadow band, which is confined to a fixed 3dp spread (alpha 190/255). */
 #panel {
     position: absolute;
     width: 329dp;
@@ -73,12 +50,9 @@ body {
         inset 0 0 0 3dp rgba(90, 87, 69, 46);
 }
 
-/* Outer iron edge, -3dp. Transparent fill -- the reference's own exterior layer has NO background,
-   only a border + inset lighting; a solid metal-outer fill here was turning this into a second
-   opaque rectangle behind the window surface instead of a thin edge. Border is a single flat tone
-   (reference: `1px solid rgba(31,31,26,.95)`); the asymmetric per-edge lighting the reference
-   expresses as 4 separate inset box-shadows is reproduced directly here instead of folding it into
-   border-*-color, boosted the same way and for the same reason as #panel's own band above. */
+/* Outer iron edge, -3dp. Transparent fill -- a solid fill here would read as a second opaque
+   rectangle behind the window surface instead of a thin edge. Per-edge lighting is 4 separate
+   inset box-shadows rather than border-*-color. */
 .login-shell-edge {
     background-color: transparent;
     border-radius: token(radius-sm)dp;
@@ -91,12 +65,9 @@ body {
         inset 0 -1dp 0 rgba(0, 0, 0, 230);
 }
 
-/* Inner groove, ~4dp inward -- flat border tone matching the reference's own
-   `inset: 4px; border: 1px solid #24261f`, PLUS the two inset shadows the reference also carries
-   here (`inset 0 0 0 1px rgba(121,112,83,.06), inset 0 0 12px rgba(0,0,0,.6)`) -- a thin warm
-   hairline catch plus a broad 12dp inward darkness. That broad darkness is what makes the
-   perimeter actually read as recessed/carved into the shell; the border alone was too thin an
-   effect on its own. */
+/* Inner groove, ~4dp inward -- flat border plus a thin warm hairline and a broad 12dp inward
+   darkness; the darkness is what sells the recessed/carved look, the border alone reads too
+   thin. */
 .login-groove {
     position: absolute;
 
@@ -115,11 +86,9 @@ body {
         inset 0 0 12dp rgba(0, 0, 0, 153);
 }
 
-/* The hero-banner IS Login's header -- it spans the same footprint the (now-removed) separate
-   iron rail used to occupy. This is deliberately NOT nested inside a metal rail: the reference
-   treats .window__header (metal, one center rivet) and .hero-banner (crimson, two side rivets)
-   as alternative header styles for different windows, never combined into one composite. Depth
-   (inset highlight/seat + cast shadow) comes from base.rcss's .modern-title-plate box-shadow. */
+/* The hero-banner IS Login's header, not nested inside a metal rail -- metal rail and crimson
+   hero-banner are alternative header styles, never combined. Depth comes from base.rcss's
+   .modern-title-plate box-shadow. */
 .login-hero-banner {
 	left: 8dp;
 	right: 8dp;
@@ -127,10 +96,8 @@ body {
 	height: 37dp;
 }
 
-/* Ornaments are diamonds INSIDE the plate now (left/right:8dp from the plate's own edges,
-   matching the reference), not external end-caps -- a real 11x11 square rotated 45deg (apparent
-   ~15.6dp). Previously these were narrow external stacked blocks that read as brackets, not
-   diamonds/studs. */
+/* Ornaments are diamonds inside the plate (8dp from its edges) -- an 11x11 square rotated 45deg,
+   not external end-caps. */
 .login-hero-cap {
 	position: absolute;
 	top: 50%;
@@ -154,22 +121,9 @@ body {
 	font-family: "token(font-body)";
 }
 
-/* color/font-weight match the reference exactly (#e1b94e / 500) rather than the general-purpose
-   token(text-warm)/bold. The reference centers via `inset:0;display:grid;place-items:center` --
-   tried the flexbox equivalent (display:flex/align-items/justify-content) here since this engine
-   has no CSS Grid, but a bare mustache-bound text node inside a flex container didn't render at
-   all (RmlUi's flex layout apparently doesn't treat an anonymous/inline text child as a real flex
-   item the way base.rcss's .tooltip__stat's actual ELEMENT children -- <strong>, etc. -- do).
-   Reverted to plain absolute positioning + text-align, same mechanism as before, with top:11dp
-   eyeballed to vertical-center a ~13dp line within the 37dp banner. letter-spacing is the
-   reference's `.02em` converted to this font-size (13dp * 0.02 = 0.26dp), not the earlier
-   unrelated 1.1px value. font-effect switches from `outline` to `shadow` -- the reference's own
-   text-shadow is `0 1px 1px #000, 0 0 5px rgba(190,139,41,.10)`; `shadow(offset-x offset-y
-   color)` reproduces the first (dominant) layer exactly (RmlUi's real font-effect, confirmed via
-   FontEffectShadow.cpp's own property registration: offset-x, offset-y, color). The second, very
-   subtle ambient glow (.10 alpha) is left unreproduced -- `glow()` exists on this engine too but
-   needs 5 parameters (outline-width, blur-width, offset-x, offset-y, color) for a barely-visible
-   effect, not worth the added complexity/risk here. */
+/* Positioned via absolute + text-align rather than flex centering -- this engine's flex layout
+   doesn't treat a bare mustache-bound text node as a real flex item, so it didn't render at all
+   inside a flex container. top:11dp eyeballed to vertical-center the line in the 37dp banner. */
 .label-server {
 	position: absolute;
 	left: 0;
@@ -184,12 +138,10 @@ body {
 	font-effect: shadow(0dp 1dp #000000);
 }
 
-/* Body is a real recessed cavity. top:50dp matches the reference's own `.login-body{top:50px}`
-   exactly. (LoginWin.cpp::SetPosition() hardcodes the real CUITextInputBox overlay's Y offset as
-   literal constants -- usernameY=72, passwordY=105 -- which happen to already line up with this
-   value: 50dp local well top + input local top 16dp/49dp + a fixed 6dp text-padding baked into
-   that C++ = 72/105 exactly. If that C++ offset is ever revisited, this is the value it's keyed
-   to.) Broad inset recess shadow now comes from base.rcss's .modern-content-well box-shadow. */
+/* Body is a real recessed cavity; broad inset shadow comes from base.rcss's .modern-content-well.
+   top:50dp must stay keyed to LoginWin.cpp::SetPosition()'s hardcoded input overlay Y offsets
+   (usernameY=72, passwordY=105 = 50dp well top + input top 16dp/49dp + a 6dp text-padding baked
+   into that C++). */
 .login-content {
 	left: 9dp;
 	right: 9dp;
@@ -198,10 +150,8 @@ body {
 	pointer-events: none;
 }
 
-/* Coordinates are local to .login-content, matching the reference's own .field-label exactly:
-   color #8d835f (a muted brass tone, not the general-purpose token(text-secondary) gray), 8dp,
-   weight 600, letter-spacing .08em (of 8dp = 0.64dp). Previously used token(text-secondary)/9dp/
-   no letter-spacing/23dp+56dp top (2dp off the reference's own 25px/58px). */
+/* Coordinates are local to .login-content. color #8d835f is a muted brass tone, distinct from
+   the general-purpose token(text-secondary) gray. */
 .label-account {
 	left: 21dp;
 	top: 25dp;
@@ -237,14 +187,9 @@ body {
 .checkbox-remember-me   { left: 100dp; top: 84dp; }
 .checkbox-save-password { left: 100dp; top: 108dp; }
 
-/* The reference's checkbox has no per-instance bevel override on either checkbox-row -- it's one
-   uniform look everywhere (base.rcss's .checkbox-box/.checkbox-box.checked). The previous
-   top/left-corner bevel-catch overrides here (both unchecked and checked) were an earlier
-   invented embellishment with no reference equivalent; removed.
-
-   Checkmark is now the reference's own technique: a single 6x3 box with a left+bottom border,
-   rotated -45deg, forming a check stroke -- not the previous 5-div pixel-stacked stand-in from
-   before `rotate()` was confirmed reliable on this renderer. */
+/* Checkbox look is uniform everywhere (base.rcss's .checkbox-box/.checkbox-box.checked), no
+   per-instance override. Checkmark is a single 6x3 box with a left+bottom border rotated -45deg,
+   forming a check stroke. */
 .checkbox-tick {
 	display: none;
 	position: absolute;
@@ -260,10 +205,8 @@ body {
 	display: block;
 }
 
-/* Footer is a structural container only -- see base.rcss's own .modern-footer-band comment. One
-   plain border-top now carries the entire body-to-footer separation, matching the reference's own
-   `.window__footer{border-top:1px solid #24251f;background:none}` exactly -- the previous
-   shadow+shine two-line pair was more decorative than the reference. */
+/* Footer is a structural container only (base.rcss's .modern-footer-band) -- one plain border-top
+   carries the entire body-to-footer separation. */
 .login-footer {
 	left: 9dp;
 	right: 9dp;
@@ -275,11 +218,8 @@ body {
 	border-top-color: #24251f;
 }
 
-/* Position/size only -- color/box-shadow/font are now inherited from base.rcss's shared .btn/
-   .btn-ok (promoted there once sys_menu became a second real consumer needing the identical
-   reference values; this file used to carry a full private copy of all of it, which is exactly
-   the kind of duplication that let sys_menu's own buttons silently stay on the old un-corrected
-   look while Login's got fixed). */
+/* Position/size only -- color/box-shadow/font are inherited from base.rcss's shared .btn/.btn-ok,
+   so all consumers stay in sync. */
 .login-btn {
 	top: 8dp;
 	width: 76dp;
@@ -300,9 +240,8 @@ body {
 	font-family: "token(font-body)";
 }
 
-/* Intentionally external to the forged dialog shell, as in the current UX. top:257dp matches the
-   reference exactly (245dp window height + 12dp below it); font-effect/color/size match the
-   reference's own `.trust-warning` (`color:#c99a3e;font-size:10px;text-shadow:0 1px 1px #000`). */
+/* Intentionally external to the forged dialog shell. top:257dp = 245dp window height + 12dp
+   below it. */
 .trust-warning {
 	position: absolute;
 	left: 30dp;

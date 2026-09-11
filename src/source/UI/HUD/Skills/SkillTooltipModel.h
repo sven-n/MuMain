@@ -2,18 +2,11 @@
 
 #include <cstdint>
 
-// Fixed-buffer model for skill hover tooltips. Built once per render call by
-// `BuildModel`, then consumed by either the in-game renderer (which writes
-// into the legacy TextList array) or the MuEditor renderer (which renders
-// via ImGui).
+// Fixed-buffer model for skill hover tooltips, built by `BuildModel` and shared by the
+// in-game renderer (legacy TextList) and the MuEditor renderer (ImGui). No heap allocations
+// per render (CODING_RULES section 12).
 //
-// Centralized so the two renderers stay in sync on content order and
-// special-case logic. Performance-conscious per CODING_RULES section 12:
-// no heap allocations per render, fixed-size buffers throughout.
-//
-// See also:
-//   - `SkillTooltip.{cpp,h}`              - in-game renderer
-//   - `MuEditor/UI/SkillEditor/SkillTooltipEditor.cpp` - editor renderer
+// See also: SkillTooltip.{cpp,h} (in-game), MuEditor/UI/SkillEditor/SkillTooltipEditor.cpp (editor)
 
 namespace UI::Skills::Tooltip
 {
@@ -37,9 +30,8 @@ struct Line
     bool isBlank;   // emit a blank "\n" line for vertical spacing
 };
 
-// Fixed-capacity buffer. `count` lines are valid. `skipCount` mirrors the
-// game tooltip's existing concept: certain lines (name, blanks) don't
-// participate in positioning math, so the renderer counts them separately.
+// Fixed-capacity buffer; `count` lines are valid. `skipCount` excludes lines (name, blanks)
+// that don't participate in positioning math.
 struct Model
 {
     Line lines[MAX_TOOLTIP_LINES];
@@ -53,11 +45,8 @@ struct Model
     }
 };
 
-// Options driving BuildModel. The hero-context fields are only read when
-// `includeCharacterSpecific` is true (i.e. in-game). The editor passes
-// `false` and the model omits all character-conditional content (class-
-// specific damage calc, color-coded requirement comparisons, party teleport
-// warnings, etc.).
+// Options driving BuildModel. Hero-context fields are only read when
+// `includeCharacterSpecific` is true; the editor passes false and gets no character-conditional content.
 struct BuildOptions
 {
     int skillType;                // Resolved skill enum (e.g. AT_SKILL_FIRE_BALL)

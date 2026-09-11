@@ -5,15 +5,25 @@
 	<link type="text/rcss" href="login_main.rcss"/>
 </head>
 <body>
-	<!-- Login-scene menu/credit button bar. -->
+	<!-- Each .btn-icon-item wrapper only shows a caption in modern theme; legacy positions the
+	     button directly via .btn-icon-menu/.btn-icon-credit and leaves the wrapper unstyled.
+
+	     Labels use DejaVu Sans glyphs (base.rcss's .btn-icon-label) -- it's the only bundled font
+	     covering both U+2261 (menu) and U+2726 (credits). -->
 	<div id="panel">
-		<div id="btn_menu" class="btn-icon btn-icon-menu">
-			<span class="btn-icon-label">M</span>
+		<div id="btn_menu_item" class="btn-icon-item">
+			<div id="btn_menu" class="btn-icon btn-icon-primary btn-icon-menu">
+				<span class="btn-icon-label">≡</span>
+			</div>
+			<span class="btn-icon-caption">Menu</span>
 		</div>
-		<div id="btn_credit" class="btn-icon btn-icon-credit">
-			<div class="btn-credit-deco"></div>
-			<div class="btn-credit-icon"></div>
-			<span class="btn-icon-label">C</span>
+		<div id="btn_credit_item" class="btn-icon-item">
+			<div id="btn_credit" class="btn-icon btn-icon-credit">
+				<div class="btn-credit-deco"></div>
+				<div class="btn-credit-icon"></div>
+				<span class="btn-icon-label">✦</span>
+			</div>
+			<span class="btn-icon-caption">Credits</span>
 		</div>
 	</div>
 </body>

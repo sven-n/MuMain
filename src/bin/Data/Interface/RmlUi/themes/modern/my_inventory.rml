@@ -5,10 +5,9 @@
 	<link type="text/rcss" href="my_inventory.rcss"/>
 </head>
 <body data-model="my_inventory">
-	<!-- Window frame/title/gold/buttons. Equipment paperdoll and the inventory
-	     grid stay fully native -- see MyInventory.h's own header comment. Panel
-	     background lives in the separate my_inventory_bg.rml (background context) instead of
-	     here, since it must paint behind the still-native 3D icons. -->
+	<!-- Window frame/title/gold/buttons only -- paperdoll and inventory grid stay native
+	     (MyInventory.h). Background lives in my_inventory_bg.rml instead, since it must paint
+	     behind the native 3D icons. -->
 	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="title-glow inv-title-glow"></div>
@@ -32,16 +31,14 @@
 		<div id="btn_expand" class="inv-btn inv-btn-expand" data-event-click="my_inventory_expand_click"></div>
 		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
 
-		<!-- Set/Socket option header labels. Each spans half of #panel's width,
-		     matching the former native hover-rect split exactly -- see MyInventory.cpp's
-		     SyncRmlModel() header comment. -->
+		<!-- Set/Socket option header labels, each spanning half of #panel's width to match the
+		     former native hover-rect split. -->
 		<div id="set_option_label" class="option-label option-label-set" data-class-active="set_option_active"
 		     data-event-mouseover="my_inventory_set_option_hover" data-event-mouseout="my_inventory_set_option_unhover">{{set_option_label}}</div>
 		<div id="socket_option_label" class="option-label option-label-socket" data-class-active="socket_option_active"
 		     data-event-mouseover="my_inventory_socket_option_hover" data-event-mouseout="my_inventory_socket_option_unhover">{{socket_option_label}}</div>
 
-		<!-- Shared tooltip for both labels above (mutually exclusive hover targets) -- same
-		     convention as main_frame.rml's #skill_tooltip. -->
+		<!-- Shared tooltip for both labels above (mutually exclusive hover targets). -->
 		<div id="item_option_tooltip" data-class-hidden="!item_option_tooltip_visible">
 			<div class="tt-line" data-for="line : item_option_tooltip_lines"
 			     data-class-tt-blue="line.color_blue" data-class-tt-yellow="line.color_yellow"

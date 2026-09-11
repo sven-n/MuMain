@@ -1,9 +1,6 @@
 //////////////////////////////////////////////////////////////////////
-// WindowGeometry.h: opt-in, composed 2D rect + hit-test for mu::ui::window
-// widgets that have a real screen-space position. Not a CObject base-class field -- a window that has a
-// meaningful rect owns one of these and forwards to it; a window whose
-// position is a per-frame WorldToScreen() projection (CMyInventory's
-// 3D-anchored slots, CCharInfoBalloonMng) never creates one.
+// WindowGeometry.h: opt-in 2D rect + hit-test, composed into widgets that
+// have a real screen-space position (not used by 3D-projected widgets).
 //////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_WINDOWGEOMETRY_H__3B7B6C0A_3C0E_4B4E_9C7B_9A2E7B2D6F4A__INCLUDED_)
@@ -13,16 +10,9 @@
 
 namespace mu::ui::window
 {
-    // Value object, not a mixin base -- composition over inheritance (Section C).
-    // Position/size are stored in whatever space the owning widget already draws
-    // in (the reference-resolution space every LayoutMode but Legacy rescales
-    // against). Contains() compares directly against the caller's coordinates
-    // with no further scaling of its own: by the time a widget's UpdateMouseEvent()
-    // runs, CManager has already re-projected MouseX/MouseY into that same space
-    // via ScopedActiveTransform's transformMouse=true (UI/Core/WindowManager.cpp),
-    // exactly the assumption the existing mu::ui::window::CheckMouseIn() free
-    // function (WindowCommon.h) already relies on -- this is a drop-in replacement
-    // for that per-widget hand-rolled rect check, not a new hit-testing rule.
+    // Value object, not a mixin base (composition over inheritance). Contains()
+    // does no scaling of its own -- it assumes CManager has already re-projected
+    // MouseX/MouseY into the widget's own space via ScopedActiveTransform.
     class WindowGeometry
     {
     public:
@@ -37,9 +27,7 @@ namespace mu::ui::window
         const SIZE& Size() const { return m_size; }
         RECT Bounds() const;
 
-        // True if (windowX, windowY) -- e.g. the global MouseX/MouseY -- falls
-        // inside this rect. Half-open, matching CheckMouseIn(): the right/bottom
-        // edge is exclusive.
+        // True if (windowX, windowY) falls inside this rect (right/bottom edge exclusive).
         bool Contains(int windowX, int windowY) const;
 
     private:

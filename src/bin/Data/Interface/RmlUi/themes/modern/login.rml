@@ -5,27 +5,17 @@
 	<link type="text/rcss" href="login.rcss"/>
 </head>
 <body>
-	<!-- Modern theme's own copy of the login panel. Per-theme file (UI::RmlBridge::LoadThemedDocument)
-	     because modern's decorative layering is genuinely modern-specific structure, not just style --
-	     the shared ../../login.rml is legacy's own theme-neutral copy and carries none of these
-	     classes (a "shared" file must not bake in one theme's vocabulary). Keep this file's
-	     ids/data-model/event-callback names in sync with
-	     ../../login.rml -- LoginWin.cpp binds against both by the same names.
+	<!-- Modern theme's own copy of the login panel -- per-theme file since modern's decorative
+	     layering is modern-specific structure, not just style. Keep ids/data-model/event-callback
+	     names in sync with ../../login.rml.
 
-	     Reference construction for how a modern-theme dialog is built -- other windows (e.g.
-	     sys_menu.rml) reuse base.rcss's shared primitives (.modern-shell-edge/.modern-content-well/
-	     .modern-footer-band/.modern-title-plate/.modern-control-well/.modern-header-rail/
-	     .modern-joint) rather than duplicating this structure; .modern-header-rail/.modern-joint
-	     specifically are NOT used by Login, see the note below. Depth comes from real box-shadow
-	     directly on window/header/body/hero-plate (the vendored SDL_GPU renderer's PR-989
-	     integration implements it -- see base.rcss's own header comment for the full source trace),
-	     so the shell reads as outer iron edge -> window surface -> inner groove, without extra
-	     shadow-plane divs. The hero-plate's diamond studs use a real `transform: rotate(45deg)`
-	     square -- SetTransform is genuinely wired into this renderer's vertex stage (verified
-	     against source). #panel uses plain .modern-frame (NOT the -crimson variant -- crimson
-	     belongs to the hero banner only, the outer window shell is neutral blackened iron), and
-	     login.rcss overrides its background/decorator/border directly to a single uniform border
-	     tone + real box-shadow, since box-shadow now carries all of the surface's depth. -->
+	     Unlike other modern windows, Login doesn't use .modern-header-rail/.modern-joint (the
+	     hero-banner is its header instead, see below). Depth comes from real box-shadow on
+	     window/header/body/hero-plate (confirmed supported by this renderer), not extra
+	     shadow-plane divs; the hero-plate's diamond studs use a real `transform: rotate(45deg)`
+	     square (SetTransform is confirmed wired into the renderer's vertex stage). #panel uses
+	     plain .modern-frame -- crimson belongs to the hero banner only -- and login.rcss overrides
+	     its border to a single tone since box-shadow now carries the depth. -->
 	<div id="panel" class="modern-frame" data-model="login">
 		<!-- Exterior blackened-metal silhouette: outer iron edge, -3dp. -->
 		<div class="modern-shell-edge login-shell-edge"></div>
@@ -33,20 +23,13 @@
 		<!-- Inner groove, ~4dp inward. -->
 		<div class="login-groove"></div>
 
-		<!-- The reference defines TWO separate, mutually-exclusive header treatments:
-		     .window__header (metal, ONE center rivet via ::before) and .hero-banner (crimson, TWO
-		     side rivets via ::before/::after) -- different windows use one or the other, never
-		     both nested together. Login's header IS the hero-banner directly (it's a "hero"
-		     identity display -- which server you're connecting to), spanning the full header
-		     footprint itself; there is no separate iron rail layer or center-rivet joint
-		     underneath it. Crimson lives ONLY on this banner -- the outer window shell (#panel,
-		     plain .modern-frame, no -crimson variant) is neutral blackened iron, and there is no
-		     ambient glow washing crimson/warm light onto that shell (the reference's own warm
-		     highlight is just the banner's own internal top gradient layer, not a separate glow
-		     element). -->
+		<!-- Two mutually-exclusive header styles exist: metal rail (one center rivet) and
+		     hero-banner (crimson, two side rivets) -- never nested together. Login's header IS
+		     the hero-banner itself (server identity display), with no separate rail/joint
+		     underneath; crimson stays confined to this banner, not the outer #panel shell. -->
 		<div class="modern-title-plate login-hero-banner">
-			<!-- Diamonds INSIDE the plate, left/right:8dp from its own edges -- the hero-banner's
-			     own ornament set, matching the reference exactly. -->
+			<!-- Diamonds inside the plate, 8dp from its own left/right edges -- the hero-banner's
+			     ornament set. -->
 			<div class="login-hero-cap login-hero-cap-left"></div>
 			<div class="login-hero-cap login-hero-cap-right"></div>
 			<span class="label label-server">{{server_name}}</span>
@@ -75,11 +58,9 @@
 			</div>
 		</div>
 
-		<!-- Footer: a structural container only -- see base.rcss's own .modern-footer-band comment.
-		     One plain border-top (login.rcss's .login-footer) carries the entire body-to-footer
-		     separation now, matching the reference's own `.window__footer{border-top:1px solid
-		     #24251f;background:none}` exactly -- the previous two-div shadow+shine pair was more
-		     decorative than the reference. -->
+		<!-- Footer: structural container only -- a single border-top (.login-footer) carries the
+		     whole body-to-footer separation, matching the reference exactly (replaces a prior
+		     two-div shadow+shine pair). -->
 		<div class="modern-footer-band login-footer">
 			<div class="btn btn-ok login-btn login-btn-ok" data-event-click="login_ok_click">
 				<span class="login-btn-label">{{ok_label}}</span>

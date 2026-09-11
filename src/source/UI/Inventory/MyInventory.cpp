@@ -77,9 +77,7 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
     if (nullptr == pNewUIMng || nullptr == pNewUI3DRenderMng || nullptr == g_pNewItemMng)
         return false;
 
-    // A user-dragged position (this window's own drag-end handler below) overrides the caller's
-    // default column/layout position -- before anything else uses x/y, so the equipment grid
-    // (created just below) and the panel both start at the same, possibly-overridden spot.
+    // A saved user-dragged position overrides the caller's default x/y before anything else uses them.
     GameConfig::GetInstance().GetWindowPosition(L"my_inventory", x, y);
 
     m_pNewUIMng = pNewUIMng;
@@ -101,8 +99,7 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
     LoadImages();
     SetEquipmentSlotInfo();
 
-    // Guarded like every other hybrid window's Create() (re-run on resolution change), so the
-    // document/model are created once, ever.
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
         const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_inventory",
@@ -196,20 +193,10 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
         if (modelCreated)
             m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_inventory.rml");
 
-        // Drag-by-title-bar -- first real caller of UI::RmlBridge::MakeDraggable() (RmlDraggable.h
-        // -- previously wired up nowhere). #title becomes the drag handle; MakeDraggable itself
-        // force-sets drag/pointer-events on it, no RCSS changes needed for the mechanism to fire.
-        //
-        // onMove independently recomputes DockRightTransform (this window's own LayoutMode, set at
-        // AddUIObj() time) rather than reading UI::Scaling::GetActiveTransform() -- this callback
-        // fires from RmlUi's own event processing, not from inside this window's own
-        // ScopedActiveTransform-wrapped Update()/Render() (WindowManager.cpp), so the ambient
-        // active transform isn't guaranteed to be this window's. SetPos() (not a raw m_Pos write)
-        // keeps the native equipment paperdoll/grid -- this window's real Type-2 companion -- in
-        // sync automatically. Feeding the resulting m_Pos back through the same SyncRmlModel()
-        // path every frame is what keeps this drag write from fighting root_x/root_y's own live
-        // data-model binding (see this window's own scoping notes for the full round-trip
-        // reasoning).
+        // #title is the drag handle (MakeDraggable). onMove recomputes DockRightTransform directly
+        // instead of reading the ambient active transform, since this callback fires from RmlUi's
+        // own event processing, outside this window's ScopedActiveTransform scope. SetPos() keeps
+        // the native paperdoll/grid in sync automatically.
         if (m_pRmlDoc)
         {
             Rml::Element* panelEl = m_pRmlDoc->GetElementById("panel");
@@ -226,15 +213,13 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
                     },
                     [this]()
                     {
-                        // Persist immediately -- m_Pos is
-                        // already the drag's final resolved position from the onMove above.
+                        // Persist immediately -- m_Pos already holds the drag's final resolved position.
                         GameConfig::GetInstance().SetWindowPosition(L"my_inventory", m_Pos.x, m_Pos.y);
                     });
             }
         }
 
-        // Frame background panel -- see MyInventoryBgRmlModel's own header comment (MyInventory.h)
-        // for why this needs the background context instead of the main one.
+        // Frame background panel uses the background context -- see MyInventoryBgRmlModel (MyInventory.h).
         if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
         {
             const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "my_inventory_bg",
@@ -247,18 +232,15 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
             if (bgModelCreated)
             {
                 m_pRmlBgDoc = UI::RmlBridge::LoadThemedDocument(bgContext, "Data/Interface/RmlUi/my_inventory_bg.rml");
-                // Shown immediately, unlike m_pRmlDoc below -- RenderBackgroundLayer() is only ever
-                // called from Render(), itself only reached while this window's own Show()/
-                // visibility already gates it (CManager skips Update()/Render() for hidden
-                // objects), so there's no separate "wrong scene" case to guard against here.
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
                 if (m_pRmlBgDoc)
                     m_pRmlBgDoc->Show();
             }
         }
 
-        // Not Show()n here -- this window starts hidden (Show(false) below) like every other
-        // closable inventory-family window; m_pRmlDoc's visibility follows this object's own
-        // Show()/Hide() via SyncRmlModel(), not an eager Show() at Create() time.
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
     }
 
     Show(false);
@@ -288,8 +270,7 @@ void CMyInventory::Release()
         m_pNewUIMng = nullptr;
     }
 
-    // See CMuHelperBar::Release()'s identical rationale -- this object's own release has no other
-    // way to hide these once created.
+    // Hide explicitly -- Release() has no other way to hide these once created.
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
     if (m_pRmlBgDoc)
@@ -652,9 +633,7 @@ bool CMyInventory::UpdateMouseEvent()
     if (true == InventoryProcess())
         return false;
 
-    // Frame corner-close "X" -- a shared frame mechanism unrelated to the retired CButton family
-    // (BtnProcess() removed); RmlUi's own Context now handles the 4 real buttons via
-    // data-event-click (see Create()).
+    // Frame corner-close "X" -- the 4 real buttons are handled by RmlUi's data-event-click (see Create()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_INVENTORY))
         return false;
 
@@ -878,17 +857,9 @@ bool CMyInventory::Update()
 
 void CMyInventory::SyncRmlModel()
 {
-    // Shared transform group -- see MyInventoryRmlModel::rootX's own header comment. Read here
-    // (inside Update(), already running within this window's own CManager-pushed
-    // ScopedActiveTransform) rather than a HUD-specific helper, since this window is positioned
-    // via ordinary SetPos()/m_Pos, not a fixed HUD anchor.
-    //
-    // m_Pos is a REFERENCE-space coordinate, not a real screen pixel -- every other reference-
-    // space value in this codebase (e.g. MainFrameWindow.cpp's bars_left/top) is resolved via
-    // screenPos = refPos*scale + offset before being handed to RmlUi's data-style-left/top (which
-    // takes literal 'px', not reference pixels). Binding raw m_Pos here leaves the panel at the
-    // wrong screen position at any non-1:1 offset -- the same double-offset-shaped bug class the
-    // CSprite/WindowGeometry retrofit hit elsewhere in this tier.
+    // m_Pos is reference-space, not screen pixels -- must resolve via scale+offset before handing
+    // to RmlUi's left/top (which takes literal px), or the panel lands at the wrong position at
+    // any non-1:1 scale.
     const auto transform = UI::Scaling::GetActiveTransform();
     const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
     const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
@@ -903,11 +874,8 @@ void CMyInventory::SyncRmlModel()
         m_BgRmlBinder.MarkDirty("root_y");
         m_BgRmlBinder.MarkDirty("root_scale");
 
-        // A closable window needs its own visibility gate, same reasoning as every persistent
-        // HUD pilot's SyncDocVisibility() -- RenderBackgroundLayer() renders whatever's currently
-        // shown in the shared background context regardless of which window called it, so
-        // Hide()/Show() here is what actually keeps this one invisible while the inventory window
-        // itself is closed.
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
         if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
     }
 
@@ -951,8 +919,7 @@ void CMyInventory::SyncRmlModel()
         (goldArgb >> 16) & 0xFF, (goldArgb >> 8) & 0xFF, goldArgb & 0xFF, (goldArgb >> 24) & 0xFF);
     syncText(&MyInventoryRmlModel::goldColor, "gold_color", Rml::String(goldColorBuf));
 
-    // Same 7-window gate RenderButtons()/BtnProcess() used to duplicate separately for
-    // visibility vs. interactivity -- RmlUi's data-class-hidden means one flag now covers both.
+    // One flag now covers both visibility and interactivity via RmlUi's data-class-hidden.
     const bool otherWindowOpen = g_pNewUISystem->IsVisible(INTERFACE_NPCSHOP)
         || g_pNewUISystem->IsVisible(INTERFACE_TRADE)
         || g_pNewUISystem->IsVisible(INTERFACE_DEVILSQUARE)
@@ -973,10 +940,8 @@ void CMyInventory::SyncRmlModel()
     syncWide(&MyInventoryRmlModel::exitTooltip, "exit_tooltip", I18N::Game::CloseIV);
     syncWide(&MyInventoryRmlModel::expandTooltip, "expand_tooltip", I18N::Game::OpenExpandedInventoryK);
 
-    // Set/Socket option header labels + shared hover tooltip -- see
-    // ItemOptionTooltipLineEntry's own comment (MyInventory.h). Label text is static per-language,
-    // but still routed through syncWide (change-checked) rather than bound once at Create() time,
-    // matching every other I18N-sourced field in this model.
+    // Label text is static per-language but still routed through syncWide (change-checked) rather
+    // than bound once at Create() time.
     wchar_t setOptionLabelBuf[128];
     mu_swprintf(setOptionLabelBuf, L"[%ls]", I18N::Game::SetOption);
     syncWide(&MyInventoryRmlModel::setOptionLabel, "set_option_label", setOptionLabelBuf);
@@ -987,12 +952,9 @@ void CMyInventory::SyncRmlModel()
     syncWide(&MyInventoryRmlModel::socketOptionLabel, "socket_option_label", socketOptionLabelBuf);
     syncBool(&MyInventoryRmlModel::socketOptionActive, "socket_option_active", g_SocketItemMgr.IsSocketSetOptionEnabled());
 
-    // Shared tooltip -- one hover target at a time (setOptionHovered/socketOptionHovered are set
-    // by the RmlUi hover event callbacks below, mutually exclusive same as the legacy left/right
-    // header-strip halves were). BuildXxxTooltipModel() is the same content resolution
-    // (RenderSetOptionList()/RenderToolTipForSocketSetOption()'s own former native-drawing bodies
-    // used) with no drawing -- only the destination (RmlUi vs. legacy TextList) differs, same
-    // convention as MainFrameWindow.cpp's skill tooltip (UI::Skills::Tooltip::BuildModelForSlot).
+    // Shared tooltip -- only one of setOptionHovered/socketOptionHovered is ever true at a time.
+    // BuildXxxTooltipModel() reuses the same content resolution as the old native-drawing code,
+    // minus the drawing.
     auto& model = m_RmlBinder.GetModel();
     bool tooltipBuilt = false;
     UI::Inventory::Tooltip::Model tooltipModel;
@@ -1030,12 +992,9 @@ bool CMyInventory::Render()
 {
     EnableAlphaTest();
 
-    // Frame background panel moved to RmlUi -- see MyInventoryBgRmlModel's own header comment
-    // (MyInventory.h) for why this goes through the background context. Must run
-    // before RenderEquippedItem()/m_pNewInventoryCtrl->Render() below only in the sense that
-    // both of those are 2D overlays on top of this frame -- the actual ordering constraint (this
-    // panel painting behind the *3D* icons) is enforced by RenderBackgroundLayer() itself running
-    // earlier in the frame than Render3D()'s C3DRenderMng pass, not by this call's position here.
+    // Frame background panel is RmlUi, routed through the background context (see
+    // MyInventoryBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
     RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     if (m_pNewInventoryCtrl)
@@ -1708,8 +1667,7 @@ bool CMyInventory::EquipmentWindowProcess()
 
                 if (emptySlotIndex != -1)
                 {
-                    // This code looks tricky... it simulates a pick up and click on the inventory slot.
-                    // God knows what happens, when this request to the server goes wrong.
+                    // Simulates picking up the item and placing it into the inventory slot.
                     if (CInventoryCtrl::CreatePickedItem(nullptr, pEquippedItem))
                     {
                         CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();

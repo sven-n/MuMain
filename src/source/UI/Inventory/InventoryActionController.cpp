@@ -193,8 +193,7 @@ bool CInventoryActionController::HandleStorageAutoMove(CInventoryCtrl* targetCon
 
 bool CInventoryActionController::HandleMixAutoMove(CInventoryCtrl* targetControl) const
 {
-    // All crafting NPC dialogs (Chaos Machine, Seed Master, Elphis, Osbourne, ...) share the
-    // single mix window, so routing the right-click here covers every crafting NPC at once.
+    // All crafting NPCs share one mix window, so this covers every crafting NPC at once.
     return g_pMixInventory->ProcessMyInvenItemAutoMove(targetControl);
 }
 

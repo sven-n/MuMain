@@ -5,9 +5,7 @@
 	<link type="text/rcss" href="buff_strip.rcss"/>
 </head>
 <body data-model="buff_strip">
-	<!-- Active-buff icon strip, horizontally centered (.center-x) with a fixed top offset. One
-	     .buff-slot instance per active buff (data-for), positioned via C++-computed slot_left/
-	     slot_top in dp. -->
+	<!-- Buff icon strip, centered; each .buff-slot is positioned via C++-computed slot_left/slot_top (dp). -->
 	<div id="panel" class="center-x">
 		<div class="buff-slot" data-for="buff : buffs"
 		     data-style-left="buff.slot_left + 'dp'" data-style-top="buff.slot_top + 'dp'">

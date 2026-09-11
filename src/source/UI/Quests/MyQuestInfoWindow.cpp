@@ -27,11 +27,8 @@ extern int g_iNumLineMessageBoxCustom;
 extern int g_iNumAnswer;
 extern wchar_t g_lpszMessageBoxCustom[NUM_LINE_CMB][MAX_LENGTH_CMB];
 
-// Replaces the two render paths' former shared m_aszMsg/m_nMsgLine buffer -- computed fresh per
-// call instead of cached in a member, since SyncRmlModel() now reads/builds both the empty-quest
-// message and the job-change state message in the same pass and a shared buffer would let one
-// stomp the other (found during review, not in the original -- its two render paths were always
-// mutually exclusive per frame, so the aliasing was harmless there).
+// Computed fresh per call rather than cached in a member -- SyncRmlModel() builds both the
+// empty-quest and job-change messages in the same pass, so a shared buffer would let one stomp the other.
 std::vector<mu::ui::window::CMyQuestInfoWindow::TextLine> mu::ui::window::CMyQuestInfoWindow::BuildTextLines(
     int nGlobalTextIndex, int nPixelWidth)
 {
@@ -233,10 +230,8 @@ bool mu::ui::window::CMyQuestInfoWindow::Update()
 
 bool mu::ui::window::CMyQuestInfoWindow::Render()
 {
-    // RmlUi's #panel now owns 100% of this window's chrome/text/list rendering. The one
-    // exception -- a selected reward-item row's live info popup -- stays a direct native call
-    // here, matching CUIQuestContentsListBox::RenderCoveredInterface's original per-frame-while-
-    // selected behavior (see m_pSelectedRewardItem's own header comment).
+    // RmlUi's #panel owns all chrome/text/list rendering; only the selected reward item's info
+    // popup is still a native per-frame call here (see m_pSelectedRewardItem).
     if (m_eTabBtnIndex == TAB_QUEST && m_pSelectedRewardItem)
     {
         const auto transform = UI::Scaling::GetActiveTransform();
@@ -506,9 +501,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("quest_list_empty");
     }
 
-    // Small (well under CBuffStrip's own "unconditional rebuild is fine" ceiling) lists, rebuilt
-    // and marked dirty unconditionally each sync -- same reasoning CreditWin.cpp's own names list
-    // and BuffStrip.cpp's buff-icon list already use.
+    // Small lists, rebuilt and marked dirty unconditionally each sync (same as CreditWin/BuffStrip).
     model.emptyQuestLines = bEmpty ? BuildTextLines(2825, 140) : std::vector<TextLine>{};
     m_RmlBinder.MarkDirty("empty_quest_lines");
 
@@ -558,10 +551,7 @@ void mu::ui::window::CMyQuestInfoWindow::SyncRmlModel()
             nStateTextIndex = 931;
         else if (byState == QUEST_END)
             nStateTextIndex = 932;
-        // QUEST_NONE/QUEST_NO/QUEST_ERROR (and any other value) fall through to 930, matching the
-        // original's own if/else-if chain (no final else -- 930 was already the first branch's
-        // condition, not a true default, but every unhandled byState value fell through to
-        // whatever m_aszMsg last held; this makes that fallthrough an explicit default instead).
+        // Any other state (QUEST_NONE/QUEST_NO/QUEST_ERROR) falls through to 930, matching the original.
 
         model.jobChangeStateLines = BuildTextLines(nStateTextIndex, 140);
         m_RmlBinder.MarkDirty("jobchange_state_lines");

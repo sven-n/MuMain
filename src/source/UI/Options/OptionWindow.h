@@ -119,8 +119,8 @@ namespace mu::ui::window
         std::vector<std::wstring> m_resolutionLabels;
         std::vector<const wchar_t*> m_resolutionLabelPointers;
 
-        // Set when a combo consumes a click; swallows the rest of that mouse-hold
-        // so the release can't fall through to the Close button (see UpdateMouseEvent).
+        // Set when a combo consumes a click, to swallow the rest of that mouse-hold so
+        // release can't fall through to the Close button.
         bool m_bSwallowClickHold = false;
 
         CComboBox m_ResolutionCombo;

@@ -1,14 +1,9 @@
-/* Legacy theme for the login-scene credits screen (CCreditWin): full-screen background, the
-   crossfading illustration pair, the static logo/deco art, the close button, and the scrolling
-   credit text -- #panel now owns 100% of this window's visuals, nothing left in Render(). Positions
-   are the original CCreditWin::Create()/SetPosition()/LoadIllust() literal 800x600-reference pixel
-   values carried over directly as dp, same convention every other ported window already uses (dp
-   responds to the same UI-scale system that used to be applied manually via fScaleX/fScaleY).
-   Credit-text colors match the original g_pRenderText colors verbatim (CLRDW_BR_GRAY/
-   CLRDW_BR_YELLOW, UIBaseDef.h); font-family is "NanumGothic" (RmlUiRuntime.cpp's own comment has
-   the font-name verification note), not the shared Liberation-Sans-only convention every other
-   ported window's legacy theme uses -- this screen's names are the one piece of RmlUi text so far
-   that isn't guaranteed ASCII. */
+/* Legacy theme for the login-scene credits screen (CCreditWin): background, crossfading
+   illustration pair, logo/deco art, close button, and scrolling credit text -- #panel owns 100%
+   of this window's visuals now. Positions are the original 800x600-reference pixel values carried
+   over directly as dp. Credit-text colors match the original g_pRenderText colors
+   (CLRDW_BR_GRAY/CLRDW_BR_YELLOW); font is "NanumGothic", not the shared Liberation-Sans
+   convention, since these credit names aren't guaranteed ASCII. */
 
 @spritesheet creditwin-logo-sheet
 {
@@ -28,11 +23,9 @@
 	creditwin-close-active: 0px 60px 54px 30px;
 }
 
-/* One @spritesheet per illustration file (16 total, im1_1.jpg..im8_2.jpg, all confirmed 400x400)
-   -- each is its own separate file, not slices of a shared sheet, so this is 16 single-rect blocks
-   rather than one real spritesheet. Named illust-im{N}-{M} to match CCreditWin::SyncRmlModel()'s
-   own generated decorator string ("image(illust-imN-M)") -- keep both in sync if this ever
-   changes. */
+/* One @spritesheet per illustration file (16 total, im1_1.jpg..im8_2.jpg, each its own file) --
+   named illust-im{N}-{M} to match CCreditWin::SyncRmlModel()'s generated decorator string; keep
+   both in sync if that changes. */
 @spritesheet illust-im1-1-sheet { src: "../../../im1_1.jpg"; illust-im1-1: 0px 0px 400px 400px; }
 @spritesheet illust-im1-2-sheet { src: "../../../im1_2.jpg"; illust-im1-2: 0px 0px 400px 400px; }
 @spritesheet illust-im2-1-sheet { src: "../../../im2_1.jpg"; illust-im2-1: 0px 0px 400px 400px; }
@@ -60,10 +53,9 @@
 	pointer-events: none;
 }
 
-/* decorator is swapped by SyncRmlModel() every time m_byIllust advances (data-style-decorator,
-   naming a sprite from one of the 16 @spritesheet blocks above); opacity animates continuously
-   while AnimationIllust() is fading (data-style-opacity). Percentage sizing -- two 50%-wide boxes
-   always sum to exactly 100% of #panel with no gap possible between them. */
+/* decorator swapped by SyncRmlModel() as m_byIllust advances; opacity animates during
+   AnimationIllust() fades. Percentage sizing keeps the two 50%-wide boxes summing to exactly
+   100% with no gap. */
 .illust {
 	position: absolute;
 	top: 21%;
@@ -85,7 +77,7 @@
 }
 
 /* Anchored to the bottom-right corner, same relationship CCreditWin::SetPosition() derives from
-   the screen-height fraction 527/600 -- see this class's own comment above. */
+   the screen-height fraction 527/600. */
 .deco {
 	position: absolute;
 	right: 0dp;
@@ -96,9 +88,8 @@
 	decorator: image(creditwin-deco-image);
 }
 
-/* Positioned relative to .deco's own corner (deco_pos + 122,63 in the original), expressed here as
-   its own independent corner anchor -- 13dp/83dp is that same offset from the screen edge, not
-   from .deco directly (RmlUi has no way to anchor to a sibling's box). */
+/* Positioned relative to .deco's own corner (deco_pos + 122,63 originally) as its own independent
+   corner anchor, since RmlUi can't anchor to a sibling's box directly. */
 .btn-close {
 	position: absolute;
 	right: 13dp;

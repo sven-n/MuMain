@@ -1,11 +1,8 @@
 /* Modern theme for the generic message/confirm dialog -- flat programmatic chrome, no legacy
    sprite art. OK/Cancel show real localized text instead of art.
 
-   #panel consumes base.rcss's .modern-frame-crimson (applied in msg_win.rml)
-   instead of its own bespoke gray background/border -- reasonable here since most of this
-   dialog's modes show a real crimson .btn-ok primary action (see .btn below). Position/size/font/
-   border-width/radius stay local/structural (.modern-frame itself sets no border-radius at all,
-   so this still needs its own value or corners go square). */
+   #panel consumes base.rcss's .modern-frame-crimson instead of a bespoke background/border.
+   .modern-frame sets no border-radius, so this still needs its own value. */
 #panel {
 	position: absolute;
 	width: 352dp;
@@ -47,11 +44,8 @@
 }
 .no-buttons #msg_line2 { top: 66dp; }
 
-/* Footer band (base.rcss's .modern-footer) -- top offset leaves a few px of clearance above the
-   button row's own top:72dp below, giving the OK/Cancel row a visibly distinct recessed-from-body
-   strip instead of floating on the same surface as the message text above it. border-radius
-   matches #panel's own token(radius-md)dp so the band's bottom-left/bottom-right corners don't
-   square off past the frame's own rounded corners. */
+/* Footer band (base.rcss's .modern-footer) -- border-radius matches #panel's so the band's
+   bottom corners don't square off past the frame's rounded corners. */
 .modern-footer {
 	top: 68dp;
 	border-bottom-left-radius: token(radius-md)dp;
@@ -73,14 +67,9 @@
 .mode-input #input_frame { display: block; }
 
 /* Do NOT redeclare background-color/border/border-radius here -- `border` is a shorthand that
-   resets border-color on all four sides, so it would silently stomp .btn-ok's crimson
-   border-color/border-top-color back to gray border-metal (same specificity, this file linked
-   after base.rcss, so this rule always wins the tie), leaving the OK button's fill crimson
-   (decorator, a different property, unaffected) but the border mismatched gray. Only what's
-   genuinely local/dp-specific stays here:
-   the mode-gated default-hidden state, this window's own top offset, and its dp-based size
-   (deliberately dp, unlike base.rcss's px .btn -- not part of this fix, a pre-existing choice for
-   this window). */
+   resets border-color on all sides, silently stomping .btn-ok's crimson border back to gray
+   (same specificity, this file wins the tie since it's linked after base.rcss). Only the
+   mode-gated hidden state and this window's local position/size stay here. */
 .btn {
 	display: none;
 	position: absolute;

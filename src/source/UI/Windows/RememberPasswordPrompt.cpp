@@ -14,14 +14,8 @@
 #include <RmlUi/Core/Element.h>
 #include <RmlUi/Core/Event.h>
 
-// RmlUi migration, Batch 2: previously built on the shared mu::ui::window::CCommonMessageBox /
-// g_MessageBox engine (~80 other unrelated dialogs also ride that singleton stack -- confirmed by
-// exhaustive grep before this rewrite). Bypassing it here for this one dialog is safe (none of
-// the other consumers reference this dialog or its state) and removes two couplings: the login
-// scene no longer needs to hand-pump g_MessageBox (see LoginScene.cpp's render path, which
-// already drives RmlUiRuntime unconditionally every frame regardless of scene), and CLoginWin no
-// longer gates its own input on the *entire* shared message-box stack being empty, just on this
-// dialog's own Pending state.
+// Bypasses the shared g_MessageBox stack: this dialog owns its own RmlUi document/state
+// independently, so callers gate on its own Pending state rather than the whole message-box stack.
 namespace
 {
     struct PromptModel
@@ -44,10 +38,7 @@ namespace
             g_pDoc->Hide();
     }
 
-    // Document/model created once, guarded the same way CLoginWin::Create() is -- see that
-    // class's header comment. This module has no owning class/Create() entry point of its own
-    // (it's plain free functions), so the guard lives here instead, called lazily from
-    // OpenRememberPasswordPrompt().
+    // Creates the document/model once, lazily, on first open.
     void EnsureCreated()
     {
         if (g_pDoc || !RmlUiRuntime::Instance().IsCreated())
@@ -70,9 +61,7 @@ namespace
         if (modelCreated)
             g_pDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/remember_password_prompt.rml");
 
-        // Centering is #panel's own `.center-both` RCSS class (remember_password_prompt.rml), not
-        // pushed from here -- it stays centered on every resize/UI-scale change too, not just at
-        // creation.
+        // Centering is handled by #panel's own `.center-both` RCSS class, not pushed from here.
     }
 
     void SyncLabels()
@@ -102,10 +91,7 @@ void OpenRememberPasswordPrompt()
     if (g_pDoc)
     {
         SyncLabels();
-        // Modal (not the ModalFlag::None default): without it, the login document underneath
-        // stays fully clickable, and RmlUi's focus-follows-click default can bring it back in
-        // front of this dialog. Context::GetElementAtPoint (Context.cpp) confirms modal
-        // hit-testing skips every element whose owner document isn't the focused/modal one.
+        // Modal: without it the login document underneath stays clickable and can steal focus back.
         g_pDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
 }
@@ -133,7 +119,7 @@ void Tick()
 
 void ReloadRmlTheme()
 {
-    if (!g_pDoc) return; // never opened -- EnsureCreated() will pick up the new theme whenever it first is
+    if (!g_pDoc) return; // never opened; EnsureCreated() will pick up the new theme later
 
     const bool wasPending = (g_Choice == RememberPasswordChoice::Pending);
     Rml::Context* context = RmlUiRuntime::Instance().GetContext();

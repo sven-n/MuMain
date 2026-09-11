@@ -789,8 +789,7 @@ float mu::ui::window::CChatInputBox::GetKeyEventOrder()
 
 void mu::ui::window::CChatInputBox::OpenningProcess()
 {
-    // Set the state before focusing: a portable field ignores GiveFocus() while
-    // still hidden, so focusing after showing lets Enter-to-open type right away.
+    // Must set state before focusing -- a hidden field ignores GiveFocus().
     m_pChatInputBox->SetState(UISTATE_NORMAL);
     m_pChatInputBox->GiveFocus();
     m_pChatInputBox->SetText(L"");

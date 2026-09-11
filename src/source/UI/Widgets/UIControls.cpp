@@ -2707,13 +2707,7 @@ CUITextInputBox::~CUITextInputBox()
 void CUITextInputBox::GetText(wchar_t* pszText, int iGetLength)
 {
     if (pszText == nullptr || iGetLength <= 0) return;
-    // Copy only as many characters as the text actually has (capped at the
-    // caller's length), then terminate right after. The previous wcsncpy form
-    // zero-padded all the way to iGetLength-1 and wrote the terminator at
-    // [iGetLength-1], so it always touched iGetLength wchar_t even for a short
-    // string - overflowing every caller whose buffer is smaller than the default
-    // iGetLength (MAX_TEXT_LENGTH = 255). That smashed the stack on Linux, where
-    // wchar_t is 4 bytes (e.g. guild creation's tempText[100], #462).
+    // Copy only as many chars as the text has (capped at iGetLength) -- a zero-padding wcsncpy here overflowed smaller caller buffers.
     size_t copyLen = m_portableText.size();
     if (copyLen > static_cast<size_t>(iGetLength - 1))
         copyLen = static_cast<size_t>(iGetLength - 1);
@@ -2779,7 +2773,6 @@ void CUITextInputBox::SetSize(int iWidth, int iHeight)
 {
     if (iWidth == 0 || iHeight == 0) return;
 
-    // The field renders through g_pRenderText, so size is the only state to keep.
     m_iWidth = iWidth;
     m_iHeight = iHeight;
 }
@@ -2803,8 +2796,7 @@ void CUITextInputBox::Init(HWND hWnd, int iWidth, int iHeight, int iMaxLength, B
 void CUITextInputBox::SetState(int iState)
 {
     m_iState = iState;
-    // A hidden box must not keep keyboard focus, or the SDL loop would keep
-    // routing input to an invisible field.
+    // A hidden box must not keep keyboard focus.
     if (m_iState == UISTATE_HIDE && s_pFocusedPortable == this)
     {
         if (g_dwKeyFocusUIID == GetUIID())
@@ -2838,12 +2830,7 @@ void CUITextInputBox::GiveFocus(BOOL SelectText)
     }
 }
 
-// Symmetric counterpart to GiveFocus(): drops keyboard focus from the focused
-// portable text field without hiding or destroying it. GiveFocus() sets both
-// s_pFocusedPortable and g_dwKeyFocusUIID, so release both here (clearing the
-// key-focus id only while it still points at this field, to avoid stomping
-// another widget), letting the field hand focus back to the game window while
-// staying visible.
+// Drops keyboard focus from the focused field without hiding it (counterpart to GiveFocus()).
 void CUITextInputBox::ReleaseFocus()
 {
     if (s_pFocusedPortable != nullptr)
@@ -3214,10 +3201,7 @@ void CUITextInputBox::OnEditKey(int iVirtualKey, bool bCtrl, bool bShift)
         break;
     case VK_RETURN:
         if (IsLocked() == TRUE) break;
-        // A multiline box inserts a hard line break; a single-line, unlocked box
-        // notifies its owning UI window so Enter confirms (e.g. submits the
-        // dialog). The login screen instead reads Enter from the global key
-        // poll, so the parentless single-line case needs nothing here.
+        // Multiline inserts a line break; single-line notifies its owning window so Enter confirms.
         if (UseMultiline() == TRUE)
         {
             InsertChar(L'\n');
@@ -3250,10 +3234,7 @@ int CUITextInputBox::VisibleLineCount(int iLineHeight) const
     return (n < 1) ? 1 : n;
 }
 
-// Break the text into displayed lines: a new line starts after every hard '\n'
-// and wherever a paragraph exceeds the box width (wrapped at the last space, or
-// mid-word when a single word is too long). Each span is [start, end) in buffer
-// indices; end excludes the wrapped space or newline.
+// Splits text into displayed lines at hard '\n's and where a paragraph exceeds the box width (wrapped at the last space, or mid-word if needed).
 void CUITextInputBox::LayoutLines(const std::wstring& display, std::vector<PortableLine>& lines) const
 {
     lines.clear();
@@ -3342,16 +3323,13 @@ void CUITextInputBox::RenderPortable()
 
     const std::wstring base = BuildDisplay();
     const int iBaseLen = static_cast<int>(base.length());
-    // Clamp both ends before the substr splice below: a negative index would
-    // wrap to a huge size_t and throw std::out_of_range.
+    // Clamp before the substr splice below -- a negative index wraps to a huge size_t and throws.
     if (m_iCaret < 0) m_iCaret = 0;
     else if (m_iCaret > iBaseLen) m_iCaret = iBaseLen;
     if (m_iSelAnchor < 0) m_iSelAnchor = 0;
     else if (m_iSelAnchor > iBaseLen) m_iSelAnchor = iBaseLen;
 
-    // Splice the IME composition (if any) into the displayed text at the caret.
-    // It is not committed to m_portableText; the caret and scroll follow its end,
-    // and the preview span is underlined. Password fields don't preview.
+    // Splices the IME composition (if any) into the displayed text at the caret, without committing it to m_portableText; password fields don't preview.
     const bool bFocused = (s_pFocusedPortable == this);
     std::wstring display = base;
     int iCaret = m_iCaret;
@@ -3393,13 +3371,9 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
     if (iCaret < 0) iCaret = 0;
     else if (iCaret > iLength) iCaret = iLength;
 
-    // Hoisted above the selection-highlight block below (it used to be computed further down,
-    // only for the caret blink) -- see that block's own comment for why the highlight needs it
-    // too now.
     const bool bFocused = (s_pFocusedPortable == this);
 
-    // Horizontal scroll: never start past the caret, advance until it fits, then
-    // recede left so deleting / moving left brings hidden text back into view.
+    // Horizontal scroll: never start past the caret, advance until it fits, then recede as needed.
     if (m_iFirstVisible > iCaret) m_iFirstVisible = iCaret;
     if (m_iFirstVisible < 0) m_iFirstVisible = 0;
     while (m_iFirstVisible < iCaret &&
@@ -3413,14 +3387,8 @@ void CUITextInputBox::RenderPortableSingleLine(const std::wstring& display, int 
         --m_iFirstVisible;
     }
 
-    // Selection highlight (suppressed while an IME composition is active, and while this field
-    // isn't the focused one). HasSelection() alone isn't enough: GiveFocus(TRUE) (Tab-cycling
-    // between two fields, e.g. CLoginWin's username/password) selects the destination field's
-    // text but never collapses the source field's own now-stale m_iSelAnchor/m_iCaret range on
-    // the way out -- without the bFocused check here, tabbing back and forth left BOTH fields
-    // satisfying HasSelection() at once, so both rendered as highlighted even though only one
-    // ever actually has keyboard focus (the caret-blink check a few lines down already gated on
-    // bFocused; this one just hadn't).
+    // Selection highlight requires bFocused, not just HasSelection() -- Tab-cycling focus (GiveFocus(TRUE))
+    // leaves the field tabbed away from with its old selection range still set, which would otherwise render too.
     if (compStart < 0 && bFocused && HasSelection())
     {
         const int iSelStart = SelectionStart();
@@ -3502,10 +3470,7 @@ void CUITextInputBox::RenderPortableMultiline(const std::wstring& display, int i
 
     const bool bFocused = (s_pFocusedPortable == this);
     const bool bBlinkOn = (static_cast<int>(m_caretTimer.GetTimeElapsed()) / CARET_BLINK_MS) % 2 == 0;
-    // bFocused required, not just HasSelection() -- see RenderPortableSingleLine()'s identical
-    // fix/comment: GiveFocus(TRUE) tab-cycling leaves the field just tabbed away from with its own
-    // stale selection range still set, which would otherwise render as highlighted right alongside
-    // the newly-focused field's own selection.
+    // bFocused required, not just HasSelection() -- see RenderPortableSingleLine() for why.
     const bool bSelection = bFocused && (compStart < 0) && HasSelection();
     const int iSelStart = SelectionStart();
     const int iSelEnd = SelectionEnd();
@@ -4105,8 +4070,7 @@ CSlideHelpMgr::CSlideHelpMgr()
 
 CSlideHelpMgr::~CSlideHelpMgr()
 {
-    // The slide-help timer's callback captures this; kill it so it cannot fire
-    // on a destroyed instance.
+    // The timer callback captures this; kill it so it can't fire on a destroyed instance.
     if (auto* scheduler = Core::Time::FrameTimerScheduler::TryInstance())
     {
         scheduler->Kill(SLIDEHELP_TIMER);

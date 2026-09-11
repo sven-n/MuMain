@@ -4,10 +4,9 @@
 	<link type="text/rcss" href="my_inventory_bg.rcss"/>
 </head>
 <body data-model="my_inventory_bg">
-	<!-- Background-context document -- see themes/legacy/my_inventory_bg.rml's own
-	     header comment for the full mechanism. Panel fill duplicates base.rcss's .modern-frame
-	     literal rather than linking base.rcss here -- same "fully independent" choice
-	     main_frame_bg.rcss already made for this context. -->
+	<!-- Background-context document (see legacy/my_inventory_bg.rml for the mechanism).
+	     Duplicates base.rcss's .modern-frame fill directly instead of linking base.rcss, same as
+	     main_frame_bg.rcss. -->
 	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="bg-panel"></div>

@@ -1,7 +1,6 @@
-/* Legacy theme for the login dialog. CWin draws nothing for this window; this theme reproduces
-   the original look by pointing decorators at the same art files the old CWin sprites used
-   (login_back.tga, login_me.tga). #panel's left/top are set from C++ to track the window's real
-   pixel origin; children below use fixed-pixel offsets relative to it. */
+/* Legacy theme for the login dialog -- decorators point at the original CWin sprite art
+   (login_back.tga, login_me.tga). #panel's left/top come from C++ to track the window's real
+   pixel origin; children use fixed-pixel offsets relative to it. */
 
 @spritesheet login-back-sheet
 {
@@ -26,8 +25,8 @@ body {
 	width: 100%;
 	height: 100%;
 	margin: 0;
-	/* body spans the whole real window, so this stays "none" -- specific elements opt back in --
-	   or every click on screen would register as hitting UI, blocking legacy input. */
+	/* Stays none since body spans the whole window -- specific elements opt back in, or every
+	   screen click would hit UI and block legacy input. */
 	pointer-events: none;
 }
 
@@ -41,10 +40,8 @@ body {
 	decorator: image(login-back-image);
 }
 
-/* modern-only decorative elements (login.rml, shared markup) -- legacy's #panel/.input-frame
-   already supply their whole look via real sprite art (login-back-image/login-input-frame-image
-   above), so these get no rule at all beyond explicitly hiding them; .modern-inset just sets
-   border-color with no border-width anywhere in this file, so it's a no-op here already. */
+/* modern-only decorative elements (shared markup, login.rml) -- legacy's #panel/.input-frame
+   already supply the full look via real sprite art, so these are just hidden. */
 .frame-accent, .login-content, .header-glow, .separator {
 	display: none;
 }
@@ -56,11 +53,8 @@ body {
 .label-account { left: 30dp; top: 113dp; }
 .label-password{ left: 30dp; top: 139dp; }
 
-/* LoginWin.cpp::SetPosition() positions the real CUITextInputBox text a fixed few px below/right
-   of this frame's own top/left (112/137 vs this rule's 106/131 -- text padding within the frame,
-   a pre-existing relationship, not a typo) and now scales that offset by the same ratio this
-   file's dp values respond to -- keep the two in sync if either changes (see that function's own
-   comment). */
+/* LoginWin.cpp::SetPosition() offsets the real text input 6px right / 6px down from this frame's
+   own left/top (112/137 vs 106/131) -- keep the two in sync if either changes. */
 .input-frame {
 	position: absolute;
 	width: 156dp;

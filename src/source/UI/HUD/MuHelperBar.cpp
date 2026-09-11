@@ -38,15 +38,11 @@ bool CMuHelperBar::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_MU_HELPER_BAR, this);
 
-    // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
-    // window's Create() (re-run on resolution change), so the document/model are created once,
-    // ever.
+    // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
         BuildRmlUi();
-        // Deliberately NOT Show()n here -- see MainFrameWindow.cpp's identical comment.
-        // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
-        // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
-        // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.
+        // Not Show()n here -- Create() runs before SceneFlag reaches MAIN_SCENE; SyncDocVisibility()
+        // (called every frame) shows it once the scene gate allows it.
 
     Show(true);
 
@@ -95,16 +91,14 @@ void CMuHelperBar::Release()
         m_pNewUIMng = NULL;
     }
 
-    // See CLoginWin::PreRelease()'s identical rationale -- this object's release has no knowledge
-    // of m_pRmlDoc otherwise, and RmlUi renders last in the frame regardless of scene.
+    // Hide the doc directly since RmlUi renders last in the frame regardless of scene (see CLoginWin::PreRelease()).
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
 
 bool CMuHelperBar::UpdateMouseEvent()
 {
-    // RmlUi's own context does hit-testing now (see this class's header comment) -- never
-    // consumes the legacy mouse event.
+    // RmlUi's own context does hit-testing now; never consumes the legacy mouse event.
     return true;
 }
 
@@ -141,9 +135,7 @@ bool CMuHelperBar::Update()
 
 bool CMuHelperBar::Render()
 {
-    // RmlUi's #panel now owns 100% of this widget's visuals -- see this class's header comment.
-    // Nothing left to draw here; SyncRmlModel() (called from Update()) is what keeps the RmlUi
-    // model current.
+    // RmlUi's #panel owns all visuals now; SyncRmlModel() (from Update()) keeps it current.
     return true;
 }
 

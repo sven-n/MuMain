@@ -1,8 +1,6 @@
-/* Background-layer companion to my_inventory.rcss -- see my_inventory_bg.rml's own header
-   comment. Loaded into the background context that renders behind the still-native 3D-composited
-   equipment/grid icons, so this file only ever holds the flat frame fill, no interactive
-   elements. Legacy theme: real sprite art, same 5-piece composition
-   CMyInventory::RenderFrame() used to draw (back fill, top/left/right/bottom border pieces). */
+/* Background layer for my_inventory.rcss, rendered behind the still-native 3D inventory grid --
+   flat frame fill only, no interactive elements. Reuses the real 5-piece sprite composition
+   CMyInventory::RenderFrame() drew. */
 
 @spritesheet inv-bg-fill-sheet  { src: "../../../newui_msgbox_back.jpg";  inv-bg-fill:   0px 0px 190px 429px; }
 @spritesheet inv-bg-top-sheet   { src: "../../../newui_item_back04.tga";  inv-bg-top:    0px 0px 190px 64px;  }

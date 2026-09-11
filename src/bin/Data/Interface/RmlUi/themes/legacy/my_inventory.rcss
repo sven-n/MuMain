@@ -1,17 +1,10 @@
-/* Legacy theme for CMyInventory's chrome (frame/title/gold/buttons) -- see
-   my_inventory.rml's own header comment. #panel's own left/top/scale come live from C++
-   (SyncRmlModel()), so every coordinate below is a plain reference pixel (px, not dp -- the
-   ancestor scale already covers UI-scale-equivalent behavior, same reasoning as main_frame.rcss's
-   own header). Button icons/positions match CMyInventory::SetButtonInfo()'s former constants
-   exactly.
+/* Legacy theme for CMyInventory's chrome (frame/title/gold/buttons). #panel's left/top/scale come
+   live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. Button
+   icons/positions match CMyInventory::SetButtonInfo()'s former constants.
 
-   Known, deliberately deferred limitation: .inv-btn (RmlUi's main context, always renders last in
-   the frame) can end up on top of CInventoryCtrl's native item tooltip when a bottom-row item's
-   tooltip extends into this button strip -- both used to be native, where ordinary same-frame
-   paint order put the tooltip on top. Real fix needs either rerouting the tooltip through the
-   post-RmlUi seam (shared infra, also used by Trade/Storage/Shop -- too broad for this window
-   alone) or the grid's own future chrome pass making the tooltip an RmlUi element too (resolves it
-   for free via DOM order). Not fixed here -- confirmed cosmetic, not functional. */
+   Known limitation: .inv-btn (always renders last, RmlUi's main context) can sit on top of
+   CInventoryCtrl's native item tooltip when a bottom-row item's tooltip extends into this button
+   strip. Confirmed cosmetic, not fixed here. */
 
 #panel {
 	position: absolute;
@@ -21,8 +14,8 @@
 	font-family: "Liberation Sans";
 }
 
-/* Drag handle -- see MyInventory.cpp's Create() comment. pointer-events/drag are force-set in
-   C++ by UI::RmlBridge::MakeDraggable(); cursor here is purely cosmetic (discoverability). */
+/* Drag handle (MyInventory.cpp Create()) -- pointer-events/drag are force-set in C++ via
+   UI::RmlBridge::MakeDraggable(); cursor here is just discoverability. */
 #title {
 	position: absolute;
 	left: 0;
@@ -80,8 +73,8 @@
 .inv-btn-myshop.close-mode { decorator: image(inv-btn-myshop-close); }
 .inv-btn-expand  { left: 124px;     decorator: image(inv-btn-expand); }
 
-/* Tooltips: siblings of their trigger, same reasoning as main_frame.rcss's own (shrink-to-fit
-   width can't grow past a narrow nested trigger in this RmlUi build). */
+/* Tooltips are siblings of their trigger -- this build's shrink-to-fit width can't grow past a
+   narrow nested trigger. */
 .tooltip {
 	display: none;
 	position: absolute;
@@ -109,10 +102,8 @@
 	display: block;
 }
 
-/* Set/Socket option header labels -- each spans half of #panel's width (matching the former
-   native hover-rect split), gray by default, yellow while an ancient set / socket set bonus is
-   actually active. Text itself is the "[Set Option]"/"[Socket Option]" I18N string, bound from
-   C++ same as every other label in this document. */
+/* Set/Socket option header labels -- each spans half of #panel's width (matches the former
+   native hover-rect split), gray by default, yellow when that set/socket bonus is active. */
 .option-label {
 	position: absolute;
 	top: 20px;
@@ -130,12 +121,10 @@
 .option-label-set { left: 0; }
 .option-label-socket { left: 95px; }
 
-/* Shared tooltip for both labels above -- anchored at the same (95px, 40px) point both native
-   call sites used. No `transform: translateX(-50%)` for centering -- that resolves against the
-   element's own box, which is stale/zero at the moment a `display:none`-until-shown element like
-   this one flips visible (see themes/modern/main_frame.rcss's .tooltip comment for the full root-
-   cause explanation, found live). A precomputed static `left` (anchor minus half the fixed width)
-   sidesteps it entirely, same fix that comment describes. */
+/* Shared tooltip for both labels, anchored at the same (95px, 40px) point both native call sites
+   used. No translateX(-50%) centering -- it resolves against the element's stale/zero box while
+   display:none (see main_frame.rcss's .tooltip comment); a precomputed static `left` sidesteps
+   it. */
 #item_option_tooltip {
 	position: absolute;
 	left: 25px;

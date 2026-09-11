@@ -1,7 +1,5 @@
-/* Modern theme for CMyInventory's chrome (frame/title/gold/buttons) -- see
-   my_inventory.rml's own header comment. Same reference-pixel geometry as legacy (the underlying
-   native equipment/grid content is theme-agnostic), reusing the same source button/money art;
-   only text styling and the tooltip look differ per modern's own design language. */
+/* Modern theme for CMyInventory's chrome (frame/title/gold/buttons) -- same geometry and button/
+   money art as legacy, only text styling and tooltip look differ. */
 
 #panel {
 	position: absolute;
@@ -11,9 +9,8 @@
 	font-family: "token(font-body)";
 }
 
-/* Fading crimson banner behind the title, same primitive login.rcss's own header banner uses --
-   see base.rcss's .title-glow comment. Sits behind #title (declared first, paint-order
-   convention). */
+/* Fading crimson banner behind the title (base.rcss's .title-glow primitive); declared before
+   #title so it paints behind it. */
 .inv-title-glow {
 	left: 20px;
 	right: 20px;
@@ -21,8 +18,8 @@
 	height: 22px;
 }
 
-/* Drag handle -- see MyInventory.cpp's Create() comment. pointer-events/drag are force-set in
-   C++ by UI::RmlBridge::MakeDraggable(); cursor here is purely cosmetic (discoverability). */
+/* Drag handle -- pointer-events/drag are force-set in C++ by UI::RmlBridge::MakeDraggable();
+   cursor here is purely cosmetic. */
 #title {
 	position: absolute;
 	left: 0;
@@ -107,9 +104,8 @@
 	display: block;
 }
 
-/* Set/Socket option header labels -- see themes/legacy/my_inventory.rcss's identical block for
-   the full rationale (hover-rect split, color meaning). Same gray/yellow as legacy -- these are
-   semantic (active vs. inactive), not part of modern's chrome palette. */
+/* Set/Socket option header labels -- gray/yellow match legacy since they're semantic
+   (active vs. inactive), not part of modern's chrome palette. */
 .option-label {
 	position: absolute;
 	top: 20px;
@@ -127,12 +123,10 @@
 .option-label-set { left: 0; }
 .option-label-socket { left: 95px; }
 
-/* Shared tooltip for both labels above -- see themes/legacy/my_inventory.rcss's identical comment
-   for why this uses a precomputed static `left` instead of `transform: translateX(-50%)` (found
-   live: that resolves against a stale/zero box for a `display:none`-until-shown element). Modern's
-   own bordered-panel look, matching this document's own .tooltip above rather than legacy's flat
-   black box; tt-line colors stay identical to legacy -- they carry meaning (option category), not
-   theme styling. */
+/* Shared tooltip for both labels above -- uses a precomputed static `left` instead of
+   `transform: translateX(-50%)`, since that resolves against a stale/zero box for a
+   `display:none`-until-shown element. tt-line colors match legacy: they carry meaning
+   (option category), not theme styling. */
 #item_option_tooltip {
 	position: absolute;
 	left: 25px;

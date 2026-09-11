@@ -1,18 +1,12 @@
 /* Modern theme for TitleSceneUI's splash-screen loading bar -- flat/gradient fill via the internal
-   `fill` element <progress> generates (styled directly below, no fill-image -- see that property's
-   own note in the legacy theme's file), same positioning as legacy (see that file's own header
-   comment for why left/top/width/height are pushed from C++ instead of set here). */
+   `fill` element <progress> generates; same positioning as legacy. */
 
 .gauge-fill {
 	position: absolute;
-	/* left/top/width/height pushed from C++ -- see title_scene.rcss's own header comment (legacy
-	   theme, same file name). */
+	/* left/top/width/height pushed from C++. */
 }
-/* Reuses main_frame.rcss's own modern-theme AG-gauge amber gradient (themes/modern/main_frame.rcss)
-   rather than inventing a new color -- literal hex, not token(...), matching that file's own
-   established convention specifically for gauge fills. <progress>'s own generated `fill` child
-   takes ordinary decorator/background-color rules directly, same as any other element -- no
-   display/position override needed on it, ElementProgress positions it manually in C++. */
+/* Reuses main_frame.rcss's modern-theme AG-gauge amber gradient (literal hex, matching that
+   file's convention for gauge fills). */
 .gauge-fill fill {
 	background-color: token(resource-ag);
 	decorator: linear-gradient(to bottom, #d4a94f, token(resource-ag) 45%, #5c4118);

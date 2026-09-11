@@ -27,9 +27,7 @@ constexpr int GLOBAL_TEXT_REQUIRED_CHARISMA = 698;
 constexpr int GLOBAL_TEXT_NEED_MORE_STAT = 74;
 constexpr int GLOBAL_TEXT_MASTERY_TYPE_BASE = 1080;
 
-// SkillAttribute.Delay is stored in milliseconds; the tooltip displays it as
-// seconds with one decimal. No GlobalText entry exists for this line yet, so
-// the format string lives here until a localized one is added.
+// Delay is stored in ms; tooltip shows seconds with one decimal. No localized GlobalText entry exists yet.
 constexpr wchar_t kCooldownFormat[] = L"Cooldown: %.1f sec";
 constexpr float kMillisPerSecond = 1000.0f;
 
@@ -50,8 +48,7 @@ bool IsCastleSiegeOnlySkill(int skillType)
     }
 }
 
-// ---- Tiny line emitters. All operate on outModel.count; bounds are clamped
-//      to MAX_TOOLTIP_LINES to avoid overflowing the fixed buffer.
+// Tiny line emitters; NextSlot clamps to MAX_TOOLTIP_LINES to avoid overflowing the fixed buffer.
 
 Line& NextSlot(Model& m)
 {
@@ -107,9 +104,8 @@ void AddFormattedWide(Model& m, int globalTextIdx, LineColor color, const wchar_
     l.isBlank = false;
 }
 
-// Requirement line. In game mode, compares value vs current and colors
-// red/white accordingly, optionally emitting a `(lacking N)` deficit line.
-// In editor mode (currentValue == -1), always white, no deficit line.
+// Requirement line: game mode colors red/white vs current value and may add a
+// `(lacking N)` deficit line; editor mode (currentValue < 0) is always white, no deficit.
 void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqStringIndex)
 {
     if (requiredValue <= 0) return;
@@ -134,28 +130,13 @@ void AddRequirementLine(Model& m, int requiredValue, int currentValue, int reqSt
     deficit.isBlank = false;
 }
 
-// =====================================================================
-// Section emitters. Tooltip layout, top to bottom:
-//
-//   [HEADER]        blank (top padding), name (bold blue), blank
-//   [BANNER TOP]    red-bg flavor banners (e.g. Infinity Arrow info)
-//   [BODY damage]   character-specific damage / buff values
-//   [BODY stats]    range, mana, ability gauge
-//   [REQUIREMENTS]  level / str / dex / energy / cha (color-coded in game mode)
-//   [BANNER BOTTOM] red-bg warnings, brand info, flavor notes
-//   [BLUE TAGS]     blue descriptor tags (mastery type, Expansion of Wizardry)
-//
-// Each populated section ends with a blank line, which the renderer draws
-// at half text-height — giving ~5px spacing between sections and bottom
-// padding. Empty sections add nothing, so absent content doesn't compound
-// the gap.
-//
-// Each emitter is called unconditionally from BuildModel; the emitter
-// itself decides whether the section has anything to add.
-// =====================================================================
+// Section emitters, top to bottom: header, top banners, body damage, body stats,
+// requirements, bottom banners, blue tags. Each ends with a blank line (drawn at
+// half text-height, ~5px spacing) only if it emitted content, so empty sections
+// add no gap. All are called unconditionally from BuildModel; each decides
+// internally whether it has anything to add.
 
-// Emit a trailing blank as a section separator, but only if the section
-// actually added at least one line.
+// Adds a separator blank line only if the section added content.
 void EndSection(Model& m, int countBeforeSection)
 {
     if (m.count > countBeforeSection) AddBlank(m);
@@ -178,9 +159,7 @@ void EmitTopBanners(Model& m, int skillType)
     EndSection(m, before);
 }
 
-// Locals shared by the EmitBodyDamage sub-emitters. Built once per call and
-// passed by const ref so each helper stays self-contained without recomputing
-// from globals.
+// Shared locals for the EmitBodyDamage sub-emitters, built once and passed by const ref.
 struct DamageContext
 {
     int heroClass;
@@ -491,10 +470,8 @@ void EmitBottomBanners(Model& m, const BuildOptions& options, int skillType)
 {
     const int before = m.count;
 
-    // Knight extension info banners. These describe the skill itself (weapon
-    // requirement, combo membership), so the editor shows them unconditionally.
-    // In game mode, the original gating stays: Knight class + extension + lvl
-    // 220, so the player only sees them when relevant.
+    // Knight extension info: shown unconditionally in editor mode; gated to
+    // Knight class + extension skill + level 220 in game mode.
     const bool gameMode = options.includeCharacterSpecific;
     const bool gameModeKnight = gameMode && gCharacterManager.GetBaseClass(Hero->Class) == CLASS_KNIGHT;
     const bool gameModeKnightExt = gameModeKnight && Hero->byExtensionSkill == 1 && CharacterAttribute->Level >= 220;
@@ -618,8 +595,7 @@ void BuildModel(const BuildOptions& options, Model& outModel)
     int iMana = 0, iDistance = 0, iSkillMana = 0;
     gSkillManager.GetSkillInformation(SkillType, 1, lpszName, &iMana, &iDistance, &iSkillMana);
 
-    // Force / Force Wave name override (character-specific: depends on the
-    // weapon's special options).
+    // Force Wave name override depends on the weapon's special options (character-specific).
     if (options.includeCharacterSpecific && SkillType == AT_SKILL_FORCE && Hero->Weapon[0].Type != -1)
     {
         for (int i = 0; i < CharacterMachine->Equipment[EQUIPMENT_WEAPON_RIGHT].SpecialNum; i++)

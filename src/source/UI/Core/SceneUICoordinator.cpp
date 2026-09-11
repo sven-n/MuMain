@@ -73,16 +73,9 @@ void CSceneUICoordinator::CreateLoginScene()
     g_LoginMainWin.Release();
     g_LoginWin.Release();
 
-    // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not CInput::Instance().GetScreenWidth()/
-    // GetScreenHeight() -- see LoginWin.cpp's LoginUIScaleRatio() for why: CInput's own copy of
-    // the screen size isn't guaranteed to already match WindowWidth/WindowHeight (the exact
-    // values every migrated window's own Create()/SetPosition() now uses internally). This
-    // function is the one place that positions g_LoginWin and g_LoginMainWin relative to each
-    // other -- their hit-test boxes sit only ~11px apart vertically at the reference resolution.
-    // A drift between this function's source of screen size and each window's own internal one
-    // could close that gap into an overlap, but that's no longer a starvation risk either way:
-    // both windows' dispatch now goes through the same depth-sorted CManager claim, not a
-    // first-checked-wins list walk.
+    // Uses WindowWidth/WindowHeight, not CInput's screen size, which isn't guaranteed to match
+    // (see LoginWin.cpp's LoginUIScaleRatio()); g_LoginWin/g_LoginMainWin sit only ~11px apart,
+    // so a mismatch here could overlap their hit-test boxes.
     g_MsgWin.Create();
     g_MsgWin.SetPosition((static_cast<int>(WindowWidth) - 352) / 2, (static_cast<int>(WindowHeight) - 113) / 2);
 
@@ -132,7 +125,11 @@ void CSceneUICoordinator::CreateCharacterScene()
     g_CharSelMainWin.Create();
 
     g_CharMakeWin.Create();
-    g_CharMakeWin.SetPosition((rInput.GetScreenWidth() - 454) / 2, (rInput.GetScreenHeight() - 406) / 2);
+    // Uses WindowWidth/WindowHeight, not CInput's screen size -- a past mismatch here made
+    // RmlUi's #panel position disagree with the real window, drifting the caret off the dialog.
+    g_CharMakeWin.SetPosition(
+        (static_cast<int>(WindowWidth) - 454) / 2,
+        (static_cast<int>(WindowHeight) - 406) / 2);
 
     g_CharSelMainWin.UpdateDisplay();
     g_CharInfoBalloonMng.UpdateDisplay();
@@ -160,16 +157,9 @@ void CSceneUICoordinator::CreateMainScene()
 
 void CSceneUICoordinator::RepositionSceneUI()
 {
-    // A lightweight SetPosition sweep isn't enough: CSprite caches
-    // m_fScrHeight = WindowHeight at Create() time and uses it for the
-    // Y-flipped coordinate math in SetPosition(). When the window resizes,
-    // every sprite's cached screen height is stale, so a pure SetPosition
-    // call lands the windows in the wrong place.
-    //
-    // The only clean way to refresh that cache is to re-Create the sprites,
-    // which is exactly what the scene's Create*Scene() function does. But
-    // that also resets each window's m_bShow flag, so we snapshot the
-    // current visibility here and restore it right after.
+    // A plain SetPosition sweep isn't enough: CSprite's cached screen height (set at Create())
+    // goes stale on resize, so we must re-Create the sprites -- which also resets m_bShow, hence
+    // the visibility snapshot/restore below.
     if (m_nScene == UIM_SCENE_LOGIN)
     {
         const bool wasShown_MsgWin = g_MsgWin.IsVisible();
@@ -181,9 +171,7 @@ void CSceneUICoordinator::RepositionSceneUI()
 
         CreateLoginScene();
 
-        // Restore visibility before re-populating: CServerSelWin's RmlUi model updates
-        // regardless of document visibility, but restoring shown/hidden state up front keeps
-        // this ordering consistent with every other window here.
+        // Restore each window's pre-resize visibility.
         if (wasShown_MsgWin)
             g_MsgWin.Show(true);
         if (wasShown_SysMenuWin)
@@ -197,18 +185,11 @@ void CSceneUICoordinator::RepositionSceneUI()
         if (wasShown_CreditWin)
             g_CreditWin.Show(true);
 
-        // Re-populate the server / server-group buttons from the existing
-        // network-side data. Create() clears the button labels, so without
-        // this the server list and groups render empty after a resolution
-        // change.
+        // Create() clears button labels; re-populate from existing network-side data.
         g_ServerSelWin.UpdateDisplay();
     }
     else if (m_nScene == UIM_SCENE_CHARACTER)
     {
-        // CreateCharacterScene() ends with an explicit g_CharSelMainWin.Show(true)
-        // so visibility of the main panel is already preserved. Other character-
-        // scene windows (msg box, server msg, char make) are shown on demand
-        // by game events, matching the fresh-scene state.
         CreateCharacterScene();
     }
     // MainScene uses the new UI system which resizes itself; nothing to do.
@@ -219,43 +200,21 @@ void CSceneUICoordinator::Update(double dDeltaTick)
     if (UIM_SCENE_NONE == m_nScene)
         return;
 
-    // Runs first, unconditionally, before anything else below -- see
-    // HasPendingConnectionReconnect()'s own comment in LoginWin.h. Pressing ESC/Cancel on the
-    // login dialog hides it immediately and kicks the (blocking) reconnect off on a background
-    // thread; this polls every frame for that thread finishing and, once it has, joins it and
-    // clears the in-flight flag so a later Cancel can start a new one.
+    // Polls for the background reconnect thread (started on Cancel) to finish, then joins it.
     if (g_LoginWin.HasPendingConnectionReconnect())
         g_LoginWin.ProcessPendingConnectionReconnect();
 
-    // New-style (CObject-tier) windows -- the only dispatch this
-    // class still drives; every window it used to own via a CWin list has migrated onto
-    // mu::ui::window::CObject/CManager. m_bCursorOnUI folds in whatever this claimed, so a
-    // migrated modal like CMsgWin still blocks CharacterScene.cpp's world-click/rotation gating
-    // the same way its old full-screen CWin::CursorInWin(WA_ALL) rect used to.
+    // m_bCursorOnUI folds in whatever claims the mouse, so a modal like CMsgWin still blocks
+    // world-click/rotation gating the same way its old full-screen rect used to.
     m_NewStyleMng.UpdateMouseEvent();
     m_NewStyleMng.UpdateKeyEvent();
     m_bCursorOnUI = m_NewStyleMng.GetActiveMouseUIObj() != nullptr;
 
     CInput& rInput = CInput::Instance();
 
-    // ESC toggles system menu in login/character scenes -- including while g_LoginWin's own dialog
-    // is up: pressing ESC there opens the system menu (Exit Game/Select Server/etc.) rather than
-    // cancelling the login form; the Cancel button still cancels it via mouse click. Checked before
-    // m_NewStyleMng.Update() (below) runs -- a migrated window's own ESC handling (e.g. CMsgWin
-    // closing itself on ESC) must not also flip g_MsgWin.IsVisible() to false in time to fool this
-    // same frame's check.
-    //
-    // Also resets/sets m_bSysMenuToggledByEscThisFrame (own comment): closing the menu here, then
-    // letting m_NewStyleMng.Update() (below) run g_LoginWin's own Escape-cancel gate in the same
-    // frame, would make a single ESC press both close the menu AND cancel the login form behind
-    // it. Unlike CCreditWin (depth 100) and CMsgWin (depth 50), both handled entirely inside
-    // m_NewStyleMng's own depth-sorted dispatch (so a lower-depth g_LoginWin's Update() always runs
-    // BEFORE theirs, seeing pre-close state for free), g_SysMenuWin's ESC close happens here,
-    // completely outside that dispatch and unconditionally before it, so g_LoginWin needs this flag
-    // in addition to the live g_SysMenuWin.IsVisible() check (LoginWin.cpp's SetActive() call) --
-    // IsVisible() alone already covers the OPEN case this same frame (it flips true here before
-    // g_LoginWin's own Update() runs below), but reads false again for the CLOSE case by the time
-    // g_LoginWin's Update() runs, without this flag to remember it happened.
+    // ESC opens/closes the system menu (mouse Cancel still cancels the login form). Runs before
+    // m_NewStyleMng.Update() and sets m_bSysMenuToggledByEscThisFrame -- without it, g_LoginWin's
+    // own Escape-cancel check would see this frame's post-toggle IsVisible() and fire too.
     m_bSysMenuToggledByEscThisFrame = false;
     if (rInput.IsKeyDown(VK_ESCAPE))
     {

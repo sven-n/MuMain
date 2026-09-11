@@ -2,16 +2,10 @@
 
 #include <cstdint>
 
-// Fixed-buffer model for CMyInventory's Set/Socket option hover tooltips. Same shape and rationale
-// as UI::Skills::Tooltip's own model (SkillTooltipModel.h) -- a renderer-agnostic Model built once
-// by a BuildXxxTooltipModel() function with no drawing, then consumed either by the legacy
-// TextList/RenderTipTextList path or bound into RmlUi (CMyInventory::SyncRmlModel()). Kept as its
-// own type rather than reusing UI::Skills::Tooltip's: the color set differs (Yellow/Green/Purple
-// here, no skill-tooltip Red/DarkRed), and the two are otherwise unrelated features.
-//
-// This header is included from GameLogic/Items/CSItemOption.h and Network/Server/SocketSystem.h
-// (both GameLogic-side) -- the same cross-layer precedent GIPetManager.h already sets by including
-// SkillTooltipModel.h.
+// Fixed-buffer tooltip model for CMyInventory's Set/Socket option hover text; built once by a
+// BuildXxxTooltipModel() and consumed by either the legacy TextList path or RmlUi. Kept separate
+// from UI::Skills::Tooltip's model since the color sets differ. Also included from GameLogic-side
+// headers (CSItemOption.h, SocketSystem.h), not just UI code.
 namespace UI::Inventory::Tooltip
 {
 

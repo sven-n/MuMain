@@ -78,14 +78,11 @@ int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayReso
     return bestIndex;
 }
 
-// I18N locale codes (ASCII) paired with the language's display name in that
-// language. The set mirrors what ResxGen emits and what I18N::GetAvailableLocales()
-// returns at runtime; held here as wide strings so the CComboBox can show
-// them without per-frame UTF-8 -> wide conversions.
+// I18N locale codes paired with each language's display name in that language,
+// held as wide strings so CComboBox can show them without per-frame conversions.
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
-    // Non-ASCII characters use universal-character-name escapes so MSVC reads
-    // the wide-string literals correctly regardless of source charset.
+    // Non-ASCII names use universal-character-name escapes for charset-safe MSVC compilation.
     { "de",    L"Deutsch" },
     { "es",    L"Espa\u00f1ol" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
@@ -112,10 +109,9 @@ static const wchar_t* const* GetLanguageLabels()
     return labels;
 }
 
-// UI font families offered by the font combo. `name` is the GameConfig font
-// family value ([UI] Font); empty = the platform default (so the look is
-// unchanged). The curated entries are bundled in the client's ./fonts directory
-// (see Core/Platform/GdiText.cpp), so they resolve even without a system install.
+// UI font families offered by the font combo. `name` is the GameConfig font family value;
+// empty = platform default. Curated entries are bundled in ./fonts so they resolve without a
+// system install.
 static const struct { const wchar_t* name; const wchar_t* label; } s_Fonts[] = {
     { L"",                L"Default" },
     { L"Liberation Sans", L"Liberation Sans" },
@@ -125,9 +121,7 @@ static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 
 static const wchar_t* const* GetFontLabels()
 {
-    // Rebuilt on every call so the localized "Default" entry follows a live
-    // language switch. The curated font names (Liberation Sans, ...) are proper
-    // nouns and stay as-is.
+    // Rebuilt every call so the localized "Default" entry follows a live language switch.
     static const wchar_t* labels[s_NumFonts] = {};
     labels[0] = I18N::Game::DefaultFont;
     for (int i = 1; i < s_NumFonts; i++)
@@ -144,19 +138,15 @@ namespace
     constexpr int SLIDER_HIT_HEIGHT = 16;
     constexpr int SLIDER_X_LOCAL = 33;       // slider start relative to m_Pos.x
 
-    // Render-level slider ("Effect limitation"). Drawn at ~half the legacy
-    // 141x29 and horizontally centered: the window content centers on x+95, so a
-    // 70-wide bar starts at x+60. Y nudged down to keep it centered in its row.
-    // Both the render (RenderButtons) and the hit test (HandleRenderLevelSlider)
-    // read these, so size/position stay in sync.
+    // Render-level slider ("Effect limitation") geometry, shared by RenderButtons and
+    // HandleRenderLevelSlider so drawing and hit-testing stay in sync.
     constexpr int RENDER_SLIDER_X_LOCAL = 60;
     constexpr int RENDER_SLIDER_Y_LOCAL = 191;
     constexpr int RENDER_SLIDER_WIDTH = 70;
     constexpr int RENDER_SLIDER_HEIGHT = 15;
     constexpr float RENDER_LEVEL_MAX = 5.f;
-    // Native size of the effect-bar sprite (the 5 numbered squares). Scaled down
-    // to RENDER_SLIDER_WIDTH x HEIGHT via RenderImageStretch, so the whole bar
-    // shrinks instead of cropping.
+    // Native size of the effect-bar sprite, scaled to RENDER_SLIDER_WIDTH x HEIGHT via
+    // RenderImageStretch so the bar shrinks instead of cropping.
     constexpr int EFFECT_BAR_SRC_WIDTH  = 141;
     constexpr int EFFECT_BAR_SRC_HEIGHT = 29;
 
@@ -175,9 +165,8 @@ namespace
     constexpr int LANG_COMBO_HEIGHT  = 16;
     constexpr int LANG_COMBO_MAX_VISIBLE = 5;
 
-    // Font combo box placement (relative to m_Pos). Row order below the effect
-    // rows is: Font, Language, Resolution, Windowed mode (combos grouped at the
-    // top so an open dropdown never overlaps the Close button).
+    // Font combo box placement (relative to m_Pos). Combos are grouped above the Close
+    // button so an open dropdown never overlaps it.
     constexpr int FONT_LABEL_Y_LOCAL = 244;
     constexpr int FONT_COMBO_X_LOCAL = 22;
     constexpr int FONT_COMBO_Y_LOCAL = 257;
@@ -325,12 +314,9 @@ void mu::ui::window::COptionWindow::SetPos(int x, int y)
 
 bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 {
-    // A combo selects on mouse-PRESS and closes its dropdown there and then; the
-    // mouse is still held. The Close button fires on RELEASE-over-button, so a
-    // press on a dropdown row that happens to sit over Close would pick the item
-    // AND, on the release, shut the window (feels like a fast double-click).
-    // Once a combo has consumed a click we swallow the rest of that hold until the
-    // button comes up, so the release can't fall through to Close.
+    // A combo selects on press while Close fires on release, so without this latch a press
+    // over Close's screen area could pick a dropdown item and then close the window on release.
+    // Swallow the rest of the hold once a combo consumes a click.
     if (m_bSwallowClickHold)
     {
         if (!mu::ui::window::IsRepeat(VK_LBUTTON))   // button released → hold is over
@@ -338,19 +324,11 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
         return false;
     }
 
-    // Combos are processed BEFORE the Close button (and the checkboxes/sliders):
-    // an open dropdown overflows below the window and can overlap the Close button
-    // and the windowed-mode checkbox, so handling combos first lets the dropdown
-    // consume the click - picking an item never also closes the window or toggles
-    // a control behind it.
-
-    // Z-order matters: an OPEN dropdown is drawn on top, so it must win the click
-    // over a closed combo whose field its list overlaps (e.g. the Font dropdown
-    // extends down over the Language field). Process the open combo first, then
-    // the closed ones - a fixed Resolution/Language/Font order would let the
-    // closed combo underneath grab the click and open instead. Selecting an item
-    // also sets m_bSwallowClickHold so the still-held press's release can't fall
-    // through to the Close button or a checkbox behind the dropdown.
+    // Combos are processed before Close and the checkboxes/sliders: an open dropdown can
+    // overflow over those controls, so combos must consume the click first.
+    //
+    // An open dropdown is drawn on top, so it must also win over a closed combo whose field
+    // it overlaps -- process open combos before closed ones, not in a fixed order.
     struct ComboSlot { CComboBox* combo; int* index; void (COptionWindow::*apply)(); };
     const ComboSlot slots[] = {
         { &m_ResolutionCombo, &m_iResolutionIndex, &COptionWindow::ApplyResolution },
@@ -373,8 +351,7 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
             }
             if (s.combo->IsMouseOverWidget())
                 return false;
-            // A press elsewhere closed this open dropdown (clicked outside, or
-            // re-picked the current item): consume it and swallow the hold too.
+            // A press elsewhere closed this dropdown: consume it and swallow the hold too.
             if (wasOpen && !s.combo->IsOpen() && mu::ui::window::IsPress(VK_LBUTTON))
             {
                 m_bSwallowClickHold = true;
@@ -383,8 +360,7 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
         }
     }
 
-    // Close button after the combos, so an open dropdown drawn over it wins the
-    // click instead of closing the window.
+    // After combos, so an open dropdown drawn over Close wins the click.
     if (m_BtnClose.UpdateMouseEvent() == true)
     {
         g_pNewUISystem->Hide(mu::ui::window::INTERFACE_OPTION);
@@ -405,8 +381,7 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 
     HandleRenderLevelSlider();
 
-    // Combo box already processed at the top. Just consume clicks inside the
-    // option window itself so they don't fall through to the world.
+    // Consume remaining clicks inside the window so they don't fall through to the world.
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, 190, 419).Contains(MouseX, MouseY))
         return false;
 
@@ -487,11 +462,8 @@ void mu::ui::window::COptionWindow::OnSoundVolumeChanged()
 
 void mu::ui::window::COptionWindow::OnMusicVolumeChanged()
 {
-    // Mute via volume only — do not stop the stream.  Once stopped, the
-    // current track is gone and raising the slider back up leaves silence
-    // until the next scene change triggers PlayMp3 for a different track.
-    // Keeping the track alive at gain 0 means raising the slider becomes
-    // audible immediately.
+    // Mute via volume only, not by stopping the stream -- stopping loses the current track
+    // until the next scene change, so raising the slider back up would stay silent.
     m_MusicOnOff = (m_iMusicLevel > 0) ? 1 : 0;
 
     AudioPlayer::SetMusicVolume(m_iMusicLevel);
@@ -614,9 +586,8 @@ void mu::ui::window::COptionWindow::RenderFrame()
     float x, y;
     x = m_Pos.x;
     y = m_Pos.y;
-    // Frame is composed of: 64px top + N*10px middle slats + 45px bottom. The
-    // slat count is tuned so the frame reaches the Close button (Y 388) plus the
-    // bottom border, after the Font/Language/Resolution/Windowed rows.
+    // Frame is 64px top + N*10px middle slats + 45px bottom; slat count is tuned to reach
+    // the Close button plus bottom border.
     constexpr int SLAT_COUNT = 30;
     constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
     RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
@@ -771,12 +742,8 @@ void mu::ui::window::COptionWindow::RenderButtons()
         RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 15.f);
     }
 
-    // Combo boxes drawn last so their expanded dropdowns sit on top of
-    // anything else in the window. Within the combo pair, render the
-    // closed one(s) first and any open dropdown last - otherwise a combo
-    // physically below an open one would draw its closed field on top of
-    // that open dropdown's list (since they overlap in screen space when
-    // the upper one expands downward).
+    // Drawn last so dropdowns sit on top; closed combos render before any open one so an open
+    // dropdown's list isn't overdrawn by a combo below it.
     CComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo };
     for (auto* c : combos) if (!c->IsOpen()) c->Render();
     for (auto* c : combos) if (c->IsOpen())  c->Render();
@@ -864,8 +831,7 @@ void mu::ui::window::COptionWindow::ApplyLanguage()
 {
     const char* code = s_Languages[m_iLanguageIndex].code;
 
-    // Persist as wide string so it round-trips cleanly through the existing
-    // GameConfig string-IO. Locale codes are ASCII so the conversion is safe.
+    // Wide string round-trips through GameConfig's string I/O; locale codes are ASCII-safe.
     std::wstring wide(code, code + std::strlen(code));
 
     // Re-selecting the active language is a no-op; skip the relocalize and disk write.
@@ -909,29 +875,20 @@ void mu::ui::window::COptionWindow::ApplyResolution()
 
     const auto [newWidth, newHeight] = m_resolutions[m_iResolutionIndex];
 
-    // SDL owns the window on every platform, so resize through SDL. The old
-    // Windows path drove Win32 SetWindowPos/ChangeDisplaySettings on g_hWnd,
-    // which SDL clamped straight back to the current size for a non-resizable
-    // window — the resolution only "took" when a windowed/fullscreen toggle
-    // reset the window style first (issue #462). MuApplyWindowResolution
-    // resizes via SDL regardless of the resizable flag and updates
-    // WindowWidth/Height synchronously through HandleWindowResize, so the
-    // Save() below records the size the user actually got.
+    // Resize through SDL (MuApplyWindowResolution), not raw Win32 SetWindowPos -- SDL clamps a
+    // non-resizable window straight back to its current size otherwise.
     MuApplyWindowResolution(static_cast<unsigned int>(newWidth), static_cast<unsigned int>(newHeight),
                             g_bUseWindowMode != FALSE);
 
-    // SDL may have coerced the request (closest fullscreen mode, borderless
-    // desktop fallback): WindowWidth/Height now hold the size that actually
-    // resulted. Persist that, and snap the combo to it so the UI never claims
-    // a resolution the display did not adopt.
+    // SDL may have coerced the request; WindowWidth/Height now hold the actual result, so
+    // persist that and snap the combo to it.
     SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
 }
 
-// Point the resolution combo at the mode the window really has. If the actual
-// size is not a listed mode, keep the current selection - config still
-// records the real size.
+// Points the resolution combo at the window's real size; if it's not a listed mode, keeps the
+// current selection (config still records the real size).
 void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
 {
     const int listed = UI::Options::FindExactDisplayResolutionIndex(m_resolutions, static_cast<int>(WindowWidth),
@@ -942,11 +899,8 @@ void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
     m_ResolutionCombo.SetSelectedIndex(listed);
 }
 
-// Windowed/fullscreen toggle. SDL owns the window, so switch modes through it
-// (MuApplyWindowResolution -> SDL_SetWindowFullscreen / SDL_SetWindowSize)
-// rather than driving the OS directly: the old Win32 ChangeDisplaySettings /
-// SetWindowLongPtr path fought SDL and left its state inconsistent with a
-// later resolution change. Keeps the current size and applies the new mode.
+// Switches windowed/fullscreen through SDL (MuApplyWindowResolution), not raw Win32 calls --
+// driving the OS directly left SDL's state inconsistent with later resolution changes.
 void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
 {
     g_bUseWindowMode = m_bWindowedMode ? TRUE : FALSE;
@@ -954,14 +908,11 @@ void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
 
     MuApplyWindowResolution(WindowWidth, WindowHeight, m_bWindowedMode);
 
-    // The mode switch may have coerced the size (closest fullscreen mode,
-    // borderless desktop fallback), so save AFTER the apply and persist the
-    // size that actually resulted along with the new mode.
+    // The mode switch may have coerced the size, so save after applying it.
     SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
 
-    // Consume the in-flight VK_LBUTTON press so the same click doesn't
-    // toggle again next frame; the user must release and click again.
+    // Consume the in-flight press so the same click doesn't toggle again next frame.
     g_pNewKeyInput->SetKeyState(VK_LBUTTON, mu::ui::window::CNewKeyInput::KEY_NONE);
 }

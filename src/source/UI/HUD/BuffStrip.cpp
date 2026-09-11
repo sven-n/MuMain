@@ -23,9 +23,7 @@ namespace
     const int BUFF_MAX_LINE_COUNT = 8;
     const int BUFF_IMG_SPACE = 5;
 
-    // Untouched from the original CNewUIBuffWindow -- the "pick the highest tier of each buff
-    // family, buffs to the front, debuffs to the back" dedup/sort logic. Fed into the RmlUi model
-    // now instead of RenderBuffStatus()'s draw loop.
+    // Picks the highest tier of each buff family; buffs sort to the front, debuffs to the back.
     eBuffState NormalizeBuffState(eBuffState raw)
     {
         switch (raw)
@@ -137,18 +135,9 @@ namespace
         }
     }
 
-    // One @spritesheet rect per 20x28 tile, 10 columns wide, generated (not hand-authored) in
-    // buff_strip.rcss -- see BuffEntry::decorator's comment (BuffStrip.h) for why. Covers rows
-    // 0-8 (90 tiles) per atlas: the real art is a 200x224 (10x8 tile) image padded by
-    // GlobalBitmap's NextPowerOfTwo() into a 256x256 GPU texture (confirmed via direct pixel
-    // decode -- see the commit message), so row 8 (y 224-252) is still real padding-adjacent
-    // texture space even past the genuine 8-row (0-7) icon content; row 9 would start at y=252,
-    // 4px from the texture's 256px edge, not worth a 10th generated row. Clamped rather than
-    // extended to cover eBuffState's full range (atlas2 alone reaches id 205, tile index 124) --
-    // RenderBuffIcon()'s own UV math (dividing by a hardcoded 256 irrespective of tile count)
-    // already goes out of [0,1] range for those high, rare/test ids in the original too, so this
-    // clamp is a graceful-degradation floor under an already-unspecified original edge case, not
-    // a fidelity cut against defined behavior.
+    // One @spritesheet rect per 20x28 tile, 10 columns wide (generated in buff_strip.rcss). The
+    // real art is 200x224 (10x8 tiles) padded to a 256x256 texture, so tile indices are clamped to
+    // 89 (rows 0-8) -- ids beyond that already go out of UV [0,1] range in the original too.
     const int kMaxTileIndex = 89; // rows 0-8, 10 cols
     Rml::String BuildIconDecorator(eBuffState buff)
     {
@@ -159,9 +148,7 @@ namespace
         return "image(" + Rml::String(isAtlas1 ? "atlas1-" : "atlas2-") + std::to_string(tileIndex) + ")";
     }
 
-    // Simplified from the original RenderBuffTooltip() -- one plain newline-joined block instead
-    // of per-line coloring (bold blue header / white body / purple duration). See this class's
-    // header comment for why.
+    // One plain newline-joined block, not the original's per-line bold/white/purple coloring.
     Rml::String BuildTooltipText(eBuffState buff)
     {
         std::list<std::wstring> tooltipinfo;
@@ -207,15 +194,11 @@ bool CBuffStrip::Create(CManager* pNewUIMng, int x, int y)
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_BUFF_WINDOW, this);
 
-    // RmlUi migration -- see this class's header comment. Guarded like every other hybrid
-    // window's Create() (re-run on resolution change), so the document/model are created once,
-    // ever.
+    // Guarded so the doc/model are created once, even though Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
         BuildRmlUi();
-        // Deliberately NOT Show()n here -- see MainFrameWindow.cpp's identical comment.
-        // Create() runs during WebzenScene()'s boot-time loading screen, well before SceneFlag
-        // ever reaches MAIN_SCENE; SyncDocVisibility() (called every frame regardless of scene)
-        // shows it the first time CSystem::SyncMainSceneHudVisibility()'s gate allows it.
+        // Not Show()n here -- Create() runs before SceneFlag reaches MAIN_SCENE; SyncDocVisibility()
+        // (called every frame) shows it once the scene gate allows it.
 
     Show(true);
 
@@ -268,16 +251,15 @@ void CBuffStrip::Release()
         m_pNewUIMng = NULL;
     }
 
-    // See CLoginWin::PreRelease()'s identical rationale.
+    // Hide the doc directly since RmlUi renders last in the frame regardless of scene (see CLoginWin::PreRelease()).
     if (m_pRmlDoc)
         m_pRmlDoc->Hide();
 }
 
 bool CBuffStrip::UpdateMouseEvent()
 {
-    // RmlUi's own context does hit-testing now -- never consumes the legacy mouse event. (The
-    // original's right-click-to-cancel special case lived here; deferred, see this class's
-    // header comment.)
+    // RmlUi's own context does hit-testing now; never consumes the legacy mouse event.
+    // (Right-click-to-cancel isn't reproduced -- see this class's header comment.)
     return true;
 }
 
@@ -294,9 +276,7 @@ bool CBuffStrip::Update()
 
 bool CBuffStrip::Render()
 {
-    // RmlUi's #panel now owns 100% of this widget's visuals -- see this class's header comment.
-    // Nothing left to draw here; SyncRmlModel() (called from Update()) is what keeps the RmlUi
-    // model current.
+    // RmlUi's #panel owns all visuals now; SyncRmlModel() (from Update()) keeps it current.
     return true;
 }
 
@@ -307,11 +287,8 @@ void CBuffStrip::SyncRmlModel()
     std::list<eBuffState> buffstate;
     BuffSort(buffstate);
 
-    // Rebuilt and marked dirty unconditionally every frame -- this is deliberate, not an
-    // oversight: the actual thing this pilot verifies is whether RmlModelBinder/RmlUi's array
-    // data view correctly handles a bound std::vector whose SIZE changes at runtime (unlike
-    // CharMakeWin's job array, which never resizes after Create()). A change-detection diff
-    // before MarkDirty() would obscure exactly the mechanism being tested; revisit only if this
+    // Rebuilt and marked dirty unconditionally every frame -- deliberate, since this verifies
+    // RmlModelBinder handling a bound std::vector whose size changes at runtime. Revisit if this
     // proves too expensive in practice.
     auto& model = m_RmlBinder.GetModel();
     model.buffs.clear();

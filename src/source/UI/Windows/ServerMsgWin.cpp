@@ -25,8 +25,7 @@ void CServerMsgWin::Create()
 {
     Release();
 
-    // Same 5-part composite background CWinEx::Create() built (WinEx.cpp), ported directly since
-    // this window no longer goes through CWinEx.
+    // 5-part composite background.
     SImgInfo aiiDescBg[BG_MAX] = {{BITMAP_LOG_IN + 11, 0, 0, 4, 4},
                                   {BITMAP_LOG_IN + 12, 0, 0, 512, 6},
                                   {BITMAP_LOG_IN + 12, 0, 6, 512, 6},
@@ -42,7 +41,7 @@ void CServerMsgWin::Create()
     m_aSprBg[BG_CENTER].SetSize(m_aSprBg[BG_TOP].GetWidth() - WE_CENTER_SPR_POS * 2, 0, X);
 
     m_ptPos.x = m_ptPos.y = 0;
-    m_nBgSideNow = 1; // was CWinEx::Create(aiiDescBg, /*nBgSideMin=*/1, ...)
+    m_nBgSideNow = 1;
 
     ::memset(m_aszMsg, 0, sizeof(wchar_t) * SMW_MSG_LINE_MAX * SMW_MSG_ROW_MAX);
     m_nMsgLine = 0;
@@ -125,10 +124,7 @@ bool CServerMsgWin::Render()
     g_pRenderText->SetTextColor(CLRDW_WHITE);
     g_pRenderText->SetBgColor(0);
 
-    // LayoutMode::Legacy (UILayoutPolicy.cpp) keeps the active transform an identity while this
-    // renders, so these real-pixel coordinates need no rescaling -- was CWin::GetXPos()/GetYPos()
-    // pre-divided by g_fScreenRate_x/y to cancel out whatever the ambient transform happened to be
-    // during the old CWin::Render() pass; that cancellation trick is unnecessary now.
+    // LayoutMode::Legacy keeps the transform identity here, so real-pixel coords need no rescaling.
     for (int i = 0; i < m_nMsgLine; ++i)
         g_pRenderText->RenderText(m_ptPos.x + 11, m_ptPos.y + 12 + i * 20, m_aszMsg[i]);
 

@@ -92,7 +92,7 @@ namespace mu::ui::window
         bool	Check_LuckyItem(ITEM* _pItem);
         bool	Check_LuckyItem_InWnd(void);
 
-        //-Virtual Function [lem_2010.9.1]
+        // Virtual overrides
         bool	Create(CManager* pNewUIMng, int x, int y);
         void	Release(void);
         void	OpeningProcess(void);
@@ -102,7 +102,6 @@ namespace mu::ui::window
         bool	Update();
         bool	Render();
         float	GetLayerDepth();	//. 3.4f
-        //- Virtual Function End
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }
         __inline void	SetPos(int _nX, int _nY) { m_ptPos.x = _nX, m_ptPos.y = _nY; }

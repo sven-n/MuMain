@@ -4,7 +4,7 @@
 #include "Character/CharacterManager.h" // gCharacterManager
 #include "Camera/CameraProjection.h" // CameraProjection
 
-// Includes mirror ZzzInterface.cpp, the unit these were extracted from.
+// Includes mirror ZzzInterface.cpp.
 #include "Core/Platform/Imm.h"
 #include "UI/Core/UIManager.h"
 #include "Render/Textures/ZzzOpenglUtil.h"

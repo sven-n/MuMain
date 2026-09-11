@@ -94,11 +94,8 @@ bool mu::ui::window::CHelpWindow::Render()
 {
     EnableAlphaTest();
 
-    // Reference-bind to the global arrays in ZzzInventory.cpp. A naive
-    // `extern wchar_t TextList[50][100];` here would resolve to
-    // mu::ui::window::TextList (the reference defined in UIManager.cpp) because
-    // this function is in the mu::ui::window namespace -- and the linker stores
-    // that reference as a 4-byte read-only pointer, so writing to it crashes.
+    // Reference-bind to ZzzInventory.cpp's globals: a naive `extern` here would resolve to
+    // the mu::ui::window::TextList reference instead and crash on write (read-only pointer).
     wchar_t (&TextList)[50][100] = ::TextList;
     int (&TextListColor)[50] = ::TextListColor;
     int (&TextBold)[50] = ::TextBold;
@@ -127,8 +124,7 @@ bool mu::ui::window::CHelpWindow::Render()
             iTextNum++;
         }
 
-        // Insert engine-added camera and MU Helper hotkey entries between F4
-        // and the rest of the shipped entries.
+        // Engine-added camera/MU Helper hotkey entries, inserted between F4 and the shipped entries.
         const wchar_t* const extraHelpLines[] = {
             I18N::Game::F8ToggleMonsterHPBar, I18N::Game::F9Toggle3DCamera,   I18N::Game::F10LockUnlockCameraZoom,
             I18N::Game::F11ResetCameraView,   I18N::Game::HomeToggleMUHelper, I18N::Game::JToggleChatCommands,

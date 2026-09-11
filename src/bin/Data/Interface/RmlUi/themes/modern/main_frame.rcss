@@ -1,18 +1,14 @@
-/* Modern theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. Same
-   layout/transform group as themes/legacy/main_frame.rcss (#bars binds left/top/scale live from
-   C++, tracking the still-legacy center-band chrome's own scale; #exp nests inside #bars to
-   inherit that transform) -- only the visual treatment differs here: flat background-color/border
-   shapes instead of legacy sprite art.
+/* Modern theme for CMainFrameWindow's HP/MP/AG/SD/EXP bars + 5 corner buttons. Same layout/
+   transform group as themes/legacy/main_frame.rcss; only the visual treatment differs here --
+   flat background-color/border shapes instead of legacy sprite art.
 
    .slot-frame (shared border/radius) and .slot-fill (translucent dark backing) give every
-   slot-like element in this group one consistent look, so a modder can retheme the whole group
-   via those two rules. .slot-fill is only applied to elements RmlUi fully owns (gauges/buttons/
-   exp) -- #item_slots/#skill_slots get .slot-frame only, since a filled box would paint over the
-   still-legacy-rendered icons they frame (RmlUi paints its document last, after those icons).
+   slot-like element one consistent look. .slot-fill only applies to elements RmlUi fully owns --
+   #item_slots/#skill_slots get .slot-frame only, since RmlUi paints its document after the
+   still-legacy icons they frame, and a filled box would paint over them.
 
-   The panel behind the bars/skill-row/potions (wood/metal frame chrome) is still drawn by legacy
-   code (RenderLeftFrame()/RenderCenterFrame(), MainFrameWindow.cpp) -- shared by both
-   themes, since that band is welded to the still-legacy skill list (out of this pilot's scope). */
+   The panel behind the bars/skill-row/potions is still drawn by legacy code, shared by both
+   themes. */
 
 #bars {
 	position: absolute;
@@ -22,8 +18,8 @@
 	width: 640px;
 	height: 39px;
 }
-/* HP/SD stack far left, MP/AG stack far right, potions+skills centered between them -- anchor
-   offsets below match #item_slots/#skill_slots' own positions exactly (kept in sync by hand). */
+/* HP/SD stack far left, MP/AG stack far right, potions+skills centered between -- offsets below
+   must match #item_slots/#skill_slots exactly (kept in sync by hand). */
 #item_hotkey_anchor { left: 140px; top: 0px; }
 #skill_list_anchor  { left: 78px;  top: 0px; }
 
@@ -35,10 +31,9 @@
 	background-color: rgba(10, 10, 10, 150);
 }
 
-/* HP/SD left column, MP/AG right column, both in the same row as potions/skills, sitting on top
-   of the exp bar. pointer-events:auto is required -- these would otherwise inherit body's `none`
-   (base.rcss's documented pointer-events trap), and #bar_hp:hover ~ .tooltip-hp etc. below could
-   never fire without it (same fix needed in legacy's own .gauge-slot). */
+/* HP/SD left column, MP/AG right column. pointer-events:auto is required -- these would
+   otherwise inherit body's `none` (base.rcss's pointer-events trap) and the :hover tooltips
+   below could never fire. */
 .gauge-slot {
 	position: absolute;
 	pointer-events: auto;
@@ -48,13 +43,10 @@
 #bar_mp { left: 510px; top: 437px; width: 122px; height: 16px; }
 #bar_ag { left: 510px; top: 455px; width: 122px; height: 8px;  }
 
-/* One continuous top edge spanning the full row, giving the whole strip a single unbroken line
-   instead of three separately-outlined pieces -- no fill of its own: RmlUi composites its whole
-   document AFTER the still-legacy 3D-rendered potion/skill icons in the middle, so a background
-   here would paint over and hide them. #gauge_fill_left/right instead carry the actual
-   translucent-dark background, restricted to the two zones that have no icon content underneath;
-   the potions/skills band in between stays genuinely unfilled, same as it always was. Top border
-   only -- flush with the exp bar below. */
+/* One continuous top edge spanning the full row instead of three separately-outlined pieces --
+   no fill of its own: RmlUi paints after the still-legacy potion/skill icons in the middle, so a
+   background here would hide them. #gauge_fill_left/right carry the actual fill, restricted to
+   the icon-free zones. */
 #gauge_frame {
 	position: absolute;
 	left: 0px;
@@ -65,10 +57,8 @@
 	pointer-events: none;
 }
 
-/* Left/right fill zones -- same span as the original two-box layout, just without their own
-   border now (the border lives on #gauge_frame above instead). Rounded only on the OUTER corner
-   pair (the one that meets #gauge_frame's own rounded end) -- the inner corner stays square since
-   nothing marks a boundary there anymore, it just fades into the unfilled middle band. */
+/* Left/right fill zones -- border lives on #gauge_frame instead. Rounded only on the outer
+   corner; the inner corner stays square, fading into the unfilled middle band. */
 #gauge_fill_left {
 	position: absolute;
 	left: 0px;
@@ -98,8 +88,8 @@
 	height: 100%;
 	border-radius: 3px;
 }
-/* background-color is the reliable base color; the gradient decorator layers on top as an
-   enhancement (a live-resized decorator rendered solid white once, root cause not isolated). */
+/* background-color is the reliable base color; a live-resized gradient decorator alone has
+   rendered solid white once, so it's layered on top as an enhancement, not relied on alone. */
 .gauge-fill-hp { background-color: token(resource-hp); decorator: linear-gradient(to bottom, #d94a3a, token(resource-hp) 45%, #4a0a05); }
 .gauge-fill-hp.poisoned { background-color: #4caf50; decorator: linear-gradient(to bottom, #a0eab0, #4caf50 45%, #2e6e35); }
 .gauge-fill-mp { background-color: token(resource-mp); decorator: linear-gradient(to bottom, #5588c8, token(resource-mp) 45%, #0f2450); }
@@ -122,27 +112,13 @@
 }
 #bar_ag .gauge-num, #bar_sd .gauge-num { font-size: 7px; }
 
-/* Tooltips are siblings of their trigger (not nested descendants) so their containing block is
-   the wide #bars group, not the narrow trigger -- this build's shrink-to-fit width hard-clamps to
-   the containing block. Shared per column (not per bar), since HP/SD sit directly above/below
-   each other in the same column.
-
-   Explicit width added -- being a sibling of the wide #bars group isn't enough on its own to
-   fill the background, same visible symptom as mu_helper_bar.rcss's own tooltip bug even though
-   the structural cause documented above is already addressed here. Sidesteps shrink-to-fit
-   entirely rather than chasing the exact remaining mechanism -- same fix #skill_tooltip/
-   buff_strip's tooltip already use successfully.
-
-   Also drops `transform: translateX(-50%)` for centering: relying on it to center the box against
-   the real width above renders hover text with no visible background at all, floating near the top
-   of the screen instead of near the HP/MP/AG/SD bars. Root cause, read directly from
-   TransformUtilities.cpp: `%` in a transform resolves against `e.GetBox()`, the
-   element's OWN already-computed border-box -- for an element that's `display:none` until
-   `:hover`, that box is only known AFTER the display flip, and the transform apparently isn't
-   being freshly resolved against it at the right moment, producing translateX(-50%) of a
-   stale/zero width instead of the real 160px. Replaced with a precomputed static `left` per
-   tooltip (anchor position minus half the fixed width) so no `%`-in-transform resolution has to
-   happen at all -- deterministic regardless of that timing question. */
+/* Tooltips are siblings of their trigger, not nested descendants, so their containing block is
+   the wide #bars group -- this build's shrink-to-fit width hard-clamps to the containing block.
+   Explicit width given (shrink-to-fit alone still isn't reliable). `transform: translateX(-50%)`
+   is avoided for centering: per TransformUtilities.cpp, `%` in a transform resolves against the
+   element's own border-box, which for a `display:none`-until-:hover element isn't reliably known
+   at the moment display flips, producing a stale/zero-width translate. A precomputed static
+   `left` (anchor minus half the fixed width) is used instead. */
 .tooltip {
 	display: none;
 	position: absolute;
@@ -169,20 +145,15 @@
 	display: block;
 	z-index: 1;
 }
-/* Do NOT add a `#bars .tooltip { bottom: ... }` rule here -- it has the same specificity as
-   #bars .tooltip-hp/.tooltip-sd/.tooltip-mp/.tooltip-ag above (ID+class each), so declared after
-   them it silently wins the tie and overrides their `bottom: auto` -- combined with their own
-   explicit `top: 410px` and no explicit height, that's a top+bottom-constrained box with no height
-   set, which this engine doesn't handle gracefully. #exp_tooltip is unaffected either way (its own
-   #exp_tooltip ID rule's `bottom: 12px` already wins on specificity regardless of order). */
+/* Do NOT add a `#bars .tooltip { bottom: ... }` rule here -- same specificity as the
+   .tooltip-hp/-sd/-mp/-ag rules above, so declared after them it wins the tie and overrides their
+   `bottom: auto`, leaving a top+bottom-constrained box with no height set (handled ungracefully
+   by this engine). */
 
-/* #top_right_row / #buttons_top: the top-right system-button panel (see main_frame.rml's header
-   comment for the flex-over-`right` positioning rationale). #top_right_row is a plain full-width
-   flex row anchored at real screen (0,0); `justify-content:flex-end` pushes #buttons_top to the
-   row's right edge. #buttons_top keeps its own dp-based visual identity, independent of #bars's
-   bound transform -- this branch's normal fixed-dp-anchor policy. Visually echoes
-   mu_helper_bar.rcss's panel/button styling for a cohesive top-HUD feel (values copied verbatim,
-   not shared -- the two documents stay independent). */
+/* #top_right_row / #buttons_top: the top-right system-button panel. #top_right_row is a
+   full-width flex row anchored at screen (0,0); `justify-content:flex-end` pushes #buttons_top to
+   the right edge. #buttons_top visually echoes mu_helper_bar.rcss's panel/button styling
+   (values copied, not shared -- the documents stay independent). */
 #top_right_row {
 	width: 100%;
 	display: flex;
@@ -238,15 +209,8 @@
 	pointer-events: none;
 }
 
-/* Same translateX(-50%)-on-display:none-toggle bug fixed everywhere else in this file and in
-   mu_helper_bar.rcss/buff_strip.rcss. TransformUtilities.cpp:
-   `%` in a transform resolves against the element's own already-computed border-box, which isn't
-   reliably available at the exact moment `display` flips from none to block on hover, so without
-   this fix it would render with no visible background at the wrong position on first hover. Fixed
-   the same way:
-   explicit width, precomputed static `left` (button center minus half this tooltip's width)
-   instead of a transform. width:100dp matches mu_helper_bar.rcss's own button tooltips, which this
-   file's header comment already says these are meant to visually echo. */
+/* Same translateX(-50%)-on-display:none-toggle bug as the tooltips above -- explicit width and a
+   precomputed static `left` instead of a transform. */
 .tooltip-top {
 	display: none;
 	position: absolute;
@@ -262,8 +226,7 @@
 	font-size: 11dp;
 	pointer-events: none;
 }
-/* left = button center (see #btn_*_top's own left + half its 48dp width above) minus half this
-   tooltip's 100dp width. */
+/* left = button center minus half the tooltip's width. */
 #tooltip_cshop_top    { left: -22dp; } /* button center 28dp */
 #tooltip_chainfo_top  { left: 28dp;  } /* button center 78dp */
 #tooltip_myinven_top  { left: 78dp;  } /* button center 128dp */
@@ -278,9 +241,8 @@
 	z-index: 1;
 }
 
-/* EXP: nested inside #bars, same reference span as legacy (x=0-640). Stays flat/programmatic per
-   this theme's convention. pointer-events:auto for the same reason as .gauge-slot above --
-   #exp:hover .tooltip below never fired without it. */
+/* EXP: nested inside #bars, same reference span as legacy (x=0-640). pointer-events:auto is
+   required so #exp:hover .tooltip below can fire. */
 #exp {
 	position: absolute;
 	left: 0px;
@@ -316,19 +278,17 @@
 	font-size: 7px;
 	pointer-events: none;
 }
-/* left is a precomputed centered value (#exp's own 640px width, minus half .tooltip's 160px), not
-   left:50%+transform:translateX(-50%) -- same fix and same reason as .tooltip-hp etc. above. */
+/* left is a precomputed centered value, not left:50%+translateX(-50%) -- same reason as the
+   .tooltip-hp etc. rules above. */
 #exp_tooltip {
 	bottom: 12px;
 	left: 240px;
 }
 
-/* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border (it would
-   read as an unwanted divider against the now-unfilled middle band -- see #gauge_frame's own
-   comment). Still no .slot-fill either: RmlUi composites its whole document
-   AFTER the still-legacy 3D-rendered icons these wrap, so a filled box would hide them. Wrapper
-   offsets match #item_hotkey_anchor/#skill_list_anchor exactly; kept in sync by hand, nothing
-   connects them automatically. */
+/* Decorative item-hotkey (potion) / skill-icon slot outlines -- no .slot-frame border or
+   .slot-fill: RmlUi paints after the still-legacy icons these wrap, so either would hide them.
+   Wrapper offsets must match #item_hotkey_anchor/#skill_list_anchor exactly (kept in sync by
+   hand). */
 #item_slots { position: absolute; left: 140px; top: 0; }
 #skill_slots { position: absolute; left: 78px; top: 0; }
 
@@ -338,9 +298,8 @@
 	border: none;
 }
 
-/* Skill list / item hotkey chrome: these are now real hover/click targets
-   (main_frame.rml) -- opt back into pointer-events (inherited `none` from body, base.rcss's
-   pointer-events trap) same as every other interactive element in this document. */
+/* Real hover/click targets -- opt back into pointer-events (inherited `none` from body,
+   base.rcss's pointer-events trap). */
 #item_slot_0, #item_slot_1, #item_slot_2, #item_slot_3,
 #skill_slot_0, #skill_slot_1, #skill_slot_2, #skill_slot_3, #skill_slot_4,
 #current_skill_slot {
@@ -348,16 +307,14 @@
 	cursor: pointer;
 }
 
-/* Same width/height/top as #skill_slot_0..4 (32x38, top:431px) -- sized/positioned to match the
-   skill row now that both rows sit on the same continuous background band. left offsets (own
-   pitch, unrelated to the skill row's) are unchanged. */
+/* Same width/height/top as #skill_slot_0..4 (32x38, top:431px), matching the shared background
+   band; left offsets use their own pitch. */
 #item_slot_0 { position: absolute; left: 6px;   top: 431px; width: 32px; height: 38px; }
 #item_slot_1 { position: absolute; left: 44px;  top: 431px; width: 32px; height: 38px; }
 #item_slot_2 { position: absolute; left: 82px;  top: 431px; width: 32px; height: 38px; }
 #item_slot_3 { position: absolute; left: 120px; top: 431px; width: 32px; height: 38px; }
 
-/* Upper-left corner of the slot box, inside it, now that the box matches the skill slots' own
-   size. */
+/* Upper-left corner of the slot box. */
 .slot-hotkey-label {
 	position: absolute;
 	left: 2px;
@@ -372,9 +329,8 @@
 	pointer-events: none;
 }
 
-/* Stack count for a bound potion -- bottom-right corner, matching the native
-   CItemHotKey::RenderItemCount()'s own offset relative to its icon. Empty string (0 or unbound)
-   renders nothing, same convention as .skill-hotkey-label's empty-slot case. */
+/* Stack count for a bound potion -- bottom-right corner. Empty string (0 or unbound) renders
+   nothing. */
 .item-stack-label {
 	position: absolute;
 	right: 2px;
@@ -389,9 +345,8 @@
 	pointer-events: none;
 }
 
-/* Same upper-left placement as .slot-hotkey-label -- separate class (see main_frame.rml's own
-   comment) purely because legacy needs independent control over this one vs. the potion Q/W/E/R
-   labels, not because modern's own treatment differs. */
+/* Same upper-left placement as .slot-hotkey-label -- kept as a separate class since legacy needs
+   independent control over this one vs. the potion Q/W/E/R labels. */
 .skill-hotkey-label {
 	position: absolute;
 	left: 2px;
@@ -406,9 +361,9 @@
 	pointer-events: none;
 }
 
-/* Skill slots are contiguous (pitch == width, no gap). The border-radius values below only
-   matter for the .selected highlight now (no default outline) -- square off the touching inner
-   edges so only the strip's outer two corners round when a slot lights up. */
+/* Skill slots are contiguous (pitch == width, no gap). border-radius only matters for the
+   .selected highlight -- square off touching inner edges so only the strip's outer corners
+   round. */
 #skill_slot_0 { position: absolute; left: 222px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_1 { position: absolute; left: 254px; top: 431px; width: 32px; height: 38px; }
 #skill_slot_2 { position: absolute; left: 286px; top: 431px; width: 32px; height: 38px; }
@@ -424,15 +379,10 @@
 }
 #current_skill_slot { position: absolute; left: 388px; top: 433px; width: 28px; height: 36px; }
 
-/* Expanded grid + pet-command row + shared tooltip. Same 78px local-origin
-   shift as #skill_slots above (#skill_list_anchor's own left, read back by C++ via
-   GetSkillListOffsetX() -- see MainFrameWindow.cpp's Render()/UpdateMouseEvent() comments)
-   -- SkillCellEntry::left/top and the tooltip's own left/top are raw, UN-rebased reference-space
-   values straight from CSkillList::RebuildGridSnapshot()/QueueTooltip(), matching exactly
-   what the still-legacy icon draw uses for the same cell, so nesting here at the same 78px offset
-   keeps the RmlUi overlay and the legacy art it sits over pixel-aligned. Containers themselves
-   stay non-interactive (pointer-events:none) -- only .skill-cell opts back in, same "container
-   inert, children interactive" pattern as #skill_slots/#item_slots. */
+/* Expanded grid + pet-command row + shared tooltip. Same 78px local-origin shift as
+   #skill_slots above -- cell/tooltip left/top values are raw, un-rebased reference-space values
+   from the same source the still-legacy icon draw uses, so this offset keeps the RmlUi overlay
+   pixel-aligned with it. Containers stay non-interactive; only .skill-cell opts back in. */
 #skill_grid, #pet_skill_row, #skill_tooltip {
 	position: absolute;
 	left: 78px;
@@ -440,10 +390,8 @@
 	pointer-events: none;
 }
 
-/* Permanent border, same look as .slot-frame (the hotkey slots) -- the still-legacy
-   IMAGE_SKILLBOX box-frame sprite is suppressed for modern theme (MainFrameWindow.cpp's
-   Render(), same exception as the compact row's selected-highlight sprite), so this is
-   the grid's only box outline. */
+/* Permanent border, same look as .slot-frame -- the legacy IMAGE_SKILLBOX sprite is suppressed
+   for modern theme, so this is the grid's only box outline. */
 .skill-cell {
 	position: absolute;
 	width: 32px;
@@ -458,9 +406,8 @@
 	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha */
 }
 
-/* Bottom-anchored translucent wipe -- shrinks from the top down as the skill's cooldown counts
-   down, matching the retired RenderSkillDelay()'s own ARGB-quad direction exactly (0x80FF8080,
-   alpha 0x80 = ~50%). Height is bound per-instance (data-style-height, main_frame.rml). */
+/* Bottom-anchored translucent wipe -- shrinks from the top down as cooldown counts down.
+   Height is bound per-instance (data-style-height, main_frame.rml). */
 .cooldown-wipe {
 	position: absolute;
 	left: 0;
@@ -470,12 +417,10 @@
 	pointer-events: none;
 }
 
-/* Shared skill tooltip, positioned via C++-pushed left/top (see comment above) then flipped to
-   grow upward from that point via translateY(-100%) -- reproduces the legacy renderer's own
-   "sy -= Height" auto-flip without porting that height math into C++ (a plain data-for list of
-   lines has no fixed height to precompute up front the way the legacy fixed-buffer model did).
-   Explicit width (not shrink-to-fit) per this build's own known quirk: an absolutely-positioned
-   multi-line box undersizes without one. */
+/* Shared skill tooltip, positioned via C++-pushed left/top then flipped to grow upward via
+   translateY(-100%), reproducing the legacy renderer's auto-flip without precomputing height in
+   C++. Explicit width given -- an absolutely-positioned multi-line box undersizes without one in
+   this build. */
 #skill_tooltip {
 	transform: translateY(-100%);
 	width: 220px;
@@ -487,15 +432,10 @@
 	font-size: 10px;
 	z-index: 2;
 }
-/* display:block is required here, not optional -- RmlUi's own default `display` for
-   any element (including <div>) is `inline` (StyleSheetSpecification.cpp registers it that way;
-   there's no HTML-style user-agent stylesheet giving <div> a block default the way a browser
-   does). Every other div in this file gets a block box for free via `position:absolute`, but
-   these ARE meant to flow normally (stacked, not each independently positioned) -- without this,
-   all the tooltip's lines render inline, one run-on paragraph instead of separate lines.
-   min-height/line-height also guarantee a blank spacer line (UI::Skills::Tooltip::Model's
-   isBlank lines, text is a lone "\n") still reserves visible vertical space even though its own
-   collapsed-whitespace content renders as nothing. */
+/* display:block is required, not optional -- RmlUi's default `display` for any element
+   (including <div>) is `inline`, unlike a browser's user-agent stylesheet. Without it these
+   lines render as one run-on paragraph instead of stacked lines. min-height/line-height also
+   guarantee a blank spacer line still reserves vertical space even though it renders nothing. */
 .tt-line {
 	display: block;
 	color: #ffffff;
@@ -504,9 +444,7 @@
 	line-height: 1.2em;
 	font-family: "token(font-body)";
 }
-/* #80b3ff -- the legacy engine's actual TEXT_COLOR_BLUE RGB (ZzzInventory.cpp), same value
-   CMyInventory's item-option tooltip uses (ItemOptionTooltipModel.h) -- these are semantic
-   (option category), not theme aesthetic, so both tooltip features share one canonical value. */
+/* #80b3ff -- legacy engine's TEXT_COLOR_BLUE, semantic (option category) not theme aesthetic. */
 .tt-line.tt-blue { color: #80b3ff; }
 .tt-line.tt-red { color: #ff6060; }
 .tt-line.tt-darkred { color: #ffffff; background-color: rgba(180, 40, 40, 200); }

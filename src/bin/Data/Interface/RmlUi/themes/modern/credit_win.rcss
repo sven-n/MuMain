@@ -1,8 +1,5 @@
-/* Modern theme for the login-scene credits screen -- flat programmatic styling, no legacy art.
-   Same #panel/logo/deco/btn-close/credit-text structure as legacy; positioning matches legacy's
-   values exactly (see that file's own comment for where they come from). Credit text stays on
-   token(font-body) (Liberation Sans) here, same as every other modern-theme screen -- legacy's
-   theme is the one that needs the extra NanumGothic face (see its own comment). */
+/* Modern theme for the login-scene credits screen -- flat programmatic styling, no legacy art;
+   same structure and positioning as legacy's credit_win.rcss. */
 
 #panel {
 	position: absolute;
@@ -15,13 +12,8 @@
 	pointer-events: none;
 }
 
-/* Same real illustration art as legacy (there's no flat-vector substitute for photographic
-   artwork) -- decorator/opacity both pushed from CreditWin.cpp's SyncRmlModel(), same as legacy.
-   Needs the same 16 @spritesheet blocks legacy declares (see that file's own comment) since this
-   theme's own credit_win.rcss is what actually gets linked for the legacy *theme*, but the
-   spritesheet names credit_win.rml's data-style-decorator references must resolve in whichever
-   theme is active -- duplicated here rather than shared, matching how every other themed asset in
-   this branch is kept theme-local. */
+/* Same illustration art as legacy (no flat-vector substitute for photographic art); decorator/opacity
+   pushed from CreditWin.cpp's SyncRmlModel(). Spritesheets duplicated here (theme-local, not shared). */
 @spritesheet illust-im1-1-sheet { src: "../../../im1_1.jpg"; illust-im1-1: 0px 0px 400px 400px; }
 @spritesheet illust-im1-2-sheet { src: "../../../im1_2.jpg"; illust-im1-2: 0px 0px 400px 400px; }
 @spritesheet illust-im2-1-sheet { src: "../../../im2_1.jpg"; illust-im2-1: 0px 0px 400px 400px; }
@@ -49,8 +41,7 @@
 .illust-left { left: 0%; }
 .illust-right { left: 50%; }
 
-/* No flat-art substitute reads well for either -- dropped, same call char_sel_main.rcss's modern
-   theme already made for the same deco.tga art. */
+/* No flat-art substitute reads well for either, so both are dropped. */
 .logo, .deco {
 	display: none;
 }
@@ -77,9 +68,8 @@
 	border: 1dp token(accent-steel);
 }
 
-/* font-family/size redeclared directly here (not inherited from #panel) -- this document's
-   data-model binding makes inheritance silently fail for this text in this RmlUi build, same
-   caveat char_sel_main.rcss's modern theme already notes for its own icon-button labels. */
+/* font-family/size redeclared directly (not inherited from #panel) -- data-model binding silently
+   breaks property inheritance for this text in this RmlUi build. */
 .btn-close-label {
 	font-family: "token(font-body)";
 	font-size: 14dp;

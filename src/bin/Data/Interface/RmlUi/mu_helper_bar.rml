@@ -12,9 +12,8 @@
 		<div id="seg_c"></div>
 		<div id="text">{{position_text}}</div>
 
-		<!-- .tooltip-* are siblings of their trigger button, not nested children -- see
-		     mu_helper_bar.rcss's own comment on .tooltip for why (shrink-to-fit containing-block
-		     clamping, same bug main_frame.rcss's tooltips already document/avoid this way). -->
+		<!-- Tooltips are siblings of their trigger button, not children -- see .tooltip in
+		     mu_helper_bar.rcss for the containing-block clamping bug this avoids. -->
 		<div id="btn_config" class="mu-btn" data-event-click="mu_helper_config_click">
 			<div class="dot"></div>
 		</div>

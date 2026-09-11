@@ -96,15 +96,7 @@ namespace mu::ui::window
         g_pRenderText->RenderText(_x + 24, _y + 150, szText, LUCKYCOIN_REG_WIDTH, 0, RT3_SORT_CENTER);
     }
 
-    // Implemented together, on trust — see task doc/2026-08-01 note:
-    // this panel, like increment 4, is unreachable via normal play until the server implements the
-    // corresponding NPC/event, so no runtime soak was possible before this swap. Own copies of the
-    // compare/log helpers. Identical shape to increment 4 (CGoldBowmanLena::Render3D): EndBitmap()
-    // at entry, restore mirror runs BEFORE BeginBitmap() at the end (own pre-panel snapshot needed).
-    // The only per-item call is RenderItem3D() (line 138 below) — same shared path increments 0-4
-    // already proved carries no GL model transform; SetItemRotation() (lines 137/139) is a plain
-    // bool-field setter (m_ItemAngle), not a GL call, consumed later inside RenderObjectScreen's
-    // angle table — verified by reading NewUIRegistrationLuckyCoin.h.
+    // Pre-panel proj/view snapshot, restored around EndBitmap()/BeginBitmap() -- same shape as CGoldBowmanLena::Render3D.
     static float s_PreLuckyCoinProj[16];
     static float s_PreLuckyCoinView[16];
 

@@ -1,5 +1,5 @@
-/* Legacy theme for the character-select scene's per-character name/guild/level tags
-   (CCharInfoBalloonMng). Source art: character_ex.tga (118x54, single frame). */
+/* Legacy theme for the character-select per-character name/guild/level tags (CCharInfoBalloonMng);
+   source art character_ex.tga (118x54, single frame). */
 
 @spritesheet charballoon-bg-sheet
 {

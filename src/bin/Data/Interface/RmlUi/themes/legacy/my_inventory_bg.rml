@@ -4,10 +4,8 @@
 	<link type="text/rcss" href="my_inventory_bg.rcss"/>
 </head>
 <body data-model="my_inventory_bg">
-	<!-- Background-context document -- sits behind the paperdoll's and inventory
-	     grid's live 3D icons (CMyInventory::Render3D()/CInventoryCtrl::Render3D()), which keep
-	     rendering via the native C3DRenderMng interleave. See MyInventory.h's
-	     MyInventoryBgRmlModel comment for the full mechanism. Never interactive. -->
+	<!-- Background-context document -- sits behind the paperdoll's and inventory grid's live 3D
+	     icons (native C3DRenderMng interleave). Never interactive. -->
 	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="bg-fill"></div>
