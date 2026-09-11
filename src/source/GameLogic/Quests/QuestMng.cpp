@@ -479,7 +479,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             switch (pRequestInfo->m_dwType)
             {
             case QUEST_REQUEST_MONSTER:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Mon.: %ls x %lu/%lu",
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementMonster,
                     ::getMonsterName(int(pRequestInfo->m_wIndex)),
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
@@ -489,17 +489,16 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 wchar_t szItemName[32];
                 ::GetItemName((int)pRequestInfo->m_pItem->Type,
                     (pRequestInfo->m_pItem->Level, szItemName);
-                ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementItem, szItemName,
                     MIN(pRequestInfo->m_dwCurValue, pRequestInfo->m_dwValue),
                     pRequestInfo->m_dwValue);
             }
             break;
             case QUEST_REQUEST_LEVEL:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Level: %lu %ls",
-                    pRequestInfo->m_dwValue, I18N::Game::Minimum);
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementLevel, pRequestInfo->m_dwValue);
                 break;
             case QUEST_REQUEST_ZEN:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Zen : %lu", pRequestInfo->m_dwValue);
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementZen, pRequestInfo->m_dwValue);
                 break;
             case QUEST_REQUEST_PVP_POINT:
                 mu_swprintf(aDest[nLine].m_szText, I18N::Game::EnemyGensMemberXLuLu,
@@ -562,7 +561,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             wchar_t szItemName[32];
             ::GetItemName((int)pRequestInfo->m_pItem->Type, pRequestInfo->m_pItem->Level,
                 szItemName);
-            ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu/%lu", szItemName,
+            ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementItem, szItemName,
                 MIN((DWORD)pRequestInfo->m_wCurValue, pRequestInfo->m_dwValue),
                 pRequestInfo->m_dwValue);
             break;
@@ -576,8 +575,7 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
             else
                 aDest[nLine].m_dwColor = ARGB(255, 223, 191, 103);
 
-            ::mu_swprintf(aDest[nLine].m_szText, L"Level: %lu %ls",
-                pRequestInfo->m_dwValue, I18N::Game::Minimum);
+            ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRequirementLevel, pRequestInfo->m_dwValue);
             break;
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
@@ -743,26 +741,26 @@ bool CQuestMng::GetRequestRewardText(SRequestRewardText* aDest, int nDestCount, 
                 break;
 
             case QUEST_REWARD_EXP:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Exp.: %lu", pRewardInfo->m_dwValue);
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRewardExp, pRewardInfo->m_dwValue);
                 break;
 
             case QUEST_REWARD_ZEN:
-                ::mu_swprintf(aDest[nLine].m_szText, L"Zen: %lu", pRewardInfo->m_dwValue);
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRewardZen, pRewardInfo->m_dwValue);
                 break;
 
             case QUEST_REWARD_ITEM:
                 wchar_t szItemName[32];
                 ::GetItemName((int)pRewardInfo->m_pItem->Type, pRewardInfo->m_pItem->Level,
                     szItemName);
-                ::mu_swprintf(aDest[nLine].m_szText, L"Item: %ls x %lu",
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRewardItem,
                     szItemName, pRewardInfo->m_dwValue);
                 break;
 
             case QUEST_REWARD_BUFF:
             {
                 const BuffInfo buffinfo = g_BuffInfo((eBuffState)pRewardInfo->m_wIndex);
-                ::mu_swprintf(aDest[nLine].m_szText, L"Bonus: %ls x %lu%ls", buffinfo.s_BuffName,
-                    pRewardInfo->m_dwValue, I18N::Game::Minute);
+                ::mu_swprintf(aDest[nLine].m_szText, I18N::Game::QuestRewardBuffBonus, buffinfo.s_BuffName,
+                    pRewardInfo->m_dwValue);
             }
             break;
 

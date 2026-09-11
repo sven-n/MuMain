@@ -552,16 +552,16 @@ BOOL CMixRecipes::GetCurRecipeName(wchar_t* pszNameOut, int iNameLine)
             switch (g_MixRecipeMgr.GetMixInventoryType())
             {
             case MIXTYPE_TRAINER:
-                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Resurrection);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::OperationResurrecting);
                 break;
             case MIXTYPE_OSBOURNE:
-                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Refine);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::OperationRefining);
                 break;
             case MIXTYPE_JERRIDON:
-                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Restore);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::OperationRestoring);
                 break;
             case MIXTYPE_ELPIS:
-                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::Refine);
+                mu_swprintf(pszNameOut, I18N::Game::ItemInappropriateForS, I18N::Game::OperationRefining);
                 break;
             default:
                 mu_swprintf(pszNameOut, L"%ls", I18N::Game::ImproperItemsForCombination);
@@ -650,6 +650,30 @@ BOOL CMixRecipes::GetRecipeAdvice(wchar_t* pszAdviceOut, int iAdivceLine)
     return TRUE;
 }
 
+namespace
+{
+/// Appends a localized detail (required level, option or quantity) to a recipe
+/// ingredient name, separated by a space. The localized text carries the
+/// placeholders, so every language can put the number where its grammar needs
+/// it instead of having it glued to a translated word.
+template <size_t N, typename... Args>
+void AppendRecipeDetail(wchar_t (&szName)[N], const wchar_t* pszFormat, Args... args)
+{
+    wchar_t szDetail[64]{};
+    mu_swprintf_s(szDetail, pszFormat, args...);
+
+    // Append in place instead of formatting szName from itself: reading and writing the same
+    // buffer in one swprintf is undefined and glibc does interleave the bytes.
+    const size_t nUsed = wcslen(szName);
+    if (nUsed + 2 >= N)
+        return;
+
+    szName[nUsed] = L' ';
+    szName[nUsed + 1] = L'\0';
+    wcsncat(szName, szDetail, N - nUsed - 2);
+}
+}
+
 int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixItems, CMixItem* pMixItems)
 {
     if (iNumMixItems < 0)	return MIX_SOURCE_ERROR;
@@ -716,33 +740,33 @@ int CMixRecipes::GetSourceName(int iItemNum, wchar_t* pszNameOut, int iNumMixIte
         else if (pMixRecipeItem->m_iLevelMin == pMixRecipeItem->m_iLevelMax)
             mu_swprintf(szTempName, L"%ls +%d", szTempName, pMixRecipeItem->m_iLevelMin);
         else if (pMixRecipeItem->m_iLevelMin == 0)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iLevelMax, I18N::Game::Maximum);
+            AppendRecipeDetail(szTempName, I18N::Game::MixLevelAtMost, pMixRecipeItem->m_iLevelMax);
         else if (pMixRecipeItem->m_iLevelMax == 255)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iLevelMin, I18N::Game::Minimum);
+            AppendRecipeDetail(szTempName, I18N::Game::MixLevelAtLeast, pMixRecipeItem->m_iLevelMin);
         else
             mu_swprintf(szTempName, L"%ls +%d~%d", szTempName, pMixRecipeItem->m_iLevelMin, pMixRecipeItem->m_iLevelMax);
 
         if (pMixRecipeItem->m_iOptionMin == 0 && pMixRecipeItem->m_iOptionMax == 255);
         else if (pMixRecipeItem->m_iOptionMin == pMixRecipeItem->m_iOptionMax)
-            mu_swprintf(szTempName, L"%ls +%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option385);
+            AppendRecipeDetail(szTempName, I18N::Game::MixOption, pMixRecipeItem->m_iOptionMin);
         else if (pMixRecipeItem->m_iOptionMin == 0)
-            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMax, I18N::Game::Option385, I18N::Game::Maximum);
+            AppendRecipeDetail(szTempName, I18N::Game::MixOptionAtMost, pMixRecipeItem->m_iOptionMax);
         else if (pMixRecipeItem->m_iOptionMax == 255)
-            mu_swprintf(szTempName, L"%ls +%d%ls%ls", szTempName, pMixRecipeItem->m_iOptionMin, I18N::Game::Option385, I18N::Game::Minimum);
+            AppendRecipeDetail(szTempName, I18N::Game::MixOptionAtLeast, pMixRecipeItem->m_iOptionMin);
         else
-            mu_swprintf(szTempName, L"%ls +%d~%d%ls", szTempName, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax, I18N::Game::Option385);
+            AppendRecipeDetail(szTempName, I18N::Game::MixOptionRange, pMixRecipeItem->m_iOptionMin, pMixRecipeItem->m_iOptionMax);
     }
 
     if (pMixRecipeItem->m_iCountMin == 0 && pMixRecipeItem->m_iCountMax == 255)
         mu_swprintf(szTempName, L"%ls (%ls)", szTempName, I18N::Game::RateIncrease);
     else if (pMixRecipeItem->m_iCountMin == pMixRecipeItem->m_iCountMax)
-        mu_swprintf(szTempName, L"%ls %d%ls", szTempName, pMixRecipeItem->m_iCountMin, I18N::Game::Quantity);
+        AppendRecipeDetail(szTempName, I18N::Game::MixCount, pMixRecipeItem->m_iCountMin);
     else if (pMixRecipeItem->m_iCountMin == 0)
-        mu_swprintf(szTempName, L"%ls %d%ls %ls", szTempName, pMixRecipeItem->m_iCountMax, I18N::Game::Quantity, I18N::Game::Maximum);
+        AppendRecipeDetail(szTempName, I18N::Game::MixCountAtMost, pMixRecipeItem->m_iCountMax);
     else if (pMixRecipeItem->m_iCountMax == 255)
-        mu_swprintf(szTempName, L"%ls %d%ls %ls", szTempName, pMixRecipeItem->m_iCountMin, I18N::Game::Quantity, I18N::Game::Minimum);
+        AppendRecipeDetail(szTempName, I18N::Game::MixCountAtLeast, pMixRecipeItem->m_iCountMin);
     else
-        mu_swprintf(szTempName, L"%ls %d~%d%ls", szTempName, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax, I18N::Game::Quantity);
+        AppendRecipeDetail(szTempName, I18N::Game::MixCountRange, pMixRecipeItem->m_iCountMin, pMixRecipeItem->m_iCountMax);
 
     BOOL bPreName = FALSE;
     if (pMixRecipeItem->m_dwSpecialItem & RCP_SP_EXCELLENT)

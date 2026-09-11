@@ -76,8 +76,11 @@ int CutStr(const wchar_t* pszSrcText, wchar_t* pTextOut, const int iTargetPixelW
         }
         else
         {
-            // we can copy that to the destination
+            // we can copy that to the destination. std::wstring::copy does not append a
+            // terminator, so write it ourselves: callers reuse the same buffer for several
+            // lines, and without it a shorter line keeps the tail of the previous one.
             tempString.copy(pTextOut, tempString.length(), 0);
+            pTextOut[tempString.length()] = L'\0';
             iLineIndex++;
             processedSourceCharacters += tempString.length();
 

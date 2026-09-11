@@ -3591,7 +3591,9 @@ void RenderSwichState()
     {
         if (Switch_Info[i].m_bySwitchState > 0)
         {
-            mu_swprintf(Buff, L"%ls%d / %ls / %ls", I18N::Game::CrownSwitch, i + 1, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
+            wchar_t szSwitch[64]{};
+            mu_swprintf_s(szSwitch, I18N::Game::CrownSwitchD, i + 1);
+            mu_swprintf(Buff, L"%ls / %ls / %ls", szSwitch, Switch_Info[i].m_szGuildName, Switch_Info[i].m_szUserName);
             g_pRenderText->SetFont(g_hFont);
             g_pRenderText->SetTextColor(255, 255, 255, 255);
             g_pRenderText->SetBgColor(0);
