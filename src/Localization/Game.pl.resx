@@ -2174,7 +2174,7 @@
     <comment>legacy_id=579</comment>
   </data>
   <data name="You are lack of %s items." xml:space="preserve">
-    <value>Brakuje Ci przedmiotów %s.</value>
+    <value>Brakuje przedmiotów — %s</value>
     <comment>legacy_id=580</comment>
   </data>
   <data name="Combine items after organizing your inventory." xml:space="preserve">
@@ -2190,7 +2190,7 @@
     <comment>legacy_id=583</comment>
   </data>
   <data name="%s Success rate: %d%%" xml:space="preserve">
-    <value>%s Wskaźnik sukcesu: %d%%</value>
+    <value>Szansa powodzenia (%s): %d%%</value>
     <comment>legacy_id=584</comment>
   </data>
   <data name="%s Required Zen: %s" xml:space="preserve">
@@ -4522,7 +4522,7 @@
     <comment>legacy_id=1212</comment>
   </data>
   <data name="Item inappropriate for %s" xml:space="preserve">
-    <value>Przedmiot nieodpowiedni dla %s</value>
+    <value>Nieodpowiedni przedmiot — %s</value>
     <comment>legacy_id=1213</comment>
   </data>
   <data name="Dark Raven" xml:space="preserve">
@@ -7574,7 +7574,7 @@
     <comment>legacy_id=2083</comment>
   </data>
   <data name="%s for only %s" xml:space="preserve">
-    <value>%s tylko za %s</value>
+    <value>%s — tylko: %s</value>
     <comment>legacy_id=2084</comment>
   </data>
   <data name="Only the Jewel of Harmony can be refined." xml:space="preserve">
@@ -8442,7 +8442,7 @@
     <comment>legacy_id=2346</comment>
   </data>
   <data name="from above the level %d, %s enabled and on." xml:space="preserve">
-    <value>z góry poziom %d, %s włączone i włączone.</value>
+    <value>Dostępne od poziomu %d: %s</value>
     <comment>legacy_id=2347</comment>
   </data>
   <data name="2nd Wing" xml:space="preserve">
@@ -12907,5 +12907,128 @@
   </data>
   <data name="Retrying in seconds" xml:space="preserve">
     <value>Ponowna próba za %d sekund...</value>
+  </data>
+  <data name="MixLevelAtLeast" xml:space="preserve">
+    <value>+%d lub wyżej</value>
+  </data>
+  <data name="MixLevelAtMost" xml:space="preserve">
+    <value>+%d lub niżej</value>
+  </data>
+  <data name="MixOption" xml:space="preserve">
+    <value>opcja +%d</value>
+  </data>
+  <data name="MixOptionAtLeast" xml:space="preserve">
+    <value>opcja +%d lub wyżej</value>
+  </data>
+  <data name="MixOptionAtMost" xml:space="preserve">
+    <value>opcja +%d lub niżej</value>
+  </data>
+  <data name="MixOptionRange" xml:space="preserve">
+    <value>opcja +%d~%d</value>
+  </data>
+  <data name="MixCount" xml:space="preserve">
+    <value>x%d</value>
+  </data>
+  <data name="MixCountAtLeast" xml:space="preserve">
+    <value>x%d lub więcej</value>
+  </data>
+  <data name="MixCountAtMost" xml:space="preserve">
+    <value>x%d lub mniej</value>
+  </data>
+  <data name="MixCountRange" xml:space="preserve">
+    <value>x%d~%d</value>
+  </data>
+  <data name="SummonedMonsterOwner" xml:space="preserve">
+    <value>%ls gracza %ls</value>
+  </data>
+  <data name="CancelSkillQuestion" xml:space="preserve">
+    <value>Czy chcesz anulować: %ls?</value>
+  </data>
+  <data name="JewelCombinationSucceeded" xml:space="preserve">
+    <value>Łączenie klejnotów powiodło się.</value>
+  </data>
+  <data name="JewelCombinationFailed" xml:space="preserve">
+    <value>Łączenie klejnotów nie powiodło się.</value>
+  </data>
+  <data name="JewelDismantlingSucceeded" xml:space="preserve">
+    <value>Rozkładanie klejnotu powiodło się.</value>
+  </data>
+  <data name="JewelDismantlingFailed" xml:space="preserve">
+    <value>Rozkładanie klejnotu nie powiodło się.</value>
+  </data>
+  <data name="ZoneDCleared" xml:space="preserve">
+    <value>Strefa %d wyczyszczona</value>
+  </data>
+  <data name="QuestRewardBuffBonus" xml:space="preserve">
+    <value>Bonus: %ls na %lu minut</value>
+  </data>
+  <data name="CrownSwitchD" xml:space="preserve">
+    <value>Przełącznik koronowy %d</value>
+  </data>
+  <data name="FruitStatIncreased" xml:space="preserve">
+    <value>(Owoc %ls) dodano %d punktów statystyk.</value>
+  </data>
+  <data name="FruitStatDecreased" xml:space="preserve">
+    <value>(Owoc %ls) odjęto %d punktów statystyk.</value>
+  </data>
+  <data name="FruitStatCannotIncrease" xml:space="preserve">
+    <value>Tej statystyki nie można już zwiększyć.</value>
+  </data>
+  <data name="FruitStatCannotDecrease" xml:space="preserve">
+    <value>Tej statystyki nie można już zmniejszyć.</value>
+  </data>
+  <data name="StatPointsAdded" xml:space="preserve">
+    <value>Dodane</value>
+  </data>
+  <data name="StatPointsRemoved" xml:space="preserve">
+    <value>Odjęte</value>
+  </data>
+  <data name="QuestCompletedSuccessfully" xml:space="preserve">
+    <value>Zadanie zostało ukończone pomyślnie.</value>
+  </data>
+  <data name="QuestFailedUnfortunately" xml:space="preserve">
+    <value>Niestety, zadanie nie zostało ukończone.</value>
+  </data>
+  <data name="RequestHasFailed" xml:space="preserve">
+    <value>Żądanie nie powiodło się.</value>
+  </data>
+  <data name="QuestRequirementMonster" xml:space="preserve">
+    <value>Potwór: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementItem" xml:space="preserve">
+    <value>Przedmiot: %ls x %lu/%lu</value>
+  </data>
+  <data name="QuestRequirementLevel" xml:space="preserve">
+    <value>Poziom: %lu lub wyżej</value>
+  </data>
+  <data name="QuestRequirementZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardExp" xml:space="preserve">
+    <value>Dośw.: %lu</value>
+  </data>
+  <data name="QuestRewardZen" xml:space="preserve">
+    <value>Zen: %lu</value>
+  </data>
+  <data name="QuestRewardItem" xml:space="preserve">
+    <value>Przedmiot: %ls x %lu</value>
+  </data>
+  <data name="OperationRefining" xml:space="preserve">
+    <value>Oczyszczanie</value>
+  </data>
+  <data name="OperationRestoring" xml:space="preserve">
+    <value>Przywracanie</value>
+  </data>
+  <data name="OperationChaosCardCombination" xml:space="preserve">
+    <value>Łączenie kart chaosu</value>
+  </data>
+  <data name="OperationCherryBlossomAssembly" xml:space="preserve">
+    <value>Składanie gałązek wiśni</value>
+  </data>
+  <data name="OperationRegistration" xml:space="preserve">
+    <value>Rejestracja</value>
+  </data>
+  <data name="OperationResurrecting" xml:space="preserve">
+    <value>Wskrzeszanie przedmiotu</value>
   </data>
 </root>

@@ -401,7 +401,7 @@ static void SetupGemIntegrationMessage()
 static void SetupCancelSkillMessage(int index)
 {
     wchar_t tBuf[MAX_GLOBAL_TEXT_STRING];
-    swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, L"%ls%ls", SkillAttribute[index].Name, I18N::Game::WouldYouLikeToCancel);
+    swprintf_s(tBuf, MAX_GLOBAL_TEXT_STRING, I18N::Game::CancelSkillQuestion, SkillAttribute[index].Name);
     g_iNumLineMessageBoxCustom = SeparateTextIntoLines(tBuf, g_lpszMessageBoxCustom[0], 2, MAX_LENGTH_CMB);
     g_iCancelSkillTarget = index;
 }

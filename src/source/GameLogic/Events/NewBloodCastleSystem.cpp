@@ -139,15 +139,16 @@ void CNewBloodCastleSystem::RenderMatchResult(void)
 
     if (m_iNumResult)
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
+        // Two halves of one sentence: the congratulation opens it, the quest name closes it.
         g_pRenderText->RenderText(x, yPos, I18N::Game::CongratulationsYouHaveSuccessfully, 0, 0, RT3_WRITE_CENTER);
+        yPos += 16;
+        g_pRenderText->RenderText(x, yPos, I18N::Game::CompletedTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
     }
     else
     {
-        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
-        yPos += 16;
         g_pRenderText->RenderText(x, yPos, I18N::Game::UnfortunatelyYouHaveFailed, 0, 0, RT3_WRITE_CENTER);
+        yPos += 16;
+        g_pRenderText->RenderText(x, yPos, I18N::Game::ToCompleteTheBloodCastleQuest, 0, 0, RT3_WRITE_CENTER);
     }
 
     yPos += 30;
