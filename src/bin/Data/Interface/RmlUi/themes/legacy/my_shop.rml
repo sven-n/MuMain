@@ -1,0 +1,31 @@
+<rml>
+<head>
+	<title>Personal Store</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="my_shop.rcss"/>
+</head>
+<body data-model="my_shop">
+	<!-- Window frame/title/edit-box background strip/Open-Close-Exit buttons only -- inventory grid
+	     and the nickname/subject CUITextInputBox stay native (MyShopInventory.h). Background lives
+	     in my_shop_bg.rml instead, since it must paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<!-- Decorative strip behind the real (native, unmoved) CUITextInputBox -- see
+		     MyShopInventory.cpp's Create() comment for why this piece alone is separable. -->
+		<div id="edit_bg"></div>
+
+		<div id="btn_exit" class="shop-btn shop-btn-exit" data-event-click="my_shop_exit_click"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+
+		<div id="btn_open" class="shop-btn shop-btn-open" data-class-locked="open_locked"
+		     data-event-click="my_shop_open_click"></div>
+		<span class="tooltip tooltip-open">{{open_tooltip}}</span>
+
+		<div id="btn_close" class="shop-btn shop-btn-close" data-class-locked="close_locked"
+		     data-event-click="my_shop_close_click"></div>
+		<span class="tooltip tooltip-close">{{close_tooltip}}</span>
+	</div>
+</body>
+</rml>

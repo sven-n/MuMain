@@ -8,6 +8,13 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 const int iMAX_SHOPTITLE_MULTI = 26;
 
 namespace
@@ -37,8 +44,9 @@ mu::ui::window::CMyShopInventory::CMyShopInventory() : m_SourceIndex(-1), m_Targ
     m_pNewInventoryCtrl = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_EditBox = NULL;
-    m_Button = NULL;
     m_bIsEnableInputValueTextBox = false;
+    m_bOpenLocked = false;
+    m_bOpenApplyTooltip = false;
 }
 
 mu::ui::window::CMyShopInventory::~CMyShopInventory()
@@ -56,8 +64,6 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
     m_pNewInventoryCtrl = new CInventoryCtrl;
     if (false == m_pNewInventoryCtrl->Create(STORAGE_TYPE::MYSHOP, g_pNewUI3DRenderMng, g_pNewItemMng, this, m_Pos.x + 16, m_Pos.y + 90, 8, 4, MAX_MY_INVENTORY_EX_INDEX))
     {
@@ -66,20 +72,6 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
     }
 
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_MY_SHOP);
-
-    m_Button = new CButton[MYSHOPINVENTORY_MAXBUTTONCOUNT];
-
-    m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_EXIT_BTN, false);
-    m_Button[MYSHOPINVENTORY_EXIT].ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_EXIT].ChangeToolTipText(&I18N::Game::Close388, true);
-
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_OPEN, false);
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeButtonInfo(m_Pos.x + 53, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
-
-    m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonImgState(true, IMAGE_MYSHOPINVENTORY_CLOSE, false);
-    m_Button[MYSHOPINVENTORY_CLOSE].ChangeButtonInfo(m_Pos.x + 93, m_Pos.y + 391, 36, 29);
-    m_Button[MYSHOPINVENTORY_CLOSE].ChangeToolTipText(&I18N::Game::Closed, true);
 
     m_EditBox = new CUITextInputBox;
 
@@ -92,6 +84,92 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
     ChangeEditBox(UISTATE_NORMAL);
     ChangePersonal(m_EnablePersonalShop);
 
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_shop",
+            [this](Rml::DataModelConstructor& c, MyShopRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("title", &model.title);
+                c.Bind("exit_tooltip", &model.exitTooltip);
+
+                c.Bind("open_locked", &model.openLocked);
+                c.Bind("open_tooltip", &model.openTooltip);
+
+                c.Bind("close_locked", &model.closeLocked);
+                c.Bind("close_tooltip", &model.closeTooltip);
+
+                c.BindEventCallback("my_shop_exit_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                    });
+                c.BindEventCallback("my_shop_open_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        wchar_t shopTitle[MAX_SHOPTITLE + 1]{};
+                        GetTitle(shopTitle);
+                        if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
+                        {
+                            if (m_EnablePersonalShop == false)
+                            {
+                                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalshopCreateMsgBoxLayout));
+                            }
+                            else
+                            {
+                                wcscpy(g_szPersonalShopTitle, shopTitle);
+                                SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
+
+                                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
+                            }
+                        }
+                        else
+                        {
+                            g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, mu::ui::window::TYPE_ERROR_MESSAGE);
+                        }
+                    });
+                c.BindEventCallback("my_shop_close_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        SocketClient->ToGameServer()->SendPlayerShopClose();
+
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/my_shop.rml");
+
+        // Frame background panel uses the background context -- see MyShopBgRmlModel (MyShopInventory.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "my_shop_bg",
+                [](Rml::DataModelConstructor& c, MyShopBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/my_shop_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
+
     Show(false);
 
     return true;
@@ -100,7 +178,6 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
 void mu::ui::window::CMyShopInventory::Release()
 {
     SAFE_DELETE(m_pNewInventoryCtrl);
-    SAFE_DELETE_ARRAY(m_Button);
     SAFE_DELETE(m_EditBox);
 
     if (m_pNewUIMng)
@@ -109,33 +186,11 @@ void mu::ui::window::CMyShopInventory::Release()
         m_pNewUIMng = NULL;
     }
 
-    UnloadImages();
-}
-
-void mu::ui::window::CMyShopInventory::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MYSHOPINVENTORY_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_MYSHOPINVENTORY_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_MYSHOPINVENTORY_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_MYSHOPINVENTORY_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_MYSHOPINVENTORY_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_MYSHOPINVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_openshop.tga", IMAGE_MYSHOPINVENTORY_OPEN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_closeshop.tga", IMAGE_MYSHOPINVENTORY_CLOSE, GL_LINEAR);
-}
-
-void mu::ui::window::CMyShopInventory::UnloadImages()
-{
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_CLOSE);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_OPEN);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_EDIT);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_EXIT_BTN);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_BOTTOM);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_RIGHT);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_LEFT);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_TOP);
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_BACK);
+    // Hide explicitly -- Release() has no other way to hide these once created.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
 }
 
 void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
@@ -146,12 +201,6 @@ void mu::ui::window::CMyShopInventory::SetPos(int x, int y)
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->SetPos(m_Pos.x + 16, m_Pos.y + 90);
-    }
-    if (m_Button)
-    {
-        m_Button[MYSHOPINVENTORY_EXIT].SetPos(m_Pos.x + 13, m_Pos.y + 391);
-        m_Button[MYSHOPINVENTORY_OPEN].SetPos(m_Pos.x + 53, m_Pos.y + 391);
-        m_Button[MYSHOPINVENTORY_CLOSE].SetPos(m_Pos.x + 93, m_Pos.y + 391);
     }
 }
 
@@ -204,42 +253,23 @@ void mu::ui::window::CMyShopInventory::ChangePersonal(bool state)
 {
     m_EnablePersonalShop = state;
 
-    if (m_EnablePersonalShop)
-    {
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
-        m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Apply, true);
-        m_Button[MYSHOPINVENTORY_CLOSE].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_Button[MYSHOPINVENTORY_CLOSE].ChangeTextColor(RGBA(255, 255, 255, 255));
-        m_Button[MYSHOPINVENTORY_CLOSE].UnLock();
-    }
-    else
-    {
-        m_Button[MYSHOPINVENTORY_CLOSE].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        m_Button[MYSHOPINVENTORY_CLOSE].ChangeTextColor(RGBA(100, 100, 100, 255));
-        m_Button[MYSHOPINVENTORY_CLOSE].Lock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
-        m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-        m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
-    }
+    // Close's lock state is purely a function of m_EnablePersonalShop (see SyncRmlModel()); only
+    // Open's lock/tooltip need their own state, since OpenButtonLock()/UnLock() can also drive them
+    // independently of this call.
+    m_bOpenLocked = false;
+    m_bOpenApplyTooltip = m_EnablePersonalShop;
 }
 
 void mu::ui::window::CMyShopInventory::OpenButtonLock()
 {
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(100, 100, 100, 255));
-    m_Button[MYSHOPINVENTORY_OPEN].Lock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Open1107, true);
+    m_bOpenLocked = true;
+    m_bOpenApplyTooltip = false;
 }
 
 void mu::ui::window::CMyShopInventory::OpenButtonUnLock()
 {
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeTextColor(RGBA(255, 255, 255, 255));
-    m_Button[MYSHOPINVENTORY_OPEN].UnLock();
-    m_Button[MYSHOPINVENTORY_OPEN].ChangeToolTipText(&I18N::Game::Apply, true);
+    m_bOpenLocked = false;
+    m_bOpenApplyTooltip = true;
 }
 
 const bool mu::ui::window::CMyShopInventory::IsEnablePersonalShop() const
@@ -414,55 +444,7 @@ bool mu::ui::window::CMyShopInventory::UpdateMouseEvent()
 
     m_EditBox->DoAction();
 
-    for (int i = 0; i < MYSHOPINVENTORY_MAXBUTTONCOUNT; ++i)
-    {
-        if (m_Button[i].UpdateMouseEvent())
-        {
-            switch (i)
-            {
-            case 0:
-            {
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-            }
-            return false;
-            case 1:
-            {
-                wchar_t shopTitle[MAX_SHOPTITLE + 1]{};
-                g_pMyShopInventory->GetTitle(shopTitle);
-                if (IsExistUndecidedPrice() == false && wcslen(shopTitle) > 0)
-                {
-                    if (m_EnablePersonalShop == false)
-                    {
-                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalshopCreateMsgBoxLayout));
-                    }
-                    else
-                    {
-                        wcscpy(g_szPersonalShopTitle, shopTitle);
-                        SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
-
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
-                    }
-                }
-                else
-                {
-                    g_pSystemLogBox->AddText(I18N::Game::ThereSNoStoreNameOrItemPrice, mu::ui::window::TYPE_ERROR_MESSAGE);
-                }
-            }
-            return false;
-            case 2:
-            {
-                SocketClient->ToGameServer()->SendPlayerShopClose();
-
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
-                g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY_EXT);
-            }
-            return false;
-            }
-        }
-    }
+    // The 3 real buttons (Exit/Open/Close) are handled by RmlUi's data-event-click (see Create()).
 
     if (WindowProcess())
         return false;
@@ -494,21 +476,45 @@ bool mu::ui::window::CMyShopInventory::Update()
         return false;
     }
 
+    SyncRmlModel();
     return true;
 }
 
-void mu::ui::window::CMyShopInventory::RenderFrame()
+void mu::ui::window::CMyShopInventory::SyncRmlModel()
 {
-    RenderImage(IMAGE_MYSHOPINVENTORY_BACK, m_Pos.x, m_Pos.y, INVENTORY_WIDTH, INVENTORY_HEIGHT);
-    RenderImage(IMAGE_MYSHOPINVENTORY_TOP, m_Pos.x, m_Pos.y, INVENTORY_WIDTH, 64.f);
-    RenderImage(IMAGE_MYSHOPINVENTORY_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_MYSHOPINVENTORY_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_MYSHOPINVENTORY_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, INVENTORY_WIDTH, 45.f);
-    RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x + 12, m_Pos.y + 49, 169.f, 26.f);
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
-    wchar_t Text[100] = {};
-    mu_swprintf(Text, I18N::Game::PersonalStore);
-    RenderText(Text, m_Pos.x, m_Pos.y + 15, INVENTORY_WIDTH, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+
+    auto& model = m_RmlBinder.GetModel();
+    auto syncBool = [&](bool MyShopRmlModel::* field, const char* boundName, bool value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncWide = [&](Rml::String MyShopRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+
+    syncWide(&MyShopRmlModel::title, "title", I18N::Game::PersonalStore);
+    syncWide(&MyShopRmlModel::exitTooltip, "exit_tooltip", I18N::Game::Close388);
+
+    syncBool(&MyShopRmlModel::openLocked, "open_locked", m_bOpenLocked);
+    syncWide(&MyShopRmlModel::openTooltip, "open_tooltip", m_bOpenApplyTooltip ? I18N::Game::Apply : I18N::Game::Open1107);
+
+    syncBool(&MyShopRmlModel::closeLocked, "close_locked", !m_EnablePersonalShop);
+    syncWide(&MyShopRmlModel::closeTooltip, "close_tooltip", I18N::Game::Closed);
 }
 
 void mu::ui::window::CMyShopInventory::RenderTextInfo()
@@ -557,7 +563,10 @@ bool mu::ui::window::CMyShopInventory::Render()
 {
     EnableAlphaTest();
 
-    RenderFrame();
+    // Frame background panel is RmlUi, routed through the background context (see
+    // MyShopBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     RenderTextInfo();
 
@@ -569,11 +578,6 @@ bool mu::ui::window::CMyShopInventory::Render()
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->Render();
-    }
-
-    for (int i = 0; i < MYSHOPINVENTORY_MAXBUTTONCOUNT; ++i)
-    {
-        m_Button[i].Render();
     }
 
     DisableAlphaBlend();

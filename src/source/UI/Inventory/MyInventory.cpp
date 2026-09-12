@@ -39,6 +39,7 @@ extern bool SelectFlag;
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
 #include "UI/RmlBridge/RmlDraggable.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
 #include "UI/Inventory/ItemOptionTooltipModel.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
@@ -231,11 +232,9 @@ bool CMyInventory::Create(CManager* pNewUIMng, C3DRenderMng* pNewUI3DRenderMng, 
                 });
             if (bgModelCreated)
             {
-                m_pRmlBgDoc = UI::RmlBridge::LoadThemedDocument(bgContext, "Data/Interface/RmlUi/my_inventory_bg.rml");
                 // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
                 // visible, so there's no "wrong scene" case to guard against here.
-                if (m_pRmlBgDoc)
-                    m_pRmlBgDoc->Show();
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/my_inventory_bg.rml");
             }
         }
 
@@ -652,8 +651,10 @@ bool CMyInventory::UpdateMouseEvent()
             || g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_LUCKYITEMWND) == true
             || g_pNewUISystem->IsVisible(INTERFACE_PURCHASESHOP_INVENTORY) == true)
         {
+            // Not a ground-drop -- one of these other windows is the real target, and dispatched
+            // after us, so `true` (not `false`) lets CManager keep going instead of eating its drop.
             ResetMouseLButton();
-            return false;
+            return true;
         }
 
         ITEM* pItemObj = pPickedItem->GetItem();
@@ -857,22 +858,9 @@ bool CMyInventory::Update()
 
 void CMyInventory::SyncRmlModel()
 {
-    // m_Pos is reference-space, not screen pixels -- must resolve via scale+offset before handing
-    // to RmlUi's left/top (which takes literal px), or the panel lands at the wrong position at
-    // any non-1:1 scale.
-    const auto transform = UI::Scaling::GetActiveTransform();
-    const float rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
-    const float rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
-
     if (m_pRmlBgDoc)
     {
-        auto& bg = m_BgRmlBinder.GetModel();
-        bg.rootX = rootX;
-        bg.rootY = rootY;
-        bg.rootScale = transform.scaleX;
-        m_BgRmlBinder.MarkDirty("root_x");
-        m_BgRmlBinder.MarkDirty("root_y");
-        m_BgRmlBinder.MarkDirty("root_scale");
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
         // RenderBackgroundLayer() renders whatever's shown in the shared background context
         // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
@@ -882,15 +870,7 @@ void CMyInventory::SyncRmlModel()
     if (!m_pRmlDoc) return;
     if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
 
-    {
-        auto& model = m_RmlBinder.GetModel();
-        model.rootX = rootX;
-        model.rootY = rootY;
-        model.rootScale = transform.scaleX;
-        m_RmlBinder.MarkDirty("root_x");
-        m_RmlBinder.MarkDirty("root_y");
-        m_RmlBinder.MarkDirty("root_scale");
-    }
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
 
     auto syncBool = [this](bool MyInventoryRmlModel::* field, const char* boundName, bool value)
     {

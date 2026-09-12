@@ -1,0 +1,80 @@
+/* Legacy theme for CMyShopInventory's chrome (frame/title/edit-box background strip/Open-Close-
+   Exit buttons). #panel's left/top/scale come live from C++ (SyncRmlModel()), so coordinates below
+   are plain reference px, not dp. The nickname/subject CUITextInputBox itself stays fully native
+   (MyShopInventory.cpp's Create()) -- #edit_bg below is only the decorative strip behind it, which
+   was already a separate sprite independent of the input box's own (alpha-0) background fill. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 15px;
+	width: 190px;
+	text-align: center;
+	color: #49b0ff;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+@spritesheet shop-edit-bg-sheet { src: "../../../newui_Box_openTitle.tga"; shop-edit-bg: 0px 0px 169px 26px; }
+#edit_bg {
+	position: absolute;
+	left: 12px;
+	top: 49px;
+	width: 169px;
+	height: 26px;
+	decorator: image(shop-edit-bg);
+	pointer-events: none;
+}
+
+/* Buttons: same 36x29 reference-pixel boxes ChangeButtonInfo() used to place them at. */
+@spritesheet shop-btn-exit-sheet  { src: "../../../newui_exit_00.tga";      shop-btn-exit:  0px 0px 36px 29px; }
+@spritesheet shop-btn-open-sheet  { src: "../../../newui_Bt_openshop.tga";  shop-btn-open:  0px 0px 36px 29px; }
+@spritesheet shop-btn-close-sheet { src: "../../../newui_Bt_closeshop.tga"; shop-btn-close: 0px 0px 36px 29px; }
+
+.shop-btn {
+	position: absolute;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.shop-btn:hover { filter: brightness(1.25); }
+.shop-btn.locked { pointer-events: none; filter: brightness(0.6); }
+
+.shop-btn-exit  { left: 13px; decorator: image(shop-btn-exit); }
+.shop-btn-open  { left: 53px; decorator: image(shop-btn-open); }
+.shop-btn-close { left: 93px; decorator: image(shop-btn-close); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit  { left: -30px; }
+.tooltip-open  { left: 10px; }
+.tooltip-close { left: 50px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_open:hover ~ .tooltip-open,
+#btn_close:hover ~ .tooltip-close {
+	display: block;
+}

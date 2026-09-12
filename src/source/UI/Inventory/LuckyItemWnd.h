@@ -8,33 +8,16 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
 #define	LUCKYITEMMAXLINE	20
-    enum eNEWUIFRAME { eFrame_BG, eFrame_T, eFrame_L, eFrame_R, eFrame_B, eFrame_END };
-    enum eIMGLIST { eImgList_MixBtn = eFrame_END, eImgList_END };
     enum eLUCKYITEMTYPE { eLuckyItemType_None = 0, eLuckyItemType_Trade, eLuckyItemType_Refinery, eLuckyItemAct_End };
     enum eLUCKYITEM { eLuckyItem_None = 0, eLuckyItem_Move, eLuckyItem_Act, eLuckyITem_Result, eLuckyItem_End };
 
-    struct sImgList
-    {
-        float	s_fWid;
-        float	s_fHgt;
-        int		s_nImgIndex;
-        void Set(int _nIndex, float _fWid, float _fHgt)
-        {
-            s_nImgIndex = _nIndex;
-            s_fWid = _fWid;
-            s_fHgt = _fHgt;
-        }
-    };
-    struct sImgFrame
-    {
-        sImgList	s_Img;
-        POINT		s_ptPos;
-    };
     struct sText
     {
         int		s_nTextIndex;	// 글로벌 텍스트 인덱스
@@ -47,11 +30,8 @@ namespace mu::ui::window
     private:
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
-        CButton			m_BtnMix;
         float					m_fInvenClr[3];
         float					m_fInvenClrWarning[3];
-        sImgList				m_sImgList[eImgList_END];
-        sImgFrame				m_sFrame[eFrame_END];
         wchar_t			m_szSubject[255];
         sText					m_sText[LUCKYITEMMAXLINE];
         int						m_nTextMaxLine;
@@ -64,9 +44,39 @@ namespace mu::ui::window
         eLUCKYITEM				m_eWndAction;
         eLUCKYITEM				m_eEnd;
 
+        // Window frame/title/mix-button are RmlUi; the inventory grid and the large dynamic
+        // multi-line result/description text block (m_sText[]/AddText()/SetFrame_Text()) stay
+        // native -- grid icons are live 3D renders (same reasoning as CStorageInventoryExt), and
+        // the text block is out of this migration's scope entirely. Unlike every other window in
+        // this "inventory family", #panel/#bg_root's width/height are NOT a fixed constant --
+        // m_fSizeX/m_fSizeY are genuinely runtime-variable (see SetSize()), so both RmlUi models
+        // also bind/sync rootWidth/rootHeight every tick instead of hardcoding a px size in RCSS.
+        struct LuckyItemRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float rootWidth = 0.f, rootHeight = 0.f;
+            Rml::String title;
+            Rml::String mixTooltip;
+            bool mixVisible = true;
+        };
+        RmlModelBinder<LuckyItemRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
+        // main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
+        // CStorageInventoryExt's identical StorageExtBgRmlModel for the full mechanism).
+        struct LuckyItemBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            float rootWidth = 0.f, rootHeight = 0.f;
+        };
+        RmlModelBinder<LuckyItemBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
+
     private:
-        void	LoadImg(void);
-        void	SetFrame(void);
         void	SetFrame_Text(eLUCKYITEM _eType);
         bool	Process_InventoryCtrl(void);
 

@@ -17,6 +17,13 @@
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Items/MixMgr.h"
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 CLuckyItemWnd::CLuckyItemWnd()
@@ -33,30 +40,6 @@ CLuckyItemWnd::~CLuckyItemWnd()
 #endif // LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
 }
 
-void CLuckyItemWnd::SetFrame(void)
-{
-    float	fLineY = m_ptPos.y + m_sImgList[eFrame_T].s_fHgt;
-    float	fBottomY = fLineY + m_sImgList[eFrame_L].s_fHgt;
-    float	fLineX_R = m_ptPos.x + m_fSizeX - m_sImgList[eFrame_L].s_fWid;
-
-    for (int i = 0; i < eFrame_END; i++)
-    {
-        m_sFrame[i].s_Img = m_sImgList[i];
-    }
-
-    m_sFrame[eFrame_BG].s_ptPos = m_ptPos;
-    m_sFrame[eFrame_T].s_ptPos = m_ptPos;
-
-    m_sFrame[eFrame_L].s_ptPos.x = m_ptPos.x;
-    m_sFrame[eFrame_L].s_ptPos.y = fLineY;
-
-    m_sFrame[eFrame_R].s_ptPos.x = fLineX_R;
-    m_sFrame[eFrame_R].s_ptPos.y = fLineY;
-
-    m_sFrame[eFrame_B].s_ptPos.x = m_ptPos.x;
-    m_sFrame[eFrame_B].s_ptPos.y = fBottomY;
-}
-
 int CLuckyItemWnd::GetLuckyItemRate(int _nType)
 {
     if (_nType == eLuckyItemType_Trade)		return 100;
@@ -67,23 +50,12 @@ int CLuckyItemWnd::GetLuckyItemRate(int _nType)
 
 void CLuckyItemWnd::Render_Frame(void)
 {
+    // Frame background/border/subject-title/mix-button are RmlUi now (lucky_item.rml/
+    // lucky_item_bg.rml -- see SyncRmlModel()). Only the mix-completion sparkle effect and the
+    // dynamic result/description text block (m_sText[]/AddText()) stay native here, untouched.
     int	i = 0;
 
-    for (i = 0; i < eFrame_END; i++)
-    {
-        RenderImage(m_sFrame[i].s_Img.s_nImgIndex, m_sFrame[i].s_ptPos.x, m_sFrame[i].s_ptPos.y, m_sFrame[i].s_Img.s_fWid, m_sFrame[i].s_Img.s_fHgt);
-    }
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(m_ptPos.x, m_ptPos.y + 18.0f, m_szSubject, m_fSizeX, 0, RT3_SORT_CENTER);
-
-    if (m_eEnd != eLuckyItem_End)
-    {
-        m_BtnMix.Render();
-    }
-    else
+    if (m_eEnd == eLuckyItem_End)
     {
         g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER, UI2DEffectCallback, this, 0, 0);
     }
@@ -230,36 +202,6 @@ void CLuckyItemWnd::GetResult(BYTE _byResult, int _nIndex, std::span<const BYTE>
     m_eWndAction = eLuckyItem_None;
 }
 
-void CLuckyItemWnd::LoadImg(void)
-{
-    float	fSizeX = m_fSizeX;
-    float	fSizeY = m_fSizeY;
-    float	fTop = 64.0f;
-    float	fBottom = 45.0f;
-    float	fLineX = 21.0f;
-    float	fLineY = fSizeY - fTop - fBottom;
-
-    const wchar_t* szFileName[] = { L"Interface\\newui_msgbox_back.jpg",
-                             L"Interface\\newui_item_back04.tga",
-                             L"Interface\\newui_item_back02-L.tga",
-                             L"Interface\\newui_item_back02-R.tga",
-                             L"Interface\\newui_item_back03.tga",
-                             L"Interface\\newui_bt_mix.tga",
-    };
-
-    m_sImgList[eFrame_BG].Set(CMessageBoxMng::IMAGE_MSGBOX_BACK, fSizeX, fSizeY);
-    m_sImgList[eFrame_T].Set(CMyInventory::IMAGE_INVENTORY_BACK_TOP2, fSizeX, fTop);
-    m_sImgList[eFrame_L].Set(CMyInventory::IMAGE_INVENTORY_BACK_LEFT, fLineX, fLineY);
-    m_sImgList[eFrame_R].Set(CMyInventory::IMAGE_INVENTORY_BACK_RIGHT, fLineX, fLineY);
-    m_sImgList[eFrame_B].Set(CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM, fSizeX, fBottom);
-    m_sImgList[eImgList_MixBtn].Set(BITMAP_INTERFACE_NEW_MIXINVENTORY_BEGIN, 44.0f, 35.0f);
-
-    for (int i = 0; i < eImgList_END; i++)
-    {
-        LoadBitmap(szFileName[i], m_sImgList[i].s_nImgIndex, GL_LINEAR);
-    }
-}
-
 bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
 {
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
@@ -279,22 +221,61 @@ bool CLuckyItemWnd::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
     SetSize(190.0f, 429.0f);
-    LoadImg();
-    SetFrame();
-
-    float	fWidth = 0.0f;
-    float	fHeight = 0.0f;
-
-    fWidth = m_sImgList[eImgList_MixBtn].s_fWid;
-    fHeight = m_sImgList[eImgList_MixBtn].s_fHgt;
-    m_BtnMix.ChangeButtonImgState(true, m_sImgList[eImgList_MixBtn].s_nImgIndex, false);
-    m_BtnMix.ChangeButtonInfo(m_ptPos.x + (m_fSizeX - fWidth) * 0.5f, m_ptPos.y + 380, fWidth, fHeight);
 
     for (int i = 0; i < LUCKYITEMMAXLINE; i++)
     {
         m_sText[i].s_nTextIndex = -1;
         m_sText[i].s_dwColor = 0;
         m_sText[i].s_nLine = false;
+    }
+
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "lucky_item",
+            [this](Rml::DataModelConstructor& c, LuckyItemRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+                c.Bind("root_width", &model.rootWidth);
+                c.Bind("root_height", &model.rootHeight);
+                c.Bind("title", &model.title);
+                c.Bind("mix_tooltip", &model.mixTooltip);
+                c.Bind("mix_visible", &model.mixVisible);
+
+                c.BindEventCallback("lucky_item_mix_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        Process_BTN_Action();
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/lucky_item.rml");
+
+        // Frame background panel uses the background context -- see LuckyItemBgRmlModel (LuckyItemWnd.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "lucky_item_bg",
+                [](Rml::DataModelConstructor& c, LuckyItemBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                    c.Bind("root_width", &model.rootWidth);
+                    c.Bind("root_height", &model.rootHeight);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/lucky_item_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
     }
 
     Show(false);
@@ -333,7 +314,7 @@ void CLuckyItemWnd::OpeningProcess(void)
         AddText(2223, 0xFF00FFFF);
         AddText(0);
         AddText(3295, 0xFF0000FF), AddText(3296, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true); // 조합
+        // Mix button tooltip text is now derived from m_eType directly in SyncRmlModel().
         break;
     case eLuckyItemType_Refinery:
         mu_swprintf(m_szSubject, L"%ls", I18N::Game::RefineLuckyItem);
@@ -341,7 +322,7 @@ void CLuckyItemWnd::OpeningProcess(void)
         AddText(3300), AddText(3301);
         AddText(0), AddText(0), AddText(0);
         AddText(3302, 0xFF0000FF);
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true); // 제련
+        // Mix button tooltip text is now derived from m_eType directly in SyncRmlModel().
         break;
     }
 }
@@ -506,9 +487,8 @@ CInventoryCtrl* CLuckyItemWnd::GetInventoryCtrl() const
 
 bool CLuckyItemWnd::Process_BTN_Action(void)
 {
-    if (!m_BtnMix.UpdateMouseEvent())
-        return false;
-
+    // Invoked directly by the RmlUi mix-button's data-event-click callback (see Create()) now,
+    // rather than polled every frame against a native CButton hit-test.
     if (m_eEnd == eLuckyItem_End)
         return false;
 
@@ -548,7 +528,8 @@ bool CLuckyItemWnd::UpdateMouseEvent(void)
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_ptPos, mu::ui::window::INTERFACE_LUCKYITEMWND);
 
-    Process_BTN_Action();
+    // Mix button click is now handled by the RmlUi "lucky_item_mix_click" event callback (see
+    // Create()), which calls Process_BTN_Action() directly -- no longer polled here.
 
     if (mu::ui::window::WindowGeometry(static_cast<int>(m_ptPos.x), static_cast<int>(m_ptPos.y), static_cast<int>(m_fSizeX), static_cast<int>(m_fSizeY)).Contains(MouseX, MouseY))
     {
@@ -579,12 +560,18 @@ bool CLuckyItemWnd::Update(void)
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
 
+    SyncRmlModel();
     return true;
 }
 
 bool CLuckyItemWnd::Render(void)
 {
     EnableAlphaTest();
+
+    // Frame background panel is RmlUi, routed through the background context (see
+    // LuckyItemBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here (see CStorageInventoryExt::Render()).
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     Render_Frame();
 
@@ -594,6 +581,56 @@ bool CLuckyItemWnd::Render(void)
     DisableAlphaBlend();
 
     return true;
+}
+
+void CLuckyItemWnd::SyncRmlModel()
+{
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_ptPos);
+
+        auto& bgModel = m_BgRmlBinder.GetModel();
+        bgModel.rootWidth = m_fSizeX;
+        bgModel.rootHeight = m_fSizeY;
+        m_BgRmlBinder.MarkDirty("root_width");
+        m_BgRmlBinder.MarkDirty("root_height");
+
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_ptPos);
+
+    auto& model = m_RmlBinder.GetModel();
+    model.rootWidth = m_fSizeX;
+    model.rootHeight = m_fSizeY;
+    m_RmlBinder.MarkDirty("root_width");
+    m_RmlBinder.MarkDirty("root_height");
+
+    auto syncWide = [&](Rml::String LuckyItemRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncBool = [&](bool LuckyItemRmlModel::* field, const char* boundName, bool value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+
+    // m_szSubject is only re-written by OpeningProcess() (on Trade/Refinery mode switch), but it's
+    // cheap to re-check every tick the same change-checked way as every other field here.
+    syncWide(&LuckyItemRmlModel::title, "title", m_szSubject);
+
+    const wchar_t* mixTooltipText = (m_eType == eLuckyItemType_Refinery) ? I18N::Game::Refine : I18N::Game::Combining;
+    syncWide(&LuckyItemRmlModel::mixTooltip, "mix_tooltip", mixTooltipText);
+
+    // Mirrors Render_Frame()'s native m_eEnd != eLuckyItem_End gate that used to pick between
+    // drawing m_BtnMix and playing the mix-completion sparkle effect.
+    syncBool(&LuckyItemRmlModel::mixVisible, "mix_visible", m_eEnd != eLuckyItem_End);
 }
 
 float CLuckyItemWnd::GetLayerDepth(void)

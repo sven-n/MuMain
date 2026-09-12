@@ -10,47 +10,20 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
     class CStorageInventory : public CObject
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_STORAGE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_STORAGE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_STORAGE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_STORAGE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_STORAGE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_STORAGE_EXPAND_BTN = CMyInventory::IMAGE_INVENTORY_EXPAND_BTN,
-
-            IMAGE_STORAGE_BTN_INSERT_ZEN = BITMAP_INTERFACE_NEW_STORAGE_BEGIN,
-            IMAGE_STORAGE_BTN_TAKE_ZEN = BITMAP_INTERFACE_NEW_STORAGE_BEGIN + 1,
-            IMAGE_STORAGE_BTN_UNLOCK = BITMAP_INTERFACE_NEW_STORAGE_BEGIN + 2,
-            IMAGE_STORAGE_BTN_LOCK = BITMAP_INTERFACE_NEW_STORAGE_BEGIN + 3,
-
-            IMAGE_STORAGE_MONEY = BITMAP_INTERFACE_NEW_STORAGE_BEGIN + 4,
-        };
-
     private:
         static constexpr float STORAGE_WIDTH = 190.0f;
         static constexpr float STORAGE_HEIGHT = 429.0f;
 
-        enum STORAGE_BUTTON
-        {
-            BTN_INSERT_ZEN = 0,
-            BTN_TAKE_ZEN,
-            BTN_LOCK,
-            MAX_BTN
-        };
-
         CManager* m_pNewUIMng;
         POINT					m_Pos;
-        CButton			m_abtn[MAX_BTN];
-        CButton			m_BtnExpand;
         CInventoryCtrl* m_pNewInventoryCtrl;
 
         bool					m_bLock;
@@ -64,6 +37,45 @@ namespace mu::ui::window
         int						m_nBackupTakeZen;
         int						m_nBackupInvenIndex;
         int						m_nBackupSourceInvenIndex;
+
+        // Window frame/title/money/buttons are RmlUi; the inventory grid stays native since its
+        // icons are live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt).
+        struct StorageRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            Rml::String title;
+            bool titleLocked = false; // legacy-only red/gray title color toggle -- see SyncRmlModel()
+
+            Rml::String zenText;
+            Rml::String zenColor; // "rgba(r,g,b,a)" -- mirrors getGoldColor()'s amount-tier color, legacy only
+            Rml::String feeLabel;
+            Rml::String feeValue;
+
+            bool expandVisible = false;
+            Rml::String expandTooltip;
+
+            bool storageLocked = false; // lock icon open/closed toggle, mirrors my_inventory's close-mode
+
+            Rml::String insertTooltip;
+            Rml::String takeTooltip;
+            Rml::String lockTooltip;
+        };
+        RmlModelBinder<StorageRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
+        // main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
+        // CMyInventory's identical MyInventoryBgRmlModel for the full mechanism).
+        struct StorageBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<StorageBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
 
     public:
         CStorageInventory();
@@ -107,13 +119,6 @@ namespace mu::ui::window
         void SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex = -1);
         void SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex, int nStorageIndex);
     private:
-        void LoadImages();
-        void UnloadImages();
-
-        void RenderBackImage();
-        void RenderText();
-
-        void ChangeLockBtnImage();
         void DeleteAllItems();
 
         void LockStorage(bool bLock);

@@ -1,0 +1,20 @@
+<rml>
+<head>
+	<title>NPC Shop Background</title>
+	<link type="text/rcss" href="npc_shop_bg.rcss"/>
+</head>
+<body data-model="npc_shop_bg">
+	<!-- Background-context document -- sits behind the grid's live 3D icons (native
+	     C3DRenderMng interleave). Never interactive. Same 5-piece frame art as
+	     my_inventory_bg.rml (NPCShop.cpp's own former LoadImages() loaded the identical file set,
+	     not storage_ext_bg.rml's back01 variant). -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-fill"></div>
+		<div class="bg-top"></div>
+		<div class="bg-left"></div>
+		<div class="bg-right"></div>
+		<div class="bg-bottom"></div>
+	</div>
+</body>
+</rml>

@@ -11,6 +11,14 @@
 
 #include "GameLogic/Social/GambleSystem.h"
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -61,9 +69,59 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_shop",
+            [this](Rml::DataModelConstructor& c, NPCShopRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
 
-    SetButtonInfo();
+                c.Bind("title", &model.title);
+                c.Bind("tax_rate_text", &model.taxRateText);
+
+                c.Bind("repair_visible", &model.repairVisible);
+                c.Bind("repair_tooltip", &model.repairTooltip);
+                c.Bind("repair_all_tooltip", &model.repairAllTooltip);
+                c.Bind("repair_all_label", &model.repairAllLabel);
+                c.Bind("repair_gold_text", &model.repairGoldText);
+                c.Bind("repair_gold_color", &model.repairGoldColor);
+
+                c.BindEventCallback("npc_shop_repair_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { ToggleState(); });
+                c.BindEventCallback("npc_shop_repair_all_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/npc_shop.rml");
+
+        // Frame background panel uses the background context -- see NPCShopBgRmlModel (NPCShop.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "npc_shop_bg",
+                [](Rml::DataModelConstructor& c, NPCShopBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/npc_shop_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
 
     Show(false);
 
@@ -72,8 +130,6 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
 
 void mu::ui::window::CNPCShop::Release()
 {
-    UnloadImages();
-
     SAFE_DELETE(m_pNewInventoryCtrl);
 
     if (m_pNewUIMng)
@@ -81,6 +137,12 @@ void mu::ui::window::CNPCShop::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
+
+    // Hide explicitly -- Release() has no other way to hide these once created.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
 }
 
 void mu::ui::window::CNPCShop::SetPos(int x, int y)
@@ -203,16 +265,19 @@ bool mu::ui::window::CNPCShop::Update()
     {
         return false;
     }
+
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::CNPCShop::Render()
 {
     EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButton();
-    RenderRepairMoney();
+
+    // Frame background panel is RmlUi, routed through the background context (see
+    // NPCShopBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     if (m_pNewInventoryCtrl)
     {
@@ -223,78 +288,62 @@ bool mu::ui::window::CNPCShop::Render()
     return true;
 }
 
-void mu::ui::window::CNPCShop::RenderFrame()
+void mu::ui::window::CNPCShop::SyncRmlModel()
 {
-    RenderImage(IMAGE_NPCSHOP_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_NPCSHOP_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_NPCSHOP_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_NPCSHOP_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_NPCSHOP_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
-}
-
-void mu::ui::window::CNPCShop::RenderTexts()
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
-
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::Merchant, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
-
-    wchar_t strText[256];
-    mu_swprintf(strText, I18N::Game::TaxRateDChangedInRealTime, m_iTaxRate);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strText, NPCSHOP_WIDTH, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CNPCShop::RenderButton()
-{
-    if (m_bRepairShop)
+    if (m_pRmlBgDoc)
     {
-        m_BtnRepair.Render();
-        m_BtnRepairAll.Render();
-    }
-}
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
-void mu::ui::window::CNPCShop::RenderRepairMoney()
-{
-    if (m_bRepairShop)
-    {
-        RenderImage(IMAGE_NPCSHOP_REPAIR_MONEY, m_Pos.x + 10, m_Pos.y + 355, 170.f, 24.f);
-        g_pRenderText->SetBgColor(255, 255, 255, 0);
-        g_pRenderText->SetTextColor(255, 220, 150, 255);
-        wchar_t strText[256];
-        ConvertGold(AllRepairGold, strText);
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 362, I18N::Game::RepairAll);
-        g_pRenderText->SetTextColor(getGoldColor(AllRepairGold));
-        g_pRenderText->RenderText(m_Pos.x + 100, m_Pos.y + 362, strText);
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
     }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+
+    auto& model = m_RmlBinder.GetModel();
+    auto syncBool = [&](bool NPCShopRmlModel::* field, const char* boundName, bool value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncText = [&](Rml::String NPCShopRmlModel::* field, const char* boundName, const Rml::String& value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncWide = [&](Rml::String NPCShopRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        syncText(field, boundName, StringUtils::WideToNarrow(text));
+    };
+
+    syncWide(&NPCShopRmlModel::title, "title", I18N::Game::Merchant);
+
+    wchar_t taxRateBuf[256];
+    mu_swprintf(taxRateBuf, I18N::Game::TaxRateDChangedInRealTime, m_iTaxRate);
+    syncWide(&NPCShopRmlModel::taxRateText, "tax_rate_text", taxRateBuf);
+
+    syncBool(&NPCShopRmlModel::repairVisible, "repair_visible", m_bRepairShop);
+    syncWide(&NPCShopRmlModel::repairTooltip, "repair_tooltip", I18N::Game::RepairL);
+    syncWide(&NPCShopRmlModel::repairAllTooltip, "repair_all_tooltip", I18N::Game::RepairAllA);
+    syncWide(&NPCShopRmlModel::repairAllLabel, "repair_all_label", I18N::Game::RepairAll);
+
+    wchar_t goldBuf[256] = { 0, };
+    ConvertGold(AllRepairGold, goldBuf);
+    syncWide(&NPCShopRmlModel::repairGoldText, "repair_gold_text", goldBuf);
+
+    // getGoldColor() packs (A<<24)+(R<<16)+(G<<8)+B -- unpack into an rgba() CSS string.
+    const unsigned int goldArgb = getGoldColor(AllRepairGold);
+    char goldColorBuf[32];
+    snprintf(goldColorBuf, sizeof(goldColorBuf), "rgba(%u,%u,%u,%u)",
+        (goldArgb >> 16) & 0xFF, (goldArgb >> 8) & 0xFF, goldArgb & 0xFF, (goldArgb >> 24) & 0xFF);
+    syncText(&NPCShopRmlModel::repairGoldColor, "repair_gold_color", Rml::String(goldColorBuf));
 }
 
 float mu::ui::window::CNPCShop::GetLayerDepth()
 {
     return 4.55;
-}
-
-void mu::ui::window::CNPCShop::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_NPCSHOP_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_NPCSHOP_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_NPCSHOP_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_repair_00.tga", IMAGE_NPCSHOP_BTN_REPAIR, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_money2.tga", IMAGE_NPCSHOP_REPAIR_MONEY, GL_LINEAR);
-}
-
-void mu::ui::window::CNPCShop::UnloadImages()
-{
-    DeleteBitmap(IMAGE_NPCSHOP_BACK);
-    DeleteBitmap(IMAGE_NPCSHOP_TOP);
-    DeleteBitmap(IMAGE_NPCSHOP_LEFT);
-    DeleteBitmap(IMAGE_NPCSHOP_LEFT);
-    DeleteBitmap(IMAGE_NPCSHOP_BOTTOM);
-    DeleteBitmap(IMAGE_NPCSHOP_BTN_REPAIR);
-    DeleteBitmap(IMAGE_NPCSHOP_REPAIR_MONEY);
 }
 
 void mu::ui::window::CNPCShop::SetTaxRate(int iTaxRate)
@@ -375,26 +424,11 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
 
 bool mu::ui::window::CNPCShop::BtnProcess()
 {
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // Top-right corner close "X" (shared frame): hides + swallows the click. The Repair/Repair-All
+    // buttons are handled by RmlUi's data-event-click (see Create()).
     if (m_bSellingItem == false && g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_NPCSHOP))
     {
         return true;
-    }
-
-    if (m_bRepairShop)
-    {
-        if (m_BtnRepair.UpdateMouseEvent() == true)
-        {
-            ToggleState();
-
-            return true;
-        }
-        if (m_BtnRepairAll.UpdateMouseEvent() == true)
-        {
-            SocketClient->ToGameServer()->SendRepairItemRequest(0xFF, 0);
-
-            return true;
-        }
     }
 
     return false;
@@ -436,17 +470,6 @@ void mu::ui::window::CNPCShop::ClosingProcess()
 
     GambleSystem::Instance().SetGambleShop(false);
     m_bSellingItem = false;
-}
-
-void mu::ui::window::CNPCShop::SetButtonInfo()
-{
-    m_BtnRepair.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
-    m_BtnRepair.ChangeButtonInfo(m_Pos.x + 54, m_Pos.y + 390, 36, 29);
-    m_BtnRepair.ChangeToolTipText(&I18N::Game::RepairL, true);
-
-    m_BtnRepairAll.ChangeButtonImgState(true, IMAGE_NPCSHOP_BTN_REPAIR, false);
-    m_BtnRepairAll.ChangeButtonInfo(m_Pos.x + 98, m_Pos.y + 390, 36, 29);
-    m_BtnRepairAll.ChangeToolTipText(&I18N::Game::RepairAllA, true);
 }
 
 void mu::ui::window::CNPCShop::SetRepairShop(bool bRepair)

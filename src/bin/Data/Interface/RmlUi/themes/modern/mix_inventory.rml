@@ -1,0 +1,31 @@
+<rml>
+<head>
+	<title>Mix Inventory</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="mix_inventory.rcss"/>
+</head>
+<body data-model="mix_inventory">
+	<!-- Window frame/title/Mix button only -- the inventory grid, socket list box, and the large
+	     native recipe/tax-rate/success-rate description panel (RenderMixDescriptions() and the
+	     dynamic text RenderFrame() still draws directly) all stay fully native (MixInventory.h).
+	     Background lives in mix_inventory_bg.rml instead, since it must paint behind the native
+	     3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- Same header composition as MyInventory/StorageExt (base.rcss's .modern-header-rail
+		     family, -px variant since #panel carries transform:scale(root_scale)). -->
+		<div class="modern-header-rail-px mix-header-rail">
+			<div class="modern-joint-px"></div>
+			<div class="modern-header-text-px">
+				<div id="title" class="modern-header-title-px">{{title}}</div>
+			</div>
+		</div>
+
+		<div id="btn_mix" class="modern-icon-btn-px mix-btn-mix" data-class-hidden="!mix_visible"
+		     data-class-locked="mix_locked" data-event-click="mix_inventory_mix_click">
+			<span class="modern-icon-btn-glyph-px">&#8644;</span>
+		</div>
+		<span class="tooltip tooltip-mix">{{mix_tooltip}}</span>
+	</div>
+</body>
+</rml>

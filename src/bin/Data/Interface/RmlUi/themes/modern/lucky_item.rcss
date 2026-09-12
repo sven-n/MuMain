@@ -1,0 +1,60 @@
+/* Modern theme for CLuckyItemWnd's chrome -- header/mix-button are vector forged-metal chrome
+   (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Inventory grid and the
+   dynamic result/description text block stay fully native, same as legacy -- no RmlUi involvement
+   there. Unlike every other window in this family, #panel's width/height are runtime-variable
+   (root_width/root_height), not a fixed px value -- see lucky_item.rml. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	font-family: "token(font-body)";
+}
+
+/* base.rcss's .modern-header-rail-px default (top:7/height:38) is used UNCHANGED here -- every
+   sibling window in this family (MyInventory top:7/height:36, StorageExt top:6/height:29) had to
+   trim the rail down from that default because their native grid's y-offset budget (44px, 36px)
+   was smaller than or close to the default rail's own footprint (45px). This window's budget is
+   `m_Pos.y + 110` (LuckyItemWnd.cpp) -- far larger than any sibling's -- so the default rail
+   already fits comfortably above the grid with no trim needed; stretching it to fill the full
+   110px budget would look like an oversized slab, not the slim title rail every other window in
+   this family uses. This class exists only so the fit rationale is documented per-window, same as
+   every sibling's own override. */
+.lucky-header-rail {
+	top: 7px;
+	height: 38px;
+}
+
+/* Centered via left:50%/negative margin-left (half of .modern-icon-btn-px's own 37px width) rather
+   than width-dependent centering math, so it stays centered regardless of #panel's runtime width.
+   top:380px matches the native `m_ptPos.y + 380` offset exactly (LuckyItemWnd.cpp), a fixed
+   distance from the panel's TOP, not scaled with height. */
+.lucky-btn-mix {
+	top: 380px;
+	left: 50%;
+	margin-left: -18.5px;
+	color: #d59b79;
+	border-color: #5c382b;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-mix {
+	top: 364px;
+	left: 50%;
+	width: 120px;
+	margin-left: -60px;
+	text-align: center;
+}
+#btn_mix:hover ~ .tooltip-mix { display: block; }

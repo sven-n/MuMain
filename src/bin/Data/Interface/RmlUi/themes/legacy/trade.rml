@@ -1,0 +1,54 @@
+<rml>
+<head>
+	<title>Trade</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="trade.rcss"/>
+</head>
+<body data-model="trade">
+	<!-- Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/divider/
+	     buttons only -- both CInventoryCtrl grids stay native (Trade.h). Background lives in
+	     trade_bg.rml instead, since it must paint behind the native 3D icons. The guild-mark emblem
+	     (RenderGuildMark()) and the cursor-following warning arrow (RenderWarningArrow()) also stay
+	     native -- both are live-rendered/live-tracking effects, not static chrome. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<div id="your_nick_bg" class="nick-bg nick-bg-your"></div>
+		<span id="your_guild_name" class="guild-name" data-class-hidden="!your_guild_visible">{{your_guild_name}}</span>
+		<span id="your_id_text" class="id-text id-text-your">{{your_id_text}}</span>
+		<span id="your_level_text" class="level-text" data-style-color="your_level_color">{{your_level_text}}</span>
+
+		<div id="your_gold_bg" class="gold-bg gold-bg-your"></div>
+		<span id="your_gold_text" class="gold-text gold-text-your" data-style-color="your_gold_color">{{your_gold_text}}</span>
+
+		<div id="your_confirm" class="checkbox-row confirm-your" data-class-checked="your_confirm_checked">
+			<div class="checkbox-box"></div>
+		</div>
+
+		<div id="divider"></div>
+
+		<div id="my_nick_bg" class="nick-bg nick-bg-my"></div>
+		<span id="my_id_text" class="id-text id-text-my">{{my_id_text}}</span>
+
+		<div id="my_gold_bg" class="gold-bg gold-bg-my"></div>
+		<span id="my_gold_text" class="gold-text gold-text-my" data-style-color="my_gold_color">{{my_gold_text}}</span>
+
+		<div id="my_confirm" class="checkbox-row confirm-my" data-class-checked="my_confirm_checked"
+		     data-class-waiting="my_confirm_waiting" data-event-click="trade_my_confirm_click">
+			<div class="checkbox-box"></div>
+		</div>
+
+		<div id="btn_exit" class="trade-btn trade-btn-exit" data-event-click="trade_exit_click"></div>
+		<span class="tooltip tooltip-exit">{{close_tooltip}}</span>
+
+		<div id="btn_zen" class="trade-btn trade-btn-zen" data-event-click="trade_zen_click"></div>
+		<span class="tooltip tooltip-zen">{{zen_tooltip}}</span>
+
+		<span id="warning_label" class="warning-label" data-style-opacity="warning_opacity">{{warning_label}}</span>
+		<span id="notice_line1" class="notice-line notice-line1">{{notice_line1}}</span>
+		<span id="notice_line2" class="notice-line notice-line2">{{notice_line2}}</span>
+		<span id="notice_line3" class="notice-line notice-line3">{{notice_line3}}</span>
+	</div>
+</body>
+</rml>

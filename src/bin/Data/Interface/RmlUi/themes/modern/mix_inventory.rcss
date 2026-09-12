@@ -1,0 +1,53 @@
+/* Modern theme for CMixInventory's chrome -- header/Mix button are vector forged-metal chrome
+   (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Inventory grid, socket
+   list box, and the large native recipe/tax-rate/success-rate text block
+   (RenderFrame()/RenderMixDescriptions()) all stay fully native, same as legacy -- no RmlUi
+   involvement there. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* Same top/height as MyInventory's own .inv-header-rail -- this window's frame art is the SAME
+   asset (newui_item_back04.tga, see mix_inventory_bg.rcss's comment), just with a much larger
+   native content budget below it: the grid doesn't start until `m_Pos.y + 110`
+   (MixInventory.cpp's CInventoryCtrl::Create() call), well past this rail's 43px bottom edge --
+   the 44-110px gap is the still-native recipe/tax-rate text block (RenderFrame()), not RmlUi's to
+   claim. */
+.mix-header-rail {
+	top: 7px;
+	height: 36px;
+}
+
+/* Single Mix button, centered: (190-37)/2, same family default size as every other
+   CInventoryCtrl-owning window's icon buttons (base.rcss's .modern-icon-btn-px comment) -- not a
+   pixel match for the native 44x35 sprite, same convention as StorageExt/MyInventory's own
+   buttons. */
+.mix-btn-mix {
+	left: 77px;
+	color: #d59b79;
+	border-color: #5c382b;
+}
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	left: 40px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_mix:hover ~ .tooltip-mix { display: block; }

@@ -6,9 +6,11 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
-#include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include <span>
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
@@ -17,12 +19,10 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            IMAGE_NPCSHOP_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_NPCSHOP_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,
-            IMAGE_NPCSHOP_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_NPCSHOP_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_NPCSHOP_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_NPCSHOP_BTN_REPAIR = CMyInventory::IMAGE_INVENTORY_REPAIR_BTN,
+            // Kept solely because CastleWindow.h's IMAGE_CASTLEWINDOW_MONEY and NPCQuest.h's
+            // IMAGE_NPCQUEST_ZEN alias this numeric bitmap slot for their own (still-native,
+            // unrelated) LoadBitmap() calls -- not used by this window's own rendering anymore,
+            // now that its money strip is RmlUi (see NPCShopRmlModel).
             IMAGE_NPCSHOP_REPAIR_MONEY = BITMAP_INTERFACE_NEW_NPCSHOP_BEGIN,
         };
 
@@ -50,12 +50,47 @@ namespace mu::ui::window
         bool m_bRepairShop;
         bool m_bIsNPCShopOpen;
 
-        CButton m_BtnRepair;
-        CButton m_BtnRepairAll;
-
         DWORD m_dwStandbyItemKey;
 
         bool m_bSellingItem;
+
+        // Window frame/title/tax-rate line/repair buttons/repair-money strip are RmlUi; the
+        // inventory grid stays native since its icons are live 3D model renders (same reasoning
+        // as CMyInventory/CStorageInventoryExt). This window has no dedicated native exit button --
+        // its corner-close "X" is the generic frame-corner hit-test (BtnProcess()'s
+        // HandleFrameCornerClose() call), left untouched by this migration.
+        struct NPCShopRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            Rml::String title;
+            Rml::String taxRateText;
+
+            bool repairVisible = false;
+            Rml::String repairTooltip;
+            Rml::String repairAllTooltip;
+
+            // Repair-money strip: wallet-style like CMyInventory's gold strip, but showing
+            // AllRepairGold (the cost to repair everything) instead of the character's own gold.
+            Rml::String repairAllLabel;
+            Rml::String repairGoldText;
+            Rml::String repairGoldColor; // "rgba(r,g,b,a)" -- mirrors getGoldColor()'s amount-tier color
+        };
+        RmlModelBinder<NPCShopRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
+        // main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
+        // CMyInventory's identical MyInventoryBgRmlModel for the full mechanism).
+        struct NPCShopBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<NPCShopBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
 
     public:
         CNPCShop();
@@ -100,19 +135,10 @@ namespace mu::ui::window
 
     private:
         void Init();
-        void SetButtonInfo();
-
-        void LoadImages();
-        void UnloadImages();
 
         bool InventoryProcess();
         bool BtnProcess();
         bool WindowProcess();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButton();
-        void RenderRepairMoney();
     };
 }
 

@@ -724,6 +724,195 @@ body {
 	box-shadow: inset 0 0 0 2dp #0c0d0b;
 }
 
+/* ============================================================================
+   Header-rail family -- px companions for root_scale-driven windows
+   ----------------------------------------------------------------------------
+   RmlUi's `dp` unit is multiplied by the CONTEXT's density-independent-pixel
+   ratio (Source/Core/ComputeProperty.cpp: `case Unit::DP: return value.number *
+   dp_ratio;`), which RmlUiRuntime.cpp's ApplyUIScale() sets once per context
+   from UIScalePercent x ViewportFitScale(). `px` is never touched by that
+   ratio. That's the right (and only) scaling mechanism for a STATIC dialog
+   like Login/SysMenu, whose entire panel is authored in `dp` with no other
+   scaling involved.
+
+   A MOVABLE window synced to a native/legacy-positioned counterpart (e.g.
+   MyInventory, tracking the native paperdoll) instead scales its whole #panel
+   via a CSS `transform: scale(root_scale)`, where root_scale comes from
+   UI::Scaling::GetActiveTransform() -- a completely different number from the
+   context's dp_ratio. Since `transform: scale()` scales its entire subtree
+   regardless of each descendant's own units, a `dp` length in such a panel
+   gets BOTH factors compounded (dp_ratio at layout, then root_scale again via
+   the transform) while a `px` length only gets root_scale -- so the two units
+   drift apart and a borrowed `dp` primitive renders at the wrong size
+   relative to that window's own `px`-based geometry.
+
+   These are the same primitives as their `dp` counterparts above --
+   same property values, same token() color/gradient references (still fully
+   shared: a tokens.ini palette edit repaints both variants) -- with every
+   length re-expressed in `px` instead. Use these (never the `dp` originals)
+   inside any window whose #panel carries a `transform: scale(root_scale)`;
+   use the `dp` originals everywhere else. Keep both variants' property lists
+   identical when editing one. */
+/* Box only -- NOT painted here. This context renders dead last in the frame, after native
+   Render3D(), so a painted rail would cover any 3D item that overflows its cell upward; the real
+   fill/border/shadow/accent live in each window's own `*_bg.rcss` as `.rail-fill`/`.rail-accent`
+   instead. This box just gives `.modern-header-text-px`'s `top:50%` a rect to resolve against. */
+.modern-header-rail-px {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 7px;
+	height: 38px;
+	pointer-events: none;
+}
+.modern-header-text-px {
+	position: absolute;
+	left: 11px;
+	top: 50%;
+	margin-top: -7px;
+	pointer-events: none;
+}
+.modern-header-eyebrow-px {
+	font-size: 7px;
+	color: #67675f;
+	font-family: "token(font-body)";
+}
+.modern-header-title-px {
+	color: token(text-warm);
+	font-family: "token(font-title)";
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0.2px;
+	font-effect: shadow(0px 1px #000000);
+}
+.modern-joint-px {
+	position: absolute;
+	left: 50%;
+	top: -8px;
+	width: 13px;
+	height: 13px;
+	margin-left: -6.5px;
+	pointer-events: none;
+	background-color: token(metal-groove);
+	border-width: 1px;
+	border-color: #484638;
+	transform: rotate(45deg);
+	box-shadow: inset 0 0 0 2px #0c0d0b;
+}
+
+/* ============================================================================
+   Inventory-family window chrome -- px companions
+   ----------------------------------------------------------------------------
+   Generalized from my_inventory.rcss's .inv-btn/.inv-wallet family (first
+   consumer: CMyInventory) for reuse by every other CInventoryCtrl-owning
+   window (Trade, Storage, Storage Ext, Mix, NPC Shop, My/Purchase Shop,
+   Inventory Extension, Lucky Item) -- they all show the same 37x26
+   corner-button chrome and, except Storage Ext, the same gold-amount strip.
+   `px` for the same reason as the header-rail family above: every one of
+   these windows scales via its own `transform: scale(root_scale)`, not the
+   RmlUi context's dp ratio.
+
+   Position (left/top/width where given) is this family's own established
+   default (CMyInventory's already-tuned values) -- override per-window only
+   when that window's own layout genuinely differs, same convention as
+   .modern-header-rail-px's top/height override in my_inventory.rcss. */
+.modern-icon-btn-px {
+	position: absolute;
+	top: 392px;
+	width: 37px;
+	height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	text-align: center;
+	line-height: 26px;
+	color: token(text-secondary);
+	background-color: #13140f;
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 11), transparent 40%),
+		linear-gradient(to bottom, #26251d, #15160f 56%, #090a08);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		0 2px 5px rgba(0, 0, 0, 133),
+		inset 0 1px 0 rgba(232, 215, 168, 18),
+		inset 0 -1px 0 #000000;
+}
+.modern-icon-btn-px:hover {
+	color: token(accent-gold-hover);
+	border-color: token(border-hover);
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 15), transparent 40%),
+		linear-gradient(to bottom, #302b1f, #18160f 56%, #0c0c09);
+}
+.modern-icon-btn-px.hidden { display: none; }
+.modern-icon-btn-px.locked { pointer-events: none; filter: brightness(0.6); }
+.modern-icon-btn-glyph-px {
+	color: inherit;
+	font-weight: bold;
+	font-family: "DejaVu Sans";
+	pointer-events: none;
+}
+
+/* Vector wallet bar (forged-metal strip + coin glyph + label), replacing every legacy money-bar
+   sprite in this family. Default geometry matches CMyInventory's own 15/366/160/20 -- override
+   left/top/width per-window if that window's layout doesn't share Inventory's 15-175px column. */
+.modern-wallet-px {
+	position: absolute;
+	left: 15px;
+	top: 366px;
+	width: 160px;
+	height: 20px;
+	pointer-events: none;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 9), transparent 34%),
+		linear-gradient(to bottom, #15160f, #090a08);
+	border: 1px token(border-rail);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 12),
+		inset 0 -1px 0 #000000;
+}
+.modern-wallet-coin-px {
+	position: absolute;
+	left: 8px;
+	top: 50%;
+	width: 12px;
+	height: 8px;
+	margin-top: -4px;
+	border: 1px #8f6922;
+	border-radius: 4px;
+	background-color: #8f6922;
+	decorator: linear-gradient(to bottom, #d3aa4e, #8f6922);
+}
+.modern-wallet-label-px {
+	position: absolute;
+	left: 26px;
+	top: 50%;
+	margin-top: -4px;
+	font-size: 7px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #77766f;
+	font-family: "token(font-body)";
+}
+/* Sibling of .modern-wallet-px, not nested in it -- same reasoning as my_inventory.rcss's
+   original #gold_text (an independent absolutely-positioned element reads its own right-aligned
+   value more simply than a child squeezed into the wallet bar's own box). */
+.modern-wallet-value-px {
+	position: absolute;
+	right: 18px;
+	top: 371px;
+	width: 110px;
+	text-align: right;
+	color: token(text-warm);
+	font-weight: 500;
+	font-size: 10px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+
 /* Recessed control cavity. background is flat (no decorator); depth comes primarily from the
    inset box-shadow. */
 .modern-control-well {

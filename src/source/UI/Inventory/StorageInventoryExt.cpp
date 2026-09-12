@@ -11,6 +11,15 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "UI/Inventory/MyInventory.h"
+
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -51,10 +60,51 @@ bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
     }
 
     SetPos(x, y);
-    LoadImages();
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
     SetItemAutoMove(false);
+
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "storage_ext",
+            [this](Rml::DataModelConstructor& c, StorageExtRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+                c.Bind("title", &model.title);
+                c.Bind("exit_tooltip", &model.exitTooltip);
+
+                c.BindEventCallback("storage_ext_exit_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        g_pNewUISystem->Hide(INTERFACE_STORAGE_EXT);
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/storage_ext.rml");
+
+        // Frame background panel uses the background context -- see StorageExtBgRmlModel (StorageInventoryExt.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "storage_ext_bg",
+                [](Rml::DataModelConstructor& c, StorageExtBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/storage_ext_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
 
     Show(false);
 
@@ -63,8 +113,6 @@ bool CStorageInventoryExt::Create(CManager* pNewUIMng, int x, int y)
 
 void CStorageInventoryExt::Release()
 {
-    UnloadImages();
-
     SAFE_DELETE(m_pNewInventoryCtrl);
 
     if (m_pNewUIMng)
@@ -78,19 +126,12 @@ void CStorageInventoryExt::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
 }
 
 bool CStorageInventoryExt::UpdateMouseEvent()
 {
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->UpdateMouseEvent())
         return false;
-
-    if (m_BtnExit.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Hide(INTERFACE_STORAGE_EXT);
-        return false;
-    }
 
     ProcessInventoryCtrl();
 
@@ -135,6 +176,7 @@ bool CStorageInventoryExt::Update()
     if (m_pNewInventoryCtrl && false == m_pNewInventoryCtrl->Update())
         return false;
 
+    SyncRmlModel();
     return true;
 }
 
@@ -142,37 +184,46 @@ bool CStorageInventoryExt::Render()
 {
     EnableAlphaTest();
 
-    RenderBackImage();
-    RenderText();
+    // Frame background panel is RmlUi, routed through the background context (see
+    // StorageExtBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->Render();
     }
 
-    m_BtnExit.Render();
-
     DisableAlphaBlend();
 
     return true;
 }
 
-void CStorageInventoryExt::RenderBackImage() const
+void CStorageInventoryExt::SyncRmlModel()
 {
-    const auto x = static_cast<float>(m_Pos.x);
-    const auto y = static_cast<float>(m_Pos.y);
-    RenderImage(IMAGE_STORAGE_BACK, x, y, STORAGE_WIDTH, STORAGE_HEIGHT);
-    RenderImage(IMAGE_STORAGE_TOP, x, y, STORAGE_WIDTH, 64.f);
-    RenderImage(IMAGE_STORAGE_LEFT, x, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_STORAGE_RIGHT, x + STORAGE_WIDTH - 21, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_STORAGE_BOTTOM, x, y + STORAGE_HEIGHT - 45, STORAGE_WIDTH, 45.f);
-}
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
-void CStorageInventoryExt::RenderText() const
-{
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 11, I18N::Game::ExpandedVault, STORAGE_WIDTH, 0, RT3_SORT_CENTER);
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+
+    auto& model = m_RmlBinder.GetModel();
+    auto syncWide = [&](Rml::String StorageExtRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+
+    syncWide(&StorageExtRmlModel::title, "title", I18N::Game::ExpandedVault);
+    syncWide(&StorageExtRmlModel::exitTooltip, "exit_tooltip", I18N::Game::Close388);
 }
 
 float CStorageInventoryExt::GetLayerDepth()
@@ -183,26 +234,6 @@ float CStorageInventoryExt::GetLayerDepth()
 CInventoryCtrl* CStorageInventoryExt::GetInventoryCtrl() const
 {
     return m_pNewInventoryCtrl;
-}
-
-void CStorageInventoryExt::LoadImages() const
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_STORAGE_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_STORAGE_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_STORAGE_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_STORAGE_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_STORAGE_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
-}
-
-void CStorageInventoryExt::UnloadImages()
-{
-    DeleteBitmap(IMAGE_INVENTORY_EXIT_BTN);
-    DeleteBitmap(IMAGE_STORAGE_BOTTOM);
-    DeleteBitmap(IMAGE_STORAGE_RIGHT);
-    DeleteBitmap(IMAGE_STORAGE_LEFT);
-    DeleteBitmap(IMAGE_STORAGE_TOP);
-    DeleteBitmap(IMAGE_STORAGE_BACK);
 }
 
 bool CStorageInventoryExt::ProcessClosing() const

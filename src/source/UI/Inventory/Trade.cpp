@@ -10,6 +10,14 @@
 #include "GameLogic/Items/CComGem.h"
 #include "Audio/DSPlaySound.h"
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -54,19 +62,105 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    m_abtn[BTN_CLOSE].ChangeButtonImgState(true, IMAGE_TRADE_BTN_CLOSE);
-    m_abtn[BTN_CLOSE].ChangeButtonInfo(x + 13, y + 390, 36, 29);
-    m_abtn[BTN_CLOSE].ChangeToolTipText(&I18N::Game::Close388, true);
-
-    m_abtn[BTN_ZEN_INPUT].ChangeButtonImgState(true, IMAGE_TRADE_BTN_ZEN_INPUT);
-    m_abtn[BTN_ZEN_INPUT].ChangeButtonInfo(x + 104, y + 390, 36, 29);
-    m_abtn[BTN_ZEN_INPUT].ChangeToolTipText(&I18N::Game::ZenTrade, true);
-
     ::memset(m_szYourID, 0, MAX_USERNAME_SIZE + 1);
     m_bTradeAlert = false;
 
     InitTradeInfo();
     InitYourInvenBackUp();
+
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "trade",
+            [this](Rml::DataModelConstructor& c, TradeRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("title", &model.title);
+
+                c.Bind("your_id_text", &model.yourIdText);
+                c.Bind("your_guild_visible", &model.yourGuildVisible);
+                c.Bind("your_guild_name", &model.yourGuildName);
+                c.Bind("your_level_text", &model.yourLevelText);
+                c.Bind("your_level_color", &model.yourLevelColor);
+                c.Bind("your_gold_text", &model.yourGoldText);
+                c.Bind("your_gold_color", &model.yourGoldColor);
+                c.Bind("your_confirm_checked", &model.yourConfirmChecked);
+
+                c.Bind("my_id_text", &model.myIdText);
+                c.Bind("my_gold_text", &model.myGoldText);
+                c.Bind("my_gold_color", &model.myGoldColor);
+                c.Bind("my_confirm_checked", &model.myConfirmChecked);
+                c.Bind("my_confirm_waiting", &model.myConfirmWaiting);
+
+                c.Bind("warning_label", &model.warningLabel);
+                c.Bind("notice_line1", &model.noticeLine1);
+                c.Bind("notice_line2", &model.noticeLine2);
+                c.Bind("notice_line3", &model.noticeLine3);
+                c.Bind("warning_opacity", &model.warningOpacity);
+
+                c.Bind("close_tooltip", &model.closeTooltip);
+                c.Bind("zen_tooltip", &model.zenTooltip);
+
+                c.BindEventCallback("trade_exit_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        ::PlayBuffer(SOUND_CLICK01);
+                        ProcessCloseBtn();
+                    });
+                c.BindEventCallback("trade_zen_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        mu::ui::window::CreateMessageBox(
+                            MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeZenMsgBoxLayout));
+                        ::PlayBuffer(SOUND_CLICK01);
+                    });
+                c.BindEventCallback("trade_my_confirm_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        if (m_nMyTradeWait > 0 || CInventoryCtrl::GetPickedItem() != NULL)
+                            return;
+
+                        ::PlayBuffer(SOUND_CLICK01);
+
+                        if (m_bTradeAlert && !m_bMyConfirm)
+                        {
+                            mu::ui::window::CreateMessageBox(
+                                MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeAlertMsgBoxLayout));
+                        }
+                        else
+                        {
+                            AlertTrade();
+                        }
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/trade.rml");
+
+        // Frame background panel uses the background context -- see TradeBgRmlModel (Trade.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "trade_bg",
+                [](Rml::DataModelConstructor& c, TradeBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/trade_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
 
     Show(false);
 
@@ -104,15 +198,18 @@ void CTrade::Release()
 
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->DeleteUI2DEffectObject(UI2DEffectCallback);
+
+    // Hide explicitly -- Release() has no other way to hide these once created.
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
 }
 
 void CTrade::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-
-    m_posMyConfirm.x = m_Pos.x + 144;
-    m_posMyConfirm.y = m_Pos.y + 390;
 }
 
 bool CTrade::UpdateMouseEvent()
@@ -177,6 +274,7 @@ bool CTrade::Update()
         || (m_pMyInvenCtrl && false == m_pMyInvenCtrl->Update()))
         return false;
 
+    SyncRmlModel();
     return true;
 }
 
@@ -184,16 +282,17 @@ bool CTrade::Render()
 {
     ::EnableAlphaTest();
 
-    RenderBackImage();
-    RenderText();
+    // Frame background panel is RmlUi, routed through the background context (see
+    // TradeBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
+
+    RenderGuildMark();
 
     if (m_pYourInvenCtrl)
         m_pYourInvenCtrl->Render();
     if (m_pMyInvenCtrl)
         m_pMyInvenCtrl->Render();
-
-    for (int i = BTN_CLOSE; i < MAX_BTN; ++i)
-        m_abtn[i].Render();
 
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->RenderUI2DEffect(INVENTORY_CAMERA_Z_ORDER,
@@ -213,97 +312,23 @@ void CTrade::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwParamB)
     }
 }
 
-void CTrade::RenderBackImage()
+// Dynamically-generated guild-emblem bitmap (::CreateGuildMark() builds it fresh from the guild's
+// live mark data) -- a live render like the paperdoll/inventory item icons, not static chrome, so
+// it stays native. The guild NAME text next to it moved to RmlUi (see SyncRmlModel()'s
+// your_guild_name/your_guild_visible); the two don't overlap (name sits above the icon), so mixing
+// a native icon with an RmlUi label here is safe, same as MyInventory mixing its native paperdoll
+// with RmlUi frame text at the same m_Pos-relative coordinates.
+void CTrade::RenderGuildMark()
 {
-    RenderImage(IMAGE_TRADE_BACK,
-        m_Pos.x, m_Pos.y, float(TRADE_WIDTH), float(TRADE_HEIGHT));
-    RenderImage(IMAGE_TRADE_TOP,
-        m_Pos.x, m_Pos.y, float(TRADE_WIDTH), 64.f);
-    RenderImage(IMAGE_TRADE_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_TRADE_RIGHT,
-        m_Pos.x + TRADE_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_TRADE_BOTTOM,
-        m_Pos.x, m_Pos.y + TRADE_HEIGHT - 45, float(TRADE_WIDTH), 45.f);
-
-    RenderImage(IMAGE_TRADE_LINE, m_Pos.x + 1, m_Pos.y + 220, 188.f, 21.f);
-    RenderImage(IMAGE_TRADE_NICK_BACK, m_Pos.x + 11, m_Pos.y + 37, 171.f, 26.f);
-    RenderImage(IMAGE_TRADE_MONEY, m_Pos.x + 11, m_Pos.y + 150, 170.f, 26.f);
-    RenderImage(IMAGE_TRADE_NICK_BACK, m_Pos.x + 11, m_Pos.y + 243, 171.f, 26.f);
-    RenderImage(IMAGE_TRADE_MONEY, m_Pos.x + 11, m_Pos.y + 356, 170.f, 26.f);
-
-    float fSrcY = m_bYourConfirm ? 29.f : 0.f;
-    RenderImage(IMAGE_TRADE_CONFIRM, m_Pos.x + 146, m_Pos.y + 186, CONFIRM_WIDTH, CONFIRM_HEIGHT, 0.f, fSrcY);
-
-    DWORD dwColor = m_nMyTradeWait > 0
-        ? RGBA(255, 0, 0, 255) : RGBA(255, 255, 255, 255);
-    fSrcY = m_bMyConfirm ? 29.f : 0.f;
-    RenderImage(IMAGE_TRADE_CONFIRM, m_Pos.x + 144, m_Pos.y + 390, CONFIRM_WIDTH, CONFIRM_HEIGHT, 0.f, fSrcY, dwColor);
-}
-
-void CTrade::RenderText()
-{
-    wchar_t szTemp[128];
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-
-    g_pRenderText->SetTextColor(216, 216, 216, 255);
-    g_pRenderText->RenderText(
-        m_Pos.x, m_Pos.y + 11, I18N::Game::Trade, TRADE_WIDTH, 0, RT3_SORT_CENTER);
-
     for (int i = 0; i < MAX_MARKS; ++i)
     {
         if (GuildMark[i].Key != -1 && GuildMark[i].Key == m_nYourGuildType)
         {
             ::CreateGuildMark(i, false);
             ::RenderBitmap(BITMAP_GUILD, (float)m_Pos.x + 15, (float)m_Pos.y + 42, 16, 16);
-            g_pRenderText->RenderText(m_Pos.x + 16, m_Pos.y + 30, GuildMark[i].GuildName);
             break;
         }
     }
-
-    g_pRenderText->SetFont(g_hFontBig);
-
-    g_pRenderText->SetTextColor(210, 230, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 32, m_Pos.y + 43, m_szYourID);
-
-    g_pRenderText->SetFont(g_hFontBold);
-
-    int nLevel;
-    DWORD dwColor;
-    ConvertYourLevel(nLevel, dwColor);
-    if (nLevel == 400)
-    {
-        mu_swprintf(szTemp, L"%d", nLevel);
-    }
-    else
-    {
-        mu_swprintf(szTemp, I18N::Game::AboutD, nLevel);
-    }
-    g_pRenderText->SetTextColor(dwColor);
-    g_pRenderText->RenderText(m_Pos.x + 134, m_Pos.y + 48, L"Lv.");
-    g_pRenderText->RenderText(m_Pos.x + 148, m_Pos.y + 48, szTemp);
-
-    ::ConvertGold(m_nYourTradeGold, szTemp);
-    g_pRenderText->SetTextColor(::getGoldColor(m_nYourTradeGold));
-    g_pRenderText->RenderText(
-        m_Pos.x + 170, m_Pos.y + 150 + 8, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-
-    ::ConvertGold(m_nMyTradeGold, szTemp);
-    g_pRenderText->SetTextColor(::getGoldColor(m_nMyTradeGold));
-    g_pRenderText->RenderText(
-        m_Pos.x + 170, m_Pos.y + 356 + 8, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
-
-    g_pRenderText->SetTextColor(210, 230, 255, 255);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 253, Hero->ID);
-
-    int nAlpha = int(std::min<int>(255, sin(WorldTime / 200) * 200 + 275));
-    g_pRenderText->SetTextColor(210, 0, 0, nAlpha);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 185, I18N::Game::Warning);
-    g_pRenderText->SetTextColor(255, 220, 150, 255);
-    g_pRenderText->RenderText(m_Pos.x + 45, m_Pos.y + 185, I18N::Game::NoticePleaseCheckOut);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 200, I18N::Game::TheLevelOfThePlayer);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + 215, I18N::Game::AndTheItemsBeforeTrading);
 }
 
 void CTrade::RenderWarningArrow()
@@ -378,6 +403,103 @@ void CTrade::ConvertYourLevel(int& rnLevel, DWORD& rdwColor)
     }
 }
 
+void CTrade::SyncRmlModel()
+{
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+
+    auto syncBool = [this](bool TradeRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncFloat = [this](float TradeRmlModel::* field, const char* boundName, float value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncText = [this](Rml::String TradeRmlModel::* field, const char* boundName, const Rml::String& value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncWide = [&](Rml::String TradeRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        syncText(field, boundName, StringUtils::WideToNarrow(text));
+    };
+    auto argbToRgba = [](DWORD argb) -> Rml::String
+    {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "rgba(%u,%u,%u,%u)",
+            (argb >> 16) & 0xFF, (argb >> 8) & 0xFF, argb & 0xFF, (argb >> 24) & 0xFF);
+        return Rml::String(buf);
+    };
+
+    syncWide(&TradeRmlModel::title, "title", I18N::Game::Trade);
+
+    syncWide(&TradeRmlModel::yourIdText, "your_id_text", m_szYourID);
+
+    Rml::String guildName;
+    for (int i = 0; i < MAX_MARKS; ++i)
+    {
+        if (GuildMark[i].Key != -1 && GuildMark[i].Key == m_nYourGuildType)
+        {
+            guildName = StringUtils::WideToNarrow(GuildMark[i].GuildName);
+            break;
+        }
+    }
+    syncBool(&TradeRmlModel::yourGuildVisible, "your_guild_visible", !guildName.empty());
+    syncText(&TradeRmlModel::yourGuildName, "your_guild_name", guildName);
+
+    int nLevel;
+    DWORD dwLevelColor;
+    ConvertYourLevel(nLevel, dwLevelColor);
+    wchar_t levelValueBuf[128];
+    if (nLevel == 400)
+        mu_swprintf(levelValueBuf, L"%d", nLevel);
+    else
+        mu_swprintf(levelValueBuf, I18N::Game::AboutD, nLevel);
+    wchar_t levelBuf[160];
+    mu_swprintf(levelBuf, L"Lv.%ls", levelValueBuf);
+    syncWide(&TradeRmlModel::yourLevelText, "your_level_text", levelBuf);
+    syncText(&TradeRmlModel::yourLevelColor, "your_level_color", argbToRgba(dwLevelColor));
+
+    wchar_t goldBuf[256];
+    ::ConvertGold(m_nYourTradeGold, goldBuf);
+    syncWide(&TradeRmlModel::yourGoldText, "your_gold_text", goldBuf);
+    syncText(&TradeRmlModel::yourGoldColor, "your_gold_color", argbToRgba(::getGoldColor(m_nYourTradeGold)));
+
+    ::ConvertGold(m_nMyTradeGold, goldBuf);
+    syncWide(&TradeRmlModel::myGoldText, "my_gold_text", goldBuf);
+    syncText(&TradeRmlModel::myGoldColor, "my_gold_color", argbToRgba(::getGoldColor(m_nMyTradeGold)));
+
+    syncWide(&TradeRmlModel::myIdText, "my_id_text", Hero->ID);
+
+    syncBool(&TradeRmlModel::yourConfirmChecked, "your_confirm_checked", m_bYourConfirm);
+    syncBool(&TradeRmlModel::myConfirmChecked, "my_confirm_checked", m_bMyConfirm);
+    syncBool(&TradeRmlModel::myConfirmWaiting, "my_confirm_waiting", m_nMyTradeWait > 0);
+
+    syncWide(&TradeRmlModel::warningLabel, "warning_label", I18N::Game::Warning);
+    syncWide(&TradeRmlModel::noticeLine1, "notice_line1", I18N::Game::NoticePleaseCheckOut);
+    syncWide(&TradeRmlModel::noticeLine2, "notice_line2", I18N::Game::TheLevelOfThePlayer);
+    syncWide(&TradeRmlModel::noticeLine3, "notice_line3", I18N::Game::AndTheItemsBeforeTrading);
+
+    // Mirrors the former sin(WorldTime)-based alpha pulse on the "Warning" word.
+    const int nAlpha = int(std::min<int>(255, sin(WorldTime / 200) * 200 + 275));
+    syncFloat(&TradeRmlModel::warningOpacity, "warning_opacity", nAlpha / 255.f);
+
+    syncWide(&TradeRmlModel::closeTooltip, "close_tooltip", I18N::Game::Close388);
+    syncWide(&TradeRmlModel::zenTooltip, "zen_tooltip", I18N::Game::ZenTrade);
+}
+
 float CTrade::GetLayerDepth()
 {
     return 2.1f;
@@ -385,34 +507,12 @@ float CTrade::GetLayerDepth()
 
 void CTrade::LoadImages()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_TRADE_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_TRADE_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_TRADE_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_TRADE_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_TRADE_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_myquest_Line.tga", IMAGE_TRADE_LINE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Account_title.tga", IMAGE_TRADE_NICK_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_money.tga", IMAGE_TRADE_MONEY, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_accept.tga", IMAGE_TRADE_CONFIRM, GL_LINEAR);
     LoadBitmap(L"Interface\\CursorSitDown.tga", IMAGE_TRADE_WARNING_ARROW, GL_LINEAR, GL_CLAMP);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_TRADE_BTN_CLOSE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_money01.tga", IMAGE_TRADE_BTN_ZEN_INPUT, GL_LINEAR);
 }
 
 void CTrade::UnloadImages()
 {
-    DeleteBitmap(IMAGE_TRADE_BTN_ZEN_INPUT);
-    DeleteBitmap(IMAGE_TRADE_BTN_CLOSE);
     DeleteBitmap(IMAGE_TRADE_WARNING_ARROW);
-    DeleteBitmap(IMAGE_TRADE_CONFIRM);
-    DeleteBitmap(IMAGE_TRADE_MONEY);
-    DeleteBitmap(IMAGE_TRADE_NICK_BACK);
-    DeleteBitmap(IMAGE_TRADE_LINE);
-    DeleteBitmap(IMAGE_TRADE_BOTTOM);
-    DeleteBitmap(IMAGE_TRADE_RIGHT);
-    DeleteBitmap(IMAGE_TRADE_LEFT);
-    DeleteBitmap(IMAGE_TRADE_TOP);
-    DeleteBitmap(IMAGE_TRADE_BACK);
 }
 
 void CTrade::ProcessClosing()
@@ -526,43 +626,15 @@ bool CTrade::ProcessBtns()
     if (m_nMyTradeWait > 0)
         --m_nMyTradeWait;
 
-    if (m_abtn[BTN_CLOSE].UpdateMouseEvent())
-    {
-        ::PlayBuffer(SOUND_CLICK01);
-        ProcessCloseBtn();
-        return true;
-    }
-    else if (mu::ui::window::IsPress(VK_LBUTTON)
+    // Top-right corner close "X" baked into the frame art: hides + swallows the click. Same
+    // hit-box g_pNewUISystem->HandleFrameCornerClose() uses elsewhere (WindowSystem.cpp), kept
+    // inline here rather than refactored, matching this window's pre-existing shape -- the real
+    // Close/Zen-input buttons are now handled by RmlUi's data-event-click (see Create()).
+    if (mu::ui::window::IsPress(VK_LBUTTON)
         && CheckMouseIn(m_Pos.x + 169, m_Pos.y + 7, 13, 12))
     {
         ::PlayBuffer(SOUND_CLICK01);
         ProcessCloseBtn();
-        return true;
-    }
-    else if (m_abtn[BTN_ZEN_INPUT].UpdateMouseEvent())
-    {
-        mu::ui::window::CreateMessageBox(
-            MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeZenMsgBoxLayout));
-        ::PlayBuffer(SOUND_CLICK01);
-        return true;
-    }
-    else if (mu::ui::window::IsRelease(VK_LBUTTON)
-        && CheckMouseIn(m_posMyConfirm.x, m_posMyConfirm.y, CONFIRM_WIDTH, CONFIRM_HEIGHT))
-    {
-        if (0 == m_nMyTradeWait && CInventoryCtrl::GetPickedItem() == NULL)
-        {
-            ::PlayBuffer(SOUND_CLICK01);
-
-            if (m_bTradeAlert && !m_bMyConfirm)
-            {
-                mu::ui::window::CreateMessageBox(
-                    MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeAlertMsgBoxLayout));
-            }
-            else
-            {
-                AlertTrade();
-            }
-        }
         return true;
     }
 

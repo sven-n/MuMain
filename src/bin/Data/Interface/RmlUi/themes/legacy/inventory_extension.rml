@@ -1,0 +1,26 @@
+<rml>
+<head>
+	<title>Inventory Extension</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="inventory_extension.rcss"/>
+</head>
+<body data-model="inventory_extension">
+	<!-- Window frame/title/exit button only -- extension grids stay native
+	     (InventoryExtension.h). Background lives in inventory_extension_bg.rml instead, since it
+	     must paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<div id="btn_exit" class="ext-btn" data-event-click="inventory_extension_exit_click"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+
+		<!-- Locked (not-yet-purchased) pages' numbered lock glyph -- flat decorative overlay,
+		     no live 3D content underneath. Table/empty-slot backing art behind this stays native
+		     (InventoryExtension.cpp's RenderFrame()). -->
+		<div class="ext-locked-page" data-for="page : locked_pages" data-style-top="page.top + 'px'">
+			<div class="ext-locked-icon" data-style-decorator="page.decorator"></div>
+		</div>
+	</div>
+</body>
+</rml>

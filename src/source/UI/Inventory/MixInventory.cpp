@@ -17,6 +17,13 @@
 #include "Audio/DSPlaySound.h"
 #include "Network/Server/SocketSystem.h"
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -49,17 +56,59 @@ bool CMixInventory::Create(CManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    POINT ptBtn = {
-        static_cast<LONG>(m_Pos.x + INVENTORY_WIDTH * 0.5f - 22.f),
-        static_cast<LONG>(m_Pos.y + 380),
-    };
-
-    m_BtnMix.ChangeButtonImgState(true, IMAGE_MIXINVENTORY_MIXBTN, false);
-    m_BtnMix.ChangeButtonInfo(m_Pos.x + INVENTORY_WIDTH * 0.5f - 22.f, m_Pos.y + 380, 44.f, 35.f);
-    m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true);
-
     m_pNewInventoryCtrl->GetSquareColorNormal(m_fInventoryColor);
     m_pNewInventoryCtrl->GetSquareColorWarning(m_fInventoryWarningColor);
+
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "mix_inventory",
+            [this](Rml::DataModelConstructor& c, MixInventoryRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+                c.Bind("title", &model.title);
+                c.Bind("mix_visible", &model.mixVisible);
+                c.Bind("mix_locked", &model.mixLocked);
+                c.Bind("mix_tooltip", &model.mixTooltip);
+
+                c.BindEventCallback("mix_inventory_mix_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        // Mirrors the old BtnProcess()'s MIX_FINISHED gate (native button was
+                        // simply not rendered/updated in that state; the RmlUi button is hidden
+                        // via mix_visible for the same reason, this is defense in depth).
+                        if (GetMixState() == MIX_FINISHED)
+                            return;
+                        Mix();
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/mix_inventory.rml");
+
+        // Frame background panel uses the background context -- see MixInventoryBgRmlModel (MixInventory.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "mix_inventory_bg",
+                [](Rml::DataModelConstructor& c, MixInventoryBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/mix_inventory_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
 
     Show(false);
 
@@ -89,14 +138,14 @@ void CMixInventory::SetMixState(int iMixState)
         m_iMixEffectTimer = 50;
         m_pNewInventoryCtrl->LockInventory();
         g_pMyInventory->GetInventoryCtrl()->LockInventory();
-        m_BtnMix.Lock();
     }
     else
     {
         m_pNewInventoryCtrl->UnlockInventory();
         g_pMyInventory->GetInventoryCtrl()->UnlockInventory();
-        m_BtnMix.UnLock();
     }
+    // Mix button's locked look (mix_locked) is refreshed from SyncRmlModel() each Update(), same
+    // as it reads GetMixState() -- no need to push it from here too.
 }
 
 bool CMixInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -262,11 +311,17 @@ bool CMixInventory::Update()
         }
     }
 
+    SyncRmlModel();
     return true;
 }
 bool CMixInventory::Render()
 {
     EnableAlphaTest();
+
+    // Frame background panel is RmlUi, routed through the background context (see
+    // MixInventoryBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     RenderFrame();
 
@@ -279,6 +334,80 @@ bool CMixInventory::Render()
     DisableAlphaBlend();
 
     return true;
+}
+
+void CMixInventory::SyncRmlModel()
+{
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
+
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+
+    auto& model = m_RmlBinder.GetModel();
+    auto syncWide = [&](Rml::String MixInventoryRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncBool = [&](bool MixInventoryRmlModel::* field, const char* boundName, bool value)
+    {
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+
+    // Mirrors RenderFrame()'s own title switch (kept there for its fLine_y layout side effect on
+    // the still-native recipe/tax-rate text laid out below it) -- same cases, same strings, just
+    // without the native RenderText() call, which is now this RmlUi title span.
+    const wchar_t* titleText = I18N::Game::Chaos;
+    switch (g_MixRecipeMgr.GetMixInventoryType())
+    {
+    case SEASON3A::MIXTYPE_GOBLIN_NORMAL:    titleText = I18N::Game::RegularCombination; break;
+    case SEASON3A::MIXTYPE_GOBLIN_CHAOSITEM: titleText = I18N::Game::ChaosWeaponCombination; break;
+    case SEASON3A::MIXTYPE_GOBLIN_ADD380:    titleText = I18N::Game::ItemOptionCombination; break;
+    case SEASON3A::MIXTYPE_CASTLE_SENIOR:    titleText = I18N::Game::Store1640; break;
+    case SEASON3A::MIXTYPE_TRAINER:          titleText = I18N::Game::ResurrectSpirit; break;
+    case SEASON3A::MIXTYPE_OSBOURNE:         titleText = I18N::Game::Refine; break;
+    case SEASON3A::MIXTYPE_JERRIDON:         titleText = I18N::Game::Restore; break;
+    case SEASON3A::MIXTYPE_ELPIS:            titleText = I18N::Game::Refine; break;
+    case SEASON3A::MIXTYPE_CHAOS_CARD:       titleText = I18N::Game::ChaosCardCombination; break;
+    case SEASON3A::MIXTYPE_CHERRYBLOSSOM:    titleText = I18N::Game::SpiritOfCherryBlossoms; break;
+    case SEASON3A::MIXTYPE_EXTRACT_SEED:     titleText = I18N::Game::Extraction; break;
+    case SEASON3A::MIXTYPE_SEED_SPHERE:      titleText = I18N::Game::Assembly; break;
+    case SEASON3A::MIXTYPE_ATTACH_SOCKET:    titleText = I18N::Game::Application; break;
+    case SEASON3A::MIXTYPE_DETACH_SOCKET:    titleText = I18N::Game::Destruction; break;
+    default:                                 titleText = I18N::Game::Chaos; break;
+    }
+    syncWide(&MixInventoryRmlModel::title, "title", titleText);
+
+    // Mirrors RenderFrame()'s former end-of-function tooltip switch (m_BtnMix.ChangeToolTipText()
+    // per mix type) -- same cases, same strings, now driving the RmlUi Mix button's tooltip span.
+    const wchar_t* tooltipText = I18N::Game::Combining;
+    switch (g_MixRecipeMgr.GetMixInventoryType())
+    {
+    case SEASON3A::MIXTYPE_TRAINER:       tooltipText = I18N::Game::Resurrection; break;
+    case SEASON3A::MIXTYPE_OSBOURNE:      tooltipText = I18N::Game::Refine; break;
+    case SEASON3A::MIXTYPE_JERRIDON:      tooltipText = I18N::Game::Restore; break;
+    case SEASON3A::MIXTYPE_ELPIS:         tooltipText = I18N::Game::Refine; break;
+    case SEASON3A::MIXTYPE_EXTRACT_SEED:  tooltipText = I18N::Game::Extraction; break;
+    case SEASON3A::MIXTYPE_SEED_SPHERE:   tooltipText = I18N::Game::Assembly; break;
+    case SEASON3A::MIXTYPE_ATTACH_SOCKET: tooltipText = I18N::Game::Application; break;
+    case SEASON3A::MIXTYPE_DETACH_SOCKET: tooltipText = I18N::Game::Destruction; break;
+    default:                              tooltipText = I18N::Game::Combining; break;
+    }
+    syncWide(&MixInventoryRmlModel::mixTooltip, "mix_tooltip", tooltipText);
+
+    // Mirrors RenderFrame()'s former early-return-at-MIX_FINISHED (which stopped the button from
+    // rendering at all) and SetMixState()'s former m_BtnMix.Lock()/UnLock() calls.
+    syncBool(&MixInventoryRmlModel::mixVisible, "mix_visible", GetMixState() != MIX_FINISHED);
+    syncBool(&MixInventoryRmlModel::mixLocked, "mix_locked", GetMixState() == MIX_REQUESTED);
 }
 
 float CMixInventory::GetLayerDepth()
@@ -302,13 +431,8 @@ void CMixInventory::UI2DEffectCallback(LPVOID pClass, DWORD dwParamA, DWORD dwPa
 
 void CMixInventory::LoadImages()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MIXINVENTORY_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_MIXINVENTORY_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_MIXINVENTORY_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_MIXINVENTORY_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_MIXINVENTORY_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_bt_mix.tga", IMAGE_MIXINVENTORY_MIXBTN, GL_LINEAR);
-
+    // Frame/top/sides/bottom + Mix button sprites are RmlUi now (mix_inventory[_bg].rcss);
+    // these scrollbar images remain for m_SocketListBox, which stays fully native.
     LoadBitmap(L"Interface\\newui_scrollbar_up.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
     LoadBitmap(L"Interface\\newui_scrollbar_m.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
     LoadBitmap(L"Interface\\newui_scrollbar_down.tga", CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
@@ -317,13 +441,6 @@ void CMixInventory::LoadImages()
 }
 void CMixInventory::UnloadImages()
 {
-    DeleteBitmap(IMAGE_MIXINVENTORY_BOTTOM);
-    DeleteBitmap(IMAGE_MIXINVENTORY_RIGHT);
-    DeleteBitmap(IMAGE_MIXINVENTORY_LEFT);
-    DeleteBitmap(IMAGE_MIXINVENTORY_TOP);
-    DeleteBitmap(IMAGE_MIXINVENTORY_BACK);
-    DeleteBitmap(IMAGE_MIXINVENTORY_MIXBTN);
-
     DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_TOP);
     DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_MIDDLE);
     DeleteBitmap(CGuardWindow::IMAGE_GUARDWINDOW_SCROLL_BOTTOM);
@@ -333,11 +450,10 @@ void CMixInventory::UnloadImages()
 
 void CMixInventory::RenderFrame()
 {
-    RenderImage(IMAGE_MIXINVENTORY_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_MIXINVENTORY_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_MIXINVENTORY_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_MIXINVENTORY_RIGHT, m_Pos.x + INVENTORY_WIDTH - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_MIXINVENTORY_BOTTOM, m_Pos.x, m_Pos.y + INVENTORY_HEIGHT - 45, 190.f, 45.f);
+    // Frame sprites (back/top/left/right/bottom) are RmlUi now -- see mix_inventory_bg.rcss.
+    // Everything below (recipe name/tax-rate/success-rate/prediction text) stays native and
+    // untouched; only the title's own RenderText() call (a few lines down) was removed since that
+    // text now renders via the RmlUi title span synced in SyncRmlModel().
 
     wchar_t szText[256] = { 0, };
     float fPos_x = m_Pos.x + 15.0f, fPos_y = m_Pos.y;
@@ -406,7 +522,9 @@ void CMixInventory::RenderFrame()
         mu_swprintf(szText, L"%ls", I18N::Game::Chaos);
         break;
     }
-    g_pRenderText->RenderText(fPos_x, fPos_y + fLine_y, szText, 160.0f, 0, RT3_SORT_CENTER);
+    // Title text itself now renders via RmlUi (SyncRmlModel() mirrors this same switch for the
+    // string); the switch stays here because fLine_y's per-case adjustment still governs the
+    // still-native text laid out below.
 
     fLine_y += 12;
     switch (g_MixRecipeMgr.GetMixInventoryType())
@@ -614,54 +732,14 @@ void CMixInventory::RenderFrame()
 
     RenderMixDescriptions(fPos_x, fPos_y);
 
-    switch (g_MixRecipeMgr.GetMixInventoryType())
-    {
-    case SEASON3A::MIXTYPE_TRAINER:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Resurrection, true);
-        break;
-    case SEASON3A::MIXTYPE_OSBOURNE:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true);
-        break;
-    case SEASON3A::MIXTYPE_JERRIDON:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Restore, true);
-        break;
-    case SEASON3A::MIXTYPE_ELPIS:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Refine, true);
-        break;
-    case SEASON3A::MIXTYPE_EXTRACT_SEED:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Extraction, true);
-        break;
-    case SEASON3A::MIXTYPE_SEED_SPHERE:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Assembly, true);
-        break;
-    case SEASON3A::MIXTYPE_ATTACH_SOCKET:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Application, true);
-        break;
-    case SEASON3A::MIXTYPE_DETACH_SOCKET:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Destruction, true);
-        break;
-    default:
-        m_BtnMix.ChangeToolTipText(&I18N::Game::Combining, true);
-        break;
-    }
-    m_BtnMix.Render();
+    // Mix button's tooltip (formerly a per-mix-type m_BtnMix.ChangeToolTipText() switch here) is
+    // now mirrored in SyncRmlModel() and rendered by the RmlUi Mix button instead.
 }
 
 bool CMixInventory::BtnProcess()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    if (GetMixState() == MIX_FINISHED)
-    {
-        return false;
-    }
-
-    if (m_BtnMix.UpdateMouseEvent() == true)
-    {
-        Mix();
-        return true;
-    }
 
     return false;
 }

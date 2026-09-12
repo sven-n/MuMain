@@ -5,6 +5,14 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
+
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
@@ -57,7 +65,63 @@ bool CInventoryExtension::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
     LoadImages();
-    SetButtonInfo();
+
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "inventory_extension",
+            [this](Rml::DataModelConstructor& c, InventoryExtensionRmlModel& model)
+            {
+                static bool s_typesRegistered = false;
+                if (!s_typesRegistered)
+                {
+                    auto lockedPage = c.RegisterStruct<LockedExtPageEntry>();
+                    lockedPage.RegisterMember("top", &LockedExtPageEntry::top);
+                    lockedPage.RegisterMember("number", &LockedExtPageEntry::number);
+                    lockedPage.RegisterMember("decorator", &LockedExtPageEntry::decorator);
+                    c.RegisterArray<std::vector<LockedExtPageEntry>>();
+                    s_typesRegistered = true;
+                }
+
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+                c.Bind("title", &model.title);
+                c.Bind("exit_tooltip", &model.exitTooltip);
+                c.Bind("locked_pages", &model.lockedPages);
+
+                c.BindEventCallback("inventory_extension_exit_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        g_pNewUISystem->Hide(INTERFACE_INVENTORY_EXT);
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/inventory_extension.rml");
+
+        // Frame background panel uses the background context -- see InventoryExtensionBgRmlModel (InventoryExtension.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "inventory_extension_bg",
+                [](Rml::DataModelConstructor& c, InventoryExtensionBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/inventory_extension_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
+
     Show(false);
 
     return true;
@@ -86,7 +150,6 @@ void CInventoryExtension::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
 }
 
 bool CInventoryExtension::UpdateMouseEvent()
@@ -109,12 +172,6 @@ bool CInventoryExtension::UpdateMouseEvent()
                 return false;
             }
         }
-    }
-
-    if (m_BtnExit.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Hide(INTERFACE_INVENTORY_EXT);
-        return false;
     }
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, WIDTH, HEIGHT).Contains(MouseX, MouseY))
@@ -177,14 +234,20 @@ bool CInventoryExtension::Update()
         }
     }
 
+    SyncRmlModel();
     return true;
 }
 
 bool CInventoryExtension::Render()
 {
     EnableAlphaTest();
+
+    // Frame background panel is RmlUi, routed through the background context (see
+    // InventoryExtensionBgRmlModel). The behind-3D-icons ordering is enforced by
+    // RenderBackgroundLayer() running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
+
     RenderFrame();
-    RenderTexts();
 
     for (int i = 0; i < CharacterAttribute->InventoryExtensions; i++)
     {
@@ -193,8 +256,6 @@ bool CInventoryExtension::Render()
             m_extension->Render();
         }
     }
-
-    m_BtnExit.Render();
 
     DisableAlphaBlend();
     return true;
@@ -205,27 +266,57 @@ void CInventoryExtension::RenderFrame() const
     const auto x = static_cast<float>(m_Pos.x);
     const auto y = static_cast<float>(m_Pos.y);
 
-    RenderImage(IMAGE_NPCSHOP_BACK, x, y, WIDTH, HEIGHT);
-    RenderImage(IMAGE_NPCSHOP_TOP, x, y, WIDTH, 64.f);
-    RenderImage(IMAGE_NPCSHOP_LEFT, x, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_NPCSHOP_RIGHT, x + WIDTH - 21, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_NPCSHOP_BOTTOM, x, y + 429 - 45, WIDTH, 45.f);
-
+    // Locked (not-yet-purchased) pages' table/empty-slot backing art only -- the outer frame and
+    // the numbered lock glyph on top of it moved to RmlUi (see this class's header comment).
     for (int i = MAX_INVENTORY_EXT_COUNT - 1; i >= CharacterAttribute->InventoryExtensions; --i)
     {
         RenderImage(IMAGE_EXTENSION_TABLE, x + 11, y + 42 + i * HEIGHT_PER_EXT, 173, HEIGHT_PER_EXT);
         RenderImage(IMAGE_EXTENSION_EMPTY, x + 15, y + 45 + i * HEIGHT_PER_EXT, 161, HEIGHT_PER_EXT - (EXT_BORDER * 2));
-        RenderImage(static_cast<GLuint>(IMAGE_EXTENSION_NO1 + i), x + 85, y + 71 + i * HEIGHT_PER_EXT, 25, 28);
     }
 }
 
-void CInventoryExtension::RenderTexts() const
+void CInventoryExtension::SyncRmlModel()
 {
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(220, 220, 220, 255);
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, I18N::Game::ExpandedInventory, WIDTH, 0, RT3_SORT_CENTER);
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
+
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
+
+    auto& model = m_RmlBinder.GetModel();
+    auto syncWide = [&](Rml::String InventoryExtensionRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+
+    syncWide(&InventoryExtensionRmlModel::title, "title", I18N::Game::ExpandedInventory);
+    syncWide(&InventoryExtensionRmlModel::exitTooltip, "exit_tooltip", I18N::Game::Close388);
+
+    // Locked-page lock glyph list -- rebuilt unconditionally every call, same "rebuild every
+    // frame" convention as CBuffStrip's buff list (list is tiny: at most MAX_INVENTORY_EXT_COUNT
+    // entries). Reflects CharacterAttribute->InventoryExtensions, the purchased-page count.
+    model.lockedPages.clear();
+    for (int i = 0; i < MAX_INVENTORY_EXT_COUNT; ++i)
+    {
+        if (i < CharacterAttribute->InventoryExtensions)
+            continue;
+
+        LockedExtPageEntry entry;
+        entry.top = 71.f + static_cast<float>(i) * HEIGHT_PER_EXT;
+        entry.number = i + 1;
+        entry.decorator = Rml::String("image(ext-lock-") + static_cast<char>('0' + entry.number) + ")";
+        model.lockedPages.push_back(entry);
+    }
+    m_RmlBinder.MarkDirty("locked_pages");
 }
 
 float CInventoryExtension::GetLayerDepth()
@@ -233,42 +324,19 @@ float CInventoryExtension::GetLayerDepth()
     return 4.55;
 }
 
-void CInventoryExtension::SetButtonInfo()
-{
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::Close388, true);
-}
-
 void CInventoryExtension::LoadImages()
 {
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_NPCSHOP_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_NPCSHOP_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_NPCSHOP_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_NPCSHOP_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_NPCSHOP_BOTTOM, GL_LINEAR);
-
+    // Frame/exit-button art moved to RmlUi (inventory_extension.rcss/inventory_extension_bg.rcss).
+    // Numbered lock glyphs moved to RmlUi too -- only the locked page's table/empty-slot backing
+    // art stays native (see this class's header comment).
     LoadBitmap(L"Interface\\newui_item_add_marking_non.jpg", IMAGE_EXTENSION_EMPTY, GL_LINEAR);
     LoadBitmap(L"Interface\\newui_item_add_table.tga", IMAGE_EXTENSION_TABLE, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_add_marking_no01.tga", IMAGE_EXTENSION_NO1, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_add_marking_no02.tga", IMAGE_EXTENSION_NO2, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_add_marking_no03.tga", IMAGE_EXTENSION_NO3, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_add_marking_no04.tga", IMAGE_EXTENSION_NO4, GL_LINEAR);
 }
 
 void CInventoryExtension::UnloadImages()
 {
-    DeleteBitmap(IMAGE_NPCSHOP_BACK);
-    DeleteBitmap(IMAGE_NPCSHOP_TOP);
-    DeleteBitmap(IMAGE_NPCSHOP_LEFT);
-    DeleteBitmap(IMAGE_NPCSHOP_LEFT);
-    DeleteBitmap(IMAGE_NPCSHOP_BOTTOM);
-
     DeleteBitmap(IMAGE_EXTENSION_EMPTY);
     DeleteBitmap(IMAGE_EXTENSION_TABLE);
-    DeleteBitmap(IMAGE_EXTENSION_NO1);
-    DeleteBitmap(IMAGE_EXTENSION_NO2);
-    DeleteBitmap(IMAGE_EXTENSION_NO3);
-    DeleteBitmap(IMAGE_EXTENSION_NO4);
 }
 
 CInventoryCtrl* CInventoryExtension::TryGetExtensionByInventoryIndex(int iIndex) const

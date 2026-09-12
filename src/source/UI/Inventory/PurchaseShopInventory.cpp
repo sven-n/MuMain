@@ -4,27 +4,17 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Inventory/MyInventory.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 
-namespace
-{
-    void RenderText(const wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort, HFONT hFont = g_hFont)
-    {
-        g_pRenderText->SetFont(hFont);
-
-        DWORD backuptextcolor = g_pRenderText->GetTextColor();
-        DWORD backuptextbackcolor = g_pRenderText->GetBgColor();
-
-        g_pRenderText->SetTextColor(color);
-        g_pRenderText->SetBgColor(backcolor);
-        g_pRenderText->RenderText(x, y, text, sx, sy, sort);
-
-        g_pRenderText->SetTextColor(backuptextcolor);
-        g_pRenderText->SetBgColor(backuptextbackcolor);
-    }
-};
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -45,8 +35,6 @@ bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, 
     if (NULL == pNewUIMng || NULL == g_pNewUI3DRenderMng || NULL == g_pNewItemMng)
         return false;
 
-    LoadImages();
-
     SetPos(x, y);
 
     m_pNewUIMng = pNewUIMng;
@@ -62,9 +50,58 @@ bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, 
     m_pNewInventoryCtrl->SetToolTipType(TOOLTIP_TYPE_PURCHASE_SHOP);
     m_pNewInventoryCtrl->LockInventory();
 
-    m_Button = new CButton;
-    m_Button->ChangeButtonImgState(true, IMAGE_INVENTORY_EXIT_BTN, false);
-    m_Button->ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 391, 36, 29);
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "purchase_shop",
+            [this](Rml::DataModelConstructor& c, PurchaseShopRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("title", &model.title);
+                c.Bind("shop_owner_text", &model.shopOwnerText);
+                c.Bind("warning_label", &model.warningLabel);
+                c.Bind("selling_price_line", &model.sellingPriceLine);
+                c.Bind("verify_line", &model.verifyLine);
+                c.Bind("already_in_store_line", &model.alreadyInStoreLine);
+                c.Bind("cancel_purchased_line", &model.cancelPurchasedLine);
+                c.Bind("cant_be_returned_line", &model.cantBeReturnedLine);
+                c.Bind("all_item_trading_line", &model.allItemTradingLine);
+                c.Bind("zen_only_line", &model.zenOnlyLine);
+
+                c.BindEventCallback("purchase_shop_exit_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/purchase_shop.rml");
+
+        // Frame background panel uses the background context -- see PurchaseShopBgRmlModel (PurchaseShopInventory.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "purchase_shop_bg",
+                [](Rml::DataModelConstructor& c, PurchaseShopBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/purchase_shop_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
 
     Show(false);
 
@@ -73,8 +110,6 @@ bool mu::ui::window::CPurchaseShopInventory::Create(CManager* pNewUIMng, int x, 
 
 void mu::ui::window::CPurchaseShopInventory::Release()
 {
-    SAFE_DELETE(m_Button);
-
     SAFE_DELETE(m_pNewInventoryCtrl);
 
     if (m_pNewUIMng)
@@ -82,8 +117,6 @@ void mu::ui::window::CPurchaseShopInventory::Release()
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
     }
-
-    UnloadImages();
 }
 
 bool mu::ui::window::CPurchaseShopInventory::InsertItem(int iIndex, std::span<const BYTE> pbyItemPacket)
@@ -129,28 +162,6 @@ int mu::ui::window::CPurchaseShopInventory::GetItemInventoryIndex(ITEM* pItem)
     return -1;
 }
 
-void mu::ui::window::CPurchaseShopInventory::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_MSGBOX_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_INVENTORY_BACK_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_INVENTORY_BACK_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_INVENTORY_BACK_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_INVENTORY_BACK_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_INVENTORY_EXIT_BTN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Box_openTitle.tga", IMAGE_MYSHOPINVENTORY_EDIT, GL_LINEAR);
-}
-
-void mu::ui::window::CPurchaseShopInventory::UnloadImages()
-{
-    DeleteBitmap(IMAGE_MYSHOPINVENTORY_EDIT);
-    DeleteBitmap(IMAGE_INVENTORY_EXIT_BTN);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_BOTTOM);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_RIGHT);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_LEFT);
-    DeleteBitmap(IMAGE_INVENTORY_BACK_TOP);
-    DeleteBitmap(IMAGE_MSGBOX_BACK);
-}
-
 bool mu::ui::window::CPurchaseShopInventory::UpdateMouseEvent()
 {
     // Top-right corner close "X" (shared frame): hides + swallows the click.
@@ -158,12 +169,8 @@ bool mu::ui::window::CPurchaseShopInventory::UpdateMouseEvent()
     {
         return false;
     }
-    if (m_Button->UpdateMouseEvent())
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PURCHASESHOP_INVENTORY);
-        return false;
-    }
 
+    // The exit button is handled by RmlUi's data-event-click (see Create()).
     if (m_pNewInventoryCtrl)
     {
         if (false == m_pNewInventoryCtrl->UpdateMouseEvent())
@@ -228,72 +235,61 @@ bool mu::ui::window::CPurchaseShopInventory::Update()
     {
         return false;
     }
+
+    SyncRmlModel();
     return true;
 }
 
-void mu::ui::window::CPurchaseShopInventory::RenderFrame()
+void mu::ui::window::CPurchaseShopInventory::SyncRmlModel()
 {
-    RenderImage(IMAGE_MSGBOX_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_INVENTORY_BACK_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_INVENTORY_BACK_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_INVENTORY_BACK_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_INVENTORY_BACK_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
-    RenderImage(IMAGE_MYSHOPINVENTORY_EDIT, m_Pos.x + 12, m_Pos.y + 49, 169.f, 26.f);
-}
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
-void mu::ui::window::CPurchaseShopInventory::RenderTextInfo()
-{
-    RenderText(I18N::Game::PersonalStore, m_Pos.x, m_Pos.y + 15, 190, 0, 0xFF49B0FF, 0x00000000, RT3_SORT_CENTER);
-    RenderText(m_TitleText.c_str(), m_Pos.x, m_Pos.y + 58, 190, 0, RGBA(0, 255, 0, 255), 0x00000000, RT3_SORT_CENTER, g_hFontBold);
-    wchar_t Text[100];
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
 
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::Warning);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 230, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
 
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::SellingPriceWhenOpeningTheStore);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 250, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
 
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::PleaseVerify);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 262, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
+    auto& model = m_RmlBinder.GetModel();
+    auto syncWide = [&](Rml::String PurchaseShopRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        const Rml::String value = StringUtils::WideToNarrow(text);
+        if (model.*field != value) { model.*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
 
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::AlreadyInThePersonalStore);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 274, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
+    syncWide(&PurchaseShopRmlModel::title, "title", I18N::Game::PersonalStore);
+    // Dynamic: set per-shop-owner via ChangeTitleText() (see WSclient.cpp's shop-open packet handler).
+    syncWide(&PurchaseShopRmlModel::shopOwnerText, "shop_owner_text", m_TitleText.c_str());
 
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::CancelPurchasedItem);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 286, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::CanTBeReturned);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 298, 0, 0, RGBA(247, 206, 77, 255), 0x00000000, RT3_SORT_LEFT);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::AllItemTrading);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 320, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
-
-    memset(&Text, 0, sizeof(wchar_t) * 100);
-    mu_swprintf(Text, I18N::Game::CanOnlyBeDoneUsingZen);
-    RenderText(Text, m_Pos.x + 30, m_Pos.y + 332, 0, 0, RGBA(255, 45, 47, 255), 0x00000000, RT3_SORT_LEFT, g_hFontBold);
+    syncWide(&PurchaseShopRmlModel::warningLabel, "warning_label", I18N::Game::Warning);
+    syncWide(&PurchaseShopRmlModel::sellingPriceLine, "selling_price_line", I18N::Game::SellingPriceWhenOpeningTheStore);
+    syncWide(&PurchaseShopRmlModel::verifyLine, "verify_line", I18N::Game::PleaseVerify);
+    syncWide(&PurchaseShopRmlModel::alreadyInStoreLine, "already_in_store_line", I18N::Game::AlreadyInThePersonalStore);
+    syncWide(&PurchaseShopRmlModel::cancelPurchasedLine, "cancel_purchased_line", I18N::Game::CancelPurchasedItem);
+    syncWide(&PurchaseShopRmlModel::cantBeReturnedLine, "cant_be_returned_line", I18N::Game::CanTBeReturned);
+    syncWide(&PurchaseShopRmlModel::allItemTradingLine, "all_item_trading_line", I18N::Game::AllItemTrading);
+    syncWide(&PurchaseShopRmlModel::zenOnlyLine, "zen_only_line", I18N::Game::CanOnlyBeDoneUsingZen);
 }
 
 bool mu::ui::window::CPurchaseShopInventory::Render()
 {
     EnableAlphaTest();
 
-    RenderFrame();
-
-    RenderTextInfo();
+    // Frame background panel is RmlUi, routed through the background context (see
+    // PurchaseShopBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     if (m_pNewInventoryCtrl)
     {
         m_pNewInventoryCtrl->Render();
     }
-
-    m_Button->Render();
 
     DisableAlphaBlend();
 

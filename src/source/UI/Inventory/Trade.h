@@ -6,9 +6,11 @@
 #include "UI/Core/WindowObject.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Quests/MyQuestInfoWindow.h"
 #include "UI/Inventory/StorageInventory.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
@@ -17,20 +19,10 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            IMAGE_TRADE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_TRADE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_TRADE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_TRADE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_TRADE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-
-            IMAGE_TRADE_LINE = CMyQuestInfoWindow::IMAGE_MYQUEST_LINE,
-            IMAGE_TRADE_NICK_BACK = BITMAP_INTERFACE_NEW_TRADE_BEGIN,
-            IMAGE_TRADE_MONEY = CMyInventory::IMAGE_INVENTORY_MONEY,
-            IMAGE_TRADE_CONFIRM = BITMAP_INTERFACE_NEW_TRADE_BEGIN + 1,
+            // Cursor-following warning-arrow overlay only -- every other sprite this window used to
+            // draw natively (frame/nick-back/money/confirm/line/buttons) moved to RmlUi
+            // (trade.rml/trade_bg.rml); see RenderWarningArrow()/LoadImages().
             IMAGE_TRADE_WARNING_ARROW = BITMAP_CURSOR + 7,
-
-            IMAGE_TRADE_BTN_CLOSE = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_TRADE_BTN_ZEN_INPUT = CStorageInventory::IMAGE_STORAGE_BTN_INSERT_ZEN,
         };
 
     private:
@@ -38,24 +30,13 @@ namespace mu::ui::window
         {
             TRADE_WIDTH = 190,
             TRADE_HEIGHT = 429,
-            CONFIRM_WIDTH = 36,
-            CONFIRM_HEIGHT = 29,
             COLUMN_TRADE_INVEN = 8,
             ROW_TRADE_INVEN = 4,
             MAX_TRADE_INVEN = COLUMN_TRADE_INVEN * ROW_TRADE_INVEN,
         };
 
-        enum TRADE_BUTTON
-        {
-            BTN_CLOSE = 0,            // Close window
-            BTN_ZEN_INPUT,            // Zen input
-            MAX_BTN
-        };
-
         CManager* m_pNewUIMng;            // UI Manager
         POINT          m_Pos;                  // Window position
-        CButton   m_abtn[MAX_BTN];        // Buttons
-        POINT          m_posMyConfirm;         // My confirmation button position
         CInventoryCtrl* m_pYourInvenCtrl; // Other player's item control
         CInventoryCtrl* m_pMyInvenCtrl;   // My item control
         ITEM           m_aYourInvenBackUp[MAX_TRADE_INVEN]; // Other player's item backup
@@ -70,6 +51,58 @@ namespace mu::ui::window
         bool           m_bMyConfirm;           // My confirmation status
         int            m_nMyTradeWait;         // Delay to prevent spamming my confirm button
         bool           m_bTradeAlert;          // Trade warning alert
+
+        // Window frame/title/both nickname displays/both gold strips/both confirm checkboxes/
+        // divider/buttons are RmlUi. Both CInventoryCtrl grids stay native since their icons are
+        // live 3D model renders (same reasoning as CMyInventory/CStorageInventoryExt). The
+        // guild-mark emblem (RenderGuildMark()) and the cursor-following warning arrow
+        // (RenderWarningArrow()) also stay native -- both are live-rendered/live-tracking effects,
+        // not static chrome.
+        struct TradeRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            Rml::String title;
+
+            Rml::String yourIdText;
+            bool yourGuildVisible = false;
+            Rml::String yourGuildName;
+            Rml::String yourLevelText;
+            Rml::String yourLevelColor;
+            Rml::String yourGoldText;
+            Rml::String yourGoldColor;
+            bool yourConfirmChecked = false;
+
+            Rml::String myIdText;
+            Rml::String myGoldText;
+            Rml::String myGoldColor;
+            bool myConfirmChecked = false;
+            bool myConfirmWaiting = false;
+
+            Rml::String warningLabel;
+            Rml::String noticeLine1;
+            Rml::String noticeLine2;
+            Rml::String noticeLine3;
+            float warningOpacity = 1.f;
+
+            Rml::String closeTooltip;
+            Rml::String zenTooltip;
+        };
+        RmlModelBinder<TradeRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind both grids' live 3D icons, but RmlUi's
+        // main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see CMyInventory's
+        // identical MyInventoryBgRmlModel for the full mechanism).
+        struct TradeBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<TradeBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
 
     public:
         CTrade();
@@ -128,8 +161,7 @@ namespace mu::ui::window
         void LoadImages();
         void UnloadImages();
 
-        void RenderBackImage();
-        void RenderText();
+        void RenderGuildMark();
         void RenderWarningArrow();
 
         void ProcessMyInvenCtrl();

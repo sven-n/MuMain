@@ -2,6 +2,7 @@
 #include "RmlTheme.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Platform/WinIni.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
@@ -229,6 +230,18 @@ namespace UI::RmlBridge
             g_ErrorReport.Write(L"> [RmlTheme] Failed to load '%hs' as theme '%hs' (source url '%hs').\r\n",
                 documentPath, GetActiveThemeName().c_str(), sourceUrl.c_str());
 
+        return doc;
+    }
+
+    Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath)
+    {
+        Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext();
+        if (!bgContext)
+            return nullptr;
+
+        Rml::ElementDocument* doc = LoadThemedDocument(bgContext, documentPath);
+        if (doc)
+            doc->Show();
         return doc;
     }
 }

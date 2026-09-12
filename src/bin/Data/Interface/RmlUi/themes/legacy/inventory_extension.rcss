@@ -1,0 +1,77 @@
+/* Legacy theme for CInventoryExtension's chrome (frame/title/exit button). #panel's left/top/
+   scale come live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 12px;
+}
+
+@spritesheet ext-btn-exit-sheet { src: "../../../newui_exit_00.tga"; ext-btn-exit: 0px 0px 36px 29px; }
+.ext-btn {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(ext-btn-exit);
+}
+.ext-btn:hover { filter: brightness(1.25); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	left: -30px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+#btn_exit:hover ~ .tooltip-exit { display: block; }
+
+/* Locked-page numbered lock glyph -- one file per number (not a packed atlas), each sheet is the
+   whole 25x28 source image. `left`/`width`/`height` match RenderImage(IMAGE_EXTENSION_NO.., x+85,
+   ..., 25, 28) (InventoryExtension.cpp); `top` comes per-instance from C++ (page.top). */
+@spritesheet ext-lock-1-sheet { src: "../../../newui_item_add_marking_no01.tga"; ext-lock-1: 0px 0px 25px 28px; }
+@spritesheet ext-lock-2-sheet { src: "../../../newui_item_add_marking_no02.tga"; ext-lock-2: 0px 0px 25px 28px; }
+@spritesheet ext-lock-3-sheet { src: "../../../newui_item_add_marking_no03.tga"; ext-lock-3: 0px 0px 25px 28px; }
+@spritesheet ext-lock-4-sheet { src: "../../../newui_item_add_marking_no04.tga"; ext-lock-4: 0px 0px 25px 28px; }
+
+.ext-locked-page {
+	position: absolute;
+	left: 85px;
+	width: 25px;
+	height: 28px;
+	pointer-events: none;
+}
+.ext-locked-icon {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 25px;
+	height: 28px;
+	pointer-events: none;
+	/* decorator set per-instance via data-style-decorator (inventory_extension.rml). */
+}

@@ -1,4 +1,4 @@
-﻿//*****************************************************************************
+//*****************************************************************************
 // File: NewUIStorageInventory.cpp
 //*****************************************************************************
 
@@ -11,10 +11,19 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Engine/Object/ZzzInventory.h"
+#include "UI/Inventory/MyInventory.h"
 
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
 #include "GameShop/MsgBoxIGSCommon.h"
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
+
+// RmlUi migration -- see this class's header comment.
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlRootTransform.h"
+#include "UI/Scaling/UITransform.h"
+#include "Core/Utilities/StringUtils.h"
+#include <RmlUi/Core/ElementDocument.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -53,21 +62,87 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
 
     SetPos(x, y);
 
-    LoadImages();
-
-    constexpr int anToolTipText[MAX_BTN] = { 235, 236, 242 };
-    for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
-    {
-        m_abtn[i].ChangeButtonImgState(true, IMAGE_STORAGE_BTN_INSERT_ZEN + i);
-        m_abtn[i].ChangeToolTipText(I18N::Game::LookupSlot(anToolTipText[i]), true);
-    }
-
-    m_BtnExpand.ChangeButtonImgState(true, IMAGE_STORAGE_EXPAND_BTN, false);
-    m_BtnExpand.ChangeToolTipText(&I18N::Game::OpeningAnExpandedVaultH, true);
-
     m_bLock = false;
     SetItemAutoMove(false);
     InitBackupItemInfo();
+
+    // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
+    if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "storage",
+            [this](Rml::DataModelConstructor& c, StorageRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("title", &model.title);
+                c.Bind("title_locked", &model.titleLocked);
+
+                c.Bind("zen_text", &model.zenText);
+                c.Bind("zen_color", &model.zenColor);
+                c.Bind("fee_label", &model.feeLabel);
+                c.Bind("fee_value", &model.feeValue);
+
+                c.Bind("expand_visible", &model.expandVisible);
+                c.Bind("expand_tooltip", &model.expandTooltip);
+
+                c.Bind("storage_locked", &model.storageLocked);
+
+                c.Bind("insert_tooltip", &model.insertTooltip);
+                c.Bind("take_tooltip", &model.takeTooltip);
+                c.Bind("lock_tooltip", &model.lockTooltip);
+
+                c.BindEventCallback("storage_insert_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenReceiptMsgBoxLayout));
+                    });
+                c.BindEventCallback("storage_take_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenPaymentMsgBoxLayout));
+                    });
+                c.BindEventCallback("storage_lock_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        if (m_bLock)
+                            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageUnlockMsgBoxLayout));
+                        else
+                            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockKeyPadMsgBoxLayout));
+                    });
+                c.BindEventCallback("storage_expand_click",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
+                    {
+                        if (CharacterAttribute->IsVaultExtended > 0)
+                            g_pNewUISystem->Toggle(INTERFACE_STORAGE_EXT);
+                    });
+            });
+
+        if (modelCreated)
+            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/storage.rml");
+
+        // Frame background panel uses the background context -- see StorageBgRmlModel (StorageInventory.h).
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            const bool bgModelCreated = m_BgRmlBinder.Create(bgContext, "storage_bg",
+                [](Rml::DataModelConstructor& c, StorageBgRmlModel& model)
+                {
+                    c.Bind("root_x", &model.rootX);
+                    c.Bind("root_y", &model.rootY);
+                    c.Bind("root_scale", &model.rootScale);
+                });
+            if (bgModelCreated)
+            {
+                // Shown immediately (unlike m_pRmlDoc) -- Render() only runs while this window is
+                // visible, so there's no "wrong scene" case to guard against here.
+                m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/storage_bg.rml");
+            }
+        }
+
+        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+        // SyncRmlModel(), not an eager Show() at Create() time.
+    }
 
     Show(false);
 
@@ -76,8 +151,6 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
 
 void CStorageInventory::Release()
 {
-    UnloadImages();
-
     SAFE_DELETE(m_pNewInventoryCtrl);
 
     if (m_pNewUIMng)
@@ -95,15 +168,6 @@ void CStorageInventory::SetPos(int x, int y)
     {
         m_pNewInventoryCtrl->SetPos(x + 15, y + 36);
     }
-
-    constexpr int xOffsetPerButton = 37;
-    constexpr int xFirstButton = 13;
-    for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
-    {
-        m_abtn[i].ChangeButtonInfo(x + xFirstButton + i * xOffsetPerButton, y + 391, 36, 29);
-    }
-
-    m_BtnExpand.ChangeButtonInfo(x + xFirstButton + MAX_BTN * xOffsetPerButton, y + 391, 36, 29);
 }
 
 bool CStorageInventory::UpdateMouseEvent()
@@ -160,86 +224,101 @@ bool CStorageInventory::UpdateKeyEvent()
 
 bool CStorageInventory::Update()
 {
-    return !(m_pNewInventoryCtrl && !m_pNewInventoryCtrl->Update());
+    if (m_pNewInventoryCtrl && !m_pNewInventoryCtrl->Update())
+        return false;
+
+    SyncRmlModel();
+    return true;
 }
 
 bool CStorageInventory::Render()
 {
     EnableAlphaTest();
 
-
-    RenderBackImage();
-    RenderText();
+    // Frame background panel is RmlUi, routed through the background context (see
+    // StorageBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
+    // running before Render3D(), not by call order here.
+    RmlUiRuntime::Instance().RenderBackgroundLayer();
 
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
-
-    for (int i = BTN_INSERT_ZEN; i < MAX_BTN; ++i)
-        m_abtn[i].Render();
-
-    if (CharacterAttribute->IsVaultExtended > 0)
-    {
-        m_BtnExpand.Render();
-    }
 
     DisableAlphaBlend();
 
     return true;
 }
 
-void CStorageInventory::RenderBackImage()
+void CStorageInventory::SyncRmlModel()
 {
-    const auto x = static_cast<float>(m_Pos.x);
-    const auto y = static_cast<float>(m_Pos.y);
-    RenderImage(IMAGE_STORAGE_BACK, x, y, STORAGE_WIDTH, STORAGE_HEIGHT);
-    RenderImage(IMAGE_STORAGE_TOP, x, y, STORAGE_WIDTH, 64.f);
-    RenderImage(IMAGE_STORAGE_LEFT, x, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_STORAGE_RIGHT, x + STORAGE_WIDTH - 21, y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_STORAGE_BOTTOM, x, y + STORAGE_HEIGHT - 45, STORAGE_WIDTH, 45.f);
+    if (m_pRmlBgDoc)
+    {
+        UI::RmlBridge::SyncRootTransform(m_BgRmlBinder, m_Pos);
 
-    RenderImage(IMAGE_STORAGE_MONEY, x + 10, y + 342, 170.f, 46.f);
-}
+        // RenderBackgroundLayer() renders whatever's shown in the shared background context
+        // regardless of caller, so this Hide()/Show() is what keeps the bg panel hidden when closed.
+        if (IsVisible()) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
 
-void CStorageInventory::RenderText()
-{
-    wchar_t szTemp[128];
-    int nTempZen;
+    if (!m_pRmlDoc) return;
+    if (IsVisible()) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
 
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
+    UI::RmlBridge::SyncRootTransform(m_RmlBinder, m_Pos);
 
-    mu_swprintf(
-        szTemp, L"%ls (%ls)", I18N::Game::Storage, I18N::Game::Lookup(m_bLock ? 241 : 240));
-    if (m_bLock)
-        g_pRenderText->SetTextColor(240, 32, 32, 255);
-    else
-        g_pRenderText->SetTextColor(216, 216, 216, 255);
-    g_pRenderText->RenderText(
-        m_Pos.x, m_Pos.y + 11, szTemp, STORAGE_WIDTH, 0, RT3_SORT_CENTER);
+    auto syncBool = [this](bool StorageRmlModel::* field, const char* boundName, bool value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncText = [this](Rml::String StorageRmlModel::* field, const char* boundName, const Rml::String& value)
+    {
+        if (m_RmlBinder.GetModel().*field != value) { m_RmlBinder.GetModel().*field = value; m_RmlBinder.MarkDirty(boundName); }
+    };
+    auto syncWide = [&](Rml::String StorageRmlModel::* field, const char* boundName, const wchar_t* text)
+    {
+        syncText(field, boundName, StringUtils::WideToNarrow(text));
+    };
 
-    nTempZen = CharacterMachine->StorageGold;
-    ConvertGold(nTempZen, szTemp);
-    g_pRenderText->SetTextColor(getGoldColor(nTempZen));
-    g_pRenderText->RenderText(
-        m_Pos.x + 168, m_Pos.y + 342 + 8, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
+    // Matches CStorageInventory::RenderText()'s former "Storage (open/close)" title, red when locked.
+    wchar_t titleBuf[128];
+    mu_swprintf(titleBuf, L"%ls (%ls)", I18N::Game::Storage, I18N::Game::Lookup(m_bLock ? 241 : 240));
+    syncWide(&StorageRmlModel::title, "title", titleBuf);
+    syncBool(&StorageRmlModel::titleLocked, "title_locked", m_bLock);
 
-    g_pRenderText->SetTextColor(240, 64, 64, 255);
-    g_pRenderText->RenderText(m_Pos.x + 10 + 15, m_Pos.y + 342 + 29, I18N::Game::StorageFee);
+    const int nZen = CharacterMachine->StorageGold;
+    wchar_t zenBuf[256] = { 0, };
+    ConvertGold(nZen, zenBuf);
+    syncWide(&StorageRmlModel::zenText, "zen_text", zenBuf);
 
-    __int64 iTotalLevel = (__int64)CharacterAttribute->Level + Master_Level_Data.nMLevel;
+    // getGoldColor() packs (A<<24)+(R<<16)+(G<<8)+B -- unpack into an rgba() CSS string, same
+    // technique as CMyInventory's gold_color (legacy theme only binds this; modern uses a fixed
+    // warm-gold color, same reasoning as my_inventory.rml's #gold_text).
+    const unsigned int zenArgb = getGoldColor(nZen);
+    char zenColorBuf[32];
+    snprintf(zenColorBuf, sizeof(zenColorBuf), "rgba(%u,%u,%u,%u)",
+        (zenArgb >> 16) & 0xFF, (zenArgb >> 8) & 0xFF, zenArgb & 0xFF, (zenArgb >> 24) & 0xFF);
+    syncText(&StorageRmlModel::zenColor, "zen_color", Rml::String(zenColorBuf));
 
-    nTempZen = int(double(iTotalLevel) * double(iTotalLevel) * 0.04);
-    nTempZen += m_bLock ? int(CharacterAttribute->Level) * 2 : 0;
-    nTempZen = std::max<int>(1, nTempZen);
+    syncWide(&StorageRmlModel::feeLabel, "fee_label", I18N::Game::StorageFee);
 
-    if (nTempZen >= 1000)
-        nTempZen = nTempZen / 100 * 100;
-    else if (nTempZen >= 100)
-        nTempZen = nTempZen / 10 * 10;
+    const __int64 iTotalLevel = (__int64)CharacterAttribute->Level + Master_Level_Data.nMLevel;
+    int nFee = int(double(iTotalLevel) * double(iTotalLevel) * 0.04);
+    nFee += m_bLock ? int(CharacterAttribute->Level) * 2 : 0;
+    nFee = std::max<int>(1, nFee);
+    if (nFee >= 1000)
+        nFee = nFee / 100 * 100;
+    else if (nFee >= 100)
+        nFee = nFee / 10 * 10;
+    wchar_t feeBuf[256] = { 0, };
+    ConvertGold(nFee, feeBuf);
+    syncWide(&StorageRmlModel::feeValue, "fee_value", feeBuf);
 
-    ConvertGold(nTempZen, szTemp);
-    g_pRenderText->SetTextColor(255, 220, 150, 255);
-    g_pRenderText->RenderText(m_Pos.x + 168, m_Pos.y + 342 + 29, szTemp, 0, 0, RT3_WRITE_RIGHT_TO_LEFT);
+    syncBool(&StorageRmlModel::expandVisible, "expand_visible", CharacterAttribute->IsVaultExtended > 0);
+    syncWide(&StorageRmlModel::expandTooltip, "expand_tooltip", I18N::Game::OpeningAnExpandedVaultH);
+
+    syncBool(&StorageRmlModel::storageLocked, "storage_locked", m_bLock);
+
+    syncWide(&StorageRmlModel::insertTooltip, "insert_tooltip", I18N::Game::Deposit);
+    syncWide(&StorageRmlModel::takeTooltip, "take_tooltip", I18N::Game::Withdraw);
+    syncWide(&StorageRmlModel::lockTooltip, "lock_tooltip", I18N::Game::WarehouseLockUnlock);
 }
 
 float CStorageInventory::GetLayerDepth()
@@ -252,47 +331,9 @@ CInventoryCtrl* CStorageInventory::GetInventoryCtrl() const
     return m_pNewInventoryCtrl;
 }
 
-void CStorageInventory::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_STORAGE_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back01.tga", IMAGE_STORAGE_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_STORAGE_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_STORAGE_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_STORAGE_BOTTOM, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_money01.tga", IMAGE_STORAGE_BTN_INSERT_ZEN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_money02.tga", IMAGE_STORAGE_BTN_TAKE_ZEN, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_lock02.tga", IMAGE_STORAGE_BTN_UNLOCK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_Bt_lock.tga", IMAGE_STORAGE_BTN_LOCK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_money3.tga", IMAGE_STORAGE_MONEY, GL_LINEAR);
-}
-
-void CStorageInventory::UnloadImages()
-{
-    DeleteBitmap(IMAGE_STORAGE_MONEY);
-    DeleteBitmap(IMAGE_STORAGE_BTN_LOCK);
-    DeleteBitmap(IMAGE_STORAGE_BTN_UNLOCK);
-    DeleteBitmap(IMAGE_STORAGE_BTN_TAKE_ZEN);
-    DeleteBitmap(IMAGE_STORAGE_BTN_INSERT_ZEN);
-    DeleteBitmap(IMAGE_STORAGE_BOTTOM);
-    DeleteBitmap(IMAGE_STORAGE_RIGHT);
-    DeleteBitmap(IMAGE_STORAGE_LEFT);
-    DeleteBitmap(IMAGE_STORAGE_TOP);
-    DeleteBitmap(IMAGE_STORAGE_BACK);
-}
-
 void CStorageInventory::LockStorage(bool bLock)
 {
     m_bLock = bLock;
-    ChangeLockBtnImage();
-}
-
-void CStorageInventory::ChangeLockBtnImage()
-{
-    m_abtn[BTN_LOCK].UnRegisterButtonState();
-    if (m_bLock)
-        m_abtn[BTN_LOCK].ChangeButtonImgState(true, IMAGE_STORAGE_BTN_LOCK);
-    else
-        m_abtn[BTN_LOCK].ChangeButtonImgState(true, IMAGE_STORAGE_BTN_UNLOCK);
 }
 
 bool CStorageInventory::ProcessClosing()
@@ -484,38 +525,8 @@ void CStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex
 
 bool CStorageInventory::ProcessBtns()
 {
-    if (CharacterAttribute->IsVaultExtended > 0 && m_BtnExpand.UpdateMouseEvent())
-    {
-        g_pNewUISystem->Toggle(INTERFACE_STORAGE_EXT);
-        return true;
-    }
-
-    if (m_abtn[BTN_INSERT_ZEN].UpdateMouseEvent())
-    {
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenReceiptMsgBoxLayout));
-        return true;
-    }
-
-    if (m_abtn[BTN_TAKE_ZEN].UpdateMouseEvent())
-    {
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenPaymentMsgBoxLayout));
-        return true;
-    }
-
-    if (m_abtn[BTN_LOCK].UpdateMouseEvent())
-    {
-        if (m_bLock)
-        {
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageUnlockMsgBoxLayout));
-        }
-        else
-        {
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockKeyPadMsgBoxLayout));
-        }
-        return true;
-    }
-
-    // Top-right corner close "X" (shared frame): hides + swallows the click.
+    // Top-right corner close "X" (shared frame): hides + swallows the click. The 4 real buttons
+    // are handled by RmlUi's data-event-click (see Create()).
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, INTERFACE_STORAGE))
         return true;
 

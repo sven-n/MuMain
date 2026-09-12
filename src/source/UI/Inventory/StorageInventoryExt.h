@@ -6,25 +6,15 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+#include <span>
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
     class CStorageInventoryExt : public CObject
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_STORAGE_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_STORAGE_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_STORAGE_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_STORAGE_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_STORAGE_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_INVENTORY_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-        };
-
     private:
         static constexpr float STORAGE_WIDTH = 190.0f;
         static constexpr float STORAGE_HEIGHT = 429.0f;
@@ -33,12 +23,35 @@ namespace mu::ui::window
         POINT					m_Pos;
 
         CInventoryCtrl* m_pNewInventoryCtrl;
-        CButton m_BtnExit;
 
         bool					m_bItemAutoMove;
         int						m_nBackupMouseX;
         int						m_nBackupMouseY;
         int						m_nBackupSourceInvenIndex;
+
+        // Window frame/title/exit button are RmlUi; the inventory grid stays native since its
+        // icons are live 3D model renders (same reasoning as CMyInventory).
+        struct StorageExtRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            Rml::String title;
+            Rml::String exitTooltip;
+        };
+        RmlModelBinder<StorageExtRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
+        // main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
+        // CMyInventory's identical MyInventoryBgRmlModel for the full mechanism).
+        struct StorageExtBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<StorageExtBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
 
     public:
         CStorageInventoryExt();
@@ -74,12 +87,6 @@ namespace mu::ui::window
         void SetItemAutoMove(bool bItemAutoMove, int nSourceInvenIndex = -1);
 
     private:
-        void LoadImages() const;
-        void UnloadImages();
-
-        void RenderBackImage() const;
-        void RenderText() const;
-
         void DeleteAllItems() const;
 
         void ProcessInventoryCtrl();

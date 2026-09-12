@@ -8,28 +8,16 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Dialogs/MessageBox.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
 #include "UI/Widgets/UIControls.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
     class CMyShopInventory : public CObject
     {
     public:
-        enum IMAGE_LIST
-        {
-            IMAGE_MYSHOPINVENTORY_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_MYSHOPINVENTORY_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_MYSHOPINVENTORY_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_MYSHOPINVENTORY_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_MYSHOPINVENTORY_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_MYSHOPINVENTORY_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-
-            IMAGE_MYSHOPINVENTORY_EDIT = BITMAP_MYSHOPINTERFACE_NEW_PERSONALINVENTORY_BEGIN,
-            IMAGE_MYSHOPINVENTORY_OPEN,
-            IMAGE_MYSHOPINVENTORY_CLOSE,
-        };
-
         enum SHOPTYEP
         {
             PERSONALSHOPSALE = 0,
@@ -43,17 +31,48 @@ namespace mu::ui::window
             INVENTORY_HEIGHT = 429,
         };
 
-        enum
-        {
-            MYSHOPINVENTORY_EXIT = 0,
-            MYSHOPINVENTORY_OPEN,
-            MYSHOPINVENTORY_CLOSE,
-            MYSHOPINVENTORY_MAXBUTTONCOUNT,
-        };
-
         CManager* m_pNewUIMng;
         CInventoryCtrl* m_pNewInventoryCtrl;
         POINT m_Pos;
+
+        // Window frame/title/edit-box background strip/Open-Close-Exit buttons are RmlUi; the
+        // inventory grid stays native since its icons are live 3D model renders (same reasoning as
+        // CMyInventory/CStorageInventoryExt). The nickname/subject CUITextInputBox (m_EditBox below)
+        // also stays fully native -- it has no RmlUi equivalent yet (see
+        // docs/rmlui-ui-system/building-new-ui.md).
+        struct MyShopRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            Rml::String title;
+
+            Rml::String exitTooltip;
+
+            bool openLocked = false;
+            Rml::String openTooltip;
+
+            bool closeLocked = true;
+            Rml::String closeTooltip;
+        };
+        RmlModelBinder<MyShopRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's main
+        // context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
+        // CStorageInventoryExt's identical StorageExtBgRmlModel for the full mechanism).
+        struct MyShopBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<MyShopBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        // Mirrors the old CButton array's Lock()/tooltip-text state (OpenButtonLock()/UnLock(),
+        // ChangePersonal()) now that the buttons themselves are RmlUi-owned.
+        bool m_bOpenLocked;
+        bool m_bOpenApplyTooltip; // true => "Apply" tooltip, false => "Open" tooltip
+
+        void SyncRmlModel();
 
     public:
         CMyShopInventory();
@@ -96,15 +115,10 @@ namespace mu::ui::window
         void DeleteAllItems();
 
     private:
-        void LoadImages();
-        void UnloadImages();
-
-    private:
         bool MyShopInventoryProcess();
         bool WindowProcess();
 
     private:
-        void RenderFrame();
         void RenderTextInfo();
 
     private:
@@ -113,7 +127,6 @@ namespace mu::ui::window
         bool				m_EnablePersonalShop;
         bool				m_bIsEnableInputValueTextBox;
 
-        CButton* m_Button;
         CUITextInputBox* m_EditBox;
     };
 

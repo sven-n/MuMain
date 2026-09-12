@@ -68,4 +68,13 @@ namespace UI::RmlBridge
     // built on this helper, not a per-window special case. Returns nullptr if the file couldn't
     // be read or the document failed to parse (logged via g_ErrorReport either way).
     Rml::ElementDocument* LoadThemedDocument(Rml::Context* context, const char* documentPath);
+
+    // LoadThemedDocument() against RmlUiRuntime::Instance().GetBackgroundContext(), then Show()s it
+    // immediately -- a background-context document doesn't follow its owning window's own
+    // Show()/Hide() lifecycle the way the main-context document does (it's driven entirely by
+    // RmlUiRuntime::RenderBackgroundLayer() being called or not, see MyInventory.h's
+    // MyInventoryBgRmlModel comment), so unlike a typical LoadThemedDocument() caller this one
+    // shows eagerly at Create() time rather than waiting for the window to actually open. Returns
+    // nullptr (silently) if the background context doesn't exist yet.
+    Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath);
 }

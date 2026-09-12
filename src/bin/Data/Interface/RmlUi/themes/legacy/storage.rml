@@ -1,0 +1,35 @@
+<rml>
+<head>
+	<title>Storage</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="storage.rcss"/>
+</head>
+<body data-model="storage">
+	<!-- Window frame/title/money/buttons only -- inventory grid stays native
+	     (StorageInventory.h). Background lives in storage_bg.rml instead, since it must paint
+	     behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title" data-class-locked="title_locked">{{title}}</span>
+
+		<div id="money_bg"></div>
+		<span id="zen_text" data-style-color="zen_color">{{zen_text}}</span>
+		<span id="fee_label">{{fee_label}}</span>
+		<span id="fee_value">{{fee_value}}</span>
+
+		<div id="btn_insert" class="stor-btn stor-btn-insert" data-event-click="storage_insert_click"></div>
+		<span class="tooltip tooltip-insert">{{insert_tooltip}}</span>
+
+		<div id="btn_take" class="stor-btn stor-btn-take" data-event-click="storage_take_click"></div>
+		<span class="tooltip tooltip-take">{{take_tooltip}}</span>
+
+		<div id="btn_lock" class="stor-btn stor-btn-lock" data-class-locked-mode="storage_locked"
+		     data-event-click="storage_lock_click"></div>
+		<span class="tooltip tooltip-lock">{{lock_tooltip}}</span>
+
+		<div id="btn_expand" class="stor-btn stor-btn-expand" data-class-hidden="!expand_visible"
+		     data-event-click="storage_expand_click"></div>
+		<span class="tooltip tooltip-expand">{{expand_tooltip}}</span>
+	</div>
+</body>
+</rml>

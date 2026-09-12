@@ -1,0 +1,22 @@
+<rml>
+<head>
+	<title>NPC Shop Background</title>
+	<link type="text/rcss" href="npc_shop_bg.rcss"/>
+</head>
+<body data-model="npc_shop_bg">
+	<!-- Background-context document (see my_inventory_bg.rml for the mechanism) -- paints the
+	     outer frame behind CInventoryCtrl's own native grid/table-frame/item-icon rendering. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-panel">
+			<div class="inv-shell-edge"></div>
+			<div class="inv-groove"></div>
+			<!-- Header rail's fill/accent, relocated from npc_shop.rml's foreground rail --
+			     see npc_shop_bg.rcss's .rail-fill comment for why. -->
+			<div class="rail-fill">
+				<div class="rail-accent"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

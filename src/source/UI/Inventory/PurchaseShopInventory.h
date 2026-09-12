@@ -6,27 +6,14 @@
 
 #include "UI/Core/WindowObject.h"
 #include "UI/Inventory/InventoryCtrl.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
-#include "UI/Inventory/MyShopInventory.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
     class CPurchaseShopInventory : public CObject
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_MSGBOX_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,	// Reference
-            IMAGE_INVENTORY_BACK_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP,
-            IMAGE_INVENTORY_BACK_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,
-            IMAGE_INVENTORY_BACK_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,
-            IMAGE_INVENTORY_BACK_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,
-            IMAGE_INVENTORY_EXIT_BTN = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,
-            IMAGE_MYSHOPINVENTORY_EDIT = CMyShopInventory::IMAGE_MYSHOPINVENTORY_EDIT,
-        };
-
     private:
         enum
         {
@@ -68,16 +55,8 @@ namespace mu::ui::window
         int GetItemInventoryIndex(ITEM* pItem);
 
     private:
-        void LoadImages();
-        void UnloadImages();
-
-    private:
         bool PurchaseShopInventoryProcess();
         bool WindowProcess();
-
-    private:
-        void RenderFrame();
-        void RenderTextInfo();
 
     private:
         CManager* m_pNewUIMng;
@@ -85,8 +64,40 @@ namespace mu::ui::window
         POINT					m_Pos;
         int						m_ShopCharacterIndex;
        std::wstring		m_TitleText;
-        CButton* m_Button;
         int						m_SourceIndex;
+
+        // Window frame/title/subtitle strip/warning text/exit button are RmlUi; the inventory grid
+        // stays native since its icons are live 3D model renders (same reasoning as
+        // CMyShopInventory/CStorageInventoryExt).
+        struct PurchaseShopRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+            Rml::String title;			// static "Personal Store" label
+            Rml::String shopOwnerText;	// dynamic shop-owner name (m_TitleText, via ChangeTitleText())
+            Rml::String warningLabel;
+            Rml::String sellingPriceLine;
+            Rml::String verifyLine;
+            Rml::String alreadyInStoreLine;
+            Rml::String cancelPurchasedLine;
+            Rml::String cantBeReturnedLine;
+            Rml::String allItemTradingLine;
+            Rml::String zenOnlyLine;
+        };
+        RmlModelBinder<PurchaseShopRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+        // The frame background panel must render behind the grid's live 3D icons, but RmlUi's
+        // main context always renders last -- so it goes through
+        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead (see
+        // CStorageInventoryExt's identical StorageExtBgRmlModel for the full mechanism).
+        struct PurchaseShopBgRmlModel
+        {
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+        };
+        RmlModelBinder<PurchaseShopBgRmlModel> m_BgRmlBinder;
+        Rml::ElementDocument* m_pRmlBgDoc = nullptr;
+
+        void SyncRmlModel();
     };
 
     inline
