@@ -435,8 +435,8 @@ namespace mu::ui::window
 
         // The left/center HUD-strip background must render BEHIND the legacy 3D-composited
         // item/skill icons, which always paint after m_pRmlDoc's "main" context -- so it lives in
-        // a separate RmlUiRuntime::GetBackgroundContext() document/model, rendered via
-        // RenderBackgroundLayer() from RenderLeftFrame().
+        // a separate RmlUiRuntime::GetBackgroundContext() document/model, painted by
+        // CManager::Render()'s centralized RenderBackgroundLayer() call.
         struct MainFrameBgRmlModel
         {
             // Mirrors MainFrameRmlModel::barsLeft/barsTop/barsScale (#bg_root uses the same

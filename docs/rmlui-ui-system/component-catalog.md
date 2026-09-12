@@ -38,13 +38,15 @@ live-3D seam — still holds):
   render in front of the item icon instead of behind it. Used by `CMyInventory` (Stage 1/3 chrome
   done; the equipment paperdoll's background/durability-tint/drag-highlight chrome deliberately
   stays native — Stage 2, skipped for this reason, see `STATUS.md`'s pilots-to-revisit table) and,
-  not yet started, the rest of the still-fully-native `C3DRenderMng` sibling windows sharing the
-  same constraint (`CInventoryExtension`, `CTrade`, vault/storage, chaos machine, market place, NPC
-  shop). Unblocks once `RmlUiRuntime::RenderBackgroundLayer()` — proven so far only for
-  `CMainFrameWindow`'s static, non-data-bound background fill — generalizes into a real insertion
-  point inside `mu::ui::window::CManager::Render()`'s z-sorted loop and is proven under this
-  window's actual per-frame-varying content; see `STATUS.md`'s "Known gaps" entry on that
-  mechanism.
+  as of 2026-09-13, the rest of the inventory-family `C3DRenderMng` sibling windows sharing the same
+  constraint: `CTrade` (two independent grids, not just one), `CStorageInventory`,
+  `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
+  `CPurchaseShopInventory`, `CInventoryExtension` (1-4 grids). `RmlUiRuntime::RenderBackgroundLayer()`
+  is what let all of these move — see `STATUS.md`'s "Known gaps" entry on that mechanism, now
+  generalized into `mu::ui::window::CManager::Render()`'s z-sorted loop instead of each window
+  wiring its own call. Market place (`UnitedMarketPlaceWindow`) isn't in this family — no
+  `CInventoryCtrl`/item grid, just a confirmation dialog that borrows this frame's sprite constants
+  cosmetically — still native, but not blocked by anything here.
 
 Visual frame primitives are theme-specific, not shared (correct per §15 — presentation is the
 theme's job, not the component's):

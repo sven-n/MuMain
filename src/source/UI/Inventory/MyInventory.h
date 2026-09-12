@@ -137,9 +137,9 @@ namespace mu::ui::window
 
         // The frame background panel must render behind the paperdoll's and inventory grid's live
         // 3D icons, but RmlUi's main context always renders last -- so it goes through
-        // RmlUiRuntime::GetBackgroundContext()/RenderBackgroundLayer() instead, from Render() (which
-        // runs before either Render3D() call). Separate document/model from m_pRmlDoc since RmlUi
-        // data models are per-context.
+        // RmlUiRuntime's background context instead, painted by CManager::Render()'s centralized
+        // RenderBackgroundLayer() call (before every window's own Render()/Render3D()). Separate
+        // document/model from m_pRmlDoc since RmlUi data models are per-context.
         struct MyInventoryBgRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;

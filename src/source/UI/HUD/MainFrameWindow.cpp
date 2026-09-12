@@ -282,10 +282,9 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 if (bgModelCreated)
                 {
                     m_pRmlBgDoc = UI::RmlBridge::LoadThemedDocument(bgContext, "Data/Interface/RmlUi/main_frame_bg.rml");
-                    // Shown immediately, unlike m_pRmlDoc -- only rendered via RenderBackgroundLayer()
-                    // from RenderLeftFrame(), which already only runs while this window's Render() does.
-                    if (m_pRmlBgDoc)
-                        m_pRmlBgDoc->Show();
+                    // Not Show()n here -- CManager::Render()'s centralized RenderBackgroundLayer()
+                    // call runs every frame regardless of this window's own visibility, so
+                    // SyncDocVisibility() now gates m_pRmlBgDoc the same way it gates m_pRmlDoc.
                 }
             }
         }
@@ -414,9 +413,9 @@ void mu::ui::window::CMainFrameWindow::RenderCenterRegion()
 
 // Theme-aware background fill behind the still-legacy 3D-composited item/skill icons. RmlUi's main
 // context always renders after the 3D-composited icons, so a background drawn through it would
-// cover them instead of sitting behind them -- RenderBackgroundLayer() drives a second,
-// background-only context, called here (before Render3D()'s icon compositing) so the panel paints
-// behind the icons. General mechanism: any other window sharing C3DRenderMng can use it too.
+// cover them instead of sitting behind them -- painted instead by CManager::Render()'s centralized
+// RenderBackgroundLayer() call (before any window's Render()/Render3D() this frame). General
+// mechanism: any other window sharing C3DRenderMng can use it too.
 //
 // main_frame_bg.rcss's colors match main_frame.rcss's .slot-fill/.slot-frame tokens exactly so the
 // RmlUi-drawn panel and the RmlUi-drawn gauges/buttons on top of it read as one surface.
@@ -424,10 +423,7 @@ void mu::ui::window::CMainFrameWindow::RenderLeftFrame()
 {
     if (UI::RmlBridge::ThemeProvidesOwnIconChrome())
     {
-        // Both #bg_left and #bg_center come from this one RenderBackgroundLayer() call -- safe to
-        // call unconditionally even before m_pRmlBgDoc exists (no-op then). Must run before
-        // RenderCenterFrame() so that panel doesn't need its own call.
-        RmlUiRuntime::Instance().RenderBackgroundLayer();
+        // #bg_left is already painted by this point -- see the function comment above.
         return;
     }
 
@@ -441,8 +437,8 @@ void mu::ui::window::CMainFrameWindow::RenderCenterFrame()
     {
         // Panel spans 214-424 (skill icons' 222-416 footprint padded 8px each side, matching
         // RenderLeftFrame()'s potion padding) so the two chrome panels meet flush with no gap.
-        // The fill itself moved to main_frame_bg.rml's #bg_center, rendered by RenderLeftFrame()'s
-        // RenderBackgroundLayer() call.
+        // The fill itself lives in main_frame_bg.rml's #bg_center, painted by CManager::Render()'s
+        // centralized RenderBackgroundLayer() call (see RenderLeftFrame()'s comment).
         //
         // This highlight overlay stays a legacy quad (dynamic, frame-conditional, not worth
         // porting) -- modern equivalent of the legacy IMAGE_MENU_2_1 highlight below.
@@ -2541,10 +2537,18 @@ void mu::ui::window::CMainFrameWindow::SetBtnState(int iBtnType, bool bStateDown
 
 void mu::ui::window::CMainFrameWindow::SyncDocVisibility(bool sceneAllowsShow)
 {
-    if (!m_pRmlDoc) return;
+    const bool show = IsVisible() && sceneAllowsShow;
 
-    if (IsVisible() && sceneAllowsShow)
-        m_pRmlDoc->Show();
-    else
-        m_pRmlDoc->Hide();
+    if (m_pRmlDoc)
+    {
+        if (show) m_pRmlDoc->Show(); else m_pRmlDoc->Hide();
+    }
+
+    // m_pRmlBgDoc needs the same gate: CManager::Render()'s centralized RenderBackgroundLayer()
+    // call replays whatever's Show()n in the shared background context every frame, regardless of
+    // whether this window itself is visible.
+    if (m_pRmlBgDoc)
+    {
+        if (show) m_pRmlBgDoc->Show(); else m_pRmlBgDoc->Hide();
+    }
 }

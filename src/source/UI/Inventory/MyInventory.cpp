@@ -973,10 +973,8 @@ bool CMyInventory::Render()
     EnableAlphaTest();
 
     // Frame background panel is RmlUi, routed through the background context (see
-    // MyInventoryBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
-    // running before Render3D(), not by call order here.
-    RmlUiRuntime::Instance().RenderBackgroundLayer();
-
+    // MyInventoryBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer()
+    // call before this window's own Render()/Render3D() run.
     if (m_pNewInventoryCtrl)
         m_pNewInventoryCtrl->Render();
 

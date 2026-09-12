@@ -39,15 +39,16 @@ public:
     void RenderFrame();
 
     // The RmlUi-behind-3D-icons seam: a second, background-only Rml::Context (m_BackgroundContext)
-    // that a caller drives
-    // explicitly, mid-frame, instead of waiting for RenderFrame()'s single fixed pre-submit slot.
-    // Flushes whatever legacy content has been recorded so far (mu::GetRenderer().
+    // that CManager::Render() (WindowManager.cpp) drives explicitly, right before the first
+    // visible window/C3DCamera in its z-sorted loop each frame, instead of waiting for
+    // RenderFrame()'s single fixed pre-submit slot. Flushes whatever legacy content has been
+    // recorded so far (mu::GetRenderer().
     // FlushRenderCommands(), MuRenderer.h) so it's actually on screen, then renders this context
-    // into the resulting gap -- content the caller records right after this call returns lands on
-    // top of it, in front of everything recorded before this call. No-op if nothing was ever
-    // loaded into the background context (every theme but the ones that opt in, e.g. `legacy`).
-    // Never receives input (see m_BackgroundContext's own comment) -- Update() still needs calling
-    // per frame for data-model/animation purposes, so this does that too, not just Render().
+    // into the resulting gap -- content recorded after this call returns lands on top of it, in
+    // front of everything recorded before this call. No-op if nothing was ever loaded into the
+    // background context (every theme but the ones that opt in, e.g. `legacy`). Never receives
+    // input (see m_BackgroundContext's own comment) -- Update() still needs calling per frame for
+    // data-model/animation purposes, so this does that too, not just Render().
     void RenderBackgroundLayer();
 
     // Every RmlUi document meant to render via RenderBackgroundLayer() loads into this context
@@ -103,20 +104,12 @@ private:
     Rml::Context* m_BackgroundContext = nullptr;
 
     // RenderBackgroundLayer() replays the ENTIRE shared background context -- every document
-    // currently Show()n in it, not just whichever window's own document prompted the call (there's
-    // no per-caller scoping, see that method's own comment). Once a second window
-    // (CMyInventory) started calling it independently of CMainFrameWindow, a window
-    // whose own Render() runs at a *later* GetLayerDepth() than another window's 3D-icon camera
-    // (both are ordinary CObjects interleaved by CManager::Render()'s one z-sorted pass) would
-    // re-replay -- and thus re-paint over -- that
-    // earlier window's already-drawn 3D icons. This guard makes only the FIRST call in a frame
-    // actually render; every later call this same frame is a cheap no-op. Safe: the first call in
-    // z-order is guaranteed to precede every camera later in the same sorted pass (that's the
-    // existing "wire your own call before your own icons" contract every caller already follows),
-    // so one replay per frame, positioned at the earliest caller, still correctly precedes all of
-    // them. Reset in RenderFrame() (the one guaranteed-once-per-frame choke point), not
-    // BeginFrame(), since RenderFrame() fires late (SetPreSubmitCallback) -- after every
-    // RenderBackgroundLayer() call this frame already happened, so resetting there arms the guard
-    // correctly for the *next* frame's first caller.
+    // currently Show()n in it, not just one particular window's. CManager::Render()
+    // (WindowManager.cpp) is the sole caller, once per visible window/C3DCamera in its z-sorted
+    // loop -- this guard is what makes only the first (lowest-GetLayerDepth) visible one actually
+    // render; every later one this same frame is a cheap no-op. Reset in RenderFrame() (the one
+    // guaranteed-once-per-frame choke point), not BeginFrame(), since RenderFrame() fires late
+    // (SetPreSubmitCallback) -- after every RenderBackgroundLayer() call this frame already
+    // happened, so resetting there arms the guard correctly for next frame.
     bool m_backgroundLayerRenderedThisFrame = false;
 };

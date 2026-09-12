@@ -569,10 +569,8 @@ bool CLuckyItemWnd::Render(void)
     EnableAlphaTest();
 
     // Frame background panel is RmlUi, routed through the background context (see
-    // LuckyItemBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
-    // running before Render3D(), not by call order here (see CStorageInventoryExt::Render()).
-    RmlUiRuntime::Instance().RenderBackgroundLayer();
-
+    // LuckyItemBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer()
+    // call before this window's own Render()/Render3D() run.
     Render_Frame();
 
     if (m_pNewInventoryCtrl)

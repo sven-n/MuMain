@@ -130,6 +130,11 @@ CSystem::~CSystem()
 bool CSystem::Create()
 {
     m_pNewUIMng = new CManager;
+    // This is the CManager instance whose windows (the inventory family, CMainFrameWindow) load
+    // documents into RmlUiRuntime's shared background context -- see
+    // CManager::SetDrivesBackgroundLayer()'s own comment for why CSceneUICoordinator's separate,
+    // scene-scoped CManager must NOT also opt in.
+    m_pNewUIMng->SetDrivesBackgroundLayer(true);
 
     m_pNewUI3DRenderMng = new C3DRenderMng;
     if (false == m_pNewUI3DRenderMng->Create(m_pNewUIMng))

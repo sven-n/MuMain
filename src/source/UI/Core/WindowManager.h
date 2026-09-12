@@ -25,9 +25,25 @@ namespace mu::ui::window
 #ifdef PBG_MOD_STAMINA_UI
         int m_nShowUICnt;
 #endif //PBG_MOD_STAMINA_UI
+
+        // Opt-in for Render()'s centralized RmlUiRuntime::RenderBackgroundLayer() call (see that
+        // method, WindowManager.cpp). RmlUiRuntime's background context is a single app-lifetime
+        // singleton shared by every CManager instance -- more than one instance exists
+        // (CSceneUICoordinator's m_NewStyleMng is a second, scene-scoped one for login/character-
+        // scene windows, separate from CSystem's app-lifetime m_pNewUIMng), but only windows
+        // registered on m_pNewUIMng ever load documents into that background context. Defaults to
+        // false so a new/other CManager instance doesn't silently start painting m_pNewUIMng's
+        // windows' background docs into its own scene -- see SetDrivesBackgroundLayer().
+        bool m_bDrivesBackgroundLayer = false;
     public:
         CManager();
         ~CManager();
+
+        // Call once, right after constructing the one CManager instance that owns the windows
+        // which actually load documents into RmlUiRuntime's background context (currently
+        // CSystem::m_pNewUIMng only -- see m_bDrivesBackgroundLayer's own comment). Every other
+        // CManager instance should leave this false.
+        void SetDrivesBackgroundLayer(bool drives) { m_bDrivesBackgroundLayer = drives; }
 
         void AddUIObj(DWORD dwKey, CObject* pUIObj);
         void RemoveUIObj(DWORD dwKey);

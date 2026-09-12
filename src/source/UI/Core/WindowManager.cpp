@@ -3,6 +3,7 @@
 #include "UI/Core/UILayoutPolicy.h"
 #include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
 #include "UI/Scaling/UITransform.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -235,6 +236,18 @@ bool mu::ui::window::CManager::Render()
     {
         if ((*vi)->IsVisible())
         {
+            // Centralized call, once per frame (RenderBackgroundLayer()'s own no-op-after-first
+            // guard makes every call past the first one here a cheap early-out) -- fires right
+            // before the first visible window/camera this frame, same position in the sequence
+            // the old per-window call sites used (each called this as the first line of its own
+            // Render()), so anything with lower GetLayerDepth() still renders, and gets flushed,
+            // before the background layer the same as before; nothing changes ordering-wise, this
+            // just removes the need for every consumer to wire its own call. Gated on
+            // m_bDrivesBackgroundLayer (see its own comment) since the shared background context
+            // is a singleton but more than one CManager instance exists.
+            if (m_bDrivesBackgroundLayer)
+                RmlUiRuntime::Instance().RenderBackgroundLayer();
+
             const auto transform = UI::Scaling::TransformForLayout((*vi)->GetLayoutMode(), WindowWidth, WindowHeight);
             UI::Scaling::ScopedActiveTransform layout(transform, true);
             (*vi)->Render();

@@ -56,6 +56,24 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `SetWindowPosition`, `RestoreDefaultOrUserPosition()`) is also done — see the "Known gaps" entry
   below for the full mechanism, built generically so the next draggable window reuses the same two
   pieces rather than inventing its own.
+- **Rest of the inventory family** (`CTrade`, `CStorageInventory`, `CStorageInventoryExt`,
+  `CMixInventory`, `CNPCShop`, `CMyShopInventory`, `CPurchaseShopInventory`,
+  `CInventoryExtension`, `CLuckyItemWnd`) — **done, both themes (2026-09-13)**: frame/header-rail/
+  title/wallet/action-buttons ported per window, following `CMyInventory`'s background-context
+  pattern; each window's own `CInventoryCtrl` grid(s) (and, for `CTrade`, both grids) stay fully
+  native, same permanent no-RmlUi-equivalent category as `CMyInventory`'s own grid. Shared
+  primitives factored out along the way instead of copy-pasted nine times:
+  `UI::RmlBridge::SyncRootTransform()`/`CreateBackgroundDocument()` (`RmlRootTransform.h`,
+  `RmlTheme.h`/`.cpp`) replace the hand-rolled root-transform math and background-document
+  boilerplate `CMyInventory` had; `base.rcss`'s `.modern-header-rail-px`/`.modern-wallet-px`/
+  `.modern-icon-btn-px` families give every window in this tier the same header/wallet/button
+  chrome instead of a one-off per window. This is also the trigger condition the "Known gaps"
+  entry below names for generalizing `RenderBackgroundLayer()` — see that entry for what changed.
+  `CMyShopInventory`/`CPurchaseShopInventory` keep their native `CUITextInputBox` subject-line field
+  exactly where `building-new-ui.md` says a Type-2 companion widget belongs — only its decorative
+  background sprite moved to RmlUi (and, after a visual bug, from the fg document to the bg one, so
+  it doesn't cover the real input box). `CMixInventory`'s large recipe/success-rate dynamic text
+  block stays native — frame chrome only for this pass, the text panel is a separate, bigger job.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -273,6 +291,24 @@ section in full detail; summarized here for visibility.
   input) and RmlUi's own event-driven `Context::ProcessMouseButtonDown/Up` — two systems now, not
   three, neither of them list/activation-driven any more.
 
+- **A window's header-rail chrome split across the fg and bg documents duplicates its `top`/
+  `height` values, with no tooling catching drift between the two copies.** Found while fixing a
+  visual bug (2026-09-13): a live 3D item icon that overflows its own slot bounding box (e.g.
+  equipped wings) rendered *underneath* the header rail, because RmlUi's main context always
+  renders last in the frame (the same constraint `RenderBackgroundLayer()` exists for). Fix: strip
+  all paint (`background-color`/`decorator`/`border`/`box-shadow`) from the shared
+  `.modern-header-rail-px` class in `base.rcss` down to layout only, and give every window's own
+  `*_bg.rcss` a `.rail-fill`/`.rail-accent` pair carrying that same paint plus that window's own
+  `top`/`height` — literally copied from the fg file's own header-rail override (e.g.
+  `storage.rcss`'s `.stor-header-rail` vs. `storage_bg.rcss`'s `.rail-fill`) — so the rail paints
+  *behind* the item icon instead of in front of it. Applied to all 10 windows with this chrome
+  (`CMyInventory` + the 9-window inventory-family port). `check_rml_rcss_drift.py` only checks
+  id/`data-model`-field/event-callback-name presence across a theme's forked files, not numeric
+  CSS property agreement — nothing currently catches these two copies drifting apart if one is
+  edited without the other. No tooling fix built yet; worth one if this pattern gets copied again
+  (a script diffing named property values between a fg selector and its bg counterpart, or simply
+  a stronger convention: always grep the sibling file's matching selector before changing either).
+
 ## Known gaps against the principles (honest status, not yet built)
 
 None of these are wrong so far — the principles doc explicitly endorses incremental delivery
@@ -280,6 +316,21 @@ None of these are wrong so far — the principles doc explicitly endorses increm
 even scheduled. Recorded so no future session mistakes "the pilots pass their own verification"
 for "the full architecture is in place":
 
+- **Correction, 2026-09-13**: `ui-target-architecture.md`'s Section D table claimed `CManager`'s
+  dispatch loop "was never actually broken." A real bug in it was found and fixed this session:
+  `CMyInventory::UpdateMouseEvent()`'s ground-drop guard returned `false` to mean "not a ground
+  drop, some other window should handle this," but `CManager::UpdateMouseEvent()`
+  (`WindowManager.cpp`) treats any `false` as "consumed, stop dispatching to every remaining
+  window this frame" — not "defer to the next one." This silently ate every attempt to drop an
+  item into `CTrade`'s own offer grid (and, by the same guard, `CStorageInventory`/`CNPCShop`/
+  `CMyShopInventory`/`CPurchaseShopInventory`/`CMixInventory`/`CLuckyItemWnd`, all checked in the
+  same guard) for as long as that code existed — a longstanding native bug, unrelated to this
+  session's RmlUi work, that simply hadn't been exercised end-to-end before. Fixed by returning
+  `true` from that branch. The dispatch *design* (topmost-first, consume-and-stop) doesn't need to
+  change; the contract just isn't written down anywhere but the loop itself, and a future window
+  adding a similar "not for me" guard could make the identical mistake — `UpdateMouseEvent()` must
+  return `true` to let dispatch continue to lower-`GetLayerDepth()` windows, `false` only to
+  genuinely consume the event and halt the frame's dispatch there.
 - **No mod/user-override resource-precedence system** (§18–19). Themes today are exactly two
   hardcoded directories (`themes/legacy/`, `themes/modern/`) selected by `GameConfig`'s theme
   name — no "user override on top of a theme" layer, no documented precedence order, no tooling
@@ -336,10 +387,12 @@ for "the full architecture is in place":
     gap, never was.
   - **RmlUi content rendering *before* a specific mid-frame point** — the direction
     `MainFrameWindow.cpp`'s icon-chrome conditional needed, and every other window sharing
-    `mu::ui::window::C3DRenderMng` (the still-unported inventory-family tier: `CMyInventory`,
-    `CInventoryExtension`, personal/web shop, `CTrade`, vault/storage, chaos machine,
-    market place, NPC shop, several message-box/quest/duel windows) will hit too once ported —
-    was genuinely missing infrastructure, now built:
+    `mu::ui::window::C3DRenderMng` will hit too — was genuinely missing infrastructure, now built.
+    The whole inventory-family tier (`CMyInventory`, `CTrade`, `CStorageInventory`,
+    `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
+    `CPurchaseShopInventory`, `CInventoryExtension`, `CLuckyItemWnd`) is now ported and using this
+    mechanism (2026-09-13); several message-box/quest/duel windows on the same
+    `C3DRenderMng` tier are not yet ported:
     - **`IMuRenderer::FlushRenderCommands()`** (`MuRenderer.h`/`MuRendererSDLGpu.cpp`) — opens a
       real render pass *mid-recording*, replaying only what's been recorded since the last flush
       (or frame start). Turned out bigger than "add one more callback like
@@ -369,13 +422,49 @@ for "the full architecture is in place":
       stays a legacy quad — never blocked by this constraint, no reason to move it. **Verified
       visually against a real server, modern theme, 2026-09-04**: potions and skill icons still
       render and animate correctly on top of the now-RmlUi-authored background, no regression.
-  - **Not yet done (Phase 2, deliberately deferred)**: generalizing the one proven call site into
+  - **Phase 2 done (2026-09-13)**: the trigger condition below fired nine times over (the whole
+    inventory-family port), so the call is now centralized in
+    `mu::ui::window::CManager::Render()`'s own z-sorted loop (`WindowManager.cpp`) instead of each
+    window wiring its own. Simpler than the `INVENTORY_CAMERA_Z_ORDER`-threshold design sketched
+    below: no z-order audit needed — the call sits immediately before `(*vi)->Render()` inside the
+    existing `if ((*vi)->IsVisible())` branch, so it still fires exactly once per frame, at the
+    exact same point in the sequence the first visible bg-doc-owning window's own call used to
+    (`RenderBackgroundLayer()`'s no-op-after-first guard, unchanged, is what makes every later
+    iteration's call in the same frame free). One consequence worth knowing: this call now fires
+    every frame regardless of which window happens to be first in z-order, not just ones that own
+    background content — any window whose own background-context document stays `Show()`n across
+    its own hidden state must gate that document's visibility itself (`CMainFrameWindow` needed a
+    fix here: `m_pRmlBgDoc` used to rely on `RenderBackgroundLayer()` only running while
+    `RenderLeftFrame()` did, i.e. while `CMainFrameWindow` itself was visible — no longer true, so
+    `SyncDocVisibility()` now gates `m_pRmlBgDoc` the same `IsVisible() && sceneAllowsShow` way it
+    already gated `m_pRmlDoc`). The inventory-family windows never had this problem — each one's
+    own `SyncRmlModel()` already explicitly `Show()`/`Hide()`s its bg doc off its own `IsVisible()`,
+    independent of who calls `RenderBackgroundLayer()`.
+  - **Correction, 2026-09-13**: the first version of this centralization put the call directly in
+    `CManager::Render()` unconditionally, which broke login/character-select — an empty background
+    panel (no title/buttons, since those live in the foreground context and stay hidden) briefly
+    appeared over those scenes. Root cause: `RmlUiRuntime`'s background context is a single
+    app-lifetime singleton, but **two** `CManager` instances exist —
+    `CSystem::m_pNewUIMng` (app-lifetime, owns the inventory family + `CMainFrameWindow`, `Update()`/
+    `Render()` only ever called during `MAIN_SCENE`) and `CSceneUICoordinator::m_NewStyleMng` (a
+    second, scene-scoped instance driving login/character-scene windows migrating off `CWin`, e.g.
+    `CSysMenuWin`, `CCreditWin`). `CreateBackgroundDocument()` `Show()`s eagerly at `CSystem::Create()`
+    time (app startup, before the login scene even renders) and nothing ever `Hide()`s those
+    documents until `m_pNewUIMng`'s own `Update()` first runs (`MAIN_SCENE` only) — so putting the
+    call unconditionally in `CManager::Render()` made `m_NewStyleMng.Render()` (which *does* run
+    during login/character-select) paint `m_pNewUIMng`'s windows' stale, still-default-positioned
+    background docs into the wrong scene. Fixed with an explicit opt-in,
+    `CManager::SetDrivesBackgroundLayer(bool)`, called `true` only on `m_pNewUIMng`
+    (`CSystem::Create()`) — `m_NewStyleMng` defaults to `false` and never fires the call. Any future
+    additional `CManager` instance defaults to not driving this layer; opt in explicitly only if its
+    own windows actually load documents into the background context.
+  - ~~Not yet done (Phase 2, deliberately deferred): generalizing the one proven call site into
     a single insertion point inside `mu::ui::window::CManager::Render()`'s own z-sorted loop (gated on
     crossing `INVENTORY_CAMERA_Z_ORDER`, 5.5 — every `mu::ui::window::C3DCamera` z-order, unlike every
     2D-chrome window's, not yet audited project-wide) so every window on `mu::ui::window::C3DRenderMng`
     benefits automatically instead of each one wiring its own `RenderBackgroundLayer()` call.
     Ship this when the first inventory-family window's own port actually needs it, not
-    speculatively ahead of that — `component-catalog.md` §26.
+    speculatively ahead of that — `component-catalog.md` §26.~~
   - Also caught and fixed while writing `check_rml_rcss_drift.py`'s test against this change: the
     checker pooled every `.Bind()`/`.BindEventCallback()`/`GetElementById()` call in a `.cpp` file
     into *every* document that file loads — silently correct as long as no file owned more than

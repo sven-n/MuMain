@@ -283,10 +283,8 @@ bool CTrade::Render()
     ::EnableAlphaTest();
 
     // Frame background panel is RmlUi, routed through the background context (see
-    // TradeBgRmlModel). The behind-3D-icons ordering is enforced by RenderBackgroundLayer()
-    // running before Render3D(), not by call order here.
-    RmlUiRuntime::Instance().RenderBackgroundLayer();
-
+    // TradeBgRmlModel), painted by CManager::Render()'s centralized RenderBackgroundLayer() call
+    // before this window's own Render()/Render3D() run.
     RenderGuildMark();
 
     if (m_pYourInvenCtrl)
