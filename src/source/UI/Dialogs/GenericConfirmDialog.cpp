@@ -298,18 +298,13 @@ void CGenericConfirmDialog::ShowNext()
 
 void CGenericConfirmDialog::Resolve(bool primary)
 {
-    if (m_pRmlDoc)
-        m_pRmlDoc->Hide();
-    if (m_pRmlBgDoc)
-        m_pRmlBgDoc->Hide();
-
-    // Same cleanup CUIPopup::Close() does for its own POPUP_INPUT case -- release the shared
-    // widget/IME state so the next window to use g_pSingleTextInputBox doesn't inherit it.
-    if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::Text)
-        ResetInputWidgetState();
+    m_bKeepOpenRequested = false;
 
     // Move out before invoking -- the callback may itself call Show() (e.g. chaining a follow-up
     // confirm), which must not stomp m_Active while its own onPrimary/onSecondary still needs it.
+    // Deliberately BEFORE hiding/ShowNext() now (see KeepOpen()'s own comment): a callback that
+    // vetoes via KeepOpen() needs nothing touched yet -- not the RmlUi documents, not the native
+    // Mode::Text widget, not the queue.
     GenericDialogConfig cfg = std::move(m_Active);
     if (primary)
     {
@@ -319,6 +314,25 @@ void CGenericConfirmDialog::Resolve(bool primary)
     {
         if (cfg.onSecondary) cfg.onSecondary();
     }
+
+    if (m_bKeepOpenRequested)
+    {
+        // Validation failed -- put everything back exactly as it was. m_pRmlDoc/m_pRmlBgDoc were
+        // never hidden and m_bActive was never touched, so as far as anything else can tell this
+        // Resolve() call never happened.
+        m_Active = std::move(cfg);
+        return;
+    }
+
+    if (m_pRmlDoc)
+        m_pRmlDoc->Hide();
+    if (m_pRmlBgDoc)
+        m_pRmlBgDoc->Hide();
+
+    // Same cleanup CUIPopup::Close() does for its own POPUP_INPUT case -- release the shared
+    // widget/IME state so the next window to use g_pSingleTextInputBox doesn't inherit it.
+    if (cfg.input && cfg.input->mode == GenericDialogConfig::InputField::Mode::Text)
+        ResetInputWidgetState();
 
     ShowNext();
 }
@@ -363,6 +377,21 @@ void CGenericConfirmDialog::UpdateTextInputWidget()
     config.textLimit = field.maxLength;
     config.password = field.masked;
     config.options = field.numericOnly ? UIOPTION_NUMBERONLY : UIOPTION_NULL;
+    // InputBoxConfig's default text color is opaque BLACK -- invisible against this dialog's own
+    // dark panel fill. Same gotcha CharMakeWin.cpp's own #input_text_anchor field already hit and
+    // documented; matches LoginWin.cpp's/CharMakeWin.cpp's own light-cream convention instead of
+    // rediscovering a third color. Also gives the field a visible recessed background (this
+    // dialog's anchor has no CSS frame of its own the way CharMakeWin's native input row does --
+    // same dark fill `.gcd-progress-track` already uses elsewhere in this same panel) so the field
+    // reads as a clickable box even before the user types anything.
+    config.textAlpha = 255;
+    config.textR = 255;
+    config.textG = 230;
+    config.textB = 210;
+    config.backAlpha = 255;
+    config.backR = 0x10;
+    config.backG = 0x0c;
+    config.backB = 0x06;
     g_pSingleTextInputBox->Configure(config);
     g_pSingleTextInputBox->GiveFocus();
     g_pSingleTextInputBox->DoAction();

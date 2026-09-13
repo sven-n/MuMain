@@ -561,7 +561,6 @@ void CCastleWindow::UpdateStatueManagingTab()
 
 void CCastleWindow::UpdateTaxManagingTab()
 {
-    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnApplyTax.UpdateMouseEvent() == true)
     {
@@ -581,8 +580,32 @@ void CCastleWindow::UpdateTaxManagingTab()
     }
     else if (m_BtnWithdraw.UpdateMouseEvent() == true)
     {
-        SetCurrMsgBoxRequest(CASTLE_MSGREQ_WITHDRAW);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleWithdrawMsgBoxLayout), &pMsgBox);
+        // Was CCastleWithdrawMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text amount
+        // entry, ported 2026-09-14. Reads its own typed amount directly (GetInputText()), not via
+        // ExecuteCastleMsgBoxRequest()'s generic switch -- that helper only covers the 10 plain
+        // OK/Cancel castle dialogs already ported, none of which need input.
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::EnterTheWithdrawalAmount, false },
+            { I18N::Game::Maximum15000000Zen, false },
+        };
+        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+        cfg.input->maxLength = 8;
+        cfg.input->numericOnly = true;
+        cfg.onPrimary = []
+        {
+            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+            const DWORD dwInputZen = strText.empty() ? 0 : static_cast<DWORD>(_wtoi(strText.c_str()));
+            if (dwInputZen == 0)
+            {
+                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                return;
+            }
+            g_SenatusInfo.DoWithdrawAction(dwInputZen);
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnChaosTaxUp.UpdateMouseEvent() == true)
     {

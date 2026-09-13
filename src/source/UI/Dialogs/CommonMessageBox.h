@@ -251,9 +251,10 @@ namespace mu::ui::window
     // CPersonalShopItemBuyMsgBoxLayout, CGambleBuyMsgBoxLayout ported to CGenericConfirmDialog --
     // see docs/rmlui-ui-system/dialog-migration-plan.md.
 
-    // Still native: chained from CPersonalShopItemValueMsgBoxLayout (CustomMessageBox.h, a
-    // text-input dialog not yet ported), which calls SetItemValue() on the instance it creates --
-    // needs a numeric price-value widget on GenericDialogConfig before this one can be ported too.
+    // Still native: chained from ShowPersonalShopItemValueDialog() (MyShopInventory.cpp -- was
+    // CPersonalShopItemValueMsgBoxLayout, CustomMessageBox.h, ported 2026-09-14), which calls
+    // SetItemValue() on the instance it creates -- needs a numeric price-value widget on
+    // GenericDialogConfig before this one can be ported too.
     class CPersonalShopItemValueCheckMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:

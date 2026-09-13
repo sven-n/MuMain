@@ -806,11 +806,16 @@ per class):
     were still sitting at its untranslated `left:50%;top:50%` spot. Fixed by subtracting half of
     `#panel`'s own box size from the raw offset before converting to reference space; this fix is
     independent of the `Render3D()`/`RenderItem3DOnTop()` back-and-forth above and stays either way.
-  - No consuming dialog class has been ported onto `title`/`input`/`progress` yet (`item3D` has 5,
-    see below) — every field still defaults to unset, so pre-existing call sites are unaffected.
-    See `dialog-migration-plan.md`'s own entry for what's deliberately out of scope (the older
-    `g_iChatInputType == 0` input path; input-row/keypad/progress-bar layout geometry not yet
-    visually verified against a real consumer).
+  - No consuming dialog class has been ported onto `title`/`progress` yet (`item3D` has 5,
+    `input.Mode::Text` has 9 as of 2026-09-14 -- see `dialog-migration-plan.md`'s "Text input"
+    entry -- `Mode::NumericKeypad` still has none) -- every unconsumed field still defaults to
+    unset, so pre-existing call sites are unaffected. See `dialog-migration-plan.md`'s own entry
+    for what's deliberately out of scope (the older `g_iChatInputType == 0` input path;
+    input-row/keypad/progress-bar layout geometry not yet visually verified against a real
+    consumer). Porting `input.Mode::Text` also surfaced a real primitive gap, now closed:
+    `CGenericConfirmDialog::KeepOpen()`, letting `onPrimary`/`onSecondary` veto a click's
+    `Resolve()` (native's own `CALLBACK_CONTINUE` convention for invalid input) -- see that entry
+    for the full writeup.
 - **`CustomMessageBox.h`** — ~76 classes on the same pattern. **2 done** (2026-09-13):
   `CDialogMsgBoxLayout`/`CDialogMsgBox` (the one near-miss that already fit as-is) and
   `CreateOkMessageBox()` (a third, previously-untracked OK-only helper, ~90 call sites migrated via

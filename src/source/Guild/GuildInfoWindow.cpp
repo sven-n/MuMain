@@ -13,6 +13,7 @@
 #include "Engine/Object/ZzzInterface.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Engine/Object/ZzzInfomation.h"
+#include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- CGuildBreakPasswordMsgBoxLayout's own maxLength
 #include "I18N/All.h"
 
 #include "Character/CharacterManager.h"
@@ -26,6 +27,42 @@ extern MARK_t GuildMark[MAX_MARKS];
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+namespace
+{
+    // Was CGuildBreakPasswordMsgBoxLayout (CustomMessageBox.h) -- a masked (bIsPassword=true),
+    // non-numeric-restricted Mode::Text WEBZEN.COM password entry, ported 2026-09-14. Shared across
+    // this file's 3 call sites (guild-disband, leave-guild, kick-member), all of which already set
+    // the global `DeleteIndex` right before showing this. Unlike the other masked-password dialogs
+    // in this batch, native's own ProcessOk does NOT return CALLBACK_CONTINUE on empty input -- it
+    // always closes, just logs an error message -- so this one deliberately never calls KeepOpen().
+    void ShowGuildBreakPasswordDialog()
+    {
+        GenericDialogConfig cfg;
+        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::IfYouWantToLeaveYourGuild, false },
+            { I18N::Game::PleaseEnterYourWEBZENCOMPassword, false },
+        };
+        cfg.input = GenericDialogConfig::InputField{};
+        cfg.input->mode = GenericDialogConfig::InputField::Mode::Text;
+        cfg.input->maxLength = g_iLengthAuthorityCode;
+        cfg.input->masked = true;
+        cfg.onPrimary = []
+        {
+            const std::wstring strText = g_pGenericConfirmDialog->GetInputText();
+            if (!strText.empty())
+            {
+                SocketClient->ToGameServer()->SendGuildKickPlayerRequest(MU_C16(GuildList[DeleteIndex].Name), MU_C16(strText.c_str()));
+            }
+            else
+            {
+                g_pSystemLogBox->AddText(I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, mu::ui::window::TYPE_ERROR_MESSAGE);
+            }
+        };
+        g_pGenericConfirmDialog->Show(std::move(cfg));
+    }
+}
 
 void RenderText(wchar_t* text, int x, int y, int sx, int sy, DWORD color, DWORD backcolor, int sort)
 {
@@ -235,7 +272,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                     };
                     cfg.onPrimary = []
                     {
-                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
+                        ShowGuildBreakPasswordDialog();
                     };
                     mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
@@ -243,7 +280,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
             else
             {
                 DeleteIndex = GetGuildMemberIndex(Hero->ID);
-                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
+                ShowGuildBreakPasswordDialog();
             }
         }
     }
@@ -270,7 +307,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                             };
                             cfg.onPrimary = []
                             {
-                                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
+                                ShowGuildBreakPasswordDialog();
                             };
                             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                         }

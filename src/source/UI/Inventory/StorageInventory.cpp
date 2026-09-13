@@ -10,8 +10,10 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Inventory/MyInventory.h"
+#include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- CStorageUnlockMsgBoxLayout's own maxLength
 
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
 #include "GameShop/MsgBoxIGSCommon.h"
@@ -96,18 +98,111 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                 c.BindEventCallback("storage_insert_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
-                        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenReceiptMsgBoxLayout));
+                        // Was CZenReceiptMsgBoxLayout (CustomMessageBox.h).
+                        mu::ui::window::GenericDialogConfig cfg;
+                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit, false } };
+                        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+                        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+                        cfg.input->maxLength = 8;
+                        cfg.input->numericOnly = true;
+                        cfg.onPrimary = []
+                        {
+                            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                            const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                            if (iInputZen == 0)
+                            {
+                                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                                return;
+                            }
+                            if (iInputZen <= (int)CharacterMachine->Gold)
+                            {
+                                SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
+                                    VaultMoneyMoveDirection::InventoryToVault, iInputZen);
+                            }
+                            else
+                            {
+                                mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+                            }
+                        };
+                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                     });
                 c.BindEventCallback("storage_take_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
-                        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CZenPaymentMsgBoxLayout));
+                        // Was CZenPaymentMsgBoxLayout (CustomMessageBox.h). The insufficient-storage-
+                        // gold branch still chains into the still-native CPasswordKeyPadMsgBoxLayout
+                        // (a numeric keypad dialog -- separate batch, unaffected by this port).
+                        mu::ui::window::GenericDialogConfig cfg;
+                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw, false } };
+                        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+                        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+                        cfg.input->maxLength = 8;
+                        cfg.input->numericOnly = true;
+                        cfg.onPrimary = []
+                        {
+                            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                            const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                            if (iInputZen == 0)
+                            {
+                                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                                return;
+                            }
+                            if (iInputZen <= CharacterMachine->StorageGold
+                                && CharacterMachine->Gold + iInputZen <= 2000000000)
+                            {
+                                if (!g_pStorageInventory->IsStorageLocked() || g_pStorageInventory->IsCorrectPassword())
+                                {
+                                    SocketClient->ToGameServer()->SendVaultMoveMoneyRequest(
+                                        VaultMoneyMoveDirection::VaultToInventory, iInputZen);
+                                }
+                                else
+                                {
+                                    g_pStorageInventory->SetBackupTakeZen(iInputZen);
+                                    mu::ui::window::CreateMessageBox(
+                                        MSGBOX_LAYOUT_CLASS(mu::ui::window::CPasswordKeyPadMsgBoxLayout));
+                                }
+                            }
+                            else if (CharacterMachine->Gold + iInputZen > 2000000000)
+                            {
+                                // Silent no-op, matching native -- still closes.
+                            }
+                            else
+                            {
+                                mu::ui::window::CreateOkMessageBox(I18N::Game::YouAreShortOfZen);
+                            }
+                        };
+                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                     });
                 c.BindEventCallback("storage_lock_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
                         if (m_bLock)
-                            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageUnlockMsgBoxLayout));
+                        {
+                            // Was CStorageUnlockMsgBoxLayout (CustomMessageBox.h).
+                            mu::ui::window::GenericDialogConfig cfg;
+                            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                            cfg.lines = {
+                                { I18N::Game::WarehouseLockUnlock, false },
+                                { I18N::Game::EnterYourWEBZENCOMPassword697, false },
+                            };
+                            cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+                            cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+                            cfg.input->maxLength = g_iLengthAuthorityCode;
+                            cfg.input->masked = true;
+                            cfg.onPrimary = []
+                            {
+                                const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                                if (strText.empty())
+                                {
+                                    mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                                    return;
+                                }
+                                SocketClient->ToGameServer()->SendRemoveVaultPin(MU_C16(strText.c_str()));
+                            };
+                            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+                        }
                         else
                             CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockKeyPadMsgBoxLayout));
                     });

@@ -180,7 +180,7 @@ every `CommonMessageBox.h` class this plan originally classified as FITS — not
 or delete in that file. `CustomMessageBox.h`'s ~76 classes (see below) and the other tracked
 subsystems (`CUIPopup`, `GameShop/MsgBoxIGS*.h`) remain.
 
-## `GenericDialogConfig` extensions — done (2026-09-13); `item3D` now has 5 consumers, `title`/`severity`/`input`/`progress` still don't
+## `GenericDialogConfig` extensions — done (2026-09-13); `item3D` (5) and `input.Mode::Text` (9) now have consumers, `title`/`severity`/`input.Mode::NumericKeypad`/`progress` still don't
 
 `GenericDialogConfig`/`CGenericConfirmDialog` (`UI/Dialogs/GenericConfirmDialog.h/.cpp`) grew
 optional `title`, `severity` (Normal/Warning/Error, look-and-feel only), `input`
@@ -215,9 +215,16 @@ shop's own foreground content, because the shared background context every other
 uses renders once, globally, before any window's own 2D content, not just this dialog's. Fixed for
 real with a third, dedicated `Rml::Context` for this dialog's own panel, rendered at a precise point
 in `CManager::Render()`'s own z-sorted loop (right before the shared 3D camera's turn) rather than
-the generic background-layer hook. `title`/`severity`/`input`/`progress` remain **infrastructure
-only** — no consuming class ported onto any of them yet, every field still defaults to unset/empty,
-so every already-ported call site (item3D included) is unaffected by that.
+the generic background-layer hook. `title`/`severity`/`progress` remain **infrastructure only** —
+no consuming class ported onto either yet, every field still defaults to unset/empty, so every
+already-ported call site is unaffected by that.
+
+**`input.Mode::Text` is now also proven end-to-end (2026-09-14)**: all 9 `CTextInputMsgBox`-derived
+classes (see "Text input" below) consume it. This surfaced one real primitive gap:
+`CGenericConfirmDialog::KeepOpen()`, letting `onPrimary`/`onSecondary` veto a click's `Resolve()`
+for input validation failures, matching every native `OkBtnDown`'s own `CALLBACK_CONTINUE`
+convention — see that section's own writeup. `Mode::NumericKeypad` still has zero consumers (the
+"Numeric keypad" batch below is separate, unstarted work).
 
 ## `CommonMessageBox.h` — 3D-item-preview classes (6 classes)
 
@@ -278,11 +285,53 @@ before starting real work here; don't trust the exact class list below as final.
     the signature so no caller needed touching. Confirmed via grep that no caller anywhere uses
     the `bool` return value, so it now unconditionally returns `true`. Build + both RmlUi
     verification scripts passed.
-- **Text input** (`CTextInputMsgBox`-based) — `GenericDialogConfig::InputField::Mode::Text` now
-  exists (see "`GenericDialogConfig` extensions" above); porting these is unblocked, not designed
-  from scratch: `CTradeZenMsgBoxLayout`, `CZenReceiptMsgBoxLayout`, `CZenPaymentMsgBoxLayout`,
-  `CPersonalShopItemValueMsgBoxLayout`, `CPersonalShopNameMsgBoxLayout`, `CCastleWithdrawMsgBoxLayout`,
-  `CStorageLockMsgBoxLayout`, `CStorageUnlockMsgBoxLayout`, `CGuildBreakPasswordMsgBoxLayout`.
+- **Text input** (`CTextInputMsgBox`-based) — **done (2026-09-14)**: all 9 classes ported onto
+  `GenericDialogConfig::InputField::Mode::Text` (`CTradeZenMsgBoxLayout` — `Trade.cpp`;
+  `CZenReceiptMsgBoxLayout`/`CZenPaymentMsgBoxLayout`/`CStorageUnlockMsgBoxLayout` —
+  `StorageInventory.cpp`; `CPersonalShopItemValueMsgBoxLayout` — factored into a shared
+  `ShowPersonalShopItemValueDialog()` free function (`MyShopInventory.h`/`.cpp`), since 3 of its 4
+  call sites already live there (the 4th, `ZzzInventory.cpp`'s `OpenPersonalShopMsgWnd(2)`, is
+  unreachable in practice — its only caller always passes 1 — but was still updated to keep the
+  function compiling); `CPersonalShopNameMsgBoxLayout` — `ZzzInventory.cpp`;
+  `CCastleWithdrawMsgBoxLayout` — `CastleWindow.cpp` (reads its own typed amount directly, not via
+  `ExecuteCastleMsgBoxRequest()`'s generic switch, since none of that switch's 10 existing cases
+  need input); `CStorageLockMsgBoxLayout` — chained from the still-native
+  `CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown` (`CustomMessageBox.cpp`, unchanged — a PIN-entry
+  keypad dialog, separate "Numeric keypad" batch below), which now captures the just-entered 4-digit
+  PIN directly in the closure instead of round-tripping it through
+  `CTextInputMsgBox::SetPassword()`/`GetPassword()`; `CGuildBreakPasswordMsgBoxLayout` — factored
+  into a shared `ShowGuildBreakPasswordDialog()` file-local helper (`GuildInfoWindow.cpp`) for its 3
+  call sites. `CTextInputMsgBox` itself (the now-unused native base class) and its own
+  `INPUTBOX_TYPE_NUMBER`/`_TEXT`/`INPUTBOX_WIDTH`/`_HEIGHT`/`_TEXTLIMIT` constants were deleted too
+  (grep-confirmed dead once all 9 subclasses were gone). Build + both RmlUi verification scripts
+  passed.
+  - **Primitive extension needed, `CGenericConfirmDialog::KeepOpen()`**: every native
+    `CTextInputMsgBox`-derived `OkBtnDown`/`ReturnDown` validates its typed input (empty field, a
+    zero/unparsed amount) and returns `CALLBACK_CONTINUE` — leaving its own MsgBox open for the
+    user to retry — rather than closing unconditionally like every plain-text confirm dialog does.
+    `GenericConfirmDialog` had no equivalent, so `onPrimary`/`onSecondary` can now call
+    `g_pGenericConfirmDialog->KeepOpen()` to veto that click's `Resolve()`: nothing gets
+    hidden/reset/advanced, `m_Active` is restored exactly as it was, as if the click never
+    happened. Used by 7 of the 9 classes in this batch (checked per-class against its own native
+    `ProcessOk` — not assumed uniform: `CGuildBreakPasswordMsgBoxLayout` specifically does NOT veto
+    on empty input, it always closes and just logs an error message, so it deliberately never calls
+    `KeepOpen()`). One known, accepted simplification: native only plays `SOUND_CLICK01` on the
+    success path, never on a `CALLBACK_CONTINUE` retry, while `CGenericConfirmDialog::Update()`
+    plays it unconditionally before `Resolve()` even knows whether `onPrimary` will veto —
+    cosmetic-only (an extra click sound on a failed retry), not worth plumbing sound timing through
+    the veto path for.
+  - Per-class WEBZEN.COM password fields (`CStorageLockMsgBoxLayout`/`CStorageUnlockMsgBoxLayout`/
+    `CGuildBreakPasswordMsgBoxLayout`) are `masked = true` but deliberately NOT `numericOnly` —
+    confirmed against native: despite `Create()`'s `dwInputType` parameter being
+    `INPUTBOX_TYPE_NUMBER` for all three, none of them ever called
+    `SetInputBoxOption(UIOPTION_NUMBERONLY | ...)` the way every zen-amount dialog does, so real
+    (alphanumeric) WEBZEN passwords were never actually digit-restricted natively either.
+  - Every dialog in this batch reuses `GenericConfirmDialog.cpp`'s existing fixed real-pixel input
+    widget size (`kInputFieldWidth`/`kInputFieldHeight` = 150x18) regardless of native's own
+    per-class width (native varies 50-130 reference px, plus a `g_iLengthAuthorityCode`-scaled width
+    for the 3 password fields) — same "one struct, not per-dialog geometry" simplification as
+    `progress`/`title`, not yet visually verified in-game against a real consumer (this is the
+    first batch to actually exercise `Mode::Text` at all).
 - **Numeric keypad** (`CKeyPadMsgBox`-based) — `Mode::NumericKeypad` now exists too, same status:
   `CPasswordKeyPadMsgBoxLayout`, `CStorageLockKeyPadMsgBoxLayout`,
   `CStorageLockCheckKeyPadMsgBoxLayout`, `CStorageLockFinalKeyPadMsgBoxLayout`,

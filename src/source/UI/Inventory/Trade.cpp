@@ -114,8 +114,27 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
                 c.BindEventCallback("trade_zen_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
-                        mu::ui::window::CreateMessageBox(
-                            MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeZenMsgBoxLayout));
+                        // Was CTradeZenMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text
+                        // amount entry, same shape as every other zen-input dialog in this batch.
+                        mu::ui::window::GenericDialogConfig cfg;
+                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade, false } };
+                        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+                        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+                        cfg.input->maxLength = 8;
+                        cfg.input->numericOnly = true;
+                        cfg.onPrimary = [this]
+                        {
+                            const std::wstring strText = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+                            const int iInputZen = strText.empty() ? 0 : _wtoi(strText.c_str());
+                            if (iInputZen == 0)
+                            {
+                                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                                return;
+                            }
+                            SendRequestMyGoldInput(iInputZen);
+                        };
+                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                         ::PlayBuffer(SOUND_CLICK01);
                     });
                 c.BindEventCallback("trade_my_confirm_click",

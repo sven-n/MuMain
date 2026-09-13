@@ -171,6 +171,13 @@ namespace mu::ui::window
     {
         return m_TargetIndex;
     }
+
+    // Shows the "enter selling price" GenericConfirmDialog -- was CPersonalShopItemValueMsgBoxLayout
+    // (CustomMessageBox.h), ported 2026-09-14. Factored out as a free function since 3 of its 4
+    // call sites already live in this file and 1 lives in ZzzInventory.cpp. Caller must already
+    // have ChangeSourceIndex()/ChangeTargetIndex() set for the item being priced -- same
+    // precondition every native call site already satisfied.
+    void ShowPersonalShopItemValueDialog();
 }
 
 #endif // !defined(AFX_NEWUIMYSHOPINVENTORY_H__A0C3DD4A_C4D5_4CF2_9702_DF54540DB6FD__INCLUDED_)

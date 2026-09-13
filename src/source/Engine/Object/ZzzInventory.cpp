@@ -40,6 +40,7 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Inventory/InventoryCtrl.h"
+#include "UI/Inventory/MyShopInventory.h" // ShowPersonalShopItemValueDialog
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/SocketSystem.h"
 #include "World/MapInfra/PortalMgr.h"
@@ -10683,11 +10684,41 @@ void OpenPersonalShopMsgWnd(int iMsgType)
 {
     if (iMsgType == 1)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalShopNameMsgBoxLayout));
+        // Was CPersonalShopNameMsgBoxLayout (CustomMessageBox.h) -- a plain (non-numeric,
+        // non-masked) Mode::Text entry, ported 2026-09-14.
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = { { I18N::Game::EnterStoreName, false } };
+        cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
+        cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
+        cfg.input->maxLength = 28;
+        cfg.onPrimary = []
+        {
+            const std::wstring strTextW = mu::ui::window::g_pGenericConfirmDialog->GetInputText();
+            if (strTextW.empty())
+            {
+                mu::ui::window::g_pGenericConfirmDialog->KeepOpen();
+                return;
+            }
+            const wchar_t* strText = strTextW.c_str();
+            if (IsCorrectShopTitle(strText))
+            {
+                wcscpy(g_szPersonalShopTitle, strText);
+            }
+            else
+            {
+                g_pSystemLogBox->AddText(I18N::Game::WrongStoreName, mu::ui::window::TYPE_SYSTEM_MESSAGE);
+            }
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (iMsgType == 2)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalShopItemValueMsgBoxLayout));
+        // Unreachable in practice (this function's only caller always passes 1), kept in parity
+        // with this function's own original shape -- was CPersonalShopItemValueMsgBoxLayout, now
+        // ShowPersonalShopItemValueDialog() (MyShopInventory.h), same as MyShopInventory.cpp's own
+        // 3 real call sites.
+        mu::ui::window::ShowPersonalShopItemValueDialog();
     }
 }
 bool IsCorrectShopTitle(const wchar_t* szShopTitle)

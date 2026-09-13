@@ -5,7 +5,9 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h" // C3DItemCommonMsgBox, CPersonalShopItemValueCheckMsgBoxLayout
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Core/WindowCommon.h" // g_IsPurchaseShop
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
 
@@ -38,6 +40,122 @@ namespace
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+void mu::ui::window::ShowPersonalShopItemValueDialog()
+{
+    // Was CPersonalShopItemValueMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text price
+    // entry, ported 2026-09-14. See MyShopInventory.h's own declaration comment for why this is a
+    // free function shared across all 4 call sites instead of duplicated per site.
+    GenericDialogConfig cfg;
+    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.lines = { { I18N::Game::EnterSellingPrice, false } };
+    cfg.input = GenericDialogConfig::InputField{};
+    cfg.input->mode = GenericDialogConfig::InputField::Mode::Text;
+    cfg.input->maxLength = 8;
+    cfg.input->numericOnly = true;
+
+    cfg.onPrimary = []
+    {
+        const std::wstring strTextW = g_pGenericConfirmDialog->GetInputText();
+        if (strTextW.empty())
+        {
+            g_pGenericConfirmDialog->KeepOpen();
+            return;
+        }
+        const int iInputZen = _wtoi(strTextW.c_str());
+        if (iInputZen == 0)
+        {
+            g_pGenericConfirmDialog->KeepOpen();
+            return;
+        }
+        const wchar_t* strText = strTextW.c_str();
+
+        CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
+        ITEM* pItem = NULL;
+        if (pPickedItem)
+        {
+            pItem = pPickedItem->GetItem();
+        }
+        else
+        {
+            int iSourceIndex = g_pMyShopInventory->GetSourceIndex();
+            pItem = g_pMyShopInventory->FindItem(iSourceIndex);
+        }
+
+        bool bResult = false;
+        if (pItem)
+        {
+            DWORD dwItemValue = ItemValue(pItem, 2);
+            if (iInputZen < (int)dwItemValue)
+                bResult = true;
+        }
+
+        if (bResult == true)
+        {
+            C3DItemCommonMsgBox* lpMsgBox = NULL;
+            CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueCheckMsgBoxLayout), &lpMsgBox);
+            if (lpMsgBox)
+            {
+                wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
+                mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
+                lpMsgBox->AddMsg(strText2, RGBA(255, 0, 0, 255), MSGBOX_FONT_BOLD);
+                lpMsgBox->AddMsg(I18N::Game::DoYouWantToSellItemAtThisPrice);
+                lpMsgBox->SetItemValue(iInputZen);
+            }
+        }
+        else
+        {
+            if (g_pMyShopInventory->IsEnablePersonalShop() == true)
+            {
+                SocketClient->ToGameServer()->SendPlayerShopClose();
+            }
+
+            CPickedItem* pPickedItem2 = CInventoryCtrl::GetPickedItem();
+
+            int iSourceIndex = -1, iTargetIndex = -1;
+
+            if (pPickedItem2)
+            {
+                ITEM* pItemObj = pPickedItem2->GetItem();
+                iSourceIndex = pPickedItem2->GetSourceLinealPos();
+                iTargetIndex = g_pMyShopInventory->GetTargetIndex();
+
+                if (pPickedItem2->GetOwnerInventory() == g_pMyInventory->GetInventoryCtrl())
+                {
+                    SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                    SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
+                }
+                else if (pPickedItem2->GetOwnerInventory() == nullptr)
+                {
+                    SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                    SendRequestEquipmentItem(STORAGE_TYPE::INVENTORY, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
+                }
+                else if (pPickedItem2->GetOwnerInventory() == g_pMyShopInventory->GetInventoryCtrl())
+                {
+                    SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                    SendRequestEquipmentItem(STORAGE_TYPE::MYSHOP, iSourceIndex, pItemObj, STORAGE_TYPE::MYSHOP, iTargetIndex);
+                }
+
+                AddPersonalItemPrice(iTargetIndex, iInputZen, g_IsPurchaseShop);
+            }
+            else
+            {
+                iSourceIndex = g_pMyShopInventory->GetSourceIndex();
+                SocketClient->ToGameServer()->SendPlayerShopSetItemPrice(iSourceIndex, iInputZen);
+                AddPersonalItemPrice(iSourceIndex, iInputZen, g_IsPurchaseShop);
+            }
+        }
+
+        g_pMyShopInventory->SetInputValueTextBox(false);
+    };
+    cfg.onSecondary = []
+    {
+        CInventoryCtrl::BackupPickedItem();
+        g_pMyShopInventory->SetInputValueTextBox(false);
+    };
+
+    g_pGenericConfirmDialog->Show(std::move(cfg));
+}
 
 mu::ui::window::CMyShopInventory::CMyShopInventory() : m_SourceIndex(-1), m_TargetIndex(-1), m_EnablePersonalShop(false)
 {
@@ -357,7 +475,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
                 ChangeSourceIndex(iSourceIndex);
                 ChangeTargetIndex(iTargetIndex);
 
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
+                ShowPersonalShopItemValueDialog();
                 SetInputValueTextBox(true);
 
                 pPickedItem->HidePickedItem();
@@ -377,7 +495,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
                 ChangeSourceIndex(iSourceIndex);
                 ChangeTargetIndex(iTargetIndex);
 
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
+                ShowPersonalShopItemValueDialog();
                 SetInputValueTextBox(true);
 
                 pPickedItem->HidePickedItem();
@@ -412,7 +530,7 @@ bool mu::ui::window::CMyShopInventory::MyShopInventoryProcess()
             {
                 ChangeSourceIndex(iCurSquareIndex);
                 ChangeTargetIndex(-1);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(CPersonalShopItemValueMsgBoxLayout));
+                ShowPersonalShopItemValueDialog();
                 SetInputValueTextBox(true);
             }
             return true;

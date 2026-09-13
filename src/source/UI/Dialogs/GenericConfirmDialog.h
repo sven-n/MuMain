@@ -189,6 +189,16 @@ namespace mu::ui::window
         // pMsgBox->GetInputBoxText()/GetInputText() from its own OK handler.
         std::wstring GetInputText() const;
 
+        // Call from `onPrimary`/`onSecondary` to veto this click's Resolve() -- the dialog stays
+        // open exactly as it was (nothing hidden, m_bActive/m_Active untouched, the native
+        // Mode::Text widget untouched) instead of closing/advancing the queue. Matches every native
+        // CTextInputMsgBox-derived OkBtnDown/ReturnDown's own "return CALLBACK_CONTINUE" convention
+        // for invalid input (empty field, a zero/unparsed amount) -- native leaves its own MsgBox
+        // open for the user to retry instead of closing unconditionally like a plain-text confirm
+        // dialog does. Typically called after GetInputText() fails validation, right before
+        // returning from `onPrimary`.
+        void KeepOpen() { m_bKeepOpenRequested = true; }
+
         // Called from Winmain.cpp's SetPostRmlUiCallback, after RmlUi's main context composites --
         // NOT from the normal CManager-driven Render() below (that always runs before RmlUi's own
         // composite, so anything drawn there gets painted over by #panel's opaque background).
@@ -285,6 +295,10 @@ namespace mu::ui::window
         // inside the RmlUi callback itself, same convention as CMsgWin/RememberPasswordPrompt.
         bool m_bPrimaryClicked = false;
         bool m_bSecondaryClicked = false;
+
+        // See KeepOpen()'s own comment. Reset at the top of every Resolve() call, read at the
+        // bottom to decide whether to actually close.
+        bool m_bKeepOpenRequested = false;
 
         // NumericKeypad's own click-accumulated digit buffer (never the real keyboard focus) --
         // shuffled mapping reproduces CKeyPadMsgBox's own anti-shoulder-surfing behavior.

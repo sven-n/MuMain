@@ -9,12 +9,6 @@
 
 namespace mu::ui::window
 {
-    enum
-    {
-        INPUTBOX_TYPE_NUMBER,
-        INPUTBOX_TYPE_TEXT,
-    };
-
     enum KEYPAD_TYPE
     {
         KEYPAD_TYPE_MOVE = 1,
@@ -22,76 +16,6 @@ namespace mu::ui::window
         KEYPAD_TYPE_LOCK_FIRST = 3,
         KEYPAD_TYPE_LOCK_SECOND = 4,
         KEYPAD_TYPE_LOCK_FINAL = 5,
-    };
-
-    static constexpr float INPUTBOX_WIDTH = 50.0f;
-    static constexpr float INPUTBOX_HEIGHT = 12.0f;
-    static constexpr int INPUTBOX_TEXTLIMIT = 8;
-
-    class CTextInputMsgBox : public CMessageBoxBase
-    {
-        static constexpr float INPUTBOX_TOP_BLANK = 10.0f;
-
-        typedef struct _MSGBOX_TEXTDATA
-        {
-            std::wstring strMsg;
-            DWORD dwColor;
-            BYTE byFontType;
-
-            _MSGBOX_TEXTDATA()
-            {
-                strMsg = L"";
-                dwColor = 0xffffffff;
-                byFontType = MSGBOX_FONT_NORMAL;
-            }
-        } MSGBOX_TEXTDATA;
-
-        typedef std::vector<MSGBOX_TEXTDATA*> type_vector_msgdata;
-        typedef std::wstring type_string;
-
-    public:
-        CTextInputMsgBox();
-        virtual ~CTextInputMsgBox();
-
-        bool Create(DWORD dwMsgBoxType, DWORD dwInputType, int iInputBoxWidth = 100, int iInputBoxHeight = 14, int iLimitText = 256, bool bIsPassword = false);
-        void Release();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-
-        bool Update();
-        bool Render();
-
-        DWORD GetMsgBoxType();
-
-        void GetInputBoxText(wchar_t* strText);
-        void SetInputBoxOption(int iOption);
-        void SetInputBoxPosition(int x, int y);
-        void SetInputBoxSize(int width, int height);
-
-    private:
-        int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
-        void SetButtonInfo();
-        void AddButtonBlank(int iAddLine);
-        void RenderTexts();
-        void RenderButtons();
-
-        DWORD m_dwMsgBoxType;
-        DWORD m_dwInputType;
-
-        CUITextInputBox* m_pInputBox;
-        type_vector_msgdata m_MsgTextList;
-
-        CMessageBoxButton m_BtnOk;
-        CMessageBoxButton m_BtnCancel;
-
-    public:
-        void SetPassword(WORD password) { m_password = password; }
-        WORD GetPassword() { return m_password; }
-
-    private:
-        WORD m_password;
     };
 
     class CKeyPadButton : public CMessageBoxButton
@@ -976,94 +900,6 @@ namespace mu::ui::window
         int m_iMiddleCount;
     };
 
-    class CTradeZenMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner);
-    };
-
-    class CZenReceiptMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    private:
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CZenPaymentMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    private:
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CPersonalShopItemValueMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    private:
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CPersonalShopNameMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-        static constexpr float INPUT_WIDTH = 130.0f;
-        static constexpr float INPUT_HEIGHT = 12.0f;
-        static constexpr int INPUT_TEXTLIMIT = 28;
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CCastleWithdrawMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CStorageLockMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CStorageUnlockMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
     class CPasswordKeyPadMsgBoxLayout : public TMsgBoxLayout<CKeyPadMsgBox>
     {
     public:
@@ -1246,18 +1082,6 @@ namespace mu::ui::window
     {
     public:
         bool SetLayout();
-    };
-
-    class CGuildBreakPasswordMsgBoxLayout : public TMsgBoxLayout<CTextInputMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT ReturnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        static CALLBACK_RESULT ProcessOk(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
     };
 
     class CGuild_ToPerson_PositionLayout : public TMsgBoxLayout<CGuild_ToPerson_Position>
