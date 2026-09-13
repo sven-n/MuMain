@@ -815,7 +815,12 @@ per class):
     consumer). Porting `input.Mode::Text` also surfaced a real primitive gap, now closed:
     `CGenericConfirmDialog::KeepOpen()`, letting `onPrimary`/`onSecondary` veto a click's
     `Resolve()` (native's own `CALLBACK_CONTINUE` convention for invalid input) -- see that entry
-    for the full writeup.
+    for the full writeup. In-game-tested and confirmed working (2026-09-14) after fixing one bug
+    found only by that testing: the field was invisible at first (opaque-black default text color
+    against this dialog's own dark panel, the same gotcha `CharMakeWin.cpp` already hit and
+    documented) -- fixed with the same light-cream text color `LoginWin.cpp`/`CharMakeWin.cpp` use,
+    plus a visible dark recessed background fill since this dialog's anchor has no native sprite
+    frame of its own to give the field a visible affordance.
 - **`CustomMessageBox.h`** — ~76 classes on the same pattern. **2 done** (2026-09-13):
   `CDialogMsgBoxLayout`/`CDialogMsgBox` (the one near-miss that already fit as-is) and
   `CreateOkMessageBox()` (a third, previously-untracked OK-only helper, ~90 call sites migrated via

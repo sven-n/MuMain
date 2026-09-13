@@ -330,8 +330,18 @@ before starting real work here; don't trust the exact class list below as final.
     widget size (`kInputFieldWidth`/`kInputFieldHeight` = 150x18) regardless of native's own
     per-class width (native varies 50-130 reference px, plus a `g_iLengthAuthorityCode`-scaled width
     for the 3 password fields) — same "one struct, not per-dialog geometry" simplification as
-    `progress`/`title`, not yet visually verified in-game against a real consumer (this is the
-    first batch to actually exercise `Mode::Text` at all).
+    `progress`/`title`. In-game-tested (2026-09-14) and confirmed working, position included.
+  - **In-game-testing bug, 2026-09-14**: the field was completely invisible on first test (typed
+    text unreadable, no visible box at all) — `UpdateTextInputWidget()`'s `InputBoxConfig` never
+    overrode the text color, which defaults to opaque black, invisible against this dialog's own
+    dark panel fill. The exact same gotcha `CharMakeWin.cpp`'s own `#input_text_anchor` field
+    already hit and documented in its own code, just not one this new call site had inherited.
+    Fixed by setting the same light-cream text color `LoginWin.cpp`/`CharMakeWin.cpp` already use
+    (255,230,210), plus a visible dark recessed background fill (`.gcd-progress-track`'s own
+    `#100c06`, reused via the widget's own `backR/G/B/Alpha` rather than CSS) since -- unlike
+    those two windows, whose native sprite chrome frames the input row -- this dialog's anchor has
+    no visual frame of its own, so the field needs to paint its own affordance to read as a
+    clickable box at all.
 - **Numeric keypad** (`CKeyPadMsgBox`-based) — `Mode::NumericKeypad` now exists too, same status:
   `CPasswordKeyPadMsgBoxLayout`, `CStorageLockKeyPadMsgBoxLayout`,
   `CStorageLockCheckKeyPadMsgBoxLayout`, `CStorageLockFinalKeyPadMsgBoxLayout`,
