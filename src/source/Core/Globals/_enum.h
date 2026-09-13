@@ -140,6 +140,11 @@ enum INTERFACE_LIST
     // CCharInfoBalloonMng's thin adapter -- never a CWin, previously driven by direct
     // CUIMng calls rather than through any list at all; same reasoning as INTERFACE_CREDITS above.
     INTERFACE_CHAR_INFO_BALLOON,
+    // CGenericConfirmDialog (UI/Dialogs/GenericConfirmDialog.h) -- the reusable RmlUi confirm-
+    // dialog primitive, distinct from INTERFACE_MESSAGEBOX (the native CMessageBoxBase/
+    // CMessageBoxMng system it's meant to eventually replace). Inserted just before INTERFACE_END,
+    // same reasoning as INTERFACE_CREDITS above.
+    INTERFACE_GENERIC_CONFIRM_DIALOG,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

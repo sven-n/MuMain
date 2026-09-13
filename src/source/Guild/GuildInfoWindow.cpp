@@ -5,6 +5,7 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Audio/DSPlaySound.h"
 #include "UIGuildInfo.h"
 #include "UI/Widgets/UIControls.h"
@@ -215,12 +216,28 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
             {
                 if (!wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName))
                 {
-                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildOutPerson));
+                    // First proof case for CGenericConfirmDialog (see UI/Dialogs/GenericConfirmDialog.h) --
+                    // was CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildOutPerson)), an OK-only informational box.
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.lines.push_back({ I18N::Game::AllianceMasterCanTDisbandTheGuild, true });
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
                 else
                 {
                     DeleteIndex = GetGuildMemberIndex(Hero->ID);
-                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakMsgBoxLayout));
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.lines = {
+                        { I18N::Game::OnceYouDisbandTheGuild, true },
+                        { I18N::Game::AllTheItemsAndZenInTheGuildVaultWillDisappear, true },
+                        { I18N::Game::AlsoTheGuildRankingInformationWillDisappear, true },
+                        { I18N::Game::WouldYouLikeToDisbandTheGuild, true },
+                    };
+                    cfg.onPrimary = []
+                    {
+                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
             }
             else
@@ -243,7 +260,19 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                         if (GUILDLIST_TEXT* pText = m_GuildMember.GetSelectedText())
                         {
                             DeleteIndex = GetGuildMemberIndex(pText->m_szID);
-                            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildPerson_Get_Out));
+                            wchar_t szNameText[300];
+                            mu_swprintf(szNameText, I18N::Game::CharacterS, GuildList[DeleteIndex].Name);
+                            mu::ui::window::GenericDialogConfig cfg;
+                            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                            cfg.lines = {
+                                { szNameText, true },
+                                { I18N::Game::WouldYouLikeToRelease, true },
+                            };
+                            cfg.onPrimary = []
+                            {
+                                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildBreakPasswordMsgBoxLayout));
+                            };
+                            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                         }
                     }
                 }
@@ -277,15 +306,19 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                     {
                         AppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
                         DeleteIndex = GetGuildMemberIndex(pText->m_szID);
-                        CCommonMessageBox* pMsgBox = NULL;
-                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildPerson_Cancel_Position_MsgBoxLayout), &pMsgBox);
-                        if (pMsgBox != NULL)
+                        wchar_t strText[256];
+                        mu_swprintf(strText, I18N::Game::CharacterS, pText->m_szID);
+                        mu::ui::window::GenericDialogConfig cfg;
+                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.lines = {
+                            { strText, false },
+                            { I18N::Game::WouldYouLikeToCancelTheRanking, false },
+                        };
+                        cfg.onPrimary = []
                         {
-                            wchar_t strText[256];
-                            mu_swprintf(strText, I18N::Game::CharacterS, pText->m_szID);
-                            pMsgBox->AddMsg(strText);
-                            pMsgBox->AddMsg(I18N::Game::WouldYouLikeToCancelTheRanking);
-                        }
+                            SocketClient->ToGameServer()->SendGuildRoleAssignRequest(G_PERSON, MU_C16(GuildList[DeleteIndex].Name), 0x03);
+                        };
+                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                     }
                 }
             }
@@ -302,7 +335,16 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                     if (wcscmp(pText->szName, GuildMark[Hero->GuildMarkIndex].GuildName))
                     {
                         wcscpy(DeleteID, pText->szName);
-                        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Break_MsgBoxLayout));
+                        wchar_t szAllianceText[256];
+                        mu_swprintf(szAllianceText, I18N::Game::SGuildFromTheAlliance, DeleteID);
+                        mu::ui::window::GenericDialogConfig cfg;
+                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.lines = {
+                            { szAllianceText, false },
+                            { I18N::Game::WouldYouLikeToRelease, false },
+                        };
+                        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendRemoveAllianceGuildRequest(MU_C16(DeleteID)); };
+                        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                     }
                 }
             }
@@ -314,7 +356,9 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                 const bool isUnionMaster = wcscmp(GuildMark[Hero->GuildMarkIndex].GuildName, GuildMark[Hero->GuildMarkIndex].UnionName) == 0;
                 if (isUnionMaster)
                 {
-                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CUnionGuild_Out_MsgBoxLayout));
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.lines.push_back({ I18N::Game::AllianceMasterCanTWithdrawTheGuild, true });
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
                 else
                 {
@@ -945,7 +989,7 @@ int mu::ui::window::CGuildInfoWindow::GetUnionCount()
 void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshipType byRelationShipType, GuildRequestType byRequestType,
     BYTE  byTargetUserIndexH, BYTE byTargetUserIndexL)
 {
-    if (!g_MessageBox->IsEmpty())
+    if (mu::ui::window::g_pGenericConfirmDialog->IsVisible())
     {
         SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
             byRelationShipType,
@@ -1000,13 +1044,25 @@ void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshi
             }
         }
 
-        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildRelationShipMsgBoxLayout), &pMsgBox);
-        if (pMsgBox)
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { szText[0], false },
+            { szText[1], false },
+            { szText[2], false },
+        };
+        cfg.onPrimary = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
         {
-            pMsgBox->AddMsg(szText[0]);
-            pMsgBox->AddMsg(szText[1]);
-            pMsgBox->AddMsg(szText[2]);
-        }
+            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+                byRelationShipType, byRequestType, 0x01,
+                MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
+        };
+        cfg.onSecondary = [byRelationShipType, byRequestType, byTargetUserIndexH, byTargetUserIndexL]
+        {
+            SocketClient->ToGameServer()->SendGuildRelationshipChangeResponse(
+                byRelationShipType, byRequestType, 0x00,
+                MAKEWORD(byTargetUserIndexH, byTargetUserIndexL));
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 }

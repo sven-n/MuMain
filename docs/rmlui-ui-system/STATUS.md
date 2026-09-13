@@ -74,6 +74,41 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   background sprite moved to RmlUi (and, after a visual bug, from the fg document to the bg one, so
   it doesn't cover the real input box). `CMixInventory`'s large recipe/success-rate dynamic text
   block stays native — frame chrome only for this pass, the text panel is a separate, bigger job.
+- **`CCharacterInfoWindow`** — **done, both themes (2026-09-13)**: fully ported, no permanently-
+  native content at all (unlike the inventory family above, this window has no `CInventoryCtrl`
+  grid, no live-3D icon, and no `CUITextInputBox` — it's a plain `CManager`-tier window, not
+  `C3DRenderMng`-backed, so it needed none of the background-context/`RenderBackgroundLayer()`
+  machinery). Frame/name/class-server crossfade/summary box/all five attribute rows (STR/AGI/VIT/
+  ENE, plus CMD for Dark Lord)/level-up "+" buttons/Exit/Quest/Pet/Master-Level all move to
+  RmlUi; every stat line `RenderAttribute()` used to draw natively (attack/defense/attack-speed/
+  mana/magic-and-curse-damage/class-specific bonus lines, buff-conditional colors) is now computed
+  in C++ exactly as before and pushed into a small `StatLine{text,color}` list per attribute box,
+  rendered via normal block flow (`display:block` stacking, 13px line-height) instead of
+  per-line C++-computed `top` offsets — reproduces the original's variable per-class/per-buff line
+  count for free. `LoadImages()`/`UnloadImages()` are kept even though this window no longer
+  renders through the legacy bitmap-atlas system: `CGensRanking` and `CUIMuHelper`'s own hunt/
+  pick-range "+" buttons alias their own `IMAGE_LIST` entries onto these same texture slots (same
+  reason `CMyQuestInfoWindow` keeps its own `LoadImages()`). One deliberate simplification: the
+  summary box's original 8-piece pixel-tiled frame (4 corner sprites + a 1px sprite tiled across
+  each edge, nested per-pixel `for` loops) is reproduced as the 4 corner sprites plus a flat
+  translucent fill rather than a literal repeating-tile port — this build has no established,
+  verified pattern for a real 1px-tile repeat (see "Findings" below), and the corners alone already
+  read as "framed." Built and verified against a real build (Debug, `windows-x64`); in-game
+  verification against a live server still pending for both themes.
+- **`CGenericConfirmDialog`** — **done, both themes (2026-09-13)**: the reusable confirm-dialog
+  primitive `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native `TMsgBoxLayout<T>`
+  family lacked (see this file's own "Tracked deferral: `CommonMessageBox`/`CustomMessageBox`" entry
+  below, and `component-catalog.md`'s "Dialog" section for the full shape — this is a separate
+  native subsystem from `UIControls.h`'s `CUIControl` family, not part of that other tracked
+  deferral). One C++ class + one document, shown with a `GenericDialogConfig` value (button set,
+  body lines, OK/Cancel callbacks) instead of a new subclass per dialog. Proven on 3 real dialogs,
+  replacing their native call sites end-to-end and deleting the 3 now-dead native classes:
+  `Guild/GuildInfoWindow.cpp`'s alliance-master-can't-leave notice (OK-only), `UI/Quests/
+  MyQuestInfoWindow.cpp`'s quest-giveup confirm (OK/Cancel, real `SendQuestCancelRequest` on OK),
+  `Network/Server/WSclient.cpp`'s guild-invite accept/decline (OK/Cancel, the "shell + caller fills
+  in body lines after construction" pattern, triggered from a network packet handler rather than a
+  UI click). Built and verified (RelWithDebInfo); in-game verification of all 3 swapped dialogs
+  (both themes, Enter/Esc, and a second dialog queuing while one is open) still pending.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -594,6 +629,120 @@ Phase 2), `CItemHotKey` (still fully legacy, Phase 3) — one file serving three
 phases. Whether that one-file-three-classes shape is itself worth splitting (e.g. once Phase 3
 lands and all three are ported) is a real, still-unmade decision; revisit it then, but it's a
 file-organization question now, not a naming one.
+
+## Tracked deferral: `CUIControl` family (`UIControls.h`) full retirement
+
+Not a permanent third toolkit alongside RmlUi and `mu::ui::window` — a fully enumerable, closeable
+checklist (`ui-target-architecture.md` item 17's "concrete instance"). Found and scoped
+2026-09-13 while investigating whether porting Friend/Mail would let this family retire. It
+wouldn't — Friend/Mail (`CUIWindowMgr`/`CUIBaseWindow`, `UI/Party/UIWindows.cpp`) is only one of
+four independent pieces still keeping this file alive:
+
+1. **`CUITextInputBox`** — permanent until RmlUi gets native `<input>`/`<textarea>` (Section E's
+   Type-2 companion; IME composition through RmlUi's DOM is the open design question, no target
+   date). Not part of this checklist's "close it out" scope — this piece stays regardless.
+2. **`CUITextListBox<T>`** (~18 subclasses in `UIControls.h`) — no rule named this class before
+   2026-09-13 (only `CUIButton` was named), which is exactly why it kept gaining consumers even on
+   windows already on `mu::ui::window::CObject`. Confirmed live consumers found this session:
+   - `CGuildInfoWindow` (`Guild/GuildInfoWindow.h`) — `CUINewGuildMemberListBox`
+   - `CMixInventory` (`UI/Inventory/MixInventory.h`) — `CUISocketListBox`, `CUIUnmixgemList`
+   - `CInGameShop` (`GameShop/InGameShop.h`) — `CUIInGameShopListBox`, `CUIBuyingListBox`,
+     `CUIPackCheckBuyingListBox`
+   - `QuestProgress.h`/`QuestProgressByEtc.h` — `CUICurQuestListBox`/`CUIQuestContentsListBox`
+     (the same two `CMyQuestInfoWindow` already ported off; natural next targets, same pattern)
+   - Guild/chat/letter/socket variants (`CUIGuildListBox`, `CUISimpleChatListBox`,
+     `CUIChatPalListBox`, `CUIWindowListBox`, `CUILetterListBox`/`CUILetterTextListBox`,
+     `CUIGuildNoticeListBox`, `CUIUnionGuildListBox`, `CUIExtraItemListBox`,
+     `CUIBCDeclareGuildListBox`/`CUIBCGuildListBox`, `CUIMoveCommandListBox`) — not yet traced to
+     live call sites individually; treat as live until checked, same discipline as the confirmed
+     ones above.
+
+   The replacement pattern is proven, not speculative: RmlUi's `data-for` binding, already used by
+   `CBuffStrip` and by `CMyQuestInfoWindow`'s own port off two of these classes. Each remaining
+   subclass is an independent, same-shape port — see `ui-target-architecture.md` item 8b / Rule 11.
+3. **`CUIButton`** — down to one known live cluster now. `CUIPopup` (`g_pUIPopup`, `UI/Dialogs/
+   UIPopup.h`) had its `POPUP_OK`/`POPUP_YESNO` call sites (the ones duplicating
+   `CGenericConfirmDialog`'s job) ported off it 2026-09-13 (see "Tracked deferral:
+   `CommonMessageBox`/`CustomMessageBox`" below) — but `CUIPopup` itself is **not** retired: one
+   live `POPUP_CUSTOM` call site remains (`UIGuildInfo.cpp`'s "Appoint" sub-guild-master/
+   battle-master picker, a bespoke multi-option menu out of `CGenericConfirmDialog`'s scope), so
+   its 4 `CUIButton` members (`m_OkButton`/`m_CancelButton`/`m_YesButton`/`m_NoButton`) are now
+   unreachable dead weight but the class itself stays. The other cluster,
+   `CUIGuildInfo`/`CUIGuildMaster` (`Guild/UIGuildInfo.h`/`UIGuildMaster.h`), is suspected dead —
+   see below (note: `CUIGuildMaster`'s dead `ReceiveGuildRelationShip`/`CloseMyPopup`/two popup-id
+   members were already deleted 2026-09-13 as part of the `CUIPopup` port, superseded by
+   `CGuildInfoWindow`'s own port earlier — the rest of the "suspected dead" verification below
+   still applies to what's left of both classes).
+4. **`CUIGuildInfo`/`CUIGuildMaster`** (`CUIControl`-rooted standalone windows, distinct from the
+   live `CGuildInfoWindow`/`CGuildMakeWindow` pair on `mu::ui::window::CObject`) — a full-codebase
+   grep found **zero instantiations of either class anywhere** (no `new`, no member declaration in
+   any other type). Strong circumstantial evidence of dead code superseded by
+   `CGuildInfoWindow`/`CGuildMakeWindow`, same shape as `CWin`/`::CButton`/`CSlider` before they
+   were deleted — but not yet given that same exhaustive verification pass. Do that verification
+   before deleting anything.
+
+**Related finding, same investigation**: `CUIManager`/`g_pUIManager` (`UI/Core/UIManager.h/.cpp`)
+looks like a live top-level manager parallel to `mu::ui::window::CManager` — it isn't. Its
+`Render()` and `UpdateInput()` method bodies are both literally empty. Its `MUTEX_*` enum lists
+~30 interfaces (including `MUTEX_TRADE`/`MUTEX_STORAGE`/`MUTEX_GUILDINFO`/`MUTEX_NPCSHOP` — windows
+long since migrated to `mu::ui::window::CManager`) but `Open()`/`IsOpen()` only actually implement
+4 of them (`MUTEX_INVENTORY`, `MUTEX_PERSONALSHOPSALE`, `MUTEX_PERSONALSHOPPURCHASE`,
+`MUTEX_SERVERDIVISION`); everything else falls through to `default: return false`. What's actually
+still real: it constructs/owns `g_pUIPopup`/`g_pUIGateKeeper`/jewel-harmony/item-add-option-info as
+globals, and `IsInputEnable()` is a genuinely still-consulted query. Worth knowing mainly so a
+future session doesn't mistake the `MUTEX_*` enum for a live, comprehensive policy layer — most of
+it is vestigial. Not in this retirement checklist's scope (it's not `UIControls.h`), but touches
+the same investigation and the same `g_pUIPopup` dependency as item 3 above.
+
+## Tracked deferral: `CommonMessageBox`/`CustomMessageBox` family port
+
+A separate native subsystem from `UIControls.h`'s `CUIControl` family tracked above — don't
+conflate the two. `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h` together declare 150+
+classes, 100% native, confirmed by a full-codebase inventory (2026-09-13). The primitive to port
+them onto now exists (`CGenericConfirmDialog`, see "What's migrated" above) and is proven on 3 of
+them. The full per-class worklist (call sites, FITS/DOESNT_FIT classification, batching groups,
+dead-code candidates) lives in `dialog-migration-plan.md` — resume there, not from memory, in a
+future session. Summary by category (counts approximate, from the inventory pass, not re-verified
+per class):
+
+- **`CommonMessageBox.h`** — ~75 classes, ~64 `TMsgBoxLayout<CCommonMessageBox>` (or
+  `<C3DItemCommonMsgBox>`/`<CFenrirRepairMsgBox>`) feature-specific confirms spanning guild/quest/
+  trade/duel/castle-siege/events/gambling. **This entire file is now fully handled** (2026-09-13):
+  63 classes ported-and-deleted or confirmed-dead-and-deleted (3 proof-pass + 7 Guild + 10
+  Trade/shop/inventory + 25 Network/server + 14 Siege/castle/CryWolf + 4 dead-code), plus 6
+  `C3DItemCommonMsgBox`-based classes left as an explicit future extension (3D-item-preview, not
+  built yet). See `dialog-migration-plan.md` for the per-class worklist. `CustomMessageBox.h`
+  (~76 more classes, separate file) is next.
+- **`CustomMessageBox.h`** — ~76 classes on the same pattern, mostly needing a new extension first.
+  **1 done** (2026-09-13): `CDialogMsgBoxLayout`/`CDialogMsgBox` (the one near-miss that already
+  fit as-is — see `dialog-migration-plan.md`). The rest: keypad/numeric-entry boxes
+  (needs its own on-screen keypad component — doesn't exist yet, not proven by the 3 dialogs
+  ported so far), fruit/gem-integration confirms, the in-game system-menu box (distinct from the
+  already-ported `CSysMenuWin`), event result screens (Blood Castle/Devil Square/Chaos Castle),
+  duel challenge/result, progress-bar modals (also not proven yet — `GenericDialogConfig` has no
+  progress concept), and ~46 `T*MsgBoxLayout<...>` wrappers.
+- **`CUIPopup`** (`UI/Dialogs/UIPopup.h`, `g_pUIPopup`) — **done** (2026-09-13). Every real
+  `POPUP_OK`/`POPUP_YESNO` call site (9 live across `Guild/UIGuildInfo.cpp`,
+  `Guild/UIGuildMaster.cpp`, `Network/Server/WSclient.cpp`) ported to `CGenericConfirmDialog`; one
+  dead `POPUP_YESNO` site (`CUIGuildMaster::ReceiveGuildRelationShip`, superseded by
+  `CGuildInfoWindow`'s own earlier port) deleted outright. `CUIPopup` itself is **not** deleted —
+  one live `POPUP_CUSTOM` site (`UIGuildInfo.cpp`'s "Appoint" picker) is a bespoke multi-option menu
+  out of scope, same as the multi-option `CustomMessageBox.h` classes below. See
+  `dialog-migration-plan.md` for the full per-call-site breakdown.
+- **`GameShop/MsgBoxIGS*.h`** — 10 more `CMessageBoxBase` subclasses, cash-shop flows (buy confirm,
+  buy-package with a live 3D item preview, buy-select-item, generic OK/Cancel, delete-item confirm,
+  gift-storage-info, send-gift + confirm, storage-item-info, use-buff/use-item confirm). The
+  item-preview ones need a hybrid extension on `CGenericConfirmDialog` (native 3D content inside an
+  otherwise-RmlUi dialog, the same `CItemHotKey`-proven pattern) — not yet built, not proven by the
+  3 dialogs ported so far, all of which were plain text.
+- **Misc**: `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) are dialog-shaped but
+  don't fit the confirm-box mold at all (help overlay, per-window popup menu, command picker) —
+  out of `CGenericConfirmDialog`'s scope entirely, would need their own primitives if ported.
+
+Not blocked on anything — each of the ~137 remaining classes is an independent, same-shape port
+(config data, not new code) for the plain-text OK/OK-Cancel ones; the keypad/progress/3D-preview
+variants need their own scoped extension to `GenericDialogConfig` first, proven the same way this
+pass proved the plain-text shape before being applied broadly.
 
 ## Upstream sync log (PR #572)
 

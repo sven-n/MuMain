@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/HUD/MasterLevel.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "I18N/All.h"
 
 #include "Audio/DSPlaySound.h"
@@ -919,7 +920,28 @@ bool mu::ui::window::CMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DA
     
     this->CurSkillID = skillData.Skill;
 
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMaster_Level_Interface));
+    wchar_t szMasterLevelText[256];
+    mu_swprintf(szMasterLevelText, I18N::Game::MasterLevelPointRequirementD, g_pMasterLevelInterface->GetConsumePoint());
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.lines = {
+        { I18N::Game::WouldYouLikeToStrengthenTheSkill, false },
+        { szMasterLevelText, false },
+    };
+    cfg.onPrimary = []
+    {
+        SocketClient->ToGameServer()->SendAddMasterSkillPoint(g_pMasterLevelInterface->GetCurSkillID());
+        MouseLButton = false;
+        MouseLButtonPop = false;
+        MouseLButtonPush = false;
+    };
+    cfg.onSecondary = []
+    {
+        MouseLButton = false;
+        MouseLButtonPop = false;
+        MouseLButtonPush = false;
+    };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
     MouseLButton = false;
 

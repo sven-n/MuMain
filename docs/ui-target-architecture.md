@@ -398,6 +398,20 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
    global `::CRadioButton` once grep shows zero remaining callers. The evolved
    `mu::ui::window::CButton` family itself is next once its own remaining callers (the
    not-yet-ported window population) reach zero — it is not exempt from this same trajectory.
+8b. **Newly found, 2026-09-13: port `CUITextListBox<T>` consumers to RmlUi `data-for`.** Unlike
+    `CUIButton`, no rule anywhere named this class before now — and it shows: `CGuildInfoWindow`
+    (`CUINewGuildMemberListBox`), `CMixInventory` (`CUISocketListBox`/`CUIUnmixgemList`), and
+    `CInGameShop` (`CUIInGameShopListBox`/`CUIBuyingListBox`/`CUIPackCheckBuyingListBox`) are all
+    already on `mu::ui::window::CObject` yet still reach into this legacy family for their list
+    content, because nothing told them not to. `CMyQuestInfoWindow`'s `data-for` port off
+    `CUICurQuestListBox`/`CUIQuestContentsListBox` is the proven reference (same pattern
+    `CBuffStrip` established for a simpler array). ~18 `CUITextListBox<T>` subclasses remain
+    (`UI/Widgets/UIControls.h`) spanning guild/chat/letter/socket/in-game-shop/move-command lists —
+    see `STATUS.md`'s tracked-deferral entry for the full list. Also found while investigating this:
+    `CUIPopup`/`CUIButton`'s remaining live path (`WSclient.cpp`'s generic server-error popups)
+    duplicates `CCommonMessageBox`'s job — moving those call sites there retires `CUIPopup`, and
+    with it `CUIButton`'s only other confirmed-live consumer besides the suspected-dead
+    `CUIGuildInfo`/`CUIGuildMaster` (see `building-new-ui.md`).
 
 **Should never be done:**
 
@@ -473,6 +487,19 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
     and developers can discover the correct component without historical
     knowledge of the codebase.
 
+    **Concrete instance, 2026-09-13**: `UIControls.h`'s `CUIControl` family is not a permanent
+    third toolkit — it's a fully enumerable, closeable checklist. It reaches zero consumers and
+    can be deleted outright (the same treatment `CWin`/`::CButton`/`CGaugeBar`/`CSlider` already
+    got) once: (a) `CUITextInputBox`'s callers move to RmlUi's own native `<input>`/`<textarea>`
+    (a separate, unscheduled design effort — IME composition through RmlUi's DOM is the open
+    question, per `building-new-ui.md`); (b) every `CUITextListBox<T>` subclass ports to `data-for`
+    (item 8b above); (c) `CUIButton`'s remaining consumers (`CUIPopup`, and the suspected-dead
+    `CUIGuildInfo`/`CUIGuildMaster`) are retired or deleted; (d) `CUIWindowMgr`/`CUIBaseWindow`
+    (friend/mail/chat-room) either gets a real RmlUi port or is explicitly re-affirmed as staying
+    native indefinitely. None of these are blocked on anything else — they're independent, and
+    (a) has no target date by design. "Is `CUIControl` necessary" should be answered against this
+    list, not treated as an open architectural question.
+
 ## I. Architectural Rules (for repo dev instructions)
 
 1. **New UI screens are RmlUi documents by default.** A native-only window requires a specific
@@ -511,3 +538,11 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
 10. **Domain logic (item drag-drop, inventory-panel mutual exclusion, skill-tooltip content
     rules) stays out of the UI kit's own types.** A UI component may call into it; it must never
     be reimplemented inside a generic UI abstraction.
+11. **For scrollable list/row content, use RmlUi's `data-for` binding, not `CUITextListBox<T>`.**
+    `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list are the proven references.
+    Do not derive a new `CUITextListBox<T>` subclass and do not add a new consumer to an existing
+    one, even from a window already on `mu::ui::window::CObject` — that base class alone doesn't
+    make a window RmlUi-native, and reaching into this family for list content is exactly how
+    `CGuildInfoWindow`/`CMixInventory`/`CInGameShop` ended up depending on it despite being on the
+    modern base class otherwise. See `STATUS.md`'s tracked-deferral entry for the full remaining
+    consumer list.

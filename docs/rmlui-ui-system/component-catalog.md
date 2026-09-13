@@ -96,6 +96,34 @@ future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" 
 per-theme RML/RCSS override mechanism itself, not a separate component but part of this same
 theming layer.
 
+## List / repeated rows
+
+RmlUi's `data-for` binding against a `std::vector<T>` model field — the proven pattern for any
+"N rows of the same shape" content, and the sanctioned replacement for `CUITextListBox<T>`
+(`UI/Widgets/UIControls.h`, `CUIControl` family): `ui-target-architecture.md` Rule 11 says not to
+reach for that legacy class in new code, this is what to reach for instead. Two proven references:
+`CBuffStrip`'s buff-icon strip (a simple array) and `CMyQuestInfoWindow`'s quest list
+(`my_quest_info.rml`/`.rcss`, ported off `CUICurQuestListBox`/`CUIQuestContentsListBox` — also
+proves `server_select.rml`'s click-a-row-to-select-it pattern on top of the same binding). No
+generic "ListBox" C++ wrapper exists (and none is needed) — each window binds its own row-shaped
+struct directly, the same way `RmlModelBinder<T>` is used everywhere else. See `STATUS.md`'s
+"Tracked deferral: `CUIControl` family... full retirement" entry for the ~18 `CUITextListBox<T>`
+subclasses still waiting on this port, one per window, same pattern each time.
+
+## Dialog
+
+`mu::ui::window::CGenericConfirmDialog`/`GenericDialogConfig` (`UI/Dialogs/GenericConfirmDialog.h`,
+`generic_confirm_dialog.rml`/`.rcss` both themes) — a real config-driven scaffold, not a per-dialog
+hand-built RML/RCSS pair: one C++ class + one document, shown with different `GenericDialogConfig`
+content (button set, body lines, OK/Cancel callbacks) per call, no new subclass or new `.rml` per
+dialog. Built to replace `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native
+`TMsgBoxLayout<T>` family (see `STATUS.md`) — proven on 3 real dialogs first
+(`Guild/GuildInfoWindow.cpp`'s alliance-master-can't-leave notice, `UI/Quests/
+MyQuestInfoWindow.cpp`'s quest-giveup confirm, `Network/Server/WSclient.cpp`'s guild-invite
+accept/decline) before porting the rest. Single active instance, not a real stack — a second
+`Show()` call while one is open queues instead of replacing it; see the class's own header comment
+for why that's not a functional regression from what it replaces.
+
 ## Dragging
 
 `UI::RmlBridge::MakeDraggable()` (`RmlDraggable.h`) — makes an RmlUi panel draggable-by-mouse with
@@ -139,14 +167,12 @@ per-window, or entirely unbuilt:
   — only the `color` enum's members differ (skill: White/Blue/Red/DarkRed; item-option:
   White/Blue/Yellow/Green/Purple), making them the natural starting point if/when this list is
   consolidated. Not bundled here — check this entry before adding a *fifth*.
-- **Dialog** (as distinct from Window/Panel above) — every dialog window today (`CMsgWin`,
-  `RememberPasswordPrompt`) is its own hand-built RML/RCSS pair; no shared "Dialog" scaffold
-  (title/body/button-row layout contract) exists for a new one to reference.
-- **Tab / TabBar, List, ScrollContainer, Notification, HUDContainer** — none of the currently
-  migrated windows have needed one yet, so none exist. `CMainFrameWindow`'s still-legacy
-  skill grid/pet-command row is the closest thing to a "grid" concept in the codebase, and it
-  hasn't been abstracted either (see `STATUS.md`'s pilots-to-revisit entry for why its icon art
-  stayed legacy 2D).
+- **Tab / TabBar, ScrollContainer, Notification, HUDContainer** — none of the currently migrated
+  windows have needed one yet, so none exist. `CMainFrameWindow`'s still-legacy skill grid/
+  pet-command row is the closest thing to a "grid" concept in the codebase, and it hasn't been
+  abstracted either (see `STATUS.md`'s pilots-to-revisit entry for why its icon art stayed legacy
+  2D). **List moved out of this bucket 2026-09-13** — see the "List / repeated rows" section above;
+  `data-for` already proves the pattern, it just isn't fully adopted yet.
 
 ## Using this catalog
 

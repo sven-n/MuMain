@@ -1,0 +1,35 @@
+<rml>
+<head>
+	<title>Generic Confirm Dialog</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="generic_confirm_dialog.rcss"/>
+</head>
+<body>
+	<!-- This is legacy's own markup in practice -- modern has its own complete fork
+	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy, confirmed
+	     against RmlTheme.cpp's per-theme-then-fallback resolution. Keep ids/data-model/event names
+	     in sync with the modern fork regardless, GenericConfirmDialog.cpp binds both by name.
+	     .center-both replaces native CCommonMessageBox's fixed-y C++ positioning (a legacy
+	     implementation artifact, not deliberate intent -- both existing RmlUi-only 2D dialogs,
+	     CMsgWin/RememberPasswordPrompt, already center this way). -->
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
+		<!-- Native CCommonMessageBox's own composite, in its own paint order: stretched back fill
+		     (shows through the caps' transparent regions) -> top cap -> middle fill -> bottom cap.
+		     See themes/legacy/generic_confirm_dialog.rcss for the sprite art itself; this replaces
+		     the flat programmatic panel this file used before real msgbox sprites were wired up. -->
+		<div class="gcd-sprite-back"></div>
+		<div class="gcd-sprite-top"></div>
+		<div class="gcd-sprite-middle"></div>
+		<div class="gcd-sprite-bottom"></div>
+		<div class="gcd-body">
+			<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+		</div>
+		<!-- solo = centered (Ok-only); paired (OkCancel) sits left-of-center instead, mirroring
+		     native CCommonMessageBox's own OK-only-vs-OK+Cancel button layout. -->
+		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary" data-class-solo="!show_cancel"
+		     data-event-click="gcd_primary_click">{{primary_label}}</div>
+		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary" data-class-hidden="!show_cancel"
+		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
+	</div>
+</body>
+</rml>

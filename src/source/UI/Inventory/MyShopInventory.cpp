@@ -5,6 +5,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "I18N/All.h"
 
@@ -117,7 +118,20 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
                         {
                             if (m_EnablePersonalShop == false)
                             {
-                                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalshopCreateMsgBoxLayout));
+                                mu::ui::window::GenericDialogConfig cfg;
+                                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                                cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
+                                cfg.onPrimary = [this]
+                                {
+                                    wchar_t confirmedTitle[MAX_SHOPTITLE]{};
+                                    GetTitle(confirmedTitle);
+                                    wcscpy(g_szPersonalShopTitle, confirmedTitle);
+                                    SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(confirmedTitle));
+
+                                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                                    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                                };
+                                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                             }
                             else
                             {

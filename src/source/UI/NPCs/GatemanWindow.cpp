@@ -4,6 +4,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzObject.h"
@@ -279,7 +280,12 @@ void CGatemanWindow::UpdateGuestMode()
         }
         else if ((int)CharacterMachine->Gold < g_pUIGateKeeper->GetEnteranceFee())
         {
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGatemanMoneyMsgBoxLayout));
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.lines = {
+                { I18N::Game::EnteringIsNotAllowed, false },
+                { I18N::Game::InsufficientZenForEntering, false },
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         }
     }
 }

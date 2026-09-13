@@ -57,6 +57,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Skills/SummonSystem.h"
@@ -6472,7 +6473,18 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x12:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::COsbourneMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::Warning2223, true },
+            { L" ", false },
+            { I18N::Game::RefineryHasStartedRefineryIsA, true },
+        };
+        cfg.onPrimary = []
+        {
+            g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_OSBOURNE);
+            g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         // 			BYTE *pbyChaosRate = ( &Data->Value) + 1;
         // 			g_pUIJewelHarmony->SetMixSuccessRate(pbyChaosRate);
     }
@@ -7330,7 +7342,15 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     PartyKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPartyMsgBoxLayout));
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.lines = {
+        { CharactersClient[FindCharacterIndex(PartyKey)].ID, false },
+        { I18N::Game::SomeoneRequestsYouToJoinTheirAParty, false },
+    };
+    cfg.onPrimary = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(true, PartyKey); };
+    cfg.onSecondary = [] { SocketClient->ToGameServer()->SendPartyInviteResponse(false, PartyKey); };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
 void ReceivePartyResult(const BYTE* ReceiveBuffer)
@@ -7492,10 +7512,20 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     auto Data = (LPPHEADER_DEFAULT_KEY)ReceiveBuffer;
     GuildPlayerKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
-    mu::ui::window::CCommonMessageBox* pMsgBox;
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildRequestMsgBoxLayout), &pMsgBox);
-    pMsgBox->AddMsg(CharactersClient[FindCharacterIndex(GuildPlayerKey)].ID);
-    pMsgBox->AddMsg(I18N::Game::YouHaveReceivedAnOfferToJoinAGuild);
+    // Third proof case for CGenericConfirmDialog (see UI/Dialogs/GenericConfirmDialog.h) -- was
+    // CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGuildRequestMsgBoxLayout)) + two AddMsg() calls
+    // (the "shell, caller fills in body lines after construction" pattern), triggered from a
+    // network packet handler rather than a UI click -- the harder invocation shape. Captures
+    // GuildPlayerKey by value rather than reading the mutable global again at click time, since a
+    // second guild-related packet could otherwise change it before the player responds.
+    const int guildPlayerKey = GuildPlayerKey;
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.lines.push_back({ CharactersClient[FindCharacterIndex(guildPlayerKey)].ID, false });
+    cfg.lines.push_back({ I18N::Game::YouHaveReceivedAnOfferToJoinAGuild, false });
+    cfg.onPrimary = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(true, guildPlayerKey); };
+    cfg.onSecondary = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(false, guildPlayerKey); };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
 void ReceiveGuildResult(const BYTE* ReceiveBuffer)
@@ -7697,14 +7727,30 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
     memset(GuildWarName, 0, sizeof GuildWarName);
     CMultiLanguage::ConvertFromUtf8(GuildWarName, Data->Name, 8);
 
+    wchar_t szChallengeText[128];
+    mu_swprintf(szChallengeText, I18N::Game::SGuildChallengesYou, GuildWarName);
+
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
     if (Data->Type == 1)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CBattleSoccerMsgBoxLayout));
+        cfg.lines = {
+            { szChallengeText, false },
+            { I18N::Game::YouHaveBeenChallengedToBattleSoccer, false },
+        };
+        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
+        cfg.onSecondary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
     }
     else
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGuildWarMsgBoxLayout));
+        cfg.lines = {
+            { szChallengeText, false },
+            { I18N::Game::ToAGuildWar, false },
+        };
+        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(true); };
+        cfg.onSecondary = [] { SocketClient->ToGameServer()->SendGuildWarResponse(false); InitGuildWar(); };
     }
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
 void ReceiveDeclareWarResult(const BYTE* ReceiveBuffer)
@@ -8394,12 +8440,10 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         break;
     case 5:
     {
-        mu::ui::window::CDialogMsgBox* pMsgBox = nullptr;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDialogMsgBoxLayout), &pMsgBox);
-        if (pMsgBox)
-        {
-            pMsgBox->AddMsg(I18N::Dialog::Lookup(Data->Cmd2));
-        }
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.primaryLabel = I18N::Game::ConversationIsOver;
+        cfg.lines = { { I18N::Dialog::Lookup(Data->Cmd2), false } };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
 
@@ -8414,8 +8458,14 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         switch (Data->Cmd2)
         {
         case 0:
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CWhiteAngelEventLayout));
+        {
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines.push_back({ I18N::Game::WouldYouLikeToReceiveTheItem, false });
+            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendWhiteAngelItemRequest(); };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             break;
+        }
 
         case 1:
             mu::ui::window::CreateOkMessageBox(I18N::Game::ThisIsNotAEventPrize);
@@ -8447,8 +8497,14 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
             mu::ui::window::CreateOkMessageBox(I18N::Game::ItemHasAlreadyGiven);
             break;
         case 1:
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CHarvestEventLayout));
+        {
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines.push_back({ I18N::Game::WouldYouLikeToReceiveTheItem, false });
+            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendLeoHelperItemRequest(); };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             break;
+        }
         case 2:
             mu::ui::window::CreateOkMessageBox(I18N::Game::FailedToGetAnItemPleaseTryAgain);
             break;
@@ -8457,18 +8513,26 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     break;
     case 16:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox = nullptr;
-
         switch (Data->Cmd2)
         {
         case 0:
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSantaTownSantaMsgBoxLayout), &pMsgBox);
-            pMsgBox->AddMsg(I18N::Game::WelcomeToSantaSVillageHere);
+        {
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines.push_back({ I18N::Game::WelcomeToSantaSVillageHere, false });
+            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             break;
+        }
         case 1:
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSantaTownSantaMsgBoxLayout), &pMsgBox);
-            pMsgBox->AddMsg(I18N::Game::WelcomeToSantaSVillagePleaseComeClaimYourGift);
+        {
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines.push_back({ I18N::Game::WelcomeToSantaSVillagePleaseComeClaimYourGift, false });
+            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             break;
+        }
         case 2:
             mu::ui::window::CreateOkMessageBox(I18N::Game::YouCanClickOnlyOnce);
             break;
@@ -8479,8 +8543,14 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     }
     break;
     case 17:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSantaTownLeaveMsgBoxLayout));
+    {
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ I18N::Game::WouldYouLikeToReturnToDevias, false });
+        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendMoveToDeviasBySnowmanRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         break;
+    }
     case 47:
     case 48:
     case 49:
@@ -8567,7 +8637,12 @@ void ReceiveGemMixResult(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityResultMsgBoxLayout));
+        wchar_t szUnityResultText[256] = { 0, };
+        mu_swprintf(szUnityResultText, L"%ls%ls %ls", I18N::Game::JewelCombination, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ szUnityResultText, true });
+        cfg.onPrimary = [] { COMGEM::Exit(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 4:
@@ -8604,7 +8679,12 @@ void ReceiveGemUnMixResult(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointResultMsgBoxLayout));
+        wchar_t szDisjointResultText[256] = { 0, };
+        mu_swprintf(szDisjointResultText, L"%ls%ls %ls", I18N::Game::DismantleJewel, I18N::Game::To1816, I18N::Game::CongratulationsYouHaveSuccessfully);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ szDisjointResultText, true });
+        cfg.onPrimary = [] { COMGEM::Exit(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 2:
@@ -8834,13 +8914,21 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(szOpenTime1, I18N::Game::YouCanEnterSNow, I18N::Game::ChaosCastle);
             mu_swprintf(szOpenTime2, I18N::Game::InSCurrentlyDDEntered, I18N::Game::ChaosCastle, Data->KeyM, 100);
 
-            mu::ui::window::CCommonMessageBox* pMsgBox = nullptr;
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
-            if (pMsgBox)
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines = {
+                { szOpenTime1, false },
+                { szOpenTime2, false },
+            };
+            cfg.onPrimary = []
             {
-                pMsgBox->AddMsg(szOpenTime1);
-                pMsgBox->AddMsg(szOpenTime2);
-            }
+                if (ITEM* pItem = g_pMyInventory->GetStandbyItem())
+                {
+                    int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
+                    SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
+                }
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         }
         else
         {
@@ -8856,12 +8944,18 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(Text, I18N::Game::AfterDMinutesYouMayEnterS, Mini, I18N::Game::ChaosCastle);
             wcscat(szOpenTime, Text);
 
-            mu::ui::window::CCommonMessageBox* pMsgBox = nullptr;
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosCastleTimeCheckMsgBoxLayout), &pMsgBox);
-            if (pMsgBox)
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines.push_back({ szOpenTime, false });
+            cfg.onPrimary = []
             {
-                pMsgBox->AddMsg(szOpenTime);
-            }
+                if (ITEM* pItem = g_pMyInventory->GetStandbyItem())
+                {
+                    int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
+                    SocketClient->ToGameServer()->SendChaosCastleEnterRequest(pItem->Level, iSrcIndex);
+                }
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         }
     }
     else if (Data->Value == 5)
@@ -9045,7 +9139,12 @@ void ReceiveDuelStart(const BYTE* ReceiveBuffer)
     }
     else if (Data->nResult == 16)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDuelCreateErrorMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::ColosseumIsOccupied, false },
+            { I18N::Game::TryItAgainLater, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (Data->nResult == 28)
     {
@@ -9153,11 +9252,21 @@ void ReceiveDuelWatchRequestReply(const BYTE* ReceiveBuffer)
     }
     else if (Data->nResult == 16)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDuelCreateErrorMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::ColosseumIsOccupied, false },
+            { I18N::Game::TryItAgainLater, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (Data->nResult == 27)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDuelWatchErrorMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::NotAvailable, true },
+            { I18N::Game::TooManyPeopleInTheColossum, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else
     {
@@ -10297,8 +10406,12 @@ void ReceiveServerImmigration(const BYTE* ReceiveBuffer)
     switch (Data->Value)
     {
     case 0:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CServerImmigrationErrorMsgBoxLayout));
+    {
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::ThePasswordYouHaveEnteredIsIncorrect, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         break;
+    }
     case 1:
         mu::ui::window::CreateOkMessageBox(L"ReceiveServerImmigration");
         break;
@@ -11328,8 +11441,9 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        g_pUIPopup->CancelPopup();
-        g_pUIPopup->SetPopup(I18N::Game::UnfortunatelyYouHaveFailed, 1, 50, POPUP_OK, nullptr);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = { { I18N::Game::UnfortunatelyYouHaveFailed, false } };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
 
@@ -11339,8 +11453,9 @@ void ReceiveHuntZoneEnter(const BYTE* ReceiveBuffer)
 
     case 2:
     {
-        g_pUIPopup->CancelPopup();
-        g_pUIPopup->SetPopup(I18N::Game::NoAuthorization, 1, 50, POPUP_OK, nullptr);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = { { I18N::Game::NoAuthorization, false } };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     }
@@ -11638,7 +11753,6 @@ void ReceiveCrownState(const BYTE* ReceiveBuffer)
 {
     auto pData = (LPPRECEIVE_CROWN_STATE)ReceiveBuffer;
 
-    g_pUIPopup->CancelPopup();
     switch (pData->m_byCrownState)
     {
     case 0:
@@ -11850,7 +11964,9 @@ void ReceiveCastleHuntZoneInfo(const BYTE* ReceiveBuffer)
 
     if (pData->m_byResult == 0)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGatemanFailMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::UnfortunatelyYouHaveFailed, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else
     {
@@ -11866,7 +11982,9 @@ void ReceiveCastleHuntZoneResult(const BYTE* ReceiveBuffer)
 
     if (pData->m_byResult == 0)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGatemanFailMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::UnfortunatelyYouHaveFailed, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 }
 
@@ -12101,21 +12219,55 @@ void ReceiveCrywolfAltarContract(const BYTE* ReceiveBuffer)
         int level = CharacterAttribute->Level;
         if (level < 260)
         {
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Dont_Set_Temple1));
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.lines = {
+                { I18N::Game::DisqualifiedForTheContractRequirement, false },
+                { I18N::Game::OnlyLevelAbove350IsAllowedToMakeAContract, false },
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             //			M34CryWolf1st::Set_Message_Box(54,0,0);
             //			M34CryWolf1st::Set_Message_Box(55,1,0);
         }
         else
         {
             //			M34CryWolf1st::Set_Message_Box(58,0,0);
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Wat_Set_Temple1));
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.lines.push_back({ I18N::Game::PleaseTryAgainInAWhile, false });
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         }
     }
     else if (pData->bResult == 1)
     {
         //		M34CryWolf1st::Set_Message_Box(3,0,0);
         //		M34CryWolf1st::Set_Message_Box(4,1,0);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Set_Temple));
+        {
+            extern int Button_Down;
+            extern int BackUp_Key;
+            BackUp_Key = CharactersClient[TargetNpc].Key;
+
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.lines = {
+                { I18N::Game::YouHaveBeenRegisteredToBeAGuardianToProtectTheWolf, false },
+                { I18N::Game::YourRoleAsAGuardianWillBeCancelledWhenYouWarp, false },
+            };
+            // Matches the original's own wiring: this dialog's OK button was registered to
+            // CCry_Wolf_Get_Temple::OkBtnDown, not its own handler -- preserved here verbatim.
+            cfg.onPrimary = []
+            {
+                if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+                {
+                    mu::ui::window::GenericDialogConfig dontCfg;
+                    dontCfg.lines.push_back({ I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false });
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(dontCfg));
+                }
+                else
+                {
+                    Button_Down = 2;
+                    SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
+                }
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+        }
 
         M34CryWolf1st::Check_AltarState(Key - 316, pData->btAltarState);
 
@@ -12406,7 +12558,11 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseRegistLuckyCoinMsgBoxLayout));
+        wchar_t szText[100] = { 0, };
+        mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Register);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ szText, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 1:
@@ -12416,7 +12572,9 @@ bool ReceiveRegistLuckyCoin(const BYTE* ReceiveBuffer)
     break;
     case 100:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CRegistOverLuckyCoinMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::YouCanOnlyApplyOncePerYourAccount, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     default:
@@ -12436,7 +12594,11 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CExchangeLuckyCoinMsgBoxLayout));
+        wchar_t szText[100] = { 0, };
+        mu_swprintf(szText, I18N::Game::YouAreLackOfSItems, I18N::Game::Exchange1940);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ szText, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 1:
@@ -12447,7 +12609,9 @@ bool ReceiveRequestExChangeLuckyCoin(const BYTE* ReceiveBuffer)
     break;
     case 2:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CExchangeLuckyCoinInvenErrMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::MoreThan2X4SpaceInInventoryIsNeeded, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     default:
@@ -12513,16 +12677,15 @@ bool ReceiveDoppelGangerState(const BYTE* ReceiveBuffer)
     {
         g_pNewUISystem->Show(mu::ui::window::INTERFACE_DOPPELGANGER_FRAME);
 
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::_3MonstersReachingTheMagicCircle, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(I18N::Game::TheCharacterDyingTheServerDisconnectingOrUsingTheWarpCommand,
-                        RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(I18N::Game::WillResultInDoppelgangerDefenseFailure, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::_3MonstersReachingTheMagicCircle, false },
+            { L" ", false },
+            { I18N::Game::TheCharacterDyingTheServerDisconnectingOrUsingTheWarpCommand, false },
+            { L" ", false },
+            { I18N::Game::WillResultInDoppelgangerDefenseFailure, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 3: // play->end
@@ -12579,35 +12742,31 @@ bool ReceiveDoppelGangerResult(const BYTE* ReceiveBuffer)
     {
         g_pDoppelGangerFrame->SetRemainTime(0);
 
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::Congratulations, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(I18N::Game::YouVeSuccessfullyDefendedDoppelganger, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
-        // 			pMsgBox->AddMsg(L" ");
-        // 			pMsgBox->AddMsg(L" ");
-        // 			char szText[256] = { 0, };
-        // 			wprintf(szText, I18N::Game::RewardedExpD, Data->dwRewardExp);
-        // 			pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_BOLD);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::Congratulations, false },
+            { L" ", false },
+            { I18N::Game::YouVeSuccessfullyDefendedDoppelganger, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 1:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::DoppelgangerDefenseFailed, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::DoppelgangerDefenseFailed, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 2:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDoppelGangerMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::YouFailedToFendOffMonstersAnd, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(L" ");
-        pMsgBox->AddMsg(I18N::Game::AllowedThemToReachThePointLine, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::YouFailedToFendOffMonstersAnd, false },
+            { L" ", false },
+            { I18N::Game::AllowedThemToReachThePointLine, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     }
@@ -12678,43 +12837,43 @@ bool ReceiveEnterEmpireGuardianEvent(const BYTE* ReceiveBuffer)
     break;
     case 1:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::EntryTime2798, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(L" ");
         wchar_t szText[256] = {};
         mu_swprintf(szText, I18N::Game::EnterAfterDMinutes, (Data->RemainTick / 60000));
-        pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::EntryTime2798, false },
+            { L" ", false },
+            { szText, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 2:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::QuestItemMissing, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::QuestItemMissing, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 3:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::CapacityExceeded, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::CapacityExceeded, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 4:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::ThereIsStillTimeRemainingInThisZone, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::ThereIsStillTimeRemainingInThisZone, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 5:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, RGBA(255, 255, 255, 255),
-                        mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines.push_back({ I18N::Game::YouCanOnlyEnterAsAMemberOfAParty, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
 
@@ -12749,36 +12908,38 @@ bool ReceiveResultEmpireGuardian(const BYTE* ReceiveBuffer)
     {
     case 0:
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::YouHaveFailedToConquerThe, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(I18N::Game::FortressOfEmpireGuardians, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.lines = {
+            { I18N::Game::YouHaveFailedToConquerThe, false },
+            { I18N::Game::FortressOfEmpireGuardians, false },
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 1:
     {
         int day = g_pEmpireGuardianTimer->GetDay();
         int zone = g_pEmpireGuardianTimer->GetZone();
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         wchar_t szText[256] = {};
+        mu::ui::window::GenericDialogConfig cfg;
         mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
-        pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        cfg.lines.push_back({ szText, false });
         mu_swprintf(szText, L"%d%ls", zone, I18N::Game::ZoneCleared);
-        pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        cfg.lines.push_back({ szText, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     case 2:
     {
         int day = g_pEmpireGuardianTimer->GetDay();
-        mu::ui::window::CCommonMessageBox* pMsgBox;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CEmpireGuardianMsgBoxLayout), &pMsgBox);
         wchar_t szText[256] = {};
+        mu::ui::window::GenericDialogConfig cfg;
         mu_swprintf(szText, I18N::Game::FortressOfEmpireGuardiansRoundD, day);
-        pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
-        pMsgBox->AddMsg(I18N::Game::HasBeenCleared, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        cfg.lines.push_back({ szText, false });
+        cfg.lines.push_back({ I18N::Game::HasBeenCleared, false });
         mu_swprintf(szText, I18N::Game::RewardedExpD, Data->Exp);
-        pMsgBox->AddMsg(szText, RGBA(255, 255, 255, 255), mu::ui::window::MSGBOX_FONT_NORMAL);
+        cfg.lines.push_back({ szText, false });
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     break;
     }

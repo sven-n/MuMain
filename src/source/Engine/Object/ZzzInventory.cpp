@@ -37,6 +37,7 @@
 #include "GameLogic/Items/ChangeRingManager.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -10569,7 +10570,20 @@ void MovePersonalShop()
                 }
                 else
                 {
-                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalshopCreateMsgBoxLayout));
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
+                    cfg.onPrimary = []
+                    {
+                        wchar_t shopTitle[MAX_SHOPTITLE]{};
+                        g_pMyShopInventory->GetTitle(shopTitle);
+                        wcscpy(g_szPersonalShopTitle, shopTitle);
+                        SocketClient->ToGameServer()->SendPlayerShopOpen(MU_C16(shopTitle));
+
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MYSHOP_INVENTORY);
+                        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_INVENTORY);
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
             }
             else

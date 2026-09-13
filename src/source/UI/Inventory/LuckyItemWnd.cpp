@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzObject.h"
@@ -515,7 +516,36 @@ bool CLuckyItemWnd::Process_BTN_Action(void)
         return false;
     }
 
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CLuckyItemMsgBoxLayout));
+    {
+        int nTextIndex[10] = { 0, };
+        switch (g_pLuckyItemWnd->GetAct())
+        {
+        case eLuckyItemType_Trade:
+            nTextIndex[0] = 3288;
+            nTextIndex[1] = 3297;
+            nTextIndex[2] = 3298;
+            nTextIndex[3] = 3299;
+            break;
+        case eLuckyItemType_Refinery:
+            nTextIndex[0] = 3289;
+            nTextIndex[1] = 539;
+            break;
+        default:
+            return false;
+        }
+
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ I18N::Game::Lookup(nTextIndex[0]), true });
+        for (int i = 1; i < 10; ++i)
+        {
+            if (nTextIndex[i] <= 0)
+                break;
+            cfg.lines.push_back({ I18N::Game::Lookup(nTextIndex[i]), false });
+        }
+        cfg.onPrimary = [] { SocketClient->ToGameServer()->SendChaosMachineMixRequest(static_cast<ChaosMachineMixType>(g_pLuckyItemWnd->SetActAction()), 0); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+    }
     return true;
 }
 

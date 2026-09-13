@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzObject.h"
@@ -303,6 +304,48 @@ bool CCastleWindow::BtnProcess()
     return false;
 }
 
+namespace
+{
+    void ExecuteCastleMsgBoxRequest()
+    {
+        switch (g_pCastleWindow->GetCurrMsgBoxRequest())
+        {
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_BUY_GATE:
+            g_SenatusInfo.DoGateRepairAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_REPAIR_GATE:
+            g_SenatusInfo.DoGateRepairAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_UPGRADE_GATE_HP:
+            g_SenatusInfo.DoGateUpgradeHPAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE:
+            g_SenatusInfo.DoGateUpgradeDefenseAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_BUY_STATUE:
+            g_SenatusInfo.DoStatueRepairAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_REPAIR_STATUE:
+            g_SenatusInfo.DoStatueRepairAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_HP:
+            g_SenatusInfo.DoStatueUpgradeHPAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE:
+            g_SenatusInfo.DoStatueUpgradeDefenseAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER:
+            g_SenatusInfo.DoStatueUpgradeRecoverAction();
+            break;
+        case mu::ui::window::CCastleWindow::CASTLE_MSGREQ_APPLY_TAX:
+            g_SenatusInfo.DoApplyTaxAction();
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 void CCastleWindow::UpdateGateManagingTab()
 {
     POINT ptOrigin = { m_Pos.x, m_Pos.y + 55 + 6 + 12 };
@@ -326,33 +369,40 @@ void CCastleWindow::UpdateGateManagingTab()
         }
     }
 
-    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::ToPurchaseSelectedCastleGate);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToPurchase);
+        cfg.lines = {
+            { I18N::Game::ToPurchaseSelectedCastleGate, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToPurchase, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnRepair.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::ToRepairSelectedCastleGate);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToPurchase);
+        cfg.lines = {
+            { I18N::Game::ToRepairSelectedCastleGate, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToPurchase, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_HP);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::UpgradingTheDurabilityOfSelectedCastleGate);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 2, 1000000);
@@ -361,14 +411,20 @@ void CCastleWindow::UpdateGateManagingTab()
         else
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 4, 1000000);
         InsertComma(szText, 1000000);
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::UpgradingTheDurabilityOfSelectedCastleGate, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToRepair, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_GATE_DEFENSE);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::UpgradingTheDefensivePowerOfSelectedCastleGate);
+
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 0)
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 2, 3000000);
         else if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrGateInfo()) == 1)
@@ -376,8 +432,15 @@ void CCastleWindow::UpdateGateManagingTab()
         else
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 4, 3000000);
         InsertComma(szText, 3000000);
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::UpgradingTheDefensivePowerOfSelectedCastleGate, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToRepair, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 }
 
@@ -400,33 +463,40 @@ void CCastleWindow::UpdateStatueManagingTab()
         }
     }
 
-    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
     wchar_t szText[256] = { 0, };
     if (m_BtnBuy.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_STATUE);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::ToPurchaseSelectedStatue);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToPurchase);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::ToPurchaseSelectedStatue, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToPurchase, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnRepair.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_STATUE);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::ToRepairSelectedStatue);
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::ToRepairSelectedStatue, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToRepair, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnUpgradeHP.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_HP);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::UpgradingDurabilityOfSelectedCastleGate);
 
         if (g_SenatusInfo.GetHPLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 1000000);
@@ -435,14 +505,19 @@ void CCastleWindow::UpdateStatueManagingTab()
         else
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 1000000);
         InsertComma(szText, 1000000);
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::UpgradingDurabilityOfSelectedCastleGate, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToRepair, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnUpgradeDefense.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_DEFENSE);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::UpgradingDefensivePowerOfSelectedStatue);
 
         if (g_SenatusInfo.GetDefenseLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 3000000);
@@ -451,14 +526,19 @@ void CCastleWindow::UpdateStatueManagingTab()
         else
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 3000000);
         InsertComma(szText, 3000000);
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::UpgradingDefensivePowerOfSelectedStatue, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToRepair, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnUpgradeRecover.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_UPGRADE_STATUE_RECOVER);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        pMsgBox->AddMsg(I18N::Game::UpgradingRecoveryPowerOfSelectedStatue);
 
         if (g_SenatusInfo.GetRecoverLevel(&g_SenatusInfo.GetCurrStatueInfo()) == 0)
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 3, 5000000);
@@ -467,8 +547,15 @@ void CCastleWindow::UpdateStatueManagingTab()
         else
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 5000000);
         InsertComma(szText, 5000000);
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::WouldYouLikeToRepair);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::UpgradingRecoveryPowerOfSelectedStatue, false },
+            { szText, false },
+            { I18N::Game::WouldYouLikeToRepair, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 }
 
@@ -479,12 +566,18 @@ void CCastleWindow::UpdateTaxManagingTab()
     if (m_BtnApplyTax.UpdateMouseEvent() == true)
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_APPLY_TAX);
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCastleMsgBoxLayout), &pMsgBox);
-        mu_swprintf(szText, I18N::Game::ChaosCombinationGoblinTaxRateD, g_SenatusInfo.GetChaosTaxRate());
-        pMsgBox->AddMsg(szText);
+        wchar_t szChaosTaxText[256] = { 0, };
+        mu_swprintf(szChaosTaxText, I18N::Game::ChaosCombinationGoblinTaxRateD, g_SenatusInfo.GetChaosTaxRate());
         mu_swprintf(szText, I18N::Game::VariousNPCTaxRateD, g_SenatusInfo.GetNormalTaxRate());
-        pMsgBox->AddMsg(szText);
-        pMsgBox->AddMsg(I18N::Game::Apply1568);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { szChaosTaxText, false },
+            { szText, false },
+            { I18N::Game::Apply1568, false },
+        };
+        cfg.onPrimary = [] { ExecuteCastleMsgBoxRequest(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
     else if (m_BtnWithdraw.UpdateMouseEvent() == true)
     {

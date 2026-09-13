@@ -4,6 +4,8 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
+#include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Guild/UIGuildInfo.h"
 #include "UI/Widgets/UIControls.h"
@@ -32,7 +34,7 @@ extern int iNextNotice;
 extern BYTE Rank;
 extern int Exp;
 extern BYTE Ranking[5];
-extern BYTE HeroClass[5];
+extern CLASS_TYPE HeroClass[5];
 extern int HeroScore[5];
 extern wchar_t HeroName[5][MAX_USERNAME_SIZE + 1];
 
@@ -188,7 +190,32 @@ bool mu::ui::window::CCryWolf::Render()
 
                 Delay_Add_inter = 390;
                 View_End_Result = true;
-                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Result_Set_Temple));
+
+                mu::ui::window::GenericDialogConfig cfg;
+                wchar_t szResultText[300];
+                mu_swprintf(szResultText, L"%ls    %ls    %ls    %ls", I18N::Game::Rank, I18N::Game::Character, I18N::Game::Class, I18N::Game::Score);
+                cfg.lines.push_back({ szResultText, false });
+                for (int i = 0; i < 5; i++)
+                {
+                    if (HeroScore[i] == -1)
+                        continue;
+                    mu_swprintf(szResultText, L"%d      %ls      %ls      %d", i + 1, HeroName[i], gCharacterManager.GetCharacterClassText(HeroClass[i]), HeroScore[i]);
+                    cfg.lines.push_back({ szResultText, false });
+                }
+                cfg.lines.push_back({ L"    ", false });
+                cfg.lines.push_back({ L"    ", false });
+                cfg.lines.push_back({ L"    ", false });
+                cfg.lines.push_back({ L"    ", false });
+                if (View_Suc_Or_Fail == 1)
+                {
+                    cfg.lines.push_back({ I18N::Game::MonsterStrengthDecreased10, false });
+                    cfg.lines.push_back({ I18N::Game::_5IncreaseInCastleAndArenaInvitationCombineRate, false });
+                }
+                else
+                {
+                    cfg.lines.push_back({ I18N::Game::AllNPCsInCrywolfHaveBeenDeleted, false });
+                }
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
         }
         else

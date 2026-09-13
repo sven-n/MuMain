@@ -4,6 +4,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "Engine/Object/ZzzObject.h"
@@ -344,7 +345,12 @@ void CGuardWindow::UpdateRegisterTab()
             }
             else
             {
-                mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSiegeLevelMsgBoxLayout));
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.lines = {
+                    { I18N::Game::YouHaveNoAbility, false },
+                    { I18N::Game::ToAttackTheCastle, false },
+                };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
         }
         break;
@@ -390,7 +396,11 @@ void CGuardWindow::UpdateRegisterInfoTab()
     {
         if (m_BtnGiveUp.UpdateMouseEvent() == true)
         {
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSiegeGiveUpMsgBoxLayout));
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.lines.push_back({ I18N::Game::AreYouReallyWantToQuitTheSiegeWargare, false });
+            cfg.onPrimary = [] { SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest(); };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         }
     }
 }

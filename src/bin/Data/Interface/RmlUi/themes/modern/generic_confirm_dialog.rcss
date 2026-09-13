@@ -1,0 +1,81 @@
+/* Modern theme for the generic confirm dialog -- forged-dialog construction (base.rcss's
+   .modern-shell-edge/.modern-groove/.modern-content-well/.modern-footer), the same primitives
+   Login/SysMenu use, rather than the flatter .modern-frame/.modern-frame-accent pair this file
+   used before. #panel's own background/border/box-shadow recipe matches sys_menu.rcss's #panel
+   exactly (both are small forged-iron dialogs with no hero-banner). No header rail/title plate --
+   this dialog has no title, unlike Login/SysMenu. */
+
+/* #panel is centered via .center-both, not a GetProperty()-read-back calc -- same reasoning as
+   remember_password_prompt.rcss. dp throughout: this is a LayoutMode::Dialog window (no
+   transform:scale(root_scale)), not one of the root_scale-tracking inventory-family windows. */
+#panel {
+	width: 230dp;
+	height: 160dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-primary);
+	border-radius: token(radius-sm)dp;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11dp 30dp rgba(0, 0, 0, 158),
+		0 2dp 5dp rgba(0, 0, 0, 217),
+		inset 0 0 0 1dp #090a08,
+		inset 0 0 0 3dp rgba(120, 115, 90, 190);
+}
+
+/* Recessed message well -- base.rcss's .modern-content-well (shared with no other consumer yet)
+   sized/positioned for this dialog's own panel. Text sits directly on the well, scrolling
+   (overflow: auto hidden) rather than growing the panel -- see the top-level
+   generic_confirm_dialog.rml's own comment for why (the Quest window's .quest-contents proves the
+   same technique).
+
+   top+bottom (not top+height) deliberately -- this element also has flex centering below, and this
+   engine's box model is content-box only (no box-sizing support anywhere in this codebase); an
+   explicit height combined with flex/padding on children pushed the box past its intended bottom
+   edge and visually overlapped the button row. Anchoring both edges keeps the box's outer size
+   exactly (right - left) x (bottom - top) regardless of its content's own layout. Content centers
+   via flex (column direction, both axes), matching the reference's `place-items:center` -- the
+   message reads centered whether it's one short line or several. */
+.gcd-body {
+	position: absolute;
+	left: 16dp;
+	right: 16dp;
+	top: 10dp;
+	bottom: 54dp;
+	overflow: auto hidden;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.gcd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: token(text-secondary);
+	font-effect: shadow(0dp 1dp #000000);
+}
+.gcd-line.bold { font-weight: bold; color: token(text-warm); }
+
+/* Divider between the message well and the button row -- base.rcss's .modern-footer, repositioned
+   to sit just above the buttons instead of flush with the panel's bottom edge. */
+.gcd-footer {
+	left: 8dp;
+	right: 8dp;
+	top: 114dp;
+	bottom: auto;
+}
+
+.btn.gcd-btn-primary, .btn.gcd-btn-secondary {
+	top: 120dp;
+	width: 60dp;
+	height: 25dp;
+	line-height: 25dp;
+}
+.gcd-btn-primary   { left: 32dp; }
+.gcd-btn-primary.solo { left: 85dp; }
+.gcd-btn-secondary { left: 138dp; }

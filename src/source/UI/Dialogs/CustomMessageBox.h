@@ -594,40 +594,6 @@ namespace mu::ui::window
         int m_iMessageType;
     };
 
-    class CDialogMsgBox : public CMessageBoxBase
-    {
-    public:
-        CDialogMsgBox();
-        ~CDialogMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT EndBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        bool Update();
-        bool Render();
-
-    private:
-        void SetAddCallbackFunc();
-        int SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType);
-
-        void SetButtonInfo();
-        void AddButtonBlank(int iAddLine);
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // text
-        type_vector_msgdata m_MsgDataList;
-        // button
-        CMessageBoxButton m_BtnEnd;
-    };
-
     class CProgressMsgBox : public CMessageBoxBase
     {
     public:
@@ -1199,12 +1165,6 @@ namespace mu::ui::window
     };
 
     class CElpisMsgBoxLayout : public TMsgBoxLayout<CElpisMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CDialogMsgBoxLayout : public TMsgBoxLayout<CDialogMsgBox>
     {
     public:
         bool SetLayout();

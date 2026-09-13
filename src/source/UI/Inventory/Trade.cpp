@@ -6,6 +6,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 
 #include "GameLogic/Items/CComGem.h"
 #include "Audio/DSPlaySound.h"
@@ -127,8 +128,16 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
 
                         if (m_bTradeAlert && !m_bMyConfirm)
                         {
-                            mu::ui::window::CreateMessageBox(
-                                MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeAlertMsgBoxLayout));
+                            // Original colored each line individually (3x orange warning, 1x red) --
+                            // GenericDialogConfig only has bold/not-bold, so all 4 collapse to bold
+                            // here (deliberate simplification, same call as the color-variant gap
+                            // noted in docs/rmlui-ui-system/dialog-migration-plan.md).
+                            mu::ui::window::GenericDialogConfig cfg;
+                            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                            for (int i = 0; i < 4; ++i)
+                                cfg.lines.push_back({ I18N::Game::Lookup(371 + i), true });
+                            cfg.onPrimary = [this] { AlertTrade(); };
+                            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                         }
                         else
                         {
@@ -662,7 +671,15 @@ void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
 
     CMultiLanguage::ConvertFromUtf8(m_szYourID, pbyYourID);
 
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTradeMsgBoxLayout));
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.lines = {
+        { m_szYourID, false },
+        { I18N::Game::WouldLikeToTradeWithYou, false },
+    };
+    cfg.onPrimary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(true); };
+    cfg.onSecondary = [] { SocketClient->ToGameServer()->SendTradeRequestResponse(false); };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
     mu::ui::window::CInventoryCtrl::BackupPickedItem();
 }

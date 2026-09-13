@@ -543,6 +543,10 @@ bool CSystem::LoadMainSceneInterface()
     if (m_pNewUILuckyItemWnd->Create(m_pNewUIMng, 260, 0) == false)
         return false;
 
+    m_pGenericConfirmDialog = new CGenericConfirmDialog;
+    m_pGenericConfirmDialog->Create(m_pNewUIMng);
+    g_pGenericConfirmDialog = m_pGenericConfirmDialog;
+
     m_pNewUIMuHelper = new CUIMuHelper;
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
@@ -643,6 +647,8 @@ void CSystem::UnloadMainSceneInterface()
 #ifdef LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
     SAFE_DELETE(m_pNewUILuckyItemWnd);
 #endif // LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
+    g_pGenericConfirmDialog = nullptr;
+    SAFE_DELETE(m_pGenericConfirmDialog);
 
     ReleasePersonalItemTable();
 }

@@ -1,5 +1,6 @@
 ﻿#include "stdafx.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"
 #include "Render/Models/ZzzBMD.h"
@@ -1652,16 +1653,21 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown(cla
         return CALLBACK_BREAK;
     }
 
-    mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
-    if (pMsgBox)
     {
         wchar_t strText[256] = { 0, };
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
         mu_swprintf(strText, I18N::Game::Lookup(COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-        pMsgBox->AddMsg(strText, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
-
+        cfg.lines.push_back({ strText, true });
         mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        pMsgBox->AddMsg(strText, CLRDW_YELLOW, MSGBOX_FONT_BOLD);
+        cfg.lines.push_back({ strText, true });
+        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+        cfg.onSecondary = []
+        {
+            COMGEM::GetBack();
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -1676,23 +1682,27 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown(class CMe
 
     if (COMGEM::CheckInv())
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
-        if (pMsgBox)
+        wchar_t strText[256] = { 0, };
+        if (COMGEM::m_cGemType == COMGEM::CELE)
         {
-            wchar_t strText[256] = { 0, };
-            if (COMGEM::m_cGemType == COMGEM::CELE)
-            {
-                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-            }
-            else if (COMGEM::m_cGemType == COMGEM::SOUL)
-            {
-                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-            }
-            pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-            pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
         }
+        else if (COMGEM::m_cGemType == COMGEM::SOUL)
+        {
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
+        }
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ strText, true });
+        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
+        cfg.lines.push_back({ strText, true });
+        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+        cfg.onSecondary = []
+        {
+            COMGEM::GetBack();
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
         PlayBuffer(SOUND_CLICK01);
         g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1716,23 +1726,27 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown(class 
 
     if (COMGEM::CheckInv())
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
-        if (pMsgBox)
+        wchar_t strText[256] = { 0, };
+        if (COMGEM::m_cGemType == COMGEM::CELE)
         {
-            wchar_t strText[256] = { 0, };
-            if (COMGEM::m_cGemType == COMGEM::CELE)
-            {
-                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-            }
-            else if (COMGEM::m_cGemType == COMGEM::SOUL)
-            {
-                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-            }
-            pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-            pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
         }
+        else if (COMGEM::m_cGemType == COMGEM::SOUL)
+        {
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
+        }
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ strText, true });
+        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
+        cfg.lines.push_back({ strText, true });
+        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+        cfg.onSecondary = []
+        {
+            COMGEM::GetBack();
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
         PlayBuffer(SOUND_CLICK01);
         g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -1756,23 +1770,27 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class 
 
     if (COMGEM::CheckInv())
     {
-        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityCheckMsgBoxLayout), &pMsgBox);
-        if (pMsgBox)
+        wchar_t strText[256] = { 0, };
+        if (COMGEM::m_cGemType == COMGEM::CELE)
         {
-            wchar_t strText[256] = { 0, };
-            if (COMGEM::m_cGemType == COMGEM::CELE)
-            {
-                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-            }
-            else if (COMGEM::m_cGemType == COMGEM::SOUL)
-            {
-                mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-            }
-            pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-            pMsgBox->AddMsg(strText, RGBA(255, 255, 0, 255), MSGBOX_FONT_BOLD);
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
         }
+        else if (COMGEM::m_cGemType == COMGEM::SOUL)
+        {
+            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
+        }
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ strText, true });
+        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
+        cfg.lines.push_back({ strText, true });
+        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+        cfg.onSecondary = []
+        {
+            COMGEM::GetBack();
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
         PlayBuffer(SOUND_CLICK01);
         g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
@@ -2018,21 +2036,24 @@ CALLBACK_RESULT mu::ui::window::CGemIntegrationDisjointMsgBox::DisjointBtnDown(c
 
         COMGEM::SelectFromList(pUT->m_iInvenIdx, pUT->m_cLevel);
 
-        mu::ui::window::CCommonMessageBox* pMsgBox = NULL;
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointCheckMsgBoxLayout), &pMsgBox);
+        int	iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
+        int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
+        COMGEM::SetGem(nIdx);
 
-        if (pMsgBox)
+        wchar_t strText[256] = { 0, };
+        mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), iGemLevel);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ strText, true });
+        mu_swprintf(strText, I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
+        cfg.lines.push_back({ strText, true });
+        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+        cfg.onSecondary = []
         {
-            wchar_t strText[256] = { 0, };
-            int	iGemLevel = COMGEM::GetUnMixGemLevel() + 1;
-            int	  nIdx = COMGEM::Check_Jewel(pItem->Type);
-            COMGEM::SetGem(nIdx);
-            mu_swprintf(strText, I18N::Game::AreYouSureToDisbandSD, I18N::Game::Lookup(COMGEM::GetJewelIndex(nIdx, COMGEM::eGEM_NAME)), iGemLevel);
-
-            pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD);
-            mu_swprintf(strText, I18N::Game::DissolvingCostDZen, COMGEM::m_iValue);
-            pMsgBox->AddMsg(strText, CLRDW_DARKYELLOW, MSGBOX_FONT_BOLD);
-        }
+            COMGEM::GetBack();
+            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointMsgBoxLayout));
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 
     PlayBuffer(SOUND_CLICK01);
@@ -2974,209 +2995,6 @@ void mu::ui::window::CChaosMixMenuMsgBox::RenderButtons()
     m_BtnMix380.Render();
     m_BtnCancel.Render();
 }
-
-mu::ui::window::CDialogMsgBox::CDialogMsgBox()
-{
-}
-
-mu::ui::window::CDialogMsgBox::~CDialogMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CDialogMsgBox::Create(float fPriority)
-{
-    int x, y, width, height;
-
-    SetAddCallbackFunc();
-
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CDialogMsgBox::Release()
-{
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        SAFE_DELETE(*vi);
-    }
-    m_MsgDataList.clear();
-}
-
-void mu::ui::window::CDialogMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
-{
-    int iOrigSize = m_MsgDataList.size();
-    int iLine = SeparateText(strMsg, dwColor, byFontType);
-    int iSize = m_MsgDataList.size();
-
-    if (iSize > 2)
-    {
-        float height = GetSize().cy;
-
-        if (iOrigSize < 2)
-        {
-            iLine = iLine + iOrigSize - 2;
-        }
-
-        height += (MSGBOX_MIDDLE_HEIGHT * iLine);
-        SetSize(GetSize().cx, height);
-        AddButtonBlank(iLine);
-    }
-}
-
-CALLBACK_RESULT mu::ui::window::CDialogMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CDialogMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnEnd.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_DIALOG_END);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CDialogMsgBox::EndBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-bool mu::ui::window::CDialogMsgBox::Update()
-{
-    m_BtnEnd.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CDialogMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-void mu::ui::window::CDialogMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CDialogMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CDialogMsgBox::EndBtnDown, MSGBOX_EVENT_USER_CUSTOM_DIALOG_END);
-}
-
-int mu::ui::window::CDialogMsgBox::SeparateText(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
-{
-    return AppendWrappedMessageLines(strMsg, byFontType, static_cast<int>(MSGBOX_TEXT_MAXWIDTH),
-        [&](const std::wstring& line)
-        {
-            auto* message = new MSGBOX_TEXTDATA;
-            message->strMsg = line;
-            message->dwColor = dwColor;
-            message->byFontType = byFontType;
-            m_MsgDataList.push_back(message);
-        });
-}
-
-void mu::ui::window::CDialogMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnEnd.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnEnd.SetText(I18N::Game::ConversationIsOver);
-}
-
-void mu::ui::window::CDialogMsgBox::AddButtonBlank(int iAddLine)
-{
-    m_BtnEnd.AddBlank(iAddLine * MSGBOX_MIDDLE_HEIGHT);
-}
-
-void mu::ui::window::CDialogMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    if (m_MsgDataList.size() > 2)
-    {
-        int iCount = m_MsgDataList.size() - 2;
-        for (int i = 0; i < iCount; ++i)
-        {
-            RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-            y += height;
-        }
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CDialogMsgBox::RenderTexts()
-{
-    
-
-    float x, y;
-
-    x = GetPos().x; y = GetPos().y + MSGBOX_TEXT_TOP_BLANK;
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (MSGBOX_WIDTH / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CDialogMsgBox::RenderButtons()
-{
-    m_BtnEnd.Render();
-}
-
-//////////////////////////////////////////////////////////////////////////
 
 mu::ui::window::CProgressMsgBox::CProgressMsgBox()
 {
@@ -5129,18 +4947,6 @@ bool mu::ui::window::CChaosCastleResultMsgBoxLayout::SetLayout()
 bool mu::ui::window::CChaosMixMenuMsgBoxLayout::SetLayout()
 {
     CChaosMixMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CDialogMsgBoxLayout::SetLayout()
-{
-    CDialogMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 

@@ -4,6 +4,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "GameLogic/Items/MixMgr.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -973,7 +974,37 @@ bool CMixInventory::Mix()
 
     if (CInventoryCtrl::GetPickedItem() == NULL)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMixCheckMsgBoxLayout));
+        wchar_t strText[256];
+        if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1] == 0)
+        {
+            mu_swprintf(strText, L"%ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]));
+        }
+        else if (g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2] == 0)
+        {
+            mu_swprintf(strText, L"%ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]));
+        }
+        else
+        {
+            mu_swprintf(strText, L"%ls %ls %ls", I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[0]),
+                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[1]),
+                I18N::Game::Lookup(g_MixRecipeMgr.GetCurRecipe()->m_iMixName[2]));
+        }
+
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { strText, true },
+            { I18N::Game::DoYouWantToCombineYourItems, false },
+        };
+        cfg.onPrimary = []
+        {
+            g_pMixInventory->SetMixState(mu::ui::window::CMixInventory::MIX_REQUESTED);
+            SocketClient->ToGameServer()->SendChaosMachineMixRequest(
+                static_cast<ChaosMachineMixType>(g_MixRecipeMgr.GetCurMixID()),
+                g_MixRecipeMgr.GetMixSubType());
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
         return true;
     }
 

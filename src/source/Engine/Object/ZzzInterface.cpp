@@ -49,6 +49,7 @@
 #include "UI/Widgets/UIControls.h"
 #include "GameLogic/Social/PartyManager.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "GameLogic/Skills/SummonSystem.h"
 #include "GameLogic/Skills/SkillManager.h"
 #include "UI/Scaling/UITransform.h"
@@ -1587,13 +1588,54 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 						if (isElf && !altarActive)
 						{
 							if (state > 0)
-								mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Get_Temple));
+							{
+								extern int Button_Down;
+								extern int BackUp_Key;
+								BackUp_Key = CharactersClient[TargetNpc].Key;
+
+								wchar_t szCryWolfText[256];
+								mu_swprintf(szCryWolfText, I18N::Game::ContractCanBeMadeForDTimes, state);
+								mu::ui::window::GenericDialogConfig cfg;
+								cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+								cfg.lines = {
+									{ szCryWolfText, false },
+									{ I18N::Game::WouldYouLikeToProceedWithTheContract, false },
+								};
+								cfg.onPrimary = []
+								{
+									if (Hero->Helper.Type == MODEL_HORN_OF_UNIRIA || Hero->Helper.Type == MODEL_HORN_OF_DINORANT || Hero->Helper.Type == MODEL_HORN_OF_FENRIR)
+									{
+										mu::ui::window::GenericDialogConfig dontCfg;
+										dontCfg.lines.push_back({ I18N::Game::ContractCanTBeMadeWhenYouAreOnAMount, false });
+										mu::ui::window::g_pGenericConfirmDialog->Show(std::move(dontCfg));
+									}
+									else
+									{
+										Button_Down = 2;
+										SocketClient->ToGameServer()->SendCrywolfContractRequest(BackUp_Key);
+									}
+								};
+								cfg.onSecondary = []
+								{
+									Button_Down = 1;
+									mu::ui::window::GenericDialogConfig needGuardianCfg;
+									needGuardianCfg.lines.push_back({ I18N::Game::WeNeedAGuardianToProtectTheWolf, false });
+									mu::ui::window::g_pGenericConfirmDialog->Show(std::move(needGuardianCfg));
+								};
+								mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+							}
 							else
-								mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Destroy_Set_Temple));
+							{
+								mu::ui::window::GenericDialogConfig cfg;
+								cfg.lines.push_back({ I18N::Game::FurtherContractCanTBeDoneSinceTheAltarHasBeenDestroyed, false });
+								mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+							}
 						}
 						else if (isElf && altarActive)
 						{
-							mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CCry_Wolf_Ing_Set_Temple));
+							mu::ui::window::GenericDialogConfig cfg;
+							cfg.lines.push_back({ I18N::Game::ContractIsOngoingThereforeDualCompactIsNotPossible, false });
+							mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 						}
 						else
 						{
@@ -1610,7 +1652,33 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 					if (!(objectType >= MODEL_CRYWOLF_ALTAR1 && objectType <= MODEL_CRYWOLF_ALTAR5))
 					{
 						if (objectType == MODEL_NPC_QUARREL)
-							mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMapEnterWerwolfMsgBoxLayout));
+						{
+							mu::ui::window::GenericDialogConfig cfg;
+							cfg.lines = {
+								{ I18N::Game::WerewolfGuardsman, true },
+								{ I18N::Game::DoYouEvenKnowAboutMe, false },
+								{ I18N::Game::IfYouHavePassedThroughThe, false },
+								{ I18N::Game::YouMustBeLocatedCloselyTogether, false },
+								{ I18N::Game::InOrderToReceiveHelpFrom, false },
+							};
+							cfg.onPrimary = []
+							{
+								// Original visually disabled (LockOkButton) the OK button in this
+								// quest state instead of gating inside the callback -- the new
+								// primitive has no disabled-button concept yet, so this guard
+								// substitutes for that (functionally equivalent, cosmetically not).
+								BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_2);
+								if (QUEST_ING != byQuestState && QUEST_END != byQuestState)
+									return;
+
+								DWORD dwGold = CharacterMachine->Gold;
+								if (dwGold >= 3000000)
+									SocketClient->ToGameServer()->SendEnterOnWerewolfRequest();
+								else
+									g_pSystemLogBox->AddText(I18N::Game::YouAreShortOfZen, mu::ui::window::TYPE_ERROR_MESSAGE);
+							};
+							mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+						}
 
 						SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
 					}
@@ -1618,7 +1686,25 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 				else if (SEASON3A::CGM3rdChangeUp::Instance().IsBalgasBarrackMap())
 				{
 					SocketClient->ToGameServer()->SendTalkToNpcRequest(CharactersClient[TargetNpc].Key);
-					mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CMapEnterGateKeeperMsgBoxLayout));
+
+					{
+						mu::ui::window::GenericDialogConfig cfg;
+						cfg.lines = {
+							{ I18N::Game::Gatekeeper, true },
+							{ I18N::Game::HmmWhoAreYouIMConfusedAreYouEvenApprovedOfBalgass, false },
+							{ I18N::Game::LugadrS12ApostlesAreHelping, false },
+							{ I18N::Game::ApostleDevinSThirdMissionRequest, false },
+						};
+						cfg.onPrimary = []
+						{
+							// Same disabled-OK-button substitution as the Werewolf dialog above.
+							BYTE byQuestState = g_csQuest.getQuestState2(QUEST_3RD_CHANGE_UP_3);
+							if (QUEST_ING != byQuestState)
+								return;
+							SocketClient->ToGameServer()->SendEnterOnGatekeeperRequest();
+						};
+						mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
+					}
 				}
 				else if (monsterIndex >= MONSTER_LITTLE_SANTA_YELLOW && monsterIndex <= MONSTER_LITTLE_SANTA_PINK)
 				{

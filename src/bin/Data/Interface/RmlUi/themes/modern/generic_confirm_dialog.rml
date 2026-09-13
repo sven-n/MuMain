@@ -1,0 +1,29 @@
+<rml>
+<head>
+	<title>Generic Confirm Dialog</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="generic_confirm_dialog.rcss"/>
+</head>
+<body>
+	<!-- Modern theme's own copy of the generic confirm dialog -- per-theme file since the
+	     forged-dialog shell (modern-shell-edge/modern-groove/modern-content-well) is modern-specific
+	     structure, not just style, same reasoning as remember_password_prompt.rml's own modern
+	     fork. Keep ids/data-model/event-callback names in sync with
+	     ../../generic_confirm_dialog.rml. -->
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
+		<!-- Exterior silhouette + inner groove -- same forged-dialog shell as Login/SysMenu's
+		     #panel (base.rcss), applied here with no header rail/title plate -- this dialog has
+		     no title. -->
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
+		<div class="gcd-body modern-content-well">
+			<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+		</div>
+		<div class="gcd-footer modern-footer"></div>
+		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary" data-class-solo="!show_cancel"
+		     data-event-click="gcd_primary_click">{{primary_label}}</div>
+		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary" data-class-hidden="!show_cancel"
+		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
+	</div>
+</body>
+</rml>

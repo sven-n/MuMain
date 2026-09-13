@@ -10,6 +10,7 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Quests/QuestProgressByEtc.h"
 #include "UI/Dialogs/MessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "Core/Utilities/StringUtils.h"
 #include "UI/Scaling/UITransform.h"
@@ -460,7 +461,21 @@ void mu::ui::window::CMyQuestInfoWindow::RmlClickGiveUp()
     if (!m_RmlBinder.GetModel().giveupEnabled)
         return;
     ::PlayBuffer(SOUND_CLICK01);
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CQuestGiveUpMsgBoxLayout));
+
+    // Second proof case for CGenericConfirmDialog (see UI/Dialogs/GenericConfirmDialog.h) -- was
+    // CreateMessageBox(MSGBOX_LAYOUT_CLASS(CQuestGiveUpMsgBoxLayout)), an OK/Cancel confirm whose
+    // OK sent SendQuestCancelRequest for the currently-selected quest.
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.lines.push_back({ I18N::Game::IfYouGiveUpYouWill, false });
+    cfg.onPrimary = [this]()
+    {
+        const DWORD dwSelectedQuest = GetSelQuestIndex();
+        const auto questNumber = static_cast<uint16_t>(LOWORD(dwSelectedQuest));
+        const auto questGroup = static_cast<uint16_t>(HIWORD(dwSelectedQuest));
+        SocketClient->ToGameServer()->SendQuestCancelRequest(questNumber, questGroup);
+    };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 }
 
 void mu::ui::window::CMyQuestInfoWindow::RmlClickExit()

@@ -7,6 +7,7 @@
 #include "UI/Inventory/InventoryCtrl.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Inventory/UIJewelHarmony.h"
 #include "GameLogic/Items/CSItemOption.h"
@@ -528,12 +529,18 @@ bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPic
 
     if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
     {
-        CFenrirRepairMsgBox* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CFenrirRepairMsgBoxLayout), &pMsgBox);
-        pMsgBox->SetSourceIndex(iSourceIndex);
+        const int iTargetIndex = targetControl->GetIndex(pItem->x, pItem->y);
 
-        const int iIndex = targetControl->GetIndex(pItem->x, pItem->y);
-        pMsgBox->SetTargetIndex(iIndex);
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ I18N::Game::WouldYouLikeToRepairFenrirSHorn, true });
+        cfg.onPrimary = [iSourceIndex, iTargetIndex]
+        {
+            SendRequestUse(iSourceIndex, iTargetIndex);
+            CInventoryCtrl::BackupPickedItem();
+        };
+        cfg.onSecondary = [] { CInventoryCtrl::BackupPickedItem(); };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
         pPickedItem->HidePickedItem();
         return true;
@@ -919,7 +926,15 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             if (g_PortalMgr.IsPortalUsable())
             {
                 g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseReviveCharmMsgBoxLayout));
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                cfg.lines.push_back({ I18N::Game::WouldYouLikeToSaveTheLocation, false });
+                cfg.onPrimary = []
+                {
+                    BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
+                    SendRequestUse(srcIndex, 0);
+                };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
             else
             {
@@ -943,13 +958,30 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
                 else
                 {
                     g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                    CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUsePortalCharmMsgBoxLayout));
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.lines.push_back({ I18N::Game::WouldYouLikeToSaveTheLocation, false });
+                    cfg.onPrimary = []
+                    {
+                        g_PortalMgr.SavePortalPosition();
+                        BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
+                        SendRequestUse(srcIndex, 0);
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                 }
             }
             else if (pItem->Durability == 1)
             {
                 g_pMyInventory->SetStandbyItemKey(pItem->Key);
-                CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CReturnPortalCharmMsgBoxLayout));
+                mu::ui::window::GenericDialogConfig cfg;
+                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                cfg.lines.push_back({ I18N::Game::WouldYouLikeToSaveTheLocation, false });
+                cfg.onPrimary = []
+                {
+                    BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
+                    SendRequestUse(srcIndex, 0);
+                };
+                mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             }
         }
         else
@@ -963,7 +995,18 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
     if (pItem->Type == ITEM_HELPER + 66)
     {
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseSantaInvitationMsgBoxLayout));
+        mu::ui::window::GenericDialogConfig cfg;
+        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines.push_back({ I18N::Game::WouldYouLikeToMoveToTheSantaSVillage, false });
+        cfg.onPrimary = []
+        {
+            if (ITEM* pStandbyItem = g_pMyInventory->GetStandbyItem())
+            {
+                int iSrcIndex = g_pMyInventory->GetStandbyItemIndex();
+                SendRequestUse(iSrcIndex, 0);
+            }
+        };
+        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 
     return false;
