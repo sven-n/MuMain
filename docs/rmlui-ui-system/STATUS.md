@@ -807,10 +807,12 @@ per class):
     `#panel`'s own box size from the raw offset before converting to reference space; this fix is
     independent of the `Render3D()`/`RenderItem3DOnTop()` back-and-forth above and stays either way.
   - No consuming dialog class has been ported onto `title`/`progress` yet (`item3D` has 5,
-    `input.Mode::Text` has 9 as of 2026-09-14 -- see `dialog-migration-plan.md`'s "Text input"
-    entry -- `Mode::NumericKeypad` still has none) -- every unconsumed field still defaults to
-    unset, so pre-existing call sites are unaffected. See `dialog-migration-plan.md`'s own entry
-    for what's deliberately out of scope (the older `g_iChatInputType == 0` input path;
+    `input.Mode::Text` has 9 and `input.Mode::NumericKeypad` has 3 as of 2026-09-14 -- see
+    `dialog-migration-plan.md`'s "Text input"/"Numeric keypad" entries) -- every unconsumed field
+    still defaults to unset, so pre-existing call sites are unaffected. `Mode::NumericKeypad`
+    builds clean but is not yet in-game-tested (unlike `Mode::Text`, which was tested and needed a
+    text-color fix -- treat this the same way until confirmed). See `dialog-migration-plan.md`'s
+    own entry for what's deliberately out of scope (the older `g_iChatInputType == 0` input path;
     input-row/keypad/progress-bar layout geometry not yet visually verified against a real
     consumer). Porting `input.Mode::Text` also surfaced a real primitive gap, now closed:
     `CGenericConfirmDialog::KeepOpen()`, letting `onPrimary`/`onSecondary` veto a click's

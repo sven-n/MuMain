@@ -342,12 +342,36 @@ before starting real work here; don't trust the exact class list below as final.
     those two windows, whose native sprite chrome frames the input row -- this dialog's anchor has
     no visual frame of its own, so the field needs to paint its own affordance to read as a
     clickable box at all.
-- **Numeric keypad** (`CKeyPadMsgBox`-based) — `Mode::NumericKeypad` now exists too, same status:
-  `CPasswordKeyPadMsgBoxLayout`, `CStorageLockKeyPadMsgBoxLayout`,
-  `CStorageLockCheckKeyPadMsgBoxLayout`, `CStorageLockFinalKeyPadMsgBoxLayout`,
-  `CStorageUnlockKeyPadMsgBoxLayout` — note several of these *chain* dialogs (PIN entry → PIN
-  confirm → password), which `onPrimary` calling `g_pGenericConfirmDialog->Show(nextConfig)` already
-  supports with no further primitive work (proven this session for the CryWolf altar chain).
+- **Numeric keypad** (`CKeyPadMsgBox`-based) — **done (2026-09-14)**: re-inventoried all 5 classes
+  (grep, not trusted from this row's own old list) and found only 3 with live call sites, all in
+  `UI/Inventory/StorageInventory.cpp`. `CPasswordKeyPadMsgBoxLayout` (vault PIN verify, 2 call
+  sites — a locked-vault item-move guard and `CZenPaymentMsgBoxLayout`'s own onPrimary from last
+  batch) → `ShowVaultPinVerifyDialog()`. `CStorageLockKeyPadMsgBoxLayout` (vault-lock flow, step 1:
+  choose new PIN, 1 call site) → `ShowStorageLockPinDialog()`. `CStorageLockCheckKeyPadMsgBoxLayout`
+  (step 2: PIN re-entry confirm, 0 external call sites — only ever chained from step 1) →
+  `ShowStorageLockPinConfirmDialog(firstPin)`, called from `ShowStorageLockPinDialog()`'s own
+  `onPrimary`; on match, this now directly builds the already-ported WEBZEN-password `Mode::Text`
+  `Show()` config inline (moved verbatim from where it used to live inside the native
+  `CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown`) rather than a third separate call site. All 3
+  file-local helpers reuse `KeepOpen()` for incomplete input and an inline adjacent-char check for
+  `IsAllSameNumber()` (native: 4-in-a-row rejection, `CreateOkMessageBox(...)`, closes normally —
+  not a `KeepOpen()` case).
+  - **`CStorageLockFinalKeyPadMsgBoxLayout`/`CStorageUnlockKeyPadMsgBoxLayout` — confirmed dead,
+    deleted, not ported**: zero call sites anywhere (grep-confirmed) — both superseded by the
+    `Mode::Text`-based WEBZEN password dialogs already ported last batch
+    (`CStorageLockMsgBoxLayout`/`CStorageUnlockMsgBoxLayout`), left behind as unreachable leftovers.
+  - `CKeyPadMsgBox` itself (the native base class, plus its own `CKeyPadButton`/
+    `CDeleteKeyPadButton` helper classes and the `KEYPAD_TYPE_*` enum) deleted too once all 5
+    subclasses were gone — grep-confirmed no other consumer, same full-cleanup discipline
+    `CTextInputMsgBox` got last batch. `MAX_KEYPADINPUT`/`MAX_PASSWORD_SIZE` (shared `_define.h`
+    constants `CKeyPadMsgBox` also used) were left alone — still used by unrelated code
+    (`g_lpszKeyPadInput` in `ZzzInventory.cpp`).
+  - Build (zero new warnings) + both RmlUi verification scripts passed. `Mode::NumericKeypad` is
+    now proven building the same way `Mode::Text` was last batch, but **not yet in-game-tested** —
+    given last batch's own invisible-text bug on `Mode::Text`'s first real exercise, treat this the
+    same way: ask the user to test both live flows (locked-vault item/zen withdrawal PIN verify,
+    and the full vault-lock chain: PIN choose → confirm match/mismatch/all-same-digit → WEBZEN
+    password) before considering it actually done, not just built.
 - **3D item preview**: `CUseFruitCheckMsgBoxLayout` — `item3D` now exists, see above.
 - **Gem-selection menus** (bespoke multi-button, not OK/Cancel): `CGemIntegrationMsgBoxLayout`,
   `CGemIntegrationUnityMsgBoxLayout`, `CGemIntegrationDisjointMsgBoxLayout`.

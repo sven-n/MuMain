@@ -30,6 +30,143 @@
 using namespace SEASON3B;
 using namespace mu::ui::window;
 
+namespace
+{
+    // Was CPasswordKeyPadMsgBoxLayout (CustomMessageBox.h) -- a plain 4-digit Mode::NumericKeypad
+    // PIN verify, ported 2026-09-14. Two call sites: SendRequestItemToMyInven's locked-vault guard
+    // below, and CZenPaymentMsgBoxLayout's own onPrimary (this same file, ported last batch).
+    void ShowVaultPinVerifyDialog()
+    {
+        GenericDialogConfig cfg;
+        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::PasswordVerification, false },
+            { I18N::Game::Choose4DigitsForPassword, false },
+        };
+        cfg.input = GenericDialogConfig::InputField{};
+        cfg.input->mode = GenericDialogConfig::InputField::Mode::NumericKeypad;
+        cfg.input->maxLength = 4;
+        cfg.onPrimary = []
+        {
+            const std::wstring strText = g_pGenericConfirmDialog->GetInputText();
+            if (strText.size() < 4)
+            {
+                g_pGenericConfirmDialog->KeepOpen();
+                return;
+            }
+            SocketClient->ToGameServer()->SendUnlockVault((WORD)_wtoi(strText.c_str()));
+        };
+        cfg.onSecondary = []
+        {
+            if (g_pPickedItem)
+                g_pPickedItem->ShowPickedItem();
+            if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_STORAGE))
+                g_pStorageInventory->SetItemAutoMove(false);
+        };
+        g_pGenericConfirmDialog->Show(std::move(cfg));
+    }
+
+    // Was CStorageLockCheckKeyPadMsgBoxLayout (CustomMessageBox.h) -- PIN re-entry confirm step of
+    // the vault-lock flow, ported 2026-09-14. Only ever reached from
+    // ShowStorageLockPinDialog()'s own onPrimary below (no external call sites natively either).
+    // `firstPin` is the PIN just typed in the first step, captured by value -- same technique this
+    // session's own CStorageLockCheckKeyPadMsgBoxLayout port already used for wInputNumber.
+    void ShowStorageLockPinConfirmDialog(std::wstring firstPin)
+    {
+        GenericDialogConfig cfg;
+        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::VerifyNewPassword, false },
+            { I18N::Game::EnterPasswordAgain, false },
+        };
+        cfg.input = GenericDialogConfig::InputField{};
+        cfg.input->mode = GenericDialogConfig::InputField::Mode::NumericKeypad;
+        cfg.input->maxLength = 4;
+        cfg.onPrimary = [firstPin]
+        {
+            const std::wstring strText = g_pGenericConfirmDialog->GetInputText();
+            if (strText.size() < 4)
+            {
+                g_pGenericConfirmDialog->KeepOpen();
+                return;
+            }
+            if (strText[0] == strText[1] && strText[1] == strText[2] && strText[2] == strText[3])
+            {
+                mu::ui::window::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
+                return;
+            }
+            if (strText != firstPin)
+            {
+                mu::ui::window::CreateOkMessageBox(I18N::Game::PasswordIsIncorrect);
+                return;
+            }
+
+            // Was CStorageLockMsgBoxLayout (CustomMessageBox.h) -- a masked (bIsPassword=true),
+            // non-numeric-restricted Mode::Text WEBZEN.COM password entry, ported 2026-09-14 (moved
+            // here verbatim from CustomMessageBox.cpp's own now-deleted
+            // CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown). The 4-digit PIN just confirmed above
+            // has no equivalent field on GenericDialogConfig -- captured directly in the closure
+            // instead of the native SetPassword()/GetPassword() round-trip through the MsgBox
+            // instance.
+            const WORD wInputNumber = (WORD)_wtoi(strText.c_str());
+            GenericDialogConfig pwCfg;
+            pwCfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            pwCfg.lines = {
+                { I18N::Game::EnterYourWEBZENCOMPassword, false },
+                { I18N::Game::EnterYourWEBZENCOMPassword697, false },
+            };
+            pwCfg.input = GenericDialogConfig::InputField{};
+            pwCfg.input->mode = GenericDialogConfig::InputField::Mode::Text;
+            pwCfg.input->maxLength = g_iLengthAuthorityCode;
+            pwCfg.input->masked = true;
+            pwCfg.onPrimary = [wInputNumber]
+            {
+                const std::wstring strPassword = g_pGenericConfirmDialog->GetInputText();
+                if (strPassword.empty())
+                {
+                    g_pGenericConfirmDialog->KeepOpen();
+                    return;
+                }
+                SocketClient->ToGameServer()->SendSetVaultPin(wInputNumber, MU_C16(strPassword.c_str()));
+            };
+            g_pGenericConfirmDialog->Show(std::move(pwCfg));
+        };
+        g_pGenericConfirmDialog->Show(std::move(cfg));
+    }
+
+    // Was CStorageLockKeyPadMsgBoxLayout (CustomMessageBox.h) -- first step of the vault-lock flow
+    // (choose a new 4-digit PIN), ported 2026-09-14. One call site: storage_lock_click's !m_bLock
+    // branch below.
+    void ShowStorageLockPinDialog()
+    {
+        GenericDialogConfig cfg;
+        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.lines = {
+            { I18N::Game::ChooseNewPassword, false },
+            { I18N::Game::Choose4DigitsForPassword, false },
+        };
+        cfg.input = GenericDialogConfig::InputField{};
+        cfg.input->mode = GenericDialogConfig::InputField::Mode::NumericKeypad;
+        cfg.input->maxLength = 4;
+        cfg.onPrimary = []
+        {
+            const std::wstring strText = g_pGenericConfirmDialog->GetInputText();
+            if (strText.size() < 4)
+            {
+                g_pGenericConfirmDialog->KeepOpen();
+                return;
+            }
+            if (strText[0] == strText[1] && strText[1] == strText[2] && strText[2] == strText[3])
+            {
+                mu::ui::window::CreateOkMessageBox(I18N::Game::ItIsNotAllowedToUseSame4Numbers);
+                return;
+            }
+            ShowStorageLockPinConfirmDialog(strText);
+        };
+        g_pGenericConfirmDialog->Show(std::move(cfg));
+    }
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -131,8 +268,8 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
                         // Was CZenPaymentMsgBoxLayout (CustomMessageBox.h). The insufficient-storage-
-                        // gold branch still chains into the still-native CPasswordKeyPadMsgBoxLayout
-                        // (a numeric keypad dialog -- separate batch, unaffected by this port).
+                        // gold branch chains into ShowVaultPinVerifyDialog() (this file, was
+                        // CPasswordKeyPadMsgBoxLayout, ported 2026-09-14).
                         mu::ui::window::GenericDialogConfig cfg;
                         cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw, false } };
@@ -160,8 +297,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                                 else
                                 {
                                     g_pStorageInventory->SetBackupTakeZen(iInputZen);
-                                    mu::ui::window::CreateMessageBox(
-                                        MSGBOX_LAYOUT_CLASS(mu::ui::window::CPasswordKeyPadMsgBoxLayout));
+                                    ShowVaultPinVerifyDialog();
                                 }
                             }
                             else if (CharacterMachine->Gold + iInputZen > 2000000000)
@@ -204,7 +340,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
                         }
                         else
-                            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CStorageLockKeyPadMsgBoxLayout));
+                            ShowStorageLockPinDialog();
                     });
                 c.BindEventCallback("storage_expand_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
@@ -587,8 +723,7 @@ void CStorageInventory::SendRequestItemToMyInven(ITEM* pItemObj, int nStorageInd
         if (!IsItemAutoMove())
             g_pPickedItem->HidePickedItem();
 
-        CreateMessageBox(
-            MSGBOX_LAYOUT_CLASS(mu::ui::window::CPasswordKeyPadMsgBoxLayout));
+        ShowVaultPinVerifyDialog();
     }
 }
 
