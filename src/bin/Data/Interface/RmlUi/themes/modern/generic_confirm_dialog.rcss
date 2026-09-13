@@ -1,36 +1,28 @@
-/* Modern theme for the generic confirm dialog -- forged-dialog construction (base.rcss's
-   .modern-shell-edge/.modern-groove/.modern-content-well/.modern-footer), the same primitives
-   Login/SysMenu use, rather than the flatter .modern-frame/.modern-frame-accent pair this file
-   used before. #panel's own background/border/box-shadow recipe matches sys_menu.rcss's #panel
-   exactly (both are small forged-iron dialogs with no hero-banner). No header rail/title plate --
-   this dialog has no title, unlike Login/SysMenu. */
+/* Modern theme for the generic confirm dialog. #panel's own background/border/box-shadow recipe
+   (matching sys_menu.rcss's #panel -- both are small forged-iron dialogs with no hero-banner), the
+   shell-edge/groove, and the well's recessed fill all moved to generic_confirm_dialog_bg.rcss --
+   see that file's own comment for why (item3D layering). This file is layout/content only now. No
+   header rail/title plate -- this dialog has no title, unlike Login/SysMenu. */
 
 /* #panel is centered via .center-both, not a GetProperty()-read-back calc -- same reasoning as
    remember_password_prompt.rcss. dp throughout: this is a LayoutMode::Dialog window (no
-   transform:scale(root_scale)), not one of the root_scale-tracking inventory-family windows. */
+   transform:scale(root_scale)), not one of the root_scale-tracking inventory-family windows.
+   Deliberately no paint here -- generic_confirm_dialog_bg.rcss's own #panel carries the same
+   width/height so the two documents' panels align exactly; see that file's comment. */
 #panel {
 	width: 230dp;
 	height: 160dp;
 	font-family: "token(font-body)";
 	font-size: 12dp;
 	color: token(text-primary);
-	border-radius: token(radius-sm)dp;
-	background-color: #080a08;
-	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
-	border-width: 1dp;
-	border-color: token(border-frame);
-	box-shadow:
-		0 11dp 30dp rgba(0, 0, 0, 158),
-		0 2dp 5dp rgba(0, 0, 0, 217),
-		inset 0 0 0 1dp #090a08,
-		inset 0 0 0 3dp rgba(120, 115, 90, 190);
 }
 
-/* Recessed message well -- base.rcss's .modern-content-well (shared with no other consumer yet)
-   sized/positioned for this dialog's own panel. Text sits directly on the well, scrolling
-   (overflow: auto hidden) rather than growing the panel -- see the top-level
-   generic_confirm_dialog.rml's own comment for why (the Quest window's .quest-contents proves the
-   same technique).
+/* Message well -- layout only now (position/overflow/flex); the recessed fill that used to come
+   from base.rcss's .modern-content-well lives in generic_confirm_dialog_bg.rcss's
+   .gcd-bg-content-fill instead (same left/right/top/bottom, so the fill still lines up exactly
+   behind this box). Text sits directly on it, scrolling (overflow: auto hidden) rather than
+   growing the panel -- see the top-level generic_confirm_dialog.rml's own comment for why (the
+   Quest window's .quest-contents proves the same technique).
 
    top+bottom (not top+height) deliberately -- this element also has flex centering below, and this
    engine's box model is content-box only (no box-sizing support anywhere in this codebase); an
@@ -60,6 +52,99 @@
 	font-effect: shadow(0dp 1dp #000000);
 }
 .gcd-line.bold { font-weight: bold; color: token(text-warm); }
+
+/* Optional bold title row (GameShop/MsgBoxIGS*.h's own title/body split) -- a flex child of
+   .gcd-body like `lines`, not a separately-positioned element (see the .rml's own comment).
+   warning/error are a look-and-feel-only hook (docs/rmlui-ui-system/dialog-migration-plan.md) --
+   not modeled on any single native class. */
+.gcd-title {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	font-weight: bold;
+	color: token(text-warm);
+	margin-bottom: 4dp;
+}
+.gcd-title.warning { color: token(semantic-warning); }
+.gcd-title.error { color: token(semantic-danger); }
+/* .gcd-title also sets `display`, so a same-specificity `.hidden { display: none; }` declared
+   earlier (base.rcss) loses the cascade tie to this file's own later declaration -- same fix as
+   `.modern-icon-btn-px.hidden`/`.shop-repair-wallet.hidden` elsewhere in this theme. */
+.gcd-title.hidden { display: none; }
+
+/* Invisible position reference for the native 3D item-preview render pass
+   (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
+   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40, CommonMessageBox.h). Renders
+   nothing itself.
+
+   position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
+   class assumes its own explicit top/left elsewhere (main_frame.rcss's #item_hotkey_anchor, a
+   fixed legacy coordinate), which this anchor doesn't have: it's meant to flow as an ordinary
+   child of .gcd-body's flex column, alongside `title`/`lines`, not be pulled out of it. */
+.gcd-item3d-anchor {
+	position: static;
+	width: 40dp;
+	height: 40dp;
+}
+
+/* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
+   `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
+   static so they can flex-wrap into a grid instead of stacking on top of each other. */
+.gcd-input-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 4dp;
+}
+/* Same display/.hidden cascade-tie fix as .gcd-title above -- without this, `data-class-hidden`
+   toggling "hidden" on this row has no visible effect since `display: flex` above always wins the
+   tie against base.rcss's earlier-declared `.hidden { display: none; }`. */
+.gcd-input-row.hidden { display: none; }
+.gcd-keypad-display {
+	color: token(text-warm);
+	font-weight: bold;
+	letter-spacing: 4dp;
+	min-height: 14dp;
+	margin-bottom: 4dp;
+}
+.gcd-keypad-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 150dp;
+}
+.gcd-keypad-grid.hidden { display: none; } /* same cascade-tie fix as .gcd-input-row above */
+.btn.gcd-keypad-btn, .btn.gcd-keypad-delete {
+	position: static;
+	width: 26dp;
+	height: 18dp;
+	margin: 1dp;
+	font-size: 9dp;
+}
+/* Position reference only, same idea as .gcd-item3d-anchor -- the native g_pSingleTextInputBox
+   widget draws on top of this natively, nothing renders through RmlUi here for Mode::Text.
+   position: static for the same reason .gcd-item3d-anchor needs it -- see that rule's comment. */
+.gcd-input-anchor {
+	position: static;
+	width: 150dp;
+	height: 18dp;
+}
+
+/* Optional progress bar (CProgressMsgBox/CCursedTempleProgressMsgBox) -- same
+   `x_fraction * 100 + '%'` fill technique main_frame.rml's own HP/MP/AG/SD/EXP gauges prove. */
+.gcd-progress-track {
+	width: 150dp;
+	height: 10dp;
+	margin-top: 4dp;
+	background-color: token(surface-recessed);
+	border: 1dp token(border-inner);
+	border-radius: token(radius-sm)dp;
+}
+.gcd-progress-fill {
+	height: 100%;
+	background-color: token(accent-gold);
+}
 
 /* Divider between the message well and the button row -- base.rcss's .modern-footer, repositioned
    to sit just above the buttons instead of flush with the panel's bottom edge. */

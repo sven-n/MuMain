@@ -51,11 +51,42 @@ public:
     // data-model/animation purposes, so this does that too, not just Render().
     void RenderBackgroundLayer();
 
+    // CManager::Render() (WindowManager.cpp) calls this once per frame, right before the first
+    // visible object whose GetLayerDepth() reaches the shared 3D camera's own z-order
+    // (INFORMATION_CAMERA_Z_ORDER, Window3DRenderMng.h) -- i.e. strictly after every ordinary
+    // window's own Render() this frame (all of which sit below that z-order) and strictly before
+    // that camera's own Render3D() pass (where item3D actually draws, via
+    // CGenericConfirmDialog::Render3D()). This precise, still-top-level position (WindowManager.
+    // cpp's own per-object loop, before any (*vi)->Render() call) matters: C3DCamera::Render()
+    // pushes a legacy GL_PROJECTION/GL_MODELVIEW matrix stack and enables depth test/mask before
+    // calling Render3D() in a loop -- recording an RmlUi render pass from INSIDE that block (e.g.
+    // from within Render3D() itself) is exactly the kind of mid-frame GPU-state interleaving that
+    // twice crashed the SetPostRmlUiCallback-based attempt to solve this same underlying problem
+    // (see GenericConfirmDialog.h's own class comment) -- this call site avoids that entirely by
+    // staying at the same safe, pre-matrix-stack point RenderBackgroundLayer() itself already
+    // uses. No-op past the first call each frame (m_dialogBackgroundLayerRenderedThisFrame), and a
+    // no-op entirely if nothing is currently Show()n in GetDialogBackgroundContext() (today, only
+    // ever CGenericConfirmDialog's own bg doc).
+    void RenderDialogBackgroundLayer();
+
     // Every RmlUi document meant to render via RenderBackgroundLayer() loads into this context
     // instead of GetContext()'s "main" one (UI::RmlBridge::LoadThemedDocument already takes a
     // Rml::Context* parameter, so no change needed there) -- e.g.
     // LoadThemedDocument(RmlUiRuntime::Instance().GetBackgroundContext(), "...").
     Rml::Context* GetBackgroundContext() const { return m_BackgroundContext; }
+
+    // A THIRD, separate background-only context -- exclusively for CGenericConfirmDialog's own
+    // panel chrome, not shared with GetBackgroundContext() (used by every ordinary window's own bg
+    // doc, e.g. NPCShop/inventory-family windows). GetBackgroundContext()'s single "renders once,
+    // globally, before the very first visible window this frame" timing works fine as long as
+    // nothing needs to render BETWEEN "some other window's own foreground content" and "this
+    // window's own 3D icon content" -- but a modal dialog does: its own panel needs to land ABOVE
+    // any other window it happens to visually overlap (e.g. opened over NPC Shop, whose own
+    // inventory-slot icons would otherwise bleed through the dialog's now-paint-less-in-the-shared-
+    // context panel), while still landing BELOW its own item3D preview (drawn via
+    // I3DRenderObj/Render3D(), the same shared 3D camera every other item-icon renderer uses).
+    // RenderDialogBackgroundLayer()'s own comment has the full call-site reasoning.
+    Rml::Context* GetDialogBackgroundContext() const { return m_DialogBackgroundContext; }
 
     // Forwards one SDL event to RmlUi. Motion and button down/up are handled directly (see the
     // .cpp) to avoid two real bugs in RmlUi's official RmlSDL::InputEventHandler (vendored at
@@ -112,4 +143,15 @@ private:
     // (SetPreSubmitCallback) -- after every RenderBackgroundLayer() call this frame already
     // happened, so resetting there arms the guard correctly for next frame.
     bool m_backgroundLayerRenderedThisFrame = false;
+
+    // See GetDialogBackgroundContext()/RenderDialogBackgroundLayer()'s own comments. Same
+    // ownership/lifetime contract as m_BackgroundContext (created alongside it in Create(),
+    // resized alongside it in OnResize(), released by the same Rml::Shutdown() call in Destroy()).
+    Rml::Context* m_DialogBackgroundContext = nullptr;
+
+    // Same once-per-frame-guard idea as m_backgroundLayerRenderedThisFrame, reset alongside it in
+    // RenderFrame() -- CManager::Render() calls RenderDialogBackgroundLayer() once per visible
+    // object at/past the 3D camera's own z-order, every frame; this is what makes only the first
+    // such call actually render.
+    bool m_dialogBackgroundLayerRenderedThisFrame = false;
 };

@@ -7,6 +7,7 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
 
 #include "GameLogic/Social/GambleSystem.h"
@@ -181,7 +182,22 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
                     _gambleSys.SetBuyItemInfo(iIndex, ItemValue(pItem, 0));
                     g_pNPCShop->SetStandbyItemKey(pItem->Key);
 
-                    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGambleBuyMsgBoxLayout));
+                    mu::ui::window::GenericDialogConfig cfg;
+                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.item3D = *pItem;
+                    cfg.lines = { { I18N::Game::WouldYouLikeToPurchase, false } };
+                    cfg.onPrimary = []
+                    {
+                        GambleSystem& gambleSys = GambleSystem::Instance();
+                        if (gambleSys.IsGambleShop() && BuyCost != 0)
+                        {
+                            const auto& itemInfo = gambleSys.GetBuyItemInfoConst();
+                            SocketClient->ToGameServer()->SendBuyItemFromNpcRequest(itemInfo.ItemIndex);
+                            BuyCost = itemInfo.ItemCost;
+                            g_ConsoleDebug->Write(MCD_SEND, L"0x32 [SendRequestBuy(%d)]", itemInfo.ItemIndex);
+                        }
+                    };
+                    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
 
                     return false;
                 }
@@ -399,7 +415,33 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
         }
         if (pItem && IsHighValueItem(pItem) == true)
         {
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CHighValueItemCheckMsgBoxLayout));
+            mu::ui::window::GenericDialogConfig cfg;
+            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.item3D = *pItem;
+            cfg.lines = {
+                { I18N::Game::AnExpensiveItem, true },
+                { I18N::Game::CheckTheItemPlease, true },
+                { I18N::Game::AreYouSureYouWantToSellIt, true },
+            };
+            cfg.onPrimary = []
+            {
+                CPickedItem* pPickedItem = mu::ui::window::CInventoryCtrl::GetPickedItem();
+                int iSourceIndex = pPickedItem ? pPickedItem->GetSourceLinealPos() : -1;
+                if (iSourceIndex >= MAX_EQUIPMENT_INDEX && iSourceIndex < MAX_MY_INVENTORY_EX_INDEX)
+                {
+                    SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+                    g_pNPCShop->SetSellingItem(true);
+                }
+                else
+                {
+                    mu::ui::window::CInventoryCtrl::BackupPickedItem();
+                }
+            };
+            cfg.onSecondary = []
+            {
+                mu::ui::window::CInventoryCtrl::BackupPickedItem();
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
             pPickedItem->HidePickedItem();
 
             return true;

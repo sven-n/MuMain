@@ -709,18 +709,116 @@ per class):
   `<C3DItemCommonMsgBox>`/`<CFenrirRepairMsgBox>`) feature-specific confirms spanning guild/quest/
   trade/duel/castle-siege/events/gambling. **This entire file is now fully handled** (2026-09-13):
   63 classes ported-and-deleted or confirmed-dead-and-deleted (3 proof-pass + 7 Guild + 10
-  Trade/shop/inventory + 25 Network/server + 14 Siege/castle/CryWolf + 4 dead-code), plus 6
-  `C3DItemCommonMsgBox`-based classes left as an explicit future extension (3D-item-preview, not
-  built yet). See `dialog-migration-plan.md` for the per-class worklist. `CustomMessageBox.h`
-  (~76 more classes, separate file) is next.
-- **`CustomMessageBox.h`** — ~76 classes on the same pattern, mostly needing a new extension first.
-  **1 done** (2026-09-13): `CDialogMsgBoxLayout`/`CDialogMsgBox` (the one near-miss that already
-  fit as-is — see `dialog-migration-plan.md`). The rest: keypad/numeric-entry boxes
-  (needs its own on-screen keypad component — doesn't exist yet, not proven by the 3 dialogs
-  ported so far), fruit/gem-integration confirms, the in-game system-menu box (distinct from the
-  already-ported `CSysMenuWin`), event result screens (Blood Castle/Devil Square/Chaos Castle),
-  duel challenge/result, progress-bar modals (also not proven yet — `GenericDialogConfig` has no
-  progress concept), and ~46 `T*MsgBoxLayout<...>` wrappers.
+  Trade/shop/inventory + 25 Network/server + 14 Siege/castle/CryWolf + 4 dead-code), plus 5 of the 6
+  `C3DItemCommonMsgBox`-based classes now ported onto the primitive's `item3D` field
+  (`CHighValueItemCheckMsgBoxLayout` — 2 call sites, `CUseFruitMsgBoxLayout`,
+  `CUsePartChargeFruitMsgBoxLayout`, `CPersonalShopItemBuyMsgBoxLayout`, `CGambleBuyMsgBoxLayout`).
+  `CPersonalShopItemValueCheckMsgBoxLayout` stays native — it needs a numeric price-value field its
+  `CTextInputMsgBox` caller sets via `SetItemValue()`, which isn't designed yet. See
+  `dialog-migration-plan.md` for the per-class worklist. `CustomMessageBox.h` (~76 more classes,
+  separate file) is next.
+- **`GenericDialogConfig` extensions** — **done** (2026-09-13): optional `title`, `severity`
+  (Normal/Warning/Error, look-and-feel only), `input` (`InputField::Mode::Text`/`NumericKeypad`),
+  `progress` (duration-only auto-close), and `item3D` (an `ITEM` snapshot). One struct, not five
+  sibling classes.
+  - **Correction, 2026-09-13**: the first version rendered `item3D` via a plain `I3DRenderObj`/
+    `C3DRenderMng` registration (`Render3D()`), like every other legacy 3D icon. In-game testing
+    (5 classes ported onto `item3D`, see `CommonMessageBox.h` entry below) showed the item never
+    appeared — that path renders through `CManager::Render()`, which always finishes *before*
+    RmlUi's main-context composite, so the dialog's own opaque `#panel` background painted over it
+    every frame regardless of z-order.
+  - **Reverted, 2026-09-14**: tried moving `item3D` off `I3DRenderObj`/`Render3D()` onto a manually
+    invoked `RenderItem3DOnTop()` called from Winmain.cpp's `SetPostRmlUiCallback` instead (the
+    established "legacy content after RmlUi" seam `CMsgWin`/`CCharMakeWin`/`CLoginWin` already use
+    for native text overlays, just the first time asked to carry 3D content) — **twice**, and both
+    attempts crashed on dialog dismiss. The first crash's cause was found and genuinely fixed at the
+    renderer level (`MuRendererSDLGpu.cpp`'s post-RmlUi replay pass only re-staged vertex data,
+    leaving a skinned draw's bone-matrix buffer unstaged/undersized while `ReplayDrawCommand`'s
+    `boneDataReady` guard stayed stale-true — an out-of-bounds GPU read; fixed by reusing
+    `StageDeferredGpuData()`, which re-stages vertex/bone/strip-index/texture data together and
+    returns a correct `boneDataReady` — this fix is real and stays). That restored visibility and
+    (combined with a separate `PanelTranslateCorrection()` fix, below) correct position, but the
+    dismiss-time crash persisted regardless — a second, still-unidentified bug in the same seam.
+    Enabling SDL_GPU validation (Debug config) to localize it hit a *different* pre-existing
+    validation failure at startup, unrelated to this feature, blocking that route. Reverted back to
+    `I3DRenderObj`/`Render3D()` (stable; `item3D` renders correctly-positioned but behind the panel)
+    rather than ship a crash. `input`'s `Mode::Text` widget keeps its own `RenderTextOnTop()`
+    post-RmlUi method (pure 2D, never implicated in the crash, matches the already-proven pattern).
+    See `theming-and-modding.md`'s "RmlUi rendering strictly last in the frame" entry for the full
+    writeup.
+  - **Fixed for real, 2026-09-14**: the fg/bg RmlUi document split `CMainFrameWindow`/the
+    inventory-family windows already prove for their own live 3D icons. `generic_confirm_dialog`'s
+    own panel background art (the modern gradient/shell-edge/groove/content-well recipe, or
+    legacy's `newui_msgbox_*` sprite composite) moved wholesale into a new
+    `generic_confirm_dialog_bg.rml`/`.rcss` per theme. The original `generic_confirm_dialog.rml`/
+    `.rcss` document is now paint-*less* where the background used to be — same `#panel` id/size/
+    centering, just nothing left to cover the item once the background document has already
+    painted it earlier the same frame. Needed **no changes at all** to `Render3D()`/
+    `PanelTranslateCorrection()`/`I3DRenderObj` registration or the post-RmlUi seam — only where the
+    panel's own background art paints from, and (see below) exactly when.
+    - **Centering bug, 2026-09-14**: the first cut of `generic_confirm_dialog_bg.rcss` didn't link
+      `base.rcss` (per convention, no `*_bg.rml` does), but `base.rcss` is where `body { width:100%;
+      height:100%; }` comes from — without it, `#panel`'s `left:50%;top:50%` had a zero-sized
+      containing block to resolve against, collapsing the whole background panel to the screen's
+      upper-left corner. Fixed by adding that one `body` rule explicitly to both themes' `_bg.rcss`
+      (not by linking `base.rcss`, which would pull in a lot more than needed).
+    - **Cross-window bleed-through bug, 2026-09-14**: the first cut also loaded the new bg doc into
+      the SHARED `RmlUiRuntime::GetBackgroundContext()` (the same one `CNPCShop`/every inventory-
+      family window's own bg doc uses), driven by the existing `RenderBackgroundLayer()` hook (fired
+      once, globally, before the very first visible window/camera each frame). That fixed the
+      standalone case, but broke the moment this dialog opened over another bg-doc window with
+      native foreground content: since `RenderBackgroundLayer()` renders ALL currently-visible bg
+      docs together, once, strictly before EVERY window's own 2D `Render()` this frame — not just
+      this dialog's — `CNPCShop`'s own inventory-slot icons (drawn later, in its own `Render()`)
+      always painted over BOTH bg docs regardless of their relative order within that shared
+      context, bleeding through the dialog's panel wherever they geometrically overlapped. This is
+      exactly the case that matters most for `item3D` (sell-to-shop/gamble-buy confirms are almost
+      always shown over an open shop window). Tried reasserting the dialog's own bg doc's stacking
+      order every frame via `ElementDocument::PullToFront()` first — insufficient, since
+      `PullToFront()` only reorders documents *within* the one shared context; it can't make that
+      context's single global render pass happen *after* another window's own `Render()`.
+      **Actually fixed** by giving the dialog's own bg doc a dedicated THIRD context
+      (`RmlUiRuntime::GetDialogBackgroundContext()`), rendered by a separately-guarded
+      `RmlUiRuntime::RenderDialogBackgroundLayer()` that `CManager::Render()` fires at a *different*
+      point than `RenderBackgroundLayer()`: right before the first visible object whose
+      `GetLayerDepth()` reaches the shared 3D camera's own z-order (`INFORMATION_CAMERA_Z_ORDER`,
+      `Window3DRenderMng.h` — the same z-order `item3D` itself renders through). Since
+      `CManager::Render()` sorts every registered object by `GetLayerDepth()` (`CNPCShop` = 2.5f,
+      the shared 3D camera = 10.9f, this dialog's own 2D `Render()` = 60.0f) and calls each one's
+      `Render()` in that order, "right before the object at/past 10.9f" is guaranteed to be
+      strictly after every ordinary window's own `Render()` this frame and strictly before
+      `item3D` draws. Deliberately triggered from `CManager::Render()`'s own loop, NOT from inside
+      `Render3D()` itself — `C3DCamera::Render()` pushes a legacy GL matrix stack and enables depth
+      test/mask before looping over every registered object's `Render3D()`, and recording an RmlUi
+      render pass from inside that block is exactly the kind of mid-frame GPU-state interleaving
+      that crashed the `SetPostRmlUiCallback` attempts above; `CManager::Render()`'s own loop,
+      before any `(*vi)->Render()` call, is the same safe, pre-matrix-stack position
+      `RenderBackgroundLayer()` itself already uses.
+    - Simpler than both reference implementations either way: this dialog's `#panel` centers via
+      plain CSS (`.center-both`), never a per-frame C++-computed position, so its background
+      document needs no `RmlModelBinder` and no position-sync code at all (`CMainFrameWindow`/
+      `CNPCShop`'s own bg docs both need a small one, since their content is anchored to an
+      adjustable HUD-band/inventory-window position).
+  - **`PanelTranslateCorrection()`, 2026-09-14**: separately, `item3D`/`input`'s anchor position was
+    found to be wrong (rendering outside the panel) because `#panel`'s `.center-both` centering uses
+    `transform: translate(-50%,-50%)`, and RmlUi's `GetAbsoluteOffset()` doesn't apply CSS
+    `transform` at any level — every descendant of `#panel` reported its position as if the panel
+    were still sitting at its untranslated `left:50%;top:50%` spot. Fixed by subtracting half of
+    `#panel`'s own box size from the raw offset before converting to reference space; this fix is
+    independent of the `Render3D()`/`RenderItem3DOnTop()` back-and-forth above and stays either way.
+  - No consuming dialog class has been ported onto `title`/`input`/`progress` yet (`item3D` has 5,
+    see below) — every field still defaults to unset, so pre-existing call sites are unaffected.
+    See `dialog-migration-plan.md`'s own entry for what's deliberately out of scope (the older
+    `g_iChatInputType == 0` input path; input-row/keypad/progress-bar layout geometry not yet
+    visually verified against a real consumer).
+- **`CustomMessageBox.h`** — ~76 classes on the same pattern. **2 done** (2026-09-13):
+  `CDialogMsgBoxLayout`/`CDialogMsgBox` (the one near-miss that already fit as-is) and
+  `CreateOkMessageBox()` (a third, previously-untracked OK-only helper, ~90 call sites migrated via
+  one function-body change). The rest: keypad/numeric-entry boxes and text-input boxes (both now
+  unblocked by the extensions above, not yet ported), fruit/gem-integration confirms, the in-game
+  system-menu box (distinct from the already-ported `CSysMenuWin`), event result screens (Blood
+  Castle/Devil Square/Chaos Castle), duel challenge/result, progress-bar modals (also now unblocked),
+  and ~46 `T*MsgBoxLayout<...>` wrappers.
 - **`CUIPopup`** (`UI/Dialogs/UIPopup.h`, `g_pUIPopup`) — **done** (2026-09-13). Every real
   `POPUP_OK`/`POPUP_YESNO` call site (9 live across `Guild/UIGuildInfo.cpp`,
   `Guild/UIGuildMaster.cpp`, `Network/Server/WSclient.cpp`) ported to `CGenericConfirmDialog`; one
@@ -731,10 +829,9 @@ per class):
   `dialog-migration-plan.md` for the full per-call-site breakdown.
 - **`GameShop/MsgBoxIGS*.h`** — 10 more `CMessageBoxBase` subclasses, cash-shop flows (buy confirm,
   buy-package with a live 3D item preview, buy-select-item, generic OK/Cancel, delete-item confirm,
-  gift-storage-info, send-gift + confirm, storage-item-info, use-buff/use-item confirm). The
-  item-preview ones need a hybrid extension on `CGenericConfirmDialog` (native 3D content inside an
-  otherwise-RmlUi dialog, the same `CItemHotKey`-proven pattern) — not yet built, not proven by the
-  3 dialogs ported so far, all of which were plain text.
+  gift-storage-info, send-gift + confirm, storage-item-info, use-buff/use-item confirm). Both the
+  title field and the 3D-item-preview hybrid extension it needs now exist on `CGenericConfirmDialog`
+  (see above) — unblocked, not yet ported.
 - **Misc**: `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) are dialog-shaped but
   don't fit the confirm-box mold at all (help overlay, per-window popup menu, command picker) —
   out of `CGenericConfirmDialog`'s scope entirely, would need their own primitives if ported.

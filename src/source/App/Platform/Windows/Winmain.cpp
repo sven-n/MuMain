@@ -77,6 +77,7 @@
 #include "UI/Windows/CreditWin.h"
 #include "UI/Windows/SysMenuWin.h"
 #include "UI/Windows/LoginWin.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -2174,6 +2175,14 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
                     g_CharMakeWin.RenderTextOnTop();
                 if (g_MsgWin.IsVisible())
                     g_MsgWin.RenderTextOnTop();
+                // CGenericConfirmDialog's own Mode::Text widget -- same seam, same reason. Guarded
+                // internally on the dialog's own active state (see RenderTextOnTop()'s own
+                // comment), so calling it unconditionally whenever this scene-gated block runs is
+                // safe and cheap the rest of the time. item3D has no equivalent call here -- it
+                // still renders via the older Render3D()/I3DRenderObj path (see
+                // GenericConfirmDialog.h's class comment for the known gap and why).
+                if (mu::ui::window::g_pGenericConfirmDialog)
+                    mu::ui::window::g_pGenericConfirmDialog->RenderTextOnTop();
                 RenderCursor();
                 EndBitmap();
             }

@@ -1,46 +1,18 @@
-/* Legacy theme for the generic confirm dialog -- reuses CCommonMessageBox's own native sprite art
-   (the exact dialog family this primitive replaces), not a flat/programmatic panel. Composite is
-   back-fill (stretched, painted first so it shows through the caps' transparent regions) + top cap
-   + middle fill + bottom cap, mirroring CommonMessageBox.cpp's RenderFrame() paint order.
+/* Legacy theme for the generic confirm dialog. CCommonMessageBox's own native sprite composite
+   (back-fill + top cap + middle fill + bottom cap) moved to generic_confirm_dialog_bg.rcss -- see
+   that file's own comment for why (item3D layering: RmlUi's main context, which this document is
+   part of, always composites LAST in the frame, so the item would otherwise always be painted
+   over by the panel's own frame art). This file is layout/content only now.
 
-   Source pixel dimensions verified directly against each file's own header (OZT's TGA-style
-   header at byte offset 16/18/20 for width/height/bit-depth; OZJ's wrapped JPEG SOF0 marker for
-   width/height) -- not guessed. `newui_msgbox_top/middle/bottom.OZT` are exactly 230x67/230x15/
-   230x50 at 32-bit, matching their own native draw constants (MSGBOX_TOP_HEIGHT/MIDDLE_HEIGHT/
-   BOTTOM_HEIGHT) exactly. `newui_msgbox_back.OZJ` is actually 225x512 -- much taller than the
-   panel ever needs, so it's authored to be CROPPED (top-left region, no stretch) rather than
-   stretched-to-fit like the other three; the rect below (222x150) matches the back layer's own
-   box size (`.gcd-sprite-back`'s 222x150 inset area) instead of the source's own full extent, to
-   avoid vertically squashing a texture 3x taller than needed. */
-@spritesheet msgbox-top-sheet
-{
-	src: "../../../newui_msgbox_top.tga";
-	msgbox-top-image: 0px 0px 230px 67px;
-}
-@spritesheet msgbox-middle-sheet
-{
-	src: "../../../newui_msgbox_middle.tga";
-	msgbox-middle-image: 0px 0px 230px 15px;
-}
-@spritesheet msgbox-bottom-sheet
-{
-	src: "../../../newui_msgbox_bottom.tga";
-	msgbox-bottom-image: 0px 0px 230px 50px;
-}
-@spritesheet msgbox-back-sheet
-{
-	src: "../../../newui_msgbox_back.jpg";
-	msgbox-back-image: 0px 0px 222px 150px;
-}
-
-/* #panel is centered via the .center-both utility class (generic_confirm_dialog.rml); every
+   #panel is centered via the .center-both utility class (generic_confirm_dialog.rml); every
    dimension is dp -- this is a LayoutMode::Dialog window (no transform:scale(root_scale)), same
    category as remember_password_prompt.rcss/msg_win.rcss, not the root_scale-tracking inventory-
    family windows -- so `dp`, not `-px`, is correct here (see base.rcss's header-rail-family
    comment for why that distinction matters). 230x160 matches native's own MSGBOX_WIDTH=230 and
    base 2-line height (67+50=117) plus room to grow -- see the fixed-panel simplification note in
    docs/rmlui-ui-system/dialog-migration-plan.md. No background-color/border here anymore -- the
-   sprite composite below provides the frame, same as native. */
+   sprite composite now lives in generic_confirm_dialog_bg.rcss's own same-sized #panel, painted
+   before this document composites. */
 #panel {
 	width: 230dp;
 	height: 160dp;
@@ -49,47 +21,10 @@
 	color: white;
 }
 
-.gcd-sprite-back {
-	position: absolute;
-	left: 4dp;
-	right: 4dp;
-	top: 5dp;
-	bottom: 5dp;
-	decorator: image(msgbox-back-image);
-}
-.gcd-sprite-top {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	height: 67dp;
-	decorator: image(msgbox-top-image);
-}
-/* Stretches to fill the panel's remaining 160-67-50=43dp -- a single stretched fill rather than
-   native's tiled repeat (native grows this by repeating a 15dp tile per extra wrapped line; this
-   primitive uses a fixed-size panel instead, see the migration plan's own note on that tradeoff).
-   Same "REPEAT fit mode isn't supported in this build" tradeoff base.rcss's own .panel-middle
-   already documents. */
-.gcd-sprite-middle {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 67dp;
-	bottom: 50dp;
-	decorator: image(msgbox-middle-image);
-}
-.gcd-sprite-bottom {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 50dp;
-	decorator: image(msgbox-bottom-image);
-}
-
-/* Text floats transparently over the sprite composite above, matching native (no separate boxed
-   "well" -- CCommonMessageBox draws its text directly over its own composited background).
-   left/right/top match native's own text metrics (MSGBOX_TEXT_TOP_BLANK=35,
+/* Text floats transparently over the sprite composite below it (painted by the background
+   document), matching native (no separate boxed "well" -- CCommonMessageBox draws its text
+   directly over its own composited background). left/right/top match native's own text metrics
+   (MSGBOX_TEXT_TOP_BLANK=35,
    MSGBOX_TEXT_MAXWIDTH=180 out of the 230-wide panel = ~25dp side margin); bottom leaves a small
    gap above the buttons (repositioned below).
 
@@ -119,6 +54,98 @@
 	color: #ffe0a0;
 }
 .gcd-line.bold { font-weight: bold; }
+
+/* Optional bold title row (GameShop/MsgBoxIGS*.h's own title/body split) -- a flex child of
+   .gcd-body like `lines`, not a separately-positioned element (see the .rml's own comment).
+   warning/error are a look-and-feel-only hook (docs/rmlui-ui-system/dialog-migration-plan.md) --
+   not modeled on any single native class. */
+.gcd-title {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	font-weight: bold;
+	color: #ffd23c;
+	margin-bottom: 4dp;
+}
+.gcd-title.warning { color: #ffb040; }
+.gcd-title.error { color: #ff4040; }
+/* .gcd-title also sets `display`, so a same-specificity `.hidden { display: none; }` declared
+   earlier (base.rcss) loses the cascade tie to this file's own later declaration -- same fix as
+   `.shop-btn.hidden`/`.stor-btn.hidden` elsewhere in this theme. */
+.gcd-title.hidden { display: none; }
+
+/* Invisible position reference for the native 3D item-preview render pass
+   (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
+   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40, CommonMessageBox.h) so the native
+   render lands sized to match wherever this box is positioned. Renders nothing itself.
+
+   position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
+   class assumes its own explicit top/left elsewhere (main_frame.rcss's #item_hotkey_anchor, a
+   fixed legacy coordinate), which this anchor doesn't have: it's meant to flow as an ordinary
+   child of .gcd-body's flex column, alongside `title`/`lines`, not be pulled out of it. */
+.gcd-item3d-anchor {
+	position: static;
+	width: 40dp;
+	height: 40dp;
+}
+
+/* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
+   `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
+   static so they can flex-wrap into a grid instead of stacking on top of each other. */
+.gcd-input-row {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	margin-top: 4dp;
+}
+/* Same display/.hidden cascade-tie fix as .gcd-title above -- without this, `data-class-hidden`
+   toggling "hidden" on this row has no visible effect since `display: flex` above always wins the
+   tie against base.rcss's earlier-declared `.hidden { display: none; }`. */
+.gcd-input-row.hidden { display: none; }
+.gcd-keypad-display {
+	color: #ffe0a0;
+	font-weight: bold;
+	letter-spacing: 4dp;
+	min-height: 14dp;
+	margin-bottom: 4dp;
+}
+.gcd-keypad-grid {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 150dp;
+}
+.gcd-keypad-grid.hidden { display: none; } /* same cascade-tie fix as .gcd-input-row above */
+.btn.gcd-keypad-btn, .btn.gcd-keypad-delete {
+	position: static;
+	width: 26dp;
+	height: 18dp;
+	margin: 1dp;
+	font-size: 10dp;
+}
+/* Position reference only, same idea as .gcd-item3d-anchor -- the native g_pSingleTextInputBox
+   widget draws on top of this natively, nothing renders through RmlUi here for Mode::Text.
+   position: static for the same reason .gcd-item3d-anchor needs it -- see that rule's comment. */
+.gcd-input-anchor {
+	position: static;
+	width: 150dp;
+	height: 18dp;
+}
+
+/* Optional progress bar (CProgressMsgBox/CCursedTempleProgressMsgBox) -- same
+   `x_fraction * 100 + '%'` fill technique main_frame.rml's own HP/MP/AG/SD/EXP gauges prove. */
+.gcd-progress-track {
+	width: 150dp;
+	height: 10dp;
+	margin-top: 4dp;
+	background-color: #100c06;
+	border: 1dp #4a3620;
+}
+.gcd-progress-fill {
+	height: 100%;
+	background-color: #ffd23c;
+}
 
 /* top: 110dp = native's own vertical math for a fixed 160dp panel (160 - MSGBOX_BTN_BOTTOM_BLANK(20)
    - MSGBOX_BTN_HEIGHT(30)). Buttons stay the shared .btn sprite (op1_b_all.tga) with real bound

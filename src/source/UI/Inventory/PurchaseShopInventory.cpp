@@ -4,7 +4,10 @@
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Inventory/MyInventory.h"
+#include "Engine/Object/ZzzCharacter.h"
+#include "Network/Server/WSclient.h"
 #include "I18N/All.h"
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
@@ -217,10 +220,29 @@ bool mu::ui::window::CPurchaseShopInventory::PurchaseShopInventoryProcess()
     if (m_pNewInventoryCtrl && IsPress(VK_LBUTTON))
     {
         int iCurSquareIndex = m_pNewInventoryCtrl->GetIndexAtPt(MouseX, MouseY);
-        if (iCurSquareIndex != -1 && m_pNewInventoryCtrl->FindItem(iCurSquareIndex) != nullptr)
+        ITEM* pItem = (iCurSquareIndex != -1) ? m_pNewInventoryCtrl->FindItem(iCurSquareIndex) : nullptr;
+        if (iCurSquareIndex != -1 && pItem != nullptr)
         {
             ChangeSourceIndex(iCurSquareIndex);
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CPersonalShopItemBuyMsgBoxLayout));
+
+            GenericDialogConfig cfg;
+            cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.item3D = *pItem;
+            cfg.lines = { { I18N::Game::DoYouWantToBuyAnItem, false } };
+            cfg.onPrimary = []
+            {
+                ITEM* pItem = g_pPurchaseShopInventory->FindItem(g_pPurchaseShopInventory->GetSourceIndex());
+                CHARACTER* pCha = &CharactersClient[g_pPurchaseShopInventory->GetShopCharacterIndex()];
+                if (pItem && pCha)
+                {
+                    int sourceIndex = g_pPurchaseShopInventory->GetItemInventoryIndex(pItem);
+                    if (sourceIndex >= 0)
+                    {
+                        SocketClient->ToGameServer()->SendPlayerShopItemBuyRequest(pCha->Key, MU_C16(pCha->ID), sourceIndex);
+                    }
+                }
+            };
+            g_pGenericConfirmDialog->Show(std::move(cfg));
         }
 
         return true;

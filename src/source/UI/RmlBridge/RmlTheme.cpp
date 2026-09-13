@@ -235,11 +235,15 @@ namespace UI::RmlBridge
 
     Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath)
     {
-        Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext();
-        if (!bgContext)
+        return CreateBackgroundDocument(documentPath, RmlUiRuntime::Instance().GetBackgroundContext());
+    }
+
+    Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath, Rml::Context* context)
+    {
+        if (!context)
             return nullptr;
 
-        Rml::ElementDocument* doc = LoadThemedDocument(bgContext, documentPath);
+        Rml::ElementDocument* doc = LoadThemedDocument(context, documentPath);
         if (doc)
             doc->Show();
         return doc;

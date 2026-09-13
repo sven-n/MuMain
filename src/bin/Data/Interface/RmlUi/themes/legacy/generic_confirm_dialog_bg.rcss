@@ -1,0 +1,98 @@
+/* Background-layer companion to generic_confirm_dialog.rcss -- see npc_shop_bg.rcss's own comment
+   for the full mechanism/rationale. Does NOT link base.rcss -- no *_bg.rml in this theme does.
+
+   CCommonMessageBox's own native sprite composite (back-fill, stretched, painted first so it
+   shows through the caps' transparent regions; then top cap; then middle fill; then bottom cap),
+   relocated wholesale from generic_confirm_dialog.rcss -- see that file's own history comment.
+   Source pixel dimensions/paths unchanged from the original (verified against each file's own
+   header at the time this was still in the foreground document -- OZT's TGA-style header at byte
+   offset 16/18/20 for width/height/bit-depth; OZJ's wrapped JPEG SOF0 marker for width/height).
+   `newui_msgbox_top/middle/bottom.OZT` are exactly 230x67/230x15/230x50 at 32-bit, matching their
+   own native draw constants (MSGBOX_TOP_HEIGHT/MIDDLE_HEIGHT/BOTTOM_HEIGHT) exactly.
+   `newui_msgbox_back.OZJ` is actually 225x512 -- much taller than the panel ever needs, so it's
+   authored to be CROPPED (top-left region, no stretch) rather than stretched-to-fit like the
+   other three; the rect below (222x150) matches the back layer's own box size instead of the
+   source's own full extent, to avoid vertically squashing a texture 3x taller than needed. */
+@spritesheet msgbox-top-sheet
+{
+	src: "../../../newui_msgbox_top.tga";
+	msgbox-top-image: 0px 0px 230px 67px;
+}
+@spritesheet msgbox-middle-sheet
+{
+	src: "../../../newui_msgbox_middle.tga";
+	msgbox-middle-image: 0px 0px 230px 15px;
+}
+@spritesheet msgbox-bottom-sheet
+{
+	src: "../../../newui_msgbox_bottom.tga";
+	msgbox-bottom-image: 0px 0px 230px 50px;
+}
+@spritesheet msgbox-back-sheet
+{
+	src: "../../../newui_msgbox_back.jpg";
+	msgbox-back-image: 0px 0px 222px 150px;
+}
+
+/* dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
+   dialog is a LayoutMode::Dialog window, so it centers via plain CSS instead of a data-bound
+   root_x/root_y/root_scale transform. Same 230x160dp size as the fg document's own #panel, so the
+   two align exactly.
+
+   body's own width/height must be set explicitly here -- normally comes from base.rcss (not linked
+   in bg documents), and #panel's left:50%/top:50% has nothing to resolve against otherwise
+   (collapses to the upper-left corner instead of centering). */
+
+body {
+	width: 100%;
+	height: 100%;
+}
+
+#panel {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 230dp;
+	height: 160dp;
+	pointer-events: none;
+}
+
+.gcd-bg-sprite-back {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 5dp;
+	bottom: 5dp;
+	pointer-events: none;
+	decorator: image(msgbox-back-image);
+}
+.gcd-bg-sprite-top {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-top-image);
+}
+/* Stretches to fill the panel's remaining 160-67-50=43dp -- see generic_confirm_dialog.rcss's
+   own history comment for why this is a single stretched fill, not native's tiled repeat. */
+.gcd-bg-sprite-middle {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 67dp;
+	bottom: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-middle-image);
+}
+.gcd-bg-sprite-bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-bottom-image);
+}

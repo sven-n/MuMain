@@ -6,23 +6,51 @@
 </head>
 <body>
 	<!-- Modern theme's own copy of the generic confirm dialog -- per-theme file since the
-	     forged-dialog shell (modern-shell-edge/modern-groove/modern-content-well) is modern-specific
-	     structure, not just style, same reasoning as remember_password_prompt.rml's own modern
-	     fork. Keep ids/data-model/event-callback names in sync with
-	     ../../generic_confirm_dialog.rml. -->
+	     forged-dialog shell structure differs by theme, same reasoning as
+	     remember_password_prompt.rml's own modern fork. Keep ids/data-model/event-callback names in
+	     sync with ../../generic_confirm_dialog.rml.
+
+	     #panel's own paint (background/border/box-shadow), the shell-edge/groove, and the well's
+	     recessed fill all moved to generic_confirm_dialog_bg.rml -- a background-context document
+	     rendered BEFORE the legacy 3D pass that draws item3D each frame (RenderBackgroundLayer(),
+	     see that file's own comment), so item3D shows through this now-paint-less #panel instead of
+	     being painted over by it (RmlUi's main context, which this document is part of, always
+	     composites LAST in the frame). #panel here is layout-only: same width/height/centering as
+	     the bg document's own copy, so the two align pixel-for-pixel with no position-sync code
+	     needed (this dialog centers via plain CSS, not a per-frame C++-computed transform). -->
 	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
-		<!-- Exterior silhouette + inner groove -- same forged-dialog shell as Login/SysMenu's
-		     #panel (base.rcss), applied here with no header rail/title plate -- this dialog has
-		     no title. -->
-		<div class="modern-shell-edge"></div>
-		<div class="modern-groove"></div>
-		<div class="gcd-body modern-content-well">
+		<div class="gcd-body">
+			<div class="gcd-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
+			     data-class-error="severity_error">{{title}}</div>
 			<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor"></div>
+			<div class="gcd-input-row" data-class-hidden="!has_input">
+				<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
+				<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(0)">{{keypad_digit_0}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(1)">{{keypad_digit_1}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(2)">{{keypad_digit_2}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(3)">{{keypad_digit_3}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(4)">{{keypad_digit_4}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(5)">{{keypad_digit_5}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(6)">{{keypad_digit_6}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(7)">{{keypad_digit_7}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(8)">{{keypad_digit_8}}</div>
+					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
+					<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
+				</div>
+				<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
+				     data-class-hidden="input_is_keypad"></div>
+			</div>
+			<div class="gcd-progress-track" data-class-hidden="!has_progress">
+				<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
+			</div>
 		</div>
 		<div class="gcd-footer modern-footer"></div>
 		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary" data-class-solo="!show_cancel"
-		     data-event-click="gcd_primary_click">{{primary_label}}</div>
-		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary" data-class-hidden="!show_cancel"
+		     data-class-hidden="has_progress" data-event-click="gcd_primary_click">{{primary_label}}</div>
+		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary"
+		     data-class-hidden="!show_cancel || has_progress"
 		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
 	</div>
 </body>

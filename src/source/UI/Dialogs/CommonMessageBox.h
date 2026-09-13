@@ -247,47 +247,14 @@ namespace mu::ui::window
     };
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-    class CHighValueItemCheckMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
+    // CHighValueItemCheckMsgBoxLayout, CUseFruitMsgBoxLayout, CUsePartChargeFruitMsgBoxLayout,
+    // CPersonalShopItemBuyMsgBoxLayout, CGambleBuyMsgBoxLayout ported to CGenericConfirmDialog --
+    // see docs/rmlui-ui-system/dialog-migration-plan.md.
 
-    class CUseFruitMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CUsePartChargeFruitMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
+    // Still native: chained from CPersonalShopItemValueMsgBoxLayout (CustomMessageBox.h, a
+    // text-input dialog not yet ported), which calls SetItemValue() on the instance it creates --
+    // needs a numeric price-value widget on GenericDialogConfig before this one can be ported too.
     class CPersonalShopItemValueCheckMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CPersonalShopItemBuyMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
-
-    class CGambleBuyMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
     {
     public:
         bool SetLayout();

@@ -2279,50 +2279,35 @@ public:
             s_postRmlUiCallback();
             s_frameActive = false;
 
-            // Re-stage vertex data: UploadVertices() (RenderQuad2D etc., called by the callback
-            // above) only appends to the CPU-side s_vtxScratch and advances s_vtxOffset -- it does
-            // NOT touch the GPU. The actual transfer-buffer map+memcpy and the copy-pass that
-            // moves it into s_vtxGpuBuf (what ReplayDrawCommand's SDL_BindGPUVertexBuffers
-            // actually reads) already ran once, early in this function (the deferred-data staging
-            // step above), using
-            // whatever s_vtxOffset was BEFORE this callback grew it further. Without redoing both
-            // steps here, every draw command the callback just pushed references a byte range in
-            // s_vtxGpuBuf that was never written this frame (stale/uninitialized GPU memory) --
-            // explains why the draw calls "succeed" (valid buffer/offsets, no validation error)
-            // yet nothing recognizable ever appears on screen. Re-copying the whole scratch
-            // buffer (not just the delta) is simplest and correct: offsets already used by the
-            // main pass are unchanged, only the tail is new.
-            if (s_vtxOffset > 0u && EnsureVertexBufferCapacity(s_vtxOffset))
-            {
-                void* mapped = SDL_MapGPUTransferBuffer(s_device, s_vtxTransferBuf, true);
-                if (mapped)
-                {
-                    std::memcpy(mapped, s_vtxScratch.data(), s_vtxOffset);
-                    SDL_UnmapGPUTransferBuffer(s_device, s_vtxTransferBuf);
-
-                    SDL_GPUCopyPass* postUiCopyPass = SDL_BeginGPUCopyPass(s_cmdBuf);
-                    if (postUiCopyPass)
-                    {
-                        SDL_GPUTransferBufferLocation vtxSrc{};
-                        vtxSrc.transfer_buffer = s_vtxTransferBuf;
-                        vtxSrc.offset = 0;
-
-                        SDL_GPUBufferRegion vtxDst{};
-                        vtxDst.buffer = s_vtxGpuBuf;
-                        vtxDst.offset = 0;
-                        vtxDst.size = s_vtxOffset;
-
-                        SDL_UploadToGPUBuffer(postUiCopyPass, &vtxSrc, &vtxDst, true);
-                        SDL_EndGPUCopyPass(postUiCopyPass);
-                    }
-                }
-                else
-                {
-                    mu::log::Get("render")->warn(
-                        "SDL_gpu -- failed to map vertex transfer buffer for post-RmlUi re-stage: {}",
-                        SDL_GetError());
-                }
-            }
+            // Re-stage EVERYTHING the callback above may have recorded, not just vertex data.
+            // UploadVertices()/the bone-row append behind a skinned RenderTriangles call/etc. all
+            // only touch their own CPU-side scratch buffer and advance the matching offset -- none
+            // of that reaches the GPU. The actual transfer-buffer map+memcpy and copy-pass that
+            // moves each one onto its real GPU buffer already ran once, early in this function
+            // (StageDeferredGpuData(), the same call the main pass above makes), using whatever
+            // those offsets were BEFORE this callback grew them further.
+            //
+            // This used to re-stage vertex data only (by hand, duplicating a slice of
+            // StageDeferredGpuData()'s own vertex-handling code) -- correct for this seam's
+            // original 2D-only callers (RenderCursor, CMsgWin/CCharMakeWin's text overlays), but
+            // silently wrong the moment a skinned 3D model entered the picture
+            // (CGenericConfirmDialog's item3D preview, 2026-09-14): a skinned draw command indexes
+            // into s_boneGpuBuf via ReplayDrawCommand's own `boneDataReady` guard, and the
+            // `boneDataReady` computed by the main pass's earlier StageDeferredGpuData() call --
+            // true whenever bone data was empty or fully staged *before* this callback ran --
+            // stayed true even though this callback's own bone rows were never uploaded and
+            // s_boneGpuBuf was never grown to fit them. That combination told ReplayDrawCommand
+            // the (undersized, stale) buffer was safe to bind and index into -- an out-of-bounds
+            // GPU buffer read, which reproduced as exactly what was seen: the item silently not
+            // rendering most frames, and an intermittent crash on whichever frame that
+            // out-of-bounds read landed somewhere the driver didn't tolerate (validation is off,
+            // see the "SDL_gpu -- validation: disabled" startup log line).
+            //
+            // Calling StageDeferredGpuData() again here instead re-stages vertex/bone/strip-index/
+            // texture data together -- it's explicitly documented as safe to call more than once
+            // per frame, the same guarantee FlushRenderCommands already relies on mid-recording --
+            // and returns a boneDataReady that's actually correct for what THIS callback recorded.
+            const bool postUiBoneDataReady = StageDeferredGpuData();
 
             if (s_renderCmds.size() > postUiCmdStart)
             {
@@ -2349,7 +2334,7 @@ public:
                     s_cmdBuf, &postUiColorTarget, 1, s_depthTexture ? &postUiDepthTarget : nullptr);
                 if (s_renderPass)
                 {
-                    ReplayCommandRange(postUiCmdStart, s_renderCmds.size(), boneDataReady);
+                    ReplayCommandRange(postUiCmdStart, s_renderCmds.size(), postUiBoneDataReady);
                     s_replayedCmdCount = s_renderCmds.size();
 
                     SDL_EndGPURenderPass(s_renderPass);

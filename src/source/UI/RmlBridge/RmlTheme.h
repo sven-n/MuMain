@@ -77,4 +77,11 @@ namespace UI::RmlBridge
     // shows eagerly at Create() time rather than waiting for the window to actually open. Returns
     // nullptr (silently) if the background context doesn't exist yet.
     Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath);
+
+    // Same as CreateBackgroundDocument(const char*) but against an explicit context instead of
+    // always GetBackgroundContext() -- e.g. RmlUiRuntime::Instance().GetDialogBackgroundContext()
+    // for CGenericConfirmDialog's own panel, which needs to render at a different point in the
+    // frame than every ordinary window's own bg doc (see RenderDialogBackgroundLayer()'s own
+    // comment for why). Returns nullptr (silently) if `context` is null.
+    Rml::ElementDocument* CreateBackgroundDocument(const char* documentPath, Rml::Context* context);
 }

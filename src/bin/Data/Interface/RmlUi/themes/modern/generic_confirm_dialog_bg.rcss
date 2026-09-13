@@ -1,0 +1,88 @@
+/* Background-layer companion to generic_confirm_dialog.rcss -- see npc_shop_bg.rcss's own comment
+   for the full mechanism/rationale (this is a byte-identical copy of #panel's/.modern-shell-edge's/
+   .modern-groove's/.modern-content-well's own recipe, not re-approximated). Does NOT link
+   base.rcss -- no *_bg.rml in this theme does.
+
+   dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
+   dialog is a LayoutMode::Dialog window (see generic_confirm_dialog.rcss's own header comment), so
+   it centers via plain CSS instead of a data-bound root_x/root_y/root_scale transform.
+
+   body's own width/height must be set explicitly here -- normally comes from base.rcss (not linked
+   in bg documents, see above), and #panel's left:50%/top:50% has nothing to resolve against
+   otherwise (collapses to the upper-left corner instead of centering). */
+
+body {
+	width: 100%;
+	height: 100%;
+}
+
+#panel {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 230dp;
+	height: 160dp;
+	pointer-events: none;
+	border-radius: token(radius-sm)dp;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11dp 30dp rgba(0, 0, 0, 158),
+		0 2dp 5dp rgba(0, 0, 0, 217),
+		inset 0 0 0 1dp #090a08,
+		inset 0 0 0 3dp rgba(120, 115, 90, 190);
+}
+
+.gcd-bg-shell-edge {
+	position: absolute;
+	left: -3dp;
+	right: -3dp;
+	top: -3dp;
+	bottom: -3dp;
+	pointer-events: none;
+	background-color: transparent;
+	border-radius: token(radius-sm)dp;
+	border-width: 1dp;
+	border-color: rgba(31, 31, 26, 242);
+	box-shadow:
+		inset 1dp 0 0 rgba(130, 121, 91, 110),
+		inset -1dp 0 0 rgba(0, 0, 0, 204),
+		inset 0 1dp 0 rgba(151, 139, 101, 90),
+		inset 0 -1dp 0 rgba(0, 0, 0, 230);
+}
+
+.gcd-bg-groove {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
+	pointer-events: none;
+	border-width: 1dp;
+	border-color: #24261f;
+	box-shadow:
+		inset 0 0 0 1dp rgba(121, 112, 83, 40),
+		inset 0 0 12dp rgba(0, 0, 0, 153);
+}
+
+/* Content-well's own fill, relocated from the fg's now paint-less .gcd-body -- see
+   generic_confirm_dialog.rcss's own comment on that class. left/right/top/bottom match .gcd-body's
+   own position exactly (fg's copy is layout-only now, no fill of its own). */
+.gcd-bg-content-fill {
+	position: absolute;
+	left: 16dp;
+	right: 16dp;
+	top: 10dp;
+	bottom: 54dp;
+	pointer-events: none;
+	background-color: token(surface-recessed);
+	decorator: linear-gradient(to bottom, #0b0d0b, #070907);
+	border-width: 1dp;
+	border-color: token(border-inner);
+	box-shadow:
+		inset 0 0 16dp rgba(0, 0, 0, 166),
+		inset 0 1dp 0 rgba(255, 255, 255, 5);
+}

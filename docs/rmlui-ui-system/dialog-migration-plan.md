@@ -180,18 +180,73 @@ every `CommonMessageBox.h` class this plan originally classified as FITS — not
 or delete in that file. `CustomMessageBox.h`'s ~76 classes (see below) and the other tracked
 subsystems (`CUIPopup`, `GameShop/MsgBoxIGS*.h`) remain.
 
-## `CommonMessageBox.h` — DOESNT_FIT (needs the 3D-item-preview extension, 6 classes)
+## `GenericDialogConfig` extensions — done (2026-09-13); `item3D` now has 5 consumers, `title`/`severity`/`input`/`progress` still don't
 
-All `TMsgBoxLayout<C3DItemCommonMsgBox>` — call `Set3DItem(pItem)`. Blocked on a native-3D-content-
-inside-RmlUi-dialog extension (the `CItemHotKey`-proven pattern is the model for how to build it),
-not yet designed. Do this as its own scoped follow-up, not folded into the plain-text batch:
+`GenericDialogConfig`/`CGenericConfirmDialog` (`UI/Dialogs/GenericConfirmDialog.h/.cpp`) grew
+optional `title`, `severity` (Normal/Warning/Error, look-and-feel only), `input`
+(`InputField::Mode::Text`/`NumericKeypad`), `progress` (duration-only, matching every real native
+progress-bar call site being fire-and-forget), and `item3D` (an `ITEM` snapshot) — one struct, not
+five sibling classes, per the design session that preceded this. `CGenericConfirmDialog` itself now
+also implements `I3DRenderObj` (registers with `g_pNewUI3DRenderMng` in `Create()`) so `item3D` can
+actually render via a `Render3D()` that reads an invisible `#gcd_item3d_anchor`'s live screen
+position and converts it back to reference space (`UI::Scaling::LogicalX/Y`) before calling
+`RenderItem3D()` — the same overall native-3D-inside-RmlUi split `CItemHotKey` proves, without that
+class's extra delta-correction math (not needed for a brand-new anchor with no legacy hardcoded
+coordinates to reconcile). `Mode::Text` hosts the shared `g_pSingleTextInputBox` portable widget,
+positioned from a second anchor (`#gcd_input_anchor`) the same way CharMakeWin.cpp's own name/
+password fields are — only the `g_iChatInputType == 1` path (the actual runtime default) is wired;
+the older raw-global-buffer `== 0` path is a deliberate, documented gap. `Mode::NumericKeypad` is
+pure RmlUi (10 shuffled-digit buttons + delete, reproducing `CKeyPadMsgBox`'s own anti-shoulder-
+surfing shuffle). Layout geometry (input row size, keypad grid, progress bar) is a first-pass
+placement inside the existing fixed 230x160dp panel, not yet visually verified in-game against a
+real consumer — expect to need tuning once the first class using each field is actually ported.
 
-- [ ] `CHighValueItemCheckMsgBoxLayout`
-- [ ] `CUseFruitMsgBoxLayout`
-- [ ] `CUsePartChargeFruitMsgBoxLayout`
-- [ ] `CPersonalShopItemValueCheckMsgBoxLayout` — also needs a numeric price-value widget (`GetItemValue()`)
-- [ ] `CPersonalShopItemBuyMsgBoxLayout`
-- [ ] `CGambleBuyMsgBoxLayout`
+**`item3D` is now proven end-to-end (2026-09-14)**, both the primitive and its rendering: the 5
+`C3DItemCommonMsgBox`-derived classes below all consume it, in-game-tested (both themes) after
+fixing 4 real bugs surfaced only by that testing — see `STATUS.md`'s own entry for the full
+writeup, summarized: a CSS cascade-tie hiding bug, an anchor `position:absolute` flex-flow bug, a
+`GetAbsoluteOffset()`-ignores-`transform` positioning bug (`PanelTranslateCorrection()`), and —the
+big one— item3D rendering invisibly *behind* the dialog's own opaque panel background, since
+RmlUi's main context always composites after the legacy 3D pass that draws it. That last one took
+three real attempts to close out: a post-RmlUi callback approach crashed twice and was abandoned;
+the fg/bg RmlUi document split that replaced it then surfaced a *second*-order bug of its own once
+tested with another window open behind the dialog (NPC Shop) — the panel bled through beneath the
+shop's own foreground content, because the shared background context every other window's bg doc
+uses renders once, globally, before any window's own 2D content, not just this dialog's. Fixed for
+real with a third, dedicated `Rml::Context` for this dialog's own panel, rendered at a precise point
+in `CManager::Render()`'s own z-sorted loop (right before the shared 3D camera's turn) rather than
+the generic background-layer hook. `title`/`severity`/`input`/`progress` remain **infrastructure
+only** — no consuming class ported onto any of them yet, every field still defaults to unset/empty,
+so every already-ported call site (item3D included) is unaffected by that.
+
+## `CommonMessageBox.h` — 3D-item-preview classes (6 classes)
+
+All `TMsgBoxLayout<C3DItemCommonMsgBox>` — call `Set3DItem(pItem)`. The primitive's own `item3D`
+support unblocked these — done 2026-09-13:
+
+- [x] `CHighValueItemCheckMsgBoxLayout` — OkCancel, two live call sites (`UI/Inventory/
+  InventoryActionController.cpp`'s double-click sell path, and `UI/NPCs/NPCShop.cpp`'s
+  drag-into-shop `InventoryProcess()` path — both found and ported; the plan's original per-class
+  grep had only caught the first one).
+- [x] `CUseFruitMsgBoxLayout` — OkCancel — `UI/Inventory/InventoryActionController.cpp`. `onPrimary`
+  still creates the native `CUseFruitCheckMsgBoxLayout` chain dialog (a quantity stepper, different
+  class, out of scope here) exactly as the old `OkBtnDown` did.
+- [x] `CUsePartChargeFruitMsgBoxLayout` — OkCancel — `UI/Inventory/InventoryActionController.cpp`.
+- [x] `CPersonalShopItemBuyMsgBoxLayout` — OkCancel — `UI/Inventory/PurchaseShopInventory.cpp`.
+- [x] `CGambleBuyMsgBoxLayout` — OkCancel — `UI/NPCs/NPCShop.cpp`.
+
+All 5 declarations + implementations removed from `CommonMessageBox.h`/`.cpp`; grep-confirmed zero
+remaining references. Per-line custom `RGBA()` colors from the original `AddMsg()` calls are not
+preserved (`GenericDialogConfig::Line` only has `bold`, matching every earlier FITS batch) — only
+the bold/non-bold distinction carries over, styled via the theme's existing warm/secondary text
+tokens. Build (162/162, zero new warnings) + both RmlUi verification scripts passed.
+
+- [ ] `CPersonalShopItemValueCheckMsgBoxLayout` — **still native.** Not a `item3D`-only port: its
+  caller (`CustomMessageBox.cpp`'s `CPersonalShopItemValueMsgBoxLayout::ProcessOk`, a `CTextInputMsgBox`
+  price-entry dialog not yet ported) calls `SetItemValue(iInputZen)` on the instance before showing
+  it, and `OkBtnDown` reads that value back via `GetItemValue()`. Needs a numeric price-value field
+  on `GenericDialogConfig` (or reuse of the `input`/`NumericKeypad` shape) once the `CTextInputMsgBox`
+  family this chains from is itself in scope — not designed now.
 
 ## `CustomMessageBox.h` (~76 classes: 46 layout wrappers + ~30 underlying box classes)
 
@@ -209,22 +264,32 @@ before starting real work here; don't trust the exact class list below as final.
   (`I18N::Dialog::Lookup(Data->Cmd2)`). No primitive change needed; `primaryLabel` already covered
   a non-"OK" label. Declarations + implementations removed from `CustomMessageBox.h`/`.cpp`;
   grep-confirmed zero remaining references. Build + both RmlUi verification scripts passed.
-  - **Aside, discovered while reading the call site**: `mu::ui::window::CreateOkMessageBox()`
-    (`UI/Core/WindowCommon.h/.cpp`) is a *third*, previously-untracked pattern — a standalone helper
-    that directly `new`s a base `CCommonMessageBox` (not a `TMsgBoxLayout<>` subclass) for a
-    one-off OK-only message, called from 14 files. Functionally a hand-rolled duplicate of
-    `CGenericConfirmDialog`'s OK-only shape. Not part of this row's scope and not touched here —
-    flagged as a worthwhile future port (likely a single mechanical find-and-replace across those
-    14 call sites) but deliberately not folded into this batch.
-- **Text input required** (`CTextInputMsgBox`-based, needs a bound text-entry field — not built):
-  `CTradeZenMsgBoxLayout`, `CZenReceiptMsgBoxLayout`, `CZenPaymentMsgBoxLayout`,
+  - **`mu::ui::window::CreateOkMessageBox()`** (`UI/Core/WindowCommon.h/.cpp`) — done (2026-09-13).
+    A *third*, previously-untracked pattern: a standalone helper that directly `new`s a base
+    `CCommonMessageBox` (not a `TMsgBoxLayout<>` subclass) for a one-off OK-only message. Unlike
+    every other row in this file, this needed **zero call-site edits** — it's a single centralized
+    function called from ~90 sites across ~19 files (`WSclient.cpp` alone accounts for most of
+    them), and every call site just calls `CreateOkMessageBox(text)` with the same signature, so
+    redirecting the one function body to `g_pGenericConfirmDialog->Show(...)` migrates all of them
+    at once. `dwColor` (only ever overridden by 2 identical call sites using a warning-red
+    highlight — `InventoryActionController.cpp`/`MainFrameWindow.cpp`, same message both times)
+    collapses to bold when non-default, same simplification as `CTradeAlertMsgBoxLayout`/
+    `COsbourneMsgBoxLayout`. `fPriority` (never overridden by any caller) is now unused — kept in
+    the signature so no caller needed touching. Confirmed via grep that no caller anywhere uses
+    the `bool` return value, so it now unconditionally returns `true`. Build + both RmlUi
+    verification scripts passed.
+- **Text input** (`CTextInputMsgBox`-based) — `GenericDialogConfig::InputField::Mode::Text` now
+  exists (see "`GenericDialogConfig` extensions" above); porting these is unblocked, not designed
+  from scratch: `CTradeZenMsgBoxLayout`, `CZenReceiptMsgBoxLayout`, `CZenPaymentMsgBoxLayout`,
   `CPersonalShopItemValueMsgBoxLayout`, `CPersonalShopNameMsgBoxLayout`, `CCastleWithdrawMsgBoxLayout`,
   `CStorageLockMsgBoxLayout`, `CStorageUnlockMsgBoxLayout`, `CGuildBreakPasswordMsgBoxLayout`.
-- **Numeric keypad** (`CKeyPadMsgBox`-based, needs a keypad component — not built):
+- **Numeric keypad** (`CKeyPadMsgBox`-based) — `Mode::NumericKeypad` now exists too, same status:
   `CPasswordKeyPadMsgBoxLayout`, `CStorageLockKeyPadMsgBoxLayout`,
   `CStorageLockCheckKeyPadMsgBoxLayout`, `CStorageLockFinalKeyPadMsgBoxLayout`,
-  `CStorageUnlockKeyPadMsgBoxLayout`.
-- **3D item preview**: `CUseFruitCheckMsgBoxLayout`.
+  `CStorageUnlockKeyPadMsgBoxLayout` — note several of these *chain* dialogs (PIN entry → PIN
+  confirm → password), which `onPrimary` calling `g_pGenericConfirmDialog->Show(nextConfig)` already
+  supports with no further primitive work (proven this session for the CryWolf altar chain).
+- **3D item preview**: `CUseFruitCheckMsgBoxLayout` — `item3D` now exists, see above.
 - **Gem-selection menus** (bespoke multi-button, not OK/Cancel): `CGemIntegrationMsgBoxLayout`,
   `CGemIntegrationUnityMsgBoxLayout`, `CGemIntegrationDisjointMsgBoxLayout`.
 - **Fixed-format result/ranking tables** (custom `RenderTexts`, no `AddMsg`):
@@ -284,10 +349,10 @@ before starting real work here; don't trust the exact class list below as final.
   **This is the one family in the whole inventory with a genuine title**: `CMsgBoxIGSCommon::
   Initialize(pszTitle, pszText)` (`GameShop/MsgBoxIGSCommon.h/.cpp`) renders `m_szTitle` in bold at
   a fixed top offset, separate from the body text below it — a real title/body split, not just a
-  bold first line the way `CCommonMessageBox`'s bold `AddMsg` lines are. `GenericDialogConfig` needs
-  an optional `title` field (bold, above `lines`) before any of these port, on top of the
-  3D-item-preview extension some of them also need. The plain OK/Cancel ones could ride the FITS
-  batch once both extensions exist (keep the title and item-preview paths reviewed together, since
+  bold first line the way `CCommonMessageBox`'s bold `AddMsg` lines are. `GenericDialogConfig.title`
+  now exists (see "`GenericDialogConfig` extensions" above) — the plain OK/Cancel ones in this
+  family are unblocked; the 3D-preview ones also need that extension (also now built) reviewed
+  together, since
   they share the same base class).
 - **Explicitly out of scope for `CGenericConfirmDialog`** (would need their own primitives if ever
   ported): `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) — help overlay,

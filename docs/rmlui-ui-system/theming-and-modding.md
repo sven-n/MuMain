@@ -290,9 +290,76 @@ coordinate into `dp`.
   requirement.** `RmlUiRuntime::Render()` fires from one fixed pre-submit callback, always after
   every legacy 2D/3D draw call for the frame — which is *why* the conditional above exists (an
   RmlUi-drawn fill would always paint over content that needs to render on top of it, since RmlUi
-  composites last). Nobody has investigated whether interleaving is possible (multiple contexts,
-  or a callback hook legacy content renders through at the right point in RmlUi's own z-order) —
-  it may well be, and would remove the need for that workaround (and its now-fixed capability
-  flag) entirely, rather than living with a paint-order workaround permanently. Not investigated
-  — tracked in `STATUS.md` as its own design question, separate from and potentially larger than
-  the §30 fix.
+  composites last). Whether interleaving is possible (multiple contexts, or a callback hook legacy
+  content renders through at the right point in RmlUi's own z-order) is still unexplored. The
+  *other* direction — legacy 3D content that needs to paint **on top of** an already-composited
+  RmlUi panel, not behind it — was attempted twice for `CGenericConfirmDialog`'s `item3D` preview
+  (2026-09-13/14, sold-item confirm dialogs in `NPCShop.cpp`/`InventoryActionController.cpp`, where
+  the item rendered invisibly *behind* the dialog's own opaque `#panel` background via the normal
+  `I3DRenderObj`/`C3DRenderMng` path) and **both attempts crashed on dialog dismiss**, so this
+  direction is NOT proven working — do not copy it as a pattern yet. What was tried: adding
+  `RenderItem3DOnTop()` (a manually-invoked draw with its own camera/projection GL setup, called
+  from Winmain.cpp's `SetPostRmlUiCallback` — the same seam `CMsgWin`/`CCharMakeWin`/`CLoginWin` use
+  for native text overlays, just the first time asked to carry live 3D content). The first crash's
+  cause was found and fixed at the renderer level: `MuRendererSDLGpu.cpp`'s post-RmlUi replay pass
+  re-staged vertex data only (the seam's original callers were all 2D quads/text), so a skinned 3D
+  draw recorded there left its bone-matrix buffer unstaged/undersized while `ReplayDrawCommand`'s
+  `boneDataReady` guard stayed stale-true from the main pass — an out-of-bounds GPU read. Fixed by
+  reusing `StageDeferredGpuData()` (the same function the main pass already calls, re-stages
+  vertex/bone/strip-index/texture data together, returns a correct `boneDataReady`) instead of a
+  hand-rolled vertex-only re-stage; this fix is real, confirmed (restored both visibility and
+  position), and stays regardless of what happens with `item3D`. The dismiss-time crash persisted
+  anyway — a second, still-unidentified bug in this same post-RmlUi seam. Enabling SDL_GPU
+  validation (Debug config) to localize it hit a *different*, pre-existing validation failure at
+  startup unrelated to this feature, blocking that diagnostic route without a separate investigation.
+  `CGenericConfirmDialog` was reverted back to the plain `I3DRenderObj`/`Render3D()` path (stable,
+  but the item still rendered behind the panel) rather than ship a dialog that crashes on Cancel.
+
+  **Fixed for real, 2026-09-14, via the *other* proven direction**: the fg/bg RmlUi document split
+  `CMainFrameWindow`/the inventory-family windows already use for their own live 3D icons. Rather
+  than move the 3D draw to a new seam, this moves the *panel's own background art* earlier: a new
+  `generic_confirm_dialog_bg.rml`/`.rcss` per theme carries what used to be `#panel`'s own paint
+  (modern's gradient/shell-edge/groove/content-well recipe, legacy's sprite composite). The original
+  foreground document is now paint-less where the background used to be, so once the background
+  document has painted the panel earlier in the same frame, the foreground document (still
+  composited last, as always) has nothing left to cover the item with. This needed **zero changes**
+  to `Render3D()`, `PanelTranslateCorrection()`, `I3DRenderObj` registration, or the post-RmlUi seam
+  — only to where the panel's background paints from, and, as it turned out, *when*.
+
+  The first cut loaded the new bg doc into the SHARED `RmlUiRuntime::GetBackgroundContext()` (the
+  same one `CNPCShop`/every inventory-family window's own bg doc uses), painted by the existing
+  `RenderBackgroundLayer()` hook (fired once, globally, before the very first visible window/camera
+  each frame). That fixed the standalone case, but broke the moment the dialog opened over another
+  bg-doc window with native foreground content: `RenderBackgroundLayer()` renders every currently-
+  visible bg doc together, once, strictly before EVERY window's own 2D `Render()` this frame — not
+  just this dialog's — so `CNPCShop`'s own inventory-slot icons (drawn later, in its own `Render()`)
+  always painted over both bg docs regardless of their relative order within that shared context,
+  bleeding through the dialog's panel wherever the two windows geometrically overlapped. That's
+  precisely the case `item3D` matters most for (sell-to-shop/gamble-buy confirms are almost always
+  shown over an open shop window). `ElementDocument::PullToFront()`, reasserted every frame, was not
+  a fix — it only reorders documents *within* one shared context; it cannot make that context's one
+  global render pass happen *after* another window's own `Render()`.
+
+  **Actually fixed** by giving the dialog's own bg doc a dedicated THIRD context
+  (`RmlUiRuntime::GetDialogBackgroundContext()`), painted by a separately-guarded
+  `RmlUiRuntime::RenderDialogBackgroundLayer()` that `CManager::Render()` (`WindowManager.cpp`)
+  fires at a different point than `RenderBackgroundLayer()`: right before the first visible object
+  whose `GetLayerDepth()` reaches the shared 3D camera's own z-order (`INFORMATION_CAMERA_Z_ORDER`,
+  `Window3DRenderMng.h` — the same z-order `item3D` itself renders through). `CManager::Render()`
+  sorts every registered object by `GetLayerDepth()` (`CNPCShop` = 2.5f, the shared 3D camera =
+  10.9f, this dialog's own 2D `Render()` = 60.0f) and calls each one's `Render()` in that order, so
+  "right before the object at/past 10.9f" is guaranteed to land strictly after every ordinary
+  window's own `Render()` this frame and strictly before `item3D` draws. This is deliberately
+  triggered from `CManager::Render()`'s own per-object loop, NOT from inside `Render3D()` itself —
+  `C3DCamera::Render()` pushes a legacy GL_PROJECTION/GL_MODELVIEW matrix stack and enables depth
+  test/mask before looping over every registered object's `Render3D()`, and recording an RmlUi
+  render pass from inside that block would be exactly the kind of mid-frame GPU-state interleaving
+  that crashed the `SetPostRmlUiCallback` attempts above; `CManager::Render()`'s own loop, before
+  any `(*vi)->Render()` call, is the same safe, pre-matrix-stack position `RenderBackgroundLayer()`
+  itself already uses — so this answers this entry's own opening question (multiple contexts,
+  interleaved at the right point in the frame) in the affirmative, at least for this one case.
+
+  Also simpler than either reference implementation regardless: this dialog centers via plain CSS
+  (`.center-both`), never a per-frame C++-computed position, so its background document needs no
+  `RmlModelBinder`/position-sync code at all, unlike `CMainFrameWindow`'s/`CNPCShop`'s own (each
+  anchored to an adjustable HUD-band/inventory-window position, so each needs a small model).

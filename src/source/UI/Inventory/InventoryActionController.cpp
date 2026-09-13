@@ -261,7 +261,36 @@ bool CInventoryActionController::HandleSellToNPC(CInventoryCtrl* targetControl) 
 
     if (IsHighValueItem(pItem))
     {
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CHighValueItemCheckMsgBoxLayout));
+        GenericDialogConfig cfg;
+        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        if (ITEM* pPreviewItem = pPickedItem->GetItem())
+        {
+            cfg.item3D = *pPreviewItem;
+        }
+        cfg.lines = {
+            { I18N::Game::AnExpensiveItem, true },
+            { I18N::Game::CheckTheItemPlease, true },
+            { I18N::Game::AreYouSureYouWantToSellIt, true },
+        };
+        cfg.onPrimary = []
+        {
+            CPickedItem* pPickedItem = CInventoryCtrl::GetPickedItem();
+            int iSourceIndex = pPickedItem ? pPickedItem->GetSourceLinealPos() : -1;
+            if (iSourceIndex >= MAX_EQUIPMENT_INDEX && iSourceIndex < MAX_MY_INVENTORY_EX_INDEX)
+            {
+                SocketClient->ToGameServer()->SendSellItemToNpcRequest(iSourceIndex);
+                g_pNPCShop->SetSellingItem(true);
+            }
+            else
+            {
+                CInventoryCtrl::BackupPickedItem();
+            }
+        };
+        cfg.onSecondary = []
+        {
+            CInventoryCtrl::BackupPickedItem();
+        };
+        g_pGenericConfirmDialog->Show(std::move(cfg));
         return true;
     }
 
@@ -704,7 +733,33 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         if (point[attributeType] < (pItem->Durability * 10))
         {
             g_pMyInventory->SetStandbyItemKey(pItem->Key);
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUsePartChargeFruitMsgBoxLayout));
+
+            wchar_t strName[50] = { 0, };
+            if (pItem->Type == ITEM_HELPER + 54)
+                mu_swprintf(strName, L"%ls", I18N::Game::STR);
+            else if (pItem->Type == ITEM_HELPER + 55)
+                mu_swprintf(strName, L"%ls", I18N::Game::AGI);
+            else if (pItem->Type == ITEM_HELPER + 56)
+                mu_swprintf(strName, L"%ls", I18N::Game::STA);
+            else if (pItem->Type == ITEM_HELPER + 57)
+                mu_swprintf(strName, L"%ls", I18N::Game::ENG);
+            else if (pItem->Type == ITEM_HELPER + 58)
+                mu_swprintf(strName, L"%ls", I18N::Game::Command);
+
+            GenericDialogConfig cfg;
+            cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.item3D = *pItem;
+            cfg.lines = {
+                { strName, true },
+                { I18N::Game::ThisIsMoreThanTheValueOfYourResettablePoints, true },
+                { I18N::Game::WouldYouLikeToReset, true },
+            };
+            cfg.onPrimary = []
+            {
+                BYTE srcIndex = g_pMyInventory->GetStandbyItemIndex();
+                SendRequestUse(srcIndex, 0);
+            };
+            g_pGenericConfirmDialog->Show(std::move(cfg));
             return false;
         }
 
@@ -892,7 +947,29 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         }
 
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseFruitMsgBoxLayout));
+
+        wchar_t strName[50] = { 0, };
+        switch (pItem->Level)
+        {
+        case 0: mu_swprintf(strName, L"%ls", I18N::Game::ENG); break;
+        case 1: mu_swprintf(strName, L"%ls", I18N::Game::STA); break;
+        case 2: mu_swprintf(strName, L"%ls", I18N::Game::AGI); break;
+        case 3: mu_swprintf(strName, L"%ls", I18N::Game::STR); break;
+        case 4: mu_swprintf(strName, L"%ls", I18N::Game::Command); break;
+        }
+
+        GenericDialogConfig cfg;
+        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.item3D = *pItem;
+        cfg.lines = {
+            { strName, true },
+            { I18N::Game::DoYouWantToUseTheFruit, true },
+        };
+        cfg.onPrimary = []
+        {
+            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseFruitCheckMsgBoxLayout));
+        };
+        g_pGenericConfirmDialog->Show(std::move(cfg));
         return true;
     }
 
