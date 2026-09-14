@@ -2,7 +2,9 @@
    (back-fill + top cap + middle fill + bottom cap) moved to generic_confirm_dialog_bg.rcss -- see
    that file's own comment for why (item3D layering: RmlUi's main context, which this document is
    part of, always composites LAST in the frame, so the item would otherwise always be painted
-   over by the panel's own frame art). This file is layout/content only now.
+   over by the panel's own frame art). This file is layout/content only now, except for
+   `.gcd-header-rail`'s own sprite decorator below (an ordinary opaque foreground image, not a
+   compositing-order concern the way item3D is -- see that rule's own comment).
 
    #panel is centered via the .center-both utility class (generic_confirm_dialog.rml); every
    dimension is dp -- this is a LayoutMode::Dialog window (no transform:scale(root_scale)), same
@@ -21,6 +23,57 @@
 	color: white;
 }
 
+/* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga, CMessageBoxMng /
+   MessageBox.cpp) -- a title-banner variant of the plain top-cap art (newui_msgbox_top.tga,
+   already ported as .gcd-bg-sprite-top in generic_confirm_dialog_bg.rcss), used natively by the
+   CustomMessageBox.cpp `*MenuMsgBox` family as a drop-in swap for the plain top cap whenever the
+   box has a title, with title text drawn directly on top. Same 230x67 slot/size as the plain
+   version (confirmed via each source image's own header) so it overlays that exact screen rect
+   with no seam. Lives in the FOREGROUND document (this file), not generic_confirm_dialog_bg.rcss
+   -- unlike item3D, a title banner has no compositing-order reason to sit behind anything; an
+   ordinary opaque foreground overlay is simplest and avoids adding a second data-model to the bg
+   document (deliberately kept 100% static -- see this dialog's scrollbar-fix history for why
+   dynamic bg-document state was rejected there too). */
+@spritesheet msgbox-titlebar-sheet
+{
+	src: "../../../newui_Message_03.tga";
+	msgbox-titlebar-image: 0px 0px 230px 67px;
+}
+
+/* A direct #panel child, sibling of .gcd-body, not nested inside it -- positioned in #panel's own
+   coordinate space (edge-to-edge, matching .gcd-bg-sprite-top's own box exactly) rather than
+   flowing with .gcd-body's own 25dp-inset content area, since the sprite is authored for the
+   panel's full 230dp width. No severity color variants of the art -- native has no concept of a
+   colored title banner, and this dialog's severity field has zero real consumers today (see
+   dialog-migration-plan.md); severity stays a text-color-only distinction (below). */
+.gcd-header-rail {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-titlebar-image);
+}
+/* Title text drawn directly over the sprite above, matching native's own
+   (GetPos().x+10, GetPos().y+10) inset (CustomMessageBox.cpp's *MenuMsgBox::RenderTexts() family,
+   the sprite's own native consumers) -- simplified to one centered line rather than replicating
+   exact pixel-wrap math, same simplification this whole port already uses elsewhere. No conflict
+   with .gcd-body's own top:35dp below -- native's title sits well above that, at y:10. */
+.gcd-header-title {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 10dp;
+	text-align: center;
+	font-family: "Liberation Sans";
+	font-weight: bold;
+	color: #ffd23c;
+	pointer-events: none;
+}
+.gcd-header-title.warning { color: #ffb040; }
+.gcd-header-title.error { color: #ff4040; }
+
 /* Text floats transparently over the sprite composite below it (painted by the background
    document), matching native (no separate boxed "well" -- CCommonMessageBox draws its text
    directly over its own composited background). left/right/top match native's own text metrics
@@ -32,19 +85,78 @@
    box-sizing support anywhere in this codebase), so an explicit height combined with a bordered/
    padded box can push past the intended bottom edge (this bit us on the first pass of this file).
    Anchoring both edges keeps the box's outer size exactly (right - left) x (bottom - top)
-   regardless of its own content. Content centers via flex (column direction, both axes) instead of
-   top-aligning, so the message reads centered whether it's one short line or several. */
+   regardless of its own content.
+
+   display:flex row: #gcd_item3d_anchor (native C3DItemCommonMsgBox's icon, left) + .gcd-text-col
+   (fills the rest, right) -- see the .rml's own comment for why row not column. The optional
+   title banner is NOT a child of this box (see .gcd-header-rail/.gcd-header-title above) -- it
+   overlays #panel's own top edge instead, independent of this box's own fixed top:35dp. */
 .gcd-body {
 	position: absolute;
 	left: 25dp;
 	right: 25dp;
 	top: 35dp;
 	bottom: 56dp;
-	overflow: auto hidden;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	align-items: center;
+}
+/* Holds lines/input-row/progress-track -- everything .gcd-body used to flex-center directly
+   before #gcd_item3d_anchor needed to sit beside it instead of above/below it (see that element's
+   own comment below and the .rml's). Fills .gcd-body's full height explicitly (rather than
+   relying on align-items, which wouldn't stretch under align-items:center) so its own
+   overflow:auto has a real bound to scroll within once content (mainly `lines`) grows taller than
+   the panel -- see the scrollbar rules below.
+
+   overflow is `overflow-x, overflow-y` (CSS shorthand order) -- `hidden auto`, NOT `auto hidden`,
+   is deliberate: horizontal never needs to scroll (`.gcd-line` wraps within a fixed width), and
+   this engine only ever instantiates a scrollbarvertical element when overflow-y is Auto/Scroll,
+   never Hidden (confirmed against RmlUi/Source/Core/Layout/ContainerBox.cpp) -- getting this
+   order backwards silently means no scrollbar is ever created, regardless of text length.
+
+   pointer-events: auto is required here too -- base.rcss's `body { pointer-events: none; }`
+   inherits down to every descendant that doesn't explicitly opt back in (same reason `.btn`/
+   `.checkbox-row` each set their own `pointer-events: auto`), and the scrollbar's generated
+   slidertrack/sliderbar are real DOM children of THIS element, so they inherit whatever this
+   element's own computed value is -- without this, the whole scrollbar (track clicks, thumb drag)
+   silently can't receive any mouse events at all. */
+.gcd-text-col {
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	height: 100%;
+	flex: 1 1 auto;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+/* Minimal flat-color scrollbar (no decorator images, matching this file's own progress-bar/keypad
+   styling) -- .gcd-text-col is the first scrollable element in this theme, so there's no existing
+   scrollbar styling to reuse; RmlUi generates real child elements for these (scrollbarvertical/
+   slidertrack/sliderbar), not pseudo-elements. Arrow buttons collapsed to 0 size -- drag-only,
+   simplest usable affordance for a narrow well. */
+.gcd-text-col scrollbarvertical {
+	width: 6dp;
+	margin: 0;
+}
+.gcd-text-col scrollbarvertical slidertrack {
+	background-color: #100c06;
+}
+.gcd-text-col scrollbarvertical sliderbar {
+	background-color: #4a4a45;
+}
+.gcd-text-col scrollbarvertical sliderbar:hover,
+.gcd-text-col scrollbarvertical sliderbar:active {
+	background-color: #6e6e66;
+}
+.gcd-text-col scrollbarvertical sliderarrowdec,
+.gcd-text-col scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.gcd-text-col scrollbarhorizontal {
+	height: 0;
 }
 .gcd-line {
 	display: block;
@@ -55,26 +167,6 @@
 }
 .gcd-line.bold { font-weight: bold; }
 
-/* Optional bold title row (GameShop/MsgBoxIGS*.h's own title/body split) -- a flex child of
-   .gcd-body like `lines`, not a separately-positioned element (see the .rml's own comment).
-   warning/error are a look-and-feel-only hook (docs/rmlui-ui-system/dialog-migration-plan.md) --
-   not modeled on any single native class. */
-.gcd-title {
-	display: block;
-	width: 100%;
-	text-align: center;
-	white-space: normal;
-	font-weight: bold;
-	color: #ffd23c;
-	margin-bottom: 4dp;
-}
-.gcd-title.warning { color: #ffb040; }
-.gcd-title.error { color: #ff4040; }
-/* .gcd-title also sets `display`, so a same-specificity `.hidden { display: none; }` declared
-   earlier (base.rcss) loses the cascade tie to this file's own later declaration -- same fix as
-   `.shop-btn.hidden`/`.stor-btn.hidden` elsewhere in this theme. */
-.gcd-title.hidden { display: none; }
-
 /* Invisible position reference for the native 3D item-preview render pass
    (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
    C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40, CommonMessageBox.h) so the native
@@ -83,12 +175,18 @@
    position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
    class assumes its own explicit top/left elsewhere (main_frame.rcss's #item_hotkey_anchor, a
    fixed legacy coordinate), which this anchor doesn't have: it's meant to flow as an ordinary
-   child of .gcd-body's flex column, alongside `title`/`lines`, not be pulled out of it. */
+   flex child of .gcd-body itself (a row, sibling of .gcd-text-col), not be pulled out of it. */
 .gcd-item3d-anchor {
 	position: static;
 	width: 40dp;
 	height: 40dp;
+	flex-shrink: 0;
+	margin-right: 8dp;
 }
+/* Same display/.hidden cascade-tie fix as .gcd-input-row/.gcd-keypad-grid below -- this anchor is
+   now conditionally hidden (data-class-hidden="!has_item3d") so .gcd-text-col alone fills the row
+   when there's no item3D, instead of always reserving a 40dp-wide empty slot. */
+.gcd-item3d-anchor.hidden { display: none; }
 
 /* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
    `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
@@ -99,9 +197,9 @@
 	align-items: center;
 	margin-top: 4dp;
 }
-/* Same display/.hidden cascade-tie fix as .gcd-title above -- without this, `data-class-hidden`
-   toggling "hidden" on this row has no visible effect since `display: flex` above always wins the
-   tie against base.rcss's earlier-declared `.hidden { display: none; }`. */
+/* .gcd-input-row sets its own `display`, so an earlier same-specificity `.hidden { display: none;
+   }` (base.rcss) loses the cascade tie without this later, more specific override -- without it,
+   `data-class-hidden` toggling "hidden" on this row would have no visible effect. */
 .gcd-input-row.hidden { display: none; }
 .gcd-keypad-display {
 	color: #ffe0a0;

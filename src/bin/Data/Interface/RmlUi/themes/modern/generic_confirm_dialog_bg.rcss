@@ -1,7 +1,10 @@
 /* Background-layer companion to generic_confirm_dialog.rcss -- see npc_shop_bg.rcss's own comment
-   for the full mechanism/rationale (this is a byte-identical copy of #panel's/.modern-shell-edge's/
-   .modern-groove's/.modern-content-well's own recipe, not re-approximated). Does NOT link
-   base.rcss -- no *_bg.rml in this theme does.
+   for the full mechanism/rationale (this started as a byte-identical copy of #panel's/
+   .modern-shell-edge's/.modern-groove's/.modern-content-well's own recipe, not re-approximated --
+   still true for every hex color and every pure-black box-shadow entry; a handful of *colored*
+   box-shadow alphas were later corrected against the reference mockup's own values, see each
+   rule's own comment, so those specific entries now intentionally diverge from the shared
+   base.rcss classes). Does NOT link base.rcss -- no *_bg.rml in this theme does.
 
    dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
    dialog is a LayoutMode::Dialog window (see generic_confirm_dialog.rcss's own header comment), so
@@ -16,26 +19,36 @@ body {
 	height: 100%;
 }
 
+/* box-shadow's rgba alphas are round(reference-alpha*255) against the reference mockup's own
+   values -- #panel's own colored highlight (0 0 0 3dp) was previously both the wrong RGB triplet
+   AND a ~4x-too-opaque alpha (120,115,90,190 instead of 90,87,69,46); every pure-black entry here
+   was already a correct conversion and is untouched. */
+/* height 178dp (was 160dp) -- must stay in sync with generic_confirm_dialog.rcss's own #panel,
+   see that file's own comment for why it grew (room for .gcd-header-rail's full, unscaled size). */
 #panel {
 	position: absolute;
 	left: 50%;
 	top: 50%;
 	transform: translate(-50%, -50%);
 	width: 230dp;
-	height: 160dp;
+	height: 178dp;
 	pointer-events: none;
 	border-radius: token(radius-sm)dp;
 	background-color: #080a08;
-	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	decorator:
+		repeating-linear-gradient(135deg, rgba(255, 255, 255, 2) 0px 2dp, transparent 2dp 5dp),
+		linear-gradient(to bottom, #11130f 0%, #080a08 100%);
 	border-width: 1dp;
 	border-color: token(border-frame);
 	box-shadow:
 		0 11dp 30dp rgba(0, 0, 0, 158),
 		0 2dp 5dp rgba(0, 0, 0, 217),
 		inset 0 0 0 1dp #090a08,
-		inset 0 0 0 3dp rgba(120, 115, 90, 190);
+		inset 0 0 0 3dp rgba(90, 87, 69, 46);
 }
 
+/* box-shadow's two colored (non-black) entries were ~4x too opaque (110/90 instead of 28/20) --
+   same fix as #panel above; the black entries were already correct and are untouched. */
 .gcd-bg-shell-edge {
 	position: absolute;
 	left: -3dp;
@@ -48,12 +61,13 @@ body {
 	border-width: 1dp;
 	border-color: rgba(31, 31, 26, 242);
 	box-shadow:
-		inset 1dp 0 0 rgba(130, 121, 91, 110),
+		inset 1dp 0 0 rgba(130, 121, 91, 28),
 		inset -1dp 0 0 rgba(0, 0, 0, 204),
-		inset 0 1dp 0 rgba(151, 139, 101, 90),
+		inset 0 1dp 0 rgba(151, 139, 101, 20),
 		inset 0 -1dp 0 rgba(0, 0, 0, 230);
 }
 
+/* box-shadow's colored entry was ~2.7x too opaque (40 instead of 15) -- same fix as above. */
 .gcd-bg-groove {
 	position: absolute;
 	left: 4dp;
@@ -64,7 +78,7 @@ body {
 	border-width: 1dp;
 	border-color: #24261f;
 	box-shadow:
-		inset 0 0 0 1dp rgba(121, 112, 83, 40),
+		inset 0 0 0 1dp rgba(121, 112, 83, 15),
 		inset 0 0 12dp rgba(0, 0, 0, 153);
 }
 
@@ -79,7 +93,9 @@ body {
 	bottom: 54dp;
 	pointer-events: none;
 	background-color: token(surface-recessed);
-	decorator: linear-gradient(to bottom, #0b0d0b, #070907);
+	decorator:
+		repeating-linear-gradient(135deg, rgba(255, 255, 255, 2) 0px 1dp, transparent 1dp 4dp),
+		linear-gradient(to bottom, #0b0d0b, #070907);
 	border-width: 1dp;
 	border-color: token(border-inner);
 	box-shadow:

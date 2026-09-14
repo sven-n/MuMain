@@ -25,21 +25,6 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Core/Utilities/StringUtils.h"
 
-// TEMPORARY, test-only: $igs1.. below let the GameShop/MsgBoxIGS*.h dialogs ported onto
-// CGenericConfirmDialog (docs/rmlui-ui-system/dialog-migration-plan.md) be visually verified
-// without a live server -- IGS isn't server-supported yet, so CInGameShop's own lists can never be
-// populated for real right now. Remove this whole block (and these includes) once that lands and
-// the dialogs can be exercised through their real trigger path instead.
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "GameShop/MsgBoxIGSBuyConfirm.h"
-#include "GameShop/MsgBoxIGSGiftStorageItemInfo.h"
-#include "GameShop/MsgBoxIGSSendGiftConfirm.h"
-#include "GameShop/MsgBoxIGSStorageItemInfo.h"
-#include "GameShop/MsgBoxIGSUseBuffConfirm.h"
-#include "GameShop/MsgBoxIGSUseItemConfirm.h"
-#include "UI/Core/WindowCommon.h"
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
-
 #ifdef _EDITOR
 #include "../MuEditor/UI/Console/MuEditorConsoleUI.h"
 #endif
@@ -293,49 +278,6 @@ bool CmuConsoleDebug::CheckCommand(const std::wstring& strCommand)
         }
         return true;
     }
-
-#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-    // TEMPORARY, test-only: fire one of the GameShop/MsgBoxIGS*.h dialogs ported onto
-    // CGenericConfirmDialog directly, with hardcoded dummy data, bypassing CInGameShop's own
-    // (currently unpopulatable, no server support) storage/gift lists entirely. Item code 0 is any
-    // ordinary non-"no item" (65535) code, enough for item3D to have something to render. Remove
-    // this whole block once IGS has real server support and these can be exercised for real.
-    else if (strCommand.compare(L"$igs1") == 0)
-    {
-        ShowIGSStorageItemInfoDialog(0, 0, 0, 'P', L"Test Item", L"1", L"30 Days");
-        return true;
-    }
-    else if (strCommand.compare(L"$igs2") == 0)
-    {
-        ShowIGSGiftStorageItemInfoDialog(0, 0, 0, L'P', L"TESTID", L"Test gift message", L"Test Item", L"1", L"30 Days");
-        return true;
-    }
-    else if (strCommand.compare(L"$igs3") == 0)
-    {
-        ShowIGSUseItemConfirmDialog(0, 0, 0, L'P', L"Test Item");
-        return true;
-    }
-    else if (strCommand.compare(L"$igs4") == 0)
-    {
-        ShowIGSUseBuffConfirmDialog(0, 0, 0, L'P', L"Test Item", L"Test Buff");
-        return true;
-    }
-    else if (strCommand.compare(L"$igs5") == 0)
-    {
-        ShowIGSBuyConfirmDialog(0, 0, 0, 0, 0, L"Test Item", L"1000 WCoinC", L"30 Days");
-        return true;
-    }
-    else if (strCommand.compare(L"$igs6") == 0)
-    {
-        ShowIGSSendGiftConfirmDialog(0, 0, 0, 0, 0, L"TESTID", L"Test gift message", L"Test Item", L"1000 WCoinC", L"30 Days");
-        return true;
-    }
-    else if (strCommand.compare(L"$igs7") == 0)
-    {
-        mu::ui::window::CreateOkMessageBoxWithTitle(L"Test Title", L"Test body text for the generic OK-only notice dialog.");
-        return true;
-    }
-#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
 
 #ifdef CSK_LH_DEBUG_CONSOLE
     if (!m_bInit)

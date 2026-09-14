@@ -106,6 +106,8 @@ void CGenericConfirmDialog::BuildRmlUi()
             c.Bind("has_progress", &model.hasProgress);
             c.Bind("progress_fraction", &model.progressFraction);
 
+            c.Bind("has_item3d", &model.hasItem3D);
+
             c.BindEventCallback("gcd_primary_click",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_bPrimaryClicked = true; });
             c.BindEventCallback("gcd_secondary_click",
@@ -694,6 +696,13 @@ void CGenericConfirmDialog::SyncRmlModel()
     {
         model.hasProgress = hasProgress;
         m_RmlBinder.MarkDirty("has_progress");
+    }
+
+    const bool hasItem3D = m_Active.item3D.has_value();
+    if (model.hasItem3D != hasItem3D)
+    {
+        model.hasItem3D = hasItem3D;
+        m_RmlBinder.MarkDirty("has_item3d");
     }
 }
 

@@ -19,31 +19,56 @@
 	     the bg document's own copy, so the two align pixel-for-pixel with no position-sync code
 	     needed (this dialog centers via plain CSS, not a per-frame C++-computed transform). -->
 	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
-		<div class="gcd-body">
-			<div class="gcd-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
-			     data-class-error="severity_error">{{title}}</div>
-			<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
-			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor"></div>
-			<div class="gcd-input-row" data-class-hidden="!has_input">
-				<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
-				<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(0)">{{keypad_digit_0}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(1)">{{keypad_digit_1}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(2)">{{keypad_digit_2}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(3)">{{keypad_digit_3}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(4)">{{keypad_digit_4}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(5)">{{keypad_digit_5}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(6)">{{keypad_digit_6}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(7)">{{keypad_digit_7}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(8)">{{keypad_digit_8}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
-					<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
-				</div>
-				<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
-				     data-class-hidden="input_is_keypad"></div>
+		<!-- data-class-has-title: with a title shown, .gcd-body reserves the header's own space
+		     (38dp height + 4dp gap) as padding-top instead of stacking it as a flex sibling of
+		     .gcd-content-row -- see .rcss's own comment for why (keeps content-row's own centering
+		     scoped to the space actually left below the header, not the whole box). -->
+		<div class="gcd-body" data-class-has-title="has_title">
+			<!-- See ../../generic_confirm_dialog.rml's own comment for why this banner collapses to
+			     nothing when untitled, and why .gcd-content-row below is nested one level down --
+			     keep both fork copies' structure in sync. -->
+			<div class="gcd-header-rail" data-class-hidden="!has_title" data-class-warning="severity_warning"
+			     data-class-error="severity_error">
+				<!-- Rivet + accent line (plain/warning look, base.rcss's .modern-joint/.modern-header-accent
+				     at their own size) vs twin side studs (error look, login.rcss's .login-hero-cap at its
+				     own size) -- mutually exclusive, same "rail has one rivet, hero-banner has two" split
+				     .modern-header-rail's own comment documents. Literal sibling divs, not ::before/::after --
+				     this engine doesn't support generated content (see every other stud/rivet in this theme). -->
+				<div class="gcd-header-joint" data-class-hidden="severity_error"></div>
+				<div class="gcd-header-accent" data-class-hidden="severity_error"></div>
+				<div class="gcd-header-cap gcd-header-cap-left" data-class-hidden="!severity_error"></div>
+				<div class="gcd-header-cap gcd-header-cap-right" data-class-hidden="!severity_error"></div>
+				<span class="gcd-header-title">{{title}}</span>
 			</div>
-			<div class="gcd-progress-track" data-class-hidden="!has_progress">
-				<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
+			<div class="gcd-content-row">
+				<!-- See ../../generic_confirm_dialog.rml's own comment for why gcd_item3d_anchor is a flex
+				     sibling of .gcd-text-col (icon-left/text-right, matching native C3DItemCommonMsgBox),
+				     not a member of it -- keep both fork copies' structure in sync. -->
+				<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+				<div class="gcd-text-col">
+					<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+					<div class="gcd-input-row" data-class-hidden="!has_input">
+						<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
+						<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(0)">{{keypad_digit_0}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(1)">{{keypad_digit_1}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(2)">{{keypad_digit_2}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(3)">{{keypad_digit_3}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(4)">{{keypad_digit_4}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(5)">{{keypad_digit_5}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(6)">{{keypad_digit_6}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(7)">{{keypad_digit_7}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(8)">{{keypad_digit_8}}</div>
+							<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
+							<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
+						</div>
+						<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
+						     data-class-hidden="input_is_keypad"></div>
+					</div>
+					<div class="gcd-progress-track" data-class-hidden="!has_progress">
+						<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="gcd-footer modern-footer"></div>

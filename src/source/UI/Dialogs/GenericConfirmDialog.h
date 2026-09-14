@@ -276,6 +276,14 @@ namespace mu::ui::window
 
             bool hasProgress = false;
             float progressFraction = 0.f;
+
+            // Toggles #gcd_item3d_anchor's own hidden/shown state and .gcd-body's icon-left/text-
+            // right layout (see generic_confirm_dialog.rcss's own comment) -- native
+            // C3DItemCommonMsgBox places its 40x40 item icon at a fixed top-left offset with body
+            // text starting to its right at a narrower max-width (MSGBOX_TEXT_LEFT_BLANK_3DITEM/
+            // MSGBOX_TEXT_MAXWIDTH_3DITEM, CommonMessageBox.h), side-by-side, not stacked -- the
+            // original single centered flex column put them on top of each other instead.
+            bool hasItem3D = false;
         };
         RmlModelBinder<GenericDialogRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

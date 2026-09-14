@@ -19,50 +19,65 @@
 	     this now-paint-less #panel instead of being painted over by it (this document's own main
 	     RmlUi context always composites LAST in the frame). See that file's own comment. -->
 	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
+		<!-- Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) swapped in for the
+		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives in THIS
+		     document (not generic_confirm_dialog_bg.rml) since, unlike item3D, there's no compositing-
+		     order reason it needs to be behind anything; an ordinary opaque foreground overlay is
+		     simplest, and avoids adding a second data-model to the (deliberately static) bg document.
+		     A direct #panel child, sibling of .gcd-body, not nested inside it -- positioned in #panel's
+		     own coordinate space (edge-to-edge, matching .gcd-bg-sprite-top's own box exactly) rather
+		     than flowing with .gcd-body's inset content. -->
+		<div class="gcd-header-rail" data-class-hidden="!has_title"></div>
+		<!-- Title text drawn directly over the sprite above, matching native's own
+		     (GetPos().x+10, GetPos().y+10) inset (CustomMessageBox.cpp's *MenuMsgBox::RenderTexts()
+		     family, the sprite's own native consumers) -- simplified to one centered line rather than
+		     replicating exact pixel-wrap math, same simplification this whole port already uses
+		     elsewhere. severity_warning/_error recolor the text only, no tinted sprite variants (see
+		     .rcss's own comment). -->
+		<div class="gcd-header-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
+		     data-class-error="severity_error">{{title}}</div>
 		<div class="gcd-body">
-			<!-- Optional bold title row (GameShop/MsgBoxIGS*.h's own title/body split) -- empty
-			     `title` means `has_title` is false and this never shows. A flex child of
-			     .gcd-body like everything else here, not a separately-positioned element -- this
-			     dialog's panel is fixed-size (no room to reflow siblings), so title just stacks
-			     above `lines` in the same centered flex column rather than needing its own
-			     absolute offset. severity_warning/_error are look-and-feel only, no behavior
-			     gated on them. -->
-			<div class="gcd-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
-			     data-class-error="severity_error">{{title}}</div>
-			<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
 			<!-- Invisible position reference for the native 3D item-preview render pass
-			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself, `item3D` unset
-			     means nothing ever reads this element's position. -->
-			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor"></div>
-			<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit buttons,
-			     same anti-shoulder-surfing idea as native CKeyPadMsgBox); Text is a real keyboard
-			     field, hosted by the native g_pSingleTextInputBox widget positioned from
-			     #gcd_input_anchor (GenericConfirmDialog.cpp's UpdateTextInputWidget(), same
-			     anchor-read-back technique CharMakeWin.cpp's own name/password fields use) -- this
-			     div renders nothing itself in Text mode, the widget draws on top of it natively. -->
-			<div class="gcd-input-row" data-class-hidden="!has_input">
-				<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
-				<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(0)">{{keypad_digit_0}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(1)">{{keypad_digit_1}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(2)">{{keypad_digit_2}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(3)">{{keypad_digit_3}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(4)">{{keypad_digit_4}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(5)">{{keypad_digit_5}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(6)">{{keypad_digit_6}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(7)">{{keypad_digit_7}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(8)">{{keypad_digit_8}}</div>
-					<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
-					<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
+			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself. A flex sibling of
+			     .gcd-text-col, not a member of it: native C3DItemCommonMsgBox places this 40x40 icon
+			     at a fixed top-left offset with body text starting to its right at a narrower
+			     max-width (MSGBOX_TEXT_LEFT_BLANK_3DITEM/MSGBOX_TEXT_MAXWIDTH_3DITEM,
+			     CommonMessageBox.h) -- side-by-side, not stacked, which .gcd-body's own
+			     flex-direction:row + this element's hidden-when-!has_item3d toggle reproduces
+			     (collapses to nothing, .gcd-text-col alone fills the row, when there's no item). -->
+			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+			<div class="gcd-text-col">
+				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit buttons,
+				     same anti-shoulder-surfing idea as native CKeyPadMsgBox); Text is a real keyboard
+				     field, hosted by the native g_pSingleTextInputBox widget positioned from
+				     #gcd_input_anchor (GenericConfirmDialog.cpp's UpdateTextInputWidget(), same
+				     anchor-read-back technique CharMakeWin.cpp's own name/password fields use) -- this
+				     div renders nothing itself in Text mode, the widget draws on top of it natively. -->
+				<div class="gcd-input-row" data-class-hidden="!has_input">
+					<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
+					<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(0)">{{keypad_digit_0}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(1)">{{keypad_digit_1}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(2)">{{keypad_digit_2}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(3)">{{keypad_digit_3}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(4)">{{keypad_digit_4}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(5)">{{keypad_digit_5}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(6)">{{keypad_digit_6}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(7)">{{keypad_digit_7}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(8)">{{keypad_digit_8}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
+						<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
+					</div>
+					<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
+					     data-class-hidden="input_is_keypad"></div>
 				</div>
-				<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
-				     data-class-hidden="input_is_keypad"></div>
-			</div>
-			<!-- Optional progress bar (CProgressMsgBox/CCursedTempleProgressMsgBox) -- fraction
-			     pushed from C++ every frame while active, same `x_fraction * 100 + '%'` technique
-			     main_frame.rml's own HP/MP/AG/SD/EXP gauges already prove. -->
-			<div class="gcd-progress-track" data-class-hidden="!has_progress">
-				<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
+				<!-- Optional progress bar (CProgressMsgBox/CCursedTempleProgressMsgBox) -- fraction
+				     pushed from C++ every frame while active, same `x_fraction * 100 + '%'` technique
+				     main_frame.rml's own HP/MP/AG/SD/EXP gauges already prove. -->
+				<div class="gcd-progress-track" data-class-hidden="!has_progress">
+					<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
+				</div>
 			</div>
 		</div>
 		<!-- solo = centered (Ok-only); paired (OkCancel) sits left-of-center instead, mirroring

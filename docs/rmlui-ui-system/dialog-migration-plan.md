@@ -438,6 +438,12 @@ before starting real work here; don't trust the exact class list below as final.
   `GenericDialogConfig.title`/`.gcd-title` (both themes) already existed from the earlier extensions
   session but had zero real consumers until this batch — first exercise for both.
 
+  **`title` upgraded from plain colored text to a real header banner (2026-09-14, after this batch's
+  own in-game testing)** — `.gcd-title` replaced by `.gcd-header-rail`/`.gcd-header-title`, styled
+  like Login/`CSysMenuWin`'s own header-rail/hero-banner rather than a bold text line, colored per
+  `severity`. See `STATUS.md`'s own entry (next to the item3D/scrollbar fixes above) for the full
+  layout writeup — no `GenericDialogConfig`/C++ changes, purely an `.rml`/`.rcss` restructure.
+
   Every button in this family renders as literal `I18N::Game::OK`/`Cancel` text (grep-checked) — no
   `primaryLabel`/`secondaryLabel` overrides needed anywhere. Every native `Initialize()` builds its
   body as one `mu_swprintf`-formatted string, pixel-wrapped via `DivideStringByPixel()` — ported as
