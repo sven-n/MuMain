@@ -6,7 +6,9 @@
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "InGameShopSystem.h"
 #include "Engine/Object/ZzzInventory.h"
-#include "MsgBoxIGSCommon.h"
+#include "Network/Server/WSclient.h" // SocketClient
+#include "UI/Core/WindowCommon.h"
+#include <filesystem>
 
 #ifdef CONSOLE_DEBUG
 
@@ -132,9 +134,7 @@ bool CInGameShopSystem::ScriptDownload()
 
         wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
         mu_swprintf(szText, I18N::Game::MUItemShopInformationDownloadFailed, m_ScriptVerInfo.Zone, m_ScriptVerInfo.year, m_ScriptVerInfo.yearId, res.GetErrorMessage());
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, szText);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::Error, szText);
         return false;
     }
 
@@ -204,9 +204,7 @@ bool CInGameShopSystem::BannerDownload()
         // MessageBox
         wchar_t szText[MAX_TEXT_LENGTH] = { '\0', };
         mu_swprintf(szText, I18N::Game::BannerDownloadFailedVersionDDDS, m_BannerVerInfo.Zone, m_BannerVerInfo.year, m_BannerVerInfo.yearId, res.GetErrorMessage());
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, szText);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::Error, szText);
 
         return false;
     }

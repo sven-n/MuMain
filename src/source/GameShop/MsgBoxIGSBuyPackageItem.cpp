@@ -255,10 +255,7 @@ CALLBACK_RESULT CMsgBoxIGSBuyPackageItem::LButtonUp(class CMessageBoxBase* pOwne
 CALLBACK_RESULT CMsgBoxIGSBuyPackageItem::BuyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
 {
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSBuyPackageItem*>(pOwner);
-    CMsgBoxIGSBuyConfirm* pMsgBox = NULL;
-    CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSBuyConfirmLayout), &pMsgBox);
-
-    pMsgBox->Initialize(pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, 0, pOwnMsgBox->m_iCashType, pOwnMsgBox->m_szPackageName, pOwnMsgBox->m_szPrice, pOwnMsgBox->m_szPeriod);
+    ShowIGSBuyConfirmDialog(pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, 0, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_iCashType, pOwnMsgBox->m_szPackageName, pOwnMsgBox->m_szPrice, pOwnMsgBox->m_szPeriod);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

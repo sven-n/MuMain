@@ -67,8 +67,13 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 #include "GameShop/InGameShopSystem.h"
-#include "GameShop/MsgBoxIGSCommon.h"
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+// Several unqualified mu::ui::window:: uses below (e.g. CSystem::GetInstance()) used to compile
+// only because the now-deleted GameShop/MsgBoxIGSCommon.h -- #included above until this batch --
+// carried its own file-scope `using namespace mu::ui::window;` that leaked into the rest of this
+// translation unit. Made explicit here instead of re-relying on an accidental transitive leak.
+using namespace mu::ui::window;
 
 #include "World/MapInfra/w_MapHeaders.h"
 
@@ -12996,23 +13001,17 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
     {
     case static_cast<BYTE>(-2):
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::DatabaseAccessFailed);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::DatabaseAccessFailed);
     }
     break;
     case static_cast<BYTE>(-1):
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ADatabaseErrorHasOccurred);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::ADatabaseErrorHasOccurred);
     }
     break;
     case 0:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseCompleted, I18N::Game::YourPurchaseHasBeenMade);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseCompleted, I18N::Game::YourPurchaseHasBeenMade);
 
         SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
 
@@ -13022,74 +13021,54 @@ bool ReceiveIGS_BuyItem(const BYTE* pReceiveBuffer)
     break;
     case 1:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::YouDoNotHaveEnoughWCoinOrPoints);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::YouDoNotHaveEnoughWCoinOrPoints);
     }
     break;
     case 2:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::YouDoNotHaveEnoughSpaceInStorage);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::YouDoNotHaveEnoughSpaceInStorage);
     }
     break;
     case 3:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemHasSoldOut);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::ThisItemHasSoldOut);
     }
     break;
     case 4:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemIsNotCurrentlyAvailable);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::ThisItemIsNotCurrentlyAvailable);
     }
     break;
     case 5:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemIsNoLongerAvailable);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::ThisItemIsNoLongerAvailable);
     }
     break;
     case 6:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::ThisItemCannotBeBought);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::ThisItemCannotBeBought);
     }
     break;
     case 7:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed, I18N::Game::EventItemsCannotBeBought);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed, I18N::Game::EventItemsCannotBeBought);
     }
     break;
     case 8:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed,
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed,
                             I18N::Game::YouVeExceededTheMaximumNumberOfTimesYouCanPurchaseEventItems);
     }
     break;
     case 9:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::PurchaseFailed,
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::PurchaseFailed,
                             I18N::Game::YouHaveSelectedAnIncorrectWCoinTypePleaseSelectAgain);
     }
     break;
     default:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::UnknownError);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::Error2, I18N::Game::UnknownError);
     }
     break;
     }
@@ -13107,110 +13086,80 @@ bool ReceiveIGS_SendItemGift(const BYTE* pReceiveBuffer)
     {
     case static_cast<BYTE>(-2):
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::DatabaseAccessFailed);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::DatabaseAccessFailed);
     }
     break;
     case static_cast<BYTE>(-1):
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ADatabaseErrorHasOccurred);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::ADatabaseErrorHasOccurred);
     }
     break;
     case 0:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDelivered, I18N::Game::YourGiftHasBeenDelivered);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDelivered, I18N::Game::YourGiftHasBeenDelivered);
 
         SocketClient->ToGameServer()->SendCashShopPointInfoRequest();
     }
     break;
     case 1:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::YouDoNotHaveEnoughCash);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::YouDoNotHaveEnoughCash);
     }
     break;
     case 2:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::TheRecipientSStorageIsFull);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::TheRecipientSStorageIsFull);
     }
     break;
     case 3:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::CannotFindTheRecipient);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::CannotFindTheRecipient);
     }
     break;
     case 4:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemHasSoldOut);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemHasSoldOut);
     }
     break;
     case 5:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemIsNoLongerAvailable);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemIsNoLongerAvailable);
     }
     break;
     case 6:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::ThisItemIsNoLongerAvailable);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::Error2, I18N::Game::ThisItemIsNoLongerAvailable);
     }
     break;
     case 7:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemCannotBeSentAsAGift);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisItemCannotBeSentAsAGift);
     }
     break;
     case 8:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisEventItemCannotBeSentAsAGift);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::ThisEventItemCannotBeSentAsAGift);
     }
     break;
     case 9:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::YouVeExceededTheNumberOfEventItemGiftsAllowed);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::YouVeExceededTheNumberOfEventItemGiftsAllowed);
     }
     break;
     case 10:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed,
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed,
                             I18N::Game::YouHaveSelectedAnIncorrectWCoinTypePleaseSelectAgain);
     }
     break;
     case 20:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::GiftDeliveryFailed, I18N::Game::IDDoesNotExist);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::GiftDeliveryFailed, I18N::Game::IDDoesNotExist);
     }
     break;
     default:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::UnknownError);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::Error2, I18N::Game::UnknownError);
     }
     break;
     }
@@ -13296,83 +13245,61 @@ bool ReceiveIGS_UseStorageItem(const BYTE* pReceiveBuffer)
     {
     case static_cast<BYTE>(-2):
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::ADatabaseAccessErrorHasOccurred);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::ADatabaseAccessErrorHasOccurred);
     }
     break;
     case static_cast<BYTE>(-1):
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::ThereHasBeenAnError);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::ThereHasBeenAnError);
     }
     break;
     case 0:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::ItemUsed, I18N::Game::TheItemHasBeenUsed);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::ItemUsed, I18N::Game::TheItemHasBeenUsed);
 
         g_pInGameShop->UpdateStorageItemList();
     }
     break;
     case 1:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::UseStorageDoesNotExist);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::UseStorageDoesNotExist);
     }
     break;
     case 2:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::YouCanReceiveThisItemOnlyFromAPCCafe);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::YouCanReceiveThisItemOnlyFromAPCCafe);
     }
     break;
     case 3:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::AnActiveColorPlanExistsInTheSelectedPeriod);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::AnActiveColorPlanExistsInTheSelectedPeriod);
     }
     break;
     case 4:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::AnActivePersonalFixedPlanExistsInTheSelectedPeriod);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::AnActivePersonalFixedPlanExistsInTheSelectedPeriod);
     }
     break;
     case 21:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::NotEnoughSpacePleaseCheckFreeSpaceInYourInventory);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::NotEnoughSpacePleaseCheckFreeSpaceInYourInventory);
     }
     break;
     case 22:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::CannotUseTheSelectedItem);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::CannotUseTheSelectedItem);
     }
     break;
 #ifdef LEM_FIX_SERVERMSG_SEALITEM
     case 24:
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::FailedToUse, I18N::Game::ThisItemCannotBeUsedAlongWithAnItemThatSAlreadyInUse);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::FailedToUse, I18N::Game::ThisItemCannotBeUsedAlongWithAnItemThatSAlreadyInUse);
     }
     break;
 #endif // LEM_FIX_SERVERMSG_SEALITEM
     default:
     {
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error2, I18N::Game::UnknownError);
+        mu::ui::window::CreateOkMessageBoxWithTitle(I18N::Game::Error2, I18N::Game::UnknownError);
     }
     break;
     }

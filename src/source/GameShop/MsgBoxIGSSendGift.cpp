@@ -7,8 +7,8 @@
 #include "MsgBoxIGSSendGift.h"
 #include "Audio/DSPlaySound.h"
 
-#include "MsgBoxIGSCommon.h"
 #include "MsgBoxIGSSendGiftConfirm.h"
+#include "UI/Core/WindowCommon.h"
 
 CMsgBoxIGSSendGift::CMsgBoxIGSSendGift()
 {
@@ -172,21 +172,15 @@ CALLBACK_RESULT CMsgBoxIGSSendGift::OKButtonDown(class CMessageBoxBase* pOwner, 
 
     if (pOwnMsgBox->m_szID[0] == '\0')
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::GiftRecipientSIDIsMissing);
+        CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::GiftRecipientSIDIsMissing);
     }
     else if (wcscmp(pOwnMsgBox->m_szID, Hero->ID) == 0)
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::YouCannotSendAGiftToYourself);
+        CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::YouCannotSendAGiftToYourself);
     }
     else
     {
-        CMsgBoxIGSSendGiftConfirm* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSSendGiftConfirmLayout), &pMsgBox);
-        pMsgBox->Initialize(pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, pOwnMsgBox->m_iPriceSeq, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_iCashType, pOwnMsgBox->m_szID, pOwnMsgBox->m_szMessage, pOwnMsgBox->m_szName, pOwnMsgBox->m_szPrice, pOwnMsgBox->m_szPeriod);
+        ShowIGSSendGiftConfirmDialog(pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, pOwnMsgBox->m_iPriceSeq, pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_iCashType, pOwnMsgBox->m_szID, pOwnMsgBox->m_szMessage, pOwnMsgBox->m_szName, pOwnMsgBox->m_szPrice, pOwnMsgBox->m_szPeriod);
     }
 
     PlayBuffer(SOUND_CLICK01);

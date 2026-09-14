@@ -15,10 +15,6 @@
 #include "UI/Inventory/MyInventory.h"
 #include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- CStorageUnlockMsgBoxLayout's own maxLength
 
-#ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
-#include "GameShop/MsgBoxIGSCommon.h"
-#endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
-
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
@@ -733,9 +729,7 @@ void CStorageInventory::SendRequestItemToStorage(ITEM* pItemObj, int nInvenIndex
     {
 #ifdef KJH_PBG_ADD_INGAMESHOP_SYSTEM
         // MessageBox
-        CMsgBoxIGSCommon* pMsgBox = nullptr;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::TheseItemsCannotBeStoredInTheInventory);
+        CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::TheseItemsCannotBeStoredInTheInventory);
 #endif // KJH_PBG_ADD_INGAMESHOP_SYSTEM
 
         g_pSystemLogBox->AddText(I18N::Game::TheseItemsCannotBeStoredInTheInventory, TYPE_ERROR_MESSAGE);

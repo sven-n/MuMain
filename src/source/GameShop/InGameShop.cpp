@@ -9,13 +9,13 @@
 #include "InGameShop.h"
 #include "MsgBoxIGSBuyPackageItem.h"
 #include "MsgBoxIGSBuySelectItem.h"
-#include "MsgBoxIGSCommon.h"
 #include "MsgBoxIGSStorageItemInfo.h"
 #include "MsgBoxIGSGiftStorageItemInfo.h"
 #include "World/MapInfra/MapManager.h"
 #include "Audio/DSPlaySound.h"
 #include "Camera/CameraProjection.h"
 #include "Render/Renderer/MuRenderer.h"
+#include "UI/Core/WindowCommon.h"
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -404,17 +404,13 @@ bool CInGameShop::BtnProcess()
 
     if (m_CashGiftButton.UpdateMouseEvent() == true)
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
+        CreateOkMessageBoxWithTitle(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
         return true;
     }
 
     if (m_CashChargeButton.UpdateMouseEvent() == true)
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
+        CreateOkMessageBoxWithTitle(I18N::Game::RestrictedFunction, I18N::Game::ThisFunctionIsNotSupportedIn);
         return true;
     }
 
@@ -429,9 +425,7 @@ bool CInGameShop::BtnProcess()
     {
         if (m_StorageItemListBox.GetLineNum() <= 0)
         {
-            CMsgBoxIGSCommon* pMsgBox = NULL;
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-            pMsgBox->Initialize(I18N::Game::Error, I18N::Game::ThereIsNoUsableItem);
+            CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::ThereIsNoUsableItem);
             return true;
         }
 
@@ -441,16 +435,12 @@ bool CInGameShop::BtnProcess()
 
         if (iStorageIndex == IGS_SAFEKEEPING_LISTBOX)					// 보관함
         {
-            CMsgBoxIGSStorageItemInfo* pMsgBox = NULL;
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSStorageItemInfoLayout), &pMsgBox);
-            pMsgBox->Initialize(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, pSelectItem->m_szType,
+            ShowIGSStorageItemInfoDialog(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode, static_cast<char>(pSelectItem->m_szType),
                 pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
         }
         else if (iStorageIndex == IGS_PRESENTBOX_LISTBOX)				// 선물 보관함
         {
-            CMsgBoxIGSGiftStorageItemInfo* pMsgBox = NULL;
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSGiftStorageItemInfoLayout), &pMsgBox);
-            pMsgBox->Initialize(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode,
+            ShowIGSGiftStorageItemInfoDialog(pSelectItem->m_iStorageSeq, pSelectItem->m_iStorageItemSeq, pSelectItem->m_wItemCode,
                 pSelectItem->m_szType, pSelectItem->m_szSendUserName, pSelectItem->m_szMessage,
                 pSelectItem->m_szName, pSelectItem->m_szNum, pSelectItem->m_szPeriod);
         }
@@ -627,18 +617,14 @@ bool CInGameShop::IsInGameShopOpen()
 
     if (!(Hero->SafeZone) && !(WD_0LORENCIA == gMapManager.WorldActive && WD_3NORIA == gMapManager.WorldActive && WD_2DEVIAS == gMapManager.WorldActive && WD_51HOME_6TH_CHAR == gMapManager.WorldActive))
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::YouCanOnlyOpenMUItemShopInATownOrSafeZone);
+        CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::YouCanOnlyOpenMUItemShopInATownOrSafeZone);
         g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", I18N::Game::YouCanOnlyOpenMUItemShopInATownOrSafeZone);
         return false;
     }
 
     if (g_InGameShopSystem->IsShopOpen() == false)
     {
-        CMsgBoxIGSCommon* pMsgBox = NULL;
-        CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSCommonLayout), &pMsgBox);
-        pMsgBox->Initialize(I18N::Game::Error, I18N::Game::CannotOpenMUItemShopPleaseReconnectToTheGame);
+        CreateOkMessageBoxWithTitle(I18N::Game::Error, I18N::Game::CannotOpenMUItemShopPleaseReconnectToTheGame);
         g_ConsoleDebug->Write(MCD_NORMAL, L"InGameShopStatue.Txt Return - false <%ls>", I18N::Game::CannotOpenMUItemShopPleaseReconnectToTheGame);
         return false;
     }

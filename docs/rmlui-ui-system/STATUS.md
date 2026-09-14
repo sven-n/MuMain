@@ -806,9 +806,13 @@ per class):
     were still sitting at its untranslated `left:50%;top:50%` spot. Fixed by subtracting half of
     `#panel`'s own box size from the raw offset before converting to reference space; this fix is
     independent of the `Render3D()`/`RenderItem3DOnTop()` back-and-forth above and stays either way.
-  - No consuming dialog class has been ported onto `title`/`progress` yet (`item3D` has 5,
-    `input.Mode::Text` has 9 and `input.Mode::NumericKeypad` has 3 as of 2026-09-14 -- see
-    `dialog-migration-plan.md`'s "Text input"/"Numeric keypad" entries) -- every unconsumed field
+  - `title` and `item3D` gained their first real consumers via the `GameShop/MsgBoxIGS*.h` batch
+    (2026-09-14, see that entry below): `title` is now used by all 7 ported GameShop classes (its
+    first consumer of any kind), `item3D` grew from 5 (`CommonMessageBox.h`'s own
+    `C3DItemCommonMsgBox` family) to 7 (+`CMsgBoxIGSStorageItemInfo`/`CMsgBoxIGSGiftStorageItemInfo`).
+    `progress` still has zero consumers. `input.Mode::Text` has 9 and `input.Mode::NumericKeypad`
+    has 3 (as of 2026-09-14 --
+    see `dialog-migration-plan.md`'s "Text input"/"Numeric keypad" entries) -- every unconsumed field
     still defaults to unset, so pre-existing call sites are unaffected. `Mode::NumericKeypad`
     builds clean but is not yet in-game-tested (unlike `Mode::Text`, which was tested and needed a
     text-color fix -- treat this the same way until confirmed). See `dialog-migration-plan.md`'s
@@ -839,11 +843,29 @@ per class):
   one live `POPUP_CUSTOM` site (`UIGuildInfo.cpp`'s "Appoint" picker) is a bespoke multi-option menu
   out of scope, same as the multi-option `CustomMessageBox.h` classes below. See
   `dialog-migration-plan.md` for the full per-call-site breakdown.
-- **`GameShop/MsgBoxIGS*.h`** — 10 more `CMessageBoxBase` subclasses, cash-shop flows (buy confirm,
-  buy-package with a live 3D item preview, buy-select-item, generic OK/Cancel, delete-item confirm,
-  gift-storage-info, send-gift + confirm, storage-item-info, use-buff/use-item confirm). Both the
-  title field and the 3D-item-preview hybrid extension it needs now exist on `CGenericConfirmDialog`
-  (see above) — unblocked, not yet ported.
+- **`GameShop/MsgBoxIGS*.h`** — **done** (2026-09-14). Re-inventoried all 11 files (1 base class used
+  directly + 10 "subclasses", actually independent copy-paste siblings, not real inheritance):
+  7 ported (`CMsgBoxIGSCommon` — factored into a shared `CreateOkMessageBoxWithTitle()` helper next
+  to `CreateOkMessageBox()`, ~50 call sites, mostly `WSclient.cpp`'s cash-shop response handlers;
+  `CMsgBoxIGSBuyConfirm`, `CMsgBoxIGSUseBuffConfirm`, `CMsgBoxIGSUseItemConfirm`,
+  `CMsgBoxIGSSendGiftConfirm` — plain `title`+`lines`+`OkCancel`; `CMsgBoxIGSStorageItemInfo`/
+  `CMsgBoxIGSGiftStorageItemInfo` — `title`+`item3D`, the first non-`C3DItemCommonMsgBox` consumers
+  of `item3D`, built from a minimal `ITEM{.Type=wItemCode}` snapshot since these are virtual
+  cash-shop items with no real level/excellent/ancient state), 1 confirmed dead and deleted
+  (`CMsgBoxIGSDeleteItemConfirm` — zero call sites anywhere), 2 staying native
+  (`CMsgBoxIGSBuyPackageItem`/`CMsgBoxIGSBuySelectItem` — genuine Buy/Present/Cancel 3-button shape
+  plus a scrollable/selectable list box, same DOESNT_FIT category as the multi-option menus
+  elsewhere) plus `CMsgBoxIGSSendGift` staying native for a different reason (needs two simultaneous
+  text-entry fields — recipient name + separate multiline message — a real, documented
+  `GenericDialogConfig` gap, not designed yet). The 3 still-native classes' own Buy/Present/error
+  button handlers were updated to call the newly-ported free functions where the class they used to
+  construct was deleted. Build clean (zero new warnings) and both RmlUi verification scripts pass.
+  One incidental bug found and fixed while porting: `WSclient.cpp` relied on an accidental file-scope
+  `using namespace mu::ui::window;` that leaked in via the now-deleted `MsgBoxIGSCommon.h`'s own
+  (unwrapped) using-directive — replaced with an explicit `using namespace mu::ui::window;` in
+  `WSclient.cpp` itself rather than re-relying on a transitive leak. **Not yet in-game-tested** —
+  this is `title`'s first real exercise (see the extensions entry above), so treat it with the same
+  caution `Mode::Text`/`Mode::NumericKeypad` needed on their own first tests.
 - **Misc**: `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) are dialog-shaped but
   don't fit the confirm-box mold at all (help overlay, per-window popup menu, command picker) —
   out of `CGenericConfirmDialog`'s scope entirely, would need their own primitives if ported.

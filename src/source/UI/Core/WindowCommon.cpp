@@ -5,7 +5,7 @@
 #include "UI/Core/WindowCommon.h"
 #include "UI/Widgets/Window/RenderNumber.h"
 #include "UI/Core/WindowSystem.h"
-#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h"
 #include "UI/Widgets/UIControls.h"  // g_pRenderText
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -23,12 +23,26 @@ extern bool g_bWndActive;
 
 bool mu::ui::window::CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor, float fPriority)
 {
-    CCommonMessageBox* pMsgBox = g_MessageBox->NewMessageBox(MSGBOX_CLASS(CCommonMessageBox));
-    if (pMsgBox)
-    {
-        return pMsgBox->Create(MSGBOX_COMMON_TYPE_OK, strMsg, dwColor);
-    }
-    return false;
+    // fPriority: never overridden by any caller (native CMessageBoxMng's priority-ordered vector
+    // has no equivalent here -- CGenericConfirmDialog is a single-instance queue, same
+    // simplification already applied throughout the CommonMessageBox.h port). dwColor: only ever
+    // overridden by the 2 call sites using a warning-red highlight; GenericDialogConfig::Line has
+    // no arbitrary color, so a non-default color collapses to bold, the same simplification used
+    // for CTradeAlertMsgBoxLayout/COsbourneMsgBoxLayout.
+    (void)fPriority;
+    GenericDialogConfig cfg;
+    cfg.lines = { { strMsg, dwColor != 0xffffffff } };
+    g_pGenericConfirmDialog->Show(std::move(cfg));
+    return true;
+}
+
+bool mu::ui::window::CreateOkMessageBoxWithTitle(const std::wstring& strTitle, const std::wstring& strMsg)
+{
+    GenericDialogConfig cfg;
+    cfg.title = strTitle;
+    cfg.lines = { { strMsg, false } };
+    g_pGenericConfirmDialog->Show(std::move(cfg));
+    return true;
 }
 
 int mu::ui::window::IsPurchaseShop()

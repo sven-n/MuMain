@@ -1,118 +1,14 @@
 #pragma once
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
-#include "UI/Widgets/UIControls.h"
-#include "UI/Options/OptionWindow.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Dialogs/CommonMessageBox.h"
 
-using namespace SEASON3B;
-using namespace mu::ui::window;
-
-class CMsgBoxIGSSendGiftConfirm : public CMessageBoxBase
-{
-public:
-    enum IMAGE_IGS_SEND_GIFT_CONFIRM
-    {
-        IMAGE_IGS_BUTTON = BITMAP_IGS_MSGBOX_BUTTON,
-        IMAGE_IGS_BACK = COptionWindow::IMAGE_OPTION_FRAME_BACK,
-        IMAGE_IGS_UP = COptionWindow::IMAGE_OPTION_FRAME_UP,
-        IMAGE_IGS_DOWN = COptionWindow::IMAGE_OPTION_FRAME_DOWN,
-        IMAGE_IGS_LEFTLINE = COptionWindow::IMAGE_OPTION_FRAME_LEFT,
-        IMAGE_IGS_RIGHTLINE = COptionWindow::IMAGE_OPTION_FRAME_RIGHT,
-        IMAGE_IGS_TEXTBOX = BITMAP_IGS_MGSBOX_BUY_CONFIRM_TEXT_BOX,
-    };
-
-    enum IMAGESIZE_IGS_SEND_GIFT_CONFIRM
-    {
-        IMAGE_IGS_WINDOW_WIDTH = 640,
-        IMAGE_IGS_WINDOW_HEIGHT = 429,
-        IMAGE_IGS_FRAME_WIDTH = 190,
-        IMAGE_IGS_FRAME_HEIGHT = 179,
-        IMAGE_IGS_TEXTBOX_WIDTH = 160,
-        IMAGE_IGS_TEXTBOX_HEIGHT = 41,
-        IMAGE_IGS_UP_HEIGHT = 64,
-        IMAGE_IGS_DOWN_HEIGHT = 45,
-        IMAGE_IGS_LINE_WIDTH = 21,
-        IMAGE_IGS_LINE_HEIGHT = 10,
-        IMAGE_IGS_BTN_WIDTH = 52,
-        IMAGE_IGS_BTN_HEIGHT = 26,
-    };
-
-    enum IGS_SEND_GIFT_CONFIRM_POS
-    {
-        IGS_BTN_OK_POS_X = 35,
-        IGS_BTN_CANCEL_POS_X = 105,
-        IGS_BTN_POS_Y = 140,
-        IGS_TEXTBOX_POS_X = 15,
-        IGS_TEXTBOX_POS_Y = 58,
-        IGS_TEXT_TITLE_POS_Y = 10,
-        IGS_TEXT_QUESTION_POS_Y = 42,
-        IGS_TEXT_NOTICE_POS_Y = 105,
-        IGS_TEXT_NOTICE_WIDTH = 150,
-        IGS_TEXT_ITEM_INFO_POS_X = 25,
-        IGS_TEXT_ITEM_INFO_NAME_POS_Y = 64,
-        IGS_TEXT_ITEM_INFO_PRICE_POS_Y = 75,
-        IGS_TEXT_ITEM_INFO_PERIOD_POS_Y = 86,
-        IGS_TEXT_ITEM_INFO_WIDTH = 143,
-    };
-
-public:
-    CMsgBoxIGSSendGiftConfirm();
-    ~CMsgBoxIGSSendGiftConfirm();
-
-    bool Create(float fPriority = 3.f);
-    void Release();
-
-    bool Update();
-    bool Render();
-
-    void Initialize(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode, int iCashType, wchar_t* pszID,
-                    wchar_t* pszMessage, wchar_t* pszName, wchar_t* pszPrice, wchar_t* pszPeriod);
-
-    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT OKButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelButtonDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-private:
-    void SetAddCallbackFunc();
-    void SetButtonInfo();
-
-    void RenderFrame();
-    void RenderTexts();
-    void RenderButtons();
-
-    void LoadImages();
-    void UnloadImages();
-
-private:
-    // buttons
-    CMessageBoxButton m_BtnOk;
-    CMessageBoxButton m_BtnCancel;
-
-    int m_iMiddleCount;
-
-    int m_iPackageSeq;
-    int m_iDisplaySeq;
-    int m_iPriceSeq;
-    DWORD m_wItemCode;
-    int m_iCashType;
-
-    wchar_t m_szID[MAX_USERNAME_SIZE + 1];
-    wchar_t m_szMessage[MAX_GIFT_MESSAGE_SIZE];
-
-    wchar_t m_szItemName[MAX_TEXT_LENGTH];
-    wchar_t m_szItemPrice[MAX_TEXT_LENGTH];
-    wchar_t m_szItemPeriod[MAX_TEXT_LENGTH];
-
-    wchar_t m_szNotice[NUM_LINE_CMB][MAX_TEXT_LENGTH];
-
-    int m_iNumNoticeLine;
-};
-
-class CMsgBoxIGSSendGiftConfirmLayout : public TMsgBoxLayout<CMsgBoxIGSSendGiftConfirm>
-{
-public:
-    bool SetLayout();
-};
+// Was CMsgBoxIGSSendGiftConfirm/CMsgBoxIGSSendGiftConfirmLayout -- ported onto
+// CGenericConfirmDialog (docs/rmlui-ui-system/dialog-migration-plan.md, "GameShop/MsgBoxIGS*.h").
+// Kept as a free function in this file since CMsgBoxIGSSendGift.cpp -- staying native (needs two
+// simultaneous text-entry fields, a genuine GenericDialogConfig gap) -- still needs to open this
+// confirm dialog once its own recipient-ID/message validation passes.
+void ShowIGSSendGiftConfirmDialog(int iPackageSeq, int iDisplaySeq, int iPriceSeq, DWORD wItemCode,
+                                   int iCashType, std::wstring id, std::wstring message,
+                                   const wchar_t* pszName, const wchar_t* pszPrice,
+                                   const wchar_t* pszPeriod);
 
 #endif // KJH_ADD_INGAMESHOP_UI_SYSTEM

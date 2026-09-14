@@ -177,8 +177,8 @@ real reference). Build + both RmlUi verification scripts passed for this batch.
 
 All 4 declarations + implementations removed from `CommonMessageBox.h`/`.cpp`. This closes out
 every `CommonMessageBox.h` class this plan originally classified as FITS — nothing left to port
-or delete in that file. `CustomMessageBox.h`'s ~76 classes (see below) and the other tracked
-subsystems (`CUIPopup`, `GameShop/MsgBoxIGS*.h`) remain.
+or delete in that file. `CustomMessageBox.h`'s ~76 classes (see below) remain; `CUIPopup` and
+`GameShop/MsgBoxIGS*.h` (the other tracked subsystems) are both done now too.
 
 ## `GenericDialogConfig` extensions — done (2026-09-13); `item3D` (5) and `input.Mode::Text` (9) now have consumers, `title`/`severity`/`input.Mode::NumericKeypad`/`progress` still don't
 
@@ -426,17 +426,85 @@ before starting real work here; don't trust the exact class list below as final.
   - Also removed one unrelated pre-existing dead `extern int DoBreakUpGuildAction_New(POPUP_RESULT)`
     declaration found in `CommonMessageBox.cpp` while working in this area (no definition, no
     caller, anywhere — stale leftover, unrelated to this session's own `DoBreakUpGuildAction`).
-- [ ] `GameShop/MsgBoxIGS*.h` — 10 `CMessageBoxBase` subclasses, all built on `CMsgBoxIGSCommon`
-  (buy confirm, buy-package w/ live 3D preview, buy-select-item, generic OK/Cancel, delete-item
-  confirm, gift-storage-info, send-gift + confirm, storage-item-info, use-buff/use-item confirm).
+- [x] `GameShop/MsgBoxIGS*.h` — **done (2026-09-14)**. Re-inventoried all 11 files (headers read in
+  full, not trusted from this row's own old description) — 1 base class used directly
+  (`CMsgBoxIGSCommon`) + 10 "subclasses" that turned out to be independent copy-paste siblings, no
+  shared C++ base beyond native `CMessageBoxBase`.
+
   **This is the one family in the whole inventory with a genuine title**: `CMsgBoxIGSCommon::
-  Initialize(pszTitle, pszText)` (`GameShop/MsgBoxIGSCommon.h/.cpp`) renders `m_szTitle` in bold at
-  a fixed top offset, separate from the body text below it — a real title/body split, not just a
-  bold first line the way `CCommonMessageBox`'s bold `AddMsg` lines are. `GenericDialogConfig.title`
-  now exists (see "`GenericDialogConfig` extensions" above) — the plain OK/Cancel ones in this
-  family are unblocked; the 3D-preview ones also need that extension (also now built) reviewed
-  together, since
-  they share the same base class).
+  Initialize(pszTitle, pszText)` (deleted along with the rest, see below) rendered `m_szTitle` in
+  bold at a fixed top offset, separate from the body text below it — a real title/body split, not
+  just a bold first line the way `CCommonMessageBox`'s bold `AddMsg` lines are.
+  `GenericDialogConfig.title`/`.gcd-title` (both themes) already existed from the earlier extensions
+  session but had zero real consumers until this batch — first exercise for both.
+
+  Every button in this family renders as literal `I18N::Game::OK`/`Cancel` text (grep-checked) — no
+  `primaryLabel`/`secondaryLabel` overrides needed anywhere. Every native `Initialize()` builds its
+  body as one `mu_swprintf`-formatted string, pixel-wrapped via `DivideStringByPixel()` — ported as
+  a single `cfg.lines` entry each, letting `.gcd-line`'s own `white-space: normal` reflow it (same
+  simplification every earlier FITS batch used).
+
+  - **Plain `title`+`lines`+`OkCancel`/`Ok` (5 classes)**:
+    - `CMsgBoxIGSCommon` (~50 call sites — `InGameShopSystem.cpp` x2, `InGameShop.cpp` x5,
+      `StorageInventory.cpp` x1, `WSclient.cpp` ~39) → new shared free function
+      `mu::ui::window::CreateOkMessageBoxWithTitle(title, text)` (`UI/Core/WindowCommon.h/.cpp`),
+      modeled directly on the existing `CreateOkMessageBox()`. Every call site's 3-line
+      construct-then-`Initialize()` pattern collapsed to one line via a scripted regex replace
+      (47 sites across 4 files) plus 2 manual conversions in `MsgBoxIGSSendGift.cpp`'s error
+      branches (still-native, see below).
+    - `CMsgBoxIGSBuyConfirm` (2 call sites, both in the still-native `BuyPackageItem`/`BuySelectItem`)
+      → `ShowIGSBuyConfirmDialog(...)` (kept in its own file as a free function, since those 2
+      native classes still need to open it from their own Buy button).
+    - `CMsgBoxIGSUseBuffConfirm` (0 external call sites, only ever chained) → `ShowIGSUseBuffConfirmDialog(...)`.
+    - `CMsgBoxIGSUseItemConfirm` (2 call sites, both ported below) → `ShowIGSUseItemConfirmDialog(...)`
+      — `onPrimary` replicates the native buff-conflict branch verbatim (`TheBuffInfo().GetBuffType()`
+      + `Hero->Object.m_BuffMap.IsEqualBuffType()`, respecting the existing
+      `#ifdef LEM_FIX_WARNINNGMSG_DELETE` override) and chains to `ShowIGSUseBuffConfirmDialog()` on
+      conflict, else sends the consume/point-info requests directly.
+    - `CMsgBoxIGSSendGiftConfirm` (1 call site, in the still-native `CMsgBoxIGSSendGift`) →
+      `ShowIGSSendGiftConfirmDialog(...)`, `id`/`message` captured by value (`std::wstring`) in the
+      `onPrimary` closure.
+  - **`item3D` + `title` (2 classes, first non-`C3DItemCommonMsgBox` consumers of `item3D`)**: both
+    native classes called `RenderItem3D(x,y,w,h, wItemCode, 0,0,0, true)` directly (a bare item code,
+    not a real `ITEM*`) since these are virtual cash-shop items with no level/excellent/ancient
+    state — ported by building a minimal `ITEM{} ; item.Type = wItemCode;` snapshot (everything else
+    stays zero, matching native's own zero args) and setting `cfg.item3D` to it.
+    - `CMsgBoxIGSStorageItemInfo` (1 call site) → `ShowIGSStorageItemInfoDialog(...)`, `onPrimary`
+      chains to `ShowIGSUseItemConfirmDialog(...)`.
+    - `CMsgBoxIGSGiftStorageItemInfo` (1 call site) → `ShowIGSGiftStorageItemInfoDialog(...)`. Its
+      native `CUITextInputBox m_MessageInputBox` is read-only display here (`SetText()` in
+      `Initialize`, never read back) — ported as one more plain `cfg.lines` entry, no `input` field
+      needed, no primitive gap. `onPrimary` chains to the same `ShowIGSUseItemConfirmDialog(...)`.
+  - **Confirmed dead, deleted (1 class)**: `CMsgBoxIGSDeleteItemConfirm` — zero call sites anywhere
+    (grep-confirmed), not ported.
+  - **Stay native, out of scope (3 classes)**: `CMsgBoxIGSBuyPackageItem`/`CMsgBoxIGSBuySelectItem`
+    — genuine `Buy`/`Present`(Gift)/`Cancel` 3-button shape (`ButtonSet` only has `Ok`/`OkCancel`)
+    plus a scrollable/selectable description or price-tier list box (`lines` is static text, no
+    interactive-list concept) — same DOESNT_FIT category as the multi-option menus elsewhere.
+    `CMsgBoxIGSSendGift` — needs two simultaneous text-entry fields (single-line recipient ID +
+    separate multiline message) at once; `GenericDialogConfig.input` is a single
+    `std::optional<InputField>` — a genuine, documented primitive gap, not improvised around. All 3
+    classes' own Buy/Present/error button handlers were still updated (mechanical call-site edits
+    only) to call the newly-ported free functions in place of the classes that got deleted.
+
+  All 8 deleted classes' declarations + implementations removed (`MsgBoxIGSCommon.h`/`.cpp` deleted
+  outright — no remaining consumer needed the file; the other 6 ported classes' files were kept
+  alive, gutted down to just the new free function, since the 3 still-native classes still
+  `#include` them). Grep-confirmed zero remaining references. Build clean (zero new warnings) + both
+  RmlUi verification scripts pass.
+
+  **Incidental bug found while porting**: removing `MsgBoxIGSCommon.h`'s include from `WSclient.cpp`
+  broke 2 unrelated unqualified `CSystem::GetInstance()` calls later in that same file (line
+  1547/8396) — turned out `WSclient.cpp` never had its own `using namespace mu::ui::window;`, it was
+  relying the entire time on `MsgBoxIGSCommon.h`'s own file-scope (unwrapped) using-directive leaking
+  in via `#include` and silently applying to the rest of the translation unit. Fixed by adding an
+  explicit `using namespace mu::ui::window;` directly to `WSclient.cpp` instead of re-relying on a
+  transitive accident.
+
+  **Not yet in-game-tested** — this is `title`'s first real exercise (previously infrastructure-only)
+  and `item3D`'s first non-`C3DItemCommonMsgBox` use; treat with the same caution
+  `Mode::Text`/`Mode::NumericKeypad` needed on their own first tests (both needed a real fix or are
+  still pending verification).
 - **Explicitly out of scope for `CGenericConfirmDialog`** (would need their own primitives if ever
   ported): `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) — help overlay,
   per-window popup menu, command picker; none are confirm-dialog shaped.

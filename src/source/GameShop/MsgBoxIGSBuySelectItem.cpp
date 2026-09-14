@@ -228,9 +228,7 @@ CALLBACK_RESULT CMsgBoxIGSBuySelectItem::BuyBtnDown(class CMessageBoxBase* pOwne
     auto* pOwnMsgBox = dynamic_cast<CMsgBoxIGSBuySelectItem*>(pOwner);
     IGS_SelectBuyItem* pItem = pOwnMsgBox->m_SelectBuyListBox.GetSelectedText();
 
-    CMsgBoxIGSBuyConfirm* pMsgBox = NULL;
-    CreateMessageBox(MSGBOX_LAYOUT_CLASS(CMsgBoxIGSBuyConfirmLayout), &pMsgBox);
-    pMsgBox->Initialize(pOwnMsgBox->m_wItemCode, pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, pItem->m_iPriceSeq, pItem->m_iCashType, pItem->m_szItemName, pItem->m_szItemPrice, pItem->m_szItemPeriod);
+    ShowIGSBuyConfirmDialog(pOwnMsgBox->m_iPackageSeq, pOwnMsgBox->m_iDisplaySeq, pItem->m_iPriceSeq, pOwnMsgBox->m_wItemCode, pItem->m_iCashType, pItem->m_szItemName, pItem->m_szItemPrice, pItem->m_szItemPeriod);
 
     PlayBuffer(SOUND_CLICK01);
     g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);

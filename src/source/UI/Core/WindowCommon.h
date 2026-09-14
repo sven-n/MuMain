@@ -12,6 +12,12 @@ namespace mu::ui::window
 {
     bool CreateOkMessageBox(const std::wstring& strMsg, DWORD dwColor = 0xffffffff, float fPriority = 3.f);
 
+    // Same as CreateOkMessageBox, plus a bold title row above the body -- models
+    // CMsgBoxIGSCommon::Initialize(pszTitle, pszText) (GameShop/MsgBoxIGSCommon.h), the one native
+    // family with a genuine title/body split, used as a generic OK-only notice/error popup at
+    // ~50 call sites (mostly WSclient.cpp's cash-shop response handlers).
+    bool CreateOkMessageBoxWithTitle(const std::wstring& strTitle, const std::wstring& strMsg);
+
     int IsPurchaseShop();
 #define g_IsPurchaseShop mu::ui::window::IsPurchaseShop()
 
