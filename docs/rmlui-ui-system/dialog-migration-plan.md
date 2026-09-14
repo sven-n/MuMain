@@ -248,12 +248,17 @@ preserved (`GenericDialogConfig::Line` only has `bold`, matching every earlier F
 the bold/non-bold distinction carries over, styled via the theme's existing warm/secondary text
 tokens. Build (162/162, zero new warnings) + both RmlUi verification scripts passed.
 
-- [ ] `CPersonalShopItemValueCheckMsgBoxLayout` — **still native.** Not a `item3D`-only port: its
-  caller (`CustomMessageBox.cpp`'s `CPersonalShopItemValueMsgBoxLayout::ProcessOk`, a `CTextInputMsgBox`
-  price-entry dialog not yet ported) calls `SetItemValue(iInputZen)` on the instance before showing
-  it, and `OkBtnDown` reads that value back via `GetItemValue()`. Needs a numeric price-value field
-  on `GenericDialogConfig` (or reuse of the `input`/`NumericKeypad` shape) once the `CTextInputMsgBox`
-  family this chains from is itself in scope — not designed now.
+- [x] `CPersonalShopItemValueCheckMsgBoxLayout` — OkCancel + `item3D` —
+  `UI/Inventory/MyShopInventory.cpp`'s `ShowPersonalShopItemValueDialog()` (chained from its own
+  `onPrimary`, once the entered price fails the "at least item value" check). This note previously
+  said it needed a numeric price-value field on `GenericDialogConfig` because its native `OkBtnDown`
+  reads `pMsgBox->GetItemValue()` — but that value is only ever set once via `SetItemValue()` and
+  read back once, never rendered as a widget inside this dialog itself (the actual numeric entry
+  happens one dialog earlier, in the already-ported `CPersonalShopItemValueMsgBoxLayout` chain, an
+  `input`-mode confirm). So it needed no new primitive capability at all — just the entered price
+  (`iInputZen`) captured by value into `onPrimary`, same shape as `NPCShop.cpp`'s `IsHighValueItem()`
+  sell-to-NPC confirm. Native class + its `CommonMessageBox.h`/`.cpp` declaration/implementation
+  removed; grep-confirmed zero remaining references.
 
 ## `CustomMessageBox.h` (~76 classes: 46 layout wrappers + ~30 underlying box classes)
 

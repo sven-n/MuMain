@@ -248,20 +248,8 @@ namespace mu::ui::window
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
     // CHighValueItemCheckMsgBoxLayout, CUseFruitMsgBoxLayout, CUsePartChargeFruitMsgBoxLayout,
-    // CPersonalShopItemBuyMsgBoxLayout, CGambleBuyMsgBoxLayout ported to CGenericConfirmDialog --
-    // see docs/rmlui-ui-system/dialog-migration-plan.md.
-
-    // Still native: chained from ShowPersonalShopItemValueDialog() (MyShopInventory.cpp -- was
-    // CPersonalShopItemValueMsgBoxLayout, CustomMessageBox.h, ported 2026-09-14), which calls
-    // SetItemValue() on the instance it creates -- needs a numeric price-value widget on
-    // GenericDialogConfig before this one can be ported too.
-    class CPersonalShopItemValueCheckMsgBoxLayout : public TMsgBoxLayout<C3DItemCommonMsgBox>
-    {
-    public:
-        bool SetLayout();
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    };
+    // CPersonalShopItemBuyMsgBoxLayout, CGambleBuyMsgBoxLayout, CPersonalShopItemValueCheckMsgBoxLayout
+    // ported to CGenericConfirmDialog -- see docs/rmlui-ui-system/dialog-migration-plan.md.
 
 }
 
