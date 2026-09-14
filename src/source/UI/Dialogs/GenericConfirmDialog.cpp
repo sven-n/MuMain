@@ -26,9 +26,8 @@
 #include <numeric>
 #include <random>
 
-// Same g_iChatInputType convention every other native window/dialog in this codebase already
-// uses (ad-hoc extern, not centralized in a header) -- see UIPopup.cpp/CharMakeWin.cpp for the
-// identical pattern. Default is 1 (Winmain.cpp) -- the modern g_pSingleTextInputBox portable
+// Same ad-hoc extern convention every other native window/dialog in this codebase uses for
+// g_iChatInputType. Default is 1 (Winmain.cpp) -- the modern g_pSingleTextInputBox portable
 // widget path, the only one this class implements (see GetInputText()'s own comment).
 extern int g_iChatInputType;
 
@@ -40,14 +39,12 @@ CGenericConfirmDialog* g_pGenericConfirmDialog = nullptr;
 namespace
 {
     // Reference-space size of the 3D-item preview slot -- matches C3DItemCommonMsgBox's own
-    // MSGBOX_3DITEM_WIDTH/HEIGHT (CommonMessageBox.h) exactly, not a new invented size.
+    // MSGBOX_3DITEM_WIDTH/HEIGHT (CommonMessageBox.h) exactly.
     constexpr float kItem3DSize = 40.0f;
 
     // Real screen-pixel size of the Mode::Text native input widget -- matches the field's own
-    // .gcd-input-anchor box in generic_confirm_dialog.rcss (both themes); kept as one named
-    // constant here since InputBoxConfig::size needs real pixels, not a value read back from
-    // RmlUi (the anchor only supplies position, same convention as every other anchor in this
-    // codebase -- CItemHotKey/CharMakeWin never read a size back either).
+    // .gcd-input-anchor box in generic_confirm_dialog.rcss (both themes). InputBoxConfig::size
+    // needs real pixels, not a value read back from RmlUi (the anchor only supplies position).
     constexpr int kInputFieldWidth = 150;
     constexpr int kInputFieldHeight = 18;
 }
@@ -61,10 +58,9 @@ void CGenericConfirmDialog::Create(CManager* pMng)
 
     pMng->AddUIObj(mu::ui::window::INTERFACE_GENERIC_CONFIRM_DIALOG, this);
 
-    // Registered for this object's whole lifetime, same convention C3DItemCommonMsgBox's own
-    // Create() uses -- Render3D() below no-ops whenever the active config has no `item3D`, and
-    // the camera's own IsVisible() gate (Window3DRenderMng.cpp) already skips calling it at all
-    // while no dialog is active, so there's no cost to staying registered between dialogs.
+    // Registered for this object's whole lifetime -- Render3D() below no-ops whenever the active
+    // config has no `item3D`, and the camera's own IsVisible() gate skips calling it at all while
+    // no dialog is active, so there's no cost to staying registered between dialogs.
     if (g_pNewUI3DRenderMng)
         g_pNewUI3DRenderMng->Add3DRenderObj(this);
 }
@@ -108,14 +104,19 @@ void CGenericConfirmDialog::BuildRmlUi()
 
             c.Bind("has_item3d", &model.hasItem3D);
 
+            c.Bind("has_portrait2d_overlay", &model.hasPortrait2DOverlay);
+            c.Bind("has_portrait2d_beside", &model.hasPortrait2DBeside);
+            c.Bind("portrait2d_text", &model.portrait2DText);
+
+            c.Bind("has_tall_panel", &model.hasTallPanel);
+
             c.BindEventCallback("gcd_primary_click",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_bPrimaryClicked = true; });
             c.BindEventCallback("gcd_secondary_click",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_bSecondaryClicked = true; });
 
             // Position argument is the FIXED grid slot (0-9), not the digit typed -- that's
-            // looked up via m_KeypadMapping, reproducing CKeyPadMsgBox's own shuffled-position
-            // anti-shoulder-surfing behavior (KeyPadBtnDown, CustomMessageBox.cpp).
+            // looked up via m_KeypadMapping, the shuffled-position anti-shoulder-surfing mapping.
             c.BindEventCallback("gcd_keypad_click",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& args)
                 {
@@ -138,12 +139,9 @@ void CGenericConfirmDialog::BuildRmlUi()
             "Data/Interface/RmlUi/generic_confirm_dialog.rml");
 
     // Background-context companion -- see the class comment for the mechanism. No RmlModelBinder
-    // needed (100% static markup, see generic_confirm_dialog_bg.rml). Loaded into this dialog's
-    // OWN dedicated context (GetDialogBackgroundContext()), not the shared GetBackgroundContext()
-    // every ordinary window's own bg doc uses -- see the class comment for why.
-    // CreateBackgroundDocument() auto-Show()s it; Hide() immediately since this dialog starts
-    // inactive -- Show()/ShowNext()/Resolve()/Release()/ReloadRmlTheme() keep it in lockstep with
-    // m_pRmlDoc from here on.
+    // needed (100% static markup, see generic_confirm_dialog_bg.rml). CreateBackgroundDocument()
+    // auto-Show()s it; Hide() immediately since this dialog starts inactive -- Show()/ShowNext()/
+    // Resolve()/Release()/ReloadRmlTheme() keep it in lockstep with m_pRmlDoc from here on.
     m_pRmlBgDoc = UI::RmlBridge::CreateBackgroundDocument("Data/Interface/RmlUi/generic_confirm_dialog_bg.rml",
         RmlUiRuntime::Instance().GetDialogBackgroundContext());
     if (m_pRmlBgDoc)
@@ -193,8 +191,7 @@ void CGenericConfirmDialog::Release()
 
 namespace
 {
-    // CKeyPadMsgBox's own shuffle (CustomMessageBox.cpp) -- 20 random adjacent swaps over 0..9.
-    // Reproduced with std::shuffle instead since this is new code, not a ported native method.
+    // 20 random adjacent swaps over 0..9 -- the shuffled keypad-digit mapping.
     std::vector<int> ShuffledDigits()
     {
         std::vector<int> digits(10);
@@ -251,12 +248,17 @@ void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
     if (m_pRmlDoc)
     {
         SyncRmlModel();
-        // Modal: blocks the game world/other UI from stealing focus or clicks while this is open --
-        // matches CMessageBoxMng's own input-blocking behavior for the system this replaces.
+        // Modal: blocks the game world/other UI from stealing focus or clicks while this is open.
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
     if (m_pRmlBgDoc)
+    {
         m_pRmlBgDoc->Show();
+        // The bg document has no data model of its own -- tallPanel's "tall" class is mirrored
+        // onto its #panel imperatively instead.
+        if (Rml::Element* bgPanel = m_pRmlBgDoc->GetElementById("panel"))
+            bgPanel->SetClass("tall", m_Active.tallPanel);
+    }
 }
 
 void CGenericConfirmDialog::ShowNext()
@@ -295,7 +297,11 @@ void CGenericConfirmDialog::ShowNext()
         m_pRmlDoc->Show(Rml::ModalFlag::Modal, Rml::FocusFlag::Document);
     }
     if (m_pRmlBgDoc)
+    {
         m_pRmlBgDoc->Show();
+        if (Rml::Element* bgPanel = m_pRmlBgDoc->GetElementById("panel"))
+            bgPanel->SetClass("tall", m_Active.tallPanel);
+    }
 }
 
 void CGenericConfirmDialog::Resolve(bool primary)
@@ -304,9 +310,8 @@ void CGenericConfirmDialog::Resolve(bool primary)
 
     // Move out before invoking -- the callback may itself call Show() (e.g. chaining a follow-up
     // confirm), which must not stomp m_Active while its own onPrimary/onSecondary still needs it.
-    // Deliberately BEFORE hiding/ShowNext() now (see KeepOpen()'s own comment): a callback that
-    // vetoes via KeepOpen() needs nothing touched yet -- not the RmlUi documents, not the native
-    // Mode::Text widget, not the queue.
+    // Deliberately BEFORE hiding/ShowNext(): a callback that vetoes via KeepOpen() needs nothing
+    // touched yet -- not the RmlUi documents, not the native Mode::Text widget, not the queue.
     GenericDialogConfig cfg = std::move(m_Active);
     if (primary)
     {
@@ -319,9 +324,7 @@ void CGenericConfirmDialog::Resolve(bool primary)
 
     if (m_bKeepOpenRequested)
     {
-        // Validation failed -- put everything back exactly as it was. m_pRmlDoc/m_pRmlBgDoc were
-        // never hidden and m_bActive was never touched, so as far as anything else can tell this
-        // Resolve() call never happened.
+        // Validation failed -- put everything back exactly as it was.
         m_Active = std::move(cfg);
         return;
     }
@@ -342,11 +345,9 @@ void CGenericConfirmDialog::Resolve(bool primary)
 bool CGenericConfirmDialog::Render()
 {
     // RmlUi's #panel owns this dialog's entire visual, except the Mode::Text input widget --
-    // drawn from RenderTextOnTop() instead (Winmain.cpp's post-RmlUi seam), not here: this
-    // Render() runs through CManager's normal per-object loop, which always executes *before*
-    // RmlUi's own main-context composite, so anything drawn here would just get painted over by
-    // #panel's own (later-composited, opaque) background. item3D still renders via Render3D()
-    // below (I3DRenderObj) -- see that method's KNOWN GAP note in the header.
+    // drawn from RenderTextOnTop() instead: this Render() runs before RmlUi's own main-context
+    // composite, so anything drawn here would get painted over by #panel's opaque background.
+    // item3D still renders via Render3D() below (I3DRenderObj).
     SyncRmlModel();
     return true;
 }
@@ -360,14 +361,8 @@ void CGenericConfirmDialog::UpdateTextInputWidget()
     if (!pAnchor)
         return;
 
-    // Read every frame, not once on Show() -- same lesson CharMakeWin.cpp's own #input_text_anchor
-    // read learned live: a same-frame read right after opening the document can catch RmlUi's
-    // layout mid-resolve, self-correcting one frame later. This dialog's layout is otherwise
-    // static, so at worst the widget is misplaced for one imperceptible frame.
-    //
-    // + PanelTranslateCorrection(): GetAbsoluteOffset() doesn't see #panel's own
-    // `transform: translate(-50%,-50%)` (`.center-both`, base.rcss) -- see that method's own
-    // comment for how this was found and confirmed.
+    // Read every frame, not once on Show() -- a same-frame read right after opening the document
+    // can catch RmlUi's layout mid-resolve, self-correcting one frame later.
     const Rml::Vector2f correction = PanelTranslateCorrection();
     const Rml::Vector2f rawPos = pAnchor->GetAbsoluteOffset();
     const Rml::Vector2f pos = { rawPos.x + correction.x, rawPos.y + correction.y };
@@ -380,12 +375,8 @@ void CGenericConfirmDialog::UpdateTextInputWidget()
     config.password = field.masked;
     config.options = field.numericOnly ? UIOPTION_NUMBERONLY : UIOPTION_NULL;
     // InputBoxConfig's default text color is opaque BLACK -- invisible against this dialog's own
-    // dark panel fill. Same gotcha CharMakeWin.cpp's own #input_text_anchor field already hit and
-    // documented; matches LoginWin.cpp's/CharMakeWin.cpp's own light-cream convention instead of
-    // rediscovering a third color. Also gives the field a visible recessed background (this
-    // dialog's anchor has no CSS frame of its own the way CharMakeWin's native input row does --
-    // same dark fill `.gcd-progress-track` already uses elsewhere in this same panel) so the field
-    // reads as a clickable box even before the user types anything.
+    // dark panel fill. Also gives the field a visible recessed background so it reads as a
+    // clickable box even before the user types anything.
     config.textAlpha = 255;
     config.textR = 255;
     config.textG = 230;
@@ -419,10 +410,8 @@ void CGenericConfirmDialog::UpdateProgress()
 
     if (now >= m_dwProgressEndTime)
     {
-        // Mirrors CProgressMsgBox::ClosingProcess -- elapse-and-close, onPrimary (if set) stands
-        // in for its hardcoded internal side effect. No onSecondary path exists for progress
-        // dialogs -- native never offers one either (see dialog-migration-plan.md's own research
-        // note: zero button-bearing progress-bar variants exist anywhere in the native family).
+        // Elapse-and-close; onPrimary (if set) stands in for the auto-close side effect. No
+        // onSecondary path exists for progress dialogs.
         ::PlayBuffer(SOUND_CLICK01);
         Resolve(true);
         return;
@@ -444,7 +433,7 @@ bool CGenericConfirmDialog::Update()
     if (m_Active.progress)
     {
         UpdateProgress();
-        return true; // progress dialogs have no buttons to poll -- see UpdateProgress()
+        return true; // progress dialogs have no buttons to poll
     }
 
     if (m_Active.input && m_Active.input->mode == GenericDialogConfig::InputField::Mode::Text)
@@ -471,8 +460,7 @@ bool CGenericConfirmDialog::UpdateKeyEvent()
     if (!m_bActive)
         return true;
 
-    // Progress dialogs are non-interactive countdowns natively (no button, no Esc-to-dismiss) --
-    // preserve that rather than inventing an early-dismiss gesture no native call site expects.
+    // Progress dialogs are non-interactive countdowns natively (no button, no Esc-to-dismiss).
     if (!m_Active.progress)
     {
         if (mu::ui::window::IsPress(VK_RETURN))
@@ -498,10 +486,9 @@ void CGenericConfirmDialog::RenderTextOnTop()
         return;
 
     // Forces an identity-like transform to match UpdateTextInputWidget()'s real-pixel
-    // GetAbsoluteOffset() position -- same reasoning as CMsgWin::RenderTextOnTop()'s identical
-    // guard: nothing else pushes an active transform here (this runs from Winmain.cpp's
-    // post-RmlUi callback, entirely outside CManager::Render()'s per-object loop), so whatever
-    // was last active would otherwise leak in unpredictably.
+    // GetAbsoluteOffset() position -- this runs from Winmain.cpp's post-RmlUi callback, entirely
+    // outside CManager::Render()'s per-object loop, so whatever transform was last active would
+    // otherwise leak in unpredictably.
     const auto transform = UI::Scaling::TransformForLayout(UI::Scaling::LayoutMode::Legacy, WindowWidth, WindowHeight);
     UI::Scaling::ScopedActiveTransform identity(transform);
     g_pSingleTextInputBox->Render();
@@ -509,12 +496,10 @@ void CGenericConfirmDialog::RenderTextOnTop()
 
 void CGenericConfirmDialog::Render3D()
 {
-    // Guarded here, not by staying unregistered -- see Create()'s own comment. Every non-item3D
-    // dialog shape (the overwhelming majority) hits this early-out every frame it's open.
+    // Guarded here, not by staying unregistered -- see Create()'s own comment.
     //
     // KNOWN GAP: this draws behind the dialog's own opaque panel background, since RmlUi's main
-    // context always composites LAST in the frame, strictly after C3DRenderMng's own CManager-
-    // driven pass -- see the class's header comment for the full writeup and what's been tried.
+    // context always composites LAST in the frame -- see the class's header comment.
     if (!m_bActive || !m_Active.item3D || !m_pRmlDoc)
         return;
 
@@ -522,22 +507,9 @@ void CGenericConfirmDialog::Render3D()
     if (!pAnchor)
         return;
 
-    // The active transform here is whatever Window3DRenderMng.cpp's TransformForOwner() just
-    // pushed for us (this object's own Dialog-layout transform, since we're a CObject -- see this
-    // method's declaration comment in the header). RenderItem3D() expects REFERENCE-space
-    // coordinates and re-applies that same transform internally to reach real screen pixels, so
-    // the anchor's real screen position must be converted back to reference space first via
-    // LogicalX/LogicalY -- the documented inverse of PositionX/PositionY. This is the same overall
-    // split CItemHotKey/C3DItemCommonMsgBox use (RmlUi/native chrome owns position, a native 3D
-    // pass draws the icon), just without their extra per-window delta-correction math: that exists
-    // in CItemHotKey specifically to reconcile OLD hardcoded reference-space slot coordinates with
-    // newer RmlUi layout, a problem this brand-new anchor doesn't have.
-    //
-    // + PanelTranslateCorrection(): GetAbsoluteOffset() alone reports the anchor's position as if
-    // #panel were still sitting at its untranslated `left:50%; top:50%` spot -- see that method's
-    // own comment for how this was found and confirmed (2026-09-14, logged real numbers showed
-    // #panel's own GetAbsoluteOffset() sitting exactly at window-center, off by exactly half its
-    // own size from where it's actually painted).
+    // RenderItem3D() expects REFERENCE-space coordinates and re-applies the active transform
+    // internally to reach real screen pixels, so the anchor's real screen position (+
+    // PanelTranslateCorrection()) must be converted back to reference space via LogicalX/LogicalY.
     const UI::Scaling::Transform transform = UI::Scaling::GetActiveTransform();
     const Rml::Vector2f correction = PanelTranslateCorrection();
     const Rml::Vector2f rawScreenPos = pAnchor->GetAbsoluteOffset();
@@ -568,12 +540,9 @@ std::wstring CGenericConfirmDialog::GetInputText() const
     if (m_Active.input->mode == GenericDialogConfig::InputField::Mode::NumericKeypad)
         return m_KeypadBuffer;
 
-    // Mode::Text -- mirrors CUIPopup::GetInputText()'s own g_iChatInputType branch, but only the
-    // g_iChatInputType == 1 path (the actual runtime default, Winmain.cpp:101/1985, and the only
-    // path CharMakeWin.cpp/LoginWin.cpp's own modern text fields use). The older
-    // g_iChatInputType == 0 raw-global-buffer path (InputText[0]/ClearInput(), still used by a
-    // handful of legacy screens) is a deliberate, documented gap -- not wired here. If a future
-    // port genuinely needs it, add it then rather than speculatively now.
+    // Mode::Text -- only the g_iChatInputType == 1 path (the actual runtime default and the one
+    // every modern text field uses). The older g_iChatInputType == 0 raw-global-buffer path is a
+    // deliberate gap -- not wired here.
     if (g_iChatInputType == 1 && g_pSingleTextInputBox)
     {
         wchar_t buffer[1024] = {};
@@ -663,7 +632,7 @@ void CGenericConfirmDialog::SyncRmlModel()
         model.inputIsKeypad = inputIsKeypad;
         m_RmlBinder.MarkDirty("input_is_keypad");
     }
-    // Always masked, matching CKeyPadMsgBox::RenderKeyPadInput's own unconditional asterisk mask.
+    // Always masked, matching the native keypad's own unconditional asterisk mask.
     const std::string inputText = inputIsKeypad ? std::string(m_KeypadBuffer.size(), '*') : std::string();
     if (model.inputText != inputText)
     {
@@ -703,6 +672,35 @@ void CGenericConfirmDialog::SyncRmlModel()
     {
         model.hasItem3D = hasItem3D;
         m_RmlBinder.MarkDirty("has_item3d");
+    }
+
+    const bool hasPortrait2DOverlay = m_Active.portrait2D.has_value()
+        && m_Active.portrait2D->layout == GenericDialogConfig::Portrait2D::Layout::Overlay;
+    if (model.hasPortrait2DOverlay != hasPortrait2DOverlay)
+    {
+        model.hasPortrait2DOverlay = hasPortrait2DOverlay;
+        m_RmlBinder.MarkDirty("has_portrait2d_overlay");
+    }
+    const bool hasPortrait2DBeside = m_Active.portrait2D.has_value()
+        && m_Active.portrait2D->layout == GenericDialogConfig::Portrait2D::Layout::Beside;
+    if (model.hasPortrait2DBeside != hasPortrait2DBeside)
+    {
+        model.hasPortrait2DBeside = hasPortrait2DBeside;
+        m_RmlBinder.MarkDirty("has_portrait2d_beside");
+    }
+    const std::string portrait2DText = hasPortrait2DOverlay
+        ? StringUtils::WideToNarrow(m_Active.portrait2D->text.c_str()) : std::string();
+    if (model.portrait2DText != portrait2DText)
+    {
+        model.portrait2DText = portrait2DText;
+        m_RmlBinder.MarkDirty("portrait2d_text");
+    }
+
+    const bool hasTallPanel = m_Active.tallPanel;
+    if (model.hasTallPanel != hasTallPanel)
+    {
+        model.hasTallPanel = hasTallPanel;
+        m_RmlBinder.MarkDirty("has_tall_panel");
     }
 }
 

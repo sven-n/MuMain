@@ -492,65 +492,8 @@ namespace mu::ui::window
         DWORD m_dwNpcIndex;
     };
 
-    class CDuelMsgBox : public CMessageBoxBase
-    {
-    public:
-        CDuelMsgBox();
-        ~CDuelMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButton();
-
-        // button
-        CMessageBoxButton m_BtnOk;
-        CMessageBoxButton m_BtnCancel;
-    };
-
-    class CDuelResultMsgBox : public CMessageBoxBase
-    {
-    public:
-        CDuelResultMsgBox();
-        ~CDuelResultMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OkBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        void SetIDs(wchar_t* pszWinnerID, wchar_t* pszLoserID);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButton();
-
-        // button
-        CMessageBoxButton m_BtnOk;
-        wchar_t m_szWinnerID[24];
-        wchar_t m_szLoserID[24];
-    };
+    // CDuelMsgBox/CDuelResultMsgBox ported to CGenericConfirmDialog's portrait2D field --
+    // see docs/rmlui-ui-system/dialog-migration-plan.md.
 
     class CGuild_ToPerson_Position : public CMessageBoxBase
     {
@@ -946,18 +889,6 @@ namespace mu::ui::window
     };
 
     class CGuild_ToPerson_PositionLayout : public TMsgBoxLayout<CGuild_ToPerson_Position>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CDuelMsgBoxLayout : public TMsgBoxLayout<CDuelMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CDuelResultMsgBoxLayout : public TMsgBoxLayout<CDuelResultMsgBox>
     {
     public:
         bool SetLayout();

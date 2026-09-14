@@ -5,15 +5,11 @@
 </head>
 <body>
 	<!-- Background-context document (see npc_shop_bg.rml for the mechanism) -- paints the panel's
-	     own frame/fill BEFORE the legacy 3D pass draws item3D each frame (RenderBackgroundLayer(),
-	     called from CManager::Render() before any window/camera in its z-sorted loop), so the item
-	     shows through the gap in generic_confirm_dialog.rml's own now-paint-less #panel instead of
-	     being painted over by it (RmlUi's main context, rendered last in the frame, would otherwise
-	     always win). No data-model -- #panel centers via plain CSS
-	     (left:50%;top:50%;transform:translate(-50%,-50%)), unlike npc_shop_bg's own
+	     own frame/fill BEFORE the 3D pass draws item3D each frame, so the item shows through the
+	     gap in generic_confirm_dialog.rml's own now-paint-less #panel instead of being painted
+	     over by it. No data-model -- #panel centers via plain CSS, unlike npc_shop_bg's own
 	     root_x/root_y/root_scale data-style bindings: this dialog's position is never
-	     C++-computed the way an inventory-family window's is, so there's nothing to sync per
-	     frame. -->
+	     C++-computed. -->
 	<div id="panel">
 		<div class="gcd-bg-shell-edge"></div>
 		<div class="gcd-bg-groove"></div>

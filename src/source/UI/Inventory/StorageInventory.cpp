@@ -42,6 +42,7 @@ namespace
         cfg.input = GenericDialogConfig::InputField{};
         cfg.input->mode = GenericDialogConfig::InputField::Mode::NumericKeypad;
         cfg.input->maxLength = 4;
+        cfg.tallPanel = true; // the on-screen digit pad doesn't comfortably fit the default panel height
         cfg.onPrimary = []
         {
             const std::wstring strText = g_pGenericConfirmDialog->GetInputText();
@@ -78,6 +79,7 @@ namespace
         cfg.input = GenericDialogConfig::InputField{};
         cfg.input->mode = GenericDialogConfig::InputField::Mode::NumericKeypad;
         cfg.input->maxLength = 4;
+        cfg.tallPanel = true; // the on-screen digit pad doesn't comfortably fit the default panel height
         cfg.onPrimary = [firstPin]
         {
             const std::wstring strText = g_pGenericConfirmDialog->GetInputText();
@@ -144,6 +146,7 @@ namespace
         cfg.input = GenericDialogConfig::InputField{};
         cfg.input->mode = GenericDialogConfig::InputField::Mode::NumericKeypad;
         cfg.input->maxLength = 4;
+        cfg.tallPanel = true; // the on-screen digit pad doesn't comfortably fit the default panel height
         cfg.onPrimary = []
         {
             const std::wstring strText = g_pGenericConfirmDialog->GetInputText();

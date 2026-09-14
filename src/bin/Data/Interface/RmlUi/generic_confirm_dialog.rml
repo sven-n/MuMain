@@ -6,54 +6,50 @@
 </head>
 <body>
 	<!-- This is legacy's own markup in practice -- modern has its own complete fork
-	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy, confirmed
-	     against RmlTheme.cpp's per-theme-then-fallback resolution. Keep ids/data-model/event names
-	     in sync with the modern fork regardless, GenericConfirmDialog.cpp binds both by name.
-	     .center-both replaces native CCommonMessageBox's fixed-y C++ positioning (a legacy
-	     implementation artifact, not deliberate intent -- both existing RmlUi-only 2D dialogs,
-	     CMsgWin/RememberPasswordPrompt, already center this way).
+	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy. Keep ids/
+	     data-model/event names in sync with the modern fork, GenericConfirmDialog.cpp binds both
+	     by name.
 
 	     Native CCommonMessageBox's own sprite composite (back fill -> top cap -> middle fill ->
 	     bottom cap) moved to generic_confirm_dialog_bg.rml -- a background-context document
-	     rendered BEFORE the legacy 3D pass that draws item3D each frame, so the item shows through
-	     this now-paint-less #panel instead of being painted over by it (this document's own main
-	     RmlUi context always composites LAST in the frame). See that file's own comment. -->
-	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
+	     rendered BEFORE the 3D pass that draws item3D each frame, so the item shows through this
+	     now-paint-less #panel instead of being painted over by it. See that file's own comment. -->
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel">
 		<!-- Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) swapped in for the
-		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives in THIS
-		     document (not generic_confirm_dialog_bg.rml) since, unlike item3D, there's no compositing-
-		     order reason it needs to be behind anything; an ordinary opaque foreground overlay is
-		     simplest, and avoids adding a second data-model to the (deliberately static) bg document.
-		     A direct #panel child, sibling of .gcd-body, not nested inside it -- positioned in #panel's
-		     own coordinate space (edge-to-edge, matching .gcd-bg-sprite-top's own box exactly) rather
-		     than flowing with .gcd-body's inset content. -->
+		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives here, not
+		     in generic_confirm_dialog_bg.rml -- unlike item3D, a title banner has no compositing-
+		     order reason to sit behind anything. A direct #panel child, sibling of .gcd-body, since
+		     it's positioned in #panel's own coordinate space (edge-to-edge), not .gcd-body's inset
+		     content area. -->
 		<div class="gcd-header-rail" data-class-hidden="!has_title"></div>
-		<!-- Title text drawn directly over the sprite above, matching native's own
-		     (GetPos().x+10, GetPos().y+10) inset (CustomMessageBox.cpp's *MenuMsgBox::RenderTexts()
-		     family, the sprite's own native consumers) -- simplified to one centered line rather than
-		     replicating exact pixel-wrap math, same simplification this whole port already uses
-		     elsewhere. severity_warning/_error recolor the text only, no tinted sprite variants (see
-		     .rcss's own comment). -->
+		<!-- Title text drawn directly over the sprite above -- simplified to one centered line
+		     rather than replicating native's exact pixel-wrap math. severity_warning/_error
+		     recolor the text only, no tinted sprite variants. -->
 		<div class="gcd-header-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
 		     data-class-error="severity_error">{{title}}</div>
 		<div class="gcd-body">
 			<!-- Invisible position reference for the native 3D item-preview render pass
 			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself. A flex sibling of
-			     .gcd-text-col, not a member of it: native C3DItemCommonMsgBox places this 40x40 icon
-			     at a fixed top-left offset with body text starting to its right at a narrower
-			     max-width (MSGBOX_TEXT_LEFT_BLANK_3DITEM/MSGBOX_TEXT_MAXWIDTH_3DITEM,
-			     CommonMessageBox.h) -- side-by-side, not stacked, which .gcd-body's own
-			     flex-direction:row + this element's hidden-when-!has_item3d toggle reproduces
-			     (collapses to nothing, .gcd-text-col alone fills the row, when there's no item). -->
+			     .gcd-text-col, not a member of it: the item icon sits at a fixed top-left offset with
+			     body text starting to its right, side-by-side rather than stacked (collapses to
+			     nothing, .gcd-text-col alone fills the row, when there's no item). -->
 			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+			<!-- Portrait2D's Beside layout -- same row-sibling slot as #gcd_item3d_anchor above
+			     (icon-left/text-right). Mutually exclusive with the Overlay slot inside
+			     .gcd-text-col below; no dialog uses both. -->
+			<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
 			<div class="gcd-text-col">
+				<!-- Portrait2D's Overlay layout (the default) -- caption text drawn on top of the
+				     sprite. First child of .gcd-text-col (icon-TOP/text-BELOW), unlike item3D's
+				     icon-left/text-right sibling shape. -->
+				<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
+					<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
+				</div>
 				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
-				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit buttons,
-				     same anti-shoulder-surfing idea as native CKeyPadMsgBox); Text is a real keyboard
-				     field, hosted by the native g_pSingleTextInputBox widget positioned from
-				     #gcd_input_anchor (GenericConfirmDialog.cpp's UpdateTextInputWidget(), same
-				     anchor-read-back technique CharMakeWin.cpp's own name/password fields use) -- this
-				     div renders nothing itself in Text mode, the widget draws on top of it natively. -->
+				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit
+				     buttons, anti-shoulder-surfing); Text is a real keyboard field, hosted by the
+				     native g_pSingleTextInputBox widget positioned from #gcd_input_anchor -- this
+				     div renders nothing itself in Text mode, the widget draws on top of it. -->
 				<div class="gcd-input-row" data-class-hidden="!has_input">
 					<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
 					<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
@@ -72,17 +68,15 @@
 					<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
 					     data-class-hidden="input_is_keypad"></div>
 				</div>
-				<!-- Optional progress bar (CProgressMsgBox/CCursedTempleProgressMsgBox) -- fraction
-				     pushed from C++ every frame while active, same `x_fraction * 100 + '%'` technique
-				     main_frame.rml's own HP/MP/AG/SD/EXP gauges already prove. -->
+				<!-- Optional progress bar -- fraction pushed from C++ every frame while active,
+				     same `x_fraction * 100 + '%'` technique main_frame.rml's own gauges use. -->
 				<div class="gcd-progress-track" data-class-hidden="!has_progress">
 					<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
 				</div>
 			</div>
 		</div>
-		<!-- solo = centered (Ok-only); paired (OkCancel) sits left-of-center instead, mirroring
-		     native CCommonMessageBox's own OK-only-vs-OK+Cancel button layout. Both buttons hide
-		     entirely while `has_progress` -- native's progress boxes have zero buttons. -->
+		<!-- solo = centered (Ok-only); paired (OkCancel) sits left-of-center instead. Both buttons
+		     hide entirely while `has_progress` -- progress boxes have zero buttons. -->
 		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary" data-class-solo="!show_cancel"
 		     data-class-hidden="has_progress" data-event-click="gcd_primary_click">{{primary_label}}</div>
 		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary"

@@ -6,16 +6,13 @@
    own header-rail/hero-banner recipes and hardware at their own full size, unlike those two which
    paint their header chrome as part of the shared forged-dialog shell. */
 
-/* #panel is centered via .center-both, not a GetProperty()-read-back calc -- same reasoning as
-   remember_password_prompt.rcss. dp throughout: this is a LayoutMode::Dialog window (no
-   transform:scale(root_scale)), not one of the root_scale-tracking inventory-family windows.
-   Deliberately no paint here -- generic_confirm_dialog_bg.rcss's own #panel carries the same
-   width/height so the two documents' panels align exactly; see that file's comment. */
-/* height grew from the original 160dp by +18dp (matching .gcd-header-rail's own growth from 20dp
-   to the full 38dp -- see that rule's own comment) so the header could take its accurate, unscaled
-   size without shrinking the content area below what it had before that rail existed -- .gcd-body's
-   own top/bottom stay the same 10dp/54dp, so this height increase becomes exactly the content
-   area's own gain (bg document's #panel must match this exactly, see that file's own comment). */
+/* #panel is centered via .center-both, not a GetProperty()-read-back calc. dp throughout: a
+   LayoutMode::Dialog window (no transform:scale(root_scale)), not one of the root_scale-tracking
+   inventory-family windows. Deliberately no paint here -- generic_confirm_dialog_bg.rcss's own
+   #panel carries the same width/height so the two documents' panels align exactly. Height is
+   160dp + 18dp for the header rail's own full 38dp height (.gcd-body's own top/bottom stay the
+   same, so this increase becomes exactly the content area's own gain; bg document's #panel must
+   match this exactly). */
 #panel {
 	width: 230dp;
 	height: 178dp;
@@ -23,49 +20,51 @@
 	font-size: 12dp;
 	color: token(text-primary);
 }
+/* Optional taller variant (GenericDialogConfig::tallPanel) -- .gcd-body's own top/bottom insets
+   are fixed dp offsets from #panel's edges, so this alone grows .gcd-body/.gcd-content-row/
+   .gcd-text-col's available content height for free; the footer/OK/Cancel buttons below need
+   their own .tall override since they're positioned via a fixed `top` from #panel's TOP edge.
+   250dp grows the ~114dp content well to ~186dp -- enough for a grown .gcd-portrait2d (100x93dp)
+   + up to 3 lines, or the numeric-keypad input row, without .gcd-text-col's own scrollbar.
+   Mirrored onto the bg document's own #panel imperatively (GenericConfirmDialog.cpp's Show()/
+   ShowNext()) since that document has no data model of its own to bind a class through. */
+#panel.tall {
+	height: 250dp;
+}
+
+/* GenericDialogConfig::Portrait2D's own art -- currently always native's IMAGE_MSGBOX_DUEL_BACK
+   sprite (newui_DuelWindow.tga), a fixed 148x138 portrait with a caption drawn directly on top --
+   the only real consumer today, though Portrait2D itself isn't Duel-specific. A plain, un-skinned
+   native asset, so both themes declare the identical rule set for it -- see legacy's own copy of
+   this same comment. */
+@spritesheet portrait2d-sheet
+{
+	src: "../../../newui_DuelWindow.tga";
+	portrait2d-image: 0px 0px 148px 138px;
+}
 
 /* Message well -- layout only now (position/overflow/flex); the recessed fill that used to come
    from base.rcss's .modern-content-well lives in generic_confirm_dialog_bg.rcss's
    .gcd-bg-content-fill instead (same left/right/top/bottom, so the fill still lines up exactly
    behind this box). Text sits directly on it, scrolling (overflow: hidden auto) rather than
-   growing the panel -- see the top-level generic_confirm_dialog.rml's own comment for why (the
-   Quest window's .quest-contents proves the same technique).
+   growing the panel by default.
 
-   top+bottom (not top+height) deliberately -- this element also has flex centering below, and this
-   engine's box model is content-box only (no box-sizing support anywhere in this codebase); an
-   explicit height combined with flex/padding on children pushed the box past its intended bottom
-   edge and visually overlapped the button row. Anchoring both edges keeps the box's outer size
-   exactly (right - left) x (bottom - top) regardless of its content's own layout. */
-/* .gcd-content-row is this box's only flex child -- the optional header banner
-   (.gcd-header-rail, hidden when untitled) is position:absolute, NOT stacked above it in the same
-   flex column (an earlier design had both as flex siblings; centering them as a single group put
-   text visibly too far down whenever the header was shorter than the box, and a later flex-start
-   attempt fixed that but lost centering entirely -- see .gcd-body.has-title's own comment below).
-   justify-content/align-items center content-row within whatever space is actually available,
-   which the has-title padding-top override (below) narrows to just the space below the header.
+   top+bottom (not top+height) deliberately -- this element also has flex centering below, and
+   this engine's box model is content-box only (no box-sizing support anywhere in this codebase);
+   an explicit height combined with flex/padding on children pushes the box past its intended
+   bottom edge. Anchoring both edges keeps the box's outer size exact regardless of content.
 
-   padding is deliberately minimal, NOT a direct copy of the reference's own
-   `.confirm-dialog .window__body{padding:20px 18px}` figure -- this box's own pre-existing
-   left/right:16dp ALREADY plays the outer-inset role the reference's own
-   `.window__body{margin:6px 8px 8px}` plays (same job, same edge), and at 16/230=~7% of this
-   panel's fixed width is already close to (in fact more generous than) the reference's own
-   combined margin+padding ratio once you account for the reference's window being free to grow
-   and absorb a bigger number where this panel's own height is fixed. Two earlier attempts both
-   overshot by treating the reference's raw padding figure as an ADDITION on top of that existing
-   16dp inset instead of the small remainder needed to reach a comparable total -- first `6dp
-   18dp` (combined ~15% per side), then `2dp 3dp` (still visibly too much extra inset in-game).
-   This is intentionally closer to zero: just enough that text doesn't touch the well's own inner
-   edge, not a second independent margin.
+   .gcd-content-row is this box's only flex child -- the optional header banner
+   (.gcd-header-rail, hidden when untitled) is position:absolute, NOT a flex sibling of it, so it
+   doesn't compete with content-row for .gcd-body's own centering (see .gcd-body.has-title below).
 
-   Safe to add directly to THIS box specifically because it's sized via left/right/top/bottom
-   (anchored edges), not an explicit width/height -- padding only shrinks the content area those
-   edges enclose, it can't push the box's own outer size past them the way it would on a
-   `width:100%`/`height:100%` child (this engine has no box-sizing support, see the comment above).
-   Both .gcd-header-rail and .gcd-content-row inherit the inset via their own width:100%, so this
-   insets the whole column, not just the text -- .gcd-header-rail itself stays without its own
-   margin/padding (reference's `.window__header{margin:7px 8px 0;padding:0 11px}`) since it's that
-   same width:100% child, so adding either there directly would hit the exact hazard just
-   described; it already picks up an equivalent inset for free from this padding instead. */
+   padding is deliberately minimal -- this box's own pre-existing left/right:16dp already plays
+   the outer-inset role, and adding more on top double-counts it. Safe to add directly to THIS box
+   specifically because it's sized via left/right/top/bottom (anchored edges), not an explicit
+   width/height -- padding only shrinks the content area those edges enclose, unlike a
+   `width:100%`/`height:100%` child where it would push the box's own outer size past them.
+   .gcd-header-rail and .gcd-content-row both inherit the inset via their own width:100%, so this
+   insets the whole column, not just the text. */
 .gcd-body {
 	position: absolute;
 	left: 16dp;
@@ -78,27 +77,20 @@
 	justify-content: center;
 	align-items: center;
 }
-/* With a title, .gcd-header-rail moves out of the flex flow entirely (position:absolute below) and
-   this reserves its space as padding-top instead (38dp height + 4dp gap) -- content-row is then
-   .gcd-body's ONLY flex participant again, so its own `justify-content:center` centers content
+/* With a title, .gcd-header-rail moves out of the flex flow entirely (position:absolute below)
+   and this reserves its space as padding-top instead (38dp height + 4dp gap) -- content-row is
+   then .gcd-body's ONLY flex participant, so its own `justify-content:center` centers content
    within the space actually left after the header, not a [header,content] group centered as a
-   unit within the WHOLE box (that earlier approach put the group's midpoint below the true midpoint
-   of the remaining space, since the header's own height counted toward the thing being centered --
-   visibly "too far down"/"not centered" in-game -- and a later flex-start attempt fixed the gap but
-   lost centering entirely, hugging content to the top instead). Taking the header out of the flex
-   flow sidesteps needing `.gcd-content-row`'s own flex-grow to reliably claim exactly 100% of
-   whatever space is left, since there's only one flex child again either way. */
+   unit within the whole box. */
 .gcd-body.has-title {
 	padding-top: 42dp;
 }
 /* Optional title banner -- uses base.rcss's own .modern-header-rail paint recipe (copied rather
-   than shared since the exact position differs) at its own full, unscaled 38dp height (matching
-   .modern-header-rail's own 38dp exactly -- see the rivet/accent/stud rules below for why scaling
-   it down first was wrong). position:absolute (not a flex child of .gcd-body) so it doesn't
-   compete with .gcd-content-row for space in .gcd-body's own centering -- see that rule's own
-   comment. severity_warning/_error recolor it (warning: amber-recolored rail; error: recolored
-   toward .modern-title-plate's own crimson hero-banner palette) -- no behavior is gated on them,
-   only styling (see the .rml's own comment). */
+   than shared since the exact position differs) at its own full, unscaled 38dp height.
+   position:absolute (not a flex child of .gcd-body) so it doesn't compete with .gcd-content-row
+   for space in .gcd-body's own centering. severity_warning/_error recolor it (warning:
+   amber-recolored rail; error: recolored toward .modern-title-plate's own crimson hero-banner
+   palette) -- no behavior is gated on them, only styling. */
 .gcd-header-rail {
 	position: absolute;
 	left: 0;
@@ -120,15 +112,12 @@
 		inset 0 -1dp 0 #000000,
 		0 2dp 4dp rgba(0, 0, 0, 133);
 }
-/* Same display/.hidden cascade-tie fix as every other data-class-hidden toggle in this file --
-   .gcd-header-rail sets its own `display`, so an earlier same-specificity `.hidden { display:
-   none; }` (base.rcss) loses the tie without this later, more specific override. */
+/* Cascade-tie fix: .gcd-header-rail sets its own `display`, so an earlier same-specificity
+   `.hidden { display: none; }` (base.rcss) loses the tie without this later, more specific
+   override. Same fix applies to every other data-class-hidden toggle in this file. */
 .gcd-header-rail.hidden { display: none; }
-/* Center rivet -- .modern-joint's (base.rcss) own exact values, not a scaled-down guess (an
-   earlier 10x10dp/top:-6dp scale-down was flagged as "not accurately positioned" in-game; using
-   the same proven recipe verbatim, on a rail now tall enough to fit it, is the fix). Plain/warning
-   look only -- hidden for severity_error, which uses the twin side studs below instead (see the
-   .rml's own comment). */
+/* Center rivet -- .modern-joint's (base.rcss) own exact values. Plain/warning look only -- hidden
+   for severity_error, which uses the twin side studs below instead. */
 .gcd-header-joint {
 	position: absolute;
 	left: 50%;
@@ -143,7 +132,7 @@
 	transform: rotate(45deg);
 	box-shadow: inset 0 0 0 2dp #0c0d0b;
 }
-/* .modern-header-accent's (base.rcss) own exact values -- same reasoning as the joint above. */
+/* .modern-header-accent's (base.rcss) own exact values. */
 .gcd-header-accent {
 	position: absolute;
 	left: 7dp;
@@ -159,9 +148,8 @@
 		token(metal-warm-edge) 70%,
 		transparent);
 }
-/* Twin diamond studs -- .login-hero-cap/-left/-right's (login.rcss) own exact values, same
-   reasoning as the joint above. severity_error only, replacing the joint+accent above (see the
-   .rml's own comment). */
+/* Twin diamond studs -- .login-hero-cap/-left/-right's (login.rcss) own exact values.
+   severity_error only, replacing the joint+accent above. */
 .gcd-header-cap {
 	position: absolute;
 	top: 50%;
@@ -179,8 +167,6 @@
 }
 .gcd-header-cap-left { left: 8dp; }
 .gcd-header-cap-right { right: 8dp; }
-/* font-size now matches .modern-header-title's (base.rcss) own 13dp exactly -- was scaled to 11dp
-   for the shorter first-attempt rail, no longer needed now that the rail is full-size. */
 .gcd-header-title {
 	color: token(text-warm);
 	font-family: "token(font-title)";
@@ -208,17 +194,13 @@
 		inset 0 -1dp 0 #080201,
 		0 2dp 5dp rgba(0, 0, 0, 140);
 }
-/* Distinct brighter gold vs the plain rail's own token(text-warm)/#d6ad45 title -- matches the
-   reference's own .hero-banner__title, a color used only for this hero-banner look, not shared
-   with the plain header. No existing token matches it exactly, so hardcoded, same as this block's
-   other hero-banner-specific colors above. */
+/* Distinct brighter gold vs the plain rail's own token(text-warm)/#d6ad45 title -- a color used
+   only for this hero-banner look. No existing token matches it exactly, so hardcoded. */
 .gcd-header-rail.error .gcd-header-title { color: #e1b94e; }
 
 /* Row holding the item3D anchor + text column -- was .gcd-body's own direct row layout until the
-   header banner above needed to sit outside it (see that rule's own comment). width:100% so it
-   spans .gcd-body's full inset width same as before (the row used to BE .gcd-body, which already
-   had that width implicitly); flex:1 1 auto claims whatever height the (possibly-hidden) banner
-   above doesn't. */
+   header banner above needed to sit outside it. width:100% so it spans .gcd-body's full inset
+   width; flex:1 1 auto claims whatever height the (possibly-hidden) banner above doesn't. */
 .gcd-content-row {
 	display: flex;
 	flex-direction: row;
@@ -228,24 +210,19 @@
 	flex: 1 1 auto;
 }
 /* Holds lines/input-row/progress-track -- everything .gcd-content-row used to flex-center
-   directly before #gcd_item3d_anchor needed to sit beside it instead of above/below it (see that
-   element's own comment below and the .rml's). Fills .gcd-content-row's full height explicitly
-   (rather than relying on align-items, which wouldn't stretch under align-items:center) so its
-   own overflow:auto has a real bound to scroll within once content (mainly `lines`) grows taller
-   than the panel -- see the scrollbar rules below.
+   directly before #gcd_item3d_anchor needed to sit beside it. Fills .gcd-content-row's full
+   height explicitly (rather than relying on align-items, which wouldn't stretch under
+   align-items:center) so its own overflow:auto has a real bound to scroll within.
 
-   overflow is `overflow-x, overflow-y` (CSS shorthand order) -- `hidden auto`, NOT `auto hidden`,
-   is deliberate: horizontal never needs to scroll (`.gcd-line` wraps within a fixed width), and
+   overflow is `overflow-x, overflow-y` (CSS shorthand order) -- `hidden auto`, NOT `auto hidden`:
    this engine only ever instantiates a scrollbarvertical element when overflow-y is Auto/Scroll,
-   never Hidden (confirmed against RmlUi/Source/Core/Layout/ContainerBox.cpp) -- getting this
-   order backwards silently means no scrollbar is ever created, regardless of text length.
+   never Hidden (Layout/ContainerBox.cpp) -- getting this order backwards silently means no
+   scrollbar is ever created, regardless of text length.
 
    pointer-events: auto is required here too -- base.rcss's `body { pointer-events: none; }`
-   inherits down to every descendant that doesn't explicitly opt back in (same reason `.btn`/
-   `.checkbox-row` each set their own `pointer-events: auto`), and the scrollbar's generated
-   slidertrack/sliderbar are real DOM children of THIS element, so they inherit whatever this
-   element's own computed value is -- without this, the whole scrollbar (track clicks, thumb drag)
-   silently can't receive any mouse events at all. */
+   inherits down to every descendant that doesn't explicitly opt back in, and the scrollbar's
+   generated slidertrack/sliderbar are real DOM children of THIS element, so they inherit whatever
+   this element's own computed value is -- without this, the scrollbar can't receive mouse events. */
 .gcd-text-col {
 	display: flex;
 	flex-direction: column;
@@ -256,11 +233,9 @@
 	overflow: hidden auto;
 	pointer-events: auto;
 }
-/* Minimal flat-color scrollbar (no decorator images, matching this file's own progress-bar/keypad
-   styling) -- .gcd-text-col is the first scrollable element in this theme, so there's no existing
-   scrollbar styling to reuse; RmlUi generates real child elements for these (scrollbarvertical/
-   slidertrack/sliderbar), not pseudo-elements. Arrow buttons collapsed to 0 size -- drag-only,
-   simplest usable affordance for a narrow well. */
+/* Minimal flat-color scrollbar -- RmlUi generates real child elements for these
+   (scrollbarvertical/slidertrack/sliderbar), not pseudo-elements. Arrow buttons collapsed to 0
+   size -- drag-only, simplest usable affordance for a narrow well. */
 .gcd-text-col scrollbarvertical {
 	width: 6dp;
 	margin: 0;
@@ -269,7 +244,7 @@
 	background-color: token(metal-rail-dark);
 }
 /* Steel gray, matching .gcd-header-rail's own metal-rail palette rather than the gold accent used
-   elsewhere in this dialog (progress-bar fill, etc.) -- ties the scrollbar to the header hardware. */
+   elsewhere in this dialog -- ties the scrollbar to the header hardware. */
 .gcd-text-col scrollbarvertical sliderbar {
 	background-color: token(metal-edge);
 }
@@ -285,9 +260,8 @@
 .gcd-text-col scrollbarhorizontal {
 	height: 0;
 }
-/* font-size/line-height explicit and smaller than #panel's own 12dp default -- reference's
-   .confirm-dialog__message is deliberately subtler/smaller than the header title (10px vs 13px),
-   this previously just inherited the panel default instead. */
+/* font-size/line-height explicit and smaller than #panel's own 12dp default -- deliberately
+   subtler than the header title. */
 .gcd-line {
 	display: block;
 	width: 100%;
@@ -302,13 +276,11 @@
 
 /* Invisible position reference for the native 3D item-preview render pass
    (GenericConfirmDialog.cpp's Render3D()); fixed reference-space size matching
-   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40, CommonMessageBox.h). Renders
-   nothing itself.
+   C3DItemCommonMsgBox's own MSGBOX_3DITEM_WIDTH/HEIGHT (40x40). Renders nothing itself.
 
    position: static overrides base.rcss's `.layout-anchor { position: absolute; ... }` -- that
-   class assumes its own explicit top/left elsewhere (main_frame.rcss's #item_hotkey_anchor, a
-   fixed legacy coordinate), which this anchor doesn't have: it's meant to flow as an ordinary
-   flex child of .gcd-body itself (a row, sibling of .gcd-text-col), not be pulled out of it. */
+   class assumes its own explicit top/left elsewhere, which this anchor doesn't have: it's meant
+   to flow as an ordinary flex child of .gcd-body (a row, sibling of .gcd-text-col). */
 .gcd-item3d-anchor {
 	position: static;
 	width: 40dp;
@@ -316,10 +288,49 @@
 	flex-shrink: 0;
 	margin-right: 8dp;
 }
-/* Same display/.hidden cascade-tie fix as .gcd-header-rail above -- this anchor is now conditionally
-   hidden (data-class-hidden="!has_item3d") so .gcd-text-col alone fills the row when there's no
-   item3D, instead of always reserving a 40dp-wide empty slot. */
+/* Cascade-tie fix: this anchor is conditionally hidden (data-class-hidden="!has_item3d") so
+   .gcd-text-col alone fills the row when there's no item3D, instead of always reserving a
+   40dp-wide empty slot. */
 .gcd-item3d-anchor.hidden { display: none; }
+
+/* Optional 2D portrait (GenericDialogConfig::Portrait2D), Overlay layout (the default) -- a
+   static flex child INSIDE .gcd-text-col (icon-top/text-below) rather than a sibling like
+   .gcd-item3d-anchor (icon-left/text-right, that's the Beside layout below). Same 100x93dp
+   sizing as legacy's own copy of this rule -- a plain native asset, not theme-skinned art, so
+   it's identical in both themes. */
+.gcd-portrait2d {
+	position: relative;
+	width: 100dp;
+	height: 93dp;
+	flex-shrink: 0;
+	margin-bottom: 4dp;
+	decorator: image(portrait2d-image);
+}
+/* Same cascade-tie fix as .gcd-item3d-anchor above. */
+.gcd-portrait2d.hidden { display: none; }
+/* Beside layout -- same sizing as legacy's own copy of this rule. */
+.gcd-portrait2d-beside {
+	position: static;
+	width: 60dp;
+	height: 56dp;
+	flex-shrink: 0;
+	margin-right: 8dp;
+	margin-bottom: 0;
+	decorator: image(portrait2d-image);
+}
+/* Overlaid directly on the sprite (native draws this ON TOP of the art, not below it) -- matches
+   native's own bold yellow; font-effect:shadow keeps it legible over the sprite's bright areas. */
+.gcd-portrait2d-text {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 2dp;
+	text-align: center;
+	font-weight: bold;
+	font-size: 9dp;
+	color: #ffff00;
+	font-effect: shadow(0dp 1dp #000000);
+}
 
 /* Optional text-entry field -- see the .rml's own comment for the NumericKeypad-vs-Text split.
    `.btn.gcd-keypad-btn`/`.gcd-keypad-delete` override `.btn`'s own `position: absolute` back to
@@ -330,10 +341,7 @@
 	align-items: center;
 	margin-top: 4dp;
 }
-/* Same display/.hidden cascade-tie fix as .gcd-header-rail above -- without this, `data-class-hidden`
-   toggling "hidden" on this row has no visible effect since `display: flex` above always wins the
-   tie against base.rcss's earlier-declared `.hidden { display: none; }`. */
-.gcd-input-row.hidden { display: none; }
+.gcd-input-row.hidden { display: none; } /* same cascade-tie fix as .gcd-header-rail above */
 .gcd-keypad-display {
 	color: token(text-warm);
 	font-weight: bold;
@@ -356,16 +364,15 @@
 	font-size: 9dp;
 }
 /* Position reference only, same idea as .gcd-item3d-anchor -- the native g_pSingleTextInputBox
-   widget draws on top of this natively, nothing renders through RmlUi here for Mode::Text.
-   position: static for the same reason .gcd-item3d-anchor needs it -- see that rule's comment. */
+   widget draws on top of this natively, nothing renders through RmlUi here for Mode::Text. */
 .gcd-input-anchor {
 	position: static;
 	width: 150dp;
 	height: 18dp;
 }
 
-/* Optional progress bar (CProgressMsgBox/CCursedTempleProgressMsgBox) -- same
-   `x_fraction * 100 + '%'` fill technique main_frame.rml's own HP/MP/AG/SD/EXP gauges prove. */
+/* Optional progress bar -- same `x_fraction * 100 + '%'` fill technique main_frame.rml's own
+   HP/MP/AG/SD/EXP gauges use. */
 .gcd-progress-track {
 	width: 150dp;
 	height: 10dp;
@@ -379,11 +386,8 @@
 	background-color: token(accent-gold);
 }
 
-/* Divider between the message well and the button row -- base.rcss's .modern-footer, repositioned
-   to sit just above the buttons instead of flush with the panel's bottom edge. top values below
-   (here and on the buttons) are +18dp over their original figures, matching #panel's own +18dp
-   height growth -- both are `top`-anchored (not `bottom`), so without this shift they'd have
-   stayed put while the panel's bottom edge moved 18dp further away, opening a gap. */
+/* Divider between the message well and the button row -- base.rcss's .modern-footer,
+   repositioned to sit just above the buttons instead of flush with the panel's bottom edge. */
 .gcd-footer {
 	left: 8dp;
 	right: 8dp;
@@ -400,3 +404,11 @@
 .gcd-btn-primary   { left: 32dp; }
 .gcd-btn-primary.solo { left: 85dp; }
 .gcd-btn-secondary { left: 138dp; }
+/* #panel.tall keeps the same 6dp footer-to-button gap and 15dp button-to-bottom margin the
+   default 178dp panel already has (132 -> 204, 138 -> 210, 210 + 25 + 15 = 250). */
+#panel.tall .gcd-footer {
+	top: 204dp;
+}
+#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary {
+	top: 210dp;
+}

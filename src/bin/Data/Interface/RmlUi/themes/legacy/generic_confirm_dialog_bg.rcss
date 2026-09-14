@@ -2,17 +2,12 @@
    for the full mechanism/rationale. Does NOT link base.rcss -- no *_bg.rml in this theme does.
 
    CCommonMessageBox's own native sprite composite (back-fill, stretched, painted first so it
-   shows through the caps' transparent regions; then top cap; then middle fill; then bottom cap),
-   relocated wholesale from generic_confirm_dialog.rcss -- see that file's own history comment.
-   Source pixel dimensions/paths unchanged from the original (verified against each file's own
-   header at the time this was still in the foreground document -- OZT's TGA-style header at byte
-   offset 16/18/20 for width/height/bit-depth; OZJ's wrapped JPEG SOF0 marker for width/height).
-   `newui_msgbox_top/middle/bottom.OZT` are exactly 230x67/230x15/230x50 at 32-bit, matching their
-   own native draw constants (MSGBOX_TOP_HEIGHT/MIDDLE_HEIGHT/BOTTOM_HEIGHT) exactly.
-   `newui_msgbox_back.OZJ` is actually 225x512 -- much taller than the panel ever needs, so it's
-   authored to be CROPPED (top-left region, no stretch) rather than stretched-to-fit like the
-   other three; the rect below (222x150) matches the back layer's own box size instead of the
-   source's own full extent, to avoid vertically squashing a texture 3x taller than needed. */
+   shows through the caps' transparent regions; then top cap; then middle fill; then bottom cap).
+   `newui_msgbox_top/middle/bottom.OZT` are exactly 230x67/230x15/230x50, matching their own
+   native draw constants exactly. `newui_msgbox_back.OZJ` is actually 225x512 -- much taller than
+   the panel ever needs, so it's authored to be CROPPED (top-left region, no stretch) rather than
+   stretched-to-fit like the other three; the rect below (222x150) matches the back layer's own
+   box size instead of the source's own full extent. */
 @spritesheet msgbox-top-sheet
 {
 	src: "../../../newui_msgbox_top.tga";
@@ -40,8 +35,7 @@
    two align exactly.
 
    body's own width/height must be set explicitly here -- normally comes from base.rcss (not linked
-   in bg documents), and #panel's left:50%/top:50% has nothing to resolve against otherwise
-   (collapses to the upper-left corner instead of centering). */
+   in bg documents), and #panel's left:50%/top:50% has nothing to resolve against otherwise. */
 
 body {
 	width: 100%;
@@ -56,6 +50,13 @@ body {
 	width: 230dp;
 	height: 160dp;
 	pointer-events: none;
+}
+/* Mirrors the fg document's own #panel.tall (GenericDialogConfig::tallPanel) -- kept in sync via
+   GenericConfirmDialog.cpp's Show()/ShowNext() (this document has no data model of its own to bind
+   a class through). .gcd-bg-sprite-middle's own top/bottom are fixed dp insets, not a percentage,
+   so it auto-stretches to fill the extra height with no change needed. */
+#panel.tall {
+	height: 240dp;
 }
 
 .gcd-bg-sprite-back {
@@ -76,8 +77,8 @@ body {
 	pointer-events: none;
 	decorator: image(msgbox-top-image);
 }
-/* Stretches to fill the panel's remaining 160-67-50=43dp -- see generic_confirm_dialog.rcss's
-   own history comment for why this is a single stretched fill, not native's tiled repeat. */
+/* Stretches to fill the panel's remaining space -- a single stretched fill, not native's tiled
+   repeat. */
 .gcd-bg-sprite-middle {
 	position: absolute;
 	left: 0;

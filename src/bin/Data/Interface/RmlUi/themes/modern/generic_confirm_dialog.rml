@@ -6,34 +6,28 @@
 </head>
 <body>
 	<!-- Modern theme's own copy of the generic confirm dialog -- per-theme file since the
-	     forged-dialog shell structure differs by theme, same reasoning as
-	     remember_password_prompt.rml's own modern fork. Keep ids/data-model/event-callback names in
-	     sync with ../../generic_confirm_dialog.rml.
+	     forged-dialog shell structure differs by theme. Keep ids/data-model/event-callback names
+	     in sync with ../../generic_confirm_dialog.rml.
 
 	     #panel's own paint (background/border/box-shadow), the shell-edge/groove, and the well's
 	     recessed fill all moved to generic_confirm_dialog_bg.rml -- a background-context document
-	     rendered BEFORE the legacy 3D pass that draws item3D each frame (RenderBackgroundLayer(),
-	     see that file's own comment), so item3D shows through this now-paint-less #panel instead of
-	     being painted over by it (RmlUi's main context, which this document is part of, always
-	     composites LAST in the frame). #panel here is layout-only: same width/height/centering as
-	     the bg document's own copy, so the two align pixel-for-pixel with no position-sync code
-	     needed (this dialog centers via plain CSS, not a per-frame C++-computed transform). -->
-	<div id="panel" class="center-both" data-model="generic_confirm_dialog">
+	     rendered BEFORE the 3D pass that draws item3D each frame, so item3D shows through this
+	     now-paint-less #panel instead of being painted over by it. -->
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel">
 		<!-- data-class-has-title: with a title shown, .gcd-body reserves the header's own space
-		     (38dp height + 4dp gap) as padding-top instead of stacking it as a flex sibling of
-		     .gcd-content-row -- see .rcss's own comment for why (keeps content-row's own centering
-		     scoped to the space actually left below the header, not the whole box). -->
+		     as padding-top instead of stacking it as a flex sibling of .gcd-content-row -- see
+		     .rcss's own comment for why (keeps content-row's own centering scoped to the space
+		     actually left below the header, not the whole box). -->
 		<div class="gcd-body" data-class-has-title="has_title">
-			<!-- See ../../generic_confirm_dialog.rml's own comment for why this banner collapses to
-			     nothing when untitled, and why .gcd-content-row below is nested one level down --
-			     keep both fork copies' structure in sync. -->
+			<!-- See ../../generic_confirm_dialog.rml's own comment for why this banner collapses
+			     to nothing when untitled, and why .gcd-content-row below is nested one level down
+			     -- keep both fork copies' structure in sync. -->
 			<div class="gcd-header-rail" data-class-hidden="!has_title" data-class-warning="severity_warning"
 			     data-class-error="severity_error">
-				<!-- Rivet + accent line (plain/warning look, base.rcss's .modern-joint/.modern-header-accent
-				     at their own size) vs twin side studs (error look, login.rcss's .login-hero-cap at its
-				     own size) -- mutually exclusive, same "rail has one rivet, hero-banner has two" split
-				     .modern-header-rail's own comment documents. Literal sibling divs, not ::before/::after --
-				     this engine doesn't support generated content (see every other stud/rivet in this theme). -->
+				<!-- Rivet + accent line (plain/warning look, base.rcss's .modern-joint/
+				     .modern-header-accent) vs twin side studs (error look, login.rcss's
+				     .login-hero-cap) -- mutually exclusive. Literal sibling divs, not
+				     ::before/::after -- this engine doesn't support generated content. -->
 				<div class="gcd-header-joint" data-class-hidden="severity_error"></div>
 				<div class="gcd-header-accent" data-class-hidden="severity_error"></div>
 				<div class="gcd-header-cap gcd-header-cap-left" data-class-hidden="!severity_error"></div>
@@ -41,11 +35,20 @@
 				<span class="gcd-header-title">{{title}}</span>
 			</div>
 			<div class="gcd-content-row">
-				<!-- See ../../generic_confirm_dialog.rml's own comment for why gcd_item3d_anchor is a flex
-				     sibling of .gcd-text-col (icon-left/text-right, matching native C3DItemCommonMsgBox),
-				     not a member of it -- keep both fork copies' structure in sync. -->
+				<!-- See ../../generic_confirm_dialog.rml's own comment for why gcd_item3d_anchor
+				     is a flex sibling of .gcd-text-col (icon-left/text-right), not a member of it
+				     -- keep both fork copies' structure in sync. -->
 				<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+				<!-- See ../../generic_confirm_dialog.rml's own comment for Portrait2D's Beside
+				     layout -- keep both fork copies' structure in sync. -->
+				<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
 				<div class="gcd-text-col">
+					<!-- See ../../generic_confirm_dialog.rml's own comment for what this
+					     reproduces and why it nests inside .gcd-text-col instead of beside it
+					     like #gcd_item3d_anchor -- keep both fork copies' structure in sync. -->
+					<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
+						<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
+					</div>
 					<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
 					<div class="gcd-input-row" data-class-hidden="!has_input">
 						<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>

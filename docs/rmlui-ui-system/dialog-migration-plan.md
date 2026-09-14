@@ -393,7 +393,21 @@ before starting real work here; don't trust the exact class list below as final.
   `CSealRegisterFailLayout`, `CSealRegisterOtherLayout`, `CSealRegisterOtherCampLayout`,
   `CCrownDefenseRemoveLayout`, `CCrownDefenseCreateLayout`, `CCursedTempleHolicItemGetLayout`,
   `CCursedTempleHolicItemSaveLayout`.
-- **Duel dialogs** (bespoke, likely countdown rendering): `CDuelMsgBoxLayout`, `CDuelResultMsgBoxLayout`.
+- [x] **Duel dialogs** — `CDuelMsgBoxLayout` (invite, OkCancel) + `CDuelResultMsgBoxLayout` (result,
+  Ok) — `Network/Server/WSclient.cpp`'s `ReceiveDuelRequest`/`ReceiveDuelResult`. Not actually
+  countdown rendering (that guess was wrong) — both classes render the exact same fixed native
+  sprite (`newui_DuelWindow.tga`, 148x138) with a single bold name-line drawn directly on top of it,
+  then 1-3 plain lines below/overlapping its bottom edge. This is a shape only these two classes use
+  anywhere in the codebase (a flat 2D image with text overlaid, unlike `item3D`'s live-rendered 3D
+  icon), so `GenericDialogConfig` gained one new optional field for it, `portrait2D` (named
+  generically, not `duelPortrait` -- this primitive is meant to be reusable, not duel-specific, even
+  though Duel is the only real consumer so far; a fixed 100x93dp-ish sprite + one bold overlaid
+  caption in its default `Overlay` layout, or icon-left/text-right like `item3D` in its `Beside`
+  layout, rendered as the first child of the text column, above `lines`) — worth adding since it
+  matches a genuinely distinct native rendering shape for exactly two real consumers today,
+  following the same "one field per recurring native shape" pattern
+  as `title`/`input`/`progress`/`item3D`. Both native classes + their `CustomMessageBox.h`/`.cpp`
+  declarations/implementations removed; grep-confirmed zero remaining references.
 
 ## Other native dialog subsystems (out of `CommonMessageBox`/`CustomMessageBox`, tracked here too)
 

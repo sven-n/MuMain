@@ -9115,7 +9115,21 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
         return;
     }
 
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDuelMsgBoxLayout));
+    // Was CDuelMsgBoxLayout (CustomMessageBox.h) -- ported to CGenericConfirmDialog's own
+    // portrait2D field (2026-09-14), reproducing native's fixed IMAGE_MSGBOX_DUEL_BACK sprite with
+    // the enemy's bracketed name overlaid on it, same as RenderTexts()'s own L"[%ls]" format.
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.portrait2D = mu::ui::window::GenericDialogConfig::Portrait2D{
+        std::wstring(L"[") + g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY) + L"]" };
+    cfg.tallPanel = true; // portrait + 2 lines doesn't comfortably fit the default panel height
+    cfg.lines = {
+        { I18N::Game::YouAreChallengedToADuel, false },
+        { I18N::Game::WouldYouLikeToAcceptTheChallenge, false },
+    };
+    cfg.onPrimary = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, TRUE); };
+    cfg.onSecondary = [] { g_DuelMgr.SendDuelRequestAnswer(DUEL_ENEMY, FALSE); };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
@@ -9328,16 +9342,32 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     mu_swprintf(szMessage, I18N::Game::DuelFinishedYouWillBeWarpedBackToTheViallageInDSeconds, 10);
     g_pSystemLogBox->AddText(szMessage, mu::ui::window::TYPE_SYSTEM_MESSAGE);
 
-    mu::ui::window::CDuelResultMsgBox* lpMsgBox = nullptr;
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDuelResultMsgBoxLayout), &lpMsgBox);
-    if (lpMsgBox)
-    {
-        wchar_t winnerName[MAX_USERNAME_SIZE + 1]{};
-        wchar_t loserName[MAX_USERNAME_SIZE + 1]{};
-        CMultiLanguage::ConvertFromUtf8(winnerName, Data->szWinner, MAX_USERNAME_SIZE);
-        CMultiLanguage::ConvertFromUtf8(loserName, Data->szLoser, MAX_USERNAME_SIZE);
-        lpMsgBox->SetIDs(winnerName, loserName);
-    }
+    // Was CDuelResultMsgBoxLayout (CustomMessageBox.h) -- ported to CGenericConfirmDialog's own
+    // portrait2D field (2026-09-14), same sprite as the invite dialog above but with "Duel
+    // Finished" as the overlaid bold line (native's own RenderTexts() draws that in the same slot
+    // the invite box uses for the enemy's name) and the winner/loser lines rendered as ordinary
+    // body lines below it. onPrimary is left unset -- native's own OkBtnDown has no live logic
+    // beyond closing the box (its one real statement, SendRequestDuelOk(...), is commented out).
+    wchar_t winnerName[MAX_USERNAME_SIZE + 1]{};
+    wchar_t loserName[MAX_USERNAME_SIZE + 1]{};
+    CMultiLanguage::ConvertFromUtf8(winnerName, Data->szWinner, MAX_USERNAME_SIZE);
+    CMultiLanguage::ConvertFromUtf8(loserName, Data->szLoser, MAX_USERNAME_SIZE);
+
+    wchar_t strLine1[256];
+    mu_swprintf(strLine1, I18N::Game::SHasJustWon, winnerName);
+    wchar_t strLine2[256];
+    mu_swprintf(strLine2, I18N::Game::TheDuelWithS, loserName);
+
+    mu::ui::window::GenericDialogConfig cfg;
+    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::Ok;
+    cfg.portrait2D = mu::ui::window::GenericDialogConfig::Portrait2D{ I18N::Game::DuelFinished };
+    cfg.tallPanel = true; // portrait + 3 lines doesn't comfortably fit the default panel height
+    cfg.lines = {
+        { strLine1, false },
+        { strLine2, false },
+        { I18N::Game::Lookup(2697), false },
+    };
+    mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
     PlayBuffer(SOUND_OPEN_DUELWINDOW);
 }
 
