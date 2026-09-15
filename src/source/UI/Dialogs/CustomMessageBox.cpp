@@ -350,713 +350,6 @@ void mu::ui::window::CUseFruitCheckMsgBox::RenderButtons()
 
 //////////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CGemIntegrationMsgBox::CGemIntegrationMsgBox()
-{
-};
-
-mu::ui::window::CGemIntegrationMsgBox::~CGemIntegrationMsgBox()
-{
-    Release();
-};
-
-bool mu::ui::window::CGemIntegrationMsgBox::Create(float fPriority)
-{
-    int x, y, width, height;
-
-    SetAddCallbackFunc();
-
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-
-    AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-
-    AddMsg(I18N::Game::YouCanCombineOrDissolve);
-    AddMsg(I18N::Game::VariousJewels);
-
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        SAFE_DELETE(*vi);
-    }
-    m_MsgDataList.clear();
-}
-
-bool mu::ui::window::CGemIntegrationMsgBox::Update()
-{
-    m_BtnUnity.Update();
-    m_BtnDisjoint.Update();
-    m_BtnCancel.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CGemIntegrationMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
-{
-    auto* pMsg = new MSGBOX_TEXTDATA;
-    pMsg->strMsg = strMsg;
-    pMsg->dwColor = dwColor;
-    pMsg->byFontType = byFontType;
-    m_MsgDataList.push_back(pMsg);
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CGemIntegrationMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnUnity.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnDisjoint.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_DISJOINT);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnCancel.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::UnityBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetMode(COMGEM::ATTACH);
-
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationUnityMsgBoxLayout));
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetMode(COMGEM::DETACH);
-
-    if (!COMGEM::FindWantedList())
-    {
-        g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
-        return CALLBACK_BREAK;
-    }
-
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(CGemIntegrationDisjointMsgBoxLayout));
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::Exit();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalf = (MSGBOX_BTN_EMPTY_WIDTH) / 2.f;
-
-    x = GetPos().x + msgboxhalfwidth - btnhalf;
-    y = GetPos().y + BTN_TOP_BLANK;
-    width = MSGBOX_BTN_EMPTY_WIDTH;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    m_BtnUnity.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-
-    m_BtnUnity.SetText(I18N::Game::JewelCombination);
-
-    x = GetPos().x + msgboxhalfwidth - btnhalf;
-    y += BTN_GAP;
-    m_BtnDisjoint.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-
-    m_BtnDisjoint.SetText(I18N::Game::DismantleJewel);
-
-    btnhalf = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalf;
-    y += BTN_GAP;
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-
-    m_BtnCancel.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < MIDDLE_COUNT; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::RenderTexts()
-{
-    
-    
-
-    float x, y;
-
-    x = GetPos().x; y = GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2);
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CGemIntegrationMsgBox::RenderButtons()
-{
-    m_BtnUnity.Render();
-    m_BtnDisjoint.Render();
-    m_BtnCancel.Render();
-}
-
-mu::ui::window::CGemIntegrationUnityMsgBox::CGemIntegrationUnityMsgBox()
-{
-}
-
-mu::ui::window::CGemIntegrationUnityMsgBox::~CGemIntegrationUnityMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CGemIntegrationUnityMsgBox::Create(float fPriority)
-{
-    int x, y, width, height;
-
-    SetAddCallbackFunc();
-
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-
-    AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-    SetText();
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::SetText(void)
-{
-    m_MsgDataList.clear();
-    if (COMGEM::m_cGemType == COMGEM::NOGEM)
-    {
-        AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        AddMsg(I18N::Game::SelectAJewelToCombine);
-    }
-    else
-    {
-        AddMsg(I18N::Game::JewelCombination, RGBA(255, 128, 0, 255), MSGBOX_FONT_BOLD);
-        AddMsg(I18N::Game::ChooseANumberButtonToCombine);
-    }
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        SAFE_DELETE(*vi);
-    }
-    m_MsgDataList.clear();
-}
-
-bool mu::ui::window::CGemIntegrationUnityMsgBox::Update()
-{
-    int i;
-    switch (COMGEM::m_cGemType)
-    {
-    case COMGEM::eNOGEM:
-        for (i = 0; i < COMGEM::eGEMTYPE_END; i++)
-            m_cJewelButton[i].Update();
-        break;
-    default:
-        for (i = 0; i < COMGEM::eCOMTYPE_END; i++)
-            m_cMixButton[i].Update();
-        break;
-    }
-    m_BtnCancel.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CGemIntegrationUnityMsgBox::Render()
-{
-    EnableAlphaTest();
-
-    RenderFrame();
-
-    RenderTexts();
-
-    RenderButtons();
-
-    DisableAlphaBlend();
-    return true;
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::AddMsg(const type_string& strMsg, DWORD dwColor, BYTE byFontType)
-{
-    auto* pMsg = new MSGBOX_TEXTDATA;
-    pMsg->strMsg = strMsg;
-    pMsg->dwColor = dwColor;
-    pMsg->byFontType = byFontType;
-    m_MsgDataList.push_back(pMsg);
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::BlessingBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_BLESSING);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::SoulBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_SOUL);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TEN);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_TWENTY);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_UNITY_THIRTY);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-    AddCallbackFunc(mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_GEM_SELECTMIX);
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::ResetWndSize(int _nType)
-{
-    int	height;
-
-    if (_nType)
-    {
-        m_nMiddleCount = 7;
-    }
-    else
-    {
-        m_nMiddleCount = MIDDLE_COUNT;
-    }
-
-    height = MSGBOX_TOP_HEIGHT + (m_nMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-    SetSize(GetSize().cx, height);
-    m_BtnCancel.SetPos(m_BtnCancel.GetPosX(), GetPos().y + GetSize().cy - 50);
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-
-    int	  nNum = 0;
-    int	  nBtnIndex[COMGEM::eGEMTYPE_END] = { 1806, 1807, 3312, 3313, 3314, 2081, 3315, 3316, 3317, 3318 };
-    wchar_t szTemp[256] = { 0, };
-    CMessageBoxButton	cButton;
-    x = GetPos().x;
-    y = GetPos().y + 50;
-    for (int i = 0; i < (int)COMGEM::eGEMTYPE_END; i++)
-    {
-        cButton.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x + 20.0f + (i % 2) * (20 + width), y + (height + 5.0f) * int(i / 2), width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-        cButton.SetText(I18N::Game::Lookup(nBtnIndex[i]));
-        m_cJewelButton.push_back(cButton);
-    }
-
-    for (int k = 0; k < (int)COMGEM::eCOMTYPE_END; k++)
-    {
-        cButton.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x + 50.0f, y + (height + 10.0f) * k, MSGBOX_BTN_EMPTY_WIDTH + 20, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-        // 1808 "%d개 조합(%d젠 소요)"
-        mu_swprintf(szTemp, I18N::Game::CombineDDZenIsRequired, 10 * (k + 1), 500000 * (k + 1));
-        cButton.SetText(szTemp);
-        m_cMixButton.push_back(cButton);
-    }
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y += 15.0f + (height + 10.0f) * (int)COMGEM::eCOMTYPE_END;
-    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close388);
-
-    ResetWndSize(0);
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-
-    for (int i = 0; i < m_nMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::RenderTexts()
-{
-    
-    
-
-    float x, y;
-
-    x = GetPos().x; y = GetPos().y + (MSGBOX_TEXT_TOP_BLANK / 2);
-    auto vi = m_MsgDataList.begin();
-    for (; vi != m_MsgDataList.end(); vi++)
-    {
-        g_pRenderText->SetTextColor((*vi)->dwColor);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        switch ((*vi)->byFontType)
-        {
-        case MSGBOX_FONT_NORMAL:
-            g_pRenderText->SetFont(g_hFont);
-            break;
-        case MSGBOX_FONT_BOLD:
-            g_pRenderText->SetFont(g_hFontBold);
-            break;
-        }
-
-        const SIZE TextSize = g_pRenderText->MeasureText(
-            (*vi)->strMsg.c_str(), static_cast<int>((*vi)->strMsg.size()));
-        const size_t TextExtentWidth = static_cast<size_t>(TextSize.cx);
-        const size_t TextExtentHeight = static_cast<size_t>(TextSize.cy);
-
-        x = GetPos().x + (GetSize().cx / 2) - (TextExtentWidth / 2);
-        g_pRenderText->RenderText((int)x, (int)y, (*vi)->strMsg.c_str());
-        y += (TextExtentHeight + 4);
-    }
-}
-
-void mu::ui::window::CGemIntegrationUnityMsgBox::RenderButtons()
-{
-    int i;
-    switch (COMGEM::m_cGemType)
-    {
-    case COMGEM::eNOGEM:
-        for (i = 0; i < COMGEM::eGEMTYPE_END; i++)
-            m_cJewelButton[i].Render();
-        break;
-    default:
-        for (i = 0; i < COMGEM::eCOMTYPE_END; i++)
-            m_cMixButton[i].Render();
-        break;
-    }
-    m_BtnCancel.Render();
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        int i;
-        switch (COMGEM::m_cGemType)
-        {
-        case COMGEM::eNOGEM:
-            for (i = 0; i < COMGEM::eGEMTYPE_END; i++)
-            {
-                if (!pMsgBox->m_cJewelButton[i].IsMouseIn())	continue;
-                COMGEM::SetGem(i * 2);
-                pMsgBox->ResetWndSize(1);
-                //	SetText();
-                break;
-            }
-            break;
-        default:
-            for (i = 0; i < COMGEM::eCOMTYPE_END; i++)
-            {
-                if (!pMsgBox->m_cMixButton[i].IsMouseIn())	continue;
-                COMGEM::m_cComType = COMGEM::GetJewelRequireCount(i);
-                pMsgBox->ResetWndSize(0);
-                g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_GEM_SELECTMIX);
-                return CALLBACK_BREAK;
-            }
-            break;
-        }
-
-        if (pMsgBox->m_BtnCancel.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetGem(COMGEM::CELE);
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetGem(COMGEM::SOUL);
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::SelectMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    if (!COMGEM::CheckInv())
-    {
-        return CALLBACK_BREAK;
-    }
-
-    {
-        wchar_t strText[256] = { 0, };
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
-        mu_swprintf(strText, I18N::Game::Lookup(COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-        cfg.lines.push_back({ strText, true });
-        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        cfg.lines.push_back({ strText, true });
-        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-        cfg.onSecondary = []
-        {
-            COMGEM::GetBack();
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
-        };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-    }
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TenBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetComType(COMGEM::FIRST);
-
-    if (COMGEM::CheckInv())
-    {
-        wchar_t strText[256] = { 0, };
-        if (COMGEM::m_cGemType == COMGEM::CELE)
-        {
-            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-        }
-        else if (COMGEM::m_cGemType == COMGEM::SOUL)
-        {
-            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-        }
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
-        cfg.lines.push_back({ strText, true });
-        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        cfg.lines.push_back({ strText, true });
-        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-        cfg.onSecondary = []
-        {
-            COMGEM::GetBack();
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
-        };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-
-        PlayBuffer(SOUND_CLICK01);
-        g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-    }
-    else
-    {
-        auto* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
-        if (pMsgBox)
-        {
-            pMsgBox->m_BtnTen.ClearEventState();
-        }
-        PlayBuffer(SOUND_CLICK01);
-    }
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::TwentyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetComType(COMGEM::SECOND);
-
-    if (COMGEM::CheckInv())
-    {
-        wchar_t strText[256] = { 0, };
-        if (COMGEM::m_cGemType == COMGEM::CELE)
-        {
-            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-        }
-        else if (COMGEM::m_cGemType == COMGEM::SOUL)
-        {
-            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-        }
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
-        cfg.lines.push_back({ strText, true });
-        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        cfg.lines.push_back({ strText, true });
-        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-        cfg.onSecondary = []
-        {
-            COMGEM::GetBack();
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
-        };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-
-        PlayBuffer(SOUND_CLICK01);
-        g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-    }
-    else
-    {
-        auto* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
-        if (pMsgBox)
-        {
-            pMsgBox->m_BtnTwenty.ClearEventState();
-        }
-        PlayBuffer(SOUND_CLICK01);
-    }
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::ThirtyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::SetComType(COMGEM::THIRD);
-
-    if (COMGEM::CheckInv())
-    {
-        wchar_t strText[256] = { 0, };
-        if (COMGEM::m_cGemType == COMGEM::CELE)
-        {
-            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfBless, COMGEM::m_cCount);
-        }
-        else if (COMGEM::m_cGemType == COMGEM::SOUL)
-        {
-            mu_swprintf(strText, I18N::Game::AreYouSureToCombineSXD, I18N::Game::JewelOfSoul, COMGEM::m_cCount);
-        }
-        mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
-        cfg.lines.push_back({ strText, true });
-        mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
-        cfg.lines.push_back({ strText, true });
-        cfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
-        cfg.onSecondary = []
-        {
-            COMGEM::GetBack();
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationUnityMsgBoxLayout));
-        };
-        mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
-
-        PlayBuffer(SOUND_CLICK01);
-        g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-    }
-    else
-    {
-        auto* pMsgBox = dynamic_cast<CGemIntegrationUnityMsgBox*>(pOwner);
-        if (pMsgBox)
-        {
-            pMsgBox->m_BtnThirty.ClearEventState();
-        }
-        PlayBuffer(SOUND_CLICK01);
-    }
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CGemIntegrationUnityMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    COMGEM::Exit();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
 mu::ui::window::CGemIntegrationDisjointMsgBox::CGemIntegrationDisjointMsgBox()
 {
     m_iMiddleFrameCount = 0;
@@ -2369,33 +1662,153 @@ void mu::ui::window::ShowCherryBlossomMenuDialog()
     g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
+// CGemIntegrationMsgBox/CGemIntegrationUnityMsgBox ported as 3 chained free functions -- see
+// WindowCommon.h's own comment on ShowGemIntegrationMenuDialog() for why. COMGEM
+// (GameLogic/Items/CComGem.h) is the shared state; every onClick below reads/writes it exactly
+// like the native handlers it replaces.
+void mu::ui::window::ShowGemIntegrationMenuDialog()
+{
+    GenericMenuConfig cfg;
+    cfg.lines.push_back({ I18N::Game::JewelCombination, true });
+    cfg.lines.push_back({ I18N::Game::YouCanCombineOrDissolve, false });
+    cfg.lines.push_back({ I18N::Game::VariousJewels, false });
+
+    auto exitFn = [] { COMGEM::Exit(); };
+
+    GenericMenuConfig::MenuButton btnUnity;
+    btnUnity.label = I18N::Game::JewelCombination;
+    btnUnity.onClick = []
+    {
+        COMGEM::SetMode(COMGEM::ATTACH);
+        mu::ui::window::ShowGemIntegrationJewelDialog();
+    };
+    cfg.buttons.push_back(std::move(btnUnity));
+
+    GenericMenuConfig::MenuButton btnDisjoint;
+    btnDisjoint.label = I18N::Game::DismantleJewel;
+    btnDisjoint.onClick = []
+    {
+        COMGEM::SetMode(COMGEM::DETACH);
+        if (!COMGEM::FindWantedList())
+        {
+            // Same check native's own DisjointBtnDown makes -- nothing eligible to dismantle.
+            // Native just logs and leaves its dialog open; re-Show()-ing this same config from
+            // inside the click (the same reentrant-queue mechanism ShowTrainerMenuDialog()/
+            // ShowTrainerRecoverDialog() already prove) reproduces that faithfully, since
+            // CGenericMenuDialog buttons always close on click.
+            g_pSystemLogBox->AddText(I18N::Game::CanTBeDismantled, mu::ui::window::TYPE_ERROR_MESSAGE);
+            mu::ui::window::ShowGemIntegrationMenuDialog();
+            return;
+        }
+        // CGemIntegrationDisjointMsgBox stays native -- embedded live inventory list-selection
+        // widget, out of scope for this primitive (see dialog-migration-plan.md).
+        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointMsgBoxLayout));
+    };
+    cfg.buttons.push_back(std::move(btnDisjoint));
+
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
+}
+
+void mu::ui::window::ShowGemIntegrationJewelDialog()
+{
+    GenericMenuConfig cfg;
+    cfg.lines.push_back({ I18N::Game::JewelCombination, true });
+    cfg.lines.push_back({ I18N::Game::SelectAJewelToCombine, false });
+    // 2-column grid instead of `compact` -- some jewel names ("Higher Refining Stone") don't fit
+    // compact's 64dp width even wrapped onto 2 lines; `columns` is a general per-dialog knob (see
+    // its own comment, GenericMenuDialog.h) that sizes buttons to fit N per row and supports
+    // wrapped labels, decoupled from `compact`'s own "small Close/Cancel button" meaning.
+    cfg.columns = 2;
+
+    int nBtnIndex[COMGEM::eGEMTYPE_END] = { 1806, 1807, 3312, 3313, 3314, 2081, 3315, 3316, 3317, 3318 };
+    for (int i = 0; i < (int)COMGEM::eGEMTYPE_END; ++i)
+    {
+        GenericMenuConfig::MenuButton btn;
+        btn.label = I18N::Game::Lookup(nBtnIndex[i]);
+        btn.onClick = [i]
+        {
+            COMGEM::SetGem(i * 2);
+            mu::ui::window::ShowGemIntegrationMixDialog();
+        };
+        cfg.buttons.push_back(std::move(btn));
+    }
+
+    auto exitFn = [] { COMGEM::Exit(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
+}
+
+void mu::ui::window::ShowGemIntegrationMixDialog()
+{
+    GenericMenuConfig cfg;
+    cfg.lines.push_back({ I18N::Game::JewelCombination, true });
+    cfg.lines.push_back({ I18N::Game::ChooseANumberButtonToCombine, false });
+
+    wchar_t szTemp[256] = { 0, };
+    for (int k = 0; k < (int)COMGEM::eCOMTYPE_END; ++k)
+    {
+        mu_swprintf(szTemp, I18N::Game::CombineDDZenIsRequired, 10 * (k + 1), 500000 * (k + 1));
+
+        GenericMenuConfig::MenuButton btn;
+        btn.label = szTemp;
+        btn.onClick = [k]
+        {
+            COMGEM::m_cComType = COMGEM::GetJewelRequireCount(k);
+            if (!COMGEM::CheckInv())
+            {
+                // CheckInv() already logged the error and called COMGEM::GetBack() (resets
+                // m_cGemType to NOGEM) -- reopen the jewel-type grid to match that state, instead
+                // of leaving the player on a mix-amount grid for a jewel type that's no longer
+                // selected (what native's own SelectMixBtnDown literally does).
+                mu::ui::window::ShowGemIntegrationJewelDialog();
+                return;
+            }
+
+            wchar_t strText[256] = { 0, };
+            mu::ui::window::GenericDialogConfig confirmCfg;
+            confirmCfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            mu_swprintf(strText, I18N::Game::Lookup(COMGEM::GetJewelIndex(COMGEM::m_cGemType, 0)), I18N::Game::JewelOfSoul, COMGEM::m_cCount);
+            confirmCfg.lines.push_back({ strText, true });
+            mu_swprintf(strText, I18N::Game::CombinationCostDZen, COMGEM::m_iValue);
+            confirmCfg.lines.push_back({ strText, true });
+            confirmCfg.onPrimary = [] { COMGEM::ProcessCSAction(); COMGEM::Exit(); };
+            confirmCfg.onSecondary = []
+            {
+                COMGEM::GetBack();
+                mu::ui::window::ShowGemIntegrationJewelDialog();
+            };
+            mu::ui::window::g_pGenericConfirmDialog->Show(std::move(confirmCfg));
+        };
+        cfg.buttons.push_back(std::move(btn));
+    }
+
+    auto exitFn = [] { COMGEM::Exit(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
+}
+
 bool mu::ui::window::CUseFruitCheckMsgBoxLayout::SetLayout()
 {
     CUseFruitCheckMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CGemIntegrationMsgBoxLayout::SetLayout()
-{
-    CGemIntegrationMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CGemIntegrationUnityMsgBoxLayout::SetLayout()
-{
-    CGemIntegrationUnityMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -2615,18 +2028,6 @@ bool mu::ui::window::CCursedTempleHolicItemSaveLayout::SetLayout()
     return true;
 }
 
-bool mu::ui::window::CElpisMsgBoxLayout::SetLayout()
-{
-    CElpisMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
 void mu::ui::window::ShowLuckyTradeMenuDialog()
 {
     GenericMenuConfig cfg;
@@ -2729,251 +2130,58 @@ void mu::ui::window::ShowTrainerRecoverDialog()
     g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
-mu::ui::window::CElpisMsgBox::CElpisMsgBox()
+// CElpisMsgBox ported to ShowElpisMenuDialog() (WindowCommon.h), onto CGenericMenuDialog. The
+// "About Refinery"/"About Jewel of Harmony" buttons never changed native's button set, only which
+// info blurb showed above it (m_iMessageType-driven) -- so this port is just the same 4-button
+// config re-Show()n with different `lines`, reusing the exact reentrant-Show()-during-click
+// chaining ShowGemIntegrationJewelDialog()/ShowGemIntegrationMixDialog() already prove. See
+// docs/rmlui-ui-system/dialog-migration-plan.md.
+void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 {
-    m_iMiddleCount = 12;
-    m_iMessageType = 0;
-}
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::Elpis;
 
-mu::ui::window::CElpisMsgBox::~CElpisMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CElpisMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CElpisMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CElpisMsgBox::Update()
-{
-    m_BtnAboutRefinary.Update();
-    m_BtnAboutJewelOfHarmony.Update();
-    m_BtnRefine.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CElpisMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
-    if (pMsgBox)
+    switch (iMessageType)
     {
-        if (pMsgBox->m_BtnAboutRefinary.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnAboutJewelOfHarmony.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnRefine.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_ELPIS_REFINE);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        pMsgBox->SetMessageType(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY);
-    }
-
-    PlayBuffer(SOUND_CLICK01);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CElpisMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        pMsgBox->SetMessageType(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY);
-    }
-
-    PlayBuffer(SOUND_CLICK01);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::RefineBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ELPIS);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CElpisMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CElpisMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CElpisMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CElpisMsgBox::AboutRefinaryBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY);
-    AddCallbackFunc(mu::ui::window::CElpisMsgBox::AboutJewelOfHarmonyBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY);
-    AddCallbackFunc(mu::ui::window::CElpisMsgBox::RefineBtnDown, MSGBOX_EVENT_USER_CUSTOM_ELPIS_REFINE);
-    AddCallbackFunc(mu::ui::window::CElpisMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CElpisMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 145;
-    m_BtnAboutRefinary.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnAboutRefinary.SetText(I18N::Game::AboutRefinery);
-
-    y = GetPos().y + 175;
-    m_BtnAboutJewelOfHarmony.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnAboutJewelOfHarmony.SetText(I18N::Game::JewelOfHarmony);
-
-    y = GetPos().y + 205;
-    m_BtnRefine.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRefine.SetText(I18N::Game::RefineGemstone);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CElpisMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y + 120, width = MSGBOX_LINE_WIDTH; height = MSGBOX_LINE_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_LINE, x, y, width, height);
-}
-
-void mu::ui::window::CElpisMsgBox::RenderTexts()
-{
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::Elpis);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 15;
-    g_pRenderText->SetTextColor(220, 183, 131, 255);	// 황금색
-
-    switch (m_iMessageType)
-    {
-    case 0:
-        mu_swprintf(szText, I18N::Game::WhatWouldYouLikeToKnow);
-        g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-        break;
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY:
-    {
-        wchar_t Textlist[7][100];
-        int lineSize = 0;
-        lineSize = CutText3(I18N::Game::GemstoneOfJewelOfHarmonyHas, Textlist[0], MSGBOX_WIDTH - 60.0f, 7, 100);
-        for (int i = 0; i < lineSize; ++i)
-        {
-            g_pRenderText->RenderText(fPos_x + 20, fPos_y + (i + 1) * 18, Textlist[i]);
-        }
-    }
-    break;
+        cfg.lines.push_back({ I18N::Game::GemstoneOfJewelOfHarmonyHas, false });
+        break;
     case MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY:
-    {
-        wchar_t Textlist[7][100];
-        int lineSize = 0;
-        lineSize = CutText3(I18N::Game::NewPowerCanBeGrantedTo, Textlist[0], MSGBOX_WIDTH - 60.0f, 7, 100);
-        for (int i = 0; i < lineSize; ++i)
-        {
-            g_pRenderText->RenderText(fPos_x + 20, fPos_y + (i + 1) * 18, Textlist[i]);
-        }
+        cfg.lines.push_back({ I18N::Game::NewPowerCanBeGrantedTo, false });
+        break;
+    default:
+        cfg.lines.push_back({ I18N::Game::WhatWouldYouLikeToKnow, false });
+        break;
     }
-    break;
-    }
-}
 
-void mu::ui::window::CElpisMsgBox::RenderButtons()
-{
-    m_BtnAboutRefinary.Render();
-    m_BtnAboutJewelOfHarmony.Render();
-    m_BtnRefine.Render();
-    m_BtnExit.Render();
+    GenericMenuConfig::MenuButton btnAboutRefinary;
+    btnAboutRefinary.label = I18N::Game::AboutRefinery;
+    btnAboutRefinary.onClick = [] { ShowElpisMenuDialog(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_REFINARY); };
+    cfg.buttons.push_back(std::move(btnAboutRefinary));
+
+    GenericMenuConfig::MenuButton btnAboutJewel;
+    btnAboutJewel.label = I18N::Game::JewelOfHarmony;
+    btnAboutJewel.onClick = [] { ShowElpisMenuDialog(MSGBOX_EVENT_USER_CUSTOM_ELPIS_ABOUT_JEWELOFHARMONY); };
+    cfg.buttons.push_back(std::move(btnAboutJewel));
+
+    GenericMenuConfig::MenuButton btnRefine;
+    btnRefine.label = I18N::Game::RefineGemstone;
+    btnRefine.onClick = []
+    {
+        g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ELPIS);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    cfg.buttons.push_back(std::move(btnRefine));
+
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCraftingDialogCloseRequest(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 void mu::ui::window::ShowSeedMasterMenuDialog()

@@ -376,8 +376,9 @@ before starting real work here; don't trust the exact class list below as final.
     and the full vault-lock chain: PIN choose → confirm match/mismatch/all-same-digit → WEBZEN
     password).
 - **3D item preview**: `CUseFruitCheckMsgBoxLayout` — `item3D` now exists, see above.
-- **Gem-selection menus** (bespoke multi-button, not OK/Cancel): `CGemIntegrationMsgBoxLayout`,
-  `CGemIntegrationUnityMsgBoxLayout`, `CGemIntegrationDisjointMsgBoxLayout`.
+- **Gem-selection menu** (bespoke, embedded live list widget): `CGemIntegrationDisjointMsgBoxLayout`
+  -- see the `CGenericMenuDialog` entry below for why its two siblings (`CGemIntegrationMsgBoxLayout`/
+  `CGemIntegrationUnityMsgBoxLayout`) *were* portable and this one isn't.
 - **Fixed-format result/ranking tables** (custom `RenderTexts`, no `AddMsg`):
   `CBloodCastleResultMsgBoxLayout`, `CDevilSquareRankMsgBoxLayout`, `CChaosCastleResultMsgBoxLayout`.
 - **Multi-option menus** (3+ named action buttons) -- **new primitive built (2026-09-15)**:
@@ -433,11 +434,59 @@ before starting real work here; don't trust the exact class list below as final.
   windows open behind them, and Esc on Cancel/Exit runs the same side-effecting lambda as clicking
   that button (verified via `ShowChaosMixMenuDialog()`'s `cfg.onCancel`).
 
-  `CElpisMsgBoxLayout`, `CGuild_ToPerson_PositionLayout`, and
-  the two Gem Integration classes stay native -- bespoke shapes this primitive's plain "click
-  closes" button model doesn't fit (Elpis: 2 of its 4 buttons swap body text in place instead of
-  closing; Guild-to-person: two buttons are a radio-select pair, not navigation; Gem Integration:
-  variable/data-driven button count plus an embedded list widget).
+  [x] `CGemIntegrationMsgBox` + `CGemIntegrationUnityMsgBox` -- done (2026-09-15), ported as 3
+  chained free functions instead of a 1:1 class replacement: `ShowGemIntegrationMenuDialog()`
+  (native's Unity/Disjoint/Cancel entry selector), `ShowGemIntegrationJewelDialog()` (Unity's
+  10-button jewel-type grid), `ShowGemIntegrationMixDialog()` (Unity's 3-button mix-amount grid).
+  Native's single `CGemIntegrationUnityMsgBox` swapped its own button set in place
+  (`ResetWndSize()`) between those last two grids without closing; since `CGenericMenuDialog`
+  buttons always close on click, that in-place swap became "close this menu, open a different
+  one," reusing the exact reentrant-`Show()`-during-click chaining `ShowTrainerMenuDialog()`/
+  `ShowTrainerRecoverDialog()` already prove (`Resolve()` invokes a button's `onClick` while
+  `m_bActive` is still `true`, so a `Show()` called from inside it queues instead of clobbering,
+  and `Resolve()`'s own trailing `ShowNext()` drains it immediately) -- no primitive change
+  needed. The 10-button jewel grid originally reused `MenuButton::compact` (64dp) to get 2 columns
+  for free from `.gmd-button-row`'s existing `flex-wrap`, but several jewel names ("Higher Refining
+  Stone") don't fit a 64dp button even wrapped -- **superseded 2026-09-15** by a proper general
+  mechanism, `GenericMenuConfig::columns` (see `GenericMenuDialog.h`'s own comment and STATUS.md's
+  `CGenericMenuDialog` entry for the full design), which decouples "N-per-row grid" from
+  `compact`'s own "small Close/Cancel button" meaning and supports wrapped 2-line labels. The
+  mix-amount grid's confirm step reuses the existing, already-ported
+  `CGenericConfirmDialog` call verbatim (native already used it here). One deliberate,
+  non-literal behavior choice: native's `SelectMixBtnDown` left the mix-amount grid visually open
+  on a failed `COMGEM::CheckInv()`, even though `CheckInv()` itself already calls
+  `COMGEM::GetBack()` (resetting the jewel-type state) -- the port instead reopens the jewel-type
+  grid on that failure, matching what `COMGEM`'s own state now says rather than native's stale
+  literal behavior. `TenBtnDown`/`TwentyBtnDown`/`ThirtyBtnDown` and both classes'
+  `BlessingBtnDown`/`SoulBtnDown` were dropped, not ported -- grep-confirmed unreachable from real
+  input even natively (their buttons are declared but never positioned/updated/rendered/hit-tested
+  anywhere). Native classes and their `*Layout::SetLayout()` removed; grep-confirmed zero
+  remaining references. Build clean (379/379).
+
+  [x] `CElpisMsgBox` -- done (2026-09-15), ported to `ShowElpisMenuDialog(int iMessageType = 0)`.
+  Unlike every consumer above, native's button set here never changed -- the "About Refinery"/
+  "About Jewel of Harmony" buttons just set `m_iMessageType`, which `RenderTexts()`'s own `switch`
+  used to pick a different info blurb above the same unchanged 4 buttons; `RefineBtnDown` opens
+  `INTERFACE_MIXINVENTORY` and closes, `ExitBtnDown`/Esc send `SendCraftingDialogCloseRequest()`
+  and close. The port is one `GenericMenuConfig` re-`Show()`n with a different `cfg.lines` entry --
+  the same reentrant-`Show()`-during-click chaining every other consumer above uses, but swapping
+  *text* instead of *buttons*, making this the simplest consumer of the mechanism so far (no
+  second phase/dialog needed). Native's own `CutText3`-based manual word-wrap was dropped as
+  unnecessary -- `.gmd-line`'s existing `white-space: normal` already wraps at the panel's CSS
+  width. No RML/RCSS changes needed (reuses the primitive's existing 4-button markup as-is). Native
+  class and its `*Layout::SetLayout()` removed; grep-confirmed zero remaining references. Build
+  clean (378/379).
+
+  `CGuild_ToPerson_PositionLayout` and `CGemIntegrationDisjointMsgBoxLayout` stay native -- bespoke
+  shapes this primitive's plain "click closes" button model doesn't fit (Guild-to-person: two
+  buttons are a simultaneous radio-select pair, not navigation -- both stay clickable/visible at
+  once and a separate OK button reads whichever was last selected, nothing here is a sequential
+  swap chaining could replace; Gem Integration Disjoint: an embedded, live, continuously-updating
+  inventory list-selection widget (`COMGEM::m_UnmixTarList`), a genuinely different UI need
+  chaining doesn't solve -- `component-catalog.md`'s "List / repeated rows" section already names
+  the proven pattern for a future dedicated port (`CMyQuestInfoWindow`'s quest list: `data-for`
+  over `{text, selected, index}` entries, `index` the real stable slot not the positional
+  `it_index`)).
 - **Progress bar / timed auto-close** (`CProgressMsgBox`/`CCursedTempleProgressMsgBox`-based, needs
   a progress-bar concept — not built): `CCrownSwitchPopLayout`, `CCrownSwitchPushLayout`,
   `CCrownSwitchOtherPushLayout`, `CSealRegisterStartLayout`, `CSealRegisterSuccessLayout`,

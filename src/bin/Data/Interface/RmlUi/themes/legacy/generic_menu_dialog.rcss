@@ -207,6 +207,15 @@
 /* A button with its own description lines needs a bit more breathing room below it than a plain
    one, so it doesn't read as crowded against whatever's next in the stack. */
 .gmd-button-cell.has-lines { margin-bottom: 10dp; }
+/* GenericMenuConfig::columns == 2 -- sized to fit exactly 2 per row within .gmd-body's own content
+   width, accounting for the WORST case where .gmd-button-row's own vertical scrollbar appears
+   (10 buttons in 2 columns = 5 rows, tall enough to need it): 230dp panel - 32dp*2 margins = 166dp,
+   - 6dp scrollbar = 160dp available. Margin trimmed to 2dp/side (from the base rule's 3dp) to
+   leave more room for the button itself: 2*(width + 4dp cell margin) <= 160dp => width <= 76dp.
+   See .gmd-btn.cols-2 below for why this needs its own decorator instead of inheriting .btn's
+   fixed-pixel sprite, and for the button's own narrower content width (this engine has no
+   box-sizing -- its border/padding add to width, they don't come out of it). */
+.gmd-button-cell.cols-2 { width: 76dp; margin: 0 2dp 6dp 2dp; }
 
 /* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
    ordinary flex children, same technique .gcd-item3d-anchor/.btn.gcd-keypad-btn already use in
@@ -218,6 +227,44 @@
 	height: 30dp;
 }
 .gmd-btn.compact { width: 64dp; }
+/* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (decorators
+   don't consume box-model space like border/padding do, so this matches the cell exactly, no
+   subtraction needed). height switches to auto (with a min-height floor so a short 1-line label
+   still looks like a normal button) since a long jewel name (e.g. "Higher Refining Stone") needs
+   to wrap onto 2 lines at this width -- .btn's own fixed height:30dp/line-height:30dp assumes a
+   single line and would otherwise let the second line spill silently past the button's own box.
+   decorator: ninepatch(...) replaces .btn's inherited decorator: image(legacy-btn-idle) (a fixed
+   108x30px sprite that doesn't stretch/shrink to a mismatched box size -- confirmed elsewhere in
+   this codebase, STATUS.md's "decorator: image(...) does not stretch" finding) with a proper
+   9-slice scale of the SAME asset using the sheet's own already-declared (if previously unused by
+   this file) `legacy-btn-idle-inner` rect -- exactly the technique server_select.rcss's .server-row
+   already proves for this exact problem (that's the actual, currently-shipping fix for the
+   STATUS.md finding above, not the flat-fill fallback an earlier comment here described; see that
+   file's own `.server-row`/`.group-btn` rules). Unlike background-color/border, a decorator paints
+   independently of the box-model layer the "bordered element with children" bug affects
+   (server_select.rcss's own comment: "the ninepatch decorator paints separately, unaffected"), so
+   this can go directly on .gmd-btn.cols-2 despite it having children (.gmd-btn-label/.gmd-tooltip)
+   -- no separate childless sibling element needed the way a flat background-color/border would. */
+.gmd-btn.cols-2 {
+	width: 76dp;
+	height: auto;
+	min-height: 30dp;
+	line-height: normal;
+	white-space: normal;
+	decorator: ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
+}
+.gmd-btn.cols-2:hover { decorator: ninepatch(legacy-btn-hover, legacy-btn-hover-inner); }
+.gmd-btn.cols-2:active { decorator: ninepatch(legacy-btn-active, legacy-btn-active-inner); }
+/* Text lives in its own element (not raw text directly in .gmd-btn) purely so a decorator change
+   here doesn't require touching the shared markup structure again; no stacking-order concerns
+   remain now that there's no separate absolutely-positioned fill sibling to compete with (an
+   element's own decorator always paints before its children are rendered, same reason
+   .gmd-tooltip's own background already sits visibly on top of its ancestor .gmd-btn's paint). */
+.gmd-btn-label {
+	display: block;
+	width: 100%;
+}
+.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; }
 /* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
    data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
 

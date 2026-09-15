@@ -152,10 +152,46 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   open — the `CManager::CompareKeyEventOrder` descending-sort finding below — plus button-row/
   bottom padding, a missing legacy-theme back-fill sprite, and a content-vs-title-banner layout gap
   in both themes (see `dialog-migration-plan.md`'s own "Multi-option menus" entry for the full
-  list). The remaining 4 native "multi-option menu" classes
-  (`CElpisMsgBox`, `CGuild_ToPerson_Position`, both Gem Integration classes) stay native — bespoke
-  button shapes (in-place content-swap, radio-select, data-driven count + embedded list) this
-  primitive's plain "click closes" model doesn't fit.
+  list). **Extended 2026-09-15**: `CGemIntegrationMsgBox`/`CGemIntegrationUnityMsgBox` also ported,
+  as 3 chained free functions (`ShowGemIntegrationMenuDialog()`/`ShowGemIntegrationJewelDialog()`/
+  `ShowGemIntegrationMixDialog()`) rather than 1:1 class replacement — native's single
+  `CGemIntegrationUnityMsgBox` swapped its own button set in place between a jewel-type grid and a
+  mix-amount grid; since this primitive's buttons always close on click, that in-place swap became
+  "close this menu, open a different one," reusing the same reentrant-`Show()`-during-click
+  chaining the Trainer pair above already proves. See `dialog-migration-plan.md`'s own entry for
+  the full mechanism and the one deliberate native-behavior deviation (reopening the jewel-type
+  grid, not the mix-amount grid, on a failed inventory re-check). **Also extended 2026-09-15**:
+  `CElpisMsgBox` ported to `ShowElpisMenuDialog(int iMessageType = 0)` — unlike every other
+  consumer above, native's own button set here never changed, only the body text above it
+  (`m_iMessageType`-driven, via a `switch` in `RenderTexts()`); the "About Refinery"/"About Jewel
+  of Harmony" buttons' `onClick` just re-`Show()`s the exact same 4-button config with a different
+  `cfg.lines` entry, reusing the identical reentrant-`Show()`-during-click chaining but to swap
+  *text* instead of buttons — the simplest consumer of this mechanism so far. 13 dialogs proven on
+  this primitive now. The remaining 2 native "multi-option menu" classes (`CGuild_ToPerson_Position`,
+  `CGemIntegrationDisjointMsgBox`) stay native — bespoke button shapes (simultaneous radio-select,
+  an embedded live inventory list-selection widget) this primitive's plain "click closes" model
+  doesn't fit.
+  **General button-grid sizing added 2026-09-15**: the jewel-type grid above initially reused
+  `MenuButton::compact` (64dp) to fit 2 per row, but several jewel names ("Higher Refining Stone")
+  don't fit 64dp even wrapped — `compact` was never meant to mean "narrow enough for an N-column
+  grid," only "the small Close/Cancel-style button," and conflating the two doesn't generalize.
+  Replaced with `GenericMenuConfig::columns` (int, 0 = unspecified/today's default for every other
+  consumer, unchanged): when set, every non-`compact` button in that dialog gets a `.gmd-btn.cols-N`
+  class (only `cols-2` exists so far) sized to fit exactly N per row, with `height: auto`/
+  `white-space: normal` (instead of `.btn`'s fixed 30dp/single-line assumption) so a long label
+  wraps onto 2 lines instead of silently overflowing past the button's own box. Legacy's `.cols-2`
+  additionally can't inherit `.btn`'s plain `image()` decorator unchanged at this new width — see
+  the "Findings" entry below — so it uses a `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)`
+  decorator instead (the same technique `server_select.rcss`'s `.server-row`/`.group-btn` already
+  prove), which correctly 9-slice-scales the real button sprite rather than falling back to a flat
+  fill/border (an earlier pass tried the flat-fill approach first; superseded once the ninepatch
+  fix was found — see the "Findings" entry for why). Modern's `.btn` decorator is a procedural
+  gradient (no fixed-pixel sprite), so its `.cols-2` keeps the flat fill/border approach (on a
+  separate childless `.gmd-btn-fill` sibling, per the "bordered element with children" finding
+  below) since there's no sprite to 9-slice in the first place. The existing 128dp/64dp buttons in
+  all 12 previously-shipped dialogs are untouched either way. Extend the same way (`.cols-N` CSS
+  class + a same-named `MenuButtonEntry` bool computed in `SyncRmlModel()`) if a future consumer
+  needs 3+ columns.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -280,15 +316,33 @@ section in full detail; summarized here for visibility.
   — check for a `CompileShader`/render-interface override, or test the specific decorator in
   isolation, rather than trusting a casual screenshot.
 - **`decorator: image(...)` does not stretch a sprite rect to fill a box sized differently from
-  the sprite's own native dimensions in this RmlUi build.** `legacy-btn-idle`/`-hover`/`-active`
-  (`base.rcss`'s `@spritesheet`) are fixed 108x30 rects; every existing user of them (`.btn`,
-  `.group-btn`) is also exactly 108x30. `server_select.rcss`'s `.server-row` tried the same
-  decorator stretched to 186x30 (the first place in this codebase asking for a non-native size) and
-  most of the box stayed unpainted instead of the sprite scaling to fill it — visually, a normal-
-  looking dark row with no visible button chrome except near the sprite's own native footprint.
-  Reverted to a flat `background-color`/`border` for that row instead (no native size to mismatch).
-  Don't assume this decorator behaves like a CSS `background-size` image at an arbitrary box size —
-  verify at the actual target dimensions, or stick to the sprite's native size.
+  the sprite's own native dimensions in this RmlUi build — but a `ninepatch(...)` decorator using
+  the same sprite sheet does, correctly, in both directions.** `legacy-btn-idle`/`-hover`/`-active`
+  (`base.rcss`'s `@spritesheet`) are fixed 108x30 rects, with a matching `-inner` "safe to stretch"
+  rect also declared for each. `server_select.rcss`'s `.server-row`/`.group-btn` first tried plain
+  `image(...)` stretched to 186x30 (the first place in this codebase asking for a non-native size)
+  and most of the box stayed unpainted instead of the sprite scaling to fill it. The actual fix
+  (not a workaround) was switching to `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)` — this
+  9-slice-scales the real sprite correctly at the new size, and is what `.server-row`/`.group-btn`
+  ship with today (a `background-color`/`border` flat-fill was tried as an intermediate step but is
+  no longer used there). Don't assume plain `image()` behaves like a CSS `background-size` image at
+  an arbitrary box size — either use `ninepatch` with a declared inner rect, or stick to the
+  sprite's own native size.
+  **Correction, 2026-09-15**: this entry previously claimed "every existing user of them (`.btn`,
+  `.group-btn`) is also exactly 108x30" — false. `generic_menu_dialog.rcss`'s legacy `.gmd-btn`
+  already overrides `width` to 128dp (default) or 64dp (`compact`) while inheriting `.btn`'s
+  108x30 `legacy-btn-idle` decorator unchanged, in all 12 pre-existing dialogs built on
+  `CGenericMenuDialog` — the exact same width-only-mismatch shape `.server-row` had before its
+  ninepatch fix, just at smaller deltas (+18.5%/−40.7% vs. `.server-row`'s +72%). Whether this is
+  visually manifesting as unpainted chrome in those 12 already-signed-off dialogs was not confirmed
+  either way (no screenshot taken) — flagging so a future visual QA pass on this primitive checks
+  it rather than assuming the existing 128dp/64dp buttons are proof the mismatch is harmless at
+  small deltas. The new `.gmd-btn.cols-2` class (added the same day) initially sidestepped the
+  question by not inheriting the sprite decorator at all (flat fill/border) — since superseded:
+  legacy's `.cols-2` now uses the same `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)` fix as
+  `.server-row`, so it (unlike the other 12 dialogs' plain `.gmd-btn`) is confirmed not to have this
+  problem. Modern's `.cols-2` keeps the flat fill/border approach, correctly — modern's `.btn` is a
+  procedural gradient, not an image sprite, so there's no ninepatch to apply there.
 - **A bordered/backgrounded element that also has child elements can render an incomplete,
   non-closed rectangle in this RmlUi build** (`server_select.rcss`'s `.server-row`, three separate
   attempts: flex children with a `<span>`, absolutely-positioned children, then plain block

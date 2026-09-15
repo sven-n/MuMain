@@ -43,11 +43,14 @@
 				     outer button/it_index aliases both resolve normally) so text that describes
 				     one specific button (e.g. CChaosMixMenuMsgBox's per-recipe blurb) renders
 				     directly above that button instead of bunched into the shared summary above. -->
-				<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines">
+				<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines" data-class-cols-2="button.cols2">
 					<div class="gmd-line" data-for="line : button.lines" data-class-bold="line.bold">{{line.text}}</div>
-					<div class="btn gmd-btn" data-class-compact="button.compact" data-class-disabled="!button.enabled"
+					<div class="btn gmd-btn" data-class-compact="button.compact" data-class-cols-2="button.cols2" data-class-disabled="!button.enabled"
 					     data-event-click="gmd_button_click(it_index)">
-						{{button.label}}
+						<!-- Label text lives in its own element rather than raw text directly in
+						     .gmd-btn -- see generic_menu_dialog.rcss's own .gmd-btn.cols-2 comment
+						     for why (a decorator change, not a markup requirement of its own). -->
+						<div class="gmd-btn-label">{{button.label}}</div>
 						<span class="gmd-tooltip" data-class-hidden="!button.has_tooltip">{{button.tooltip}}</span>
 					</div>
 				</div>

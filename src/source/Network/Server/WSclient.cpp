@@ -6460,7 +6460,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         if (COMGEM::isAble())
         {
             g_pNewUISystem->HideAll();
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationMsgBoxLayout));
+            mu::ui::window::ShowGemIntegrationMenuDialog();
         }
     }
     break;
@@ -6474,7 +6474,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
     case 0x11:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CElpisMsgBoxLayout));
+        mu::ui::window::ShowElpisMenuDialog();
     }
     break;
     case 0x12:

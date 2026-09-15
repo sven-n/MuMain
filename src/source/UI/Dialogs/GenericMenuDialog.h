@@ -53,6 +53,17 @@ namespace mu::ui::window
         };
         std::vector<MenuButton> buttons; // 1..N, data-driven -- no hardcoded max
 
+        // 0 = unspecified (today's default: buttons flow at their normal width, one per row in
+        // every current consumer's fixed-width panel -- unchanged behavior). >0 = every button in
+        // `buttons` that isn't `compact` is sized to fit exactly that many per row (see
+        // generic_menu_dialog.rcss's own `.gmd-btn.cols-2`/`.gmd-button-cell.cols-2`), instead of
+        // `compact` being (mis)used as a stand-in for "narrow enough to fit two per row" -- that
+        // conflated two unrelated concerns (a small Close/Cancel-style button vs. a same-purpose
+        // button grid). Only 2 is implemented (Gem Integration's 10-button jewel-type grid is the
+        // only consumer so far); add a new `.cols-N` CSS class + a same-named MenuButtonEntry flag
+        // in GenericMenuDialog.cpp the same way if a future consumer needs a different count.
+        int columns = 0;
+
         // Optional, fires on Esc. Decoupled from `buttons` (not "whichever button is last") so a
         // caller can't accidentally rely on button order for cancel semantics.
         std::function<void()> onCancel;
@@ -107,6 +118,7 @@ namespace mu::ui::window
             bool hasLines = false;  // toggles .gmd-button-cell's extra bottom margin (RCSS)
             bool enabled = true;
             bool compact = false;
+            bool cols2 = false;     // GenericMenuConfig::columns == 2 && !compact -- see its comment
         };
         struct GenericMenuRmlModel
         {

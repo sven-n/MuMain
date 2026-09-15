@@ -30,11 +30,15 @@
 				     handler -- proven pattern, see ../../generic_menu_dialog.rml's own comment.
 				     gmd-button-cell wraps each button with its own optional description lines --
 				     see ../../generic_menu_dialog.rml's own comment for why (nested data-for). -->
-				<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines">
+				<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines" data-class-cols-2="button.cols2">
 					<div class="gmd-line" data-for="line : button.lines" data-class-bold="line.bold">{{line.text}}</div>
-					<div class="btn gmd-btn" data-class-compact="button.compact" data-class-disabled="!button.enabled"
+					<div class="btn gmd-btn" data-class-compact="button.compact" data-class-cols-2="button.cols2" data-class-disabled="!button.enabled"
 					     data-event-click="gmd_button_click(it_index)">
-						{{button.label}}
+						<!-- See ../../generic_menu_dialog.rml's own comment for why the fill/label
+						     split exists (bordered elements with children don't paint a complete box
+						     in this engine) and why .gmd-btn-label needs position:relative. -->
+						<div class="gmd-btn-fill"></div>
+						<div class="gmd-btn-label">{{button.label}}</div>
 						<span class="gmd-tooltip" data-class-hidden="!button.has_tooltip">{{button.tooltip}}</span>
 					</div>
 				</div>

@@ -41,6 +41,27 @@ namespace mu::ui::window
     // CreateMessageBox call sites for it even before this port). Kept for parity with the other 8.
     void ShowCherryBlossomMenuDialog();
 
+    // CGemIntegrationMsgBox/CGemIntegrationUnityMsgBox ported onto CGenericMenuDialog as 3 chained
+    // free functions instead of 1:1 class replacement -- native's single CGemIntegrationUnityMsgBox
+    // swapped its own button set in place (ResetWndSize()) between a jewel-type grid and a
+    // mix-amount grid; CGenericMenuDialog's buttons always close on click, so that in-place swap
+    // becomes "close this menu, open a different one" via the same reentrant-Show()-during-click
+    // chaining ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() already prove. COMGEM
+    // (GameLogic/Items/CComGem.h) is the shared state the 3 phases read/write, same as native.
+    // CGemIntegrationDisjointMsgBox stays native (embedded live inventory list-selection widget,
+    // a different problem chaining doesn't solve) -- see dialog-migration-plan.md.
+    void ShowGemIntegrationMenuDialog();  // entry selector: Unity / Disjoint / Cancel
+    void ShowGemIntegrationJewelDialog(); // Unity phase 1: pick a jewel type
+    void ShowGemIntegrationMixDialog();   // Unity phase 2: pick a mix-amount tier
+
+    // CElpisMsgBox ported onto CGenericMenuDialog -- unlike the other consumers above, the button
+    // set here never changes; only the body text above it does (native's own m_iMessageType), so
+    // this is the same reentrant-Show()-during-click chaining reused to swap `lines`, not buttons.
+    // iMessageType selects which blurb to show (0 = default prompt; otherwise one of the
+    // MSGBOX_EVENT_USER_CUSTOM_ELPIS_* values, MessageBox.h) -- the "About" buttons' onClick calls
+    // this same function again with a different value instead of opening a second dialog.
+    void ShowElpisMenuDialog(int iMessageType = 0);
+
     int IsPurchaseShop();
 #define g_IsPurchaseShop mu::ui::window::IsPurchaseShop()
 

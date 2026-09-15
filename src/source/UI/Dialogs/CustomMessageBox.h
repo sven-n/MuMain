@@ -54,96 +54,6 @@ namespace mu::ui::window
         CMessageBoxButton m_BtnCancel;
     };
 
-    class CGemIntegrationMsgBox : public CMessageBoxBase
-    {
-        static constexpr float MIDDLE_COUNT = 5.0f;
-        static constexpr float BTN_TOP_BLANK = 60.0f;
-        static constexpr float BTN_GAP = 40.0f;
-    public:
-        CGemIntegrationMsgBox();
-        virtual ~CGemIntegrationMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT UnityBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DisjointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // texts
-        type_vector_msgdata m_MsgDataList;
-        // button
-        CMessageBoxButton m_BtnUnity;
-        CMessageBoxButton m_BtnDisjoint;
-        CMessageBoxButton m_BtnCancel;
-    };
-
-    class CGemIntegrationUnityMsgBox : public CMessageBoxBase
-    {
-        enum
-        {
-            STATE_BASIC,
-        };
-        static constexpr float MIDDLE_COUNT = 10.0f;
-        static constexpr float BTN_TOP_BLANK = 60.0f;
-        static constexpr float BTN_GAP = 40.0f;
-    public:
-        CGemIntegrationUnityMsgBox();
-        virtual ~CGemIntegrationUnityMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT BlessingBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SoulBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT TenBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT TwentyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ThirtyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SelectMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    private:
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // texts
-        type_vector_msgdata m_MsgDataList;
-        // button
-
-        void SetText(void);
-        void ResetWndSize(int _nType);
-        std::vector<CMessageBoxButton>	m_cJewelButton;
-        std::vector<CMessageBoxButton>	m_cMixButton;
-        int									m_nMiddleCount;
-
-        CMessageBoxButton m_BtnBlessing;
-        CMessageBoxButton m_BtnSoul;
-        CMessageBoxButton m_BtnTen;
-        CMessageBoxButton m_BtnTwenty;
-        CMessageBoxButton m_BtnThirty;
-        CMessageBoxButton m_BtnCancel;
-    };
-
     class CGemIntegrationDisjointMsgBox : public CMessageBoxBase
     {
     public:
@@ -256,44 +166,6 @@ namespace mu::ui::window
     // ShowChaosMixMenuDialog()/ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() (WindowCommon.h),
     // all onto CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h) -- see
     // docs/rmlui-ui-system/dialog-migration-plan.md.
-
-    class CElpisMsgBox : public CMessageBoxBase
-    {
-    public:
-        CElpisMsgBox();
-        ~CElpisMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AboutRefinaryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AboutJewelOfHarmonyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RefineBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-        void SetMessageType(int iMessageType) { m_iMessageType = iMessageType; }
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnAboutRefinary;
-        CMessageBoxButton m_BtnAboutJewelOfHarmony;
-        CMessageBoxButton m_BtnRefine;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-        int m_iMessageType;
-    };
 
     class CProgressMsgBox : public CMessageBoxBase
     {
@@ -436,18 +308,6 @@ namespace mu::ui::window
         bool SetLayout();
     };
 
-    class CGemIntegrationMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CGemIntegrationUnityMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationUnityMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
     class CGemIntegrationDisjointMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationDisjointMsgBox>
     {
     public:
@@ -467,12 +327,6 @@ namespace mu::ui::window
     };
 
     class CChaosCastleResultMsgBoxLayout : public TMsgBoxLayout<CChaosCastleResultMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CElpisMsgBoxLayout : public TMsgBoxLayout<CElpisMsgBox>
     {
     public:
         bool SetLayout();

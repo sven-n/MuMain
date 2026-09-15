@@ -53,6 +53,7 @@ void CGenericMenuDialog::BuildRmlUi()
             button.RegisterMember("has_lines", &MenuButtonEntry::hasLines);
             button.RegisterMember("enabled", &MenuButtonEntry::enabled);
             button.RegisterMember("compact", &MenuButtonEntry::compact);
+            button.RegisterMember("cols2", &MenuButtonEntry::cols2);
             c.RegisterArray<std::vector<MenuButtonEntry>>();
             c.Bind("buttons", &model.buttons);
 
@@ -253,6 +254,7 @@ void CGenericMenuDialog::SyncRmlModel()
         entry.hasLines = !button.lines.empty();
         entry.enabled = button.enabled;
         entry.compact = button.compact;
+        entry.cols2 = (m_Active.columns == 2) && !button.compact;
         newButtons.push_back(std::move(entry));
     }
     bool buttonsChanged = newButtons.size() != model.buttons.size();
@@ -262,7 +264,7 @@ void CGenericMenuDialog::SyncRmlModel()
         const auto& b = model.buttons[i];
         buttonsChanged = a.label != b.label || a.tooltip != b.tooltip
             || a.hasTooltip != b.hasTooltip || a.enabled != b.enabled || a.compact != b.compact
-            || a.lines.size() != b.lines.size();
+            || a.cols2 != b.cols2 || a.lines.size() != b.lines.size();
         for (size_t j = 0; j < a.lines.size() && !buttonsChanged; ++j)
             buttonsChanged = a.lines[j].text != b.lines[j].text || a.lines[j].bold != b.lines[j].bold;
     }
