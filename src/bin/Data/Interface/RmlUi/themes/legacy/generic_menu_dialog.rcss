@@ -1,0 +1,256 @@
+/* Legacy theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve, the sprite composite
+   paints directly in this same document.
+
+   #panel is centered via .center-both; dp throughout (LayoutMode::Dialog window, same category
+   as generic_confirm_dialog.rcss). 230dp matches native's own MSGBOX_WIDTH and
+   generic_confirm_dialog.rcss's own panel width, for visual consistency between the two
+   sibling primitives. Fixed 260dp height comfortably fits the largest native consumer (5
+   buttons + a few lines of text) with .gmd-button-row's own scrollbar (below) as the safety
+   valve, not pixel-exact math. */
+#panel {
+	width: 230dp;
+	height: 260dp;
+	font-family: "Liberation Sans";
+	font-size: 12dp;
+	color: white;
+}
+
+/* Same native sprite family (and same spritesheet declarations) as
+   generic_confirm_dialog_bg.rcss -- CCommonMessageBox's own back-fill + top/middle/bottom cap
+   composite. Redeclared here rather than shared across documents (RmlUi spritesheets are
+   per-document); see that file's own comment for the source pixel dimensions. */
+@spritesheet msgbox-top-sheet
+{
+	src: "../../../newui_msgbox_top.tga";
+	msgbox-top-image: 0px 0px 230px 67px;
+}
+@spritesheet msgbox-middle-sheet
+{
+	src: "../../../newui_msgbox_middle.tga";
+	msgbox-middle-image: 0px 0px 230px 15px;
+}
+@spritesheet msgbox-bottom-sheet
+{
+	src: "../../../newui_msgbox_bottom.tga";
+	msgbox-bottom-image: 0px 0px 230px 50px;
+}
+/* newui_msgbox_back.OZJ is actually 225x512 -- much taller than any panel needs, so (same as
+   generic_confirm_dialog_bg.rcss's own copy of this comment) it's cropped top-left rather than
+   stretched-to-fit. The rect below matches this panel's own back-layer box size (230dp wide,
+   260dp tall, minus the 4dp/5dp insets .gmd-sprite-back applies), not the source's full extent. */
+@spritesheet msgbox-back-sheet
+{
+	src: "../../../newui_msgbox_back.jpg";
+	msgbox-back-image: 0px 0px 222px 250px;
+}
+.gmd-sprite-back {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 5dp;
+	bottom: 5dp;
+	pointer-events: none;
+	decorator: image(msgbox-back-image);
+}
+.gmd-sprite-top {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-top-image);
+}
+/* Single stretched fill (not tiled) -- same technique generic_confirm_dialog_bg.rcss's own
+   .gcd-bg-sprite-middle uses. */
+.gmd-sprite-middle {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 67dp;
+	bottom: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-middle-image);
+}
+.gmd-sprite-bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-bottom-image);
+}
+
+/* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite -- same asset/mechanism
+   generic_confirm_dialog.rcss's own .gcd-header-rail uses for an optional title, redeclared
+   here since spritesheets are per-document. Painted after .gmd-sprite-top in the markup, so it
+   overlays that exact same 230x67 screen rect with no seam. */
+@spritesheet msgbox-titlebar-sheet
+{
+	src: "../../../newui_Message_03.tga";
+	msgbox-titlebar-image: 0px 0px 230px 67px;
+}
+.gmd-header-rail {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-titlebar-image);
+}
+.gmd-header-rail.hidden { display: none; } /* cascade-tie fix, same as every other data-class-hidden toggle here */
+.gmd-header-title {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 10dp;
+	text-align: center;
+	font-family: "Liberation Sans";
+	font-weight: bold;
+	color: #ffd23c;
+	pointer-events: none;
+}
+.gmd-header-title.hidden { display: none; }
+
+/* Content column -- lines (optional) + the button list. left/right kept a bit wider than
+   native's own MSGBOX_TEXT_MAXWIDTH margin so buttons/text don't crowd the panel edges; top/
+   bottom leave room for the sprite caps. Untitled dialogs keep justify-content:center -- with no
+   banner competing for space, a short button stack centered in the panel reads fine. When
+   titled, .gmd-body.has-title switches to flex-start instead: reserving the banner's own space
+   as padding-top, then ALSO centering the remainder would produce a large, content-amount-
+   dependent gap above the first line/button whenever the actual content (especially with
+   per-button lines, e.g. CChaosMixMenuMsgBox) is shorter than the panel's own fixed height --
+   native itself always top-anchors content right after the title, never centers it a second
+   time underneath. */
+.gmd-body {
+	position: absolute;
+	left: 32dp;
+	right: 32dp;
+	top: 20dp;
+	bottom: 28dp;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.gmd-body.has-title {
+	/* .gmd-body's own top:20dp is meant for the untitled case; reset to 0 here so padding-top
+	   below is the ONLY offset. */
+	top: 0;
+	/* Not "67dp banner height + 4dp gap" -- the banner sprite is 67dp tall but most of that is
+	   decorative fade/gradient below the actual title text, which itself sits at
+	   .gmd-header-title's own top:10dp. generic_confirm_dialog.rcss's legacy theme already proves
+	   the right number for this exact same banner asset/size (newui_Message_03.tga, same 230x67
+	   slot): its own .gcd-body uses a flat top:35dp regardless of title, i.e. content starts 35dp
+	   from the panel's top edge, clearing the title text by a modest, already-tested gap without
+	   waiting out the rest of the sprite. Mirrored here. */
+	padding-top: 35dp;
+	justify-content: flex-start;
+}
+.gmd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: #ffe0a0;
+	margin-bottom: 4dp;
+}
+.gmd-line.bold { font-weight: bold; }
+
+/* No explicit column count -- row + flex-wrap lets the button count/width and the row's own
+   available width determine how many fit per line, same mechanism
+   generic_confirm_dialog.rcss's own numeric-keypad grid already proves. Every native consumer's
+   fixed 128dp button width only ever fits one per row within this panel, so this naturally
+   reproduces their own single-column stack with no config knob needed; a future consumer with
+   narrower buttons would simply wrap onto more columns on its own.
+   overflow/pointer-events follow the exact same reasoning as .gcd-text-col in
+   generic_confirm_dialog.rcss (shorthand order matters for scrollbar creation; pointer-events
+   must be re-opted-in or the generated scrollbar can't receive input). */
+.gmd-button-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 100%;
+	max-height: 100%;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+.gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: #100c06; }
+.gmd-button-row scrollbarvertical sliderbar { background-color: #4a4a45; }
+.gmd-button-row scrollbarvertical sliderbar:hover,
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: #6e6e66; }
+.gmd-button-row scrollbarvertical sliderarrowdec,
+.gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
+.gmd-button-row scrollbarhorizontal { height: 0; }
+
+/* Repeated unit of .gmd-button-row -- one button plus its own optional description lines
+   (button.lines), stacked in a column so text that belongs to a specific button (e.g.
+   CChaosMixMenuMsgBox's per-recipe blurb) renders directly above that button instead of being
+   bunched into the shared .gmd-line summary above the whole row. Width mirrors .gmd-btn's own two
+   sizes below so .gmd-line's width:100% wraps to the same column the button itself occupies; the
+   margin that used to live on .gmd-btn moved here so row spacing is unchanged. Empty
+   button.lines (the common case) just means an empty cell around a plain button -- no visual
+   difference from before this existed. */
+.gmd-button-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 128dp;
+	margin: 0 3dp 6dp 3dp;
+}
+.gmd-button-cell.compact { width: 64dp; }
+/* A button with its own description lines needs a bit more breathing room below it than a plain
+   one, so it doesn't read as crowded against whatever's next in the stack. */
+.gmd-button-cell.has-lines { margin-bottom: 10dp; }
+
+/* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
+   ordinary flex children, same technique .gcd-item3d-anchor/.btn.gcd-keypad-btn already use in
+   generic_confirm_dialog.rcss. 128dp/64dp match native's own two button sizes exactly
+   (MSGBOX_BTN_EMPTY_WIDTH/_SMALL_WIDTH, CommonMessageBox.h). */
+.gmd-btn {
+	position: static;
+	width: 128dp;
+	height: 30dp;
+}
+.gmd-btn.compact { width: 64dp; }
+/* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
+   data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
+
+/* Static per-button hint text -- known at Show() time, so a plain :hover reveal is enough (no
+   need for the heavier C++-positioned tooltip panel main_frame.rml's own skill tooltip uses,
+   which exists for dynamically-positioned content this doesn't have). Child of .gmd-btn (not a
+   hand-authored sibling like my_inventory.rcss's own tooltips) since this is a data-for-repeated
+   button, so a descendant combinator is used instead of that file's `~` sibling one. */
+.gmd-tooltip {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: 100%;
+	margin-bottom: 4dp;
+	transform: translateX(-50%);
+	width: 140dp;
+	white-space: normal;
+	text-align: center;
+	font-size: 10dp;
+	font-weight: normal;
+	color: white;
+	background-color: #100c06;
+	border: 1dp #4a3620;
+	padding: 3dp 6dp;
+	pointer-events: none;
+}
+.gmd-btn:hover .gmd-tooltip {
+	display: block;
+}
+/* Guards against a hover-reveal when there's no tooltip text at all -- matches the hover rule
+   above's own specificity (3 classes each) so this later declaration wins the cascade tie
+   instead of losing to it outright, same convention every other .hidden cascade-tie fix in this
+   codebase uses (no !important -- confirmed unsupported by this engine's stylesheet parser). */
+.gmd-btn:hover .gmd-tooltip.hidden {
+	display: none;
+}

@@ -137,7 +137,7 @@ bool CUIManager::PressKey(int nKey)
 
 bool CUIManager::IsInputEnable()
 {
-    if (InputEnable || GuildInputEnable || (g_pUIPopup->GetPopupID() != 0 && g_pUIPopup->IsInputEnable()))
+    if (InputEnable || GuildInputEnable)
         return true;
     // A focused portable text field captures the keyboard without taking Win32 focus,
     // so report "input active" explicitly to suppress world/camera keys while typing.

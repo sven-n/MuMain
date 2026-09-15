@@ -145,6 +145,11 @@ enum INTERFACE_LIST
     // CMessageBoxMng system it's meant to eventually replace). Inserted just before INTERFACE_END,
     // same reasoning as INTERFACE_CREDITS above.
     INTERFACE_GENERIC_CONFIRM_DIALOG,
+    // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h) -- sibling primitive to
+    // CGenericConfirmDialog for native "N-button menu" dialogs (CSystemMenuMsgBox and similar),
+    // a different button model (arbitrary labeled list vs two fixed OK/Cancel slots). Same
+    // reasoning as INTERFACE_CREDITS above.
+    INTERFACE_GENERIC_MENU_DIALOG,
     INTERFACE_END,
     INTERFACE_COUNT = INTERFACE_END - 2,
 };

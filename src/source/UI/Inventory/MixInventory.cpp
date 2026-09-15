@@ -5,6 +5,7 @@
 #include "UI/Core/WindowGeometry.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Core/WindowCommon.h" // ShowChaosMixMenuDialog
 #include "GameLogic/Items/MixMgr.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Render/Effects/ZzzEffect.h"
@@ -181,7 +182,7 @@ void CMixInventory::OpeningProcess()
 
     if (g_MixRecipeMgr.GetMixInventoryType() == SEASON3A::MIXTYPE_GOBLIN_NORMAL)
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CChaosMixMenuMsgBoxLayout));
+        mu::ui::window::ShowChaosMixMenuDialog();
     }
 }
 

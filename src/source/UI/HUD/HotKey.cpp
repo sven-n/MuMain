@@ -4,8 +4,11 @@
 
 #include "UI/HUD/HotKey.h"
 #include "UI/Core/WindowSystem.h"
+#include "UI/Core/WindowCommon.h" // ShowSystemMenuDialog
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
+#include "UI/Dialogs/GenericConfirmDialog.h" // g_pGenericConfirmDialog
+#include "UI/Dialogs/GenericMenuDialog.h" // g_pGenericMenuDialog
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "GameLogic/Events/w_CursedTemple.h"
@@ -120,9 +123,20 @@ bool mu::ui::window::CHotKey::UpdateKeyEvent()
 {
     if (mu::ui::window::IsPress(VK_ESCAPE) == true)
     {
-        if (g_MessageBox->IsEmpty())
+        // g_MessageBox->IsEmpty() only sees native CMessageBoxBase-family boxes -- the
+        // RmlUi-based CGenericConfirmDialog/CGenericMenuDialog primitives live outside that
+        // system entirely, so without these extra checks this would hijack Esc (to open the
+        // system menu) out from under an already-open generic dialog. In practice both dialogs'
+        // GetKeyEventOrder() (100.0f) is now well above this object's (1.0f), and
+        // CManager::CompareKeyEventOrder sorts descending (highest runs first) -- so a visible
+        // dialog should already have consumed the same Escape press and returned false before
+        // this object's own UpdateKeyEvent() is even called this frame. Kept anyway as a cheap
+        // defensive check in case that ordering is ever changed again.
+        if (g_MessageBox->IsEmpty()
+            && !mu::ui::window::g_pGenericConfirmDialog->IsVisible()
+            && !mu::ui::window::g_pGenericMenuDialog->IsVisible())
         {
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSystemMenuMsgBoxLayout));
+            mu::ui::window::ShowSystemMenuDialog();
             PlayBuffer(SOUND_CLICK01);
             return false;
         }

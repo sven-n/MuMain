@@ -124,6 +124,38 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   in body lines after construction" pattern, triggered from a network packet handler rather than a
   UI click). Built and verified (RelWithDebInfo); in-game verification of all 3 swapped dialogs
   (both themes, Enter/Esc, and a second dialog queuing while one is open) still pending.
+- **`CGenericMenuDialog`** — **done, both themes (2026-09-15)**: sibling primitive to
+  `CGenericConfirmDialog` for `CustomMessageBox.h`'s "multi-option menu" shape (an arbitrary list of
+  N labeled action buttons, not two fixed OK/Cancel slots) — see `dialog-migration-plan.md`'s own
+  "Multi-option menus" entry for the full design rationale (why a separate primitive, the
+  `data-for`/`it_index` button-array precedent, no fg/bg document split needed). One C++ class + one
+  document, shown with a `GenericMenuConfig` value (title, body lines, a button vector, `onCancel`).
+  `MenuButton` also carries its own optional `lines` — some native consumers (`CChaosMixMenuMsgBox`,
+  `CTrainerRecoverMsgBox`) interleave a few lines of body text with *each individual button* rather
+  than grouping it all above the whole list (the shared `GenericMenuConfig::lines` is only right
+  for an actual once-per-dialog summary); a first pass wrongly flattened everything into that
+  shared block, fixed 2026-09-15 by adding this per-button field (RML: a nested `data-for` over
+  `button.lines` inside the same repeated cell as the button itself — RmlUi re-parses each outer
+  iteration's own inner RML, so nesting resolves normally; no prior precedent for nesting
+  `data-for` in this codebase, but confirmed architecturally sound from `DataViewFor::Update()`'s
+  own `SetInnerRML()` call).
+  Proven on 10 real dialogs, replacing their native call sites end-to-end and deleting all 10
+  now-dead native classes: `CSystemMenuMsgBox` (proof-of-concept; Esc/system menu, 5 uniform-size
+  buttons), `CChaosMixMenuMsgBox`, `CTrainerMenuMsgBox`/`CTrainerRecoverMsgBox` (one opens the
+  other, same nesting native had), `CSeedMasterMenuMsgBox`, `CSeedInvestigatorMenuMsgBox`,
+  `CResetCharacterPointMsgBox`, `CDelgardoMainMenuMsgBox`, `CLuckyTradeMenuMsgBox`, and
+  `CCherryBlossomMsgBox` (ported for parity but has no live caller — same as its native
+  predecessor). Built and verified (RelWithDebInfo, 378/379 steps); **in-game tested and signed
+  off by the user (2026-09-15)**, all 10 dialogs, both themes. Testing surfaced and fixed several
+  real bugs beyond the per-button-`lines` one already described above: Esc not closing these
+  dialogs at all, then (once fixed) closing the wrong window entirely when other windows were also
+  open — the `CManager::CompareKeyEventOrder` descending-sort finding below — plus button-row/
+  bottom padding, a missing legacy-theme back-fill sprite, and a content-vs-title-banner layout gap
+  in both themes (see `dialog-migration-plan.md`'s own "Multi-option menus" entry for the full
+  list). The remaining 4 native "multi-option menu" classes
+  (`CElpisMsgBox`, `CGuild_ToPerson_Position`, both Gem Integration classes) stay native — bespoke
+  button shapes (in-place content-swap, radio-select, data-driven count + embedded list) this
+  primitive's plain "click closes" model doesn't fit.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -195,6 +227,31 @@ section in full detail; summarized here for visibility.
   are only ever *called* during `MAIN_SCENE` — that alone isn't a visibility gate once a window's
   visuals move to a persistent RmlUi document, which renders every frame regardless of scene. See
   `newui-tier-adapter.md`'s third `MAIN_SCENE` prerequisite.
+- **`CManager::CompareKeyEventOrder` (`WindowManager.cpp`) sorts `m_vecUI` DESCENDING by
+  `GetKeyEventOrder()` — the HIGHEST value runs first, not the lowest** (`return a.GetKeyEventOrder()
+  > b.GetKeyEventOrder();`, which is what `std::sort` needs for descending order). Every
+  `GetKeyEventOrder()` override comment in this codebase (including ones written earlier in this
+  same file's own history) assumed the opposite — "lower number = higher priority = runs first" —
+  which is backwards here. `CManager::UpdateKeyEvent()` stops at the first object whose
+  `UpdateKeyEvent()` returns `false`, so getting this backwards doesn't just misorder cosmetically:
+  a dialog meant to be a top-priority modal that's given a LOW value will instead run dead last,
+  letting an ordinary window's own (unguarded) Esc-to-close fire first and swallow the keypress
+  before the dialog ever gets a turn. Concretely: `CGenericConfirmDialog`/`CGenericMenuDialog` were
+  first set to `0.0f` intending "runs before everything," which actually put them below
+  `CMyInventory`'s un-overridden `CObject` default (`3.0f`) — so with the Chaos Mix Menu dialog,
+  Mix Inventory, and the regular Inventory all open, Esc closed the Inventory instead of the modal
+  dialog. Fixed by giving both dialogs `100.0f` (comfortably above every other override in the
+  codebase — the highest existing tier before this was `10.0f`, shared by `CWindowMenu`/
+  `CMessageBoxMng`/`COptionWindow`/etc.), so they always run first under the manager's real
+  descending sort regardless of what else is open. **Do not "fix" the comparator itself** — it's
+  long-standing and ~15 other classes are already calibrated against its actual (descending)
+  behavior; treat "higher `GetKeyEventOrder()` = runs first" as the real contract when adding or
+  auditing any class's value, and don't trust a same-file comment that says otherwise (several
+  didn't, until this was found). `HotKey.cpp`'s Esc handler additionally still guards explicitly
+  against `g_pGenericConfirmDialog`/`g_pGenericMenuDialog` being visible before auto-opening the
+  system menu (belt-and-suspenders; with the ordering now correct this guard should never actually
+  trigger, but costs nothing to keep) — any *third* dialog primitive built the same way should get
+  the same high `GetKeyEventOrder()`, not a copy of that guard.
 - **RmlUi's own default `display` value is `inline`, not `block`, for every element including
   `<div>`** (confirmed against the vendored source, `StyleSheetSpecification.cpp` — there's no
   browser-style user-agent stylesheet giving `<div>` a block default the way HTML does). An
@@ -1111,8 +1168,7 @@ per class):
   - `input.Mode::Text` has 9 and `input.Mode::NumericKeypad` has 3 (as of 2026-09-14 --
     see `dialog-migration-plan.md`'s "Text input"/"Numeric keypad" entries) -- every unconsumed field
     still defaults to unset, so pre-existing call sites are unaffected. `Mode::NumericKeypad`
-    builds clean but is not yet in-game-tested (unlike `Mode::Text`, which was tested and needed a
-    text-color fix -- treat this the same way until confirmed). See `dialog-migration-plan.md`'s
+    is in-game-tested and confirmed working (2026-09-15). See `dialog-migration-plan.md`'s
     own entry for what's deliberately out of scope (the older `g_iChatInputType == 0` input path;
     input-row/keypad/progress-bar layout geometry not yet visually verified against a real
     consumer). Porting `input.Mode::Text` also surfaced a real primitive gap, now closed:
@@ -1160,9 +1216,21 @@ per class):
   One incidental bug found and fixed while porting: `WSclient.cpp` relied on an accidental file-scope
   `using namespace mu::ui::window;` that leaked in via the now-deleted `MsgBoxIGSCommon.h`'s own
   (unwrapped) using-directive — replaced with an explicit `using namespace mu::ui::window;` in
-  `WSclient.cpp` itself rather than re-relying on a transitive leak. **Not yet in-game-tested** —
-  this is `title`'s first real exercise (see the extensions entry above), so treat it with the same
-  caution `Mode::Text`/`Mode::NumericKeypad` needed on their own first tests.
+  `WSclient.cpp` itself rather than re-relying on a transitive leak. **In-game-tested and confirmed
+  working (2026-09-15)** — this was `title`'s first real exercise (see the extensions entry above)
+  and `item3D`'s first non-`C3DItemCommonMsgBox` use.
+- **Duel dialogs** (`CDuelMsgBoxLayout`/`CDuelResultMsgBoxLayout`) — **done** (2026-09-15). Both
+  render a fixed native sprite (`newui_DuelWindow.tga`, 148x138) with a caption drawn on top of it,
+  then a few lines of body text — a shape only these two classes use anywhere, distinct from
+  `item3D`'s live-rendered 3D icon. Added `GenericDialogConfig::Portrait2D` for it (`Overlay`:
+  caption on the sprite, matching native; `Beside`: icon-left/text-right like `item3D`, no consumer
+  yet), named generically rather than duel-specific since the primitive itself isn't. Also added
+  `GenericDialogConfig::tallPanel`: grows `#panel` (both fg/bg documents, both themes) via a "tall"
+  CSS class instead of relying on `.gcd-text-col`'s scrollbar, for content that doesn't comfortably
+  fit the default height (a `Portrait2D`, or `Mode::NumericKeypad`'s digit pad) where scrolling
+  mid-interaction is bad UX — applied to both Duel dialogs and the 3 vault-PIN keypad dialogs. The
+  bg document has no data model of its own, so its `#panel` picks up the "tall" class imperatively
+  from `Show()`/`ShowNext()` instead of a binding. In-game-tested and confirmed working, both themes.
 - **Misc**: `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) are dialog-shaped but
   don't fit the confirm-box mold at all (help overlay, per-window popup menu, command picker) —
   out of `CGenericConfirmDialog`'s scope entirely, would need their own primitives if ported.

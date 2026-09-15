@@ -84,6 +84,7 @@
 #include "UI/Inventory/LuckyItemWnd.h"
 #include "UI/Core/WindowMuHelper.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/GenericMenuDialog.h"
 
 namespace mu::ui::window
 {
@@ -232,6 +233,7 @@ namespace mu::ui::window
         CMuHelperExt* m_pNewUIMuHelperExt;
         CMuHelperSkillList* m_pNewUIMuHelperSkillList;
         CGenericConfirmDialog* m_pGenericConfirmDialog;
+        CGenericMenuDialog* m_pGenericMenuDialog;
 
         bool CreateChatCommandWindow();
 

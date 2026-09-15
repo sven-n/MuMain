@@ -185,37 +185,8 @@ namespace mu::ui::window
         CMessageBoxButton m_BtnCancel;
     };
 
-    class CSystemMenuMsgBox : public CMessageBoxBase
-    {
-    public:
-        CSystemMenuMsgBox();
-        virtual ~CSystemMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT GameOverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ChooseServerBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ChooseCharacterBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT OptionBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-        void RenderFrame();
-        void RenderButtons();
-
-        // button
-        CMessageBoxButton m_BtnGameOver;
-        CMessageBoxButton m_BtnChooseServer;
-        CMessageBoxButton m_BtnChooseCharacter;
-        CMessageBoxButton m_BtnOption;
-        CMessageBoxButton m_BtnCancel;
-    };
+    // CSystemMenuMsgBox/CSystemMenuMsgBoxLayout ported to ShowSystemMenuDialog() (WindowCommon.h),
+    // a proof-of-concept for CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
 
     class CBloodCastleResultMsgBox : public CMessageBoxBase
     {
@@ -281,105 +252,10 @@ namespace mu::ui::window
         CMessageBoxButton m_BtnOk;
     };
 
-    class CChaosMixMenuMsgBox : public CMessageBoxBase
-    {
-        static constexpr float MIDDLE_COUNT = 13.0f;
-    public:
-        CChaosMixMenuMsgBox();
-        virtual ~CChaosMixMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT GeneralMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ChaosMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT Mix380BtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnGeneralMix;
-        CMessageBoxButton m_BtnChaosMix;
-        CMessageBoxButton m_BtnMix380;
-        CMessageBoxButton m_BtnCancel;
-    };
-
-    class CTrainerMenuMsgBox : public CMessageBoxBase
-    {
-    public:
-        CTrainerMenuMsgBox();
-        ~CTrainerMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RecoverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ReviveBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnRecover;
-        CMessageBoxButton m_BtnRevive;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
-
-    class CTrainerRecoverMsgBox : public CMessageBoxBase
-    {
-    public:
-        CTrainerRecoverMsgBox();
-        ~CTrainerRecoverMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RecoverDarkSpiritrBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RecoverDarkHorseBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnRecoverDarkSpirit;
-        CMessageBoxButton m_BtnRecoverDarkHorse;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
+    // CChaosMixMenuMsgBox/CTrainerMenuMsgBox/CTrainerRecoverMsgBox ported to
+    // ShowChaosMixMenuDialog()/ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() (WindowCommon.h),
+    // all onto CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h) -- see
+    // docs/rmlui-ui-system/dialog-migration-plan.md.
 
     class CElpisMsgBox : public CMessageBoxBase
     {
@@ -546,203 +422,13 @@ namespace mu::ui::window
         CMessageBoxButton m_BtnCancel;
     };
 
-    class CCherryBlossomMsgBox : public CMessageBoxBase
-    {
-    public:
-        CCherryBlossomMsgBox();
-        ~CCherryBlossomMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT WhiteCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RedCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT GodCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnWhiteCB;
-        CMessageBoxButton m_BtnRedCB;
-        CMessageBoxButton m_BtnGoldCB;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
-
-    class CLuckyTradeMenuMsgBox : public CMessageBoxBase
-    {
-    public:
-        CLuckyTradeMenuMsgBox();
-        ~CLuckyTradeMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT LuckyItemTradeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT LuckyItemRefineryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnTrade;
-        CMessageBoxButton m_BtnRefinery;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
-
-    class CSeedMasterMenuMsgBox : public CMessageBoxBase
-    {
-    public:
-        CSeedMasterMenuMsgBox();
-        ~CSeedMasterMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExtractSeedBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT SeedSphereBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnExtractSeed;
-        CMessageBoxButton m_BtnSeedSphere;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
-
-    class CSeedInvestigatorMenuMsgBox : public CMessageBoxBase
-    {
-    public:
-        CSeedInvestigatorMenuMsgBox();
-        ~CSeedInvestigatorMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AttachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT DetachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnAttachSocket;
-        CMessageBoxButton m_BtnDetachSocket;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
-
-    class CResetCharacterPointMsgBox : public CMessageBoxBase
-    {
-    public:
-        CResetCharacterPointMsgBox();
-        ~CResetCharacterPointMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ResetCharacterPointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetButtonInfo();
-        bool isCharacterEquipmentItem();
-        void SetAddCallbackFunc();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-    private:
-        CMessageBoxButton m_ResetCharacterPointBtn;
-        CMessageBoxButton m_BtnExit;
-        int m_iMiddleCount;
-    };
-
-    class CDelgardoMainMenuMsgBox : public CMessageBoxBase
-    {
-    public:
-        CDelgardoMainMenuMsgBox();
-        ~CDelgardoMainMenuMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        bool Update();
-        bool Render();
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT RegBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExchangeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        // buttons
-        CMessageBoxButton m_BtnReg;
-        CMessageBoxButton m_BtnExchange;
-        CMessageBoxButton m_BtnExit;
-
-        int m_iMiddleCount;
-    };
+    // CCherryBlossomMsgBox/CLuckyTradeMenuMsgBox/CSeedMasterMenuMsgBox/CSeedInvestigatorMenuMsgBox/
+    // CResetCharacterPointMsgBox/CDelgardoMainMenuMsgBox ported to ShowCherryBlossomMenuDialog()/
+    // ShowLuckyTradeMenuDialog()/ShowSeedMasterMenuDialog()/ShowSeedInvestigatorMenuDialog()/
+    // ShowResetCharacterPointDialog()/ShowDelgardoMainMenuDialog() (WindowCommon.h), all onto
+    // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h). ShowCherryBlossomMenuDialog() has no
+    // live callers -- same as its native predecessor (grep-confirmed zero CreateMessageBox call
+    // sites even before this port).
 
     class CUseFruitCheckMsgBoxLayout : public TMsgBoxLayout<CUseFruitCheckMsgBox>
     {
@@ -781,24 +467,6 @@ namespace mu::ui::window
     };
 
     class CChaosCastleResultMsgBoxLayout : public TMsgBoxLayout<CChaosCastleResultMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CChaosMixMenuMsgBoxLayout : public TMsgBoxLayout<CChaosMixMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CTrainerMenuMsgBoxLayout : public TMsgBoxLayout<CTrainerMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CTrainerRecoverMsgBoxLayout : public TMsgBoxLayout<CTrainerRecoverMsgBox>
     {
     public:
         bool SetLayout();
@@ -882,11 +550,6 @@ namespace mu::ui::window
         bool SetLayout();
     };
 
-    class CSystemMenuMsgBoxLayout : public TMsgBoxLayout<CSystemMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
 
     class CGuild_ToPerson_PositionLayout : public TMsgBoxLayout<CGuild_ToPerson_Position>
     {
@@ -894,40 +557,6 @@ namespace mu::ui::window
         bool SetLayout();
     };
 
-    class CCherryBlossomMsgBoxLayout : public TMsgBoxLayout<CCherryBlossomMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CSeedMasterMenuMsgBoxLayout : public TMsgBoxLayout<CSeedMasterMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-    class CSeedInvestigatorMenuMsgBoxLayout : public TMsgBoxLayout<CSeedInvestigatorMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CResetCharacterPointMsgBoxLayout : public TMsgBoxLayout<CResetCharacterPointMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CDelgardoMainMenuMsgBoxLayout : public TMsgBoxLayout<CDelgardoMainMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
-
-    class CLuckyTradeMenuMsgBoxLayout : public TMsgBoxLayout<CLuckyTradeMenuMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
 }
 
 #endif // _NEWUICUSOMMESSAGEBOX_H_

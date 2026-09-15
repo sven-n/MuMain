@@ -1,0 +1,140 @@
+/* Modern theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Reuses base.rcss's
+   shared forged-dialog shell directly (.modern-frame/.modern-shell-edge/.modern-groove/
+   .modern-header-rail/.modern-content-well) -- the same pieces sys_menu.rcss already proves for
+   "a small forged-iron dialog with no hero-banner," so this file only supplies layout, not paint. */
+
+/* #panel is centered via .center-both, dp throughout (LayoutMode::Dialog window). Same 230dp
+   width and 260dp height as legacy's own copy, for visual consistency between the two themes and
+   with generic_confirm_dialog's own panel width. */
+#panel {
+	width: 230dp;
+	height: 260dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-primary);
+}
+
+/* Recessed content plane (base.rcss's .modern-content-well) -- positioned here since that shared
+   class only supplies paint, not position/size (see its own comment: "position stays the
+   consuming window's own responsibility"). pointer-events:auto overrides the shared class's own
+   `none` -- .modern-content-well is normally a pure backdrop with interactive content positioned
+   as separate siblings elsewhere (see sys_menu.rml's own #btn_* buttons), but this dialog nests
+   its buttons directly inside the well instead, so they need real button pointer-events to reach
+   through it. */
+.gmd-content-well {
+	left: 14dp;
+	right: 14dp;
+	top: 10dp;
+	bottom: 16dp;
+	pointer-events: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+/* With a title, the header rail (base.rcss's .modern-header-rail, top:7dp height:38dp) visually
+   overlaps this well's own top edge -- painting order alone (well before rail in the .rml)
+   already keeps the rail's opaque fill on top there, but the well's own FLEX CONTENT still needs
+   to clear the rail's bottom edge, hence this padding rather than moving the well's own box.
+   justify-content also switches to flex-start here -- see ../../generic_menu_dialog.rcss's own
+   copy of this comment for why (centering the remainder under the banner would produce a large,
+   content-dependent gap above the first line/button; untitled dialogs keep centering since they
+   have no banner to compete with). */
+.gmd-content-well.has-title {
+	padding-top: 40dp;
+	justify-content: flex-start;
+}
+
+.gmd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: token(text-secondary);
+	font-size: 10dp;
+	line-height: 15dp;
+	margin-bottom: 4dp;
+}
+.gmd-line.bold { font-weight: bold; color: token(text-warm); }
+
+/* No explicit column count -- see ../../generic_menu_dialog.rcss's own copy of this comment for
+   why row + flex-wrap (derived from button count/width vs. available space) replaces a
+   caller-specified column knob. overflow shorthand order and pointer-events follow the exact
+   same reasoning as .gcd-text-col in generic_confirm_dialog.rcss. */
+.gmd-button-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 100%;
+	max-height: 100%;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+.gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: token(metal-rail-dark); }
+.gmd-button-row scrollbarvertical sliderbar { background-color: token(metal-edge); }
+.gmd-button-row scrollbarvertical sliderbar:hover,
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: token(metal-highlight); }
+.gmd-button-row scrollbarvertical sliderarrowdec,
+.gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
+.gmd-button-row scrollbarhorizontal { height: 0; }
+
+/* Repeated unit of .gmd-button-row -- see legacy's own copy of this rule for the full reasoning
+   (button + its own optional description lines, stacked in a column; the margin that used to
+   live on .gmd-btn moved here). */
+.gmd-button-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 128dp;
+	margin: 0 3dp 6dp 3dp;
+}
+.gmd-button-cell.compact { width: 64dp; }
+/* See legacy's own copy of this rule for why. */
+.gmd-button-cell.has-lines { margin-bottom: 10dp; }
+
+/* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
+   ordinary flex children, same technique generic_confirm_dialog.rcss's own item3d-anchor/keypad
+   buttons already use. 128dp/64dp match legacy's own copy of this rule (native's two button
+   sizes) for consistency between themes. */
+.gmd-btn {
+	position: static;
+	width: 128dp;
+	height: 30dp;
+}
+.gmd-btn.compact { width: 64dp; }
+/* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
+   data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
+
+/* Static per-button hint text -- same reasoning as legacy's own copy of this rule (known at
+   Show() time, so a plain :hover reveal suffices, no need for the heavier C++-positioned tooltip
+   panel main_frame.rml's own skill tooltip uses). */
+.gmd-tooltip {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: 100%;
+	margin-bottom: 4dp;
+	transform: translateX(-50%);
+	width: 140dp;
+	white-space: normal;
+	text-align: center;
+	font-size: 10dp;
+	font-weight: normal;
+	color: token(text-primary);
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-frame);
+	padding: 3dp 6dp;
+	pointer-events: none;
+}
+.gmd-btn:hover .gmd-tooltip {
+	display: block;
+}
+/* Guards against a hover-reveal when there's no tooltip text -- matches the hover rule above's
+   own specificity so this later declaration wins the cascade tie; see legacy's own copy of this
+   rule for why not !important (unsupported by this engine's stylesheet parser). */
+.gmd-btn:hover .gmd-tooltip.hidden {
+	display: none;
+}

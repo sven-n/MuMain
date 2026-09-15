@@ -334,8 +334,8 @@ void CGenericConfirmDialog::Resolve(bool primary)
     if (m_pRmlBgDoc)
         m_pRmlBgDoc->Hide();
 
-    // Same cleanup CUIPopup::Close() does for its own POPUP_INPUT case -- release the shared
-    // widget/IME state so the next window to use g_pSingleTextInputBox doesn't inherit it.
+    // Release the shared widget/IME state so the next window to use g_pSingleTextInputBox
+    // doesn't inherit it.
     if (cfg.input && cfg.input->mode == GenericDialogConfig::InputField::Mode::Text)
         ResetInputWidgetState();
 
@@ -467,11 +467,16 @@ bool CGenericConfirmDialog::UpdateKeyEvent()
         {
             ::PlayBuffer(SOUND_CLICK01);
             Resolve(true);
+            // Fully consumed -- see CGenericMenuDialog::UpdateKeyEvent()'s own copy of this
+            // comment for why (this object now runs before CHotKey; !IsVisible() here could let
+            // the same keypress also reach CHotKey the instant this dialog closes).
+            return false;
         }
         else if (mu::ui::window::IsPress(VK_ESCAPE))
         {
             ::PlayBuffer(SOUND_CLICK01);
             Resolve(m_Active.buttons == GenericDialogConfig::ButtonSet::Ok);
+            return false;
         }
     }
 

@@ -3,6 +3,7 @@
 #include "UI/Dialogs/WindowMenu.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/Core/WindowCommon.h" // ShowSystemMenuDialog
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "UI/Widgets/UIControls.h"
@@ -80,7 +81,7 @@ bool mu::ui::window::CWindowMenu::UpdateMouseEvent()
         case 0:
         {
             g_pNewUISystem->Hide(mu::ui::window::INTERFACE_WINDOW_MENU);
-            mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSystemMenuMsgBoxLayout));
+            mu::ui::window::ShowSystemMenuDialog();
             return false;
         }
         break;

@@ -371,22 +371,73 @@ before starting real work here; don't trust the exact class list below as final.
     `CTextInputMsgBox` got last batch. `MAX_KEYPADINPUT`/`MAX_PASSWORD_SIZE` (shared `_define.h`
     constants `CKeyPadMsgBox` also used) were left alone — still used by unrelated code
     (`g_lpszKeyPadInput` in `ZzzInventory.cpp`).
-  - Build (zero new warnings) + both RmlUi verification scripts passed. `Mode::NumericKeypad` is
-    now proven building the same way `Mode::Text` was last batch, but **not yet in-game-tested** —
-    given last batch's own invisible-text bug on `Mode::Text`'s first real exercise, treat this the
-    same way: ask the user to test both live flows (locked-vault item/zen withdrawal PIN verify,
+  - Build (zero new warnings) + both RmlUi verification scripts passed. **In-game-tested and
+    confirmed working (2026-09-15)**, both live flows (locked-vault item/zen withdrawal PIN verify,
     and the full vault-lock chain: PIN choose → confirm match/mismatch/all-same-digit → WEBZEN
-    password) before considering it actually done, not just built.
+    password).
 - **3D item preview**: `CUseFruitCheckMsgBoxLayout` — `item3D` now exists, see above.
 - **Gem-selection menus** (bespoke multi-button, not OK/Cancel): `CGemIntegrationMsgBoxLayout`,
   `CGemIntegrationUnityMsgBoxLayout`, `CGemIntegrationDisjointMsgBoxLayout`.
 - **Fixed-format result/ranking tables** (custom `RenderTexts`, no `AddMsg`):
   `CBloodCastleResultMsgBoxLayout`, `CDevilSquareRankMsgBoxLayout`, `CChaosCastleResultMsgBoxLayout`.
-- **Multi-option menus** (3+ named action buttons): `CChaosMixMenuMsgBoxLayout`,
-  `CTrainerMenuMsgBoxLayout`, `CTrainerRecoverMsgBoxLayout`, `CElpisMsgBoxLayout`,
-  `CSystemMenuMsgBoxLayout`, `CCherryBlossomMsgBoxLayout`, `CSeedMasterMenuMsgBoxLayout`,
-  `CSeedInvestigatorMenuMsgBoxLayout`, `CDelgardoMainMenuMsgBoxLayout`, `CLuckyTradeMenuMsgBoxLayout`,
-  `CResetCharacterPointMsgBoxLayout`, `CGuild_ToPerson_PositionLayout`.
+- **Multi-option menus** (3+ named action buttons) -- **new primitive built (2026-09-15)**:
+  `CGenericMenuDialog`/`GenericMenuConfig` (`UI/Dialogs/GenericMenuDialog.h/.cpp`), a sibling to
+  `CGenericConfirmDialog` for an arbitrary N-button list instead of two fixed OK/Cancel slots. No
+  fg/bg document split (no consumer needs item3D); modern theme reuses base.rcss's shared
+  `.modern-frame`/`.modern-shell-edge`/`.modern-groove`/`.modern-header-rail`/`.modern-content-well`
+  directly (the same pieces `sys_menu.rcss` already proves), so it needed no bespoke paint of its
+  own, unlike `CGenericConfirmDialog`. Buttons are a real `data-for`-bound array using RmlUi's own
+  `it_index` loop variable in the click handler (`char_make.rml`'s job-select buttons are the
+  proven precedent for this) -- not a fixed-slot hack like the numeric keypad. Per-button
+  `tooltip` (plain CSS `:hover` reveal) and `enabled` (reuses `.btn.disabled`) are supported but
+  have no real consumer yet. No explicit column count: `.gmd-button-row` is plain `flex-wrap`,
+  so how many buttons fit per row falls out of button width vs. available width on its own --
+  every current consumer's fixed 128dp buttons only ever fit one per row, reproducing their own
+  single-column stack for free.
+
+  [x] `CSystemMenuMsgBoxLayout` -- proof-of-concept port, done. `ShowSystemMenuDialog()`
+  (`UI/Core/WindowCommon.h/.cpp`), 2 call sites (`HotKey.cpp`'s Esc handler, `WindowMenu.cpp`'s
+  menu item 0). All 5 buttons keep native's own uniform 108x29 size (this is the one class in
+  this bucket where Cancel is NOT the smaller size). Native class removed; grep-confirmed zero
+  remaining references. Build clean, both RmlUi verification scripts pass. **In-game tested and
+  signed off (2026-09-15)**, alongside the other 9 below.
+
+  [x] Remaining 9 -- done (2026-09-15), same primitive, all free functions in `WindowCommon.h`/
+  `CustomMessageBox.cpp`: `ShowChaosMixMenuDialog()` (`MixInventory.cpp`'s `OpeningProcess`),
+  `ShowTrainerMenuDialog()`/`ShowTrainerRecoverDialog()` (the Recover button on the first opens
+  the second, same nesting native had; `WSclient.cpp` opcode 7), `ShowSeedMasterMenuDialog()`/
+  `ShowSeedInvestigatorMenuDialog()`/`ShowResetCharacterPointDialog()`/
+  `ShowDelgardoMainMenuDialog()`/`ShowLuckyTradeMenuDialog()` (`WSclient.cpp` opcodes 0x17/0x18/
+  0x19/0x20/0x26), `ShowCherryBlossomMenuDialog()` (no live caller, see below). All native classes
+  and their `*Layout::SetLayout()` removed; grep-confirmed zero remaining references. `cfg.onCancel`
+  is set to the same lambda as the trailing Cancel/Exit button wherever that button has a real side
+  effect (e.g. ChaosMixMenu's Cancel also hides/clears the mix inventory behind it) -- native itself
+  never wired Esc for any of these 9 (no `MSGBOX_EVENT_PRESSKEY_ESC` handler), so without this an
+  Esc-close newly made possible by this primitive could leave a caller window stuck half-configured.
+  `CTrainerRecoverMsgBox`'s native per-pet repair-cost sentence (`npcBreeder::CalcRecoveryZen`,
+  computed once at `Show()` time) was folded into `cfg.lines` (prefixed with the pet's own name)
+  rather than adding a per-button caption field to the primitive for this one consumer.
+  `ShowCherryBlossomMenuDialog()` faithfully ports `CCherryBlossomMsgBox` as-is including its 3 color
+  buttons being no-ops beyond closing (native bug/unfinished feature, not introduced here) -- and
+  grep-confirmed there was never a live `CreateMessageBox()` call site for this class even before
+  the port, so it has none now either. Build clean (378/379, no new warnings), both RmlUi
+  verification scripts pass. **In-game tested and signed off (2026-09-15)**. Testing surfaced and
+  fixed several primitive-level bugs along the way: Esc not closing dialogs at all, per-button
+  description text (`MenuButton::lines`, a nested `data-for`) rendering as one bunched block
+  instead of interleaved with its own button, insufficient button-row/bottom padding, a missing
+  legacy-theme back-fill sprite, a content-vs-title-banner layout gap in both themes, and (the
+  significant one) `CGenericMenuDialog`/`CGenericConfirmDialog` losing the Esc keypress to
+  whatever plain window happened to sort ahead of them under `CManager::CompareKeyEventOrder`'s
+  real descending sort -- see STATUS.md's "Findings worth knowing" for that last one. All 10
+  dialogs (this proof-of-concept plus the 9 below) now close correctly via Esc even with other
+  windows open behind them, and Esc on Cancel/Exit runs the same side-effecting lambda as clicking
+  that button (verified via `ShowChaosMixMenuDialog()`'s `cfg.onCancel`).
+
+  `CElpisMsgBoxLayout`, `CGuild_ToPerson_PositionLayout`, and
+  the two Gem Integration classes stay native -- bespoke shapes this primitive's plain "click
+  closes" button model doesn't fit (Elpis: 2 of its 4 buttons swap body text in place instead of
+  closing; Guild-to-person: two buttons are a radio-select pair, not navigation; Gem Integration:
+  variable/data-driven button count plus an embedded list widget).
 - **Progress bar / timed auto-close** (`CProgressMsgBox`/`CCursedTempleProgressMsgBox`-based, needs
   a progress-bar concept — not built): `CCrownSwitchPopLayout`, `CCrownSwitchPushLayout`,
   `CCrownSwitchOtherPushLayout`, `CSealRegisterStartLayout`, `CSealRegisterSuccessLayout`,
@@ -407,7 +458,11 @@ before starting real work here; don't trust the exact class list below as final.
   matches a genuinely distinct native rendering shape for exactly two real consumers today,
   following the same "one field per recurring native shape" pattern
   as `title`/`input`/`progress`/`item3D`. Both native classes + their `CustomMessageBox.h`/`.cpp`
-  declarations/implementations removed; grep-confirmed zero remaining references.
+  declarations/implementations removed; grep-confirmed zero remaining references. Also gained
+  `GenericDialogConfig::tallPanel` alongside this (grows `#panel` via a CSS class instead of relying
+  on `.gcd-text-col`'s scrollbar, for content that doesn't comfortably fit the default height) —
+  applied to both Duel dialogs and the 3 `Mode::NumericKeypad` vault-PIN dialogs. **In-game-tested
+  and confirmed working (2026-09-15)**, both themes.
 
 ## Other native dialog subsystems (out of `CommonMessageBox`/`CustomMessageBox`, tracked here too)
 
@@ -437,11 +492,20 @@ before starting real work here; don't trust the exact class list below as final.
     picker plus its own OK/Cancel) stays fully native, same DOESNT_FIT category as
     `CChaosMixMenuMsgBoxLayout` etc. `CUIGuildInfo::CloseMyPopup()`/`m_dwPopupID` also stay
     unchanged — they now exclusively (and correctly) govern just that surviving popup.
-  - **Optional follow-up, not done**: `UIPopup.cpp`/`.h`'s `POPUP_OK`/`POPUP_OKCANCEL`/
-    `POPUP_YESNO`/`POPUP_INPUT`/`POPUP_TIMEOUT` branches in `UpdateInput()`/`Render()`/`PressKey()`
-    are now unreachable (zero live callers pass those flags anymore) but were left in place —
-    trimming them is a separate, slightly riskier change to a still-alive shared class, not blocking
-    this batch.
+  - **Follow-up done (2026-09-15)**: `UIPopup.cpp`/`.h` trimmed to what the one surviving caller
+    (`UIGuildInfo.cpp`'s Appoint picker) actually exercises. Confirmed via grep that
+    `SetPopup()`/`SetPopupExtraFunc()` have exactly one call site, always `POPUP_CUSTOM` with a
+    `NULL` `ResultFunc`, always immediately followed by `SetPopupExtraFunc()` — so every built-in
+    OK/OK-Cancel/Yes-No/timeout/text-input branch in `SetPopup()`/`CancelPopup()`/`PressKey()`/
+    `UpdateInput()`/`Render()`, plus their backing members (`m_OkButton`/`m_CancelButton`/
+    `m_YesButton`/`m_NoButton`, the text array, timeout/input state) and macros
+    (`POPUP_OK`/`POPUP_OKCANCEL`/`POPUP_YESNO`/`POPUP_TIMEOUT`/`POPUP_INPUT`,
+    `POPUP_RESULT_OK`/`_CANCEL`/`_YES`/`_NO`/`_TIMEOUT`, `POPUP_ALIGN`), were dead. `SetPopup()`'s
+    signature dropped to just `(ResultFunc)`; `CUIManager::IsInputEnable()`'s now-always-false
+    `g_pUIPopup->IsInputEnable()` clause removed too. Also deleted two fully-dead
+    `POPUP_RESULT`-shaped free functions this cleanup exposed as unreferenced from anywhere:
+    `DenyCrownRegistPopupClose` (`WSclient.cpp`) and `DoEditGuildMarkConfirmAction`
+    (`UIGuildMaster.cpp`). Build clean.
   - Also removed one unrelated pre-existing dead `extern int DoBreakUpGuildAction_New(POPUP_RESULT)`
     declaration found in `CommonMessageBox.cpp` while working in this area (no definition, no
     caller, anywhere — stale leftover, unrelated to this session's own `DoBreakUpGuildAction`).
@@ -526,10 +590,8 @@ before starting real work here; don't trust the exact class list below as final.
   explicit `using namespace mu::ui::window;` directly to `WSclient.cpp` instead of re-relying on a
   transitive accident.
 
-  **Not yet in-game-tested** — this is `title`'s first real exercise (previously infrastructure-only)
-  and `item3D`'s first non-`C3DItemCommonMsgBox` use; treat with the same caution
-  `Mode::Text`/`Mode::NumericKeypad` needed on their own first tests (both needed a real fix or are
-  still pending verification).
+  **In-game-tested and confirmed working (2026-09-15)** — this was `title`'s first real exercise
+  (previously infrastructure-only) and `item3D`'s first non-`C3DItemCommonMsgBox` use.
 - **Explicitly out of scope for `CGenericConfirmDialog`** (would need their own primitives if ever
   ported): `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) — help overlay,
   per-window popup menu, command picker; none are confirm-dialog shaped.

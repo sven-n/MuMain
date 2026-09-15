@@ -58,6 +58,7 @@
 #include "UI/Dialogs/CommonMessageBox.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Core/WindowCommon.h" // ShowTrainerMenuDialog/ShowSeedMasterMenuDialog/etc.
 #include "UI/Inventory/InventoryCtrl.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "GameLogic/Skills/SummonSystem.h"
@@ -6451,7 +6452,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         break;
 
     case 7:
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTrainerMenuMsgBoxLayout));
+        mu::ui::window::ShowTrainerMenuDialog();
         break;
 
     case INDEX_NPC_LAHAP:
@@ -6524,22 +6525,22 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x17:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSeedMasterMenuMsgBoxLayout));
+        mu::ui::window::ShowSeedMasterMenuDialog();
     }
     break;
     case 0x18:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CSeedInvestigatorMenuMsgBoxLayout));
+        mu::ui::window::ShowSeedInvestigatorMenuDialog();
     }
     break;
     case 0x19:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CResetCharacterPointMsgBoxLayout));
+        mu::ui::window::ShowResetCharacterPointDialog();
     }
     break;
     case 0x20:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CDelgardoMainMenuMsgBoxLayout));
+        mu::ui::window::ShowDelgardoMainMenuDialog();
     }
     break;
     case 0x21:
@@ -6572,7 +6573,7 @@ BOOL ReceiveTalk(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     break;
     case 0x26:
     {
-        mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CLuckyTradeMenuMsgBoxLayout));
+        mu::ui::window::ShowLuckyTradeMenuDialog();
     }
     break;
     default:
@@ -11717,13 +11718,6 @@ void ReceiveCrownSwitchState(const BYTE* ReceiveBuffer)
     }
     break;
     }
-}
-
-int DenyCrownRegistPopupClose(POPUP_RESULT Result)
-{
-    if (Result & POPUP_RESULT_ESC)
-        return 0;
-    return 1;
 }
 
 void ReceiveCrownRegist(const BYTE* ReceiveBuffer)

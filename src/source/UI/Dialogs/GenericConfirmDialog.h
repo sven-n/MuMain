@@ -157,7 +157,16 @@ namespace mu::ui::window
         bool IsVisible() const override { return m_bActive; }
         // Above CMsgWin's 50.0f -- a confirm dialog should sit on top of an ordinary message window.
         float GetLayerDepth() override { return 60.0f; }
-        float GetKeyEventOrder() override { return 10.0f; }
+        // CManager::CompareKeyEventOrder (WindowManager.cpp) sorts DESCENDING -- the HIGHEST
+        // GetKeyEventOrder() runs FIRST, not the lowest (`return a > b`). CManager::UpdateKeyEvent()
+        // stops at the first object whose UpdateKeyEvent() returns false, and while visible this
+        // is a true modal (see UpdateMouseEvent() above): it must claim Enter/Escape before every
+        // other registered object gets a look, including a plain window's own Esc-to-close (e.g.
+        // CMyInventory, which has no such guard and will otherwise close itself first and swallow
+        // the keypress). 100.0f is comfortably above every other GetKeyEventOrder() override in
+        // the codebase today (highest existing tier is 10.0f, shared by CWindowMenu/
+        // CMessageBoxMng/COptionWindow/etc.).
+        float GetKeyEventOrder() override { return 100.0f; }
         void ReloadRmlTheme() override;
 
         // I3DRenderObj. Window3DRenderMng.cpp's shared render loop dynamic_casts each registered

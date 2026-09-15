@@ -332,7 +332,7 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                     {
                         s_eAppointStatus = (GUILD_STATUS)pText->m_GuildStatus;
                         wcscpy(s_szTargetID, pText->m_szID);
-                        m_dwPopupID = g_pUIPopup->SetPopup(NULL, 0, 0, POPUP_CUSTOM, NULL);
+                        m_dwPopupID = g_pUIPopup->SetPopup(NULL);
                         g_pUIPopup->SetPopupExtraFunc(::DoAppointAction, ::RenderAppoint);
                     }
                 }

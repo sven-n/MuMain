@@ -18,6 +18,29 @@ namespace mu::ui::window
     // ~50 call sites (mostly WSclient.cpp's cash-shop response handlers).
     bool CreateOkMessageBoxWithTitle(const std::wstring& strTitle, const std::wstring& strMsg);
 
+    // Was CSystemMenuMsgBoxLayout (CustomMessageBox.h) -- proof-of-concept port onto
+    // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h), the sibling N-button-menu primitive.
+    // Two call sites (HotKey.cpp's Esc handler, WindowMenu.cpp's menu-item 0), neither passes any
+    // parameters, so this is a plain free function like CreateOkMessageBox() above.
+    void ShowSystemMenuDialog();
+
+    // Batch of 9 more CustomMessageBox.h "multi-option menu" classes ported onto the same
+    // CGenericMenuDialog primitive, same reasoning/shape as ShowSystemMenuDialog() above -- see
+    // docs/rmlui-ui-system/dialog-migration-plan.md's "Multi-option menus" entry. All plain free
+    // functions (no parameters; each reads the globals it needs directly, same as the native
+    // classes it replaces).
+    void ShowChaosMixMenuDialog();
+    void ShowTrainerMenuDialog();
+    void ShowTrainerRecoverDialog();
+    void ShowSeedMasterMenuDialog();
+    void ShowSeedInvestigatorMenuDialog();
+    void ShowResetCharacterPointDialog();
+    void ShowDelgardoMainMenuDialog();
+    void ShowLuckyTradeMenuDialog();
+    // No live callers -- same as its native predecessor CCherryBlossomMsgBox (grep-confirmed zero
+    // CreateMessageBox call sites for it even before this port). Kept for parity with the other 8.
+    void ShowCherryBlossomMenuDialog();
+
     int IsPurchaseShop();
 #define g_IsPurchaseShop mu::ui::window::IsPurchaseShop()
 

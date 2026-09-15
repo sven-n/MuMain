@@ -547,6 +547,10 @@ bool CSystem::LoadMainSceneInterface()
     m_pGenericConfirmDialog->Create(m_pNewUIMng);
     g_pGenericConfirmDialog = m_pGenericConfirmDialog;
 
+    m_pGenericMenuDialog = new CGenericMenuDialog;
+    m_pGenericMenuDialog->Create(m_pNewUIMng);
+    g_pGenericMenuDialog = m_pGenericMenuDialog;
+
     m_pNewUIMuHelper = new CUIMuHelper;
     if (m_pNewUIMuHelper->Create(m_pNewUIMng, PanelColumnX(1), 0) == false)
         return false;
@@ -649,6 +653,9 @@ void CSystem::UnloadMainSceneInterface()
 #endif // LEM_FIX_LUCKYITEM_UICLASS_SAFEDELETE
     g_pGenericConfirmDialog = nullptr;
     SAFE_DELETE(m_pGenericConfirmDialog);
+
+    g_pGenericMenuDialog = nullptr;
+    SAFE_DELETE(m_pGenericMenuDialog);
 
     ReleasePersonalItemTable();
 }

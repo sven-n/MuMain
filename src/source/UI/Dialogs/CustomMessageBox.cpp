@@ -1,6 +1,7 @@
 ﻿#include "stdafx.h"
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/Dialogs/GenericConfirmDialog.h"
+#include "UI/Dialogs/GenericMenuDialog.h"
 #include "Audio/DSPlaySound.h"
 #include "UI/Widgets/UIControls.h"
 #include "Render/Models/ZzzBMD.h"
@@ -1412,285 +1413,122 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderButtons()
 
 //////////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CSystemMenuMsgBox::CSystemMenuMsgBox()
+// Was CSystemMenuMsgBox/CSystemMenuMsgBoxLayout -- proof-of-concept port onto
+// CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h), the sibling N-button-menu primitive to
+// CGenericConfirmDialog. Declared in WindowCommon.h (its own two call sites,
+// UI/HUD/HotKey.cpp's Esc handler and UI/Dialogs/WindowMenu.cpp's menu item 0, only need the
+// declaration); implemented here rather than in WindowCommon.cpp since every global this touches
+// (Hero, g_pNewUIHotKey, g_ErrorReport, MUHelper::g_MuHelper, M34CryWolf1st, ...) was already
+// reachable from this file, unlike the genuinely generic CreateOkMessageBox()/
+// CreateOkMessageBoxWithTitle() helpers that do live in WindowCommon.cpp.
+//
+// All 5 buttons keep native's own uniform 108x29 size (MSGBOX_BTN_EMPTY_WIDTH/_HEIGHT) -- unlike
+// most other CustomMessageBox.h menu classes, this one does NOT give Cancel the smaller
+// MSGBOX_BTN_EMPTY_SMALL_WIDTH treatment, so no button here sets compact=true.
+void mu::ui::window::ShowSystemMenuDialog()
 {
-}
+    GenericMenuConfig cfg;
 
-mu::ui::window::CSystemMenuMsgBox::~CSystemMenuMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CSystemMenuMsgBox::Create(float fPriority)
-{
-    int x, y, width, height;
-
-    SetAddCallbackFunc();
-
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 100;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (5 * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CSystemMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CSystemMenuMsgBox::Update()
-{
-    m_BtnGameOver.Update();
-    m_BtnChooseServer.Update();
-    m_BtnChooseCharacter.Update();
-    m_BtnOption.Update();
-    m_BtnCancel.Update();
-    return true;
-}
-
-bool mu::ui::window::CSystemMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-void mu::ui::window::CSystemMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < 5; ++i)
+    GenericMenuConfig::MenuButton btnGameOver;
+    btnGameOver.label = I18N::Game::ExitGame;
+    btnGameOver.onClick = []
     {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
+        g_ErrorReport.Write(L"> Menu - Exit game. ");
+        g_ErrorReport.WriteCurrentTime();
 
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
+        SaveOptions();
+        SaveMacro(L"Data\\Macro.txt");
 
-void mu::ui::window::CSystemMenuMsgBox::RenderButtons()
-{
-    m_BtnGameOver.Render();
-    m_BtnChooseServer.Render();
-    m_BtnChooseCharacter.Render();
-    m_BtnOption.Render();
-    m_BtnCancel.Render();
-}
-
-void mu::ui::window::CSystemMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER);
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER);
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER);
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::OptionBtnDown, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_OPTION);
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-    AddCallbackFunc(mu::ui::window::CSystemMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_PRESSKEY_ESC);
-}
-
-void mu::ui::window::CSystemMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 23;
-    m_BtnGameOver.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnGameOver.SetText(I18N::Game::ExitGame);
-
-    y += 30.f;
-    m_BtnChooseServer.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnChooseServer.SetText(I18N::Game::SelectServer);
-
-    y += 30.f;
-    m_BtnChooseCharacter.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnChooseCharacter.SetText(I18N::Game::SwitchCharacter);
-
-    y += 30.f;
-    m_BtnOption.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnOption.SetText(I18N::Game::Option385);
-
-    y += 30.f;
-    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnCancel.SetText(I18N::Game::Cancel);
-}
-
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CSystemMenuMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnGameOver.IsMouseIn() == true)
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_GAMEOVER);
-
-            if (Hero->PK) return CALLBACK_BREAK;
-
-            g_pNewUIHotKey->SetStateGameOver(true);
-
-            return CALLBACK_BREAK;
+            g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
-        if (pMsgBox->m_BtnChooseServer.IsMouseIn() == true)
+        else
         {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSESERVER);
-
-            if (Hero->PK) return CALLBACK_BREAK;
-
-            g_pNewUIHotKey->SetStateGameOver(true);
-
-            return CALLBACK_BREAK;
+            MUHelper::g_MuHelper.TriggerStop();
+            LogOut = true;
+            SocketClient->ToGameServer()->SendLogOut(LogOutType::CloseGame);
+            PostMessage(g_hWnd, WM_CLOSE, 0, 0);
+            g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
         }
-        if (pMsgBox->m_BtnChooseCharacter.IsMouseIn() == true)
+
+        if (!Hero->PK) g_pNewUIHotKey->SetStateGameOver(true);
+    };
+    cfg.buttons.push_back(std::move(btnGameOver));
+
+    GenericMenuConfig::MenuButton btnChooseServer;
+    btnChooseServer.label = I18N::Game::SelectServer;
+    btnChooseServer.onClick = []
+    {
+        View_End_Result = false;
+        Suc_Or_Fail = -1;
+        M34CryWolf1st::CryWolfMVPInit();
+
+        g_ErrorReport.Write(L"> Menu - Join another server. ");
+        g_ErrorReport.WriteCurrentTime();
+
+        SaveOptions();
+        SaveMacro(L"Data\\Macro.txt");
+
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_CHOOSECHARACTER);
-
-            if (Hero->PK) return CALLBACK_BREAK;
-
-            g_pNewUIHotKey->SetStateGameOver(true);
-
-            return CALLBACK_BREAK;
+            g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_ERROR_MESSAGE);
         }
-        if (pMsgBox->m_BtnOption.IsMouseIn() == true)
+        else
         {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SYSTEMMENU_OPTION);
-            return CALLBACK_BREAK;
+            MUHelper::g_MuHelper.TriggerStop();
+            g_pNewUIMng->ResetActiveUIObj();
+            LogOut = true;
+            SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToServerSelection);
+            g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
         }
-        if (pMsgBox->m_BtnCancel.IsMouseIn() == true)
+
+        if (!Hero->PK) g_pNewUIHotKey->SetStateGameOver(true);
+    };
+    cfg.buttons.push_back(std::move(btnChooseServer));
+
+    GenericMenuConfig::MenuButton btnChooseCharacter;
+    btnChooseCharacter.label = I18N::Game::SwitchCharacter;
+    btnChooseCharacter.onClick = []
+    {
+        View_End_Result = false;
+        Suc_Or_Fail = -1;
+        M34CryWolf1st::CryWolfMVPInit();
+
+        g_ErrorReport.Write(L"> Menu - Join with another character. ");
+        g_ErrorReport.WriteCurrentTime();
+
+        SaveOptions();
+        SaveMacro(L"Data\\Macro.txt");
+
+        if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
         {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
+            g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_SYSTEM_MESSAGE);
         }
-    }
+        else
+        {
+            MUHelper::g_MuHelper.TriggerStop();
+            g_pNewUIMng->ResetActiveUIObj();
+            LogOut = true;
+            SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToCharacterSelection);
+            g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 1");
+        }
 
-    return CALLBACK_CONTINUE;
-}
+        if (!Hero->PK) g_pNewUIHotKey->SetStateGameOver(true);
+    };
+    cfg.buttons.push_back(std::move(btnChooseCharacter));
 
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::GameOverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_ErrorReport.Write(L"> Menu - Exit game. ");
-    g_ErrorReport.WriteCurrentTime();
+    GenericMenuConfig::MenuButton btnOption;
+    btnOption.label = I18N::Game::Option385;
+    btnOption.onClick = [] { g_pNewUISystem->Show(mu::ui::window::INTERFACE_OPTION); };
+    cfg.buttons.push_back(std::move(btnOption));
 
-    SaveOptions();
-    SaveMacro(L"Data\\Macro.txt");
+    GenericMenuConfig::MenuButton btnCancel;
+    btnCancel.label = I18N::Game::Cancel;
+    // No onClick -- native's own CancelBtnDown has no side effect beyond closing the box.
+    cfg.buttons.push_back(std::move(btnCancel));
 
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
-    {
-        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_ERROR_MESSAGE);
-    }
-    else
-    {
-        MUHelper::g_MuHelper.TriggerStop();
-        LogOut = true;
-        SocketClient->ToGameServer()->SendLogOut(LogOutType::CloseGame);
-        PostMessage(g_hWnd, WM_CLOSE, 0, 0);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 0");
-    }
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseServerBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    View_End_Result = false;
-    Suc_Or_Fail = -1;
-    M34CryWolf1st::CryWolfMVPInit();
-
-    g_ErrorReport.Write(L"> Menu - Join another server. ");
-    g_ErrorReport.WriteCurrentTime();
-
-    SaveOptions();
-    SaveMacro(L"Data\\Macro.txt");
-
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
-    {
-        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_ERROR_MESSAGE);
-    }
-    else
-    {
-        MUHelper::g_MuHelper.TriggerStop();
-        g_pNewUIMng->ResetActiveUIObj();
-        LogOut = true;
-        SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToServerSelection);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 2");
-    }
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::ChooseCharacterBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    View_End_Result = false;
-    Suc_Or_Fail = -1;
-    M34CryWolf1st::CryWolfMVPInit();
-
-    g_ErrorReport.Write(L"> Menu - Join with another character. ");
-    g_ErrorReport.WriteCurrentTime();
-
-    //  게임내에서 설정한 데이터 저장.
-    SaveOptions();
-    SaveMacro(L"Data\\Macro.txt");
-
-    if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_MIXINVENTORY))
-    {
-        g_pSystemLogBox->AddText(I18N::Game::ExitGameAfterClosingTheChaosInterface, mu::ui::window::TYPE_SYSTEM_MESSAGE);
-    }
-    else
-    {
-        MUHelper::g_MuHelper.TriggerStop();
-        g_pNewUIMng->ResetActiveUIObj();
-        LogOut = true;SocketClient->ToGameServer()->SendLogOut(LogOutType::BackToCharacterSelection);
-        g_ConsoleDebug->Write(MCD_SEND, L"0xF1 [SendRequestLogOut] 1");
-    }
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::OptionBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_OPTION);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSystemMenuMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 mu::ui::window::CBloodCastleResultMsgBox::CBloodCastleResultMsgBox()
@@ -2008,230 +1846,58 @@ void mu::ui::window::CChaosCastleResultMsgBox::RenderFrame()
 
 //////////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CChaosMixMenuMsgBox::CChaosMixMenuMsgBox()
-{
-}
-
-mu::ui::window::CChaosMixMenuMsgBox::~CChaosMixMenuMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CChaosMixMenuMsgBox::Create(float fPriority)
-{
-    int x, y, width, height;
-
-    SetAddCallbackFunc();
-
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (MIDDLE_COUNT * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CChaosMixMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CChaosMixMenuMsgBox::Update()
-{
-    m_BtnGeneralMix.Update();
-    m_BtnChaosMix.Update();
-    m_BtnMix380.Update();
-    m_BtnCancel.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CChaosMixMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CChaosMixMenuMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnGeneralMix.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_GENERALMIX);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnChaosMix.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_CHAOSMIX);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnMix380.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_MIX380);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnCancel.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(0);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(1);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(2);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CChaosMixMenuMsgBox::CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.ClearCheckRecipeResult();
-    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CChaosMixMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::GeneralMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_GENERALMIX);
-    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::ChaosMixBtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_CHAOSMIX);
-    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::Mix380BtnDown, MSGBOX_EVENT_USER_CUSTOM_MIXMENU_MIX380);
-    AddCallbackFunc(mu::ui::window::CChaosMixMenuMsgBox::CancelBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CChaosMixMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 85;
-    m_BtnGeneralMix.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnGeneralMix.SetText(I18N::Game::RegularCombination);
-
-    y = GetPos().y + 155;
-    m_BtnChaosMix.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnChaosMix.SetText(I18N::Game::ChaosWeaponCombination);
-
-    y = GetPos().y + 225;
-    m_BtnMix380.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnMix380.SetText(I18N::Game::ItemOptionCombination);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnCancel.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnCancel.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CChaosMixMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < MIDDLE_COUNT; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CChaosMixMenuMsgBox::RenderTexts()
+void mu::ui::window::ShowChaosMixMenuDialog()
 {
     wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
 
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 128, 0, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::SelectMethodOfCombination);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::SelectMethodOfCombination;
+    // No shared summary lines -- native interleaves each recipe's own blurb directly above its
+    // button instead of grouping all the body text above the whole list; see MenuButton::lines.
 
-    fPos_y += 15;
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFont);
-
+    GenericMenuConfig::MenuButton btnGeneralMix;
+    btnGeneralMix.label = I18N::Game::RegularCombination;
     mu_swprintf(szText, I18N::Game::Wings7TypesFruitDevilSInvitation);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
+    btnGeneralMix.lines.push_back({ szText, false });
     mu_swprintf(szText, I18N::Game::Dinorant1015ItemsCloakOfInvisibility, Hero->ID);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
+    btnGeneralMix.lines.push_back({ szText, false });
     mu_swprintf(szText, I18N::Game::FenrirSHornScrollOfBloodCondorSFeather, Hero->ID);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
+    btnGeneralMix.lines.push_back({ szText, false });
+    btnGeneralMix.onClick = [] { g_MixRecipeMgr.SetMixType(0); };
+    cfg.buttons.push_back(std::move(btnGeneralMix));
 
-    fPos_y += 100;
+    GenericMenuConfig::MenuButton btnChaosMix;
+    btnChaosMix.label = I18N::Game::ChaosWeaponCombination;
     mu_swprintf(szText, I18N::Game::ChaosDragonAxeChaosLightningStaff, Hero->ID);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
+    btnChaosMix.lines.push_back({ szText, false });
     mu_swprintf(szText, I18N::Game::ChaosNatureBow, Hero->ID);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
+    btnChaosMix.lines.push_back({ szText, false });
+    btnChaosMix.onClick = [] { g_MixRecipeMgr.SetMixType(1); };
+    cfg.buttons.push_back(std::move(btnChaosMix));
 
-    fPos_y += 85;
+    GenericMenuConfig::MenuButton btnMix380;
+    btnMix380.label = I18N::Game::ItemOptionCombination;
     mu_swprintf(szText, I18N::Game::Add380ItemOption, Hero->ID);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 0 * 15, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
+    btnMix380.lines.push_back({ szText, false });
+    btnMix380.onClick = [] { g_MixRecipeMgr.SetMixType(2); };
+    cfg.buttons.push_back(std::move(btnMix380));
 
-void mu::ui::window::CChaosMixMenuMsgBox::RenderButtons()
-{
-    m_BtnGeneralMix.Render();
-    m_BtnChaosMix.Render();
-    m_BtnMix380.Render();
-    m_BtnCancel.Render();
+    // Native's own CancelBtnDown side effect, mirrored onto Esc too (cfg.onCancel below) -- this
+    // dialog sits on top of an already-open MixInventory, so just closing it without also
+    // clearing/hiding that would leave it stuck half-configured.
+    auto cancelFn = []
+    {
+        g_MixRecipeMgr.ClearCheckRecipeResult();
+        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    GenericMenuConfig::MenuButton btnCancel;
+    btnCancel.label = I18N::Game::Close388;
+    btnCancel.compact = true;
+    btnCancel.onClick = cancelFn;
+    cfg.buttons.push_back(std::move(btnCancel));
+    cfg.onCancel = cancelFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 mu::ui::window::CProgressMsgBox::CProgressMsgBox()
@@ -2669,207 +2335,38 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()
 // CDuelMsgBox/CDuelResultMsgBox ported to CGenericConfirmDialog's portrait2D field --
 // see docs/rmlui-ui-system/dialog-migration-plan.md.
 
-CCherryBlossomMsgBox::CCherryBlossomMsgBox()
+void mu::ui::window::ShowCherryBlossomMenuDialog()
 {
-    m_iMiddleCount = 8;
-}
+    GenericMenuConfig cfg;
 
-CCherryBlossomMsgBox::~CCherryBlossomMsgBox()
-{
-    Release();
-}
-
-bool CCherryBlossomMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-
-    SetButtonInfo();
-
-    return true;
-}
-
-void CCherryBlossomMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool CCherryBlossomMsgBox::Update()
-{
-    m_BtnWhiteCB.Update();
-    m_BtnRedCB.Update();
-    m_BtnGoldCB.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool CCherryBlossomMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT CCherryBlossomMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CCherryBlossomMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnWhiteCB.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_CB_WHITE);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnRedCB.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_CB_RED);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnGoldCB.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_CB_GOLD);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT CCherryBlossomMsgBox::WhiteCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT CCherryBlossomMsgBox::RedCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT CCherryBlossomMsgBox::GodCBBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT CCherryBlossomMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    //	SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-    return CALLBACK_CONTINUE;
-}
-
-void CCherryBlossomMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::WhiteCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_WHITE);
-    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::RedCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_RED);
-    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::GodCBBtnDown, MSGBOX_EVENT_USER_CUSTOM_CB_GOLD);
-    AddCallbackFunc(mu::ui::window::CCherryBlossomMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void CCherryBlossomMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 50;
-    m_BtnWhiteCB.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnWhiteCB.SetText(I18N::Game::Lookup(2542));
-
-    y = GetPos().y + 100;
-    m_BtnRedCB.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRedCB.SetText(I18N::Game::Lookup(2543));
-
-    y = GetPos().y + 150;
-    m_BtnGoldCB.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnGoldCB.SetText(I18N::Game::GoldenCherryBlossomsBranches);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    // 1002 "닫기"
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void CCherryBlossomMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void CCherryBlossomMsgBox::RenderTexts()
-{
     wchar_t title[256];
+    mu_swprintf(title, L"%ls", MonsterScript[450].Name);
+    cfg.title = title;
+    cfg.lines.push_back({ I18N::Game::GoldenCherryBlossomsBranches, true });
 
-    MONSTER_SCRIPT* m = &MonsterScript[450];
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(title, L"%ls", m->Name);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + 10, title, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
+    // Native's own 3 color buttons are no-ops beyond closing the box (WhiteCBBtnDown/RedCBBtnDown/
+    // GodCBBtnDown never set a mix type or open an interface) -- faithfully ported as-is, not a
+    // bug introduced here. Combined with there being no live CreateMessageBox() call site for this
+    // class either (see WindowCommon.h's own comment), this dialog looks like unfinished/parked
+    // native content, not a working feature.
+    GenericMenuConfig::MenuButton btnWhite;
+    btnWhite.label = I18N::Game::Lookup(2542);
+    cfg.buttons.push_back(std::move(btnWhite));
 
-    wchar_t titleinfo[256];
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 0, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(titleinfo, L"%ls", I18N::Game::GoldenCherryBlossomsBranches);
-    g_pRenderText->RenderText(GetPos().x, GetPos().y + 70, titleinfo, MSGBOX_WIDTH, 0, RT3_SORT_CENTER);
-}
+    GenericMenuConfig::MenuButton btnRed;
+    btnRed.label = I18N::Game::Lookup(2543);
+    cfg.buttons.push_back(std::move(btnRed));
 
-void CCherryBlossomMsgBox::RenderButtons()
-{
-    m_BtnWhiteCB.Render();
-    m_BtnRedCB.Render();
-    m_BtnGoldCB.Render();
-    m_BtnExit.Render();
+    GenericMenuConfig::MenuButton btnGold;
+    btnGold.label = I18N::Game::GoldenCherryBlossomsBranches;
+    cfg.buttons.push_back(std::move(btnGold));
+
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    cfg.buttons.push_back(std::move(btnExit));
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 bool mu::ui::window::CUseFruitCheckMsgBoxLayout::SetLayout()
@@ -2947,18 +2444,6 @@ bool mu::ui::window::CDevilSquareRankMsgBoxLayout::SetLayout()
 bool mu::ui::window::CChaosCastleResultMsgBoxLayout::SetLayout()
 {
     CChaosCastleResultMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CChaosMixMenuMsgBoxLayout::SetLayout()
-{
-    CChaosMixMenuMsgBox* pMsgBox = GetMsgBox();
     if (0 == pMsgBox)
         return false;
 
@@ -3130,30 +2615,6 @@ bool mu::ui::window::CCursedTempleHolicItemSaveLayout::SetLayout()
     return true;
 }
 
-bool mu::ui::window::CTrainerMenuMsgBoxLayout::SetLayout()
-{
-    CTrainerMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CTrainerRecoverMsgBoxLayout::SetLayout()
-{
-    CTrainerRecoverMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
 bool mu::ui::window::CElpisMsgBoxLayout::SetLayout()
 {
     CElpisMsgBox* pMsgBox = GetMsgBox();
@@ -3166,664 +2627,106 @@ bool mu::ui::window::CElpisMsgBoxLayout::SetLayout()
     return true;
 }
 
-bool mu::ui::window::CSystemMenuMsgBoxLayout::SetLayout()
+void mu::ui::window::ShowLuckyTradeMenuDialog()
 {
-    CSystemMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
+    GenericMenuConfig cfg;
+    // Hardcoded Korean, no I18N constant -- faithfully carried over from native's own literal.
+    cfg.title = L"럭키아이템 교환NPC"; // "LuckyItem Trade NPC"
+    cfg.lines.push_back({ L"럭키아이템으로 교환하거나 제련할 수 있습니?", false });
 
-    if (false == pMsgBox->Create())
-        return false;
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCraftingDialogCloseRequest(); };
 
-    return true;
-}
+    GenericMenuConfig::MenuButton btnTrade;
+    btnTrade.label = L"럭키아이템 교환"; // "GlobalText"
+    btnTrade.onClick = [] { g_pLuckyItemWnd->SetAct(eLuckyItemType_Trade); g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND); };
+    cfg.buttons.push_back(std::move(btnTrade));
 
-bool CCherryBlossomMsgBoxLayout::SetLayout()
-{
-    CCherryBlossomMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
+    GenericMenuConfig::MenuButton btnRefinery;
+    btnRefinery.label = L"럭키아이템 제련"; // "GlobalText"
+    btnRefinery.onClick = [] { g_pLuckyItemWnd->SetAct(eLuckyItemType_Refinery); g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND); };
+    cfg.buttons.push_back(std::move(btnRefinery));
 
-    if (false == pMsgBox->Create())
-        return false;
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
 
-    return true;
-}
-
-bool mu::ui::window::CSeedMasterMenuMsgBoxLayout::SetLayout()
-{
-    CSeedMasterMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CSeedInvestigatorMenuMsgBoxLayout::SetLayout()
-{
-    CSeedInvestigatorMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CResetCharacterPointMsgBoxLayout::SetLayout()
-{
-    CResetCharacterPointMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CDelgardoMainMenuMsgBoxLayout::SetLayout()
-{
-    CDelgardoMainMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-bool mu::ui::window::CLuckyTradeMenuMsgBoxLayout::SetLayout()
-{
-    CLuckyTradeMenuMsgBox* pMsgBox = GetMsgBox();
-    if (0 == pMsgBox)
-        return false;
-
-    if (false == pMsgBox->Create())
-        return false;
-
-    return true;
-}
-
-mu::ui::window::CLuckyTradeMenuMsgBox::CLuckyTradeMenuMsgBox()
-{
-    m_iMiddleCount = 7;
-}
-
-mu::ui::window::CLuckyTradeMenuMsgBox::~CLuckyTradeMenuMsgBox()
-{
-    Release();
-}
-
-void mu::ui::window::CLuckyTradeMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CLuckyTradeMenuMsgBox::Update()
-{
-    m_BtnTrade.Update();
-    m_BtnRefinery.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CLuckyTradeMenuMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-bool mu::ui::window::CLuckyTradeMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    CLuckyTradeMenuMsgBox* pMsgBox = dynamic_cast<CLuckyTradeMenuMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnTrade.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_TRADE);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnRefinery.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_REFINERY);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_pLuckyItemWnd->SetAct(eLuckyItemType_Trade);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND);
-    //g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_pLuckyItemWnd->SetAct(eLuckyItemType_Refinery);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYITEMWND);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CLuckyTradeMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CLuckyTradeMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemTradeBtnDown, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_TRADE);
-    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::LuckyItemRefineryBtnDown, MSGBOX_EVENT_USER_CUSTOM_LUCKYITEM_REFINERY);
-    AddCallbackFunc(mu::ui::window::CLuckyTradeMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CLuckyTradeMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 85;
-    m_BtnTrade.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnTrade.SetText(L"럭키아이템 교환");	// "GlobalText"
-
-    y = GetPos().y + 120;
-    m_BtnRefinery.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRefinery.SetText(L"럭키아이템 제련");	// "GlobalText"
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CLuckyTradeMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CLuckyTradeMenuMsgBox::RenderTexts()
-{
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, L"럭키아이템 교환NPC");	// "LuckyItem Trade NPC"
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 15;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, L"럭키아이템으로 교환하거나 제련할 수 있습니?");
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CLuckyTradeMenuMsgBox::RenderButtons()
-{
-    m_BtnTrade.Render();
-    m_BtnRefinery.Render();
-    m_BtnExit.Render();
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-mu::ui::window::CTrainerMenuMsgBox::CTrainerMenuMsgBox()
+void mu::ui::window::ShowTrainerMenuDialog()
 {
-    m_iMiddleCount = 7;
-}
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::Trainer;
+    cfg.lines.push_back({ I18N::Game::Hi, false });
 
-mu::ui::window::CTrainerMenuMsgBox::~CTrainerMenuMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CTrainerMenuMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CTrainerMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CTrainerMenuMsgBox::Update()
-{
-    m_BtnRecover.Update();
-    m_BtnRevive.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CTrainerMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CTrainerMenuMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnRecover.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnRevive.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_REVIVE);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CTrainerRecoverMsgBoxLayout));
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_TRAINER);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CTrainerMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCloseNpcRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CTrainerMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::RecoverBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER);
-    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::ReviveBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_REVIVE);
-    AddCallbackFunc(mu::ui::window::CTrainerMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CTrainerMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 85;
-    m_BtnRecover.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRecover.SetText(I18N::Game::RestoreLifeDurability);
-
-    y = GetPos().y + 120;
-    m_BtnRevive.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRevive.SetText(I18N::Game::ResurrectSpirit);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CTrainerMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CTrainerMenuMsgBox::RenderTexts()
-{
     wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::Trainer);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 15;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, I18N::Game::Hi);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
     mu_swprintf(szText, I18N::Game::SWhatIsYourCommand, Hero->ID);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
+    cfg.lines.push_back({ szText, false });
 
-void mu::ui::window::CTrainerMenuMsgBox::RenderButtons()
-{
-    m_BtnRecover.Render();
-    m_BtnRevive.Render();
-    m_BtnExit.Render();
-}
+    GenericMenuConfig::MenuButton btnRecover;
+    btnRecover.label = I18N::Game::RestoreLifeDurability;
+    btnRecover.onClick = [] { mu::ui::window::ShowTrainerRecoverDialog(); };
+    cfg.buttons.push_back(std::move(btnRecover));
 
-mu::ui::window::CTrainerRecoverMsgBox::CTrainerRecoverMsgBox()
-{
-    m_iMiddleCount = 7;
-}
-
-mu::ui::window::CTrainerRecoverMsgBox::~CTrainerRecoverMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CTrainerRecoverMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CTrainerRecoverMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CTrainerRecoverMsgBox::Update()
-{
-    m_BtnRecoverDarkSpirit.Update();
-    m_BtnRecoverDarkHorse.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CTrainerRecoverMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CTrainerRecoverMsgBox*>(pOwner);
-    if (pMsgBox)
+    GenericMenuConfig::MenuButton btnRevive;
+    btnRevive.label = I18N::Game::ResurrectSpirit;
+    btnRevive.onClick = []
     {
-        if (pMsgBox->m_BtnRecoverDarkSpirit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKSPRIT);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnRecoverDarkHorse.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKHORSE);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
+        g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_TRAINER);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    cfg.buttons.push_back(std::move(btnRevive));
 
-    return CALLBACK_CONTINUE;
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCloseNpcRequest(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
+void mu::ui::window::ShowTrainerRecoverDialog()
 {
-    npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT);
-    SocketClient->ToGameServer()->SendCloseNpcRequest();
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::Trainer;
+    cfg.lines.push_back({ I18N::Game::SelectThePetToRecoverLife, false });
 
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
+    // Native positions each pet's own recovery-cost/status sentence (from CalcRecoveryZen)
+    // directly under that pet's own button -- attached to each MenuButton's own lines here so it
+    // renders in the same place, rather than bunched above the whole button list.
+    wchar_t costText[100] = { 0, };
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCloseNpcRequest(); };
 
-    return CALLBACK_BREAK;
-}
+    GenericMenuConfig::MenuButton btnDarkHorse;
+    btnDarkHorse.label = I18N::Game::DarkHorse;
+    npcBreeder::CalcRecoveryZen(REVIVAL_DARKHORSE, costText);
+    btnDarkHorse.lines.push_back({ costText, false });
+    btnDarkHorse.onClick = [] { npcBreeder::RecoverPet(REVIVAL_DARKHORSE); SocketClient->ToGameServer()->SendCloseNpcRequest(); };
+    cfg.buttons.push_back(std::move(btnDarkHorse));
 
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    npcBreeder::RecoverPet(REVIVAL_DARKHORSE);
-    SocketClient->ToGameServer()->SendCloseNpcRequest();
+    GenericMenuConfig::MenuButton btnDarkSpirit;
+    btnDarkSpirit.label = I18N::Game::DarkRaven;
+    npcBreeder::CalcRecoveryZen(REVIVAL_DARKSPIRIT, costText);
+    btnDarkSpirit.lines.push_back({ costText, false });
+    btnDarkSpirit.onClick = [] { npcBreeder::RecoverPet(REVIVAL_DARKSPIRIT); SocketClient->ToGameServer()->SendCloseNpcRequest(); };
+    cfg.buttons.push_back(std::move(btnDarkSpirit));
 
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
 
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CTrainerRecoverMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCloseNpcRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CTrainerRecoverMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkSpiritrBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKSPRIT);
-    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::RecoverDarkHorseBtnDown, MSGBOX_EVENT_USER_CUSTOM_TRAINER_MENU_RECOVER_DARKHORSE);
-    AddCallbackFunc(mu::ui::window::CTrainerRecoverMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CTrainerRecoverMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-
-    y = GetPos().y + 65;
-    m_BtnRecoverDarkHorse.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRecoverDarkHorse.SetText(I18N::Game::DarkHorse);
-
-    y = GetPos().y + 115;
-    m_BtnRecoverDarkSpirit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnRecoverDarkSpirit.SetText(I18N::Game::DarkRaven);
-
-    btnhalfwidth = MSGBOX_BTN_EMPTY_SMALL_WIDTH / 2.f;
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CTrainerRecoverMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CTrainerRecoverMsgBox::RenderTexts()
-{
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::Trainer);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 15;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, I18N::Game::SelectThePetToRecoverLife);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetTextColor(206, 192, 146, 255);
-    npcBreeder::CalcRecoveryZen(REVIVAL_DARKHORSE, szText);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 75, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    npcBreeder::CalcRecoveryZen(REVIVAL_DARKSPIRIT, szText);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 125, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CTrainerRecoverMsgBox::RenderButtons()
-{
-    m_BtnRecoverDarkSpirit.Render();
-    m_BtnRecoverDarkHorse.Render();
-    m_BtnExit.Render();
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 mu::ui::window::CElpisMsgBox::CElpisMsgBox()
@@ -4073,564 +2976,107 @@ void mu::ui::window::CElpisMsgBox::RenderButtons()
     m_BtnExit.Render();
 }
 
-mu::ui::window::CSeedMasterMenuMsgBox::CSeedMasterMenuMsgBox()
+void mu::ui::window::ShowSeedMasterMenuDialog()
 {
-    m_iMiddleCount = 7;
-}
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::SeedMaster;
+    cfg.lines.push_back({ I18N::Game::ExtractTheSeedOrTheSeedSphere, false });
+    cfg.lines.push_back({ I18N::Game::YouMayAssemblyThemTogether, false });
 
-mu::ui::window::CSeedMasterMenuMsgBox::~CSeedMasterMenuMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CSeedMasterMenuMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CSeedMasterMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CSeedMasterMenuMsgBox::Update()
-{
-    m_BtnExtractSeed.Update();
-    m_BtnSeedSphere.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CSeedMasterMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CSeedMasterMenuMsgBox*>(pOwner);
-    if (pMsgBox)
+    GenericMenuConfig::MenuButton btnExtract;
+    btnExtract.label = I18N::Game::SeedExtraction;
+    btnExtract.onClick = []
     {
-        if (pMsgBox->m_BtnExtractSeed.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_EXTRACT_SEED);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnSeedSphere.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_SEED_SPHERE);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
+        g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_EXTRACT_SEED);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    cfg.buttons.push_back(std::move(btnExtract));
 
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_EXTRACT_SEED);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_SEED_SPHERE);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedMasterMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CSeedMasterMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::ExtractSeedBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_EXTRACT_SEED);
-    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::SeedSphereBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_MASTER_MENU_SEED_SPHERE);
-    AddCallbackFunc(mu::ui::window::CSeedMasterMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CSeedMasterMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 85;
-    m_BtnExtractSeed.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnExtractSeed.SetText(I18N::Game::SeedExtraction);
-
-    y = GetPos().y + 120;
-    m_BtnSeedSphere.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnSeedSphere.SetText(I18N::Game::SeedSphereAssembly);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CSeedMasterMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
+    GenericMenuConfig::MenuButton btnSphere;
+    btnSphere.label = I18N::Game::SeedSphereAssembly;
+    btnSphere.onClick = []
     {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
+        g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_SEED_SPHERE);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    cfg.buttons.push_back(std::move(btnSphere));
 
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCraftingDialogCloseRequest(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
-void mu::ui::window::CSeedMasterMenuMsgBox::RenderTexts()
+void mu::ui::window::ShowSeedInvestigatorMenuDialog()
 {
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::SeedResearcher;
+    cfg.lines.push_back({ I18N::Game::EitherApplyTheSeedSphere, false });
+    cfg.lines.push_back({ I18N::Game::OrDestroyTheSeedSphereAccordingly, false });
 
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::SeedMaster);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 15;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, I18N::Game::ExtractTheSeedOrTheSeedSphere);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, I18N::Game::YouMayAssemblyThemTogether);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CSeedMasterMenuMsgBox::RenderButtons()
-{
-    m_BtnExtractSeed.Render();
-    m_BtnSeedSphere.Render();
-    m_BtnExit.Render();
-}
-
-mu::ui::window::CSeedInvestigatorMenuMsgBox::CSeedInvestigatorMenuMsgBox()
-{
-    m_iMiddleCount = 7;
-}
-
-mu::ui::window::CSeedInvestigatorMenuMsgBox::~CSeedInvestigatorMenuMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CSeedInvestigatorMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Update()
-{
-    m_BtnAttachSocket.Update();
-    m_BtnDetachSocket.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CSeedInvestigatorMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CSeedInvestigatorMenuMsgBox*>(pOwner);
-    if (pMsgBox)
+    GenericMenuConfig::MenuButton btnAttach;
+    btnAttach.label = I18N::Game::SeedSphereApplication;
+    btnAttach.onClick = []
     {
-        if (pMsgBox->m_BtnAttachSocket.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_ATTACH_SOCKET);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnDetachSocket.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_DETACH_SOCKET);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
+        g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ATTACH_SOCKET);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    cfg.buttons.push_back(std::move(btnAttach));
 
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_ATTACH_SOCKET);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_DETACH_SOCKET);
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CSeedInvestigatorMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CSeedInvestigatorMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::AttachSocketBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_ATTACH_SOCKET);
-    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::DetachSocketBtnDown, MSGBOX_EVENT_USER_CUSTOM_SEED_INVESTIGATOR_MENU_DETACH_SOCKET);
-    AddCallbackFunc(mu::ui::window::CSeedInvestigatorMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CSeedInvestigatorMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 85;
-    m_BtnAttachSocket.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnAttachSocket.SetText(I18N::Game::SeedSphereApplication);
-
-    y = GetPos().y + 120;
-    m_BtnDetachSocket.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnDetachSocket.SetText(I18N::Game::SeedSphereDestruction);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
+    GenericMenuConfig::MenuButton btnDetach;
+    btnDetach.label = I18N::Game::SeedSphereDestruction;
+    btnDetach.onClick = []
     {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
+        g_MixRecipeMgr.SetMixType(SEASON3A::MIXTYPE_DETACH_SOCKET);
+        g_pNewUISystem->Show(mu::ui::window::INTERFACE_MIXINVENTORY);
+    };
+    cfg.buttons.push_back(std::move(btnDetach));
 
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCraftingDialogCloseRequest(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
+
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
-void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderTexts()
+void mu::ui::window::ShowResetCharacterPointDialog()
 {
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::ReInitializationHelper;
+    cfg.lines.push_back({ I18N::Game::ClickOnTheButtonToReinitializeAllStatPoints, false });
 
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::SeedResearcher);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 15;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, I18N::Game::EitherApplyTheSeedSphere);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, I18N::Game::OrDestroyTheSeedSphereAccordingly);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CSeedInvestigatorMenuMsgBox::RenderButtons()
-{
-    m_BtnAttachSocket.Render();
-    m_BtnDetachSocket.Render();
-    m_BtnExit.Render();
-}
-
-mu::ui::window::CResetCharacterPointMsgBox::CResetCharacterPointMsgBox()
-{
-    m_iMiddleCount = 7;
-}
-
-mu::ui::window::CResetCharacterPointMsgBox::~CResetCharacterPointMsgBox()
-{
-    Release();
-}
-
-bool mu::ui::window::CResetCharacterPointMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
-
-    int x = 0, y = 0, width = 0, height = 0;
-
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
-
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-    return true;
-}
-
-void mu::ui::window::CResetCharacterPointMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 105;
-    m_ResetCharacterPointBtn.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_ResetCharacterPointBtn.SetText(I18N::Game::StatReInitialization); // "스탯 초기화"
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CResetCharacterPointMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-void mu::ui::window::CResetCharacterPointMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown, MSGBOX_EVENT_USER_CUSTOM_RESET_CHARACTER_POINT);
-    AddCallbackFunc(mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CResetCharacterPointMsgBox*>(pOwner);
-    if (pMsgBox)
+    GenericMenuConfig::MenuButton btnReset;
+    btnReset.label = I18N::Game::StatReInitialization; // "스탯 초기화"
+    btnReset.onClick = []
     {
-        if (pMsgBox->m_ResetCharacterPointBtn.IsMouseIn() == true)
+        for (int i = 0; i < MAX_EQUIPMENT; i++)
         {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_RESET_CHARACTER_POINT);
-            return CALLBACK_BREAK;
+            if (CharacterMachine->Equipment[i].Type != -1)
+            {
+                g_pSystemLogBox->AddText(I18N::Game::TheAppliedEquipmentsCannotBeReset, mu::ui::window::TYPE_ERROR_MESSAGE);
+                return;
+            }
         }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
+        SocketClient->ToGameServer()->SendResetCharacterPointRequest();
+    };
+    cfg.buttons.push_back(std::move(btnReset));
 
-    return CALLBACK_CONTINUE;
-}
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    // No onClick -- native's own ExitBtnDown has no side effect beyond closing the box.
+    cfg.buttons.push_back(std::move(btnExit));
 
-bool mu::ui::window::CResetCharacterPointMsgBox::Update()
-{
-    m_ResetCharacterPointBtn.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CResetCharacterPointMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-void mu::ui::window::CResetCharacterPointMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CResetCharacterPointMsgBox::RenderTexts()
-{
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::ReInitializationHelper);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 25;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, I18N::Game::ClickOnTheButtonToReinitializeAllStatPoints);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 18, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CResetCharacterPointMsgBox::RenderButtons()
-{
-    m_ResetCharacterPointBtn.Render();
-    m_BtnExit.Render();
-}
-
-bool mu::ui::window::CResetCharacterPointMsgBox::isCharacterEquipmentItem()
-{
-    for (int i = 0; i < MAX_EQUIPMENT; i++) {
-        if (CharacterMachine->Equipment[i].Type != -1) {
-            return true;
-        }
-    }
-    return false;
-}
-
-CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ResetCharacterPointBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-
-    for (int i = 0; i < MAX_EQUIPMENT; i++) {
-        if (CharacterMachine->Equipment[i].Type != -1)
-        {
-            g_pSystemLogBox->AddText(I18N::Game::TheAppliedEquipmentsCannotBeReset, mu::ui::window::TYPE_ERROR_MESSAGE);
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    SocketClient->ToGameServer()->SendResetCharacterPointRequest();
-
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CResetCharacterPointMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-    return CALLBACK_BREAK;
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
 mu::ui::window::CGuild_ToPerson_Position::CGuild_ToPerson_Position()
@@ -4926,191 +3372,31 @@ bool mu::ui::window::CGuild_ToPerson_PositionLayout::SetLayout()
     return true;
 }
 
-mu::ui::window::CDelgardoMainMenuMsgBox::CDelgardoMainMenuMsgBox()
+void mu::ui::window::ShowDelgardoMainMenuDialog()
 {
-    m_iMiddleCount = 7;
-}
+    GenericMenuConfig cfg;
+    cfg.title = I18N::Game::Delgado;
+    cfg.lines.push_back({ I18N::Game::RegisterYourLuckyCoinsOr, false });
+    cfg.lines.push_back({ I18N::Game::UseTheLuckyCoinsYouAlreadyHave, false });
+    cfg.lines.push_back({ I18N::Game::AndExchangeThemForItems, false });
 
-mu::ui::window::CDelgardoMainMenuMsgBox::~CDelgardoMainMenuMsgBox()
-{
-    Release();
-}
+    GenericMenuConfig::MenuButton btnReg;
+    btnReg.label = I18N::Game::LuckyCoinRegistration;
+    btnReg.onClick = [] { g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION); };
+    cfg.buttons.push_back(std::move(btnReg));
 
-bool mu::ui::window::CDelgardoMainMenuMsgBox::Create(float fPriority)
-{
-    SetAddCallbackFunc();
+    GenericMenuConfig::MenuButton btnExchange;
+    btnExchange.label = I18N::Game::LuckyCoinExchange;
+    btnExchange.onClick = [] { g_pNewUISystem->Show(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN); };
+    cfg.buttons.push_back(std::move(btnExchange));
 
-    int x, y, width, height;
-    x = (SCREEN_WIDTH / 2) - (MSGBOX_WIDTH / 2);
-    y = 60;
-    width = MSGBOX_WIDTH;
-    height = MSGBOX_TOP_HEIGHT + (m_iMiddleCount * MSGBOX_MIDDLE_HEIGHT) + MSGBOX_BOTTOM_HEIGHT;
+    auto exitFn = [] { SocketClient->ToGameServer()->SendCraftingDialogCloseRequest(); };
+    GenericMenuConfig::MenuButton btnExit;
+    btnExit.label = I18N::Game::Close388;
+    btnExit.compact = true;
+    btnExit.onClick = exitFn;
+    cfg.buttons.push_back(std::move(btnExit));
+    cfg.onCancel = exitFn;
 
-    CMessageBoxBase::Create(x, y, width, height, fPriority);
-    SetButtonInfo();
-
-    return true;
-}
-
-void mu::ui::window::CDelgardoMainMenuMsgBox::Release()
-{
-    CMessageBoxBase::Release();
-}
-
-bool mu::ui::window::CDelgardoMainMenuMsgBox::Update()
-{
-    m_BtnReg.Update();
-    m_BtnExchange.Update();
-    m_BtnExit.Update();
-
-    return true;
-}
-
-bool mu::ui::window::CDelgardoMainMenuMsgBox::Render()
-{
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
-    return true;
-}
-
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    auto* pMsgBox = dynamic_cast<CDelgardoMainMenuMsgBox*>(pOwner);
-    if (pMsgBox)
-    {
-        if (pMsgBox->m_BtnReg.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_REGISTRATION_LUCKY_COIN);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExchange.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_EXCHANGE_LUCKY_COIN);
-            return CALLBACK_BREAK;
-        }
-        if (pMsgBox->m_BtnExit.IsMouseIn() == true)
-        {
-            g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_USER_COMMON_CANCEL);
-            return CALLBACK_BREAK;
-        }
-    }
-
-    return CALLBACK_CONTINUE;
-}
-
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_LUCKYCOIN_REGISTRATION);
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    g_pNewUISystem->Show(mu::ui::window::INTERFACE_EXCHANGE_LUCKYCOIN);
-
-    return CALLBACK_BREAK;
-}
-
-CALLBACK_RESULT mu::ui::window::CDelgardoMainMenuMsgBox::ExitBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam)
-{
-    SocketClient->ToGameServer()->SendCraftingDialogCloseRequest();
-
-    PlayBuffer(SOUND_CLICK01);
-    g_MessageBox->SendEvent(pOwner, MSGBOX_EVENT_DESTROY);
-
-    return CALLBACK_BREAK;
-}
-
-void mu::ui::window::CDelgardoMainMenuMsgBox::SetAddCallbackFunc()
-{
-    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::LButtonUp, MSGBOX_EVENT_MOUSE_LBUTTON_UP);
-    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::RegBtnDown, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_REGISTRATION_LUCKY_COIN);
-    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::ExchangeBtnDown, MSGBOX_EVENT_USER_CUSTOM_DELGARDO_EXCHANGE_LUCKY_COIN);
-    AddCallbackFunc(mu::ui::window::CDelgardoMainMenuMsgBox::ExitBtnDown, MSGBOX_EVENT_USER_COMMON_CANCEL);
-}
-
-void mu::ui::window::CDelgardoMainMenuMsgBox::SetButtonInfo()
-{
-    float x, y, width, height;
-
-    float msgboxhalfwidth = (GetSize().cx / 2.f);
-    float btnhalfwidth = MSGBOX_BTN_EMPTY_WIDTH / 2.f;
-
-    width = MSGBOX_BTN_EMPTY_WIDTH + 20;
-    height = MSGBOX_BTN_EMPTY_HEIGHT;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + 85;
-    m_BtnReg.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnReg.SetText(I18N::Game::LuckyCoinRegistration);
-
-    y = GetPos().y + 120;
-    m_BtnExchange.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY);
-    m_BtnExchange.SetText(I18N::Game::LuckyCoinExchange);
-
-    width = MSGBOX_BTN_EMPTY_SMALL_WIDTH;
-    btnhalfwidth = width / 2.f;
-    x = GetPos().x + msgboxhalfwidth - btnhalfwidth;
-    y = GetPos().y + GetSize().cy - (MSGBOX_BTN_EMPTY_HEIGHT + MSGBOX_BTN_BOTTOM_BLANK);
-    m_BtnExit.SetInfo(CMessageBoxMng::IMAGE_MSGBOX_BTN_EMPTY_SMALL, x, y, width, height, CMessageBoxButton::MSGBOX_BTN_SIZE_EMPTY_SMALL);
-    m_BtnExit.SetText(I18N::Game::Close388);
-}
-
-void mu::ui::window::CDelgardoMainMenuMsgBox::RenderFrame()
-{
-    float x, y, width, height;
-
-    x = GetPos().x; y = GetPos().y + 2.f, width = GetSize().cx - MSGBOX_BACK_BLANK_WIDTH; height = GetSize().cy - MSGBOX_BACK_BLANK_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BACK, x, y, width, height);
-
-    x = GetPos().x; y = GetPos().y, width = MSGBOX_WIDTH; height = MSGBOX_TOP_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR, x, y, width, height);
-
-    x = GetPos().x; y += MSGBOX_TOP_HEIGHT; width = MSGBOX_WIDTH; height = MSGBOX_MIDDLE_HEIGHT;
-    for (int i = 0; i < m_iMiddleCount; ++i)
-    {
-        RenderImage(CMessageBoxMng::IMAGE_MSGBOX_MIDDLE, x, y, width, height);
-        y += height;
-    }
-
-    x = GetPos().x; width = MSGBOX_WIDTH; height = MSGBOX_BOTTOM_HEIGHT;
-    RenderImage(CMessageBoxMng::IMAGE_MSGBOX_BOTTOM, x, y, width, height);
-}
-
-void mu::ui::window::CDelgardoMainMenuMsgBox::RenderTexts()
-{
-    wchar_t szText[256] = { 0, };
-    float fPos_x = GetPos().x + 10;
-    float fPos_y = GetPos().y + 10;
-
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetFont(g_hFontBold);
-    mu_swprintf(szText, I18N::Game::Delgado);
-    g_pRenderText->RenderText(fPos_x, fPos_y, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-
-    fPos_y += 26;
-    g_pRenderText->SetFont(g_hFont);
-    mu_swprintf(szText, I18N::Game::RegisterYourLuckyCoinsOr);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 1 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, I18N::Game::UseTheLuckyCoinsYouAlreadyHave);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 2 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-    mu_swprintf(szText, I18N::Game::AndExchangeThemForItems);
-    g_pRenderText->RenderText(fPos_x, fPos_y + 3 * 12, szText, MSGBOX_WIDTH - 20.0f, 0, RT3_SORT_CENTER);
-}
-
-void mu::ui::window::CDelgardoMainMenuMsgBox::RenderButtons()
-{
-    m_BtnReg.Render();
-    m_BtnExchange.Render();
-    m_BtnExit.Render();
+    g_pGenericMenuDialog->Show(std::move(cfg));
 }

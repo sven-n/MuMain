@@ -97,20 +97,6 @@ void RenderGuildMark(int iPos_x, int iPos_y)
     g_pRenderText->RenderText(iPos_x + 50, iPos_y + 245, I18N::Game::TheMousePleaseDraw);
 }
 
-int DoEditGuildMarkConfirmAction(POPUP_RESULT Result)
-{
-    if (Result == POPUP_RESULT_YES)
-    {
-        m_nCurrMode = MODE_EDIT_GUILDMARK;
-        m_eCurrStep = STEP_EDIT_GUILD_MARK;
-        SocketClient->ToGameServer()->SendGuildMasterAnswer(true);
-
-        if (Hero->GuildStatus != G_NONE)
-            memcpy(&GuildMark[MARK_EDIT], &GuildMark[Hero->GuildMarkIndex], sizeof(MARK_t));
-    }
-    return 1;
-}
-
 CUIGuildMaster::CUIGuildMaster()
 {
     m_bOpened = false;
