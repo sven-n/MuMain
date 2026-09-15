@@ -68,6 +68,8 @@ namespace SEASON3B
         void SendRequestKanturu3rdInfo();
         void SendRequestKanturu3rdEnter();
 
+        void ClosingProcess();
+
     private:
         void Initialize();
 
