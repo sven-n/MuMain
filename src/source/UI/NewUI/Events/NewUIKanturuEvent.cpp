@@ -396,6 +396,11 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
     m_bEnterRequest = true;
 }
 
+void SEASON3B::CNewUIKanturu2ndEnterNpc::ClosingProcess()
+{
+    SocketClient->ToGameServer()->SendCloseNpcRequest();
+}
+
 void SEASON3B::CNewUIKanturu2ndEnterNpc::LoadImages()
 {
     LoadBitmap(L"Interface\\newui_msgbox_top.tga", IMAGE_KANTURU2ND_TOP, GL_LINEAR);
