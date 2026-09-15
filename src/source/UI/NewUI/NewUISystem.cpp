@@ -1393,10 +1393,6 @@ void CNewUISystem::Hide(DWORD dwKey)
     {
         g_pEnterDevilSquare->ClosingProcess();
     }
-    else if (dwKey == INTERFACE_KANTURU2ND_ENTERNPC)
-    {
-        m_pNewKanturu2ndEnterNpc->ClosingProcess();
-    }
     else if (dwKey == INTERFACE_BLOODCASTLE_TIME)
     {
         g_pBloodCastle->ClosingProcess();

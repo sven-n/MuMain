@@ -101,6 +101,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::UpdateKeyEvent()
         if (SEASON3B::IsPress(VK_ESCAPE) == true)
         {
             g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+            ClosingProcess();
             PlayBuffer(SOUND_CLICK01);
             return false;
         }
@@ -382,6 +383,7 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::ReceiveKanturu3rdEnter(BYTE btResult)
     DeleteJoint(BITMAP_JOINT_ENERGY, NULL);
 
     g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+    ClosingProcess();
 }
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdInfo()
@@ -398,6 +400,9 @@ void SEASON3B::CNewUIKanturu2ndEnterNpc::SendRequestKanturu3rdEnter()
 
 void SEASON3B::CNewUIKanturu2ndEnterNpc::ClosingProcess()
 {
+    // Releases the server-side NPC dialog. Only call when no KanturuEnterRequest
+    // will follow: the server drops the enter request once OpenedNpc is cleared,
+    // and the enter is sent later at animation frame 42 after the dialog hides.
     SocketClient->ToGameServer()->SendCloseNpcRequest();
 }
 
@@ -488,6 +493,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
             if (pItemHelper->Type == ITEM_HORN_OF_UNIRIA)
             {
                 CreateMessageBox(POPUP_UNIRIA);
+                ClosingProcess();
                 return true;
             }
 
@@ -495,6 +501,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
                 || g_ChangeRingMgr->CheckChangeRing(pItemRingRight->Type))
             {
                 CreateMessageBox(POPUP_CHANGERING);
+                ClosingProcess();
                 return true;
             }
 
@@ -509,6 +516,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
                 || (pItemWing->Type == ITEM_WING + 135)))
             {
                 CreateMessageBox(POPUP_NOT_HELPER);
+                ClosingProcess();
                 return true;
             }
 
@@ -520,6 +528,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
             else
             {
                 CreateMessageBox(POPUP_NOT_MUNSTONE);
+                ClosingProcess();
                 return true;
             }
         }
@@ -530,6 +539,7 @@ bool SEASON3B::CNewUIKanturu2ndEnterNpc::BtnProcess()
     if (m_BtnClose.UpdateMouseEvent() == true)
     {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_KANTURU2ND_ENTERNPC);
+        ClosingProcess();
 
         return true;
     }
