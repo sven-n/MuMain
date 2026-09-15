@@ -1,0 +1,143 @@
+/* Legacy theme's shared window shell -- the msgbox sprite-frame chrome (top/middle/bottom cap
+   composite + optional title-banner swap), factored out of generic_menu_dialog.rcss into its own
+   template (window_shell.rml) so any consumer can reuse the same markup instead of hand-copying it.
+   Loaded automatically by any document that links window_shell.rml as a template (RmlUi merges a
+   template's own <head> links into the consuming document's head) -- a consumer does not need its
+   own <link> to this file.
+
+   Named `window-shell-*`, not `gmd-*` -- this markup is no longer generic-menu-dialog-specific.
+   Values below are unchanged from generic_menu_dialog.rcss's former .gmd-sprite-*/.gmd-header-rail/
+   .gmd-header-title/.gmd-body rules, just renamed. */
+
+/* Same native sprite family (and same spritesheet declarations) as generic_confirm_dialog_bg.rcss
+   -- CCommonMessageBox's own back-fill + top/middle/bottom cap composite. Redeclared here rather
+   than shared across documents (RmlUi spritesheets are per-document). */
+@spritesheet msgbox-top-sheet
+{
+	src: "../../../newui_msgbox_top.tga";
+	msgbox-top-image: 0px 0px 230px 67px;
+}
+@spritesheet msgbox-middle-sheet
+{
+	src: "../../../newui_msgbox_middle.tga";
+	msgbox-middle-image: 0px 0px 230px 15px;
+}
+@spritesheet msgbox-bottom-sheet
+{
+	src: "../../../newui_msgbox_bottom.tga";
+	msgbox-bottom-image: 0px 0px 230px 50px;
+}
+/* newui_msgbox_back.OZJ is actually 225x512 -- much taller than any panel needs, so it's cropped
+   top-left rather than stretched-to-fit. The rect below matches this shell's own back-layer box
+   size (230dp wide, 260dp tall, minus the 4dp/5dp insets .window-shell-sprite-back applies), not
+   the source's full extent. */
+@spritesheet msgbox-back-sheet
+{
+	src: "../../../newui_msgbox_back.jpg";
+	msgbox-back-image: 0px 0px 222px 250px;
+}
+.window-shell-sprite-back {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 5dp;
+	bottom: 5dp;
+	pointer-events: none;
+	decorator: image(msgbox-back-image);
+}
+.window-shell-sprite-top {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-top-image);
+}
+/* Single stretched fill (not tiled) -- same technique generic_confirm_dialog_bg.rcss's own
+   .gcd-bg-sprite-middle uses. */
+.window-shell-sprite-middle {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 67dp;
+	bottom: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-middle-image);
+}
+.window-shell-sprite-bottom {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	height: 50dp;
+	pointer-events: none;
+	decorator: image(msgbox-bottom-image);
+}
+
+/* Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite -- same asset/mechanism
+   generic_confirm_dialog.rcss's own .gcd-header-rail uses for an optional title, redeclared here
+   since spritesheets are per-document. Painted after .window-shell-sprite-top in the markup, so it
+   overlays that exact same 230x67 screen rect with no seam. */
+@spritesheet msgbox-titlebar-sheet
+{
+	src: "../../../newui_Message_03.tga";
+	msgbox-titlebar-image: 0px 0px 230px 67px;
+}
+.window-shell-header-rail {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	height: 67dp;
+	pointer-events: none;
+	decorator: image(msgbox-titlebar-image);
+}
+.window-shell-header-rail.hidden { display: none; } /* cascade-tie fix, same as every other data-class-hidden toggle here */
+.window-shell-header-title {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 10dp;
+	text-align: center;
+	font-family: "Liberation Sans";
+	font-weight: bold;
+	color: #ffd23c;
+	pointer-events: none;
+}
+.window-shell-header-title.hidden { display: none; }
+
+/* Content slot -- the consumer's own markup lands inside this element (RmlUi template `content`
+   target). left/right kept a bit wider than native's own MSGBOX_TEXT_MAXWIDTH margin so content
+   doesn't crowd the panel edges; top/bottom leave room for the sprite caps. Untitled consumers keep
+   justify-content:center -- with no banner competing for space, a short stack centered in the panel
+   reads fine. When titled, .window-shell-content.has-title switches to flex-start instead:
+   reserving the banner's own space as padding-top, then ALSO centering the remainder would produce
+   a large, content-amount-dependent gap above the first line/button whenever the actual content is
+   shorter than the panel's own fixed height -- native itself always top-anchors content right after
+   the title, never centers it a second time underneath. */
+.window-shell-content {
+	position: absolute;
+	left: 32dp;
+	right: 32dp;
+	top: 20dp;
+	bottom: 28dp;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+.window-shell-content.has-title {
+	/* .window-shell-content's own top:20dp is meant for the untitled case; reset to 0 here so
+	   padding-top below is the ONLY offset. */
+	top: 0;
+	/* Not "67dp banner height + 4dp gap" -- the banner sprite is 67dp tall but most of that is
+	   decorative fade/gradient below the actual title text, which itself sits at
+	   .window-shell-header-title's own top:10dp. generic_confirm_dialog.rcss's legacy theme already
+	   proves the right number for this exact same banner asset/size (newui_Message_03.tga, same
+	   230x67 slot): its own .gcd-body uses a flat top:35dp regardless of title, i.e. content starts
+	   35dp from the panel's top edge, clearing the title text by a modest, already-tested gap
+	   without waiting out the rest of the sprite. Mirrored here. */
+	padding-top: 35dp;
+	justify-content: flex-start;
+}

@@ -1,0 +1,56 @@
+<template name="window_shell" content="content">
+<head>
+	<link type="text/rcss" href="window_shell.rcss"/>
+</head>
+<!-- Modern theme's shared window shell -- the "metal rail" chrome (base.rcss's .modern-frame/
+     .modern-shell-edge/.modern-groove/.modern-header-rail/.modern-content-well family), the same
+     pieces sys_menu.rml already proves for "a small forged-iron dialog with no hero-banner." Not
+     dialog-specific despite first being extracted from generic_menu_dialog.rml -- sys_menu.rml
+     itself is a plain window, not a dialog, and already uses this exact chrome. See
+     docs/rmlui-ui-system/architecture-principles.md for the fuller shell taxonomy
+     (window_shell_crimson/window_shell_item are separate, unbuilt siblings for other chrome styles).
+
+     A consumer document links this file as a template resource in its own head section and sets
+     this template's name as its own body element's template attribute (see
+     generic_menu_dialog.rml for the worked example) -- whatever content that consumer's body
+     element contains gets spliced into #content below, which owns the has_title-driven padding via
+     window_shell.rcss's own .window-shell-content.has-title rule.
+
+     DO NOT write a literal angle-bracket example of a body-with-template-attribute tag anywhere in
+     this file, comments included -- RmlUi's own Template::Load() (Source/Core/Template.cpp) finds
+     this template's real head and body regions via a raw, comment-blind text search for the first
+     literal opening-bracket-plus-word match, not real XML parsing. A stray example that merely
+     LOOKS like a body tag with this same template's own name as its template attribute value gets
+     sliced in as if it were real markup, self-referentially injecting this template into itself and
+     recursing until a stack overflow -- confirmed the hard way, see STATUS.md.
+
+     ALSO avoid writing "head" and "body" separated only by a slash (as in the two words joined by
+     a plain forward slash, no spaces) anywhere in this file, comments included -- RmlUi's own
+     FindTag() (Source/Core/XMLParseTools.cpp) tracks whether the found word was preceded by a slash
+     in a `found_closing` flag that is declared OUTSIDE its own per-candidate search loop and never
+     reset between rejected candidates within one call. A slash sitting directly before either word
+     anywhere in this file flips that flag for the rest of that same search, so every later
+     candidate -- including the one real body tag below -- gets compared against the wrong
+     open/close expectation and rejected, and the template silently fails to load. Confirmed the
+     hard way (a single stray slash-joined mention of these two words broke this exact template),
+     see STATUS.md.
+
+     Requires from the consumer's own data model: `has_title` (bool) and `title` (string).
+
+     id="panel" set here, not by the consumer -- every current *_dialog.rcss defines its own
+     document-scoped `#panel { width/height/... }` sizing rule (RmlUi CSS/IDs are per-document, so
+     reusing the same id across different documents' own window_shell instances is safe), the same
+     way the pre-template markup always named this element #panel. -->
+<body id="panel" class="center-both modern-frame">
+	<div class="modern-shell-edge"></div>
+	<div class="modern-groove"></div>
+	<div id="content" class="window-shell-content modern-content-well" data-class-has-title="has_title"></div>
+	<div class="window-shell-header-rail modern-header-rail" data-class-hidden="!has_title">
+		<div class="modern-joint"></div>
+		<div class="modern-header-accent"></div>
+		<div class="modern-header-text">
+			<div class="modern-header-title">{{title}}</div>
+		</div>
+	</div>
+</body>
+</template>

@@ -50,6 +50,7 @@ import re
 import sys
 
 LOAD_THEMED_RE = re.compile(r'LoadThemedDocument\([^,]*,\s*"Data/Interface/RmlUi/([A-Za-z0-9_]+)\.rml"\)')
+TEMPLATE_LINK_RE = re.compile(r'<link\s+type="text/template"\s+href="([^"]+)"')
 LOAD_THEMED_ASSIGN_RE = re.compile(
     r'([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:UI::RmlBridge::)?LoadThemedDocument\('
     r'[^,]*,\s*"Data/Interface/RmlUi/([A-Za-z0-9_]+)\.rml"\)'
@@ -124,21 +125,73 @@ def find_document_windows(source_root: pathlib.Path) -> dict[str, set[str]]:
     return windows
 
 
+def with_linked_templates(entry_path: pathlib.Path, resolve_dir: pathlib.Path) -> list[pathlib.Path]:
+    """entry_path plus every `<link type="text/template" href="...">` it
+    (transitively) references, resolved against resolve_dir -- the theme folder
+    the reference actually runs under, NOT necessarily entry_path's own on-disk
+    directory. This matters for the shared fallback .rml: RmlTheme.cpp's
+    LoadThemedDocument()/ThemedDocumentSourceUrl() always builds a per-theme
+    source URL for relative-href resolution, even when the content it read came
+    from the shared file, not a themed fork -- so the shared file's own
+    `<link href="...">`s resolve into whichever theme is using it at runtime, not
+    into the shared file's own literal folder. A template supplies real markup/
+    bindings a document relies on (e.g. window_shell.rml's `has_title`/`title`),
+    so its content counts toward satisfying this document's own C++ contract."""
+    seen = {entry_path}
+    ordered = [entry_path]
+    queue = [entry_path]
+    while queue:
+        current = queue.pop()
+        if not current.is_file():
+            continue
+        text = current.read_text(encoding="utf-8", errors="ignore")
+        for href in TEMPLATE_LINK_RE.findall(text):
+            linked = (resolve_dir / href).resolve()
+            if linked not in seen:
+                seen.add(linked)
+                ordered.append(linked)
+                queue.append(linked)
+    return ordered
+
+
 def theme_copies(asset_root: pathlib.Path, doc_name: str) -> list[pathlib.Path]:
     """The shared file (if it exists) plus every per-theme fork that exists for
     this document. main_frame today has zero shared file, only two forks --
-    that's a valid, checkable state, not an error."""
-    copies = []
+    that's a valid, checkable state, not an error. Each copy is expanded to
+    include its own linked templates (see with_linked_templates) -- a fork that
+    delegates its shell markup to a template shouldn't be flagged as missing
+    names the template itself provides. The shared file is checked once per
+    theme that has no fork of its own for this document, since that's every
+    theme it could actually be serving at runtime."""
     shared = asset_root / f"{doc_name}.rml"
-    if shared.is_file():
-        copies.append(shared)
     themes_dir = asset_root / "themes"
-    if themes_dir.is_dir():
-        for theme_dir in sorted(p for p in themes_dir.iterdir() if p.is_dir()):
-            forked = theme_dir / f"{doc_name}.rml"
-            if forked.is_file():
-                copies.append(forked)
-    return copies
+    theme_dirs = sorted((p for p in themes_dir.iterdir() if p.is_dir()), key=lambda p: p.name) if themes_dir.is_dir() else []
+
+    expanded: list[pathlib.Path] = []
+    seen: set[pathlib.Path] = set()
+
+    def add_all(paths: list[pathlib.Path]) -> None:
+        for p in paths:
+            if p not in seen:
+                seen.add(p)
+                expanded.append(p)
+
+    forked_theme_names = set()
+    for theme_dir in theme_dirs:
+        forked = theme_dir / f"{doc_name}.rml"
+        if forked.is_file():
+            forked_theme_names.add(theme_dir.name)
+            add_all(with_linked_templates(forked, theme_dir))
+
+    if shared.is_file():
+        if theme_dirs:
+            for theme_dir in theme_dirs:
+                if theme_dir.name not in forked_theme_names:
+                    add_all(with_linked_templates(shared, theme_dir))
+        else:
+            add_all(with_linked_templates(shared, shared.parent))
+
+    return expanded
 
 
 def main() -> int:

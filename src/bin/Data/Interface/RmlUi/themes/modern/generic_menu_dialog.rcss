@@ -1,8 +1,10 @@
 /* Modern theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
-   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Reuses base.rcss's
-   shared forged-dialog shell directly (.modern-frame/.modern-shell-edge/.modern-groove/
-   .modern-header-rail/.modern-content-well) -- the same pieces sys_menu.rcss already proves for
-   "a small forged-iron dialog with no hero-banner," so this file only supplies layout, not paint. */
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Frame/border/header
+   chrome (base.rcss's .modern-frame/.modern-shell-edge/.modern-groove/.modern-header-rail/
+   .modern-content-well) now lives in window_shell.rml/.rcss, a template shared with any future
+   consumer -- not exclusive to this dialog (see that file's own comment; sys_menu.rml already
+   proves the same chrome on a plain, non-dialog window). This file supplies only this document's
+   own content layout (lines/buttons), not the shell. */
 
 /* #panel is centered via .center-both, dp throughout (LayoutMode::Dialog window). Same 230dp
    width and 260dp height as legacy's own copy, for visual consistency between the two themes and
@@ -13,37 +15,6 @@
 	font-family: "token(font-body)";
 	font-size: 12dp;
 	color: token(text-primary);
-}
-
-/* Recessed content plane (base.rcss's .modern-content-well) -- positioned here since that shared
-   class only supplies paint, not position/size (see its own comment: "position stays the
-   consuming window's own responsibility"). pointer-events:auto overrides the shared class's own
-   `none` -- .modern-content-well is normally a pure backdrop with interactive content positioned
-   as separate siblings elsewhere (see sys_menu.rml's own #btn_* buttons), but this dialog nests
-   its buttons directly inside the well instead, so they need real button pointer-events to reach
-   through it. */
-.gmd-content-well {
-	left: 14dp;
-	right: 14dp;
-	top: 10dp;
-	bottom: 16dp;
-	pointer-events: auto;
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-}
-/* With a title, the header rail (base.rcss's .modern-header-rail, top:7dp height:38dp) visually
-   overlaps this well's own top edge -- painting order alone (well before rail in the .rml)
-   already keeps the rail's opaque fill on top there, but the well's own FLEX CONTENT still needs
-   to clear the rail's bottom edge, hence this padding rather than moving the well's own box.
-   justify-content also switches to flex-start here -- see ../../generic_menu_dialog.rcss's own
-   copy of this comment for why (centering the remainder under the banner would produce a large,
-   content-dependent gap above the first line/button; untitled dialogs keep centering since they
-   have no banner to compete with). */
-.gmd-content-well.has-title {
-	padding-top: 40dp;
-	justify-content: flex-start;
 }
 
 .gmd-line {

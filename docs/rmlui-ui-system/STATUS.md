@@ -469,6 +469,44 @@ section in full detail; summarized here for visibility.
   edited without the other. No tooling fix built yet; worth one if this pattern gets copied again
   (a script diffing named property values between a fg selector and its bg counterpart, or simply
   a stronger convention: always grep the sibling file's matching selector before changing either).
+- **RmlUi's own `Template::Load()` (`Source/Core/Template.cpp`) finds a `<template>` file's head/body
+  regions with a raw, comment-blind text search, not real XML parsing — and its helper,
+  `XMLParseTools::FindTag()`, has its own separate, genuinely surprising state bug.** Found the hard
+  way (2026-09-16) building `window_shell.rml` (both themes, the first `<template>` this codebase
+  has ever used, for `CGenericMenuDialog`'s shared frame/header chrome — see this file's
+  `CGenericMenuDialog` entry). Two distinct, stackable failure modes, both triggered purely by
+  *comment text* inside the template file itself:
+  1. **A literal angle-bracket example of `<body template="...">` anywhere in the file (including
+     inside an XML comment) gets sliced in as if it were real markup.** `Template::Load()` locates
+     the real `<body>...</body>` region via `FindTag("body", ...)`, a plain substring scan with no
+     concept of comments — an illustrative usage example in a doc-comment describing "consumers
+     write `<body template=\"window_shell\">`" is found *before* the real body tag if it appears
+     first in the file, and if that example uses this same template's own name, the sliced-in body
+     content re-triggers `template="window_shell"` on itself when parsed, recursively injecting the
+     template into itself with no cycle detection — a genuine stack overflow crash (Windows
+     exception `0xc00000fd`) at document-load time. Fix: never write a literal tag-shaped example in
+     a template file's own comments — describe the usage in prose instead.
+  2. **A stray `/` directly adjacent to the word "head" or "body" anywhere in the file (comments
+     included) silently breaks the template for a completely different reason, once (1) is fixed.**
+     `FindTag()`'s `found_closing` flag (tracking whether a candidate match was preceded by a `/`) is
+     declared *outside* its own per-candidate search loop and is never reset between rejected
+     candidates within one call (`Source/Core/XMLParseTools.cpp`). A comment mentioning "real
+     head/body regions" (slash, no spaces) sets `found_closing = true` while rejecting that
+     obviously-not-a-tag candidate — but the flag stays `true` for the rest of that same `FindTag()`
+     call, so the *next* candidate (the real `<body id="panel">` opening tag) gets compared against
+     the wrong open/close expectation and is also rejected. The search then runs off the end of the
+     file, `FindTag()` returns null, and `Template::Load()` fails outright — logged only as `Failed
+     to load template ...`/`Template ... not found`/`Failed to find template '...'`, no crash, no
+     stack trace, and (confirmed the hard way) the consuming document silently falls back to
+     unstyled flow layout: no frame/border/header visible at all, with whatever content the consumer
+     supplied just stacked at the top of the screen in raw document order. `.gcd`/`.gmd`-family
+     documents are especially exposed to this since their own doc-comments already routinely
+     describe "head" and "body" together. Fix: never join "head" and "body" with a bare slash
+     (comments included) anywhere in a `<template>` file — write "head and body" instead. Both bugs
+     are specific to files loaded *as* a `<template>` (via `TemplateCache::LoadTemplate()`/
+     `Template::Load()`); normal `.rml` documents parsed the regular way never hit either code path,
+     so this only matters when authoring a new shared template, not every RmlUi file in this
+     codebase.
 
 ## Known gaps against the principles (honest status, not yet built)
 

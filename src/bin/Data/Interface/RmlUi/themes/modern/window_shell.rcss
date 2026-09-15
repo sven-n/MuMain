@@ -1,0 +1,36 @@
+/* Modern theme's shared window shell -- the "metal rail" chrome (base.rcss's .modern-frame/
+   .modern-shell-edge/.modern-groove/.modern-header-rail/.modern-content-well family), factored out
+   of generic_menu_dialog.rcss into its own template (window_shell.rml) so any consumer -- dialog or
+   plain window -- can reuse the same markup instead of hand-copying it. Loaded automatically by any
+   document that links window_shell.rml as a template (RmlUi merges a template's own <head> links
+   into the consuming document's head) -- a consumer does not need its own <link> to this file.
+
+   Named `window-shell-*`, not `gmd-*` -- this markup is no longer generic-menu-dialog-specific (see
+   window_shell.rml's own comment). Values below are unchanged from generic_menu_dialog.rcss's
+   former .gmd-content-well rule, just renamed. */
+.window-shell-content {
+	left: 14dp;
+	right: 14dp;
+	top: 10dp;
+	bottom: 16dp;
+	pointer-events: auto;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+/* With a title, the header rail (base.rcss's .modern-header-rail, top:7dp height:38dp) visually
+   overlaps this well's own top edge -- painting order alone (well before rail in the .rml) already
+   keeps the rail's opaque fill on top there, but the well's own FLEX CONTENT still needs to clear
+   the rail's bottom edge, hence this padding rather than moving the well's own box. justify-content
+   also switches to flex-start here -- centering the remainder under the banner would produce a
+   large, content-dependent gap above the first line/button; untitled consumers keep centering since
+   they have no banner to compete with. */
+.window-shell-content.has-title {
+	padding-top: 40dp;
+	justify-content: flex-start;
+}
+/* .window-shell-header-rail needs no rule of its own -- it's co-applied with base.rcss's own
+   .modern-header-rail, which already supplies the full look (position/size/decorator/box-shadow).
+   The window-shell- class exists only so this element has a name that isn't tied to any one
+   consumer, for anything a future variant might need to target specifically. */
