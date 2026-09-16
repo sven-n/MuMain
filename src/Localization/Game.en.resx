@@ -12970,4 +12970,10 @@
   <data name="ChatCommandsUnknownCommand" xml:space="preserve">
     <value>This command is not available anymore.</value>
   </data>
+  <data name="%s Jewel" xml:space="preserve">
+    <value>%s Jewel</value>
+  </data>
+  <data name="%s Transformation Ring" xml:space="preserve">
+    <value>%s Transformation Ring</value>
+  </data>
 </root>

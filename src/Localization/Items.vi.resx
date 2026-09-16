@@ -1,0 +1,2731 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Kris" xml:space="preserve">
+    <value>Kris</value>
+    <comment>legacy_id=0</comment>
+  </data>
+  <data name="Short Sword" xml:space="preserve">
+    <value>Kiếm Ngắn</value>
+    <comment>legacy_id=1</comment>
+  </data>
+  <data name="Rapier" xml:space="preserve">
+    <value>Kiếm Nhọn</value>
+    <comment>legacy_id=2</comment>
+  </data>
+  <data name="Katache" xml:space="preserve">
+    <value>Katache</value>
+    <comment>legacy_id=3</comment>
+  </data>
+  <data name="Sword of Assassin" xml:space="preserve">
+    <value>Kiếm Sát Thủ</value>
+    <comment>legacy_id=4</comment>
+  </data>
+  <data name="Blade" xml:space="preserve">
+    <value>Đao</value>
+    <comment>legacy_id=5</comment>
+  </data>
+  <data name="Gladius" xml:space="preserve">
+    <value>Gladius</value>
+    <comment>legacy_id=6</comment>
+  </data>
+  <data name="Falchion" xml:space="preserve">
+    <value>Falchion</value>
+    <comment>legacy_id=7</comment>
+  </data>
+  <data name="Serpent Sword" xml:space="preserve">
+    <value>Kiếm Rắn</value>
+    <comment>legacy_id=8</comment>
+  </data>
+  <data name="Sword of Salamander" xml:space="preserve">
+    <value>Kiếm Salamander</value>
+    <comment>legacy_id=9</comment>
+  </data>
+  <data name="Light Saber" xml:space="preserve">
+    <value>Kiếm Ánh Sáng</value>
+    <comment>legacy_id=10</comment>
+  </data>
+  <data name="Legendary Sword" xml:space="preserve">
+    <value>Kiếm Huyền Thoại</value>
+    <comment>legacy_id=11</comment>
+  </data>
+  <data name="Heliacal Sword" xml:space="preserve">
+    <value>Kiếm Mặt Trời</value>
+    <comment>legacy_id=12</comment>
+  </data>
+  <data name="Double Blade" xml:space="preserve">
+    <value>Song Đao</value>
+    <comment>legacy_id=13</comment>
+  </data>
+  <data name="Lightning Sword" xml:space="preserve">
+    <value>Kiếm Sét</value>
+    <comment>legacy_id=14</comment>
+  </data>
+  <data name="Giant Sword" xml:space="preserve">
+    <value>Kiếm Khổng Lồ</value>
+    <comment>legacy_id=15</comment>
+  </data>
+  <data name="Sword of Destruction" xml:space="preserve">
+    <value>Kiếm Huỷ Diệt</value>
+    <comment>legacy_id=16</comment>
+  </data>
+  <data name="Dark Breaker" xml:space="preserve">
+    <value>Phá Bóng Tối</value>
+    <comment>legacy_id=17</comment>
+  </data>
+  <data name="Thunder Blade" xml:space="preserve">
+    <value>Đao Sấm Sét</value>
+    <comment>legacy_id=18</comment>
+  </data>
+  <data name="Divine Sword of Archangel" xml:space="preserve">
+    <value>Kiếm Thần Thánh Archangel</value>
+    <comment>legacy_id=19</comment>
+  </data>
+  <data name="Knight Blade" xml:space="preserve">
+    <value>Đao Kỵ Sĩ</value>
+    <comment>legacy_id=20</comment>
+  </data>
+  <data name="Dark Reign Blade" xml:space="preserve">
+    <value>Đao Vương Quyền Bóng Tối</value>
+    <comment>legacy_id=21</comment>
+  </data>
+  <data name="Bone Blade" xml:space="preserve">
+    <value>Đao Xương</value>
+    <comment>legacy_id=22</comment>
+  </data>
+  <data name="Explosion Blade" xml:space="preserve">
+    <value>Đao Bùng Nổ</value>
+    <comment>legacy_id=23</comment>
+  </data>
+  <data name="Daybreak" xml:space="preserve">
+    <value>Bình Minh</value>
+    <comment>legacy_id=24</comment>
+  </data>
+  <data name="Sword Dancer" xml:space="preserve">
+    <value>Kiếm Vũ</value>
+    <comment>legacy_id=25</comment>
+  </data>
+  <data name="Flamberge" xml:space="preserve">
+    <value>Flamberge</value>
+    <comment>legacy_id=26</comment>
+  </data>
+  <data name="Sword Breaker" xml:space="preserve">
+    <value>Phá Kiếm</value>
+    <comment>legacy_id=27</comment>
+  </data>
+  <data name="Imperial Sword" xml:space="preserve">
+    <value>Kiếm Hoàng Gia</value>
+    <comment>legacy_id=28</comment>
+  </data>
+  <data name="Rune Blade" xml:space="preserve">
+    <value>Đao Rune</value>
+    <comment>legacy_id=31</comment>
+  </data>
+  <data name="Sacred Glove" xml:space="preserve">
+    <value>Găng Tay Thánh</value>
+    <comment>legacy_id=32</comment>
+  </data>
+  <data name="Storm Hard Glove" xml:space="preserve">
+    <value>Găng Tay Bão Tố</value>
+    <comment>legacy_id=33</comment>
+  </data>
+  <data name="Piercing Blade Glove" xml:space="preserve">
+    <value>Găng Tay Xuyên Giáp</value>
+    <comment>legacy_id=34</comment>
+  </data>
+  <data name="Phoenix Soul Star" xml:space="preserve">
+    <value>Sao Linh Hồn Phượng Hoàng</value>
+    <comment>legacy_id=35</comment>
+  </data>
+  <data name="Small Axe" xml:space="preserve">
+    <value>Rìu Nhỏ</value>
+    <comment>legacy_id=512</comment>
+  </data>
+  <data name="Hand Axe" xml:space="preserve">
+    <value>Rìu Tay</value>
+    <comment>legacy_id=513</comment>
+  </data>
+  <data name="Double Axe" xml:space="preserve">
+    <value>Rìu Đôi</value>
+    <comment>legacy_id=514</comment>
+  </data>
+  <data name="Tomahawk" xml:space="preserve">
+    <value>Tomahawk</value>
+    <comment>legacy_id=515</comment>
+  </data>
+  <data name="Elven Axe" xml:space="preserve">
+    <value>Rìu Elf</value>
+    <comment>legacy_id=516</comment>
+  </data>
+  <data name="Battle Axe" xml:space="preserve">
+    <value>Rìu Chiến</value>
+    <comment>legacy_id=517</comment>
+  </data>
+  <data name="Nikkea Axe" xml:space="preserve">
+    <value>Rìu Nikkea</value>
+    <comment>legacy_id=518</comment>
+  </data>
+  <data name="Larkan Axe" xml:space="preserve">
+    <value>Rìu Larkan</value>
+    <comment>legacy_id=519</comment>
+  </data>
+  <data name="Crescent Axe" xml:space="preserve">
+    <value>Rìu Lưỡi Liềm</value>
+    <comment>legacy_id=520</comment>
+  </data>
+  <data name="Mace" xml:space="preserve">
+    <value>Chùy</value>
+    <comment>legacy_id=1024</comment>
+  </data>
+  <data name="Morning Star" xml:space="preserve">
+    <value>Chuỳ Sao Mai</value>
+    <comment>legacy_id=1025</comment>
+  </data>
+  <data name="Flail" xml:space="preserve">
+    <value>Chùy Xích</value>
+    <comment>legacy_id=1026</comment>
+  </data>
+  <data name="Great Hammer" xml:space="preserve">
+    <value>Búa Vĩ Đại</value>
+    <comment>legacy_id=1027</comment>
+  </data>
+  <data name="Crystal Morning Star" xml:space="preserve">
+    <value>Chuỳ Sao Mai Pha Lê</value>
+    <comment>legacy_id=1028</comment>
+  </data>
+  <data name="Crystal Sword" xml:space="preserve">
+    <value>Kiếm Pha Lê</value>
+    <comment>legacy_id=1029</comment>
+  </data>
+  <data name="Chaos Dragon Axe" xml:space="preserve">
+    <value>Rìu Rồng Hỗn Nguyên</value>
+    <comment>legacy_id=1030</comment>
+  </data>
+  <data name="Elemental Mace" xml:space="preserve">
+    <value>Chùy Nguyên Tố</value>
+    <comment>legacy_id=1031</comment>
+  </data>
+  <data name="Battle Scepter" xml:space="preserve">
+    <value>Quyền Trượng Chiến</value>
+    <comment>legacy_id=1032</comment>
+  </data>
+  <data name="Master Scepter" xml:space="preserve">
+    <value>Quyền Trượng Bậc Thầy</value>
+    <comment>legacy_id=1033</comment>
+  </data>
+  <data name="Great Scepter" xml:space="preserve">
+    <value>Quyền Trượng Vĩ Đại</value>
+    <comment>legacy_id=1034</comment>
+  </data>
+  <data name="Lord Scepter" xml:space="preserve">
+    <value>Quyền Trượng Lãnh Chúa</value>
+    <comment>legacy_id=1035</comment>
+  </data>
+  <data name="Great Lord Scepter" xml:space="preserve">
+    <value>Quyền Trượng Đại Lãnh Chúa</value>
+    <comment>legacy_id=1036</comment>
+  </data>
+  <data name="Divine Scepter of Archangel" xml:space="preserve">
+    <value>Quyền Trượng Thần Thánh Archangel</value>
+    <comment>legacy_id=1037</comment>
+  </data>
+  <data name="Soleil Scepter" xml:space="preserve">
+    <value>Quyền Trượng Soleil</value>
+    <comment>legacy_id=1038</comment>
+  </data>
+  <data name="Shining Scepter" xml:space="preserve">
+    <value>Quyền Trượng Rực Rỡ</value>
+    <comment>legacy_id=1039</comment>
+  </data>
+  <data name="Frost Mace" xml:space="preserve">
+    <value>Chùy Băng Giá</value>
+    <comment>legacy_id=1040</comment>
+  </data>
+  <data name="Absolute Scepter" xml:space="preserve">
+    <value>Quyền Trượng Tuyệt Đối</value>
+    <comment>legacy_id=1041</comment>
+  </data>
+  <data name="Stryker Scepter" xml:space="preserve">
+    <value>Quyền Trượng Stryker</value>
+    <comment>legacy_id=1042</comment>
+  </data>
+  <data name="Light Spear" xml:space="preserve">
+    <value>Thương Ánh Sáng</value>
+    <comment>legacy_id=1536</comment>
+  </data>
+  <data name="Spear" xml:space="preserve">
+    <value>Thương</value>
+    <comment>legacy_id=1537</comment>
+  </data>
+  <data name="Dragon Lance" xml:space="preserve">
+    <value>Giáo Rồng</value>
+    <comment>legacy_id=1538</comment>
+  </data>
+  <data name="Giant Trident" xml:space="preserve">
+    <value>Đinh Ba Khổng Lồ</value>
+    <comment>legacy_id=1539</comment>
+  </data>
+  <data name="Serpent Spear" xml:space="preserve">
+    <value>Thương Rắn</value>
+    <comment>legacy_id=1540</comment>
+  </data>
+  <data name="Double Poleaxe" xml:space="preserve">
+    <value>Kích Đôi</value>
+    <comment>legacy_id=1541</comment>
+  </data>
+  <data name="Halberd" xml:space="preserve">
+    <value>Kích</value>
+    <comment>legacy_id=1542</comment>
+  </data>
+  <data name="Berdysh" xml:space="preserve">
+    <value>Berdysh</value>
+    <comment>legacy_id=1543</comment>
+  </data>
+  <data name="Great Scythe" xml:space="preserve">
+    <value>Lưỡi Hái Vĩ Đại</value>
+    <comment>legacy_id=1544</comment>
+  </data>
+  <data name="Bill of Balrog" xml:space="preserve">
+    <value>Kích Balrog</value>
+    <comment>legacy_id=1545</comment>
+  </data>
+  <data name="Dragon Spear" xml:space="preserve">
+    <value>Thương Rồng</value>
+    <comment>legacy_id=1546</comment>
+  </data>
+  <data name="Beuroba" xml:space="preserve">
+    <value>Beuroba</value>
+    <comment>legacy_id=1547</comment>
+  </data>
+  <data name="Short Bow" xml:space="preserve">
+    <value>Cung Ngắn</value>
+    <comment>legacy_id=2048</comment>
+  </data>
+  <data name="Bow" xml:space="preserve">
+    <value>Cung</value>
+    <comment>legacy_id=2049</comment>
+  </data>
+  <data name="Elven Bow" xml:space="preserve">
+    <value>Cung Elf</value>
+    <comment>legacy_id=2050</comment>
+  </data>
+  <data name="Battle Bow" xml:space="preserve">
+    <value>Cung Chiến</value>
+    <comment>legacy_id=2051</comment>
+  </data>
+  <data name="Tiger Bow" xml:space="preserve">
+    <value>Cung Hổ</value>
+    <comment>legacy_id=2052</comment>
+  </data>
+  <data name="Silver Bow" xml:space="preserve">
+    <value>Cung Bạc</value>
+    <comment>legacy_id=2053</comment>
+  </data>
+  <data name="Chaos Nature Bow" xml:space="preserve">
+    <value>Cung Hỗn Nguyên Thiên Nhiên</value>
+    <comment>legacy_id=2054</comment>
+  </data>
+  <data name="Bolt" xml:space="preserve">
+    <value>Tên Nỏ</value>
+    <comment>legacy_id=2055</comment>
+  </data>
+  <data name="Crossbow" xml:space="preserve">
+    <value>Nỏ</value>
+    <comment>legacy_id=2056</comment>
+  </data>
+  <data name="Golden Crossbow" xml:space="preserve">
+    <value>Nỏ Vàng</value>
+    <comment>legacy_id=2057</comment>
+  </data>
+  <data name="Arquebus" xml:space="preserve">
+    <value>Arquebus</value>
+    <comment>legacy_id=2058</comment>
+  </data>
+  <data name="Light Crossbow" xml:space="preserve">
+    <value>Nỏ Ánh Sáng</value>
+    <comment>legacy_id=2059</comment>
+  </data>
+  <data name="Serpent Crossbow" xml:space="preserve">
+    <value>Nỏ Rắn</value>
+    <comment>legacy_id=2060</comment>
+  </data>
+  <data name="Bluewing Crossbow" xml:space="preserve">
+    <value>Nỏ Cánh Xanh</value>
+    <comment>legacy_id=2061</comment>
+  </data>
+  <data name="Aquagold Crossbow" xml:space="preserve">
+    <value>Nỏ Hoàng Kim</value>
+    <comment>legacy_id=2062</comment>
+  </data>
+  <data name="Arrows" xml:space="preserve">
+    <value>Mũi Tên</value>
+    <comment>legacy_id=2063</comment>
+  </data>
+  <data name="Saint Crossbow" xml:space="preserve">
+    <value>Nỏ Thánh</value>
+    <comment>legacy_id=2064</comment>
+  </data>
+  <data name="Celestial Bow" xml:space="preserve">
+    <value>Cung Thiên Giới</value>
+    <comment>legacy_id=2065</comment>
+  </data>
+  <data name="Divine Crossbow of Archangel" xml:space="preserve">
+    <value>Nỏ Thần Thánh Archangel</value>
+    <comment>legacy_id=2066</comment>
+  </data>
+  <data name="Great Reign Crossbow" xml:space="preserve">
+    <value>Nỏ Vương Quyền Vĩ Đại</value>
+    <comment>legacy_id=2067</comment>
+  </data>
+  <data name="Arrow Viper Bow" xml:space="preserve">
+    <value>Cung Rắn Độc</value>
+    <comment>legacy_id=2068</comment>
+  </data>
+  <data name="Sylph Wind Bow" xml:space="preserve">
+    <value>Cung Gió Sylph</value>
+    <comment>legacy_id=2069</comment>
+  </data>
+  <data name="Albatross Bow" xml:space="preserve">
+    <value>Cung Hải Âu</value>
+    <comment>legacy_id=2070</comment>
+  </data>
+  <data name="Stinger Bow" xml:space="preserve">
+    <value>Cung Ngòi Độc</value>
+    <comment>legacy_id=2071</comment>
+  </data>
+  <data name="Air Lyn Bow" xml:space="preserve">
+    <value>Cung Air Lyn</value>
+    <comment>legacy_id=2072</comment>
+  </data>
+  <data name="Skull Staff" xml:space="preserve">
+    <value>Gậy Đầu Lâu</value>
+    <comment>legacy_id=2560</comment>
+  </data>
+  <data name="Angelic Staff" xml:space="preserve">
+    <value>Gậy Thiên Thần</value>
+    <comment>legacy_id=2561</comment>
+  </data>
+  <data name="Serpent Staff" xml:space="preserve">
+    <value>Gậy Rắn</value>
+    <comment>legacy_id=2562</comment>
+  </data>
+  <data name="Thunder Staff" xml:space="preserve">
+    <value>Gậy Sấm Sét</value>
+    <comment>legacy_id=2563</comment>
+  </data>
+  <data name="Gorgon Staff" xml:space="preserve">
+    <value>Gậy Gorgon</value>
+    <comment>legacy_id=2564</comment>
+  </data>
+  <data name="Legendary Staff" xml:space="preserve">
+    <value>Gậy Huyền Thoại</value>
+    <comment>legacy_id=2565</comment>
+  </data>
+  <data name="Staff of Resurrection" xml:space="preserve">
+    <value>Gậy Hồi Sinh</value>
+    <comment>legacy_id=2566</comment>
+  </data>
+  <data name="Chaos Lightning Staff" xml:space="preserve">
+    <value>Gậy Sét Hỗn Nguyên</value>
+    <comment>legacy_id=2567</comment>
+  </data>
+  <data name="Staff of Destruction" xml:space="preserve">
+    <value>Gậy Huỷ Diệt</value>
+    <comment>legacy_id=2568</comment>
+  </data>
+  <data name="Dragon Soul Staff" xml:space="preserve">
+    <value>Gậy Linh Hồn Rồng</value>
+    <comment>legacy_id=2569</comment>
+  </data>
+  <data name="Divine Staff of Archangel" xml:space="preserve">
+    <value>Gậy Thần Thánh Archangel</value>
+    <comment>legacy_id=2570</comment>
+  </data>
+  <data name="Staff of Kundun" xml:space="preserve">
+    <value>Gậy Kundun</value>
+    <comment>legacy_id=2571</comment>
+  </data>
+  <data name="Grand Viper Staff" xml:space="preserve">
+    <value>Gậy Rắn Độc Vĩ Đại</value>
+    <comment>legacy_id=2572</comment>
+  </data>
+  <data name="Platina Staff" xml:space="preserve">
+    <value>Gậy Bạch Kim</value>
+    <comment>legacy_id=2573</comment>
+  </data>
+  <data name="Mistery Stick" xml:space="preserve">
+    <value>Trượng Bí Ẩn</value>
+    <comment>legacy_id=2574</comment>
+  </data>
+  <data name="Violent Wind Stick" xml:space="preserve">
+    <value>Trượng Cuồng Phong</value>
+    <comment>legacy_id=2575</comment>
+  </data>
+  <data name="Red Wing Stick" xml:space="preserve">
+    <value>Trượng Cánh Đỏ</value>
+    <comment>legacy_id=2576</comment>
+  </data>
+  <data name="Ancient Stick" xml:space="preserve">
+    <value>Trượng Cổ Đại</value>
+    <comment>legacy_id=2577</comment>
+  </data>
+  <data name="Demonic Stick" xml:space="preserve">
+    <value>Trượng Ác Quỷ</value>
+    <comment>legacy_id=2578</comment>
+  </data>
+  <data name="Storm Blitz Stick" xml:space="preserve">
+    <value>Trượng Bão Tố Chớp Nhoáng</value>
+    <comment>legacy_id=2579</comment>
+  </data>
+  <data name="Eternal Wing Stick" xml:space="preserve">
+    <value>Trượng Cánh Vĩnh Cửu</value>
+    <comment>legacy_id=2580</comment>
+  </data>
+  <data name="Book of Sahamutt" xml:space="preserve">
+    <value>Sách Sahamutt</value>
+    <comment>legacy_id=2581</comment>
+  </data>
+  <data name="Book of Neil" xml:space="preserve">
+    <value>Sách Neil</value>
+    <comment>legacy_id=2582</comment>
+  </data>
+  <data name="Book of Lagle" xml:space="preserve">
+    <value>Sách Lagle</value>
+    <comment>legacy_id=2583</comment>
+  </data>
+  <data name="Deadly Staff" xml:space="preserve">
+    <value>Gậy Tử Thần</value>
+    <comment>legacy_id=2590</comment>
+  </data>
+  <data name="Imperial Staff" xml:space="preserve">
+    <value>Gậy Hoàng Gia</value>
+    <comment>legacy_id=2591</comment>
+  </data>
+  <data name="Chromatic Staff" xml:space="preserve">
+    <value>Gậy Ngũ Sắc</value>
+    <comment>legacy_id=2593</comment>
+  </data>
+  <data name="Raven Stick" xml:space="preserve">
+    <value>Trượng Quạ Đen</value>
+    <comment>legacy_id=2594</comment>
+  </data>
+  <data name="Divine Stick of Archangel" xml:space="preserve">
+    <value>Trượng Thần Thánh Archangel</value>
+    <comment>legacy_id=2596</comment>
+  </data>
+  <data name="Small Shield" xml:space="preserve">
+    <value>Khiên Nhỏ</value>
+    <comment>legacy_id=3072</comment>
+  </data>
+  <data name="Horn Shield" xml:space="preserve">
+    <value>Khiên Sừng</value>
+    <comment>legacy_id=3073</comment>
+  </data>
+  <data name="Kite Shield" xml:space="preserve">
+    <value>Khiên Diều</value>
+    <comment>legacy_id=3074</comment>
+  </data>
+  <data name="Elven Shield" xml:space="preserve">
+    <value>Khiên Elf</value>
+    <comment>legacy_id=3075</comment>
+  </data>
+  <data name="Buckler" xml:space="preserve">
+    <value>Khiên Tròn</value>
+    <comment>legacy_id=3076</comment>
+  </data>
+  <data name="Dragon Slayer Shield" xml:space="preserve">
+    <value>Khiên Sát Long</value>
+    <comment>legacy_id=3077</comment>
+  </data>
+  <data name="Skull Shield" xml:space="preserve">
+    <value>Khiên Đầu Lâu</value>
+    <comment>legacy_id=3078</comment>
+  </data>
+  <data name="Spiked Shield" xml:space="preserve">
+    <value>Khiên Gai</value>
+    <comment>legacy_id=3079</comment>
+  </data>
+  <data name="Tower Shield" xml:space="preserve">
+    <value>Khiên Tháp</value>
+    <comment>legacy_id=3080</comment>
+  </data>
+  <data name="Plate Shield" xml:space="preserve">
+    <value>Khiên Thép Tấm</value>
+    <comment>legacy_id=3081</comment>
+  </data>
+  <data name="Big Round Shield" xml:space="preserve">
+    <value>Khiên Tròn Lớn</value>
+    <comment>legacy_id=3082</comment>
+  </data>
+  <data name="Serpent Shield" xml:space="preserve">
+    <value>Khiên Rắn</value>
+    <comment>legacy_id=3083</comment>
+  </data>
+  <data name="Bronze Shield" xml:space="preserve">
+    <value>Khiên Đồng</value>
+    <comment>legacy_id=3084</comment>
+  </data>
+  <data name="Dragon Shield" xml:space="preserve">
+    <value>Khiên Rồng</value>
+    <comment>legacy_id=3085</comment>
+  </data>
+  <data name="Legendary Shield" xml:space="preserve">
+    <value>Khiên Huyền Thoại</value>
+    <comment>legacy_id=3086</comment>
+  </data>
+  <data name="Grand Soul Shield" xml:space="preserve">
+    <value>Khiên Đại Linh Hồn</value>
+    <comment>legacy_id=3087</comment>
+  </data>
+  <data name="Elemental Shield" xml:space="preserve">
+    <value>Khiên Nguyên Tố</value>
+    <comment>legacy_id=3088</comment>
+  </data>
+  <data name="Crimson Glory" xml:space="preserve">
+    <value>Khiên Vinh Quang</value>
+    <comment>legacy_id=3089</comment>
+  </data>
+  <data name="Salamander Shield" xml:space="preserve">
+    <value>Khiên Salamander</value>
+    <comment>legacy_id=3090</comment>
+  </data>
+  <data name="Frost Barrier" xml:space="preserve">
+    <value>Khiên Băng Giá</value>
+    <comment>legacy_id=3091</comment>
+  </data>
+  <data name="Guardian Shield" xml:space="preserve">
+    <value>Khiên Vệ Thần</value>
+    <comment>legacy_id=3092</comment>
+  </data>
+  <data name="Cross Shield" xml:space="preserve">
+    <value>Khiên Thánh Giá</value>
+    <comment>legacy_id=3093</comment>
+  </data>
+  <data name="Bronze Helm" xml:space="preserve">
+    <value>Mũ Đồng</value>
+    <comment>legacy_id=3584</comment>
+  </data>
+  <data name="Dragon Helm" xml:space="preserve">
+    <value>Mũ Rồng</value>
+    <comment>legacy_id=3585</comment>
+  </data>
+  <data name="Pad Helm" xml:space="preserve">
+    <value>Mũ Đệm</value>
+    <comment>legacy_id=3586</comment>
+  </data>
+  <data name="Legendary Helm" xml:space="preserve">
+    <value>Mũ Huyền Thoại</value>
+    <comment>legacy_id=3587</comment>
+  </data>
+  <data name="Bone Helm" xml:space="preserve">
+    <value>Mũ Xương</value>
+    <comment>legacy_id=3588</comment>
+  </data>
+  <data name="Leather Helm" xml:space="preserve">
+    <value>Mũ Da</value>
+    <comment>legacy_id=3589</comment>
+  </data>
+  <data name="Scale Helm" xml:space="preserve">
+    <value>Mũ Vảy</value>
+    <comment>legacy_id=3590</comment>
+  </data>
+  <data name="Sphinx Mask" xml:space="preserve">
+    <value>Mặt Nạ Sphinx</value>
+    <comment>legacy_id=3591</comment>
+  </data>
+  <data name="Brass Helm" xml:space="preserve">
+    <value>Mũ Đồng Thau</value>
+    <comment>legacy_id=3592</comment>
+  </data>
+  <data name="Plate Helm" xml:space="preserve">
+    <value>Mũ Thép Tấm</value>
+    <comment>legacy_id=3593</comment>
+  </data>
+  <data name="Vine Helm" xml:space="preserve">
+    <value>Mũ Dây Leo</value>
+    <comment>legacy_id=3594</comment>
+  </data>
+  <data name="Silk Helm" xml:space="preserve">
+    <value>Mũ Lụa</value>
+    <comment>legacy_id=3595</comment>
+  </data>
+  <data name="Wind Helm" xml:space="preserve">
+    <value>Mũ Gió</value>
+    <comment>legacy_id=3596</comment>
+  </data>
+  <data name="Spirit Helm" xml:space="preserve">
+    <value>Mũ Linh Hồn</value>
+    <comment>legacy_id=3597</comment>
+  </data>
+  <data name="Guardian Helm" xml:space="preserve">
+    <value>Mũ Vệ Thần</value>
+    <comment>legacy_id=3598</comment>
+  </data>
+  <data name="Black Dragon Helm" xml:space="preserve">
+    <value>Mũ Rồng Đen</value>
+    <comment>legacy_id=3600</comment>
+  </data>
+  <data name="Dark Phoenix Helm" xml:space="preserve">
+    <value>Mũ Phượng Hoàng Bóng Tối</value>
+    <comment>legacy_id=3601</comment>
+  </data>
+  <data name="Grand Soul Helm" xml:space="preserve">
+    <value>Mũ Đại Linh Hồn</value>
+    <comment>legacy_id=3602</comment>
+  </data>
+  <data name="Divine Helm" xml:space="preserve">
+    <value>Mũ Thần Thánh</value>
+    <comment>legacy_id=3603</comment>
+  </data>
+  <data name="Great Dragon Helm" xml:space="preserve">
+    <value>Mũ Rồng Vĩ Đại</value>
+    <comment>legacy_id=3605</comment>
+  </data>
+  <data name="Dark Soul Helm" xml:space="preserve">
+    <value>Mũ Linh Hồn Bóng Tối</value>
+    <comment>legacy_id=3606</comment>
+  </data>
+  <data name="Red Spirit Helm" xml:space="preserve">
+    <value>Mũ Linh Hồn Đỏ</value>
+    <comment>legacy_id=3608</comment>
+  </data>
+  <data name="Light Plate Mask" xml:space="preserve">
+    <value>Mặt Nạ Thép Tấm Ánh Sáng</value>
+    <comment>legacy_id=3609</comment>
+  </data>
+  <data name="Adamantine Mask" xml:space="preserve">
+    <value>Mặt Nạ Adamantine</value>
+    <comment>legacy_id=3610</comment>
+  </data>
+  <data name="Dark Steel Mask" xml:space="preserve">
+    <value>Mặt Nạ Thép Bóng Tối</value>
+    <comment>legacy_id=3611</comment>
+  </data>
+  <data name="Dark Master Mask" xml:space="preserve">
+    <value>Mặt Nạ Bá Chủ Bóng Tối</value>
+    <comment>legacy_id=3612</comment>
+  </data>
+  <data name="Dragon Knight Helm" xml:space="preserve">
+    <value>Mũ Kỵ Sĩ Rồng</value>
+    <comment>legacy_id=3613</comment>
+  </data>
+  <data name="Venom Mist Helm" xml:space="preserve">
+    <value>Mũ Sương Độc</value>
+    <comment>legacy_id=3614</comment>
+  </data>
+  <data name="Sylphid Ray Helm" xml:space="preserve">
+    <value>Mũ Tia Sylphid</value>
+    <comment>legacy_id=3615</comment>
+  </data>
+  <data name="Sunlight Mask" xml:space="preserve">
+    <value>Mặt Nạ Ánh Mặt Trời</value>
+    <comment>legacy_id=3617</comment>
+  </data>
+  <data name="Ashcrow Helm" xml:space="preserve">
+    <value>Mũ Ashcrow</value>
+    <comment>legacy_id=3618</comment>
+  </data>
+  <data name="Eclipse Helm" xml:space="preserve">
+    <value>Mũ Nhật Thực</value>
+    <comment>legacy_id=3619</comment>
+  </data>
+  <data name="Iris Helm" xml:space="preserve">
+    <value>Mũ Iris</value>
+    <comment>legacy_id=3620</comment>
+  </data>
+  <data name="Glorious Mask" xml:space="preserve">
+    <value>Mặt Nạ Vinh Quang</value>
+    <comment>legacy_id=3622</comment>
+  </data>
+  <data name="Mistery Helm" xml:space="preserve">
+    <value>Mũ Bí Ẩn</value>
+    <comment>legacy_id=3623</comment>
+  </data>
+  <data name="Red Wing Helm" xml:space="preserve">
+    <value>Mũ Cánh Đỏ</value>
+    <comment>legacy_id=3624</comment>
+  </data>
+  <data name="Ancient Helm" xml:space="preserve">
+    <value>Mũ Cổ Đại</value>
+    <comment>legacy_id=3625</comment>
+  </data>
+  <data name="Black Rose Helm" xml:space="preserve">
+    <value>Mũ Hoa Hồng Đen</value>
+    <comment>legacy_id=3626</comment>
+  </data>
+  <data name="Aura Helm" xml:space="preserve">
+    <value>Mũ Hào Quang</value>
+    <comment>legacy_id=3627</comment>
+  </data>
+  <data name="Lilium Helm" xml:space="preserve">
+    <value>Mũ Lilium</value>
+    <comment>legacy_id=3628</comment>
+  </data>
+  <data name="Titan Helm" xml:space="preserve">
+    <value>Mũ Titan</value>
+    <comment>legacy_id=3629</comment>
+  </data>
+  <data name="Brave Helm" xml:space="preserve">
+    <value>Mũ Dũng Cảm</value>
+    <comment>legacy_id=3630</comment>
+  </data>
+  <data name="Seraphim Helm" xml:space="preserve">
+    <value>Mũ Seraphim</value>
+    <comment>legacy_id=3633</comment>
+  </data>
+  <data name="Faith Helm" xml:space="preserve">
+    <value>Mũ Đức Tin</value>
+    <comment>legacy_id=3634</comment>
+  </data>
+  <data name="Paewang Mask" xml:space="preserve">
+    <value>Mặt Nạ Paewang</value>
+    <comment>legacy_id=3635</comment>
+  </data>
+  <data name="Hades Helm" xml:space="preserve">
+    <value>Mũ Hades</value>
+    <comment>legacy_id=3636</comment>
+  </data>
+  <data name="Sacred Helm" xml:space="preserve">
+    <value>Mũ Thánh</value>
+    <comment>legacy_id=3643</comment>
+  </data>
+  <data name="Storm Hard Helm" xml:space="preserve">
+    <value>Mũ Bão Tố Cứng</value>
+    <comment>legacy_id=3644</comment>
+  </data>
+  <data name="Piercing Helm" xml:space="preserve">
+    <value>Mũ Xuyên Phá</value>
+    <comment>legacy_id=3645</comment>
+  </data>
+  <data name="Phoenix Soul Helmet" xml:space="preserve">
+    <value>Mũ Linh Hồn Phượng Hoàng</value>
+    <comment>legacy_id=3657</comment>
+  </data>
+  <data name="Bronze Armor" xml:space="preserve">
+    <value>Áo Giáp Đồng</value>
+    <comment>legacy_id=4096</comment>
+  </data>
+  <data name="Dragon Armor" xml:space="preserve">
+    <value>Áo Giáp Rồng</value>
+    <comment>legacy_id=4097</comment>
+  </data>
+  <data name="Pad Armor" xml:space="preserve">
+    <value>Áo Giáp Đệm</value>
+    <comment>legacy_id=4098</comment>
+  </data>
+  <data name="Legendary Armor" xml:space="preserve">
+    <value>Áo Giáp Huyền Thoại</value>
+    <comment>legacy_id=4099</comment>
+  </data>
+  <data name="Bone Armor" xml:space="preserve">
+    <value>Áo Giáp Xương</value>
+    <comment>legacy_id=4100</comment>
+  </data>
+  <data name="Leather Armor" xml:space="preserve">
+    <value>Áo Giáp Da</value>
+    <comment>legacy_id=4101</comment>
+  </data>
+  <data name="Scale Armor" xml:space="preserve">
+    <value>Áo Giáp Vảy</value>
+    <comment>legacy_id=4102</comment>
+  </data>
+  <data name="Sphinx Armor" xml:space="preserve">
+    <value>Áo Giáp Sphinx</value>
+    <comment>legacy_id=4103</comment>
+  </data>
+  <data name="Brass Armor" xml:space="preserve">
+    <value>Áo Giáp Đồng Thau</value>
+    <comment>legacy_id=4104</comment>
+  </data>
+  <data name="Plate Armor" xml:space="preserve">
+    <value>Áo Giáp Thép Tấm</value>
+    <comment>legacy_id=4105</comment>
+  </data>
+  <data name="Vine Armor" xml:space="preserve">
+    <value>Áo Giáp Dây Leo</value>
+    <comment>legacy_id=4106</comment>
+  </data>
+  <data name="Silk Armor" xml:space="preserve">
+    <value>Áo Giáp Lụa</value>
+    <comment>legacy_id=4107</comment>
+  </data>
+  <data name="Wind Armor" xml:space="preserve">
+    <value>Áo Giáp Gió</value>
+    <comment>legacy_id=4108</comment>
+  </data>
+  <data name="Spirit Armor" xml:space="preserve">
+    <value>Áo Giáp Linh Hồn</value>
+    <comment>legacy_id=4109</comment>
+  </data>
+  <data name="Guardian Armor" xml:space="preserve">
+    <value>Áo Giáp Vệ Thần</value>
+    <comment>legacy_id=4110</comment>
+  </data>
+  <data name="Storm Crow Armor" xml:space="preserve">
+    <value>Áo Giáp Quạ Bão Tố</value>
+    <comment>legacy_id=4111</comment>
+  </data>
+  <data name="Black Dragon Armor" xml:space="preserve">
+    <value>Áo Giáp Rồng Đen</value>
+    <comment>legacy_id=4112</comment>
+  </data>
+  <data name="Dark Phoenix Armor" xml:space="preserve">
+    <value>Áo Giáp Phượng Hoàng Bóng Tối</value>
+    <comment>legacy_id=4113</comment>
+  </data>
+  <data name="Grand Soul Armor" xml:space="preserve">
+    <value>Áo Giáp Đại Linh Hồn</value>
+    <comment>legacy_id=4114</comment>
+  </data>
+  <data name="Divine Armor" xml:space="preserve">
+    <value>Áo Giáp Thần Thánh</value>
+    <comment>legacy_id=4115</comment>
+  </data>
+  <data name="Thunder Hawk Armor" xml:space="preserve">
+    <value>Áo Giáp Ưng Sấm Sét</value>
+    <comment>legacy_id=4116</comment>
+  </data>
+  <data name="Great Dragon Armor" xml:space="preserve">
+    <value>Áo Giáp Rồng Vĩ Đại</value>
+    <comment>legacy_id=4117</comment>
+  </data>
+  <data name="Dark Soul Armor" xml:space="preserve">
+    <value>Áo Giáp Linh Hồn Bóng Tối</value>
+    <comment>legacy_id=4118</comment>
+  </data>
+  <data name="Hurricane Armor" xml:space="preserve">
+    <value>Áo Giáp Cuồng Phong</value>
+    <comment>legacy_id=4119</comment>
+  </data>
+  <data name="Red Sprit Armor" xml:space="preserve">
+    <value>Áo Giáp Linh Hồn Đỏ</value>
+    <comment>legacy_id=4120</comment>
+  </data>
+  <data name="Light Plate Armor" xml:space="preserve">
+    <value>Áo Giáp Thép Tấm Ánh Sáng</value>
+    <comment>legacy_id=4121</comment>
+  </data>
+  <data name="Adamantine Armor" xml:space="preserve">
+    <value>Áo Giáp Adamantine</value>
+    <comment>legacy_id=4122</comment>
+  </data>
+  <data name="Dark Steel Armor" xml:space="preserve">
+    <value>Áo Giáp Thép Bóng Tối</value>
+    <comment>legacy_id=4123</comment>
+  </data>
+  <data name="Dark Master Armor" xml:space="preserve">
+    <value>Áo Giáp Bá Chủ Bóng Tối</value>
+    <comment>legacy_id=4124</comment>
+  </data>
+  <data name="Dragon Knight Armor" xml:space="preserve">
+    <value>Áo Giáp Kỵ Sĩ Rồng</value>
+    <comment>legacy_id=4125</comment>
+  </data>
+  <data name="Venom Mist Armor" xml:space="preserve">
+    <value>Áo Giáp Sương Độc</value>
+    <comment>legacy_id=4126</comment>
+  </data>
+  <data name="Sylphid Ray Armor" xml:space="preserve">
+    <value>Áo Giáp Tia Sylphid</value>
+    <comment>legacy_id=4127</comment>
+  </data>
+  <data name="Volcano Armor" xml:space="preserve">
+    <value>Áo Giáp Núi Lửa</value>
+    <comment>legacy_id=4128</comment>
+  </data>
+  <data name="Sunlight Armor" xml:space="preserve">
+    <value>Áo Giáp Ánh Mặt Trời</value>
+    <comment>legacy_id=4129</comment>
+  </data>
+  <data name="Ashcrow Armor" xml:space="preserve">
+    <value>Áo Giáp Ashcrow</value>
+    <comment>legacy_id=4130</comment>
+  </data>
+  <data name="Eclipse Armor" xml:space="preserve">
+    <value>Áo Giáp Nhật Thực</value>
+    <comment>legacy_id=4131</comment>
+  </data>
+  <data name="Iris Armor" xml:space="preserve">
+    <value>Áo Giáp Iris</value>
+    <comment>legacy_id=4132</comment>
+  </data>
+  <data name="Valiant Armor" xml:space="preserve">
+    <value>Áo Giáp Anh Dũng</value>
+    <comment>legacy_id=4133</comment>
+  </data>
+  <data name="Glorious Armor" xml:space="preserve">
+    <value>Áo Giáp Vinh Quang</value>
+    <comment>legacy_id=4134</comment>
+  </data>
+  <data name="Mistery Armor" xml:space="preserve">
+    <value>Áo Giáp Bí Ẩn</value>
+    <comment>legacy_id=4135</comment>
+  </data>
+  <data name="Red Wing Armor" xml:space="preserve">
+    <value>Áo Giáp Cánh Đỏ</value>
+    <comment>legacy_id=4136</comment>
+  </data>
+  <data name="Ancient Armor" xml:space="preserve">
+    <value>Áo Giáp Cổ Đại</value>
+    <comment>legacy_id=4137</comment>
+  </data>
+  <data name="Black Rose Armor" xml:space="preserve">
+    <value>Áo Giáp Hoa Hồng Đen</value>
+    <comment>legacy_id=4138</comment>
+  </data>
+  <data name="Aura Armor" xml:space="preserve">
+    <value>Áo Giáp Hào Quang</value>
+    <comment>legacy_id=4139</comment>
+  </data>
+  <data name="Lilium Armor" xml:space="preserve">
+    <value>Áo Giáp Lilium</value>
+    <comment>legacy_id=4140</comment>
+  </data>
+  <data name="Titan Armor" xml:space="preserve">
+    <value>Áo Giáp Titan</value>
+    <comment>legacy_id=4141</comment>
+  </data>
+  <data name="Brave Armor" xml:space="preserve">
+    <value>Áo Giáp Dũng Cảm</value>
+    <comment>legacy_id=4142</comment>
+  </data>
+  <data name="Destory Armor" xml:space="preserve">
+    <value>Áo Giáp Hủy Diệt</value>
+    <comment>legacy_id=4143</comment>
+  </data>
+  <data name="Phantom Armor" xml:space="preserve">
+    <value>Áo Giáp Bóng Ma</value>
+    <comment>legacy_id=4144</comment>
+  </data>
+  <data name="Seraphim Armor" xml:space="preserve">
+    <value>Áo Giáp Seraphim</value>
+    <comment>legacy_id=4145</comment>
+  </data>
+  <data name="Faith Armor" xml:space="preserve">
+    <value>Áo Giáp Đức Tin</value>
+    <comment>legacy_id=4146</comment>
+  </data>
+  <data name="Paewang Armor" xml:space="preserve">
+    <value>Áo Giáp Paewang</value>
+    <comment>legacy_id=4147</comment>
+  </data>
+  <data name="Hades Armor" xml:space="preserve">
+    <value>Áo Giáp Hades</value>
+    <comment>legacy_id=4148</comment>
+  </data>
+  <data name="Sacred Armor" xml:space="preserve">
+    <value>Áo Giáp Thánh</value>
+    <comment>legacy_id=4155</comment>
+  </data>
+  <data name="Storm Hard Armor" xml:space="preserve">
+    <value>Áo Giáp Bão Tố Cứng</value>
+    <comment>legacy_id=4156</comment>
+  </data>
+  <data name="Piercing Armor" xml:space="preserve">
+    <value>Áo Giáp Xuyên Phá</value>
+    <comment>legacy_id=4157</comment>
+  </data>
+  <data name="Phoenix Soul Armor" xml:space="preserve">
+    <value>Áo Giáp Linh Hồn Phượng Hoàng</value>
+    <comment>legacy_id=4169</comment>
+  </data>
+  <data name="Bronze Pants" xml:space="preserve">
+    <value>Quần Giáp Đồng</value>
+    <comment>legacy_id=4608</comment>
+  </data>
+  <data name="Dragon Pants" xml:space="preserve">
+    <value>Quần Giáp Rồng</value>
+    <comment>legacy_id=4609</comment>
+  </data>
+  <data name="Pad Pants" xml:space="preserve">
+    <value>Quần Giáp Đệm</value>
+    <comment>legacy_id=4610</comment>
+  </data>
+  <data name="Legendary Pants" xml:space="preserve">
+    <value>Quần Giáp Huyền Thoại</value>
+    <comment>legacy_id=4611</comment>
+  </data>
+  <data name="Bone Pants" xml:space="preserve">
+    <value>Quần Giáp Xương</value>
+    <comment>legacy_id=4612</comment>
+  </data>
+  <data name="Leather Pants" xml:space="preserve">
+    <value>Quần Giáp Da</value>
+    <comment>legacy_id=4613</comment>
+  </data>
+  <data name="Scale Pants" xml:space="preserve">
+    <value>Quần Giáp Vảy</value>
+    <comment>legacy_id=4614</comment>
+  </data>
+  <data name="Sphinx Pants" xml:space="preserve">
+    <value>Quần Giáp Sphinx</value>
+    <comment>legacy_id=4615</comment>
+  </data>
+  <data name="Brass Pants" xml:space="preserve">
+    <value>Quần Giáp Đồng Thau</value>
+    <comment>legacy_id=4616</comment>
+  </data>
+  <data name="Plate Pants" xml:space="preserve">
+    <value>Quần Giáp Thép Tấm</value>
+    <comment>legacy_id=4617</comment>
+  </data>
+  <data name="Vine Pants" xml:space="preserve">
+    <value>Quần Giáp Dây Leo</value>
+    <comment>legacy_id=4618</comment>
+  </data>
+  <data name="Silk Pants" xml:space="preserve">
+    <value>Quần Giáp Lụa</value>
+    <comment>legacy_id=4619</comment>
+  </data>
+  <data name="Wind Pants" xml:space="preserve">
+    <value>Quần Giáp Gió</value>
+    <comment>legacy_id=4620</comment>
+  </data>
+  <data name="Spirit Pants" xml:space="preserve">
+    <value>Quần Giáp Linh Hồn</value>
+    <comment>legacy_id=4621</comment>
+  </data>
+  <data name="Guardian Pants" xml:space="preserve">
+    <value>Quần Giáp Vệ Thần</value>
+    <comment>legacy_id=4622</comment>
+  </data>
+  <data name="Storm Crow Pants" xml:space="preserve">
+    <value>Quần Giáp Quạ Bão Tố</value>
+    <comment>legacy_id=4623</comment>
+  </data>
+  <data name="Black Dragon Pants" xml:space="preserve">
+    <value>Quần Giáp Rồng Đen</value>
+    <comment>legacy_id=4624</comment>
+  </data>
+  <data name="Dark Phoenix Pants" xml:space="preserve">
+    <value>Quần Giáp Phượng Hoàng Bóng Tối</value>
+    <comment>legacy_id=4625</comment>
+  </data>
+  <data name="Grand Soul Pants" xml:space="preserve">
+    <value>Quần Giáp Đại Linh Hồn</value>
+    <comment>legacy_id=4626</comment>
+  </data>
+  <data name="Divine Pants" xml:space="preserve">
+    <value>Quần Giáp Thần Thánh</value>
+    <comment>legacy_id=4627</comment>
+  </data>
+  <data name="Thunder Hawk Pants" xml:space="preserve">
+    <value>Quần Giáp Ưng Sấm Sét</value>
+    <comment>legacy_id=4628</comment>
+  </data>
+  <data name="Great Dragon Pants" xml:space="preserve">
+    <value>Quần Giáp Rồng Vĩ Đại</value>
+    <comment>legacy_id=4629</comment>
+  </data>
+  <data name="Dark Soul Pants" xml:space="preserve">
+    <value>Quần Giáp Linh Hồn Bóng Tối</value>
+    <comment>legacy_id=4630</comment>
+  </data>
+  <data name="Hurricane Pants" xml:space="preserve">
+    <value>Quần Giáp Cuồng Phong</value>
+    <comment>legacy_id=4631</comment>
+  </data>
+  <data name="Red Spirit Pants" xml:space="preserve">
+    <value>Quần Giáp Linh Hồn Đỏ</value>
+    <comment>legacy_id=4632</comment>
+  </data>
+  <data name="Light Plate Pants" xml:space="preserve">
+    <value>Quần Giáp Thép Tấm Ánh Sáng</value>
+    <comment>legacy_id=4633</comment>
+  </data>
+  <data name="Adamantine Pants" xml:space="preserve">
+    <value>Quần Giáp Adamantine</value>
+    <comment>legacy_id=4634</comment>
+  </data>
+  <data name="Dark Steel Pants" xml:space="preserve">
+    <value>Quần Giáp Thép Bóng Tối</value>
+    <comment>legacy_id=4635</comment>
+  </data>
+  <data name="Dark Master Pants" xml:space="preserve">
+    <value>Quần Giáp Bá Chủ Bóng Tối</value>
+    <comment>legacy_id=4636</comment>
+  </data>
+  <data name="Dragon Knight Pants" xml:space="preserve">
+    <value>Quần Giáp Kỵ Sĩ Rồng</value>
+    <comment>legacy_id=4637</comment>
+  </data>
+  <data name="Venom Mist Pants" xml:space="preserve">
+    <value>Quần Giáp Sương Độc</value>
+    <comment>legacy_id=4638</comment>
+  </data>
+  <data name="Sylphid Ray Pants" xml:space="preserve">
+    <value>Quần Giáp Tia Sylphid</value>
+    <comment>legacy_id=4639</comment>
+  </data>
+  <data name="Volcano Pants" xml:space="preserve">
+    <value>Quần Giáp Núi Lửa</value>
+    <comment>legacy_id=4640</comment>
+  </data>
+  <data name="Sunlight Pants" xml:space="preserve">
+    <value>Quần Giáp Ánh Mặt Trời</value>
+    <comment>legacy_id=4641</comment>
+  </data>
+  <data name="Ashcrow Pants" xml:space="preserve">
+    <value>Quần Giáp Ashcrow</value>
+    <comment>legacy_id=4642</comment>
+  </data>
+  <data name="Eclipse Pants" xml:space="preserve">
+    <value>Quần Giáp Nhật Thực</value>
+    <comment>legacy_id=4643</comment>
+  </data>
+  <data name="Iris Pants" xml:space="preserve">
+    <value>Quần Giáp Iris</value>
+    <comment>legacy_id=4644</comment>
+  </data>
+  <data name="Valiant Pants" xml:space="preserve">
+    <value>Quần Giáp Anh Dũng</value>
+    <comment>legacy_id=4645</comment>
+  </data>
+  <data name="Glorious Pants" xml:space="preserve">
+    <value>Quần Giáp Vinh Quang</value>
+    <comment>legacy_id=4646</comment>
+  </data>
+  <data name="Mistery Pants" xml:space="preserve">
+    <value>Quần Giáp Bí Ẩn</value>
+    <comment>legacy_id=4647</comment>
+  </data>
+  <data name="Red Wing Pants" xml:space="preserve">
+    <value>Quần Giáp Cánh Đỏ</value>
+    <comment>legacy_id=4648</comment>
+  </data>
+  <data name="Ancient Pants" xml:space="preserve">
+    <value>Quần Giáp Cổ Đại</value>
+    <comment>legacy_id=4649</comment>
+  </data>
+  <data name="Black Rose Pants" xml:space="preserve">
+    <value>Quần Giáp Hoa Hồng Đen</value>
+    <comment>legacy_id=4650</comment>
+  </data>
+  <data name="Aura Pants" xml:space="preserve">
+    <value>Quần Giáp Hào Quang</value>
+    <comment>legacy_id=4651</comment>
+  </data>
+  <data name="Lilium Pants" xml:space="preserve">
+    <value>Quần Giáp Lilium</value>
+    <comment>legacy_id=4652</comment>
+  </data>
+  <data name="Titan Pants" xml:space="preserve">
+    <value>Quần Giáp Titan</value>
+    <comment>legacy_id=4653</comment>
+  </data>
+  <data name="Brave Pants" xml:space="preserve">
+    <value>Quần Giáp Dũng Cảm</value>
+    <comment>legacy_id=4654</comment>
+  </data>
+  <data name="Destory Pants" xml:space="preserve">
+    <value>Quần Giáp Hủy Diệt</value>
+    <comment>legacy_id=4655</comment>
+  </data>
+  <data name="Phantom Pants" xml:space="preserve">
+    <value>Quần Giáp Bóng Ma</value>
+    <comment>legacy_id=4656</comment>
+  </data>
+  <data name="Seraphim Pants" xml:space="preserve">
+    <value>Quần Giáp Seraphim</value>
+    <comment>legacy_id=4657</comment>
+  </data>
+  <data name="Faith Pants" xml:space="preserve">
+    <value>Quần Giáp Đức Tin</value>
+    <comment>legacy_id=4658</comment>
+  </data>
+  <data name="Paewang Pants" xml:space="preserve">
+    <value>Quần Giáp Paewang</value>
+    <comment>legacy_id=4659</comment>
+  </data>
+  <data name="Hades Pants" xml:space="preserve">
+    <value>Quần Giáp Hades</value>
+    <comment>legacy_id=4660</comment>
+  </data>
+  <data name="Sacred Pants" xml:space="preserve">
+    <value>Quần Giáp Thánh</value>
+    <comment>legacy_id=4667</comment>
+  </data>
+  <data name="Storm Hard Pants" xml:space="preserve">
+    <value>Quần Giáp Bão Tố Cứng</value>
+    <comment>legacy_id=4668</comment>
+  </data>
+  <data name="Piercing Pants" xml:space="preserve">
+    <value>Quần Giáp Xuyên Phá</value>
+    <comment>legacy_id=4669</comment>
+  </data>
+  <data name="Phoenix Soul Pants" xml:space="preserve">
+    <value>Quần Giáp Linh Hồn Phượng Hoàng</value>
+    <comment>legacy_id=4681</comment>
+  </data>
+  <data name="Bronze Gloves" xml:space="preserve">
+    <value>Găng Tay Đồng</value>
+    <comment>legacy_id=5120</comment>
+  </data>
+  <data name="Dragon Gloves" xml:space="preserve">
+    <value>Găng Tay Rồng</value>
+    <comment>legacy_id=5121</comment>
+  </data>
+  <data name="Pad Gloves" xml:space="preserve">
+    <value>Găng Tay Đệm</value>
+    <comment>legacy_id=5122</comment>
+  </data>
+  <data name="Legendary Gloves" xml:space="preserve">
+    <value>Găng Tay Huyền Thoại</value>
+    <comment>legacy_id=5123</comment>
+  </data>
+  <data name="Bone Gloves" xml:space="preserve">
+    <value>Găng Tay Xương</value>
+    <comment>legacy_id=5124</comment>
+  </data>
+  <data name="Leather Gloves" xml:space="preserve">
+    <value>Găng Tay Da</value>
+    <comment>legacy_id=5125</comment>
+  </data>
+  <data name="Scale Gloves" xml:space="preserve">
+    <value>Găng Tay Vảy</value>
+    <comment>legacy_id=5126</comment>
+  </data>
+  <data name="Sphinx Gloves" xml:space="preserve">
+    <value>Găng Tay Sphinx</value>
+    <comment>legacy_id=5127</comment>
+  </data>
+  <data name="Brass Gloves" xml:space="preserve">
+    <value>Găng Tay Đồng Thau</value>
+    <comment>legacy_id=5128</comment>
+  </data>
+  <data name="Plate Gloves" xml:space="preserve">
+    <value>Găng Tay Thép Tấm</value>
+    <comment>legacy_id=5129</comment>
+  </data>
+  <data name="Vine Gloves" xml:space="preserve">
+    <value>Găng Tay Dây Leo</value>
+    <comment>legacy_id=5130</comment>
+  </data>
+  <data name="Silk Gloves" xml:space="preserve">
+    <value>Găng Tay Lụa</value>
+    <comment>legacy_id=5131</comment>
+  </data>
+  <data name="Wind Gloves" xml:space="preserve">
+    <value>Găng Tay Gió</value>
+    <comment>legacy_id=5132</comment>
+  </data>
+  <data name="Spirit Gloves" xml:space="preserve">
+    <value>Găng Tay Linh Hồn</value>
+    <comment>legacy_id=5133</comment>
+  </data>
+  <data name="Guardian Gloves" xml:space="preserve">
+    <value>Găng Tay Vệ Thần</value>
+    <comment>legacy_id=5134</comment>
+  </data>
+  <data name="Storm Crow Gloves" xml:space="preserve">
+    <value>Găng Tay Quạ Bão Tố</value>
+    <comment>legacy_id=5135</comment>
+  </data>
+  <data name="Black Dragon Gloves" xml:space="preserve">
+    <value>Găng Tay Rồng Đen</value>
+    <comment>legacy_id=5136</comment>
+  </data>
+  <data name="Dark Phoenix Gloves" xml:space="preserve">
+    <value>Găng Tay Phượng Hoàng Bóng Tối</value>
+    <comment>legacy_id=5137</comment>
+  </data>
+  <data name="Grand Soul Gloves" xml:space="preserve">
+    <value>Găng Tay Đại Linh Hồn</value>
+    <comment>legacy_id=5138</comment>
+  </data>
+  <data name="Divine Gloves" xml:space="preserve">
+    <value>Găng Tay Thần Thánh</value>
+    <comment>legacy_id=5139</comment>
+  </data>
+  <data name="Thunder Hawk Gloves" xml:space="preserve">
+    <value>Găng Tay Ưng Sấm Sét</value>
+    <comment>legacy_id=5140</comment>
+  </data>
+  <data name="Great Dragon Gloves" xml:space="preserve">
+    <value>Găng Tay Rồng Vĩ Đại</value>
+    <comment>legacy_id=5141</comment>
+  </data>
+  <data name="Dark Soul Gloves" xml:space="preserve">
+    <value>Găng Tay Linh Hồn Bóng Tối</value>
+    <comment>legacy_id=5142</comment>
+  </data>
+  <data name="Hurricane Gloves" xml:space="preserve">
+    <value>Găng Tay Cuồng Phong</value>
+    <comment>legacy_id=5143</comment>
+  </data>
+  <data name="Red Spirit Gloves" xml:space="preserve">
+    <value>Găng Tay Linh Hồn Đỏ</value>
+    <comment>legacy_id=5144</comment>
+  </data>
+  <data name="Light Plate Gloves" xml:space="preserve">
+    <value>Găng Tay Thép Tấm Ánh Sáng</value>
+    <comment>legacy_id=5145</comment>
+  </data>
+  <data name="Adamantine Gloves" xml:space="preserve">
+    <value>Găng Tay Adamantine</value>
+    <comment>legacy_id=5146</comment>
+  </data>
+  <data name="Dark Steel Gloves" xml:space="preserve">
+    <value>Găng Tay Thép Bóng Tối</value>
+    <comment>legacy_id=5147</comment>
+  </data>
+  <data name="Dark Master Gloves" xml:space="preserve">
+    <value>Găng Tay Bá Chủ Bóng Tối</value>
+    <comment>legacy_id=5148</comment>
+  </data>
+  <data name="Dragon Knight Gloves" xml:space="preserve">
+    <value>Găng Tay Kỵ Sĩ Rồng</value>
+    <comment>legacy_id=5149</comment>
+  </data>
+  <data name="Venom Mist Gloves" xml:space="preserve">
+    <value>Găng Tay Sương Độc</value>
+    <comment>legacy_id=5150</comment>
+  </data>
+  <data name="Sylphid Ray Gloves" xml:space="preserve">
+    <value>Găng Tay Tia Sylphid</value>
+    <comment>legacy_id=5151</comment>
+  </data>
+  <data name="Volcano Gloves" xml:space="preserve">
+    <value>Găng Tay Núi Lửa</value>
+    <comment>legacy_id=5152</comment>
+  </data>
+  <data name="Sunlight Gloves" xml:space="preserve">
+    <value>Găng Tay Ánh Mặt Trời</value>
+    <comment>legacy_id=5153</comment>
+  </data>
+  <data name="Ashcrow Gloves" xml:space="preserve">
+    <value>Găng Tay Ashcrow</value>
+    <comment>legacy_id=5154</comment>
+  </data>
+  <data name="Eclipse Gloves" xml:space="preserve">
+    <value>Găng Tay Nhật Thực</value>
+    <comment>legacy_id=5155</comment>
+  </data>
+  <data name="Iris Gloves" xml:space="preserve">
+    <value>Găng Tay Iris</value>
+    <comment>legacy_id=5156</comment>
+  </data>
+  <data name="Valiant Gloves" xml:space="preserve">
+    <value>Găng Tay Anh Dũng</value>
+    <comment>legacy_id=5157</comment>
+  </data>
+  <data name="Glorious Gloves" xml:space="preserve">
+    <value>Găng Tay Vinh Quang</value>
+    <comment>legacy_id=5158</comment>
+  </data>
+  <data name="Mistery Gloves" xml:space="preserve">
+    <value>Găng Tay Bí Ẩn</value>
+    <comment>legacy_id=5159</comment>
+  </data>
+  <data name="Red Wing Gloves" xml:space="preserve">
+    <value>Găng Tay Cánh Đỏ</value>
+    <comment>legacy_id=5160</comment>
+  </data>
+  <data name="Ancient Gloves" xml:space="preserve">
+    <value>Găng Tay Cổ Đại</value>
+    <comment>legacy_id=5161</comment>
+  </data>
+  <data name="Black Rose Gloves" xml:space="preserve">
+    <value>Găng Tay Hoa Hồng Đen</value>
+    <comment>legacy_id=5162</comment>
+  </data>
+  <data name="Aura Gloves" xml:space="preserve">
+    <value>Găng Tay Hào Quang</value>
+    <comment>legacy_id=5163</comment>
+  </data>
+  <data name="Lilium Gloves" xml:space="preserve">
+    <value>Găng Tay Lilium</value>
+    <comment>legacy_id=5164</comment>
+  </data>
+  <data name="Titan Gloves" xml:space="preserve">
+    <value>Găng Tay Titan</value>
+    <comment>legacy_id=5165</comment>
+  </data>
+  <data name="Brave Gloves" xml:space="preserve">
+    <value>Găng Tay Dũng Cảm</value>
+    <comment>legacy_id=5166</comment>
+  </data>
+  <data name="Destory Gloves" xml:space="preserve">
+    <value>Găng Tay Hủy Diệt</value>
+    <comment>legacy_id=5167</comment>
+  </data>
+  <data name="Phantom Gloves" xml:space="preserve">
+    <value>Găng Tay Bóng Ma</value>
+    <comment>legacy_id=5168</comment>
+  </data>
+  <data name="Seraphim Gloves" xml:space="preserve">
+    <value>Găng Tay Seraphim</value>
+    <comment>legacy_id=5169</comment>
+  </data>
+  <data name="Faith Gloves" xml:space="preserve">
+    <value>Găng Tay Đức Tin</value>
+    <comment>legacy_id=5170</comment>
+  </data>
+  <data name="Paewang Gloves" xml:space="preserve">
+    <value>Găng Tay Paewang</value>
+    <comment>legacy_id=5171</comment>
+  </data>
+  <data name="Hades Gloves" xml:space="preserve">
+    <value>Găng Tay Hades</value>
+    <comment>legacy_id=5172</comment>
+  </data>
+  <data name="Bronze Boots" xml:space="preserve">
+    <value>Giày Đồng</value>
+    <comment>legacy_id=5632</comment>
+  </data>
+  <data name="Dragon Boots" xml:space="preserve">
+    <value>Giày Rồng</value>
+    <comment>legacy_id=5633</comment>
+  </data>
+  <data name="Pad Boots" xml:space="preserve">
+    <value>Giày Đệm</value>
+    <comment>legacy_id=5634</comment>
+  </data>
+  <data name="Legendary Boots" xml:space="preserve">
+    <value>Giày Huyền Thoại</value>
+    <comment>legacy_id=5635</comment>
+  </data>
+  <data name="Bone Boots" xml:space="preserve">
+    <value>Giày Xương</value>
+    <comment>legacy_id=5636</comment>
+  </data>
+  <data name="Leather Boots" xml:space="preserve">
+    <value>Giày Da</value>
+    <comment>legacy_id=5637</comment>
+  </data>
+  <data name="Scale Boots" xml:space="preserve">
+    <value>Giày Vảy</value>
+    <comment>legacy_id=5638</comment>
+  </data>
+  <data name="Sphinx Boots" xml:space="preserve">
+    <value>Giày Sphinx</value>
+    <comment>legacy_id=5639</comment>
+  </data>
+  <data name="Brass Boots" xml:space="preserve">
+    <value>Giày Đồng Thau</value>
+    <comment>legacy_id=5640</comment>
+  </data>
+  <data name="Plate Boots" xml:space="preserve">
+    <value>Giày Thép Tấm</value>
+    <comment>legacy_id=5641</comment>
+  </data>
+  <data name="Vine Boots" xml:space="preserve">
+    <value>Giày Dây Leo</value>
+    <comment>legacy_id=5642</comment>
+  </data>
+  <data name="Silk Boots" xml:space="preserve">
+    <value>Giày Lụa</value>
+    <comment>legacy_id=5643</comment>
+  </data>
+  <data name="Wind Boots" xml:space="preserve">
+    <value>Giày Gió</value>
+    <comment>legacy_id=5644</comment>
+  </data>
+  <data name="Spirit Boots" xml:space="preserve">
+    <value>Giày Linh Hồn</value>
+    <comment>legacy_id=5645</comment>
+  </data>
+  <data name="Guardian Boots" xml:space="preserve">
+    <value>Giày Vệ Thần</value>
+    <comment>legacy_id=5646</comment>
+  </data>
+  <data name="Storm Crow Boots" xml:space="preserve">
+    <value>Giày Quạ Bão Tố</value>
+    <comment>legacy_id=5647</comment>
+  </data>
+  <data name="Black Dragon Boots" xml:space="preserve">
+    <value>Giày Rồng Đen</value>
+    <comment>legacy_id=5648</comment>
+  </data>
+  <data name="Dark Phoenix Boots" xml:space="preserve">
+    <value>Giày Phượng Hoàng Bóng Tối</value>
+    <comment>legacy_id=5649</comment>
+  </data>
+  <data name="Grand Soul Boots" xml:space="preserve">
+    <value>Giày Đại Linh Hồn</value>
+    <comment>legacy_id=5650</comment>
+  </data>
+  <data name="Divine Boots" xml:space="preserve">
+    <value>Giày Thần Thánh</value>
+    <comment>legacy_id=5651</comment>
+  </data>
+  <data name="Thunder Hawk Boots" xml:space="preserve">
+    <value>Giày Ưng Sấm Sét</value>
+    <comment>legacy_id=5652</comment>
+  </data>
+  <data name="Great Dragon Boots" xml:space="preserve">
+    <value>Giày Rồng Vĩ Đại</value>
+    <comment>legacy_id=5653</comment>
+  </data>
+  <data name="Dark Soul Boots" xml:space="preserve">
+    <value>Giày Linh Hồn Bóng Tối</value>
+    <comment>legacy_id=5654</comment>
+  </data>
+  <data name="Hurricane Boots" xml:space="preserve">
+    <value>Giày Cuồng Phong</value>
+    <comment>legacy_id=5655</comment>
+  </data>
+  <data name="Red Spirit Boots" xml:space="preserve">
+    <value>Giày Linh Hồn Đỏ</value>
+    <comment>legacy_id=5656</comment>
+  </data>
+  <data name="Light Plate Boots" xml:space="preserve">
+    <value>Giày Thép Tấm Ánh Sáng</value>
+    <comment>legacy_id=5657</comment>
+  </data>
+  <data name="Adamantine Boots" xml:space="preserve">
+    <value>Giày Adamantine</value>
+    <comment>legacy_id=5658</comment>
+  </data>
+  <data name="Dark Steel Boots" xml:space="preserve">
+    <value>Giày Thép Bóng Tối</value>
+    <comment>legacy_id=5659</comment>
+  </data>
+  <data name="Dark Master Boots" xml:space="preserve">
+    <value>Giày Bá Chủ Bóng Tối</value>
+    <comment>legacy_id=5660</comment>
+  </data>
+  <data name="Dragon Knight Boots" xml:space="preserve">
+    <value>Giày Kỵ Sĩ Rồng</value>
+    <comment>legacy_id=5661</comment>
+  </data>
+  <data name="Venom Mist Boots" xml:space="preserve">
+    <value>Giày Sương Độc</value>
+    <comment>legacy_id=5662</comment>
+  </data>
+  <data name="Sylphid Ray Boots" xml:space="preserve">
+    <value>Giày Tia Sylphid</value>
+    <comment>legacy_id=5663</comment>
+  </data>
+  <data name="Volcano Boots" xml:space="preserve">
+    <value>Giày Núi Lửa</value>
+    <comment>legacy_id=5664</comment>
+  </data>
+  <data name="Sunlight Boots" xml:space="preserve">
+    <value>Giày Ánh Mặt Trời</value>
+    <comment>legacy_id=5665</comment>
+  </data>
+  <data name="Ashcrow Boots" xml:space="preserve">
+    <value>Giày Ashcrow</value>
+    <comment>legacy_id=5666</comment>
+  </data>
+  <data name="Eclipse Boots" xml:space="preserve">
+    <value>Giày Nhật Thực</value>
+    <comment>legacy_id=5667</comment>
+  </data>
+  <data name="Iris Boots" xml:space="preserve">
+    <value>Giày Iris</value>
+    <comment>legacy_id=5668</comment>
+  </data>
+  <data name="Valiant Boots" xml:space="preserve">
+    <value>Giày Anh Dũng</value>
+    <comment>legacy_id=5669</comment>
+  </data>
+  <data name="Glorious Boots" xml:space="preserve">
+    <value>Giày Vinh Quang</value>
+    <comment>legacy_id=5670</comment>
+  </data>
+  <data name="Mistery Boots" xml:space="preserve">
+    <value>Giày Bí Ẩn</value>
+    <comment>legacy_id=5671</comment>
+  </data>
+  <data name="Red Wing Boots" xml:space="preserve">
+    <value>Giày Cánh Đỏ</value>
+    <comment>legacy_id=5672</comment>
+  </data>
+  <data name="Ancient Boots" xml:space="preserve">
+    <value>Giày Cổ Đại</value>
+    <comment>legacy_id=5673</comment>
+  </data>
+  <data name="Black Rose Boots" xml:space="preserve">
+    <value>Giày Hoa Hồng Đen</value>
+    <comment>legacy_id=5674</comment>
+  </data>
+  <data name="Aura Boots" xml:space="preserve">
+    <value>Giày Hào Quang</value>
+    <comment>legacy_id=5675</comment>
+  </data>
+  <data name="Lilium Boots" xml:space="preserve">
+    <value>Giày Lilium</value>
+    <comment>legacy_id=5676</comment>
+  </data>
+  <data name="Titan Boots" xml:space="preserve">
+    <value>Giày Titan</value>
+    <comment>legacy_id=5677</comment>
+  </data>
+  <data name="Brave Boots" xml:space="preserve">
+    <value>Giày Dũng Cảm</value>
+    <comment>legacy_id=5678</comment>
+  </data>
+  <data name="Destory Boots" xml:space="preserve">
+    <value>Giày Hủy Diệt</value>
+    <comment>legacy_id=5679</comment>
+  </data>
+  <data name="Phantom Boots" xml:space="preserve">
+    <value>Giày Bóng Ma</value>
+    <comment>legacy_id=5680</comment>
+  </data>
+  <data name="Seraphim Boots" xml:space="preserve">
+    <value>Giày Seraphim</value>
+    <comment>legacy_id=5681</comment>
+  </data>
+  <data name="Faith Boots" xml:space="preserve">
+    <value>Giày Đức Tin</value>
+    <comment>legacy_id=5682</comment>
+  </data>
+  <data name="Phaewang Boots" xml:space="preserve">
+    <value>Giày Phaewang</value>
+    <comment>legacy_id=5683</comment>
+  </data>
+  <data name="Hades Boots" xml:space="preserve">
+    <value>Giày Hades</value>
+    <comment>legacy_id=5684</comment>
+  </data>
+  <data name="Sacred Boots" xml:space="preserve">
+    <value>Giày Thánh</value>
+    <comment>legacy_id=5691</comment>
+  </data>
+  <data name="Storm Hard Boots" xml:space="preserve">
+    <value>Giày Bão Tố Cứng</value>
+    <comment>legacy_id=5692</comment>
+  </data>
+  <data name="Piercing Boots" xml:space="preserve">
+    <value>Giày Xuyên Phá</value>
+    <comment>legacy_id=5693</comment>
+  </data>
+  <data name="Phoenix Soul Boots" xml:space="preserve">
+    <value>Giày Linh Hồn Phượng Hoàng</value>
+    <comment>legacy_id=5705</comment>
+  </data>
+  <data name="Wings of Elf" xml:space="preserve">
+    <value>Cánh Elf</value>
+    <comment>legacy_id=6144</comment>
+  </data>
+  <data name="Wings of Heaven" xml:space="preserve">
+    <value>Cánh Thiên Đường</value>
+    <comment>legacy_id=6145</comment>
+  </data>
+  <data name="Wings of Satan" xml:space="preserve">
+    <value>Cánh Satan</value>
+    <comment>legacy_id=6146</comment>
+  </data>
+  <data name="Wings of Spirits" xml:space="preserve">
+    <value>Cánh Tinh Linh</value>
+    <comment>legacy_id=6147</comment>
+  </data>
+  <data name="Wings of Soul" xml:space="preserve">
+    <value>Cánh Linh Hồn</value>
+    <comment>legacy_id=6148</comment>
+  </data>
+  <data name="Wings of Dragon" xml:space="preserve">
+    <value>Cánh Rồng</value>
+    <comment>legacy_id=6149</comment>
+  </data>
+  <data name="Wings of Darkness" xml:space="preserve">
+    <value>Cánh Bóng Tối</value>
+    <comment>legacy_id=6150</comment>
+  </data>
+  <data name="Orb of Twisting Slash" xml:space="preserve">
+    <value>Cầu Phép Chém Xoáy</value>
+    <comment>legacy_id=6151</comment>
+  </data>
+  <data name="Orb of Healing" xml:space="preserve">
+    <value>Cầu Phép Hồi Máu</value>
+    <comment>legacy_id=6152</comment>
+  </data>
+  <data name="Orb of Greater Defense" xml:space="preserve">
+    <value>Cầu Phép Đại Phòng Thủ</value>
+    <comment>legacy_id=6153</comment>
+  </data>
+  <data name="Orb of Greater Damage" xml:space="preserve">
+    <value>Cầu Phép Đại Sát Thương</value>
+    <comment>legacy_id=6154</comment>
+  </data>
+  <data name="Orb of Summoning" xml:space="preserve">
+    <value>Cầu Phép Triệu Hồi</value>
+    <comment>legacy_id=6155</comment>
+  </data>
+  <data name="Orb of Rageful Blow" xml:space="preserve">
+    <value>Cầu Phép Đòn Cuồng Nộ</value>
+    <comment>legacy_id=6156</comment>
+  </data>
+  <data name="Orb of Impale" xml:space="preserve">
+    <value>Cầu Phép Đâm Xuyên</value>
+    <comment>legacy_id=6157</comment>
+  </data>
+  <data name="Orb of Greater Fortitude" xml:space="preserve">
+    <value>Cầu Phép Đại Kiên Cường</value>
+    <comment>legacy_id=6158</comment>
+  </data>
+  <data name="Jewel of Chaos" xml:space="preserve">
+    <value>Ngọc Hỗn Nguyên</value>
+    <comment>legacy_id=6159</comment>
+  </data>
+  <data name="Orb of Fire Slash" xml:space="preserve">
+    <value>Cầu Phép Chém Lửa</value>
+    <comment>legacy_id=6160</comment>
+  </data>
+  <data name="Orb of Penetration" xml:space="preserve">
+    <value>Cầu Phép Xuyên Phá</value>
+    <comment>legacy_id=6161</comment>
+  </data>
+  <data name="Orb of Ice Arrow" xml:space="preserve">
+    <value>Cầu Phép Mũi Tên Băng</value>
+    <comment>legacy_id=6162</comment>
+  </data>
+  <data name="Orb of Death Stab" xml:space="preserve">
+    <value>Cầu Phép Đâm Tử Thần</value>
+    <comment>legacy_id=6163</comment>
+  </data>
+  <data name="Scroll of Fireburst" xml:space="preserve">
+    <value>Cuộn Nổ Lửa</value>
+    <comment>legacy_id=6165</comment>
+  </data>
+  <data name="Scroll of Summon" xml:space="preserve">
+    <value>Cuộn Triệu Hồi</value>
+    <comment>legacy_id=6166</comment>
+  </data>
+  <data name="Scroll of Critical Damage" xml:space="preserve">
+    <value>Cuộn Sát Thương Chí Mạng</value>
+    <comment>legacy_id=6167</comment>
+  </data>
+  <data name="Scroll of Electric Spark" xml:space="preserve">
+    <value>Cuộn Tia Điện</value>
+    <comment>legacy_id=6168</comment>
+  </data>
+  <data name="Packed Jewel of Bless" xml:space="preserve">
+    <value>Gói Ngọc Phúc Lành</value>
+    <comment>legacy_id=6174</comment>
+  </data>
+  <data name="Packed Jewel of Soul" xml:space="preserve">
+    <value>Gói Ngọc Linh Hồn</value>
+    <comment>legacy_id=6175</comment>
+  </data>
+  <data name="Red Ribbon Box" xml:space="preserve">
+    <value>Hộp Ruy Băng Đỏ</value>
+    <comment>legacy_id=6176</comment>
+  </data>
+  <data name="Green Ribbon Box" xml:space="preserve">
+    <value>Hộp Ruy Băng Xanh Lá</value>
+    <comment>legacy_id=6177</comment>
+  </data>
+  <data name="Blue Ribbon Box" xml:space="preserve">
+    <value>Hộp Ruy Băng Xanh Dương</value>
+    <comment>legacy_id=6178</comment>
+  </data>
+  <data name="Scroll of Fire Scream" xml:space="preserve">
+    <value>Cuộn Thét Lửa</value>
+    <comment>legacy_id=6179</comment>
+  </data>
+  <data name="Wing of Storm" xml:space="preserve">
+    <value>Cánh Bão Tố</value>
+    <comment>legacy_id=6180</comment>
+  </data>
+  <data name="Wing of Eternal" xml:space="preserve">
+    <value>Cánh Vĩnh Cửu</value>
+    <comment>legacy_id=6181</comment>
+  </data>
+  <data name="Wing of Illusion" xml:space="preserve">
+    <value>Cánh Ảo Ảnh</value>
+    <comment>legacy_id=6182</comment>
+  </data>
+  <data name="Wing of Ruin" xml:space="preserve">
+    <value>Cánh Diệt Vong</value>
+    <comment>legacy_id=6183</comment>
+  </data>
+  <data name="Cape of Emperor" xml:space="preserve">
+    <value>Áo Choàng Hoàng Đế</value>
+    <comment>legacy_id=6184</comment>
+  </data>
+  <data name="Wing of Curse" xml:space="preserve">
+    <value>Cánh Nguyền Rủa</value>
+    <comment>legacy_id=6185</comment>
+  </data>
+  <data name="Wings of Despair" xml:space="preserve">
+    <value>Cánh Tuyệt Vọng</value>
+    <comment>legacy_id=6186</comment>
+  </data>
+  <data name="Wing of Dimension" xml:space="preserve">
+    <value>Cánh Không Gian</value>
+    <comment>legacy_id=6187</comment>
+  </data>
+  <data name="Crystal of Destruction" xml:space="preserve">
+    <value>Tinh Thể Hủy Diệt</value>
+    <comment>legacy_id=6188</comment>
+  </data>
+  <data name="Crystal of Multi-Shot" xml:space="preserve">
+    <value>Tinh Thể Đa Bắn</value>
+    <comment>legacy_id=6189</comment>
+  </data>
+  <data name="Crystal of Recovery" xml:space="preserve">
+    <value>Tinh Thể Hồi Phục</value>
+    <comment>legacy_id=6190</comment>
+  </data>
+  <data name="Crystal of Flame Strike" xml:space="preserve">
+    <value>Tinh Thể Cước Lửa</value>
+    <comment>legacy_id=6191</comment>
+  </data>
+  <data name="Scroll of Chaotic Diseier" xml:space="preserve">
+    <value>Cuộn Hỗn Loạn Diseier</value>
+    <comment>legacy_id=6192</comment>
+  </data>
+  <data name="Cape of Fighter" xml:space="preserve">
+    <value>Áo Choàng Chiến Binh</value>
+    <comment>legacy_id=6193</comment>
+  </data>
+  <data name="Cape of Overrule" xml:space="preserve">
+    <value>Áo Choàng Thống Trị</value>
+    <comment>legacy_id=6194</comment>
+  </data>
+  <data name="Seed Fire" xml:space="preserve">
+    <value>Hạt Giống Lửa</value>
+    <comment>legacy_id=6204</comment>
+  </data>
+  <data name="Seed Water" xml:space="preserve">
+    <value>Hạt Giống Nước</value>
+    <comment>legacy_id=6205</comment>
+  </data>
+  <data name="Seed Ice" xml:space="preserve">
+    <value>Hạt Giống Băng</value>
+    <comment>legacy_id=6206</comment>
+  </data>
+  <data name="Seed Wind" xml:space="preserve">
+    <value>Hạt Giống Gió</value>
+    <comment>legacy_id=6207</comment>
+  </data>
+  <data name="Seed Lightning" xml:space="preserve">
+    <value>Hạt Giống Sét</value>
+    <comment>legacy_id=6208</comment>
+  </data>
+  <data name="Seed Earth" xml:space="preserve">
+    <value>Hạt Giống Đất</value>
+    <comment>legacy_id=6209</comment>
+  </data>
+  <data name="Sphere (Mono)" xml:space="preserve">
+    <value>Cầu Bậc 1</value>
+    <comment>legacy_id=6214</comment>
+  </data>
+  <data name="Sphere (Di)" xml:space="preserve">
+    <value>Cầu Bậc 2</value>
+    <comment>legacy_id=6215</comment>
+  </data>
+  <data name="Sphere (Tri)" xml:space="preserve">
+    <value>Cầu Bậc 3</value>
+    <comment>legacy_id=6216</comment>
+  </data>
+  <data name="Sphere (4)" xml:space="preserve">
+    <value>Cầu Bậc 4</value>
+    <comment>legacy_id=6217</comment>
+  </data>
+  <data name="Sphere (5)" xml:space="preserve">
+    <value>Cầu Bậc 5</value>
+    <comment>legacy_id=6218</comment>
+  </data>
+  <data name="Seed Sphere Fire 1" xml:space="preserve">
+    <value>Hạt Cầu Lửa 1</value>
+    <comment>legacy_id=6244</comment>
+  </data>
+  <data name="Seed Sphere Water 1" xml:space="preserve">
+    <value>Hạt Cầu Nước 1</value>
+    <comment>legacy_id=6245</comment>
+  </data>
+  <data name="Seed Sphere Ice 1" xml:space="preserve">
+    <value>Hạt Cầu Băng 1</value>
+    <comment>legacy_id=6246</comment>
+  </data>
+  <data name="Seed Sphere Wind 1" xml:space="preserve">
+    <value>Hạt Cầu Gió 1</value>
+    <comment>legacy_id=6247</comment>
+  </data>
+  <data name="Seed Sphere Lightning 1" xml:space="preserve">
+    <value>Hạt Cầu Sét 1</value>
+    <comment>legacy_id=6248</comment>
+  </data>
+  <data name="Seed Sphere Earth 1" xml:space="preserve">
+    <value>Hạt Cầu Đất 1</value>
+    <comment>legacy_id=6249</comment>
+  </data>
+  <data name="Seed Sphere Fire 2" xml:space="preserve">
+    <value>Hạt Cầu Lửa 2</value>
+    <comment>legacy_id=6250</comment>
+  </data>
+  <data name="Seed Sphere Water 2" xml:space="preserve">
+    <value>Hạt Cầu Nước 2</value>
+    <comment>legacy_id=6251</comment>
+  </data>
+  <data name="Seed Sphere Ice 2" xml:space="preserve">
+    <value>Hạt Cầu Băng 2</value>
+    <comment>legacy_id=6252</comment>
+  </data>
+  <data name="Seed Sphere Wind 2" xml:space="preserve">
+    <value>Hạt Cầu Gió 2</value>
+    <comment>legacy_id=6253</comment>
+  </data>
+  <data name="Seed Sphere Lightning 2" xml:space="preserve">
+    <value>Hạt Cầu Sét 2</value>
+    <comment>legacy_id=6254</comment>
+  </data>
+  <data name="Seed Sphere Earth 2" xml:space="preserve">
+    <value>Hạt Cầu Đất 2</value>
+    <comment>legacy_id=6255</comment>
+  </data>
+  <data name="Seed Sphere Fire 3" xml:space="preserve">
+    <value>Hạt Cầu Lửa 3</value>
+    <comment>legacy_id=6256</comment>
+  </data>
+  <data name="Seed Sphere Water 3" xml:space="preserve">
+    <value>Hạt Cầu Nước 3</value>
+    <comment>legacy_id=6257</comment>
+  </data>
+  <data name="Seed Sphere Ice 3" xml:space="preserve">
+    <value>Hạt Cầu Băng 3</value>
+    <comment>legacy_id=6258</comment>
+  </data>
+  <data name="Seed Sphere Wind 3" xml:space="preserve">
+    <value>Hạt Cầu Gió 3</value>
+    <comment>legacy_id=6259</comment>
+  </data>
+  <data name="Seed Sphere Lightning 3" xml:space="preserve">
+    <value>Hạt Cầu Sét 3</value>
+    <comment>legacy_id=6260</comment>
+  </data>
+  <data name="Seed Sphere Earth 3" xml:space="preserve">
+    <value>Hạt Cầu Đất 3</value>
+    <comment>legacy_id=6261</comment>
+  </data>
+  <data name="Seed Sphere Fire 4" xml:space="preserve">
+    <value>Hạt Cầu Lửa 4</value>
+    <comment>legacy_id=6262</comment>
+  </data>
+  <data name="Seed Sphere Water 4" xml:space="preserve">
+    <value>Hạt Cầu Nước 4</value>
+    <comment>legacy_id=6263</comment>
+  </data>
+  <data name="Seed Sphere Ice 4" xml:space="preserve">
+    <value>Hạt Cầu Băng 4</value>
+    <comment>legacy_id=6264</comment>
+  </data>
+  <data name="Seed Sphere Wind 4" xml:space="preserve">
+    <value>Hạt Cầu Gió 4</value>
+    <comment>legacy_id=6265</comment>
+  </data>
+  <data name="Seed Sphere Lightning 4" xml:space="preserve">
+    <value>Hạt Cầu Sét 4</value>
+    <comment>legacy_id=6266</comment>
+  </data>
+  <data name="Seed Sphere Earth 4" xml:space="preserve">
+    <value>Hạt Cầu Đất 4</value>
+    <comment>legacy_id=6267</comment>
+  </data>
+  <data name="Seed Sphere Fire 5" xml:space="preserve">
+    <value>Hạt Cầu Lửa 5</value>
+    <comment>legacy_id=6268</comment>
+  </data>
+  <data name="Seed Sphere Water 5" xml:space="preserve">
+    <value>Hạt Cầu Nước 5</value>
+    <comment>legacy_id=6269</comment>
+  </data>
+  <data name="Seed Sphere Ice 5" xml:space="preserve">
+    <value>Hạt Cầu Băng 5</value>
+    <comment>legacy_id=6270</comment>
+  </data>
+  <data name="Seed Sphere Wind 5" xml:space="preserve">
+    <value>Hạt Cầu Gió 5</value>
+    <comment>legacy_id=6271</comment>
+  </data>
+  <data name="Seed Sphere Lightning 5" xml:space="preserve">
+    <value>Hạt Cầu Sét 5</value>
+    <comment>legacy_id=6272</comment>
+  </data>
+  <data name="Seed Sphere Earth 5" xml:space="preserve">
+    <value>Hạt Cầu Đất 5</value>
+    <comment>legacy_id=6273</comment>
+  </data>
+  <data name="Packed Jewel of Life" xml:space="preserve">
+    <value>Gói Ngọc Sinh Mệnh</value>
+    <comment>legacy_id=6280</comment>
+  </data>
+  <data name="Packed Jewel of Creation" xml:space="preserve">
+    <value>Gói Ngọc Sáng Tạo</value>
+    <comment>legacy_id=6281</comment>
+  </data>
+  <data name="Packed Jewel of Guardian" xml:space="preserve">
+    <value>Gói Ngọc Hộ Mệnh</value>
+    <comment>legacy_id=6282</comment>
+  </data>
+  <data name="Packed Gemstone" xml:space="preserve">
+    <value>Gói Đá Quý</value>
+    <comment>legacy_id=6283</comment>
+  </data>
+  <data name="Packed Jewel of Harmony" xml:space="preserve">
+    <value>Gói Ngọc Hoà Hợp</value>
+    <comment>legacy_id=6284</comment>
+  </data>
+  <data name="Packed Jewel of Chaos" xml:space="preserve">
+    <value>Gói Ngọc Hỗn Nguyên</value>
+    <comment>legacy_id=6285</comment>
+  </data>
+  <data name="Packed Lower Refine Stone" xml:space="preserve">
+    <value>Gói Đá Tinh Luyện Hạ</value>
+    <comment>legacy_id=6286</comment>
+  </data>
+  <data name="Packed Higher Refine Stone" xml:space="preserve">
+    <value>Gói Đá Tinh Luyện Thượng</value>
+    <comment>legacy_id=6287</comment>
+  </data>
+  <data name="Guardian Angel" xml:space="preserve">
+    <value>Thiên Thần Hộ Mệnh</value>
+    <comment>legacy_id=6656</comment>
+  </data>
+  <data name="Imp" xml:space="preserve">
+    <value>Imp</value>
+    <comment>legacy_id=6657</comment>
+  </data>
+  <data name="Horn of Uniria" xml:space="preserve">
+    <value>Sừng Uniria</value>
+    <comment>legacy_id=6658</comment>
+  </data>
+  <data name="Horn of Dinorant" xml:space="preserve">
+    <value>Sừng Dinorant</value>
+    <comment>legacy_id=6659</comment>
+  </data>
+  <data name="Dark Horse" xml:space="preserve">
+    <value>Ngựa Bóng Tối</value>
+    <comment>legacy_id=6660</comment>
+  </data>
+  <data name="Dark Raven" xml:space="preserve">
+    <value>Quạ Bóng Tối</value>
+    <comment>legacy_id=6661</comment>
+  </data>
+  <data name="Ring of Ice" xml:space="preserve">
+    <value>Nhẫn Băng</value>
+    <comment>legacy_id=6664</comment>
+  </data>
+  <data name="Ring of Poison" xml:space="preserve">
+    <value>Nhẫn Độc</value>
+    <comment>legacy_id=6665</comment>
+  </data>
+  <data name="Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình</value>
+    <comment>legacy_id=6666</comment>
+  </data>
+  <data name="Life Stone" xml:space="preserve">
+    <value>Đá Sinh Mệnh</value>
+    <comment>legacy_id=6667</comment>
+  </data>
+  <data name="Pendant of Lightning" xml:space="preserve">
+    <value>Dây Chuyền Sấm Sét</value>
+    <comment>legacy_id=6668</comment>
+  </data>
+  <data name="Pendant of Fire" xml:space="preserve">
+    <value>Dây Chuyền Lửa</value>
+    <comment>legacy_id=6669</comment>
+  </data>
+  <data name="Loch's Feather" xml:space="preserve">
+    <value>Lông Vũ Loch</value>
+    <comment>legacy_id=6670</comment>
+  </data>
+  <data name="Fruits" xml:space="preserve">
+    <value>Trái Cây</value>
+    <comment>legacy_id=6671</comment>
+  </data>
+  <data name="Scroll of Archangel" xml:space="preserve">
+    <value>Cuộn Đại Thiên Thần</value>
+    <comment>legacy_id=6672</comment>
+  </data>
+  <data name="Blood Bone" xml:space="preserve">
+    <value>Xương Máu</value>
+    <comment>legacy_id=6673</comment>
+  </data>
+  <data name="Invisibility Cloak" xml:space="preserve">
+    <value>Áo Choàng Tàng Hình</value>
+    <comment>legacy_id=6674</comment>
+  </data>
+  <data name="Weapon of Archangel" xml:space="preserve">
+    <value>Vũ Khí Đại Thiên Thần</value>
+    <comment>legacy_id=6675</comment>
+  </data>
+  <data name="Wizard's Ring" xml:space="preserve">
+    <value>Nhẫn Pháp Sư</value>
+    <comment>legacy_id=6676</comment>
+  </data>
+  <data name="Ring of Fire" xml:space="preserve">
+    <value>Nhẫn Lửa</value>
+    <comment>legacy_id=6677</comment>
+  </data>
+  <data name="Ring of Earth" xml:space="preserve">
+    <value>Nhẫn Đất</value>
+    <comment>legacy_id=6678</comment>
+  </data>
+  <data name="Ring of Wind" xml:space="preserve">
+    <value>Nhẫn Gió</value>
+    <comment>legacy_id=6679</comment>
+  </data>
+  <data name="Ring of Magic" xml:space="preserve">
+    <value>Nhẫn Phép Thuật</value>
+    <comment>legacy_id=6680</comment>
+  </data>
+  <data name="Pendant of Ice" xml:space="preserve">
+    <value>Dây Chuyền Băng</value>
+    <comment>legacy_id=6681</comment>
+  </data>
+  <data name="Pendant of Wind" xml:space="preserve">
+    <value>Dây Chuyền Gió</value>
+    <comment>legacy_id=6682</comment>
+  </data>
+  <data name="Pendant of Water" xml:space="preserve">
+    <value>Dây Chuyền Nước</value>
+    <comment>legacy_id=6683</comment>
+  </data>
+  <data name="Pendant of Ability" xml:space="preserve">
+    <value>Dây Chuyền Nội Lực</value>
+    <comment>legacy_id=6684</comment>
+  </data>
+  <data name="Armor of Guardsman" xml:space="preserve">
+    <value>Áo Giáp Vệ Binh</value>
+    <comment>legacy_id=6685</comment>
+  </data>
+  <data name="Cape of Lord" xml:space="preserve">
+    <value>Áo Choàng Lãnh Chúa</value>
+    <comment>legacy_id=6686</comment>
+  </data>
+  <data name="Spirit" xml:space="preserve">
+    <value>Linh Hồn</value>
+    <comment>legacy_id=6687</comment>
+  </data>
+  <data name="Splinter of Armor" xml:space="preserve">
+    <value>Mảnh Giáp Vỡ</value>
+    <comment>legacy_id=6688</comment>
+  </data>
+  <data name="Bless of Guardian" xml:space="preserve">
+    <value>Phúc Lành Vệ Thần</value>
+    <comment>legacy_id=6689</comment>
+  </data>
+  <data name="Claw of Beast" xml:space="preserve">
+    <value>Móng Vuốt Dã Thú</value>
+    <comment>legacy_id=6690</comment>
+  </data>
+  <data name="Fragment of Horn" xml:space="preserve">
+    <value>Mảnh Sừng</value>
+    <comment>legacy_id=6691</comment>
+  </data>
+  <data name="Broken Horn" xml:space="preserve">
+    <value>Sừng Gãy</value>
+    <comment>legacy_id=6692</comment>
+  </data>
+  <data name="Horn of Fenrir" xml:space="preserve">
+    <value>Sừng Fenrir</value>
+    <comment>legacy_id=6693</comment>
+  </data>
+  <data name="Moonstone Pendant" xml:space="preserve">
+    <value>Dây Chuyền Đá Mặt Trăng</value>
+    <comment>legacy_id=6694</comment>
+  </data>
+  <data name="Elite Skeleton Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Tinh Anh Xương</value>
+    <comment>legacy_id=6695</comment>
+  </data>
+  <data name="Jack O'Lantern Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Bí Ngô</value>
+    <comment>legacy_id=6696</comment>
+  </data>
+  <data name="Christmas Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Giáng Sinh</value>
+    <comment>legacy_id=6697</comment>
+  </data>
+  <data name="Game Master Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Quản Trò</value>
+    <comment>legacy_id=6698</comment>
+  </data>
+  <data name="Old Scroll" xml:space="preserve">
+    <value>Cuộn Giấy Cổ</value>
+    <comment>legacy_id=6705</comment>
+  </data>
+  <data name="Illusion Sorcerer Covenant" xml:space="preserve">
+    <value>Khế Ước Ảo Thuật Sư</value>
+    <comment>legacy_id=6706</comment>
+  </data>
+  <data name="Scroll of Blood" xml:space="preserve">
+    <value>Cuộn Máu</value>
+    <comment>legacy_id=6707</comment>
+  </data>
+  <data name="Flame of Condor" xml:space="preserve">
+    <value>Ngọn Lửa Kền Kền</value>
+    <comment>legacy_id=6708</comment>
+  </data>
+  <data name="Feather of Condor" xml:space="preserve">
+    <value>Lông Vũ Kền Kền</value>
+    <comment>legacy_id=6709</comment>
+  </data>
+  <data name="Demon" xml:space="preserve">
+    <value>Ác Quỷ</value>
+    <comment>legacy_id=6720</comment>
+  </data>
+  <data name="Spirit of Guardian" xml:space="preserve">
+    <value>Linh Hồn Vệ Thần</value>
+    <comment>legacy_id=6721</comment>
+  </data>
+  <data name="Pet Rudolf" xml:space="preserve">
+    <value>Thú Cưng Rudolf</value>
+    <comment>legacy_id=6723</comment>
+  </data>
+  <data name="Snowman Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Người Tuyết</value>
+    <comment>legacy_id=6724</comment>
+  </data>
+  <data name="Panda Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Gấu Trúc</value>
+    <comment>legacy_id=6732</comment>
+  </data>
+  <data name="Pet Panda" xml:space="preserve">
+    <value>Thú Cưng Gấu Trúc</value>
+    <comment>legacy_id=6736</comment>
+  </data>
+  <data name="Pet Unicorn" xml:space="preserve">
+    <value>Thú Cưng Kỳ Lân</value>
+    <comment>legacy_id=6762</comment>
+  </data>
+  <data name="Skeleton Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình Xương</value>
+    <comment>legacy_id=6778</comment>
+  </data>
+  <data name="Pet Skeleton" xml:space="preserve">
+    <value>Thú Cưng Xương</value>
+    <comment>legacy_id=6779</comment>
+  </data>
+  <data name="Transformation Ring1" xml:space="preserve">
+    <value>Nhẫn Biến Hình 1</value>
+    <comment>legacy_id=6819</comment>
+  </data>
+  <data name="Transformation Ring2" xml:space="preserve">
+    <value>Nhẫn Biến Hình 2</value>
+    <comment>legacy_id=6820</comment>
+  </data>
+  <data name="Transformation Ring3" xml:space="preserve">
+    <value>Nhẫn Biến Hình 3</value>
+    <comment>legacy_id=6821</comment>
+  </data>
+  <data name="Apple" xml:space="preserve">
+    <value>Táo</value>
+    <comment>legacy_id=7168</comment>
+  </data>
+  <data name="Small Healing Potion" xml:space="preserve">
+    <value>Bình Máu Nhỏ</value>
+    <comment>legacy_id=7169</comment>
+  </data>
+  <data name="Medium Healing Potion" xml:space="preserve">
+    <value>Bình Máu Vừa</value>
+    <comment>legacy_id=7170</comment>
+  </data>
+  <data name="Large Healing Potion" xml:space="preserve">
+    <value>Bình Máu Lớn</value>
+    <comment>legacy_id=7171</comment>
+  </data>
+  <data name="Small Mana Potion" xml:space="preserve">
+    <value>Bình Mana Nhỏ</value>
+    <comment>legacy_id=7172</comment>
+  </data>
+  <data name="Medium Mana Potion" xml:space="preserve">
+    <value>Bình Mana Vừa</value>
+    <comment>legacy_id=7173</comment>
+  </data>
+  <data name="Large Mana Potion" xml:space="preserve">
+    <value>Bình Mana Lớn</value>
+    <comment>legacy_id=7174</comment>
+  </data>
+  <data name="Siege Potion" xml:space="preserve">
+    <value>Bình Công Thành</value>
+    <comment>legacy_id=7175</comment>
+  </data>
+  <data name="Antidote" xml:space="preserve">
+    <value>Thuốc Giải</value>
+    <comment>legacy_id=7176</comment>
+  </data>
+  <data name="Ale" xml:space="preserve">
+    <value>Rượu</value>
+    <comment>legacy_id=7177</comment>
+  </data>
+  <data name="Town Portal Scroll" xml:space="preserve">
+    <value>Cuộn Về Thành</value>
+    <comment>legacy_id=7178</comment>
+  </data>
+  <data name="Box of Luck" xml:space="preserve">
+    <value>Hộp May Mắn</value>
+    <comment>legacy_id=7179</comment>
+  </data>
+  <data name="Jewel of Bless" xml:space="preserve">
+    <value>Ngọc Phúc Lành</value>
+    <comment>legacy_id=7181</comment>
+  </data>
+  <data name="Jewel of Soul" xml:space="preserve">
+    <value>Ngọc Linh Hồn</value>
+    <comment>legacy_id=7182</comment>
+  </data>
+  <data name="Jewel of Life" xml:space="preserve">
+    <value>Ngọc Sinh Mệnh</value>
+    <comment>legacy_id=7184</comment>
+  </data>
+  <data name="Devil's Eye" xml:space="preserve">
+    <value>Mắt Quỷ</value>
+    <comment>legacy_id=7185</comment>
+  </data>
+  <data name="Devil's Key" xml:space="preserve">
+    <value>Chìa Khoá Quỷ</value>
+    <comment>legacy_id=7186</comment>
+  </data>
+  <data name="Devil's Invitation" xml:space="preserve">
+    <value>Thư Mời Của Quỷ</value>
+    <comment>legacy_id=7187</comment>
+  </data>
+  <data name="Jewel of Creation" xml:space="preserve">
+    <value>Ngọc Sáng Tạo</value>
+    <comment>legacy_id=7190</comment>
+  </data>
+  <data name="Scroll of Emperor Ring of Honor" xml:space="preserve">
+    <value>Cuộn Nhẫn Danh Dự Hoàng Đế</value>
+    <comment>legacy_id=7191</comment>
+  </data>
+  <data name="Broken Sword Dark Stone" xml:space="preserve">
+    <value>Đá Bóng Tối Kiếm Gãy</value>
+    <comment>legacy_id=7192</comment>
+  </data>
+  <data name="Tear of Elf" xml:space="preserve">
+    <value>Giọt Lệ Elf</value>
+    <comment>legacy_id=7193</comment>
+  </data>
+  <data name="Soul Shard of Wizard" xml:space="preserve">
+    <value>Mảnh Linh Hồn Pháp Sư</value>
+    <comment>legacy_id=7194</comment>
+  </data>
+  <data name="Lost Map" xml:space="preserve">
+    <value>Bản Đồ Thất Lạc</value>
+    <comment>legacy_id=7196</comment>
+  </data>
+  <data name="Symbol of Kundun" xml:space="preserve">
+    <value>Biểu Tượng Kundun</value>
+    <comment>legacy_id=7197</comment>
+  </data>
+  <data name="Jewel of Guardian" xml:space="preserve">
+    <value>Ngọc Hộ Mệnh</value>
+    <comment>legacy_id=7199</comment>
+  </data>
+  <data name="Pink Chocolate Box" xml:space="preserve">
+    <value>Hộp Sô Cô La Hồng</value>
+    <comment>legacy_id=7200</comment>
+  </data>
+  <data name="Red Chocolate Box" xml:space="preserve">
+    <value>Hộp Sô Cô La Đỏ</value>
+    <comment>legacy_id=7201</comment>
+  </data>
+  <data name="Blue Chocolate Box" xml:space="preserve">
+    <value>Hộp Sô Cô La Xanh</value>
+    <comment>legacy_id=7202</comment>
+  </data>
+  <data name="Small Shield Potion" xml:space="preserve">
+    <value>Bình Khiên Nhỏ</value>
+    <comment>legacy_id=7203</comment>
+  </data>
+  <data name="Medium Shield Potion" xml:space="preserve">
+    <value>Bình Khiên Vừa</value>
+    <comment>legacy_id=7204</comment>
+  </data>
+  <data name="Large Shield Potion" xml:space="preserve">
+    <value>Bình Khiên Lớn</value>
+    <comment>legacy_id=7205</comment>
+  </data>
+  <data name="Small Complex Potion" xml:space="preserve">
+    <value>Bình Cao Cấp Nhỏ</value>
+    <comment>legacy_id=7206</comment>
+  </data>
+  <data name="Medium Complex Potion" xml:space="preserve">
+    <value>Bình Cao Cấp Vừa</value>
+    <comment>legacy_id=7207</comment>
+  </data>
+  <data name="Large Complex Potion" xml:space="preserve">
+    <value>Bình Cao Cấp Lớn</value>
+    <comment>legacy_id=7208</comment>
+  </data>
+  <data name="Gemstone" xml:space="preserve">
+    <value>Đá Quý</value>
+    <comment>legacy_id=7209</comment>
+  </data>
+  <data name="Jewel of Harmony" xml:space="preserve">
+    <value>Ngọc Hoà Hợp</value>
+    <comment>legacy_id=7210</comment>
+  </data>
+  <data name="Lower Refine Stone" xml:space="preserve">
+    <value>Đá Tinh Luyện Hạ</value>
+    <comment>legacy_id=7211</comment>
+  </data>
+  <data name="Higher Refine Stone" xml:space="preserve">
+    <value>Đá Tinh Luyện Thượng</value>
+    <comment>legacy_id=7212</comment>
+  </data>
+  <data name="Pumpkin of Luck" xml:space="preserve">
+    <value>Bí Ngô May Mắn</value>
+    <comment>legacy_id=7213</comment>
+  </data>
+  <data name="Jack O'Lantern Blessings" xml:space="preserve">
+    <value>Phúc Lành Bí Ngô</value>
+    <comment>legacy_id=7214</comment>
+  </data>
+  <data name="Jack O'Lantern Wrath" xml:space="preserve">
+    <value>Thịnh Nộ Bí Ngô</value>
+    <comment>legacy_id=7215</comment>
+  </data>
+  <data name="Jack O'Lantern Cry" xml:space="preserve">
+    <value>Tiếng Khóc Bí Ngô</value>
+    <comment>legacy_id=7216</comment>
+  </data>
+  <data name="Jack O'Lantern Food" xml:space="preserve">
+    <value>Thức Ăn Bí Ngô</value>
+    <comment>legacy_id=7217</comment>
+  </data>
+  <data name="Jack O'Lantern Drink" xml:space="preserve">
+    <value>Thức Uống Bí Ngô</value>
+    <comment>legacy_id=7218</comment>
+  </data>
+  <data name="Christmas Star" xml:space="preserve">
+    <value>Ngôi Sao Giáng Sinh</value>
+    <comment>legacy_id=7219</comment>
+  </data>
+  <data name="GM Gift" xml:space="preserve">
+    <value>Quà GM</value>
+    <comment>legacy_id=7220</comment>
+  </data>
+  <data name="Firecracker" xml:space="preserve">
+    <value>Pháo</value>
+    <comment>legacy_id=7231</comment>
+  </data>
+  <data name="Flame of Death Beam Knight" xml:space="preserve">
+    <value>Ngọn Lửa Death Beam Knight</value>
+    <comment>legacy_id=7233</comment>
+  </data>
+  <data name="Horn of Hell Maine" xml:space="preserve">
+    <value>Sừng Hell Maine</value>
+    <comment>legacy_id=7234</comment>
+  </data>
+  <data name="Feather of Dark Phoenix" xml:space="preserve">
+    <value>Lông Vũ Phượng Hoàng Bóng Tối</value>
+    <comment>legacy_id=7235</comment>
+  </data>
+  <data name="Eye of Abyssal" xml:space="preserve">
+    <value>Mắt Vực Thẳm</value>
+    <comment>legacy_id=7236</comment>
+  </data>
+  <data name="Cherry Blossom Play-Box" xml:space="preserve">
+    <value>Hộp Quà Hoa Anh Đào</value>
+    <comment>legacy_id=7252</comment>
+  </data>
+  <data name="Cherry Blossom Wine" xml:space="preserve">
+    <value>Rượu Hoa Anh Đào</value>
+    <comment>legacy_id=7253</comment>
+  </data>
+  <data name="Cherry Blossom Rice Cake" xml:space="preserve">
+    <value>Bánh Gạo Hoa Anh Đào</value>
+    <comment>legacy_id=7254</comment>
+  </data>
+  <data name="Cherry Blossom Flower Petal" xml:space="preserve">
+    <value>Cánh Hoa Anh Đào</value>
+    <comment>legacy_id=7255</comment>
+  </data>
+  <data name="Golden Cherry Blossom Branch" xml:space="preserve">
+    <value>Cành Hoa Anh Đào Vàng</value>
+    <comment>legacy_id=7258</comment>
+  </data>
+  <data name="Christmas Firecracker" xml:space="preserve">
+    <value>Pháo Giáng Sinh</value>
+    <comment>legacy_id=7267</comment>
+  </data>
+  <data name="Suspicious Scrap of Paper" xml:space="preserve">
+    <value>Mảnh Giấy Khả Nghi</value>
+    <comment>legacy_id=7269</comment>
+  </data>
+  <data name="Gaion's Order" xml:space="preserve">
+    <value>Mệnh Lệnh Của Gaion</value>
+    <comment>legacy_id=7270</comment>
+  </data>
+  <data name="First Secromicon Fragment" xml:space="preserve">
+    <value>Mảnh Secromicon 1</value>
+    <comment>legacy_id=7271</comment>
+  </data>
+  <data name="Second Secromicon Fragment" xml:space="preserve">
+    <value>Mảnh Secromicon 2</value>
+    <comment>legacy_id=7272</comment>
+  </data>
+  <data name="Third Secromicon Fragment" xml:space="preserve">
+    <value>Mảnh Secromicon 3</value>
+    <comment>legacy_id=7273</comment>
+  </data>
+  <data name="Fourth Secromicon Fragment" xml:space="preserve">
+    <value>Mảnh Secromicon 4</value>
+    <comment>legacy_id=7274</comment>
+  </data>
+  <data name="Fifth Secromicon Fragment" xml:space="preserve">
+    <value>Mảnh Secromicon 5</value>
+    <comment>legacy_id=7275</comment>
+  </data>
+  <data name="Sixth Secromicon Fragment" xml:space="preserve">
+    <value>Mảnh Secromicon 6</value>
+    <comment>legacy_id=7276</comment>
+  </data>
+  <data name="Complete Secromicon" xml:space="preserve">
+    <value>Trọn Bộ Secromicon</value>
+    <comment>legacy_id=7277</comment>
+  </data>
+  <data name="Scroll of Poison" xml:space="preserve">
+    <value>Cuộn Độc Dược</value>
+    <comment>legacy_id=7680</comment>
+  </data>
+  <data name="Scroll of Meteorite" xml:space="preserve">
+    <value>Cuộn Thiên Thạch</value>
+    <comment>legacy_id=7681</comment>
+  </data>
+  <data name="Scroll of Lighting" xml:space="preserve">
+    <value>Cuộn Sét Đánh</value>
+    <comment>legacy_id=7682</comment>
+  </data>
+  <data name="Scroll of Fire Ball" xml:space="preserve">
+    <value>Cuộn Cầu Lửa</value>
+    <comment>legacy_id=7683</comment>
+  </data>
+  <data name="Scroll of Flame" xml:space="preserve">
+    <value>Cuộn Ngọn Lửa</value>
+    <comment>legacy_id=7684</comment>
+  </data>
+  <data name="Scroll of Teleport" xml:space="preserve">
+    <value>Cuộn Dịch Chuyển</value>
+    <comment>legacy_id=7685</comment>
+  </data>
+  <data name="Scroll of Ice" xml:space="preserve">
+    <value>Cuộn Băng</value>
+    <comment>legacy_id=7686</comment>
+  </data>
+  <data name="Scroll of Twister" xml:space="preserve">
+    <value>Cuộn Lốc Xoáy</value>
+    <comment>legacy_id=7687</comment>
+  </data>
+  <data name="Scroll of Evil Spirit" xml:space="preserve">
+    <value>Cuộn Linh Hồn Ác</value>
+    <comment>legacy_id=7688</comment>
+  </data>
+  <data name="Scroll of Hellfire" xml:space="preserve">
+    <value>Cuộn Lửa Địa Ngục</value>
+    <comment>legacy_id=7689</comment>
+  </data>
+  <data name="Scroll of Power Wave" xml:space="preserve">
+    <value>Cuộn Sóng Năng Lượng</value>
+    <comment>legacy_id=7690</comment>
+  </data>
+  <data name="Scroll of Aqua Beam" xml:space="preserve">
+    <value>Cuộn Tia Nước</value>
+    <comment>legacy_id=7691</comment>
+  </data>
+  <data name="Scroll of Cometfall" xml:space="preserve">
+    <value>Cuộn Sao Băng Rơi</value>
+    <comment>legacy_id=7692</comment>
+  </data>
+  <data name="Scroll of Inferno" xml:space="preserve">
+    <value>Cuộn Hoả Ngục</value>
+    <comment>legacy_id=7693</comment>
+  </data>
+  <data name="Scroll of Teleport Ally" xml:space="preserve">
+    <value>Cuộn Dịch Chuyển Đồng Đội</value>
+    <comment>legacy_id=7694</comment>
+  </data>
+  <data name="Scroll of Soul Barrier" xml:space="preserve">
+    <value>Cuộn Lá Chắn Linh Hồn</value>
+    <comment>legacy_id=7695</comment>
+  </data>
+  <data name="Scroll of Decay" xml:space="preserve">
+    <value>Cuộn Phân Rã</value>
+    <comment>legacy_id=7696</comment>
+  </data>
+  <data name="Scroll of Ice Storm" xml:space="preserve">
+    <value>Cuộn Bão Băng</value>
+    <comment>legacy_id=7697</comment>
+  </data>
+  <data name="Scroll of Nova" xml:space="preserve">
+    <value>Cuộn Nova</value>
+    <comment>legacy_id=7698</comment>
+  </data>
+  <data name="Chain Lightning Parchment" xml:space="preserve">
+    <value>Trang Sách Sét Xích</value>
+    <comment>legacy_id=7699</comment>
+  </data>
+  <data name="Drain Life Parchment" xml:space="preserve">
+    <value>Trang Sách Hút Máu</value>
+    <comment>legacy_id=7700</comment>
+  </data>
+  <data name="Lightning Shock Parchment" xml:space="preserve">
+    <value>Trang Sách Sốc Điện</value>
+    <comment>legacy_id=7701</comment>
+  </data>
+  <data name="Damage Reflection Parchment" xml:space="preserve">
+    <value>Trang Sách Phản Đòn</value>
+    <comment>legacy_id=7702</comment>
+  </data>
+  <data name="Berserker Parchment" xml:space="preserve">
+    <value>Trang Sách Cuồng Nộ</value>
+    <comment>legacy_id=7703</comment>
+  </data>
+  <data name="Sleep Parchment" xml:space="preserve">
+    <value>Trang Sách Giấc Ngủ</value>
+    <comment>legacy_id=7704</comment>
+  </data>
+  <data name="Weakness Parchment" xml:space="preserve">
+    <value>Trang Sách Suy Yếu</value>
+    <comment>legacy_id=7706</comment>
+  </data>
+  <data name="Innovation Parchment" xml:space="preserve">
+    <value>Trang Sách Cải Tiến</value>
+    <comment>legacy_id=7707</comment>
+  </data>
+  <data name="Scroll of Wizardry Enhance" xml:space="preserve">
+    <value>Cuộn Tăng Cường Pháp Thuật</value>
+    <comment>legacy_id=7708</comment>
+  </data>
+  <data name="Scroll of Gigantic Storm" xml:space="preserve">
+    <value>Cuộn Bão Khổng Lồ</value>
+    <comment>legacy_id=7709</comment>
+  </data>
+  <data name="Chain Drive Parchment" xml:space="preserve">
+    <value>Trang Sách Chain Drive</value>
+    <comment>legacy_id=7710</comment>
+  </data>
+  <data name="Dark Side Parchment" xml:space="preserve">
+    <value>Trang Sách Bóng Tối</value>
+    <comment>legacy_id=7711</comment>
+  </data>
+  <data name="Dragon Roar Parchment" xml:space="preserve">
+    <value>Trang Sách Rồng Gầm</value>
+    <comment>legacy_id=7712</comment>
+  </data>
+  <data name="Dragon Slasher Parchment" xml:space="preserve">
+    <value>Trang Sách Rồng Chém</value>
+    <comment>legacy_id=7713</comment>
+  </data>
+  <data name="Ignore Defense Parchment" xml:space="preserve">
+    <value>Trang Sách Xuyên Giáp</value>
+    <comment>legacy_id=7714</comment>
+  </data>
+  <data name="Increase Health Parchment" xml:space="preserve">
+    <value>Trang Sách Tăng Sinh Lực</value>
+    <comment>legacy_id=7715</comment>
+  </data>
+  <data name="Increase Block Parchment" xml:space="preserve">
+    <value>Trang Sách Tăng Đỡ Đòn</value>
+    <comment>legacy_id=7716</comment>
+  </data>
+</root>

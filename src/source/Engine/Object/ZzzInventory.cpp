@@ -1713,7 +1713,7 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
     }
     else if (iType == ITEM_ORB_OF_SUMMONING)
     {
-        mu_swprintf(Text, L"%ls %ls", SkillAttribute[30 + iLevel].Name, I18N::Game::Jewel);
+        mu_swprintf(Text, I18N::Game::SJewel, SkillAttribute[30 + iLevel].Name);
     }
     else if (iType == ITEM_RED_RIBBON_BOX)
     {
@@ -1765,7 +1765,7 @@ void GetItemName(int iType, int iLevel, wchar_t* Text)
         {
             if (SommonTable[iLevel] == MonsterScript[i].Type)
             {
-                mu_swprintf(Text, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
+                mu_swprintf(Text, I18N::Game::STransformationRing, MonsterScript[i].Name);
             }
         }
     }
@@ -2421,7 +2421,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
     }
     else if (ip->Type == ITEM_ORB_OF_SUMMONING)
     {
-        mu_swprintf(TextList[TextNum], L"%ls %ls", SkillAttribute[30 + Level].Name, I18N::Game::Jewel);
+        mu_swprintf(TextList[TextNum], I18N::Game::SJewel, SkillAttribute[30 + Level].Name);
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
@@ -2429,7 +2429,7 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
+                mu_swprintf(TextList[TextNum], I18N::Game::STransformationRing, MonsterScript[i].Name);
                 break;
             }
         }
@@ -5816,7 +5816,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
 
     if (ip->Type == ITEM_ORB_OF_SUMMONING)
     {
-        mu_swprintf(TextList[TextNum], L"%ls %ls", SkillAttribute[30 + Level].Name, I18N::Game::Jewel);
+        mu_swprintf(TextList[TextNum], I18N::Game::SJewel, SkillAttribute[30 + Level].Name);
     }
     else if (ip->Type == ITEM_TRANSFORMATION_RING)
     {
@@ -5824,7 +5824,7 @@ void RenderRepairInfo(int sx, int sy, ITEM* ip, bool Sell)
         {
             if (SommonTable[Level] == MonsterScript[i].Type)
             {
-                mu_swprintf(TextList[TextNum], L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
+                mu_swprintf(TextList[TextNum], I18N::Game::STransformationRing, MonsterScript[i].Name);
                 break;
             }
         }
@@ -6324,7 +6324,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
     if (o->Type == MODEL_ORB_OF_SUMMONING)
     {
         SetDescriptorGrayTextColor(descriptor);
-        FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", SkillAttribute[30 + ItemLevel].Name, I18N::Game::Jewel);
+        FormatGroundItemLabelText(descriptor.Name, I18N::Game::SJewel, SkillAttribute[30 + ItemLevel].Name);
     }
     else if (COMGEM::NOGEM != COMGEM::Check_Jewel_Com(o->Type, true))
     {
@@ -6526,7 +6526,7 @@ void BuildGroundItemLabelDescriptor(OBJECT* o, ITEM* ip, GroundItemLabelDescript
         {
             if (SommonTable[ItemLevel] == MonsterScript[i].Type)
             {
-                FormatGroundItemLabelText(descriptor.Name, L"%ls %ls", MonsterScript[i].Name, I18N::Game::TransformationRing);
+                FormatGroundItemLabelText(descriptor.Name, I18N::Game::STransformationRing, MonsterScript[i].Name);
                 break;
             }
         }

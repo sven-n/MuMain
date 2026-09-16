@@ -429,23 +429,23 @@
     <comment>legacy_id=105</comment>
   </data>
   <data name="Firecracker" xml:space="preserve">
-    <value>Pháo</value>
+    <value>Pháo Nổ</value>
     <comment>legacy_id=106</comment>
   </data>
   <data name="Heart of love" xml:space="preserve">
-    <value>Trái tim tình yêu</value>
+    <value>Trái Tim Tình Yêu</value>
     <comment>legacy_id=107</comment>
   </data>
   <data name="Olive of love" xml:space="preserve">
-    <value>Ô liu tình yêu</value>
+    <value>Ô Liu Tình Yêu</value>
     <comment>legacy_id=108</comment>
   </data>
   <data name="Silver medal" xml:space="preserve">
-    <value>Huy chương bạc</value>
+    <value>Huy Chương Bạc</value>
     <comment>legacy_id=109</comment>
   </data>
   <data name="Gold medal" xml:space="preserve">
-    <value>Huy chương vàng</value>
+    <value>Huy Chương Vàng</value>
     <comment>legacy_id=110</comment>
   </data>
   <data name="Box of Heaven" xml:space="preserve">
@@ -3030,11 +3030,11 @@
     <comment>legacy_id=801,802,803,804,805,806,807,808</comment>
   </data>
   <data name="Absolute Weapon of Archangel" xml:space="preserve">
-    <value>Absolute Weapon of Archangel</value>
+    <value>Vũ Khí Tuyệt Đối Archangel</value>
     <comment>legacy_id=809</comment>
   </data>
   <data name="Stone" xml:space="preserve">
-    <value>Stone</value>
+    <value>Đá</value>
     <comment>legacy_id=810,2064</comment>
   </data>
   <data name="Absolute Staff of Archangel" xml:space="preserve">
@@ -3402,11 +3402,11 @@
     <comment>legacy_id=905</comment>
   </data>
   <data name="Ring of Honor" xml:space="preserve">
-    <value>Ring of Honor</value>
+    <value>Nhẫn Danh Dự</value>
     <comment>legacy_id=906</comment>
   </data>
   <data name="Dark Stone" xml:space="preserve">
-    <value>Dark Stone</value>
+    <value>Đá Bóng Tối</value>
     <comment>legacy_id=907</comment>
   </data>
   <data name="/DuelChallenge" xml:space="preserve">
@@ -3466,7 +3466,7 @@
     <comment>legacy_id=921</comment>
   </data>
   <data name="Ring of Warrior" xml:space="preserve">
-    <value>Ring of Warrior</value>
+    <value>Nhẫn Chiến Binh</value>
     <comment>legacy_id=922,928</comment>
   </data>
   <data name="You can drop the ring when you reach level %d." xml:space="preserve">
@@ -3490,7 +3490,7 @@
     <comment>legacy_id=927</comment>
   </data>
   <data name="Ring of glory" xml:space="preserve">
-    <value>Ring of Glory</value>
+    <value>Nhẫn Vinh Quang</value>
     <comment>legacy_id=929</comment>
   </data>
   <data name="Quest: Unfinished" xml:space="preserve">
@@ -4122,7 +4122,7 @@
     <comment>legacy_id=1096</comment>
   </data>
   <data name="Stone of Friendship" xml:space="preserve">
-    <value>Stone of Friendship</value>
+    <value>Đá Tình Bạn</value>
     <comment>legacy_id=1098</comment>
   </data>
   <data name="Used in the My Friend event." xml:space="preserve">
@@ -4638,7 +4638,7 @@
     <comment>legacy_id=1234</comment>
   </data>
   <data name="Crest of monarch" xml:space="preserve">
-    <value>Crest of Monarch</value>
+    <value>Huy Hiệu Quân Vương</value>
     <comment>legacy_id=1235</comment>
   </data>
   <data name="Used in combining Cape of Lord &amp; Warrior's Cloak" xml:space="preserve">
@@ -4826,7 +4826,7 @@
     <comment>legacy_id=1289</comment>
   </data>
   <data name="Sign of lord" xml:space="preserve">
-    <value>Ấn tín lãnh chúa</value>
+    <value>Ấn Tín Lãnh Chúa</value>
     <comment>legacy_id=1290</comment>
   </data>
   <data name="Use in siege registration" xml:space="preserve">
@@ -6174,11 +6174,11 @@
     <comment>legacy_id=1649</comment>
   </data>
   <data name="Blue lucky pouch" xml:space="preserve">
-    <value>Túi may mắn màu xanh</value>
+    <value>Túi May Mắn Màu Xanh</value>
     <comment>legacy_id=1650</comment>
   </data>
   <data name="Red lucky pouch" xml:space="preserve">
-    <value>Túi may mắn màu đỏ</value>
+    <value>Túi May Mắn Màu Đỏ</value>
     <comment>legacy_id=1651</comment>
   </data>
   <data name="Free entrance to Kalima" xml:space="preserve">
@@ -6522,7 +6522,7 @@
     <comment>legacy_id=1737</comment>
   </data>
   <data name="Command" xml:space="preserve">
-    <value>Lãnh đạo</value>
+    <value>Command</value>
     <comment>legacy_id=1738,1900</comment>
   </data>
   <data name="Long gmae time may be harmful to your health" xml:space="preserve">
@@ -7398,15 +7398,15 @@
     <comment>legacy_id=2011</comment>
   </data>
   <data name="Lilac candy box" xml:space="preserve">
-    <value>Hộp kẹo Lilac</value>
+    <value>Hộp Kẹo Lilac</value>
     <comment>legacy_id=2012</comment>
   </data>
   <data name="Orange candy box" xml:space="preserve">
-    <value>Hộp kẹo Orange</value>
+    <value>Hộp Kẹo Orange</value>
     <comment>legacy_id=2013</comment>
   </data>
   <data name="Navy candy box" xml:space="preserve">
-    <value>Hộp kẹo Navy</value>
+    <value>Hộp Kẹo Navy</value>
     <comment>legacy_id=2014</comment>
   </data>
   <data name="Would you like to receive the item?" xml:space="preserve">
@@ -12977,5 +12977,11 @@
   </data>
   <data name="ChatCommandsUnknownCommand" xml:space="preserve">
     <value>Lệnh này không còn khả dụng.</value>
+  </data>
+  <data name="%s Jewel" xml:space="preserve">
+    <value>Ngọc %s</value>
+  </data>
+  <data name="%s Transformation Ring" xml:space="preserve">
+    <value>Nhẫn Biến Hình %s</value>
   </data>
 </root>
