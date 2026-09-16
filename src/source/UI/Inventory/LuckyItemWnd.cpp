@@ -535,7 +535,7 @@ bool CLuckyItemWnd::Process_BTN_Action(void)
         }
 
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines.push_back({ I18N::Game::Lookup(nTextIndex[0]), true });
         for (int i = 1; i < 10; ++i)
         {

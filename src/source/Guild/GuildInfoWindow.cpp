@@ -39,7 +39,7 @@ namespace
     void ShowGuildBreakPasswordDialog()
     {
         GenericDialogConfig cfg;
-        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::IfYouWantToLeaveYourGuild, false },
             { I18N::Game::PleaseEnterYourWEBZENCOMPassword, false },
@@ -263,7 +263,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                 {
                     DeleteIndex = GetGuildMemberIndex(Hero->ID);
                     mu::ui::window::GenericDialogConfig cfg;
-                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.showCancel = true;
                     cfg.lines = {
                         { I18N::Game::OnceYouDisbandTheGuild, true },
                         { I18N::Game::AllTheItemsAndZenInTheGuildVaultWillDisappear, true },
@@ -300,7 +300,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                             wchar_t szNameText[300];
                             mu_swprintf(szNameText, I18N::Game::CharacterS, GuildList[DeleteIndex].Name);
                             mu::ui::window::GenericDialogConfig cfg;
-                            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                            cfg.showCancel = true;
                             cfg.lines = {
                                 { szNameText, true },
                                 { I18N::Game::WouldYouLikeToRelease, true },
@@ -346,7 +346,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                         wchar_t strText[256];
                         mu_swprintf(strText, I18N::Game::CharacterS, pText->m_szID);
                         mu::ui::window::GenericDialogConfig cfg;
-                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.showCancel = true;
                         cfg.lines = {
                             { strText, false },
                             { I18N::Game::WouldYouLikeToCancelTheRanking, false },
@@ -375,7 +375,7 @@ bool mu::ui::window::CGuildInfoWindow::Check_Btn()
                         wchar_t szAllianceText[256];
                         mu_swprintf(szAllianceText, I18N::Game::SGuildFromTheAlliance, DeleteID);
                         mu::ui::window::GenericDialogConfig cfg;
-                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.showCancel = true;
                         cfg.lines = {
                             { szAllianceText, false },
                             { I18N::Game::WouldYouLikeToRelease, false },
@@ -1082,7 +1082,7 @@ void mu::ui::window::CGuildInfoWindow::ReceiveGuildRelationShip(GuildRelationshi
         }
 
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { szText[0], false },
             { szText[1], false },

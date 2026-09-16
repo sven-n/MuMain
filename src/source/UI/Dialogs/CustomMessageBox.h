@@ -9,51 +9,6 @@
 
 namespace mu::ui::window
 {
-    class CUseFruitCheckMsgBox : public CMessageBoxBase, public I3DRenderObj
-    {
-        static constexpr float MSGBOX_TEXT_MAXWIDTH_3DITEM = 120.0f;
-        static constexpr float MSGBOX_TEXT_LEFT_BLANK_3DITEM = 60.0f;
-        static constexpr float MSGBOX_3DITEM_WIDTH = 40.0f;
-        static constexpr float MSGBOX_3DITEM_HEIGHT = 40.0f;
-    public:
-        CUseFruitCheckMsgBox();
-        virtual ~CUseFruitCheckMsgBox();
-
-        bool Create(float fPriority = 3.f);
-        void Release();
-
-        void Set3DItem(ITEM* pItem);
-
-        bool Update();
-        bool Render();
-        void Render3D();
-
-        bool IsVisible() const;
-
-        static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT AddBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT MinusBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-        static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-
-    private:
-        void AddMsg(const type_string& strMsg, DWORD dwColor = CLRDW_WHITE, BYTE byFontType = MSGBOX_FONT_NORMAL);
-        void SetAddCallbackFunc();
-        void SetButtonInfo();
-
-        void RenderFrame();
-        void RenderTexts();
-        void RenderButtons();
-
-        ITEM m_Item;
-
-        type_vector_msgdata m_MsgDataList;
-
-        // button
-        CMessageBoxButton m_BtnAdd;
-        CMessageBoxButton m_BtnMinus;
-        CMessageBoxButton m_BtnCancel;
-    };
-
     class CGemIntegrationDisjointMsgBox : public CMessageBoxBase
     {
     public:
@@ -301,12 +256,6 @@ namespace mu::ui::window
     // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h). ShowCherryBlossomMenuDialog() has no
     // live callers -- same as its native predecessor (grep-confirmed zero CreateMessageBox call
     // sites even before this port).
-
-    class CUseFruitCheckMsgBoxLayout : public TMsgBoxLayout<CUseFruitCheckMsgBox>
-    {
-    public:
-        bool SetLayout();
-    };
 
     class CGemIntegrationDisjointMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationDisjointMsgBox>
     {

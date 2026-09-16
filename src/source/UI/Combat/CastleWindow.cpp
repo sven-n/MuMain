@@ -374,7 +374,7 @@ void CCastleWindow::UpdateGateManagingTab()
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_BUY_GATE);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         cfg.lines = {
@@ -389,7 +389,7 @@ void CCastleWindow::UpdateGateManagingTab()
     {
         SetCurrMsgBoxRequest(CASTLE_MSGREQ_REPAIR_GATE);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrGateInfo()));
         cfg.lines = {
@@ -412,7 +412,7 @@ void CCastleWindow::UpdateGateManagingTab()
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 4, 1000000);
         InsertComma(szText, 1000000);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::UpgradingTheDurabilityOfSelectedCastleGate, false },
             { szText, false },
@@ -433,7 +433,7 @@ void CCastleWindow::UpdateGateManagingTab()
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 4, 3000000);
         InsertComma(szText, 3000000);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::UpgradingTheDefensivePowerOfSelectedCastleGate, false },
             { szText, false },
@@ -470,7 +470,7 @@ void CCastleWindow::UpdateStatueManagingTab()
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::ToPurchaseSelectedStatue, false },
             { szText, false },
@@ -485,7 +485,7 @@ void CCastleWindow::UpdateStatueManagingTab()
         mu_swprintf(szText, I18N::Game::DZenIsRequired, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         InsertComma(szText, g_SenatusInfo.GetRepairCost(&g_SenatusInfo.GetCurrStatueInfo()));
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::ToRepairSelectedStatue, false },
             { szText, false },
@@ -506,7 +506,7 @@ void CCastleWindow::UpdateStatueManagingTab()
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 1000000);
         InsertComma(szText, 1000000);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::UpgradingDurabilityOfSelectedCastleGate, false },
             { szText, false },
@@ -527,7 +527,7 @@ void CCastleWindow::UpdateStatueManagingTab()
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 3000000);
         InsertComma(szText, 3000000);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::UpgradingDefensivePowerOfSelectedStatue, false },
             { szText, false },
@@ -548,7 +548,7 @@ void CCastleWindow::UpdateStatueManagingTab()
             mu_swprintf(szText, I18N::Game::DGuardianJewelAndDZenAreRequired, 7, 5000000);
         InsertComma(szText, 5000000);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::UpgradingRecoveryPowerOfSelectedStatue, false },
             { szText, false },
@@ -569,7 +569,7 @@ void CCastleWindow::UpdateTaxManagingTab()
         mu_swprintf(szChaosTaxText, I18N::Game::ChaosCombinationGoblinTaxRateD, g_SenatusInfo.GetChaosTaxRate());
         mu_swprintf(szText, I18N::Game::VariousNPCTaxRateD, g_SenatusInfo.GetNormalTaxRate());
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { szChaosTaxText, false },
             { szText, false },
@@ -585,7 +585,7 @@ void CCastleWindow::UpdateTaxManagingTab()
         // ExecuteCastleMsgBoxRequest()'s generic switch -- that helper only covers the 10 plain
         // OK/Cancel castle dialogs already ported, none of which need input.
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::EnterTheWithdrawalAmount, false },
             { I18N::Game::Maximum15000000Zen, false },

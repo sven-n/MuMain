@@ -216,9 +216,9 @@ void CUIGuildInfo::DoGuildInfoTabMouseAction()
             else
             {
                 mu::ui::window::GenericDialogConfig cfg;
-                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                cfg.showCancel = true;
                 cfg.primaryLabel = I18N::Game::Yes;
-                cfg.secondaryLabel = I18N::Game::No;
+                cfg.cancelLabel = I18N::Game::No;
                 cfg.lines = {
                     { I18N::Game::OnceYouDisbandTheGuild, false },
                     { I18N::Game::AllTheItemsAndZenInTheGuildVaultWillDisappear, false },
@@ -353,9 +353,9 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                         wcscpy(s_szTargetID, pText->m_szID);
 
                     mu::ui::window::GenericDialogConfig cfg;
-                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.showCancel = true;
                     cfg.primaryLabel = I18N::Game::Yes;
-                    cfg.secondaryLabel = I18N::Game::No;
+                    cfg.cancelLabel = I18N::Game::No;
                     cfg.lines = {
                         { szText, false },
                         { I18N::Game::WouldYouLikeToCancelTheRanking, false },
@@ -387,9 +387,9 @@ void CUIGuildInfo::DoGuildMemberTabMouseAction()
                     mu_swprintf(szText, I18N::Game::CharacterS, pText->m_szID);
 
                     mu::ui::window::GenericDialogConfig cfg;
-                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.showCancel = true;
                     cfg.primaryLabel = I18N::Game::Yes;
-                    cfg.secondaryLabel = I18N::Game::No;
+                    cfg.cancelLabel = I18N::Game::No;
                     cfg.lines = {
                         { szText, false },
                         { I18N::Game::WouldYouLikeToRelease, false },
@@ -454,9 +454,9 @@ void CUIGuildInfo::DoGuildUnionMouseAction()
                         wcscpy(s_szTargetID, pText->szName);
 
                         mu::ui::window::GenericDialogConfig cfg;
-                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.showCancel = true;
                         cfg.primaryLabel = I18N::Game::Yes;
-                        cfg.secondaryLabel = I18N::Game::No;
+                        cfg.cancelLabel = I18N::Game::No;
                         cfg.lines = {
                             { szText, false },
                             { I18N::Game::WouldYouLikeToRelease, false },

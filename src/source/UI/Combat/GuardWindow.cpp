@@ -397,7 +397,7 @@ void CGuardWindow::UpdateRegisterInfoTab()
         if (m_BtnGiveUp.UpdateMouseEvent() == true)
         {
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines.push_back({ I18N::Game::AreYouReallyWantToQuitTheSiegeWargare, false });
             cfg.onPrimary = [] { SocketClient->ToGameServer()->SendCastleSiegeUnregisterRequest(); };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));

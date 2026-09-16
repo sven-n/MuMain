@@ -466,7 +466,7 @@ void mu::ui::window::CMyQuestInfoWindow::RmlClickGiveUp()
     // CreateMessageBox(MSGBOX_LAYOUT_CLASS(CQuestGiveUpMsgBoxLayout)), an OK/Cancel confirm whose
     // OK sent SendQuestCancelRequest for the currently-selected quest.
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.lines.push_back({ I18N::Game::IfYouGiveUpYouWill, false });
     cfg.onPrimary = [this]()
     {

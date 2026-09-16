@@ -226,7 +226,7 @@ bool mu::ui::window::CPurchaseShopInventory::PurchaseShopInventoryProcess()
             ChangeSourceIndex(iCurSquareIndex);
 
             GenericDialogConfig cfg;
-            cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.item3D = *pItem;
             cfg.lines = { { I18N::Game::DoYouWantToBuyAnItem, false } };
             cfg.onPrimary = []

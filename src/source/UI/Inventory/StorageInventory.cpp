@@ -34,7 +34,7 @@ namespace
     void ShowVaultPinVerifyDialog()
     {
         GenericDialogConfig cfg;
-        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::PasswordVerification, false },
             { I18N::Game::Choose4DigitsForPassword, false },
@@ -71,7 +71,7 @@ namespace
     void ShowStorageLockPinConfirmDialog(std::wstring firstPin)
     {
         GenericDialogConfig cfg;
-        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::VerifyNewPassword, false },
             { I18N::Game::EnterPasswordAgain, false },
@@ -108,7 +108,7 @@ namespace
             // instance.
             const WORD wInputNumber = (WORD)_wtoi(strText.c_str());
             GenericDialogConfig pwCfg;
-            pwCfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            pwCfg.showCancel = true;
             pwCfg.lines = {
                 { I18N::Game::EnterYourWEBZENCOMPassword, false },
                 { I18N::Game::EnterYourWEBZENCOMPassword697, false },
@@ -138,7 +138,7 @@ namespace
     void ShowStorageLockPinDialog()
     {
         GenericDialogConfig cfg;
-        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { I18N::Game::ChooseNewPassword, false },
             { I18N::Game::Choose4DigitsForPassword, false },
@@ -236,7 +236,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                     {
                         // Was CZenReceiptMsgBoxLayout (CustomMessageBox.h).
                         mu::ui::window::GenericDialogConfig cfg;
-                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.showCancel = true;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit, false } };
                         cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
                         cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
@@ -270,7 +270,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                         // gold branch chains into ShowVaultPinVerifyDialog() (this file, was
                         // CPasswordKeyPadMsgBoxLayout, ported 2026-09-14).
                         mu::ui::window::GenericDialogConfig cfg;
-                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.showCancel = true;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw, false } };
                         cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
                         cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
@@ -317,7 +317,7 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                         {
                             // Was CStorageUnlockMsgBoxLayout (CustomMessageBox.h).
                             mu::ui::window::GenericDialogConfig cfg;
-                            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                            cfg.showCancel = true;
                             cfg.lines = {
                                 { I18N::Game::WarehouseLockUnlock, false },
                                 { I18N::Game::EnterYourWEBZENCOMPassword697, false },

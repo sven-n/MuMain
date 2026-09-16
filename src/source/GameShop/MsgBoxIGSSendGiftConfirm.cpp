@@ -22,7 +22,7 @@ void ShowIGSSendGiftConfirmDialog(int iPackageSeq, int iDisplaySeq, int iPriceSe
     wcscpy(szItemPeriod, pszPeriod);
 
     GenericDialogConfig cfg;
-    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.title = I18N::Game::GiftConfirmation;
     cfg.lines = {
         { I18N::Game::DoYouWantToGiftTheFollowingItemS, false },

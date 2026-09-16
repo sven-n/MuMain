@@ -395,7 +395,13 @@
 	bottom: auto;
 }
 
-.btn.gcd-btn-primary, .btn.gcd-btn-secondary {
+/* Three fixed, named-role slots (primary/secondary/cancel -- see GenericDialogConfig's own
+   comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
+   Cancel; `.gcd-btn-cancel` is today's original always-Cancel/Close slot (unchanged id meaning
+   from before this rename, just renamed from `.gcd-btn-secondary`). Paired-layout values below
+   are value-for-value identical to before this redesign -- zero visual change for every existing
+   Ok/OkCancel consumer, which always renders solo or paired (primary+cancel), never triple. */
+.btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
 	top: 138dp;
 	width: 60dp;
 	height: 25dp;
@@ -403,12 +409,20 @@
 }
 .gcd-btn-primary   { left: 32dp; }
 .gcd-btn-primary.solo { left: 85dp; }
-.gcd-btn-secondary { left: 138dp; }
+/* Paired: whichever of secondary/cancel is the sole second button sits in this one slot -- both
+   selectors share the position since only one is ever visible outside of `.triple`. */
+.gcd-btn-secondary, .gcd-btn-cancel { left: 138dp; }
+/* Triple (all three shown, e.g. Create/Decrease/Cancel) -- native's own `triwidth = panelWidth/3`
+   centering (CUseFruitCheckMsgBox::SetButtonInfo(), CustomMessageBox.cpp), each 60dp button
+   centered within its own 230dp/3 = 76.67dp third: primary ~8dp, secondary ~85dp, cancel ~162dp. */
+.gcd-btn-primary.triple { left: 8dp; }
+.gcd-btn-secondary.triple { left: 85dp; }
+.gcd-btn-cancel.triple { left: 162dp; }
 /* #panel.tall keeps the same 6dp footer-to-button gap and 15dp button-to-bottom margin the
    default 178dp panel already has (132 -> 204, 138 -> 210, 210 + 25 + 15 = 250). */
 #panel.tall .gcd-footer {
 	top: 204dp;
 }
-#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary {
+#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary, #panel.tall .btn.gcd-btn-cancel {
 	top: 210dp;
 }

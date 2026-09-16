@@ -75,13 +75,26 @@
 				</div>
 			</div>
 		</div>
-		<!-- solo = centered (Ok-only); paired (OkCancel) sits left-of-center instead. Both buttons
-		     hide entirely while `has_progress` -- progress boxes have zero buttons. -->
-		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary" data-class-solo="!show_cancel"
+		<!-- Three fixed, named-role slots (see GenericDialogConfig's own comment): primary is
+		     always shown; secondary is a real second action (Decrease/Gift/Discard...), never
+		     Cancel; cancel is always dismiss semantics, independently optional. Layout depends on
+		     how many of the three are actually visible this Show() call -- solo (primary only),
+		     paired (primary + exactly one of secondary/cancel, today's original Ok/OkCancel shape,
+		     unchanged position), or triple (all three, native's own Create/Decrease/Cancel-style
+		     3-way split). All three hide entirely while `has_progress` -- progress boxes have zero
+		     buttons. -->
+		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary"
+		     data-class-solo="!has_secondary &amp;&amp; !show_cancel"
+		     data-class-triple="has_secondary &amp;&amp; show_cancel"
 		     data-class-hidden="has_progress" data-event-click="gcd_primary_click">{{primary_label}}</div>
 		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary"
-		     data-class-hidden="!show_cancel || has_progress"
+		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-hidden="!has_secondary || has_progress"
 		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
+		<div id="gcd_btn_cancel" class="btn gcd-btn-cancel"
+		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-hidden="!show_cancel || has_progress"
+		     data-event-click="gcd_cancel_click">{{cancel_label}}</div>
 	</div>
 </body>
 </rml>

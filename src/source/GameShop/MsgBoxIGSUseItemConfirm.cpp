@@ -21,7 +21,7 @@ void ShowIGSUseItemConfirmDialog(int iStorageSeq, int iStorageItemSeq, WORD wIte
     mu_swprintf(szDescription, I18N::Game::DoYouWishToUseS, pszItemName);
 
     GenericDialogConfig cfg;
-    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.title = I18N::Game::UseConfirmation;
     cfg.lines = { { szDescription, false } };
     cfg.onPrimary = [iStorageSeq, iStorageItemSeq, wItemCode, szItemType, itemName = std::wstring(pszItemName)]

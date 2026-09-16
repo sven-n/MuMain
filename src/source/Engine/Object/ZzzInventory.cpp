@@ -10572,7 +10572,7 @@ void MovePersonalShop()
                 else
                 {
                     mu::ui::window::GenericDialogConfig cfg;
-                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.showCancel = true;
                     cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
                     cfg.onPrimary = []
                     {
@@ -10687,7 +10687,7 @@ void OpenPersonalShopMsgWnd(int iMsgType)
         // Was CPersonalShopNameMsgBoxLayout (CustomMessageBox.h) -- a plain (non-numeric,
         // non-masked) Mode::Text entry, ported 2026-09-14.
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = { { I18N::Game::EnterStoreName, false } };
         cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
         cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;

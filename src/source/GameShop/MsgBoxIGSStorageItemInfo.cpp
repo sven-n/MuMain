@@ -27,7 +27,7 @@ void ShowIGSStorageItemInfoDialog(int iStorageSeq, int iStorageItemSeq, WORD wIt
     item.Type = wItemCode;
 
     GenericDialogConfig cfg;
-    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.title = I18N::Game::ItemInfoWindow;
     cfg.lines = { { pszName, true }, { szNum, false }, { szPeriod, false } };
     cfg.item3D = item;

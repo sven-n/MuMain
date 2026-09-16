@@ -31,10 +31,20 @@ namespace mu::ui::window
     // dialog, and a variant would make the common plain-text case syntactically heavier.
     struct GenericDialogConfig
     {
-        enum class ButtonSet { Ok, OkCancel };
-        ButtonSet buttons = ButtonSet::Ok;
+        // Always shown -- OK, Create, Buy, Save, etc. Free-form, not fixed to "OK".
         std::wstring primaryLabel = L"OK";
-        std::wstring secondaryLabel = L"Cancel"; // ignored unless buttons == OkCancel
+
+        // Optional real second action, distinct from Cancel -- e.g. Decrease (fruit consume),
+        // Present/Gift (IGS buy), Discard. Unset = no middle button (today's Ok-only/Ok+Cancel
+        // shape). Never fires from Esc -- only `onCancel` below does.
+        std::optional<std::wstring> secondaryLabel;
+
+        // Optional Cancel/Close button -- always dismiss semantics (fires on click AND on Esc).
+        // false = no cancel button at all (replaces the old ButtonSet::Ok). `cancelLabel` only
+        // overrides the displayed text (e.g. "Close", "No" for a Yes/No-shaped confirm) -- role,
+        // position, and Esc-binding stay fixed regardless of what it says.
+        bool showCancel = false;
+        std::wstring cancelLabel = L"Cancel";
 
         struct Line { std::wstring text; bool bold = false; };
         std::vector<Line> lines;
@@ -97,7 +107,8 @@ namespace mu::ui::window
         bool tallPanel = false;
 
         std::function<void()> onPrimary;   // OK / Enter / progress-timer-elapsed
-        std::function<void()> onSecondary; // Cancel / Esc -- optional, safe to leave empty
+        std::function<void()> onSecondary; // fires only if secondaryLabel is set; never Esc-bound
+        std::function<void()> onCancel;    // fires on the cancel button AND on Esc
     };
 
     // Reusable RmlUi confirm dialog -- one document/model, one instance, shown with different
@@ -137,7 +148,7 @@ namespace mu::ui::window
         // (Mode::NumericKeypad). Call from `onPrimary`.
         std::wstring GetInputText() const;
 
-        // Call from `onPrimary`/`onSecondary` to veto this click's Resolve() -- the dialog stays
+        // Call from `onPrimary`/`onSecondary`/`onCancel` to veto this click's Resolve() -- the dialog stays
         // open exactly as it was instead of closing/advancing the queue. Typically called after
         // GetInputText() fails validation, right before returning from `onPrimary`.
         void KeepOpen() { m_bKeepOpenRequested = true; }
@@ -179,7 +190,9 @@ namespace mu::ui::window
         void BuildRmlUi();
         void SyncRmlModel();
         void ShowNext();            // pops m_Queue (if non-empty) and opens the document
-        void Resolve(bool primary); // hides the document, invokes the chosen callback, then ShowNext()
+        // Which button resolved the dialog -- dispatches to cfg.onPrimary/onSecondary/onCancel.
+        enum class ClickResult { Primary, Secondary, Cancel };
+        void Resolve(ClickResult which); // hides the document, invokes the chosen callback, then ShowNext()
 
         void UpdateProgress();      // advances the progress-bar fraction, auto-resolves on elapse
         void UpdateTextInputWidget();  // per-frame Configure()/GiveFocus()/DoAction() for Mode::Text
@@ -196,9 +209,13 @@ namespace mu::ui::window
         struct GenericDialogRmlModel
         {
             std::vector<LineEntry> lines;
-            bool showCancel = false;
             Rml::String primaryLabel;
+
+            bool hasSecondary = false;
             Rml::String secondaryLabel;
+
+            bool showCancel = false;
+            Rml::String cancelLabel;
 
             bool hasTitle = false;
             Rml::String title;
@@ -251,6 +268,7 @@ namespace mu::ui::window
         // inside the RmlUi callback itself.
         bool m_bPrimaryClicked = false;
         bool m_bSecondaryClicked = false;
+        bool m_bCancelClicked = false;
 
         // See KeepOpen()'s own comment. Reset at the top of every Resolve() call, read at the
         // bottom to decide whether to actually close.

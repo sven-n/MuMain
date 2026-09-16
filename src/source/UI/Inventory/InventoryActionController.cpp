@@ -262,7 +262,7 @@ bool CInventoryActionController::HandleSellToNPC(CInventoryCtrl* targetControl) 
     if (IsHighValueItem(pItem))
     {
         GenericDialogConfig cfg;
-        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         if (ITEM* pPreviewItem = pPickedItem->GetItem())
         {
             cfg.item3D = *pPreviewItem;
@@ -561,7 +561,7 @@ bool CInventoryActionController::ApplyJewels(CInventoryCtrl* targetControl, CPic
         const int iTargetIndex = targetControl->GetIndex(pItem->x, pItem->y);
 
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines.push_back({ I18N::Game::WouldYouLikeToRepairFenrirSHorn, true });
         cfg.onPrimary = [iSourceIndex, iTargetIndex]
         {
@@ -747,7 +747,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
                 mu_swprintf(strName, L"%ls", I18N::Game::Command);
 
             GenericDialogConfig cfg;
-            cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.item3D = *pItem;
             cfg.lines = {
                 { strName, true },
@@ -959,15 +959,43 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
         }
 
         GenericDialogConfig cfg;
-        cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.item3D = *pItem;
         cfg.lines = {
             { strName, true },
             { I18N::Game::DoYouWantToUseTheFruit, true },
         };
-        cfg.onPrimary = []
+        cfg.onPrimary = [item3D = *cfg.item3D, itemName = std::wstring(strName)]
         {
-            CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CUseFruitCheckMsgBoxLayout));
+            // Chained follow-up confirm -- Create/Decrease/Cancel, matching native
+            // CUseFruitCheckMsgBox exactly. item3D/itemName are the same values already computed
+            // above (not re-read from pItem, which may not outlive this callback). byIndex is
+            // looked up fresh in each callback (not captured here), same as native's own
+            // AddBtnDown/MinusBtnDown -- the standby item key was already latched via
+            // SetStandbyItemKey() above.
+            wchar_t strText[128] = { 0, };
+            mu_swprintf(strText, L"( %ls%ls )", itemName.c_str(), I18N::Game::Fruit);
+
+            GenericDialogConfig fruitCfg;
+            fruitCfg.item3D = item3D;
+            fruitCfg.lines = {
+                { strText, true },
+                { I18N::Game::Choose, true },
+            };
+            fruitCfg.primaryLabel = I18N::Game::Create;
+            fruitCfg.onPrimary = []
+            {
+                BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
+                SendRequestUse(byIndex, 0, true);
+            };
+            fruitCfg.secondaryLabel = I18N::Game::Decrease;
+            fruitCfg.onSecondary = []
+            {
+                BYTE byIndex = g_pMyInventory->GetStandbyItemIndex();
+                SendRequestUse(byIndex, 0, false);
+            };
+            fruitCfg.showCancel = true;
+            g_pGenericConfirmDialog->Show(std::move(fruitCfg));
         };
         g_pGenericConfirmDialog->Show(std::move(cfg));
         return true;
@@ -1004,7 +1032,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             {
                 g_pMyInventory->SetStandbyItemKey(pItem->Key);
                 mu::ui::window::GenericDialogConfig cfg;
-                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                cfg.showCancel = true;
                 cfg.lines.push_back({ I18N::Game::WouldYouLikeToSaveTheLocation, false });
                 cfg.onPrimary = []
                 {
@@ -1036,7 +1064,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
                 {
                     g_pMyInventory->SetStandbyItemKey(pItem->Key);
                     mu::ui::window::GenericDialogConfig cfg;
-                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.showCancel = true;
                     cfg.lines.push_back({ I18N::Game::WouldYouLikeToSaveTheLocation, false });
                     cfg.onPrimary = []
                     {
@@ -1051,7 +1079,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
             {
                 g_pMyInventory->SetStandbyItemKey(pItem->Key);
                 mu::ui::window::GenericDialogConfig cfg;
-                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                cfg.showCancel = true;
                 cfg.lines.push_back({ I18N::Game::WouldYouLikeToSaveTheLocation, false });
                 cfg.onPrimary = []
                 {
@@ -1073,7 +1101,7 @@ bool CInventoryActionController::TryConsumeItem(CInventoryCtrl* targetControl, I
     {
         g_pMyInventory->SetStandbyItemKey(pItem->Key);
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines.push_back({ I18N::Game::WouldYouLikeToMoveToTheSantaSVillage, false });
         cfg.onPrimary = []
         {

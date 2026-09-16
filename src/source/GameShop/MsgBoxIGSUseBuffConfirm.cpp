@@ -17,7 +17,7 @@ void ShowIGSUseBuffConfirmDialog(int iStorageSeq, int iStorageItemSeq, WORD wIte
     mu_swprintf(szDescription, I18N::Game::UsingTheSItemWillNegate, pszItemName, pszBuffName, pszItemName);
 
     GenericDialogConfig cfg;
-    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.title = I18N::Game::BuffItemUseConfirmation;
     cfg.lines = { { szDescription, false } };
     cfg.onPrimary = [iStorageSeq, iStorageItemSeq, wItemCode, szItemType]

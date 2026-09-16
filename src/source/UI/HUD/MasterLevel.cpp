@@ -923,7 +923,7 @@ bool mu::ui::window::CMasterLevel::CheckAttributeArea(const _MASTER_SKILLTREE_DA
     wchar_t szMasterLevelText[256];
     mu_swprintf(szMasterLevelText, I18N::Game::MasterLevelPointRequirementD, g_pMasterLevelInterface->GetConsumePoint());
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.lines = {
         { I18N::Game::WouldYouLikeToStrengthenTheSkill, false },
         { szMasterLevelText, false },

@@ -45,7 +45,7 @@ void mu::ui::window::ShowPersonalShopItemValueDialog()
     // entry, ported 2026-09-14. See MyShopInventory.h's own declaration comment for why this is a
     // free function shared across all 4 call sites instead of duplicated per site.
     GenericDialogConfig cfg;
-    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.lines = { { I18N::Game::EnterSellingPrice, false } };
     cfg.input = GenericDialogConfig::InputField{};
     cfg.input->mode = GenericDialogConfig::InputField::Mode::Text;
@@ -99,7 +99,7 @@ void mu::ui::window::ShowPersonalShopItemValueDialog()
             mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
 
             GenericDialogConfig cfg;
-            cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.item3D = *pItem;
             cfg.lines = {
                 { strText2, true },
@@ -297,7 +297,7 @@ bool mu::ui::window::CMyShopInventory::Create(CManager* pNewUIMng, int x, int y)
                             if (m_EnablePersonalShop == false)
                             {
                                 mu::ui::window::GenericDialogConfig cfg;
-                                cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                                cfg.showCancel = true;
                                 cfg.lines.push_back({ I18N::Game::DoYouWantToOpenAStore, false });
                                 cfg.onPrimary = [this]
                                 {

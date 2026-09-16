@@ -183,7 +183,7 @@ bool mu::ui::window::CNPCShop::UpdateMouseEvent()
                     g_pNPCShop->SetStandbyItemKey(pItem->Key);
 
                     mu::ui::window::GenericDialogConfig cfg;
-                    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                    cfg.showCancel = true;
                     cfg.item3D = *pItem;
                     cfg.lines = { { I18N::Game::WouldYouLikeToPurchase, false } };
                     cfg.onPrimary = []
@@ -416,7 +416,7 @@ bool mu::ui::window::CNPCShop::InventoryProcess()
         if (pItem && IsHighValueItem(pItem) == true)
         {
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.item3D = *pItem;
             cfg.lines = {
                 { I18N::Game::AnExpensiveItem, true },

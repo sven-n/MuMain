@@ -7349,7 +7349,7 @@ void ReceiveParty(const BYTE* ReceiveBuffer)
     PartyKey = ((int)(Data->KeyH) << 8) + Data->KeyL;
 
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.lines = {
         { CharactersClient[FindCharacterIndex(PartyKey)].ID, false },
         { I18N::Game::SomeoneRequestsYouToJoinTheirAParty, false },
@@ -7526,7 +7526,7 @@ void ReceiveGuild(const BYTE* ReceiveBuffer)
     // second guild-related packet could otherwise change it before the player responds.
     const int guildPlayerKey = GuildPlayerKey;
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.lines.push_back({ CharactersClient[FindCharacterIndex(guildPlayerKey)].ID, false });
     cfg.lines.push_back({ I18N::Game::YouHaveReceivedAnOfferToJoinAGuild, false });
     cfg.onPrimary = [guildPlayerKey]() { SocketClient->ToGameServer()->SendGuildJoinResponse(true, guildPlayerKey); };
@@ -7737,7 +7737,7 @@ void ReceiveDeclareWar(const BYTE* ReceiveBuffer)
     mu_swprintf(szChallengeText, I18N::Game::SGuildChallengesYou, GuildWarName);
 
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     if (Data->Type == 1)
     {
         cfg.lines = {
@@ -8466,7 +8466,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         case 0:
         {
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines.push_back({ I18N::Game::WouldYouLikeToReceiveTheItem, false });
             cfg.onPrimary = [] { SocketClient->ToGameServer()->SendWhiteAngelItemRequest(); };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -8505,7 +8505,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         case 1:
         {
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines.push_back({ I18N::Game::WouldYouLikeToReceiveTheItem, false });
             cfg.onPrimary = [] { SocketClient->ToGameServer()->SendLeoHelperItemRequest(); };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -8524,7 +8524,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         case 0:
         {
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines.push_back({ I18N::Game::WelcomeToSantaSVillageHere, false });
             cfg.onPrimary = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -8533,7 +8533,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
         case 1:
         {
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines.push_back({ I18N::Game::WelcomeToSantaSVillagePleaseComeClaimYourGift, false });
             cfg.onPrimary = [] { SocketClient->ToGameServer()->SendSantaClausItemRequest(); };
             mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -8551,7 +8551,7 @@ void ReceiveServerCommand(const BYTE* ReceiveBuffer)
     case 17:
     {
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines.push_back({ I18N::Game::WouldYouLikeToReturnToDevias, false });
         cfg.onPrimary = [] { SocketClient->ToGameServer()->SendMoveToDeviasBySnowmanRequest(); };
         mu::ui::window::g_pGenericConfirmDialog->Show(std::move(cfg));
@@ -8921,7 +8921,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             mu_swprintf(szOpenTime2, I18N::Game::InSCurrentlyDDEntered, I18N::Game::ChaosCastle, Data->KeyM, 100);
 
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines = {
                 { szOpenTime1, false },
                 { szOpenTime2, false },
@@ -8951,7 +8951,7 @@ void ReceiveEventZoneOpenTime(const BYTE* ReceiveBuffer)
             wcscat(szOpenTime, Text);
 
             mu::ui::window::GenericDialogConfig cfg;
-            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+            cfg.showCancel = true;
             cfg.lines.push_back({ szOpenTime, false });
             cfg.onPrimary = []
             {
@@ -9120,7 +9120,7 @@ void ReceiveDuelRequest(const BYTE* ReceiveBuffer)
     // portrait2D field (2026-09-14), reproducing native's fixed IMAGE_MSGBOX_DUEL_BACK sprite with
     // the enemy's bracketed name overlaid on it, same as RenderTexts()'s own L"[%ls]" format.
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.portrait2D = mu::ui::window::GenericDialogConfig::Portrait2D{
         std::wstring(L"[") + g_DuelMgr.GetDuelPlayerID(DUEL_ENEMY) + L"]" };
     cfg.tallPanel = true; // portrait + 2 lines doesn't comfortably fit the default panel height
@@ -9360,7 +9360,6 @@ void ReceiveDuelResult(const BYTE* ReceiveBuffer)
     mu_swprintf(strLine2, I18N::Game::TheDuelWithS, loserName);
 
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::Ok;
     cfg.portrait2D = mu::ui::window::GenericDialogConfig::Portrait2D{ I18N::Game::DuelFinished };
     cfg.tallPanel = true; // portrait + 3 lines doesn't comfortably fit the default panel height
     cfg.lines = {

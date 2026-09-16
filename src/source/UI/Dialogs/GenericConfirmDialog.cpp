@@ -76,9 +76,11 @@ void CGenericConfirmDialog::BuildRmlUi()
             c.RegisterArray<std::vector<LineEntry>>();
             c.Bind("lines", &model.lines);
 
-            c.Bind("show_cancel", &model.showCancel);
             c.Bind("primary_label", &model.primaryLabel);
+            c.Bind("has_secondary", &model.hasSecondary);
             c.Bind("secondary_label", &model.secondaryLabel);
+            c.Bind("show_cancel", &model.showCancel);
+            c.Bind("cancel_label", &model.cancelLabel);
 
             c.Bind("has_title", &model.hasTitle);
             c.Bind("title", &model.title);
@@ -114,6 +116,8 @@ void CGenericConfirmDialog::BuildRmlUi()
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_bPrimaryClicked = true; });
             c.BindEventCallback("gcd_secondary_click",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_bSecondaryClicked = true; });
+            c.BindEventCallback("gcd_cancel_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { m_bCancelClicked = true; });
 
             // Position argument is the FIXED grid slot (0-9), not the digit typed -- that's
             // looked up via m_KeypadMapping, the shuffled-position anti-shoulder-surfing mapping.
@@ -226,6 +230,7 @@ void CGenericConfirmDialog::Show(GenericDialogConfig cfg)
     m_bActive = true;
     m_bPrimaryClicked = false;
     m_bSecondaryClicked = false;
+    m_bCancelClicked = false;
     m_KeypadBuffer.clear();
     m_KeypadMapping.clear();
     m_bItem3DDebugLogged = false;
@@ -273,6 +278,7 @@ void CGenericConfirmDialog::ShowNext()
     m_Queue.pop_front();
     m_bPrimaryClicked = false;
     m_bSecondaryClicked = false;
+    m_bCancelClicked = false;
     m_KeypadBuffer.clear();
     m_KeypadMapping.clear();
     m_bItem3DDebugLogged = false;
@@ -304,22 +310,20 @@ void CGenericConfirmDialog::ShowNext()
     }
 }
 
-void CGenericConfirmDialog::Resolve(bool primary)
+void CGenericConfirmDialog::Resolve(ClickResult which)
 {
     m_bKeepOpenRequested = false;
 
     // Move out before invoking -- the callback may itself call Show() (e.g. chaining a follow-up
-    // confirm), which must not stomp m_Active while its own onPrimary/onSecondary still needs it.
-    // Deliberately BEFORE hiding/ShowNext(): a callback that vetoes via KeepOpen() needs nothing
-    // touched yet -- not the RmlUi documents, not the native Mode::Text widget, not the queue.
+    // confirm), which must not stomp m_Active while its own onPrimary/onSecondary/onCancel still
+    // needs it. Deliberately BEFORE hiding/ShowNext(): a callback that vetoes via KeepOpen() needs
+    // nothing touched yet -- not the RmlUi documents, not the native Mode::Text widget, not the queue.
     GenericDialogConfig cfg = std::move(m_Active);
-    if (primary)
+    switch (which)
     {
-        if (cfg.onPrimary) cfg.onPrimary();
-    }
-    else
-    {
-        if (cfg.onSecondary) cfg.onSecondary();
+    case ClickResult::Primary:   if (cfg.onPrimary)   cfg.onPrimary();   break;
+    case ClickResult::Secondary: if (cfg.onSecondary) cfg.onSecondary(); break;
+    case ClickResult::Cancel:    if (cfg.onCancel)    cfg.onCancel();    break;
     }
 
     if (m_bKeepOpenRequested)
@@ -411,9 +415,9 @@ void CGenericConfirmDialog::UpdateProgress()
     if (now >= m_dwProgressEndTime)
     {
         // Elapse-and-close; onPrimary (if set) stands in for the auto-close side effect. No
-        // onSecondary path exists for progress dialogs.
+        // onSecondary/onCancel path exists for progress dialogs.
         ::PlayBuffer(SOUND_CLICK01);
-        Resolve(true);
+        Resolve(ClickResult::Primary);
         return;
     }
 
@@ -443,13 +447,19 @@ bool CGenericConfirmDialog::Update()
     {
         m_bPrimaryClicked = false;
         ::PlayBuffer(SOUND_CLICK01);
-        Resolve(true);
+        Resolve(ClickResult::Primary);
     }
     else if (m_bSecondaryClicked)
     {
         m_bSecondaryClicked = false;
         ::PlayBuffer(SOUND_CLICK01);
-        Resolve(false);
+        Resolve(ClickResult::Secondary);
+    }
+    else if (m_bCancelClicked)
+    {
+        m_bCancelClicked = false;
+        ::PlayBuffer(SOUND_CLICK01);
+        Resolve(ClickResult::Cancel);
     }
 
     return true;
@@ -466,7 +476,7 @@ bool CGenericConfirmDialog::UpdateKeyEvent()
         if (mu::ui::window::IsPress(VK_RETURN))
         {
             ::PlayBuffer(SOUND_CLICK01);
-            Resolve(true);
+            Resolve(ClickResult::Primary);
             // Fully consumed -- see CGenericMenuDialog::UpdateKeyEvent()'s own copy of this
             // comment for why (this object now runs before CHotKey; !IsVisible() here could let
             // the same keypress also reach CHotKey the instant this dialog closes).
@@ -475,7 +485,10 @@ bool CGenericConfirmDialog::UpdateKeyEvent()
         else if (mu::ui::window::IsPress(VK_ESCAPE))
         {
             ::PlayBuffer(SOUND_CLICK01);
-            Resolve(m_Active.buttons == GenericDialogConfig::ButtonSet::Ok);
+            // Esc never triggers the real `secondary` action -- only dismiss semantics. Mirrors
+            // today's exact behavior: no cancel button configured means Esc acts like Primary
+            // (matches the old `ButtonSet::Ok` case), otherwise it's a genuine Cancel.
+            Resolve(m_Active.showCancel ? ClickResult::Cancel : ClickResult::Primary);
             return false;
         }
     }
@@ -577,13 +590,6 @@ void CGenericConfirmDialog::SyncRmlModel()
         m_RmlBinder.MarkDirty("lines");
     }
 
-    const bool showCancel = m_Active.buttons == GenericDialogConfig::ButtonSet::OkCancel;
-    if (model.showCancel != showCancel)
-    {
-        model.showCancel = showCancel;
-        m_RmlBinder.MarkDirty("show_cancel");
-    }
-
     const std::string primaryLabel = StringUtils::WideToNarrow(m_Active.primaryLabel.c_str());
     if (model.primaryLabel != primaryLabel)
     {
@@ -591,11 +597,30 @@ void CGenericConfirmDialog::SyncRmlModel()
         m_RmlBinder.MarkDirty("primary_label");
     }
 
-    const std::string secondaryLabel = StringUtils::WideToNarrow(m_Active.secondaryLabel.c_str());
+    const bool hasSecondary = m_Active.secondaryLabel.has_value();
+    if (model.hasSecondary != hasSecondary)
+    {
+        model.hasSecondary = hasSecondary;
+        m_RmlBinder.MarkDirty("has_secondary");
+    }
+    const std::string secondaryLabel = hasSecondary
+        ? StringUtils::WideToNarrow(m_Active.secondaryLabel->c_str()) : std::string();
     if (model.secondaryLabel != secondaryLabel)
     {
         model.secondaryLabel = secondaryLabel;
         m_RmlBinder.MarkDirty("secondary_label");
+    }
+
+    if (model.showCancel != m_Active.showCancel)
+    {
+        model.showCancel = m_Active.showCancel;
+        m_RmlBinder.MarkDirty("show_cancel");
+    }
+    const std::string cancelLabel = StringUtils::WideToNarrow(m_Active.cancelLabel.c_str());
+    if (model.cancelLabel != cancelLabel)
+    {
+        model.cancelLabel = cancelLabel;
+        m_RmlBinder.MarkDirty("cancel_label");
     }
 
     const bool hasTitle = !m_Active.title.empty();

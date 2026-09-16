@@ -1596,7 +1596,7 @@ void Action(CHARACTER* c, OBJECT* o, bool Now)
 								wchar_t szCryWolfText[256];
 								mu_swprintf(szCryWolfText, I18N::Game::ContractCanBeMadeForDTimes, state);
 								mu::ui::window::GenericDialogConfig cfg;
-								cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+								cfg.showCancel = true;
 								cfg.lines = {
 									{ szCryWolfText, false },
 									{ I18N::Game::WouldYouLikeToProceedWithTheContract, false },

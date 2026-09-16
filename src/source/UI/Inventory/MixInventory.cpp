@@ -993,7 +993,7 @@ bool CMixInventory::Mix()
         }
 
         mu::ui::window::GenericDialogConfig cfg;
-        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+        cfg.showCancel = true;
         cfg.lines = {
             { strText, true },
             { I18N::Game::DoYouWantToCombineYourItems, false },

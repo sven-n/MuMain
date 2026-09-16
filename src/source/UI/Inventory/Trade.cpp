@@ -117,7 +117,7 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
                         // Was CTradeZenMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text
                         // amount entry, same shape as every other zen-input dialog in this batch.
                         mu::ui::window::GenericDialogConfig cfg;
-                        cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                        cfg.showCancel = true;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade, false } };
                         cfg.input = mu::ui::window::GenericDialogConfig::InputField{};
                         cfg.input->mode = mu::ui::window::GenericDialogConfig::InputField::Mode::Text;
@@ -152,7 +152,7 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
                             // here (deliberate simplification, same call as the color-variant gap
                             // noted in docs/rmlui-ui-system/dialog-migration-plan.md).
                             mu::ui::window::GenericDialogConfig cfg;
-                            cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+                            cfg.showCancel = true;
                             for (int i = 0; i < 4; ++i)
                                 cfg.lines.push_back({ I18N::Game::Lookup(371 + i), true });
                             cfg.onPrimary = [this] { AlertTrade(); };
@@ -691,7 +691,7 @@ void CTrade::ProcessToReceiveTradeRequest(char* pbyYourID)
     CMultiLanguage::ConvertFromUtf8(m_szYourID, pbyYourID);
 
     mu::ui::window::GenericDialogConfig cfg;
-    cfg.buttons = mu::ui::window::GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.lines = {
         { m_szYourID, false },
         { I18N::Game::WouldLikeToTradeWithYou, false },

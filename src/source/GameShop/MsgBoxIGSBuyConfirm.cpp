@@ -22,7 +22,7 @@ void ShowIGSBuyConfirmDialog(int iPackageSeq, int iDisplaySeq, int iPriceSeq, WO
     mu_swprintf(szItemPeriod, I18N::Game::DurationS, pszPeriod);
 
     GenericDialogConfig cfg;
-    cfg.buttons = GenericDialogConfig::ButtonSet::OkCancel;
+    cfg.showCancel = true;
     cfg.title = I18N::Game::PurchaseConfirmation;
     cfg.lines = {
         { I18N::Game::DoYouWishToBuyTheFollowingItemS, false },

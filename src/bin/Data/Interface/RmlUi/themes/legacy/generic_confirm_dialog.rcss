@@ -277,17 +277,32 @@
 }
 
 /* top: 110dp = native's own vertical math for a fixed 160dp panel. Buttons stay the shared .btn
-   sprite with real bound text, not native's own baked OK/Cancel art -- labels are data-driven. */
-.btn.gcd-btn-primary, .btn.gcd-btn-secondary {
+   sprite with real bound text, not native's own baked OK/Cancel art -- labels are data-driven.
+
+   Three fixed, named-role slots (primary/secondary/cancel -- see GenericDialogConfig's own
+   comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
+   Cancel; `.gcd-btn-cancel` is today's original always-Cancel/Close slot (unchanged id meaning
+   from before this rename, just renamed from `.gcd-btn-secondary`). Paired-layout values below
+   are value-for-value identical to before this redesign -- zero visual change for every existing
+   Ok/OkCancel consumer, which always renders solo or paired (primary+cancel), never triple. */
+.btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
 	top: 110dp;
 	width: 54dp;
 	height: 30dp;
 }
 .gcd-btn-primary   { left: 30dp; }
 .gcd-btn-primary.solo { left: 88dp; }
-.gcd-btn-secondary { left: 146dp; }
+/* Paired: whichever of secondary/cancel is the sole second button sits in this one slot -- both
+   selectors share the position since only one is ever visible outside of `.triple`. */
+.gcd-btn-secondary, .gcd-btn-cancel { left: 146dp; }
+/* Triple (all three shown, e.g. Create/Decrease/Cancel) -- native's own `triwidth = panelWidth/3`
+   centering (CUseFruitCheckMsgBox::SetButtonInfo(), CustomMessageBox.cpp), each 54dp button
+   centered within its own 230dp/3 = 76.67dp third: primary ~11dp, secondary ~88dp, cancel ~165dp. */
+.gcd-btn-primary.triple { left: 11dp; }
+.gcd-btn-secondary.triple { left: 88dp; }
+.gcd-btn-cancel.triple { left: 165dp; }
 /* #panel.tall's buttons keep the same 20dp bottom margin the default 160dp panel already has
    (110 + 30 + 20 = 160). */
-#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary {
+#panel.tall .btn.gcd-btn-primary, #panel.tall .btn.gcd-btn-secondary, #panel.tall .btn.gcd-btn-cancel {
 	top: 190dp;
 }
