@@ -1,8 +1,9 @@
 # Retiring the CUIMng/CNewUIManager split
 
-Living document — update this, not the plan file, as phases land. See the architecture discussion
-that led here for the full reasoning; this doc tracks execution status and the gotchas found doing
-it, so the next phase doesn't rediscover them the hard way.
+**Status: complete.** All phases (0–6) plus the directory restructure below have landed — nothing
+in this document is still open. Kept as the execution record and gotcha reference for this
+merger, not as an active worklist; see [`STATUS.md`](STATUS.md) for what's still open across the
+UI architecture generally.
 
 ## Why
 
@@ -11,8 +12,8 @@ artifact of *when* each was written (`CNewUIManager` is Webzen's own `SEASON3B`-
 generation, built because `CUIMng`'s fixed-member design couldn't scale to that era's flood of new
 panels), not a live distinction — both serve the same current game. The goal is one window-object
 system, not two, with `CUIMng`'s windows migrating onto `CNewUIObj`/`CNewUIManager` one at a
-time, matching the incremental, independently-verified discipline the RmlUi migration
-(`docs/rmlui-ui-system/`) already established. Of the 11 windows `CUIMng` originally owned, one
+time, matching the incremental, independently-verified discipline the RmlUi migration (this
+directory) already established. Of the 11 windows `CUIMng` originally owned, one
 (`COptionWin`) turned out to be dead code rather than a migration candidate — see Phase 2 below.
 
 ## Design
@@ -236,7 +237,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
   z-order bugs surfaced when opening either while the login dialog was up:
   - **Credits opened on top of the login dialog's own panel, not behind it.** `CCreditWin`'s
     visuals are plain `CSprite`/`g_pRenderText` content (Phase 1), drawn in a C++ pass strictly
-    *before* RmlUi's own frame-final document render (`docs/rmlui-ui-system/README.md`'s "RmlUi
+    *before* RmlUi's own frame-final document render (`README.md`'s "RmlUi
     renders last") — `login.rml`'s own panel therefore always painted over it regardless of which
     was opened more recently, a cross-render-phase case no RmlUi-side z-index could fix (the two
     are sequential passes, not comparable layers). Fixed the same way as
@@ -433,7 +434,7 @@ time, matching the incremental, independently-verified discipline the RmlUi migr
 - **Phase 5 (rename cleanup) — done, 2026-09-05.** Dropped the "New"/`NewUI*` naming (`CNewUIObj`,
   `CNewUIManager`, `WindowObject.h`, the `INTERFACE_*` prefix, etc.) — it only ever meant "new relative
   to `CUIMng`", which stopped being a meaningful distinction once `CUIMng` was deleted in Phase 4.
-  Landed as two independently-rebuilt passes (`docs/rmlui-ui-system/building-new-ui.md` has the
+  Landed as two independently-rebuilt passes (`building-new-ui.md` has the
   full widget-toolkit map this came from):
   1. **Namespace extraction.** A blind `New*` strip isn't safe — `CNewUIButton`→`CButton` collides
      with `UI/Widgets/Button.h`'s already-existing `CButton`, `CNewUIRadioButton`→`CRadioButton`

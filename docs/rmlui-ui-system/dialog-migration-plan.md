@@ -2,17 +2,477 @@
 
 Tracked, resumable checklist for porting the ~137 remaining native confirm-dialog classes onto the
 `CGenericConfirmDialog` primitive (see `component-catalog.md`'s "Dialog" section for what the
-primitive supports, and `STATUS.md`'s "What's migrated" for how/why it was built). This file is the
-per-class worklist; `STATUS.md`'s "Tracked deferral" entry stays the short pointer to it.
+primitive supports, and `STATUS.md`'s "What's migrated" for how/why it was built). This file owns
+everything about this one migration now — both the per-class worklist below and (2026-09-16,
+merged in from `STATUS.md`'s own former "Tracked deferral" entry) the `GenericDialogConfig`
+feature-extension history right after this intro — rather than splitting the two across files that
+each pointed at the other.
 
-Primitive shape, as a reminder for what "FITS" means below: a fixed list of plain text lines (each
-optionally bold), and either an OK-only or OK+Cancel button set, with callbacks on click. No
-keypad, no progress bar, no 3D item preview, no 3+-button menus.
+Primitive shape at the time the per-class checklist below was classified, as a reminder for what
+"FITS" meant there: a fixed list of plain text lines (each optionally bold), and either an OK-only
+or OK+Cancel button set, with callbacks on click. No keypad, no progress bar, no 3D item preview,
+no 3+-button menus. **The primitive has since grown well past this baseline** — see the
+feature-extension history immediately below for everything added (`title`/`severity`/`input`/
+`progress`/`item3D`/`portrait2D`/`tallPanel`, and the `primary`/`secondary`/`cancel` button-role
+redesign) — but the checklist's own FITS/DOESNT_FIT calls were made against this original baseline
+shape and haven't been retroactively re-run against the grown primitive; a class marked
+DOESNT_FIT for, say, needing a 3rd button may fit today and is worth a second look before assuming
+the old verdict still holds.
 
 Full inventory pass done 2026-09-13 (`CommonMessageBox.h`/`.cpp` read in full; `CustomMessageBox.h`/
 `.cpp` characterized by sampling — see that section's own confidence note). Re-verify a class's
 `SetLayout()`/`Create()` at port time rather than trusting this list blindly if its shape looks
 even slightly off from the table — this is a starting point, not a guarantee.
+
+## Feature-extension history: `GenericDialogConfig` growth and the full native inventory
+
+A separate native subsystem from `UIControls.h`'s `CUIControl` family (tracked in
+`tracked-deferrals.md`) — don't conflate the two. `UI/Dialogs/CommonMessageBox.h`/
+`CustomMessageBox.h` together declare 150+ classes, 100% native, confirmed by a full-codebase
+inventory (2026-09-13). The primitive to port them onto now exists (`CGenericConfirmDialog`, see
+`STATUS.md`'s "What's migrated" for how/why it was built) and is proven on 3 of them. Summary by
+category (counts approximate, from the inventory pass, not re-verified per class) — the per-class
+checklist below ("Already ported" onward) is the live, resumable worklist itself:
+
+- **`CommonMessageBox.h`** — ~75 classes, ~64 `TMsgBoxLayout<CCommonMessageBox>` (or
+  `<C3DItemCommonMsgBox>`/`<CFenrirRepairMsgBox>`) feature-specific confirms spanning guild/quest/
+  trade/duel/castle-siege/events/gambling. **This entire file is now fully handled** (2026-09-13):
+  63 classes ported-and-deleted or confirmed-dead-and-deleted (3 proof-pass + 7 Guild + 10
+  Trade/shop/inventory + 25 Network/server + 14 Siege/castle/CryWolf + 4 dead-code), plus 5 of the 6
+  `C3DItemCommonMsgBox`-based classes now ported onto the primitive's `item3D` field
+  (`CHighValueItemCheckMsgBoxLayout` — 2 call sites, `CUseFruitMsgBoxLayout`,
+  `CUsePartChargeFruitMsgBoxLayout`, `CPersonalShopItemBuyMsgBoxLayout`, `CGambleBuyMsgBoxLayout`).
+  `CPersonalShopItemValueCheckMsgBoxLayout` stays native — it needs a numeric price-value field its
+  `CTextInputMsgBox` caller sets via `SetItemValue()`, which isn't designed yet. See
+  `dialog-migration-plan.md` for the per-class worklist. `CustomMessageBox.h` (~76 more classes,
+  separate file) is next.
+- **`GenericDialogConfig` extensions** — **done** (2026-09-13): optional `title`, `severity`
+  (Normal/Warning/Error, look-and-feel only), `input` (`InputField::Mode::Text`/`NumericKeypad`),
+  `progress` (duration-only auto-close), and `item3D` (an `ITEM` snapshot). One struct, not five
+  sibling classes.
+  - **Correction, 2026-09-13**: the first version rendered `item3D` via a plain `I3DRenderObj`/
+    `C3DRenderMng` registration (`Render3D()`), like every other legacy 3D icon. In-game testing
+    (5 classes ported onto `item3D`, see `CommonMessageBox.h` entry below) showed the item never
+    appeared — that path renders through `CManager::Render()`, which always finishes *before*
+    RmlUi's main-context composite, so the dialog's own opaque `#panel` background painted over it
+    every frame regardless of z-order.
+  - **Reverted, 2026-09-14**: tried moving `item3D` off `I3DRenderObj`/`Render3D()` onto a manually
+    invoked `RenderItem3DOnTop()` called from Winmain.cpp's `SetPostRmlUiCallback` instead (the
+    established "legacy content after RmlUi" seam `CMsgWin`/`CCharMakeWin`/`CLoginWin` already use
+    for native text overlays, just the first time asked to carry 3D content) — **twice**, and both
+    attempts crashed on dialog dismiss. The first crash's cause was found and genuinely fixed at the
+    renderer level (`MuRendererSDLGpu.cpp`'s post-RmlUi replay pass only re-staged vertex data,
+    leaving a skinned draw's bone-matrix buffer unstaged/undersized while `ReplayDrawCommand`'s
+    `boneDataReady` guard stayed stale-true — an out-of-bounds GPU read; fixed by reusing
+    `StageDeferredGpuData()`, which re-stages vertex/bone/strip-index/texture data together and
+    returns a correct `boneDataReady` — this fix is real and stays). That restored visibility and
+    (combined with a separate `PanelTranslateCorrection()` fix, below) correct position, but the
+    dismiss-time crash persisted regardless — a second, still-unidentified bug in the same seam.
+    Enabling SDL_GPU validation (Debug config) to localize it hit a *different* pre-existing
+    validation failure at startup, unrelated to this feature, blocking that route. Reverted back to
+    `I3DRenderObj`/`Render3D()` (stable; `item3D` renders correctly-positioned but behind the panel)
+    rather than ship a crash. `input`'s `Mode::Text` widget keeps its own `RenderTextOnTop()`
+    post-RmlUi method (pure 2D, never implicated in the crash, matches the already-proven pattern).
+    See `theming-and-modding.md`'s "RmlUi rendering strictly last in the frame" entry for the full
+    writeup.
+  - **Fixed for real, 2026-09-14**: the fg/bg RmlUi document split `CMainFrameWindow`/the
+    inventory-family windows already prove for their own live 3D icons. `generic_confirm_dialog`'s
+    own panel background art (the modern gradient/shell-edge/groove/content-well recipe, or
+    legacy's `newui_msgbox_*` sprite composite) moved wholesale into a new
+    `generic_confirm_dialog_bg.rml`/`.rcss` per theme. The original `generic_confirm_dialog.rml`/
+    `.rcss` document is now paint-*less* where the background used to be — same `#panel` id/size/
+    centering, just nothing left to cover the item once the background document has already
+    painted it earlier the same frame. Needed **no changes at all** to `Render3D()`/
+    `PanelTranslateCorrection()`/`I3DRenderObj` registration or the post-RmlUi seam — only where the
+    panel's own background art paints from, and (see below) exactly when.
+    - **Centering bug, 2026-09-14**: the first cut of `generic_confirm_dialog_bg.rcss` didn't link
+      `base.rcss` (per convention, no `*_bg.rml` does), but `base.rcss` is where `body { width:100%;
+      height:100%; }` comes from — without it, `#panel`'s `left:50%;top:50%` had a zero-sized
+      containing block to resolve against, collapsing the whole background panel to the screen's
+      upper-left corner. Fixed by adding that one `body` rule explicitly to both themes' `_bg.rcss`
+      (not by linking `base.rcss`, which would pull in a lot more than needed).
+    - **Cross-window bleed-through bug, 2026-09-14**: the first cut also loaded the new bg doc into
+      the SHARED `RmlUiRuntime::GetBackgroundContext()` (the same one `CNPCShop`/every inventory-
+      family window's own bg doc uses), driven by the existing `RenderBackgroundLayer()` hook (fired
+      once, globally, before the very first visible window/camera each frame). That fixed the
+      standalone case, but broke the moment this dialog opened over another bg-doc window with
+      native foreground content: since `RenderBackgroundLayer()` renders ALL currently-visible bg
+      docs together, once, strictly before EVERY window's own 2D `Render()` this frame — not just
+      this dialog's — `CNPCShop`'s own inventory-slot icons (drawn later, in its own `Render()`)
+      always painted over BOTH bg docs regardless of their relative order within that shared
+      context, bleeding through the dialog's panel wherever they geometrically overlapped. This is
+      exactly the case that matters most for `item3D` (sell-to-shop/gamble-buy confirms are almost
+      always shown over an open shop window). Tried reasserting the dialog's own bg doc's stacking
+      order every frame via `ElementDocument::PullToFront()` first — insufficient, since
+      `PullToFront()` only reorders documents *within* the one shared context; it can't make that
+      context's single global render pass happen *after* another window's own `Render()`.
+      **Actually fixed** by giving the dialog's own bg doc a dedicated THIRD context
+      (`RmlUiRuntime::GetDialogBackgroundContext()`), rendered by a separately-guarded
+      `RmlUiRuntime::RenderDialogBackgroundLayer()` that `CManager::Render()` fires at a *different*
+      point than `RenderBackgroundLayer()`: right before the first visible object whose
+      `GetLayerDepth()` reaches the shared 3D camera's own z-order (`INFORMATION_CAMERA_Z_ORDER`,
+      `Window3DRenderMng.h` — the same z-order `item3D` itself renders through). Since
+      `CManager::Render()` sorts every registered object by `GetLayerDepth()` (`CNPCShop` = 2.5f,
+      the shared 3D camera = 10.9f, this dialog's own 2D `Render()` = 60.0f) and calls each one's
+      `Render()` in that order, "right before the object at/past 10.9f" is guaranteed to be
+      strictly after every ordinary window's own `Render()` this frame and strictly before
+      `item3D` draws. Deliberately triggered from `CManager::Render()`'s own loop, NOT from inside
+      `Render3D()` itself — `C3DCamera::Render()` pushes a legacy GL matrix stack and enables depth
+      test/mask before looping over every registered object's `Render3D()`, and recording an RmlUi
+      render pass from inside that block is exactly the kind of mid-frame GPU-state interleaving
+      that crashed the `SetPostRmlUiCallback` attempts above; `CManager::Render()`'s own loop,
+      before any `(*vi)->Render()` call, is the same safe, pre-matrix-stack position
+      `RenderBackgroundLayer()` itself already uses.
+    - Simpler than both reference implementations either way: this dialog's `#panel` centers via
+      plain CSS (`.center-both`), never a per-frame C++-computed position, so its background
+      document needs no `RmlModelBinder` and no position-sync code at all (`CMainFrameWindow`/
+      `CNPCShop`'s own bg docs both need a small one, since their content is anchored to an
+      adjustable HUD-band/inventory-window position).
+  - **`PanelTranslateCorrection()`, 2026-09-14**: separately, `item3D`/`input`'s anchor position was
+    found to be wrong (rendering outside the panel) because `#panel`'s `.center-both` centering uses
+    `transform: translate(-50%,-50%)`, and RmlUi's `GetAbsoluteOffset()` doesn't apply CSS
+    `transform` at any level — every descendant of `#panel` reported its position as if the panel
+    were still sitting at its untranslated `left:50%;top:50%` spot. Fixed by subtracting half of
+    `#panel`'s own box size from the raw offset before converting to reference space; this fix is
+    independent of the `Render3D()`/`RenderItem3DOnTop()` back-and-forth above and stays either way.
+  - `title` and `item3D` gained their first real consumers via the `GameShop/MsgBoxIGS*.h` batch
+    (2026-09-14, see that entry below): `title` is now used by all 7 ported GameShop classes (its
+    first consumer of any kind), `item3D` grew from 5 (`CommonMessageBox.h`'s own
+    `C3DItemCommonMsgBox` family) to 7 (+`CMsgBoxIGSStorageItemInfo`/`CMsgBoxIGSGiftStorageItemInfo`).
+    `progress` still has zero consumers.
+  - **Layout bug found in-game (2026-09-14, via `$igs1`/`$igs2` test commands), fixed**: item3D
+    visually overlapped the body text, and always had (this predates the GameShop batch — same bug
+    on the already-shipped `CHighValueItemCheckMsgBoxLayout`/sell-expensive-item-to-NPC-shop
+    confirm). Root cause: native `C3DItemCommonMsgBox::Render3D()`/`RenderTexts()`
+    (`CommonMessageBox.cpp`) place the 40x40 icon at a fixed top-left offset with body text
+    starting to its *right* (`MSGBOX_TEXT_LEFT_BLANK_3DITEM`/`MSGBOX_TEXT_MAXWIDTH_3DITEM`,
+    `CommonMessageBox.h`) — icon and text side-by-side — but the RmlUi port put `#gcd_item3d_anchor`
+    in the same single centered flex *column* as `lines`, stacking them instead. Fixed by adding a
+    `has_item3d`-bound model field, moving `title`/`lines`/`input-row`/`progress-track` into a new
+    `.gcd-text-col` wrapper, and making `.gcd-body` a flex *row*: the anchor (hidden via
+    `data-class-hidden="!has_item3d"`, collapsing to nothing when absent) sits to the left,
+    `.gcd-text-col` fills the remaining width to its right — reproducing native's side-by-side
+    layout exactly. Also fixed a smaller pre-existing issue this exposed: the anchor was never
+    gated at all before, so every non-item3D dialog silently reserved an empty 40dp flex slot.
+  - **Long-text clipping, also found in-game (2026-09-14), fixed**: very long body text got clipped
+    with no visible way to read the rest — `.gcd-body`'s `overflow: auto hidden` was technically
+    already there, but this theme system has zero pre-existing scrollbar-decorator CSS anywhere
+    (RmlUi generates real `scrollbarvertical`/`slidertrack`/`sliderbar` elements for this, not
+    pseudo-elements, and without styling they're effectively invisible). Added minimal flat-color
+    scrollbar CSS to `.gcd-text-col` (the same wrapper from the item3D fix above, since overflow
+    now lives there instead of on `.gcd-body`) in both themes — no decorator images, matching this
+    dialog's own progress-bar/keypad styling. Considered dynamic panel resizing instead (more
+    native-like — `CMsgBoxIGSCommon` itself grows `m_iMsgBoxHeight` with content) but rejected: it
+    would require syncing height between this document and its own background document (currently
+    100% static, no data-model, deliberately kept that way — see the fg/bg split's own comment)
+    every time content changes, a bigger and riskier change to shared dialog infrastructure than a
+    self-contained scrollbar.
+  - **`title` upgraded from plain colored text to a real header banner (2026-09-14)**, matching
+    Login/`CSysMenuWin`'s own header-rail/hero-banner look instead of just a bold colored line —
+    requested after seeing the plain-text version in-game, then refined again after the user
+    supplied a full reference HTML/CSS mockup of this theme's "blackened iron/carved frame/crimson
+    title-strip/gold rivet" visual language and flagged two remaining gaps against it (see below).
+    `.gcd-title` (a flex child of `.gcd-text-col`) removed entirely, replaced with
+    `.gcd-header-rail`/`.gcd-header-title` — but the two themes now diverge structurally, not just
+    in paint, because the reference exposed a real per-theme asset difference (below).
+
+    **Modern**: kept the in-flow flex design from the first pass — `.gcd-body` became a flex
+    *column* of `[.gcd-header-rail, .gcd-content-row]` (the latter holding
+    `#gcd_item3d_anchor`+`.gcd-text-col`, i.e. everything `.gcd-body` used to flex-center directly);
+    the banner collapses to zero height when `!has_title`, so `.gcd-content-row`'s own
+    `flex:1 1 auto` claims the full box and untitled dialogs stay pixel-identical. `.gcd-header-rail`
+    copies `base.rcss`'s `.modern-header-rail` paint recipe (already matched the reference's own
+    `.window__header`/`.hero-banner` almost to the rgba value — both are clearly built from the same
+    tokens) but as an in-flow ~20dp element instead of an absolutely-positioned 38dp one;
+    `severity_error` recolors it toward `.modern-title-plate`'s crimson hero-banner palette,
+    `severity_warning` is an amber recolor of the same rail. The reference comparison caught one
+    real omission the first pass missed entirely: the rivet/stud hardware. This engine has no
+    `::before`/`::after` support (confirmed: zero real usages anywhere in `themes/*/`), so every
+    existing stud/rivet in this codebase (`.modern-joint`, `.login-hero-cap-left/right`) is a
+    literal sibling `<div>` — added the same way here: `.gcd-header-joint` (copy of `.modern-joint`,
+    13×13dp/-8dp scaled to 10×10dp/-6dp) + `.gcd-header-accent` (copy of `.modern-header-accent`)
+    for the plain/warning look, `.gcd-header-cap-left/right` (copy of `.login-hero-cap`, 11×11dp
+    scaled to 8×8dp) for the twin-stud crimson look, mutually exclusive via
+    `data-class-hidden="severity_error"` / `"!severity_error"` — mirrors `.modern-header-rail`'s own
+    documented "one rivet OR two side studs, never both" rule. Needed `position:relative` added to
+    `.gcd-header-rail` so these new absolutely-positioned children anchor to it, not `#panel`.
+
+    **Legacy**: the first pass built a flat-color CSS band here too, reasoning "no header-rail asset
+    exists to reuse" — wrong: the user pointed out a purpose-made sprite exists, and it does —
+    `newui_Message_03.tga` (`src/bin/Data/Interface/newui_Message_03.OZT`, 230×67, pixel-identical
+    size to the plain top-cap `newui_msgbox_top.tga` already used by `.gcd-bg-sprite-top`), loaded
+    natively as `CMessageBoxMng::IMAGE_MSGBOX_TOP_TITLEBAR` (`MessageBox.cpp:461`) and used by 12
+    `CustomMessageBox.cpp`/`CursedTempleEnter.cpp`/`CursedTempleResult.cpp` classes as a drop-in
+    top-cap swap whenever the box has a title, with text drawn over it — exactly the pattern
+    needed. Reused it directly: new `@spritesheet` in `generic_confirm_dialog.rcss` (legacy) sources
+    it as `msgbox-titlebar-image` (`0px 0px 230px 67px`); `.gcd-header-rail` (legacy) is now
+    `position:absolute; left:0;right:0;top:0;height:67dp;` with `decorator:image(...)`, a **direct
+    `#panel` child sibling of `.gcd-body`, not nested inside it** — lives in the *foreground*
+    document (not `generic_confirm_dialog_bg.rml`), since unlike item3D a title banner has no
+    compositing-order reason to sit behind anything, and an ordinary opaque foreground overlay
+    avoids adding a second data-model to the (deliberately static) background document.
+    `.gcd-header-title` sits over it at `top:10dp`, matching native's own
+    `(GetPos().x+10,GetPos().y+10)` title inset — well above `.gcd-body`'s own unrelated `top:35dp`
+    text offset, so no geometry conflict, no change to `.gcd-body` needed. No severity color
+    variants of the *art* (native has no colored-banner concept and this field has zero real
+    severity consumers today) — severity stays a text-color-only distinction, matching what
+    `.gcd-title.warning/.error` already did. This also meant reverting legacy's own
+    `.gcd-content-row` wrapper from the first pass (`.gcd-body` goes back to being the
+    item3D-anchor+`.gcd-text-col` row directly) — that indirection was only needed to share space
+    with an in-flow *painted* rail; a fixed-size sprite overlay outside `.gcd-body` entirely doesn't
+    need it. Modern's own `.gcd-content-row` structure is unaffected and still correct (matches the
+    reference's own header+body DOM shape). Build clean, both RmlUi verification scripts pass after
+    each pass. **Not yet in-game-tested** — same caution as `title` itself above.
+
+    **Follow-up pass (2026-09-14)**, after the user confirmed legacy's own banner looked right and
+    asked for a closer paddings/frames/shadows audit of modern against the reference: two Explore
+    passes over every relevant file turned up two separate, unrelated issues.
+
+    First, **the scrollbar from the fix above has never actually been able to render, in either
+    theme** — `.gcd-text-col`'s `overflow: auto hidden;` has the shorthand's `overflow-x, overflow-y`
+    argument order backwards (confirmed against `StyleSheetSpecification.cpp:337` and 7+ real usages
+    elsewhere in the vendored RmlUi tree, all correctly `hidden auto`). This engine only ever
+    instantiates a `scrollbarvertical` element when `overflow-y` is `Auto`/`Scroll`
+    (`Layout/ContainerBox.cpp:126-176`), never `Hidden` — so with the axes backwards, no scrollbar
+    was ever created regardless of text length; this was a real, always-reproducible bug, not a "not
+    tested with long enough text yet" gap. Fixed by swapping to `overflow: hidden auto;` in both
+    themes. Considered switching to dynamic dialog height instead (the user asked) but decided
+    against it once the actual bug was found — no bg/fg document sync risk this way, consistent with
+    why dynamic resizing was rejected for this dialog earlier.
+
+    Fixing the overflow order alone wasn't enough, though — once it built, the user reported the
+    scrollbar still didn't respond to clicks/drags at all. Root cause: `base.rcss`'s `body {
+    pointer-events: none; }` is inherited (`StyleSheetSpecification.cpp:386`,
+    `RegisterProperty(PropertyId::PointerEvents, "pointer-events", "auto", true, false)` — third arg
+    is `inherited`), and every genuinely-interactive element in this theme opts back in explicitly
+    (`.btn`, `.checkbox-row`, `#backdrop`, etc. all set their own `pointer-events: auto`) —
+    `.gcd-text-col` never did, so it (and, since RmlUi's generated `scrollbarvertical`/`slidertrack`/
+    `sliderbar` elements are real DOM children of it, the scrollbar itself) silently inherited
+    `none` all the way down and could never receive hover/mousedown/drag events, independent of the
+    overflow-order bug. Fixed by adding `pointer-events: auto;` directly to `.gcd-text-col` in both
+    themes. Confirmed via a separate investigation that no C++/application-side input plumbing was
+    ever needed here — `WidgetScroll`/`ElementScroll` (vendored, unmodified) handle scrollbar
+    generation and drag capture entirely internally once mouse events reach the element at all, and
+    this dialog's own document already proves that pipeline works (its OK/Cancel/keypad buttons use
+    the exact same `GetContext()`/`ProcessSdlEvent` path) — the blocker was purely this one missing
+    CSS property, not a missing hook.
+
+    Second, the paddings/shadows audit (scoped to this dialog's own files only — shared `base.rcss`
+    classes like `.btn` were checked and are already clean, zero changes) found real, confirmed
+    numeric mismatches against the reference, all in `themes/modern/`:
+    - `generic_confirm_dialog_bg.rcss`: three box-shadow rgba entries (`.gcd-bg-shell-edge` x2,
+      `.gcd-bg-groove` x1, `#panel` x1) had colored (non-black) highlight-line alphas rendering
+      ~3–4.5x more opaque than the reference intends (every pure-black entry in the same rules was
+      already a correct `round(alpha×255)` conversion — this wasn't a wholesale re-derivation, just
+      the colored entries); `#panel`'s own entry also had the wrong RGB triplet, not just alpha.
+      Fixed all four to the correct converted values. Also added the reference's subtle diagonal
+      noise texture (`repeating-linear-gradient`, present in the mockup's `.window`/`.window__body`
+      but missing here entirely) to `#panel` and `.gcd-bg-content-fill`.
+    - `generic_confirm_dialog.rcss`: added padding to `.gcd-body` (safe here specifically because
+      it's sized via anchored left/right/top/bottom edges, not an explicit width/height — this
+      engine has no box-sizing support, so padding on a `width:100%`/`height:100%` child would have
+      overflowed it instead, which is why the padding went on `.gcd-body` and not
+      `.gcd-content-row`/`.gcd-text-col` directly) — reference's confirm-dialog-specific
+      `.window__body{padding:20px 18px}` breathing room had no counterpart before this. Also gave
+      `.gcd-header-rail.error`'s title its own brighter gold (`#e1b94e`, matching the reference's
+      distinct `.hero-banner__title` color instead of reusing the plain rail's `text-warm` token),
+      and gave `.gcd-line` its own smaller `font-size`/`line-height` (previously just inherited
+      `#panel`'s 12dp default) matching the reference's own body-text-subtler-than-title hierarchy.
+      Left `.gcd-header-rail`'s own side margin/padding alone despite the reference having some
+      (`margin:7px 8px 0`/`padding:0 11px`) — same box-sizing hazard, not worth the risk for a
+      cosmetic-only gap. Left `.btn` sizing, the `.gcd-bg-groove` ring's existence, and the header
+      title's second (glow) text-shadow layer alone too — respectively: already provably correct,
+      a visual-identity call without a clear reference mandate, and an apparent single-shadow-only
+      engine limitation. Build clean, both RmlUi verification scripts pass. **Not yet in-game-tested.**
+
+    **In-game test results (2026-09-14)**: legacy's banner confirmed good, no changes needed there
+    again. The scrollbar still didn't respond to clicks/drags even after the overflow-order fix —
+    root cause was a second, unrelated bug: `base.rcss`'s `body { pointer-events: none; }` is
+    inherited (`StyleSheetSpecification.cpp:386`), and every real interactive element in this theme
+    opts back in explicitly (`.btn`, `.checkbox-row`, `#backdrop`, ...) — `.gcd-text-col` never did,
+    so it and its generated scrollbar children silently inherited `none` and couldn't receive any
+    mouse events, independent of the overflow fix. Fixed with `pointer-events: auto;` on
+    `.gcd-text-col` in both themes. Confirmed separately that no C++/application-side input
+    plumbing was ever needed — `WidgetScroll`/`ElementScroll` (vendored, unmodified) handle
+    scrollbar generation and drag capture entirely internally once mouse events reach the element,
+    and this dialog's own OK/Cancel/keypad buttons already prove that pipeline works for this exact
+    document/context. Also recolored both themes' scrollbar thumbs on request: legacy from gold
+    (`#ffd23c`) to a dark neutral gray (`#4a4a45`, hover/active `#6e6e66`); modern from the gold
+    accent (`token(accent-gold)`/`token(text-warm)`) to the same steel-gray palette as the header
+    rail (`token(metal-edge)`/`token(metal-highlight)`, track `token(metal-rail-dark)`) instead of
+    gold, tying it visually to the header hardware rather than the progress-bar/accent language.
+
+    **Follow-up frame/padding pass (2026-09-14)**, focused specifically on frame geometry (borders,
+    corner radius, inset rings) and content-to-container padding, per the user's request. A third
+    Explore pass found corner radius, the inner groove ring inset (4dp), and the outer shell edge
+    inset (-3dp) all already exactly matched the reference — no changes there. The one real,
+    confirmed gap: `.gcd-body`'s own comment already documented the target
+    (`.confirm-dialog .window__body{padding:20px 18px}`) but the shipped padding was still the
+    original conservative `4dp 6dp`. Fixed to `6dp 18dp` — horizontal matches the reference
+    directly, but vertical deliberately stays far short of 20dp: this box's height is a fixed 96dp
+    (not auto-sized to content like the reference's own window), and the item3D+title combination
+    (7 ported classes use both together) needs header-rail (20dp+4dp margin) + item3D's own fixed
+    40dp icon height just to fit — 20dp vertical padding would leave only 12dp for everything else,
+    too tight for that combination; 6dp leaves 32dp, still workable. `.gcd-header-rail`'s own
+    margin/padding (reference: `margin:7px 8px 0`/`padding:0 11px`) stays unset, same `width:100%`-
+    plus-no-box-sizing hazard as before — it already gets an equivalent inset for free now via
+    `.gcd-body`'s own larger padding. Build clean, both RmlUi verification scripts pass.
+
+    **In-game test (2026-09-14) found this `6dp 18dp` padding wrong — corrected to `2dp 3dp`.**
+    Screenshot showed the "Gift Confirmation" dialog's content floating with clearly too much
+    margin from the panel edges, clipping/scrolling harder than before. Root cause: `.gcd-body`'s
+    pre-existing `left/right:16dp` already plays the exact role of the reference's own
+    `.window__body{margin:6px 8px 8px}` (outer inset from the panel edge to the content well — kept
+    in sync with `.gcd-bg-content-fill`, per that file's own comment) — and at 16/230≈7% of this
+    panel's width, it was *already* more generous than the reference's own 8/320≈2.5%. Copying the
+    reference's `padding:20px 18px` on top of that double-counted the inset: combined ≈15% per
+    side vs. the reference's own combined (margin+padding) ≈8% — and because this panel is a fixed
+    160dp (not auto-height like the reference's own window, which just grows to absorb its
+    padding), that excess came directly out of an already-scarce fixed content budget instead of
+    being absorbed by a taller window. Corrected to a much smaller `2dp 3dp` — sized to close the
+    gap to the reference's ~8% *combined* target given `.gcd-body`'s own inset already covers most
+    of it, not to re-add the reference's own padding figure a second time. Build clean, both RmlUi
+    verification scripts pass.
+
+    **Second in-game test (2026-09-14) — 3 more corrections**, from a screenshot of the
+    "Gift Confirmation" dialog: (1) `.gcd-body`'s padding was *still* too much even at `2dp 3dp` —
+    tightened further to a flat `1dp`, relying almost entirely on the pre-existing `left/right:16dp`
+    outer inset rather than adding a second, independent one. (2) The header rivet
+    (`.gcd-header-joint`) "not accurately positioned" — root cause: it was a scaled-down guess
+    (10×10dp/`top:-6dp`/`margin-left:-5dp`) instead of `.modern-joint`'s (`base.rcss`) own proven,
+    already-shipped values; restored to the exact original 13×13dp/`top:-8dp`/`margin-left:-6.5dp`
+    (same fix applied to `.gcd-header-accent` and the twin `.gcd-header-cap` studs — both restored
+    to their own source classes' exact sizes instead of scaled-down guesses). (3) The header banner
+    itself was too small next to the reference — `.gcd-header-rail`'s height grew from a scaled-down
+    20dp to `.modern-header-rail`'s own full 38dp (`.gcd-header-title`'s `font-size` likewise grew
+    from 11dp to `.modern-header-title`'s own 13dp), and — per the user's explicit go-ahead — rather
+    than let that shrink the content area, `#panel` itself grew from 160dp to 178dp (+18dp, exactly
+    matching the rail's own +18dp growth) in *both* `generic_confirm_dialog.rcss` and
+    `_bg.rcss` (kept in sync, per that pair's own standing requirement) — `.gcd-body`'s `top`/
+    `bottom` stayed the same 10dp/54dp, so the entire +18dp becomes new content-area height, not a
+    wash. `.gcd-footer`/the button row's own `top` values shifted +18dp to match (both are
+    `top`-anchored, not `bottom`-anchored, so they'd otherwise have stayed put while the panel's
+    bottom edge moved away from them). Legacy theme is unaffected by any of this — its panel is
+    sprite-asset-sized (230×160, tied to real `newui_msgbox_*`/`newui_Message_03` art) and was
+    already confirmed correct; only modern's fully CSS-painted panel is free to resize. Confirmed
+    `GenericConfirmDialog.cpp`'s own `PanelTranslateCorrection()` (used for the item3D/anchor
+    position pipeline) reads `#panel`'s live computed box size at runtime rather than a hardcoded
+    constant, so this resize needed no C++ changes. Build clean, both RmlUi verification scripts
+    pass.
+
+    **Third in-game test (2026-09-14) — one more correction**, from a screenshot of the
+    "Buff Item Use Confirmation" dialog: a large empty gap appeared between the header and the
+    first line of body text, with the text floating roughly centered in the leftover space rather
+    than sitting right below the header. Root cause: `.gcd-body { justify-content: center; }`
+    centers the `[.gcd-header-rail, .gcd-content-row]` group as a whole within the box — fine when
+    there's no header (matches the reference's own `.confirm-dialog` single-message-centering
+    intent) but wrong once a real 38dp header is competing for space, since `.gcd-content-row`'s
+    own `flex:1 1 auto` doesn't reliably claim exactly 100% of the remaining space in every case
+    this engine's flex implementation has been tested against — with the group's rendered size
+    smaller than the box, centering left the large gap under the header. Fixed with a
+    `data-class-has-title="has_title"` binding on `.gcd-body` (same pattern as every other
+    conditional class in this dialog) and a new `.gcd-body.has-title { justify-content: flex-start;
+    }` override — content now starts right after the header's own `margin-bottom` regardless of
+    how much space `.gcd-content-row`'s flex-grow actually claims, robust either way. Untitled
+    dialogs are unaffected (still centered, `has-title` never applies). Legacy is unaffected too —
+    its header lives outside `.gcd-body` entirely as a `#panel`-level sprite overlay, never part of
+    this flex group. Build clean, both RmlUi verification scripts pass.
+
+    **Fourth in-game test (2026-09-14) — the flex-start fix wasn't it either.** User: "text
+    contents [are] too far down. They still don't look centered." The `flex-start` change fixed the
+    big gap but as a side effect gave up centering entirely (content now hugs the top of whatever
+    space is left instead of centering within it) — not what was wanted; the actual ask was for
+    text to center within the space *below* the header, not within the whole box including the
+    header, and not hug the top either. Real fix: took `.gcd-header-rail` out of the flex flow
+    entirely (`position:absolute; left:0;right:0;top:0;` in `.gcd-body`'s own box, no longer a flex
+    sibling of `.gcd-content-row`) and reverted `.gcd-body.has-title` from `justify-content:
+    flex-start` to `padding-top: 42dp` (38dp header height + 4dp gap) instead. With the header out
+    of the flex flow, `.gcd-content-row` goes back to being `.gcd-body`'s *only* flex child, so its
+    own `justify-content: center` (unconditional again, no `has-title` override needed for it)
+    centers content within whatever space `padding-top` leaves below the header — not a
+    `[header, content-row]` group centered as a unit (the original bug: put the group's midpoint
+    below the true midpoint of the remaining space, since the header's height counted toward what
+    was being centered), and not hugging the top either (the `flex-start` attempt's own overshoot).
+    This also stops depending on `.gcd-content-row`'s `flex-grow` reliably claiming exactly 100% of
+    remaining space at all — with only one flex child, centering it is a much simpler, safer flex
+    scenario than balancing two. Untitled dialogs, whose `.gcd-body` never gets the `has-title`
+    class, are unaffected; legacy is unaffected for the same reason as the previous entry. Build
+    clean, both RmlUi verification scripts pass. **Not yet in-game-tested against this
+    correction.**
+  - `input.Mode::Text` has 9 and `input.Mode::NumericKeypad` has 3 (as of 2026-09-14 --
+    see `dialog-migration-plan.md`'s "Text input"/"Numeric keypad" entries) -- every unconsumed field
+    still defaults to unset, so pre-existing call sites are unaffected. `Mode::NumericKeypad`
+    is in-game-tested and confirmed working (2026-09-15). See `dialog-migration-plan.md`'s
+    own entry for what's deliberately out of scope (the older `g_iChatInputType == 0` input path;
+    input-row/keypad/progress-bar layout geometry not yet visually verified against a real
+    consumer). Porting `input.Mode::Text` also surfaced a real primitive gap, now closed:
+    `CGenericConfirmDialog::KeepOpen()`, letting `onPrimary`/`onSecondary` veto a click's
+    `Resolve()` (native's own `CALLBACK_CONTINUE` convention for invalid input) -- see that entry
+    for the full writeup. In-game-tested and confirmed working (2026-09-14) after fixing one bug
+    found only by that testing: the field was invisible at first (opaque-black default text color
+    against this dialog's own dark panel, the same gotcha `CharMakeWin.cpp` already hit and
+    documented) -- fixed with the same light-cream text color `LoginWin.cpp`/`CharMakeWin.cpp` use,
+    plus a visible dark recessed background fill since this dialog's anchor has no native sprite
+    frame of its own to give the field a visible affordance.
+- **`CustomMessageBox.h`** — ~76 classes on the same pattern. **2 done** (2026-09-13):
+  `CDialogMsgBoxLayout`/`CDialogMsgBox` (the one near-miss that already fit as-is) and
+  `CreateOkMessageBox()` (a third, previously-untracked OK-only helper, ~90 call sites migrated via
+  one function-body change). The rest: keypad/numeric-entry boxes and text-input boxes (both now
+  unblocked by the extensions above, not yet ported), fruit/gem-integration confirms, the in-game
+  system-menu box (distinct from the already-ported `CSysMenuWin`), event result screens (Blood
+  Castle/Devil Square/Chaos Castle), duel challenge/result, progress-bar modals (also now unblocked),
+  and ~46 `T*MsgBoxLayout<...>` wrappers.
+- **`CUIPopup`** (`UI/Dialogs/UIPopup.h`, `g_pUIPopup`) — **done** (2026-09-13). Every real
+  `POPUP_OK`/`POPUP_YESNO` call site (9 live across `Guild/UIGuildInfo.cpp`,
+  `Guild/UIGuildMaster.cpp`, `Network/Server/WSclient.cpp`) ported to `CGenericConfirmDialog`; one
+  dead `POPUP_YESNO` site (`CUIGuildMaster::ReceiveGuildRelationShip`, superseded by
+  `CGuildInfoWindow`'s own earlier port) deleted outright. `CUIPopup` itself is **not** deleted —
+  one live `POPUP_CUSTOM` site (`UIGuildInfo.cpp`'s "Appoint" picker) is a bespoke multi-option menu
+  out of scope, same as the multi-option `CustomMessageBox.h` classes below. See
+  `dialog-migration-plan.md` for the full per-call-site breakdown.
+- **`GameShop/MsgBoxIGS*.h`** — **done** (2026-09-14). Re-inventoried all 11 files (1 base class used
+  directly + 10 "subclasses", actually independent copy-paste siblings, not real inheritance):
+  7 ported (`CMsgBoxIGSCommon` — factored into a shared `CreateOkMessageBoxWithTitle()` helper next
+  to `CreateOkMessageBox()`, ~50 call sites, mostly `WSclient.cpp`'s cash-shop response handlers;
+  `CMsgBoxIGSBuyConfirm`, `CMsgBoxIGSUseBuffConfirm`, `CMsgBoxIGSUseItemConfirm`,
+  `CMsgBoxIGSSendGiftConfirm` — plain `title`+`lines`+`OkCancel`; `CMsgBoxIGSStorageItemInfo`/
+  `CMsgBoxIGSGiftStorageItemInfo` — `title`+`item3D`, the first non-`C3DItemCommonMsgBox` consumers
+  of `item3D`, built from a minimal `ITEM{.Type=wItemCode}` snapshot since these are virtual
+  cash-shop items with no real level/excellent/ancient state), 1 confirmed dead and deleted
+  (`CMsgBoxIGSDeleteItemConfirm` — zero call sites anywhere), 2 staying native
+  (`CMsgBoxIGSBuyPackageItem`/`CMsgBoxIGSBuySelectItem` — genuine Buy/Present/Cancel 3-button shape
+  plus a scrollable/selectable list box, same DOESNT_FIT category as the multi-option menus
+  elsewhere) plus `CMsgBoxIGSSendGift` staying native for a different reason (needs two simultaneous
+  text-entry fields — recipient name + separate multiline message — a real, documented
+  `GenericDialogConfig` gap, not designed yet). The 3 still-native classes' own Buy/Present/error
+  button handlers were updated to call the newly-ported free functions where the class they used to
+  construct was deleted. Build clean (zero new warnings) and both RmlUi verification scripts pass.
+  One incidental bug found and fixed while porting: `WSclient.cpp` relied on an accidental file-scope
+  `using namespace mu::ui::window;` that leaked in via the now-deleted `MsgBoxIGSCommon.h`'s own
+  (unwrapped) using-directive — replaced with an explicit `using namespace mu::ui::window;` in
+  `WSclient.cpp` itself rather than re-relying on a transitive leak. **In-game-tested and confirmed
+  working (2026-09-15)** — this was `title`'s first real exercise (see the extensions entry above)
+  and `item3D`'s first non-`C3DItemCommonMsgBox` use.
+- **Duel dialogs** (`CDuelMsgBoxLayout`/`CDuelResultMsgBoxLayout`) — **done** (2026-09-15). Both
+  render a fixed native sprite (`newui_DuelWindow.tga`, 148x138) with a caption drawn on top of it,
+  then a few lines of body text — a shape only these two classes use anywhere, distinct from
+  `item3D`'s live-rendered 3D icon. Added `GenericDialogConfig::Portrait2D` for it (`Overlay`:
+  caption on the sprite, matching native; `Beside`: icon-left/text-right like `item3D`, no consumer
+  yet), named generically rather than duel-specific since the primitive itself isn't. Also added
+  `GenericDialogConfig::tallPanel`: grows `#panel` (both fg/bg documents, both themes) via a "tall"
+  CSS class instead of relying on `.gcd-text-col`'s scrollbar, for content that doesn't comfortably
+  fit the default height (a `Portrait2D`, or `Mode::NumericKeypad`'s digit pad) where scrolling
+  mid-interaction is bad UX — applied to both Duel dialogs and the 3 vault-PIN keypad dialogs. The
+  bg document has no data model of its own, so its `#panel` picks up the "tall" class imperatively
+  from `Show()`/`ShowNext()` instead of a binding. In-game-tested and confirmed working, both themes.
+- **Misc**: `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) are dialog-shaped but
+  don't fit the confirm-box mold at all (help overlay, per-window popup menu, command picker) —
+  out of `CGenericConfirmDialog`'s scope entirely, would need their own primitives if ported.
+
+Not blocked on anything — each of the ~137 remaining classes is an independent, same-shape port
+(config data, not new code) for the plain-text OK/OK-Cancel ones; the keypad/progress/3D-preview
+variants need their own scoped extension to `GenericDialogConfig` first, proven the same way this
+pass proved the plain-text shape before being applied broadly.
 
 ## Already ported (proof pass, done)
 
@@ -203,7 +663,7 @@ real consumer — expect to need tuning once the first class using each field is
 
 **`item3D` is now proven end-to-end (2026-09-14)**, both the primitive and its rendering: the 5
 `C3DItemCommonMsgBox`-derived classes below all consume it, in-game-tested (both themes) after
-fixing 4 real bugs surfaced only by that testing — see `STATUS.md`'s own entry for the full
+fixing 4 real bugs surfaced only by that testing — see `engine-findings.md` for the full
 writeup, summarized: a CSS cascade-tie hiding bug, an anchor `position:absolute` flex-flow bug, a
 `GetAbsoluteOffset()`-ignores-`transform` positioning bug (`PanelTranslateCorrection()`), and —the
 big one— item3D rendering invisibly *behind* the dialog's own opaque panel background, since
@@ -429,7 +889,7 @@ before starting real work here; don't trust the exact class list below as final.
   legacy-theme back-fill sprite, a content-vs-title-banner layout gap in both themes, and (the
   significant one) `CGenericMenuDialog`/`CGenericConfirmDialog` losing the Esc keypress to
   whatever plain window happened to sort ahead of them under `CManager::CompareKeyEventOrder`'s
-  real descending sort -- see STATUS.md's "Findings worth knowing" for that last one. All 10
+  real descending sort -- see `engine-findings.md` for that last one. All 10
   dialogs (this proof-of-concept plus the 9 below) now close correctly via Esc even with other
   windows open behind them, and Esc on Cancel/Exit runs the same side-effecting lambda as clicking
   that button (verified via `ShowChaosMixMenuDialog()`'s `cfg.onCancel`).
@@ -573,8 +1033,8 @@ before starting real work here; don't trust the exact class list below as final.
   **`title` upgraded from plain colored text to a real header banner (2026-09-14, after this batch's
   own in-game testing)** — `.gcd-title` replaced by `.gcd-header-rail`/`.gcd-header-title`, styled
   like Login/`CSysMenuWin`'s own header-rail/hero-banner rather than a bold text line, colored per
-  `severity`. See `STATUS.md`'s own entry (next to the item3D/scrollbar fixes above) for the full
-  layout writeup — no `GenericDialogConfig`/C++ changes, purely an `.rml`/`.rcss` restructure.
+  `severity`. See the feature-extension history above (next to the item3D/scrollbar fixes) for the
+  full layout writeup — no `GenericDialogConfig`/C++ changes, purely an `.rml`/`.rcss` restructure.
 
   Every button in this family renders as literal `I18N::Game::OK`/`Cancel` text (grep-checked) — no
   `primaryLabel`/`secondaryLabel` overrides needed anywhere. Every native `Initialize()` builds its
@@ -616,9 +1076,11 @@ before starting real work here; don't trust the exact class list below as final.
   - **Confirmed dead, deleted (1 class)**: `CMsgBoxIGSDeleteItemConfirm` — zero call sites anywhere
     (grep-confirmed), not ported.
   - **Stay native, out of scope (3 classes)**: `CMsgBoxIGSBuyPackageItem`/`CMsgBoxIGSBuySelectItem`
-    — genuine `Buy`/`Present`(Gift)/`Cancel` 3-button shape (`ButtonSet` only has `Ok`/`OkCancel`)
-    plus a scrollable/selectable description or price-tier list box (`lines` is static text, no
-    interactive-list concept) — same DOESNT_FIT category as the multi-option menus elsewhere.
+    — genuine `Buy`/`Present`(Gift)/`Cancel` 3-button shape (`ButtonSet` only had `Ok`/`OkCancel` at
+    the time; the button-role redesign below removed this specific blocker, see `secondaryLabel`/
+    `showCancel`) plus a scrollable/selectable description or price-tier list box (`lines` is static
+    text, no interactive-list concept) — the list-box gap is the same DOESNT_FIT category as the
+    multi-option menus elsewhere, and still keeps these 2 classes native.
     `CMsgBoxIGSSendGift` — needs two simultaneous text-entry fields (single-line recipient ID +
     separate multiline message) at once; `GenericDialogConfig.input` is a single
     `std::optional<InputField>` — a genuine, documented primitive gap, not improvised around. All 3
@@ -644,6 +1106,44 @@ before starting real work here; don't trust the exact class list below as final.
 - **Explicitly out of scope for `CGenericConfirmDialog`** (would need their own primitives if ever
   ported): `CHelpWindow`, `CWindowMenu`, `CChatCommandWindow` (`UI/Dialogs/`) — help overlay,
   per-window popup menu, command picker; none are confirm-dialog shaped.
+
+## Button model redesign: `primary`/`secondary`/`cancel` roles — done (2026-09-16)
+
+`GenericDialogConfig`'s old `ButtonSet::Ok`/`OkCancel` enum only supported one action plus a fixed
+"Cancel" second slot, blocking any dialog with a genuine third named button (`CUseFruitCheckMsgBox`'s
+`item3D` + `[Create] [Decrease] [Cancel]`; also the reason `CMsgBoxIGSBuyPackageItem`/
+`CMsgBoxIGSBuySelectItem` above stayed native). Replaced with three fixed, role-named slots instead
+of two positional ones: `primaryLabel`/`onPrimary` (always shown, free-form label), optional
+`secondaryLabel`/`onSecondary` (a real second action — Decrease/Gift/Discard, never Esc-bound), and
+`showCancel`/`cancelLabel`/`onCancel` (always dismiss semantics, fires on Esc, text overridable).
+Still exactly 3 fixed slots, not an arbitrary list — stays out of `CGenericMenuDialog`'s territory.
+
+Mechanically swept all ~70 existing `ButtonSet::OkCancel` call sites to `showCancel = true` (zero
+behavior change — `ButtonSet::Ok` needed no change at all, it's the default) plus the one explicit
+`ButtonSet::Ok` assignment (`WSclient.cpp`, deleted outright as redundant). `UIGuildInfo.cpp`'s 4
+Yes/No confirms, which repurposed the old "secondary" slot's text as `No`, were renamed to
+`cancelLabel = I18N::Game::No` specifically — leaving them as `secondaryLabel` under the new meaning
+would have silently added a real (unwanted) second button alongside Cancel.
+
+Button-row RML/RCSS (both themes) grew a third `#gcd_btn_cancel` element (today's original Cancel
+slot, renamed) alongside the new `#gcd_btn_secondary`, with `solo`/`triple` layout classes computed
+from `has_secondary && show_cancel`; the existing 2-button `paired` position values are untouched
+(`.gcd-btn-secondary`/`.gcd-btn-cancel` share the same left offset when only one of them is visible),
+so every pre-existing consumer renders pixel-identical to before. `.triple` (all 3 shown) uses new
+position values derived from native's own `triwidth = panelWidth / 3` centering
+(`CUseFruitCheckMsgBox::SetButtonInfo()`) — not yet visually tuned in-game.
+
+**First (and so far only) `.triple` consumer: `CUseFruitCheckMsgBox` migrated and deleted.**
+`InventoryActionController.cpp`'s existing "Do you want to use the fruit?" confirm (`item3D` +
+Ok/Cancel, already on `CGenericConfirmDialog`) now chains a second `Show()` from its own `onPrimary`
+instead of opening the native box: `primaryLabel = Create`/`onPrimary` sends the add-points request,
+`secondaryLabel = Decrease`/`onSecondary` sends the remove-points request, `showCancel = true`
+(default "Cancel", no-op). `byIndex` is looked up fresh inside each callback via
+`g_pMyInventory->GetStandbyItemIndex()`, matching native's own `AddBtnDown`/`MinusBtnDown` exactly;
+`item3D` is the same `ITEM` snapshot already captured by the first dialog's own `cfg.item3D`, copied
+into the closure rather than re-read from the original `ITEM*` (which doesn't outlive the callback).
+`CUseFruitCheckMsgBox`/`CUseFruitCheckMsgBoxLayout` deleted from `CustomMessageBox.h/.cpp` outright,
+zero remaining references. Not yet in-game-tested.
 
 ## How to use this file
 

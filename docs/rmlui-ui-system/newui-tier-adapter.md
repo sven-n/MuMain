@@ -3,7 +3,7 @@
 How to port an in-game HUD/`mu::ui::window::CObject`-tier window to RmlUi. This is a *different* tier from every
 other document in `rmlui-ui-system/` — `mu::ui::window::CObject`/`mu::ui::window::CManager`, not `CWin`/`CSceneUICoordinator` — with its
 own base class, its own lifecycle, and its own input-gating mechanism. Read this before touching
-any window on that tier (as of `docs/newui-legacy-merger.md`'s directory restructure, these live
+any window on that tier (as of `newui-legacy-merger.md`'s directory restructure, these live
 in topic folders directly under `UI/` — `UI/HUD/`, `UI/Inventory/`, etc. — not one `UI/NewUI/`
 folder); the `CWin`-tier docs (`README.md`, `theming-and-modding.md`,
 `layout-and-scaling.md`) still apply for RML/RCSS content itself, just not for how the C++ side
@@ -24,10 +24,10 @@ its `IsCursorOnUI()` didn't need a *new* mechanism added the way this tier did �
 already existed via `CursorInWin()`, it just needed its rect kept in sync with the RmlUi visuals
 (see `layout-and-scaling.md`'s `CalculateFixedAnchorLayout()` story). **Don't read "already
 existed" as "already reliable"**: `CursorInWin()`'s rect going stale was the mechanism behind
-several confirmed bugs in this same `CWin` tier (`STATUS.md`'s click-activation finding) — the
-comparison here (this tier needed a new flag, `CWin`-tier didn't) still holds. Those specific bugs
-are fixed and the list-driven activation dispatch that caused them was later deleted outright
-(`STATUS.md`'s "Update, 2026-09-05" note); `CalculateFixedAnchorLayout()`'s own hand-duplicated
+several confirmed bugs in this same `CWin` tier (`engine-findings.md`'s click-activation finding) —
+the comparison here (this tier needed a new flag, `CWin`-tier didn't) still holds. Those specific
+bugs are fixed and the list-driven activation dispatch that caused them was later deleted outright
+(`engine-findings.md`'s "Update, 2026-09-05" note); `CalculateFixedAnchorLayout()`'s own hand-duplicated
 rect-sync is the one piece of this that's still a real, open reliability concern, not a solved
 detail.
 The `mu::ui::window::CObject` tier has none of that: a different base class (`mu::ui::window::CObject`, not `CWin`), a different manager
@@ -101,7 +101,7 @@ system could plausibly add another.
    real scene-transition points (each `g_*Win` global's own `Show()`, driven by
    `CSceneUICoordinator::CreateLoginScene()`/`CreateCharacterScene()`/`CreateMainScene()`/
    `Release()` — the generic `ShowWin()`/`HideWin()` pair this used to go through on `CUIMng`'s own
-   window list was confirmed dead and deleted outright in `docs/newui-legacy-merger.md`'s Phase 4,
+   window list was confirmed dead and deleted outright in `newui-legacy-merger.md`'s Phase 4,
    once every window it would have applied to had migrated off that list). Its `Update()`/`Render()` are
    themselves only ever *called* during `MAIN_SCENE` (`MainScene.cpp`) — before any `mu::ui::window::CObject`
    window owned an RmlUi document, that call-site gate was already a complete visibility gate on
@@ -144,21 +144,22 @@ member/accessor/macro that referenced it, updated to match (`INTERFACE_MU_HELPER
 `mu::ui::window::CObject` base class/tier boundary itself — that's structural (touches the ~88 other
 still-unported `mu::ui::window::CObject` windows' shared machinery), not a per-class naming choice, and stays
 premature with only 2 pilots. (The physical file location piece of this deferral was resolved
-separately by the `UI/` directory restructure — `docs/newui-legacy-merger.md`, 2026-09-05 — these
-windows now live in `UI/HUD/` etc., not `UI/NewUI/HUD/`.) See [`STATUS.md`](STATUS.md)'s "Tracked
-deferral" section for the full reasoning on the base-class/tier piece that remains.
+separately by the `UI/` directory restructure — `newui-legacy-merger.md`, 2026-09-05 — these
+windows now live in `UI/HUD/` etc., not `UI/NewUI/HUD/`.) See
+[`tracked-deferrals.md`](tracked-deferrals.md)'s "Tracked deferral" section for the full reasoning
+on the base-class/tier piece that remains.
 
 **One exception that was meant to apply here, overtaken by a blanket rename**: when a legacy file
 welds multiple classes together and a single pass only ports some of them, renaming just the
 ported one leaves the file's still-legacy residents mismatched for the remaining phases —
 `CMainFrameWindow` (ported) sharing a file with still-fully-legacy `CSkillList`/`CItemHotKey` was
 meant to be the concrete case this exception protected, deferring `CNewUIMainFrameWindow`'s own
-rename until Phase 3. In practice, `docs/newui-legacy-merger.md`'s Phase 5 mechanical prefix-drop
+rename until Phase 3. In practice, `newui-legacy-merger.md`'s Phase 5 mechanical prefix-drop
 (2026-09-05) renamed every `CNewUI*`/`INewUI*` identifier in the tier in one blanket pass, with no
 per-file carve-out — so `CNewUIMainFrameWindow`, `CNewUISkillList`, and `CNewUIItemHotKey` all
 became `CMainFrameWindow`/`CSkillList`/`CItemHotKey` anyway, incidentally, alongside the ~88 other
-windows' renames. See `STATUS.md`'s "Tracked deferral: `CMainFrameWindow`'s own class rename" for
-what's actually still open now that the naming half of it is moot. Don't generalize the original
+windows' renames. See `tracked-deferrals.md`'s "Tracked deferral: `CMainFrameWindow`'s own class
+rename" for what's actually still open now that the naming half of it is moot. Don't generalize the original
 exception beyond its intended shape (a shared file, a partial port); a clean one-class-one-file
 port still renames at port time, no exception.
 

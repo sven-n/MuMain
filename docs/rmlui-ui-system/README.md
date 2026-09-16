@@ -16,7 +16,7 @@ detail.
 The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
 widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `mu::ui::window::CObject` tier,
 all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc. —
-see `docs/newui-legacy-merger.md` for the folder history) — with no layout engine, retained scene
+see `newui-legacy-merger.md` for the folder history) — with no layout engine, retained scene
 graph, or data-binding layer between them. RmlUi is being adopted as the long-term replacement per
 [`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
 new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.md) for what's
@@ -46,7 +46,25 @@ classify a given piece of legacy code either way. **[Modern Theme Visual Directi
 honest inventory of what already exists as a reusable UI primitive (Window/Panel, Button,
 Checkbox, layout utilities, data binding, theming, dragging) versus what a future port would be
 the first real use case for (ItemSlot, ProgressBar, Tooltip unification, Dialog, and more) — check
-here before inventing a new one-off mechanism.
+here before inventing a new one-off mechanism. **[Engine Findings](engine-findings.md)** —
+empirical, engine-specific RmlUi build gotchas found while porting (split out of `STATUS.md`,
+2026-09-16) — check before assuming a new bug is novel. **[Tracked Deferrals](tracked-deferrals.md)**
+— forward-looking punch-lists for what's known-incomplete (the `mu::ui::window::CObject`-tier
+adapter naming, `CMainFrameWindow`'s file split, `CUIControl` family retirement) plus the "Pilots
+to revisit" table (also split out of `STATUS.md`, 2026-09-16); the `CommonMessageBox`/
+`CustomMessageBox` port's own tracked deferral lives in `dialog-migration-plan.md` instead, which
+already owned its per-class worklist. **[Migration Ledger](migration-ledger.md)** — a flat,
+per-class table of every legacy window/dialog/list-widget component and its migration status
+(2026-09-16) — check here for "is `X` done?" instead of grepping the tree.
+
+This directory also holds the wider C++ UI-kit story `architecture-principles.md` sits inside:
+**[UI Architecture Assessment](ui-architecture-assessment.md)**/**[UI Target
+Architecture](ui-target-architecture.md)** — a point-in-time inventory of every C++ widget toolkit
+in this codebase (not just RmlUi) and the target architecture proposal built from it (frozen
+2026-09-05/06 snapshots — see their own banners for what's since changed) — and
+**[`newui-legacy-merger.md`](newui-legacy-merger.md)** — the (now-complete) history of retiring the
+`CUIMng`/`CNewUIManager` window-ownership split, a prerequisite/parallel effort to this one that
+several findings below still reference.
 
 ## Renderer integration: SDL_GPU
 
@@ -175,7 +193,7 @@ thumb has to reset `top` back to a fixed value on every drag tick or it visibly 
 
 **First real caller landed 2026-09-07: `CMyInventory`'s title bar.** (Its original caller,
 `COptionWin`'s two sliders, was deleted outright as confirmed-dead code during the
-CUIMng/CNewUIManager merger, `docs/newui-legacy-merger.md` — not a retirement of this primitive
+CUIMng/CNewUIManager merger, `newui-legacy-merger.md` — not a retirement of this primitive
 itself.) The primitive was fixed 2026-09-04 to write the dragged position as `dp` (divided by the
 panel's own `Context::GetDensityIndependentPixelRatio()`) instead of a raw `px` inline style that
 never scaled with `UIScalePercent`. Persistence is now built too, generically: `MakeDraggable()`
@@ -200,7 +218,7 @@ free-function module in `namespace UI::Login`.
 window's own `Release()` by name on every scene transition (`CreateLoginScene()`/
 `CreateCharacterScene()`/`CreateMainScene()`/its own `Release()` — no generic window-list walk
 does this any more; that mechanism, `CUIMng::RemoveWinList()`, was confirmed unreachable and
-deleted outright in `docs/newui-legacy-merger.md`'s Phase 4). Either way, the legacy
+deleted outright in `newui-legacy-merger.md`'s Phase 4). Either way, the legacy
 `Release()`/`PreRelease()` path never touches an RmlUi document, so a hybrid window's document
 (created once, reused forever) stays exactly as visible as it was — and since RmlUi renders last
 in the frame, it then paints on top of whatever the *next* scene draws, indefinitely. Every hybrid
@@ -265,6 +283,10 @@ it onto the new manager would have been pure wasted effort on dead code — it w
 
 ## Status
 
-See [`STATUS.md`](STATUS.md) — what's migrated, the per-port checklist, empirical findings worth
-knowing before the next port, and known gaps against `architecture-principles.md`. All further
-RmlUi UI work continues on this branch.
+See [`STATUS.md`](STATUS.md) — what's migrated, the per-port checklist, and known gaps against
+`architecture-principles.md` — plus [`engine-findings.md`](engine-findings.md) for empirical,
+engine-specific gotchas worth knowing before the next port,
+[`tracked-deferrals.md`](tracked-deferrals.md) for forward-looking punch-lists (split out of
+`STATUS.md`, 2026-09-16, so each has one clear job), and
+[`migration-ledger.md`](migration-ledger.md) for the full per-component status table (2026-09-16).
+All further RmlUi UI work continues on this branch.

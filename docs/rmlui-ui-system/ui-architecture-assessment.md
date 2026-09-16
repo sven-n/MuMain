@@ -1,12 +1,22 @@
 # UI Architecture Assessment — MU Online Client
 
+> **Point-in-time snapshot, 2026-09-05 — not kept current.** Three sections were later found to
+> need correction; see [`ui-target-architecture.md`](ui-target-architecture.md)'s "Correction,
+> 2026-09-05/06" notes in Sections A and C before trusting this document's claims about `CInput`/
+> `CNewKeyInput`, `CMyInventory`'s geometry, or the native/RmlUi permanent-boundary framing. Other
+> facts here have also since changed without an inline correction (e.g. `RmlDraggable`/
+> `MakeDraggable()`'s "zero live call sites" claim below — false since 2026-09-07, see
+> [`STATUS.md`](STATUS.md)). Treat this file as historical evidence for how the target architecture
+> in `ui-target-architecture.md` was derived, not as a source of current facts — check `STATUS.md`
+> for those.
+
 A point-in-time architectural assessment of `src/source/UI/` and its dependencies, done by direct
 code inspection (base classes, `#include` graphs, live call sites via grep) rather than by reading
 this project's own status docs, which were deliberately treated as unverified claims and checked
 independently. Produced 2026-09-05, ahead of any decision to unify the UI system further — see
-`docs/newui-legacy-merger.md` (window-ownership unification, already done) and
-`docs/rmlui-ui-system/` (the RmlUi presentation-layer migration, in progress) for the initiatives
-this assessment evaluates the current state against.
+[`newui-legacy-merger.md`](newui-legacy-merger.md) (window-ownership unification, already done) and
+this directory's own [`README.md`](README.md) (the RmlUi presentation-layer migration, in progress)
+for the initiatives this assessment evaluates the current state against.
 
 ## Executive Summary
 

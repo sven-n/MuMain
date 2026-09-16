@@ -342,12 +342,15 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
 
 **Needed immediately (cheap, zero behavior risk, unblocks clear thinking):**
 
-1. Rename `CUIManager`'s `INTERFACE_*` enum values (e.g. `INTERFACE_INVENTORY` →
-   `MUTEX_INVENTORY`) so no two enums share names. Pure mechanical rename.
-2. Document, in the repo's dev instructions (Section I), that RmlUi + `base.rcss` is canonical for
+1. ~~Rename `CUIManager`'s `INTERFACE_*` enum values (e.g. `INTERFACE_INVENTORY` →
+   `MUTEX_INVENTORY`) so no two enums share names. Pure mechanical rename.~~ — **done.** Confirmed
+   directly against `UI/Core/UIManager.h`: the enum is already `MUTEX_*` throughout
+   (`MUTEX_INVENTORY`, `MUTEX_TRADE`, etc.), no two enums share names anymore.
+2. ~~Document, in the repo's dev instructions (Section I), that RmlUi + `base.rcss` is canonical for
    anything with a presentation layer, `mu::ui::window::CButton`/`CCheckBox`/`CRadioButton` is the
    transitional bridge for the still-native population only, and nothing else — so no new window
-   picks a fourth path by default.
+   picks a fourth path by default.~~ — **done.** `AGENTS.md`'s "UI code — read this first too"
+   section states exactly this, pointing at `architecture-principles.md`/`building-new-ui.md`.
 
 **Needed before further native UI development continues at any real pace:**
 
@@ -407,7 +410,7 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
     `CUICurQuestListBox`/`CUIQuestContentsListBox` is the proven reference (same pattern
     `CBuffStrip` established for a simpler array). ~18 `CUITextListBox<T>` subclasses remain
     (`UI/Widgets/UIControls.h`) spanning guild/chat/letter/socket/in-game-shop/move-command lists —
-    see `STATUS.md`'s tracked-deferral entry for the full list. Also found while investigating this:
+    see `tracked-deferrals.md`'s entry for the full list. Also found while investigating this:
     `CUIPopup`/`CUIButton`'s remaining live path (`WSclient.cpp`'s generic server-error popups)
     duplicates `CCommonMessageBox`'s job — moving those call sites there retires `CUIPopup`, and
     with it `CUIButton`'s only other confirmed-live consumer besides the suspected-dead
@@ -438,10 +441,13 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
     Do not mass-rename solely for aesthetics. Prefer compatibility aliases or
     forwarding headers where migration risk is high.
 
-14. Publish the canonical component catalog.
-
-    Document the supported primitive for each reusable UI responsibility and
-    explicitly mark superseded implementations.
+14. ~~Publish the canonical component catalog.~~ — **done, 2026-09-04.**
+    [`rmlui-ui-system/component-catalog.md`](rmlui-ui-system/component-catalog.md) documents the
+    supported primitive per reusable UI responsibility (Window/Panel, Button, Checkbox, Dialog,
+    layout utilities, data binding, theming, list/repeated rows, dragging) and an explicit
+    "does not exist as a reusable primitive yet" section for genuine gaps (ItemSlot, ProgressBar,
+    unified Tooltip, Tab/ScrollContainer/Notification/HUDContainer) — kept current as a living
+    document, not a one-time snapshot.
 
 15. ~~Establish reference screens.~~ — **done, 2026-09-07.** One canonical example named per
     shape, each already built, verified against a real server, and cited elsewhere in this doc set
@@ -544,5 +550,5 @@ Ordered by leverage-per-risk, using what's actually true today (not a generic te
     one, even from a window already on `mu::ui::window::CObject` — that base class alone doesn't
     make a window RmlUi-native, and reaching into this family for list content is exactly how
     `CGuildInfoWindow`/`CMixInventory`/`CInGameShop` ended up depending on it despite being on the
-    modern base class otherwise. See `STATUS.md`'s tracked-deferral entry for the full remaining
+    modern base class otherwise. See `tracked-deferrals.md`'s entry for the full remaining
     consumer list.

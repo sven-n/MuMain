@@ -175,5 +175,5 @@ flows post-retrofit at more than one resolution, not just eyeballing a screensho
   its legacy duplicate, so consolidating the *remaining* legacy classes is a separate effort
   against code that's being phased out anyway. (Directory reorganization itself — dropping the
   `UI/Legacy`/`UI/NewUI` folder split in favor of topic folders directly under `UI/` — is done, see
-  `docs/newui-legacy-merger.md`; the class-name collision this surfaced, `CButton` vs. the former
+  `newui-legacy-merger.md`; the class-name collision this surfaced, `CButton` vs. the former
   `mu::ui::window::CButton`, is exactly this still-deferred class-consolidation item.)

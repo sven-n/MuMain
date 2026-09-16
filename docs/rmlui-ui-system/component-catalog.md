@@ -37,7 +37,7 @@ live-3D seam — still holds):
   context always composites last in the frame — porting the frame chrome today would flip it to
   render in front of the item icon instead of behind it. Used by `CMyInventory` (Stage 1/3 chrome
   done; the equipment paperdoll's background/durability-tint/drag-highlight chrome deliberately
-  stays native — Stage 2, skipped for this reason, see `STATUS.md`'s pilots-to-revisit table) and,
+  stays native — Stage 2, skipped for this reason, see `tracked-deferrals.md`'s pilots-to-revisit table) and,
   as of 2026-09-13, the rest of the inventory-family `C3DRenderMng` sibling windows sharing the same
   constraint: `CTrade` (two independent grids, not just one), `CStorageInventory`,
   `CStorageInventoryExt`, `CMixInventory`, `CNPCShop`, `CMyShopInventory`,
@@ -106,23 +106,41 @@ reach for that legacy class in new code, this is what to reach for instead. Two 
 (`my_quest_info.rml`/`.rcss`, ported off `CUICurQuestListBox`/`CUIQuestContentsListBox` — also
 proves `server_select.rml`'s click-a-row-to-select-it pattern on top of the same binding). No
 generic "ListBox" C++ wrapper exists (and none is needed) — each window binds its own row-shaped
-struct directly, the same way `RmlModelBinder<T>` is used everywhere else. See `STATUS.md`'s
-"Tracked deferral: `CUIControl` family... full retirement" entry for the ~18 `CUITextListBox<T>`
-subclasses still waiting on this port, one per window, same pattern each time.
+struct directly, the same way `RmlModelBinder<T>` is used everywhere else. See
+`tracked-deferrals.md`'s "Tracked deferral: `CUIControl` family... full retirement" entry for the
+~18 `CUITextListBox<T>` subclasses still waiting on this port, one per window, same pattern each
+time.
 
 ## Dialog
 
 `mu::ui::window::CGenericConfirmDialog`/`GenericDialogConfig` (`UI/Dialogs/GenericConfirmDialog.h`,
 `generic_confirm_dialog.rml`/`.rcss` both themes) — a real config-driven scaffold, not a per-dialog
 hand-built RML/RCSS pair: one C++ class + one document, shown with different `GenericDialogConfig`
-content (button set, body lines, OK/Cancel callbacks) per call, no new subclass or new `.rml` per
-dialog. Built to replace `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native
-`TMsgBoxLayout<T>` family (see `STATUS.md`) — proven on 3 real dialogs first
-(`Guild/GuildInfoWindow.cpp`'s alliance-master-can't-leave notice, `UI/Quests/
-MyQuestInfoWindow.cpp`'s quest-giveup confirm, `Network/Server/WSclient.cpp`'s guild-invite
-accept/decline) before porting the rest. Single active instance, not a real stack — a second
-`Show()` call while one is open queues instead of replacing it; see the class's own header comment
-for why that's not a functional regression from what it replaces.
+content per call, no new subclass or new `.rml` per dialog. Buttons are three fixed, role-named
+slots, not a positional pair — `primaryLabel`/`onPrimary` (always shown), optional
+`secondaryLabel`/`onSecondary` (a real second action, e.g. "Decrease", never Esc-bound), and
+`showCancel`/`cancelLabel`/`onCancel` (always dismiss semantics, fires on Esc) — see
+`dialog-migration-plan.md`'s "Button model redesign" entry (2026-09-16). Built to replace
+`UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native `TMsgBoxLayout<T>` family
+(see `STATUS.md`) — proven on 3 real dialogs first (`Guild/GuildInfoWindow.cpp`'s
+alliance-master-can't-leave notice, `UI/Quests/MyQuestInfoWindow.cpp`'s quest-giveup confirm,
+`Network/Server/WSclient.cpp`'s guild-invite accept/decline) before porting the rest. Single active
+instance, not a real stack — a second `Show()` call while one is open queues instead of replacing
+it; see the class's own header comment for why that's not a functional regression from what it
+replaces.
+
+`mu::ui::window::CGenericMenuDialog`/`GenericMenuConfig` (`UI/Dialogs/GenericMenuDialog.h`,
+`generic_menu_dialog.rml`/`.rcss` both themes) — sibling primitive for the "arbitrary list of N
+labeled action buttons" shape (a multi-option menu, not two/three fixed named slots) that
+`CGenericConfirmDialog` doesn't cover. One C++ class + one document, shown with a
+`GenericMenuConfig` value (title, body lines, a button vector each with its own optional label/
+tooltip/per-button lines/compact flag, an optional `columns` grid width, `onCancel`). Frame/border/
+header chrome lives in the shared `window_shell` `<template>` (both themes), not duplicated per
+dialog. Proven on 13 real dialogs (`dialog-migration-plan.md`'s "Multi-option menus" entry has the
+full list) — the two remaining native "multi-option menu" classes
+(`CGuild_ToPerson_Position`, `CGemIntegrationDisjointMsgBox`) stay native because their actual shape
+doesn't fit this primitive's plain "click closes" model (simultaneous radio-select, an embedded
+live inventory list-selection widget).
 
 ## Dragging
 
@@ -147,7 +165,7 @@ per-window, or entirely unbuilt:
   (`CItemHotKey::RenderItems()` → `RenderItem3D()`/`ZzzInventory.cpp` →
   `RenderObjectScreen(MODEL_...)`), the icon is a genuine **live 3D model render**, the same
   technique `CCharMakeWin`'s character-preview panel uses — Section E of
-  [`ui-target-architecture.md`](../ui-target-architecture.md) puts that in the *permanent*,
+  [`ui-target-architecture.md`](ui-target-architecture.md) puts that in the *permanent*,
   no-RmlUi-equivalent bucket, not the temporary sprite-atlas one. So only the slot chrome around
   the icon is a real "prove the pattern" candidate; the icon itself stays native permanently, same
   as `CCharMakeWin`'s preview.
@@ -170,7 +188,7 @@ per-window, or entirely unbuilt:
 - **Tab / TabBar, ScrollContainer, Notification, HUDContainer** — none of the currently migrated
   windows have needed one yet, so none exist. `CMainFrameWindow`'s still-legacy skill grid/
   pet-command row is the closest thing to a "grid" concept in the codebase, and it hasn't been
-  abstracted either (see `STATUS.md`'s pilots-to-revisit entry for why its icon art stayed legacy
+  abstracted either (see `tracked-deferrals.md`'s pilots-to-revisit entry for why its icon art stayed legacy
   2D). **List moved out of this bucket 2026-09-13** — see the "List / repeated rows" section above;
   `data-for` already proves the pattern, it just isn't fully adopted yet.
 
