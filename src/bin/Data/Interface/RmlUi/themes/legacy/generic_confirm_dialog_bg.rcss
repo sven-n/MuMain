@@ -1,35 +1,8 @@
 /* Background-layer companion to generic_confirm_dialog.rcss -- see npc_shop_bg.rcss's own comment
-   for the full mechanism/rationale. Does NOT link base.rcss -- no *_bg.rml in this theme does.
+   for the full mechanism/rationale. Native sprite composite now lives in window_shell_bg.rcss
+   (linked automatically via window_shell_bg.rml's own head).
 
-   CCommonMessageBox's own native sprite composite (back-fill, stretched, painted first so it
-   shows through the caps' transparent regions; then top cap; then middle fill; then bottom cap).
-   `newui_msgbox_top/middle/bottom.OZT` are exactly 230x67/230x15/230x50, matching their own
-   native draw constants exactly. `newui_msgbox_back.OZJ` is actually 225x512 -- much taller than
-   the panel ever needs, so it's authored to be CROPPED (top-left region, no stretch) rather than
-   stretched-to-fit like the other three; the rect below (222x150) matches the back layer's own
-   box size instead of the source's own full extent. */
-@spritesheet msgbox-top-sheet
-{
-	src: "../../../newui_msgbox_top.tga";
-	msgbox-top-image: 0px 0px 230px 67px;
-}
-@spritesheet msgbox-middle-sheet
-{
-	src: "../../../newui_msgbox_middle.tga";
-	msgbox-middle-image: 0px 0px 230px 15px;
-}
-@spritesheet msgbox-bottom-sheet
-{
-	src: "../../../newui_msgbox_bottom.tga";
-	msgbox-bottom-image: 0px 0px 230px 50px;
-}
-@spritesheet msgbox-back-sheet
-{
-	src: "../../../newui_msgbox_back.jpg";
-	msgbox-back-image: 0px 0px 222px 150px;
-}
-
-/* dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
+   dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
    dialog is a LayoutMode::Dialog window, so it centers via plain CSS instead of a data-bound
    root_x/root_y/root_scale transform. Same 230x160dp size as the fg document's own #panel, so the
    two align exactly.
@@ -53,47 +26,8 @@ body {
 }
 /* Mirrors the fg document's own #panel.tall (GenericDialogConfig::tallPanel) -- kept in sync via
    GenericConfirmDialog.cpp's Show()/ShowNext() (this document has no data model of its own to bind
-   a class through). .gcd-bg-sprite-middle's own top/bottom are fixed dp insets, not a percentage,
-   so it auto-stretches to fill the extra height with no change needed. */
+   a class through). window_shell_bg.rcss's own .window-shell-sprite-middle top/bottom are fixed dp
+   insets, not a percentage, so it auto-stretches to fill the extra height with no change needed. */
 #panel.tall {
 	height: 240dp;
-}
-
-.gcd-bg-sprite-back {
-	position: absolute;
-	left: 4dp;
-	right: 4dp;
-	top: 5dp;
-	bottom: 5dp;
-	pointer-events: none;
-	decorator: image(msgbox-back-image);
-}
-.gcd-bg-sprite-top {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 0;
-	height: 67dp;
-	pointer-events: none;
-	decorator: image(msgbox-top-image);
-}
-/* Stretches to fill the panel's remaining space -- a single stretched fill, not native's tiled
-   repeat. */
-.gcd-bg-sprite-middle {
-	position: absolute;
-	left: 0;
-	right: 0;
-	top: 67dp;
-	bottom: 50dp;
-	pointer-events: none;
-	decorator: image(msgbox-middle-image);
-}
-.gcd-bg-sprite-bottom {
-	position: absolute;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	height: 50dp;
-	pointer-events: none;
-	decorator: image(msgbox-bottom-image);
 }

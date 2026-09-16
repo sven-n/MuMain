@@ -507,6 +507,30 @@ section in full detail; summarized here for visibility.
      `Template::Load()`); normal `.rml` documents parsed the regular way never hit either code path,
      so this only matters when authoring a new shared template, not every RmlUi file in this
      codebase.
+- **A `<link type="text/rcss">` living inside a `<template>` file's own head never gets this
+  project's `token(...)` design-token substitution — it reaches RmlUi as raw, unsubstituted text,
+  and every `token(...)` call in it silently fails to parse.** Found the hard way (2026-09-16)
+  building `window_shell_bg.rml` (the background-only shell variant, `CGenericConfirmDialog`'s bg
+  document being the first consumer): the template's own head originally linked `base.rcss`
+  directly (mirroring how a normal document does it), and every single `token(...)`-based property
+  in `base.rcss` (dozens of them — colors, borders, decorators) failed with a `[RmlUi][Warning]
+  Syntax error parsing property declaration '...token(...)...'` at document-load time — no crash,
+  just large, silent chunks of the shared theme's own styling missing. Root cause:
+  `token(...)` isn't a real RmlUi feature at all — it's this project's own preprocessing step
+  (`RmlTheme.cpp`'s `InlineTokenizedStylesheet()`), which works by regex-scanning the **raw RML
+  text** of whatever file `UI::RmlBridge::LoadThemedDocument()`/`CreateBackgroundDocument()` was
+  asked to load, finding that document's own direct `<link type="text/rcss">` entries, and rewriting
+  each one in place with its tokens already resolved, all *before* RmlUi's own document loader ever
+  sees the text. A template file is fetched by RmlUi's own internal `TemplateCache::LoadTemplate()`
+  (a plain `StreamFile`/`fopen` read), which never runs through this project's C++ loading path at
+  all — so a template's own `<link type="text/rcss">` entries are invisible to
+  `InlineTokenizedStylesheet()` no matter what they point at. Fix: never link a `token(...)`-using
+  stylesheet from within a `<template>` file's own head — link it directly from the top-level
+  consuming document's own head instead (`generic_confirm_dialog_bg.rml` linking `base.rcss`
+  directly, rather than `window_shell_bg.rml` doing it on its behalf, is the actual fix). A
+  template's own paired `.rcss` is safe to link from within the template itself only if it contains
+  no `token(...)` calls (confirmed true of `window_shell.rcss`/`window_shell_bg.rcss`, both
+  themes — plain dp/hex values throughout, no design tokens).
 
 ## Known gaps against the principles (honest status, not yet built)
 

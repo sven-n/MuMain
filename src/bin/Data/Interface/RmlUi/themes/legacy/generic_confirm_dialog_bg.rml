@@ -2,18 +2,14 @@
 <head>
 	<title>Generic Confirm Dialog Background</title>
 	<link type="text/rcss" href="generic_confirm_dialog_bg.rcss"/>
+	<link type="text/template" href="window_shell_bg.rml"/>
 </head>
-<body>
-	<!-- Background-context document (see npc_shop_bg.rml for the mechanism) -- paints
-	     CCommonMessageBox's own native sprite composite BEFORE the 3D pass draws item3D each frame,
-	     so the item shows through the gap in generic_confirm_dialog.rml's own now-paint-less
-	     #panel instead of being painted over by it. No data-model -- #panel centers via plain CSS,
-	     never a C++-computed position. -->
-	<div id="panel">
-		<div class="gcd-bg-sprite-back"></div>
-		<div class="gcd-bg-sprite-top"></div>
-		<div class="gcd-bg-sprite-middle"></div>
-		<div class="gcd-bg-sprite-bottom"></div>
-	</div>
-</body>
+<!-- Background-context document (see npc_shop_bg.rml for the mechanism) -- paints CCommonMessageBox's
+     own native sprite composite BEFORE the 3D pass draws item3D each frame, so the item shows
+     through the gap in generic_confirm_dialog.rml's own now-paint-less #panel instead of being
+     painted over by it. No data-model -- #panel centers via plain CSS, never a C++-computed
+     position.
+
+     Sprite composite now lives in window_shell_bg.rml -- see its own comment. -->
+<body template="window_shell_bg"></body>
 </rml>
