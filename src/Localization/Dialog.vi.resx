@@ -1,0 +1,947 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Text_0" xml:space="preserve">
+    <value>Vâng! Bạn cần gì không?</value>
+    <comment>legacy_id=0</comment>
+  </data>
+  <data name="Text_1" xml:space="preserve">
+    <value>Xin chào! Ta là Pasi the Mage. Hahaha! Hừm... Sự vận động của các vì sao có vẻ không ổn. Tương lai của bạn... Hừm... Ta cũng không thể nhìn thấy tương lai của bạn... Vì sao lại thế nhỉ...?</value>
+    <comment>legacy_id=1</comment>
+  </data>
+  <data name="Text_2" xml:space="preserve">
+    <value>Xin chào! Ta tên là Baz, người giữ Kho. Ta có thể giúp đỡ bạn bất cứ nơi đâu bạn đến. Đừng ngần ngại gửi đồ đạc của bạn cho ta.</value>
+    <comment>legacy_id=2</comment>
+  </data>
+  <data name="Text_3" xml:space="preserve">
+    <value>Nhiều nhà thám hiểm từng nói với ta rằng tiếng đàn hạc giúp xoa dịu và xua tan mệt mỏi. Bạn có cần ta giúp gì không?</value>
+    <comment>legacy_id=3</comment>
+  </data>
+  <data name="Text_4" xml:space="preserve">
+    <value>Xin chào! Ta tên là Baz, người giữ Kho. Ta có thể giúp đỡ bạn bất cứ nơi đâu bạn đến. Đừng ngần ngại gửi đồ đạc của bạn cho ta.</value>
+    <comment>legacy_id=4</comment>
+  </data>
+  <data name="Text_5" xml:space="preserve">
+    <value>Bạn đã mang đủ tiền chưa? Không có tiền, ta không thể ghép đồ vì ta cần tiền để tiếp tục nghiên cứu. Hiểu chưa? Bạn có muốn biết cần bao nhiêu tiền không?</value>
+    <comment>legacy_id=5</comment>
+  </data>
+  <data name="Text_6" xml:space="preserve">
+    <value>Chào mừng đến với MU! Hãy nhấn phím F1 nếu bạn cần trợ giúp trong lúc du hành khắp lục địa MU.</value>
+    <comment>legacy_id=6</comment>
+  </data>
+  <data name="Text_7" xml:space="preserve">
+    <value>Đây là lần đầu bạn đến Lorencia sao? Hãy đi đến lối ra phía đông nam trước đài phun nước và thử săn Budge Dragon hoặc Spider. Skeleton ở phía tây bắc nguy hiểm lắm đấy.</value>
+    <comment>legacy_id=7</comment>
+  </data>
+  <data name="Text_8" xml:space="preserve">
+    <value>Chào mừng đến với Noria. Nếu đây là lần đầu bạn đến đây, hãy đi qua lính gác Kho rồi ra lối phía nam. Hãy thử săn quái vật cấp thấp như Scorpion hoặc Goblin.</value>
+    <comment>legacy_id=8</comment>
+  </data>
+  <data name="Text_9" xml:space="preserve">
+    <value>Nếu bạn cần hướng dẫn chi tiết về lục địa MU, hãy xem tại http://muonline.webzen.net</value>
+    <comment>legacy_id=9</comment>
+  </data>
+  <data name="Text_50" xml:space="preserve">
+    <value>'Scroll of the Emperor', ghi chép về Muren, vị hoàng đế đầu tiên của MU, được cho là đã từng xuất hiện quanh Lost Tower, Atlans và Dungeon.</value>
+    <comment>legacy_id=50</comment>
+  </data>
+  <data name="Answer_50_Slot_0" xml:space="preserve">
+    <value>Ta không biết lại có thứ như vậy tồn tại...</value>
+    <comment>legacy_id=1500</comment>
+  </data>
+  <data name="Text_51" xml:space="preserve">
+    <value>Lễ vật bạn dâng lên Thần chưa đủ. Ta sẽ kể cho bạn nghe về lời sấm truyền nếu bạn dâng 1,000,000 Zen.</value>
+    <comment>legacy_id=51</comment>
+  </data>
+  <data name="Answer_51_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại với 1,000,000 Zen.</value>
+    <comment>legacy_id=1510</comment>
+  </data>
+  <data name="Text_52" xml:space="preserve">
+    <value>'Scroll of the Emperor', ghi chép về Muren, vị hoàng đế đầu tiên thống nhất MU, được cho là đã từng xuất hiện quanh Lost Tower, Atlans và Dungeon.</value>
+    <comment>legacy_id=52</comment>
+  </data>
+  <data name="Answer_52_Slot_0" xml:space="preserve">
+    <value>Hãy kể thêm cho ta nghe.</value>
+    <comment>legacy_id=1520</comment>
+  </data>
+  <data name="Text_53" xml:space="preserve">
+    <value>'Scroll of the Emperor' được bao bọc bởi một sức mạnh phi thường. Bất cứ ai đọc nó sẽ được ban phước bởi sức mạnh đó.</value>
+    <comment>legacy_id=53</comment>
+  </data>
+  <data name="Answer_53_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể lại câu chuyện.</value>
+    <comment>legacy_id=1530</comment>
+  </data>
+  <data name="Answer_53_Slot_1" xml:space="preserve">
+    <value>Ta sẽ đi tìm nó.</value>
+    <comment>legacy_id=1531</comment>
+  </data>
+  <data name="Answer_53_Slot_2" xml:space="preserve">
+    <value>Ta không quan tâm.</value>
+    <comment>legacy_id=1532</comment>
+  </data>
+  <data name="Text_54" xml:space="preserve">
+    <value>Hãy đi tìm 'Scroll of the Emperor'. Bạn sẽ được ban cho sức mạnh to lớn khi đọc nó.</value>
+    <comment>legacy_id=54</comment>
+  </data>
+  <data name="Answer_54_Slot_0" xml:space="preserve">
+    <value>Ta sẽ đi tìm nó.</value>
+    <comment>legacy_id=1540</comment>
+  </data>
+  <data name="Text_55" xml:space="preserve">
+    <value>Bạn đã tìm thấy 'Scroll of the Emperor'! Lễ kỷ niệm thống nhất của vị hoàng đế đầu tiên của đế chế Mu, Muren, đã được ghi lại tại đây bằng sức mạnh của phép thuật. Người sở hữu 'Scroll of the Emperor' sẽ được ban cho sức mạnh to lớn.</value>
+    <comment>legacy_id=55</comment>
+  </data>
+  <data name="Answer_55_Slot_0" xml:space="preserve">
+    <value>Hãy kể cho ta nghe về ghi chép đó.</value>
+    <comment>legacy_id=1550</comment>
+  </data>
+  <data name="Text_56" xml:space="preserve">
+    <value>Ghi chép lịch sử về vị hoàng đế đầu tiên Muren chứa đựng lễ kỷ niệm hòa bình thông qua chiến thắng của Muren trước tất cả các lãnh chúa chiến tranh, và nhờ đó thống nhất lục địa thành Đế chế MU.</value>
+    <comment>legacy_id=56</comment>
+  </data>
+  <data name="Answer_56_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1560</comment>
+  </data>
+  <data name="Text_57" xml:space="preserve">
+    <value>Muren là một trong ba anh hùng đã chấm dứt sự hỗn loạn mà cuộc xâm lược của Sekneum gây ra cho người dân.</value>
+    <comment>legacy_id=57</comment>
+  </data>
+  <data name="Answer_57_Slot_0" xml:space="preserve">
+    <value>Hãy kể lại câu chuyện trước đó.</value>
+    <comment>legacy_id=1570</comment>
+  </data>
+  <data name="Answer_57_Slot_1" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1571</comment>
+  </data>
+  <data name="Text_58" xml:space="preserve">
+    <value>Có thể tìm thấy những bảo vật phép thuật được gọi là 'Broken Sword', 'Tear of Elf' và 'Soul of Wizard'. 'Broken Sword' được các dark knight dâng lên như biểu tượng cho lòng dũng cảm, sự trung thành và ước nguyện thịnh vượng của họ.</value>
+    <comment>legacy_id=58</comment>
+  </data>
+  <data name="Answer_58_Slot_0" xml:space="preserve">
+    <value>Hãy kể lại câu chuyện trước đó.</value>
+    <comment>legacy_id=1580</comment>
+  </data>
+  <data name="Answer_58_Slot_1" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1581</comment>
+  </data>
+  <data name="Text_59" xml:space="preserve">
+    <value>'Soul of Wizard' được các dark wizard dâng lên như biểu tượng cho lời thề sử dụng sức mạnh của mình vì hòa bình và tự do của đế chế. Năm Mu thứ 10, trích đoạn ghi chép lễ kỷ niệm hòa bình...</value>
+    <comment>legacy_id=59</comment>
+  </data>
+  <data name="Answer_59_Slot_0" xml:space="preserve">
+    <value>Hãy kể lại câu chuyện trước đó.</value>
+    <comment>legacy_id=1590</comment>
+  </data>
+  <data name="Answer_59_Slot_1" xml:space="preserve">
+    <value>Thì ra chuyện đã xảy ra như vậy...</value>
+    <comment>legacy_id=1591</comment>
+  </data>
+  <data name="Text_60" xml:space="preserve">
+    <value>Nếu bạn đã đọc 'Scroll of the Emperor', hãy tìm kiếm 'Broken Sword' mà các dark knight cổ đại đã dùng trong lễ kỷ niệm hòa bình. Theo những gì ta nghe được, một vài dark knight đã tìm thấy nó ở Atlans, Lost Tower và Tarkan.</value>
+    <comment>legacy_id=60</comment>
+  </data>
+  <data name="Answer_60_Slot_0" xml:space="preserve">
+    <value>Ta sẽ tìm ra nó.</value>
+    <comment>legacy_id=1600</comment>
+  </data>
+  <data name="Answer_60_Slot_1" xml:space="preserve">
+    <value>Ta bỏ cuộc.</value>
+    <comment>legacy_id=1601</comment>
+  </data>
+  <data name="Text_61" xml:space="preserve">
+    <value>Nguy hiểm rình rập ở khắp mọi ngóc ngách những nơi đó và 'Broken Sword' không dễ gì tìm thấy được. Nhưng nếu bạn tìm được nó, một sức mạnh mới sẽ được ban cho bạn! Hãy quay lại gặp ta khi tìm được 'Broken Sword'.</value>
+    <comment>legacy_id=61</comment>
+  </data>
+  <data name="Answer_61_Slot_0" xml:space="preserve">
+    <value>Ta sẽ tìm và mang nó về.</value>
+    <comment>legacy_id=1610</comment>
+  </data>
+  <data name="Text_62" xml:space="preserve">
+    <value>Dark knight dũng cảm, bạn đã tìm thấy 'Broken Sword'! Sau khi thống nhất lục địa Mu, Muren, vị hoàng đế đầu tiên, đã bẻ gãy thanh kiếm 'Apocalypse' của mình như biểu tượng cho ước nguyện không bao giờ có chiến tranh nổ ra nữa.</value>
+    <comment>legacy_id=62</comment>
+  </data>
+  <data name="Answer_62_Slot_0" xml:space="preserve">
+    <value>Hãy kể thêm cho ta nghe.</value>
+    <comment>legacy_id=1620</comment>
+  </data>
+  <data name="Text_63" xml:space="preserve">
+    <value>Sau cuộc chiến, các dark knight mong muốn trở thành blade knight bắt đầu tìm kiếm 'Broken Sword' cổ đại để chứng minh lòng dũng cảm của mình.</value>
+    <comment>legacy_id=63</comment>
+  </data>
+  <data name="Answer_63_Slot_0" xml:space="preserve">
+    <value>Thì ra chuyện đã xảy ra như vậy!</value>
+    <comment>legacy_id=1630</comment>
+  </data>
+  <data name="Text_64" xml:space="preserve">
+    <value>Bạn đã đọc 'Scroll of the Emperor' rồi phải không. Vậy chắc bạn đã biết về 3 báu vật được ghi lại trong 'Scroll of the Emperor'. Hãy đi tìm viên pha lê 'Tear of Elf' được các elf cổ đại tạo ra bằng sức mạnh tinh thần.</value>
+    <comment>legacy_id=64</comment>
+  </data>
+  <data name="Answer_64_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể thêm cho ta nghe.</value>
+    <comment>legacy_id=1640</comment>
+  </data>
+  <data name="Text_65" xml:space="preserve">
+    <value>Nơi đó vô cùng nguy hiểm và 'Tear of Elf' cực kỳ khó tìm. Nhưng nếu bạn tìm được 'Tear of Elf', một sức mạnh mới sẽ được ban cho bạn. Giờ hãy đi tìm 'Tear of Elf' rồi quay lại gặp ta.</value>
+    <comment>legacy_id=65</comment>
+  </data>
+  <data name="Answer_65_Slot_0" xml:space="preserve">
+    <value>Ta sẽ đi tìm 'Tear of Elf'!</value>
+    <comment>legacy_id=1650</comment>
+  </data>
+  <data name="Text_66" xml:space="preserve">
+    <value>Bạn đã tìm thấy 'Tear of Elf'! Sau cuộc chiến, Lunedil, nữ hoàng elf, đã tạo ra viên đá lệ bằng cách gieo phép thuật lên viên đá tinh thần để các elf có thể triệu hồi sức mạnh của nữ thần và xây dựng sức mạnh của mình.</value>
+    <comment>legacy_id=66</comment>
+  </data>
+  <data name="Answer_66_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1660</comment>
+  </data>
+  <data name="Text_67" xml:space="preserve">
+    <value>Bạn đã đọc 'Scroll of the Emperor' rồi phải không. Vậy chắc bạn đã biết về 3 báu vật được ghi lại trong đó.</value>
+    <comment>legacy_id=67</comment>
+  </data>
+  <data name="Answer_67_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1670</comment>
+  </data>
+  <data name="Text_68" xml:space="preserve">
+    <value>Với sức mạnh của bạn, ta tin chắc bạn sẽ tìm được 'Soul of Wizard'. Giờ hãy đi tìm 'Soul of Wizard' và quay lại gặp ta khi tìm được nó.</value>
+    <comment>legacy_id=68</comment>
+  </data>
+  <data name="Answer_68_Slot_0" xml:space="preserve">
+    <value>Ta sẽ đi tìm 'Soul of Wizard'.</value>
+    <comment>legacy_id=1680</comment>
+  </data>
+  <data name="Text_69" xml:space="preserve">
+    <value>Ta biết bạn sẽ tìm được 'Soul of Wizard' mà! Etramu, pháp sư vĩ đại nhất của Arka, đã tạo ra viên đá phép bảo hộ linh hồn, vì lo sợ những dark knight yếu đuối có thể gục ngã trước cuộc tấn công của Kundun.</value>
+    <comment>legacy_id=69</comment>
+  </data>
+  <data name="Answer_69_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể thêm cho ta nghe.</value>
+    <comment>legacy_id=1690</comment>
+  </data>
+  <data name="Text_70" xml:space="preserve">
+    <value>Một dark wizard sở hữu viên đá phép này sẽ trở thành soul master.</value>
+    <comment>legacy_id=70</comment>
+  </data>
+  <data name="Answer_70_Slot_0" xml:space="preserve">
+    <value>Giờ đây ta đã là một soul master!</value>
+    <comment>legacy_id=1700</comment>
+  </data>
+  <data name="Text_71" xml:space="preserve">
+    <value>Lễ vật bạn dâng lên Thần chưa đủ. Ta sẽ kể cho bạn nghe về lời sấm truyền nếu bạn dâng 2,000,000 Zen.</value>
+    <comment>legacy_id=71</comment>
+  </data>
+  <data name="Answer_71_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại với 2,000,000 Zen.</value>
+    <comment>legacy_id=1710</comment>
+  </data>
+  <data name="Text_72" xml:space="preserve">
+    <value>Một sức mạnh mới đã được ban cho bạn nhờ vào ý chí kiên cường và sức mạnh của bạn. Cầu mong ân sủng của Lugard luôn ở bên bạn.</value>
+    <comment>legacy_id=72</comment>
+  </data>
+  <data name="Answer_72_Slot_0" xml:space="preserve">
+    <value>Cầu mong ân sủng của Thần luôn ở bên bạn...</value>
+    <comment>legacy_id=1720</comment>
+  </data>
+  <data name="Text_73" xml:space="preserve">
+    <value>Bạn đã sở hữu sức mạnh to lớn rồi. Ta không có lời sấm truyền nào cho bạn nữa.</value>
+    <comment>legacy_id=73</comment>
+  </data>
+  <data name="Answer_73_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại sau.</value>
+    <comment>legacy_id=1730</comment>
+  </data>
+  <data name="Text_74" xml:space="preserve">
+    <value>Hãy quay lại sau khi bạn đã trở nên mạnh mẽ hơn.</value>
+    <comment>legacy_id=74</comment>
+  </data>
+  <data name="Answer_74_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi ta mạnh mẽ hơn.</value>
+    <comment>legacy_id=1740</comment>
+  </data>
+  <data name="Text_75" xml:space="preserve">
+    <value>Nếu bạn đã trở thành một chiến binh mạnh mẽ, bạn sẽ có thể tìm ra nó.</value>
+    <comment>legacy_id=75</comment>
+  </data>
+  <data name="Answer_75_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1750</comment>
+  </data>
+  <data name="Text_76" xml:space="preserve">
+    <value>Kể từ đó, một tập tục ra đời, theo đó các dark knight muốn trở thành blade knight sẽ bẻ gãy thanh kiếm của mình như biểu tượng cho lời thề không bao giờ sử dụng kiếm một cách bất chính.</value>
+    <comment>legacy_id=76</comment>
+  </data>
+  <data name="Answer_76_Slot_0" xml:space="preserve">
+    <value>Hãy kể thêm cho ta nghe.</value>
+    <comment>legacy_id=1760</comment>
+  </data>
+  <data name="Text_77" xml:space="preserve">
+    <value>Một số elf ưa mạo hiểm nói rằng chúng đã được nhìn thấy ở Lost Tower, Atlans và Tarkan.</value>
+    <comment>legacy_id=77</comment>
+  </data>
+  <data name="Answer_77_Slot_0" xml:space="preserve">
+    <value>'Ta sẽ đi tìm nó!</value>
+    <comment>legacy_id=1770</comment>
+  </data>
+  <data name="Answer_77_Slot_1" xml:space="preserve">
+    <value>Ta không muốn đến một nơi như vậy.</value>
+    <comment>legacy_id=1771</comment>
+  </data>
+  <data name="Text_78" xml:space="preserve">
+    <value>Đây được gọi là 'Tear of Elf', và elf nào tìm được viên đá này sẽ trở thành muse elf, có khả năng triệu hồi sức mạnh của các nữ thần elf.</value>
+    <comment>legacy_id=78</comment>
+  </data>
+  <data name="Answer_78_Slot_0" xml:space="preserve">
+    <value>Ta đã trở thành muse elf!</value>
+    <comment>legacy_id=1780</comment>
+  </data>
+  <data name="Text_79" xml:space="preserve">
+    <value>Vì bạn đã tìm được cả 'Scroll of the Emperor' lẫn 'Broken Sword', từ nay bạn sẽ được gọi là blade knight.</value>
+    <comment>legacy_id=79</comment>
+  </data>
+  <data name="Answer_79_Slot_0" xml:space="preserve">
+    <value>Ta đã trở thành Blade Knight!</value>
+    <comment>legacy_id=1790</comment>
+  </data>
+  <data name="Text_80" xml:space="preserve">
+    <value>Sau khi đế chế được thống nhất, người dân đã thề trung thành với hoàng đế. Một vài báu vật được dâng lên như biểu tượng cho lòng trung thành của họ như sau.</value>
+    <comment>legacy_id=80</comment>
+  </data>
+  <data name="Answer_80_Slot_0" xml:space="preserve">
+    <value>Hãy kể lại câu chuyện trước đó.</value>
+    <comment>legacy_id=1800</comment>
+  </data>
+  <data name="Answer_80_Slot_1" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1801</comment>
+  </data>
+  <data name="Text_81" xml:space="preserve">
+    <value>'Tear of Elf' được các elf dâng lên như minh chứng cho lời thề tăng cường sức mạnh của elf và loài người.</value>
+    <comment>legacy_id=81</comment>
+  </data>
+  <data name="Answer_81_Slot_0" xml:space="preserve">
+    <value>Hãy kể lại câu chuyện trước đó.</value>
+    <comment>legacy_id=1810</comment>
+  </data>
+  <data name="Answer_81_Slot_1" xml:space="preserve">
+    <value>Xin hãy kể tiếp.</value>
+    <comment>legacy_id=1811</comment>
+  </data>
+  <data name="Text_82" xml:space="preserve">
+    <value>Hãy đi tìm 'Soul of Wizard'. Theo các dark wizard cổ đại, nó được nhìn thấy lần cuối quanh Lost Tower, Atlans và Tarkan.</value>
+    <comment>legacy_id=82</comment>
+  </data>
+  <data name="Answer_82_Slot_0" xml:space="preserve">
+    <value>Ta sẽ đi tìm nó.</value>
+    <comment>legacy_id=1820</comment>
+  </data>
+  <data name="Answer_82_Slot_1" xml:space="preserve">
+    <value>Ta sẽ quay lại sau.</value>
+    <comment>legacy_id=1821</comment>
+  </data>
+  <data name="Text_90" xml:space="preserve">
+    <value>Bạn đã đọc xong 'Decree of the Emperor'. Nhưng bạn có biết về bản khế ước bí mật giữa Muren và Semeden, thủ lĩnh summoner không? Muren đã được hứa hẹn một điều để đổi lấy việc chuyển giao Elbe cho đế chế.</value>
+    <comment>legacy_id=90</comment>
+  </data>
+  <data name="Answer_90_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=1900</comment>
+  </data>
+  <data name="Text_91" xml:space="preserve">
+    <value>Lục địa MU có một cánh cổng chiều không gian được đặt dưới sự giám sát của các summoner. Và Semeden đã trao Abyss of Eye như một lời hứa. Hãy đi và mang Abyss of Eye trở về.</value>
+    <comment>legacy_id=91</comment>
+  </data>
+  <data name="Answer_91_Slot_0" xml:space="preserve">
+    <value>Chấp nhận yêu cầu</value>
+    <comment>legacy_id=1910</comment>
+  </data>
+  <data name="Answer_91_Slot_1" xml:space="preserve">
+    <value>Từ chối yêu cầu</value>
+    <comment>legacy_id=1911</comment>
+  </data>
+  <data name="Text_92" xml:space="preserve">
+    <value>Ta nghe nói Abyss of Eye được tìm thấy quanh Atlance, Lost Tower và Tarkan. Hãy quay lại cùng Abyss of Eye ngay khi bạn tìm được nó.</value>
+    <comment>legacy_id=92</comment>
+  </data>
+  <data name="Answer_92_Slot_0" xml:space="preserve">
+    <value>Kể nốt câu chuyện</value>
+    <comment>legacy_id=1920</comment>
+  </data>
+  <data name="Text_93" xml:space="preserve">
+    <value>Bạn đã tìm thấy Abyss of Eye. Đây được biết đến là một vật thể cấu thành từ nguyên tố không tồn tại trong thế giới thực. Nó lan truyền từ thế giới trước hiện tại, cùng với đó ký ức sẽ quay trở lại.</value>
+    <comment>legacy_id=93</comment>
+  </data>
+  <data name="Answer_93_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=1930</comment>
+  </data>
+  <data name="Text_94" xml:space="preserve">
+    <value>Abyss of Eye mang một ý nghĩa đặc biệt đối với ta vì ta giám sát và giao tiếp xuyên suốt các chiều không gian của thế giới này. Nếu bạn mang Abyss of Eye về, ta sẽ ban cho bạn danh hiệu Blood Summoner dành cho Semeden, người giám sát chiều không gian của bạn.</value>
+    <comment>legacy_id=94</comment>
+  </data>
+  <data name="Answer_94_Slot_0" xml:space="preserve">
+    <value>Sắc phong làm Blood Summoner</value>
+    <comment>legacy_id=1940</comment>
+  </data>
+  <data name="Text_100" xml:space="preserve">
+    <value>Báu vật huyền thoại có tên 'Ring of Glory' là thứ cần thiết để đạt được phước lành và sức mạnh của Muren. Nó đã một lần nữa xuất hiện trên vùng đất của chúng ta. Nhưng bạn vẫn chưa sẵn sàng. Hãy chờ đến khi bạn dày dạn kinh nghiệm hơn.</value>
+    <comment>legacy_id=100</comment>
+  </data>
+  <data name="Answer_100_Slot_0" xml:space="preserve">
+    <value>Vậy ta cần phải làm gì?</value>
+    <comment>legacy_id=2000</comment>
+  </data>
+  <data name="Text_101" xml:space="preserve">
+    <value>Bạn cần thêm kinh nghiệm để có thể sống sót qua Nhiệm vụ này. Hãy quay lại khi đạt được 220 cấp độ theo các thử thách của đế chế đã mất.</value>
+    <comment>legacy_id=101</comment>
+  </data>
+  <data name="Answer_101_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi thời khắc đến.</value>
+    <comment>legacy_id=2010</comment>
+  </data>
+  <data name="Text_102" xml:space="preserve">
+    <value>Báu vật huyền thoại có tên 'Ring of Glory' là thứ cần thiết để đạt được phước lành và sức mạnh của Muren. Nó đã một lần nữa xuất hiện trên vùng đất của chúng ta.</value>
+    <comment>legacy_id=102</comment>
+  </data>
+  <data name="Answer_102_Slot_0" xml:space="preserve">
+    <value>Ta muốn nghe thêm.</value>
+    <comment>legacy_id=2020</comment>
+  </data>
+  <data name="Text_103" xml:space="preserve">
+    <value>Bất cứ ai sở hữu 'Ring of Glory' sẽ nhận được phước lành của Muren. Người ta nói nó được tìm thấy ở những sa mạc bên kia biển.</value>
+    <comment>legacy_id=103</comment>
+  </data>
+  <data name="Answer_103_Slot_0" xml:space="preserve">
+    <value>Vì sao lại thế?</value>
+    <comment>legacy_id=2030</comment>
+  </data>
+  <data name="Text_104" xml:space="preserve">
+    <value>Quái vật ở đó khá mạnh mẽ. Chúng đang sở hữu chiếc nhẫn.</value>
+    <comment>legacy_id=104</comment>
+  </data>
+  <data name="Answer_104_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể lại câu chuyện.</value>
+    <comment>legacy_id=2040</comment>
+  </data>
+  <data name="Answer_104_Slot_1" xml:space="preserve">
+    <value>Ta sẽ thử.</value>
+    <comment>legacy_id=2041</comment>
+  </data>
+  <data name="Answer_104_Slot_2" xml:space="preserve">
+    <value>Ta vẫn chưa sẵn sàng.</value>
+    <comment>legacy_id=2042</comment>
+  </data>
+  <data name="Text_105" xml:space="preserve">
+    <value>'Ring of Glory' có thể ở một nơi gần hơn bạn nghĩ. Khi có được nó, chắc chắn bạn sẽ cảm nhận được sự thay đổi trong sức mạnh của mình. Nhưng đây sẽ không phải là nhiệm vụ dễ dàng.</value>
+    <comment>legacy_id=105</comment>
+  </data>
+  <data name="Answer_105_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại cùng với nó.</value>
+    <comment>legacy_id=2050</comment>
+  </data>
+  <data name="Text_108" xml:space="preserve">
+    <value>Đây quả thực là 'Ring of Glory.' Nó tỏa ra một luồng khí huyền bí, còn hơn cả những gì ta tưởng tượng. Chiếc nhẫn này mang trong mình một truyền thuyết mà bạn thậm chí không thể nào hiểu hết được. Đây thực sự là một phước lành trong tay bạn.</value>
+    <comment>legacy_id=108</comment>
+  </data>
+  <data name="Answer_108_Slot_0" xml:space="preserve">
+    <value>Ta hiểu rồi.</value>
+    <comment>legacy_id=2080</comment>
+  </data>
+  <data name="Text_109" xml:space="preserve">
+    <value>Người ta nói chiếc nhẫn này có thể hồi sinh sự sống và ban tặng sự trẻ mãi không già. Nhưng nó chỉ có tác dụng với những anh hùng sở hữu sức mạnh đủ để điều khiển được năng lực của nó.</value>
+    <comment>legacy_id=109</comment>
+  </data>
+  <data name="Answer_109_Slot_0" xml:space="preserve">
+    <value>Vì sao lại thế?</value>
+    <comment>legacy_id=2090</comment>
+  </data>
+  <data name="Text_110" xml:space="preserve">
+    <value>Đó là vì Etramu, Pháp sư của Arka, đã yểm một câu thần chú để ngăn cái ác lợi dụng nó. Nhưng chiếc nhẫn cho thấy bạn xứng đáng với nó.</value>
+    <comment>legacy_id=110</comment>
+  </data>
+  <data name="Answer_110_Slot_0" xml:space="preserve">
+    <value>Vậy sao?</value>
+    <comment>legacy_id=2100</comment>
+  </data>
+  <data name="Text_111" xml:space="preserve">
+    <value>'Ring of Glory' được tạo ra cùng lúc với lời tiên tri Secromicon, bằng một loại kim loại bất diệt. Cả hai đều được xem là linh vật, nhưng tung tích của chúng trở nên bí ẩn khi bị lấy đi trong cuộc nổi loạn của phó chỉ huy Gaion.</value>
+    <comment>legacy_id=111</comment>
+  </data>
+  <data name="Answer_111_Slot_0" xml:space="preserve">
+    <value>Vậy sao?!</value>
+    <comment>legacy_id=2110</comment>
+  </data>
+  <data name="Text_112" xml:space="preserve">
+    <value>Giờ đây khi 'Ring of Glory' đã được tìm thấy, bạn sẽ có thể trở nên mạnh mẽ hơn nữa với tư cách một chiến binh.</value>
+    <comment>legacy_id=112</comment>
+  </data>
+  <data name="Answer_112_Slot_0" xml:space="preserve">
+    <value>Ta cảm thấy sức mạnh của mình đang tăng lên!</value>
+    <comment>legacy_id=2120</comment>
+  </data>
+  <data name="Text_113" xml:space="preserve">
+    <value>Ngươi sẽ trở thành một đấng tồn tại vĩ đại hơn trước kia rất nhiều. Hãy dùng sức mạnh của mình vì hòa bình của đế chế chúng ta.</value>
+    <comment>legacy_id=113</comment>
+  </data>
+  <data name="Answer_113_Slot_0" xml:space="preserve">
+    <value>Ta sẽ làm vậy.</value>
+    <comment>legacy_id=2130</comment>
+  </data>
+  <data name="Text_114" xml:space="preserve">
+    <value>Ngươi đã sở hữu sức mạnh thiêng liêng rồi.</value>
+    <comment>legacy_id=114</comment>
+  </data>
+  <data name="Answer_114_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại sau.</value>
+    <comment>legacy_id=2140</comment>
+  </data>
+  <data name="Text_115" xml:space="preserve">
+    <value>'Dark Stone', được cho là ban sức mạnh mới cho các chiến binh, đã được tìm thấy trên lục địa Mu. Tuy nhiên, ngươi vẫn chưa đủ khả năng để sử dụng sức mạnh đó. Hãy chờ đến khi ngươi sẵn sàng.</value>
+    <comment>legacy_id=115</comment>
+  </data>
+  <data name="Answer_115_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã sẵn sàng.</value>
+    <comment>legacy_id=2150</comment>
+  </data>
+  <data name="Text_116" xml:space="preserve">
+    <value>Để có được toàn bộ sức mạnh, ngươi cần chuẩn bị cho mình 'Scroll of the Emperor' ghi lại các sự kiện lịch sử về Emperor Muren. Hãy đến gặp 'Sevina' ở Devias.</value>
+    <comment>legacy_id=116</comment>
+  </data>
+  <data name="Answer_116_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã sẵn sàng.</value>
+    <comment>legacy_id=2160</comment>
+  </data>
+  <data name="Text_117" xml:space="preserve">
+    <value>Ngươi đã thất bại trong việc trở thành Blade Knight. Hãy quay lại sau khi có được sức mạnh mới thông qua 'Ring of Glory'.</value>
+    <comment>legacy_id=117</comment>
+  </data>
+  <data name="Answer_117_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã sẵn sàng.</value>
+    <comment>legacy_id=2170</comment>
+  </data>
+  <data name="Text_118" xml:space="preserve">
+    <value>Ngươi phải dâng 3,000,000 Zen cho các vị Thần để làm lễ thánh hóa nhiệm vụ này. Zen của ngươi không đủ.</value>
+    <comment>legacy_id=118</comment>
+  </data>
+  <data name="Answer_118_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại với 3,000,000 Zen.</value>
+    <comment>legacy_id=2180</comment>
+  </data>
+  <data name="Text_119" xml:space="preserve">
+    <value>Lễ vật ngươi dâng lên Thần vẫn chưa đủ. Ta sẽ kể cho ngươi nghe về lời sấm truyền nếu ngươi dâng 2,000,000 Zen.</value>
+    <comment>legacy_id=119</comment>
+  </data>
+  <data name="Answer_119_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại với 2,000,000 Zen.</value>
+    <comment>legacy_id=2190</comment>
+  </data>
+  <data name="Text_130" xml:space="preserve">
+    <value>Quả đúng là 'Ring of Glory'. Hãy nhìn xem nó lấp lánh thế nào. Chiếc nhẫn này chứa đựng thời gian và truyền thuyết mà ngươi thậm chí không thể nào thấu hiểu được. Thật là một phước lành khi ngươi tìm thấy nó!</value>
+    <comment>legacy_id=130</comment>
+  </data>
+  <data name="Answer_130_Slot_0" xml:space="preserve">
+    <value>Nghe vậy ta thật sự bất ngờ!</value>
+    <comment>legacy_id=2300</comment>
+  </data>
+  <data name="Text_131" xml:space="preserve">
+    <value>Đúng vậy, chiếc nhẫn được cho là có sức mạnh hồi sinh người chết và ban cho tuổi trẻ vĩnh cửu. Nó chỉ phát huy hết sức mạnh khi ở trong tay một anh hùng đích thực, người có thể khống chế được sức mạnh của nhẫn.</value>
+    <comment>legacy_id=131</comment>
+  </data>
+  <data name="Answer_131_Slot_0" xml:space="preserve">
+    <value>Vì sao lại như vậy?</value>
+    <comment>legacy_id=2310</comment>
+  </data>
+  <data name="Text_132" xml:space="preserve">
+    <value>Đó là vì Etramu, Pháp sư của Arka, đã đặt một lời nguyền lên nó để nó không rơi vào tay kẻ xấu. Nhưng có vẻ như ngươi chính là người xứng đáng!</value>
+    <comment>legacy_id=132</comment>
+  </data>
+  <data name="Answer_132_Slot_0" xml:space="preserve">
+    <value>Vậy sao!</value>
+    <comment>legacy_id=2320</comment>
+  </data>
+  <data name="Text_133" xml:space="preserve">
+    <value>'Ring of Glory' được tạo ra cùng lúc với lời tiên tri Secromicon, bằng một loại kim loại bất hoại. Cả hai đều được xem là vật thiêng, nhưng tung tích của chúng đã trở nên bí ẩn khi bị đánh cắp trong cuộc nổi loạn của phó chỉ huy Gaion.</value>
+    <comment>legacy_id=133</comment>
+  </data>
+  <data name="Answer_133_Slot_0" xml:space="preserve">
+    <value>Vậy sao!</value>
+    <comment>legacy_id=2330</comment>
+  </data>
+  <data name="Text_134" xml:space="preserve">
+    <value>Giờ đây khi 'Ring of Glory' đã được tìm thấy, ngươi sẽ có thể trưởng thành hơn nữa với tư cách một chiến binh.</value>
+    <comment>legacy_id=134</comment>
+  </data>
+  <data name="Answer_134_Slot_0" xml:space="preserve">
+    <value>Ta cảm thấy sức mạnh của mình đang tăng lên!</value>
+    <comment>legacy_id=2340</comment>
+  </data>
+  <data name="Text_135" xml:space="preserve">
+    <value>Nếu ngươi muốn có được sức mạnh mới, hãy lắng nghe ta thật kỹ. 'Dark Stone', được cho là ban sức mạnh mới cho các chiến binh, đã được tìm thấy trên lục địa Mu.</value>
+    <comment>legacy_id=135</comment>
+  </data>
+  <data name="Answer_135_Slot_0" xml:space="preserve">
+    <value>Ta muốn nghe thêm.</value>
+    <comment>legacy_id=2350</comment>
+  </data>
+  <data name="Text_136" xml:space="preserve">
+    <value>Với 'Dark Stone', ngươi có thể lĩnh hội một khả năng mới. Đây sẽ không phải là việc dễ dàng, nhưng vì ngươi đã có thể có được 'Ring of Glory' nên có lẽ ngươi sẽ làm được.</value>
+    <comment>legacy_id=136</comment>
+  </data>
+  <data name="Answer_136_Slot_0" xml:space="preserve">
+    <value>Ta cần phải làm gì?</value>
+    <comment>legacy_id=2360</comment>
+  </data>
+  <data name="Text_137" xml:space="preserve">
+    <value>Có tin đồn rằng ngươi có thể tìm thấy viên đá đó ở Tarkan và Icarus. Hãy cẩn thận với lũ quái vật. Những con quái sở hữu viên đá đó chỉ phản ứng với những ai có khả năng đặc biệt.</value>
+    <comment>legacy_id=137</comment>
+  </data>
+  <data name="Answer_137_Slot_0" xml:space="preserve">
+    <value>Xin hãy kể lại câu chuyện một lần nữa.</value>
+    <comment>legacy_id=2370</comment>
+  </data>
+  <data name="Answer_137_Slot_1" xml:space="preserve">
+    <value>Vậy thì ta sẽ thử!</value>
+    <comment>legacy_id=2371</comment>
+  </data>
+  <data name="Answer_137_Slot_2" xml:space="preserve">
+    <value>Ta vẫn chưa cảm thấy tự tin.</value>
+    <comment>legacy_id=2372</comment>
+  </data>
+  <data name="Text_138" xml:space="preserve">
+    <value>'Dark Stone' đang gọi ngươi ngay lúc này. Khi có được nó trong tay, chắc chắn ngươi sẽ có được sức mạnh mà chưa từng cảm nhận trước đây, nhưng rất nhiều chiến binh khác cũng đang khao khát tìm kiếm viên đá đó.</value>
+    <comment>legacy_id=138</comment>
+  </data>
+  <data name="Answer_138_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại cùng với 'Dark Stone'.</value>
+    <comment>legacy_id=2380</comment>
+  </data>
+  <data name="Text_139" xml:space="preserve">
+    <value>Vậy là ngươi đã tìm thấy 'Dark Stone'. Theo ghi chép, viên đá này chính là máu khô của anh hùng 'Benelope', người đã chiến đấu trong Cuộc Chiến giữa các vị Thần và Satan.</value>
+    <comment>legacy_id=139</comment>
+  </data>
+  <data name="Answer_139_Slot_0" xml:space="preserve">
+    <value>Hãy kể cho ta nghe thêm.</value>
+    <comment>legacy_id=2390</comment>
+  </data>
+  <data name="Text_140" xml:space="preserve">
+    <value>Benelope xuất thân từ dòng dõi hiệp sĩ. Sau thất bại trong cuộc chiến, ông đã khổ luyện để tìm ra phép thuật và kỹ năng chiến đấu mới. Những kỹ năng này đã được âm thầm truyền lại cho các chiến binh mang trong mình dòng máu hiệp sĩ, để chống lại thế lực hùng mạnh của Kundun.</value>
+    <comment>legacy_id=140</comment>
+  </data>
+  <data name="Answer_140_Slot_0" xml:space="preserve">
+    <value>Vậy...</value>
+    <comment>legacy_id=2400</comment>
+  </data>
+  <data name="Text_141" xml:space="preserve">
+    <value>Đúng vậy, trong huyết quản ngươi chảy dòng máu của một chiến binh. Vì thế, sức mạnh của Benelope sẽ được trao cho ngươi thông qua Dark Stone.</value>
+    <comment>legacy_id=141</comment>
+  </data>
+  <data name="Answer_141_Slot_0" xml:space="preserve">
+    <value>Ta đã được ban cho sức mạnh mới!</value>
+    <comment>legacy_id=2410</comment>
+  </data>
+  <data name="Text_142" xml:space="preserve">
+    <value>Ngươi đã có được sức mạnh mới thông qua 'Ring of Glory'. Nhưng có một điều ngươi vẫn chưa biết.</value>
+    <comment>legacy_id=142</comment>
+  </data>
+  <data name="Answer_142_Slot_0" xml:space="preserve">
+    <value>Đó là gì?</value>
+    <comment>legacy_id=2420</comment>
+  </data>
+  <data name="Text_143" xml:space="preserve">
+    <value>Rất có thể ngươi sẽ có được sức mạnh mới. Báu vật huyền thoại mang tên 'Dark Stone', vốn được xem là vật thiêng cùng với 'Ring of Glory', đang gọi ngươi.</value>
+    <comment>legacy_id=143</comment>
+  </data>
+  <data name="Answer_143_Slot_0" xml:space="preserve">
+    <value>Thật khó tin!</value>
+    <comment>legacy_id=2430</comment>
+  </data>
+  <data name="Text_144" xml:space="preserve">
+    <value>Lugard, Thần Ánh Sáng, đã nhờ ngươi một việc. Tuy nhiên, ngươi vẫn chưa đủ tư cách. Ta khuyên ngươi hãy quay lại khi đã trở nên mạnh mẽ hơn.</value>
+    <comment>legacy_id=144</comment>
+  </data>
+  <data name="Answer_144_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã trở nên mạnh mẽ hơn.</value>
+    <comment>legacy_id=2440</comment>
+  </data>
+  <data name="Text_145" xml:space="preserve">
+    <value>Lugard, Thần Ánh Sáng, đã nhờ ngươi một việc. Tuy nhiên, ngươi vẫn chưa đủ tư cách. Hãy quay lại khi đã hoàn thành nhiệm vụ trước đó.</value>
+    <comment>legacy_id=145</comment>
+  </data>
+  <data name="Answer_145_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã hoàn thành nó.</value>
+    <comment>legacy_id=2450</comment>
+  </data>
+  <data name="Text_146" xml:space="preserve">
+    <value>Ngươi không có đủ Zen. Ngươi có thể đăng ký nhiệm vụ này bằng cách dâng 5,000,000 Zen cho Lugard.</value>
+    <comment>legacy_id=146</comment>
+  </data>
+  <data name="Answer_146_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã sẵn sàng.</value>
+    <comment>legacy_id=2460</comment>
+  </data>
+  <data name="Text_147" xml:space="preserve">
+    <value>Lugard, Thần Ánh Sáng, đã nhờ ngươi một việc.</value>
+    <comment>legacy_id=147</comment>
+  </data>
+  <data name="Answer_147_Slot_0" xml:space="preserve">
+    <value>Là việc gì vậy?</value>
+    <comment>legacy_id=2470</comment>
+  </data>
+  <data name="Text_148" xml:space="preserve">
+    <value>Lugard yêu cầu ngươi đi tìm các anh hùng để chống lại mối đe dọa mới của Balgass đối với MU.</value>
+    <comment>legacy_id=148</comment>
+  </data>
+  <data name="Answer_148_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2480</comment>
+  </data>
+  <data name="Text_149" xml:space="preserve">
+    <value>Chúng ta biết rằng đội quân của Balgass đang tiến đánh lục địa MU qua ngả Pháo đài Cry Wolf, nhưng vẫn chưa có lời giải thích chính xác cho toàn bộ câu chuyện.</value>
+    <comment>legacy_id=149</comment>
+  </data>
+  <data name="Answer_149_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2490</comment>
+  </data>
+  <data name="Text_150" xml:space="preserve">
+    <value>Chúng ta đang cố gắng hết sức để hiểu ý nghĩa niềm tin mà Lugar đặt vào chúng ta, nhưng vẫn còn chật vật vì khả năng còn hạn chế.</value>
+    <comment>legacy_id=150</comment>
+  </data>
+  <data name="Answer_150_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2500</comment>
+  </data>
+  <data name="Text_151" xml:space="preserve">
+    <value>Ta tin rằng các ngươi chính là những người có thể giúp đỡ chúng ta. Ngươi có hứng thú hợp tác với chúng ta không?</value>
+    <comment>legacy_id=151</comment>
+  </data>
+  <data name="Answer_151_Slot_0" xml:space="preserve">
+    <value>Nghe lại.</value>
+    <comment>legacy_id=2510</comment>
+  </data>
+  <data name="Answer_151_Slot_1" xml:space="preserve">
+    <value>Chấp nhận yêu cầu</value>
+    <comment>legacy_id=2511</comment>
+  </data>
+  <data name="Answer_151_Slot_2" xml:space="preserve">
+    <value>Từ chối yêu cầu</value>
+    <comment>legacy_id=2512</comment>
+  </data>
+  <data name="Text_152" xml:space="preserve">
+    <value>Để giúp đỡ chúng ta, ngươi phải chống lại đội quân của Balgass. Trước khi bắt đầu, ta cần kiểm tra xem ngươi đã đủ mạnh cho nhiệm vụ này chưa.</value>
+    <comment>legacy_id=152</comment>
+  </data>
+  <data name="Answer_152_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2520</comment>
+  </data>
+  <data name="Text_153" xml:space="preserve">
+    <value>Hãy tiêu diệt các quái vật Death Beam, Hellmaine và Dark Phoenix đang thống trị Tarkan, Aida và Icarus, sau đó mang về 3 bằng chứng tương ứng.</value>
+    <comment>legacy_id=153</comment>
+  </data>
+  <data name="Answer_153_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện</value>
+    <comment>legacy_id=2530</comment>
+  </data>
+  <data name="Text_154" xml:space="preserve">
+    <value>Chúc mừng, ngươi đã hoàn thành nhiệm vụ. Đây là chút quà nhỏ cho công sức của ngươi.</value>
+    <comment>legacy_id=154</comment>
+  </data>
+  <data name="Answer_154_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2540</comment>
+  </data>
+  <data name="Text_155" xml:space="preserve">
+    <value>Balgass là một mối đe dọa lớn vì hắn đang hợp tác cùng Eresia, Nữ hoàng Pháp thuật, và đã mang đến hiểm họa như vậy cho thế giới này.</value>
+    <comment>legacy_id=155</comment>
+  </data>
+  <data name="Answer_155_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2550</comment>
+  </data>
+  <data name="Text_156" xml:space="preserve">
+    <value>Chúng ta dự đoán rằng Balgass đang mưu tính một mối đe dọa mới nhằm vào lục địa MU cùng với đội quân pháp thuật tà ác của hắn.</value>
+    <comment>legacy_id=156</comment>
+  </data>
+  <data name="Answer_156_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện</value>
+    <comment>legacy_id=2560</comment>
+  </data>
+  <data name="Text_157" xml:space="preserve">
+    <value>Ngươi không có đủ tiền. Hãy dâng 7,000,000 Zen cho Lugard để đăng ký nhiệm vụ này.</value>
+    <comment>legacy_id=157</comment>
+  </data>
+  <data name="Answer_157_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã sẵn sàng.</value>
+    <comment>legacy_id=2570</comment>
+  </data>
+  <data name="Text_158" xml:space="preserve">
+    <value>Chào mừng, giờ đây ngươi đã thực sự sẵn sàng giúp đỡ chúng ta.</value>
+    <comment>legacy_id=158</comment>
+  </data>
+  <data name="Answer_158_Slot_0" xml:space="preserve">
+    <value>Ngươi cần giúp đỡ việc gì?</value>
+    <comment>legacy_id=2580</comment>
+  </data>
+  <data name="Text_159" xml:space="preserve">
+    <value>Theo thông tin chúng ta có được, Balgass đã dựng lên một nơi gọi là Barracks. 12 sứ đồ của Lugard tin rằng đây là một mối đe dọa mới từ Balgass.</value>
+    <comment>legacy_id=159</comment>
+  </data>
+  <data name="Answer_159_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2590</comment>
+  </data>
+  <data name="Text_160" xml:space="preserve">
+    <value>Thông tin chính xác về 'Barrack' thúc đẩy một người phải tiến vào khu vực Barrack để làm suy giảm mối đe dọa từ sự phát triển hơn nữa của đội quân Balgass.</value>
+    <comment>legacy_id=160</comment>
+  </data>
+  <data name="Answer_160_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2600</comment>
+  </data>
+  <data name="Text_161" xml:space="preserve">
+    <value>May mắn thay, sự bảo hộ của Lugar có thể giúp tìm ra con đường để tiến vào Barrack của Balgass. Hãy vào khu vực đó, tiêu diệt binh lính và thu thập thông tin chính xác. Ngươi có sẵn lòng mang về dữ liệu cần thiết không?</value>
+    <comment>legacy_id=161</comment>
+  </data>
+  <data name="Answer_161_Slot_0" xml:space="preserve">
+    <value>Nghe lại.</value>
+    <comment>legacy_id=2610</comment>
+  </data>
+  <data name="Answer_161_Slot_1" xml:space="preserve">
+    <value>Chấp nhận yêu cầu</value>
+    <comment>legacy_id=2611</comment>
+  </data>
+  <data name="Answer_161_Slot_2" xml:space="preserve">
+    <value>Từ chối yêu cầu</value>
+    <comment>legacy_id=2612</comment>
+  </data>
+  <data name="Text_162" xml:space="preserve">
+    <value>Hãy đến nghĩa địa phía bắc của khu vực Cry Wolf và tìm nơi ẩn náu của binh lính từ Barrack của Balgass. Phước lành của Lugar đã khiến một kẻ có được trí khôn. Hắn tự xưng là Werewolf Guardsman.</value>
+    <comment>legacy_id=162</comment>
+  </data>
+  <data name="Answer_162_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2620</comment>
+  </data>
+  <data name="Text_163" xml:space="preserve">
+    <value>Hắn sẽ dẫn ngươi đến Barrack của Balgass. Hãy tiến vào khu vực đó và tiêu diệt tối thiểu 10 quái vật trong Barrack.</value>
+    <comment>legacy_id=163</comment>
+  </data>
+  <data name="Answer_163_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện</value>
+    <comment>legacy_id=2630</comment>
+  </data>
+  <data name="Text_164" xml:space="preserve">
+    <value>Ngươi đã hoàn thành nhiệm vụ một cách an toàn, ta trân trọng công sức và ý chí kiên cường của ngươi.</value>
+    <comment>legacy_id=164</comment>
+  </data>
+  <data name="Answer_164_Slot_0" xml:space="preserve">
+    <value>Tiếp tục nói chuyện.</value>
+    <comment>legacy_id=2640</comment>
+  </data>
+  <data name="Text_165" xml:space="preserve">
+    <value>Ngươi đã mang lại sự giúp đỡ to lớn để xây dựng hòa bình cho lục địa MU và Cry Wolf, nhờ vào thông tin thu thập được và toàn bộ số quái vật đã bị tiêu diệt.</value>
+    <comment>legacy_id=165</comment>
+  </data>
+  <data name="Answer_165_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện</value>
+    <comment>legacy_id=2650</comment>
+  </data>
+  <data name="Text_166" xml:space="preserve">
+    <value>Ngươi vẫn chưa đủ tư cách. Hãy đến gặp Security Guard Mallon, và quay lại khi ngươi đã hoàn toàn đủ điều kiện cho nhiệm vụ này.</value>
+    <comment>legacy_id=166</comment>
+  </data>
+  <data name="Answer_166_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện.</value>
+    <comment>legacy_id=2660</comment>
+  </data>
+  <data name="Text_167" xml:space="preserve">
+    <value>Ngươi không có đủ tiền. Hãy dâng 10,000,000 Zen cho Lugard để đăng ký nhiệm vụ này.</value>
+    <comment>legacy_id=167</comment>
+  </data>
+  <data name="Answer_167_Slot_0" xml:space="preserve">
+    <value>Ta sẽ quay lại khi đã sẵn sàng.</value>
+    <comment>legacy_id=2670</comment>
+  </data>
+  <data name="Text_168" xml:space="preserve">
+    <value>Lòng dũng cảm chủ động của ngươi đã thắp lên niềm hy vọng lớn lao cho tất cả chúng ta.</value>
+    <comment>legacy_id=168</comment>
+  </data>
+  <data name="Answer_168_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2680</comment>
+  </data>
+  <data name="Text_169" xml:space="preserve">
+    <value>Balgass đã ẩn mình ở một nơi riêng biệt để hồi phục cơ thể mệt mỏi của hắn.</value>
+    <comment>legacy_id=169</comment>
+  </data>
+  <data name="Answer_169_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2690</comment>
+  </data>
+  <data name="Text_170" xml:space="preserve">
+    <value>Để hoàn thành nhiệm vụ mà Lugar đã ủy thác, cần phải tìm ra vị trí chính xác của Balgass và tiêu diệt đội quân đang được huấn luyện.</value>
+    <comment>legacy_id=170</comment>
+  </data>
+  <data name="Answer_170_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2700</comment>
+  </data>
+  <data name="Text_171" xml:space="preserve">
+    <value>Nhiệm vụ cuối cùng tiếp nối sau nhiệm vụ của Lugar bao gồm một thử thách to lớn và khó khăn. Ngươi vẫn còn hứng thú chứ?</value>
+    <comment>legacy_id=171</comment>
+  </data>
+  <data name="Answer_171_Slot_0" xml:space="preserve">
+    <value>Nghe lại.</value>
+    <comment>legacy_id=2710</comment>
+  </data>
+  <data name="Answer_171_Slot_1" xml:space="preserve">
+    <value>Chấp nhận yêu cầu</value>
+    <comment>legacy_id=2711</comment>
+  </data>
+  <data name="Answer_171_Slot_2" xml:space="preserve">
+    <value>Từ chối yêu cầu</value>
+    <comment>legacy_id=2712</comment>
+  </data>
+  <data name="Text_172" xml:space="preserve">
+    <value>Hãy tiến vào bên trong qua cánh cửa ở rìa phía bắc của Barrack thuộc Balgass; chúng ta sẽ chuẩn bị sẵn sàng nơi đó trước.</value>
+    <comment>legacy_id=172</comment>
+  </data>
+  <data name="Answer_172_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện</value>
+    <comment>legacy_id=2720</comment>
+  </data>
+  <data name="Text_173" xml:space="preserve">
+    <value>Chúc mừng, ngươi đã vượt qua bài thử cuối cùng của Lugar. Và giờ đây, phước lành của ngài sẽ theo ngươi đến bất cứ nơi đâu.</value>
+    <comment>legacy_id=173</comment>
+  </data>
+  <data name="Answer_173_Slot_0" xml:space="preserve">
+    <value>Tiếp tục lắng nghe.</value>
+    <comment>legacy_id=2730</comment>
+  </data>
+  <data name="Text_174" xml:space="preserve">
+    <value>Công sức của ngươi đã được đền đáp xứng đáng, giữ gìn hòa bình cho lục địa MU và Cry Wolf trước mối đe dọa mới từ Balgass. Ta vô cùng trân trọng sự giúp đỡ của ngươi.</value>
+    <comment>legacy_id=174</comment>
+  </data>
+  <data name="Answer_174_Slot_0" xml:space="preserve">
+    <value>Kết thúc câu chuyện</value>
+    <comment>legacy_id=2740</comment>
+  </data>
+</root>
