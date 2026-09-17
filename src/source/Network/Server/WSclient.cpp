@@ -10228,20 +10228,18 @@ void ReceiveEventChipInfomation(const BYTE* ReceiveBuffer)
     }
 
     if (g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET)
+    {
+        ZeroMemory(g_strGiftName, sizeof(char) * 64);
 
-        if (g_bEventChipDialogEnable == EVENT_SCRATCH_TICKET)
-        {
-            ZeroMemory(g_strGiftName, sizeof(char) * 64);
-
-            ClearInput(FALSE);
-            InputTextMax[0] = 12;
-            InputNumber = 1;
-            InputEnable = false;
-            GoldInputEnable = false;
-            InputGold = 0;
-            StorageGoldFlag = 0;
-            g_bScratchTicket = true;
-        }
+        ClearInput(FALSE);
+        InputTextMax[0] = 12;
+        InputNumber = 1;
+        InputEnable = false;
+        GoldInputEnable = false;
+        InputGold = 0;
+        StorageGoldFlag = 0;
+        g_bScratchTicket = true;
+    }
 }
 
 void ReceiveEventChip(const BYTE* ReceiveBuffer)
