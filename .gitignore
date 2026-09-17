@@ -76,3 +76,7 @@ src/graphify-out/
 
 # Local-only files
 docs/reviews/
+
+# Python bytecode caches (tools/)
+__pycache__/
+*.pyc
