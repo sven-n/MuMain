@@ -39,7 +39,7 @@ WZResult CShopList::LoadCategroy(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    const auto narrowPath = mu_narrow_path(szFilePath);
+    const auto narrowPath = mu_open_path(szFilePath);
     ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
@@ -106,7 +106,7 @@ WZResult CShopList::LoadPackage(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    const auto narrowPath = mu_narrow_path(szFilePath);
+    const auto narrowPath = mu_open_path(szFilePath);
     ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
@@ -158,7 +158,7 @@ WZResult CShopList::LoadProduct(const wchar_t* szFilePath) // OK
 
     std::ifstream ifs;
 
-    const auto narrowPath = mu_narrow_path(szFilePath);
+    const auto narrowPath = mu_open_path(szFilePath);
     ifs.open(narrowPath, std::ifstream::in);
 
     DWORD LastError = GetLastError();
@@ -222,7 +222,7 @@ FILE_ENCODE CShopList::IsFileEncodingUtf8(const wchar_t* szFilePath) // OK
 {
     std::ifstream ifs;
 
-    ifs.open(mu_narrow_path(szFilePath), std::ifstream::in);
+    ifs.open(mu_open_path(szFilePath), std::ifstream::in);
 
     if (!ifs.is_open())
     {
