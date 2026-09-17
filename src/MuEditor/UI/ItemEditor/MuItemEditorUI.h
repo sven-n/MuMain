@@ -13,6 +13,8 @@ class CMuItemEditorUI
 public:
     static CMuItemEditorUI& GetInstance();
 
+    static bool HasInstance();
+
     void Render(bool& showEditor);
     void ClearSearch() { m_szItemSearchBuffer[0] = '\0'; }
     void SaveColumnPreferences();
