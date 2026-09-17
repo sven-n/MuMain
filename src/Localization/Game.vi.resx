@@ -9665,6 +9665,9 @@
     <value>Biến thành Panda.</value>
     <comment>legacy_id=2743</comment>
   </data>
+  <data name="Zen increase %d%%" xml:space="preserve">
+    <value>Tăng %d%% Zen</value>
+  </data>
   <data name="Zen increase 50%%" xml:space="preserve">
     <value>Tăng 50%% Zen</value>
     <comment>legacy_id=2744</comment>

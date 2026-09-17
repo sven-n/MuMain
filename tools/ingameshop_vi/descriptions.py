@@ -8,7 +8,7 @@ translation keeps the same number of '#' in the same places.
 
 DESCRIPTIONS = {
 "*Exp gain increase#*Auto life increase at 5%#*Not applicable to Master Level.#*You may use it with Seal of Ascension or Seal of Wealth#*You cannot use Seal of Divinity at the same time.":
-"*Tăng kinh nghiệm nhận được#*Tự hồi 5% sinh lực#*Không áp dụng cho cấp Master.#*Dùng chung được với Ấn Thăng Hoa hoặc Ấn Phú Quý#*Không dùng chung với Ấn Thần Thánh.",
+"*Tăng 5% hồi phục sinh lực#*Không tăng kinh nghiệm#*Hiệu lực 30 phút.#*Dùng chung được với Ấn Thăng Hoa hoặc Ấn Phú Quý#*Dùng chung được với Ấn Thần Thánh.",
 
 "*Gold Channel Ticket_30 Day + 115 Goblin Point##*This is an exclusive ticket to enter Gold Channel.":
 "*Vé Kênh Vàng_30 Ngày + 115 Điểm Goblin##*Vé riêng để vào Kênh Vàng.",
@@ -17,25 +17,25 @@ DESCRIPTIONS = {
 "*Vé Kênh Vàng_7 Ngày + 40 Điểm Goblin##*Vé riêng để vào Kênh Vàng.",
 
 "*Increases experience gained and improves item drop rate.#*Not applicable to Master Level.#*You may use it with Seal of Healing or Seal of Divinity#*You cannot use Seal of Ascension at the same time.#":
-"*Tăng kinh nghiệm nhận được và tăng tỉ lệ rơi vật phẩm.#*Không áp dụng cho cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Không dùng chung với Ấn Thăng Hoa.#",
+"*Tăng 30% Zen nhặt được, không tăng kinh nghiệm.#*Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Dùng chung được với Ấn Thăng Hoa.#",
 
 "*Increases experience gained from killing monters.#*Not applicable to Master Level Characters.#*You may use it with Seal of Healing or Seal of Divinity#*You cannot use Seal of Wealth at the same time.#":
-"*Tăng kinh nghiệm nhận được khi diệt quái.#*Không áp dụng cho nhân vật cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Không dùng chung với Ấn Phú Quý.#",
+"*Tăng 30% kinh nghiệm khi diệt quái.#*Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Dùng chung được với Ấn Phú Quý.#",
 
 "*Item drop increase+Auto mana increase at 5%#*You may use it with Seal of Ascension or Seal of Wealth#*You cannot use Seal of Healing at the same time.":
-"*Tăng tỉ lệ rơi vật phẩm + Tự hồi 5% mana#*Dùng chung được với Ấn Thăng Hoa hoặc Ấn Phú Quý#*Không dùng chung với Ấn Hồi Phục.",
+"*Tự hồi 5% mana, không tăng tỉ lệ rơi vật phẩm#*Dùng chung được với Ấn Thăng Hoa hoặc Ấn Phú Quý#*Dùng chung được với Ấn Hồi Phục.",
 
 "*Master Seal of Ascension_30 Day + 70 Goblin Point##*Increases experience gained from killing monsters.#*Master Level only#*You cannot use Master Seal of Wealth at the same time.":
-"*Ấn Thăng Hoa Master_30 Ngày + 70 Điểm Goblin##*Tăng kinh nghiệm nhận được khi diệt quái.#*Chỉ dành cho cấp Master#*Không dùng chung với Ấn Phú Quý Master.",
+"*Ấn Thăng Hoa Master_30 Ngày + 70 Điểm Goblin##*Tăng 50% kinh nghiệm khi diệt quái.#*Hiệu lực 2 giờ#*Dùng chung được với Ấn Phú Quý Master.",
 
 "*Master Seal of Ascension_7 Day + 25 Goblin Point##*Increases experience gained from killing monsters.#*Master Level only#*You cannot use Master Seal of Wealth at the same time.":
-"*Ấn Thăng Hoa Master_7 Ngày + 25 Điểm Goblin##*Tăng kinh nghiệm nhận được khi diệt quái.#*Chỉ dành cho cấp Master#*Không dùng chung với Ấn Phú Quý Master.",
+"*Ấn Thăng Hoa Master_7 Ngày + 25 Điểm Goblin##*Tăng 50% kinh nghiệm khi diệt quái.#*Hiệu lực 2 giờ#*Dùng chung được với Ấn Phú Quý Master.",
 
 "*Master Seal of Wealth_30 Day + 105 Goblin Point##*Increases experience gained and improves item drop rate.#*Master Level only#*You cannot use Master Seal of Ascension at the same time.":
-"*Ấn Phú Quý Master_30 Ngày + 105 Điểm Goblin##*Tăng kinh nghiệm nhận được và tăng tỉ lệ rơi vật phẩm.#*Chỉ dành cho cấp Master#*Không dùng chung với Ấn Thăng Hoa Master.",
+"*Ấn Phú Quý Master_30 Ngày + 105 Điểm Goblin##*Tăng 50% Zen nhặt được, không tăng kinh nghiệm.#*Hiệu lực 2 giờ#*Dùng chung được với Ấn Thăng Hoa Master.",
 
 "*Master Seal of Wealth_7 Day + 35 Goblin Point##*Increases experience gained and improves item drop rate.#*Master Level only#*You cannot use Master Seal of Ascension at the same time.":
-"*Ấn Phú Quý Master_7 Ngày + 35 Điểm Goblin##*Tăng kinh nghiệm nhận được và tăng tỉ lệ rơi vật phẩm.#*Chỉ dành cho cấp Master#*Không dùng chung với Ấn Thăng Hoa Master.",
+"*Ấn Phú Quý Master_7 Ngày + 35 Điểm Goblin##*Tăng 50% Zen nhặt được, không tăng kinh nghiệm.#*Hiệu lực 2 giờ#*Dùng chung được với Ấn Thăng Hoa Master.",
 
 "*Resurrect automatically in the place character died#(When game client is once closed all the restored data will be initialized#It cannot be used in event maps)#*The coordinates will be initialized when character reconnects.#*You can only use once per item.":
 "*Tự động hồi sinh ngay tại nơi nhân vật chết#(Khi đóng game, toàn bộ dữ liệu đã lưu sẽ bị xoá#Không dùng được ở bản đồ sự kiện)#*Toạ độ sẽ bị xoá khi nhân vật kết nối lại.#*Mỗi vật phẩm chỉ dùng được một lần.",
@@ -44,16 +44,16 @@ DESCRIPTIONS = {
 "*Quay về nơi bạn đã dùng Bùa Di Chuyển lần đầu #(Khi đóng game, toàn bộ dữ liệu đã lưu sẽ bị xoá.#Không dùng được ở bản đồ sự kiện)#*Toạ độ sẽ bị xoá khi nhân vật kết nối lại.#*Mỗi vật phẩm chỉ dùng được một lần.",
 
 "*Seal of Ascension_30 Day + 70 Goblin Point##*Increases experience gained from killing monters.#*Not applicable to Master Level Characters.#*You may use it with Seal of Healing or Seal of Divinity#*You cannot use Seal of Wealth at the same time.":
-"*Ấn Thăng Hoa_30 Ngày + 70 Điểm Goblin##*Tăng kinh nghiệm nhận được khi diệt quái.#*Không áp dụng cho nhân vật cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Không dùng chung với Ấn Phú Quý.",
+"*Ấn Thăng Hoa_30 Ngày + 70 Điểm Goblin##*Tăng 30% kinh nghiệm khi diệt quái.#*Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Dùng chung được với Ấn Phú Quý.",
 
 "*Seal of Ascension_7 Day + 25 Goblin Point##*Increases experience gained from killing monters.#*Not applicable to Master Level Characters.#*You may use it with Seal of Healing or Seal of Divinity#*You cannot use Seal of Wealth at the same time.":
-"*Ấn Thăng Hoa_7 Ngày + 25 Điểm Goblin##*Tăng kinh nghiệm nhận được khi diệt quái.#*Không áp dụng cho nhân vật cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Không dùng chung với Ấn Phú Quý.",
+"*Ấn Thăng Hoa_7 Ngày + 25 Điểm Goblin##*Tăng 30% kinh nghiệm khi diệt quái.#*Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Dùng chung được với Ấn Phú Quý.",
 
 "*Seal of Wealth_30 Day + 105 Goblin Point##*Increases experience gained and improves item drop rate.#*Not applicable to Master Level.#*You may use it with Seal of Healing or Seal of Divinity#*You cannot use Seal of Ascension at the same time.":
-"*Ấn Phú Quý_30 Ngày + 105 Điểm Goblin##*Tăng kinh nghiệm nhận được và tăng tỉ lệ rơi vật phẩm.#*Không áp dụng cho cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Không dùng chung với Ấn Thăng Hoa.",
+"*Ấn Phú Quý_30 Ngày + 105 Điểm Goblin##*Tăng 30% Zen nhặt được, không tăng kinh nghiệm.#*Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Dùng chung được với Ấn Thăng Hoa.",
 
 "*Seal of Wealth_7 Day + 35 Goblin Point##*Increases experience gained and improves item drop rate.#*Not applicable to Master Level.#*You may use it with Seal of Healing or Seal of Divinity#*You cannot use Seal of Ascension at the same time.":
-"*Ấn Phú Quý_7 Ngày + 35 Điểm Goblin##*Tăng kinh nghiệm nhận được và tăng tỉ lệ rơi vật phẩm.#*Không áp dụng cho cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Không dùng chung với Ấn Thăng Hoa.",
+"*Ấn Phú Quý_7 Ngày + 35 Điểm Goblin##*Tăng 30% Zen nhặt được, không tăng kinh nghiệm.#*Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#*Dùng chung được với Ấn Hồi Phục hoặc Ấn Thần Thánh#*Dùng chung được với Ấn Thăng Hoa.",
 
 "A random item can be obtained when the box is dropped on the field.#Better item can be obtained than Box of Kundun [+1] #Drop Item List#Excellent Weapon#Excellent Armor#Jewel#Zen#* Please keep the spare space in your inventory":
 "Nhận ngẫu nhiên một vật phẩm khi thả hộp xuống đất.#Vật phẩm tốt hơn Hộp Kundun [+1] #Danh sách vật phẩm#Vũ Khí Excellent#Giáp Excellent#Ngọc#Zen#* Hãy chừa sẵn chỗ trống trong hành trang",
@@ -80,13 +80,13 @@ DESCRIPTIONS = {
 "Có thể nhận Vũ Khí Archangel với 6 dòng Excellent qua Vé Vật Phẩm Hiếm 8.",
 
 "Attack power +40#Wizardry increase +40#Curse spell +40#Wear it with Pet Skeleton and get 30% extra EXP #100 W Coin - 1Day#500 W Coin - 7Days":
-"Sát thương +40#Pháp thuật +40#Nguyền rủa +40#Dùng chung với Thú Cưng Xương để nhận thêm 30% EXP #100 W Coin - 1 Ngày#500 W Coin - 7 Ngày",
+"Sát thương +40#Pháp thuật +40#Nguyền rủa +40#Dùng chung được với Thú Cưng Xương #100 W Coin - 1 Ngày#500 W Coin - 7 Ngày",
 
 "Attack(Wizardry) power +10%#Attack speed increase +10#100 W Coin - 1Day#500 W Coin - 7Day":
 "Sát thương (Pháp thuật) +10%#Tốc độ đánh +10#100 W Coin - 1 Ngày#500 W Coin - 7 Ngày",
 
 "Collects zen automatically.#Zen increase +50%#Defensibility + 50#*Minimum Level:28#150 W Coin - 1Day#700 W Coin - 7Day":
-"Tự động nhặt Zen.#Zen +50%#Phòng thủ +50#*Cấp tối thiểu: 28#150 W Coin - 1 Ngày#700 W Coin - 7 Ngày",
+"Tự động nhặt Zen.#Zen và kinh nghiệm +50% (+15% mỗi cấp nâng)#Phòng thủ +50 (+10 mỗi cấp nâng)#*Cấp tối thiểu: 28#150 W Coin - 1 Ngày#700 W Coin - 7 Ngày",
 
 "Creates a unlimited number of Summoner Character in one server.#Only 1 Summoner character card is needed per server.":
 "Tạo được không giới hạn nhân vật Summoner trên một máy chủ.#Mỗi máy chủ chỉ cần 1 thẻ nhân vật Summoner.",
@@ -143,10 +143,10 @@ DESCRIPTIONS = {
 "Hồi 3% HP#Hồi mana khi diệt quái bằng cấp nhân vật/8#90 W Coin - 1 Ngày#450 W Coin - 7 Ngày",
 
 "Increases  HP + 100, SD + 500 This item can't be used with Oak Charm":
-"Tăng HP +100, SD +500. Không dùng chung với Bùa Sồi",
+"Tăng 20% kinh nghiệm. Không dùng chung với Bùa Sồi",
 
 "Increases  HP + 50 This item can't be used with Golden Oak Charm":
-"Tăng HP +50. Không dùng chung với Bùa Sồi Vàng",
+"Tăng 10% kinh nghiệm. Không dùng chung với Bùa Sồi Vàng",
 
 "Increases Attack Power and Wizardry by 40%.#Increases Attack Speed by 10.#1Day - 100 W Coin#7Day - 500 W Coin#30Day - 1400 W Coin":
 "Tăng 40% sát thương và pháp thuật.#Tăng 10 tốc độ đánh.#1 Ngày - 100 W Coin#7 Ngày - 500 W Coin#30 Ngày - 1400 W Coin",
@@ -161,49 +161,49 @@ DESCRIPTIONS = {
 "Tăng 40 sát thương/pháp thuật (30 phút)#Không dùng chung với Rượu Hoa Anh Đào và Bánh Gạo Hoa Anh Đào.",
 
 "Increases Attack Speed by 15.#This item can be used with Protection, Wrath, Wizardry, Mana and Health scroll.#You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 15 tốc độ đánh.#Dùng chung được với Cuộn Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 10 tốc độ đánh.#Dùng chung được với Cuộn Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Attack Speed by 15.#This item can be used with Protection,Wrath,Wizardry,Mana and Health scroll.##You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 15 tốc độ đánh.#Dùng chung được với Cuộn Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 10 tốc độ đánh.#Dùng chung được với Cuộn Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Critical Damage + 10% This item can't be used with Statue of Hawk":
-"Tăng 10% sát thương chí mạng. Không dùng chung với Tượng Chim Ưng",
+"Tăng 100 tỉ lệ tấn công lên quái vật. Không dùng chung với Tượng Chim Ưng",
 
 "Increases Critical Damage by 20%#You cannot use Scroll of Strengthener at the same time.":
-"Tăng 20% sát thương chí mạng#Không dùng chung với Cuộn Tăng Lực.",
+"Tăng 100 tỉ lệ tấn công lên quái và 20 sát thương#Không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Critical Damage by 20%.#This item can be used with Quickness, Protection, Wrath, Wizardry, Mana and Health scroll.#You cannot use Scroll of Strengthener at the same time.":
-"Tăng 20% sát thương chí mạng.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Không dùng chung với Cuộn Tăng Lực.",
+"Tăng 100 tỉ lệ tấn công lên quái và 20 sát thương.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Defense by 60.#This item can be used with Quickness, Wrath, Wizardry, Mana and Health scroll.#You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 60 phòng thủ.#Dùng chung được với Cuộn Nhanh Nhẹn, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 20% phòng thủ.#Dùng chung được với Cuộn Nhanh Nhẹn, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Defense by 60.#This item can be used with Quickness,Wrath,Wizardry,Mana and Health scroll.##You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 60 phòng thủ.#Dùng chung được với Cuộn Nhanh Nhẹn, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 20% phòng thủ.#Dùng chung được với Cuộn Nhanh Nhẹn, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Excellent Damage + 10% This item can't be used with Statue of Goral":
 "Tăng 10% sát thương Excellent. Không dùng chung với Tượng Sơn Dương",
 
 "Increases Excellent Damage by 20%.#This item can be used with Quickness, Protection, Wrath, Wizardry, Mana and Health scroll.#You cannot use Scroll of Battle at the same time.":
-"Tăng 20% sát thương Excellent.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Không dùng chung với Cuộn Chiến Đấu.",
+"Tăng 30 sát thương và 30 phòng thủ.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật, Mana và Sinh Lực.#Không dùng chung với Cuộn Chiến Đấu.",
 
 "Increases Excellent Damage by 20%.#You cannot use Scroll of Battle at the same time.":
-"Tăng 20% sát thương Excellent.#Không dùng chung với Cuộn Chiến Đấu.",
+"Tăng 30 sát thương và 30 phòng thủ.#Không dùng chung với Cuộn Chiến Đấu.",
 
 "Increases HP by 200.#This item can be used with Quickness, Protection, Wrath, Wizardry and Mana scroll.#You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 200 HP.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Mana.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 500 HP.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Mana.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases HP by 200.#This item can be used with Quickness,Protection,Wrath,Wizardry and Mana scroll.##You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 200 HP.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Mana.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 500 HP.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Mana.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Item Drop Rate + 20%":
-"Tăng 20% tỉ lệ rơi vật phẩm",
+"Tăng 20% Zen nhặt được",
 
 "Increases MP  by 300. #This item can be used with Quickness, Protection, Wrath, Wizardry and Health scroll.#You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 300 MP. #Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 500 MP. #Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases MP  by 300. #This item can be used with Quickness,Protection,Wrath,Wizardry and Health scroll.##You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 300 MP. #Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 500 MP. #Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Pháp Thuật và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Max Life 700 (30 min)#This item can't be used with Cherry Blossom Wine and Cherry Blossom Petal at a same time.":
 "Tăng 700 sinh lực tối đa (30 phút)#Không dùng chung với Rượu Hoa Anh Đào và Cánh Hoa Anh Đào.",
@@ -212,16 +212,16 @@ DESCRIPTIONS = {
 "Tăng 700 mana tối đa (30 phút)#Không dùng chung với Bánh Gạo Hoa Anh Đào và Cánh Hoa Anh Đào.",
 
 "Increases Wizardry by 30.#This item can be used with Quickness, Protection, Wrath, Mana and Health scroll.#You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 30 pháp thuật.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Mana và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 20% sát thương pháp thuật.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Mana và Sinh Lực.#Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases Wizardry by 30.#This item can be used with Quickness,Protection,Wrath,Mana and Health scroll.##You can use this item with Battle or Strengthener scroll but Battle scroll can't be used with Strengthener scroll.":
-"Tăng 30 pháp thuật.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Mana và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
+"Tăng 20% sát thương pháp thuật.#Dùng chung được với Cuộn Nhanh Nhẹn, Bảo Vệ, Phẫn Nộ, Mana và Sinh Lực.##Dùng chung được với Cuộn Chiến Đấu hoặc Cuộn Tăng Lực, nhưng Cuộn Chiến Đấu không dùng chung với Cuộn Tăng Lực.",
 
 "Increases experience gained and improves item drop rate.#Master Level only#*You cannot use Master Seal of Ascension at the same time.":
-"Tăng kinh nghiệm nhận được và tăng tỉ lệ rơi vật phẩm.#Chỉ dành cho cấp Master#*Không dùng chung với Ấn Thăng Hoa Master.",
+"Tăng 50% Zen nhặt được, không tăng kinh nghiệm.#Hiệu lực 2 giờ#*Dùng chung được với Ấn Thăng Hoa Master.",
 
 "Increases experience gained from killing monsters.#Master Level only#*You cannot use Master Seal of Wealth at the same time.":
-"Tăng kinh nghiệm nhận được khi diệt quái.#Chỉ dành cho cấp Master#*Không dùng chung với Ấn Phú Quý Master.",
+"Tăng 50% kinh nghiệm khi diệt quái.#Hiệu lực 2 giờ#*Dùng chung được với Ấn Phú Quý Master.",
 
 "Increases the success rate of combination by 10%":
 "Tăng 10% tỉ lệ thành công khi ghép đồ",
@@ -272,10 +272,10 @@ DESCRIPTIONS = {
 "Dịch vụ xoá Cây Kỹ Năng Master#Dịch vụ đổi tên nhân vật#Dịch vụ chuyển máy chủ#Dịch vụ chuyển nhân vật##Chỉ mua được trên trang web",
 
 "Max AG Increase + level#*You cannot use SD Boost Aura at the same time.#120 W Coin - 1Day#600 W Coin - 7Day":
-"Tăng AG tối đa + cấp độ#*Không dùng chung với Hào Quang Tăng SD.#120 W Coin - 1 Ngày#600 W Coin - 7 Ngày",
+"Tăng 50 AG tối đa#*Không dùng chung với Hào Quang Tăng SD.#120 W Coin - 1 Ngày#600 W Coin - 7 Ngày",
 
 "Max SD Increase level * 10#*You cannot use AG Boost Aura at the same time.#120 W Coin - 1Day#600 W Coin - 7Day":
-"Tăng SD tối đa bằng cấp độ x 10#*Không dùng chung với Hào Quang Tăng AG.#120 W Coin - 1 Ngày#600 W Coin - 7 Ngày",
+"Tăng 10% SD tối đa#*Không dùng chung với Hào Quang Tăng AG.#120 W Coin - 1 Ngày#600 W Coin - 7 Ngày",
 
 "Moving speed increase#Defense increase +10#Damage increase +12#Damage absorption +12#*Can be equippend by Dark Wizard":
 "Tăng tốc độ di chuyển#Phòng thủ +10#Sát thương +12#Hấp thụ sát thương +12#*Dành cho Dark Wizard",
@@ -329,7 +329,7 @@ DESCRIPTIONS = {
 "Thú Cưng Gấu Trúc (7 Ngày)#Ấn Hồi Phục (7 Ngày)#Bó Ngọc Phúc Lành (10)#Bó Ngọc Linh Hồn (10)#Cuộn Bắn Liên Hoàn#Cầu Phép Mũi Tên Băng#Cầu Phép Xuyên Phá#Cầu Phép Hồi Phục",
 
 "Prevents experience to be gained.#Applicable to Master Level.#If you were using a seal already, the previous seal effects will disappea":
-"Ngăn không cho nhận kinh nghiệm.#Áp dụng cho cấp Master.#Nếu bạn đang dùng một Ấn khác, hiệu lực của Ấn cũ sẽ mất",
+"Tăng 3% hồi phục sinh lực và mana.#Hiệu lực 1 giờ, áp dụng cho cả cấp Master.#Nếu bạn đang dùng một Ấn khác, hiệu lực của Ấn cũ sẽ mất",
 
 "Resets Agility status#1EA - 200 Point#W Coin item cannot be neither traded nor thrown away.":
 "Reset điểm Nhanh Nhẹn#1 Cái - 200 Điểm#Vật phẩm W Coin không giao dịch và không vứt bỏ được.",
@@ -356,7 +356,7 @@ DESCRIPTIONS = {
 "Hồi tới 65% SD#10 Cái - 40 W Coin#Vật phẩm đã mua sẽ được chuyển vào kho. #Để dùng, hãy bấm nút SỬ DỤNG trong kho.",
 
 "Surrounding Zens are automatically collected#Attack power/Wizardry/Curse spell 20% increase#- Attack speed increase +10#- Exp 30% increase #-Wear it with Skeleton Transformation Ring and get 30% extra EXP#150 W Coin - 1Day#700 W Coin - 7Day":
-"Tự động nhặt Zen xung quanh#Tăng 20% sát thương/pháp thuật/nguyền rủa#- Tốc độ đánh +10#- Tăng 30% EXP #- Dùng chung với Nhẫn Biến Hình Xương để nhận thêm 30% EXP#150 W Coin - 1 Ngày#700 W Coin - 7 Ngày",
+"Tự động nhặt Zen xung quanh#Tăng 20% sát thương/pháp thuật/nguyền rủa#- Tốc độ đánh +10#- Tăng 50% EXP #- Dùng chung được với Nhẫn Biến Hình Xương#150 W Coin - 1 Ngày#700 W Coin - 7 Ngày",
 
 "The space of your storage can be expanded to the size 8*15.#In the case you already used this item you can’t use this item again.":
 "Mở rộng kho đồ thêm 8*15 ô.#Nếu đã dùng vật phẩm này rồi thì không dùng lại được nữa.",
@@ -386,7 +386,7 @@ DESCRIPTIONS = {
 "Biến hình thành Gấu Trúc#Tăng 50% Zen#Sát thương/Pháp thuật/Nguyền rủa +30#100 W Coin - 1 Ngày#500 W Coin - 7 Ngày",
 
 "Wizardry + 15%#Attack power +15%#Attack(Wizardry)Speed +10#130 W Coin - 1Day#600 W Coin - 7Day":
-"Pháp thuật +15%#Sát thương +15%#Tốc độ đánh (pháp thuật) +10#130 W Coin - 1 Ngày#600 W Coin - 7 Ngày",
+"Tăng 5% tỉ lệ sát thương chí mạng###130 W Coin - 1 Ngày#600 W Coin - 7 Ngày",
 
 "You can do a Goblin combination with a Sealed Golden Box to create a Golden Box##You can only use once per item.":
 "Ghép cùng Hộp Vàng Niêm Phong tại Chaos Goblin để tạo ra Hộp Vàng##Mỗi vật phẩm chỉ dùng được một lần.",

@@ -9657,6 +9657,9 @@
     <value>Transform into Panda.</value>
     <comment>legacy_id=2743</comment>
   </data>
+  <data name="Zen increase %d%%" xml:space="preserve">
+    <value>Zen increase %d%%</value>
+  </data>
   <data name="Zen increase 50%%" xml:space="preserve">
     <value>Zen increase 50%%</value>
     <comment>legacy_id=2744</comment>
