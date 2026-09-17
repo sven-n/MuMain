@@ -85,4 +85,52 @@ public unsafe partial class ConnectionManager
             ManagedLog.Write(ManagedLog.Level.Error, $"NET: Login packet staging failed, handle={handle}: {ex}");
         }
     }
+
+    /// <summary>
+    /// Sends a stat point increase request for several points at once to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="statType">The stat type (0 = strength, 1 = agility, 2 = vitality, 3 = energy, 4 = leadership).</param>
+    /// <param name="amount">The number of points to add to that stat.</param>
+    /// <remarks>
+    /// Not part of the original protocol: the original client sends one 0xF3, 0x06 packet per point, which makes
+    /// spending a big pool of level-up-points slow. The sub code 0xE0 is unused by the original client.
+    /// There is no generated struct for it, because the packet definitions come from the NuGet package.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SendIncreaseCharacterStatPointMultiple")]
+    public static void SendIncreaseCharacterStatPointMultiple(int handle, byte @statType, ushort @amount)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Stat point increase send skipped; connection handle={handle} not found");
+            return;
+        }
+
+        if (@amount == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                const int length = 7;
+                var packet = pipeWriter.GetSpan(length)[..length];
+                packet[0] = 0xC1;
+                packet[1] = length;
+                packet[2] = 0xF3;
+                packet[3] = 0xE0;
+                packet[4] = @statType;
+                packet[5] = (byte)(@amount >> 8);
+                packet[6] = (byte)(@amount & 0xFF);
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Stat point increase packet staging failed, handle={handle}: {ex}");
+        }
+    }
 }

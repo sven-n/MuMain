@@ -12976,4 +12976,34 @@
   <data name="%s Transformation Ring" xml:space="preserve">
     <value>%s Transformation Ring</value>
   </data>
+  <data name="PvE" xml:space="preserve">
+    <value>PvE</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>PvP</value>
+  </data>
+  <data name="Full Strength" xml:space="preserve">
+    <value>Full Strength</value>
+  </data>
+  <data name="Full Energy" xml:space="preserve">
+    <value>Full Energy</value>
+  </data>
+  <data name="Full Command" xml:space="preserve">
+    <value>Full Command</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Support</value>
+  </data>
+  <data name="Suggest" xml:space="preserve">
+    <value>Suggest</value>
+  </data>
+  <data name="Suggested stat points" xml:space="preserve">
+    <value>Suggested stat points</value>
+  </data>
+  <data name="Click to switch build preset" xml:space="preserve">
+    <value>Click to switch build preset</value>
+  </data>
+  <data name="Add all points using the suggested build" xml:space="preserve">
+    <value>Add all points using the suggested build</value>
+  </data>
 </root>

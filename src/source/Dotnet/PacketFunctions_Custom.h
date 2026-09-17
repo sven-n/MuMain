@@ -17,6 +17,8 @@
 
 #include <coreclr_delegates.h>
 
+#include "PacketFunctions_CommonEnums.h"
+
 /// <summary>
 /// Extension methods to start writing messages of this namespace on a <see cref="Connection"/>.
 /// </summary>
@@ -64,6 +66,17 @@ public:
     /// </remarks>
     void SendLogin(const wchar_t* username, const wchar_t* password, const BYTE* clientVersion,
                    const BYTE* clientSerial);
+
+    /// <summary>
+    /// Sends a stat point increase request for several points at once to this connection.
+    /// </summary>
+    /// <param name="statType">The stat to increase.</param>
+    /// <param name="amount">The number of points to add to that stat.</param>
+    /// <remarks>
+    /// Not part of the original protocol (0xF3, 0xE0): the original client sends one packet per point, which makes
+    /// spending a big pool of level-up-points slow. The server caps the amount at the available points.
+    /// </remarks>
+    void SendIncreaseCharacterStatPointMultiple(CharacterStatAttribute statType, uint16_t amount);
 };
 
 /// <summary>

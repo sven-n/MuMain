@@ -36,6 +36,25 @@ void PacketFunctions_ClientToServer_Custom::SendLogin(const wchar_t* username, c
                      clientSerial);
 }
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendIncreaseCharacterStatPointMultipleFn)(int32_t, BYTE, uint16_t);
+
+void PacketFunctions_ClientToServer_Custom::SendIncreaseCharacterStatPointMultiple(CharacterStatAttribute statType,
+                                                                                  uint16_t amount)
+{
+    static SendIncreaseCharacterStatPointMultipleFn dotnet_SendIncreaseCharacterStatPointMultiple = nullptr;
+    if (!dotnet_SendIncreaseCharacterStatPointMultiple)
+    {
+        dotnet_SendIncreaseCharacterStatPointMultiple = LoadManagedSymbol<SendIncreaseCharacterStatPointMultipleFn>(
+            "ConnectionManager_SendIncreaseCharacterStatPointMultiple");
+        if (!dotnet_SendIncreaseCharacterStatPointMultiple)
+        {
+            return;
+        }
+    }
+
+    dotnet_SendIncreaseCharacterStatPointMultiple(this->GetHandle(), static_cast<BYTE>(statType), amount);
+}
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExtFn)(int32_t, uint16_t, uint32_t);
 
 void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)

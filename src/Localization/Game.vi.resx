@@ -12984,4 +12984,34 @@
   <data name="%s Transformation Ring" xml:space="preserve">
     <value>Nhẫn Biến Hình %s</value>
   </data>
+  <data name="PvE" xml:space="preserve">
+    <value>PvE</value>
+  </data>
+  <data name="PvP" xml:space="preserve">
+    <value>PvP</value>
+  </data>
+  <data name="Full Strength" xml:space="preserve">
+    <value>Full Sức mạnh</value>
+  </data>
+  <data name="Full Energy" xml:space="preserve">
+    <value>Full Năng lượng</value>
+  </data>
+  <data name="Full Command" xml:space="preserve">
+    <value>Full Mệnh lệnh</value>
+  </data>
+  <data name="Support" xml:space="preserve">
+    <value>Hỗ trợ</value>
+  </data>
+  <data name="Suggest" xml:space="preserve">
+    <value>Gợi ý</value>
+  </data>
+  <data name="Suggested stat points" xml:space="preserve">
+    <value>Điểm gợi ý</value>
+  </data>
+  <data name="Click to switch build preset" xml:space="preserve">
+    <value>Bấm để đổi kiểu build</value>
+  </data>
+  <data name="Add all points using the suggested build" xml:space="preserve">
+    <value>Cộng toàn bộ điểm theo build gợi ý</value>
+  </data>
 </root>
