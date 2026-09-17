@@ -3133,6 +3133,10 @@ void RenderItemInfo(int sx, int sy, ITEM* ip, bool Sell, int Inventype, bool bIt
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;
         TextNum++;
+        mu_swprintf(TextList[TextNum], I18N::Game::EXPRate50Increase);
+        TextListColor[TextNum] = TEXT_COLOR_BLUE;
+        TextBold[TextNum] = false;
+        TextNum++;
         mu_swprintf(TextList[TextNum], I18N::Game::IncreaseDefensiveSkill50);
         TextListColor[TextNum] = TEXT_COLOR_BLUE;
         TextBold[TextNum] = false;

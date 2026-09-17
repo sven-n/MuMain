@@ -527,6 +527,14 @@ bool CNewUIInventoryActionController::ApplyJewels(CNewUIInventoryCtrl* targetCon
         bSuccess = false;
     }
 
+    // The pet unicorn is upgraded with the jewel of bless and repaired with the jewel of life,
+    // although it isn't worn in one of the slots which the checks above allow.
+    if (iType == ITEM_PET_UNICORN)
+    {
+        bSuccess = (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iLevel < 6) ||
+                   (pPickItem->Type == ITEM_JEWEL_OF_LIFE && iDurability != 255);
+    }
+
     if (pPickItem->Type == ITEM_JEWEL_OF_BLESS && iType == ITEM_HORN_OF_FENRIR && iDurability != 255)
     {
         CFenrirRepairMsgBox* pMsgBox = nullptr;
@@ -640,7 +648,13 @@ bool CNewUIInventoryActionController::TryConsumeItem(CNewUIInventoryCtrl* target
         pItem->Type == ITEM_POTION + 94 ||
         (pItem->Type >= ITEM_CHERRY_BLOSSOM_WINE && pItem->Type <= ITEM_CHERRY_BLOSSOM_FLOWER_PETAL) ||
         (pItem->Type >= ITEM_POTION + 97 && pItem->Type <= ITEM_POTION + 98) || pItem->Type == ITEM_HELPER + 81 ||
-        pItem->Type == ITEM_HELPER + 82 || pItem->Type == ITEM_POTION + 133)
+        pItem->Type == ITEM_HELPER + 82 || pItem->Type == ITEM_POTION + 133 ||
+        // Cash shop seals and auras. Without these the double click is silently swallowed
+        // here and falls through to the equip path, so the items can never be used.
+        (pItem->Type >= ITEM_HELPER + 43 && pItem->Type <= ITEM_HELPER + 45) ||
+        pItem->Type == ITEM_HELPER + 62 || pItem->Type == ITEM_HELPER + 63 ||
+        pItem->Type == ITEM_HELPER + 93 || pItem->Type == ITEM_HELPER + 94 ||
+        (pItem->Type >= ITEM_HELPER + 103 && pItem->Type <= ITEM_HELPER + 105))
     {
         SendRequestUse(iIndex, 0);
         if (isApple)
