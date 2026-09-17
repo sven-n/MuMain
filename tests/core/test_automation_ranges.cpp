@@ -2,13 +2,16 @@
 // the weapon -> range table and the result vocabulary the auto-helper and the
 // control socket share. Driving a character needs the world; these do not.
 //
-// Run: ctest --test-dir out/build/linux-x64 --build-config Release -R "Automation"
+// Run: ctest --test-dir <build directory> --build-config Release -R "Automation"
 
 #include "doctest.h"
 
 #include "GameLogic/Automation/Attack.h"
 #include "GameLogic/Automation/Movement.h"
 #include "GameLogic/Automation/Pickup.h"
+
+// MSVC needs a complete std::basic_ostream to print a string_view comparison.
+#include <ostream>
 
 using namespace GameLogic::Automation;
 

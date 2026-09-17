@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include "App/Control/ControlTaps.h"
 #include "Core/Utilities/Log/MuLogger.h"
 #include "UI/Chat/Chat.h"
 #include <memory>
@@ -996,6 +997,7 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
         memset(GuildMark[MARK_EDIT].GuildName, 0, sizeof(GuildMark[MARK_EDIT].GuildName));
         SelectMarkColor = 0;
         g_ErrorReport.Write(L"[ReceiveLogOut]");
+        App::Control::Events::RecordDisconnected("the server closed the session");
         if (SocketClient != nullptr)
         {
             SocketClient->Close();
@@ -1025,6 +1027,8 @@ BOOL ReceiveLogOut(const BYTE* ReceiveBuffer, BOOL bEncrypted)
 
 void ResetClientToLoginScene()
 {
+    App::Control::Events::RecordDisconnected("the game session was torn down");
+
     // Mirror of the in-game logout path (see ReceiveLogOut, case 2): release the
     // active game session and return to a clean login scene. The auto-reconnect
     // flow always runs this from MAIN_SCENE, so the teardown is unconditional.
@@ -1925,6 +1929,8 @@ void ReceiveChat(const BYTE* ReceiveBuffer)
                 g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_CHAT_MESSAGE);
             }
         }
+
+        App::Control::Events::RecordChatLine(ID, Text, "public");
     }
 }
 
@@ -1954,6 +1960,8 @@ void ReceiveChatWhisper(const BYTE* ReceiveBuffer)
     }
 
     g_pChatListBox->AddText(ID, Text, SEASON3B::TYPE_WHISPER_MESSAGE);
+
+    App::Control::Events::RecordChatLine(ID, Text, "whisper");
 }
 
 void ReceiveChatWhisperResult(const BYTE* ReceiveBuffer)
@@ -2703,6 +2711,8 @@ void ReceiveCreatePlayerViewportExtended(std::span<const BYTE> ReceiveBuffer)
         }
     }
 
+    App::Control::Events::RecordViewEnterKey(Key);
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x12 [ReceiveCreatePlayerViewportExtended]");
 }
 
@@ -2954,6 +2964,8 @@ void ReceiveCreateMonsterViewport(const BYTE* ReceiveBuffer)
             MUHelper::g_MuHelper.AddTarget(Key, false);
         }
 
+        App::Control::Events::RecordViewEnterKey(Key);
+
         for (int j = 0; j < Data2->s_BuffCount; ++j)
         {
             RegisterBuff(static_cast<eBuffState>(Data2->s_BuffEffectState[j]), o);
@@ -3179,6 +3191,8 @@ void ReceiveDeleteCharacterViewport(const BYTE* ReceiveBuffer)
             UnRegisterBuff(g_CharacterBuff((&pCha->Object), k), &pCha->Object);
         }
 
+        App::Control::Events::RecordViewLeaveKey(Key);
+
         DeleteCharacter(Key);
         CHARACTER* pPlayer = FindCharacterTagShopTitle(Key);
         if (pPlayer)
@@ -3206,6 +3220,8 @@ void ReceiveDamage(const BYTE* ReceiveBuffer)
         CharacterAttribute->Shield = ShieldDamage;
     else
         CharacterAttribute->Shield = 0;
+
+    App::Control::Events::RecordAttackDamage(AttackPlayer, HeroKey, Damage, ShieldDamage, 0);
 }
 
 void ReceiveAttackDamageCastle(CHARACTER* c, OBJECT* o, const bool success, const int key, const int damage,
@@ -3558,6 +3574,8 @@ void ReceiveAttackDamageExtended(const BYTE* ReceiveBuffer)
         ReceiveAttackDamage(c, o, Success, Key, Damage, ShieldDamage, DamageType, bRepeatedly, bEndRepeatedly,
                             bDoubleEnable, bComboEnable);
     }
+
+    App::Control::Events::RecordAttackDamage(AttackPlayer, Key, Damage, ShieldDamage, DamageType);
 }
 
 void ReceiveAction(const BYTE* ReceiveBuffer, int Size)
@@ -5717,6 +5735,9 @@ BOOL ReceiveDieExp(const BYTE* ReceiveBuffer, BOOL bEncrypted)
     c->Dead = 1;
     c->Movement = false;
 
+    App::Control::Events::RecordDeathOf(Key, HeroKey);
+    App::Control::Events::RecordExperienceGain(Exp, Damage);
+
     if (gCharacterManager.IsMasterExperienceActive(CharacterAttribute->Class, CharacterAttribute->Level) == true)
     {
         g_pMainFrame->SetPreExp_Wide(Master_Level_Data.lMasterLevel_Experince);
@@ -5929,6 +5950,8 @@ void ReceiveDie(const BYTE* ReceiveBuffer, int Size)
 
     c->m_byDieType = SkillType;
 
+    App::Control::Events::RecordDeathOf(Key, -1);
+
     if (gMapManager.InBloodCastle() == true)
     {
         FallingStartCharacter(c, o);
@@ -6002,6 +6025,7 @@ void ReceiveCreateMoney(std::span<const BYTE> ReceiveBuffer)
 
     CreateMoneyDrop(&Items[Data->Id], Data->Amount, Position, Data->IsFreshDrop);
     MUHelper::g_MuHelper.AddItem(Data->Id, {Data->PositionX, Data->PositionY});
+    App::Control::Events::RecordDropAppeared(Data->Id);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x20 [ReceiveCreateMoney]");
 }
@@ -6045,6 +6069,7 @@ void ReceiveCreateItemViewportExtended(std::span<const BYTE> ReceiveBuffer)
 
         CreateItemDrop(&Items[id], params, Position, isFreshDrop);
         MUHelper::g_MuHelper.AddItem(id, {itemStartData->PositionX, itemStartData->PositionY});
+        App::Control::Events::RecordDropAppeared(id);
 
         Offset += length;
     }
@@ -6062,6 +6087,8 @@ void ReceiveDeleteItemViewport(const BYTE* ReceiveBuffer)
         int Key = ((int)(Data2->KeyH) << 8) + Data2->KeyL;
         if (Key < 0 || Key >= MAX_ITEMS)
             Key = 0;
+        App::Control::Events::RecordDropVanished(Key, "gone");
+
         Items[Key].Object.Live = false;
         Offset += sizeof(PDELETE_CHARACTER);
 
@@ -6887,6 +6914,7 @@ void ReceiveRepair(const BYTE* ReceiveBuffer)
 
 void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
 {
+
     if (Size >= sizeof(PRECEIVE_LEVEL_UP_EXTENDED))
     {
         auto Data = (LPPRECEIVE_LEVEL_UP_EXTENDED)ReceiveBuffer;
@@ -6947,6 +6975,8 @@ void ReceiveLevelUp(const BYTE* ReceiveBuffer, int Size)
         CreateEffect(BITMAP_MAGIC + 1, o->Position, o->Angle, o->Light, 0, o);
     }
     PlayBuffer(SOUND_LEVEL_UP);
+
+    App::Control::Events::RecordLevelUp(CharacterAttribute->Level);
 
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x05 [ReceiveLevelUp]");
 }
@@ -7078,6 +7108,8 @@ void ReceiveStatsExtended(const BYTE* ReceiveBuffer)
 
         break;
     }
+
+    App::Control::Events::RecordHeroStats();
 }
 
 void ReceivePK(const BYTE* ReceiveBuffer)
@@ -7394,6 +7426,8 @@ void ReceivePartyList(const BYTE* ReceiveBuffer)
         Party[i].index = -1;
     }
 
+    App::Control::Events::RecordPartyChange("list", Party[0].Name);
+
     g_ConsoleDebug->Write(MCD_RECEIVE, L"0x42 [ReceivePartyList(partynum : %d)]", Data->Count);
 }
 
@@ -7416,6 +7450,8 @@ void ReceivePartyInfo(const BYTE* ReceiveBuffer)
 
 void ReceivePartyLeave(const BYTE* ReceiveBuffer)
 {
+    App::Control::Events::RecordPartyChange("left", L"");
+
     PartyNumber = 0;
     memset(Party, 0, sizeof(Party));
     for (int i = 0; i < MAX_PARTYS; i++)

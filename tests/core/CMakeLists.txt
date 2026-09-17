@@ -72,10 +72,33 @@ mu_add_test(
         MuClient
 )
 
+# The local-socket transport exists only in builds with the control socket.
+if(ENABLE_CONTROL_SOCKET)
+    mu_add_test(
+        NAME test_local_socket
+        SOURCES
+            test_local_socket.cpp
+            ${CMAKE_SOURCE_DIR}/src/source/Core/Platform/LocalSocket.cpp
+        # The transport and the test's own client side are Winsock calls on
+        # Windows; on POSIX they come from libc.
+        LINK_LIBS
+            $<$<BOOL:${WIN32}>:ws2_32>
+    )
+endif()
+
 mu_add_test(
     NAME test_automation_ranges
     SOURCES
         test_automation_ranges.cpp
+)
+
+mu_add_test(
+    NAME test_synthetic_input
+    SOURCES
+        test_synthetic_input.cpp
+        ${CMAKE_SOURCE_DIR}/src/source/App/Platform/Windows/Winmain.cpp
+    LINK_LIBS
+        MuClient
 )
 
 mu_add_test(

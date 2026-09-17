@@ -16,6 +16,7 @@
 #define SSW_RIGHT_SERVER_G_MAX 10
 
 class CServerGroup;
+class CServerInfo;
 
 class CServerSelWin : public CWin
 {
@@ -56,7 +57,17 @@ public:
     void Show(bool bShow);
     bool CursorInWin(int nArea);
 
+    // Selects a server group and one of its servers without a click, doing
+    // exactly what the two button branches do. `groupName` empty or null picks
+    // the first group in the list. Returns false when the list holds no such
+    // group or server, or when the server is full.
+    bool SelectServer(const wchar_t* groupName, int serverIndex);
+
 protected:
+    // Asks the connect server for the game server behind this entry and
+    // remembers the choice. Shared by the click path and SelectServer().
+    bool ConnectToServer(CServerInfo* pServerInfo);
+
     void PreRelease();
     void SetServerBtnPosition();
     void SetArrowSpritePosition();

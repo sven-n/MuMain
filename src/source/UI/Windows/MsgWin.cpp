@@ -448,6 +448,19 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
     rUIMng.ShowWin(this);
 }
 
+int CMsgWin::PendingMessageCode() const
+{
+    return const_cast<CMsgWin*>(this)->IsShow() ? m_nMsgCode : -1;
+}
+
+void CMsgWin::DismissMessage()
+{
+    if (!IsShow())
+        return;
+
+    ManageOKClick();
+}
+
 void CMsgWin::ManageOKClick()
 {
     CUIMng& rUIMng = CUIMng::Instance();
