@@ -1,0 +1,70 @@
+// doctest unit tests for the mouse-free automation primitives' pure parts:
+// the weapon -> range table and the result vocabulary the auto-helper and the
+// control socket share. Driving a character needs the world; these do not.
+//
+// Run: ctest --test-dir out/build/linux-x64 --build-config Release -R "Automation"
+
+#include "doctest.h"
+
+#include "GameLogic/Automation/Attack.h"
+#include "GameLogic/Automation/Movement.h"
+#include "GameLogic/Automation/Pickup.h"
+
+using namespace GameLogic::Automation;
+
+TEST_CASE("Automation reach follows the equipped weapon [core][automation]")
+{
+    CHECK(BasicAttackRange(false, false) == doctest::Approx(1.8f));
+    CHECK(BasicAttackRange(true, false) == doctest::Approx(2.2f));
+    CHECK(BasicAttackRange(false, true) == doctest::Approx(6.0f));
+
+    // A bow in hand outranges a spear even when both read as equipped, which is
+    // the order the helper's original checks had.
+    CHECK(BasicAttackRange(true, true) == doctest::Approx(6.0f));
+
+    // The named constants are the single source of those numbers.
+    CHECK(BasicAttackRangeDefault < BasicAttackRangeSpear);
+    CHECK(BasicAttackRangeSpear < BasicAttackRangeBow);
+    CHECK(BasicAttackRange(false, false) == BasicAttackRangeDefault);
+}
+
+TEST_CASE("Automation results map to the control vocabulary [core][automation]")
+{
+    // The two the spec names for a refused act.
+    CHECK(ResultName(AttackResult::NoPath) == "no_path");
+    CHECK(ResultName(AttackResult::NotInView) == "not_in_view");
+    CHECK(ResultName(MoveResult::NoPath) == "no_path");
+    CHECK(ResultName(PickupResult::Gone) == "not_in_view");
+    CHECK(ResultName(PickupResult::NoPath) == "no_path");
+
+    CHECK(ResultName(AttackResult::NotAttackable) == "not_attackable");
+    CHECK(ResultName(AttackResult::Attacked) == "attacked");
+    CHECK(ResultName(MoveResult::Arrived) == "arrived");
+    CHECK(ResultName(PickupResult::Requested) == "requested");
+
+    // Every result has a name; none is empty.
+    const AttackResult attacks[] = {AttackResult::Attacked, AttackResult::Approaching, AttackResult::Busy,
+                                    AttackResult::NoTarget, AttackResult::NotInView,   AttackResult::NotAttackable,
+                                    AttackResult::NoPath,   AttackResult::Blocked,     AttackResult::NoArrows};
+    for (const AttackResult result : attacks)
+    {
+        CHECK_FALSE(ResultName(result).empty());
+    }
+}
+
+TEST_CASE("Automation forgets a target only when it is hopeless [core][automation]")
+{
+    // What the auto-helper has always dropped a target for.
+    CHECK(ShouldForgetTarget(AttackResult::NotInView));
+    CHECK(ShouldForgetTarget(AttackResult::NotAttackable));
+    CHECK(ShouldForgetTarget(AttackResult::NoPath));
+    CHECK(ShouldForgetTarget(AttackResult::Blocked));
+
+    // And what it keeps trying: a swing in progress, a walk in progress, an
+    // empty quiver.
+    CHECK_FALSE(ShouldForgetTarget(AttackResult::Attacked));
+    CHECK_FALSE(ShouldForgetTarget(AttackResult::Approaching));
+    CHECK_FALSE(ShouldForgetTarget(AttackResult::Busy));
+    CHECK_FALSE(ShouldForgetTarget(AttackResult::NoTarget));
+    CHECK_FALSE(ShouldForgetTarget(AttackResult::NoArrows));
+}

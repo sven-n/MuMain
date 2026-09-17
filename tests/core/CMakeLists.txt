@@ -73,6 +73,12 @@ mu_add_test(
 )
 
 mu_add_test(
+    NAME test_automation_ranges
+    SOURCES
+        test_automation_ranges.cpp
+)
+
+mu_add_test(
     NAME test_frame_profiler
     SOURCES
         test_frame_profiler.cpp
