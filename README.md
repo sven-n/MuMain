@@ -292,6 +292,7 @@ The client reads options from `config.ini` in the executable directory:
 | **`[UI]`** | `Locale` | `"en"` | Active generated UI locale. The Options window persists runtime language changes here. |
 | **`[Camera]`** | `Zoom` | `1735` | Persisted Orbital-camera distance. |
 | **`[Render]`** | `VSync` | `1` | `1` enables display-paced presentation; `0` keeps VSync disabled across restarts and fullscreen/resolution changes. `$vsync on` / `$vsync off` update this value. |
+| **`[Gameplay]`** | `EnforceSkillRequirements` | `0` | `0` lets the character use every skill it owns regardless of level, strength, agility, energy and leadership - matching a server which doesn't check the `Skill.bmd` requirements either, so a reset doesn't take the learned skills away. `1` restores the original check, which also greys out the skill icon and marks the tooltip lines red. |
 
 Rendering always uses the SDL GPU backend. The legacy `[Render] CoreProfile`
 key is not read; values `0` and `1` have no effect and do not select an OpenGL

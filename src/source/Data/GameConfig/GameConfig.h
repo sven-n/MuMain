@@ -87,6 +87,11 @@ public:
     int GetZoom() const { return m_zoom; }
     void SetZoom(int zoom);
 
+    // Gameplay — whether the Skill.bmd requirements (level, strength,
+    // dexterity, energy, leadership) gate skill usage. See
+    // CfgDefaultEnforceSkillRequirements for why this is off by default.
+    bool GetEnforceSkillRequirements() const { return m_enforceSkillRequirements; }
+
     // Render
     bool GetSortParticleDraws() const { return m_sortParticleDraws; }
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
@@ -131,6 +136,8 @@ private:
     int m_zoom;
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
+
+    bool m_enforceSkillRequirements;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue);
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);
