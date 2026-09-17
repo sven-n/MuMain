@@ -15127,6 +15127,14 @@ void InsertBuffLogicalEffect(eBuffState buff, OBJECT* o, const int bufftime)
 {
     if (o && o == &Hero->Object)
     {
+        // Whenever the server tells us how long the buff runs, register it here, so that every
+        // buff item shows its remaining time - not only the ones listed in the switch below,
+        // which otherwise fall back to the fixed (mostly 30 minute) time of ItemAddOption.bmd.
+        if (bufftime > 0)
+        {
+            g_RegisterBuffTime(buff, bufftime);
+        }
+
         switch (buff)
         {
         case eBuff_Hellowin1:
@@ -15310,6 +15318,10 @@ void ClearBuffLogicalEffect(eBuffState buff, OBJECT* o)
 {
     if (o && o == &Hero->Object)
     {
+        // Counterpart of the generic registration in InsertBuffLogicalEffect: the timer of a
+        // buff which isn't listed below has to be dropped as well.
+        g_UnRegisterBuffTime(buff);
+
         switch (buff)
         {
         case eBuff_Hellowin1:
