@@ -244,6 +244,13 @@ static std::function<void()> s_preSubmitCallback;
 // inside s_preSubmitCallback itself.
 static std::function<void()> s_postRmlUiCallback;
 
+// The texture this frame's UI seams (RmlUi's pre-submit callback, the post-RmlUi pass) must
+// render into. Normally the swapchain texture; on a frame that captures its pixels (screenshot
+// readback, reconnect capture) it is that frame's substitute colour target, so the capture
+// includes the UI exactly as the player sees it. Set only for the duration of those seams
+// inside EndFrame(); nullptr otherwise, when GetFrameGpuContext() falls back to the swapchain.
+static SDL_GPUTexture* s_frameColorTarget = nullptr;
+
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
 static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
 static SDL_GPURenderPass* s_renderPass = nullptr;
@@ -2193,50 +2200,14 @@ public:
             }
         }
 
-        if (reconnectCaptureTexture && frameColorTexture != reconnectCaptureTexture)
-        {
-            SDL_GPUBlitInfo blit{};
-            blit.source.texture = frameColorTexture;
-            blit.source.w = s_swapW;
-            blit.source.h = s_swapH;
-            blit.destination.texture = reconnectCaptureTexture;
-            blit.destination.w = s_swapW;
-            blit.destination.h = s_swapH;
-            blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
-            blit.flip_mode = SDL_FLIP_NONE;
-            blit.filter = SDL_GPU_FILTER_LINEAR;
-            SDL_BlitGPUTexture(s_cmdBuf, &blit);
-        }
-
-        if (frameColorTexture != s_swapchainTexture)
-        {
-            BlitTextureToSwapchain(s_cmdBuf, frameColorTexture);
-        }
-
-        if (s_frameReadbackTexture)
-        {
-            if (!renderPassCompleted)
-            {
-                mu::log::Get("render")->warn("SDL_gpu -- frame readback render pass failed: {}", SDL_GetError());
-                FailPendingFrameReadback();
-            }
-            else
-            {
-                if (SubmitFramePixelDownload(s_cmdBuf, s_frameReadbackTexture, frameReadbackFormat))
-                {
-                    s_cmdBuf = nullptr;
-                }
-                ReleaseFrameReadbackTexture();
-            }
-        }
-
         // RmlUi port: fires after this frame's own game content is fully recorded onto s_cmdBuf
-        // (the blit-to-swapchain above) but before it's submitted -- see SetPreSubmitCallback's
-        // own comment (MuRenderer.h) for why this exact spot is the only correct one. Skipped on
-        // a frame that took the readback branch above and already submitted+nulled s_cmdBuf
-        // early (screenshot capture); RmlUi simply doesn't render that one frame, matching this
-        // path's existing "screenshots don't include the frame that happened to overlap them"
-        // character rather than adding new complexity to cover it.
+        // but before it's submitted -- see SetPreSubmitCallback's own comment (MuRenderer.h) for
+        // why this exact spot is the only correct one. Both UI seams below render into
+        // frameColorTexture (published through s_frameColorTarget/GetFrameGpuContext()), not the
+        // swapchain directly: on a screenshot/capture frame that is the substitute colour target
+        // whose pixels get read back, so the capture shows the UI the player saw. The blit to the
+        // swapchain and the readback download deliberately come after these seams.
+        s_frameColorTarget = frameColorTexture;
         if (s_cmdBuf && s_preSubmitCallback)
         {
             s_preSubmitCallback();
@@ -2312,7 +2283,7 @@ public:
             if (s_renderCmds.size() > postUiCmdStart)
             {
                 SDL_GPUColorTargetInfo postUiColorTarget{};
-                postUiColorTarget.texture = s_swapchainTexture;
+                postUiColorTarget.texture = frameColorTexture;
                 postUiColorTarget.load_op = SDL_GPU_LOADOP_LOAD;
                 postUiColorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
@@ -2340,6 +2311,45 @@ public:
                     SDL_EndGPURenderPass(s_renderPass);
                     s_renderPass = nullptr;
                 }
+            }
+        }
+
+        s_frameColorTarget = nullptr;
+
+        if (reconnectCaptureTexture && frameColorTexture != reconnectCaptureTexture)
+        {
+            SDL_GPUBlitInfo blit{};
+            blit.source.texture = frameColorTexture;
+            blit.source.w = s_swapW;
+            blit.source.h = s_swapH;
+            blit.destination.texture = reconnectCaptureTexture;
+            blit.destination.w = s_swapW;
+            blit.destination.h = s_swapH;
+            blit.load_op = SDL_GPU_LOADOP_DONT_CARE;
+            blit.flip_mode = SDL_FLIP_NONE;
+            blit.filter = SDL_GPU_FILTER_LINEAR;
+            SDL_BlitGPUTexture(s_cmdBuf, &blit);
+        }
+
+        if (frameColorTexture != s_swapchainTexture)
+        {
+            BlitTextureToSwapchain(s_cmdBuf, frameColorTexture);
+        }
+
+        if (s_frameReadbackTexture)
+        {
+            if (!renderPassCompleted)
+            {
+                mu::log::Get("render")->warn("SDL_gpu -- frame readback render pass failed: {}", SDL_GetError());
+                FailPendingFrameReadback();
+            }
+            else
+            {
+                if (SubmitFramePixelDownload(s_cmdBuf, s_frameReadbackTexture, frameReadbackFormat))
+                {
+                    s_cmdBuf = nullptr;
+                }
+                ReleaseFrameReadbackTexture();
             }
         }
 
@@ -2740,7 +2750,8 @@ public:
     // without extra bookkeeping here.
     [[nodiscard]] FrameGpuContext GetFrameGpuContext() override
     {
-        return FrameGpuContext{s_cmdBuf, s_swapchainTexture, s_swapW, s_swapH};
+        return FrameGpuContext{s_cmdBuf, s_frameColorTarget ? s_frameColorTarget : s_swapchainTexture, s_swapW,
+                               s_swapH};
     }
 
     // RmlUi port: looks up s_textureMap directly rather than going through ResolveTextureId(),
