@@ -133,4 +133,52 @@ public unsafe partial class ConnectionManager
             ManagedLog.Write(ManagedLog.Level.Error, $"NET: Stat point increase packet staging failed, handle={handle}: {ex}");
         }
     }
+
+    /// <summary>
+    /// Sends a master skill point add request for several points at once to this connection.
+    /// </summary>
+    /// <param name="handle">The handle of the connection.</param>
+    /// <param name="skillId">The master skill to raise.</param>
+    /// <param name="amount">The number of points to add to that skill.</param>
+    /// <remarks>
+    /// Not part of the original protocol: the original client sends one 0xF3, 0x52 packet per point, which makes
+    /// filling a master skill tree slow. The sub code 0xE1 is unused by the original client.
+    /// There is no generated struct for it, because the packet definitions come from the NuGet package.
+    /// </remarks>
+    [UnmanagedCallersOnly(EntryPoint = "ConnectionManager_SendAddMasterSkillPointMultiple")]
+    public static void SendAddMasterSkillPointMultiple(int handle, ushort @skillId, byte @amount)
+    {
+        if (!Connections.TryGetValue(handle, out var connection))
+        {
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Master skill point add send skipped; connection handle={handle} not found");
+            return;
+        }
+
+        if (@amount == 0)
+        {
+            return;
+        }
+
+        try
+        {
+            connection.CreateAndSend(pipeWriter =>
+            {
+                const int length = 7;
+                var packet = pipeWriter.GetSpan(length)[..length];
+                packet[0] = 0xC1;
+                packet[1] = length;
+                packet[2] = 0xF3;
+                packet[3] = 0xE1;
+                packet[4] = (byte)(@skillId & 0xFF);
+                packet[5] = (byte)(@skillId >> 8);
+                packet[6] = @amount;
+
+                return length;
+            });
+        }
+        catch (Exception ex)
+        {
+            ManagedLog.Write(ManagedLog.Level.Error, $"NET: Master skill point add packet staging failed, handle={handle}: {ex}");
+        }
+    }
 }

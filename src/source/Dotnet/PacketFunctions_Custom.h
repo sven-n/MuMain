@@ -77,6 +77,18 @@ public:
     /// spending a big pool of level-up-points slow. The server caps the amount at the available points.
     /// </remarks>
     void SendIncreaseCharacterStatPointMultiple(CharacterStatAttribute statType, uint16_t amount);
+
+    /// <summary>
+    /// Sends a master skill point add request for several points at once to this connection.
+    /// </summary>
+    /// <param name="skillId">The master skill to raise.</param>
+    /// <param name="amount">The number of points to add to that skill.</param>
+    /// <remarks>
+    /// Not part of the original protocol (0xF3, 0xE1): the original client sends one packet per point, which makes
+    /// filling a master skill tree slow. The server adds points until the amount is reached, the skill is at its
+    /// maximum level, or the character runs out of master level up points.
+    /// </remarks>
+    void SendAddMasterSkillPointMultiple(uint16_t skillId, BYTE amount);
 };
 
 /// <summary>

@@ -55,6 +55,24 @@ void PacketFunctions_ClientToServer_Custom::SendIncreaseCharacterStatPointMultip
     dotnet_SendIncreaseCharacterStatPointMultiple(this->GetHandle(), static_cast<BYTE>(statType), amount);
 }
 
+typedef void(CORECLR_DELEGATE_CALLTYPE* SendAddMasterSkillPointMultipleFn)(int32_t, uint16_t, BYTE);
+
+void PacketFunctions_ClientToServer_Custom::SendAddMasterSkillPointMultiple(uint16_t skillId, BYTE amount)
+{
+    static SendAddMasterSkillPointMultipleFn dotnet_SendAddMasterSkillPointMultiple = nullptr;
+    if (!dotnet_SendAddMasterSkillPointMultiple)
+    {
+        dotnet_SendAddMasterSkillPointMultiple = LoadManagedSymbol<SendAddMasterSkillPointMultipleFn>(
+            "ConnectionManager_SendAddMasterSkillPointMultiple");
+        if (!dotnet_SendAddMasterSkillPointMultiple)
+        {
+            return;
+        }
+    }
+
+    dotnet_SendAddMasterSkillPointMultiple(this->GetHandle(), skillId, amount);
+}
+
 typedef void(CORECLR_DELEGATE_CALLTYPE* SendAuthenticateExtFn)(int32_t, uint16_t, uint32_t);
 
 void PacketFunctions_ChatServer_Custom::SendAuthenticateExt(uint16_t roomId, uint32_t token)
