@@ -13,6 +13,25 @@ constexpr auto MAX_MASTER_SKILL_REQUIRES = 2;
 constexpr auto MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK = 10;
 constexpr auto MAX_MASTER_TREE_RANK = 10;
 
+// One master skill a build wants at a given level. The tree requirements
+// (parent skill, rank gate, base skill) are resolved by the simulation, so a
+// preset only has to name the skills it actually cares about, in the order it
+// wants them filled.
+struct MASTER_SUGGEST_ENTRY
+{
+    ActionSkillType SkillNumber;
+    BYTE TargetLevel;
+};
+
+// The points a single skill would receive. The list keeps the order in which
+// the simulation spent them, because the server validates every request
+// against the tree - a parent skill has to be sent before its child.
+struct MASTER_SUGGEST_RESULT
+{
+    ActionSkillType SkillNumber;
+    int Points;
+};
+
 enum MASTER_SKILL_TREE_CLASS : WORD
 {
     MASTER_SKILL_TREE_CLASS_NONE = 0,
@@ -76,6 +95,15 @@ namespace SEASON3B
         enum IMAGE_LIST
         {
             IMAGE_MASTER_INTERFACE = BITMAP_INTERFACE_MASTER_BEGIN,
+            IMAGE_MASTER_BTN_SUGGEST = BITMAP_INTERFACE_MASTER_BEGIN + 14,
+        };
+
+        // One build recommendation: the skills to fill, in priority order.
+        struct SUGGEST_PRESET
+        {
+            const wchar_t* const* s_pNameSlot;
+            const MASTER_SUGGEST_ENTRY* s_pEntries;
+            int s_iEntryCount;
         };
 
         CNewUIMasterLevel();
@@ -109,6 +137,12 @@ namespace SEASON3B
         DWORD ButtonX[MAX_MASTER_SKILL_CATEGORY];
         DWORD ButtonY[MAX_MASTER_SKILL_CATEGORY];
         CNewUIButton m_CloseBT;
+        CNewUIButton m_BtnSuggestPreset;
+        CNewUIButton m_BtnSuggestApply;
+        // 0 = suggestion off, otherwise 1-based index into the class preset table.
+        int m_iSuggestPreset;
+        MASTER_SKILL_TREE_CLASS m_eSuggestPresetClass;
+        std::vector<MASTER_SUGGEST_RESULT> m_vSuggestPoint;
         int CategoryPoint[MAX_MASTER_SKILL_CATEGORY];
         int skillPoint[MAX_MASTER_SKILL_CATEGORY][MAX_MASTER_TREE_RANK];
         BYTE ConsumePoint;
@@ -135,6 +169,20 @@ namespace SEASON3B
         bool CheckBeforeSkill(ActionSkillType skill, BYTE skillLevel);
 
         int GetBeforeSkillID(int index);
+
+        const SUGGEST_PRESET* GetPresetTable(int& count) const;
+        const _MASTER_SKILLTREE_DATA* FindSkillData(ActionSkillType skill) const;
+        int GetSuggestedPoints(ActionSkillType skill) const;
+        int GetSimulatedLevel(ActionSkillType skill) const;
+        int GetSimulatedRankLevel(BYTE group, BYTE rank) const;
+        void AddSuggestedPoints(ActionSkillType skill, int points);
+        bool EnsureRequirements(const _MASTER_SKILLTREE_DATA& skillData, int& freePoints, int depth);
+        void SpendSuggestedPoints(ActionSkillType skill, int targetLevel, int& freePoints, int depth);
+        void ResetSuggestion();
+        void CycleSuggestPreset();
+        void CalcSuggestion();
+        void ApplySuggestedPoints();
+        void RenderSuggestButtons();
 
         void SetMasterSkillTreeData();
         void SetMasterSkillToolTipData();

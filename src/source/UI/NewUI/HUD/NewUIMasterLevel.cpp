@@ -15,6 +15,308 @@ namespace
 {
     _MASTER_SKILLTREE_DATA m_stMasterSkillTreeData[MAX_MASTER_SKILL_DATA];
     _MASTER_SKILL_TOOLTIP m_stMasterSkillTooltip[MAX_MASTER_SKILL_DATA];
+
+    using SUGGEST_PRESET = SEASON3B::CNewUIMasterLevel::SUGGEST_PRESET;
+
+    // Build presets. Each entry is a skill and the level the build wants it
+    // at; the entries are filled in order, so put the skills the build cares
+    // about most first. Skills which are only needed to unlock something else
+    // (a parent skill, or the 10 points a rank needs before the next one
+    // opens) do not have to be listed - CalcSuggestion adds them by itself.
+    const MASTER_SUGGEST_ENTRY g_aBladeMasterPvE[] = {
+        { AT_SKILL_DurabilityReduction1, 10 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_AttackSuccRateInc, 20 },
+        { AT_SKILL_TWISTING_SLASH_STR, 20 },
+        { AT_SKILL_TWISTING_SLASH_MASTERY, 20 },
+        { AT_SKILL_MaximumLifeIncrease, 20 },
+        { AT_SKILL_WeaponMasteryBladeMaster, 20 },
+        { AT_SKILL_STRIKE_OF_DESTRUCTION_STR, 20 },
+        { AT_SKILL_PvPAttackRate, 10 },
+        { AT_SKILL_TwoHandedSwordStrengthener, 20 },
+        { AT_SKILL_TwoHandedSwordMaster, 20 },
+        { AT_SKILL_SWELL_LIFE_STR, 20 },
+        { AT_SKILL_SWELL_LIFE_PROFICIENCY, 20 },
+        { AT_SKILL_MinimumAttackPowerInc, 20 },
+        { AT_SKILL_MonsterAttackLifeInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aBladeMasterPvP[] = {
+        { AT_SKILL_PvPDefenceRateInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_SdRecoverySpeedInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+        { AT_SKILL_DEATHSTAB_STR, 20 },
+        { AT_SKILL_MaximumLifeIncrease, 20 },
+        { AT_SKILL_WeaponMasteryBladeMaster, 20 },
+        { AT_SKILL_MaximumManaIncrease, 20 },
+        { AT_SKILL_PvPAttackRate, 20 },
+        { AT_SKILL_OneHandedSwordStrengthener, 20 },
+        { AT_SKILL_OneHandedSwordMaster, 10 },
+        { AT_SKILL_SWELL_LIFE_STR, 20 },
+        { AT_SKILL_SWELL_LIFE_PROFICIENCY, 20 },
+        { AT_SKILL_MinimumAttackPowerInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aGrandMasterPvE[] = {
+        { AT_SKILL_DurabilityReduction1, 10 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_AutomaticManaRecInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_EXPANSION_OF_WIZARDRY_STR, 20 },
+        { AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY, 20 },
+        { AT_SKILL_EVIL_SPIRIT_STR, 20 },
+        { AT_SKILL_MagicMasteryGrandMaster, 20 },
+        { AT_SKILL_BLAST_STR, 20 },
+        { AT_SKILL_ICE_STR, 20 },
+        { AT_SKILL_OneHandedStaffStrengthener, 20 },
+        { AT_SKILL_OneHandedStaffMaster, 10 },
+        { AT_SKILL_SOUL_BARRIER_STR, 20 },
+        { AT_SKILL_SOUL_BARRIER_PROFICIENCY, 20 },
+        { AT_SKILL_MinimumWizardryInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aGrandMasterPvP[] = {
+        { AT_SKILL_PvPDefenceRateInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_SdRecoverySpeedInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+        { AT_SKILL_EXPANSION_OF_WIZARDRY_STR, 20 },
+        { AT_SKILL_EXPANSION_OF_WIZARDRY_MASTERY, 20 },
+        { AT_SKILL_EVIL_SPIRIT_STR, 20 },
+        { AT_SKILL_MagicMasteryGrandMaster, 20 },
+        { AT_SKILL_ShieldStrengthenerGrandMaster, 20 },
+        { AT_SKILL_ShieldMasteryGrandMaster, 20 },
+        { AT_SKILL_SOUL_BARRIER_STR, 20 },
+        { AT_SKILL_SOUL_BARRIER_PROFICIENCY, 20 },
+        { AT_SKILL_MinimumWizardryInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aHighElfPvE[] = {
+        { AT_SKILL_DurabilityReduction1, 10 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_TRIPLE_SHOT_STR, 20 },
+        { AT_SKILL_TRIPLE_SHOT_MASTERY, 10 },
+        { AT_SKILL_ATTACK_STR, 20 },
+        { AT_SKILL_ATTACK_MASTERY, 20 },
+        { AT_SKILL_WeaponMasteryHighElf, 20 },
+        { AT_SKILL_ICE_ARROW_STR, 20 },
+        { AT_SKILL_BowStrengthener, 20 },
+        { AT_SKILL_BowMastery, 10 },
+        { AT_SKILL_INFINITY_ARROW_STR, 20 },
+        { AT_SKILL_MinimumAttPowerInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aHighElfPvP[] = {
+        { AT_SKILL_PvPDefenceRateInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_SdRecoverySpeedInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+        { AT_SKILL_DEFENSE_STR, 20 },
+        { AT_SKILL_DEFENSE_MASTERY, 20 },
+        { AT_SKILL_ATTACK_STR, 20 },
+        { AT_SKILL_ATTACK_MASTERY, 20 },
+        { AT_SKILL_WeaponMasteryHighElf, 20 },
+        { AT_SKILL_PvPAttackRate, 20 },
+        { AT_SKILL_CrossbowStrengthener, 20 },
+        { AT_SKILL_CrossbowMastery, 20 },
+        { AT_SKILL_INFINITY_ARROW_STR, 20 },
+        { AT_SKILL_MinimumAttPowerInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aHighElfSupport[] = {
+        { AT_SKILL_HEALING_STR, 20 },
+        { AT_SKILL_DEFENSE_STR, 20 },
+        { AT_SKILL_DEFENSE_MASTERY, 20 },
+        { AT_SKILL_ATTACK_STR, 20 },
+        { AT_SKILL_SummonedMonsterStr1, 20 },
+        { AT_SKILL_SummonedMonsterStr2, 20 },
+        { AT_SKILL_AutomaticManaRecInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_ShieldStrengthenerHighElf, 20 },
+        { AT_SKILL_ShieldMasteryHighElf, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aDimensionMasterPvE[] = {
+        { AT_SKILL_DurabilityReduction1, 10 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_AutomaticManaRecInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_LIGHTNING_SHOCK_STR, 20 },
+        { AT_SKILL_ALICE_CHAINLIGHTNING_STR, 20 },
+        { AT_SKILL_MagicMasterySummoner, 20 },
+        { AT_SKILL_LightningTomeStren, 20 },
+        { AT_SKILL_LightningTomeMastery, 20 },
+        { AT_SKILL_StickStrengthener, 20 },
+        { AT_SKILL_StickMastery, 20 },
+        { AT_SKILL_ALICE_BERSERKER_STR, 20 },
+        { AT_SKILL_BerserkerProficiency, 20 },
+        { AT_SKILL_MinimumWizCurseInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aDimensionMasterPvP[] = {
+        { AT_SKILL_PvPDefenceRateInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_SdRecoverySpeedInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+        { AT_SKILL_ALICE_SLEEP_STR, 20 },
+        { AT_SKILL_LIGHTNING_SHOCK_STR, 20 },
+        { AT_SKILL_MagicMasterySummoner, 20 },
+        { AT_SKILL_ALICE_DRAINLIFE_STR, 20 },
+        { AT_SKILL_OtherWorldTomeStreng, 20 },
+        { AT_SKILL_OtherWorldTomeMastery, 10 },
+        { AT_SKILL_ALICE_BERSERKER_STR, 20 },
+        { AT_SKILL_BerserkerProficiency, 20 },
+        { AT_SKILL_MinimumWizCurseInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aDuelMasterPvE[] = {
+        { AT_SKILL_DurabilityReduction1, 10 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_TWISTING_SLASH_STR_MG, 20 },
+        { AT_SKILL_WeaponMasteryDuelMaster, 20 },
+        { AT_SKILL_BLAST_STR_MG, 20 },
+        { AT_SKILL_EVIL_SPIRIT_STR_MG, 20 },
+        { AT_SKILL_MagicMasteryDuelMaster, 20 },
+        { AT_SKILL_ICE_STR_MG, 20 },
+        { AT_SKILL_FIRE_SLASH_STR, 20 },
+        { AT_SKILL_AutomaticHpRecInc, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aDuelMasterPvP[] = {
+        { AT_SKILL_PvPDefenceRateInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_SdRecoverySpeedInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+        { AT_SKILL_POWER_SLASH_STR, 20 },
+        { AT_SKILL_TWISTING_SLASH_STR_MG, 20 },
+        { AT_SKILL_WeaponMasteryDuelMaster, 20 },
+        { AT_SKILL_EVIL_SPIRIT_STR_MG, 20 },
+        { AT_SKILL_MagicMasteryDuelMaster, 20 },
+        { AT_SKILL_FIRE_SLASH_STR, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aLordEmperorPvE[] = {
+        { AT_SKILL_DurabilityReduction1, 10 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_FIREBURST_STR, 20 },
+        { AT_SKILL_FIREBURST_MASTERY, 20 },
+        { AT_SKILL_EARTHSHAKE_STR, 20 },
+        { AT_SKILL_EARTHSHAKE_MASTERY, 20 },
+        { AT_SKILL_WeaponMasteryLordEmperor, 20 },
+        { AT_SKILL_FIRE_SCREAM_STR, 20 },
+        { AT_SKILL_ScepterStrengthener, 20 },
+        { AT_SKILL_ScepterMastery, 20 },
+        { AT_SKILL_CommandAttackInc, 20 },
+        { AT_SKILL_DarkSpiritStr, 20 },
+        { AT_SKILL_DarkSpiritStr2, 20 },
+        { AT_SKILL_DarkSpiritStr3, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aLordEmperorPvP[] = {
+        { AT_SKILL_PvPDefenceRateInc, 20 },
+        { AT_SKILL_MaximumSDincrease, 20 },
+        { AT_SKILL_SdRecoverySpeedInc, 20 },
+        { AT_SKILL_DefenseIncrease, 20 },
+        { AT_SKILL_DefenseSuccessRateInc, 20 },
+        { AT_SKILL_ADD_CRITICAL_STR1, 20 },
+        { AT_SKILL_ADD_CRITICAL_STR2, 20 },
+        { AT_SKILL_ADD_CRITICAL_STR3, 20 },
+        { AT_SKILL_FIREBURST_STR, 20 },
+        { AT_SKILL_FIREBURST_MASTERY, 20 },
+        { AT_SKILL_WeaponMasteryLordEmperor, 20 },
+        { AT_SKILL_ShieldStrengthenerLordEmperor, 20 },
+        { AT_SKILL_ShieldMastery, 20 },
+        { AT_SKILL_CommandAttackInc, 20 },
+        { AT_SKILL_DarkSpiritStr, 20 },
+        { AT_SKILL_DarkSpiritStr2, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aTempleKnightPvE[] = {
+        { AT_SKILL_DurabilityReduction1FistMaster, 10 },
+        { AT_SKILL_IncreaseMaximumSd, 20 },
+        { AT_SKILL_IncreasesDefense, 20 },
+        { AT_SKILL_IncreaseAttackSuccessRate, 20 },
+        { AT_SKILL_KILLING_BLOW_STR, 20 },
+        { AT_SKILL_KILLING_BLOW_MASTERY, 20 },
+        { AT_SKILL_IncreaseMaximumHp, 20 },
+        { AT_SKILL_WeaponMasteryFistMaster, 20 },
+        { AT_SKILL_DRAGON_ROAR_STR, 20 },
+        { AT_SKILL_CHAIN_DRIVE_STR, 20 },
+        { AT_SKILL_IncreasePvPAttackRate, 10 },
+        { AT_SKILL_EquippedWeaponStrengthener, 20 },
+        { AT_SKILL_EquippedWeaponMastery, 20 },
+        { AT_SKILL_IncreaseMinimumAttackPower, 20 },
+        { AT_SKILL_RecoverHPfromMonsterKills, 20 },
+    };
+
+    const MASTER_SUGGEST_ENTRY g_aTempleKnightPvP[] = {
+        { AT_SKILL_IncreasePvPDefenseRate, 20 },
+        { AT_SKILL_IncreaseMaximumSd, 20 },
+        { AT_SKILL_IncreaseSdRecoveryRate, 20 },
+        { AT_SKILL_IncreasesDefense, 20 },
+        { AT_SKILL_IncreaseDefenseSuccessRate, 20 },
+        { AT_SKILL_BEAST_UPPERCUT_STR, 20 },
+        { AT_SKILL_BEAST_UPPERCUT_MASTERY, 20 },
+        { AT_SKILL_IncreaseMaximumHp, 20 },
+        { AT_SKILL_WeaponMasteryFistMaster, 20 },
+        { AT_SKILL_IncreasePvPAttackRate, 20 },
+        { AT_SKILL_DEF_UP_OURFORCES_STR, 20 },
+        { AT_SKILL_DEF_UP_OURFORCES_MASTERY, 20 },
+        { AT_SKILL_HP_UP_OURFORCES_STR, 20 },
+        { AT_SKILL_IncreaseMinimumAttackPower, 20 },
+    };
+
+#define MASTER_PRESET(namePtr, table) { namePtr, table, static_cast<int>(_countof(table)) }
+
+    const SUGGEST_PRESET g_aPresetBladeMaster[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aBladeMasterPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aBladeMasterPvP),
+    };
+
+    const SUGGEST_PRESET g_aPresetGrandMaster[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aGrandMasterPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aGrandMasterPvP),
+    };
+
+    const SUGGEST_PRESET g_aPresetHighElf[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aHighElfPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aHighElfPvP),
+        MASTER_PRESET(&I18N::Game::Support, g_aHighElfSupport),
+    };
+
+    const SUGGEST_PRESET g_aPresetDimensionMaster[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aDimensionMasterPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aDimensionMasterPvP),
+    };
+
+    const SUGGEST_PRESET g_aPresetDuelMaster[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aDuelMasterPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aDuelMasterPvP),
+    };
+
+    const SUGGEST_PRESET g_aPresetLordEmperor[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aLordEmperorPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aLordEmperorPvP),
+    };
+
+    const SUGGEST_PRESET g_aPresetTempleKnight[] = {
+        MASTER_PRESET(&I18N::Game::PvE, g_aTempleKnightPvE),
+        MASTER_PRESET(&I18N::Game::PvP, g_aTempleKnightPvP),
+    };
+
+#undef MASTER_PRESET
 }
 
 
@@ -24,6 +326,8 @@ SEASON3B::CNewUIMasterLevel::CNewUIMasterLevel()
     this->ConsumePoint = 0;
     this->CurSkillID = 0;
     this->classCode = MASTER_SKILL_TREE_CLASS_NONE;
+    this->m_iSuggestPreset = 0;
+    this->m_eSuggestPresetClass = MASTER_SKILL_TREE_CLASS_NONE;
     this->CategoryTextIndex = 0;
     this->categoryPos[0] = { 11,55 };
     this->categoryPos[1] = { 221,55 };
@@ -65,6 +369,19 @@ bool SEASON3B::CNewUIMasterLevel::Create(CNewUIManager* pNewUIMng)
     this->m_CloseBT.ChangeButtonInfo(611, 9, 13, 14);
 
     this->m_CloseBT.ChangeToolTipText(&I18N::Game::Close388);
+
+    // Suggestion bar, in the free part of the title bar left of the class name.
+    this->m_BtnSuggestPreset.ChangeButtonImgState(true, IMAGE_MASTER_BTN_SUGGEST, true);
+    this->m_BtnSuggestPreset.ChangeButtonInfo(14, 5, 58, 20);
+    this->m_BtnSuggestPreset.ChangeTextBackColor(RGBA(255, 255, 255, 0));
+    this->m_BtnSuggestPreset.ChangeText(&I18N::Game::Suggest);
+    this->m_BtnSuggestPreset.ChangeToolTipText(&I18N::Game::ClickToSwitchBuildPreset, true);
+
+    this->m_BtnSuggestApply.ChangeButtonImgState(true, IMAGE_MASTER_BTN_SUGGEST, true);
+    this->m_BtnSuggestApply.ChangeButtonInfo(76, 5, 58, 20);
+    this->m_BtnSuggestApply.ChangeTextBackColor(RGBA(255, 255, 255, 0));
+    this->m_BtnSuggestApply.ChangeText(&I18N::Game::Apply);
+    this->m_BtnSuggestApply.ChangeToolTipText(&I18N::Game::AddAllPointsUsingTheSuggestedBuild, true);
 
     for (int i = 0; i < MAX_MASTER_SKILL_CATEGORY; i++)
     {
@@ -411,6 +728,7 @@ bool SEASON3B::CNewUIMasterLevel::Render()
     RenderImage(IMAGE_MASTER_INTERFACE + 1, this->PosX + Bitmaps[IMAGE_MASTER_INTERFACE].Width, this->PosY, Bitmaps[IMAGE_MASTER_INTERFACE + 1].Width, Bitmaps[IMAGE_MASTER_INTERFACE + 1].Height);
     this->RenderIcon();
     this->m_CloseBT.Render();
+    this->RenderSuggestButtons();
     DisableAlphaBlend();
     this->RenderText();
 
@@ -419,6 +737,16 @@ bool SEASON3B::CNewUIMasterLevel::Render()
 
 bool SEASON3B::CNewUIMasterLevel::Update()
 {
+    // The preset index points into the table of the class whose tree is
+    // loaded, so a class change has to drop the selection.
+    if (this->m_eSuggestPresetClass != this->classCode)
+    {
+        this->ResetSuggestion();
+        this->m_eSuggestPresetClass = this->classCode;
+    }
+
+    this->CalcSuggestion();
+
     return true;
 }
 
@@ -427,6 +755,25 @@ bool SEASON3B::CNewUIMasterLevel::UpdateMouseEvent()
     if (this->m_CloseBT.UpdateMouseEvent() == true)
     {
         g_pNewUISystem->Hide(SEASON3B::INTERFACE_MASTER_LEVEL);
+
+        return true;
+    }
+
+    int presetCount = 0;
+    const bool hasPreset = (this->GetPresetTable(presetCount) != nullptr && presetCount > 0);
+
+    if (hasPreset && this->m_BtnSuggestPreset.UpdateMouseEvent() == true)
+    {
+        this->CycleSuggestPreset();
+        PlayBuffer(SOUND_CLICK01);
+
+        return true;
+    }
+
+    if (hasPreset && this->m_iSuggestPreset > 0 && this->m_BtnSuggestApply.UpdateMouseEvent() == true)
+    {
+        this->ApplySuggestedPoints();
+        PlayBuffer(SOUND_CLICK01);
 
         return true;
     }
@@ -498,11 +845,12 @@ void SEASON3B::CNewUIMasterLevel::LoadImages()
     LoadBitmap(L"Interface\\new_Master_arrow06.tga", IMAGE_MASTER_INTERFACE + 11, GL_LINEAR);
     LoadBitmap(L"Interface\\new_Master_arrow07.tga", IMAGE_MASTER_INTERFACE + 12, GL_LINEAR);
     LoadBitmap(L"Interface\\new_Master_arrow08.tga", IMAGE_MASTER_INTERFACE + 13, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_btn_empty_very_small.tga", IMAGE_MASTER_BTN_SUGGEST, GL_LINEAR);
 }
 
 void SEASON3B::CNewUIMasterLevel::UnloadImages()
 {
-    for (int i = 0; i < 14; i++)
+    for (int i = 0; i < 15; i++)
     {
         DeleteBitmap(i + IMAGE_MASTER_INTERFACE, false);
     }
@@ -650,6 +998,40 @@ void SEASON3B::CNewUIMasterLevel::RenderIcon()
             RenderImage(IMAGE_MASTER_INTERFACE + 13, CalcX, CalcY, 40, 28, 0, 0, 40 / 64.f, 28 / 32.f);
 
         g_pRenderText->RenderText(CalcX + 8 + 30, CalcY + 28 - 5, std::to_wstring(skillLevel).c_str());
+    }
+
+    // Suggestion badges on top of the icons, in a second pass so they are not
+    // affected by the per-icon text color above.
+    if (this->m_iSuggestPreset > 0)
+    {
+        g_pRenderText->SetFont(g_hFontBold);
+        g_pRenderText->SetTextColor(120, 255, 120, 255);
+        g_pRenderText->SetBgColor(0, 0, 0, 0);
+
+        for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+        {
+            const int points = this->GetSuggestedPoints(it->second.Skill);
+
+            if (points <= 0)
+            {
+                continue;
+            }
+
+            const int index = (it->second.Index - 1) % 4;
+            const BYTE rank = SkillAttribute[it->second.Skill].SkillRank;
+            const int CalcX = (int)(index * 49.0f + this->categoryPos[it->second.Group].x);
+            const int CalcY = (int)(this->categoryPos[it->second.Group].y + (rank - 1) * 41.0f);
+
+            wchar_t badge[16] = {};
+            mu_swprintf(badge, L"+%d", points);
+
+            constexpr unsigned int BadgeColor = 0xB0000000u;
+            RenderColorQuadARGB(CalcX + 8 + SKILL_ICON_WIDTH + 1, CalcY + 2, 22, 13, BadgeColor);
+            g_pRenderText->RenderText(CalcX + 8 + SKILL_ICON_WIDTH + 1, CalcY + 3, badge, 22, 0, RT3_SORT_CENTER);
+        }
+
+        g_pRenderText->SetFont(g_hFont);
+        g_pRenderText->SetTextColor(255, 255, 255, 255);
     }
 
     this->RenderToolTip();
@@ -1046,6 +1428,338 @@ void SEASON3B::CNewUIMasterLevel::SkillUpgrade(int index, BYTE skillLevel, float
     // And update the category points
     const int addedPoints = skillLevel - oldLevel;
     this->CategoryPoint[it->second.Group] += addedPoints;
+}
+
+const SEASON3B::CNewUIMasterLevel::SUGGEST_PRESET* SEASON3B::CNewUIMasterLevel::GetPresetTable(int& count) const
+{
+    switch (this->classCode)
+    {
+    case MASTER_SKILL_TREE_CLASS_BLADEMASTER:
+        count = static_cast<int>(_countof(g_aPresetBladeMaster));
+        return g_aPresetBladeMaster;
+    case MASTER_SKILL_TREE_CLASS_GRANDMASTER:
+        count = static_cast<int>(_countof(g_aPresetGrandMaster));
+        return g_aPresetGrandMaster;
+    case MASTER_SKILL_TREE_CLASS_HIGHELF:
+        count = static_cast<int>(_countof(g_aPresetHighElf));
+        return g_aPresetHighElf;
+    case MASTER_SKILL_TREE_CLASS_DIMENSIONMASTER:
+        count = static_cast<int>(_countof(g_aPresetDimensionMaster));
+        return g_aPresetDimensionMaster;
+    case MASTER_SKILL_TREE_CLASS_DUELMASTER:
+        count = static_cast<int>(_countof(g_aPresetDuelMaster));
+        return g_aPresetDuelMaster;
+    case MASTER_SKILL_TREE_CLASS_LORDEMPEROR:
+        count = static_cast<int>(_countof(g_aPresetLordEmperor));
+        return g_aPresetLordEmperor;
+    case MASTER_SKILL_TREE_CLASS_TEMPLEKNIGHT:
+        count = static_cast<int>(_countof(g_aPresetTempleKnight));
+        return g_aPresetTempleKnight;
+    default:
+        break;
+    }
+
+    count = 0;
+
+    return nullptr;
+}
+
+const _MASTER_SKILLTREE_DATA* SEASON3B::CNewUIMasterLevel::FindSkillData(ActionSkillType skill) const
+{
+    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+    {
+        if (it->second.Skill == skill)
+        {
+            return &it->second;
+        }
+    }
+
+    return nullptr;
+}
+
+int SEASON3B::CNewUIMasterLevel::GetSuggestedPoints(ActionSkillType skill) const
+{
+    int points = 0;
+
+    for (const auto& entry : this->m_vSuggestPoint)
+    {
+        if (entry.SkillNumber == skill)
+        {
+            points += entry.Points;
+        }
+    }
+
+    return points;
+}
+
+int SEASON3B::CNewUIMasterLevel::GetSimulatedLevel(ActionSkillType skill) const
+{
+    return CharacterAttribute->MasterSkillInfo[skill].GetSkillLevel() + this->GetSuggestedPoints(skill);
+}
+
+int SEASON3B::CNewUIMasterLevel::GetSimulatedRankLevel(BYTE group, BYTE rank) const
+{
+    int highest = 0;
+
+    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+    {
+        if (it->second.Group != group || SkillAttribute[it->second.Skill].SkillRank != rank)
+        {
+            continue;
+        }
+
+        const int level = this->GetSimulatedLevel(it->second.Skill);
+
+        if (level > highest)
+        {
+            highest = level;
+        }
+    }
+
+    return highest;
+}
+
+void SEASON3B::CNewUIMasterLevel::AddSuggestedPoints(ActionSkillType skill, int points)
+{
+    // Consecutive points for the same skill are one request; a skill which is
+    // filled again later (because something else needed it first) gets its own
+    // entry, so the order the server sees stays the order we simulated.
+    if (!this->m_vSuggestPoint.empty() && this->m_vSuggestPoint.back().SkillNumber == skill)
+    {
+        this->m_vSuggestPoint.back().Points += points;
+
+        return;
+    }
+
+    this->m_vSuggestPoint.push_back({ skill, points });
+}
+
+bool SEASON3B::CNewUIMasterLevel::EnsureRequirements(const _MASTER_SKILLTREE_DATA& skillData, int& freePoints, int depth)
+{
+    // Same three conditions the tree itself checks before it lets a point in,
+    // but against the simulated levels instead of the current ones.
+    if (!this->CheckBeforeSkill(skillData.Skill, static_cast<BYTE>(this->GetSimulatedLevel(skillData.Skill))))
+    {
+        return false;
+    }
+
+    if (!g_csItemOption.IsNonWeaponSkillOrIsSkillEquipped(skillData.Skill))
+    {
+        return false;
+    }
+
+    for (int i = 0; i < MAX_MASTER_SKILL_REQUIRES; i++)
+    {
+        const auto requiredSkill = skillData.RequireSkill[i];
+
+        if (requiredSkill < AT_SKILL_MASTER_BEGIN || requiredSkill > AT_SKILL_MASTER_END)
+        {
+            continue;
+        }
+
+        if (this->GetSimulatedLevel(requiredSkill) < MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK)
+        {
+            this->SpendSuggestedPoints(requiredSkill, MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK, freePoints, depth + 1);
+        }
+
+        if (this->GetSimulatedLevel(requiredSkill) < MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK)
+        {
+            return false;
+        }
+    }
+
+    const BYTE rank = SkillAttribute[skillData.Skill].SkillRank;
+
+    if (rank <= 1)
+    {
+        return true;
+    }
+
+    if (this->GetSimulatedRankLevel(skillData.Group, rank - 1) >= MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK)
+    {
+        return true;
+    }
+
+    // The rank above only opens once some skill of the rank below is at 10.
+    // The preset does not have to name one - take the first one of that rank
+    // which can be filled.
+    for (auto it = this->map_masterData.begin(); it != this->map_masterData.end(); it++)
+    {
+        if (it->second.Group != skillData.Group || SkillAttribute[it->second.Skill].SkillRank != rank - 1)
+        {
+            continue;
+        }
+
+        this->SpendSuggestedPoints(it->second.Skill, MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK, freePoints, depth + 1);
+
+        if (this->GetSimulatedRankLevel(skillData.Group, rank - 1) >= MASTER_SKILL_LEVEL_REQ_FOR_NEXT_RANK)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void SEASON3B::CNewUIMasterLevel::SpendSuggestedPoints(ActionSkillType skill, int targetLevel, int& freePoints, int depth)
+{
+    if (freePoints <= 0 || depth > MAX_MASTER_TREE_RANK)
+    {
+        return;
+    }
+
+    const auto* skillData = this->FindSkillData(skill);
+
+    if (skillData == nullptr)
+    {
+        // Not part of this class' tree - the preset lists a skill the loaded
+        // tree data does not have.
+        return;
+    }
+
+    int level = this->GetSimulatedLevel(skill);
+    const int maxLevel = std::min(targetLevel, static_cast<int>(skillData->MaxLevel));
+
+    if (level >= maxLevel)
+    {
+        return;
+    }
+
+    if (!this->EnsureRequirements(*skillData, freePoints, depth))
+    {
+        return;
+    }
+
+    // Learning a skill costs its required points and gives that many levels at
+    // once - exactly what the server does - every level after that costs one.
+    while (level < maxLevel)
+    {
+        const int cost = (level == 0) ? std::max(1, static_cast<int>(skillData->RequiredPoints)) : 1;
+
+        if (freePoints < cost || level + cost > skillData->MaxLevel)
+        {
+            break;
+        }
+
+        freePoints -= cost;
+        level += cost;
+
+        this->AddSuggestedPoints(skill, cost);
+    }
+}
+
+void SEASON3B::CNewUIMasterLevel::ResetSuggestion()
+{
+    this->m_iSuggestPreset = 0;
+    this->m_BtnSuggestPreset.ChangeText(&I18N::Game::Suggest);
+    this->m_vSuggestPoint.clear();
+}
+
+void SEASON3B::CNewUIMasterLevel::CycleSuggestPreset()
+{
+    int presetCount = 0;
+    const SUGGEST_PRESET* presets = this->GetPresetTable(presetCount);
+
+    if (presets == nullptr || presetCount <= 0)
+    {
+        this->ResetSuggestion();
+
+        return;
+    }
+
+    // 0 is "no suggestion", so the cycle runs off -> preset 1 -> ... -> off.
+    this->m_iSuggestPreset = (this->m_iSuggestPreset + 1) % (presetCount + 1);
+
+    if (this->m_iSuggestPreset == 0)
+    {
+        this->m_BtnSuggestPreset.ChangeText(&I18N::Game::Suggest);
+    }
+    else
+    {
+        this->m_BtnSuggestPreset.ChangeText(presets[this->m_iSuggestPreset - 1].s_pNameSlot);
+    }
+}
+
+void SEASON3B::CNewUIMasterLevel::CalcSuggestion()
+{
+    this->m_vSuggestPoint.clear();
+
+    int presetCount = 0;
+    const SUGGEST_PRESET* presets = this->GetPresetTable(presetCount);
+
+    if (this->m_iSuggestPreset <= 0 || presets == nullptr || this->m_iSuggestPreset > presetCount)
+    {
+        return;
+    }
+
+    int freePoints = Master_Level_Data.nMLevelUpMPoint;
+
+    if (freePoints <= 0)
+    {
+        return;
+    }
+
+    const SUGGEST_PRESET& preset = presets[this->m_iSuggestPreset - 1];
+
+    // Rank by rank, because a rank only opens once the one below it has a
+    // skill at level 10 - filling the whole preset top down would waste the
+    // points on skills the character cannot reach yet. Within a rank the
+    // preset order decides.
+    for (BYTE rank = 1; rank <= MAX_MASTER_TREE_RANK && freePoints > 0; rank++)
+    {
+        for (int i = 0; i < preset.s_iEntryCount && freePoints > 0; i++)
+        {
+            const MASTER_SUGGEST_ENTRY& entry = preset.s_pEntries[i];
+
+            if (SkillAttribute[entry.SkillNumber].SkillRank != rank)
+            {
+                continue;
+            }
+
+            this->SpendSuggestedPoints(entry.SkillNumber, entry.TargetLevel, freePoints, 0);
+        }
+    }
+}
+
+void SEASON3B::CNewUIMasterLevel::ApplySuggestedPoints()
+{
+    if (this->m_iSuggestPreset <= 0 || Master_Level_Data.nMLevelUpMPoint <= 0)
+    {
+        return;
+    }
+
+    // One packet per skill instead of one per point. The order matters: the
+    // server checks every request against the tree, so a parent skill has to
+    // arrive before the skill which requires it.
+    for (const auto& entry : this->m_vSuggestPoint)
+    {
+        if (entry.Points <= 0)
+        {
+            continue;
+        }
+
+        SocketClient->ToGameServer()->SendAddMasterSkillPointMultiple(
+            static_cast<uint16_t>(entry.SkillNumber), static_cast<BYTE>(entry.Points));
+    }
+
+    this->m_vSuggestPoint.clear();
+}
+
+void SEASON3B::CNewUIMasterLevel::RenderSuggestButtons()
+{
+    int presetCount = 0;
+
+    if (this->GetPresetTable(presetCount) == nullptr || presetCount <= 0)
+    {
+        return;
+    }
+
+    this->m_BtnSuggestPreset.Render();
+
+    if (this->m_iSuggestPreset > 0)
+    {
+        this->m_BtnSuggestApply.Render();
+    }
 }
 
 void SEASON3B::CNewUIMasterLevel::ClearSkillTreeData()
