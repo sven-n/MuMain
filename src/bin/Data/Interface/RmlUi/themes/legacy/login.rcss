@@ -110,19 +110,29 @@ body {
 	login-cancel-active: 0px 60px 54px 30px;
 }
 
+/* dp throughout (was px) -- #panel and every other sibling element in this file (labels,
+   input-frame, checkbox rows) are already dp, which scales with the user's own UI-scale setting;
+   a px-sized/positioned button doesn't, and drifts out of step with the (dp-scaled) panel at any
+   scale other than 100% -- see engine-findings.md's own "dp and px are not interchangeable"
+   entry. bottom:15dp (not a fixed top) anchors these to #panel's own bottom edge the same way
+   option_window.rcss's .option-close-btn and generic_confirm_dialog.rcss's own buttons already
+   do, instead of a fixed offset from the top that drifts away from the bottom edge as the panel's
+   own (dp-scaled) height changes relative to it. 15dp preserves the original top:200px's visual
+   position exactly at 100% scale (245dp panel - 200dp - 30dp button height = 15dp). */
 .btn {
 	position: absolute;
-	width: 54px;
-	height: 30px;
+	width: 54dp;
+	height: 30dp;
 	text-align: center;
 	vertical-align: middle;
-	line-height: 30px;
+	line-height: 30dp;
 	cursor: pointer;
 	color: transparent;
 	pointer-events: auto;
+	bottom: 15dp;
 }
 .btn-ok {
-	left: 150px; top: 200px;
+	left: 150dp;
 	decorator: image(login-ok-idle);
 }
 .btn-ok:hover {
@@ -132,7 +142,7 @@ body {
 	decorator: image(login-ok-active);
 }
 .btn-cancel {
-	left: 211px; top: 200px;
+	left: 211dp;
 	decorator: image(login-cancel-idle);
 }
 .btn-cancel:hover {
@@ -142,10 +152,13 @@ body {
 	decorator: image(login-cancel-active);
 }
 
+/* dp, not px -- same reasoning as .btn above. Sits below #panel's own bottom edge by design (top:
+   252dp vs a 245dp-tall panel), not bottom-anchored to it -- this is overflow content, not a
+   panel-relative element like the buttons. */
 .trust-warning {
 	position: absolute;
-	left: 30px;
-	top: 252px;
-	width: 280px;
+	left: 30dp;
+	top: 252dp;
+	width: 280dp;
 	color: #ffd23c;
 }
