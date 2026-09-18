@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "Core/Input/KeyState.h"
+#include "Core/Input/SyntheticInput.h"
 
 #include <SDL3/SDL.h>
 
@@ -65,6 +66,13 @@ namespace Core::Input
 
     bool IsKeyDown(int virtualKey)
     {
+        // A scripted press (control socket) counts as down for the frame it
+        // is injected, ahead of the device state below.
+        if (Synthetic::IsKeyHeld(virtualKey))
+        {
+            return true;
+        }
+
         // Poll live input from SDL on every platform. The Win32 path used
         // GetAsyncKeyState because the old child EDIT controls stole keyboard
         // focus from the SDL window; they were replaced by the portable text

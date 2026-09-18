@@ -475,6 +475,19 @@ void CMsgWin::PopUp(int nMsgCode, wchar_t* pszMsg)
     Show(true);
 }
 
+int CMsgWin::PendingMessageCode() const
+{
+    return IsVisible() ? m_nMsgCode : -1;
+}
+
+void CMsgWin::DismissMessage()
+{
+    if (!IsVisible())
+        return;
+
+    ManageOKClick();
+}
+
 void CMsgWin::ManageOKClick()
 {
     Show(false);

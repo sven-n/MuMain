@@ -11,6 +11,7 @@
 namespace Rml { class ElementDocument; }
 
 class CServerGroup;
+class CServerInfo;
 
 // Pure RmlUi 2D UI: RmlUi owns all of this window's rendering and click handling. Two
 // always-visible columns laid out by server_select.rcss's flexbox rules -- server groups on the
@@ -46,7 +47,17 @@ public:
         return 20.0f;
     }
 
+    // Selects a server group and one of its servers without a click, doing
+    // exactly what the two click handlers do. `groupName` empty or null picks
+    // the first group in the list. Returns false when the list holds no such
+    // group or server, or when the server is full.
+    bool SelectServer(const wchar_t* groupName, int serverIndex);
+
 private:
+    // Asks the connect server for the game server behind this entry and
+    // remembers the choice. Shared by the click path and SelectServer().
+    bool ConnectToServer(CServerInfo* pServerInfo);
+
     void SelectGroup(int nBtnPos);
     void SyncRmlModel();
 
