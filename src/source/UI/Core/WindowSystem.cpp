@@ -5,7 +5,10 @@
 
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "World/MapInfra/MapManager.h"
+#include "Scenes/SceneCore.h"
 
+// Defined in Winmain.cpp; only ever declared at file scope (see MainScene.cpp).
+extern int LoadingWorld;
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -1752,11 +1755,9 @@ void CSystem::HideGroupBeforeOpenInterface()
 
 void CSystem::SyncMainSceneHudVisibility()
 {
-    extern EGameScene SceneFlag;
     // Also gate on LoadingWorld < 30: SceneFlag flips to MAIN_SCENE before the server-sent
     // world/hero data is actually ready, so this mirrors MainScene.cpp's own "not really in
     // MAIN_SCENE yet" check to avoid showing the HUD documents too early.
-    extern int LoadingWorld;
     const bool sceneAllowsShow = (SceneFlag == MAIN_SCENE) && (LoadingWorld < 30);
 
     if (m_pMuHelperBar)
