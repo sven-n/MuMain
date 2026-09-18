@@ -60,6 +60,12 @@ void CGenericMenuDialog::BuildRmlUi()
             c.Bind("has_title", &model.hasTitle);
             c.Bind("title", &model.title);
 
+            // window_shell's positioning/dragging extension -- unused here, this dialog stays
+            // screen-centered (see GenericMenuRmlModel's own comment).
+            c.Bind("positioned", &model.positioned);
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+
             // Position argument is the clicked button's own data-for index (it_index) -- a
             // proven RmlUi pattern already used by char_make.rml/server_select.rml/
             // my_quest_info.rml/main_frame.rml, not a fixed-slot workaround.

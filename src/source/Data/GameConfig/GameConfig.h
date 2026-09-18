@@ -115,6 +115,26 @@ public:
     bool GetVSyncEnabled() const { return m_vsyncEnabled; }
     void SetVSyncEnabled(bool enabled);
 
+    // DXP-23's per-system effect-cost toggles, promoted from console-only ($effects ...)
+    // diagnostics to persisted, in-game-options-exposed settings -- see MainScene.h's
+    // SetDisableEffects/SetDisableParticles/SetDisableSkillEffectModels/SetDisableBoids/
+    // SetDisableWingShadow for what each one actually gates.
+    bool GetDisableEffects() const { return m_disableEffects; }
+    void SetDisableEffects(bool disabled);
+    bool GetDisableParticles() const { return m_disableParticles; }
+    void SetDisableParticles(bool disabled);
+    bool GetDisableSkillEffectModels() const { return m_disableSkillEffectModels; }
+    void SetDisableSkillEffectModels(bool disabled);
+    bool GetDisableBoids() const { return m_disableBoids; }
+    void SetDisableBoids(bool disabled);
+    bool GetDisableWingShadow() const { return m_disableWingShadow; }
+    void SetDisableWingShadow(bool disabled);
+
+    // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
+    // above, this time for the console-only `$fps <N>` diagnostic (SceneManager::SetTargetFps).
+    int GetFpsCap() const { return m_fpsCap; }
+    void SetFpsCap(int fps);
+
     // GPU backend override -- "default"/"vulkan"/"direct3d12"/"metal". Manual config.ini edit
     // only, same as GetSortParticleDraws() above: no setter, no in-game options-window exposure.
     std::wstring GetRenderBackend() const { return m_renderBackend; }
@@ -161,6 +181,12 @@ private:
     bool m_sortParticleDraws;
     bool m_vsyncEnabled;
     std::wstring m_renderBackend;
+    bool m_disableEffects;
+    bool m_disableParticles;
+    bool m_disableSkillEffectModels;
+    bool m_disableBoids;
+    bool m_disableWingShadow;
+    int m_fpsCap;
 
     int ReadInt(const wchar_t* section, const wchar_t* key, int defaultValue) const;
     void WriteInt(const wchar_t* section, const wchar_t* key, int value);

@@ -126,6 +126,14 @@ namespace mu::ui::window
             Rml::String title;
             std::vector<LineEntry> lines;
             std::vector<MenuButtonEntry> buttons;
+
+            // window_shell's own positioning/dragging extension (added for CGenericMenuDialog's
+            // sake as much as option_window.rml's -- the shared template requires every consumer's
+            // model to carry these fields even if unused). Never set true here: this dialog stays
+            // screen-centered, matching every native menu dialog it replaces.
+            bool positioned = false;
+            float rootX = 0.f;
+            float rootY = 0.f;
         };
         RmlModelBinder<GenericMenuRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;

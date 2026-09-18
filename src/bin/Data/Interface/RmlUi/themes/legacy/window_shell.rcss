@@ -122,11 +122,43 @@
 	right: 32dp;
 	top: 20dp;
 	bottom: 28dp;
+	pointer-events: auto;
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 }
+/* Toggled by window_shell.rml's data-class-window-shell-positioned -- cancels .center-both's own
+   transform:translate(-50%,-50%) for a consumer that supplies an already-final real-pixel
+   top-left via root_x/root_y instead of wanting the self-centering shift. See window_shell.rml's
+   own comment for why this is a class toggle, not a raw data-style-transform override. */
+.window-shell-positioned {
+	transform: none;
+}
+
+/* Footer anchor, sibling of #content -- see window_shell.rml's own comment. Same bottom inset
+   #content itself used to reserve (28dp) so a consumer moving its close button here (via
+   UI::RmlBridge::PromoteToWindowShellFooter()) sees no visual shift from before this element
+   existed. pointer-events:none on the anchor itself (it has no visual/hit-test purpose of its
+   own) -- a moved-in .btn already carries its own pointer-events:auto.
+
+   Explicit height, not left as auto against a bare `bottom` offset -- every other absolutely-
+   positioned box in this file (.window-shell-sprite-top/-bottom, etc) always pairs its offset with
+   either a second offset (top+bottom) or an explicit height, never `bottom` alone; this is the
+   first one to try "bottom only" and it left the box's own height indeterminate (found live: a
+   .btn moved in here rendered with no visible text -- .btn's own height:30dp still applied to the
+   BUTTON, but resolving ITS bottom:0 against a footer box of uncertain height put it somewhere
+   unreliable). 30dp matches .btn's own height so bottom:0 on a moved-in close button still sits
+   flush with this box's own bottom edge, same effective spot as before. */
+.window-shell-footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 30dp;
+	bottom: 28dp;
+	pointer-events: none;
+}
+
 .window-shell-content.has-title {
 	/* .window-shell-content's own top:20dp is meant for the untitled case; reset to 0 here so
 	   padding-top below is the ONLY offset. */

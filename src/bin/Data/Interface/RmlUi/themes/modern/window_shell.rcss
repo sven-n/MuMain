@@ -8,6 +8,14 @@
    Named `window-shell-*`, not `gmd-*` -- this markup is no longer generic-menu-dialog-specific (see
    window_shell.rml's own comment). Values below are unchanged from generic_menu_dialog.rcss's
    former .gmd-content-well rule, just renamed. */
+/* Toggled by window_shell.rml's data-class-window-shell-positioned -- cancels .center-both's own
+   transform:translate(-50%,-50%) for a consumer that supplies an already-final real-pixel
+   top-left via root_x/root_y instead of wanting the self-centering shift. See window_shell.rml's
+   own comment for why this is a class toggle, not a raw data-style-transform override. */
+.window-shell-positioned {
+	transform: none;
+}
+
 .window-shell-content {
 	left: 14dp;
 	right: 14dp;
@@ -34,3 +42,21 @@
    .modern-header-rail, which already supplies the full look (position/size/decorator/box-shadow).
    The window-shell- class exists only so this element has a name that isn't tied to any one
    consumer, for anything a future variant might need to target specifically. */
+
+/* Footer anchor, sibling of #content -- see window_shell.rml's own comment. Same bottom inset
+   #content itself used to reserve (16dp) so a consumer moving its close button here (via
+   UI::RmlBridge::PromoteToWindowShellFooter()) sees no visual shift from before this element
+   existed. pointer-events:none on the anchor itself (it has no visual/hit-test purpose of its
+   own) -- a moved-in .btn already carries its own pointer-events:auto.
+
+   Explicit height, not left as auto against a bare `bottom` offset -- see legacy's own copy of
+   this comment for why (found live: a moved-in .btn's own text stopped rendering with an
+   indeterminate-height footer box). 30dp matches .btn's own height. */
+.window-shell-footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	height: 30dp;
+	bottom: 16dp;
+	pointer-events: none;
+}

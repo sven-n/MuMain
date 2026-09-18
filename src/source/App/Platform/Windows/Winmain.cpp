@@ -29,6 +29,7 @@
 #include "Engine/Object/ZzzOpenData.h"
 #include "Scenes/SceneCore.h"
 #include "Scenes/SceneManager.h"
+#include "Scenes/MainScene.h"
 #include "Network/Reconnect/ReconnectManager.h"
 #include "Network/IncomingPacketQueue.h"
 #include "Core/Time/FrameTimerScheduler.h"
@@ -304,16 +305,28 @@ namespace
 bool g_hasPendingVSyncPreference = false;
 bool g_pendingVSyncPreference = true;
 
+// Target FPS to apply whenever VSync ends up off (either genuinely disabled, or unavailable on
+// this system) -- the persisted user preference (Options window's FPS Limit row, formerly only
+// reachable via the console-only `$fps <N>` diagnostic), using the same -1-means-uncapped
+// convention SceneManager::SetTargetFps() already defines. Replaces the previous hardcoded
+// GetFPSLimit() (monitor refresh rate) fallback -- CfgDefaultFpsCap is -1 (uncapped), so a player
+// who has never touched the new setting and has VSync off gets uncapped rendering instead of a
+// monitor-matched cap, matching how most games behave with VSync off and no explicit limit set.
+double EffectiveOffVSyncTargetFps()
+{
+    return GameConfig::GetInstance().GetFpsCap();
+}
+
 void ApplyVSyncPreferenceNow(bool enabled)
 {
     if (!IsVSyncAvailable())
     {
-        SetTargetFps(GetFPSLimit());
+        SetTargetFps(EffectiveOffVSyncTargetFps());
         return;
     }
 
     const bool applied = enabled ? EnableVSync() : DisableVSync();
-    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : GetFPSLimit());
+    SetTargetFps((applied || IsVSyncEnabled()) ? -1 : EffectiveOffVSyncTargetFps());
     ResetFrameStats();
 }
 
@@ -2219,6 +2232,17 @@ int WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int nC
 
     InitVSync();
     ApplyVSyncPreferenceNow(GameConfig::GetInstance().GetVSyncEnabled());
+
+    // Apply persisted DXP-23 effect-cost toggles (Options window's Graphics tab, formerly only
+    // reachable via the console-only $effects ... diagnostics) at launch, same as VSync above.
+    {
+        GameConfig& cfg = GameConfig::GetInstance();
+        SetDisableEffects(cfg.GetDisableEffects());
+        SetDisableParticles(cfg.GetDisableParticles());
+        SetDisableSkillEffectModels(cfg.GetDisableSkillEffectModels());
+        SetDisableBoids(cfg.GetDisableBoids());
+        SetDisableWingShadow(cfg.GetDisableWingShadow());
+    }
 
     // Make the bundled ./fonts faces resolvable by GDI before the first CreateFont,
     // so a chosen curated font works even without a system-wide install.

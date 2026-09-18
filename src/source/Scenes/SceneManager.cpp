@@ -98,10 +98,20 @@ void SetShowDebugInfo(bool enabled)
     if (enabled) g_bShowFpsCounter = false;
 }
 
+bool GetShowDebugInfo()
+{
+    return g_bShowDebugInfo;
+}
+
 void SetShowFpsCounter(bool enabled)
 {
     g_bShowFpsCounter = enabled;
     if (enabled) g_bShowDebugInfo = false;
+}
+
+bool GetShowFpsCounter()
+{
+    return g_bShowFpsCounter;
 }
 
 void SetShowGLStats(bool enabled)
@@ -647,6 +657,15 @@ static void RenderDebugInfo()
              FrameProfiler::AccumulatorMs(FP::Present));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
+    // RmlUi's own Update()/Render() self-time -- fires from SetPreSubmitCallback, after Present's
+    // blit is recorded (see RmlUiRuntime::RenderFrame()), so like Present above this is the
+    // PREVIOUS frame's cost, not this one's. Was previously unmeasured (RenderFrame() ran outside
+    // every FRAME_PROFILE scope) -- the old "UI" row above never included this.
+    mu_swprintf(szLine, L"RmlUi ms  Update:%6.2f  Render:%6.2f",
+             FrameProfiler::AccumulatorMs(FP::RmlUiUpdate),
+             FrameProfiler::AccumulatorMs(FP::RmlUiRender));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
     // Move/update-phase cost of particle & effect simulation (UpdateGameEntities(), not the
     // render-side Effects pass above) — added to gauge whether MoveEffects()/MoveParticles()
     // are worth parallelizing on a worker thread pool (see feature-ffp-shader-port task memory).
@@ -712,6 +731,7 @@ static void RenderGLStats()
     static constexpr Pass kRows[] = {
         Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
         Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
+        Pass::RmlUiUpdate, Pass::RmlUiRender,
     };
 
     mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");

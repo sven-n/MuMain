@@ -8,9 +8,23 @@
 #include "Data/GameConfig/GameConfig.h"
 #include "Data/GameConfig/GameConfigConstants.h"
 #include "Audio/AudioPlayer.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "UI/RmlBridge/RmlWindowShell.h"
+#include "Core/Utilities/StringUtils.h"
+#include "Scenes/SceneManager.h"
+#include "Scenes/MainScene.h"
+#include "App/Platform/Windows/Winmain.h"
+#include "UI/Core/SceneUICoordinator.h"
+#include "UI/Windows/RememberPasswordPrompt.h"
 #include <algorithm>
 #include <cstring>
 #include "I18N/All.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Elements/ElementFormControl.h>
+#include <RmlUi/Core/Event.h>
 
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
@@ -24,6 +38,11 @@ float ConvertY(float y);
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
+
+// Grace period (in SyncRmlModel() calls, i.e. frames) after BuildRmlUi() during which the
+// resolution/language/font <select> change callbacks are ignored -- see m_rmlSyncCount's own
+// comment in OptionWindow.h.
+static constexpr int kRmlSelectSettleFrames = 5;
 
 std::vector<UI::Options::DisplayResolution>
 UI::Options::NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions)
@@ -78,40 +97,27 @@ int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayReso
     return bestIndex;
 }
 
-// I18N locale codes paired with each language's display name in that language,
-// held as wide strings so CComboBox can show them without per-frame conversions.
+// I18N locale codes paired with each language's display name in that language, held as wide
+// strings so the label vector can be rebuilt without per-frame conversions.
 static const struct { const char* code; const wchar_t* label; } s_Languages[] = {
     { "en",    L"English" },
     // Non-ASCII names use universal-character-name escapes for charset-safe MSVC compilation.
     { "de",    L"Deutsch" },
-    { "es",    L"Espa\u00f1ol" },                                                  // Español
+    { "es",    L"Español" },                                                  // Español
     { "id",    L"Bahasa Indonesia" },
-    { "ja",    L"\u65E5\u672C\u8A9E" },                                       // 日本語
+    { "ja",    L"日本語" },                                       // 日本語
     { "pl",    L"Polski" },
-    { "pt",    L"Portugu\u00eas" },                                                // Português
-    { "ru",    L"\u0420\u0443\u0441\u0441\u043a\u0438\u0439" },                   // Русский
+    { "pt",    L"Português" },                                                // Português
+    { "ru",    L"Русский" },                   // Русский
     { "tl",    L"Tagalog" },
-    { "uk",    L"\u0423\u043a\u0440\u0430\u0457\u043d\u0441\u044c\u043a\u0430" }, // Українська
-    { "zh-TW", L"\u7e41\u9ad4\u4e2d\u6587" },                                      // 繁體中文
+    { "uk",    L"Українська" }, // Українська
+    { "zh-TW", L"繁體中文" },                                      // 繁體中文
 };
 static const int s_NumLanguages = sizeof(s_Languages) / sizeof(s_Languages[0]);
 
-static const wchar_t* const* GetLanguageLabels()
-{
-    static const wchar_t* labels[s_NumLanguages] = {};
-    static bool initialized = false;
-    if (!initialized)
-    {
-        for (int i = 0; i < s_NumLanguages; i++)
-            labels[i] = s_Languages[i].label;
-        initialized = true;
-    }
-    return labels;
-}
-
-// UI font families offered by the font combo. `name` is the GameConfig font family value;
-// empty = platform default. Curated entries are bundled in ./fonts so they resolve without a
-// system install.
+// UI font families offered by the font row. `name` is the GameConfig font family value; empty =
+// platform default. Curated entries are bundled in ./fonts so they resolve without a system
+// install.
 static const struct { const wchar_t* name; const wchar_t* label; } s_Fonts[] = {
     { L"",                L"Default" },
     { L"Liberation Sans", L"Liberation Sans" },
@@ -119,61 +125,11 @@ static const struct { const wchar_t* name; const wchar_t* label; } s_Fonts[] = {
 };
 static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 
-static const wchar_t* const* GetFontLabels()
-{
-    // Rebuilt every call so the localized "Default" entry follows a live language switch.
-    static const wchar_t* labels[s_NumFonts] = {};
-    labels[0] = I18N::Game::DefaultFont;
-    for (int i = 1; i < s_NumFonts; i++)
-        labels[i] = s_Fonts[i].label;
-    return labels;
-}
-
-namespace
-{
-    // Volume levels are integers 0..MAX_VOLUME; the slider track is SLIDER_WIDTH pixels wide.
-    constexpr int MAX_VOLUME = 10;
-    constexpr int SLIDER_WIDTH = 124;        // pixels
-    constexpr int SLIDER_HIT_PADDING = 8;    // extra px on each side for easier clicks
-    constexpr int SLIDER_HIT_HEIGHT = 16;
-    constexpr int SLIDER_X_LOCAL = 33;       // slider start relative to m_Pos.x
-
-    // Render-level slider ("Effect limitation") geometry, shared by RenderButtons and
-    // HandleRenderLevelSlider so drawing and hit-testing stay in sync.
-    constexpr int RENDER_SLIDER_X_LOCAL = 60;
-    constexpr int RENDER_SLIDER_Y_LOCAL = 191;
-    constexpr int RENDER_SLIDER_WIDTH = 70;
-    constexpr int RENDER_SLIDER_HEIGHT = 15;
-    constexpr float RENDER_LEVEL_MAX = 5.f;
-    // Native size of the effect-bar sprite, scaled to RENDER_SLIDER_WIDTH x HEIGHT via
-    // RenderImageStretch so the bar shrinks instead of cropping.
-    constexpr int EFFECT_BAR_SRC_WIDTH  = 141;
-    constexpr int EFFECT_BAR_SRC_HEIGHT = 29;
-
-    // Resolution combo box placement (relative to m_Pos)
-    constexpr int RES_COMBO_X_LOCAL = 22;
-    constexpr int RES_COMBO_Y_LOCAL = 335;
-    constexpr int RES_COMBO_WIDTH   = 148;  // spans the old left-to-right arrow area
-    constexpr int RES_COMBO_HEIGHT  = 16;
-    constexpr int RES_COMBO_MAX_VISIBLE = 4;  // scrollbar appears when list > this
-
-    // Language combo box placement (relative to m_Pos).
-    constexpr int LANG_LABEL_Y_LOCAL = 283;
-    constexpr int LANG_COMBO_X_LOCAL = 22;
-    constexpr int LANG_COMBO_Y_LOCAL = 296;
-    constexpr int LANG_COMBO_WIDTH   = 148;
-    constexpr int LANG_COMBO_HEIGHT  = 16;
-    constexpr int LANG_COMBO_MAX_VISIBLE = 5;
-
-    // Font combo box placement (relative to m_Pos). Combos are grouped above the Close
-    // button so an open dropdown never overlaps it.
-    constexpr int FONT_LABEL_Y_LOCAL = 244;
-    constexpr int FONT_COMBO_X_LOCAL = 22;
-    constexpr int FONT_COMBO_Y_LOCAL = 257;
-    constexpr int FONT_COMBO_WIDTH   = 148;
-    constexpr int FONT_COMBO_HEIGHT  = 16;
-    constexpr int FONT_COMBO_MAX_VISIBLE = 5;
-}
+// FPS cap choices offered by the Video tab's FPS Limit row -- -1 matches SceneManager::SetTargetFps's
+// own "uncapped" sentinel and GameConfig::GetFpsCap()'s default, so "Uncapped" doubles as this
+// setting's untouched-by-the-user state (see Winmain.cpp's EffectiveOffVSyncTargetFps()).
+static const int s_FpsCapValues[] = { 24, 30, 60, 120, 144, -1 };
+static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapValues[0]);
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -196,6 +152,19 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
     m_iLanguageIndex = FindCurrentLanguageIndex();
     m_iFontIndex = FindCurrentFontIndex();
+
+    m_iActiveTab = 0;
+
+    m_bVsyncEnabled = GameConfig::GetInstance().GetVSyncEnabled();
+    m_iFpsCapIndex = FindCurrentFpsCapIndex();
+
+    m_bDisableEffects = GameConfig::GetInstance().GetDisableEffects();
+    m_bDisableParticles = GameConfig::GetInstance().GetDisableParticles();
+    m_bDisableSkillEffectModels = GameConfig::GetInstance().GetDisableSkillEffectModels();
+    m_bDisableBoids = GameConfig::GetInstance().GetDisableBoids();
+    m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
+
+    m_iThemeIndex = FindCurrentThemeIndex();
 }
 
 mu::ui::window::COptionWindow::~COptionWindow()
@@ -208,16 +177,218 @@ bool mu::ui::window::COptionWindow::Create(CManager* pNewUIMng, int x, int y)
     if (NULL == pNewUIMng)
         return false;
 
+    // x/y from the caller are WindowSystem.cpp's old reference-resolution constant
+    // ((640/2)-(190/2), 5) -- meaningless now that this window is centered by window_shell's own
+    // `.center-both` CSS, the same as every other window_shell consumer. Kept as a parameter only
+    // for call-site compatibility.
+    (void)x;
+    (void)y;
+
     m_pNewUIMng = pNewUIMng;
     m_pNewUIMng->AddUIObj(mu::ui::window::INTERFACE_OPTION, this);
-    SetPos(x, y);
     LoadImages();
-    SetButtonInfo();
     InitResolutionCombo();
     InitLanguageCombo();
     InitFontCombo();
+
+    if (RmlUiRuntime::Instance().IsCreated())
+        BuildRmlUi();
+
     Show(false);
     return true;
+}
+
+void mu::ui::window::COptionWindow::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "option_window",
+        [this](Rml::DataModelConstructor& c, OptionRmlModel& model)
+        {
+            c.Bind("positioned", &model.positioned);
+            c.Bind("root_x", &model.rootX);
+            c.Bind("root_y", &model.rootY);
+
+            c.Bind("has_title", &model.hasTitle);
+            c.Bind("title", &model.title);
+            c.Bind("close_label", &model.closeLabel);
+
+            c.Bind("active_tab", &model.activeTab);
+            c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
+            c.Bind("tab_audio_label", &model.tabAudioLabel);
+            c.Bind("tab_video_label", &model.tabVideoLabel);
+            c.Bind("tab_graphics_label", &model.tabGraphicsLabel);
+            c.Bind("tab_ui_label", &model.tabUiLabel);
+            c.Bind("tab_general_label", &model.tabGeneralLabel);
+
+            c.Bind("auto_attack", &model.autoAttack);
+            c.Bind("auto_attack_label", &model.autoAttackLabel);
+            c.Bind("whisper_sound", &model.whisperSound);
+            c.Bind("whisper_sound_label", &model.whisperSoundLabel);
+            c.Bind("slide_help", &model.slideHelp);
+            c.Bind("slide_help_label", &model.slideHelpLabel);
+            c.Bind("render_all_effects", &model.renderAllEffects);
+            c.Bind("render_all_effects_label", &model.renderAllEffectsLabel);
+            c.Bind("windowed_mode", &model.windowedMode);
+            c.Bind("windowed_mode_label", &model.windowedModeLabel);
+
+            c.Bind("sound_volume", &model.soundVolume);
+            c.Bind("sound_volume_max", &model.soundVolumeMax);
+            c.Bind("sound_volume_label", &model.soundVolumeLabel);
+            c.Bind("music_volume", &model.musicVolume);
+            c.Bind("music_volume_max", &model.musicVolumeMax);
+            c.Bind("music_volume_label", &model.musicVolumeLabel);
+            c.Bind("render_level", &model.renderLevel);
+            c.Bind("render_level_max", &model.renderLevelMax);
+            c.Bind("render_level_label", &model.renderLevelLabel);
+
+            c.RegisterArray<std::vector<Rml::String>>();
+            c.Bind("resolution_labels", &model.resolutionLabels);
+            c.Bind("resolution_index", &model.resolutionIndex);
+            c.Bind("resolution_row_label", &model.resolutionRowLabel);
+            c.Bind("language_labels", &model.languageLabels);
+            c.Bind("language_index", &model.languageIndex);
+            c.Bind("language_row_label", &model.languageRowLabel);
+            c.Bind("font_labels", &model.fontLabels);
+            c.Bind("font_index", &model.fontIndex);
+            c.Bind("font_row_label", &model.fontRowLabel);
+
+            // Video tab additions.
+            c.Bind("vsync_enabled", &model.vsyncEnabled);
+            c.Bind("vsync_label", &model.vsyncLabel);
+            c.Bind("fps_cap_labels", &model.fpsCapLabels);
+            c.Bind("fps_cap_index", &model.fpsCapIndex);
+            c.Bind("fps_cap_row_label", &model.fpsCapRowLabel);
+
+            // Graphics tab -- DXP-23's per-system effect-cost toggles.
+            c.Bind("disable_effects", &model.disableEffects);
+            c.Bind("disable_effects_label", &model.disableEffectsLabel);
+            c.Bind("disable_particles", &model.disableParticles);
+            c.Bind("disable_particles_label", &model.disableParticlesLabel);
+            c.Bind("disable_skill_effect_models", &model.disableSkillEffectModels);
+            c.Bind("disable_skill_effect_models_label", &model.disableSkillEffectModelsLabel);
+            c.Bind("disable_boids", &model.disableBoids);
+            c.Bind("disable_boids_label", &model.disableBoidsLabel);
+            c.Bind("disable_wing_shadow", &model.disableWingShadow);
+            c.Bind("disable_wing_shadow_label", &model.disableWingShadowLabel);
+
+            // Interface/UI tab.
+            c.Bind("show_fps_counter", &model.showFpsCounter);
+            c.Bind("show_fps_counter_label", &model.showFpsCounterLabel);
+            c.Bind("show_debug_info", &model.showDebugInfo);
+            c.Bind("show_debug_info_label", &model.showDebugInfoLabel);
+            c.Bind("theme_labels", &model.themeLabels);
+            c.Bind("theme_index", &model.themeIndex);
+            c.Bind("theme_row_label", &model.themeRowLabel);
+
+            c.BindEventCallback("option_select_tab",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                {
+                    if (arguments.size() == 1)
+                        RmlClickSelectTab(arguments[0].Get<int>(-1));
+                });
+
+            c.BindEventCallback("option_toggle_auto_attack",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleAutoAttack(); });
+            c.BindEventCallback("option_toggle_whisper_sound",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWhisperSound(); });
+            c.BindEventCallback("option_toggle_slide_help",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleSlideHelp(); });
+            c.BindEventCallback("option_toggle_render_all_effects",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleRenderAllEffects(); });
+            c.BindEventCallback("option_toggle_windowed_mode",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleWindowedMode(); });
+
+            // Range/select inputs: `data-value` two-way-binds for display, but the callback reads
+            // the just-committed value straight off the event's own target element rather than
+            // trusting that data-value's internal write-back listener already ran first on this
+            // same "change" event -- listener ordering between two independently-attached
+            // listeners for the same event isn't part of the documented contract.
+            c.BindEventCallback("option_sound_volume_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlSoundVolumeChanged(std::atoi(control->GetValue().c_str()));
+                });
+            c.BindEventCallback("option_music_volume_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlMusicVolumeChanged(std::atoi(control->GetValue().c_str()));
+                });
+            c.BindEventCallback("option_render_level_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlRenderLevelChanged(std::atoi(control->GetValue().c_str()));
+                });
+            c.BindEventCallback("option_resolution_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlResolutionChanged(std::atoi(control->GetValue().c_str()));
+                });
+            c.BindEventCallback("option_language_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlLanguageChanged(std::atoi(control->GetValue().c_str()));
+                });
+            c.BindEventCallback("option_font_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlFontChanged(std::atoi(control->GetValue().c_str()));
+                });
+
+            c.BindEventCallback("option_toggle_vsync",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleVsync(); });
+            c.BindEventCallback("option_fps_cap_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlFpsCapChanged(std::atoi(control->GetValue().c_str()));
+                });
+
+            c.BindEventCallback("option_toggle_disable_effects",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableEffects(); });
+            c.BindEventCallback("option_toggle_disable_particles",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableParticles(); });
+            c.BindEventCallback("option_toggle_disable_skill_effect_models",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableSkillEffectModels(); });
+            c.BindEventCallback("option_toggle_disable_boids",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableBoids(); });
+            c.BindEventCallback("option_toggle_disable_wing_shadow",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableWingShadow(); });
+
+            c.BindEventCallback("option_toggle_show_fps_counter",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
+            c.BindEventCallback("option_toggle_show_debug_info",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowDebugInfo(); });
+            c.BindEventCallback("option_theme_changed",
+                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+                {
+                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
+                        RmlThemeChanged(std::atoi(control->GetValue().c_str()));
+                });
+
+            c.BindEventCallback("option_click_close",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+        });
+
+    (void)modelCreated;
+
+    // Not draggable for now -- window_shell_header's id and GameConfig's "option_window" position
+    // slot are still there, ready to wire back up via UI::RmlBridge::MakeDraggable() the same way
+    // CMyInventory's #title does, once dragging is revisited.
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+        "Data/Interface/RmlUi/option_window.rml");
+    m_pPanelEl = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
+
+    // Close button parses inside #content (window_shell's only splice target, see
+    // option_window.rml's own comment) but belongs outside it, a direct #panel child like
+    // generic_confirm_dialog.rcss's own buttons -- move it into window_shell's shared footer
+    // anchor now that the document (and its data bindings) are fully loaded.
+    if (m_pRmlDoc)
+        UI::RmlBridge::PromoteToWindowShellFooter(m_pRmlDoc, "option_close_btn");
 }
 
 void mu::ui::window::COptionWindow::InitResolutionCombo()
@@ -238,63 +409,27 @@ void mu::ui::window::COptionWindow::InitResolutionCombo()
     {
         m_resolutionLabels.push_back(std::to_wstring(width) + L" x " + std::to_wstring(height));
     }
-
-    m_resolutionLabelPointers.clear();
-    m_resolutionLabelPointers.reserve(m_resolutionLabels.size());
-    for (const std::wstring& label : m_resolutionLabels)
-    {
-        m_resolutionLabelPointers.push_back(label.c_str());
-    }
-
-    m_ResolutionCombo.Setup(
-        m_Pos.x + RES_COMBO_X_LOCAL,
-        m_Pos.y + RES_COMBO_Y_LOCAL,
-        RES_COMBO_WIDTH,
-        RES_COMBO_HEIGHT,
-        m_resolutionLabelPointers.data(),
-        static_cast<int>(m_resolutions.size()),
-        m_iResolutionIndex,
-        RES_COMBO_MAX_VISIBLE);
 }
 
 void mu::ui::window::COptionWindow::InitLanguageCombo()
 {
-    m_LanguageCombo.Setup(
-        m_Pos.x + LANG_COMBO_X_LOCAL,
-        m_Pos.y + LANG_COMBO_Y_LOCAL,
-        LANG_COMBO_WIDTH,
-        LANG_COMBO_HEIGHT,
-        GetLanguageLabels(),
-        s_NumLanguages,
-        m_iLanguageIndex,
-        LANG_COMBO_MAX_VISIBLE);
+    m_iLanguageIndex = FindCurrentLanguageIndex();
 }
 
 void mu::ui::window::COptionWindow::InitFontCombo()
 {
-    m_FontCombo.Setup(
-        m_Pos.x + FONT_COMBO_X_LOCAL,
-        m_Pos.y + FONT_COMBO_Y_LOCAL,
-        FONT_COMBO_WIDTH,
-        FONT_COMBO_HEIGHT,
-        GetFontLabels(),
-        s_NumFonts,
-        m_iFontIndex,
-        FONT_COMBO_MAX_VISIBLE);
-}
-
-void mu::ui::window::COptionWindow::SetButtonInfo()
-{
-    m_BtnClose.ChangeTextBackColor(RGBA(255, 255, 255, 0));
-    m_BtnClose.ChangeButtonImgState(true, IMAGE_OPTION_BTN_CLOSE, true);
-    m_BtnClose.ChangeButtonInfo(m_Pos.x + 68, m_Pos.y + 388, 54, 30);
-    m_BtnClose.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-    m_BtnClose.ChangeImgColor(BUTTON_STATE_DOWN, RGBA(255, 255, 255, 255));
+    m_iFontIndex = FindCurrentFontIndex();
 }
 
 void mu::ui::window::COptionWindow::Release()
 {
     UnloadImages();
+
+    if (m_pRmlDoc)
+    {
+        m_pRmlDoc->Close();
+        m_pRmlDoc = nullptr;
+    }
 
     if (m_pNewUIMng)
     {
@@ -307,184 +442,81 @@ void mu::ui::window::COptionWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
-    m_ResolutionCombo.SetPos(m_Pos.x + RES_COMBO_X_LOCAL, m_Pos.y + RES_COMBO_Y_LOCAL);
-    m_LanguageCombo.SetPos(m_Pos.x + LANG_COMBO_X_LOCAL, m_Pos.y + LANG_COMBO_Y_LOCAL);
-    m_FontCombo.SetPos(m_Pos.x + FONT_COMBO_X_LOCAL, m_Pos.y + FONT_COMBO_Y_LOCAL);
+}
+
+void mu::ui::window::COptionWindow::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+    if (m_pRmlDoc)
+    {
+        if (bShow) m_pRmlDoc->Show();
+        else m_pRmlDoc->Hide();
+    }
+}
+
+void mu::ui::window::COptionWindow::ReloadRmlTheme()
+{
+    // Same shape CGenericMenuDialog::ReloadRmlTheme() already establishes -- needed here because
+    // this window's own UI Theme dropdown (Interface/UI tab) can trigger a theme switch from
+    // inside itself, and CManager::ReloadAllRmlThemes() sweeps every registered window through
+    // this override, this one included.
+    if (!m_pRmlDoc)
+        return;
+
+    const bool wasVisible = m_pRmlDoc->IsVisible();
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+    m_pPanelEl = nullptr;
+
+    BuildRmlUi();
+    if (wasVisible)
+    {
+        SyncRmlModel();
+        if (m_pRmlDoc)
+            m_pRmlDoc->Show();
+    }
 }
 
 bool mu::ui::window::COptionWindow::UpdateMouseEvent()
 {
-    // A combo selects on press while Close fires on release, so without this latch a press
-    // over Close's screen area could pick a dropdown item and then close the window on release.
-    // Swallow the rest of the hold once a combo consumes a click.
-    if (m_bSwallowClickHold)
-    {
-        if (!mu::ui::window::IsRepeat(VK_LBUTTON))   // button released → hold is over
-            m_bSwallowClickHold = false;
-        return false;
-    }
-
-    // Combos are processed before Close and the checkboxes/sliders: an open dropdown can
-    // overflow over those controls, so combos must consume the click first.
+    // RmlUi's #panel owns all hit-testing for its own controls now; just claim the rest of the
+    // window's own screen rect so a click here doesn't fall through to the world/scene behind it
+    // -- this window isn't modal (unlike CGenericMenuDialog's UpdateMouseEvent(), which just
+    // returns !IsVisible()), so a real rect is needed rather than blocking every click outright.
+    // Read the panel's own live rendered position/size straight from RmlUi rather than
+    // approximating them from hardcoded dp constants -- that approximation drifted from
+    // wherever `.center-both`/window_shell actually put the panel (a stale native reference-pixel
+    // 190x419 originally, then a since-removed dp-based guess), and separately, INTERFACE_OPTION
+    // wasn't registered in UILayoutPolicy.cpp's table at all, so it defaulted to LayoutMode::Dialog
+    // (a 640x480-reference rescale) instead of the Legacy (identity) transform this window's real-
+    // device-pixel math needs -- MouseX/MouseY were being remapped into a completely different
+    // coordinate space than this hit-test rect, so it almost never matched and clicks fell through
+    // to world/character movement. Both fixed: INTERFACE_OPTION now maps to LayoutMode::Legacy, and
+    // this rect is read from the actual element instead of duplicated constants.
     //
-    // An open dropdown is drawn on top, so it must also win over a closed combo whose field
-    // it overlaps -- process open combos before closed ones, not in a fixed order.
-    struct ComboSlot { CComboBox* combo; int* index; void (COptionWindow::*apply)(); };
-    const ComboSlot slots[] = {
-        { &m_ResolutionCombo, &m_iResolutionIndex, &COptionWindow::ApplyResolution },
-        { &m_LanguageCombo,   &m_iLanguageIndex,   &COptionWindow::ApplyLanguage   },
-        { &m_FontCombo,       &m_iFontIndex,       &COptionWindow::ApplyFont        },
-    };
-    for (int pass = 0; pass < 2; ++pass)   // pass 0 = open combo (on top), pass 1 = closed
+    // Defensive re-fetch: m_pPanelEl should already be valid whenever m_pRmlDoc is (BuildRmlUi()
+    // sets both together), but if it's ever out of sync -- e.g. a future change re-parents/renames
+    // #panel without updating this cache -- silently returning "unclaimed" here would reopen this
+    // exact click-through bug with no diagnostic trail. Re-resolving costs one GetElementById() at
+    // most, only in that already-broken case.
+    if (!m_pPanelEl && m_pRmlDoc)
+        m_pPanelEl = m_pRmlDoc->GetElementById("panel");
+
+    if (m_pPanelEl)
     {
-        for (const ComboSlot& s : slots)
-        {
-            const bool wasOpen = s.combo->IsOpen();
-            if (wasOpen != (pass == 0))
-                continue;
-            if (s.combo->UpdateMouseEvent())
-            {
-                *s.index = s.combo->GetSelectedIndex();
-                (this->*s.apply)();
-                m_bSwallowClickHold = true;
-                return false;
-            }
-            if (s.combo->IsMouseOverWidget())
-                return false;
-            // A press elsewhere closed this dropdown: consume it and swallow the hold too.
-            if (wasOpen && !s.combo->IsOpen() && mu::ui::window::IsPress(VK_LBUTTON))
-            {
-                m_bSwallowClickHold = true;
-                return false;
-            }
-        }
+        const Rml::Vector2f offset = m_pPanelEl->GetAbsoluteOffset(Rml::BoxArea::Border);
+        const int panelWidthPx = static_cast<int>(m_pPanelEl->GetOffsetWidth());
+        const int panelHeightPx = static_cast<int>(m_pPanelEl->GetOffsetHeight());
+        if (mu::ui::window::WindowGeometry(static_cast<int>(offset.x), static_cast<int>(offset.y), panelWidthPx,
+                                            panelHeightPx)
+                .Contains(MouseX, MouseY))
+            return false;
     }
-
-    // After combos, so an open dropdown drawn over Close wins the click.
-    if (m_BtnClose.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_OPTION);
-        return false;
-    }
-
-    bool oldWindowedMode = m_bWindowedMode;
-    HandleCheckboxInputs();
-
-    if (m_bWindowedMode != oldWindowedMode)
-        ApplyWindowModeToggle();
-
-    if (HandleVolumeSlider(m_iVolumeLevel, 104))
-        OnSoundVolumeChanged();
-
-    if (HandleVolumeSlider(m_iMusicLevel, 132))
-        OnMusicVolumeChanged();
-
-    HandleRenderLevelSlider();
-
-    // Consume remaining clicks inside the window so they don't fall through to the world.
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, 190, 419).Contains(MouseX, MouseY))
-        return false;
 
     return true;
 }
-
-void mu::ui::window::COptionWindow::HandleCheckboxInputs()
-{
-    struct Checkbox { int yLocal; bool* target; };
-    const Checkbox boxes[] = {
-        {  43, &m_bAutoAttack        },
-        {  65, &m_bWhisperSound      },
-        { 155, &m_bSlideHelp         },
-        { 238, &m_bRenderAllEffects  },
-        { 356, &m_bWindowedMode      },
-    };
-
-    constexpr int CHECKBOX_X_LOCAL = 150;
-    constexpr int CHECKBOX_SIZE = 15;
-
-    if (!mu::ui::window::IsPress(VK_LBUTTON))
-        return;
-
-    for (const auto& cb : boxes)
-    {
-        if (CheckMouseIn(m_Pos.x + CHECKBOX_X_LOCAL, m_Pos.y + cb.yLocal, CHECKBOX_SIZE, CHECKBOX_SIZE))
-            *cb.target = !*cb.target;
-    }
-}
-
-// Handles wheel + drag input on a volume slider track.
-// Returns true if the level changed this frame.
-bool mu::ui::window::COptionWindow::HandleVolumeSlider(int& level, int yOffset)
-{
-    if (!CheckMouseIn(m_Pos.x + SLIDER_X_LOCAL - SLIDER_HIT_PADDING,
-                      m_Pos.y + yOffset,
-                      SLIDER_WIDTH + SLIDER_HIT_PADDING,
-                      SLIDER_HIT_HEIGHT))
-    {
-        return false;
-    }
-
-    const int oldValue = level;
-
-    if (MouseWheel > 0)
-    {
-        MouseWheel = 0;
-        level++;
-    }
-    else if (MouseWheel < 0)
-    {
-        MouseWheel = 0;
-        level--;
-    }
-
-    if (mu::ui::window::IsRepeat(VK_LBUTTON))
-    {
-        int x = MouseX - (m_Pos.x + SLIDER_X_LOCAL);
-        if (x < 0)
-            level = 0;
-        else
-            level = (int)(((float)MAX_VOLUME * x) / (float)SLIDER_WIDTH + 0.5f);
-    }
-
-    // Clamp once after all adjustments
-    level = std::clamp(level, 0, MAX_VOLUME);
-
-    return (level != oldValue);
-}
-
-void mu::ui::window::COptionWindow::OnSoundVolumeChanged()
-{
-    m_SoundOnOff = (m_iVolumeLevel > 0) ? 1 : 0;
-    SetEffectVolumeLevel(m_iVolumeLevel);
-    GameConfig::GetInstance().SetSoundVolume(m_iVolumeLevel);
-    GameConfig::GetInstance().Save();
-}
-
-void mu::ui::window::COptionWindow::OnMusicVolumeChanged()
-{
-    // Mute via volume only, not by stopping the stream -- stopping loses the current track
-    // until the next scene change, so raising the slider back up would stay silent.
-    m_MusicOnOff = (m_iMusicLevel > 0) ? 1 : 0;
-
-    AudioPlayer::SetMusicVolume(m_iMusicLevel);
-
-    GameConfig::GetInstance().SetMusicVolume(m_iMusicLevel);
-    GameConfig::GetInstance().Save();
-}
-
-void mu::ui::window::COptionWindow::HandleRenderLevelSlider()
-{
-    if (!CheckMouseIn(m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
-                      RENDER_SLIDER_WIDTH, RENDER_SLIDER_HEIGHT))
-        return;
-
-    if (!mu::ui::window::IsRepeat(VK_LBUTTON))
-        return;
-
-    int x = MouseX - (m_Pos.x + RENDER_SLIDER_X_LOCAL);
-    m_iRenderLevel = (int)((RENDER_LEVEL_MAX * x) / (float)RENDER_SLIDER_WIDTH + 0.5f);
-}
-
 
 bool mu::ui::window::COptionWindow::UpdateKeyEvent()
 {
@@ -503,16 +535,16 @@ bool mu::ui::window::COptionWindow::UpdateKeyEvent()
 
 bool mu::ui::window::COptionWindow::Update()
 {
+    // Outside any RmlUi event dispatch -- safe to destroy/rebuild m_pRmlDoc here if a theme switch
+    // was requested (see m_bPendingThemeSwitch's own comment).
+    ApplyPendingThemeSwitch();
+    SyncRmlModel();
     return true;
 }
 
 bool mu::ui::window::COptionWindow::Render()
 {
-    EnableAlphaTest();
-    RenderFrame();
-    RenderContents();
-    RenderButtons();
-    DisableAlphaBlend();
+    // RmlUi's #panel owns all chrome/text/control rendering now; nothing left to draw natively.
     return true;
 }
 
@@ -528,23 +560,28 @@ float mu::ui::window::COptionWindow::GetKeyEventOrder()	// 10.f;
 
 void mu::ui::window::COptionWindow::OpenningProcess()
 {
-    // Resync state that may have been changed externally while the window was hidden.
-    m_bSwallowClickHold = false;   // drop any stale combo click-swallow latch
+    // Resync state that may have been changed externally while the window was hidden -- including
+    // via the console-only $vsync/$effects .../$theme commands these same settings are now also
+    // exposed through, so opening this window always reflects the current live truth.
     InitResolutionCombo();
     m_iLanguageIndex = FindCurrentLanguageIndex();
-    m_LanguageCombo.SetSelectedIndex(m_iLanguageIndex);
-    m_LanguageCombo.Close();
     m_iFontIndex = FindCurrentFontIndex();
-    m_FontCombo.SetSelectedIndex(m_iFontIndex);
-    m_FontCombo.Close();
     m_bWindowedMode = (g_bUseWindowMode == TRUE);
+
+    m_bVsyncEnabled = GameConfig::GetInstance().GetVSyncEnabled();
+    m_iFpsCapIndex = FindCurrentFpsCapIndex();
+
+    m_bDisableEffects = GameConfig::GetInstance().GetDisableEffects();
+    m_bDisableParticles = GameConfig::GetInstance().GetDisableParticles();
+    m_bDisableSkillEffectModels = GameConfig::GetInstance().GetDisableSkillEffectModels();
+    m_bDisableBoids = GameConfig::GetInstance().GetDisableBoids();
+    m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
+
+    m_iThemeIndex = FindCurrentThemeIndex();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
 {
-    m_ResolutionCombo.Close();
-    m_LanguageCombo.Close();
-    m_FontCombo.Close();
 }
 
 void mu::ui::window::COptionWindow::LoadImages()
@@ -581,172 +618,245 @@ void mu::ui::window::COptionWindow::UnloadImages()
     DeleteBitmap(IMAGE_OPTION_VOLUME_COLOR);
 }
 
-void mu::ui::window::COptionWindow::RenderFrame()
+void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
 {
-    float x, y;
-    x = m_Pos.x;
-    y = m_Pos.y;
-    // Frame is 64px top + N*10px middle slats + 45px bottom; slat count is tuned to reach
-    // the Close button plus bottom border.
-    constexpr int SLAT_COUNT = 30;
-    constexpr float FRAME_HEIGHT = 64.f + SLAT_COUNT * 10.f + 45.f;
-    RenderImage(IMAGE_OPTION_FRAME_BACK, x, y, 190.f, FRAME_HEIGHT);
-    RenderImage(IMAGE_OPTION_FRAME_UP, x, y, 190.f, 64.f);
-    y += 64.f;
-    for (int i = 0; i < SLAT_COUNT; ++i)
-    {
-        RenderImage(IMAGE_OPTION_FRAME_LEFT, x, y, 21.f, 10.f);
-        RenderImage(IMAGE_OPTION_FRAME_RIGHT, x + 190 - 21, y, 21.f, 10.f);
-        y += 10.f;
-    }
-    RenderImage(IMAGE_OPTION_FRAME_DOWN, x, y, 190.f, 45.f);
-
-    y = m_Pos.y + 60.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after auto attack
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after whisper
-
-    y = m_Pos.y + 150.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after music vol
-
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after slide help
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render level
-
-    y += 25.f;
-    RenderImage(IMAGE_OPTION_LINE, x + 18, y, 154.f, 2.f);     // after render full effects
+    if (nTab < 0 || nTab > 5)
+        return;
+    m_iActiveTab = nTab;
+    PlayBuffer(SOUND_CLICK01);
 }
 
-void mu::ui::window::COptionWindow::RenderContents()
+void mu::ui::window::COptionWindow::RmlToggleAutoAttack()
 {
-    float x, y;
-    x = m_Pos.x + 20.f;
-    y = m_Pos.y + 46.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Auto Attack
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Whisper Sound
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Sound Volume
-    y += 28.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Music Volume
-    y += 40.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Slide Help
-    y += 22.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Render Level
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Render Full Effects
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 48, I18N::Game::AutomaticAttack);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 70, I18N::Game::BeepSoundForWhispering);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 92, I18N::Game::SoundVolume);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 120, I18N::Game::MusicVolume);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 160, I18N::Game::SlideHelp);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 182, I18N::Game::EffectLimitation);
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 221, I18N::Game::RenderFullEffects);
-
-    y += 25.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Font
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + FONT_LABEL_Y_LOCAL, I18N::Game::Font);
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Language
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + LANG_LABEL_Y_LOCAL, I18N::Game::Language);
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Resolution
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 322, I18N::Game::Resolution);
-
-    y += 39.f;
-    RenderImage(IMAGE_OPTION_POINT, x, y, 10.f, 10.f);       // Windowed Mode
-    g_pRenderText->RenderText(m_Pos.x + 40, m_Pos.y + 361, I18N::Game::WindowedMode);
+    m_bAutoAttack = !m_bAutoAttack;
 }
 
-void mu::ui::window::COptionWindow::RenderButtons()
+void mu::ui::window::COptionWindow::RmlToggleWhisperSound()
 {
-    m_BtnClose.Render();
+    m_bWhisperSound = !m_bWhisperSound;
+}
 
-    if (m_bAutoAttack)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 43, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 43, 15, 15, 0, 15.f);
-    }
+void mu::ui::window::COptionWindow::RmlToggleSlideHelp()
+{
+    m_bSlideHelp = !m_bSlideHelp;
+}
 
-    if (m_bWhisperSound)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 65, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 65, 15, 15, 0, 15.f);
-    }
+void mu::ui::window::COptionWindow::RmlToggleRenderAllEffects()
+{
+    m_bRenderAllEffects = !m_bRenderAllEffects;
+}
 
-    if (m_bSlideHelp)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 155, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 155, 15, 15, 0, 15.f);
-    }
+void mu::ui::window::COptionWindow::RmlToggleWindowedMode()
+{
+    m_bWindowedMode = !m_bWindowedMode;
+    ApplyWindowModeToggle();
+}
 
-    RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x + 33, m_Pos.y + 104, 124.f, 16.f);
-    if (m_iVolumeLevel > 0)
-    {
-        RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + 33, m_Pos.y + 104, 124.f * 0.1f * (m_iVolumeLevel), 16.f);
-    }
+void mu::ui::window::COptionWindow::RmlSoundVolumeChanged(int value)
+{
+    m_iVolumeLevel = std::clamp(value, 0, 10);
+    OnSoundVolumeChanged();
+}
 
-    // Music volume bar
-    RenderImage(IMAGE_OPTION_VOLUME_BACK, m_Pos.x + 33, m_Pos.y + 132, 124.f, 16.f);
-    if (m_iMusicLevel > 0)
-    {
-        RenderImage(IMAGE_OPTION_VOLUME_COLOR, m_Pos.x + 33, m_Pos.y + 132, 124.f * 0.1f * (m_iMusicLevel), 16.f);
-    }
+void mu::ui::window::COptionWindow::RmlMusicVolumeChanged(int value)
+{
+    m_iMusicLevel = std::clamp(value, 0, 10);
+    OnMusicVolumeChanged();
+}
 
-    RenderImageStretch(IMAGE_OPTION_EFFECT_BACK, m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
-                       (float)RENDER_SLIDER_WIDTH, (float)RENDER_SLIDER_HEIGHT,
-                       0.f, 0.f, (float)EFFECT_BAR_SRC_WIDTH, (float)EFFECT_BAR_SRC_HEIGHT);
-    if (m_iRenderLevel >= 0)
-    {
-        // Reveal proportionally to the level: shrink both the dest width and the
-        // sampled source width by the same fraction so the squares stay aligned.
-        const float fill = 0.2f * (m_iRenderLevel + 1);
-        RenderImageStretch(IMAGE_OPTION_EFFECT_COLOR, m_Pos.x + RENDER_SLIDER_X_LOCAL, m_Pos.y + RENDER_SLIDER_Y_LOCAL,
-                           (float)RENDER_SLIDER_WIDTH * fill, (float)RENDER_SLIDER_HEIGHT,
-                           0.f, 0.f, (float)EFFECT_BAR_SRC_WIDTH * fill, (float)EFFECT_BAR_SRC_HEIGHT);
-    }
+void mu::ui::window::COptionWindow::RmlRenderLevelChanged(int value)
+{
+    m_iRenderLevel = std::clamp(value, 0, 5);
+}
 
-    if (m_bRenderAllEffects)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 217, 15, 15, 0, 15.f);
-    }
+void mu::ui::window::COptionWindow::RmlResolutionChanged(int index)
+{
+    // WidgetDropDown (RmlUi's native <select> backing class) can re-fire "change" a few times of
+    // its own accord while it settles its data-for option list against the freshly-populated
+    // data-value index -- observed in practice to land on the wrong (smallest/first-listed)
+    // option and force the real window down to it, even though m_iResolutionIndex already held
+    // the correct value at that point (so the old "no-op if unchanged" guard alone didn't catch
+    // it: the spurious index and the correct one legitimately differ). No real user input can
+    // land here this early -- the window isn't even shown until well after boot -- so ignore
+    // every change callback until the settle window has elapsed (m_rmlSyncCount's own comment).
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= static_cast<int>(m_resolutions.size()))
+        return;
+    if (index == m_iResolutionIndex)
+        return;
+    m_iResolutionIndex = index;
+    ApplyResolution();
+}
 
-    if (m_bWindowedMode)
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 0);
-    }
-    else
-    {
-        RenderImage(IMAGE_OPTION_BTN_CHECK, m_Pos.x + 150, m_Pos.y + 356, 15, 15, 0, 15.f);
-    }
+void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= s_NumLanguages)
+        return;
+    m_iLanguageIndex = index;
+    ApplyLanguage();
+}
 
-    // Drawn last so dropdowns sit on top; closed combos render before any open one so an open
-    // dropdown's list isn't overdrawn by a combo below it.
-    CComboBox* combos[] = { &m_ResolutionCombo, &m_LanguageCombo, &m_FontCombo };
-    for (auto* c : combos) if (!c->IsOpen()) c->Render();
-    for (auto* c : combos) if (c->IsOpen())  c->Render();
+void mu::ui::window::COptionWindow::RmlFontChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= s_NumFonts)
+        return;
+    m_iFontIndex = index;
+    ApplyFont();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleVsync()
+{
+    m_bVsyncEnabled = !m_bVsyncEnabled;
+    // Persists + applies live next frame -- see this function's own doc comment (Winmain.cpp).
+    // Calling GameConfig::SetVSyncEnabled() directly here would persist without applying.
+    MuSetVSyncPreference(m_bVsyncEnabled);
+}
+
+void mu::ui::window::COptionWindow::RmlFpsCapChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index >= s_NumFpsCapValues)
+        return;
+    if (index == m_iFpsCapIndex)
+        return;
+    m_iFpsCapIndex = index;
+
+    const int fps = s_FpsCapValues[index];
+    // Unconditional, same as the console-only `$fps <N>` diagnostic this replaces -- it doesn't
+    // check VSync state either; if VSync is on, this can transiently override it until the next
+    // VSync toggle re-asserts -1 (a pre-existing characteristic of SetTargetFps, not new here).
+    SetTargetFps(fps);
+    GameConfig::GetInstance().SetFpsCap(fps);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleDisableEffects()
+{
+    m_bDisableEffects = !m_bDisableEffects;
+    SetDisableEffects(m_bDisableEffects);
+    GameConfig::GetInstance().SetDisableEffects(m_bDisableEffects);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleDisableParticles()
+{
+    m_bDisableParticles = !m_bDisableParticles;
+    SetDisableParticles(m_bDisableParticles);
+    GameConfig::GetInstance().SetDisableParticles(m_bDisableParticles);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleDisableSkillEffectModels()
+{
+    m_bDisableSkillEffectModels = !m_bDisableSkillEffectModels;
+    SetDisableSkillEffectModels(m_bDisableSkillEffectModels);
+    GameConfig::GetInstance().SetDisableSkillEffectModels(m_bDisableSkillEffectModels);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleDisableBoids()
+{
+    m_bDisableBoids = !m_bDisableBoids;
+    SetDisableBoids(m_bDisableBoids);
+    GameConfig::GetInstance().SetDisableBoids(m_bDisableBoids);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleDisableWingShadow()
+{
+    m_bDisableWingShadow = !m_bDisableWingShadow;
+    SetDisableWingShadow(m_bDisableWingShadow);
+    GameConfig::GetInstance().SetDisableWingShadow(m_bDisableWingShadow);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::RmlToggleShowFpsCounter()
+{
+    // No member/persistence -- SetShowFpsCounter() also clears ShowDebugInfo internally
+    // (mutually exclusive), and SyncRmlModel() reads both live every frame, so the other
+    // checkbox reflects the change on its own without any extra bookkeeping here.
+    SetShowFpsCounter(!GetShowFpsCounter());
+}
+
+void mu::ui::window::COptionWindow::RmlToggleShowDebugInfo()
+{
+    SetShowDebugInfo(!GetShowDebugInfo());
+}
+
+void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    if (index < 0 || index > 1)
+        return;
+    if (index == m_iThemeIndex)
+        return;
+
+    // Deferred to Update() -- see m_bPendingThemeSwitch's own comment (OptionWindow.h) for why
+    // this can't run synchronously here: it would destroy m_pRmlDoc mid-dispatch of the very
+    // <select> "change" event that called this.
+    m_iPendingThemeIndex = index;
+    m_bPendingThemeSwitch = true;
+}
+
+void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
+{
+    if (!m_bPendingThemeSwitch)
+        return;
+    m_bPendingThemeSwitch = false;
+
+    const int index = m_iPendingThemeIndex;
+    m_iThemeIndex = index;
+
+    // Exact sequence `$theme <legacy|modern>` (muConsoleDebug.cpp) already uses at runtime, plus
+    // Save() -- that command is explicitly session-only, this UI control should persist.
+    const std::string themeName = (index == 1) ? "modern" : "legacy";
+    if (!UI::RmlBridge::ThemeExists(themeName))
+        return;
+
+    GameConfig::GetInstance().SetRmlTheme(StringUtils::NarrowToWide(themeName));
+    GameConfig::GetInstance().Save();
+    UI::RmlBridge::SetActiveThemeName(themeName);
+    CSceneUICoordinator::Instance().GetNewStyleMng().ReloadAllRmlThemes();
+    if (mu::ui::window::CManager* newUIMng = g_pNewUIMng)
+        newUIMng->ReloadAllRmlThemes();
+    UI::Login::ReloadRmlTheme();
+}
+
+void mu::ui::window::COptionWindow::RmlClickClose()
+{
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_OPTION);
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::OnSoundVolumeChanged()
+{
+    m_SoundOnOff = (m_iVolumeLevel > 0) ? 1 : 0;
+    SetEffectVolumeLevel(m_iVolumeLevel);
+    GameConfig::GetInstance().SetSoundVolume(m_iVolumeLevel);
+    GameConfig::GetInstance().Save();
+}
+
+void mu::ui::window::COptionWindow::OnMusicVolumeChanged()
+{
+    // Mute via volume only, not by stopping the stream -- stopping loses the current track until
+    // the next scene change, so raising the slider back up would stay silent.
+    m_MusicOnOff = (m_iMusicLevel > 0) ? 1 : 0;
+
+    AudioPlayer::SetMusicVolume(m_iMusicLevel);
+
+    GameConfig::GetInstance().SetMusicVolume(m_iMusicLevel);
+    GameConfig::GetInstance().Save();
 }
 
 void mu::ui::window::COptionWindow::SetAutoAttack(bool bAuto)
@@ -866,6 +976,22 @@ void mu::ui::window::COptionWindow::ApplyFont()
     GameConfig::GetInstance().Save();
 }
 
+int mu::ui::window::COptionWindow::FindCurrentFpsCapIndex()
+{
+    const int fpsCap = GameConfig::GetInstance().GetFpsCap();
+    for (int i = 0; i < s_NumFpsCapValues; ++i)
+    {
+        if (s_FpsCapValues[i] == fpsCap)
+            return i;
+    }
+    return s_NumFpsCapValues - 1;  // "Uncapped" -- last entry, matches CfgDefaultFpsCap (-1)
+}
+
+int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
+{
+    return UI::RmlBridge::GetActiveThemeName() == "modern" ? 1 : 0;
+}
+
 void mu::ui::window::COptionWindow::ApplyResolution()
 {
     if (m_iResolutionIndex < 0 || m_iResolutionIndex >= static_cast<int>(m_resolutions.size()))
@@ -881,13 +1007,13 @@ void mu::ui::window::COptionWindow::ApplyResolution()
                             g_bUseWindowMode != FALSE);
 
     // SDL may have coerced the request; WindowWidth/Height now hold the actual result, so
-    // persist that and snap the combo to it.
+    // persist that and snap the selection to it.
     SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
 }
 
-// Points the resolution combo at the window's real size; if it's not a listed mode, keeps the
+// Points the resolution selection at the window's real size; if it's not a listed mode, keeps the
 // current selection (config still records the real size).
 void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
 {
@@ -896,7 +1022,6 @@ void mu::ui::window::COptionWindow::SyncResolutionComboToWindow()
     if (listed < 0)
         return;
     m_iResolutionIndex = listed;
-    m_ResolutionCombo.SetSelectedIndex(listed);
 }
 
 // Switches windowed/fullscreen through SDL (MuApplyWindowResolution), not raw Win32 calls --
@@ -912,7 +1037,155 @@ void mu::ui::window::COptionWindow::ApplyWindowModeToggle()
     SyncResolutionComboToWindow();
     GameConfig::GetInstance().SetWindowSize(WindowWidth, WindowHeight);
     GameConfig::GetInstance().Save();
+}
 
-    // Consume the in-flight press so the same click doesn't toggle again next frame.
-    g_pNewKeyInput->SetKeyState(VK_LBUTTON, mu::ui::window::CNewKeyInput::KEY_NONE);
+void mu::ui::window::COptionWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    // Saturates rather than wrapping; only ever compared against kRmlSelectSettleFrames below.
+    if (m_rmlSyncCount < 1000)
+        ++m_rmlSyncCount;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    // Diffed first, matching MyQuestInfoWindow::SyncRmlModel()'s own ordering for its activeTab.
+    if (model.activeTab != m_iActiveTab) { model.activeTab = m_iActiveTab; m_RmlBinder.MarkDirty("active_tab"); }
+
+    // Re-fetched every sync, not just once at BuildRmlUi() time -- native re-rendered every one of
+    // these from the live I18N::Game::* pointer every frame, so a language switch made from this
+    // very window relabels it immediately rather than only on next reopen.
+    const auto syncLabel = [this](Rml::String& field, const char* fieldName, const wchar_t* text)
+    {
+        const Rml::String narrow = StringUtils::WideToNarrow(text);
+        if (field != narrow)
+        {
+            field = narrow;
+            m_RmlBinder.MarkDirty(fieldName);
+        }
+    };
+    syncLabel(model.title, "title", I18N::Game::Option385);
+    syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
+    syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
+    syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
+    syncLabel(model.tabVideoLabel, "tab_video_label", I18N::Game::Video);
+    syncLabel(model.tabGraphicsLabel, "tab_graphics_label", I18N::Game::Graphics);
+    syncLabel(model.tabUiLabel, "tab_ui_label", I18N::Game::UI);
+    syncLabel(model.tabGeneralLabel, "tab_general_label", I18N::Game::General);
+    syncLabel(model.autoAttackLabel, "auto_attack_label", I18N::Game::AutomaticAttack);
+    syncLabel(model.whisperSoundLabel, "whisper_sound_label", I18N::Game::BeepSoundForWhispering);
+    syncLabel(model.slideHelpLabel, "slide_help_label", I18N::Game::SlideHelp);
+    syncLabel(model.renderAllEffectsLabel, "render_all_effects_label", I18N::Game::RenderFullEffects);
+    syncLabel(model.windowedModeLabel, "windowed_mode_label", I18N::Game::WindowedMode);
+    syncLabel(model.soundVolumeLabel, "sound_volume_label", I18N::Game::SoundVolume);
+    syncLabel(model.musicVolumeLabel, "music_volume_label", I18N::Game::MusicVolume);
+    syncLabel(model.renderLevelLabel, "render_level_label", I18N::Game::EffectLimitation);
+    syncLabel(model.resolutionRowLabel, "resolution_row_label", I18N::Game::Resolution);
+    syncLabel(model.languageRowLabel, "language_row_label", I18N::Game::Language);
+    syncLabel(model.fontRowLabel, "font_row_label", I18N::Game::Font);
+    syncLabel(model.vsyncLabel, "vsync_label", I18N::Game::VSync);
+    syncLabel(model.fpsCapRowLabel, "fps_cap_row_label", I18N::Game::FPSLimit);
+    syncLabel(model.disableEffectsLabel, "disable_effects_label", I18N::Game::DisableEffects);
+    syncLabel(model.disableParticlesLabel, "disable_particles_label", I18N::Game::DisableParticles);
+    syncLabel(model.disableSkillEffectModelsLabel, "disable_skill_effect_models_label",
+              I18N::Game::DisableSkillEffectModels);
+    syncLabel(model.disableBoidsLabel, "disable_boids_label", I18N::Game::DisableAmbientWildlife);
+    syncLabel(model.disableWingShadowLabel, "disable_wing_shadow_label", I18N::Game::DisableWingShadow);
+    syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
+    syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
+    syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
+
+    // positioned/root_x/root_y stay at their model defaults (false/0/0, see OptionRmlModel's own
+    // comment) -- nothing to sync while dragging is off; window_shell's `.center-both` CSS owns
+    // positioning entirely, same as every other window_shell consumer.
+
+    if (model.autoAttack != m_bAutoAttack) { model.autoAttack = m_bAutoAttack; m_RmlBinder.MarkDirty("auto_attack"); }
+    if (model.whisperSound != m_bWhisperSound) { model.whisperSound = m_bWhisperSound; m_RmlBinder.MarkDirty("whisper_sound"); }
+    if (model.slideHelp != m_bSlideHelp) { model.slideHelp = m_bSlideHelp; m_RmlBinder.MarkDirty("slide_help"); }
+    if (model.renderAllEffects != m_bRenderAllEffects) { model.renderAllEffects = m_bRenderAllEffects; m_RmlBinder.MarkDirty("render_all_effects"); }
+    if (model.windowedMode != m_bWindowedMode) { model.windowedMode = m_bWindowedMode; m_RmlBinder.MarkDirty("windowed_mode"); }
+
+    if (model.soundVolume != m_iVolumeLevel) { model.soundVolume = m_iVolumeLevel; m_RmlBinder.MarkDirty("sound_volume"); }
+    if (model.musicVolume != m_iMusicLevel) { model.musicVolume = m_iMusicLevel; m_RmlBinder.MarkDirty("music_volume"); }
+    if (model.renderLevel != m_iRenderLevel) { model.renderLevel = m_iRenderLevel; m_RmlBinder.MarkDirty("render_level"); }
+
+    std::vector<Rml::String> newResolutionLabels;
+    newResolutionLabels.reserve(m_resolutionLabels.size());
+    for (const auto& label : m_resolutionLabels)
+        newResolutionLabels.push_back(StringUtils::WideToNarrow(label.c_str()));
+    if (newResolutionLabels != model.resolutionLabels)
+    {
+        model.resolutionLabels = std::move(newResolutionLabels);
+        m_RmlBinder.MarkDirty("resolution_labels");
+    }
+    if (model.resolutionIndex != m_iResolutionIndex) { model.resolutionIndex = m_iResolutionIndex; m_RmlBinder.MarkDirty("resolution_index"); }
+
+    if (model.languageLabels.empty())
+    {
+        model.languageLabels.reserve(s_NumLanguages);
+        for (int i = 0; i < s_NumLanguages; ++i)
+            model.languageLabels.push_back(StringUtils::WideToNarrow(s_Languages[i].label));
+        m_RmlBinder.MarkDirty("language_labels");
+    }
+    if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlBinder.MarkDirty("language_index"); }
+
+    // Rebuilt every sync (not just once) so the localized "Default" entry follows a live language
+    // switch, same as native's own GetFontLabels().
+    std::vector<Rml::String> newFontLabels;
+    newFontLabels.reserve(s_NumFonts);
+    newFontLabels.push_back(StringUtils::WideToNarrow(I18N::Game::DefaultFont));
+    for (int i = 1; i < s_NumFonts; ++i)
+        newFontLabels.push_back(StringUtils::WideToNarrow(s_Fonts[i].label));
+    if (newFontLabels != model.fontLabels)
+    {
+        model.fontLabels = std::move(newFontLabels);
+        m_RmlBinder.MarkDirty("font_labels");
+    }
+    if (model.fontIndex != m_iFontIndex) { model.fontIndex = m_iFontIndex; m_RmlBinder.MarkDirty("font_index"); }
+
+    if (model.vsyncEnabled != m_bVsyncEnabled) { model.vsyncEnabled = m_bVsyncEnabled; m_RmlBinder.MarkDirty("vsync_enabled"); }
+
+    // Rebuilt every sync (not just once), same reasoning as font_labels' own "Default" entry --
+    // the localized "Uncapped" entry needs to follow a live language switch.
+    std::vector<Rml::String> newFpsCapLabels;
+    newFpsCapLabels.reserve(s_NumFpsCapValues);
+    for (int i = 0; i < s_NumFpsCapValues; ++i)
+    {
+        newFpsCapLabels.push_back(s_FpsCapValues[i] < 0
+            ? StringUtils::WideToNarrow(I18N::Game::Uncapped)
+            : StringUtils::WideToNarrow((std::to_wstring(s_FpsCapValues[i]) + L" FPS").c_str()));
+    }
+    if (newFpsCapLabels != model.fpsCapLabels)
+    {
+        model.fpsCapLabels = std::move(newFpsCapLabels);
+        m_RmlBinder.MarkDirty("fps_cap_labels");
+    }
+    if (model.fpsCapIndex != m_iFpsCapIndex) { model.fpsCapIndex = m_iFpsCapIndex; m_RmlBinder.MarkDirty("fps_cap_index"); }
+
+    if (model.disableEffects != m_bDisableEffects) { model.disableEffects = m_bDisableEffects; m_RmlBinder.MarkDirty("disable_effects"); }
+    if (model.disableParticles != m_bDisableParticles) { model.disableParticles = m_bDisableParticles; m_RmlBinder.MarkDirty("disable_particles"); }
+    if (model.disableSkillEffectModels != m_bDisableSkillEffectModels) { model.disableSkillEffectModels = m_bDisableSkillEffectModels; m_RmlBinder.MarkDirty("disable_skill_effect_models"); }
+    if (model.disableBoids != m_bDisableBoids) { model.disableBoids = m_bDisableBoids; m_RmlBinder.MarkDirty("disable_boids"); }
+    if (model.disableWingShadow != m_bDisableWingShadow) { model.disableWingShadow = m_bDisableWingShadow; m_RmlBinder.MarkDirty("disable_wing_shadow"); }
+
+    // Read live, not from a member -- SetShowFpsCounter()/SetShowDebugInfo() (SceneManager.h) are
+    // mutually exclusive, so this reflects either checkbox toggling the other one off immediately,
+    // including when toggled via the $fpscounter/$details console commands instead of this window.
+    const bool showFpsCounter = GetShowFpsCounter();
+    const bool showDebugInfo = GetShowDebugInfo();
+    if (model.showFpsCounter != showFpsCounter) { model.showFpsCounter = showFpsCounter; m_RmlBinder.MarkDirty("show_fps_counter"); }
+    if (model.showDebugInfo != showDebugInfo) { model.showDebugInfo = showDebugInfo; m_RmlBinder.MarkDirty("show_debug_info"); }
+
+    // Rebuilt every sync, same reasoning as fps_cap_labels above.
+    std::vector<Rml::String> newThemeLabels = {
+        StringUtils::WideToNarrow(I18N::Game::Legacy),
+        StringUtils::WideToNarrow(I18N::Game::Modern),
+    };
+    if (newThemeLabels != model.themeLabels)
+    {
+        model.themeLabels = std::move(newThemeLabels);
+        m_RmlBinder.MarkDirty("theme_labels");
+    }
+    if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlBinder.MarkDirty("theme_index"); }
 }

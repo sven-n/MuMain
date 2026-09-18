@@ -5,47 +5,56 @@
 @spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
 
 /* #panel consumes base.rcss's .modern-frame/.modern-frame-crimson instead of a bespoke fill.
-   .modern-frame sets no border-radius, so this still needs its own value. */
+   .modern-frame sets no border-radius, so this still needs its own value -- `px` not `dp` since
+   #panel carries transform:scale(root_scale) (see base.rcss's header-rail-family comment for why
+   a `dp` length would double-scale here). */
 #panel {
 	position: absolute;
 	transform-origin: left top;
 	width: 190px;
 	height: 429px;
-	border-radius: token(radius-md)dp;
+	border-radius: token(radius-md)px;
 	font-family: "token(font-body)";
-}
-
-/* Fading crimson banner behind the title (base.rcss's .title-glow primitive); declared before
-   #title so it paints behind it. */
-.quest-title-glow {
-	left: 20px;
-	right: 20px;
-	top: 4px;
-	height: 22px;
 }
 
 .frame-piece { display: none; }
 
-.quest-header {
-	height: 23px; /* 27px minus the 4dp top inset .modern-header's own base rule now starts from */
-	border-top-left-radius: token(radius-md)dp;
-	border-top-right-radius: token(radius-md)dp;
+/* Header: base.rcss's shared .modern-header-rail-px box (layout only) plus this window's own
+   fill/border/shadow -- copied verbatim from the inventory family's *_bg.rcss .rail-fill (e.g.
+   my_inventory_bg.rcss), since this window has no background-context document to put it in (no
+   live 3D content needing to render behind it, unlike CMyInventory/CTrade/etc.). top/height fit
+   this window's own layout (tab-row starts at top:27px), not the family's usual 36-38px rail. */
+.quest-header-rail {
+	top: 7px;
+	height: 20px;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1px;
+	border-color: token(border-rail);
+	border-bottom-color: #171812;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 18),
+		inset 0 -1px 0 #000000,
+		0 2px 4px rgba(0, 0, 0, 133);
 }
-.quest-footer {
-	top: 388px;
-	border-bottom-left-radius: token(radius-md)dp;
-	border-bottom-right-radius: token(radius-md)dp;
-}
-
-#title {
+/* Same recipe as the family's .rail-accent (my_inventory_bg.rcss etc.) -- painted last (declared
+   after .modern-joint-px/.modern-header-text-px in the RML) so it sits on top of the rail fill. */
+.quest-header-accent {
 	position: absolute;
-	left: 0;
-	top: 12px;
-	width: 190px;
-	text-align: center;
-	color: token(text-warm);
-	font-weight: bold;
-	font-size: 12px;
+	left: 7px;
+	right: 7px;
+	bottom: 2px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
 }
 
 .tab-row {
@@ -151,7 +160,9 @@
 .quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
 .quest-content-row.clickable:hover { color: token(accent-gold-hover); }
 
-.quest-btn, .quest-btn-exit {
+/* Open/Give-up only -- Exit uses base.rcss's shared .modern-icon-btn-px instead (below), which
+   already carries its own position/size/cursor/hover/locked treatment. */
+.quest-btn {
 	position: absolute;
 	top: 392px;
 	width: 36px;
@@ -159,8 +170,8 @@
 	cursor: pointer;
 	pointer-events: auto;
 }
-/* Same brightness-filter hover used uniformly on sprite or flat-background buttons. */
-.quest-btn:hover, .quest-btn-exit:hover { filter: brightness(1.25); }
+/* Same brightness-filter hover used uniformly on these sprite-backed buttons. */
+.quest-btn:hover { filter: brightness(1.25); }
 /* No pointer-events:none here -- that would block :hover (and the tooltip) while locked, which
    is the default state until a quest is selected. */
 .quest-btn.locked { filter: brightness(0.6); }
@@ -168,24 +179,10 @@
 .quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
 .quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
 
-/* Exit is a common close button, not quest-specific -- flat/token chrome with a text label
-   instead of reusing legacy's sprite, unlike Open/Give-up above. */
-.quest-btn-exit {
-	left: 13px;
-	background-color: token(surface-control);
-	border: 1dp token(border-frame);
-	border-radius: token(radius-sm)dp;
-}
-.btn-exit-label {
-	display: block;
-	width: 100%;
-	height: 100%;
-	text-align: center;
-	line-height: 29px;
-	font-weight: bold;
-	font-size: 14px;
-	color: token(text-primary);
-}
+/* Exit: base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family (same primitive
+   as every other window's corner buttons) -- only this window's own left offset needed on top of
+   its defaults (top:392px, 37x26, hover/locked states all included). */
+.quest-btn-exit { left: 13px; }
 
 /* Tooltips: siblings of their trigger button, same convention as my_inventory.rcss. */
 .tooltip {

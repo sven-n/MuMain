@@ -3101,7 +3101,14 @@ void MoveHero()
 
     CheckGate();
 
-    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse())
+    // Core::Input::IsMouseOverUI() added as a 4th gate here too -- same rationale as the duplicate
+    // check in Attack() above and Input/Selection.cpp's SelectObjects(): MouseOnWindow/
+    // CheckMouseUse() alone don't reliably know about RmlUi-rendered content (an RmlUi-migrated
+    // window's own legacy CObject-level mouse-claim bookkeeping can lag or miss entirely), so a
+    // click landing on one -- COptionWindow being the concrete case that surfaced this -- fell
+    // through and moved the character instead of being consumed by the window. IsMouseOverUI()
+    // queries RmlUi's own hover chain directly, sidestepping that per-window bookkeeping.
+    if (!MouseOnWindow && false == g_pNewUISystem->CheckMouseUse() && !Core::Input::IsMouseOverUI())
     {
         bool Success = false;
         if (MouseUpdateTime >= MouseUpdateTimeMax && !s_bIgnoreHeldClickAfterNpcTalk)

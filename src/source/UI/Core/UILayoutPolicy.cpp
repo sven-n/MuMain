@@ -23,6 +23,14 @@ UI::Scaling::LayoutMode UI::Layout::ForInterface(std::uint32_t interfaceKey)
     case INTERFACE_CHAR_MAKE:
     case INTERFACE_LOGIN_MAIN:
     case INTERFACE_LOGIN:
+    // Not modal (world clicks/character movement must still work around it, unlike
+    // CGenericMenuDialog) -- its own UpdateMouseEvent() needs a real WindowGeometry hit-test
+    // against MouseX/MouseY in the same real-device-pixel space its window_shell content and
+    // RestoreDefaultOrUserPosition() already use. Falling through to the default Dialog mode
+    // (PanelTransform's 640x480-reference rescale) remapped MouseX/MouseY into a completely
+    // different coordinate space than that hit-test rect, so it almost never matched and clicks
+    // fell through to the world underneath -- found live (see OptionWindow.cpp's own history).
+    case INTERFACE_OPTION:
         return LayoutMode::Legacy;
 
     case INTERFACE_NAME_WINDOW:

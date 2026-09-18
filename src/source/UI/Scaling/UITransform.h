@@ -5,7 +5,17 @@ namespace UI::Scaling
     inline constexpr int DockLogicalBottom = 432;
     // Shared ceiling for "general" (non-HUD-band, non-dock) uniform auto-fit -- PanelTransform's
     // own cap, and RmlUiRuntime.cpp's dp-ratio auto-fit reuses the same number (single source of
-    // truth).
+    // truth) for every RmlUi document's `dp` unit (i.e. every migrated panel's own text size).
+    // Briefly raised to 2.75 on a theory that this ceiling was why an RmlUi dialog's text looked
+    // small -- wrong lever: at a *reported* 1024x768 (well under where this cap ever saturates,
+    // ViewportFitScale's own raw ramp only reaches 1.6 there), kFitDampingExponent's quadratic
+    // ramp actually made the *effective* scale slightly SMALLER with a higher ceiling (same raw
+    // value spread over a wider [1, ceiling] range dampens harder), i.e. this change made the
+    // reported case marginally worse, not better. Reverted to 2.0. A dialog's text looking small
+    // relative to its OWN theme's sibling windows at a shared resolution is a per-document
+    // `font-size` choice (see option_window.rcss's own history), not a global ceiling problem --
+    // don't reach for this constant again without a specific higher-resolution report to test
+    // against.
     inline constexpr float MaximumPanelScale = 2.0f;
 
     struct Transform

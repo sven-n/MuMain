@@ -87,6 +87,13 @@ void GameConfig::Load()
     m_vsyncEnabled = ReadBool(CfgSectionRender, CfgKeyVSync, CfgDefaultVSync);
     m_renderBackend = GameConfigValidation::ValidateRenderBackend(
         ReadString(CfgSectionRender, CfgKeyRenderBackend, CfgDefaultRenderBackend), CfgDefaultRenderBackend);
+    m_disableEffects = ReadBool(CfgSectionRender, CfgKeyDisableEffects, CfgDefaultDisableEffects);
+    m_disableParticles = ReadBool(CfgSectionRender, CfgKeyDisableParticles, CfgDefaultDisableParticles);
+    m_disableSkillEffectModels =
+        ReadBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, CfgDefaultDisableSkillEffectModels);
+    m_disableBoids = ReadBool(CfgSectionRender, CfgKeyDisableBoids, CfgDefaultDisableBoids);
+    m_disableWingShadow = ReadBool(CfgSectionRender, CfgKeyDisableWingShadow, CfgDefaultDisableWingShadow);
+    m_fpsCap = ReadInt(CfgSectionRender, CfgKeyFpsCap, CfgDefaultFpsCap);
 
     // Strip keys/sections we used to write but no longer use, so user config
     // files don't accumulate orphans. Append one line per retired key — no
@@ -133,6 +140,12 @@ void GameConfig::Save()
 
     WriteInt(CfgSectionCamera, CfgKeyZoom, m_zoom);
     WriteBool(CfgSectionRender, CfgKeyVSync, m_vsyncEnabled);
+    WriteBool(CfgSectionRender, CfgKeyDisableEffects, m_disableEffects);
+    WriteBool(CfgSectionRender, CfgKeyDisableParticles, m_disableParticles);
+    WriteBool(CfgSectionRender, CfgKeyDisableSkillEffectModels, m_disableSkillEffectModels);
+    WriteBool(CfgSectionRender, CfgKeyDisableBoids, m_disableBoids);
+    WriteBool(CfgSectionRender, CfgKeyDisableWingShadow, m_disableWingShadow);
+    WriteInt(CfgSectionRender, CfgKeyFpsCap, m_fpsCap);
 }
 
 std::vector<std::wstring> GameConfig::ReadStringList(const wchar_t* section, const wchar_t* keyPrefix)
@@ -197,6 +210,36 @@ void GameConfig::SetMusicVolume(int level)
 void GameConfig::SetVSyncEnabled(bool enabled)
 {
     m_vsyncEnabled = enabled;
+}
+
+void GameConfig::SetDisableEffects(bool disabled)
+{
+    m_disableEffects = disabled;
+}
+
+void GameConfig::SetDisableParticles(bool disabled)
+{
+    m_disableParticles = disabled;
+}
+
+void GameConfig::SetDisableSkillEffectModels(bool disabled)
+{
+    m_disableSkillEffectModels = disabled;
+}
+
+void GameConfig::SetDisableBoids(bool disabled)
+{
+    m_disableBoids = disabled;
+}
+
+void GameConfig::SetDisableWingShadow(bool disabled)
+{
+    m_disableWingShadow = disabled;
+}
+
+void GameConfig::SetFpsCap(int fps)
+{
+    m_fpsCap = fps;
 }
 
 void GameConfig::SetRememberMe(bool remember)

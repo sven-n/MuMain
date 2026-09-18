@@ -59,6 +59,18 @@ namespace CfgKeys
     inline constexpr wchar_t CfgKeySortParticleDraws[] = L"SortParticleDraws";
     inline constexpr wchar_t CfgKeyVSync[] = L"VSync";
     inline constexpr wchar_t CfgKeyRenderBackend[] = L"Backend";
+    // DXP-23's per-system effect-cost toggles (MainScene.h's SetDisableEffects/SetDisableParticles/
+    // SetDisableSkillEffectModels/SetDisableBoids/SetDisableWingShadow), originally console-only
+    // ($effects ...) diagnostics -- promoted to persisted, in-game-options-exposed settings since
+    // they're functionally just "reduce rendering cost for a low-end PC."
+    inline constexpr wchar_t CfgKeyDisableEffects[] = L"DisableEffects";
+    inline constexpr wchar_t CfgKeyDisableParticles[] = L"DisableParticles";
+    inline constexpr wchar_t CfgKeyDisableSkillEffectModels[] = L"DisableSkillEffectModels";
+    inline constexpr wchar_t CfgKeyDisableBoids[] = L"DisableBoids";
+    inline constexpr wchar_t CfgKeyDisableWingShadow[] = L"DisableWingShadow";
+    // User-chosen FPS cap when VSync is off; -1 = uncapped. Same promotion story as the toggles
+    // above, this time for the console-only `$fps <N>` diagnostic.
+    inline constexpr wchar_t CfgKeyFpsCap[] = L"FpsCap";
 }
 
 namespace CfgDefaults
@@ -103,6 +115,13 @@ namespace CfgDefaults
     // Opt-in until real effects have been visually checked on target hardware.
     inline constexpr bool CfgDefaultSortParticleDraws = false;
     inline constexpr bool CfgDefaultVSync = true;
+
+    inline constexpr bool CfgDefaultDisableEffects = false;
+    inline constexpr bool CfgDefaultDisableParticles = false;
+    inline constexpr bool CfgDefaultDisableSkillEffectModels = false;
+    inline constexpr bool CfgDefaultDisableBoids = false;
+    inline constexpr bool CfgDefaultDisableWingShadow = false;
+    inline constexpr int CfgDefaultFpsCap = -1;  // Uncapped
 
     // "default" = this app's own platform-aware pick (prefers Vulkan on Windows to avoid
     // D3D12's vsync-cap bug; SDL's own auto-pick elsewhere). Other accepted values:

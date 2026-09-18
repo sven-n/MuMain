@@ -1,4 +1,4 @@
-﻿
+
 #include "stdafx.h"
 #include "UI/Chat/Chat.h"
 #include "UI/Character/CharacterInfoWindow.h"
@@ -17,6 +17,14 @@
 #include "UI/Core/UIManager.h"
 #include "Network/Server/ServerListManager.h"
 #include "I18N/All.h"
+#include "Core/Utilities/StringUtils.h"
+#include "UI/Scaling/UITransform.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "UI/RmlBridge/RmlTheme.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -60,6 +68,29 @@ namespace
 
         return multiplier;
     }
+
+    Rml::String MakeColorRgba(int r, int g, int b, int a)
+    {
+        wchar_t buf[32];
+        mu_swprintf(buf, L"rgba(%d,%d,%d,%d)", r, g, b, a);
+        return StringUtils::WideToNarrow(buf);
+    }
+
+    // Mirrors UI::Chat::SetPlayerColor(BYTE) -- that function sets g_pRenderText's live text
+    // color state rather than returning one, which this binding needs instead.
+    Rml::String GetPlayerColorRgba(BYTE pk)
+    {
+        switch (pk)
+        {
+        case 0: return MakeColorRgba(150, 255, 240, 255); // npc
+        case 1: return MakeColorRgba(100, 120, 255, 255);
+        case 2: return MakeColorRgba(140, 180, 255, 255);
+        case 3: return MakeColorRgba(200, 220, 255, 255); // normal
+        case 4: return MakeColorRgba(255, 150, 60, 255);  // pk1
+        case 5: return MakeColorRgba(255, 80, 30, 255);   // pk2
+        default: return MakeColorRgba(255, 0, 0, 255);    // pk3
+        }
+    }
 }
 
 mu::ui::window::CCharacterInfoWindow::CCharacterInfoWindow()
@@ -85,52 +116,115 @@ bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, in
 
     LoadImages();
 
-    SetButtonInfo();
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "character_info",
+            [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("can_level_up", &model.canLevelUp);
+                c.Bind("show_charisma", &model.showCharisma);
+
+                c.Bind("name_text", &model.nameText);
+                c.Bind("name_color", &model.nameColor);
+                c.Bind("classname_text", &model.classNameText);
+                c.Bind("servername_text", &model.serverNameText);
+                c.Bind("classname_opacity", &model.classNameOpacity);
+                c.Bind("servername_opacity", &model.serverNameOpacity);
+
+                c.Bind("level_text", &model.levelText);
+                c.Bind("levelup_point_text", &model.levelUpPointText);
+                c.Bind("exp_text", &model.expText);
+                c.Bind("point_probability_text", &model.pointProbabilityText);
+                c.Bind("point_text", &model.pointText);
+
+                c.Bind("str_label", &model.strLabel);
+                c.Bind("agi_label", &model.agiLabel);
+                c.Bind("vit_label", &model.vitLabel);
+                c.Bind("ene_label", &model.eneLabel);
+                c.Bind("cmd_label", &model.cmdLabel);
+                c.Bind("str_value_text", &model.strValueText);
+                c.Bind("str_value_color", &model.strValueColor);
+                c.Bind("agi_value_text", &model.agiValueText);
+                c.Bind("agi_value_color", &model.agiValueColor);
+                c.Bind("vit_value_text", &model.vitValueText);
+                c.Bind("vit_value_color", &model.vitValueColor);
+                c.Bind("ene_value_text", &model.eneValueText);
+                c.Bind("ene_value_color", &model.eneValueColor);
+                c.Bind("cmd_value_text", &model.cmdValueText);
+                c.Bind("cmd_value_color", &model.cmdValueColor);
+
+                auto statLine = c.RegisterStruct<StatLine>();
+                statLine.RegisterMember("text", &StatLine::text);
+                statLine.RegisterMember("color", &StatLine::color);
+                c.RegisterArray<std::vector<StatLine>>();
+                c.Bind("str_lines", &model.strLines);
+                c.Bind("agi_lines", &model.agiLines);
+                c.Bind("vit_lines", &model.vitLines);
+                c.Bind("ene_lines", &model.eneLines);
+
+                c.Bind("master_level_enabled", &model.masterLevelEnabled);
+
+                c.Bind("exit_tooltip", &model.exitTooltip);
+                c.Bind("quest_tooltip", &model.questTooltip);
+                c.Bind("pet_tooltip", &model.petTooltip);
+                c.Bind("masterlevel_tooltip", &model.masterLevelTooltip);
+
+                c.BindEventCallback("chainfo_increase_stat",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickIncreaseStat(arguments[0].Get<int>(-1));
+                    });
+                c.BindEventCallback("chainfo_click_exit",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+                c.BindEventCallback("chainfo_click_quest",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickQuest(); });
+                c.BindEventCallback("chainfo_click_pet",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickPet(); });
+                c.BindEventCallback("chainfo_click_masterlevel",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickMasterLevel(); });
+            });
+
+        if (modelCreated)
+        {
+            auto& model = m_RmlBinder.GetModel();
+            model.strLabel = StringUtils::WideToNarrow(I18N::Game::STR);
+            model.agiLabel = StringUtils::WideToNarrow(I18N::Game::AGI);
+            model.vitLabel = StringUtils::WideToNarrow(I18N::Game::STA);
+            model.eneLabel = StringUtils::WideToNarrow(I18N::Game::ENG);
+            model.cmdLabel = StringUtils::WideToNarrow(I18N::Game::Command);
+
+            wchar_t strText[256];
+            mu_swprintf(strText, I18N::Game::CloseS, L"C");
+            model.exitTooltip = StringUtils::WideToNarrow(strText);
+            mu_swprintf(strText, L"%ls(%ls)", I18N::Game::Quest, L"T");
+            model.questTooltip = StringUtils::WideToNarrow(strText);
+            model.petTooltip = StringUtils::WideToNarrow(I18N::Game::Pet);
+            model.masterLevelTooltip = StringUtils::WideToNarrow(I18N::Game::MasterSkillTreeA);
+        }
+
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+            "Data/Interface/RmlUi/character_info.rml");
+    }
 
     Show(false);
 
     return true;
 }
 
-void mu::ui::window::CCharacterInfoWindow::SetButtonInfo()
-{
-    wchar_t strText[256];
-
-    m_BtnStat[STAT_STRENGTH].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
-    m_BtnStat[STAT_STRENGTH].ChangeButtonInfo(m_Pos.x + 160, m_Pos.y + HEIGHT_STRENGTH + 2, 16, 15);
-
-    m_BtnStat[STAT_DEXTERITY].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
-    m_BtnStat[STAT_DEXTERITY].ChangeButtonInfo(m_Pos.x + 160, m_Pos.y + HEIGHT_DEXTERITY + 2, 16, 15);
-
-    m_BtnStat[STAT_VITALITY].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
-    m_BtnStat[STAT_VITALITY].ChangeButtonInfo(m_Pos.x + 160, m_Pos.y + HEIGHT_VITALITY + 2, 16, 15);
-
-    m_BtnStat[STAT_ENERGY].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
-    m_BtnStat[STAT_ENERGY].ChangeButtonInfo(m_Pos.x + 160, m_Pos.y + HEIGHT_ENERGY + 2, 16, 15);
-
-    m_BtnStat[STAT_CHARISMA].ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_STAT, false);
-    m_BtnStat[STAT_CHARISMA].ChangeButtonInfo(m_Pos.x + 160, m_Pos.y + HEIGHT_CHARISMA + 2, 16, 15);
-
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_EXIT, false);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    mu_swprintf(strText, I18N::Game::CloseS, L"C");
-    m_BtnExit.ChangeToolTipText(strText, true);
-    m_BtnQuest.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_QUEST, false);
-    m_BtnQuest.ChangeButtonInfo(m_Pos.x + 50, m_Pos.y + 392, 36, 29);
-    mu_swprintf(strText, L"%ls(%ls)", I18N::Game::Quest, L"T");
-    m_BtnQuest.ChangeToolTipText(strText, true);
-    m_BtnPet.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_PET, false);
-    m_BtnPet.ChangeButtonInfo(m_Pos.x + 87, m_Pos.y + 392, 36, 29);
-    m_BtnPet.ChangeToolTipText(&I18N::Game::Pet, true);
-
-    m_BtnMasterLevel.ChangeButtonImgState(true, IMAGE_CHAINFO_BTN_MASTERLEVEL, false);
-    m_BtnMasterLevel.ChangeButtonInfo(m_Pos.x + 124, m_Pos.y + 392, 36, 29);
-    m_BtnMasterLevel.ChangeToolTipText(&I18N::Game::MasterSkillTreeA, true);
-}
-
 void mu::ui::window::CCharacterInfoWindow::Release()
 {
     UnloadImages();
+
+    if (m_pRmlDoc)
+    {
+        m_pRmlDoc->Close();
+        m_pRmlDoc = nullptr;
+    }
 
     if (m_pNewUIMng)
     {
@@ -145,76 +239,26 @@ void mu::ui::window::CCharacterInfoWindow::SetPos(int x, int y)
     m_Pos.y = y;
 }
 
-bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
+void mu::ui::window::CCharacterInfoWindow::Show(bool bShow)
 {
-    if (BtnProcess() == true)
+    mu::ui::window::CObject::Show(bShow);
+    if (m_pRmlDoc)
     {
-        return false;
+        if (bShow) m_pRmlDoc->Show();
+        else m_pRmlDoc->Hide();
     }
-
-    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CHAINFO_WINDOW_WIDTH, CHAINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
-    {
-        return false;
-    }
-
-    return true;
 }
 
-bool mu::ui::window::CCharacterInfoWindow::BtnProcess()
+bool mu::ui::window::CCharacterInfoWindow::UpdateMouseEvent()
 {
     // Top-right corner close "X" (shared frame). Hides + swallows the click.
     if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_CHARACTER))
-        return true;
+        return false;
 
-    if (CharacterAttribute->LevelUpPoint > 0)
-    {
-        int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
-        int iCount = 0;
-        if (iBaseClass == CLASS_DARK_LORD)
-        {
-            iCount = 5;
-        }
-        else
-        {
-            iCount = 4;
-        }
-        for (int i = 0; i < iCount; ++i)
-        {
-            if (m_BtnStat[i].UpdateMouseEvent() == true)
-            {
-                SocketClient->ToGameServer()->SendIncreaseCharacterStatPoint(static_cast<CharacterStatAttribute>(i));
-                PlayBuffer(SOUND_CLICK01);
-                return true;
-            }
-        }
-    }
+    if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, CHAINFO_WINDOW_WIDTH, CHAINFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
+        return false;
 
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHARACTER);
-        return true;
-    }
-
-    if (m_BtnQuest.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MYQUEST);
-        return true;
-    }
-
-    if (m_BtnPet.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_PET);
-        return true;
-    }
-
-    if (m_BtnMasterLevel.UpdateMouseEvent() == true)
-    {
-        if (gCharacterManager.IsMasterLevel(Hero->Class)
-            && Hero->Class != CLASS_TEMPLENIGHT)
-            g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
-        return true;
-    }
-    return false;
+    return true;
 }
 
 bool mu::ui::window::CCharacterInfoWindow::UpdateKeyEvent()
@@ -235,96 +279,209 @@ bool mu::ui::window::CCharacterInfoWindow::UpdateKeyEvent()
 
 bool mu::ui::window::CCharacterInfoWindow::Update()
 {
+    SyncRmlModel();
     return true;
-}
-
-void mu::ui::window::CCharacterInfoWindow::RenderFrame()
-{
-    RenderImage(IMAGE_CHAINFO_BACK, m_Pos.x, m_Pos.y, 190.f, 429.f);
-    RenderImage(IMAGE_CHAINFO_TOP, m_Pos.x, m_Pos.y, 190.f, 64.f);
-    RenderImage(IMAGE_CHAINFO_LEFT, m_Pos.x, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CHAINFO_RIGHT, m_Pos.x + 190 - 21, m_Pos.y + 64, 21.f, 320.f);
-    RenderImage(IMAGE_CHAINFO_BOTTOM, m_Pos.x, m_Pos.y + 429 - 45, 190.f, 45.f);
-
-    constexpr unsigned int SummaryBackdropColor = 0x4D000000u;
-    RenderColorQuadARGB(m_Pos.x + 12, m_Pos.y + 48, 160, 66, SummaryBackdropColor);
-    RenderImage(IMAGE_CHAINFO_TABLE_TOP_LEFT, m_Pos.x + 12, m_Pos.y + 48, 14, 14);
-    RenderImage(IMAGE_CHAINFO_TABLE_TOP_RIGHT, m_Pos.x + 12 + 165 - 14, m_Pos.y + 48, 14, 14);
-    RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_LEFT, m_Pos.x + 12, m_Pos.y + 119 - 14, 14, 14);
-    RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT, m_Pos.x + 12 + 165 - 14, m_Pos.y + 119 - 14, 14, 14);
-
-    for (int x = m_Pos.x + 12 + 14; x < m_Pos.x + 12 + 165 - 14; ++x)
-    {
-        RenderImage(IMAGE_CHAINFO_TABLE_TOP_PIXEL, x, m_Pos.y + 48, 1, 14);
-        RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x, m_Pos.y + 119 - 14, 1, 14);
-    }
-
-    for (int x = m_Pos.x + 14; x < m_Pos.x + 12 + 165 - 4; ++x)
-    {
-        RenderImage(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, x, m_Pos.y + 48 + 12, 1, 14);
-    }
-
-    for (int y = m_Pos.y + 48 + 14; y < m_Pos.y + 119 - 14; y++)
-    {
-        RenderImage(IMAGE_CHAINFO_TABLE_LEFT_PIXEL, m_Pos.x + 12, y, 14, 1);
-        RenderImage(IMAGE_CHAINFO_TABLE_RIGHT_PIXEL, m_Pos.x + 12 + 165 - 14, y, 14, 1);
-    }
-
-    RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x + 11, m_Pos.y + HEIGHT_STRENGTH, 170.f, 21.f);
-    RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x + 11, m_Pos.y + HEIGHT_DEXTERITY, 170.f, 21.f);
-    RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x + 11, m_Pos.y + HEIGHT_VITALITY, 170.f, 21.f);
-    RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x + 11, m_Pos.y + HEIGHT_ENERGY, 170.f, 21.f);
-    if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD)
-    {
-        RenderImage(IMAGE_CHAINFO_TEXTBOX, m_Pos.x + 11, m_Pos.y + HEIGHT_CHARISMA, 170.f, 21.f);
-    }
 }
 
 bool mu::ui::window::CCharacterInfoWindow::Render()
 {
-    EnableAlphaTest();
-    RenderFrame();
-    RenderTexts();
-    RenderButtons();
-    DisableAlphaBlend();
+    // RmlUi's #panel owns all chrome/text/button rendering now; nothing left to draw natively.
     return true;
 }
 
-void mu::ui::window::CCharacterInfoWindow::RenderTexts()
+float mu::ui::window::CCharacterInfoWindow::GetLayerDepth()
 {
-    RenderSubjectTexts();
-    RenderTableTexts();
-    RenderAttribute();
+    return 5.1f;
 }
 
-void mu::ui::window::CCharacterInfoWindow::RenderSubjectTexts()
+void mu::ui::window::CCharacterInfoWindow::OpenningProcess()
 {
-    wchar_t strID[256];
-    mu_swprintf(strID, L"%ls", CharacterAttribute->Name);
+    ResetEquipmentLevel();
+
+    const bool masterLevelEnabled = gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT;
+    if (m_RmlBinder.GetModel().masterLevelEnabled != masterLevelEnabled)
+    {
+        m_RmlBinder.GetModel().masterLevelEnabled = masterLevelEnabled;
+        m_RmlBinder.MarkDirty("master_level_enabled");
+    }
+
+    g_csItemOption.init();
+
+    if (CharacterMachine->IsZeroDurability())
+    {
+        CharacterMachine->CalculateAll();
+    }
+
+    if (g_QuestMng.IsIndexInCurQuestIndexList(0x10009))
+    {
+        if (g_QuestMng.IsEPRequestRewardState(0x10009))
+        {
+            g_pMyQuestInfoWindow->UnselectQuestList();
+            SocketClient->ToGameServer()->SendQuestClientActionRequest(1, 9);
+            g_QuestMng.SetEPRequestRewardState(0x10009, false);
+        }
+    }
+}
+
+void mu::ui::window::CCharacterInfoWindow::RmlClickIncreaseStat(int stat)
+{
+    if (CharacterAttribute->LevelUpPoint <= 0)
+        return;
+
+    const int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
+    const int iCount = (iBaseClass == CLASS_DARK_LORD) ? 5 : 4;
+    if (stat < 0 || stat >= iCount)
+        return;
+
+    SocketClient->ToGameServer()->SendIncreaseCharacterStatPoint(static_cast<CharacterStatAttribute>(stat));
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::CCharacterInfoWindow::RmlClickExit()
+{
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_CHARACTER);
+}
+
+void mu::ui::window::CCharacterInfoWindow::RmlClickQuest()
+{
+    g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MYQUEST);
+}
+
+void mu::ui::window::CCharacterInfoWindow::RmlClickPet()
+{
+    g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_PET);
+}
+
+void mu::ui::window::CCharacterInfoWindow::RmlClickMasterLevel()
+{
+    if (gCharacterManager.IsMasterLevel(Hero->Class) && Hero->Class != CLASS_TEMPLENIGHT)
+        g_pNewUISystem->Toggle(mu::ui::window::INTERFACE_MASTER_LEVEL);
+}
+
+void mu::ui::window::CCharacterInfoWindow::LoadImages()
+{
+    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CHAINFO_BACK, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_CHAINFO_TOP, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CHAINFO_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CHAINFO_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CHAINFO_BOTTOM, GL_LINEAR);
+
+    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_CHAINFO_TABLE_TOP_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_CHAINFO_TABLE_TOP_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_CHAINFO_TABLE_BOTTOM_LEFT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_CHAINFO_TABLE_TOP_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_CHAINFO_TABLE_LEFT_PIXEL, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CHAINFO_TABLE_RIGHT_PIXEL, GL_LINEAR);
+
+    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CHAINFO_BTN_EXIT, GL_LINEAR);
+
+    LoadBitmap(L"Interface\\newui_cha_textbox02.tga", IMAGE_CHAINFO_TEXTBOX, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chainfo_btn_level.tga", IMAGE_CHAINFO_BTN_STAT, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chainfo_btn_quest.tga", IMAGE_CHAINFO_BTN_QUEST, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chainfo_btn_pet.tga", IMAGE_CHAINFO_BTN_PET, GL_LINEAR);
+    LoadBitmap(L"Interface\\newui_chainfo_btn_master.tga", IMAGE_CHAINFO_BTN_MASTERLEVEL, GL_LINEAR);
+}
+
+void mu::ui::window::CCharacterInfoWindow::UnloadImages()
+{
+    DeleteBitmap(IMAGE_CHAINFO_BTN_MASTERLEVEL);
+    DeleteBitmap(IMAGE_CHAINFO_BTN_PET);
+    DeleteBitmap(IMAGE_CHAINFO_BTN_QUEST);
+    DeleteBitmap(IMAGE_CHAINFO_BTN_STAT);
+    DeleteBitmap(IMAGE_CHAINFO_TEXTBOX);
+
+    DeleteBitmap(IMAGE_CHAINFO_BTN_EXIT);
+
+    DeleteBitmap(IMAGE_CHAINFO_BOTTOM);
+    DeleteBitmap(IMAGE_CHAINFO_RIGHT);
+    DeleteBitmap(IMAGE_CHAINFO_LEFT);
+    DeleteBitmap(IMAGE_CHAINFO_TOP);
+    DeleteBitmap(IMAGE_CHAINFO_BACK);
+
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_RIGHT_PIXEL);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_LEFT_PIXEL);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_PIXEL);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_BOTTOM_LEFT);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_RIGHT);
+    DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_LEFT);
+}
+
+void mu::ui::window::CCharacterInfoWindow::ResetEquipmentLevel()
+{
+    ITEM* pItem = CharacterMachine->Equipment;
+    Hero->Weapon[0].Level = pItem[EQUIPMENT_WEAPON_RIGHT].Level;
+    Hero->Weapon[1].Level = pItem[EQUIPMENT_WEAPON_LEFT].Level;
+    Hero->BodyPart[BODYPART_HELM].Level = pItem[EQUIPMENT_HELM].Level;
+    Hero->BodyPart[BODYPART_ARMOR].Level = pItem[EQUIPMENT_ARMOR].Level;
+    Hero->BodyPart[BODYPART_PANTS].Level = pItem[EQUIPMENT_PANTS].Level;
+    Hero->BodyPart[BODYPART_GLOVES].Level = pItem[EQUIPMENT_GLOVES].Level;
+    Hero->BodyPart[BODYPART_BOOTS].Level = pItem[EQUIPMENT_BOOTS].Level;
+
+    CheckFullSet(Hero);
+}
+
+void mu::ui::window::CCharacterInfoWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    const auto transform = UI::Scaling::GetActiveTransform();
+    model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
+    model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
+    model.rootScale = transform.scaleX;
+    m_RmlBinder.MarkDirty("root_x");
+    m_RmlBinder.MarkDirty("root_y");
+    m_RmlBinder.MarkDirty("root_scale");
+
+    model.canLevelUp = CharacterAttribute->LevelUpPoint > 0;
+    m_RmlBinder.MarkDirty("can_level_up");
+    model.showCharisma = gCharacterManager.GetBaseClass(Hero->Class) == CLASS_DARK_LORD;
+    m_RmlBinder.MarkDirty("show_charisma");
+
+    BuildSubjectTexts();
+    BuildTableTexts();
+    BuildAttributeLines();
+}
+
+void mu::ui::window::CCharacterInfoWindow::BuildSubjectTexts()
+{
+    auto& model = m_RmlBinder.GetModel();
+
+    model.nameText = StringUtils::WideToNarrow(CharacterAttribute->Name);
+    model.nameColor = GetPlayerColorRgba(Hero->PK);
+    m_RmlBinder.MarkDirty("name_text");
+    m_RmlBinder.MarkDirty("name_color");
+
     wchar_t strClassName[256];
     mu_swprintf(strClassName, L"(%ls)", gCharacterManager.GetCharacterClassText(CharacterAttribute->Class));
-
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(20, 20, 20, 20);
-    UI::Chat::SetPlayerColor(Hero->PK);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 12, strID, 190, 0, RT3_SORT_CENTER);
+    model.classNameText = StringUtils::WideToNarrow(strClassName);
+    m_RmlBinder.MarkDirty("classname_text");
 
     wchar_t strServerName[MAX_TEXT_LENGTH];
-
     const wchar_t* apszGlobalText[4]
         = { I18N::Game::SDServer, I18N::Game::SDNonPvPServer, I18N::Game::SDGoldPvPServer, I18N::Game::SDGoldServer };
     mu_swprintf(strServerName, apszGlobalText[g_ServerListManager->GetNonPVPInfo()],
         g_ServerListManager->GetSelectServerName(), g_ServerListManager->GetSelectServerIndex());
+    model.serverNameText = StringUtils::WideToNarrow(strServerName);
+    m_RmlBinder.MarkDirty("servername_text");
 
-    float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
-    g_pRenderText->SetTextColor(255, 255, 255, 127 * (2.f - fAlpha));
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strClassName, 190, 0, RT3_SORT_CENTER);
-    g_pRenderText->SetTextColor(255, 255, 255, 127 * fAlpha);
-    g_pRenderText->RenderText(m_Pos.x, m_Pos.y + 27, strServerName, 190, 0, RT3_SORT_CENTER);
+    const float fAlpha = sinf(WorldTime * 0.001f) + 1.f;
+    model.classNameOpacity = (127 * (2.f - fAlpha)) / 255.f;
+    model.serverNameOpacity = (127 * fAlpha) / 255.f;
+    m_RmlBinder.MarkDirty("classname_opacity");
+    m_RmlBinder.MarkDirty("servername_opacity");
 }
 
-void mu::ui::window::CCharacterInfoWindow::RenderTableTexts()
+void mu::ui::window::CCharacterInfoWindow::BuildTableTexts()
 {
+    auto& model = m_RmlBinder.GetModel();
+
     wchar_t strLevel[128];
     wchar_t strExp[128];
     wchar_t strPoint[128];
@@ -355,31 +512,23 @@ void mu::ui::window::CCharacterInfoWindow::RenderTableTexts()
         mu_swprintf(strPoint, L"%ls %d/%d | %ls %d/%d", I18N::Game::Create, 0, 0, I18N::Game::Decrease, 0, 0);
     }
 
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetTextColor(230, 230, 0, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + 58, strLevel);
+    model.levelText = StringUtils::WideToNarrow(strLevel);
+    m_RmlBinder.MarkDirty("level_text");
 
     if (CharacterAttribute->LevelUpPoint > 0)
     {
         wchar_t strLevelUpPoint[128];
-
-        if (gCharacterManager.IsMasterLevel(CharacterAttribute->Class) == false || CharacterAttribute->LevelUpPoint > 0)
-        {
-            mu_swprintf(strLevelUpPoint, I18N::Game::PointD, CharacterAttribute->LevelUpPoint);
-        }
-        else
-            mu_swprintf(strLevelUpPoint, L"");
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetTextColor(255, 138, 0, 255);
-        g_pRenderText->SetBgColor(0, 0, 0, 0);
-        g_pRenderText->RenderText(m_Pos.x + 110, m_Pos.y + 58, strLevelUpPoint);
+        mu_swprintf(strLevelUpPoint, I18N::Game::PointD, CharacterAttribute->LevelUpPoint);
+        model.levelUpPointText = StringUtils::WideToNarrow(strLevelUpPoint);
     }
+    else
+    {
+        model.levelUpPointText.clear();
+    }
+    m_RmlBinder.MarkDirty("levelup_point_text");
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + 75, strExp);
+    model.expText = StringUtils::WideToNarrow(strExp);
+    m_RmlBinder.MarkDirty("exp_text");
 
     int iAddPoint, iMinusPoint;
 
@@ -444,44 +593,41 @@ void mu::ui::window::CCharacterInfoWindow::RenderTableTexts()
 
     wchar_t strPointProbability[128];
     mu_swprintf(strPointProbability, I18N::Game::DD1907, iAddPoint, iMinusPoint);
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(76, 197, 254, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + 88, strPointProbability);
+    model.pointProbabilityText = StringUtils::WideToNarrow(strPointProbability);
+    m_RmlBinder.MarkDirty("point_probability_text");
 
-    g_pRenderText->SetTextColor(76, 197, 254, 255);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-    g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + 101, strPoint);
+    model.pointText = StringUtils::WideToNarrow(strPoint);
+    m_RmlBinder.MarkDirty("point_text");
 }
 
-void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
+void mu::ui::window::CCharacterInfoWindow::BuildAttributeLines()
 {
-    g_pRenderText->SetFont(g_hFontBold);
+    auto& model = m_RmlBinder.GetModel();
 
     WORD wStrength;
 
     wStrength = CharacterAttribute->Strength + CharacterAttribute->AddStrength;
 
+    Rml::String strengthColor;
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion1))
     {
-        g_pRenderText->SetTextColor(255, 120, 0, 255);
+        strengthColor = MakeColorRgba(255, 120, 0, 255);
+    }
+    else if (CharacterAttribute->AddStrength)
+    {
+        strengthColor = MakeColorRgba(100, 150, 255, 255);
     }
     else
-        if (CharacterAttribute->AddStrength)
-        {
-            g_pRenderText->SetTextColor(100, 150, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(230, 230, 0, 255);
-        }
+    {
+        strengthColor = MakeColorRgba(230, 230, 0, 255);
+    }
 
     wchar_t strStrength[32];
     mu_swprintf(strStrength, L"%d", wStrength);
-
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_STRENGTH + 6, I18N::Game::STR, 74, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_STRENGTH + 6, strStrength, 86, 0, RT3_SORT_CENTER);
+    model.strValueText = StringUtils::WideToNarrow(strStrength);
+    model.strValueColor = strengthColor;
+    m_RmlBinder.MarkDirty("str_value_text");
+    m_RmlBinder.MarkDirty("str_value_color");
 
     wchar_t strAttakMamage[256];
     int iAttackDamageMin = 0;
@@ -759,35 +905,23 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
         }
     }
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetBgColor(0, 0, 0, 0);
-
-    if (bAttackDamage)
-    {
-        g_pRenderText->SetTextColor(100, 150, 255, 255);
-    }
-    else
-    {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-    }
+    Rml::String attackDamageColor = bAttackDamage ? MakeColorRgba(100, 150, 255, 255) : MakeColorRgba(255, 255, 255, 255);
 
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        attackDamageColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll3))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        attackDamageColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        attackDamageColor = MakeColorRgba(255, 0, 240, 255);
     }
 
-    int iY = HEIGHT_STRENGTH + 25;
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + HEIGHT_STRENGTH + 25, strAttakMamage);
+    model.strLines.clear();
+    model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageColor });
 
     if (iAttackRatingPK > 0)
     {
@@ -800,32 +934,31 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
             mu_swprintf(strAttakMamage, I18N::Game::AttackRateD, iAttackRatingPK);
         }
 
-        iY += 13;
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strAttakMamage);
+        model.strLines.push_back({ StringUtils::WideToNarrow(strAttakMamage), attackDamageColor });
     }
+    m_RmlBinder.MarkDirty("str_lines");
 
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->SetBgColor(0);
-
+    Rml::String dexterityColor;
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion2))
     {
-        g_pRenderText->SetTextColor(255, 120, 0, 255);
+        dexterityColor = MakeColorRgba(255, 120, 0, 255);
+    }
+    else if (CharacterAttribute->AddDexterity)
+    {
+        dexterityColor = MakeColorRgba(100, 150, 255, 255);
     }
     else
-        if (CharacterAttribute->AddDexterity)
-        {
-            g_pRenderText->SetTextColor(100, 150, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(230, 230, 0, 255);
-        }
+    {
+        dexterityColor = MakeColorRgba(230, 230, 0, 255);
+    }
 
     wchar_t strDexterity[32];
     WORD wDexterity = CharacterAttribute->Dexterity + CharacterAttribute->AddDexterity;
     mu_swprintf(strDexterity, L"%d", wDexterity);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_DEXTERITY + 6, I18N::Game::AGI, 74, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_DEXTERITY + 6, strDexterity, 86, 0, RT3_SORT_CENTER);
+    model.agiValueText = StringUtils::WideToNarrow(strDexterity);
+    model.agiValueColor = dexterityColor;
+    m_RmlBinder.MarkDirty("agi_value_text");
+    m_RmlBinder.MarkDirty("agi_value_color");
 
     bool bDexSuccess = true;
     int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
@@ -1010,49 +1143,40 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
         }
         else
         {
-            // 209
-            mu_swprintf(strBlocking, I18N::Game::DefenseD,
-                t_adjdef + maxdefense + iChangeRingAddDefense
-            );
+            mu_swprintf(strBlocking, I18N::Game::DefenseD, t_adjdef + maxdefense + iChangeRingAddDefense);
         }
     }
 
-    iY = HEIGHT_DEXTERITY + 24;
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
+    model.agiLines.clear();
 
+    Rml::String defenseColor = MakeColorRgba(255, 255, 255, 255);
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin3))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        defenseColor = MakeColorRgba(255, 0, 240, 255);
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll2))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        defenseColor = MakeColorRgba(255, 0, 240, 255);
     }
     if (g_isCharacterBuff((&Hero->Object), eBuff_Def_up_Ourforces))
     {
-        g_pRenderText->SetTextColor(100, 150, 255, 255);
+        defenseColor = MakeColorRgba(100, 150, 255, 255);
     }
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strBlocking);
+    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), defenseColor });
 
     WORD wAttackSpeed = CLASS_WIZARD == iBaseClass || CLASS_SUMMONER == iBaseClass
         ? CharacterAttribute->MagicSpeed : CharacterAttribute->AttackSpeed;
 
     mu_swprintf(strBlocking, I18N::Game::AttackSpeedD, wAttackSpeed);
-    iY += 13;
 
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-
+    Rml::String attackSpeedColor = MakeColorRgba(255, 255, 255, 255);
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin1))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        attackSpeedColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll1))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        attackSpeedColor = MakeColorRgba(255, 0, 240, 255);
     }
 
     ITEM* phelper = &CharacterMachine->Equipment[EQUIPMENT_HELPER];
@@ -1063,12 +1187,11 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
-                g_pRenderText->SetTextColor(255, 0, 240, 255);
+                attackSpeedColor = MakeColorRgba(255, 0, 240, 255);
             }
         }
     }
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strBlocking);
+    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), attackSpeedColor });
 
     if (itemoption380Defense != 0 || iDefenseRate != 0)
     {
@@ -1078,43 +1201,37 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
     {
         mu_swprintf(strBlocking, I18N::Game::DefenseRateD, CharacterAttribute->SuccessfulBlockingPK + add_defense_success_rate_pvp);
     }
-
-    iY += 13;
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strBlocking);
-
-    g_pRenderText->SetFont(g_hFontBold);
+    model.agiLines.push_back({ StringUtils::WideToNarrow(strBlocking), MakeColorRgba(255, 255, 255, 255) });
+    m_RmlBinder.MarkDirty("agi_lines");
 
     WORD wVitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
 
+    Rml::String vitalityColor;
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion3))
     {
-        g_pRenderText->SetTextColor(255, 120, 0, 255);
+        vitalityColor = MakeColorRgba(255, 120, 0, 255);
     }
     else if (g_isCharacterBuff((&Hero->Object), eBuff_Hp_up_Ourforces))
     {
         CharacterMachine->CalculateAll();
         wVitality = CharacterAttribute->Vitality + CharacterAttribute->AddVitality;
-        g_pRenderText->SetTextColor(100, 150, 255, 255);
+        vitalityColor = MakeColorRgba(100, 150, 255, 255);
     }
     else if (CharacterAttribute->AddVitality)
     {
-        g_pRenderText->SetTextColor(100, 150, 255, 255);
+        vitalityColor = MakeColorRgba(100, 150, 255, 255);
     }
     else
     {
-        g_pRenderText->SetTextColor(230, 230, 0, 255);
+        vitalityColor = MakeColorRgba(230, 230, 0, 255);
     }
 
     wchar_t strVitality[256];
     mu_swprintf(strVitality, L"%d", wVitality);
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_VITALITY + 6, I18N::Game::STA, 74, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_VITALITY + 6, strVitality, 86, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
+    model.vitValueText = StringUtils::WideToNarrow(strVitality);
+    model.vitValueColor = vitalityColor;
+    m_RmlBinder.MarkDirty("vit_value_text");
+    m_RmlBinder.MarkDirty("vit_value_color");
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -1124,71 +1241,65 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
     {
         mu_swprintf(strVitality, I18N::Game::HPDD, CharacterAttribute->Life, CharacterAttribute->LifeMax);
     }
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
 
+    Rml::String hpColor = MakeColorRgba(255, 255, 255, 255);
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin4))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        hpColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll5))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        hpColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_RiceCake))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        hpColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (phelper->Durability != 0 && phelper->Type == ITEM_SPIRIT_OF_GUARDIAN)
     {
         if (IsRequireEquipItem(phelper))
         {
             if (false == pItemHelper->bExpiredPeriod)
             {
-                g_pRenderText->SetTextColor(255, 0, 240, 255);
+                hpColor = MakeColorRgba(255, 0, 240, 255);
             }
         }
     }
-    g_pRenderText->SetBgColor(0);
-    iY = HEIGHT_VITALITY + 24;
-    g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strVitality);
+
+    model.vitLines.clear();
+    model.vitLines.push_back({ StringUtils::WideToNarrow(strVitality), hpColor });
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
-        iY += 13;
-        //물리공격력
         mu_swprintf(strVitality, I18N::Game::MeleeDamageD, 50 + (wVitality / 10));
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strVitality);
+        model.vitLines.push_back({ StringUtils::WideToNarrow(strVitality), MakeColorRgba(255, 255, 255, 255) });
     }
-
-    g_pRenderText->SetFont(g_hFontBold);
+    m_RmlBinder.MarkDirty("vit_lines");
 
     WORD wEnergy = CharacterAttribute->Energy + CharacterAttribute->AddEnergy;
 
+    Rml::String energyColor;
     if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion4))
     {
-        g_pRenderText->SetTextColor(255, 120, 0, 255);
+        energyColor = MakeColorRgba(255, 120, 0, 255);
+    }
+    else if (CharacterAttribute->AddEnergy)
+    {
+        energyColor = MakeColorRgba(100, 150, 255, 255);
     }
     else
-        if (CharacterAttribute->AddEnergy)
-        {
-            g_pRenderText->SetTextColor(100, 150, 255, 255);
-        }
-        else
-        {
-            g_pRenderText->SetTextColor(230, 230, 0, 255);
-        }
+    {
+        energyColor = MakeColorRgba(230, 230, 0, 255);
+    }
 
     wchar_t strEnergy[256];
     mu_swprintf(strEnergy, L"%d", wEnergy);
+    model.eneValueText = StringUtils::WideToNarrow(strEnergy);
+    model.eneValueColor = energyColor;
+    m_RmlBinder.MarkDirty("ene_value_text");
+    m_RmlBinder.MarkDirty("ene_value_color");
 
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_ENERGY + 6, I18N::Game::ENG, 74, 0, RT3_SORT_CENTER);
-    g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_ENERGY + 6, strEnergy, 86, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
+    model.eneLines.clear();
 
     if (gCharacterManager.IsMasterLevel(Hero->Class) == true)
     {
@@ -1197,27 +1308,20 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
     else
         mu_swprintf(strEnergy, I18N::Game::ManaDD, CharacterAttribute->Mana, CharacterAttribute->ManaMax);
 
-    g_pRenderText->SetBgColor(0);
-    g_pRenderText->SetTextColor(255, 255, 255, 255);
-
+    Rml::String manaColor = MakeColorRgba(255, 255, 255, 255);
     if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin5))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        manaColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll6))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        manaColor = MakeColorRgba(255, 0, 240, 255);
     }
-
     if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Liguor))
     {
-        g_pRenderText->SetTextColor(255, 0, 240, 255);
+        manaColor = MakeColorRgba(255, 0, 240, 255);
     }
-
-    iY = HEIGHT_ENERGY + 24;
-
-    g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + iY, strEnergy);
+    model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), manaColor });
 
     if (iBaseClass == CLASS_WIZARD || iBaseClass == CLASS_DARK || iBaseClass == CLASS_SUMMONER)
     {
@@ -1356,25 +1460,20 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
             mu_swprintf(strEnergy, I18N::Game::WizardryDmgDD216, iMagicDamageMin + maxMg, iMagicDamageMax + maxMg);
         }
 
-        iY += 13;
-        g_pRenderText->SetBgColor(0);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-
+        Rml::String magicDamageColor = MakeColorRgba(255, 255, 255, 255);
         if (g_isCharacterBuff((&Hero->Object), eBuff_Hellowin2))
         {
-            g_pRenderText->SetTextColor(255, 0, 240, 255);
+            magicDamageColor = MakeColorRgba(255, 0, 240, 255);
         }
-
         if (g_isCharacterBuff((&Hero->Object), eBuff_EliteScroll4))
         {
-            g_pRenderText->SetTextColor(255, 0, 240, 255);
+            magicDamageColor = MakeColorRgba(255, 0, 240, 255);
         }
-
         if (g_isCharacterBuff((&Hero->Object), eBuff_CherryBlossom_Petal))
         {
-            g_pRenderText->SetTextColor(255, 0, 240, 255);
+            magicDamageColor = MakeColorRgba(255, 0, 240, 255);
         }
-        g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + iY, strEnergy);
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), magicDamageColor });
     }
 
     if (iBaseClass == CLASS_SUMMONER)
@@ -1462,198 +1561,59 @@ void mu::ui::window::CCharacterInfoWindow::RenderAttribute()
                 iCurseDamageMin, iCurseDamageMax);
         }
 
-        iY += 13;
-        g_pRenderText->RenderText(m_Pos.x + 18, m_Pos.y + iY, strEnergy);
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
     }
 
-    iY += 13;
     if (iBaseClass == CLASS_KNIGHT)
     {
         mu_swprintf(strEnergy, I18N::Game::SkillDamageD, 200 + (wEnergy / 10));
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
     }
     if (iBaseClass == CLASS_DARK)
     {
         mu_swprintf(strEnergy, I18N::Game::SkillDamageD, 200);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
     }
     if (iBaseClass == CLASS_DARK_LORD)
     {
         mu_swprintf(strEnergy, I18N::Game::SkillDamageD, 200 + (wEnergy / 20));
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
     }
 
     if (iBaseClass == CLASS_RAGEFIGHTER)
     {
-        //마법공격력
         mu_swprintf(strEnergy, I18N::Game::DivineDamageRoarSlasherD, 50 + (wEnergy / 10));
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
-        iY += 13;
-        //범위공격력
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
         mu_swprintf(strEnergy, I18N::Game::AOEDamageDarkSideD, 100 + (wDexterity / 8 + wEnergy / 10));
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iY, strEnergy);
+        model.eneLines.push_back({ StringUtils::WideToNarrow(strEnergy), MakeColorRgba(255, 255, 255, 255) });
     }
+    m_RmlBinder.MarkDirty("ene_lines");
 
     if (iBaseClass == CLASS_DARK_LORD)
     {
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetBgColor(0);
-
         WORD wCharisma;
 
         wCharisma = CharacterAttribute->Charisma + CharacterAttribute->AddCharisma;
 
+        Rml::String charismaColor;
         if (g_isCharacterBuff((&Hero->Object), eBuff_SecretPotion5))
         {
-            g_pRenderText->SetTextColor(255, 120, 0, 255);
+            charismaColor = MakeColorRgba(255, 120, 0, 255);
+        }
+        else if (CharacterAttribute->AddCharisma)
+        {
+            charismaColor = MakeColorRgba(100, 150, 255, 255);
         }
         else
-
-            if (CharacterAttribute->AddCharisma)
-            {
-                g_pRenderText->SetTextColor(100, 150, 255, 255);
-            }
-            else
-            {
-                g_pRenderText->SetTextColor(230, 230, 0, 255);
-            }
+        {
+            charismaColor = MakeColorRgba(230, 230, 0, 255);
+        }
 
         wchar_t strCharisma[256];
         mu_swprintf(strCharisma, L"%d", wCharisma);
-        g_pRenderText->RenderText(m_Pos.x + 12, m_Pos.y + HEIGHT_CHARISMA + 6, I18N::Game::Command, 74, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 86, m_Pos.y + HEIGHT_CHARISMA + 6, strCharisma, 86, 0, RT3_SORT_CENTER);
+        model.cmdValueText = StringUtils::WideToNarrow(strCharisma);
+        model.cmdValueColor = charismaColor;
+        m_RmlBinder.MarkDirty("cmd_value_text");
+        m_RmlBinder.MarkDirty("cmd_value_color");
     }
-}
-
-void mu::ui::window::CCharacterInfoWindow::RenderButtons()
-{
-    int iBaseClass = gCharacterManager.GetBaseClass(Hero->Class);
-    int iCount = 0;
-    if (iBaseClass == CLASS_DARK_LORD)
-    {
-        iCount = 5;
-    }
-    else
-    {
-        iCount = 4;
-    }
-
-    if (CharacterAttribute->LevelUpPoint > 0)
-    {
-        for (int i = 0; i < iCount; ++i)
-        {
-            m_BtnStat[i].Render();
-        }
-    }
-
-    m_BtnExit.Render();
-    m_BtnQuest.Render();
-    m_BtnPet.Render();
-    m_BtnMasterLevel.Render();
-}
-
-float mu::ui::window::CCharacterInfoWindow::GetLayerDepth()
-{
-    return 5.1f;
-}
-
-void mu::ui::window::CCharacterInfoWindow::LoadImages()
-{
-    LoadBitmap(L"Interface\\newui_msgbox_back.jpg", IMAGE_CHAINFO_BACK, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back04.tga", IMAGE_CHAINFO_TOP, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-L.tga", IMAGE_CHAINFO_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back02-R.tga", IMAGE_CHAINFO_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_back03.tga", IMAGE_CHAINFO_BOTTOM, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_item_table01(L).tga", IMAGE_CHAINFO_TABLE_TOP_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table01(R).tga", IMAGE_CHAINFO_TABLE_TOP_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table02(L).tga", IMAGE_CHAINFO_TABLE_BOTTOM_LEFT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table02(R).tga", IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(Up).tga", IMAGE_CHAINFO_TABLE_TOP_PIXEL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(Dw).tga", IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(L).tga", IMAGE_CHAINFO_TABLE_LEFT_PIXEL, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_item_table03(R).tga", IMAGE_CHAINFO_TABLE_RIGHT_PIXEL, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_exit_00.tga", IMAGE_CHAINFO_BTN_EXIT, GL_LINEAR);
-
-    LoadBitmap(L"Interface\\newui_cha_textbox02.tga", IMAGE_CHAINFO_TEXTBOX, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chainfo_btn_level.tga", IMAGE_CHAINFO_BTN_STAT, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chainfo_btn_quest.tga", IMAGE_CHAINFO_BTN_QUEST, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chainfo_btn_pet.tga", IMAGE_CHAINFO_BTN_PET, GL_LINEAR);
-    LoadBitmap(L"Interface\\newui_chainfo_btn_master.tga", IMAGE_CHAINFO_BTN_MASTERLEVEL, GL_LINEAR);
-}
-
-void mu::ui::window::CCharacterInfoWindow::UnloadImages()
-{
-    DeleteBitmap(IMAGE_CHAINFO_BTN_MASTERLEVEL);
-    DeleteBitmap(IMAGE_CHAINFO_BTN_PET);
-    DeleteBitmap(IMAGE_CHAINFO_BTN_QUEST);
-    DeleteBitmap(IMAGE_CHAINFO_BTN_STAT);
-    DeleteBitmap(IMAGE_CHAINFO_TEXTBOX);
-
-    DeleteBitmap(IMAGE_CHAINFO_BTN_EXIT);
-
-    DeleteBitmap(IMAGE_CHAINFO_BOTTOM);
-    DeleteBitmap(IMAGE_CHAINFO_RIGHT);
-    DeleteBitmap(IMAGE_CHAINFO_LEFT);
-    DeleteBitmap(IMAGE_CHAINFO_TOP);
-    DeleteBitmap(IMAGE_CHAINFO_BACK);
-
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_RIGHT_PIXEL);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_LEFT_PIXEL);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_BOTTOM_PIXEL);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_PIXEL);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_BOTTOM_RIGHT);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_BOTTOM_LEFT);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_RIGHT);
-    DeleteBitmap(IMAGE_CHAINFO_TABLE_TOP_LEFT);
-}
-
-void mu::ui::window::CCharacterInfoWindow::OpenningProcess()
-{
-    ResetEquipmentLevel();
-
-    if (gCharacterManager.IsMasterLevel(Hero->Class) == true && Hero->Class != CLASS_TEMPLENIGHT)
-    {
-        m_BtnMasterLevel.UnLock();
-        m_BtnMasterLevel.ChangeImgColor(BUTTON_STATE_UP, RGBA(255, 255, 255, 255));
-        m_BtnMasterLevel.ChangeTextColor(RGBA(255, 255, 255, 255));
-    }
-    else
-    {
-        m_BtnMasterLevel.Lock();
-        m_BtnMasterLevel.ChangeImgColor(BUTTON_STATE_UP, RGBA(100, 100, 100, 255));
-        m_BtnMasterLevel.ChangeTextColor(RGBA(100, 100, 100, 255));
-    }
-
-    g_csItemOption.init();
-
-    if (CharacterMachine->IsZeroDurability())
-    {
-        CharacterMachine->CalculateAll();
-    }
-
-    if (g_QuestMng.IsIndexInCurQuestIndexList(0x10009))
-    {
-        if (g_QuestMng.IsEPRequestRewardState(0x10009))
-        {
-            g_pMyQuestInfoWindow->UnselectQuestList();
-            SocketClient->ToGameServer()->SendQuestClientActionRequest(1, 9);
-            g_QuestMng.SetEPRequestRewardState(0x10009, false);
-        }
-    }
-}
-
-void mu::ui::window::CCharacterInfoWindow::ResetEquipmentLevel()
-{
-    ITEM* pItem = CharacterMachine->Equipment;
-    Hero->Weapon[0].Level = pItem[EQUIPMENT_WEAPON_RIGHT].Level;
-    Hero->Weapon[1].Level = pItem[EQUIPMENT_WEAPON_LEFT].Level;
-    Hero->BodyPart[BODYPART_HELM].Level = pItem[EQUIPMENT_HELM].Level;
-    Hero->BodyPart[BODYPART_ARMOR].Level = pItem[EQUIPMENT_ARMOR].Level;
-    Hero->BodyPart[BODYPART_PANTS].Level = pItem[EQUIPMENT_PANTS].Level;
-    Hero->BodyPart[BODYPART_GLOVES].Level = pItem[EQUIPMENT_GLOVES].Level;
-    Hero->BodyPart[BODYPART_BOOTS].Level = pItem[EQUIPMENT_BOOTS].Level;
-
-    CheckFullSet(Hero);
 }
