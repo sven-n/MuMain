@@ -244,11 +244,13 @@ static std::function<void()> s_preSubmitCallback;
 // inside s_preSubmitCallback itself.
 static std::function<void()> s_postRmlUiCallback;
 
-// The texture this frame's UI seams (RmlUi's pre-submit callback, the post-RmlUi pass) must
-// render into. Normally the swapchain texture; on a frame that captures its pixels (screenshot
-// readback, reconnect capture) it is that frame's substitute colour target, so the capture
-// includes the UI exactly as the player sees it. Set only for the duration of those seams
-// inside EndFrame(); nullptr otherwise, when GetFrameGpuContext() falls back to the swapchain.
+// The texture every pass of this frame renders into: the main pass, FlushRenderCommands'
+// mid-frame passes (behind which RmlUi's background contexts draw), and the UI seams (RmlUi's
+// pre-submit callback, the post-RmlUi pass). Normally the swapchain texture; on a frame that
+// captures its pixels (screenshot readback, reconnect capture) it is that frame's substitute
+// colour target, chosen once in BeginFrame() so the capture includes everything the player
+// sees -- the background-context documents flushed mid-frame included. nullptr means the
+// swapchain (GetFrameGpuContext() falls back to it); reset at the end of EndFrame().
 static SDL_GPUTexture* s_frameColorTarget = nullptr;
 
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
@@ -263,6 +265,9 @@ static Uint32 s_swapH = 0u;
 static std::uint32_t s_pendingFrameCaptureTextureId = 0u;
 static FrameReadbackState s_frameReadbackState;
 static SDL_GPUTexture* s_frameReadbackTexture = nullptr;
+// Resolved in BeginFrame() from the requests pending at that point (see ResolveFrameColorTarget).
+static SDL_GPUTextureFormat s_frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+static SDL_GPUTexture* s_reconnectCaptureTexture = nullptr;
 
 constexpr Uint32 FrameReadbackBytesPerPixel = 4u;
 constexpr Uint32 FrameReadbackRowAlignment = 256u;
@@ -1072,6 +1077,50 @@ static void WarmTtfFonts()
 // ---------------------------------------------------------------------------
 static std::unordered_map<std::uint32_t, void*> s_textureMap;
 static std::unordered_map<std::uint32_t, std::pair<std::uint32_t, std::uint32_t>> s_textureSizes;
+
+[[nodiscard]] static SDL_GPUTexture* FrameColorTexture()
+{
+    return s_frameColorTarget ? s_frameColorTarget : s_swapchainTexture;
+}
+
+// Called by BeginFrame() once the swapchain texture is known: a screenshot readback or a
+// reconnect capture requested before this frame claims the whole frame's colour target, so
+// every pass renders into the capture texture and nothing has to be replayed after the fact.
+static void ResolveFrameColorTarget()
+{
+    s_frameColorTarget = nullptr;
+    s_reconnectCaptureTexture = nullptr;
+    s_frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
+
+    if (s_frameReadbackState.IsPending())
+    {
+        s_frameReadbackFormat = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
+        if (CreateFrameReadbackTexture(s_frameReadbackFormat))
+        {
+            s_frameColorTarget = s_frameReadbackTexture;
+        }
+        else
+        {
+            FailPendingFrameReadback();
+        }
+    }
+
+    if (s_pendingFrameCaptureTextureId != 0u)
+    {
+        const auto texture = s_textureMap.find(s_pendingFrameCaptureTextureId);
+        const auto size = s_textureSizes.find(s_pendingFrameCaptureTextureId);
+        if (texture != s_textureMap.end() && size != s_textureSizes.end() && size->second.first == s_swapW &&
+            size->second.second == s_swapH)
+        {
+            s_reconnectCaptureTexture = static_cast<SDL_GPUTexture*>(texture->second);
+            if (!s_frameColorTarget)
+            {
+                s_frameColorTarget = s_reconnectCaptureTexture;
+            }
+        }
+        s_pendingFrameCaptureTextureId = 0u;
+    }
+}
 static std::unordered_set<std::uint32_t> s_ownedTextureIds;
 static std::uint32_t s_cachedTextureId = 0u;
 static void* s_cachedTexture = nullptr;
@@ -1749,6 +1798,8 @@ public:
         // Recreates on first frame or when window is resized.
         CreateOrResizeDepthTexture(s_swapW, s_swapH);
 
+        ResolveFrameColorTarget();
+
         // Deferred rendering: do NOT begin the render pass here.
         // Draw calls record RenderCmds into s_renderCmds during the frame.
         // EndFrame will: copy vertex data → begin render pass → replay → end → submit.
@@ -1965,8 +2016,8 @@ public:
     // at the one pre-existing pass boundary.
     void ReplayCommandRange(std::size_t startIdx, std::size_t endIdx, bool boneDataReady)
     {
-        SDL_GPUViewport currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH), 0.0f,
-                                         1.0f};
+        SDL_GPUViewport currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH),
+                                        0.0f, 1.0f};
         SDL_Rect currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
         Render::SdlGpuReplayState replayState;
 
@@ -2051,7 +2102,7 @@ public:
         const bool boneDataReady = StageDeferredGpuData();
 
         SDL_GPUColorTargetInfo colorTarget{};
-        colorTarget.texture = s_swapchainTexture;
+        colorTarget.texture = FrameColorTexture();
         colorTarget.load_op = s_mainColorPassOpenedThisFrame ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
         if (!s_mainColorPassOpenedThisFrame)
         {
@@ -2114,8 +2165,13 @@ public:
         // Render pass — replay all recorded draw commands.
         // The GPU vertex/index buffers now contain current-frame data.
         // ---------------------------------------------------------------
-        SDL_GPUTextureFormat frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
-        if (s_frameReadbackState.IsPending())
+        // The frame's colour target was chosen in BeginFrame() (ResolveFrameColorTarget); a
+        // request that arrived mid-frame is honoured late, as before: its texture has not
+        // received the passes FlushRenderCommands already ran, so it starts fresh and replays
+        // every recorded command (harmless for a target nobody has seen yet).
+        SDL_GPUTexture* const targetChosenAtBegin = FrameColorTexture();
+        SDL_GPUTextureFormat frameReadbackFormat = s_frameReadbackFormat;
+        if (s_frameReadbackState.IsPending() && !s_frameReadbackTexture)
         {
             frameReadbackFormat = SDL_GetGPUSwapchainTextureFormat(s_device, s_window);
             if (!CreateFrameReadbackTexture(frameReadbackFormat))
@@ -2124,7 +2180,7 @@ public:
             }
         }
 
-        SDL_GPUTexture* reconnectCaptureTexture = nullptr;
+        SDL_GPUTexture* reconnectCaptureTexture = s_reconnectCaptureTexture;
         if (s_pendingFrameCaptureTextureId != 0u)
         {
             const auto texture = s_textureMap.find(s_pendingFrameCaptureTextureId);
@@ -2141,16 +2197,9 @@ public:
                                                   : reconnectCaptureTexture ? reconnectCaptureTexture
                                                                             : s_swapchainTexture;
 
-        // FlushRenderCommands (if it ran earlier this frame) only ever writes to s_swapchainTexture
-        // directly -- a readback/capture frame's substituted frameColorTexture never received that
-        // content, so it must always be treated as fresh (CLEAR, full replay) regardless of
-        // s_mainColorPassOpenedThisFrame; re-replaying already-flushed commands here is harmless
-        // (a different render target, not double-visible) and is how this rare frame recovers the
-        // otherwise-flushed content for its capture. The common case (frameColorTexture is the
-        // swapchain) honors whatever FlushRenderCommands already established.
-        const bool targetingSwapchain = frameColorTexture == s_swapchainTexture;
-        const bool clearThisPass = !targetingSwapchain || !s_mainColorPassOpenedThisFrame;
-        const std::size_t replayStart = targetingSwapchain ? s_replayedCmdCount : 0u;
+        const bool chosenLate = frameColorTexture != targetChosenAtBegin;
+        const bool clearThisPass = chosenLate || !s_mainColorPassOpenedThisFrame;
+        const std::size_t replayStart = chosenLate ? 0u : s_replayedCmdCount;
 
         bool renderPassCompleted = false;
         if (IsFrameTimingEnabled())
@@ -2193,11 +2242,8 @@ public:
             s_renderPass = nullptr;
             renderPassCompleted = true;
 
-            if (targetingSwapchain)
-            {
-                s_mainColorPassOpenedThisFrame = true;
-                s_replayedCmdCount = s_renderCmds.size();
-            }
+            s_mainColorPassOpenedThisFrame = true;
+            s_replayedCmdCount = s_renderCmds.size();
         }
 
         // RmlUi port: fires after this frame's own game content is fully recorded onto s_cmdBuf
@@ -2301,8 +2347,8 @@ public:
                 // inside them targeting the *already-nulled* s_renderPass from the main pass's own
                 // close (a few lines up) -- SDL_GPU silently no-ops a null render pass rather
                 // than crashing, which is why this had no visible symptom beyond "nothing drawn".
-                s_renderPass = SDL_BeginGPURenderPass(
-                    s_cmdBuf, &postUiColorTarget, 1, s_depthTexture ? &postUiDepthTarget : nullptr);
+                s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &postUiColorTarget, 1,
+                                                      s_depthTexture ? &postUiDepthTarget : nullptr);
                 if (s_renderPass)
                 {
                     ReplayCommandRange(postUiCmdStart, s_renderCmds.size(), postUiBoneDataReady);
