@@ -86,10 +86,13 @@
 	     generic_confirm_dialog.rcss's own .gcd-btn-primary/etc have to #panel (not nested inside
 	     .gcd-body). #content is a single splice target (Template::ParseTemplate only resolves one
 	     content id), so a consumer can't author an element here directly; empty and inert by
-	     default (harmless for generic_menu_dialog, which never touches it) until a consumer moves
-	     an already-parsed element into it via UI::RmlBridge::PromoteToWindowShellFooter()
-	     (RmlWindowShell.h) after the document loads -- see option_window.rml's close button for the
-	     worked example. -->
+	     default (harmless for generic_menu_dialog, which never touches it) until a consumer builds
+	     into it in C++ (Rml::ElementDocument::CreateElement() + AppendChild(), NOT authored as
+	     `{{}}`-bound RML markup elsewhere and moved here after load -- that was tried first
+	     (option_window.rml's close button) and never rendered its label text: RmlUi's
+	     text-interpolation DataView is only created at an element's original XML parse, and
+	     re-attaching to a new parent doesn't recreate it, only re-scans attributes for data-*
+	     bindings) -- see COptionWindow::BuildRmlUi() for the current worked example. -->
 	<div id="window_shell_footer" class="window-shell-footer"></div>
 </body>
 </template>

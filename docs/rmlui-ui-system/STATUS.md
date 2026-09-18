@@ -14,7 +14,9 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   `COptionWin` (the `CWin`-tier options window) was confirmed unreachable in live play — its
   RmlUi port was never wired up, and the class was later deleted outright as confirmed-dead code
   (see `README.md`'s Coexistence patterns); `CSysMenuWin`'s Option button opens
-  `mu::ui::window::COptionWindow` instead. Built and verified against a real server, both themes.
+  `mu::ui::window::COptionWindow` instead — now a 6-tab settings window (grown well past a flat
+  options list, see `migration-ledger.md`'s own row for the full history), built and verified live
+  against a real server, both themes.
 - **In-game HUD (`mu::ui::window::CObject` tier)** — `CMuHelperBar` (map/position readout + MU Helper bot
   control bar) and `CBuffStrip` (active-buff icon strip, the `data-for`/dynamic-array pilot at
   this tier) are fully done. `CMainFrameWindow`'s 3-phase HUD-frame port is **done**: Phase 1
@@ -441,9 +443,11 @@ for "the full architecture is in place":
   just an inventory, not a sequenced plan; nothing there says what order to tackle them in. The
   ledger's own audit also surfaced two components worth a closer look: `mu::ui::window::COptionWindow`
   (the live in-game Options window, opened by `CSysMenuWin`'s Option button per the "Coexistence
-  patterns" note in `README.md`) has zero RmlUi call sites despite reading as though it might already
-  be replaced, and `CServerMsgWin` (sibling of the already-done `CMsgWin`) is likewise still fully
-  native — neither was previously called out anywhere as a distinct, still-open gap. Conversely,
+  patterns" note in `README.md`) had zero RmlUi call sites at the time despite reading as though it
+  might already be replaced — **since ported and shipped (2026-09-19), see `migration-ledger.md`'s
+  own row** — and `CServerMsgWin` (sibling of the already-done `CMsgWin`) is likewise still fully
+  native and not yet a distinct port target (a real, unrelated visibility bug in it was found and
+  fixed along the way, see its own ledger row — not a port). Conversely,
   `CCreditWin` turned out to already be a real, shipped RmlUi port (`credit_win.rml`) that was never
   logged in this file's own "What's migrated" list above — worth adding there if confirmed.
 - ~~`MuPlatform::Initialize()`/`CreatePlatformWindow()`/`GetWindow()`/`Shutdown()`/

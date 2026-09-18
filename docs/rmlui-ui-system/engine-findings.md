@@ -19,6 +19,18 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   has no `data-model` at all and still needs this. Every text-bearing selector across
   `themes/modern/*.rcss` now declares its own `font-family: "token(font-body)"` rather than
   inheriting one.
+  **Recurred, 2026-09-19** (`option_window.rcss`'s modern `.option-tab-btn`): rediscovered the
+  hard way, at real cost — invisible tab-button text was mis-diagnosed for several rounds as a
+  flex-item/decorator/box-shadow interaction (tried decorator directly on a flex item, decorator
+  isolated onto a non-flex sibling child, then rebuilding the whole row as `position:absolute`
+  with percentage widths to structurally match `.btn` — none of it made any difference), when the
+  rule simply never had `font-family` at all. **Check this finding FIRST, before any structural
+  theory, whenever a NEW element's text is invisible but the rest of its box (background/border/
+  decorator) renders fine** — that pattern (box paints, text doesn't) is this finding's own
+  signature, not evidence of a layout/decorator bug. Modern has no document-wide default the way
+  legacy's `#panel` rule provides one; every other visible piece of text in a modern document
+  already compensates with its own explicit `font-family` (the window title, row labels, selects,
+  `.btn` itself) — a new rule that skips it is the one to suspect.
 - **`UI::RmlBridge::LoadThemedDocument()`'s design-token substitution (`RmlTheme.cpp`) must
   resolve a `<link href>` against `sourceUrl`'s directory, not wherever the RML text was actually
   read from.** For any document with no `themes/<theme>/<name>.rml` override (everything except
@@ -311,4 +323,60 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   template's own paired `.rcss` is safe to link from within the template itself only if it contains
   no `token(...)` calls (confirmed true of `window_shell.rcss`/`window_shell_bg.rcss`, both
   themes — plain dp/hex values throughout, no design tokens).
+- **Moving an already-parsed element to a new parent (`Element::RemoveChild()` then
+  `AppendChild()` elsewhere in the same document) does not preserve a `{{}}` text-interpolation
+  binding, even though it does preserve `data-*` attribute bindings (`data-event-click`,
+  `data-class-*`, etc).** Found building `option_window.rml`'s close button (2026-09-18): moved a
+  `<div>{{close_label}}</div>` from inside `window_shell`'s `#content` splice slot into a new
+  `#window_shell_footer` anchor via a small `UI::RmlBridge` helper, immediately after
+  `LoadThemedDocument()` returned. The button's click handler kept working; its label text never
+  rendered, in either theme. Root cause, confirmed by reading the vendored source directly:
+  `RemoveChild()` → `SetParent(nullptr)` → `SetDataModel(nullptr)` → `DataModel::OnElementRemove()`
+  tears down that element's existing `DataView`s. `AppendChild()` into the new parent →
+  `SetParent(new_parent)` → `SetDataModel(model)` → `ElementUtilities::ApplyDataViewsControllers()`
+  re-fires, but that function **only re-scans the element's own attributes for `data-[type]-...`
+  bindings** (`ElementUtilities.cpp`) — it has no code path that re-parses a plain text node's
+  `{{expr}}` content, because that substitution normally only ever happens once, at the text
+  node's original XML-parse time. An attribute-bound behavior (click, class toggle, two-way
+  `data-value`) survives the move; a `{{}}`-bound text node's own binding does not, silently,
+  leaving it either blank or frozen at whatever it last resolved to. **Fix: don't reparent an
+  already-`{{}}`-bound element.** Either build the element directly at its final location in the
+  first place (imperative C++: `ElementDocument::CreateElement()` + `AppendChild()`, setting its
+  text via `SetInnerRML()` each sync instead of a data binding — `COptionWindow`'s close button now
+  does this), or keep it declared in its original position and reach the same visual effect with
+  CSS (`position:absolute` against a shared ancestor) instead of an actual DOM move.
+- **RmlUi's native `<select>`/`<option>` (`WidgetDropDown`) needs its generated `selectvalue`/
+  `selectbox`/`selectarrow` sub-elements styled by hand, including `position` — unlike
+  `WidgetSlider`, which force-sets `drag` on its own generated sub-elements programmatically,
+  `WidgetDropDown` sets only `visibility`/`z-index`/`clip`/`overflow-y` on `selectbox`
+  (`WidgetDropDown.cpp`) and leaves `position` entirely to the consumer's own CSS.** Skipping it
+  (as `option_window.rcss` initially did for all 5 dropdowns) makes the option list render as
+  ordinary in-flow block content instead of a floating overlay: no background (transparent over
+  whatever's behind the panel), no bounded size (grows the row instead of overlaying it), and
+  multiple open dropdowns' lists interleaving into the same flow with no visual separation. Even
+  after adding `position:absolute`/`z-index`/background/an explicit `scrollbarvertical` width to
+  `selectbox` (mirroring `generic_confirm_dialog.rcss`'s own already-proven scrollbar recipe),
+  clicking an option still did not reliably commit a selection or fire this window's own `change`
+  callback, for a cause never conclusively isolated. **Recommendation: don't reach for native
+  `<select>` for a new dropdown in this codebase — use a `data-for`-driven custom control instead**
+  (a clickable "current value" box toggling a `data-class-hidden` sibling list of
+  `data-for`-generated option rows, each with its own `data-event-click`), the same mechanism this
+  codebase's tab-bar pattern already uses successfully. `option_window.rcss`'s `.option-dropdown`/
+  `.option-dropdown-value`/`.option-dropdown-list`/`.option-dropdown-option` family (2026-09-19) is
+  the worked example — it replaced all 5 native `<select>`s outright once the above didn't hold up
+  after three separate rounds of fixes.
+- **A persistent RmlUi document driven by a scene's own restricted manual pump (`UpdateMouseEvent()`
+  + `UpdateKeyEvent()` + `Render()`, bypassing the full `mu::ui::window::CManager::Update()` sweep)
+  must still have its own `Update()` called explicitly — it is not implied by the other three.**
+  `LoginScene.cpp`/`CharacterScene.cpp` both pump `COptionWindow` this way (comment: "can't use full
+  g_pNewUISystem update", since those scenes don't run the full HUD/inventory UI stack), and both
+  omitted `Update()`. `COptionWindow::Update()` is what runs `SyncRmlModel()` — the step that pushes
+  this window's own C++ state into its RmlUi data model — so every `{{}}`-bound field stayed at its
+  default-constructed empty value and the window rendered with no text at all, specifically in
+  those two scenes. Because the window is a single persistent instance, the very first real
+  `Update()` call (from the full sweep, once a scene reaches it) permanently populates the model —
+  which is why the symptom didn't reappear on a later visit to a scene that still skips the call.
+  Fix: any scene-local manual pump of a persistent window needs `Update()` in the same sequence the
+  full sweep uses (`UpdateMouseEvent` → `UpdateKeyEvent` → `Update` → `Render`), not just the three
+  that look input/render-related by name.
 

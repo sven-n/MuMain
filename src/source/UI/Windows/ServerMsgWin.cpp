@@ -52,6 +52,15 @@ void CServerMsgWin::Create()
 
 void CServerMsgWin::Release()
 {
+    // Reset the base CObject visibility flag directly (not this class's own Show(), which would
+    // also touch the sprites below after they're already gone) -- every sibling window released
+    // alongside this one at the character-select -> main-scene transition
+    // (CSceneUICoordinator::CreateMainScene()) explicitly hides itself in its own Release(); this
+    // one didn't, so if a server notice was showing at that exact moment, the render sweep kept
+    // calling this window's own Render() against now-released sprites (plus the still-cached
+    // message text) for a frame or two afterward -- a stray flash at whatever position this
+    // window was last shown at (upper-left, see CSceneUICoordinator's own SetPosition call).
+    mu::ui::window::CObject::Show(false);
     for (auto& sprite : m_aSprBg)
         sprite.Release();
 }

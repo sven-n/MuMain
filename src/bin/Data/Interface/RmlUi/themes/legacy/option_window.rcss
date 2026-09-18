@@ -217,29 +217,121 @@
 	height: 0;
 }
 
-/* First real use of RmlUi's native <select>/<option> in this codebase -- see option_window.rml's
-   own comment on why (spike before trusting; a data-for custom dropdown is the fallback).
-   pointer-events: auto explicit here too, same reasoning as .option-slider's own comment. */
-.option-select {
+/* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first
+   (see option_window.rml's own comment for the full history) and never reliably worked in this
+   engine: the widget's own generated selectvalue/selectbox/selectarrow sub-elements need CSS this
+   theme never fully gave them (no `position` set programmatically the way WidgetSlider forces
+   `drag` on its own sub-elements), and even once styled, option clicks still didn't reliably reach
+   this window's own change callback. This reuses the exact data-for/data-class/data-event-click
+   mechanism .option-tab-btn above already proves reliable, plus a single shared
+   model.openDropdown field (OptionWindow.h) so opening one dropdown closes any other automatically
+   -- no separate exclusivity logic needed. position:relative so .option-dropdown-list's own
+   position:absolute (below) resolves against ITS box. */
+.option-dropdown {
+	position: relative;
 	flex-grow: 1;
 	height: 18dp;
+}
+.option-dropdown-value {
+	display: block;
+	width: 100%;
+	height: 100%;
+	padding: 0 4dp;
+	line-height: 18dp;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	pointer-events: auto;
 	background-color: #0c0e0b;
 	border-width: 1dp;
 	border-color: #514a35;
 	color: #d9d0b8;
+}
+/* Floating popup -- top:100% (not a hardcoded dp offset) so it always sits flush under the value
+   box regardless of that row's own height. max-height+overflow-y:auto caps a long list
+   (Resolution has ~25 entries) with a real scrollbar instead of growing past the panel. Needs the
+   .hidden override below: this file loads after base.rcss, so its own display:block would
+   otherwise tie with (and silently beat) base.rcss's global .hidden{display:none} at equal
+   specificity -- same cascade-tie bug .option-tab-panel's own comment already covers.
+
+   z-index:1 -- without it, this absolutely-positioned popup paints/hit-tests at its own plain DOM
+   position among .option-row siblings, i.e. BEHIND whichever row comes later in markup order (an
+   .option-row without its own z-index just participates in normal top-to-bottom paint order, same
+   as any other sibling) -- found live: a dropdown opened above a lower row rendered behind it, and
+   clicking an option that visually overlapped a checkbox row actually triggered THAT checkbox
+   instead. RmlUi's own native <select> (WidgetDropDown.cpp) sets this same 1 on its generated
+   selectbox for the identical reason -- this is the custom-dropdown equivalent of that. */
+.option-dropdown-list {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	width: 100%;
+	max-height: 90dp;
+	overflow-y: auto;
+	z-index: 1;
+	background-color: #0c0e0b;
+	border-width: 1dp;
+	border-color: #514a35;
 	pointer-events: auto;
 }
+.option-dropdown-list.hidden {
+	display: none;
+}
+/* Explicit scrollbar sizing, same reasoning generic_confirm_dialog.rcss's own .gcd-text-col
+   comment already gives for its own overflow:auto well -- an unstyled scrollbarvertical isn't
+   just visually wrong, its own (also unstyled) hit-test area can cover most/all of the option
+   row's width instead of a slim strip at the edge, silently swallowing clicks meant for the
+   option text beneath it as a scrollbar drag instead (found live: "clicking a value just scrolls
+   it"). Arrow buttons collapsed to 0, same drag/click-only affordance as every other scrollbar in
+   this codebase. */
+.option-dropdown-list scrollbarvertical {
+	width: 6dp;
+	margin: 0;
+}
+.option-dropdown-list scrollbarvertical slidertrack {
+	background-color: #100c06;
+}
+.option-dropdown-list scrollbarvertical sliderbar {
+	background-color: #4a4a45;
+}
+.option-dropdown-list scrollbarvertical sliderbar:hover,
+.option-dropdown-list scrollbarvertical sliderbar:active {
+	background-color: #6e6e66;
+}
+.option-dropdown-list scrollbarvertical sliderarrowdec,
+.option-dropdown-list scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.option-dropdown-option {
+	display: block;
+	width: 100%;
+	padding: 2dp 4dp;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	color: #d9d0b8;
+}
+.option-dropdown-option:hover {
+	color: #ffffff;
+	background-color: #514a35;
+}
+.option-dropdown-option.selected {
+	color: #ffffff;
+	background-color: #8f6922;
+}
 
-/* .btn already defaults to position:absolute (base.rcss) -- kept, not overridden to static, since
-   the close button is meant to sit at a FIXED spot regardless of which tab is active, not flow
-   after whatever that tab's own last row happens to be (found live: the button visibly jumped up
-   or down depending on the active tab's row count). option_window.rml parses this element inside
-   #content (window_shell's only splice target) but OptionWindow.cpp moves it into
-   window_shell.rml's own #window_shell_footer right after load (UI::RmlBridge::
-   PromoteToWindowShellFooter(), matching generic_confirm_dialog.rcss's own direct-#panel-child
-   buttons) -- bottom:0 here resolves against that footer's own box (window_shell.rcss's own
-   .window-shell-footer, itself position:absolute against #panel), not #content's. left:50%+
-   transform centers it horizontally the same way .center-both does. */
+/* Not authored in option_window.rml at all -- COptionWindow::BuildRmlUi() builds this element
+   directly in C++ inside window_shell.rml's own #window_shell_footer (a `{{close_label}}` version
+   of this div, moved into the footer after load, never rendered its label -- see
+   OptionWindow.h's own comment on m_pCloseButtonEl). .btn already defaults to position:absolute
+   (base.rcss) -- kept, not overridden to static, since the close button is meant to sit at a
+   FIXED spot regardless of which tab is active, not flow after whatever that tab's own last row
+   happens to be (found live: the button visibly jumped up or down depending on the active tab's
+   row count). bottom:0 here resolves against the footer's own box (window_shell.rcss's own
+   .window-shell-footer, itself position:absolute against #panel). left:50%+transform centers it
+   horizontally the same way .center-both does. */
 .option-close-btn {
 	left: 50%;
 	bottom: 0;

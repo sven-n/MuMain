@@ -125,12 +125,20 @@ namespace mu::ui::window
         void SyncRmlModel();
         // Performs a theme switch recorded by RmlThemeChanged(), deferred to Update() -- see
         // m_bPendingThemeSwitch's own comment for why this can't happen synchronously inside the
-        // <select>'s own change event.
+        // dropdown-option click event that recorded it.
         void ApplyPendingThemeSwitch();
 
         // Invoked directly from RmlUi data-event-click/-change bindings (see BuildRmlUi()), not
         // polled. RmlClickSelectTab first, matching MyQuestInfoWindow's own tab-callback ordering.
         void RmlClickSelectTab(int nTab);
+        // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family, replacing
+        // RmlUi's native <select>) -- dropdownId is 0=resolution,1=fpsCap,2=theme,3=language,4=font,
+        // matching model.openDropdown's own comment (OptionWindow.h). RmlDropdownOptionClick
+        // dispatches to the same RmlResolutionChanged()/RmlFpsCapChanged()/etc. this window already
+        // had for its (now-removed) native <select> change handlers -- only how they get called
+        // changed, not what they do.
+        void RmlToggleDropdown(int dropdownId);
+        void RmlDropdownOptionClick(int dropdownId, int optionIndex);
         void RmlToggleAutoAttack();
         void RmlToggleWhisperSound();
         void RmlToggleSlideHelp();
@@ -173,7 +181,8 @@ namespace mu::ui::window
 
             bool hasTitle = true;
             Rml::String title;
-            Rml::String closeLabel;
+            // No closeLabel/close_label field here -- the close button isn't part of this
+            // document's declarative markup anymore, see m_pCloseButtonEl's own comment.
 
             // Tab state -- bound/diffed first, matching MyQuestInfoWindow's own convention for its
             // own activeTab field (see BuildRmlUi()/SyncRmlModel()). 0=Gameplay, 1=Audio, 2=Video,
@@ -185,6 +194,21 @@ namespace mu::ui::window
             Rml::String tabGraphicsLabel;
             Rml::String tabUiLabel;
             Rml::String tabGeneralLabel;
+
+            // Which custom dropdown (.option-dropdown) is currently open, -1 = none. A single
+            // field rather than one bool per dropdown gives exclusivity for free -- opening one
+            // overwrites whichever other id was here, no separate "close the others" step needed.
+            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font (RmlToggleDropdown()/
+            // RmlDropdownOptionClick()'s own ids). Replaces RmlUi's native <select>/<option>
+            // (WidgetDropDown) entirely -- see option_window.rml's own history for why: that
+            // widget's own generated selectbox/selectvalue/selectarrow sub-elements need CSS this
+            // theme never gave them (no position set programmatically, unlike WidgetSlider), and
+            // even after fixing that, selecting an option still didn't reliably reach this
+            // window's own change callback. option_window.rml itself flagged this as a real risk
+            // up front ("spike before trusting; a data-for custom dropdown is the fallback") --
+            // this is that fallback, reusing the exact data-for + data-class + data-event-click
+            // mechanism the tab bar above already proves reliable.
+            int openDropdown = -1;
 
             bool autoAttack = true;
             Rml::String autoAttackLabel;
@@ -210,12 +234,18 @@ namespace mu::ui::window
             std::vector<Rml::String> resolutionLabels;
             int resolutionIndex = 0;
             Rml::String resolutionRowLabel;
+            // Text shown in the dropdown's own closed-state box -- resolutionLabels[resolutionIndex],
+            // kept as its own diffed field rather than a {{}} array-index expression (this engine's
+            // binding-expression grammar is otherwise untested for that, see DataExpression.cpp).
+            Rml::String resolutionValueLabel;
             std::vector<Rml::String> languageLabels;
             int languageIndex = 0;
             Rml::String languageRowLabel;
+            Rml::String languageValueLabel;
             std::vector<Rml::String> fontLabels;
             int fontIndex = 0;
             Rml::String fontRowLabel;
+            Rml::String fontValueLabel;
 
             // Video tab additions.
             bool vsyncEnabled = true;
@@ -223,6 +253,7 @@ namespace mu::ui::window
             std::vector<Rml::String> fpsCapLabels;
             int fpsCapIndex = 0;
             Rml::String fpsCapRowLabel;
+            Rml::String fpsCapValueLabel;
 
             // Graphics tab -- DXP-23's per-system effect-cost toggles, promoted to a real setting.
             bool disableEffects = false;
@@ -244,6 +275,7 @@ namespace mu::ui::window
             std::vector<Rml::String> themeLabels;
             int themeIndex = 0;
             Rml::String themeRowLabel;
+            Rml::String themeValueLabel;
         };
         RmlModelBinder<OptionRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -253,6 +285,21 @@ namespace mu::ui::window
         // never drift from wherever `.center-both` (or a future positioned/dragged mode) actually
         // put the panel, in either theme.
         Rml::Element* m_pPanelEl = nullptr;
+
+        // Built directly in C++ (BuildRmlUi()) inside window_shell.rml's own #window_shell_footer,
+        // not authored as `{{close_label}}` markup in option_window.rml -- a `{{}}`-bound text node
+        // that gets moved to a new parent via UI::RmlBridge::PromoteToWindowShellFooter() (as this
+        // element originally was) never renders its text: the DataView responsible for that
+        // substitution is only created once, at the original element's initial XML parse, and
+        // RmlUi's own re-attach path (Element::SetDataModel() -> ApplyDataViewsControllers()) only
+        // rescans an element's *attributes* for new bindings, never plain text content -- so the
+        // text-interpolation view is simply never recreated after the move (found live: the button
+        // rendered with no label at all, in both themes). Building it here instead sidesteps the
+        // whole DataView-survives-a-reparent question -- its label is set imperatively via
+        // SetInnerRML() in SyncRmlModel() (diffed against m_lastCloseButtonLabel), and its click is
+        // a plain Rml::EventListener (see BuildRmlUi()'s own comment), not a data-event-click.
+        Rml::Element* m_pCloseButtonEl = nullptr;
+        Rml::String m_lastCloseButtonLabel;
 
     private:
         CManager* m_pNewUIMng;
@@ -274,6 +321,8 @@ namespace mu::ui::window
         std::vector<std::wstring> m_resolutionLabels;
 
         int m_iActiveTab = 0;
+        // -1 = none open. See model.openDropdown's own comment (OptionRmlModel) for the id scheme.
+        int m_iOpenDropdown = -1;
 
         // Video tab additions -- m_bVsyncEnabled seeded from GameConfig::GetVSyncEnabled() (same
         // place m_bWindowedMode seeds from g_bUseWindowMode); m_iFpsCapIndex indexes
@@ -305,12 +354,13 @@ namespace mu::ui::window
         bool m_bPendingThemeSwitch = false;
         int m_iPendingThemeIndex = 0;
 
-        // Counts SyncRmlModel() calls since BuildRmlUi() -- the resolution/language/font <select>s
-        // fire a handful of spurious "change" events of their own while RmlUi settles their
-        // data-for option list against the freshly-populated data-value index (see
-        // RmlResolutionChanged's own comment); real user input can't possibly land in this window
-        // this soon after Create() since it isn't even shown yet, so change events are ignored
-        // until the settle window has elapsed.
+        // Counts SyncRmlModel() calls since BuildRmlUi() -- originally guarded against RmlUi's
+        // native <select> (WidgetDropDown) firing a handful of spurious "change" events of its own
+        // while settling its data-for option list against the freshly-populated data-value index,
+        // back when resolution/language/font/fps-cap/theme used native <select>s (since replaced
+        // by the .option-dropdown custom control, see model.openDropdown's own comment). Kept as a
+        // harmless no-op-this-early guard on RmlDropdownOptionClick()'s own callers -- real user
+        // input can't land in this window this soon after Create() since it isn't shown yet.
         int m_rmlSyncCount = 0;
     };
 }

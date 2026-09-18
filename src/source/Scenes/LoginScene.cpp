@@ -483,11 +483,21 @@ bool NewRenderLogInScene(HDC hDC)
     RenderDebugWindow();
 #endif
 
-    // Handle option window in login/character scenes (can't use full g_pNewUISystem update)
+    // Handle option window in login/character scenes (can't use full g_pNewUISystem update).
+    // Update() (not just UpdateMouseEvent()/UpdateKeyEvent()) is required here too -- it's what
+    // runs SyncRmlModel(), which pushes this window's own C++ state (tab/row labels, checkbox
+    // values, everything bound via {{}}) into its RmlUi data model. Without it, every bound field
+    // stays at its default-constructed empty value and the window renders with no text at all
+    // (found live: fixed the moment CManager::Update() started running this window normally, i.e.
+    // after reaching a scene that pumps the full g_pNewUISystem update -- the model, once
+    // populated there, stays populated even back in a scene that skips this call again, which is
+    // why the symptom didn't reappear after visiting one such scene). Same order the full
+    // CManager sweep uses (UpdateMouseEvent -> UpdateKeyEvent -> Update -> Render).
     if (g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_OPTION))
     {
         g_pOption->UpdateMouseEvent();
         g_pOption->UpdateKeyEvent();
+        g_pOption->Update();
         g_pOption->Render();
     }
 

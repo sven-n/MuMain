@@ -10,7 +10,6 @@
 #include "Audio/AudioPlayer.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/RmlBridge/RmlTheme.h"
-#include "UI/RmlBridge/RmlWindowShell.h"
 #include "Core/Utilities/StringUtils.h"
 #include "Scenes/SceneManager.h"
 #include "Scenes/MainScene.h"
@@ -25,6 +24,8 @@
 #include <RmlUi/Core/ElementDocument.h>
 #include <RmlUi/Core/Elements/ElementFormControl.h>
 #include <RmlUi/Core/Event.h>
+#include <RmlUi/Core/EventListener.h>
+#include <functional>
 
 extern int m_MusicOnOff;
 extern int m_SoundOnOff;
@@ -131,6 +132,24 @@ static const int s_NumFonts = sizeof(s_Fonts) / sizeof(s_Fonts[0]);
 static const int s_FpsCapValues[] = { 24, 30, 60, 120, 144, -1 };
 static const int s_NumFpsCapValues = sizeof(s_FpsCapValues) / sizeof(s_FpsCapValues[0]);
 
+namespace
+{
+    // Self-owning, same pattern as RmlDraggable.cpp's own DragMoveListener -- deletes itself in
+    // OnDetach() per RmlUi's AddEventListener contract, so the caller never needs to track or clean
+    // it up. Used for the close button (m_pCloseButtonEl) instead of a data-event-click binding
+    // since that element isn't part of this document's declarative markup/data model wiring
+    // anymore -- see m_pCloseButtonEl's own comment in OptionWindow.h.
+    class ClickListener : public Rml::EventListener
+    {
+    public:
+        explicit ClickListener(std::function<void()> onClick) : m_OnClick(std::move(onClick)) {}
+        void ProcessEvent(Rml::Event&) override { if (m_OnClick) m_OnClick(); }
+        void OnDetach(Rml::Element*) override { delete this; }
+    private:
+        std::function<void()> m_OnClick;
+    };
+}
+
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
@@ -209,7 +228,6 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
 
             c.Bind("has_title", &model.hasTitle);
             c.Bind("title", &model.title);
-            c.Bind("close_label", &model.closeLabel);
 
             c.Bind("active_tab", &model.activeTab);
             c.Bind("tab_gameplay_label", &model.tabGameplayLabel);
@@ -218,6 +236,8 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("tab_graphics_label", &model.tabGraphicsLabel);
             c.Bind("tab_ui_label", &model.tabUiLabel);
             c.Bind("tab_general_label", &model.tabGeneralLabel);
+
+            c.Bind("open_dropdown", &model.openDropdown);
 
             c.Bind("auto_attack", &model.autoAttack);
             c.Bind("auto_attack_label", &model.autoAttackLabel);
@@ -244,12 +264,15 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("resolution_labels", &model.resolutionLabels);
             c.Bind("resolution_index", &model.resolutionIndex);
             c.Bind("resolution_row_label", &model.resolutionRowLabel);
+            c.Bind("resolution_value_label", &model.resolutionValueLabel);
             c.Bind("language_labels", &model.languageLabels);
             c.Bind("language_index", &model.languageIndex);
             c.Bind("language_row_label", &model.languageRowLabel);
+            c.Bind("language_value_label", &model.languageValueLabel);
             c.Bind("font_labels", &model.fontLabels);
             c.Bind("font_index", &model.fontIndex);
             c.Bind("font_row_label", &model.fontRowLabel);
+            c.Bind("font_value_label", &model.fontValueLabel);
 
             // Video tab additions.
             c.Bind("vsync_enabled", &model.vsyncEnabled);
@@ -257,6 +280,7 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("fps_cap_labels", &model.fpsCapLabels);
             c.Bind("fps_cap_index", &model.fpsCapIndex);
             c.Bind("fps_cap_row_label", &model.fpsCapRowLabel);
+            c.Bind("fps_cap_value_label", &model.fpsCapValueLabel);
 
             // Graphics tab -- DXP-23's per-system effect-cost toggles.
             c.Bind("disable_effects", &model.disableEffects);
@@ -278,6 +302,7 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("theme_labels", &model.themeLabels);
             c.Bind("theme_index", &model.themeIndex);
             c.Bind("theme_row_label", &model.themeRowLabel);
+            c.Bind("theme_value_label", &model.themeValueLabel);
 
             c.BindEventCallback("option_select_tab",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -320,33 +345,25 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
                     if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
                         RmlRenderLevelChanged(std::atoi(control->GetValue().c_str()));
                 });
-            c.BindEventCallback("option_resolution_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+            // .option-dropdown custom control (replaces the resolution/language/font/fps-cap/theme
+            // native <select>s, see model.openDropdown's own comment) -- one shared toggle callback
+            // and one shared option-click callback, dispatching by dropdownId rather than one pair
+            // of callbacks per dropdown.
+            c.BindEventCallback("option_toggle_dropdown",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                 {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlResolutionChanged(std::atoi(control->GetValue().c_str()));
+                    if (arguments.size() == 1)
+                        RmlToggleDropdown(arguments[0].Get<int>(-1));
                 });
-            c.BindEventCallback("option_language_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
+            c.BindEventCallback("option_dropdown_option_click",
+                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
                 {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlLanguageChanged(std::atoi(control->GetValue().c_str()));
-                });
-            c.BindEventCallback("option_font_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
-                {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlFontChanged(std::atoi(control->GetValue().c_str()));
+                    if (arguments.size() == 2)
+                        RmlDropdownOptionClick(arguments[0].Get<int>(-1), arguments[1].Get<int>(-1));
                 });
 
             c.BindEventCallback("option_toggle_vsync",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleVsync(); });
-            c.BindEventCallback("option_fps_cap_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
-                {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlFpsCapChanged(std::atoi(control->GetValue().c_str()));
-                });
 
             c.BindEventCallback("option_toggle_disable_effects",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleDisableEffects(); });
@@ -363,15 +380,7 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowFpsCounter(); });
             c.BindEventCallback("option_toggle_show_debug_info",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlToggleShowDebugInfo(); });
-            c.BindEventCallback("option_theme_changed",
-                [this](Rml::DataModelHandle, Rml::Event& ev, const Rml::VariantList&)
-                {
-                    if (auto* control = rmlui_dynamic_cast<Rml::ElementFormControl*>(ev.GetTargetElement()))
-                        RmlThemeChanged(std::atoi(control->GetValue().c_str()));
-                });
 
-            c.BindEventCallback("option_click_close",
-                [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
         });
 
     (void)modelCreated;
@@ -383,12 +392,24 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
         "Data/Interface/RmlUi/option_window.rml");
     m_pPanelEl = m_pRmlDoc ? m_pRmlDoc->GetElementById("panel") : nullptr;
 
-    // Close button parses inside #content (window_shell's only splice target, see
-    // option_window.rml's own comment) but belongs outside it, a direct #panel child like
-    // generic_confirm_dialog.rcss's own buttons -- move it into window_shell's shared footer
-    // anchor now that the document (and its data bindings) are fully loaded.
+    // Built directly here, not as option_window.rml markup -- a direct #panel child like
+    // generic_confirm_dialog.rcss's own buttons, living in window_shell's shared footer anchor
+    // (a sibling of #content, since #content is window_shell's only splice target and this button
+    // must sit outside it). Previously authored as `{{close_label}}` RML markup and moved into the
+    // footer post-load via UI::RmlBridge::PromoteToWindowShellFooter() -- reverted, see
+    // m_pCloseButtonEl's own comment in OptionWindow.h for why that never rendered its label.
+    m_pCloseButtonEl = nullptr;
     if (m_pRmlDoc)
-        UI::RmlBridge::PromoteToWindowShellFooter(m_pRmlDoc, "option_close_btn");
+    {
+        if (Rml::Element* footer = m_pRmlDoc->GetElementById("window_shell_footer"))
+        {
+            Rml::ElementPtr btn = m_pRmlDoc->CreateElement("div");
+            m_pCloseButtonEl = footer->AppendChild(std::move(btn));
+            m_pCloseButtonEl->SetClassNames("btn btn-cancel option-close-btn");
+            m_pCloseButtonEl->AddEventListener(Rml::EventId::Click, new ClickListener([this]() { RmlClickClose(); }));
+        }
+    }
+    m_lastCloseButtonLabel.clear();
 }
 
 void mu::ui::window::COptionWindow::InitResolutionCombo()
@@ -626,6 +647,32 @@ void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
     PlayBuffer(SOUND_CLICK01);
 }
 
+void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
+{
+    if (dropdownId < 0 || dropdownId > 4)
+        return;
+    // Toggle: clicking the currently-open one's own value box closes it; clicking any other
+    // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
+    // was open as a side effect -- see model.openDropdown's own comment for why a single field
+    // gives exclusivity for free.
+    m_iOpenDropdown = (m_iOpenDropdown == dropdownId) ? -1 : dropdownId;
+    PlayBuffer(SOUND_CLICK01);
+}
+
+void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int optionIndex)
+{
+    switch (dropdownId)
+    {
+    case 0: RmlResolutionChanged(optionIndex); break;
+    case 1: RmlFpsCapChanged(optionIndex); break;
+    case 2: RmlThemeChanged(optionIndex); break;
+    case 3: RmlLanguageChanged(optionIndex); break;
+    case 4: RmlFontChanged(optionIndex); break;
+    default: break;
+    }
+    m_iOpenDropdown = -1;
+}
+
 void mu::ui::window::COptionWindow::RmlToggleAutoAttack()
 {
     m_bAutoAttack = !m_bAutoAttack;
@@ -671,14 +718,11 @@ void mu::ui::window::COptionWindow::RmlRenderLevelChanged(int value)
 
 void mu::ui::window::COptionWindow::RmlResolutionChanged(int index)
 {
-    // WidgetDropDown (RmlUi's native <select> backing class) can re-fire "change" a few times of
-    // its own accord while it settles its data-for option list against the freshly-populated
-    // data-value index -- observed in practice to land on the wrong (smallest/first-listed)
-    // option and force the real window down to it, even though m_iResolutionIndex already held
-    // the correct value at that point (so the old "no-op if unchanged" guard alone didn't catch
-    // it: the spurious index and the correct one legitimately differ). No real user input can
-    // land here this early -- the window isn't even shown until well after boot -- so ignore
-    // every change callback until the settle window has elapsed (m_rmlSyncCount's own comment).
+    // Only ever called from RmlDropdownOptionClick(), itself only reachable from an explicit
+    // option click -- no self-firing spurious-event risk the way RmlUi's native <select>
+    // (WidgetDropDown) had (this settle-frame guard predates the custom-dropdown rewrite, kept as
+    // a harmless no-op-this-early safety net rather than removed, see m_rmlSyncCount's own
+    // comment).
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
     if (index < 0 || index >= static_cast<int>(m_resolutions.size()))
@@ -691,7 +735,7 @@ void mu::ui::window::COptionWindow::RmlResolutionChanged(int index)
 
 void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
 {
-    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
     if (index < 0 || index >= s_NumLanguages)
@@ -702,7 +746,7 @@ void mu::ui::window::COptionWindow::RmlLanguageChanged(int index)
 
 void mu::ui::window::COptionWindow::RmlFontChanged(int index)
 {
-    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
     if (index < 0 || index >= s_NumFonts)
@@ -721,7 +765,7 @@ void mu::ui::window::COptionWindow::RmlToggleVsync()
 
 void mu::ui::window::COptionWindow::RmlFpsCapChanged(int index)
 {
-    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
     if (index < 0 || index >= s_NumFpsCapValues)
@@ -794,7 +838,7 @@ void mu::ui::window::COptionWindow::RmlToggleShowDebugInfo()
 
 void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
 {
-    // See RmlResolutionChanged's own comment -- same <select> settle race applies here.
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
     if (m_rmlSyncCount < kRmlSelectSettleFrames)
         return;
     if (index < 0 || index > 1)
@@ -804,7 +848,8 @@ void mu::ui::window::COptionWindow::RmlThemeChanged(int index)
 
     // Deferred to Update() -- see m_bPendingThemeSwitch's own comment (OptionWindow.h) for why
     // this can't run synchronously here: it would destroy m_pRmlDoc mid-dispatch of the very
-    // <select> "change" event that called this.
+    // dropdown-option click event that called this (RmlDropdownOptionClick(), itself invoked from
+    // a data-event-click on one of the option divs this document is about to unload).
     m_iPendingThemeIndex = index;
     m_bPendingThemeSwitch = true;
 }
@@ -1052,6 +1097,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
 
     // Diffed first, matching MyQuestInfoWindow::SyncRmlModel()'s own ordering for its activeTab.
     if (model.activeTab != m_iActiveTab) { model.activeTab = m_iActiveTab; m_RmlBinder.MarkDirty("active_tab"); }
+    if (model.openDropdown != m_iOpenDropdown) { model.openDropdown = m_iOpenDropdown; m_RmlBinder.MarkDirty("open_dropdown"); }
 
     // Re-fetched every sync, not just once at BuildRmlUi() time -- native re-rendered every one of
     // these from the live I18N::Game::* pointer every frame, so a language switch made from this
@@ -1065,8 +1111,30 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
             m_RmlBinder.MarkDirty(fieldName);
         }
     };
+    // .option-dropdown's own closed-state box shows this instead of a {{}} array-index expression
+    // -- see model.resolutionValueLabel's own comment (OptionWindow.h) for why.
+    const auto syncDropdownValue = [this](Rml::String& field, const char* fieldName,
+                                            const std::vector<Rml::String>& labels, int index)
+    {
+        const Rml::String value =
+            (index >= 0 && index < static_cast<int>(labels.size())) ? labels[index] : Rml::String();
+        if (field != value)
+        {
+            field = value;
+            m_RmlBinder.MarkDirty(fieldName);
+        }
+    };
     syncLabel(model.title, "title", I18N::Game::Option385);
-    syncLabel(model.closeLabel, "close_label", I18N::Game::Close);
+    // Imperative, not a bound field -- see m_pCloseButtonEl's own comment for why.
+    if (m_pCloseButtonEl)
+    {
+        const Rml::String closeLabelText = StringUtils::WideToNarrow(I18N::Game::Close);
+        if (m_lastCloseButtonLabel != closeLabelText)
+        {
+            m_lastCloseButtonLabel = closeLabelText;
+            m_pCloseButtonEl->SetInnerRML(closeLabelText);
+        }
+    }
     syncLabel(model.tabGameplayLabel, "tab_gameplay_label", I18N::Game::Gameplay);
     syncLabel(model.tabAudioLabel, "tab_audio_label", I18N::Game::Audio);
     syncLabel(model.tabVideoLabel, "tab_video_label", I18N::Game::Video);
@@ -1120,6 +1188,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("resolution_labels");
     }
     if (model.resolutionIndex != m_iResolutionIndex) { model.resolutionIndex = m_iResolutionIndex; m_RmlBinder.MarkDirty("resolution_index"); }
+    syncDropdownValue(model.resolutionValueLabel, "resolution_value_label", model.resolutionLabels, model.resolutionIndex);
 
     if (model.languageLabels.empty())
     {
@@ -1129,6 +1198,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("language_labels");
     }
     if (model.languageIndex != m_iLanguageIndex) { model.languageIndex = m_iLanguageIndex; m_RmlBinder.MarkDirty("language_index"); }
+    syncDropdownValue(model.languageValueLabel, "language_value_label", model.languageLabels, model.languageIndex);
 
     // Rebuilt every sync (not just once) so the localized "Default" entry follows a live language
     // switch, same as native's own GetFontLabels().
@@ -1143,6 +1213,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("font_labels");
     }
     if (model.fontIndex != m_iFontIndex) { model.fontIndex = m_iFontIndex; m_RmlBinder.MarkDirty("font_index"); }
+    syncDropdownValue(model.fontValueLabel, "font_value_label", model.fontLabels, model.fontIndex);
 
     if (model.vsyncEnabled != m_bVsyncEnabled) { model.vsyncEnabled = m_bVsyncEnabled; m_RmlBinder.MarkDirty("vsync_enabled"); }
 
@@ -1162,6 +1233,7 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("fps_cap_labels");
     }
     if (model.fpsCapIndex != m_iFpsCapIndex) { model.fpsCapIndex = m_iFpsCapIndex; m_RmlBinder.MarkDirty("fps_cap_index"); }
+    syncDropdownValue(model.fpsCapValueLabel, "fps_cap_value_label", model.fpsCapLabels, model.fpsCapIndex);
 
     if (model.disableEffects != m_bDisableEffects) { model.disableEffects = m_bDisableEffects; m_RmlBinder.MarkDirty("disable_effects"); }
     if (model.disableParticles != m_bDisableParticles) { model.disableParticles = m_bDisableParticles; m_RmlBinder.MarkDirty("disable_particles"); }
@@ -1188,4 +1260,5 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
         m_RmlBinder.MarkDirty("theme_labels");
     }
     if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlBinder.MarkDirty("theme_index"); }
+    syncDropdownValue(model.themeValueLabel, "theme_value_label", model.themeLabels, model.themeIndex);
 }
