@@ -24,7 +24,7 @@
     {
       "name": "windows-x86",
       "displayName": "Windows x86",
-      "description": "Standard build without editor features",
+      "description": "Player build: no editor, no control socket",
       "inherits": "windows-base",
       "architecture": {
         "value": "x86",
@@ -33,6 +33,7 @@
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
+        "ENABLE_CONTROL_SOCKET": "OFF",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
         "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
@@ -40,7 +41,7 @@
     {
       "name": "windows-x86-mueditor",
       "displayName": "Windows x86 MuEditor",
-      "description": "Build with editor features",
+      "description": "Developer build: editor features and the control socket for scripted clients",
       "inherits": "windows-base",
       "architecture": {
         "value": "x86",
@@ -49,6 +50,7 @@
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "ON",
+        "ENABLE_CONTROL_SOCKET": "ON",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x86.cmake",
         "VCPKG_TARGET_TRIPLET": "x86-windows"
       }
@@ -56,7 +58,7 @@
     {
       "name": "windows-x64",
       "displayName": "Windows x64",
-      "description": "Standard build without editor features",
+      "description": "Player build: no editor, no control socket",
       "inherits": "windows-base",
       "architecture": {
         "value": "x64",
@@ -65,6 +67,7 @@
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "OFF",
+        "ENABLE_CONTROL_SOCKET": "OFF",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
@@ -72,7 +75,7 @@
     {
       "name": "windows-x64-mueditor",
       "displayName": "Windows x64 MuEditor",
-      "description": "Build with editor features",
+      "description": "Developer build: editor features and the control socket for scripted clients",
       "inherits": "windows-base",
       "architecture": {
         "value": "x64",
@@ -81,6 +84,7 @@
       "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
       "cacheVariables": {
         "ENABLE_EDITOR": "ON",
+        "ENABLE_CONTROL_SOCKET": "ON",
         "VCPKG_CHAINLOAD_TOOLCHAIN_FILE": "${sourceDir}/toolchain-x64.cmake",
         "VCPKG_TARGET_TRIPLET": "x64-windows"
       }
@@ -104,11 +108,22 @@
     {
       "name": "linux-x64",
       "displayName": "Linux x86_64",
-      "description": "Native Linux x64 build — full build target, must compile and pass tests",
+      "description": "Native Linux x64 player build (no editor, no control socket) — full build target, must compile and pass tests",
       "inherits": "linux-base",
       "toolchainFile": "${sourceDir}/cmake/toolchains/linux-x64.cmake",
       "cacheVariables": {
-        "ENABLE_EDITOR": "OFF"
+        "ENABLE_EDITOR": "OFF",
+        "ENABLE_CONTROL_SOCKET": "OFF"
+      }
+    },
+    {
+      "name": "linux-x64-mueditor",
+      "displayName": "Linux x86_64 MuEditor",
+      "description": "Native Linux x64 developer build: editor features and the control socket — also the compile database that lets clangd index src/MuEditor and App/Control",
+      "inherits": "linux-x64",
+      "cacheVariables": {
+        "ENABLE_EDITOR": "ON",
+        "ENABLE_CONTROL_SOCKET": "ON"
       }
     },
     {
@@ -130,11 +145,12 @@
     {
       "name": "macos-arm64",
       "displayName": "macOS arm64",
-      "description": "Native macOS Apple Silicon build — full build target, must compile and pass tests",
+      "description": "Native macOS Apple Silicon player build (no editor, no control socket) — full build target, must compile and pass tests",
       "inherits": "macos-base",
       "toolchainFile": "${sourceDir}/cmake/toolchains/macos-arm64.cmake",
       "cacheVariables": {
-        "ENABLE_EDITOR": "OFF"
+        "ENABLE_EDITOR": "OFF",
+        "ENABLE_CONTROL_SOCKET": "OFF"
       }
     }
   ],
@@ -197,6 +213,18 @@
       "name": "linux-x64-release",
       "displayName": "Linux x64 Release",
       "configurePreset": "linux-x64",
+      "configuration": "Release"
+    },
+    {
+      "name": "linux-x64-mueditor-debug",
+      "displayName": "Linux x64 MuEditor Debug",
+      "configurePreset": "linux-x64-mueditor",
+      "configuration": "Debug"
+    },
+    {
+      "name": "linux-x64-mueditor-release",
+      "displayName": "Linux x64 MuEditor Release",
+      "configurePreset": "linux-x64-mueditor",
       "configuration": "Release"
     },
     {

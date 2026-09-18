@@ -34,6 +34,11 @@ public:
 
     void ConnectConnectionServer();
 
+    // Sends a login without touching the text boxes or the remembered
+    // credentials in config.ini. The manual path calls it after validating
+    // what the player typed; automation calls it directly.
+    void SubmitCredentials(const wchar_t* pszUsername, const wchar_t* pszPassword);
+
     CUITextInputBox* GetUsernameInputBox() const
     {
         return m_pUsernameInputBox;

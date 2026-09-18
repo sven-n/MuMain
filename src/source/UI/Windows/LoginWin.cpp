@@ -390,27 +390,41 @@ void CLoginWin::RequestLogin()
         CUIMng::Instance().PopUpMsgWin(MESSAGE_INPUT_PASSWORD);
     else
     {
-        if (CurrentProtocolState == RECEIVE_JOIN_SERVER_SUCCESS)
-        {
-            g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", m_Username);
-
-            g_ErrorReport.Write(L"> Login Request.\r\n");
-            g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", m_Username);
-
-            LogIn = 1;
-            wcscpy(LogInID, (m_Username));
-            CurrentProtocolState = REQUEST_LOG_IN;
-
-            SocketClient->ToGameServer()->SendLogin(m_Username, m_Password, Version, Serial);
-
-            // Keep the credentials in memory so auto-reconnect can re-login
-            // without prompting after an in-game disconnect.
-            ReconnectManager::Instance().CacheCredentials(m_Username, m_Password);
-
-            g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, SEASON3B::TYPE_SYSTEM_MESSAGE);
-            g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
-        }
+        SubmitCredentials(m_Username, m_Password);
     }
+}
+
+void CLoginWin::SubmitCredentials(const wchar_t* pszUsername, const wchar_t* pszPassword)
+{
+    if (CurrentProtocolState != RECEIVE_JOIN_SERVER_SUCCESS)
+        return;
+
+    if (pszUsername == nullptr || pszPassword == nullptr)
+        return;
+
+    // Put the login screen away before the request goes out. The manual path
+    // hides it on the click; a caller that submits credentials directly must
+    // not leave it up, or its text fields keep the keyboard focus and no key
+    // reaches the game afterwards. Hiding an already hidden window is a no-op.
+    CUIMng::Instance().HideWin(this);
+
+    g_ConsoleDebug->Write(MCD_NORMAL, L"Login with the following account: %ls", pszUsername);
+
+    g_ErrorReport.Write(L"> Login Request.\r\n");
+    g_ErrorReport.Write(L"> Try to Login \"%ls\"\r\n", pszUsername);
+
+    LogIn = 1;
+    wcscpy(LogInID, pszUsername);
+    CurrentProtocolState = REQUEST_LOG_IN;
+
+    SocketClient->ToGameServer()->SendLogin(pszUsername, pszPassword, Version, Serial);
+
+    // Keep the credentials in memory so auto-reconnect can re-login
+    // without prompting after an in-game disconnect.
+    ReconnectManager::Instance().CacheCredentials(pszUsername, pszPassword);
+
+    g_pSystemLogBox->AddText(I18N::Game::VerifyingYourAccount, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
 }
 
 void CLoginWin::CancelLogin()

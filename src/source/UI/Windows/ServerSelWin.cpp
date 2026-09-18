@@ -434,19 +434,7 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
 
             if (pServerInfo->m_iPercent < 100)
             {
-                CUIMng::Instance().HideWin(this);
-
-                SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
-                g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, SEASON3B::TYPE_SYSTEM_MESSAGE);
-                g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
-
-                //if (m_pSelectServerGroup->m_iSequence == 0)
-                //{
-                //    bTestServer = true;
-                //}
-
-                g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex, pServerInfo->m_byNonPvP);
-
+                ConnectToServer(pServerInfo);
                 break;
             }
             else if (pServerInfo->m_iPercent < 128)
@@ -455,6 +443,64 @@ void CServerSelWin::UpdateWhileActive(double dDeltaTick)
             }
         }
     }
+}
+
+bool CServerSelWin::ConnectToServer(CServerInfo* pServerInfo)
+{
+    if (pServerInfo == NULL || m_pSelectServerGroup == NULL)
+        return false;
+
+    CUIMng::Instance().HideWin(this);
+
+    SocketClient->ToConnectServer()->SendConnectionInfoRequest(static_cast<uint16_t>(pServerInfo->m_iConnectIndex));
+    g_pSystemLogBox->AddText(I18N::Game::ConnectingToTheServer, SEASON3B::TYPE_SYSTEM_MESSAGE);
+    g_pSystemLogBox->AddText(I18N::Game::PleaseWait, SEASON3B::TYPE_SYSTEM_MESSAGE);
+
+    g_ServerListManager->SetSelectServerInfo(m_pSelectServerGroup->m_szName, pServerInfo->m_iIndex,
+                                             pServerInfo->m_byNonPvP);
+
+    return true;
+}
+
+bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
+{
+    CServerGroup* pChosenGroup = NULL;
+    CServerGroup* pServerGroup = NULL;
+
+    g_ServerListManager->SetFirst();
+    while (g_ServerListManager->GetNext(pServerGroup))
+    {
+        const bool bWanted = (groupName == NULL || groupName[0] == L'\0')
+                                 ? (pChosenGroup == NULL)
+                                 : (wcscmp(pServerGroup->m_szName, groupName) == 0);
+        if (bWanted)
+        {
+            pChosenGroup = pServerGroup;
+            if (groupName != NULL && groupName[0] != L'\0')
+                break;
+        }
+    }
+
+    if (pChosenGroup == NULL)
+        return false;
+
+    // Same two steps the click path takes: mark the group, rebuild its server
+    // buttons, then connect to the chosen server.
+    if (m_iSelectServerBtnIndex != -1)
+        m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
+
+    m_iSelectServerBtnIndex = pChosenGroup->m_iBtnPos;
+    m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
+    UpdateDisplay();
+
+    if (m_pSelectServerGroup == NULL)
+        return false;
+
+    CServerInfo* pServerInfo = m_pSelectServerGroup->GetServerInfo(serverIndex);
+    if (pServerInfo == NULL || pServerInfo->m_iPercent >= 100)
+        return false;
+
+    return ConnectToServer(pServerInfo);
 }
 
 void CServerSelWin::RenderControls()
