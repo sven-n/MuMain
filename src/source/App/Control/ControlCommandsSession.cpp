@@ -59,7 +59,8 @@ json CharacterList()
         }
 
         json character;
-        character["slot"] = slot;
+        // Slots are reported as `select-char --slot` counts them, from 1.
+        character["slot"] = slot + 1;
         character["name"] = Core::Text::ToUtf8(name);
         character["level"] = Scenes::CharacterLevelInSlot(slot);
         characters.push_back(std::move(character));
