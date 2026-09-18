@@ -1,0 +1,96 @@
+/* Modern theme for CPurchaseShopInventory's chrome -- header/nameplate-strip/warning-text/exit
+   button are vector forged-metal chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-
+   dialog language). Inventory grid stays fully native (sprite art + live 3D icons), same as
+   legacy -- no RmlUi involvement there. No gold wallet strip -- this window shows no Zen total
+   (same as StorageExt, the other gold-less window in this family). */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:7/height:29 -- rail ends at 36px. The nameplate strip below (.pshop-title-strip) runs
+   44-70px, and the native grid starts at `m_Pos.y + 90` (PurchaseShopInventory.cpp's
+   CInventoryCtrl::Create() call) -- 20px clear after the strip. top:7 (same as MyInventory's own
+   rail top) keeps .modern-joint-px's rivet at -1px, inside purchase_shop_bg.rcss's
+   .inv-shell-edge at -3px -- same contained relationship as StorageExt/MyInventory. */
+.pshop-header-rail {
+	top: 7px;
+	height: 29px;
+}
+
+/* Nameplate strip for the dynamic shop-owner name -- native's separate text row (RenderTextInfo(),
+   PurchaseShopInventory.cpp) painted over IMAGE_MYSHOPINVENTORY_EDIT's sprite; here a plain vector
+   strip using the same metal-rail gradient as the header above. Sits between the header rail
+   (ends 36px) and the native grid (starts 90px). */
+.pshop-title-strip {
+	position: absolute;
+	left: 12px;
+	top: 44px;
+	width: 166px;
+	height: 26px;
+	pointer-events: none;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 10), transparent 30%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1px;
+	border-color: token(border-rail);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 15),
+		inset 0 -1px 0 #000000;
+}
+.pshop-title-strip-text {
+	position: absolute;
+	left: 0;
+	top: 6px;
+	width: 166px;
+	text-align: center;
+	color: token(text-warm);
+	font-family: "token(font-title)";
+	font-weight: 500;
+	font-size: 12px;
+	font-effect: shadow(0px 1px #000000);
+	pointer-events: none;
+}
+
+/* Static warning notice below the grid -- semantic red/gold match legacy exactly (meaning, not
+   theme palette), same convention as my_inventory.rcss's tt-line colors. */
+.warning-label, .warning-label-2 {
+	position: absolute;
+	left: 30px;
+	color: #ff2d2f;
+	font-weight: bold;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.warning-label { top: 230px; }
+.warning-line {
+	position: absolute;
+	left: 30px;
+	color: #f7ce4d;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.line-1 { top: 250px; }
+.line-2 { top: 262px; }
+.line-3 { top: 274px; }
+.line-4 { top: 286px; }
+.line-5 { top: 298px; }
+.line-6 { top: 320px; }
+.line-7 { top: 332px; }
+
+/* Single exit button, centered: (190-37)/2. */
+.pshop-btn-exit {
+	left: 77px;
+	color: #d59b79;
+	border-color: #5c382b;
+}

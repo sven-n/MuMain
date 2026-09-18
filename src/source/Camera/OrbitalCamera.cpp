@@ -7,7 +7,7 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include <cmath>
 
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "UI/Scaling/UITransform.h"
 #include "Data/GameConfig/GameConfig.h"
 #include "CameraDebugLog.h"

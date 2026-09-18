@@ -1,0 +1,47 @@
+<rml>
+<head>
+	<title>Generic Menu Dialog</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="generic_menu_dialog.rcss"/>
+	<link type="text/template" href="window_shell.rml"/>
+</head>
+<!-- Sibling primitive to generic_confirm_dialog.rml -- see GenericMenuDialog.h's own class
+     comment for why this is a separate primitive (arbitrary N-button list vs two fixed named
+     buttons) and why it's a single document, unlike generic_confirm_dialog's fg/bg split (no
+     item3D here, so no compositing-order problem to solve).
+
+     This is legacy's own markup in practice -- modern has its own complete fork
+     (themes/modern/generic_menu_dialog.rml). Keep ids/data-model/event names in sync,
+     GenericMenuDialog.cpp binds both by name.
+
+     Frame/border/header chrome now lives entirely in window_shell.rml (see its own comment) --
+     this document supplies only its own content, spliced into that template's #content slot. -->
+<body template="window_shell" data-model="generic_menu_dialog">
+	<div class="gmd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+	<!-- No explicit column count -- .gmd-button-row's own flex-wrap lets the button count/width
+	     and the row's available space determine layout, same technique the numeric-keypad grid in
+	     generic_confirm_dialog.rcss already proves. Every native consumer's own fixed 128dp button
+	     width only ever fits one per row here, so this naturally reproduces their single-column
+	     stack with no config knob needed. -->
+	<div class="gmd-button-row">
+		<!-- it_index (RmlUi's own data-for loop variable) passed straight into the click handler
+		     -- proven pattern, see char_make.rml's job-select buttons for the original precedent.
+		     gmd-button-cell wraps each button together with its own optional description lines
+		     (button.lines, a nested data-for -- RmlUi re-parses each outer iteration's own inner
+		     RML, so the inner loop and the outer button/it_index aliases both resolve normally) so
+		     text that describes one specific button (e.g. CChaosMixMenuMsgBox's per-recipe blurb)
+		     renders directly above that button instead of bunched into the shared summary above. -->
+		<div class="gmd-button-cell" data-for="button : buttons" data-class-compact="button.compact" data-class-has-lines="button.has_lines" data-class-cols-2="button.cols2">
+			<div class="gmd-line" data-for="line : button.lines" data-class-bold="line.bold">{{line.text}}</div>
+			<div class="btn gmd-btn" data-class-compact="button.compact" data-class-cols-2="button.cols2" data-class-disabled="!button.enabled"
+			     data-event-click="gmd_button_click(it_index)">
+				<!-- Label text lives in its own element rather than raw text directly in
+				     .gmd-btn -- see generic_menu_dialog.rcss's own .gmd-btn.cols-2 comment
+				     for why (a decorator change, not a markup requirement of its own). -->
+				<div class="gmd-btn-label">{{button.label}}</div>
+				<span class="gmd-tooltip" data-class-hidden="!button.has_tooltip">{{button.tooltip}}</span>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

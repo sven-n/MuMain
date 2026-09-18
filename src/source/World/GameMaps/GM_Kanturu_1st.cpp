@@ -11,7 +11,7 @@
 #include "Engine/AI/ZzzAI.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Engine/Object/ZzzOpenData.h"
 #include "Render/Effects/ZzzEffect.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"

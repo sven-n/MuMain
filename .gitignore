@@ -37,6 +37,11 @@ build-linux/
 # Bundled UI fonts (curated, shipped with the client) are source-controlled.
 !**/bin/fonts/
 !**/bin/fonts/**
+# RmlUi UI content (RML/RCSS documents and themes) is authored source, not build output.
+!src/bin/Data/
+!src/bin/Data/Interface/
+!src/bin/Data/Interface/RmlUi/
+!src/bin/Data/Interface/RmlUi/**
 **/obj/
 *.user
 *.suo

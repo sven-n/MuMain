@@ -486,7 +486,7 @@ void CMuEditorCore::Update()
         // Process input blocking for editor UI (keyboard)
         g_MuInputBlockerCore.ProcessInputBlocking();
 
-        // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in NewUICommon.cpp
+        // Note: Keyboard blocking is now handled in ScanAsyncKeyState() in WindowCommon.cpp
         // It prevents the game from scanning keyboard state when ImGui wants to capture it
     }
 }
@@ -555,7 +555,7 @@ void CMuEditorCore::Render()
     }
 #endif
 
-    // Finalize draw data. Task 4.2 uploads and renders it inside the engine's
+    // Finalize draw data. A later step uploads and renders it inside the engine's
     // existing SDL GPU pass; starting another pass here would break ownership.
     ImGui::Render();
     m_bDrawDataReady = true;

@@ -1,0 +1,338 @@
+/* Modern theme's option (settings) window content -- frame/header/positioning come from
+   window_shell.rcss; this file only lays out the rows spliced into its #content slot.
+
+   #panel is a genuine real-dp size, NOT native COptionWindow's own reference-resolution rect
+   (190x419) -- this template assumes no resolution-based rescaling (layout-and-scaling.md's
+   "there isn't a reference resolution"), so copying native's reference-pixel constants here
+   produced a wildly oversized panel once combined with window_shell's own chrome (found the hard
+   way, see window_shell.rml's own comment on the reverted root_scale attempt). Unlike the legacy
+   theme's sprite-art chrome, this theme's frame is plain CSS gradients/borders with no fixed
+   source-art width to match, so it doesn't need to match the legacy #panel's own width (230dp,
+   locked to its sprite chrome's real size) -- 320dp here (widened from an earlier 300dp alongside
+   the font-size bump below, so the wider label column doesn't have to shrink the control column to
+   compensate) so the control column below can start nearer the row's own center, not just "wide
+   enough"; window_shell's own existing 14dp/side content margins are already generous, no override
+   needed the way legacy's 32dp/side shared margin needed one. Positioning is pure CSS
+   (.center-both) now that dragging is off, so this file alone owns the panel's size -- nothing
+   else mirrors it.
+
+   Height (294dp) mirrors legacy's own sizing math for the same reason: sized for the tallest tab
+   (Graphics, 6 checkbox rows: 6*24dp=144dp, at the 18dp row height below + 6dp margin-bottom) plus
+   the tab bar (~42dp: 26dp height + 8dp margin-top + 8dp margin-bottom, the margin-top widened
+   live to clear the header rail's own box-shadow bleed) and the always-visible close button block
+   (~38dp), inside window_shell.rcss's own titled-panel insets here (10dp top + padding-top 40dp +
+   16dp bottom = 66dp): 144+42+38+66=290dp minimum, +4dp buffer. Down from the original flat
+   single-column layout's 380dp now that content splits across tabs. */
+#panel {
+	width: 320dp;
+	height: 294dp;
+}
+
+/* One row of tab buttons -- back to flex (see history below); flex was never the actual problem.
+   Same "forged-metal" gradient+box-shadow recipe as base.rcss's own .btn/.btn:hover, minus .btn's
+   own fixed position:absolute/width/height so these can flex-size instead.
+
+   History: this text rendered as invisible through several structural rewrites -- flex item with
+   the decorator directly on it, flex item with the decorator isolated onto a separate non-flex
+   sibling child, then position:absolute with percentage widths matching .btn's own non-flex
+   structure exactly -- and stayed invisible through every one of them. The actual cause turned out
+   to be unrelated to all of that: this rule never set `font-family`, and unlike legacy (which sets
+   one document-wide default on #panel), this theme has NO fallback -- every other piece of visible
+   text in this document (the window title, row labels, selects, .btn itself) explicitly declares
+   its own font-family; this was the one place that never did, so it was rendering in RmlUi's own
+   unstyled/unloaded default font the whole time, through every otherwise-irrelevant layout
+   experiment. */
+.option-tab-row {
+	display: flex;
+	width: 100%;
+	height: 26dp;
+	margin-top: 8dp;
+	margin-bottom: 8dp;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+}
+.option-tab-btn {
+	flex: 1 1 0;
+	margin: 0 1.5dp;
+	height: 26dp;
+	line-height: 26dp;
+	text-align: center;
+	cursor: pointer;
+	pointer-events: auto;
+	font-family: "token(font-body)";
+	font-size: 10dp;
+	color: token(text-secondary);
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 10),
+		transparent 45%),
+		linear-gradient(to bottom, #26251d, #13140f 58%, #0a0b09);
+	border-width: 1dp;
+	border-color: #4a4738;
+	border-radius: token(radius-sm)dp;
+	box-shadow:
+		inset 0 1dp 0 rgba(232, 215, 168, 14),
+		inset 0 -1dp 0 #000000,
+		0 1dp 2dp rgba(0, 0, 0, 153);
+}
+.option-tab-btn:hover {
+	color: token(accent-gold-hover);
+	border-color: #776646;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 13),
+		transparent 45%),
+		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09);
+}
+/* Active: warm gold-metal shade (same bevel technique, .btn-ok's inverted-light-source-free
+   approach, just gold instead of crimson) so the selected tab reads as a distinct, different
+   metal, not just a recolored idle button. */
+.option-tab-btn.active-tab {
+	color: #171006;
+	background-color: token(accent-gold);
+	border-color: token(accent-gold-hover);
+	decorator: linear-gradient(to bottom,
+		rgba(255, 241, 199, 30),
+		transparent 45%),
+		linear-gradient(to bottom, token(accent-gold-hover), token(accent-gold) 58%, #6b5220);
+	box-shadow:
+		inset 0 1dp 0 rgba(255, 245, 214, 60),
+		inset 0 -1dp 0 rgba(0, 0, 0, 120),
+		0 1dp 3dp rgba(0, 0, 0, 153);
+}
+
+/* Each tab's row group -- a flex column of its own, same as #content itself, so its own rows
+   still stack top-to-bottom once spliced in. Needs the .hidden override below: this file loads
+   after base.rcss, so its own display:flex would otherwise tie with (and silently beat) base.rcss's
+   global .hidden{display:none} at equal specificity, leaving a "hidden" tab visibly rendered --
+   the exact bug window_shell.rcss's own .window-shell-header-rail.hidden rule already fixed once
+   for its header rail; same fix, same reason. */
+.option-tab-panel {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+.option-tab-panel.hidden {
+	display: none;
+}
+
+/* Each settings row is a small flex line inside window_shell's own flex-column #content -- native
+   used fixed per-row px offsets; this reproduces the same top-to-bottom order via normal flow
+   instead (architecture-principles.md's own guidance: traceable intent, not literal numbers). */
+.option-row {
+	position: relative;
+	width: 100%;
+	display: flex;
+	align-items: center;
+	flex-shrink: 0;
+	margin-bottom: 6dp;
+}
+.option-checkbox-row {
+	height: 18dp;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Not base.rcss's own .checkbox-label -- that's position:absolute, glyph-first (built for
+   login.rml's standalone checkboxes), which doesn't line up with a column of sibling rows. This
+   row uses .option-row-label (below) instead, label-first in the markup, same as every other row
+   type -- see option_window.rml's own comment. */
+.checkbox-box {
+	flex-shrink: 0;
+}
+/* Checkmark is a single 6x3 box with a left+bottom border rotated -45deg, same technique
+   login.rcss's own modern checkbox already proves -- positioned against .checkbox-box itself
+   (its containing block), unaffected by where that box sits within the row. */
+.checkbox-tick {
+	display: none;
+	position: absolute;
+	left: 2dp;
+	top: 1dp;
+	width: 6dp;
+	height: 3dp;
+	border-left: 2dp #171006;
+	border-bottom: 2dp #171006;
+	transform: rotate(-45deg);
+}
+.checkbox-box.checked .checkbox-tick {
+	display: block;
+}
+
+/* 148dp -- widened from 130dp alongside the 9dp->10dp font bump (see #panel's own comment on why:
+   reported live as smaller than this theme's own sibling windows). Puts the control column's own
+   start near the row's horizontal center (well width 292dp: 320dp panel - 14dp*2 margins) instead
+   of flush against the label. The two longest labels in this window were also shortened in
+   Game.en.resx (see legacy's own copy of this comment) -- kept in sync across both themes even
+   though modern's own wider well needed it less. New control width: 292-148=144dp. */
+.option-row-label {
+	width: 148dp;
+	flex-shrink: 0;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+	font-size: 10dp;
+	color: token(text-secondary);
+}
+
+.option-slider-row,
+.option-select-row {
+	height: 20dp;
+}
+
+/* First real use of RmlUi's native <input type="range"> in this codebase -- drives the same
+   WidgetSlider class as scrollbars, styled via the same slidertrack/sliderbar sub-elements
+   generic_confirm_dialog.rcss already proves render/receive-input correctly in this build. Arrow
+   sub-elements collapsed to 0 like that file's own scrollbar rule -- drag/click-only, matching
+   native's own slider affordance (no stepper buttons).
+
+   pointer-events: auto is required directly on this element, not just an ancestor -- same reason
+   generic_confirm_dialog.rcss's own .gcd-text-col states it explicitly right next to its
+   scrollbar rules: base.rcss's `body { pointer-events: none; }` inherits down to every descendant
+   that doesn't opt back in, and WidgetSlider's generated slidertrack/sliderbar are real DOM
+   children of THIS element (the <input> itself), inheriting whatever ITS OWN computed value is.
+   .window-shell-content resetting to auto further up the tree covers ordinary rows fine, but
+   leaving this un-stated here relies on that inheritance chain never getting interrupted anywhere
+   in between -- explicit here removes the doubt (found live: the slider never moved on drag). */
+.option-slider {
+	flex-grow: 1;
+	height: 12dp;
+	pointer-events: auto;
+}
+.option-slider slidertrack {
+	height: 4dp;
+	background-color: rgba(0, 0, 0, 140);
+	border-radius: token(radius-sm)dp;
+}
+.option-slider sliderbar {
+	width: 10dp;
+	decorator: linear-gradient(to bottom, token(accent-gold-hover), token(accent-gold));
+	border-radius: token(radius-sm)dp;
+}
+.option-slider sliderarrowdec,
+.option-slider sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+
+/* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first
+   (see option_window.rml's own comment for the full history) and never reliably worked in this
+   engine: the widget's own generated selectvalue/selectbox/selectarrow sub-elements need CSS this
+   theme never fully gave them (no `position` set programmatically the way WidgetSlider forces
+   `drag` on its own sub-elements), and even once styled, option clicks still didn't reliably reach
+   this window's own change callback. This reuses the exact data-for/data-class/data-event-click
+   mechanism .option-tab-btn above already proves reliable, plus a single shared
+   model.openDropdown field (OptionWindow.h) so opening one dropdown closes any other automatically
+   -- no separate exclusivity logic needed. position:relative so .option-dropdown-list's own
+   position:absolute (below) resolves against ITS box. */
+.option-dropdown {
+	position: relative;
+	flex-grow: 1;
+	height: 18dp;
+}
+.option-dropdown-value {
+	display: block;
+	width: 100%;
+	height: 100%;
+	padding: 0 4dp;
+	line-height: 18dp;
+	white-space: nowrap;
+	overflow: hidden;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: rgba(0, 0, 0, 140);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	border-radius: token(radius-sm)dp;
+	color: token(text-secondary);
+	font-family: "token(font-body)";
+	font-size: 10dp;
+}
+/* Floating popup -- top:100% (not a hardcoded dp offset) so it always sits flush under the value
+   box regardless of that row's own height. max-height+overflow-y:auto caps a long list
+   (Resolution has ~25 entries) with a real scrollbar instead of growing past the panel. Needs the
+   .hidden override below: this file loads after base.rcss, so its own display:block would
+   otherwise tie with (and silently beat) base.rcss's global .hidden{display:none} at equal
+   specificity -- same cascade-tie bug .option-tab-panel's own comment already covers.
+
+   z-index:1 -- without it, this absolutely-positioned popup paints/hit-tests at its own plain DOM
+   position among .option-row siblings, i.e. BEHIND whichever row comes later in markup order (an
+   .option-row without its own z-index just participates in normal top-to-bottom paint order, same
+   as any other sibling) -- found live: a dropdown opened above a lower row rendered behind it, and
+   clicking an option that visually overlapped a checkbox row actually triggered THAT checkbox
+   instead. RmlUi's own native <select> (WidgetDropDown.cpp) sets this same 1 on its generated
+   selectbox for the identical reason -- this is the custom-dropdown equivalent of that. */
+.option-dropdown-list {
+	display: block;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	width: 100%;
+	max-height: 90dp;
+	overflow-y: auto;
+	z-index: 1;
+	background-color: #0c0d0a;
+	border-width: 1dp;
+	border-color: token(border-frame);
+	pointer-events: auto;
+}
+.option-dropdown-list.hidden {
+	display: none;
+}
+/* Explicit scrollbar sizing, same reasoning generic_confirm_dialog.rcss's own .gcd-text-col
+   comment already gives for its own overflow:auto well -- an unstyled scrollbarvertical isn't
+   just visually wrong, its own (also unstyled) hit-test area can cover most/all of the option
+   row's width instead of a slim strip at the edge, silently swallowing clicks meant for the
+   option text beneath it as a scrollbar drag instead (found live: "clicking a value just scrolls
+   it"). Arrow buttons collapsed to 0, same drag/click-only affordance as every other scrollbar in
+   this codebase. */
+.option-dropdown-list scrollbarvertical {
+	width: 6dp;
+	margin: 0;
+}
+.option-dropdown-list scrollbarvertical slidertrack {
+	background-color: token(metal-rail-dark);
+}
+.option-dropdown-list scrollbarvertical sliderbar {
+	background-color: token(metal-edge);
+}
+.option-dropdown-list scrollbarvertical sliderbar:hover,
+.option-dropdown-list scrollbarvertical sliderbar:active {
+	background-color: token(metal-highlight);
+}
+.option-dropdown-list scrollbarvertical sliderarrowdec,
+.option-dropdown-list scrollbarvertical sliderarrowinc {
+	width: 0;
+	height: 0;
+}
+.option-dropdown-option {
+	display: block;
+	width: 100%;
+	padding: 2dp 4dp;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	color: token(text-secondary);
+	font-family: "token(font-body)";
+	font-size: 10dp;
+}
+.option-dropdown-option:hover {
+	color: token(accent-gold-hover);
+	background-color: token(surface-panel);
+}
+.option-dropdown-option.selected {
+	color: token(text-warm);
+	background-color: token(accent-steel);
+}
+
+/* Not authored in option_window.rml at all -- COptionWindow::BuildRmlUi() builds this element
+   directly in C++ inside window_shell.rml's own #window_shell_footer (a `{{close_label}}` version
+   of this div, moved into the footer after load, never rendered its label -- see
+   OptionWindow.h's own comment on m_pCloseButtonEl). .btn already defaults to position:absolute
+   (base.rcss) -- kept, not overridden to static, since the close button is meant to sit at a
+   FIXED spot regardless of which tab is active, not flow after whatever that tab's own last row
+   happens to be (found live: the button visibly jumped up or down depending on the active tab's
+   row count). bottom:0 here resolves against the footer's own box (window_shell.rcss's own
+   .window-shell-footer, itself position:absolute against #panel). left:50%+transform centers it
+   horizontally the same way .center-both does. */
+.option-close-btn {
+	left: 50%;
+	bottom: 0;
+	transform: translateX(-50%);
+}

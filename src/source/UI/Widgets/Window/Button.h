@@ -1,0 +1,497 @@
+
+#if !defined(AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_)
+#define AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_
+
+#pragma once
+
+#include "UI/Widgets/Window/Tooltip.h"
+#include "Render/Sprites/Sprite.h"
+
+namespace mu::ui::window
+{
+    enum BUTTON_STATE
+    {
+        BUTTON_STATE_UP = 0,
+        BUTTON_STATE_DOWN,
+        BUTTON_STATE_OVER,
+    };
+
+    enum RADIOGROUPEVENT
+    {
+        RADIOGROUPEVENT_NONE = -1,
+    };
+
+    struct ButtonInfo
+    {
+        int s_ImgIndex;
+        int s_BTstate;
+        unsigned int s_imgColor;
+        ButtonInfo() : s_ImgIndex(0), s_BTstate(0), s_imgColor(0xffffffff) { }
+    };
+
+    typedef std::map<int, ButtonInfo>  ButtonStateMap;
+
+    class CBaseButton
+    {
+    public:
+        CBaseButton();
+        virtual ~CBaseButton();
+
+    public:
+        void SetPos(const POINT& pos);
+        void SetSize(const POINT& size);
+        void SetPos(int x, int y);
+        void SetSize(int sx, int sy);
+
+    public:
+        const POINT& GetPos();
+        const POINT& GetSize();
+        const BUTTON_STATE GetBTState();
+
+    public:
+        void Lock();
+        void UnLock();
+        bool IsLock();
+
+    public:
+        bool RadioProcess();
+        bool Process();
+
+    protected:
+        // Shared CSprite-driven rendering for the state-indexed, vertically-stacked-frame image
+        // both CButton and CRadioButton draw. CSprite bakes scale/WindowHeight in at Create()
+        // time, so the sprite must be rebuilt whenever those go stale.
+        void RenderStateImage(int imgIndex, int frame, int frameCount, unsigned int color);
+
+    private:
+        // Hit-tests via WindowGeometry; built fresh from m_Pos/m_Size each call rather than cached.
+        bool IsMouseIn() const;
+
+        CSprite m_sprite;
+        int     m_spriteImgIndex = -1;
+        int     m_spriteFrameCount = -1;
+        POINT   m_spriteFrameSize{ 0, 0 };
+        unsigned int m_spriteWindowHeight = 0;
+        float   m_spriteScaleX = 0.0f;
+        float   m_spriteScaleY = 0.0f;
+
+    protected:
+        POINT					m_Pos;
+        POINT					m_Size;
+        BUTTON_STATE			m_EventState;
+        bool					m_Lock;
+    };
+
+    inline
+        void CBaseButton::SetPos(const POINT& pos)
+    {
+        m_Pos = pos;
+    }
+
+    inline
+        void CBaseButton::SetSize(const POINT& size)
+    {
+        m_Size = size;
+    }
+
+    inline
+        const POINT& CBaseButton::GetPos()
+    {
+        return m_Pos;
+    }
+
+    inline
+        const POINT& CBaseButton::GetSize()
+    {
+        return m_Size;
+    }
+
+    inline
+        const BUTTON_STATE CBaseButton::GetBTState()
+    {
+        return m_EventState;
+    }
+
+#ifndef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE			// #ifndef
+    inline
+        void CBaseButton::Lock()
+    {
+        m_Lock = true;
+    }
+
+    inline
+        void CBaseButton::UnLock()
+    {
+        m_Lock = false;
+    }
+#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
+
+    inline
+        bool CBaseButton::IsLock()
+    {
+        return m_Lock;
+    }
+
+    class CButton : public CBaseButton
+    {
+    public:
+        CButton();
+        virtual ~CButton();
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeButtonImgState(bool imgregister, int imgindex, bool overflg = false, bool isimgwidth = false, bool bClickEffect = false);
+
+#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeButtonImgState(bool imgregister, int imgindex,
+            bool overflg = false, bool isimgwidth = false);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeButtonInfo(int x, int y, int sx, int sy);
+
+    private:
+        void Initialize();
+        void Destroy();
+
+    public:
+        void RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate);
+        void UnRegisterButtonState();
+
+    public:
+        void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
+        void ChangeText(std::wstring btname);
+        // Slot overload: stores a pointer to an I18N variable so the label refreshes on locale change.
+        void ChangeText(const wchar_t* const* nameSlot);
+        void SetFont(HFONT hFont);
+
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeButtonState(BUTTON_STATE eventstate, int iButtonState);
+        void MoveTextPos(int iX, int iY);
+        void MoveTextTipPos(int iX, int iY);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+        void ChangeTextBackColor(const DWORD bcolor);
+        void ChangeTextColor(const DWORD color);
+
+        // Forwards to the owned CTooltip; kept as CButton's own method names for existing call sites.
+        void ChangeToolTipText(std::wstring tooltiptext, bool istoppos = false);
+        // Slot overload — see ChangeText(const wchar_t* const*).
+        void ChangeToolTipText(const wchar_t* const* tooltipSlot, bool istoppos = false);
+        void ChangeToolTipTextColor(const DWORD color);
+        void SetToolTipFont(HFONT hFont);
+
+        void ChangeImgWidth(bool isimgwidth);
+        void ChangeImgIndex(int imgindex, int curimgstate = 0);
+        void ChangeAlpha(unsigned char fAlpha, bool isfontalph = true);
+        void ChangeAlpha(float fAlpha, bool isfontalph = true);
+    public:
+        bool UpdateMouseEvent();
+
+    public:
+        bool Render(bool RendOption = false);
+
+    private:
+        void ChangeFrame();
+
+    private:
+        ButtonStateMap           m_ButtonInfo;
+
+    private:
+       std::wstring		m_Name;
+       // When set (by the slot overload of ChangeText), the cached string refreshes on locale change.
+       const wchar_t* const* m_pNameSlot = nullptr;
+       // Whether I18N::RegisterLocaleObserver has been called, so EnsureLocaleObserver is idempotent.
+       bool                  m_LocaleObserverRegistered = false;
+
+       // Owned tooltip; ChangeToolTipText()/etc. just forward into it.
+       CTooltip              m_tooltip;
+
+        HFONT					m_hTextFont;
+        DWORD					m_NameColor;
+        DWORD					m_NameBackColor;
+
+        int						m_CurImgIndex;
+        int						m_CurImgState;
+
+        WORD					m_ImgWidth;
+        WORD					m_ImgHeight;
+
+        unsigned int			m_CurImgColor;
+        bool                    m_IsImgWidth;
+
+        unsigned char			m_fAlpha;
+
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        bool					m_bClickEffect;
+        int						m_iMoveTextPosX;
+        int						m_iMoveTextPosY;
+        int						m_iMoveTextTipPosX;
+        int						m_iMoveTextTipPosY;
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+    private:
+        void EnsureLocaleObserver();
+        static void OnLocaleChanged(void* ctx) noexcept;
+    };
+
+    inline void CButton::ChangeImgWidth(bool isimgwidth)
+    {
+        m_IsImgWidth = isimgwidth;
+    }
+
+    inline void CButton::ChangeText(std::wstring btname)
+    {
+        // Drop any prior I18N slot binding so the locale observer won't clobber this literal string.
+        m_pNameSlot = nullptr;
+        m_Name = btname;
+    }
+
+    inline
+        void CButton::SetFont(HFONT hFont)
+    {
+        m_hTextFont = hFont;
+    }
+
+    inline
+        void CButton::ChangeTextBackColor(const DWORD bcolor)
+    {
+        m_NameBackColor = bcolor;
+    }
+
+    inline
+        void CButton::ChangeTextColor(const DWORD color)
+    {
+        m_NameColor = color;
+    }
+
+    inline
+        void CButton::ChangeToolTipText(std::wstring tooltiptext, bool istoppos)
+    {
+        m_tooltip.SetText(std::move(tooltiptext));
+        m_tooltip.SetAnchorAbove(istoppos);
+    }
+
+    inline
+        void CButton::SetToolTipFont(HFONT hFont)
+    {
+        m_tooltip.SetFont(hFont);
+    }
+
+    inline
+        void CButton::ChangeToolTipTextColor(const DWORD color)
+    {
+        m_tooltip.SetTextColor(color);
+    }
+
+    class CRadioButton : public CBaseButton
+    {
+    public:
+        CRadioButton();
+        virtual ~CRadioButton();
+
+    public:
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeRadioButtonImgState(int imgindex, bool isDown = false, bool bClickEffect = false);
+#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeRadioButtonImgState(int imgindex, bool isDown = false);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeRadioButtonInfo(int x, int y, int sx, int sy);
+        void ChangeFrame(BUTTON_STATE eventstate);
+
+    public:
+        void ChangeImgColor(BUTTON_STATE eventstate, unsigned int color);
+        void ChangeText(std::wstring btname);
+        // Slot overload — see CButton::ChangeText(const wchar_t* const*).
+        void ChangeText(const wchar_t* const* nameSlot);
+        void ChangeTextBackColor(const DWORD bcolor);
+        void ChangeTextColor(const DWORD color);
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeButtonState(BUTTON_STATE eventstate, int iButtonState);
+        void ChangeButtonState(int iImgIndex, BUTTON_STATE eventstate, int iButtonState);
+        void SetFont(HFONT hFont);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+    public:
+        void RegisterButtonState(BUTTON_STATE eventstate, int imgindex, int btstate);
+        void UnRegisterButtonState();
+
+    public:
+        bool UpdateMouseEvent(bool isGroupevent = false);
+
+    public:
+        bool Render();
+
+    private:
+        void ChangeImgIndex(int imgindex, int curimgstate = 0);
+        void ChangeFrame();
+        void Initialize();
+        void Destroy();
+
+    private:
+        ButtonStateMap           m_RadioButtonInfo;
+       std::wstring		 m_Name;
+       // See CButton::m_pNameSlot — same purpose for radio buttons.
+       const wchar_t* const* m_pNameSlot = nullptr;
+       bool                  m_LocaleObserverRegistered = false;
+
+        DWORD					m_NameColor;
+        DWORD					m_NameBackColor;
+        DWORD					m_CurImgIndex;
+        DWORD					m_CurImgState;
+        DWORD					m_ImgWidth;
+        DWORD					m_ImgHeight;
+        DWORD					m_CurImgColor;
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        HFONT					m_hTextFont;
+        bool					m_bClickEffect;
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+#ifdef KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
+        bool					m_bLockImage;
+#endif // KJH_MOD_RADIOBTN_MOUSE_OVER_IMAGE
+
+    private:
+        void EnsureLocaleObserver();
+        static void OnLocaleChanged(void* ctx) noexcept;
+    };
+
+    inline
+        void CRadioButton::ChangeText(std::wstring btname)
+    {
+        m_pNameSlot = nullptr;
+        m_Name = btname;
+    }
+
+    inline
+        void CRadioButton::ChangeTextBackColor(const DWORD bcolor)
+    {
+        m_NameBackColor = bcolor;
+    }
+
+    inline
+        void CRadioButton::ChangeTextColor(const DWORD color)
+    {
+        m_NameColor = color;
+    }
+
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+    inline
+        void CRadioButton::SetFont(HFONT hFont)
+    {
+        m_hTextFont = hFont;
+    }
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+    class CRadioGroupButton
+    {
+    public:
+        CRadioGroupButton();
+        virtual ~CRadioGroupButton();
+
+    public:
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void CreateRadioGroup(int radiocount, int imgindex, bool bClickEffect = false);
+        void ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy, int iDistance = 1);
+        void MoveTextPos(int iX, int iY);
+#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void CreateRadioGroup(int radiocount, int imgindex);
+        void ChangeRadioButtonInfo(bool iswidth, int x, int y, int sx, int sy);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void ChangeRadioText(std::list<std::wstring>& textlist);
+        // Slot overload: entries are pointers to I18N variables; labels refresh on language change.
+        void ChangeRadioText(std::list<const wchar_t* const*>& slotList);
+        void ChangeFrame(int buttonIndex);
+        void LockButtonindex(int buttonIndex);
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void SetFont(HFONT hFont, int iButtonIndex);
+        void SetFont(HFONT hFont);
+        void ChangeButtonState(BUTTON_STATE eventstate, int iButtonState);
+        void ChangeButtonState(int iBtnIndex, int iImgIndex,
+            BUTTON_STATE eventstate, int iButtonState);
+        POINT GetPos(int iButtonIndex);
+#else // KJH_ADD_INGAMESHOP_UI_SYSTEM
+        void SetFontIndex(int buttonIndex, HFONT hFont);
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+
+    public:
+        void RegisterRadioButton(CRadioButton* button);
+        void UnRegisterRadioButton();
+
+    public:
+        const int GetCurButtonIndex();
+
+    public:
+        int UpdateMouseEvent();
+
+    public:
+        bool Render();
+
+    private:
+        void SetCurButtonIndex(int index);
+        void Initialize();
+        void Destroy();
+
+    private:
+        typedef std::list<CRadioButton*>      RadioButtonList;
+
+    private:
+        RadioButtonList				m_RadioList;
+        DWORD						m_CurButtonIndex;
+#ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
+        int							m_iButtonDistance;			// ��ư�� ��ư������ ����
+#endif // KJH_ADD_INGAMESHOP_UI_SYSTEM
+    };
+
+    inline
+        void CRadioGroupButton::SetCurButtonIndex(int index)
+    {
+        m_CurButtonIndex = index;
+    }
+
+    inline
+        const int CRadioGroupButton::GetCurButtonIndex()
+    {
+        return m_CurButtonIndex;
+    }
+
+    class CCheckBox
+    {
+    public:
+        CCheckBox();
+        virtual ~CCheckBox();
+        void CheckBoxImgState(int imgindex);
+        void RegisterBoxState(bool eventstate);
+        void ChangeText(std::wstring btname);
+        // Slot overload — see CButton::ChangeText(const wchar_t* const*).
+        void ChangeText(const wchar_t* const* nameSlot);
+        void CheckBoxInfo(int x, int y, int sx, int sy);
+        bool GetBoxState();
+
+        void Render();
+        bool UpdateMouseEvent();
+    private:
+        int						s_ImgIndex;
+        POINT					m_Pos;
+        POINT					m_Size;
+       std::wstring		m_Name;
+       const wchar_t* const* m_pNameSlot = nullptr;
+       bool                  m_LocaleObserverRegistered = false;
+        HFONT					m_hTextFont;
+        DWORD					m_NameColor;
+        DWORD					m_NameBackColor;
+        float					m_ImgWidth;
+        float					m_ImgHeight;
+        bool					State;
+
+        // Own small parallel version of CBaseButton::RenderStateImage's pattern -- CCheckBox isn't
+        // part of the CBaseButton hierarchy and only ever needs a 2-frame (on/off) table.
+        CSprite m_sprite;
+        int     m_spriteImgIndex = -1;
+        POINT   m_spriteFrameSize{ 0, 0 };
+        unsigned int m_spriteWindowHeight = 0;
+        float   m_spriteScaleX = 0.0f;
+        float   m_spriteScaleY = 0.0f;
+
+    private:
+        void EnsureLocaleObserver();
+        static void OnLocaleChanged(void* ctx) noexcept;
+    };
+};
+
+#endif // !defined(AFX_NEWUIBUTTON_H__7DC4490D_D859_4159_9EE5_FBC4ECDE209A__INCLUDED_)

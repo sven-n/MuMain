@@ -1,6 +1,3 @@
-// GlobalBitmap.cpp: implementation of the CGlobalBitmap class.
-//
-//////////////////////////////////////////////////////////////////////
 
 #include "stdafx.h"
 #include "turbojpeg.h"
@@ -524,6 +521,16 @@ GLuint CGlobalBitmap::LoadImage(const std::wstring& filename, GLuint uiFilter, G
 
             return uiNewTextureIndex;
         }
+    }
+    return BITMAP_UNKNOWN;
+}
+GLuint CGlobalBitmap::LoadImageExclusive(const std::wstring& filename, GLuint uiFilter, GLuint uiWrapMode)
+{
+    GLuint uiNewTextureIndex = GenerateTextureIndex();
+    if (true == LoadImage(uiNewTextureIndex, filename, uiFilter, uiWrapMode))
+    {
+        m_listNonamedIndex.push_back(uiNewTextureIndex);
+        return uiNewTextureIndex;
     }
     return BITMAP_UNKNOWN;
 }

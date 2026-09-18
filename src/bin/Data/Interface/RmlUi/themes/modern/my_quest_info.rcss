@@ -1,0 +1,249 @@
+/* Modern theme for CMyQuestInfoWindow -- flat/token styling for common chrome, but Open/Give-up
+   are quest-specific actions with no generic equivalent, so they reuse legacy's sprites
+   (theme-local duplication) instead of a flat placeholder. */
+@spritesheet myquest-btn-open-sheet   { src: "../../../Quest_Bt_open.tga"; myquest-btn-open:   0px 0px 36px 29px; }
+@spritesheet myquest-btn-giveup-sheet { src: "../../../Quest_Bt_cast.tga"; myquest-btn-giveup: 0px 0px 36px 29px; }
+
+/* #panel consumes base.rcss's .modern-frame/.modern-frame-crimson instead of a bespoke fill.
+   .modern-frame sets no border-radius, so this still needs its own value -- `px` not `dp` since
+   #panel carries transform:scale(root_scale) (see base.rcss's header-rail-family comment for why
+   a `dp` length would double-scale here). */
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	border-radius: token(radius-md)px;
+	font-family: "token(font-body)";
+}
+
+.frame-piece { display: none; }
+
+/* Header: base.rcss's shared .modern-header-rail-px box (layout only) plus this window's own
+   fill/border/shadow -- copied verbatim from the inventory family's *_bg.rcss .rail-fill (e.g.
+   my_inventory_bg.rcss), since this window has no background-context document to put it in (no
+   live 3D content needing to render behind it, unlike CMyInventory/CTrade/etc.). top/height fit
+   this window's own layout (tab-row starts at top:27px), not the family's usual 36-38px rail. */
+.quest-header-rail {
+	top: 7px;
+	height: 20px;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1px;
+	border-color: token(border-rail);
+	border-bottom-color: #171812;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 18),
+		inset 0 -1px 0 #000000,
+		0 2px 4px rgba(0, 0, 0, 133);
+}
+/* Same recipe as the family's .rail-accent (my_inventory_bg.rcss etc.) -- painted last (declared
+   after .modern-joint-px/.modern-header-text-px in the RML) so it sits on top of the rail fill. */
+.quest-header-accent {
+	position: absolute;
+	left: 7px;
+	right: 7px;
+	bottom: 2px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+.tab-row {
+	position: absolute;
+	left: 10px;
+	top: 27px;
+	width: 166px;
+	height: 22px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+}
+.tab-btn {
+	position: absolute;
+	top: 0;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 12px;
+	color: token(text-secondary);
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.tab-btn.active { color: token(text-warm); background-color: token(accent-steel); border-radius: token(radius-sm)dp; }
+.tab-btn-quest { left: 0; width: 48px; }
+.tab-btn-jobchange { left: 48px; width: 48px; }
+.tab-btn-castletemple { left: 96px; width: 72px; }
+
+.quest-tab, .jobchange-tab, .castletemple-tab {
+	position: absolute;
+	left: 9px;
+	top: 60px;
+	width: 172px;
+	height: 320px;
+}
+.hidden { display: none; }
+
+/* display:block on every non-absolutely-positioned element below is load-bearing (see legacy
+   theme's my_quest_info.rcss for why). */
+.quest-empty-msg {
+	position: absolute;
+	left: 14px;
+	top: 30px;
+	width: 140px;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+	text-align: left;
+}
+.quest-empty-msg span { display: block; }
+
+.quest-list {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 172px;
+	height: 130px;
+	overflow: auto hidden;
+}
+.quest-row {
+	display: block;
+	width: 100%;
+	height: 18px;
+	line-height: 18px;
+	padding-left: 4px;
+	color: token(text-primary);
+	font-size: 12px;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+}
+.quest-row:hover { color: token(accent-gold-hover); }
+.quest-row.selected { color: token(accent-gold-hover); font-weight: bold; background-color: token(surface-panel); }
+
+.quest-divider {
+	position: absolute;
+	left: 0;
+	top: 130px;
+	width: 172px;
+	height: 21px;
+	border-top: 1dp token(border-frame);
+}
+
+.quest-contents {
+	position: absolute;
+	left: 0;
+	top: 151px;
+	width: 172px;
+	height: 169px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	overflow: auto hidden;
+}
+.quest-content-row {
+	display: block;
+	width: 100%;
+	padding: 1px 4px;
+	font-size: 12px;
+	color: token(text-primary);
+}
+.quest-content-row.bold { font-weight: bold; }
+.quest-content-row.clickable { cursor: pointer; pointer-events: auto; }
+.quest-content-row.clickable:hover { color: token(accent-gold-hover); }
+
+/* Open/Give-up only -- Exit uses base.rcss's shared .modern-icon-btn-px instead (below), which
+   already carries its own position/size/cursor/hover/locked treatment. */
+.quest-btn {
+	position: absolute;
+	top: 392px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Same brightness-filter hover used uniformly on these sprite-backed buttons. */
+.quest-btn:hover { filter: brightness(1.25); }
+/* No pointer-events:none here -- that would block :hover (and the tooltip) while locked, which
+   is the default state until a quest is selected. */
+.quest-btn.locked { filter: brightness(0.6); }
+
+.quest-btn-open { left: 50px; decorator: image(myquest-btn-open); }
+.quest-btn-giveup { left: 87px; decorator: image(myquest-btn-giveup); }
+
+/* Exit: base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family (same primitive
+   as every other window's corner buttons) -- only this window's own left offset needed on top of
+   its defaults (top:392px, 37x26, hover/locked states all included). */
+.quest-btn-exit { left: 13px; }
+
+/* Tooltips: siblings of their trigger button, same convention as my_inventory.rcss. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 365px;
+	width: 110px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	text-align: center;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit   { left: -24px; }
+.tooltip-open   { left: 13px; }
+.tooltip-giveup { left: 50px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_quest_open:hover ~ .tooltip-open,
+#btn_quest_giveup:hover ~ .tooltip-giveup {
+	display: block;
+}
+
+.jobchange-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(accent-steel-hover);
+	font-weight: bold;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+.jobchange-contents, .jobchange-state {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 12px;
+}
+.jobchange-contents span, .jobchange-state span { display: block; }
+.jobchange-state { color: token(accent-gold-hover); font-weight: bold; margin-top: 12px; }
+
+.castle-title, .temple-title {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+	margin-top: 6px;
+}
+.castle-line, .temple-line {
+	display: block;
+	text-align: center;
+	width: 172px;
+	color: token(text-primary);
+	font-size: 12px;
+}

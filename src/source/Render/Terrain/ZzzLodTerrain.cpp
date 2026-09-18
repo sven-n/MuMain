@@ -518,7 +518,7 @@ void CreateTerrainLight()
         for (int x = 0; x < TERRAIN_SIZE; x++)
         {
             int Index = TERRAIN_INDEX(x, y);
-            float Luminosity = DotProduct(TerrainNormal[Index], Light) + 0.5f;
+            float Luminosity = VectorDotProduct(TerrainNormal[Index], Light) + 0.5f;
             if (Luminosity < 0.f)
                 Luminosity = 0.f;
             else if (Luminosity > 1.f)
@@ -546,7 +546,7 @@ void CreateTerrainLight_Part(int xi, int yi)
         for (int x = xi - 4; x < xi + 4; x++)
         {
             int Index = TERRAIN_INDEX(x, y);
-            float Luminosity = DotProduct(TerrainNormal[Index], Light) + 0.5f;
+            float Luminosity = VectorDotProduct(TerrainNormal[Index], Light) + 0.5f;
             if (Luminosity < 0.f) Luminosity = 0.f;
             else if (Luminosity > 1.f) Luminosity = 1.f;
             for (int i = 0; i < 3; i++)
@@ -2314,11 +2314,11 @@ void CreateFrustrum(float xAspect, float yAspect, vec3_t position)
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[3], FrustrumVertex[4], FrustrumFaceNormal[2]);
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[4], FrustrumVertex[1], FrustrumFaceNormal[3]);
     FaceNormalize(FrustrumVertex[3], FrustrumVertex[2], FrustrumVertex[1], FrustrumFaceNormal[4]);
-    FrustrumFaceD[0] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[0]);
-    FrustrumFaceD[1] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[1]);
-    FrustrumFaceD[2] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
-    FrustrumFaceD[3] = -DotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
-    FrustrumFaceD[4] = -DotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
+    FrustrumFaceD[0] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[0]);
+    FrustrumFaceD[1] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[1]);
+    FrustrumFaceD[2] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[2]);
+    FrustrumFaceD[3] = -VectorDotProduct(FrustrumVertex[0], FrustrumFaceNormal[3]);
+    FrustrumFaceD[4] = -VectorDotProduct(FrustrumVertex[1], FrustrumFaceNormal[4]);
 
     CreateFrustrum2D(position);
 
@@ -2511,7 +2511,7 @@ bool TestFrustrum(vec3_t Position, float Range)
 
     for (int i = 0; i < 5; i++)
     {
-        if (DotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
+        if (VectorDotProduct(Position, FrustrumFaceNormal[i]) + FrustrumFaceD[i] < -Range)
         {
             return false;
         }
@@ -2547,11 +2547,11 @@ void CFrustrum::Make(vec3_t vEye, float fFov, float fAspect, float fDist)
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[3], FrustrumVertex[4], m_FrustrumNorm[2]);
     FaceNormalize(FrustrumVertex[0], FrustrumVertex[4], FrustrumVertex[1], m_FrustrumNorm[3]);
     FaceNormalize(FrustrumVertex[3], FrustrumVertex[2], FrustrumVertex[1], m_FrustrumNorm[4]);
-    m_FrustrumD[0] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[0]);
-    m_FrustrumD[1] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[1]);
-    m_FrustrumD[2] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[2]);
-    m_FrustrumD[3] = -DotProduct(FrustrumVertex[0], m_FrustrumNorm[3]);
-    m_FrustrumD[4] = -DotProduct(FrustrumVertex[1], m_FrustrumNorm[4]);
+    m_FrustrumD[0] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[0]);
+    m_FrustrumD[1] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[1]);
+    m_FrustrumD[2] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[2]);
+    m_FrustrumD[3] = -VectorDotProduct(FrustrumVertex[0], m_FrustrumNorm[3]);
+    m_FrustrumD[4] = -VectorDotProduct(FrustrumVertex[1], m_FrustrumNorm[4]);
 }
 
 void CFrustrum::Create(vec3_t vEye, float fFov, float fAspect, float fDist)
@@ -2569,7 +2569,7 @@ bool CFrustrum::Test(vec3_t vPos, float fRange)
     for (int i = 0; i < 5; ++i)
     {
         float fValue;
-        fValue = m_FrustrumD[i] + DotProduct(vPos, m_FrustrumNorm[i]);
+        fValue = m_FrustrumD[i] + VectorDotProduct(vPos, m_FrustrumNorm[i]);
         if (fValue < -fRange) return false;
     }
     return true;

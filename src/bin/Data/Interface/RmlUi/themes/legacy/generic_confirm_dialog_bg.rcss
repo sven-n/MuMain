@@ -1,0 +1,33 @@
+/* Background-layer companion to generic_confirm_dialog.rcss -- see npc_shop_bg.rcss's own comment
+   for the full mechanism/rationale. Native sprite composite now lives in window_shell_bg.rcss
+   (linked automatically via window_shell_bg.rml's own head).
+
+   dp, not px -- unlike the root_scale-tracking inventory-family windows' own *_bg.rcss files, this
+   dialog is a LayoutMode::Dialog window, so it centers via plain CSS instead of a data-bound
+   root_x/root_y/root_scale transform. Same 230x160dp size as the fg document's own #panel, so the
+   two align exactly.
+
+   body's own width/height must be set explicitly here -- normally comes from base.rcss (not linked
+   in bg documents), and #panel's left:50%/top:50% has nothing to resolve against otherwise. */
+
+body {
+	width: 100%;
+	height: 100%;
+}
+
+#panel {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	width: 230dp;
+	height: 160dp;
+	pointer-events: none;
+}
+/* Mirrors the fg document's own #panel.tall (GenericDialogConfig::tallPanel) -- kept in sync via
+   GenericConfirmDialog.cpp's Show()/ShowNext() (this document has no data model of its own to bind
+   a class through). window_shell_bg.rcss's own .window-shell-sprite-middle top/bottom are fixed dp
+   insets, not a percentage, so it auto-stretches to fill the extra height with no change needed. */
+#panel.tall {
+	height: 240dp;
+}

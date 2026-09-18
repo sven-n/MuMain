@@ -1,0 +1,49 @@
+/* Modern theme for CMyShopInventory's chrome -- header/edit-strip/buttons are vector forged-metal
+   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Inventory grid
+   and the nickname/subject CUITextInputBox stay fully native, same as legacy -- no RmlUi
+   involvement there. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* No .modern-header-rail-px override -- the default (top:7/height:38) already clears this
+   window's grid start (`m_Pos.y + 90`) and the edit-box strip below it. */
+
+/* #edit_bg moved to my_shop_bg.rcss (background context) -- see that file's own comment. */
+
+/* Buttons: base.rcss's shared .modern-icon-btn-px family at its default 37x26/top:392 geometry --
+   only left offsets differ (13/53/93, this window's own native spacing). */
+.shop-btn-exit  { left: 13px; color: #d59b79; border-color: #5c382b; }
+.shop-btn-open  { left: 53px; }
+.shop-btn-close { left: 93px; }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit  { left: -27px; }
+.tooltip-open  { left: 12px; }
+.tooltip-close { left: 52px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_open:hover ~ .tooltip-open,
+#btn_close:hover ~ .tooltip-close {
+	display: block;
+}

@@ -1,0 +1,153 @@
+/* Legacy theme for CMyInventory's chrome (frame/title/gold/buttons). #panel's left/top/scale come
+   live from C++ (SyncRmlModel()), so coordinates below are plain reference px, not dp. Button
+   icons/positions match CMyInventory::SetButtonInfo()'s former constants.
+
+   Known limitation: .inv-btn (always renders last, RmlUi's main context) can sit on top of
+   CInventoryCtrl's native item tooltip when a bottom-row item's tooltip extends into this button
+   strip. Confirmed cosmetic, not fixed here. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+/* Drag handle (MyInventory.cpp Create()) -- pointer-events/drag are force-set in C++ via
+   UI::RmlBridge::MakeDraggable(); cursor here is just discoverability. */
+#title {
+	position: absolute;
+	left: 0;
+	top: 12px;
+	width: 190px;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 12px;
+	cursor: move;
+}
+
+@spritesheet inv-money-sheet { src: "../../../newui_item_money.tga"; inv-money: 0px 0px 170px 26px; }
+#gold_bg {
+	position: absolute;
+	left: 11px;
+	top: 364px;
+	width: 170px;
+	height: 26px;
+	decorator: image(inv-money);
+	pointer-events: none;
+}
+#gold_text {
+	position: absolute;
+	left: 50px;
+	top: 371px;
+	font-weight: bold;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+/* Buttons: same 36x29 reference-pixel boxes SetButtonInfo() used to place them at. */
+@spritesheet inv-btn-exit-sheet    { src: "../../../newui_exit_00.tga";        inv-btn-exit:    0px 0px 36px 29px; }
+@spritesheet inv-btn-repair-sheet  { src: "../../../newui_repair_00.tga";      inv-btn-repair:  0px 0px 36px 29px; }
+@spritesheet inv-btn-expand-sheet  { src: "../../../newui_expansion_btn.tga";  inv-btn-expand:  0px 0px 36px 29px; }
+@spritesheet inv-btn-myshop-open-sheet  { src: "../../../newui_Bt_openshop.tga";  inv-btn-myshop-open:  0px 0px 36px 29px; }
+@spritesheet inv-btn-myshop-close-sheet { src: "../../../newui_Bt_closeshop.tga"; inv-btn-myshop-close: 0px 0px 36px 29px; }
+
+.inv-btn {
+	position: absolute;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.inv-btn:hover { filter: brightness(1.25); }
+.inv-btn.hidden { display: none; }
+.inv-btn.locked { pointer-events: none; filter: brightness(0.6); }
+
+.inv-btn-exit    { left: 13px;      decorator: image(inv-btn-exit); }
+.inv-btn-repair  { left: 50px;      decorator: image(inv-btn-repair); }
+.inv-btn-myshop  { left: 87px;      decorator: image(inv-btn-myshop-open); }
+.inv-btn-myshop.close-mode { decorator: image(inv-btn-myshop-close); }
+.inv-btn-expand  { left: 124px;     decorator: image(inv-btn-expand); }
+
+/* Tooltips are siblings of their trigger -- this build's shrink-to-fit width can't grow past a
+   narrow nested trigger. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit   { left: -30px; }
+.tooltip-repair { left: 7px; }
+.tooltip-myshop { left: 44px; }
+.tooltip-expand { left: 60px; }
+
+#btn_exit:hover ~ .tooltip-exit,
+#btn_repair:hover ~ .tooltip-repair,
+#btn_myshop:hover ~ .tooltip-myshop,
+#btn_expand:hover ~ .tooltip-expand {
+	display: block;
+}
+
+/* Set/Socket option header labels -- each spans half of #panel's width (matches the former
+   native hover-rect split), gray by default, yellow when that set/socket bonus is active. */
+.option-label {
+	position: absolute;
+	top: 20px;
+	width: 95px;
+	height: 15px;
+	text-align: center;
+	font-family: "Liberation Sans";
+	font-weight: bold;
+	font-size: 12px;
+	color: #666666;
+	pointer-events: auto;
+	cursor: default;
+}
+.option-label.active { color: #ffcc1a; }
+.option-label-set { left: 0; }
+.option-label-socket { left: 95px; }
+
+/* Shared tooltip for both labels, anchored at the same (95px, 40px) point both native call sites
+   used. No translateX(-50%) centering -- it resolves against the element's stale/zero box while
+   display:none (see main_frame.rcss's .tooltip comment); a precomputed static `left` sidesteps
+   it. */
+#item_option_tooltip {
+	position: absolute;
+	left: 25px;
+	top: 40px;
+	width: 140px;
+	text-align: center;
+	background-color: rgba(0, 0, 0, 200);
+	border-radius: 3px;
+	padding: 4px 6px;
+	font-family: "Liberation Sans";
+	font-size: 10px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tt-line {
+	display: block;
+	color: #ffffff;
+	white-space: normal;
+	min-height: 1.2em;
+	line-height: 1.2em;
+}
+.tt-line.tt-blue { color: #80b3ff; }
+.tt-line.tt-yellow { color: #ffcc1a; }
+.tt-line.tt-green { color: #1aff80; }
+.tt-line.tt-purple { color: #ff1aff; }
+.tt-line.bold { font-weight: bold; }

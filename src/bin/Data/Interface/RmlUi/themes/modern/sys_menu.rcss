@@ -1,0 +1,38 @@
+/* Modern theme for the system menu -- uses base.rcss's shared forged-dialog shell, with the
+   metal .modern-header-rail/.modern-joint header variant instead of Login's crimson hero-banner
+   (this dialog has no hero plate). #panel mirrors Login's neutral forged-window surface rather
+   than sharing via .modern-frame directly, so it doesn't affect .modern-frame's other consumers.
+   Buttons rely entirely on base.rcss's shared .btn.
+
+   #panel is centered via base.rcss's .center-both utility class. Height grew by 31dp over the
+   old sprite geometry to fit the real 38dp metal header rail; top-anchored buttons shift down by
+   the same 31dp, bottom-anchored ones are unaffected since the growth is all at the top.
+
+   #btn_option/#btn_close's `bottom` values are the old "distance from panel bottom to button
+   TOP" (86/52) minus the button's 30dp height -- CSS `bottom` measures to the BOTTOM edge, so
+   using 86/52 directly would overlap #btn_select_server above. */
+#panel {
+	width: 213dp;
+	height: 218dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-primary);
+	border-radius: token(radius-sm)dp;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1dp;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11dp 30dp rgba(0, 0, 0, 158),
+		0 2dp 5dp rgba(0, 0, 0, 217),
+		inset 0 0 0 1dp #090a08,
+		inset 0 0 0 3dp rgba(120, 115, 90, 190);
+}
+#panel.compact {
+	height: 186dp;
+}
+
+#btn_exit_game    { left: 52dp; top: 64dp; }
+#btn_select_server{ left: 52dp; top: 98dp; }
+#btn_option       { left: 52dp; bottom: 56dp; }
+#btn_close        { left: 52dp; bottom: 22dp; }

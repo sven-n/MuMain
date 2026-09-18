@@ -21,11 +21,11 @@
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "World/MapInfra/MapManager.h"
 #include "Camera/CameraMove.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "UI/Scaling/UITransform.h"
 #include "GameLogic/Events/Cinematic/CDirection.h"
 #include "World/MapInfra/w_MapHeaders.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "CameraDebugLog.h"
 
 // External variable declarations
@@ -720,18 +720,22 @@ void DefaultCamera::UpdateCustomCameraDistance()
 
     int iIndex = TERRAIN_INDEX((Hero->PositionX), (Hero->PositionY));
 
+    // *FPS_ANIMATION_FACTOR -- this ramp used to advance a fixed 10 units per Update() call, with
+    // no time basis (Update() runs once per rendered frame, not on a fixed timestep), so it ramped
+    // N times faster at high/uncapped FPS than at the ~25fps this was tuned against.
+    extern float FPS_ANIMATION_FACTOR;
     if ((TerrainWall[iIndex] & TW_CAMERA_UP) == TW_CAMERA_UP)
     {
         if (m_State.CustomDistance <= CUSTOM_CAMERA_DISTANCE1)
         {
-            m_State.CustomDistance += 10;
+            m_State.CustomDistance += 10.f * FPS_ANIMATION_FACTOR;
         }
     }
     else
     {
         if (m_State.CustomDistance > 0)
         {
-            m_State.CustomDistance -= 10;
+            m_State.CustomDistance -= 10.f * FPS_ANIMATION_FACTOR;
         }
     }
 }
@@ -786,7 +790,14 @@ void DefaultCamera::UpdateCameraDistance()
     if (m_FramesSinceActivation < 2)
         m_State.Distance = m_State.DistanceTarget;
     else
-        m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3;
+    {
+        // *FPS_ANIMATION_FACTOR -- this approach-to-target fraction (1/3 per call) had no time
+        // basis, so it converged in a fixed number of CALLS rather than a fixed amount of real
+        // time; at high/uncapped FPS the zoom would snap to target in a single visible instant
+        // instead of gliding, since many more 1/3-steps happen per real second.
+        extern float FPS_ANIMATION_FACTOR;
+        m_State.Distance += (m_State.DistanceTarget - m_State.Distance) / 3.f * FPS_ANIMATION_FACTOR;
+    }
 }
 
 void DefaultCamera::SetCameraFOV()

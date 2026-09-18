@@ -1,7 +1,4 @@
-﻿// w_CursedTemple.cpp: implementation of the CursedTemple class.
-//
-//////////////////////////////////////////////////////////////////////
-
+﻿
 #include "stdafx.h"
 #include "w_CursedTemple.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
@@ -11,13 +8,13 @@
 #include "Engine/Object/ZzzCharacter.h"
 #include "Render/Terrain/ZzzLodTerrain.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "Character/CSParts.h"
 #include "Audio/DSPlaySound.h"
 #include "Engine/Object/ZzzOpenData.h"
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/NewUISystem.h"
-#include "UI/NewUI/Inventory/NewUIInventoryCtrl.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Core/WindowSystem.h"
+#include "UI/Inventory/InventoryCtrl.h"
 #include "World/MapInfra/MapManager.h"
 #include "I18N/All.h"
 
@@ -86,9 +83,9 @@ void CursedTemple::SetInterfaceState(bool state, int subtype)
 
     if (m_InterfaceState == false)
     {
-        if (!g_pNewUISystem->IsVisible(SEASON3B::INTERFACE_CURSEDTEMPLE_RESULT))
+        if (!g_pNewUISystem->IsVisible(mu::ui::window::INTERFACE_CURSEDTEMPLE_RESULT))
         {
-            SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+            mu::ui::window::CInventoryCtrl::BackupPickedItem();
             g_pNewUISystem->HideAll();
         }
     }
@@ -100,7 +97,7 @@ bool CursedTemple::GetInterfaceState(int type, int subtype)
 
     bool result = m_InterfaceState;
 
-    if (type == INTERFACE_COMMAND)
+    if (type == mu::ui::window::INTERFACE_COMMAND)
     {
         auto tempSubtype = (COMMAND_TYPE)(subtype);
 
@@ -989,22 +986,22 @@ void CursedTemple::UpdateTempleSystemMsg(int _Value)
     case 2:
         break;
     case 3:
-        g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::TheAdmissionAndScrollLevelsDoNotMatch, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 4:
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotEnterTheZoneWithTheNumberOfMembersExceedingTheLimit, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotEnterTheZoneWithTheNumberOfMembersExceedingTheLimit, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 5:
         mu_swprintf(szText, I18N::Game::YouMayEnterOnlyDTimesPerDay, 6);
-        g_pSystemLogBox->AddText(szText, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(szText, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 6:
         break;
     case 7:
-        g_pSystemLogBox->AddText(I18N::Game::YouCannotEnterIfYouAreA1stStageOutlaw, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCannotEnterIfYouAreA1stStageOutlaw, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     case 8:
-        g_pSystemLogBox->AddText(I18N::Game::YouCanTWarpWearingTheRingOfTransformation, SEASON3B::TYPE_ERROR_MESSAGE);
+        g_pSystemLogBox->AddText(I18N::Game::YouCanTWarpWearingTheRingOfTransformation, mu::ui::window::TYPE_ERROR_MESSAGE);
         break;
     }
 }
@@ -1170,7 +1167,7 @@ void CursedTemple::ReceiveCursedTempleState(const eCursedTempleState state)
         SetTerrainWaterState(m_TerrainWaterIndex, 1);
         m_TerrainWaterIndex.clear();
         SetInterfaceState(false);
-        SEASON3B::CNewUIInventoryCtrl::BackupPickedItem();
+        mu::ui::window::CInventoryCtrl::BackupPickedItem();
     }
 }
 

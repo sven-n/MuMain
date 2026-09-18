@@ -1,0 +1,205 @@
+/* Modern theme for CTrade's chrome -- header/wallets/checkboxes/buttons are vector forged-metal
+   chrome (matching Login/SysMenu/MyInventory/StorageExt's forged-dialog language). Both trade grids
+   stay fully native (sprite art + live 3D icons), same as legacy -- no RmlUi involvement there.
+
+   Every element below the header keeps the SAME top offset legacy uses (copied from
+   CTrade::RenderBackImage()/RenderText()'s former constants): those gaps are dictated by the two
+   still-native CInventoryCtrl grids' fixed y-offsets (`m_Pos.y + 68` / `m_Pos.y + 274`), which this
+   port does not change, so only the header (above the first grid) and each control's own visual
+   treatment differ from legacy -- not their vertical position. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+}
+
+/* top:6/height:29 -- identical rail budget to StorageExt's .ext-header-rail. Ends at 35px, leaving
+   35..68 for the your-side nickname/level/guild block below, well inside the your-grid's own
+   `m_Pos.y + 68` start. Rivet sits at -2px, still inside trade_bg.rcss's .inv-shell-edge at -3px --
+   same contained relationship as StorageExt/MyInventory. */
+.trade-header-rail {
+	top: 6px;
+	height: 29px;
+}
+
+/* Sits above the native guild-mark emblem (RenderGuildMark(): 16x16 at x+15,y+42), mirroring
+   legacy's own guild-name position -- the old left:11/top:37 overlapped the icon. */
+.guild-name {
+	position: absolute;
+	left: 15px;
+	top: 30px;
+	font-size: 9px;
+	color: #8a8a82;
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.id-text {
+	position: absolute;
+	color: token(text-warm);
+	font-family: "token(font-body)";
+	font-weight: 500;
+	white-space: nowrap;
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+/* left:34 (not the shared 11px column) clears the guild-mark emblem's x15..31 span. */
+.id-text-your { left: 34px; top: 48px; font-size: 12px; }
+.id-text-my   { left: 11px; top: 253px; font-size: 12px; }
+
+.level-text {
+	position: absolute;
+	left: 130px;
+	top: 48px;
+	width: 49px;
+	text-align: right;
+	font-weight: 500;
+	font-size: 11px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+
+/* Wallet strips: base.rcss's shared .modern-wallet-px/.modern-wallet-value-px family, instantiated
+   TWICE at this window's own two native top offsets (150/356) -- each with its own id, bound to its
+   own C++ field (your_gold_text/color vs my_gold_text/color), not a single shared element. */
+.trade-gold-your       { top: 150px; }
+.trade-gold-your-value { top: 155px; }
+.trade-gold-my         { top: 356px; }
+.trade-gold-my-value   { top: 361px; }
+
+/* Confirm/accept control -- a real circular OK button (.modern-icon-btn-px's recipe, circular +
+   smaller), not the flat checkbox primitive that read as a bare outline square. Centered on the
+   same points the legacy 36x29 accept-button hit-boxes were. */
+.trade-confirm-btn {
+	position: absolute;
+	width: 22px;
+	height: 22px;
+	border-radius: 50%;
+	cursor: pointer;
+	pointer-events: auto;
+	text-align: center;
+	line-height: 22px;
+	color: #514a35;
+	background-color: #13140f;
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 11), transparent 40%),
+		linear-gradient(to bottom, #26251d, #15160f 56%, #090a08);
+	border: 1px token(border-frame);
+	box-shadow:
+		0 2px 5px rgba(0, 0, 0, 133),
+		inset 0 1px 0 rgba(232, 215, 168, 18),
+		inset 0 -1px 0 #000000;
+}
+.trade-confirm-btn.checked {
+	color: token(text-warm);
+	border-color: token(border-hover);
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 15), transparent 40%),
+		linear-gradient(to bottom, #8f6922, #6b4d18);
+}
+/* Red ring while m_nMyTradeWait > 0, approximating the former RenderImage() red color-multiply
+   cooldown tint -- appended to (not replacing) the button's own resting shadow. */
+.trade-confirm-btn.waiting {
+	box-shadow:
+		0 2px 5px rgba(0, 0, 0, 133),
+		inset 0 1px 0 rgba(232, 215, 168, 18),
+		inset 0 -1px 0 #000000,
+		0 0 0 2px rgba(220, 40, 40, 220);
+}
+.confirm-glyph {
+	color: inherit;
+	font-weight: bold;
+	font-size: 11px;
+	font-family: "DejaVu Sans";
+	pointer-events: none;
+}
+.confirm-your {
+	left: 153px;
+	top: 189px;
+	cursor: default;
+	pointer-events: none;
+}
+.confirm-my {
+	left: 153px;
+	top: 393px;
+}
+
+/* Divider between the two players' halves -- same subtle warm accent-line treatment as
+   trade_bg.rcss's own .rail-accent (the header rail's bottom edge), at this window's own former
+   divider position (top:220, matching IMAGE_TRADE_LINE's old placement) instead of hugging the
+   rail. */
+.trade-divider {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 220px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+.trade-btn-exit { left: 13px;  color: #d59b79; border-color: #5c382b; }
+.trade-btn-zen  { left: 104px; }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 376px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit { left: -20px; }
+.tooltip-zen  { left: 60px; }
+#btn_exit:hover ~ .tooltip-exit,
+#btn_zen:hover ~ .tooltip-zen {
+	display: block;
+}
+
+/* Warning/notice help text -- squeezed into the 22px gap between the your-side confirm checkbox
+   and the divider (198..220), same reasoning as every other px value in this file: the grids around
+   it are fixed, so this band is what's left. "Warning" blinks via warning_opacity (C++ mirrors the
+   old sin(WorldTime)-based alpha pulse); the rest is a fixed warm hint color. */
+.warning-label {
+	position: absolute;
+	left: 11px;
+	top: 198px;
+	color: #e35b5b;
+	font-weight: 500;
+	font-size: 7px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+.notice-line {
+	position: absolute;
+	left: 11px;
+	color: token(text-secondary);
+	font-weight: 500;
+	font-size: 7px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-family: "token(font-body)";
+}
+.notice-line1 { left: 34px; top: 198px; }
+.notice-line2 { top: 206px; }
+.notice-line3 { top: 213px; }

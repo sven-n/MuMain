@@ -1,0 +1,86 @@
+/* Legacy theme for CPurchaseShopInventory's chrome (frame/title/subtitle-strip/warning-text/exit
+   button). #panel's left/top/scale come live from C++ (SyncRmlModel()), so coordinates below are
+   plain reference px, not dp. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 15px;
+	width: 190px;
+	text-align: center;
+	color: #49b0ff;
+	font-size: 12px;
+}
+
+/* Same sprite as CMyShopInventory's own subject-box background (newui_Box_openTitle.tga) --
+   purely decorative here, behind a read-only shop-owner name instead of a live text field. */
+@spritesheet pshop-title-strip-sheet { src: "../../../newui_Box_openTitle.tga"; pshop-title-strip: 0px 0px 169px 26px; }
+.shop-title-strip {
+	position: absolute;
+	left: 12px;
+	top: 49px;
+	width: 169px;
+	height: 26px;
+	pointer-events: none;
+	decorator: image(pshop-title-strip);
+}
+#shop_owner_text {
+	position: absolute;
+	left: 0;
+	top: 58px;
+	width: 190px;
+	text-align: center;
+	color: #00ff00;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+
+/* Static warning notice below the grid -- same seven lines/colors/offsets as the old
+   RenderTextInfo() (PurchaseShopInventory.cpp). */
+.warning-label, .warning-label-2 {
+	position: absolute;
+	left: 30px;
+	color: #ff2d2f;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.warning-label { top: 230px; }
+.warning-line {
+	position: absolute;
+	left: 30px;
+	color: #f7ce4d;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.line-1 { top: 250px; }
+.line-2 { top: 262px; }
+.line-3 { top: 274px; }
+.line-4 { top: 286px; }
+.line-5 { top: 298px; }
+.line-6 { top: 320px; }
+.line-7 { top: 332px; }
+
+@spritesheet pshop-btn-exit-sheet { src: "../../../newui_exit_00.tga"; pshop-btn-exit: 0px 0px 36px 29px; }
+.shop-btn-exit {
+	position: absolute;
+	left: 13px;
+	top: 391px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+	decorator: image(pshop-btn-exit);
+}
+.shop-btn-exit:hover { filter: brightness(1.25); }

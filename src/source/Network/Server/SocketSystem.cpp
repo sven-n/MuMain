@@ -6,8 +6,11 @@
 #include "Render/Models/ZzzBMD.h"
 #include "Engine/Object/ZzzCharacter.h"
 #include "WSclient.h"
-#include "UI/Legacy/UIControls.h"
+#include "UI/Widgets/UIControls.h"
 #include "Character/CharacterManager.h"
+
+#include <algorithm>
+#include <cwchar>
 
 using namespace SEASON4A;
 
@@ -380,46 +383,53 @@ BOOL CSocketItemMgr::IsSocketSetOptionEnabled()
     return (!m_EquipSetBonusList.empty());
 }
 
-void CSocketItemMgr::RenderToolTipForSocketSetOption(int iPos_x, int iPos_y)
+bool CSocketItemMgr::BuildSocketOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel)
 {
-    if (IsSocketSetOptionEnabled())
+    if (!IsSocketSetOptionEnabled())
+        return false;
+
+    BYTE TextNum = 0;
+
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+    mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++;
+
+    mu_swprintf(TextList[TextNum], I18N::Game::SocketPackageOption);
+    TextListColor[TextNum] = TEXT_COLOR_PURPLE;
+    TextBold[TextNum] = true;
+    TextNum++;
+
+    wchar_t szOptionValueText[16] = { 0, };
+    SOCKET_OPTION_INFO* pInfo = NULL;
+    for (std::deque<DWORD>::iterator iter = m_EquipSetBonusList.begin(); iter != m_EquipSetBonusList.end(); ++iter)
     {
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->SetBgColor(100, 0, 0, 0);
-
-        int PosX, PosY;
-
-        PosX = iPos_x + 95;//+60;
-        PosY = iPos_y + 40;
-
-        BYTE TextNum = 0;
-        BYTE SkipNum = 0;
-        BYTE setIndex = 0;
-
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-        mu_swprintf(TextList[TextNum], L"\n"); TextListColor[TextNum] = 0; TextBold[TextNum] = false; TextNum++; SkipNum++;
-
-        mu_swprintf(TextList[TextNum], I18N::Game::SocketPackageOption);
-        TextListColor[TextNum] = TEXT_COLOR_PURPLE;
-        TextBold[TextNum] = true;
+        pInfo = &m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][*iter];
+        CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
+        mu_swprintf(TextList[TextNum], L"%ls %ls", pInfo->m_szOptionName, szOptionValueText);
+        TextListColor[TextNum] = TEXT_COLOR_BLUE;
+        TextBold[TextNum] = false;
         TextNum++;
-
-        wchar_t szOptionText[64] = { 0, };
-        wchar_t szOptionValueText[16] = { 0, };
-        SOCKET_OPTION_INFO* pInfo = NULL;
-        for (std::deque<DWORD>::iterator iter = m_EquipSetBonusList.begin(); iter != m_EquipSetBonusList.end(); ++iter)
-        {
-            pInfo = &m_SocketOptionInfo[SOT_EQUIP_SET_BONUS_OPTIONS][*iter];
-            CalcSocketOptionValueText(szOptionValueText, pInfo->m_bOptionType, (float)pInfo->m_iOptionValue[0]);
-            mu_swprintf(TextList[TextNum], L"%ls %ls", pInfo->m_szOptionName, szOptionValueText);
-            TextListColor[TextNum] = TEXT_COLOR_BLUE;
-            TextBold[TextNum] = false;
-            TextNum++;
-        }
-
-        RenderTipTextList(PosX, PosY, TextNum, 140, RT3_SORT_CENTER);
     }
+
+    outModel.Reset();
+    outModel.count = std::min<int>(TextNum, UI::Inventory::Tooltip::MAX_TOOLTIP_LINES);
+    for (int i = 0; i < outModel.count; ++i)
+    {
+        UI::Inventory::Tooltip::Line& line = outModel.lines[i];
+        wcsncpy(line.text, TextList[i], UI::Inventory::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1);
+        line.text[UI::Inventory::Tooltip::MAX_TOOLTIP_LINE_TEXT - 1] = L'\0';
+        switch (TextListColor[i])
+        {
+        case TEXT_COLOR_BLUE:   line.color = UI::Inventory::Tooltip::LineColor::Blue;   break;
+        case TEXT_COLOR_YELLOW: line.color = UI::Inventory::Tooltip::LineColor::Yellow; break;
+        case TEXT_COLOR_GREEN:  line.color = UI::Inventory::Tooltip::LineColor::Green;  break;
+        case TEXT_COLOR_PURPLE: line.color = UI::Inventory::Tooltip::LineColor::Purple; break;
+        default:                line.color = UI::Inventory::Tooltip::LineColor::White;  break;
+        }
+        line.isBold = TextBold[i] != 0;
+    }
+
+    return true;
 }
 
 void CSocketItemMgr::CheckSocketSetOption()

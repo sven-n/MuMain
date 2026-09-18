@@ -1,0 +1,100 @@
+<rml>
+<head>
+	<title>Generic Confirm Dialog</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="generic_confirm_dialog.rcss"/>
+</head>
+<body>
+	<!-- This is legacy's own markup in practice -- modern has its own complete fork
+	     (themes/modern/generic_confirm_dialog.rml) and never loads this shared copy. Keep ids/
+	     data-model/event names in sync with the modern fork, GenericConfirmDialog.cpp binds both
+	     by name.
+
+	     Native CCommonMessageBox's own sprite composite (back fill -> top cap -> middle fill ->
+	     bottom cap) moved to generic_confirm_dialog_bg.rml -- a background-context document
+	     rendered BEFORE the 3D pass that draws item3D each frame, so the item shows through this
+	     now-paint-less #panel instead of being painted over by it. See that file's own comment. -->
+	<div id="panel" class="center-both" data-model="generic_confirm_dialog" data-class-tall="has_tall_panel">
+		<!-- Native's own IMAGE_MSGBOX_TOP_TITLEBAR sprite (newui_Message_03.tga) swapped in for the
+		     plain top-cap art whenever a title is shown -- see .rcss's own comment. Lives here, not
+		     in generic_confirm_dialog_bg.rml -- unlike item3D, a title banner has no compositing-
+		     order reason to sit behind anything. A direct #panel child, sibling of .gcd-body, since
+		     it's positioned in #panel's own coordinate space (edge-to-edge), not .gcd-body's inset
+		     content area. -->
+		<div class="gcd-header-rail" data-class-hidden="!has_title"></div>
+		<!-- Title text drawn directly over the sprite above -- simplified to one centered line
+		     rather than replicating native's exact pixel-wrap math. severity_warning/_error
+		     recolor the text only, no tinted sprite variants. -->
+		<div class="gcd-header-title" data-class-hidden="!has_title" data-class-warning="severity_warning"
+		     data-class-error="severity_error">{{title}}</div>
+		<div class="gcd-body">
+			<!-- Invisible position reference for the native 3D item-preview render pass
+			     (GenericConfirmDialog.cpp's Render3D()) -- renders nothing itself. A flex sibling of
+			     .gcd-text-col, not a member of it: the item icon sits at a fixed top-left offset with
+			     body text starting to its right, side-by-side rather than stacked (collapses to
+			     nothing, .gcd-text-col alone fills the row, when there's no item). -->
+			<div id="gcd_item3d_anchor" class="gcd-item3d-anchor layout-anchor" data-class-hidden="!has_item3d"></div>
+			<!-- Portrait2D's Beside layout -- same row-sibling slot as #gcd_item3d_anchor above
+			     (icon-left/text-right). Mutually exclusive with the Overlay slot inside
+			     .gcd-text-col below; no dialog uses both. -->
+			<div class="gcd-portrait2d gcd-portrait2d-beside" data-class-hidden="!has_portrait2d_beside"></div>
+			<div class="gcd-text-col">
+				<!-- Portrait2D's Overlay layout (the default) -- caption text drawn on top of the
+				     sprite. First child of .gcd-text-col (icon-TOP/text-BELOW), unlike item3D's
+				     icon-left/text-right sibling shape. -->
+				<div class="gcd-portrait2d" data-class-hidden="!has_portrait2d_overlay">
+					<div class="gcd-portrait2d-text">{{portrait2d_text}}</div>
+				</div>
+				<div class="gcd-line" data-for="line : lines" data-class-bold="line.bold">{{line.text}}</div>
+				<!-- Optional text-entry field -- NumericKeypad is pure RmlUi (shuffled-digit
+				     buttons, anti-shoulder-surfing); Text is a real keyboard field, hosted by the
+				     native g_pSingleTextInputBox widget positioned from #gcd_input_anchor -- this
+				     div renders nothing itself in Text mode, the widget draws on top of it. -->
+				<div class="gcd-input-row" data-class-hidden="!has_input">
+					<div class="gcd-keypad-display" data-class-hidden="!input_is_keypad">{{input_text}}</div>
+					<div class="gcd-keypad-grid" data-class-hidden="!input_is_keypad">
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(0)">{{keypad_digit_0}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(1)">{{keypad_digit_1}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(2)">{{keypad_digit_2}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(3)">{{keypad_digit_3}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(4)">{{keypad_digit_4}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(5)">{{keypad_digit_5}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(6)">{{keypad_digit_6}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(7)">{{keypad_digit_7}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(8)">{{keypad_digit_8}}</div>
+						<div class="btn gcd-keypad-btn" data-event-click="gcd_keypad_click(9)">{{keypad_digit_9}}</div>
+						<div class="btn gcd-keypad-delete" data-event-click="gcd_keypad_delete_click">Del</div>
+					</div>
+					<div id="gcd_input_anchor" class="gcd-input-anchor layout-anchor"
+					     data-class-hidden="input_is_keypad"></div>
+				</div>
+				<!-- Optional progress bar -- fraction pushed from C++ every frame while active,
+				     same `x_fraction * 100 + '%'` technique main_frame.rml's own gauges use. -->
+				<div class="gcd-progress-track" data-class-hidden="!has_progress">
+					<div class="gcd-progress-fill" data-style-width="progress_fraction * 100 + '%'"></div>
+				</div>
+			</div>
+		</div>
+		<!-- Three fixed, named-role slots (see GenericDialogConfig's own comment): primary is
+		     always shown; secondary is a real second action (Decrease/Gift/Discard...), never
+		     Cancel; cancel is always dismiss semantics, independently optional. Layout depends on
+		     how many of the three are actually visible this Show() call -- solo (primary only),
+		     paired (primary + exactly one of secondary/cancel, today's original Ok/OkCancel shape,
+		     unchanged position), or triple (all three, native's own Create/Decrease/Cancel-style
+		     3-way split). All three hide entirely while `has_progress` -- progress boxes have zero
+		     buttons. -->
+		<div id="gcd_btn_primary" class="btn btn-ok gcd-btn-primary"
+		     data-class-solo="!has_secondary &amp;&amp; !show_cancel"
+		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-hidden="has_progress" data-event-click="gcd_primary_click">{{primary_label}}</div>
+		<div id="gcd_btn_secondary" class="btn gcd-btn-secondary"
+		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-hidden="!has_secondary || has_progress"
+		     data-event-click="gcd_secondary_click">{{secondary_label}}</div>
+		<div id="gcd_btn_cancel" class="btn gcd-btn-cancel"
+		     data-class-triple="has_secondary &amp;&amp; show_cancel"
+		     data-class-hidden="!show_cancel || has_progress"
+		     data-event-click="gcd_cancel_click">{{cancel_label}}</div>
+	</div>
+</body>
+</rml>

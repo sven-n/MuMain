@@ -18,6 +18,18 @@ Before writing or modifying code:
 The rules are not exhaustive — they capture the conventions that matter most for
 this codebase. Follow the style of surrounding code where the rules don't speak.
 
+## UI code — read this first too
+
+Before adding or touching anything under `UI/` (a window, dialog, HUD panel, or widget), read
+[`docs/rmlui-ui-system/architecture-principles.md`](docs/rmlui-ui-system/architecture-principles.md)
+(the governing UI policy) and
+[`docs/rmlui-ui-system/building-new-ui.md`](docs/rmlui-ui-system/building-new-ui.md) (which base
+class and widget family to actually use — for anything with a visible presentation, that's RmlUi +
+`base.rcss`, not one of the closed/transitional native toolkits). This codebase's UI history has
+several near-identical-name classes across different eras that look interchangeable and aren't;
+these docs exist specifically so new code doesn't reach for a closed or transitional one by
+accident.
+
 ## Build setup
 
 The project uses CMake. Supported build environments and setup steps are

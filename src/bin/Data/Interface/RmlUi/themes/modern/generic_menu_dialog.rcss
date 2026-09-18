@@ -1,0 +1,175 @@
+/* Modern theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Frame/border/header
+   chrome (base.rcss's .modern-frame/.modern-shell-edge/.modern-groove/.modern-header-rail/
+   .modern-content-well) now lives in window_shell.rml/.rcss, a template shared with any future
+   consumer -- not exclusive to this dialog (see that file's own comment; sys_menu.rml already
+   proves the same chrome on a plain, non-dialog window). This file supplies only this document's
+   own content layout (lines/buttons), not the shell. */
+
+/* #panel is centered via .center-both, dp throughout (LayoutMode::Dialog window). Same 230dp
+   width and 260dp height as legacy's own copy, for visual consistency between the two themes and
+   with generic_confirm_dialog's own panel width. */
+#panel {
+	width: 230dp;
+	height: 260dp;
+	font-family: "token(font-body)";
+	font-size: 12dp;
+	color: token(text-primary);
+}
+
+.gmd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: token(text-secondary);
+	font-size: 10dp;
+	line-height: 15dp;
+	margin-bottom: 4dp;
+}
+.gmd-line.bold { font-weight: bold; color: token(text-warm); }
+
+/* No explicit column count -- see ../../generic_menu_dialog.rcss's own copy of this comment for
+   why row + flex-wrap (derived from button count/width vs. available space) replaces a
+   caller-specified column knob. overflow shorthand order and pointer-events follow the exact
+   same reasoning as .gcd-text-col in generic_confirm_dialog.rcss. */
+.gmd-button-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 100%;
+	max-height: 100%;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+.gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: token(metal-rail-dark); }
+.gmd-button-row scrollbarvertical sliderbar { background-color: token(metal-edge); }
+.gmd-button-row scrollbarvertical sliderbar:hover,
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: token(metal-highlight); }
+.gmd-button-row scrollbarvertical sliderarrowdec,
+.gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
+.gmd-button-row scrollbarhorizontal { height: 0; }
+
+/* Repeated unit of .gmd-button-row -- see legacy's own copy of this rule for the full reasoning
+   (button + its own optional description lines, stacked in a column; the margin that used to
+   live on .gmd-btn moved here). */
+.gmd-button-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 128dp;
+	margin: 0 3dp 6dp 3dp;
+}
+.gmd-button-cell.compact { width: 64dp; }
+/* See legacy's own copy of this rule for why. */
+.gmd-button-cell.has-lines { margin-bottom: 10dp; }
+/* GenericMenuConfig::columns == 2 -- see legacy's own copy of this rule for the full reasoning
+   (worst-case scrollbar width, no box-sizing support). Content width: 230dp panel - 14dp*2
+   .gmd-content-well insets = 202dp -- minus another 2dp for .modern-content-well's own
+   border-width:1dp (base.rcss; also no-box-sizing, so this reduces the well's actual content box
+   even though it's not visible in this file) = 200dp, - 6dp scrollbar = 194dp. A first pass used
+   94dp here with zero safety margin, landing exactly on this budget's edge once the 2dp border
+   was accounted for -- one wrap-breaking dp over, and the grid collapsed to 1 column in-game.
+   Margin trimmed to 2dp/side, and this time leaving real headroom (90dp, not the bare 92dp max):
+   2*(90 + 4dp cell margin) = 188dp <= 194dp. */
+.gmd-button-cell.cols-2 { width: 90dp; margin: 0 2dp 6dp 2dp; }
+
+/* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
+   ordinary flex children, same technique generic_confirm_dialog.rcss's own item3d-anchor/keypad
+   buttons already use. 128dp/64dp match legacy's own copy of this rule (native's two button
+   sizes) for consistency between themes. */
+.gmd-btn {
+	position: static;
+	width: 128dp;
+	height: 30dp;
+}
+.gmd-btn.compact { width: 64dp; }
+/* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (matches
+   the cell exactly, no subtraction -- see legacy's own copy of this rule for why: border/padding
+   moved off this element onto .gmd-btn-fill/.gmd-btn-label below). height/line-height/white-space
+   change because a long jewel name needs to wrap onto 2 lines at this width -- .btn's own fixed
+   height:30dp/line-height:30dp assumes a single line. Unlike legacy, .btn's decorator here is a
+   procedural gradient (base.rcss), not a fixed-pixel image sprite, so it doesn't have legacy's
+   stretch-mismatch problem -- but the fill/label split below is still needed regardless of theme,
+   for a different reason (see .gmd-btn-fill's own comment).
+   position:relative -- see legacy's own copy of this rule for why (containing block for
+   .gmd-btn-fill's absolute positioning; without it the fill escapes past .gmd-btn's own
+   position:static and covers the whole .gmd-content-well instead of just this button). */
+.gmd-btn.cols-2 {
+	position: relative;
+	width: 90dp;
+	height: auto;
+	min-height: 30dp;
+	line-height: normal;
+	white-space: normal;
+}
+/* Deliberately empty/inert for the default and compact sizes -- see legacy's own copy of this
+   rule for why. */
+.gmd-btn-fill {
+	position: absolute;
+	z-index: 0;
+	pointer-events: none;
+}
+/* Lives on this separate, childless sibling rather than directly on .gmd-btn.cols-2 -- a
+   bordered/backgrounded element that also has children renders an incomplete, non-closed box in
+   this engine (STATUS.md's own finding, first found via server_select.rcss's .server-row);
+   .gmd-btn always has a child (.gmd-tooltip below), so the fill has to live on a sibling instead.
+   No decorator override needed here (modern's .btn decorator is a procedural gradient, not an
+   image sprite), just the border/background this class needs on its own. */
+.gmd-btn.cols-2 .gmd-btn-fill {
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+	border-width: 1dp;
+	border-color: token(border-frame);
+	background-color: token(surface-control);
+}
+.gmd-btn.cols-2:hover .gmd-btn-fill { border-color: token(border-hover); }
+.gmd-btn.cols-2:active .gmd-btn-fill { background-color: #0a0b09; }
+/* See legacy's own copy of this rule for why position:relative + an explicit z-index above the
+   fill's own are both required (this engine's actual stacking tiebreak among positioned siblings
+   turned out not to match a "later in markup wins" assumption -- confirmed the hard way), and why
+   text lives here instead of directly in .gmd-btn. */
+.gmd-btn-label {
+	position: relative;
+	z-index: 1;
+	display: block;
+	width: 100%;
+}
+.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; }
+/* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
+   data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
+
+/* Static per-button hint text -- same reasoning as legacy's own copy of this rule (known at
+   Show() time, so a plain :hover reveal suffices, no need for the heavier C++-positioned tooltip
+   panel main_frame.rml's own skill tooltip uses). */
+.gmd-tooltip {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: 100%;
+	margin-bottom: 4dp;
+	transform: translateX(-50%);
+	width: 140dp;
+	white-space: normal;
+	text-align: center;
+	font-size: 10dp;
+	font-weight: normal;
+	color: token(text-primary);
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-frame);
+	padding: 3dp 6dp;
+	pointer-events: none;
+}
+.gmd-btn:hover .gmd-tooltip {
+	display: block;
+}
+/* Guards against a hover-reveal when there's no tooltip text -- matches the hover rule above's
+   own specificity so this later declaration wins the cascade tie; see legacy's own copy of this
+   rule for why not !important (unsupported by this engine's stylesheet parser). */
+.gmd-btn:hover .gmd-tooltip.hidden {
+	display: none;
+}

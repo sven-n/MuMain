@@ -1,0 +1,48 @@
+<template name="window_shell_bg" content="content">
+<head></head>
+<!-- Modern theme's background-only window shell -- a sibling of window_shell.rml (see its own
+     comment for the general family) with no header block and no data-model of any kind. This
+     variant exists specifically for background-context companion documents (the *_bg.rml pattern,
+     see npc_shop_bg.rml for the mechanism) -- those are deliberately 100% static markup (no
+     RmlModelBinder), which window_shell's own has_title/title bindings would have nothing to bind
+     against. CGenericConfirmDialog's own generic_confirm_dialog_bg.rml is the first consumer; its
+     real header lives in the paired foreground document instead.
+
+     Deliberately empty head (Template::Load() requires this element to exist at all, but nothing
+     needs linking here) -- unlike window_shell.rml (whose own paired stylesheet has no token(...)
+     calls at all), the classes used below (.modern-shell-edge/.modern-groove) live in base.rcss,
+     which is full of token(...) markers. RmlTheme.cpp's own InlineTokenizedStylesheet() substitutes
+     token(...) markers by scanning the raw text of whatever RML file
+     UI::RmlBridge::LoadThemedDocument()/CreateBackgroundDocument() was asked to load, rewriting
+     each of ITS OWN direct rcss link entries in place -- a template file's own head is never one of
+     those, since RmlUi's own TemplateCache::LoadTemplate() reads a template file directly from
+     disk, entirely bypassing this project's C++ loading path. An rcss link to base.rcss living here
+     instead would reach RmlUi as raw, unsubstituted text, and every token(...) call in it would
+     silently fail to parse -- confirmed the hard way, see STATUS.md. The consuming document links
+     base.rcss itself, directly in its own head, the normal way (see
+     generic_confirm_dialog_bg.rml).
+
+     Deliberately does NOT apply .modern-frame to #panel -- unlike window_shell's own metal-rail
+     look, this consumer's frame paint is its own bespoke hatched-iron treatment (matches the
+     project's own reference mockup for plain confirm/message dialogs), not the standard bevel-
+     border frame. Only .modern-shell-edge/.modern-groove are shared here (their own box-shadow
+     highlight alphas are close enough that a same-document override in the consumer's own rcss can
+     restore the exact original values, see generic_confirm_dialog_bg.rcss); #panel's own
+     background/border/decorator and #content's own fill paint stay 100% the consuming document's
+     responsibility, same as .modern-content-well's own "position and paint are the consumer's job"
+     convention already establishes.
+
+     A consumer links this file as a template resource in its own head section and sets this
+     template's name as its own body element's template attribute (see
+     generic_confirm_dialog_bg.rml for the worked example), with no children of its own needed --
+     nothing gets spliced into #content below for a purely static bg document, but the slot exists
+     for a future consumer that does need one. See STATUS.md's "Findings worth knowing" for the two
+     Template::Load()/FindTag() gotchas discovered while building window_shell.rml -- avoid a
+     literal tag-shaped example anywhere in this file's own comments, and never join the words head
+     and body with a bare slash, anywhere in this file, comments included. -->
+<body id="panel">
+	<div class="modern-shell-edge"></div>
+	<div class="modern-groove"></div>
+	<div id="content"></div>
+</body>
+</template>

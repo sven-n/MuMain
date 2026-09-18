@@ -1,0 +1,30 @@
+<template name="window_shell_bg">
+<head>
+	<link type="text/rcss" href="window_shell_bg.rcss"/>
+</head>
+<!-- Legacy theme's background-only window shell -- a sibling of window_shell.rml (see its own
+     comment for the general family) with no header/title-banner sprite swap at all. This variant
+     exists specifically for background-context companion documents (the *_bg.rml pattern, see
+     npc_shop_bg.rml for the mechanism) -- those are deliberately 100% static markup (no
+     RmlModelBinder), and this consumer's real header (when it has one) lives in a separate,
+     paired foreground document instead. CGenericConfirmDialog's own generic_confirm_dialog_bg.rml
+     is the first consumer.
+
+     No content slot -- unlike the modern fork, legacy's bg document has no separate content-fill
+     piece of its own (the sprite-back art already reads as the recessed surface, no extra
+     CSS-decorated fill needed), so there is nothing to ever splice in here.
+
+     A consumer links this file as a template resource in its own head section and sets this
+     template's name as its own body element's template attribute (see
+     generic_confirm_dialog_bg.rml for the worked example), with no children of its own needed. See
+     STATUS.md's "Findings worth knowing" for the two Template::Load()/FindTag() gotchas discovered
+     while building window_shell.rml -- avoid a literal tag-shaped example anywhere in this file's
+     own comments, and never join the words head and body with a bare slash, anywhere in this file,
+     comments included. -->
+<body id="panel">
+	<div class="window-shell-sprite-back"></div>
+	<div class="window-shell-sprite-top"></div>
+	<div class="window-shell-sprite-middle"></div>
+	<div class="window-shell-sprite-bottom"></div>
+</body>
+</template>

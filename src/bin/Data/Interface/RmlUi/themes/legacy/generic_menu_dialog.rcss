@@ -1,0 +1,171 @@
+/* Legacy theme for the generic menu dialog. Single document (unlike generic_confirm_dialog's
+   fg/bg split) -- no item3D here, so no compositing-order problem to solve. Frame/border/header
+   chrome (sprite frame + optional title banner) now lives in window_shell.rml/.rcss, a template
+   shared with any future consumer -- not exclusive to this dialog (see that file's own comment).
+   This file supplies only this document's own content layout (lines/buttons), not the shell.
+
+   #panel is centered via .center-both; dp throughout (LayoutMode::Dialog window, same category
+   as generic_confirm_dialog.rcss). 230dp matches native's own MSGBOX_WIDTH and
+   generic_confirm_dialog.rcss's own panel width, for visual consistency between the two
+   sibling primitives. Fixed 260dp height comfortably fits the largest native consumer (5
+   buttons + a few lines of text) with .gmd-button-row's own scrollbar (below) as the safety
+   valve, not pixel-exact math. */
+#panel {
+	width: 230dp;
+	height: 260dp;
+	font-family: "Liberation Sans";
+	font-size: 12dp;
+	color: white;
+}
+
+.gmd-line {
+	display: block;
+	width: 100%;
+	text-align: center;
+	white-space: normal;
+	color: #ffe0a0;
+	margin-bottom: 4dp;
+}
+.gmd-line.bold { font-weight: bold; }
+
+/* No explicit column count -- row + flex-wrap lets the button count/width and the row's own
+   available width determine how many fit per line, same mechanism
+   generic_confirm_dialog.rcss's own numeric-keypad grid already proves. Every native consumer's
+   fixed 128dp button width only ever fits one per row within this panel, so this naturally
+   reproduces their own single-column stack with no config knob needed; a future consumer with
+   narrower buttons would simply wrap onto more columns on its own.
+   overflow/pointer-events follow the exact same reasoning as .gcd-text-col in
+   generic_confirm_dialog.rcss (shorthand order matters for scrollbar creation; pointer-events
+   must be re-opted-in or the generated scrollbar can't receive input). */
+.gmd-button-row {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	justify-content: center;
+	width: 100%;
+	max-height: 100%;
+	overflow: hidden auto;
+	pointer-events: auto;
+}
+.gmd-button-row scrollbarvertical { width: 6dp; margin: 0; }
+.gmd-button-row scrollbarvertical slidertrack { background-color: #100c06; }
+.gmd-button-row scrollbarvertical sliderbar { background-color: #4a4a45; }
+.gmd-button-row scrollbarvertical sliderbar:hover,
+.gmd-button-row scrollbarvertical sliderbar:active { background-color: #6e6e66; }
+.gmd-button-row scrollbarvertical sliderarrowdec,
+.gmd-button-row scrollbarvertical sliderarrowinc { width: 0; height: 0; }
+.gmd-button-row scrollbarhorizontal { height: 0; }
+
+/* Repeated unit of .gmd-button-row -- one button plus its own optional description lines
+   (button.lines), stacked in a column so text that belongs to a specific button (e.g.
+   CChaosMixMenuMsgBox's per-recipe blurb) renders directly above that button instead of being
+   bunched into the shared .gmd-line summary above the whole row. Width mirrors .gmd-btn's own two
+   sizes below so .gmd-line's width:100% wraps to the same column the button itself occupies; the
+   margin that used to live on .gmd-btn moved here so row spacing is unchanged. Empty
+   button.lines (the common case) just means an empty cell around a plain button -- no visual
+   difference from before this existed. */
+.gmd-button-cell {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 128dp;
+	margin: 0 3dp 6dp 3dp;
+}
+.gmd-button-cell.compact { width: 64dp; }
+/* A button with its own description lines needs a bit more breathing room below it than a plain
+   one, so it doesn't read as crowded against whatever's next in the stack. */
+.gmd-button-cell.has-lines { margin-bottom: 10dp; }
+/* GenericMenuConfig::columns == 2 -- sized to fit exactly 2 per row within .gmd-body's own content
+   width, accounting for the WORST case where .gmd-button-row's own vertical scrollbar appears
+   (10 buttons in 2 columns = 5 rows, tall enough to need it): 230dp panel - 32dp*2 margins = 166dp,
+   - 6dp scrollbar = 160dp available. Margin trimmed to 2dp/side (from the base rule's 3dp) to
+   leave more room for the button itself: 2*(width + 4dp cell margin) <= 160dp => width <= 76dp.
+   See .gmd-btn.cols-2 below for why this needs its own decorator instead of inheriting .btn's
+   fixed-pixel sprite, and for the button's own narrower content width (this engine has no
+   box-sizing -- its border/padding add to width, they don't come out of it). */
+.gmd-button-cell.cols-2 { width: 76dp; margin: 0 2dp 6dp 2dp; }
+
+/* .btn defaults to position:absolute (base.rcss) -- overridden back to static so buttons flow as
+   ordinary flex children, same technique .gcd-item3d-anchor/.btn.gcd-keypad-btn already use in
+   generic_confirm_dialog.rcss. 128dp/64dp match native's own two button sizes exactly
+   (MSGBOX_BTN_EMPTY_WIDTH/_SMALL_WIDTH, CommonMessageBox.h). */
+.gmd-btn {
+	position: static;
+	width: 128dp;
+	height: 30dp;
+}
+.gmd-btn.compact { width: 64dp; }
+/* GenericMenuConfig::columns == 2 -- see .gmd-button-cell.cols-2 above for the width math (decorators
+   don't consume box-model space like border/padding do, so this matches the cell exactly, no
+   subtraction needed). height switches to auto (with a min-height floor so a short 1-line label
+   still looks like a normal button) since a long jewel name (e.g. "Higher Refining Stone") needs
+   to wrap onto 2 lines at this width -- .btn's own fixed height:30dp/line-height:30dp assumes a
+   single line and would otherwise let the second line spill silently past the button's own box.
+   decorator: ninepatch(...) replaces .btn's inherited decorator: image(legacy-btn-idle) (a fixed
+   108x30px sprite that doesn't stretch/shrink to a mismatched box size -- confirmed elsewhere in
+   this codebase, STATUS.md's "decorator: image(...) does not stretch" finding) with a proper
+   9-slice scale of the SAME asset using the sheet's own already-declared (if previously unused by
+   this file) `legacy-btn-idle-inner` rect -- exactly the technique server_select.rcss's .server-row
+   already proves for this exact problem (that's the actual, currently-shipping fix for the
+   STATUS.md finding above, not the flat-fill fallback an earlier comment here described; see that
+   file's own `.server-row`/`.group-btn` rules). Unlike background-color/border, a decorator paints
+   independently of the box-model layer the "bordered element with children" bug affects
+   (server_select.rcss's own comment: "the ninepatch decorator paints separately, unaffected"), so
+   this can go directly on .gmd-btn.cols-2 despite it having children (.gmd-btn-label/.gmd-tooltip)
+   -- no separate childless sibling element needed the way a flat background-color/border would. */
+.gmd-btn.cols-2 {
+	width: 76dp;
+	height: auto;
+	min-height: 30dp;
+	line-height: normal;
+	white-space: normal;
+	decorator: ninepatch(legacy-btn-idle, legacy-btn-idle-inner);
+}
+.gmd-btn.cols-2:hover { decorator: ninepatch(legacy-btn-hover, legacy-btn-hover-inner); }
+.gmd-btn.cols-2:active { decorator: ninepatch(legacy-btn-active, legacy-btn-active-inner); }
+/* Text lives in its own element (not raw text directly in .gmd-btn) purely so a decorator change
+   here doesn't require touching the shared markup structure again; no stacking-order concerns
+   remain now that there's no separate absolutely-positioned fill sibling to compete with (an
+   element's own decorator always paints before its children are rendered, same reason
+   .gmd-tooltip's own background already sits visibly on top of its ancestor .gmd-btn's paint). */
+.gmd-btn-label {
+	display: block;
+	width: 100%;
+}
+.gmd-btn.cols-2 .gmd-btn-label { padding: 4dp 2dp; }
+/* .btn.disabled (base.rcss) already gives the exact look a disabled menu button needs --
+   data-class-disabled="!button.enabled" just toggles that existing class, no new rule needed. */
+
+/* Static per-button hint text -- known at Show() time, so a plain :hover reveal is enough (no
+   need for the heavier C++-positioned tooltip panel main_frame.rml's own skill tooltip uses,
+   which exists for dynamically-positioned content this doesn't have). Child of .gmd-btn (not a
+   hand-authored sibling like my_inventory.rcss's own tooltips) since this is a data-for-repeated
+   button, so a descendant combinator is used instead of that file's `~` sibling one. */
+.gmd-tooltip {
+	display: none;
+	position: absolute;
+	left: 50%;
+	bottom: 100%;
+	margin-bottom: 4dp;
+	transform: translateX(-50%);
+	width: 140dp;
+	white-space: normal;
+	text-align: center;
+	font-size: 10dp;
+	font-weight: normal;
+	color: white;
+	background-color: #100c06;
+	border: 1dp #4a3620;
+	padding: 3dp 6dp;
+	pointer-events: none;
+}
+.gmd-btn:hover .gmd-tooltip {
+	display: block;
+}
+/* Guards against a hover-reveal when there's no tooltip text at all -- matches the hover rule
+   above's own specificity (3 classes each) so this later declaration wins the cascade tie
+   instead of losing to it outright, same convention every other .hidden cascade-tie fix in this
+   codebase uses (no !important -- confirmed unsupported by this engine's stylesheet parser). */
+.gmd-btn:hover .gmd-tooltip.hidden {
+	display: none;
+}

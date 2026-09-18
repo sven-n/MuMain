@@ -1,0 +1,925 @@
+/* Shared, cross-window RCSS for the modern theme: generic (non-positional) rules reused by more
+   than one migrated window, plus the anchor/center/stretch layout utility classes every window
+   uses. Every migrated window's <head> links this file first, then its own per-window positional
+   .rcss.
+
+   Second generation: blackened iron / dark forged metal. Colors/borders below are named against
+   this theme's design-token table -- keep the trailing token-name comment next to each value;
+   that table is the source of truth.
+
+   Depth primitives (.modern-frame/.modern-panel/.modern-inset, .btn/.checkbox-box below) simulate
+   raised/recessed surfaces using per-side border-color bevels plus `decorator:
+   linear-gradient(...)`. Light source is fixed upper-left: a RAISED surface gets a lighter
+   top/left border/gradient corner, darker bottom/right; a RECESSED surface inverts both. Never
+   mix the two directions on one element.
+
+   Real `box-shadow` (inset/outset, blur, multiple shadows) is supported by this renderer and used
+   directly for shadow/glow effects a border color can't express; the per-side bevel technique
+   stays the right tool for a surface's own edge. Engine note: this engine's rgba() parses alpha
+   as a 0-255 integer, not a 0-1 CSS float -- every box-shadow color below is pre-converted to the
+   0-255 form. */
+
+body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	pointer-events: none;
+}
+
+/* Full-screen dim overlay for modal-style windows (SysMenuWin/OptionWin). */
+#backdrop {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	background-color: token(surface-deep);
+	pointer-events: auto;
+}
+
+.checkbox-row {
+	position: absolute;
+	cursor: pointer;
+	pointer-events: auto;
+}
+/* Small recessed control whose gold indicates checked state, not the theme's general-purpose
+   accent-gold token (noticeably brighter/more saturated than this control's own tone). No
+   decorator/bevel on the unchecked state -- flat by design. */
+.checkbox-box {
+	display: inline-block;
+	width: 12dp;
+	height: 12dp;
+	background-color: #0c0e0b;
+	border-width: 1dp;
+	border-color: #514a35;
+	border-radius: token(radius-sm)dp;
+	box-shadow: inset 0 1dp 2dp rgba(0, 0, 0, 140);
+}
+.checkbox-box.checked {
+	background-color: #8f6922;
+	decorator: linear-gradient(to bottom, #d3aa4e, #8f6922);
+	border-color: #aa8132;
+}
+.checkbox-label {
+	position: absolute;
+	left: 18dp; /* 12dp box + reference's own 6px flex gap */
+	top: 0;
+	white-space: nowrap;
+	font-family: "token(font-body)";
+	font-size: 9dp;
+	color: token(text-secondary);
+}
+
+/* Flat dark-iron fill with a visible metal-frame border -- steel is the general interactive
+   accent (hover/focus), gold is reserved for selected-state/text emphasis, never general button
+   chrome. Per-side border bevel (light top/left, dark bottom/right) is the same "raised surface"
+   language .modern-frame uses -- a single uniform border-color would read as a web button, not a
+   forged-metal one. Shared by every .btn consumer (sys_menu, msg_win, remember_password_prompt,
+   char_make, char_sel_main, credit_win, mu_helper_bar, my_quest_info, server_select, login). */
+.btn {
+	position: absolute;
+	width: 108dp;
+	height: 30dp;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30dp;
+	cursor: pointer;
+	font-family: "token(font-body)";
+	font-size: 9dp;
+	letter-spacing: 0.18dp;
+	color: #c0b9a4;
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 10),
+		transparent 45%),
+		linear-gradient(to bottom, #26251d, #13140f 58%, #0a0b09);
+	border-width: 1dp;
+	border-color: #4a4738;
+	border-radius: token(radius-sm)dp;
+	pointer-events: auto;
+	box-shadow:
+		inset 0 1dp 0 rgba(232, 215, 168, 14),
+		inset 0 -1dp 0 #000000,
+		0 1dp 2dp rgba(0, 0, 0, 153);
+}
+.btn:hover {
+	color: #e0c476;
+	border-color: #776646;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 13),
+		transparent 45%),
+		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09);
+}
+.btn:active {
+	/* Real 1dp downward shift plus one inset shadow. Native :active pseudo-class -- unverified
+	   against this branch's own mouse-input routing, but degrades gracefully if it never fires. */
+	transform: translateY(1dp);
+	box-shadow: inset 0 1dp 3dp rgba(0, 0, 0, 184);
+}
+.btn.disabled {
+	pointer-events: none;
+	background-color: #0a0b09;
+	color: token(semantic-neutral);
+	border-color: rgba(70, 70, 59, 60); /* metal-mid's rgb @ 60 alpha, stays neutral when disabled, no gold */
+	opacity: 0.55;
+	cursor: default;
+}
+
+/* Opt-in primary/hero variant -- apply alongside .btn (class="btn btn-ok") for a window's one
+   confirm-style action; plain .btn stays flat/neutral for a list of equal-weight actions (e.g.
+   sys_menu.rcss's four stacked buttons). Overrides only color properties, not layout. Must stay
+   textually after .btn/.btn:hover/.btn:active (equal specificity once combined on one element,
+   so source order decides). */
+.btn-ok {
+	color: #e5c35c;
+	background-color: #351009;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 212, 151, 18),
+		transparent 38%),
+		linear-gradient(to bottom, #651b12, #351009 58%, #160706);
+	border-color: #733022;
+	box-shadow:
+		inset 0 1dp 0 rgba(255, 218, 159, 23),
+		inset 0 -1dp 0 #090201,
+		0 2dp 5dp rgba(0, 0, 0, 128);
+}
+.btn-ok:hover {
+	decorator: linear-gradient(to bottom,
+		rgba(255, 212, 151, 26),
+		transparent 38%),
+		linear-gradient(to bottom, #7a2116, #451309 58%, #1c0907);
+	border-color: #9a4028;
+}
+/* No :active override -- the reference gives .btn-primary no separate pressed state either; the
+   generic .btn:active above applies uniformly to both variants, matching its actual cascade. */
+.btn-ok.disabled {
+	/* Resets decorator/box-shadow to neutral -- two classes here outrank .btn-ok's one-class
+	   declarations on specificity, so without this the crimson gradient/shadow would paint over
+	   the disabled neutral fill. */
+	decorator: none;
+	box-shadow: none;
+}
+
+/* Shared icon-only button -- carved-iron FAB look, same gradient/shadow recipe as .btn/.btn-ok
+   above.
+
+   position:absolute against #panel directly, not nested in a positioned wrapper -- nesting under
+   a bottom/right-anchored wrapper made buttons vanish entirely on this engine. */
+.btn-icon {
+	position: absolute;
+	width: 54dp;
+	height: 30dp;
+	cursor: pointer;
+	pointer-events: auto;
+	text-align: center;
+	line-height: 30dp;
+	color: token(text-secondary);
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 11),
+		transparent 40%),
+		linear-gradient(to bottom, #26251d, #15160f 56%, #090a08);
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
+	box-shadow:
+		0 2dp 5dp rgba(0, 0, 0, 133),
+		inset 0 1dp 0 rgba(232, 215, 168, 18),
+		inset 0 -1dp 0 #000000;
+}
+.btn-icon:hover {
+	color: token(accent-gold-hover);
+	border-color: token(border-hover);
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 15),
+		transparent 40%),
+		linear-gradient(to bottom, #302b1f, #18160f 56%, #0c0c09);
+	box-shadow:
+		0 3dp 6dp rgba(0, 0, 0, 143),
+		inset 0 1dp 0 rgba(224, 196, 118, 28),
+		inset 0 -1dp 0 #000000;
+}
+.btn-icon:active {
+	transform: translateY(1dp);
+	background-color: #0a0b09;
+	decorator: none;
+	box-shadow: inset 0 2dp 5dp rgba(0, 0, 0, 199);
+}
+/* background-color is a solid dark neutral, not token(surface-control) -- that token is already
+   near-transparent, and combined with opacity:0.5 the button read as completely gone rather than
+   dimmed. A solid fill dimmed by opacity reads as "disabled," not "absent." */
+.btn-icon.disabled {
+	pointer-events: none;
+	opacity: 0.55;
+	cursor: default;
+	color: token(text-secondary);
+	decorator: none;
+	background-color: #0a0b09;
+	border: 1dp token(border-frame);
+	box-shadow: none;
+}
+/* Opt-in hero variant for a bar's one primary action (e.g. Menu) -- same .btn-ok convention as
+   above: add alongside .btn-icon, overrides only color properties. */
+.btn-icon-primary {
+	color: token(text-warm);
+	background-color: #2d0d08;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 212, 151, 18),
+		transparent 36%),
+		linear-gradient(to bottom, #4b160f, #2d0d08 58%, #130604);
+	border-color: #733022;
+	box-shadow:
+		0 2dp 5dp rgba(0, 0, 0, 133),
+		inset 0 1dp 0 rgba(255, 218, 159, 20),
+		inset 0 -1dp 0 #090201;
+}
+.btn-icon-primary:hover {
+	color: token(accent-gold-hover);
+	border-color: #9a4028;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 212, 151, 26),
+		transparent 36%),
+		linear-gradient(to bottom, #651b12, #351009 58%, #160706);
+}
+/* font-family/size often need redeclaring directly on the label span -- inheritance from a
+   data-model-bound ancestor silently fails for text in this RmlUi build.
+   DejaVu Sans, not token(font-body)/Liberation Sans -- these labels are Unicode glyphs and
+   Liberation Sans's cmap only covers one of them. RmlUi has no per-glyph fallback across loaded
+   faces (only a single whole-family fallback_face), so this can't be split per-character within
+   one font-family. */
+.btn-icon-label {
+	color: token(text-primary);
+	font-weight: bold;
+	font-family: "DejaVu Sans";
+}
+.btn-icon-primary .btn-icon-label {
+	color: token(text-warm);
+}
+.btn-icon.disabled .btn-icon-label {
+	color: token(text-disabled);
+}
+
+/* .btn-icon-item (the wrapper markup in login_main.rml/char_sel_main.rml) is deliberately
+   unstyled -- no CSS rule, position:static by default. .btn-icon/.btn-icon-caption both resolve
+   position:absolute directly against #panel, one level only (see .btn-icon's own comment). */
+.btn-icon-caption {
+	position: absolute;
+	width: 72dp;
+	line-height: 12dp;
+	text-align: center;
+	font-size: 9dp;
+	color: token(text-secondary);
+	font-family: "token(font-body)";
+	white-space: nowrap;
+}
+
+/* Reusable window-layering primitives. Usage: apply .modern-frame to the outer positioned panel
+   element itself (keeps its position/size), then add ONE decorative child div with .modern-panel,
+   inset a few px on all sides, as the FIRST child (so it paints behind real content) -- the small
+   reveal between the frame's inner edge and the panel's border is deliberate, a third visual band
+   of the frame's own material. Real content stays a direct child of .modern-frame at its original
+   position -- do NOT nest content inside .modern-panel, its inset would shift every child.
+
+   This engine has no CSS variable mechanism, so a shared class can only carry structural
+   properties portably; a window's own palette comes from a *named palette variant* modifier class
+   (e.g. .modern-frame-crimson below) applied alongside the base class
+   (class="modern-frame modern-frame-crimson") -- the variant only overrides color/decorator,
+   .modern-frame's own border-width/mechanism still applies underneath. Position/size stay the
+   consuming window's own responsibility either way. */
+.modern-frame {
+	background-color: rgba(17, 19, 15, 196); /* surface-panel's rgb @ 196 alpha -- can't use token(surface-panel) directly, it has no alpha channel of its own */
+	decorator: linear-gradient(to bottom, rgba(32, 34, 29, 196) 0%, rgba(17, 19, 15, 196) 45%, rgba(8, 10, 8, 196) 100%);
+	border-width: 2dp;
+	border-top-color: rgba(92, 96, 88, 160); /* metal-edge's rgb @ 160 alpha: bevel-light, brighter than the fill for a real edge-catch */
+	border-left-color: rgba(92, 96, 88, 160);
+	border-bottom-color: rgba(0, 0, 0, 190); /* bevel-dark */
+	border-right-color: rgba(0, 0, 0, 190);
+}
+.modern-panel {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
+	pointer-events: none;
+	background-color: token(surface-recessed);
+	decorator: linear-gradient(to bottom, rgba(14, 16, 13, 180) 0%, rgba(7, 8, 7, 180) 100%);
+	border-width: 1dp;
+	border-color: token(border-inner); /* the recessed content-well border this token exists for */
+	border-top-color: rgba(0, 0, 0, 160); /* bevel-dark-inset: recessed relative to the frame */
+	border-left-color: rgba(0, 0, 0, 160);
+	border-bottom-color: rgba(107, 96, 69, 20); /* metal-warm-edge's rgb @ 20 alpha: bevel-light-inset, a faint warm catch */
+	border-right-color: rgba(107, 96, 69, 20);
+	border-radius: token(radius-md)dp;
+}
+
+/* Palette variant for the "real dialog" family (login/msg_win/my_quest_info/sys_menu/
+   remember_password_prompt). Apply alongside .modern-frame/.modern-panel
+   (class="modern-frame modern-frame-crimson"), not instead of them. Despite the name this isn't
+   crimson itself (that's accent-crimson) -- it's a marginally warmer, slightly darker iron than
+   plain .modern-frame; only title/label text and the checkbox go warm/gold. */
+.modern-frame-crimson {
+	background-color: #0e0f0c;
+	decorator: linear-gradient(to bottom, #191b15, #0e0f0c 30%, #080907);
+	border-top-color: rgba(107, 96, 69, 90); /* metal-warm-edge's rgb @ 90 alpha: a warm iron highlight catching the top edge */
+	border-left-color: rgba(0, 0, 0, 160);
+	border-right-color: rgba(0, 0, 0, 160);
+	border-bottom-color: rgba(0, 0, 0, 220);
+}
+.modern-panel-crimson {
+	background-color: #0a0b09;
+	decorator: linear-gradient(to bottom, #111210, #0a0b09 55%, #060706);
+	border-top-color: rgba(107, 96, 69, 45); /* metal-warm-edge's rgb @ 45 alpha */
+	border-bottom-color: rgba(0, 0, 0, 240);
+	border-left-color: #050505;
+	border-right-color: #050505;
+}
+
+/* Thin accent line just inside .modern-frame -- border only, no fill, so the frame's own gradient
+   still shows through. Apply as a direct child of .modern-frame, inset a few px more than
+   .modern-panel (a fourth visual band, not a replacement for the frame/panel pair).
+   Position/size stay the consuming window's own responsibility. */
+.modern-frame-accent {
+	position: absolute;
+	pointer-events: none;
+	border-width: 1dp;
+}
+.modern-frame-accent-crimson {
+	border-color: rgba(70, 70, 59, 166); /* metal-mid's rgb @ 166 alpha */
+	border-top-color: token(accent-steel-hover);
+	border-bottom-color: rgba(0, 0, 0, 200);
+}
+
+/* Raised header/footer bands -- overlay bands painted after .modern-panel (not a repositioning of
+   it), so title text/labels/buttons stay exactly where they are while a raised band draws across
+   the top/bottom of the surface. Apply as a direct child of .modern-frame, sized by the consuming
+   window. left/right/top default to the same 4dp inset as .modern-panel/.modern-frame-accent, not
+   flush with .modern-frame's own edge (0/0) -- flush would paint over the frame's 2dp bevel
+   border. A window can widen it back to 0/0 locally if it wants the header to reach the edge. */
+.modern-header {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	pointer-events: none;
+	background-color: #171813;
+	decorator: linear-gradient(to bottom, #24241d 0%, #171813 45%, #0d0f0c 100%);
+	border-bottom-width: 1dp;
+	border-bottom-color: #000000;
+}
+/* Small round metal stud straddling the header's top edge, centered via width/height/margin-left
+   (no transform needed). border-radius is a fixed dp value equal to half width/height, not 50% --
+   this engine's border-radius only accepts a length (px/dp), not a percentage. */
+.modern-header-rivet {
+	position: absolute;
+	left: 50%;
+	top: -4dp;
+	width: 8dp;
+	height: 8dp;
+	margin-left: -4dp;
+	pointer-events: none;
+	background-color: #0c0d0b;
+	decorator: radial-gradient(circle, #6b6045 0%, #0c0d0b 75%);
+	border: 1dp #484638;
+	border-radius: 4dp;
+}
+.modern-footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	pointer-events: none;
+	border-top-width: 1dp;
+	border-top-color: #24251f;
+}
+
+/* Border-only recessed bevel, no fill -- for an element with legacy-drawn content underneath it
+   (RmlUi always composites last, so any fill here would hide that content). */
+.modern-inset {
+	border-width: 1dp;
+	border-top-color: rgba(0, 0, 0, 190); /* bevel-dark-inset */
+	border-left-color: rgba(0, 0, 0, 190);
+	border-bottom-color: rgba(255, 255, 255, 30); /* bevel-light-inset */
+	border-right-color: rgba(255, 255, 255, 30);
+}
+.modern-inset.focused {
+	border-top-color: token(accent-steel);
+	border-left-color: rgba(116, 123, 116, 170); /* accent-steel's rgb @ 170 alpha */
+}
+
+/* Reusable "fading crimson banner" -- a soft ambient radial glow meant to sit behind a window's
+   title text (warm-cream core cooling to a muted crimson ring, fading to transparent). Position/
+   size stay the consuming window's own responsibility; place it as a sibling BEFORE the title
+   text it sits behind (RmlUi paints earlier siblings first). */
+.title-glow {
+	position: absolute;
+	pointer-events: none;
+	decorator: radial-gradient(ellipse, rgba(230, 195, 140, 110), rgba(125, 25, 15, 130) 55%, transparent 88%);
+}
+
+/* Shared tooltip shell -- every window's single-line discoverability tooltip applies this
+   directly. .tooltip__name/-type/-rule/-stat/-bonus below are structured-content primitives (a
+   name/type/divider/stat-rows/bonus-line item tooltip) not consumed by any window yet, laid down
+   so a future one doesn't get invented ad hoc. */
+.tooltip {
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+}
+.tooltip__name {
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-family: "token(font-body)";
+}
+.tooltip__type {
+	margin-top: 2dp;
+	color: token(text-secondary);
+	font-family: "token(font-body)";
+	text-transform: uppercase;
+}
+.tooltip__rule {
+	display: block;
+	height: 1dp;
+	margin: 6dp 0;
+	background-color: token(border-recessed);
+}
+.tooltip__stat {
+	display: flex;
+	justify-content: space-between;
+	color: token(text-secondary);
+	font-family: "token(font-body)";
+}
+.tooltip__stat strong {
+	color: token(text-primary);
+	font-weight: bold;
+}
+.tooltip__bonus {
+	margin-top: 6dp;
+	color: token(semantic-success);
+	font-family: "token(font-body)";
+}
+
+/* Shared item-slot primitives -- generalized from main_frame.rcss's .slot-frame/.slot-fill/
+   .selected so any future slot-based UI has a ready-made look. main_frame.rcss keeps its own
+   class names (bound from C++/RML) but is retinted to match these exactly. */
+.slot {
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
+}
+.slot--filled {
+	background-color: rgba(10, 10, 10, 150); /* dark backing, matches main_frame.rcss's existing .slot-fill convention -- not surface-control, that token is for a resting icon-button's light wash, the opposite direction */
+}
+.slot--selected {
+	border-color: token(border-selected);
+	background-color: rgba(180, 138, 50, 25); /* border-selected's rgb @ 25 alpha wash */
+}
+
+.hidden {
+	display: none;
+}
+
+/* Layout primitives -- identical to
+   themes/legacy/base.rcss's copy; pure layout, nothing theme-specific to vary. */
+
+.anchor-top-left {
+	position: absolute;
+	left: 0;
+	top: 0;
+}
+.anchor-top-right {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.anchor-bottom-left {
+	position: absolute;
+	left: 0;
+	bottom: 0;
+}
+.anchor-bottom-right {
+	position: absolute;
+	right: 0;
+	bottom: 0;
+}
+
+.center-x {
+	position: absolute;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.center-y {
+	position: absolute;
+	top: 50%;
+	transform: translateY(-50%);
+}
+.center-both {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+}
+
+.stretch-x {
+	position: absolute;
+	left: 0;
+	right: 0;
+}
+.stretch-y {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+}
+.stretch-both {
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 0;
+	bottom: 0;
+}
+
+/* Invisible marker read by C++ via Element::GetAbsoluteOffset() -- see themes/legacy/base.rcss's
+   identical comment for the full mechanism. */
+.layout-anchor {
+	position: absolute;
+	visibility: hidden;
+	width: 0;
+	height: 0;
+	pointer-events: none;
+}
+
+
+/* ============================================================================
+   Forged-dialog construction
+   ----------------------------------------------------------------------------
+   Structural counterpart to the palette tokens above. Explicit RML layers +
+   per-side bevel borders rather than box-shadow. The login dialog is the
+   first consumer.
+   ============================================================================ */
+
+/* Exterior silhouette / asymmetric perimeter. Put this as the first child of a positioned
+   .modern-frame; it creates the dark outer edge a browser would express with an outside
+   pseudo-element/shadow. Transparent fill -- a solid fill here would read as a second opaque
+   rectangle behind the window surface instead of a thin edge. Highlight alphas are boosted well
+   past a literal browser conversion, which reads as invisible over a real 3D game scene. */
+.modern-shell-edge {
+	position: absolute;
+	left: -3dp;
+	right: -3dp;
+	top: -3dp;
+	bottom: -3dp;
+	pointer-events: none;
+	background-color: transparent;
+	border-radius: token(radius-sm)dp;
+	border-width: 1dp;
+	border-color: rgba(31, 31, 26, 242);
+	box-shadow:
+		inset 1dp 0 0 rgba(130, 121, 91, 110),
+		inset -1dp 0 0 rgba(0, 0, 0, 204),
+		inset 0 1dp 0 rgba(151, 139, 101, 90),
+		inset 0 -1dp 0 rgba(0, 0, 0, 230);
+}
+
+/* Inner groove, ~4dp inward -- counterpart to .modern-shell-edge above: a thin warm hairline
+   catch plus a broad inward darkness, which is what sells the recessed/carved look. */
+.modern-groove {
+	position: absolute;
+	left: 4dp;
+	right: 4dp;
+	top: 4dp;
+	bottom: 4dp;
+	pointer-events: none;
+	border-width: 1dp;
+	border-color: #24261f;
+	box-shadow:
+		inset 0 0 0 1dp rgba(121, 112, 83, 40),
+		inset 0 0 12dp rgba(0, 0, 0, 153);
+}
+
+/* Visible-width blackened-iron rail -- metal header with ONE center rivet (.modern-joint below),
+   the alternative to .modern-title-plate's crimson hero-banner (never both on the same window).
+   box-shadow's inset pair is the header's top catch-light/bottom seat; the outset pair is the
+   cast shadow proving this rail sits above whatever's below it. */
+.modern-header-rail {
+	position: absolute;
+	left: 8dp;
+	right: 8dp;
+	top: 7dp;
+	height: 38dp;
+	pointer-events: none;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1dp;
+	border-color: token(border-rail);
+	border-bottom-color: #171812;
+	box-shadow:
+		inset 0 1dp 0 rgba(235, 218, 169, 18),
+		inset 0 -1dp 0 #000000,
+		0 2dp 4dp rgba(0, 0, 0, 133);
+}
+
+/* Subtle horizontal warm accent line near the rail's bottom edge -- purely decorative, painted as
+   the rail's last child so it sits on top of the rail's fill. */
+.modern-header-accent {
+	position: absolute;
+	left: 7dp;
+	right: 7dp;
+	bottom: 2dp;
+	height: 1dp;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+/* Title text for .modern-header-rail. Vertically centered in the rail's 38dp height via
+   top:50%/margin-top. Not used by Login (its header is the crimson hero-banner/
+   .modern-title-plate, with the server name centered directly on the plate). */
+.modern-header-text {
+	position: absolute;
+	left: 11dp;
+	top: 50%;
+	margin-top: -7dp;
+	pointer-events: none;
+}
+/* Available for a future window that wants a small uppercase category label above the title --
+   not consumed today. */
+.modern-header-eyebrow {
+	font-size: 7dp;
+	color: #67675f;
+	font-family: "token(font-body)";
+}
+.modern-header-title {
+	color: token(text-warm);
+	font-family: "token(font-title)";
+	font-size: 13dp;
+	font-weight: 500;
+	letter-spacing: 0.2dp;
+	font-effect: shadow(0dp 1dp #000000);
+}
+
+/* Recessed body plane. Content belongs inside this element in RML. The broad inset box-shadow is
+   what sells "physically recessed behind the frame" -- a border-color bevel alone is too thin an
+   effect for a cavity this size. */
+.modern-content-well {
+	position: absolute;
+	pointer-events: none;
+	background-color: token(surface-recessed);
+	decorator: linear-gradient(to bottom, #0b0d0b, #070907);
+	border-width: 1dp;
+	border-color: token(border-inner);
+	box-shadow:
+		inset 0 0 16dp rgba(0, 0, 0, 166),
+		inset 0 1dp 0 rgba(255, 255, 255, 5);
+}
+
+/* A structural container for the action row, not a second boxed panel -- no fill, no border, no
+   visual identity of its own; still a real element since it needs to hold the buttons. */
+.modern-footer-band {
+	position: absolute;
+	pointer-events: none;
+}
+
+/* Physical crimson title plate -- this IS the hero-banner header for whichever window uses it
+   (Login among them); a window uses this OR the metal .modern-header-rail/.modern-joint pair,
+   never both. box-shadow's inset pair is the plate's top highlight/bottom seat; outset is the
+   cast shadow proving it sits on/in whatever's behind it. */
+.modern-title-plate {
+	position: absolute;
+	pointer-events: none;
+	background-color: token(metal-title-face);
+	decorator:
+		linear-gradient(to bottom, rgba(255, 217, 158, 18), transparent 34%),
+		linear-gradient(to bottom, #55150f 0%, token(metal-title-face) 56%, token(metal-title-face-dark) 100%);
+	border-width: 1dp;
+	border-color: token(border-title);
+	box-shadow:
+		inset 0 1dp 0 rgba(255, 208, 145, 23),
+		inset 0 -1dp 0 #080201,
+		0 2dp 5dp rgba(0, 0, 0, 140);
+}
+
+/* Center-rivet stud for the METAL rail (.modern-header-rail, not .modern-title-plate) -- a real
+   13x13 square rotated 45deg. Centered via left:50%/negative margin-left rather than
+   `translateX(-50%) rotate(45deg)`, since combining calc()/translate with rotate in one
+   declaration isn't verified on this engine. top:-8dp straddles the rail's top edge. */
+.modern-joint {
+	position: absolute;
+	left: 50%;
+	top: -8dp;
+	width: 13dp;
+	height: 13dp;
+	margin-left: -6.5dp;
+	pointer-events: none;
+	background-color: token(metal-groove);
+	border-width: 1dp;
+	border-color: #484638;
+	transform: rotate(45deg);
+	box-shadow: inset 0 0 0 2dp #0c0d0b;
+}
+
+/* ============================================================================
+   Header-rail family -- px companions for root_scale-driven windows
+   ----------------------------------------------------------------------------
+   RmlUi's `dp` unit is multiplied by the CONTEXT's density-independent-pixel
+   ratio (Source/Core/ComputeProperty.cpp: `case Unit::DP: return value.number *
+   dp_ratio;`), which RmlUiRuntime.cpp's ApplyUIScale() sets once per context
+   from UIScalePercent x ViewportFitScale(). `px` is never touched by that
+   ratio. That's the right (and only) scaling mechanism for a STATIC dialog
+   like Login/SysMenu, whose entire panel is authored in `dp` with no other
+   scaling involved.
+
+   A MOVABLE window synced to a native/legacy-positioned counterpart (e.g.
+   MyInventory, tracking the native paperdoll) instead scales its whole #panel
+   via a CSS `transform: scale(root_scale)`, where root_scale comes from
+   UI::Scaling::GetActiveTransform() -- a completely different number from the
+   context's dp_ratio. Since `transform: scale()` scales its entire subtree
+   regardless of each descendant's own units, a `dp` length in such a panel
+   gets BOTH factors compounded (dp_ratio at layout, then root_scale again via
+   the transform) while a `px` length only gets root_scale -- so the two units
+   drift apart and a borrowed `dp` primitive renders at the wrong size
+   relative to that window's own `px`-based geometry.
+
+   These are the same primitives as their `dp` counterparts above --
+   same property values, same token() color/gradient references (still fully
+   shared: a tokens.ini palette edit repaints both variants) -- with every
+   length re-expressed in `px` instead. Use these (never the `dp` originals)
+   inside any window whose #panel carries a `transform: scale(root_scale)`;
+   use the `dp` originals everywhere else. Keep both variants' property lists
+   identical when editing one. */
+/* Box only -- NOT painted here. This context renders dead last in the frame, after native
+   Render3D(), so a painted rail would cover any 3D item that overflows its cell upward; the real
+   fill/border/shadow/accent live in each window's own `*_bg.rcss` as `.rail-fill`/`.rail-accent`
+   instead. This box just gives `.modern-header-text-px`'s `top:50%` a rect to resolve against. */
+.modern-header-rail-px {
+	position: absolute;
+	left: 8px;
+	right: 8px;
+	top: 7px;
+	height: 38px;
+	pointer-events: none;
+}
+.modern-header-text-px {
+	position: absolute;
+	left: 11px;
+	top: 50%;
+	margin-top: -7px;
+	pointer-events: none;
+}
+.modern-header-eyebrow-px {
+	font-size: 7px;
+	color: #67675f;
+	font-family: "token(font-body)";
+}
+.modern-header-title-px {
+	color: token(text-warm);
+	font-family: "token(font-title)";
+	font-size: 13px;
+	font-weight: 500;
+	letter-spacing: 0.2px;
+	font-effect: shadow(0px 1px #000000);
+}
+.modern-joint-px {
+	position: absolute;
+	left: 50%;
+	top: -8px;
+	width: 13px;
+	height: 13px;
+	margin-left: -6.5px;
+	pointer-events: none;
+	background-color: token(metal-groove);
+	border-width: 1px;
+	border-color: #484638;
+	transform: rotate(45deg);
+	box-shadow: inset 0 0 0 2px #0c0d0b;
+}
+
+/* ============================================================================
+   Inventory-family window chrome -- px companions
+   ----------------------------------------------------------------------------
+   Generalized from my_inventory.rcss's .inv-btn/.inv-wallet family (first
+   consumer: CMyInventory) for reuse by every other CInventoryCtrl-owning
+   window (Trade, Storage, Storage Ext, Mix, NPC Shop, My/Purchase Shop,
+   Inventory Extension, Lucky Item) -- they all show the same 37x26
+   corner-button chrome and, except Storage Ext, the same gold-amount strip.
+   `px` for the same reason as the header-rail family above: every one of
+   these windows scales via its own `transform: scale(root_scale)`, not the
+   RmlUi context's dp ratio.
+
+   Position (left/top/width where given) is this family's own established
+   default (CMyInventory's already-tuned values) -- override per-window only
+   when that window's own layout genuinely differs, same convention as
+   .modern-header-rail-px's top/height override in my_inventory.rcss. */
+.modern-icon-btn-px {
+	position: absolute;
+	top: 392px;
+	width: 37px;
+	height: 26px;
+	cursor: pointer;
+	pointer-events: auto;
+	text-align: center;
+	line-height: 26px;
+	color: token(text-secondary);
+	background-color: #13140f;
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 11), transparent 40%),
+		linear-gradient(to bottom, #26251d, #15160f 56%, #090a08);
+	border: 1px token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		0 2px 5px rgba(0, 0, 0, 133),
+		inset 0 1px 0 rgba(232, 215, 168, 18),
+		inset 0 -1px 0 #000000;
+}
+.modern-icon-btn-px:hover {
+	color: token(accent-gold-hover);
+	border-color: token(border-hover);
+	decorator:
+		linear-gradient(to bottom, rgba(255, 255, 255, 15), transparent 40%),
+		linear-gradient(to bottom, #302b1f, #18160f 56%, #0c0c09);
+}
+.modern-icon-btn-px.hidden { display: none; }
+.modern-icon-btn-px.locked { pointer-events: none; filter: brightness(0.6); }
+.modern-icon-btn-glyph-px {
+	color: inherit;
+	font-weight: bold;
+	font-family: "DejaVu Sans";
+	pointer-events: none;
+}
+
+/* Vector wallet bar (forged-metal strip + coin glyph + label), replacing every legacy money-bar
+   sprite in this family. Default geometry matches CMyInventory's own 15/366/160/20 -- override
+   left/top/width per-window if that window's layout doesn't share Inventory's 15-175px column. */
+.modern-wallet-px {
+	position: absolute;
+	left: 15px;
+	top: 366px;
+	width: 160px;
+	height: 20px;
+	pointer-events: none;
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 9), transparent 34%),
+		linear-gradient(to bottom, #15160f, #090a08);
+	border: 1px token(border-rail);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 12),
+		inset 0 -1px 0 #000000;
+}
+.modern-wallet-coin-px {
+	position: absolute;
+	left: 8px;
+	top: 50%;
+	width: 12px;
+	height: 8px;
+	margin-top: -4px;
+	border: 1px #8f6922;
+	border-radius: 4px;
+	background-color: #8f6922;
+	decorator: linear-gradient(to bottom, #d3aa4e, #8f6922);
+}
+.modern-wallet-label-px {
+	position: absolute;
+	left: 26px;
+	top: 50%;
+	margin-top: -4px;
+	font-size: 7px;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+	color: #77766f;
+	font-family: "token(font-body)";
+}
+/* Sibling of .modern-wallet-px, not nested in it -- same reasoning as my_inventory.rcss's
+   original #gold_text (an independent absolutely-positioned element reads its own right-aligned
+   value more simply than a child squeezed into the wallet bar's own box). */
+.modern-wallet-value-px {
+	position: absolute;
+	right: 18px;
+	top: 371px;
+	width: 110px;
+	text-align: right;
+	color: token(text-warm);
+	font-weight: 500;
+	font-size: 10px;
+	white-space: nowrap;
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+
+/* Recessed control cavity. background is flat (no decorator); depth comes primarily from the
+   inset box-shadow. */
+.modern-control-well {
+	background-color: #080a08;
+	border-width: 1dp;
+	border-color: #37372e;
+	box-shadow:
+		inset 0 2dp 7dp rgba(0, 0, 0, 191),
+		inset 0 0 0 1dp rgba(113, 102, 74, 13);
+}

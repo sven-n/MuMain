@@ -1,0 +1,33 @@
+<rml>
+<head>
+	<title>Personal Store - Purchase</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="purchase_shop.rcss"/>
+</head>
+<body data-model="purchase_shop">
+	<!-- Window frame/title/subtitle-strip/warning-text/exit-button only -- inventory grid stays
+	     native (PurchaseShopInventory.h). Background lives in purchase_shop_bg.rml instead, since
+	     it must paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<span id="title">{{title}}</span>
+
+		<!-- Reproduces IMAGE_MYSHOPINVENTORY_EDIT (newui_Box_openTitle.tga), the same sprite
+		     CMyShopInventory's own subject strip uses -- here purely decorative behind the
+		     shop-owner's (read-only) name, not a live text-input widget. -->
+		<div class="shop-title-strip"></div>
+		<span id="shop_owner_text">{{shop_owner_text}}</span>
+
+		<span class="warning-label">{{warning_label}}</span>
+		<span class="warning-line line-1">{{selling_price_line}}</span>
+		<span class="warning-line line-2">{{verify_line}}</span>
+		<span class="warning-line line-3">{{already_in_store_line}}</span>
+		<span class="warning-line line-4">{{cancel_purchased_line}}</span>
+		<span class="warning-line line-5">{{cant_be_returned_line}}</span>
+		<span class="warning-label-2 line-6">{{all_item_trading_line}}</span>
+		<span class="warning-label-2 line-7">{{zen_only_line}}</span>
+
+		<div id="btn_exit" class="shop-btn-exit" data-event-click="purchase_shop_exit_click"></div>
+	</div>
+</body>
+</rml>

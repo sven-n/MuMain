@@ -2,6 +2,7 @@
 #include "Core/Globals/_define.h"
 #include "Core/Globals/_enum.h"
 #include "Core/Utilities/Singleton.h"
+#include "UI/Inventory/ItemOptionTooltipModel.h"
 
 #include <array>
 #include <cstdint>
@@ -159,7 +160,16 @@ public:
     void	CheckItemSetOptions(void);
     void	MoveSetOptionList(const int StartX, const int StartY);
     void	RenderSetOptionButton(const int StartX, const int StartY);
-    void	RenderSetOptionList(const int StartX, const int StartY);
+
+    // RmlUi port (CMyInventory) of the former RenderSetOptionList(StartX, StartY) --
+    // same content resolution (per-active-set standard/ext/full option lines via the static
+    // RenderSetOptionList(SET_SEARCH_RESULT_OPT&, ...) helper below, unchanged and still shared
+    // with RenderSetOptionListInItem's own item-tooltip use), no drawing. Returns false (and
+    // leaves outModel untouched) when m_SetSearchResultCount == 0 -- hover gating is the caller's
+    // job now (CMyInventory::SyncRmlModel(), driven by RmlUi's own mouseover/mouseout), unlike the
+    // old native version which also gated on its own m_bViewOptionList flag.
+    // CMyInventory::SyncRmlModel() is the only caller.
+    bool    BuildSetOptionTooltipModel(UI::Inventory::Tooltip::Model& outModel);
 
     int     RenderSetOptionListInItem(const ITEM* ip, int TextNum, bool bIsEquippedItem = false);
 

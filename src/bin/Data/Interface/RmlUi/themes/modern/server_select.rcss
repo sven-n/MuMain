@@ -1,0 +1,209 @@
+/* Modern theme for the server-select dialog -- flat programmatic chrome, no legacy sprite art.
+   Same DOM/class structure as the legacy theme (server_select.rml is shared); only the visual
+   treatment differs. #panel stays invisible, matching the real legacy screen.
+
+   Two always-visible columns laid out by real flexbox (#columns/#group_col/#server_col), not an
+   absolutely-positioned flyout. #panel/#pvp_notice/#desc_panel are plain normal-flow block
+   content, sized to their real children. */
+
+/* No explicit position here -- .center-both (base.rcss) supplies position:absolute plus the
+   centering math, same as sys_menu.rcss/msg_win.rcss's #panel. */
+#panel {
+	width: 420px;
+	font-family: "token(font-body)";
+	font-size: 12px;
+	color: token(text-primary);
+	padding: 10px;
+}
+
+/* height:300px is fixed, not auto -- #panel uses .center-both, which recenters around #panel's
+   current size on every change, so an auto height here would visibly shift the whole panel as
+   #columns grows/shrinks. Each column scrolls internally via overflow:auto instead. */
+#columns {
+	display: flex;
+	flex-direction: row;
+	align-items: flex-start;
+	gap: 18px; /* matches the reference's own two-column gap */
+	height: 300px;
+}
+
+/* height (not max-height) matches #columns' fixed height -- a shorter list centers within this
+   fixed box instead of shrinking it; overflow:auto still scrolls a taller one. */
+#group_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px; /* matches the reference's own list row gap */
+	width: 140px;
+	height: 300px;
+	overflow: hidden auto;
+}
+#server_col {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	gap: 6px;
+	width: 240px;
+	height: 300px;
+	overflow: hidden auto;
+}
+
+/* Neutral iron base -- same recipe as base.rcss's shared .btn, re-declared in px (this window
+   hasn't migrated to the dp scaling system). Crimson is reserved for .checked below, so a group
+   button only reads as "confirm" once selected. Childless, so no border-width+children risk here
+   (unlike .server-row below). Row spacing comes from #group_col's own `gap`. */
+.group-btn {
+	width: 140px;
+	height: 30px;
+	text-align: center;
+	vertical-align: middle;
+	line-height: 30px;
+	cursor: pointer;
+	pointer-events: auto;
+	color: #c0b9a4;
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 10),
+		transparent 45%),
+		linear-gradient(to bottom, #26251d, #13140f 58%, #0a0b09); /* base.rcss's .btn recipe */
+	border-width: 1px;
+	border-color: #4a4738;
+	border-radius: token(radius-sm)px;
+	font-family: "token(font-body)";
+}
+.group-btn:hover {
+	color: #e0c476;
+	border-color: #776646;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 13),
+		transparent 45%),
+		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09); /* base.rcss's .btn:hover recipe */
+}
+.group-btn:active {
+	transform: translateY(1px);
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 184); /* base.rcss's .btn:active recipe */
+}
+/* Selected state: crimson+gold, base.rcss's .btn-ok recipe -- the one place this row should read
+   as an active/confirmed choice. */
+.group-btn.checked {
+	color: token(text-warm);
+	background-color: #351009;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 212, 151, 18),
+		transparent 38%),
+		linear-gradient(to bottom, #651b12, #351009 58%, #160706);
+	border-color: token(accent-gold-hover);
+	box-shadow:
+		inset 0 1px 0 rgba(255, 218, 159, 23),
+		inset 0 -1px 0 #090201,
+		0 2px 5px rgba(0, 0, 0, 128);
+}
+.group-btn.checked:hover {
+	decorator: linear-gradient(to bottom,
+		rgba(255, 212, 151, 26),
+		transparent 38%),
+		linear-gradient(to bottom, #7a2116, #451309 58%, #1c0907); /* base.rcss's .btn-ok:hover recipe */
+	border-color: #9a4028;
+}
+
+/* The gauge bar reads as *inside* the same button frame as the name, so .server-row carries the
+   border/gradient itself with .server-gauge-slot as its one child. A border+background element
+   with a child has failed to render as a closed box in past attempts on this exact element in
+   this RmlUi build -- real box-shadow (used here) is confirmed safe, unlike border-width, so
+   verify visually after any further change here.
+
+   color stays token(accent-gold) -- a real legacy PvP-category mapping (see .gray/.orange below).
+
+   height is 23px, not .group-btn's real 32px -- `height` is content size only; 23 + this row's
+   3px+4px padding + 1px+1px border = 32, matching .group-btn's on-screen height.
+
+   width 218px = this row's 240px border-box target (matching #server_col) minus its own
+   10px+10px padding and 1px+1px border. .server-gauge-slot's 200px width is inset by a 10px left
+   margin to center it within that 218px. */
+.server-row {
+	display: block;
+	width: 218px;
+	height: 23px;
+	padding: 3px 10px 4px;
+	text-align: center;
+	line-height: 14px;
+	white-space: nowrap;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: #13140f;
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 10),
+		transparent 45%),
+		linear-gradient(to bottom, #26251d, #13140f 58%, #0a0b09); /* base.rcss's .btn recipe */
+	border-width: 1px;
+	border-color: token(border-frame);
+	border-radius: token(radius-sm)px;
+	box-shadow:
+		inset 0 1px 0 rgba(232, 215, 168, 9),
+		inset 0 -1px 0 rgba(0, 0, 0, 209),
+		0 1px 2px rgba(0, 0, 0, 107);
+	color: token(accent-gold);
+	font-family: "token(font-body)";
+}
+.server-row:hover {
+	decorator: linear-gradient(to bottom,
+		rgba(255, 255, 255, 13),
+		transparent 45%),
+		linear-gradient(to bottom, #302b1f, #18160f 58%, #0c0c09); /* base.rcss's .btn:hover recipe */
+	border-color: #776646; /* base.rcss's .btn:hover border, literal since .btn:hover isn't tokenized */
+}
+.server-row:active {
+	transform: translateY(1px);
+	box-shadow: inset 0 1px 3px rgba(0, 0, 0, 184); /* base.rcss's .btn:active recipe */
+}
+.server-row.gray {
+	color: token(semantic-neutral);
+}
+.server-row.orange {
+	color: token(semantic-warning);
+}
+
+/* Recessed groove for the population bar -- box-shadow only, no border-width, since this element
+   has a child (.server-gauge-fill) and border-width+children is the same risk .server-row carries
+   above. `repeating-linear-gradient` isn't supported by this engine (silently renders nothing),
+   so this uses a plain dark recessed fill instead of a tick-mark track. */
+.server-gauge-slot {
+	display: block;
+	width: 200px;
+	height: 5px;
+	margin: 4px 0 0 9px;
+	background-color: #050605;
+	box-shadow: inset 0 1px 2px rgba(0, 0, 0, 199);
+}
+/* Population tier by load_fraction -- medium is the default/untagged case, overridden by
+   .tier-low/.tier-high. Dark-stop hexes have no token of their own; bright stops are the real
+   semantic-success/-warning/-danger tokens. */
+.server-gauge-fill {
+	display: block;
+	height: 100%;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 23);
+	decorator: linear-gradient(to right, #765c22, token(semantic-warning));
+}
+.server-gauge-fill.tier-low {
+	decorator: linear-gradient(to right, #516a3d, token(semantic-success));
+}
+.server-gauge-fill.tier-high {
+	decorator: linear-gradient(to right, #6d1711, token(semantic-danger));
+}
+
+/* Normal block flow below #columns, not position:absolute with a hand-picked top offset. */
+#pvp_notice {
+	margin-top: 16px;
+	width: 100%;
+	color: token(semantic-warning);
+	font-size: 11px;
+	font-family: "token(font-body)";
+}
+
+#desc_panel {
+	margin-top: 10px;
+	width: 100%;
+	color: token(text-primary);
+	white-space: normal;
+	font-family: "token(font-body)";
+}

@@ -200,18 +200,18 @@ void Frustum::CalculatePlanes(const vec3_t position, const vec3_t forward,
         VectorCopy(m_Vertices[planeDefs[i].v2], v2);
         VectorCopy(m_Vertices[planeDefs[i].v3], v3);
         FaceNormalize(v1, v2, v3, m_Planes[i].normal);
-        m_Planes[i].distance = -DotProduct(position, m_Planes[i].normal);
+        m_Planes[i].distance = -VectorDotProduct(position, m_Planes[i].normal);
     }
 
     // Near plane: forward direction
     VectorCopy(forward, m_Planes[4].normal);
-    m_Planes[4].distance = -DotProduct(nearCenter, m_Planes[4].normal);
+    m_Planes[4].distance = -VectorDotProduct(nearCenter, m_Planes[4].normal);
 
     // Far plane: negative forward direction (VectorScale needs non-const input)
     vec3_t forwardMut;
     VectorCopy(forward, forwardMut);
     VectorScale(forwardMut, -1.0f, m_Planes[5].normal);
-    m_Planes[5].distance = -DotProduct(farCenter, m_Planes[5].normal);
+    m_Planes[5].distance = -VectorDotProduct(farCenter, m_Planes[5].normal);
 }
 
 bool Frustum::TestSphere(const vec3_t center, float radius) const
@@ -219,7 +219,7 @@ bool Frustum::TestSphere(const vec3_t center, float radius) const
     // Test sphere against all 6 planes
     for (int i = 0; i < 6; i++)
     {
-        float distance = DotProduct(center, m_Planes[i].normal) + m_Planes[i].distance;
+        float distance = VectorDotProduct(center, m_Planes[i].normal) + m_Planes[i].distance;
 
         // If sphere is completely outside this plane, it's culled
         if (distance < -radius)
@@ -241,7 +241,7 @@ bool Frustum::TestAABB(const AABB& box) const
         pVertex[2] = (m_Planes[i].normal[2] >= 0.0f) ? box.max[2] : box.min[2];
 
         // If p-vertex is outside, entire box is outside
-        if (DotProduct(pVertex, m_Planes[i].normal) + m_Planes[i].distance < 0.0f)
+        if (VectorDotProduct(pVertex, m_Planes[i].normal) + m_Planes[i].distance < 0.0f)
             return false;
     }
 
@@ -253,7 +253,7 @@ bool Frustum::TestPoint(const vec3_t point) const
     // Test point against all 6 planes
     for (int i = 0; i < 6; i++)
     {
-        float distance = DotProduct(point, m_Planes[i].normal) + m_Planes[i].distance;
+        float distance = VectorDotProduct(point, m_Planes[i].normal) + m_Planes[i].distance;
 
         // If point is outside this plane, it's culled
         if (distance < 0.0f)

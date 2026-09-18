@@ -1,0 +1,18 @@
+<rml>
+<head>
+	<title>Main Frame Background</title>
+	<link type="text/rcss" href="main_frame_bg.rcss"/>
+</head>
+<body data-model="main_frame_bg">
+	<!-- Loaded into the background context (not main_frame.rml's main one) so this panel paints
+	     behind the legacy 3D item/skill icons, which the main context's single render pass can't
+	     do. root_x/root_y/root_scale and the offsets mirror main_frame.rml's #bars values from
+	     C++; reference-space coordinates match legacy's RenderLeftFrame()/RenderCenterFrame() by
+	     inspection only -- keep them in sync manually. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div id="bg_left" data-style-left="left_offset_x + 'px'"></div>
+		<div id="bg_center" data-style-left="center_offset_x + 214 + 'px'"></div>
+	</div>
+</body>
+</rml>

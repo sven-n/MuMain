@@ -1,0 +1,98 @@
+<template name="window_shell" content="content">
+<head>
+	<link type="text/rcss" href="window_shell.rcss"/>
+</head>
+<!-- Modern theme's shared window shell -- the "metal rail" chrome (base.rcss's .modern-frame/
+     .modern-shell-edge/.modern-groove/.modern-header-rail/.modern-content-well family), the same
+     pieces sys_menu.rml already proves for "a small forged-iron dialog with no hero-banner." Not
+     dialog-specific despite first being extracted from generic_menu_dialog.rml -- sys_menu.rml
+     itself is a plain window, not a dialog, and already uses this exact chrome. See
+     docs/rmlui-ui-system/architecture-principles.md for the fuller shell taxonomy
+     (window_shell_crimson/window_shell_item are separate, unbuilt siblings for other chrome styles).
+
+     A consumer document links this file as a template resource in its own head section and sets
+     this template's name as its own body element's template attribute (see
+     generic_menu_dialog.rml for the worked example) -- whatever content that consumer's body
+     element contains gets spliced into #content below, which owns the has_title-driven padding via
+     window_shell.rcss's own .window-shell-content.has-title rule.
+
+     DO NOT write a literal angle-bracket example of a body-with-template-attribute tag anywhere in
+     this file, comments included -- RmlUi's own Template::Load() (Source/Core/Template.cpp) finds
+     this template's real head and body regions via a raw, comment-blind text search for the first
+     literal opening-bracket-plus-word match, not real XML parsing. A stray example that merely
+     LOOKS like a body tag with this same template's own name as its template attribute value gets
+     sliced in as if it were real markup, self-referentially injecting this template into itself and
+     recursing until a stack overflow -- confirmed the hard way, see STATUS.md.
+
+     ALSO avoid writing "head" and "body" separated only by a slash (as in the two words joined by
+     a plain forward slash, no spaces) anywhere in this file, comments included -- RmlUi's own
+     FindTag() (Source/Core/XMLParseTools.cpp) tracks whether the found word was preceded by a slash
+     in a `found_closing` flag that is declared OUTSIDE its own per-candidate search loop and never
+     reset between rejected candidates within one call. A slash sitting directly before either word
+     anywhere in this file flips that flag for the rest of that same search, so every later
+     candidate -- including the one real body tag below -- gets compared against the wrong
+     open/close expectation and rejected, and the template silently fails to load. Confirmed the
+     hard way (a single stray slash-joined mention of these two words broke this exact template),
+     see STATUS.md.
+
+     Requires from the consumer's own data model: `has_title` (bool) and `title` (string). Also
+     requires `positioned` (bool) and `root_x`/`root_y` (real device-pixel numbers, NOT reference-
+     resolution values needing a scale transform -- this template's own dp chrome already assumes
+     no resolution-based rescaling, per layout-and-scaling.md's "there isn't a reference
+     resolution" policy; a consumer that also needs UI::Scaling's older reference-resolution
+     convention doesn't belong on this template, see option_window.rml's own history for why a
+     `root_scale`+`transform:scale()` variant of this was tried and reverted -- it double-scaled
+     this shell's own already-real-sized chrome). Every consumer that never sets `positioned` true
+     keeps today's plain screen-centered behavior unchanged (an empty-string style value leaves the
+     `.center-both` class's own left/top in effect, since an inline style only overrides when it
+     actually holds a value) -- `option_window.rml` is the first consumer to opt in, for a window
+     that can be dragged to a specific real-pixel spot instead of always centering.
+     `#window_shell_header` (the header rail, given a stable id here rather than only a class) is
+     the drag handle a positioned consumer can pass to `UI::RmlBridge::MakeDraggable()`, same
+     pattern as `my_inventory.rml`'s `#title` -- `CGenericMenuDialog` doesn't do this today, native
+     menu dialogs were never draggable.
+
+     id="panel" set here, not by the consumer -- every current *_dialog.rcss defines its own
+     document-scoped `#panel { width/height/... }` sizing rule (RmlUi CSS/IDs are per-document, so
+     reusing the same id across different documents' own window_shell instances is safe), the same
+     way the pre-template markup always named this element #panel.
+
+     `.center-both` (base.rcss) also sets `transform: translate(-50%, -50%)`, on top of its own
+     left:50%/top:50% -- that class stays applied even in positioned mode (only left/top get an
+     inline override above), so a positioned consumer's root_x/root_y (an already-final real-pixel
+     top-left, not a center point) would otherwise still get shifted by an extra half the panel's
+     own width/height. .window-shell-positioned (window_shell.rcss) cancels it via a toggled class,
+     not a raw data-style-transform override -- an inline style set to the empty string (the
+     ternary's false branch) is safe for left/top (a plain length that just fails to parse and
+     falls through to the cascade), but risked something worse for transform specifically when
+     tried live (found the hard way: caused this panel to render full-screen instead of just
+     losing the -50%/-50% shift). data-class-* is the same proven toggle mechanism every other
+     conditional class here already uses (data-class-hidden, data-class-checked, etc). -->
+<body id="panel" class="center-both modern-frame"
+      data-style-left="positioned ? (root_x + 'px') : ''"
+      data-style-top="positioned ? (root_y + 'px') : ''"
+      data-class-window-shell-positioned="positioned">
+	<div class="modern-shell-edge"></div>
+	<div class="modern-groove"></div>
+	<div id="content" class="window-shell-content modern-content-well" data-class-has-title="has_title"></div>
+	<div id="window_shell_header" class="window-shell-header-rail modern-header-rail" data-class-hidden="!has_title">
+		<div class="modern-joint"></div>
+		<div class="modern-header-accent"></div>
+		<div class="modern-header-text">
+			<div class="modern-header-title">{{title}}</div>
+		</div>
+	</div>
+	<!-- Optional footer anchor, sibling of #content -- a direct #panel child, same relationship
+	     generic_confirm_dialog.rcss's own .gcd-btn-primary/etc have to #panel (not nested inside
+	     .gcd-body). #content is a single splice target (Template::ParseTemplate only resolves one
+	     content id), so a consumer can't author an element here directly; empty and inert by
+	     default (harmless for generic_menu_dialog, which never touches it) until a consumer builds
+	     into it in C++ (Rml::ElementDocument::CreateElement() + AppendChild(), NOT authored as
+	     `{{}}`-bound RML markup elsewhere and moved here after load -- that was tried first
+	     (option_window.rml's close button) and never rendered its label text: RmlUi's
+	     text-interpolation DataView is only created at an element's original XML parse, and
+	     re-attaching to a new parent doesn't recreate it, only re-scans attributes for data-*
+	     bindings) -- see COptionWindow::BuildRmlUi() for the current worked example. -->
+	<div id="window_shell_footer" class="window-shell-footer"></div>
+</body>
+</template>

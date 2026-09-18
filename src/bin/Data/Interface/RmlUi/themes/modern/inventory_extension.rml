@@ -1,0 +1,34 @@
+<rml>
+<head>
+	<title>Inventory Extension</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="inventory_extension.rcss"/>
+</head>
+<body data-model="inventory_extension">
+	<!-- Window frame/title/exit button only -- extension grids stay native
+	     (InventoryExtension.h). Background lives in inventory_extension_bg.rml instead, since it
+	     must paint behind the native 3D icons. -->
+	<div id="panel" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<!-- Header rail: `-px` since #panel carries transform:scale(root_scale) (base.rcss). -->
+		<div class="modern-header-rail-px ext-header-rail">
+			<div class="modern-joint-px"></div>
+			<div class="modern-header-text-px">
+				<div id="title" class="modern-header-title-px">{{title}}</div>
+			</div>
+		</div>
+
+		<div id="btn_exit" class="modern-icon-btn-px ext-btn-exit" data-event-click="inventory_extension_exit_click">
+			<span class="modern-icon-btn-glyph-px">&#215;</span>
+		</div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+
+		<!-- Locked (not-yet-purchased) pages -- vector badge instead of legacy's raster lock
+		     glyph, matching this theme's forged-metal chrome language. Table/empty-slot backing
+		     art behind this stays native (InventoryExtension.cpp's RenderFrame()). -->
+		<div class="ext-locked-page" data-for="page : locked_pages" data-style-top="page.top + 'px'">
+			<div class="ext-locked-badge">{{page.number}}</div>
+		</div>
+	</div>
+</body>
+</rml>

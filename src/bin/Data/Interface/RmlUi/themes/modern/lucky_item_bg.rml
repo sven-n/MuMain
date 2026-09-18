@@ -1,0 +1,24 @@
+<rml>
+<head>
+	<title>Lucky Item Background</title>
+	<link type="text/rcss" href="lucky_item_bg.rcss"/>
+</head>
+<body data-model="lucky_item_bg">
+	<!-- Background-context document (see my_inventory_bg.rml for the mechanism) -- paints the
+	     outer frame behind CInventoryCtrl's own native grid/table-frame/item-icon rendering.
+	     Width/height are runtime-variable (root_width/root_height) -- see lucky_item.rml. -->
+	<div id="bg_root" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-width="root_width + 'px'" data-style-height="root_height + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="bg-panel">
+			<div class="inv-shell-edge"></div>
+			<div class="inv-groove"></div>
+			<!-- Header rail's fill/accent, relocated from lucky_item.rml's foreground rail --
+			     see lucky_item_bg.rcss's .rail-fill comment for why. -->
+			<div class="rail-fill">
+				<div class="rail-accent"></div>
+			</div>
+		</div>
+	</div>
+</body>
+</rml>

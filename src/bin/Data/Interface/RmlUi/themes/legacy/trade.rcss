@@ -1,0 +1,175 @@
+/* Legacy theme for CTrade's chrome (frame/title/both nicknames/both gold strips/both confirm
+   checkboxes/divider/buttons). #panel's left/top/scale come live from C++ (SyncRmlModel()), so
+   coordinates below are plain reference px, not dp -- values are copied straight from
+   CTrade::RenderBackImage()/RenderText()'s former m_Pos-relative constants. Both trade grids
+   (native) start at `x+16,y+68` (your) and `x+16,y+274` (mine) -- CTrade::Create()'s
+   CInventoryCtrl::Create() calls -- nothing here overlaps either. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "Liberation Sans";
+}
+
+#title {
+	position: absolute;
+	left: 0;
+	top: 11px;
+	width: 190px;
+	text-align: center;
+	color: #d8d8d8;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+
+@spritesheet trade-nick-sheet  { src: "../../../newui_Account_title.tga"; trade-nick-back: 0px 0px 171px 26px; }
+@spritesheet trade-money-sheet { src: "../../../newui_item_money.tga";    trade-money-back: 0px 0px 170px 26px; }
+@spritesheet trade-line-sheet  { src: "../../../newui_myquest_Line.tga";  trade-line-image: 0px 0px 188px 21px; }
+
+.nick-bg { position: absolute; width: 171px; height: 26px; decorator: image(trade-nick-back); pointer-events: none; }
+.nick-bg-your { left: 11px; top: 37px; }
+.nick-bg-my   { left: 11px; top: 243px; }
+
+.gold-bg { position: absolute; width: 170px; height: 26px; decorator: image(trade-money-back); pointer-events: none; }
+.gold-bg-your { left: 11px; top: 150px; }
+.gold-bg-my   { left: 11px; top: 356px; }
+
+#divider {
+	position: absolute;
+	left: 1px;
+	top: 220px;
+	width: 188px;
+	height: 21px;
+	decorator: image(trade-line-image);
+	pointer-events: none;
+}
+
+.id-text { position: absolute; color: #d2e6ff; white-space: nowrap; pointer-events: none; }
+.id-text-your { left: 32px; top: 43px; font-size: 14px; font-weight: bold; }
+.id-text-my   { left: 20px; top: 253px; font-size: 12px; font-weight: bold; }
+
+.guild-name {
+	position: absolute;
+	left: 16px;
+	top: 30px;
+	color: #d8d8d8;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.level-text {
+	position: absolute;
+	left: 134px;
+	top: 48px;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.gold-text {
+	position: absolute;
+	left: 11px;
+	width: 159px;
+	text-align: right;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.gold-text-your { top: 158px; }
+.gold-text-my   { top: 364px; }
+
+/* Confirm checkboxes reuse base.rcss's shared .checkbox-row/.checkbox-box/.checkbox-box.checked
+   primitive (same one Login uses), overridden locally to this window's real 36x29 accept-button
+   art instead of Login's small 16x16 tick box -- same pattern login.rcss itself uses to swap in
+   its own spritesheet over base.rcss's default. */
+@spritesheet trade-confirm-sheet {
+	src: "../../../newui_Bt_accept.tga";
+	trade-confirm-unchecked: 0px 0px 36px 29px;
+	trade-confirm-checked:   0px 29px 36px 29px;
+}
+.checkbox-row {
+	position: absolute;
+	width: 36px;
+	height: 29px;
+}
+.checkbox-box {
+	width: 36px;
+	height: 29px;
+	decorator: image(trade-confirm-unchecked);
+}
+.checkbox-box.checked { decorator: image(trade-confirm-checked); }
+
+/* Other player's confirmation -- display-only, matches ProcessBtns() never hit-testing it. */
+.confirm-your { left: 146px; top: 186px; cursor: default; pointer-events: none; }
+/* My own confirmation -- clickable (trade_my_confirm_click). Red ring while m_nMyTradeWait > 0,
+   approximating the former RenderImage() red color-multiply cooldown tint. */
+.confirm-my { left: 144px; top: 390px; cursor: pointer; pointer-events: auto; }
+.confirm-my.waiting .checkbox-box { box-shadow: 0 0 0 2px rgba(220, 40, 40, 220); }
+
+@spritesheet trade-btn-exit-sheet { src: "../../../newui_exit_00.tga";    trade-btn-exit: 0px 0px 36px 29px; }
+@spritesheet trade-btn-zen-sheet  { src: "../../../newui_Bt_money01.tga"; trade-btn-zen:  0px 0px 36px 29px; }
+.trade-btn {
+	position: absolute;
+	top: 390px;
+	width: 36px;
+	height: 29px;
+	cursor: pointer;
+	pointer-events: auto;
+}
+.trade-btn:hover { filter: brightness(1.25); }
+.trade-btn-exit { left: 13px;  decorator: image(trade-btn-exit); }
+.trade-btn-zen  { left: 104px; decorator: image(trade-btn-zen); }
+
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 375px;
+	width: 120px;
+	white-space: nowrap;
+	background-color: rgba(0, 0, 0, 200);
+	color: #ffffff;
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "Liberation Sans";
+	font-size: 11px;
+	pointer-events: none;
+	z-index: 1;
+}
+.tooltip-exit { left: -20px; }
+.tooltip-zen  { left: 60px; }
+#btn_exit:hover ~ .tooltip-exit,
+#btn_zen:hover ~ .tooltip-zen {
+	display: block;
+}
+
+/* Warning/notice help text block above "my confirm" -- "Warning" blinks via warning_opacity
+   (C++ mirrors the old sin(WorldTime)-based alpha pulse); the rest is a fixed warm hint color. */
+.warning-label {
+	position: absolute;
+	left: 20px;
+	top: 185px;
+	color: #d20000;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.notice-line {
+	position: absolute;
+	left: 20px;
+	color: #ffdc96;
+	font-weight: bold;
+	font-size: 12px;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.notice-line1 { left: 45px; top: 185px; }
+.notice-line2 { top: 200px; }
+.notice-line3 { top: 215px; }

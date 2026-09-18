@@ -1,0 +1,97 @@
+/* Modern theme for the MU Helper mini control bar + hero position readout -- flat programmatic
+   chrome, no legacy sprite art. Same layout as themes/legacy/mu_helper_bar.rcss. */
+
+#panel {
+	position: absolute;
+	width: 207dp;
+	height: 25dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	background-color: rgba(15, 16, 13, 190);
+	border: 1dp token(border-frame);
+	border-radius: token(radius-sm)dp;
+}
+
+/* No legacy seam art -- the three segments collapse into #panel's own flat fill; elements stay in
+   the document (data bindings target them by id) but render nothing of their own. */
+#seg_a, #seg_b, #seg_c {
+	display: none;
+}
+
+#text {
+	position: absolute;
+	left: 10dp;
+	top: 5dp;
+	width: 132dp;
+	height: 9dp;
+	text-align: center;
+	color: token(text-primary);
+	font-family: "token(font-body)";
+	white-space: nowrap;
+	pointer-events: none;
+}
+
+.mu-btn {
+	position: absolute;
+	top: 2dp;
+	width: 18dp;
+	height: 13dp;
+	cursor: pointer;
+	pointer-events: auto;
+	background-color: token(surface-control);
+	border: 1dp token(border-frame);
+	border-radius: 2dp;
+}
+.mu-btn:hover {
+	background-color: token(accent-steel);
+	border: 1dp token(accent-steel);
+}
+#btn_config { left: 153dp; }
+#btn_start  { left: 171dp; }
+#btn_stop   { left: 171dp; }
+
+/* Plain colored dot per button (no icon art) -- config: neutral, start: success, stop: danger. */
+.dot {
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 6dp;
+	height: 6dp;
+	transform: translate(-50%, -50%);
+	border-radius: 3dp;
+	pointer-events: none;
+}
+#btn_config .dot { background-color: token(semantic-neutral); }
+#btn_start .dot  { background-color: token(semantic-success); }
+#btn_stop .dot   { background-color: token(semantic-danger); }
+
+/* Siblings of .mu-btn, not nested children -- this build's shrink-to-fit width hard-clamps to the
+   containing block, so nesting inside an 18dp button would clamp the tooltip to ~18dp regardless
+   of text length. Given an explicit width and a precomputed static `left` instead of
+   `translateX(-50%)`, since `%` in a transform resolves against the element's own border-box,
+   which isn't reliably available right when `display` flips from none to block on :hover. */
+.tooltip {
+	display: none;
+	position: absolute;
+	top: 18dp;
+	width: 100dp;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1dp token(border-frame);
+	color: #ffffff;
+	padding: 2dp 4dp;
+	border-radius: token(radius-sm)dp;
+	font-family: "token(font-body)";
+	font-size: 11dp;
+	pointer-events: none;
+}
+/* left = button center minus half the tooltip's width. */
+.tooltip-config { left: 112dp; } /* button center 162dp */
+.tooltip-start,
+.tooltip-stop   { left: 130dp; } /* button center 180dp */
+#btn_config:hover ~ .tooltip-config,
+#btn_start:hover ~ .tooltip-start,
+#btn_stop:hover ~ .tooltip-stop {
+	display: block;
+	z-index: 1;
+}

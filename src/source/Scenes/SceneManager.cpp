@@ -36,15 +36,15 @@ FrameTimingState g_frameTiming;
 #include "Engine/Physics/PhysicsManager.h"
 #include "Core/Time/Timer.h"
 #include "Core/Input/Input.h"
-#include "UI/Legacy/UIMng.h"
+#include "UI/Core/SceneUICoordinator.h"
 #include "Network/Server/WSclient.h"
 #include "Network/Reconnect/ReconnectManager.h"
-#include "UI/NewUI/Dialogs/ReconnectDialog.h"
+#include "UI/Dialogs/ReconnectDialog.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "Network/Server/ServerListManager.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 #include "Engine/Object/ZzzInterface.h"
-#include "UI/NewUI/HUD/Notices.h"
+#include "UI/HUD/Notices.h"
 #include "I18N/All.h"
 #include "Engine/AI/ZzzAI.h"
 #include "App/Platform/Windows/Winmain.h"
@@ -98,10 +98,20 @@ void SetShowDebugInfo(bool enabled)
     if (enabled) g_bShowFpsCounter = false;
 }
 
+bool GetShowDebugInfo()
+{
+    return g_bShowDebugInfo;
+}
+
 void SetShowFpsCounter(bool enabled)
 {
     g_bShowFpsCounter = enabled;
     if (enabled) g_bShowDebugInfo = false;
+}
+
+bool GetShowFpsCounter()
+{
+    return g_bShowFpsCounter;
 }
 
 void SetShowGLStats(bool enabled)
@@ -273,7 +283,7 @@ static void ConsumeScreenshot()
                                  pixels.rgb.data(), 100);
     if (saved)
     {
-        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), SEASON3B::TYPE_SYSTEM_MESSAGE);
+        g_pSystemLogBox->AddText(g_screenshotCapture.Message().c_str(), mu::ui::window::TYPE_SYSTEM_MESSAGE);
     }
 
     GrabScreen++;
@@ -364,7 +374,7 @@ static void UpdateLoginAndCharacterScenes()
     dDeltaTick = MIN(dDeltaTick, 200.0 * FPS_ANIMATION_FACTOR);
 
     CInput::Instance().Update();
-    CUIMng::Instance().Update(dDeltaTick);
+    CSceneUICoordinator::Instance().Update(dDeltaTick);
 }
 
 /**
@@ -634,10 +644,10 @@ static void RenderDebugInfo()
                 FrameProfiler::AccumulatorMs(FP::Characters), FrameProfiler::AccumulatorMs(FP::Items),
                 FrameProfiler::AccumulatorMs(FP::Effects),
                 FrameProfiler::AccumulatorMs(FP::Other)); // 1-frame-lagged: debug-overlay/reconnect-dialog render cost
-                                                          // only now (Present split out below, DXP-23)
+                                                          // only now (Present split out below)
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // DXP-23: UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
+    // UI = RenderMainSceneUI() self-time (was previously unmeasured, fell outside every
     // FRAME_PROFILE scope) -- this frame's own value, RenderCurrentScene() already ran above.
     // Present = PlatformSwapBuffers() self-time, split out of Other so a large reading
     // unambiguously points at GPU-stall wait rather than HUD render cost -- 1-frame-lagged like
@@ -645,6 +655,15 @@ static void RenderDebugInfo()
     mu_swprintf(szLine, L"UI:%6.2f  Present:%6.2f",
              FrameProfiler::AccumulatorMs(FP::UI),
              FrameProfiler::AccumulatorMs(FP::Present));
+    g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
+
+    // RmlUi's own Update()/Render() self-time -- fires from SetPreSubmitCallback, after Present's
+    // blit is recorded (see RmlUiRuntime::RenderFrame()), so like Present above this is the
+    // PREVIOUS frame's cost, not this one's. Was previously unmeasured (RenderFrame() ran outside
+    // every FRAME_PROFILE scope) -- the old "UI" row above never included this.
+    mu_swprintf(szLine, L"RmlUi ms  Update:%6.2f  Render:%6.2f",
+             FrameProfiler::AccumulatorMs(FP::RmlUiUpdate),
+             FrameProfiler::AccumulatorMs(FP::RmlUiRender));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
     // Move/update-phase cost of particle & effect simulation (UpdateGameEntities(), not the
@@ -655,7 +674,7 @@ static void RenderDebugInfo()
              FrameProfiler::AccumulatorMs(FP::MoveParticles));
     g_pRenderText->RenderText((int)DEBUG_TEXT_X, y, szLine); y += DEBUG_TEXT_LINE_HEIGHT;
 
-    // DXP-20 baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
+    // Baseline: BMD::Transform() self-time (CPU skinning + per-vertex/normal loops),
     // summed across every body transformed this frame (subset of the Objects/Chars/Items passes
     // above, not additive with them). Judge the whole GPU-skinning task against this number.
     mu_swprintf(szLine, L"Skinning ms  Transform:%5.2f", FrameProfiler::AccumulatorMs(FP::Skinning));
@@ -712,6 +731,7 @@ static void RenderGLStats()
     static constexpr Pass kRows[] = {
         Pass::Terrain, Pass::Objects, Pass::Characters, Pass::Items, Pass::Effects, Pass::Sprites,
         Pass::Particles, Pass::Joints, Pass::UI, Pass::Overlay, Pass::Other,
+        Pass::RmlUiUpdate, Pass::RmlUiRender,
     };
 
     mu_swprintf(szLine, L"SDLStats  Pass       CPUms  Draw Merge  2D  VtxKB");
@@ -868,7 +888,7 @@ static void CheckServerConnection()
         g_ErrorReport.Write(L"> Connection closed. ");
         g_ErrorReport.WriteCurrentTime();
         g_ConsoleDebug->Write(MCD_NORMAL, L"Connection closed");
-        CUIMng::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
+        CSceneUICoordinator::Instance().PopUpMsgWin(MESSAGE_SERVER_LOST);
     }
 }
 

@@ -1,5 +1,3 @@
-// MsgBoxIGSBuyPackageItem.h: interface for the CMsgBoxIGSBuyPackageItem class.
-//////////////////////////////////////////////////////////////////////
 
 #if !defined(AFX_MSGBOXIGSBUYPACKAGEITEM_H__42A6E746_9439_4E71_9C86_7CDF5F96AFE3__INCLUDED_)
 #define AFX_MSGBOXIGSBUYPACKAGEITEM_H__42A6E746_9439_4E71_9C86_7CDF5F96AFE3__INCLUDED_
@@ -8,15 +6,16 @@
 
 #ifdef KJH_ADD_INGAMESHOP_UI_SYSTEM
 
-#include "UI/Legacy/UIControls.h"
-#include "UI/NewUI/Dialogs/NewUIMessageBox.h"
-#include "UI/NewUI/Dialogs/NewUICommonMessageBox.h"
-#include "UI/NewUI/Widgets/NewUIButton.h"
+#include "UI/Widgets/UIControls.h"
+#include "UI/Dialogs/MessageBox.h"
+#include "UI/Dialogs/CommonMessageBox.h"
+#include "UI/Widgets/Window/Button.h"
 #include "GameShop/ShopListManager/ShopPackage.h"
 
 using namespace SEASON3B;
+using namespace mu::ui::window;
 
-class CMsgBoxIGSBuyPackageItem : public CNewUIMessageBoxBase, public INewUI3DRenderObj
+class CMsgBoxIGSBuyPackageItem : public CMessageBoxBase, public I3DRenderObj
 {
 public:
     enum IMAGE_IGS_BUY_PACKAGE_ITEM
@@ -72,10 +71,10 @@ public:
 
     void Initialize(CShopPackage* pPackage);
 
-    static CALLBACK_RESULT LButtonUp(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT BuyBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT PresentBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
-    static CALLBACK_RESULT CancelBtnDown(class CNewUIMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT LButtonUp(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT BuyBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT PresentBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
+    static CALLBACK_RESULT CancelBtnDown(class CMessageBoxBase* pOwner, const leaf::xstreambuf& xParam);
 
 private:
     void SetAddCallbackFunc();
@@ -97,9 +96,9 @@ private:
     void UnloadImages();
 
 private:
-    CNewUIMessageBoxButton m_BtnBuy;
-    CNewUIMessageBoxButton m_BtnPresent;
-    CNewUIMessageBoxButton m_BtnCancel;
+    CMessageBoxButton m_BtnBuy;
+    CMessageBoxButton m_BtnPresent;
+    CMessageBoxButton m_BtnCancel;
     CUIBuyingListBox m_PackageInfo;
 
     int m_iPackageSeq;

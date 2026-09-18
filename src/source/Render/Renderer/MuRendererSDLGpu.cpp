@@ -1,6 +1,4 @@
 // MuRendererSDLGpu.cpp: SDL_gpu backend implementation of IMuRenderer.
-// Story 4.3.1 — Flow Code: VS1-RENDER-SDLGPU-BACKEND
-// Story 4.3.2 — Flow Code: VS1-RENDER-SHADERS (shader loading, fog UBO, pipeline fixes)
 //
 // MuRendererSDLGpu replaces the OpenGL immediate-mode backend (MuRendererGL)
 // with SDL_gpu — selecting Metal on macOS, Vulkan on Linux, D3D12 on Windows.
@@ -13,12 +11,12 @@
 //   - BeginFrame() / EndFrame() are instance methods called from MuMain.cpp game loop.
 //   - Real HLSL shaders loaded from MU_SHADER_DIR blobs (set by CMake).
 //   - Fog uniform buffer (s_fogUniformBuf) is created in Init() and updated in SetFog().
-//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D (AC-8 fix).
+//   - Separate 2D/3D pipeline sets: s_pipelines2D / s_pipelines3D.
 //   - Deferred draw command recording: vertices collected during frame, copied to GPU
-//     in EndFrame() BEFORE the render pass, then draw commands replayed (AC-7 fix).
+//     in EndFrame() BEFORE the render pass, then draw commands replayed.
 //
 // GUARD STRUCTURE:
-//   Story 7.9.3: SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
+//   SDL_gpu is the only renderer backend (MuRenderer.cpp deleted).
 
 // Include SDL3 GPU header only in this file — not exposed to game logic.
 // SDL3 is a required project dependency, so these includes are unconditional.
@@ -85,7 +83,7 @@ constexpr int k_PipelineCount = 9;
 // Pipeline index for "blend disabled".
 constexpr int k_PipelineDisabled = 8;
 
-// Story 7.9.7 (AC-7): Vertex uniform layout matching cbuffer Transform in HLSL.
+// Vertex uniform layout matching cbuffer Transform in HLSL.
 // Contains MVP matrix + fog params, pushed per-draw via SDL_PushGPUVertexUniformData.
 struct VertexUniforms
 {
@@ -116,7 +114,7 @@ namespace mu
 {
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-10): Fog uniform buffer struct — in mu:: namespace so that
+// Fog uniform buffer struct — in mu:: namespace so that
 // test_shaderprograms.cpp can forward-declare and verify layout via static_assert.
 // Mirrors the FogUniforms cbuffer declared in basic_textured.frag.hlsl (std140).
 // HLSL cbuffer layout: uint4 register, float2 + padding register, float4 register.
@@ -145,7 +143,6 @@ static_assert(offsetof(FogUniform, fogColor) == 32, "FogUniform HLSL float4 regi
 static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuffer)");
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-6): GetShaderBlobPath
 // Returns the absolute path to a compiled shader blob given GPU driver name,
 // shader stage, and shader base name. Uses MU_SHADER_DIR (CMake compile def).
 // driver: "vulkan" | "direct3d12" | "metal"
@@ -184,7 +181,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 }
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-6): GetShaderFormat
 // Returns the SDL_GPUShaderFormat constant name for the given driver.
 // Only used internally — returns the correct enum value for SDL_CreateGPUShader.
 // ---------------------------------------------------------------------------
@@ -202,7 +198,6 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 }
 
 // ---------------------------------------------------------------------------
-// Story 4.3.2 (AC-6): LoadShaderBlob
 // Loads a compiled shader blob from disk into a byte vector.
 // Returns empty vector on failure (caller logs via mu::log).
 // ---------------------------------------------------------------------------
@@ -238,6 +233,16 @@ static_assert(sizeof(FogUniform) == 48, "FogUniform must be 48 bytes (HLSL cbuff
 
 static SDL_GPUDevice* s_device = nullptr;
 static SDL_Window* s_window = nullptr;
+
+// RmlUi port: see SetPreSubmitCallback's own comment (MuRenderer.h) for what this is and why.
+static std::function<void()> s_preSubmitCallback;
+
+// RmlUi port: see SetPostRmlUiCallback's own comment (MuRenderer.h). Fires after RmlUi's own
+// render pass has closed, for content that must sit visually on top of RmlUi (the game cursor,
+// legacy CUITextInputBox text) -- see EndFrame()'s own comment at the call site for why this
+// needs its own small render pass rather than just calling RenderQuad2D-style functions from
+// inside s_preSubmitCallback itself.
+static std::function<void()> s_postRmlUiCallback;
 
 // Per-frame command buffer and render pass handles (valid between BeginFrame/EndFrame).
 static SDL_GPUCommandBuffer* s_cmdBuf = nullptr;
@@ -480,8 +485,8 @@ static void ConfigureD3D12Diagnostics(const char* driverName)
     }
 }
 
-// Story 4.3.2 (AC-8): Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
-// Story 7.9.7: Added DepthReadOnly variants (depth test ON, depth write OFF) for particles.
+// Separate pipeline sets for 2D (Vertex2D) and 3D (Vertex3D) geometry.
+// DepthReadOnly variants (depth test ON, depth write OFF) support particles.
 // s_pipelines2D: depth ON (test+write), Vertex2D layout (pitch=20).
 // s_pipelines2DDepthOff: depth OFF, Vertex2D layout.
 // s_pipelines3D: depth ON (test+write), Vertex3D layout (pitch=40).
@@ -499,7 +504,7 @@ static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedNoCull[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthOff[k_PipelineCount] = {};
 static SDL_GPUGraphicsPipeline* s_pipelinesSkinnedDepthReadOnly[k_PipelineCount] = {};
 
-// Story 4.3.2 (AC-7): Single pre-frame vertex upload.
+// Single pre-frame vertex upload.
 // Draws accumulate in growable CPU memory before one GPU upload.
 static SDL_GPUTransferBuffer* s_vtxTransferBuf = nullptr;
 static SDL_GPUBuffer* s_vtxGpuBuf = nullptr;
@@ -544,7 +549,7 @@ enum class RenderCmdType : uint8_t
     DrawSkinnedTriangles,
     DrawIndexedQuads, // indexed 2D or 3D with static quad index buffer
     DrawIndexedStrip, // indexed 3D with per-frame strip indices (Vertex3D)
-    DrawTriangles2D,  // Story 7.9.8: non-indexed 2D triangles (Vertex2D) for text atlas
+    DrawTriangles2D,  // non-indexed 2D triangles (Vertex2D) for text atlas
 };
 
 struct RenderCmd
@@ -692,6 +697,15 @@ static Render::DrawCommandHistory s_previousDrawCommands;
 // True between BeginFrame/EndFrame — replaces s_renderPass as the "frame active" guard
 // during the collection phase (render pass is only opened in EndFrame now).
 static bool s_frameActive = false;
+
+// RmlUi-behind-3D-icons seam (FlushRenderCommands): lets a caller open a real render pass
+// mid-recording instead of waiting for EndFrame's single one. s_replayedCmdCount is how far
+// into s_renderCmds the swapchain/depth targets already reflect; s_mainColorPassOpenedThisFrame
+// is whether any such pass (a flush, or EndFrame's own) has opened yet this frame -- the first
+// one CLEARs, every one after LOADs. Both reset only in BeginFrame, so multiple flushes (and
+// EndFrame's own final one) each pick up exactly the range recorded since the last one.
+static std::size_t s_replayedCmdCount = 0u;
+static bool s_mainColorPassOpenedThisFrame = false;
 #ifdef _EDITOR
 void QueueEditorRenderCommand()
 {
@@ -842,19 +856,19 @@ static SDL_GPUShader* s_fragShaderCol = nullptr;     // basic_colored.frag
 static SDL_GPUShader* s_vertShaderShadow = nullptr;  // shadow_volume.vert
 static SDL_GPUShader* s_vertShaderSkinned = nullptr; // skinned_textured.vert
 
-// Story 7.9.7 (AC-3): Depth buffer texture for correct 3D depth testing.
+// Depth buffer texture for correct 3D depth testing.
 // Created in Init() at swapchain dimensions, recreated on window resize.
 static SDL_GPUTexture* s_depthTexture = nullptr;
 static Uint32 s_depthW = 0u;
 static Uint32 s_depthH = 0u;
 static SDL_FColor s_clearColor{0.0f, 0.0f, 0.0f, 1.0f};
 
-// Story 4.3.2 (AC-10): Fog uniform buffer and transfer buffer.
+// Fog uniform buffer and transfer buffer.
 static SDL_GPUBuffer* s_fogUniformBuf = nullptr;
 static SDL_GPUTransferBuffer* s_fogTransferBuf = nullptr;
 static bool s_fogDirty = true; // upload on first draw if SetFog not called
 
-// Story 7.9.8 (AC-2): SDL_ttf GPU text engine and font variants.
+// SDL_ttf GPU text engine and font variants.
 // s_textEngine: atlas-based text engine created after SDL_GPUDevice.
 // s_ttfFont*: pre-loaded fonts for UI text rendering (normal, bold, big, fixed).
 static TTF_TextEngine* s_textEngine = nullptr;
@@ -1219,7 +1233,7 @@ void ClearTextureRegistry()
 }
 
 // ---------------------------------------------------------------------------
-// Story 4.4.1 (AC-4, Task 6): SamplerRegistry — parallel to TextureRegistry.
+// SamplerRegistry — parallel to TextureRegistry.
 // Maps caller-provided uint32_t ids to SDL_GPUSampler* (stored as void* for test linkage).
 // RegisterSampler / LookupSampler / UnregisterSampler follow the same pattern as the texture registry.
 // Sampler binding in draw calls uses LookupSampler(textureId) instead of the hardcoded s_defaultSampler.
@@ -1327,7 +1341,8 @@ public:
     // Init: Create GPU device, claim window, initialize pipelines and buffers.
     // Called once after window creation, before the game loop.
     // -----------------------------------------------------------------------
-    [[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+    [[nodiscard]] static bool Init(void* pNativeWindow, std::string_view fontFamily,
+                                   std::string_view renderBackend, float normalPointSize,
                                    float bigPointSize, float fixedPointSize)
     {
         s_window = static_cast<SDL_Window*>(pNativeWindow);
@@ -1337,14 +1352,43 @@ public:
             return false;
         }
 
-        // Create GPU device with all supported shader formats.
-        // SDL_gpu selects the platform backend automatically:
-        //   Metal on macOS, Vulkan on Linux, D3D12 on Windows.
-        mu::log::Get("render")->info("SDL_gpu -- validation: {}",
-                                     Render::kGpuValidationEnabled ? "enabled" : "disabled");
+        // "default" (or empty) means this app's own platform-aware pick; Windows prefers Vulkan
+        // (SDL's own default D3D12 pick doesn't vsync-cap FPS correctly -- see the
+        // FPS_ANIMATION_FACTOR/CCreditWin fix commits), other platforms pass straight through to
+        // SDL's own auto-pick. Any other value forces that specific SDL_gpu driver name
+        // ("vulkan"/"direct3d12"/"metal") on any platform. config.ini's [Render] Backend key
+        // (GameConfig::GetRenderBackend()) is the source of this value; GameConfigValidation
+        // already normalized case/whitespace/the "d3d12" alias.
+        std::string requestedBackend(renderBackend);
+        if (requestedBackend.empty() || requestedBackend == "default")
+        {
+#ifdef _WIN32
+            requestedBackend = "vulkan";
+#else
+            requestedBackend.clear();
+#endif
+        }
+        const char* requestedDriverName = requestedBackend.empty() ? nullptr : requestedBackend.c_str();
+
+        // SDL_CreateGPUDevice() with a specific driver name has no built-in fallback (fails
+        // outright if that driver isn't available), so retry with nullptr (SDL's own auto-pick)
+        // if the requested one fails -- still works on a machine without it, just loses whatever
+        // benefit the requested backend had until that's addressed directly.
+        mu::log::Get("render")->info("SDL_gpu -- validation: {}, requested backend: {}",
+                                     Render::kGpuValidationEnabled ? "enabled" : "disabled",
+                                     requestedDriverName ? requestedDriverName : "(SDL auto-pick)");
         s_device =
             SDL_CreateGPUDevice(SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
-                                Render::kGpuValidationEnabled, nullptr);
+                                Render::kGpuValidationEnabled, requestedDriverName);
+
+        if (!s_device && requestedDriverName != nullptr)
+        {
+            mu::log::Get("render")->warn("SDL_gpu -- '{}' device creation failed ({}), falling back to "
+                                         "SDL's own auto-picked driver", requestedDriverName, SDL_GetError());
+            s_device = SDL_CreateGPUDevice(
+                SDL_GPU_SHADERFORMAT_SPIRV | SDL_GPU_SHADERFORMAT_DXIL | SDL_GPU_SHADERFORMAT_MSL,
+                Render::kGpuValidationEnabled, nullptr);
+        }
 
         if (!s_device)
         {
@@ -1366,7 +1410,7 @@ public:
             return false;
         }
 
-        // Story 4.3.2: Load real HLSL shader blobs from MU_SHADER_DIR.
+        // Load real HLSL shader blobs from MU_SHADER_DIR.
         // Driver name used to select the correct blob format (SPIR-V/DXIL/MSL).
         if (!LoadShaders(driverName))
         {
@@ -1454,7 +1498,7 @@ public:
             return false;
         }
 
-        // Story 4.3.2 (AC-10): Create fog uniform GPU buffer and transfer buffer.
+        // Create fog uniform GPU buffer and transfer buffer.
         if (!CreateFogUniformBuffers())
         {
             mu::log::Get("render")->error("SDL_gpu -- fog uniform buffer creation failed");
@@ -1474,7 +1518,7 @@ public:
             return false;
         }
 
-        // Story 7.9.7 (AC-3): Create initial depth texture at window size.
+        // Create initial depth texture at window size.
         // BeginFrame() will recreate it if the swapchain dimensions differ.
         {
             int winW = 0;
@@ -1529,7 +1573,7 @@ public:
         s_frameReadbackState.Reset();
 
 #if MU_HAS_SDL_TTF
-        // Story 7.9.8 (AC-2): Destroy SDL_ttf resources before the GPU device.
+        // Destroy SDL_ttf resources before the GPU device.
         // Close font variants first, then default font, then engine.
         CloseTtfFont(s_ttfFontFixed);
         CloseTtfFont(s_ttfFontBig);
@@ -1564,7 +1608,7 @@ public:
             s_defaultSampler = nullptr;
         }
 
-        // Story 7.9.7 (AC-3): Release depth texture.
+        // Release depth texture.
         if (s_depthTexture)
         {
             SDL_ReleaseGPUTexture(s_device, s_depthTexture);
@@ -1573,7 +1617,7 @@ public:
             s_depthH = 0u;
         }
 
-        // Story 4.3.2 (AC-10): Release fog uniform buffers.
+        // Release fog uniform buffers.
         if (s_fogUniformBuf)
         {
             SDL_ReleaseGPUBuffer(s_device, s_fogUniformBuf);
@@ -1640,6 +1684,8 @@ public:
         s_vtxOffset = 0u;
         s_renderCmds.clear();
         s_previousDrawCommands.fill(kNoDrawCommand);
+        s_replayedCmdCount = 0u;
+        s_mainColorPassOpenedThisFrame = false;
         s_stripIdxScratch.clear();
         s_boneRowScratch.clear();
         s_lastBonePalette = nullptr;
@@ -1689,10 +1735,10 @@ public:
             return;
         }
 
-        // Story 7.9.7: Fog/alpha uniform is now pushed per-draw-call via
+        // Fog/alpha uniform is now pushed per-draw-call via
         // SDL_PushGPUFragmentUniformData — no copy pass needed here.
 
-        // Story 7.9.7 (AC-3): Ensure depth texture matches swapchain dimensions.
+        // Ensure depth texture matches swapchain dimensions.
         // Recreates on first frame or when window is resized.
         CreateOrResizeDepthTexture(s_swapW, s_swapH);
 
@@ -1707,30 +1753,23 @@ public:
     // Called once per frame after all draw calls.
     // Replaces SDL_GL_SwapWindow / SwapBuffers in the game loop.
     //
-    // Story 4.3.2 (AC-7): After ending the render pass, unmap the vertex
+    // After ending the render pass, unmap the vertex
     // transfer buffer and issue a single copy pass to flush the frame's
     // accumulated vertex data to the GPU vertex buffer. The next frame's
     // render pass will read from the updated GPU buffer.
     // -----------------------------------------------------------------------
-    void EndFrame() override
+    // Stages this frame's accumulated CPU-side vertex/bone/strip-index/texture-update scratch
+    // buffers to the GPU via one copy pass. Safe to call more than once per frame --
+    // FlushRenderCommands (mid-recording) and EndFrame's own final stage both call this. Each
+    // call re-uploads the buffers' current full contents from offset 0, not just what's new since
+    // the last call: harmless (offsets already used stay unchanged, only the tail is new data),
+    // same "just redo the whole thing" precedent the pre-existing post-RmlUi pass already
+    // established below. Returns whether bone data is ready, for ReplayCommandRange to pass into
+    // ReplayDrawCommand.
+    bool StageDeferredGpuData()
     {
-        if (!s_frameActive)
-        {
-            // Frame was not started (minimized window or error).
-            if (s_cmdBuf)
-            {
-                SDL_CancelGPUCommandBuffer(s_cmdBuf);
-                s_cmdBuf = nullptr;
-            }
-            FailPendingFrameReadback();
-            return;
-        }
-        s_frameActive = false;
-
         // ---------------------------------------------------------------
-        // Phase 1: Grow GPU buffers if needed, then stage recorded CPU vertices.
-        // ---------------------------------------------------------------
-        // ---------------------------------------------------------------
+        // Grow GPU buffers if needed, then stage recorded CPU vertices.
         // This happens BEFORE the render pass so the GPU reads current-
         // frame data, eliminating the 1-frame vertex delay that caused
         // streak artifacts when vertex counts varied between frames.
@@ -1906,8 +1945,166 @@ public:
         }
         s_textureUpdates.clear();
 
+        return boneDataReady;
+    }
+
+    // Replays s_renderCmds[startIdx, endIdx) into the currently-open s_renderPass. Every render
+    // pass boundary (the main pass, the post-RmlUi pass, and FlushRenderCommands' own pass) starts
+    // its own range with a fresh default full-window viewport/scissor and its own
+    // SdlGpuReplayState -- consistent with how the pre-existing post-RmlUi pass boundary has
+    // always worked, not a new limitation introduced here: a SetViewport/SetScissor command
+    // mid-range still applies correctly: it's only *implicit* state carried over from before the
+    // range (never re-declared) that resets to full-window at each new pass, same as it always has
+    // at the one pre-existing pass boundary.
+    void ReplayCommandRange(std::size_t startIdx, std::size_t endIdx, bool boneDataReady)
+    {
+        SDL_GPUViewport currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH), 0.0f,
+                                         1.0f};
+        SDL_Rect currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
+        Render::SdlGpuReplayState replayState;
+
+        for (std::size_t i = startIdx; i < endIdx; ++i)
+        {
+            const RenderCmd& cmd = s_renderCmds[i];
+            if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
+            {
+                continue;
+            }
+            ++s_dbgRenderCmdsReplayedThisFrame;
+
+            switch (cmd.type)
+            {
+            case RenderCmdType::SetViewport:
+            {
+                currentViewport = cmd.viewport;
+                if (replayState.SelectViewport(currentViewport))
+                    SDL_SetGPUViewport(s_renderPass, &currentViewport);
+                break;
+            }
+
+            case RenderCmdType::SetScissor:
+            {
+                currentScissor = cmd.scissor;
+                if (replayState.SelectScissor(currentScissor))
+                    SDL_SetGPUScissor(s_renderPass, &currentScissor);
+                break;
+            }
+
+#ifdef _EDITOR
+            case RenderCmdType::EditorOverlay:
+            {
+                g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
+                replayState.Invalidate();
+                if (replayState.SelectViewport(currentViewport))
+                    SDL_SetGPUViewport(s_renderPass, &currentViewport);
+                if (replayState.SelectScissor(currentScissor))
+                    SDL_SetGPUScissor(s_renderPass, &currentScissor);
+                break;
+            }
+#endif
+
+            case RenderCmdType::DrawTriangles:
+            case RenderCmdType::DrawSkinnedTriangles:
+            case RenderCmdType::DrawIndexedQuads:
+            case RenderCmdType::DrawIndexedStrip:
+            case RenderCmdType::DrawTriangles2D:
+            {
+                ReplayDrawCommand(cmd, boneDataReady, currentScissor, replayState);
+                break;
+            }
+            } // switch
+        } // for
+    }
+
+    // RmlUi-behind-3D-icons seam: opens a real render pass NOW, mid-recording, instead of waiting
+    // for EndFrame's single one -- lets a caller paint behind a live 3D render despite RmlUi's
+    // main context always compositing last. CLEARs on the first flush of the frame, LOADs on every one after
+    // (including EndFrame's own final one, see its own call to ReplayCommandRange below) --
+    // s_mainColorPassOpenedThisFrame/s_replayedCmdCount track that across calls, reset only in
+    // BeginFrame. A caller (e.g. a second Rml::Context's Render(), or any other content that must
+    // sit behind whatever legacy drawing happens right after this call returns) should follow this
+    // with its own draw calls before the frame's recording continues.
+    //
+    // Same characterization as the pre-existing pre-submit callback's own comment: on a frame that
+    // took the screenshot/readback branch, this always targets s_swapchainTexture directly, not
+    // the substituted readback/capture texture -- content flushed here on such a frame won't
+    // appear in the captured image. Accepted, matching that already-established precedent, not a
+    // new limitation.
+    void FlushRenderCommands() override
+    {
+        if (!s_frameActive || !s_cmdBuf || !s_swapchainTexture)
+        {
+            return; // no frame in progress (minimized window, or called outside Begin/EndFrame)
+        }
+        if (s_renderCmds.size() <= s_replayedCmdCount)
+        {
+            return; // nothing recorded since the last flush -- avoid an empty pass
+        }
+
+        const bool boneDataReady = StageDeferredGpuData();
+
+        SDL_GPUColorTargetInfo colorTarget{};
+        colorTarget.texture = s_swapchainTexture;
+        colorTarget.load_op = s_mainColorPassOpenedThisFrame ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
+        if (!s_mainColorPassOpenedThisFrame)
+        {
+            colorTarget.clear_color = s_clearColor;
+        }
+        colorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+        SDL_GPUDepthStencilTargetInfo depthTarget{};
+        depthTarget.texture = s_depthTexture;
+        depthTarget.load_op = s_mainColorPassOpenedThisFrame ? SDL_GPU_LOADOP_LOAD : SDL_GPU_LOADOP_CLEAR;
+        if (!s_mainColorPassOpenedThisFrame)
+        {
+            depthTarget.clear_depth = 1.0f;
+        }
+        depthTarget.store_op = SDL_GPU_STOREOP_STORE;
+        depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+        depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+
+        s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
+        if (s_renderPass)
+        {
+            ReplayCommandRange(s_replayedCmdCount, s_renderCmds.size(), boneDataReady);
+            SDL_EndGPURenderPass(s_renderPass);
+            s_renderPass = nullptr;
+        }
+
+        s_mainColorPassOpenedThisFrame = true;
+        s_replayedCmdCount = s_renderCmds.size();
+
+        // Commands recorded after this point must not merge backward into a command from the
+        // pass that just closed -- same reasoning as the post-RmlUi callback's identical reset
+        // below (MergeAdjacentQuadCommand/MergeAdjacentTriangleCommand would otherwise grow an
+        // already-replayed, already-closed command instead of appending a new one).
+        s_previousDrawCommands.fill(kNoDrawCommand);
+    }
+
+    void EndFrame() override
+    {
+        if (!s_frameActive)
+        {
+            // Frame was not started (minimized window or error).
+            if (s_cmdBuf)
+            {
+                SDL_CancelGPUCommandBuffer(s_cmdBuf);
+                s_cmdBuf = nullptr;
+            }
+            FailPendingFrameReadback();
+            return;
+        }
+        s_frameActive = false;
+
         // ---------------------------------------------------------------
-        // Phase 3: Render pass — replay all recorded draw commands.
+        // Stage this frame's remaining accumulated vertex/bone/strip/texture data
+        // (StageDeferredGpuData is safe to call again even if FlushRenderCommands already
+        // called it earlier this same frame -- see its own comment).
+        // ---------------------------------------------------------------
+        const bool boneDataReady = StageDeferredGpuData();
+
+        // ---------------------------------------------------------------
+        // Render pass — replay all recorded draw commands.
         // The GPU vertex/index buffers now contain current-frame data.
         // ---------------------------------------------------------------
         SDL_GPUTextureFormat frameReadbackFormat = SDL_GPU_TEXTUREFORMAT_INVALID;
@@ -1936,6 +2133,18 @@ public:
         SDL_GPUTexture* const frameColorTexture = s_frameReadbackTexture    ? s_frameReadbackTexture
                                                   : reconnectCaptureTexture ? reconnectCaptureTexture
                                                                             : s_swapchainTexture;
+
+        // FlushRenderCommands (if it ran earlier this frame) only ever writes to s_swapchainTexture
+        // directly -- a readback/capture frame's substituted frameColorTexture never received that
+        // content, so it must always be treated as fresh (CLEAR, full replay) regardless of
+        // s_mainColorPassOpenedThisFrame; re-replaying already-flushed commands here is harmless
+        // (a different render target, not double-visible) and is how this rare frame recovers the
+        // otherwise-flushed content for its capture. The common case (frameColorTexture is the
+        // swapchain) honors whatever FlushRenderCommands already established.
+        const bool targetingSwapchain = frameColorTexture == s_swapchainTexture;
+        const bool clearThisPass = !targetingSwapchain || !s_mainColorPassOpenedThisFrame;
+        const std::size_t replayStart = targetingSwapchain ? s_replayedCmdCount : 0u;
+
         bool renderPassCompleted = false;
         if (IsFrameTimingEnabled())
         {
@@ -1947,87 +2156,41 @@ public:
         {
             SDL_GPUColorTargetInfo colorTarget{};
             colorTarget.texture = frameColorTexture;
-            colorTarget.clear_color = s_clearColor;
-            colorTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+            colorTarget.load_op = clearThisPass ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+            if (clearThisPass)
+            {
+                colorTarget.clear_color = s_clearColor;
+            }
             colorTarget.store_op = SDL_GPU_STOREOP_STORE;
 
             SDL_GPUDepthStencilTargetInfo depthTarget{};
             depthTarget.texture = s_depthTexture;
-            depthTarget.clear_depth = 1.0f;
-            depthTarget.load_op = SDL_GPU_LOADOP_CLEAR;
+            depthTarget.load_op = clearThisPass ? SDL_GPU_LOADOP_CLEAR : SDL_GPU_LOADOP_LOAD;
+            if (clearThisPass)
+            {
+                depthTarget.clear_depth = 1.0f;
+            }
             depthTarget.store_op = SDL_GPU_STOREOP_STORE;
             depthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
             depthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
-            depthTarget.cycle = true;
+            depthTarget.cycle = clearThisPass;
 
             s_renderPass = SDL_BeginGPURenderPass(s_cmdBuf, &colorTarget, 1, s_depthTexture ? &depthTarget : nullptr);
         }
 
         if (s_renderPass)
         {
-            // Track explicit state. Pipeline changes re-apply the active scissor because
-            // SDL GPU backends may discard it while binding a new pipeline.
-            SDL_GPUViewport s_currentViewport{0.0f, 0.0f, static_cast<float>(s_swapW), static_cast<float>(s_swapH),
-                                              0.0f, 1.0f};
-            SDL_Rect s_currentScissor{0, 0, static_cast<int>(s_swapW), static_cast<int>(s_swapH)};
-
-            // Replay state and editor commands after texture invalidation, but skip
-            // game draws because their deferred texture pointers may be dangling.
-            Render::SdlGpuReplayState replayState;
-            for (const auto& cmd : s_renderCmds)
-            {
-                if (s_texturesInvalidated && IsUnsafeInvalidatedDrawCommand(cmd.type))
-                {
-                    continue;
-                }
-                ++s_dbgRenderCmdsReplayedThisFrame;
-
-                switch (cmd.type)
-                {
-                case RenderCmdType::SetViewport:
-                {
-                    s_currentViewport = cmd.viewport;
-                    if (replayState.SelectViewport(s_currentViewport))
-                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
-                    break;
-                }
-
-                case RenderCmdType::SetScissor:
-                {
-                    s_currentScissor = cmd.scissor;
-                    if (replayState.SelectScissor(s_currentScissor))
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    break;
-                }
-
-#ifdef _EDITOR
-                case RenderCmdType::EditorOverlay:
-                {
-                    g_MuEditorCore.RenderDrawData(s_cmdBuf, s_renderPass);
-                    replayState.Invalidate();
-                    if (replayState.SelectViewport(s_currentViewport))
-                        SDL_SetGPUViewport(s_renderPass, &s_currentViewport);
-                    if (replayState.SelectScissor(s_currentScissor))
-                        SDL_SetGPUScissor(s_renderPass, &s_currentScissor);
-                    break;
-                }
-#endif
-
-                case RenderCmdType::DrawTriangles:
-                case RenderCmdType::DrawSkinnedTriangles:
-                case RenderCmdType::DrawIndexedQuads:
-                case RenderCmdType::DrawIndexedStrip:
-                case RenderCmdType::DrawTriangles2D:
-                {
-                    ReplayDrawCommand(cmd, boneDataReady, s_currentScissor, replayState);
-                    break;
-                }
-                } // switch
-            } // for
+            ReplayCommandRange(replayStart, s_renderCmds.size(), boneDataReady);
 
             SDL_EndGPURenderPass(s_renderPass);
             s_renderPass = nullptr;
             renderPassCompleted = true;
+
+            if (targetingSwapchain)
+            {
+                s_mainColorPassOpenedThisFrame = true;
+                s_replayedCmdCount = s_renderCmds.size();
+            }
         }
 
         if (reconnectCaptureTexture && frameColorTexture != reconnectCaptureTexture)
@@ -2064,6 +2227,119 @@ public:
                     s_cmdBuf = nullptr;
                 }
                 ReleaseFrameReadbackTexture();
+            }
+        }
+
+        // RmlUi port: fires after this frame's own game content is fully recorded onto s_cmdBuf
+        // (the blit-to-swapchain above) but before it's submitted -- see SetPreSubmitCallback's
+        // own comment (MuRenderer.h) for why this exact spot is the only correct one. Skipped on
+        // a frame that took the readback branch above and already submitted+nulled s_cmdBuf
+        // early (screenshot capture); RmlUi simply doesn't render that one frame, matching this
+        // path's existing "screenshots don't include the frame that happened to overlap them"
+        // character rather than adding new complexity to cover it.
+        if (s_cmdBuf && s_preSubmitCallback)
+        {
+            s_preSubmitCallback();
+        }
+
+        // RmlUi port: content that must sit visually on top of RmlUi (the game cursor, legacy
+        // CUITextInputBox text -- see SetPostRmlUiCallback's own comment, MuRenderer.h). Fires
+        // after RmlUi's own render pass (opened/closed inside s_preSubmitCallback above) has
+        // closed, so this needs its OWN render pass rather than reusing the main one above: the
+        // main pass's replay loop (and the s_renderCmds it consumes) already ran and closed
+        // before s_preSubmitCallback fired, so anything the callback below pushes via the normal
+        // RenderQuad2D-style functions lands at the *tail* of s_renderCmds, past what that loop
+        // already replayed -- it would otherwise sit unreplayed until next frame's BeginFrame()
+        // clears it away unseen (dropped, not delayed). LOAD_OP_LOAD (not CLEAR) on both targets
+        // so this stacks on top of the main pass's content and RmlUi's, rather than erasing them.
+        if (s_cmdBuf && s_postRmlUiCallback)
+        {
+            const std::size_t postUiCmdStart = s_renderCmds.size();
+
+            // RenderQuad2D/RenderTriangles/etc. all early-return on !s_frameActive, which was
+            // set false at the very top of this function -- correct for the normal "recording"
+            // window (BeginFrame..EndFrame's own replay), but this callback runs deep inside
+            // EndFrame, after that window closed. Without this, every draw call the callback
+            // makes (RenderCursor, CLoginWin::RenderTextOnTop) is silently dropped -- no warning,
+            // no crash, just nothing on screen. Restored to false right after: nothing past this
+            // point should still be recording new frame content.
+            // Also reset the per-family "previous draw command" merge tracking (normally only
+            // reset once per frame, in BeginFrame): it's a persistent index into s_renderCmds
+            // that survives across this whole function, unaware of postUiCmdStart above. Without
+            // this, MergeAdjacentQuadCommand/MergeAdjacentTriangleCommand happily merge the
+            // callback's draws (RenderCursor's quad, say) backward into the LAST matching
+            // command from the main pass -- one that was already replayed and closed several
+            // lines up -- growing its vtxCount/idxCount instead of appending a new command here.
+            // That command is never replayed again, so the merged-in geometry silently never
+            // renders: s_renderCmds.size() doesn't even grow, so postUiCmdStart's own "were any
+            // commands pushed" check below sees nothing happened, no crash, no warning.
+            s_previousDrawCommands.fill(kNoDrawCommand);
+
+            s_frameActive = true;
+            s_postRmlUiCallback();
+            s_frameActive = false;
+
+            // Re-stage EVERYTHING the callback above may have recorded, not just vertex data.
+            // UploadVertices()/the bone-row append behind a skinned RenderTriangles call/etc. all
+            // only touch their own CPU-side scratch buffer and advance the matching offset -- none
+            // of that reaches the GPU. The actual transfer-buffer map+memcpy and copy-pass that
+            // moves each one onto its real GPU buffer already ran once, early in this function
+            // (StageDeferredGpuData(), the same call the main pass above makes), using whatever
+            // those offsets were BEFORE this callback grew them further.
+            //
+            // This used to re-stage vertex data only (by hand, duplicating a slice of
+            // StageDeferredGpuData()'s own vertex-handling code) -- correct for this seam's
+            // original 2D-only callers (RenderCursor, CMsgWin/CCharMakeWin's text overlays), but
+            // silently wrong the moment a skinned 3D model entered the picture
+            // (CGenericConfirmDialog's item3D preview, 2026-09-14): a skinned draw command indexes
+            // into s_boneGpuBuf via ReplayDrawCommand's own `boneDataReady` guard, and the
+            // `boneDataReady` computed by the main pass's earlier StageDeferredGpuData() call --
+            // true whenever bone data was empty or fully staged *before* this callback ran --
+            // stayed true even though this callback's own bone rows were never uploaded and
+            // s_boneGpuBuf was never grown to fit them. That combination told ReplayDrawCommand
+            // the (undersized, stale) buffer was safe to bind and index into -- an out-of-bounds
+            // GPU buffer read, which reproduced as exactly what was seen: the item silently not
+            // rendering most frames, and an intermittent crash on whichever frame that
+            // out-of-bounds read landed somewhere the driver didn't tolerate (validation is off,
+            // see the "SDL_gpu -- validation: disabled" startup log line).
+            //
+            // Calling StageDeferredGpuData() again here instead re-stages vertex/bone/strip-index/
+            // texture data together -- it's explicitly documented as safe to call more than once
+            // per frame, the same guarantee FlushRenderCommands already relies on mid-recording --
+            // and returns a boneDataReady that's actually correct for what THIS callback recorded.
+            const bool postUiBoneDataReady = StageDeferredGpuData();
+
+            if (s_renderCmds.size() > postUiCmdStart)
+            {
+                SDL_GPUColorTargetInfo postUiColorTarget{};
+                postUiColorTarget.texture = s_swapchainTexture;
+                postUiColorTarget.load_op = SDL_GPU_LOADOP_LOAD;
+                postUiColorTarget.store_op = SDL_GPU_STOREOP_STORE;
+
+                SDL_GPUDepthStencilTargetInfo postUiDepthTarget{};
+                postUiDepthTarget.texture = s_depthTexture;
+                postUiDepthTarget.load_op = SDL_GPU_LOADOP_LOAD;
+                postUiDepthTarget.store_op = SDL_GPU_STOREOP_DONT_CARE;
+                postUiDepthTarget.stencil_load_op = SDL_GPU_LOADOP_DONT_CARE;
+                postUiDepthTarget.stencil_store_op = SDL_GPU_STOREOP_DONT_CARE;
+
+                // ReplayDrawCommand/BindReplayPipeline (inside ReplayCommandRange) bind against
+                // the global s_renderPass directly, not a parameter -- assign it here (matching
+                // the main pass's own SDL_BeginGPURenderPass call above, which does the same), not
+                // just a local. Assigning only a local here left every SDL_Bind*/SDL_Draw* call
+                // inside them targeting the *already-nulled* s_renderPass from the main pass's own
+                // close (a few lines up) -- SDL_GPU silently no-ops a null render pass rather
+                // than crashing, which is why this had no visible symptom beyond "nothing drawn".
+                s_renderPass = SDL_BeginGPURenderPass(
+                    s_cmdBuf, &postUiColorTarget, 1, s_depthTexture ? &postUiDepthTarget : nullptr);
+                if (s_renderPass)
+                {
+                    ReplayCommandRange(postUiCmdStart, s_renderCmds.size(), postUiBoneDataReady);
+                    s_replayedCmdCount = s_renderCmds.size();
+
+                    SDL_EndGPURenderPass(s_renderPass);
+                    s_renderPass = nullptr;
+                }
             }
         }
 
@@ -2149,7 +2425,7 @@ public:
 
     // -----------------------------------------------------------------------
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-1): BeginScene — 3D viewport and projection setup.
+    // BeginScene — 3D viewport and projection setup.
     // SDL_gpu backend: sets viewport on the render pass. Projection/camera
     // transforms are handled via uniform buffers (not immediate-mode matrices).
     // -----------------------------------------------------------------------
@@ -2176,7 +2452,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-1): EndScene — restore state after 3D pass.
+    // EndScene — restore state after 3D pass.
     // SDL_gpu backend: reset viewport to full window.
     // -----------------------------------------------------------------------
     void EndScene() override
@@ -2269,7 +2545,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-2): Begin2DPass — mark 2D mode for pipeline selection.
+    // Begin2DPass — mark 2D mode for pipeline selection.
     // SDL_gpu uses separate 2D pipelines (Vertex2D layout, depth OFF).
     // -----------------------------------------------------------------------
     void Begin2DPass() override
@@ -2295,7 +2571,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-2): End2DPass — restore 3D mode.
+    // End2DPass — restore 3D mode.
     // -----------------------------------------------------------------------
     void End2DPass() override
     {
@@ -2304,7 +2580,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-7): ClearScreen — no-op on SDL_gpu.
+    // ClearScreen — no-op on SDL_gpu.
     // SDL_gpu clears the swapchain texture at BeginFrame (LOADOP_CLEAR).
     // -----------------------------------------------------------------------
     void ClearScreen() override
@@ -2318,7 +2594,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-5): RenderLines — line primitive rendering.
+    // RenderLines — line primitive rendering.
     // SDL_gpu backend: emit line primitives using existing 3D pipeline.
     // For now, renders as thin triangles (SDL_gpu line support varies).
     // -----------------------------------------------------------------------
@@ -2401,7 +2677,7 @@ public:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7-9-2 (AC-6): IsFrameActive — frame lifecycle query.
+    // IsFrameActive — frame lifecycle query.
     // Returns true when a render pass is open (between BeginFrame/EndFrame).
     // -----------------------------------------------------------------------
     [[nodiscard]] bool IsFrameActive() const override
@@ -2437,7 +2713,7 @@ public:
         return true;
     }
 
-    // Story 4.4.1 (AC-2, Task 6.2/6.3): GetDevice override — returns s_device.
+    // GetDevice override — returns s_device.
     // Allows GlobalBitmap.cpp to obtain the SDL_GPUDevice* via mu::GetRenderer().GetDevice()
     // without a direct dependency on MuRendererSDLGpu.cpp internals.
     // Logs a warning via mu::log if s_device is nullptr (renderer not initialized).
@@ -2451,13 +2727,48 @@ public:
         return s_device;
     }
 
-    // Story 7.9.8 (AC-2): SDL_ttf text engine accessor.
+    // RmlUi port: SDL_Window* accessor, mirrors GetDevice() above.
+    [[nodiscard]] SDL_Window* GetWindow() override
+    {
+        return s_window;
+    }
+
+    // RmlUi port: current frame's command buffer + swapchain texture, for
+    // RenderInterface_SDL_GPU::BeginFrame(). Null/zero outside BeginFrame()/EndFrame() --
+    // s_cmdBuf and s_swapchainTexture are reset at the top of BeginFrame() and s_cmdBuf is
+    // cleared to nullptr once submitted in EndFrame(), so this naturally reflects that window
+    // without extra bookkeeping here.
+    [[nodiscard]] FrameGpuContext GetFrameGpuContext() override
+    {
+        return FrameGpuContext{s_cmdBuf, s_swapchainTexture, s_swapW, s_swapH};
+    }
+
+    // RmlUi port: looks up s_textureMap directly rather than going through ResolveTextureId(),
+    // since RmlUi needs the actual SDL_GPUTexture* to hand to its own vendored backend, not a
+    // resolved logical id.
+    [[nodiscard]] void* GetRawTexture(std::uint32_t textureId) override
+    {
+        auto it = s_textureMap.find(textureId);
+        return it != s_textureMap.end() ? it->second : nullptr;
+    }
+
+    void SetPreSubmitCallback(std::function<void()> callback) override
+    {
+        s_preSubmitCallback = std::move(callback);
+    }
+
+    void SetPostRmlUiCallback(std::function<void()> callback) override
+    {
+        s_postRmlUiCallback = std::move(callback);
+    }
+
+    // SDL_ttf text engine accessor.
     [[nodiscard]] TTF_TextEngine* GetTextEngine() override
     {
         return s_textEngine;
     }
 
-    // Story 7.9.8 (AC-2): Default TTF font accessor.
+    // Default TTF font accessor.
     [[nodiscard]] TTF_Font* GetTtfFont() override
     {
         return s_ttfFont;
@@ -2497,7 +2808,7 @@ public:
         return s_cachedWinH;
     }
 
-    // Story 7.9.8 (AC-6): Submit text atlas triangles as deferred draw commands.
+    // Submit text atlas triangles as deferred draw commands.
     void SubmitTextTriangles(std::span<const Vertex2D> vertices, void* atlasTexture, void* sampler = nullptr) override
     {
         if (vertices.empty() || !s_frameActive || !atlasTexture)
@@ -2722,7 +3033,7 @@ public:
         return LookupTexture(textureId) != nullptr;
     }
 
-    // [Story 7-6-7: AC-3] GPU backend driver name for error reporting.
+    // GPU backend driver name for error reporting.
     [[nodiscard]] const char* GetGPUDriverName() const override
     {
         return s_device ? SDL_GetGPUDeviceDriver(s_device) : "unknown";
@@ -2764,7 +3075,7 @@ public:
             return;
         }
 
-        // Story 4.3.2 (AC-8): RenderQuad2D uses the 2D pipeline set (Vertex2D layout).
+        // RenderQuad2D uses the 2D pipeline set (Vertex2D layout).
         // Always disable depth test for 2D sprites — they must render on top of 3D
         // geometry regardless of depth buffer state. The 3D pass fills the depth buffer
         // with near values (characters close to camera) that would occlude 2D UI.
@@ -2871,7 +3182,7 @@ public:
             return;
         }
 
-        // Story 4.3.2 (AC-8): RenderTriangles uses the 3D pipeline set (Vertex3D layout).
+        // RenderTriangles uses the 3D pipeline set (Vertex3D layout).
         const int pipelineIdx = GetActivePipelineIndex();
         SDL_GPUGraphicsPipeline* pipeline = GetActive3DPipeline();
         if (!pipeline)
@@ -3145,7 +3456,7 @@ public:
 
         const Uint32 numIndices = numQuads * 6;
 
-        // Story 4.3.2 (AC-8): RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
+        // RenderQuadStrip uses the 3D pipeline set (Vertex3D layout).
         SDL_GPUGraphicsPipeline* pipeline = GetActive3DPipeline();
         if (!pipeline)
         {
@@ -3227,7 +3538,7 @@ public:
     // -----------------------------------------------------------------------
     // SetFog: Populate FogUniform from FogParams and mark the GPU buffer dirty.
     // The buffer is uploaded in BeginFrame() before the render pass.
-    // Story 4.3.2 (AC-10): Fog uniform buffer support.
+    // Fog uniform buffer support.
     // -----------------------------------------------------------------------
     void SetDepthMask(bool enabled) override
     {
@@ -3237,14 +3548,14 @@ public:
     {
         m_cullFaceEnabled = enabled;
     }
-    // Story 7.9.7: SetColorMask — track color write state.
+    // SetColorMask — track color write state.
     // When all channels are disabled (shadow volume stencil passes), draw calls
     // are skipped entirely since we have no stencil buffer support yet.
     void SetColorMask(bool r, bool g, bool b, bool a) override
     {
         m_colorWriteEnabled = (r || g || b || a);
     }
-    // Story 7.9.7: SetStencilTest — track stencil state.
+    // SetStencilTest — track stencil state.
     // All stencil-dependent rendering (shadow volumes, shadow darkening) is skipped
     // since we have no stencil buffer. Without this, RenderShadowToScreen() draws
     // a full-screen darkening quad that covers the entire scene.
@@ -3255,14 +3566,14 @@ public:
     void SetAlphaTest(bool enabled) override
     {
         m_alphaTestEnabled = enabled;
-        // Story 7.9.7 (AC-5): Propagate alpha test state to the fog uniform
+        // Propagate alpha test state to the fog uniform
         // so the fragment shader's `if (alphaDiscardEnabled && color.a <= alphaThreshold) discard;`
         // actually fires for particle sprites.
         m_fogUniform.alphaDiscardEnabled = enabled ? 1u : 0u;
         s_fogDirty = true;
     }
 
-    // Story 7.9.7 (AC-7): Override SetAlphaFunc to propagate alpha threshold
+    // Override SetAlphaFunc to propagate alpha threshold
     // to the fog uniform. Game code calls SetAlphaFunc(GL_GREATER, 0.25f)
     // via EnableAlphaTest() in ZzzOpenglUtil.cpp.
     void SetAlphaFunc(int /*func*/, float ref) override
@@ -3295,7 +3606,7 @@ public:
         // fogEnabled: true when mode != 0 (mode 0 = no fog / GL_LINEAR from caller).
         // alphaDiscardEnabled / alphaThreshold: not in FogParams; default off.
         m_fogUniform.fogEnabled = m_fogEnabled ? 1u : 0u;
-        // Story 7.9.7: Preserve alpha discard state — SetFog must NOT reset
+        // Preserve alpha discard state — SetFog must NOT reset
         // alphaDiscardEnabled/alphaThreshold set by SetAlphaTest/SetAlphaFunc.
         m_fogUniform.pad0 = 0.0f;
         m_fogUniform.fogStart = params.start;
@@ -3446,7 +3757,7 @@ private:
     bool m_stencilTestEnabled = false;
     int m_boundTextureId = -1;
     FogParams m_fogParams{};
-    // Story 4.3.2 (AC-10): CPU-side fog uniform data, uploaded to GPU when dirty.
+    // CPU-side fog uniform data, uploaded to GPU when dirty.
     FogUniform m_fogUniform{};
 
     // Matrix stack for 3D rendering (replaces OpenGL fixed-function matrix stack).
@@ -3561,7 +3872,6 @@ private:
     // -----------------------------------------------------------------------
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-2, AC-5): LoadShaders
     // Loads all 6 HLSL shader blobs from MU_SHADER_DIR and creates
     // SDL_GPUShader handles for pipeline creation.
     // driverName: SDL_GetGPUDeviceDriver(s_device) result.
@@ -3632,7 +3942,7 @@ private:
 
         // basic_textured.frag — fatal: required for textured 2D draws.
         // Samplers: t0 (texture), s0 (sampler); Uniform buffers: FogUniforms (pushed per-draw)
-        // Story 7.9.7: Changed from numStorageBuffers=1 to numUniformBuffers=1 so fog/alpha
+        // Changed from numStorageBuffers=1 to numUniformBuffers=1 so fog/alpha
         // data can be pushed per-draw-call via SDL_PushGPUFragmentUniformData (not a GPU buffer).
         s_fragShaderTex = createShader("basic_textured", "frag", SDL_GPU_SHADERSTAGE_FRAGMENT, 1, 0, 1, /*fatal=*/true);
         if (!s_fragShaderTex)
@@ -3645,7 +3955,7 @@ private:
         // basic_colored.vert — non-fatal (colored path degrades gracefully).
         // Inputs: pos(TEXCOORD0), color(TEXCOORD1)
         // Uniform buffers: b0, space1 (ScreenSize)
-        // NOTE (HIGH-4): Shader handles below are loaded as pipeline hooks for
+        // NOTE: Shader handles below are loaded as pipeline hooks for
         //   future IMuRenderer::RenderColoredGeometry() and RenderShadowVolume()
         //   methods. No dedicated pipeline sets exist yet — these shaders are not
         //   assigned to any pipeline in this story. Deferred to a follow-up story.
@@ -3674,7 +3984,7 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2: ReleaseShaders — release all 6 shader handles.
+    // ReleaseShaders — release all 6 shader handles.
     // Called after CreatePipelines() and during Shutdown() as a safety net.
     // -----------------------------------------------------------------------
     static void ReleaseShaders()
@@ -3712,7 +4022,6 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-8): BuildBlendPipeline
     // Creates one textured blend/depth/cull variant and captures SDL's immediate
     // error before another pipeline build can overwrite it.
     // -----------------------------------------------------------------------
@@ -3880,7 +4189,7 @@ private:
         SDL_GPUGraphicsPipelineTargetInfo targetInfo{};
         targetInfo.color_target_descriptions = &colorTargetDesc;
         targetInfo.num_color_targets = 1;
-        // Story 7.9.7 (AC-3): Enable depth-stencil target so pipelines match
+        // Enable depth-stencil target so pipelines match
         // the render pass that now includes a depth buffer.
         targetInfo.has_depth_stencil_target = true;
         targetInfo.depth_stencil_format = SDL_GPU_TEXTUREFORMAT_D32_FLOAT;
@@ -3947,13 +4256,12 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-8): CreatePipelines
     // Builds every blend variant. The selected 3D, 2D depth-off, and skinned sets
     // are required; unused 2D depth-on remains optional.
     // -----------------------------------------------------------------------
     [[nodiscard]] static bool CreatePipelines()
     {
-        // Blend mode table from architecture-rendering.md and story dev notes.
+        // Blend mode table matching this renderer's blend pipeline.
         // Indices match BlendMode enum cast to int; index 8 = disabled.
         //
         // SDL_GPUBlendFactor values (INVALID=0, ZERO=1, ONE=2, SRC_COLOR=3,
@@ -4134,7 +4442,6 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 7.9.7 (AC-3): CreateOrResizeDepthTexture
     // Creates (or recreates on resize) an SDL_GPUTexture with depth format
     // matching the current swapchain dimensions. Called from Init() and
     // BeginFrame() when swapchain size changes.
@@ -4184,7 +4491,6 @@ private:
     }
 
     // -----------------------------------------------------------------------
-    // Story 4.3.2 (AC-10): CreateFogUniformBuffers
     // Creates the GPU buffer (s_fogUniformBuf) used as a storage buffer in
     // the fragment shader, and its companion transfer buffer (s_fogTransferBuf).
     // Size = sizeof(FogUniform) = 48 bytes.
@@ -4600,7 +4906,7 @@ private:
 
 // ---------------------------------------------------------------------------
 // GetRenderer / InitSDLGpuRenderer / ShutdownSDLGpuRenderer:
-// Story 7.9.3: MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
+// MU_USE_OPENGL_BACKEND removed — SDL_gpu is the only backend.
 // ---------------------------------------------------------------------------
 
 [[nodiscard]] IMuRenderer& GetRenderer()
@@ -4610,10 +4916,12 @@ private:
 }
 
 // C++ linkage entry points for MuMain.cpp (no class forward declaration needed).
-[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily, float normalPointSize,
+[[nodiscard]] bool InitSDLGpuRenderer(void* pNativeWindow, std::string_view fontFamily,
+                                      std::string_view renderBackend, float normalPointSize,
                                       float bigPointSize, float fixedPointSize)
 {
-    return MuRendererSDLGpu::Init(pNativeWindow, fontFamily, normalPointSize, bigPointSize, fixedPointSize);
+    return MuRendererSDLGpu::Init(pNativeWindow, fontFamily, renderBackend, normalPointSize, bigPointSize,
+                                  fixedPointSize);
 }
 
 void WaitForSDLGpuIdle()

@@ -9,7 +9,7 @@ endif()
 set(ALLOWED_FILES
     "Core/Input/ImeInput.cpp"
     "Scenes/CharacterScene.cpp"
-    "UI/Legacy/UIControls.cpp"
+    "UI/Widgets/UIControls.cpp"
 )
 
 file(GLOB_RECURSE source_files

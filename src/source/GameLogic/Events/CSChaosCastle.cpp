@@ -5,20 +5,20 @@
 #include "stdafx.h"
 
 #include "Core/Utilities/Random.h"
-#include "UI/Legacy/UIWindows.h"
+#include "UI/Party/UIWindows.h"
 #include "Render/Textures/ZzzOpenglUtil.h"
 #include "Render/Textures/ZzzTexture.h"
 #include "Render/Models/ZzzBMD.h"
 #include "Scenes/SceneCore.h"
 #include "Render/Effects/ZzzEffect.h"
-#include "UI/Legacy/UIManager.h"
+#include "UI/Core/UIManager.h"
 #include "CSChaosCastle.h"
 
-#include "UI/NewUI/Dialogs/NewUICustomMessageBox.h"
+#include "UI/Dialogs/CustomMessageBox.h"
 #include "World/MapInfra/MapManager.h"
 #include "Character/CharacterManager.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/NewUI/NewUISystem.h"
+#include "UI/Core/WindowSystem.h"
 
 #include <algorithm>
 #include <array>
@@ -139,7 +139,7 @@ void ChangeChaosCastleUnit(CHARACTER* c)
     {
         g_pWindowMgr->SendUIMessage(UI_MESSAGE_CLOSE, t_dwUIID, 0);
     }
-    if (g_pUIManager->IsOpen(INTERFACE_FRIEND))
+    if (g_pUIManager->IsOpen(MUTEX_FRIEND))
     {
         CUIFriendWindow* t_pFW = g_pWindowMgr->GetFriendMainWindow();
         t_pFW->Close();

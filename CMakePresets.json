@@ -176,6 +176,12 @@
       "configuration": "Release"
     },
     {
+      "name": "windows-x64-relwithdebinfo",
+      "displayName": "x64 RelWithDebInfo",
+      "configurePreset": "windows-x64",
+      "configuration": "RelWithDebInfo"
+    },
+    {
       "name": "windows-x64-mueditor-debug",
       "displayName": "x64 MuEditor Debug",
       "configurePreset": "windows-x64-mueditor",

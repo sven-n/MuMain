@@ -1,0 +1,68 @@
+/* Modern theme for the character-select scene's button bar -- flat programmatic icon buttons, no
+   legacy sprite art. Icon-only buttons get a short plain-ASCII label plus a caption below
+   (base.rcss's .btn-icon-label/.btn-icon-caption). `bottom` shifts from the original 11dp to
+   25dp to leave room for the caption, which reuses that 11dp value.
+
+   .btn-icon/.btn-icon-label/.btn-icon-caption are base.rcss's shared classes; only this window's
+   positional overrides remain below, keyed to the #btn_x buttons directly, not the #btn_x_item
+   wrappers -- both button and caption resolve position:absolute straight against #panel, one
+   level only. Nesting position:absolute under a bottom/right-anchored wrapper made these buttons
+   vanish entirely on this engine. */
+
+#panel {
+	position: absolute;
+	font-family: "token(font-body)";
+	font-size: 14dp;
+}
+
+.btn-icon {
+	bottom: 25dp;
+}
+#btn_create { left: 22dp; }
+#btn_menu   { left: 77dp; }
+#btn_connect { right: 77dp; }
+#btn_delete  { right: 22dp; }
+
+/* Each caption's left/right is its button's value minus 9dp ((72-54)/2) -- centers the wider
+   caption on the button above it. #btn_x_item is used only as a CSS scope (unstyled,
+   position:static), not a positioning context. */
+#btn_create_item .btn-icon-caption  { left: 13dp; bottom: 11dp; }
+#btn_menu_item .btn-icon-caption    { left: 68dp; bottom: 11dp; }
+#btn_connect_item .btn-icon-caption { right: 68dp; bottom: 11dp; }
+#btn_delete_item .btn-icon-caption  { right: 13dp; bottom: 11dp; }
+
+/* font-family/size redeclared directly here (not inherited from #panel) -- this document's
+   data-model bindings make inheritance silently fail for this text in this RmlUi build. */
+.btn-icon-label {
+	font-size: 14dp;
+}
+
+.deco {
+	display: none;
+}
+
+/* Legacy's dock for its button row -- dropped for modern, since the flat carved-iron button
+   chrome already reads as its own contained unit without a backing strip. */
+.info-bar {
+	display: none;
+}
+
+#account_block_message {
+	position: absolute;
+	left: 0;
+	top: 330dp;
+	width: 640dp;
+	pointer-events: none;
+}
+.line-row {
+	line-height: 18dp;
+	text-align: center;
+}
+.line {
+	display: inline-block;
+	color: token(text-warm);
+	background-color: token(semantic-danger);
+	white-space: nowrap;
+	padding: 0 2dp;
+	font-family: "token(font-body)";
+}
