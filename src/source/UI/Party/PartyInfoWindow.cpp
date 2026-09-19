@@ -48,7 +48,17 @@ bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 
     if (RmlUiRuntime::Instance().IsCreated())
     {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "party_info",
+        BuildRmlUi();
+    }
+
+    Show(false);
+
+    return true;
+}
+
+void CPartyInfoWindow::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "party_info",
             [this](Rml::DataModelConstructor& c, PartyInfoRmlModel& model)
             {
                 c.Bind("root_x", &model.rootX);
@@ -104,13 +114,21 @@ bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
             };
         }
 
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-            "Data/Interface/RmlUi/party_info.rml");
-    }
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+        "Data/Interface/RmlUi/party_info.rml");
+}
 
-    Show(false);
+void CPartyInfoWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
 
-    return true;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() self-corrects visibility/live model state.
 }
 
 void CPartyInfoWindow::Release()

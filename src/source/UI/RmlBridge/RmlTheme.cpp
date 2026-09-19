@@ -6,6 +6,7 @@
 
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Factory.h>
 
 #include <algorithm>
 #include <cctype>
@@ -173,6 +174,19 @@ namespace UI::RmlBridge
     {
         ActiveThemeNameStorage() = ToLower(themeName);
         ProvidesOwnIconChromeStorage() = ComputeProvidesOwnIconChrome(ActiveThemeNameStorage());
+
+        // Both themes deliberately reuse the same <template name="..."> for a shared concept
+        // (e.g. "window_shell_bg") in their own themes/<theme>/ copy. Rml::TemplateCache caches a
+        // template both by its resolved file path (fine -- each theme's path is distinct) and by
+        // that declared name (Factory.h's GetTemplate()/TemplateCache::GetTemplate(), used to
+        // resolve <body template="...">) -- and the by-name entry is only refreshed when a path is
+        // loaded for the first time, not on every lookup. Once both themes' copies of a shared
+        // template name have been loaded at least once each, the by-name entry keeps pointing at
+        // whichever theme's copy was most recently loaded fresh, regardless of which theme is
+        // active now -- so a document reloaded against the *other* theme could still splice in the
+        // wrong theme's template content. Clearing here forces every <body template="..."> lookup
+        // after this point to reload fresh from the now-active theme's own file.
+        Rml::Factory::ClearTemplateCache();
     }
 
     bool ThemeExists(const std::string& themeName)

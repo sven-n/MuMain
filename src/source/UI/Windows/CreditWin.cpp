@@ -101,36 +101,54 @@ void CCreditWin::Create()
 	// Guarded so the document/model are created once, since Create() re-runs on resolution change.
 	if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
 	{
-		const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "credit_win",
-			[this](Rml::DataModelConstructor& c, CreditWinRmlModel& model)
-			{
-				c.BindEventCallback("creditwin_close_click",
-					[this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
-
-				c.Bind("department", &model.department);
-				c.Bind("team", &model.team);
-				c.Bind("department_opacity", &model.departmentOpacity);
-				c.Bind("team_opacity", &model.teamOpacity);
-				c.Bind("names_opacity", &model.namesOpacity);
-
-				auto name = c.RegisterStruct<CreditNameEntry>();
-				name.RegisterMember("text", &CreditNameEntry::text);
-				c.RegisterArray<std::vector<CreditNameEntry>>();
-				c.Bind("names", &model.names);
-
-				c.Bind("illust_left_decorator", &model.illustLeftDecorator);
-				c.Bind("illust_right_decorator", &model.illustRightDecorator);
-				c.Bind("illust_opacity", &model.illustOpacity);
-			});
-
-		if (modelCreated)
-			m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/credit_win.rml");
+		BuildRmlUi();
 	}
 
 	// AddUIObj() is idempotent, so this is safe to call again on every recreate.
 	CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_CREDITS, this);
 
 	Show(false);
+}
+
+void CCreditWin::BuildRmlUi()
+{
+	const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "credit_win",
+		[this](Rml::DataModelConstructor& c, CreditWinRmlModel& model)
+		{
+			c.BindEventCallback("creditwin_close_click",
+				[this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickClose(); });
+
+			c.Bind("department", &model.department);
+			c.Bind("team", &model.team);
+			c.Bind("department_opacity", &model.departmentOpacity);
+			c.Bind("team_opacity", &model.teamOpacity);
+			c.Bind("names_opacity", &model.namesOpacity);
+
+			auto name = c.RegisterStruct<CreditNameEntry>();
+			name.RegisterMember("text", &CreditNameEntry::text);
+			c.RegisterArray<std::vector<CreditNameEntry>>();
+			c.Bind("names", &model.names);
+
+			c.Bind("illust_left_decorator", &model.illustLeftDecorator);
+			c.Bind("illust_right_decorator", &model.illustRightDecorator);
+			c.Bind("illust_opacity", &model.illustOpacity);
+		});
+
+	if (modelCreated)
+		m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/credit_win.rml");
+}
+
+void CCreditWin::ReloadRmlTheme()
+{
+	if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+
+	Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+	m_RmlBinder.Destroy(context);
+	context->UnloadDocument(m_pRmlDoc);
+	m_pRmlDoc = nullptr;
+
+	BuildRmlUi();
+	// Next frame's SyncRmlModel() self-corrects visibility/live model state.
 }
 
 void CCreditWin::Release()

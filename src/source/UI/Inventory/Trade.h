@@ -102,6 +102,7 @@ namespace mu::ui::window
         RmlModelBinder<TradeBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     public:
@@ -117,6 +118,8 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+
+        void ReloadRmlTheme() override;
 
         float GetLayerDepth();	//. 2.1f
 

@@ -36,6 +36,9 @@ namespace UI::RmlBridge
     // Overwrites the live active-theme cache GetActiveThemeName()/ThemeProvidesOwnIconChrome() read
     // from (lowercased, same normalization GetActiveThemeName() has always applied). Does not touch
     // GameConfig and does not rebuild any window's document by itself -- see this file's top comment.
+    // Does clear RmlUi's own template cache (Rml::Factory::ClearTemplateCache()), since two themes'
+    // same-named <template> forks (e.g. "window_shell_bg") would otherwise leave that name resolving
+    // to whichever theme's copy was most recently freshly loaded, not necessarily the one now active.
     void SetActiveThemeName(const std::string& themeName);
 
     // True if themes/<themeName>/base.rcss exists and is readable -- the minimum a folder needs to

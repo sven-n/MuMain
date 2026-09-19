@@ -53,7 +53,10 @@ namespace mu::ui::window
         void RmlClickSelectTab(int tab);
         void RmlClickExit();
 
+        void ReloadRmlTheme() override;
+
     private:
+        void BuildRmlUi();
         void SyncRmlModel();
         void CalcDamage(int iNumTapButton);
 

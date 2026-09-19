@@ -40,7 +40,19 @@ void CServerSelWin::Create()
 
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_select",
+        BuildRmlUi();
+    }
+
+    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
+
+    Show(false);
+
+    UpdateDisplay();
+}
+
+void CServerSelWin::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "server_select",
             [this](Rml::DataModelConstructor& c, ServerSelRmlModel& model)
             {
                 auto group = c.RegisterStruct<GroupEntry>();
@@ -88,15 +100,27 @@ void CServerSelWin::Create()
             m_RmlBinder.GetModel().pvpNoticeLine1 = StringUtils::WideToNarrow(I18N::Game::TendsToBeCrowded);
             m_RmlBinder.GetModel().pvpNoticeLine2 = StringUtils::WideToNarrow(I18N::Game::WeRecommendThatYouUseOtherServers);
 
-            m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_select.rml");
-        }
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(), "Data/Interface/RmlUi/server_select.rml");
     }
+}
 
-    CSceneUICoordinator::Instance().GetNewStyleMng().AddUIObj(mu::ui::window::INTERFACE_SERVER_SELECT, this);
+void CServerSelWin::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
 
-    Show(false);
+    // No per-frame SyncRmlModel() poll here (see Update()), unlike the other 6 ported windows --
+    // a fresh BuildRmlUi() would otherwise come up with an empty/default model and hidden until
+    // the player closes/reopens this window, so both are restored explicitly below.
+    const bool wasVisible = IsVisible();
 
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
     UpdateDisplay();
+    Show(wasVisible);
 }
 
 void CServerSelWin::Release()

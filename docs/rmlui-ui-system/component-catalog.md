@@ -107,6 +107,25 @@ future capability flag). See `theming-and-modding.md`'s "Forking a theme's RML" 
 per-theme RML/RCSS override mechanism itself, not a separate component but part of this same
 theming layer.
 
+**Every window that creates a themed document must override `ReloadRmlTheme()` — this is not
+optional and the compiler won't catch skipping it.** `IObject::ReloadRmlTheme()`
+(`UI/Core/WindowObject.h`) defaults to a no-op; `CManager::ReloadAllRmlThemes()` already sweeps
+every registered window and calls it, but a window that doesn't override it silently keeps
+rendering the theme that was active when it first opened, indefinitely. 16 windows across the
+docked-window and inventory families shipped with exactly this gap before being fixed (2026-09-20).
+The pattern (same for all of them): factor the RmlUi setup already in `Create()` — model binder
+registration + `LoadThemedDocument()`/`CreateBackgroundDocument()` — into a private `BuildRmlUi()`,
+call it from `Create()`, then implement `ReloadRmlTheme()` as: if `m_pRmlDoc` is null, return
+(never opened yet); otherwise destroy the model binder, `UnloadDocument()` the old document, null
+the pointer (same for `m_pRmlBgDoc`/its binder if the window has one, via
+`RmlUiRuntime::Instance().GetBackgroundContext()`), then call `BuildRmlUi()` again. A window with a
+per-frame `SyncRmlModel()`-style poll (most of them) needs nothing further — the next frame
+self-corrects visibility/live data. A window without one (`CServerSelWin` is the one exception
+found so far) must also explicitly re-run whatever populates its model and re-apply visibility,
+since nothing else will. Reference implementations: `CMainFrameWindow::ReloadRmlTheme()`
+(`UI/HUD/MainFrameWindow.cpp`, main + background doc) and `CCharacterInfoWindow::ReloadRmlTheme()`
+(`UI/Character/CharacterInfoWindow.cpp`, main doc only).
+
 ## List / repeated rows
 
 RmlUi's `data-for` binding against a `std::vector<T>` model field — the proven pattern for any

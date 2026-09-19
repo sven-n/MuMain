@@ -389,6 +389,34 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   Fix: any scene-local manual pump of a persistent window needs `Update()` in the same sequence the
   full sweep uses (`UpdateMouseEvent` → `UpdateKeyEvent` → `Update` → `Render`), not just the three
   that look input/render-related by name.
+- **A `static bool` guard around `RegisterStruct<T>()`/`RegisterArray<C>()` inside a model's
+  registration lambda is a stale, actively harmful pattern — delete it, don't add a new one.**
+  `RmlModelBinder<T>::Create()` gives every `Create()` call its own fresh `Rml::DataTypeRegister`
+  (not one shared across calls), specifically so the registration lambda can safely re-run in full
+  every time, including from `ReloadRmlTheme()`. A `static bool s_typesRegistered` guard predates
+  that fix (it worked around an older bug where the register really was shared and re-declaring a
+  type crashed) — post-fix, it's actively wrong: on the *second* `Create()` call for the same
+  window (i.e. any `ReloadRmlTheme()`), the guard's `static` state persists from the first call and
+  skips registration entirely, leaving the array/struct type unregistered on this call's otherwise-
+  empty fresh register, breaking the `c.Bind()` that follows it. Found in 5 files that already had
+  `ReloadRmlTheme()` implemented (so already reachable via `$theme`) — `CBuffStrip`, `CMainFrameWindow`,
+  `CCharMakeWin`, `CCharInfoBalloonMng`, `CInventoryExtension` — all fixed by simply removing the
+  guard and letting the registration run unconditionally every call, per `RmlModelBinder.h`'s own
+  stated intent.
+- **`Rml::TemplateCache` caches a `<template>` by declared name as well as by resolved file path,
+  and the by-name entry is never invalidated on its own.** Two themes deliberately reusing the same
+  `<template name="...">` for their own fork of a shared concept (`window_shell`, `window_shell_bg`)
+  each cache correctly under their own distinct file path, but `<body template="...">` resolution
+  goes through the by-name map (`Rml::Factory::GetTemplate()`), which is only refreshed when a given
+  *path* is loaded for the first time — not on every lookup. Once both themes' copies of a shared
+  template name have each been loaded at least once in the session, the by-name entry keeps
+  pointing at whichever theme's copy was most recently loaded fresh, regardless of which theme is
+  active now, so a document reloaded against the *other* theme can silently splice in the wrong
+  theme's template content (symptom: a dialog's background-context frame losing its sprite/paint
+  after a `$theme` round-trip). Fix: `UI::RmlBridge::SetActiveThemeName()` (`RmlTheme.cpp`) now calls
+  `Rml::Factory::ClearTemplateCache()` on every theme change, before any window's `ReloadRmlTheme()`
+  runs — the one place every theme switch already goes through. Any future template shared by name
+  across theme forks is covered automatically; no per-window awareness needed.
 
 ## `CObject`/`CManager`/`LayoutMode` gotchas
 

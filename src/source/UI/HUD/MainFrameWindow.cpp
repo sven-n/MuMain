@@ -171,28 +171,24 @@ void mu::ui::window::CMainFrameWindow::BuildRmlUi()
                 c.Bind("skill_slot_4_cooldown", &model.skillSlot4Cooldown);
                 c.Bind("current_skill_cooldown", &model.currentSkillCooldown);
 
-                // See CCharMakeWin::BuildRmlUi()'s comment on why this guard is needed.
-                static bool s_typesRegistered = false;
-                if (!s_typesRegistered)
-                {
-                    auto skillCell = c.RegisterStruct<SkillCellEntry>();
-                    skillCell.RegisterMember("left", &SkillCellEntry::left);
-                    skillCell.RegisterMember("top", &SkillCellEntry::top);
-                    skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
-                    skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
-                    skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
-                    skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
-                    c.RegisterArray<std::vector<SkillCellEntry>>();
+                // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
+                // call, including from ReloadRmlTheme() -- no guard here.
+                auto skillCell = c.RegisterStruct<SkillCellEntry>();
+                skillCell.RegisterMember("left", &SkillCellEntry::left);
+                skillCell.RegisterMember("top", &SkillCellEntry::top);
+                skillCell.RegisterMember("skill_index", &SkillCellEntry::skillIndex);
+                skillCell.RegisterMember("is_pet", &SkillCellEntry::isPet);
+                skillCell.RegisterMember("is_current", &SkillCellEntry::isCurrent);
+                skillCell.RegisterMember("cooldown_fraction", &SkillCellEntry::cooldownFraction);
+                c.RegisterArray<std::vector<SkillCellEntry>>();
 
-                    auto tooltipLine = c.RegisterStruct<SkillTooltipLineEntry>();
-                    tooltipLine.RegisterMember("text", &SkillTooltipLineEntry::text);
-                    tooltipLine.RegisterMember("color_blue", &SkillTooltipLineEntry::colorBlue);
-                    tooltipLine.RegisterMember("color_red", &SkillTooltipLineEntry::colorRed);
-                    tooltipLine.RegisterMember("color_dark_red", &SkillTooltipLineEntry::colorDarkRed);
-                    tooltipLine.RegisterMember("bold", &SkillTooltipLineEntry::bold);
-                    c.RegisterArray<std::vector<SkillTooltipLineEntry>>();
-                    s_typesRegistered = true;
-                }
+                auto tooltipLine = c.RegisterStruct<SkillTooltipLineEntry>();
+                tooltipLine.RegisterMember("text", &SkillTooltipLineEntry::text);
+                tooltipLine.RegisterMember("color_blue", &SkillTooltipLineEntry::colorBlue);
+                tooltipLine.RegisterMember("color_red", &SkillTooltipLineEntry::colorRed);
+                tooltipLine.RegisterMember("color_dark_red", &SkillTooltipLineEntry::colorDarkRed);
+                tooltipLine.RegisterMember("bold", &SkillTooltipLineEntry::bold);
+                c.RegisterArray<std::vector<SkillTooltipLineEntry>>();
 
                 c.Bind("skill_grid_open", &model.skillGridOpen);
                 c.Bind("skill_grid_cells", &model.skillGridCells);
