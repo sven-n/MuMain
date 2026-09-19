@@ -141,6 +141,25 @@ void ApplyButtonUp()
     MouseRButton = false;
 }
 
+// Takes an injected press back, for an injection that is dropped before its
+// sequence ended. Unlike ApplyButtonUp this raises no release edge: the
+// caller has already been told its command did not finish, so the click must
+// not complete behind its back.
+void RetractButton()
+{
+    if (g_injection.button == Core::Input::Synthetic::MouseButton::Left)
+    {
+        MouseLButton = false;
+        MouseLButtonPush = false;
+        MouseLButtonPop = false;
+        Core::Input::ClearLeftMouseButtonPressEdge();
+        return;
+    }
+    MouseRButton = false;
+    MouseRButtonPush = false;
+    MouseRButtonPop = false;
+}
+
 void AdvanceKey()
 {
     // Pressed -> Released: down for exactly one scan.
@@ -293,6 +312,16 @@ void BeginFrame()
 
 void Reset()
 {
+    // A click that is dropped mid-sequence has already written the button
+    // down; take that back, or the game keeps seeing a button held by a frame
+    // that will never come. A key needs nothing: `IsKeyHeld` reads the stage,
+    // which goes away with the injection.
+    const bool holdingButton =
+        g_injection.kind == Kind::Click && (g_injection.stage == Stage::Pressed || g_injection.stage == Stage::Held);
+    if (holdingButton)
+    {
+        RetractButton();
+    }
     g_injection = {};
 }
 } // namespace Core::Input::Synthetic

@@ -52,6 +52,8 @@ enum class MouseButton : std::uint8_t
 // rendered frame before the key-state scan.
 void BeginFrame();
 
-// Forgets any injection, for tests.
+// Forgets the in-flight injection, releasing a button it had already pressed.
+// Called when the command that scheduled one gives up on it — a timeout, an
+// interrupt, or a caller that disconnected — and by the tests.
 void Reset();
 } // namespace Core::Input::Synthetic

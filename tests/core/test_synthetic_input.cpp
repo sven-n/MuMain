@@ -136,3 +136,41 @@ TEST_CASE("A click walks press, hold, release through the mouse globals [core][s
     BeginFrame();
     CHECK(IsIdle());
 }
+
+TEST_CASE("Abandoning an injection releases what it pressed [core][synthetic-input]")
+{
+    ResetInjector guard;
+    WindowWidth = 1280;
+    WindowHeight = 960;
+
+    // A key that is dropped while down: the state simply goes away.
+    CHECK(PressKey(VK_HOME));
+    BeginFrame();
+    CHECK(IsKeyHeld(VK_HOME));
+    Reset();
+    CHECK(IsIdle());
+    CHECK_FALSE(IsKeyHeld(VK_HOME));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_HOME));
+
+    // A click that is dropped while the button is down has to take the press
+    // back, or the game keeps seeing one no frame will ever end. No release
+    // edge is raised: the command it belonged to was already answered.
+    MouseLButton = false;
+    MouseLButtonPush = false;
+    MouseLButtonPop = false;
+
+    CHECK(Click(1000.0f, 725.0f, MouseButton::Left));
+    BeginFrame();
+    CHECK(MouseLButton);
+
+    Reset();
+    CHECK(IsIdle());
+    CHECK_FALSE(MouseLButton);
+    CHECK_FALSE(MouseLButtonPush);
+    CHECK_FALSE(MouseLButtonPop);
+    CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
+    CHECK_FALSE(Core::Input::IsKeyDown(VK_LBUTTON));
+
+    // And a fresh injection is accepted right away.
+    CHECK(Click(10.0f, 10.0f, MouseButton::Right));
+}

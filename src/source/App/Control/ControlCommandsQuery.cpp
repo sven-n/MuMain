@@ -261,6 +261,15 @@ public:
     {
     }
 
+    // Timed out, interrupted, or its caller went away: forget the injection
+    // instead of letting it reach the game after its command was answered.
+    // A finished injection is already gone, so this only bites on the paths
+    // that abandon one.
+    ~SyntheticInputAct() override
+    {
+        Core::Input::Synthetic::Reset();
+    }
+
     [[nodiscard]] std::string_view Name() const override
     {
         return m_name;

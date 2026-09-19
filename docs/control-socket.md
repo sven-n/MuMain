@@ -110,7 +110,10 @@ locate and click. Key names are case-insensitive: the letters, the digits,
 and `f1`–`f12`; anything else answers `bad_request`. Both answer once the
 release frame has run; a second injection while one is in flight answers
 `busy`, while a walk or an attack in flight is left alone — injecting a key is
-an observation of the act slot, not a claim on it. Not covered: typing text (`say` sends chat), key chords, drags.
+an observation of the act slot, not a claim on it. The sequence follows
+*rendered* frames, so an injection sent to a client that is not rendering (the
+occluded-window case below) answers `timeout` and is dropped rather than
+delivered late. Not covered: typing text (`say` sends chat), key chords, drags.
 
 ## Events
 
