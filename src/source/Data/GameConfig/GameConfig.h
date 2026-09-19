@@ -73,7 +73,10 @@ public:
     void SetRmlTheme(const std::wstring& theme);
 
     // Global RmlUi UI scale, as a percentage (100 = normal). Drives RmlUiRuntime's
-    // Context::SetDensityIndependentPixelRatio() call; only RCSS authored in `dp` responds.
+    // Context::SetDensityIndependentPixelRatio() call; only RCSS authored in `dp` responds. The
+    // setter clamps to [CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent];
+    // a value read from disk is taken as-is, so a hand-edited config.ini stays authoritative
+    // until something writes the setting back.
     int GetUIScalePercent() const { return m_uiScalePercent; }
     void SetUIScalePercent(int percent);
 

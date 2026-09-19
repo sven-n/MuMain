@@ -1478,6 +1478,12 @@
   <data name="UI Theme" xml:space="preserve">
     <value>UI Theme</value>
   </data>
+  <data name="UI Scale" xml:space="preserve">
+    <value>UI Scale</value>
+  </data>
+  <data name="UI Scale Tooltip" xml:space="preserve">
+    <value>Multiplier on top of the automatic fit to the window size</value>
+  </data>
   <data name="Legacy" xml:space="preserve">
     <value>Legacy</value>
   </data>
