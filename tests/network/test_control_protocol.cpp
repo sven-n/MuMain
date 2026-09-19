@@ -84,7 +84,7 @@ TEST_CASE("Control protocol serves the documented command vocabulary [network][c
     const std::vector<std::string> expected = {
         "ping",   "scene", "state",   "nearby", "events",   "wait-for", "screenshot", "login",  "select-char",
         "logout", "quit",  "move",    "warp",   "teleport", "attack",   "skill",      "pickup", "use",
-        "equip",  "say",   "whisper", "party",  "halt",     "hotkey",   "click-ui",
+        "equip",  "say",   "whisper", "party",  "halt",     "hotkey",   "click-ui",   "type",
     };
 
     for (const std::string& command : expected)

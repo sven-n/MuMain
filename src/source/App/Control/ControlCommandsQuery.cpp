@@ -473,6 +473,36 @@ std::string Hotkey(const Request& request, std::unique_ptr<Act>& act)
     return {};
 }
 
+std::string Type(const Request& request, std::unique_ptr<Act>& act)
+{
+    std::string text;
+    if (!request.GetString("text", text) || text.empty())
+    {
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`type` needs a non-empty `text`");
+    }
+
+    bool pressEnter = false;
+    (void)request.GetBool("enter", pressEnter);
+
+    if (!Core::Input::Synthetic::TypeText(text, pressEnter))
+    {
+        if (!Core::Input::Synthetic::IsIdle())
+        {
+            return EncodeError(request.EncodedId(), ErrorCode::Busy, "another key or click is still being injected");
+        }
+        return EncodeError(request.EncodedId(), ErrorCode::BadRequest,
+                           "`type` takes printable text of at most " +
+                               std::to_string(Core::Input::Synthetic::MaxTypedTextBytes) +
+                               " bytes; a newline or a tab is a `hotkey`");
+    }
+
+    json result;
+    result["text"] = text;
+    result["enter"] = pressEnter;
+    act = std::make_unique<SyntheticInputAct>("type", result.dump());
+    return {};
+}
+
 std::string ClickUi(const Request& request, std::unique_ptr<Act>& act)
 {
     double windowX = 0.0;

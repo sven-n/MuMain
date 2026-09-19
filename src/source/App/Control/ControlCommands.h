@@ -31,6 +31,7 @@ std::string WaitFor(const Request& request, std::unique_ptr<Act>& act);
 std::string Screenshot(const Request& request, std::unique_ptr<Act>& act);
 std::string Hotkey(const Request& request, std::unique_ptr<Act>& act);
 std::string ClickUi(const Request& request, std::unique_ptr<Act>& act);
+std::string Type(const Request& request, std::unique_ptr<Act>& act);
 
 // Session family.
 std::string Login(const Request& request, std::unique_ptr<Act>& act);

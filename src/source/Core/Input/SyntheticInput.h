@@ -20,6 +20,7 @@
 // nothing.
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <optional>
 #include <string_view>
@@ -49,6 +50,18 @@ enum class MouseButton : std::uint8_t
 // Schedules a press-and-release of the button at a window pixel, preceded by a
 // pointer move there. False when another injection is still in flight.
 [[nodiscard]] bool Click(float windowX, float windowY, MouseButton button);
+
+// Schedules `text` (UTF-8) as typed characters for whatever field has keyboard
+// focus, optionally followed by a Return press for fields that submit on it.
+// A key press carries no character of its own, so this is the only way to fill
+// a text field -- `PressKey` moves the caret, this writes into it. False when
+// another injection is still in flight, or when the text is empty or longer
+// than `MaxTypedTextBytes`.
+[[nodiscard]] bool TypeText(std::string_view text, bool pressEnter);
+
+// Longest `TypeText` accepts, in bytes. Any real field in the game (account,
+// character, guild name, chat line) is far shorter.
+inline constexpr std::size_t MaxTypedTextBytes = 256;
 
 // True while no injection is in flight; the command that scheduled one
 // answers once this turns true again.

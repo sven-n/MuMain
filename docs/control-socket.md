@@ -73,6 +73,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `screenshot` (`out`) | capture the next frame to a path |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
+| `type` (`text`, `enter`) | type text into the focused field, optionally submitting it |
 | `login` (`account`, `password`, `server`) | server selection, credentials, character list |
 | `select-char` (`name` or `slot`) | enter the world with that character |
 | `logout`, `quit` | back to the character list; close the client |
@@ -113,10 +114,18 @@ click. Key names are case-insensitive: the letters, the digits, `esc`,
 `pageup`, `pagedown`, `up`, `down`, `left`, `right`, `printscreen` and
 `f1`–`f12`; anything else answers `bad_request`. A press and its release are
 always separated by a rendered frame, since the legacy readers consume
-press/release edges per frame. Both answer once the release frame has run; a
-second injection while one is in flight answers `busy`. Not covered: typing
-text (`say` sends chat — a key press carries no character, so a text field
-receives the key but no glyph), key chords, drags.
+press/release edges per frame.
+
+A key press carries no character — in this client characters arrive as their
+own event — so `type` is what fills a text field: the account and password
+boxes, a character or guild name, a chat line. It sends the text to whatever
+field has keyboard focus (click it first), and with `enter` true follows it
+with a Return press one frame later, for fields that submit on it. Printable
+text only, at most 256 bytes; a newline or a tab is a `hotkey`, and UTF-8 goes
+through unchanged.
+
+All three answer once the release frame has run; a second injection while one
+is in flight answers `busy`. Not covered: key chords, drags.
 
 ## Events
 

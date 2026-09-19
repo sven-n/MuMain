@@ -17,6 +17,8 @@
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/WinCompat.h"
 
+#include <string>
+
 using namespace Core::Input::Synthetic;
 
 namespace
@@ -117,6 +119,47 @@ TEST_CASE("A click walks press, hold and release across frames [core][synthetic-
     CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
     CHECK_FALSE(IsIdle());
 
+    BeginFrame();
+    CHECK(IsIdle());
+}
+
+TEST_CASE("Typed text is refused when it is empty, oversized or not text [core][synthetic-input]")
+{
+    ResetInjector guard;
+
+    CHECK_FALSE(TypeText("", false));
+    CHECK_FALSE(TypeText(std::string(MaxTypedTextBytes + 1, 'a'), false));
+    // A newline or a tab is a key, not field content.
+    CHECK_FALSE(TypeText("line\nbreak", false));
+    CHECK_FALSE(TypeText("tab\there", false));
+    CHECK(IsIdle());
+
+    CHECK(TypeText(std::string(MaxTypedTextBytes, 'a'), false));
+    CHECK_FALSE(IsIdle());
+    // Non-ASCII is text like any other; the event carries UTF-8 unchanged.
+    CHECK_FALSE(TypeText("Kalima", false));
+    Reset();
+    CHECK(TypeText("Gens\xc3\xb3", false));
+}
+
+TEST_CASE("Typed text takes one frame, plus two when it submits [core][synthetic-input]")
+{
+    ResetInjector guard;
+
+    CHECK(TypeText("GuildName", false));
+    BeginFrame();  // characters
+    CHECK_FALSE(IsIdle());
+    BeginFrame();
+    CHECK(IsIdle());
+
+    CHECK(TypeText("GuildName", true));
+    BeginFrame();  // characters
+    CHECK_FALSE(IsIdle());
+    BeginFrame();  // Return down -- the field has the text by now
+    CHECK(IsKeyHeld(VK_RETURN));
+    BeginFrame();  // Return up
+    CHECK_FALSE(IsKeyHeld(VK_RETURN));
+    CHECK_FALSE(IsIdle());
     BeginFrame();
     CHECK(IsIdle());
 }

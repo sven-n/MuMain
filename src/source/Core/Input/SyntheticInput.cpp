@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <cctype>
+#include <cstddef>
 #include <cstdint>
 #include <string>
 
@@ -17,6 +18,7 @@ enum class Kind : std::uint8_t
     None,
     Key,
     Click,
+    Text,
 };
 
 // Frames of the sequence. A key is down for the first frame only, which is
@@ -38,6 +40,13 @@ struct Injection
     float windowX = 0.0f;
     float windowY = 0.0f;
     Core::Input::Synthetic::MouseButton button = Core::Input::Synthetic::MouseButton::Left;
+    // Owned storage for a Kind::Text injection. SDL_TextInputEvent carries a
+    // `const char*` that SDL copies only for events it generates itself, so a
+    // pushed one points at this string and it has to outlive the frame that
+    // consumes the event -- it does, since the injection is only cleared a
+    // frame after its last push.
+    std::string text;
+    bool pressEnter = false;
 };
 
 Injection g_injection;
@@ -138,6 +147,20 @@ void PushMouseButton(bool down)
     SDL_PushEvent(&event);
 }
 
+void PushTextInput()
+{
+    const SDL_WindowID windowId = GameWindowId();
+    if (windowId == 0)
+        return;
+
+    SDL_Event event{};
+    event.type = SDL_EVENT_TEXT_INPUT;
+    event.text.timestamp = SDL_GetTicksNS();
+    event.text.windowID = windowId;
+    event.text.text = g_injection.text.c_str();
+    SDL_PushEvent(&event);
+}
+
 void PushKey(bool down)
 {
     const SDL_WindowID windowId = GameWindowId();
@@ -170,6 +193,34 @@ void AdvanceKey()
         return;
     }
     g_injection = {};
+}
+
+// Frame 1 delivers the characters, frame 2 the Return press when one was asked
+// for, frame 3 its release. A field that submits on Return therefore sees the
+// text before the submit, in separate pumps of the event loop.
+void AdvanceText()
+{
+    switch (g_injection.stage)
+    {
+    case Stage::Pressed:
+        if (!g_injection.pressEnter)
+        {
+            g_injection = {};
+            return;
+        }
+        g_injection.virtualKey = VK_RETURN;
+        PushKey(true);
+        g_injection.stage = Stage::Held;
+        return;
+    case Stage::Held:
+        PushKey(false);
+        g_injection.stage = Stage::Released;
+        return;
+    case Stage::Released:
+    case Stage::Idle:
+        g_injection = {};
+        return;
+    }
 }
 
 void AdvanceClick()
@@ -265,6 +316,32 @@ bool Click(float windowX, float windowY, MouseButton button)
     return true;
 }
 
+bool TypeText(std::string_view text, bool pressEnter)
+{
+    if (!IsIdle())
+    {
+        return false;
+    }
+    if (text.empty() || text.size() > MaxTypedTextBytes)
+    {
+        return false;
+    }
+    // Control characters are not text: a newline or a tab belongs to `PressKey`
+    // (and `pressEnter` below), not into a field's contents.
+    const bool hasControl =
+        std::any_of(text.begin(), text.end(), [](char c) { return static_cast<unsigned char>(c) < 0x20; });
+    if (hasControl)
+    {
+        return false;
+    }
+
+    g_injection = {};
+    g_injection.kind = Kind::Text;
+    g_injection.text.assign(text);
+    g_injection.pressEnter = pressEnter;
+    return true;
+}
+
 bool IsIdle()
 {
     return g_injection.kind == Kind::None;
@@ -277,9 +354,11 @@ bool IsKeyHeld(int virtualKey)
     {
         return false;
     }
-    if (g_injection.kind == Kind::Key)
+    if (g_injection.kind == Kind::Key || g_injection.kind == Kind::Text)
     {
-        return virtualKey == g_injection.virtualKey;
+        // Kind::Text only sets a key while it delivers the Return that submits
+        // the field; until then its virtualKey is 0, which matches nothing.
+        return virtualKey != 0 && virtualKey == g_injection.virtualKey;
     }
     return g_injection.kind == Kind::Click && virtualKey == VirtualKeyForButton(g_injection.button);
 }
@@ -308,6 +387,15 @@ void BeginFrame()
             return;
         }
         AdvanceClick();
+        return;
+    case Kind::Text:
+        if (g_injection.stage == Stage::Idle)
+        {
+            PushTextInput();
+            g_injection.stage = Stage::Pressed;
+            return;
+        }
+        AdvanceText();
         return;
     }
 }
