@@ -3,8 +3,8 @@
    not the generic .modern-frame/.modern-frame-crimson treatment: this window docks in the same
    PanelColumnX() row as CMyInventory/CMyQuestInfoWindow/CPetInfoWindow/CPartyInfoWindow and should
    read as the same family when open side by side. #panel/shell-edge/groove/header-rail chrome now
-   all come from docked_panel_frame.rcss (shared with the other three, which used to each duplicate
-   these same values) -- only genuinely window-specific content stays here. */
+   all come from docked_panel_frame.rcss, shared with the other three -- only genuinely
+   window-specific content stays here. */
 
 #name, #classname, #servername {
 	position: absolute;

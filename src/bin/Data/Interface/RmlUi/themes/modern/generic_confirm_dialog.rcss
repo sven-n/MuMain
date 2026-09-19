@@ -43,10 +43,10 @@
 	portrait2d-image: 0px 0px 148px 138px;
 }
 
-/* Message well -- layout only now (position/overflow/flex); the recessed fill that used to come
-   from base.rcss's .modern-content-well lives in generic_confirm_dialog_bg.rcss's
-   .gcd-bg-content-fill instead (same left/right/top/bottom, so the fill still lines up exactly
-   behind this box). Text sits directly on it, scrolling (overflow: hidden auto) rather than
+/* Message well -- layout only (position/overflow/flex); the recessed fill lives in
+   generic_confirm_dialog_bg.rcss's .gcd-bg-content-fill instead (same left/right/top/bottom, so
+   the fill still lines up exactly behind this box). Text sits directly on it, scrolling
+   (overflow: hidden auto) rather than
    growing the panel by default.
 
    top+bottom (not top+height) deliberately -- this element also has flex centering below, and
@@ -198,9 +198,10 @@
    only for this hero-banner look. No existing token matches it exactly, so hardcoded. */
 .gcd-header-rail.error .gcd-header-title { color: #e1b94e; }
 
-/* Row holding the item3D anchor + text column -- was .gcd-body's own direct row layout until the
-   header banner above needed to sit outside it. width:100% so it spans .gcd-body's full inset
-   width; flex:1 1 auto claims whatever height the (possibly-hidden) banner above doesn't. */
+/* Row holding the item3D anchor + text column, sibling of the header banner (outside .gcd-body's
+   own row layout so it doesn't compete with the banner for space). width:100% so it spans
+   .gcd-body's full inset width; flex:1 1 auto claims whatever height the (possibly-hidden) banner
+   above doesn't. */
 .gcd-content-row {
 	display: flex;
 	flex-direction: row;
@@ -209,8 +210,8 @@
 	width: 100%;
 	flex: 1 1 auto;
 }
-/* Holds lines/input-row/progress-track -- everything .gcd-content-row used to flex-center
-   directly before #gcd_item3d_anchor needed to sit beside it. Fills .gcd-content-row's full
+/* Holds lines/input-row/progress-track, alongside #gcd_item3d_anchor within .gcd-content-row.
+   Fills .gcd-content-row's full
    height explicitly (rather than relying on align-items, which wouldn't stretch under
    align-items:center) so its own overflow:auto has a real bound to scroll within.
 
@@ -397,10 +398,8 @@
 
 /* Three fixed, named-role slots (primary/secondary/cancel -- see GenericDialogConfig's own
    comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
-   Cancel; `.gcd-btn-cancel` is today's original always-Cancel/Close slot (unchanged id meaning
-   from before this rename, just renamed from `.gcd-btn-secondary`). Paired-layout values below
-   are value-for-value identical to before this redesign -- zero visual change for every existing
-   Ok/OkCancel consumer, which always renders solo or paired (primary+cancel), never triple. */
+   Cancel; `.gcd-btn-cancel` is the always-Cancel/Close slot. Every existing Ok/OkCancel consumer
+   always renders solo or paired (primary+cancel), never triple. */
 .btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
 	top: 138dp;
 	width: 60dp;

@@ -38,8 +38,7 @@ namespace mu::ui::window
         // Window frame/title/edit-box background strip/Open-Close-Exit buttons are RmlUi; the
         // inventory grid stays native since its icons are live 3D model renders (same reasoning as
         // CMyInventory/CStorageInventoryExt). The nickname/subject CUITextInputBox (m_EditBox below)
-        // also stays fully native -- it has no RmlUi equivalent yet (see
-        // docs/rmlui-ui-system/building-new-ui.md).
+        // also stays fully native -- it has no RmlUi equivalent yet.
         struct MyShopRmlModel
         {
             float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
@@ -172,11 +171,9 @@ namespace mu::ui::window
         return m_TargetIndex;
     }
 
-    // Shows the "enter selling price" GenericConfirmDialog -- was CPersonalShopItemValueMsgBoxLayout
-    // (CustomMessageBox.h), ported 2026-09-14. Factored out as a free function since 3 of its 4
-    // call sites already live in this file and 1 lives in ZzzInventory.cpp. Caller must already
-    // have ChangeSourceIndex()/ChangeTargetIndex() set for the item being priced -- same
-    // precondition every native call site already satisfied.
+    // Shows the "enter selling price" GenericConfirmDialog. Factored out as a free function since
+    // 3 of its 4 call sites already live in this file and 1 lives in ZzzInventory.cpp. Caller must
+    // already have ChangeSourceIndex()/ChangeTargetIndex() set for the item being priced.
     void ShowPersonalShopItemValueDialog();
 }
 

@@ -27,8 +27,8 @@
 		     original's pixel-tiled 8-piece frame (4 corner sprites + repeating 1px edge tiles) --
 		     see character_info.rcss's header comment for why the repeating edges were dropped.
 		     A bordered/backgrounded leaf with child elements can render an incomplete box in this
-		     RmlUi build (see STATUS.md's "Findings"), so the fill is its own childless leaf, and
-		     the corners are unstyled siblings, not children of it. -->
+		     RmlUi build, so the fill is its own childless leaf, and the corners are unstyled
+		     siblings, not children of it. -->
 		<div class="summary-fill"></div>
 		<div class="summary-corner corner-tl"></div>
 		<div class="summary-corner corner-tr"></div>

@@ -42,9 +42,8 @@ namespace mu::ui::window
         void ClosingProcess();
 
         // Gates the RmlUi doc's Show()/Hide() on IsVisible() AND sceneAllowsShow. Needed because
-        // Update() (which used to own doc visibility) only runs during MAIN_SCENE; this is called
-        // every frame regardless of scene from CSystem::SyncMainSceneHudVisibility(), so leaving
-        // MAIN_SCENE still hides the doc.
+        // Update() only runs during MAIN_SCENE; this is called every frame regardless of scene
+        // from CSystem::SyncMainSceneHudVisibility(), so leaving MAIN_SCENE still hides the doc.
         void SyncDocVisibility(bool sceneAllowsShow);
 
         void ReloadRmlTheme() override;

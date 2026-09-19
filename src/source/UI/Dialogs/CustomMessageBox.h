@@ -50,8 +50,8 @@ namespace mu::ui::window
         CMessageBoxButton m_BtnCancel;
     };
 
-    // CSystemMenuMsgBox/CSystemMenuMsgBoxLayout ported to ShowSystemMenuDialog() (WindowCommon.h),
-    // a proof-of-concept for CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
+    // CSystemMenuMsgBox/CSystemMenuMsgBoxLayout are now ShowSystemMenuDialog() (WindowCommon.h),
+    // on CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
 
     class CBloodCastleResultMsgBox : public CMessageBoxBase
     {
@@ -117,10 +117,9 @@ namespace mu::ui::window
         CMessageBoxButton m_BtnOk;
     };
 
-    // CChaosMixMenuMsgBox/CTrainerMenuMsgBox/CTrainerRecoverMsgBox ported to
+    // CChaosMixMenuMsgBox/CTrainerMenuMsgBox/CTrainerRecoverMsgBox are now
     // ShowChaosMixMenuDialog()/ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() (WindowCommon.h),
-    // all onto CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h) -- see
-    // docs/rmlui-ui-system/dialog-migration-plan.md.
+    // all on CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h).
 
     class CProgressMsgBox : public CMessageBoxBase
     {
@@ -195,8 +194,7 @@ namespace mu::ui::window
         DWORD m_dwNpcIndex;
     };
 
-    // CDuelMsgBox/CDuelResultMsgBox ported to CGenericConfirmDialog's portrait2D field --
-    // see docs/rmlui-ui-system/dialog-migration-plan.md.
+    // CDuelMsgBox/CDuelResultMsgBox are now CGenericConfirmDialog's portrait2D field.
 
     class CGuild_ToPerson_Position : public CMessageBoxBase
     {
@@ -250,12 +248,11 @@ namespace mu::ui::window
     };
 
     // CCherryBlossomMsgBox/CLuckyTradeMenuMsgBox/CSeedMasterMenuMsgBox/CSeedInvestigatorMenuMsgBox/
-    // CResetCharacterPointMsgBox/CDelgardoMainMenuMsgBox ported to ShowCherryBlossomMenuDialog()/
+    // CResetCharacterPointMsgBox/CDelgardoMainMenuMsgBox are now ShowCherryBlossomMenuDialog()/
     // ShowLuckyTradeMenuDialog()/ShowSeedMasterMenuDialog()/ShowSeedInvestigatorMenuDialog()/
-    // ShowResetCharacterPointDialog()/ShowDelgardoMainMenuDialog() (WindowCommon.h), all onto
+    // ShowResetCharacterPointDialog()/ShowDelgardoMainMenuDialog() (WindowCommon.h), all on
     // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h). ShowCherryBlossomMenuDialog() has no
-    // live callers -- same as its native predecessor (grep-confirmed zero CreateMessageBox call
-    // sites even before this port).
+    // live callers -- grep-confirmed zero CreateMessageBox call sites for it.
 
     class CGemIntegrationDisjointMsgBoxLayout : public TMsgBoxLayout<CGemIntegrationDisjointMsgBox>
     {

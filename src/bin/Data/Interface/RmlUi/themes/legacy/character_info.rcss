@@ -9,8 +9,8 @@
    The summary box's original 8-piece pixel-tiled frame (4 corner sprites + a 1px sprite tiled
    across each edge, RenderFrame()'s nested for-loops) is reproduced as corner brackets + a flat
    translucent fill instead of a literal repeating-tile port -- this build has no established,
-   verified pattern for a real 1px-tile repeat (see STATUS.md's decorator-native-size finding),
-   and the brackets alone already read as "framed corners" the way the original intended. This is a
+   verified pattern for a real 1px-tile repeat, and the brackets alone already read as "framed
+   corners" the way the original intended. This is a
    simpler, single-fill variant of docked_panel_frame.rcss's own title/content-split group-box
    technique (no title strip here), so it keeps its own local corner/fill classes rather than the
    shared .gbox-* ones -- only the corner sprites themselves (docked-corner-tl/tr/bl/br) come from

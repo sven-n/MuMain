@@ -41,9 +41,8 @@ using namespace mu::ui::window;
 
 void mu::ui::window::ShowPersonalShopItemValueDialog()
 {
-    // Was CPersonalShopItemValueMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text price
-    // entry, ported 2026-09-14. See MyShopInventory.h's own declaration comment for why this is a
-    // free function shared across all 4 call sites instead of duplicated per site.
+    // Numeric Mode::Text price entry. See MyShopInventory.h's own declaration comment for why
+    // this is a free function shared across all 4 call sites instead of duplicated per site.
     GenericDialogConfig cfg;
     cfg.showCancel = true;
     cfg.lines = { { I18N::Game::EnterSellingPrice, false } };
@@ -90,11 +89,9 @@ void mu::ui::window::ShowPersonalShopItemValueDialog()
 
         if (bResult == true)
         {
-            // Was CPersonalShopItemValueCheckMsgBoxLayout (CommonMessageBox.h) -- a plain
-            // item3D + OkCancel confirm, same shape as NPCShop.cpp's own IsHighValueItem() sell
-            // confirm; ported 2026-09-14. iInputZen was only ever passed through via
-            // SetItemValue()/GetItemValue(), never rendered as a widget of its own, so it's just
-            // captured by value here instead of needing a GenericDialogConfig field.
+            // Plain item3D + OkCancel confirm, same shape as NPCShop.cpp's own IsHighValueItem()
+            // sell confirm. iInputZen is just captured by value here instead of needing a
+            // GenericDialogConfig field of its own.
             wchar_t strText2[MAX_TEXT_LENGTH] = { 0, };
             mu_swprintf(strText2, I18N::Game::SellingPriceSZen, strText);
 

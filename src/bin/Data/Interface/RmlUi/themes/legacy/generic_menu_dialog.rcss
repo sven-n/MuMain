@@ -102,13 +102,11 @@
    to wrap onto 2 lines at this width -- .btn's own fixed height:30dp/line-height:30dp assumes a
    single line and would otherwise let the second line spill silently past the button's own box.
    decorator: ninepatch(...) replaces .btn's inherited decorator: image(legacy-btn-idle) (a fixed
-   108x30px sprite that doesn't stretch/shrink to a mismatched box size -- confirmed elsewhere in
-   this codebase, STATUS.md's "decorator: image(...) does not stretch" finding) with a proper
-   9-slice scale of the SAME asset using the sheet's own already-declared (if previously unused by
-   this file) `legacy-btn-idle-inner` rect -- exactly the technique server_select.rcss's .server-row
-   already proves for this exact problem (that's the actual, currently-shipping fix for the
-   STATUS.md finding above, not the flat-fill fallback an earlier comment here described; see that
-   file's own `.server-row`/`.group-btn` rules). Unlike background-color/border, a decorator paints
+   108x30px sprite that doesn't stretch/shrink to a mismatched box size in this engine) with a
+   proper 9-slice scale of the SAME asset using the sheet's own already-declared (if previously
+   unused by this file) `legacy-btn-idle-inner` rect -- exactly the technique server_select.rcss's
+   .server-row already proves for this exact problem (see that file's own `.server-row`/
+   `.group-btn` rules). Unlike background-color/border, a decorator paints
    independently of the box-model layer the "bordered element with children" bug affects
    (server_select.rcss's own comment: "the ninepatch decorator paints separately, unaffected"), so
    this can go directly on .gmd-btn.cols-2 despite it having children (.gmd-btn-label/.gmd-tooltip)

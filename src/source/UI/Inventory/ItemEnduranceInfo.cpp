@@ -261,7 +261,6 @@ void mu::ui::window::CItemEnduranceInfo::RenderLeft()
 {
     UI::Scaling::ScopedActiveTransform layout(UI::Scaling::ScreenOverlayTransform(WindowWidth, WindowHeight));
 
-    // Todo
     int iNextPosY = m_UIStartPos.y;
 
     if (gCharacterManager.GetBaseClass(Hero->Class) == CLASS_ELF)

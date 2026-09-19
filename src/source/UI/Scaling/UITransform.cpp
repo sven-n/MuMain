@@ -135,9 +135,9 @@ UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHe
 // Pure geometry + WindowContentScale, deliberately NOT including UIScalePercent -- every caller
 // that needs the user's preference multiplies UIScalePercentMultiplier() in itself, once, so it's
 // never double-counted.
-// The one shared "fit the reference size to the real window, clamped" core, now used by both the
+// The one shared "fit the reference size to the real window, clamped" core, used by both the
 // legacy UI::Scaling transforms (via CappedUniformScale/BottomHudScale below) and RmlUiRuntime.cpp's
-// dp-ratio auto-fit -- previously two near-identical private copies of this same formula.
+// dp-ratio auto-fit.
 float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float maximumScale)
 {
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
@@ -165,9 +165,9 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
 // migrated window's now-RCSS-owned layout -- must scale its own fixed reference-pixel offsets by,
 // to stay pixel-for-pixel aligned with the RmlUi element it's shadowing. Same composition
 // RmlUiRuntime.cpp's ApplyUIScale() uses for RmlUi's own dp ratio (UIScalePercent x
-// ViewportFitScale(MaximumPanelScale)) -- the single shared implementation of a formula that used
-// to be hand-copied per window (CharSelMainWin.cpp's GetUIScaleRatio(), LoginMainWin.cpp's inline
-// version, LoginWin.cpp's LoginUIScaleRatio()); each hand-copy risks independently reintroducing
+// ViewportFitScale(MaximumPanelScale)) -- the single shared implementation, used by
+// CharSelMainWin.cpp's GetUIScaleRatio(), LoginMainWin.cpp, and LoginWin.cpp's
+// LoginUIScaleRatio(). Don't hand-copy this formula per window: a hand-copy risks reintroducing
 // the same staleness bug (reading CInput::Instance().GetScreenWidth()/GetScreenHeight() instead of
 // the WindowWidth/WindowHeight globals RmlUiRuntime::OnResize() actually uses). Callers must pass
 // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not a separate copy of the screen size.

@@ -9,10 +9,6 @@
 // base.rcss's "px companions" comment (my_inventory.rcss's header-rail family) for why these two
 // window families need different CSS units too.
 //
-// Originally duplicated per window (CMyInventory::SyncRmlModel()'s "m_Pos is reference-space, not
-// screen pixels" block, for both its foreground and background models); factored out once a second
-// consumer needed the exact same math.
-//
 // `Model` must expose public `float rootX, rootY, rootScale` members bound to
 // "root_x"/"root_y"/"root_scale" respectively (same shape as MyInventoryRmlModel/
 // MyInventoryBgRmlModel in MyInventory.h) -- this only writes those three fields and marks them

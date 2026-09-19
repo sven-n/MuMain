@@ -39,9 +39,9 @@ namespace UI::RmlBridge
     void SetActiveThemeName(const std::string& themeName);
 
     // True if themes/<themeName>/base.rcss exists and is readable -- the minimum a folder needs to
-    // be a real theme (every window's document links it first, per theming-and-modding.md). Meant
-    // as a pre-switch validation gate (e.g. for the `$theme` command) so an unknown/misspelled name
-    // is rejected up front instead of silently rendering every window unstyled.
+    // be a real theme (every window's document links it first). Meant as a pre-switch validation
+    // gate (e.g. for the `$theme` command) so an unknown/misspelled name is rejected up front
+    // instead of silently rendering every window unstyled.
     bool ThemeExists(const std::string& themeName);
 
     // A declared theme capability (C++ must never branch on a theme's NAME -- a theme wanting

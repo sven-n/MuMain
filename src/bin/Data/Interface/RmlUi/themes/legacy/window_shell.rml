@@ -4,9 +4,8 @@
 </head>
 <!-- Legacy theme's shared window shell -- the msgbox sprite-frame chrome (top/middle/bottom cap
      composite + optional title-banner swap), the same asset/mechanism generic_confirm_dialog_bg.rcss
-     uses for its own back-fill + cap composite. Not dialog-specific despite first being extracted
-     from generic_menu_dialog.rml -- see docs/rmlui-ui-system/architecture-principles.md for the
-     fuller shell taxonomy (window_shell_item is a separate, unbuilt sibling for the 5-piece
+     uses for its own back-fill + cap composite. Not dialog-specific: any window needing this same
+     chrome can link it (window_shell_item is a separate, unbuilt sibling for the 5-piece
      item-window composite family; legacy's login/sys_menu pair stay bespoke, too little shared
      structure to templatize).
 
@@ -21,7 +20,7 @@
      literal opening-bracket-plus-word match, not real XML parsing. A stray example that merely
      LOOKS like a body tag with this same template's own name as its template attribute value gets
      sliced in as if it were real markup, self-referentially injecting this template into itself and
-     recursing until a stack overflow -- confirmed the hard way, see STATUS.md.
+     recursing until a stack overflow.
 
      ALSO avoid writing "head" and "body" separated only by a slash (as in the two words joined by
      a plain forward slash, no spaces) anywhere in this file, comments included -- RmlUi's own
@@ -30,18 +29,15 @@
      reset between rejected candidates within one call. A slash sitting directly before either word
      anywhere in this file flips that flag for the rest of that same search, so every later
      candidate -- including the one real body tag below -- gets compared against the wrong
-     open/close expectation and rejected, and the template silently fails to load. Confirmed the
-     hard way (a single stray slash-joined mention of these two words broke this exact template),
-     see STATUS.md.
+     open/close expectation and rejected, and the template silently fails to load.
 
      Requires from the consumer's own data model: `has_title` (bool) and `title` (string). Also
      requires `positioned` (bool) and `root_x`/`root_y` (real device-pixel numbers, NOT reference-
      resolution values needing a scale transform -- this template's own dp chrome already assumes
-     no resolution-based rescaling, per layout-and-scaling.md's "there isn't a reference
-     resolution" policy; a consumer that also needs UI::Scaling's older reference-resolution
-     convention doesn't belong on this template, see option_window.rml's own history for why a
-     `root_scale`+`transform:scale()` variant of this was tried and reverted -- it double-scaled
-     this shell's own already-real-sized chrome). Every consumer that never sets `positioned` true
+     no resolution-based rescaling; a consumer that also needs UI::Scaling's older
+     reference-resolution convention doesn't belong on this template -- a `root_scale`+
+     `transform:scale()` variant would double-scale this shell's own already-real-sized chrome).
+     Every consumer that never sets `positioned` true
      keeps today's plain screen-centered behavior unchanged (an empty-string style value leaves the
      `.center-both` class's own left/top in effect, since an inline style only overrides when it
      actually holds a value) -- `option_window.rml` is the first consumer to opt in, for a window
@@ -63,9 +59,9 @@
      own width/height. .window-shell-positioned (window_shell.rcss) cancels it via a toggled class,
      not a raw data-style-transform override -- an inline style set to the empty string (the
      ternary's false branch) is safe for left/top (a plain length that just fails to parse and
-     falls through to the cascade), but risked something worse for transform specifically when
-     tried live (found the hard way: caused this panel to render full-screen instead of just
-     losing the -50%/-50% shift). data-class-* is the same proven toggle mechanism every other
+     falls through to the cascade), but for transform specifically an empty-string override instead
+     renders this panel full-screen rather than just losing the -50%/-50% shift.
+     data-class-* is the same proven toggle mechanism every other
      conditional class here already uses (data-class-hidden, data-class-checked, etc). -->
 <body id="panel" class="center-both"
       data-style-left="positioned ? (root_x + 'px') : ''"

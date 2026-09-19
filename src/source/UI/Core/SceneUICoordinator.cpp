@@ -205,7 +205,7 @@ void CSceneUICoordinator::Update(double dDeltaTick)
         g_LoginWin.ProcessPendingConnectionReconnect();
 
     // m_bCursorOnUI folds in whatever claims the mouse, so a modal like CMsgWin still blocks
-    // world-click/rotation gating the same way its old full-screen rect used to.
+    // world-click/rotation gating even without a full-screen rect of its own.
     m_NewStyleMng.UpdateMouseEvent();
     m_NewStyleMng.UpdateKeyEvent();
     m_bCursorOnUI = m_NewStyleMng.GetActiveMouseUIObj() != nullptr;

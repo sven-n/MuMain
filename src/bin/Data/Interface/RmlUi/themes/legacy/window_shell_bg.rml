@@ -16,11 +16,10 @@
 
      A consumer links this file as a template resource in its own head section and sets this
      template's name as its own body element's template attribute (see
-     generic_confirm_dialog_bg.rml for the worked example), with no children of its own needed. See
-     STATUS.md's "Findings worth knowing" for the two Template::Load()/FindTag() gotchas discovered
-     while building window_shell.rml -- avoid a literal tag-shaped example anywhere in this file's
-     own comments, and never join the words head and body with a bare slash, anywhere in this file,
-     comments included. -->
+     generic_confirm_dialog_bg.rml for the worked example), with no children of its own needed.
+     As with window_shell.rml, avoid a literal tag-shaped example anywhere in this file's own
+     comments, and never join the words head and body with a bare slash, anywhere in this file,
+     comments included (RmlUi's Template::Load()/FindTag() text search is comment-blind). -->
 <body id="panel">
 	<div class="window-shell-sprite-back"></div>
 	<div class="window-shell-sprite-top"></div>

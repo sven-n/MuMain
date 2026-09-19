@@ -64,7 +64,7 @@ See `ui-target-architecture.md` Section H item 15 for the full reasoning behind 
    `UI/HUD/`, `UI/NPCs/`, `UI/Party/`, `UI/Quests/`, `UI/Character/`, `UI/Options/`. `UI/Widgets/`
    is for genuinely generic, feature-agnostic controls only (not a catch-all). `UI/Dialogs/` is for
    modal/message-box-style windows. `UI/Windows/` is the closed, already-migrated `CWin`-heritage
-   set from `newui-legacy-merger.md` Phases 1-3 — don't add new windows there.
+   set — don't add new windows there.
 5. **Porting/wrapping an existing big legacy subsystem instead of writing one from scratch?** Wrap
    it behind a thin `mu::ui::window::CObject` adapter whose methods forward into the legacy
    implementation, rather than reimplementing it or inventing a second parallel manager.
@@ -93,11 +93,11 @@ instead.
 | Scrollable list of rows | *(no native-tier wrapper — don't build one)* | — | `CUITextListBox<T>` (`UI/Widgets/UIControls.h`, `CUIControl` family) is the legacy answer and is closed to new consumers (`ui-target-architecture.md` Rule 11) — including from a window already on `mu::ui::window::CObject`, which doesn't exempt it. The real answer is RmlUi's `data-for` binding: `CBuffStrip`'s buff-icon strip and `CMyQuestInfoWindow`'s quest list (ported off `CUICurQuestListBox`/`CUIQuestContentsListBox`) are the two proven references |
 | MU Helper bot-engine window | `mu::ui::window::CUIMuHelper` | `UI/Core/WindowMuHelper.h` | Deliberately kept its `UI` — the plain-stripped `CMuHelper` would collide with `MUHelper::CMuHelper`, the actual bot-logic engine this window displays/controls (a real, unrelated class, not a duplicate) |
 
-## Resolved name collisions (Phase 5, 2026-09-05)
+## Resolved name collisions
 
 Three pairs of classes shared nearly the same name across toolkits, purely by historical accident
-— none of them were duplicates of each other or interchangeable. `newui-legacy-merger.md`'s
-Phase 5 resolved this with real namespaces instead of prefix soup: `namespace SEASON3B` (itself a
+— none of them were duplicates of each other or interchangeable. This was resolved with real
+namespaces instead of prefix soup: `namespace SEASON3B` (itself a
 literal historical-version name) split into `mu::ui::window` for this tier's classes (`mu::` is
 this project's own already-established top-level namespace — `mu::platform`, `mu::log` — so this
 extends existing convention rather than inventing a new one), leaving the sprite toolkit and
@@ -130,8 +130,8 @@ qualification at the actual use site (`::CRadioButton` if you mean the `UIContro
 - **`CSlider`** (`UI/Widgets/Slider.h`, composed a `CButton` + `CGaugeBar`) — deleted 2026-09-05,
   confirmed zero consumers anywhere in the tree. If a slider control is genuinely needed again,
   design it for the `mu::ui::window` tier fresh rather than reviving this.
-- **`UIDefaultBase`** — deleted during the `UI/` directory restructure (`newui-legacy-merger.md`),
-  fully inert (`#ifdef`-gated on a macro that was never defined).
+- **`UIDefaultBase`** — deleted during the `UI/` directory restructure, fully inert (`#ifdef`-gated
+  on a macro that was never defined).
 
 ## The `UIWindows.cpp` / `CFriendWindow` pattern — a legitimate stopgap, not confusion or a dead end
 
@@ -153,8 +153,6 @@ way the native-3D/world-overlay boundary is. Wrap, don't reimplement, until that
 - [`ui-target-architecture.md`](ui-target-architecture.md) — the canonical/transitional
   framing this doc's widget guidance follows, the full RmlUi-vs-native boundary reasoning, and the
   broader UI-kit migration plan this is one item of.
-- [`newui-legacy-merger.md`](newui-legacy-merger.md) — the `CUIMng`/`CWin` retirement history,
-  the `UI/` directory restructure, and Phase 5's namespace/rename work.
 - [`newui-tier-adapter.md`](newui-tier-adapter.md) — how to port a window's *rendering* to RmlUi
   once it exists (a separate, later step from choosing its base class here).
 - [`architecture-principles.md`](architecture-principles.md) — the overarching design philosophy.

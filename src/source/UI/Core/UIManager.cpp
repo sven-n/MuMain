@@ -13,7 +13,7 @@
 #include "GameLogic/Items/PersonalShopTitleImp.h"
 #include "GameLogic/Items/CComGem.h"
 #include "Audio/DSPlaySound.h"
-#include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
+#include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable
 #include "UI/Dialogs/CustomMessageBox.h"
 #include "UI/NPCs/NPCShop.h"
 

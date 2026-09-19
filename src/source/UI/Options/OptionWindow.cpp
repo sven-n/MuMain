@@ -395,9 +395,8 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
     // Built directly here, not as option_window.rml markup -- a direct #panel child like
     // generic_confirm_dialog.rcss's own buttons, living in window_shell's shared footer anchor
     // (a sibling of #content, since #content is window_shell's only splice target and this button
-    // must sit outside it). Previously authored as `{{close_label}}` RML markup and moved into the
-    // footer post-load via UI::RmlBridge::PromoteToWindowShellFooter() -- reverted, see
-    // m_pCloseButtonEl's own comment in OptionWindow.h for why that never rendered its label.
+    // must sit outside it). See m_pCloseButtonEl's own comment in OptionWindow.h for why this
+    // isn't authored as `{{close_label}}` RML markup instead.
     m_pCloseButtonEl = nullptr;
     if (m_pRmlDoc)
     {
@@ -507,15 +506,12 @@ bool mu::ui::window::COptionWindow::UpdateMouseEvent()
     // -- this window isn't modal (unlike CGenericMenuDialog's UpdateMouseEvent(), which just
     // returns !IsVisible()), so a real rect is needed rather than blocking every click outright.
     // Read the panel's own live rendered position/size straight from RmlUi rather than
-    // approximating them from hardcoded dp constants -- that approximation drifted from
-    // wherever `.center-both`/window_shell actually put the panel (a stale native reference-pixel
-    // 190x419 originally, then a since-removed dp-based guess), and separately, INTERFACE_OPTION
-    // wasn't registered in UILayoutPolicy.cpp's table at all, so it defaulted to LayoutMode::Dialog
-    // (a 640x480-reference rescale) instead of the Legacy (identity) transform this window's real-
-    // device-pixel math needs -- MouseX/MouseY were being remapped into a completely different
-    // coordinate space than this hit-test rect, so it almost never matched and clicks fell through
-    // to world/character movement. Both fixed: INTERFACE_OPTION now maps to LayoutMode::Legacy, and
-    // this rect is read from the actual element instead of duplicated constants.
+    // approximating them from hardcoded dp constants -- a hardcoded guess drifts from wherever
+    // `.center-both`/window_shell actually puts the panel. INTERFACE_OPTION must map to
+    // LayoutMode::Legacy (identity transform) in UILayoutPolicy.cpp's table, not the default
+    // LayoutMode::Dialog (640x480-reference rescale) -- otherwise MouseX/MouseY is remapped into a
+    // different coordinate space than this hit-test rect, and clicks fall through to
+    // world/character movement instead.
     //
     // Defensive re-fetch: m_pPanelEl should already be valid whenever m_pRmlDoc is (BuildRmlUi()
     // sets both together), but if it's ever out of sync -- e.g. a future change re-parents/renames

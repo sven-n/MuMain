@@ -239,12 +239,12 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   live RmlUi-element-bounds query replacing it entirely was, and remains, a larger refactor with no
   confirmed bug driving it).
 
-  **Update, 2026-09-05**: the underlying mechanism the rest of this finding describes no longer
-  exists. `newui-legacy-merger.md`'s Phase 4 found `CursorInWin()`-driven activation dispatch
-  (`SetActiveWin`/`ShowWin`/`HideWin`/`RemoveWinList`, and the `m_WinList` it walked) fully
-  unreachable — every window it once drove had by then migrated onto `mu::ui::window::CObject`/
-  `CManager` — and deleted it outright, then renamed what remained of the class from `CUIMng` to
-  `CSceneUICoordinator` (a pure rename, method bodies unchanged). `CalculateFixedAnchorLayout()`'s
+  **The underlying mechanism the rest of this finding describes no longer exists.**
+  `CursorInWin()`-driven activation dispatch (`SetActiveWin`/`ShowWin`/`HideWin`/`RemoveWinList`, and
+  the `m_WinList` it walked) was found fully unreachable — every window it once drove had by then
+  migrated onto `mu::ui::window::CObject`/`CManager` — and deleted outright, and what remained of the
+  class was renamed from `CUIMng` to `CSceneUICoordinator` (a pure rename, method bodies unchanged).
+  `CalculateFixedAnchorLayout()`'s
   hand-duplicated math (the still-open item just above) is unaffected by that deletion and remains
   exactly as described. The three-parallel-input-tracking-systems root cause this finding used to
   point at is also gone as stated — `CInput`'s VK-polling no longer drives any
@@ -390,7 +390,7 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   full sweep uses (`UpdateMouseEvent` → `UpdateKeyEvent` → `Update` → `Render`), not just the three
   that look input/render-related by name.
 
-## `CObject`/`CManager`/`LayoutMode` gotchas (moved from `newui-legacy-merger.md`, 2026-09-19)
+## `CObject`/`CManager`/`LayoutMode` gotchas
 
 Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but
 these are facts about the still-live `CManager`/`UI::Scaling` machinery every window on this tier

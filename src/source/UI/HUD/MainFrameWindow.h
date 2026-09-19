@@ -248,8 +248,8 @@ namespace mu::ui::window
     // Render() is a thin passthrough, not a full no-op: RmlUi always paints last in the frame, so
     // moving the center-band background chrome to RmlUi would occlude the still-legacy skill row
     // painted earlier. Render() still calls RenderLeftFrame()/RenderCenterFrame() (chrome for
-    // regions with legacy content) and RenderCurrentSkillAndHotSkillList(); only the chrome/parts
-    // for fully-ported regions (right frame, exp background, buttons, gauges) were removed.
+    // regions with legacy content) and RenderCurrentSkillAndHotSkillList(); the chrome/parts for
+    // fully-RmlUi regions (right frame, exp background, buttons, gauges) are gone.
     //
     // UpdateMouseEvent() drops BtnProcess() (RmlUi now hit-tests the corner buttons) and always
     // reports "not consumed". UpdateKeyEvent() is unchanged -- still gates legacy CItemHotKey
@@ -265,8 +265,8 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            // Gauge/button textures are no longer loaded here -- RmlUi loads them directly (see
-            // main_frame.rcss's @spritesheet blocks).
+            // Gauge/button textures are loaded by RmlUi directly (see main_frame.rcss's
+            // @spritesheet blocks), not here.
             IMAGE_MENU_1 = BITMAP_INTERFACE_NEW_MAINFRAME_BEGIN,	// newui_menu01.jpg
             IMAGE_MENU_2,		// newui_menu02.jpg
             IMAGE_MENU_3,		// newui_menu03.jpg

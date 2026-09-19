@@ -13,7 +13,7 @@
 #include "UI/Dialogs/GenericConfirmDialog.h"
 #include "Engine/Object/ZzzInventory.h"
 #include "UI/Inventory/MyInventory.h"
-#include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- CStorageUnlockMsgBoxLayout's own maxLength
+#include "Scenes/SceneCore.h" // g_iLengthAuthorityCode -- the WEBZEN password field's maxLength below
 
 // RmlUi migration -- see this class's header comment.
 #include "Render/RmlUi/RmlUiRuntime.h"
@@ -28,9 +28,9 @@ using namespace mu::ui::window;
 
 namespace
 {
-    // Was CPasswordKeyPadMsgBoxLayout (CustomMessageBox.h) -- a plain 4-digit Mode::NumericKeypad
-    // PIN verify, ported 2026-09-14. Two call sites: SendRequestItemToMyInven's locked-vault guard
-    // below, and CZenPaymentMsgBoxLayout's own onPrimary (this same file, ported last batch).
+    // Plain 4-digit Mode::NumericKeypad PIN verify. Two call sites: SendRequestItemToMyInven's
+    // locked-vault guard below, and the insufficient-storage-gold zen-payment onPrimary further
+    // down in this file.
     void ShowVaultPinVerifyDialog()
     {
         GenericDialogConfig cfg;
@@ -63,11 +63,9 @@ namespace
         g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 
-    // Was CStorageLockCheckKeyPadMsgBoxLayout (CustomMessageBox.h) -- PIN re-entry confirm step of
-    // the vault-lock flow, ported 2026-09-14. Only ever reached from
-    // ShowStorageLockPinDialog()'s own onPrimary below (no external call sites natively either).
-    // `firstPin` is the PIN just typed in the first step, captured by value -- same technique this
-    // session's own CStorageLockCheckKeyPadMsgBoxLayout port already used for wInputNumber.
+    // PIN re-entry confirm step of the vault-lock flow. Only ever reached from
+    // ShowStorageLockPinDialog()'s own onPrimary below. `firstPin` is the PIN just typed in the
+    // first step, captured by value.
     void ShowStorageLockPinConfirmDialog(std::wstring firstPin)
     {
         GenericDialogConfig cfg;
@@ -99,13 +97,10 @@ namespace
                 return;
             }
 
-            // Was CStorageLockMsgBoxLayout (CustomMessageBox.h) -- a masked (bIsPassword=true),
-            // non-numeric-restricted Mode::Text WEBZEN.COM password entry, ported 2026-09-14 (moved
-            // here verbatim from CustomMessageBox.cpp's own now-deleted
-            // CStorageLockCheckKeyPadMsgBoxLayout::OkBtnDown). The 4-digit PIN just confirmed above
-            // has no equivalent field on GenericDialogConfig -- captured directly in the closure
-            // instead of the native SetPassword()/GetPassword() round-trip through the MsgBox
-            // instance.
+            // Masked (bIsPassword=true), non-numeric-restricted Mode::Text WEBZEN.COM password
+            // entry. The 4-digit PIN just confirmed above has no equivalent field on
+            // GenericDialogConfig -- captured directly in the closure instead of a
+            // SetPassword()/GetPassword() round-trip.
             const WORD wInputNumber = (WORD)_wtoi(strText.c_str());
             GenericDialogConfig pwCfg;
             pwCfg.showCancel = true;
@@ -132,9 +127,8 @@ namespace
         g_pGenericConfirmDialog->Show(std::move(cfg));
     }
 
-    // Was CStorageLockKeyPadMsgBoxLayout (CustomMessageBox.h) -- first step of the vault-lock flow
-    // (choose a new 4-digit PIN), ported 2026-09-14. One call site: storage_lock_click's !m_bLock
-    // branch below.
+    // First step of the vault-lock flow (choose a new 4-digit PIN). One call site:
+    // storage_lock_click's !m_bLock branch below.
     void ShowStorageLockPinDialog()
     {
         GenericDialogConfig cfg;
@@ -234,7 +228,6 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                 c.BindEventCallback("storage_insert_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
-                        // Was CZenReceiptMsgBoxLayout (CustomMessageBox.h).
                         mu::ui::window::GenericDialogConfig cfg;
                         cfg.showCancel = true;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToDeposit, false } };
@@ -266,9 +259,8 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                 c.BindEventCallback("storage_take_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
-                        // Was CZenPaymentMsgBoxLayout (CustomMessageBox.h). The insufficient-storage-
-                        // gold branch chains into ShowVaultPinVerifyDialog() (this file, was
-                        // CPasswordKeyPadMsgBoxLayout, ported 2026-09-14).
+                        // The insufficient-storage-gold branch chains into
+                        // ShowVaultPinVerifyDialog() (this file).
                         mu::ui::window::GenericDialogConfig cfg;
                         cfg.showCancel = true;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToWithdraw, false } };
@@ -315,7 +307,6 @@ bool CStorageInventory::Create(CManager* pNewUIMng, int x, int y)
                     {
                         if (m_bLock)
                         {
-                            // Was CStorageUnlockMsgBoxLayout (CustomMessageBox.h).
                             mu::ui::window::GenericDialogConfig cfg;
                             cfg.showCancel = true;
                             cfg.lines = {
@@ -505,7 +496,7 @@ void CStorageInventory::SyncRmlModel()
         syncText(field, boundName, StringUtils::WideToNarrow(text));
     };
 
-    // Matches CStorageInventory::RenderText()'s former "Storage (open/close)" title, red when locked.
+    // "Storage (open/close)" title text, red when locked.
     wchar_t titleBuf[128];
     mu_swprintf(titleBuf, L"%ls (%ls)", I18N::Game::Storage, I18N::Game::Lookup(m_bLock ? 241 : 240));
     syncWide(&StorageRmlModel::title, "title", titleBuf);

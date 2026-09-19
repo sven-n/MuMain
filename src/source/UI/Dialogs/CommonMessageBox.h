@@ -249,7 +249,7 @@ namespace mu::ui::window
 
     // CHighValueItemCheckMsgBoxLayout, CUseFruitMsgBoxLayout, CUsePartChargeFruitMsgBoxLayout,
     // CPersonalShopItemBuyMsgBoxLayout, CGambleBuyMsgBoxLayout, CPersonalShopItemValueCheckMsgBoxLayout
-    // ported to CGenericConfirmDialog -- see docs/rmlui-ui-system/dialog-migration-plan.md.
+    // are now CGenericConfirmDialog-based.
 
 }
 

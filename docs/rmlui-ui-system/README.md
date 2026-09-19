@@ -15,9 +15,9 @@ detail.
 
 The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
 widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `mu::ui::window::CObject` tier,
-all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc. —
-see `newui-legacy-merger.md` for the folder history) — with no layout engine, retained scene
-graph, or data-binding layer between them. RmlUi is being adopted as the long-term replacement per
+all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc.)
+— with no layout engine, retained scene graph, or data-binding layer between them. RmlUi is being
+adopted as the long-term replacement per
 [`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
 new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.md) for what's
 migrated so far. `COptionWin` was ported but confirmed unreachable in live play, then deleted
@@ -59,10 +59,9 @@ left of the `CommonMessageBox`/`CustomMessageBox` dialog family.
 This directory also holds the wider C++ UI-kit story `architecture-principles.md` sits inside:
 **[UI Target Architecture](ui-target-architecture.md)** — the C++ object-layer companion to
 `architecture-principles.md`, naming actual classes: canonical components, the RmlUi-vs-native
-strategy, and the migration plan/rules `building-new-ui.md` builds on — and
-**[`newui-legacy-merger.md`](newui-legacy-merger.md)** — a short pointer to the (complete) history
-of retiring the `CUIMng`/`CNewUIManager` window-ownership split, plus the still-relevant
-`CObject`/`CManager` gotchas that history surfaced (now folded into `engine-findings.md`).
+strategy, and the migration plan/rules `building-new-ui.md` builds on. The `CUIMng`/
+`CNewUIManager` window-ownership split retirement is complete; its still-relevant `CObject`/
+`CManager` gotchas now live in `engine-findings.md`.
 
 ## Renderer integration: SDL_GPU
 
@@ -208,7 +207,7 @@ free-function module in `namespace UI::Login`.
 window's own `Release()` by name on every scene transition (`CreateLoginScene()`/
 `CreateCharacterScene()`/`CreateMainScene()`/its own `Release()` — no generic window-list walk
 does this any more; that mechanism, `CUIMng::RemoveWinList()`, was confirmed unreachable and
-deleted outright in `newui-legacy-merger.md`'s Phase 4). Either way, the legacy
+deleted outright). Either way, the legacy
 `Release()`/`PreRelease()` path never touches an RmlUi document, so a hybrid window's document
 (created once, reused forever) stays exactly as visible as it was — and since RmlUi renders last
 in the frame, it then paints on top of whatever the *next* scene draws, indefinitely. Every hybrid
@@ -220,10 +219,8 @@ optional boilerplate, even if some other call site currently happens to hide it 
 (`g_pNewUISystem->Show(INTERFACE_OPTION)`), never `CUIMng::m_OptionWin`. Unlike `COptionWin`,
 which retained its own self-contained RmlUi content (own model, own slider-drag math), migrating
 it onto the new manager would have been pure wasted effort on dead code — it was deleted outright
-(2026-09-04, part of the `CUIMng`/`CNewUIManager` merger's Phase 4) rather than ported. See
-`newui-legacy-merger.md` for that merger's full history; the product decision this once left open
-(retire one of the two options-window implementations) is resolved — only
-`mu::ui::window::COptionWindow` remains.
+rather than ported. The product decision this once left open (retire one of the two
+options-window implementations) is resolved — only `mu::ui::window::COptionWindow` remains.
 
 ## Gotchas
 

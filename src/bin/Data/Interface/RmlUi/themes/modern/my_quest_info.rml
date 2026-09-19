@@ -8,11 +8,9 @@
 <body>
 	<!-- Modern theme's own copy of CMyQuestInfoWindow's frame -- per-theme file since the
 	     header-rail chrome is modern-specific structure, not just style. #panel/shell-edge/groove/
-	     header-rail paint now come from docked_panel_frame.rcss, shared with
-	     CCharacterInfoWindow/CPetInfoWindow/CPartyInfoWindow (this window used to be the visual
-	     outlier in this family, on .modern-frame/.modern-frame-crimson instead of the forged-dialog
-	     recipe the other three use -- brought in line per explicit instruction: all four should read
-	     as one family). Keep ids/data-model/event-callback names in sync with ../../my_quest_info.rml. -->
+	     header-rail paint come from docked_panel_frame.rcss, shared with
+	     CCharacterInfoWindow/CPetInfoWindow/CPartyInfoWindow so all four read as one family.
+	     Keep ids/data-model/event-callback names in sync with ../../my_quest_info.rml. -->
 	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
 		<div class="modern-shell-edge"></div>
@@ -21,8 +19,7 @@
 		<!-- Header uses base.rcss's shared .modern-header-rail-px/.modern-joint-px/
 		     .modern-header-text-px/.modern-header-title-px family -- same forged-metal rail the
 		     rest of the inventory family (CMyInventory, CTrade, CStorageInventory, etc.) and
-		     CSysMenuWin use, replacing this window's own older .modern-header/.title-glow/
-		     .modern-header-rivet chrome. `-px` variants since #panel carries
+		     CSysMenuWin use. `-px` variants since #panel carries
 		     transform:scale(root_scale) (see base.rcss's comment on that class family). Fill/border/
 		     shadow paint is docked_panel_frame.rcss's shared .docked-header-rail-fill/
 		     .docked-rail-accent now; .quest-header-rail only overrides height (20px, shorter than
@@ -67,9 +64,8 @@
 		</div>
 
 		<!-- Siblings of .quest-tab, not children -- .quest-tab is itself position:absolute, so a
-		     child inside it would resolve left/top against ITS box (172x320 @ 9,60), not #panel's.
-		     As children these buttons' top:392px landed past the panel's own 429px height, found
-		     only via in-game testing. No footer band here (unlike the older chrome this replaces)
+		     child inside it would resolve left/top against ITS box (172x320 @ 9,60), not #panel's;
+		     as a child, top:392px would land past the panel's own 429px height. No footer band here
 		     -- the inventory-family reference windows just place .modern-icon-btn-px buttons
 		     directly on the frame surface, no separate raised footer strip. -->
 		<div id="btn_quest_open" class="quest-btn quest-btn-open" data-class-hidden="active_tab != 0"
@@ -101,8 +97,7 @@
 		</div>
 
 		<!-- Exit uses base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family --
-		     same primitive every other window in this family uses for its corner buttons, replacing
-		     this window's own bespoke flat-token button+label pair. -->
+		     same primitive every other window in this family uses for its corner buttons. -->
 		<div id="btn_exit" class="modern-icon-btn-px quest-btn-exit" data-event-click="myquest_click_exit">
 			<span class="modern-icon-btn-glyph-px">&#215;</span>
 		</div>

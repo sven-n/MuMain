@@ -114,8 +114,7 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
                 c.BindEventCallback("trade_zen_click",
                     [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&)
                     {
-                        // Was CTradeZenMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text
-                        // amount entry, same shape as every other zen-input dialog in this batch.
+                        // Numeric Mode::Text amount entry, same shape as every other zen-input dialog.
                         mu::ui::window::GenericDialogConfig cfg;
                         cfg.showCancel = true;
                         cfg.lines = { { I18N::Game::EnterTheAmountOfZenYouWouldLikeToTrade, false } };
@@ -147,10 +146,8 @@ bool CTrade::Create(CManager* pNewUIMng, int x, int y)
 
                         if (m_bTradeAlert && !m_bMyConfirm)
                         {
-                            // Original colored each line individually (3x orange warning, 1x red) --
-                            // GenericDialogConfig only has bold/not-bold, so all 4 collapse to bold
-                            // here (deliberate simplification, same call as the color-variant gap
-                            // noted in docs/rmlui-ui-system/dialog-migration-plan.md).
+                            // GenericDialogConfig only has bold/not-bold, not per-line color, so all
+                            // 4 lines (3 warning + 1 red in the native layout) collapse to bold here.
                             mu::ui::window::GenericDialogConfig cfg;
                             cfg.showCancel = true;
                             for (int i = 0; i < 4; ++i)
@@ -518,7 +515,7 @@ void CTrade::SyncRmlModel()
     syncWide(&TradeRmlModel::noticeLine2, "notice_line2", I18N::Game::TheLevelOfThePlayer);
     syncWide(&TradeRmlModel::noticeLine3, "notice_line3", I18N::Game::AndTheItemsBeforeTrading);
 
-    // Mirrors the former sin(WorldTime)-based alpha pulse on the "Warning" word.
+    // sin(WorldTime)-based alpha pulse on the "Warning" word.
     const int nAlpha = int(std::min<int>(255, sin(WorldTime / 200) * 200 + 275));
     syncFloat(&TradeRmlModel::warningOpacity, "warning_opacity", nAlpha / 255.f);
 

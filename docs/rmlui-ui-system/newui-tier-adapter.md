@@ -3,9 +3,8 @@
 How to port an in-game HUD/`mu::ui::window::CObject`-tier window to RmlUi. This is a *different* tier from every
 other document in `rmlui-ui-system/` — `mu::ui::window::CObject`/`mu::ui::window::CManager`, not `CWin`/`CSceneUICoordinator` — with its
 own base class, its own lifecycle, and its own input-gating mechanism. Read this before touching
-any window on that tier (as of `newui-legacy-merger.md`'s directory restructure, these live
-in topic folders directly under `UI/` — `UI/HUD/`, `UI/Inventory/`, etc. — not one `UI/NewUI/`
-folder); the `CWin`-tier docs (`README.md`, `theming-and-modding.md`,
+any window on that tier (these live in topic folders directly under `UI/` — `UI/HUD/`,
+`UI/Inventory/`, etc. — not one `UI/NewUI/` folder); the `CWin`-tier docs (`README.md`, `theming-and-modding.md`,
 `layout-and-scaling.md`) still apply for RML/RCSS content itself, just not for how the C++ side
 plugs in.
 
@@ -103,8 +102,8 @@ system could plausibly add another.
    real scene-transition points (each `g_*Win` global's own `Show()`, driven by
    `CSceneUICoordinator::CreateLoginScene()`/`CreateCharacterScene()`/`CreateMainScene()`/
    `Release()` — the generic `ShowWin()`/`HideWin()` pair this used to go through on `CUIMng`'s own
-   window list was confirmed dead and deleted outright in `newui-legacy-merger.md`'s Phase 4,
-   once every window it would have applied to had migrated off that list). Its `Update()`/`Render()` are
+   window list was confirmed dead and deleted outright, once every window it would have applied to
+   had migrated off that list). Its `Update()`/`Render()` are
    themselves only ever *called* during `MAIN_SCENE` (`MainScene.cpp`) — before any `mu::ui::window::CObject`
    window owned an RmlUi document, that call-site gate was already a complete visibility gate on
    its own, since nothing drew otherwise. It stops being one the moment a window's visuals move to
@@ -146,8 +145,8 @@ member/accessor/macro that referenced it, updated to match (`INTERFACE_MU_HELPER
 `mu::ui::window::CObject` base class/tier boundary itself — that's structural (touches the ~88 other
 still-unported `mu::ui::window::CObject` windows' shared machinery), not a per-class naming choice, and stays
 premature with only 2 pilots. (The physical file location piece of this deferral was resolved
-separately by the `UI/` directory restructure — `newui-legacy-merger.md`, 2026-09-05 — these
-windows now live in `UI/HUD/` etc., not `UI/NewUI/HUD/`.) See
+separately by the `UI/` directory restructure — these windows now live in `UI/HUD/` etc., not
+`UI/NewUI/HUD/`.) See
 [`tracked-deferrals.md`](tracked-deferrals.md)'s "Tracked deferral" section for the full reasoning
 on the base-class/tier piece that remains.
 
