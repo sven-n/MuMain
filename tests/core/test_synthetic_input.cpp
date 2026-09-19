@@ -1,24 +1,21 @@
-// doctest unit tests for the scripted key/click injector: the key-name
-// table and the frame sequence a `hotkey` or `click-ui` walks through.
-// The mouse globals it writes are plain variables, so no window is needed.
+// doctest unit tests for the scripted key/click injector: the key-name table,
+// the virtual-key to scancode mapping the injected events are built from, and
+// the frame sequence a `hotkey` or `click-ui` walks through.
+//
+// The events themselves need a window and an initialised SDL, which a unit
+// test has neither of; the injector pushes nothing in that case and still
+// walks its frames, which is what is asserted here. That the events reach the
+// UI is a live property, verified by driving a client through the socket.
 //
 // Run: ctest --test-dir <build directory> --build-config Release -R "synthetic"
 
 #include "doctest.h"
 
+#include <SDL3/SDL.h>
+
 #include "Core/Input/KeyState.h"
 #include "Core/Input/SyntheticInput.h"
 #include "Core/Platform/WinCompat.h"
-
-extern int MouseX;
-extern int MouseY;
-extern float g_fWindowMouseX;
-extern float g_fWindowMouseY;
-extern bool MouseLButton;
-extern bool MouseLButtonPush;
-extern bool MouseLButtonPop;
-extern unsigned int WindowWidth;
-extern unsigned int WindowHeight;
 
 using namespace Core::Input::Synthetic;
 
@@ -98,41 +95,50 @@ TEST_CASE("A second injection is refused while one is in flight [core][synthetic
     CHECK(Click(1.0f, 1.0f, MouseButton::Left));
 }
 
-TEST_CASE("A click walks press, hold, release through the mouse globals [core][synthetic-input]")
+TEST_CASE("A click walks press, hold and release across frames [core][synthetic-input]")
 {
     ResetInjector guard;
-    WindowWidth = 1280;
-    WindowHeight = 960;
-    MouseLButton = false;
-    MouseLButtonPush = false;
-    MouseLButtonPop = false;
 
     CHECK(Click(1000.0f, 725.0f, MouseButton::Left));
+    // Scheduled, not yet applied: the frame has not begun.
+    CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
 
     BeginFrame();
-    CHECK(g_fWindowMouseX == doctest::Approx(1000.0f));
-    CHECK(g_fWindowMouseY == doctest::Approx(725.0f));
-    // The overlay space is 640x480 stretched over the window.
-    CHECK(MouseX == 500);
-    CHECK(MouseY == 362);
-    CHECK(MouseLButton);
-    CHECK(MouseLButtonPush);
-    CHECK_FALSE(MouseLButtonPop);
     CHECK(IsKeyHeld(VK_LBUTTON));
     CHECK(Core::Input::IsKeyDown(VK_LBUTTON));
+    CHECK_FALSE(IsKeyHeld(VK_RBUTTON));
 
-    // The scene clears the one-shot push at the end of the frame.
-    MouseLButtonPush = false;
+    // Held for a second frame, so the press and its release are never delivered
+    // in one pump of the event loop.
     BeginFrame();
-    CHECK(MouseLButton);
     CHECK(IsKeyHeld(VK_LBUTTON));
 
     BeginFrame();
-    CHECK_FALSE(MouseLButton);
-    CHECK(MouseLButtonPop);
     CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
     CHECK_FALSE(IsIdle());
 
     BeginFrame();
     CHECK(IsIdle());
+}
+
+TEST_CASE("Injected keys map to the scancodes the event carries [core][synthetic-input]")
+{
+    // The injector builds its SDL key events from this mapping; a key it does
+    // not translate produces no event at all, so the two have to agree.
+    CHECK(Core::Input::ScancodeForVirtualKey(VK_ESCAPE) == SDL_SCANCODE_ESCAPE);
+    CHECK(Core::Input::ScancodeForVirtualKey(VK_RETURN) == SDL_SCANCODE_RETURN);
+    CHECK(Core::Input::ScancodeForVirtualKey(VK_F12) == SDL_SCANCODE_F12);
+    CHECK(Core::Input::ScancodeForVirtualKey('I') == SDL_SCANCODE_I);
+    CHECK(Core::Input::ScancodeForVirtualKey('7') == SDL_SCANCODE_7);
+    CHECK(Core::Input::ScancodeForVirtualKey('0') == SDL_SCANCODE_0);
+
+    for (const char* name : {"esc", "enter", "tab", "space", "backspace", "home", "end", "insert", "delete",
+                             "pageup", "pagedown", "up", "down", "left", "right", "printscreen", "f1", "f12",
+                             "a", "z", "0", "9"})
+    {
+        CAPTURE(name);
+        const std::optional<int> virtualKey = VirtualKeyFromName(name);
+        REQUIRE(virtualKey.has_value());
+        CHECK(Core::Input::ScancodeForVirtualKey(*virtualKey) != SDL_SCANCODE_UNKNOWN);
+    }
 }

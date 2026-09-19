@@ -1,14 +1,23 @@
 // Injected key presses and mouse clicks for scripted control of the client.
 //
-// An injection is applied below the game's own input readers — `IsKeyDown`
-// consults the held key, a click writes the same mouse globals the event
-// loop fills from real SDL events — so every handler reacts exactly as it
-// does to a human. Nothing here touches the window system: no pointer
-// movement, no focus change, no synthetic OS events.
+// An injection is pushed onto SDL's own event queue, so it travels the exact
+// path a physical key or click takes: the event loop routes it to the UI
+// consumer first (RmlUi, which is driven by SDL events alone and would never
+// see an injection written straight into the legacy input globals) and to the
+// legacy readers when the UI leaves it unclaimed. `IsKeyDown` additionally
+// consults the held key, because SDL's own keyboard and mouse state reports
+// physical devices and is not moved by a pushed event.
 //
 // Sequencing follows rendered frames: `BeginFrame()` runs once per rendered
 // frame (before the key-state scan) and advances one injection through
-// press -> hold -> release. At most one injection is in flight at a time.
+// press -> hold -> release, so a press and its release are always separated by
+// a rendered frame -- the legacy readers consume press/release edges per frame
+// and would miss a pair delivered in one pump. At most one injection is in
+// flight at a time.
+//
+// No window means no event: before the game window exists (and in unit tests,
+// where SDL is not initialised) an injection still walks its frames, but pushes
+// nothing.
 #pragma once
 
 #include <cstdint>
@@ -37,8 +46,8 @@ enum class MouseButton : std::uint8_t
 // still in flight.
 [[nodiscard]] bool PressKey(int virtualKey);
 
-// Schedules a press-and-release of the button at a window pixel. False when
-// another injection is still in flight.
+// Schedules a press-and-release of the button at a window pixel, preceded by a
+// pointer move there. False when another injection is still in flight.
 [[nodiscard]] bool Click(float windowX, float windowY, MouseButton button);
 
 // True while no injection is in flight; the command that scheduled one

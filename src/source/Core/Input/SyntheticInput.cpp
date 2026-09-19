@@ -2,37 +2,16 @@
 #include "Core/Input/SyntheticInput.h"
 
 #include "Core/Input/KeyState.h"
-#include "UI/Scaling/UITransform.h"
+
+#include <SDL3/SDL.h>
 
 #include <algorithm>
 #include <cctype>
 #include <cstdint>
 #include <string>
 
-// Mouse state the event loop fills from real SDL events (ZzzOpenglUtil.cpp,
-// Winmain.cpp); a click writes the same globals so the UI cannot tell the
-// difference.
-extern int MouseX;
-extern int MouseY;
-extern float g_fWindowMouseX;
-extern float g_fWindowMouseY;
-extern bool MouseLButton;
-extern bool MouseLButtonPush;
-extern bool MouseLButtonPop;
-extern bool MouseRButton;
-extern bool MouseRButtonPush;
-extern bool MouseRButtonPop;
-extern int g_iMousePopPosition_x;
-extern int g_iMousePopPosition_y;
-extern int g_iNoMouseTime;
-extern unsigned int WindowWidth;
-extern unsigned int WindowHeight;
-
 namespace
 {
-constexpr int ReferenceWidth = 640;
-constexpr int ReferenceHeight = 480;
-
 enum class Kind : std::uint8_t
 {
     None,
@@ -101,54 +80,96 @@ int VirtualKeyForButton(Core::Input::Synthetic::MouseButton button)
     return button == Core::Input::Synthetic::MouseButton::Left ? VK_LBUTTON : VK_RBUTTON;
 }
 
-void ApplyPointerPosition()
+Uint8 SdlButton(Core::Input::Synthetic::MouseButton button)
 {
-    g_fWindowMouseX = g_injection.windowX;
-    g_fWindowMouseY = g_injection.windowY;
-    const auto transform =
-        UI::Scaling::ScreenOverlayTransform(static_cast<int>(WindowWidth), static_cast<int>(WindowHeight));
-    MouseX = std::clamp(static_cast<int>(UI::Scaling::LogicalX(transform, g_injection.windowX)), 0, ReferenceWidth);
-    MouseY = std::clamp(static_cast<int>(UI::Scaling::LogicalY(transform, g_injection.windowY)), 0, ReferenceHeight);
-    g_iNoMouseTime = 0;
+    return button == Core::Input::Synthetic::MouseButton::Left ? SDL_BUTTON_LEFT : SDL_BUTTON_RIGHT;
 }
 
-void ApplyButtonDown()
+// The game's only window; null before it exists (and in unit tests, where SDL is
+// not initialised) -- an injection then advances through its frames without
+// producing any event.
+SDL_Window* GameWindow()
 {
-    if (g_injection.button == Core::Input::Synthetic::MouseButton::Left)
-    {
-        MouseLButtonPop = false;
-        MouseLButtonPush = !MouseLButton;
-        MouseLButton = true;
-        Core::Input::RecordLeftMouseButtonPressEdge();
-        return;
-    }
-    MouseRButtonPop = false;
-    MouseRButtonPush = !MouseRButton;
-    MouseRButton = true;
+    int count = 0;
+    SDL_Window** windows = SDL_GetWindows(&count);
+    SDL_Window* window = count > 0 ? windows[0] : nullptr;
+    SDL_free(static_cast<void*>(windows));
+    return window;
 }
 
-void ApplyButtonUp()
+SDL_WindowID GameWindowId()
 {
-    if (g_injection.button == Core::Input::Synthetic::MouseButton::Left)
-    {
-        MouseLButtonPop = MouseLButton;
-        MouseLButton = false;
-        g_iMousePopPosition_x = MouseX;
-        g_iMousePopPosition_y = MouseY;
+    SDL_Window* window = GameWindow();
+    return window != nullptr ? SDL_GetWindowID(window) : 0;
+}
+
+// Pointer position for the click about to be pushed. A press is dispatched to
+// whatever the pointer last moved over, so the move has to precede it.
+void PushPointerMotion()
+{
+    const SDL_WindowID windowId = GameWindowId();
+    if (windowId == 0)
         return;
-    }
-    MouseRButtonPop = MouseRButton;
-    MouseRButton = false;
+
+    SDL_Event event{};
+    event.type = SDL_EVENT_MOUSE_MOTION;
+    event.motion.timestamp = SDL_GetTicksNS();
+    event.motion.windowID = windowId;
+    event.motion.x = g_injection.windowX;
+    event.motion.y = g_injection.windowY;
+    SDL_PushEvent(&event);
+}
+
+void PushMouseButton(bool down)
+{
+    const SDL_WindowID windowId = GameWindowId();
+    if (windowId == 0)
+        return;
+
+    SDL_Event event{};
+    event.type = down ? SDL_EVENT_MOUSE_BUTTON_DOWN : SDL_EVENT_MOUSE_BUTTON_UP;
+    event.button.timestamp = SDL_GetTicksNS();
+    event.button.windowID = windowId;
+    event.button.button = SdlButton(g_injection.button);
+    event.button.down = down;
+    event.button.clicks = 1;
+    event.button.x = g_injection.windowX;
+    event.button.y = g_injection.windowY;
+    SDL_PushEvent(&event);
+}
+
+void PushKey(bool down)
+{
+    const SDL_WindowID windowId = GameWindowId();
+    if (windowId == 0)
+        return;
+
+    const auto scancode = static_cast<SDL_Scancode>(Core::Input::ScancodeForVirtualKey(g_injection.virtualKey));
+    if (scancode == SDL_SCANCODE_UNKNOWN)
+        return;
+
+    SDL_Event event{};
+    event.type = down ? SDL_EVENT_KEY_DOWN : SDL_EVENT_KEY_UP;
+    event.key.timestamp = SDL_GetTicksNS();
+    event.key.windowID = windowId;
+    event.key.scancode = scancode;
+    event.key.key = SDL_GetKeyFromScancode(scancode, SDL_KMOD_NONE, false);
+    event.key.mod = SDL_KMOD_NONE;
+    event.key.down = down;
+    event.key.repeat = false;
+    SDL_PushEvent(&event);
 }
 
 void AdvanceKey()
 {
-    // Pressed -> Released: down for exactly one scan.
-    g_injection.stage = g_injection.stage == Stage::Pressed ? Stage::Released : Stage::Idle;
-    if (g_injection.stage == Stage::Idle)
+    // Pressed -> Released: down for exactly one scan, then the matching key-up.
+    if (g_injection.stage == Stage::Pressed)
     {
-        g_injection.kind = Kind::None;
+        PushKey(false);
+        g_injection.stage = Stage::Released;
+        return;
     }
+    g_injection = {};
 }
 
 void AdvanceClick()
@@ -159,8 +180,7 @@ void AdvanceClick()
         g_injection.stage = Stage::Held;
         return;
     case Stage::Held:
-        ApplyPointerPosition();
-        ApplyButtonUp();
+        PushMouseButton(false);
         g_injection.stage = Stage::Released;
         return;
     case Stage::Released:
@@ -273,6 +293,7 @@ void BeginFrame()
     case Kind::Key:
         if (g_injection.stage == Stage::Idle)
         {
+            PushKey(true);
             g_injection.stage = Stage::Pressed;
             return;
         }
@@ -281,8 +302,8 @@ void BeginFrame()
     case Kind::Click:
         if (g_injection.stage == Stage::Idle)
         {
-            ApplyPointerPosition();
-            ApplyButtonDown();
+            PushPointerMotion();
+            PushMouseButton(true);
             g_injection.stage = Stage::Pressed;
             return;
         }

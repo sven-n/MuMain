@@ -54,6 +54,11 @@ namespace Core::Input
         }
     }
 
+    int ScancodeForVirtualKey(int virtualKey)
+    {
+        return static_cast<int>(VkToScancode(virtualKey));
+    }
+
     void RecordLeftMouseButtonPressEdge()
     {
         g_leftMouseButtonPressEdge = true;

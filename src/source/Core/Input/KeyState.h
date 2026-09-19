@@ -10,4 +10,9 @@ namespace Core::Input
     // state. The argument is a Win32 virtual-key code (VK_*) or an ASCII letter
     // or digit, matching what the existing call sites already pass.
     bool IsKeyDown(int virtualKey);
+
+    // SDL scancode for a Win32 virtual-key code (or an ASCII letter/digit), as an int so this
+    // header stays free of SDL. SDL_SCANCODE_UNKNOWN (0) for keys the shim does not translate.
+    // Exported for the synthetic injector, which has to build real SDL key events.
+    int ScancodeForVirtualKey(int virtualKey);
 }

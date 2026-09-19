@@ -95,21 +95,28 @@ target, the skills the character owns, equipment, inventory, buffs, party and
 
 ### Synthetic input
 
-`hotkey` and `click-ui` inject a key or a click *below* the game's own input
-readers: the key counts as down for one rendered frame in the same key-state
-scan a physical key goes through, and the click writes the same mouse
-variables the event loop fills from real mouse events, at a window pixel. The
-window system is never involved — no pointer movement, no focus change, no
-synthetic OS events — so a scripted session can open the system menu, the
-inventory or start the MU Helper from its HUD button while the human keeps
-working elsewhere. Coordinates for `click-ui` are the pixels of the client
-area, the same space a `screenshot` image is in, so a script can capture,
-locate and click. Key names are case-insensitive: the letters, the digits,
-`esc`, `enter`, `tab`, `space`, `backspace`, `home`, `end`, `insert`,
-`delete`, `pageup`, `pagedown`, `up`, `down`, `left`, `right`, `printscreen`
-and `f1`–`f12`; anything else answers `bad_request`. Both answer once the
-release frame has run; a second injection while one is in flight answers
-`busy`. Not covered: typing text (`say` sends chat), key chords, drags.
+`hotkey` and `click-ui` inject a key or a click onto the client's own SDL
+event queue, so it takes the same path a physical key or click takes: the
+event loop offers it to the UI first and to the legacy readers when the UI
+leaves it unclaimed. That is what makes both work regardless of which UI a
+window is built in — an RmlUi document is driven by SDL events alone, and
+never sees anything written straight into the legacy input globals, so a
+scripted session can press an RmlUi window's tabs, dropdowns and buttons as
+well as the original HUD's. Nothing else about the window system is touched:
+no focus change, no OS-level input, so the human can keep working elsewhere
+while a scripted client plays. A click is preceded by a pointer move to its
+own position, because a press is dispatched to whatever the pointer last
+moved over. Coordinates for `click-ui` are the pixels of the client area, the
+same space a `screenshot` image is in, so a script can capture, locate and
+click. Key names are case-insensitive: the letters, the digits, `esc`,
+`enter`, `tab`, `space`, `backspace`, `home`, `end`, `insert`, `delete`,
+`pageup`, `pagedown`, `up`, `down`, `left`, `right`, `printscreen` and
+`f1`–`f12`; anything else answers `bad_request`. A press and its release are
+always separated by a rendered frame, since the legacy readers consume
+press/release edges per frame. Both answer once the release frame has run; a
+second injection while one is in flight answers `busy`. Not covered: typing
+text (`say` sends chat — a key press carries no character, so a text field
+receives the key but no glyph), key chords, drags.
 
 ## Events
 
