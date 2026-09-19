@@ -109,7 +109,8 @@ locate and click. Key names are case-insensitive: the letters, the digits,
 `delete`, `pageup`, `pagedown`, `up`, `down`, `left`, `right`, `printscreen`
 and `f1`–`f12`; anything else answers `bad_request`. Both answer once the
 release frame has run; a second injection while one is in flight answers
-`busy`. Not covered: typing text (`say` sends chat), key chords, drags.
+`busy`, while a walk or an attack in flight is left alone — injecting a key is
+an observation of the act slot, not a claim on it. Not covered: typing text (`say` sends chat), key chords, drags.
 
 ## Events
 

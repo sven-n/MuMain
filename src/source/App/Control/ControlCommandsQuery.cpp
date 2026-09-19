@@ -265,6 +265,13 @@ public:
     {
         return m_name;
     }
+    // An injected key or click observes the single act slot rather than
+    // taking it: opening the inventory does not cancel a walk. A second
+    // injection is still refused, by the idleness check in the handler.
+    [[nodiscard]] bool IsAct() const override
+    {
+        return false;
+    }
 
     [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
