@@ -1,106 +1,10 @@
 /* Modern theme for CCharacterInfoWindow -- same forged-dialog chrome recipe as CMyInventory
    (shell-edge/groove/gradient panel fill, rail-with-rivet header, bordered square icon buttons),
    not the generic .modern-frame/.modern-frame-crimson treatment: this window docks in the same
-   PanelColumnX() row as CMyInventory/CMyQuestInfoWindow and should read as the same family when
-   open side by side.
-
-   CMyInventory splits this look into a separate background RmlUi context (my_inventory_bg.rcss)
-   purely to solve one paint-order problem: its equipped item's live-3D icon renders natively
-   *behind* the frame, and RmlUi's main context always composites last, so the frame has to live in
-   a context that renders before the icon does. CCharacterInfoWindow has no live-3D content at all,
-   so that constraint doesn't apply -- the whole look lives directly in this single foreground
-   document instead. Values below are copied from my_inventory_bg.rcss/my_inventory.rcss's own px
-   literals (already unmodified defaults, same as those files copy from base.rcss's dp originals),
-   not approximated -- keep this file in sync by inspection if either of those change. */
-
-#panel {
-	position: absolute;
-	transform-origin: left top;
-	width: 190px;
-	height: 429px;
-	font-family: "token(font-body)";
-	border-radius: token(radius-sm)px;
-	background-color: #080a08;
-	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
-	border-width: 1px;
-	border-color: token(border-frame);
-	box-shadow:
-		0 11px 30px rgba(0, 0, 0, 158),
-		0 2px 5px rgba(0, 0, 0, 217),
-		inset 0 0 0 1px #090a08,
-		inset 0 0 0 3px rgba(120, 115, 90, 190);
-}
-
-/* Outer blackened-iron edge, -3px -- base.rcss's .modern-shell-edge, unmodified (its own is `dp`,
-   this window's #panel is root_scale-transformed so needs the literal-px copy, same reasoning
-   base.rcss's -px header-rail/icon-btn/wallet family exists for). */
-.chainfo-shell-edge {
-	position: absolute;
-	left: -3px;
-	right: -3px;
-	top: -3px;
-	bottom: -3px;
-	pointer-events: none;
-	background-color: transparent;
-	border-radius: token(radius-sm)px;
-	border-width: 1px;
-	border-color: rgba(31, 31, 26, 242);
-	box-shadow:
-		inset 1px 0 0 rgba(130, 121, 91, 110),
-		inset -1px 0 0 rgba(0, 0, 0, 204),
-		inset 0 1px 0 rgba(151, 139, 101, 90),
-		inset 0 -1px 0 rgba(0, 0, 0, 230);
-}
-/* Inner groove, ~4px inward -- base.rcss's .modern-groove, unmodified. This is what gives the
-   panel body its recessed/carved surface, the same treatment CMyInventory's body reads as. */
-.chainfo-groove {
-	position: absolute;
-	left: 4px;
-	right: 4px;
-	top: 4px;
-	bottom: 4px;
-	pointer-events: none;
-	border-width: 1px;
-	border-color: #24261f;
-	box-shadow:
-		inset 0 0 0 1px rgba(121, 112, 83, 40),
-		inset 0 0 12px rgba(0, 0, 0, 153);
-}
-
-/* Header rail: base.rcss's .modern-header-rail-px (layout only -- paint normally lives in a
-   window's own *_bg.rcss for the live-3D-icon-overflow reason documented there; this window has
-   no such content, so the paint lives here directly instead, copied from my_inventory_bg.rcss's
-   .rail-fill/.rail-accent). top:7/height:38 matches CMyInventory/SysMenu exactly. */
-.chainfo-header-rail {
-	top: 7px;
-	height: 38px;
-	background-color: token(metal-dark);
-	decorator:
-		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
-		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
-	border-width: 1px;
-	border-color: token(border-rail);
-	border-bottom-color: #171812;
-	box-shadow:
-		inset 0 1px 0 rgba(235, 218, 169, 18),
-		inset 0 -1px 0 #000000,
-		0 2px 4px rgba(0, 0, 0, 133);
-}
-.chainfo-rail-accent {
-	position: absolute;
-	left: -1px;
-	right: -1px;
-	bottom: 2px;
-	height: 1px;
-	pointer-events: none;
-	opacity: 0.35;
-	decorator: linear-gradient(to right,
-		transparent,
-		token(metal-warm-edge) 30%,
-		#84754e 50%,
-		token(metal-warm-edge) 70%,
-		transparent);
-}
+   PanelColumnX() row as CMyInventory/CMyQuestInfoWindow/CPetInfoWindow/CPartyInfoWindow and should
+   read as the same family when open side by side. #panel/shell-edge/groove/header-rail chrome now
+   all come from docked_panel_frame.rcss (shared with the other three, which used to each duplicate
+   these same values) -- only genuinely window-specific content stays here. */
 
 #name, #classname, #servername {
 	position: absolute;
@@ -218,23 +122,9 @@
 .chainfo-btn-pet         { left: 95px; }
 .chainfo-btn-masterlevel { left: 136px; }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 376px;
-	width: 110px;
-	white-space: nowrap;
-	background-color: token(surface-tooltip);
-	border: 1px token(border-frame);
-	color: token(text-primary);
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-family: "token(font-body)";
-	font-size: 11px;
-	text-align: center;
-	pointer-events: none;
-	z-index: 1;
-}
+/* .tooltip's shared shape lives in docked_panel_frame.rcss -- this window's own action row sits a
+   touch lower than the others', hence its own top override. */
+.tooltip { top: 376px; }
 .tooltip-exit        { left: -24px; }
 .tooltip-quest       { left: 14px; }
 .tooltip-pet         { left: 55px; }

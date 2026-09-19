@@ -2,26 +2,32 @@
 <head>
 	<title>Character Info</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
 	<link type="text/rcss" href="character_info.rcss"/>
 </head>
 <body>
 	<!-- Modern theme's own copy of CCharacterInfoWindow's frame -- matches CMyInventory's own
 	     forged-dialog chrome (shell-edge/groove/gradient panel, rail-with-rivet header, bordered
 	     square icon buttons) rather than the generic .modern-frame/.modern-frame-crimson treatment,
-	     since this window docks in the same PanelColumnX() row as CMyInventory/CMyQuestInfoWindow
-	     and is meant to read as the same visual family, not a one-off. Unlike CMyInventory, this
-	     window has no live-3D icon to paint behind, so the whole forged-dialog look (normally split
-	     into a separate background context purely to solve that paint-order problem -- see
-	     my_inventory_bg.rcss) lives directly in this one foreground document instead. Keep ids/
-	     data-model/event-callback names in sync with ../../character_info.rml. -->
+	     since this window docks in the same PanelColumnX() row as CMyInventory/CMyQuestInfoWindow/
+	     CPetInfoWindow/CPartyInfoWindow and is meant to read as the same visual family, not a
+	     one-off -- all four now share this exact shell via docked_panel_frame.rcss (#panel's own
+	     gradient/border/box-shadow, and .docked-header-rail-fill/.docked-rail-accent below); this
+	     file only carries what's genuinely window-specific. .modern-shell-edge/.modern-groove come
+	     straight from base.rcss (no more pointless unmodified per-window duplicate of them). Unlike
+	     CMyInventory, this window has no live-3D icon to paint behind, so the whole forged-dialog
+	     look lives directly in this one foreground document instead of a separate background
+	     context. Keep ids/data-model/event-callback names in sync with ../../character_info.rml. -->
 	<div id="panel" data-model="character_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
-		<div class="chainfo-shell-edge"></div>
-		<div class="chainfo-groove"></div>
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
 
-		<div class="modern-header-rail-px chainfo-header-rail">
+		<!-- No top/height override needed -- .modern-header-rail-px's own default (top:7/height:38)
+		     already matches what this window wants. -->
+		<div class="modern-header-rail-px docked-header-rail-fill">
 			<div class="modern-joint-px"></div>
-			<div class="chainfo-rail-accent"></div>
+			<div class="docked-rail-accent"></div>
 		</div>
 
 		<span id="name" data-style-color="name_color">{{name_text}}</span>

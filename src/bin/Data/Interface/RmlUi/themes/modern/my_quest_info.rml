@@ -2,35 +2,37 @@
 <head>
 	<title>My Quest Info</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
 	<link type="text/rcss" href="my_quest_info.rcss"/>
 </head>
 <body>
-	<!-- Modern theme's own copy of CMyQuestInfoWindow's frame -- per-theme file since
-	     modern-frame/modern-frame-crimson plus the header-rail chrome are modern-specific
-	     structure, not just style. Keep ids/data-model/event-callback names in sync with
-	     ../../my_quest_info.rml. -->
-	<div id="panel" class="modern-frame modern-frame-crimson" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	<!-- Modern theme's own copy of CMyQuestInfoWindow's frame -- per-theme file since the
+	     header-rail chrome is modern-specific structure, not just style. #panel/shell-edge/groove/
+	     header-rail paint now come from docked_panel_frame.rcss, shared with
+	     CCharacterInfoWindow/CPetInfoWindow/CPartyInfoWindow (this window used to be the visual
+	     outlier in this family, on .modern-frame/.modern-frame-crimson instead of the forged-dialog
+	     recipe the other three use -- brought in line per explicit instruction: all four should read
+	     as one family). Keep ids/data-model/event-callback names in sync with ../../my_quest_info.rml. -->
+	<div id="panel" data-model="my_quest_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
 	     data-style-transform="'scale(' + root_scale + ')'">
-		<div class="frame-piece frame-top"></div>
-		<div class="frame-piece frame-left"></div>
-		<div class="frame-piece frame-right"></div>
-		<div class="frame-piece frame-bottom"></div>
+		<div class="modern-shell-edge"></div>
+		<div class="modern-groove"></div>
 
 		<!-- Header uses base.rcss's shared .modern-header-rail-px/.modern-joint-px/
 		     .modern-header-text-px/.modern-header-title-px family -- same forged-metal rail the
 		     rest of the inventory family (CMyInventory, CTrade, CStorageInventory, etc.) and
 		     CSysMenuWin use, replacing this window's own older .modern-header/.title-glow/
 		     .modern-header-rivet chrome. `-px` variants since #panel carries
-		     transform:scale(root_scale) (see base.rcss's comment on that class family). Unlike
-		     that family, this window has no background-context document (no live 3D content to
-		     paint behind), so .quest-header-rail supplies the rail's own fill/border/shadow
-		     directly here instead of a sibling *_bg.rcss's .rail-fill. -->
-		<div class="modern-header-rail-px quest-header-rail">
+		     transform:scale(root_scale) (see base.rcss's comment on that class family). Fill/border/
+		     shadow paint is docked_panel_frame.rcss's shared .docked-header-rail-fill/
+		     .docked-rail-accent now; .quest-header-rail only overrides height (20px, shorter than
+		     the family default 38px, to leave room for the tab-row right below it). -->
+		<div class="modern-header-rail-px docked-header-rail-fill quest-header-rail">
 			<div class="modern-joint-px"></div>
 			<div class="modern-header-text-px">
 				<div id="title" class="modern-header-title-px">Quest</div>
 			</div>
-			<div class="quest-header-accent"></div>
+			<div class="docked-rail-accent"></div>
 		</div>
 
 		<div class="tab-row">

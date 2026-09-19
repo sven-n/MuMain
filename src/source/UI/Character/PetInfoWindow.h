@@ -5,46 +5,17 @@
 #pragma once
 
 #include "UI/Core/WindowObject.h"
-#include "UI/Widgets/Window/Button.h"
-#include "UI/Dialogs/MessageBox.h"
-#include "UI/Inventory/MyInventory.h"
-#include "UI/Inventory/InventoryCtrl.h"
-#include "Guild/GuildInfoWindow.h"
-#include "UI/HUD/MainFrameWindow.h"
+#include "UI/Core/WindowManager.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
+    // Fully RmlUi-based (#panel, pet_info.rml/.rcss) -- no live 3D content, same shape as the
+    // already-ported CCharacterInfoWindow it docks alongside.
     class CPetInfoWindow : public CObject
     {
-    public:
-        enum IMAGE_LIST
-        {
-            IMAGE_PETINFO_BACK = CMessageBoxMng::IMAGE_MSGBOX_BACK,			//. newui_msgbox_back.jpg
-            IMAGE_PETINFO_TOP = CMyInventory::IMAGE_INVENTORY_BACK_TOP2,		//. newui_item_back04.tga	(190,64)
-            IMAGE_PETINFO_LEFT = CMyInventory::IMAGE_INVENTORY_BACK_LEFT,		//. newui_item_back02-l.tga	(21,320)
-            IMAGE_PETINFO_RIGHT = CMyInventory::IMAGE_INVENTORY_BACK_RIGHT,	//. newui_item_back02-r.tga	(21,320)
-            IMAGE_PETINFO_BOTTOM = CMyInventory::IMAGE_INVENTORY_BACK_BOTTOM,	//. newui_item_back03.tga	(190,45)
-            IMAGE_PETINFO_BTN_EXIT = CMyInventory::IMAGE_INVENTORY_EXIT_BTN,	//. newui_exit_00.tga
-
-            IMAGE_PETINFO_TAB_BUTTON = CGuildInfoWindow::IMAGE_GUILDINFO_TAB_BUTTON,	//. newui_guild_tab04.tga (56,44,h22)
-
-            IMAGE_PETINFO_SKILL = CSkillList::IMAGE_COMMAND,				//. newui_command.jpg
-            IMAGE_PETINFO_SKILLBOX = CSkillList::IMAGE_SKILLBOX,			//. newui_skillbox.jpg (32,38)
-
-            IMAGE_PETINFO_TABLE_TOP_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_LEFT,			//. newui_item_table01(L).tga (14,14)
-            IMAGE_PETINFO_TABLE_TOP_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_RIGHT,		//. newui_item_table01(R).tga (14,14)
-            IMAGE_PETINFO_TABLE_BOTTOM_LEFT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_LEFT,	//. newui_item_table02(L).tga (14,14)
-            IMAGE_PETINFO_TABLE_BOTTOM_RIGHT = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_RIGHT,	//. newui_item_table02(R).tga (14,14)
-            IMAGE_PETINFO_TABLE_TOP_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_TOP_PIXEL,		//. newui_item_table03(up).tga (1, 14)
-            IMAGE_PETINFO_TABLE_BOTTOM_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_BOTTOM_PIXEL,	//. newui_item_table03(dw).tga (1,14)
-            IMAGE_PETINFO_TABLE_LEFT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_LEFT_PIXEL,		//. newui_item_table03(L).tga (14,1)
-            IMAGE_PETINFO_TABLE_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,	//. newui_item_table03(R).tga (14,1)
-
-            // PetLifeBar (Original)
-            IMAGE_PETINFO_LIFEBAR = BITMAP_INTERFACE_NEW_PETINFO_WINDOW_BEGIN,			//. newui_pet_lifebar01.jpg (151,12)
-            IMAGE_PETINFO_LIFE,															//. newui_Pet_lifebar02.jpg (1,8)
-        };
-
     private:
         enum
         {
@@ -58,26 +29,6 @@ namespace mu::ui::window
             TAB_TYPE_DARKSPIRIT
         };
 
-        enum EVENT_STATE
-        {
-            EVENT_NONE = 0,
-            EVENT_EXIT_BTN_HOVER,
-            EVENT_EXIT_BTN_HOLDING
-        };
-
-    private:
-        CManager* m_pNewUIMng;
-        CRadioGroupButton		m_BtnTab;
-        CButton				m_BtnExit;
-        POINT						m_Pos;
-
-        int							m_iNumCurOpenTab;
-
-        EVENT_STATE					m_EventState;
-
-        int							m_aiDamage[2];
-        float						m_fAddDamagePercent;
-
     public:
         CPetInfoWindow();
         virtual ~CPetInfoWindow();
@@ -86,29 +37,63 @@ namespace mu::ui::window
         void Release();
 
         void SetPos(int x, int y);
+        void Show(bool bShow) override;
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
 
-        bool BtnProcess();
-
         float GetLayerDepth();	//. 2.3f
 
         void OpenningProcess();
         void ClosingProcess();
 
-    private:
-        void LoadImages();
-        void UnloadImages();
+        // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
+        void RmlClickSelectTab(int tab);
+        void RmlClickExit();
 
-        void InitButtons();
-        void RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth = 60, int iTitleHeight = 20);
+    private:
+        void SyncRmlModel();
         void CalcDamage(int iNumTapButton);
-        bool RenderDarkHorseInfo(PET_INFO* pPetInfo);
-        bool RenderDarkSpiritInfo(PET_INFO* pPetInfo);
-        bool RenderToolTip();
+
+        struct PetInfoRmlModel
+        {
+            // Movable window (SetPos(), collision-shuffled by PanelColumnX), not HUD-anchored --
+            // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            int activeTab = TAB_TYPE_DARKHORSE;
+            Rml::String windowTitle;
+            Rml::String tabDarkHorseLabel, tabDarkSpiritLabel;
+            Rml::String exitTooltip;
+
+            // Dark Horse tab
+            bool dhHasPet = false;
+            Rml::String dhNoPetText;
+            Rml::String dhLevelText, dhLifeText, dhExpText, dhDmgText, dhAtkSpeedText;
+            float dhHpPercent = 0.f;
+
+            // Dark Spirit tab
+            bool dsHasPet = false;
+            Rml::String dsNoPetText;
+            Rml::String dsLevelText, dsLifeText, dsExpText, dsDmgText, dsAtkSpeedText, dsCharismaText;
+            float dsHpPercent = 0.f;
+
+            // Set once at Create(); static I18N labels, never re-synced (this window has no
+            // language switcher of its own).
+            Rml::String commandsLabel;
+            Rml::String skillBasicActionLabel, skillRandomAttackLabel, skillAttackWithOwnerLabel, skillAttackTargetLabel;
+        };
+        RmlModelBinder<PetInfoRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    private:
+        CManager* m_pNewUIMng;
+        POINT m_Pos;
+
+        int m_aiDamage[2];
+        float m_fAddDamagePercent;
     };
 }
 

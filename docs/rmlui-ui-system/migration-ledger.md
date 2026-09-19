@@ -69,9 +69,9 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
-| `CCharacterInfoWindow` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated" |
+| `CCharacterInfoWindow` | `CObject`-tier | Done | RmlUi-only 2D | `STATUS.md` "What's migrated"; frame/shell shared with `CMyQuestInfoWindow`/`CPetInfoWindow`/`CPartyInfoWindow` via `docked_panel_frame.rcss` (2026-09-19, see `STATUS.md`'s dock-neighbor gap note) |
 | `CNameWindow` | `CObject`-tier | Not started | TBD | |
-| `CPetInfoWindow` | `CObject`-tier | Not started | TBD | Docks alongside `CMyInventory`/`CCharacterInfoWindow` (`PanelColumnX`) — check on-screen neighbors before picking a modern-theme treatment, per `STATUS.md`'s "no documented cross-check" gap |
+| `CPetInfoWindow` | `CObject`-tier | Done (2026-09-19) | RmlUi-only 2D | No live-3D content (pure text/icon/bar), same shape as `CCharacterInfoWindow`. The docking coupling this row used to flag as unverified turned out to be real but harmless: `WindowSystem.cpp`'s existing native show/hide choreography (`INTERFACE_PET` forces `INTERFACE_CHARACTER` open and vice versa on close) needed zero changes — it only ever reads/writes `m_Pos`/`IsVisible()`, same as before the port. `CCharacterInfoWindow::RmlClickPet()` already called `Toggle(INTERFACE_PET)` before this port landed (a contract waiting to be fulfilled). Group boxes (`RenderGroupBox()`'s 9-slice tiling) reproduced as corner-bracket sprites + flat fills in legacy, a single flat `token(surface-panel)` rect in modern — same simplification `character_info.rcss`'s own summary box already established, not a literal 1px-tile port. Its modern theme initially shipped flatter than `CCharacterInfoWindow`'s forged-dialog look (a conscious effort tradeoff), then unified with it same-day once the shared `docked_panel_frame.rcss` partial existed — see `STATUS.md`'s dock-neighbor gap note. |
 
 ### Inventory / Shop / Trade
 
@@ -89,8 +89,8 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
-| `CPartyListWindow` | `CObject`-tier | Not started | TBD | |
-| `CPartyInfoWindow` | `CObject`-tier | Not started | TBD | Docks with `CMyInventory`/`CCharacterInfoWindow` — same dock-neighbor check as `CPetInfoWindow` above |
+| `CPartyListWindow` | `CObject`-tier | Not started | TBD | Different class from `CPartyInfoWindow` below — the always-on HUD mini list, fixed position, not the full management window. Aliases `IMAGE_PARTY_FLAG`/`IMAGE_PARTY_EXIT`'s numeric slot IDs from `CPartyInfoWindow::IMAGE_LIST` (loads its own copies of the same files independently, doesn't depend on `CPartyInfoWindow::LoadImages()` having run) — a real compile-time coupling to keep in mind if this window is ever trimmed further. |
+| `CPartyInfoWindow` | `CObject`-tier | Done (2026-09-19) | RmlUi-only 2D | No live-3D content, same shape as `CCharacterInfoWindow`. Looser docking than `CPetInfoWindow`: opens standalone (just closes Character/Inventory first via `HideAllGroupA()`), no forced pairing — `WindowSystem.cpp` needed zero changes. Member rows (`RenderMemberStatue`'s `iIndex * 71` pixel math) ported to a `data-for` list stacked via normal block flow (`height: 71px` per row) instead of computed offsets — first repeated-row list in this codebase built directly against a live global array (`Party[]`/`PartyNumber`) each frame rather than a cached snapshot, since the row count is small (`MAX_PARTYS` = 5). `IMAGE_LIST` enum and `LoadImages()`/`UnloadImages()` kept despite the window no longer rendering through the legacy bitmap-atlas system, same reason `CCharacterInfoWindow` kept its own — `CPartyListWindow` aliases two of this window's texture slot IDs. Frame/shell now shared with `CCharacterInfoWindow`/`CMyQuestInfoWindow`/`CPetInfoWindow` via `docked_panel_frame.rcss` (both themes) — see `STATUS.md`'s dock-neighbor gap note for why this exists. |
 | `CFriendWindow` | `CObject`-tier | Stays native (transitional stopgap) | Native-only (stopgap) | `building-new-ui.md`'s own reference-shape table and "`UIWindows.cpp`/`CFriendWindow` pattern" section — thin adapter over a live legacy subsystem (friend/mail/chat-room), not excluded from a future port, just not scheduled |
 | `CGuildMakeWindow` | `CObject`-tier | Not started | TBD | |
 | `CGuildInfoWindow` | `CObject`-tier | Not started | TBD | Already a `CGenericConfirmDialog` caller for its alliance-master-can't-leave notice — the window shell itself is still fully native |
@@ -99,7 +99,7 @@ have had no investigation beyond confirming no RmlUi call sites exist, not a sha
 
 | Component | Category | Status | Target shape / primitive | Detail pointer |
 |---|---|---|---|---|
-| `CMyQuestInfoWindow` | `CObject`-tier | Done | RmlUi-only 2D | `component-catalog.md`'s "List / repeated rows" — the `data-for` reference for `CUITextListBox<T>` retirement |
+| `CMyQuestInfoWindow` | `CObject`-tier | Done | RmlUi-only 2D | `component-catalog.md`'s "List / repeated rows" — the `data-for` reference for `CUITextListBox<T>` retirement. Modern theme moved off its own `.modern-frame`/`.modern-frame-crimson` onto the shared forged-dialog recipe in `docked_panel_frame.rcss` (2026-09-19) — it was the visual outlier `STATUS.md`'s dock-neighbor gap note flags; now matches `CCharacterInfoWindow`/`CPetInfoWindow`/`CPartyInfoWindow`. |
 | `CQuestProgress` | `CObject`-tier | Not started | TBD | |
 | `CQuestProgressByEtc` | `CObject`-tier | Not started | TBD | |
 | `CNPCQuest` | `CObject`-tier + live-3D (`I3DRenderObj`) | Not started | TBD (likely Hybrid) | |

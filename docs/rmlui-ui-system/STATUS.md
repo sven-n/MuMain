@@ -487,7 +487,23 @@ for "the full architecture is in place":
   `component-catalog.md` don't yet instruct a future port to check its `PanelColumnX` (or
   equivalent) screen-neighbors' current look before picking a modern-theme treatment — that's the
   fix still needed, either as a step in `/port-window` or a note in the catalog, before the next
-  window in this dock group is ported.
+  port in this same `PanelColumnX` family. **Recurred once (2026-09-19) then fixed for real
+  (same day, follow-up pass)**: `CPetInfoWindow`/`CPartyInfoWindow`'s own modern themes initially
+  shipped with a flatter, simpler flat-token treatment instead of copying `CMyInventory`'s
+  forged-dialog chrome, a conscious effort tradeoff at the time, not an oversight — but it meant
+  these two read as a visually distinct sub-family from their own `PanelColumnX` screen-neighbors.
+  Resolved by extracting the shared chrome into `docked_panel_frame.rcss` (legacy and modern, one
+  per theme) instead of a fourth copy-paste: `character_info`/`my_quest_info`/`pet_info`/
+  `party_info` now all link it for `#panel`'s frame/fill (legacy) or forged-dialog gradient/shell-
+  edge/groove/header-rail (modern), and each keeps only genuinely window-specific content in its own
+  `.rcss`. `CMyQuestInfoWindow`'s modern theme — the original outlier this whole gap note was about
+  — was brought in line too (off `.modern-frame`/`.modern-frame-crimson` onto the shared forged
+  recipe), so all four now render as one family, not three-plus-an-outlier. `CMyInventory` stays
+  deliberately out of this partial (its frame paint lives in a separate `*_bg.rml` context that
+  can't link it — a real technical constraint, not oversight). **The underlying gap — no documented
+  step to check `PanelColumnX` screen-neighbors before picking a new port's modern-theme
+  treatment — is still real** for the next window that joins this dock group; only the two
+  recurrences have been fixed, not the process gap that let them happen twice.
 
 ## Pilots to revisit, and tracked deferrals
 

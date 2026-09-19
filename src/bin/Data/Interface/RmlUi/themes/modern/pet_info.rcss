@@ -1,0 +1,196 @@
+/* Modern theme for CPetInfoWindow -- same forged-dialog shell/header-rail/exit-button family as
+   CCharacterInfoWindow/CMyQuestInfoWindow/CPartyInfoWindow, via docked_panel_frame.rcss and
+   themes/modern/pet_info.rml (this window's own per-theme markup override). Group boxes stay a
+   single flat token(surface-panel) rounded rect (no corner-bracket sprites in modern, same as
+   character_info's own .summary-fill), not the legacy corner-and-fill technique. */
+#title {
+	position: absolute;
+	left: 60px;
+	top: 13px;
+	width: 70px;
+	text-align: center;
+	color: token(text-warm);
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	pointer-events: none;
+	font-effect: shadow(0px 1px #000000);
+}
+
+.tab-row {
+	position: absolute;
+	left: 12px;
+	top: 48px;
+	width: 112px;
+	height: 22px;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+}
+.tab-btn {
+	position: absolute;
+	top: 0;
+	width: 56px;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 12px;
+	color: token(text-secondary);
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+}
+.tab-btn.active { color: token(text-warm); background-color: token(accent-steel); border-radius: token(radius-sm)dp; }
+.tab-btn-darkhorse { left: 0; }
+.tab-btn-darkspirit { left: 56px; }
+
+.pet-tab { position: absolute; left: 0; top: 0; width: 190px; height: 429px; }
+.hidden { display: none; }
+
+.pet-no-pet-msg {
+	display: block;
+	position: absolute;
+	left: 15px;
+	top: 100px;
+	width: 160px;
+	color: token(accent-gold-hover);
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	text-align: center;
+}
+
+.pet-subtitle {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 25px;
+	width: 70px;
+	text-align: center;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	pointer-events: none;
+}
+
+.gbox-content-fill {
+	position: absolute;
+	background-color: token(surface-panel);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+.gbox-title-text {
+	display: block;
+	position: absolute;
+	text-align: center;
+	font-weight: bold;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(accent-gold-hover);
+	pointer-events: none;
+}
+
+.gbox-dh-content-fill { left: 12px; top: 75px; width: 166px; height: 105px; }
+.gbox-dh-title-text { left: 14px; top: 80px; width: 56px; }
+
+.gbox-ds1-content-fill { left: 12px; top: 75px; width: 166px; height: 121px; }
+.gbox-ds1-title-text { left: 14px; top: 80px; width: 56px; }
+
+.gbox-ds2-content-fill { left: 12px; top: 196px; width: 166px; height: 195px; }
+.gbox-ds2-title-text { left: 14px; top: 201px; width: 56px; }
+
+.pet-stat-text {
+	display: block;
+	position: absolute;
+	left: 22px;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	white-space: nowrap;
+	pointer-events: none;
+}
+.pet-dh-life-text { top: 103px; }
+.pet-dh-exp-text { top: 134px; }
+.pet-dh-dmg-text { top: 147px; }
+.pet-dh-atkspeed-text { top: 160px; }
+.pet-ds-life-text { top: 103px; }
+.pet-ds-exp-text { top: 134px; }
+.pet-ds-dmg-text { top: 147px; }
+.pet-ds-atkspeed-text { top: 160px; }
+.pet-ds-charisma-text { top: 173px; }
+
+.hp-bar {
+	position: absolute;
+	left: 19px;
+	width: 147px;
+	height: 8px;
+	background-color: token(surface-control);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+.hp-bar-dh { top: 115px; }
+.hp-bar-ds { top: 115px; }
+.hp-bar-fill {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 0%;
+	height: 8px;
+	background-color: #7fc25c;
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+
+.skill-slot {
+	position: absolute;
+	left: 22px;
+	width: 32px;
+	height: 38px;
+	background-color: token(surface-control);
+	border-radius: token(radius-sm)dp;
+	pointer-events: none;
+}
+.skill-slot-0 { top: 224px; }
+.skill-slot-1 { top: 264px; }
+.skill-slot-2 { top: 304px; }
+.skill-slot-3 { top: 344px; }
+
+/* No flat-token equivalent for the legacy command-icon sprites -- reuse the same art here too. */
+@spritesheet petinfo-skillicon-0-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-0: 1px 0px 19px 27px; }
+@spritesheet petinfo-skillicon-1-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-1: 21px 0px 19px 27px; }
+@spritesheet petinfo-skillicon-2-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-2: 41px 0px 19px 27px; }
+@spritesheet petinfo-skillicon-3-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-3: 61px 0px 19px 27px; }
+.skill-icon {
+	position: absolute;
+	left: 29px;
+	width: 19px;
+	height: 27px;
+	pointer-events: none;
+}
+.skill-icon-0 { top: 230px; decorator: image(petinfo-skillicon-0); }
+.skill-icon-1 { top: 270px; decorator: image(petinfo-skillicon-1); }
+.skill-icon-2 { top: 310px; decorator: image(petinfo-skillicon-2); }
+.skill-icon-3 { top: 350px; decorator: image(petinfo-skillicon-3); }
+
+.skill-label {
+	display: block;
+	position: absolute;
+	left: 14px;
+	width: 100px;
+	text-align: center;
+	font-size: 12px;
+	font-family: "token(font-body)";
+	color: token(text-primary);
+	pointer-events: none;
+}
+.skill-label-0 { top: 241px; }
+.skill-label-1 { top: 281px; }
+.skill-label-2 { top: 321px; }
+.skill-label-3 { top: 361px; }
+
+/* Exit: base.rcss's shared .modern-icon-btn-px/.modern-icon-btn-glyph-px family, this window's own
+   left offset only. */
+.pet-btn-exit { left: 13px; }
+
+.tooltip { top: 365px; }
+.tooltip-exit { left: -24px; }

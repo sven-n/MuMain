@@ -2,6 +2,7 @@
 <head>
 	<title>Character Info</title>
 	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
 	<link type="text/rcss" href="character_info.rcss"/>
 </head>
 <body>

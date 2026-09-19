@@ -41,6 +41,16 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   place, fails silently, and leaves the `<link>` (and every `token(...)` inside it) untouched.
   Also fixed the same function iterating only the first `<link>` match instead of every one
   (a document links `base.rcss` then its own `<name>.rcss`; only the first was ever substituted).
+  **The "everything except login/msg_win/remember_password_prompt/main_frame" list above is stale**
+  — `character_info` and `my_quest_info` have since grown their own `themes/modern/*.rml`
+  overrides too (richer forged-dialog markup than their shared fallback: shell-edge/groove/header-
+  rail chrome, `modern-icon-btn-px` buttons instead of legacy-style sprite ones), and more windows
+  may follow. **Don't infer a document's real rendered markup from the shared top-level `.rml` file
+  alone — check for a `themes/<theme>/<name>.rml` override first**, `LoadThemedDocument()` prefers
+  it silently. Cost real time once already: a shared-RML class (`info-btn`) was compared against a
+  theme's own `.rcss` (which styled a *different* class, `chainfo-btn-*`) and read as a bug, when
+  the theme's real per-theme RML override already used the matching classes correctly — the diff
+  was checked against the wrong source file.
 - **`overflow:hidden` does not clip an absolutely-positioned oversized child in this RmlUi
   build**, even with `clip: always`. Use generated named `@spritesheet` rects instead for sprite
   atlases — see `newui-tier-adapter.md`.
