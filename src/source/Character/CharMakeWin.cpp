@@ -190,22 +190,18 @@ void CCharMakeWin::BuildRmlUi()
         {
             model.jobs.resize(MAX_CLASS);
 
-            // RegisterStruct()/RegisterArray() declare a C++ type to RmlUi's Context-wide data-type
-            // registry (persists for the Context's lifetime); re-declaring an already-registered
-            // type returns a null handle that crashes the next .RegisterMember() call. c.Bind()
-            // below is per-model and must still rerun every time.
-            static bool s_typesRegistered = false;
-            if (!s_typesRegistered)
-            {
-                auto job = c.RegisterStruct<JobButtonEntry>();
-                job.RegisterMember("rel_left", &JobButtonEntry::relLeft);
-                job.RegisterMember("rel_top", &JobButtonEntry::relTop);
-                job.RegisterMember("checked", &JobButtonEntry::checked);
-                job.RegisterMember("disabled", &JobButtonEntry::disabled);
-                job.RegisterMember("label", &JobButtonEntry::label);
-                c.RegisterArray<std::vector<JobButtonEntry>>();
-                s_typesRegistered = true;
-            }
+            // RegisterStruct()/RegisterArray() run against this Create() call's own
+            // Rml::DataTypeRegister (RmlModelBinder.h), not one shared across calls -- so this
+            // must re-run in full every time this registration function runs, including from
+            // ReloadRmlTheme(); a guard skipping it on a later call would register nothing on
+            // that call's (fresh, otherwise-empty) register and break the c.Bind() below.
+            auto job = c.RegisterStruct<JobButtonEntry>();
+            job.RegisterMember("rel_left", &JobButtonEntry::relLeft);
+            job.RegisterMember("rel_top", &JobButtonEntry::relTop);
+            job.RegisterMember("checked", &JobButtonEntry::checked);
+            job.RegisterMember("disabled", &JobButtonEntry::disabled);
+            job.RegisterMember("label", &JobButtonEntry::label);
+            c.RegisterArray<std::vector<JobButtonEntry>>();
 
             c.Bind("jobs", &model.jobs);
             c.Bind("dark_lord_extra", &model.darkLordExtra);

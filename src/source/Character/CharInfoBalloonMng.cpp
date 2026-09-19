@@ -80,21 +80,17 @@ void CCharInfoBalloonMng::BuildRmlUi()
         {
             model.balloons.resize(kBalloonCount);
 
-            // See CCharMakeWin::BuildRmlUi()'s comment on why this guard is needed.
-            static bool s_typesRegistered = false;
-            if (!s_typesRegistered)
-            {
-                auto entry = c.RegisterStruct<BalloonEntry>();
-                entry.RegisterMember("hidden", &BalloonEntry::hidden);
-                entry.RegisterMember("screen_x", &BalloonEntry::screenX);
-                entry.RegisterMember("screen_y", &BalloonEntry::screenY);
-                entry.RegisterMember("name_color", &BalloonEntry::nameColor);
-                entry.RegisterMember("name", &BalloonEntry::name);
-                entry.RegisterMember("guild", &BalloonEntry::guild);
-                entry.RegisterMember("klass", &BalloonEntry::klass);
-                c.RegisterArray<std::vector<BalloonEntry>>();
-                s_typesRegistered = true;
-            }
+            // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
+            // call, including from ReloadRmlTheme() -- no guard here.
+            auto entry = c.RegisterStruct<BalloonEntry>();
+            entry.RegisterMember("hidden", &BalloonEntry::hidden);
+            entry.RegisterMember("screen_x", &BalloonEntry::screenX);
+            entry.RegisterMember("screen_y", &BalloonEntry::screenY);
+            entry.RegisterMember("name_color", &BalloonEntry::nameColor);
+            entry.RegisterMember("name", &BalloonEntry::name);
+            entry.RegisterMember("guild", &BalloonEntry::guild);
+            entry.RegisterMember("klass", &BalloonEntry::klass);
+            c.RegisterArray<std::vector<BalloonEntry>>();
 
             c.Bind("balloons", &model.balloons);
         });

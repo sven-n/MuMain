@@ -69,6 +69,8 @@ public:
 	void Release();
 	void Show(bool bShow) override;
 
+	void ReloadRmlTheme() override;
+
 	// Set by the RmlUi close button's click binding; polled and cleared in Update().
 	void RmlClickClose() { m_bRmlCloseClicked = true; }
 
@@ -111,6 +113,7 @@ private:
 
 	bool m_bRmlCloseClicked = false;
 
+	void BuildRmlUi();
 	void SyncRmlModel();
 };
 

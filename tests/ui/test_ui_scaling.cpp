@@ -2,6 +2,8 @@
 
 #include <doctest.h>
 
+#include <algorithm>
+
 #include "Character/CharSelMainWin.h"
 #include "Core/Input/Input.h"
 #include "Core/Platform/WinCompat.h"
@@ -227,6 +229,46 @@ TEST_CASE("display resolution options use unique supported sizes [ui][options]")
     CHECK(UI::Options::FindExactDisplayResolutionIndex(resolutions, 1920, 1080) == 1);
     CHECK(UI::Options::FindExactDisplayResolutionIndex(resolutions, 1600, 900) == -1);
     CHECK(UI::Options::FindClosestDisplayResolutionIndex(resolutions, 1366, 768) == 0);
+}
+
+TEST_CASE("UI scale options offer an ascending ladder around the default [ui][options]")
+{
+    const auto& choices = UI::Options::UIScalePercentChoices();
+
+    REQUIRE(choices.size() >= 3);
+    CHECK(std::is_sorted(choices.begin(), choices.end()));
+    CHECK(std::adjacent_find(choices.begin(), choices.end()) == choices.end());
+    // The default must be selectable, or "back to normal" would not be reachable from the row.
+    CHECK(std::find(choices.begin(), choices.end(), CfgDefaults::CfgDefaultUIScalePercent) != choices.end());
+    // Never offers a value the config setter would clamp away.
+    CHECK(choices.front() >= CfgDefaults::CfgMinUIScalePercent);
+    CHECK(choices.back() <= CfgDefaults::CfgMaxUIScalePercent);
+
+    // A config.ini value between two offered steps shows the nearer one, out-of-range values the
+    // nearest end; exact values map to themselves.
+    for (size_t i = 0; i < choices.size(); ++i)
+        CHECK(UI::Options::FindClosestUIScaleIndex(choices[i]) == static_cast<int>(i));
+    CHECK(UI::Options::FindClosestUIScaleIndex(choices.front() - 1000) == 0);
+    CHECK(UI::Options::FindClosestUIScaleIndex(choices.back() + 1000) == static_cast<int>(choices.size()) - 1);
+    // Midway between two steps, the lower one wins (ties resolve down, see the declaration).
+    const int firstStep = choices[0];
+    const int secondStep = choices[1];
+    CHECK(UI::Options::FindClosestUIScaleIndex((firstStep + secondStep) / 2) == 0);
+}
+
+TEST_CASE("UI scale percent clamps to the supported range [config][ui]")
+{
+    auto& config = GameConfig::GetInstance();
+    const int previous = config.GetUIScalePercent();
+
+    config.SetUIScalePercent(CfgDefaults::CfgMinUIScalePercent - 10);
+    CHECK(config.GetUIScalePercent() == CfgDefaults::CfgMinUIScalePercent);
+    config.SetUIScalePercent(CfgDefaults::CfgMaxUIScalePercent + 100);
+    CHECK(config.GetUIScalePercent() == CfgDefaults::CfgMaxUIScalePercent);
+    config.SetUIScalePercent(125);
+    CHECK(config.GetUIScalePercent() == 125);
+
+    config.SetUIScalePercent(previous);
 }
 
 TEST_CASE("VSync preference defaults on and remains mutable [config][render]")

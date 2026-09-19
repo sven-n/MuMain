@@ -442,6 +442,41 @@ for "the full architecture is in place":
   step to check `PanelColumnX` screen-neighbors before picking a new port's modern-theme
   treatment — is still real** for the next window that joins this dock group; only the two
   recurrences have been fixed, not the process gap that let them happen twice.
+- **Theme hot-swap (`$theme <name>`, the Options window's theme picker) relies on two separate
+  "don't forget" steps, both of which have already failed once (fixed 2026-09-20, mechanism still
+  unaddressed).** `IObject::ReloadRmlTheme()` (`UI/Core/WindowObject.h`) defaults to a no-op virtual
+  a window must remember to override; `CManager::ReloadAllRmlThemes()` sweeps every registered
+  window correctly, but a window that never overrides the hook just silently keeps rendering
+  whatever theme was active when it first opened. 16 windows shipped with exactly this gap
+  (`CharacterInfoWindow`, `PetInfoWindow`, `PartyInfoWindow`, `MyQuestInfoWindow`, the whole
+  `Inventory/` family, `NPCShop`, `CreditWin`, `ServerSelWin`) before being fixed — see
+  `component-catalog.md`'s "Theming" section for the now-corrected pattern every one of them
+  follows. Separately, the actual "theme changed" call sites already need **three independent
+  calls** to reach everything that exists today (`CSceneUICoordinator`'s `CManager` for the
+  login/char-select tier, a second independent `CManager` for the `MAIN_SCENE` HUD tier, plus a
+  free-function call for `RememberPasswordPrompt` since it isn't a `CObject` at all) — a second
+  instance of the same failure mode one level up: nothing forces a new manager/tier/window to be
+  wired into every future reload call site either.
+
+  **Proposed fix, not yet built**: move both responsibilities into `UI::RmlBridge` itself
+  (`RmlTheme.h/.cpp`), already the single mandatory choke point every window goes through to obtain
+  a themed document. A small, tier-agnostic registry —
+  `RegisterForThemeReload(const void* owner, std::function<void()> onThemeChanged)` /
+  `UnregisterForThemeReload(const void* owner)`, keyed by an opaque owner pointer so it covers
+  `CObject`-tier windows, `CWin`-tier windows, and free-function modules uniformly — plus one
+  canonical `UI::RmlBridge::ReloadAllThemedDocuments()` sweep that calls every registered callback.
+  `$theme`/the Options window's theme picker collapse to that single call; a future window/tier is
+  covered automatically with zero edits to those call sites. Each window registers once, right next
+  to the code that already creates its first document (`RegisterForThemeReload(this, [this]{
+  BuildRmlUi(); });` in `BuildRmlUi()`/`Create()`), and unregisters in `Release()` — a one-line
+  addition co-located with code that already exists, instead of a same-shaped-but-separate virtual
+  override 100+ lines away that's easy to skip entirely (exactly what happened to the 16 windows
+  above). Once every themed window (all 27 of them) is migrated onto this registry,
+  `IObject::ReloadRmlTheme()`, `CManager::ReloadAllRmlThemes()`, and the two `CManager`-sweep call
+  sites can be deleted outright, leaving one mechanism instead of two parallel ones. Rough size: a
+  ~40-line registry, then a mechanical one-line-per-window migration across all 27 themed windows,
+  plus deleting the two now-dead sweep mechanisms. Not scheduled — recorded here so the next person
+  who touches theme-reload doesn't have to re-derive this design from scratch.
 
 ## Pilots to revisit, and tracked deferrals
 

@@ -33,6 +33,8 @@ namespace mu::ui::window
         bool Update();
         bool Render();
 
+        void ReloadRmlTheme() override;
+
         void ClosingProcess();
 
     public:
@@ -97,6 +99,7 @@ namespace mu::ui::window
         RmlModelBinder<PurchaseShopBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
     };
 

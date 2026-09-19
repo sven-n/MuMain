@@ -147,6 +147,7 @@ namespace mu::ui::window
         RmlModelBinder<MyInventoryBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     public:
@@ -191,6 +192,8 @@ namespace mu::ui::window
         void Render3D();
 
         bool IsVisible() const;
+
+        void ReloadRmlTheme() override;
 
         void OpenningProcess();
         void ClosingProcess();

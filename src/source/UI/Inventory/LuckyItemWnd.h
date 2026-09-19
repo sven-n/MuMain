@@ -74,6 +74,7 @@ namespace mu::ui::window
         RmlModelBinder<LuckyItemBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     private:
@@ -111,6 +112,7 @@ namespace mu::ui::window
         bool	UpdateKeyEvent();
         bool	Update();
         bool	Render();
+        void	ReloadRmlTheme() override;
         float	GetLayerDepth();	//. 3.4f
 
         __inline void	SetAct(eLUCKYITEMTYPE _eAct) { m_eType = _eAct; }

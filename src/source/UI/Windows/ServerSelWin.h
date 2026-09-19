@@ -29,6 +29,8 @@ public:
     void UpdateDisplay();
     void Show(bool bShow) override;
 
+    void ReloadRmlTheme() override;
+
     // Bound to the RmlUi document's data-event-click callbacks; acts immediately.
     void RmlClickSelectGroup(int nBtnPos);
     void RmlClickSelectServer(int nServerIndex);
@@ -59,6 +61,7 @@ private:
     bool ConnectToServer(CServerInfo* pServerInfo);
 
     void SelectGroup(int nBtnPos);
+    void BuildRmlUi();
     void SyncRmlModel();
 
     struct GroupEntry

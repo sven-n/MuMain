@@ -105,9 +105,16 @@ namespace CfgDefaults
     // Defaults to legacy so nothing changes for existing players until they opt in.
     inline constexpr wchar_t CfgDefaultRmlTheme[] = L"legacy";
 
-    // 100% = unscaled. {75, 100, 125, 150} is the initially-supported set (see the in-game
-    // options UI, once one exists) -- the underlying mechanism accepts any positive value.
+    // 100% = unscaled. The options window's UI tab offers a fixed ladder of values
+    // (UI::Options::UIScalePercentChoices()); a hand-edited config.ini may hold anything in
+    // [CfgMinUIScalePercent, CfgMaxUIScalePercent].
     inline constexpr int CfgDefaultUIScalePercent = 100;
+
+    // Bounds GameConfig::SetUIScalePercent() clamps to. The floor is a usability limit, not a
+    // technical one: below 50% the options window's own rows are too small to click the setting
+    // back up. The ceiling is the point past which a small window cannot show a full panel.
+    inline constexpr int CfgMinUIScalePercent = 50;
+    inline constexpr int CfgMaxUIScalePercent = 300;
 
     // Legacy config compatibility only. SDL GPU ignores this key and default.
     inline constexpr bool CfgDefaultCoreProfile = true;

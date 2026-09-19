@@ -73,7 +73,17 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
     // Guarded so the document/model are created once, even if Create() re-runs on resolution change.
     if (!m_pRmlDoc && RmlUiRuntime::Instance().IsCreated())
     {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_shop",
+        BuildRmlUi();
+    }
+
+    Show(false);
+
+    return true;
+}
+
+void mu::ui::window::CNPCShop::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "npc_shop",
             [this](Rml::DataModelConstructor& c, NPCShopRmlModel& model)
             {
                 c.Bind("root_x", &model.rootX);
@@ -120,13 +130,31 @@ bool mu::ui::window::CNPCShop::Create(CManager* pNewUIMng, int x, int y)
             }
         }
 
-        // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
-        // SyncRmlModel(), not an eager Show() at Create() time.
+    // Not Show()n here -- m_pRmlDoc's visibility follows this window's own Show()/Hide() via
+    // SyncRmlModel(), not an eager Show() at Create() time.
+}
+
+void mu::ui::window::CNPCShop::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
+
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    if (m_pRmlBgDoc)
+    {
+        if (Rml::Context* bgContext = RmlUiRuntime::Instance().GetBackgroundContext())
+        {
+            m_BgRmlBinder.Destroy(bgContext);
+            bgContext->UnloadDocument(m_pRmlBgDoc);
+        }
+        m_pRmlBgDoc = nullptr;
     }
 
-    Show(false);
-
-    return true;
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() self-corrects visibility for both docs.
 }
 
 void mu::ui::window::CNPCShop::Release()

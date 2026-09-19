@@ -118,7 +118,17 @@ bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, in
 
     if (RmlUiRuntime::Instance().IsCreated())
     {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "character_info",
+        BuildRmlUi();
+    }
+
+    Show(false);
+
+    return true;
+}
+
+void mu::ui::window::CCharacterInfoWindow::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "character_info",
             [this](Rml::DataModelConstructor& c, CharacterInfoRmlModel& model)
             {
                 c.Bind("root_x", &model.rootX);
@@ -207,13 +217,21 @@ bool mu::ui::window::CCharacterInfoWindow::Create(CManager* pNewUIMng, int x, in
             model.masterLevelTooltip = StringUtils::WideToNarrow(I18N::Game::MasterSkillTreeA);
         }
 
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-            "Data/Interface/RmlUi/character_info.rml");
-    }
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+        "Data/Interface/RmlUi/character_info.rml");
+}
 
-    Show(false);
+void mu::ui::window::CCharacterInfoWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
 
-    return true;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() self-corrects visibility/live model state.
 }
 
 void mu::ui::window::CCharacterInfoWindow::Release()

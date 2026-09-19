@@ -51,6 +51,7 @@ namespace mu::ui::window
         RmlModelBinder<StorageExtBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     public:
@@ -66,6 +67,8 @@ namespace mu::ui::window
         bool UpdateKeyEvent() override;
         bool Update() override;
         bool Render() override;
+
+        void ReloadRmlTheme() override;
 
         float GetLayerDepth() override;	//. 2.2f
 

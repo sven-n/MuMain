@@ -78,6 +78,7 @@ namespace mu::ui::window
         bool Render();
         float GetLayerDepth();	//. 5.1f
         void OpenningProcess();
+        void ReloadRmlTheme() override;
 
         // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
         void RmlClickIncreaseStat(int stat);
@@ -102,6 +103,7 @@ namespace mu::ui::window
             Rml::String color; // "rgba(r,g,b,a)"
         };
 
+        void BuildRmlUi();
         void SyncRmlModel();
         void BuildSubjectTexts();
         void BuildTableTexts();

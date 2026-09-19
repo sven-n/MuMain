@@ -90,6 +90,7 @@ namespace mu::ui::window
         RmlModelBinder<NPCShopBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     public:
@@ -132,6 +133,8 @@ namespace mu::ui::window
 
         void SetSellingItem(bool bFlag);
         bool IsSellingItem();
+
+        void ReloadRmlTheme() override;
 
     private:
         void Init();

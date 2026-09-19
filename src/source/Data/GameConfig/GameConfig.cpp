@@ -5,6 +5,8 @@
 #include <imagehlp.h>
 #endif
 
+#include <algorithm>
+
 #include "GameConfigConstants.h"
 #include "GameConfigValidation.h"
 #include "Core/Platform/WinCompat.h"
@@ -282,7 +284,10 @@ void GameConfig::SetRmlTheme(const std::wstring& theme)
 
 void GameConfig::SetUIScalePercent(int percent)
 {
-    m_uiScalePercent = percent;
+    // Clamped, not validated-and-rejected: every writer (the options window's UI-scale row, the
+    // console command) is a user-facing dial, and silently keeping the previous value would look
+    // like the control did nothing. See CfgMinUIScalePercent's own comment for the bounds.
+    m_uiScalePercent = std::clamp(percent, CfgDefaults::CfgMinUIScalePercent, CfgDefaults::CfgMaxUIScalePercent);
 }
 
 bool GameConfig::GetWindowPosition(const std::wstring& windowId, int& outX, int& outY) const

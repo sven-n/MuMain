@@ -85,10 +85,13 @@ namespace mu::ui::window
         void RmlClickExit();
         void RmlClickKickMember(int index);
 
+        void ReloadRmlTheme() override;
+
     private:
         void LoadImages();
         void UnloadImages();
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
         // One member "status card" row -- mirrors RenderMemberStatue()'s per-slot rendering.

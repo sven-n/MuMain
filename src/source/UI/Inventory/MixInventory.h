@@ -64,6 +64,7 @@ namespace mu::ui::window
         RmlModelBinder<MixInventoryBgRmlModel> m_BgRmlBinder;
         Rml::ElementDocument* m_pRmlBgDoc = nullptr;
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     public:
@@ -93,6 +94,8 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+
+        void ReloadRmlTheme() override;
 
         float GetLayerDepth();	//. 3.4f
 

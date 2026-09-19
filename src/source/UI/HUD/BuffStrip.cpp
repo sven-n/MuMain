@@ -210,18 +210,14 @@ void CBuffStrip::BuildRmlUi()
     const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "buff_strip",
         [this](Rml::DataModelConstructor& c, BuffStripRmlModel& model)
         {
-            // See CCharMakeWin::BuildRmlUi()'s comment on why this guard is needed.
-            static bool s_typesRegistered = false;
-            if (!s_typesRegistered)
-            {
-                auto buff = c.RegisterStruct<BuffEntry>();
-                buff.RegisterMember("slot_left", &BuffEntry::slotLeft);
-                buff.RegisterMember("slot_top", &BuffEntry::slotTop);
-                buff.RegisterMember("decorator", &BuffEntry::decorator);
-                buff.RegisterMember("tooltip", &BuffEntry::tooltip);
-                c.RegisterArray<std::vector<BuffEntry>>();
-                s_typesRegistered = true;
-            }
+            // See CCharMakeWin::BuildRmlUi()'s comment on why this must re-run in full every
+            // call, including from ReloadRmlTheme() -- no guard here.
+            auto buff = c.RegisterStruct<BuffEntry>();
+            buff.RegisterMember("slot_left", &BuffEntry::slotLeft);
+            buff.RegisterMember("slot_top", &BuffEntry::slotTop);
+            buff.RegisterMember("decorator", &BuffEntry::decorator);
+            buff.RegisterMember("tooltip", &BuffEntry::tooltip);
+            c.RegisterArray<std::vector<BuffEntry>>();
 
             c.Bind("buffs", &model.buffs);
         });

@@ -67,7 +67,17 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
 
     if (RmlUiRuntime::Instance().IsCreated())
     {
-        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_quest_info",
+        BuildRmlUi();
+    }
+
+    Show(false);
+
+    return true;
+}
+
+void mu::ui::window::CMyQuestInfoWindow::BuildRmlUi()
+{
+    const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "my_quest_info",
             [this](Rml::DataModelConstructor& c, MyQuestInfoRmlModel& model)
             {
                 c.Bind("root_x", &model.rootX);
@@ -156,13 +166,21 @@ bool mu::ui::window::CMyQuestInfoWindow::Create(CManager* pNewUIMng, int x, int 
             model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::Exit);
         }
 
-        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
-            "Data/Interface/RmlUi/my_quest_info.rml");
-    }
+    m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+        "Data/Interface/RmlUi/my_quest_info.rml");
+}
 
-    Show(false);
+void mu::ui::window::CMyQuestInfoWindow::ReloadRmlTheme()
+{
+    if (!m_pRmlDoc) return; // never opened -- BuildRmlUi() will simply pick up the new theme whenever it first is
 
-    return true;
+    Rml::Context* context = RmlUiRuntime::Instance().GetContext();
+    m_RmlBinder.Destroy(context);
+    context->UnloadDocument(m_pRmlDoc);
+    m_pRmlDoc = nullptr;
+
+    BuildRmlUi();
+    // Next frame's SyncRmlModel() self-corrects visibility/live model state.
 }
 
 void mu::ui::window::CMyQuestInfoWindow::Release()

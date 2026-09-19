@@ -71,6 +71,7 @@ namespace mu::ui::window
         bool m_bOpenLocked;
         bool m_bOpenApplyTooltip; // true => "Apply" tooltip, false => "Open" tooltip
 
+        void BuildRmlUi();
         void SyncRmlModel();
 
     public:
@@ -83,6 +84,7 @@ namespace mu::ui::window
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
+        void ReloadRmlTheme() override;
         void ClosingProcess();
         float GetLayerDepth();	//. 3.2f
 

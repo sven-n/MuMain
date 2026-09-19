@@ -21,6 +21,15 @@ using DisplayResolution = std::pair<int, int>;
 std::vector<DisplayResolution> NormalizeDisplayResolutions(std::vector<DisplayResolution> resolutions);
 int FindExactDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
 int FindClosestDisplayResolutionIndex(const std::vector<DisplayResolution>& resolutions, int width, int height);
+
+// The UI tab's UI-scale row offers this fixed ladder of percentages (ascending), the same shape
+// the FPS Limit row's own value table has. Free function rather than a private static table so the
+// list and the lookup below are testable without standing up the window (tests/ui/test_ui_scaling.cpp).
+const std::vector<int>& UIScalePercentChoices();
+// Index of the offered percentage to show for `percent`, which need not be one of them --
+// GameConfig's own bounds are wider than this ladder, so a hand-edited config.ini legitimately
+// holds values in between. Ties resolve to the lower entry.
+int FindClosestUIScaleIndex(int percent);
 } // namespace UI::Options
 
 namespace mu::ui::window
@@ -117,6 +126,10 @@ namespace mu::ui::window
         // UI::RmlBridge::GetActiveThemeName().
         int FindCurrentThemeIndex();
 
+        // Interface/UI tab's UI Scale row -- indexes UI::Options::UIScalePercentChoices() against
+        // GameConfig::GetUIScalePercent().
+        int FindCurrentUIScaleIndex();
+
         void OnSoundVolumeChanged();
         void OnMusicVolumeChanged();
 
@@ -127,13 +140,15 @@ namespace mu::ui::window
         // m_bPendingThemeSwitch's own comment for why this can't happen synchronously inside the
         // dropdown-option click event that recorded it.
         void ApplyPendingThemeSwitch();
+        // Same deferral for the UI-scale row -- see m_bPendingUIScaleApply's own comment.
+        void ApplyPendingUIScale();
 
         // Invoked directly from RmlUi data-event-click/-change bindings (see BuildRmlUi()), not
         // polled. RmlClickSelectTab first, matching MyQuestInfoWindow's own tab-callback ordering.
         void RmlClickSelectTab(int nTab);
         // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
         // native <select> isn't used here) -- dropdownId is 0=resolution,1=fpsCap,2=theme,
-        // 3=language,4=font, matching model.openDropdown's own comment (OptionWindow.h).
+        // 3=language,4=font,5=uiScale, matching model.openDropdown's own comment (OptionWindow.h).
         // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
         // dropdownId.
         void RmlToggleDropdown(int dropdownId);
@@ -163,6 +178,7 @@ namespace mu::ui::window
         void RmlToggleShowFpsCounter();
         void RmlToggleShowDebugInfo();
         void RmlThemeChanged(int index);
+        void RmlUIScaleChanged(int index);
         void RmlClickClose();
 
         struct OptionRmlModel
@@ -197,7 +213,7 @@ namespace mu::ui::window
             // Which custom dropdown (.option-dropdown) is currently open, -1 = none. A single
             // field rather than one bool per dropdown gives exclusivity for free -- opening one
             // overwrites whichever other id was here, no separate "close the others" step needed.
-            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font (RmlToggleDropdown()/
+            // 0=resolution, 1=fpsCap, 2=theme, 3=language, 4=font, 5=uiScale (RmlToggleDropdown()/
             // RmlDropdownOptionClick()'s own ids). Replaces RmlUi's native <select>/<option>
             // (WidgetDropDown) entirely -- see option_window.rml's own history for why: that
             // widget's own generated selectbox/selectvalue/selectarrow sub-elements need CSS this
@@ -275,6 +291,15 @@ namespace mu::ui::window
             int themeIndex = 0;
             Rml::String themeRowLabel;
             Rml::String themeValueLabel;
+            std::vector<Rml::String> uiScaleLabels;
+            int uiScaleIndex = 0;
+            Rml::String uiScaleRowLabel;
+            Rml::String uiScaleValueLabel;
+            // First hover tooltip in this window -- the row's label alone can't say what the
+            // percentage multiplies (option_window.rml's own .option-row-tip markup shows it on
+            // hover, purely in RCSS, the same `:hover` mechanism main_frame.rcss's own gauge
+            // tooltips use).
+            Rml::String uiScaleTooltip;
         };
         RmlModelBinder<OptionRmlModel> m_RmlBinder;
         Rml::ElementDocument* m_pRmlDoc = nullptr;
@@ -344,6 +369,10 @@ namespace mu::ui::window
         // (see OptionRmlModel's own comment on why: they're mutually exclusive globals with no
         // GameConfig backing).
         int m_iThemeIndex;
+        // Indexes UI::Options::UIScalePercentChoices(); seeded from GameConfig::GetUIScalePercent()
+        // (and re-seeded in OpenningProcess(), so a scale set from outside this window -- e.g. a
+        // hand-edited config.ini -- shows up on the next open).
+        int m_iUIScaleIndex;
         // A theme switch destroys and rebuilds every registered RmlUi document (including this
         // window's own, via CManager::ReloadAllRmlThemes()) -- doing that synchronously inside
         // RmlThemeChanged() would tear down m_pRmlDoc while still unwinding through RmlUi's own
@@ -352,6 +381,14 @@ namespace mu::ui::window
         // from Update(), outside any RmlUi event) performs it on the next tick.
         bool m_bPendingThemeSwitch = false;
         int m_iPendingThemeIndex = 0;
+        // Applying a UI scale resizes the window to its current size (MuApplyWindowResolution),
+        // which re-runs every resolution-dependent system, re-asserts RmlUi's dp ratio on all
+        // three contexts and pumps SDL while settling the window -- too much to run while still
+        // unwinding through RmlUi's own dispatch of the option click that asked for it. Deferred to
+        // Update() for the same reason m_bPendingThemeSwitch is, even though this path (unlike a
+        // theme switch) does not itself destroy m_pRmlDoc.
+        bool m_bPendingUIScaleApply = false;
+        int m_iPendingUIScalePercent = 0;
 
         // Counts SyncRmlModel() calls since BuildRmlUi(). Acts as a harmless no-op-this-early
         // guard on RmlDropdownOptionClick()'s own callers -- real user input can't land in this

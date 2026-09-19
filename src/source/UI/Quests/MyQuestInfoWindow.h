@@ -92,10 +92,13 @@ namespace mu::ui::window
         void RmlClickGiveUp();
         void RmlClickExit();
 
+        void ReloadRmlTheme() override;
+
     private:
         // Populates the shared IMAGE_LIST texture slots sibling windows alias onto (see IMAGE_LIST above).
         void LoadImages();
         void UnloadImages();
+        void BuildRmlUi();
 
         // One quest-list row; mirrors SCurQuestItem (UIControls.h) minus legacy scroll/render bookkeeping.
         struct QuestEntry
