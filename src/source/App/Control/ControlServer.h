@@ -25,8 +25,9 @@ public:
     // space in it could not be passed (design.md, D1).
     static constexpr const char* SocketPathVariable = "MU_CONTROL_SOCKET";
 
-    // Connections accepted, and requests served, per frame. Bounded so a
-    // busy caller cannot stall rendering.
+    // Connections accepted per frame, and requests served per frame *per
+    // connection*. Bounded so a busy caller cannot stall rendering; counted
+    // per connection so a busy one cannot starve the others either.
     static constexpr std::size_t MaxAcceptsPerFrame = 4;
     static constexpr std::size_t MaxRequestsPerFrame = 16;
 

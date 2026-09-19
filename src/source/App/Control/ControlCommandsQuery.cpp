@@ -19,6 +19,7 @@
 #include <memory>
 #include <optional>
 #include <utility>
+#include <vector>
 
 namespace
 {
@@ -102,23 +103,33 @@ public:
 
     [[nodiscard]] Status Tick(std::string& response) override
     {
-        for (const App::Control::Events::Record& record : App::Control::Events::Since(m_since))
+        if (m_delivered == m_pending.size())
         {
-            m_since = record.seq;
-
-            json result;
-            result["event"] = EventObject(record);
-            response = App::Control::EncodeResult(EncodedId(), result.dump());
-            // One line per frame keeps the order and the framing simple;
-            // the rest follow on the next frames.
-            return Status::Emitted;
+            // Scanning the ring costs its whole capacity, so take everything
+            // that is new in one pass and hand it out from there; the ring is
+            // only visited again once this batch has been delivered.
+            m_pending = App::Control::Events::Since(m_since);
+            m_delivered = 0;
+            if (m_pending.empty())
+            {
+                return Status::Running;
+            }
+            m_since = m_pending.back().seq;
         }
 
-        return Status::Running;
+        json result;
+        result["event"] = EventObject(m_pending[m_delivered]);
+        ++m_delivered;
+        response = App::Control::EncodeResult(EncodedId(), result.dump());
+        // One line at a time keeps the order and the framing simple; the
+        // dispatcher asks again in the same frame while a backlog is left.
+        return Status::Emitted;
     }
 
 private:
     std::uint64_t m_since;
+    std::vector<App::Control::Events::Record> m_pending;
+    std::size_t m_delivered = 0;
 };
 
 // wait-for: watches the ring until a matching event arrives.
@@ -261,9 +272,25 @@ public:
     {
     }
 
+    // Timed out, interrupted, or its caller went away: forget the injection
+    // instead of letting it reach the game after its command was answered.
+    // A finished injection is already gone, so this only bites on the paths
+    // that abandon one.
+    ~SyntheticInputAct() override
+    {
+        Core::Input::Synthetic::Reset();
+    }
+
     [[nodiscard]] std::string_view Name() const override
     {
         return m_name;
+    }
+    // An injected key or click observes the single act slot rather than
+    // taking it: opening the inventory does not cancel a walk. A second
+    // injection is still refused, by the idleness check in the handler.
+    [[nodiscard]] bool IsAct() const override
+    {
+        return false;
     }
 
     [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override

@@ -88,6 +88,14 @@ void ControlServer::RecordSceneTransition()
         Events::RecordScene(scene);
     }
 
+    if (scene != "world")
+    {
+        // Leaving the world forgets the map, so entering the same one again
+        // is a change: without this, a `map` event is missing after every
+        // return to the map the character logged out on.
+        m_lastMap = -1;
+    }
+
     // The map is read here rather than tapped in the packet handler: the
     // world is only loaded some frames after the map-change packet, so the
     // packet itself still names the map being left, and the map index is
@@ -117,8 +125,6 @@ void ControlServer::AcceptNewConnections()
 
 void ControlServer::ServeRequests()
 {
-    std::size_t served = 0;
-
     for (Connection& connection : m_connections)
     {
         if (!connection.socket->IsOpen())
@@ -128,6 +134,10 @@ void ControlServer::ServeRequests()
 
         connection.socket->ReadAvailable();
 
+        // The budget is per connection: a chatty driver must not starve a
+        // second connection sitting on `events --follow`, whose unread bytes
+        // would otherwise pile up until the input cap closes it.
+        std::size_t served = 0;
         std::string line;
         while (served < MaxRequestsPerFrame && connection.socket->TakeLine(line))
         {

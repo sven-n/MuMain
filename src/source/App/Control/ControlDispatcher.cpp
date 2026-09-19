@@ -6,6 +6,7 @@
 #include "Scenes/SceneCore.h"
 
 #include <chrono>
+#include <cstddef>
 #include <optional>
 #include <utility>
 
@@ -18,6 +19,11 @@ namespace Commands = App::Control::Commands;
 // `halt` is the control plane's own command: besides stopping the
 // character it cancels whatever act is in flight.
 constexpr std::string_view HaltCommand = "halt";
+
+// Lines a single streaming reader may emit in one frame. A fight records
+// events faster than frames are rendered, so a follower has to be allowed a
+// backlog; the cap keeps one busy stream from owning the frame.
+constexpr std::size_t MaxStreamedLinesPerFrame = 64;
 
 const std::vector<CommandEntry>& CommandTable()
 {
@@ -215,13 +221,29 @@ void Dispatcher::TickWatchers()
     for (auto watcher = m_watchers.begin(); watcher != m_watchers.end();)
     {
         std::string response;
-        const Act::Status status = watcher->command->Tick(response);
+        Act::Status status = watcher->command->Tick(response);
+
+        // Streamed lines: send them and let the reader keep running, up to
+        // the frame's budget so a backlog drains faster than one line per
+        // rendered frame.
+        std::size_t emitted = 0;
+        while (status == Act::Status::Emitted && emitted < MaxStreamedLinesPerFrame)
+        {
+            Queue(watcher->connection, std::move(response));
+            ++emitted;
+            response.clear();
+            status = watcher->command->Tick(response);
+        }
+
+        if (emitted > 0)
+        {
+            watcher->startedAt = std::chrono::steady_clock::now();
+        }
 
         if (status == Act::Status::Emitted)
         {
-            // A streamed line: send it and let the reader keep running.
+            // The budget ran out with more to come; the rest follow next frame.
             Queue(watcher->connection, std::move(response));
-            watcher->startedAt = std::chrono::steady_clock::now();
             ++watcher;
             continue;
         }

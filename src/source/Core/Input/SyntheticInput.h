@@ -74,6 +74,9 @@ inline constexpr std::size_t MaxTypedTextBytes = 256;
 // rendered frame before the key-state scan.
 void BeginFrame();
 
-// Forgets any injection, for tests.
+// Forgets the in-flight injection, releasing a key or button it had already
+// pressed, so the UI is not left holding one.
+// Called when the command that scheduled one gives up on it — a timeout, an
+// interrupt, or a caller that disconnected — and by the tests.
 void Reset();
 } // namespace Core::Input::Synthetic

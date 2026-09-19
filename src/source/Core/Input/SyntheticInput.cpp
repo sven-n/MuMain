@@ -402,6 +402,20 @@ void BeginFrame()
 
 void Reset()
 {
+    // An injection dropped before its sequence ended has already delivered its
+    // press as an event; the matching release has to follow, or the UI keeps
+    // seeing a key or a button held down by a frame that will never come. It
+    // is sent at once rather than on the release frame: the command it
+    // belonged to has already been answered.
+    const bool pressed = g_injection.stage == Stage::Pressed || g_injection.stage == Stage::Held;
+    if (pressed && g_injection.kind == Kind::Key)
+    {
+        PushKey(false);
+    }
+    else if (pressed && g_injection.kind == Kind::Click)
+    {
+        PushMouseButton(false);
+    }
     g_injection = {};
 }
 } // namespace Core::Input::Synthetic

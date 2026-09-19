@@ -185,3 +185,29 @@ TEST_CASE("Injected keys map to the scancodes the event carries [core][synthetic
         CHECK(Core::Input::ScancodeForVirtualKey(*virtualKey) != SDL_SCANCODE_UNKNOWN);
     }
 }
+
+TEST_CASE("Abandoning an injection takes its press back [core][synthetic-input]")
+{
+    ResetInjector guard;
+
+    // A key dropped while down: the press is no longer held, and the release
+    // event that balances it is pushed at once instead of on the release
+    // frame, because the command it belonged to has already been answered.
+    CHECK(PressKey(VK_HOME));
+    BeginFrame();
+    CHECK(IsKeyHeld(VK_HOME));
+    Reset();
+    CHECK(IsIdle());
+    CHECK_FALSE(IsKeyHeld(VK_HOME));
+
+    // The same for a click dropped between its press and its release.
+    CHECK(Click(1000.0f, 725.0f, MouseButton::Left));
+    BeginFrame();
+    CHECK(IsKeyHeld(VK_LBUTTON));
+    Reset();
+    CHECK(IsIdle());
+    CHECK_FALSE(IsKeyHeld(VK_LBUTTON));
+
+    // And a fresh injection is accepted right away.
+    CHECK(Click(10.0f, 10.0f, MouseButton::Right));
+}

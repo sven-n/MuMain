@@ -125,7 +125,11 @@ text only, at most 256 bytes; a newline or a tab is a `hotkey`, and UTF-8 goes
 through unchanged.
 
 All three answer once the release frame has run; a second injection while one
-is in flight answers `busy`. Not covered: key chords, drags.
+is in flight answers `busy`, while a walk or an attack in flight is left alone
+— injecting a key is an observation of the act slot, not a claim on it. The
+sequence follows *rendered* frames, so an injection sent to a client that is
+not rendering (the occluded-window case below) answers `timeout` and is
+dropped rather than delivered late. Not covered: key chords, drags.
 
 ## Events
 
