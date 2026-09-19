@@ -81,7 +81,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `teleport` (`x`, `y`, `map`) | the game master's own move command |
 | `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
 | `skill` (`skill`, `target`) | cast a skill the character owns |
-| `pickup` (`item`) | walk to a drop and take it |
+| `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
 | `say` (`text`), `whisper` (`name`, `text`) | chat, including `/` commands |
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |

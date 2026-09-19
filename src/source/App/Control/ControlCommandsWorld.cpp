@@ -728,25 +728,17 @@ std::string Pickup(const Request& request, std::unique_ptr<Act>& act)
 {
     // `id` is the protocol's own request identifier, so a drop is named by
     // `item` — the id `nearby` reports for it.
-    int id = 0;
-    if (!request.GetInt("item", id))
+    int slot = 0;
+    if (!request.GetInt("item", slot))
     {
         return EncodeError(request.EncodedId(), ErrorCode::BadRequest, "`pickup` needs an item id");
     }
 
-    // `nearby` reports both the server id and the client's own slot; accept
-    // either, because the pickup packet carries the slot.
-    int slot = -1;
-    for (int index = 0; index < MAX_ITEMS; ++index)
-    {
-        if (Items[index].Object.Live && (Items[index].Key == id || index == id))
-        {
-            slot = index;
-            break;
-        }
-    }
-
-    if (slot < 0)
+    // The id is the client's own slot in the dropped-item table — what
+    // `nearby` and the `drop` events report, and what the pickup packet
+    // carries. The drop's server key is a different id space and is not
+    // addressable here.
+    if (slot < 0 || slot >= MAX_ITEMS || !Items[slot].Object.Live)
     {
         return EncodeError(request.EncodedId(), ErrorCode::NotInView, "no such drop in view");
     }
