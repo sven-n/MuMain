@@ -94,10 +94,10 @@ public:
     {
         return false;
     }
-    // A follower runs until its caller goes away.
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    // A follower runs until its caller goes away: no deadline at all.
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
-        return std::chrono::milliseconds::max();
+        return std::nullopt;
     }
 
     [[nodiscard]] Status Tick(std::string& response) override
@@ -139,7 +139,7 @@ public:
     {
         return false;
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return m_timeout;
     }
@@ -218,7 +218,7 @@ public:
         return false;
     }
 
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return ScreenshotDeadline;
     }
@@ -266,7 +266,7 @@ public:
         return m_name;
     }
 
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return SyntheticInputDeadline;
     }

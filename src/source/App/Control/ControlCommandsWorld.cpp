@@ -25,6 +25,7 @@
 #include <chrono>
 #include <cmath>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -168,7 +169,7 @@ public:
     {
         return "move";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return MoveDeadline;
     }
@@ -254,7 +255,7 @@ public:
     {
         return "attack";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return AttackDeadline;
     }
@@ -364,7 +365,7 @@ public:
     {
         return "skill";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return SkillDeadline;
     }
@@ -443,7 +444,7 @@ public:
     {
         return "pickup";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return PickupDeadline;
     }
@@ -509,7 +510,7 @@ public:
     {
         return "warp";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return WarpDeadline;
     }
@@ -566,7 +567,7 @@ public:
     {
         return "teleport";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return TeleportDeadline;
     }

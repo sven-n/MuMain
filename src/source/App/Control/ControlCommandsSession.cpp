@@ -14,6 +14,7 @@
 
 #include <chrono>
 #include <memory>
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -98,7 +99,7 @@ public:
     {
         return "login";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return LoginDeadline;
     }
@@ -288,7 +289,7 @@ public:
     {
         return "select-char";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return SelectCharacterDeadline;
     }
@@ -346,7 +347,7 @@ public:
     {
         return "logout";
     }
-    [[nodiscard]] std::chrono::milliseconds Deadline() const override
+    [[nodiscard]] std::optional<std::chrono::milliseconds> Deadline() const override
     {
         return LogoutDeadline;
     }

@@ -5,6 +5,8 @@
 #include "App/Control/ControlEvents.h"
 #include "Scenes/SceneCore.h"
 
+#include <chrono>
+#include <optional>
 #include <utility>
 
 namespace
@@ -224,8 +226,9 @@ void Dispatcher::TickWatchers()
         }
 
         const bool finished = status == Act::Status::Finished;
+        const std::optional<std::chrono::milliseconds> deadline = watcher->command->Deadline();
         const bool expired =
-            !finished && std::chrono::steady_clock::now() - watcher->startedAt >= watcher->command->Deadline();
+            !finished && deadline.has_value() && std::chrono::steady_clock::now() - watcher->startedAt >= *deadline;
 
         if (!finished && !expired)
         {
@@ -260,8 +263,9 @@ void Dispatcher::TickAct()
         return;
     }
 
+    const std::optional<std::chrono::milliseconds> deadline = m_act->Deadline();
     const auto elapsed = std::chrono::steady_clock::now() - m_actStartedAt;
-    if (elapsed < m_act->Deadline())
+    if (!deadline.has_value() || elapsed < *deadline)
     {
         return;
     }
