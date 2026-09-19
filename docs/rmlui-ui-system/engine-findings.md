@@ -239,12 +239,12 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   live RmlUi-element-bounds query replacing it entirely was, and remains, a larger refactor with no
   confirmed bug driving it).
 
-  **Update, 2026-09-05**: the underlying mechanism the rest of this finding describes no longer
-  exists. `newui-legacy-merger.md`'s Phase 4 found `CursorInWin()`-driven activation dispatch
-  (`SetActiveWin`/`ShowWin`/`HideWin`/`RemoveWinList`, and the `m_WinList` it walked) fully
-  unreachable — every window it once drove had by then migrated onto `mu::ui::window::CObject`/
-  `CManager` — and deleted it outright, then renamed what remained of the class from `CUIMng` to
-  `CSceneUICoordinator` (a pure rename, method bodies unchanged). `CalculateFixedAnchorLayout()`'s
+  **The underlying mechanism the rest of this finding describes no longer exists.**
+  `CursorInWin()`-driven activation dispatch (`SetActiveWin`/`ShowWin`/`HideWin`/`RemoveWinList`, and
+  the `m_WinList` it walked) was found fully unreachable — every window it once drove had by then
+  migrated onto `mu::ui::window::CObject`/`CManager` — and deleted outright, and what remained of the
+  class was renamed from `CUIMng` to `CSceneUICoordinator` (a pure rename, method bodies unchanged).
+  `CalculateFixedAnchorLayout()`'s
   hand-duplicated math (the still-open item just above) is unaffected by that deletion and remains
   exactly as described. The three-parallel-input-tracking-systems root cause this finding used to
   point at is also gone as stated — `CInput`'s VK-polling no longer drives any
@@ -389,4 +389,77 @@ Tier-specific findings (`mu::ui::window::CObject`-tier) live in `newui-tier-adap
   Fix: any scene-local manual pump of a persistent window needs `Update()` in the same sequence the
   full sweep uses (`UpdateMouseEvent` → `UpdateKeyEvent` → `Update` → `Render`), not just the three
   that look input/render-related by name.
+
+## `CObject`/`CManager`/`LayoutMode` gotchas
+
+Found during the `CWin`→`CObject` migration itself (now complete, see `migration-ledger.md`), but
+these are facts about the still-live `CManager`/`UI::Scaling` machinery every window on this tier
+depends on — not historical record of that migration. That file is now a short pointer to git
+history; this is the durable half of what it used to say in full.
+
+- **`CManager::AddUIObj(dwKey, obj)` silently overwrites the object's `LayoutMode` on first
+  registration** — it calls `obj->SetLayoutMode(UI::Layout::ForInterface(dwKey))` unconditionally,
+  clobbering whatever the constructor set. `UILayoutPolicy.cpp`'s table, not the window's own
+  constructor, is the real authority — every `INTERFACE_*` key needs its own explicit `case` there,
+  or it silently falls through to `default: return LayoutMode::Dialog` (a real, resolution-scaled
+  transform, not a safe no-op default).
+- **A window with real-pixel (not reference-space) rendering needs `LayoutMode::Legacy`** — the one
+  mode that resolves to a genuine identity transform. Two independent reasons this matters: (1)
+  `CManager::UpdateMouseEvent()` wraps each dispatch in a `ScopedActiveTransform(transform,
+  transformMouse=true)` that remaps the *global* `MouseX`/`MouseY` through whatever transform is
+  active — a window expecting real, untransformed mouse coordinates for its own hit-testing gets
+  checked in the wrong coordinate space under any other mode. (2) Text rendering consults
+  `UI::Scaling::GetActiveTransform()` directly; `CSprite::Render()` does NOT consult the transform's
+  *scale* (baked in once at `Create()`), but DOES read its *offset* — a mixed, partial dependency,
+  not all-or-nothing. A wrong active transform corrupts text scale/position and sprite offset, but
+  never sprite scale.
+- **A legacy widget that reads `GetActiveTransform()` at render time (not just once at
+  position-set time) can end up double-scaled** if its owning window's `Update()` now runs inside a
+  `ScopedActiveTransform` scope it didn't run inside pre-migration. `CUITextInputBox::Render()` is
+  the concrete case: it rescales the position it was given via `ConvertPositionX/Y` using whatever
+  transform is active *when `Render()` runs* — a fundamentally different contract than `CSprite`'s
+  "store real pixels, ignore the transform entirely." Code that divides a real-pixel position by
+  the ambient transform before `SetPosition()`, relying on `Render()`'s later multiply to cancel it
+  back out, breaks the moment the divide and the multiply no longer see the same transform (e.g.
+  the divide now runs inside a `LayoutMode::Legacy` identity scope but the later `Render()` doesn't,
+  or vice versa) — fix by never doing the divide-now/multiply-later dance at all: store real pixels
+  directly, and wrap the consuming `Render()` call in the same explicit `ScopedActiveTransform` the
+  write used, so both sides agree unconditionally regardless of which context triggered the write.
+  Any window driving a `CUIControl`-family widget (`CUITextInputBox` and siblings) needs this
+  "identity at both ends" treatment.
+- **`g_pTimer`'s `GetTimeElapsed()` is total process uptime, never reset anywhere in this
+  codebase** (`ResetTimer()` has zero callers) — the existing `dDeltaTick =
+  MIN(g_pTimer->GetTimeElapsed(), 200.0 * FPS_ANIMATION_FACTOR)` only behaves like a per-frame delta
+  because the clamp dominates almost immediately and forever after; in steady state it's just `200.0
+  * FPS_ANIMATION_FACTOR`. A window's own parameterless `Update()` needing a real per-frame delta
+  should read that same clamped expression, not `g_pTimer` itself.
+- **A window's own per-frame `Update()` can race a same-frame check elsewhere that depends on its
+  state.** One instance: a full `Update()` sweep running before a check for "is anything currently
+  visible" let a single input event (e.g. Esc) both close a window *and* trigger a different
+  toggle in the same frame, since the toggle check saw the just-updated (already-changed) state
+  instead of the frame's starting state. General lesson: order matters when one piece of per-frame
+  logic reads state another piece in the same frame can resolve/consume — decide the ordering
+  deliberately, don't assume "runs later in the function" is safe by default.
+- **A window using `CObject`'s shown/active split (`IsActive()`/`SetActive()`/
+  `UpdateWhileShown()`/`UpdateWhileActive()`) should compute `SetActive()` from *every* condition
+  that ought to suspend active-handling, not just whatever originally motivated adding the split.**
+  Folding every "a higher-priority modal is covering me" condition into one `SetActive(...)` call at
+  the top of `UpdateWhileShown()` means `CObject::Update()`'s own dispatch gates
+  `UpdateWhileActive()` automatically — one place this logic lives, not a separate ad hoc check per
+  modal. Also generalizes: setting a per-frame gating flag from state read *before* a call that
+  might resolve/consume that same state later in the same function reproduces a "snapshot before it
+  changes" ordering for free, without a dedicated snapshot member.
+- **Check whether a window's own click-gating override is hardcoded to always return a fixed value
+  before assuming it needs real click-handling ported** — a window whose interactivity was already
+  structurally unreachable pre-migration needs no porting for that piece, just a literal
+  `return true;`/`return false;` in the new method. Don't assume interactivity from the presence of
+  buttons/sliders in a window's member list; check the actual gate.
+- **A modal window relevant to a gameplay scene (not just menus) must fold its own claimed-input
+  state into whatever that scene's "is the cursor over UI" query consults**, or a click on the world
+  behind it falls through to world/gameplay logic once it's no longer tracked by whatever the old
+  aggregate query walked. Fix generally, not per-window: fold the new tier's own per-frame
+  hover/claim result into the same aggregate the legacy query already computed, before the legacy
+  side's own early-return, so any future window gets this for free with no per-window special-casing
+  — it just needs to implement its own input methods to actually claim (return the "consumed" value)
+  when appropriate.
 

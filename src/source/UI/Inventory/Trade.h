@@ -19,9 +19,9 @@ namespace mu::ui::window
     public:
         enum IMAGE_LIST
         {
-            // Cursor-following warning-arrow overlay only -- every other sprite this window used to
-            // draw natively (frame/nick-back/money/confirm/line/buttons) moved to RmlUi
-            // (trade.rml/trade_bg.rml); see RenderWarningArrow()/LoadImages().
+            // Cursor-following warning-arrow overlay only -- every other sprite in this window
+            // (frame/nick-back/money/confirm/line/buttons) is RmlUi (trade.rml/trade_bg.rml);
+            // see RenderWarningArrow()/LoadImages().
             IMAGE_TRADE_WARNING_ARROW = BITMAP_CURSOR + 7,
         };
 

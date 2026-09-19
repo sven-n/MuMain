@@ -580,10 +580,9 @@ void CCastleWindow::UpdateTaxManagingTab()
     }
     else if (m_BtnWithdraw.UpdateMouseEvent() == true)
     {
-        // Was CCastleWithdrawMsgBoxLayout (CustomMessageBox.h) -- a numeric Mode::Text amount
-        // entry, ported 2026-09-14. Reads its own typed amount directly (GetInputText()), not via
-        // ExecuteCastleMsgBoxRequest()'s generic switch -- that helper only covers the 10 plain
-        // OK/Cancel castle dialogs already ported, none of which need input.
+        // Numeric Mode::Text amount entry. Reads its own typed amount directly
+        // (GetInputText()), not via ExecuteCastleMsgBoxRequest()'s generic switch -- that helper
+        // only covers plain OK/Cancel castle dialogs, none of which need input.
         mu::ui::window::GenericDialogConfig cfg;
         cfg.showCancel = true;
         cfg.lines = {

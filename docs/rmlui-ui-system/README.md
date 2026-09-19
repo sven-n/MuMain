@@ -15,9 +15,9 @@ detail.
 
 The client's game UI is spread across three legacy widget frameworks — the `CWin`/`CButton`
 widget set, the `CUIControl`/`CUIBaseWindow` toolkit (`UIControls.h`), and the `mu::ui::window::CObject` tier,
-all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc. —
-see `newui-legacy-merger.md` for the folder history) — with no layout engine, retained scene
-graph, or data-binding layer between them. RmlUi is being adopted as the long-term replacement per
+all living directly under `UI/` in topic folders (`UI/Widgets/`, `UI/HUD/`, `UI/Inventory/`, etc.)
+— with no layout engine, retained scene graph, or data-binding layer between them. RmlUi is being
+adopted as the long-term replacement per
 [`architecture-principles.md`](architecture-principles.md), migrated window by window, old and
 new systems coexisting rather than a big-bang rewrite. See [`STATUS.md`](STATUS.md) for what's
 migrated so far. `COptionWin` was ported but confirmed unreachable in live play, then deleted
@@ -51,20 +51,17 @@ empirical, engine-specific RmlUi build gotchas found while porting (split out of
 2026-09-16) — check before assuming a new bug is novel. **[Tracked Deferrals](tracked-deferrals.md)**
 — forward-looking punch-lists for what's known-incomplete (the `mu::ui::window::CObject`-tier
 adapter naming, `CMainFrameWindow`'s file split, `CUIControl` family retirement) plus the "Pilots
-to revisit" table (also split out of `STATUS.md`, 2026-09-16); the `CommonMessageBox`/
-`CustomMessageBox` port's own tracked deferral lives in `dialog-migration-plan.md` instead, which
-already owned its per-class worklist. **[Migration Ledger](migration-ledger.md)** — a flat,
-per-class table of every legacy window/dialog/list-widget component and its migration status
-(2026-09-16) — check here for "is `X` done?" instead of grepping the tree.
+to revisit" table (also split out of `STATUS.md`, 2026-09-16). **[Migration Ledger](migration-ledger.md)**
+— a flat, per-class table of every legacy window/dialog/list-widget component and its migration
+status (2026-09-16) — check here for "is `X` done?" instead of grepping the tree, including what's
+left of the `CommonMessageBox`/`CustomMessageBox` dialog family.
 
 This directory also holds the wider C++ UI-kit story `architecture-principles.md` sits inside:
-**[UI Architecture Assessment](ui-architecture-assessment.md)**/**[UI Target
-Architecture](ui-target-architecture.md)** — a point-in-time inventory of every C++ widget toolkit
-in this codebase (not just RmlUi) and the target architecture proposal built from it (frozen
-2026-09-05/06 snapshots — see their own banners for what's since changed) — and
-**[`newui-legacy-merger.md`](newui-legacy-merger.md)** — the (now-complete) history of retiring the
-`CUIMng`/`CNewUIManager` window-ownership split, a prerequisite/parallel effort to this one that
-several findings below still reference.
+**[UI Target Architecture](ui-target-architecture.md)** — the C++ object-layer companion to
+`architecture-principles.md`, naming actual classes: canonical components, the RmlUi-vs-native
+strategy, and the migration plan/rules `building-new-ui.md` builds on. The `CUIMng`/
+`CNewUIManager` window-ownership split retirement is complete; its still-relevant `CObject`/
+`CManager` gotchas now live in `engine-findings.md`.
 
 ## Renderer integration: SDL_GPU
 
@@ -82,13 +79,14 @@ working capability of this backend — worth knowing if a future theme wants to 
 `RenderInterface_SDL_GPU` implements `CompileShader`/`RenderShader`/`ReleaseShader` for the
 gradient family, porting the upstream GL3 reference backend's shader math to a new HLSL fragment
 shader baked into `ShadersCompiledSPV.h` via this project's own
-`glslangValidator`/`spirv-cross`/`dxc` toolchain. **`box-shadow`/`blur`/`backdrop-filter` are
-not** — they parse fine (a working RCSS property registration reads as "supported" if that's all
-you check) but silently render as a solid opaque block or not at all, since RmlUi's own
-layer/filter/compositing subsystem (`PushLayer`/`CompileFilter`/`RenderFilter`) isn't implemented
-in this backend at all — a materially bigger task than the gradient one was. Check the render
-interface (or test the decorator in isolation), never just the RCSS parser, before assuming a CSS
-visual property actually renders.
+`glslangValidator`/`spirv-cross`/`dxc` toolchain. **`box-shadow` also genuinely renders now**
+(inset/outset, real blur, comma-separated multiple shadows — fixed as part of the 2026-09-10
+renderer upgrade); `filter`/`backdrop-filter`/`mask-image` remain unimplemented (`filter:
+brightness()`/`contrast()` are the one working exception) — see `engine-findings.md` for the
+current, authoritative capability list before assuming a CSS visual property renders; it's been
+wrong in both directions before (a property that looked parsed-but-inert turned out to work, and
+vice versa), so check the render interface or test the decorator in isolation, never just the RCSS
+parser or an older note in this doc set.
 
 **Texture-lifetime rule**: `CGlobalBitmap`'s numbered-slot cache is designed for code that
 re-resolves a texture by logical id every frame (`CSprite` etc.) — slots get silently
@@ -191,20 +189,11 @@ than hand-rolled mouse tracking. Two things worth knowing before using it: `hand
 events never fire at all, not even hover), and it moves **both** axes — a horizontal-only slider
 thumb has to reset `top` back to a fixed value on every drag tick or it visibly drifts.
 
-**First real caller landed 2026-09-07: `CMyInventory`'s title bar.** (Its original caller,
-`COptionWin`'s two sliders, was deleted outright as confirmed-dead code during the
-CUIMng/CNewUIManager merger, `newui-legacy-merger.md` — not a retirement of this primitive
-itself.) The primitive was fixed 2026-09-04 to write the dragged position as `dp` (divided by the
-panel's own `Context::GetDensityIndependentPixelRatio()`) instead of a raw `px` inline style that
-never scaled with `UIScalePercent`. Persistence is now built too, generically: `MakeDraggable()`
-gained an optional `OnDragEnd` callback (RmlUi's `Dragend` event) as the "persist now" hook, and
-`GameConfig::GetWindowPosition()`/`SetWindowPosition(windowId, x, y)` (`GameConfig.h`/`.cpp`) gives
-any caller immediate, crash-safe disk persistence keyed by a short window id — bypassing the usual
-member-field+`Save()` batching deliberately, since a drag has no "Apply" button. See
-`STATUS.md`'s "Known gaps" entry (the struck-through `MakeDraggable` one) for the full mechanism,
-including the collision-avoidance-vs-idle-reset nuance `CMyInventory::RestoreDefaultOrUserPosition()`
-handles. **Still open**: no audit yet of how a persisted position behaves across a
-resolution/UI-scale/theme change post-drag.
+**First real caller landed 2026-09-07: `CMyInventory`'s title bar** — persists via
+`GameConfig::GetWindowPosition()`/`SetWindowPosition()` and an `OnDragEnd` hook, in `dp` not raw
+`px`. See `component-catalog.md`'s "Dragging" section for the full mechanism and
+`tracked-deferrals.md` for what's still unaudited (a persisted position across a
+resolution/UI-scale/theme change).
 
 ## Coexistence patterns
 
@@ -218,7 +207,7 @@ free-function module in `namespace UI::Login`.
 window's own `Release()` by name on every scene transition (`CreateLoginScene()`/
 `CreateCharacterScene()`/`CreateMainScene()`/its own `Release()` — no generic window-list walk
 does this any more; that mechanism, `CUIMng::RemoveWinList()`, was confirmed unreachable and
-deleted outright in `newui-legacy-merger.md`'s Phase 4). Either way, the legacy
+deleted outright). Either way, the legacy
 `Release()`/`PreRelease()` path never touches an RmlUi document, so a hybrid window's document
 (created once, reused forever) stays exactly as visible as it was — and since RmlUi renders last
 in the frame, it then paints on top of whatever the *next* scene draws, indefinitely. Every hybrid
@@ -230,10 +219,8 @@ optional boilerplate, even if some other call site currently happens to hide it 
 (`g_pNewUISystem->Show(INTERFACE_OPTION)`), never `CUIMng::m_OptionWin`. Unlike `COptionWin`,
 which retained its own self-contained RmlUi content (own model, own slider-drag math), migrating
 it onto the new manager would have been pure wasted effort on dead code — it was deleted outright
-(2026-09-04, part of the `CUIMng`/`CNewUIManager` merger's Phase 4) rather than ported. See
-`newui-legacy-merger.md` for that merger's full history; the product decision this once left open
-(retire one of the two options-window implementations) is resolved — only
-`mu::ui::window::COptionWindow` remains.
+rather than ported. The product decision this once left open (retire one of the two
+options-window implementations) is resolved — only `mu::ui::window::COptionWindow` remains.
 
 ## Gotchas
 
@@ -257,12 +244,9 @@ it onto the new manager would have been pure wasted effort on dead code — it w
   top of it if that child comes earlier in document order — reorder by moving the visually-topmost
   element later in the document, not by trying to fight it with z-index tricks.
 - **Same-frame update-order cascades** — see [Frame lifecycle](#frame-lifecycle-three-render-seams) above.
-- **RCSS comments don't nest.** `/* ... */` closes at the first `*/`, not the intended one —
-  content between a premature close and the next real `*/` parses as garbage CSS. `base.rcss` is
-  linked by nearly every modern-theme window, so a broken comment there has a wide, confusing
-  blast radius (multiple unrelated windows losing interactivity/positioning/visibility at once)
-  that doesn't look like a syntax error at first glance. If a shared file's change is followed by
-  several unrelated windows breaking at once, suspect that file's own syntax first.
+- **RCSS comments don't nest** — a broken comment in a widely-linked shared file (`base.rcss`) has
+  a wide, confusing blast radius. See `engine-findings.md` for the full gotcha, including the
+  `<template>`-file-specific caveat.
 
 ## Source map
 
@@ -277,8 +261,7 @@ it onto the new manager would have been pure wasted effort on dead code — it w
 | Draggable helper | [`UI/RmlBridge/RmlDraggable.h/.cpp`](../../src/source/UI/RmlBridge/RmlDraggable.h) |
 | `SetMovable` | [`UI/Widgets/Win.h/.cpp`](../../src/source/UI/Widgets/Win.h) — replaces per-class `CursorInWin(WA_MOVE)` overrides |
 | Texture lifetime | [`Render/Sprites/GlobalBitmap.h/.cpp`](../../src/source/Render/Sprites/GlobalBitmap.h) — `LoadImageExclusive()` |
-| Migrated windows (`CWin` tier) | [`LoginWin`](../../src/source/UI/Windows/LoginWin.h), [`LoginMainWin`](../../src/source/UI/Windows/LoginMainWin.h), [`SysMenuWin`](../../src/source/UI/Windows/SysMenuWin.h), [`RememberPasswordPrompt`](../../src/source/UI/Windows/RememberPasswordPrompt.h), [`CCharSelMainWin`](../../src/source/Character/CharSelMainWin.h), [`CCharMakeWin`](../../src/source/Character/CharMakeWin.h), [`CCharInfoBalloonMng`](../../src/source/Character/CharInfoBalloonMng.h), [`MsgWin`](../../src/source/UI/Windows/MsgWin.h). (`OptionWin` was ported then confirmed unreachable in live play — see [Coexistence patterns](#coexistence-patterns) — and has since been deleted as confirmed-dead code.) |
-| Migrated windows (`mu::ui::window::CObject` tier) | [`CMuHelperBar`](../../src/source/UI/HUD/MuHelperBar.h), [`CBuffStrip`](../../src/source/UI/HUD/BuffStrip.h) (fully done) — see [newui-tier-adapter.md](newui-tier-adapter.md). [`CMainFrameWindow`](../../src/source/UI/HUD/MainFrameWindow.h) is 2 of 3 planned phases done (`STATUS.md`'s "What's migrated") — its file also still houses two fully-legacy classes (`CSkillList`/`CItemHotKey`), not yet ported. |
+| Migrated windows, full per-component list | [`migration-ledger.md`](migration-ledger.md) — every legacy window/dialog/list-widget's current status; don't duplicate that table here, it drifts |
 | RML/RCSS assets | [`bin/Data/Interface/RmlUi/`](../../src/bin/Data/Interface/RmlUi/) — one `.rml` per window + `themes/{legacy,modern}/` |
 
 ## Status

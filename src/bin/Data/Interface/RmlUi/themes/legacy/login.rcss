@@ -113,8 +113,8 @@ body {
 /* dp throughout (was px) -- #panel and every other sibling element in this file (labels,
    input-frame, checkbox rows) are already dp, which scales with the user's own UI-scale setting;
    a px-sized/positioned button doesn't, and drifts out of step with the (dp-scaled) panel at any
-   scale other than 100% -- see engine-findings.md's own "dp and px are not interchangeable"
-   entry. bottom:15dp (not a fixed top) anchors these to #panel's own bottom edge the same way
+   scale other than 100% -- dp and px are not interchangeable in this build. bottom:15dp (not a
+   fixed top) anchors these to #panel's own bottom edge the same way
    option_window.rcss's .option-close-btn and generic_confirm_dialog.rcss's own buttons already
    do, instead of a fixed offset from the top that drifts away from the bottom edge as the panel's
    own (dp-scaled) height changes relative to it. 15dp preserves the original top:200px's visual

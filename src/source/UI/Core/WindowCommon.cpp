@@ -244,7 +244,7 @@ void mu::ui::window::CNewKeyInput::ScanAsyncKeyState()
 #ifdef _EDITOR
     // Must stay inside the editor guard: outside the editor nothing sets
     // g_bEnterPressed=true, so this would clear every Enter press before chat-open
-    // logic saw it (previously broke Enter-to-chat on non-editor SDL3 builds).
+    // logic sees it, breaking Enter-to-chat on non-editor SDL3 builds.
     if (IsPress(VK_RETURN) && IsEnterPressed() == false)
     {
         m_pInputInfo[VK_RETURN].byKeyState = KEY_NONE;

@@ -18,17 +18,14 @@ namespace mu::ui::window
     // ~50 call sites (mostly WSclient.cpp's cash-shop response handlers).
     bool CreateOkMessageBoxWithTitle(const std::wstring& strTitle, const std::wstring& strMsg);
 
-    // Was CSystemMenuMsgBoxLayout (CustomMessageBox.h) -- proof-of-concept port onto
-    // CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h), the sibling N-button-menu primitive.
-    // Two call sites (HotKey.cpp's Esc handler, WindowMenu.cpp's menu-item 0), neither passes any
-    // parameters, so this is a plain free function like CreateOkMessageBox() above.
+    // Uses CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h), the sibling N-button-menu
+    // primitive. Two call sites (HotKey.cpp's Esc handler, WindowMenu.cpp's menu-item 0), neither
+    // passes any parameters, so this is a plain free function like CreateOkMessageBox() above.
     void ShowSystemMenuDialog();
 
-    // Batch of 9 more CustomMessageBox.h "multi-option menu" classes ported onto the same
-    // CGenericMenuDialog primitive, same reasoning/shape as ShowSystemMenuDialog() above -- see
-    // docs/rmlui-ui-system/dialog-migration-plan.md's "Multi-option menus" entry. All plain free
-    // functions (no parameters; each reads the globals it needs directly, same as the native
-    // classes it replaces).
+    // Batch of 9 more multi-option menu dialogs on the same CGenericMenuDialog primitive, same
+    // reasoning/shape as ShowSystemMenuDialog() above. All plain free functions (no parameters;
+    // each reads the globals it needs directly).
     void ShowChaosMixMenuDialog();
     void ShowTrainerMenuDialog();
     void ShowTrainerRecoverDialog();
@@ -37,19 +34,18 @@ namespace mu::ui::window
     void ShowResetCharacterPointDialog();
     void ShowDelgardoMainMenuDialog();
     void ShowLuckyTradeMenuDialog();
-    // No live callers -- same as its native predecessor CCherryBlossomMsgBox (grep-confirmed zero
-    // CreateMessageBox call sites for it even before this port). Kept for parity with the other 8.
+    // No live callers -- grep-confirmed zero CreateMessageBox call sites for it. Kept for parity
+    // with the other 8.
     void ShowCherryBlossomMenuDialog();
 
-    // CGemIntegrationMsgBox/CGemIntegrationUnityMsgBox ported onto CGenericMenuDialog as 3 chained
-    // free functions instead of 1:1 class replacement -- native's single CGemIntegrationUnityMsgBox
-    // swapped its own button set in place (ResetWndSize()) between a jewel-type grid and a
-    // mix-amount grid; CGenericMenuDialog's buttons always close on click, so that in-place swap
-    // becomes "close this menu, open a different one" via the same reentrant-Show()-during-click
-    // chaining ShowTrainerMenuDialog()/ShowTrainerRecoverDialog() already prove. COMGEM
-    // (GameLogic/Items/CComGem.h) is the shared state the 3 phases read/write, same as native.
+    // 3 chained free functions instead of 1:1 class replacement -- native's single
+    // CGemIntegrationUnityMsgBox swaps its own button set in place (ResetWndSize()) between a
+    // jewel-type grid and a mix-amount grid; CGenericMenuDialog's buttons always close on click,
+    // so that in-place swap becomes "close this menu, open a different one" via the same
+    // reentrant-Show()-during-click chaining ShowTrainerMenuDialog()/ShowTrainerRecoverDialog()
+    // already prove. COMGEM (GameLogic/Items/CComGem.h) is the shared state the 3 phases read/write.
     // CGemIntegrationDisjointMsgBox stays native (embedded live inventory list-selection widget,
-    // a different problem chaining doesn't solve) -- see dialog-migration-plan.md.
+    // a different problem chaining doesn't solve).
     void ShowGemIntegrationMenuDialog();  // entry selector: Unity / Disjoint / Cancel
     void ShowGemIntegrationJewelDialog(); // Unity phase 1: pick a jewel type
     void ShowGemIntegrationMixDialog();   // Unity phase 2: pick a mix-amount tier

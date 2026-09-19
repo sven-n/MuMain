@@ -131,12 +131,11 @@ namespace mu::ui::window
         // Invoked directly from RmlUi data-event-click/-change bindings (see BuildRmlUi()), not
         // polled. RmlClickSelectTab first, matching MyQuestInfoWindow's own tab-callback ordering.
         void RmlClickSelectTab(int nTab);
-        // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family, replacing
-        // RmlUi's native <select>) -- dropdownId is 0=resolution,1=fpsCap,2=theme,3=language,4=font,
-        // matching model.openDropdown's own comment (OptionWindow.h). RmlDropdownOptionClick
-        // dispatches to the same RmlResolutionChanged()/RmlFpsCapChanged()/etc. this window already
-        // had for its (now-removed) native <select> change handlers -- only how they get called
-        // changed, not what they do.
+        // Custom-dropdown mechanism (option_window.rml's own .option-dropdown family; RmlUi's
+        // native <select> isn't used here) -- dropdownId is 0=resolution,1=fpsCap,2=theme,
+        // 3=language,4=font, matching model.openDropdown's own comment (OptionWindow.h).
+        // RmlDropdownOptionClick dispatches to RmlResolutionChanged()/RmlFpsCapChanged()/etc. per
+        // dropdownId.
         void RmlToggleDropdown(int dropdownId);
         void RmlDropdownOptionClick(int dropdownId, int optionIndex);
         void RmlToggleAutoAttack();
@@ -354,13 +353,9 @@ namespace mu::ui::window
         bool m_bPendingThemeSwitch = false;
         int m_iPendingThemeIndex = 0;
 
-        // Counts SyncRmlModel() calls since BuildRmlUi() -- originally guarded against RmlUi's
-        // native <select> (WidgetDropDown) firing a handful of spurious "change" events of its own
-        // while settling its data-for option list against the freshly-populated data-value index,
-        // back when resolution/language/font/fps-cap/theme used native <select>s (since replaced
-        // by the .option-dropdown custom control, see model.openDropdown's own comment). Kept as a
-        // harmless no-op-this-early guard on RmlDropdownOptionClick()'s own callers -- real user
-        // input can't land in this window this soon after Create() since it isn't shown yet.
+        // Counts SyncRmlModel() calls since BuildRmlUi(). Acts as a harmless no-op-this-early
+        // guard on RmlDropdownOptionClick()'s own callers -- real user input can't land in this
+        // window this soon after Create() since it isn't shown yet.
         int m_rmlSyncCount = 0;
     };
 }

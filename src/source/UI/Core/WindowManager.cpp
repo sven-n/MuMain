@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Core/UILayoutPolicy.h"
-#include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable (issue #447)
+#include "UI/Widgets/UIControls.h"  // CUITextInputBox::GetFocusedPortable
 #include "UI/Scaling/UITransform.h"
 #include "Render/RmlUi/RmlUiRuntime.h"
 #include "UI/Core/Window3DRenderMng.h" // INFORMATION_CAMERA_Z_ORDER, see Render()'s own comment

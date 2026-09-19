@@ -281,10 +281,8 @@
 
    Three fixed, named-role slots (primary/secondary/cancel -- see GenericDialogConfig's own
    comment). `.gcd-btn-secondary` is a real second action (Decrease/Gift/Discard...), never
-   Cancel; `.gcd-btn-cancel` is today's original always-Cancel/Close slot (unchanged id meaning
-   from before this rename, just renamed from `.gcd-btn-secondary`). Paired-layout values below
-   are value-for-value identical to before this redesign -- zero visual change for every existing
-   Ok/OkCancel consumer, which always renders solo or paired (primary+cancel), never triple. */
+   Cancel; `.gcd-btn-cancel` is the always-Cancel/Close slot. Every existing Ok/OkCancel consumer
+   always renders solo or paired (primary+cancel), never triple. */
 .btn.gcd-btn-primary, .btn.gcd-btn-secondary, .btn.gcd-btn-cancel {
 	top: 110dp;
 	width: 54dp;

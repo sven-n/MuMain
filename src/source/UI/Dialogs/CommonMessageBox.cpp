@@ -1027,7 +1027,7 @@ CALLBACK_RESULT mu::ui::window::CQuestCountLimitMsgBoxLayout::OkBtnDown(class CM
 }
 #endif	// ASG_ADD_TIME_LIMIT_QUEST
 
-// CPersonalShopItemValueCheckMsgBoxLayout ported to CGenericConfirmDialog (MyShopInventory.cpp's
-// ShowPersonalShopItemValueDialog()) -- see docs/rmlui-ui-system/dialog-migration-plan.md.
+// CPersonalShopItemValueCheckMsgBoxLayout is now CGenericConfirmDialog-based
+// (MyShopInventory.cpp's ShowPersonalShopItemValueDialog()).
 
 

@@ -5,8 +5,8 @@ Each entry below names what's still incomplete and, where applicable, what futur
 should fold it in. See [`STATUS.md`](STATUS.md) for what's actually done, and
 [`engine-findings.md`](engine-findings.md) for engine-specific gotchas found along the way. The
 `CommonMessageBox`/`CustomMessageBox` family port used to have its own tracked-deferral entry
-here too — it moved into [`dialog-migration-plan.md`](dialog-migration-plan.md) instead (2026-09-16),
-since that file already owns the per-class worklist this content was pointing at.
+here too — it's now just [`migration-ledger.md`](migration-ledger.md)'s Dialog family table
+(2026-09-19), which is what's actually maintained.
 
 ## Pilots to revisit when the relevant phase arrives
 
@@ -19,7 +19,7 @@ one of the trigger initiatives on the right.
 | Window(s) | Known deviation | Revisit when... |
 |---|---|---|
 | `CMuHelperBar`, `CBuffStrip` (`mu_helper_bar.rcss`, `buff_strip.rcss`) | Repeat their own `font-family`/`font-size`/color literals inline instead of referencing shared tokens (§21) | A design-token/shared-variable layer is built — retrofit these two RCSS files to use it as the worked examples, don't leave them as the last two still on literals. |
-| `CMuHelperBar`, `CBuffStrip` and every `CWin`-tier window | Base class/tier boundary (`mu::ui::window::CObject`/`CWin`) unchanged (§12, "Tracked deferral" below) — file location itself was resolved by the `UI/` directory restructure (`newui-legacy-merger.md`, 2026-09-05): `UI/NewUI/HUD/` is now `UI/HUD/` | A base-class/tier restructuring pass is undertaken — not before enough windows exist to know the real target shape (this is the existing tracked deferral, not new). |
+| `CMuHelperBar`, `CBuffStrip` and every `CWin`-tier window | Base class/tier boundary (`mu::ui::window::CObject`/`CWin`) unchanged (§12, "Tracked deferral" below) — file location itself was resolved by the `UI/` directory restructure: `UI/NewUI/HUD/` is now `UI/HUD/` | A base-class/tier restructuring pass is undertaken — not before enough windows exist to know the real target shape (this is the existing tracked deferral, not new). |
 | All `CWin`-tier windows, `CMuHelperBar`, `CBuffStrip` | No resolution × UI-scale × theme × drag-state validation matrix has been run against any of them (§25) — verification so far has been ad hoc per window | A validation-matrix/test-plan artifact is built — run it retroactively against every already-migrated window, not just new ones going forward. |
 | All draggable migrated windows | Existing drag system's interaction with theme-default-layout + UI-scale (§10–11) has never been explicitly audited | The drag/preference-integration audit (itself an unstarted gap, above) happens — check these windows specifically, don't just audit the mechanism in the abstract. |
 | `CBuffStrip` | Right-click-to-cancel not reproduced; tooltip is plain-text instead of the original's per-line-colored rich tooltip (both already documented as deliberate scope cuts in `newui-tier-adapter.md`, not silent gaps) | Right-click-distinct-from-left-click is proven generally in a `data-event-click` binding, or the three non-unified tooltip mechanisms (§12) get consolidated — whichever comes first. |
@@ -39,9 +39,9 @@ name and every `INTERFACE_*`/`CSystem` member/accessor/macro referencing them �
 their legacy-tier names (§12). What's still deferred: the `mu::ui::window::CObject` base class/tier boundary
 itself, and collapsing the `INTERFACE_*`-keyed lookup + `g_p*` macro pattern into something that
 doesn't require a per-window case in a shared table. (The physical file location half of this —
-`UI/NewUI/HUD/` — was resolved separately by the `UI/` directory restructure,
-`newui-legacy-merger.md`, 2026-09-05: that folder no longer exists, its contents are now
-`UI/HUD/`, a pure move with no base-class/tier change.) The base-class/tier boundary and
+`UI/NewUI/HUD/` — was resolved separately by the `UI/` directory restructure: that folder no
+longer exists, its contents are now `UI/HUD/`, a pure move with no base-class/tier change.) The
+base-class/tier boundary and
 `INTERFACE_*` pattern are structural — they touch the other ~88 still-unported `mu::ui::window::CObject`
 windows' shared machinery, not just the pilots so far — and stay premature with only 2 data
 points. Revisit once more of those windows are ported to RmlUi and the real shape of a unified
@@ -58,9 +58,9 @@ of its own 3-phase pilot, `main_frame.rml`/`.rcss`) was originally **not** renam
 the plan was to hold that rename until Phase 3 landed, so the file's still-legacy classes
 wouldn't sit mismatched against an already-renamed one for however long Phase 2/3 took.
 
-**That plan was overtaken by `newui-legacy-merger.md`'s Phase 5 (2026-09-05)**: its
-mechanical, repo-wide prefix-drop renamed every `CNewUI*`/`INewUI*` identifier in the whole tier in
-one blanket pass, with no per-file carve-out for this deferral — so `CNewUIMainFrameWindow`,
+**That plan was overtaken by a later mechanical, repo-wide prefix-drop** that renamed every
+`CNewUI*`/`INewUI*` identifier in the whole tier in one blanket pass, with no per-file carve-out
+for this deferral — so `CNewUIMainFrameWindow`,
 `CNewUISkillList`, and `CNewUIItemHotKey` all became `CMainFrameWindow`/`CSkillList`/`CItemHotKey`
 together, incidentally, alongside the ~88 other windows' renames. The naming mismatch this
 deferral was protecting against never actually happens now — all three names moved in the same

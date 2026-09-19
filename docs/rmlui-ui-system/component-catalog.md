@@ -57,6 +57,17 @@ theme's job, not the component's):
 - `legacy`: `themes/legacy/base.rcss`'s sprite-based 3-part `.panel-cap-top`/`.panel-cap-bottom`/
   `.panel-middle`.
 
+A second, narrower shared frame exists for one specific window family: the `PanelColumnX()`-docked,
+single-document (no background-context split) windows that visually read as one group on screen —
+`character_info`, `my_quest_info`, `pet_info`, `party_info` today. Their `#panel`/frame sprites/exit
+button/tooltip shape/group-box corner-and-fill technique (legacy) and forged-dialog panel gradient/
+shell-edge/groove/header-rail (modern) are byte-identical, so they link a shared
+`docked_panel_frame.rcss` (both themes) instead of each re-declaring it — see `migration-ledger.md`'s
+`CPetInfoWindow`/`CPartyInfoWindow` rows and `STATUS.md`'s dock-neighbor gap note for why this
+exists. **A new window joining this same `PanelColumnX` dock group should link this partial too**,
+not copy-paste a fifth version — check its current window list before assuming it doesn't apply.
+`CMyInventory` is deliberately not part of it (separate `*_bg.rml` context, can't link it).
+
 ## Button
 
 Real shared contract across both themes already — `.btn`/`.btn-ok`/`.btn-cancel`/`.btn.disabled`,
@@ -116,18 +127,30 @@ time.
 `mu::ui::window::CGenericConfirmDialog`/`GenericDialogConfig` (`UI/Dialogs/GenericConfirmDialog.h`,
 `generic_confirm_dialog.rml`/`.rcss` both themes) — a real config-driven scaffold, not a per-dialog
 hand-built RML/RCSS pair: one C++ class + one document, shown with different `GenericDialogConfig`
-content per call, no new subclass or new `.rml` per dialog. Buttons are three fixed, role-named
-slots, not a positional pair — `primaryLabel`/`onPrimary` (always shown), optional
-`secondaryLabel`/`onSecondary` (a real second action, e.g. "Decrease", never Esc-bound), and
-`showCancel`/`cancelLabel`/`onCancel` (always dismiss semantics, fires on Esc) — see
-`dialog-migration-plan.md`'s "Button model redesign" entry (2026-09-16). Built to replace
-`UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native `TMsgBoxLayout<T>` family
-(see `STATUS.md`) — proven on 3 real dialogs first (`Guild/GuildInfoWindow.cpp`'s
-alliance-master-can't-leave notice, `UI/Quests/MyQuestInfoWindow.cpp`'s quest-giveup confirm,
-`Network/Server/WSclient.cpp`'s guild-invite accept/decline) before porting the rest. Single active
-instance, not a real stack — a second `Show()` call while one is open queues instead of replacing
-it; see the class's own header comment for why that's not a functional regression from what it
-replaces.
+content per call, no new subclass or new `.rml` per dialog. **The struct itself is the field
+reference** (`GenericConfirmDialog.h`, each field commented at its declaration) — don't duplicate
+that list here, it'll drift; skim the header before adding a new field. Worth knowing before
+reading it cold:
+- Buttons are three fixed, role-named slots, not a positional pair —
+  `primaryLabel`/`onPrimary` (always shown), optional `secondaryLabel`/`onSecondary` (a real second
+  action, e.g. "Decrease", never Esc-bound), and `showCancel`/`cancelLabel`/`onCancel` (always
+  dismiss semantics, fires on Esc).
+- `KeepOpen()` lets `onPrimary`/`onSecondary` veto their own click (invalid typed input, etc.) —
+  the dialog stays open exactly as it was, as if the click never happened. Needed by any consumer
+  migrating a native dialog whose `OkBtnDown` could return "keep this open" instead of closing.
+- `item3D` (a live 3D item-preview snapshot) renders on top of the panel via a foreground/
+  background RmlUi document split, not a post-RmlUi callback — RmlUi's main context always
+  composites last in the frame, so a single-document panel would always paint over the item
+  instead of under it. The mechanism (a dedicated third `Rml::Context`,
+  `RmlUiRuntime::RenderDialogBackgroundLayer()`, fired from `CManager::Render()`'s own loop right
+  before the shared 3D camera's z-order) is fully documented in the class's own header comment —
+  read that, not a paraphrase, before touching anything `item3D`-adjacent.
+- Single active instance, not a real stack — a second `Show()` call while one is open queues
+  instead of replacing it; see the class's own header comment for why that's not a functional
+  regression from what it replaces.
+
+Built to replace `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s native `TMsgBoxLayout<T>`
+family — see `migration-ledger.md`'s Dialog family table for what's left.
 
 `mu::ui::window::CGenericMenuDialog`/`GenericMenuConfig` (`UI/Dialogs/GenericMenuDialog.h`,
 `generic_menu_dialog.rml`/`.rcss` both themes) — sibling primitive for the "arbitrary list of N
@@ -136,11 +159,16 @@ labeled action buttons" shape (a multi-option menu, not two/three fixed named sl
 `GenericMenuConfig` value (title, body lines, a button vector each with its own optional label/
 tooltip/per-button lines/compact flag, an optional `columns` grid width, `onCancel`). Frame/border/
 header chrome lives in the shared `window_shell` `<template>` (both themes), not duplicated per
-dialog. Proven on 13 real dialogs (`dialog-migration-plan.md`'s "Multi-option menus" entry has the
-full list) — the two remaining native "multi-option menu" classes
-(`CGuild_ToPerson_Position`, `CGemIntegrationDisjointMsgBox`) stay native because their actual shape
-doesn't fit this primitive's plain "click closes" model (simultaneous radio-select, an embedded
-live inventory list-selection widget).
+dialog. Proven on 13 real dialogs (`migration-ledger.md`'s Dialog family table has the current
+list) — the two remaining native "multi-option menu" classes (`CGuild_ToPerson_Position`,
+`CGemIntegrationDisjointMsgBox`) stay native because their actual shape doesn't fit this
+primitive's plain "click closes" model (simultaneous radio-select, an embedded live inventory
+list-selection widget). Several consumers chain a second `Show()` from inside a button's own
+`onClick` — closing this menu and immediately opening a different one (or the same one with
+different content) — a reentrant pattern proven by the Trainer menu pair, the Gem Integration
+jewel-type→mix-amount flow, and Elpis's text-only variant; `GenericMenuDialog.h`'s own header
+documents why this is safe (buttons always close on click, so there's no `KeepOpen()`-style veto
+to interact with).
 
 ## Dragging
 
@@ -185,12 +213,27 @@ per-window, or entirely unbuilt:
   — only the `color` enum's members differ (skill: White/Blue/Red/DarkRed; item-option:
   White/Blue/Yellow/Green/Purple), making them the natural starting point if/when this list is
   consolidated. Not bundled here — check this entry before adding a *fifth*.
-- **Tab / TabBar, ScrollContainer, Notification, HUDContainer** — none of the currently migrated
-  windows have needed one yet, so none exist. `CMainFrameWindow`'s still-legacy skill grid/
-  pet-command row is the closest thing to a "grid" concept in the codebase, and it hasn't been
-  abstracted either (see `tracked-deferrals.md`'s pilots-to-revisit entry for why its icon art stayed legacy
-  2D). **List moved out of this bucket 2026-09-13** — see the "List / repeated rows" section above;
-  `data-for` already proves the pattern, it just isn't fully adopted yet.
+- **ScrollContainer, Notification, HUDContainer** — none of the currently migrated windows have
+  needed one yet, so none exist. `CMainFrameWindow`'s still-legacy skill grid/pet-command row is
+  the closest thing to a "grid" concept in the codebase, and it hasn't been abstracted either (see
+  `tracked-deferrals.md`'s pilots-to-revisit entry for why its icon art stayed legacy 2D). **List
+  moved out of this bucket 2026-09-13** — see the "List / repeated rows" section above; `data-for`
+  already proves the pattern, it just isn't fully adopted yet.
+
+## Tab / TabBar
+
+**Moved out of "doesn't exist yet" (2026-09-19)** — proven on 3 windows now:
+`COptionWindow` (6 tabs), `CMyQuestInfoWindow` (3 tabs), `CPetInfoWindow` (2 tabs). Same shape every
+time, no reusable C++ wrapper needed (matches this catalog's general "each window binds its own"
+convention): an `int active_tab` model field, one `.tab-btn` per tab with
+`data-class-active="active_tab == N"` and `data-event-click="window_select_tab(N)"`, and each tab's
+content wrapped in a panel with `data-class-hidden="active_tab != N"`. `RmlClickSelectTab(int)` is
+the C++-side handler name convention. Legacy theme swaps a sprite decorator on `.active`
+(`my_quest_info.rcss`'s `.tab-btn-quest.active { decorator: image(myquest-tab-small); }` — real
+sprite-art tabs, one CRadioGroupButton frame per state); modern swaps a flat
+`background-color: token(accent-steel)` instead (no sprite art needed). Start from
+`my_quest_info.rml`/`.rcss` (3 tabs, plain content panels) or `pet_info.rml`/`.rcss` (2 tabs, sprite-
+based tab art) rather than inventing the mechanism again.
 
 ## Using this catalog
 

@@ -558,8 +558,8 @@ bool CLuckyItemWnd::UpdateMouseEvent(void)
     // Top-right corner close "X" (shared frame): hides + swallows the click.
     g_pNewUISystem->HandleFrameCornerClose(m_ptPos, mu::ui::window::INTERFACE_LUCKYITEMWND);
 
-    // Mix button click is now handled by the RmlUi "lucky_item_mix_click" event callback (see
-    // Create()), which calls Process_BTN_Action() directly -- no longer polled here.
+    // Mix button click is handled by the RmlUi "lucky_item_mix_click" event callback (see
+    // Create()), which calls Process_BTN_Action() directly -- not polled here.
 
     if (mu::ui::window::WindowGeometry(static_cast<int>(m_ptPos.x), static_cast<int>(m_ptPos.y), static_cast<int>(m_fSizeX), static_cast<int>(m_fSizeY)).Contains(MouseX, MouseY))
     {
@@ -656,8 +656,8 @@ void CLuckyItemWnd::SyncRmlModel()
     const wchar_t* mixTooltipText = (m_eType == eLuckyItemType_Refinery) ? I18N::Game::Refine : I18N::Game::Combining;
     syncWide(&LuckyItemRmlModel::mixTooltip, "mix_tooltip", mixTooltipText);
 
-    // Mirrors Render_Frame()'s native m_eEnd != eLuckyItem_End gate that used to pick between
-    // drawing m_BtnMix and playing the mix-completion sparkle effect.
+    // Same m_eEnd != eLuckyItem_End condition Render_Frame() checks for the mix-completion
+    // sparkle effect -- drives the RmlUi mix button's visibility here.
     syncBool(&LuckyItemRmlModel::mixVisible, "mix_visible", m_eEnd != eLuckyItem_End);
 }
 

@@ -2,46 +2,37 @@
    window_shell.rcss; this file only lays out the rows spliced into its #content slot.
 
    #panel is a genuine real-dp size, NOT native COptionWindow's own reference-resolution rect
-   (190x419) -- this template assumes no resolution-based rescaling (layout-and-scaling.md's
-   "there isn't a reference resolution"), so copying native's reference-pixel constants here
-   produced a wildly oversized panel once combined with window_shell's own chrome (found the hard
-   way, see window_shell.rml's own comment on the reverted root_scale attempt). Unlike the legacy
-   theme's sprite-art chrome, this theme's frame is plain CSS gradients/borders with no fixed
-   source-art width to match, so it doesn't need to match the legacy #panel's own width (230dp,
-   locked to its sprite chrome's real size) -- 320dp here (widened from an earlier 300dp alongside
-   the font-size bump below, so the wider label column doesn't have to shrink the control column to
-   compensate) so the control column below can start nearer the row's own center, not just "wide
-   enough"; window_shell's own existing 14dp/side content margins are already generous, no override
-   needed the way legacy's 32dp/side shared margin needed one. Positioning is pure CSS
-   (.center-both) now that dragging is off, so this file alone owns the panel's size -- nothing
-   else mirrors it.
+   (190x419) -- this template assumes no resolution-based rescaling, so copying native's
+   reference-pixel constants here would produce a wildly oversized panel once combined with
+   window_shell's own chrome. Unlike the legacy theme's sprite-art chrome, this theme's frame is
+   plain CSS gradients/borders with no fixed source-art width to match, so it doesn't need to
+   match the legacy #panel's own width (230dp, locked to its sprite chrome's real size) -- 320dp
+   here so the control column below can start nearer the row's own center, not just "wide enough";
+   window_shell's own existing 14dp/side content margins are already generous, no override needed
+   the way legacy's 32dp/side shared margin needed one. Positioning is pure CSS (.center-both) now
+   that dragging is off, so this file alone owns the panel's size -- nothing else mirrors it.
 
    Height (294dp) mirrors legacy's own sizing math for the same reason: sized for the tallest tab
    (Graphics, 6 checkbox rows: 6*24dp=144dp, at the 18dp row height below + 6dp margin-bottom) plus
-   the tab bar (~42dp: 26dp height + 8dp margin-top + 8dp margin-bottom, the margin-top widened
-   live to clear the header rail's own box-shadow bleed) and the always-visible close button block
-   (~38dp), inside window_shell.rcss's own titled-panel insets here (10dp top + padding-top 40dp +
-   16dp bottom = 66dp): 144+42+38+66=290dp minimum, +4dp buffer. Down from the original flat
-   single-column layout's 380dp now that content splits across tabs. */
+   the tab bar (~42dp: 26dp height + 8dp margin-top + 8dp margin-bottom, the margin-top clearing
+   the header rail's own box-shadow bleed) and the always-visible close button block (~38dp),
+   inside window_shell.rcss's own titled-panel insets here (10dp top + padding-top 40dp + 16dp
+   bottom = 66dp): 144+42+38+66=290dp minimum, +4dp buffer. Content splits across tabs, so only
+   one tab's rows need to fit at a time. */
 #panel {
 	width: 320dp;
 	height: 294dp;
 }
 
-/* One row of tab buttons -- back to flex (see history below); flex was never the actual problem.
-   Same "forged-metal" gradient+box-shadow recipe as base.rcss's own .btn/.btn:hover, minus .btn's
-   own fixed position:absolute/width/height so these can flex-size instead.
+/* One row of tab buttons -- flex layout. Same "forged-metal" gradient+box-shadow recipe as
+   base.rcss's own .btn/.btn:hover, minus .btn's own fixed position:absolute/width/height so these
+   can flex-size instead.
 
-   History: this text rendered as invisible through several structural rewrites -- flex item with
-   the decorator directly on it, flex item with the decorator isolated onto a separate non-flex
-   sibling child, then position:absolute with percentage widths matching .btn's own non-flex
-   structure exactly -- and stayed invisible through every one of them. The actual cause turned out
-   to be unrelated to all of that: this rule never set `font-family`, and unlike legacy (which sets
-   one document-wide default on #panel), this theme has NO fallback -- every other piece of visible
-   text in this document (the window title, row labels, selects, .btn itself) explicitly declares
-   its own font-family; this was the one place that never did, so it was rendering in RmlUi's own
-   unstyled/unloaded default font the whole time, through every otherwise-irrelevant layout
-   experiment. */
+   font-family must be set explicitly on this rule -- unlike legacy (which sets one document-wide
+   default on #panel), this theme has no fallback; every other piece of visible text in this
+   document (the window title, row labels, selects, .btn itself) explicitly declares its own
+   font-family, and without it here this button's text renders in RmlUi's unstyled default font
+   instead. */
 .option-tab-row {
 	display: flex;
 	width: 100%;
@@ -117,7 +108,7 @@
 
 /* Each settings row is a small flex line inside window_shell's own flex-column #content -- native
    used fixed per-row px offsets; this reproduces the same top-to-bottom order via normal flow
-   instead (architecture-principles.md's own guidance: traceable intent, not literal numbers). */
+   instead, keeping row order traceable from the markup rather than from literal numbers. */
 .option-row {
 	position: relative;
 	width: 100%;
@@ -156,9 +147,9 @@
 	display: block;
 }
 
-/* 148dp -- widened from 130dp alongside the 9dp->10dp font bump (see #panel's own comment on why:
-   reported live as smaller than this theme's own sibling windows). Puts the control column's own
-   start near the row's horizontal center (well width 292dp: 320dp panel - 14dp*2 margins) instead
+/* 148dp -- alongside the 9dp->10dp font bump (see #panel's own comment on why). Puts the control
+   column's own start near the row's horizontal center (well width 292dp: 320dp panel - 14dp*2
+   margins) instead
    of flush against the label. The two longest labels in this window were also shortened in
    Game.en.resx (see legacy's own copy of this comment) -- kept in sync across both themes even
    though modern's own wider well needed it less. New control width: 292-148=144dp. */
@@ -189,7 +180,7 @@
    children of THIS element (the <input> itself), inheriting whatever ITS OWN computed value is.
    .window-shell-content resetting to auto further up the tree covers ordinary rows fine, but
    leaving this un-stated here relies on that inheritance chain never getting interrupted anywhere
-   in between -- explicit here removes the doubt (found live: the slider never moved on drag). */
+   in between -- without it explicitly set here, the slider never moves on drag. */
 .option-slider {
 	flex-grow: 1;
 	height: 12dp;
@@ -212,8 +203,8 @@
 }
 
 /* Custom dropdown -- NOT RmlUi's native <select>/<option> (WidgetDropDown). That was tried first
-   (see option_window.rml's own comment for the full history) and never reliably worked in this
-   engine: the widget's own generated selectvalue/selectbox/selectarrow sub-elements need CSS this
+   and never reliably worked in this engine: the widget's own generated
+   selectvalue/selectbox/selectarrow sub-elements need CSS this
    theme never fully gave them (no `position` set programmatically the way WidgetSlider forces
    `drag` on its own sub-elements), and even once styled, option clicks still didn't reliably reach
    this window's own change callback. This reuses the exact data-for/data-class/data-event-click
@@ -254,9 +245,9 @@
    z-index:1 -- without it, this absolutely-positioned popup paints/hit-tests at its own plain DOM
    position among .option-row siblings, i.e. BEHIND whichever row comes later in markup order (an
    .option-row without its own z-index just participates in normal top-to-bottom paint order, same
-   as any other sibling) -- found live: a dropdown opened above a lower row rendered behind it, and
-   clicking an option that visually overlapped a checkbox row actually triggered THAT checkbox
-   instead. RmlUi's own native <select> (WidgetDropDown.cpp) sets this same 1 on its generated
+   as any other sibling): a dropdown opened above a lower row would render behind it, and clicking
+   an option that visually overlaps a checkbox row would trigger that checkbox instead.
+   RmlUi's own native <select> (WidgetDropDown.cpp) sets this same 1 on its generated
    selectbox for the identical reason -- this is the custom-dropdown equivalent of that. */
 .option-dropdown-list {
 	display: block;
@@ -279,9 +270,8 @@
    comment already gives for its own overflow:auto well -- an unstyled scrollbarvertical isn't
    just visually wrong, its own (also unstyled) hit-test area can cover most/all of the option
    row's width instead of a slim strip at the edge, silently swallowing clicks meant for the
-   option text beneath it as a scrollbar drag instead (found live: "clicking a value just scrolls
-   it"). Arrow buttons collapsed to 0, same drag/click-only affordance as every other scrollbar in
-   this codebase. */
+   option text beneath it as a scrollbar drag instead. Arrow buttons collapsed to 0, same
+   drag/click-only affordance as every other scrollbar in this codebase. */
 .option-dropdown-list scrollbarvertical {
 	width: 6dp;
 	margin: 0;
@@ -327,8 +317,8 @@
    OptionWindow.h's own comment on m_pCloseButtonEl). .btn already defaults to position:absolute
    (base.rcss) -- kept, not overridden to static, since the close button is meant to sit at a
    FIXED spot regardless of which tab is active, not flow after whatever that tab's own last row
-   happens to be (found live: the button visibly jumped up or down depending on the active tab's
-   row count). bottom:0 here resolves against the footer's own box (window_shell.rcss's own
+   happens to be (which would otherwise shift its position as the active tab's row count changes).
+   bottom:0 here resolves against the footer's own box (window_shell.rcss's own
    .window-shell-footer, itself position:absolute against #panel). left:50%+transform centers it
    horizontally the same way .center-both does. */
 .option-close-btn {

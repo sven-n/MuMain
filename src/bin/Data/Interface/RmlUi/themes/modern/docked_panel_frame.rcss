@@ -5,14 +5,11 @@
 
    Reuses base.rcss's already-shared .modern-shell-edge/.modern-groove/.modern-header-rail-px/
    .modern-joint-px/.modern-header-text-px/.modern-header-title-px/.modern-icon-btn-px directly
-   (every consumer here already links base.rcss) rather than re-declaring them -- character_info.rcss
-   used to carry its own unmodified, pointless duplicate of shell-edge/groove as
-   .chainfo-shell-edge/.chainfo-groove; that's gone now, its RML applies the shared classes directly.
-   Only the PAINT that base.rcss's shared classes don't already cover (the #panel gradient/border/
-   box-shadow body, and the header-rail's own fill/border/box-shadow + accent line) lives here --
-   my_quest_info previously used a different, flatter .modern-frame/.modern-frame-crimson primitive
-   instead of this recipe; brought in line per explicit instruction (these four should render as one
-   family, not three-plus-an-outlier).
+   (every consumer here already links base.rcss) rather than re-declaring them; each window's RML
+   applies the shared classes directly. Only the PAINT that base.rcss's shared classes don't
+   already cover (the #panel gradient/border/box-shadow body, and the header-rail's own
+   fill/border/box-shadow + accent line) lives here -- these four windows share this one
+   forged-dialog recipe so they render as one family.
 
    my_inventory is NOT part of this -- my_inventory_bg.rcss's own .bg-panel/.inv-shell-edge/
    .inv-groove/.rail-fill are a real, separately-justified duplicate (its background paint lives in a

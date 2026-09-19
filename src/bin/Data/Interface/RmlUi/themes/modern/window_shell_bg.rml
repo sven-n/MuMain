@@ -18,9 +18,8 @@
      those, since RmlUi's own TemplateCache::LoadTemplate() reads a template file directly from
      disk, entirely bypassing this project's C++ loading path. An rcss link to base.rcss living here
      instead would reach RmlUi as raw, unsubstituted text, and every token(...) call in it would
-     silently fail to parse -- confirmed the hard way, see STATUS.md. The consuming document links
-     base.rcss itself, directly in its own head, the normal way (see
-     generic_confirm_dialog_bg.rml).
+     silently fail to parse. The consuming document links base.rcss itself, directly in its own
+     head, the normal way (see generic_confirm_dialog_bg.rml).
 
      Deliberately does NOT apply .modern-frame to #panel -- unlike window_shell's own metal-rail
      look, this consumer's frame paint is its own bespoke hatched-iron treatment (matches the
@@ -36,10 +35,10 @@
      template's name as its own body element's template attribute (see
      generic_confirm_dialog_bg.rml for the worked example), with no children of its own needed --
      nothing gets spliced into #content below for a purely static bg document, but the slot exists
-     for a future consumer that does need one. See STATUS.md's "Findings worth knowing" for the two
-     Template::Load()/FindTag() gotchas discovered while building window_shell.rml -- avoid a
-     literal tag-shaped example anywhere in this file's own comments, and never join the words head
-     and body with a bare slash, anywhere in this file, comments included. -->
+     for a future consumer that does need one. As with window_shell.rml, avoid a literal
+     tag-shaped example anywhere in this file's own comments, and never join the words head
+     and body with a bare slash, anywhere in this file, comments included (RmlUi's
+     Template::Load()/FindTag() text search is comment-blind). -->
 <body id="panel">
 	<div class="modern-shell-edge"></div>
 	<div class="modern-groove"></div>

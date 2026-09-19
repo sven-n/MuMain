@@ -174,9 +174,10 @@ uses, not a dialog itself.
 
 The native `TMsgBoxLayout<T>` family is far smaller today than `STATUS.md`'s historical "~140
 classes" figure — that count predates this branch's migration work. 16 dialogs are already ported
-and their native classes deleted outright (see `dialog-migration-plan.md` for the full list and
-per-dialog history: 3 on `CGenericConfirmDialog`, 13 on `CGenericMenuDialog`). What's left, by
-current grep of the two headers:
+and their native classes deleted outright (3 on `CGenericConfirmDialog`, 13 on
+`CGenericMenuDialog` — see `component-catalog.md`'s Dialog section for how the two primitives
+work; per-dialog porting history lives in git log, not a doc, once a dialog is done). What's left,
+by current grep of the two headers:
 
 | Component | Status | Target primitive | Detail pointer |
 |---|---|---|---|

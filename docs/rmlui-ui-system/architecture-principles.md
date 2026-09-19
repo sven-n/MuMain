@@ -6,9 +6,9 @@ implementation of these principles on this specific codebase (`layout-and-scalin
 `theming-and-modding.md`, `newui-tier-adapter.md`), an amendment scoped to one recurring question
 (`legacy-theme-modernization.md`), a status/reference report against all of the above (`STATUS.md`,
 `engine-findings.md`, `tracked-deferrals.md`), or a design record for the wider C++ UI-kit story
-this policy also governs (`ui-architecture-assessment.md`/`ui-target-architecture.md`,
-`newui-legacy-merger.md`). None of them repeat the reasoning here — if something below and
-something elsewhere in this directory ever seem to disagree, this file wins; go fix the other file.
+this policy also governs (`ui-target-architecture.md`). None of them repeat the reasoning here — if
+something below and something elsewhere in this directory ever seem to disagree, this file wins; go
+fix the other file.
 
 This is the governing policy for the RmlUi UI migration, issued by the user. It reframes the
 migration's success criterion: not "the old UI now renders through RmlUi" but "a unified,

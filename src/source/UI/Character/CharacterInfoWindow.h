@@ -140,7 +140,7 @@ namespace mu::ui::window
 
             bool masterLevelEnabled = false;
 
-            // Set once at Create(); legacy CButton tooltips had no RmlUi equivalent before this.
+            // Set once at Create() -- static tooltip text, no per-frame update needed.
             Rml::String exitTooltip, questTooltip, petTooltip, masterLevelTooltip;
         };
         RmlModelBinder<CharacterInfoRmlModel> m_RmlBinder;

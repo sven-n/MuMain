@@ -114,7 +114,7 @@
 }
 /* Lives on this separate, childless sibling rather than directly on .gmd-btn.cols-2 -- a
    bordered/backgrounded element that also has children renders an incomplete, non-closed box in
-   this engine (STATUS.md's own finding, first found via server_select.rcss's .server-row);
+   this engine (same finding server_select.rcss's own .server-row documents);
    .gmd-btn always has a child (.gmd-tooltip below), so the fill has to live on a sibling instead.
    No decorator override needed here (modern's .btn decorator is a procedural gradient, not an
    image sprite), just the border/background this class needs on its own. */
@@ -131,8 +131,8 @@
 .gmd-btn.cols-2:active .gmd-btn-fill { background-color: #0a0b09; }
 /* See legacy's own copy of this rule for why position:relative + an explicit z-index above the
    fill's own are both required (this engine's actual stacking tiebreak among positioned siblings
-   turned out not to match a "later in markup wins" assumption -- confirmed the hard way), and why
-   text lives here instead of directly in .gmd-btn. */
+   does not follow a "later in markup wins" assumption), and why text lives here instead of
+   directly in .gmd-btn. */
 .gmd-btn-label {
 	position: relative;
 	z-index: 1;

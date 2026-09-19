@@ -113,7 +113,7 @@ namespace mu::ui::window
 
     // Reusable RmlUi confirm dialog -- one document/model, one instance, shown with different
     // GenericDialogConfig content per call. Replacement primitive for CCommonMessageBox/
-    // CustomMessageBox's whole native TMsgBoxLayout<> family (see STATUS.md).
+    // CustomMessageBox's whole native TMsgBoxLayout<> family.
     //
     // Single active instance, not a stack: if Show() is called while one is already open, the new
     // config is queued and shown once the active one resolves -- matches CMsgWin's own single-

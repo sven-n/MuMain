@@ -11,13 +11,11 @@
      LoadThemedDocument()'s sourceUrl, always themes/<theme>/) -- each theme needs a REAL copy of
      that stylesheet at themes/<theme>/option_window.rcss, there is no equivalent "shared" fallback
      for a <link>'s href the way there is for the .rml file itself. A root-level RCSS at this same
-     directory is never reachable by either theme -- confirmed the hard way: an earlier version put
-     the legacy stylesheet there, and every edit to it was silently inert for the legacy theme.
+     directory is never reachable by either theme, regardless of edits made there.
      checkboxes/range-sliders/selects use the same shared base.rcss primitives in both themes, no
      structural fork of THIS file needed yet. If a theme-specific rendering workaround ever forces a
      DOM difference (the way generic_menu_dialog.rml's modern fork needed an extra .gmd-btn-fill
-     div), fork this file at that point rather than pre-emptively -- see README.md's theming
-     section.
+     div), fork this file at that point rather than pre-emptively.
 
      Every row uses the same two-column shape (label, then control), .option-row-label first in
      each row's own markup order -- including the checkbox rows, which put the label BEFORE
@@ -35,12 +33,11 @@
      is off, so it's screen-centered via window_shell's own .center-both fallback, same as every
      other window_shell consumer; no C++-computed position involved.
 
-     Tabs (added after the initial flat 10-row layout started overlapping/outgrowing the panel):
-     one .option-tab-row of .option-tab-btn's, each data-class-active-tab="active_tab == N" +
+     Tabs: one .option-tab-row of .option-tab-btn's, each data-class-active-tab="active_tab == N" +
      data-event-click="option_select_tab(N)" -- same data-class-X toggle mechanism
      window_shell.rcss's own data-class-has-title already proves, not a raw data-style override
-     (see window_shell.rml's own history on why that's the safer choice for a toggled visual
-     state). Six .option-tab-panel siblings follow, one per tab, data-class-hidden="active_tab !=
+     (a class toggle avoids the cascade-tie risk a raw style override would carry for a toggled
+     visual state). Six .option-tab-panel siblings follow, one per tab, data-class-hidden="active_tab !=
      N" -- each is itself a flex column (see option_window.rcss's own .option-tab-panel rule), and
      needs the .option-tab-panel.hidden compound-selector override the same file also carries, or
      it would tie with base.rcss's global .hidden{display:none} at equal specificity and silently
@@ -103,8 +100,8 @@
 			       data-attr-max="render_level_max" data-value="render_level"
 			       data-event-change="option_render_level_changed"/>
 		</div>
-		<!-- Custom dropdown, not RmlUi's native <select>/<option> -- that was tried first (see git
-		     history) and never reliably worked in this engine: WidgetDropDown's own generated
+		<!-- Custom dropdown, not RmlUi's native <select>/<option> -- that was tried first and never
+		     reliably worked in this engine: WidgetDropDown's own generated
 		     selectvalue/selectbox/selectarrow sub-elements need CSS this theme never fully gave
 		     them, and even once styled, option clicks still didn't reliably reach this window's
 		     change callback. Reuses the exact mechanism the tab bar above already proves reliable:
@@ -151,10 +148,8 @@
 		</div>
 	</div>
 
-	<!-- Tab 3: Graphics -- DXP-23's per-system effect-cost toggles (MainScene.h), promoted from
-	     console-only $effects ... diagnostics to a persisted, in-game-options setting since
-	     they're functionally just "reduce rendering cost for a low-end PC" (see OptionWindow.cpp's
-	     own history/comments). -->
+	<!-- Tab 3: Graphics -- per-system effect-cost toggles (MainScene.h) for reducing rendering cost
+	     on a low-end PC. -->
 	<div class="option-tab-panel" data-class-hidden="active_tab != 3">
 		<div class="option-row option-checkbox-row" data-event-click="option_toggle_render_all_effects">
 			<span class="option-row-label">{{render_all_effects_label}}</span>

@@ -31,7 +31,14 @@ that's fine; retrofit to `dp` opportunistically, not as a forced mass-edit.
 
 A second, older scaling system also exists: `UI::Scaling` (`UITransform.cpp`), a window-size-driven
 auto-scale (`BottomHudScale`, `CappedUniformScale` → `PanelTransform`/`DockTransform`/
-`FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. It drives still-legacy
+`FloatingWorkspaceTransform`), clamped to a fixed range per layout kind. The ramp between the
+640×480 reference (1.0×) and each ceiling is **linear** — `ViewportFitScale()` is
+`clamp(min(w/640, h/480), 1, ceiling)`, the same formula the original client used — so at
+`UIScalePercent=100` a migrated window lands on exactly the pixels the legacy one did at every
+resolution, which is what makes screenshot comparison against the original meaningful. (A
+quadratic damping of that ramp existed briefly; it was removed because it broke that parity at
+every intermediate resolution — 1.25× instead of 1.5× at 1280×720 — and the user dial below is
+the right lever for "too big at my resolution".) It drives still-legacy
 `CWin`/`mu::ui::window::CObject` rendering/hit-testing, and — via `bars_scale` — `main_frame.rcss`'s HUD bars too
 (`MainFrameWindow.h`'s `MainFrameRmlModel::barsLeft` comment has the full reasoning for why
 that one window uses this system instead of `dp`). Two axes exist, and both systems now respect
@@ -71,14 +78,8 @@ not just an OS scale preference) needs different handling for the `dp`-ratio pat
 diverge there. Confirm on real high-DPI hardware (not just OS-scaled hardware, now confirmed above)
 before trusting that path in play.
 
-**Known RmlUi quirk**: in at least one document (`char_sel_main.rml`, which has a `data-model` and
-several `data-event-click` bindings), a `font-family`/`font-size` declared on an ancestor
-(`#panel`) failed to inherit down to a `<span>` two levels deep — RmlUi logged "No font face
-defined. Missing 'font-family' property" and the text silently never rendered, even though every
-other inherited property (and the div's own background/border) worked fine. Root cause not fully
-chased down. Workaround, confirmed working: declare `font-family`/`font-size` directly on
-whatever element actually renders the text, rather than relying on inheritance from a distant
-ancestor, in any RmlUi document that uses `data-model`/`data-event-click` bindings.
+See `engine-findings.md`'s font-family inheritance finding before assuming a new element's
+invisible text is a layout bug — it's the single most-recurring gotcha in this doc set.
 
 ## Anchor/sizing utility classes (`base.rcss`)
 
@@ -168,12 +169,11 @@ flows post-retrofit at more than one resolution, not just eyeballing a screensho
 
 ## Deferred (not part of this policy yet)
 
-- A formal multi-resolution automated visual-regression test matrix. No test harness exists for
-  this today; keep doing manual spot-checks at a couple of resolutions/UI-scale values per window.
-- Consolidating legacy duplicate component classes (`CButton`/`CUIButton`/`mu::ui::window::CButton` etc.) —
-  those are legacy C++ duplications predating RmlUi; migrating a window to RmlUi already retires
-  its legacy duplicate, so consolidating the *remaining* legacy classes is a separate effort
-  against code that's being phased out anyway. (Directory reorganization itself — dropping the
-  `UI/Legacy`/`UI/NewUI` folder split in favor of topic folders directly under `UI/` — is done, see
-  `newui-legacy-merger.md`; the class-name collision this surfaced, `CButton` vs. the former
-  `mu::ui::window::CButton`, is exactly this still-deferred class-consolidation item.)
+- A formal multi-resolution automated visual-regression test matrix — see `tracked-deferrals.md`
+  for the current status; keep doing manual spot-checks per window until one exists.
+- Whether `CButton`/`CUIButton`/`mu::ui::window::CButton` (three separate C++ classes, one per
+  legacy era) should eventually merge into one. **Not a naming-collision question** — that part is
+  already resolved, each lives in its own namespace (`building-new-ui.md`'s "Resolved name
+  collisions" section) and the compiler never confuses them. What's still open is purely whether
+  consolidating their *behavior* is worth it; migrating a window to RmlUi already retires whichever
+  of the three it used, so this only matters for the shrinking population still native.

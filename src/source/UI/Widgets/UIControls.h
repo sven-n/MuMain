@@ -1099,7 +1099,7 @@ public:
 protected:
     virtual BOOL DoMouseAction();
 
-    // Portable text field implementation (issue #447).
+    // Portable text field implementation.
     struct PortableLine
     {
         int start;
@@ -1143,7 +1143,7 @@ public:
 protected:
     HWND m_hParentWnd;
 
-    // Portable text field state (issue #447).
+    // Portable text field state.
     std::wstring m_portableText;
     std::wstring m_composition; // IME preedit shown at the caret, not yet committed
     int m_iCaretAreaX = 0;      // last rendered caret rect (reference px, screen space)

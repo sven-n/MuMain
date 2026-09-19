@@ -414,9 +414,8 @@ void mu::ui::window::CGemIntegrationDisjointMsgBox::RenderButtons()
 
 //////////////////////////////////////////////////////////////////////////
 
-// Was CSystemMenuMsgBox/CSystemMenuMsgBoxLayout -- proof-of-concept port onto
-// CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h), the sibling N-button-menu primitive to
-// CGenericConfirmDialog. Declared in WindowCommon.h (its own two call sites,
+// Uses CGenericMenuDialog (UI/Dialogs/GenericMenuDialog.h), the sibling N-button-menu primitive
+// to CGenericConfirmDialog. Declared in WindowCommon.h (its own two call sites,
 // UI/HUD/HotKey.cpp's Esc handler and UI/Dialogs/WindowMenu.cpp's menu item 0, only need the
 // declaration); implemented here rather than in WindowCommon.cpp since every global this touches
 // (Hero, g_pNewUIHotKey, g_ErrorReport, MUHelper::g_MuHelper, M34CryWolf1st, ...) was already
@@ -1333,8 +1332,7 @@ bool mu::ui::window::CCursedTempleProgressMsgBox::CheckHeroAction()
     return true;
 }
 
-// CDuelMsgBox/CDuelResultMsgBox ported to CGenericConfirmDialog's portrait2D field --
-// see docs/rmlui-ui-system/dialog-migration-plan.md.
+// CDuelMsgBox/CDuelResultMsgBox are now CGenericConfirmDialog's portrait2D field.
 
 void mu::ui::window::ShowCherryBlossomMenuDialog()
 {
@@ -1409,7 +1407,7 @@ void mu::ui::window::ShowGemIntegrationMenuDialog()
             return;
         }
         // CGemIntegrationDisjointMsgBox stays native -- embedded live inventory list-selection
-        // widget, out of scope for this primitive (see dialog-migration-plan.md).
+        // widget, out of scope for this primitive.
         mu::ui::window::CreateMessageBox(MSGBOX_LAYOUT_CLASS(mu::ui::window::CGemIntegrationDisjointMsgBoxLayout));
     };
     cfg.buttons.push_back(std::move(btnDisjoint));
@@ -1826,12 +1824,11 @@ void mu::ui::window::ShowTrainerRecoverDialog()
     g_pGenericMenuDialog->Show(std::move(cfg));
 }
 
-// CElpisMsgBox ported to ShowElpisMenuDialog() (WindowCommon.h), onto CGenericMenuDialog. The
-// "About Refinery"/"About Jewel of Harmony" buttons never changed native's button set, only which
-// info blurb showed above it (m_iMessageType-driven) -- so this port is just the same 4-button
-// config re-Show()n with different `lines`, reusing the exact reentrant-Show()-during-click
-// chaining ShowGemIntegrationJewelDialog()/ShowGemIntegrationMixDialog() already prove. See
-// docs/rmlui-ui-system/dialog-migration-plan.md.
+// ShowElpisMenuDialog() (WindowCommon.h), onto CGenericMenuDialog. The "About Refinery"/"About
+// Jewel of Harmony" buttons never change the button set, only which info blurb shows above it
+// (m_iMessageType-driven) -- so this is just the same 4-button config re-Show()n with different
+// `lines`, reusing the same reentrant-Show()-during-click chaining
+// ShowGemIntegrationJewelDialog()/ShowGemIntegrationMixDialog() use.
 void mu::ui::window::ShowElpisMenuDialog(int iMessageType)
 {
     GenericMenuConfig cfg;

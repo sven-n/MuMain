@@ -1,13 +1,11 @@
 /* Legacy theme's shared window shell -- the msgbox sprite-frame chrome (top/middle/bottom cap
-   composite + optional title-banner swap), factored out of generic_menu_dialog.rcss into its own
-   template (window_shell.rml) so any consumer can reuse the same markup instead of hand-copying it.
-   Loaded automatically by any document that links window_shell.rml as a template (RmlUi merges a
-   template's own <head> links into the consuming document's head) -- a consumer does not need its
-   own <link> to this file.
+   composite + optional title-banner swap), reusable by any consumer via its own template
+   (window_shell.rml) instead of hand-copying this markup. Loaded automatically by any document
+   that links window_shell.rml as a template (RmlUi merges a template's own <head> links into the
+   consuming document's head) -- a consumer does not need its own <link> to this file.
 
-   Named `window-shell-*`, not `gmd-*` -- this markup is no longer generic-menu-dialog-specific.
-   Values below are unchanged from generic_menu_dialog.rcss's former .gmd-sprite-*/.gmd-header-rail/
-   .gmd-header-title/.gmd-body rules, just renamed. */
+   Named `window-shell-*`, not `gmd-*`, since this markup isn't specific to the generic menu
+   dialog -- any window needing this same sprite-frame chrome can reuse it. */
 
 /* Same native sprite family (and same spritesheet declarations) as generic_confirm_dialog_bg.rcss
    -- CCommonMessageBox's own back-fill + top/middle/bottom cap composite. Redeclared here rather
@@ -136,20 +134,17 @@
 	transform: none;
 }
 
-/* Footer anchor, sibling of #content -- see window_shell.rml's own comment. Same bottom inset
-   #content itself used to reserve (28dp) so a consumer moving its close button here (via
-   UI::RmlBridge::PromoteToWindowShellFooter()) sees no visual shift from before this element
-   existed. pointer-events:none on the anchor itself (it has no visual/hit-test purpose of its
-   own) -- a moved-in .btn already carries its own pointer-events:auto.
+/* Footer anchor, sibling of #content -- see window_shell.rml's own comment. Matches #content's own
+   28dp bottom inset so a consumer moving its close button here (via
+   UI::RmlBridge::PromoteToWindowShellFooter()) sees no visual shift. pointer-events:none on the
+   anchor itself (it has no visual/hit-test purpose of its own) -- a moved-in .btn already carries
+   its own pointer-events:auto.
 
-   Explicit height, not left as auto against a bare `bottom` offset -- every other absolutely-
-   positioned box in this file (.window-shell-sprite-top/-bottom, etc) always pairs its offset with
-   either a second offset (top+bottom) or an explicit height, never `bottom` alone; this is the
-   first one to try "bottom only" and it left the box's own height indeterminate (found live: a
-   .btn moved in here rendered with no visible text -- .btn's own height:30dp still applied to the
-   BUTTON, but resolving ITS bottom:0 against a footer box of uncertain height put it somewhere
-   unreliable). 30dp matches .btn's own height so bottom:0 on a moved-in close button still sits
-   flush with this box's own bottom edge, same effective spot as before. */
+   Explicit height, not left as auto against a bare `bottom` offset -- `bottom` alone leaves this
+   box's own height indeterminate, and a .btn moved in here (height:30dp on the BUTTON itself)
+   would then resolve its own bottom:0 against a footer box of uncertain height, landing somewhere
+   unreliable. 30dp matches .btn's own height so bottom:0 on a moved-in close button sits flush
+   with this box's own bottom edge. */
 .window-shell-footer {
 	position: absolute;
 	left: 0;

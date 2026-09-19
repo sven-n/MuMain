@@ -113,89 +113,27 @@ genuinely stay in C++ — worth reading before auditing any legacy-theme code ag
   port's theme treatment). Built and verified against a real build (Debug, `windows-x64`); in-game
   verification against a live server still pending for both themes.
 - **`CGenericConfirmDialog`** — **done, both themes (2026-09-13)**: the reusable confirm-dialog
-  primitive `UI/Dialogs/CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native `TMsgBoxLayout<T>`
-  family lacked (see `dialog-migration-plan.md`'s "Feature-extension history" entry for the full
-  migration story, and `component-catalog.md`'s "Dialog" section for the full shape — this is a
-  separate native subsystem from `UIControls.h`'s `CUIControl` family, tracked separately in
-  `tracked-deferrals.md`). One C++ class + one document, shown with a `GenericDialogConfig` value (three fixed,
-  role-named button slots — `primary`/optional `secondary`/optional `showCancel` — plus body lines;
-  see `dialog-migration-plan.md`'s "Button model redesign" entry, 2026-09-16, for the full
-  primary/secondary/cancel design) instead of a new subclass per dialog. Proven on 3 real dialogs,
-  replacing their native call sites end-to-end and deleting the 3 now-dead native classes:
-  `Guild/GuildInfoWindow.cpp`'s alliance-master-can't-leave notice (OK-only), `UI/Quests/
-  MyQuestInfoWindow.cpp`'s quest-giveup confirm (OK/Cancel, real `SendQuestCancelRequest` on OK),
-  `Network/Server/WSclient.cpp`'s guild-invite accept/decline (OK/Cancel, the "shell + caller fills
-  in body lines after construction" pattern, triggered from a network packet handler rather than a
-  UI click). Built and verified (RelWithDebInfo); in-game verification of all 3 swapped dialogs
-  (both themes, Enter/Esc, and a second dialog queuing while one is open) still pending.
-- **`CGenericMenuDialog`** — **done, both themes (2026-09-15)**: sibling primitive to
-  `CGenericConfirmDialog` for `CustomMessageBox.h`'s "multi-option menu" shape (an arbitrary list of
-  N labeled action buttons, not two fixed OK/Cancel slots) — see `dialog-migration-plan.md`'s own
-  "Multi-option menus" entry for the full design rationale (why a separate primitive, the
-  `data-for`/`it_index` button-array precedent, no fg/bg document split needed). One C++ class + one
-  document, shown with a `GenericMenuConfig` value (title, body lines, a button vector, `onCancel`).
-  `MenuButton` also carries its own optional `lines` — some native consumers (`CChaosMixMenuMsgBox`,
-  `CTrainerRecoverMsgBox`) interleave a few lines of body text with *each individual button* rather
-  than grouping it all above the whole list (the shared `GenericMenuConfig::lines` is only right
-  for an actual once-per-dialog summary); a first pass wrongly flattened everything into that
-  shared block, fixed 2026-09-15 by adding this per-button field (RML: a nested `data-for` over
-  `button.lines` inside the same repeated cell as the button itself — RmlUi re-parses each outer
-  iteration's own inner RML, so nesting resolves normally; no prior precedent for nesting
-  `data-for` in this codebase, but confirmed architecturally sound from `DataViewFor::Update()`'s
-  own `SetInnerRML()` call).
-  Proven on 10 real dialogs, replacing their native call sites end-to-end and deleting all 10
-  now-dead native classes: `CSystemMenuMsgBox` (proof-of-concept; Esc/system menu, 5 uniform-size
-  buttons), `CChaosMixMenuMsgBox`, `CTrainerMenuMsgBox`/`CTrainerRecoverMsgBox` (one opens the
-  other, same nesting native had), `CSeedMasterMenuMsgBox`, `CSeedInvestigatorMenuMsgBox`,
-  `CResetCharacterPointMsgBox`, `CDelgardoMainMenuMsgBox`, `CLuckyTradeMenuMsgBox`, and
-  `CCherryBlossomMsgBox` (ported for parity but has no live caller — same as its native
-  predecessor). Built and verified (RelWithDebInfo, 378/379 steps); **in-game tested and signed
-  off by the user (2026-09-15)**, all 10 dialogs, both themes. Testing surfaced and fixed several
-  real bugs beyond the per-button-`lines` one already described above: Esc not closing these
-  dialogs at all, then (once fixed) closing the wrong window entirely when other windows were also
-  open — the `CManager::CompareKeyEventOrder` descending-sort finding below — plus button-row/
-  bottom padding, a missing legacy-theme back-fill sprite, and a content-vs-title-banner layout gap
-  in both themes (see `dialog-migration-plan.md`'s own "Multi-option menus" entry for the full
-  list). **Extended 2026-09-15**: `CGemIntegrationMsgBox`/`CGemIntegrationUnityMsgBox` also ported,
-  as 3 chained free functions (`ShowGemIntegrationMenuDialog()`/`ShowGemIntegrationJewelDialog()`/
-  `ShowGemIntegrationMixDialog()`) rather than 1:1 class replacement — native's single
-  `CGemIntegrationUnityMsgBox` swapped its own button set in place between a jewel-type grid and a
-  mix-amount grid; since this primitive's buttons always close on click, that in-place swap became
-  "close this menu, open a different one," reusing the same reentrant-`Show()`-during-click
-  chaining the Trainer pair above already proves. See `dialog-migration-plan.md`'s own entry for
-  the full mechanism and the one deliberate native-behavior deviation (reopening the jewel-type
-  grid, not the mix-amount grid, on a failed inventory re-check). **Also extended 2026-09-15**:
-  `CElpisMsgBox` ported to `ShowElpisMenuDialog(int iMessageType = 0)` — unlike every other
-  consumer above, native's own button set here never changed, only the body text above it
-  (`m_iMessageType`-driven, via a `switch` in `RenderTexts()`); the "About Refinery"/"About Jewel
-  of Harmony" buttons' `onClick` just re-`Show()`s the exact same 4-button config with a different
-  `cfg.lines` entry, reusing the identical reentrant-`Show()`-during-click chaining but to swap
-  *text* instead of buttons — the simplest consumer of this mechanism so far. 13 dialogs proven on
-  this primitive now. The remaining 2 native "multi-option menu" classes (`CGuild_ToPerson_Position`,
-  `CGemIntegrationDisjointMsgBox`) stay native — bespoke button shapes (simultaneous radio-select,
-  an embedded live inventory list-selection widget) this primitive's plain "click closes" model
-  doesn't fit.
-  **General button-grid sizing added 2026-09-15**: the jewel-type grid above initially reused
-  `MenuButton::compact` (64dp) to fit 2 per row, but several jewel names ("Higher Refining Stone")
-  don't fit 64dp even wrapped — `compact` was never meant to mean "narrow enough for an N-column
-  grid," only "the small Close/Cancel-style button," and conflating the two doesn't generalize.
-  Replaced with `GenericMenuConfig::columns` (int, 0 = unspecified/today's default for every other
-  consumer, unchanged): when set, every non-`compact` button in that dialog gets a `.gmd-btn.cols-N`
-  class (only `cols-2` exists so far) sized to fit exactly N per row, with `height: auto`/
-  `white-space: normal` (instead of `.btn`'s fixed 30dp/single-line assumption) so a long label
-  wraps onto 2 lines instead of silently overflowing past the button's own box. Legacy's `.cols-2`
-  additionally can't inherit `.btn`'s plain `image()` decorator unchanged at this new width — see
-  the "Findings" entry below — so it uses a `ninepatch(legacy-btn-idle, legacy-btn-idle-inner)`
-  decorator instead (the same technique `server_select.rcss`'s `.server-row`/`.group-btn` already
-  prove), which correctly 9-slice-scales the real button sprite rather than falling back to a flat
-  fill/border (an earlier pass tried the flat-fill approach first; superseded once the ninepatch
-  fix was found — see the "Findings" entry for why). Modern's `.btn` decorator is a procedural
-  gradient (no fixed-pixel sprite), so its `.cols-2` keeps the flat fill/border approach (on a
-  separate childless `.gmd-btn-fill` sibling, per the "bordered element with children" finding
-  below) since there's no sprite to 9-slice in the first place. The existing 128dp/64dp buttons in
-  all 12 previously-shipped dialogs are untouched either way. Extend the same way (`.cols-N` CSS
-  class + a same-named `MenuButtonEntry` bool computed in `SyncRmlModel()`) if a future consumer
-  needs 3+ columns.
+  primitive `CommonMessageBox.h`/`CustomMessageBox.h`'s ~140-class native `TMsgBoxLayout<T>` family
+  lacked. See `component-catalog.md`'s "Dialog" section for the full shape (`GenericDialogConfig`'s
+  field reference lives in the struct's own comments now, not narrated here). Proven on 3 real
+  dialogs first, replacing their native call sites end-to-end and deleting the native classes —
+  `migration-ledger.md`'s Dialog family table has the current count and what's left.
+- **`CGenericMenuDialog`** — **done, both themes (2026-09-15)**: sibling primitive for
+  `CustomMessageBox.h`'s "multi-option menu" shape (an arbitrary list of N labeled action buttons,
+  not two fixed OK/Cancel slots) — see `component-catalog.md`'s "Dialog" section for the shape and
+  the reentrant-`Show()`-during-click chaining pattern several consumers use. Proven on 13 real
+  dialogs, replacing their native call sites end-to-end and deleting all of them —
+  `migration-ledger.md`'s Dialog family table has the current list. Testing surfaced and fixed real
+  bugs along the way, most notably `CManager::CompareKeyEventOrder`'s descending-sort issue (Esc
+  closing the wrong window when several were open — see that entry below) and a nested-`data-for`
+  requirement (`MenuButton::lines`, for native consumers that interleave body text per-button
+  rather than once above the whole list — confirmed architecturally sound from
+  `DataViewFor::Update()`'s own `SetInnerRML()` call, no prior precedent for nesting `data-for` in
+  this codebase before this). `GenericMenuConfig::columns`/`.gmd-btn.cols-N` (added for a jewel-type
+  grid whose item names didn't fit the existing 64dp `compact` button width) is the generalized
+  fix if a future consumer needs an N-per-row button grid — legacy's `.cols-2` needed a
+  `ninepatch()` decorator instead of `.btn`'s plain `image()` at the new width (see "Findings"
+  below); modern's stays a flat fill/border since its `.btn` has no fixed-pixel sprite to 9-slice.
 
 ## Checklist for every new port (principles §27's workflow, condensed to what to actually check)
 
@@ -511,24 +449,28 @@ Moved to [`tracked-deferrals.md`](tracked-deferrals.md) (2026-09-16) -- the "Pil
 table plus the three short tracked-deferral punch-lists (`mu::ui::window::CObject`-tier adapter
 naming, `CMainFrameWindow`'s class-rename/file-split, `CUIControl` family retirement). The fourth,
 much larger tracked deferral this section used to include -- `CommonMessageBox`/`CustomMessageBox`
--- lives entirely in [`dialog-migration-plan.md`](dialog-migration-plan.md) now instead (that file
-already owned the per-class worklist this content pointed at; the two are consolidated into one
-file rather than two cross-pointing at each other).
+-- is now just [`migration-ledger.md`](migration-ledger.md)'s Dialog family table (2026-09-19): the
+per-class worklist this used to point at is done for all but a handful of classes, so a dedicated
+file for it stopped earning its keep.
 
-## Upstream sync log (PR #572)
+## Upstream sync log
 
-This branch sits on top of `sven-n/MuMain` PR #572 (head: `yesid-bocanegra/MuMain:main`, the
-SDL_GPU renderer branch) rather than `main` directly, since #572 hasn't merged yet. Log every
-rebase onto a newer PR #572 head here — one line per sync, not one row per upstream commit. That's
-a deliberately lighter shape than the SDL-migration branch's per-source-commit replay ledgers
-(`docs/porting/*-ledger.md` on `pr572/main`): those exist because that branch replays an
-independently-evolved commit history into a differently-restructured target and has to prove each
-source commit's *behavior* survived the restructuring. We don't have that problem — this branch's
-own commits are ours, `git log` already documents them faithfully, and each sync so far has been a
-clean, non-overlapping rebase. If a future sync ever needs real reconciliation (upstream renames or
-restructures a file this branch has also touched), that's the trigger to consider a heavier
-per-commit ledger — not before.
+**Branch of record changed, 2026-09-19**: local `rmlui-on-sdl-gpu` (`fork`/nitoygo's copy) turned
+out to already be merged upstream via `sven-n/MuMain` PR #580, into `sven-n/MuMain`'s
+`dev/rmlui-ui-system` branch — which has since picked up further commits of its own (render-capture
+fixes, an `RmlModelBinder` per-model `DataTypeRegister` fix). This branch now tracks
+`origin/dev/rmlui-ui-system` directly (local `rmlui-on-sdl-gpu`'s upstream repointed there), not
+`fork/rmlui-on-sdl-gpu`. The PR #572 relationship logged below predates this and describes an
+earlier stage of this branch's history — record here whether that relationship still holds the
+next time it becomes relevant, don't assume the entries below are still current without checking.
 
-| Date | Upstream commits pulled in | Conflict verdict | Resulting local tip |
+Log every rebase/sync onto a newer upstream head here — one line per sync, not one row per upstream
+commit (this branch's own commits are ours, `git log` already documents them faithfully; a heavier
+per-source-commit replay ledger, like the SDL-migration branch's `docs/porting/*-ledger.md`, is
+only warranted if a future sync needs real reconciliation — upstream renaming/restructuring a file
+this branch also touched — not before).
+
+| Date | Sync | Conflict verdict | Resulting tip |
 |---|---|---|---|
-| 2026-09-01 | `a9739fb2` docs(render): document Windows parity gaps (docs-only, 2 files, zero overlap with anything this branch touches) | Clean — verified in an isolated worktree before applying to the real branch; identical tree except the 2 upstream docs files | `878f35e4` |
+| 2026-09-01 | Rebased onto `sven-n/MuMain` PR #572 (`a9739fb2` docs(render): document Windows parity gaps — docs-only, 2 files, zero overlap with anything this branch touches) | Clean — verified in an isolated worktree first | `878f35e4` |
+| 2026-09-19 | Rebased local `rmlui-on-sdl-gpu` (1 commit: `CPetInfoWindow`/`CPartyInfoWindow` port + docked-frame unification) onto `origin/dev/rmlui-ui-system` (7 commits ahead); pushed as a fast-forward, `b3bf33d7..233d808b` | Clean — zero conflicts, verified via a full incremental build against the new base | `233d808b` |

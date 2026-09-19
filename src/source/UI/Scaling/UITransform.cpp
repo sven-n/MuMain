@@ -25,13 +25,6 @@ constexpr float kMaximumHudScale = 2.0f;
 // ponytail: 2.25x dock ceiling; adjust only from rebuilt native screenshots.
 constexpr float kMaximumDockScale = 2.25f;
 constexpr float kMaximumTypographyScale = 2.25f;
-// ponytail: 2.0 = quadratic damping (a resolution halfway between reference and the ceiling scales
-// up about 1/4 as far as a linear fit would, same endpoints preserved either way). Raise toward 1.0
-// for less damping (1.0 = no damping, the original linear behavior), or above 2.0 for more, only
-// from rebuilt native screenshots at a few real resolutions. Deliberately doesn't touch
-// kReferenceWidth/Height or any of the ceilings above -- same "no scaling" and "fully capped"
-// endpoints as before, only the ramp in between changes.
-constexpr float kFitDampingExponent = 2.0f;
 constexpr int kNormalFontPointSize = 11;
 constexpr int kMaximumNormalFontPointSize = 16;
 constexpr int kBigFontPointSize = 22;
@@ -142,9 +135,9 @@ UI::Scaling::Transform UI::Scaling::PanelTransform(int windowWidth, int windowHe
 // Pure geometry + WindowContentScale, deliberately NOT including UIScalePercent -- every caller
 // that needs the user's preference multiplies UIScalePercentMultiplier() in itself, once, so it's
 // never double-counted.
-// The one shared "fit the reference size to the real window, clamped" core, now used by both the
+// The one shared "fit the reference size to the real window, clamped" core, used by both the
 // legacy UI::Scaling transforms (via CappedUniformScale/BottomHudScale below) and RmlUiRuntime.cpp's
-// dp-ratio auto-fit -- previously two near-identical private copies of this same formula.
+// dp-ratio auto-fit.
 float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float maximumScale)
 {
     const float widthScale = static_cast<float>(windowWidth) / kReferenceWidth;
@@ -158,20 +151,13 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
     // clipped at 640x480 on a 125%-scaled display).
     const float minBound = 1.0f;
     const float maxBound = maximumScale * contentScale;
-    const float raw = std::clamp(std::min(widthScale, heightScale), minBound, maxBound);
-
-    // Dampen the ramp between the two endpoints -- raw itself already IS the answer
-    // at the reference resolution (minBound, t=0) and at/past the ceiling (maxBound, t=1); only
-    // resolutions strictly between the two get pulled down toward minBound, by kFitDampingExponent
-    // (see its own comment). Reduces the reference/ceiling gap to a fraction [0,1] first (`range`
-    // guards the degenerate case where they're equal or inverted), applies the curve, then remaps
-    // back -- so this stays purely a reshaping of the existing formula's output, not a second
-    // independent scale factor.
-    const float range = maxBound - minBound;
-    if (range <= 0.0f)
-        return raw;
-    const float t = (raw - minBound) / range;
-    return minBound + std::pow(t, kFitDampingExponent) * range;
+    // Linear between the reference size and the ceiling -- the same ramp the original client's
+    // UI::Scaling used, so UIScalePercent=100 reproduces the legacy layout exactly at every
+    // resolution and a screenshot of a migrated window can be compared pixel for pixel against the
+    // original. A user who finds this too large at a modest resolution turns UIScalePercent down;
+    // that dial multiplies this value post-clamp (UIScalePercentMultiplier), so the curve itself
+    // stays the single, predictable auto-fit every caller shares.
+    return std::clamp(std::min(widthScale, heightScale), minBound, maxBound);
 }
 
 // Combined ratio every legacy "Type-2 companion" object -- a real, functional non-RmlUi widget
@@ -179,9 +165,9 @@ float UI::Scaling::ViewportFitScale(int windowWidth, int windowHeight, float max
 // migrated window's now-RCSS-owned layout -- must scale its own fixed reference-pixel offsets by,
 // to stay pixel-for-pixel aligned with the RmlUi element it's shadowing. Same composition
 // RmlUiRuntime.cpp's ApplyUIScale() uses for RmlUi's own dp ratio (UIScalePercent x
-// ViewportFitScale(MaximumPanelScale)) -- the single shared implementation of a formula that used
-// to be hand-copied per window (CharSelMainWin.cpp's GetUIScaleRatio(), LoginMainWin.cpp's inline
-// version, LoginWin.cpp's LoginUIScaleRatio()); each hand-copy risks independently reintroducing
+// ViewportFitScale(MaximumPanelScale)) -- the single shared implementation, used by
+// CharSelMainWin.cpp's GetUIScaleRatio(), LoginMainWin.cpp, and LoginWin.cpp's
+// LoginUIScaleRatio(). Don't hand-copy this formula per window: a hand-copy risks reintroducing
 // the same staleness bug (reading CInput::Instance().GetScreenWidth()/GetScreenHeight() instead of
 // the WindowWidth/WindowHeight globals RmlUiRuntime::OnResize() actually uses). Callers must pass
 // WindowWidth/WindowHeight (ZzzOpenglUtil.cpp), not a separate copy of the screen size.
