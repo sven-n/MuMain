@@ -110,7 +110,7 @@ bool LocalSocketConnection::ReadAvailable()
         if (received > 0)
         {
             m_inbox.append(chunk, static_cast<std::size_t>(received));
-            if (m_inbox.size() > MaxPendingInputBytes)
+            if (PendingLineBytes() > MaxPendingInputBytes)
             {
                 Close();
                 return false;
@@ -133,6 +133,12 @@ bool LocalSocketConnection::ReadAvailable()
         Close();
         return false;
     }
+}
+
+std::size_t LocalSocketConnection::PendingLineBytes() const
+{
+    const std::size_t lastTerminator = m_inbox.find_last_of(LineTerminator);
+    return lastTerminator == std::string::npos ? m_inbox.size() : m_inbox.size() - lastTerminator - 1;
 }
 
 bool LocalSocketConnection::TakeLine(std::string& line)

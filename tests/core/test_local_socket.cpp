@@ -13,7 +13,9 @@
 
 #include "Core/Platform/WinSock.h" // SOCKET, closesocket, WSAStartup (no-ops on POSIX)
 
+#include <algorithm>
 #include <chrono>
+#include <cstddef>
 #include <cstring>
 #include <filesystem>
 #include <string>
@@ -118,6 +120,30 @@ std::unique_ptr<Core::Platform::LocalSocketConnection> AcceptWithin(Core::Platfo
         std::this_thread::sleep_for(std::chrono::milliseconds(2));
     }
     return nullptr;
+}
+
+// Pushes a payload in through chunks, buffering each one on the connection
+// without draining lines: how a pipelining script and the frame loop that
+// only serves a few requests per frame interleave.
+bool BufferInto(SOCKET client, Core::Platform::LocalSocketConnection& connection, std::string_view payload)
+{
+    constexpr std::size_t ChunkBytes = 16 * 1024;
+    std::size_t offset = 0;
+    while (offset < payload.size())
+    {
+        const std::size_t size = std::min(ChunkBytes, payload.size() - offset);
+        const int sent = SendAll(client, payload.substr(offset, size));
+        if (sent <= 0)
+        {
+            return false;
+        }
+        offset += static_cast<std::size_t>(sent);
+        if (!connection.ReadAvailable())
+        {
+            return false;
+        }
+    }
+    return true;
 }
 
 bool ReadLineWithin(Core::Platform::LocalSocketConnection& connection, std::string& line,
@@ -309,6 +335,55 @@ TEST_CASE("Local socket reports a closed peer [core][local-socket]")
     }
     CHECK_FALSE(connection->IsOpen());
 
+    listener.Close();
+    std::filesystem::remove_all(directory);
+}
+
+TEST_CASE("Local socket bounds the unterminated tail, not a pipelined batch [core][local-socket]")
+{
+    const auto directory = MakeSocketDirectory();
+    const std::string path = (directory / "cap.sock").string();
+
+    Core::Platform::LocalSocketListener listener;
+    std::string error;
+    REQUIRE(listener.Listen(path, error));
+
+    const SOCKET client = ConnectTo(path);
+    REQUIRE(client != INVALID_SOCKET);
+    auto connection = AcceptWithin(listener, std::chrono::milliseconds(500));
+    REQUIRE(connection != nullptr);
+
+    // More complete lines than the cap holds in bytes, queued before any of
+    // them is served. A batch of valid commands is not abuse: the connection
+    // stays open and every line survives in order.
+    const std::string command = "{\"cmd\":\"ping\"}\n";
+    const std::size_t lines = (Core::Platform::LocalSocketConnection::MaxPendingInputBytes / command.size()) + 64;
+    std::string batch;
+    batch.reserve(command.size() * lines);
+    for (std::size_t index = 0; index < lines; ++index)
+    {
+        batch += command;
+    }
+    REQUIRE(batch.size() > Core::Platform::LocalSocketConnection::MaxPendingInputBytes);
+
+    REQUIRE(BufferInto(client, *connection, batch));
+    CHECK(connection->IsOpen());
+
+    std::size_t taken = 0;
+    std::string line;
+    while (connection->TakeLine(line))
+    {
+        CHECK(line == "{\"cmd\":\"ping\"}");
+        ++taken;
+    }
+    CHECK(taken == lines);
+
+    // A peer that never terminates its line is still cut off.
+    const std::string blob(Core::Platform::LocalSocketConnection::MaxPendingInputBytes + 1, 'x');
+    CHECK_FALSE(BufferInto(client, *connection, blob));
+    CHECK_FALSE(connection->IsOpen());
+
+    closesocket(client);
     listener.Close();
     std::filesystem::remove_all(directory);
 }

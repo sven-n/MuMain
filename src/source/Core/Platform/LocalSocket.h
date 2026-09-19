@@ -62,6 +62,12 @@ public:
     void Close();
 
 private:
+    // Bytes of the unterminated tail of the inbox: what a peer has sent since
+    // its last newline. Complete lines are excluded — they are bounded by the
+    // rate the owner drains them at, and a pipelined batch of valid commands
+    // is not abuse.
+    [[nodiscard]] std::size_t PendingLineBytes() const;
+
     SOCKET m_handle;
     std::string m_inbox;
     std::string m_outbox;
