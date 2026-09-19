@@ -239,6 +239,28 @@ static void GenerateScreenshotFilename(wchar_t* outFileName, wchar_t* outMessage
     wcscat(outMessage, lpszTemp);
 }
 
+/**
+ * @brief Names a scripted capture that was given no path of its own.
+ *
+ * Seconds and a counter of this process' own keep two captures of the same
+ * minute apart; the player's rolling counter and the shared `GrabFileName`
+ * buffer stay untouched, so a pending Print Screen still reports its own name.
+ */
+static std::wstring GenerateScriptedScreenshotFilename()
+{
+    static int scriptedCaptureCount = 0;
+
+    SYSTEMTIME st;
+    GetLocalTime(&st);
+
+    wchar_t fileName[256];
+    mu_swprintf(fileName, L"Screen(%02d_%02d-%02d_%02d_%02d)-%04d.jpg", st.wMonth, st.wDay, st.wHour, st.wMinute,
+                st.wSecond, scriptedCaptureCount);
+    scriptedCaptureCount = (scriptedCaptureCount + 1) % 10000;
+
+    return fileName;
+}
+
 static ScreenshotCaptureState g_screenshotCapture;
 
 // Set while a scripted capture (control socket) is pending; a human's Print
@@ -375,9 +397,7 @@ bool RequestScriptedScreenshot(const std::wstring& path, ScreenshotCompletion on
     std::wstring fileName = path;
     if (fileName.empty())
     {
-        wchar_t screenshotText[256];
-        GenerateScreenshotFilename(GrabFileName, screenshotText);
-        fileName = GrabFileName;
+        fileName = GenerateScriptedScreenshotFilename();
     }
 
     if (!BeginScreenshotCapture(fileName, L""))

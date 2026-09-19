@@ -301,9 +301,15 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     if (pChosenGroup == nullptr)
         return false;
 
+    // A group the display could not place has no button of its own, so there
+    // is nothing this entry point can select.
+    const int iBtnPos = pChosenGroup->m_iBtnPos;
+    if (iBtnPos < 0 || static_cast<std::size_t>(iBtnPos) >= kMaxGroups)
+        return false;
+
     // Same two steps the click path takes: mark the group, rebuild its server
     // list, then connect to the chosen server.
-    m_iSelectServerBtnIndex = pChosenGroup->m_iBtnPos;
+    m_iSelectServerBtnIndex = iBtnPos;
     UpdateDisplay();
 
     if (m_pSelectServerGroup == nullptr)

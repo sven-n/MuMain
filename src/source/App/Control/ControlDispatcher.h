@@ -66,8 +66,9 @@ public:
         return "{}";
     }
 
-    // How long the act may run before it answers `timeout`.
-    [[nodiscard]] virtual std::chrono::milliseconds Deadline() const = 0;
+    // How long the act may run before it answers `timeout`. No value means it
+    // never times out: a streaming reader runs until its caller goes away.
+    [[nodiscard]] virtual std::optional<std::chrono::milliseconds> Deadline() const = 0;
 
     [[nodiscard]] const std::string& EncodedId() const
     {

@@ -70,7 +70,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `nearby` | the objects the client can see |
 | `events` (`since`, `follow`) | recorded events, or a live stream of them |
 | `wait-for` (`event`, `match`, `timeout`) | block until a matching event arrives |
-| `screenshot` (`out`) | capture the next frame to a path |
+| `screenshot` (`out`) | capture the next frame to a path; without `out` it names itself, uniquely per capture |
 | `hotkey` (`key`) | press one game key for a frame: `esc`, `i`, `home`, `f1`, … |
 | `click-ui` (`x`, `y`, `button`) | click a window pixel (`left` by default) |
 | `type` (`text`, `enter`) | type text into the focused field, optionally submitting it |
@@ -82,7 +82,7 @@ Error codes: `bad_request`, `unknown_command`, `wrong_scene`, `busy`,
 | `teleport` (`x`, `y`, `map`) | the game master's own move command |
 | `attack` (`target`, `times`, `interval`) | plain attacks on an id or character name |
 | `skill` (`skill`, `target`) | cast a skill the character owns |
-| `pickup` (`item`) | walk to a drop and take it |
+| `pickup` (`item`) | walk to a drop and take it, by the id `nearby` reports for it |
 | `use` (`slot`), `equip` (`slot`, `target_slot`) | inventory actions |
 | `say` (`text`), `whisper` (`name`, `text`) | chat, including `/` commands |
 | `party` (`action`, `target`) | `invite`, `accept`, `decline`, `leave` |
