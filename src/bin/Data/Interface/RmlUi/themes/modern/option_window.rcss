@@ -321,6 +321,47 @@
 	background-color: token(accent-steel);
 }
 
+/* Hover tooltip for a row whose label can't explain itself (the UI Scale row, this window's only
+   one so far -- see option_window.rml's own comment). Only geometry/visibility here: the element
+   also carries base.rcss's own shared `.tooltip` class, which already supplies this theme's
+   tooltip fill, border, radius, colour and font family -- exactly what that shell was laid down
+   for, and the reason this file is much shorter than the legacy theme's copy of the same block
+   (that theme's base.rcss has no shared .tooltip).
+
+   pointer-events must be stated on the ROW, not left to inherit: base.rcss's
+   `body { pointer-events: none; }` reaches everything that doesn't opt back in, and an
+   .option-select-row (unlike .option-checkbox-row) never needed it before -- without it, hovering
+   the row's label area produces no :hover and the tip would only show over the dropdown box
+   itself. The tip stays pointer-events:none so it can't eat the hover that shows it.
+
+   Below the row (top:100%), with that row's own dropdown list flipped above it (bottom:100%) --
+   the reverse of every other row here, because this is the last row of its tab and a 9-entry list
+   opening downwards painted over the panel's bottom edge and its close button (seen live in the
+   legacy theme; the geometry is the same here). Wrapping left at the default with no fixed height,
+   because the sentence is longer than one line at this width. z-index 2 keeps the tip over an open
+   list (z-index 1). */
+.option-row-tipped {
+	pointer-events: auto;
+}
+.option-row-tip {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	width: 240dp;
+	z-index: 2;
+	padding: 4dp 6dp;
+	font-size: 9dp;
+	pointer-events: none;
+}
+.option-row-tipped:hover .option-row-tip {
+	display: block;
+}
+.option-row-tipped .option-dropdown-list {
+	top: auto;
+	bottom: 100%;
+}
+
 /* Not authored in option_window.rml at all -- COptionWindow::BuildRmlUi() builds this element
    directly in C++ inside window_shell.rml's own #window_shell_footer (a `{{close_label}}` version
    of this div, moved into the footer after load, never rendered its label -- see

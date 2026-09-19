@@ -322,6 +322,54 @@
 	background-color: #8f6922;
 }
 
+/* Hover tooltip for a row whose label can't explain itself (the UI Scale row, this window's only
+   one so far -- see option_window.rml's own comment). Declarative `:hover`, no C++ hover callback:
+   the same mechanism main_frame.rcss's own gauge tooltips use, and the reason this theme declares
+   the whole look here is that its base.rcss has no shared .tooltip shell (the modern theme's does,
+   so its copy of this file only positions the element). Values mirror main_frame.rcss's own
+   .tooltip rule (same translucent black fill, same 9dp text) with this window's border colour.
+
+   pointer-events must be stated on the ROW, not just left to inherit: base.rcss's
+   `body { pointer-events: none; }` reaches every element that doesn't opt back in, and an
+   .option-select-row (unlike .option-checkbox-row) never needed it before -- without it, hovering
+   the row's own label area produces no :hover at all, and the tip would only appear while the
+   cursor is over the dropdown box itself. The tip stays pointer-events:none so it can't eat the
+   hover that is showing it.
+
+   Placed BELOW the row (top:100%) and the row's own dropdown list ABOVE it (bottom:100%), which is
+   the reverse of every other row here: this row is the last one in its tab, and a 9-entry list
+   opening downwards from it painted over the panel's own bottom frame art and its close button
+   (seen live). Flipping the list up puts it over the rows above instead, and moving the tip down
+   keeps the two from landing on top of each other. white-space stays default (wrapping) and no
+   height is set -- the sentence is longer than the 210dp content well, so it wraps to as many
+   lines as it needs. z-index 2 keeps the tip over an open list (z-index 1). */
+.option-row-tipped {
+	pointer-events: auto;
+}
+.option-row-tip {
+	display: none;
+	position: absolute;
+	left: 0;
+	top: 100%;
+	width: 190dp;
+	z-index: 2;
+	padding: 2dp 4dp;
+	background-color: rgba(0, 0, 0, 200);
+	border-width: 1dp;
+	border-color: #514a35;
+	border-radius: 3dp;
+	color: #ffffff;
+	font-size: 9dp;
+	pointer-events: none;
+}
+.option-row-tipped:hover .option-row-tip {
+	display: block;
+}
+.option-row-tipped .option-dropdown-list {
+	top: auto;
+	bottom: 100%;
+}
+
 /* Not authored in option_window.rml at all -- COptionWindow::BuildRmlUi() builds this element
    directly in C++ inside window_shell.rml's own #window_shell_footer (a `{{close_label}}` version
    of this div, moved into the footer after load, never rendered its label -- see

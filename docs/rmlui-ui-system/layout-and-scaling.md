@@ -20,6 +20,17 @@ user-controlled UI scale, and it's now wired up: `GameConfig::GetUIScalePercent(
 `context->SetDensityIndependentPixelRatio(percent / 100.0f)` in both `RmlUiRuntime::Create()` and
 `OnResize()` (`Render/RmlUi/RmlUiRuntime.cpp`).
 
+The setting has an in-game control: **Options window → UI tab → "UI Scale"**, a dropdown over a
+fixed ladder (50/60/70/80/90/100/125/150/200 %) with a hover tooltip saying what the percentage
+multiplies. Picking a value writes `GameConfig::SetUIScalePercent()` (clamped to
+`CfgMinUIScalePercent`..`CfgMaxUIScalePercent`, i.e. 50–300 — a hand-edited `config.ini` may sit
+between two offered steps, and the row then shows the nearest one), saves, and re-applies the scale
+by resizing the window to the size it already has (`MuApplyWindowResolution(WindowWidth,
+WindowHeight, windowed)`): nothing recomputes the ratio on its own, but every resolution-dependent
+system — all three contexts' `dp` ratio, `UI::Scaling`'s active transform, the legacy `CWin` layout,
+the 3D UI cameras — does so on a resize. That apply is deferred to `COptionWindow::Update()`, out of
+RmlUi's own event dispatch, like the theme switch next to it.
+
 Any RCSS length meant to respect the user's scale setting uses the `dp` unit instead of `px`.
 `10dp` becomes `10 * (UIScalePercent / 100)` real pixels; `10px` always stays exactly 10 real
 pixels regardless of the setting. This is opt-in per property, not a blanket rescale — a window

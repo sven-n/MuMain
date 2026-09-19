@@ -17,6 +17,7 @@
 #include "UI/Core/SceneUICoordinator.h"
 #include "UI/Windows/RememberPasswordPrompt.h"
 #include <algorithm>
+#include <cstdlib>
 #include <cstring>
 #include "I18N/All.h"
 
@@ -88,6 +89,35 @@ int UI::Options::FindClosestDisplayResolutionIndex(const std::vector<DisplayReso
     for (size_t i = 1; i < resolutions.size(); ++i)
     {
         const long long distance = distanceSquared(resolutions[i]);
+        if (distance < bestDistance)
+        {
+            bestIndex = static_cast<int>(i);
+            bestDistance = distance;
+        }
+    }
+
+    return bestIndex;
+}
+
+const std::vector<int>& UI::Options::UIScalePercentChoices()
+{
+    // Ascending; 100 (the default) is deliberately one of them so "back to normal" is a single
+    // click. The floor matches GameConfig's own clamp (CfgMinUIScalePercent) -- below it the
+    // options window's own rows get too small to click the setting back up. The ceiling stops at
+    // 200 rather than the clamp's 300: past 200 the window no longer fits on a 1280x720 client,
+    // which is the smallest size the resolution row offers on a typical display.
+    static const std::vector<int> choices = {50, 60, 70, 80, 90, 100, 125, 150, 200};
+    return choices;
+}
+
+int UI::Options::FindClosestUIScaleIndex(int percent)
+{
+    const auto& choices = UIScalePercentChoices();
+    int bestIndex = 0;
+    int bestDistance = std::abs(choices.front() - percent);
+    for (size_t i = 1; i < choices.size(); ++i)
+    {
+        const int distance = std::abs(choices[i] - percent);
         if (distance < bestDistance)
         {
             bestIndex = static_cast<int>(i);
@@ -184,6 +214,7 @@ mu::ui::window::COptionWindow::COptionWindow()
     m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
 
     m_iThemeIndex = FindCurrentThemeIndex();
+    m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
 mu::ui::window::COptionWindow::~COptionWindow()
@@ -303,6 +334,11 @@ void mu::ui::window::COptionWindow::BuildRmlUi()
             c.Bind("theme_index", &model.themeIndex);
             c.Bind("theme_row_label", &model.themeRowLabel);
             c.Bind("theme_value_label", &model.themeValueLabel);
+            c.Bind("ui_scale_labels", &model.uiScaleLabels);
+            c.Bind("ui_scale_index", &model.uiScaleIndex);
+            c.Bind("ui_scale_row_label", &model.uiScaleRowLabel);
+            c.Bind("ui_scale_value_label", &model.uiScaleValueLabel);
+            c.Bind("ui_scale_tooltip", &model.uiScaleTooltip);
 
             c.BindEventCallback("option_select_tab",
                 [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
@@ -557,8 +593,10 @@ bool mu::ui::window::COptionWindow::UpdateKeyEvent()
 bool mu::ui::window::COptionWindow::Update()
 {
     // Outside any RmlUi event dispatch -- safe to destroy/rebuild m_pRmlDoc here if a theme switch
-    // was requested (see m_bPendingThemeSwitch's own comment).
+    // was requested (see m_bPendingThemeSwitch's own comment), and to resize the window for a new
+    // UI scale (m_bPendingUIScaleApply's own comment).
     ApplyPendingThemeSwitch();
+    ApplyPendingUIScale();
     SyncRmlModel();
     return true;
 }
@@ -599,6 +637,7 @@ void mu::ui::window::COptionWindow::OpenningProcess()
     m_bDisableWingShadow = GameConfig::GetInstance().GetDisableWingShadow();
 
     m_iThemeIndex = FindCurrentThemeIndex();
+    m_iUIScaleIndex = FindCurrentUIScaleIndex();
 }
 
 void mu::ui::window::COptionWindow::ClosingProcess()
@@ -649,7 +688,7 @@ void mu::ui::window::COptionWindow::RmlClickSelectTab(int nTab)
 
 void mu::ui::window::COptionWindow::RmlToggleDropdown(int dropdownId)
 {
-    if (dropdownId < 0 || dropdownId > 4)
+    if (dropdownId < 0 || dropdownId > 5)
         return;
     // Toggle: clicking the currently-open one's own value box closes it; clicking any other
     // (including a different dropdown's) overwrites m_iOpenDropdown, which closes whatever else
@@ -663,12 +702,29 @@ void mu::ui::window::COptionWindow::RmlDropdownOptionClick(int dropdownId, int o
 {
     switch (dropdownId)
     {
-    case 0: RmlResolutionChanged(optionIndex); break;
-    case 1: RmlFpsCapChanged(optionIndex); break;
-    case 2: RmlThemeChanged(optionIndex); break;
-    case 3: RmlLanguageChanged(optionIndex); break;
-    case 4: RmlFontChanged(optionIndex); break;
-    default: break;
+    // Expanded to one statement per line (rather than this switch's original one-line cases) only
+    // because upstream CI's clang-format check rejects a short case label on its own line, and
+    // adding `case 5` made the whole block a changed range.
+    case 0:
+        RmlResolutionChanged(optionIndex);
+        break;
+    case 1:
+        RmlFpsCapChanged(optionIndex);
+        break;
+    case 2:
+        RmlThemeChanged(optionIndex);
+        break;
+    case 3:
+        RmlLanguageChanged(optionIndex);
+        break;
+    case 4:
+        RmlFontChanged(optionIndex);
+        break;
+    case 5:
+        RmlUIScaleChanged(optionIndex);
+        break;
+    default:
+        break;
     }
     m_iOpenDropdown = -1;
 }
@@ -878,6 +934,46 @@ void mu::ui::window::COptionWindow::ApplyPendingThemeSwitch()
     UI::Login::ReloadRmlTheme();
 }
 
+void mu::ui::window::COptionWindow::RmlUIScaleChanged(int index)
+{
+    // See RmlResolutionChanged's own comment -- same settle-frame guard applies here.
+    if (m_rmlSyncCount < kRmlSelectSettleFrames)
+        return;
+    const auto& choices = UI::Options::UIScalePercentChoices();
+    if (index < 0 || index >= static_cast<int>(choices.size()))
+        return;
+    if (index == m_iUIScaleIndex)
+        return;
+
+    m_iUIScaleIndex = index;
+    // Deferred to Update() -- see m_bPendingUIScaleApply's own comment (OptionWindow.h).
+    m_iPendingUIScalePercent = choices[index];
+    m_bPendingUIScaleApply = true;
+}
+
+void mu::ui::window::COptionWindow::ApplyPendingUIScale()
+{
+    if (!m_bPendingUIScaleApply)
+        return;
+    m_bPendingUIScaleApply = false;
+
+    GameConfig::GetInstance().SetUIScalePercent(m_iPendingUIScalePercent);
+    GameConfig::GetInstance().Save();
+    // Same re-apply the `ui scale` developer command uses: nothing recomputes the scale on its own,
+    // but every resolution-dependent system (RmlUi's dp ratio on all three contexts, the legacy
+    // CWin layout, the 3D UI cameras) does so on a resize, so a resize to the size the window
+    // already has is what makes the new scale take effect live. Deliberately NOT followed by
+    // GameConfig::SetWindowSize()/Save() the way ApplyResolution() is -- the window size did not
+    // change here, and writing it back is what shrank the window to 320x200 when this row first
+    // drove ApplyResolution() directly.
+    MuApplyWindowResolution(WindowWidth, WindowHeight, g_bUseWindowMode != FALSE);
+
+    // The clamp may have coerced the request (a choice outside GameConfig's bounds can't happen
+    // today, but the ladder and the clamp are independent constants), so re-seed from what was
+    // actually stored rather than from the clicked index.
+    m_iUIScaleIndex = FindCurrentUIScaleIndex();
+}
+
 void mu::ui::window::COptionWindow::RmlClickClose()
 {
     g_pNewUISystem->Hide(mu::ui::window::INTERFACE_OPTION);
@@ -1037,6 +1133,11 @@ int mu::ui::window::COptionWindow::FindCurrentThemeIndex()
     return UI::RmlBridge::GetActiveThemeName() == "modern" ? 1 : 0;
 }
 
+int mu::ui::window::COptionWindow::FindCurrentUIScaleIndex()
+{
+    return UI::Options::FindClosestUIScaleIndex(GameConfig::GetInstance().GetUIScalePercent());
+}
+
 void mu::ui::window::COptionWindow::ApplyResolution()
 {
     if (m_iResolutionIndex < 0 || m_iResolutionIndex >= static_cast<int>(m_resolutions.size()))
@@ -1163,6 +1264,8 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     syncLabel(model.showFpsCounterLabel, "show_fps_counter_label", I18N::Game::ShowFPSCounter);
     syncLabel(model.showDebugInfoLabel, "show_debug_info_label", I18N::Game::ShowDebugInfo);
     syncLabel(model.themeRowLabel, "theme_row_label", I18N::Game::UITheme);
+    syncLabel(model.uiScaleRowLabel, "ui_scale_row_label", I18N::Game::UIScale);
+    syncLabel(model.uiScaleTooltip, "ui_scale_tooltip", I18N::Game::UIScaleTooltip);
 
     // positioned/root_x/root_y stay at their model defaults (false/0/0, see OptionRmlModel's own
     // comment) -- nothing to sync while dragging is off; window_shell's `.center-both` CSS owns
@@ -1261,4 +1364,22 @@ void mu::ui::window::COptionWindow::SyncRmlModel()
     }
     if (model.themeIndex != m_iThemeIndex) { model.themeIndex = m_iThemeIndex; m_RmlBinder.MarkDirty("theme_index"); }
     syncDropdownValue(model.themeValueLabel, "theme_value_label", model.themeLabels, model.themeIndex);
+
+    // Built once -- unlike the font/fps-cap/theme lists, no entry is a localized word, so a live
+    // language switch can't change any of these labels. The space before the sign is deliberate
+    // ("100 %"), matching the "60 FPS" spacing of the FPS Limit row above.
+    if (model.uiScaleLabels.empty())
+    {
+        const auto& choices = UI::Options::UIScalePercentChoices();
+        model.uiScaleLabels.reserve(choices.size());
+        for (const int percent : choices)
+            model.uiScaleLabels.push_back(StringUtils::WideToNarrow((std::to_wstring(percent) + L" %").c_str()));
+        m_RmlBinder.MarkDirty("ui_scale_labels");
+    }
+    if (model.uiScaleIndex != m_iUIScaleIndex)
+    {
+        model.uiScaleIndex = m_iUIScaleIndex;
+        m_RmlBinder.MarkDirty("ui_scale_index");
+    }
+    syncDropdownValue(model.uiScaleValueLabel, "ui_scale_value_label", model.uiScaleLabels, model.uiScaleIndex);
 }

@@ -114,7 +114,7 @@
 		     .option-dropdown-value, so clicking an option doesn't also bubble into the toggle
 		     handler), and each data-for-generated .option-dropdown-option calls
 		     option_dropdown_option_click(N, it_index) on click. Same shape reused below for FPS
-		     Limit/UI Theme/Language/Font. -->
+		     Limit/UI Theme/UI Scale/Language/Font. -->
 		<div class="option-row option-select-row">
 			<span class="option-row-label">{{resolution_row_label}}</span>
 			<div class="option-dropdown">
@@ -227,6 +227,32 @@
 					     data-event-click="option_dropdown_option_click(2, it_index)">{{label}}</div>
 				</div>
 			</div>
+		</div>
+		<!-- UI Scale -- the only row in this window whose label can't say what it does on its own
+		     ("scale of what, relative to what"), so it carries this window's first hover tooltip:
+		     .option-row-tip, a plain sibling span shown by an RCSS `:hover` rule on its own row
+		     (both themes' option_window.rcss), the same declarative mechanism main_frame.rcss's
+		     own gauge tooltips use -- no C++ hover callback, unlike CMainFrameWindow's skill
+		     tooltip, which needs one only because its content is per-skill data. It carries the
+		     shared `.tooltip` class as well as .option-row-tip: the modern theme's base.rcss owns a
+		     real tooltip shell under that name (background/border/color/font) and this row should
+		     look like every other tooltip there, while the legacy theme has no such shared shell
+		     (its own main_frame.rcss declares .tooltip per-document) and gets the whole look from
+		     themes/legacy/option_window.rcss instead. The span sits AFTER .option-dropdown in
+		     markup order so that, while the dropdown list is open, the tip paints above it rather
+		     than under it -- and, being the last row of its tab, this row's list opens upwards
+		     while its tip sits below the row (both themes' option_window.rcss). -->
+		<div class="option-row option-select-row option-row-tipped">
+			<span class="option-row-label">{{ui_scale_row_label}}</span>
+			<div class="option-dropdown">
+				<div class="option-dropdown-value" data-event-click="option_toggle_dropdown(5)">{{ui_scale_value_label}}</div>
+				<div class="option-dropdown-list" data-class-hidden="open_dropdown != 5">
+					<div class="option-dropdown-option" data-for="label : ui_scale_labels"
+					     data-class-selected="it_index == ui_scale_index"
+					     data-event-click="option_dropdown_option_click(5, it_index)">{{label}}</div>
+				</div>
+			</div>
+			<span class="tooltip option-row-tip">{{ui_scale_tooltip}}</span>
 		</div>
 	</div>
 
