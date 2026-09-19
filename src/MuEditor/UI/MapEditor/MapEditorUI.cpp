@@ -27,6 +27,7 @@
 #include "World/MapInfra/MapManager.h"     // gMapManager.WorldActive
 #include "Core/MuEditorCore.h"             // hover flag for input blocking
 #include "UI/Console/MuEditorConsoleUI.h"
+#include "Core/Utilities/StringUtils.h"    // WideToNarrow (UTF-8 safe, unlike raw truncation)
 
 #include <cstring>
 
@@ -48,11 +49,21 @@ extern bool SelectFlag;
 // Tints tiles by their TerrainWall attribute while the Attribute tab is showing.
 extern bool g_bMapEditorAttrOverlay;
 
+// Highlights the texture brush's tile footprint on the ground before/while
+// painting (ZzzLodTerrain.cpp). Bounds are inclusive tile coordinates.
+extern bool g_bMapEditorBrushHighlight;
+extern int  g_MapEditorBrushMinX, g_MapEditorBrushMinY;
+extern int  g_MapEditorBrushMaxX, g_MapEditorBrushMaxY;
+
+// Outlines the selected object in the 3D view (ZzzObject.cpp), reusing the
+// engine's existing debug bounding-box wireframe renderer.
+extern OBJECT* g_MapEditorSelectedObject;
+
 // Terrain height sculpt (ZzzLodTerrain.cpp).
 void AddTerrainHeight(float xf, float yf, float Height, int Range, float* Buffer);
 void CreateTerrainNormal();
 void CreateTerrainLight();
-void SaveTerrainHeight(wchar_t* name);
+bool SaveTerrainHeight(wchar_t* name);
 
 // Live mouse-button states. We capture and clear these before the game consumes
 // them (CaptureInputForPainting) so painting doesn't also move/attack the hero.
@@ -130,6 +141,8 @@ void CMapEditorUI::RestoreGameMode()
 
 void CMapEditorUI::Render(bool* p_open)
 {
+    const bool show = (p_open != nullptr && *p_open);
+
     // While the minimap top-down view is active (and still on FreeFly), render the
     // whole map: full-terrain bounds + g_Camera.TopViewEnable, which the engine
     // itself uses for minimap capture to bypass per-tile terrain AND object
@@ -141,6 +154,19 @@ void CMapEditorUI::Render(bool* p_open)
     {
         extern bool g_bMapEditorFullTerrain;
         extern CameraState g_Camera;
+
+        // The window closing (X button, editor mode toggled off, or the panel no
+        // longer being drawn) must end minimap capture even if the user never
+        // clicked "Back to game camera" -- otherwise TopViewEnable/full-terrain
+        // stay stuck true and MainScene's TopViewEnable early-return permanently
+        // freezes normal gameplay input/UI processing.
+        if (!show && m_bMinimapMode)
+        {
+            m_bMinimapMode = false;
+            if (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly)
+                CameraManager::Instance().SetCameraMode(CameraMode::Default);
+        }
+
         const bool topdown = m_bMinimapMode &&
                              (CameraManager::Instance().GetCurrentMode() == CameraMode::FreeFly);
         if (topdown)
@@ -169,10 +195,11 @@ void CMapEditorUI::Render(bool* p_open)
         m_topdownWasActive = topdown;
     }
 
-    const bool show = (p_open != nullptr && *p_open);
     if (!show)
     {
-        g_bMapEditorAttrOverlay = false;   // no panel -> no overlay
+        g_bMapEditorAttrOverlay = false;     // no panel -> no overlay
+        g_bMapEditorBrushHighlight = false;  // no panel -> no brush cursor
+        g_MapEditorSelectedObject = nullptr; // no panel -> no selection outline
         RestoreGameMode();
         return;
     }
@@ -196,9 +223,11 @@ void CMapEditorUI::Render(bool* p_open)
         g_MuEditorCore.SetHoveringUI(true);
 
     // Each tab decides what edit mode / overlay it needs this frame; default to none.
-    // The Attribute tab turns the overlay back on below when it's the active tab.
+    // The Attribute tab turns the overlay back on below when it's the active tab, and
+    // the Texture tab turns the brush highlight back on the same way.
     m_desiredEditFlag = EDIT_NONE;
     g_bMapEditorAttrOverlay = false;
+    g_bMapEditorBrushHighlight = false;
 
     if (ImGui::BeginTabBar("MapEditorTabs"))
     {
@@ -250,6 +279,12 @@ void CMapEditorUI::Render(bool* p_open)
         // Later phases add tabs here (Attribute / Height).
         ImGui::EndTabBar();
     }
+
+    // The selection outline follows m_pSelected regardless of which tab is active
+    // (so switching to, say, the Attribute tab doesn't hide which object you had
+    // selected), and clears itself automatically whenever m_pSelected does
+    // (world change, delete, undo).
+    g_MapEditorSelectedObject = m_pSelected;
 
     ImGui::End();
 
@@ -400,8 +435,19 @@ void CMapEditorUI::PaintMapping()
     if (!m_bPaintingEnabled || !SelectFlag || g_MuEditorCore.IsHoveringUI())
     {
         m_StrokeActive = false;
+        g_bMapEditorBrushHighlight = false;
         return;
     }
+
+    // Highlight the brush's tile footprint on the ground before the click lands
+    // (PR feedback: "a highlight for ... the paint rectangle on the ground"),
+    // using the exact same [x-BrushSize, x+BrushSize] box the paint loop below
+    // writes to.
+    g_bMapEditorBrushHighlight = true;
+    g_MapEditorBrushMinX = (int)SelectXF - BrushSize;
+    g_MapEditorBrushMaxX = (int)SelectXF + BrushSize;
+    g_MapEditorBrushMinY = (int)SelectYF - BrushSize;
+    g_MapEditorBrushMaxY = (int)SelectYF + BrushSize;
 
     const int x = (int)SelectXF;
     const int y = (int)SelectYF;
@@ -638,7 +684,18 @@ void CMapEditorUI::RenderSelectedObjectPanel()
     const bool posEdited = ImGui::InputFloat3("Pos", pos, "%.0f");
     if (ImGui::IsItemActivated()) TakeObjectUndoSnapshot();
     if (posEdited)
+    {
+        // Reposition() may delete and re-create `o` when the move crosses an
+        // object-grid block boundary, so re-fetch the live pointer before any
+        // further use below.
         m_pSelected = Editor::ObjectPlace::Reposition(o, pos[0], pos[1], pos[2]);
+        o = m_pSelected;
+        if (o == nullptr)
+        {
+            m_objStatus = "Reposition failed; selection cleared.";
+            return;
+        }
+    }
 
     // Angle + scale edit safely in place. Snapshot when a field is first grabbed.
     ImGui::SetNextItemWidth(280.0f);
@@ -749,10 +806,19 @@ void CMapEditorUI::RenderAttributeTab()
     // the two legitimately disagree (the client blocks object footprints, the server
     // does not - 1084 tiles on Tarkan). So we need the server's current TerrainData as
     // a base, and we write only the tiles edited this session.
-    int editedCount = 0;
-    for (int i = 0; i < CELLS; ++i)
-        if (m_attrEdited[i] && Editor::AttrSave::StaticAttribute(TerrainWall[i]) != m_attrBaseline[i])
-            ++editedCount;
+    //
+    // This tab is redrawn every frame it's active, but the count only actually changes
+    // on a paint stroke, an undo, or a baseline reset - so only rescan all CELLS tiles
+    // when one of those has flagged it dirty, instead of every frame the tab is open.
+    if (m_attrCountDirty)
+    {
+        m_attrEditedCountCache = 0;
+        for (int i = 0; i < CELLS; ++i)
+            if (m_attrEdited[i] && Editor::AttrSave::StaticAttribute(TerrainWall[i]) != m_attrBaseline[i])
+                ++m_attrEditedCountCache;
+        m_attrCountDirty = false;
+    }
+    const int editedCount = m_attrEditedCountCache;
 
     ImGui::Text("Step 1: download this map's \"Terrain Data\" from the Admin Panel, then:");
     if (ImGui::Button("Load server base .att...", ImVec2(-1.0f, 0.0f)))
@@ -765,7 +831,7 @@ void CMapEditorUI::RenderAttributeTab()
             {
                 const size_t slash = path.find_last_of(L"\\/");
                 const std::wstring leaf = (slash == std::wstring::npos) ? path : path.substr(slash + 1);
-                m_serverBaseName.assign(leaf.begin(), leaf.end());
+                m_serverBaseName = StringUtils::WideToNarrow(leaf.c_str());
                 m_attrStatus = "Server base loaded. Your edits will be merged onto it.";
             }
             else
@@ -833,6 +899,7 @@ void CMapEditorUI::EnsureAttrBaseline(int world)
     m_attrBaselineWorld = world;
     m_serverBase.clear();
     m_serverBaseName.clear();
+    m_attrCountDirty = true;
 }
 
 void CMapEditorUI::PaintAttribute()
@@ -876,6 +943,7 @@ void CMapEditorUI::PaintAttribute()
                 m_attrEdited[idx] = true;
         }
     }
+    m_attrCountDirty = true;
 }
 
 void CMapEditorUI::TakeAttrUndoSnapshot()
@@ -891,6 +959,7 @@ void CMapEditorUI::UndoAttr()
     std::memcpy(TerrainWall, m_attrUndo.data(), CELLS * sizeof(unsigned short));
     m_bAttrHasUndo = false;
     m_attrStatus = "Undo: reverted last attribute stroke.";
+    m_attrCountDirty = true;
 }
 
 void CMapEditorUI::RenderMinimapTab()
@@ -1015,13 +1084,23 @@ void CMapEditorUI::RenderHeightTab()
         const int world = ResolveWorldNumber();
         wchar_t fileName[128];
         swprintf_s(fileName, L"Data\\World%d\\TerrainHeight.OZB", world);
-        SaveTerrainHeight(fileName);
-        g_MuEditorConsoleUI.LogEditor("[MapEditor] Saved terrain height to TerrainHeight.OZB");
-        Editor::Files::MirrorNextToExe(fileName, world);
+        if (SaveTerrainHeight(fileName))
+        {
+            g_MuEditorConsoleUI.LogEditor("[MapEditor] Saved terrain height to TerrainHeight.OZB");
+            Editor::Files::MirrorNextToExe(fileName, world);
+            m_heightStatus = "Saved terrain height.";
+        }
+        else
+        {
+            g_MuEditorConsoleUI.LogEditor("[MapEditor] FAILED to save terrain height (disk full / I/O error?)");
+            m_heightStatus = "Save failed - file may be truncated or missing.";
+        }
     }
     ImGui::PopStyleColor(2);
     ImGui::TextColored(ImVec4(0.9f, 0.7f, 0.3f, 1.0f),
                        "Overwrites the live map height file (no backup).");
+    if (!m_heightStatus.empty())
+        ImGui::TextColored(ImVec4(0.6f, 1.0f, 0.6f, 1.0f), "%s", m_heightStatus.c_str());
 
     SculptHeight();
 }
@@ -1086,10 +1165,19 @@ void CMapEditorUI::SculptHeight()
     // Without this the editor happily sculpts higher, but on the next login every
     // cell past the cap collapses to a flat plateau. Clamping here keeps what you see
     // equal to what you get. (factor matches SaveTerrainHeight/OpenTerrainHeight.)
+    //
+    // Only the brush's own footprint was touched above (both branches edit the same
+    // [cx-r, cx+r] x [cy-r, cy+r] box around the cursor), so only reclamp that box
+    // instead of all 65536 cells every frame the brush is held.
     const float factor = (gMapManager.WorldActive == WD_55LOGINSCENE) ? 3.0f : 1.5f;
     const float maxHeight = 255.0f * factor;
-    for (int i = 0; i < CELLS; ++i)
-        BackTerrainHeight[i] = std::clamp(BackTerrainHeight[i], 0.0f, maxHeight);
+    const int r = m_heightBrush;
+    for (int iy = cy - r; iy <= cy + r; ++iy)
+        for (int ix = cx - r; ix <= cx + r; ++ix)
+        {
+            float& h = BackTerrainHeight[TERRAIN_INDEX_REPEAT(ix, iy)];
+            h = std::clamp(h, 0.0f, maxHeight);
+        }
 
     // Rebuild lighting/normals so the change is visible immediately.
     CreateTerrainNormal();

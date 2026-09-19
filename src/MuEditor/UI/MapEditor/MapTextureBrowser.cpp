@@ -120,7 +120,8 @@ void CMapTextureBrowser::ScanWorlds()
 void CMapTextureBrowser::ClearPreviews()
 {
     for (const Preview& p : m_previews)
-        DeleteBitmap(p.slot, true);
+        if (p.attempted)
+            DeleteBitmap(p.slot, true);
     m_previews.clear();
 }
 
@@ -144,24 +145,31 @@ void CMapTextureBrowser::LoadWorld(int world)
     }
     std::sort(files.begin(), files.end());
 
+    // Reserve a slot and a list entry per file up front, but defer the actual disk
+    // read + GPU upload to Render()'s budgeted loop (see LoadPending below) - doing
+    // all of this synchronously here caused a visible multi-hundred-ms hitch every
+    // time the Texture Browse tab opened or the World dropdown changed.
     unsigned int slot = BROWSER_SLOT_BASE;
     for (const fs::path& file : files)
     {
         if ((int)m_previews.size() >= MAX_PREVIEWS)
             break;
-
-        // LoadBitmap prepends "Data\\", so pass the path relative to Data root:
-        // "World<N>\<jpg-or-tga name>". bCheck=false so a bad file logs quietly
-        // instead of popping an error box.
-        const std::wstring relative = L"World" + std::to_wstring(world) + L"\\" +
-                                      LoaderName(file);
-        const bool ok = LoadBitmap(relative.c_str(), slot, GL_LINEAR, GL_REPEAT, false);
-
-        m_previews.push_back({ file.filename().wstring(), slot, ok });
+        m_previews.push_back({ file.filename().wstring(), slot, false, false });
         ++slot;
     }
 
-    g_MuEditorConsoleUI.LogEditor("[MapEditor] Texture browser loaded World textures");
+    g_MuEditorConsoleUI.LogEditor("[MapEditor] Texture browser scanned World textures");
+}
+
+void CMapTextureBrowser::LoadPending(Preview& p)
+{
+    // LoadBitmap prepends "Data\\", so pass the path relative to Data root:
+    // "World<N>\<jpg-or-tga name>". bCheck=false so a bad file logs quietly
+    // instead of popping an error box.
+    const std::wstring relative = L"World" + std::to_wstring(m_selectedWorld) + L"\\" +
+                                  LoaderName(fs::path(p.file));
+    p.loaded = LoadBitmap(relative.c_str(), p.slot, GL_LINEAR, GL_REPEAT, false);
+    p.attempted = true;
 }
 
 void CMapTextureBrowser::Render(int defaultWorld)
@@ -269,9 +277,16 @@ void CMapTextureBrowser::Render(int defaultWorld)
 
     ImGui::BeginChild("BrowserThumbs", ImVec2(0, 0), false);
     std::string hoveredThisFrame;
+    int loadBudget = 6;   // decode + GPU upload is lighter than a model preview, but still throttle
     for (int idx = 0; idx < (int)m_previews.size(); ++idx)
     {
-        const Preview& p = m_previews[idx];
+        Preview& p = m_previews[idx];
+        if (!p.attempted && loadBudget > 0)
+        {
+            LoadPending(p);
+            --loadBudget;
+        }
+
         if (idx % COLUMNS != 0)
             ImGui::SameLine();
 
@@ -287,8 +302,10 @@ void CMapTextureBrowser::Render(int defaultWorld)
         if (p.loaded)
             clicked = ImGui::ImageButton("t", (ImTextureID)Bitmaps[p.slot].TextureNumber,
                                          ImVec2(THUMB_SIZE, THUMB_SIZE));
-        else
+        else if (p.attempted)
             clicked = ImGui::Button("fail", ImVec2(THUMB_SIZE, THUMB_SIZE));
+        else
+            clicked = ImGui::Button("...", ImVec2(THUMB_SIZE, THUMB_SIZE));   // pending
 
         if (ImGui::IsItemHovered())
         {

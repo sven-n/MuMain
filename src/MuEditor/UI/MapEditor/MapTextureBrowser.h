@@ -28,12 +28,14 @@ private:
     struct Preview
     {
         std::wstring file;        // file name (for the tooltip)
-        unsigned int slot;        // bitmap index the image was loaded into (GLuint)
-        bool         loaded;      // false if the file failed to decode
+        unsigned int slot;        // bitmap index reserved for this preview (GLuint)
+        bool         attempted;   // true once we've tried loading it (budgeted, so not immediate)
+        bool         loaded;      // false if pending, or if the file failed to decode
     };
 
     void ScanWorlds();
     void LoadWorld(int world);
+    void LoadPending(Preview& p);   // budgeted, called from Render()'s thumbnail loop
     void ClearPreviews();
 
     bool             m_scanned = false;

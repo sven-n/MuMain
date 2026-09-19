@@ -141,8 +141,14 @@ bool SaveClientAtt(int world, int mapNumber)
         g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveClientAtt FAILED: could not open the .att for write");
         return false;
     }
-    fwrite(enc.get(), 1, encBytes, fp);
+    const bool ok = fwrite(enc.get(), 1, encBytes, fp) == static_cast<size_t>(encBytes);
     fclose(fp);
+
+    if (!ok)
+    {
+        g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveClientAtt FAILED: write error (disk full?)");
+        return false;
+    }
 
     g_MuEditorConsoleUI.LogEditor("[MapEditor] Saved terrain attributes (encrypted) to EncTerrain.att");
     Editor::Files::MirrorNextToExe(fileName, world);
@@ -267,8 +273,14 @@ bool SaveServerAtt(int serverMapNumber,
         g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveServerAtt FAILED: could not open the .att for write");
         return false;
     }
-    fwrite(data.data(), 1, data.size(), fp);
+    const bool ok = fwrite(data.data(), 1, data.size(), fp) == data.size();
     fclose(fp);
+
+    if (!ok)
+    {
+        g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveServerAtt FAILED: write error (disk full?)");
+        return false;
+    }
 
     outPath = fileName;
 

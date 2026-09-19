@@ -3246,6 +3246,14 @@ void RenderObjectVisual(OBJECT* o)
     }
 }
 
+#ifdef _EDITOR
+// Set by the Map Editor's Objects tab (Select & edit mode): the object currently
+// selected in the inspector panel, so it can be outlined in the 3D view. Reuses
+// the existing debug bounding-box wireframe (RenderBoundingBox) instead of a
+// second box-drawing implementation.
+OBJECT* g_MapEditorSelectedObject = nullptr;
+#endif
+
 void RenderObjects()
 {
 #ifdef _EDITOR
@@ -3424,6 +3432,12 @@ void RenderObjects()
                             {
                                 RenderBoundingBox(o);
                             }
+#ifdef _EDITOR
+                            if (o->Visible == true && o == g_MapEditorSelectedObject)
+                            {
+                                RenderBoundingBox(o);
+                            }
+#endif // _EDITOR
 #endif // CSK_DEBUG_RENDER_BOUNDINGBOX
                         }
 

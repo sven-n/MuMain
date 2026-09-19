@@ -56,8 +56,14 @@ bool SaveMappingEncrypted(int worldNumber, int mapNumber)
         return false;
     }
 
-    fwrite(enc.get(), 1, encBytes, fp);
+    const bool ok = fwrite(enc.get(), 1, encBytes, fp) == static_cast<size_t>(encBytes);
     fclose(fp);
+
+    if (!ok)
+    {
+        g_MuEditorConsoleUI.LogEditor("[MapEditor] SaveMapping FAILED: write error (disk full?)");
+        return false;
+    }
 
     g_MuEditorConsoleUI.LogEditor("[MapEditor] Saved terrain mapping (encrypted) to EncTerrain.map");
     Editor::Files::MirrorNextToExe(fileName, worldNumber);

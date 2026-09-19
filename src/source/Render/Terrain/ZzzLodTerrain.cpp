@@ -737,7 +737,7 @@ bool OpenTerrainHeight(wchar_t* filename)
     return true;
 }
 
-void SaveTerrainHeight(wchar_t* name)
+bool SaveTerrainHeight(wchar_t* name)
 {
     auto* Buffer = new unsigned char[256 * 256];
     for (int i = 0; i < 256; i++)
@@ -755,23 +755,42 @@ void SaveTerrainHeight(wchar_t* name)
             dst++;
         }
     }
+    // OZBPrefix is a single global last populated by whichever world's height file
+    // was most recently opened via OpenTerrainHeight - it does NOT track which
+    // world `name` actually belongs to. If the target file already exists, read
+    // its own prefix bytes fresh so a save to a different/override world number
+    // never writes another world's stale prefix; only fall back to the cached
+    // global for a brand-new file that has no prefix of its own yet.
+    unsigned char prefixToWrite[4];
+    memcpy(prefixToWrite, OZBPrefix, sizeof(prefixToWrite));
+    if (FILE* existing = _wfopen(name, L"rb"))
+    {
+        unsigned char existingPrefix[4];
+        if (fread(existingPrefix, 1, sizeof(existingPrefix), existing) == sizeof(existingPrefix))
+            memcpy(prefixToWrite, existingPrefix, sizeof(prefixToWrite));
+        fclose(existing);
+    }
+
     FILE* fp = _wfopen(name, L"wb");
     if (fp == NULL)
     {
         SAFE_DELETE_ARRAY(Buffer);
-        return;
+        return false;
     }
 
     // The 4-byte .OZB prefix first - OpenTerrainHeight seeks past it and sizes the
     // file as 4 + 1080 + 256*256. Without it the file is 4 bytes short and the map
-    // fails to load on the next login.
-    fwrite(OZBPrefix, 4, 1, fp);
-    fwrite(BMPHeader, 1080, 1, fp);
+    // fails to load on the next login. Check every write: a disk-full/I/O error
+    // partway through must not be reported back to the caller as a success.
+    bool ok = fwrite(prefixToWrite, 4, 1, fp) == 1;
+    ok = ok && fwrite(BMPHeader, 1080, 1, fp) == 1;
 
-    for (int i = 0; i < 256; i++) fwrite(Buffer + (255 - i) * 256, 256, 1, fp);
+    for (int i = 0; i < 256 && ok; i++)
+        ok = fwrite(Buffer + (255 - i) * 256, 256, 1, fp) == 1;
 
     SAFE_DELETE_ARRAY(Buffer);
     fclose(fp);
+    return ok;
 }
 
 bool OpenTerrainHeightNew(const wchar_t* strFilename)
@@ -2983,6 +3002,16 @@ static void RenderAttributeOverlay()
             if (!TestFrustrum2D(bxf + 2.f, byf + 2.f, g_fFrustumRange) && !g_Camera.TopViewEnable)
                 continue;
 
+            // Every interior corner in this 4x4 block is shared by up to 4 quads, so
+            // sample the block's 5x5 height grid once (25 lookups) instead of calling
+            // RequestTerrainHeight per-quad-corner (up to 64 lookups, most of them
+            // recomputing the same shared corner repeatedly).
+            float blockHeight[5][5];
+            for (int hi = 0; hi < 5; ++hi)
+                for (int hj = 0; hj < 5; ++hj)
+                    blockHeight[hi][hj] = RequestTerrainHeight((bxf + (float)hj) * TERRAIN_SCALE,
+                                                                (byf + (float)hi) * TERRAIN_SCALE);
+
             for (int i = 0; i < 4; i++)
             {
                 for (int j = 0; j < 4; j++)
@@ -3004,10 +3033,10 @@ static void RenderAttributeOverlay()
                     const float sx = xf * TERRAIN_SCALE;
                     const float sy = yf * TERRAIN_SCALE;
                     const float lift = 3.0f;   // sit just above the ground to avoid z-fighting
-                    glVertex3f(sx, sy, RequestTerrainHeight(sx, sy) + lift);
-                    glVertex3f(sx + TERRAIN_SCALE, sy, RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + lift);
-                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + lift);
-                    glVertex3f(sx, sy + TERRAIN_SCALE, RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + lift);
+                    glVertex3f(sx, sy, blockHeight[i][j] + lift);
+                    glVertex3f(sx + TERRAIN_SCALE, sy, blockHeight[i][j + 1] + lift);
+                    glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE, blockHeight[i + 1][j + 1] + lift);
+                    glVertex3f(sx, sy + TERRAIN_SCALE, blockHeight[i + 1][j] + lift);
                 }
             }
         }
@@ -3015,6 +3044,69 @@ static void RenderAttributeOverlay()
     glEnd();
 
     glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glDepthMask(GL_TRUE);
+    glPopAttrib();
+}
+
+// Set by the Map Editor's Texture tab while painting is enabled: the brush's tile
+// footprint under the cursor, so it can be highlighted on the ground before/while
+// you click (like a cursor), instead of only finding out where you painted after
+// the fact. Min/max are inclusive tile coordinates.
+bool g_bMapEditorBrushHighlight = false;
+int  g_MapEditorBrushMinX = 0, g_MapEditorBrushMinY = 0;
+int  g_MapEditorBrushMaxX = 0, g_MapEditorBrushMaxY = 0;
+
+static void RenderBrushHighlight()
+{
+    // Same push/pop discipline as RenderAttributeOverlay.
+    glPushAttrib(GL_ENABLE_BIT | GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_LINE_BIT);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glDepthMask(GL_FALSE);   // tint on top of terrain, don't write depth
+
+    const float lift = 3.5f;   // a hair above the attribute overlay's lift to avoid z-fighting with it
+
+    // Translucent fill over every tile the next click would paint.
+    glColor4f(1.0f, 0.95f, 0.25f, 0.28f);
+    glBegin(GL_QUADS);
+    for (int yi = g_MapEditorBrushMinY; yi <= g_MapEditorBrushMaxY; ++yi)
+    {
+        for (int xi = g_MapEditorBrushMinX; xi <= g_MapEditorBrushMaxX; ++xi)
+        {
+            if (xi < 0 || yi < 0 || xi >= TERRAIN_SIZE || yi >= TERRAIN_SIZE)
+                continue;
+            const float sx = (float)xi * TERRAIN_SCALE;
+            const float sy = (float)yi * TERRAIN_SCALE;
+            glVertex3f(sx, sy, RequestTerrainHeight(sx, sy) + lift);
+            glVertex3f(sx + TERRAIN_SCALE, sy, RequestTerrainHeight(sx + TERRAIN_SCALE, sy) + lift);
+            glVertex3f(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE,
+                       RequestTerrainHeight(sx + TERRAIN_SCALE, sy + TERRAIN_SCALE) + lift);
+            glVertex3f(sx, sy + TERRAIN_SCALE, RequestTerrainHeight(sx, sy + TERRAIN_SCALE) + lift);
+        }
+    }
+    glEnd();
+
+    // Bright outline around the whole rectangle so the footprint reads clearly at
+    // a glance, matching the "select the paint rectangle on the ground" request.
+    glLineWidth(2.5f);
+    glColor4f(1.0f, 0.95f, 0.15f, 0.9f);
+    glBegin(GL_LINE_LOOP);
+    {
+        const float x0 = (float)g_MapEditorBrushMinX * TERRAIN_SCALE;
+        const float y0 = (float)g_MapEditorBrushMinY * TERRAIN_SCALE;
+        const float x1 = (float)(g_MapEditorBrushMaxX + 1) * TERRAIN_SCALE;
+        const float y1 = (float)(g_MapEditorBrushMaxY + 1) * TERRAIN_SCALE;
+        glVertex3f(x0, y0, RequestTerrainHeight(x0, y0) + lift);
+        glVertex3f(x1, y0, RequestTerrainHeight(x1, y0) + lift);
+        glVertex3f(x1, y1, RequestTerrainHeight(x1, y1) + lift);
+        glVertex3f(x0, y1, RequestTerrainHeight(x0, y1) + lift);
+    }
+    glEnd();
+
+    glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+    glLineWidth(1.0f);
     glDepthMask(GL_TRUE);
     glPopAttrib();
 }
@@ -3064,6 +3156,10 @@ void RenderTerrain(bool EditFlag)
     if (EditFlag && SelectFlag)
     {
         RenderTerrainTile(SelectXF, SelectYF, (int)SelectXF, (int)SelectYF, 1.f, 1, EditFlag);
+#ifdef _EDITOR
+        if (g_bMapEditorBrushHighlight)
+            RenderBrushHighlight();
+#endif
     }
     if (!EditFlag)
     {

@@ -125,6 +125,16 @@ Read-only diagnostics:
 - A warning if the viewport and window dimensions disagree.
 - A **Copy debug info to clipboard** button - handy for bug reports.
 
+### 3.3 Map Editor tab
+
+A separate top-level toolbar button (not one of the DevEditor's own tabs) that
+opens an in-client editor for a map's terrain textures, terrain height,
+walkability attributes, and world objects, plus a top-down minimap capture -
+saving back to the game's own on-disk formats. See
+[`src/MuEditor/UI/MapEditor/MAP_EDITOR.md`](../src/MuEditor/UI/MapEditor/MAP_EDITOR.md)
+for the full usage guide (tabs, save targets, and the client/server attribute
+merge workflow).
+
 ---
 
 ## 4. What persists, what doesn't
@@ -157,4 +167,9 @@ src/MuEditor/
     DevEditor/
       DevEditorUI.h              # struct + interface
       DevEditorUI.cpp            # all panels, overrides, debug toggles
+    MapEditor/
+      MAP_EDITOR.md              # usage guide for the Map Editor (§3.3 above)
+      MapEditorUI.h / .cpp       # tab UI + edit-mode dispatch
+      Map*.h / .cpp              # per-tab logic: texture/object/attribute/height
+                                  # save+load, minimap capture, thumbnails
 ```

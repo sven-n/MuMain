@@ -6,6 +6,8 @@
 #include "MapObjectImport.h"
 #include "ObjectThumbnail.h"
 
+#include "Core/Utilities/StringUtils.h"
+
 #include "imgui.h"
 
 #include <algorithm>
@@ -30,13 +32,6 @@ namespace
         return s;
     }
 
-    std::string NarrowOf(const std::wstring& w)
-    {
-        std::string s;
-        for (wchar_t c : w)
-            s.push_back((c < 128) ? (char)c : '?');
-        return s;
-    }
 }
 
 CMapObjectBrowser& CMapObjectBrowser::GetInstance()
@@ -170,7 +165,7 @@ void CMapObjectBrowser::Render(int currentWorld, int* outImportedType)
     ImGui::BeginChild("ObjModels", ImVec2(0, 0), true);
     for (int i = 0; i < (int)m_files.size() && i < (int)m_thumbs.size(); ++i)
     {
-        const std::string name = NarrowOf(m_files[i]);
+        const std::string name = StringUtils::WideToNarrow(m_files[i].c_str());
         if (!filterLower.empty())
         {
             std::string lower = name;

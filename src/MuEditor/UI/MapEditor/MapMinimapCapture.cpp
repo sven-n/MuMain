@@ -78,12 +78,13 @@ namespace
         FILE* fp = _wfopen(path, L"wb");
         if (fp == nullptr)
             return false;
+        bool ok = true;
         if (prefixLen > 0)
-            fwrite(prefix, 1, prefixLen, fp);
-        fwrite(hdr, 1, 18, fp);
-        fwrite(pixels.data(), 1, pixels.size(), fp);
+            ok = fwrite(prefix, 1, prefixLen, fp) == static_cast<size_t>(prefixLen);
+        ok = ok && fwrite(hdr, 1, 18, fp) == 18;
+        ok = ok && fwrite(pixels.data(), 1, pixels.size(), fp) == pixels.size();
         fclose(fp);
-        return true;
+        return ok;
     }
 }
 

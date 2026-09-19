@@ -70,6 +70,9 @@ All under `src/MuEditor/UI/MapEditor/`:
 - Palette of the map's 30 tile slots (`Bitmaps[BITMAP_MAPTILE + 0..29]`), Layer 1
   (base) / Layer 2 (overlay) selector, brush size, overlay opacity, **dropper**
   (Alt-click or toggle) to pick the tile under the cursor.
+- While painting is enabled, the brush's tile footprint is highlighted on the
+  ground under the cursor (translucent fill + outline) before you click, so you
+  can see exactly what a stroke will cover instead of finding out after the fact.
 - Paints `TerrainMappingLayer1/2[]` and `TerrainMappingAlpha[]`. One-level **undo**
   snapshots those arrays at stroke start.
 - **Save** → `Editor::MapSave::SaveMappingEncrypted()` → `Data\World{N}\EncTerrain{N}.map`.
@@ -87,6 +90,10 @@ All under `src/MuEditor/UI/MapEditor/`:
 - **Select & edit:** left-click ray-picks a visible object (`CollisionDetectObjects`);
   drag to move (grab-offset so a click doesn't jump it); Pos/Angle/Scale fields;
   **Delete**. Moving re-blocks the object if it crosses a 16×16 grid cell.
+- The selected object is outlined in the 3D view (reuses the engine's debug
+  bounding-box wireframe) so it's easy to tell which object the panel is editing,
+  and the outline follows you to other tabs until the selection changes.
+  **Windows-only** (the underlying wireframe renderer isn't built on Linux/macOS).
 - **Undo** snapshots all objects before each edit. **Save** → engine `SaveObjects`
   → `Data\World{N}\EncTerrain{N}.obj` (already encrypted).
 

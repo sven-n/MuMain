@@ -131,6 +131,7 @@ private:
     bool  m_heightStrokeActive = false;
     bool  m_bHeightHasUndo = false;
     std::vector<float> m_heightUndo;  // BackTerrainHeight snapshot before a stroke
+    std::string m_heightStatus;       // last "Save height" result
 
     // Minimap top-down mode: while active (and camera is FreeFly), force the whole
     // terrain to render for a full-map screenshot.
@@ -158,6 +159,8 @@ private:
     int  m_attrBaselineWorld = -1;          // world the baseline was taken on
     std::vector<BYTE>  m_serverBase;        // server's current TerrainData (65539)
     std::string m_serverBaseName;           // shown in the UI ("" = none loaded)
+    int  m_attrEditedCountCache = 0;        // cached "tiles edited" count for the status line
+    bool m_attrCountDirty = true;           // recompute the cache only after paint/undo/baseline reset
 
     // Snapshots the baseline / clears the edit set when the map changes.
     void EnsureAttrBaseline(int world);
