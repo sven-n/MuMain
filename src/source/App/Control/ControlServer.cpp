@@ -125,8 +125,6 @@ void ControlServer::AcceptNewConnections()
 
 void ControlServer::ServeRequests()
 {
-    std::size_t served = 0;
-
     for (Connection& connection : m_connections)
     {
         if (!connection.socket->IsOpen())
@@ -136,6 +134,10 @@ void ControlServer::ServeRequests()
 
         connection.socket->ReadAvailable();
 
+        // The budget is per connection: a chatty driver must not starve a
+        // second connection sitting on `events --follow`, whose unread bytes
+        // would otherwise pile up until the input cap closes it.
+        std::size_t served = 0;
         std::string line;
         while (served < MaxRequestsPerFrame && connection.socket->TakeLine(line))
         {
