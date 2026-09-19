@@ -484,12 +484,18 @@ bool CServerSelWin::SelectServer(const wchar_t* groupName, int serverIndex)
     if (pChosenGroup == NULL)
         return false;
 
+    // A group the display could not place has no button to check, so there is
+    // nothing this entry point can select.
+    const int iBtnPos = pChosenGroup->m_iBtnPos;
+    if (iBtnPos < 0 || iBtnPos >= SSW_SERVER_G_MAX)
+        return false;
+
     // Same two steps the click path takes: mark the group, rebuild its server
     // buttons, then connect to the chosen server.
     if (m_iSelectServerBtnIndex != -1)
         m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(false);
 
-    m_iSelectServerBtnIndex = pChosenGroup->m_iBtnPos;
+    m_iSelectServerBtnIndex = iBtnPos;
     m_aServerGroupBtn[m_iSelectServerBtnIndex].SetCheck(true);
     UpdateDisplay();
 
