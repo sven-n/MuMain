@@ -1,0 +1,92 @@
+/* Shared forged-dialog frame for the PanelColumnX()-docked single-document window family:
+   character_info, my_quest_info, pet_info, party_info -- all read as one visual family on screen
+   (same PanelColumnX() docking slots), so their modern-theme chrome should match, not diverge by
+   window. Link this BEFORE the window's own .rcss.
+
+   Reuses base.rcss's already-shared .modern-shell-edge/.modern-groove/.modern-header-rail-px/
+   .modern-joint-px/.modern-header-text-px/.modern-header-title-px/.modern-icon-btn-px directly
+   (every consumer here already links base.rcss) rather than re-declaring them -- character_info.rcss
+   used to carry its own unmodified, pointless duplicate of shell-edge/groove as
+   .chainfo-shell-edge/.chainfo-groove; that's gone now, its RML applies the shared classes directly.
+   Only the PAINT that base.rcss's shared classes don't already cover (the #panel gradient/border/
+   box-shadow body, and the header-rail's own fill/border/box-shadow + accent line) lives here --
+   my_quest_info previously used a different, flatter .modern-frame/.modern-frame-crimson primitive
+   instead of this recipe; brought in line per explicit instruction (these four should render as one
+   family, not three-plus-an-outlier).
+
+   my_inventory is NOT part of this -- my_inventory_bg.rcss's own .bg-panel/.inv-shell-edge/
+   .inv-groove/.rail-fill are a real, separately-justified duplicate (its background paint lives in a
+   *_bg.rml context that deliberately can't link base.rcss or this file). Copy these same values in
+   if that constraint is ever lifted; don't approximate them. */
+
+#panel {
+	position: absolute;
+	transform-origin: left top;
+	width: 190px;
+	height: 429px;
+	font-family: "token(font-body)";
+	border-radius: token(radius-sm)px;
+	background-color: #080a08;
+	decorator: linear-gradient(to bottom, #11130f 0%, #080a08 100%);
+	border-width: 1px;
+	border-color: token(border-frame);
+	box-shadow:
+		0 11px 30px rgba(0, 0, 0, 158),
+		0 2px 5px rgba(0, 0, 0, 217),
+		inset 0 0 0 1px #090a08,
+		inset 0 0 0 3px rgba(120, 115, 90, 190);
+}
+
+.frame-piece { display: none; }
+
+/* Header-rail paint -- position comes from base.rcss's .modern-header-rail-px, applied alongside
+   this class in the RML; each window's own class (e.g. .chainfo-header-rail) only needs to override
+   top/height when it differs from this default (38px tall, matching CMyInventory/CSysMenuWin). */
+.docked-header-rail-fill {
+	background-color: token(metal-dark);
+	decorator:
+		linear-gradient(to bottom, rgba(205, 184, 129, 13), transparent 31%),
+		linear-gradient(to bottom, token(metal-rail), #171813 45%, token(metal-rail-dark));
+	border-width: 1px;
+	border-color: token(border-rail);
+	border-bottom-color: #171812;
+	box-shadow:
+		inset 0 1px 0 rgba(235, 218, 169, 18),
+		inset 0 -1px 0 #000000,
+		0 2px 4px rgba(0, 0, 0, 133);
+}
+/* Nested inside .docked-header-rail-fill so left/right/bottom resolve against it. */
+.docked-rail-accent {
+	position: absolute;
+	left: -1px;
+	right: -1px;
+	bottom: 2px;
+	height: 1px;
+	pointer-events: none;
+	opacity: 0.35;
+	decorator: linear-gradient(to right,
+		transparent,
+		token(metal-warm-edge) 30%,
+		#84754e 50%,
+		token(metal-warm-edge) 70%,
+		transparent);
+}
+
+/* Tooltip shape only -- top varies slightly per window (character_info's own action row sits a bit
+   lower than the others') so that stays a per-window override; everything else is identical. */
+.tooltip {
+	display: none;
+	position: absolute;
+	width: 110px;
+	white-space: nowrap;
+	background-color: token(surface-tooltip);
+	border: 1px token(border-frame);
+	color: token(text-primary);
+	padding: 2px 4px;
+	border-radius: 3px;
+	font-family: "token(font-body)";
+	font-size: 11px;
+	text-align: center;
+	pointer-events: none;
+	z-index: 1;
+}

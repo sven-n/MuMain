@@ -1,0 +1,51 @@
+<rml>
+<head>
+	<title>Party Info</title>
+	<link type="text/rcss" href="base.rcss"/>
+	<link type="text/rcss" href="docked_panel_frame.rcss"/>
+	<link type="text/rcss" href="party_info.rcss"/>
+</head>
+<body>
+	<!-- Movable, non-HUD window: root_x/root_y/root_scale come from UI::Scaling::GetActiveTransform(),
+	     same convention as character_info.rml's #panel. -->
+	<div id="panel" data-model="party_info" data-style-left="root_x + 'px'" data-style-top="root_y + 'px'"
+	     data-style-transform="'scale(' + root_scale + ')'">
+		<div class="frame-piece frame-top"></div>
+		<div class="frame-piece frame-left"></div>
+		<div class="frame-piece frame-right"></div>
+		<div class="frame-piece frame-bottom"></div>
+
+		<span id="title">{{window_title}}</span>
+
+		<div class="party-empty-msg" data-class-hidden="has_party">
+			<span data-for="line : empty_state_lines">{{line.text}}</span>
+		</div>
+
+		<div class="party-list" data-class-hidden="!has_party">
+			<div class="party-row" data-for="m : members">
+				<div class="gbox-corner gbox-corner-tl"></div>
+				<div class="gbox-corner gbox-corner-tr-title"></div>
+				<div class="gbox-corner gbox-corner-tr"></div>
+				<div class="gbox-corner gbox-corner-bl"></div>
+				<div class="gbox-corner gbox-corner-br"></div>
+				<div class="gbox-title-fill"></div>
+				<div class="gbox-content-fill"></div>
+
+				<span class="party-name" data-style-color="m.name_color">{{m.name}}</span>
+				<div class="party-flag" data-class-hidden="!m.is_leader"></div>
+				<span class="party-map">{{m.map_text}}</span>
+				<span class="party-coord">{{m.coord_text}}</span>
+				<div class="party-hp-bar">
+					<div class="party-hp-fill" data-style-width="m.hp_percent + '%'"></div>
+				</div>
+				<span class="party-hp-text">{{m.hp_text}}</span>
+				<div class="party-kick-btn" data-class-hidden="!m.show_kick"
+				     data-event-click="party_kick_member(m.index)"></div>
+			</div>
+		</div>
+
+		<div id="btn_exit" data-event-click="party_click_exit"></div>
+		<span class="tooltip tooltip-exit">{{exit_tooltip}}</span>
+	</div>
+</body>
+</rml>

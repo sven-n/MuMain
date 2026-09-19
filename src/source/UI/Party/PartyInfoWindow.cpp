@@ -5,10 +5,18 @@
 #include "UI/Party/PartyInfoWindow.h"
 #include "UI/Core/WindowSystem.h"
 #include "UI/Core/WindowGeometry.h"
+#include "UI/Scaling/UITransform.h"
+#include "UI/RmlBridge/RmlTheme.h"
+#include "Render/RmlUi/RmlUiRuntime.h"
+#include "Core/Utilities/StringUtils.h"
 #include "GameLogic/Events/CSChaosCastle.h"
 #include "Audio/DSPlaySound.h"
 #include "GameLogic/Events/w_CursedTemple.h"
 #include "World/MapInfra/MapManager.h"
+
+#include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/ElementDocument.h>
+#include <RmlUi/Core/Event.h>
 
 using namespace SEASON3B;
 using namespace mu::ui::window;
@@ -18,6 +26,7 @@ CPartyInfoWindow::CPartyInfoWindow()
     m_pNewUIMng = NULL;
     m_Pos.x = m_Pos.y = 0;
     m_bParty = false;
+    m_iSelectedCharID = -1;
 }
 
 CPartyInfoWindow::~CPartyInfoWindow()
@@ -37,7 +46,67 @@ bool CPartyInfoWindow::Create(CManager* pNewUIMng, int x, int y)
 
     LoadImages();
 
-    InitButtons();
+    if (RmlUiRuntime::Instance().IsCreated())
+    {
+        const bool modelCreated = m_RmlBinder.Create(RmlUiRuntime::Instance().GetContext(), "party_info",
+            [this](Rml::DataModelConstructor& c, PartyInfoRmlModel& model)
+            {
+                c.Bind("root_x", &model.rootX);
+                c.Bind("root_y", &model.rootY);
+                c.Bind("root_scale", &model.rootScale);
+
+                c.Bind("has_party", &model.hasParty);
+                c.Bind("window_title", &model.windowTitle);
+                c.Bind("exit_tooltip", &model.exitTooltip);
+
+                auto textLine = c.RegisterStruct<TextLine>();
+                textLine.RegisterMember("text", &TextLine::text);
+                c.RegisterArray<std::vector<TextLine>>();
+                c.Bind("empty_state_lines", &model.emptyStateLines);
+
+                auto member = c.RegisterStruct<PartyMemberRow>();
+                member.RegisterMember("name", &PartyMemberRow::name);
+                member.RegisterMember("name_color", &PartyMemberRow::nameColor);
+                member.RegisterMember("map_text", &PartyMemberRow::mapText);
+                member.RegisterMember("coord_text", &PartyMemberRow::coordText);
+                member.RegisterMember("hp_text", &PartyMemberRow::hpText);
+                member.RegisterMember("hp_percent", &PartyMemberRow::hpPercent);
+                member.RegisterMember("is_leader", &PartyMemberRow::isLeader);
+                member.RegisterMember("show_kick", &PartyMemberRow::showKick);
+                member.RegisterMember("index", &PartyMemberRow::index);
+                c.RegisterArray<std::vector<PartyMemberRow>>();
+                c.Bind("members", &model.members);
+
+                c.BindEventCallback("party_click_exit",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList&) { RmlClickExit(); });
+                c.BindEventCallback("party_kick_member",
+                    [this](Rml::DataModelHandle, Rml::Event&, const Rml::VariantList& arguments)
+                    {
+                        if (arguments.size() == 1)
+                            RmlClickKickMember(arguments[0].Get<int>(-1));
+                    });
+            });
+
+        if (modelCreated)
+        {
+            auto& model = m_RmlBinder.GetModel();
+            model.windowTitle = StringUtils::WideToNarrow(I18N::Game::Party);
+            model.exitTooltip = StringUtils::WideToNarrow(I18N::Game::ClosePartyWindowP);
+
+            model.emptyStateLines = {
+                { StringUtils::WideToNarrow(I18N::Game::TypePartyWithTheMouseCursorOn) },
+                { StringUtils::WideToNarrow(I18N::Game::ThePlayerYouWouldLike) },
+                { StringUtils::WideToNarrow(I18N::Game::ToCreateAPartyWith) },
+                { StringUtils::WideToNarrow(I18N::Game::AndYouCanCreate) },
+                { StringUtils::WideToNarrow(I18N::Game::APartyWithThem) },
+                { StringUtils::WideToNarrow(I18N::Game::YouCanShareMoreExpWith) },
+                { StringUtils::WideToNarrow(I18N::Game::YourPartyMembersBasedOnLevel) },
+            };
+        }
+
+        m_pRmlDoc = UI::RmlBridge::LoadThemedDocument(RmlUiRuntime::Instance().GetContext(),
+            "Data/Interface/RmlUi/party_info.rml");
+    }
 
     Show(false);
 
@@ -48,24 +117,16 @@ void CPartyInfoWindow::Release()
 {
     UnloadImages();
 
+    if (m_pRmlDoc)
+    {
+        m_pRmlDoc->Close();
+        m_pRmlDoc = nullptr;
+    }
+
     if (m_pNewUIMng)
     {
         m_pNewUIMng->RemoveUIObj(this);
         m_pNewUIMng = NULL;
-    }
-}
-
-void CPartyInfoWindow::InitButtons()
-{
-    m_BtnExit.ChangeButtonImgState(true, IMAGE_PARTY_BASE_WINDOW_BTN_EXIT);
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-    m_BtnExit.ChangeToolTipText(&I18N::Game::ClosePartyWindowP, true);
-
-    for (int i = 0; i < MAX_PARTYS; i++)
-    {
-        int iVal = i * 71;
-        m_BtnPartyExit[i].ChangeButtonImgState(true, IMAGE_PARTY_EXIT);
-        m_BtnPartyExit[i].ChangeButtonInfo(m_Pos.x + 159, m_Pos.y + 63 + iVal, 13, 13);
     }
 }
 
@@ -78,39 +139,23 @@ void CPartyInfoWindow::ClosingProcess()
 {
 }
 
-bool CPartyInfoWindow::BtnProcess()
+void CPartyInfoWindow::RmlClickExit()
 {
-    // Top-right corner close "X" (shared frame). Hides + swallows the click.
-    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PARTY))
-        return true;
+    g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PARTY);
+}
 
-    if (m_BtnExit.UpdateMouseEvent() == true)
-    {
-        g_pNewUISystem->Hide(mu::ui::window::INTERFACE_PARTY);
-        return true;
-    }
+void CPartyInfoWindow::RmlClickKickMember(int index)
+{
+    if (index < 0 || index >= PartyNumber)
+        return;
 
-    if (IsVisible())
-    {
-        for (int i = 0; i < PartyNumber; i++)
-        {
-            if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
-            {
-                if (m_BtnPartyExit[i].UpdateMouseEvent())
-                {
-                    LeaveParty(i);
-                    return true;
-                }
-            }
-        }
-    }
-
-    return false;
+    LeaveParty(index);
 }
 
 bool CPartyInfoWindow::UpdateMouseEvent()
 {
-    if (true == BtnProcess())
+    // Top-right corner close "X" (shared frame). Hides + swallows the click.
+    if (g_pNewUISystem->HandleFrameCornerClose(m_Pos, mu::ui::window::INTERFACE_PARTY))
         return false;
 
     if (mu::ui::window::WindowGeometry(m_Pos.x, m_Pos.y, PARTY_INFO_WINDOW_WIDTH, PARTY_INFO_WINDOW_HEIGHT).Contains(MouseX, MouseY))
@@ -137,143 +182,15 @@ bool CPartyInfoWindow::UpdateKeyEvent()
 
 bool CPartyInfoWindow::Update()
 {
-    if (IsVisible())
-    {
-        if (PartyNumber > 0)
-            SetParty(true);
-        else
-            SetParty(false);
-    }
-
+    SetParty(PartyNumber > 0);
+    SyncRmlModel();
     return true;
 }
 
 bool CPartyInfoWindow::Render()
 {
-    EnableAlphaTest();
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(0xFFFFFFFF);
-
-    DWORD dwPreBGColor = g_pRenderText->GetBgColor();
-    g_pRenderText->SetBgColor(RGBA(0, 0, 0, 0));
-
-    RenderImage(IMAGE_PARTY_BASE_WINDOW_BACK, m_Pos.x, m_Pos.y, float(PARTY_INFO_WINDOW_WIDTH), float(PARTY_INFO_WINDOW_HEIGHT));
-    RenderImage(IMAGE_PARTY_BASE_WINDOW_TOP, m_Pos.x, m_Pos.y, float(PARTY_INFO_WINDOW_WIDTH), 64.f);
-    RenderImage(IMAGE_PARTY_BASE_WINDOW_LEFT, m_Pos.x, m_Pos.y + 64.f, 21.f, float(PARTY_INFO_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_PARTY_BASE_WINDOW_RIGHT, m_Pos.x + float(PARTY_INFO_WINDOW_WIDTH) - 21.f, m_Pos.y + 64.f, 21.f, float(PARTY_INFO_WINDOW_HEIGHT) - 64.f - 45.f);
-    RenderImage(IMAGE_PARTY_BASE_WINDOW_BOTTOM, m_Pos.x, m_Pos.y + float(PARTY_INFO_WINDOW_HEIGHT) - 45.f, float(PARTY_INFO_WINDOW_WIDTH), 45.f);
-
-    m_BtnExit.Render();
-    g_pRenderText->SetFont(g_hFontBold);
-    g_pRenderText->RenderText(m_Pos.x + 60, m_Pos.y + 12, I18N::Game::Party, 72, 0, RT3_SORT_CENTER);
-
-    g_pRenderText->SetFont(g_hFont);
-
-    if (m_bParty)
-    {
-        for (int i = 0; i < PartyNumber; i++)
-        {
-            PARTY_t* pMember = &Party[i];
-
-            bool bExitBtnRender = false;
-
-            if (!wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID))
-            {
-                bExitBtnRender = true;
-            }
-
-            RenderMemberStatue(i, pMember, bExitBtnRender);
-        }
-    }
-    else
-    {
-        int iStartHeight = 60;
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight, I18N::Game::TypePartyWithTheMouseCursorOn, 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 15, I18N::Game::ThePlayerYouWouldLike, 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 30, I18N::Game::ToCreateAPartyWith, 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 50, I18N::Game::AndYouCanCreate, 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 65, I18N::Game::APartyWithThem, 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 80, I18N::Game::YouCanShareMoreExpWith, 0, 0, RT3_SORT_CENTER);
-        g_pRenderText->RenderText(m_Pos.x + 20, m_Pos.y + iStartHeight + 95, I18N::Game::YourPartyMembersBasedOnLevel, 0, 0, RT3_SORT_CENTER);
-    }
-
-    g_pRenderText->SetBgColor(dwPreBGColor);
-
-    DisableAlphaBlend();
-
+    // RmlUi's #panel owns all chrome/text/button rendering now; nothing left to draw natively.
     return true;
-}
-
-void CPartyInfoWindow::RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth/* =60 */, int iTitleHeight/* =20  */)
-{
-    EnableAlphaTest();
-
-    constexpr unsigned int TitleBackdropColor = 0xE6000000u;
-    constexpr unsigned int ContentBackdropColor = 0x99000000u;
-    RenderColorQuadARGB(float(iPosX + 3), float(iPosY + 2), float(iTitleWidth - 8),
-        float(iTitleHeight), TitleBackdropColor);
-    RenderColorQuadARGB(float(iPosX + 3), float(iPosY + 2 + iTitleHeight), float(iWidth - 7),
-        float(iHeight - iTitleHeight - 7), ContentBackdropColor);
-
-    RenderImage(IMAGE_PARTY_TABLE_TOP_LEFT, iPosX, iPosY, 14, 14);
-    RenderImage(IMAGE_PARTY_TABLE_TOP_RIGHT, iPosX + iTitleWidth - 14, iPosY, 14, 14);
-    RenderImage(IMAGE_PARTY_TABLE_TOP_RIGHT, iPosX + iWidth - 14, iPosY + iTitleHeight, 14, 14);
-    RenderImage(IMAGE_PARTY_TABLE_BOTTOM_LEFT, iPosX, iPosY + iHeight - 14, 14, 14);
-    RenderImage(IMAGE_PARTY_TABLE_BOTTOM_RIGHT, iPosX + iWidth - 14, iPosY + iHeight - 14, 14, 14);
-
-    RenderImage(IMAGE_PARTY_TABLE_TOP_PIXEL, iPosX + 6, iPosY, iTitleWidth - 12, 14);
-    RenderImage(IMAGE_PARTY_TABLE_RIGHT_PIXEL, iPosX + iTitleWidth - 14, iPosY + 6, 14, iTitleHeight - 6);
-    RenderImage(IMAGE_PARTY_TABLE_TOP_PIXEL, iPosX + iTitleWidth - 5, iPosY + iTitleHeight, iWidth - iTitleWidth - 6, 14);
-    RenderImage(IMAGE_PARTY_TABLE_RIGHT_PIXEL, iPosX + iWidth - 14, iPosY + iTitleHeight + 6, 14, iHeight - iTitleHeight - 14);
-    RenderImage(IMAGE_PARTY_TABLE_BOTTOM_PIXEL, iPosX + 6, iPosY + iHeight - 14, iWidth - 12, 14);
-    RenderImage(IMAGE_PARTY_TABLE_LEFT_PIXEL, iPosX, iPosY + 6, 14, iHeight - 14);
-}
-
-void CPartyInfoWindow::RenderMemberStatue(int iIndex, PARTY_t* pMember, bool bExitBtnRender /*= false*/)
-{
-    wchar_t szText[256] = { 0, };
-
-    int iVal = iIndex * 71;
-    int iPosX = m_Pos.x + 10;
-    int iPosY = m_Pos.y + 40 + iVal;
-
-    RenderGroupBox(iPosX, iPosY, 170, 70, 70, 20);
-
-    g_pRenderText->SetFont(g_hFontBold);
-    if (iIndex == 0)
-    {
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetTextColor(0, 255, 0, 255);
-        g_pRenderText->RenderText(iPosX, iPosY + 8, pMember->Name, 70, 0, RT3_SORT_CENTER);
-        RenderImage(IMAGE_PARTY_FLAG, m_Pos.x + 146, iPosY + 23, 10, 12);
-    }
-    else
-    {
-        g_pRenderText->SetFont(g_hFontBold);
-        g_pRenderText->SetTextColor(255, 255, 255, 255);
-        g_pRenderText->RenderText(iPosX, iPosY + 8, pMember->Name, 70, 0, RT3_SORT_CENTER);
-    }
-
-    g_pRenderText->SetFont(g_hFont);
-    g_pRenderText->SetTextColor(RGBA(194, 194, 194, 255));
-
-    g_pRenderText->RenderText(iPosX + 10, iPosY + 26, gMapManager.GetMapName(pMember->Map), 70, 0, RT3_SORT_LEFT);
-
-    mu_swprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
-    g_pRenderText->RenderText(iPosX + 85, iPosY + 26, szText, 60, 0, RT3_SORT_LEFT);
-
-    int iHP = (pMember->currHP * 147) / pMember->maxHP;
-    RenderImage(IMAGE_PARTY_HPBAR_BACK, iPosX + 8, iPosY + 39, 151, 8);
-    RenderImage(IMAGE_PARTY_HPBAR, iPosX + 10, iPosY + 41, iHP, 4);
-
-    mu_swprintf(szText, L"%d %ls %d", pMember->currHP, I18N::Game::Text2374, pMember->maxHP);
-    g_pRenderText->RenderText(iPosX + 88, iPosY + 51, szText, 70, 0, RT3_SORT_RIGHT);
-
-    if (bExitBtnRender)
-    {
-        m_BtnPartyExit[iIndex].Render();
-    }
 }
 
 bool CPartyInfoWindow::LeaveParty(const int iIndex)
@@ -293,13 +210,15 @@ void CPartyInfoWindow::SetPos(int x, int y)
 {
     m_Pos.x = x;
     m_Pos.y = y;
+}
 
-    m_BtnExit.ChangeButtonInfo(m_Pos.x + 13, m_Pos.y + 392, 36, 29);
-
-    for (int i = 0; i < MAX_PARTYS; i++)
+void CPartyInfoWindow::Show(bool bShow)
+{
+    mu::ui::window::CObject::Show(bShow);
+    if (m_pRmlDoc)
     {
-        int iVal = i * 71;
-        m_BtnPartyExit[i].ChangeButtonInfo(m_Pos.x + 159, m_Pos.y + 63 + iVal, 13, 13);
+        if (bShow) m_pRmlDoc->Show();
+        else m_pRmlDoc->Hide();
     }
 }
 
@@ -311,6 +230,61 @@ void CPartyInfoWindow::SetParty(bool bParty)
 float CPartyInfoWindow::GetLayerDepth()
 {
     return 2.4f;
+}
+
+void CPartyInfoWindow::SyncRmlModel()
+{
+    if (!m_pRmlDoc)
+        return;
+
+    auto& model = m_RmlBinder.GetModel();
+
+    const auto transform = UI::Scaling::GetActiveTransform();
+    model.rootX = static_cast<float>(m_Pos.x) * transform.scaleX + transform.offsetX;
+    model.rootY = static_cast<float>(m_Pos.y) * transform.scaleY + transform.offsetY;
+    model.rootScale = transform.scaleX;
+    m_RmlBinder.MarkDirty("root_x");
+    m_RmlBinder.MarkDirty("root_y");
+    m_RmlBinder.MarkDirty("root_scale");
+
+    if (model.hasParty != m_bParty)
+    {
+        model.hasParty = m_bParty;
+        m_RmlBinder.MarkDirty("has_party");
+    }
+
+    if (!m_bParty)
+        return;
+
+    wchar_t szText[256] = { 0, };
+    std::vector<PartyMemberRow> members;
+    members.reserve(PartyNumber);
+
+    for (int i = 0; i < PartyNumber; i++)
+    {
+        PARTY_t* pMember = &Party[i];
+
+        PartyMemberRow row;
+        row.index = i;
+        row.name = StringUtils::WideToNarrow(pMember->Name);
+        row.nameColor = (i == 0) ? "rgba(0,255,0,255)" : "rgba(255,255,255,255)";
+        row.mapText = StringUtils::WideToNarrow(gMapManager.GetMapName(pMember->Map));
+
+        mu_swprintf(szText, L"(%d,%d)", pMember->x, pMember->y);
+        row.coordText = StringUtils::WideToNarrow(szText);
+
+        row.hpPercent = pMember->maxHP > 0 ? (pMember->currHP * 100.f) / pMember->maxHP : 0.f;
+        mu_swprintf(szText, L"%d %ls %d", pMember->currHP, I18N::Game::Text2374, pMember->maxHP);
+        row.hpText = StringUtils::WideToNarrow(szText);
+
+        row.isLeader = (i == 0);
+        row.showKick = !wcscmp(Party[0].Name, Hero->ID) || !wcscmp(Party[i].Name, Hero->ID);
+
+        members.push_back(row);
+    }
+
+    model.members = std::move(members);
+    m_RmlBinder.MarkDirty("members");
 }
 
 void CPartyInfoWindow::LoadImages()

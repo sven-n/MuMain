@@ -4,16 +4,27 @@
 
 #pragma once
 
+#include <vector>
+
 #include "UI/Core/WindowObject.h"
 #include "UI/Core/WindowManager.h"
 #include "UI/Inventory/MyInventory.h"
-#include "UI/Widgets/Window/Button.h"
+#include "UI/RmlBridge/RmlModelBinder.h"
+
+namespace Rml { class ElementDocument; }
 
 namespace mu::ui::window
 {
+    // Fully RmlUi-based (#panel, party_info.rml/.rcss) -- no live 3D content, same shape as the
+    // already-ported CCharacterInfoWindow/CMyQuestInfoWindow it docks alongside.
     class CPartyInfoWindow : public CObject
     {
     public:
+        // Kept even though this window no longer renders through the legacy bitmap-atlas system --
+        // CPartyListWindow (the always-on HUD mini party list, a different class) aliases
+        // IMAGE_PARTY_FLAG/IMAGE_PARTY_EXIT's numeric slot IDs onto its own IMAGE_LIST and loads its
+        // own copies of the same files into them independently, but this enum's values still have to
+        // exist for that alias to compile against.
         enum IMAGE_LIST
         {
             // Base Window (Reference)
@@ -34,7 +45,7 @@ namespace mu::ui::window
             IMAGE_PARTY_TABLE_RIGHT_PIXEL = CInventoryCtrl::IMAGE_ITEM_TABLE_RIGHT_PIXEL,		//. newui_item_table03(R).tga (14,1)
 
             IMAGE_PARTY_HPBAR_BACK = BITMAP_PARTY_INFO_BEGIN,		// newui_party_lifebar01.jpg	(151, 8)
-            IMAGE_PARTY_HPBAR,										// newui_party_lifebar02.jpg	(147, 4)
+            IMAGE_PARTY_HPBAR,										// newui_Party_lifebar02.jpg	(147, 4)
             IMAGE_PARTY_FLAG,										// newui_party_flag.tga			(10, 12)
             IMAGE_PARTY_EXIT,										// newui_Party_x.tga			(13, 26)	// 임시
         };
@@ -46,18 +57,6 @@ namespace mu::ui::window
             PARTY_INFO_WINDOW_HEIGHT = 429,
         };
 
-    private:
-        CManager* m_pNewUIMng;
-        POINT						m_Pos;
-
-        // Exit Button
-        CButton				m_BtnExit;							// 파티창 나가기버튼
-        CButton				m_BtnPartyExit[MAX_PARTYS];			// 파티탈퇴버튼
-
-        int							m_iSelectedCharID;		// Party List에서 캐릭터 ID를 선택 (default : -1)
-
-        bool						m_bParty;
-
     public:
         CPartyInfoWindow();
         virtual ~CPartyInfoWindow();
@@ -66,13 +65,12 @@ namespace mu::ui::window
         void Release();
 
         void SetPos(int x, int y);
+        void Show(bool bShow) override;
 
         bool UpdateMouseEvent();
         bool UpdateKeyEvent();
         bool Update();
         bool Render();
-
-        bool BtnProcess();
 
         float GetLayerDepth();	//. 2.4f
 
@@ -83,15 +81,57 @@ namespace mu::ui::window
 
         void SetParty(bool bParty);
 
+        // Invoked directly from RmlUi data-event-click bindings (see Create()), not polled.
+        void RmlClickExit();
+        void RmlClickKickMember(int index);
+
     private:
         void LoadImages();
         void UnloadImages();
 
-        void InitButtons();
-        void RenderGroupBox(int iPosX, int iPosY, int iWidth, int iHeight, int iTitleWidth = 60, int iTitleHeight = 20);
+        void SyncRmlModel();
 
-        void RenderMemberStatue(int iIndex, PARTY_t* pMember, bool bExitBtnRender = false);
-        void RenderPartyMiniList(int iIndex, PARTY_t* pMember);
+        // One member "status card" row -- mirrors RenderMemberStatue()'s per-slot rendering.
+        struct PartyMemberRow
+        {
+            Rml::String name, nameColor;
+            Rml::String mapText, coordText, hpText;
+            float hpPercent = 0.f;
+            bool isLeader = false;
+            bool showKick = false;
+            int index = 0;
+        };
+        // A single text line, reused for the empty-state "how to party" message block.
+        struct TextLine
+        {
+            Rml::String text;
+        };
+
+        struct PartyInfoRmlModel
+        {
+            // Movable window (SetPos(), collision-shuffled by PanelColumnX), not HUD-anchored --
+            // sourced from UI::Scaling::GetActiveTransform(), same convention as character_info.
+            float rootX = 0.f, rootY = 0.f, rootScale = 1.f;
+
+            bool hasParty = false;
+            std::vector<TextLine> emptyStateLines;
+            std::vector<PartyMemberRow> members;
+
+            // Set once at Create(); static I18N labels, never re-synced (this window has no
+            // language switcher of its own).
+            Rml::String windowTitle;
+            Rml::String exitTooltip;
+        };
+        RmlModelBinder<PartyInfoRmlModel> m_RmlBinder;
+        Rml::ElementDocument* m_pRmlDoc = nullptr;
+
+    private:
+        CManager* m_pNewUIMng;
+        POINT m_Pos;
+
+        int m_iSelectedCharID;		// Party List에서 캐릭터 ID를 선택 (default : -1)
+
+        bool m_bParty;
     };
 }
 

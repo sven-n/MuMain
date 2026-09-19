@@ -1,0 +1,188 @@
+/* Legacy theme for CPetInfoWindow -- #panel/frame sprites/exit button/tooltip shape/group-box
+   corner-and-fill shape are shared with character_info/my_quest_info/party_info via
+   docked_panel_frame.rcss (linked in pet_info.rml before this file) -- only window-specific content
+   lives here now. Coordinates below are plain reference px, matching that shared convention. */
+.frame-top { decorator: image(docked-bg-top-a); }
+
+/* CRadioGroupButton's own tab sprite -- 2 stacked 56x22 frames (idle then selected); verify frame
+   order live, swap the y-offsets below if it renders backwards. */
+@spritesheet petinfo-tab-idle-sheet   { src: "../../../newui_guild_tab04.tga"; petinfo-tab-idle:   0px 0px  56px 22px; }
+@spritesheet petinfo-tab-active-sheet { src: "../../../newui_guild_tab04.tga"; petinfo-tab-active: 0px 22px 56px 22px; }
+
+@spritesheet petinfo-lifebar-back-sheet { src: "../../../newui_pet_lifebar01.jpg"; petinfo-lifebar-back: 0px 0px 151px 12px; }
+@spritesheet petinfo-lifebar-fill-sheet { src: "../../../newui_pet_lifebar02.jpg"; petinfo-lifebar-fill: 0px 0px 1px 8px; }
+
+@spritesheet petinfo-skillbox-sheet { src: "../../../newui_skillbox.jpg"; petinfo-skillbox: 0px 0px 32px 38px; }
+/* newui_command.jpg command-icon sheet (CSkillList::IMAGE_COMMAND) -- 4 fixed 19x27 icons at the
+   same u-offsets RenderDarkSpiritInfo() used (1/21/41/61), y=0. */
+@spritesheet petinfo-skillicon-0-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-0: 1px 0px 19px 27px; }
+@spritesheet petinfo-skillicon-1-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-1: 21px 0px 19px 27px; }
+@spritesheet petinfo-skillicon-2-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-2: 41px 0px 19px 27px; }
+@spritesheet petinfo-skillicon-3-sheet { src: "../../../newui_command.jpg"; petinfo-skillicon-3: 61px 0px 19px 27px; }
+
+#title {
+	position: absolute;
+	left: 60px;
+	top: 13px;
+	width: 70px;
+	text-align: center;
+	color: #ffffff;
+	font-weight: bold;
+	font-size: 12px;
+	pointer-events: none;
+}
+
+.tab-row { position: absolute; left: 12px; top: 48px; width: 112px; height: 22px; }
+.tab-btn {
+	position: absolute;
+	top: 0;
+	width: 56px;
+	height: 22px;
+	text-align: center;
+	line-height: 22px;
+	font-size: 12px;
+	color: #b5b5b5;
+	cursor: pointer;
+	pointer-events: auto;
+	white-space: nowrap;
+	overflow: hidden;
+	decorator: image(petinfo-tab-idle);
+}
+.tab-btn.active { color: #ffffff; decorator: image(petinfo-tab-active); }
+.tab-btn-darkhorse { left: 0; }
+.tab-btn-darkspirit { left: 56px; }
+
+.pet-tab { position: absolute; left: 0; top: 0; width: 190px; height: 429px; }
+.hidden { display: none; }
+
+.pet-no-pet-msg {
+	display: block;
+	position: absolute;
+	left: 15px;
+	top: 100px;
+	width: 160px;
+	color: #0000ff;
+	font-weight: bold;
+	font-size: 12px;
+	text-align: center;
+}
+
+.pet-subtitle {
+	display: block;
+	position: absolute;
+	left: 60px;
+	top: 25px;
+	width: 70px;
+	text-align: center;
+	font-size: 12px;
+	color: #ffffff;
+	pointer-events: none;
+}
+
+/* Group-box shape (.gbox-corner/.gbox-title-fill/.gbox-content-fill/.gbox-title-text) comes from
+   docked_panel_frame.rcss -- only per-instance position + which corner sprite stays here. */
+.gbox-dh-corner-tl { left: 12px; top: 75px; decorator: image(docked-corner-tl); }
+.gbox-dh-corner-tr { left: 166px; top: 75px; decorator: image(docked-corner-tr); }
+.gbox-dh-corner-bl { left: 12px; top: 166px; decorator: image(docked-corner-bl); }
+.gbox-dh-corner-br { left: 166px; top: 166px; decorator: image(docked-corner-br); }
+.gbox-dh-title-fill { left: 15px; top: 77px; width: 52px; height: 20px; }
+.gbox-dh-content-fill { left: 15px; top: 97px; width: 161px; height: 78px; }
+.gbox-dh-title-text { left: 14px; top: 83px; width: 56px; }
+
+.gbox-ds1-corner-tl { left: 12px; top: 75px; decorator: image(docked-corner-tl); }
+.gbox-ds1-corner-tr { left: 166px; top: 75px; decorator: image(docked-corner-tr); }
+.gbox-ds1-corner-bl { left: 12px; top: 182px; decorator: image(docked-corner-bl); }
+.gbox-ds1-corner-br { left: 166px; top: 182px; decorator: image(docked-corner-br); }
+.gbox-ds1-title-fill { left: 15px; top: 77px; width: 52px; height: 20px; }
+.gbox-ds1-content-fill { left: 15px; top: 97px; width: 161px; height: 94px; }
+.gbox-ds1-title-text { left: 14px; top: 83px; width: 56px; }
+
+.gbox-ds2-corner-tl { left: 12px; top: 196px; decorator: image(docked-corner-tl); }
+.gbox-ds2-corner-tr { left: 166px; top: 196px; decorator: image(docked-corner-tr); }
+.gbox-ds2-corner-bl { left: 12px; top: 377px; decorator: image(docked-corner-bl); }
+.gbox-ds2-corner-br { left: 166px; top: 377px; decorator: image(docked-corner-br); }
+.gbox-ds2-title-fill { left: 15px; top: 198px; width: 52px; height: 20px; }
+.gbox-ds2-content-fill { left: 15px; top: 218px; width: 161px; height: 168px; }
+.gbox-ds2-title-text { left: 14px; top: 204px; width: 56px; }
+
+.pet-stat-text {
+	display: block;
+	position: absolute;
+	left: 22px;
+	font-size: 12px;
+	color: #ffffff;
+	white-space: nowrap;
+	pointer-events: none;
+}
+.pet-dh-life-text { top: 103px; }
+.pet-dh-exp-text { top: 134px; }
+.pet-dh-dmg-text { top: 147px; }
+.pet-dh-atkspeed-text { top: 160px; }
+.pet-ds-life-text { top: 103px; }
+.pet-ds-exp-text { top: 134px; }
+.pet-ds-dmg-text { top: 147px; }
+.pet-ds-atkspeed-text { top: 160px; }
+.pet-ds-charisma-text { top: 173px; }
+
+/* HP bar: background sprite + a fill whose width is bound as a percentage of its own 147px max
+   (matches RenderDarkHorseInfo/RenderDarkSpiritInfo's own `iHP = min(life,255)*147/255`). */
+.hp-bar {
+	position: absolute;
+	left: 19px;
+	width: 151px;
+	height: 12px;
+	decorator: image(petinfo-lifebar-back);
+	pointer-events: none;
+}
+.hp-bar-dh { top: 115px; }
+.hp-bar-ds { top: 115px; }
+.hp-bar-fill {
+	position: absolute;
+	left: 2px;
+	top: 2px;
+	width: 0%;
+	max-width: 147px;
+	height: 8px;
+	decorator: image(petinfo-lifebar-fill);
+	pointer-events: none;
+}
+
+.skill-slot {
+	position: absolute;
+	left: 22px;
+	width: 32px;
+	height: 38px;
+	decorator: image(petinfo-skillbox);
+	pointer-events: none;
+}
+.skill-slot-0 { top: 224px; }
+.skill-slot-1 { top: 264px; }
+.skill-slot-2 { top: 304px; }
+.skill-slot-3 { top: 344px; }
+
+.skill-icon {
+	position: absolute;
+	left: 29px;
+	width: 19px;
+	height: 27px;
+	pointer-events: none;
+}
+.skill-icon-0 { top: 230px; decorator: image(petinfo-skillicon-0); }
+.skill-icon-1 { top: 270px; decorator: image(petinfo-skillicon-1); }
+.skill-icon-2 { top: 310px; decorator: image(petinfo-skillicon-2); }
+.skill-icon-3 { top: 350px; decorator: image(petinfo-skillicon-3); }
+
+.skill-label {
+	display: block;
+	position: absolute;
+	left: 14px;
+	width: 100px;
+	text-align: center;
+	font-size: 12px;
+	color: #ffffff;
+	pointer-events: none;
+}
+.skill-label-0 { top: 241px; }
+.skill-label-1 { top: 281px; }
+.skill-label-2 { top: 321px; }
+.skill-label-3 { top: 361px; }

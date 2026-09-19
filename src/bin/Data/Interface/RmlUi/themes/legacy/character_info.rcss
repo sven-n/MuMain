@@ -1,52 +1,33 @@
 /* Legacy theme for CCharacterInfoWindow -- a plain CManager-tier window (no C3DRenderMng, no
    live-3D icon, no CUITextInputBox), so unlike the inventory family it needed no background-
    context split: 100% of its chrome/text/buttons move straight to #panel's own foreground
-   document. #panel's left/top/scale come live from C++ (SyncRmlModel()); coordinates below are
-   plain reference px, not dp, same convention as my_quest_info.rcss.
+   document. #panel's frame (fill/top/left/right/bottom sprites, exit button, tooltip shape) is
+   shared with my_quest_info/pet_info/party_info via docked_panel_frame.rcss (linked below) -- only
+   window-specific content lives here now. Coordinates below are plain reference px, not dp, same
+   convention as my_quest_info.rcss.
 
    The summary box's original 8-piece pixel-tiled frame (4 corner sprites + a 1px sprite tiled
    across each edge, RenderFrame()'s nested for-loops) is reproduced as corner brackets + a flat
    translucent fill instead of a literal repeating-tile port -- this build has no established,
    verified pattern for a real 1px-tile repeat (see STATUS.md's decorator-native-size finding),
-   and the brackets alone already read as "framed corners" the way the original intended.
+   and the brackets alone already read as "framed corners" the way the original intended. This is a
+   simpler, single-fill variant of docked_panel_frame.rcss's own title/content-split group-box
+   technique (no title strip here), so it keeps its own local corner/fill classes rather than the
+   shared .gbox-* ones -- only the corner sprites themselves (docked-corner-tl/tr/bl/br) come from
+   the partial.
 
    Attribute extra-line blocks (str/agi/vit/ene) use normal block flow (each line a
    display:block span, line-height 13px) instead of individually positioned lines: the original
    (RenderAttribute()) stacks a variable number of lines per block depending on class/buff state
    at a constant +13px step, which block flow reproduces for free without hand-computing each
    line's own top offset in C++. */
-@spritesheet chainfo-bg-fill-sheet { src: "../../../newui_msgbox_back.jpg"; chainfo-bg-fill: 0px 0px 190px 429px; }
-@spritesheet chainfo-bg-top-sheet  { src: "../../../newui_item_back04.tga"; chainfo-bg-top: 0px 0px 190px 64px; }
-@spritesheet chainfo-bg-left-sheet  { src: "../../../newui_item_back02-L.tga"; chainfo-bg-left:  0px 0px 21px 320px; }
-@spritesheet chainfo-bg-right-sheet { src: "../../../newui_item_back02-R.tga"; chainfo-bg-right: 0px 0px 21px 320px; }
-@spritesheet chainfo-bg-bottom-sheet { src: "../../../newui_item_back03.tga"; chainfo-bg-bottom: 0px 0px 190px 45px; }
-
-@spritesheet chainfo-corner-tl-sheet { src: "../../../newui_item_table01(L).tga"; chainfo-corner-tl: 0px 0px 14px 14px; }
-@spritesheet chainfo-corner-tr-sheet { src: "../../../newui_item_table01(R).tga"; chainfo-corner-tr: 0px 0px 14px 14px; }
-@spritesheet chainfo-corner-bl-sheet { src: "../../../newui_item_table02(L).tga"; chainfo-corner-bl: 0px 0px 14px 14px; }
-@spritesheet chainfo-corner-br-sheet { src: "../../../newui_item_table02(R).tga"; chainfo-corner-br: 0px 0px 14px 14px; }
-
 @spritesheet chainfo-textbox-sheet { src: "../../../newui_cha_textbox02.tga"; chainfo-textbox: 0px 0px 170px 21px; }
 @spritesheet chainfo-stat-btn-sheet { src: "../../../newui_chainfo_btn_level.tga"; chainfo-stat-btn: 0px 0px 16px 15px; }
-@spritesheet chainfo-btn-exit-sheet { src: "../../../newui_exit_00.tga"; chainfo-btn-exit: 0px 0px 36px 29px; }
 @spritesheet chainfo-btn-quest-sheet { src: "../../../newui_chainfo_btn_quest.tga"; chainfo-btn-quest: 0px 0px 36px 29px; }
 @spritesheet chainfo-btn-pet-sheet { src: "../../../newui_chainfo_btn_pet.tga"; chainfo-btn-pet: 0px 0px 36px 29px; }
 @spritesheet chainfo-btn-masterlevel-sheet { src: "../../../newui_chainfo_btn_master.tga"; chainfo-btn-masterlevel: 0px 0px 36px 29px; }
 
-#panel {
-	position: absolute;
-	transform-origin: left top;
-	width: 190px;
-	height: 429px;
-	decorator: image(chainfo-bg-fill);
-	font-family: "Liberation Sans";
-}
-
-.frame-piece { position: absolute; pointer-events: none; }
-.frame-top    { left: 0;   top: 0;    width: 190px; height: 64px;  decorator: image(chainfo-bg-top); }
-.frame-left   { left: 0;   top: 64px; width: 21px;  height: 320px; decorator: image(chainfo-bg-left); }
-.frame-right  { left: 169px; top: 64px; width: 21px; height: 320px; decorator: image(chainfo-bg-right); }
-.frame-bottom { left: 0;   top: 384px; width: 190px; height: 45px; decorator: image(chainfo-bg-bottom); }
+.frame-top { decorator: image(docked-bg-top-a); }
 
 #name, #classname, #servername {
 	position: absolute;
@@ -70,10 +51,10 @@
 	pointer-events: none;
 }
 .summary-corner { position: absolute; width: 14px; height: 14px; pointer-events: none; }
-.corner-tl { left: 12px;  top: 48px; decorator: image(chainfo-corner-tl); }
-.corner-tr { left: 163px; top: 48px; decorator: image(chainfo-corner-tr); }
-.corner-bl { left: 12px;  top: 105px; decorator: image(chainfo-corner-bl); }
-.corner-br { left: 163px; top: 105px; decorator: image(chainfo-corner-br); }
+.corner-tl { left: 12px;  top: 48px; decorator: image(docked-corner-tl); }
+.corner-tr { left: 163px; top: 48px; decorator: image(docked-corner-tr); }
+.corner-bl { left: 12px;  top: 105px; decorator: image(docked-corner-bl); }
+.corner-br { left: 163px; top: 105px; decorator: image(docked-corner-br); }
 
 .level-text, .levelup-point-text, .exp-text, .point-probability-text, .point-text {
 	display: block;
@@ -149,6 +130,8 @@
 .stat-btn-ene { top: 297px; }
 .stat-btn-cmd { top: 352px; }
 
+/* Exit is fully shared now (docked_panel_frame.rcss's #btn_exit) -- only Quest/Pet/MasterLevel
+   (this window's own extra shortcuts, not part of the shared frame) stay local. */
 .info-btn {
 	position: absolute;
 	top: 392px;
@@ -159,7 +142,6 @@
 }
 .info-btn:hover { filter: brightness(1.25); }
 .info-btn.locked { filter: brightness(0.6); }
-.info-btn-exit { left: 13px; decorator: image(chainfo-btn-exit); }
 .info-btn-quest { left: 50px; decorator: image(chainfo-btn-quest); }
 .info-btn-pet { left: 87px; decorator: image(chainfo-btn-pet); }
 .info-btn-masterlevel { left: 124px; decorator: image(chainfo-btn-masterlevel); }
@@ -168,27 +150,10 @@
    same convention as my_quest_info.rcss. */
 .btn-exit-label { display: none; }
 
-.tooltip {
-	display: none;
-	position: absolute;
-	top: 365px;
-	width: 110px;
-	white-space: nowrap;
-	background-color: rgba(0, 0, 0, 200);
-	color: #ffffff;
-	padding: 2px 4px;
-	border-radius: 3px;
-	font-size: 11px;
-	text-align: center;
-	pointer-events: none;
-	z-index: 1;
-}
-.tooltip-exit { left: -24px; }
 .tooltip-quest { left: 13px; }
 .tooltip-pet { left: 50px; }
 .tooltip-masterlevel { left: 87px; }
 
-#btn_exit:hover ~ .tooltip-exit,
 #btn_quest:hover ~ .tooltip-quest,
 #btn_pet:hover ~ .tooltip-pet,
 #btn_masterlevel:hover ~ .tooltip-masterlevel {
