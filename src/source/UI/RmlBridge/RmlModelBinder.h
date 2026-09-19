@@ -3,6 +3,9 @@
 #include "stdafx.h"
 #include <RmlUi/Core/Context.h>
 #include <RmlUi/Core/DataModelHandle.h>
+#include <RmlUi/Core/DataTypeRegister.h>
+
+#include <memory>
 
 // Generalizes the model/renderer split already proven by UI::Skills::Tooltip's
 // SkillTooltipModel.h/.cpp (a plain-data Model, consumed today by two independent renderers)
@@ -38,8 +41,19 @@ public:
     template <typename RegisterFn>
     bool Create(Rml::Context* context, const Rml::String& modelName, RegisterFn&& registerFields)
     {
-        Rml::DataModelConstructor constructor = context->CreateDataModel(modelName);
-        if (!constructor) return false;
+        // Own type register per model, not the context's shared default one: the shared
+        // register keeps every RegisterStruct<T>()/RegisterArray<C>() for the context's lifetime,
+        // so a second Create() after Destroy() (ReloadRmlTheme()) would get "Struct type already
+        // declared" and a null StructHandle whose RegisterMember() dereferences it. A fresh
+        // register per Create() makes the registration function re-runnable; struct types are
+        // then per model, which is how every window here uses them anyway.
+        m_TypeRegister = std::make_unique<Rml::DataTypeRegister>();
+        Rml::DataModelConstructor constructor = context->CreateDataModel(modelName, m_TypeRegister.get());
+        if (!constructor)
+        {
+            m_TypeRegister.reset();
+            return false;
+        }
 
         registerFields(constructor, m_Model);
         m_Handle = constructor.GetModelHandle();
@@ -56,6 +70,7 @@ public:
     {
         if (m_ModelName.empty()) return;
         context->RemoveDataModel(m_ModelName);
+        m_TypeRegister.reset(); // after the model, which holds a raw pointer to it
         m_Model = Model{};
         m_Handle = Rml::DataModelHandle{};
         m_ModelName.clear();
@@ -75,6 +90,7 @@ public:
 
 private:
     Model m_Model{};
+    std::unique_ptr<Rml::DataTypeRegister> m_TypeRegister;
     Rml::DataModelHandle m_Handle;
     Rml::String m_ModelName;
 };
