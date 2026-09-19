@@ -9,12 +9,14 @@ folder); the `CWin`-tier docs (`README.md`, `theming-and-modding.md`,
 `layout-and-scaling.md`) still apply for RML/RCSS content itself, just not for how the C++ side
 plugs in.
 
-Proven on two pilots so far: `CMuHelperBar` (`UI/HUD/MuHelperBar.h/.cpp` →
+Proven on the first two pilots, `CMuHelperBar` (`UI/HUD/MuHelperBar.h/.cpp` →
 `Data/Interface/RmlUi/mu_helper_bar.rml`, renamed at port time from the legacy `CNewUIHeroPositionInfo`)
 and `CBuffStrip` (`UI/HUD/BuffStrip.h/.cpp` → `Data/Interface/RmlUi/buff_strip.rml`, renamed
 from `CNewUIBuffWindow` — the active-buff icon strip, and the first `data-for`/dynamic-array pilot
-at this tier). This doc is the pattern extracted from both; expect it to keep firming up as more
-`mu::ui::window::CObject` windows are ported.
+at this tier), and since firmed up by `CMainFrameWindow`'s full 3-phase port (`migration-ledger.md`)
+— including this tier's first `data-event-mouseup`/right-click binding (Phase 3). This doc is the
+pattern extracted from all three; check `migration-ledger.md` for the current full list of
+`mu::ui::window::CObject`-tier ports before assuming this doc's own examples are the only ones.
 
 ## Why this tier needed its own pass
 
@@ -149,19 +151,12 @@ windows now live in `UI/HUD/` etc., not `UI/NewUI/HUD/`.) See
 [`tracked-deferrals.md`](tracked-deferrals.md)'s "Tracked deferral" section for the full reasoning
 on the base-class/tier piece that remains.
 
-**One exception that was meant to apply here, overtaken by a blanket rename**: when a legacy file
-welds multiple classes together and a single pass only ports some of them, renaming just the
-ported one leaves the file's still-legacy residents mismatched for the remaining phases —
-`CMainFrameWindow` (ported) sharing a file with still-fully-legacy `CSkillList`/`CItemHotKey` was
-meant to be the concrete case this exception protected, deferring `CNewUIMainFrameWindow`'s own
-rename until Phase 3. In practice, `newui-legacy-merger.md`'s Phase 5 mechanical prefix-drop
-(2026-09-05) renamed every `CNewUI*`/`INewUI*` identifier in the tier in one blanket pass, with no
-per-file carve-out — so `CNewUIMainFrameWindow`, `CNewUISkillList`, and `CNewUIItemHotKey` all
-became `CMainFrameWindow`/`CSkillList`/`CItemHotKey` anyway, incidentally, alongside the ~88 other
-windows' renames. See `tracked-deferrals.md`'s "Tracked deferral: `CMainFrameWindow`'s own class
-rename" for what's actually still open now that the naming half of it is moot. Don't generalize the original
-exception beyond its intended shape (a shared file, a partial port); a clean one-class-one-file
-port still renames at port time, no exception.
+**A one-time naming exception here (deferring `CMainFrameWindow`'s own rename past its partial
+port) was overtaken by a later blanket mechanical rename and never mattered in practice** — see
+`tracked-deferrals.md`'s "`CMainFrameWindow`'s own class rename" entry for what's actually still
+open (a file-organization question, not naming). Don't generalize this: a clean one-class-one-file
+port still renames at port time, no exception — the carve-out only ever applied to a legacy file
+welding multiple classes together with a partial port.
 
 ## Proven by `CBuffStrip` (the second pilot)
 

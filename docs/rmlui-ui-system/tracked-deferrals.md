@@ -5,8 +5,8 @@ Each entry below names what's still incomplete and, where applicable, what futur
 should fold it in. See [`STATUS.md`](STATUS.md) for what's actually done, and
 [`engine-findings.md`](engine-findings.md) for engine-specific gotchas found along the way. The
 `CommonMessageBox`/`CustomMessageBox` family port used to have its own tracked-deferral entry
-here too — it moved into [`dialog-migration-plan.md`](dialog-migration-plan.md) instead (2026-09-16),
-since that file already owns the per-class worklist this content was pointing at.
+here too — it's now just [`migration-ledger.md`](migration-ledger.md)'s Dialog family table
+(2026-09-19), which is what's actually maintained.
 
 ## Pilots to revisit when the relevant phase arrives
 

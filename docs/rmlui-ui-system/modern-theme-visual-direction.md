@@ -7,13 +7,11 @@ document — it stays a pixel-faithful reproduction of the original game's look,
 [`legacy-theme-modernization.md`](legacy-theme-modernization.md) instead.
 
 **Second generation, 2026-09-10**: this document previously described a cool-steel/blue-gray
-palette (2026-09-09). It has been fully superseded by a blackened-iron/dark-forged-metal direction,
-adopted from a second, more detailed reference visual study and executed as a real design-system
-consolidation (canonical tokens → shared primitives → propagated to every screen), not just a
-value refresh. Every token in this document was renamed as well as revalued — see
-[Design tokens](#design-tokens) for the full old→new map. If you're looking at a comment anywhere
-in `themes/modern/*.rcss` that still says "cool steel" or references an old token name, that
-comment is stale; this document and `tokens.ini` are the source of truth.
+palette (2026-09-09), fully superseded by the current blackened-iron/dark-forged-metal direction —
+every token was renamed as well as revalued as part of that switch (mechanically, via
+`tools/migrate_rcss_tokens.py`; confirmed 2026-09-19, no old token name survives anywhere in
+`themes/modern/*.rcss`/`.ini`). This document and `tokens.ini` are the sole source of truth for
+current token names/values — there is no old→new mapping still worth keeping.
 
 ## Direction
 
@@ -66,36 +64,16 @@ external `<link type="text/rcss">` for cascade purposes. Content-driven, not the
 is the single source of truth for values; this document is the source of truth for what each token
 *means*.
 
-**`box-shadow`/`filter`/`backdrop-filter` do not render on this engine** (parse fine, but
-`RmlUiRenderInterface` leaves layer/filter compositing unimplemented — a blurred `box-shadow`
-paints as a solid opaque block, not a blur). Bevel/depth cues come from plain per-side
-`border-*-color` bevels plus `decorator: linear-gradient(...)` instead (confirmed working) — see
-`base.rcss`'s `.modern-frame`/`.modern-panel`/`.modern-inset` for the technique. `filter:
-brightness(...)` **does** work and already ships (`my_inventory.rcss`'s `.inv-btn:hover`) — only
-the blur/shadow/compositing-dependent filters are the gap.
-
-### Old → new token name map (2026-09-10 rename)
-
-Every `token(name)` call site across the whole theme was mechanically renamed, then every value
-was retuned to the new palette. `accent-blue` (confirmed unused anywhere) was dropped rather than
-renamed.
-
-| Old name | New name |
-|---|---|
-| `surface-0` | `surface-deep` |
-| `surface-1` | `surface-recessed` |
-| `surface-2` | `surface-panel` |
-| `surface-3` | `surface-control` |
-| `border-metal` | `border-frame` (general-purpose visible edge — see note below) |
-| `border-strong` | `border-frame` (collapsed into the same token — the reference doesn't meaningfully distinguish these two weights) |
-| `border-subtle` | `border-recessed` |
-| `accent-steel-bright` | `accent-steel-hover` |
-| `accent-crimson-bright` | `accent-crimson-hover` |
-| `accent-gold-bright` | `accent-gold-hover` |
-| `text-title` | `text-warm` |
-| `text-body` | `text-primary` |
-| `text-muted` | `text-secondary` (a new, distinct, dimmer `text-muted` now exists as a third tier) |
-| `text-emphasis` | `accent-gold` (was already documented as an alias of it) |
+**Current engine capability (see `engine-findings.md` for the authoritative, up-to-date list —
+this has changed direction before, don't trust a stale copy of it): `box-shadow` genuinely renders
+now** (inset/outset, real blur, comma-separated multiple shadows — fixed as of the 2026-09-10
+renderer upgrade, in active use throughout `base.rcss`/`login.rcss`/`sys_menu.rcss`/
+`server_select.rcss`). **`filter`/`backdrop-filter`/`mask-image` remain unimplemented** —
+`filter: brightness()`/`contrast()` are the one confirmed-working exception
+(`my_inventory.rcss`'s `.inv-btn:hover`). Bevel/depth cues predating the box-shadow fix still use
+plain per-side `border-*-color` bevels plus `decorator: linear-gradient(...)` — see `base.rcss`'s
+`.modern-frame`/`.modern-panel`/`.modern-inset` — real `box-shadow` is now also a valid choice for
+new work, not just the bevel technique.
 
 **`border-inner` is a genuinely new token**, not a renamed one — reserved specifically for a
 recessed content-well edge (`.modern-panel`'s own border, for instance), distinct from
@@ -341,7 +319,7 @@ committed/released baseline.
 | `text-shadow` | Not a registered property (distinct from `box-shadow`, see below) | `font-effect: outline(...)`, already used throughout |
 | `repeating-linear-gradient` / `repeating-radial-gradient` / `repeating-conic-gradient` | **Confirmed working** as of the 2026-09-10 renderer upgrade — `RmlUi_Renderer_SDL_GPU.cpp` wires a `repeating` flag straight into the same `ShaderGradientFunction` enum the plain gradients use | Safe to use directly now; previously the advice was to fall back to a plain gradient or a tileable `@spritesheet` texture |
 | `box-shadow` (inset and outset, with real blur) | **Confirmed working** as of the 2026-09-10 renderer upgrade — previously parsed but never rendered (layer/filter compositing was unimplemented); `login.rcss` is the first real consumer (frame bevel rings, the recessed-well vignette, button/input inset shadows) | Use directly, standard CSS syntax (`PropertyParserBoxShadow.cpp` confirms `inset`/offset/blur/spread/color in any order, comma-separated for multiple shadows) — the old per-side `border-*-color` bevel technique is still valid for crisp hard-edged lines, but a blurred shadow no longer needs faking |
-| `filter: blur()` / `drop-shadow()`, `backdrop-filter`, `mask-image` | **Confirmed working** as of the 2026-09-10 renderer upgrade (part of the same PR's layer/filter-compositing work) | Not yet used anywhere in this theme — available for a future pass (e.g. a frosted modal backdrop) |
+| `filter: blur()` / `drop-shadow()`, `backdrop-filter`, `mask-image` | **Still unimplemented** — the 2026-09-10 upgrade's PR scope included this, but only `box-shadow` was actually confirmed working afterward (see `engine-findings.md`, which corrects an earlier version of this same row); don't assume PR scope equals delivered behavior without testing the decorator in isolation | `filter: brightness()`/`contrast()` are the one working exception (row below); for anything else needing a frosted/blurred look, no direct equivalent exists yet |
 | `filter: brightness()`/`contrast()` | Confirmed working already before the upgrade — shipped (`my_inventory.rcss`'s `.inv-btn:hover`) | Use freely |
 | `conic-gradient` | Confirmed working already before the upgrade — `RmlUi_Renderer_SDL_GPU.cpp` implements the full gradient family via `CompileShader`; there's a vendored `Tests/Data/VisualTests/shader_conic_gradient.rml` | Safe to use directly for a segmented/arc effect |
 | A circular/radial progress arc | Browser CSS has no native equivalent; the reference fakes one with `conic-gradient` | RmlUi's own `<progress direction="clockwise"\|"counter-clockwise">` — real octant-triangle geometry (`ElementProgress.cpp`), **but only when a `fill-image`/sprite texture is set on the `<progress>` element** (confirmed by reading `ElementProgress::GenerateGeometry()` — without a texture, no manual mesh is built for the circular directions, so a decorator-only circular progress silently renders as an unclipped rectangle regardless of `value`). For a flat/vector look, use explicit segment `<div>`s instead (see `main_frame.rcss`'s planned HUD work) |
